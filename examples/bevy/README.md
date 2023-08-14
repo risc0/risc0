@@ -1,14 +1,23 @@
 # Bevy Game Engine Example
+
 This code demonstrates a minimal example of how to use the [bevy] game engine inside the RISC Zero [zkVM].
 
 [zkVM]: https://dev.risczero.com/zkvm
 [bevy]: https://bevyengine.org/
 
 ## Quick Start
+
 First, [install Rust] if you don't already have it.
-Then, run the example with:
+
+Next, install the `cargo-risczero` tool and install the toolchain with:
+```bash
+cargo install cargo-risczero
+cargo risczero install
 ```
-  cargo run --release
+
+Then, run the example with:
+```bash
+cargo run --release
 ```
 
 [install Rust]: https://doc.rust-lang.org/cargo/getting-started/installation.html
@@ -24,14 +33,15 @@ To link gameplay to a particular player, you may want to pair this demo with the
 [ECDSA]: https://github.com/risc0/risc0/tree/main/examples/ecdsa
 
 ## Project Organization
+
 zkVM applications are organized into a [host program] and a [guest program].
 The host program can be found in [`src/main.rs`] and the guest program can be found in [`methods/guest/src/main.rs`].
 
 The [host] first [executes] the guest program and then [proves the execution] to construct a [receipt].
 The receipt can be passed to a third party, who can examine the [journal] to check the program's outputs and can [verify] the [receipt] to ensure the integrity of the [guest program]'s execution.
 
-[`src/main.rs`]: https://github.com/risc0/risc0/tree/v0.16.1/examples/bevy/src/main.rs
-[`methods/guest/src/main.rs`]: https://github.com/risc0/risc0/tree/v0.16.1/examples/bevy/methods/guest/src/main.rs
+[`src/main.rs`]: src/main.rs
+[`methods/guest/src/main.rs`]: methods/guest/src/main.rs
 [host]: https://dev.risczero.com/terminology#host
 [executes]: https://dev.risczero.com/terminology#execute
 [guest program]: https://dev.risczero.com/terminology#guest-program
@@ -42,6 +52,7 @@ The receipt can be passed to a third party, who can examine the [journal] to che
 [journal]: https://dev.risczero.com/terminology#journal
 
 ## More Resources
+
 For more information about building, running, and testing zkVM applications, see our [developer docs].
 
 [developer docs]: https://dev.risczero.com/zkvm

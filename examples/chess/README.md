@@ -11,9 +11,16 @@ The demo uses the [shakmaty] crate to prove that a chess position has a checkmat
 ## Quick Start
 
 First, [install Rust] if you don't already have it.
-Then, run the example with:
+
+Next, install the `cargo-risczero` tool and install the toolchain with:
+```bash
+cargo install cargo-risczero
+cargo risczero install
 ```
-  cargo run --release
+
+Then, run the example with:
+```bash
+cargo run --release
 ```
 
 Congratulations! You just constructed a zero-knowledge proof that the position defined [here] includes a mate-in-one.
@@ -22,6 +29,7 @@ Congratulations! You just constructed a zero-knowledge proof that the position d
 [here](https://github.com/risc0/risc0/blob/main/examples/chess/src/main.rs#L29)
 
 ## Use Cases
+
 By using this demo as part of a [Bonsai application], you could build an app where on-chain payment depends on off-chain activity.
 For example, you might issue an on-chain award for the first person who can find a mate-in-one.
 
@@ -31,14 +39,15 @@ To learn more about this use case, check out our Twitter thread about using Bons
 [zk coprocessor]: https://twitter.com/RiscZero/status/1677316664772132864
 
 ## Project Organization
+
 zkVM applications are organized into a [host program] and a [guest program].
 The host program can be found in [`src/main.rs`], and the guest program can be found in [`methods/guest/src/main.rs`].
 
 The [host] first [executes] the guest program and then [proves the execution] to construct a [receipt].
 The receipt can be passed to a third party, who can examine the [journal] to check the program's outputs and can [verify] the [receipt] to ensure the integrity of the [guest program]'s execution.
 
-[`src/main.rs`]: https://github.com/risc0/risc0/tree/v0.16.1/examples/chess/src/main.rs
-[`methods/guest/src/main.rs`]: https://github.com/risc0/risc0/tree/v0.16.1/examples/chess/methods/guest/src/main.rs
+[`src/main.rs`]: src/main.rs
+[`methods/guest/src/main.rs`]: methods/guest/src/main.rs
 [host]: https://dev.risczero.com/terminology#host
 [executes]: https://dev.risczero.com/terminology#execute
 [guest program]: https://dev.risczero.com/terminology#guest-program
@@ -49,6 +58,7 @@ The receipt can be passed to a third party, who can examine the [journal] to che
 [journal]: https://dev.risczero.com/terminology#journal
 
 ## Approach
+
 This is a simple [zkVM application] that demonstrates how to use a Rust crate inside the [zkVM].
 Here, we use the [shakmaty] crate, which makes it possible to handle chess notation and chess logic.
 To learn more about using Rust crates inside the zkVM, check out our [Rust Resources] page.
@@ -68,6 +78,7 @@ The [guest code] checks that applying the move to the initial board state is leg
 [journal]: https://dev.risczero.com/terminology#journal
 
 ## More Resources
+
 - For a video walk-through of this example, check out this [excerpt from our workshop at ZK HACK III].
 - For more information about building, running, and testing zkVM applications, see our [developer docs].
 
