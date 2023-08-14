@@ -34,7 +34,7 @@ use tracing::{debug, error, trace, warn};
 use super::block_history;
 use crate::EthersClientConfig;
 
-// #[tracing::instrument]
+#[tracing::instrument(skip_all)]
 pub(crate) async fn recover_delay(state: State, sender: mpsc::Sender<Log>) -> Result<State> {
     match (state.from.as_number(), state.to.as_number()) {
         (Some(from), Some(to)) if from > to => {
@@ -137,7 +137,7 @@ fn parse_error_response(error: ProviderError) -> Option<(BlockNumber, BlockNumbe
     })
 }
 
-// #[tracing::instrument]
+#[tracing::instrument(skip_all)]
 pub(crate) async fn get_latest_block(client: &Provider<Ws>) -> Result<Option<BlockNumber>> {
     Ok(client
         .get_block(BlockNumber::Latest)
@@ -277,7 +277,7 @@ impl State {
     }
 }
 
-// #[tracing::instrument]
+#[tracing::instrument(skip_all)]
 pub(crate) async fn recover_lost_blocks(state: State, sender: Sender<Log>) -> Result<State> {
     let latest_block = match block_history::get_latest_block(state.client.provider()).await {
         Ok(Some(block)) => match block.as_number() {
