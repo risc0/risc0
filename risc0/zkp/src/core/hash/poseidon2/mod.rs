@@ -243,6 +243,7 @@ where
 #[cfg(test)]
 mod tests {
     use test_log::test;
+    use crate::core::hash::poseidon2::consts::_M_EXT;
 
     use super::*;
     use crate::core::hash::poseidon2::consts::_M_EXT;
@@ -393,6 +394,15 @@ mod tests {
         ];
         for i in 0..DIGEST_WORDS {
             assert_eq!(result.as_words()[i], goal[i], "At entry {}", i);
+        }
+    }
+
+    #[test]
+    fn poseidon2_ext_matrices_match() {
+        for i in 0..CELLS {
+            for j in 0..CELLS {
+                assert_eq!(_M_EXT[i * CELLS + j].as_u32(), M_EXT_MONTGOMERY[i * CELLS + j].as_u32_montgomery());
+            }
         }
     }
 }
