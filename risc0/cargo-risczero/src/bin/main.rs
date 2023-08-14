@@ -12,20 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use anyhow::Result;
 use cargo_risczero::{Cargo, RisczeroCmd};
 use clap::Parser;
 use tracing_subscriber::EnvFilter;
 
-fn main() {
+fn main() -> Result<()> {
     tracing_subscriber::fmt()
         .with_env_filter(EnvFilter::from_default_env())
         .init();
 
     let Cargo::Risczero(args) = Cargo::parse();
-
     match args.command {
-        RisczeroCmd::New(new) => {
-            new.run();
-        }
+        RisczeroCmd::BuildToolchain(cmd) => cmd.run(),
+        RisczeroCmd::Install(cmd) => cmd.run(),
+        RisczeroCmd::New(cmd) => cmd.run(),
     }
 }

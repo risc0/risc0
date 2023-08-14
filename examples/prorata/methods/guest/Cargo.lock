@@ -491,7 +491,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-binfmt"
-version = "0.16.1"
+version = "0.17.0"
 dependencies = [
  "anyhow",
  "elf",
@@ -503,7 +503,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im"
-version = "0.16.1"
+version = "0.17.0"
 dependencies = [
  "anyhow",
  "log",
@@ -515,7 +515,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-core"
-version = "0.16.1"
+version = "0.17.0"
 dependencies = [
  "bytemuck",
  "rand_core",
@@ -523,7 +523,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkp"
-version = "0.16.1"
+version = "0.17.0"
 dependencies = [
  "anyhow",
  "blake2",
@@ -542,7 +542,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "0.16.1"
+version = "0.17.0"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -564,7 +564,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "0.16.1"
+version = "0.17.0"
 
 [[package]]
 name = "rkyv"

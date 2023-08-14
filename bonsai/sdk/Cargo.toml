@@ -1,7 +1,7 @@
 [package]
 name = "bonsai-sdk"
 description = "Bonsai Software Development Kit"
-version = "0.2.0"
+version = "0.3.0"
 edition = { workspace = true }
 license = { workspace = true }
 homepage = { workspace = true }
@@ -14,8 +14,9 @@ thiserror = "1.0"
 tokio = { version = "1.19", features = ["full", "sync"], optional = true }
 
 [dev-dependencies]
-env_logger = "0.9.0"
+env_logger = "0.10"
 httpmock = "0.6"
+temp-env = "0.3"
 uuid = { version = "1.3", features = ["v4"] }
 
 [lib]

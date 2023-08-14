@@ -260,9 +260,16 @@ impl InnerReceipt {
         match self {
             InnerReceipt::Flat(x) => x.verify_with_context(ctx, image_id.into(), journal),
             InnerReceipt::Succinct(x) => x.verify_with_context(ctx),
-            // TODO: add support for dev-mode
-            InnerReceipt::Fake => Err(VerificationError::InvalidProof),
+            InnerReceipt::Fake => Self::verify_fake(),
         }
+    }
+
+    fn verify_fake() -> Result<(), VerificationError> {
+        #[cfg(feature = "std")]
+        if cfg!(not(feature = "disable-dev-mode")) && std::env::var("RISC0_DEV_MODE").is_ok() {
+            return Ok(());
+        }
+        Err(VerificationError::InvalidProof)
     }
 
     /// Returns the [InnerReceipt::Flat] arm, will panic if invalid.

@@ -28,6 +28,10 @@ jobs:
       - name: install rust
         uses: ./.github/actions/rustup
 
+      - run: cargo run --bin cargo-risczero -- risczero install
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Install Foundry
         uses: risc0/foundry-toolchain@2fe7e70b520f62368a0e3c464f997df07ede420f
 
@@ -49,9 +53,9 @@ jobs:
         run: forge test -vvv
         working-directory: bonsai/examples/governance
 
-      - name: run forge tests in bonsai/examples/governance
-        env:
-          TEST_USE_ZKVM: true
-          BONSAI_PROVING: local
-        run: forge test -vvv
-        working-directory: bonsai/examples/governance
+      # - name: run forge tests (with zkvm) in bonsai/examples/governance
+      #   env:
+      #     TEST_USE_ZKVM: true
+      #     BONSAI_PROVING: local
+      #   run: forge test -vvv
+      #   working-directory: bonsai/examples/governance

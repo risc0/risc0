@@ -75,10 +75,14 @@ jobs:
       - uses: ./.github/actions/sccache
         with:
           key: ${{ matrix.os }}-${{ matrix.feature }}
+      - run: cargo run --bin cargo-risczero -- risczero install
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: cargo xtask install
       - run: cargo xtask gen-receipt
       - run: cargo test -F $FEATURE -F profiler
-      - run: cargo test -F $FEATURE --tests -- --ignored
+      - run: cargo test -F $FEATURE --tests -- --ignored --test-threads 1
+      - run: cargo test -F $FEATURE -F disable-dev-mode -p risc0-r0vm
       - run: cargo test --manifest-path bonsai/examples/governance/Cargo.toml
         if: matrix.device == 'cpu'
       - run: cargo check -F $FEATURE --benches
@@ -134,6 +138,9 @@ jobs:
       - uses: ./.github/actions/sccache
         with:
           key: ${{ matrix.os }}-${{ matrix.feature }}
+      - run: cargo run --bin cargo-risczero -- risczero install
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: cargo test -F $FEATURE
         working-directory: examples
       - run: cargo test -F $FEATURE
@@ -141,7 +148,7 @@ jobs:
         if: matrix.device == 'cpu'
 
   doc:
-    runs-on: ubuntu-22.04-64c
+    runs-on: ubuntu-latest-8-cores
     steps:
       # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
       - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
@@ -153,6 +160,9 @@ jobs:
       - uses: ./.github/actions/sccache
         with:
           key: Linux
+      - run: cargo run --bin cargo-risczero -- risczero install
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: cargo xtask gen-receipt
       - run: cargo doc --no-deps --exclude=risc0-zkvm-methods --workspace
       - name: Install mdbook
@@ -175,6 +185,9 @@ jobs:
       - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
       - uses: actions/checkout@v3
       - uses: ./.github/actions/rustup
+      - run: cargo run --bin cargo-risczero -- risczero install
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: |
           cargo run -p cargo-risczero risczero new --template templates/rust-starter --templ-subdir="" --path $(pwd) --dest ${{ runner.temp }} template-test
         shell: bash
@@ -182,7 +195,7 @@ jobs:
       - run: ${{ runner.temp }}/template-test/target/release/host
 
   web:
-    runs-on: ubuntu-22.04-64c
+    runs-on: ubuntu-latest-8-cores
     env:
       RUSTC_WRAPPER: sccache
     steps:
@@ -196,6 +209,9 @@ jobs:
         with:
           node-version: 18
       - uses: ./.github/actions/sccache
+      - run: cargo run --bin cargo-risczero -- risczero install
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: cargo xtask install
       - run: cargo xtask gen-receipt
       - run: |
