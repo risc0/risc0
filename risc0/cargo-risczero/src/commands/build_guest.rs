@@ -15,6 +15,7 @@
 use std::{
     fs::{self, File},
     io::Write,
+    path::PathBuf,
     process::Command,
 };
 
@@ -22,7 +23,7 @@ use anyhow::{Context, Result};
 use cargo_metadata::MetadataCommand;
 use clap::Parser;
 use docker_generate::DockerFile;
-use risc0_zkvm::{MemoryImage, Program, MEM_SIZE, PAGE_SIZE};
+use risc0_zkvm::{sha::Digest, MemoryImage, Program, MEM_SIZE, PAGE_SIZE};
 use risc0_zkvm_platform::memory;
 
 use crate::utils::{ensure_binary, CommandExt};
@@ -52,11 +53,13 @@ impl BuildGuest {
         let package_name = pkg_name.replace('-', "_");
         self.create_dockerfile(package_name.as_str())?;
         self.build()?;
-        eprintln!("ELF ready at ./elfs/{package_name}");
-        eprintln!(
-            "ImageID={}",
-            self.image_id(&format!("elfs/{package_name}"))?
-        );
+
+        let paths = fs::read_dir(&format!("./elfs/{package_name}/"))?;
+        eprintln!("ELFs ready at:");
+        for path in paths {
+            let entry = path.unwrap().path();
+            eprintln!("{} - ImageID: {}", entry.display(), self.image_id(&entry)?);
+        }
 
         Ok(())
     }
@@ -78,7 +81,6 @@ impl BuildGuest {
             .workdir("/src")
             .copy(".", ".")
             .env(manifest_env)
-            .env(pkg_env)
             .env(c_flags_env)
             .run(
                 "cargo +risc0 fetch --target riscv32im-risc0-zkvm-elf --manifest-path $CARGO_MANIFEST_PATH --locked",
@@ -90,13 +92,13 @@ impl BuildGuest {
                 \t--release \\\n\
                 \t--target riscv32im-risc0-zkvm-elf \\\n\
                 \t--manifest-path $CARGO_MANIFEST_PATH")
-            .run("FILENAME=$(ls target/riscv32im-risc0-zkvm-elf/release/*.d | cut -d '.' -f 1) && mv $FILENAME $PKG_NAME");
+            .run(r"find target/riscv32im-risc0-zkvm-elf/release -maxdepth 1 -type f -exec test -x {} \; -exec cp {} /tmp/ \;");
 
         let binary: DockerFile<'_> = DockerFile::new()
             .comment("binary stage")
             .from_alias("binary", "scratch")
             .env(pkg_env)
-            .copy_from("build", "/src/$PKG_NAME", "$PKG_NAME");
+            .copy_from("build", "/tmp", "/$PKG_NAME");
 
         let file = DockerFile::new().dockerfile(build).dockerfile(binary);
         let mut dockerfile = File::create("Dockerfile")?;
@@ -118,12 +120,12 @@ impl BuildGuest {
         Ok(())
     }
 
-    /// Generate the image ID for a given ELF.
-    fn image_id(&self, elf_path: &str) -> Result<String> {
+    /// Compute the image ID for a given ELF.
+    fn image_id(&self, elf_path: &PathBuf) -> Result<Digest> {
         let elf = fs::read(elf_path)?;
         let program = Program::load_elf(&elf, MEM_SIZE as u32).context("unable to load elf")?;
         let image = MemoryImage::new(&program, PAGE_SIZE as u32)
             .context("unable to create memory image")?;
-        Ok(hex::encode(image.compute_id()))
+        Ok(image.compute_id())
     }
 }
