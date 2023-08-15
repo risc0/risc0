@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use std::time::Duration;
+
 use anyhow::Result;
 use bonsai_ethereum_relay::{EthersClientConfig, Relayer};
 use clap::Parser;
@@ -48,10 +50,6 @@ struct Args {
     #[arg(short, long, env)]
     wallet_key_identifier: String,
 
-    /// Toggle to use a KMS client
-    #[arg(long)]
-    use_kms: bool,
-
     /// Bonsai API URL
     #[arg(long, env, default_value_t = DEFAULT_BONSAI_API_URL.to_string())]
     bonsai_api_url: String,
@@ -80,10 +78,14 @@ async fn main() -> Result<()> {
         relay_contract_address: args.contract_address,
     };
 
+    const WAIT_DURATION: Duration = Duration::from_secs(5);
+    const MAX_RETRIES: u64 = 7 * 24 * 60 * 60 / WAIT_DURATION.as_secs(); // 1 week
     let client_config = EthersClientConfig::new(
         args.eth_node_url,
         args.eth_chain_id,
         args.wallet_key_identifier.try_into()?,
+        MAX_RETRIES,
+        WAIT_DURATION,
     );
 
     relayer.run(client_config).await
