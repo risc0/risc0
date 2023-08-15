@@ -91,7 +91,7 @@ pub const FAULT_CHECKER_ELF: &[u8] = &{FAULT_CHECKER_ELF:?};
 "##
         );
 
-        std::fs::write("risc0/zkvm/fault-ids//src/lib.rs", rust_code).unwrap();
+        std::fs::write("risc0/zkvm/fault-ids/src/lib.rs", rust_code).unwrap();
     }
 }
 
