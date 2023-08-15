@@ -69,7 +69,7 @@ fn main() {
     let mut guest_prof: Option<risc0_zkvm::Profiler> = None;
     #[cfg(feature = "profiler")]
     if args.pprof_out.is_some() {
-        let elf = args.binfmt.elf.unwrap();
+        let elf = args.binfmt.elf.clone().unwrap();
         let elf_contents = fs::read(&elf).unwrap();
         guest_prof = Some(risc0_zkvm::Profiler::new(elf.to_str().unwrap(), &elf_contents).unwrap());
     }
