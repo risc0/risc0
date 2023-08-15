@@ -26,7 +26,7 @@ impl Install {
 }
 
 fn install_wasm_tools() {
-    if which("wask-pack").is_err() {
+    if which("wasm-pack").is_err() {
         let sh = Shell::new().unwrap();
         cmd!(sh, "cargo install --locked wasm-pack").run().unwrap();
     }
