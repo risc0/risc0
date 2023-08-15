@@ -12,7 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-pub(crate) mod block_history;
-pub(crate) mod event_processor;
-pub(crate) mod proxy_callback_proof_processor;
-pub(crate) mod proxy_callback_proof_request_stream;
+use clap::Parser;
+use which::which;
+use xshell::{cmd, Shell};
+
+#[derive(Parser)]
+pub struct Install;
+
+impl Install {
+    pub fn run(&self) {
+        install_wasm_tools();
+    }
+}
+
+fn install_wasm_tools() {
+    if which("wasm-pack").is_err() {
+        let sh = Shell::new().unwrap();
+        cmd!(sh, "cargo install --locked wasm-pack").run().unwrap();
+    }
+}

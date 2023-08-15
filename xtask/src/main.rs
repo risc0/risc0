@@ -12,11 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+mod bootstrap;
+mod bootstrap_poseidon;
+mod gen_receipt;
+mod install;
+
 use clap::{Parser, Subcommand};
-use risc0_zkvm::{prove::default_prover, ExecutorEnv};
-use risc0_zkvm_methods::{FIB_ELF, FIB_ID};
-use which::which;
-use xshell::{cmd, Shell};
+
+use self::{
+    bootstrap::Bootstrap, bootstrap_poseidon::BootstrapPoseidon, gen_receipt::GenReceipt,
+    install::Install,
+};
 
 #[derive(Parser)]
 struct Cli {
@@ -26,46 +32,20 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Commands {
-    Install,
-    GenReceipt,
+    Bootstrap(Bootstrap),
+    BootstrapPoseidon(BootstrapPoseidon),
+    GenReceipt(GenReceipt),
+    Install(Install),
 }
 
 impl Commands {
     fn run(&self) {
         match self {
-            Commands::Install => self.cmd_install(),
-            Commands::GenReceipt => self.cmd_gen_receipt(),
+            Commands::Bootstrap(cmd) => cmd.run(),
+            Commands::BootstrapPoseidon(cmd) => cmd.run(),
+            Commands::Install(cmd) => cmd.run(),
+            Commands::GenReceipt(cmd) => cmd.run(),
         }
-    }
-
-    fn cmd_install(&self) {
-        install_wasm_tools();
-    }
-
-    fn cmd_gen_receipt(&self) {
-        let iterations = 100;
-        let env = ExecutorEnv::builder()
-            .add_input(&[iterations])
-            .build()
-            .unwrap();
-        let receipt = default_prover().prove_elf(env, FIB_ELF).unwrap();
-        let receipt_bytes = bincode::serialize(&receipt).unwrap();
-
-        let rust_code = format!(
-            r##"
-pub const FIB_ID: [u32; 8] = {FIB_ID:?};
-pub const FIB_RECEIPT: &[u8] = &{receipt_bytes:?};
-"##
-        );
-
-        std::fs::write("risc0/zkvm/receipts/src/receipts.rs", rust_code).unwrap();
-    }
-}
-
-fn install_wasm_tools() {
-    if which("wask-pack").is_err() {
-        let sh = Shell::new().unwrap();
-        cmd!(sh, "cargo install --locked wasm-pack").run().unwrap();
     }
 }
 
