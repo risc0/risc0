@@ -14,61 +14,64 @@
 
 use std::{fs, path::PathBuf};
 
-use clap::Parser;
-use risc0_zkvm::{serde::to_vec, Executor, ExecutorEnv};
+use clap::{Args, Parser};
+use risc0_zkvm::{Executor, ExecutorEnv};
 
 /// Runs a RISC-V ELF binary within the RISC Zero ZKVM.
 #[derive(Parser)]
-#[clap(about, version, author)]
-struct Args {
-    /// The ELF file to run
-    #[clap(long)]
-    elf: PathBuf,
+#[command(about, version, author)]
+struct Cli {
+    #[command(flatten)]
+    binfmt: BinFmt,
 
     /// Receipt output file.
-    #[clap(long)]
+    #[arg(long)]
     receipt: Option<PathBuf>,
 
     /// File to read initial input from.
-    #[clap(long)]
+    #[arg(long)]
     initial_input: Option<PathBuf>,
 
     /// Display verbose output.
-    #[clap(short, long, action = clap::ArgAction::Count)]
+    #[arg(short, long, action = clap::ArgAction::Count)]
     verbose: u8,
 
     /// Add environment vairables in the form of NAME=value.
-    #[clap(long, action = clap::ArgAction::Append)]
+    #[arg(long, action = clap::ArgAction::Append)]
     env: Vec<String>,
 
     /// Write "pprof" protobuf output of the guest's run to this file.
     /// You can use google's pprof (<https://github.com/google/pprof>)
     /// to read it.
     #[cfg(feature = "profiler")]
-    #[clap(long)]
+    #[arg(long)]
     pprof_out: Option<PathBuf>,
+}
+
+#[derive(Args)]
+#[group(required = true, multiple = false)]
+struct BinFmt {
+    /// The ELF to execute
+    #[arg(long)]
+    elf: Option<PathBuf>,
+
+    /// The image to execute
+    #[arg(long)]
+    image: Option<PathBuf>,
 }
 
 fn main() {
     env_logger::init();
 
-    let args = Args::parse();
-    let elf_contents = fs::read(&args.elf).unwrap();
-
-    if args.verbose > 0 {
-        eprintln!(
-            "Read {} bytes of ELF from {}",
-            elf_contents.len(),
-            args.elf.display()
-        );
-    }
+    let args = Cli::parse();
 
     #[cfg(feature = "profiler")]
     let mut guest_prof: Option<risc0_zkvm::Profiler> = None;
     #[cfg(feature = "profiler")]
     if args.pprof_out.is_some() {
-        guest_prof =
-            Some(risc0_zkvm::Profiler::new(args.elf.to_str().unwrap(), &elf_contents).unwrap());
+        let elf = args.binfmt.elf.unwrap();
+        let elf_contents = fs::read(&elf).unwrap();
+        guest_prof = Some(risc0_zkvm::Profiler::new(elf.to_str().unwrap(), &elf_contents).unwrap());
     }
 
     let session = {
@@ -91,7 +94,16 @@ fn main() {
         }
 
         let env = builder.build().unwrap();
-        let mut exec = Executor::from_elf(env, &elf_contents).unwrap();
+        let mut exec = if let Some(elf) = args.binfmt.elf {
+            let elf_contents = fs::read(&elf).unwrap();
+            Executor::from_elf(env, &elf_contents).unwrap()
+        } else if let Some(image) = args.binfmt.image {
+            let image_contents = fs::read(&image).unwrap();
+            let image = bincode::deserialize(&image_contents).unwrap();
+            Executor::new(env, image)
+        } else {
+            unreachable!()
+        };
         exec.run().unwrap()
     };
 
@@ -106,7 +118,7 @@ fn main() {
 
     let receipt = session.prove().unwrap();
 
-    let receipt_data = to_vec(&receipt).unwrap();
+    let receipt_data = bincode::serialize(&receipt).unwrap();
     let receipt_bytes = bytemuck::cast_slice(&receipt_data);
     if let Some(receipt_file) = args.receipt.as_ref() {
         fs::write(receipt_file, receipt_bytes).expect("Unable to write receipt file");

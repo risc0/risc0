@@ -34,7 +34,7 @@ mod bonsai;
 #[cfg(not(feature = "disable-dev-mode"))]
 mod dev_mode;
 mod exec;
-mod ipc;
+mod external;
 pub(crate) mod loader;
 mod local;
 mod plonk;
@@ -57,6 +57,7 @@ use risc0_zkp::{
 };
 use risc0_zkvm_platform::{memory::MEM_SIZE, PAGE_SIZE, WORD_SIZE};
 
+pub use self::external::ExternalProver;
 use self::{bonsai::BonsaiProver, local::LocalProver};
 use crate::{
     receipt::{Receipt, VerifierContext},

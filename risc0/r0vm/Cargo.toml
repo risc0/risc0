@@ -9,6 +9,7 @@ repository = { workspace = true }
 
 [dependencies]
 anyhow = "1.0"
+bincode = "1.3"
 bytemuck = "1.12"
 clap = { version = "4.0", features = ["derive"] }
 env_logger = "0.10"
@@ -21,6 +22,9 @@ assert_fs = "1.0"
 risc0-zkvm-methods = { path = "../zkvm/methods" }
 risc0-zkvm-platform = { workspace = true }
 temp-env = "0.3"
+test-log = { version = "0.2", features = ["trace"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [features]
 cuda = ["risc0-zkvm/cuda"]

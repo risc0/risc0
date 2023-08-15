@@ -16,8 +16,10 @@
 
 mod elf;
 mod image;
+mod sys_state;
 
 pub use crate::{
     elf::Program,
-    image::{read_sha_halfs, tagged_struct, write_sha_halfs, MemoryImage, SystemState},
+    image::{compute_image_id, MemoryImage},
+    sys_state::{read_sha_halfs, tagged_struct, write_sha_halfs, SystemState},
 };
