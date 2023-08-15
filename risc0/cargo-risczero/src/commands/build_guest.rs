@@ -49,14 +49,10 @@ impl BuildGuest {
             .name;
         eprintln!("Building the riscv32im-risc0-zkvm-elf binary for {pkg_name}...");
         ensure_binary("docker", &["--version"])?;
-        let package_name = pkg_name.replace("-", "_");
-        self.create_dockerfile(package_name.as_str())?;
+        self.create_dockerfile(pkg_name.as_str())?;
         self.build()?;
-        eprintln!("ELF ready at ./elfs/{package_name}");
-        eprintln!(
-            "ImageID={}",
-            self.image_id(&format!("elfs/{package_name}"))?
-        );
+        eprintln!("ELF ready at ./elfs/{pkg_name}");
+        eprintln!("ImageID={}", self.image_id(&format!("elfs/{pkg_name}"))?);
 
         Ok(())
     }
