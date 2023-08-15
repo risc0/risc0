@@ -17,14 +17,14 @@ use rrs_lib::{instruction_executor::InstructionExecutor, HartState};
 
 pub fn main() {
     let mut mini_monitor: MiniMonitor = env::read();
-    let regs = mini_monitor.registers;
+    let registers = mini_monitor.registers;
     let pc = mini_monitor.pc;
 
     let mut instruction_executor = InstructionExecutor {
         mem: &mut mini_monitor,
         hart_state: &mut HartState {
-            registers: regs,
-            pc: pc,
+            registers,
+            pc,
             last_register_write: None,
         },
     };
