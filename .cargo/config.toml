@@ -1,4 +1,5 @@
 [alias]
+xfast = "run --package xtask --"
 xtask = "run --release --package xtask --"
 
 [build]
