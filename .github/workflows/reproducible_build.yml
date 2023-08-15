@@ -27,7 +27,7 @@ jobs:
         with:
           node-version: 18
       - run: echo "expected_image_id=9ee1612b0a7e270f8df248e47dc85d9908ff4c1e7df42f398a65ca878b57a23d" >> $GITHUB_ENV
-      - run: echo "branch_image_id=$(echo $(cargo run --bin cargo-risczero -- risczero build --manifest-path examples/factors/methods/guest/Cargo.toml 2>&1) | rev | cut -d ' ' -f 1 | rev)" >> $GITHUB_ENV
+      - run: echo "branch_image_id=$(echo -n $(cargo run --bin cargo-risczero -- risczero build --manifest-path examples/factors/methods/guest/Cargo.toml 2>&1) | rev | cut -d ' ' -f 1 | rev)" >> $GITHUB_ENV
       - name: Fail PR if image IDs not matching
         if: ${{ '${{ env.expected_image_id }}' != '${{ env.branch_image_id }}' }}
         run: exit 1
