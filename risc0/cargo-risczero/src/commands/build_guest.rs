@@ -78,6 +78,7 @@ impl BuildGuest {
             .workdir("/src")
             .copy(".", ".")
             .env(manifest_env)
+            .env(pkg_env)
             .env(c_flags_env)
             .run(
                 "cargo +risc0 fetch --target riscv32im-risc0-zkvm-elf --manifest-path $CARGO_MANIFEST_PATH --locked",
@@ -89,17 +90,13 @@ impl BuildGuest {
                 \t--release \\\n\
                 \t--target riscv32im-risc0-zkvm-elf \\\n\
                 \t--manifest-path $CARGO_MANIFEST_PATH")
-            .run("rename -d 's/-/_/g' target/riscv32im-risc0-zkvm-elf/release/*");
+            .run("FILENAME=$(ls target/riscv32im-risc0-zkvm-elf/release/*.d | cut -d '.' -f 1) && mv $FILENAME $PKG_NAME");
 
         let binary: DockerFile<'_> = DockerFile::new()
             .comment("binary stage")
             .from_alias("binary", "scratch")
             .env(pkg_env)
-            .copy_from(
-                "build",
-                "/src/target/riscv32im-risc0-zkvm-elf/release/$PKG_NAME",
-                "$PKG_NAME",
-            );
+            .copy_from("build", "/src/$PKG_NAME", "$PKG_NAME");
 
         let file = DockerFile::new().dockerfile(build).dockerfile(binary);
         let mut dockerfile = File::create("Dockerfile")?;
