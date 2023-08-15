@@ -89,7 +89,7 @@ impl BuildGuest {
                 \t--release \\\n\
                 \t--target riscv32im-risc0-zkvm-elf \\\n\
                 \t--manifest-path $CARGO_MANIFEST_PATH")
-            .run("rename 's/-/_/g' target/riscv32im-risc0-zkvm-elf/release/*");
+            .run("rename -d 's/-/_/g' target/riscv32im-risc0-zkvm-elf/release/*");
 
         let binary: DockerFile<'_> = DockerFile::new()
             .comment("binary stage")
