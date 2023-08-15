@@ -9,8 +9,8 @@ For a step-by-step guide to building your first zkVM application, we recommend [
 ## Quick Start
 First, [install Rust] if you don't already have it.
 Then, run the example with:
-```
-  cargo run --release
+```bash
+cargo run --release
 ```
 
 Congratulations! You just constructed a zero-knowledge proof that you know the factors of 391.
