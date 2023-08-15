@@ -2,6 +2,23 @@
 
 A simple digital signature scheme built on the RISC Zero platform.
 
+## Quick Start
+
+First, [install Rust] if you don't already have it.
+
+Next, install the `cargo-risczero` tool and install the toolchain with:
+```bash
+cargo install cargo-risczero
+cargo risczero install
+```
+
+Then, run the example with:
+```bash
+cargo run --release -- "This is a signed message" --passphrase="passw0rd"
+```
+
+[install Rust]: https://doc.rust-lang.org/cargo/getting-started/installation.html
+
 ## Summary
 
 From [Wikipedia](https://en.wikipedia.org/wiki/Digital_signature):
@@ -27,9 +44,3 @@ receipt proves that the identity was computed by taking the SHA-256d of
 the signer's passphrase (i.e. not just copied). Thus the signer must possess the
 passphrase. Sending those along with the message covers the full scope of a
 typical digital signature scheme.
-
-## Run the example
-
-```bash
-cargo run --release -- "This is a signed message" --passphrase="passw0rd"
-```
