@@ -28,7 +28,13 @@ use risc0_zkvm_platform::memory;
 
 use crate::utils::{ensure_binary, CommandExt};
 
-const DOCKER_IGNORE: &'static str = "**/elfs\n**/target\n**/Dockerfile\n**/.git";
+const DOCKER_IGNORE: &str = r#"
+**/elfs
+**/target
+**/Dockerfile
+**/.git
+"#;
+
 /// `cargo risczero build-guest`
 #[derive(Parser)]
 pub struct BuildGuest {
@@ -50,15 +56,19 @@ impl BuildGuest {
             .name;
         eprintln!("Building the riscv32im-risc0-zkvm-elf binary for {pkg_name}...");
         ensure_binary("docker", &["--version"])?;
+        if let Err(err) = self.check_cargo_lock() {
+            eprintln!("{err}");
+        }
         let package_name = pkg_name.replace('-', "_");
         self.create_dockerfile(package_name.as_str())?;
         self.build()?;
+        self.clean()?;
 
         let paths = fs::read_dir(&format!("./elfs/{package_name}/"))?;
-        eprintln!("ELFs ready at:");
+        println!("ELFs ready at:");
         for path in paths {
             let entry = path.unwrap().path();
-            eprintln!("{} - ImageID: {}", entry.display(), self.image_id(&entry)?);
+            println!("{} - ImageID: {}", entry.display(), self.image_id(&entry)?);
         }
 
         Ok(())
@@ -120,6 +130,25 @@ impl BuildGuest {
         Ok(())
     }
 
+    /// Remove Dockerfile and .dockerignore files.
+    fn clean(&self) -> Result<()> {
+        Command::new("rm")
+            .args(["Dockerfile", ".dockerignore"])
+            .run_verbose()
+    }
+
+    fn check_cargo_lock(&self) -> Result<()> {
+        let lock_file = PathBuf::from(&self.manifest_path)
+            .parent()
+            .context("invalid manifest path")?
+            .join("Cargo.lock");
+        fs::metadata(lock_file.clone()).context(format!(
+            "Cargo.lock not found in path {}",
+            lock_file.display()
+        ))?;
+        Ok(())
+    }
+
     /// Compute the image ID for a given ELF.
     fn image_id(&self, elf_path: &PathBuf) -> Result<Digest> {
         let elf = fs::read(elf_path)?;
@@ -127,5 +156,46 @@ impl BuildGuest {
         let image = MemoryImage::new(&program, PAGE_SIZE as u32)
             .context("unable to create memory image")?;
         Ok(image.compute_id())
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use std::{env, path::Path};
+
+    use super::BuildGuest;
+
+    struct Tester {
+        manifest_path: String,
+        elf_path: String,
+        expected_image_id: String,
+    }
+
+    impl Tester {
+        fn run(&self) {
+            env::set_current_dir("../../").unwrap();
+            let builder = BuildGuest {
+                manifest_path: self.manifest_path.clone(),
+            };
+            builder.run().unwrap();
+            assert_eq!(
+                builder
+                    .image_id(&Path::new(&self.elf_path).to_path_buf())
+                    .unwrap()
+                    .to_string(),
+                self.expected_image_id
+            );
+        }
+    }
+    #[test]
+    #[ignore] // requires Docker to be installed
+    fn test_reproducible_multiply_method() {
+        let multiply_test = Tester {
+            manifest_path: "examples/factors/methods/guest/Cargo.toml".to_string(),
+            elf_path: "elfs/multiply/multiply".to_string(),
+            expected_image_id: "9ee1612b0a7e270f8df248e47dc85d9908ff4c1e7df42f398a65ca878b57a23d"
+                .to_string(),
+        };
+        multiply_test.run()
     }
 }
