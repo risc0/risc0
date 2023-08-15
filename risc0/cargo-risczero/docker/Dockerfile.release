@@ -7,5 +7,6 @@ RUN curl --proto '=https' --tlsv1.2 --retry 10 --retry-connrefused -fsSL 'https:
 ENV PATH="/root/.cargo/bin:${PATH}"
 RUN cargo install cargo-risczero
 RUN cargo risczero install
+RUN apt-get install -y --no-install-recommends rename
 
 ENTRYPOINT [ "/bin/sh" ]

@@ -49,10 +49,14 @@ impl BuildGuest {
             .name;
         eprintln!("Building the riscv32im-risc0-zkvm-elf binary for {pkg_name}...");
         ensure_binary("docker", &["--version"])?;
-        self.create_dockerfile(pkg_name.as_str())?;
+        let package_name = pkg_name.replace('-', "_");
+        self.create_dockerfile(package_name.as_str())?;
         self.build()?;
-        eprintln!("ELF ready at ./elfs/{pkg_name}");
-        eprintln!("ImageID={}", self.image_id(&format!("elfs/{pkg_name}"))?);
+        eprintln!("ELF ready at ./elfs/{package_name}");
+        eprintln!(
+            "ImageID={}",
+            self.image_id(&format!("elfs/{package_name}"))?
+        );
 
         Ok(())
     }
@@ -84,7 +88,8 @@ impl BuildGuest {
                 \t--locked \\\n\
                 \t--release \\\n\
                 \t--target riscv32im-risc0-zkvm-elf \\\n\
-                \t--manifest-path $CARGO_MANIFEST_PATH");
+                \t--manifest-path $CARGO_MANIFEST_PATH")
+            .run("rename 's/-/_/g' target/riscv32im-risc0-zkvm-elf/release/*");
 
         let binary: DockerFile<'_> = DockerFile::new()
             .comment("binary stage")
