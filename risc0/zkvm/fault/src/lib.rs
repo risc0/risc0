@@ -13,7 +13,6 @@
 // limitations under the License.
 
 #![doc = include_str!("../README.md")]
-#![no_std]
 
 #[cfg(not(target_os = "zkvm"))]
 include!(concat!(env!("OUT_DIR"), "/methods.rs"));
