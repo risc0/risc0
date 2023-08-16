@@ -11,21 +11,23 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-use std::time::Duration;
 
+use anyhow::Result;
 use bonsai_ethereum_contracts::i_bonsai_relay::CallbackRequestFilter;
 use ethers::{
-    core::k256::ecdsa::SigningKey,
-    middleware::SignerMiddleware,
-    prelude::{signer::SignerMiddlewareError, *},
+    prelude::{k256::ecdsa::SigningKey, signer::SignerMiddlewareError},
     providers::{Middleware, Provider, PubsubClient, SubscriptionStream, Ws},
-    types::{Address, Log},
+    types::{Address, BlockNumber, Log},
 };
-use futures::StreamExt;
-use tracing::{debug, error, warn};
+use ethers_signers::Wallet;
+use futures::{Stream, StreamExt};
+use tokio_stream::wrappers::ReceiverStream;
+use tracing::{debug, error, info};
 
+use super::{block_history, block_history::State};
 use crate::{api::error::Error, downloader::event_processor::EventProcessor, EthersClientConfig};
 
+#[derive(Debug)]
 pub(crate) struct ProxyCallbackProofRequestStream<
     EP: EventProcessor<Event = CallbackRequestFilter> + Sync + Send,
 > {
@@ -50,51 +52,46 @@ impl<EP: EventProcessor<Event = CallbackRequestFilter> + Sync + Send>
     }
 
     pub(crate) async fn run(self) -> Result<(), Error> {
-        const WAIT_DURATION: Duration = Duration::from_secs(5);
         const EVENT_NAME: &str = "CallbackRequest(address,bytes32,bytes,address,bytes4,uint64)";
-        const MAX_RETRIES: u64 = 7 * 24 * 60 * 60 / WAIT_DURATION.as_secs(); // 1 week
+
         let filter = ethers::types::Filter::new()
             .address(self.proxy_contract_address)
             .event(EVENT_NAME);
-        let mut client = self.client_config.get_client().await?;
-        let mut recreate_client = false;
+        let client = self.client_config.get_client().await?;
+        let last_processed_block_number = client.get_block_number().await?;
+        let last_processed_block = BlockNumber::Number(last_processed_block_number);
+        let mut state = State {
+            client_config: self.client_config.clone(),
+            client,
+            recreate_client: false,
+            last_processed_block: last_processed_block_number,
+            latest_block: last_processed_block_number,
+            filter,
+            from: last_processed_block,
+            to: last_processed_block,
+        };
 
         loop {
-            self.recreate_client(
-                &mut client,
-                &mut recreate_client,
-                MAX_RETRIES,
-                WAIT_DURATION,
-            )
-            .await?;
-            let logs = client.subscribe_logs(&filter).await;
-            self.match_logs(logs, &mut recreate_client).await;
+            state = self.recreate_client(state.clone()).await?;
+            state = self.recover_block_delay(state.clone()).await;
+            let logs = state.client.subscribe_logs(&state.filter).await;
+            self.match_logs(state.clone(), logs).await;
         }
     }
 
-    async fn recreate_client(
-        &self,
-        client: &mut SignerMiddleware<Provider<Ws>, Wallet<SigningKey>>,
-        recreate_flag: &mut bool,
-        max_retries: u64,
-        wait_duration: Duration,
-    ) -> Result<(), Error> {
-        if *recreate_flag {
+    async fn recreate_client(&self, state: State) -> Result<State, Error> {
+        let state = if state.recreate_client {
             debug!("Recreating client.");
-            *client = self
-                .client_config
-                .get_client_with_reconnects(max_retries, wait_duration)
-                .await?;
-            *recreate_flag = false;
+            state.recreate_client().await?
+        } else {
+            state
         };
-        Ok(())
+        Ok(state)
     }
 
-    async fn process_logs(
-        &self,
-        mut subscription_stream: SubscriptionStream<'_, impl PubsubClient, Log>,
-    ) -> Result<(), Error> {
-        while let Some(log) = subscription_stream.next().await {
+    async fn process_logs(&self, stream: impl Stream<Item = Log>) {
+        tokio::pin!(stream);
+        while let Some(log) = stream.next().await {
             let parsed_event: Result<CallbackRequestFilter, _> = ethers::contract::parse_log(log);
             match parsed_event {
                 Ok(event) => {
@@ -105,31 +102,57 @@ impl<EP: EventProcessor<Event = CallbackRequestFilter> + Sync + Send>
                 Err(error) => error!(?error, "Error parsing log"),
             }
         }
-        Ok(())
     }
 
     async fn match_logs(
         &self,
+        state: State,
         logs: Result<
             SubscriptionStream<'_, impl PubsubClient, Log>,
             SignerMiddlewareError<Provider<Ws>, Wallet<SigningKey>>,
         >,
-        recreate_client_flag: &mut bool,
-    ) {
+    ) -> State {
         match logs {
             Ok(logs) => {
                 debug!("Successfully subscribed to logs");
-                self.process_logs(logs).await.map_or_else(
-                    |error| error!(?error, "Failed to process logs"),
-                    |_| {
-                        warn!("Proxy stream ended, reconnecting...");
-                        *recreate_client_flag = true
-                    },
-                )
+                self.process_logs(logs).await;
+                state
             }
             Err(error) => {
                 error!(?error, "Failed to subscribe to logs");
-                *recreate_client_flag = true;
+                State {
+                    recreate_client: true,
+                    ..state
+                }
+            }
+        }
+    }
+    async fn recover_block_delay(&self, state: State) -> State {
+        info!(?state, "Starting to recover delay.");
+        let original_state = state.clone();
+        let (tx, rx) = tokio::sync::mpsc::channel(100);
+        let recover_lost_blocks_handler =
+            tokio::spawn(async move { block_history::recover_lost_blocks(state, tx).await });
+        self.process_logs(ReceiverStream::new(rx)).await;
+        match recover_lost_blocks_handler.await {
+            Ok(Ok(new_state)) => {
+                info!(state = ?new_state, "Successfully recovered block delay.");
+                let new_from = BlockNumber::Number(new_state.last_processed_block);
+                let new_to = BlockNumber::Number(new_state.latest_block);
+                State {
+                    filter: new_state.filter.clone().from_block(new_from),
+                    from: new_from,
+                    to: new_to,
+                    ..new_state
+                }
+            }
+            Ok(Err(error)) => {
+                error!(?error, "Failed to recover block delay.");
+                original_state
+            }
+            Err(error) => {
+                error!(?error, "Tokio Task `recover_last_blocks_handler` failed.");
+                original_state
             }
         }
     }

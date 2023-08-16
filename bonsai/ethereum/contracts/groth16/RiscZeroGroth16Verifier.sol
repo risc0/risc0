@@ -82,8 +82,8 @@ contract RiscZeroGroth16Verifier is IRiscZeroVerifier, Groth16Verifier {
     using SafeCast for uint256;
 
     // Control ID hash for the identity_p254 predicate decomposed as implemented by splitDigest.
-    uint256 internal constant CONTROL_ID_0 = uint256(0x41bc00f14e6b8601221f40715dc4d1ed);
-    uint256 internal constant CONTROL_ID_1 = uint256(0x159a44e61692a5c66afe6eb6317f0dc7);
+    uint256 internal constant CONTROL_ID_0 = uint256(0x68e42d8b3ddc499f4e1799a767052ab3);
+    uint256 internal constant CONTROL_ID_1 = uint256(0x3802684f1645e0a028585b0445d39231);
 
     /// @notice splits a digest into two 128-bit words to use as public signal inputs.
     /// @dev RISC Zero's Circom verifier circuit takes each of two hash digests in two 128-bit
