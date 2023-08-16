@@ -34,7 +34,7 @@ const DOCKER_IGNORE: &str = r#"
 **/.git
 "#;
 
-/// `cargo risczero build-guest`
+/// `cargo risczero build`
 #[derive(Parser)]
 pub struct BuildGuest {
     /// Location of the Cargo.toml of the guest code

@@ -19,7 +19,6 @@ dirs = "5.0"
 docker-generate = "0.1"
 flate2 = "1"
 fs2 = "0.4"
-hex = "0.4"
 reqwest = { version = "0.11", default-features = false, features = [
   "blocking",
   "json",
