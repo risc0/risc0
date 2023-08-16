@@ -29,7 +29,7 @@ fn expected_stdout() -> String {
 
 fn load_receipt(path: &Path) -> Receipt {
     let data = std::fs::read(path).unwrap();
-    risc0_zkvm::serde::from_slice(&data).unwrap()
+    bincode::deserialize(&data).unwrap()
 }
 
 #[test]
