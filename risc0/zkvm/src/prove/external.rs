@@ -31,14 +31,16 @@ use crate::{ExecutorEnv, Receipt, Segment, SegmentReceipt, Session, VerifierCont
 pub struct ExternalProver {
     name: String,
     r0vm_path: PathBuf,
+    hashfn: String,
 }
 
 impl ExternalProver {
     /// Construct an [ExternalProver].
-    pub fn new<P: AsRef<Path>>(name: &str, r0vm_path: P) -> Self {
+    pub fn new<P: AsRef<Path>>(name: &str, r0vm_path: P, hashfn: &str) -> Self {
         Self {
             name: name.to_string(),
             r0vm_path: r0vm_path.as_ref().to_path_buf(),
+            hashfn: hashfn.to_string(),
         }
     }
 }
@@ -47,11 +49,9 @@ impl Prover for ExternalProver {
     fn prove(
         &self,
         env: ExecutorEnv<'_>,
-        _ctx: &VerifierContext,
+        ctx: &VerifierContext,
         image: MemoryImage,
     ) -> Result<Receipt> {
-        // TODO: deal with VerifierContext
-
         log::debug!("Launching {}", &self.r0vm_path.to_string_lossy());
         let temp_dir = tempdir()?;
 
@@ -67,6 +67,8 @@ impl Prover for ExternalProver {
             .arg(&image_path)
             .arg("--receipt")
             .arg(&receipt_path)
+            .arg("--hashfn")
+            .arg(&self.hashfn)
             .stdin(Stdio::piped());
 
         let mut child = cmd.spawn()?;
@@ -80,7 +82,10 @@ impl Prover for ExternalProver {
         }
 
         let receipt_bytes = std::fs::read(receipt_path)?;
-        Ok(bincode::deserialize(&receipt_bytes)?)
+        let receipt: Receipt = bincode::deserialize(&receipt_bytes)?;
+        let image_id = image.compute_id();
+        receipt.verify_with_context(ctx, image_id)?;
+        Ok(receipt)
     }
 
     fn prove_session(&self, _ctx: &VerifierContext, _session: &Session) -> Result<Receipt> {

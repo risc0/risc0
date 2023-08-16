@@ -14,8 +14,8 @@
 
 use std::{fs, path::PathBuf};
 
-use clap::{Args, Parser};
-use risc0_zkvm::{Executor, ExecutorEnv};
+use clap::{Args, Parser, ValueEnum};
+use risc0_zkvm::{prove::get_prover, Executor, ExecutorEnv, VerifierContext};
 
 /// Runs a RISC-V ELF binary within the RISC Zero ZKVM.
 #[derive(Parser)]
@@ -27,6 +27,10 @@ struct Cli {
     /// Receipt output file.
     #[arg(long)]
     receipt: Option<PathBuf>,
+
+    /// The hash function to use to produce a proof.
+    #[arg(long, value_enum, default_value_t = HashFn::Sha256)]
+    hashfn: HashFn,
 
     /// File to read initial input from.
     #[arg(long)]
@@ -58,6 +62,13 @@ struct BinFmt {
     /// The image to execute
     #[arg(long)]
     image: Option<PathBuf>,
+}
+
+#[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
+enum HashFn {
+    #[value(name = "sha-256")]
+    Sha256,
+    Poseidon,
 }
 
 fn main() {
@@ -116,7 +127,13 @@ fn main() {
             .expect("Unable to write profiling output");
     }
 
-    let receipt = session.prove().unwrap();
+    let prover_name = match args.hashfn {
+        HashFn::Sha256 => "$default",
+        HashFn::Poseidon => "$poseidon",
+    };
+    let prover = get_prover(prover_name);
+    let ctx = VerifierContext::default();
+    let receipt = prover.prove_session(&ctx, &session).unwrap();
 
     let receipt_data = bincode::serialize(&receipt).unwrap();
     let receipt_bytes = bytemuck::cast_slice(&receipt_data);

@@ -25,7 +25,7 @@ fn prove_nothing() -> Result<Receipt> {
     let input = to_vec(&MultiTestSpec::DoNothing).unwrap();
     let env = ExecutorEnv::builder().add_input(&input).build().unwrap();
     let r0vm_path = cargo_bin("r0vm");
-    let prover = ExternalProver::new("r0vm", r0vm_path);
+    let prover = ExternalProver::new("r0vm", r0vm_path, "sha-256");
     prover.prove_elf(env, MULTI_TEST_ELF)
 }
 
