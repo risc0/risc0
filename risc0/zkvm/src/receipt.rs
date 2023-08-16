@@ -460,15 +460,6 @@ impl ReceiptMetadata {
     }
 }
 
-/// Compute and return the ImageID of the given `(merkle_root, pc)` pair.
-pub fn compute_image_id(merkle_root: &Digest, pc: u32) -> Digest {
-    SystemState {
-        merkle_root: *merkle_root,
-        pc,
-    }
-    .digest()
-}
-
 impl Default for VerifierContext {
     fn default() -> Self {
         Self {
