@@ -4,6 +4,23 @@ This example demonstrates how to use the zkVM to calculate pro rata distribution
 
 Walking through this example on Linux requires a minimum of around 12GB of RAM and under 20 minutes including compile time on a reasonably modern CPU such as the 8-core Ryzen 5800X.
 
+## Quick Start
+
+First, [install Rust] if you don't already have it.
+
+Next, install the `cargo-risczero` tool and install the toolchain with:
+```bash
+cargo install cargo-risczero
+cargo risczero install
+```
+
+Then, run the example with:
+```bash
+cargo run --release
+```
+
+[install Rust]: https://doc.rust-lang.org/cargo/getting-started/installation.html
+
 ## Building
 
 To run tests and then build a copy of the pro rata command line utility:

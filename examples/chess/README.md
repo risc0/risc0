@@ -14,7 +14,7 @@ First, [install Rust] if you don't already have it.
 
 Next, install the `cargo-risczero` tool and install the toolchain with:
 ```bash
-cargo install risczero
+cargo install cargo-risczero
 cargo risczero install
 ```
 

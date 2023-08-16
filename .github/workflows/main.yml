@@ -86,8 +86,6 @@ jobs:
       - run: cargo test --manifest-path bonsai/examples/governance/Cargo.toml
         if: matrix.device == 'cpu'
       - run: cargo check -F $FEATURE --benches
-      - run: cargo check -p bootstrap
-        if: matrix.device == 'cpu'
       - run: cargo check -p risc0-build
         if: matrix.device == 'cpu'
       - run: cargo check -F $FEATURE -p risc0-circuit-rv32im
