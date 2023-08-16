@@ -12,10 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{fs, path::PathBuf};
+use std::{fs, path::PathBuf, rc::Rc};
 
 use clap::{Args, Parser, ValueEnum};
-use risc0_zkvm::{prove::get_prover, Executor, ExecutorEnv, VerifierContext};
+use risc0_zkvm::{
+    prove::{get_prover, Prover},
+    Executor, ExecutorEnv, VerifierContext,
+};
 
 /// Runs a RISC-V ELF binary within the RISC Zero ZKVM.
 #[derive(Parser)]
@@ -105,11 +108,11 @@ fn main() {
         }
 
         let env = builder.build().unwrap();
-        let mut exec = if let Some(elf) = args.binfmt.elf {
-            let elf_contents = fs::read(&elf).unwrap();
+        let mut exec = if let Some(ref elf_path) = args.binfmt.elf {
+            let elf_contents = fs::read(elf_path).unwrap();
             Executor::from_elf(env, &elf_contents).unwrap()
-        } else if let Some(image) = args.binfmt.image {
-            let image_contents = fs::read(&image).unwrap();
+        } else if let Some(ref image_path) = args.binfmt.image {
+            let image_contents = fs::read(image_path).unwrap();
             let image = bincode::deserialize(&image_contents).unwrap();
             Executor::new(env, image)
         } else {
@@ -127,11 +130,7 @@ fn main() {
             .expect("Unable to write profiling output");
     }
 
-    let prover_name = match args.hashfn {
-        HashFn::Sha256 => "$default",
-        HashFn::Poseidon => "$poseidon",
-    };
-    let prover = get_prover(prover_name);
+    let prover = args.get_prover();
     let ctx = VerifierContext::default();
     let receipt = prover.prove_session(&ctx, &session).unwrap();
 
@@ -146,5 +145,21 @@ fn main() {
                 receipt_file.display()
             );
         }
+    }
+}
+
+impl Cli {
+    fn get_prover(&self) -> Rc<dyn Prover> {
+        if let Some(dev_mode) = std::env::var("RISC0_DEV_MODE").ok() {
+            if dev_mode == "1" || dev_mode == "true" || dev_mode == "yes" {
+                return get_prover("$devmode");
+            }
+        }
+
+        let prover_name = match self.hashfn {
+            HashFn::Sha256 => "$default",
+            HashFn::Poseidon => "$poseidon",
+        };
+        get_prover(prover_name)
     }
 }
