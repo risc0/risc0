@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/// This module implements the Executor.
+//! This module implements the Executor.
 use std::{cell::RefCell, collections::HashMap, fmt::Debug, io::Write, mem::take, rc::Rc};
 
 use addr2line::{
