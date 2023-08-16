@@ -29,7 +29,7 @@ use test_log::test;
 use super::{get_prover, LocalProver, Prover};
 use crate::{
     prove::HalEval,
-    receipt::{compute_image_id, InnerReceipt, Receipt, SegmentReceipts},
+    receipt::{InnerReceipt, Receipt, SegmentReceipts},
     serde::{from_slice, to_vec},
     testutils, Executor, ExecutorEnv, ExitCode, CIRCUIT, FAULT_CHECKER_ID,
 };
@@ -140,8 +140,14 @@ fn memory_io() {
     fn is_fault_proof(receipt: Receipt) -> bool {
         match receipt.inner {
             InnerReceipt::Flat(SegmentReceipts(segments)) => {
-                let pre = segments.last().unwrap().get_metadata().unwrap().pre;
-                compute_image_id(&pre.merkle_root, pre.pc) == FAULT_CHECKER_ID.into()
+                let last_image_id = segments
+                    .last()
+                    .unwrap()
+                    .get_metadata()
+                    .unwrap()
+                    .pre
+                    .digest();
+                last_image_id == FAULT_CHECKER_ID.into()
             }
             _ => false,
         }
