@@ -23,8 +23,8 @@ use anyhow::{Context, Result};
 use cargo_metadata::MetadataCommand;
 use clap::Parser;
 use docker_generate::DockerFile;
-use risc0_zkvm::{sha::Digest, MemoryImage, Program, MEM_SIZE, PAGE_SIZE};
-use risc0_zkvm_platform::memory;
+use risc0_binfmt::{MemoryImage, Program};
+use risc0_zkvm_platform::{memory, memory::MEM_SIZE, PAGE_SIZE};
 
 use crate::utils::{ensure_binary, CommandExt};
 
@@ -63,7 +63,9 @@ impl BuildGuest {
         self.build()?;
         self.clean()?;
 
-        let paths = fs::read_dir(&format!("./elfs/{package_name}/"))?;
+        let paths = fs::read_dir(&format!(
+            "./target/riscv-guest/riscv32im-risc0-zkvm-elf/docker/{package_name}/"
+        ))?;
         println!("ELFs ready at:");
         for path in paths {
             let entry = path.unwrap().path();
@@ -154,25 +156,29 @@ impl BuildGuest {
     }
 
     /// Compute the image ID for a given ELF.
-    fn image_id(&self, elf_path: &PathBuf) -> Result<Digest> {
+    fn image_id(&self, elf_path: &PathBuf) -> Result<String> {
         let elf = fs::read(elf_path)?;
         let program = Program::load_elf(&elf, MEM_SIZE as u32).context("unable to load elf")?;
         let image = MemoryImage::new(&program, PAGE_SIZE as u32)
             .context("unable to create memory image")?;
-        Ok(image.compute_id())
+        Ok(image.compute_id().to_string())
     }
 }
 
 #[cfg(test)]
 mod test {
-    use std::{env, path::Path};
+    use std::{env, path::PathBuf};
 
     use super::BuildGuest;
 
+    struct Elf {
+        path: String,
+        image_id: String,
+    }
+
     struct Tester {
         manifest_path: String,
-        elf_path: String,
-        expected_image_id: String,
+        elfs: Vec<Elf>,
     }
 
     impl Tester {
@@ -182,25 +188,42 @@ mod test {
                 manifest_path: self.manifest_path.clone(),
             };
             builder.run().unwrap();
-            assert_eq!(
-                builder
-                    .image_id(&Path::new(&self.elf_path).to_path_buf())
-                    .unwrap()
-                    .to_string(),
-                self.expected_image_id
-            );
+            for elf in self.elfs.iter() {
+                assert_eq!(
+                    builder.image_id(&PathBuf::from(&elf.path)).unwrap(),
+                    elf.image_id
+                );
+            }
         }
     }
     #[test]
     #[ignore] // requires Docker to be installed
-    fn test_reproducible_multiply_method() {
-        let multiply_test = Tester {
-            manifest_path: "examples/factors/methods/guest/Cargo.toml".to_string(),
-            elf_path: "target/riscv-guest/riscv32im-risc0-zkvm-elf/docker/multiply/multiply"
-                .to_string(),
-            expected_image_id: "9ee1612b0a7e270f8df248e47dc85d9908ff4c1e7df42f398a65ca878b57a23d"
-                .to_string(),
+              // Test build reproducibility for risc0_zkvm_methods_guest.
+              // If the code of the package or any of its dependencies change,
+              // it may be required to recompute the expected image_ids.
+              // For that, run:
+              // `cargo risczero build --manifest-path risc0/zkvm/methods/guest/Cargo.toml`
+    fn test_reproducible_methods_guest() {
+        let zkvm_methods_guest = Tester {
+            manifest_path: "risc0/zkvm/methods/guest/Cargo.toml".to_string(),
+            elfs: vec![
+                Elf {
+                    path: "target/riscv-guest/riscv32im-risc0-zkvm-elf/docker/risc0_zkvm_methods_guest/hello_commit"
+                    .to_string(),
+                    image_id: "eb12f9b97d8759327f651afeb09ae9a5713e7dbc428284d453b8cf56e8dadd5a".to_string()
+                },
+                Elf {
+                    path: "target/riscv-guest/riscv32im-risc0-zkvm-elf/docker/risc0_zkvm_methods_guest/multi_test"
+                    .to_string(),
+                    image_id: "761900e766a4ae1d8edcb2b49dc9aee54b94e42c9b0d6421cfb112314c4e3efc".to_string(),
+                },
+                Elf {
+                    path: "target/riscv-guest/riscv32im-risc0-zkvm-elf/docker/risc0_zkvm_methods_guest/slice_io"
+                    .to_string(),
+                    image_id: "3f2ad1a2d500ab4ab927eebe241d872d3f598065b8987b182410cf01f350f74c".to_string()
+                }
+            ],
         };
-        multiply_test.run()
+        zkvm_methods_guest.run()
     }
 }
