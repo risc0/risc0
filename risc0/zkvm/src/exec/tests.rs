@@ -27,7 +27,7 @@ use test_log::test;
 use super::{Executor, ExecutorEnv, TraceEvent};
 use crate::{
     serde::{from_slice, to_vec},
-    testutils, ExitCode, MemoryImage, Program, Session,
+    testutils, ExitCode, MemoryImage, Program, Session, FAULT_CHECKER_ID,
 };
 
 fn run_test(spec: MultiTestSpec) {
@@ -655,7 +655,12 @@ fn session_limit() {
 
 #[test]
 fn memory_access() {
-    fn access_memory(addr: u32) -> Result<Session> {
+    fn session_faulted(session: Session) -> bool {
+        let last = session.segments.last().unwrap().resolve().unwrap();
+        last.pre_image.compute_id() == FAULT_CHECKER_ID.into()
+    }
+
+    fn access_memory(addr: u32) -> Session {
         let spec = to_vec(&MultiTestSpec::OutOfBounds).unwrap();
         let addr = to_vec(&addr).unwrap();
         let env = ExecutorEnv::builder()
@@ -663,10 +668,13 @@ fn memory_access() {
             .add_input(&addr)
             .build()
             .unwrap();
-        Executor::from_elf(env, MULTI_TEST_ELF).unwrap().run()
+        Executor::from_elf(env, MULTI_TEST_ELF)
+            .unwrap()
+            .run()
+            .unwrap()
     }
 
-    access_memory(0x0000_0000).unwrap();
-    access_memory(0x0C00_0000).unwrap();
-    access_memory(0x0B00_0000).unwrap();
+    assert!(session_faulted(access_memory(0x0000_0000)));
+    assert!(session_faulted(access_memory(0x0C00_0000)));
+    assert!(!session_faulted(access_memory(0x0B00_0000)));
 }

@@ -29,9 +29,9 @@ use test_log::test;
 use super::{get_prover, LocalProver, Prover};
 use crate::{
     prove::HalEval,
-    receipt::Receipt,
+    receipt::{compute_image_id, InnerReceipt, Receipt, SegmentReceipts},
     serde::{from_slice, to_vec},
-    testutils, Executor, ExecutorEnv, ExitCode, CIRCUIT,
+    testutils, Executor, ExecutorEnv, ExitCode, CIRCUIT, FAULT_CHECKER_ID,
 };
 
 fn prove_nothing(name: &str) -> Result<Receipt> {
@@ -137,6 +137,16 @@ fn bigint_accel() {
 #[test]
 #[serial]
 fn memory_io() {
+    fn is_fault_proof(receipt: Receipt) -> bool {
+        match receipt.inner {
+            InnerReceipt::Flat(SegmentReceipts(segments)) => {
+                let pre = segments.last().unwrap().get_metadata().unwrap().pre;
+                compute_image_id(&pre.merkle_root, pre.pc) == FAULT_CHECKER_ID.into()
+            }
+            _ => false,
+        }
+    }
+
     fn run_memio(pairs: &[(usize, usize)]) -> Result<Receipt> {
         let spec = MultiTestSpec::ReadWriteMem {
             values: pairs
@@ -160,22 +170,24 @@ fn memory_io() {
     );
 
     // Double writes are fine
-    run_memio(&[(POS, 1), (POS, 1)]).unwrap();
+    assert!(!is_fault_proof(run_memio(&[(POS, 1), (POS, 1)]).unwrap()));
 
     // Writes at different addresses are fine
-    run_memio(&[(POS, 1), (POS + 4, 2)]).unwrap();
+    assert!(!is_fault_proof(
+        run_memio(&[(POS, 1), (POS + 4, 2)]).unwrap()
+    ));
 
     // Aligned write is fine
-    run_memio(&[(POS, 1)]).unwrap();
+    assert!(!is_fault_proof(run_memio(&[(POS, 1)]).unwrap()));
 
     // Unaligned write is bad
-    run_memio(&[(POS + 1001, 1)]).unwrap();
+    assert!(is_fault_proof(run_memio(&[(POS + 1001, 1)]).unwrap()));
 
     // Aligned read is fine
-    run_memio(&[(POS, 0)]).unwrap();
+    assert!(!is_fault_proof(run_memio(&[(POS, 0)]).unwrap()));
 
     // Unaligned read is bad
-    run_memio(&[(POS + 1, 0)]).unwrap();
+    assert!(is_fault_proof(run_memio(&[(POS + 1, 0)]).unwrap()));
 }
 
 #[test]
