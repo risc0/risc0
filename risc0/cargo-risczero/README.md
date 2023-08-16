@@ -67,7 +67,7 @@ Use the `build-toolchain` command to build the toolchain locally for your host. 
 
 ## build
 
-Use the `build` command to build a guest code for the target `riscv32im-risc0-zkvm-elf`. The resulting ELF binary will be saved on `elfs/`. Warning: this requires having docker installed.
+Use the `build` command to build a guest code for the target `riscv32im-risc0-zkvm-elf`. The resulting ELF binary will be saved on `target/riscv-guest/riscv32im-risc0-zkvm-elf/docker/`. Warning: this requires having docker installed.
 
 ### Examples
 

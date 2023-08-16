@@ -219,7 +219,7 @@ jobs:
           npm test -- --firefox
         working-directory: examples/browser-verify
 
-  verifiable-build:
+  reproducible-build:
     runs-on: [self-hosted, prod, Linux, X64, docker]
     steps:
       # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842

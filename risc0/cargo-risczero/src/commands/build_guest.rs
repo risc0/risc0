@@ -124,7 +124,12 @@ impl BuildGuest {
     /// Overwrites if an ELF with the same name already exists.
     fn build(&self) -> Result<()> {
         Command::new("docker")
-            .args(["build", "--output=elfs/", "--target=binary", "."])
+            .args([
+                "build",
+                "--output=target/riscv-guest/riscv32im-risc0-zkvm-elf/docker/",
+                "--target=binary",
+                ".",
+            ])
             .run_verbose()?;
 
         Ok(())
@@ -192,7 +197,8 @@ mod test {
     fn test_reproducible_multiply_method() {
         let multiply_test = Tester {
             manifest_path: "examples/factors/methods/guest/Cargo.toml".to_string(),
-            elf_path: "elfs/multiply/multiply".to_string(),
+            elf_path: "target/riscv-guest/riscv32im-risc0-zkvm-elf/docker/multiply/multiply"
+                .to_string(),
             expected_image_id: "9ee1612b0a7e270f8df248e47dc85d9908ff4c1e7df42f398a65ca878b57a23d"
                 .to_string(),
         };
