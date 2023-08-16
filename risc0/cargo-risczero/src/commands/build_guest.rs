@@ -29,7 +29,6 @@ use risc0_zkvm_platform::memory;
 use crate::utils::{ensure_binary, CommandExt};
 
 const DOCKER_IGNORE: &str = r#"
-**/elfs
 **/target
 **/Dockerfile
 **/.git
