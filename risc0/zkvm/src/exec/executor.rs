@@ -31,7 +31,6 @@ use risc0_zkp::{
     },
     ZK_CYCLES,
 };
-use risc0_zkvm_fault_ids::FAULT_CHECKER_ELF;
 use risc0_zkvm_platform::{
     fileno,
     memory::MEM_SIZE,
@@ -52,7 +51,7 @@ use crate::{
     opcode::{MajorType, OpCode},
     receipt::ExitCode,
     serde::to_vec,
-    ExecutorEnv, Loader, Segment, SegmentRef, Session, SimpleSegmentRef,
+    ExecutorEnv, Loader, Segment, SegmentRef, Session, SimpleSegmentRef, FAULT_CHECKER_ELF,
 };
 
 /// The number of cycles required to compress a SHA-256 block.

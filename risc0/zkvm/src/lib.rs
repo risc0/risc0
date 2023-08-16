@@ -22,6 +22,8 @@ extern crate alloc;
 mod control_id;
 #[cfg(feature = "prove")]
 mod exec;
+mod fault_ids;
+pub use fault_ids::{FAULT_CHECKER_ELF, FAULT_CHECKER_ID};
 pub mod guest;
 #[cfg(feature = "prove")]
 mod opcode;

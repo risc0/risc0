@@ -89,12 +89,12 @@ use risc0_zkp::{
     layout::Buffer,
     verify::VerificationError,
 };
-use risc0_zkvm_fault_ids::FAULT_CHECKER_ID;
 use risc0_zkvm_platform::WORD_SIZE;
 use serde::{Deserialize, Serialize};
 
 use crate::{
     control_id::{BLAKE2B_CONTROL_ID, POSEIDON_CONTROL_ID, SHA256_CONTROL_ID},
+    fault_ids::FAULT_CHECKER_ID,
     recursion::SuccinctReceipt,
     sha::rust_crypto::{Digest as _, Sha256},
 };
