@@ -33,6 +33,12 @@ use risc0_zkvm::sha::Digest;
 const ANVIL_DEFAULT_KEY: &'static str =
     "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
 
+/// Interval between connection attempts in case of connection loss.
+const CONNECTION_RETRY_INTERVAL: std::time::Duration = std::time::Duration::from_secs(5);
+
+/// Number of connection attempts.
+const CONNECTION_RETRY_ATTEMPTS: u64 = 60;
+
 #[derive(Subcommand)]
 enum Command {
     /// Runs the RISC-V ELF binary.
@@ -73,6 +79,14 @@ enum Command {
             default_value = ANVIL_DEFAULT_KEY
         )]
         private_key: String,
+
+        /// Number of connection attempts.
+        #[arg(short = 'a', long, env, default_value_t = CONNECTION_RETRY_ATTEMPTS)]
+        connection_retry_attempts: u64,
+
+        /// Interval between connection attempts.
+        #[arg(short = 'i', long, env, default_value_t = CONNECTION_RETRY_INTERVAL.into(), value_parser = humantime::parse_duration)]
+        connection_retry_interval: humantime::Duration,
     },
 }
 
@@ -217,6 +231,8 @@ async fn main() -> anyhow::Result<()> {
             eth_node,
             eth_chain_id,
             private_key,
+            connection_retry_attempts,
+            connection_retry_interval,
         } => {
             let relayer = Relayer {
                 rest_api: true,
@@ -226,8 +242,13 @@ async fn main() -> anyhow::Result<()> {
                 bonsai_api_key: args.global_opts.bonsai_api_key.clone(),
                 relay_contract_address: relay_address,
             };
-            let client_config =
-                EthersClientConfig::new(eth_node, eth_chain_id, private_key.try_into()?);
+            let client_config = EthersClientConfig::new(
+                eth_node,
+                eth_chain_id,
+                private_key.try_into()?,
+                connection_retry_attempts,
+                connection_retry_interval.into(),
+            );
             let server_handle = tokio::spawn(relayer.run(client_config));
 
             // HACK: Wait 1 second to give local Bonsai a chance to start.

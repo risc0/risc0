@@ -81,13 +81,11 @@ jobs:
       - run: cargo xtask install
       - run: cargo xtask gen-receipt
       - run: cargo test -F $FEATURE -F profiler
-      - run: cargo test -F $FEATURE --tests -- --ignored --test-threads 1
+      - run: cargo test --workspace --exclude cargo-risczero -F $FEATURE --tests -- --ignored --test-threads 1
       - run: cargo test -F $FEATURE -F disable-dev-mode -p risc0-r0vm
       - run: cargo test --manifest-path bonsai/examples/governance/Cargo.toml
         if: matrix.device == 'cpu'
       - run: cargo check -F $FEATURE --benches
-      - run: cargo check -p bootstrap
-        if: matrix.device == 'cpu'
       - run: cargo check -p risc0-build
         if: matrix.device == 'cpu'
       - run: cargo check -F $FEATURE -p risc0-circuit-rv32im
@@ -218,3 +216,15 @@ jobs:
           npm install
           npm test -- --firefox
         working-directory: examples/browser-verify
+
+  reproducible-build:
+    runs-on: [self-hosted, prod, Linux, X64, docker]
+    steps:
+      # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
+      - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/rustup
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - run: cargo test --package cargo-risczero --tests -- --ignored

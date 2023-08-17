@@ -29,7 +29,7 @@ fn expected_stdout() -> String {
 
 fn load_receipt(path: &Path) -> Receipt {
     let data = std::fs::read(path).unwrap();
-    risc0_zkvm::serde::from_slice(&data).unwrap()
+    bincode::deserialize(&data).unwrap()
 }
 
 #[test]
@@ -53,7 +53,7 @@ fn stdio_outputs_in_receipt() {
         .success();
 
     let receipt = load_receipt(&receipt_file);
-    let segments = receipt.inner.flat();
+    let segments = receipt.inner.flat().unwrap();
     assert_eq!(segments.len(), 1);
     assert!(segments[0].get_seal_bytes().len() > 0);
     receipt.verify(STANDARD_LIB_ID).unwrap();

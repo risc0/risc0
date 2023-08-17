@@ -22,14 +22,13 @@ use risc0_binfmt::MemoryImage;
 use super::Prover;
 use crate::{ExecutorEnv, Receipt, Segment, SegmentReceipt, Session, VerifierContext};
 
-/// An implementation of a [Prover] that runs proof workloads remotely.
-pub struct RemoteProver {
+/// An implementation of a [Prover] that runs proof workloads via Bonsai.
+pub struct BonsaiProver {
     name: String,
 }
 
-impl RemoteProver {
-    /// construct a remote prover. Unlike the [LocalProver], the hal is taken
-    /// care of by the remote prover.
+impl BonsaiProver {
+    /// Construct a [BonsaiProver].
     pub fn new(name: &str) -> Self {
         Self {
             name: name.to_string(),
@@ -37,7 +36,7 @@ impl RemoteProver {
     }
 }
 
-impl Prover for RemoteProver {
+impl Prover for BonsaiProver {
     fn get_name(&self) -> String {
         self.name.clone()
     }
