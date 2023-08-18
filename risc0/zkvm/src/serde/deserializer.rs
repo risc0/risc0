@@ -471,7 +471,7 @@ impl<'de, 'a, R: WordRead + 'de> serde::Deserializer<'de> for &'a mut Deserializ
 
 #[cfg(test)]
 mod tests {
-    use alloc::string::String;
+    use alloc::{string::String, vec::Vec};
 
     use serde::{Deserialize, Serialize};
 

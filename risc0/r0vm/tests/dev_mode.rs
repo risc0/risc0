@@ -45,7 +45,7 @@ fn dev_mode() {
     let receipt = run_dev_mode();
     temp_env::with_var("RISC0_DEV_MODE", Some("1"), || {
         receipt.verify(risc0_zkvm_methods::MULTI_TEST_ID).unwrap();
-        assert_eq!(receipt.inner, risc0_zkvm::receipt::InnerReceipt::Fake);
+        assert_eq!(receipt.inner, risc0_zkvm::InnerReceipt::Fake);
     });
 }
 

@@ -12,22 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use risc0_zkp::{field::baby_bear::BabyBear, taps::TapSet};
-
-use crate::recursion::{CircuitCoreDef, CircuitImpl, TapsProvider, TAPSET};
-
-impl CircuitImpl {
-    const fn new() -> Self {
-        CircuitImpl
-    }
-}
-
-impl TapsProvider for CircuitImpl {
-    fn get_taps(&self) -> &'static TapSet<'static> {
-        TAPSET
-    }
-}
-
-impl CircuitCoreDef<BabyBear> for CircuitImpl {}
-
-pub(crate) const CIRCUIT_CORE: CircuitImpl = CircuitImpl::new();
+pub(crate) mod exec;
+pub(crate) mod opcode;
+pub(crate) mod prove;
+pub(crate) mod session;
+#[cfg(test)]
+mod testutils;

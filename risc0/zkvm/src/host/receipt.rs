@@ -33,13 +33,15 @@
 //! [Receipt::verify], which will itself call
 //! [InnerReceipt::verify] for the interior [InnerReceipt]).
 //!
-//! # Usage
-//! To create a [Receipt], use [crate::Session::prove]:
+//! # Example
+//!
 //! ```rust
+//! # #[cfg(feature = "prove")]
 //! use risc0_zkvm::{default_prover, ExecutorEnv};
 //! use risc0_zkvm_methods::FIB_ELF;
 //!
 //! # #[cfg(not(feature = "cuda"))]
+//! # #[cfg(feature = "prove")]
 //! # {
 //! let env = ExecutorEnv::builder().add_input(&[20]).build().unwrap();
 //! let receipt = default_prover().prove_elf(env, FIB_ELF).unwrap();
@@ -54,10 +56,12 @@
 //! ```rust
 //! use risc0_zkvm::Receipt;
 //!
+//! # #[cfg(feature = "prove")]
 //! # use risc0_zkvm::{default_prover, ExecutorEnv};
 //! # use risc0_zkvm_methods::{FIB_ELF, FIB_ID};
 //!
 //! # #[cfg(not(feature = "cuda"))]
+//! # #[cfg(feature = "prove")]
 //! # {
 //! # let env = ExecutorEnv::builder().add_input(&[20]).build().unwrap();
 //! # let receipt = default_prover().prove_elf(env, FIB_ELF).unwrap();
@@ -92,11 +96,11 @@ use risc0_zkp::{
 use risc0_zkvm_platform::WORD_SIZE;
 use serde::{Deserialize, Serialize};
 
-use crate::{
+use super::{
     control_id::{BLAKE2B_CONTROL_ID, POSEIDON_CONTROL_ID, SHA256_CONTROL_ID},
     recursion::SuccinctReceipt,
-    sha::rust_crypto::{Digest as _, Sha256},
 };
+use crate::sha::rust_crypto::{Digest as _, Sha256};
 
 /// Indicates how a Segment or Session's execution has terminated
 #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
@@ -258,7 +262,7 @@ impl InnerReceipt {
 
     fn verify_fake() -> Result<(), VerificationError> {
         #[cfg(feature = "std")]
-        if cfg!(not(feature = "disable-dev-mode")) && std::env::var("RISC0_DEV_MODE").is_ok() {
+        if crate::is_dev_mode() {
             return Ok(());
         }
         Err(VerificationError::InvalidProof)
@@ -374,7 +378,7 @@ impl SegmentReceipt {
             .suites
             .get(&self.hashfn)
             .ok_or(VerificationError::InvalidHashSuite)?;
-        risc0_zkp::verify::verify(&crate::CIRCUIT, suite, &self.seal, check_code)
+        risc0_zkp::verify::verify(&super::CIRCUIT, suite, &self.seal, check_code)
     }
 
     /// Returns the [ReceiptMetadata] for this receipt.
