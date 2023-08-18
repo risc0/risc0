@@ -19,7 +19,7 @@ mod merkle;
 mod read_iop;
 
 use alloc::{vec, vec::Vec};
-use core::{cell::RefCell, fmt, iter::zip};
+use core::{cell::RefCell, fmt::{self, Display}, iter::zip};
 
 pub(crate) use merkle::MerkleTreeVerifier;
 pub use read_iop::ReadIOP;
