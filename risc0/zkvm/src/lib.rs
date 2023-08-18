@@ -69,10 +69,16 @@ pub const fn align_up(addr: usize, align: usize) -> usize {
 /// Returns `true` if dev mode is enabled.
 #[cfg(feature = "std")]
 pub fn is_dev_mode() -> bool {
-    cfg!(not(feature = "disable-dev-mode"))
-        && std::env::var("RISC0_DEV_MODE")
-            .ok()
-            .map(|x| x.to_lowercase())
-            .filter(|x| x == "1" || x == "true" || x == "yes")
-            .is_some()
+    let is_env_set = std::env::var("RISC0_DEV_MODE")
+        .ok()
+        .map(|x| x.to_lowercase())
+        .filter(|x| x == "1" || x == "true" || x == "yes")
+        .is_some();
+
+    if cfg!(feature = "disable-dev-mode") && is_env_set {
+        panic!("zkVM: Inconsistent settings -- please resolve. \
+            The RISC0_DEV_MODE environment variable is set but dev mode has been disabled by feature flag.");
+    }
+
+    cfg!(not(feature = "disable-dev-mode")) && is_env_set
 }
