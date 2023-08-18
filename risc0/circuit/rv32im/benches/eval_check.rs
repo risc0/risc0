@@ -52,7 +52,7 @@ pub fn eval_check(c: &mut Criterion) {
     for po2 in [2, 8, 16, 22].iter() {
         let params = EvalCheckParams::new(*po2);
         let hal = std::rc::Rc::new(risc0_zkp::hal::metal::MetalHalSha256::new());
-        let eval = risc0_circuit_rv32im::metal::MetalEvalCheckSha256::new(hal.clone());
+        let eval = risc0_circuit_rv32im::metal::MetalEvalCheck::<MetalHashSha256>::new(hal.clone());
         group.bench_function(BenchmarkId::new("metal", po2), |b| {
             b.iter(|| {
                 eval_check_impl(&params, hal.as_ref(), &eval);
