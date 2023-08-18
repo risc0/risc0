@@ -62,7 +62,7 @@ fn main() {
             .iter()
             .fold(0, |acc, segment| acc + segment.get_seal_bytes().len());
 
-        let usage = 0; // prover.get_peak_memory_usage();
+        let usage = prover.get_peak_memory_usage();
         let throughput = (cycles as f64) / duration.as_secs_f64();
 
         if !args.quiet {

@@ -464,7 +464,7 @@ fn fail() {
 fn profiler() {
     use risc0_binfmt::Program;
 
-    use crate::exec::profiler::{Frame, Profiler};
+    use crate::host::server::exec::profiler::{Frame, Profiler};
 
     let mut prof = Profiler::new("multi_test.elf", MULTI_TEST_ELF).unwrap();
     {
