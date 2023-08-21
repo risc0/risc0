@@ -44,7 +44,7 @@ pub struct Risczero {
 #[derive(Subcommand)]
 /// Primary commands  of `cargo risczero`.
 pub enum RisczeroCmd {
-    /// Build a guest code in a reproducible way.
+    /// Build guest code.
     Build(BuildGuest),
     /// Build the riscv32im-risc0-zkvm-elf toolchain.
     BuildToolchain(BuildToolchain),
