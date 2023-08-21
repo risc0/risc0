@@ -99,11 +99,8 @@ Use this command any time you'd like to check your progress.
 
 ## Concept break: How do we run and prove the guest program?
 
-<<<<<<< HEAD:examples/hello-world/tutorial.md
+
 Our next objective is to provide the guest program with input. Before we implement this, let's take a closer look at how we run and prove the guest program in `hello-world/src/main.rs`.
-=======
-Our next objective is to provide the guest program with input. Before we implement this, let's take a closer look at how we run and prove the guest program in `factors/host/src/main.rs`.
->>>>>>> main:examples/factors/README.md
 
 In the starter template project, our host driver program creates an executor environment before constructing a prover.  When `Prover::prove_elf()` is called, it will produce a receipt:
 
