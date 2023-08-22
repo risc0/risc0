@@ -14,7 +14,7 @@
 
 use std::{
     cell::RefCell,
-    collections::{btree_map::Entry, BTreeMap},
+    collections::{btree_map::Entry, BTreeMap, HashSet},
     fs::File,
     io::Write,
     path::{Path, PathBuf},
@@ -23,7 +23,7 @@ use std::{
 use anyhow::{bail, Context, Result};
 use clap::Parser;
 use indicatif::{ProgressBar, ProgressStyle};
-use risc0_crates_validator::{profiles, CrateProfile, ProfileConfig};
+use risc0_crates_validator::{profiles, CrateProfile, ProfileConfig, SELECTED_CRATES};
 use tokio_stream::StreamExt;
 use tracing::{debug, info};
 use tracing_subscriber::EnvFilter;
@@ -73,11 +73,12 @@ struct Args {
 #[tracing::instrument]
 async fn download_database() -> Result<PathBuf> {
     let url = "https://static.crates.io/db-dump.tar.gz";
+    let path = "/tmp/db-dump.tar.gz";
     debug!("Downloading from {}", url);
 
-    let tar_file_path = Path::new("/tmp/db-dump.tar.gz");
+    let tar_file_path = Path::new(path);
     if tar_file_path.exists() {
-        debug!("File already exists, skipping...");
+        debug!("File already exists at '{path}', skipping...");
         return Ok(tar_file_path.to_path_buf());
     }
     let mut file =
@@ -172,7 +173,18 @@ async fn main() -> Result<()> {
     debug!("Sorting...");
     crates.sort_by(|r1, r2| r2.downloads.cmp(&r1.downloads));
 
-    for cur_crate in crates.iter().take(args.crate_count) {
+    let selected_crates = {
+        let handpicked = crates
+            .iter()
+            .filter(|c| SELECTED_CRATES.contains(&c.name.as_str()));
+        crates
+            .iter()
+            .take(args.crate_count)
+            .chain(handpicked)
+            .collect::<HashSet<_>>()
+    };
+
+    for cur_crate in selected_crates {
         let version = &most_recent[&cur_crate.id];
         debug!("Processing: {} - {}", cur_crate.name, version.num);
 

@@ -54,10 +54,17 @@ pub fn lookup_crate(crate_name: &str, mut profile: CrateProfile) -> CrateProfile
         // Just need 'std' block:
         "rand" | "serde" | "serde_json" | "anyhow" | "hyper" | "tracing-log"
         | "tracing-subscriber" | "sha-1" | "serde_urlencoded" | "hex" | "h2" | "tracing-core"
-        | "toml" | "tracing" | "tracing-futures" | "sha2" | "sha1" | "serde_yaml" | "csv"
-        | "multimap" | "tower" | "serde_cbor" | "md-5" | "tinytemplate" | "cargo_metadata"
-        | "serde_bytes" | "tungstenite" | "tracing-serde" | "sha3" | "string_cache"
-        | "serde_with" | "headers" | "hyper-timeout" => profile.std = true,
+        | "toml" | "tracing" | "tracing-futures" | "sha1" | "serde_yaml" | "csv" | "multimap"
+        | "tower" | "serde_cbor" | "md-5" | "tinytemplate" | "cargo_metadata" | "serde_bytes"
+        | "tungstenite" | "tracing-serde" | "sha3" | "string_cache" | "serde_with" | "headers"
+        | "hyper-timeout" => profile.std = true,
+        // Custom circuit patches
+        "sha2" => {
+            profile.sha2_patch = true;
+            profile.std = true;
+        }
+        "k256" => profile.k256_patch = true,
+        "crypto-bigint" => profile.crypto_bigint_patch = true,
         _ => profile.customized = false,
     }
     profile
