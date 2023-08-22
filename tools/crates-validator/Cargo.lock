@@ -1234,7 +1234,6 @@ dependencies = [
  "db-dump",
  "handlebars",
  "indicatif 0.15.0",
- "once_cell",
  "reqwest",
  "serde",
  "serde_json",
