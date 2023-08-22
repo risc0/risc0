@@ -12,21 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use anyhow::Result;
-use cargo_risczero::{Cargo, RisczeroCmd};
 use clap::Parser;
-use tracing_subscriber::EnvFilter;
+use which::which;
+use xshell::{cmd, Shell};
 
-fn main() -> Result<()> {
-    tracing_subscriber::fmt()
-        .with_env_filter(EnvFilter::from_default_env())
-        .init();
+#[derive(Parser)]
+pub struct Install;
 
-    let Cargo::Risczero(args) = Cargo::parse();
-    match args.command {
-        RisczeroCmd::Build(cmd) => cmd.run(),
-        RisczeroCmd::BuildToolchain(cmd) => cmd.run(),
-        RisczeroCmd::Install(cmd) => cmd.run(),
-        RisczeroCmd::New(cmd) => cmd.run(),
+impl Install {
+    pub fn run(&self) {
+        install_wasm_tools();
+    }
+}
+
+fn install_wasm_tools() {
+    if which("wasm-pack").is_err() {
+        let sh = Shell::new().unwrap();
+        cmd!(sh, "cargo install --locked wasm-pack").run().unwrap();
     }
 }

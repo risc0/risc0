@@ -264,19 +264,21 @@ impl InnerReceipt {
         Err(VerificationError::InvalidProof)
     }
 
-    /// Returns the [InnerReceipt::Flat] arm, will panic if invalid.
-    pub fn flat(&self) -> &[SegmentReceipt] {
-        match self {
-            InnerReceipt::Flat(x) => &x.0,
-            _ => panic!(),
+    /// Returns the [InnerReceipt::Flat] arm.
+    pub fn flat(&self) -> Result<&[SegmentReceipt], VerificationError> {
+        if let InnerReceipt::Flat(x) = self {
+            Ok(&x.0)
+        } else {
+            Err(VerificationError::ReceiptFormatError)
         }
     }
 
-    /// Returns the [InnerReceipt::Succinct] arm, will panic if invalid.
-    pub fn succinct(&self) -> &SuccinctReceipt {
-        match self {
-            InnerReceipt::Succinct(x) => x,
-            _ => panic!(),
+    /// Returns the [InnerReceipt::Succinct] arm.
+    pub fn succinct(&self) -> Result<&SuccinctReceipt, VerificationError> {
+        if let InnerReceipt::Succinct(x) = self {
+            Ok(x)
+        } else {
+            Err(VerificationError::ReceiptFormatError)
         }
     }
 }
@@ -458,15 +460,6 @@ impl ReceiptMetadata {
             _ => Err(VerificationError::ReceiptFormatError),
         }
     }
-}
-
-/// Compute and return the ImageID of the given `(merkle_root, pc)` pair.
-pub fn compute_image_id(merkle_root: &Digest, pc: u32) -> Digest {
-    SystemState {
-        merkle_root: *merkle_root,
-        pc,
-    }
-    .digest()
 }
 
 impl Default for VerifierContext {
