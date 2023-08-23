@@ -311,14 +311,17 @@ impl<'a> Executor<'a> {
                     let page = image.load_page(page_idx);
                     page_entry_addr = image.info.get_page_entry_addr(page_idx);
                     match page_idx == image.info.root_idx {
-                        true => (Some(image.info.get_page_entry_addr(page_idx)), 1, page),
+                        false => (Some(image.info.get_page_entry_addr(page_idx)), 1, page),
                         // Here, we use none to indicate that the entry is the root page.
-                        false => (
-                            None,
-                            1,
-                            page[..(image.info.root_addr - image.info.root_page_addr) as usize]
-                                .to_vec(),
-                        ),
+                        true => {
+                            println!("root hash {}", risc0_binfmt::hash_page_bytes(&page.clone()));
+                            (
+                                None,
+                                1,
+                                page[..(image.info.root_addr - image.info.root_page_addr) as usize]
+                                    .to_vec(),
+                            )
+                        }
                     }
                 }
             };
