@@ -33,21 +33,21 @@ use risc0_zkp::{
 };
 use risc0_zkvm_platform::{
     fileno,
-    memory::MEM_SIZE,
+    memory::{MEM_SIZE, SYSTEM},
     syscall::{
         bigint, ecall, halt,
         reg_abi::{REG_A0, REG_A1, REG_A2, REG_A3, REG_A4, REG_T0},
     },
     PAGE_SIZE, WORD_SIZE,
 };
-use rrs_lib::{instruction_executor::InstructionExecutor, HartState, Memory};
+use rrs_lib::{instruction_executor::InstructionExecutor, HartState};
 use serde::{Deserialize, Serialize};
 
 use super::TraceEvent;
 use crate::{
     align_up,
     exec::monitor::MemoryMonitor,
-    mini_monitor::MiniMonitor,
+    mini_monitor::{MerklePathElement, MiniMonitor},
     opcode::{MajorType, OpCode},
     receipt::ExitCode,
     serde::to_vec,
@@ -198,7 +198,32 @@ impl<'a> Executor<'a> {
 
     /// Run the executor until [ExitCode::Paused] or [ExitCode::Halted] is
     /// reached, producing a [Session] as a result.
-    pub fn run_with_callback<F>(&mut self, mut callback: F) -> Result<Session>
+    pub fn run_with_callback<F>(&mut self, callback: F) -> Result<Session>
+    where
+        F: FnMut(Segment) -> Result<Box<dyn SegmentRef>>,
+    {
+        let mut guest_session = self.run_guest_only_with_callback(callback)?;
+        match guest_session.exit_code {
+            ExitCode::Fault => {
+                let fault_checker_session = self.run_fault_checker()?;
+                for segment in fault_checker_session.segments {
+                    guest_session.segments.push(segment);
+                }
+                guest_session.journal = fault_checker_session.journal;
+                Ok(guest_session)
+            }
+            _ => Ok(guest_session),
+        }
+    }
+
+    /// Run the executor with the default callback.
+    pub fn run_guest_only(&mut self) -> Result<Session> {
+        self.run_guest_only_with_callback(|segment| Ok(Box::new(SimpleSegmentRef::new(segment))))
+    }
+
+    /// Run the executor until [ExitCode::Paused], [ExitCode::Halted], or
+    /// [ExitCode::Fault] is reached, producing a [Session] as a result.
+    pub fn run_guest_only_with_callback<F>(&mut self, mut callback: F) -> Result<Session>
     where
         F: FnMut(Segment) -> Result<Box<dyn SegmentRef>>,
     {
@@ -265,12 +290,6 @@ impl<'a> Executor<'a> {
 
         let exit_code = run_loop()?;
         self.exit_code = Some(exit_code);
-        if let ExitCode::Fault = exit_code {
-            let fault_check_segments = self.run_fault_checker()?;
-            for segment in fault_check_segments {
-                self.segments.push(segment);
-            }
-        }
         Ok(Session::new(
             take(&mut self.segments),
             journal.buf.take(),
@@ -278,37 +297,114 @@ impl<'a> Executor<'a> {
         ))
     }
 
-    fn run_fault_checker(&mut self) -> Result<Vec<Box<dyn SegmentRef>>> {
-        let pc = self.pc;
-        // construct the system state
-        let mut memory_map: HashMap<u32, Option<u32>> = HashMap::new();
+    fn make_merkle_path(
+        addr: u32,
+        image: &MemoryImage,
+        path: &mut HashMap<u32, MerklePathElement>,
+    ) {
+        let mut page_entry_addr = addr;
+        loop {
+            let page_idx = image.info.get_page_index(page_entry_addr);
+            let element = match path.get(&page_idx) {
+                Some((entry, ref_count, data)) => (*entry, ref_count + 1, data.clone()),
+                None => {
+                    let page = image.load_page(page_idx);
+                    page_entry_addr = image.info.get_page_entry_addr(page_idx);
+                    match page_idx == image.info.root_idx {
+                        true => (Some(image.info.get_page_entry_addr(page_idx)), 1, page),
+                        // Here, we use none to indicate that the entry is the root page.
+                        false => (
+                            None,
+                            1,
+                            page[..(image.info.root_addr - image.info.root_page_addr) as usize]
+                                .to_vec(),
+                        ),
+                    }
+                }
+            };
+            path.insert(page_idx, element);
 
-        let registers = self.monitor.load_registers();
-        for register in registers {
-            let register_value = self
-                .monitor
-                .read_mem(register, rrs_lib::MemAccessSize::Word);
-            memory_map.insert(register, register_value);
+            // we found the root index. This means that we completed the merkle path.
+            if page_idx == image.info.root_idx {
+                break;
+            }
+        }
+    }
+
+    #[cfg(test)]
+    pub fn check_registers(&mut self) {
+        assert_eq!(
+            self.monitor.load_registers(),
+            self.get_fault_checker_memory_map().get_registers().unwrap()
+        )
+    }
+
+    #[cfg(test)]
+    pub fn check_pc(&mut self) {
+        assert_eq!(
+            self.monitor.load_u32(self.pc).unwrap(),
+            self.get_fault_checker_memory_map().get_pc_value().unwrap()
+        )
+    }
+
+    #[cfg(test)]
+    pub fn check_post_id(&mut self) {
+        assert_eq!(
+            self.monitor.build_image(self.pc).compute_root_hash(),
+            self.get_fault_checker_memory_map()
+                .compute_root_hash()
+                .unwrap()
+        )
+    }
+
+    fn get_fault_checker_memory_map(&mut self) -> MiniMonitor {
+        let pc = self.pc;
+        let image = self.monitor.build_image(self.pc);
+
+        // In order for the fault checker to prove that it tried to execute the
+        // instruction using the same state it needs to generate the same post Image ID
+        // hash that matches the previous state. Rather than give it a full set of
+        // system memory, we can simply pass the page referenced by by the pc, the
+        // system page that contains all register contents, and the merkle path from
+        // those two pages up to the root page. The fault checker will take these pages
+        // and write the post image ID to the journal after ensuring that the next
+        // instruction fill fail.
+        let mut memory_map: HashMap<u32, MerklePathElement> = HashMap::new();
+        Self::make_merkle_path(pc, &image, &mut memory_map);
+        Self::make_merkle_path(SYSTEM.start() as u32, &image, &mut memory_map);
+
+        for (idx, (entry, ref_count, _data)) in memory_map.clone() {
+            match entry {
+                Some(addr) => {
+                    println!("idx {idx}, ( entry: {addr}, ref count: {ref_count}, page digest: )")
+                }
+                None => println!("idx {idx}, ( entry: root, ref count: {ref_count} )"),
+            }
         }
 
-        // In order to determine if the next instruction will fault, we need to
-        // reconstruct the state of the RISC-V emulator and run it using rrs's step
-        // function.
-        memory_map.insert(pc, self.monitor.read_mem(pc, rrs_lib::MemAccessSize::Word));
-
-        let mini_monitor = MiniMonitor {
+        MiniMonitor {
             pc,
-            registers,
             memory_map,
-        };
+            page_size: image.info.page_size,
+        }
+    }
+
+    fn run_fault_checker(&mut self) -> Result<Session> {
+        let mini_monitor = self.get_fault_checker_memory_map();
         let env = ExecutorEnv::builder()
             .add_input(&to_vec(&mini_monitor).unwrap())
             .build()
             .unwrap();
 
         let mut exec = self::Executor::from_elf(env, FAULT_CHECKER_ELF).unwrap();
-        let session = exec.run().unwrap();
-        Ok(session.segments)
+        let session = exec.run_guest_only()?;
+        if let ExitCode::Halted(_) = session.exit_code {
+            bail!(
+                "Fault checker returned with exit code: {:?}. Expected `ExitCode::Halted(_)` from fault checker",
+                session.exit_code
+            );
+        }
+        Ok(session)
     }
 
     fn split(&mut self, pre_image: MemoryImage) -> Result<()> {

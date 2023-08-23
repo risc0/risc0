@@ -678,3 +678,20 @@ fn memory_access() {
     assert!(session_faulted(access_memory(0x0C00_0000)));
     assert!(!session_faulted(access_memory(0x0B00_0000)));
 }
+
+#[test]
+fn merklize_after_fault() {
+    let spec = to_vec(&MultiTestSpec::OutOfBounds).unwrap();
+    let addr = to_vec(&0x0000_0000).unwrap();
+    let env = ExecutorEnv::builder()
+        .add_input(&spec)
+        .add_input(&addr)
+        .build()
+        .unwrap();
+    let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
+    let session = exec.run_guest_only().unwrap();
+    assert_eq!(session.exit_code, ExitCode::Fault);
+    exec.check_registers();
+    exec.check_pc();
+    exec.check_post_id();
+}
