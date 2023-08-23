@@ -313,15 +313,12 @@ impl<'a> Executor<'a> {
                     match page_idx == image.info.root_idx {
                         false => (Some(image.info.get_page_entry_addr(page_idx)), 1, page),
                         // Here, we use none to indicate that the entry is the root page.
-                        true => {
-                            println!("root hash {}", risc0_binfmt::hash_page_bytes(&page.clone()));
-                            (
-                                None,
-                                1,
-                                page[..(image.info.root_addr - image.info.root_page_addr) as usize]
-                                    .to_vec(),
-                            )
-                        }
+                        true => (
+                            None,
+                            1,
+                            page[..(image.info.root_addr - image.info.root_page_addr) as usize]
+                                .to_vec(),
+                        ),
                     }
                 }
             };
@@ -375,15 +372,6 @@ impl<'a> Executor<'a> {
         let mut memory_map: HashMap<u32, MerklePathElement> = HashMap::new();
         Self::make_merkle_path(pc, &image, &mut memory_map);
         Self::make_merkle_path(SYSTEM.start() as u32, &image, &mut memory_map);
-
-        for (idx, (entry, ref_count, _data)) in memory_map.clone() {
-            match entry {
-                Some(addr) => {
-                    println!("idx {idx}, ( entry: {addr}, ref count: {ref_count}, page digest: )")
-                }
-                None => println!("idx {idx}, ( entry: root, ref count: {ref_count} )"),
-            }
-        }
 
         MiniMonitor {
             pc,
