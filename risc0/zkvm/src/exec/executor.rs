@@ -389,9 +389,9 @@ impl<'a> Executor<'a> {
 
         let mut exec = self::Executor::from_elf(env, FAULT_CHECKER_ELF).unwrap();
         let session = exec.run_guest_only()?;
-        if let ExitCode::Halted(_) = session.exit_code {
+        if session.exit_code != ExitCode::Halted(0) {
             bail!(
-                "Fault checker returned with exit code: {:?}. Expected `ExitCode::Halted(_)` from fault checker",
+                "Fault checker returned with exit code: {:?}. Expected `ExitCode::Halted(0)` from fault checker",
                 session.exit_code
             );
         }
