@@ -1,9 +1,10 @@
-name: foundry
+name: bonsai
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, 'release-*' ]
   pull_request:
+    branches: [ main, 'release-*' ]
 
   workflow_dispatch:
 
@@ -12,8 +13,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # Install foundry and use it to lint and test parts of the codebase that use Solidity.
-  foundry:
+  test:
     runs-on: ubuntu-latest
     steps:
       # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
@@ -25,6 +25,7 @@ jobs:
         with:
           submodules: recursive
 
+      # Install dependencies.
       - name: install rust
         uses: ./.github/actions/rustup
 
@@ -35,6 +36,7 @@ jobs:
       - name: Install Foundry
         uses: risc0/foundry-toolchain@2fe7e70b520f62368a0e3c464f997df07ede420f
 
+      # Lint
       - name: check solidity code formatting in bonsai/ethereum
         run: forge fmt --check
         working-directory: bonsai/ethereum
@@ -43,19 +45,25 @@ jobs:
         run: forge fmt --check
         working-directory: bonsai/examples/governance
 
+      # Test
+      - name: run cargo tests in bonsai
+        run: cargo test --manifest-path bonsai/Cargo.toml
+
+      - name: run cargo tests in bonsai/examples/governance
+        run: cargo test --manifest-path bonsai/examples/governance/Cargo.toml
+
       - name: run forge tests in bonsai/ethereum
         run: forge test -vvv
         working-directory: bonsai/ethereum
 
-      - name: run forge tests in bonsai/examples/governance
+      - name: run forge tests without the zkVM in bonsai/examples/governance
         env:
           TEST_USE_ZKVM: false
         run: forge test -vvv
         working-directory: bonsai/examples/governance
 
-      # - name: run forge tests (with zkvm) in bonsai/examples/governance
-      #   env:
-      #     TEST_USE_ZKVM: true
-      #     BONSAI_PROVING: local
-      #   run: forge test -vvv
-      #   working-directory: bonsai/examples/governance
+       - name: run forge tests with the zkvm in bonsai/examples/governance
+         env:
+           TEST_USE_ZKVM: true
+         run: forge test -vvv
+         working-directory: bonsai/examples/governance
