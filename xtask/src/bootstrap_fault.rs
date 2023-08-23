@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use clap::Parser;
-use risc0_zkvm::{FAULT_CHECKER_ELF, FAULT_CHECKER_ID};
+use risc0_zkvm_fault::{FAULT_CHECKER_ELF, FAULT_CHECKER_ID};
 #[derive(Parser)]
 pub struct BootstrapFault;
 
