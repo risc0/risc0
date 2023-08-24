@@ -30,9 +30,9 @@ use serde::{Deserialize, Serialize};
 use crate::sha::{Impl, Sha256};
 
 // each element of the merkle path has the following:
-// 2) a page entry address index. None indicates root index.
-// 3) a reference count
-// 4) the page bytes
+// 1) a page entry address index. None indicates root index.
+// 2) a reference count
+// 3) the page bytes
 pub type MerklePathElement = (Option<u32>, u32, Vec<u8>);
 
 /// This is a small implementation of a memory monitor used for the fault
