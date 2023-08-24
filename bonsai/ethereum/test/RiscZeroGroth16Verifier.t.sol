@@ -55,7 +55,9 @@ contract RiscZeroGroth16VerifierTest is Test {
     IRiscZeroVerifier internal verifier;
 
     function setUp() external {
-        verifier = new RiscZeroGroth16Verifier();
+        uint256 control_id_0 = vm.envUint("CONTROL_ID_0");
+        uint256 control_id_1 = vm.envUint("CONTROL_ID_1");
+        verifier = new RiscZeroGroth16Verifier(control_id_0, control_id_1);
     }
 
     function testVerifyKnownGoodReceipt() external view {
