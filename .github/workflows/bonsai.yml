@@ -13,7 +13,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  test:
+  bonsai:
     runs-on: ubuntu-latest
     steps:
       # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
