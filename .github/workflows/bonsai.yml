@@ -14,7 +14,7 @@ concurrency:
 
 jobs:
   bonsai:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, prod, Linux, cpu]
     steps:
       # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
       - name: checkout dummy commit (submodule bug workaround)
