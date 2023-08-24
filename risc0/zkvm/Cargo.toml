@@ -68,7 +68,7 @@ tracing = { version = "0.1", default-features = false, features = [
 typetag = { version = "0.2", optional = true }
 
 [dev-dependencies]
-clap = { version = "4.0", features = ["derive"] }
+clap = { version = "4.0, <4.4.0", features = ["derive"] }
 criterion = { version = "0.5", features = ["html_reports"] }
 human-repr = "1.0"
 tracing-forest = "0.1"
