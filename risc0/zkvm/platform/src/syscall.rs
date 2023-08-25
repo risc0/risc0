@@ -357,10 +357,18 @@ pub unsafe extern "C" fn sys_bigint(
 
 /// # Safety
 ///
-/// `recv_buf` must be aligned and dereferenceable.
+/// `recv_buf` must be aligned, dereferenceable, and point to a u32 buffer with
+/// at least `words` capacity.
 #[no_mangle]
 pub unsafe extern "C" fn sys_rand(recv_buf: *mut u32, words: usize) {
-    syscall_0(nr::SYS_RANDOM, recv_buf, words);
+    let bytes_req: [u8; WORD_SIZE] = ((words * WORD_SIZE) as u32).to_le_bytes();
+    syscall_2(
+        nr::SYS_RANDOM,
+        recv_buf,
+        words,
+        bytes_req.as_ptr() as u32,
+        WORD_SIZE as u32,
+    );
 }
 
 /// # Safety

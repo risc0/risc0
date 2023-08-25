@@ -82,7 +82,9 @@ pub fn send_recv_slice<T: Pod, U: Pod>(syscall_name: SyscallName, to_host: &[T])
     let syscall::Return(nelem, _) = syscall(syscall_name, bytemuck::cast_slice(to_host), &mut []);
     let nwords = align_up(core::mem::size_of::<T>() * nelem as usize, WORD_SIZE) / WORD_SIZE;
     let from_host_buf = unsafe { core::slice::from_raw_parts_mut(sys_alloc_words(nwords), nwords) };
-    syscall(syscall_name, &[], from_host_buf);
+    if nwords > 0 {
+        syscall(syscall_name, &[], from_host_buf);
+    }
     &bytemuck::cast_slice(from_host_buf)[..nelem as usize]
 }
 
