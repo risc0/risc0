@@ -1,10 +1,6 @@
 [workspace]
 resolver = "2"
 members = [
-  "bonsai/ethereum",
-  "bonsai/ethereum-relay",
-  "bonsai/rest-api-mock",
-  "bonsai/sdk",
   "risc0/binfmt",
   "risc0/build",
   "risc0/build_kernel",
