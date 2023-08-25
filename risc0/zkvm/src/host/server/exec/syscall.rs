@@ -31,10 +31,7 @@ use risc0_zkvm_platform::{
     WORD_SIZE,
 };
 
-use crate::host::client::{
-    env::{ExecutorEnv, SliceIo},
-    posix_io::PosixIo,
-};
+use crate::host::client::{env::ExecutorEnv, posix_io::PosixIo, slice_io::SliceIo};
 
 /// A host-side implementation of a system call.
 pub trait Syscall {
@@ -109,9 +106,10 @@ impl<'a> SyscallTable<'a> {
             .with_syscall(SYS_READ, posix_io.clone())
             .with_syscall(SYS_READ_AVAIL, posix_io.clone())
             .with_syscall(SYS_WRITE, posix_io);
-        for (syscall, handler) in env.slice_io.iter() {
+        for (syscall, handler) in env.slice_io.borrow().inner.iter() {
+            let handler = SysSliceIo::new(handler.clone());
             this.inner
-                .insert(syscall.clone(), Rc::new(RefCell::new(handler.clone())));
+                .insert(syscall.clone(), Rc::new(RefCell::new(handler)));
         }
 
         this
@@ -214,42 +212,58 @@ impl Syscall for SysRandom {
     }
 }
 
+/// A wrapper around a SliceIo that exposes it as a Syscall handler.
+pub struct SysSliceIo<'a> {
+    handler: Rc<RefCell<dyn SliceIo + 'a>>,
+    stored_result: RefCell<Option<Bytes>>,
+}
+
+impl<'a> SysSliceIo<'a> {
+    /// Wraps the given [SliceIo] into a [SysSliceIo].
+    pub fn new(handler: Rc<RefCell<dyn SliceIo + 'a>>) -> Self {
+        Self {
+            handler,
+            stored_result: RefCell::new(None),
+        }
+    }
+}
+
 /// An implementation of a [Syscall] for a [SliceIo].
 ///
 /// When activated as a SyscallHandler, the SyscallHandler expects two
 /// calls. The first call returns (nelem, _) indicating how many
 /// elements are to be sent back to the guest, and the second call
 /// actually returns the elements after the guest allocates space.
-impl<'a> Syscall for SliceIo<'a> {
+impl<'a> Syscall for SysSliceIo<'a> {
     fn syscall(
         &mut self,
-        _syscall: &str,
+        syscall: &str,
         ctx: &mut dyn SyscallContext,
         to_guest: &mut [u32],
     ) -> Result<(u32, u32)> {
-        let mut stored_buf = self.stored_buf.borrow_mut();
+        let mut stored_result = self.stored_result.borrow_mut();
         let buf_ptr = ctx.load_register(REG_A3);
         let buf_len = ctx.load_register(REG_A4);
         let from_guest = ctx.load_region(buf_ptr, buf_len)?;
-        Ok(match stored_buf.take() {
+        Ok(match stored_result.take() {
             None => {
                 // First call of pair. Send the data from the guest to the SliceIo
                 // and save what it returns.
                 assert_eq!(to_guest.len(), 0);
-                let mut callback = self.callback.borrow_mut();
-                let buf = callback(Bytes::from(from_guest))?;
-                let len = buf.len() as u32;
-                *stored_buf = Some(buf);
+                let mut handler = self.handler.borrow_mut();
+                let result = handler.handle_io(syscall, from_guest.into())?;
+                let len = result.len() as u32;
+                *stored_result = Some(result);
                 (len, 0)
             }
-            Some(buf) => {
+            Some(stored) => {
                 // Second call of pair. We already have data to send
                 // to the guest; send it to the buffer that the guest
                 // allocated.
                 let to_guest_bytes: &mut [u8] = bytemuck::cast_slice_mut(to_guest);
-                assert!(buf.len() <= to_guest_bytes.len());
-                assert!(buf.len() + WORD_SIZE > to_guest_bytes.len());
-                to_guest_bytes[..buf.len()].clone_from_slice(&buf);
+                assert!(stored.len() <= to_guest_bytes.len());
+                assert!(stored.len() + WORD_SIZE > to_guest_bytes.len());
+                to_guest_bytes[..stored.len()].clone_from_slice(&stored);
                 (0, 0)
             }
         })

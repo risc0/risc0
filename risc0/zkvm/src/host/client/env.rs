@@ -24,18 +24,19 @@ use std::{
 use anyhow::Result;
 use bytemuck::Pod;
 use bytes::Bytes;
-use risc0_zkvm_platform::{self, fileno, syscall::SyscallName};
+use risc0_zkvm_platform::{self, fileno};
 
-use super::{exec::TraceEvent, posix_io::PosixIo};
+use super::{
+    exec::TraceEvent,
+    posix_io::PosixIo,
+    slice_io::{slice_io_from_fn, SliceIo, SliceIoTable},
+};
 
 /// A builder pattern used to construct an [ExecutorEnv].
 #[derive(Clone, Default)]
 pub struct ExecutorEnvBuilder<'a> {
     inner: ExecutorEnv<'a>,
 }
-
-/// A callback used for I/O.
-type IoCallback<'a> = dyn FnMut(Bytes) -> Result<Bytes> + 'a;
 
 /// A callback used to collect [TraceEvent]s.
 pub type TraceCallback<'a> = dyn FnMut(TraceEvent) -> Result<()> + 'a;
@@ -50,18 +51,9 @@ pub struct ExecutorEnv<'a> {
     pub(crate) segment_limit_po2: Option<usize>,
     pub(crate) session_limit: Option<usize>,
     pub(crate) posix_io: Rc<RefCell<PosixIo<'a>>>,
-    pub(crate) slice_io: HashMap<String, SliceIo<'a>>,
+    pub(crate) slice_io: Rc<RefCell<SliceIoTable<'a>>>,
     pub(crate) input: Vec<u8>,
     pub(crate) trace: Option<Rc<RefCell<TraceCallback<'a>>>>,
-}
-
-/// An I/O handler that returns arbitrary data to the guest.
-///
-/// On the guest side, use `env::send_recv_slice`.
-#[derive(Clone)]
-pub(crate) struct SliceIo<'a> {
-    pub(crate) callback: Rc<RefCell<IoCallback<'a>>>,
-    pub(crate) stored_buf: RefCell<Option<Bytes>>,
 }
 
 impl<'a> ExecutorEnv<'a> {
@@ -215,18 +207,24 @@ impl<'a> ExecutorEnvBuilder<'a> {
     }
 
     /// Add a handler for simple I/O handling.
+    pub fn slice_io(&mut self, channel: &str, handler: impl SliceIo + 'a) -> &mut Self {
+        self.inner
+            .slice_io
+            .borrow_mut()
+            .with_handler(channel, handler);
+        self
+    }
+
+    /// Add a handler for simple I/O handling.
     pub fn io_callback(
         &mut self,
-        channel: SyscallName,
+        channel: &str,
         callback: impl Fn(Bytes) -> Result<Bytes> + 'a,
     ) -> &mut Self {
-        self.inner.slice_io.insert(
-            channel.as_str().to_string(),
-            SliceIo {
-                callback: Rc::new(RefCell::new(callback)),
-                stored_buf: RefCell::new(None),
-            },
-        );
+        self.inner
+            .slice_io
+            .borrow_mut()
+            .with_handler(channel, slice_io_from_fn(callback));
         self
     }
 

@@ -12,23 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-fn main() {
-    #[cfg(feature = "profiler")]
-    {
-        std::env::set_var("PROTOC", protobuf_src::protoc());
-        prost_build::compile_protos(
-            &["src/host/server/exec/profile.proto"],
-            &["src/host/server/exec"],
-        )
-        .unwrap();
-    }
-    #[cfg(any(feature = "client", feature = "prove"))]
-    {
-        protobuf_codegen::Codegen::new()
-            .pure()
-            .include("src/host/protos")
-            .input("src/host/protos/ipc.proto")
-            .cargo_out_dir("protos")
-            .run_from_script();
-    }
-}
+use std::{
+    io::{BufReader, BufWriter},
+    path::{Path, PathBuf},
+    process::{Child, ChildStdin, ChildStdout, Command, Stdio},
+};
+
+use anyhow::{anyhow, bail, Result};
+use bytes::Bytes;
+use serde::{Deserialize, Serialize};
+
+use crate::{
+    host::recursion::SuccinctReceipt, ExecutorEnv, ExitCode, ProverOpts, Receipt, SegmentReceipt,
+    TraceEvent,
+};

@@ -1,0 +1,160 @@
+syntax = "proto3";
+
+message Void {}
+
+message SessionInfo {
+  uint32 segments = 1;
+  bytes journal = 2;
+  ExitCode exit_code = 3;
+}
+
+message SegmentInfo {
+  uint32 index = 1;
+  uint32 po2 = 2;
+  uint32 insn_cycles = 3;
+  Asset segment = 4;
+}
+
+message ExitCode {
+  oneof value {
+    uint32 halted = 1;
+    uint32 paused = 2;
+    Void system_split = 3;
+    Void session_limit = 4;
+  }
+}
+
+message Asset {
+  oneof kind {
+    bytes inline = 1;
+    string path = 2;
+  }
+}
+
+message AssetRequest {
+  enum Kind {
+    UNSPECIFIED = 0;
+    INLINE = 1;
+    PATH = 2;
+  }
+
+  Kind kind = 1;
+}
+
+message ExecuteRequest {
+  Binary binary = 1;
+  map<string, string> env_vars = 4;
+  map<string, Void> slice_ios = 5;
+  map<uint32, Void> read_fds = 6;
+  map<uint32, Void> write_fds = 7;
+}
+
+message ServerExecuteRequest {
+  ExecuteRequest execute = 1;
+}
+
+message ServerProveRequest {
+  ExecuteRequest execute = 1;
+  ProverOpts opts = 2;
+  AssetRequest receipt = 3;
+}
+
+message Binary {
+  enum BinaryType {
+    UNSPECIFIED = 0;
+    IMAGE = 1;
+    ELF = 2;
+  }
+
+  BinaryType kind = 1;
+  Asset asset = 2;
+}
+
+message ProverOpts {}
+
+message ServerRequest {
+  oneof kind {
+    uint32 hello = 1;
+    ServerExecuteRequest execute = 2;
+    ServerProveRequest prove = 3;
+  }
+}
+
+message HelloRequest {
+  uint32 version = 1;
+}
+
+message HelloReply {
+  oneof kind {
+    uint32 version = 1;
+    string error = 2;
+  }
+}
+
+message ClientRequest {
+  oneof kind {
+    ClientIoRequest io = 1;
+    ClientSegmentDoneRequest segment_done = 2;
+    ClientSessionDoneRequest session_done = 3;
+  }
+}
+
+message ClientIoRequest {
+  oneof kind {
+    PosixIo posix = 1;
+    SliceIo slice = 2;
+    TraceEvent trace = 3;
+  }
+}
+
+message ClientIoReply {
+  oneof kind {
+    bytes ok = 1;
+    string error = 2;
+  }
+}
+
+message GenericReply {
+  oneof kind {
+    Void ok = 1;
+    string error = 2;
+  }
+}
+
+message PosixIo {
+  uint32 fd = 1;
+  PosixCmd cmd = 2;
+}
+
+message PosixCmd {
+  oneof kind {
+    Void read = 1;
+    bytes write = 2;
+  }
+}
+
+message SliceIo {
+  string name = 1;
+  bytes from_guest = 2;
+}
+
+message ClientSegmentDoneRequest {
+  SegmentInfo segment = 1;
+}
+
+message ClientSessionDoneRequest {
+  SessionInfo session = 1;
+}
+
+message TraceEvent {}
+
+service Server {
+  rpc hello(HelloRequest) returns (HelloReply);
+  rpc execute(ServerExecuteRequest) returns (GenericReply);
+}
+
+service Client {
+  rpc io(ClientIoRequest) returns (ClientIoReply);
+  rpc segment_done(ClientSegmentDoneRequest) returns (GenericReply);
+  rpc session_done(ClientSessionDoneRequest) returns (GenericReply);
+}

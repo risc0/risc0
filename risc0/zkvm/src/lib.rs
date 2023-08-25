@@ -34,24 +34,30 @@ pub use risc0_binfmt::{MemoryImage, Program, SystemState};
 pub use risc0_zkvm_platform::{declare_syscall, memory::MEM_SIZE, PAGE_SIZE};
 
 #[cfg(not(target_os = "zkvm"))]
-#[cfg(feature = "client")]
-pub use self::host::client::{
-    env::{ExecutorEnv, ExecutorEnvBuilder},
-    exec::TraceEvent,
-    prove::{bonsai::BonsaiProver, default_prover, external::ExternalProver, Prover, ProverOpts},
-};
-#[cfg(not(target_os = "zkvm"))]
 #[cfg(feature = "profiler")]
 pub use self::host::server::exec::profiler::Profiler;
 #[cfg(not(target_os = "zkvm"))]
 #[cfg(feature = "prove")]
 pub use self::host::{
     client::prove::local::LocalProver,
+    ipc::server::IpcServer,
     server::{
         exec::executor::Executor,
         prove::{get_prover_impl, loader::Loader, DynProverImpl},
         session::{FileSegmentRef, Segment, SegmentRef, Session, SessionEvents, SimpleSegmentRef},
     },
+};
+#[cfg(not(target_os = "zkvm"))]
+#[cfg(feature = "client")]
+pub use self::host::{
+    client::{
+        env::{ExecutorEnv, ExecutorEnvBuilder},
+        exec::TraceEvent,
+        prove::{
+            bonsai::BonsaiProver, default_prover, external::ExternalProver, Prover, ProverOpts,
+        },
+    },
+    ipc::client::IpcClient,
 };
 #[cfg(not(target_os = "zkvm"))]
 pub use self::host::{

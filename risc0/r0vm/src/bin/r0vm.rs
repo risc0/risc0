@@ -23,6 +23,9 @@ use risc0_zkvm::{
 #[derive(Parser)]
 #[command(about, version, author)]
 struct Cli {
+    #[arg(long)]
+    ipc: bool,
+
     #[command(flatten)]
     binfmt: BinFmt,
 
@@ -77,6 +80,10 @@ fn main() {
     env_logger::init();
 
     let args = Cli::parse();
+    if args.ipc {
+        args.run_ipc();
+        return;
+    }
 
     #[cfg(feature = "profiler")]
     let mut guest_prof: Option<risc0_zkvm::Profiler> = None;
@@ -155,8 +162,13 @@ impl Cli {
         };
         let opts = ProverOpts {
             hashfn: hashfn.to_string(),
+            lift: false,
         };
 
         get_prover_impl(&opts).unwrap()
+    }
+
+    fn run_ipc(&self) {
+        todo!()
     }
 }
