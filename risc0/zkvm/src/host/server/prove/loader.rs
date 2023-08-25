@@ -34,7 +34,7 @@ use risc0_zkp::{
 };
 use risc0_zkvm_platform::{memory, WORD_SIZE};
 
-use crate::CIRCUIT;
+use crate::host::CIRCUIT;
 
 // TODO: get from circuit
 const SETUP_STEP_REGS: usize = 84;
@@ -475,7 +475,7 @@ mod tests {
 
     use test_log::test;
 
-    use crate::prove::loader::{TripleWord, TripleWordIter};
+    use super::{TripleWord, TripleWordIter};
 
     fn triple_test(input: &[(u32, u32)], expected: &[TripleWord]) {
         let mut map = BTreeMap::new();

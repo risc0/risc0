@@ -17,10 +17,8 @@ use std::{process::Command, rc::Rc, time::Instant};
 use clap::Parser;
 use human_repr::{HumanCount, HumanDuration};
 use risc0_zkvm::{
-    prove::{default_prover, Prover},
-    receipt::Receipt,
-    serde::to_vec,
-    Executor, ExecutorEnv, Session, VerifierContext,
+    get_prover_impl, serde::to_vec, DynProverImpl, Executor, ExecutorEnv, ProverOpts, Receipt,
+    Session, VerifierContext,
 };
 use risc0_zkvm_methods::{
     bench::{BenchmarkSpec, SpecWithIters},
@@ -46,7 +44,7 @@ fn main() {
             .with(tracing_forest::ForestLayer::default())
             .init();
 
-        let prover = default_prover();
+        let prover = get_prover_impl(&ProverOpts::default()).unwrap();
 
         let start = Instant::now();
         let (session, receipt) = top(prover.clone(), iterations);
@@ -115,7 +113,7 @@ fn run_with_iterations(iterations: usize) {
 }
 
 #[tracing::instrument(skip_all)]
-fn top(prover: Rc<dyn Prover>, iterations: u64) -> (Session, Receipt) {
+fn top(prover: Rc<dyn DynProverImpl>, iterations: u64) -> (Session, Receipt) {
     let spec = SpecWithIters(BenchmarkSpec::SimpleLoop, iterations);
     let env = ExecutorEnv::builder()
         .add_input(&to_vec(&spec).unwrap())

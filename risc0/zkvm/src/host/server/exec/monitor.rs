@@ -24,8 +24,8 @@ use risc0_zkvm_platform::{
 };
 use rrs_lib::{MemAccessSize, Memory};
 
-use super::{io::SyscallContext, TraceEvent};
-use crate::session::PageFaults;
+use super::syscall::SyscallContext;
+use crate::host::{client::exec::TraceEvent, server::session::PageFaults};
 
 /// The number of blocks that fit within a single page.
 const BLOCKS_PER_PAGE: usize = PAGE_SIZE / BLOCK_BYTES;

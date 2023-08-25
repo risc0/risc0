@@ -17,52 +17,51 @@
 use std::{
     cell::RefCell,
     collections::HashMap,
-    io::{BufRead, BufReader, Cursor, Read, Write},
+    io::{BufRead, BufReader, Read, Write},
     rc::Rc,
 };
 
 use anyhow::Result;
 use bytemuck::Pod;
-use risc0_zkvm_platform::{
-    fileno,
-    syscall::{
-        nr::{SYS_GETENV, SYS_READ, SYS_READ_AVAIL, SYS_WRITE},
-        SyscallName,
-    },
-};
-use thiserror::Error;
+use bytes::Bytes;
+use risc0_zkvm_platform::{self, fileno, syscall::SyscallName};
 
-use super::{
-    io::{slice_io_from_fn, syscalls, PosixIo, SliceIo, Syscall, SyscallTable},
-    TraceEvent,
-};
-
-/// The default segment limit specified in powers of 2 cycles. Choose this value
-/// to try and fit with 8GB of RAM.
-const DEFAULT_SEGMENT_LIMIT_PO2: usize = 20; // 1M cycles
+use super::{exec::TraceEvent, posix_io::PosixIo};
 
 /// A builder pattern used to construct an [ExecutorEnv].
-#[derive(Clone)]
+#[derive(Clone, Default)]
 pub struct ExecutorEnvBuilder<'a> {
     inner: ExecutorEnv<'a>,
 }
 
+/// A callback used for I/O.
+type IoCallback<'a> = dyn FnMut(Bytes) -> Result<Bytes> + 'a;
+
 /// A callback used to collect [TraceEvent]s.
 pub type TraceCallback<'a> = dyn FnMut(TraceEvent) -> Result<()> + 'a;
 
-/// The [super::Executor] is configured from this object.
+/// The [crate::Executor] is configured from this object.
 ///
 /// The executor environment holds configuration details that inform how the
 /// guest environment is set up prior to guest program execution.
-#[derive(Clone)]
+#[derive(Clone, Default)]
 pub struct ExecutorEnv<'a> {
-    env_vars: HashMap<String, String>,
-    pub(crate) segment_limit_po2: usize,
-    session_limit: Option<usize>,
-    syscalls: SyscallTable<'a>,
-    pub(crate) io: Rc<RefCell<PosixIo<'a>>>,
+    pub(crate) env_vars: HashMap<String, String>,
+    pub(crate) segment_limit_po2: Option<usize>,
+    pub(crate) session_limit: Option<usize>,
+    pub(crate) posix_io: Rc<RefCell<PosixIo<'a>>>,
+    pub(crate) slice_io: HashMap<String, SliceIo<'a>>,
     pub(crate) input: Vec<u8>,
-    pub(crate) trace_callback: Option<Rc<RefCell<TraceCallback<'a>>>>,
+    pub(crate) trace: Option<Rc<RefCell<TraceCallback<'a>>>>,
+}
+
+/// An I/O handler that returns arbitrary data to the guest.
+///
+/// On the guest side, use `env::send_recv_slice`.
+#[derive(Clone)]
+pub(crate) struct SliceIo<'a> {
+    pub(crate) callback: Rc<RefCell<IoCallback<'a>>>,
+    pub(crate) stored_buf: RefCell<Option<Bytes>>,
 }
 
 impl<'a> ExecutorEnv<'a> {
@@ -71,59 +70,13 @@ impl<'a> ExecutorEnv<'a> {
     /// # Example
     ///
     /// ```
-    /// use risc0_zkvm::{
-    ///     ExecutorEnv,
-    ///     ExecutorEnvBuilder};
-    ///
-    /// let a: u64 = 400;
+    /// use risc0_zkvm::ExecutorEnv;
     ///
     /// let env = ExecutorEnv::builder().build();
     /// ```
     pub fn builder() -> ExecutorEnvBuilder<'a> {
         ExecutorEnvBuilder::default()
     }
-
-    pub(crate) fn get_segment_limit(&self) -> usize {
-        1 << self.segment_limit_po2
-    }
-
-    pub(crate) fn get_session_limit(&self) -> Option<usize> {
-        self.session_limit
-    }
-
-    pub(crate) fn get_syscall(&self, name: &str) -> Option<&Rc<RefCell<(dyn Syscall + 'a)>>> {
-        self.syscalls.inner.get(name)
-    }
-}
-
-impl<'a> Default for ExecutorEnv<'a> {
-    fn default() -> Self {
-        Self::builder().build().unwrap()
-    }
-}
-
-impl<'a> Default for ExecutorEnvBuilder<'a> {
-    fn default() -> Self {
-        Self {
-            inner: ExecutorEnv {
-                env_vars: Default::default(),
-                segment_limit_po2: DEFAULT_SEGMENT_LIMIT_PO2,
-                session_limit: None,
-                syscalls: Default::default(),
-                io: Default::default(),
-                input: Default::default(),
-                trace_callback: Default::default(),
-            },
-        }
-    }
-}
-
-/// [ExecutorEnvBuilder] errors.
-#[derive(Debug, Error)]
-pub enum ExecutorEnvBuilderErr {
-    /// Segment limit PO2 falls outside supported range.
-    #[error("Invalid segment_limit_po2: {po2}")]
-    SegmentLimitPo2OutOfBounds { po2: usize },
 }
 
 impl<'a> ExecutorEnvBuilder<'a> {
@@ -132,40 +85,12 @@ impl<'a> ExecutorEnvBuilder<'a> {
     /// # Example
     ///
     /// ```
-    /// use risc0_zkvm::{
-    ///     ExecutorEnv,
-    ///     ExecutorEnvBuilder};
+    /// use risc0_zkvm::ExecutorEnv;
     ///
     /// let env = ExecutorEnv::builder().build().unwrap();
     /// ```
-    pub fn build(&mut self) -> Result<ExecutorEnv<'a>, ExecutorEnvBuilderErr> {
-        // Enforce segment_limit_po2 bounds
-        if self.inner.segment_limit_po2 < risc0_zkp::MIN_CYCLES_PO2
-            || self.inner.segment_limit_po2 > risc0_zkp::MAX_CYCLES_PO2
-        {
-            return Err(ExecutorEnvBuilderErr::SegmentLimitPo2OutOfBounds {
-                po2: self.inner.segment_limit_po2,
-            });
-        }
-
-        // Construct the executor environment
-        let mut result = self.clone();
-        let getenv = syscalls::Getenv(self.inner.env_vars.clone());
-        if !self.inner.input.is_empty() {
-            let reader = Cursor::new(self.inner.input.clone());
-            result
-                .inner
-                .io
-                .borrow_mut()
-                .with_read_fd(fileno::STDIN, reader);
-        }
-        let io = result.inner.io.clone();
-        result
-            .syscall(SYS_GETENV, getenv)
-            .syscall(SYS_READ, io.clone())
-            .syscall(SYS_READ_AVAIL, io.clone())
-            .syscall(SYS_WRITE, io);
-        Ok(result.inner.clone())
+    pub fn build(&mut self) -> Result<ExecutorEnv<'a>> {
+        Ok(self.inner.clone())
     }
 
     /// Set a segment limit, specified in powers of 2 cycles.
@@ -173,7 +98,7 @@ impl<'a> ExecutorEnvBuilder<'a> {
     /// Given value must be between [risc0_zkp::MIN_CYCLES_PO2] and
     /// [risc0_zkp::MAX_CYCLES_PO2] (inclusive).
     pub fn segment_limit_po2(&mut self, limit: usize) -> &mut Self {
-        self.inner.segment_limit_po2 = limit;
+        self.inner.segment_limit_po2 = Some(limit);
         self
     }
 
@@ -182,11 +107,7 @@ impl<'a> ExecutorEnvBuilder<'a> {
     /// # Example
     ///
     /// ```
-    /// use risc0_zkvm::{
-    ///    ExecutorEnv,
-    ///    ExecutorEnvBuilder};
-    ///
-    /// const NEW_SESSION_LIMIT: usize = 32 * 1024 * 1024; // 32M cycles
+    /// use risc0_zkvm::ExecutorEnv;
     ///
     /// let env = ExecutorEnv::builder()
     ///     .session_limit(Some(32 * 1024 * 1024)) // 32M cycles
@@ -203,10 +124,8 @@ impl<'a> ExecutorEnvBuilder<'a> {
     /// # Example
     ///
     /// ```
-    /// use risc0_zkvm::{
-    ///     ExecutorEnv,
-    ///     ExecutorEnvBuilder};
     /// use std::collections::HashMap;
+    /// use risc0_zkvm::ExecutorEnv;
     ///
     /// let mut vars = HashMap::new();
     /// vars.insert("VAR1".to_string(), "SOME_VALUE".to_string());
@@ -227,9 +146,7 @@ impl<'a> ExecutorEnvBuilder<'a> {
     /// # Example
     ///
     /// ```
-    /// # use risc0_zkvm::{
-    /// #   ExecutorEnv,
-    /// #   ExecutorEnvBuilder};
+    /// use risc0_zkvm::ExecutorEnv;
     ///
     /// let env = ExecutorEnv::builder()
     ///     .env_var("VAR1", "SOME_VALUE")
@@ -251,10 +168,8 @@ impl<'a> ExecutorEnvBuilder<'a> {
     /// # Example
     ///
     /// ```
-    /// use risc0_zkvm::{
-    ///     ExecutorEnv,
-    ///     ExecutorEnvBuilder,
-    ///     serde::to_vec};
+    /// use risc0_zkvm::ExecutorEnv;
+    /// use risc0_zkvm::serde::to_vec;
     ///
     /// let a: u64 = 400;
     /// let b: u64 = 200;
@@ -269,12 +184,6 @@ impl<'a> ExecutorEnvBuilder<'a> {
         self.inner
             .input
             .extend_from_slice(bytemuck::cast_slice(slice));
-        self
-    }
-
-    /// Add a handler for a raw syscall implementation.
-    pub fn syscall(&mut self, syscall: SyscallName, handler: impl Syscall + 'a) -> &mut Self {
-        self.inner.syscalls.with_syscall(syscall, handler);
         self
     }
 
@@ -295,31 +204,29 @@ impl<'a> ExecutorEnvBuilder<'a> {
 
     /// Add a posix-style file descriptor for reading.
     pub fn read_fd(&mut self, fd: u32, reader: impl BufRead + 'a) -> &mut Self {
-        self.inner.io.borrow_mut().with_read_fd(fd, reader);
+        self.inner.posix_io.borrow_mut().with_read_fd(fd, reader);
         self
     }
 
     /// Add a posix-style file descriptor for writing.
     pub fn write_fd(&mut self, fd: u32, writer: impl Write + 'a) -> &mut Self {
-        self.inner.io.borrow_mut().with_write_fd(fd, writer);
+        self.inner.posix_io.borrow_mut().with_write_fd(fd, writer);
         self
     }
 
-    /// Add a handler for a syscall which inputs and outputs a slice
-    /// of plain old data.
-    pub fn slice_io(&mut self, syscall: SyscallName, handler: impl SliceIo + 'a) -> &mut Self {
-        self.syscall(syscall, handler.to_syscall());
-        self
-    }
-
-    /// Add a handler for a syscall which inputs and outputs a slice
-    /// of plain old data.
+    /// Add a handler for simple I/O handling.
     pub fn io_callback(
         &mut self,
-        syscall: SyscallName,
-        f: impl Fn(&[u8]) -> Vec<u8> + 'a,
+        channel: SyscallName,
+        callback: impl Fn(Bytes) -> Result<Bytes> + 'a,
     ) -> &mut Self {
-        self.slice_io(syscall, slice_io_from_fn(f));
+        self.inner.slice_io.insert(
+            channel.as_str().to_string(),
+            SliceIo {
+                callback: Rc::new(RefCell::new(callback)),
+                stored_buf: RefCell::new(None),
+            },
+        );
         self
     }
 
@@ -328,7 +235,7 @@ impl<'a> ExecutorEnvBuilder<'a> {
         &mut self,
         callback: impl FnMut(TraceEvent) -> Result<()> + 'a,
     ) -> &mut Self {
-        self.inner.trace_callback = Some(Rc::new(RefCell::new(callback)));
+        self.inner.trace = Some(Rc::new(RefCell::new(callback)));
         self
     }
 }

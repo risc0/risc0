@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use clap::Parser;
-use risc0_zkvm::{prove::default_prover, ExecutorEnv};
+use risc0_zkvm::{get_prover_impl, ExecutorEnv, ProverOpts};
 use risc0_zkvm_methods::{FIB_ELF, FIB_ID};
 
 #[derive(Parser)]
@@ -26,7 +26,11 @@ impl GenReceipt {
             .add_input(&[iterations])
             .build()
             .unwrap();
-        let receipt = default_prover().prove_elf(env, FIB_ELF).unwrap();
+        let opts = ProverOpts::default();
+        let receipt = get_prover_impl(&opts)
+            .unwrap()
+            .prove_elf(env, FIB_ELF)
+            .unwrap();
         let receipt_bytes = bincode::serialize(&receipt).unwrap();
 
         let rust_code = format!(

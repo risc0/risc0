@@ -13,7 +13,6 @@
 // limitations under the License.
 
 use anyhow::Result;
-use risc0_binfmt::MemoryImage;
 use risc0_circuit_rv32im::{
     layout::{OutBuffer, LAYOUT},
     REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA,
@@ -26,16 +25,14 @@ use risc0_zkp::{
     prove::adapter::ProveAdapter,
 };
 
-use super::{HalEval, Prover};
+use super::{exec::MachineContext, DynProverImpl, HalEval};
 use crate::{
-    prove::exec::MachineContext,
-    receipt::{InnerReceipt, SegmentReceipts},
-    Executor, ExecutorEnv, Loader, Receipt, Segment, SegmentReceipt, Session, VerifierContext,
-    CIRCUIT,
+    host::{receipt::SegmentReceipts, CIRCUIT},
+    InnerReceipt, Loader, Receipt, Segment, SegmentReceipt, Session, VerifierContext,
 };
 
 /// An implementation of a [Prover] that runs locally.
-pub struct LocalProver<H, E>
+pub struct ProverImpl<H, E>
 where
     H: Hal<Field = BabyBear, Elem = Elem, ExtElem = ExtElem>,
     E: EvalCheck<H>,
@@ -44,12 +41,12 @@ where
     hal_eval: HalEval<H, E>,
 }
 
-impl<H, E> LocalProver<H, E>
+impl<H, E> ProverImpl<H, E>
 where
     H: Hal<Field = BabyBear, Elem = Elem, ExtElem = ExtElem>,
     E: EvalCheck<H>,
 {
-    /// Construct a [LocalProver] with the given name and [HalEval].
+    /// Construct a [ProverImpl] with the given name and [HalEval].
     pub fn new(name: &str, hal_eval: HalEval<H, E>) -> Self {
         Self {
             name: name.to_string(),
@@ -58,19 +55,11 @@ where
     }
 }
 
-impl<H, E> Prover for LocalProver<H, E>
+impl<H, E> DynProverImpl for ProverImpl<H, E>
 where
     H: Hal<Field = BabyBear, Elem = Elem, ExtElem = ExtElem>,
     E: EvalCheck<H>,
 {
-    fn get_name(&self) -> String {
-        self.name.clone()
-    }
-
-    fn get_peak_memory_usage(&self) -> usize {
-        self.hal_eval.hal.get_memory_usage()
-    }
-
     fn prove_session(&self, ctx: &VerifierContext, session: &Session) -> Result<Receipt> {
         log::info!("prove_session: {}", self.name);
         let mut segments = Vec::new();
@@ -150,14 +139,7 @@ where
         Ok(receipt)
     }
 
-    fn prove(
-        &self,
-        env: ExecutorEnv<'_>,
-        ctx: &VerifierContext,
-        image: MemoryImage,
-    ) -> Result<Receipt> {
-        let mut exec = Executor::new(env, image);
-        let session = exec.run()?;
-        self.prove_session(ctx, &session)
+    fn get_peak_memory_usage(&self) -> usize {
+        self.hal_eval.hal.get_memory_usage()
     }
 }
