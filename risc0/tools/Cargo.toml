@@ -8,7 +8,7 @@ repository = { workspace = true }
 description = "RISC Zero devtools"
 
 [dependencies]
-clap = { version = "4.0, <4.4.0", features = ["derive"] }
+clap = { version = "4.4", features = ["derive"] }
 risc0-zkvm = { workspace = true, features = ["default"] }
 
 [dev-dependencies]

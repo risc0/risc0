@@ -11,7 +11,7 @@ repository = { workspace = true }
 anyhow = "1.0"
 bincode = "1.3"
 bytemuck = "1.12"
-clap = { version = "4.0, <4.4.0", features = ["derive"] }
+clap = { version = "4.4", features = ["derive"] }
 env_logger = "0.10"
 risc0-zkvm = { workspace = true, features = ["default"] }
 
