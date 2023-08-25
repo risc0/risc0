@@ -16,8 +16,7 @@ use std::{fs, path::PathBuf, rc::Rc};
 
 use clap::{Args, Parser, ValueEnum};
 use risc0_zkvm::{
-    prove::{get_prover, Prover},
-    Executor, ExecutorEnv, VerifierContext,
+    get_prover_impl, DynProverImpl, Executor, ExecutorEnv, ProverOpts, VerifierContext,
 };
 
 /// Runs a RISC-V ELF binary within the RISC Zero ZKVM.
@@ -114,7 +113,7 @@ fn main() {
         } else if let Some(ref image_path) = args.binfmt.image {
             let image_contents = fs::read(image_path).unwrap();
             let image = bincode::deserialize(&image_contents).unwrap();
-            Executor::new(env, image)
+            Executor::new(env, image).unwrap()
         } else {
             unreachable!()
         };
@@ -149,17 +148,15 @@ fn main() {
 }
 
 impl Cli {
-    fn get_prover(&self) -> Rc<dyn Prover> {
-        if let Some(dev_mode) = std::env::var("RISC0_DEV_MODE").ok() {
-            if dev_mode == "1" || dev_mode == "true" || dev_mode == "yes" {
-                return get_prover("$devmode");
-            }
-        }
-
-        let prover_name = match self.hashfn {
-            HashFn::Sha256 => "$default",
-            HashFn::Poseidon => "$poseidon",
+    fn get_prover(&self) -> Rc<dyn DynProverImpl> {
+        let hashfn = match self.hashfn {
+            HashFn::Sha256 => "sha-256",
+            HashFn::Poseidon => "poseidon",
         };
-        get_prover(prover_name)
+        let opts = ProverOpts {
+            hashfn: hashfn.to_string(),
+        };
+
+        get_prover_impl(&opts).unwrap()
     }
 }

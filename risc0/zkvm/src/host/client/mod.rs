@@ -12,14 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-fn main() {
-    #[cfg(feature = "profiler")]
-    {
-        std::env::set_var("PROTOC", protobuf_src::protoc());
-        prost_build::compile_protos(
-            &["src/host/server/exec/profile.proto"],
-            &["src/host/server/exec"],
-        )
-        .unwrap();
-    }
-}
+pub(crate) mod env;
+pub(crate) mod exec;
+pub(crate) mod posix_io;
+pub(crate) mod prove;

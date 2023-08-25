@@ -23,24 +23,22 @@ use anyhow::{anyhow, bail, Result};
 use risc0_binfmt::MemoryImage;
 use tempfile::tempdir;
 
-use super::Prover;
-use crate::{ExecutorEnv, Receipt, Segment, SegmentReceipt, Session, VerifierContext};
+use super::{Prover, ProverOpts};
+use crate::{ExecutorEnv, Receipt, VerifierContext};
 
 /// An implementation of a [Prover] that runs proof workloads via an external
 /// `r0vm` process.
 pub struct ExternalProver {
     name: String,
     r0vm_path: PathBuf,
-    hashfn: String,
 }
 
 impl ExternalProver {
     /// Construct an [ExternalProver].
-    pub fn new<P: AsRef<Path>>(name: &str, r0vm_path: P, hashfn: &str) -> Self {
+    pub fn new<P: AsRef<Path>>(name: &str, r0vm_path: P) -> Self {
         Self {
             name: name.to_string(),
             r0vm_path: r0vm_path.as_ref().to_path_buf(),
-            hashfn: hashfn.to_string(),
         }
     }
 }
@@ -50,6 +48,7 @@ impl Prover for ExternalProver {
         &self,
         env: ExecutorEnv<'_>,
         ctx: &VerifierContext,
+        opts: &ProverOpts,
         image: MemoryImage,
     ) -> Result<Receipt> {
         log::debug!("Launching {}", &self.r0vm_path.to_string_lossy());
@@ -68,7 +67,7 @@ impl Prover for ExternalProver {
             .arg("--receipt")
             .arg(&receipt_path)
             .arg("--hashfn")
-            .arg(&self.hashfn)
+            .arg(&opts.hashfn)
             .stdin(Stdio::piped());
 
         let mut child = cmd.spawn()?;
@@ -86,19 +85,6 @@ impl Prover for ExternalProver {
         let image_id = image.compute_id();
         receipt.verify_with_context(ctx, image_id)?;
         Ok(receipt)
-    }
-
-    fn prove_session(&self, _ctx: &VerifierContext, _session: &Session) -> Result<Receipt> {
-        bail!("this is unimplemented for prover [{}]", self.get_name())
-    }
-
-    fn prove_segment(&self, _ctx: &VerifierContext, _segment: &Segment) -> Result<SegmentReceipt> {
-        bail!("this is unimplemented for prover [{}]", self.get_name())
-    }
-
-    fn get_peak_memory_usage(&self) -> usize {
-        // TODO: get execution stats from external process.
-        0
     }
 
     fn get_name(&self) -> String {

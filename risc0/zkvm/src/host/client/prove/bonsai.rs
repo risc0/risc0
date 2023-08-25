@@ -14,13 +14,12 @@
 
 use core::time::Duration;
 
-use ::bonsai_sdk::alpha::SdkErr;
-use anyhow::{bail, Result};
-use bonsai_sdk::alpha as bonsai_sdk;
+use anyhow::{anyhow, bail, Result};
+use bonsai_sdk::alpha::{Client, SdkErr};
 use risc0_binfmt::MemoryImage;
 
 use super::Prover;
-use crate::{ExecutorEnv, Receipt, Segment, SegmentReceipt, Session, VerifierContext};
+use crate::{ExecutorEnv, ProverOpts, Receipt, VerifierContext};
 
 /// An implementation of a [Prover] that runs proof workloads via Bonsai.
 pub struct BonsaiProver {
@@ -41,25 +40,14 @@ impl Prover for BonsaiProver {
         self.name.clone()
     }
 
-    fn get_peak_memory_usage(&self) -> usize {
-        0
-    }
-
-    fn prove_session(&self, _ctx: &VerifierContext, _session: &Session) -> Result<Receipt> {
-        bail!("this is unimplemented for prover [{}]", self.get_name())
-    }
-
-    fn prove_segment(&self, _ctx: &VerifierContext, _segment: &Segment) -> Result<SegmentReceipt> {
-        bail!("this is unimplemented for prover [{}]", self.get_name())
-    }
-
     fn prove(
         &self,
         env: ExecutorEnv<'_>,
         _ctx: &VerifierContext,
+        _opts: &ProverOpts,
         image: MemoryImage,
     ) -> Result<Receipt> {
-        let client = bonsai_sdk::Client::from_env()?;
+        let client = Client::from_env()?;
 
         // upload the image
         let image_id = hex::encode(image.compute_id());
@@ -91,10 +79,9 @@ impl Prover for BonsaiProver {
             }
             if res.status == "SUCCEEDED" {
                 // Download the receipt, containing the output
-                let receipt_url = match res.receipt_url {
-                    Some(url) => url,
-                    None => bail!("API error, missing receipt on completed session"),
-                };
+                let receipt_url = res
+                    .receipt_url
+                    .ok_or(anyhow!("API error, missing receipt on completed session"))?;
 
                 let receipt_buf = client.download(&receipt_url)?;
                 let receipt: Receipt = bincode::deserialize(&receipt_buf)?;
