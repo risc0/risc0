@@ -221,11 +221,6 @@ where
 
     fs::create_dir_all(target_dir.as_ref()).unwrap();
 
-    let mut drop_keys = vec![];
-    for (key, _) in env::vars().filter(|x| x.0.starts_with("CARGO") || x.0.starts_with("RUSTUP")) {
-        drop_keys.push(key);
-    }
-
     let mut args = vec![
         "+risc0",
         "build",
