@@ -3549,6 +3549,7 @@ dependencies = [
  "bincode",
  "bonsai-sdk",
  "bytemuck",
+ "bytes",
  "cfg-if",
  "crypto-bigint",
  "generic-array",
