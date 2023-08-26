@@ -561,6 +561,7 @@ dependencies = [
  "anyhow",
  "blake2",
  "bytemuck",
+ "cc",
  "digest",
  "hex",
  "log",

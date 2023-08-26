@@ -42,6 +42,9 @@ struct Metrics {
 }
 
 fn main() {
+    #[cfg(feature = "supra_ntt")]
+    risc0_zkp::hal::cuda::sppark_init();
+
     tracing_subscriber::registry()
         .with(EnvFilter::from_default_env())
         .with(tracing_forest::ForestLayer::default())

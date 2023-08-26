@@ -12,6 +12,8 @@ name = "ntt"
 harness = false
 
 [dependencies]
+#sppark = { git = "https://github.com/supranational/risc0-sppark-dev.git", optional = true }
+sppark = { path = "../../../risc0-sppark-dev/rust/", optional = true }
 anyhow = { version = "1.0", default-features = false }
 blake2 = { version = "0.10.6", default-features = false }
 bytemuck = { version = "1.12", features = ["derive"] }
@@ -28,6 +30,9 @@ risc0-sys = { workspace = true, optional = true }
 risc0-zkvm-platform = { workspace = true }
 serde = { version = "1.0", default-features = false, features = ["derive"] }
 tracing = { version = "0.1", default-features = false, features = ["attributes"] }
+
+[build-dependencies]
+cc = "^1.0.70"
 
 [target.'cfg(not(target_os = "zkvm"))'.dependencies]
 log = "0.4"
@@ -46,6 +51,10 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [features]
 default = ["prove"]
+supra_ntt = [
+    "cuda",
+    "sppark",
+]
 cuda = [
   "dep:cust",
   "prove",

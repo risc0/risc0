@@ -24,8 +24,10 @@ use cust::{
 use lazy_static::lazy_static;
 use risc0_core::field::{
     baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
-    Elem, ExtElem, RootsOfUnity,
+    ExtElem, RootsOfUnity,
 };
+#[cfg(not(feature = "supra_ntt"))]
+use risc0_core::field::Elem;
 
 use super::{Buffer, Hal, TRACKER};
 use crate::{
@@ -50,6 +52,24 @@ lazy_static! {
         context.set_flags(ContextFlags::SCHED_AUTO).unwrap();
         context
     };
+}
+
+#[cfg(feature = "supra_ntt")]
+pub fn sppark_init() {
+    extern "C" {
+        fn sppark_init() -> sppark::Error;
+    }
+
+    let err = unsafe {
+        sppark_init()
+    };
+
+    if err.code != 0 {
+        panic!(
+            "Failure during sppark_init: {}",
+            String::from(err)
+        );
+    }
 }
 
 pub trait CudaHash {
@@ -439,6 +459,7 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
     }
 
     #[tracing::instrument(skip_all)]
+    #[cfg(not(feature = "supra_ntt"))]
     fn batch_expand(
         &self,
         output: &Self::Buffer<Self::Elem>,
@@ -470,6 +491,52 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
     }
 
     #[tracing::instrument(skip_all)]
+    #[cfg(feature = "supra_ntt")]
+    fn batch_expand(
+        &self,
+        output: &Self::Buffer<Self::Elem>,
+        input: &Self::Buffer<Self::Elem>,
+        poly_count: usize,
+    ) {
+        let out_size = output.size() / poly_count;
+        let in_size = input.size() / poly_count;
+        let expand_bits = log2_ceil(out_size / in_size);
+        assert_eq!(output.size(), out_size * poly_count);
+        assert_eq!(input.size(), in_size * poly_count);
+        assert_eq!(out_size, in_size * (1 << expand_bits));
+
+        let in_bits = log2_ceil(in_size);
+
+        extern "C" {
+            fn batch_expand(
+                d_out: DevicePointer<u8>,
+                d_in: DevicePointer<u8>,
+                lg_domain_size: u32,
+                lg_blowup: u32,
+                poly_count: u32,
+            ) -> sppark::Error;
+        }
+
+        let err = unsafe {
+            batch_expand(
+                output.as_device_ptr(),
+                input.as_device_ptr(),
+                in_bits.try_into().unwrap(),
+                expand_bits.try_into().unwrap(),
+                poly_count.try_into().unwrap(),
+            )
+        };
+
+        if err.code != 0 {
+            panic!(
+                "Failure during batch_expand: {}",
+                String::from(err)
+            );
+        }
+    }
+
+    #[tracing::instrument(skip_all)]
+    #[cfg(not(feature = "supra_ntt"))]
     fn batch_evaluate_ntt(&self, io: &Self::Buffer<Self::Elem>, count: usize, expand_bits: usize) {
         let row_size = io.size() / count;
         assert_eq!(row_size * count, io.size());
@@ -498,6 +565,41 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
     }
 
     #[tracing::instrument(skip_all)]
+    #[cfg(feature = "supra_ntt")]
+    fn batch_evaluate_ntt(&self, io: &Self::Buffer<Self::Elem>, count: usize, expand_bits: usize) {
+        let row_size = io.size() / count;
+        assert_eq!(row_size * count, io.size());
+        let n_bits = log2_ceil(row_size);
+        assert_eq!(row_size, 1 << n_bits);
+        assert!(n_bits >= expand_bits);
+        assert!(n_bits < Self::Elem::MAX_ROU_PO2);
+
+        extern "C" {
+            fn batch_NTT(
+                d_inout: DevicePointer<u8>,
+                lg_domain_size: u32,
+                poly_count: u32,
+            ) -> sppark::Error;
+        }
+
+        let err = unsafe {
+            batch_NTT(
+                io.as_device_ptr(),
+                n_bits.try_into().unwrap(),
+                count.try_into().unwrap(),
+            )
+        };
+
+        if err.code != 0 {
+            panic!(
+                "Failure during batch_evaluate_ntt: {}",
+                String::from(err)
+            );
+        }
+    }
+
+    #[tracing::instrument(skip_all)]
+    #[cfg(not(feature = "supra_ntt"))]
     fn batch_interpolate_ntt(&self, io: &Self::Buffer<Self::Elem>, count: usize) {
         let row_size = io.size() / count;
         assert_eq!(row_size * count, io.size());
@@ -536,6 +638,39 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
             .unwrap();
         }
         stream.synchronize().unwrap();
+    }
+
+    #[tracing::instrument(skip_all)]
+    #[cfg(feature = "supra_ntt")]
+    fn batch_interpolate_ntt(&self, io: &Self::Buffer<Self::Elem>, count: usize) {
+        let row_size = io.size() / count;
+        assert_eq!(row_size * count, io.size());
+        let n_bits = log2_ceil(row_size);
+        assert_eq!(row_size, 1 << n_bits);
+        assert!(n_bits < Self::Elem::MAX_ROU_PO2);
+
+        extern "C" {
+            fn batch_iNTT(
+                d_inout: DevicePointer<u8>,
+                lg_domain_size: u32,
+                poly_count: u32,
+            ) -> sppark::Error;
+        }
+
+        let err = unsafe {
+            batch_iNTT(
+                io.as_device_ptr(),
+                n_bits.try_into().unwrap(),
+                count.try_into().unwrap(),
+            )
+        };
+
+        if err.code != 0 {
+            panic!(
+                "Failure during batch_interpolate_ntt: {}",
+                String::from(err)
+            );
+        }
     }
 
     #[tracing::instrument(skip_all)]
@@ -626,6 +761,7 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
     }
 
     #[tracing::instrument(skip_all)]
+    #[cfg(not(feature = "supra_ntt"))]
     fn zk_shift(&self, io: &Self::Buffer<Self::Elem>, poly_count: usize) {
         let bits = log2_ceil(io.size() / poly_count);
         let count = io.size();
@@ -643,6 +779,36 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
             .unwrap();
         }
         stream.synchronize().unwrap();
+    }
+
+    #[tracing::instrument(skip_all)]
+    #[cfg(feature = "supra_ntt")]
+    fn zk_shift(&self, io: &Self::Buffer<Self::Elem>, poly_count: usize) {
+        let bits = log2_ceil(io.size() / poly_count);
+        assert_eq!(io.size(), poly_count * (1 << bits));
+
+        extern "C" {
+            fn batch_zk_shift(
+                d_inout: DevicePointer<u8>,
+                lg_domain_size: u32,
+                poly_count: u32,
+            ) -> sppark::Error;
+        }
+
+        let err = unsafe {
+            batch_zk_shift(
+                io.as_device_ptr(),
+                bits.try_into().unwrap(),
+                poly_count.try_into().unwrap(),
+            )
+        };
+
+        if err.code != 0 {
+            panic!(
+                "Failure during zk_shift: {}",
+                String::from(err)
+            );
+        }
     }
 
     #[tracing::instrument(skip_all)]

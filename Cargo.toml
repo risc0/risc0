@@ -54,7 +54,7 @@ opt-level = 3
 opt-level = 3
 
 [profile.release]
-debug = 1
+#debug = 1 # This slows CPU side things a little
 lto = true
 
 [profile.release.build-override]
