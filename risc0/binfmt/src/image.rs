@@ -25,7 +25,6 @@ use risc0_zkvm_platform::{
 };
 use serde::{Deserialize, Serialize};
 use sha2::{
-    compress256,
     digest::{generic_array::GenericArray, typenum::U64},
 };
 
@@ -312,7 +311,7 @@ fn hash_page_bytes(page: &[u8]) -> Digest {
     assert!(page.len() % BLOCK_BYTES == 0);
     for block in page.chunks_exact(BLOCK_BYTES) {
         let blocks: GenericArray<u8, U64> = GenericArray::clone_from_slice(block);
-        compress256(&mut state, [blocks; 1].as_slice());
+        sha2::compress256(&mut state, [blocks; 1].as_slice());
     }
     state.into()
 }

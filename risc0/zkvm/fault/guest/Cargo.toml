@@ -10,4 +10,3 @@ risc0-zkvm = { path = "../..", default-features = false, features = [ "std" ] }
 risc0-binfmt = { path = "../../../binfmt" }
 rrs-lib = "0.1"
 serde = "1.0"
-sha2 = "0.10.6"

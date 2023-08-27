@@ -28,9 +28,10 @@ use test_log::test;
 
 use super::{get_prover_impl, HalEval, ProverImpl};
 use crate::{
-    host::{server::testutils, CIRCUIT},
+    host::{receipt::SegmentReceipts, server::testutils, CIRCUIT},
     serde::{from_slice, to_vec},
-    DynProverImpl, Executor, ExecutorEnv, ExitCode, ProverOpts, Receipt, FAULT_CHECKER_ID,
+    DynProverImpl, Executor, ExecutorEnv, ExitCode, InnerReceipt, ProverOpts, Receipt,
+    FAULT_CHECKER_ID,
 };
 
 fn prove_nothing(hashfn: &str) -> Result<Receipt> {
