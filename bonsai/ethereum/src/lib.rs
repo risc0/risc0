@@ -47,7 +47,7 @@ mod tests {
         },
         utils::{hex, Anvil, AnvilInstance},
     };
-    use risc0_zkvm::{receipt::InnerReceipt, Receipt};
+    use risc0_zkvm::{InnerReceipt, Receipt};
 
     use crate::{
         i_bonsai_relay,

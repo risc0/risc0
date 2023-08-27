@@ -14,13 +14,20 @@
 
 //! Build Solidity contracts with Foundry when `cargo build` is invoked.
 
-use clap::Parser;
-use foundry_cli::cmd::{forge, Cmd};
+use std::process::Command;
+
+use anyhow::Context;
 
 fn main() -> anyhow::Result<()> {
-    let cmd = forge::build::BuildArgs::try_parse_from(["--"].into_iter())?;
-    let _ = cmd
-        .run()
-        .map_err(|e| anyhow::anyhow!("{}", e.to_string()))?;
+    let mut forge_build = Command::new("forge")
+        .arg("build")
+        .spawn()
+        .context("failed to start `forge build`")?;
+
+    let status = forge_build.wait().context("failed to run `forge build`")?;
+    if !status.success() {
+        anyhow::bail!("`forge build` exited with failed status: {}", status);
+    }
+
     Ok(())
 }

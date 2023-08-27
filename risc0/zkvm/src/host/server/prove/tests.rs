@@ -26,24 +26,28 @@ use risc0_zkvm_platform::{memory, WORD_SIZE};
 use serial_test::serial;
 use test_log::test;
 
-use super::{get_prover, LocalProver, Prover};
+use super::{get_prover_impl, HalEval, ProverImpl};
 use crate::{
-    prove::HalEval,
-    receipt::{InnerReceipt, Receipt, SegmentReceipts},
+    host::{server::testutils, CIRCUIT},
     serde::{from_slice, to_vec},
-    testutils, Executor, ExecutorEnv, ExitCode, CIRCUIT, FAULT_CHECKER_ID,
+    DynProverImpl, Executor, ExecutorEnv, ExitCode, ProverOpts, Receipt, FAULT_CHECKER_ID,
 };
 
-fn prove_nothing(name: &str) -> Result<Receipt> {
+fn prove_nothing(hashfn: &str) -> Result<Receipt> {
     let input = to_vec(&MultiTestSpec::DoNothing).unwrap();
     let env = ExecutorEnv::builder().add_input(&input).build().unwrap();
-    get_prover(name).prove_elf(env, MULTI_TEST_ELF)
+    let opts = ProverOpts {
+        hashfn: hashfn.to_string(),
+    };
+    get_prover_impl(&opts)
+        .unwrap()
+        .prove_elf(env, MULTI_TEST_ELF)
 }
 
 #[test]
 #[cfg_attr(feature = "cuda", serial)]
 fn hashfn_poseidon() {
-    prove_nothing("$poseidon").unwrap();
+    prove_nothing("poseidon").unwrap();
 }
 
 #[test]
@@ -54,14 +58,14 @@ fn hashfn_blake2b() {
     };
     let input = to_vec(&MultiTestSpec::DoNothing).unwrap();
     let env = ExecutorEnv::builder().add_input(&input).build().unwrap();
-    let prover = LocalProver::new("cpu:blake2b", hal_eval);
+    let prover = ProverImpl::new("cpu:blake2b", hal_eval);
     prover.prove_elf(env, MULTI_TEST_ELF).unwrap();
 }
 
 #[test]
 #[cfg_attr(feature = "cuda", serial)]
 fn receipt_serde() {
-    let receipt = prove_nothing("$default").unwrap();
+    let receipt = prove_nothing("sha-256").unwrap();
     let encoded: Vec<u32> = to_vec(&receipt).unwrap();
     let decoded: Receipt = from_slice(&encoded).unwrap();
     assert_eq!(decoded, receipt);
@@ -71,7 +75,7 @@ fn receipt_serde() {
 #[test]
 #[cfg_attr(feature = "cuda", serial)]
 fn check_image_id() {
-    let receipt = prove_nothing("$default").unwrap();
+    let receipt = prove_nothing("sha-256").unwrap();
     let mut image_id: Digest = MULTI_TEST_ID.into();
     for word in image_id.as_mut_words() {
         *word = word.wrapping_add(1);
@@ -226,7 +230,7 @@ fn session_events() {
 
     use risc0_zkvm_methods::HELLO_COMMIT_ELF;
 
-    use crate::session::{Segment, SessionEvents};
+    use crate::{Segment, SessionEvents};
 
     struct Logger {
         on_pre_prove_segment_flag: Rc<RefCell<bool>>,
@@ -322,7 +326,7 @@ mod riscv {
             let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
 
             let env = ExecutorEnv::default();
-            let mut exec = Executor::new(env, image);
+            let mut exec = Executor::new(env, image).unwrap();
             let session = exec.run().unwrap();
             session.prove().unwrap();
         }

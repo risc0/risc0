@@ -15,6 +15,7 @@
 use std::{collections::BTreeMap, io::Cursor, str::from_utf8, sync::Mutex};
 
 use anyhow::Result;
+use bytes::Bytes;
 use risc0_zkp::core::digest::Digest;
 use risc0_zkvm_methods::{
     multi_test::{MultiTestSpec, SYS_MULTI_TEST},
@@ -24,10 +25,11 @@ use risc0_zkvm_platform::{fileno, PAGE_SIZE, WORD_SIZE};
 use sha2::{Digest as _, Sha256};
 use test_log::test;
 
-use super::{Executor, ExecutorEnv, TraceEvent};
+use super::executor::Executor;
 use crate::{
+    host::server::testutils,
     serde::{from_slice, to_vec},
-    testutils, ExitCode, MemoryImage, Program, Session, FAULT_CHECKER_ID,
+    ExecutorEnv, ExitCode, MemoryImage, Program, Session, TraceEvent, FAULT_CHECKER_ID,
 };
 
 fn run_test(spec: MultiTestSpec) {
@@ -55,7 +57,7 @@ fn basic() {
     let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
     let pre_image_id = image.compute_id();
 
-    let mut exec = Executor::new(env, image);
+    let mut exec = Executor::new(env, image).unwrap();
     let session = exec.run().unwrap();
     let segments = session.resolve().unwrap();
 
@@ -89,7 +91,7 @@ fn system_split() {
     let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
     let pre_image_id = image.compute_id();
 
-    let mut exec = Executor::new(env, image);
+    let mut exec = Executor::new(env, image).unwrap();
     let session = exec.run().unwrap();
     let segments = session.resolve().unwrap();
 
@@ -113,7 +115,7 @@ fn libm_build() {
 
 #[test]
 fn host_syscall() {
-    let expected: Vec<Vec<u8>> = vec![
+    let expected: Vec<Bytes> = vec![
         "".into(),
         "H".into(),
         "He".into(),
@@ -125,13 +127,13 @@ fn host_syscall() {
         count: expected.len() as u32 - 1,
     })
     .unwrap();
-    let actual: Mutex<Vec<Vec<u8>>> = Vec::new().into();
+    let actual: Mutex<Vec<Bytes>> = Vec::new().into();
     let env = ExecutorEnv::builder()
         .add_input(&input)
-        .io_callback(SYS_MULTI_TEST, |buf: &[u8]| -> Vec<u8> {
+        .io_callback(SYS_MULTI_TEST, |buf| {
             let mut actual = actual.lock().unwrap();
-            actual.push(buf.into());
-            expected[actual.len()].clone()
+            actual.push(buf);
+            Ok(expected[actual.len()].clone())
         })
         .build()
         .unwrap();
@@ -149,7 +151,7 @@ fn host_syscall_callback_panic() {
     let input = to_vec(&MultiTestSpec::Syscall { count: 5 }).unwrap();
     let env = ExecutorEnv::builder()
         .add_input(&input)
-        .io_callback(SYS_MULTI_TEST, |_buf: &[u8]| -> Vec<u8> {
+        .io_callback(SYS_MULTI_TEST, |_| {
             panic!("I am panicking from here!");
         })
         .build()
@@ -462,7 +464,7 @@ fn fail() {
 fn profiler() {
     use risc0_binfmt::Program;
 
-    use crate::exec::profiler::{Frame, Profiler};
+    use crate::host::server::exec::profiler::{Frame, Profiler};
 
     let mut prof = Profiler::new("multi_test.elf", MULTI_TEST_ELF).unwrap();
     {
