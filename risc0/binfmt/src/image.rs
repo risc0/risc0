@@ -17,13 +17,17 @@ use std::collections::BTreeMap;
 use anyhow::Result;
 use risc0_zkp::core::{
     digest::Digest,
-    hash::sha::{cpu::Impl, Sha256, BLOCK_BYTES, SHA256_INIT},
+    hash::sha::{BLOCK_BYTES, SHA256_INIT},
 };
 use risc0_zkvm_platform::{
     memory::{MEM_SIZE, PAGE_TABLE},
-    syscall::DIGEST_BYTES,
+    syscall::{DIGEST_BYTES, DIGEST_WORDS},
 };
 use serde::{Deserialize, Serialize};
+use sha2::{
+    compress256,
+    digest::{generic_array::GenericArray, typenum::U64},
+};
 
 use crate::{elf::Program, SystemState};
 
@@ -304,14 +308,13 @@ impl MemoryImage {
 }
 
 fn hash_page_bytes(page: &[u8]) -> Digest {
-    let mut state = SHA256_INIT;
+    let mut state: [u32; DIGEST_WORDS] = SHA256_INIT.into();
     assert!(page.len() % BLOCK_BYTES == 0);
     for block in page.chunks_exact(BLOCK_BYTES) {
-        let block1 = Digest::try_from(&block[0..DIGEST_BYTES]).unwrap();
-        let block2 = Digest::try_from(&block[DIGEST_BYTES..BLOCK_BYTES]).unwrap();
-        state = *Impl::compress(&state, &block1, &block2);
+        let blocks: GenericArray<u8, U64> = GenericArray::clone_from_slice(block);
+        compress256(&mut state, [blocks; 1].as_slice());
     }
-    state
+    state.into()
 }
 
 #[cfg(test)]

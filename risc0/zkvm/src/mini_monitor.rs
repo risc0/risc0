@@ -15,6 +15,7 @@
 use std::collections::HashMap;
 
 use anyhow::{bail, Result};
+use risc0_binfmt::compute_image_id;
 use risc0_zkp::core::{
     digest::Digest,
     hash::sha::{BLOCK_BYTES, SHA256_INIT},
@@ -165,7 +166,8 @@ impl MiniMonitor {
 
         self.traverse_merkle_path(&mut memory_map, self.pc);
         self.traverse_merkle_path(&mut memory_map, SYSTEM.start() as u32);
-        self.get_root_digest(&mut memory_map)
+        let digest = self.get_root_digest(&mut memory_map)?;
+        Ok(compute_image_id(&digest, self.get_pc_value()?))
     }
 
     /// get the page index. The page index is the key for the hash map used in

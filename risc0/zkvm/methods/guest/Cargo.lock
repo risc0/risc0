@@ -520,6 +520,7 @@ dependencies = [
  "risc0-zkp",
  "risc0-zkvm-platform",
  "serde",
+ "sha2",
 ]
 
 [[package]]
@@ -591,6 +592,7 @@ dependencies = [
  "risc0-zkp",
  "risc0-zkvm-platform",
  "serde",
+ "sha2",
  "tempfile",
  "tracing",
 ]

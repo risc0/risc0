@@ -21,3 +21,4 @@ log = "0.4"
 risc0-zkp = { workspace = true, features = ["std"] }
 risc0-zkvm-platform = { workspace = true }
 serde = { version = "1.0", default-features = false, features = ["derive", "std"] }
+sha2 = "0.10.6"

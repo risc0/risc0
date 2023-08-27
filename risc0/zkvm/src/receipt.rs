@@ -96,6 +96,7 @@ use crate::{
     control_id::{BLAKE2B_CONTROL_ID, POSEIDON_CONTROL_ID, SHA256_CONTROL_ID},
     fault_ids::FAULT_CHECKER_ID,
     recursion::SuccinctReceipt,
+    serde::from_slice,
     sha::rust_crypto::{Digest as _, Sha256},
 };
 
@@ -216,6 +217,19 @@ impl SegmentReceipts {
 
         if metadata.exit_code == ExitCode::SystemSplit {
             return Err(VerificationError::UnexpectedExitCode);
+        }
+
+        // For receipts indicating proof of fault, the guest code should post the
+        // post-image ID of the original guest code to prove that the fault checker
+        // tried to execute the next instruction from the same state of the machine.
+        if metadata.pre.digest() == FAULT_CHECKER_ID.into() {
+            // let post_id = &journal[WORD_SIZE..];
+            let digest: Digest = from_slice(&journal.clone()).unwrap();
+            println!("journal: {:?}", digest.clone().as_bytes());
+            println!("pre post: {:?}", prev_image_id.as_bytes());
+            if digest != prev_image_id {
+                return Err(VerificationError::FaultStateMismatch);
+            }
         }
 
         let digest = Sha256::digest(journal);

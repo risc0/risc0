@@ -14,11 +14,9 @@
 
 use std::collections::VecDeque;
 
-use risc0_zkp::core::{
-    digest::Digest,
-    hash::sha::{cpu::Impl, Sha256},
-};
+use risc0_zkp::core::digest::Digest;
 use serde::{Deserialize, Serialize};
+use sha2::{Digest as _, Sha256};
 
 /// Represents the public state of a segment, needed for continuations and
 /// receipt verification.
@@ -53,7 +51,8 @@ impl SystemState {
 
 /// Implementation of the struct hash described in the recursion predicates RFC.
 pub fn tagged_struct(tag: &str, down: &[Digest], data: &[u32]) -> Digest {
-    let tag_digest: Digest = *Impl::hash_bytes(tag.as_bytes());
+    let tag_digest: Digest =
+        Digest::try_from(Sha256::digest(tag.as_bytes()).to_vec().as_slice()).unwrap();
     let mut all = Vec::<u8>::new();
     all.extend_from_slice(tag_digest.as_bytes());
     for digest in down {
@@ -64,7 +63,7 @@ pub fn tagged_struct(tag: &str, down: &[Digest], data: &[u32]) -> Digest {
     }
     let down_count: u16 = down.len().try_into().unwrap();
     all.extend_from_slice(&down_count.to_le_bytes());
-    *Impl::hash_bytes(&all)
+    Digest::try_from(Sha256::digest(&all).to_vec().as_slice()).unwrap()
 }
 
 pub fn read_sha_halfs(flat: &mut VecDeque<u32>) -> Digest {
