@@ -372,7 +372,11 @@ impl<'a> Executor<'a> {
             self.get_fault_checker_memory_map()
                 .compute_root_hash()
                 .unwrap()
-        )
+        );
+        assert_eq!(
+            self.monitor.build_image(self.pc).compute_id(),
+            self.get_fault_checker_memory_map().compute_id().unwrap()
+        );
     }
 
     fn get_fault_checker_memory_map(&mut self) -> MiniMonitor {

@@ -15,11 +15,8 @@
 use std::collections::HashMap;
 
 use anyhow::{bail, Result};
-use risc0_binfmt::compute_image_id;
-use risc0_zkp::core::{
-    digest::Digest,
-    hash::sha::{BLOCK_BYTES, SHA256_INIT},
-};
+use risc0_binfmt::{compute_image_id, hash_page_bytes};
+use risc0_zkp::core::digest::Digest;
 use risc0_zkvm_platform::{
     memory::{SYSTEM, TEXT_START},
     syscall::{reg_abi::REG_MAX, DIGEST_BYTES},
@@ -27,8 +24,6 @@ use risc0_zkvm_platform::{
 };
 use rrs_lib::Memory;
 use serde::{Deserialize, Serialize};
-
-use crate::sha::{Impl, Sha256};
 
 // each element of the merkle path has the following:
 // 1) a page entry address index. None indicates root index.
@@ -101,17 +96,6 @@ impl MiniMonitor {
         Ok(registers)
     }
 
-    fn hash_page_bytes(page: &[u8]) -> Digest {
-        let mut state = SHA256_INIT;
-        assert!(page.len() % BLOCK_BYTES == 0);
-        for block in page.chunks_exact(BLOCK_BYTES) {
-            let block1 = Digest::try_from(&block[0..DIGEST_BYTES]).unwrap();
-            let block2 = Digest::try_from(&block[DIGEST_BYTES..BLOCK_BYTES]).unwrap();
-            state = *Impl::compress(&state, &block1, &block2);
-        }
-        state
-    }
-
     fn get_root_digest(&self, memory_map: &mut HashMap<u32, MerklePathElement>) -> Result<Digest> {
         // we need to start at the two leaf pages and merklize
         let mut addr = self.pc;
@@ -125,7 +109,7 @@ impl MiniMonitor {
                 Some(val) => *val,
                 None => {
                     // we're at the root page. Compute the digest.
-                    return Ok(Self::hash_page_bytes(&data));
+                    return Ok(hash_page_bytes(&data));
                 }
             };
         }
@@ -144,7 +128,7 @@ impl MiniMonitor {
             }
 
             // get the digest
-            let digest = &Self::hash_page_bytes(&data);
+            let digest = &hash_page_bytes(&data);
             let digest_bytes = digest.as_bytes();
 
             // get the entry page
@@ -166,8 +150,12 @@ impl MiniMonitor {
 
         self.traverse_merkle_path(&mut memory_map, self.pc);
         self.traverse_merkle_path(&mut memory_map, SYSTEM.start() as u32);
-        let digest = self.get_root_digest(&mut memory_map)?;
-        Ok(compute_image_id(&digest, self.get_pc_value()?))
+        self.get_root_digest(&mut memory_map)
+    }
+
+    /// get the image ID of the memory map
+    pub fn compute_id(&self) -> Result<Digest> {
+        Ok(compute_image_id(&self.compute_root_hash()?, self.pc))
     }
 
     /// get the page index. The page index is the key for the hash map used in

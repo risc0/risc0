@@ -24,9 +24,7 @@ use risc0_zkvm_platform::{
     syscall::{DIGEST_BYTES, DIGEST_WORDS},
 };
 use serde::{Deserialize, Serialize};
-use sha2::{
-    digest::{generic_array::GenericArray, typenum::U64},
-};
+use sha2::digest::{generic_array::GenericArray, typenum::U64};
 
 use crate::{elf::Program, SystemState};
 
@@ -306,7 +304,7 @@ impl MemoryImage {
     }
 }
 
-fn hash_page_bytes(page: &[u8]) -> Digest {
+pub fn hash_page_bytes(page: &[u8]) -> Digest {
     let mut state: [u32; DIGEST_WORDS] = SHA256_INIT.into();
     assert!(page.len() % BLOCK_BYTES == 0);
     for block in page.chunks_exact(BLOCK_BYTES) {
