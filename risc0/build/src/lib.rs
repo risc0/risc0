@@ -172,11 +172,16 @@ fn guest_packages(pkg: &Package) -> Vec<Package> {
         .collect()
 }
 
+fn is_debug() -> bool {
+    get_env_var("RISC0_BUILD_DEBUG") == "1"
+}
+
 /// Returns all methods associated with the given riscv guest package.
 fn guest_methods<P>(pkg: &Package, target_dir: P) -> Vec<Risc0Method>
 where
     P: AsRef<Path>,
 {
+    let profile = if is_debug() { "debug" } else { "release" };
     pkg.targets
         .iter()
         .filter(|target| target.kind.iter().any(|kind| kind == "bin"))
@@ -185,10 +190,23 @@ where
             elf_path: target_dir
                 .as_ref()
                 .join("riscv32im-risc0-zkvm-elf")
-                .join("release")
+                .join(profile)
                 .join(&target.name),
         })
         .collect()
+}
+
+fn get_env_var(name: &str) -> String {
+    println!("cargo:rerun-if-env-changed={name}");
+    env::var(name).unwrap_or_default()
+}
+
+fn sanitized_cmd(tool: &str) -> Command {
+    let mut cmd = Command::new(tool);
+    for (key, _) in env::vars().filter(|x| x.0.starts_with("CARGO") || x.0.starts_with("RUSTUP")) {
+        cmd.env_remove(key);
+    }
+    cmd
 }
 
 // Builds a package that targets the riscv guest into the specified target
@@ -197,9 +215,7 @@ fn build_guest_package<P>(pkg: &Package, target_dir: P, features: Vec<String>)
 where
     P: AsRef<Path>,
 {
-    let skip_var_name = "RISC0_SKIP_BUILD";
-    println!("cargo:rerun-if-env-changed={}", skip_var_name);
-    if env::var(skip_var_name).is_ok() {
+    if !get_env_var("RISC0_SKIP_BUILD").is_empty() {
         return;
     }
 
@@ -208,7 +224,6 @@ where
     let mut args = vec![
         "+risc0",
         "build",
-        "--release",
         "--target",
         "riscv32im-risc0-zkvm-elf",
         "--manifest-path",
@@ -216,19 +231,40 @@ where
         "--target-dir",
         target_dir.as_ref().to_str().unwrap(),
     ];
+
+    if !is_debug() {
+        args.push("--release");
+    }
+
     let features_str = features.join(",");
     if !features.is_empty() {
         args.push("--features");
         args.push(&features_str);
     }
-    println!("Building guest package: cargo {}", args.join(" "));
 
-    let mut cmd = Command::new("cargo");
-    for (key, _) in env::vars().filter(|x| x.0.starts_with("CARGO") || x.0.starts_with("RUSTUP")) {
-        cmd.env_remove(key);
+    let rustc = sanitized_cmd("rustup")
+        .args(["+risc0", "which", "rustc"])
+        .output()
+        .unwrap()
+        .stdout;
+    let rustc = String::from_utf8(rustc).unwrap();
+    let rustc = rustc.trim();
+
+    let mut cmd = sanitized_cmd("cargo");
+
+    let rust_src = get_env_var("RISC0_RUST_SRC");
+    if !rust_src.is_empty() {
+        args.push("-Z");
+        args.push("build-std=alloc,core,proc_macro,panic_abort,std");
+        args.push("-Z");
+        args.push("build-std-features=compiler-builtins-mem");
+        cmd.env("__CARGO_TESTS_ONLY_SRC_ROOT", rust_src);
     }
 
+    println!("Building guest package: cargo {}", args.join(" "));
+
     let mut child = cmd
+        .env("RUSTC", rustc)
         .env(
             "CARGO_ENCODED_RUSTFLAGS",
             [

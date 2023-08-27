@@ -9,3 +9,6 @@ configure-args = []
 [rust]
 lld = true
 llvm-tools = true
+
+[llvm]
+download-ci-llvm = false
