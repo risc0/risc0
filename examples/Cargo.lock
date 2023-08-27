@@ -82,16 +82,15 @@ dependencies = [
 
 [[package]]
 name = "anstream"
-version = "0.3.2"
+version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0ca84f3628370c59db74ee214b3263d58f9aadd9b4fe7e711fd87dc452b7f163"
+checksum = "b1f58811cfac344940f1a400b6e6231ce35171f614f26439e80f8c1465c5cc0c"
 dependencies = [
  "anstyle",
  "anstyle-parse",
  "anstyle-query",
  "anstyle-wincon",
  "colorchoice",
- "is-terminal",
  "utf8parse",
 ]
 
@@ -121,9 +120,9 @@ dependencies = [
 
 [[package]]
 name = "anstyle-wincon"
-version = "1.0.1"
+version = "2.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "180abfa45703aebe0093f79badacc01b8fd4ea2e35118747e5811127f926e188"
+checksum = "58f54d10c6dfa51283a066ceab3ec1ab78d13fae00aa49243a45e4571fb79dfd"
 dependencies = [
  "anstyle",
  "windows-sys 0.48.0",
@@ -525,7 +524,7 @@ version = "0.1.0"
 dependencies = [
  "chess-core",
  "chess-methods",
- "clap 4.3.19",
+ "clap 4.4.0",
  "risc0-zkvm",
  "serde",
  "shakmaty",
@@ -599,9 +598,9 @@ dependencies = [
 
 [[package]]
 name = "clap"
-version = "4.3.19"
+version = "4.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5fd304a20bff958a57f04c4e96a2e7594cc4490a0e809cbd48bb6437edaa452d"
+checksum = "1d5f1946157a96594eb2d2c10eb7ad9a2b27518cb3000209dec700c35df9197d"
 dependencies = [
  "clap_builder",
  "clap_derive",
@@ -610,9 +609,9 @@ dependencies = [
 
 [[package]]
 name = "clap_builder"
-version = "4.3.19"
+version = "4.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "01c6a3f08f1fe5662a35cfe393aec09c4df95f60ee93b7556505260f75eee9e1"
+checksum = "78116e32a042dd73c2901f0dc30790d20ff3447f3e3472fad359e8c3d282bcd6"
 dependencies = [
  "anstream",
  "anstyle",
@@ -622,9 +621,9 @@ dependencies = [
 
 [[package]]
 name = "clap_derive"
-version = "4.3.12"
+version = "4.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "54a9bb5758fc5dfe728d1019941681eccaf0cf8a4189b692a0ee2f2ecf90a050"
+checksum = "c9fd1a5729c4548118d7d70ff234a44868d00489a4b6597b0b020918a0e91a1a"
 dependencies = [
  "heck",
  "proc-macro2",
@@ -1033,7 +1032,7 @@ dependencies = [
 name = "ecdsa-example"
 version = "0.1.0"
 dependencies = [
- "clap 4.3.19",
+ "clap 4.4.0",
  "ecdsa-methods",
  "k256",
  "rand_core",
@@ -2794,7 +2793,7 @@ version = "0.1.0"
 dependencies = [
  "bincode",
  "ciborium",
- "clap 4.3.19",
+ "clap 4.4.0",
  "prorata-core",
  "prorata-methods",
  "risc0-zkvm",
@@ -3736,7 +3735,7 @@ dependencies = [
 name = "sha"
 version = "0.12.0"
 dependencies = [
- "clap 4.3.19",
+ "clap 4.4.0",
  "hex",
  "risc0-zkvm",
  "serde",
@@ -4446,7 +4445,7 @@ name = "waldo"
 version = "0.1.0"
 dependencies = [
  "bincode",
- "clap 4.3.19",
+ "clap 4.4.0",
  "env_logger",
  "image",
  "risc0-zkvm",
@@ -4947,7 +4946,7 @@ dependencies = [
 name = "zkevm-demo"
 version = "0.1.0"
 dependencies = [
- "clap 4.3.19",
+ "clap 4.4.0",
  "env_logger",
  "ethers-core",
  "ethers-providers",
