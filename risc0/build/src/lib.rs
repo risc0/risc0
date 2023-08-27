@@ -203,9 +203,10 @@ fn get_env_var(name: &str) -> String {
 
 fn sanitized_cmd(tool: &str) -> Command {
     let mut cmd = Command::new(tool);
-    for (key, _) in env::vars().filter(|x| x.0.starts_with("CARGO") || x.0.starts_with("RUSTUP")) {
+    for (key, _val) in env::vars().filter(|x| x.0.starts_with("CARGO")) {
         cmd.env_remove(key);
     }
+    cmd.env_remove("RUSTUP_TOOLCHAIN");
     cmd
 }
 
@@ -221,8 +222,17 @@ where
 
     fs::create_dir_all(target_dir.as_ref()).unwrap();
 
+    let rustc = sanitized_cmd("rustup")
+        .args(["+risc0", "which", "rustc"])
+        .output()
+        .expect("rustup failed")
+        .stdout;
+    let rustc = String::from_utf8(rustc).unwrap();
+    let rustc = rustc.trim();
+    println!("Using rustc: {rustc}");
+
+    let mut cmd = sanitized_cmd("cargo");
     let mut args = vec![
-        "+risc0",
         "build",
         "--target",
         "riscv32im-risc0-zkvm-elf",
@@ -241,16 +251,6 @@ where
         args.push("--features");
         args.push(&features_str);
     }
-
-    let rustc = sanitized_cmd("rustup")
-        .args(["+risc0", "which", "rustc"])
-        .output()
-        .unwrap()
-        .stdout;
-    let rustc = String::from_utf8(rustc).unwrap();
-    let rustc = rustc.trim();
-
-    let mut cmd = sanitized_cmd("cargo");
 
     let rust_src = get_env_var("RISC0_RUST_SRC");
     if !rust_src.is_empty() {
@@ -288,7 +288,7 @@ where
         .args(args)
         .stderr(Stdio::piped())
         .spawn()
-        .unwrap();
+        .expect("cargo build failed");
     let stderr = child.stderr.take().unwrap();
 
     // HACK: Attempt to bypass the parent cargo output capture and
