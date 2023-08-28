@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{cell::RefCell, collections::HashMap, rc::Rc};
+use std::{cell::RefCell, collections::BTreeMap, rc::Rc};
 
 use anyhow::Result;
 use bytes::Bytes;
@@ -36,7 +36,7 @@ pub trait SliceIo {
 
 #[derive(Clone, Default)]
 pub struct SliceIoTable<'a> {
-    pub(crate) inner: HashMap<String, Rc<RefCell<dyn SliceIo + 'a>>>,
+    pub(crate) inner: BTreeMap<String, Rc<RefCell<dyn SliceIo + 'a>>>,
 }
 
 type Callback<'a> = Rc<RefCell<dyn Fn(Bytes) -> Result<Bytes> + 'a>>;

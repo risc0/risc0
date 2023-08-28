@@ -24,11 +24,7 @@ fn main() {
     }
     #[cfg(any(feature = "client", feature = "prove"))]
     {
-        protobuf_codegen::Codegen::new()
-            .pure()
-            .include("src/host/protos")
-            .input("src/host/protos/ipc.proto")
-            .cargo_out_dir("protos")
-            .run_from_script();
+        std::env::set_var("PROTOC", protobuf_src::protoc());
+        prost_build::compile_protos(&["src/host/protos/api.proto"], &["src/host/protos"]).unwrap();
     }
 }

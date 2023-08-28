@@ -17,7 +17,7 @@
 use std::{
     cell::RefCell,
     collections::HashMap,
-    io::{BufRead, BufReader, Read, Write},
+    io::{BufRead, BufReader, Cursor, Read, Write},
     rc::Rc,
 };
 
@@ -82,7 +82,17 @@ impl<'a> ExecutorEnvBuilder<'a> {
     /// let env = ExecutorEnv::builder().build().unwrap();
     /// ```
     pub fn build(&mut self) -> Result<ExecutorEnv<'a>> {
-        Ok(self.inner.clone())
+        let inner = self.inner.clone();
+
+        if !inner.input.is_empty() {
+            let reader = Cursor::new(inner.input.clone());
+            inner
+                .posix_io
+                .borrow_mut()
+                .with_read_fd(fileno::STDIN, reader);
+        }
+
+        Ok(inner)
     }
 
     /// Set a segment limit, specified in powers of 2 cycles.
@@ -216,15 +226,15 @@ impl<'a> ExecutorEnvBuilder<'a> {
     }
 
     /// Add a handler for simple I/O handling.
-    pub fn io_callback(
+    pub fn io_callback<C: AsRef<str>>(
         &mut self,
-        channel: &str,
+        channel: C,
         callback: impl Fn(Bytes) -> Result<Bytes> + 'a,
     ) -> &mut Self {
         self.inner
             .slice_io
             .borrow_mut()
-            .with_handler(channel, slice_io_from_fn(callback));
+            .with_handler(channel.as_ref(), slice_io_from_fn(callback));
         self
     }
 

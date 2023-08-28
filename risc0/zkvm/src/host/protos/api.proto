@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+package protos.api;
+
 message Void {}
 
 message SessionInfo {
@@ -16,7 +18,7 @@ message SegmentInfo {
 }
 
 message ExitCode {
-  oneof value {
+  oneof kind {
     uint32 halted = 1;
     uint32 paused = 2;
     Void system_split = 3;
@@ -43,10 +45,11 @@ message AssetRequest {
 
 message ExecuteRequest {
   Binary binary = 1;
-  map<string, string> env_vars = 4;
-  map<string, Void> slice_ios = 5;
-  map<uint32, Void> read_fds = 6;
-  map<uint32, Void> write_fds = 7;
+  AssetRequest segments = 2;
+  map<string, string> env_vars = 3;
+  repeated string slice_ios = 4;
+  repeated uint32 read_fds = 5;
+  repeated uint32 write_fds = 6;
 }
 
 message ServerExecuteRequest {
@@ -74,9 +77,8 @@ message ProverOpts {}
 
 message ServerRequest {
   oneof kind {
-    uint32 hello = 1;
-    ServerExecuteRequest execute = 2;
-    ServerProveRequest prove = 3;
+    ServerExecuteRequest execute = 1;
+    ServerProveRequest prove = 2;
   }
 }
 
@@ -87,15 +89,16 @@ message HelloRequest {
 message HelloReply {
   oneof kind {
     uint32 version = 1;
-    string error = 2;
+    GenericError error = 2;
   }
 }
 
 message ClientRequest {
   oneof kind {
-    ClientIoRequest io = 1;
-    ClientSegmentDoneRequest segment_done = 2;
-    ClientSessionDoneRequest session_done = 3;
+    GenericError error = 1;
+    ClientIoRequest io = 2;
+    ClientSegmentDoneRequest segment_done = 3;
+    ClientSessionDoneRequest session_done = 4;
   }
 }
 
@@ -110,14 +113,14 @@ message ClientIoRequest {
 message ClientIoReply {
   oneof kind {
     bytes ok = 1;
-    string error = 2;
+    GenericError error = 2;
   }
 }
 
 message GenericReply {
   oneof kind {
     Void ok = 1;
-    string error = 2;
+    GenericError error = 2;
   }
 }
 
@@ -128,7 +131,7 @@ message PosixIo {
 
 message PosixCmd {
   oneof kind {
-    Void read = 1;
+    uint32 read = 1;
     bytes write = 2;
   }
 }
@@ -146,15 +149,23 @@ message ClientSessionDoneRequest {
   SessionInfo session = 1;
 }
 
+message GenericError {
+  string reason = 1;
+}
+
 message TraceEvent {}
 
 service Server {
   rpc hello(HelloRequest) returns (HelloReply);
-  rpc execute(ServerExecuteRequest) returns (GenericReply);
+  rpc execute(ServerExecuteRequest) returns (stream ClientRequest);
 }
 
 service Client {
   rpc io(ClientIoRequest) returns (ClientIoReply);
   rpc segment_done(ClientSegmentDoneRequest) returns (GenericReply);
   rpc session_done(ClientSessionDoneRequest) returns (GenericReply);
+}
+
+service Parent {
+  rpc channel(stream ClientRequest) returns (stream ServerRequest);
 }

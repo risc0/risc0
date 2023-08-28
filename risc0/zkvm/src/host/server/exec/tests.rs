@@ -130,7 +130,7 @@ fn host_syscall() {
     let actual: Mutex<Vec<Bytes>> = Vec::new().into();
     let env = ExecutorEnv::builder()
         .add_input(&input)
-        .io_callback(SYS_MULTI_TEST.as_str(), |buf| {
+        .io_callback(SYS_MULTI_TEST, |buf| {
             let mut actual = actual.lock().unwrap();
             actual.push(buf);
             Ok(expected[actual.len()].clone())
@@ -151,7 +151,7 @@ fn host_syscall_callback_panic() {
     let input = to_vec(&MultiTestSpec::Syscall { count: 5 }).unwrap();
     let env = ExecutorEnv::builder()
         .add_input(&input)
-        .io_callback(SYS_MULTI_TEST.as_str(), |_| {
+        .io_callback(SYS_MULTI_TEST, |_| {
             panic!("I am panicking from here!");
         })
         .build()

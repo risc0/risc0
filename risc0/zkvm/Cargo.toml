@@ -26,7 +26,6 @@ required-features = ["prove"]
 
 [build-dependencies]
 prost-build = { version = "0.11", optional = true }
-protobuf-codegen = { version = "3.2", optional = true }
 protobuf-src = { version = "1.1", optional = true }
 
 [dependencies]
@@ -66,7 +65,6 @@ crypto-bigint = { version = "0.5", default-features = false, features = [
 num-derive = "0.4"
 num-traits = { version = "0.2", default-features = false, optional = true }
 prost = { version = "0.11", optional = true }
-protobuf = { version = "3.2", optional = true }
 rand = { version = "0.8", optional = true }
 rayon = { version = "1.5", optional = true }
 rrs-lib = { version = "0.1", optional = true }
@@ -98,8 +96,9 @@ client = [
   "dep:bincode",
   "dep:bonsai-sdk",
   "dep:bytes",
-  "dep:protobuf",
-  "dep:protobuf-codegen",
+  "dep:prost",
+  "dep:prost-build",
+  "dep:protobuf-src",
   "std",
 ]
 cuda = ["prove", "risc0-circuit-rv32im/cuda", "risc0-zkp/cuda"]
@@ -124,8 +123,9 @@ prove = [
   "dep:generic-array",
   "dep:getrandom",
   "dep:lazy-regex",
-  "dep:protobuf",
-  "dep:protobuf-codegen",
+  "dep:prost",
+  "dep:prost-build",
+  "dep:protobuf-src",
   "dep:rand",
   "dep:rayon",
   "dep:rrs-lib",

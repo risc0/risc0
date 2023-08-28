@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#[cfg(any(feature = "client", feature = "prove"))]
+pub(crate) mod api;
 #[cfg(feature = "client")]
 pub(crate) mod client;
 pub(crate) mod control_id;
-#[cfg(any(feature = "client", feature = "prove"))]
-pub(crate) mod ipc;
 pub(crate) mod receipt;
 pub(crate) mod recursion;
 #[cfg(feature = "prove")]
@@ -24,7 +24,9 @@ pub(crate) mod server;
 
 #[cfg(any(feature = "client", feature = "prove"))]
 mod protos {
-    include!(concat!(env!("OUT_DIR"), "/protos/mod.rs"));
+    pub(crate) mod api {
+        include!(concat!(env!("OUT_DIR"), "/protos.api.rs"));
+    }
 }
 
 const CIRCUIT: risc0_circuit_rv32im::CircuitImpl = risc0_circuit_rv32im::CircuitImpl::new();

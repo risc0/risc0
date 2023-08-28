@@ -14,12 +14,11 @@
 
 //! Handlers for two-way private I/O between host and guest.
 
-use std::{cell::RefCell, cmp::min, collections::HashMap, io::Cursor, rc::Rc, str::from_utf8};
+use std::{cell::RefCell, cmp::min, collections::HashMap, rc::Rc, str::from_utf8};
 
 use anyhow::{anyhow, bail, Result};
 use bytes::Bytes;
 use risc0_zkvm_platform::{
-    fileno,
     syscall::{
         nr::{
             SYS_CYCLE_COUNT, SYS_GETENV, SYS_LOG, SYS_PANIC, SYS_RANDOM, SYS_READ, SYS_READ_AVAIL,
@@ -94,10 +93,6 @@ impl<'a> SyscallTable<'a> {
         };
 
         let posix_io = env.posix_io.clone();
-        if !env.input.is_empty() {
-            let reader = Cursor::new(env.input.clone());
-            posix_io.borrow_mut().with_read_fd(fileno::STDIN, reader);
-        }
         this.with_syscall(SYS_CYCLE_COUNT, SysCycleCount)
             .with_syscall(SYS_LOG, SysLog)
             .with_syscall(SYS_PANIC, SysPanic)
@@ -303,12 +298,13 @@ impl<'a> Syscall for Rc<RefCell<PosixIo<'a>>> {
 
 impl<'a> PosixIo<'a> {
     fn sys_read_avail(&mut self, ctx: &mut dyn SyscallContext) -> Result<(u32, u32)> {
+        log::debug!("sys_read_avail");
         let fd = ctx.load_register(REG_A3);
         let reader = self
             .read_fds
             .get_mut(&fd)
             .ok_or(anyhow!("Bad read file descriptor {fd}"))?;
-        let navail = reader.borrow_mut().fill_buf().unwrap().len() as u32;
+        let navail = reader.borrow_mut().fill_buf()?.len() as u32;
         log::debug!("navail: {navail}");
         Ok((navail, 0))
     }
@@ -338,21 +334,21 @@ impl<'a> PosixIo<'a> {
 
         // So that we don't have to deal with short reads, keep
         // reading until we get EOF or fill the buffer.
-        let read_all = |mut buf: &mut [u8]| -> usize {
+        let read_all = |mut buf: &mut [u8]| -> Result<usize> {
             let mut tot_nread = 0;
             while !buf.is_empty() {
-                let nread = reader.borrow_mut().read(buf).unwrap();
+                let nread = reader.borrow_mut().read(buf)?;
                 if nread == 0 {
                     break;
                 }
                 tot_nread += nread;
                 (_, buf) = buf.split_at_mut(nread);
             }
-            tot_nread
+            Ok(tot_nread)
         };
 
         let to_guest_u8 = bytemuck::cast_slice_mut(to_guest);
-        let nread_main = read_all(to_guest_u8);
+        let nread_main = read_all(to_guest_u8)?;
         assert_eq!(
             nread_main,
             to_guest_u8.len(),
@@ -371,7 +367,7 @@ impl<'a> PosixIo<'a> {
 
         // Fill unaligned word out.
         let mut to_guest_end: [u8; WORD_SIZE] = [0; WORD_SIZE];
-        let nread_end = read_all(&mut to_guest_end[0..unaligned_end]);
+        let nread_end = read_all(&mut to_guest_end[0..unaligned_end])?;
 
         Ok((
             (nread_main + nread_end) as u32,
@@ -391,10 +387,7 @@ impl<'a> PosixIo<'a> {
 
         log::debug!("Writing {buf_len} bytes to file descriptor {fd}");
 
-        writer
-            .borrow_mut()
-            .write_all(from_guest_bytes.as_slice())
-            .unwrap();
+        writer.borrow_mut().write_all(from_guest_bytes.as_slice())?;
         Ok((0, 0))
     }
 }
