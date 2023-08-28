@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use core::slice;
 use std::collections::BTreeMap;
 
 use anyhow::Result;
@@ -305,13 +306,41 @@ impl MemoryImage {
 }
 
 pub fn hash_page_bytes(page: &[u8]) -> Digest {
-    let mut state: [u32; DIGEST_WORDS] = SHA256_INIT.into();
+    let mut state = SHA256_INIT;
     assert!(page.len() % BLOCK_BYTES == 0);
     for block in page.chunks_exact(BLOCK_BYTES) {
-        let blocks: GenericArray<u8, U64> = GenericArray::clone_from_slice(block);
-        sha2::compress256(&mut state, [blocks; 1].as_slice());
+        let block1 = Digest::try_from(&block[0..DIGEST_BYTES]).unwrap();
+        let block2 = Digest::try_from(&block[DIGEST_BYTES..BLOCK_BYTES]).unwrap();
+        state = compress(&state, &block1, &block2);
     }
-    state.into()
+    state
+}
+
+fn set_word(buf: &mut [u8], idx: usize, word: u32) {
+    buf[(4 * idx)..(4 * idx + 4)].copy_from_slice(&word.to_ne_bytes());
+}
+
+// TODO: this code is copied from risc0/zkp/src/core/hash/sha/cpu.rs
+fn compress(orig_state: &Digest, block_half1: &Digest, block_half2: &Digest) -> Digest {
+    // Convert the state from big-endian to native byte order.
+    let mut state: [u32; DIGEST_WORDS] = *orig_state.as_ref();
+    for word in state.iter_mut() {
+        *word = word.to_be();
+    }
+
+    // Half-blocks may not be contiguous so they must be copied here.
+    let mut block: GenericArray<u8, U64> = GenericArray::default();
+    for i in 0..8 {
+        set_word(block.as_mut_slice(), i, block_half1.as_words()[i]);
+        set_word(block.as_mut_slice(), 8 + i, block_half2.as_words()[i]);
+    }
+    sha2::compress256(&mut state, slice::from_ref(&block));
+
+    // Convert the state from big-endian to native byte order.
+    for word in state.iter_mut() {
+        *word = word.to_be();
+    }
+    Digest::from(state)
 }
 
 #[cfg(test)]

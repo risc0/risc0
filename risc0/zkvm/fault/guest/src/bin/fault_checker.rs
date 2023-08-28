@@ -17,7 +17,7 @@ use rrs_lib::{instruction_executor::InstructionExecutor, HartState};
 
 pub fn main() {
     let mut mini_monitor: MiniMonitor = env::read();
-    let post_id = mini_monitor.compute_root_hash().unwrap();
+    let post_id = mini_monitor.compute_id().unwrap();
     let registers = mini_monitor.get_registers().unwrap();
     let pc = mini_monitor.get_pc_value().unwrap();
 
@@ -33,8 +33,4 @@ pub fn main() {
         "fault checker expected instruction at 0x{pc:08x} to fail. Actual execution was successful",
     );
     env::commit(&post_id);
-    //        [pc.to_be_bytes().as_slice(), post_id.as_bytes()]
-    //            .concat()
-    //            .as_slice(),
-    //    );
 }

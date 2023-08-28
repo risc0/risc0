@@ -961,7 +961,7 @@ dependencies = [
  "log",
  "risc0-zkvm",
  "serde",
- "sha2",
+ "sha2 0.10.7",
  "test-log",
 ]
 
@@ -2071,7 +2071,7 @@ dependencies = [
  "elliptic-curve",
  "once_cell",
  "serdect",
- "sha2",
+ "sha2 0.10.7",
  "signature",
 ]
 
@@ -2812,7 +2812,7 @@ dependencies = [
  "rust_decimal",
  "rust_decimal_macros",
  "serde",
- "sha2",
+ "sha2 0.10.7",
 ]
 
 [[package]]
@@ -3076,7 +3076,7 @@ dependencies = [
  "once_cell",
  "revm-primitives",
  "ripemd",
- "sha2",
+ "sha2 0.10.7",
  "sha3",
  "substrate-bn",
 ]
@@ -3156,6 +3156,7 @@ dependencies = [
  "risc0-zkp",
  "risc0-zkvm-platform",
  "serde",
+ "sha2 0.10.6",
 ]
 
 [[package]]
@@ -3178,7 +3179,7 @@ dependencies = [
  "directories",
  "glob",
  "hex",
- "sha2",
+ "sha2 0.10.7",
  "tempfile",
 ]
 
@@ -3251,7 +3252,7 @@ dependencies = [
  "risc0-sys",
  "risc0-zkvm-platform",
  "serde",
- "sha2",
+ "sha2 0.10.7",
  "tracing",
 ]
 
@@ -3284,7 +3285,7 @@ dependencies = [
  "risc0-zkvm-platform",
  "rrs-lib",
  "serde",
- "sha2",
+ "sha2 0.10.7",
  "tempfile",
  "thiserror",
  "tracing",
@@ -3701,6 +3702,16 @@ name = "sha1"
 version = "0.10.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f04293dc80c3993519f2d7f6f511707ee7094fe0c6d3406feb330cdb3540eba3"
+dependencies = [
+ "cfg-if",
+ "cpufeatures",
+ "digest",
+]
+
+[[package]]
+name = "sha2"
+version = "0.10.6"
+source = "git+https://github.com/risc0/RustCrypto-hashes?tag=sha2/v0.10.6-risc0#e75cafd9f55da196061f6fadf8bc8a86778192b7"
 dependencies = [
  "cfg-if",
  "cpufeatures",
@@ -4416,7 +4427,7 @@ dependencies = [
  "rand",
  "risc0-zkvm",
  "serde",
- "sha2",
+ "sha2 0.10.7",
 ]
 
 [[package]]
