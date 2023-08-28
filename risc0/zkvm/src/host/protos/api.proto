@@ -2,7 +2,111 @@ syntax = "proto3";
 
 package protos.api;
 
-message Void {}
+message ServerRequest {
+  oneof kind {
+    ExecuteRequest execute = 1;
+    ProveRequest prove = 2;
+    ProveSegmentRequest prove_segment = 3;
+    LiftRequest lift = 4;
+    JoinRequest join = 5;
+  }
+}
+
+message HelloRequest {
+  uint32 version = 1;
+}
+
+message HelloReply {
+  oneof kind {
+    HelloResult ok = 1;
+    GenericError error = 2;
+  }
+}
+
+message HelloResult {
+  uint32 version = 2;
+}
+
+message ExecuteRequest {
+  ExecutorEnv env = 1;
+  AssetRequest segments_out = 2;
+}
+
+message ProveRequest {
+  ExecutorEnv env = 1;
+  ProverOpts opts = 2;
+  AssetRequest receipt_out = 3;
+}
+
+message ProveSegmentRequest {
+  ProverOpts opts = 1;
+  Asset segment = 2;
+  AssetRequest receipt_out = 3;
+}
+
+message ProveSegmentReply {
+  oneof kind {
+    ProveSegmentResult ok = 1;
+    GenericError error = 2;
+  }
+}
+
+message JoinRequest {
+  Asset left = 1;
+  Asset right = 2;
+  AssetRequest receipt_out = 3;
+}
+
+message JoinReply {
+  oneof kind {
+    JoinResult ok = 1;
+    GenericError error = 2;
+  }
+}
+
+message JoinResult {
+  Asset receipt = 1;
+}
+
+message LiftRequest {
+  Asset receipt = 1;
+  AssetRequest receipt_out = 2;
+}
+
+message LiftReply {
+  oneof kind {
+    LiftResult ok = 1;
+    GenericError error = 2;
+  }
+}
+
+message LiftResult {
+  Asset receipt = 1;
+}
+
+message ExecutorEnv {
+  Binary binary = 1;
+  map<string, string> env_vars = 2;
+  repeated string slice_ios = 3;
+  repeated uint32 read_fds = 4;
+  repeated uint32 write_fds = 5;
+}
+
+message Binary {
+  enum Kind {
+    UNSPECIFIED = 0;
+    IMAGE = 1;
+    ELF = 2;
+  }
+
+  Kind kind = 1;
+  Asset asset = 2;
+}
+
+message ProverOpts {
+  string hashfn = 1;
+  bool lift = 2;
+}
 
 message SessionInfo {
   uint32 segments = 1;
@@ -15,6 +119,10 @@ message SegmentInfo {
   uint32 po2 = 2;
   uint32 insn_cycles = 3;
   Asset segment = 4;
+}
+
+message ProveSegmentResult {
+  Asset receipt = 1;
 }
 
 message ExitCode {
@@ -43,66 +151,17 @@ message AssetRequest {
   Kind kind = 1;
 }
 
-message ExecuteRequest {
-  Binary binary = 1;
-  AssetRequest segments = 2;
-  map<string, string> env_vars = 3;
-  repeated string slice_ios = 4;
-  repeated uint32 read_fds = 5;
-  repeated uint32 write_fds = 6;
-}
-
-message ServerExecuteRequest {
-  ExecuteRequest execute = 1;
-}
-
-message ServerProveRequest {
-  ExecuteRequest execute = 1;
-  ProverOpts opts = 2;
-  AssetRequest receipt = 3;
-}
-
-message Binary {
-  enum BinaryType {
-    UNSPECIFIED = 0;
-    IMAGE = 1;
-    ELF = 2;
-  }
-
-  BinaryType kind = 1;
-  Asset asset = 2;
-}
-
-message ProverOpts {}
-
-message ServerRequest {
-  oneof kind {
-    ServerExecuteRequest execute = 1;
-    ServerProveRequest prove = 2;
-  }
-}
-
-message HelloRequest {
-  uint32 version = 1;
-}
-
-message HelloReply {
-  oneof kind {
-    uint32 version = 1;
-    GenericError error = 2;
-  }
-}
-
-message ClientRequest {
+message ClientCallback {
   oneof kind {
     GenericError error = 1;
-    ClientIoRequest io = 2;
-    ClientSegmentDoneRequest segment_done = 3;
-    ClientSessionDoneRequest session_done = 4;
+    OnIoRequest io = 2;
+    OnSegmentDone segment_done = 3;
+    OnSessionDone session_done = 4;
+    OnProveDone prove_done = 5;
   }
 }
 
-message ClientIoRequest {
+message OnIoRequest {
   oneof kind {
     PosixIo posix = 1;
     SliceIo slice = 2;
@@ -110,18 +169,9 @@ message ClientIoRequest {
   }
 }
 
-message ClientIoReply {
-  oneof kind {
-    bytes ok = 1;
-    GenericError error = 2;
-  }
-}
-
-message GenericReply {
-  oneof kind {
-    Void ok = 1;
-    GenericError error = 2;
-  }
+message SliceIo {
+  string name = 1;
+  bytes from_guest = 2;
 }
 
 message PosixIo {
@@ -136,36 +186,56 @@ message PosixCmd {
   }
 }
 
-message SliceIo {
-  string name = 1;
-  bytes from_guest = 2;
+message TraceEvent {}
+
+message OnIoReply {
+  oneof kind {
+    bytes ok = 1;
+    GenericError error = 2;
+  }
 }
 
-message ClientSegmentDoneRequest {
+message OnSegmentDone {
   SegmentInfo segment = 1;
 }
 
-message ClientSessionDoneRequest {
+message OnSessionDone {
   SessionInfo session = 1;
+}
+
+message OnProveDone {
+  Asset receipt = 1;
+}
+
+message GenericReply {
+  oneof kind {
+    Void ok = 1;
+    GenericError error = 2;
+  }
 }
 
 message GenericError {
   string reason = 1;
 }
 
-message TraceEvent {}
+message Void {}
 
 service Server {
   rpc hello(HelloRequest) returns (HelloReply);
-  rpc execute(ServerExecuteRequest) returns (stream ClientRequest);
+  rpc prove(ProveRequest) returns (stream ClientCallback);
+  rpc execute(ExecuteRequest) returns (stream ClientCallback);
+  rpc prove_segment(ProveSegmentRequest) returns (ProveSegmentReply);
+  rpc lift(LiftRequest) returns (LiftReply);
+  rpc join(JoinRequest) returns (JoinReply);
 }
 
-service Client {
-  rpc io(ClientIoRequest) returns (ClientIoReply);
-  rpc segment_done(ClientSegmentDoneRequest) returns (GenericReply);
-  rpc session_done(ClientSessionDoneRequest) returns (GenericReply);
+service ExecuteCallback {
+  rpc on_io(OnIoRequest) returns (OnIoReply);
+  rpc on_segment_done(OnSegmentDone) returns (GenericReply);
+  rpc on_session_done(OnSessionDone) returns (Void);
 }
 
-service Parent {
-  rpc channel(stream ClientRequest) returns (stream ServerRequest);
+service ProveCallback {
+  rpc on_io(OnIoRequest) returns (OnIoReply);
+  rpc on_prove(OnProveDone) returns (Void);
 }

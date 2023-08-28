@@ -17,31 +17,34 @@ pub(crate) mod server;
 #[cfg(test)]
 mod tests;
 
-use core::{sync::atomic::Ordering, time::Duration};
 use std::{
     io::{Read, Write},
     net::{TcpListener, TcpStream},
     path::{Path, PathBuf},
     process::{Child, Command},
     sync::Arc,
-    sync::{atomic::AtomicBool, mpsc::channel},
+    sync::{
+        atomic::{AtomicBool, Ordering},
+        mpsc::channel,
+    },
     thread,
+    time::Duration,
 };
 
 use anyhow::{anyhow, Result};
-use bytes::{Buf, BufMut};
+use bytes::{Buf, BufMut, Bytes};
 use prost::Message;
+use risc0_binfmt::MemoryImage;
+
+use crate::ProverOpts;
 
 mod pb {
     pub use crate::host::protos::api::*;
-    pub use crate::host::protos::api::{
-        asset::Kind as AssetKind, asset_request::Kind as AssetRequestKind, binary::BinaryType,
-        client_io_reply::Kind as ClientIoReplyKind, client_io_request::Kind as ClientIoRequestKind,
-        client_request::Kind as ClientRequestKind, exit_code::Kind as ExitCodeKind,
-        generic_reply::Kind as GenericReplyKind, hello_reply::Kind as HelloReplyKind,
-        posix_cmd::Kind as PosixCmdKind, server_request::Kind as ServerRequestKind,
-    };
 }
+
+const CONNECT_TIMEOUT: Duration = Duration::from_secs(10);
+
+trait RootMessage: Message {}
 
 pub trait Connection {
     fn stream(&self) -> &TcpStream;
@@ -54,6 +57,14 @@ pub struct ConnectionWrapper {
     buf: Vec<u8>,
 }
 
+impl RootMessage for pb::HelloRequest {}
+impl RootMessage for pb::HelloReply {}
+impl RootMessage for pb::ServerRequest {}
+impl RootMessage for pb::ClientCallback {}
+impl RootMessage for pb::GenericReply {}
+impl RootMessage for pb::OnIoReply {}
+impl RootMessage for pb::ProveSegmentReply {}
+
 impl ConnectionWrapper {
     fn new(inner: Box<dyn Connection>) -> Self {
         Self {
@@ -62,7 +73,7 @@ impl ConnectionWrapper {
         }
     }
 
-    fn send<T: Message>(&mut self, msg: T) -> Result<()> {
+    fn send<T: RootMessage>(&mut self, msg: T) -> Result<()> {
         let len = msg.encoded_len();
         self.buf.clear();
         self.buf.put_u32_le(len as u32);
@@ -70,7 +81,7 @@ impl ConnectionWrapper {
         Ok(self.inner.stream().write_all(&self.buf)?)
     }
 
-    fn recv<T: Default + Message>(&mut self) -> Result<T> {
+    fn recv<T: Default + RootMessage>(&mut self) -> Result<T> {
         let mut stream = self.inner.stream();
         self.buf.resize(4, 0);
         stream.read_exact(&mut self.buf)?;
@@ -129,12 +140,12 @@ impl Connector for ParentProcessConnector {
             }
         });
 
-        let stream = rx.recv_timeout(Duration::from_secs(3));
-        let stream = stream.map_err(|_| {
+        let stream = rx.recv_timeout(CONNECT_TIMEOUT);
+        let stream = stream.map_err(|err| {
             shutdown.store(true, Ordering::Relaxed);
             let _ = TcpStream::connect(addr);
             handle.join().unwrap();
-            anyhow!("Fail")
+            err
         })?;
 
         Ok(ConnectionWrapper::new(Box::new(
@@ -219,4 +230,108 @@ fn malformed_err() -> anyhow::Error {
 
 fn void() -> pb::Void {
     pb::Void {}
+}
+
+impl pb::Asset {
+    fn as_bytes(&self) -> Result<Bytes> {
+        let bytes = match self.kind.clone().ok_or(malformed_err())? {
+            pb::asset::Kind::Inline(bytes) => bytes,
+            pb::asset::Kind::Path(path) => std::fs::read(path)?,
+        };
+        Ok(bytes.into())
+    }
+}
+
+impl From<Result<(), anyhow::Error>> for pb::GenericReply {
+    fn from(result: Result<(), anyhow::Error>) -> Self {
+        Self {
+            kind: Some(match result {
+                Ok(_) => pb::generic_reply::Kind::Ok(void()),
+                Err(err) => pb::generic_reply::Kind::Error(err.into()),
+            }),
+        }
+    }
+}
+
+impl From<anyhow::Error> for pb::GenericError {
+    fn from(err: anyhow::Error) -> Self {
+        Self {
+            reason: err.to_string(),
+        }
+    }
+}
+
+impl From<pb::GenericError> for anyhow::Error {
+    fn from(err: pb::GenericError) -> Self {
+        anyhow::Error::msg(err.reason)
+    }
+}
+
+impl From<pb::ProverOpts> for ProverOpts {
+    fn from(opts: pb::ProverOpts) -> Self {
+        Self {
+            hashfn: opts.hashfn,
+            lift: opts.lift,
+        }
+    }
+}
+
+impl From<ProverOpts> for pb::ProverOpts {
+    fn from(opts: ProverOpts) -> Self {
+        Self {
+            hashfn: opts.hashfn,
+            lift: opts.lift,
+        }
+    }
+}
+
+impl TryFrom<Binary> for pb::Binary {
+    type Error = anyhow::Error;
+
+    fn try_from(binary: Binary) -> Result<Self> {
+        Ok(Self {
+            kind: match binary.kind {
+                BinaryKind::Elf => pb::binary::Kind::Elf,
+                BinaryKind::Image => pb::binary::Kind::Image,
+            } as i32,
+            asset: Some(pb::Asset {
+                kind: Some(match binary.asset {
+                    Asset::Inline(bytes) => pb::asset::Kind::Inline(bytes.into()),
+                    Asset::Path(path) => {
+                        let path_str = path.to_str().ok_or(anyhow!("path is not UTF-8"))?;
+                        pb::asset::Kind::Path(path_str.to_string())
+                    }
+                }),
+            }),
+        })
+    }
+}
+
+pub struct Binary {
+    kind: BinaryKind,
+    asset: Asset,
+}
+
+#[allow(unused)]
+pub enum BinaryKind {
+    Elf,
+    Image,
+}
+
+#[allow(unused)]
+pub enum Asset {
+    Inline(Bytes),
+    Path(PathBuf),
+}
+
+impl TryFrom<MemoryImage> for Binary {
+    type Error = anyhow::Error;
+
+    fn try_from(image: MemoryImage) -> Result<Self> {
+        let bytes = bincode::serialize(&image)?;
+        Ok(Self {
+            kind: BinaryKind::Image,
+            asset: Asset::Inline(bytes.into()),
+        })
+    }
 }

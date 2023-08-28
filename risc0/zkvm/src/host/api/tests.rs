@@ -12,9 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use std::{net::TcpListener, thread};
+
 use anyhow::Result;
 use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_PATH};
-use std::{net::TcpListener, thread};
+use test_log::test;
 
 use super::{pb, ConnectionWrapper, Connector, TcpConnection};
 use crate::{serde::to_vec, ApiClient, ApiServer, ExecutorEnv};
@@ -38,7 +40,7 @@ impl Connector for TestClientConnector {
     }
 }
 
-#[test_log::test]
+#[test]
 fn basic() {
     let client_connector = TestClientConnector::new().unwrap();
     let addr = client_connector.listener.local_addr().unwrap();
@@ -49,22 +51,17 @@ fn basic() {
             let input = to_vec(&MultiTestSpec::DoNothing).unwrap();
             let env = ExecutorEnv::builder().add_input(&input).build().unwrap();
             let binary = pb::Binary {
-                kind: pb::BinaryType::Elf as i32,
+                kind: pb::binary::Kind::Elf as i32,
                 asset: Some(pb::Asset {
-                    kind: Some(pb::AssetKind::Path(MULTI_TEST_PATH.into())),
+                    kind: Some(pb::asset::Kind::Path(MULTI_TEST_PATH.into())),
                 }),
             };
             let segments = pb::AssetRequest {
-                kind: pb::AssetRequestKind::Path as i32,
+                kind: pb::asset_request::Kind::Path as i32,
             };
 
             let client = ApiClient::new(Box::new(client_connector));
-            client
-                .execute(&env, binary, segments, |segment| {
-                    println!("segment: {}", segment.index);
-                    Ok(())
-                })
-                .unwrap();
+            client.execute(&env, binary, segments, |_| Ok(())).unwrap();
         })
         .unwrap();
     let server_handle = thread::Builder::new()

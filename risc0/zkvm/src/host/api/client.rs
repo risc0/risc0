@@ -17,7 +17,7 @@ use std::path::Path;
 use anyhow::{anyhow, bail, Result};
 use bytes::Bytes;
 
-use super::{malformed_err, pb, void, ConnectionWrapper, Connector, ParentProcessConnector};
+use super::{malformed_err, pb, Binary, ConnectionWrapper, Connector, ParentProcessConnector};
 use crate::{host::recursion::SuccinctReceipt, ExecutorEnv, ProverOpts, Receipt, SegmentReceipt};
 
 /// TODO
@@ -51,24 +51,20 @@ impl Client {
 
         let reply: pb::HelloReply = conn.recv()?;
         log::debug!("rx: {reply:?}");
-        if let pb::HelloReplyKind::Error(err) = reply.kind.ok_or(malformed_err())? {
+        if let pb::hello_reply::Kind::Error(err) = reply.kind.ok_or(malformed_err())? {
             let code = conn.close()?;
             log::debug!("Child finished with: {code}");
             bail!(err);
         }
 
+        // TODO: check version
+
         Ok(conn)
     }
 
-    fn make_execute_request(
-        &self,
-        env: &ExecutorEnv<'_>,
-        binary: pb::Binary,
-        segments: pb::AssetRequest,
-    ) -> pb::ExecuteRequest {
-        pb::ExecuteRequest {
+    fn make_execute_env(&self, env: &ExecutorEnv<'_>, binary: pb::Binary) -> pb::ExecutorEnv {
+        pb::ExecutorEnv {
             binary: Some(binary),
-            segments: Some(segments),
             env_vars: env.env_vars.clone(),
             slice_ios: env.slice_io.borrow().inner.keys().cloned().collect(),
             read_fds: env.posix_io.borrow().read_fds.keys().cloned().collect(),
@@ -80,44 +76,33 @@ impl Client {
     // r0vm prove --ipc --image $IMAGE --hashfn $HFN --output $RECEIPT
     pub fn prove(
         &self,
-        _env: &ExecutorEnv<'_>,
-        _opts: ProverOpts,
-        _image: pb::Asset,
+        env: &ExecutorEnv<'_>,
+        opts: ProverOpts,
+        binary: Binary,
     ) -> Result<Receipt> {
-        // let mut conn = self.connect()?;
+        let mut conn = self.connect()?;
 
-        // let mut request = protos::ServerProveRequest::new();
-        // let execute = self.make_execute_request(env, image);
-        // request.execute = Some(execute).into();
+        let request = pb::ServerRequest {
+            kind: Some(pb::server_request::Kind::Prove(pb::ProveRequest {
+                env: Some(self.make_execute_env(env, binary.try_into()?)),
+                opts: Some(opts.into()),
+                receipt_out: Some(pb::AssetRequest {
+                    kind: pb::asset_request::Kind::Inline as i32,
+                }),
+            })),
+        };
+        conn.send(request)?;
 
-        // conn.send(request)?;
+        let asset = self.prove_handler(&mut conn, env)?;
 
-        // let request = IpcServerRequest::Prove(IpcServerProveRequest {
-        //     bin_type: BinaryType::Image,
-        //     binary: image,
-        //     opts,
-        //     receipt: AssetRequest::Inline,
-        //     env_vars: env.env_vars.clone(),
-        //     slice_ios,
-        // });
-        // bincode::serialize_into(&mut writer, &request)?;
+        let code = conn.close()?;
+        if code != 0 {
+            bail!("Child finished with: {code}");
+        }
 
-        // let receipt = loop {
-        //     let request = bincode::deserialize_from(&mut reader)?;
-        //     let either = self.prove_dispatch(&env, request)?;
-        //     match either {
-        //         Either::Response(response) => bincode::serialize_into(&mut writer,
-        // &response)?,         Either::Done(receipt) => break receipt,
-        //     }
-        // };
-
-        // let code = conn.wait()?;
-        // if code != 0 {
-        //     bail!("Child finished with: {code}");
-        // }
-
-        // Ok(receipt)
-        todo!()
+        let receipt_bytes = asset.as_bytes()?;
+        let receipt = bincode::deserialize(&receipt_bytes)?;
+        Ok(receipt)
     }
 
     /// TODO
@@ -126,7 +111,7 @@ impl Client {
         &self,
         env: &ExecutorEnv<'_>,
         binary: pb::Binary,
-        segments: pb::AssetRequest,
+        segments_out: pb::AssetRequest,
         callback: F,
     ) -> Result<pb::SessionInfo>
     where
@@ -135,40 +120,15 @@ impl Client {
         let mut conn = self.connect()?;
 
         let request = pb::ServerRequest {
-            kind: Some(pb::ServerRequestKind::Execute(pb::ServerExecuteRequest {
-                execute: Some(self.make_execute_request(env, binary, segments)),
+            kind: Some(pb::server_request::Kind::Execute(pb::ExecuteRequest {
+                env: Some(self.make_execute_env(env, binary)),
+                segments_out: Some(segments_out),
             })),
         };
         log::debug!("tx: {request:?}");
         conn.send(request)?;
 
-        let mut callback = callback;
-        let result = loop {
-            let request: pb::ClientRequest = conn.recv()?;
-            log::debug!("rx: {request:?}");
-            match request.kind.ok_or(malformed_err())? {
-                pb::ClientRequestKind::Io(io) => {
-                    let msg: pb::ClientIoReply = self.on_io(env, io).into();
-                    log::debug!("tx: {msg:?}");
-                    conn.send(msg)?;
-                }
-                pb::ClientRequestKind::SegmentDone(segment) => {
-                    let reply: pb::GenericReply = segment
-                        .segment
-                        .map_or_else(|| Err(malformed_err()), |segment| callback(segment))
-                        .into();
-                    log::debug!("tx: {reply:?}");
-                    conn.send(reply)?;
-                }
-                pb::ClientRequestKind::SessionDone(session) => {
-                    break match session.session {
-                        Some(session) => Ok(session),
-                        None => Err(malformed_err()),
-                    }
-                }
-                pb::ClientRequestKind::Error(err) => break Err(err.into()),
-            };
-        };
+        let result = self.execute_handler(callback, &mut conn, env);
 
         let code = conn.close()?;
         if code != 0 {
@@ -180,34 +140,48 @@ impl Client {
 
     /// TODO
     // r0vm prove --segment $SEGMENT --lift --hashfn $HFN --output $RECEIPT
-    pub fn prove_segment(&self, _opts: ProverOpts, _segment: pb::Asset) -> Result<SegmentReceipt> {
-        // let (mut child, channel) = self.connect()?;
+    pub fn prove_segment(
+        &self,
+        opts: ProverOpts,
+        segment: pb::Asset,
+        receipt_out: pb::AssetRequest,
+    ) -> Result<SegmentReceipt> {
+        let mut conn = self.connect()?;
 
-        // let request = IpcServerRequest::ProveSegment(IpcServerProveSegmentRequest {
-        //     segment,
-        //     opts,
-        //     receipt: AssetRequest::Inline,
-        // });
-        // bincode::serialize_into(writer, &request)?;
+        let request = pb::ServerRequest {
+            kind: Some(pb::server_request::Kind::ProveSegment(
+                pb::ProveSegmentRequest {
+                    opts: Some(opts.into()),
+                    segment: Some(segment),
+                    receipt_out: Some(receipt_out),
+                },
+            )),
+        };
+        log::debug!("tx: {request:?}");
+        conn.send(request)?;
 
-        // let response: IpcProveSegmentResponse = bincode::deserialize_from(reader)?;
-        // let result = match response {
-        //     IpcProveSegmentResponse::Ok { receipt } => Ok(receipt),
-        //     IpcProveSegmentResponse::Error { reason } => Err(anyhow!(reason)),
-        // };
+        let reply: pb::ProveSegmentReply = conn.recv()?;
 
-        // let status = child.wait()?;
-        // if !status.success() {
-        //     bail!("Child finished with: {:?}", status.code())
-        // }
+        let result = match reply.kind.ok_or(malformed_err())? {
+            pb::prove_segment_reply::Kind::Ok(result) => {
+                let receipt_bytes = result.receipt.ok_or(malformed_err())?.as_bytes()?;
+                let receipt = bincode::deserialize(&receipt_bytes)?;
+                Ok(receipt)
+            }
+            pb::prove_segment_reply::Kind::Error(err) => Err(err.into()),
+        };
 
-        // result
-        todo!()
+        let code = conn.close()?;
+        if code != 0 {
+            bail!("Child finished with: {code}");
+        }
+
+        result
     }
 
     /// TODO
     // r0vm lift --receipt $INPUT --output $OUTPUT
-    pub fn lift(&self, _opts: &ProverOpts, _receipt: &SegmentReceipt) -> Result<SuccinctReceipt> {
+    pub fn lift(&self, _opts: ProverOpts, _receipt: &SegmentReceipt) -> Result<SuccinctReceipt> {
         todo!()
     }
 
@@ -215,32 +189,100 @@ impl Client {
     // r0vm join --left $LHS --right $RHS --output $RECEIPT
     pub fn join(
         &self,
-        _opts: &ProverOpts,
+        _opts: ProverOpts,
         _lhs: &SuccinctReceipt,
         _rhs: &SuccinctReceipt,
     ) -> Result<SuccinctReceipt> {
         todo!()
     }
 
-    fn on_io(&self, env: &ExecutorEnv<'_>, request: pb::ClientIoRequest) -> Result<Bytes> {
+    fn execute_handler<F>(
+        &self,
+        callback: F,
+        conn: &mut ConnectionWrapper,
+        env: &ExecutorEnv<'_>,
+    ) -> Result<pb::SessionInfo>
+    where
+        F: FnMut(pb::SegmentInfo) -> Result<()>,
+    {
+        let mut callback = callback;
+        loop {
+            let request: pb::ClientCallback = conn.recv()?;
+            log::debug!("rx: {request:?}");
+            match request.kind.ok_or(malformed_err())? {
+                pb::client_callback::Kind::Io(io) => {
+                    let msg: pb::OnIoReply = self.on_io(env, io).into();
+                    log::debug!("tx: {msg:?}");
+                    conn.send(msg)?;
+                }
+                pb::client_callback::Kind::SegmentDone(segment) => {
+                    let reply: pb::GenericReply = segment
+                        .segment
+                        .map_or_else(|| Err(malformed_err()), |segment| callback(segment))
+                        .into();
+                    log::debug!("tx: {reply:?}");
+                    conn.send(reply)?;
+                }
+                pb::client_callback::Kind::SessionDone(session) => {
+                    return match session.session {
+                        Some(session) => Ok(session),
+                        None => Err(malformed_err()),
+                    }
+                }
+                pb::client_callback::Kind::ProveDone(_) => {
+                    return Err(anyhow!("Illegal client callback"))
+                }
+                pb::client_callback::Kind::Error(err) => return Err(err.into()),
+            };
+        }
+    }
+
+    fn prove_handler(
+        &self,
+        conn: &mut ConnectionWrapper,
+        env: &ExecutorEnv<'_>,
+    ) -> Result<pb::Asset> {
+        loop {
+            let request: pb::ClientCallback = conn.recv()?;
+            match request.kind.ok_or(malformed_err())? {
+                pb::client_callback::Kind::Io(io) => {
+                    let msg: pb::OnIoReply = self.on_io(env, io).into();
+                    log::debug!("tx: {msg:?}");
+                    conn.send(msg)?;
+                }
+                pb::client_callback::Kind::SegmentDone(_) => {
+                    return Err(anyhow!("Illegal client callback"))
+                }
+                pb::client_callback::Kind::SessionDone(_) => {
+                    return Err(anyhow!("Illegal client callback"))
+                }
+                pb::client_callback::Kind::ProveDone(done) => {
+                    return Ok(done.receipt.ok_or(malformed_err())?)
+                }
+                pb::client_callback::Kind::Error(err) => return Err(err.into()),
+            }
+        }
+    }
+
+    fn on_io(&self, env: &ExecutorEnv<'_>, request: pb::OnIoRequest) -> Result<Bytes> {
         match request.kind.ok_or(malformed_err())? {
-            pb::ClientIoRequestKind::Posix(posix) => {
+            pb::on_io_request::Kind::Posix(posix) => {
                 let cmd = posix.cmd.ok_or(malformed_err())?;
                 match cmd.kind.ok_or(malformed_err())? {
-                    pb::PosixCmdKind::Read(nread) => {
+                    pb::posix_cmd::Kind::Read(nread) => {
                         self.on_posix_read(env, posix.fd, nread as usize)
                     }
-                    pb::PosixCmdKind::Write(from_guest) => {
+                    pb::posix_cmd::Kind::Write(from_guest) => {
                         self.on_posix_write(env, posix.fd, from_guest.into())?;
                         Ok(Bytes::new())
                     }
                 }
             }
-            pb::ClientIoRequestKind::Slice(slice_io) => {
+            pb::on_io_request::Kind::Slice(slice_io) => {
                 self.on_slice(env, &slice_io.name, slice_io.from_guest.into())
             }
-            pb::ClientIoRequestKind::Trace(_event) => {
-                // self.on_trace(env, event)?;
+            pb::on_io_request::Kind::Trace(event) => {
+                self.on_trace(env, event)?;
                 Ok(Bytes::new())
             }
         }
@@ -281,46 +323,21 @@ impl Client {
         Ok(result)
     }
 
-    // fn on_trace(&self, env: &ExecutorEnv<'_>, event: TraceEvent) -> Result<()> {
-    //     if let Some(ref trace_callback) = env.trace {
-    //         trace_callback.borrow_mut()(event)?;
-    //     }
-    //     Ok(())
-    // }
+    fn on_trace(&self, _env: &ExecutorEnv<'_>, _event: pb::TraceEvent) -> Result<()> {
+        // if let Some(ref trace_callback) = env.trace {
+        //     trace_callback.borrow_mut()(event)?;
+        // }
+        Ok(())
+    }
 }
 
-impl From<Result<Bytes, anyhow::Error>> for pb::ClientIoReply {
+impl From<Result<Bytes, anyhow::Error>> for pb::OnIoReply {
     fn from(result: Result<Bytes, anyhow::Error>) -> Self {
-        pb::ClientIoReply {
+        Self {
             kind: Some(match result {
-                Ok(bytes) => pb::ClientIoReplyKind::Ok(bytes.into()),
-                Err(err) => pb::ClientIoReplyKind::Error(err.into()),
+                Ok(bytes) => pb::on_io_reply::Kind::Ok(bytes.into()),
+                Err(err) => pb::on_io_reply::Kind::Error(err.into()),
             }),
         }
-    }
-}
-
-impl From<Result<(), anyhow::Error>> for pb::GenericReply {
-    fn from(result: Result<(), anyhow::Error>) -> Self {
-        pb::GenericReply {
-            kind: Some(match result {
-                Ok(_) => pb::GenericReplyKind::Ok(void()),
-                Err(err) => pb::GenericReplyKind::Error(err.into()),
-            }),
-        }
-    }
-}
-
-impl From<anyhow::Error> for pb::GenericError {
-    fn from(err: anyhow::Error) -> Self {
-        pb::GenericError {
-            reason: err.to_string(),
-        }
-    }
-}
-
-impl From<pb::GenericError> for anyhow::Error {
-    fn from(err: pb::GenericError) -> Self {
-        anyhow::Error::msg(err.reason)
     }
 }

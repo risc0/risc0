@@ -67,7 +67,7 @@ pub trait Prover {
 }
 
 /// Options to configure a [Prover].
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct ProverOpts {
     /// The hash function to use.
     pub hashfn: String,
