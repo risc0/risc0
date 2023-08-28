@@ -229,10 +229,7 @@ impl SegmentReceipts {
         // post-image ID of the original guest code to prove that the fault checker
         // tried to execute the next instruction from the same state of the machine.
         if metadata.pre.digest() == FAULT_CHECKER_ID.into() {
-            // let post_id = &journal[WORD_SIZE..];
             let digest: Digest = from_slice(&journal.clone()).unwrap();
-            println!("journal: {:?}", digest.clone().as_bytes());
-            println!("pre post: {:?}", prev_image_id.as_bytes());
             if digest != prev_image_id {
                 return Err(VerificationError::FaultStateMismatch);
             }
