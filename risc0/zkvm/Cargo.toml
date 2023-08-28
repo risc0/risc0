@@ -35,10 +35,10 @@ cfg-if = "1.0"
 getrandom = { version = "0.2", features = ["custom"] }
 hex = { version = "0.4.3", default-features = false, features = ["alloc"] }
 libm = "0.2"
-risc0-binfmt = { workspace = true, optional = true }
+risc0-binfmt = { workspace = true }
 risc0-zkp = { workspace = true }
 risc0-zkvm-platform = { workspace = true }
-rrs-lib = { version = "0.1", optional = true }
+rrs-lib = "0.1"
 serde = { version = "1.0", default-features = false, features = [
   "alloc",
   "derive",
@@ -118,7 +118,6 @@ prove = [
   "dep:rand",
   "dep:rayon",
   "dep:sha2",
-  "dep:rrs-lib",
   "dep:thiserror",
   "dep:typetag",
   "risc0-circuit-rv32im/prove",
@@ -128,9 +127,7 @@ prove = [
 std = [
   "anyhow/std",
   "num-traits?/std",
-  "dep:risc0-binfmt",
   "risc0-circuit-rv32im/std",
   "risc0-zkp/std",
-  "dep:rrs-lib",
   "serde/std",
 ]
