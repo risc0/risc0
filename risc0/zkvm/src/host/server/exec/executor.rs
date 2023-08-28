@@ -350,7 +350,7 @@ impl<'a> Executor<'a> {
     }
 
     #[cfg(test)]
-    pub fn check_registers(&mut self) {
+    fn check_registers(&mut self) {
         assert_eq!(
             self.monitor.load_registers(),
             self.get_fault_checker_memory_map().get_registers().unwrap()
@@ -358,7 +358,7 @@ impl<'a> Executor<'a> {
     }
 
     #[cfg(test)]
-    pub fn check_pc(&mut self) {
+    fn check_pc(&mut self) {
         assert_eq!(
             self.monitor.load_u32(self.pc).unwrap(),
             self.get_fault_checker_memory_map().get_pc_value().unwrap()
@@ -366,7 +366,7 @@ impl<'a> Executor<'a> {
     }
 
     #[cfg(test)]
-    pub fn check_post_id(&mut self) {
+    fn check_post_id(&mut self) {
         assert_eq!(
             self.monitor.build_image(self.pc).compute_root_hash(),
             self.get_fault_checker_memory_map()
@@ -759,5 +759,28 @@ impl<'a> Executor<'a> {
             None,
             1 + chunks + 1,
         ))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::serde::to_vec;
+    use crate::{Executor, ExecutorEnv, ExitCode};
+    use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF};
+    #[test]
+    fn merklize_after_fault() {
+        let spec = to_vec(&MultiTestSpec::OutOfBounds).unwrap();
+        let addr = to_vec(&0x0000_0000).unwrap();
+        let env = ExecutorEnv::builder()
+            .add_input(&spec)
+            .add_input(&addr)
+            .build()
+            .unwrap();
+        let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
+        let session = exec.run_guest_only().unwrap();
+        assert_eq!(session.exit_code, ExitCode::Fault);
+        exec.check_registers();
+        exec.check_pc();
+        exec.check_post_id();
     }
 }
