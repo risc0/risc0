@@ -29,9 +29,7 @@ use db_dump::{
     versions::Row as VersionRow,
 };
 use indicatif::{ProgressBar, ProgressStyle};
-use risc0_crates_validator::{
-    profiles, CrateProfile, ProfileConfig, SELECTED_CRATES,
-};
+use risc0_crates_validator::{profiles, CrateProfile, ProfileConfig, SELECTED_CRATES};
 use tokio_stream::StreamExt;
 use tracing::{debug, info, warn};
 use tracing_subscriber::EnvFilter;
@@ -227,9 +225,7 @@ async fn main() -> Result<()> {
         info!("Adding selected crates to profile");
         let handpicked = crates
             .iter()
-            .filter(|c| {
-                SELECTED_CRATES.contains(&c.name.as_str())
-            })
+            .filter(|c| SELECTED_CRATES.contains(&c.name.as_str()))
             .map(|c| c.clone())
             .collect::<Vec<_>>();
         selected_crates.extend(handpicked);

@@ -36,7 +36,6 @@ pub const SELECTED_CRATES: &[&str] = &[
     "sha2",
     "sha3",
     "thiserror",
-
     // Hand picked crates
     "openssl",
 ];
