@@ -32,10 +32,12 @@ use test_log::test;
 
 use super::executor::Executor;
 use crate::{
-    host::server::testutils,
+    host::server::{
+        exec::syscall::{Syscall, SyscallContext},
+        testutils,
+    },
     serde::{from_slice, to_vec},
-    testutils, ExecutorEnv, ExecutorEnvBuilder, ExitCode, MemoryImage, Program, Session, Syscall,
-    SyscallContext, TraceEvent,
+    ExecutorEnv, ExitCode, MemoryImage, Program, Session, TraceEvent,
 };
 
 fn run_test(spec: MultiTestSpec) {
@@ -724,22 +726,18 @@ fn post_state_digest_randomization() {
     let post_state_digests: HashSet<Digest> = (0..ITERATIONS)
         .map(|_| {
             // Run the guest and extract the post state digest.
-            Executor::from_elf(
-                ExecutorEnvBuilder::default()
-                    .syscall(SYS_RANDOM, RiggedRandom)
-                    .build()
-                    .unwrap(),
-                HELLO_COMMIT_ELF,
-            )
-            .unwrap()
-            .run()
-            .unwrap()
-            .segments
-            .last()
-            .unwrap()
-            .resolve()
-            .unwrap()
-            .post_image_id
+            let mut exec = Executor::from_elf(ExecutorEnv::default(), HELLO_COMMIT_ELF).unwrap();
+            // Override the default randomness syscall using crate-internal API.
+            exec.syscall_table.with_syscall(SYS_RANDOM, RiggedRandom);
+
+            exec.run()
+                .unwrap()
+                .segments
+                .last()
+                .unwrap()
+                .resolve()
+                .unwrap()
+                .post_image_id
         })
         .collect();
     assert_eq!(post_state_digests.len(), 1);
