@@ -34,7 +34,8 @@ use super::executor::Executor;
 use crate::{
     host::server::testutils,
     serde::{from_slice, to_vec},
-    ExecutorEnv, ExecutorEnvBuilder, ExitCode, MemoryImage, Program, Session, TraceEvent,
+    testutils, ExecutorEnv, ExecutorEnvBuilder, ExitCode, MemoryImage, Program, Session, Syscall,
+    SyscallContext, TraceEvent,
 };
 
 fn run_test(spec: MultiTestSpec) {
@@ -703,6 +704,21 @@ fn post_state_digest_randomization() {
         .collect();
     assert_eq!(post_state_digests.len(), ITERATIONS);
 
+    // Replacement syscall for sys_random to disable the memory image randomization.
+    struct RiggedRandom;
+    impl Syscall for RiggedRandom {
+        fn syscall(
+            &mut self,
+            _syscall: &str,
+            _ctx: &mut dyn SyscallContext,
+            to_guest: &mut [u32],
+        ) -> Result<(u32, u32)> {
+            let rand_buf = vec![27u8; to_guest.len() * WORD_SIZE];
+            bytemuck::cast_slice_mut(to_guest).clone_from_slice(rand_buf.as_slice());
+            Ok((0, 0))
+        }
+    }
+
     // Run a number of iterations of a guest with rigged randomness and confirm all
     // have the same post state digest.
     let post_state_digests: HashSet<Digest> = (0..ITERATIONS)
@@ -710,16 +726,7 @@ fn post_state_digest_randomization() {
             // Run the guest and extract the post state digest.
             Executor::from_elf(
                 ExecutorEnvBuilder::default()
-                    .io_callback(SYS_RANDOM, |from_guest| {
-                        let bytes_req = u32::from_le_bytes(
-                            <[u8; WORD_SIZE]>::try_from(from_guest.to_vec())
-                                .map_err(|_| anyhow::anyhow!("SYS_RANDOM bad request"))?,
-                        );
-                        log::debug!("SYS_RANDOM: {}", bytes_req);
-                        let rand_buf = vec![0u8; bytes_req as usize];
-                        // getrandom::getrandom(rand_buf.as_mut_slice())?;
-                        Ok(Bytes::from(rand_buf))
-                    })
+                    .syscall(SYS_RANDOM, RiggedRandom)
                     .build()
                     .unwrap(),
                 HELLO_COMMIT_ELF,

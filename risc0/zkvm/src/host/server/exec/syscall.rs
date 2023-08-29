@@ -16,7 +16,7 @@
 
 use std::{cell::RefCell, cmp::min, collections::HashMap, io::Cursor, rc::Rc, str::from_utf8};
 
-use anyhow::{anyhow, bail, ensure, Result};
+use anyhow::{anyhow, bail, Result};
 use bytes::Bytes;
 use risc0_zkvm_platform::{
     fileno,
@@ -214,42 +214,12 @@ impl Syscall for SysRandom {
     }
 }
 
-// pub(crate) fn sys_random(from_guest: Bytes) -> Result<Bytes> {
-// let bytes_req = u32::from_le_bytes(
-// <[u8; WORD_SIZE]>::try_from(from_guest)
-// .context("SYS_RANDOM invalid request data from guest"),
-// );
-// log::debug!("SYS_RANDOM: {}", bytes_req.len());
-// let mut rand_buf = vec![0u8; bytes_req];
-// getrandom::getrandom(rand_buf.as_mut_slice())?;
-// Ok(Bytes::from(rand_buf))
-// }
-
 /// An implementation of a [Syscall] for a [SliceIo].
 ///
-/// When invoked by the guest, this [Syscall] implementation will pass the bytes
-/// from the guest to the [SliceIo] callback. In return, the `to_guest` buffer
-/// provided for response data will be filled with bytes from the callback
-/// response. Any bytes remaining of the callback response will be stored, and
-/// the syscall result will indicate how many bytes are left to be read.
-///
-/// Subsequent calls to this handler will continue to return the remaining
-/// callback response until all of it has been returned to guest. The guest must
-/// not pass new input to the host until all bytes have been read from the
-/// previous callback.
-///
-/// A common pattern in the guest is to use [SliceIo] syscalls with two steps:
-///
-/// 1. Invoke the `syscall` with the callback input and empty `to_guest` buffer
-///    to get the number of available bytes in the response.
-/// 2. Invoke the `syscall` with a `from_host` buffer of large enough to accept
-///    all bytes of the callback response.
-///
-/// This is the pattern implemented in `env::send_recv_slice`. It is also
-/// possible to receive the available data either in a single call, by providing
-/// a buffer to the host for receiving callback data on the first invocation,
-/// and it is possible to receive the callback response in multiple calls to
-/// support a smaller receive buffer.
+/// When activated as a SyscallHandler, the SyscallHandler expects two
+/// calls. The first call returns (nelem, _) indicating how many
+/// elements are to be sent back to the guest, and the second call
+/// actually returns the elements after the guest allocates space.
 impl<'a> Syscall for SliceIo<'a> {
     fn syscall(
         &mut self,
@@ -257,41 +227,32 @@ impl<'a> Syscall for SliceIo<'a> {
         ctx: &mut dyn SyscallContext,
         to_guest: &mut [u32],
     ) -> Result<(u32, u32)> {
+        let mut stored_buf = self.stored_buf.borrow_mut();
         let buf_ptr = ctx.load_register(REG_A3);
         let buf_len = ctx.load_register(REG_A4);
         let from_guest = ctx.load_region(buf_ptr, buf_len)?;
-        let to_guest_bytes: &mut [u8] = bytemuck::cast_slice_mut(to_guest);
-
-        let mut stored_buf = self.stored_buf.borrow_mut();
-        let mut buf = match stored_buf.take() {
+        Ok(match stored_buf.take() {
             None => {
-                // No stored response available. Issue a call to the callback.
+                // First call of pair. Send the data from the guest to the SliceIo
+                // and save what it returns.
+                assert_eq!(to_guest.len(), 0);
                 let mut callback = self.callback.borrow_mut();
-                callback(Bytes::from(from_guest))?
+                let buf = callback(Bytes::from(from_guest))?;
+                let len = buf.len() as u32;
+                *stored_buf = Some(buf);
+                (len, 0)
             }
             Some(buf) => {
-                // We already have data to send to the guest; fill the provided buffer.
-                // It is an error for the guest to provided additional input before reading
-                // stored response in full.
-                ensure!(
-                    from_guest.len() == 0,
-                    "unexpected input from guest to slice io syscall"
-                );
-                buf
+                // Second call of pair. We already have data to send
+                // to the guest; send it to the buffer that the guest
+                // allocated.
+                let to_guest_bytes: &mut [u8] = bytemuck::cast_slice_mut(to_guest);
+                assert!(buf.len() <= to_guest_bytes.len());
+                assert!(buf.len() + WORD_SIZE > to_guest_bytes.len());
+                to_guest_bytes[..buf.len()].clone_from_slice(&buf);
+                (0, 0)
             }
-        };
-
-        if buf.len() <= to_guest_bytes.len() {
-            // Guest provided large enough buffer. Return the full response.
-            to_guest_bytes[..buf.len()].clone_from_slice(&buf);
-            Ok((0, 0))
-        } else {
-            // Fill the provided buffer and store any bytes that would not fit.
-            to_guest_bytes.clone_from_slice(&buf.split_to(to_guest_bytes.len()));
-            let navail = buf.len() as u32;
-            *stored_buf = Some(buf);
-            Ok((navail, 0))
-        }
+        })
     }
 }
 
