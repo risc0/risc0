@@ -22,11 +22,12 @@ use std::{
     path::{Path, PathBuf},
 };
 
+use anyhow::Result;
 use risc0_binfmt::MemoryImage;
 use risc0_zkp::core::digest::Digest;
 use serde::{Deserialize, Serialize};
 
-use crate::{exec::SyscallRecord, receipt::ExitCode};
+use crate::host::{receipt::ExitCode, server::exec::executor::SyscallRecord};
 
 #[derive(Clone, Default, Serialize, Deserialize, Debug)]
 pub struct PageFaults {
@@ -67,7 +68,7 @@ pub struct Session {
 #[typetag::serde(tag = "type")]
 pub trait SegmentRef: Send {
     /// Resolve this reference into an actual [Segment].
-    fn resolve(&self) -> anyhow::Result<Segment>;
+    fn resolve(&self) -> Result<Segment>;
 }
 
 /// The execution trace of a portion of a program.
@@ -121,7 +122,7 @@ impl Session {
 
     /// A convenience method that resolves all [SegmentRef]s and returns the
     /// associated [Segment]s.
-    pub fn resolve(&self) -> anyhow::Result<Vec<Segment>> {
+    pub fn resolve(&self) -> Result<Vec<Segment>> {
         self.segments
             .iter()
             .map(|segment_ref| segment_ref.resolve())
@@ -176,7 +177,7 @@ pub struct SimpleSegmentRef {
 
 #[typetag::serde]
 impl SegmentRef for SimpleSegmentRef {
-    fn resolve(&self) -> anyhow::Result<Segment> {
+    fn resolve(&self) -> Result<Segment> {
         Ok(self.segment.clone())
     }
 }
@@ -202,7 +203,7 @@ pub struct FileSegmentRef {
 
 #[typetag::serde]
 impl SegmentRef for FileSegmentRef {
-    fn resolve(&self) -> anyhow::Result<Segment> {
+    fn resolve(&self) -> Result<Segment> {
         let mut contents = Vec::new();
         let mut file = File::open(&self.path)?;
         file.read_to_end(&mut contents)?;
@@ -215,7 +216,7 @@ impl FileSegmentRef {
     /// Construct a [FileSegmentRef]
     ///
     /// This builds a FileSegmentRef that stores `segment` in a file at `path`.
-    pub fn new(segment: &Segment, path: &Path) -> anyhow::Result<Self> {
+    pub fn new(segment: &Segment, path: &Path) -> Result<Self> {
         let path = path.join(format!("{}.bincode", segment.index));
         let mut file = File::create(&path)?;
         let contents = bincode::serialize(&segment)?;

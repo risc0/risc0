@@ -34,8 +34,10 @@ use risc0_zkvm_platform::{
 
 use super::plonk;
 use crate::{
-    opcode::{MajorType, OpCode},
-    session::PageFaults,
+    host::server::{
+        opcode::{MajorType, OpCode},
+        session::PageFaults,
+    },
     Segment,
 };
 

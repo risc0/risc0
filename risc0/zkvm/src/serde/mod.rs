@@ -48,7 +48,7 @@ pub use serializer::{to_vec, to_vec_with_capacity, Serializer, WordWrite};
 
 #[cfg(test)]
 mod tests {
-    use std::collections::HashMap;
+    use alloc::{collections::BTreeMap, string::String, vec, vec::Vec};
 
     use crate::serde::{from_slice, to_vec};
 
@@ -62,10 +62,10 @@ mod tests {
 
     #[test]
     fn test_map_round_trip() {
-        let input: HashMap<String, u32> =
-            HashMap::from([("foo".into(), 1), ("bar".into(), 2), ("baz".into(), 3)]);
+        let input: BTreeMap<String, u32> =
+            BTreeMap::from([("foo".into(), 1), ("bar".into(), 2), ("baz".into(), 3)]);
         let data = to_vec(&input).unwrap();
-        let output: HashMap<String, u32> = from_slice(data.as_slice()).unwrap();
+        let output: BTreeMap<String, u32> = from_slice(data.as_slice()).unwrap();
         assert_eq!(input, output);
     }
 

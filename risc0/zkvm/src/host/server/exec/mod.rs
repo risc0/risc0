@@ -12,14 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-fn main() {
-    #[cfg(feature = "profiler")]
-    {
-        std::env::set_var("PROTOC", protobuf_src::protoc());
-        prost_build::compile_protos(
-            &["src/host/server/exec/profile.proto"],
-            &["src/host/server/exec"],
-        )
-        .unwrap();
-    }
-}
+//! The execution phase is implemented by this module.
+//!
+//! The result of the execution phase is a [crate::Session]. Each
+//! [crate::Session] contains one or more [crate::Segment]s, each of which
+//! contains an execution trace of the specified program.
+
+pub(crate) mod executor;
+mod monitor;
+#[cfg(feature = "profiler")]
+pub(crate) mod profiler;
+pub(crate) mod syscall;
+#[cfg(test)]
+mod tests;

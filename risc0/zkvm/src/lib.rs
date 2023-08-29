@@ -18,52 +18,67 @@
 #![deny(missing_docs)]
 
 extern crate alloc;
-#[cfg(not(target_os = "zkvm"))]
-mod control_id;
-#[cfg(feature = "prove")]
-mod exec;
+
 pub mod guest;
-#[cfg(feature = "prove")]
-mod opcode;
-#[cfg(feature = "prove")]
-pub mod prove;
 #[cfg(not(target_os = "zkvm"))]
-pub mod receipt;
-#[cfg(not(target_os = "zkvm"))]
-pub mod recursion;
+mod host;
 pub mod serde;
-#[cfg(feature = "prove")]
-mod session;
 pub mod sha;
 
-#[cfg(test)]
-mod testutils;
-
 pub use anyhow::Result;
+#[cfg(not(target_os = "zkvm"))]
+#[cfg(any(feature = "client", feature = "prove"))]
+pub use bytes::Bytes;
 #[cfg(not(target_os = "zkvm"))]
 pub use risc0_binfmt::{MemoryImage, Program, SystemState};
 pub use risc0_zkvm_platform::{declare_syscall, memory::MEM_SIZE, PAGE_SIZE};
 
 #[cfg(not(target_os = "zkvm"))]
-pub use self::control_id::POSEIDON_CONTROL_ID;
-#[cfg(feature = "profiler")]
-pub use self::exec::profiler::Profiler;
-#[cfg(not(target_os = "zkvm"))]
-pub use self::receipt::{ExitCode, Receipt, ReceiptMetadata, SegmentReceipt, VerifierContext};
-#[cfg(feature = "prove")]
-pub use self::{
-    exec::io::{Syscall, SyscallContext},
-    exec::{Executor, ExecutorEnv, ExecutorEnvBuilder},
-    prove::{default_prover, loader::Loader},
-    session::{FileSegmentRef, Segment, SegmentRef, Session, SessionEvents, SimpleSegmentRef},
+#[cfg(feature = "client")]
+pub use self::host::client::{
+    env::{ExecutorEnv, ExecutorEnvBuilder},
+    exec::TraceEvent,
+    prove::{bonsai::BonsaiProver, default_prover, external::ExternalProver, Prover, ProverOpts},
 };
-
 #[cfg(not(target_os = "zkvm"))]
-const CIRCUIT: risc0_circuit_rv32im::CircuitImpl = risc0_circuit_rv32im::CircuitImpl::new();
+#[cfg(feature = "profiler")]
+pub use self::host::server::exec::profiler::Profiler;
+#[cfg(not(target_os = "zkvm"))]
+#[cfg(feature = "prove")]
+pub use self::host::{
+    client::prove::local::LocalProver,
+    server::{
+        exec::executor::Executor,
+        prove::{get_prover_impl, loader::Loader, DynProverImpl},
+        session::{FileSegmentRef, Segment, SegmentRef, Session, SessionEvents, SimpleSegmentRef},
+    },
+};
+#[cfg(not(target_os = "zkvm"))]
+pub use self::host::{
+    control_id::POSEIDON_CONTROL_ID,
+    receipt::{ExitCode, InnerReceipt, Receipt, ReceiptMetadata, SegmentReceipt, VerifierContext},
+};
 
 /// Align the given address `addr` upwards to alignment `align`.
 ///
 /// Requires that `align` is a power of two.
 pub const fn align_up(addr: usize, align: usize) -> usize {
     (addr + align - 1) & !(align - 1)
+}
+
+/// Returns `true` if dev mode is enabled.
+#[cfg(feature = "std")]
+pub fn is_dev_mode() -> bool {
+    let is_env_set = std::env::var("RISC0_DEV_MODE")
+        .ok()
+        .map(|x| x.to_lowercase())
+        .filter(|x| x == "1" || x == "true" || x == "yes")
+        .is_some();
+
+    if cfg!(feature = "disable-dev-mode") && is_env_set {
+        panic!("zkVM: Inconsistent settings -- please resolve. \
+            The RISC0_DEV_MODE environment variable is set but dev mode has been disabled by feature flag.");
+    }
+
+    cfg!(not(feature = "disable-dev-mode")) && is_env_set
 }
