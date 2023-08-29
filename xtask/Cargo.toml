@@ -11,6 +11,7 @@ regex = "1"
 risc0-core = { workspace = true }
 risc0-zkp = { workspace = true }
 risc0-zkvm = { workspace = true, features = ["default"] }
+risc0-zkvm-fault = { path = "../risc0/fault" }
 risc0-zkvm-methods = { path = "../risc0/zkvm/methods" }
 tempfile = "3.5"
 which = "4.4"
