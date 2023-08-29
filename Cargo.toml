@@ -59,15 +59,3 @@ lto = true
 
 [profile.release.build-override]
 opt-level = 3
-
-[patch."https://github.com/gakonst/ethers-rs"]
-ethers = { git = "https://github.com/gakonst/ethers-rs?", tag = "ethers-v2.0.8" }
-ethers-addressbook = { git = "https://github.com/gakonst/ethers-rs?", tag = "ethers-v2.0.8" }
-ethers-core = { git = "https://github.com/gakonst/ethers-rs?", tag = "ethers-v2.0.8" }
-ethers-contract = { git = "https://github.com/gakonst/ethers-rs?", tag = "ethers-v2.0.8" }
-ethers-contract-abigen = { git = "https://github.com/gakonst/ethers-rs?", tag = "ethers-v2.0.8" }
-ethers-providers = { git = "https://github.com/gakonst/ethers-rs?", tag = "ethers-v2.0.8" }
-ethers-signers = { git = "https://github.com/gakonst/ethers-rs?", tag = "ethers-v2.0.8" }
-ethers-middleware = { git = "https://github.com/gakonst/ethers-rs?", tag = "ethers-v2.0.8" }
-ethers-etherscan = { git = "https://github.com/gakonst/ethers-rs?", tag = "ethers-v2.0.8" }
-ethers-solc = { git = "https://github.com/gakonst/ethers-rs?", tag = "ethers-v2.0.8" }
