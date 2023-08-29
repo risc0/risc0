@@ -270,6 +270,11 @@ impl<'a> Executor<'a> {
                             log::debug!("Halted({inner}): {}", self.segment_cycle);
                             return Ok(exit_code);
                         }
+                        ExitCode::Fault => {
+                            log::debug!("Fault: {}", self.segment_cycle);
+                            self.split(post_image)?;
+                            return Ok(exit_code);
+                        }
                     };
                 };
             }
