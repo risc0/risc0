@@ -24,5 +24,5 @@ serde = { version = "1.0", default-features = false, features = ["alloc", "deriv
 sha2 = { git = "https://github.com/risc0/RustCrypto-hashes", tag = "sha2/v0.10.6-risc0", default-features = false, features = [ "compress" ] }
 
 [features]
-default = [ "std" ]
-std = ["anyhow/std", "elf/std", "risc0-zkp/std", "serde/std", "sha2/std" ]
+default = ["std"]
+std = ["anyhow/std", "elf/std", "risc0-zkp/std", "serde/std", "sha2/std"]
