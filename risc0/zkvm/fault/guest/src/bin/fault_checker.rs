@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use risc0_zkvm::{guest::env, MiniMonitor};
+use risc0_zkvm::{guest::env, FaultCheckMonitor};
 use rrs_lib::{instruction_executor::InstructionExecutor, HartState};
 
 pub fn main() {
-    let mut mini_monitor: MiniMonitor = env::read();
+    let mut mini_monitor: FaultCheckMonitor = env::read();
     let post_id = mini_monitor.compute_id().unwrap();
     let registers = mini_monitor.get_registers().unwrap();
     let pc = mini_monitor.get_pc_value().unwrap();

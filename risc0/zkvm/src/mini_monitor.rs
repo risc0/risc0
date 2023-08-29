@@ -35,7 +35,7 @@ pub type MerklePathElement = (Option<u32>, u32, Vec<u8>);
 /// checker. It records all memory regions needed for a signle RISC-V
 /// instruction execution.
 #[derive(Serialize, Deserialize, Debug)]
-pub struct MiniMonitor {
+pub struct FaultCheckMonitor {
     /// The program counter of the instruction to execute
     pub pc: u32,
     /// A mapping between all register values and program counter and a word of
@@ -45,7 +45,7 @@ pub struct MiniMonitor {
     pub page_size: u32,
 }
 
-impl MiniMonitor {
+impl FaultCheckMonitor {
     const LOWEST: u32 = TEXT_START;
     const HIGHEST: u32 = SYSTEM.start() as u32;
     /// Given an address, return true if the address is within the zkVM's
@@ -176,7 +176,7 @@ impl MiniMonitor {
 /// that it's aligned. The only thing the fault checker needs to do is to ensure
 /// that the read and write addresses are within range. The reads and writes do
 /// not need to fetch/write to the memory map.
-impl Memory for MiniMonitor {
+impl Memory for FaultCheckMonitor {
     fn read_mem(&mut self, addr: u32, _size: rrs_lib::MemAccessSize) -> Option<u32> {
         // Since we don't actually need to read. Return `Some(0)` on a successful read.
         self.address_is_within_range(addr).then_some(0)

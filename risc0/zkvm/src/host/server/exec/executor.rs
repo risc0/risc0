@@ -51,7 +51,7 @@ use crate::{
         receipt::ExitCode,
         server::opcode::{MajorType, OpCode},
     },
-    mini_monitor::{MerklePathElement, MiniMonitor},
+    mini_monitor::{FaultCheckMonitor, MerklePathElement},
     serde::to_vec,
     ExecutorEnv, Loader, Segment, SegmentRef, Session, SimpleSegmentRef, FAULT_CHECKER_ELF,
 };
@@ -379,7 +379,7 @@ impl<'a> Executor<'a> {
         );
     }
 
-    fn get_fault_checker_memory_map(&mut self) -> MiniMonitor {
+    fn get_fault_checker_memory_map(&mut self) -> FaultCheckMonitor {
         let pc = self.pc;
         let image = self.monitor.build_image(self.pc);
 
@@ -395,7 +395,7 @@ impl<'a> Executor<'a> {
         Self::make_merkle_path(pc, &image, &mut memory_map);
         Self::make_merkle_path(SYSTEM.start() as u32, &image, &mut memory_map);
 
-        MiniMonitor {
+        FaultCheckMonitor {
             pc,
             memory_map,
             page_size: image.info.page_size,
