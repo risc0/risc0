@@ -212,11 +212,11 @@ mod test {
     fn test_reproducible_methods_guest() {
         let tester = Tester::new("risc0/zkvm/methods/guest/Cargo.toml");
         tester.compare_image_id(
-            "risc0_zkvm_methods_guest/hello_commit",
+            "risc0_zkvm_methods_guest/multi_test",
             "851ad4ed2ade10e8f330737e36107f338f276e7036f992dd9da5010ff7fb6fea",
         );
         tester.compare_image_id(
-            "risc0_zkvm_methods_guest/multi_test",
+            "risc0_zkvm_methods_guest/hello_commit",
             "46c239f8f36b1e6dd239c0586b662fc1ea71cd593fe43a57903b974a69694b22",
         );
         tester.compare_image_id(
