@@ -37,7 +37,7 @@ use anyhow::Result;
 use gimli::{EndianRcSlice, RunTimeEndian};
 use prost::Message;
 
-use super::TraceEvent;
+use crate::TraceEvent;
 
 mod proto {
     // Generated proto interface.

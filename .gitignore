@@ -3,6 +3,7 @@
 *.swo
 .bazelrc.local
 .cache
+.devcontainer/
 .dockerignore
 .DS_Store
 .idea/
