@@ -40,9 +40,9 @@ pub fn lookup_crate(crate_name: &str, mut profile: CrateProfile) -> CrateProfile
             profile.std = true;
             profile.inject_cc_flags = true;
         }
-        "crossbeam-epoch" | "crossbeam-deque" | "rayon" | "rayon-core" | "crossbeam-queue"
-        | "concurrent-queue" | "vsdb" | "vsdbsled" | "redox_users" | "async-channel"
-        | "async-io" | "async-executor" | "blocking" => {
+        "async-channel" | "async-executor" | "async-io" | "blocking" | "concurrent-queue"
+        | "crossbeam-deque" | "crossbeam-epoch" | "crossbeam-queue" | "rayon" | "rayon-core"
+        | "redox_users" | "vsdb" | "vsdbsled" => {
             // NOTE: the crate 'crossbeam-utils'|'crossbeam-channel'|'crossbeam' itself
             // still fails to build because you can't crates-io patch itself
             profile.crossbeam_patch = true;
@@ -52,13 +52,13 @@ pub fn lookup_crate(crate_name: &str, mut profile: CrateProfile) -> CrateProfile
             profile.std = true;
         }
         // Just need 'std' block:
-        "rand" | "serde" | "serde_json" | "anyhow" | "hyper" | "tracing-log" | "ethers-core"
-        | "revm" | "env_logger" | "revm-primitives" | "clap" | "openssl" | "tracing-subscriber"
-        | "sha-1" | "serde_urlencoded" | "hex" | "h2" | "tracing-core" | "toml" | "tracing"
-        | "tracing-futures" | "sha1" | "serde_yaml" | "csv" | "multimap" | "tower"
-        | "serde_cbor" | "md-5" | "tinytemplate" | "cargo_metadata" | "serde_bytes"
-        | "tungstenite" | "tracing-serde" | "sha3" | "sha2" | "k256" | "crypto-bigint"
-        | "string_cache" | "serde_with" | "headers" | "hyper-timeout" => profile.std = true,
+        "anyhow" | "cargo_metadata" | "clap" | "crypto-bigint" | "csv" | "env_logger"
+        | "ethers-core" | "h2" | "headers" | "hex" | "hyper" | "hyper-timeout" | "k256"
+        | "md-5" | "multimap" | "openssl" | "rand" | "revm" | "revm-primitives" | "serde"
+        | "serde_bytes" | "serde_cbor" | "serde_json" | "serde_urlencoded" | "serde_with"
+        | "serde_yaml" | "sha-1" | "sha1" | "sha2" | "sha3" | "string_cache" | "tinytemplate"
+        | "toml" | "tower" | "tracing" | "tracing-core" | "tracing-futures" | "tracing-log"
+        | "tracing-serde" | "tracing-subscriber" | "tungstenite" => profile.std = true,
         _ => profile.customized = false,
     }
     profile
