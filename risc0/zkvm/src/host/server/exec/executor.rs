@@ -493,9 +493,14 @@ impl<'a> Executor<'a> {
                 mem: &mut self.monitor,
                 hart_state: &mut hart,
             };
-            if let Err(_) = inst_exec.step() {
+            if let Err(err) = inst_exec.step() {
                 self.split_insn = Some(self.insn_counter);
-                log::debug!("fault: [{}] pc: 0x{:08x}", self.segment_cycle, self.pc,);
+                log::debug!(
+                    "fault: [{}] pc: 0x{:08x} ({:?})",
+                    self.segment_cycle,
+                    self.pc,
+                    err
+                );
                 self.monitor.undo()?;
                 return Ok(Some(ExitCode::Fault));
             }
