@@ -10,9 +10,6 @@ out/*
 # Docs
 docs/
 
-# Dotenv file
-.env
-
 # Cargo
 target/
 
