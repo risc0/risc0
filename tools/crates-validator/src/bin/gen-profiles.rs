@@ -14,7 +14,7 @@
 
 use std::{
     cell::RefCell,
-    collections::{btree_map::Entry, BTreeMap, HashSet},
+    collections::{btree_map::Entry, BTreeMap, HashMap, HashSet},
     fs::File,
     io::Write,
     path::{Path, PathBuf},
@@ -22,10 +22,18 @@ use std::{
 
 use anyhow::{bail, Context, Result};
 use clap::Parser;
+use db_dump::{
+    categories::{CategoryId, Row as CategoryRow},
+    crates::{CrateId, Row as CrateRow},
+    crates_categories::Row as CratesCategoriesRow,
+    versions::Row as VersionRow,
+};
 use indicatif::{ProgressBar, ProgressStyle};
-use risc0_crates_validator::{profiles, CrateProfile, ProfileConfig, SELECTED_CRATES};
+use risc0_crates_validator::{
+    profiles, CrateProfile, ProfileConfig, SELECTED_CRATES,
+};
 use tokio_stream::StreamExt;
-use tracing::{debug, info};
+use tracing::{debug, info, warn};
 use tracing_subscriber::EnvFilter;
 
 #[derive(Parser)]
@@ -46,7 +54,7 @@ struct Args {
     risc0_path: Option<String>,
 
     /// Sets the risc0_gh_branch attribute
-    #[arg(long, conflicts_with = "risc0_path")]
+    #[arg(short = 'b', long, conflicts_with = "risc0_path")]
     risc0_gh_branch: Option<String>,
 
     /// Sets the output location of the json [ProfileConfig]
@@ -68,6 +76,27 @@ struct Args {
     /// This will disable all crate-specific profile modifications
     #[arg(long)]
     no_profiles: bool,
+
+    /// Add selected crates to the profile
+    #[arg(short, long, conflicts_with = "name")]
+    selected_crates: bool,
+
+    /// Add selected categories to the profile
+    #[arg(
+        short = 'C',
+        long,
+        conflicts_with = "name",
+        value_parser,
+        value_delimiter = ' '
+    )]
+    categories: Option<Vec<String>>,
+
+    /// Number of crates per category to add to the profile
+    ///
+    /// This will add the top N crates per category to the profile, sorted by
+    /// downloads.
+    #[arg(short = 'L', long, default_value = None, requires = "categories")]
+    category_count_limit: Option<usize>,
 }
 
 #[tracing::instrument]
@@ -140,6 +169,8 @@ async fn main() -> Result<()> {
     // Process the db-dump...
     let mut most_recent = BTreeMap::new();
     let mut crates = Vec::new();
+    let mut categories = HashMap::new();
+    let mut crates_categories = HashMap::new();
 
     debug!("Loading...");
     let crate_name = &args.name;
@@ -147,44 +178,75 @@ async fn main() -> Result<()> {
         info!("Selecting only {name}");
     }
 
-    db_dump::Loader::new()
-        .crates(|row| {
-            if let Some(crate_name) = &crate_name {
-                if row.name != *crate_name {
-                    return;
-                }
+    let handle_categories = |row: CategoryRow| {
+        categories.insert(row.id, row.slug.to_string());
+    };
+
+    let handle_crates = |row: CrateRow| {
+        if let Some(crate_name) = &crate_name {
+            if row.name != *crate_name {
+                return;
             }
-            crates.push(row);
-        })
-        .versions(|row| match most_recent.entry(row.crate_id) {
-            Entry::Vacant(entry) => {
+        }
+        crates.push(row);
+    };
+
+    let handle_versions = |row: VersionRow| match most_recent.entry(row.crate_id) {
+        Entry::Vacant(entry) => {
+            entry.insert(row);
+        }
+        Entry::Occupied(mut entry) => {
+            // find newest, non-pre-release version:
+            if row.created_at > entry.get().created_at && row.num.pre.is_empty() {
                 entry.insert(row);
             }
-            Entry::Occupied(mut entry) => {
-                // find newest, non-pre-release version:
-                if row.created_at > entry.get().created_at && row.num.pre.is_empty() {
-                    entry.insert(row);
-                }
-            }
-        })
+        }
+    };
+
+    let handle_crates_categories = |row: CratesCategoriesRow| {
+        crates_categories.insert(row.crate_id, row.category_id);
+    };
+
+    db_dump::Loader::new()
+        .crates_categories(handle_crates_categories)
+        .categories(handle_categories)
+        .crates(handle_crates)
+        .versions(handle_versions)
         .load(db_path)
         .context("Failed to load database")?;
 
     debug!("Sorting...");
     crates.sort_by(|r1, r2| r2.downloads.cmp(&r1.downloads));
 
-    let selected_crates = {
+    let mut selected_crates = crates
+        .iter()
+        .take(args.crate_count)
+        .map(|c| c.clone())
+        .collect::<Vec<_>>();
+    if args.selected_crates {
+        info!("Adding selected crates to profile");
         let handpicked = crates
             .iter()
-            .filter(|c| SELECTED_CRATES.contains(&c.name.as_str()));
-        crates
-            .iter()
-            .take(args.crate_count)
-            .chain(handpicked)
-            .collect::<HashSet<_>>()
+            .filter(|c| {
+                SELECTED_CRATES.contains(&c.name.as_str())
+            })
+            .map(|c| c.clone())
+            .collect::<Vec<_>>();
+        selected_crates.extend(handpicked);
+    };
+    if args.categories.is_some() {
+        info!("Adding selected categories to profile");
+        let mut crates_from_categories =
+            add_categories(&crates, &categories, &args.categories, &crates_categories);
+        crates_from_categories.sort_by(|r1, r2| r2.downloads.cmp(&r1.downloads));
+        if let Some(limit) = args.category_count_limit {
+            selected_crates.extend(crates_from_categories.into_iter().take(limit));
+        } else {
+            selected_crates.extend(crates_from_categories);
+        }
     };
 
-    for cur_crate in selected_crates {
+    for cur_crate in &selected_crates {
         let version = &most_recent[&cur_crate.id];
         debug!("Processing: {} - {}", cur_crate.name, version.num);
 
@@ -206,7 +268,107 @@ async fn main() -> Result<()> {
     let mut output = File::create(&args.output_path)?;
     output.write_all(serde_json::to_string(&config)?.as_bytes())?;
 
+    debug!(
+        "Total of {} crates included in the profile.",
+        selected_crates.len()
+    );
     info!("Wrote profile to: {}", args.output_path.to_string_lossy());
 
     Ok(())
+}
+
+fn filter_categories(
+    categories: &HashMap<CategoryId, String>,
+    desired_categories: &Option<Vec<String>>,
+) -> HashMap<CategoryId, String> {
+    let filter = match desired_categories {
+        None => return HashMap::new(),
+        Some(c) => c.iter().map(String::from).collect::<HashSet<String>>(),
+    };
+
+    let mut show_existent_categories = false;
+    let existent_categories = categories
+        .values()
+        .map(|v| v.clone())
+        .collect::<HashSet<_>>();
+    let included_categories = filter
+        .intersection(&existent_categories)
+        .collect::<HashSet<_>>();
+    filter.difference(&existent_categories).for_each(|c| {
+        show_existent_categories = true;
+        warn!("Category '{}' does not exist, ignoring...", c);
+    });
+    if show_existent_categories {
+        let mut c = existent_categories.iter().collect::<Vec<_>>();
+        c.sort();
+        warn!("Existent categories: {c:?}");
+    }
+    let mut filtered = HashMap::new();
+    categories.iter().for_each(|(k, v)| {
+        if included_categories.contains(v) {
+            filtered.insert(*k, v.clone());
+        }
+    });
+
+    filtered
+}
+
+fn add_categories(
+    crates: &Vec<CrateRow>,
+    categories: &HashMap<CategoryId, String>,
+    filter: &Option<Vec<String>>,
+    crates_categories: &HashMap<CrateId, CategoryId>,
+) -> Vec<CrateRow> {
+    let filtered_categories = filter_categories(categories, filter);
+    crates
+        .iter()
+        .filter(|c| match crates_categories.get(&c.id) {
+            Some(category_id) => filtered_categories.contains_key(category_id),
+            None => false,
+        })
+        .map(|c| c.clone())
+        .collect()
+}
+
+#[cfg(test)]
+mod tests {
+    use rstest::*;
+
+    use super::*;
+
+    type CategoryMap = HashMap<CategoryId, String>;
+
+    #[fixture]
+    fn categories(#[default(vec!["a", "b", "c"])] names: Vec<impl ToString>) -> CategoryMap {
+        let mut categories = HashMap::new();
+        names.into_iter().enumerate().for_each(|(i, name)| {
+            categories.insert(CategoryId(i as u32), name.to_string());
+        });
+        categories
+    }
+
+    #[rstest]
+    fn filter_categories_absent_filter(categories: CategoryMap) {
+        let filter = None;
+        let expected = HashMap::new();
+
+        assert_eq!(expected, filter_categories(&categories, &filter));
+    }
+
+    #[rstest]
+    fn filter_categories_empty_filter(categories: CategoryMap) {
+        let filter = vec![];
+        let expected = HashMap::new();
+
+        assert_eq!(expected, filter_categories(&categories, &Some(filter)));
+    }
+
+    #[rstest]
+    fn filter_categories_given_filter(categories: CategoryMap) {
+        let filter = vec!["a".to_string()];
+        let mut expected = HashMap::new();
+        expected.insert(CategoryId(0), "a".into());
+
+        assert_eq!(expected, filter_categories(&categories, &Some(filter)));
+    }
 }
