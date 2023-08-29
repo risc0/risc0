@@ -26,7 +26,7 @@ import {BonsaiRelayQueueWrapper} from "./BonsaiRelayQueueWrapper.sol";
 import {BonsaiTestRelay} from "./BonsaiTestRelay.sol";
 import {BonsaiCheats} from "./BonsaiCheats.sol";
 import {IRiscZeroVerifier} from "./IRiscZeroVerifier.sol";
-import {RiscZeroGroth16Verifier} from "./groth16/RiscZeroGroth16Verifier.sol";
+import {ControlID, RiscZeroGroth16Verifier} from "./groth16/RiscZeroGroth16Verifier.sol";
 
 /// @notice A base contract for testing a Bonsai callback receiver contract
 /// @dev Based on the BONSAI_PROVING environment, a real or a mock BonsaiRelay will be used:
@@ -54,9 +54,7 @@ abstract contract BonsaiTest is Test, BonsaiCheats {
             bonsaiTestRelay = new BonsaiTestRelay(vm.envOr("TEST_BONSAI_TEST_RELAY_EXPECTED_CHAIN_ID", uint256(31337)));
             bonsaiRelay = new BonsaiRelayQueueWrapper(bonsaiTestRelay);
         } else {
-            uint256 control_id_0 = vm.envUint("CONTROL_ID_0");
-            uint256 control_id_1 = vm.envUint("CONTROL_ID_1");
-            IRiscZeroVerifier verifier = new RiscZeroGroth16Verifier(control_id_0, control_id_1);
+            IRiscZeroVerifier verifier = new RiscZeroGroth16Verifier(ControlID.CONTROL_ID_0, ControlID.CONTROL_ID_1);
             bonsaiVerifyingRelay = new BonsaiRelay(verifier);
             bonsaiRelay = new BonsaiRelayQueueWrapper(bonsaiVerifyingRelay);
         }
