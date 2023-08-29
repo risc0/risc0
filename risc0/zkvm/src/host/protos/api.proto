@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+import "google/protobuf/empty.proto";
+
 package protos.api;
 
 message ServerRequest {
@@ -51,26 +53,10 @@ message ProveSegmentReply {
   }
 }
 
-message JoinRequest {
-  Asset left = 1;
-  Asset right = 2;
-  AssetRequest receipt_out = 3;
-}
-
-message JoinReply {
-  oneof kind {
-    JoinResult ok = 1;
-    GenericError error = 2;
-  }
-}
-
-message JoinResult {
-  Asset receipt = 1;
-}
-
 message LiftRequest {
-  Asset receipt = 1;
-  AssetRequest receipt_out = 2;
+  ProverOpts opts = 1;
+  Asset receipt = 2;
+  AssetRequest receipt_out = 3;
 }
 
 message LiftReply {
@@ -81,6 +67,24 @@ message LiftReply {
 }
 
 message LiftResult {
+  Asset receipt = 1;
+}
+
+message JoinRequest {
+  ProverOpts opts = 1;
+  Asset left = 2;
+  Asset right = 3;
+  AssetRequest receipt_out = 4;
+}
+
+message JoinReply {
+  oneof kind {
+    JoinResult ok = 1;
+    GenericError error = 2;
+  }
+}
+
+message JoinResult {
   Asset receipt = 1;
 }
 
@@ -129,8 +133,8 @@ message ExitCode {
   oneof kind {
     uint32 halted = 1;
     uint32 paused = 2;
-    Void system_split = 3;
-    Void session_limit = 4;
+    google.protobuf.Empty system_split = 3;
+    google.protobuf.Empty session_limit = 4;
   }
 }
 
@@ -142,13 +146,10 @@ message Asset {
 }
 
 message AssetRequest {
-  enum Kind {
-    UNSPECIFIED = 0;
-    INLINE = 1;
-    PATH = 2;
+  oneof kind {
+    google.protobuf.Empty inline = 1;
+    string path = 2;
   }
-
-  Kind kind = 1;
 }
 
 message ClientCallback {
@@ -209,7 +210,7 @@ message OnProveDone {
 
 message GenericReply {
   oneof kind {
-    Void ok = 1;
+    google.protobuf.Empty ok = 1;
     GenericError error = 2;
   }
 }
@@ -217,8 +218,6 @@ message GenericReply {
 message GenericError {
   string reason = 1;
 }
-
-message Void {}
 
 service Server {
   rpc hello(HelloRequest) returns (HelloReply);
@@ -232,10 +231,10 @@ service Server {
 service ExecuteCallback {
   rpc on_io(OnIoRequest) returns (OnIoReply);
   rpc on_segment_done(OnSegmentDone) returns (GenericReply);
-  rpc on_session_done(OnSessionDone) returns (Void);
+  rpc on_session_done(OnSessionDone) returns (google.protobuf.Empty);
 }
 
 service ProveCallback {
   rpc on_io(OnIoRequest) returns (OnIoReply);
-  rpc on_prove(OnProveDone) returns (Void);
+  rpc on_prove(OnProveDone) returns (google.protobuf.Empty);
 }

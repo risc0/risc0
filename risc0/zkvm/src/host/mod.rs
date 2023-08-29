@@ -25,6 +25,7 @@ pub(crate) mod server;
 #[cfg(any(feature = "client", feature = "prove"))]
 mod protos {
     pub(crate) mod api {
+        #![allow(non_snake_case)]
         include!(concat!(env!("OUT_DIR"), "/protos.api.rs"));
     }
 }

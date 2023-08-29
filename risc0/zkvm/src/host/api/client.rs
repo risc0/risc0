@@ -17,29 +17,228 @@ use std::path::Path;
 use anyhow::{anyhow, bail, Result};
 use bytes::Bytes;
 
-use super::{malformed_err, pb, Binary, ConnectionWrapper, Connector, ParentProcessConnector};
+use super::{
+    malformed_err, pb, Asset, AssetRequest, Binary, ConnectionWrapper, Connector,
+    ParentProcessConnector,
+};
 use crate::{host::recursion::SuccinctReceipt, ExecutorEnv, ProverOpts, Receipt, SegmentReceipt};
 
-/// TODO
+/// A client implementation for interacting with a zkVM server.
 pub struct Client {
     connector: Box<dyn Connector>,
 }
 
-impl Client {
-    /// Construct an [IpcClient] based on environment variables.
-    // pub fn from_env() -> Self {
-    //     let server_path = std::env::var("R0VM_PATH").unwrap_or("r0vm".to_string());
-    //     IpcClient::new(server_path)
-    // }
+impl Default for Client {
+    fn default() -> Self {
+        Self::new().unwrap()
+    }
+}
 
-    pub fn new(connector: Box<dyn Connector>) -> Self {
+impl Client {
+    /// Construct a [Client] that connects to `r0vm` in a child process.
+    pub fn new() -> Result<Self> {
+        Self::new_sub_process("r0vm")
+    }
+
+    /// Construct a [Client] that connects to a sub-process which implements
+    /// the server by calling the specified `server_path`.
+    pub fn new_sub_process<P: AsRef<Path>>(server_path: P) -> Result<Self> {
+        let connector = ParentProcessConnector::new(server_path)?;
+        Ok(Self::with_connector(Box::new(connector)))
+    }
+
+    /// Construct a [Client] based on environment variables.
+    pub fn from_env() -> Result<Self> {
+        let server_path = std::env::var("R0VM_PATH").unwrap_or("r0vm".to_string());
+        Client::new_sub_process(server_path)
+    }
+
+    /// Construct a [Client] using the specified [Connector] to establish a
+    /// connection with the server.
+    pub fn with_connector(connector: Box<dyn Connector>) -> Self {
         Self { connector }
     }
 
     /// TODO
-    pub fn new_sub_process<P: AsRef<Path>>(server_path: P) -> Result<Self> {
-        let connector = ParentProcessConnector::new(server_path)?;
-        Ok(Self::new(Box::new(connector)))
+    pub fn prove(
+        &self,
+        env: &ExecutorEnv<'_>,
+        opts: ProverOpts,
+        binary: Binary,
+    ) -> Result<Receipt> {
+        let mut conn = self.connect()?;
+
+        let request = pb::ServerRequest {
+            kind: Some(pb::server_request::Kind::Prove(pb::ProveRequest {
+                env: Some(self.make_execute_env(env, binary.try_into()?)),
+                opts: Some(opts.into()),
+                receipt_out: Some(pb::AssetRequest {
+                    kind: Some(pb::asset_request::Kind::Inline(())),
+                }),
+            })),
+        };
+        conn.send(request)?;
+
+        let asset = self.prove_handler(&mut conn, env)?;
+
+        let code = conn.close()?;
+        if code != 0 {
+            bail!("Child finished with: {code}");
+        }
+
+        let receipt_bytes = asset.as_bytes()?;
+        let receipt = bincode::deserialize(&receipt_bytes)?;
+        Ok(receipt)
+    }
+
+    /// TODO
+    pub fn execute<F>(
+        &self,
+        env: &ExecutorEnv<'_>,
+        binary: Binary,
+        segments_out: AssetRequest,
+        callback: F,
+    ) -> Result<pb::SessionInfo>
+    where
+        F: FnMut(pb::SegmentInfo) -> Result<()>,
+    {
+        let mut conn = self.connect()?;
+
+        let request = pb::ServerRequest {
+            kind: Some(pb::server_request::Kind::Execute(pb::ExecuteRequest {
+                env: Some(self.make_execute_env(env, binary.try_into()?)),
+                segments_out: Some(segments_out.try_into()?),
+            })),
+        };
+        log::debug!("tx: {request:?}");
+        conn.send(request)?;
+
+        let result = self.execute_handler(callback, &mut conn, env);
+
+        let code = conn.close()?;
+        if code != 0 {
+            bail!("Child finished with: {code}");
+        }
+
+        result
+    }
+
+    /// TODO
+    pub fn prove_segment(
+        &self,
+        opts: ProverOpts,
+        segment: Asset,
+        receipt_out: AssetRequest,
+    ) -> Result<SegmentReceipt> {
+        let mut conn = self.connect()?;
+
+        let request = pb::ServerRequest {
+            kind: Some(pb::server_request::Kind::ProveSegment(
+                pb::ProveSegmentRequest {
+                    opts: Some(opts.into()),
+                    segment: Some(segment.try_into()?),
+                    receipt_out: Some(receipt_out.try_into()?),
+                },
+            )),
+        };
+        log::debug!("tx: {request:?}");
+        conn.send(request)?;
+
+        let reply: pb::ProveSegmentReply = conn.recv()?;
+
+        let result = match reply.kind.ok_or(malformed_err())? {
+            pb::prove_segment_reply::Kind::Ok(result) => {
+                let receipt_bytes = result.receipt.ok_or(malformed_err())?.as_bytes()?;
+                let receipt = bincode::deserialize(&receipt_bytes)?;
+                Ok(receipt)
+            }
+            pb::prove_segment_reply::Kind::Error(err) => Err(err.into()),
+        };
+
+        let code = conn.close()?;
+        if code != 0 {
+            bail!("Child finished with: {code}");
+        }
+
+        result
+    }
+
+    /// TODO
+    pub fn lift(
+        &self,
+        opts: ProverOpts,
+        receipt: Asset,
+        receipt_out: AssetRequest,
+    ) -> Result<SuccinctReceipt> {
+        let mut conn = self.connector.connect()?;
+
+        let request = pb::ServerRequest {
+            kind: Some(pb::server_request::Kind::Lift(pb::LiftRequest {
+                opts: Some(opts.into()),
+                receipt: Some(receipt.try_into()?),
+                receipt_out: Some(receipt_out.try_into()?),
+            })),
+        };
+        log::debug!("tx: {request:?}");
+        conn.send(request)?;
+
+        let reply: pb::LiftReply = conn.recv()?;
+
+        let result = match reply.kind.ok_or(malformed_err())? {
+            pb::lift_reply::Kind::Ok(result) => {
+                let receipt_bytes = result.receipt.ok_or(malformed_err())?.as_bytes()?;
+                let receipt = bincode::deserialize(&receipt_bytes)?;
+                Ok(receipt)
+            }
+            pb::lift_reply::Kind::Error(err) => Err(err.into()),
+        };
+
+        let code = conn.close()?;
+        if code != 0 {
+            bail!("Child finished with: {code}");
+        }
+
+        result
+    }
+
+    /// TODO
+    pub fn join(
+        &self,
+        opts: ProverOpts,
+        left: Asset,
+        right: Asset,
+        receipt_out: AssetRequest,
+    ) -> Result<SuccinctReceipt> {
+        let mut conn = self.connector.connect()?;
+
+        let request = pb::ServerRequest {
+            kind: Some(pb::server_request::Kind::Join(pb::JoinRequest {
+                opts: Some(opts.into()),
+                left: Some(left.try_into()?),
+                right: Some(right.try_into()?),
+                receipt_out: Some(receipt_out.try_into()?),
+            })),
+        };
+        log::debug!("tx: {request:?}");
+        conn.send(request)?;
+
+        let reply: pb::JoinReply = conn.recv()?;
+
+        let result = match reply.kind.ok_or(malformed_err())? {
+            pb::join_reply::Kind::Ok(result) => {
+                let receipt_bytes = result.receipt.ok_or(malformed_err())?.as_bytes()?;
+                let receipt = bincode::deserialize(&receipt_bytes)?;
+                Ok(receipt)
+            }
+            pb::join_reply::Kind::Error(err) => Err(err.into()),
+        };
+
+        let code = conn.close()?;
+        if code != 0 {
+            bail!("Child finished with: {code}");
+        }
+
+        result
     }
 
     fn connect(&self) -> Result<ConnectionWrapper> {
@@ -70,130 +269,6 @@ impl Client {
             read_fds: env.posix_io.borrow().read_fds.keys().cloned().collect(),
             write_fds: env.posix_io.borrow().write_fds.keys().cloned().collect(),
         }
-    }
-
-    /// TODO
-    // r0vm prove --ipc --image $IMAGE --hashfn $HFN --output $RECEIPT
-    pub fn prove(
-        &self,
-        env: &ExecutorEnv<'_>,
-        opts: ProverOpts,
-        binary: Binary,
-    ) -> Result<Receipt> {
-        let mut conn = self.connect()?;
-
-        let request = pb::ServerRequest {
-            kind: Some(pb::server_request::Kind::Prove(pb::ProveRequest {
-                env: Some(self.make_execute_env(env, binary.try_into()?)),
-                opts: Some(opts.into()),
-                receipt_out: Some(pb::AssetRequest {
-                    kind: pb::asset_request::Kind::Inline as i32,
-                }),
-            })),
-        };
-        conn.send(request)?;
-
-        let asset = self.prove_handler(&mut conn, env)?;
-
-        let code = conn.close()?;
-        if code != 0 {
-            bail!("Child finished with: {code}");
-        }
-
-        let receipt_bytes = asset.as_bytes()?;
-        let receipt = bincode::deserialize(&receipt_bytes)?;
-        Ok(receipt)
-    }
-
-    /// TODO
-    // r0vm execute --ipc --image $IMAGE
-    pub fn execute<F>(
-        &self,
-        env: &ExecutorEnv<'_>,
-        binary: pb::Binary,
-        segments_out: pb::AssetRequest,
-        callback: F,
-    ) -> Result<pb::SessionInfo>
-    where
-        F: FnMut(pb::SegmentInfo) -> Result<()>,
-    {
-        let mut conn = self.connect()?;
-
-        let request = pb::ServerRequest {
-            kind: Some(pb::server_request::Kind::Execute(pb::ExecuteRequest {
-                env: Some(self.make_execute_env(env, binary)),
-                segments_out: Some(segments_out),
-            })),
-        };
-        log::debug!("tx: {request:?}");
-        conn.send(request)?;
-
-        let result = self.execute_handler(callback, &mut conn, env);
-
-        let code = conn.close()?;
-        if code != 0 {
-            bail!("Child finished with: {code}");
-        }
-
-        result
-    }
-
-    /// TODO
-    // r0vm prove --segment $SEGMENT --lift --hashfn $HFN --output $RECEIPT
-    pub fn prove_segment(
-        &self,
-        opts: ProverOpts,
-        segment: pb::Asset,
-        receipt_out: pb::AssetRequest,
-    ) -> Result<SegmentReceipt> {
-        let mut conn = self.connect()?;
-
-        let request = pb::ServerRequest {
-            kind: Some(pb::server_request::Kind::ProveSegment(
-                pb::ProveSegmentRequest {
-                    opts: Some(opts.into()),
-                    segment: Some(segment),
-                    receipt_out: Some(receipt_out),
-                },
-            )),
-        };
-        log::debug!("tx: {request:?}");
-        conn.send(request)?;
-
-        let reply: pb::ProveSegmentReply = conn.recv()?;
-
-        let result = match reply.kind.ok_or(malformed_err())? {
-            pb::prove_segment_reply::Kind::Ok(result) => {
-                let receipt_bytes = result.receipt.ok_or(malformed_err())?.as_bytes()?;
-                let receipt = bincode::deserialize(&receipt_bytes)?;
-                Ok(receipt)
-            }
-            pb::prove_segment_reply::Kind::Error(err) => Err(err.into()),
-        };
-
-        let code = conn.close()?;
-        if code != 0 {
-            bail!("Child finished with: {code}");
-        }
-
-        result
-    }
-
-    /// TODO
-    // r0vm lift --receipt $INPUT --output $OUTPUT
-    pub fn lift(&self, _opts: ProverOpts, _receipt: &SegmentReceipt) -> Result<SuccinctReceipt> {
-        todo!()
-    }
-
-    /// TODO
-    // r0vm join --left $LHS --right $RHS --output $RECEIPT
-    pub fn join(
-        &self,
-        _opts: ProverOpts,
-        _lhs: &SuccinctReceipt,
-        _rhs: &SuccinctReceipt,
-    ) -> Result<SuccinctReceipt> {
-        todo!()
     }
 
     fn execute_handler<F>(

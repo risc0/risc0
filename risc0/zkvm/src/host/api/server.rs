@@ -15,7 +15,7 @@
 use std::{
     error::Error as StdError,
     io::{BufReader, Error as IoError, ErrorKind as IoErrorKind, Read, Write},
-    path::Path,
+    path::{Path, PathBuf},
 };
 
 use anyhow::{anyhow, bail, Result};
@@ -24,7 +24,7 @@ use risc0_binfmt::{MemoryImage, Program};
 use risc0_zkvm_platform::{memory::MEM_SIZE, PAGE_SIZE};
 use serde::{Deserialize, Serialize};
 
-use super::{malformed_err, pb, ConnectionWrapper, Connector, TcpConnector};
+use super::{malformed_err, path_to_string, pb, ConnectionWrapper, Connector, TcpConnector};
 use crate::{
     get_prover_impl, host::client::slice_io::SliceIo, Executor, ExecutorEnv, ProverOpts, Segment,
     SegmentRef, VerifierContext,
@@ -202,7 +202,9 @@ impl Server {
             pb::server_request::Kind::Execute(request) => {
                 self.on_execute(conn, request)?;
             }
-            pb::server_request::Kind::ProveSegment(_) => todo!(),
+            pb::server_request::Kind::ProveSegment(request) => {
+                self.on_prove_segment(conn, request)?
+            }
             pb::server_request::Kind::Lift(_) => todo!(),
             pb::server_request::Kind::Join(_) => todo!(),
         };
@@ -217,13 +219,15 @@ impl Server {
         let binary = env_request.binary.ok_or(malformed_err())?;
         let image = binary.as_image()?;
         let segments_out = request.segments_out.ok_or(malformed_err())?;
-        let work_dir = tempfile::tempdir()?;
 
         let mut exec = Executor::new(env, image)?;
         let session = exec.run_with_callback(|segment| {
             let segment_bytes = bincode::serialize(&segment)?;
-            let segment_path = work_dir.path().join(format!("segment-{}", segment.index));
-            let asset = pb::Asset::from_bytes(&segments_out, segment_bytes.into(), &segment_path)?;
+            let asset = pb::Asset::from_bytes(
+                &segments_out,
+                segment_bytes.into(),
+                format!("segment-{}", segment.index),
+            )?;
             let msg = pb::ClientCallback {
                 kind: Some(pb::client_callback::Kind::SegmentDone(pb::OnSegmentDone {
                     segment: Some(pb::SegmentInfo {
@@ -276,13 +280,11 @@ impl Server {
         let ctx = VerifierContext::default();
         let receipt = prover.prove(env, &ctx, image)?;
 
-        let work_dir = tempfile::tempdir()?;
         let receipt_bytes = bincode::serialize(&receipt)?;
-        let receipt_path = work_dir.path().join("receipt.zkp");
         let asset = pb::Asset::from_bytes(
             &request.receipt_out.ok_or(malformed_err())?,
             receipt_bytes.into(),
-            &receipt_path,
+            "receipt.zkp",
         )?;
 
         let msg = pb::ClientCallback {
@@ -296,14 +298,36 @@ impl Server {
         Ok(())
     }
 
-    // fn on_prove_segment<R: Read, W: Write>(
-    //     &self,
-    //     reader: R,
-    //     writer: W,
-    //     request: ApiServerProveSegmentRequest,
-    // ) -> Result<()> {
-    //     todo!()
-    // }
+    fn on_prove_segment(
+        &self,
+        mut conn: ConnectionWrapper,
+        request: pb::ProveSegmentRequest,
+    ) -> Result<()> {
+        let opts: ProverOpts = request.opts.ok_or(malformed_err())?.into();
+        let segment_bytes = request.segment.ok_or(malformed_err())?.as_bytes()?;
+        let segment: Segment = bincode::deserialize(&segment_bytes)?;
+
+        let prover = get_prover_impl(&opts)?;
+        let ctx = VerifierContext::default();
+        let receipt = prover.prove_segment(&ctx, &segment)?;
+
+        let receipt_bytes = bincode::serialize(&receipt)?;
+        let asset = pb::Asset::from_bytes(
+            &request.receipt_out.ok_or(malformed_err())?,
+            receipt_bytes.into(),
+            "receipt.zkp",
+        )?;
+
+        let msg = pb::ProveSegmentReply {
+            kind: Some(pb::prove_segment_reply::Kind::Ok(pb::ProveSegmentResult {
+                receipt: Some(asset),
+            })),
+        };
+        log::debug!("tx: {msg:?}");
+        conn.send(msg)?;
+
+        Ok(())
+    }
 
     fn build_env(
         &self,
@@ -346,17 +370,21 @@ impl From<pb::GenericError> for IoError {
 }
 
 impl pb::Asset {
-    pub fn from_bytes(request: &pb::AssetRequest, bytes: Bytes, path: &Path) -> Result<Self> {
-        match request.kind() {
-            pb::asset_request::Kind::Unspecified => bail!(malformed_err()),
-            pb::asset_request::Kind::Inline => Ok(Self {
+    pub fn from_bytes<P: AsRef<Path>>(
+        request: &pb::AssetRequest,
+        bytes: Bytes,
+        path: P,
+    ) -> Result<Self> {
+        match request.kind.as_ref().ok_or(malformed_err())? {
+            pb::asset_request::Kind::Inline(()) => Ok(Self {
                 kind: Some(pb::asset::Kind::Inline(bytes.into())),
             }),
-            pb::asset_request::Kind::Path => {
-                std::fs::write(path, bytes)?;
-                let path_str = path.to_str().ok_or(anyhow!("path is not UTF-8"))?;
+            pb::asset_request::Kind::Path(base_path) => {
+                let base_path = PathBuf::from(base_path);
+                let path = base_path.join(path);
+                std::fs::write(&path, bytes)?;
                 Ok(Self {
-                    kind: Some(pb::asset::Kind::Path(path_str.to_string())),
+                    kind: Some(pb::asset::Kind::Path(path_to_string(path)?)),
                 })
             }
         }

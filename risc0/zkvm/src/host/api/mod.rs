@@ -64,6 +64,10 @@ impl RootMessage for pb::ClientCallback {}
 impl RootMessage for pb::GenericReply {}
 impl RootMessage for pb::OnIoReply {}
 impl RootMessage for pb::ProveSegmentReply {}
+impl RootMessage for pb::LiftRequest {}
+impl RootMessage for pb::LiftReply {}
+impl RootMessage for pb::JoinRequest {}
+impl RootMessage for pb::JoinReply {}
 
 impl ConnectionWrapper {
     fn new(inner: Box<dyn Connection>) -> Self {
@@ -228,10 +232,6 @@ fn malformed_err() -> anyhow::Error {
     anyhow!("Malformed error")
 }
 
-fn void() -> pb::Void {
-    pb::Void {}
-}
-
 impl pb::Asset {
     fn as_bytes(&self) -> Result<Bytes> {
         let bytes = match self.kind.clone().ok_or(malformed_err())? {
@@ -246,7 +246,7 @@ impl From<Result<(), anyhow::Error>> for pb::GenericReply {
     fn from(result: Result<(), anyhow::Error>) -> Self {
         Self {
             kind: Some(match result {
-                Ok(_) => pb::generic_reply::Kind::Ok(void()),
+                Ok(_) => pb::generic_reply::Kind::Ok(()),
                 Err(err) => pb::generic_reply::Kind::Error(err.into()),
             }),
         }
@@ -294,15 +294,7 @@ impl TryFrom<Binary> for pb::Binary {
                 BinaryKind::Elf => pb::binary::Kind::Elf,
                 BinaryKind::Image => pb::binary::Kind::Image,
             } as i32,
-            asset: Some(pb::Asset {
-                kind: Some(match binary.asset {
-                    Asset::Inline(bytes) => pb::asset::Kind::Inline(bytes.into()),
-                    Asset::Path(path) => {
-                        let path_str = path.to_str().ok_or(anyhow!("path is not UTF-8"))?;
-                        pb::asset::Kind::Path(path_str.to_string())
-                    }
-                }),
-            }),
+            asset: Some(binary.asset.try_into()?),
         })
     }
 }
@@ -312,16 +304,49 @@ pub struct Binary {
     asset: Asset,
 }
 
-#[allow(unused)]
 pub enum BinaryKind {
     Elf,
     Image,
 }
 
-#[allow(unused)]
 pub enum Asset {
     Inline(Bytes),
     Path(PathBuf),
+}
+
+pub enum AssetRequest {
+    Inline,
+    Path(PathBuf),
+}
+
+impl Binary {
+    pub fn new_elf_inline(bytes: Bytes) -> Self {
+        Self {
+            kind: BinaryKind::Elf,
+            asset: Asset::Inline(bytes),
+        }
+    }
+
+    pub fn new_elf_path<P: AsRef<Path>>(path: P) -> Self {
+        Self {
+            kind: BinaryKind::Elf,
+            asset: Asset::Path(path.as_ref().to_path_buf()),
+        }
+    }
+
+    pub fn new_image_inline(bytes: Bytes) -> Self {
+        Self {
+            kind: BinaryKind::Image,
+            asset: Asset::Inline(bytes),
+        }
+    }
+
+    pub fn new_image_path<P: AsRef<Path>>(path: P) -> Self {
+        Self {
+            kind: BinaryKind::Image,
+            asset: Asset::Path(path.as_ref().to_path_buf()),
+        }
+    }
 }
 
 impl TryFrom<MemoryImage> for Binary {
@@ -332,6 +357,51 @@ impl TryFrom<MemoryImage> for Binary {
         Ok(Self {
             kind: BinaryKind::Image,
             asset: Asset::Inline(bytes.into()),
+        })
+    }
+}
+
+fn invalid_path() -> anyhow::Error {
+    anyhow::Error::msg("Path must be UTF-8")
+}
+
+fn path_to_string<P: AsRef<Path>>(path: P) -> Result<String> {
+    Ok(path.as_ref().to_str().ok_or(invalid_path())?.to_string())
+}
+
+impl TryFrom<AssetRequest> for pb::AssetRequest {
+    type Error = anyhow::Error;
+
+    fn try_from(value: AssetRequest) -> Result<Self> {
+        Ok(Self {
+            kind: Some(match value {
+                AssetRequest::Inline => pb::asset_request::Kind::Inline(()),
+                AssetRequest::Path(path) => pb::asset_request::Kind::Path(path_to_string(path)?),
+            }),
+        })
+    }
+}
+
+impl TryFrom<Asset> for pb::Asset {
+    type Error = anyhow::Error;
+
+    fn try_from(value: Asset) -> Result<Self> {
+        Ok(Self {
+            kind: match value {
+                Asset::Inline(bytes) => Some(pb::asset::Kind::Inline(bytes.into())),
+                Asset::Path(path) => Some(pb::asset::Kind::Path(path_to_string(path)?)),
+            },
+        })
+    }
+}
+
+impl TryFrom<pb::Asset> for Asset {
+    type Error = anyhow::Error;
+
+    fn try_from(value: pb::Asset) -> Result<Self> {
+        Ok(match value.kind.ok_or(malformed_err())? {
+            pb::asset::Kind::Inline(bytes) => Asset::Inline(bytes.into()),
+            pb::asset::Kind::Path(path) => Asset::Path(PathBuf::from(path)),
         })
     }
 }
