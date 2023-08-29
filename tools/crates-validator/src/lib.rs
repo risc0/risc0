@@ -30,7 +30,7 @@ use tracing::{debug, error, info, warn};
 pub mod profiles;
 pub mod selected_crates;
 
-pub use selected_crates::SELECTED_CRATES;
+pub use selected_crates::*;
 
 /// Validation Results fields
 #[derive(Debug, Serialize, Deserialize)]
@@ -97,15 +97,6 @@ pub struct CrateProfile {
     ///
     /// Reference: https://github.com/risc0/risc0/issues/444
     pub crossbeam_patch: bool,
-
-    /// Toggles injecting custom circuit patches for the `sha2` crate.
-    pub sha2_patch: bool,
-
-    /// Toggles injecting custom circuit patches for the `k256` crate.
-    pub k256_patch: bool,
-
-    /// Toggles injecting custom circuit patches for the `crypto-bigint` crate.
-    pub crypto_bigint_patch: bool,
 
     /// Validation results
     pub results: Option<ValidationResults>,
@@ -177,21 +168,6 @@ const CROSSBEAM_PATCH: &str = r#"
 crossbeam = { git = "https://github.com/risc0/crossbeam", rev = "b25eb50f8c193f36dacb6739692261ea96827bb7" }
 crossbeam-utils = { git = "https://github.com/risc0/crossbeam", rev = "b25eb50f8c193f36dacb6739692261ea96827bb7" }
 crossbeam-channel = { git = "https://github.com/risc0/crossbeam", rev = "b25eb50f8c193f36dacb6739692261ea96827bb7" }"#;
-
-// NOTE: Custom circuit patch following zeth dependency
-const CRYPTO_BIGINT_PATCH: &str = r#"
-[patch.crates-io]
-crypto-bigint = { git = "https://github.com/risc0/RustCrypto-crypto-bigint", tag = "v0.5.2-risc0" }"#;
-
-// NOTE: Custom circuit patch following zeth dependency
-const K256_PATCH: &str = r#"
-[patch.crates-io]
-k256 = { git = "https://github.com/risc0/RustCrypto-elliptic-curves", tag = "k256/v0.13.1-risc0" }"#;
-
-// NOTE: Custom circuit patch following zeth dependency
-const SHA2_PATCH: &str = r#"
-[patch.crates-io]
-sha2 = { git = "https://github.com/risc0/RustCrypto-hashes", tag = "sha2/v0.10.6-risc0" }"#;
 
 const MAX_ERROR_LINES: u64 = 200;
 
@@ -376,15 +352,6 @@ impl Validator {
         );
         if profile.crossbeam_patch {
             crate_line += CROSSBEAM_PATCH;
-        }
-        if profile.crypto_bigint_patch {
-            crate_line += CRYPTO_BIGINT_PATCH;
-        }
-        if profile.k256_patch {
-            crate_line += K256_PATCH;
-        }
-        if profile.sha2_patch {
-            crate_line += SHA2_PATCH;
         }
 
         vars.insert("risc0_feature_std", risc0_feature_std);
