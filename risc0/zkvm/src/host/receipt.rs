@@ -100,7 +100,11 @@ use super::{
     control_id::{BLAKE2B_CONTROL_ID, POSEIDON_CONTROL_ID, SHA256_CONTROL_ID},
     recursion::SuccinctReceipt,
 };
-use crate::sha::rust_crypto::{Digest as _, Sha256};
+use crate::{
+    fault_ids::FAULT_CHECKER_ID,
+    serde::from_slice,
+    sha::rust_crypto::{Digest as _, Sha256},
+};
 
 /// Indicates how a Segment or Session's execution has terminated
 #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
@@ -119,6 +123,10 @@ pub enum ExitCode {
     /// This indicates normal termination of a program with an interior exit
     /// code returned from the guest.
     Halted(u32),
+
+    /// This indicates termination of a program where the next instruction will
+    /// fail.
+    Fault,
 }
 
 /// Data associated with a receipt which is used for both input and
@@ -206,12 +214,25 @@ impl SegmentReceipts {
         final_receipt.verify_with_context(ctx)?;
         let metadata = final_receipt.get_metadata()?;
         log::debug!("final: {metadata:#?}");
-        if prev_image_id != metadata.pre.digest() {
+        // If there's more than one segment, the last segment could be the fault checker
+        if prev_image_id != metadata.pre.digest()
+            && !(receipts.len() > 0 && metadata.pre.digest() == FAULT_CHECKER_ID.into())
+        {
             return Err(VerificationError::ImageVerificationError);
         }
 
         if metadata.exit_code == ExitCode::SystemSplit {
             return Err(VerificationError::UnexpectedExitCode);
+        }
+
+        // For receipts indicating proof of fault, the guest code should post the
+        // post-image ID of the original guest code to prove that the fault checker
+        // tried to execute the next instruction from the same state of the machine.
+        if metadata.pre.digest() == FAULT_CHECKER_ID.into() {
+            let digest: Digest = from_slice(&journal.clone()).unwrap();
+            if digest != prev_image_id {
+                return Err(VerificationError::FaultStateMismatch);
+            }
         }
 
         let digest = Sha256::digest(journal);
