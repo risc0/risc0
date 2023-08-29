@@ -12,9 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::collections::BTreeMap;
+extern crate alloc;
+use alloc::collections::BTreeMap;
 
+#[cfg(feature = "std")]
 use anyhow::{anyhow, bail, Context, Result};
+#[cfg(feature = "std")]
 use elf::{endian::LittleEndian, file::Class, ElfBytes};
 
 /// A RISC Zero program
@@ -26,6 +29,7 @@ pub struct Program {
     pub image: BTreeMap<u32, u32>,
 }
 
+#[cfg(feature = "std")]
 impl Program {
     /// Initialize a RISC Zero Program from an appropriate ELF file
     pub fn load_elf(input: &[u8], max_mem: u32) -> Result<Program> {

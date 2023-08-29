@@ -592,7 +592,6 @@ dependencies = [
  "libm",
  "log",
  "num-derive",
- "risc0-binfmt",
  "risc0-circuit-rv32im",
  "risc0-core",
  "risc0-zkp",

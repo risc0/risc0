@@ -12,7 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::collections::VecDeque;
+extern crate alloc;
+use alloc::collections::VecDeque;
 
 use risc0_zkp::core::digest::Digest;
 use risc0_zkvm_platform::syscall::DIGEST_WORDS;

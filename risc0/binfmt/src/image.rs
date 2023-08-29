@@ -12,8 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+extern crate alloc;
+use alloc::collections::BTreeMap;
 use core::slice;
-use std::collections::BTreeMap;
 
 use anyhow::Result;
 use risc0_zkp::core::{

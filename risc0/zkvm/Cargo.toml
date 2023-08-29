@@ -35,7 +35,7 @@ cfg-if = "1.0"
 getrandom = { version = "0.2", features = ["custom"] }
 hex = { version = "0.4.3", default-features = false, features = ["alloc"] }
 libm = "0.2"
-risc0-binfmt = { workspace = true }
+risc0-binfmt = { workspace = true, optional = true }
 risc0-zkp = { workspace = true }
 risc0-zkvm-platform = { workspace = true }
 rrs-lib = "0.1"
@@ -127,6 +127,7 @@ prove = [
 std = [
   "anyhow/std",
   "num-traits?/std",
+  "risc0-binfmt/std",
   "risc0-circuit-rv32im/std",
   "risc0-zkp/std",
   "serde/std",

@@ -15,10 +15,14 @@ tracing = "0.1"
 tracing-subscriber = "0.3"
 
 [dependencies]
-anyhow = { version = "1.0" }
-elf = "0.7"
+anyhow = { version = "1.0", default-features = false }
+elf = { version = "0.7", default-features = false }
 log = "0.4"
-risc0-zkp = { workspace = true, features = ["std"] }
+risc0-zkp = { workspace = true }
 risc0-zkvm-platform = { workspace = true }
-serde = { version = "1.0", default-features = false, features = ["derive", "std"] }
-sha2 = { git = "https://github.com/risc0/RustCrypto-hashes", tag = "sha2/v0.10.6-risc0", features = [ "compress" ]}
+serde = { version = "1.0", default-features = false, features = ["alloc", "derive"] }
+sha2 = { git = "https://github.com/risc0/RustCrypto-hashes", tag = "sha2/v0.10.6-risc0", default-features = false, features = [ "compress" ] }
+
+[features]
+default = [ "std" ]
+std = ["anyhow/std", "elf/std", "risc0-zkp/std", "serde/std", "sha2/std" ]
