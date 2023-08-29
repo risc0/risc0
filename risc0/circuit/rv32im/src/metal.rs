@@ -22,7 +22,7 @@ use risc0_core::field::{
 use risc0_zkp::{
     core::log2_ceil,
     hal::{
-        metal::{BufferImpl as MetalBuffer, MetalHal, MetalHash, MetalHashSha256},
+        metal::{BufferImpl as MetalBuffer, MetalHal, MetalHash},
         EvalCheck,
     },
     INV_RATE,
@@ -49,8 +49,6 @@ impl<MH: MetalHash> MetalEvalCheck<MH> {
         Self { hal, kernel }
     }
 }
-
-pub type MetalEvalCheckSha256 = MetalEvalCheck<MetalHashSha256>;
 
 impl<MH: MetalHash> EvalCheck<MetalHal<MH>> for MetalEvalCheck<MH> {
     #[tracing::instrument(skip_all)]

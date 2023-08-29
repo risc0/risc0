@@ -20,7 +20,7 @@ pub(crate) mod tests {
         SessionId,
     };
     use ethers::types::{Address, Bytes, H256, U256};
-    use risc0_zkvm::{receipt::InnerReceipt, Receipt};
+    use risc0_zkvm::{InnerReceipt, Receipt};
     use uuid::Uuid;
     use wiremock::{
         matchers::{method, path},

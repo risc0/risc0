@@ -14,18 +14,14 @@
 
 use anyhow::Result;
 use assert_cmd::cargo::cargo_bin;
-use risc0_zkvm::{
-    prove::{ExternalProver, Prover},
-    serde::to_vec,
-    ExecutorEnv, Receipt,
-};
+use risc0_zkvm::{serde::to_vec, ExecutorEnv, ExternalProver, Prover, Receipt};
 use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID};
 
 fn prove_nothing() -> Result<Receipt> {
     let input = to_vec(&MultiTestSpec::DoNothing).unwrap();
     let env = ExecutorEnv::builder().add_input(&input).build().unwrap();
     let r0vm_path = cargo_bin("r0vm");
-    let prover = ExternalProver::new("r0vm", r0vm_path, "sha-256");
+    let prover = ExternalProver::new("r0vm", r0vm_path);
     prover.prove_elf(env, MULTI_TEST_ELF)
 }
 

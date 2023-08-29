@@ -20,7 +20,7 @@ use risc0_zkp::{adapter::CircuitInfo, core::digest::Digest, verify::Verification
 use serde::{Deserialize, Serialize};
 
 use super::CircuitImpl;
-use crate::{
+use crate::host::{
     control_id::POSEIDON_CONTROL_ID,
     receipt::{ReceiptMetadata, VerifierContext},
     recursion::{circuit_impl::CIRCUIT_CORE, control_id::RECURSION_CONTROL_IDS},
