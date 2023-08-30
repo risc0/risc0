@@ -36,7 +36,7 @@ use bytes::{Buf, BufMut, Bytes};
 use prost::Message;
 use risc0_binfmt::MemoryImage;
 
-use crate::ProverOpts;
+use crate::{ExitCode, ProverOpts, TraceEvent};
 
 mod pb {
     pub use crate::host::protos::api::*;
@@ -60,7 +60,7 @@ pub struct ConnectionWrapper {
 impl RootMessage for pb::HelloRequest {}
 impl RootMessage for pb::HelloReply {}
 impl RootMessage for pb::ServerRequest {}
-impl RootMessage for pb::ClientCallback {}
+impl RootMessage for pb::ServerReply {}
 impl RootMessage for pb::GenericReply {}
 impl RootMessage for pb::OnIoReply {}
 impl RootMessage for pb::ProveSegmentReply {}
@@ -271,7 +271,6 @@ impl From<pb::ProverOpts> for ProverOpts {
     fn from(opts: pb::ProverOpts) -> Self {
         Self {
             hashfn: opts.hashfn,
-            lift: opts.lift,
         }
     }
 }
@@ -280,7 +279,6 @@ impl From<ProverOpts> for pb::ProverOpts {
     fn from(opts: ProverOpts) -> Self {
         Self {
             hashfn: opts.hashfn,
-            lift: opts.lift,
         }
     }
 }
@@ -403,5 +401,39 @@ impl TryFrom<pb::Asset> for Asset {
             pb::asset::Kind::Inline(bytes) => Asset::Inline(bytes.into()),
             pb::asset::Kind::Path(path) => Asset::Path(PathBuf::from(path)),
         })
+    }
+}
+
+impl TryFrom<pb::TraceEvent> for TraceEvent {
+    type Error = anyhow::Error;
+
+    fn try_from(event: pb::TraceEvent) -> Result<Self> {
+        Ok(match event.kind.ok_or(malformed_err())? {
+            pb::trace_event::Kind::InsnStart(event) => TraceEvent::InstructionStart {
+                cycle: event.cycle,
+                pc: event.pc,
+            },
+            pb::trace_event::Kind::RegisterSet(event) => TraceEvent::RegisterSet {
+                idx: event.idx as usize,
+                value: event.value,
+            },
+            pb::trace_event::Kind::MemorySet(event) => TraceEvent::MemorySet {
+                addr: event.addr,
+                value: event.value,
+            },
+        })
+    }
+}
+
+impl From<ExitCode> for pb::ExitCode {
+    fn from(value: ExitCode) -> Self {
+        Self {
+            kind: Some(match value {
+                ExitCode::SystemSplit => pb::exit_code::Kind::SystemSplit(()),
+                ExitCode::SessionLimit => pb::exit_code::Kind::SessionLimit(()),
+                ExitCode::Paused(code) => pb::exit_code::Kind::Paused(code),
+                ExitCode::Halted(code) => pb::exit_code::Kind::Halted(code),
+            }),
+        }
     }
 }

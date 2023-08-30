@@ -15,7 +15,7 @@ message ServerRequest {
 }
 
 message HelloRequest {
-  uint32 version = 1;
+  Version version = 1;
 }
 
 message HelloReply {
@@ -26,7 +26,7 @@ message HelloReply {
 }
 
 message HelloResult {
-  uint32 version = 2;
+  Version version = 1;
 }
 
 message ExecuteRequest {
@@ -72,8 +72,8 @@ message LiftResult {
 
 message JoinRequest {
   ProverOpts opts = 1;
-  Asset left = 2;
-  Asset right = 3;
+  Asset left_receipt = 2;
+  Asset right_receipt = 3;
   AssetRequest receipt_out = 4;
 }
 
@@ -86,6 +86,10 @@ message JoinReply {
 
 message JoinResult {
   Asset receipt = 1;
+}
+
+message Version {
+  uint32 version = 1;
 }
 
 message ExecutorEnv {
@@ -109,7 +113,6 @@ message Binary {
 
 message ProverOpts {
   string hashfn = 1;
-  bool lift = 2;
 }
 
 message SessionInfo {
@@ -152,13 +155,19 @@ message AssetRequest {
   }
 }
 
+message ServerReply {
+  oneof kind {
+    ClientCallback ok = 1;
+    GenericError error = 2;
+  }
+}
+
 message ClientCallback {
   oneof kind {
-    GenericError error = 1;
-    OnIoRequest io = 2;
-    OnSegmentDone segment_done = 3;
-    OnSessionDone session_done = 4;
-    OnProveDone prove_done = 5;
+    OnIoRequest io = 1;
+    OnSegmentDone segment_done = 2;
+    OnSessionDone session_done = 3;
+    OnProveDone prove_done = 4;
   }
 }
 
@@ -187,7 +196,28 @@ message PosixCmd {
   }
 }
 
-message TraceEvent {}
+message TraceEvent {
+  message InstructionStart {
+    uint32 cycle = 1;
+    uint32 pc = 2;
+  }
+
+  message RegisterSet {
+    uint32 idx = 1;
+    uint32 value = 2;
+  }
+
+  message MemorySet {
+    uint32 addr = 1;
+    uint32 value = 2;
+  }
+
+  oneof kind {
+    InstructionStart insn_start = 1;
+    RegisterSet register_set = 2;
+    MemorySet memory_set = 3;
+  }
+}
 
 message OnIoReply {
   oneof kind {
@@ -221,8 +251,8 @@ message GenericError {
 
 service Server {
   rpc hello(HelloRequest) returns (HelloReply);
-  rpc prove(ProveRequest) returns (stream ClientCallback);
-  rpc execute(ExecuteRequest) returns (stream ClientCallback);
+  rpc prove(ProveRequest) returns (stream ServerReply);
+  rpc execute(ExecuteRequest) returns (stream ServerReply);
   rpc prove_segment(ProveSegmentRequest) returns (ProveSegmentReply);
   rpc lift(LiftRequest) returns (LiftReply);
   rpc join(JoinRequest) returns (JoinReply);

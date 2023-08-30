@@ -162,7 +162,6 @@ impl Cli {
         };
         let opts = ProverOpts {
             hashfn: hashfn.to_string(),
-            lift: false,
         };
 
         get_prover_impl(&opts).unwrap()

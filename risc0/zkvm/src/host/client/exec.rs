@@ -28,7 +28,7 @@ pub enum TraceEvent {
     /// A register has been set
     RegisterSet {
         /// Register ID (0-16)
-        reg: usize,
+        idx: usize,
         /// New value in the register
         value: u32,
     },
@@ -48,7 +48,7 @@ impl std::fmt::Debug for TraceEvent {
             Self::InstructionStart { cycle, pc } => {
                 write!(f, "InstructionStart({cycle}, 0x{pc:08X})")
             }
-            Self::RegisterSet { reg, value } => write!(f, "RegisterSet({reg}, 0x{value:08X})"),
+            Self::RegisterSet { idx, value } => write!(f, "RegisterSet({idx}, 0x{value:08X})"),
             Self::MemorySet { addr, value } => write!(f, "MemorySet(0x{addr:08X}, 0x{value:08X})"),
         }
     }

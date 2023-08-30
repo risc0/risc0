@@ -71,16 +71,12 @@ pub trait Prover {
 pub struct ProverOpts {
     /// The hash function to use.
     pub hashfn: String,
-
-    /// Perform a lift after proving?
-    pub lift: bool,
 }
 
 impl Default for ProverOpts {
     fn default() -> Self {
         Self {
             hashfn: "sha-256".to_string(),
-            lift: false,
         }
     }
 }

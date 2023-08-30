@@ -205,8 +205,8 @@ impl Client {
     pub fn join(
         &self,
         opts: ProverOpts,
-        left: Asset,
-        right: Asset,
+        left_receipt: Asset,
+        right_receipt: Asset,
         receipt_out: AssetRequest,
     ) -> Result<SuccinctReceipt> {
         let mut conn = self.connector.connect()?;
@@ -214,8 +214,8 @@ impl Client {
         let request = pb::ServerRequest {
             kind: Some(pb::server_request::Kind::Join(pb::JoinRequest {
                 opts: Some(opts.into()),
-                left: Some(left.try_into()?),
-                right: Some(right.try_into()?),
+                left_receipt: Some(left_receipt.try_into()?),
+                right_receipt: Some(right_receipt.try_into()?),
                 receipt_out: Some(receipt_out.try_into()?),
             })),
         };
@@ -244,7 +244,9 @@ impl Client {
     fn connect(&self) -> Result<ConnectionWrapper> {
         let mut conn = self.connector.connect()?;
 
-        let request = pb::HelloRequest { version: 0 };
+        let request = pb::HelloRequest {
+            version: Some(pb::Version { version: 0 }),
+        };
         log::debug!("tx: {request:?}");
         conn.send(request)?;
 
@@ -282,33 +284,36 @@ impl Client {
     {
         let mut callback = callback;
         loop {
-            let request: pb::ClientCallback = conn.recv()?;
-            log::debug!("rx: {request:?}");
-            match request.kind.ok_or(malformed_err())? {
-                pb::client_callback::Kind::Io(io) => {
-                    let msg: pb::OnIoReply = self.on_io(env, io).into();
-                    log::debug!("tx: {msg:?}");
-                    conn.send(msg)?;
-                }
-                pb::client_callback::Kind::SegmentDone(segment) => {
-                    let reply: pb::GenericReply = segment
-                        .segment
-                        .map_or_else(|| Err(malformed_err()), |segment| callback(segment))
-                        .into();
-                    log::debug!("tx: {reply:?}");
-                    conn.send(reply)?;
-                }
-                pb::client_callback::Kind::SessionDone(session) => {
-                    return match session.session {
-                        Some(session) => Ok(session),
-                        None => Err(malformed_err()),
+            let reply: pb::ServerReply = conn.recv()?;
+            log::debug!("rx: {reply:?}");
+
+            match reply.kind.ok_or(malformed_err())? {
+                pb::server_reply::Kind::Ok(request) => match request.kind.ok_or(malformed_err())? {
+                    pb::client_callback::Kind::Io(io) => {
+                        let msg: pb::OnIoReply = self.on_io(env, io).into();
+                        log::debug!("tx: {msg:?}");
+                        conn.send(msg)?;
                     }
-                }
-                pb::client_callback::Kind::ProveDone(_) => {
-                    return Err(anyhow!("Illegal client callback"))
-                }
-                pb::client_callback::Kind::Error(err) => return Err(err.into()),
-            };
+                    pb::client_callback::Kind::SegmentDone(segment) => {
+                        let reply: pb::GenericReply = segment
+                            .segment
+                            .map_or_else(|| Err(malformed_err()), |segment| callback(segment))
+                            .into();
+                        log::debug!("tx: {reply:?}");
+                        conn.send(reply)?;
+                    }
+                    pb::client_callback::Kind::SessionDone(session) => {
+                        return match session.session {
+                            Some(session) => Ok(session),
+                            None => Err(malformed_err()),
+                        }
+                    }
+                    pb::client_callback::Kind::ProveDone(_) => {
+                        return Err(anyhow!("Illegal client callback"))
+                    }
+                },
+                pb::server_reply::Kind::Error(err) => return Err(err.into()),
+            }
         }
     }
 
@@ -318,23 +323,25 @@ impl Client {
         env: &ExecutorEnv<'_>,
     ) -> Result<pb::Asset> {
         loop {
-            let request: pb::ClientCallback = conn.recv()?;
-            match request.kind.ok_or(malformed_err())? {
-                pb::client_callback::Kind::Io(io) => {
-                    let msg: pb::OnIoReply = self.on_io(env, io).into();
-                    log::debug!("tx: {msg:?}");
-                    conn.send(msg)?;
-                }
-                pb::client_callback::Kind::SegmentDone(_) => {
-                    return Err(anyhow!("Illegal client callback"))
-                }
-                pb::client_callback::Kind::SessionDone(_) => {
-                    return Err(anyhow!("Illegal client callback"))
-                }
-                pb::client_callback::Kind::ProveDone(done) => {
-                    return Ok(done.receipt.ok_or(malformed_err())?)
-                }
-                pb::client_callback::Kind::Error(err) => return Err(err.into()),
+            let reply: pb::ServerReply = conn.recv()?;
+            match reply.kind.ok_or(malformed_err())? {
+                pb::server_reply::Kind::Ok(request) => match request.kind.ok_or(malformed_err())? {
+                    pb::client_callback::Kind::Io(io) => {
+                        let msg: pb::OnIoReply = self.on_io(env, io).into();
+                        log::debug!("tx: {msg:?}");
+                        conn.send(msg)?;
+                    }
+                    pb::client_callback::Kind::SegmentDone(_) => {
+                        return Err(anyhow!("Illegal client callback"))
+                    }
+                    pb::client_callback::Kind::SessionDone(_) => {
+                        return Err(anyhow!("Illegal client callback"))
+                    }
+                    pb::client_callback::Kind::ProveDone(done) => {
+                        return Ok(done.receipt.ok_or(malformed_err())?)
+                    }
+                },
+                pb::server_reply::Kind::Error(err) => return Err(err.into()),
             }
         }
     }
@@ -398,10 +405,10 @@ impl Client {
         Ok(result)
     }
 
-    fn on_trace(&self, _env: &ExecutorEnv<'_>, _event: pb::TraceEvent) -> Result<()> {
-        // if let Some(ref trace_callback) = env.trace {
-        //     trace_callback.borrow_mut()(event)?;
-        // }
+    fn on_trace(&self, env: &ExecutorEnv<'_>, event: pb::TraceEvent) -> Result<()> {
+        if let Some(ref trace_callback) = env.trace {
+            trace_callback.borrow_mut()(event.try_into()?)?;
+        }
         Ok(())
     }
 }

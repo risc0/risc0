@@ -30,7 +30,7 @@ use crate::{
     SegmentRef, VerifierContext,
 };
 
-/// TODO
+/// A server implementation for handling requests by clients of the zkVM.
 pub struct Server {
     connector: Box<dyn Connector>,
 }
@@ -74,13 +74,15 @@ impl PosixIoProxy {
 impl Read for PosixIoProxy {
     fn read(&mut self, to_guest: &mut [u8]) -> std::io::Result<usize> {
         let nread = to_guest.len().try_into().map_io_err()?;
-        let request = pb::ClientCallback {
-            kind: Some(pb::client_callback::Kind::Io(pb::OnIoRequest {
-                kind: Some(pb::on_io_request::Kind::Posix(pb::PosixIo {
-                    fd: self.fd,
-                    cmd: Some(pb::PosixCmd {
-                        kind: Some(pb::posix_cmd::Kind::Read(nread)),
-                    }),
+        let request = pb::ServerReply {
+            kind: Some(pb::server_reply::Kind::Ok(pb::ClientCallback {
+                kind: Some(pb::client_callback::Kind::Io(pb::OnIoRequest {
+                    kind: Some(pb::on_io_request::Kind::Posix(pb::PosixIo {
+                        fd: self.fd,
+                        cmd: Some(pb::PosixCmd {
+                            kind: Some(pb::posix_cmd::Kind::Read(nread)),
+                        }),
+                    })),
                 })),
             })),
         };
@@ -105,13 +107,15 @@ impl Read for PosixIoProxy {
 
 impl Write for PosixIoProxy {
     fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
-        let request = pb::ClientCallback {
-            kind: Some(pb::client_callback::Kind::Io(pb::OnIoRequest {
-                kind: Some(pb::on_io_request::Kind::Posix(pb::PosixIo {
-                    fd: self.fd,
-                    cmd: Some(pb::PosixCmd {
-                        kind: Some(pb::posix_cmd::Kind::Write(buf.into())),
-                    }),
+        let request = pb::ServerReply {
+            kind: Some(pb::server_reply::Kind::Ok(pb::ClientCallback {
+                kind: Some(pb::client_callback::Kind::Io(pb::OnIoRequest {
+                    kind: Some(pb::on_io_request::Kind::Posix(pb::PosixIo {
+                        fd: self.fd,
+                        cmd: Some(pb::PosixCmd {
+                            kind: Some(pb::posix_cmd::Kind::Write(buf.into())),
+                        }),
+                    })),
                 })),
             })),
         };
@@ -152,11 +156,13 @@ impl SliceIoProxy {
 
 impl SliceIo for SliceIoProxy {
     fn handle_io(&mut self, syscall: &str, from_guest: Bytes) -> Result<Bytes> {
-        let request = pb::ClientCallback {
-            kind: Some(pb::client_callback::Kind::Io(pb::OnIoRequest {
-                kind: Some(pb::on_io_request::Kind::Slice(pb::SliceIo {
-                    name: syscall.to_string(),
-                    from_guest: from_guest.into(),
+        let request = pb::ServerReply {
+            kind: Some(pb::server_reply::Kind::Ok(pb::ClientCallback {
+                kind: Some(pb::client_callback::Kind::Io(pb::OnIoRequest {
+                    kind: Some(pb::on_io_request::Kind::Slice(pb::SliceIo {
+                        name: syscall.to_string(),
+                        from_guest: from_guest.into(),
+                    })),
                 })),
             })),
         };
@@ -188,7 +194,9 @@ impl Server {
         log::debug!("rx: {request:?}");
         // TODO: check version
         let reply = pb::HelloReply {
-            kind: Some(pb::hello_reply::Kind::Ok(pb::HelloResult { version: 0 })),
+            kind: Some(pb::hello_reply::Kind::Ok(pb::HelloResult {
+                version: Some(pb::Version { version: 0 }),
+            })),
         };
         log::debug!("tx: {reply:?}");
         conn.send(reply)?;
@@ -228,14 +236,16 @@ impl Server {
                 segment_bytes.into(),
                 format!("segment-{}", segment.index),
             )?;
-            let msg = pb::ClientCallback {
-                kind: Some(pb::client_callback::Kind::SegmentDone(pb::OnSegmentDone {
-                    segment: Some(pb::SegmentInfo {
-                        index: segment.index,
-                        po2: segment.po2.try_into()?,
-                        insn_cycles: segment.insn_cycles.try_into()?,
-                        segment: Some(asset),
-                    }),
+            let msg = pb::ServerReply {
+                kind: Some(pb::server_reply::Kind::Ok(pb::ClientCallback {
+                    kind: Some(pb::client_callback::Kind::SegmentDone(pb::OnSegmentDone {
+                        segment: Some(pb::SegmentInfo {
+                            index: segment.index,
+                            po2: segment.po2.try_into()?,
+                            insn_cycles: segment.insn_cycles.try_into()?,
+                            segment: Some(asset),
+                        }),
+                    })),
                 })),
             };
             log::debug!("tx: {msg:?}");
@@ -251,15 +261,15 @@ impl Server {
             Ok(Box::new(EmptySegmentRef))
         })?;
 
-        let msg = pb::ClientCallback {
-            kind: Some(pb::client_callback::Kind::SessionDone(pb::OnSessionDone {
-                session: Some(pb::SessionInfo {
-                    segments: session.segments.len().try_into()?,
-                    journal: session.journal,
-                    exit_code: Some(pb::ExitCode {
-                        kind: Some(pb::exit_code::Kind::Halted(0)), // TODO
+        let msg = pb::ServerReply {
+            kind: Some(pb::server_reply::Kind::Ok(pb::ClientCallback {
+                kind: Some(pb::client_callback::Kind::SessionDone(pb::OnSessionDone {
+                    session: Some(pb::SessionInfo {
+                        segments: session.segments.len().try_into()?,
+                        journal: session.journal,
+                        exit_code: Some(session.exit_code.into()),
                     }),
-                }),
+                })),
             })),
         };
         log::debug!("tx: {msg:?}");
@@ -287,9 +297,11 @@ impl Server {
             "receipt.zkp",
         )?;
 
-        let msg = pb::ClientCallback {
-            kind: Some(pb::client_callback::Kind::ProveDone(pb::OnProveDone {
-                receipt: Some(asset),
+        let msg = pb::ServerReply {
+            kind: Some(pb::server_reply::Kind::Ok(pb::ClientCallback {
+                kind: Some(pb::client_callback::Kind::ProveDone(pb::OnProveDone {
+                    receipt: Some(asset),
+                })),
             })),
         };
         log::debug!("tx: {msg:?}");
@@ -349,6 +361,7 @@ impl Server {
         for name in request.slice_ios.iter() {
             env_builder.slice_io(&name, proxy.try_clone()?);
         }
+        // TODO: add trace callback proxy
         env_builder.build()
     }
 }
