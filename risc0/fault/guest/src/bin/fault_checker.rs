@@ -12,6 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#![no_main]
-risc0_zkvm::guest::entry!(main);
-pub fn main() {}
+use risc0_zkvm::{guest::env, FaultCheckMonitor};
+use rrs_lib::{instruction_executor::InstructionExecutor, HartState};
+
+pub fn main() {
+    let fault_monitor: FaultCheckMonitor = env::read();
+
+    let mut instruction_executor = InstructionExecutor {
+        mem: &mut fault_monitor.clone(),
+        hart_state: &mut HartState {
+            registers: fault_monitor.regs,
+            pc: fault_monitor.pc,
+            last_register_write: None,
+        },
+    };
+    instruction_executor.step().expect_err(
+        "fault checker expected instruction at 0x{pc:08x} to fail. Actual execution was successful",
+    );
+    env::commit(&fault_monitor.post_id);
+}

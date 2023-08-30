@@ -7,3 +7,4 @@ edition = "2021"
 
 [dependencies]
 risc0-zkvm = { path = "../../zkvm", default-features = false, features = [ "std" ] }
+rrs-lib = "0.1"
