@@ -154,7 +154,8 @@ fn memory_io() {
                     .digest();
                 last_image_id == FAULT_CHECKER_ID.into()
             }
-            // Fault receipts can only be encoded in the Flat format until recursion support is available.
+            // Fault receipts can only be encoded in the Flat format until recursion support is
+            // available.
             _ => false,
         }
     }

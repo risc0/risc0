@@ -62,7 +62,8 @@ impl Memory for FaultCheckMonitor {
                 _ => 0,
             }
         } else {
-            0 // Since we don't actually need to read. Return `Some(0)` on anything else
+            0 // Since we don't actually need to read. Return `Some(0)` on
+              // anything else
         };
         self.address_is_within_range(addr).then_some(val)
     }
