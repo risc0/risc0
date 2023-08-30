@@ -52,7 +52,9 @@ use crate::{
         receipt::ExitCode,
         server::opcode::{MajorType, OpCode},
     },
-    ExecutorEnv, Loader, Segment, SegmentRef, Session, SimpleSegmentRef, FAULT_CHECKER_ELF,
+    serde::to_vec,
+    ExecutorEnv, FaultCheckMonitor, Loader, Segment, SegmentRef, Session, SimpleSegmentRef,
+    FAULT_CHECKER_ELF,
 };
 
 /// The number of cycles required to compress a SHA-256 block.
@@ -315,7 +317,15 @@ impl<'a> Executor<'a> {
     }
 
     fn run_fault_checker(&mut self) -> Result<Session> {
-        let env = ExecutorEnv::builder().build().unwrap();
+        let fault_monitor = FaultCheckMonitor {
+            pc: self.pc,
+            insn: self.monitor.load_u32(self.pc)?,
+            regs: self.monitor.load_registers(),
+            post_id: self.monitor.build_image(self.pc).compute_id(),
+        };
+        let env = ExecutorEnv::builder()
+            .add_input(&to_vec(&fault_monitor)?)
+            .build()?;
 
         let mut exec = self::Executor::from_elf(env, FAULT_CHECKER_ELF).unwrap();
         let session = exec.run_guest_only()?;
