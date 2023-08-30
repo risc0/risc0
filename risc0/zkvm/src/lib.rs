@@ -27,10 +27,14 @@ mod host;
 pub mod serde;
 pub mod sha;
 
+#[cfg(feature = "std")]
+mod fault_monitor;
 pub use anyhow::Result;
 #[cfg(not(target_os = "zkvm"))]
 #[cfg(any(feature = "client", feature = "prove"))]
 pub use bytes::Bytes;
+#[cfg(feature = "std")]
+pub use fault_monitor::FaultCheckMonitor;
 #[cfg(not(target_os = "zkvm"))]
 pub use risc0_binfmt::{MemoryImage, Program, SystemState};
 pub use risc0_zkvm_platform::{declare_syscall, memory::MEM_SIZE, PAGE_SIZE};
