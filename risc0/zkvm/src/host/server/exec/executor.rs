@@ -52,7 +52,7 @@ use crate::{
         receipt::ExitCode,
         server::opcode::{MajorType, OpCode},
     },
-    ExecutorEnv, Loader, Segment, SegmentRef, Session, SimpleSegmentRef,
+    ExecutorEnv, Loader, Segment, SegmentRef, Session, SimpleSegmentRef, FAULT_CHECKER_ELF,
 };
 
 /// The number of cycles required to compress a SHA-256 block.
@@ -215,7 +215,32 @@ impl<'a> Executor<'a> {
 
     /// Run the executor until [ExitCode::Paused] or [ExitCode::Halted] is
     /// reached, producing a [Session] as a result.
-    pub fn run_with_callback<F>(&mut self, mut callback: F) -> Result<Session>
+    pub fn run_with_callback<F>(&mut self, callback: F) -> Result<Session>
+    where
+        F: FnMut(Segment) -> Result<Box<dyn SegmentRef>>,
+    {
+        let mut guest_session = self.run_guest_only_with_callback(callback)?;
+        match guest_session.exit_code {
+            ExitCode::Fault => {
+                let fault_checker_session = self.run_fault_checker()?;
+                for segment in fault_checker_session.segments {
+                    guest_session.segments.push(segment);
+                }
+                guest_session.journal = fault_checker_session.journal;
+                Ok(guest_session)
+            }
+            _ => Ok(guest_session),
+        }
+    }
+
+    /// Run the executor with the default callback.
+    pub fn run_guest_only(&mut self) -> Result<Session> {
+        self.run_guest_only_with_callback(|segment| Ok(Box::new(SimpleSegmentRef::new(segment))))
+    }
+
+    /// Run the executor until [ExitCode::Paused], [ExitCode::Halted], or
+    /// [ExitCode::Fault] is reached, producing a [Session] as a result.
+    pub fn run_guest_only_with_callback<F>(&mut self, mut callback: F) -> Result<Session>
     where
         F: FnMut(Segment) -> Result<Box<dyn SegmentRef>>,
     {
@@ -289,6 +314,20 @@ impl<'a> Executor<'a> {
         ))
     }
 
+    fn run_fault_checker(&mut self) -> Result<Session> {
+        let env = ExecutorEnv::builder().build().unwrap();
+
+        let mut exec = self::Executor::from_elf(env, FAULT_CHECKER_ELF).unwrap();
+        let session = exec.run_guest_only()?;
+        if session.exit_code != ExitCode::Halted(0) {
+            bail!(
+                "Fault checker returned with exit code: {:?}. Expected `ExitCode::Halted(0)` from fault checker",
+                session.exit_code
+            );
+        }
+        Ok(session)
+    }
+
     fn split(&mut self, pre_image: MemoryImage) -> Result<()> {
         self.pre_image = pre_image;
         self.body_cycles = 0;
@@ -358,12 +397,21 @@ impl<'a> Executor<'a> {
                 last_register_write: None,
             };
 
-            InstructionExecutor {
+            let mut inst_exec = InstructionExecutor {
                 mem: &mut self.monitor,
                 hart_state: &mut hart,
+            };
+            if let Err(err) = inst_exec.step() {
+                self.split_insn = Some(self.insn_counter);
+                log::debug!(
+                    "fault: [{}] pc: 0x{:08x} ({:?})",
+                    self.segment_cycle,
+                    self.pc,
+                    err
+                );
+                self.monitor.undo()?;
+                return Ok(Some(ExitCode::Fault));
             }
-            .step()
-            .map_err(|err| anyhow!("InstructionExecutor failure: {:?}", err))?;
 
             if let Some(idx) = hart.last_register_write {
                 self.monitor.store_register(idx, hart.registers[idx]);
