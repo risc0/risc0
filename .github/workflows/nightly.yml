@@ -36,6 +36,7 @@ jobs:
       - name: Generate the profile
         run: |
           target/release/gen-profiles \
+          -s crates/selected.json \
           -r ${{ github.workspace }} \
           -o ${{ runner.temp }}/crate-validation/profiles.json \
           -c $TOP_N_CRATES
