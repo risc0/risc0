@@ -645,7 +645,6 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
         stream.synchronize().unwrap();
     }
 
-    #[tracing::instrument(skip_all)]
     fn mix_poly_coeffs(
         &self,
         output: &Self::Buffer<Self::ExtElem>,
@@ -779,7 +778,6 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
         stream.synchronize().unwrap();
     }
 
-    #[tracing::instrument(skip_all)]
     fn hash_fold(&self, io: &Self::Buffer<Digest>, input_size: usize, output_size: usize) {
         assert_eq!(input_size, 2 * output_size);
         self.hash.as_ref().unwrap().hash_fold(self, io, output_size);

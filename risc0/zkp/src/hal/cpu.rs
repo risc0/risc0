@@ -399,7 +399,6 @@ impl<F: Field> Hal for CpuHal<F> {
             });
     }
 
-    #[tracing::instrument(skip_all)]
     fn mix_poly_coeffs(
         &self,
         output: &Self::Buffer<Self::ExtElem>,
