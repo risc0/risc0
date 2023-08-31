@@ -19,7 +19,10 @@
     "sha3",
     "thiserror"
   ],
-  "handpicked": [
+  "cryptography": [
     "openssl"
+  ],
+  "homomorphic encryption": [
+    "tfhe"
   ]
 }
