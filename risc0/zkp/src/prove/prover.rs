@@ -187,39 +187,43 @@ impl<'a, H: Hal> Prover<'a, H> {
         // it's not we keep the order for consistency.
 
         let mut eval_u: Vec<H::ExtElem> = Vec::new();
-        for (id, pg) in self.groups.iter().enumerate() {
-            let pg = pg.as_ref().unwrap();
+        tracing::info_span!("eval_u").in_scope(|| {
+            for (id, pg) in self.groups.iter().enumerate() {
+                let pg = pg.as_ref().unwrap();
 
-            let mut which = Vec::new();
-            let mut xs = Vec::new();
-            for tap in self.taps.group_taps(id) {
-                which.push(tap.offset() as u32);
-                let x = back_one.pow(tap.back()) * z;
-                xs.push(x);
-                all_xs.push(x);
+                let mut which = Vec::new();
+                let mut xs = Vec::new();
+                for tap in self.taps.group_taps(id) {
+                    which.push(tap.offset() as u32);
+                    let x = back_one.pow(tap.back()) * z;
+                    xs.push(x);
+                    all_xs.push(x);
+                }
+                let which = self.hal.copy_from_u32("which", which.as_slice());
+                let xs = self.hal.copy_from_extelem("xs", xs.as_slice());
+                let out = self.hal.alloc_extelem("out", which.size());
+                self.hal
+                    .batch_evaluate_any(&pg.coeffs, pg.count, &which, &xs, &out);
+                out.view(|view| {
+                    eval_u.extend(view);
+                });
             }
-            let which = self.hal.copy_from_u32("which", which.as_slice());
-            let xs = self.hal.copy_from_extelem("xs", xs.as_slice());
-            let out = self.hal.alloc_extelem("out", which.size());
-            self.hal
-                .batch_evaluate_any(&pg.coeffs, pg.count, &which, &xs, &out);
-            out.view(|view| {
-                eval_u.extend(view);
-            });
-        }
+        });
 
         // Now, convert the values to coefficients via interpolation
-        let mut pos = 0;
         let mut coeff_u = vec![H::ExtElem::ZERO; eval_u.len()];
-        for reg in self.taps.regs() {
-            poly_interpolate(
-                &mut coeff_u[pos..],
-                &all_xs[pos..],
-                &eval_u[pos..],
-                reg.size(),
-            );
-            pos += reg.size();
-        }
+        tracing::info_span!("poly_interpolate").in_scope(|| {
+            let mut pos = 0;
+            for reg in self.taps.regs() {
+                poly_interpolate(
+                    &mut coeff_u[pos..],
+                    &all_xs[pos..],
+                    &eval_u[pos..],
+                    reg.size(),
+                );
+                pos += reg.size();
+            }
+        });
 
         // Add in the coeffs of the check polynomials.
         let z_pow = z.pow(ext_size);
@@ -252,40 +256,42 @@ impl<'a, H: Hal> Prover<'a, H> {
         let combo_count = self.taps.combos_size();
         let combos = vec![H::ExtElem::ZERO; self.cycles * (combo_count + 1)];
         let combos = self.hal.copy_from_extelem("combos", combos.as_slice());
-        let mut cur_mix = H::ExtElem::ONE;
+        tracing::info_span!("mix_poly_coeffs").in_scope(|| {
+            let mut cur_mix = H::ExtElem::ONE;
 
-        for (id, pg) in self.groups.iter().enumerate() {
-            let pg = pg.as_ref().unwrap();
+            for (id, pg) in self.groups.iter().enumerate() {
+                let pg = pg.as_ref().unwrap();
 
-            let mut which = Vec::new();
-            for reg in self.taps.group_regs(id) {
-                which.push(reg.combo_id() as u32);
+                let group_size = self.taps.group_size(id);
+                let mut which = Vec::with_capacity(group_size);
+                for reg in self.taps.group_regs(id) {
+                    which.push(reg.combo_id() as u32);
+                }
+                let which = self.hal.copy_from_u32("which", which.as_slice());
+                self.hal.mix_poly_coeffs(
+                    &combos,
+                    &cur_mix,
+                    &mix,
+                    &pg.coeffs,
+                    &which,
+                    group_size,
+                    self.cycles,
+                );
+                cur_mix *= mix.pow(group_size);
             }
+
+            let which = vec![combo_count as u32; H::CHECK_SIZE];
             let which_buf = self.hal.copy_from_u32("which", which.as_slice());
-            let group_size = self.taps.group_size(id);
             self.hal.mix_poly_coeffs(
                 &combos,
                 &cur_mix,
                 &mix,
-                &pg.coeffs,
+                &check_group.coeffs,
                 &which_buf,
-                group_size,
+                H::CHECK_SIZE,
                 self.cycles,
             );
-            cur_mix *= mix.pow(group_size);
-        }
-
-        let which = vec![combo_count as u32; H::CHECK_SIZE];
-        let which_buf = self.hal.copy_from_u32("which", which.as_slice());
-        self.hal.mix_poly_coeffs(
-            &combos,
-            &cur_mix,
-            &mix,
-            &check_group.coeffs,
-            &which_buf,
-            H::CHECK_SIZE,
-            self.cycles,
-        );
+        });
 
         // Load the near final coefficients back to the CPU
         tracing::info_span!("load_combos").in_scope(|| {
