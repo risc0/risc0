@@ -29,7 +29,7 @@ use db_dump::{
     versions::Row as VersionRow,
 };
 use indicatif::{ProgressBar, ProgressStyle};
-use risc0_crates_validator::{profiles, CrateProfile, ProfileConfig, selected_crates};
+use risc0_crates_validator::{profiles, selected_crates, CrateProfile, ProfileConfig};
 use tokio_stream::StreamExt;
 use tracing::{debug, info, warn};
 use tracing_subscriber::EnvFilter;
@@ -238,9 +238,12 @@ async fn main() -> Result<()> {
                 .context("Failed to read crates selection in file '{file}'")?;
             let handpicked = selected_crates::parse_crates_json(json)
                 .context("Failed to parse crates selection JSON in file '{file}'")?;
-            crates.iter().filter(|c| handpicked.contains(&c.name)).for_each(|c| {
-                selected_crates.push(c.clone());
-            });
+            crates
+                .iter()
+                .filter(|c| handpicked.contains(&c.name))
+                .for_each(|c| {
+                    selected_crates.push(c.clone());
+                });
         }
     };
     if args.categories.is_some() {
