@@ -44,7 +44,6 @@ pub trait CircuitStepHandler<E: Elem> {
     ) -> Result<()>;
 
     fn sort(&mut self, name: &str);
-    fn calc_prefix_products(&mut self);
 }
 
 pub struct CircuitStepContext {

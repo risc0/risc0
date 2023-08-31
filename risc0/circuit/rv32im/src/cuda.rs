@@ -23,7 +23,7 @@ use risc0_zkp::{
     core::log2_ceil,
     hal::{
         cuda::{BufferImpl as CudaBuffer, CudaHal, CudaHash, CudaHashPoseidon, CudaHashSha256},
-        Buffer, EvalCheck, Hal,
+        Buffer, CircuitHal, Hal,
     },
     INV_RATE,
 };
@@ -34,20 +34,20 @@ use crate::{
 
 const KERNELS_FATBIN: &[u8] = include_bytes!(env!("RV32IM_CUDA_PATH"));
 
-pub struct CudaEvalCheck<CH: CudaHash> {
+pub struct CudaCircuitHal<CH: CudaHash> {
     hal: Rc<CudaHal<CH>>, // retain a reference to ensure the context remains valid
     module: Module,
 }
 
-impl<CH: CudaHash> CudaEvalCheck<CH> {
-    #[tracing::instrument(name = "CudaEvalCheck::new", skip_all)]
+impl<CH: CudaHash> CudaCircuitHal<CH> {
+    #[tracing::instrument(name = "CudaCircuitHal::new", skip_all)]
     pub fn new(hal: Rc<CudaHal<CH>>) -> Self {
         let module = Module::from_fatbin(KERNELS_FATBIN, &[]).unwrap();
         Self { hal, module }
     }
 }
 
-impl<'a, CH: CudaHash> EvalCheck<CudaHal<CH>> for CudaEvalCheck<CH> {
+impl<'a, CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
     #[tracing::instrument(skip_all)]
     fn eval_check(
         &self,
@@ -109,8 +109,8 @@ impl<'a, CH: CudaHash> EvalCheck<CudaHal<CH>> for CudaEvalCheck<CH> {
     }
 }
 
-pub type CudaEvalCheckSha256 = CudaEvalCheck<CudaHashSha256>;
-pub type CudaEvalCheckPoseidon = CudaEvalCheck<CudaHashPoseidon>;
+pub type CudaCircuitHalSha256 = CudaCircuitHal<CudaHashSha256>;
+pub type CudaCircuitHalPoseidon = CudaCircuitHal<CudaHashPoseidon>;
 
 #[cfg(test)]
 mod tests {
@@ -123,16 +123,16 @@ mod tests {
     };
     use test_log::test;
 
-    use crate::cpu::CpuEvalCheck;
+    use crate::cpu::CpuCircuitHal;
 
     #[test]
     fn eval_check() {
         const PO2: usize = 4;
         let circuit = crate::CircuitImpl::new();
         let cpu_hal: CpuHal<BabyBear> = CpuHal::new(Sha256HashSuite::new_suite());
-        let cpu_eval = CpuEvalCheck::new(&circuit);
+        let cpu_eval = CpuCircuitHal::new(&circuit);
         let gpu_hal = Rc::new(CudaHalSha256::new());
-        let gpu_eval = super::CudaEvalCheck::new(gpu_hal.clone());
+        let gpu_eval = super::CudaCircuitHal::new(gpu_hal.clone());
         crate::testutil::eval_check(&cpu_hal, cpu_eval, gpu_hal.as_ref(), gpu_eval, PO2);
     }
 }

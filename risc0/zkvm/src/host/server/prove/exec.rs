@@ -248,13 +248,6 @@ impl CircuitStepHandler<Elem> for MachineContext {
         self.memory.ram_plonk.sort();
         self.memory.bytes_plonk.sort();
     }
-
-    #[tracing::instrument(skip(self))]
-    fn calc_prefix_products(&mut self) {
-        for accum in &mut self.memory.plonk_accum {
-            accum.1.calc_prefix_products()
-        }
-    }
 }
 
 impl MachineContext {

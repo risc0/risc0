@@ -14,7 +14,7 @@
 
 use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion};
 use risc0_circuit_rv32im::{
-    cpu::CpuEvalCheck,
+    cpu::CpuCircuitHal,
     testutil::{eval_check_impl, EvalCheckParams},
     CircuitImpl,
 };
@@ -28,10 +28,10 @@ pub fn eval_check(c: &mut Criterion) {
         let params = EvalCheckParams::new(*po2);
         let circuit = CircuitImpl::new();
         let hal = CpuHal::new(Sha256HashSuite::<BabyBear>::new_suite());
-        let eval = CpuEvalCheck::new(&circuit);
+        let circuit_hal = CpuCircuitHal::new(&circuit);
         group.bench_function(BenchmarkId::new("cpu", po2), |b| {
             b.iter(|| {
-                eval_check_impl(&params, &hal, &eval);
+                eval_check_impl(&params, &hal, &circuit_hal);
             });
         });
     }
@@ -40,10 +40,10 @@ pub fn eval_check(c: &mut Criterion) {
     for po2 in [2, 8, 16, 20, 21].iter() {
         let params = EvalCheckParams::new(*po2);
         let hal = std::rc::Rc::new(risc0_zkp::hal::cuda::CudaHalSha256::new());
-        let eval = risc0_circuit_rv32im::cuda::CudaEvalCheckSha256::new(hal.clone());
+        let circuit_hal = risc0_circuit_rv32im::cuda::CudaCircuitHalSha256::new(hal.clone());
         group.bench_function(BenchmarkId::new("cuda", po2), |b| {
             b.iter(|| {
-                eval_check_impl(&params, hal.as_ref(), &eval);
+                eval_check_impl(&params, hal.as_ref(), &circuit_hal);
             });
         });
     }
@@ -52,12 +52,12 @@ pub fn eval_check(c: &mut Criterion) {
     for po2 in [2, 8, 16, 22].iter() {
         let params = EvalCheckParams::new(*po2);
         let hal = std::rc::Rc::new(risc0_zkp::hal::metal::MetalHalSha256::new());
-        let eval = risc0_circuit_rv32im::metal::MetalEvalCheck::<
+        let circuit_hal = risc0_circuit_rv32im::metal::MetalCircuitHal::<
             risc0_zkp::hal::metal::MetalHashSha256,
         >::new(hal.clone());
         group.bench_function(BenchmarkId::new("metal", po2), |b| {
             b.iter(|| {
-                eval_check_impl(&params, hal.as_ref(), &eval);
+                eval_check_impl(&params, hal.as_ref(), &circuit_hal);
             });
         });
     }

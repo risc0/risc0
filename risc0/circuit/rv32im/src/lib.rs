@@ -86,9 +86,6 @@ mod tests {
         fn sort(&mut self, _name: &str) {
             unimplemented!()
         }
-        fn calc_prefix_products(&mut self) {
-            unimplemented!()
-        }
     }
 
     #[test]
@@ -115,7 +112,7 @@ pub mod testutil {
     };
     use risc0_zkp::{
         adapter::{CircuitInfo, TapsProvider},
-        hal::{Buffer, EvalCheck, Hal},
+        hal::{Buffer, CircuitHal, Hal},
         INV_RATE,
     };
 
@@ -177,12 +174,12 @@ pub mod testutil {
     }
 
     #[allow(unused)]
-    pub(crate) fn eval_check<H1, H2, E1, E2>(hal1: &H1, eval1: E1, hal2: &H2, eval2: E2, po2: usize)
+    pub(crate) fn eval_check<H1, H2, C1, C2>(hal1: &H1, eval1: C1, hal2: &H2, eval2: C2, po2: usize)
     where
         H1: Hal<Elem = BabyBearElem, ExtElem = BabyBearExtElem>,
         H2: Hal<Elem = BabyBearElem, ExtElem = BabyBearExtElem>,
-        E1: EvalCheck<H1>,
-        E2: EvalCheck<H2>,
+        C1: CircuitHal<H1>,
+        C2: CircuitHal<H2>,
     {
         let params = EvalCheckParams::new(po2);
         let check1 = eval_check_impl(&params, hal1, &eval1);
@@ -190,10 +187,10 @@ pub mod testutil {
         assert_eq!(check1, check2);
     }
 
-    pub fn eval_check_impl<H, E>(params: &EvalCheckParams, hal: &H, eval: &E) -> Vec<H::Elem>
+    pub fn eval_check_impl<H, C>(params: &EvalCheckParams, hal: &H, circuit_hal: &C) -> Vec<H::Elem>
     where
         H: Hal<Elem = BabyBearElem, ExtElem = BabyBearExtElem>,
-        E: EvalCheck<H>,
+        C: CircuitHal<H>,
     {
         let check = hal.alloc_elem("check", BabyBearExtElem::EXT_SIZE * params.domain);
         let code = hal.copy_from_elem("code", &params.code);
@@ -201,7 +198,7 @@ pub mod testutil {
         let accum = hal.copy_from_elem("accum", &params.accum);
         let mix = hal.copy_from_elem("mix", &params.mix);
         let out = hal.copy_from_elem("out", &params.out);
-        eval.eval_check(
+        circuit_hal.eval_check(
             &check,
             &[&accum, &code, &data],
             &[&mix, &out],
