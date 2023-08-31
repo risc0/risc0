@@ -12,7 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use anyhow::{Context, Result};
+use anyhow::{anyhow, Context, Result};
+use std::collections::{HashMap, HashSet};
 
 const BAD_JSON_ERR_MSG: &str = r#"
 JSON is not properly formatted.
@@ -26,10 +27,6 @@ Expected a JSON as follows:
         ...
     }"#;
 
-fn bad_json() -> anyhow::Error {
-    anyhow::anyhow!("{}", BAD_JSON_ERR_MSG)
-}
-
 pub fn read_crates_selection(path: impl AsRef<str>) -> Result<String> {
     Ok(std::fs::read_to_string(path.as_ref()).context(format!(
         "Failed to read content from file '{}'",
@@ -37,19 +34,14 @@ pub fn read_crates_selection(path: impl AsRef<str>) -> Result<String> {
     ))?)
 }
 
-pub fn parse_crates_json(raw_json: impl AsRef<str>) -> Result<Vec<String>> {
-    let json: serde_json::Value =
-        serde_json::from_str(raw_json.as_ref()).context("Failed to parse JSON")?;
-    let obj = json.as_object().ok_or_else(bad_json)?;
-    let mut crates = Vec::new();
-    for (_k, v) in obj {
-        let arr = v.as_array().ok_or_else(bad_json)?;
-        for i in arr {
-            let s = i.as_str().ok_or_else(bad_json)?;
-            crates.push(s.to_string());
-        }
-    }
-    Ok(crates)
+pub fn parse_crates_json(raw_json: impl AsRef<str>) -> Result<HashSet<String>> {
+    let json: HashMap<String, Vec<String>> =
+        serde_json::from_str(raw_json.as_ref()).or_else(|_| Err(anyhow!("{BAD_JSON_ERR_MSG}")))?;
+    Ok(json
+        .values()
+        .flatten()
+        .map(String::from)
+        .collect::<HashSet<_>>())
 }
 
 #[cfg(test)]
@@ -69,6 +61,12 @@ mod tests {
             ]
         }"#;
         let crates = parse_crates_json(json).expect("Failed to parse JSON");
-        assert_eq!(crates, vec!["a1", "a2", "b1", "b2"])
+        assert_eq!(
+            crates,
+            vec!["a1", "a2", "b1", "b2"]
+                .into_iter()
+                .map(String::from)
+                .collect::<HashSet<_>>()
+        );
     }
 }
