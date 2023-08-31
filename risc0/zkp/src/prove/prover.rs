@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use log::debug;
+use rayon::prelude::*;
 use risc0_core::field::{Elem, ExtElem, RootsOfUnity};
 
 use crate::{
@@ -95,7 +95,7 @@ impl<'a, H: Hal> Prover<'a, H> {
 
         group_ref.merkle.commit(&mut self.iop);
 
-        debug!(
+        log::debug!(
             "{} group root: {}",
             self.taps.group_name(tap_group_index),
             group_ref.merkle.root()
@@ -138,7 +138,7 @@ impl<'a, H: Hal> Prover<'a, H> {
         check_poly.view(|check_out| {
             for i in (0..domain).step_by(4) {
                 if check_out[i] != H::Elem::ZERO {
-                    debug!("check[{}] =  {:?}", i, check_out[i]);
+                    log::debug!("check[{}] =  {:?}", i, check_out[i]);
                 }
             }
         });
@@ -164,7 +164,7 @@ impl<'a, H: Hal> Prover<'a, H> {
         // Make the PolyGroup + add it to the IOP;
         let check_group = PolyGroup::new(self.hal, check_poly, H::CHECK_SIZE, self.cycles, "check");
         check_group.merkle.commit(&mut self.iop);
-        debug!("checkGroup: {}", check_group.merkle.root());
+        log::debug!("checkGroup: {}", check_group.merkle.root());
 
         // Now pick a value for Z, which is used as the DEEP-ALI query point.
         let z = self.iop.random_ext_elem();
@@ -234,7 +234,7 @@ impl<'a, H: Hal> Prover<'a, H> {
             coeff_u.extend(view);
         });
 
-        debug!("Size of U = {}", coeff_u.len());
+        log::debug!("Size of U = {}", coeff_u.len());
         self.iop.write_field_elem_slice(&coeff_u);
         let hash_u = self
             .hal
@@ -245,7 +245,7 @@ impl<'a, H: Hal> Prover<'a, H> {
 
         // Set the mix mix value, which is used for FRI batching.
         let mix = self.iop.random_ext_elem();
-        debug!("Mix = {mix:?}");
+        log::debug!("Mix = {mix:?}");
 
         // Do the coefficent mixing
         // Begin by making a zeroed output buffer
@@ -288,45 +288,48 @@ impl<'a, H: Hal> Prover<'a, H> {
         );
 
         // Load the near final coefficients back to the CPU
-        combos.view_mut(|combos| {
-            // Subtract the U coeffs from the combos
-            let mut cur_pos = 0;
-            let mut cur = H::ExtElem::ONE;
-            for reg in self.taps.regs() {
-                for i in 0..reg.size() {
-                    combos[self.cycles * reg.combo_id() + i] -= cur * coeff_u[cur_pos + i];
-                }
-                cur *= mix;
-                cur_pos += reg.size();
-            }
-            // Subtract the final 'check' coefficents
-            for _ in 0..H::CHECK_SIZE {
-                combos[self.cycles * combo_count] -= cur * coeff_u[cur_pos];
-                cur_pos += 1;
-                cur *= mix;
-            }
-            // Divide each element by (x - Z * back1^back) for each back
-            for combo in 0..combo_count {
-                for back in self.taps.get_combo(combo).slice() {
-                    assert_eq!(
-                        poly_divide(
-                            &mut combos[combo * self.cycles..combo * self.cycles + self.cycles],
-                            z * back_one.pow((*back).into())
-                        ),
-                        H::ExtElem::ZERO
-                    );
-                }
-            }
-            // Divide check polys by z^EXT_SIZE
-            assert_eq!(
-                poly_divide(
-                    &mut combos[combo_count * self.cycles..combo_count * self.cycles + self.cycles],
-                    z_pow
-                ),
-                H::ExtElem::ZERO
-            );
+        tracing::info_span!("load_combos").in_scope(|| {
+            combos.view_mut(|combos| {
+                tracing::info_span!("part1").in_scope(|| {
+                    let mut cur_pos = 0;
+                    let mut cur = H::ExtElem::ONE;
+                    // Subtract the U coeffs from the combos
+                    for reg in self.taps.regs() {
+                        for i in 0..reg.size() {
+                            combos[self.cycles * reg.combo_id() + i] -= cur * coeff_u[cur_pos + i];
+                        }
+                        cur *= mix;
+                        cur_pos += reg.size();
+                    }
+                    // Subtract the final 'check' coefficents
+                    for _ in 0..H::CHECK_SIZE {
+                        combos[self.cycles * combo_count] -= cur * coeff_u[cur_pos];
+                        cur_pos += 1;
+                        cur *= mix;
+                    }
+                });
+                // Divide each element by (x - Z * back1^back) for each back
+                tracing::info_span!("part2").in_scope(|| {
+                    combos
+                        .par_chunks_exact_mut(self.cycles)
+                        .zip(0..combo_count)
+                        .for_each(|(combo, i)| {
+                            for back in self.taps.get_combo(i).slice() {
+                                assert_eq!(
+                                    poly_divide(combo, z * back_one.pow((*back).into())),
+                                    H::ExtElem::ZERO
+                                );
+                            }
+                        });
+                });
+                tracing::info_span!("part3").in_scope(|| {
+                    // Divide check polys by z^EXT_SIZE
+                    let slice = &mut combos
+                        [combo_count * self.cycles..combo_count * self.cycles + self.cycles];
+                    assert_eq!(poly_divide(slice, z_pow), H::ExtElem::ZERO);
+                });
+            });
         });
-
         // Sum the combos up into one final polynomial + make it into 4 Fp polys.
         // Additionally, it needs to be bit reversed to make everyone happy
         let final_poly_coeffs = self
@@ -336,7 +339,7 @@ impl<'a, H: Hal> Prover<'a, H> {
 
         // Finally do the FRI protocol to prove the degree of the polynomial
         self.hal.batch_bit_reverse(&final_poly_coeffs, ext_size);
-        debug!("FRI-proof, size = {}", final_poly_coeffs.size() / ext_size);
+        log::debug!("FRI-proof, size = {}", final_poly_coeffs.size() / ext_size);
 
         fri_prove(self.hal, &mut self.iop, &final_poly_coeffs, |iop, idx| {
             for pg in self.groups.iter() {
@@ -348,7 +351,7 @@ impl<'a, H: Hal> Prover<'a, H> {
 
         // Return final proof
         let proof = self.iop.proof;
-        debug!("Proof size = {}", proof.len());
+        log::debug!("Proof size = {}", proof.len());
         proof
     }
 }
