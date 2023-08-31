@@ -17,7 +17,7 @@ use risc0_core::field::{Elem, ExtElem, RootsOfUnity};
 
 use crate::{
     core::poly::{poly_divide, poly_interpolate},
-    hal::{Buffer, EvalCheck, Hal},
+    hal::{Buffer, CircuitHal, Hal},
     prove::{fri::fri_prove, poly_group::PolyGroup, write_iop::WriteIOP},
     taps::TapSet,
     INV_RATE,
@@ -104,9 +104,9 @@ impl<'a, H: Hal> Prover<'a, H> {
 
     /// Generates the proof and returns the seal.
     #[tracing::instrument(skip_all)]
-    pub fn finalize<E>(mut self, globals: &[&H::Buffer<H::Elem>], eval: &E) -> Vec<u32>
+    pub fn finalize<C>(mut self, globals: &[&H::Buffer<H::Elem>], circuit_hal: &C) -> Vec<u32>
     where
-        E: EvalCheck<H>,
+        C: CircuitHal<H>,
     {
         // Set the poly mix value, which is used for constraint compression in the
         // DEEP-ALI protocol.
@@ -125,7 +125,7 @@ impl<'a, H: Hal> Prover<'a, H> {
             .iter()
             .map(|pg| &pg.as_ref().unwrap().evaluated)
             .collect();
-        eval.eval_check(
+        circuit_hal.eval_check(
             &check_poly,
             groups.as_slice(),
             globals,

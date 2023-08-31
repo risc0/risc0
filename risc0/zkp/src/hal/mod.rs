@@ -152,7 +152,7 @@ pub trait Hal {
     );
 }
 
-pub trait EvalCheck<H: Hal> {
+pub trait CircuitHal<H: Hal> {
     /// Compute check polynomial.
     fn eval_check(
         &self,

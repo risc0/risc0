@@ -125,8 +125,4 @@ impl<'a, F: Field> CircuitStepHandler<F::Elem> for Handler<'a, F> {
     fn sort(&mut self, _name: &str) {
         unimplemented!()
     }
-
-    fn calc_prefix_products(&mut self) {
-        unimplemented!()
-    }
 }

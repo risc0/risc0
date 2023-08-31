@@ -51,7 +51,7 @@ use risc0_core::field::{
 use risc0_zkp::{
     adapter::CircuitInfo,
     core::digest::DIGEST_WORDS,
-    hal::{EvalCheck, Hal},
+    hal::{CircuitHal, Hal},
 };
 use risc0_zkvm_platform::{memory::MEM_SIZE, PAGE_SIZE, WORD_SIZE};
 
@@ -103,18 +103,18 @@ pub trait DynProverImpl {
     fn get_peak_memory_usage(&self) -> usize;
 }
 
-/// A pair of [Hal] and [EvalCheck].
+/// A pair of [Hal] and [CircuitHal].
 #[derive(Clone)]
-pub struct HalEval<H, E>
+pub struct HalPair<H, C>
 where
     H: Hal<Field = BabyBear, Elem = Elem, ExtElem = ExtElem>,
-    E: EvalCheck<H>,
+    C: CircuitHal<H>,
 {
     /// A [Hal] implementation.
     pub hal: Rc<H>,
 
-    /// An [EvalCheck] implementation.
-    pub eval: Rc<E>,
+    /// An [CircuitHal] implementation.
+    pub circuit_hal: Rc<C>,
 }
 
 impl Session {
@@ -169,23 +169,29 @@ mod cuda {
     use std::rc::Rc;
 
     use anyhow::{bail, Result};
-    use risc0_circuit_rv32im::cuda::{CudaEvalCheckPoseidon, CudaEvalCheckSha256};
+    use risc0_circuit_rv32im::cuda::{CudaCircuitHalPoseidon, CudaCircuitHalSha256};
     use risc0_zkp::hal::cuda::{CudaHalPoseidon, CudaHalSha256};
 
-    use super::{DynProverImpl, HalEval, ProverImpl};
+    use super::{DynProverImpl, HalPair, ProverImpl};
     use crate::ProverOpts;
 
     pub fn get_prover_impl(opts: &ProverOpts) -> Result<Rc<dyn DynProverImpl>> {
         match opts.hashfn.as_str() {
             "sha-256" => {
                 let hal = Rc::new(CudaHalSha256::new());
-                let eval = Rc::new(CudaEvalCheckSha256::new(hal.clone()));
-                Ok(Rc::new(ProverImpl::new("cuda", HalEval { hal, eval })))
+                let circuit_hal = Rc::new(CudaCircuitHalSha256::new(hal.clone()));
+                Ok(Rc::new(ProverImpl::new(
+                    "cuda",
+                    HalPair { hal, circuit_hal },
+                )))
             }
             "poseidon" => {
                 let hal = Rc::new(CudaHalPoseidon::new());
-                let eval = Rc::new(CudaEvalCheckPoseidon::new(hal.clone()));
-                Ok(Rc::new(ProverImpl::new("cuda", HalEval { hal, eval })))
+                let circuit_hal = Rc::new(CudaCircuitHalPoseidon::new(hal.clone()));
+                Ok(Rc::new(ProverImpl::new(
+                    "cuda",
+                    HalPair { hal, circuit_hal },
+                )))
             }
             _ => bail!("Unsupported hashfn: {}", opts.hashfn),
         }
@@ -197,25 +203,31 @@ mod metal {
     use std::rc::Rc;
 
     use anyhow::{bail, Result};
-    use risc0_circuit_rv32im::metal::MetalEvalCheck;
+    use risc0_circuit_rv32im::metal::MetalCircuitHal;
     use risc0_zkp::hal::metal::{
         MetalHalPoseidon, MetalHalSha256, MetalHashPoseidon, MetalHashSha256,
     };
 
-    use super::{DynProverImpl, HalEval, ProverImpl};
+    use super::{DynProverImpl, HalPair, ProverImpl};
     use crate::ProverOpts;
 
     pub fn get_prover_impl(opts: &ProverOpts) -> Result<Rc<dyn DynProverImpl>> {
         match opts.hashfn.as_str() {
             "sha-256" => {
                 let hal = Rc::new(MetalHalSha256::new());
-                let eval = Rc::new(MetalEvalCheck::<MetalHashSha256>::new(hal.clone()));
-                Ok(Rc::new(ProverImpl::new("metal", HalEval { hal, eval })))
+                let circuit_hal = Rc::new(MetalCircuitHal::<MetalHashSha256>::new(hal.clone()));
+                Ok(Rc::new(ProverImpl::new(
+                    "metal",
+                    HalPair { hal, circuit_hal },
+                )))
             }
             "poseidon" => {
                 let hal = Rc::new(MetalHalPoseidon::new());
-                let eval = Rc::new(MetalEvalCheck::<MetalHashPoseidon>::new(hal.clone()));
-                Ok(Rc::new(ProverImpl::new("metal", HalEval { hal, eval })))
+                let circuit_hal = Rc::new(MetalCircuitHal::<MetalHashPoseidon>::new(hal.clone()));
+                Ok(Rc::new(ProverImpl::new(
+                    "metal",
+                    HalPair { hal, circuit_hal },
+                )))
             }
             _ => bail!("Unsupported hashfn: {}", opts.hashfn),
         }
@@ -227,13 +239,13 @@ mod cpu {
     use std::rc::Rc;
 
     use anyhow::{bail, Result};
-    use risc0_circuit_rv32im::cpu::CpuEvalCheck;
+    use risc0_circuit_rv32im::cpu::CpuCircuitHal;
     use risc0_zkp::{
         core::hash::{poseidon::PoseidonHashSuite, sha::Sha256HashSuite},
         hal::cpu::CpuHal,
     };
 
-    use super::{DynProverImpl, HalEval, ProverImpl};
+    use super::{DynProverImpl, HalPair, ProverImpl};
     use crate::{host::CIRCUIT, ProverOpts};
 
     pub fn get_prover_impl(opts: &ProverOpts) -> Result<Rc<dyn DynProverImpl>> {
@@ -243,9 +255,9 @@ mod cpu {
             _ => bail!("Unsupported hashfn: {}", opts.hashfn),
         };
         let hal = Rc::new(CpuHal::new(suite));
-        let eval = Rc::new(CpuEvalCheck::new(&CIRCUIT));
-        let hal_eval = HalEval { hal, eval };
-        Ok(Rc::new(ProverImpl::new("cpu", hal_eval)))
+        let circuit_hal = Rc::new(CpuCircuitHal::new(&CIRCUIT));
+        let hal_pair = HalPair { hal, circuit_hal };
+        Ok(Rc::new(ProverImpl::new("cpu", hal_pair)))
     }
 }
 
