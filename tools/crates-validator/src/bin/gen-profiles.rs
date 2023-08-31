@@ -29,7 +29,7 @@ use db_dump::{
     versions::Row as VersionRow,
 };
 use indicatif::{ProgressBar, ProgressStyle};
-use risc0_crates_validator::{profiles, CrateProfile, ProfileConfig, SELECTED_CRATES};
+use risc0_crates_validator::{profiles, CrateProfile, ProfileConfig, selected_crates};
 use tokio_stream::StreamExt;
 use tracing::{debug, info, warn};
 use tracing_subscriber::EnvFilter;
@@ -75,9 +75,19 @@ struct Args {
     #[arg(long)]
     no_profiles: bool,
 
-    /// Add selected crates to the profile
+    /// Path for the JSON specifying crates to be added to the profile.
+    ///
+    /// The expected format is a JSON as follows:
+    ///    {
+    ///       "<identifier>": [
+    ///           "<crate_name_1>",
+    ///           "<crate_name_2>",
+    ///           ...
+    ///       ],
+    ///       ...
+    ///    }
     #[arg(short, long, conflicts_with = "name")]
-    selected_crates: bool,
+    selected_crates: Option<Vec<String>>,
 
     /// Add selected categories to the profile
     #[arg(
@@ -221,14 +231,17 @@ async fn main() -> Result<()> {
         .take(args.crate_count)
         .map(|c| c.clone())
         .collect::<Vec<_>>();
-    if args.selected_crates {
+    if let Some(json_files) = args.selected_crates {
         info!("Adding selected crates to profile");
-        let handpicked = crates
-            .iter()
-            .filter(|c| SELECTED_CRATES.contains(&c.name.as_str()))
-            .map(|c| c.clone())
-            .collect::<Vec<_>>();
-        selected_crates.extend(handpicked);
+        for file in json_files {
+            let json = selected_crates::read_crates_selection(file)
+                .context("Failed to read crates selection in file '{file}'")?;
+            let handpicked = selected_crates::parse_crates_json(json)
+                .context("Failed to parse crates selection JSON in file '{file}'")?;
+            crates.iter().filter(|c| handpicked.contains(&c.name)).for_each(|c| {
+                selected_crates.push(c.clone());
+            });
+        }
     };
     if args.categories.is_some() {
         info!("Adding selected categories to profile");
@@ -241,6 +254,13 @@ async fn main() -> Result<()> {
             selected_crates.extend(crates_from_categories);
         }
     };
+
+    // Ensure that we don't have any duplicates
+    let selected_crates = selected_crates
+        .into_iter()
+        .collect::<HashSet<_>>()
+        .into_iter()
+        .collect::<Vec<_>>();
 
     for cur_crate in &selected_crates {
         let version = &most_recent[&cur_crate.id];

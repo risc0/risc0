@@ -12,30 +12,63 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Important crates, not necessarily the most popular
-pub const SELECTED_CRATES: &[&str] = &[
-    // Zeth dependencies
-    "anyhow",
-    "hashbrown",
-    "hex-literal",
-    "once_cell",
-    "revm",
-    "ruint",
-    "serde",
-    "thiserror",
-    "alloy-primitives",
-    "alloy-rlp",
-    "alloy-rlp-derive",
-    "anyhow",
-    "bytes",
-    "ethers-core",
-    "k256",
-    "revm-primitives",
-    "rlp",
-    "serde",
-    "sha2",
-    "sha3",
-    "thiserror",
-    // Hand picked crates
-    "openssl",
-];
+use anyhow::{Context, Result};
+
+const BAD_JSON_ERR_MSG: &str = r#"
+JSON is not properly formatted.
+Expected a JSON as follows:
+    {
+        "<identifier>": [
+            "<crate_name_1>",
+            "<crate_name_2>",
+            ...
+        ],
+        ...
+    }"#;
+
+fn bad_json() -> anyhow::Error {
+    anyhow::anyhow!("{}", BAD_JSON_ERR_MSG)
+}
+
+pub fn read_crates_selection(path: impl AsRef<str>) -> Result<String> {
+    Ok(std::fs::read_to_string(path.as_ref()).context(format!(
+        "Failed to read content from file '{}'",
+        path.as_ref()
+    ))?)
+}
+
+pub fn parse_crates_json(raw_json: impl AsRef<str>) -> Result<Vec<String>> {
+    let json: serde_json::Value =
+        serde_json::from_str(raw_json.as_ref()).context("Failed to parse JSON")?;
+    let obj = json.as_object().ok_or_else(bad_json)?;
+    let mut crates = Vec::new();
+    for (_k, v) in obj {
+        let arr = v.as_array().ok_or_else(bad_json)?;
+        for i in arr {
+            let s = i.as_str().ok_or_else(bad_json)?;
+            crates.push(s.to_string());
+        }
+    }
+    Ok(crates)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_parse_crates_json() {
+        let json = r#"{
+            "a": [
+                "a1",
+                "a2"
+            ],
+            "b": [
+                "b1",
+                "b2"
+            ]
+        }"#;
+        let crates = parse_crates_json(json).expect("Failed to parse JSON");
+        assert_eq!(crates, vec!["a1", "a2", "b1", "b2"])
+    }
+}

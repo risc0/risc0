@@ -30,8 +30,6 @@ use tracing::{debug, error, info, warn};
 pub mod profiles;
 pub mod selected_crates;
 
-pub use selected_crates::*;
-
 /// Validation Results fields
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ValidationResults {
