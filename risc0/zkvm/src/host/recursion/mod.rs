@@ -24,6 +24,7 @@ mod poly_ext;
 mod receipt;
 mod taps;
 
+pub use control_id::ALLOWED_IDS_ROOT;
 pub use poly_ext::DEF;
 pub use receipt::{valid_control_ids, SuccinctReceipt};
 
