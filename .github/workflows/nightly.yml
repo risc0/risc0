@@ -27,6 +27,8 @@ jobs:
 
       - run: cargo install --force --path risc0/cargo-risczero
 
+      - run: cargo risczero install
+
       - run: cargo build --release
         working-directory: tools/crates-validator/
 

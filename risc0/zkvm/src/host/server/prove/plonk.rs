@@ -14,7 +14,7 @@
 
 use std::collections::VecDeque;
 
-use risc0_core::field::{self, Elem, ExtElem};
+use risc0_core::field::{Elem, ExtElem, Field};
 use risc0_zkp::MAX_CYCLES;
 
 // Main RAM plonk rows have the following 7 plonk elements:
@@ -41,7 +41,7 @@ impl RamPlonk {
         }
     }
 
-    pub fn write<E: field::Elem>(&mut self, elems: &[E; 7])
+    pub fn write<E: Elem>(&mut self, elems: &[E; 7])
     where
         u32: From<E>,
     {
@@ -69,7 +69,7 @@ impl RamPlonk {
         self.main_ram.sort_unstable_by(|a, b| b.cmp(a));
     }
 
-    pub fn read<E: field::Elem>(&mut self, elems: &mut [E; 7])
+    pub fn read<E: Elem>(&mut self, elems: &mut [E; 7])
     where
         u32: From<E>,
     {
@@ -104,7 +104,7 @@ impl BytesPlonk {
         }
     }
 
-    pub fn write<E: field::Elem>(&mut self, elems: &[E; 2])
+    pub fn write<E: Elem>(&mut self, elems: &[E; 2])
     where
         u32: From<E>,
     {
@@ -119,7 +119,7 @@ impl BytesPlonk {
         // BytesPlonk is already sorted.
     }
 
-    pub fn read<E: field::Elem>(&mut self, outs: &mut [E; 2]) {
+    pub fn read<E: Elem>(&mut self, outs: &mut [E; 2]) {
         while self.counts[self.read_pos] == 0 {
             self.read_pos += 1;
         }
@@ -134,11 +134,11 @@ impl BytesPlonk {
 }
 
 /// Plonk accumulations.  Saves factors to compute prefix products.
-pub struct PlonkAccum<F: field::Field> {
+pub struct PlonkAccum<F: Field> {
     elems: VecDeque<F::ExtElem>,
 }
 
-impl<F: field::Field> PlonkAccum<F> {
+impl<F: Field> PlonkAccum<F> {
     pub fn new() -> Self {
         PlonkAccum {
             elems: VecDeque::new(),
@@ -160,17 +160,9 @@ impl<F: field::Field> PlonkAccum<F> {
             out.clone_from_slice(self.elems.pop_front().unwrap().subelems());
         }
     }
-
-    pub fn calc_prefix_products(&mut self) {
-        let mut tot = F::ExtElem::ONE;
-        for val in self.elems.iter_mut() {
-            tot *= *val;
-            *val = tot;
-        }
-    }
 }
 
-impl<F: field::Field> Default for PlonkAccum<F> {
+impl<F: Field> Default for PlonkAccum<F> {
     fn default() -> Self {
         Self::new()
     }

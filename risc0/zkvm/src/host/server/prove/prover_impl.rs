@@ -20,45 +20,45 @@ use risc0_circuit_rv32im::{
 use risc0_core::field::baby_bear::{BabyBear, Elem, ExtElem};
 use risc0_zkp::{
     adapter::TapsProvider,
-    hal::{EvalCheck, Hal},
+    hal::{CircuitHal, Hal},
     layout::Buffer,
     prove::adapter::ProveAdapter,
 };
 
-use super::{exec::MachineContext, DynProverImpl, HalEval};
+use super::{exec::MachineContext, DynProverImpl, HalPair};
 use crate::{
     host::{receipt::SegmentReceipts, CIRCUIT},
     InnerReceipt, Loader, Receipt, Segment, SegmentReceipt, Session, VerifierContext,
 };
 
 /// An implementation of a [Prover] that runs locally.
-pub struct ProverImpl<H, E>
+pub struct ProverImpl<H, C>
 where
     H: Hal<Field = BabyBear, Elem = Elem, ExtElem = ExtElem>,
-    E: EvalCheck<H>,
+    C: CircuitHal<H>,
 {
     name: String,
-    hal_eval: HalEval<H, E>,
+    hal_pair: HalPair<H, C>,
 }
 
-impl<H, E> ProverImpl<H, E>
+impl<H, C> ProverImpl<H, C>
 where
     H: Hal<Field = BabyBear, Elem = Elem, ExtElem = ExtElem>,
-    E: EvalCheck<H>,
+    C: CircuitHal<H>,
 {
-    /// Construct a [ProverImpl] with the given name and [HalEval].
-    pub fn new(name: &str, hal_eval: HalEval<H, E>) -> Self {
+    /// Construct a [ProverImpl] with the given name and [HalPair].
+    pub fn new(name: &str, hal_pair: HalPair<H, C>) -> Self {
         Self {
             name: name.to_string(),
-            hal_eval,
+            hal_pair,
         }
     }
 }
 
-impl<H, E> DynProverImpl for ProverImpl<H, E>
+impl<H, C> DynProverImpl for ProverImpl<H, C>
 where
     H: Hal<Field = BabyBear, Elem = Elem, ExtElem = ExtElem>,
-    E: EvalCheck<H>,
+    C: CircuitHal<H>,
 {
     fn prove_session(&self, ctx: &VerifierContext, session: &Session) -> Result<Receipt> {
         log::info!("prove_session: {}", self.name);
@@ -89,7 +89,7 @@ where
             segment.po2,
             segment.insn_cycles,
         );
-        let (hal, eval) = (self.hal_eval.hal.as_ref(), &self.hal_eval.eval);
+        let (hal, circuit_hal) = (self.hal_pair.hal.as_ref(), &self.hal_pair.circuit_hal);
         let hashfn = &hal.get_hash_suite().name;
 
         let io = segment.prepare_globals();
@@ -127,7 +127,7 @@ where
         log::debug!("Globals: {:?}", OutBuffer(out_slice).tree(&LAYOUT));
         let out = hal.copy_from_elem("out", &adapter.get_io().as_slice());
 
-        let seal = prover.finalize(&[&mix, &out], eval.as_ref());
+        let seal = prover.finalize(&[&mix, &out], circuit_hal.as_ref());
 
         let receipt = SegmentReceipt {
             seal,
@@ -140,6 +140,6 @@ where
     }
 
     fn get_peak_memory_usage(&self) -> usize {
-        self.hal_eval.hal.get_memory_usage()
+        self.hal_pair.hal.get_memory_usage()
     }
 }
