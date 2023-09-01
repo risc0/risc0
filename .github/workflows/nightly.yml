@@ -27,7 +27,9 @@ jobs:
 
       - run: cargo install --force --path risc0/cargo-risczero
 
-      - run: cargo risczero install
+      - run: cargo run --bin cargo-risczero -- risczero install
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - run: cargo build --release
         working-directory: tools/crates-validator/
