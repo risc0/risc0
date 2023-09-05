@@ -54,6 +54,8 @@ pub trait Hal {
 
     const CHECK_SIZE: usize = INV_RATE * Self::ExtElem::EXT_SIZE;
 
+    fn has_unified_memory(&self) -> bool;
+
     fn get_memory_usage(&self) -> usize {
         TRACKER.lock().unwrap().peak
     }
@@ -140,8 +142,6 @@ pub trait Hal {
 
     fn hash_fold(&self, io: &Self::Buffer<Digest>, input_size: usize, output_size: usize);
 
-    fn has_unified_memory(&self) -> bool;
-
     fn gather_sample(
         &self,
         dst: &Self::Buffer<Self::Elem>,
@@ -152,7 +152,7 @@ pub trait Hal {
     );
 }
 
-pub trait EvalCheck<H: Hal> {
+pub trait CircuitHal<H: Hal> {
     /// Compute check polynomial.
     fn eval_check(
         &self,

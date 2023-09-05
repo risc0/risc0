@@ -14,12 +14,11 @@
 
 //! Handlers for two-way private I/O between host and guest.
 
-use std::{cell::RefCell, cmp::min, collections::HashMap, io::Cursor, rc::Rc, str::from_utf8};
+use std::{cell::RefCell, cmp::min, collections::HashMap, rc::Rc, str::from_utf8};
 
 use anyhow::{anyhow, bail, Result};
 use bytes::Bytes;
 use risc0_zkvm_platform::{
-    fileno,
     syscall::{
         nr::{
             SYS_CYCLE_COUNT, SYS_GETENV, SYS_LOG, SYS_PANIC, SYS_RANDOM, SYS_READ, SYS_READ_AVAIL,
@@ -31,10 +30,7 @@ use risc0_zkvm_platform::{
     WORD_SIZE,
 };
 
-use crate::host::client::{
-    env::{ExecutorEnv, SliceIo},
-    posix_io::PosixIo,
-};
+use crate::host::client::{env::ExecutorEnv, posix_io::PosixIo, slice_io::SliceIo};
 
 /// A host-side implementation of a system call.
 pub trait Syscall {
@@ -97,10 +93,6 @@ impl<'a> SyscallTable<'a> {
         };
 
         let posix_io = env.posix_io.clone();
-        if !env.input.is_empty() {
-            let reader = Cursor::new(env.input.clone());
-            posix_io.borrow_mut().with_read_fd(fileno::STDIN, reader);
-        }
         this.with_syscall(SYS_CYCLE_COUNT, SysCycleCount)
             .with_syscall(SYS_LOG, SysLog)
             .with_syscall(SYS_PANIC, SysPanic)
@@ -109,9 +101,10 @@ impl<'a> SyscallTable<'a> {
             .with_syscall(SYS_READ, posix_io.clone())
             .with_syscall(SYS_READ_AVAIL, posix_io.clone())
             .with_syscall(SYS_WRITE, posix_io);
-        for (syscall, handler) in env.slice_io.iter() {
+        for (syscall, handler) in env.slice_io.borrow().inner.iter() {
+            let handler = SysSliceIo::new(handler.clone());
             this.inner
-                .insert(syscall.clone(), Rc::new(RefCell::new(handler.clone())));
+                .insert(syscall.clone(), Rc::new(RefCell::new(handler)));
         }
 
         this
@@ -214,42 +207,58 @@ impl Syscall for SysRandom {
     }
 }
 
+/// A wrapper around a SliceIo that exposes it as a Syscall handler.
+pub struct SysSliceIo<'a> {
+    handler: Rc<RefCell<dyn SliceIo + 'a>>,
+    stored_result: RefCell<Option<Bytes>>,
+}
+
+impl<'a> SysSliceIo<'a> {
+    /// Wraps the given [SliceIo] into a [SysSliceIo].
+    pub fn new(handler: Rc<RefCell<dyn SliceIo + 'a>>) -> Self {
+        Self {
+            handler,
+            stored_result: RefCell::new(None),
+        }
+    }
+}
+
 /// An implementation of a [Syscall] for a [SliceIo].
 ///
 /// When activated as a SyscallHandler, the SyscallHandler expects two
 /// calls. The first call returns (nelem, _) indicating how many
 /// elements are to be sent back to the guest, and the second call
 /// actually returns the elements after the guest allocates space.
-impl<'a> Syscall for SliceIo<'a> {
+impl<'a> Syscall for SysSliceIo<'a> {
     fn syscall(
         &mut self,
-        _syscall: &str,
+        syscall: &str,
         ctx: &mut dyn SyscallContext,
         to_guest: &mut [u32],
     ) -> Result<(u32, u32)> {
-        let mut stored_buf = self.stored_buf.borrow_mut();
+        let mut stored_result = self.stored_result.borrow_mut();
         let buf_ptr = ctx.load_register(REG_A3);
         let buf_len = ctx.load_register(REG_A4);
         let from_guest = ctx.load_region(buf_ptr, buf_len)?;
-        Ok(match stored_buf.take() {
+        Ok(match stored_result.take() {
             None => {
                 // First call of pair. Send the data from the guest to the SliceIo
                 // and save what it returns.
                 assert_eq!(to_guest.len(), 0);
-                let mut callback = self.callback.borrow_mut();
-                let buf = callback(Bytes::from(from_guest))?;
-                let len = buf.len() as u32;
-                *stored_buf = Some(buf);
+                let mut handler = self.handler.borrow_mut();
+                let result = handler.handle_io(syscall, from_guest.into())?;
+                let len = result.len() as u32;
+                *stored_result = Some(result);
                 (len, 0)
             }
-            Some(buf) => {
+            Some(stored) => {
                 // Second call of pair. We already have data to send
                 // to the guest; send it to the buffer that the guest
                 // allocated.
                 let to_guest_bytes: &mut [u8] = bytemuck::cast_slice_mut(to_guest);
-                assert!(buf.len() <= to_guest_bytes.len());
-                assert!(buf.len() + WORD_SIZE > to_guest_bytes.len());
-                to_guest_bytes[..buf.len()].clone_from_slice(&buf);
+                assert!(stored.len() <= to_guest_bytes.len());
+                assert!(stored.len() + WORD_SIZE > to_guest_bytes.len());
+                to_guest_bytes[..stored.len()].clone_from_slice(&stored);
                 (0, 0)
             }
         })
@@ -289,12 +298,13 @@ impl<'a> Syscall for Rc<RefCell<PosixIo<'a>>> {
 
 impl<'a> PosixIo<'a> {
     fn sys_read_avail(&mut self, ctx: &mut dyn SyscallContext) -> Result<(u32, u32)> {
+        log::debug!("sys_read_avail");
         let fd = ctx.load_register(REG_A3);
         let reader = self
             .read_fds
             .get_mut(&fd)
             .ok_or(anyhow!("Bad read file descriptor {fd}"))?;
-        let navail = reader.borrow_mut().fill_buf().unwrap().len() as u32;
+        let navail = reader.borrow_mut().fill_buf()?.len() as u32;
         log::debug!("navail: {navail}");
         Ok((navail, 0))
     }
@@ -324,21 +334,21 @@ impl<'a> PosixIo<'a> {
 
         // So that we don't have to deal with short reads, keep
         // reading until we get EOF or fill the buffer.
-        let read_all = |mut buf: &mut [u8]| -> usize {
+        let read_all = |mut buf: &mut [u8]| -> Result<usize> {
             let mut tot_nread = 0;
             while !buf.is_empty() {
-                let nread = reader.borrow_mut().read(buf).unwrap();
+                let nread = reader.borrow_mut().read(buf)?;
                 if nread == 0 {
                     break;
                 }
                 tot_nread += nread;
                 (_, buf) = buf.split_at_mut(nread);
             }
-            tot_nread
+            Ok(tot_nread)
         };
 
         let to_guest_u8 = bytemuck::cast_slice_mut(to_guest);
-        let nread_main = read_all(to_guest_u8);
+        let nread_main = read_all(to_guest_u8)?;
         assert_eq!(
             nread_main,
             to_guest_u8.len(),
@@ -357,7 +367,7 @@ impl<'a> PosixIo<'a> {
 
         // Fill unaligned word out.
         let mut to_guest_end: [u8; WORD_SIZE] = [0; WORD_SIZE];
-        let nread_end = read_all(&mut to_guest_end[0..unaligned_end]);
+        let nread_end = read_all(&mut to_guest_end[0..unaligned_end])?;
 
         Ok((
             (nread_main + nread_end) as u32,
@@ -377,10 +387,7 @@ impl<'a> PosixIo<'a> {
 
         log::debug!("Writing {buf_len} bytes to file descriptor {fd}");
 
-        writer
-            .borrow_mut()
-            .write_all(from_guest_bytes.as_slice())
-            .unwrap();
+        writer.borrow_mut().write_all(from_guest_bytes.as_slice())?;
         Ok((0, 0))
     }
 }
