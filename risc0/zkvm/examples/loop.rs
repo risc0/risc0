@@ -32,6 +32,10 @@ struct Args {
     #[arg(long, short)]
     iterations: Option<u64>,
 
+    /// Specify the hash function to use.
+    #[arg(short, long)]
+    hashfn: Option<String>,
+
     #[arg(long, short)]
     quiet: bool,
 }
@@ -44,7 +48,11 @@ fn main() {
             .with(tracing_forest::ForestLayer::default())
             .init();
 
-        let prover = get_prover_impl(&ProverOpts::default()).unwrap();
+        let mut opts = ProverOpts::default();
+        if let Some(hashfn) = args.hashfn {
+            opts.hashfn = hashfn;
+        }
+        let prover = get_prover_impl(&opts).unwrap();
 
         let start = Instant::now();
         let (session, receipt) = top(prover.clone(), iterations);

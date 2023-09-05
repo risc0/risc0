@@ -28,6 +28,10 @@ struct Args {
     #[arg(short, long)]
     iterations: u32,
 
+    /// Specify the hash function to use.
+    #[arg(short, long)]
+    hashfn: Option<String>,
+
     #[arg(short, long, default_value_t = false)]
     skip_prover: bool,
 }
@@ -48,7 +52,11 @@ fn main() {
         .init();
 
     let args = Args::parse();
-    let prover = get_prover_impl(&ProverOpts::default()).unwrap();
+    let mut opts = ProverOpts::default();
+    if let Some(hashfn) = args.hashfn {
+        opts.hashfn = hashfn;
+    }
+    let prover = get_prover_impl(&opts).unwrap();
     let metrics = top(prover, args.iterations, args.skip_prover);
     println!("{metrics:?}");
 }

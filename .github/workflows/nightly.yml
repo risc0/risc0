@@ -27,6 +27,8 @@ jobs:
 
       - run: cargo install --force --path risc0/cargo-risczero
 
+      - run: cargo risczero install
+
       - run: cargo build --release
         working-directory: tools/crates-validator/
 
@@ -36,6 +38,7 @@ jobs:
       - name: Generate the profile
         run: |
           target/release/gen-profiles \
+          -s crates/selected.json \
           -r ${{ github.workspace }} \
           -o ${{ runner.temp }}/crate-validation/profiles.json \
           -c $TOP_N_CRATES

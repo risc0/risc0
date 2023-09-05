@@ -17,7 +17,7 @@ use std::{fmt::Debug, marker::PhantomData, rc::Rc};
 use bytemuck::Pod;
 use risc0_core::field::Field;
 
-use super::{Buffer, EvalCheck, Hal};
+use super::{Buffer, CircuitHal, Hal};
 use crate::core::{digest::Digest, hash::HashSuite};
 
 #[derive(Clone)]
@@ -329,28 +329,28 @@ where
     }
 }
 
-pub struct DualEvalCheck<F, LH, RH, LE, RE>
+pub struct DualCircuitHal<F, LH, RH, LC, RC>
 where
     F: Field,
     LH: Hal<Field = F>,
     RH: Hal<Field = F>,
-    LE: EvalCheck<LH>,
-    RE: EvalCheck<RH>,
+    LC: CircuitHal<LH>,
+    RC: CircuitHal<RH>,
 {
-    lhs: Rc<LE>,
-    rhs: Rc<RE>,
+    lhs: Rc<LC>,
+    rhs: Rc<RC>,
     phantom: PhantomData<(LH, RH)>,
 }
 
-impl<F, LH, RH, LE, RE> DualEvalCheck<F, LH, RH, LE, RE>
+impl<F, LH, RH, LC, RC> DualCircuitHal<F, LH, RH, LC, RC>
 where
     F: Field,
     LH: Hal<Field = F>,
     RH: Hal<Field = F>,
-    LE: EvalCheck<LH>,
-    RE: EvalCheck<RH>,
+    LC: CircuitHal<LH>,
+    RC: CircuitHal<RH>,
 {
-    pub fn new(lhs: Rc<LE>, rhs: Rc<RE>) -> Self {
+    pub fn new(lhs: Rc<LC>, rhs: Rc<RC>) -> Self {
         Self {
             lhs,
             rhs,
@@ -359,13 +359,13 @@ where
     }
 }
 
-impl<F, LH, RH, LE, RE> EvalCheck<DualHal<F, LH, RH>> for DualEvalCheck<F, LH, RH, LE, RE>
+impl<F, LH, RH, LC, RC> CircuitHal<DualHal<F, LH, RH>> for DualCircuitHal<F, LH, RH, LC, RC>
 where
     F: Field,
     LH: Hal<Field = F, Elem = F::Elem, ExtElem = F::ExtElem>,
     RH: Hal<Field = F, Elem = F::Elem, ExtElem = F::ExtElem>,
-    LE: EvalCheck<LH>,
-    RE: EvalCheck<RH>,
+    LC: CircuitHal<LH>,
+    RC: CircuitHal<RH>,
 {
     fn eval_check(
         &self,

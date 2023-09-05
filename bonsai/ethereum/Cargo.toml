@@ -15,10 +15,12 @@ anyhow = "1.0"
 
 [dependencies]
 ethers = { version = "2.0", features = ["rustls", "ws"] }
+hex = { version = "0.4", optional = true }
+risc0-zkvm = { workspace = true, default-features = false, optional = true }
 
 [dev-dependencies]
-risc0-zkvm = { workspace = true, default-features = false }
 tokio = { version = "1", features = ["macros", "rt"] }
 
 [features]
 default = []
+control-id = ["dep:risc0-zkvm", "dep:hex"]
