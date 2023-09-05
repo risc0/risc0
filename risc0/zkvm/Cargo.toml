@@ -64,7 +64,7 @@ crypto-bigint = { version = "0.5", default-features = false, features = [
 ], optional = true }
 num-derive = "0.4"
 num-traits = { version = "0.2", default-features = false, optional = true }
-prost = { version = "0.11", optional = true }
+prost = { version = "0.12", optional = true }
 rand = { version = "0.8", optional = true }
 rayon = { version = "1.5", optional = true }
 rrs-lib = { version = "0.1", optional = true }
