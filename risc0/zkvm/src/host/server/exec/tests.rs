@@ -563,14 +563,14 @@ fn trace() {
                 cycle: cycle1,
                 pc: pc1,
             }, TraceEvent::RegisterSet {
-                reg: 5,
+                idx: 5,
                 value: 1337,
             }, TraceEvent::InstructionStart {
                 // sw x5, 548(zero)
                 cycle: cycle2,
                 pc: pc2,
             }, TraceEvent::RegisterSet {
-                reg: 6,
+                idx: 6,
                 value: 0x08000000,
             }] = window
             {

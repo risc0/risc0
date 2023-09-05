@@ -92,7 +92,15 @@ tar = "0.4"
 test-log = { version = "0.2", features = ["trace"] }
 
 [features]
-client = ["dep:bincode", "dep:bonsai-sdk", "dep:bytes", "std"]
+client = [
+  "dep:bincode",
+  "dep:bonsai-sdk",
+  "dep:bytes",
+  "dep:prost",
+  "dep:prost-build",
+  "dep:protobuf-src",
+  "std",
+]
 cuda = ["prove", "risc0-circuit-rv32im/cuda", "risc0-zkp/cuda"]
 dual = []
 metal = ["prove", "risc0-circuit-rv32im/metal", "risc0-zkp/metal"]
@@ -110,11 +118,14 @@ prove = [
   "dep:addr2line",
   "dep:bincode",
   "dep:bytes",
+  "dep:crypto-bigint",
   "dep:num-traits",
   "dep:generic-array",
   "dep:getrandom",
   "dep:lazy-regex",
-  "dep:crypto-bigint",
+  "dep:prost",
+  "dep:prost-build",
+  "dep:protobuf-src",
   "dep:rand",
   "dep:rayon",
   "dep:rrs-lib",
