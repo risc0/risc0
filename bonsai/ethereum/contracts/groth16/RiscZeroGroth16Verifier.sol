@@ -78,7 +78,8 @@ struct Seal {
 }
 
 /// Control ID hash for the identity_p254 predicate decomposed as implemented by splitDigest.
-/// New releases of RISC Zero's zkvm may require updating these values.
+/// New releases of RISC Zero's zkvm may require updating these values. These values can be
+/// obtained by running `cargo run --bin bonsai-ethereum-contracts -F control-id`
 library ControlID {
     uint256 public constant CONTROL_ID_0 = 0x68e42d8b3ddc499f4e1799a767052ab3;
     uint256 public constant CONTROL_ID_1 = 0x3802684f1645e0a028585b0445d39231;
