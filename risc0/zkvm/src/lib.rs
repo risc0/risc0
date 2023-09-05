@@ -63,6 +63,7 @@ pub use self::host::{
 pub use self::host::{
     control_id::POSEIDON_CONTROL_ID,
     receipt::{ExitCode, InnerReceipt, Receipt, ReceiptMetadata, SegmentReceipt, VerifierContext},
+    recursion::ALLOWED_IDS_ROOT,
 };
 
 /// Align the given address `addr` upwards to alignment `align`.
