@@ -310,10 +310,8 @@ impl MemoryMonitor {
         self.registers[idx] = data;
         self.mark_page(SYSTEM.start() as u32);
         if self.enable_trace {
-            self.trace_events.insert(TraceEvent::RegisterSet {
-                reg: idx,
-                value: data,
-            });
+            self.trace_events
+                .insert(TraceEvent::RegisterSet { idx, value: data });
         }
     }
 
