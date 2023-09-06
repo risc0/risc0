@@ -58,6 +58,15 @@ impl BuildToolchain {
         }
 
         let out = self.build_toolchain(&rust_dir)?;
+        let tools_bin_dir = out.toolchain_dir.parent().unwrap().join("stage2-tools-bin");
+        let target_bin_dir = out.toolchain_dir.join("bin");
+
+        for tool in tools_bin_dir.read_dir()? {
+            let tool = tool?;
+            let tool_name = tool.file_name();
+            eprintln!("copy tool: {tool_name:?}");
+            std::fs::copy(&tool.path(), target_bin_dir.join(tool_name))?;
+        }
 
         RustupToolchain::link(RUSTUP_TOOLCHAIN_NAME, &out.toolchain_dir)?;
 

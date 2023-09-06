@@ -1,5 +1,7 @@
 [alias]
-xtask = "run --release --package xtask --"
+risc0 = "run --package cargo-risczero -- risczero"
+xfast = "run --package xtask --"
+xtask = "run --package xtask --release --"
 
 [build]
 rustflags = ["-Dclippy::all", "-Dwarnings"]

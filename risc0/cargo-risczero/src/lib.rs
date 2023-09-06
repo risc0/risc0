@@ -20,6 +20,7 @@ mod toolchain;
 mod utils;
 
 use clap::{Parser, Subcommand};
+use commands::build_guest::BuildGuest;
 
 use crate::commands::{build_toolchain::BuildToolchain, install::Install, new::NewCommand};
 
@@ -43,6 +44,8 @@ pub struct Risczero {
 #[derive(Subcommand)]
 /// Primary commands  of `cargo risczero`.
 pub enum RisczeroCmd {
+    /// Build guest code.
+    Build(BuildGuest),
     /// Build the riscv32im-risc0-zkvm-elf toolchain.
     BuildToolchain(BuildToolchain),
     /// Install the riscv32im-risc0-zkvm-elf toolchain.

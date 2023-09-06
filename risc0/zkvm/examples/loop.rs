@@ -17,10 +17,8 @@ use std::{process::Command, rc::Rc, time::Instant};
 use clap::Parser;
 use human_repr::{HumanCount, HumanDuration};
 use risc0_zkvm::{
-    prove::{default_prover, Prover},
-    receipt::Receipt,
-    serde::to_vec,
-    Executor, ExecutorEnv, Session, VerifierContext,
+    get_prover_impl, serde::to_vec, DynProverImpl, Executor, ExecutorEnv, ProverOpts, Receipt,
+    Session, VerifierContext,
 };
 use risc0_zkvm_methods::{
     bench::{BenchmarkSpec, SpecWithIters},
@@ -34,6 +32,10 @@ struct Args {
     #[arg(long, short)]
     iterations: Option<u64>,
 
+    /// Specify the hash function to use.
+    #[arg(short, long)]
+    hashfn: Option<String>,
+
     #[arg(long, short)]
     quiet: bool,
 }
@@ -46,7 +48,11 @@ fn main() {
             .with(tracing_forest::ForestLayer::default())
             .init();
 
-        let prover = default_prover();
+        let mut opts = ProverOpts::default();
+        if let Some(hashfn) = args.hashfn {
+            opts.hashfn = hashfn;
+        }
+        let prover = get_prover_impl(&opts).unwrap();
 
         let start = Instant::now();
         let (session, receipt) = top(prover.clone(), iterations);
@@ -60,6 +66,7 @@ fn main() {
         let seal = receipt
             .inner
             .flat()
+            .unwrap()
             .iter()
             .fold(0, |acc, segment| acc + segment.get_seal_bytes().len());
 
@@ -114,7 +121,7 @@ fn run_with_iterations(iterations: usize) {
 }
 
 #[tracing::instrument(skip_all)]
-fn top(prover: Rc<dyn Prover>, iterations: u64) -> (Session, Receipt) {
+fn top(prover: Rc<dyn DynProverImpl>, iterations: u64) -> (Session, Receipt) {
     let spec = SpecWithIters(BenchmarkSpec::SimpleLoop, iterations);
     let env = ExecutorEnv::builder()
         .add_input(&to_vec(&spec).unwrap())

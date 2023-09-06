@@ -16,8 +16,7 @@ use std::rc::Rc;
 
 use clap::Parser;
 use risc0_zkvm::{
-    prove::{default_prover, Prover},
-    Executor, ExecutorEnv, VerifierContext,
+    get_prover_impl, DynProverImpl, Executor, ExecutorEnv, ProverOpts, VerifierContext,
 };
 use risc0_zkvm_methods::FIB_ELF;
 use tracing_subscriber::{prelude::*, EnvFilter};
@@ -28,6 +27,10 @@ struct Args {
     /// Number of iterations.
     #[arg(short, long)]
     iterations: u32,
+
+    /// Specify the hash function to use.
+    #[arg(short, long)]
+    hashfn: Option<String>,
 
     #[arg(short, long, default_value_t = false)]
     skip_prover: bool,
@@ -49,13 +52,17 @@ fn main() {
         .init();
 
     let args = Args::parse();
-    let prover = default_prover();
+    let mut opts = ProverOpts::default();
+    if let Some(hashfn) = args.hashfn {
+        opts.hashfn = hashfn;
+    }
+    let prover = get_prover_impl(&opts).unwrap();
     let metrics = top(prover, args.iterations, args.skip_prover);
     println!("{metrics:?}");
 }
 
 #[tracing::instrument(skip_all)]
-fn top(prover: Rc<dyn Prover>, iterations: u32, skip_prover: bool) -> Metrics {
+fn top(prover: Rc<dyn DynProverImpl>, iterations: u32, skip_prover: bool) -> Metrics {
     let env = ExecutorEnv::builder()
         .add_input(&[iterations])
         .build()
@@ -82,6 +89,7 @@ fn top(prover: Rc<dyn Prover>, iterations: u32, skip_prover: bool) -> Metrics {
             .unwrap()
             .inner
             .flat()
+            .unwrap()
             .iter()
             .fold(0, |acc, segment| acc + segment.get_seal_bytes().len())
     };

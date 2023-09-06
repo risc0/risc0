@@ -32,7 +32,7 @@ use crate::{
     INV_RATE, MAX_CYCLES_PO2, QUERIES,
 };
 
-#[derive(Debug, PartialEq)]
+#[derive(PartialEq)]
 pub enum VerificationError {
     ReceiptFormatError,
     ControlVerificationError,
@@ -42,6 +42,12 @@ pub enum VerificationError {
     JournalDigestMismatch,
     UnexpectedExitCode,
     InvalidHashSuite,
+}
+
+impl fmt::Debug for VerificationError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        fmt::Display::fmt(&self, f)
+    }
 }
 
 impl fmt::Display for VerificationError {

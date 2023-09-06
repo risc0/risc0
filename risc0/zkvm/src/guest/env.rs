@@ -33,8 +33,15 @@ use crate::{
 
 static mut HASHER: Option<Sha256> = None;
 
+/// A random 16 byte value initalized to random data, provided by the host, on
+/// guest start and upon resuming from a pause. Setting this value ensures that
+/// the total memory image have at least 128-bits of entropy, preventing
+/// information leakage through the post-state digest.
+static mut MEMORY_IMAGE_ENTROPY: [u8; 16] = [0u8; 16];
+
 pub(crate) fn init() {
     unsafe { HASHER = Some(Sha256::new()) };
+    unsafe { getrandom::getrandom(&mut MEMORY_IMAGE_ENTROPY).unwrap() };
 }
 
 pub(crate) fn finalize(halt: bool, user_exit: u8) {
@@ -180,6 +187,7 @@ impl<R: Read + ?Sized> Read for &mut R {
     fn read<T: DeserializeOwned>(&mut self) -> T {
         (**self).read()
     }
+
     fn read_slice<T: Pod>(&mut self, buf: &mut [T]) {
         (**self).read_slice(buf)
     }

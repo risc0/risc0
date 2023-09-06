@@ -14,7 +14,7 @@
 
 use std::{str::FromStr, time::Duration};
 
-use anyhow::{Context, Result};
+use anyhow::{anyhow, Context, Error, Result};
 use ethers::{
     core::k256::{ecdsa::SigningKey, SecretKey},
     middleware::SignerMiddleware,
@@ -27,8 +27,8 @@ use tracing::{debug, error};
 pub struct WalletKey(SecretKey);
 
 impl TryFrom<String> for WalletKey {
-    type Error = anyhow::Error;
-    fn try_from(value: String) -> std::result::Result<Self, Self::Error> {
+    type Error = Error;
+    fn try_from(value: String) -> Result<Self, Self::Error> {
         let decoded =
             hex::decode(value.trim_start_matches("0x")).context("Failed to decode private key.")?;
         let key =
@@ -38,8 +38,8 @@ impl TryFrom<String> for WalletKey {
 }
 
 impl FromStr for WalletKey {
-    type Err = anyhow::Error;
-    fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
+    type Err = Error;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
         s.to_string().try_into()
     }
 }
@@ -67,14 +67,24 @@ pub struct EthersClientConfig {
     pub eth_node_url: String,
     pub eth_chain_id: u64,
     pub wallet_key_identifier: WalletKey,
+    pub retries: u64,
+    pub wait_time: Duration,
 }
 
 impl EthersClientConfig {
-    pub fn new(eth_node_url: String, eth_chain_id: u64, wallet_key_identifier: WalletKey) -> Self {
+    pub fn new(
+        eth_node_url: String,
+        eth_chain_id: u64,
+        wallet_key_identifier: WalletKey,
+        retries: u64,
+        wait_time: Duration,
+    ) -> Self {
         Self {
             eth_node_url,
             eth_chain_id,
             wallet_key_identifier,
+            retries,
+            wait_time,
         }
     }
 
@@ -100,22 +110,20 @@ impl EthersClientConfig {
 
     pub async fn get_client_with_reconnects(
         &self,
-        max_retries: u64,
-        retry_time: Duration,
     ) -> Result<SignerMiddleware<Provider<Ws>, Wallet<SigningKey>>> {
-        for _ in 0..max_retries {
+        for _ in 0..self.retries {
             let client = self.get_client().await;
             if client.is_ok() {
                 return client;
             } else {
                 debug!(
-                    "Failed to create client. Retrying in {} seconds.",
-                    retry_time.as_secs()
+                    "Failed to create client. Retrying in {:?} seconds.",
+                    self.wait_time.as_secs()
                 );
-                tokio::time::sleep(retry_time).await;
+                tokio::time::sleep(self.wait_time).await;
             }
         }
         error!("Failed to create client.");
-        Err(anyhow::anyhow!("Failed to create client."))
+        Err(anyhow!("Failed to create client."))
     }
 }
