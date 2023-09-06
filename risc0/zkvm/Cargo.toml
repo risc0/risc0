@@ -25,7 +25,7 @@ name = "loop"
 required-features = ["prove"]
 
 [build-dependencies]
-prost-build = { version = "0.11", optional = true }
+prost-build = { version = "0.12", optional = true }
 protobuf-src = { version = "1.1", optional = true }
 
 [dependencies]
