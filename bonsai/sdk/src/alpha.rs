@@ -95,6 +95,23 @@ pub mod responses {
         ///
         /// If the status == 'SUCCEEDED' then this should be present
         pub receipt_url: Option<String>,
+        /// Session Error message
+        ///
+        /// If the session is not RUNNING or SUCCEEDED, this is the error raised from within bonsai.
+        pub error_msg: Option<String>,
+        /// Session Proving State
+        ///
+        /// Indication of where in the proving pipeline the session currently is.
+        /// Possible states in order, include:
+        /// * 'Setup'
+        /// * 'Executor'
+        /// * 'ProveSegments'
+        /// * 'Planner'
+        /// * 'Recursion'
+        /// * 'RecursionJoin'
+        /// * 'Finalize'
+        /// * 'InProgress'
+        pub state: Option<String>,
     }
 
     /// Snark proof request object
@@ -130,6 +147,10 @@ pub mod responses {
         /// Generated snark proof, following the snarkjs calldata format:
         /// <https://github.com/iden3/snarkjs#26-simulate-a-verification-call>
         pub output: Option<SnarkProof>,
+        /// Snark Error message
+        ///
+        /// If the SNARK status is not RUNNING or SUCCEEDED, this is the error raised from within bonsai.
+        pub error_msg: Option<String>,
     }
 }
 
@@ -572,6 +593,8 @@ mod tests {
         let response = SessionStatusRes {
             status: "RUNNING".to_string(),
             receipt_url: None,
+            error_msg: None,
+            state: None,
         };
 
         let create_mock = server.mock(|when, then| {
@@ -633,6 +656,7 @@ mod tests {
         let response = SnarkStatusRes {
             status: "RUNNING".to_string(),
             output: None,
+            error_msg: None,
         };
 
         let create_mock = server.mock(|when, then| {
