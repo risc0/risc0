@@ -212,16 +212,16 @@ mod test {
     fn test_reproducible_methods_guest() {
         let tester = Tester::new("risc0/zkvm/methods/guest/Cargo.toml");
         tester.compare_image_id(
-            "risc0_zkvm_methods_guest/hello_commit",
-            "2e6b054b4ff242f95f41a18c4cb4d10328d86e5fa6349b3460cc5db9bf76589a",
+            "risc0_zkvm_methods_guest/multi_test",
+            "851ad4ed2ade10e8f330737e36107f338f276e7036f992dd9da5010ff7fb6fea",
         );
         tester.compare_image_id(
-            "risc0_zkvm_methods_guest/multi_test",
-            "a79f97f9ce15b680c259538b1e98356032d7144821f295f378c29e1055af860d",
+            "risc0_zkvm_methods_guest/hello_commit",
+            "46c239f8f36b1e6dd239c0586b662fc1ea71cd593fe43a57903b974a69694b22",
         );
         tester.compare_image_id(
             "risc0_zkvm_methods_guest/slice_io",
-            "664f0943909dc7301458ce535c897f588fe62df73e419d9c653ae87d81941fa1",
+            "78d183c563f1ef6dc230c2dc504e29238ad284b175a5d1f6389b0e2649e0bd7b",
         );
     }
 }

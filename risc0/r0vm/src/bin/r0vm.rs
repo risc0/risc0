@@ -16,7 +16,7 @@ use std::{fs, path::PathBuf, rc::Rc};
 
 use clap::{Args, Parser, ValueEnum};
 use risc0_zkvm::{
-    get_prover_impl, DynProverImpl, Executor, ExecutorEnv, ProverOpts, VerifierContext,
+    get_prover_impl, ApiServer, DynProverImpl, Executor, ExecutorEnv, ProverOpts, VerifierContext,
 };
 
 /// Runs a RISC-V ELF binary within the RISC Zero ZKVM.
@@ -24,7 +24,7 @@ use risc0_zkvm::{
 #[command(about, version, author)]
 struct Cli {
     #[command(flatten)]
-    binfmt: BinFmt,
+    mode: Mode,
 
     /// Receipt output file.
     #[arg(long)]
@@ -56,7 +56,10 @@ struct Cli {
 
 #[derive(Args)]
 #[group(required = true, multiple = false)]
-struct BinFmt {
+struct Mode {
+    #[arg(long)]
+    port: Option<u16>,
+
     /// The ELF to execute
     #[arg(long)]
     elf: Option<PathBuf>,
@@ -77,12 +80,16 @@ fn main() {
     env_logger::init();
 
     let args = Cli::parse();
+    if let Some(port) = args.mode.port {
+        run_server(port);
+        return;
+    }
 
     #[cfg(feature = "profiler")]
     let mut guest_prof: Option<risc0_zkvm::Profiler> = None;
     #[cfg(feature = "profiler")]
     if args.pprof_out.is_some() {
-        let elf = args.binfmt.elf.clone().unwrap();
+        let elf = args.mode.elf.clone().unwrap();
         let elf_contents = fs::read(&elf).unwrap();
         guest_prof = Some(risc0_zkvm::Profiler::new(elf.to_str().unwrap(), &elf_contents).unwrap());
     }
@@ -107,10 +114,10 @@ fn main() {
         }
 
         let env = builder.build().unwrap();
-        let mut exec = if let Some(ref elf_path) = args.binfmt.elf {
+        let mut exec = if let Some(ref elf_path) = args.mode.elf {
             let elf_contents = fs::read(elf_path).unwrap();
             Executor::from_elf(env, &elf_contents).unwrap()
-        } else if let Some(ref image_path) = args.binfmt.image {
+        } else if let Some(ref image_path) = args.mode.image {
             let image_contents = fs::read(image_path).unwrap();
             let image = bincode::deserialize(&image_contents).unwrap();
             Executor::new(env, image).unwrap()
@@ -159,4 +166,10 @@ impl Cli {
 
         get_prover_impl(&opts).unwrap()
     }
+}
+
+fn run_server(port: u16) {
+    let addr = format!("127.0.0.1:{port}");
+    let server = ApiServer::new_tcp(addr);
+    server.run().unwrap()
 }

@@ -148,6 +148,12 @@ impl SyscallName {
     }
 }
 
+impl AsRef<str> for SyscallName {
+    fn as_ref(&self) -> &str {
+        self.as_str()
+    }
+}
+
 /// Returned registers (a0, a1) from a syscall invocation.
 #[repr(C)]
 pub struct Return(pub u32, pub u32);

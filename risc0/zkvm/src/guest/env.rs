@@ -187,6 +187,7 @@ impl<R: Read + ?Sized> Read for &mut R {
     fn read<T: DeserializeOwned>(&mut self) -> T {
         (**self).read()
     }
+
     fn read_slice<T: Pod>(&mut self, buf: &mut [T]) {
         (**self).read_slice(buf)
     }

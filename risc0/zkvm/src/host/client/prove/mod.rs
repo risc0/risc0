@@ -22,6 +22,7 @@ use std::{path::PathBuf, rc::Rc};
 use anyhow::Result;
 use risc0_binfmt::{MemoryImage, Program};
 use risc0_zkvm_platform::{memory::MEM_SIZE, PAGE_SIZE};
+use serde::{Deserialize, Serialize};
 
 use self::{bonsai::BonsaiProver, external::ExternalProver};
 use crate::{is_dev_mode, ExecutorEnv, Receipt, VerifierContext};
@@ -65,7 +66,8 @@ pub trait Prover {
     }
 }
 
-/// Options for to configure a [Prover].
+/// Options to configure a [Prover].
+#[derive(Clone, Serialize, Deserialize)]
 pub struct ProverOpts {
     /// The hash function to use.
     pub hashfn: String,
