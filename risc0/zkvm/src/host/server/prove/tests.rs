@@ -117,6 +117,25 @@ fn sha_basics() {
 }
 
 #[test]
+#[serial]
+fn sha_iter() {
+    let input = to_vec(&MultiTestSpec::ShaDigestIter {
+        data: Vec::from([0u8; 32]),
+        num_iter: 1453,
+    })
+    .unwrap();
+    let env = ExecutorEnv::builder().add_input(&input).build().unwrap();
+    let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
+    let session = exec.run().unwrap();
+    let receipt = session.prove().unwrap();
+    let digest = Digest::try_from(receipt.journal).unwrap();
+    assert_eq!(
+        hex::encode(digest),
+        "64f0f3d366aba3c216392318bcf94931d92f77a4275511a44efffe0f8c6d9c23"
+    )
+}
+
+#[test]
 fn bigint_accel() {
     let cases = testutils::generate_bigint_test_cases(&mut rand::thread_rng(), 10);
     for case in cases {
