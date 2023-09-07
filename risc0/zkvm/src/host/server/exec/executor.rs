@@ -374,7 +374,7 @@ impl<'a> Executor<'a> {
         // * return ExitCode::SystemSplit
         // otherwise, commit memory and hart
         let total_pending_cycles = self.total_cycles() + opcode.cycles + op_result.extra_cycles;
-        // log::info!(
+        // log::debug!(
         //     "cycle: {}, segment: {}, total: {}",
         //     self.segment_cycle,
         //     total_pending_cycles,
