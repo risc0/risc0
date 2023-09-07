@@ -433,6 +433,7 @@ impl From<ExitCode> for pb::ExitCode {
                 ExitCode::SessionLimit => pb::exit_code::Kind::SessionLimit(()),
                 ExitCode::Paused(code) => pb::exit_code::Kind::Paused(code),
                 ExitCode::Halted(code) => pb::exit_code::Kind::Halted(code),
+                ExitCode::Fault => pb::exit_code::Kind::Fault(()),
             }),
         }
     }
