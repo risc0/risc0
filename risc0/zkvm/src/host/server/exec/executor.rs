@@ -56,7 +56,7 @@ use crate::{
 };
 
 /// The number of cycles required to compress a SHA-256 block.
-const SHA_CYCLES: usize = 72;
+const SHA_CYCLES: usize = 73;
 
 /// Number of cycles required to complete a BigInt operation.
 const BIGINT_CYCLES: usize = 9;
@@ -373,15 +373,8 @@ impl<'a> Executor<'a> {
         // * don't record any activity
         // * return ExitCode::SystemSplit
         // otherwise, commit memory and hart
-        let extra_cycles = if self.monitor.pending_cycles() == 0 {
-            1280
-        } else {
-            0
-        };
-
-        let total_pending_cycles =
-            self.total_cycles() + opcode.cycles + op_result.extra_cycles + extra_cycles;
-        // log::debug!(
+        let total_pending_cycles = self.total_cycles() + opcode.cycles + op_result.extra_cycles;
+        // log::info!(
         //     "cycle: {}, segment: {}, total: {}",
         //     self.segment_cycle,
         //     total_pending_cycles,
