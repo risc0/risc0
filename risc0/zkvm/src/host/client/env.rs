@@ -139,7 +139,7 @@ impl<'a> ExecutorEnvBuilder<'a> {
     ///     .unwrap();
     /// ```
     pub fn env_vars(&mut self, vars: HashMap<String, String>) -> &mut Self {
-        self.inner.env_vars = vars;
+        self.inner.env_vars.extend(vars);
         self
     }
 
