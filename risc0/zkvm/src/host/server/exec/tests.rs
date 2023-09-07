@@ -666,7 +666,7 @@ fn session_limit() {
 #[test]
 fn memory_access() {
     fn session_faulted(session: Result<Session>) -> bool {
-        if cfg!(feature = "enable_fault_proof") {
+        if cfg!(feature = "enable-fault-proof") {
             let session = session.unwrap();
             let last = session.segments.last().unwrap().resolve().unwrap();
             last.pre_image.compute_id() == FAULT_CHECKER_ID.into()
