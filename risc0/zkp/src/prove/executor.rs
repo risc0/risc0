@@ -132,7 +132,8 @@ where
 
     pub fn expand(&mut self) -> Result<()> {
         debug!("expand");
-        if self.steps > (1 << self.max_po2) {
+        assert!(false, "expand must not be called.");
+        if self.steps >= (1 << self.max_po2) {
             bail!("Cannot expand, max po2 of {} reached.", self.max_po2);
         }
         let new_code = self.expand_buf(&self.code, F::Elem::ZERO, self.code_size);

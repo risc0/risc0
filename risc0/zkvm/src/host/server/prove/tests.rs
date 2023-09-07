@@ -121,7 +121,7 @@ fn sha_basics() {
 fn sha_iter() {
     let input = to_vec(&MultiTestSpec::ShaDigestIter {
         data: Vec::from([0u8; 32]),
-        num_iter: 1453,
+        num_iter: 1500,
     })
     .unwrap();
     let env = ExecutorEnv::builder().add_input(&input).build().unwrap();
@@ -131,7 +131,7 @@ fn sha_iter() {
     let digest = Digest::try_from(receipt.journal).unwrap();
     assert_eq!(
         hex::encode(digest),
-        "64f0f3d366aba3c216392318bcf94931d92f77a4275511a44efffe0f8c6d9c23"
+        "9d4d1940b5c0c6d09c10add9631806f9df9467884d3e9ce4a147113e27f5c02a"
     )
 }
 

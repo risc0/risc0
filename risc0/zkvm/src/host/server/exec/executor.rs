@@ -373,8 +373,14 @@ impl<'a> Executor<'a> {
         // * don't record any activity
         // * return ExitCode::SystemSplit
         // otherwise, commit memory and hart
+        let extra_cycles = if self.monitor.pending_cycles() == 0 {
+            1280
+        } else {
+            0
+        };
 
-        let total_pending_cycles = self.total_cycles() + opcode.cycles + op_result.extra_cycles;
+        let total_pending_cycles =
+            self.total_cycles() + opcode.cycles + op_result.extra_cycles + extra_cycles;
         // log::debug!(
         //     "cycle: {}, segment: {}, total: {}",
         //     self.segment_cycle,

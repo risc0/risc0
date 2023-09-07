@@ -364,6 +364,22 @@ impl MemoryMonitor {
         Ok(())
     }
 
+    pub fn pending_cycles(&mut self) -> usize {
+        let mut pending_cycles: usize = 0;
+        for action in self.pending_actions.iter().rev() {
+            match action {
+                Action::PageRead(_page_idx, cycles) => {
+                    pending_cycles += cycles;
+                }
+                Action::PageWrite(_page_idx, cycles) => {
+                    pending_cycles += cycles;
+                }
+                _ => {}
+            }
+        }
+        pending_cycles
+    }
+
     // commit all pending activity
     pub fn commit(&mut self, cycle: usize) {
         self.pending_actions.clear();
