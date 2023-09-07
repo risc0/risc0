@@ -131,3 +131,6 @@ std = [
   "risc0-zkp/std",
   "serde/std",
 ]
+
+# this is a temporary feature that will be removed after proof of fault becomes more stable
+enable_fault_proof = []

@@ -142,7 +142,12 @@ fn bigint_accel() {
 #[test]
 #[serial]
 fn memory_io() {
-    fn is_fault_proof(receipt: Receipt) -> bool {
+    fn is_fault_proof(receipt: Result<Receipt>) -> bool {
+        // this if statement will be removed once this feature is more mature
+        if !cfg!(feature = "enable_fault_proof") {
+            return receipt.is_err();
+        }
+        let receipt = receipt.unwrap();
         match receipt.inner {
             InnerReceipt::Flat(SegmentReceipts(segments)) => {
                 let last_image_id = segments
@@ -183,24 +188,22 @@ fn memory_io() {
     );
 
     // Double writes are fine
-    assert!(!is_fault_proof(run_memio(&[(POS, 1), (POS, 1)]).unwrap()));
+    assert!(!is_fault_proof(run_memio(&[(POS, 1), (POS, 1)])));
 
     // Writes at different addresses are fine
-    assert!(!is_fault_proof(
-        run_memio(&[(POS, 1), (POS + 4, 2)]).unwrap()
-    ));
+    assert!(!is_fault_proof(run_memio(&[(POS, 1), (POS + 4, 2)])));
 
     // Aligned write is fine
-    assert!(!is_fault_proof(run_memio(&[(POS, 1)]).unwrap()));
+    assert!(!is_fault_proof(run_memio(&[(POS, 1)])));
 
     // Unaligned write is bad
-    assert!(is_fault_proof(run_memio(&[(POS + 1001, 1)]).unwrap()));
+    assert!(is_fault_proof(run_memio(&[(POS + 1001, 1)])));
 
     // Aligned read is fine
-    assert!(!is_fault_proof(run_memio(&[(POS, 0)]).unwrap()));
+    assert!(!is_fault_proof(run_memio(&[(POS, 0)])));
 
     // Unaligned read is bad
-    assert!(is_fault_proof(run_memio(&[(POS + 1, 0)]).unwrap()));
+    assert!(is_fault_proof(run_memio(&[(POS + 1, 0)])));
 }
 
 #[test]

@@ -420,7 +420,11 @@ impl<'a> Executor<'a> {
                     err
                 );
                 self.monitor.undo()?;
-                return Ok(Some(ExitCode::Fault));
+                if cfg!(feature = "enable_fault_proof") {
+                    return Ok(Some(ExitCode::Fault));
+                } else {
+                    bail!("rrs instruction executor failed with {:?}", err);
+                }
             }
 
             if let Some(idx) = hart.last_register_write {

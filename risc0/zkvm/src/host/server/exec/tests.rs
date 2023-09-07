@@ -657,12 +657,18 @@ fn session_limit() {
 
 #[test]
 fn memory_access() {
-    fn session_faulted(session: Session) -> bool {
-        let last = session.segments.last().unwrap().resolve().unwrap();
-        last.pre_image.compute_id() == FAULT_CHECKER_ID.into()
+    fn session_faulted(session: Result<Session>) -> bool {
+        if cfg!(feature = "enable_fault_proof") {
+            let session = session.unwrap();
+            let last = session.segments.last().unwrap().resolve().unwrap();
+            last.pre_image.compute_id() == FAULT_CHECKER_ID.into()
+        } else {
+            // this will be removed once this feature is more mature
+            session.is_err()
+        }
     }
 
-    fn access_memory(addr: u32) -> Session {
+    fn access_memory(addr: u32) -> Result<Session> {
         let spec = to_vec(&MultiTestSpec::OutOfBounds).unwrap();
         let addr = to_vec(&addr).unwrap();
         let env = ExecutorEnv::builder()
@@ -670,10 +676,7 @@ fn memory_access() {
             .add_input(&addr)
             .build()
             .unwrap();
-        Executor::from_elf(env, MULTI_TEST_ELF)
-            .unwrap()
-            .run()
-            .unwrap()
+        Executor::from_elf(env, MULTI_TEST_ELF).unwrap().run()
     }
 
     assert!(session_faulted(access_memory(0x0000_0000)));
