@@ -40,18 +40,24 @@ pub use risc0_binfmt::{MemoryImage, Program, SystemState};
 pub use risc0_zkvm_platform::{declare_syscall, memory::MEM_SIZE, PAGE_SIZE};
 
 #[cfg(not(target_os = "zkvm"))]
-#[cfg(feature = "client")]
-pub use self::host::client::{
-    env::{ExecutorEnv, ExecutorEnvBuilder},
-    exec::TraceEvent,
-    prove::{bonsai::BonsaiProver, default_prover, external::ExternalProver, Prover, ProverOpts},
-};
-#[cfg(not(target_os = "zkvm"))]
 #[cfg(feature = "profiler")]
 pub use self::host::server::exec::profiler::Profiler;
 #[cfg(not(target_os = "zkvm"))]
+#[cfg(feature = "client")]
+pub use self::host::{
+    api::client::Client as ApiClient,
+    client::{
+        env::{ExecutorEnv, ExecutorEnvBuilder},
+        exec::TraceEvent,
+        prove::{
+            bonsai::BonsaiProver, default_prover, external::ExternalProver, Prover, ProverOpts,
+        },
+    },
+};
+#[cfg(not(target_os = "zkvm"))]
 #[cfg(feature = "prove")]
 pub use self::host::{
+    api::server::Server as ApiServer,
     client::prove::local::LocalProver,
     server::{
         exec::executor::Executor,
@@ -63,6 +69,7 @@ pub use self::host::{
 pub use self::host::{
     control_id::POSEIDON_CONTROL_ID,
     receipt::{ExitCode, InnerReceipt, Receipt, ReceiptMetadata, SegmentReceipt, VerifierContext},
+    recursion::ALLOWED_IDS_ROOT,
 };
 
 /// Align the given address `addr` upwards to alignment `align`.

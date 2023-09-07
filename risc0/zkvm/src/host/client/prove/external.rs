@@ -12,19 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{
-    fs::File,
-    io::Write,
-    path::{Path, PathBuf},
-    process::{Command, Stdio},
-};
+use std::path::{Path, PathBuf};
 
-use anyhow::{anyhow, bail, Result};
+use anyhow::Result;
 use risc0_binfmt::MemoryImage;
-use tempfile::tempdir;
 
 use super::{Prover, ProverOpts};
-use crate::{ExecutorEnv, Receipt, VerifierContext};
+use crate::{ApiClient, ExecutorEnv, Receipt, VerifierContext};
 
 /// An implementation of a [Prover] that runs proof workloads via an external
 /// `r0vm` process.
@@ -52,38 +46,12 @@ impl Prover for ExternalProver {
         image: MemoryImage,
     ) -> Result<Receipt> {
         log::debug!("Launching {}", &self.r0vm_path.to_string_lossy());
-        let temp_dir = tempdir()?;
 
-        let image_path = temp_dir.path().join("image");
-        let receipt_path = temp_dir.path().join("receipt");
-        {
-            let image_file = File::create(&image_path)?;
-            bincode::serialize_into(image_file, &image)?;
-        }
-
-        let mut cmd = Command::new(&self.r0vm_path);
-        cmd.arg("--image")
-            .arg(&image_path)
-            .arg("--receipt")
-            .arg(&receipt_path)
-            .arg("--hashfn")
-            .arg(&opts.hashfn)
-            .stdin(Stdio::piped());
-
-        let mut child = cmd.spawn()?;
-
-        let mut stdin = child.stdin.take().ok_or(anyhow!("Failed to open stdin"))?;
-        std::thread::spawn(move || stdin.write_all(&env.input));
-
-        let status = child.wait()?;
-        if !status.success() {
-            bail!("Failed to run r0vm");
-        }
-
-        let receipt_bytes = std::fs::read(receipt_path)?;
-        let receipt: Receipt = bincode::deserialize(&receipt_bytes)?;
         let image_id = image.compute_id();
+        let client = ApiClient::new_sub_process(&self.r0vm_path)?;
+        let receipt = client.prove(&env, opts.clone(), image.try_into()?)?;
         receipt.verify_with_context(ctx, image_id)?;
+
         Ok(receipt)
     }
 

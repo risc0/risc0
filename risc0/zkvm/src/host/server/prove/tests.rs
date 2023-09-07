@@ -15,7 +15,7 @@
 use std::rc::Rc;
 
 use anyhow::Result;
-use risc0_circuit_rv32im::cpu::CpuEvalCheck;
+use risc0_circuit_rv32im::cpu::CpuCircuitHal;
 use risc0_zkp::{
     core::{digest::Digest, hash::blake2b::Blake2bCpuHashSuite},
     hal::cpu::CpuHal,
@@ -26,7 +26,7 @@ use risc0_zkvm_platform::{memory, WORD_SIZE};
 use serial_test::serial;
 use test_log::test;
 
-use super::{get_prover_impl, HalEval, ProverImpl};
+use super::{get_prover_impl, HalPair, ProverImpl};
 use crate::{
     host::{receipt::SegmentReceipts, server::testutils, CIRCUIT},
     serde::{from_slice, to_vec},
@@ -53,13 +53,13 @@ fn hashfn_poseidon() {
 
 #[test]
 fn hashfn_blake2b() {
-    let hal_eval = HalEval {
+    let hal_pair = HalPair {
         hal: Rc::new(CpuHal::new(Blake2bCpuHashSuite::new_suite())),
-        eval: Rc::new(CpuEvalCheck::new(&CIRCUIT)),
+        circuit_hal: Rc::new(CpuCircuitHal::new(&CIRCUIT)),
     };
     let input = to_vec(&MultiTestSpec::DoNothing).unwrap();
     let env = ExecutorEnv::builder().add_input(&input).build().unwrap();
-    let prover = ProverImpl::new("cpu:blake2b", hal_eval);
+    let prover = ProverImpl::new("cpu:blake2b", hal_pair);
     prover.prove_elf(env, MULTI_TEST_ELF).unwrap();
 }
 
@@ -115,6 +115,25 @@ fn sha_basics() {
         run_sha("abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq"),
         "248d6a61d20638b8e5c026930c3e6039a33ce45964ff2167f6ecedd419db06c1"
     );
+}
+
+#[test]
+#[serial]
+fn sha_iter() {
+    let input = to_vec(&MultiTestSpec::ShaDigestIter {
+        data: Vec::from([0u8; 32]),
+        num_iter: 1500,
+    })
+    .unwrap();
+    let env = ExecutorEnv::builder().add_input(&input).build().unwrap();
+    let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
+    let session = exec.run().unwrap();
+    let receipt = session.prove().unwrap();
+    let digest = Digest::try_from(receipt.journal).unwrap();
+    assert_eq!(
+        hex::encode(digest),
+        "9d4d1940b5c0c6d09c10add9631806f9df9467884d3e9ce4a147113e27f5c02a"
+    )
 }
 
 #[test]
