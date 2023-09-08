@@ -216,10 +216,8 @@ impl SegmentReceipts {
         log::debug!("final: {metadata:#?}");
         // If there's more than one segment, the last segment could be the fault checker
         let final_receipt_is_fault_checker = cfg!(feature = "enable-fault-proof")
-                && metadata.pre.digest() == FAULT_CHECKER_ID.into();
-        if prev_image_id != metadata.pre.digest()
-            && !final_receipt_is_fault_checker
-        {
+            && metadata.pre.digest() == FAULT_CHECKER_ID.into();
+        if prev_image_id != metadata.pre.digest() && !final_receipt_is_fault_checker {
             return Err(VerificationError::ImageVerificationError);
         }
 
