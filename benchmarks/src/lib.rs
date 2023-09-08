@@ -22,8 +22,10 @@ use serde::Serialize;
 pub struct Metrics {
     pub job_name: String,
     pub job_size: u32,
+    pub exec_duration: Duration,
     pub proof_duration: Duration,
     pub verify_duration: Duration,
+    pub cycles: u32,
     pub output_bytes: u32,
     pub proof_bytes: u32,
 }
@@ -33,8 +35,10 @@ impl Metrics {
         Metrics {
             job_name,
             job_size,
+            exec_duration: Duration::default(),
             proof_duration: Duration::default(),
             verify_duration: Duration::default(),
+            cycles: 0,
             output_bytes: 0,
             proof_bytes: 0,
         }
@@ -43,8 +47,10 @@ impl Metrics {
     pub fn println(&self, prefix: &str) {
         info!("{}job_name:           {:?}", prefix, &self.job_name);
         info!("{}job_size:           {:?}", prefix, &self.job_size);
+        info!("{}exec_duration:      {:?}", prefix, &self.exec_duration);
         info!("{}proof_duration:     {:?}", prefix, &self.proof_duration);
         info!("{}verify_duration:    {:?}", prefix, &self.verify_duration);
+        info!("{}cycles:             {:?}", prefix, &self.cycles);
         info!("{}output_bytes:       {:?}", prefix, &self.output_bytes);
         info!("{}proof_bytes:        {:?}", prefix, &self.proof_bytes);
     }
@@ -67,12 +73,14 @@ pub trait Benchmark {
     fn host_compute(&mut self) -> Option<Self::ComputeOut> {
         None
     }
-
+    fn exec_compute(&mut self) -> (u32, Duration);
     fn guest_compute(&mut self) -> (Self::ComputeOut, Self::ProofType);
     fn verify_proof(&self, output: &Self::ComputeOut, proof: &Self::ProofType) -> bool;
 
     fn run(&mut self) -> Metrics {
         let mut metrics = Metrics::new(String::from(Self::NAME), Self::job_size(self.spec()));
+
+        (metrics.cycles, metrics.exec_duration) = self.exec_compute();
 
         let (g_output, proof) = {
             let start = Instant::now();
@@ -109,8 +117,10 @@ pub fn init_logging() {
 struct CsvRow<'a> {
     job_name: &'a str,
     job_size: u32,
+    exec_duration_microsec: u128,
     proof_duration_microsec: u128,
     verify_duration_microsec: u128,
+    cycles: u32,
     proof_bytes: u32,
 }
 
@@ -149,8 +159,10 @@ pub fn run_jobs<B: Benchmark>(out_path: &PathBuf, specs: Vec<B::Spec>) -> Vec<Me
         out.serialize(CsvRow {
             job_name: &job_metrics.job_name,
             job_size: job_metrics.job_size,
+            exec_duration_microsec: job_metrics.exec_duration.as_micros(),
             proof_duration_microsec: job_metrics.proof_duration.as_micros(),
             verify_duration_microsec: job_metrics.verify_duration.as_micros(),
+            cycles: job_metrics.cycles,
             proof_bytes: job_metrics.proof_bytes,
         })
         .expect("Could not serialize");

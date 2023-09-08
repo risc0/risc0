@@ -19,16 +19,17 @@ use k256::{
 use rand_core::OsRng;
 use risc0_benchmark::Benchmark;
 use risc0_zkvm::{
-    default_prover,
     serde::{from_slice, to_vec},
     sha::DIGEST_WORDS,
-    ExecutorEnv, Receipt,
+    Executor, ExecutorEnv, ExitCode, MemoryImage, Program, Receipt, Session, MEM_SIZE, PAGE_SIZE,
 };
+use std::time::{Duration, Instant};
 
 pub struct Job<'a> {
     pub spec: u32,
     pub env: ExecutorEnv<'a>,
-    pub image: Vec<u8>,
+    pub image: MemoryImage,
+    pub session: Session,
     pub verifying_key: EncodedPoint,
     pub message: Vec<u8>,
     pub signature: Signature,
@@ -79,10 +80,15 @@ impl Benchmark for Job<'_> {
             .build()
             .unwrap();
 
+        let program = Program::load_elf(&image, MEM_SIZE as u32).unwrap();
+        let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
+        let session = Session::new(vec![], vec![], ExitCode::Halted(0));
+
         Job {
             spec,
             env,
             image,
+            session,
             verifying_key,
             message,
             signature,
@@ -98,9 +104,7 @@ impl Benchmark for Job<'_> {
     }
 
     fn guest_compute(&mut self) -> (Self::ComputeOut, Self::ProofType) {
-        let receipt = default_prover()
-            .prove_elf(self.env.clone(), &self.image)
-            .expect("receipt");
+        let receipt = self.session.prove().expect("receipt");
 
         let (receipt_verifying_key, receipt_message) =
             from_slice::<(EncodedPoint, Vec<u8>), _>(&receipt.journal)
@@ -109,6 +113,19 @@ impl Benchmark for Job<'_> {
                 .unwrap();
 
         ((receipt_verifying_key, receipt_message), receipt)
+    }
+
+    fn exec_compute(&mut self) -> (u32, Duration) {
+        let mut exec = Executor::new(self.env.clone(), self.image.clone()).unwrap();
+        let start = Instant::now();
+        self.session = exec.run().unwrap();
+        let elapsed = start.elapsed();
+        let mut cycles = 0usize;
+        let segments = self.session.resolve().unwrap();
+        for segment in segments {
+            cycles += segment.insn_cycles
+        }
+        (cycles as u32, elapsed)
     }
 
     fn verify_proof(&self, _output: &Self::ComputeOut, proof: &Self::ProofType) -> bool {

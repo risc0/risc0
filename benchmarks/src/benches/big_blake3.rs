@@ -15,16 +15,17 @@
 use rand::{rngs::StdRng, RngCore, SeedableRng};
 use risc0_benchmark::Benchmark;
 use risc0_zkvm::{
-    default_prover,
     serde::to_vec,
     sha::{Digest, DIGEST_WORDS},
-    ExecutorEnv, Receipt,
+    Executor, ExecutorEnv, ExitCode, MemoryImage, Program, Receipt, Session, MEM_SIZE, PAGE_SIZE,
 };
+use std::time::{Duration, Instant};
 
 pub struct Job<'a> {
     pub guest_input: Vec<u8>,
     pub env: ExecutorEnv<'a>,
-    pub image: Vec<u8>,
+    pub image: MemoryImage,
+    pub session: Session,
 }
 
 pub fn new_jobs() -> Vec<<Job<'static> as Benchmark>::Spec> {
@@ -74,10 +75,15 @@ impl Benchmark for Job<'_> {
             .build()
             .unwrap();
 
+        let program = Program::load_elf(&image, MEM_SIZE as u32).unwrap();
+        let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
+        let session = Session::new(vec![], vec![], ExitCode::Halted(0));
+
         Job {
             guest_input,
             env,
             image,
+            session,
         }
     }
 
@@ -85,10 +91,21 @@ impl Benchmark for Job<'_> {
         &self.guest_input
     }
 
+    fn exec_compute(&mut self) -> (u32, Duration) {
+        let mut exec = Executor::new(self.env.clone(), self.image.clone()).unwrap();
+        let start = Instant::now();
+        self.session = exec.run().unwrap();
+        let elapsed = start.elapsed();
+        let mut cycles = 0usize;
+        let segments = self.session.resolve().unwrap();
+        for segment in segments {
+            cycles += segment.insn_cycles
+        }
+        (cycles as u32, elapsed)
+    }
+
     fn guest_compute(&mut self) -> (Self::ComputeOut, Self::ProofType) {
-        let receipt = default_prover()
-            .prove_elf(self.env.clone(), &self.image)
-            .expect("receipt");
+        let receipt = self.session.prove().expect("receipt");
         let guest_output: Digest = Digest::try_from(receipt.journal.clone())
             .unwrap()
             .try_into()
