@@ -133,7 +133,7 @@ impl Prover {
                             .write()?
                             .put_session(task.session_id.clone(), "FAILED".to_string()),
                     };
-                    tracing::error!("Task {} failed! - {}", msg, err)
+                    tracing::error!("Task {} failed! - {:?}", msg, err)
                 }
             }
         }
