@@ -22,7 +22,7 @@ use risc0_zkvm_platform::{
     syscall::{
         nr::{
             SYS_CYCLE_COUNT, SYS_GETENV, SYS_LOG, SYS_PANIC, SYS_RANDOM, SYS_READ, SYS_READ_AVAIL,
-            SYS_WRITE,
+            SYS_VERIFY, SYS_VERIFY_METADATA, SYS_WRITE,
         },
         reg_abi::{REG_A3, REG_A4, REG_A5},
         SyscallName,
@@ -30,7 +30,10 @@ use risc0_zkvm_platform::{
     WORD_SIZE,
 };
 
-use crate::host::client::{env::ExecutorEnv, posix_io::PosixIo, slice_io::SliceIo};
+use crate::{
+    host::client::{env::ExecutorEnv, posix_io::PosixIo, slice_io::SliceIo},
+    sha::Digest,
+};
 
 /// A host-side implementation of a system call.
 pub trait Syscall {
@@ -208,6 +211,36 @@ impl Syscall for SysRandom {
         getrandom::getrandom(rand_buf.as_mut_slice())?;
         bytemuck::cast_slice_mut(to_guest).clone_from_slice(rand_buf.as_slice());
         Ok((0, 0))
+    }
+}
+
+pub(crate) struct SysVerify;
+impl Syscall for SysVerify {
+    fn syscall(
+        &mut self,
+        syscall: &str,
+        ctx: &mut dyn SyscallContext,
+        to_guest: &mut [u32],
+    ) -> Result<(u32, u32)> {
+        let from_guest_ptr = ctx.load_register(REG_A3);
+        let from_guest_len = ctx.load_register(REG_A4);
+        let from_guest: Vec<u8> = ctx.load_region(from_guest_ptr, from_guest_len)?;
+
+        //            .try_into()
+        //            .map_err(|vec| anyhow!("failed to convert to [u8; DIGEST_BYTES]: {:?}", vec))?;
+
+        if syscall == SYS_VERIFY_METADATA.as_str() {
+            let metadata_digest: Digest = from_guest
+                .try_into()
+                .map_err(|vec| anyhow!("failed to convert to [u8; DIGEST_BYTES]: {:?}", vec))?;
+            // DO NOT MERGE(victor): Implement checking of the receipt.
+            log::debug!("SYS_VERIFY_METADATA: {}", hex::encode(&from_guest));
+            Ok((0, 0))
+        } else if syscall == SYS_VERIFY.as_str() {
+            Ok((0, 0))
+        } else {
+            bail!("SysVerify received unrecognized syscall: {}", syscall)
+        }
     }
 }
 

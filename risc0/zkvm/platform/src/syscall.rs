@@ -131,6 +131,8 @@ pub mod nr {
     declare_syscall!(pub SYS_READ_AVAIL);
     declare_syscall!(pub SYS_READ);
     declare_syscall!(pub SYS_WRITE);
+    declare_syscall!(pub SYS_VERIFY);
+    declare_syscall!(pub SYS_VERIFY_METADATA);
 }
 
 impl SyscallName {
@@ -643,4 +645,69 @@ pub extern "C" fn sys_alloc_aligned(bytes: usize, align: usize) -> *mut u8 {
 
     unsafe { HEAP_POS = heap_pos };
     ptr
+}
+
+/// Send an image ID and journal hash to the host to request the post state digest from a matching
+/// ReceiptMetadata with successful exit status.
+///
+/// A cooperative will only return if there is a verifying proof with successful exit status
+/// associated with the given image ID and journal digest; and will always return a result code of
+/// 0 to register a0. The caller must calculate the ReceiptMetadata digest, using the provided post
+/// state digest and encode the digest into a public assumptions list for inclusion in the guest
+/// output.
+#[no_mangle]
+pub extern "C" fn sys_verify(
+    image_id: *const [u32; DIGEST_WORDS],
+    journal_digest: *const [u32; DIGEST_WORDS],
+    post_state_digest_out: *mut [u32; DIGEST_WORDS],
+) {
+    let mut to_host = [0u32; 2 * DIGEST_WORDS];
+    to_host[..DIGEST_WORDS].copy_from_slice(unsafe { &*image_id });
+    to_host[DIGEST_WORDS..].copy_from_slice(unsafe { &*journal_digest });
+
+    let Return(a0, _) = unsafe {
+        // Send the image_id and journal_digest to the host in a syscall.
+        // Expect in return that post_state_digest_out is populated with the post state digest for
+        // from a matching ReceiptMetadata.
+        syscall_2(
+            nr::SYS_VERIFY,
+            post_state_digest_out as *mut u32,
+            DIGEST_WORDS,
+            to_host.as_ptr() as u32,
+            2 * DIGEST_BYTES as u32,
+        )
+    };
+
+    // Check to ensure the host indicated success by returning 0.
+    // This should always be the case. This check is included for forwards-compatiblity.
+    if a0 != 0 {
+        const MSG: &[u8] = "sys_resolve_guest_journal returned error result".as_bytes();
+        unsafe { sys_panic(MSG.as_ptr(), MSG.len()) };
+    }
+}
+
+/// Send a ReceiptMetadata digest to the host to request verification.
+///
+/// A cooperative will only return if there is a verifying proof associated with that metadata
+/// digest, and will always return a result code of 0 to register a0. The caller must encode the
+/// metadata_digest into a public assumptions list for inclusion in the guest output.
+#[no_mangle]
+pub extern "C" fn sys_verify_metadata(metadata_digest: *const [u32; DIGEST_WORDS]) {
+    let Return(a0, _) = unsafe {
+        // Send the metadata_digest to the host via software ecall.
+        syscall_2(
+            nr::SYS_VERIFY_METADATA,
+            null_mut(),
+            0,
+            metadata_digest as u32,
+            DIGEST_BYTES as u32,
+        )
+    };
+
+    // Check to ensure the host indicated success by returning 0.
+    // This should always be the case. This check is included for forwards-compatiblity.
+    if a0 != 0 {
+        const MSG: &[u8] = "sys_verify returned error result".as_bytes();
+        unsafe { sys_panic(MSG.as_ptr(), MSG.len()) };
+    }
 }

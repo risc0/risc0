@@ -58,6 +58,14 @@ pub(crate) fn finalize(halt: bool, user_exit: u8) {
     }
 }
 
+/// Pause the execution of the zkvm.
+///
+/// Execution may be continued at a later time.
+pub fn pause() {
+    finalize(false, 0);
+    init();
+}
+
 /// Exchange data with the host.
 pub fn syscall(syscall: SyscallName, to_host: &[u8], from_host: &mut [u32]) -> syscall::Return {
     unsafe {
@@ -70,6 +78,14 @@ pub fn syscall(syscall: SyscallName, to_host: &[u8], from_host: &mut [u32]) -> s
         )
     }
 }
+/// Verify there exists a receipt for an execution with the given `image_id` and `journal`.
+///
+/// In order to be valid, the [Receipt] must have have `ExitCode::Halted(0)`, an empty
+/// assumptions list, and an all-zeroes input hash. It may have any post [SystemState].
+pub fn verify(image_id: &Digest, journal: &[u8]) -> Result<(), VerifyError>;
+
+/// Verify that there exists a valid receipt with the specified [ReceiptMetadata].
+pub fn verify_metdata(meta: &ReceiptMetadata) -> Result<(), VerifyMetadataError>;
 
 /// Exhanges slices of plain old data with the host.
 ///
@@ -164,14 +180,6 @@ pub fn journal() -> FdWriter<impl for<'a> Fn(&'a [u8])> {
 /// Reaturn a reader for the standard input
 pub fn stdin() -> FdReader {
     FdReader::new(fileno::STDIN)
-}
-
-/// Pause the execution of the zkvm.
-///
-/// Execution may be continued at a later time.
-pub fn pause() {
-    finalize(false, 0);
-    init();
 }
 
 /// Reads and deserializes objects
