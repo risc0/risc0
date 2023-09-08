@@ -48,6 +48,8 @@ cargo run --release --bin verify -- -i waldo.webp -r receipt.bin
 Running the verifier proves that the contents of [receipt.journal] were indeed constructed by the binary file associated with the expected [ImageID].
 
 [install Rust]: https://doc.rust-lang.org/cargo/getting-started/installation.html
+[receipt.journal]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.Receipt.html#structfield.journal
+[ImageID]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.MemoryImage.html#method.compute_id
 
 ## Approach
 
