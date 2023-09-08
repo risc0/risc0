@@ -106,6 +106,7 @@ dual = []
 metal = ["prove", "risc0-circuit-rv32im/metal", "risc0-zkp/metal"]
 default = ["client", "prove"]
 disable-dev-mode = []
+fault-proof = []
 profiler = [
   "dep:addr2line",
   "dep:gimli",
@@ -115,6 +116,7 @@ profiler = [
 ]
 prove = [
   "client",
+  "fault-proof",
   "dep:addr2line",
   "dep:bincode",
   "dep:bytes",

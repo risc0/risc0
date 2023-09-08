@@ -6,5 +6,5 @@ edition = "2021"
 [workspace]
 
 [dependencies]
-risc0-zkvm = { path = "../../zkvm", default-features = false, features = [ "std" ] }
+risc0-zkvm = { path = "../../zkvm", default-features = false, features = [ "std", "fault-proof" ] }
 rrs-lib = "0.1"
