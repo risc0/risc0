@@ -193,6 +193,17 @@ impl SegmentReceipts {
         image_id: Digest,
         journal: &[u8],
     ) -> Result<(), VerificationError> {
+        let mut fault_id_count = 0;
+        let mut is_fault_meta = |metadata: &ReceiptMetadata| -> bool {
+            if cfg!(feature = "enable-fault-proof")
+                && metadata.pre.digest() == FAULT_CHECKER_ID.into()
+            {
+                fault_id_count += 1;
+                return true;
+            }
+            false
+        };
+
         let (final_receipt, receipts) = self
             .0
             .as_slice()
@@ -203,7 +214,7 @@ impl SegmentReceipts {
             receipt.verify_with_context(ctx)?;
             let metadata = receipt.get_metadata()?;
             log::debug!("metadata: {metadata:#?}");
-            if prev_image_id != metadata.pre.digest() {
+            if prev_image_id != metadata.pre.digest() || !is_fault_meta(&metadata) {
                 return Err(VerificationError::ImageVerificationError);
             }
             if metadata.exit_code != ExitCode::SystemSplit {
@@ -215,9 +226,7 @@ impl SegmentReceipts {
         let metadata = final_receipt.get_metadata()?;
         log::debug!("final: {metadata:#?}");
         // If there's more than one segment, the last segment could be the fault checker
-        let final_receipt_is_fault_checker = cfg!(feature = "enable-fault-proof")
-            && metadata.pre.digest() == FAULT_CHECKER_ID.into();
-        if prev_image_id != metadata.pre.digest() && !final_receipt_is_fault_checker {
+        if prev_image_id != metadata.pre.digest() && !is_fault_meta(&metadata) {
             return Err(VerificationError::ImageVerificationError);
         }
 
@@ -228,13 +237,20 @@ impl SegmentReceipts {
         // For receipts indicating proof of fault, the guest code should post the
         // post-image ID of the original guest code to prove that the fault checker
         // tried to execute the next instruction from the same state of the machine.
-        if cfg!(feature = "enable-fault-proof")
-            && metadata.pre.digest() == FAULT_CHECKER_ID.into()
-            && receipts.len() > 0
-        {
+        if cfg!(feature = "enable-fault-proof") && fault_id_count > 0 && receipts.len() > 0 {
             let digest: Digest = from_slice(&journal.clone()).unwrap();
             if digest != prev_image_id {
                 return Err(VerificationError::FaultStateMismatch);
+            }
+            // fault checker should only end in a Halted(0) state. Any other
+            // status indicates that something went wrong.
+            if metadata.exit_code != ExitCode::Halted(0) {
+                return Err(VerificationError::UnexpectedExitCode);
+            }
+            // There should be no more than one receipt that represents contains the
+            // FAULT_CHECKER_ID as the preimage ID.
+            if fault_id_count > 1 {
+                return Err(VerificationError::ImageVerificationError);
             }
         }
 
