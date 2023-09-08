@@ -14,6 +14,7 @@
 
 use risc0_benchmark::Benchmark;
 use risc0_zkvm::{default_prover, serde::to_vec, sha::DIGEST_WORDS, ExecutorEnv, Receipt};
+use sha3::{Digest, Keccak256};
 
 pub struct Job<'a> {
     pub spec: u32,
@@ -25,11 +26,11 @@ pub fn new_jobs() -> Vec<<Job<'static> as Benchmark>::Spec> {
     vec![1, 10, 100]
 }
 
-const METHOD_ID: [u32; DIGEST_WORDS] = risc0_benchmark_methods::ITER_BLAKE3_ID;
-const METHOD_PATH: &'static str = risc0_benchmark_methods::ITER_BLAKE3_PATH;
+const METHOD_ID: [u32; DIGEST_WORDS] = risc0_benchmark_methods::ITER_KECCAK_ID;
+const METHOD_PATH: &'static str = risc0_benchmark_methods::ITER_KECCAK_PATH;
 
 impl Benchmark for Job<'_> {
-    const NAME: &'static str = "iter_blake3";
+    const NAME: &'static str = "iter_keccak";
     type Spec = u32;
     type ComputeOut = risc0_zkvm::sha::Digest;
     type ProofType = Receipt;
@@ -73,15 +74,15 @@ impl Benchmark for Job<'_> {
     }
 
     fn host_compute(&mut self) -> Option<Self::ComputeOut> {
-        let mut hash = blake3::hash(&[0u8; 32]);
-        let mut data = hash.as_bytes();
+        let mut data = Vec::from([0u8; 32]);
 
-        for _ in 1..self.spec {
-            hash = blake3::hash(data);
-            data = hash.as_bytes();
+        for _i in 0..self.spec {
+            let mut hasher = Keccak256::new();
+            hasher.update(&data);
+            data = hasher.finalize().to_vec();
         }
 
-        Some(risc0_zkvm::sha::Digest::try_from(*data).unwrap())
+        Some(risc0_zkvm::sha::Digest::try_from(data.as_slice()).unwrap())
     }
 
     fn guest_compute(&mut self) -> (Self::ComputeOut, Self::ProofType) {

@@ -34,9 +34,13 @@ struct Cli {
 enum Command {
     All,
     BigSha2,
+    BigBlake2b,
+    BigBlake3,
+    BigKeccak,
     IterSha2,
+    IterKeccak,
     IterBlake2b,
-    // IterBlake3,
+    IterBlake3,
     EcdsaVerify,
 }
 
@@ -48,17 +52,33 @@ fn main() {
         run_jobs::<big_sha2::Job>(&cli.out, big_sha2::new_jobs());
     }
 
+    if cli.command == Command::All || cli.command == Command::BigKeccak {
+        run_jobs::<big_keccak::Job>(&cli.out, big_keccak::new_jobs());
+    }
+
+    if cli.command == Command::All || cli.command == Command::BigBlake2b {
+        run_jobs::<big_blake2b::Job>(&cli.out, big_blake2b::new_jobs());
+    }
+
+    if cli.command == Command::All || cli.command == Command::BigBlake3 {
+        run_jobs::<big_blake3::Job>(&cli.out, big_blake3::new_jobs());
+    }
+
     if cli.command == Command::All || cli.command == Command::IterSha2 {
         run_jobs::<iter_sha2::Job>(&cli.out, iter_sha2::new_jobs());
+    }
+
+    if cli.command == Command::All || cli.command == Command::IterKeccak {
+        run_jobs::<iter_keccak::Job>(&cli.out, iter_keccak::new_jobs());
     }
 
     if cli.command == Command::All || cli.command == Command::IterBlake2b {
         run_jobs::<iter_blake2b::Job>(&cli.out, iter_blake2b::new_jobs());
     }
 
-    // if cli.command == Command::All || cli.command == Command::IterBlake3 {
-    //     run_jobs::<iter_blake3::Job>(&cli.out, iter_blake3::new_jobs());
-    // }
+    if cli.command == Command::All || cli.command == Command::IterBlake3 {
+        run_jobs::<iter_blake3::Job>(&cli.out, iter_blake3::new_jobs());
+    }
 
     if cli.command == Command::All || cli.command == Command::EcdsaVerify {
         run_jobs::<ecdsa_verify::Job>(&cli.out, ecdsa_verify::new_jobs());

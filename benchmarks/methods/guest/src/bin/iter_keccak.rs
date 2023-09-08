@@ -11,27 +11,32 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 #![no_main]
 
-use risc0_zkvm::guest::env;
+use risc0_zkvm::{guest::env, sha::Digest};
+use sha3::{Digest as _, Keccak256};
 
 risc0_zkvm::entry!(main);
 
 pub fn main() {
-    let input: Vec<u8> = env::read();
+    let data: Vec<u8> = env::read();
 
     let mut num_iter: u32;
-    num_iter = input[0] as u32;
-    num_iter = num_iter | ((input[1] as u32) << 8);
-    num_iter = num_iter | ((input[2] as u32) << 16);
-    num_iter = num_iter | ((input[3] as u32) << 24);
+    num_iter = data[0] as u32;
+    num_iter = num_iter | ((data[1] as u32) << 8);
+    num_iter = num_iter | ((data[2] as u32) << 16);
+    num_iter = num_iter | ((data[3] as u32) << 24);
 
-    let mut pre_output = blake3::hash(&input[4..]);
-    let mut output = pre_output.as_bytes();
+    let mut hash = keccak(&data[4..]);
     for _ in 1..num_iter {
-        pre_output = blake3::hash(output);
-        output = pre_output.as_bytes();
+        hash = keccak(hash);
     }
 
-    env::commit(&risc0_zkvm::sha::Digest::try_from(*output).unwrap())
+    env::commit(&Digest::try_from(hash).unwrap())
+}
+
+#[inline]
+pub fn keccak(data: impl AsRef<[u8]>) -> [u8; 32] {
+    Keccak256::digest(data).into()
 }

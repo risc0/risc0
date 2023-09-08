@@ -13,7 +13,7 @@ risc0-benchmark-methods = { path = "methods" }
 risc0-build = { path = "../risc0/build" }
 
 [dependencies]
-blake3 = "1.4"
+blake3 = { version = "1.4", default-features = false }
 blake2 = { version = "0.10.6", default-features = false }
 clap = { version = "4.0", features = ["derive"] }
 csv = "1.1"
@@ -27,6 +27,7 @@ risc0-zkp = { path = "../risc0/zkp", default-features = false }
 risc0-zkvm = { path = "../risc0/zkvm", default-features = false, features = ["prove"] }
 serde = { version = "1.0", features = ["derive"] }
 sha2 = "0.10.6"
+sha3 = "0.10"
 
 [features]
 cuda = ["risc0-zkvm/cuda"]

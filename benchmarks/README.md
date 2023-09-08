@@ -8,9 +8,29 @@ Computes the SHA2-256 hash of large random buffers of various sizes.
 
 Computes the SHA2-256 hash of a given buffer for a given amount of iterations.
 
+### `big_keccak`
+
+Computes the Keccak hash of large random buffers of various sizes.
+
+### `iter_keccak`
+
+Computes the Keccak hash of a given buffer for a given amount of iterations.
+
+### `big_blake2b`
+
+Computes the Blake2b hash of large random buffers of various sizes.
+
 ### `iter_blake2b`
 
 Computes the Blake2b hash of a given buffer for a given amount of iterations.
+
+### `big_blake3`
+
+Computes the Blake3 hash of large random buffers of various sizes.
+
+### `iter_blake3`
+
+Computes the Blake3 hash of a given buffer for a given amount of iterations.
 
 ### `ecdsa_verify`
 
