@@ -18,7 +18,7 @@ use anyhow::Context;
 use bonsai_ethereum_relay::{EthersClientConfig, Relayer};
 use bonsai_ethereum_relay_cli::{resolve_guest_entry, resolve_image_output, Output};
 use bonsai_sdk::{
-    alpha::{responses::SnarkProof, SdkErr},
+    alpha::responses::SnarkProof,
     alpha_async::{get_client_from_parts, upload_img},
 };
 use clap::{Args, Parser, Subcommand};
@@ -299,7 +299,8 @@ async fn upload_images(
             bonsai_client.clone(),
             img_id.clone(),
             guest_entry.elf.to_vec(),
-        )?;
+        )
+        .await?;
 
         image_ids.push(guest_entry.image_id.into());
     }
