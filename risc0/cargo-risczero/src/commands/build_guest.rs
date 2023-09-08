@@ -213,7 +213,7 @@ mod test {
         let tester = Tester::new("risc0/zkvm/methods/guest/Cargo.toml");
         tester.compare_image_id(
             "risc0_zkvm_methods_guest/multi_test",
-            "2a1f586685d5d7ff121cacdeab79432ae6e872bc2b8ff99335cfebe7ea3987c4",
+            "e292842cb47a065057c3b7dae52c93dd849307e2e2746eec22c58517a3474f92",
         );
         tester.compare_image_id(
             "risc0_zkvm_methods_guest/hello_commit",
