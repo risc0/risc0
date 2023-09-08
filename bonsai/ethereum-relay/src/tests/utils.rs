@@ -39,6 +39,8 @@ pub(crate) mod tests {
         let status_response = SessionStatusRes {
             status: "SUCCEEDED".to_string(),
             receipt_url: Some(format!("{}/fake/receipt/path", server.uri())),
+            error_msg: None,
+            state: None,
         };
 
         let receipt_data_response = Receipt {
@@ -66,6 +68,7 @@ pub(crate) mod tests {
         let snark_status_res = SnarkStatusRes {
             status: "SUCCEEDED".to_string(),
             output: dummy_snark,
+            error_msg: None,
         };
 
         Mock::given(method("POST"))

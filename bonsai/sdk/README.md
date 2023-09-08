@@ -36,6 +36,11 @@ fn run_bonsai(input_data: Vec<u8>) -> Result<()> {
     loop {
         let res = session.status(&client)?;
         if res.status == "RUNNING" {
+            tracing::debug!(
+                "Current status: {} - state: {} - continue polling...",
+                res.status,
+                res.state.unwrap_or_default()
+            );
             std::thread::sleep(Duration::from_secs(15));
             continue;
         }
@@ -51,7 +56,7 @@ fn run_bonsai(input_data: Vec<u8>) -> Result<()> {
                 .verify(METHOD_NAME_ID)
                 .expect("Receipt verification failed");
         } else {
-            panic!("Workflow exited: {}", res.status);
+            panic!("Workflow exited: {} - | err: {}", res.status, res.error_msg.unwrap_or_default());
         }
 
         break;
@@ -59,4 +64,40 @@ fn run_bonsai(input_data: Vec<u8>) -> Result<()> {
 
     Ok(())
 }
+```
+
+## STARK to SNARK
+
+After a STARK proof is generated, it is possible to convert the proof to SNARK.
+
+### Example
+
+```rust
+fn run_stark2snark(session_id: String) -> Result<()> {
+    let client = bonsai_sdk::Client::from_env()?;
+
+    let snark_session = client.create_snark(session_id)?;
+    tracing::info!("Created snark session: {}", snark_session.uuid);
+    loop {
+        let res = snark_session.status(&client)?;
+        match res.status.as_str() {
+            "RUNNING" => {
+                tracing::debug!("Current status: {} - continue polling...", res.status,);
+                std::thread::sleep(Duration::from_secs(15));
+                continue;
+            }
+            "SUCCEEDED" => {
+                let snark_proof = res.output;
+                tracing::info!("Snark proof!: {snark_proof:?}");
+                break;
+            }
+            _ => {
+                panic!("Workflow exited: {} err: {}", res.status, res.error_msg.unwrap_or_default());
+            }
+        }
+    }
+    Ok(())
+}
+
+run_stark2snark(session_id)?;
 ```
