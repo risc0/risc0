@@ -13,12 +13,22 @@
 // limitations under the License.
 
 use clap::Parser;
-use risc0_fault::{FAULT_CHECKER_ELF, FAULT_CHECKER_ID};
+use risc0_fault::{FAULT_CHECKER_ID, FAULT_CHECKER_PATH};
 #[derive(Parser)]
 pub struct BootstrapFault;
+const FAULT_CHECKER_ELF_RISC0_PATH: &str = "risc0/zkvm/src/fault_checker.elf";
 
 impl BootstrapFault {
     pub fn run(&self) {
+        // move the ELF locally
+        std::fs::copy(FAULT_CHECKER_PATH, FAULT_CHECKER_ELF_RISC0_PATH).expect(
+            format!(
+                "failed to copy fault checker elf from {} to {}",
+                FAULT_CHECKER_PATH, FAULT_CHECKER_ELF_RISC0_PATH
+            )
+            .as_str(),
+        );
+
         let rust_code = format!(
             r##"// Copyright 2023 RISC Zero, Inc.
 //
@@ -43,7 +53,7 @@ pub const FAULT_CHECKER_ID: [u32; 8] = {FAULT_CHECKER_ID:?};
 
 /// The ELF of the fault checker guest program
 #[rustfmt::skip]
-pub const FAULT_CHECKER_ELF: &[u8] = &{FAULT_CHECKER_ELF:?};
+pub const FAULT_CHECKER_ELF: &[u8] = include_bytes!("fault_checker.elf");
 "##
         );
 
