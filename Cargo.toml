@@ -32,6 +32,7 @@ bonsai-ethereum-contracts = { version = "0.1.0", path = "bonsai/ethereum" }
 bonsai-ethereum-relay = { version = "0.1.0", default-features = false, path = "bonsai/ethereum-relay" }
 bonsai-rest-api-mock = { version = "0.1.0", default-features = false, path = "bonsai/rest-api-mock" }
 bonsai-sdk = { version = "0.3.0", default-features = false, path = "bonsai/sdk" }
+risc0-benchmark = { version = "0.17.0", default-features = false, path = "benchmarks" }
 risc0-binfmt = { version = "0.17.0", default-features = false, path = "risc0/binfmt" }
 risc0-build = { version = "0.17.0", default-features = false, path = "risc0/build" }
 risc0-build-kernel = { version = "0.17.0", default-features = false, path = "risc0/build_kernel" }

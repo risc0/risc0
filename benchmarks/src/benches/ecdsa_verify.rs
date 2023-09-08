@@ -1,0 +1,125 @@
+// Copyright 2023 RISC Zero, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+use k256::{
+    ecdsa::{signature::Signer, Signature, SigningKey},
+    EncodedPoint,
+};
+use rand_core::OsRng;
+use risc0_benchmark::Benchmark;
+use risc0_zkvm::{
+    default_prover,
+    serde::{from_slice, to_vec},
+    sha::DIGEST_WORDS,
+    ExecutorEnv, Receipt,
+};
+
+pub struct Job<'a> {
+    pub spec: u32,
+    pub env: ExecutorEnv<'a>,
+    pub image: Vec<u8>,
+    pub verifying_key: EncodedPoint,
+    pub message: Vec<u8>,
+    pub signature: Signature,
+}
+
+pub fn new_jobs() -> Vec<<Job<'static> as Benchmark>::Spec> {
+    vec![1]
+}
+
+const METHOD_ID: [u32; DIGEST_WORDS] = risc0_benchmark_methods::ECDSA_VERIFY_ID;
+const METHOD_PATH: &'static str = risc0_benchmark_methods::ECDSA_VERIFY_PATH;
+
+impl Benchmark for Job<'_> {
+    const NAME: &'static str = "ecdsa_verify";
+    type Spec = u32;
+    type ComputeOut = (EncodedPoint, Vec<u8>);
+    type ProofType = Receipt;
+
+    fn job_size(spec: &Self::Spec) -> u32 {
+        *spec
+    }
+
+    fn output_size_bytes(_output: &Self::ComputeOut, proof: &Self::ProofType) -> u32 {
+        (proof.journal.len()) as u32
+    }
+
+    fn proof_size_bytes(proof: &Self::ProofType) -> u32 {
+        (proof
+            .inner
+            .flat()
+            .unwrap()
+            .iter()
+            .fold(0, |acc, segment| acc + segment.get_seal_bytes().len())) as u32
+    }
+
+    fn new(spec: Self::Spec) -> Self {
+        let image = std::fs::read(METHOD_PATH).expect("image");
+
+        // Generate a random secp256k1 keypair and sign the message.
+        let signing_key = SigningKey::random(&mut OsRng);
+        let verifying_key = signing_key.verifying_key().to_encoded_point(true);
+        let message =
+            b"This is a message that will be signed, and verified within the zkVM".to_vec();
+        let signature: Signature = signing_key.sign(&message);
+
+        let env = ExecutorEnv::builder()
+            .add_input(&to_vec(&(spec, verifying_key, message.clone(), signature)).unwrap())
+            .build()
+            .unwrap();
+
+        Job {
+            spec,
+            env,
+            image,
+            verifying_key,
+            message,
+            signature,
+        }
+    }
+
+    fn spec(&self) -> &Self::Spec {
+        &self.spec
+    }
+
+    fn host_compute(&mut self) -> Option<Self::ComputeOut> {
+        Some((self.verifying_key, self.message.clone()))
+    }
+
+    fn guest_compute(&mut self) -> (Self::ComputeOut, Self::ProofType) {
+        let receipt = default_prover()
+            .prove_elf(self.env.clone(), &self.image)
+            .expect("receipt");
+
+        let (receipt_verifying_key, receipt_message) =
+            from_slice::<(EncodedPoint, Vec<u8>), _>(&receipt.journal)
+                .unwrap()
+                .try_into()
+                .unwrap();
+
+        ((receipt_verifying_key, receipt_message), receipt)
+    }
+
+    fn verify_proof(&self, _output: &Self::ComputeOut, proof: &Self::ProofType) -> bool {
+        let result = proof.verify(METHOD_ID);
+
+        match result {
+            Ok(_) => true,
+            Err(err) => {
+                println!("{}", err);
+                false
+            }
+        }
+    }
+}
