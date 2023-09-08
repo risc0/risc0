@@ -50,7 +50,7 @@ impl FaultCheckMonitor {
 /// the execution gets to this point, the address has been checked to ensure
 /// that it's aligned. The only thing the fault checker needs to do is to ensure
 /// that the read and write addresses are within range. The reads and writes do
-/// not need to fetch/write to the memory map. One exception is the PC. The pc
+/// not need to fetch/write to the memory map. One exception is the next instruction. The instruction at pc
 /// needs to be fetched from memory. For this implementation, a special case has
 /// been implemented to fetch the instruction.
 impl Memory for FaultCheckMonitor {
