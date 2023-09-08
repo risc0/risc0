@@ -228,7 +228,10 @@ impl SegmentReceipts {
         // For receipts indicating proof of fault, the guest code should post the
         // post-image ID of the original guest code to prove that the fault checker
         // tried to execute the next instruction from the same state of the machine.
-        if metadata.pre.digest() == FAULT_CHECKER_ID.into() {
+        if cfg!(feature = "enable-fault-proof")
+            && metadata.pre.digest() == FAULT_CHECKER_ID.into()
+            && receipts.len() > 0
+        {
             let digest: Digest = from_slice(&journal.clone()).unwrap();
             if digest != prev_image_id {
                 return Err(VerificationError::FaultStateMismatch);
