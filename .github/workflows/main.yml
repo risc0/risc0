@@ -29,19 +29,34 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 18
-      - run: cargo fmt --all --check
-      - run: cargo fmt --all --check --manifest-path examples/Cargo.toml
-      - run: cargo fmt --all --check --manifest-path bonsai/Cargo.toml
-      - run: cargo fmt --all --check --manifest-path bonsai/examples/governance/Cargo.toml
-      - run: cargo sort --workspace --check
-      - run: cargo sort --workspace --check examples
-      - run: cargo sort --workspace --check bonsai
-      - run: cargo sort --workspace --check bonsai/examples/governance
-      - uses: actions/setup-python@v4
+      - uses: dorny/paths-filter@v2
+        id: filter
         with:
-          python-version: '3.10'
-      - run: python license-check.py
+          filters: |
+            fmt:
+              - 'examples/**'
+              - 'bonsai/**'
+            license:
+              - 'LICENSE'
+      - name: Conditional Steps
+        if: steps.filter.outputs.fmt == 'true'
+        run: |
+          cargo fmt --all --check
+          cargo fmt --all --check --manifest-path examples/Cargo.toml
+          cargo fmt --all --check --manifest-path bonsai/Cargo.toml
+          cargo fmt --all --check --manifest-path bonsai/examples/governance/Cargo.toml
+          cargo sort --workspace --check
+          cargo sort --workspace --check examples
+          cargo sort --workspace --check bonsai
+          cargo sort --workspace --check bonsai/examples/governance
 
+      - name: Check License
+        if: steps.filter.outputs.license == 'true'
+        run: |
+          - uses: actions/setup-python@v4
+            with:
+              python-version: '3.10'
+          - run: python license-check.py
   test:
     runs-on: [self-hosted, prod, "${{ matrix.os }}", "${{ matrix.device }}"]
     strategy:
