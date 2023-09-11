@@ -16,7 +16,7 @@
 pub(crate) mod tests {
     use bonsai_ethereum_contracts::i_bonsai_relay::CallbackRequestFilter;
     use bonsai_sdk::alpha::{
-        responses::{CreateSessRes, SessionStatusRes, SnarkProof, SnarkStatusRes},
+        responses::{CreateSessRes, Groth16Seal, SessionStatusRes, SnarkProof, SnarkStatusRes},
         SessionId,
     };
     use ethers::types::{Address, Bytes, H256, U256};
@@ -64,7 +64,11 @@ pub(crate) mod tests {
             zeroes.to_string(),
             zeroes.to_string(),
         ];
-        let dummy_snark = Some(SnarkProof { a, b, c, public });
+        let dummy_snark = Some(SnarkProof {
+            snark: Groth16Seal { a, b, c, public },
+            post_state_digest: vec![],
+            journal: vec![],
+        });
         let snark_status_res = SnarkStatusRes {
             status: "SUCCEEDED".to_string(),
             output: dummy_snark,
