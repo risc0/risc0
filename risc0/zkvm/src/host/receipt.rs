@@ -214,7 +214,7 @@ impl SegmentReceipts {
             receipt.verify_with_context(ctx)?;
             let metadata = receipt.get_metadata()?;
             log::debug!("metadata: {metadata:#?}");
-            if prev_image_id != metadata.pre.digest() || !is_fault_meta(&metadata) {
+            if prev_image_id != metadata.pre.digest() && !is_fault_meta(&metadata) {
                 return Err(VerificationError::ImageVerificationError);
             }
             if metadata.exit_code != ExitCode::SystemSplit {
