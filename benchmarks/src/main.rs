@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// This is based on zk-benchmarking: https://github.com/delendum-xyz/zk-benchmarking
+
 use clap::{Parser, Subcommand};
 use risc0_benchmark::{init_logging, run_jobs};
 use std::path::PathBuf;
