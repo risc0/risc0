@@ -123,8 +123,11 @@ pub mod responses {
     }
 
     /// Snark Proof object
+    ///
+    /// following the snarkjs calldata format:
+    /// <https://github.com/iden3/snarkjs#26-simulate-a-verification-call>
     #[derive(Debug, Deserialize, Serialize, PartialEq)]
-    pub struct SnarkProof {
+    pub struct SnarkSeal {
         /// Proof 'a' value
         pub a: Vec<String>,
         /// Proof 'b' value
@@ -133,6 +136,21 @@ pub mod responses {
         pub c: Vec<String>,
         /// Proof public outputs
         pub public: Vec<String>,
+    }
+
+    /// Snark Proof object
+    ///
+    /// All relevant data to verify both the snark proof an corresponding imageId on chain.
+    #[derive(Debug, Deserialize, Serialize, PartialEq)]
+    pub struct SnarkProof {
+        /// Snark seal from snarkjs
+        pub snark: SnarkSeal,
+        /// Post State Digest
+        ///
+        /// Collected from the STARK proof via `receipt.get_metadata().post.digest()`
+        pub post_state_digest: Vec<u8>,
+        /// Journal data from the risc-zkvm Receipt object
+        pub journal: Vec<u8>,
     }
 
     /// Session Status response
@@ -144,8 +162,7 @@ pub mod responses {
         pub status: String,
         /// SNARK proof output
         ///
-        /// Generated snark proof, following the snarkjs calldata format:
-        /// <https://github.com/iden3/snarkjs#26-simulate-a-verification-call>
+        /// Generated snark proof,
         pub output: Option<SnarkProof>,
         /// Snark Error message
         ///
