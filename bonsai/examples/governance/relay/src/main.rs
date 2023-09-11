@@ -18,8 +18,8 @@ use anyhow::Context;
 use bonsai_ethereum_relay::{EthersClientConfig, Relayer};
 use bonsai_ethereum_relay_cli::{resolve_guest_entry, resolve_image_output, Output};
 use bonsai_sdk::{
-    alpha::{responses::SnarkProof, SdkErr},
-    alpha_async::{get_client_from_parts, put_image},
+    alpha::responses::SnarkProof,
+    alpha_async::{get_client_from_parts, upload_img},
 };
 use clap::{Args, Parser, Subcommand};
 use ethers::{
@@ -295,16 +295,12 @@ async fn upload_images(
             get_client_from_parts(bonsai_api_url.to_string(), bonsai_api_key.to_string()).await?;
         let img_id = image_id.clone();
 
-        match put_image(
+        upload_img(
             bonsai_client.clone(),
             img_id.clone(),
             guest_entry.elf.to_vec(),
         )
-        .await
-        {
-            Ok(()) | Err(SdkErr::ImageIdExists) => Ok::<_, anyhow::Error>(()),
-            Err(err) => Err(err.into()),
-        }?;
+        .await?;
 
         image_ids.push(guest_entry.image_id.into());
     }

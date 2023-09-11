@@ -15,7 +15,7 @@
 use std::time::Duration;
 
 use anyhow::{anyhow, bail, Context, Result};
-use bonsai_sdk::alpha::{responses::SnarkProof, Client, SdkErr};
+use bonsai_sdk::alpha::{responses::SnarkProof, Client};
 use risc0_build::GuestListEntry;
 use risc0_zkvm::{
     Executor, ExecutorEnv, MemoryImage, Program, Receipt, ReceiptMetadata, MEM_SIZE, PAGE_SIZE,
@@ -65,11 +65,7 @@ pub fn prove_alpha(elf: &[u8], input: Vec<u8>) -> Result<Output> {
 
     let img_id = get_digest(elf).context("Failed to generate elf memory image")?;
 
-    match client.upload_img(&img_id, elf.to_vec()) {
-        Ok(()) => (),
-        Err(SdkErr::ImageIdExists) => (),
-        Err(err) => return Err(err.into()),
-    }
+    client.upload_img(&img_id, elf.to_vec())?;
 
     let input_id = client
         .upload_input(input)
