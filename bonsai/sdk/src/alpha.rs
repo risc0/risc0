@@ -126,13 +126,13 @@ pub mod responses {
     #[derive(Debug, Deserialize, Serialize, PartialEq)]
     pub struct SnarkSeal {
         /// Proof 'a' value
-        pub a: Vec<String>,
+        pub a: Vec<Vec<u8>>,
         /// Proof 'b' value
-        pub b: Vec<Vec<String>>,
+        pub b: Vec<Vec<Vec<u8>>>,
         /// Proof 'c' value
-        pub c: Vec<String>,
+        pub c: Vec<Vec<u8>>,
         /// Proof public outputs
-        pub public: Vec<String>,
+        pub public: Vec<Vec<u8>>,
     }
 
     /// Snark Proof object
