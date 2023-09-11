@@ -13,13 +13,13 @@
 // limitations under the License.
 
 use rand::{rngs::StdRng, RngCore, SeedableRng};
-use risc0_benchmark::Benchmark;
+use risc0_benchmark::{exec_compute, get_image, Benchmark};
 use risc0_zkvm::{
     serde::to_vec,
     sha::{Digest, DIGEST_WORDS},
-    Executor, ExecutorEnv, ExitCode, MemoryImage, Program, Receipt, Session, MEM_SIZE, PAGE_SIZE,
+    ExecutorEnv, ExitCode, MemoryImage, Receipt, Session,
 };
-use std::time::{Duration, Instant};
+use std::time::Duration;
 
 pub struct Job<'a> {
     pub guest_input: Vec<u8>,
@@ -69,13 +69,11 @@ impl Benchmark for Job<'_> {
     }
 
     fn new(guest_input: Self::Spec) -> Self {
-        let image = std::fs::read(METHOD_PATH).expect("image");
+        let image = get_image(METHOD_PATH);
         let env = ExecutorEnv::builder()
             .add_input(&to_vec(&guest_input).unwrap())
             .build()
             .unwrap();
-        let program = Program::load_elf(&image, MEM_SIZE as u32).unwrap();
-        let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
         let session = Session::new(vec![], vec![], ExitCode::Halted(0));
 
         Job {
@@ -91,15 +89,8 @@ impl Benchmark for Job<'_> {
     }
 
     fn exec_compute(&mut self) -> (u32, Duration) {
-        let mut exec = Executor::new(self.env.clone(), self.image.clone()).unwrap();
-        let start = Instant::now();
-        self.session = exec.run().unwrap();
-        let elapsed = start.elapsed();
-        let mut cycles = 0usize;
-        let segments = self.session.resolve().unwrap();
-        for segment in segments {
-            cycles += segment.insn_cycles
-        }
+        let (cycles, elapsed, session) = exec_compute(self.image.clone(), self.env.clone());
+        self.session = session;
         (cycles as u32, elapsed)
     }
 

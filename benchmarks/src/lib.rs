@@ -17,6 +17,7 @@ use std::path::{Path, PathBuf};
 use std::time::{Duration, Instant};
 
 use log::info;
+use risc0_zkvm::{Executor, ExecutorEnv, MemoryImage, Program, Session, MEM_SIZE, PAGE_SIZE};
 use serde::Serialize;
 
 pub struct Metrics {
@@ -107,6 +108,25 @@ pub trait Benchmark {
 
         metrics
     }
+}
+
+pub fn get_image(path: &str) -> MemoryImage {
+    let elf = std::fs::read(path).expect("elf");
+    let program = Program::load_elf(&elf, MEM_SIZE as u32).unwrap();
+    MemoryImage::new(&program, PAGE_SIZE as u32).unwrap()
+}
+
+pub fn exec_compute<'a>(image: MemoryImage, env: ExecutorEnv<'a>) -> (u32, Duration, Session) {
+    let mut exec = Executor::new(env.clone(), image.clone()).unwrap();
+    let start = Instant::now();
+    let session = exec.run().unwrap();
+    let elapsed = start.elapsed();
+    let mut cycles = 0usize;
+    let segments = session.resolve().unwrap();
+    for segment in segments {
+        cycles += segment.insn_cycles
+    }
+    (cycles as u32, elapsed, session)
 }
 
 pub fn init_logging() {
