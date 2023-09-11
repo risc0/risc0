@@ -19,7 +19,7 @@ pub(crate) mod tests {
         responses::{CreateSessRes, Groth16Seal, SessionStatusRes, SnarkProof, SnarkStatusRes},
         SessionId,
     };
-    use ethers::types::{Address, Bytes, H256, U256};
+    use ethers::types::{Address, Bytes, H256};
     use risc0_zkvm::{InnerReceipt, Receipt};
     use uuid::Uuid;
     use wiremock::{
@@ -51,18 +51,18 @@ pub(crate) mod tests {
         let create_snark_res = CreateSessRes {
             uuid: receipt_id.to_string(),
         };
-        let zeroes = &U256::zero().to_string();
-        let a = vec![zeroes.to_string(), zeroes.to_string()];
+        let zeroes = vec![0x0];
+        let a = vec![zeroes.clone(), zeroes.clone()];
         let b = vec![
-            vec![zeroes.to_string(), zeroes.to_string()],
-            vec![zeroes.to_string(), zeroes.to_string()],
+            vec![zeroes.clone(), zeroes.clone()],
+            vec![zeroes.clone(), zeroes.clone()],
         ];
-        let c = vec![zeroes.to_string(), zeroes.to_string()];
+        let c = vec![zeroes.clone(), zeroes.clone()];
         let public = vec![
-            zeroes.to_string(),
-            zeroes.to_string(),
-            zeroes.to_string(),
-            zeroes.to_string(),
+            zeroes.clone(),
+            zeroes.clone(),
+            zeroes.clone(),
+            zeroes.clone(),
         ];
         let dummy_snark = Some(SnarkProof {
             snark: Groth16Seal { a, b, c, public },
