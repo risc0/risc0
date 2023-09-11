@@ -24,9 +24,6 @@ use self::responses::{
 /// Bonsai Alpha SDK error classes
 #[derive(Debug, Error)]
 pub enum SdkErr {
-    /// The API already has the supplied imageID
-    #[error("the supplied imageId already exists")]
-    ImageIdExists,
     /// Server side failure
     #[error("server error `{0}`")]
     InternalServerErr(String),
@@ -213,6 +210,11 @@ pub struct Client {
     pub(crate) client: BlockingClient,
 }
 
+enum ImageExistsOpt {
+    Exists,
+    New(ImgUploadRes),
+}
+
 /// Creates a [reqwest::Client] for internal connection pooling
 fn construct_req_client(api_key: &str) -> Result<BlockingClient, SdkErr> {
     let mut headers = header::HeaderMap::new();
@@ -264,14 +266,14 @@ impl Client {
         Ok(res.json::<UploadRes>()?)
     }
 
-    fn get_image_upload_url(&self, image_id: &str) -> Result<ImgUploadRes, SdkErr> {
+    fn get_image_upload_url(&self, image_id: &str) -> Result<ImageExistsOpt, SdkErr> {
         let res = self
             .client
             .get(format!("{}/images/upload/{}", self.url, image_id))
             .send()?;
 
         if res.status() == 204 {
-            return Err(SdkErr::ImageIdExists);
+            return Ok(ImageExistsOpt::Exists);
         }
 
         if !res.status().is_success() {
@@ -279,7 +281,7 @@ impl Client {
             return Err(SdkErr::InternalServerErr(body));
         }
 
-        Ok(res.json::<ImgUploadRes>()?)
+        Ok(ImageExistsOpt::New(res.json::<ImgUploadRes>()?))
     }
 
     /// Upload body to a given URL
@@ -297,27 +299,39 @@ impl Client {
 
     /// Upload a image buffer to the /images/ route
     ///
-    /// The image data can be either:
-    /// * ELF file bytes
-    /// * bincode encoded MemoryImage
-    pub fn upload_img(&self, image_id: &str, buf: Vec<u8>) -> Result<(), SdkErr> {
-        let upload_res = self.get_image_upload_url(image_id)?;
-        self.put_data(&upload_res.url, buf)?;
-        Ok(())
-    }
-
-    /// Upload a image file to the /images/ route
+    /// The boolean return indicates if the image already exists in bonsai
     ///
     /// The image data can be either:
     /// * ELF file bytes
     /// * bincode encoded MemoryImage
-    pub fn upload_img_file(&self, image_id: &str, path: &Path) -> Result<(), SdkErr> {
-        let upload_data = self.get_image_upload_url(image_id)?;
+    pub fn upload_img(&self, image_id: &str, buf: Vec<u8>) -> Result<bool, SdkErr> {
+        let res_or_exists = self.get_image_upload_url(image_id)?;
+        match res_or_exists {
+            ImageExistsOpt::Exists => Ok(true),
+            ImageExistsOpt::New(upload_res) => {
+                self.put_data(&upload_res.url, buf)?;
+                Ok(false)
+            }
+        }
+    }
 
-        let fd = File::open(path)?;
-        self.put_data(&upload_data.url, fd)?;
-
-        Ok(())
+    /// Upload a image file to the /images/ route
+    ///
+    /// The boolean return indicates if the image already exists in bonsai
+    ///
+    /// The image data can be either:
+    /// * ELF file bytes
+    /// * bincode encoded MemoryImage
+    pub fn upload_img_file(&self, image_id: &str, path: &Path) -> Result<bool, SdkErr> {
+        let res_or_exists = self.get_image_upload_url(image_id)?;
+        match res_or_exists {
+            ImageExistsOpt::Exists => Ok(true),
+            ImageExistsOpt::New(upload_res) => {
+                let fd = File::open(path)?;
+                self.put_data(&upload_res.url, fd)?;
+                Ok(false)
+            }
+        }
     }
 
     // - /inputs
@@ -478,17 +492,17 @@ mod tests {
         let server_url = format!("http://{}", server.address());
         let client = super::Client::from_parts(server_url, TEST_KEY.to_string())
             .expect("Failed to construct client");
-        client
+        let exists = client
             .upload_img(TEST_ID, data)
             .expect("Failed to upload input");
+        assert!(!exists);
         get_mock.assert();
         put_mock.assert();
     }
 
     #[test]
-    #[should_panic(expected = "value: ImageIdExists")]
     fn image_upload_dup() {
-        let data = vec![];
+        let data = vec![0x41];
 
         let server = MockServer::start();
 
@@ -510,12 +524,13 @@ mod tests {
         let server_url = format!("http://{}", server.address());
         let client = super::Client::from_parts(server_url, TEST_KEY.to_string())
             .expect("Failed to construct client");
-        client.upload_img(TEST_ID, data).unwrap()
+        let exists = client.upload_img(TEST_ID, data).unwrap();
+        assert!(exists);
     }
 
     #[test]
     fn input_upload() {
-        env_logger::init();
+        // env_logger::init();
         let data = vec![];
 
         let server = MockServer::start();

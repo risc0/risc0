@@ -30,8 +30,8 @@ mod tests {
         Relayer,
     };
     use bonsai_sdk::{
-        alpha::{Client as BonsaiClient, SdkErr},
-        alpha_async::{get_client_from_parts, put_image},
+        alpha::Client as BonsaiClient,
+        alpha_async::{get_client_from_parts, upload_img},
     };
     use ethers::types::{Bytes, H256 as ethers_H256, U256};
     use risc0_zkvm::{MemoryImage, Program, MEM_SIZE, PAGE_SIZE};
@@ -166,11 +166,9 @@ mod tests {
                 .expect("unable to create memory image");
             let image_id = hex::encode(image.compute_id());
             let image = bincode::serialize(&image).expect("Failed to serialize memory img");
-            let upload_result = put_image(bonsai_client.clone(), image_id.clone(), image).await;
-            match upload_result {
-                Ok(_) | Err(SdkErr::ImageIdExists) => {}
-                Err(_) => upload_result.expect("unable to upload result"),
-            }
+            upload_img(bonsai_client.clone(), image_id.clone(), image)
+                .await
+                .expect("unable to upload result");
             image_id
         };
         dbg!(&image_key);
@@ -313,11 +311,9 @@ mod tests {
             MemoryImage::new(&program, PAGE_SIZE as u32).expect("unable to create memory image");
         let image_id = hex::encode(image.compute_id());
         let image = bincode::serialize(&image).expect("Failed to serialize memory img");
-        let upload_result = put_image(bonsai_client.clone(), image_id.clone(), image).await;
-        match upload_result {
-            Ok(_) | Err(SdkErr::ImageIdExists) => {}
-            Err(_) => upload_result.expect("unable to upload result"),
-        }
+        upload_img(bonsai_client.clone(), image_id.clone(), image)
+            .await
+            .expect("unable to upload result");
 
         // Since we are using the True Elf, the first 4 bytes need to be the length
         // of the slice (in little endian)
