@@ -15,7 +15,7 @@
 use std::time::Duration;
 
 use bonsai_sdk::{
-    alpha::{responses::SnarkSeal, Client, SessionId, SnarkId},
+    alpha::{responses::Groth16Seal, Client, SessionId, SnarkId},
     alpha_async::{create_snark, snark_status},
 };
 use ethers::{
@@ -69,7 +69,7 @@ pub(crate) async fn get_snark_proof(
     Ok(proof)
 }
 
-pub fn tokenize_snark_proof(proof: &SnarkSeal) -> anyhow::Result<Token> {
+pub fn tokenize_snark_proof(proof: &Groth16Seal) -> anyhow::Result<Token> {
     if proof.b.len() != 2 {
         anyhow::bail!("hex-strings encoded proof is not well formed");
     }

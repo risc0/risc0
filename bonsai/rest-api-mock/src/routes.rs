@@ -20,7 +20,7 @@ use axum::{
     Extension, Json,
 };
 use bonsai_sdk::alpha::responses::{
-    CreateSessRes, ImgUploadRes, ProofReq, SessionStatusRes, SnarkProof, SnarkReq, SnarkSeal,
+    CreateSessRes, Groth16Seal, ImgUploadRes, ProofReq, SessionStatusRes, SnarkProof, SnarkReq,
     SnarkStatusRes, UploadRes,
 };
 use tracing::info;
@@ -131,7 +131,7 @@ pub(crate) async fn snark_status(
     Ok(Json(SnarkStatusRes {
         status: "SUCCEEDED".to_string(),
         output: Some(SnarkProof {
-            snark: SnarkSeal {
+            snark: Groth16Seal {
                 a: vec![],
                 b: vec![],
                 c: vec![],

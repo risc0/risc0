@@ -124,7 +124,7 @@ pub mod responses {
     /// following the snarkjs calldata format:
     /// <https://github.com/iden3/snarkjs#26-simulate-a-verification-call>
     #[derive(Debug, Deserialize, Serialize, PartialEq)]
-    pub struct SnarkSeal {
+    pub struct Groth16Seal {
         /// Proof 'a' value
         pub a: Vec<Vec<u8>>,
         /// Proof 'b' value
@@ -141,7 +141,7 @@ pub mod responses {
     #[derive(Debug, Deserialize, Serialize, PartialEq)]
     pub struct SnarkProof {
         /// Snark seal from snarkjs
-        pub snark: SnarkSeal,
+        pub snark: Groth16Seal,
         /// Post State Digest
         ///
         /// Collected from the STARK proof via `receipt.get_metadata().post.digest()`
