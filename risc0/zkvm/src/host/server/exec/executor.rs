@@ -101,8 +101,11 @@ impl OpCodeResult {
     }
 }
 
+/// Error variants used in the Executor
 pub enum ExecutorError {
+    /// This variant represents an instance of Session that Faulted
     Fault(Session),
+    /// This variant represents all other errors
     Error(anyhow::Error),
 }
 
