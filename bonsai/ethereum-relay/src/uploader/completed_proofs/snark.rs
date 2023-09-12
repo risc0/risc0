@@ -83,20 +83,20 @@ pub fn tokenize_snark_proof(proof: &Groth16Seal) -> anyhow::Result<Token> {
             proof
                 .a
                 .iter()
-                .map(|elm| U256::from_little_endian(&elm).into_token())
+                .map(|elm| U256::from_little_endian(elm).into_token())
                 .collect(),
         ),
         Token::FixedArray(vec![
             Token::FixedArray(
                 proof.b[0]
                     .iter()
-                    .map(|elm| U256::from_little_endian(&elm).into_token())
+                    .map(|elm| U256::from_little_endian(elm).into_token())
                     .collect(),
             ),
             Token::FixedArray(
                 proof.b[1]
                     .iter()
-                    .map(|elm| U256::from_little_endian(&elm).into_token())
+                    .map(|elm| U256::from_little_endian(elm).into_token())
                     .collect(),
             ),
         ]),
@@ -104,7 +104,7 @@ pub fn tokenize_snark_proof(proof: &Groth16Seal) -> anyhow::Result<Token> {
             proof
                 .c
                 .iter()
-                .map(|elm| U256::from_little_endian(&elm).into_token())
+                .map(|elm| U256::from_little_endian(elm).into_token())
                 .collect(),
         ),
     ]))
