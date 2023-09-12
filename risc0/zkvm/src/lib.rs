@@ -61,6 +61,7 @@ pub use self::host::{
     client::prove::local::LocalProver,
     server::{
         exec::executor::Executor,
+        exec::executor::ExecutorError,
         prove::{get_prover_impl, loader::Loader, DynProverImpl, HalPair},
         session::{FileSegmentRef, Segment, SegmentRef, Session, SessionEvents, SimpleSegmentRef},
     },

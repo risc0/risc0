@@ -33,11 +33,14 @@ use test_log::test;
 use super::executor::Executor;
 use crate::{
     host::server::{
-        exec::syscall::{Syscall, SyscallContext},
+        exec::{
+            executor::ExecutorError,
+            syscall::{Syscall, SyscallContext},
+        },
         testutils,
     },
     serde::{from_slice, to_vec},
-    ExecutorEnv, ExitCode, MemoryImage, Program, Session, TraceEvent, FAULT_CHECKER_ID,
+    ExecutorEnv, ExitCode, MemoryImage, Program, Session, TraceEvent,
 };
 
 fn run_test(spec: MultiTestSpec) {
@@ -627,7 +630,7 @@ fn session_limit() {
         loop_cycles: u32,
         segment_limit_po2: usize,
         session_count_limit: usize,
-    ) -> Result<Session> {
+    ) -> Result<Session, ExecutorError> {
         let session_cycles = (1 << segment_limit_po2) * session_count_limit;
         let spec = &to_vec(&MultiTestSpec::BusyLoop {
             cycles: loop_cycles,
@@ -665,18 +668,19 @@ fn session_limit() {
 
 #[test]
 fn memory_access() {
-    fn session_faulted(session: Result<Session>) -> bool {
+    fn session_faulted(session: Result<Session, ExecutorError>) -> bool {
         if cfg!(feature = "enable-fault-proof") {
-            let session = session.unwrap();
-            let last = session.segments.last().unwrap().resolve().unwrap();
-            last.pre_image.compute_id() == FAULT_CHECKER_ID.into()
+            match session {
+                Err(ExecutorError::Fault(_)) => true,
+                _ => false,
+            }
         } else {
             // this will be removed once this feature is more mature
             session.is_err()
         }
     }
 
-    fn access_memory(addr: u32) -> Result<Session> {
+    fn access_memory(addr: u32) -> Result<Session, ExecutorError> {
         let spec = to_vec(&MultiTestSpec::OutOfBounds).unwrap();
         let addr = to_vec(&addr).unwrap();
         let env = ExecutorEnv::builder()

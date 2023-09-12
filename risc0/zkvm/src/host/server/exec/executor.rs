@@ -14,6 +14,7 @@
 
 //! This module implements the Executor.
 
+use core::fmt;
 use std::{cell::RefCell, fmt::Debug, io::Write, mem::take, rc::Rc};
 
 use addr2line::{
@@ -99,6 +100,36 @@ impl OpCodeResult {
         }
     }
 }
+
+pub enum ExecutorError {
+    Fault(Session),
+    Error(anyhow::Error),
+}
+
+use std::error::Error as StdError;
+unsafe impl Sync for ExecutorError {}
+unsafe impl Send for ExecutorError {}
+
+impl std::fmt::Debug for ExecutorError {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        fmt::Display::fmt(&self, f)
+    }
+}
+
+impl std::fmt::Display for ExecutorError {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        match self {
+            ExecutorError::Error(e) => write!(f, "{e}"),
+            ExecutorError::Fault(s) => write!(
+                f,
+                "Faulted Session [Image ID: {}]",
+                s.segments[0].resolve().unwrap().pre_image.compute_id()
+            ),
+        }
+    }
+}
+
+impl StdError for ExecutorError {}
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct SyscallRecord {
@@ -211,25 +242,31 @@ impl<'a> Executor<'a> {
 
     /// This will run the executor to get a [Session] which contain the results
     /// of the execution.
-    pub fn run(&mut self) -> Result<Session> {
+    pub fn run(&mut self) -> Result<Session, ExecutorError> {
         self.run_with_callback(|segment| Ok(Box::new(SimpleSegmentRef::new(segment))))
     }
 
     /// Run the executor until [ExitCode::Paused] or [ExitCode::Halted] is
     /// reached, producing a [Session] as a result.
-    pub fn run_with_callback<F>(&mut self, callback: F) -> Result<Session>
+    pub fn run_with_callback<F>(&mut self, callback: F) -> Result<Session, ExecutorError>
     where
         F: FnMut(Segment) -> Result<Box<dyn SegmentRef>>,
     {
-        let mut guest_session = self.run_guest_only_with_callback(callback)?;
+        let mut guest_session = match self.run_guest_only_with_callback(callback) {
+            Ok(session) => session,
+            Err(e) => return Err(ExecutorError::Error(e)),
+        };
         match guest_session.exit_code {
             ExitCode::Fault => {
-                let fault_checker_session = self.run_fault_checker()?;
+                let fault_checker_session = match self.run_fault_checker() {
+                    Ok(session) => session,
+                    Err(e) => return Err(ExecutorError::Error(e)),
+                };
                 for segment in fault_checker_session.segments {
                     guest_session.segments.push(segment);
                 }
                 guest_session.journal = fault_checker_session.journal;
-                Ok(guest_session)
+                Err(ExecutorError::Fault(guest_session))
             }
             _ => Ok(guest_session),
         }
