@@ -19,8 +19,9 @@ use k256::{
 };
 use rand_core::OsRng;
 use risc0_zkvm::{
+    default_prover,
     serde::{from_slice, to_vec},
-    Executor, ExecutorEnv, SessionReceipt,
+    ExecutorEnv, Receipt,
 };
 
 /// Given an secp256k1 verifier key (i.e. public key), message and signature,
@@ -31,15 +32,17 @@ fn prove_ecdsa_verification(
     verifying_key: &VerifyingKey,
     message: &[u8],
     signature: &Signature,
-) -> Box<dyn SessionReceipt> {
+) -> Receipt {
     let env = ExecutorEnv::builder()
         .add_input(&to_vec(&(verifying_key.to_encoded_point(true), message, signature)).unwrap())
         .build()
         .unwrap();
 
-    let mut exec = Executor::from_elf(env, ECDSA_VERIFY_ELF).unwrap();
-    let session = exec.run().unwrap();
-    session.prove().unwrap()
+    // Obtain the default prover.
+    let prover = default_prover();
+
+    // Produce a receipt by proving the specified ELF binary.
+    prover.prove_elf(env, ECDSA_VERIFY_ELF).unwrap()
 }
 
 fn main() {
@@ -52,9 +55,9 @@ fn main() {
     let receipt = prove_ecdsa_verification(signing_key.verifying_key(), message, &signature);
 
     // Verify the receipt and then access the journal.
-    receipt.verify(ECDSA_VERIFY_ID.into()).unwrap();
+    receipt.verify(ECDSA_VERIFY_ID).unwrap();
     let (receipt_verifying_key, receipt_message) =
-        from_slice::<(EncodedPoint, Vec<u8>), _>(&receipt.get_journal())
+        from_slice::<(EncodedPoint, Vec<u8>), _>(&receipt.journal)
             .unwrap()
             .try_into()
             .unwrap();

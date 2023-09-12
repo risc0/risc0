@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{cell::RefCell, marker::PhantomData, rc::Rc};
+use std::{cell::RefCell, fmt::Debug, marker::PhantomData, rc::Rc};
 
 use bytemuck::Pod;
 use cust::{
     device::DeviceAttribute,
     function::{BlockSize, GridSize},
-    memory::UnifiedPointer,
+    memory::{DevicePointer, GpuBuffer},
     prelude::*,
 };
 use lazy_static::lazy_static;
@@ -33,7 +33,7 @@ use crate::{
         digest::Digest,
         hash::{
             poseidon::{self, PoseidonHashSuite},
-            sha::{cpu::Impl as CpuImpl, Sha256HashSuite},
+            sha::Sha256HashSuite,
             HashSuite,
         },
         log2_ceil,
@@ -53,9 +53,6 @@ lazy_static! {
 }
 
 pub trait CudaHash {
-    /// Which hash suite should the CPU use
-    type HashSuite: HashSuite<BabyBear>;
-
     /// Create a hash implemention
     fn new(hal: &CudaHal<Self>) -> Self;
 
@@ -69,15 +66,20 @@ pub trait CudaHash {
         output: &BufferImpl<Digest>,
         matrix: &BufferImpl<BabyBearElem>,
     );
+
+    /// Return the HashSuite
+    fn get_hash_suite(&self) -> &HashSuite<BabyBear>;
 }
 
-pub struct CudaHashSha256;
+pub struct CudaHashSha256 {
+    suite: HashSuite<BabyBear>,
+}
 
 impl CudaHash for CudaHashSha256 {
-    type HashSuite = Sha256HashSuite<BabyBear, CpuImpl>;
-
     fn new(_hal: &CudaHal<Self>) -> Self {
-        CudaHashSha256 {}
+        CudaHashSha256 {
+            suite: Sha256HashSuite::new_suite(),
+        }
     }
 
     fn hash_fold(&self, hal: &CudaHal<Self>, io: &BufferImpl<Digest>, output_size: usize) {
@@ -128,9 +130,14 @@ impl CudaHash for CudaHashSha256 {
         }
         stream.synchronize().unwrap();
     }
+
+    fn get_hash_suite(&self) -> &HashSuite<BabyBear> {
+        &self.suite
+    }
 }
 
 pub struct CudaHashPoseidon {
+    suite: HashSuite<BabyBear>,
     round_constants: BufferImpl<BabyBearElem>,
     mds: BufferImpl<BabyBearElem>,
     partial_comp_matrix: BufferImpl<BabyBearElem>,
@@ -138,21 +145,16 @@ pub struct CudaHashPoseidon {
 }
 
 impl CudaHash for CudaHashPoseidon {
-    type HashSuite = PoseidonHashSuite;
-
     fn new(hal: &CudaHal<Self>) -> Self {
         let round_constants =
             hal.copy_from_elem("round_constants", poseidon::consts::ROUND_CONSTANTS);
         let mds = hal.copy_from_elem("mds", poseidon::consts::MDS);
-        let partial_comp_matrix = hal.copy_from_elem(
-            "partial_comp_matrix",
-            &*poseidon::consts::PARTIAL_COMP_MATRIX,
-        );
-        let partial_comp_offset = hal.copy_from_elem(
-            "partial_comp_offset",
-            &*poseidon::consts::PARTIAL_COMP_OFFSET,
-        );
+        let partial_comp_matrix =
+            hal.copy_from_elem("partial_comp_matrix", poseidon::consts::PARTIAL_COMP_MATRIX);
+        let partial_comp_offset =
+            hal.copy_from_elem("partial_comp_offset", poseidon::consts::PARTIAL_COMP_OFFSET);
         CudaHashPoseidon {
+            suite: PoseidonHashSuite::new_suite(),
             round_constants,
             mds,
             partial_comp_matrix,
@@ -216,6 +218,10 @@ impl CudaHash for CudaHashPoseidon {
         }
         stream.synchronize().unwrap();
     }
+
+    fn get_hash_suite(&self) -> &HashSuite<BabyBear> {
+        &self.suite
+    }
 }
 
 pub struct CudaHal<Hash: CudaHash + ?Sized> {
@@ -230,7 +236,7 @@ pub type CudaHalPoseidon = CudaHal<CudaHashPoseidon>;
 
 struct RawBuffer {
     name: &'static str,
-    buf: UnifiedBuffer<u8>,
+    buf: DeviceBuffer<u8>,
 }
 
 impl RawBuffer {
@@ -239,7 +245,7 @@ impl RawBuffer {
         TRACKER.lock().unwrap().alloc(size);
         Self {
             name,
-            buf: unsafe { UnifiedBuffer::uninitialized(size).unwrap() },
+            buf: unsafe { DeviceBuffer::uninitialized(size).unwrap() },
         }
     }
 }
@@ -276,7 +282,7 @@ impl<T: Pod> BufferImpl<T> {
         assert!(bytes_len > 0);
         let mut buffer = RawBuffer::new(name, bytes_len);
         let bytes = bytemuck::cast_slice(slice);
-        buffer.buf.copy_from_slice(bytes);
+        buffer.buf.copy_from(bytes).unwrap();
         BufferImpl {
             buffer: Rc::new(RefCell::new(buffer)),
             size: slice.len(),
@@ -285,14 +291,14 @@ impl<T: Pod> BufferImpl<T> {
         }
     }
 
-    pub fn as_device_ptr(&self) -> UnifiedPointer<u8> {
-        let ptr = self.buffer.borrow_mut().buf.as_unified_ptr();
+    pub fn as_device_ptr(&self) -> DevicePointer<u8> {
+        let ptr = self.buffer.borrow_mut().buf.as_device_ptr();
         let offset = self.offset * std::mem::size_of::<T>();
         unsafe { ptr.offset(offset.try_into().unwrap()) }
     }
 
-    pub fn as_device_ptr_with_offset(&self, offset: usize) -> UnifiedPointer<u8> {
-        let ptr = self.buffer.borrow_mut().buf.as_unified_ptr();
+    pub fn as_device_ptr_with_offset(&self, offset: usize) -> DevicePointer<u8> {
+        let ptr = self.buffer.borrow_mut().buf.as_device_ptr();
         let offset = (self.offset + offset) * std::mem::size_of::<T>();
         unsafe { ptr.offset(offset.try_into().unwrap()) }
     }
@@ -315,14 +321,17 @@ impl<T: Pod> Buffer<T> for BufferImpl<T> {
 
     fn view<F: FnOnce(&[T])>(&self, f: F) {
         let buf = self.buffer.borrow_mut();
-        let slice = bytemuck::cast_slice(&buf.buf);
+        let host_buf = buf.buf.as_host_vec().unwrap();
+        let slice = bytemuck::cast_slice(&host_buf);
         f(&slice[self.offset..]);
     }
 
     fn view_mut<F: FnOnce(&mut [T])>(&self, f: F) {
         let mut buf = self.buffer.borrow_mut();
-        let slice = bytemuck::cast_slice_mut(&mut buf.buf);
+        let mut host_buf = buf.buf.as_host_vec().unwrap();
+        let slice = bytemuck::cast_slice_mut(&mut host_buf);
         f(&mut slice[self.offset..]);
+        buf.buf.copy_from(&host_buf).unwrap();
     }
 }
 
@@ -391,10 +400,7 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
     type Field = BabyBear;
     type Elem = BabyBearElem;
     type ExtElem = BabyBearExtElem;
-    type Buffer<T: Clone + Pod> = BufferImpl<T>;
-    type HashSuite = CH::HashSuite;
-    type HashFn = <CH::HashSuite as HashSuite<BabyBear>>::HashFn;
-    type Rng = <CH::HashSuite as HashSuite<BabyBear>>::Rng;
+    type Buffer<T: Clone + Debug + PartialEq + Pod> = BufferImpl<T>;
 
     fn alloc_elem(&self, name: &'static str, size: usize) -> Self::Buffer<Self::Elem> {
         BufferImpl::new(name, size)
@@ -564,27 +570,59 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
         out: &Self::Buffer<Self::ExtElem>,
     ) {
         let po2 = log2_ceil(coeffs.size() / poly_count);
-        assert_eq!(poly_count * (1 << po2), coeffs.size());
+        let count = 1 << po2;
+        assert_eq!(poly_count * count, coeffs.size());
         let eval_count = which.size();
         assert_eq!(xs.size(), eval_count);
         assert_eq!(out.size(), eval_count);
-        let count = 1 << po2;
 
         let stream = Stream::new(StreamFlags::DEFAULT, None).unwrap();
-        let kernel = self.module.get_function("batch_evaluate_any").unwrap();
-        let params = self.compute_simple_params(eval_count);
+        let kernel = self.module.get_function("multi_poly_eval").unwrap();
+        let threads_per_block = self.max_threads / 4;
+        const BYTES_PER_WORD: u32 = 4;
+        const WORDS_PER_FP4: u32 = 4;
+        let shared_size = threads_per_block * BYTES_PER_WORD * WORDS_PER_FP4;
+        let (grid, block) = self.compute_simple_params(out.size() * threads_per_block as usize);
         unsafe {
-            launch!(kernel<<<params.0, params.1, 0, stream>>>(
+            launch!(kernel<<<grid, block, shared_size, stream>>>(
                 out.as_device_ptr(),
                 coeffs.as_device_ptr(),
                 which.as_device_ptr(),
                 xs.as_device_ptr(),
                 count,
-                eval_count
             ))
             .unwrap();
         }
         stream.synchronize().unwrap();
+    }
+
+    #[tracing::instrument(skip_all)]
+    fn gather_sample(
+        &self,
+        dst: &Self::Buffer<Self::Elem>,
+        src: &Self::Buffer<Self::Elem>,
+        idx: usize,
+        size: usize,
+        stride: usize,
+    ) {
+        let stream = Stream::new(StreamFlags::DEFAULT, None).unwrap();
+        let kernel = self.module.get_function("gather_sample").unwrap();
+        let (grid, block) = self.compute_simple_params(size);
+        unsafe {
+            launch!(kernel<<<grid, block, 0, stream>>>(
+                dst.as_device_ptr(),
+                src.as_device_ptr(),
+                idx,
+                size,
+                stride,
+            ))
+            .unwrap();
+        }
+        stream.synchronize().unwrap();
+    }
+
+    fn has_unified_memory(&self) -> bool {
+        false
     }
 
     #[tracing::instrument(skip_all)]
@@ -607,7 +645,6 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
         stream.synchronize().unwrap();
     }
 
-    #[tracing::instrument(skip_all)]
     fn mix_poly_coeffs(
         &self,
         output: &Self::Buffer<Self::ExtElem>,
@@ -741,7 +778,6 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
         stream.synchronize().unwrap();
     }
 
-    #[tracing::instrument(skip_all)]
     fn hash_fold(&self, io: &Self::Buffer<Digest>, input_size: usize, output_size: usize) {
         assert_eq!(input_size, 2 * output_size);
         self.hash.as_ref().unwrap().hash_fold(self, io, output_size);
@@ -750,6 +786,10 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
     #[tracing::instrument(skip_all)]
     fn hash_rows(&self, output: &Self::Buffer<Digest>, matrix: &Self::Buffer<Self::Elem>) {
         self.hash.as_ref().unwrap().hash_rows(self, output, matrix);
+    }
+
+    fn get_hash_suite(&self) -> &HashSuite<Self::Field> {
+        self.hash.as_ref().unwrap().get_hash_suite()
     }
 }
 
@@ -847,6 +887,12 @@ mod tests {
     #[serial]
     fn batch_evaluate_any() {
         testutil::batch_evaluate_any(CudaHalSha256::new());
+    }
+
+    #[test]
+    #[serial]
+    fn gather_sample() {
+        testutil::gather_sample(CudaHalSha256::new());
     }
 
     #[test]

@@ -33,6 +33,6 @@ fn main() {
         .verify(&message, &signature)
         .expect("ECDSA signature verification failed");
 
-    // Commit to the journal the verifying key and messge that was signed.
+    // Commit to the journal the verifying key and message that was signed.
     env::commit(&(encoded_verifying_key, message));
 }

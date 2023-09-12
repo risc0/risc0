@@ -16,8 +16,9 @@ use chess_core::Inputs;
 use chess_methods::{CHECKMATE_ELF, CHECKMATE_ID};
 use clap::{Arg, Command};
 use risc0_zkvm::{
+    default_prover,
     serde::{from_slice, to_vec},
-    Executor, ExecutorEnv, SessionReceipt,
+    ExecutorEnv, Receipt,
 };
 use shakmaty::{fen::Fen, CastlingMode, Chess, FromSetup, Position, Setup};
 
@@ -40,9 +41,8 @@ fn main() {
     let receipt = chess(&inputs);
 
     // Verify receipt and parse it for committed data
-    receipt.verify(CHECKMATE_ID.into()).unwrap();
-    let vec = receipt.get_journal();
-    let committed_state: String = from_slice(&vec).unwrap();
+    receipt.verify(CHECKMATE_ID).unwrap();
+    let committed_state: String = from_slice(&receipt.journal).unwrap();
     assert_eq!(inputs.board, committed_state);
     let fen = Fen::from_ascii(committed_state.as_bytes()).unwrap();
     let setup = Setup::from(fen);
@@ -55,20 +55,17 @@ fn main() {
     );
 }
 
-fn chess(inputs: &Inputs) -> Box<dyn SessionReceipt> {
+fn chess(inputs: &Inputs) -> Receipt {
     let env = ExecutorEnv::builder()
         .add_input(&to_vec(inputs).unwrap())
         .build()
         .unwrap();
 
-    // Make the Executor.
-    let mut exec = Executor::from_elf(env, CHECKMATE_ELF).unwrap();
+    // Obtain the default prover.
+    let prover = default_prover();
 
-    // Run the executor to produce a session.
-    let session = exec.run().unwrap();
-
-    // Prove the session to produce a receipt.
-    session.prove().unwrap()
+    // Produce a receipt by proving the specified ELF binary.
+    prover.prove_elf(env, CHECKMATE_ELF).unwrap()
 }
 
 #[cfg(test)]

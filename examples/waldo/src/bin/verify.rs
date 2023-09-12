@@ -16,7 +16,7 @@ use std::{error::Error, fs, path::PathBuf};
 
 use clap::Parser;
 use image::{io::Reader as ImageReader, GenericImageView, RgbImage};
-use risc0_zkvm::{serde, SessionFlatReceipt, SessionReceipt};
+use risc0_zkvm::{serde, Receipt};
 use waldo_core::{
     image::{ImageMerkleTree, IMAGE_CHUNK_SIZE},
     Journal,
@@ -70,11 +70,11 @@ fn main() -> Result<(), Box<dyn Error>> {
     );
 
     // Load and verify the receipt file.
-    let receipt: SessionFlatReceipt = bincode::deserialize(&fs::read(&args.receipt)?)?;
-    receipt.verify(IMAGE_CROP_ID.into())?;
+    let receipt: Receipt = bincode::deserialize(&fs::read(&args.receipt)?)?;
+    receipt.verify(IMAGE_CROP_ID)?;
 
     // Check consistency of the journal against the input Where's Waldo image.
-    let journal: Journal = serde::from_slice(&receipt.get_journal())?;
+    let journal: Journal = serde::from_slice(&receipt.journal)?;
     if &journal.root != &img_merkle_tree.root() {
         return Err(format!(
             "Image root in journal does not match the expected image: {:?} != {:?}",

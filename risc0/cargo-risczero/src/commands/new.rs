@@ -14,7 +14,7 @@
 
 use std::path::PathBuf;
 
-use anyhow::Context;
+use anyhow::{Context, Result};
 use cargo_generate::{GenerateArgs, TemplatePath, Vcs};
 use clap::Parser;
 use const_format::concatcp;
@@ -24,15 +24,15 @@ const RISC0_TEMPLATE_DIR: &str = "templates/rust-starter";
 const RISC0_VERSION: &str = env!("CARGO_PKG_VERSION");
 const RISC0_RELEASE_TAG: &str = concatcp!("v", RISC0_VERSION);
 
-#[derive(Parser)]
 /// `cargo risczero new`
+#[derive(Parser)]
 pub struct NewCommand {
     /// Name which will be used as the output project name.
     #[arg()]
     pub name: String,
 
-    /// GitHub repository URL.
-    #[clap(value_parser, long, short, default_value = RISC0_GH_REPO)]
+    /// GH repository URL.
+    #[arg(long, short, default_value = RISC0_GH_REPO)]
     pub template: String,
 
     /// Location of the template
@@ -40,15 +40,15 @@ pub struct NewCommand {
     /// The subdirectory location of the template used for generating the new
     /// project. This path is relative to the base repository specified by
     /// --template
-    #[clap(value_parser, long, default_value = RISC0_TEMPLATE_DIR)]
+    #[arg(long, default_value = RISC0_TEMPLATE_DIR)]
     pub templ_subdir: String,
 
     /// template git tag.
-    #[clap(value_parser, long, default_value = RISC0_RELEASE_TAG)]
+    #[arg(long, default_value = RISC0_RELEASE_TAG)]
     pub tag: String,
 
     /// template git branch, overrides `tag` option
-    #[clap(value_parser, long, default_value = "")]
+    #[arg(long, default_value = "")]
     pub branch: String,
 
     /// Destination directory to create project in.
@@ -57,34 +57,34 @@ pub struct NewCommand {
     /// `/tmp/cool-project/`
     ///
     /// Default: `pwd`
-    #[clap(value_parser, long)]
+    #[arg(long)]
     pub dest: Option<PathBuf>,
 
     /// Disable init'ing a git repo in the dest project
-    #[clap(value_parser, long, global = true)]
+    #[arg(long, global = true)]
     pub no_git: bool,
 
     /// Toggles templates to use crates from github
     ///
     /// Sets the value of the arg to be the cargo `branch` variable
-    #[clap(value_parser, long)]
+    #[arg(long)]
     pub use_git_branch: Option<String>,
 
     /// Toggles `std` feature flag for guest code
     ///
     /// Toggles the `#![no_std]` in the guest main() and the `std` feature flag
     /// on the `risc0_zkvm` crate.
-    #[clap(value_parser, long, global = false)]
+    #[arg(long, global = false)]
     pub std: bool,
 
     /// Use a path dependency for risc0.
-    #[clap(long)]
+    #[arg(long)]
     pub path: Option<PathBuf>,
 }
 
 impl NewCommand {
     /// Execute this command
-    pub fn run(&self) -> anyhow::Result<()> {
+    pub fn run(&self) -> Result<()> {
         let dest_dir = if let Some(dest_dir) = self.dest.clone() {
             dest_dir
         } else {
@@ -157,7 +157,7 @@ impl NewCommand {
             overwrite: false,
             other_args: None,
         })
-        .with_context(|| "failed to generate project")?;
+        .expect("Failed to generate project");
 
         Ok(())
     }
@@ -221,7 +221,7 @@ mod tests {
             proj_name,
         ]);
 
-        new.run();
+        new.run().unwrap();
 
         let proj_path = tmpdir.path().join(proj_name);
 
@@ -258,7 +258,7 @@ mod tests {
             proj_name,
         ]);
 
-        new.run();
+        new.run().unwrap();
 
         let proj_path = tmpdir.path().join(proj_name);
 
@@ -288,7 +288,7 @@ mod tests {
             proj_name,
         ]);
 
-        new.run();
+        new.run().unwrap();
 
         let proj_path = tmpdir.path().join(proj_name);
 

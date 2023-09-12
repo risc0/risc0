@@ -20,7 +20,7 @@ use risc0_core::field::{
 use risc0_zkp::{
     adapter::PolyFp,
     core::log2_ceil,
-    hal::{cpu::CpuBuffer, EvalCheck, Hal},
+    hal::{cpu::CpuBuffer, CircuitHal, Hal},
     INV_RATE,
 };
 
@@ -28,17 +28,17 @@ use crate::{
     GLOBAL_MIX, GLOBAL_OUT, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA,
 };
 
-pub struct CpuEvalCheck<'a, C: PolyFp<BabyBear>> {
+pub struct CpuCircuitHal<'a, C: PolyFp<BabyBear>> {
     circuit: &'a C,
 }
 
-impl<'a, C: PolyFp<BabyBear>> CpuEvalCheck<'a, C> {
+impl<'a, C: PolyFp<BabyBear>> CpuCircuitHal<'a, C> {
     pub fn new(circuit: &'a C) -> Self {
         Self { circuit }
     }
 }
 
-impl<'a, C, H> EvalCheck<H> for CpuEvalCheck<'a, C>
+impl<'a, C, H> CircuitHal<H> for CpuCircuitHal<'a, C>
 where
     C: PolyFp<BabyBear> + Sync,
     H: Hal<
@@ -78,7 +78,7 @@ where
         let check = check.as_slice();
         let check = unsafe { std::slice::from_raw_parts(check.as_ptr(), check.len()) };
 
-        let args: &[&[BabyBearElem]] = &[&code, &out, &data, &mix, &accum];
+        let args: &[&[BabyBearElem]] = &[code, out, data, mix, accum];
 
         (0..domain).into_par_iter().for_each(|cycle| {
             let tot = self.circuit.poly_fp(cycle, domain, &poly_mix, args);

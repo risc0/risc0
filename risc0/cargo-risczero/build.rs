@@ -4,7 +4,7 @@ use std::env;
 mod runtime {
     use std::{env, fs, io, path::Path};
 
-    use risc0_build::setup_guest_build_env;
+    use risc0_build::build_rust_runtime;
     use zip::{write::FileOptions, CompressionMethod, ZipWriter};
 
     pub fn build_and_zip_runtime() {
@@ -12,9 +12,8 @@ mod runtime {
         // the cargo-risczero binary.
         let out_dir_env = env::var_os("OUT_DIR").unwrap();
         let out_dir = Path::new(&out_dir_env); // $ROOT/target/$profile/build/$crate/out
-        let guest_build_env = setup_guest_build_env(out_dir);
 
-        let rust_runtime = guest_build_env.build_rust_runtime();
+        let rust_runtime = build_rust_runtime();
         let f = fs::File::create(out_dir.join("cargo-risczero.zip")).unwrap();
         let mut zip = ZipWriter::new(f);
         let options = FileOptions::default().compression_method(CompressionMethod::Stored);

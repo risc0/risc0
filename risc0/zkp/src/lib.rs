@@ -25,10 +25,12 @@ pub mod core;
 #[cfg(feature = "prove")]
 pub mod hal;
 pub mod layout;
+#[cfg(not(target_os = "zkvm"))]
 mod merkle;
 #[cfg(feature = "prove")]
 pub mod prove;
 pub mod taps;
+#[cfg(not(target_os = "zkvm"))]
 pub mod verify;
 
 #[cfg(not(feature = "prove"))]
@@ -42,8 +44,8 @@ pub mod hal {
 
 pub use risc0_core::field;
 
-pub const MIN_CYCLES_PO2: usize = 11;
-pub const MIN_CYCLES: usize = 1 << MIN_CYCLES_PO2; // 1K
+pub const MIN_CYCLES_PO2: usize = 13;
+pub const MIN_CYCLES: usize = 1 << MIN_CYCLES_PO2; // 8K
 pub const MAX_CYCLES_PO2: usize = 24;
 pub const MAX_CYCLES: usize = 1 << MAX_CYCLES_PO2; // 16M
 
@@ -54,8 +56,12 @@ pub const MIN_PO2: usize = core::log2_ceil(1 + ZK_CYCLES);
 
 /// Inverse of Reed-Solomon Expansion Rate
 pub const INV_RATE: usize = 4;
-/// FRI folding factor is 2 ^ FRI_FOLD_PO2
+
 const FRI_FOLD_PO2: usize = 4;
+
+/// FRI folding factor is 2 ^ FRI_FOLD_PO2
 pub const FRI_FOLD: usize = 1 << FRI_FOLD_PO2;
+
 /// FRI continues until the degree of the FRI polynomial reaches FRI_MIN_DEGREE
+#[cfg(not(target_os = "zkvm"))]
 const FRI_MIN_DEGREE: usize = 256;

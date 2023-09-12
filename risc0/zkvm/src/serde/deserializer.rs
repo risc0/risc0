@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use alloc::{string::String, vec::Vec};
+use alloc::{string::String, vec};
 
 use bytemuck::Pod;
 use risc0_zkvm_platform::WORD_SIZE;
@@ -56,7 +56,7 @@ impl WordRead for &[u32] {
     }
 
     fn read_padded_bytes(&mut self, out: &mut [u8]) -> Result<()> {
-        let bytes: &[u8] = bytemuck::cast_slice(*self);
+        let bytes: &[u8] = bytemuck::cast_slice(self);
         if out.len() > bytes.len() {
             Err(Error::DeserializeUnexpectedEnd)
         } else {
@@ -319,11 +319,10 @@ impl<'de, 'a, R: WordRead + 'de> serde::Deserializer<'de> for &'a mut Deserializ
         V: Visitor<'de>,
     {
         let len_bytes = self.try_take_word()? as usize;
-        let mut bytes: Vec<u8> = Vec::with_capacity(len_bytes);
         // TODO: Can we use MaybeUninit here instead of zeroing out?
         // The documentation for sys::io::Read implies that it's not
         // safe; is there another way to not do double writes here?
-        bytes.resize(len_bytes, 0);
+        let mut bytes = vec![0u8; len_bytes];
         self.reader.read_padded_bytes(&mut bytes)?;
         visitor.visit_string(String::from_utf8(bytes).map_err(|_| Error::DeserializeBadChar)?)
     }
@@ -340,11 +339,10 @@ impl<'de, 'a, R: WordRead + 'de> serde::Deserializer<'de> for &'a mut Deserializ
         V: Visitor<'de>,
     {
         let len_bytes = self.try_take_word()? as usize;
-        let mut bytes: Vec<u8> = Vec::with_capacity(len_bytes);
         // TODO: Can we use MaybeUninit here instead of zeroing out?
         // The documentation for sys::io::Read implies that it's not
         // safe; is there another way to not do double writes here?
-        bytes.resize(len_bytes, 0);
+        let mut bytes = vec![0u8; len_bytes];
         self.reader.read_padded_bytes(&mut bytes)?;
         visitor.visit_byte_buf(bytes)
     }
@@ -473,7 +471,7 @@ impl<'de, 'a, R: WordRead + 'de> serde::Deserializer<'de> for &'a mut Deserializ
 
 #[cfg(test)]
 mod tests {
-    use alloc::string::String;
+    use alloc::{string::String, vec::Vec};
 
     use serde::{Deserialize, Serialize};
 

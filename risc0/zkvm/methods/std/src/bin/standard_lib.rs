@@ -22,8 +22,8 @@ pub fn main() {
     match test_mode.as_str() {
         "STDIO" => {
             // Test stdin, stdout, stderr
-            println!("Hello world on stdout!");
             eprintln!("Hello world on stderr!");
+            println!("Hello world on stdout!");
             let mut from_stdin = Vec::new();
             stdin().read_to_end(&mut from_stdin).unwrap();
             stdout().write_all(&from_stdin).unwrap();

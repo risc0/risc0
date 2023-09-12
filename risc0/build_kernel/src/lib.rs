@@ -109,6 +109,9 @@ impl KernelBuild {
         for src in self.files.iter() {
             println!("cargo:rerun-if-changed={}", src.display());
         }
+        for dep in self.deps.iter() {
+            println!("cargo:rerun-if-changed={}", dep.display());
+        }
         match &self.kernel_type {
             KernelType::Cpp => self.compile_cpp(output),
             KernelType::Cuda => self.compile_cuda(output),
@@ -117,8 +120,8 @@ impl KernelBuild {
     }
 
     fn compile_cpp(&mut self, output: &str) {
-        // TODO: figure out how to use cached_compile
-        // self.cached_compile(output, "a", |out_dir, _out_path| {
+        // It's *highly* recommended to install `sccache` and use this combined with
+        // `RUSTC_WRAPPER=/path/to/sccache` to speed up rebuilds of C++ kernels
         cc::Build::new()
             .cpp(true)
             .debug(false)
@@ -128,13 +131,7 @@ impl KernelBuild {
             .flag_if_supported("-fno-var-tracking")
             .flag_if_supported("-fno-var-tracking-assignments")
             .flag_if_supported("-g0")
-            // .cargo_metadata(false)
-            // .out_dir(out_dir)
             .compile(output);
-        // });
-        // println!("cargo:rustc-link-lib=static={}", lib_name);
-        // println!("cargo:rustc-link-lib={}", stdlib);
-        // println!("cargo:rustc-link-search=native={}", dst.display());
     }
 
     fn compile_cuda(&mut self, output: &str) {
@@ -155,7 +152,7 @@ impl KernelBuild {
 
                 // Note: we default to -O1 because O3 can upwards of 5 hours (or more)
                 // to compile on the current CUDA toolchain. Using O1 only shows a ~10%
-                // decrease in performance but a compile time in int the minutes. Use
+                // decrease in performance but a compile time in the minutes. Use
                 // RISC0_CUDA_OPT=3 for any performance critical releases / builds / testing
                 let ptx_opt_level = env::var("RISC0_CUDA_OPT").unwrap_or_else(|_| "1".to_string());
                 cmd.arg(format!("--ptxas-options=-O{ptx_opt_level}"));
@@ -180,7 +177,7 @@ impl KernelBuild {
             |out_dir, out_path, sys_inc_dir| {
                 let mut air_paths = vec![];
                 for src in self.files.iter() {
-                    let out_path = out_dir.join(&src).with_extension("").with_extension("air");
+                    let out_path = out_dir.join(src).with_extension("").with_extension("air");
                     if let Some(parent) = out_path.parent() {
                         fs::create_dir_all(parent).unwrap();
                     }
@@ -206,7 +203,7 @@ impl KernelBuild {
                     .arg("metallib")
                     .args(air_paths)
                     .arg("-o")
-                    .arg(&out_path)
+                    .arg(out_path)
                     .status()
                     .unwrap();
                 if !result.success() {

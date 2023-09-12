@@ -13,22 +13,26 @@
 // limitations under the License.
 
 #[cfg(feature = "experimental")]
-use cargo_risczero::commands::build::BuildSubcommand;
+use cargo_risczero::BuildSubcommand;
+
+use anyhow::Result;
 use cargo_risczero::{Cargo, RisczeroCmd};
 use clap::Parser;
 use tracing_subscriber::EnvFilter;
 
-fn main() -> anyhow::Result<()> {
+fn main() -> Result<()> {
     tracing_subscriber::fmt()
         .with_env_filter(EnvFilter::from_default_env())
         .init();
 
     let Cargo::Risczero(args) = Cargo::parse();
-
     match args.command {
-        RisczeroCmd::New(new) => new.run(),
+        RisczeroCmd::Build(cmd) => cmd.run(),
+        RisczeroCmd::BuildToolchain(cmd) => cmd.run(),
+        RisczeroCmd::Install(cmd) => cmd.run(),
+        RisczeroCmd::New(cmd) => cmd.run(),
         #[cfg(feature = "experimental")]
-        RisczeroCmd::Build(build) => build.run(BuildSubcommand::Build),
+        RisczeroCmd::BuildCrate(build) => build.run(BuildSubcommand::Build),
         #[cfg(feature = "experimental")]
         RisczeroCmd::Test(build) => build.run(BuildSubcommand::Test),
     }

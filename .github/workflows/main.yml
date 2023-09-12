@@ -36,14 +36,12 @@ jobs:
           node-version: 18
       - run: cargo fmt --all --check
       - run: cargo fmt --all --check --manifest-path examples/Cargo.toml
-      - run: cargo fmt --all --check --manifest-path templates/bonsai/Cargo.toml
+      - run: cargo fmt --all --check --manifest-path bonsai/Cargo.toml
+      - run: cargo fmt --all --check --manifest-path bonsai/examples/governance/Cargo.toml
       - run: cargo sort --workspace --check
       - run: cargo sort --workspace --check examples
-      - run: cargo sort --workspace --check templates/bonsai
-      - run: npm install
-        working-directory: templates/bonsai
-      - run: npm run ci
-        working-directory: templates/bonsai
+      - run: cargo sort --workspace --check bonsai
+      - run: cargo sort --workspace --check bonsai/examples/governance
       - uses: actions/setup-python@v4
         with:
           python-version: '3.10'
@@ -64,9 +62,6 @@ jobs:
           - os: macOS
             feature: metal
             device: apple_m2_pro
-          # - os: Linux
-          #   feature: cuda
-          #   device: nvidia_tesla_t4g
     env:
       CUDA_LIBRARY_PATH: /usr/lib/cuda
       FEATURE: ${{ matrix.feature }}
@@ -76,23 +71,27 @@ jobs:
       # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
       - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
       - uses: actions/checkout@v3
+        with:
+          # Recursive checkout required to build Solidity contracts and bindings.
+          submodules: recursive
       - uses: ./.github/actions/rustup
       - uses: actions/setup-node@v3
         with:
           node-version: 18
+      - uses: risc0/foundry-toolchain@2fe7e70b520f62368a0e3c464f997df07ede420f
       - uses: ./.github/actions/sccache
-      - run: npm install
-        working-directory: templates/bonsai
+        with:
+          key: ${{ matrix.os }}-${{ matrix.feature }}
+      - run: cargo run --bin cargo-risczero -- risczero install
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: cargo xtask install
+      - run: cargo xtask gen-receipt
       - run: cargo test -F $FEATURE -F profiler
-      - run: cargo test -F $FEATURE --tests -- --ignored
-      - run: cargo test -F $FEATURE --manifest-path examples/Cargo.toml
-      - run: PATH=$PWD/node_modules/.bin:$PATH cargo test -F $FEATURE
-        working-directory: templates/bonsai
-      - run: cargo build --manifest-path risc0/wasm/Cargo.toml --target wasm32-unknown-unknown
+      - run: cargo test --workspace -F $FEATURE --tests -- --ignored --test-threads 1
+      - run: cargo test -F $FEATURE -F disable-dev-mode -p risc0-r0vm
         if: matrix.device == 'cpu'
       - run: cargo check -F $FEATURE --benches
-      - run: cargo check -p bootstrap
-        if: matrix.device == 'cpu'
       - run: cargo check -p risc0-build
         if: matrix.device == 'cpu'
       - run: cargo check -F $FEATURE -p risc0-circuit-rv32im
@@ -106,17 +105,71 @@ jobs:
       - run: cargo check -F $FEATURE -p risc0-sys
       - run: cargo check -F $FEATURE -p risc0-zkp
       - run: cargo check -F $FEATURE -p risc0-zkvm
+      - uses: risc0/clippy-action@main
+        with:
+          reporter: 'github-pr-check'
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          clippy_flags: --features $FEATURE --all-targets
       - run: sccache --show-stats
 
-  doc:
-    runs-on: [self-hosted, prod, Linux, cpu]
+  examples:
+    runs-on: [self-hosted, prod, "${{ matrix.os }}", "${{ matrix.device }}"]
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [Linux, macOS]
+        feature: [default]
+        device: [cpu]
+        include:
+          - os: Linux
+            feature: cuda
+            device: nvidia_rtx_a5000
+          - os: macOS
+            feature: metal
+            device: apple_m2_pro
+    env:
+      CUDA_LIBRARY_PATH: /usr/lib/cuda
+      FEATURE: ${{ matrix.feature }}
+      RUST_BACKTRACE: full
+      RUSTC_WRAPPER: sccache
     steps:
       # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
       - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
       - uses: actions/checkout@v3
+        with:
+          # Recursive checkout required to build Solidity contracts and bindings.
+          submodules: recursive
+      - uses: ./.github/actions/rustup
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - uses: ./.github/actions/sccache
+        with:
+          key: ${{ matrix.os }}-${{ matrix.feature }}
+      - run: cargo run --bin cargo-risczero -- risczero install
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: cargo test -F $FEATURE
+        working-directory: examples
+
+  doc:
+    runs-on: ubuntu-latest-8-cores
+    steps:
+      # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
+      - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
+      - uses: actions/checkout@v3
+        with:
+          # Recursive checkout required to build Solidity contracts and bindings.
+          submodules: recursive
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
-      - run: RISC0_SKIP_BUILD=1 cargo doc --no-deps --exclude=risc0-zkvm-methods --workspace
+        with:
+          key: Linux
+      - run: cargo run --bin cargo-risczero -- risczero install
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: cargo xtask gen-receipt
+      - run: cargo doc --no-deps --exclude=risc0-zkvm-methods --workspace
       - name: Install mdbook
         uses: risc0/cargo-install@2cfb0024938d23011106cbf127b393bc83fddba1
         with:
@@ -137,8 +190,48 @@ jobs:
       - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
       - uses: actions/checkout@v3
       - uses: ./.github/actions/rustup
+      - run: cargo run --bin cargo-risczero -- risczero install
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: |
           cargo run -p cargo-risczero risczero new --template templates/rust-starter --templ-subdir="" --path $(pwd) --dest ${{ runner.temp }} template-test
         shell: bash
       - run: cargo build --release --manifest-path ${{ runner.temp }}/template-test/Cargo.toml
       - run: ${{ runner.temp }}/template-test/target/release/host
+
+  web:
+    runs-on: ubuntu-latest-8-cores
+    env:
+      RUSTC_WRAPPER: sccache
+    steps:
+      # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
+      - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
+      - uses: actions/checkout@v3
+      - uses: browser-actions/setup-firefox@v1
+      - run: firefox --version
+      - uses: ./.github/actions/rustup
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - uses: ./.github/actions/sccache
+      - run: cargo run --bin cargo-risczero -- risczero install
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: cargo xtask install
+      - run: cargo xtask gen-receipt
+      - run: |
+          npm install
+          npm test -- --firefox
+        working-directory: examples/browser-verify
+
+  reproducible-build:
+    runs-on: [self-hosted, prod, Linux, X64, docker]
+    steps:
+      # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
+      - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/rustup
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - run: cargo test -p cargo-risczero -F docker

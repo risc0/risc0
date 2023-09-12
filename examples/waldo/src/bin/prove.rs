@@ -16,7 +16,7 @@ use std::{error::Error, fs, path::PathBuf};
 
 use clap::Parser;
 use image::{io::Reader as ImageReader, GenericImageView};
-use risc0_zkvm::{serde, Executor, ExecutorEnv};
+use risc0_zkvm::{default_prover, serde, ExecutorEnv};
 use waldo_core::{
     image::{ImageMask, ImageMerkleTree, IMAGE_CHUNK_SIZE},
     merkle::SYS_VECTOR_ORACLE,
@@ -50,7 +50,7 @@ struct Args {
     /// Optional input file path to an image mask to apply to Waldo.
     /// Grayscale pixel values will be subtracted from the cropped image of
     /// Waldo such that a black pixel in the mask will result in the
-    /// cooresponding image pixel being blacked out. Must be the same
+    /// corresponding image pixel being blacked out. Must be the same
     /// dimensions, in pixels, as the cut out x and y.
     #[clap(short = 'm', long, value_parser, value_hint = clap::ValueHint::FilePath)]
     mask: Option<PathBuf>,
@@ -124,13 +124,15 @@ fn main() -> Result<(), Box<dyn Error>> {
         "Running the prover to cut out Waldo at {:?} with dimensions {:?}",
         input.crop_location, input.crop_dimensions,
     );
-    // Make the Executor, loading the image crop method binary.
-    let mut exec = Executor::from_elf(env, IMAGE_CROP_ELF)?;
-    let session = exec.run()?;
-    let receipt = session.prove()?;
+
+    // Obtain the default prover.
+    let prover = default_prover();
+
+    // Produce a receipt by proving the specified ELF binary.
+    let receipt = prover.prove_elf(env, IMAGE_CROP_ELF).unwrap();
 
     // Save the receipt to disk so it can be sent to the verifier.
-    fs::write(&args.receipt, receipt.encode())?;
+    fs::write(&args.receipt, bincode::serialize(&receipt).unwrap())?;
     println!("Success! Saved the receipt to {}", &args.receipt.display());
 
     Ok(())

@@ -18,7 +18,7 @@ use log::debug;
 use risc0_core::field::ExtElem;
 
 use crate::{
-    core::{hash::HashFn, log2_ceil},
+    core::log2_ceil,
     hal::{Buffer, Hal},
     prove::{merkle::MerkleTreeProver, write_iop::WriteIOP},
     FRI_FOLD, FRI_MIN_DEGREE, INV_RATE, QUERIES,
@@ -36,7 +36,7 @@ impl<H: Hal> ProveRoundInfo<H> {
     /// produce the evaluations of the polynomial, the merkle tree
     /// committing to the evaluation, and the coefficients of the folded
     /// polynomial.
-    pub fn new(hal: &H, iop: &mut WriteIOP<H::Field, H::Rng>, coeffs: &H::Buffer<H::Elem>) -> Self {
+    pub fn new(hal: &H, iop: &mut WriteIOP<H::Field>, coeffs: &H::Buffer<H::Elem>) -> Self {
         debug!("Doing FRI folding");
         let ext_size = H::ExtElem::EXT_SIZE;
         // Get the number of coefficients of the polynomial over the extension field.
@@ -74,11 +74,11 @@ impl<H: Hal> ProveRoundInfo<H> {
         }
     }
 
-    pub fn prove_query(&mut self, iop: &mut WriteIOP<H::Field, H::Rng>, pos: &mut usize) {
+    pub fn prove_query(&mut self, hal: &H, iop: &mut WriteIOP<H::Field>, pos: &mut usize) {
         // Compute which group we are in
         let group = *pos % (self.domain / FRI_FOLD);
         // Generate the proof
-        self.merkle.prove(iop, group);
+        self.merkle.prove(hal, iop, group);
         // Update pos
         *pos = group;
     }
@@ -87,11 +87,11 @@ impl<H: Hal> ProveRoundInfo<H> {
 #[tracing::instrument(skip_all)]
 pub fn fri_prove<H: Hal, F>(
     hal: &H,
-    iop: &mut WriteIOP<H::Field, H::Rng>,
+    iop: &mut WriteIOP<H::Field>,
     coeffs: &H::Buffer<H::Elem>,
-    mut f: F,
+    inner: F,
 ) where
-    F: FnMut(&mut WriteIOP<H::Field, H::Rng>, usize),
+    F: Fn(&mut WriteIOP<H::Field>, usize),
 {
     let ext_size = H::ExtElem::EXT_SIZE;
     let orig_domain = coeffs.size() / ext_size * INV_RATE;
@@ -109,7 +109,7 @@ pub fn fri_prove<H: Hal, F>(
     // Dump final polynomial + commit
     final_coeffs.view(|view| {
         iop.write_field_elem_slice::<H::Elem>(view);
-        let digest = H::HashFn::hash_elem_slice(view);
+        let digest = hal.get_hash_suite().hashfn.hash_elem_slice(view);
         iop.commit(&digest);
     });
     // Do queries
@@ -118,10 +118,10 @@ pub fn fri_prove<H: Hal, F>(
         // Get a 'random' index.
         let mut pos = iop.random_bits(log2_ceil(orig_domain)) as usize;
         // Do the 'inner' proof for this index
-        f(iop, pos);
+        inner(iop, pos);
         // Write the per-round proofs
         for round in rounds.iter_mut() {
-            round.prove_query(iop, &mut pos);
+            round.prove_query(hal, iop, &mut pos);
         }
     }
 }

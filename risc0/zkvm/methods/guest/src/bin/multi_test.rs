@@ -18,7 +18,8 @@
 #![no_std]
 
 extern crate alloc;
-use alloc::vec;
+
+use alloc::{format, vec};
 use core::arch::asm;
 
 use getrandom::getrandom;
@@ -30,7 +31,7 @@ use risc0_zkvm::{
 use risc0_zkvm_methods::multi_test::{MultiTestSpec, SYS_MULTI_TEST};
 use risc0_zkvm_platform::{
     fileno, memory,
-    syscall::{bigint, sys_bigint, sys_read, sys_write},
+    syscall::{bigint, sys_bigint, sys_read, sys_read_words, sys_write},
 };
 
 risc0_zkvm::entry!(main);
@@ -140,34 +141,38 @@ pub fn main() {
             }
         }
         MultiTestSpec::SysRead {
-            mut orig,
+            mut buf,
             fd,
             pos_and_len,
         } => {
             for (pos, len) in pos_and_len {
                 let num_read =
-                    unsafe { sys_read(fd, orig.as_mut_ptr().add(pos as usize), len as usize) };
+                    unsafe { sys_read(fd, buf.as_mut_ptr().add(pos as usize), len as usize) };
                 assert_eq!(num_read, len as usize);
             }
-
-            env::commit(&orig);
+            env::commit(&buf);
         }
         MultiTestSpec::PauseContinue => {
             env::log("before");
             env::pause();
             env::log("after");
         }
-        MultiTestSpec::CopyToStdout { fd } => {
+        MultiTestSpec::EchoStdout { nbytes, fd } => {
             // Unaligned buffer size to exercise things a little bit.
-            const BUF_SIZE: usize = 9;
-            let mut buf = [0u8; BUF_SIZE];
+            let mut buf = vec![0u8; nbytes as usize];
             loop {
                 let nread = unsafe { sys_read(fd, buf.as_mut_ptr(), buf.len()) };
                 if nread == 0 {
                     break;
                 }
-                unsafe { sys_write(fileno::STDOUT, buf.as_mut_ptr(), nread) }
+                unsafe { sys_write(fileno::STDOUT, buf.as_ptr(), nread) }
             }
+        }
+        MultiTestSpec::EchoWords { fd, nwords } => {
+            let nwords = nwords as usize;
+            let mut buf = vec![0u32; nwords];
+            unsafe { sys_read_words(fd, buf.as_mut_ptr(), nwords) };
+            env::commit_slice(&buf);
         }
         MultiTestSpec::BusyLoop { cycles } => {
             let mut last_cycles = env::get_cycle_count();
@@ -211,5 +216,26 @@ pub fn main() {
             let len = (memory::STACK_TOP - memory::RESERVED_STACK) as usize;
             let _data = black_box(vec![0_u8; len]);
         }
+        MultiTestSpec::RsaCompat => {
+            // This test comes from: https://github.com/RustCrypto/RSA/blob/master/tests/pkcs1v15.rs
+            use risc0_zkvm::sha::rust_crypto::Sha256;
+            use rsa::{
+                pkcs1v15::SigningKey, pkcs8::DecodePrivateKey, signature::Signer, RsaPrivateKey,
+            };
+
+            let pem = include_str!("rsa2048-priv.pem");
+            let private_key = RsaPrivateKey::from_pkcs8_pem(pem).unwrap();
+            let signing_key = SigningKey::<Sha256>::new(private_key);
+
+            let signature = signing_key.sign(b"rsa4096");
+            let expected = "029E365B60971D5A499FF5E1C288B954D3A5DCF52482CEE46DB90DC860B725A8D6CA031146FA156E9F17579BE6122FFB11DAC35E59B2193D75F7B31CE1442DDE7F4FF7885AD5D6080266E9A33BB4CEC93FCC2B6B885457A0ABF19E2DAA00876F694B37F535F119925CCCF9A17B90AE6CF39F07D7FEFBEECDF1B344C14B728196DDD154230BADDEDA5A7EFF373F6CD3EF6D41789572A7A068E3A252D3B7D5D706C6170D8CFDB48C8E738A4B3BFEA3E15716805E376EBD99EA09C6E82F3CFA13CEB23CD289E8F95C27F489ADC05AAACE8A9276EE7CED3B7A5C7264F0D34FF18CEDC3E91D667FCF9992A8CFDE8562F65FDDE1E06595C27E0F82063839A358C927B2";
+            assert_eq!(format!("{}", signature), expected);
+        }
+        MultiTestSpec::OutOfBounds => unsafe {
+            let addr: u32 = env::read();
+            // Access memory outside of allowed boundaries. This is intended to cause a
+            // fault
+            asm!( "mv x6, {}", "sw x5, (x6)" , in(reg) addr, out("x5") _, out("x6") _);
+        },
     }
 }

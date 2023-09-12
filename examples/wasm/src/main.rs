@@ -13,8 +13,9 @@
 // limitations under the License.
 
 use risc0_zkvm::{
+    default_prover,
     serde::{from_slice, to_vec},
-    Executor, ExecutorEnv,
+    ExecutorEnv,
 };
 use wasm_methods::{WASM_INTERP_ELF, WASM_INTERP_ID};
 
@@ -86,13 +87,16 @@ fn run_guest(iters: i32) -> i32 {
         .build()
         .unwrap();
 
-    let mut exec = Executor::from_elf(env, WASM_INTERP_ELF).unwrap();
-    let session = exec.run().unwrap();
-    let receipt = session.prove().unwrap();
-    receipt.verify(WASM_INTERP_ID.into()).expect(
+    // Obtain the default prover.
+    let prover = default_prover();
+
+    // Produce a receipt by proving the specified ELF binary.
+    let receipt = prover.prove_elf(env, WASM_INTERP_ELF).unwrap();
+
+    receipt.verify(WASM_INTERP_ID).expect(
         "Code you have proven should successfully verify; did you specify the correct image ID?",
     );
-    let result: i32 = from_slice(&receipt.get_journal()).unwrap();
+    let result: i32 = from_slice(&receipt.journal).unwrap();
 
     result
 }

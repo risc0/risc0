@@ -2,6 +2,23 @@
 
 This code demonstrates how to provably compute the SHA-256 hash of a string using RISC Zero.
 
+## Quick Start
+
+First, [install Rust] if you don't already have it.
+
+Next, install the `cargo-risczero` tool and install the toolchain with:
+```bash
+cargo install cargo-risczero
+cargo risczero install
+```
+
+Then, run the example with:
+```bash
+cargo run --release
+```
+
+[install Rust]: https://doc.rust-lang.org/cargo/getting-started/installation.html
+
 Notable details:
 * We show two ways of calling the hash function:
   * Using `risc0_zkvm::sha`, which is the SHA-256 interface included in the `risc0_zkvm` crate.

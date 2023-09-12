@@ -43,7 +43,7 @@ impl<E: Elem> Accum<E> {
         for (_kind, elems) in self.kinds.iter_mut() {
             let mut tot = E::ONE;
             for elem in elems.iter_mut() {
-                tot = tot * *elem;
+                tot *= *elem;
                 *elem = tot;
             }
         }
@@ -123,10 +123,6 @@ impl<'a, F: Field> CircuitStepHandler<F::Elem> for Handler<'a, F> {
     }
 
     fn sort(&mut self, _name: &str) {
-        unimplemented!()
-    }
-
-    fn calc_prefix_products(&mut self) {
         unimplemented!()
     }
 }

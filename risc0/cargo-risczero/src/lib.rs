@@ -15,20 +15,19 @@
 #![doc = include_str!("../README.md")]
 #![deny(missing_docs)]
 
+mod commands;
+mod toolchain;
+mod utils;
+
 use clap::{Parser, Subcommand};
+use commands::build_guest::BuildGuest;
 
 #[cfg(feature = "experimental")]
 use crate::commands::build::BuildCommand;
-use crate::commands::new::NewCommand;
+#[cfg(feature = "experimental")]
+pub use crate::commands::build::BuildSubcommand;
 
-/// Implementations of the commands
-pub mod commands {
-    /// Build a crate for RISC Zero.
-    #[cfg(feature = "experimental")]
-    pub mod build;
-    /// Create a new RISC Zero project.
-    pub mod new;
-}
+use crate::commands::{build_toolchain::BuildToolchain, install::Install, new::NewCommand};
 
 #[derive(Parser)]
 #[command(name = "cargo", bin_name = "cargo")]
@@ -50,11 +49,17 @@ pub struct Risczero {
 #[derive(Subcommand)]
 /// Primary commands  of `cargo risczero`.
 pub enum RisczeroCmd {
+    /// Build guest code.
+    Build(BuildGuest),
+    /// Build the riscv32im-risc0-zkvm-elf toolchain.
+    BuildToolchain(BuildToolchain),
+    /// Install the riscv32im-risc0-zkvm-elf toolchain.
+    Install(Install),
     /// Creates a new risczero starter project.
     New(NewCommand),
     /// Build a crate for RISC Zero.
     #[cfg(feature = "experimental")]
-    Build(BuildCommand),
+    BuildCrate(BuildCommand),
     /// Build and test a crate for RISC Zero.
     #[cfg(feature = "experimental")]
     Test(BuildCommand),

@@ -1,0 +1,22 @@
+[package]
+name = "governance-methods"
+version = "0.1.0"
+edition = "2021"
+
+[package.metadata.risc0]
+methods = ["guest"]
+
+[build-dependencies]
+risc0-build = { workspace = true, features = ["guest-list"] }
+
+[dependencies]
+risc0-build = { workspace = true, features = ["guest-list"] }
+risc0-zkvm = { workspace = true }
+
+[dev-dependencies]
+hex-literal = "0.4"
+
+[features]
+default = []
+metal = ["risc0-zkvm/metal"]
+cuda = ["risc0-zkvm/cuda"]

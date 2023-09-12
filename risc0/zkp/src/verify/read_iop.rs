@@ -12,25 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use core::marker::PhantomData;
+use alloc::boxed::Box;
 
 use risc0_core::field::{Elem, Field};
 
-use crate::core::{digest::Digest, hash::Rng};
+use crate::core::{
+    digest::Digest,
+    hash::{Rng, RngFactory},
+};
 
-#[derive(Debug)]
-pub struct ReadIOP<'a, F: Field, R: Rng<F>> {
+pub struct ReadIOP<'a, F: Field> {
     proof: &'a [u32],
-    rng: R,
-    phantom: PhantomData<F>,
+    rng: Box<dyn Rng<F>>,
 }
 
-impl<'a, F: Field, R: Rng<F>> ReadIOP<'a, F, R> {
-    pub fn new(proof: &'a [u32]) -> Self {
+impl<'a, F: Field> ReadIOP<'a, F> {
+    pub fn new(proof: &'a [u32], rng: &dyn RngFactory<F>) -> Self {
         ReadIOP {
             proof,
-            rng: R::new(),
-            phantom: PhantomData,
+            rng: rng.new_rng(),
         }
     }
 

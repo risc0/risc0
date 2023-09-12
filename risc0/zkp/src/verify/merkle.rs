@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use alloc::vec::Vec;
-use core::marker::PhantomData;
+use alloc::{boxed::Box, vec::Vec};
 
-use super::VerifyHal;
+use risc0_core::field::Field;
+
 use crate::{
     core::{digest::Digest, hash::HashFn},
     merkle::MerkleTreeParams,
@@ -25,7 +25,7 @@ use crate::{
 /// A struct against which we verify merkle branches, consisting of the
 /// parameters of the Merkle tree and top - the vector of hash values in the top
 /// row of the tree, above which we verify only once.
-pub struct MerkleTreeVerifier<'a, H: VerifyHal> {
+pub(crate) struct MerkleTreeVerifier<'a> {
     params: MerkleTreeParams,
 
     // Conceptually, the merkle tree here is twice as long as the
@@ -38,10 +38,8 @@ pub struct MerkleTreeVerifier<'a, H: VerifyHal> {
     top: &'a [Digest],
 
     // These are the rest of the tree.  These have the virtual indexes [1, top_size).
-    rest: Vec<<H::HashFn as HashFn<H::Field>>::DigestPtr>,
-
-    // Support for accelerator operations.
-    phantom_hal: PhantomData<H>,
+    #[allow(clippy::vec_box)]
+    rest: Vec<Box<Digest>>,
 }
 
 // Translates from virtual indexes to indexes in the "top" and "rest" arrays.
@@ -80,11 +78,12 @@ impl SplitMerkleIndex for MerkleTreeParams {
     }
 }
 
-impl<'a, H: VerifyHal> MerkleTreeVerifier<'a, H> {
+impl<'a> MerkleTreeVerifier<'a> {
     /// Constructs a new MerkleTreeVerifier by making the params, and then
     /// computing the root hashes from the top level hashes.
-    pub fn new(
-        iop: &mut ReadIOP<'a, H::Field, H::Rng>,
+    pub fn new<F: Field>(
+        iop: &mut ReadIOP<'a, F>,
+        hashfn: &dyn HashFn<F>,
         row_size: usize,
         col_size: usize,
         queries: usize,
@@ -94,8 +93,7 @@ impl<'a, H: VerifyHal> MerkleTreeVerifier<'a, H> {
         // Fill top vector with digests from IOP.
         let top = iop.read_pod_slice(params.top_size);
         // Populate hashes up to the root of the tree.
-        let mut rest =
-            Vec::<<H::HashFn as HashFn<H::Field>>::DigestPtr>::with_capacity(params.top_size - 1);
+        let mut rest = Vec::with_capacity(params.top_size - 1);
 
         let fill_rest = rest.spare_capacity_mut();
 
@@ -103,14 +101,14 @@ impl<'a, H: VerifyHal> MerkleTreeVerifier<'a, H> {
             for i in (params.top_size / 2..params.top_size).rev() {
                 let top_idx = params.idx_to_top(2 * i);
                 fill_rest[params.idx_to_rest(i)]
-                    .write(H::HashFn::hash_pair(&top[top_idx], &top[top_idx + 1]));
+                    .write(hashfn.hash_pair(&top[top_idx], &top[top_idx + 1]));
             }
         }
         for i in (1..params.top_size / 2).rev() {
             // SAFETY: We're working from the top down, so we will
             // have already filled elements at upper_rest_idx.
             let upper_rest_idx = params.idx_to_rest(i * 2);
-            fill_rest[params.idx_to_rest(i)].write(H::HashFn::hash_pair(
+            fill_rest[params.idx_to_rest(i)].write(hashfn.hash_pair(
                 unsafe { fill_rest[upper_rest_idx].assume_init_ref() },
                 unsafe { fill_rest[upper_rest_idx + 1].assume_init_ref() },
             ));
@@ -123,12 +121,7 @@ impl<'a, H: VerifyHal> MerkleTreeVerifier<'a, H> {
         };
 
         // Commit to root (index 1).
-        let verifier = MerkleTreeVerifier {
-            params,
-            top,
-            rest,
-            phantom_hal: PhantomData,
-        };
+        let verifier = MerkleTreeVerifier { params, top, rest };
         iop.commit(verifier.root());
         verifier
     }
@@ -138,26 +131,27 @@ impl<'a, H: VerifyHal> MerkleTreeVerifier<'a, H> {
         if self.rest.is_empty() {
             &self.top[self.params.idx_to_top(1)]
         } else {
-            &*self.rest[self.params.idx_to_rest(1)]
+            &self.rest[self.params.idx_to_rest(1)]
         }
     }
 
     /// Verifies a branch provided by an IOP.
-    pub fn verify(
+    pub fn verify<F: Field>(
         &self,
-        iop: &mut ReadIOP<'a, H::Field, H::Rng>,
+        iop: &mut ReadIOP<'a, F>,
+        hashfn: &dyn HashFn<F>,
         mut idx: usize,
-    ) -> Result<&'a [H::Elem], VerificationError> {
+    ) -> Result<&'a [F::Elem], VerificationError> {
         if idx >= self.params.row_size {
             return Err(VerificationError::MerkleQueryOutOfRange {
-                idx: idx,
+                idx,
                 rows: self.params.row_size,
             });
         }
         // Initialize a vector to hold field elements.
-        let out: &[H::Elem] = iop.read_field_elem_slice(self.params.col_size);
+        let out: &[F::Elem] = iop.read_field_elem_slice(self.params.col_size);
         // Get the hash at the leaf of the tree by hashing these field elements.
-        let mut cur = H::HashFn::hash_elem_slice(out);
+        let mut cur = hashfn.hash_elem_slice(out);
         // Shift idx to start of the row
         idx += self.params.row_size;
         while idx >= 2 * self.params.top_size {
@@ -172,9 +166,9 @@ impl<'a, H: VerifyHal> MerkleTreeVerifier<'a, H> {
             // Now ascend to the parent index, and compute the hash there.
             idx /= 2;
             if low_bit == 1 {
-                cur = H::HashFn::hash_pair(&other, &cur);
+                cur = hashfn.hash_pair(other, &cur);
             } else {
-                cur = H::HashFn::hash_pair(&cur, &other);
+                cur = hashfn.hash_pair(&cur, other);
             }
         }
         // Once we reduce to an index for which we have the hash, check that it's

@@ -1,0 +1,27 @@
+[package]
+name = "bonsai-ethereum-relay-cli"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "1.0"
+bincode = "1.3"
+bonsai-ethereum-relay = { workspace = true }
+bonsai-sdk = { workspace = true, features = ["async"] }
+bytemuck = "1.13"
+clap = { version = "4.3", features = ["derive", "env"] }
+ethers = { version = "2.0", features = ["rustls", "ws"] }
+ethers-signers = { version = "2.0", features = ["aws"] }
+hex = "0.4"
+humantime = "2.1.0"
+methods = { workspace = true }
+risc0-build = { workspace = true, features = ["guest-list"] }
+risc0-zkvm = { workspace = true, default-features = false, features = [
+  "prove",
+] }
+tokio = { version = "1.19", features = ["full", "sync"] }
+
+[features]
+default = []
+metal = ["risc0-zkvm/metal"]
+cuda = ["risc0-zkvm/cuda"]

@@ -1,5 +1,7 @@
 [workspace]
 members = [
+    "bevy",
+    "browser-verify",
     "chess",
     "chess/core",
     "digital-signature",
@@ -10,7 +12,8 @@ members = [
     "json/core",
     "password-checker",
     "password-checker/core",
-    "prorata/host",
+    "prorata",
+    "prorata/core",
     "sha",
     "waldo",
     "waldo/core",

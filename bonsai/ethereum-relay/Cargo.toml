@@ -1,0 +1,56 @@
+[package]
+name = "bonsai-ethereum-relay"
+description = "A relayer to integrate Ethereum with Bonsai."
+version = "0.1.0"
+edition = { workspace = true }
+license = { workspace = true }
+homepage = { workspace = true }
+repository = { workspace = true }
+
+[package.metadata.release]
+release = false
+
+[dependencies]
+anyhow = "1.0"
+async-trait = "0.1"
+axum = { version = "0.6", features = ["macros", "headers"] }
+bincode = "1.3"
+bonsai-ethereum-contracts = { workspace = true }
+bonsai-rest-api-mock = { workspace = true }
+bonsai-sdk = { workspace = true, features = ["async"] }
+clap = { version = "4.4", features = ["derive", "env"] }
+displaydoc = "0.2"
+ethers = { version = "2.0", features = ["rustls", "ws", "ethers-solc"] }
+ethers-signers = { version = "2.0", features = ["aws"] }
+futures = "0.3"
+hex = "0.4"
+hyper = "0.14"
+pin-project = "1"
+reqwest = { version = "0.11", features = ["stream", "json", "gzip"] }
+risc0-zkvm = { workspace = true }
+rusoto_core = { version = "0.48", default-features = false, features = [
+  "rustls",
+] }
+rusoto_kms = { version = "0.48", default-features = false }
+semver = "1.0"
+serde = { version = "1.0", default-features = false, features = ["derive"] }
+serde_json = "1.0"
+snafu = "0.7"
+thiserror = "1.0"
+tokio = { version = "1.19", features = ["full", "sync"] }
+tokio-stream = "0.1"
+tower-http = { version = "0.4", features = ["trace"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
+typed-builder = "0.12.0"
+utoipa = { version = "3.0", features = ["axum_extras", "time", "uuid"] }
+utoipa-swagger-ui = { version = "3.0", features = ["axum", "debug-embed"] }
+validator = { version = "0.16", features = ["derive"] }
+
+[dev-dependencies]
+bincode = "1"
+bytemuck = "1.13"
+risc0-zkvm-methods = { path = "../../risc0/zkvm/methods", default-features = false }
+time = "0.3"
+uuid = { version = "1.3", features = ["v4", "serde"] }
+wiremock = "0.5"

@@ -17,10 +17,8 @@ use std::{process::Command, rc::Rc, time::Instant};
 use clap::Parser;
 use human_repr::{HumanCount, HumanDuration};
 use risc0_zkvm::{
-    prove::{default_prover, Prover},
-    receipt::SessionReceipt,
-    serde::to_vec,
-    Executor, ExecutorEnv, Session,
+    get_prover_impl, serde::to_vec, DynProverImpl, Executor, ExecutorEnv, ProverOpts, Receipt,
+    Session, VerifierContext,
 };
 use risc0_zkvm_methods::{
     bench::{BenchmarkSpec, SpecWithIters},
@@ -34,6 +32,10 @@ struct Args {
     #[arg(long, short)]
     iterations: Option<u64>,
 
+    /// Specify the hash function to use.
+    #[arg(short, long)]
+    hashfn: Option<String>,
+
     #[arg(long, short)]
     quiet: bool,
 }
@@ -46,7 +48,11 @@ fn main() {
             .with(tracing_forest::ForestLayer::default())
             .init();
 
-        let prover = default_prover();
+        let mut opts = ProverOpts::default();
+        if let Some(hashfn) = args.hashfn {
+            opts.hashfn = hashfn;
+        }
+        let prover = get_prover_impl(&opts).unwrap();
 
         let start = Instant::now();
         let (session, receipt) = top(prover.clone(), iterations);
@@ -57,7 +63,13 @@ fn main() {
             .iter()
             .fold(0, |acc, segment| acc + (1 << segment.po2));
 
-        let seal = receipt.get_seal_len();
+        let seal = receipt
+            .inner
+            .flat()
+            .unwrap()
+            .iter()
+            .fold(0, |acc, segment| acc + segment.get_seal_bytes().len());
+
         let usage = prover.get_peak_memory_usage();
         let throughput = (cycles as f64) / duration.as_secs_f64();
 
@@ -109,7 +121,7 @@ fn run_with_iterations(iterations: usize) {
 }
 
 #[tracing::instrument(skip_all)]
-fn top(prover: Rc<dyn Prover>, iterations: u64) -> (Session, Box<dyn SessionReceipt>) {
+fn top(prover: Rc<dyn DynProverImpl>, iterations: u64) -> (Session, Receipt) {
     let spec = SpecWithIters(BenchmarkSpec::SimpleLoop, iterations);
     let env = ExecutorEnv::builder()
         .add_input(&to_vec(&spec).unwrap())
@@ -117,6 +129,7 @@ fn top(prover: Rc<dyn Prover>, iterations: u64) -> (Session, Box<dyn SessionRece
         .unwrap();
     let mut exec = Executor::from_elf(env, BENCH_ELF).unwrap();
     let session = exec.run().unwrap();
-    let receipt = prover.prove_session(&session).unwrap();
+    let ctx = VerifierContext::default();
+    let receipt = prover.prove_session(&ctx, &session).unwrap();
     (session, receipt)
 }

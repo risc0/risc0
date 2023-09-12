@@ -14,21 +14,16 @@
 
 //! Functions for computing SHA-256 hashes.
 
-use alloc::{boxed::Box, format, vec::Vec};
-use core::{
-    cell::UnsafeCell,
-    mem::{self, MaybeUninit},
-};
+use alloc::vec::Vec;
 
 use risc0_zkp::core::{
-    digest::{Digest, DIGEST_WORDS},
+    digest::Digest,
     hash::sha::{Block, BLOCK_WORDS, SHA256_INIT},
 };
 use risc0_zkvm_platform::{
     syscall::{sys_sha_buffer, sys_sha_compress},
     WORD_SIZE,
 };
-use serde::Serialize;
 
 use crate::align_up;
 
@@ -145,7 +140,7 @@ fn copy_and_update(
             // for in_state and out_state to point at the same place, and for
             // out_state to be uninitialized memory, and those preclude us
             // from using references.
-            if blocks.len() > 0 {
+            if !blocks.is_empty() {
                 unsafe {
                     sys_sha_buffer(
                         out_state.cast(),
@@ -177,7 +172,7 @@ pub(crate) fn update_u32(
             // for in_state and out_state to point at the same place, and for
             // out_state to be uninitialized memory, and those preclude us
             // from using references.
-            if blocks.len() > 0 {
+            if !blocks.is_empty() {
                 unsafe {
                     sys_sha_buffer(
                         out_state.cast(),
@@ -205,7 +200,7 @@ fn update_u8(out_state: *mut Digest, mut in_state: *const Digest, bytes: &[u8], 
             // for in_state and out_state to point at the same place, and for
             // out_state to be uninitialized memory, and those preclude us
             // from using references.
-            if blocks.len() > 0 {
+            if !blocks.is_empty() {
                 unsafe {
                     sys_sha_buffer(
                         out_state.cast(),

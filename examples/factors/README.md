@@ -2,34 +2,50 @@
 
 The _factors_ example is a minimalistic RISC Zero zkVM proof. The prover demonstrates that they know two nontrivial factors (i.e. both greater than 1) of a number, without revealing what those factors are. Thus, the prover demonstrates that a number is composite — and that they know the factors — without revealing any further information about the number.
 
-To see this example in action, [install Rust] and use `cargo run` in this directory to run it:
-```sh
-cargo run
+## Quick Start
+First, [install Rust] if you don't already have it.
+
+Next, install the `cargo-risczero` tool and install the toolchain with:
+
+```bash
+cargo install cargo-risczero
+cargo risczero install
 ```
 
+Then, run the example with:
+```bash
+cargo run --release
+```
+
+Congratulations! You just constructed a zero-knowledge proof that you know the factors of 391.
+
+[install Rust]: https://doc.rust-lang.org/cargo/getting-started/installation.html
+
 # Tutorial
+
 ## How to Recreate _Factors_
 
-This example is a good introduction for beginners new to RISC Zero; if you're looking to get started creating RISC Zero zkVM projects, you're in the right place! 
-If you're looking for a higher level overview of the Factors example, check out the [Understanding Factors] explainer instead. 
+This example is a good introduction for beginners new to RISC Zero; if you're looking to get started creating RISC Zero zkVM projects, you're in the right place!
+If you're looking for a higher level overview of the Factors example, check out the [Understanding Factors] explainer instead.
 We'll spend the rest of this README walking you through how to recreate the factors example for yourself, assuming no prior knowledge of RISC Zero.
 
 ## Step 1: Create a new project
 
 First, [install Rust] if you don't already have it. Next you can create a RISC Zero zkVM project with boilerplate already filled out using our [`cargo risczero` tool]:
 
-```sh
+```bash
 ## Install from crates.io
 cargo install cargo-risczero
+cargo risczero install
 
-## Navigate to where you want to create your project
+# Navigate to where you want to create your project
 cd wherever/you/want
 
-## Create a project from our starter template
+# Create a project from our starter template
 cargo risczero new factors
 ```
 This will create a project named `factors` in the directory where you ran the `cargo risczero new` command. Now we can enter our new project's directory and start working on it!
-```sh
+```bash
 cd factors
 ```
 
@@ -77,7 +93,7 @@ Here are what the other two lines with `METHOD_NAME_ELF` and `METHOD_NAME_ID` sh
 
 ```no_compile
     // Rename METHOD_NAME_ELF
-    let mut exec = Executor::from_elf(env, MULTIPLY_ELF).unwrap();
+    let receipt = prover.prove_elf(env, MULTIPLY_ELF).unwrap();
 
     // Rename METHOD_NAME_ID
     // receipt.verify(MULTIPLY_ID).unwrap();
@@ -91,26 +107,29 @@ Use this command any time you'd like to check your progress.
 
 ## Concept break: How do we run and prove the guest program?
 
-Our next objective is to provide the guest program with input. Before we implement this, let's take a closer look at how we run and prove the guest program in `factors/src/main.rs`.
+Our next objective is to provide the guest program with input. Before we implement this, let's take a closer look at how we run and prove the guest program in `factors/host/src/main.rs`.
 
-In the starter template project, our host driver program creates an executor environment before constructing an executor.  When `Executor::run()` is called, it will produce a session. Calling `Session::prove()` will cause our guest program to execute, producing a receipt:
+In the starter template project, our host driver program creates an executor environment before constructing a prover.  When `Prover::prove_elf()` is called, it will produce a receipt:
 
 ```rust
     use factors_methods::{MULTIPLY_ELF, MULTIPLY_ID};
     use risc0_zkvm::{
+      default_prover,
       serde::{from_slice, to_vec},
-      Executor, ExecutorEnv,
+      ExecutorEnv,
     };
 
     // First, we construct an executor environment
     let env = ExecutorEnv::builder().build().unwrap();
 
-    // Next, we make an executor, loading the (renamed) ELF binary.
-    let mut exec = Executor::from_elf(env, MULTIPLY_ELF).unwrap();
-
     // We're not quite ready to run these steps yet
-    // let session = exec.run().unwrap();
-    // let receipt = session.prove().unwrap();
+
+    // Obtain the default prover.
+    // let prover = default_prover();
+
+    // Produce a receipt by proving the specified ELF binary.
+    // let receipt = prover.prove_elf(env, MULTIPLY_ELF).unwrap();
+
     // receipt.verify(MULTIPLY_ID).unwrap();
 ```
 
@@ -118,7 +137,7 @@ In the starter template project, our host driver program creates an executor env
 
 ## Step 5 (Host): Share two values with the guest
 
-In this step, we'll be continuing to modify `factors/src/main.rs`.
+In this step, we'll be continuing to modify `factors/host/src/main.rs`.
 Let's start by picking some aesthetically pleasing primes:
 ```
 fn main() {
@@ -127,23 +146,20 @@ fn main() {
 }
 ```
 
-We'd like the host to make the values of `a` and `b` available to the guest prior to execution. We can do this by adding them to the the executor environment, which is responsible for managing guest-readable memory. When the `Executor` is constructed, it will have access to these guest inputs.
+We'd like the host to make the values of `a` and `b` available to the guest prior to execution. We can do this by adding them to the the executor environment, which is responsible for managing guest-readable memory. When the prover executes the program, it will have access to these guest inputs.
 
  We need to add these values as inputs before the executor environment is built:
 
  ```rust
     use factors_methods::{MULTIPLY_ELF, MULTIPLY_ID};
-    use risc0_zkvm::{
-      serde::to_vec,
-      Executor, ExecutorEnv,
-    };
+    use risc0_zkvm::{serde::to_vec, ExecutorEnv};
 
     let a: u64 = 17;
     let b: u64 = 23;
 
     // First, we construct an executor environment
     let env = ExecutorEnv::builder()
-    // Send a & b to the guest
+      // Send a & b to the guest
       .add_input(&to_vec(&a).unwrap())
       .add_input(&to_vec(&b).unwrap())
       .build()
@@ -216,11 +232,8 @@ Once more, the program won't do anything, but it should run successfully and bui
 For this step, we return to the main file for the host driver program at `factors/host/src/main.rs`, which currently has a placeholder comment asking to fill in with code for handling the [receipt]:
 
 ```no_compile
-    // Run the executor to produce a session.
-    let session = exec.run().unwrap();
-
-    // Prove the session to produce a receipt.
-    let receipt = session.prove().unwrap();
+    // Run the prover to produce a receipt.
+    let receipt = prover.prove_elf(env, METHOD_NAME_ELF).unwrap();
 ```
 
 In a real-world scenario, we'd want to hand the [receipt] to someone else, but reading it ourselves will be a nice way to check our project is working as expected.
@@ -229,28 +242,27 @@ So, let's extract the [journal]'s contents by replacing the "`TODO`" in the abov
 ```rust
     use factors_methods::{MULTIPLY_ELF, MULTIPLY_ID};
     use risc0_zkvm::{
+      default_prover,
+      ExecutorEnv,
       serde::{from_slice, to_vec},
-      Executor, ExecutorEnv,
     };
 
     let a: u64 = 17;
     let b: u64 = 23;
 
     let env = ExecutorEnv::builder()
-    // Send a & b to the guest
-    .add_input(&to_vec(&a).unwrap())
-    .add_input(&to_vec(&b).unwrap())
-    .build()
-    .unwrap();
+      // Send a & b to the guest
+      .add_input(&to_vec(&a).unwrap())
+      .add_input(&to_vec(&b).unwrap())
+      .build()
+      .unwrap();
 
-    let mut exec = Executor::from_elf(env, MULTIPLY_ELF).unwrap();
-    let session = exec.run().unwrap();
-
-    let receipt = session.prove().unwrap();
-    receipt.verify(MULTIPLY_ID.into()).unwrap();
+    let prover = default_prover();
+    let receipt = prover.prove_elf(env, MULTIPLY_ELF).unwrap();
+    receipt.verify(MULTIPLY_ID).unwrap();
 
     // Extract journal of receipt (i.e. output c, where c = a * b)
-    let c: u64 = from_slice(&receipt.get_journal()).unwrap();
+    let c: u64 = from_slice(&receipt.journal).unwrap();
 
     // Print an assertion
     println!("Hello, world! I know the factors of {}, and I can prove it!", c);

@@ -17,9 +17,10 @@ mod wordlist;
 use std::io;
 
 use risc0_zkvm::{
+    default_prover,
     serde::{from_slice, to_vec},
     sha::Digest,
-    Executor, ExecutorEnv, SessionReceipt,
+    ExecutorEnv, Receipt,
 };
 use wordle_core::{GameState, WordFeedback, WORD_LENGTH};
 use wordle_methods::{WORDLE_GUEST_ELF, WORDLE_GUEST_ID};
@@ -38,19 +39,22 @@ impl<'a> Server<'a> {
 
     pub fn get_secret_word_hash(&self) -> Digest {
         let receipt = self.check_round("_____");
-        let game_state: GameState = from_slice(&receipt.get_journal()).unwrap();
+        let game_state: GameState = from_slice(&receipt.journal).unwrap();
         game_state.correct_word_hash
     }
 
-    pub fn check_round(&self, guess_word: &str) -> Box<dyn SessionReceipt> {
+    pub fn check_round(&self, guess_word: &str) -> Receipt {
         let env = ExecutorEnv::builder()
             .add_input(&to_vec(self.secret_word).unwrap())
             .add_input(&to_vec(&guess_word).unwrap())
             .build()
             .unwrap();
-        let mut exec = Executor::from_elf(env, WORDLE_GUEST_ELF).unwrap();
-        let session = exec.run().unwrap();
-        session.prove().unwrap()
+
+        // Obtain the default prover.
+        let prover = default_prover();
+
+        // Produce a receipt by proving the specified ELF binary.
+        prover.prove_elf(env, WORDLE_GUEST_ELF).unwrap()
     }
 }
 
@@ -64,12 +68,12 @@ struct Player {
 }
 
 impl Player {
-    pub fn check_receipt(&self, receipt: Box<dyn SessionReceipt>) -> WordFeedback {
+    pub fn check_receipt(&self, receipt: Receipt) -> WordFeedback {
         receipt
-            .verify(WORDLE_GUEST_ID.into())
+            .verify(WORDLE_GUEST_ID)
             .expect("receipt verification failed");
 
-        let game_state: GameState = from_slice(&receipt.get_journal()).unwrap();
+        let game_state: GameState = from_slice(&receipt.journal).unwrap();
         if game_state.correct_word_hash != self.hash {
             panic!("The hash mismatched, so the server cheated!");
         }

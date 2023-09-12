@@ -19,73 +19,73 @@
 
 extern crate alloc;
 
-#[cfg(feature = "binfmt")]
-pub mod binfmt;
-mod control_id;
-#[cfg(feature = "prove")]
-mod exec;
 pub mod guest;
-#[cfg(feature = "prove")]
-mod opcode;
-#[cfg(feature = "prove")]
-pub mod prove;
-pub mod receipt;
-pub mod recursion;
+#[cfg(not(target_os = "zkvm"))]
+mod host;
 pub mod serde;
-#[cfg(feature = "prove")]
-mod session;
 pub mod sha;
 
-#[cfg(test)]
-mod testutils;
-
 pub use anyhow::Result;
-use risc0_zkp::core::hash::{
-    blake2b::{Blake2b, Blake2bHashFn},
-    poseidon::PoseidonHashFn,
-    sha::{Sha256, Sha256HashFn},
-};
+#[cfg(not(target_os = "zkvm"))]
+#[cfg(any(feature = "client", feature = "prove"))]
+pub use bytes::Bytes;
+#[cfg(not(target_os = "zkvm"))]
+pub use risc0_binfmt::{MemoryImage, Program, SystemState};
 pub use risc0_zkvm_platform::{declare_syscall, memory::MEM_SIZE, PAGE_SIZE};
 
-#[cfg(feature = "binfmt")]
-pub use self::binfmt::{elf::Program, image::MemoryImage};
-#[cfg(feature = "profiler")]
-pub use self::exec::profiler::Profiler;
-pub use self::receipt::{ExitCode, SegmentReceipt, SessionFlatReceipt, SessionReceipt};
-#[cfg(feature = "prove")]
-pub use self::{
-    exec::io::{Syscall, SyscallContext},
-    exec::{Executor, ExecutorEnv, ExecutorEnvBuilder},
-    prove::loader::Loader,
-    session::{FileSegmentRef, Segment, SegmentRef, Session, SimpleSegmentRef},
-};
-use crate::control_id::{RawControlId, BLAKE2B_CONTROL_ID, POSEIDON_CONTROL_ID, SHA256_CONTROL_ID};
 #[cfg(not(target_os = "zkvm"))]
-pub use crate::receipt::verify;
-pub use crate::receipt::{ReceiptMetadata, SystemState};
-const CIRCUIT: risc0_circuit_rv32im::CircuitImpl = risc0_circuit_rv32im::CircuitImpl::new();
-
-/// Associate a specific CONTROL_ID with a HashFn.
-pub trait ControlId {
-    /// The associated CONTROL_ID for a HashFn.
-    const CONTROL_ID: RawControlId;
-}
-
-impl<S: Sha256> ControlId for Sha256HashFn<S> {
-    const CONTROL_ID: RawControlId = SHA256_CONTROL_ID;
-}
-
-impl ControlId for PoseidonHashFn {
-    const CONTROL_ID: RawControlId = POSEIDON_CONTROL_ID;
-}
-
-impl<T: Blake2b> ControlId for Blake2bHashFn<T> {
-    const CONTROL_ID: RawControlId = BLAKE2B_CONTROL_ID;
-}
+#[cfg(feature = "profiler")]
+pub use self::host::server::exec::profiler::Profiler;
+#[cfg(not(target_os = "zkvm"))]
+#[cfg(feature = "client")]
+pub use self::host::{
+    api::client::Client as ApiClient,
+    client::{
+        env::{ExecutorEnv, ExecutorEnvBuilder},
+        exec::TraceEvent,
+        prove::{
+            bonsai::BonsaiProver, default_prover, external::ExternalProver, Prover, ProverOpts,
+        },
+    },
+};
+#[cfg(not(target_os = "zkvm"))]
+#[cfg(feature = "prove")]
+pub use self::host::{
+    api::server::Server as ApiServer,
+    client::prove::local::LocalProver,
+    server::{
+        exec::executor::Executor,
+        prove::{get_prover_impl, loader::Loader, DynProverImpl},
+        session::{FileSegmentRef, Segment, SegmentRef, Session, SessionEvents, SimpleSegmentRef},
+    },
+};
+#[cfg(not(target_os = "zkvm"))]
+pub use self::host::{
+    control_id::POSEIDON_CONTROL_ID,
+    receipt::{ExitCode, InnerReceipt, Receipt, ReceiptMetadata, SegmentReceipt, VerifierContext},
+    recursion::ALLOWED_IDS_ROOT,
+};
 
 /// Align the given address `addr` upwards to alignment `align`.
 ///
 /// Requires that `align` is a power of two.
 pub const fn align_up(addr: usize, align: usize) -> usize {
     (addr + align - 1) & !(align - 1)
+}
+
+/// Returns `true` if dev mode is enabled.
+#[cfg(feature = "std")]
+pub fn is_dev_mode() -> bool {
+    let is_env_set = std::env::var("RISC0_DEV_MODE")
+        .ok()
+        .map(|x| x.to_lowercase())
+        .filter(|x| x == "1" || x == "true" || x == "yes")
+        .is_some();
+
+    if cfg!(feature = "disable-dev-mode") && is_env_set {
+        panic!("zkVM: Inconsistent settings -- please resolve. \
+            The RISC0_DEV_MODE environment variable is set but dev mode has been disabled by feature flag.");
+    }
+
+    cfg!(not(feature = "disable-dev-mode")) && is_env_set
 }

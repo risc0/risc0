@@ -17,6 +17,7 @@ use std::{fs, io, io::Write, path::PathBuf, process::Stdio};
 use anyhow::{anyhow, bail, Context};
 use cargo_metadata::{Artifact, ArtifactProfile, Message};
 use clap::Parser;
+use risc0_build::cargo_command;
 use risc0_zkvm::{Executor, ExecutorEnv};
 use tempfile::{tempdir, TempDir};
 
@@ -98,12 +99,9 @@ impl BuildCommand {
         fs::create_dir_all(&target_dir)
             .with_context(|| "failed to ensure target directory exists")?;
 
-        let guest_build_env = risc0_build::setup_guest_build_env(&target_dir);
-
         // Build the cargo build/test command for building the crate.
-        let mut cmd = guest_build_env.cargo_command(
+        let mut cmd = cargo_command(
             subcommand.as_ref(),
-            true,
             &[
                 "-C",
                 &format!(

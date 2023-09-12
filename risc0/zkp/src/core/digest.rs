@@ -34,7 +34,7 @@ pub const DIGEST_BYTES: usize = DIGEST_WORDS * WORD_SIZE;
 /// Digest represents the results of a hashing function.  It is always 256 bits
 /// of storage although depending on the hash it may have additional structure
 /// (for example Poseidon's output is actually composed of field elements).  The
-/// storage is in u32's in part to simiplify alignment requirements, especially
+/// storage is in u32's in part to simplify alignment requirements, especially
 /// in the zkVM.
 #[derive(
     Copy, Clone, Eq, Ord, PartialOrd, PartialEq, Hash, Pod, Zeroable, Serialize, Deserialize,
@@ -131,7 +131,7 @@ impl<'a> TryFrom<&'a [u32]> for &'a Digest {
 
     fn try_from(data: &'a [u32]) -> Result<Self, Self::Error> {
         match bytemuck::try_cast_slice(data) {
-            Ok(&[ref digest]) => Ok(digest),
+            Ok([digest]) => Ok(digest),
             Ok(_) => Err(PodCastError::SizeMismatch),
             Err(e) => Err(e),
         }
@@ -216,13 +216,13 @@ impl AsMut<[u32]> for Digest {
 
 impl Display for Digest {
     fn fmt(&self, f: &mut Formatter) -> core::fmt::Result {
-        f.write_str(&hex::encode(&self))
+        f.write_str(&hex::encode(self))
     }
 }
 
 impl Debug for Digest {
     fn fmt(&self, f: &mut Formatter) -> core::fmt::Result {
-        f.write_str(&format!("Digest({})", &hex::encode(&self)))
+        f.write_str(&format!("Digest({})", &hex::encode(self)))
     }
 }
 

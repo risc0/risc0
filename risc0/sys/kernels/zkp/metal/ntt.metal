@@ -81,6 +81,14 @@ kernel void batch_expand(device Fp* out,
   }
 }
 
+kernel void gather_sample(device Fp* dst,
+                          const device Fp* src,
+                          const device uint32_t& idx,
+                          const device uint32_t& stride,
+                          uint gid [[thread_position_in_grid]]) {
+  dst[gid] = src[gid * stride + idx];
+}
+
 kernel void multi_ntt_fwd_step(device Fp* io,
                                const device Fp* rou,
                                const device uint32_t& nBits,

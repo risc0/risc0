@@ -12,63 +12,86 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{fs, path::PathBuf};
+use std::{fs, path::PathBuf, rc::Rc};
 
-use clap::Parser;
-use risc0_zkvm::{Executor, ExecutorEnv};
+use clap::{Args, Parser, ValueEnum};
+use risc0_zkvm::{
+    get_prover_impl, ApiServer, DynProverImpl, Executor, ExecutorEnv, ProverOpts, VerifierContext,
+};
 
 /// Runs a RISC-V ELF binary within the RISC Zero ZKVM.
 #[derive(Parser)]
-#[clap(about, version, author)]
-struct Args {
-    /// The ELF file to run
-    #[clap(long)]
-    elf: PathBuf,
+#[command(about, version, author)]
+struct Cli {
+    #[command(flatten)]
+    mode: Mode,
 
     /// Receipt output file.
-    #[clap(long)]
+    #[arg(long)]
     receipt: Option<PathBuf>,
 
+    /// The hash function to use to produce a proof.
+    #[arg(long, value_enum, default_value_t = HashFn::Sha256)]
+    hashfn: HashFn,
+
     /// File to read initial input from.
-    #[clap(long)]
+    #[arg(long)]
     initial_input: Option<PathBuf>,
 
     /// Display verbose output.
-    #[clap(short, long, action = clap::ArgAction::Count)]
+    #[arg(short, long, action = clap::ArgAction::Count)]
     verbose: u8,
 
     /// Add environment vairables in the form of NAME=value.
-    #[clap(long, action = clap::ArgAction::Append)]
+    #[arg(long, action = clap::ArgAction::Append)]
     env: Vec<String>,
 
     /// Write "pprof" protobuf output of the guest's run to this file.
     /// You can use google's pprof (<https://github.com/google/pprof>)
     /// to read it.
     #[cfg(feature = "profiler")]
-    #[clap(long)]
+    #[arg(long)]
     pprof_out: Option<PathBuf>,
+}
+
+#[derive(Args)]
+#[group(required = true, multiple = false)]
+struct Mode {
+    #[arg(long)]
+    port: Option<u16>,
+
+    /// The ELF to execute
+    #[arg(long)]
+    elf: Option<PathBuf>,
+
+    /// The image to execute
+    #[arg(long)]
+    image: Option<PathBuf>,
+}
+
+#[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
+enum HashFn {
+    #[value(name = "sha-256")]
+    Sha256,
+    Poseidon,
 }
 
 fn main() {
     env_logger::init();
 
-    let args = Args::parse();
-    let elf_contents = fs::read(&args.elf).unwrap();
-
-    if args.verbose > 0 {
-        eprintln!(
-            "Read {} bytes of ELF from {}",
-            elf_contents.len(),
-            args.elf.display()
-        );
+    let args = Cli::parse();
+    if let Some(port) = args.mode.port {
+        run_server(port);
+        return;
     }
 
     #[cfg(feature = "profiler")]
     let mut guest_prof: Option<risc0_zkvm::Profiler> = None;
     #[cfg(feature = "profiler")]
     if args.pprof_out.is_some() {
-        guest_prof =
-            Some(risc0_zkvm::Profiler::new(args.elf.to_str().unwrap(), &elf_contents).unwrap());
+        let elf = args.mode.elf.clone().unwrap();
+        let elf_contents = fs::read(&elf).unwrap();
+        guest_prof = Some(risc0_zkvm::Profiler::new(elf.to_str().unwrap(), &elf_contents).unwrap());
     }
 
     let session = {
@@ -91,7 +114,16 @@ fn main() {
         }
 
         let env = builder.build().unwrap();
-        let mut exec = Executor::from_elf(env, &elf_contents).unwrap();
+        let mut exec = if let Some(ref elf_path) = args.mode.elf {
+            let elf_contents = fs::read(elf_path).unwrap();
+            Executor::from_elf(env, &elf_contents).unwrap()
+        } else if let Some(ref image_path) = args.mode.image {
+            let image_contents = fs::read(image_path).unwrap();
+            let image = bincode::deserialize(&image_contents).unwrap();
+            Executor::new(env, image).unwrap()
+        } else {
+            unreachable!()
+        };
         exec.run().unwrap()
     };
 
@@ -104,11 +136,14 @@ fn main() {
             .expect("Unable to write profiling output");
     }
 
-    let receipt = session.prove().unwrap();
+    let prover = args.get_prover();
+    let ctx = VerifierContext::default();
+    let receipt = prover.prove_session(&ctx, &session).unwrap();
 
-    let receipt_data = receipt.encode();
+    let receipt_data = bincode::serialize(&receipt).unwrap();
+    let receipt_bytes = bytemuck::cast_slice(&receipt_data);
     if let Some(receipt_file) = args.receipt.as_ref() {
-        fs::write(receipt_file, receipt_data.as_slice()).expect("Unable to write receipt file");
+        fs::write(receipt_file, receipt_bytes).expect("Unable to write receipt file");
         if args.verbose > 0 {
             eprintln!(
                 "Wrote {} bytes of receipt to {}",
@@ -117,4 +152,24 @@ fn main() {
             );
         }
     }
+}
+
+impl Cli {
+    fn get_prover(&self) -> Rc<dyn DynProverImpl> {
+        let hashfn = match self.hashfn {
+            HashFn::Sha256 => "sha-256",
+            HashFn::Poseidon => "poseidon",
+        };
+        let opts = ProverOpts {
+            hashfn: hashfn.to_string(),
+        };
+
+        get_prover_impl(&opts).unwrap()
+    }
+}
+
+fn run_server(port: u16) {
+    let addr = format!("127.0.0.1:{port}");
+    let server = ApiServer::new_tcp(addr);
+    server.run().unwrap()
 }

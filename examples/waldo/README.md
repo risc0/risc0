@@ -1,6 +1,6 @@
 # Where's Waldo
 
-***Check out our [blogpost](https://risczero.com/blog/waldo) about this example!***
+***Check out our [blogpost](https://www.risczero.com/news/waldo) about this example!***
 
 [Where's Waldo] is a [favorite analogy] for zero-knowledge proofs. In
 particular, there is this visual that if you take a Where's Waldo image and
@@ -17,6 +17,37 @@ where Waldo is?
 This example implements a RISC0 zero-knowledge program which allows a prover to
 convince a verifier they know Waldo's location in a public Where's Waldo puzzle,
 without revealing Waldo's coordinates.
+
+## Quick Start
+### External Dependencies
+First, [install Rust] if you don't already have it.
+
+### RISC Zero Dependencies
+Next, install the `cargo-risczero` tool and install the toolchain with:
+```bash
+cargo install cargo-risczero
+cargo risczero install
+```
+
+### Run the Prover to construct a Receipt
+Now, you're ready to construct a [receipt] that proves you know where Waldo is located. From the `waldo` folder, run:
+```bash
+# Prove that you know where Waldo is in waldo.webp
+cargo run --release --bin prove -- -i waldo.webp -x 1150 -y 291 --width 58 --height 70 -m waldo_mask.png
+```
+
+Congratulations! You just proved that you know where Waldo is!
+
+### Run the Verifier
+You can send the `receipt` to a third party, who can `verify` it by running:
+```bash
+# Verify that the prover actually found Waldo.
+cargo run --release --bin verify -- -i waldo.webp -r receipt.bin
+```
+
+Running the verifier proves that the contents of [receipt.journal] were indeed constructed by the binary file associated with the expected [ImageID].
+
+[install Rust]: https://doc.rust-lang.org/cargo/getting-started/installation.html
 
 ## Approach
 

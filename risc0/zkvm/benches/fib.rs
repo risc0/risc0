@@ -15,7 +15,7 @@
 use criterion::{
     black_box, criterion_group, criterion_main, BatchSize, BenchmarkId, Criterion, Throughput,
 };
-use risc0_zkvm::{prove::default_prover, Executor, ExecutorEnv};
+use risc0_zkvm::{get_prover_impl, Executor, ExecutorEnv, ProverOpts, VerifierContext};
 use risc0_zkvm_methods::FIB_ELF;
 
 fn setup(iterations: u32) -> Executor<'static> {
@@ -34,7 +34,9 @@ enum Scope {
 pub fn bench(c: &mut Criterion) {
     let mut group = c.benchmark_group("fib");
 
-    let prover = default_prover();
+    let opts = ProverOpts::default();
+    let prover = get_prover_impl(&opts).unwrap();
+    let ctx = VerifierContext::default();
 
     for iterations in [100, 1000, 10_000] {
         let mut exec = setup(iterations);
@@ -80,7 +82,7 @@ pub fn bench(c: &mut Criterion) {
                                 let mut exec = setup(iterations);
                                 exec.run().unwrap()
                             },
-                            |session| black_box(prover.prove_session(&session).unwrap()),
+                            |session| black_box(prover.prove_session(&ctx, &session).unwrap()),
                             BatchSize::SmallInput,
                         )
                     });
@@ -94,7 +96,7 @@ pub fn bench(c: &mut Criterion) {
                             |mut exec| {
                                 black_box({
                                     let session = exec.run().unwrap();
-                                    prover.prove_session(&session).unwrap()
+                                    prover.prove_session(&ctx, &session).unwrap()
                                 })
                             },
                             BatchSize::SmallInput,

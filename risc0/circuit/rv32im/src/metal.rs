@@ -22,8 +22,8 @@ use risc0_core::field::{
 use risc0_zkp::{
     core::log2_ceil,
     hal::{
-        metal::{BufferImpl as MetalBuffer, MetalHal, MetalHash, MetalHashSha256},
-        EvalCheck,
+        metal::{BufferImpl as MetalBuffer, MetalHal, MetalHash},
+        CircuitHal,
     },
     INV_RATE,
 };
@@ -35,12 +35,12 @@ use crate::{
 };
 
 #[derive(Debug)]
-pub struct MetalEvalCheck<MH: MetalHash> {
+pub struct MetalCircuitHal<MH: MetalHash> {
     hal: Rc<MetalHal<MH>>,
     kernel: ComputePipelineDescriptor,
 }
 
-impl<MH: MetalHash> MetalEvalCheck<MH> {
+impl<MH: MetalHash> MetalCircuitHal<MH> {
     pub fn new(hal: Rc<MetalHal<MH>>) -> Self {
         let library = hal.device.new_library_with_data(METAL_LIB).unwrap();
         let function = library.get_function("eval_check", None).unwrap();
@@ -50,9 +50,7 @@ impl<MH: MetalHash> MetalEvalCheck<MH> {
     }
 }
 
-pub type MetalEvalCheckSha256 = MetalEvalCheck<MetalHashSha256>;
-
-impl<MH: MetalHash> EvalCheck<MetalHal<MH>> for MetalEvalCheck<MH> {
+impl<MH: MetalHash> CircuitHal<MetalHal<MH>> for MetalCircuitHal<MH> {
     #[tracing::instrument(skip_all)]
     fn eval_check(
         &self,
@@ -97,10 +95,14 @@ impl<MH: MetalHash> EvalCheck<MetalHal<MH>> for MetalEvalCheck<MH> {
 mod tests {
     use std::rc::Rc;
 
-    use risc0_zkp::hal::{cpu::BabyBearSha256CpuHal, metal::MetalHalSha256};
+    use risc0_core::field::baby_bear::BabyBear;
+    use risc0_zkp::{
+        core::hash::sha::Sha256HashSuite,
+        hal::{cpu::CpuHal, metal::MetalHalSha256},
+    };
     use test_log::test;
 
-    use crate::cpu::CpuEvalCheck;
+    use crate::cpu::CpuCircuitHal;
 
     // TODO: figure out a better way to test this.
     #[test]
@@ -109,10 +111,10 @@ mod tests {
         // The number of cycles, choose a number that doesn't make tests take too long.
         const PO2: usize = 4;
         let circuit = crate::CircuitImpl::new();
-        let cpu_hal = BabyBearSha256CpuHal::new();
-        let cpu_eval = CpuEvalCheck::new(&circuit);
+        let cpu_hal = CpuHal::new(Sha256HashSuite::<BabyBear>::new_suite());
+        let cpu_eval = CpuCircuitHal::new(&circuit);
         let gpu_hal = Rc::new(MetalHalSha256::new());
-        let gpu_eval = super::MetalEvalCheck::new(gpu_hal.clone());
+        let gpu_eval = super::MetalCircuitHal::new(gpu_hal.clone());
         crate::testutil::eval_check(&cpu_hal, cpu_eval, gpu_hal.as_ref(), gpu_eval, PO2);
     }
 

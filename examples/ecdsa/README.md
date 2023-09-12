@@ -2,6 +2,23 @@
 
 This example demonstrates how to verify an ECDSA signature inside the zkVM.
 
+## Quick Start
+
+First, [install Rust] if you don't already have it.
+
+Next, install the `cargo-risczero` tool and install the toolchain with:
+```bash
+cargo install cargo-risczero
+cargo risczero install
+```
+
+Then, run the example with:
+```bash
+cargo run --release
+```
+
+[install Rust]: https://doc.rust-lang.org/cargo/getting-started/installation.html
+
 ## Use Cases
 
 Verifying digital signatures is a primary method of authentication for many protocols, and ECDSA is
