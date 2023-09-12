@@ -20,7 +20,7 @@ import {Script} from "forge-std/Script.sol";
 import {console2} from "forge-std/console2.sol";
 import {BonsaiRelay} from "bonsai/BonsaiRelay.sol";
 import {BonsaiCheats} from "bonsai/BonsaiCheats.sol";
-import {RiscZeroGroth16Verifier} from "bonsai/groth16/RiscZeroGroth16Verifier.sol";
+import {ControlID, RiscZeroGroth16Verifier} from "bonsai/groth16/RiscZeroGroth16Verifier.sol";
 import {IRiscZeroVerifier} from "bonsai/IRiscZeroVerifier.sol";
 import {IVotes} from "openzeppelin/contracts/governance/utils/IVotes.sol";
 
@@ -80,7 +80,7 @@ contract Deploy is Script, BonsaiCheats {
                 console2.log("Using IRiscZeroVerifier at ", address(verifierAddr));
                 verifier = IRiscZeroVerifier(verifierAddr);
             } else {
-                verifier = new RiscZeroGroth16Verifier();
+                verifier = new RiscZeroGroth16Verifier(ControlID.CONTROL_ID_0, ControlID.CONTROL_ID_1);
                 console2.log("Deployed RiscZeroGroth16Verifier to ", address(verifier));
             }
 
