@@ -1,3 +1,5 @@
+// Copyright 2023 RISC Zero, Inc.
+
 use std::env;
 
 #[cfg(feature = "experimental")]

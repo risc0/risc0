@@ -1,3 +1,5 @@
+// Copyright 2023 RISC Zero, Inc.
+
 use getrandom::{register_custom_getrandom, Error};
 
 use crate::{syscall::sys_rand, WORD_SIZE};
