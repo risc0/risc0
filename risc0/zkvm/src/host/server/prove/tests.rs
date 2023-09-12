@@ -28,10 +28,12 @@ use test_log::test;
 
 use super::{get_prover_impl, HalPair, ProverImpl};
 use crate::{
-    host::{receipt::SegmentReceipts, server::testutils, CIRCUIT},
+    host::{
+        server::{exec::executor::ExecutorError, testutils},
+        CIRCUIT,
+    },
     serde::{from_slice, to_vec},
-    DynProverImpl, Executor, ExecutorEnv, ExitCode, InnerReceipt, ProverOpts, Receipt,
-    FAULT_CHECKER_ID,
+    DynProverImpl, Executor, ExecutorEnv, ExitCode, ProverOpts, Receipt,
 };
 
 fn prove_nothing(hashfn: &str) -> Result<Receipt> {
@@ -167,19 +169,8 @@ fn memory_io() {
             return receipt.is_err();
         }
         let receipt = receipt.unwrap();
-        match receipt.inner {
-            InnerReceipt::Flat(SegmentReceipts(segments)) => {
-                let last_image_id = segments
-                    .last()
-                    .unwrap()
-                    .get_metadata()
-                    .unwrap()
-                    .pre
-                    .digest();
-                last_image_id == FAULT_CHECKER_ID.into()
-            }
-            // Fault receipts can only be encoded in the Flat format until recursion support is
-            // available.
+        match receipt.verify(MULTI_TEST_ID) {
+            Err(VerificationError::ValidFaultReceipt) => true,
             _ => false,
         }
     }
@@ -195,7 +186,11 @@ fn memory_io() {
         let input = to_vec(&spec)?;
         let env = ExecutorEnv::builder().add_input(&input).build().unwrap();
         let mut exec = Executor::from_elf(env, MULTI_TEST_ELF)?;
-        let session = exec.run()?;
+        let session = match exec.run() {
+            Ok(session) => session,
+            Err(ExecutorError::Fault(session)) => session,
+            Err(ExecutorError::Error(e)) => return Err(e),
+        };
         session.prove()
     }
 
