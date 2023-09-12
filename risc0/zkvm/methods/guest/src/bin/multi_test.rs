@@ -111,6 +111,13 @@ pub fn main() {
             let digest = sha::Impl::hash_bytes(&data);
             env::commit(&digest);
         }
+        MultiTestSpec::ShaDigestIter { data, num_iter } => {
+            let mut hash = &data[..];
+            for _ in 0..num_iter {
+                hash = sha::Impl::hash_bytes(hash).as_bytes();
+            }
+            env::commit(&Digest::try_from(hash).unwrap())
+        }
         MultiTestSpec::Syscall { count } => {
             let mut input: &[u8] = &[];
             let mut input_len: usize = 0;

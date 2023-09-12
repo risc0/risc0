@@ -12,7 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{collections::BTreeMap, io::Cursor, str::from_utf8, sync::Mutex};
+use std::{
+    collections::{BTreeMap, HashSet},
+    io::Cursor,
+    str::from_utf8,
+    sync::Mutex,
+};
 
 use anyhow::Result;
 use bytes::Bytes;
@@ -21,13 +26,16 @@ use risc0_zkvm_methods::{
     multi_test::{MultiTestSpec, SYS_MULTI_TEST},
     HELLO_COMMIT_ELF, MULTI_TEST_ELF, SLICE_IO_ELF, STANDARD_LIB_ELF,
 };
-use risc0_zkvm_platform::{fileno, PAGE_SIZE, WORD_SIZE};
+use risc0_zkvm_platform::{fileno, syscall::nr::SYS_RANDOM, PAGE_SIZE, WORD_SIZE};
 use sha2::{Digest as _, Sha256};
 use test_log::test;
 
 use super::executor::Executor;
 use crate::{
-    host::server::testutils,
+    host::server::{
+        exec::syscall::{Syscall, SyscallContext},
+        testutils,
+    },
     serde::{from_slice, to_vec},
     ExecutorEnv, ExitCode, MemoryImage, Program, Session, TraceEvent,
 };
@@ -690,4 +698,66 @@ fn memory_access() {
     access_memory(0x0000_0000).err().unwrap();
     access_memory(0x0C00_0000).err().unwrap();
     access_memory(0x0B00_0000).unwrap();
+}
+
+/// The post-state digest (i.e. the Merkle root of the memory state at the end
+/// of the pogram) should be randomized on each execution to avoid potential
+/// leakage of private information.
+#[test]
+fn post_state_digest_randomization() {
+    // Run a number of iterations of a guest and confirm all have the unique post
+    // state digest.
+    const ITERATIONS: usize = 10;
+    let post_state_digests: HashSet<Digest> = (0..ITERATIONS)
+        .map(|_| {
+            // Run the guest and extract the post state digest.
+            Executor::from_elf(ExecutorEnv::default(), HELLO_COMMIT_ELF)
+                .unwrap()
+                .run()
+                .unwrap()
+                .segments
+                .last()
+                .unwrap()
+                .resolve()
+                .unwrap()
+                .post_image_id
+        })
+        .collect();
+    assert_eq!(post_state_digests.len(), ITERATIONS);
+
+    // Replacement syscall for sys_random to disable the memory image randomization.
+    struct RiggedRandom;
+    impl Syscall for RiggedRandom {
+        fn syscall(
+            &mut self,
+            _syscall: &str,
+            _ctx: &mut dyn SyscallContext,
+            to_guest: &mut [u32],
+        ) -> Result<(u32, u32)> {
+            let rand_buf = vec![27u8; to_guest.len() * WORD_SIZE];
+            bytemuck::cast_slice_mut(to_guest).clone_from_slice(rand_buf.as_slice());
+            Ok((0, 0))
+        }
+    }
+
+    // Run a number of iterations of a guest with rigged randomness and confirm all
+    // have the same post state digest.
+    let post_state_digests: HashSet<Digest> = (0..ITERATIONS)
+        .map(|_| {
+            // Run the guest and extract the post state digest.
+            let mut exec = Executor::from_elf(ExecutorEnv::default(), HELLO_COMMIT_ELF).unwrap();
+            // Override the default randomness syscall using crate-internal API.
+            exec.syscall_table.with_syscall(SYS_RANDOM, RiggedRandom);
+
+            exec.run()
+                .unwrap()
+                .segments
+                .last()
+                .unwrap()
+                .resolve()
+                .unwrap()
+                .post_image_id
+        })
+        .collect();
+    assert_eq!(post_state_digests.len(), 1);
 }

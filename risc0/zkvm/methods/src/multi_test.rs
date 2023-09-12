@@ -29,6 +29,10 @@ pub enum MultiTestSpec {
     ShaDigest {
         data: Vec<u8>,
     },
+    ShaDigestIter {
+        data: Vec<u8>,
+        num_iter: u32,
+    },
     EventTrace,
     Profiler,
     Fail,

@@ -494,18 +494,17 @@ pub fn embed_methods_with_options(mut guest_pkg_to_options: HashMap<&str, GuestO
             #[cfg(feature = "guest-list")]
             guest_list_entries.push(method.guest_list_entry());
         }
-
-        #[cfg(feature = "guest-list")]
-        methods_file
-            .write_all(
-                format!(
-                    "\npub const GUEST_LIST: &[GuestListEntry] = &[{}];\n",
-                    guest_list_entries.join(",")
-                )
-                .as_bytes(),
-            )
-            .unwrap();
     }
+    #[cfg(feature = "guest-list")]
+    methods_file
+        .write_all(
+            format!(
+                "\npub const GUEST_LIST: &[GuestListEntry] = &[{}];\n",
+                guest_list_entries.join(",")
+            )
+            .as_bytes(),
+        )
+        .unwrap();
 
     // HACK: It's not particularly practical to figure out all the
     // files that all the guest crates transtively depend on.  So, we
