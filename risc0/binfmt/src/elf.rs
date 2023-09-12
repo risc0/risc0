@@ -12,7 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::collections::BTreeMap;
+extern crate alloc;
+
+use alloc::collections::BTreeMap;
 
 use anyhow::{anyhow, bail, Context, Result};
 use elf::{endian::LittleEndian, file::Class, ElfBytes};
@@ -67,7 +69,7 @@ impl Program {
                 } else {
                     let mut word = 0;
                     // Don't read past the end of the file.
-                    let len = std::cmp::min(file_size - i, 4);
+                    let len = core::cmp::min(file_size - i, 4);
                     for j in 0..len {
                         let offset = (offset + i + j) as usize;
                         let byte = input.get(offset).context("Invalid segment offset")?;

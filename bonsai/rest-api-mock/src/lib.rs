@@ -111,12 +111,12 @@ mod test {
             let image = MemoryImage::new(&program, PAGE_SIZE as u32)?;
             let image_id = hex::encode(image.compute_id());
             let image = bincode::serialize(&image).expect("Failed to serialize memory img");
-            bonsai_sdk::put_image(client.clone(), image_id.clone(), image).await?;
+            bonsai_sdk::upload_img(client.clone(), image_id.clone(), image).await?;
             image_id
         };
 
         // Prepare input data and upload it.
-        let input_id = bonsai_sdk::put_input(client.clone(), vec![]).await?;
+        let input_id = bonsai_sdk::upload_input(client.clone(), vec![]).await?;
 
         // Start a session running the prover
         let session = bonsai_sdk::create_session(client.clone(), img_id, input_id).await?;
