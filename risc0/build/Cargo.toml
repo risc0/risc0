@@ -8,7 +8,7 @@ homepage = { workspace = true }
 repository = { workspace = true }
 
 [dependencies]
-cargo_metadata = "0.17"
+cargo_metadata = "0.18"
 risc0-binfmt = { workspace = true }
 risc0-zkp = { workspace = true, features = ["std"] }
 risc0-zkvm-platform = { workspace = true }
