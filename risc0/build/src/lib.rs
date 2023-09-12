@@ -21,8 +21,7 @@ use std::{
     default::Default,
     env,
     fs::{self, File},
-    io::stderr,
-    io::{BufRead, BufReader, Write},
+    io::{stderr, BufRead, BufReader, Write},
     path::{Path, PathBuf},
     process::{Command, Stdio},
 };

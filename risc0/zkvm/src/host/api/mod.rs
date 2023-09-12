@@ -22,10 +22,10 @@ use std::{
     net::{TcpListener, TcpStream},
     path::{Path, PathBuf},
     process::{Child, Command},
-    sync::Arc,
     sync::{
         atomic::{AtomicBool, Ordering},
         mpsc::channel,
+        Arc,
     },
     thread,
     time::Duration,

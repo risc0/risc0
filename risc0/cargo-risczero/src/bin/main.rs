@@ -12,10 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use anyhow::Result;
 #[cfg(feature = "experimental")]
 use cargo_risczero::BuildSubcommand;
-
-use anyhow::Result;
 use cargo_risczero::{Cargo, RisczeroCmd};
 use clap::Parser;
 use tracing_subscriber::EnvFilter;
