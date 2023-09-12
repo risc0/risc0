@@ -43,7 +43,7 @@ Search this template for the string `TODO`, and make the necessary changes to im
 
 ## Directory Structure
 It is possible to organize the files for these components in various ways. 
-However, in the [`cargo risczero`](https://docs.rs/cargo-risczero/0.16/cargo_risczero/) starter template we use a standard directory structure for zkVM applications, and we recommend you use this structure as well. 
+However, in the [`cargo risczero`](https://docs.rs/cargo-risczero/0.16/cargo_risczero/) starter template we use a standard directory structure for zkVM applications, which we think is a good starting point for your applications.
 
 ```
 project_name
