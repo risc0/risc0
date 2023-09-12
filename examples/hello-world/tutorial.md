@@ -44,6 +44,7 @@ cd hello-world
 ## Step 2: Give the methods package a name
 
 The methods package contains the program that executes on the guest zkVM as well as a few supporting libraries. Before we proceed, let's change its name in `methods/Cargo.toml` to match the name of our project, renaming `name = methods` to `name = hello-world-methods`.
+Also in `host/Cargo.toml`, rename `methods = { path = "../methods" }` to `factors-methods = { path = "../methods" }` in order to locate the renamed guest code.
 
 Parts of this package are included in the driver program `src/main.rs`, so change the line
 
@@ -130,11 +131,7 @@ In the starter template project, our host driver program creates an executor env
 
 ## Step 5 (Host): Share two values with the guest
 
-<<<<<<< HEAD:examples/hello-world/tutorial.md
 In this step, we'll be continuing to modify `hello-world/src/main.rs`.
-=======
-In this step, we'll be continuing to modify `factors/host/src/main.rs`.
->>>>>>> main:examples/factors/README.md
 Let's start by picking some aesthetically pleasing primes:
 ```
 fn main() {
