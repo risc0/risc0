@@ -200,6 +200,7 @@ message TraceEvent {
   message InstructionStart {
     uint32 cycle = 1;
     uint32 pc = 2;
+    uint32 insn = 3;
   }
 
   message RegisterSet {

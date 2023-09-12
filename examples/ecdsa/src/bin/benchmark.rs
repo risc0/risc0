@@ -12,12 +12,47 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use ecdsa_methods::BENCHMARK_ELF;
-use risc0_zkvm::{Executor, ExecutorEnv};
+use anyhow::{anyhow, bail};
+use ecdsa_methods::{BENCHMARK_ELF, BENCHMARK_PATH};
+use risc0_zkvm::{Executor, ExecutorEnv, Profiler};
 
 // Simple main to load and run the benchmark binary in the RISC Zero Executor.
-fn main() {
-    let env = ExecutorEnv::builder().build().unwrap();
-    let mut exec = Executor::from_elf(env, BENCHMARK_ELF).unwrap();
-    std::hint::black_box(exec.run().unwrap());
+fn main() -> anyhow::Result<()> {
+    // Get a profile path from an environment variable and build the profiler.
+    let pprof_out = match std::env::var("ZKVM_PPROF_OUT") {
+        Ok(val) => Some(val),
+        Err(std::env::VarError::NotPresent) => None,
+        Err(e) => bail!("malformed env var: {}", e),
+    };
+    println!("{}", BENCHMARK_PATH);
+    let mut profiler = pprof_out
+        .as_ref()
+        .map(|path| Profiler::new(&path, BENCHMARK_ELF))
+        .transpose()?;
+
+    {
+        // Build the executor env.
+        let env = {
+            let mut builder = ExecutorEnv::builder();
+            if let Some(ref mut p) = profiler {
+                builder.trace_callback(p.make_trace_callback());
+            }
+            builder
+                .build()
+                .map_err(|e| anyhow!("environment build failed: {:?}", e))?
+        };
+
+        // Execute the benchmarks.
+        Executor::from_elf(env, BENCHMARK_ELF)?.run()?;
+    }
+
+    // Write out the pprof.
+    if let Some(ref mut p) = profiler {
+        p.finalize();
+        let report = p.encode_to_vec();
+        std::fs::write(pprof_out.as_ref().unwrap(), &report)
+            .expect("Unable to write profiling output");
+    }
+
+    Ok(())
 }

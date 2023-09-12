@@ -409,9 +409,10 @@ impl TryFrom<pb::TraceEvent> for TraceEvent {
 
     fn try_from(event: pb::TraceEvent) -> Result<Self> {
         Ok(match event.kind.ok_or(malformed_err())? {
-            pb::trace_event::Kind::InsnStart(event) => TraceEvent::InstructionStart {
+            pb::trace_event::Kind::InsnStart(event) => TraceEvent::Instruction {
                 cycle: event.cycle,
                 pc: event.pc,
+                insn: event.insn,
             },
             pb::trace_event::Kind::RegisterSet(event) => TraceEvent::RegisterSet {
                 idx: event.idx as usize,

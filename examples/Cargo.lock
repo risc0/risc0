@@ -1041,6 +1041,7 @@ dependencies = [
 name = "ecdsa-example"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "clap 4.4.0",
  "ecdsa-methods",
  "k256",
@@ -1646,6 +1647,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b6c80984affa11d98d1b88b66ac8853f143217b399d3c74116778ff8fdb4ed2e"
 dependencies = [
  "fallible-iterator",
+ "indexmap 1.9.3",
  "stable_deref_trait",
 ]
 
@@ -3382,6 +3384,7 @@ dependencies = [
  "crypto-bigint",
  "generic-array",
  "getrandom",
+ "gimli",
  "hex",
  "lazy-regex",
  "libm",
