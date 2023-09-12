@@ -22,7 +22,7 @@ use risc0_zkvm::{Executor, ExecutorEnv, MemoryImage, Program, Receipt, MEM_SIZE,
 /// Result of executing a guest image, possibly containing a proof.
 pub enum Output {
     Execution { journal: Vec<u8> },
-    Bonsai { snark_proof: SnarkReceipt },
+    Bonsai { snark_receipt: SnarkReceipt },
 }
 
 /// Execute and prove the guest locally, on this machine, as opposed to sending
@@ -105,7 +105,7 @@ pub fn prove_alpha(elf: &[u8], input: Vec<u8>) -> Result<Output> {
     })()?;
 
     let snark_session = client.create_snark(session.uuid)?;
-    let snark_proof: SnarkReceipt = (|| loop {
+    let snark_receipt: SnarkReceipt = (|| loop {
         let res = snark_session.status(&client)?;
         match res.status.as_str() {
             "RUNNING" => {
@@ -126,7 +126,7 @@ pub fn prove_alpha(elf: &[u8], input: Vec<u8>) -> Result<Output> {
         }
     })()?;
 
-    Ok(Output::Bonsai { snark_proof })
+    Ok(Output::Bonsai { snark_receipt })
 }
 
 pub fn resolve_guest_entry<'a>(

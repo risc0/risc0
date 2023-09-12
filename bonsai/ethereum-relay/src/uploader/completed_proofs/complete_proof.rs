@@ -21,7 +21,7 @@ use bonsai_sdk::{
 };
 use ethers::abi;
 
-use super::snark::tokenize_snark_proof;
+use super::snark::tokenize_snark_receipt;
 use crate::{api, uploader::completed_proofs::error::CompleteProofError};
 
 #[derive(Debug, Clone)]
@@ -45,12 +45,12 @@ pub(crate) async fn get_complete_proof(
 
     let snark_id =
         super::snark::get_snark_id(bonsai_client.clone(), bonsai_proof_id.clone()).await?;
-    let snark_proof =
-        super::snark::get_snark_proof(bonsai_client.clone(), snark_id, bonsai_proof_id.clone())
+    let snark_receipt =
+        super::snark::get_snark_receipt(bonsai_client.clone(), snark_id, bonsai_proof_id.clone())
             .await?;
     let seal = match dev_mode {
         true => vec![],
-        false => abi::encode(&[tokenize_snark_proof(&snark_proof.snark).map_err(|_| {
+        false => abi::encode(&[tokenize_snark_receipt(&snark_receipt.snark).map_err(|_| {
             CompleteProofError::SnarkFailed {
                 id: bonsai_proof_id.clone(),
             }
@@ -58,7 +58,7 @@ pub(crate) async fn get_complete_proof(
     };
 
     let post_state_digest: [u8; 32] = match dev_mode {
-        false => snark_proof.post_state_digest.try_into().map_err(|_err| {
+        false => snark_receipt.post_state_digest.try_into().map_err(|_err| {
             CompleteProofError::SnarkFailed {
                 id: bonsai_proof_id.clone(),
             }
@@ -68,7 +68,7 @@ pub(crate) async fn get_complete_proof(
 
     let payload = [
         callback_request.function_selector.as_slice(),
-        snark_proof.journal.as_slice(),
+        snark_receipt.journal.as_slice(),
         callback_request.image_id.as_slice(),
     ]
     .concat();

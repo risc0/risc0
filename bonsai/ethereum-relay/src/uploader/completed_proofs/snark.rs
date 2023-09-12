@@ -40,7 +40,7 @@ pub(crate) async fn get_snark_id(
     Ok(snark_id)
 }
 
-pub(crate) async fn get_snark_proof(
+pub(crate) async fn get_snark_receipt(
     client: Client,
     snark_id: SnarkId,
     session_id: SessionId,
@@ -57,7 +57,7 @@ pub(crate) async fn get_snark_proof(
             })?;
         match (snark.status.as_str(), snark.output) {
             ("RUNNING", _) => tokio::time::sleep(Duration::from_secs(1)).await,
-            ("SUCCEEDED", Some(snark_proof)) => break snark_proof,
+            ("SUCCEEDED", Some(snark_receipt)) => break snark_receipt,
             ("SUCCEEDED", None) => return Err(CompleteProofError::SnarkFailed { id: session_id }),
             ("FAILED", _) => return Err(CompleteProofError::SnarkFailed { id: session_id }),
             ("TIMED_OUT", _) => return Err(CompleteProofError::SnarkTimedOut { id: session_id }),
@@ -69,7 +69,7 @@ pub(crate) async fn get_snark_proof(
     Ok(proof)
 }
 
-pub fn tokenize_snark_proof(proof: &Groth16Seal) -> anyhow::Result<Token> {
+pub fn tokenize_snark_receipt(proof: &Groth16Seal) -> anyhow::Result<Token> {
     if proof.b.len() != 2 {
         anyhow::bail!("hex-strings encoded proof is not well formed");
     }
