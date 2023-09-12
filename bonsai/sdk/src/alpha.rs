@@ -135,11 +135,11 @@ pub mod responses {
         pub public: Vec<Vec<u8>>,
     }
 
-    /// Snark Proof object
+    /// Snark Receipt object
     ///
     /// All relevant data to verify both the snark proof an corresponding imageId on chain.
     #[derive(Debug, Deserialize, Serialize, PartialEq)]
-    pub struct SnarkProof {
+    pub struct SnarkReceipt {
         /// Snark seal from snarkjs
         pub snark: Groth16Seal,
         /// Post State Digest
@@ -157,10 +157,10 @@ pub mod responses {
         ///
         /// values: `[ RUNNING | SUCCEEDED | FAILED | TIMED_OUT | ABORTED ]`
         pub status: String,
-        /// SNARK proof output
+        /// SNARK receipt output
         ///
-        /// Generated snark proof,
-        pub output: Option<SnarkProof>,
+        /// Generated snark receipt,
+        pub output: Option<SnarkReceipt>,
         /// Snark Error message
         ///
         /// If the SNARK status is not `RUNNING` or `SUCCEEDED`, this is the error raised from within bonsai.

@@ -44,7 +44,7 @@ pub(crate) async fn get_snark_proof(
     client: Client,
     snark_id: SnarkId,
     session_id: SessionId,
-) -> Result<bonsai_sdk::alpha::responses::SnarkProof, CompleteProofError> {
+) -> Result<bonsai_sdk::alpha::responses::SnarkReceipt, CompleteProofError> {
     // Hit the Bonsai API until the receipt is ready
     // TODO: This is not the most efficient way to do this. We should convert to
     // a Future implementation later.
@@ -83,20 +83,20 @@ pub fn tokenize_snark_proof(proof: &Groth16Seal) -> anyhow::Result<Token> {
             proof
                 .a
                 .iter()
-                .map(|elm| U256::from_little_endian(elm).into_token())
+                .map(|elm| U256::from_big_endian(elm).into_token())
                 .collect(),
         ),
         Token::FixedArray(vec![
             Token::FixedArray(
                 proof.b[0]
                     .iter()
-                    .map(|elm| U256::from_little_endian(elm).into_token())
+                    .map(|elm| U256::from_big_endian(elm).into_token())
                     .collect(),
             ),
             Token::FixedArray(
                 proof.b[1]
                     .iter()
-                    .map(|elm| U256::from_little_endian(elm).into_token())
+                    .map(|elm| U256::from_big_endian(elm).into_token())
                     .collect(),
             ),
         ]),
@@ -104,7 +104,7 @@ pub fn tokenize_snark_proof(proof: &Groth16Seal) -> anyhow::Result<Token> {
             proof
                 .c
                 .iter()
-                .map(|elm| U256::from_little_endian(elm).into_token())
+                .map(|elm| U256::from_big_endian(elm).into_token())
                 .collect(),
         ),
     ]))

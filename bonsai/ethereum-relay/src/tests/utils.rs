@@ -16,7 +16,7 @@
 pub(crate) mod tests {
     use bonsai_ethereum_contracts::i_bonsai_relay::CallbackRequestFilter;
     use bonsai_sdk::alpha::{
-        responses::{CreateSessRes, Groth16Seal, SessionStatusRes, SnarkProof, SnarkStatusRes},
+        responses::{CreateSessRes, Groth16Seal, SessionStatusRes, SnarkReceipt, SnarkStatusRes},
         SessionId,
     };
     use ethers::types::{Address, Bytes, H256};
@@ -64,7 +64,7 @@ pub(crate) mod tests {
             zeroes.clone(),
             zeroes.clone(),
         ];
-        let dummy_snark = Some(SnarkProof {
+        let dummy_snark = Some(SnarkReceipt {
             snark: Groth16Seal { a, b, c, public },
             post_state_digest: vec![],
             journal: vec![],

@@ -15,14 +15,14 @@
 use std::time::Duration;
 
 use anyhow::{anyhow, bail, Context, Result};
-use bonsai_sdk::alpha::{responses::SnarkProof, Client};
+use bonsai_sdk::alpha::{responses::SnarkReceipt, Client};
 use risc0_build::GuestListEntry;
 use risc0_zkvm::{Executor, ExecutorEnv, MemoryImage, Program, Receipt, MEM_SIZE, PAGE_SIZE};
 
 /// Result of executing a guest image, possibly containing a proof.
 pub enum Output {
     Execution { journal: Vec<u8> },
-    Bonsai { snark_proof: SnarkProof },
+    Bonsai { snark_proof: SnarkReceipt },
 }
 
 /// Execute and prove the guest locally, on this machine, as opposed to sending
@@ -105,7 +105,7 @@ pub fn prove_alpha(elf: &[u8], input: Vec<u8>) -> Result<Output> {
     })()?;
 
     let snark_session = client.create_snark(session.uuid)?;
-    let snark_proof: SnarkProof = (|| loop {
+    let snark_proof: SnarkReceipt = (|| loop {
         let res = snark_session.status(&client)?;
         match res.status.as_str() {
             "RUNNING" => {
