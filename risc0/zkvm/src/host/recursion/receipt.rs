@@ -14,16 +14,19 @@
 
 use alloc::{collections::VecDeque, vec::Vec};
 
-use risc0_binfmt::{read_sha_halfs, tagged_struct, write_sha_halfs, SystemState};
+use risc0_binfmt::{read_sha_halfs, write_sha_halfs, SystemState};
 use risc0_core::field::baby_bear::BabyBearElem;
 use risc0_zkp::{adapter::CircuitInfo, core::digest::Digest, verify::VerificationError};
 use serde::{Deserialize, Serialize};
 
 use super::CircuitImpl;
-use crate::host::{
-    control_id::POSEIDON_CONTROL_ID,
-    receipt::{ReceiptMetadata, VerifierContext},
-    recursion::{circuit_impl::CIRCUIT_CORE, control_id::RECURSION_CONTROL_IDS},
+use crate::{
+    host::{
+        control_id::POSEIDON_CONTROL_ID,
+        receipt::VerifierContext,
+        recursion::{circuit_impl::CIRCUIT_CORE, control_id::RECURSION_CONTROL_IDS},
+    },
+    ReceiptMetadata,
 };
 
 /// This function gets valid control IDs from the poseidon and recursion
@@ -71,21 +74,6 @@ impl ReceiptMetadata {
         write_sha_halfs(flat, &self.output);
         Ok(())
     }
-
-    /// Hash the [crate::ReceiptMetadata] to get a digest of the struct.
-    pub fn digest(&self) -> Result<Digest, VerificationError> {
-        let (sys_exit, user_exit) = self.get_exit_code_pairs()?;
-        Ok(tagged_struct(
-            "risc0.ReceiptMeta",
-            &[
-                self.input,
-                self.pre.digest(),
-                self.post.digest(),
-                self.output,
-            ],
-            &[sys_exit, user_exit],
-        ))
-    }
 }
 
 /// This struct represents a receipt for one or more [crate::SegmentReceipt]s
@@ -131,7 +119,7 @@ impl SuccinctReceipt {
         seal_meta.drain(0..16);
         // Verify the output hash matches that data
         let output_hash = read_sha_halfs(&mut seal_meta);
-        if output_hash != self.meta.digest()? {
+        if output_hash != self.meta.digest() {
             return Err(VerificationError::JournalDigestMismatch);
         }
         // Everything passed

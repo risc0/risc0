@@ -27,7 +27,7 @@ use risc0_binfmt::MemoryImage;
 use risc0_zkp::core::digest::Digest;
 use serde::{Deserialize, Serialize};
 
-use crate::host::{receipt::ExitCode, server::exec::executor::SyscallRecord};
+use crate::{host::server::exec::executor::SyscallRecord, ExitCode};
 
 #[derive(Clone, Default, Serialize, Deserialize, Debug)]
 pub struct PageFaults {

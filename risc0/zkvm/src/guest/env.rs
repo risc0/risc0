@@ -140,10 +140,6 @@ pub enum VerifyMetadataError {
     /// If there is a conditional receipt to verify, it's assumptions must first be verified to
     /// make the receipt unconditional.
     NonEmptyAssumptionsList,
-
-    /// An error occured in attempting to calculate the digest of the [ReceiptMetadata], resulting
-    /// from an internal consistancy error within the struct.
-    MetadataParsingError(risc0_zkp::verify::VerificationError),
 }
 
 impl fmt::Display for VerifyMetadataError {
@@ -152,9 +148,6 @@ impl fmt::Display for VerifyMetadataError {
             VerifyMetadataError::NonEmptyAssumptionsList => {
                 write!(f, "assumptions list is not empty")
             }
-            VerifyMetadataError::MetadataParsingError(e) => {
-                write!(f, "error is interpretting recipt metadata: {}", e)
-            }
         }
     }
 }
@@ -162,15 +155,9 @@ impl fmt::Display for VerifyMetadataError {
 #[cfg(feature = "std")]
 impl std::error::Error for VerifyMetadataError {}
 
-impl From<risc0_zkp::verify::VerificationError> for VerifyMetadataError {
-    fn from(err: risc0_zkp::verify::VerificationError) -> Self {
-        Self::MetadataParsingError(err)
-    }
-}
-
 /// Verify that there exists a valid receipt with the specified [ReceiptMetadata].
 pub fn verify_metdata(meta: &ReceiptMetadata) -> Result<(), VerifyMetadataError> {
-    let meta_digest = meta.digest()?;
+    let meta_digest = meta.digest();
     unsafe { sys_verify_metadata(meta_digest.as_ref()) };
     // DO NOT MERGE(victor): Calculate the ReceiptMetadata digest and add it to a running
     // assumptions list.

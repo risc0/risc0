@@ -49,10 +49,9 @@ use crate::{
     align_up,
     host::{
         client::exec::TraceEvent,
-        receipt::ExitCode,
         server::opcode::{MajorType, OpCode},
     },
-    ExecutorEnv, Loader, Segment, SegmentRef, Session, SimpleSegmentRef,
+    ExecutorEnv, ExitCode, Loader, Segment, SegmentRef, Session, SimpleSegmentRef,
 };
 
 /// The number of cycles required to compress a SHA-256 block.

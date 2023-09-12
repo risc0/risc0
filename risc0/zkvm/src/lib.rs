@@ -22,19 +22,19 @@ extern crate alloc;
 pub mod guest;
 #[cfg(not(target_os = "zkvm"))]
 mod host;
+mod receipt_metadata;
 pub mod serde;
 pub mod sha;
 
 /// Re-exports for recursion
-#[cfg(not(target_os = "zkvm"))]
-#[cfg(feature = "prove")]
+#[cfg(all(not(target_os = "zkvm"), feature = "prove"))]
 pub mod recursion {
     pub use super::host::recursion::*;
 }
 
+pub use self::receipt_metadata::{ExitCode, ReceiptMetadata};
 pub use anyhow::Result;
-#[cfg(not(target_os = "zkvm"))]
-#[cfg(any(feature = "client", feature = "prove"))]
+#[cfg(all(not(target_os = "zkvm"), any(feature = "client", feature = "prove")))]
 pub use bytes::Bytes;
 #[cfg(not(target_os = "zkvm"))]
 pub use risc0_binfmt::{MemoryImage, Program, SystemState};
@@ -69,7 +69,7 @@ pub use self::host::{
 #[cfg(not(target_os = "zkvm"))]
 pub use self::host::{
     control_id::POSEIDON_CONTROL_ID,
-    receipt::{ExitCode, InnerReceipt, Receipt, ReceiptMetadata, SegmentReceipt, VerifierContext},
+    receipt::{InnerReceipt, Receipt, SegmentReceipt, VerifierContext},
     recursion::ALLOWED_IDS_ROOT,
 };
 

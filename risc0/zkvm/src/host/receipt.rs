@@ -100,46 +100,10 @@ use super::{
     control_id::{BLAKE2B_CONTROL_ID, POSEIDON_CONTROL_ID, SHA256_CONTROL_ID},
     recursion::SuccinctReceipt,
 };
-use crate::sha::rust_crypto::{Digest as _, Sha256};
-
-/// Indicates how a Segment or Session's execution has terminated
-#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
-pub enum ExitCode {
-    /// This indicates when a system-initiated split has occured due to the
-    /// segment limit being exceeded.
-    SystemSplit,
-
-    /// This indicates that the session limit has been reached.
-    SessionLimit,
-
-    /// A user may manually pause a session so that it can be resumed at a later
-    /// time, along with the user returned code.
-    Paused(u32),
-
-    /// This indicates normal termination of a program with an interior exit
-    /// code returned from the guest.
-    Halted(u32),
-}
-
-/// Data associated with a receipt which is used for both input and
-/// output of global state.
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
-pub struct ReceiptMetadata {
-    /// The [SystemState] of a segment just before execution has begun.
-    pub pre: SystemState,
-
-    /// The [SystemState] of a segment just after execution has completed.
-    pub post: SystemState,
-
-    /// The exit code for a segment
-    pub exit_code: ExitCode,
-
-    /// A [Digest] of the input, from the viewpoint of the guest.
-    pub input: Digest,
-
-    /// A [Digest] of the journal, from the viewpoint of the guest.
-    pub output: Digest,
-}
+use crate::{
+    sha::rust_crypto::{Digest as _, Sha256},
+    ExitCode, ReceiptMetadata,
+};
 
 /// A receipt attesting to the execution of a Session.
 ///
