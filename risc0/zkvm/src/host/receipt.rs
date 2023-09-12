@@ -86,7 +86,7 @@ pub struct ReceiptMetadata {
 /// [Receipt::journal] was produced by executing a [crate::Session] based on a
 /// specified memory image. This image is _not_ included in the receipt and must
 /// be provided by the verifier when calling [Receipt::verify].
-/// 
+///
 /// A prover can provide a Receipt to an untrusting party to convince them that
 /// the results contained within the Receipt (in the [Receipt::journal]) came
 /// from running specific code. Conversely, a verifier can inspect a receipt to
@@ -96,7 +96,7 @@ pub struct ReceiptMetadata {
 ///
 /// To create a [Receipt] attesting to the faithful execution of your code, run
 /// one of the `prove` functions from a [crate::Prover].
-/// 
+///
 /// ```rust
 /// # #[cfg(feature = "prove")]
 /// use risc0_zkvm::{default_prover, ExecutorEnv};
@@ -257,7 +257,7 @@ impl InnerReceipt {
     }
 
     /// Returns the [InnerReceipt::Flat] arm.
-    /// 
+    ///
     /// Returns this arm as a slice of [SegmentReceipt]s, as the
     /// `SegmentReceipts` type used to hold them is a private type.
     pub fn flat(&self) -> Result<&[SegmentReceipt], VerificationError> {

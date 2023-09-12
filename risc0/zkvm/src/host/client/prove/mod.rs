@@ -29,7 +29,7 @@ use crate::{is_dev_mode, ExecutorEnv, Receipt, VerifierContext};
 
 /// A Prover can execute a given [MemoryImage] or ELF file and produce a
 /// [Receipt] that can be used to verify correct computation.
-/// 
+///
 /// # Usage
 /// To produce a proof, you must minimally provide an [ExecutorEnv] and either
 /// an ELF file or a [MemoryImage]. See the
@@ -54,14 +54,14 @@ use crate::{is_dev_mode, ExecutorEnv, Receipt, VerifierContext};
 /// // A straightforward case with an ELF file
 /// let env = ExecutorEnv::builder().add_input(&[20]).build().unwrap();
 /// let receipt = default_prover().prove_elf(env, FIB_ELF).unwrap();
-/// 
+///
 /// // Or you can specify a context and options
 /// // (Using the defaults as we do here is equivalent to the above code.)
 /// let env = ExecutorEnv::builder().add_input(&[20]).build().unwrap();
 /// let ctx = VerifierContext::default();
 /// let opts = ProverOpts::default();
 /// let receipt = default_prover().prove_elf_with_ctx(env, &ctx, FIB_ELF, &opts).unwrap();
-/// 
+///
 /// // Or you can prove from a `MemoryImage`
 /// // (generating a `MemoryImage` from an ELF file in this way is equivalent
 /// // to the above code.)
