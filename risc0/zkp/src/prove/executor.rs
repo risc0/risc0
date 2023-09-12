@@ -132,6 +132,7 @@ where
 
     pub fn expand(&mut self) -> Result<()> {
         debug!("expand");
+        assert!(false, "expand must not be called.");
         if self.steps >= (1 << self.max_po2) {
             bail!("Cannot expand, max po2 of {} reached.", self.max_po2);
         }
