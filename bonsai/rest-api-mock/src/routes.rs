@@ -105,10 +105,14 @@ pub(crate) async fn session_status(
         Some(_) => Ok(Json(SessionStatusRes {
             status,
             receipt_url: Some(format!("{}/receipts/{}", storage.local_url, session_id)),
+            error_msg: None,
+            state: None,
         })),
         None => Ok(Json(SessionStatusRes {
             status,
             receipt_url: None,
+            error_msg: None,
+            state: None,
         })),
     }
 }
@@ -132,6 +136,7 @@ pub(crate) async fn snark_status(
             c: vec![],
             public: vec![],
         }),
+        error_msg: None,
     }))
 }
 

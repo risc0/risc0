@@ -24,9 +24,6 @@ use self::responses::{
 /// Bonsai Alpha SDK error classes
 #[derive(Debug, Error)]
 pub enum SdkErr {
-    /// The API already has the supplied imageID
-    #[error("the supplied imageId already exists")]
-    ImageIdExists,
     /// Server side failure
     #[error("server error `{0}`")]
     InternalServerErr(String),
@@ -88,13 +85,31 @@ pub mod responses {
     pub struct SessionStatusRes {
         /// Current status
         ///
-        /// values: [RUNNING | SUCCEEDED | FAILED | TIMED_OUT | ABORTED |
-        /// SUCCEEDED]
+        /// values: `[ RUNNING | SUCCEEDED | FAILED | TIMED_OUT | ABORTED ]`
         pub status: String,
         /// Final receipt download URL
         ///
-        /// If the status == 'SUCCEEDED' then this should be present
+        /// If the status == `SUCCEEDED` then this should be present
         pub receipt_url: Option<String>,
+        /// Session Error message
+        ///
+        /// If the session is not `RUNNING` or `SUCCEEDED`, this is the error raised from within bonsai,
+        /// otherwise it is [None].
+        pub error_msg: Option<String>,
+        /// Session Proving State
+        ///
+        /// If the status is `RUNNING`, this is a indication of where in the
+        /// proving pipeline the session currently is, otherwise it is [None].
+        /// Possible states in order, include:
+        /// * `Setup`
+        /// * `Executor`
+        /// * `ProveSegments`
+        /// * `Planner`
+        /// * `Recursion`
+        /// * `RecursionJoin`
+        /// * `Finalize`
+        /// * `InProgress`
+        pub state: Option<String>,
     }
 
     /// Snark proof request object
@@ -122,14 +137,17 @@ pub mod responses {
     pub struct SnarkStatusRes {
         /// Current status
         ///
-        /// values: [RUNNING | SUCCEEDED | FAILED | TIMED_OUT | ABORTED |
-        /// SUCCEEDED]
+        /// values: `[ RUNNING | SUCCEEDED | FAILED | TIMED_OUT | ABORTED ]`
         pub status: String,
         /// SNARK proof output
         ///
         /// Generated snark proof, following the snarkjs calldata format:
         /// <https://github.com/iden3/snarkjs#26-simulate-a-verification-call>
         pub output: Option<SnarkProof>,
+        /// Snark Error message
+        ///
+        /// If the SNARK status is not `RUNNING` or `SUCCEEDED`, this is the error raised from within bonsai.
+        pub error_msg: Option<String>,
     }
 }
 
@@ -192,6 +210,11 @@ pub struct Client {
     pub(crate) client: BlockingClient,
 }
 
+enum ImageExistsOpt {
+    Exists,
+    New(ImgUploadRes),
+}
+
 /// Creates a [reqwest::Client] for internal connection pooling
 fn construct_req_client(api_key: &str) -> Result<BlockingClient, SdkErr> {
     let mut headers = header::HeaderMap::new();
@@ -243,14 +266,14 @@ impl Client {
         Ok(res.json::<UploadRes>()?)
     }
 
-    fn get_image_upload_url(&self, image_id: &str) -> Result<ImgUploadRes, SdkErr> {
+    fn get_image_upload_url(&self, image_id: &str) -> Result<ImageExistsOpt, SdkErr> {
         let res = self
             .client
             .get(format!("{}/images/upload/{}", self.url, image_id))
             .send()?;
 
         if res.status() == 204 {
-            return Err(SdkErr::ImageIdExists);
+            return Ok(ImageExistsOpt::Exists);
         }
 
         if !res.status().is_success() {
@@ -258,7 +281,7 @@ impl Client {
             return Err(SdkErr::InternalServerErr(body));
         }
 
-        Ok(res.json::<ImgUploadRes>()?)
+        Ok(ImageExistsOpt::New(res.json::<ImgUploadRes>()?))
     }
 
     /// Upload body to a given URL
@@ -276,27 +299,39 @@ impl Client {
 
     /// Upload a image buffer to the /images/ route
     ///
-    /// The image data can be either:
-    /// * ELF file bytes
-    /// * bincode encoded MemoryImage
-    pub fn upload_img(&self, image_id: &str, buf: Vec<u8>) -> Result<(), SdkErr> {
-        let upload_res = self.get_image_upload_url(image_id)?;
-        self.put_data(&upload_res.url, buf)?;
-        Ok(())
-    }
-
-    /// Upload a image file to the /images/ route
+    /// The boolean return indicates if the image already exists in bonsai
     ///
     /// The image data can be either:
     /// * ELF file bytes
     /// * bincode encoded MemoryImage
-    pub fn upload_img_file(&self, image_id: &str, path: &Path) -> Result<(), SdkErr> {
-        let upload_data = self.get_image_upload_url(image_id)?;
+    pub fn upload_img(&self, image_id: &str, buf: Vec<u8>) -> Result<bool, SdkErr> {
+        let res_or_exists = self.get_image_upload_url(image_id)?;
+        match res_or_exists {
+            ImageExistsOpt::Exists => Ok(true),
+            ImageExistsOpt::New(upload_res) => {
+                self.put_data(&upload_res.url, buf)?;
+                Ok(false)
+            }
+        }
+    }
 
-        let fd = File::open(path)?;
-        self.put_data(&upload_data.url, fd)?;
-
-        Ok(())
+    /// Upload a image file to the /images/ route
+    ///
+    /// The boolean return indicates if the image already exists in bonsai
+    ///
+    /// The image data can be either:
+    /// * ELF file bytes
+    /// * bincode encoded MemoryImage
+    pub fn upload_img_file(&self, image_id: &str, path: &Path) -> Result<bool, SdkErr> {
+        let res_or_exists = self.get_image_upload_url(image_id)?;
+        match res_or_exists {
+            ImageExistsOpt::Exists => Ok(true),
+            ImageExistsOpt::New(upload_res) => {
+                let fd = File::open(path)?;
+                self.put_data(&upload_res.url, fd)?;
+                Ok(false)
+            }
+        }
     }
 
     // - /inputs
@@ -457,17 +492,17 @@ mod tests {
         let server_url = format!("http://{}", server.address());
         let client = super::Client::from_parts(server_url, TEST_KEY.to_string())
             .expect("Failed to construct client");
-        client
+        let exists = client
             .upload_img(TEST_ID, data)
             .expect("Failed to upload input");
+        assert!(!exists);
         get_mock.assert();
         put_mock.assert();
     }
 
     #[test]
-    #[should_panic(expected = "value: ImageIdExists")]
     fn image_upload_dup() {
-        let data = vec![];
+        let data = vec![0x41];
 
         let server = MockServer::start();
 
@@ -489,12 +524,13 @@ mod tests {
         let server_url = format!("http://{}", server.address());
         let client = super::Client::from_parts(server_url, TEST_KEY.to_string())
             .expect("Failed to construct client");
-        client.upload_img(TEST_ID, data).unwrap()
+        let exists = client.upload_img(TEST_ID, data).unwrap();
+        assert!(exists);
     }
 
     #[test]
     fn input_upload() {
-        env_logger::init();
+        // env_logger::init();
         let data = vec![];
 
         let server = MockServer::start();
@@ -572,6 +608,8 @@ mod tests {
         let response = SessionStatusRes {
             status: "RUNNING".to_string(),
             receipt_url: None,
+            error_msg: None,
+            state: None,
         };
 
         let create_mock = server.mock(|when, then| {
@@ -633,6 +671,7 @@ mod tests {
         let response = SnarkStatusRes {
             status: "RUNNING".to_string(),
             output: None,
+            error_msg: None,
         };
 
         let create_mock = server.mock(|when, then| {
