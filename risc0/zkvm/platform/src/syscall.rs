@@ -656,7 +656,7 @@ pub extern "C" fn sys_alloc_aligned(bytes: usize, align: usize) -> *mut u8 {
 /// state digest and encode the digest into a public assumptions list for inclusion in the guest
 /// output.
 #[no_mangle]
-pub extern "C" fn sys_verify(
+pub unsafe extern "C" fn sys_verify(
     image_id: *const [u32; DIGEST_WORDS],
     journal_digest: *const [u32; DIGEST_WORDS],
     post_state_digest_out: *mut [u32; DIGEST_WORDS],
@@ -692,7 +692,7 @@ pub extern "C" fn sys_verify(
 /// digest, and will always return a result code of 0 to register a0. The caller must encode the
 /// metadata_digest into a public assumptions list for inclusion in the guest output.
 #[no_mangle]
-pub extern "C" fn sys_verify_metadata(metadata_digest: *const [u32; DIGEST_WORDS]) {
+pub unsafe extern "C" fn sys_verify_metadata(metadata_digest: *const [u32; DIGEST_WORDS]) {
     let Return(a0, _) = unsafe {
         // Send the metadata_digest to the host via software ecall.
         syscall_2(

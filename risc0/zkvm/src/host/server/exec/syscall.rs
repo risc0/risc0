@@ -25,7 +25,7 @@ use risc0_zkvm_platform::{
             SYS_VERIFY, SYS_VERIFY_METADATA, SYS_WRITE,
         },
         reg_abi::{REG_A3, REG_A4, REG_A5},
-        SyscallName,
+        SyscallName, DIGEST_BYTES, DIGEST_WORDS,
     },
     WORD_SIZE,
 };
@@ -224,19 +224,49 @@ impl Syscall for SysVerify {
     ) -> Result<(u32, u32)> {
         let from_guest_ptr = ctx.load_register(REG_A3);
         let from_guest_len = ctx.load_register(REG_A4);
-        let from_guest: Vec<u8> = ctx.load_region(from_guest_ptr, from_guest_len)?;
-
-        //            .try_into()
-        //            .map_err(|vec| anyhow!("failed to convert to [u8; DIGEST_BYTES]: {:?}", vec))?;
+        let mut from_guest: Vec<u8> = ctx.load_region(from_guest_ptr, from_guest_len)?;
 
         if syscall == SYS_VERIFY_METADATA.as_str() {
             let metadata_digest: Digest = from_guest
                 .try_into()
                 .map_err(|vec| anyhow!("failed to convert to [u8; DIGEST_BYTES]: {:?}", vec))?;
             // DO NOT MERGE(victor): Implement checking of the receipt.
-            log::debug!("SYS_VERIFY_METADATA: {}", hex::encode(&from_guest));
+            log::debug!("SYS_VERIFY_METADATA: {}", hex::encode(&metadata_digest));
             Ok((0, 0))
         } else if syscall == SYS_VERIFY.as_str() {
+            if from_guest.len() != DIGEST_BYTES * 2 {
+                bail!(
+                    "sys_verify call with input of lenth {} bytes; expected {}",
+                    from_guest.len(),
+                    DIGEST_BYTES * 2
+                );
+            }
+            if to_guest.len() != DIGEST_WORDS {
+                bail!(
+                    "sys_verify call with output of lenth {} words; expected {}",
+                    to_guest.len(),
+                    DIGEST_WORDS
+                );
+            }
+
+            let journal_digest: Digest = from_guest
+                .split_off(DIGEST_BYTES)
+                .try_into()
+                .map_err(|vec| anyhow!("failed to convert to [u8; DIGEST_BYTES]: {:?}", vec))?;
+            let image_id: Digest = from_guest
+                .try_into()
+                .map_err(|vec| anyhow!("failed to convert to [u8; DIGEST_BYTES]: {:?}", vec))?;
+
+            // DO NOT MERGE(victor): Implement checking of the receipt.
+            log::debug!(
+                "SYS_VERIFY: {}, {}",
+                hex::encode(&image_id),
+                hex::encode(&journal_digest)
+            );
+
+            // DO NOT MERGE(victor): Actually look up and return the post state digest.
+            to_guest.copy_from_slice(&[0u32; DIGEST_WORDS]);
+
             Ok((0, 0))
         } else {
             bail!("SysVerify received unrecognized syscall: {}", syscall)

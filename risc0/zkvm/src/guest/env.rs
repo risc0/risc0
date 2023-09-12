@@ -14,9 +14,12 @@
 
 //! Functions for interacting with the host environment.
 
+use core::fmt;
+
 use bytemuck::Pod;
 use risc0_zkvm_platform::{
-    fileno, syscall,
+    fileno,
+    syscall::{self, sys_verify, sys_verify_metadata, DIGEST_WORDS},
     syscall::{
         sys_alloc_words, sys_cycle_count, sys_halt, sys_log, sys_pause, sys_read, sys_read_words,
         sys_write, syscall_2, SyscallName,
@@ -27,24 +30,30 @@ use serde::{de::DeserializeOwned, Serialize};
 
 use crate::{
     align_up,
-    serde::{Deserializer, Result as SerdeResult, Serializer, WordRead, WordWrite},
-    sha::rust_crypto::{Digest as _, Sha256},
+    serde::{Deserializer, Serializer, WordRead, WordWrite},
+    sha::{
+        rust_crypto::{Digest as _, Sha256},
+        Digest,
+    },
+    ReceiptMetadata,
 };
 
 static mut HASHER: Option<Sha256> = None;
 
 /// A random 16 byte value initalized to random data, provided by the host, on
 /// guest start and upon resuming from a pause. Setting this value ensures that
-/// the total memory image have at least 128-bits of entropy, preventing
+/// the total memory image has at least 128 bits of entropy, preventing
 /// information leakage through the post-state digest.
 static mut MEMORY_IMAGE_ENTROPY: [u8; 16] = [0u8; 16];
 
 pub(crate) fn init() {
+    // DO NOT MERGE(victor): Initialize the assumptions list here.
     unsafe { HASHER = Some(Sha256::new()) };
     unsafe { getrandom::getrandom(&mut MEMORY_IMAGE_ENTROPY).unwrap() };
 }
 
 pub(crate) fn finalize(halt: bool, user_exit: u8) {
+    // DO NOT MERGE(victor): Adjust the output definition to include the assumptions list.
     unsafe {
         let hasher = core::mem::take(&mut HASHER);
         let output = hasher.unwrap_unchecked().finalize();
@@ -78,14 +87,95 @@ pub fn syscall(syscall: SyscallName, to_host: &[u8], from_host: &mut [u32]) -> s
         )
     }
 }
+
+/// Error encountered during a call to [crate::verify]
+///
+/// Note that an error is only returned for "provable" errors. In particular, if the host fails to
+/// find a receipt matching the requested image_id and journal, this is not a provable error. In
+/// this case, the [crate::verify] will not return.
+#[derive(Debug)]
+pub enum VerifyError {}
+
+impl fmt::Display for VerifyError {
+    fn fmt(&self, _f: &mut fmt::Formatter) -> fmt::Result {
+        unreachable!("VerifyError error enum is empty and cannot be constructed");
+    }
+}
+
+#[cfg(feature = "std")]
+impl std::error::Error for VerifyError {}
+
 /// Verify there exists a receipt for an execution with the given `image_id` and `journal`.
 ///
 /// In order to be valid, the [Receipt] must have have `ExitCode::Halted(0)`, an empty
 /// assumptions list, and an all-zeroes input hash. It may have any post [SystemState].
-pub fn verify(image_id: &Digest, journal: &[u8]) -> Result<(), VerifyError>;
+pub fn verify(image_id: &Digest, journal: &[u8]) -> Result<(), VerifyError> {
+    let journal_digest: Digest = Sha256::digest(journal).as_slice().try_into().unwrap();
+    let mut post_state_digest = Digest::new([0u32; DIGEST_WORDS]); // TOOD(victor): Use
+                                                                   // MaybeUninit?
+    unsafe {
+        sys_verify(
+            image_id.as_ref(),
+            journal_digest.as_ref(),
+            post_state_digest.as_mut(),
+        )
+    };
+
+    // DO NOT MERGE(victor): Calculate the ReceiptMetadata digest and add it to a running
+    // assumptions list.
+
+    Ok(())
+}
+
+/// Error encountered during a call to [crate::verify_metdata].
+///
+/// Note that an error is only returned for "provable" errors. In particular, if the host fails to
+/// find a receipt matching the requested image_id and journal, this is not a provable error. In
+/// this case, the [crate::verify] will not return.
+#[derive(Debug)]
+pub enum VerifyMetadataError {
+    /// The provided [ReceiptMetadata] struct contained a non-empty asssumptions list.
+    ///
+    /// This is a semantic error as only unconditional receipts can be verified inside the guest.
+    /// If there is a conditional receipt to verify, it's assumptions must first be verified to
+    /// make the receipt unconditional.
+    NonEmptyAssumptionsList,
+
+    /// An error occured in attempting to calculate the digest of the [ReceiptMetadata], resulting
+    /// from an internal consistancy error within the struct.
+    MetadataParsingError(risc0_zkp::verify::VerificationError),
+}
+
+impl fmt::Display for VerifyMetadataError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match &self {
+            VerifyMetadataError::NonEmptyAssumptionsList => {
+                write!(f, "assumptions list is not empty")
+            }
+            VerifyMetadataError::MetadataParsingError(e) => {
+                write!(f, "error is interpretting recipt metadata: {}", e)
+            }
+        }
+    }
+}
+
+#[cfg(feature = "std")]
+impl std::error::Error for VerifyMetadataError {}
+
+impl From<risc0_zkp::verify::VerificationError> for VerifyMetadataError {
+    fn from(err: risc0_zkp::verify::VerificationError) -> Self {
+        Self::MetadataParsingError(err)
+    }
+}
 
 /// Verify that there exists a valid receipt with the specified [ReceiptMetadata].
-pub fn verify_metdata(meta: &ReceiptMetadata) -> Result<(), VerifyMetadataError>;
+pub fn verify_metdata(meta: &ReceiptMetadata) -> Result<(), VerifyMetadataError> {
+    let meta_digest = meta.digest()?;
+    unsafe { sys_verify_metadata(meta_digest.as_ref()) };
+    // DO NOT MERGE(victor): Calculate the ReceiptMetadata digest and add it to a running
+    // assumptions list.
+    Ok(())
+}
 
 /// Exhanges slices of plain old data with the host.
 ///
@@ -253,7 +343,7 @@ impl Read for FdReader {
 }
 
 impl WordRead for FdReader {
-    fn read_words(&mut self, words: &mut [u32]) -> SerdeResult<()> {
+    fn read_words(&mut self, words: &mut [u32]) -> crate::serde::Result<()> {
         let nread_bytes = unsafe { sys_read_words(self.fd, words.as_mut_ptr(), words.len()) };
         if nread_bytes == words.len() * WORD_SIZE {
             Ok(())
@@ -262,7 +352,7 @@ impl WordRead for FdReader {
         }
     }
 
-    fn read_padded_bytes(&mut self, bytes: &mut [u8]) -> SerdeResult<()> {
+    fn read_padded_bytes(&mut self, bytes: &mut [u8]) -> crate::serde::Result<()> {
         if self.read_bytes_all(bytes) != bytes.len() {
             return Err(crate::serde::Error::DeserializeUnexpectedEnd);
         }
@@ -333,12 +423,12 @@ impl<F: Fn(&[u8])> Write for FdWriter<F> {
 }
 
 impl<F: Fn(&[u8])> WordWrite for FdWriter<F> {
-    fn write_words(&mut self, words: &[u32]) -> SerdeResult<()> {
+    fn write_words(&mut self, words: &[u32]) -> crate::serde::Result<()> {
         self.write_bytes(bytemuck::cast_slice(words));
         Ok(())
     }
 
-    fn write_padded_bytes(&mut self, bytes: &[u8]) -> SerdeResult<()> {
+    fn write_padded_bytes(&mut self, bytes: &[u8]) -> crate::serde::Result<()> {
         self.write_bytes(bytes);
         let unaligned = bytes.len() % WORD_SIZE;
         if unaligned != 0 {
