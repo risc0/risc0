@@ -14,6 +14,8 @@
 
 //! Manages formatted binaries used by the RISC Zero zkVM
 
+#![cfg_attr(all(not(feature = "std"), not(test)), no_std)]
+
 mod elf;
 mod image;
 mod sys_state;
