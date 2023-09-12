@@ -13,67 +13,6 @@
 // limitations under the License.
 
 //! Manages the output and cryptographic data for a proven computation.
-//!
-//! Receipts are zero-knowledge proofs of computation. They attest that specific
-//! code was executed to generate the information contained in the receipt. The
-//! prover can provide a receipt to an untrusting party to convince them that
-//! the results contained within the receipt came from running specific code.
-//! Conversely, a verify can inspect a receipt to confirm that its results must
-//! have been generated from the expected code, even when this code was run by
-//! an untrusted source.
-//!
-//! There are two types of receipt, a [Receipt] proving the execution
-//! of a [crate::Session], and a [SegmentReceipt] proving the execution of a
-//! [crate::Segment].
-//!
-//! Because [crate::Session]s are user-determined, whereas
-//! [crate::Segment]s are automatically generated, typical use cases will handle
-//! [Receipt]s directly and [SegmentReceipt]s only indirectly as part
-//! of the [Receipt]s that contain them (for instance, by calling
-//! [Receipt::verify], which will itself call
-//! [InnerReceipt::verify] for the interior [InnerReceipt]).
-//!
-//! # Example
-//!
-//! ```rust
-//! # #[cfg(feature = "prove")]
-//! use risc0_zkvm::{default_prover, ExecutorEnv};
-//! use risc0_zkvm_methods::FIB_ELF;
-//!
-//! # #[cfg(not(feature = "cuda"))]
-//! # #[cfg(feature = "prove")]
-//! # {
-//! let env = ExecutorEnv::builder().add_input(&[20]).build().unwrap();
-//! let receipt = default_prover().prove_elf(env, FIB_ELF).unwrap();
-//! # }
-//! ```
-//!
-//! To confirm that a [Receipt] was honestly generated, use
-//! [Receipt::verify] and supply the ImageID of the code that should
-//! have been executed as a parameter. (See
-//! [risc0_build](https://docs.rs/risc0-build/latest/risc0_build/) for more
-//! information about how ImageIDs are generated.)
-//! ```rust
-//! use risc0_zkvm::Receipt;
-//!
-//! # #[cfg(feature = "prove")]
-//! # use risc0_zkvm::{default_prover, ExecutorEnv};
-//! # use risc0_zkvm_methods::{FIB_ELF, FIB_ID};
-//!
-//! # #[cfg(not(feature = "cuda"))]
-//! # #[cfg(feature = "prove")]
-//! # {
-//! # let env = ExecutorEnv::builder().add_input(&[20]).build().unwrap();
-//! # let receipt = default_prover().prove_elf(env, FIB_ELF).unwrap();
-//! receipt.verify(FIB_ID).unwrap();
-//! # }
-//! ```
-//!
-//! The public outputs of the [Receipt] are contained in the
-//! [Receipt::journal]. We provide serialization tools in the zkVM
-//! [serde](crate::serde) module, which can be used to read data from the
-//! journal as the same type it was written to the journal. If you prefer, you
-//! can also directly access the [Receipt::journal] as a `Vec<u8>`.
 
 use alloc::{collections::BTreeMap, string::String, vec::Vec};
 use core::fmt::Debug;
@@ -143,10 +82,59 @@ pub struct ReceiptMetadata {
 
 /// A receipt attesting to the execution of a Session.
 ///
-/// A Receipt attests that the `journal` was produced by executing a
-/// [crate::Session] based on a specified memory image. This image is _not_
-/// included in the receipt and must be provided by the verifier when calling
-/// [Receipt::verify].
+/// A Receipt is a zero-knowledge proof of computation. It attests that the
+/// [Receipt::journal] was produced by executing a [crate::Session] based on a
+/// specified memory image. This image is _not_ included in the receipt and must
+/// be provided by the verifier when calling [Receipt::verify].
+/// 
+/// A prover can provide a Receipt to an untrusting party to convince them that
+/// the results contained within the Receipt (in the [Receipt::journal]) came
+/// from running specific code. Conversely, a verifier can inspect a receipt to
+/// confirm that its results must have been generated from the expected code,
+/// even when this code was run by an untrusted source.
+/// # Example
+///
+/// To create a [Receipt] attesting to the faithful execution of your code, run
+/// one of the `prove` functions from a [crate::Prover].
+/// 
+/// ```rust
+/// # #[cfg(feature = "prove")]
+/// use risc0_zkvm::{default_prover, ExecutorEnv};
+/// use risc0_zkvm_methods::FIB_ELF;
+///
+/// # #[cfg(not(feature = "cuda"))]
+/// # #[cfg(feature = "prove")]
+/// # {
+/// let env = ExecutorEnv::builder().add_input(&[20]).build().unwrap();
+/// let receipt = default_prover().prove_elf(env, FIB_ELF).unwrap();
+/// # }
+/// ```
+///
+/// To confirm that a [Receipt] was honestly generated, use
+/// [Receipt::verify] and supply the ImageID of the code that should
+/// have been executed as a parameter. (See
+/// [risc0_build](https://docs.rs/risc0-build/latest/risc0_build/) for more
+/// information about how ImageIDs are generated.)
+/// ```rust
+/// use risc0_zkvm::Receipt;
+/// # #[cfg(feature = "prove")]
+/// # use risc0_zkvm::{default_prover, ExecutorEnv};
+/// # use risc0_zkvm_methods::{FIB_ELF, FIB_ID};
+///
+/// # #[cfg(not(feature = "cuda"))]
+/// # #[cfg(feature = "prove")]
+/// # {
+/// # let env = ExecutorEnv::builder().add_input(&[20]).build().unwrap();
+/// # let receipt = default_prover().prove_elf(env, FIB_ELF).unwrap();
+/// receipt.verify(FIB_ID).unwrap();
+/// # }
+/// ```
+///
+/// The public outputs of the [Receipt] are contained in the
+/// [Receipt::journal]. We provide serialization tools in the zkVM
+/// [serde](crate::serde) module, which can be used to read data from the
+/// journal as the same type it was written to the journal. If you prefer, you
+/// can also directly access the [Receipt::journal] as a `Vec<u8>`.
 #[derive(Debug, Deserialize, Serialize, PartialEq)]
 pub struct Receipt {
     /// The polymorphic [InnerReceipt].
@@ -159,11 +147,11 @@ pub struct Receipt {
     pub journal: Vec<u8>,
 }
 
-/// An inner receipt can take the form of a collection of [SegmentReceipts] or a
+/// An inner receipt can take the form of a collection of [SegmentReceipt]s or a
 /// [SuccinctReceipt].
 #[derive(Debug, Deserialize, Serialize, PartialEq)]
 pub enum InnerReceipt {
-    /// The [SegmentReceipts].
+    /// The [SegmentReceipt]s.
     Flat(SegmentReceipts),
 
     /// The [SuccinctReceipt].
@@ -269,6 +257,9 @@ impl InnerReceipt {
     }
 
     /// Returns the [InnerReceipt::Flat] arm.
+    /// 
+    /// Returns this arm as a slice of [SegmentReceipt]s, as the
+    /// `SegmentReceipts` type used to hold them is a private type.
     pub fn flat(&self) -> Result<&[SegmentReceipt], VerificationError> {
         if let InnerReceipt::Flat(x) = self {
             Ok(&x.0)
