@@ -110,7 +110,11 @@ impl<'a> SyscallTable<'a> {
         this
     }
 
-    fn with_syscall(&mut self, syscall: SyscallName, handler: impl Syscall + 'a) -> &mut Self {
+    pub(crate) fn with_syscall(
+        &mut self,
+        syscall: SyscallName,
+        handler: impl Syscall + 'a,
+    ) -> &mut Self {
         self.inner
             .insert(syscall.as_str().to_string(), Rc::new(RefCell::new(handler)));
         self

@@ -25,6 +25,13 @@ mod host;
 pub mod serde;
 pub mod sha;
 
+/// Re-exports for recursion
+#[cfg(not(target_os = "zkvm"))]
+#[cfg(feature = "prove")]
+pub mod recursion {
+    pub use super::host::recursion::*;
+}
+
 pub use anyhow::Result;
 #[cfg(not(target_os = "zkvm"))]
 #[cfg(any(feature = "client", feature = "prove"))]
@@ -55,7 +62,7 @@ pub use self::host::{
     client::prove::local::LocalProver,
     server::{
         exec::executor::Executor,
-        prove::{get_prover_impl, loader::Loader, DynProverImpl},
+        prove::{get_prover_impl, loader::Loader, DynProverImpl, HalPair},
         session::{FileSegmentRef, Segment, SegmentRef, Session, SessionEvents, SimpleSegmentRef},
     },
 };
