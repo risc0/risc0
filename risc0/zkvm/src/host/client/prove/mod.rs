@@ -27,8 +27,52 @@ use serde::{Deserialize, Serialize};
 use self::{bonsai::BonsaiProver, external::ExternalProver};
 use crate::{is_dev_mode, ExecutorEnv, Receipt, VerifierContext};
 
-/// A Prover can execute a given [MemoryImage] and produce a [Receipt] that can
-/// be used to verify correct computation.
+/// A Prover can execute a given [MemoryImage] or ELF file and produce a
+/// [Receipt] that can be used to verify correct computation.
+/// 
+/// # Usage
+/// To produce a proof, you must minimally provide an [ExecutorEnv] and either
+/// an ELF file or a [MemoryImage]. See the
+/// [risc0_build](https://docs.rs/risc0-build/latest/risc0_build/) crate for
+/// more information on producing ELF files from Rust source code.
+///
+/// ```rust
+/// use risc0_zkvm::{
+///     default_prover,
+///     ExecutorEnv,
+///     MEM_SIZE,
+///     MemoryImage,
+///     PAGE_SIZE,
+///     Program,
+///     ProverOpts,
+///     VerifierContext,
+/// };
+/// use risc0_zkvm_methods::FIB_ELF;
+///
+/// # #[cfg(not(feature = "cuda"))]
+/// # {
+/// // A straightforward case with an ELF file
+/// let env = ExecutorEnv::builder().add_input(&[20]).build().unwrap();
+/// let receipt = default_prover().prove_elf(env, FIB_ELF).unwrap();
+/// 
+/// // Or you can specify a context and options
+/// // (Using the defaults as we do here is equivalent to the above code.)
+/// let env = ExecutorEnv::builder().add_input(&[20]).build().unwrap();
+/// let ctx = VerifierContext::default();
+/// let opts = ProverOpts::default();
+/// let receipt = default_prover().prove_elf_with_ctx(env, &ctx, FIB_ELF, &opts).unwrap();
+/// 
+/// // Or you can prove from a `MemoryImage`
+/// // (generating a `MemoryImage` from an ELF file in this way is equivalent
+/// // to the above code.)
+/// let program = Program::load_elf(FIB_ELF, MEM_SIZE as u32).unwrap();
+/// let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
+/// let env = ExecutorEnv::builder().add_input(&[20]).build().unwrap();
+/// let ctx = VerifierContext::default();
+/// let opts = ProverOpts::default();
+/// let receipt = default_prover().prove(env, &ctx, &opts, image).unwrap();
+/// # }
+/// ```
 pub trait Prover {
     /// Return a name for this [Prover].
     fn get_name(&self) -> String;
