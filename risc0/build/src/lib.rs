@@ -351,6 +351,13 @@ where
         cmd.args(&["--features", &features_str]);
     }
 
+    cmd.args(&[
+        "--manifest-path",
+        pkg.manifest_path.as_str(),
+        "--target-dir",
+        target_dir.as_ref().to_str().unwrap(),
+    ]);
+
     if !is_debug() {
         cmd.args(&["--release"]);
     }
