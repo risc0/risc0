@@ -14,15 +14,15 @@
 
 use std::path::PathBuf;
 
-use anyhow::{Context, Result};
+use anyhow::Result;
 use cargo_generate::{GenerateArgs, TemplatePath, Vcs};
 use clap::Parser;
 use const_format::concatcp;
 
 const RISC0_GH_REPO: &str = "https://github.com/risc0/risc0";
 const RISC0_TEMPLATE_DIR: &str = "templates/rust-starter";
-const RISC0_VERSION: &str = env!("CARGO_PKG_VERSION");
-const RISC0_RELEASE_TAG: &str = concatcp!("v", RISC0_VERSION);
+const RISC0_DEFAULT_VERSION: &str = env!("CARGO_PKG_VERSION");
+const RISC0_RELEASE_TAG: &str = concatcp!("v", RISC0_DEFAULT_VERSION);
 
 /// `cargo risczero new`
 #[derive(Parser)]
@@ -88,7 +88,7 @@ impl NewCommand {
         let dest_dir = if let Some(dest_dir) = self.dest.clone() {
             dest_dir
         } else {
-            std::env::current_dir().with_context(|| "failed to fetch cwd")?
+            std::env::current_dir().expect("Failed to fetch cwd")
         };
 
         let mut template_path = TemplatePath {
@@ -107,6 +107,9 @@ impl NewCommand {
             template_path.tag = None;
         }
 
+        let risc0_version = std::env::var("CARGO_PKG_VERSION")
+            .unwrap_or_else(|_| RISC0_DEFAULT_VERSION.to_string());
+
         let mut template_variables = Vec::new();
         if let Some(branch) = self.use_git_branch.as_ref() {
             let spec =
@@ -114,15 +117,13 @@ impl NewCommand {
             template_variables.push(format!("risc0_build={spec}"));
             template_variables.push(format!("risc0_zkvm={spec}"));
         } else if let Some(path) = self.path.as_ref() {
-            let path = path
-                .to_str()
-                .with_context(|| "invalid path string for command executable")?;
+            let path = path.to_str().unwrap();
             let build = format!("path = \"{path}/risc0/build\"");
             let zkvm = format!("path = \"{path}/risc0/zkvm\"");
             template_variables.push(format!("risc0_build={build}"));
             template_variables.push(format!("risc0_zkvm={zkvm}"));
         } else {
-            let spec = format!("version = \"{RISC0_VERSION}\"");
+            let spec = format!("version = \"{risc0_version}\"");
             template_variables.push(format!("risc0_build={spec}"));
             template_variables.push(format!("risc0_zkvm={spec}"));
         }
@@ -175,27 +176,26 @@ mod tests {
 
     use super::*;
 
-    fn make_test_env() -> anyhow::Result<(TempDir, PathBuf, &'static str)> {
-        let tmpdir = tempdir().with_context("failed to create tempdir")?;
-        let manifest_path = std::env::var("CARGO_MANIFEST_DIR")
-            .with_context(|| "missing CARGO_MANIFEST_DIR var")?;
+    fn make_test_env() -> (TempDir, PathBuf, &'static str) {
+        let tmpdir = tempdir().expect("Failed to create tempdir");
+        let manifest_path =
+            std::env::var("CARGO_MANIFEST_DIR").expect("Missing CARGO_MANIFEST_DIR var");
         // NOTE: cargo run and cargo test have a slightly different idea of what the
         // manifest_dir is. https://github.com/rust-lang/cargo/issues/3946
         let template_path = Path::new(&manifest_path).join("../../");
-        Ok((tmpdir, template_path, "my_project"))
+        (tmpdir, template_path, "my_project")
     }
 
-    fn find_in_file(needle: &str, file: &Path) -> anyhow::Result<bool> {
-        let file = File::open(file)?;
+    fn find_in_file(needle: &str, file: &Path) -> bool {
+        let file = File::open(file).unwrap();
         let reader = BufReader::new(file);
         for line in reader.lines() {
-            let line_data =
-                line.with_context(|| format!("failed to readline from {file}", file.display()))?;
+            let line_data = line.expect("Failed to readline");
             if line_data.contains(needle) {
-                return Ok(true);
+                return true;
             }
         }
-        Ok(false)
+        false
     }
 
     #[test]
