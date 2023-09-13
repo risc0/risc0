@@ -17,7 +17,7 @@ use std::{process::Command, rc::Rc, time::Instant};
 use clap::Parser;
 use human_repr::{HumanCount, HumanDuration};
 use risc0_zkvm::{
-    get_prover_impl, serde::to_vec, DynProverImpl, Executor, ExecutorEnv, ProverOpts, Receipt,
+    get_prover_server, serde::to_vec, Executor, ExecutorEnv, ProverOpts, ProverServer, Receipt,
     Session, VerifierContext,
 };
 use risc0_zkvm_methods::{
@@ -52,7 +52,7 @@ fn main() {
         if let Some(hashfn) = args.hashfn {
             opts.hashfn = hashfn;
         }
-        let prover = get_prover_impl(&opts).unwrap();
+        let prover = get_prover_server(&opts).unwrap();
 
         let start = Instant::now();
         let (session, receipt) = top(prover.clone(), iterations);
@@ -121,7 +121,7 @@ fn run_with_iterations(iterations: usize) {
 }
 
 #[tracing::instrument(skip_all)]
-fn top(prover: Rc<dyn DynProverImpl>, iterations: u64) -> (Session, Receipt) {
+fn top(prover: Rc<dyn ProverServer>, iterations: u64) -> (Session, Receipt) {
     let spec = SpecWithIters(BenchmarkSpec::SimpleLoop, iterations);
     let env = ExecutorEnv::builder()
         .add_input(&to_vec(&spec).unwrap())
