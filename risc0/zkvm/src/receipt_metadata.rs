@@ -71,12 +71,12 @@ impl ReceiptMetadata {
     /// Hash the [crate::ReceiptMetadata] to get a digest of the struct.
     pub fn digest(&self) -> Digest {
         let (sys_exit, user_exit) = self.exit_code.into_pair();
-        tagged_struct(
+        tagged_struct::<crate::sha::Impl>(
             "risc0.ReceiptMeta",
             &[
                 self.input,
-                self.pre.digest(),
-                self.post.digest(),
+                self.pre.digest::<crate::sha::Impl>(),
+                self.post.digest::<crate::sha::Impl>(),
                 self.output,
             ],
             &[sys_exit, user_exit],

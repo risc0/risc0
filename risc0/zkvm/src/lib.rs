@@ -37,14 +37,13 @@ pub use anyhow::Result;
 #[cfg(all(not(target_os = "zkvm"), any(feature = "client", feature = "prove")))]
 pub use bytes::Bytes;
 #[cfg(not(target_os = "zkvm"))]
-pub use risc0_binfmt::{MemoryImage, Program, SystemState};
+pub use risc0_binfmt::MemoryImage;
+pub use risc0_binfmt::{Program, SystemState};
 pub use risc0_zkvm_platform::{declare_syscall, memory::MEM_SIZE, PAGE_SIZE};
 
-#[cfg(not(target_os = "zkvm"))]
-#[cfg(feature = "profiler")]
+#[cfg(all(not(target_os = "zkvm"), feature = "profiler"))]
 pub use self::host::server::exec::profiler::Profiler;
-#[cfg(not(target_os = "zkvm"))]
-#[cfg(feature = "client")]
+#[cfg(all(not(target_os = "zkvm"), feature = "client"))]
 pub use self::host::{
     api::client::Client as ApiClient,
     client::{
@@ -55,8 +54,7 @@ pub use self::host::{
         },
     },
 };
-#[cfg(not(target_os = "zkvm"))]
-#[cfg(feature = "prove")]
+#[cfg(all(not(target_os = "zkvm"), feature = "prove"))]
 pub use self::host::{
     api::server::Server as ApiServer,
     client::prove::local::LocalProver,

@@ -15,11 +15,14 @@
 //! Manages formatted binaries used by the RISC Zero zkVM
 
 mod elf;
+#[cfg(not(target_os = "zkvm"))]
 mod image;
 mod sys_state;
 
 pub use crate::{
     elf::Program,
-    image::{compute_image_id, MemoryImage},
     sys_state::{read_sha_halfs, tagged_struct, write_sha_halfs, SystemState},
 };
+
+#[cfg(not(target_os = "zkvm"))]
+pub use crate::image::{compute_image_id, MemoryImage};

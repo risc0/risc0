@@ -159,18 +159,18 @@ impl SegmentReceipts {
             receipt.verify_with_context(ctx)?;
             let metadata = receipt.get_metadata()?;
             log::debug!("metadata: {metadata:#?}");
-            if prev_image_id != metadata.pre.digest() {
+            if prev_image_id != metadata.pre.digest::<crate::sha::Impl>() {
                 return Err(VerificationError::ImageVerificationError);
             }
             if metadata.exit_code != ExitCode::SystemSplit {
                 return Err(VerificationError::UnexpectedExitCode);
             }
-            prev_image_id = metadata.post.digest();
+            prev_image_id = metadata.post.digest::<crate::sha::Impl>();
         }
         final_receipt.verify_with_context(ctx)?;
         let metadata = final_receipt.get_metadata()?;
         log::debug!("final: {metadata:#?}");
-        if prev_image_id != metadata.pre.digest() {
+        if prev_image_id != metadata.pre.digest::<crate::sha::Impl>() {
             return Err(VerificationError::ImageVerificationError);
         }
 
