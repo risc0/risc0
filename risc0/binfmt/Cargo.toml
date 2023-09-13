@@ -24,4 +24,4 @@ serde = { version = "1.0", default-features = false, features = ["derive", "allo
 
 [features]
 default = ["std"]
-std = ["log/std", "risc0-zkp/std", "serde/std", "elf/std", "anyhow/std"]
+std = ["anyhow/std", "elf/std", "log/std", "risc0-zkp/std", "serde/std"]
