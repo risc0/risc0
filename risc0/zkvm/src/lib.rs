@@ -70,7 +70,10 @@ pub use self::host::{
 #[cfg(not(target_os = "zkvm"))]
 pub use self::host::{
     control_id::POSEIDON_CONTROL_ID,
-    receipt::{ExitCode, InnerReceipt, Receipt, ReceiptMetadata, SegmentReceipt, VerifierContext},
+    receipt::{
+        ExitCode, InnerReceipt, Receipt, ReceiptMetadata, SegmentReceipt, SegmentReceipts,
+        VerifierContext,
+    },
     recursion::ALLOWED_IDS_ROOT,
 };
 

@@ -213,11 +213,11 @@ mod test {
         let tester = Tester::new("risc0/zkvm/methods/guest/Cargo.toml");
         tester.compare_image_id(
             "risc0_zkvm_methods_guest/multi_test",
-            "e292842cb47a065057c3b7dae52c93dd849307e2e2746eec22c58517a3474f92",
+            "417778745b43c82a20db33a55c2b1d6e0805e0fa7eec80c9654e7321121e97af",
         );
         tester.compare_image_id(
             "risc0_zkvm_methods_guest/hello_commit",
-            "993d3ceaefdbcd0dc855418c16a60ada197954d15cb9e7568ca5a70772abc501",
+            "c7c399c25ecf26b79e987ed060efce1f0836a594ad1059b138b6ed2f123dad38",
         );
         tester.compare_image_id(
             "risc0_zkvm_methods_guest/slice_io",
