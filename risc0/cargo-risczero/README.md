@@ -77,23 +77,14 @@ With this containerized build process, we ensure that all builds of your guest c
 
 Note: The build command requires the docker CLI installed and in your PATH.
 
-### Examples
-
-```bash
-# Build the factors example
-cargo risczero build --manifest-path examples/factors/methods/guest/Cargo.toml
-
-ELFs ready at:
-./elfs/multiply/multiply - ImageID: 9ee1612b0a7e270f8df248e47dc85d9908ff4c1e7df42f398a65ca878b57a23d
-
-```
+### Example
 
 ```bash
 # Build the chess example
 cargo risczero build --manifest-path examples/chess/methods/guest/Cargo.toml
 
 ELFs ready at:
-./elfs/risc0_zkvm_methods_guest/hello_commit - ImageID: eb12f9b97d8759327f651afeb09ae9a5713e7dbc428284d453b8cf56e8dadd5a
-./elfs/risc0_zkvm_methods_guest/multi_test - ImageID: 761900e766a4ae1d8edcb2b49dc9aee54b94e42c9b0d6421cfb112314c4e3efc
-./elfs/risc0_zkvm_methods_guest/slice_io - ImageID: 3f2ad1a2d500ab4ab927eebe241d872d3f598065b8987b182410cf01f350f74c
+ImageID: 417778745b43c82a20db33a55c2b1d6e0805e0fa7eec80c9654e7321121e97af - "target/riscv-guest/riscv32im-risc0-zkvm-elf/docker/risc0_zkvm_methods_guest/multi_test"
+ImageID: c7c399c25ecf26b79e987ed060efce1f0836a594ad1059b138b6ed2f123dad38 - "target/riscv-guest/riscv32im-risc0-zkvm-elf/docker/risc0_zkvm_methods_guest/hello_commit"
+ImageID: a51a4b747f18b7e5f36a016bdd6f885e8293dbfca2759d6667a6df8edd5f2489 - "target/riscv-guest/riscv32im-risc0-zkvm-elf/docker/risc0_zkvm_methods_guest/slice_io"
 ```
