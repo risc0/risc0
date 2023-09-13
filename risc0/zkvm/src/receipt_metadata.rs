@@ -12,10 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use alloc::{collections::VecDeque, vec::Vec};
+use core::{convert::Infallible, fmt};
+
 use crate::{
     sha::{tagged_struct, Digest},
     SystemState,
 };
+use risc0_binfmt::{read_sha_halfs, write_sha_halfs};
 use serde::{Deserialize, Serialize};
 
 /// Indicates how a Segment or Session's execution has terminated
@@ -46,6 +50,28 @@ impl ExitCode {
             // DO NOT MERGE(victor): Confirm SessionLimit can have an associated exit code.
             ExitCode::SessionLimit => (3, 0),
         }
+    }
+
+    pub(crate) fn from_pair(
+        sys_exit: u32,
+        user_exit: u32,
+    ) -> Result<ExitCode, InvalidExitCodeError> {
+        match sys_exit {
+            0 => Ok(ExitCode::Halted(user_exit)),
+            1 => Ok(ExitCode::Paused(user_exit)),
+            2 => Ok(ExitCode::SystemSplit),
+            3 => Ok(ExitCode::SessionLimit),
+            _ => Err(InvalidExitCodeError(sys_exit, user_exit)),
+        }
+    }
+}
+
+#[derive(Debug, Copy, Clone)]
+pub struct InvalidExitCodeError(u32, u32);
+
+impl fmt::Display for InvalidExitCodeError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "invalid exit code pair ({}, {})", self.0, self.1)
     }
 }
 
@@ -83,5 +109,37 @@ impl ReceiptMetadata {
             ],
             &[sys_exit, user_exit],
         )
+    }
+
+    /// Decode a [crate::ReceiptMetadata] from a list of [u32]'s
+    pub fn decode(flat: &mut VecDeque<u32>) -> Result<Self, InvalidExitCodeError> {
+        let input = read_sha_halfs(flat);
+        let pre = SystemState::decode(flat);
+        let post = SystemState::decode(flat);
+        let sys_exit = flat.pop_front().unwrap();
+        let user_exit = flat.pop_front().unwrap();
+        let exit_code = ExitCode::from_pair(sys_exit, user_exit)?;
+        let output = read_sha_halfs(flat);
+
+        Ok(Self {
+            input,
+            pre,
+            post,
+            exit_code,
+            output,
+        })
+    }
+
+    // TODO(victor): Consider returning () instead of Result<(), Infallible>
+    /// Encode a [crate::ReceiptMetadata] to a list of [u32]'s
+    pub fn encode(&self, flat: &mut Vec<u32>) -> Result<(), Infallible> {
+        write_sha_halfs(flat, &self.input);
+        self.pre.encode(flat);
+        self.post.encode(flat);
+        let (sys_exit, user_exit) = self.exit_code.into_pair();
+        flat.push(sys_exit);
+        flat.push(user_exit);
+        write_sha_halfs(flat, &self.output);
+        Ok(())
     }
 }

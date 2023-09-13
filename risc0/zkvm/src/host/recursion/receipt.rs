@@ -14,7 +14,7 @@
 
 use alloc::{collections::VecDeque, vec::Vec};
 
-use risc0_binfmt::{read_sha_halfs, write_sha_halfs, SystemState};
+use risc0_binfmt::read_sha_halfs;
 use risc0_core::field::baby_bear::BabyBearElem;
 use risc0_zkp::{adapter::CircuitInfo, core::digest::Digest, verify::VerificationError};
 use serde::{Deserialize, Serialize};
@@ -41,39 +41,6 @@ pub fn valid_control_ids() -> Vec<Digest> {
         all_ids.push(Digest::from_hex(digest_str).unwrap());
     }
     all_ids
-}
-
-impl ReceiptMetadata {
-    /// Decode a [crate::ReceiptMetadata] from a list of [u32]'s
-    pub fn decode(flat: &mut VecDeque<u32>) -> Result<Self, VerificationError> {
-        let input = read_sha_halfs(flat);
-        let pre = SystemState::decode(flat);
-        let post = SystemState::decode(flat);
-        let sys_exit = flat.pop_front().unwrap();
-        let user_exit = flat.pop_front().unwrap();
-        let exit_code = ReceiptMetadata::make_exit_code(sys_exit, user_exit)?;
-        let output = read_sha_halfs(flat);
-
-        Ok(Self {
-            input,
-            pre,
-            post,
-            exit_code,
-            output,
-        })
-    }
-
-    /// Encode a [crate::ReceiptMetadata] to a list of [u32]'s
-    pub fn encode(&self, flat: &mut Vec<u32>) -> Result<(), VerificationError> {
-        write_sha_halfs(flat, &self.input);
-        self.pre.encode(flat);
-        self.post.encode(flat);
-        let (sys_exit, user_exit) = self.get_exit_code_pairs()?;
-        flat.push(sys_exit);
-        flat.push(user_exit);
-        write_sha_halfs(flat, &self.output);
-        Ok(())
-    }
 }
 
 /// This struct represents a receipt for one or more [crate::SegmentReceipt]s

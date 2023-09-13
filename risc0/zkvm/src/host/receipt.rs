@@ -336,7 +336,7 @@ impl SegmentReceipt {
     /// Returns the [ReceiptMetadata] for this receipt.
     pub fn get_metadata(&self) -> Result<ReceiptMetadata, VerificationError> {
         let elems = bytemuck::cast_slice(&self.seal);
-        ReceiptMetadata::decode_from_io(layout::OutBuffer(elems))
+        decode_receipt_metadata_from_io(layout::OutBuffer(elems))
     }
 
     /// Return the seal for this receipt, as a slice of bytes.
@@ -361,61 +361,40 @@ fn decode_system_state_from_io(
     Ok(SystemState { pc, merkle_root })
 }
 
-impl ReceiptMetadata {
-    fn decode_from_io(io: layout::OutBuffer) -> Result<Self, VerificationError> {
-        let body = layout::LAYOUT.mux.body;
-        let pre = decode_system_state_from_io(io, body.global.pre)?;
-        let mut post = decode_system_state_from_io(io, body.global.post)?;
-        // In order to avoid extra logic in the rv32im circuit to perform arthimetic on
-        // the PC with carry, the PC is always recorded as the current PC +
-        // 4. Thus we need to adjust the decoded PC for the post SystemState.
-        post.pc = post
-            .pc
-            .checked_sub(WORD_SIZE as u32)
-            .ok_or(VerificationError::ReceiptFormatError)?;
-        let input_bytes: Vec<u8> = io
-            .tree(body.global.input)
-            .get_bytes()
-            .or(Err(VerificationError::ReceiptFormatError))?;
-        let input = Digest::try_from(input_bytes).or(Err(VerificationError::ReceiptFormatError))?;
-        let output_bytes: Vec<u8> = io
-            .tree(body.global.output)
-            .get_bytes()
-            .or(Err(VerificationError::ReceiptFormatError))?;
-        let output =
-            Digest::try_from(output_bytes).or(Err(VerificationError::ReceiptFormatError))?;
-        let sys_exit = io.get_u64(body.global.sys_exit_code) as u32;
-        let user_exit = io.get_u64(body.global.user_exit_code) as u32;
-        let exit_code = ReceiptMetadata::make_exit_code(sys_exit, user_exit)?;
-        Ok(Self {
-            pre,
-            post,
-            exit_code,
-            input,
-            output,
-        })
-    }
-
-    pub(crate) fn get_exit_code_pairs(&self) -> Result<(u32, u32), VerificationError> {
-        match self.exit_code {
-            ExitCode::Halted(user_exit) => Ok((0, user_exit)),
-            ExitCode::Paused(user_exit) => Ok((1, user_exit)),
-            ExitCode::SystemSplit => Ok((2, 0)),
-            _ => Err(VerificationError::ReceiptFormatError),
-        }
-    }
-
-    pub(crate) fn make_exit_code(
-        sys_exit: u32,
-        user_exit: u32,
-    ) -> Result<ExitCode, VerificationError> {
-        match sys_exit {
-            0 => Ok(ExitCode::Halted(user_exit)),
-            1 => Ok(ExitCode::Paused(user_exit)),
-            2 => Ok(ExitCode::SystemSplit),
-            _ => Err(VerificationError::ReceiptFormatError),
-        }
-    }
+fn decode_receipt_metadata_from_io(
+    io: layout::OutBuffer,
+) -> Result<ReceiptMetadata, VerificationError> {
+    let body = layout::LAYOUT.mux.body;
+    let pre = decode_system_state_from_io(io, body.global.pre)?;
+    let mut post = decode_system_state_from_io(io, body.global.post)?;
+    // In order to avoid extra logic in the rv32im circuit to perform arthimetic on
+    // the PC with carry, the PC is always recorded as the current PC +
+    // 4. Thus we need to adjust the decoded PC for the post SystemState.
+    post.pc = post
+        .pc
+        .checked_sub(WORD_SIZE as u32)
+        .ok_or(VerificationError::ReceiptFormatError)?;
+    let input_bytes: Vec<u8> = io
+        .tree(body.global.input)
+        .get_bytes()
+        .or(Err(VerificationError::ReceiptFormatError))?;
+    let input = Digest::try_from(input_bytes).or(Err(VerificationError::ReceiptFormatError))?;
+    let output_bytes: Vec<u8> = io
+        .tree(body.global.output)
+        .get_bytes()
+        .or(Err(VerificationError::ReceiptFormatError))?;
+    let output = Digest::try_from(output_bytes).or(Err(VerificationError::ReceiptFormatError))?;
+    let sys_exit = io.get_u64(body.global.sys_exit_code) as u32;
+    let user_exit = io.get_u64(body.global.user_exit_code) as u32;
+    let exit_code =
+        ExitCode::from_pair(sys_exit, user_exit).or(Err(VerificationError::ReceiptFormatError))?;
+    Ok(ReceiptMetadata {
+        pre,
+        post,
+        exit_code,
+        input,
+        output,
+    })
 }
 
 impl Default for VerifierContext {
