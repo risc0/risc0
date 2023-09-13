@@ -13,22 +13,6 @@
 // limitations under the License.
 
 //! Run the zkVM guest and prove its results.
-//!
-//! # Usage
-//! The primary use of this module is to provably run a zkVM guest by use of a
-//! [Session]. See the [Session] documentation for more detailed usage
-//! information.
-//!
-//! ```rust
-//! use risc0_zkvm::{default_prover, ExecutorEnv};
-//! use risc0_zkvm_methods::FIB_ELF;
-//!
-//! # #[cfg(not(feature = "cuda"))]
-//! # {
-//! let env = ExecutorEnv::builder().add_input(&[20]).build().unwrap();
-//! let receipt = default_prover().prove_elf(env, FIB_ELF).unwrap();
-//! # }
-//! ```
 
 mod dev_mode;
 mod exec;

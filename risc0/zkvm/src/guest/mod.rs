@@ -12,16 +12,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//! The RISC Zero ZKVM's guest-side RISC-V API.
+//! The RISC Zero zkVM's guest-side RISC-V API.
 //!
 //! Code that is validated by the [RISC Zero zkVM](crate) is run inside the
 //! guest. In the minimal case, an entrypoint (the guest's "`main`" function)
 //! must be provided by using the [entry! macro](entry). In almost all
-//! practical cases, the guest will want to read private input data using
-//! [env::read] and commit public output data using [env::commit]; additional
-//! I/O functionality is also available in [mod@env].
+//! practical cases, the guest will want to read private input data from the
+//! host and write public data to the journal. In the simplest case, this can be
+//! done with [env::read] and [env::commit], respectively; additional I/O
+//! functionality is also available in [mod@env].
 //!
-//! For example[^starter-ex], the following guest code proves a number is
+//! ## Installation
+//!
+//! To build and run RISC Zero zkVM code, you will need to install the RISC Zero
+//! toolchain, which can be done using the
+//! [`cargo-risczero`](https://crates.io/crates/cargo-risczero) tool:
+//!
+//! ```sh
+//! cargo install cargo-risczero
+//! cargo risczero install
+//! ```
+//!
+//! ## Example
+//!
+//! The following guest code[^starter-ex] proves a number is
 //! composite by multiplying two unsigned integers, and panicking if either is
 //! `1` or if the multiplication overflows:
 //! ```ignore
@@ -52,7 +66,7 @@
 //! [rust guest workarounds](https://github.com/risc0/risc0/issues?q=is%3Aissue+is%3Aopen+label%3A%22rust+guest+workarounds%22)
 //! tag on GitHub.
 //!
-//! [^starter-ex]: The example is based on the [RISC Zero Rust Starter repository](https://github.com/risc0/risc0-rust-starter).
+//! [^starter-ex]: The example is based on the [Factors example](https://github.com/risc0/risc0/tree/main/examples/factors).
 
 #![deny(missing_docs)]
 
