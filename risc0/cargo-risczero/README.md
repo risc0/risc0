@@ -80,7 +80,7 @@ Note: The build command requires the docker CLI installed and in your PATH.
 ### Example
 
 ```bash
-# Build the chess example
+# Build the zkVM's test examples
 cargo risczero build --manifest-path risc0/zkvm/methods/guest/Cargo.toml
 
 ELFs ready at:
