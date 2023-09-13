@@ -32,10 +32,7 @@ impl Program {
     /// Initialize a RISC Zero Program from an appropriate ELF file
     pub fn load_elf(input: &[u8], max_mem: u32) -> Result<Program> {
         let mut image: BTreeMap<u32, u32> = BTreeMap::new();
-        let elf = match ElfBytes::<LittleEndian>::minimal_parse(input) {
-            Ok(elf) => elf,
-            Err(e) => bail!("Elf parse error: {e}"),
-        };
+        let elf = ElfBytes::<LittleEndian>::minimal_parse(input).ok_or(|err| anyhow!("Elf parse error: {err}")?;
         if elf.ehdr.class != Class::ELF32 {
             bail!("Not a 32-bit ELF");
         }
