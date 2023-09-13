@@ -10,13 +10,13 @@ docs.rs](https://docs.rs/risc0-zkvm), we have additional (non-reference)
 resources for using our zkVM that you may also find helpful, especially if
 you're new to the RISC Zero zkVM. These include:
 
-* Our [Factors](https://github.com/risc0/risc0/tree/main/examples/factors#tutorial)
-tutorial, which walks you through writing your first zkVM project.
+* Our [Hello World](https://github.com/risc0/risc0/tree/main/examples/hello-world) demo -- a minimal zkVM application that works out-of-the-box.
+* Our [zkVM Tutorial](https://github.com/risc0/risc0/tree/main/examples/hello-world/tutorial.md), which walks you through writing your first zkVM project.
 * The [`cargo risczero` tool](https://crates.io/crates/cargo-risczero). It
 includes a `new` command which generates code for building and launching a zkVM
 guest and guidance on where projects most commonly modify host and guest code.
-* The [zkVM Rust examples
-directory](https://github.com/risc0/risc0/tree/main/examples), which contains
+* The [examples
+folder](https://github.com/risc0/risc0/tree/main/examples), which contains
 various examples using our zkVM.
 * [This clip](https://youtu.be/cLqFvhmXiD0) from our presentation at ZK Hack III
 gives an overview of the RISC Zero zkVM. [Our YouTube
@@ -26,7 +26,7 @@ channel](https://www.youtube.com/@risczero) has many more videos as well.
   GitHub tag. If you're having problems running your code in the zkVM, you can
   see if there's a workaround, and if you're using a workaround, you can track
   when it gets resolved to a permanent solution.
-* And more on [the RISC Zero website](https://www.risczero.com/)!
+* And more on [the RISC Zero developer website](https://dev.risczero.com/)!
 
 # Crate Feature Flags
 
