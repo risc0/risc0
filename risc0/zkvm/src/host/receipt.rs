@@ -147,11 +147,11 @@ pub struct Receipt {
     pub journal: Vec<u8>,
 }
 
-/// An inner receipt can take the form of a collection of [SegmentReceipt]s or a
+/// An inner receipt can take the form of a [SegmentReceipts] collection or a
 /// [SuccinctReceipt].
 #[derive(Debug, Deserialize, Serialize, PartialEq)]
 pub enum InnerReceipt {
-    /// The [SegmentReceipt]s.
+    /// The [SegmentReceipts].
     Flat(SegmentReceipts),
 
     /// The [SuccinctReceipt].
@@ -257,9 +257,6 @@ impl InnerReceipt {
     }
 
     /// Returns the [InnerReceipt::Flat] arm.
-    ///
-    /// Returns this arm as a slice of [SegmentReceipt]s, as the
-    /// `SegmentReceipts` type used to hold them is a private type.
     pub fn flat(&self) -> Result<&[SegmentReceipt], VerificationError> {
         if let InnerReceipt::Flat(x) = self {
             Ok(&x.0)
