@@ -54,7 +54,7 @@ bytes = { version = "1.4", features = ["serde"], optional = true }
 risc0-binfmt = { workspace = true }
 risc0-circuit-rv32im = { workspace = true }
 risc0-core = { workspace = true }
-generic-array = { version = "0.14", default-features = false, optional = true }
+generic-array = { version = "1.0", default-features = false, optional = true }
 getrandom = { version = "0.2", optional = true }
 gimli = { version = "0.27", optional = true }
 lazy-regex = { version = "2.4", optional = true }
