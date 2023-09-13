@@ -12,8 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::{sha::Digest, SystemState};
-use risc0_binfmt::tagged_struct;
+use crate::{
+    sha::{tagged_struct, Digest},
+    SystemState,
+};
 use serde::{Deserialize, Serialize};
 
 /// Indicates how a Segment or Session's execution has terminated
@@ -71,7 +73,7 @@ impl ReceiptMetadata {
     /// Hash the [crate::ReceiptMetadata] to get a digest of the struct.
     pub fn digest(&self) -> Digest {
         let (sys_exit, user_exit) = self.exit_code.into_pair();
-        tagged_struct::<crate::sha::Impl>(
+        tagged_struct(
             "risc0.ReceiptMeta",
             &[
                 self.input,

@@ -44,6 +44,8 @@ impl SystemState {
         write_sha_halfs(flat, &self.merkle_root);
     }
 
+    // DO NOT MERGE(victor): Consider how to avoid consumers of this method needing to supply the
+    // Sha256 implementation explicitly.
     /// Hash the [crate::SystemState] to get a digest of the struct.
     pub fn digest<S: Sha256>(&self) -> Digest {
         tagged_struct::<S>("risc0.SystemState", &[self.merkle_root], &[self.pc])

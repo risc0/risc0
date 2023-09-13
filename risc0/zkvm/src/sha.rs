@@ -61,6 +61,10 @@ cfg_if::cfg_if! {
     }
 }
 
+pub(crate) fn tagged_struct(tag: &str, down: &[Digest], data: &[u32]) -> Digest {
+    risc0_binfmt::tagged_struct::<Impl>(tag, down, data)
+}
+
 pub mod rust_crypto {
     //! [Rust Crypto] wrappers for the RISC0 Sha256 trait.
     //!
