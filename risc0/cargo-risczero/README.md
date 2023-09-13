@@ -14,6 +14,8 @@ After that you can verify it works via:
 ```bash
 cargo risczero --version
 ```
+### Docker
+In order to use the `build` command, you will need `docker` available in your PATH. For developer machines, this is simple with [Docker Desktop.](https://docs.docker.com/desktop/)
 
 ## install
 
@@ -67,7 +69,13 @@ Use the `build-toolchain` command to build the toolchain locally for your host. 
 
 ## build
 
-Use the `build` command to build a guest code for the target `riscv32im-risc0-zkvm-elf`. The resulting ELF binary will be saved on `target/riscv-guest/riscv32im-risc0-zkvm-elf/docker/`. Warning: this requires having docker installed.
+Use the `build` command to build guest code for the zkVM target `riscv32im-risc0-zkvm-elf` deterministically.
+
+The compiled ELF is saved in: `./target/riscv-guest/riscv32im-risc0-zkvm-elf/docker/`
+
+With this containerized build process, we ensure that all builds of your guest code, regardless of the machine or local environment, will produce the same ImageID. The ImageID, and its importance to [security,](https://dev.risczero.com/tech_faq#security) is explained in more detail in our [developer FAQ.](https://dev.risczero.com/tech_faq#zkvm-application-design)
+
+Note: The build command requires the docker CLI installed and in your PATH.
 
 ### Examples
 
@@ -75,7 +83,17 @@ Use the `build` command to build a guest code for the target `riscv32im-risc0-zk
 # Build the factors example
 cargo risczero build --manifest-path examples/factors/methods/guest/Cargo.toml
 
+ELFs ready at:
+./elfs/multiply/multiply - ImageID: 9ee1612b0a7e270f8df248e47dc85d9908ff4c1e7df42f398a65ca878b57a23d
+
+```
+
+```bash
 # Build the chess example
 cargo risczero build --manifest-path examples/chess/methods/guest/Cargo.toml
 
+ELFs ready at:
+./elfs/risc0_zkvm_methods_guest/hello_commit - ImageID: eb12f9b97d8759327f651afeb09ae9a5713e7dbc428284d453b8cf56e8dadd5a
+./elfs/risc0_zkvm_methods_guest/multi_test - ImageID: 761900e766a4ae1d8edcb2b49dc9aee54b94e42c9b0d6421cfb112314c4e3efc
+./elfs/risc0_zkvm_methods_guest/slice_io - ImageID: 3f2ad1a2d500ab4ab927eebe241d872d3f598065b8987b182410cf01f350f74c
 ```
