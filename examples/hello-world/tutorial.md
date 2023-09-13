@@ -1,37 +1,26 @@
-# Factors
+# Tutorial: Building your first zkVM application
+Welcome!
 
-The _factors_ example is a minimalistic RISC Zero zkVM proof. The prover demonstrates that they know two nontrivial factors (i.e. both greater than 1) of a number, without revealing what those factors are. Thus, the prover demonstrates that a number is composite — and that they know the factors — without revealing any further information about the number.
+This tutorial will walk you through building your first [zkVM application].
+By following the steps in this guide, you will:
+- Use the [cargo risczero] tool to create a blank [starter template]
+- Make the handful of changes necessary to create a functional zkVM application
+- Finish the tutorial with an exact copy of the [host] and [guest] programs from the [hello-world] example.
 
-## Quick Start
-First, [install Rust] if you don't already have it.
+For more resources for building zkVM applications, check out our [developer docs].
 
-Next, install the `cargo-risczero` tool and install the toolchain with:
-
-```bash
-cargo install cargo-risczero
-cargo risczero install
-```
-
-Then, run the example with:
-```bash
-cargo run --release
-```
-
-Congratulations! You just constructed a zero-knowledge proof that you know the factors of 391.
-
-[install Rust]: https://doc.rust-lang.org/cargo/getting-started/installation.html
-
-# Tutorial
-
-## How to Recreate _Factors_
-
-This example is a good introduction for beginners new to RISC Zero; if you're looking to get started creating RISC Zero zkVM projects, you're in the right place!
-If you're looking for a higher level overview of the Factors example, check out the [Understanding Factors] explainer instead.
-We'll spend the rest of this README walking you through how to recreate the factors example for yourself, assuming no prior knowledge of RISC Zero.
+[zkVM application]: https://dev.risczero.com/zkvm
+[cargo risczero]: https://docs.rs/cargo-risczero/latest/cargo_risczero/
+[starter template]: https://github.com/risc0/risc0/tree/v0.16.0/templates/rust-starter
+[hello-world]: https://github.com/risc0/risc0/tree/v0.16.0/examples/hello-world
+[developer docs]: https://dev.risczero.com/zkvm
+[host]: https://dev.risczero.com/terminology#host-program
+[guest]: https://dev.risczero.com/terminology#guest-program
 
 ## Step 1: Create a new project
 
-First, [install Rust] if you don't already have it. Next you can create a RISC Zero zkVM project with boilerplate already filled out using our [`cargo risczero` tool]:
+First, [install Rust] if you don't already have it.
+Now, you can create a RISC Zero zkVM project from the command line:
 
 ```bash
 ## Install from crates.io
@@ -41,18 +30,21 @@ cargo risczero install
 # Navigate to where you want to create your project
 cd wherever/you/want
 
-# Create a project from our starter template
-cargo risczero new factors
+## Create a project from our starter template
+cargo risczero new hello-world
 ```
-This will create a project named `factors` in the directory where you ran the `cargo risczero new` command. Now we can enter our new project's directory and start working on it!
+This will create a project named `hello-world` in the directory where you ran the [`cargo risczero new`] command. Now we can enter our new project's directory and start working on it!
 ```bash
-cd factors
+cd hello-world
 ```
+
+[`cargo risczero new`]: https://docs.rs/cargo-risczero/latest/cargo_risczero/#new
+[install Rust]: https://www.rust-lang.org/tools/install
 
 ## Step 2: Give the methods package a name
 
-The methods package contains the program that executes on the guest zkVM as well as a few supporting libraries. Before we proceed, let's change its name in `methods/Cargo.toml` to match the name of our project, renaming `name = methods` to `name = factors-methods`.
-Also in `host/Cargo.toml`, rename `methods = { path = "../methods" }` to `factors-methods = { path = "../methods" }` in order to locate the renamed guest code.
+The methods package contains the program that executes on the guest zkVM as well as a few supporting libraries. Before we proceed, let's change its name in `methods/Cargo.toml` to match the name of our project, renaming `name = methods` to `name = hello-world-methods`.
+Also in `host/Cargo.toml`, rename `methods = { path = "../methods" }` to `hello-world-methods = { path = "../methods" }` in order to locate the renamed guest code.
 
 Parts of this package are included in the driver program `src/main.rs`, so change the line
 
@@ -63,12 +55,12 @@ use methods::{METHOD_NAME_ELF, METHOD_NAME_ID};
 to
 
 ```no_compile
-use factors_methods::{METHOD_NAME_ELF, METHOD_NAME_ID};
+use hello_world_methods::{METHOD_NAME_ELF, METHOD_NAME_ID};
 ```
 
 ## Step 3: Give the guest program and its packages a name
 
-Take a moment to look inside the methods package directory. The `factors` project will call a program that executes on the guest zkVM whose source is found in `methods/guest/src/main.rs`. Our next step will be to name this guest program.
+Take a moment to look inside the methods package directory. The `hello-world` project will call a program that executes on the guest zkVM whose source is found in `methods/guest/src/main.rs`. Our next step will be to name this guest program.
 
 
 Edit `methods/guest/Cargo.toml`, changing the line `name = "method_name"` to instead read `name = "multiply"`.
@@ -77,18 +69,18 @@ Edit `methods/guest/Cargo.toml`, changing the line `name = "method_name"` to ins
 In order to access guest code from the host driver program, the host program `host/src/main.rs` includes two guest methods: `METHOD_NAME_ELF` and `METHOD_NAME_ID`.
 
 ```no_compile
-use factors_methods::{METHOD_NAME_ELF, METHOD_NAME_ID};
+use hello_world_methods::{METHOD_NAME_ELF, METHOD_NAME_ID};
 
 ```
 
 Both of these must be changed to reflect the new guest program name:
 
 ```
-use factors_methods::{MULTIPLY_ELF, MULTIPLY_ID};
+use hello_world_methods::{MULTIPLY_ELF, MULTIPLY_ID};
 ```
 (As an aside, if you add more than one callable guest program to your next RISC Zero zkVM project, you'll need to include `ELF` and `ID` references once for each guest file.)
 
-While we're at it, let's update the references to `METHOD_NAME_ELF` and `METHOD_NAME_ID` in `factors/host/src/main.rs` to reflect our new program name. Don't worry about why these lines are included yet; for now, we're just being diligent not to leave dead references behind.
+While we're at it, let's update the references to `METHOD_NAME_ELF` and `METHOD_NAME_ID` in `hello-world/host/src/main.rs` to reflect our new program name. Don't worry about why these lines are included yet; for now, we're just being diligent not to leave dead references behind.
 
 Here are what the other two lines with `METHOD_NAME_ELF` and `METHOD_NAME_ID` should look like after updating:
 
@@ -108,12 +100,13 @@ Use this command any time you'd like to check your progress.
 
 ## Concept break: How do we run and prove the guest program?
 
-Our next objective is to provide the guest program with input. Before we implement this, let's take a closer look at how we run and prove the guest program in `factors/host/src/main.rs`.
+
+Our next objective is to provide the guest program with input. Before we implement this, let's take a closer look at how we run and prove the guest program in `hello-world/src/main.rs`.
 
 In the starter template project, our host driver program creates an executor environment before constructing a prover.  When `Prover::prove_elf()` is called, it will produce a receipt:
 
 ```rust
-    use factors_methods::{MULTIPLY_ELF, MULTIPLY_ID};
+    use hello_world_methods::{MULTIPLY_ELF, MULTIPLY_ID};
     use risc0_zkvm::{
       default_prover,
       serde::{from_slice, to_vec},
@@ -138,7 +131,7 @@ In the starter template project, our host driver program creates an executor env
 
 ## Step 5 (Host): Share two values with the guest
 
-In this step, we'll be continuing to modify `factors/host/src/main.rs`.
+In this step, we'll be continuing to modify `hello-world/src/main.rs`.
 Let's start by picking some aesthetically pleasing primes:
 ```
 fn main() {
@@ -152,7 +145,7 @@ We'd like the host to make the values of `a` and `b` available to the guest prio
  We need to add these values as inputs before the executor environment is built:
 
  ```rust
-    use factors_methods::{MULTIPLY_ELF, MULTIPLY_ID};
+    use hello_world_methods::{MULTIPLY_ELF, MULTIPLY_ID};
     use risc0_zkvm::{serde::to_vec, ExecutorEnv};
 
     let a: u64 = 17;
@@ -230,7 +223,7 @@ Once more, the program won't do anything, but it should run successfully and bui
 
 ## Step 7 (Host): Generate a receipt and read its journal contents
 
-For this step, we return to the main file for the host driver program at `factors/host/src/main.rs`, which currently has a placeholder comment asking to fill in with code for handling the [receipt]:
+For this step, we return to the main file for the host driver program at `hello-world/host/src/main.rs`, which currently has a placeholder comment asking to fill in with code for handling the [receipt]:
 
 ```no_compile
     // Run the prover to produce a receipt.
@@ -241,7 +234,7 @@ In a real-world scenario, we'd want to hand the [receipt] to someone else, but r
 So, let's extract the [journal]'s contents by replacing the "`TODO`" in the above code snippet with the following lines.
 
 ```rust
-    use factors_methods::{MULTIPLY_ELF, MULTIPLY_ID};
+    use hello_world_methods::{MULTIPLY_ELF, MULTIPLY_ID};
     use risc0_zkvm::{
       default_prover,
       ExecutorEnv,
@@ -276,12 +269,9 @@ Or, if you believe you've found a bug or other problem in our code, please open 
 
 If you're ready to start building more complex projects, we recommend taking a look at the other examples in our [examples directory] and looking through our further [Getting Started resources] for more project ideas that use zero-knowledge proofs.
 
-[install Rust]: https://www.rust-lang.org/tools/install
-[`cargo risczero` tool]: https://crates.io/crates/cargo-risczero
-[examples directory]: https://github.com/risc0/risc0/tree/main/examples
-[Getting Started resources]: https://www.risczero.com/docs/
-[Discord]: https://discord.com/invite/risczero
+[examples directory]: https://github.com/risc0/risc0/tree/v0.16.3/examples
+[Getting Started resources]: https://dev.risczero.com/zkvm
+[Discord]: https://discord.gg/risczero
 [issue]: https://github.com/risc0/risc0/issues
-[receipt]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/receipt/struct.Receipt.html
-[journal]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/receipt/struct.Receipt.html#structfield.journal
-[Understanding Factors]: https://www.risczero.com/docs/examples/starter
+[receipt]: https:/dev.risczero.com/terminology#receipt
+[journal]: https:/dev.risczero.com/terminology#journal
