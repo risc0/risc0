@@ -21,23 +21,22 @@ use std::{
 
 use anyhow::Result;
 use bytes::Bytes;
-use risc0_zkp::core::digest::Digest;
 use risc0_zkvm_methods::{
     multi_test::{MultiTestSpec, SYS_MULTI_TEST},
-    HELLO_COMMIT_ELF, MULTI_TEST_ELF, SLICE_IO_ELF, STANDARD_LIB_ELF,
+    HELLO_COMMIT_ELF, HELLO_COMMIT_ID, MULTI_TEST_ELF, SLICE_IO_ELF, STANDARD_LIB_ELF,
 };
 use risc0_zkvm_platform::{fileno, syscall::nr::SYS_RANDOM, PAGE_SIZE, WORD_SIZE};
 use sha2::{Digest as _, Sha256};
 use test_log::test;
 
-use super::executor::Executor;
 use crate::{
     host::server::{
         exec::syscall::{Syscall, SyscallContext},
         testutils,
     },
     serde::{from_slice, to_vec},
-    ExecutorEnv, ExitCode, MemoryImage, Program, Session, TraceEvent,
+    sha::Digest,
+    Executor, ExecutorEnv, ExitCode, MemoryImage, Program, Session, TraceEvent,
 };
 
 fn run_test(spec: MultiTestSpec) {
@@ -355,6 +354,47 @@ fn large_io_bytes() {
     }
     let actual: &[u32] = bytemuck::cast_slice(&stdout);
     assert_eq!(&buf, actual);
+}
+
+// TODO(victor): Make sure to add tests to proving as well.
+#[test]
+fn sys_verify() {
+    let hello_commit_session = Executor::from_elf(ExecutorEnv::default(), HELLO_COMMIT_ELF)
+        .unwrap()
+        .run()
+        .unwrap();
+
+    let spec = to_vec(&MultiTestSpec::SysVerify {
+        image_id: HELLO_COMMIT_ID.into(),
+        journal: hello_commit_session.journal,
+    })
+    .unwrap();
+
+    let env = ExecutorEnv::builder().add_input(&spec).build().unwrap();
+    Executor::from_elf(env, MULTI_TEST_ELF)
+        .unwrap()
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn sys_verify_metadata() {
+    let hello_commit_session = Executor::from_elf(ExecutorEnv::default(), HELLO_COMMIT_ELF)
+        .unwrap()
+        .run()
+        .unwrap();
+
+    // TODO(victor) Also execute with a receipt of failure.
+    let spec = to_vec(&MultiTestSpec::SysVerifyMetadata {
+        meta: hello_commit_session.get_metadata().unwrap(),
+    })
+    .unwrap();
+
+    let env = ExecutorEnv::builder().add_input(&spec).build().unwrap();
+    Executor::from_elf(env, MULTI_TEST_ELF)
+        .unwrap()
+        .run()
+        .unwrap();
 }
 
 #[test]

@@ -19,6 +19,9 @@ use alloc::{collections::VecDeque, vec::Vec};
 use risc0_zkp::core::{digest::Digest, hash::sha::Sha256};
 use serde::{Deserialize, Serialize};
 
+#[cfg(not(target_os = "zkvm"))]
+use crate::MemoryImage;
+
 /// Represents the public state of a segment, needed for continuations and
 /// receipt verification.
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -49,6 +52,16 @@ impl SystemState {
     /// Hash the [crate::SystemState] to get a digest of the struct.
     pub fn digest<S: Sha256>(&self) -> Digest {
         tagged_struct::<S>("risc0.SystemState", &[self.merkle_root], &[self.pc])
+    }
+}
+
+#[cfg(not(target_os = "zkvm"))]
+impl From<&MemoryImage> for SystemState {
+    fn from(image: &MemoryImage) -> Self {
+        Self {
+            pc: image.pc,
+            merkle_root: image.compute_root_hash(),
+        }
     }
 }
 

@@ -103,7 +103,9 @@ impl<'a> SyscallTable<'a> {
             .with_syscall(SYS_GETENV, SysGetenv(env.env_vars.clone()))
             .with_syscall(SYS_READ, posix_io.clone())
             .with_syscall(SYS_READ_AVAIL, posix_io.clone())
-            .with_syscall(SYS_WRITE, posix_io);
+            .with_syscall(SYS_WRITE, posix_io)
+            .with_syscall(SYS_VERIFY, SysVerify)
+            .with_syscall(SYS_VERIFY_METADATA, SysVerify);
         for (syscall, handler) in env.slice_io.borrow().inner.iter() {
             let handler = SysSliceIo::new(handler.clone());
             this.inner

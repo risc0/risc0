@@ -109,7 +109,7 @@ pub struct SyscallRecord {
 pub struct Executor<'a> {
     env: ExecutorEnv<'a>,
     pub(crate) syscall_table: SyscallTable<'a>,
-    pre_image: MemoryImage,
+    pre_image: Option<MemoryImage>,
     monitor: MemoryMonitor,
     pc: u32,
     init_cycles: usize,
@@ -150,8 +150,7 @@ impl<'a> Executor<'a> {
         }
 
         let pc = image.pc;
-        let pre_image = image.clone();
-        let monitor = MemoryMonitor::new(image, env.trace.is_some());
+        let monitor = MemoryMonitor::new(image.clone(), env.trace.is_some());
         let loader = Loader::new();
         let init_cycles = loader.init_cycles();
         let fini_cycles = loader.fini_cycles();
@@ -161,7 +160,7 @@ impl<'a> Executor<'a> {
         Ok(Self {
             env,
             syscall_table,
-            pre_image,
+            pre_image: Some(image),
             monitor,
             pc,
             init_cycles,
@@ -230,13 +229,15 @@ impl<'a> Executor<'a> {
             .borrow_mut()
             .with_write_fd(fileno::JOURNAL, journal.clone());
 
-        let mut run_loop = || -> Result<ExitCode> {
+        let mut run_loop = || -> Result<(ExitCode, MemoryImage)> {
             loop {
                 if let Some(exit_code) = self.step()? {
                     let total_cycles = self.total_cycles();
                     log::debug!("exit_code: {exit_code:?}, total_cycles: {total_cycles}");
                     assert!(total_cycles <= self.segment_limit);
-                    let pre_image = self.pre_image.clone();
+                    let pre_image = self.pre_image.take().ok_or_else(|| {
+                        anyhow!("attempted to run the executor with no pre_image")
+                    })?;
                     let post_image = self.monitor.build_image(self.pc);
                     let post_image_id = post_image.compute_id();
                     let syscalls = take(&mut self.syscalls);
@@ -258,32 +259,34 @@ impl<'a> Executor<'a> {
                     let segment_ref = callback(segment)?;
                     self.segments.push(segment_ref);
                     match exit_code {
-                        ExitCode::SystemSplit => self.split(post_image)?,
+                        ExitCode::SystemSplit => self.split(Some(post_image))?,
                         ExitCode::SessionLimit => bail!("Session limit exceeded"),
                         ExitCode::Paused(inner) => {
                             log::debug!("Paused({inner}): {}", self.segment_cycle);
-                            self.split(post_image)?;
-                            return Ok(exit_code);
+                            // Set the pre_image so that the Executor can be run again to resume.
+                            self.split(Some(post_image.clone()))?;
+                            return Ok((exit_code, post_image));
                         }
                         ExitCode::Halted(inner) => {
                             log::debug!("Halted({inner}): {}", self.segment_cycle);
-                            return Ok(exit_code);
+                            return Ok((exit_code, post_image));
                         }
                     };
                 };
             }
         };
 
-        let exit_code = run_loop()?;
+        let (exit_code, post_image) = run_loop()?;
         self.exit_code = Some(exit_code);
         Ok(Session::new(
             take(&mut self.segments),
             journal.buf.take(),
             exit_code,
+            post_image,
         ))
     }
 
-    fn split(&mut self, pre_image: MemoryImage) -> Result<()> {
+    fn split(&mut self, pre_image: Option<MemoryImage>) -> Result<()> {
         self.pre_image = pre_image;
         self.body_cycles = 0;
         self.split_insn = None;

@@ -16,18 +16,21 @@
 //! execution traces between the execution phase and the proving phase.
 
 use alloc::collections::BTreeSet;
+use std::borrow::Borrow;
 use std::{
     fs::File,
     io::{Read, Write},
     path::{Path, PathBuf},
 };
 
-use anyhow::Result;
-use risc0_binfmt::MemoryImage;
-use risc0_zkp::core::digest::Digest;
+use anyhow::{anyhow, Result};
 use serde::{Deserialize, Serialize};
 
-use crate::{host::server::exec::executor::SyscallRecord, ExitCode};
+use crate::{
+    host::server::exec::executor::SyscallRecord,
+    sha::{Digest, Sha256, DIGEST_WORDS},
+    ExitCode, MemoryImage, ReceiptMetadata,
+};
 
 #[derive(Clone, Default, Serialize, Deserialize, Debug)]
 pub struct PageFaults {
@@ -54,6 +57,11 @@ pub struct Session {
 
     /// The [ExitCode] of the session.
     pub exit_code: ExitCode,
+
+    // DO NOT MERGE(victor): This makes the segment object much larger. Consider how to address
+    // this.
+    /// The final [MemoryState] at the end of execution.
+    pub post_image: MemoryImage,
 
     /// The hooks to be called during the proving phase.
     #[serde(skip)]
@@ -111,11 +119,17 @@ pub trait SessionEvents {
 
 impl Session {
     /// Construct a new [Session] from its constituent components.
-    pub fn new(segments: Vec<Box<dyn SegmentRef>>, journal: Vec<u8>, exit_code: ExitCode) -> Self {
+    pub fn new(
+        segments: Vec<Box<dyn SegmentRef>>,
+        journal: Vec<u8>,
+        exit_code: ExitCode,
+        post_image: MemoryImage,
+    ) -> Self {
         Self {
             segments,
             journal,
             exit_code,
+            post_image,
             hooks: Vec::new(),
         }
     }
@@ -132,6 +146,24 @@ impl Session {
     /// Add a hook to be called during the proving phase.
     pub fn add_hook<E: SessionEvents + 'static>(&mut self, hook: E) {
         self.hooks.push(Box::new(hook));
+    }
+
+    /// Calculate for the [ReceiptMetadata] associated with this [Session]. The [ReceiptMetadata]
+    /// is the claim that will be proven if this [Session] is passed to the [Prover].
+    pub fn get_metadata(&self) -> Result<ReceiptMetadata> {
+        let first_segment = &self
+            .segments
+            .first()
+            .ok_or_else(|| anyhow!("session has no segments"))?
+            .resolve()?;
+
+        Ok(ReceiptMetadata {
+            pre: first_segment.pre_image.borrow().into(),
+            post: self.post_image.borrow().into(),
+            exit_code: self.exit_code,
+            input: Digest::new([0u32; DIGEST_WORDS]),
+            output: *crate::sha::Impl::hash_bytes(&self.journal),
+        })
     }
 }
 

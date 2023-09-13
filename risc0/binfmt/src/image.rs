@@ -42,6 +42,7 @@ pub struct MemoryImage {
     /// Metadata about the structure of the page table
     pub info: PageTableInfo,
 
+    // TODO(victor): Include the pc in the MemoryImage digest and remove it from SystemState.
     /// Program Counter from [Program] entry point
     pub pc: u32,
 }
