@@ -148,6 +148,12 @@ pub fn main() {
             }
             env::commit(&buf);
         }
+        MultiTestSpec::SysVerify { image_id, journal } => {
+            env::verify(&image_id, &journal).unwrap();
+        }
+        MultiTestSpec::SysVerifyMetadata { meta } => {
+            env::verify_metadata(&meta).unwrap();
+        }
         MultiTestSpec::PauseContinue => {
             env::log("before");
             env::pause();

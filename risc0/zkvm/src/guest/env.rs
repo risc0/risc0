@@ -156,7 +156,7 @@ impl fmt::Display for VerifyMetadataError {
 impl std::error::Error for VerifyMetadataError {}
 
 /// Verify that there exists a valid receipt with the specified [ReceiptMetadata].
-pub fn verify_metdata(meta: &ReceiptMetadata) -> Result<(), VerifyMetadataError> {
+pub fn verify_metadata(meta: &ReceiptMetadata) -> Result<(), VerifyMetadataError> {
     let meta_digest = meta.digest();
     unsafe { sys_verify_metadata(meta_digest.as_ref()) };
     // DO NOT MERGE(victor): Calculate the ReceiptMetadata digest and add it to a running

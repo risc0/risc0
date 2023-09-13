@@ -17,7 +17,7 @@ extern crate alloc;
 
 use alloc::vec::Vec;
 
-use risc0_zkvm::declare_syscall;
+use risc0_zkvm::{declare_syscall, sha::Digest, ReceiptMetadata};
 use risc0_zkvm_platform::syscall::bigint;
 use serde::{Deserialize, Serialize};
 
@@ -51,6 +51,13 @@ pub enum MultiTestSpec {
         fd: u32,
         // Position and length to do reads
         pos_and_len: Vec<(u32, u32)>,
+    },
+    SysVerify {
+        image_id: Digest,
+        journal: Vec<u8>,
+    },
+    SysVerifyMetadata {
+        meta: ReceiptMetadata,
     },
     EchoStdout {
         nbytes: u32,

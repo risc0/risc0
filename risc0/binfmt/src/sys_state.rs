@@ -103,12 +103,13 @@ fn write_u32_bytes(flat: &mut Vec<u32>, word: u32) {
 #[cfg(test)]
 mod tests {
     use super::tagged_struct;
+    use risc0_zkp::core::hash::sha::cpu;
 
     #[test]
     fn test_tagged_struct() {
-        let digest1 = tagged_struct("foo", &[], &[1, 2013265920, 3]);
-        let digest2 = tagged_struct("bar", &[digest1, digest1], &[2013265920, 5]);
-        let digest3 = tagged_struct(
+        let digest1 = tagged_struct::<cpu::Impl>("foo", &[], &[1, 2013265920, 3]);
+        let digest2 = tagged_struct::<cpu::Impl>("bar", &[digest1, digest1], &[2013265920, 5]);
+        let digest3 = tagged_struct::<cpu::Impl>(
             "baz",
             &[digest1, digest2, digest1],
             &[6, 7, 2013265920, 9, 10],
