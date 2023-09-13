@@ -304,7 +304,7 @@ mod riscv {
         use std::io::Read;
 
         use flate2::read::GzDecoder;
-        use risc0_zkvm_platform::{memory::MEM_SIZE, PAGE_SIZE};
+        use risc0_zkvm_platform::PAGE_SIZE;
         use tar::Archive;
 
         let bytes = include_bytes!("../testdata/riscv-tests.tgz");
@@ -323,7 +323,7 @@ mod riscv {
             let mut elf = Vec::new();
             entry.read_to_end(&mut elf).unwrap();
 
-            let program = Program::load_elf(elf.as_slice(), MEM_SIZE as u32).unwrap();
+            let program = Program::load_elf(elf.as_slice()).unwrap();
             let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
 
             let env = ExecutorEnv::default();

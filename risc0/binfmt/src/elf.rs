@@ -18,6 +18,7 @@ use alloc::collections::BTreeMap;
 
 use anyhow::{anyhow, bail, Context, Result};
 use elf::{endian::LittleEndian, file::Class, ElfBytes};
+use risc0_zkvm_platform::memory::GUEST_MAX_MEM;
 
 /// A RISC Zero program
 pub struct Program {
@@ -30,7 +31,7 @@ pub struct Program {
 
 impl Program {
     /// Initialize a RISC Zero Program from an appropriate ELF file
-    pub fn load_elf(input: &[u8], max_mem: u32) -> Result<Program> {
+    pub fn load_elf(input: &[u8]) -> Result<Program> {
         let mut image: BTreeMap<u32, u32> = BTreeMap::new();
         let elf = ElfBytes::<LittleEndian>::minimal_parse(input)
             .map_err(|err| anyhow!("Elf parse error: {err}"))?;
@@ -48,7 +49,7 @@ impl Program {
             .e_entry
             .try_into()
             .map_err(|err| anyhow!("e_entry was larger than 32 bits. {err}"))?;
-        if entry >= max_mem || entry % 4 != 0 {
+        if entry >= GUEST_MAX_MEM || entry % 4 != 0 {
             bail!("Invalid entrypoint");
         }
         let segments = elf.segments().ok_or(anyhow!("Missing segment table"))?;
@@ -60,14 +61,14 @@ impl Program {
                 .p_filesz
                 .try_into()
                 .map_err(|err| anyhow!("filesize was larger than 32 bits. {err}"))?;
-            if file_size >= max_mem {
+            if file_size >= GUEST_MAX_MEM {
                 bail!("Invalid segment file_size");
             }
             let mem_size: u32 = segment
                 .p_memsz
                 .try_into()
                 .map_err(|err| anyhow!("mem_size was larger than 32 bits {err}"))?;
-            if mem_size >= max_mem {
+            if mem_size >= GUEST_MAX_MEM {
                 bail!("Invalid segment mem_size");
             }
             let vaddr: u32 = segment

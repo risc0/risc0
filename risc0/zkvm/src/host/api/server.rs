@@ -21,7 +21,7 @@ use std::{
 use anyhow::{anyhow, bail, Result};
 use bytes::Bytes;
 use risc0_binfmt::{MemoryImage, Program};
-use risc0_zkvm_platform::{memory::MEM_SIZE, PAGE_SIZE};
+use risc0_zkvm_platform::PAGE_SIZE;
 use serde::{Deserialize, Serialize};
 
 use super::{malformed_err, path_to_string, pb, ConnectionWrapper, Connector, TcpConnector};
@@ -52,7 +52,7 @@ impl pb::Binary {
             pb::binary::Kind::Unspecified => bail!(malformed_err()),
             pb::binary::Kind::Image => bincode::deserialize(&bytes)?,
             pb::binary::Kind::Elf => {
-                let program = Program::load_elf(&bytes, MEM_SIZE as u32)?;
+                let program = Program::load_elf(&bytes)?;
                 MemoryImage::new(&program, PAGE_SIZE as u32)?
             }
         };

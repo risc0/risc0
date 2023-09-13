@@ -34,7 +34,6 @@ use risc0_zkp::{
 };
 use risc0_zkvm_platform::{
     fileno,
-    memory::MEM_SIZE,
     syscall::{
         bigint, ecall, halt,
         reg_abi::{REG_A0, REG_A1, REG_A2, REG_A3, REG_A4, REG_T0},
@@ -196,7 +195,7 @@ impl<'a> Executor<'a> {
     /// let mut exec = Executor::from_elf(env, BENCH_ELF).unwrap();
     /// ```
     pub fn from_elf(env: ExecutorEnv<'a>, elf: &[u8]) -> Result<Self> {
-        let program = Program::load_elf(elf, MEM_SIZE as u32)?;
+        let program = Program::load_elf(elf)?;
         let image = MemoryImage::new(&program, PAGE_SIZE as u32)?;
         let obj_ctx = if log::log_enabled!(log::Level::Trace) {
             let file = addr2line::object::read::File::parse(elf)?;
