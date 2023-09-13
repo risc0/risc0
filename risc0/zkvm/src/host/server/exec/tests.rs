@@ -386,7 +386,7 @@ fn sys_verify_metadata() {
 
     // TODO(victor) Also execute with a receipt of failure.
     let spec = to_vec(&MultiTestSpec::SysVerifyMetadata {
-        meta: hello_commit_session.get_metadata().unwrap(),
+        metadata_words: to_vec(&hello_commit_session.get_metadata().unwrap()).unwrap(),
     })
     .unwrap();
 

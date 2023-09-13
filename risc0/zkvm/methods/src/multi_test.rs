@@ -17,7 +17,7 @@ extern crate alloc;
 
 use alloc::vec::Vec;
 
-use risc0_zkvm::{declare_syscall, sha::Digest, ReceiptMetadata};
+use risc0_zkvm::{declare_syscall, sha::Digest};
 use risc0_zkvm_platform::syscall::bigint;
 use serde::{Deserialize, Serialize};
 
@@ -57,7 +57,8 @@ pub enum MultiTestSpec {
         journal: Vec<u8>,
     },
     SysVerifyMetadata {
-        meta: ReceiptMetadata,
+        // Define this field as a serialized vector to avoid circular dependency issues.
+        metadata_words: Vec<u32>,
     },
     EchoStdout {
         nbytes: u32,

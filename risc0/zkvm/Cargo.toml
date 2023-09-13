@@ -86,7 +86,7 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 [target.'cfg(not(target_os = "zkvm"))'.dev-dependencies]
 env_logger = "0.10"
 flate2 = "1.0"
-risc0-zkvm-methods = { path = "methods" }
+risc0-zkvm-methods = { workspace = true }
 serial_test = "2.0"
 tar = "0.4"
 test-log = { version = "0.2", features = ["trace"] }
