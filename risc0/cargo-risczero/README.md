@@ -81,7 +81,7 @@ Note: The build command requires the docker CLI installed and in your PATH.
 
 ```bash
 # Build the chess example
-cargo risczero build --manifest-path examples/chess/methods/guest/Cargo.toml
+cargo risczero build --manifest-path risc0/zkvm/methods/guest/Cargo.toml
 
 ELFs ready at:
 ImageID: 417778745b43c82a20db33a55c2b1d6e0805e0fa7eec80c9654e7321121e97af - "target/riscv-guest/riscv32im-risc0-zkvm-elf/docker/risc0_zkvm_methods_guest/multi_test"
