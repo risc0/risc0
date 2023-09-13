@@ -12,7 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::collections::BTreeMap;
+extern crate alloc;
+
+use alloc::{collections::BTreeMap, vec, vec::Vec};
 
 use anyhow::Result;
 use risc0_zkp::core::{

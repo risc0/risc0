@@ -46,6 +46,7 @@ pub use self::host::server::exec::profiler::Profiler;
 #[cfg(all(not(target_os = "zkvm"), feature = "client"))]
 pub use self::host::{
     api::client::Client as ApiClient,
+    api::Connector,
     client::{
         env::{ExecutorEnv, ExecutorEnvBuilder},
         exec::TraceEvent,
