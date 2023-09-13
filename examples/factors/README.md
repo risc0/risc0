@@ -52,6 +52,7 @@ cd factors
 ## Step 2: Give the methods package a name
 
 The methods package contains the program that executes on the guest zkVM as well as a few supporting libraries. Before we proceed, let's change its name in `methods/Cargo.toml` to match the name of our project, renaming `name = methods` to `name = factors-methods`.
+Also in `host/Cargo.toml`, rename `methods = { path = "../methods" }` to `factors-methods = { path = "../methods" }` in order to locate the renamed guest code.
 
 Parts of this package are included in the driver program `src/main.rs`, so change the line
 
