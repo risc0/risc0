@@ -25,7 +25,7 @@ use risc0_zkp::{
     prove::adapter::ProveAdapter,
 };
 
-use super::{exec::MachineContext, DynProverImpl, HalPair};
+use super::{exec::MachineContext, HalPair, ProverServer};
 use crate::{
     host::{receipt::SegmentReceipts, CIRCUIT},
     InnerReceipt, Loader, Receipt, Segment, SegmentReceipt, Session, VerifierContext,
@@ -55,7 +55,7 @@ where
     }
 }
 
-impl<H, C> DynProverImpl for ProverImpl<H, C>
+impl<H, C> ProverServer for ProverImpl<H, C>
 where
     H: Hal<Field = BabyBear, Elem = Elem, ExtElem = ExtElem>,
     C: CircuitHal<H>,

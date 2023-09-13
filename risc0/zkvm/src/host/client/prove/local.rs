@@ -16,10 +16,10 @@ use anyhow::Result;
 use risc0_binfmt::MemoryImage;
 
 use super::{Prover, ProverOpts};
-use crate::{get_prover_impl, ExecutorEnv, Receipt, VerifierContext};
+use crate::{get_prover_server, ExecutorEnv, Receipt, VerifierContext};
 
-/// A [Prover] implementation that selects a [crate::DynProverImpl] by calling
-/// [get_prover_impl].
+/// A [Prover] implementation that selects a [crate::ProverServer] by calling
+/// [get_prover_server].
 pub struct LocalProver {
     name: String,
 }
@@ -41,7 +41,7 @@ impl Prover for LocalProver {
         opts: &ProverOpts,
         image: MemoryImage,
     ) -> Result<Receipt> {
-        get_prover_impl(opts)?.prove(env, ctx, image)
+        get_prover_server(opts)?.prove(env, ctx, image)
     }
 
     fn get_name(&self) -> String {
