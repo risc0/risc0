@@ -32,7 +32,8 @@ impl Program {
     /// Initialize a RISC Zero Program from an appropriate ELF file
     pub fn load_elf(input: &[u8], max_mem: u32) -> Result<Program> {
         let mut image: BTreeMap<u32, u32> = BTreeMap::new();
-        let elf = ElfBytes::<LittleEndian>::minimal_parse(input)?;
+        let elf = ElfBytes::<LittleEndian>::minimal_parse(input)
+            .map_err(|err| anyhow!("Elf parse error: {err}"))?;
         if elf.ehdr.class != Class::ELF32 {
             bail!("Not a 32-bit ELF");
         }
@@ -42,7 +43,11 @@ impl Program {
         if elf.ehdr.e_type != elf::abi::ET_EXEC {
             bail!("Invalid ELF type, must be executable");
         }
-        let entry: u32 = elf.ehdr.e_entry.try_into()?;
+        let entry: u32 = elf
+            .ehdr
+            .e_entry
+            .try_into()
+            .map_err(|err| anyhow!("e_entry was larger than 32 bits. {err}"))?;
         if entry >= max_mem || entry % 4 != 0 {
             bail!("Invalid entrypoint");
         }
@@ -51,16 +56,28 @@ impl Program {
             bail!("Too many program headers");
         }
         for segment in segments.iter().filter(|x| x.p_type == elf::abi::PT_LOAD) {
-            let file_size: u32 = segment.p_filesz.try_into()?;
+            let file_size: u32 = segment
+                .p_filesz
+                .try_into()
+                .map_err(|err| anyhow!("filesize was larger than 32 bits. {err}"))?;
             if file_size >= max_mem {
                 bail!("Invalid segment file_size");
             }
-            let mem_size: u32 = segment.p_memsz.try_into()?;
+            let mem_size: u32 = segment
+                .p_memsz
+                .try_into()
+                .map_err(|err| anyhow!("mem_size was larger than 32 bits {err}"))?;
             if mem_size >= max_mem {
                 bail!("Invalid segment mem_size");
             }
-            let vaddr: u32 = segment.p_vaddr.try_into()?;
-            let offset: u32 = segment.p_offset.try_into()?;
+            let vaddr: u32 = segment
+                .p_vaddr
+                .try_into()
+                .map_err(|err| anyhow!("vaddr is larger than 32 bits. {err}"))?;
+            let offset: u32 = segment
+                .p_offset
+                .try_into()
+                .map_err(|err| anyhow!("offset is larger than 32 bits. {err}"))?;
             for i in (0..mem_size).step_by(4) {
                 let addr = vaddr.checked_add(i).context("Invalid segment vaddr")?;
                 if i >= file_size {
