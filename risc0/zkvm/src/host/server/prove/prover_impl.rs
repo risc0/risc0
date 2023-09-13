@@ -31,7 +31,7 @@ use crate::{
     InnerReceipt, Loader, Receipt, Segment, SegmentReceipt, Session, VerifierContext,
 };
 
-/// An implementation of a [Prover] that runs locally.
+/// An implementation of a Prover that runs locally.
 pub struct ProverImpl<H, C>
 where
     H: Hal<Field = BabyBear, Elem = Elem, ExtElem = ExtElem>,
