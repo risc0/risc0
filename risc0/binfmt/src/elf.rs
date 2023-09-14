@@ -81,6 +81,9 @@ impl Program {
                 .map_err(|err| anyhow!("offset is larger than 32 bits. {err}"))?;
             for i in (0..mem_size).step_by(4) {
                 let addr = vaddr.checked_add(i).context("Invalid segment vaddr")?;
+                if addr >= GUEST_MAX_MEM {
+                    bail!("Address [0x{addr:08x}] exceeds maximum address for guest programs [0x{GUEST_MAX_MEM:08x}]");
+                }
                 if i >= file_size {
                     // Past the file size, all zeros.
                     image.insert(addr, 0);
