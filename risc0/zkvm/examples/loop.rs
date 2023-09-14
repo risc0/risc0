@@ -17,7 +17,7 @@ use std::{process::Command, rc::Rc, time::Instant};
 use clap::Parser;
 use human_repr::{HumanCount, HumanDuration};
 use risc0_zkvm::{
-    get_prover_impl, serde::to_vec, DynProverImpl, Executor, ExecutorEnv, ProverOpts, Receipt,
+    get_prover_server, serde::to_vec, Executor, ExecutorEnv, ProverOpts, ProverServer, Receipt,
     Session, VerifierContext,
 };
 use risc0_zkvm_methods::{
@@ -33,8 +33,12 @@ struct Args {
     iterations: Option<u64>,
 
     /// Specify the hash function to use.
-    #[arg(short, long)]
+    #[arg(short = 'f', long)]
     hashfn: Option<String>,
+
+    /// Specify the segment po2
+    #[arg(short, long, default_value_t = 20)]
+    po2: usize,
 
     #[arg(long, short)]
     quiet: bool,
@@ -52,10 +56,10 @@ fn main() {
         if let Some(hashfn) = args.hashfn {
             opts.hashfn = hashfn;
         }
-        let prover = get_prover_impl(&opts).unwrap();
+        let prover = get_prover_server(&opts).unwrap();
 
         let start = Instant::now();
-        let (session, receipt) = top(prover.clone(), iterations);
+        let (session, receipt) = top(prover.clone(), iterations, args.po2);
         let segments = session.resolve().unwrap();
         let duration = start.elapsed();
 
@@ -101,12 +105,12 @@ fn main() {
             900 * 1024,  // 23, 8M
             1400 * 1024, // 24, 16M
         ] {
-            run_with_iterations(iterations);
+            run_with_iterations(iterations, args.po2);
         }
     }
 }
 
-fn run_with_iterations(iterations: usize) {
+fn run_with_iterations(iterations: usize, po2: usize) {
     let mut cmd = Command::new(std::env::current_exe().unwrap());
     if iterations == 0 {
         cmd.arg("--quiet");
@@ -114,6 +118,8 @@ fn run_with_iterations(iterations: usize) {
     let ok = cmd
         .arg("--iterations")
         .arg(iterations.to_string())
+        .arg("--po2")
+        .arg(po2.to_string())
         .status()
         .unwrap()
         .success();
@@ -121,10 +127,11 @@ fn run_with_iterations(iterations: usize) {
 }
 
 #[tracing::instrument(skip_all)]
-fn top(prover: Rc<dyn DynProverImpl>, iterations: u64) -> (Session, Receipt) {
+fn top(prover: Rc<dyn ProverServer>, iterations: u64, po2: usize) -> (Session, Receipt) {
     let spec = SpecWithIters(BenchmarkSpec::SimpleLoop, iterations);
     let env = ExecutorEnv::builder()
         .add_input(&to_vec(&spec).unwrap())
+        .segment_limit_po2(po2)
         .build()
         .unwrap();
     let mut exec = Executor::from_elf(env, BENCH_ELF).unwrap();
