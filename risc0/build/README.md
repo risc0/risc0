@@ -31,7 +31,7 @@ guest code. For example, if your guest code is in the `guest` directory,
 then `Cargo.toml` might include
 ```toml
 [build-dependencies]
-risc0-build = "0.17"
+risc0-build = "0.18"
 
 [package.metadata.risc0]
 methods = ["guest"]

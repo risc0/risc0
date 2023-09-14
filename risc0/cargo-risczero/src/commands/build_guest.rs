@@ -98,7 +98,7 @@ impl BuildGuest {
         let rustflags_env = &[("RUSTFLAGS", rustflags.as_str())];
 
         let build = DockerFile::new()
-            .from_alias("build", "risczero/risc0-guest-builder:v0.17")
+            .from_alias("build", "risczero/risc0-guest-builder:v0.18")
             .workdir("/src")
             .copy(".", ".")
             .env(manifest_env)
