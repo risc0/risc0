@@ -47,6 +47,7 @@ pub use self::host::server::exec::profiler::Profiler;
 #[cfg(feature = "client")]
 pub use self::host::{
     api::client::Client as ApiClient,
+    api::Connector,
     client::{
         env::{ExecutorEnv, ExecutorEnvBuilder},
         exec::TraceEvent,
@@ -62,14 +63,17 @@ pub use self::host::{
     client::prove::local::LocalProver,
     server::{
         exec::executor::Executor,
-        prove::{get_prover_impl, loader::Loader, DynProverImpl, HalPair},
+        prove::{get_prover_server, loader::Loader, HalPair, ProverServer},
         session::{FileSegmentRef, Segment, SegmentRef, Session, SessionEvents, SimpleSegmentRef},
     },
 };
 #[cfg(not(target_os = "zkvm"))]
 pub use self::host::{
     control_id::POSEIDON_CONTROL_ID,
-    receipt::{ExitCode, InnerReceipt, Receipt, ReceiptMetadata, SegmentReceipt, VerifierContext},
+    receipt::{
+        ExitCode, InnerReceipt, Receipt, ReceiptMetadata, SegmentReceipt, SegmentReceipts,
+        VerifierContext,
+    },
     recursion::ALLOWED_IDS_ROOT,
 };
 
