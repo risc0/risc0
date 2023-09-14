@@ -41,7 +41,7 @@ If you'd like to install the toolchain on a host not listed above, you can use t
 
 ## new
 
-The `new` command will create a new project from an existing template. It defaults to the [rust-starter template] but can be used with other templates locally or hosted on github.
+The `new` command will create a new project from an existing template. It defaults to the [rust-starter template][rust-starter] but can be used with other templates locally or hosted on github.
 
 ### Examples
 

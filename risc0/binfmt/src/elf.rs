@@ -18,6 +18,7 @@ use alloc::collections::BTreeMap;
 
 use anyhow::{anyhow, bail, Context, Result};
 use elf::{endian::LittleEndian, file::Class, ElfBytes};
+use risc0_zkvm_platform::WORD_SIZE;
 
 /// A RISC Zero program
 pub struct Program {
@@ -48,7 +49,7 @@ impl Program {
             .e_entry
             .try_into()
             .map_err(|err| anyhow!("e_entry was larger than 32 bits. {err}"))?;
-        if entry >= max_mem || entry % 4 != 0 {
+        if entry >= max_mem || entry % WORD_SIZE as u32 != 0 {
             bail!("Invalid entrypoint");
         }
         let segments = elf.segments().ok_or(anyhow!("Missing segment table"))?;
@@ -74,11 +75,14 @@ impl Program {
                 .p_vaddr
                 .try_into()
                 .map_err(|err| anyhow!("vaddr is larger than 32 bits. {err}"))?;
+            if vaddr % WORD_SIZE as u32 != 0 {
+                bail!("vaddr {vaddr:08x} is unaligned");
+            }
             let offset: u32 = segment
                 .p_offset
                 .try_into()
                 .map_err(|err| anyhow!("offset is larger than 32 bits. {err}"))?;
-            for i in (0..mem_size).step_by(4) {
+            for i in (0..mem_size).step_by(WORD_SIZE) {
                 let addr = vaddr.checked_add(i).context("Invalid segment vaddr")?;
                 if addr >= max_mem {
                     bail!("Address [0x{addr:08x}] exceeds maximum address for guest programs [0x{max_mem:08x}]");
@@ -89,7 +93,7 @@ impl Program {
                 } else {
                     let mut word = 0;
                     // Don't read past the end of the file.
-                    let len = core::cmp::min(file_size - i, 4);
+                    let len = core::cmp::min(file_size - i, WORD_SIZE as u32);
                     for j in 0..len {
                         let offset = (offset + i + j) as usize;
                         let byte = input.get(offset).context("Invalid segment offset")?;
