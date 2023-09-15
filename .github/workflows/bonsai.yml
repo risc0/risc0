@@ -49,6 +49,10 @@ jobs:
       - name: run cargo tests in bonsai
         run: cargo test --manifest-path bonsai/Cargo.toml
 
+      - name: run local e2e test in bonsai/ethereum-relay
+        run: cargo test --package bonsai-ethereum-relay --test e2e_test -- tests::e2e_test_counter --exact --nocapture --ignored
+        working-directory: bonsai/ethereum
+
       - name: run cargo tests in bonsai/examples/governance
         run: cargo test --manifest-path bonsai/examples/governance/Cargo.toml
 
