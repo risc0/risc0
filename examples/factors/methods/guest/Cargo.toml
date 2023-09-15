@@ -7,3 +7,5 @@ edition = "2021"
 
 [dependencies]
 risc0-zkvm = { path = "../../../../risc0/zkvm", default-features = false }
+# TODO(victor): Refactor such that this import is not required.
+risc0-zkvm-platform = { path = "../../../../risc0/zkvm/platform", features = ["panic_impl"] }

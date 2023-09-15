@@ -17,6 +17,9 @@ libm = { version = "0.2", optional = true }
 [features]
 default = []
 # Build a rust runtime
+# TODO(victor): These features are _not_ well-factored
+entrypoint = []
+panic_impl = []
 rust-runtime = ["export-getrandom", "export-syscalls", "export-libm"]
 export-syscalls = []
 export-libm = ["dep:libm"]

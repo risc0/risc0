@@ -635,7 +635,7 @@ pub extern "C" fn sys_alloc_words(nwords: usize) -> *mut u32 {
 
 #[cfg(feature = "export-syscalls")]
 #[no_mangle]
-pub extern "C" fn sys_alloc_aligned(bytes: usize, align: usize) -> *mut u8 {
+pub unsafe extern "C" fn sys_alloc_aligned(bytes: usize, align: usize) -> *mut u8 {
     extern "C" {
         // This symbol is defined by the loader and marks the end
         // of all elf sections, so this is where we start our

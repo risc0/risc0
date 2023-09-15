@@ -155,8 +155,8 @@ impl<'a> ExecutorEnvBuilder<'a> {
     ///     .build()
     ///     .unwrap();
     /// ```
-    pub fn args(&mut self, args: impl IntoIterator<str>) -> &mut Self {
-        self.inner.args.extend(args.map(|s| s.to_string()));
+    pub fn args(&mut self, args: &[String]) -> &mut Self {
+        self.inner.args.extend_from_slice(args);
         self
     }
 

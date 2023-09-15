@@ -38,7 +38,7 @@ libm = "0.2"
 risc0-circuit-rv32im = { workspace = true }
 risc0-core = { workspace = true }
 risc0-zkp = { workspace = true }
-risc0-zkvm-platform = { workspace = true }
+risc0-zkvm-platform = { workspace = true, features = ["rust-runtime"] }
 serde = { version = "1.0", default-features = false, features = [
   "alloc",
   "derive",

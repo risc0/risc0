@@ -180,7 +180,7 @@ impl BuildCommand {
             for t in &tests {
                 eprintln!("Running test {t}");
                 let env = ExecutorEnv::builder()
-                    .args(test_args.clone())
+                    .args(&test_args)
                     .env_var("RUST_TEST_NOCAPTURE", "1")
                     .build()?;
 

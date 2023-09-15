@@ -17,7 +17,7 @@ getrandom = "0.2"
 risc0-zkp = { path = "../../../zkp", default-features = false }
 risc0-zkvm = { path = "../..", default-features = false }
 risc0-zkvm-methods = { path = "..", default-features = false }
-risc0-zkvm-platform = { path = "../../platform" }
+risc0-zkvm-platform = { path = "../../platform", features = ["panic_impl"] }
 rsa = { version = "0.9", default-features = false, features = ["pem"] }
 serde = { version = "1.0", default-features = false, features = ["derive"] }
 

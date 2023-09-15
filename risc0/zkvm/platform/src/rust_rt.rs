@@ -12,15 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use core::{
-    alloc::{GlobalAlloc, Layout},
-    panic::PanicInfo,
-};
+use core::alloc::{GlobalAlloc, Layout};
+
+#[cfg(feature = "panic_impl")]
+use core::panic::PanicInfo;
 
 use crate::syscall;
 
 extern crate alloc;
 
+#[cfg(feature = "entrypoint")]
 static STACK_TOP: u32 = crate::memory::STACK_TOP;
 
 // Entry point; sets up global pointer and stack pointer and passes
@@ -31,7 +32,7 @@ static STACK_TOP: u32 = crate::memory::STACK_TOP;
 // start isn't already defined by e.g. risc0_zkvm::guest which needs
 // to initialize things like the journal.
 
-#[cfg(target_os = "zkvm")]
+#[cfg(feature = "entrypoint")]
 core::arch::global_asm!(
     r#"
 .section .text._start
@@ -50,7 +51,7 @@ _start:
     sym STACK_TOP
 );
 
-#[cfg(target_os = "zkvm")]
+#[cfg(feature = "panic_impl")]
 #[panic_handler]
 fn panic_fault(panic_info: &PanicInfo) -> ! {
     let msg = alloc::format!("{}", panic_info);
@@ -60,7 +61,6 @@ fn panic_fault(panic_info: &PanicInfo) -> ! {
 
 struct BumpPointerAlloc;
 
-#[cfg(target_os = "zkvm")]
 unsafe impl GlobalAlloc for BumpPointerAlloc {
     unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
         syscall::sys_alloc_aligned(layout.align(), layout.size())
@@ -71,6 +71,5 @@ unsafe impl GlobalAlloc for BumpPointerAlloc {
     }
 }
 
-#[cfg(target_os = "zkvm")]
 #[global_allocator]
 static HEAP: BumpPointerAlloc = BumpPointerAlloc;

@@ -208,6 +208,7 @@ fn get_env_var(name: &str) -> String {
     env::var(name).unwrap_or_default()
 }
 
+/// Build a [Command] with CARGO and RUSTUP_TOOLCHAIN environment variables removed.
 fn sanitized_cmd(tool: &str) -> Command {
     let mut cmd = Command::new(tool);
     for (key, _val) in env::vars().filter(|x| x.0.starts_with("CARGO")) {
@@ -223,14 +224,27 @@ pub fn cargo_command(cargo_command: &str, rustflags: &[&str]) -> Command {
     let rustc = sanitized_cmd("rustup")
         .args(["+risc0", "which", "rustc"])
         .output()
-        .expect("rustup failed")
+        .expect("rustup failed to find risc0 toolchain")
         .stdout;
+
     let rustc = String::from_utf8(rustc).unwrap();
     let rustc = rustc.trim();
     println!("Using rustc: {rustc}");
 
     let mut cmd = sanitized_cmd("cargo");
+    // DIFF: --manifest-path and --target-dir were removed here.
     let mut args = vec![cargo_command, "--target", "riscv32im-risc0-zkvm-elf"];
+
+    // DIFF: ---
+    //if !is_debug() {
+    //    args.push("--release");
+    //}
+
+    //let features_str = features.join(",");
+    //if !features.is_empty() {
+    //    args.push("--features");
+    //    args.push(&features_str);
+    //}
 
     let rust_src = get_env_var("RISC0_RUST_SRC");
     if !rust_src.is_empty() {
@@ -241,6 +255,8 @@ pub fn cargo_command(cargo_command: &str, rustflags: &[&str]) -> Command {
         cmd.env("__CARGO_TESTS_ONLY_SRC_ROOT", rust_src);
     }
 
+    // DIFF: This println! no longer means what it did before.
+    //       The command is still missing some args.
     println!("Building guest package: cargo {}", args.join(" "));
 
     let rustflags_envvar = [
@@ -278,7 +294,10 @@ pub fn cargo_command(cargo_command: &str, rustflags: &[&str]) -> Command {
 ///
 /// This can be used to build programs for the zkvm which don't depend on risc0_zkvm.
 pub fn build_rust_runtime() -> String {
-    build_staticlib("risc0-zkvm-platform", &["rust-runtime"])
+    build_staticlib(
+        "risc0-zkvm-platform",
+        &["rust-runtime", "entrypoint", "panic_impl"],
+    )
 }
 
 /// Builds a static library and returns the name of the resultant file.
@@ -288,8 +307,12 @@ fn build_staticlib(guest_pkg: &str, features: &[&str]) -> String {
     let mut cmd = cargo_command("rustc", &[]);
     eprintln!("Building for guest: {:?}", cmd);
 
+    if !is_debug() {
+        cmd.arg("--release");
+    }
+
+    // Add args to specify the package to be built, and to build is as a staticlib.
     cmd.args(&[
-        "--release",
         "--package",
         guest_pkg,
         "--target-dir",
@@ -298,10 +321,12 @@ fn build_staticlib(guest_pkg: &str, features: &[&str]) -> String {
         "--message-format=json",
         "--crate-type=staticlib",
     ]);
+
     for feature in features {
         cmd.args(&["--features", &(guest_pkg.to_owned() + "/" + feature)]);
     }
 
+    // Run the build command and extract the name of the resulting staticlib artifact.
     let mut child = cmd.stdout(Stdio::piped()).spawn().unwrap();
     let reader = std::io::BufReader::new(child.stdout.take().unwrap());
     let mut libs = Vec::new();
@@ -335,8 +360,14 @@ fn build_staticlib(guest_pkg: &str, features: &[&str]) -> String {
 
 // Builds a package that targets the riscv guest into the specified target
 // directory.
-fn build_guest_package<P>(pkg: &Package, target_dir: P, features: Vec<String>, runtime_lib: &str)
-where
+//
+// If runtime_lib is Some(lib), link lib with the built guest package.
+fn build_guest_package<P>(
+    pkg: &Package,
+    target_dir: P,
+    features: Vec<String>,
+    runtime_lib: Option<&str>,
+) where
     P: AsRef<Path>,
 {
     if !get_env_var("RISC0_SKIP_BUILD").is_empty() {
@@ -345,7 +376,16 @@ where
 
     fs::create_dir_all(target_dir.as_ref()).unwrap();
 
-    let mut cmd = cargo_command("build", &["-C", &format!("link_arg={}", runtime_lib)]);
+    let rustflags = if let Some(lib) = runtime_lib {
+        vec!["-C".to_string(), format!("link_arg={}", lib)]
+    } else {
+        vec![]
+    };
+
+    let mut cmd = cargo_command(
+        "build",
+        &rustflags.iter().map(|s| s.as_str()).collect::<Vec<_>>(),
+    );
 
     let features_str = features.join(",");
     if !features.is_empty() {
@@ -482,8 +522,6 @@ pub fn embed_methods_with_options(mut guest_pkg_to_options: HashMap<&str, GuestO
 
     detect_toolchain(RUSTUP_TOOLCHAIN_NAME);
 
-    let runtime_lib = build_rust_runtime();
-
     for guest_pkg in guest_packages {
         println!("Building guest package {}.{}", pkg.name, guest_pkg.name);
 
@@ -491,7 +529,7 @@ pub fn embed_methods_with_options(mut guest_pkg_to_options: HashMap<&str, GuestO
             .remove(guest_pkg.name.as_str())
             .unwrap_or_default();
 
-        build_guest_package(&guest_pkg, &guest_dir, guest_options.features, &runtime_lib);
+        build_guest_package(&guest_pkg, &guest_dir, guest_options.features, None);
 
         for method in guest_methods(&guest_pkg, &guest_dir) {
             methods_file

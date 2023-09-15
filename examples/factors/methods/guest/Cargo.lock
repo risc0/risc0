@@ -202,6 +202,7 @@ name = "multiply"
 version = "0.1.0"
 dependencies = [
  "risc0-zkvm",
+ "risc0-zkvm-platform",
 ]
 
 [[package]]
@@ -336,6 +337,11 @@ dependencies = [
 [[package]]
 name = "risc0-zkvm-platform"
 version = "0.17.0"
+dependencies = [
+ "bytemuck",
+ "getrandom",
+ "libm",
+]
 
 [[package]]
 name = "rustix"

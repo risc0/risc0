@@ -56,7 +56,6 @@
 
 #![deny(missing_docs)]
 
-mod alloc;
 pub mod env;
 pub mod sha;
 
@@ -86,17 +85,6 @@ pub fn abort(msg: &str) -> ! {
     // sys_panic will issue an invalid instruction for non-compliant hosts.
     unsafe {
         sys_panic(msg.as_ptr(), msg.len());
-    }
-}
-
-#[cfg(all(not(feature = "std"), target_os = "zkvm"))]
-mod handlers {
-    use core::panic::PanicInfo;
-
-    #[panic_handler]
-    fn panic_fault(panic_info: &PanicInfo) -> ! {
-        let msg = ::alloc::format!("{}", panic_info);
-        crate::guest::abort(&msg)
     }
 }
 

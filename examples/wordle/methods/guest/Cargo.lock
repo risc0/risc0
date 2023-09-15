@@ -345,6 +345,11 @@ dependencies = [
 [[package]]
 name = "risc0-zkvm-platform"
 version = "0.17.0"
+dependencies = [
+ "bytemuck",
+ "getrandom",
+ "libm",
+]
 
 [[package]]
 name = "rustix"
