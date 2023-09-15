@@ -120,7 +120,7 @@ pub const {upper}_PATH: &str = r#"{elf_path}"#;
 }
 
 /// Returns the given cargo Package from the metadata in the Cargo.toml manifest
-/// withing the provided `manifest_dir`.
+/// within the provided `manifest_dir`.
 pub fn get_package(manifest_dir: impl AsRef<Path>) -> Package {
     let manifest_path = manifest_dir.as_ref().join("Cargo.toml");
     let manifest_meta = MetadataCommand::new()
@@ -188,6 +188,7 @@ fn is_debug() -> bool {
 
 /// Returns all methods associated with the given riscv guest package.
 fn guest_methods(pkg: &Package, target_dir: impl AsRef<Path>) -> Vec<Risc0Method> {
+    let profile = if is_debug() { "debug" } else { "release" };
     pkg.targets
         .iter()
         .filter(|target| target.kind.iter().any(|kind| kind == "bin"))
@@ -196,7 +197,7 @@ fn guest_methods(pkg: &Package, target_dir: impl AsRef<Path>) -> Vec<Risc0Method
             elf_path: target_dir
                 .as_ref()
                 .join("riscv32im-risc0-zkvm-elf")
-                .join("release")
+                .join(profile)
                 .join(&target.name),
         })
         .collect()
@@ -273,9 +274,9 @@ pub fn cargo_command(cargo_command: &str, rustflags: &[&str]) -> Command {
     cmd
 }
 
-/// Builds a static library providing a rust runtime.  This can be
-/// used to build programs for the zkvm which don't depend on
-/// risc0_zkvm.
+/// Builds a static library providing a rust runtime.
+///
+/// This can be used to build programs for the zkvm which don't depend on risc0_zkvm.
 pub fn build_rust_runtime() -> String {
     build_staticlib("risc0-zkvm-platform", &["rust-runtime"])
 }

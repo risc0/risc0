@@ -5,7 +5,6 @@ edition = "2021"
 
 [build-dependencies]
 risc0-build = { {{ risc0_build }} }
-risc0-zkvm-platform = { {{ risc0_zkvm_platform }} }
 
 [package.metadata.risc0]
 methods = ["guest"]

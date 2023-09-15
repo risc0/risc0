@@ -430,17 +430,19 @@ ENV_VAR2=
 fn args() {
     let test_cases = [vec![], vec!["grep", "-c", "foo bar", "-"], vec![""]];
     for args_arr in test_cases {
-        let args: Vec<String> = args_arr.into_iter().map(|s| s.to_string()).collect();
         let env = ExecutorEnv::builder()
             .env_var("TEST_MODE", "ARGS")
-            .args(args.clone())
+            .args(&args_arr)
             .build()
             .unwrap();
         let mut exec = Executor::from_elf(env, STANDARD_LIB_ELF).unwrap();
         let session = exec.run().unwrap();
         assert_eq!(
             from_slice::<Vec<String>, _>(&session.journal).unwrap(),
-            args
+            args_arr
+                .into_iter()
+                .map(|s| s.to_string())
+                .collect::<Vec<String>>(),
         );
     }
 }

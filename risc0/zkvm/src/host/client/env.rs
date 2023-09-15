@@ -145,6 +145,7 @@ impl<'a> ExecutorEnvBuilder<'a> {
     }
 
     /// Add an argument array to the guest environment.
+    ///
     /// # Example
     /// ```
     /// # use risc0_zkvm::ExecutorEnv;
@@ -154,8 +155,8 @@ impl<'a> ExecutorEnvBuilder<'a> {
     ///     .build()
     ///     .unwrap();
     /// ```
-    pub fn args(&mut self, args: Vec<String>) -> &mut Self {
-        self.inner.args = args;
+    pub fn args(&mut self, args: impl IntoIterator<str>) -> &mut Self {
+        self.inner.args.extend(args.map(|s| s.to_string()));
         self
     }
 

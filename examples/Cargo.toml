@@ -23,6 +23,7 @@ members = [
     "zkevm-demo",
     "zkevm-demo/core",
 ]
+resolver = "2"
 
 # Always optimize; otherwise tests take excessively long.
 [profile.dev]
