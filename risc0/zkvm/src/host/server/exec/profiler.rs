@@ -35,8 +35,9 @@ use addr2line::{
 };
 use anyhow::{anyhow, Result};
 use gimli::{EndianRcSlice, RunTimeEndian};
-// use prost::Message;
+use prost::Message;
 use rrs_lib::instruction_formats::{IType, JType, OPCODE_JAL, OPCODE_JALR};
+use rustc_demangle::demangle;
 
 use crate::TraceEvent;
 
@@ -91,7 +92,7 @@ fn extract_call_stack_op(insn: u32) -> Option<CallStackOp> {
 ///
 /// Each node represents a unique call-stack as defined by a list of return
 /// addresses.
-#[derive(Debug, Default)]
+#[derive(Clone, Debug, Default)]
 struct CallNode {
     /// Counter by program counter with the current call stack.
     // TODO(victor): Is this horribly inefficient?
@@ -118,9 +119,12 @@ pub struct Profiler {
     // Cycle count when the last instruction started
     cycle: u32,
 
-    // Current call stack tree used for counting attributed cycles.
-    // TODO(victor): Replace by adding a parent pointer to the tree?
-    curr_stack: Vec<CallNode>,
+    // Path of the call stack as a series of program counters,
+    // representing the journey to the current node from the root
+    call_stack_path: Vec<u32>,
+
+    // Counts per program counter
+    counts: HashMap<u32, usize>,
 
     // Root of the tree used to store samples attributable to a call stack.
     stacks: CallNode,
@@ -132,7 +136,7 @@ pub struct Profiler {
 
 /// Represents a frame. Prefer to export the whole profiler proto using
 /// profiler.as_protobuf().
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct Frame {
     /// Function name
     pub name: String,
@@ -146,7 +150,7 @@ pub struct Frame {
 
 fn decode_frame(fr: addr2line::Frame<EndianRcSlice<RunTimeEndian>>) -> Option<Frame> {
     Some(Frame {
-        name: fr.function.as_ref()?.raw_name().ok()?.to_string(),
+        name: demangle(&fr.function.as_ref()?.raw_name().ok()?).to_string(),
         lineno: fr.location.as_ref()?.line? as i64,
         filename: fr.location.as_ref()?.file?.to_string(),
     })
@@ -176,11 +180,11 @@ impl Profiler {
             insn: 0,
             cycle: 0,
             stacks: CallNode::default(),
-            curr_stack: Vec::default(),
+            call_stack_path: Vec::new(),
+            counts: HashMap::new(),
             ctx,
             profile: ProfileBuilder::new(),
         };
-        profiler.curr_stack.push(profiler.stacks);
 
         // Save the main binary name
         let bin_name = profiler.profile.get_string(filename);
@@ -208,54 +212,49 @@ impl Profiler {
 
     /// Returns a callback to populate this profiler, suitable for
     /// passing to ProverOpts::with_trace_callback.
-    pub fn make_trace_callback<'a>(
-        &'a mut self,
-    ) -> impl FnMut(TraceEvent) -> anyhow::Result<()> + 'a {
-        |event| {
+    pub fn make_trace_callback(&mut self) -> impl FnMut(TraceEvent) -> anyhow::Result<()> + '_ {
+        move |event| {
             match event {
-                // pc is the location of the instruction insn which starts execution at cycle.
                 TraceEvent::Instruction { cycle, pc, insn } => {
-                    // Count against the last program counter.
-                    // NOTE: This accounting means page faults and padding due to segment splits
-                    // will be attributed to the last run instruction. It may be worthwhile to
-                    // consider other accounting options to depending on what is most helpful for
-                    // profiling and optimization of guests.
                     let cycles = cycle - self.cycle;
                     let orig_pc = self.pc;
                     let orig_insn = self.insn;
 
-                    let top = &mut self.curr_stack.last();
-                    match top {
-                        Some(t) => {
-                            *t.counts.entry(orig_pc).or_insert(0) += cycles as usize;
-                            match extract_call_stack_op(orig_insn) {
-                                Some(CallStackOp::Push) => {
-                                    self.curr_stack.push(*t.calls.entry(orig_pc).or_default());
-                                }
-                                Some(CallStackOp::Pop) => {
-                                    self.curr_stack.pop().ok_or(anyhow!(
-                                        "attempted to follow a return with an empty call stack"
-                                    ))?;
-                                }
-                                Some(CallStackOp::PopPush) => {
-                                    self.curr_stack.pop().ok_or(anyhow!(
-                                        "attempted to follow a return with an empty call stack"
-                                    ))?;
-                                    let top = &mut self.curr_stack.last();
-                                    match *top {
-                                        Some(t) => self
-                                            .curr_stack
-                                            .push(*t.calls.entry(orig_pc).or_default()),
-                                        None => {}
-                                    }
-                                }
-                                None => {}
+                    *self.counts.entry(orig_pc).or_insert(0) += cycles as usize;
+
+                    // We get a mutable reference to the deepest CallNode by following the call_stack_path
+                    let mut curr_node = &mut self.stacks;
+                    for &key in &self.call_stack_path {
+                        curr_node = curr_node.calls.entry(key).or_insert_with(CallNode::default);
+                    }
+
+                    curr_node
+                        .counts
+                        .entry(orig_pc)
+                        .and_modify(|e| *e += cycles as usize)
+                        .or_insert(cycles as usize);
+
+                    if let Some(op) = extract_call_stack_op(orig_insn) {
+                        // println!("CallStackOp {:?} - {}", op, orig_pc);
+                        match op {
+                            CallStackOp::Push => {
+                                self.call_stack_path.push(orig_pc);
+                            }
+                            CallStackOp::Pop => {
+                                self.call_stack_path.pop().ok_or_else(|| {
+                                    anyhow!("attempted to follow a return with an empty call stack")
+                                })?;
+                            }
+                            CallStackOp::PopPush => {
+                                self.call_stack_path.pop().ok_or_else(|| {
+                                    anyhow!("attempted to follow a return with an empty call stack")
+                                })?;
+                                self.call_stack_path.push(orig_pc);
                             }
                         }
-                        None => {}
                     }
-                    // *top.counts.entry(orig_pc).or_insert(0) += cycles as usize;
 
+                    // Update pc, insn, and cycle
                     self.pc = pc;
                     self.insn = insn;
                     self.cycle = cycle;
@@ -266,48 +265,91 @@ impl Profiler {
         }
     }
 
-    /// Count and save the profiling samples, consuming the profiler and
-    /// returning the compiled profile protobuf.
-    pub fn finalize(mut self) -> proto::Profile {
-        // PICK UP FROM HERE: Walk the call stack and construct samples.
+    // pub fn finalize(&mut self) {
+    //     // Walk the call stack and construct samples.
+    //     for (pc, count) in self.stacks.counts.iter() {
+    //         let frames = lookup_pc(*pc, &self.ctx);
+    //         let loc = proto::Location {
+    //             address: *pc as u64,
+    //             line: frames
+    //                 .into_iter()
+    //                 .map(|fr| proto::Line {
+    //                     function_id: self.profile.get_function(&fr.name, &fr.filename),
+    //                     line: fr.lineno,
+    //                 })
+    //                 .collect(),
+    //             ..Default::default()
+    //         };
+    //         let sample = proto::Sample {
+    //             location_id: vec![self.profile.get_location(loc)],
+    //             value: vec![*count as i64],
+    //             ..Default::default()
+    //         };
+    //         self.profile.add_sample(sample);
+    //     }
+    // }
+    fn walk_stack(&mut self, node: &CallNode, stack: Vec<Frame>) {
+        for (&pc, count) in &node.counts {
+            let mut new_stack = stack.clone();
 
-        for (pc, count) in self.stacks.counts.iter() {
-            let frames = lookup_pc(*pc, &self.ctx);
-            let loc = proto::Location {
-                address: *pc as u64,
-                line: frames
-                    .into_iter()
-                    .map(|fr| proto::Line {
-                        function_id: self.profile.get_function(&fr.name, &fr.filename),
-                        line: fr.lineno,
-                    })
-                    .collect(),
-                ..Default::default()
-            };
+            let frames = lookup_pc(pc, &self.ctx);
+            if !frames.is_empty() {
+                new_stack.extend(frames);
+            }
+
+            let location_ids: Vec<_> = new_stack
+                .iter()
+                .enumerate()
+                .map(|(index, fr)| {
+                    let func_id = self.profile.get_function(&fr.name, &fr.filename);
+                    let loc = proto::Location {
+                        address: (pc as u64) + index as u64, // Adjusting the address for each frame in the stack
+                        line: vec![proto::Line {
+                            function_id: func_id,
+                            line: fr.lineno,
+                        }],
+                        ..Default::default()
+                    };
+                    self.profile.get_location(loc)
+                })
+                .collect();
+
             let sample = proto::Sample {
-                location_id: vec![self.profile.get_location(loc)],
+                location_id: location_ids,
                 value: vec![*count as i64],
                 ..Default::default()
             };
+
             self.profile.add_sample(sample);
+
+            if let Some(calls) = &node.calls.get(&pc) {
+                self.walk_stack(calls, new_stack);
+            }
         }
-        self.profile.profile
     }
 
-    // /// Returns the result of this profiling run as a protobuf.
-    // pub fn as_protobuf(&self) -> &proto::Profile {
-    //     assert!(
-    //         !self.profile.profile.sample.is_empty(),
-    //         "Call finalize() first to generate the protobuf"
-    //     );
-    //     &self.profile.profile
-    // }
+    /// Count and save the profiling samples, consuming the profiler and
+    /// returning the compiled profile protobuf.
+    pub fn finalize(&mut self) {
+        let stacks = std::mem::take(&mut self.stacks);
+        self.walk_stack(&stacks, Vec::new());
+        self.stacks = stacks;
+    }
 
-    // /// Returns the result of this profiling run, encoded and ready for writing
-    // /// to a file.
-    // pub fn encode_to_vec(&mut self) -> Vec<u8> {
-    //     self.as_protobuf().encode_to_vec()
-    // }
+    /// Returns the result of this profiling run as a protobuf.
+    pub fn as_protobuf(&self) -> &proto::Profile {
+        assert!(
+            !self.profile.profile.sample.is_empty(),
+            "Call finalize() first to generate the protobuf"
+        );
+        &self.profile.profile
+    }
+
+    /// Returns the result of this profiling run, encoded and ready for writing
+    /// to a file.
+    pub fn encode_to_vec(&mut self) -> Vec<u8> {
+        self.as_protobuf().encode_to_vec()
+    }
 }
 
 struct ProfileBuilder {

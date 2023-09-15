@@ -4,8 +4,9 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+anyhow = "1.0"
 factors-methods = { path = "methods" }
-risc0-zkvm = { path = "../../risc0/zkvm" }
+risc0-zkvm = { path = "../../risc0/zkvm", features = ["profiler"] }
 serde = "1.0"
 
 [features]

@@ -1323,6 +1323,7 @@ dependencies = [
 name = "factors"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "factors-methods",
  "risc0-zkvm",
  "serde",
@@ -3402,6 +3403,7 @@ dependencies = [
  "risc0-zkp",
  "risc0-zkvm-platform",
  "rrs-lib",
+ "rustc-demangle",
  "serde",
  "sha2",
  "tempfile",
