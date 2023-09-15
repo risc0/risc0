@@ -26,7 +26,7 @@ use serde::{Deserialize, Serialize};
 
 use super::{malformed_err, path_to_string, pb, ConnectionWrapper, Connector, TcpConnector};
 use crate::{
-    get_prover_impl, host::client::slice_io::SliceIo, Executor, ExecutorEnv, ProverOpts, Segment,
+    get_prover_server, host::client::slice_io::SliceIo, Executor, ExecutorEnv, ProverOpts, Segment,
     SegmentRef, VerifierContext,
 };
 
@@ -286,7 +286,7 @@ impl Server {
         let image = binary.as_image()?;
 
         let opts: ProverOpts = request.opts.ok_or(malformed_err())?.into();
-        let prover = get_prover_impl(&opts)?;
+        let prover = get_prover_server(&opts)?;
         let ctx = VerifierContext::default();
         let receipt = prover.prove(env, &ctx, image)?;
 
@@ -319,7 +319,7 @@ impl Server {
         let segment_bytes = request.segment.ok_or(malformed_err())?.as_bytes()?;
         let segment: Segment = bincode::deserialize(&segment_bytes)?;
 
-        let prover = get_prover_impl(&opts)?;
+        let prover = get_prover_server(&opts)?;
         let ctx = VerifierContext::default();
         let receipt = prover.prove_segment(&ctx, &segment)?;
 

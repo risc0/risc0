@@ -338,7 +338,7 @@ dependencies = [
 
 [[package]]
 name = "bonsai-sdk"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "reqwest",
  "serde",
@@ -1319,22 +1319,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "factors"
-version = "0.1.0"
-dependencies = [
- "factors-methods",
- "risc0-zkvm",
- "serde",
-]
-
-[[package]]
-name = "factors-methods"
-version = "0.1.0"
-dependencies = [
- "risc0-build",
-]
-
-[[package]]
 name = "fallible-iterator"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1760,6 +1744,22 @@ name = "heck"
 version = "0.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "95505c38b4572b2d910cecb0281560f54b440a19336cbbcb27bf6ce6adc6f5a8"
+
+[[package]]
+name = "hello-world"
+version = "0.1.0"
+dependencies = [
+ "hello-world-methods",
+ "risc0-zkvm",
+ "serde",
+]
+
+[[package]]
+name = "hello-world-methods"
+version = "0.1.0"
+dependencies = [
+ "risc0-build",
+]
 
 [[package]]
 name = "hermit-abi"
@@ -3261,7 +3261,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-binfmt"
-version = "0.17.0"
+version = "0.18.0"
 dependencies = [
  "anyhow",
  "elf",
@@ -3273,7 +3273,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build"
-version = "0.17.0"
+version = "0.18.0"
 dependencies = [
  "cargo_metadata",
  "risc0-binfmt",
@@ -3285,7 +3285,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build-kernel"
-version = "0.17.0"
+version = "0.18.0"
 dependencies = [
  "cc",
  "directories",
@@ -3297,7 +3297,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im"
-version = "0.17.0"
+version = "0.18.0"
 dependencies = [
  "anyhow",
  "cust",
@@ -3315,7 +3315,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im-sys"
-version = "0.17.0"
+version = "0.18.0"
 dependencies = [
  "glob",
  "risc0-build-kernel",
@@ -3325,7 +3325,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-core"
-version = "0.17.0"
+version = "0.18.0"
 dependencies = [
  "bytemuck",
  "rand_core",
@@ -3333,7 +3333,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-sys"
-version = "0.17.0"
+version = "0.18.0"
 dependencies = [
  "cc",
  "glob",
@@ -3343,7 +3343,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkp"
-version = "0.17.0"
+version = "0.18.0"
 dependencies = [
  "anyhow",
  "blake2",
@@ -3370,7 +3370,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "0.17.0"
+version = "0.18.0"
 dependencies = [
  "addr2line",
  "anyhow",
@@ -3409,11 +3409,11 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "0.17.0"
+version = "0.18.0"
 
 [[package]]
 name = "risc0-zkvm-receipts"
-version = "0.17.0"
+version = "0.18.0"
 
 [[package]]
 name = "rkyv"

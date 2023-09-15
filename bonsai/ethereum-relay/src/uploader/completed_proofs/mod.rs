@@ -15,4 +15,4 @@
 mod complete_proof;
 mod error;
 pub(crate) mod manager;
-mod snark;
+pub(crate) mod snark;

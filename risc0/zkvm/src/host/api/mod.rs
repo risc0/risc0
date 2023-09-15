@@ -104,7 +104,9 @@ impl ConnectionWrapper {
     }
 }
 
+/// Connects a zkVM client and server
 pub trait Connector {
+    /// Create a client-server connection
     fn connect(&self) -> Result<ConnectionWrapper>;
 }
 

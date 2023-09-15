@@ -45,9 +45,11 @@ You can send the `receipt` to a third party, who can `verify` it by running:
 cargo run --release --bin verify -- -i waldo.webp -r receipt.bin
 ```
 
-Running the verifier proves that the contents of [receipt.journal] were indeed constructed by the binary file associated with the expected [ImageID].
+Running the verifier proves that the contents of the [journal] were indeed constructed by the binary file associated with the expected [ImageID].
 
 [install Rust]: https://doc.rust-lang.org/cargo/getting-started/installation.html
+[journal]: https://docs.rs/risc0-zkvm/0.18.0/risc0_zkvm/struct.Receipt.html#structfield.journal
+[ImageID]: https://dev.risczero.com/terminology#image-id
 
 ## Approach
 
