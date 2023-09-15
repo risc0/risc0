@@ -298,7 +298,7 @@ fn build_staticlib(guest_pkg: &str, features: &[&str]) -> String {
         "--crate-type=staticlib",
     ]);
     for feature in features {
-        cmd.args(&["--features", feature]);
+        cmd.args(&["--features", &(guest_pkg.to_owned() + "/" + feature)]);
     }
 
     let mut child = cmd.stdout(Stdio::piped()).spawn().unwrap();
