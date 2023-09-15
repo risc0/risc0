@@ -189,6 +189,21 @@ where
         io.assert_eq();
     }
 
+    #[cfg(feature = "supra_ntt")]
+    fn batch_expand_into_evaluate_ntt(
+        &self,
+        io: &Self::Buffer<Self::Elem>,
+        input: &Self::Buffer<Self::Elem>,
+        count: usize,
+        expand_bits: usize
+    ) {
+        self.lhs.batch_expand(&io.lhs, &input.lhs, count);
+        self.rhs.batch_expand(&io.rhs, &input.rhs, count);
+        self.lhs.batch_evaluate_ntt(&io.lhs, count, expand_bits);
+        self.rhs.batch_evaluate_ntt(&io.rhs, count, expand_bits);
+        io.assert_eq();
+    }
+
     fn batch_interpolate_ntt(&self, io: &Self::Buffer<Self::Elem>, count: usize) {
         self.lhs.batch_interpolate_ntt(&io.lhs, count);
         self.rhs.batch_interpolate_ntt(&io.rhs, count);

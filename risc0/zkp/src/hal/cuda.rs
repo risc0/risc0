@@ -599,6 +599,18 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
     }
 
     #[tracing::instrument(skip_all)]
+    #[cfg(feature = "supra_ntt")]
+    fn batch_expand_into_evaluate_ntt(
+        &self,
+        _io: &Self::Buffer<Self::Elem>,
+        _input: &Self::Buffer<Self::Elem>,
+        _count: usize,
+        _expand_bits: usize
+    ) {
+        unimplemented!();
+    }
+
+    #[tracing::instrument(skip_all)]
     #[cfg(not(feature = "supra_ntt"))]
     fn batch_interpolate_ntt(&self, io: &Self::Buffer<Self::Elem>, count: usize) {
         let row_size = io.size() / count;
@@ -1029,14 +1041,23 @@ mod tests {
 
     #[test]
     #[serial]
+    #[cfg(not(feature = "supra_ntt"))]
     fn batch_expand() {
         testutil::batch_expand(CudaHalSha256::new());
     }
 
     #[test]
     #[serial]
+    #[cfg(not(feature = "supra_ntt"))]
     fn batch_evaluate_ntt() {
         testutil::batch_evaluate_ntt(CudaHalSha256::new());
+    }
+
+    #[test]
+    #[serial]
+    #[cfg(feature = "supra_ntt")]
+    fn batch_expand_into_evaluate_ntt() {
+        testutil::batch_expand_into_evaluate_ntt(CudaHalSha256::new());
     }
 
     #[test]

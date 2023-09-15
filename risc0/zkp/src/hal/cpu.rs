@@ -328,6 +328,18 @@ impl<F: Field> Hal for CpuHal<F> {
     }
 
     #[tracing::instrument(skip_all)]
+    #[cfg(feature = "supra_ntt")]
+    fn batch_expand_into_evaluate_ntt(
+        &self,
+        _io: &Self::Buffer<Self::Elem>,
+        _input: &Self::Buffer<Self::Elem>,
+        _count: usize,
+        _expand_bits: usize
+    ) {
+        unimplemented!();
+    }
+
+    #[tracing::instrument(skip_all)]
     fn batch_interpolate_ntt(&self, io: &Self::Buffer<Self::Elem>, count: usize) {
         let row_size = io.size() / count;
         assert_eq!(row_size * count, io.size());

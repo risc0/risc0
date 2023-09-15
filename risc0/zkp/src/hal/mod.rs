@@ -83,6 +83,15 @@ pub trait Hal {
 
     fn batch_evaluate_ntt(&self, io: &Self::Buffer<Self::Elem>, count: usize, expand_bits: usize);
 
+    #[cfg(feature = "supra_ntt")]
+    fn batch_expand_into_evaluate_ntt(
+        &self,
+        io: &Self::Buffer<Self::Elem>,
+        input: &Self::Buffer<Self::Elem>,
+        count: usize,
+        expand_bits: usize
+    );
+
     fn batch_interpolate_ntt(&self, io: &Self::Buffer<Self::Elem>, count: usize);
 
     fn batch_bit_reverse(&self, io: &Self::Buffer<Self::Elem>, count: usize);
@@ -283,6 +292,24 @@ mod testutil {
         let input = generate_elem(&hal, &mut rng, input_size);
         let output = hal.alloc_elem("output", output_size);
         hal.batch_expand(&output, &input, poly_count);
+    }
+
+    #[cfg(feature = "supra_ntt")]
+    pub(crate) fn batch_expand_into_evaluate_ntt<H: Hal>(hal_gpu: H) {
+        let mut rng = thread_rng();
+        let hal_cpu = CpuHal::new(hal_gpu.get_hash_suite().clone());
+        let hal = DualHal::new(Rc::new(hal_cpu), Rc::new(hal_gpu));
+
+        let count = DATA_SIZE;
+        let expand_bits = 2;
+        let steps = 1 << 16;
+        let domain = steps * INV_RATE;
+        let input_size = count * steps;
+        let io_size = count * domain;
+
+        let input = generate_elem(&hal, &mut rng, input_size);
+        let io = hal.alloc_elem("io", io_size);
+        hal.batch_expand_into_evaluate_ntt(&io, &input, count, expand_bits);
     }
 
     pub(crate) fn batch_interpolate_ntt<H: Hal>(hal_gpu: H) {
