@@ -270,6 +270,7 @@ name = "bevy-methods"
 version = "0.1.0"
 dependencies = [
  "risc0-build",
+ "risc0-zkvm-platform",
 ]
 
 [[package]]
@@ -551,6 +552,7 @@ name = "chess-methods"
 version = "0.1.0"
 dependencies = [
  "risc0-build",
+ "risc0-zkvm-platform",
 ]
 
 [[package]]
@@ -987,6 +989,7 @@ name = "digital-signature-methods"
 version = "0.1.0"
 dependencies = [
  "risc0-build",
+ "risc0-zkvm-platform",
 ]
 
 [[package]]
@@ -1054,6 +1057,7 @@ name = "ecdsa-methods"
 version = "0.1.0"
 dependencies = [
  "risc0-build",
+ "risc0-zkvm-platform",
 ]
 
 [[package]]
@@ -1332,6 +1336,7 @@ name = "factors-methods"
 version = "0.1.0"
 dependencies = [
  "risc0-build",
+ "risc0-zkvm-platform",
 ]
 
 [[package]]
@@ -2082,6 +2087,7 @@ name = "json-methods"
 version = "0.1.0"
 dependencies = [
  "risc0-build",
+ "risc0-zkvm-platform",
 ]
 
 [[package]]
@@ -2660,6 +2666,7 @@ name = "password-checker-methods"
 version = "0.1.0"
 dependencies = [
  "risc0-build",
+ "risc0-zkvm-platform",
 ]
 
 [[package]]
@@ -2870,6 +2877,7 @@ name = "prorata-methods"
 version = "0.1.0"
 dependencies = [
  "risc0-build",
+ "risc0-zkvm-platform",
 ]
 
 [[package]]
@@ -3810,6 +3818,7 @@ name = "sha-methods"
 version = "0.1.0"
 dependencies = [
  "risc0-build",
+ "risc0-zkvm-platform",
 ]
 
 [[package]]
@@ -4540,6 +4549,7 @@ name = "waldo-methods"
 version = "0.1.0"
 dependencies = [
  "risc0-build",
+ "risc0-zkvm-platform",
 ]
 
 [[package]]
@@ -4671,6 +4681,7 @@ name = "wasm-methods"
 version = "0.1.0"
 dependencies = [
  "risc0-build",
+ "risc0-zkvm-platform",
 ]
 
 [[package]]
@@ -4954,6 +4965,7 @@ name = "wordle-methods"
 version = "0.1.0"
 dependencies = [
  "risc0-build",
+ "risc0-zkvm-platform",
 ]
 
 [[package]]
@@ -5027,6 +5039,7 @@ name = "zkevm-methods"
 version = "0.1.0"
 dependencies = [
  "risc0-build",
+ "risc0-zkvm-platform",
 ]
 
 [[package]]
