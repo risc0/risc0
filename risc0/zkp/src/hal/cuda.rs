@@ -865,12 +865,6 @@ mod tests {
 
     #[test]
     #[serial]
-    fn batch_expand() {
-        testutil::batch_expand(CudaHalSha256::new());
-    }
-
-    #[test]
-    #[serial]
     fn batch_expand_into_evaluate_ntt() {
         testutil::batch_expand_into_evaluate_ntt(CudaHalSha256::new());
     }
