@@ -9,7 +9,7 @@ use anyhow::Result;
 use bonsai_sdk::alpha as bonsai_sdk;
 use methods::{METHOD_NAME_ELF, METHOD_NAME_ID};
 use risc0_zkvm::{
-    Receipt, serde::to_vec, MemoryImage, Program, MEM_SIZE, PAGE_SIZE,
+    Receipt, serde::to_vec, MemoryImage, Program, GUEST_MAX_MEM, PAGE_SIZE,
 };
 use std::time::Duration;
 
@@ -18,7 +18,7 @@ fn run_bonsai(input_data: Vec<u8>) -> Result<()> {
 
     // create the memoryImg, upload it and return the imageId
     let img_id = {
-        let program = Program::load_elf(METHOD_NAME_ELF, MEM_SIZE as u32)?;
+        let program = Program::load_elf(METHOD_NAME_ELF, GUEST_MAX_MEM as u32)?;
         let image = MemoryImage::new(&program, PAGE_SIZE as u32)?;
         let image_id = hex::encode(image.compute_id());
         let image = bincode::serialize(&image).expect("Failed to serialize memory img");
