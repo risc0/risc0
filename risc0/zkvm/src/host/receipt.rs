@@ -48,8 +48,9 @@ use crate::{
 ///
 /// A Receipt is a zero-knowledge proof of computation. It attests that the
 /// [Receipt::journal] was produced by executing a [crate::Session] based on a
-/// specified memory image. This image is _not_ included in the receipt and must
-/// be provided by the verifier when calling [Receipt::verify].
+/// specified memory image. This image is _not_ included in the receipt; the
+/// verifier must provide an [ImageID](https://dev.risczero.com/terminology),
+/// a cryptographic hash corresponding to the expected image.
 ///
 /// A prover can provide a Receipt to an untrusting party to convince them that
 /// the results contained within the Receipt (in the [Receipt::journal]) came

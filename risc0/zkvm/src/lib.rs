@@ -39,7 +39,7 @@ pub use receipt_metadata::{ExitCode, ReceiptMetadata};
 #[cfg(not(target_os = "zkvm"))]
 pub use risc0_binfmt::MemoryImage;
 pub use risc0_binfmt::{Program, SystemState};
-pub use risc0_zkvm_platform::{declare_syscall, memory::MEM_SIZE, PAGE_SIZE};
+pub use risc0_zkvm_platform::{declare_syscall, memory::GUEST_MAX_MEM, PAGE_SIZE};
 
 #[cfg(all(not(target_os = "zkvm"), feature = "profiler"))]
 pub use self::host::server::exec::profiler::Profiler;
@@ -61,14 +61,14 @@ pub use self::host::{
     client::prove::local::LocalProver,
     server::{
         exec::executor::Executor,
-        prove::{get_prover_impl, loader::Loader, DynProverImpl, HalPair},
+        prove::{get_prover_server, loader::Loader, HalPair, ProverServer},
         session::{FileSegmentRef, Segment, SegmentRef, Session, SessionEvents, SimpleSegmentRef},
     },
 };
 #[cfg(not(target_os = "zkvm"))]
 pub use self::host::{
     control_id::POSEIDON_CONTROL_ID,
-    receipt::{InnerReceipt, Receipt, SegmentReceipt, VerifierContext},
+    receipt::{InnerReceipt, Receipt, SegmentReceipt, SegmentReceipts, VerifierContext},
     recursion::ALLOWED_IDS_ROOT,
 };
 

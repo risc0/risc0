@@ -16,7 +16,7 @@ use std::rc::Rc;
 
 use clap::Parser;
 use risc0_zkvm::{
-    get_prover_impl, DynProverImpl, Executor, ExecutorEnv, ProverOpts, VerifierContext,
+    get_prover_server, Executor, ExecutorEnv, ProverOpts, ProverServer, VerifierContext,
 };
 use risc0_zkvm_methods::FIB_ELF;
 use tracing_subscriber::{prelude::*, EnvFilter};
@@ -56,13 +56,13 @@ fn main() {
     if let Some(hashfn) = args.hashfn {
         opts.hashfn = hashfn;
     }
-    let prover = get_prover_impl(&opts).unwrap();
+    let prover = get_prover_server(&opts).unwrap();
     let metrics = top(prover, args.iterations, args.skip_prover);
     println!("{metrics:?}");
 }
 
 #[tracing::instrument(skip_all)]
-fn top(prover: Rc<dyn DynProverImpl>, iterations: u32, skip_prover: bool) -> Metrics {
+fn top(prover: Rc<dyn ProverServer>, iterations: u32, skip_prover: bool) -> Metrics {
     let env = ExecutorEnv::builder()
         .add_input(&[iterations])
         .build()
