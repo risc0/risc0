@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use anyhow::{anyhow, bail};
-use factors_methods::{MULTIPLY_ELF, MULTIPLY_PATH};
+use hello_world_methods::{MULTIPLY_ELF, MULTIPLY_PATH};
 use risc0_zkvm::serde::to_vec;
 use risc0_zkvm::{Executor, ExecutorEnv, Profiler};
 
