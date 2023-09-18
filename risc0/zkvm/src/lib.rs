@@ -35,7 +35,7 @@ pub mod recursion {
 pub use anyhow::Result;
 #[cfg(all(not(target_os = "zkvm"), any(feature = "client", feature = "prove")))]
 pub use bytes::Bytes;
-pub use receipt_metadata::{ExitCode, ReceiptMetadata};
+pub use receipt_metadata::{ExitCode, Output, ReceiptMetadata};
 #[cfg(not(target_os = "zkvm"))]
 pub use risc0_binfmt::MemoryImage;
 pub use risc0_binfmt::{Program, SystemState};

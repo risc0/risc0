@@ -22,59 +22,6 @@ use crate::{
 use risc0_binfmt::{read_sha_halfs, write_sha_halfs};
 use serde::{Deserialize, Serialize};
 
-/// Indicates how a Segment or Session's execution has terminated
-#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
-pub enum ExitCode {
-    /// This indicates when a system-initiated split has occured due to the
-    /// segment limit being exceeded.
-    SystemSplit,
-
-    /// This indicates that the session limit has been reached.
-    SessionLimit,
-
-    /// A user may manually pause a session so that it can be resumed at a later
-    /// time, along with the user returned code.
-    Paused(u32),
-
-    /// This indicates normal termination of a program with an interior exit
-    /// code returned from the guest.
-    Halted(u32),
-}
-
-impl ExitCode {
-    pub(crate) fn into_pair(self) -> (u32, u32) {
-        match self {
-            ExitCode::Halted(user_exit) => (0, user_exit),
-            ExitCode::Paused(user_exit) => (1, user_exit),
-            ExitCode::SystemSplit => (2, 0),
-            // DO NOT MERGE(victor): Confirm SessionLimit can have an associated exit code.
-            ExitCode::SessionLimit => (3, 0),
-        }
-    }
-
-    pub(crate) fn from_pair(
-        sys_exit: u32,
-        user_exit: u32,
-    ) -> Result<ExitCode, InvalidExitCodeError> {
-        match sys_exit {
-            0 => Ok(ExitCode::Halted(user_exit)),
-            1 => Ok(ExitCode::Paused(user_exit)),
-            2 => Ok(ExitCode::SystemSplit),
-            3 => Ok(ExitCode::SessionLimit),
-            _ => Err(InvalidExitCodeError(sys_exit, user_exit)),
-        }
-    }
-}
-
-#[derive(Debug, Copy, Clone)]
-pub struct InvalidExitCodeError(u32, u32);
-
-impl fmt::Display for InvalidExitCodeError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "invalid exit code pair ({}, {})", self.0, self.1)
-    }
-}
-
 /// Data associated with a receipt which is used for both input and
 /// output of global state.
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -141,5 +88,89 @@ impl ReceiptMetadata {
         flat.push(user_exit);
         write_sha_halfs(flat, &self.output);
         Ok(())
+    }
+}
+
+/// Indicates how a Segment or Session's execution has terminated
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
+pub enum ExitCode {
+    /// This indicates when a system-initiated split has occured due to the
+    /// segment limit being exceeded.
+    SystemSplit,
+
+    /// This indicates that the session limit has been reached.
+    SessionLimit,
+
+    /// A user may manually pause a session so that it can be resumed at a later
+    /// time, along with the user returned code.
+    Paused(u32),
+
+    /// This indicates normal termination of a program with an interior exit
+    /// code returned from the guest.
+    Halted(u32),
+}
+
+impl ExitCode {
+    pub(crate) fn into_pair(self) -> (u32, u32) {
+        match self {
+            ExitCode::Halted(user_exit) => (0, user_exit),
+            ExitCode::Paused(user_exit) => (1, user_exit),
+            ExitCode::SystemSplit => (2, 0),
+            // DO NOT MERGE(victor): Confirm SessionLimit can have an associated exit code.
+            ExitCode::SessionLimit => (3, 0),
+        }
+    }
+
+    pub(crate) fn from_pair(
+        sys_exit: u32,
+        user_exit: u32,
+    ) -> Result<ExitCode, InvalidExitCodeError> {
+        match sys_exit {
+            0 => Ok(ExitCode::Halted(user_exit)),
+            1 => Ok(ExitCode::Paused(user_exit)),
+            2 => Ok(ExitCode::SystemSplit),
+            3 => Ok(ExitCode::SessionLimit),
+            _ => Err(InvalidExitCodeError(sys_exit, user_exit)),
+        }
+    }
+}
+
+#[derive(Debug, Copy, Clone)]
+pub struct InvalidExitCodeError(u32, u32);
+
+impl fmt::Display for InvalidExitCodeError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "invalid exit code pair ({}, {})", self.0, self.1)
+    }
+}
+
+/// Output field in the [crate::ReceiptMetadata], committing to a claimed journal and assumptions list.
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct Output {
+    /// A SHA-256 digest of the journal committed to by the guest execution.
+    pub journal: Digest,
+
+    /// A ordered list of [crate::ReceiptMetadata] digests corresponding to the calls to `env::verify`.
+    ///
+    /// Verifying a [crate::Receipt] corresponding to a [crate::ReceiptMetadata] with a non-empty
+    /// assumptions list does not guarantee unconditionally any of the claims over the guest
+    /// execution (i.e. if the assumptions list is non-empty, then the journal digest cannot be
+    /// trusted to correspond to a genuine execution). The claims can be checked by additional
+    /// verifying a [crate::Receipt] for every digest in the assumptions list.
+    pub assumptions: Vec<Digest>,
+}
+
+impl Output {
+    /// Hash the [Output] to get a digest of the struct.
+    pub fn digest(&self) -> Digest {
+        tagged_struct(
+            "risc0.Output",
+            &[self.journal, self.assumptions_digest()],
+            &[],
+        )
+    }
+
+    pub fn assumptions_digest(&self) -> Digest {
+        Default::default()
     }
 }

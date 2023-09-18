@@ -16,7 +16,10 @@ extern crate alloc;
 
 use alloc::{collections::VecDeque, vec::Vec};
 
-use risc0_zkp::core::{digest::Digest, hash::sha::Sha256};
+use risc0_zkp::core::{
+    digest::{Digest, DIGEST_WORDS},
+    hash::sha::Sha256,
+};
 use serde::{Deserialize, Serialize};
 
 #[cfg(not(target_os = "zkvm"))]
@@ -79,6 +82,19 @@ pub fn tagged_struct<S: Sha256>(tag: &str, down: &[Digest], data: &[u32]) -> Dig
     let down_count: u16 = down.len().try_into().unwrap();
     all.extend_from_slice(&down_count.to_le_bytes());
     *S::hash_bytes(&all)
+}
+
+/// TODO(victor)
+pub fn tagged_list<S: Sha256>(tag: &str, list: &[Digest]) -> Digest {
+    list.into_iter()
+        .fold(Digest::new([0u32; DIGEST_WORDS]), |list_digest, elem| {
+            tagged_list_cons::<S>(tag, elem.clone(), list_digest)
+        })
+}
+
+/// TODO(victor)
+pub fn tagged_list_cons<S: Sha256>(tag: &str, head: Digest, rest: Digest) -> Digest {
+    tagged_struct::<S>(tag, &[head, rest], &[])
 }
 
 pub fn read_sha_halfs(flat: &mut VecDeque<u32>) -> Digest {

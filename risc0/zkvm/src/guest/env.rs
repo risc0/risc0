@@ -19,10 +19,10 @@ use core::fmt;
 use bytemuck::Pod;
 use risc0_zkvm_platform::{
     fileno,
-    syscall::{self, sys_verify, sys_verify_metadata, DIGEST_WORDS},
     syscall::{
-        sys_alloc_words, sys_cycle_count, sys_halt, sys_log, sys_pause, sys_read, sys_read_words,
-        sys_write, syscall_2, SyscallName,
+        self, sys_alloc_words, sys_cycle_count, sys_halt, sys_log, sys_pause, sys_read,
+        sys_read_words, sys_verify, sys_verify_metadata, sys_write, syscall_2, SyscallName,
+        DIGEST_WORDS,
     },
     WORD_SIZE,
 };

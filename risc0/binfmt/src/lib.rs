@@ -23,7 +23,9 @@ mod sys_state;
 
 pub use crate::{
     elf::Program,
-    sys_state::{read_sha_halfs, tagged_struct, write_sha_halfs, SystemState},
+    sys_state::{
+        read_sha_halfs, tagged_list, tagged_list_cons, tagged_struct, write_sha_halfs, SystemState,
+    },
 };
 
 #[cfg(not(target_os = "zkvm"))]
