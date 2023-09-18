@@ -17,7 +17,7 @@ use std::time::Duration;
 use anyhow::{anyhow, bail, Context, Result};
 use bonsai_sdk::alpha::{responses::SnarkReceipt, Client};
 use risc0_build::GuestListEntry;
-use risc0_zkvm::{Executor, ExecutorEnv, MemoryImage, Program, Receipt, MEM_SIZE, PAGE_SIZE};
+use risc0_zkvm::{Executor, ExecutorEnv, MemoryImage, Program, Receipt, GUEST_MAX_MEM, PAGE_SIZE};
 
 /// Result of executing a guest image, possibly containing a proof.
 pub enum Output {
@@ -47,7 +47,7 @@ pub fn execute_locally(elf: &[u8], input: Vec<u8>) -> Result<Output> {
 pub const POLL_INTERVAL_SEC: u64 = 4;
 
 fn get_digest(elf: &[u8]) -> Result<String> {
-    let program = Program::load_elf(elf, MEM_SIZE as u32)?;
+    let program = Program::load_elf(elf, GUEST_MAX_MEM as u32)?;
     let image = MemoryImage::new(&program, PAGE_SIZE as u32)?;
     Ok(hex::encode(image.compute_id()))
 }
