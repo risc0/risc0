@@ -87,8 +87,8 @@ fn run_stark2snark(session_id: String) -> Result<()> {
                 continue;
             }
             "SUCCEEDED" => {
-                let snark_proof = res.output;
-                tracing::info!("Snark proof!: {snark_proof:?}");
+                let snark_receipt = res.output;
+                tracing::info!("Snark proof!: {snark_receipt:?}");
                 break;
             }
             _ => {

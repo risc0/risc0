@@ -38,6 +38,7 @@ use ethers::core::types::Address;
 use storage::{in_memory::InMemoryStorage, Storage};
 use tokio::sync::Notify;
 use tracing::info;
+pub use uploader::completed_proofs::snark::tokenize_snark_receipt;
 use uploader::{
     completed_proofs::manager::BonsaiCompleteProofManager,
     pending_proofs::manager::BonsaiPendingProofManager,

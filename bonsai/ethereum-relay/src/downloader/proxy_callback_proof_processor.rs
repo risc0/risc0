@@ -17,7 +17,7 @@ use std::sync::Arc;
 use bonsai_ethereum_contracts::i_bonsai_relay::CallbackRequestFilter;
 use bonsai_sdk::{
     alpha::Client,
-    alpha_async::{create_session, put_input},
+    alpha_async::{create_session, upload_input},
 };
 use tokio::sync::Notify;
 use tracing::info;
@@ -52,7 +52,8 @@ impl<S: Storage + Sync + Send> EventProcessor for ProxyCallbackProofRequestProce
         &self,
         event: CallbackRequestFilter,
     ) -> Result<(), crate::api::error::Error> {
-        let input_id = put_input(self.bonsai_client.clone(), event.input.clone().to_vec()).await?;
+        let input_id =
+            upload_input(self.bonsai_client.clone(), event.input.clone().to_vec()).await?;
         let bonsai_session_id = create_session(
             self.bonsai_client.clone(),
             hex::encode(event.image_id),

@@ -41,6 +41,28 @@ Search this template for the string `TODO`, and make the necessary changes to im
  * Reference documentation for our Rust crates is available at [docs.rs], including the [RISC Zero zkVM crate](https://docs.rs/risc0-zkvm), the [cargo risczero crate](https://docs.rs/cargo-risczero), the [RISC Zero build crate](https://docs.rs/risc0-build), and others (the full list is available at [https://github.com/risc0/risc0/blob/main/README.md]).
  * Our [main repository](https://www.github.com/risc0/risc0).
 
+## Directory Structure
+It is possible to organize the files for these components in various ways. 
+However, in the [`cargo risczero`](https://docs.rs/cargo-risczero/0.18/cargo_risczero/) starter template we use a standard directory structure for zkVM applications, which we think is a good starting point for your applications.
+
+```
+project_name
+├── Cargo.toml
+├── host
+│   ├── Cargo.toml
+│   └── src
+│       └── main.rs                        <-- [Host code goes here]
+└── methods
+    ├── Cargo.toml
+    ├── build.rs                           
+    ├── guest
+    │   ├── Cargo.toml
+    │   └── src
+    │       └── bin
+    │           └── method_name.rs         <-- [Guest code goes here]
+    └── src
+        └── lib.rs                       
+```
 
 ## Contributor's Guide
 We welcome contributions to documentation and code via PRs and GitHub Issues on our [main repository](http://www.github.com/risc0) or any of our other repositories.

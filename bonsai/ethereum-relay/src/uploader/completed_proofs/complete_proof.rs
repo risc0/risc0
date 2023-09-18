@@ -17,12 +17,11 @@ use bonsai_ethereum_contracts::i_bonsai_relay::{
 };
 use bonsai_sdk::{
     alpha::{Client, SessionId},
-    alpha_async::{download, session_status},
+    alpha_async::session_status,
 };
 use ethers::abi;
-use risc0_zkvm::Receipt;
 
-use super::snark::tokenize_snark_proof;
+use super::snark::tokenize_snark_receipt;
 use crate::{api, uploader::completed_proofs::error::CompleteProofError};
 
 #[derive(Debug, Clone)]
@@ -37,23 +36,7 @@ pub(crate) async fn get_complete_proof(
     bonsai_proof_id: SessionId,
     callback_request: CallbackRequestFilter,
 ) -> Result<CompleteProof, CompleteProofError> {
-    let bonsai_response = session_status(bonsai_client.clone(), bonsai_proof_id.clone())
-        .await
-        .map_err(|err| CompleteProofError::ClientAPI {
-            source: api::error::Error::Bonsai(err),
-            id: bonsai_proof_id.clone(),
-        })?;
-
-    let receipt_url_result = match bonsai_response.receipt_url {
-        Some(url) => Ok(url),
-        None => Err(CompleteProofError::ReceiptNotFound {
-            id: bonsai_proof_id.clone(),
-        }),
-    };
-
-    let receipt_url = receipt_url_result?;
-
-    let receipt_buf = download(bonsai_client.clone(), receipt_url)
+    session_status(bonsai_client.clone(), bonsai_proof_id.clone())
         .await
         .map_err(|err| CompleteProofError::ClientAPI {
             source: api::error::Error::Bonsai(err),
@@ -62,38 +45,30 @@ pub(crate) async fn get_complete_proof(
 
     let snark_id =
         super::snark::get_snark_id(bonsai_client.clone(), bonsai_proof_id.clone()).await?;
-    let snark_proof =
-        super::snark::get_snark_proof(bonsai_client.clone(), snark_id, bonsai_proof_id.clone())
+    let snark_receipt =
+        super::snark::get_snark_receipt(bonsai_client.clone(), snark_id, bonsai_proof_id.clone())
             .await?;
     let seal = match dev_mode {
         true => vec![],
-        false => abi::encode(&[tokenize_snark_proof(&snark_proof).map_err(|_| {
+        false => abi::encode(&[tokenize_snark_receipt(&snark_receipt.snark).map_err(|_| {
             CompleteProofError::SnarkFailed {
                 id: bonsai_proof_id.clone(),
             }
         })?]),
     };
 
-    let receipt: Receipt =
-        bincode::deserialize(&receipt_buf).map_err(|_| CompleteProofError::InvalidReceipt {
-            id: bonsai_proof_id.clone(),
-        })?;
     let post_state_digest: [u8; 32] = match dev_mode {
-        false => {
-            let metadata =
-                receipt
-                    .get_metadata()
-                    .map_err(|_| CompleteProofError::InvalidReceipt {
-                        id: bonsai_proof_id.clone(),
-                    })?;
-            metadata.post.digest().into()
-        }
+        false => snark_receipt.post_state_digest.try_into().map_err(|_err| {
+            CompleteProofError::SnarkFailed {
+                id: bonsai_proof_id.clone(),
+            }
+        })?,
         true => [0u8; 32],
     };
 
     let payload = [
         callback_request.function_selector.as_slice(),
-        receipt.journal.as_slice(),
+        snark_receipt.journal.as_slice(),
         callback_request.image_id.as_slice(),
     ]
     .concat();
