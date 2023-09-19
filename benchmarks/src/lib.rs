@@ -19,7 +19,9 @@ use std::path::{Path, PathBuf};
 use std::time::{Duration, Instant};
 
 use log::info;
-use risc0_zkvm::{Executor, ExecutorEnv, MemoryImage, Program, Session, MEM_SIZE, PAGE_SIZE};
+use risc0_zkvm::{
+    serde::to_vec, Executor, ExecutorEnv, MemoryImage, Program, Session, MEM_SIZE, PAGE_SIZE,
+};
 use serde::Serialize;
 
 pub struct Metrics {
@@ -131,6 +133,17 @@ pub fn exec_compute<'a>(image: MemoryImage, env: ExecutorEnv<'a>) -> (u32, Durat
     (cycles as u32, elapsed, session)
 }
 
+pub fn init_gpu_kernel() {
+    let image = get_image(risc0_benchmark_methods::ITER_SHA2_PATH);
+    let mut guest_input = Vec::from([0u8; 36]);
+    guest_input[0] = 1u8;
+    let env = ExecutorEnv::builder()
+        .add_input(&to_vec(&guest_input).unwrap())
+        .build()
+        .unwrap();
+    exec_compute(image, env);
+}
+
 pub fn init_logging() {
     env_logger::init();
 }
@@ -139,10 +152,10 @@ pub fn init_logging() {
 struct CsvRow<'a> {
     job_name: &'a str,
     job_size: u32,
-    exec_duration_microsec: u128,
-    proof_duration_microsec: u128,
-    verify_duration_microsec: u128,
-    cycles: u32,
+    exec_duration_seconds: f64,
+    proof_duration_seconds: f64,
+    verify_duration_seconds: f64,
+    insn_cycles: u32,
     proof_bytes: u32,
 }
 
@@ -181,10 +194,10 @@ pub fn run_jobs<B: Benchmark>(out_path: &PathBuf, specs: Vec<B::Spec>) -> Vec<Me
         out.serialize(CsvRow {
             job_name: &job_metrics.job_name,
             job_size: job_metrics.job_size,
-            exec_duration_microsec: job_metrics.exec_duration.as_micros(),
-            proof_duration_microsec: job_metrics.proof_duration.as_micros(),
-            verify_duration_microsec: job_metrics.verify_duration.as_micros(),
-            cycles: job_metrics.cycles,
+            exec_duration_seconds: job_metrics.exec_duration.as_secs_f64(),
+            proof_duration_seconds: job_metrics.proof_duration.as_secs_f64(),
+            verify_duration_seconds: job_metrics.verify_duration.as_secs_f64(),
+            insn_cycles: job_metrics.cycles,
             proof_bytes: job_metrics.proof_bytes,
         })
         .expect("Could not serialize");

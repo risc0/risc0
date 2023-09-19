@@ -14,6 +14,9 @@
 
 // This is based on zk-benchmarking: https://github.com/delendum-xyz/zk-benchmarking
 
+#[cfg(any(feature = "metal", feature = "cuda"))]
+use risc0_benchmark::init_gpu_kernel;
+
 use clap::{Parser, Subcommand};
 use risc0_benchmark::{init_logging, run_jobs};
 use std::path::PathBuf;
@@ -48,6 +51,10 @@ enum Command {
 
 fn main() {
     init_logging();
+
+    #[cfg(any(feature = "metal", feature = "cuda"))]
+    init_gpu_kernel();
+
     let cli = Cli::parse();
 
     if cli.command == Command::All || cli.command == Command::BigSha2 {
