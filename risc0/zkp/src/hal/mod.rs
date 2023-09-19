@@ -76,14 +76,13 @@ pub trait Hal {
     ) -> Self::Buffer<Self::ExtElem>;
     fn copy_from_u32(&self, name: &'static str, slice: &[u32]) -> Self::Buffer<u32>;
 
-    fn batch_expand(
+    fn batch_expand_into_evaluate_ntt(
         &self,
         output: &Self::Buffer<Self::Elem>,
         input: &Self::Buffer<Self::Elem>,
         count: usize,
+        expand_bits: usize,
     );
-
-    fn batch_evaluate_ntt(&self, io: &Self::Buffer<Self::Elem>, count: usize, expand_bits: usize);
 
     fn batch_interpolate_ntt(&self, io: &Self::Buffer<Self::Elem>, count: usize);
 
@@ -254,7 +253,7 @@ mod testutil {
         hal.batch_evaluate_any(&coeffs, poly_count as usize, &which, &xs, &out);
     }
 
-    pub(crate) fn batch_evaluate_ntt<H: Hal>(hal_gpu: H) {
+    pub(crate) fn batch_expand_into_evaluate_ntt<H: Hal>(hal_gpu: H) {
         let mut rng = thread_rng();
         let hal_cpu = CpuHal::new(hal_gpu.get_hash_suite().clone());
         let hal = DualHal::new(Rc::new(hal_cpu), Rc::new(hal_gpu));
@@ -263,26 +262,12 @@ mod testutil {
         let expand_bits = 2;
         let steps = 1 << 16;
         let domain = steps * INV_RATE;
-        let io_size = count * domain;
-
-        let io = generate_elem(&hal, &mut rng, io_size);
-        hal.batch_evaluate_ntt(&io, count, expand_bits);
-    }
-
-    pub(crate) fn batch_expand<H: Hal>(hal_gpu: H) {
-        let mut rng = thread_rng();
-        let hal_cpu = CpuHal::new(hal_gpu.get_hash_suite().clone());
-        let hal = DualHal::new(Rc::new(hal_cpu), Rc::new(hal_gpu));
-
-        let poly_count = DATA_SIZE;
-        let steps = 1 << 16;
-        let domain = steps * INV_RATE;
-        let input_size = poly_count * steps;
-        let output_size = poly_count * domain;
+        let input_size = count * steps;
+        let output_size = count * domain;
 
         let input = generate_elem(&hal, &mut rng, input_size);
         let output = hal.alloc_elem("output", output_size);
-        hal.batch_expand(&output, &input, poly_count);
+        hal.batch_expand_into_evaluate_ntt(&output, &input, count, expand_bits);
     }
 
     pub(crate) fn batch_interpolate_ntt<H: Hal>(hal_gpu: H) {

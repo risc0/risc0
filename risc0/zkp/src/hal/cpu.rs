@@ -295,36 +295,41 @@ impl<F: Field> Hal for CpuHal<F> {
     }
 
     #[tracing::instrument(skip_all)]
-    fn batch_expand(
+    fn batch_expand_into_evaluate_ntt(
         &self,
         output: &Self::Buffer<Self::Elem>,
         input: &Self::Buffer<Self::Elem>,
         count: usize,
+        expand_bits: usize,
     ) {
-        let out_size = output.size() / count;
-        let in_size = input.size() / count;
-        let expand_bits = log2_ceil(out_size / in_size);
-        assert_eq!(out_size, in_size * (1 << expand_bits));
-        assert_eq!(out_size * count, output.size());
-        assert_eq!(in_size * count, input.size());
-        output
-            .as_slice_mut()
-            .par_chunks_exact_mut(out_size)
-            .zip(input.as_slice().par_chunks_exact(in_size))
-            .for_each(|(output, input)| {
-                expand(output, input, expand_bits);
-            });
-    }
+        // batch_expand
+        {
+            let out_size = output.size() / count;
+            let in_size = input.size() / count;
+            let expand_bits = log2_ceil(out_size / in_size);
+            assert_eq!(out_size, in_size * (1 << expand_bits));
+            assert_eq!(out_size * count, output.size());
+            assert_eq!(in_size * count, input.size());
+            output
+                .as_slice_mut()
+                .par_chunks_exact_mut(out_size)
+                .zip(input.as_slice().par_chunks_exact(in_size))
+                .for_each(|(output, input)| {
+                    expand(output, input, expand_bits);
+                });
+        }
 
-    #[tracing::instrument(skip_all)]
-    fn batch_evaluate_ntt(&self, io: &Self::Buffer<Self::Elem>, count: usize, expand_bits: usize) {
-        let row_size = io.size() / count;
-        assert_eq!(row_size * count, io.size());
-        io.as_slice_mut()
-            .par_chunks_exact_mut(row_size)
-            .for_each(|row| {
-                evaluate_ntt::<Self::Elem, Self::Elem>(row, expand_bits);
-            });
+        // batch_evaluate_ntt
+        {
+            let row_size = output.size() / count;
+            assert_eq!(row_size * count, output.size());
+            output
+                .as_slice_mut()
+                .par_chunks_exact_mut(row_size)
+                .for_each(|row| {
+                    evaluate_ntt::<Self::Elem, Self::Elem>(row, expand_bits);
+                });
+        }
     }
 
     #[tracing::instrument(skip_all)]
