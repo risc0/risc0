@@ -35,7 +35,7 @@ pub async fn get_client_from_parts(url: String, api_key: String) -> Result<Clien
 }
 
 /// Upload a input buffer to the /inputs/ route
-pub async fn put_input(bonsai_client: Client, buf: Vec<u8>) -> Result<String, SdkErr> {
+pub async fn upload_input(bonsai_client: Client, buf: Vec<u8>) -> Result<String, SdkErr> {
     tokio::task::spawn_blocking(move || bonsai_client.upload_input(buf))
         .await
         .map_err(|err| SdkErr::InternalServerErr(format!("{err}")))?
@@ -43,14 +43,16 @@ pub async fn put_input(bonsai_client: Client, buf: Vec<u8>) -> Result<String, Sd
 
 /// Upload a image buffer to the /images/ route
 ///
+/// The boolean return indicates if the image already exists in bonsai
+///
 /// The image data can be either:
 /// * ELF file bytes
 /// * bincode encoded MemoryImage
-pub async fn put_image(
+pub async fn upload_img(
     bonsai_client: Client,
     image_id: String,
     image: Vec<u8>,
-) -> Result<(), SdkErr> {
+) -> Result<bool, SdkErr> {
     tokio::task::spawn_blocking(move || bonsai_client.upload_img(&image_id, image))
         .await
         .map_err(|err| SdkErr::InternalServerErr(format!("{err}")))?

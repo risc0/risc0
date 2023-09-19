@@ -139,6 +139,7 @@ prove = [
 std = [
   "anyhow/std",
   "num-traits?/std",
+  "risc0-binfmt/std",
   "risc0-circuit-rv32im/std",
   "risc0-zkp/std",
   "serde/std",

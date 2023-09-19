@@ -9,7 +9,7 @@ use anyhow::Result;
 use bonsai_sdk::alpha as bonsai_sdk;
 use methods::{METHOD_NAME_ELF, METHOD_NAME_ID};
 use risc0_zkvm::{
-    Receipt, serde::to_vec, MemoryImage, Program, MEM_SIZE, PAGE_SIZE,
+    Receipt, serde::to_vec, MemoryImage, Program, GUEST_MAX_MEM, PAGE_SIZE,
 };
 use std::time::Duration;
 
@@ -18,7 +18,7 @@ fn run_bonsai(input_data: Vec<u8>) -> Result<()> {
 
     // create the memoryImg, upload it and return the imageId
     let img_id = {
-        let program = Program::load_elf(METHOD_NAME_ELF, MEM_SIZE as u32)?;
+        let program = Program::load_elf(METHOD_NAME_ELF, GUEST_MAX_MEM as u32)?;
         let image = MemoryImage::new(&program, PAGE_SIZE as u32)?;
         let image_id = hex::encode(image.compute_id());
         let image = bincode::serialize(&image).expect("Failed to serialize memory img");
@@ -36,6 +36,11 @@ fn run_bonsai(input_data: Vec<u8>) -> Result<()> {
     loop {
         let res = session.status(&client)?;
         if res.status == "RUNNING" {
+            tracing::debug!(
+                "Current status: {} - state: {} - continue polling...",
+                res.status,
+                res.state.unwrap_or_default()
+            );
             std::thread::sleep(Duration::from_secs(15));
             continue;
         }
@@ -51,7 +56,7 @@ fn run_bonsai(input_data: Vec<u8>) -> Result<()> {
                 .verify(METHOD_NAME_ID)
                 .expect("Receipt verification failed");
         } else {
-            panic!("Workflow exited: {}", res.status);
+            panic!("Workflow exited: {} - | err: {}", res.status, res.error_msg.unwrap_or_default());
         }
 
         break;
@@ -59,4 +64,40 @@ fn run_bonsai(input_data: Vec<u8>) -> Result<()> {
 
     Ok(())
 }
+```
+
+## STARK to SNARK
+
+After a STARK proof is generated, it is possible to convert the proof to SNARK.
+
+### Example
+
+```rust
+fn run_stark2snark(session_id: String) -> Result<()> {
+    let client = bonsai_sdk::Client::from_env()?;
+
+    let snark_session = client.create_snark(session_id)?;
+    tracing::info!("Created snark session: {}", snark_session.uuid);
+    loop {
+        let res = snark_session.status(&client)?;
+        match res.status.as_str() {
+            "RUNNING" => {
+                tracing::debug!("Current status: {} - continue polling...", res.status,);
+                std::thread::sleep(Duration::from_secs(15));
+                continue;
+            }
+            "SUCCEEDED" => {
+                let snark_receipt = res.output;
+                tracing::info!("Snark proof!: {snark_receipt:?}");
+                break;
+            }
+            _ => {
+                panic!("Workflow exited: {} err: {}", res.status, res.error_msg.unwrap_or_default());
+            }
+        }
+    }
+    Ok(())
+}
+
+run_stark2snark(session_id)?;
 ```

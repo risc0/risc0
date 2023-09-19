@@ -77,7 +77,7 @@ impl Risc0Method {
         }
 
         let elf = fs::read(&self.elf_path).unwrap();
-        let program = Program::load_elf(&elf, memory::MEM_SIZE as u32).unwrap();
+        let program = Program::load_elf(&elf, memory::GUEST_MAX_MEM as u32).unwrap();
         let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
         image.compute_id()
     }

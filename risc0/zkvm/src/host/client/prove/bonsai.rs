@@ -15,7 +15,7 @@
 use core::time::Duration;
 
 use anyhow::{anyhow, bail, Result};
-use bonsai_sdk::alpha::{Client, SdkErr};
+use bonsai_sdk::alpha::Client;
 use risc0_binfmt::MemoryImage;
 
 use super::Prover;
@@ -53,13 +53,8 @@ impl Prover for BonsaiProver {
         let image_id = hex::encode(image.compute_id());
         let image = bincode::serialize(&image)?;
 
-        // ImageIdExists indicates that this image has already been uploaded to bonsai.
-        // If this is the case, simply move on to uploading the input.
-        match client.upload_img(&image_id, image) {
-            Ok(()) => (),
-            Err(SdkErr::ImageIdExists) => (),
-            Err(err) => return Err(err.into()),
-        }
+        // return value 'exists' is ignored here
+        client.upload_img(&image_id, image)?;
 
         // upload input data
         let input_id = client.upload_input(env.input)?;

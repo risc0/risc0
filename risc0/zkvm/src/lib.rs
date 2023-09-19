@@ -25,13 +25,20 @@ mod host;
 pub mod serde;
 pub mod sha;
 
+/// Re-exports for recursion
+#[cfg(not(target_os = "zkvm"))]
+#[cfg(feature = "prove")]
+pub mod recursion {
+    pub use super::host::recursion::*;
+}
+
 pub use anyhow::Result;
 #[cfg(not(target_os = "zkvm"))]
 #[cfg(any(feature = "client", feature = "prove"))]
 pub use bytes::Bytes;
 #[cfg(not(target_os = "zkvm"))]
 pub use risc0_binfmt::{MemoryImage, Program, SystemState};
-pub use risc0_zkvm_platform::{declare_syscall, memory::MEM_SIZE, PAGE_SIZE};
+pub use risc0_zkvm_platform::{declare_syscall, memory::GUEST_MAX_MEM, PAGE_SIZE};
 
 #[cfg(not(target_os = "zkvm"))]
 #[cfg(feature = "profiler")]
@@ -40,6 +47,7 @@ pub use self::host::server::exec::profiler::Profiler;
 #[cfg(feature = "client")]
 pub use self::host::{
     api::client::Client as ApiClient,
+    api::Connector,
     client::{
         env::{ExecutorEnv, ExecutorEnvBuilder},
         exec::TraceEvent,
@@ -55,14 +63,17 @@ pub use self::host::{
     client::prove::local::LocalProver,
     server::{
         exec::executor::Executor,
-        prove::{get_prover_impl, loader::Loader, DynProverImpl},
+        prove::{get_prover_server, loader::Loader, HalPair, ProverServer},
         session::{FileSegmentRef, Segment, SegmentRef, Session, SessionEvents, SimpleSegmentRef},
     },
 };
 #[cfg(not(target_os = "zkvm"))]
 pub use self::host::{
     control_id::POSEIDON_CONTROL_ID,
-    receipt::{ExitCode, InnerReceipt, Receipt, ReceiptMetadata, SegmentReceipt, VerifierContext},
+    receipt::{
+        ExitCode, InnerReceipt, Receipt, ReceiptMetadata, SegmentReceipt, SegmentReceipts,
+        VerifierContext,
+    },
     recursion::ALLOWED_IDS_ROOT,
 };
 
