@@ -18,6 +18,8 @@
 #![deny(missing_docs)]
 
 extern crate alloc;
+mod fault_ids;
+pub use fault_ids::{FAULT_CHECKER_ELF, FAULT_CHECKER_ID};
 
 pub mod guest;
 #[cfg(not(target_os = "zkvm"))]
@@ -25,17 +27,14 @@ mod host;
 pub mod serde;
 pub mod sha;
 
-/// Re-exports for recursion
-#[cfg(not(target_os = "zkvm"))]
-#[cfg(feature = "prove")]
-pub mod recursion {
-    pub use super::host::recursion::*;
-}
-
+#[cfg(feature = "fault-proof")]
+mod fault_monitor;
 pub use anyhow::Result;
 #[cfg(not(target_os = "zkvm"))]
 #[cfg(any(feature = "client", feature = "prove"))]
 pub use bytes::Bytes;
+#[cfg(feature = "fault-proof")]
+pub use fault_monitor::FaultCheckMonitor;
 #[cfg(not(target_os = "zkvm"))]
 pub use risc0_binfmt::{MemoryImage, Program, SystemState};
 pub use risc0_zkvm_platform::{declare_syscall, memory::GUEST_MAX_MEM, PAGE_SIZE};
