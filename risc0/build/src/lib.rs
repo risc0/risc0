@@ -220,7 +220,7 @@ fn sanitized_cmd(tool: &str) -> Command {
 
 /// Creates a std::process::Command to execute the given cargo
 /// command in an environment suitable for targeting the zkvm guest.
-pub fn cargo_command(cargo_command: &str, rustflags: &[&str]) -> Command {
+pub fn cargo_command(cargo_command: &str, rust_flags: &[&str]) -> Command {
     let rustc = sanitized_cmd("rustup")
         .args(["+risc0", "which", "rustc"])
         .output()
@@ -260,7 +260,7 @@ pub fn cargo_command(cargo_command: &str, rustflags: &[&str]) -> Command {
     println!("Building guest package: cargo {}", args.join(" "));
 
     let rustflags_envvar = [
-        rustflags,
+        rust_flags,
         &[
             // Replace atomic ops with nonatomic versions since the guest is single threaded.
             "-C",
@@ -366,8 +366,12 @@ fn build_staticlib(guest_pkg: &str, features: &[&str]) -> String {
 
 // Builds a package that targets the riscv guest into the specified target
 // directory.
-fn build_guest_package<P>(pkg: &Package, target_dir: P, features: Vec<String>, runtime_lib: &str)
-where
+fn build_guest_package<P>(
+    pkg: &Package,
+    target_dir: P,
+    features: Vec<String>,
+    runtime_lib: Option<&str>,
+) where
     P: AsRef<Path>,
 {
     if !get_env_var("RISC0_SKIP_BUILD").is_empty() {
@@ -376,7 +380,11 @@ where
 
     fs::create_dir_all(target_dir.as_ref()).unwrap();
 
-    let mut cmd = cargo_command("build", &["-C", &format!("link_arg={}", runtime_lib)]);
+    let mut cmd = if let Some(lib) = runtime_lib {
+        cargo_command("build", &["-C", &format!("link_arg={}", lib)])
+    } else {
+        cargo_command("build", &[])
+    };
 
     let features_str = features.join(",");
     if !features.is_empty() {
@@ -513,8 +521,6 @@ pub fn embed_methods_with_options(mut guest_pkg_to_options: HashMap<&str, GuestO
 
     detect_toolchain(RUSTUP_TOOLCHAIN_NAME);
 
-    let runtime_lib = build_rust_runtime();
-
     for guest_pkg in guest_packages {
         println!("Building guest package {}.{}", pkg.name, guest_pkg.name);
 
@@ -522,7 +528,7 @@ pub fn embed_methods_with_options(mut guest_pkg_to_options: HashMap<&str, GuestO
             .remove(guest_pkg.name.as_str())
             .unwrap_or_default();
 
-        build_guest_package(&guest_pkg, &guest_dir, guest_options.features, &runtime_lib);
+        build_guest_package(&guest_pkg, &guest_dir, guest_options.features, None);
 
         for method in guest_methods(&guest_pkg, &guest_dir) {
             methods_file

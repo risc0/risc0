@@ -86,9 +86,9 @@ impl BuildCommand {
             ),
         };
 
-        // Unpack the rust-runtime.a file that is included in this binary.
+        // Unpack the risc0-zkvm-platform.a file that is included in this binary.
         let tmpdir = tempdir()?;
-        let rust_runtime = get_zip_file(&tmpdir, "rust-runtime.a")?;
+        let rust_runtime = get_zip_file(&tmpdir, "risc0-zkvm-platform.a")?;
 
         // Determine the target directory where the build artifacts should be placed.
         let target_dir = &self

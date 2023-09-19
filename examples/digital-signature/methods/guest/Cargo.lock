@@ -393,7 +393,6 @@ version = "0.1.0"
 dependencies = [
  "digital-signature-core",
  "risc0-zkvm",
- "risc0-zkvm-platform",
 ]
 
 [[package]]

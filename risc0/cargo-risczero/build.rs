@@ -22,7 +22,7 @@ mod runtime {
     use zip::{write::FileOptions, CompressionMethod, ZipWriter};
 
     pub fn build_and_zip_runtime() {
-        // Build the rust-runtime.a file and place it in a zip archive for inclusion in
+        // Build the risc0-zkvm-platform.a file and place it in a zip archive for inclusion in
         // the cargo-risczero binary.
         let out_dir_env = env::var_os("OUT_DIR").unwrap();
         let out_dir = Path::new(&out_dir_env); // $ROOT/target/$profile/build/$crate/out
@@ -32,7 +32,7 @@ mod runtime {
         let mut zip = ZipWriter::new(f);
         let options = FileOptions::default().compression_method(CompressionMethod::Stored);
 
-        zip.start_file("rust-runtime.a", options).unwrap();
+        zip.start_file("risc0-zkvm-platform.a", options).unwrap();
         let mut runtime_in = fs::File::open(rust_runtime).unwrap();
         io::copy(&mut runtime_in, &mut zip).unwrap();
         zip.finish().unwrap();
