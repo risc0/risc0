@@ -16,6 +16,7 @@ use super::WORD_SIZE;
 
 pub const MEM_BITS: usize = 28;
 pub const MEM_SIZE: usize = 1 << MEM_BITS;
+pub const GUEST_MAX_MEM: usize = SYSTEM.start;
 
 pub struct Region {
     start: usize,

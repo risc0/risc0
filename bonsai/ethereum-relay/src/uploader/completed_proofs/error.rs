@@ -66,8 +66,6 @@ impl BonsaiCompleteProofManagerError {
 pub(crate) enum CompleteProofError {
     /// bonsai client error for proof
     ClientAPI { source: Error, id: ProofID },
-    /// bonsai receipt was not found for proof
-    ReceiptNotFound { id: ProofID },
     /// bonsai snark conversion for proof failed
     SnarkFailed { id: ProofID },
     /// bonsai snark timed out
@@ -76,8 +74,6 @@ pub(crate) enum CompleteProofError {
     SnarkAborted { id: ProofID },
     /// bonsai snark is in unknown state
     SnarkUnknown { id: ProofID },
-    /// invalid receipt
-    InvalidReceipt { id: ProofID },
 }
 
 impl CompleteProofError {
@@ -87,8 +83,6 @@ impl CompleteProofError {
             | CompleteProofError::SnarkFailed { id }
             | CompleteProofError::SnarkTimedOut { id }
             | CompleteProofError::SnarkUnknown { id }
-            | CompleteProofError::ReceiptNotFound { id }
-            | CompleteProofError::InvalidReceipt { id }
             | CompleteProofError::ClientAPI { id, .. } => id,
         }
     }
