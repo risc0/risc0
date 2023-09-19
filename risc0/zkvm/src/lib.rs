@@ -37,7 +37,7 @@ pub use bytes::Bytes;
 pub use fault_monitor::FaultCheckMonitor;
 #[cfg(not(target_os = "zkvm"))]
 pub use risc0_binfmt::{MemoryImage, Program, SystemState};
-pub use risc0_zkvm_platform::{declare_syscall, memory::MEM_SIZE, PAGE_SIZE};
+pub use risc0_zkvm_platform::{declare_syscall, memory::GUEST_MAX_MEM, PAGE_SIZE};
 
 #[cfg(not(target_os = "zkvm"))]
 #[cfg(feature = "profiler")]

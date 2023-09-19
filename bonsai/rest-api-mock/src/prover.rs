@@ -19,7 +19,7 @@ use std::{
 
 use anyhow::Context;
 use risc0_zkvm::{
-    Executor, ExecutorEnv, InnerReceipt, MemoryImage, Program, Receipt, MEM_SIZE, PAGE_SIZE,
+    Executor, ExecutorEnv, InnerReceipt, MemoryImage, Program, Receipt, GUEST_MAX_MEM, PAGE_SIZE,
 };
 use tokio::sync::mpsc;
 
@@ -87,7 +87,7 @@ impl Prover {
                 let mem_img = image.as_slice();
                 let mem_img = if mem_img[0..ELFMAGIC.len()] == ELFMAGIC {
                     tracing::info!("Loading guest image form ELF file");
-                    let program = Program::load_elf(mem_img, MEM_SIZE as u32)?;
+                    let program = Program::load_elf(mem_img, GUEST_MAX_MEM as u32)?;
                     MemoryImage::new(&program, PAGE_SIZE as u32)?
                 } else {
                     bincode::deserialize(mem_img).context("failed to decode memory image")?

@@ -757,3 +757,14 @@ fn post_state_digest_randomization() {
         .collect();
     assert_eq!(post_state_digests.len(), 1);
 }
+
+#[test]
+#[should_panic(expected = "cycle count too large")]
+fn too_many_sha() {
+    let spec = to_vec(&MultiTestSpec::TooManySha).unwrap();
+    let env = ExecutorEnv::builder().add_input(&spec).build().unwrap();
+    Executor::from_elf(env, MULTI_TEST_ELF)
+        .unwrap()
+        .run()
+        .unwrap();
+}

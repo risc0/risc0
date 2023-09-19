@@ -35,7 +35,7 @@ use risc0_zkp::{
 };
 use risc0_zkvm_platform::{
     fileno,
-    memory::MEM_SIZE,
+    memory::GUEST_MAX_MEM,
     syscall::{
         bigint, ecall, halt,
         reg_abi::{REG_A0, REG_A1, REG_A2, REG_A3, REG_A4, REG_T0},
@@ -228,7 +228,7 @@ impl<'a> Executor<'a> {
     /// let mut exec = Executor::from_elf(env, BENCH_ELF).unwrap();
     /// ```
     pub fn from_elf(env: ExecutorEnv<'a>, elf: &[u8]) -> Result<Self> {
-        let program = Program::load_elf(elf, MEM_SIZE as u32)?;
+        let program = Program::load_elf(elf, GUEST_MAX_MEM as u32)?;
         let image = MemoryImage::new(&program, PAGE_SIZE as u32)?;
         let obj_ctx = if log::log_enabled!(log::Level::Trace) {
             let file = addr2line::object::read::File::parse(elf)?;
@@ -392,6 +392,7 @@ impl<'a> Executor<'a> {
                 return Ok(Some(ExitCode::SessionLimit));
             }
         }
+        let pre_cycles = self.total_cycles();
 
         let insn = self.monitor.load_u32(self.pc)?;
         let opcode = OpCode::decode(insn, self.pc)?;
@@ -483,6 +484,12 @@ impl<'a> Executor<'a> {
         //     total_pending_cycles,
         //     self.total_cycles()
         // );
+        if total_pending_cycles - pre_cycles > self.segment_limit {
+            // some instructions could be invoked with parameters that increase the cycle
+            // count over the segment limit. If this is the case, doing a system split won't
+            // do anything so halt the executor.
+            bail!("execution of instruction at pc [0x{:08x}] resulted in a cycle count too large to fit into a single segment.", self.pc);
+        }
         let exit_code = if total_pending_cycles > self.segment_limit {
             self.split_insn = Some(self.insn_counter);
             log::debug!("split: [{}] pc: 0x{:08x}", self.segment_cycle, self.pc,);

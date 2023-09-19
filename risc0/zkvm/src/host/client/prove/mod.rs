@@ -21,7 +21,7 @@ use std::{path::PathBuf, rc::Rc};
 
 use anyhow::Result;
 use risc0_binfmt::{MemoryImage, Program};
-use risc0_zkvm_platform::{memory::MEM_SIZE, PAGE_SIZE};
+use risc0_zkvm_platform::{memory::GUEST_MAX_MEM, PAGE_SIZE};
 use serde::{Deserialize, Serialize};
 
 use self::{bonsai::BonsaiProver, external::ExternalProver};
@@ -40,7 +40,7 @@ use crate::{is_dev_mode, ExecutorEnv, Receipt, VerifierContext};
 /// use risc0_zkvm::{
 ///     default_prover,
 ///     ExecutorEnv,
-///     MEM_SIZE,
+///     GUEST_MAX_MEM,
 ///     MemoryImage,
 ///     PAGE_SIZE,
 ///     Program,
@@ -65,7 +65,7 @@ use crate::{is_dev_mode, ExecutorEnv, Receipt, VerifierContext};
 /// // Or you can prove from a `MemoryImage`
 /// // (generating a `MemoryImage` from an ELF file in this way is equivalent
 /// // to the above code.)
-/// let program = Program::load_elf(FIB_ELF, MEM_SIZE as u32).unwrap();
+/// let program = Program::load_elf(FIB_ELF, GUEST_MAX_MEM as u32).unwrap();
 /// let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
 /// let env = ExecutorEnv::builder().add_input(&[20]).build().unwrap();
 /// let ctx = VerifierContext::default();
@@ -104,7 +104,7 @@ pub trait Prover {
         elf: &[u8],
         opts: &ProverOpts,
     ) -> Result<Receipt> {
-        let program = Program::load_elf(elf, MEM_SIZE as u32)?;
+        let program = Program::load_elf(elf, GUEST_MAX_MEM as u32)?;
         let image = MemoryImage::new(&program, PAGE_SIZE as u32)?;
         self.prove(env, ctx, opts, image)
     }
