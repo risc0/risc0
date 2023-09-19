@@ -20,7 +20,7 @@ use std::time::{Duration, Instant};
 
 use log::info;
 use risc0_zkvm::{
-    serde::to_vec, Executor, ExecutorEnv, MemoryImage, Program, Session, MEM_SIZE, PAGE_SIZE,
+    serde::to_vec, Executor, ExecutorEnv, MemoryImage, Program, Session, GUEST_MAX_MEM, PAGE_SIZE,
 };
 use serde::Serialize;
 
@@ -116,7 +116,7 @@ pub trait Benchmark {
 
 pub fn get_image(path: &str) -> MemoryImage {
     let elf = std::fs::read(path).expect("elf");
-    let program = Program::load_elf(&elf, MEM_SIZE as u32).unwrap();
+    let program = Program::load_elf(&elf, GUEST_MAX_MEM as u32).unwrap();
     MemoryImage::new(&program, PAGE_SIZE as u32).unwrap()
 }
 
