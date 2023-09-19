@@ -47,6 +47,7 @@ enum Command {
     IterBlake2b,
     IterBlake3,
     EcdsaVerify,
+    Ed25519Verify,
     Fibonacci,
 }
 
@@ -92,6 +93,10 @@ fn main() {
 
     if cli.command == Command::All || cli.command == Command::EcdsaVerify {
         run_jobs::<ecdsa_verify::Job>(&cli.out, ecdsa_verify::new_jobs());
+    }
+
+    if cli.command == Command::All || cli.command == Command::Ed25519Verify {
+        run_jobs::<ed25519_verify::Job>(&cli.out, ed25519_verify::new_jobs());
     }
 
     if cli.command == Command::All || cli.command == Command::Fibonacci {

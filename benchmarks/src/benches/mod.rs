@@ -17,6 +17,7 @@ pub mod big_blake3;
 pub mod big_keccak;
 pub mod big_sha2;
 pub mod ecdsa_verify;
+pub mod ed25519_verify;
 pub mod fibonacci;
 pub mod iter_blake2b;
 pub mod iter_blake3;

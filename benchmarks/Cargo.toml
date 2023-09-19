@@ -13,15 +13,16 @@ risc0-benchmark-methods = { path = "methods" }
 risc0-build = { path = "../risc0/build" }
 
 [dependencies]
-byteorder = "1.4"
-blake3 = { version = "1.4", default-features = false }
 blake2 = { version = "0.10.6", default-features = false }
+blake3 = { version = "1.4", default-features = false }
+byteorder = "1.4"
 clap = { version = "4.0", features = ["derive"] }
 csv = "1.1"
+ed25519-dalek = { version = "2.0.0-rc.3", default-features = false, features = ["rand_core"] }
 env_logger = "0.10"
+k256 = { version = "0.13", features = ["serde"] }
 log = "0.4"
 rand = "0.8"
-k256 = { version = "0.13", features = ["serde"] }
 rand_core = "0.6.4"
 risc0-benchmark-methods = { workspace = true }
 risc0-zkp = { path = "../risc0/zkp", default-features = false }
