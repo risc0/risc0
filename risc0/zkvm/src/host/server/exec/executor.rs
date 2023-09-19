@@ -123,11 +123,7 @@ impl std::fmt::Display for ExecutorError {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match self {
             ExecutorError::Error(e) => write!(f, "{e}"),
-            ExecutorError::Fault(s) => write!(
-                f,
-                "Faulted Session [Image ID: {}]",
-                s.segments[0].resolve().unwrap().pre_image.compute_id()
-            ),
+            ExecutorError::Fault(_) => write!(f, "Faulted Session",),
         }
     }
 }
