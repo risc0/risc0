@@ -127,13 +127,14 @@ fn main() {
         exec.run().unwrap()
     };
 
-    // Now that we're done with the prover, we can collect the guest profiling data.
+    // Now that we're done with the executor, we can collect the guest profiling data.
     #[cfg(feature = "profiler")]
     if let Some(ref mut profiler) = guest_prof.as_mut() {
         profiler.finalize();
         let report = profiler.encode_to_vec();
         fs::write(args.pprof_out.as_ref().unwrap(), &report)
             .expect("Unable to write profiling output");
+        return;
     }
 
     let prover = args.get_prover();

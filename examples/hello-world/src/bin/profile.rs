@@ -48,7 +48,13 @@ fn main() -> anyhow::Result<()> {
         };
 
         // Execute the example.
-        Executor::from_elf(env, MULTIPLY_ELF)?.run()?;
+        let session = Executor::from_elf(env, MULTIPLY_ELF)?.run()?;
+        let segments = session.resolve()?;
+        let mut cycles = 0usize;
+        for segment in segments {
+            cycles += segment.insn_cycles
+        }
+        println!("{cycles}");
     }
 
     // Write out the pprof.

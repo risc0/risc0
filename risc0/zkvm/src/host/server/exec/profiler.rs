@@ -27,6 +27,7 @@
 //  * Demangle symbols
 
 use std::collections::HashMap;
+use std::hash::{Hash, Hasher};
 
 use addr2line::{
     fallible_iterator::FallibleIterator,
@@ -37,9 +38,10 @@ use anyhow::{anyhow, Result};
 use gimli::{EndianRcSlice, RunTimeEndian};
 use prost::Message;
 use rrs_lib::instruction_formats::{IType, JType, OPCODE_JAL, OPCODE_JALR};
-use rustc_demangle::demangle;
 
 use crate::TraceEvent;
+
+use self::proto::Line;
 
 mod proto {
     // Generated proto interface.
@@ -102,12 +104,6 @@ struct CallNode {
     pub(crate) calls: HashMap<u32, CallNode>,
 }
 
-impl CallNode {
-    // fn walkl(&self) -> impl Iterator<Item = (&'a [u32], usize)> + 'a {
-    //     self.calls.iter()
-    // }
-}
-
 /// Manages profiling state
 pub struct Profiler {
     // Current program counter
@@ -123,11 +119,8 @@ pub struct Profiler {
     // representing the journey to the current node from the root
     call_stack_path: Vec<u32>,
 
-    // Counts per program counter
-    counts: HashMap<u32, usize>,
-
     // Root of the tree used to store samples attributable to a call stack.
-    stacks: CallNode,
+    root: CallNode,
 
     ctx: Context<EndianRcSlice<RunTimeEndian>>,
 
@@ -150,7 +143,7 @@ pub struct Frame {
 
 fn decode_frame(fr: addr2line::Frame<EndianRcSlice<RunTimeEndian>>) -> Option<Frame> {
     Some(Frame {
-        name: demangle(&fr.function.as_ref()?.raw_name().ok()?).to_string(),
+        name: fr.function.as_ref()?.demangle().ok()?.to_string(),
         lineno: fr.location.as_ref()?.line? as i64,
         filename: fr.location.as_ref()?.file?.to_string(),
     })
@@ -179,9 +172,8 @@ impl Profiler {
             pc: u32::MAX,
             insn: 0,
             cycle: 0,
-            stacks: CallNode::default(),
+            root: CallNode::default(),
             call_stack_path: Vec::new(),
-            counts: HashMap::new(),
             ctx,
             profile: ProfileBuilder::new(),
         };
@@ -220,10 +212,8 @@ impl Profiler {
                     let orig_pc = self.pc;
                     let orig_insn = self.insn;
 
-                    *self.counts.entry(orig_pc).or_insert(0) += cycles as usize;
-
                     // We get a mutable reference to the deepest CallNode by following the call_stack_path
-                    let mut curr_node = &mut self.stacks;
+                    let mut curr_node = &mut self.root;
                     for &key in &self.call_stack_path {
                         curr_node = curr_node.calls.entry(key).or_insert_with(CallNode::default);
                     }
@@ -235,7 +225,6 @@ impl Profiler {
                         .or_insert(cycles as usize);
 
                     if let Some(op) = extract_call_stack_op(orig_insn) {
-                        // println!("CallStackOp {:?} - {}", op, orig_pc);
                         match op {
                             CallStackOp::Push => {
                                 self.call_stack_path.push(orig_pc);
@@ -265,29 +254,6 @@ impl Profiler {
         }
     }
 
-    // pub fn finalize(&mut self) {
-    //     // Walk the call stack and construct samples.
-    //     for (pc, count) in self.stacks.counts.iter() {
-    //         let frames = lookup_pc(*pc, &self.ctx);
-    //         let loc = proto::Location {
-    //             address: *pc as u64,
-    //             line: frames
-    //                 .into_iter()
-    //                 .map(|fr| proto::Line {
-    //                     function_id: self.profile.get_function(&fr.name, &fr.filename),
-    //                     line: fr.lineno,
-    //                 })
-    //                 .collect(),
-    //             ..Default::default()
-    //         };
-    //         let sample = proto::Sample {
-    //             location_id: vec![self.profile.get_location(loc)],
-    //             value: vec![*count as i64],
-    //             ..Default::default()
-    //         };
-    //         self.profile.add_sample(sample);
-    //     }
-    // }
     fn walk_stack(&mut self, node: &CallNode, stack: Vec<Frame>) {
         for (&pc, count) in &node.counts {
             let mut new_stack = stack.clone();
@@ -297,13 +263,13 @@ impl Profiler {
                 new_stack.extend(frames);
             }
 
-            let location_ids: Vec<_> = new_stack
+            let mut location_ids: Vec<_> = new_stack
                 .iter()
-                .enumerate()
-                .map(|(index, fr)| {
+                .map(|fr| {
                     let func_id = self.profile.get_function(&fr.name, &fr.filename);
+                    // println!("{} - {} - {} - {}", pc, count, func_id, fr.name);
                     let loc = proto::Location {
-                        address: (pc as u64) + index as u64, // Adjusting the address for each frame in the stack
+                        address: pc as u64,
                         line: vec![proto::Line {
                             function_id: func_id,
                             line: fr.lineno,
@@ -313,17 +279,18 @@ impl Profiler {
                     self.profile.get_location(loc)
                 })
                 .collect();
-
+            location_ids.reverse();
             let sample = proto::Sample {
                 location_id: location_ids,
                 value: vec![*count as i64],
                 ..Default::default()
             };
+            // println!("{:?}", sample);
 
             self.profile.add_sample(sample);
 
-            if let Some(calls) = &node.calls.get(&pc) {
-                self.walk_stack(calls, new_stack);
+            if let Some(next_node) = node.calls.get(&pc) {
+                self.walk_stack(next_node, new_stack);
             }
         }
     }
@@ -331,9 +298,8 @@ impl Profiler {
     /// Count and save the profiling samples, consuming the profiler and
     /// returning the compiled profile protobuf.
     pub fn finalize(&mut self) {
-        let stacks = std::mem::take(&mut self.stacks);
-        self.walk_stack(&stacks, Vec::new());
-        self.stacks = stacks;
+        let root = self.root.clone();
+        self.walk_stack(&root, Vec::new());
     }
 
     /// Returns the result of this profiling run as a protobuf.
@@ -357,6 +323,8 @@ struct ProfileBuilder {
 
     functions: HashMap<(String, String), u64>,
 
+    locations: HashMap<LocationKey, u64>,
+
     profile: proto::Profile,
 }
 
@@ -365,6 +333,7 @@ impl ProfileBuilder {
         let mut builder = Self {
             strings: HashMap::new(),
             functions: HashMap::new(),
+            locations: HashMap::new(),
             profile: Default::default(),
         };
 
@@ -383,12 +352,22 @@ impl ProfileBuilder {
     }
 
     fn get_location(&mut self, mut loc: proto::Location) -> u64 {
+        // Check if a Location with the same characteristics already exists
+        let key = LocationKey {
+            address: loc.address,
+            lines: loc.line.clone(),
+        };
+        if let Some(&id) = self.locations.get(&key) {
+            return id;
+        }
+
         let id = self.profile.location.len() as u64 + 1;
         loc.id = id;
         if !self.profile.mapping.is_empty() {
-            loc.mapping_id = 1;
+            loc.mapping_id = 0; // TODO: check this
         }
         self.profile.location.push(loc);
+        self.locations.insert(key, id);
         id
     }
 
@@ -445,3 +424,26 @@ impl ProfileBuilder {
         })
     }
 }
+
+struct LocationKey {
+    address: u64,
+    lines: Vec<Line>,
+}
+
+impl Hash for LocationKey {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.address.hash(state);
+        for line in &self.lines {
+            line.function_id.hash(state);
+            line.line.hash(state);
+        }
+    }
+}
+
+impl PartialEq for LocationKey {
+    fn eq(&self, other: &Self) -> bool {
+        self.address == other.address && self.lines == other.lines
+    }
+}
+
+impl Eq for LocationKey {}

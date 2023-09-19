@@ -3403,7 +3403,6 @@ dependencies = [
  "risc0-zkp",
  "risc0-zkvm-platform",
  "rrs-lib",
- "rustc-demangle",
  "serde",
  "sha2",
  "tempfile",
