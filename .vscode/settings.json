@@ -39,6 +39,7 @@
     "Cargo.toml",
     "bonsai/examples/governance/Cargo.toml",
     "examples/Cargo.toml",
+    "risc0/fault/guest/Cargo.toml",
     "risc0/zkvm/methods/guest/Cargo.toml",
     "risc0/zkvm/methods/std/Cargo.toml"
   ]

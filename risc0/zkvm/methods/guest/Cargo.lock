@@ -181,6 +181,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "downcast-rs"
+version = "1.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9ea835d29036a4087793836fa931b08837ad5e957da9e23886b29586fb9b6650"
+
+[[package]]
 name = "elf"
 version = "0.7.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -512,7 +518,7 @@ checksum = "e5ea92a5b6195c6ef2a0295ea818b312502c6fc94dde986c5553242e18fd4ce2"
 
 [[package]]
 name = "risc0-binfmt"
-version = "0.17.0"
+version = "0.18.0"
 dependencies = [
  "anyhow",
  "elf",
@@ -524,7 +530,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build"
-version = "0.17.0"
+version = "0.18.0"
 dependencies = [
  "cargo_metadata",
  "risc0-binfmt",
@@ -536,7 +542,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im"
-version = "0.17.0"
+version = "0.18.0"
 dependencies = [
  "anyhow",
  "log",
@@ -548,7 +554,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-core"
-version = "0.17.0"
+version = "0.18.0"
 dependencies = [
  "bytemuck",
  "rand_core",
@@ -556,7 +562,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkp"
-version = "0.17.0"
+version = "0.18.0"
 dependencies = [
  "anyhow",
  "blake2",
@@ -575,7 +581,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "0.17.0"
+version = "0.18.0"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -590,6 +596,7 @@ dependencies = [
  "risc0-core",
  "risc0-zkp",
  "risc0-zkvm-platform",
+ "rrs-lib",
  "serde",
  "tempfile",
  "tracing",
@@ -597,7 +604,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-methods"
-version = "0.17.0"
+version = "0.18.0"
 dependencies = [
  "env_logger",
  "risc0-build",
@@ -622,11 +629,21 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "0.17.0"
+version = "0.18.0"
 dependencies = [
  "bytemuck",
  "getrandom",
  "libm",
+]
+
+[[package]]
+name = "rrs-lib"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b4382d3af3a4ebdae7f64ba6edd9114fff92c89808004c4943b393377a25d001"
+dependencies = [
+ "downcast-rs",
+ "paste",
 ]
 
 [[package]]

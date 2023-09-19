@@ -12,17 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use factors::multiply_factors;
-use factors_methods::MULTIPLY_ID;
+#![doc = include_str!("../README.md")]
 
-fn main() {
-    // Pick two numbers
-    let (receipt, _) = multiply_factors(17, 23);
-
-    // Here is where one would send 'receipt' over the network...
-
-    // Verify receipt, panic if it's wrong
-    receipt.verify(MULTIPLY_ID).expect(
-        "Code you have proven should successfully verify; did you specify the correct image ID?",
-    );
-}
+#[cfg(not(target_os = "zkvm"))]
+include!(concat!(env!("OUT_DIR"), "/methods.rs"));

@@ -144,6 +144,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "69dde51e8fef5e12c1d65e0929b03d66e4c0c18282bc30ed2ca050ad6f44dd82"
 
 [[package]]
+name = "downcast-rs"
+version = "1.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9ea835d29036a4087793836fa931b08837ad5e957da9e23886b29586fb9b6650"
+
+[[package]]
 name = "elf"
 version = "0.7.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -372,7 +378,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-binfmt"
-version = "0.17.0"
+version = "0.18.0"
 dependencies = [
  "anyhow",
  "elf",
@@ -384,7 +390,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im"
-version = "0.17.0"
+version = "0.18.0"
 dependencies = [
  "anyhow",
  "log",
@@ -396,7 +402,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-core"
-version = "0.17.0"
+version = "0.18.0"
 dependencies = [
  "bytemuck",
  "rand_core",
@@ -404,7 +410,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkp"
-version = "0.17.0"
+version = "0.18.0"
 dependencies = [
  "anyhow",
  "blake2",
@@ -423,7 +429,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "0.17.0"
+version = "0.18.0"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -439,6 +445,7 @@ dependencies = [
  "risc0-core",
  "risc0-zkp",
  "risc0-zkvm-platform",
+ "rrs-lib",
  "serde",
  "tempfile",
  "tracing",
@@ -446,11 +453,21 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "0.17.0"
+version = "0.18.0"
 dependencies = [
  "bytemuck",
  "getrandom",
  "libm",
+]
+
+[[package]]
+name = "rrs-lib"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b4382d3af3a4ebdae7f64ba6edd9114fff92c89808004c4943b393377a25d001"
+dependencies = [
+ "downcast-rs",
+ "paste",
 ]
 
 [[package]]

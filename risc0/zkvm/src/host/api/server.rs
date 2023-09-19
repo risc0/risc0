@@ -21,12 +21,12 @@ use std::{
 use anyhow::{anyhow, bail, Result};
 use bytes::Bytes;
 use risc0_binfmt::{MemoryImage, Program};
-use risc0_zkvm_platform::{memory::MEM_SIZE, PAGE_SIZE};
+use risc0_zkvm_platform::{memory::GUEST_MAX_MEM, PAGE_SIZE};
 use serde::{Deserialize, Serialize};
 
 use super::{malformed_err, path_to_string, pb, ConnectionWrapper, Connector, TcpConnector};
 use crate::{
-    get_prover_impl, host::client::slice_io::SliceIo, Executor, ExecutorEnv, ProverOpts, Segment,
+    get_prover_server, host::client::slice_io::SliceIo, Executor, ExecutorEnv, ProverOpts, Segment,
     SegmentRef, VerifierContext,
 };
 
@@ -52,7 +52,7 @@ impl pb::Binary {
             pb::binary::Kind::Unspecified => bail!(malformed_err()),
             pb::binary::Kind::Image => bincode::deserialize(&bytes)?,
             pb::binary::Kind::Elf => {
-                let program = Program::load_elf(&bytes, MEM_SIZE as u32)?;
+                let program = Program::load_elf(&bytes, GUEST_MAX_MEM as u32)?;
                 MemoryImage::new(&program, PAGE_SIZE as u32)?
             }
         };
@@ -286,7 +286,7 @@ impl Server {
         let image = binary.as_image()?;
 
         let opts: ProverOpts = request.opts.ok_or(malformed_err())?.into();
-        let prover = get_prover_impl(&opts)?;
+        let prover = get_prover_server(&opts)?;
         let ctx = VerifierContext::default();
         let receipt = prover.prove(env, &ctx, image)?;
 
@@ -319,7 +319,7 @@ impl Server {
         let segment_bytes = request.segment.ok_or(malformed_err())?.as_bytes()?;
         let segment: Segment = bincode::deserialize(&segment_bytes)?;
 
-        let prover = get_prover_impl(&opts)?;
+        let prover = get_prover_server(&opts)?;
         let ctx = VerifierContext::default();
         let receipt = prover.prove_segment(&ctx, &segment)?;
 

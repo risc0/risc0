@@ -77,13 +77,26 @@ struct Seal {
     uint256[2] c;
 }
 
+/// Control ID hash for the identity_p254 predicate decomposed as implemented by splitDigest.
+/// New releases of RISC Zero's zkvm may require updating these values. These values can be
+/// obtained by running `cargo run --bin bonsai-ethereum-contracts -F control-id`
+library ControlID {
+    uint256 public constant CONTROL_ID_0 = 0x68e42d8b3ddc499f4e1799a767052ab3;
+    uint256 public constant CONTROL_ID_1 = 0x3802684f1645e0a028585b0445d39231;
+}
+
 contract RiscZeroGroth16Verifier is IRiscZeroVerifier, Groth16Verifier {
     using ReceiptMetadataLib for ReceiptMetadata;
     using SafeCast for uint256;
 
     // Control ID hash for the identity_p254 predicate decomposed as implemented by splitDigest.
-    uint256 internal constant CONTROL_ID_0 = uint256(0x68e42d8b3ddc499f4e1799a767052ab3);
-    uint256 internal constant CONTROL_ID_1 = uint256(0x3802684f1645e0a028585b0445d39231);
+    uint256 public immutable CONTROL_ID_0;
+    uint256 public immutable CONTROL_ID_1;
+
+    constructor(uint256 control_id_0, uint256 control_id_1) {
+        CONTROL_ID_0 = control_id_0;
+        CONTROL_ID_1 = control_id_1;
+    }
 
     /// @notice splits a digest into two 128-bit words to use as public signal inputs.
     /// @dev RISC Zero's Circom verifier circuit takes each of two hash digests in two 128-bit

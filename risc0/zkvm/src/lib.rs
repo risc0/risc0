@@ -18,6 +18,8 @@
 #![deny(missing_docs)]
 
 extern crate alloc;
+mod fault_ids;
+pub use fault_ids::{FAULT_CHECKER_ELF, FAULT_CHECKER_ID};
 
 pub mod guest;
 #[cfg(not(target_os = "zkvm"))]
@@ -25,20 +27,17 @@ mod host;
 pub mod serde;
 pub mod sha;
 
-/// Re-exports for recursion
-#[cfg(not(target_os = "zkvm"))]
-#[cfg(feature = "prove")]
-pub mod recursion {
-    pub use super::host::recursion::*;
-}
-
+#[cfg(feature = "fault-proof")]
+mod fault_monitor;
 pub use anyhow::Result;
 #[cfg(not(target_os = "zkvm"))]
 #[cfg(any(feature = "client", feature = "prove"))]
 pub use bytes::Bytes;
+#[cfg(feature = "fault-proof")]
+pub use fault_monitor::FaultCheckMonitor;
 #[cfg(not(target_os = "zkvm"))]
 pub use risc0_binfmt::{MemoryImage, Program, SystemState};
-pub use risc0_zkvm_platform::{declare_syscall, memory::MEM_SIZE, PAGE_SIZE};
+pub use risc0_zkvm_platform::{declare_syscall, memory::GUEST_MAX_MEM, PAGE_SIZE};
 
 #[cfg(not(target_os = "zkvm"))]
 #[cfg(feature = "profiler")]
@@ -47,6 +46,7 @@ pub use self::host::server::exec::profiler::Profiler;
 #[cfg(feature = "client")]
 pub use self::host::{
     api::client::Client as ApiClient,
+    api::Connector,
     client::{
         env::{ExecutorEnv, ExecutorEnvBuilder},
         exec::TraceEvent,
@@ -62,14 +62,17 @@ pub use self::host::{
     client::prove::local::LocalProver,
     server::{
         exec::executor::Executor,
-        prove::{get_prover_impl, loader::Loader, DynProverImpl, HalPair},
+        prove::{get_prover_server, loader::Loader, HalPair, ProverServer},
         session::{FileSegmentRef, Segment, SegmentRef, Session, SessionEvents, SimpleSegmentRef},
     },
 };
 #[cfg(not(target_os = "zkvm"))]
 pub use self::host::{
     control_id::POSEIDON_CONTROL_ID,
-    receipt::{ExitCode, InnerReceipt, Receipt, ReceiptMetadata, SegmentReceipt, VerifierContext},
+    receipt::{
+        ExitCode, InnerReceipt, Receipt, ReceiptMetadata, SegmentReceipt, SegmentReceipts,
+        VerifierContext,
+    },
     recursion::ALLOWED_IDS_ROOT,
 };
 

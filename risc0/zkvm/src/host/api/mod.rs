@@ -104,7 +104,9 @@ impl ConnectionWrapper {
     }
 }
 
+/// Connects a zkVM client and server
 pub trait Connector {
+    /// Create a client-server connection
     fn connect(&self) -> Result<ConnectionWrapper>;
 }
 
@@ -433,6 +435,7 @@ impl From<ExitCode> for pb::ExitCode {
                 ExitCode::SessionLimit => pb::exit_code::Kind::SessionLimit(()),
                 ExitCode::Paused(code) => pb::exit_code::Kind::Paused(code),
                 ExitCode::Halted(code) => pb::exit_code::Kind::Halted(code),
+                ExitCode::Fault => pb::exit_code::Kind::Fault(()),
             }),
         }
     }

@@ -15,10 +15,10 @@
 use anyhow::{bail, Result};
 
 use crate::{
-    DynProverImpl, InnerReceipt, Receipt, Segment, SegmentReceipt, Session, VerifierContext,
+    InnerReceipt, ProverServer, Receipt, Segment, SegmentReceipt, Session, VerifierContext,
 };
 
-/// An implementation of a [DynProverImpl] for development and testing purposes.
+/// An implementation of a [ProverServer] for development and testing purposes.
 ///
 /// This DevModeProver does not produce an actual proof.
 /// Instead, the guest code is executed and a fake receipt is returned with
@@ -39,7 +39,7 @@ use crate::{
 /// `risc0_zkvm` crate.
 pub struct DevModeProver;
 
-impl DynProverImpl for DevModeProver {
+impl ProverServer for DevModeProver {
     fn prove_session(&self, _ctx: &VerifierContext, session: &Session) -> Result<Receipt> {
         eprintln!(
             "WARNING: Proving in dev mode does not generate a valid receipt. \

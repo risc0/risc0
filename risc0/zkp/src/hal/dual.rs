@@ -172,21 +172,19 @@ where
         BufferImpl::new(lhs, rhs)
     }
 
-    fn batch_expand(
+    #[tracing::instrument(skip_all)]
+    fn batch_expand_into_evaluate_ntt(
         &self,
         output: &Self::Buffer<Self::Elem>,
         input: &Self::Buffer<Self::Elem>,
         count: usize,
+        expand_bits: usize,
     ) {
-        self.lhs.batch_expand(&output.lhs, &input.lhs, count);
-        self.rhs.batch_expand(&output.rhs, &input.rhs, count);
+        self.lhs
+            .batch_expand_into_evaluate_ntt(&output.lhs, &input.lhs, count, expand_bits);
+        self.rhs
+            .batch_expand_into_evaluate_ntt(&output.rhs, &input.rhs, count, expand_bits);
         output.assert_eq();
-    }
-
-    fn batch_evaluate_ntt(&self, io: &Self::Buffer<Self::Elem>, count: usize, expand_bits: usize) {
-        self.lhs.batch_evaluate_ntt(&io.lhs, count, expand_bits);
-        self.rhs.batch_evaluate_ntt(&io.rhs, count, expand_bits);
-        io.assert_eq();
     }
 
     fn batch_interpolate_ntt(&self, io: &Self::Buffer<Self::Elem>, count: usize) {
