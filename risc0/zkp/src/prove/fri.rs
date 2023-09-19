@@ -47,10 +47,9 @@ impl<H: Hal> ProveRoundInfo<H> {
         let evaluated = hal.alloc_elem("evaluated", domain * ext_size);
         // Put in the coefficients, padding out with zeros so that we are left with the
         // same polynomial represented by a larger coefficient list
-        hal.batch_expand(&evaluated, coeffs, ext_size);
         // Evaluate the NTT in-place, filling the buffer with the evaluations of the
         // polynomial.
-        hal.batch_evaluate_ntt(&evaluated, ext_size, log2_ceil(INV_RATE));
+        hal.batch_expand_into_evaluate_ntt(&evaluated, coeffs, ext_size, log2_ceil(INV_RATE));
         // Compute a Merkle tree committing to the polynomial evaluations.
         let merkle = MerkleTreeProver::new(
             hal,

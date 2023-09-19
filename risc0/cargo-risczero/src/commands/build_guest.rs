@@ -24,7 +24,7 @@ use clap::Parser;
 use docker_generate::DockerFile;
 use risc0_binfmt::{MemoryImage, Program};
 use risc0_zkvm_platform::{
-    memory::{MEM_SIZE, TEXT_START},
+    memory::{GUEST_MAX_MEM, TEXT_START},
     PAGE_SIZE,
 };
 use tempfile::tempdir;
@@ -166,7 +166,8 @@ impl BuildGuest {
     /// Compute the image ID for a given ELF.
     fn compute_image_id(&self, elf_path: &Path) -> Result<String> {
         let elf = fs::read(elf_path)?;
-        let program = Program::load_elf(&elf, MEM_SIZE as u32).context("unable to load elf")?;
+        let program =
+            Program::load_elf(&elf, GUEST_MAX_MEM as u32).context("unable to load elf")?;
         let image = MemoryImage::new(&program, PAGE_SIZE as u32)
             .context("unable to create memory image")?;
         Ok(image.compute_id().to_string())
@@ -213,7 +214,7 @@ mod test {
         let tester = Tester::new("risc0/zkvm/methods/guest/Cargo.toml");
         tester.compare_image_id(
             "risc0_zkvm_methods_guest/multi_test",
-            "aa593b59f897db9926bf90d3c252f01eb6ed805ea0ab5894ead20e18397fae08",
+            "c094a8253e33eefda14e0a3b96f192ab30d8f35cc640191cf0533e9371c8c74a",
         );
         tester.compare_image_id(
             "risc0_zkvm_methods_guest/hello_commit",

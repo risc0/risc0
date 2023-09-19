@@ -47,7 +47,7 @@ jobs:
 
       # Test
       - name: run cargo tests in bonsai
-        run: cargo test --manifest-path bonsai/Cargo.toml
+        run: cargo test --manifest-path bonsai/Cargo.toml --tests -- --include-ignored --nocapture
 
       - name: run cargo tests in bonsai/examples/governance
         run: cargo test --manifest-path bonsai/examples/governance/Cargo.toml
