@@ -102,7 +102,9 @@ impl Prover {
                         anyhow::anyhow!("failed to build executor environment: {:?}", e)
                     })?;
                 let mut exec = Executor::new(env, mem_img)?;
-                let session = exec.run().context("Executor failed to generate a successful session)?;
+                let session = exec
+                    .run()
+                    .context("Executor failed to generate a successful session")?;
 
                 let receipt = Receipt {
                     inner: InnerReceipt::Fake,
