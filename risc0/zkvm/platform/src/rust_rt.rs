@@ -12,51 +12,58 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//! This module contains the components required to link a Rust binary.
+//!
+//! In particular:
+//! * It defines an entrypoint ensuring initialization and finalization are done properly.
+//! * It includes a panic handler.
+//! * It includes an allocator.
+
 use core::alloc::{GlobalAlloc, Layout};
 
-#[cfg(feature = "panic_impl")]
 use core::panic::PanicInfo;
 
 use crate::syscall;
 
 extern crate alloc;
 
-#[cfg(feature = "entrypoint")]
-static STACK_TOP: u32 = crate::memory::STACK_TOP;
-
-// Entry point; sets up global pointer and stack pointer and passes
-// to __start.  TODO: when asm_const is stablized, use that here
-// instead of defining a symbol and dereferencing it.
-//
-// This version of _start is marked as "weak" so it only gets used if
-// start isn't already defined by e.g. risc0_zkvm::guest which needs
-// to initialize things like the journal.
-
-#[cfg(feature = "entrypoint")]
-core::arch::global_asm!(
-    r#"
-.section .text._start
-.weak _start
-_start:
-    .option push;
-    .option norelax
-    la gp, __global_pointer$
-    .option pop
-    la sp, {0}
-    lw sp, 0(sp)
-    call main
-    li a1, 0
-    call sys_halt
-"#,
-    sym STACK_TOP
-);
-
-#[cfg(feature = "panic_impl")]
-#[panic_handler]
-fn panic_fault(panic_info: &PanicInfo) -> ! {
+/// panic! implementation for use in no_std guest programs.
+#[cfg_attr(feature = "panic-handler", panic_handler)]
+pub fn panic_fault(panic_info: &PanicInfo) -> ! {
     let msg = alloc::format!("{}", panic_info);
     let msg_bytes = msg.as_bytes();
     unsafe { syscall::sys_panic(msg.as_ptr(), msg.len()) }
+}
+
+#[cfg(feature = "entrypoint")]
+mod entrypoint {
+    // Entry point; sets up global pointer and stack pointer and passes
+    // to __start.  TODO: when asm_const is stablized, use that here
+    // instead of defining a symbol and dereferencing it.
+    //
+    // This version of _start is marked as "weak" so it only gets used if
+    // start isn't already defined by e.g. risc0_zkvm::guest which needs
+    // to initialize things like the journal.
+
+    static STACK_TOP: u32 = crate::memory::STACK_TOP;
+
+    core::arch::global_asm!(
+        r#"
+    .section .text._start
+    .weak _start
+    _start:
+        .option push;
+        .option norelax
+        la gp, __global_pointer$
+        .option pop
+        la sp, {0}
+        lw sp, 0(sp)
+        call main
+        li a1, 0
+        call sys_halt
+    "#,
+        sym STACK_TOP
+    );
 }
 
 struct BumpPointerAlloc;

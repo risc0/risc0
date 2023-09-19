@@ -92,6 +92,8 @@ jobs:
       - run: cargo check -F $FEATURE -p risc0-circuit-rv32im
       - run: cargo check -p risc0-core
         if: matrix.device == 'cpu'
+      - run: cargo check -p cargo-risczero
+        if: matrix.device == 'cpu'
       - run: cargo check -p cargo-risczero -F experimental
         if: matrix.device == 'cpu'
       - run: cargo check -F $FEATURE -p risc0-r0vm
