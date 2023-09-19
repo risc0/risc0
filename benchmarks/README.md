@@ -33,6 +33,9 @@
 |iter_blake3|10|0.003066042|1.477961875|0.002822625|31643|238308|
 |iter_blake3|100|0.009363417|6.03728775|0.002566708|277343|262244|
 |ecdsa_verify|1|0.056222375|13.614030542|0.005111834|857204|490760|
+|finbonacci|10|0.002501834|0.957013333|0.002423792|1197|215268|
+|finbonacci|1000|0.002855792|0.984983041|0.002478083|11097|215268|
+|finbonacci|10000|0.00612475|3.230235|0.002325958|101097|250020|
 
 ### CPU on M1 Max MacBook Pro (10-core CPU)
 
@@ -67,9 +70,12 @@
 |iter_blake3|10|0.003142792|8.624936833|0.002167708|31643|238308|
 |iter_blake3|100|0.009847208|36.232478542|0.002451792|277343|262244|
 |ecdsa_verify|1|0.055257792|79.138589166|0.005018|857204|490760|
+|finbonacci|10|0.002588291|5.279785917|0.002324458|1197|215268|
+|finbonacci|1000|0.002904|5.237076916|0.002488167|11097|215268|
+|finbonacci|10000|0.006032958|21.261764167|0.002341916|101097|250020|
 
 
-## Running the benchmarks
+## Running all the benchmarks
 
 ### CPU
 
@@ -89,42 +95,49 @@ $ RUST_LOG=info cargo run --release -F metal -- --out metrics.csv all
 $ RUST_LOG=info cargo run --release -F cuda -- --out metrics.csv all
 ```
 
-## Jobs
+## Running specific benchmark
+To run a specific benchmark replace the `all` option used in the previous command with one of the following:
+e.g.,
+```console
+$ RUST_LOG=info cargo run --release -F metal -- --out metrics.csv big-sha2
+```
 
-### `big_sha2`
+### `big-sha2`
 
 Computes the SHA2-256 hash of large random buffers of various sizes.
 
-### `iter_sha2`
+### `iter-sha2`
 
 Computes the SHA2-256 hash of a given buffer for a given amount of iterations.
 
-### `big_keccak`
+### `big-keccak`
 
 Computes the Keccak hash of large random buffers of various sizes.
 
-### `iter_keccak`
+### `iter-keccak`
 
 Computes the Keccak hash of a given buffer for a given amount of iterations.
 
-### `big_blake2b`
+### `big-blake2b`
 
 Computes the Blake2b hash of large random buffers of various sizes.
 
-### `iter_blake2b`
+### `iter-blake2b`
 
 Computes the Blake2b hash of a given buffer for a given amount of iterations.
 
-### `big_blake3`
+### `big-blake3`
 
 Computes the Blake3 hash of large random buffers of various sizes.
 
-### `iter_blake3`
+### `iter-blake3`
 
 Computes the Blake3 hash of a given buffer for a given amount of iterations.
 
-### `ecdsa_verify`
+### `ecdsa-verify`
 
 Verifies a given ECDSA signature (on the secp256k1 curve).
 
+### `fibonacci`
 
+Computes the Fibonacci sequence of a given number.
