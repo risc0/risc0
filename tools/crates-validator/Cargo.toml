@@ -12,12 +12,15 @@ db-dump = "0.4"
 handlebars = "4.3"
 indicatif = "0.15"
 reqwest = { version = "0.11", features = ["stream"] }
+semver = { version = "1.0.18", features = ["serde"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
+serde_valid = { version = "0.16.3", features = ["toml"] }
 strum = { version = "0.24", features = ["derive"] }
 tempfile = "3"
 tokio = { version = "1.13", features = ["full"] }
 tokio-stream = "0.1"
+toml = { version = "0.8", features = ["parse"] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 

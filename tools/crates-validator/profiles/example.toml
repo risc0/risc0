@@ -1,0 +1,78 @@
+# Defines a profile configuration for a specific crate.
+# Lines containing a single `#` are placeholders for the user to fill in.
+
+### This section defines the profile configuration table with all the possible
+### settings to configure how a crate should be built inside the guest.
+# [crate.<identifier>]
+
+### Specify the crate name.
+## Mandatory
+# name = "<crate-name>"
+
+### Specify a list of versions to be built.
+## Mandatory
+# versions = ["list", "of", "versions"]
+
+### Instructs whether to use the standard library or not.
+## Optional, default: false
+# std = true/false
+
+### Instructs whether to use the fast mode or not, by enabling
+### `RISC0_EXPERIMENTAL_PREFLIGHT` feature.
+## Optional, default: true
+# fast_mode = true/false
+
+############## NOTE ##############
+# Either `risc0_gh_branch` or    #
+# `risc0_path` must be specified #
+# but not both.                  #
+##################################
+
+### Define which Github branch should be used for templates and crate imports.
+## Optional, default: None
+# risc0_gh_branch = "<branch>"
+
+### Define a local path to a RISC0 repository, which will be used for templates
+### and crate imports.
+## Optional, default: None
+# risc0_path = "<path>"
+
+### Injects a custom `main` function body into the crate.
+## Optional, default: None
+# custom_main = 'println!("Hello, world!");'
+
+### Inject a top level scop string, e.g. `use lazy_static::lazy_static;`
+## Optional, default: None
+# import_str = '<import-string>'
+
+### Informs whether we should expect the build/run steps to fail or not.
+## Optional, default: false
+# should_fail = true/false
+
+### Toggles if we should inject CC flags
+### Reference: https://github.com/risc0/risc0/issues/443
+## Optional, default: false
+# inject_cc_flags = true/false
+
+### Specify a list of crates to be patched.
+## Optional, default: None
+# patch = '''
+# [patch.crates-io]
+# <crate-dependency-1> = { git = "<git-url>", rev = "<git-rev>" }
+# <crate-dependency-2> = { version = "<version>", features = ["<feature-1>", "<feature-2>"] }
+# '''
+
+# [crate.example]
+name = "example"
+versions = ["0.1.0"]
+std = true
+fast_mode = true
+risc0_gh_branch = "main"
+custom_main = "assert_eq!(42, 42);"
+import_str = "use example::EXAMPLE;"
+should_fail = false
+inject_cc_flags = true
+patch = '''
+[patch.crates-io]
+example = { git = "<git-url>", rev = "<git-rev>" }
+'''

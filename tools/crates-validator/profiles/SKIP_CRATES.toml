@@ -1,0 +1,5 @@
+crates = [
+  "miow", # Windows specific crate that depends on `windows-sys`
+  "windows-sys",
+  "redox_syscall", # Tools for redox OS, not supported
+]

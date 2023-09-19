@@ -29,7 +29,7 @@ use db_dump::{
     versions::Row as VersionRow,
 };
 use indicatif::{ProgressBar, ProgressStyle};
-use risc0_crates_validator::{profiles, selected_crates, CrateProfile, ProfileConfig};
+use risc0_crates_validator::{profiles, CrateProfile, ProfileConfig};
 use tokio_stream::StreamExt;
 use tracing::{debug, info, warn};
 use tracing_subscriber::EnvFilter;
@@ -75,19 +75,20 @@ struct Args {
     #[arg(long)]
     no_profiles: bool,
 
-    /// Path for the JSON specifying crates to be added to the profile.
-    ///
-    /// The expected format is a JSON as follows:
-    ///    {
-    ///       "<identifier>": [
-    ///           "<crate_name_1>",
-    ///           "<crate_name_2>",
-    ///           ...
-    ///       ],
-    ///       ...
-    ///    }
-    #[arg(short, long, conflicts_with = "name")]
-    selected_crates: Option<Vec<String>>,
+    // TODO(cardosaum): Replace this by using module `profile`
+    // /// Path for the JSON specifying crates to be added to the profile.
+    // ///
+    // /// The expected format is a JSON as follows:
+    // ///    {
+    // ///       "<identifier>": [
+    // ///           "<crate_name_1>",
+    // ///           "<crate_name_2>",
+    // ///           ...
+    // ///       ],
+    // ///       ...
+    // ///    }
+    // #[arg(short, long, conflicts_with = "name")]
+    // selected_crates: Option<Vec<String>>,
 
     /// Add selected categories to the profile
     #[arg(
@@ -231,21 +232,22 @@ async fn main() -> Result<()> {
         .take(args.crate_count)
         .map(|c| c.clone())
         .collect::<Vec<_>>();
-    if let Some(json_files) = args.selected_crates {
-        info!("Adding selected crates to profile");
-        for file in json_files {
-            let json = selected_crates::read_crates_selection(file)
-                .context("Failed to read crates selection in file '{file}'")?;
-            let handpicked = selected_crates::parse_crates_json(json)
-                .context("Failed to parse crates selection JSON in file '{file}'")?;
-            crates
-                .iter()
-                .filter(|c| handpicked.contains(&c.name))
-                .for_each(|c| {
-                    selected_crates.push(c.clone());
-                });
-        }
-    };
+    // TODO(cardosaum): Replace this by using module `profile`
+    // if let Some(json_files) = args.selected_crates {
+    //     info!("Adding selected crates to profile");
+    //     for file in json_files {
+    //         let json = selected_crates::read_crates_selection(file)
+    //             .context("Failed to read crates selection in file '{file}'")?;
+    //         let handpicked = selected_crates::parse_crates_json(json)
+    //             .context("Failed to parse crates selection JSON in file '{file}'")?;
+    //         crates
+    //             .iter()
+    //             .filter(|c| handpicked.contains(&c.name))
+    //             .for_each(|c| {
+    //                 selected_crates.push(c.clone());
+    //             });
+    //     }
+    // };
     if args.categories.is_some() {
         info!("Adding selected categories to profile");
         let mut crates_from_categories =

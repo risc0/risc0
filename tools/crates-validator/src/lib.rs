@@ -25,10 +25,10 @@ use anyhow::{bail, Context, Result};
 use handlebars::Handlebars;
 use serde::{Deserialize, Serialize};
 use tempfile::tempdir;
-use tracing::{debug, error, info, warn};
+use tracing::{debug, error, info};
 
 pub mod profiles;
-pub mod selected_crates;
+pub mod skip_crates;
 
 /// Validation Results fields
 #[derive(Debug, Serialize, Deserialize)]
@@ -491,11 +491,12 @@ impl Validator {
 
     /// Run a given profile through the set of tests
     fn run(&self, profile: &mut CrateProfile) -> Result<()> {
-        if profiles::SKIP_CRATES.contains(&profile.name.as_str()) {
-            warn!("Skipping {} due to SKIP_CRATES", profile.name);
-            profile.results = Some(ValidationResults::from(RunStatus::Skipped));
-            return Ok(());
-        }
+        // TODO(cardosaum): Replace logic with `skip_crates` module
+        // if profiles::SKIP_CRATES.contains(&profile.name.as_str()) {
+        //     warn!("Skipping {} due to SKIP_CRATES", profile.name);
+        //     profile.results = Some(ValidationResults::from(RunStatus::Skipped));
+        //     return Ok(());
+        // }
         let working_dir = self.gen_initial_project(profile)?;
         self.customize_guest(profile, &working_dir)?;
         let (build_success, build_errors) = self.build_project(profile, &working_dir)?;

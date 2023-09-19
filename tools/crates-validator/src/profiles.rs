@@ -12,13 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::CrateProfile;
+use std::fmt::Display;
 
-pub const SKIP_CRATES: &[&str] = &[
-    "miow", // Windows specific crate that depends on `windows-sys`
-    "windows-sys",
-    "redox_syscall", // Tools for redox OS, not supported
-];
+use crate::CrateProfile;
+use anyhow::{Context, Result};
+use serde_valid::Validate;
 
 pub fn lookup_crate(crate_name: &str, mut profile: CrateProfile) -> CrateProfile {
     profile.customized = true;
@@ -64,4 +62,151 @@ pub fn lookup_crate(crate_name: &str, mut profile: CrateProfile) -> CrateProfile
         _ => profile.customized = false,
     }
     profile
+}
+
+#[derive(
+    Debug, Clone, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize, serde_valid::Validate,
+)]
+pub struct Profile {
+    #[validate(min_length = 1)]
+    pub name: String,
+    #[validate(min_items = 1)]
+    pub versions: Vec<semver::Version>,
+    #[serde(default)]
+    pub std: bool,
+    #[serde(default = "default_true")]
+    pub fast_mode: bool,
+    #[serde(flatten)]
+    pub risc_zero_repository: RiscZeroRepo,
+    #[serde(default)]
+    pub custom_main: Option<String>,
+    #[serde(default)]
+    pub import_str: Option<String>,
+    #[serde(default)]
+    pub should_fail: bool,
+    #[serde(default)]
+    pub inject_cc_flags: bool,
+    #[serde(default)]
+    pub patch: Option<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
+pub enum RiscZeroRepo {
+    #[serde(rename = "risc0_gh_branch")]
+    Github(String),
+    #[serde(rename = "risc0_path")]
+    Local(String),
+}
+
+pub fn parse_toml(content: impl AsRef<str> + Display) -> Result<Profile> {
+    let profile = toml::from_str::<Profile>(content.as_ref())
+        .with_context(|| format!("Failed to parse toml with content:\n{content}",))?;
+    profile.validate().context("Invalid Profile file")?;
+    Ok(profile)
+}
+
+pub fn read_toml(path: impl AsRef<str> + Display) -> Result<String> {
+    std::fs::read_to_string(path.as_ref())
+        .with_context(|| format!("Failed to read profile file: {path}",))
+}
+
+const fn default_true() -> bool {
+    true
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use rstest::*;
+    use serde_valid::Validate;
+
+    const EXAMPLE_TOML_PATH: &str = "./profiles/example.toml";
+    const EXAMPLE_TOML_STR: &str = r#"name = "example"
+    versions = ["0.1.0"]
+    std = true
+    fast_mode = true
+    risc0_gh_branch = "main"
+    custom_main = "assert_eq!(42, 42);"
+    import_str = "use example::EXAMPLE;"
+    should_fail = false
+    inject_cc_flags = true
+    patch = '''
+[patch.crates-io]
+example = { git = '<git-url>', rev = '<git-rev>' }'''"#;
+
+    #[fixture]
+    fn profile() -> Profile {
+        Profile {
+            name: "example".to_string(),
+            versions: vec![semver::Version::new(0, 1, 0)],
+            std: true,
+            fast_mode: true,
+            risc_zero_repository: RiscZeroRepo::Github("main".to_string()),
+            custom_main: Some("assert_eq!(42, 42);".to_string()),
+            import_str: Some("use example::EXAMPLE;".to_string()),
+            should_fail: false,
+            inject_cc_flags: true,
+            patch: Some(
+                "\
+                [patch.crates-io]\n\
+                example = { git = '<git-url>', rev = '<git-rev>' }"
+                    .to_string(),
+            ),
+        }
+    }
+
+    #[test]
+    fn can_read_toml_file() {
+        let content = read_toml(EXAMPLE_TOML_PATH).unwrap();
+        assert!(!content.is_empty());
+    }
+
+    #[rstest]
+    fn successfully_parse_toml(profile: Profile) {
+        let parsed = parse_toml(EXAMPLE_TOML_STR).unwrap();
+        assert_eq!(parsed, profile);
+        assert!(parsed.validate().is_ok());
+    }
+
+    #[test]
+    fn profile_accept_multiple_versions() {
+        let content = r#"name = 'example'
+        versions = ["0.1.0", "0.2.0"]
+        risc0_gh_branch = 'main'"#;
+        let parsed = parse_toml(content).unwrap();
+        assert_eq!(parsed.versions.len(), 2);
+        assert_eq!(parsed.versions[0], semver::Version::new(0, 1, 0));
+        assert_eq!(parsed.versions[1], semver::Version::new(0, 2, 0));
+    }
+
+    #[rstest]
+    #[case::missing_name_field(None)]
+    #[case::empty_name_field(Some(""))]
+    #[should_panic]
+    fn profile_requires_name(#[case] name: Option<&str>) {
+        let mut content = String::new();
+        content.push_str("versions = [\"0.1.0\"]\n");
+        content.push_str("risc0_gh_branch = 'main'\n");
+        if let Some(n) = name {
+            content.push_str(&format!("name = '{}'\n", n));
+        }
+        parse_toml(content).unwrap();
+    }
+
+    #[rstest]
+    #[case::missing_versions_field(None)]
+    #[case::empty_versions_string_field(Some(""))]
+    #[case::empty_versions_array(Some("[]"))]
+    #[should_panic]
+    fn profile_requires_at_least_one_version(
+        #[case] versions: Option<&str>,
+    ) {
+        let mut content = String::new();
+        content.push_str("name = 'example'\n");
+        content.push_str("risc0_gh_branch = 'main'\n");
+        if let Some(v) = versions {
+            content.push_str(&format!("versions = {v}\n"));
+        }
+        parse_toml(content).unwrap();
+    }
 }
