@@ -113,10 +113,11 @@ impl Benchmark for Job<'_> {
         ((receipt_verifying_key, receipt_message), receipt)
     }
 
-    fn exec_compute(&mut self) -> (u32, Duration) {
-        let (cycles, elapsed, session) = exec_compute(self.image.clone(), self.env.clone());
+    fn exec_compute(&mut self) -> (u32, u32, Duration) {
+        let (cycles, insn_cycles, elapsed, session) =
+            exec_compute(self.image.clone(), self.env.clone());
         self.session = session;
-        (cycles as u32, elapsed)
+        (cycles, insn_cycles, elapsed)
     }
 
     fn verify_proof(&self, _output: &Self::ComputeOut, proof: &Self::ProofType) -> bool {

@@ -31,6 +31,7 @@ pub struct Metrics {
     pub proof_duration: Duration,
     pub verify_duration: Duration,
     pub cycles: u32,
+    pub insn_cycles: u32,
     pub output_bytes: u32,
     pub proof_bytes: u32,
 }
@@ -44,6 +45,7 @@ impl Metrics {
             proof_duration: Duration::default(),
             verify_duration: Duration::default(),
             cycles: 0,
+            insn_cycles: 0,
             output_bytes: 0,
             proof_bytes: 0,
         }
@@ -56,6 +58,7 @@ impl Metrics {
         info!("{}proof_duration:     {:?}", prefix, &self.proof_duration);
         info!("{}verify_duration:    {:?}", prefix, &self.verify_duration);
         info!("{}cycles:             {:?}", prefix, &self.cycles);
+        info!("{}insn_cycles:        {:?}", prefix, &self.insn_cycles);
         info!("{}output_bytes:       {:?}", prefix, &self.output_bytes);
         info!("{}proof_bytes:        {:?}", prefix, &self.proof_bytes);
     }
@@ -78,14 +81,14 @@ pub trait Benchmark {
     fn host_compute(&mut self) -> Option<Self::ComputeOut> {
         None
     }
-    fn exec_compute(&mut self) -> (u32, Duration);
+    fn exec_compute(&mut self) -> (u32, u32, Duration);
     fn guest_compute(&mut self) -> (Self::ComputeOut, Self::ProofType);
     fn verify_proof(&self, output: &Self::ComputeOut, proof: &Self::ProofType) -> bool;
 
     fn run(&mut self) -> Metrics {
         let mut metrics = Metrics::new(String::from(Self::NAME), Self::job_size(self.spec()));
 
-        (metrics.cycles, metrics.exec_duration) = self.exec_compute();
+        (metrics.cycles, metrics.insn_cycles, metrics.exec_duration) = self.exec_compute();
 
         let (g_output, proof) = {
             let start = Instant::now();
@@ -120,17 +123,22 @@ pub fn get_image(path: &str) -> MemoryImage {
     MemoryImage::new(&program, PAGE_SIZE as u32).unwrap()
 }
 
-pub fn exec_compute<'a>(image: MemoryImage, env: ExecutorEnv<'a>) -> (u32, Duration, Session) {
+pub fn exec_compute<'a>(image: MemoryImage, env: ExecutorEnv<'a>) -> (u32, u32, Duration, Session) {
     let mut exec = Executor::new(env.clone(), image.clone()).unwrap();
     let start = Instant::now();
     let session = exec.run().unwrap();
     let elapsed = start.elapsed();
-    let mut cycles = 0usize;
     let segments = session.resolve().unwrap();
-    for segment in segments {
-        cycles += segment.insn_cycles
-    }
-    (cycles as u32, elapsed, session)
+    let (exec_cycles, prove_cycles) =
+        segments
+            .iter()
+            .fold((0, 0), |(exec_cycles, prove_cycles), segment| {
+                (
+                    exec_cycles + segment.insn_cycles,
+                    prove_cycles + (1 << segment.po2),
+                )
+            });
+    (prove_cycles as u32, exec_cycles as u32, elapsed, session)
 }
 
 pub fn init_gpu_kernel() {
@@ -152,10 +160,11 @@ pub fn init_logging() {
 struct CsvRow<'a> {
     job_name: &'a str,
     job_size: u32,
-    exec_duration_seconds: f64,
-    proof_duration_seconds: f64,
-    verify_duration_seconds: f64,
+    exec_duration: u128,
+    proof_duration: u128,
+    verify_duration: u128,
     insn_cycles: u32,
+    prove_cycles: u32,
     proof_bytes: u32,
 }
 
@@ -194,10 +203,11 @@ pub fn run_jobs<B: Benchmark>(out_path: &PathBuf, specs: Vec<B::Spec>) -> Vec<Me
         out.serialize(CsvRow {
             job_name: &job_metrics.job_name,
             job_size: job_metrics.job_size,
-            exec_duration_seconds: job_metrics.exec_duration.as_secs_f64(),
-            proof_duration_seconds: job_metrics.proof_duration.as_secs_f64(),
-            verify_duration_seconds: job_metrics.verify_duration.as_secs_f64(),
-            insn_cycles: job_metrics.cycles,
+            exec_duration: job_metrics.exec_duration.as_nanos(),
+            proof_duration: job_metrics.proof_duration.as_nanos(),
+            verify_duration: job_metrics.verify_duration.as_nanos(),
+            prove_cycles: job_metrics.cycles,
+            insn_cycles: job_metrics.insn_cycles,
             proof_bytes: job_metrics.proof_bytes,
         })
         .expect("Could not serialize");

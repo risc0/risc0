@@ -89,10 +89,11 @@ impl Benchmark for Job<'_> {
         Some(a)
     }
 
-    fn exec_compute(&mut self) -> (u32, Duration) {
-        let (cycles, elapsed, session) = exec_compute(self.image.clone(), self.env.clone());
+    fn exec_compute(&mut self) -> (u32, u32, Duration) {
+        let (cycles, insn_cycles, elapsed, session) =
+            exec_compute(self.image.clone(), self.env.clone());
         self.session = session;
-        (cycles as u32, elapsed)
+        (cycles, insn_cycles, elapsed)
     }
 
     fn guest_compute(&mut self) -> (Self::ComputeOut, Self::ProofType) {
