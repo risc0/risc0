@@ -96,6 +96,8 @@ jobs:
       - run: cargo check -F $FEATURE -p risc0-sys
       - run: cargo check -F $FEATURE -p risc0-zkp
       - run: cargo check -F $FEATURE -p risc0-zkvm
+      # build risc0-zkvm verifier for a no-std environment
+      - run: cargo check --target x86_64-unknown-none -p risc0-zkvm --no-default-features
       - uses: risc0/clippy-action@main
         with:
           reporter: 'github-pr-check'
