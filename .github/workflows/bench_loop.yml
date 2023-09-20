@@ -1,0 +1,69 @@
+name: Benchmark loop
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  bench:
+    runs-on: [self-hosted, prod, bench, "${{ matrix.os }}", "${{ matrix.device }}"]
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [Linux, macOS]
+        feature: [default]
+        device: [cpu]
+        include:
+          - os: Linux
+            feature: cuda
+            device: nvidia_rtx_a5000
+          - os: macOS
+            feature: metal
+            device: apple_m2_pro
+
+    env:
+      CUDA_LIBRARY_PATH: /usr/lib/cuda
+      FEATURE: ${{ matrix.feature }}
+      RUSTC_WRAPPER: sccache
+
+    steps:
+      # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
+      - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/rustup
+      - uses: ./.github/actions/sccache
+        with:
+          key: ${{ matrix.os }}-${{ matrix.feature }}
+      - run: cargo run --bin cargo-risczero -- risczero install
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: cargo run -F $FEATURE --example loop -- --json | tee ${{ matrix.os }}-${{ matrix.device }}.json
+        working-directory: risc0/zkvm
+      - name: Upload benchmark result
+      - uses: actions/upload-artifact@v2
+        with:
+          name: benchmark-result
+          path: risc0/zkvm/${{ matrix.os }}-${{ matrix.device }}.json
+      - name: Checkout gh-pages repository
+        uses: actions/checkout@v3
+        with:
+          repository: risc0/ghpages
+          ref: main
+          token: ${{ secrets.BENCHMARK_TOKEN }}
+      - name: Download benchmark result
+        uses: actions/download-artifact@v2
+        with:
+          name: benchmark-result
+          path: datasheet
+      - name: Push benchmark result
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add datasheet/${{ matrix.os }}-${{ matrix.device }}.json
+          git commit -m "Add build artifacts"
+          git remote set-url origin https://${{ secrets.BENCHMARK_TOKEN }}@github.com/risc0/ghpages.git
+          git push -f origin main

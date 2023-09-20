@@ -3400,6 +3400,7 @@ dependencies = [
  "risc0-zkvm-platform",
  "rrs-lib",
  "serde",
+ "serde_json",
  "sha2",
  "tempfile",
  "thiserror",
