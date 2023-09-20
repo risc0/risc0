@@ -251,8 +251,12 @@ async fn upload_images(
         )));
 
         // upload binary to Bonsai
-        let bonsai_client =
-            get_client_from_parts(bonsai_api_url.to_string(), bonsai_api_key.to_string()).await?;
+        let bonsai_client = get_client_from_parts(
+            bonsai_api_url.to_string(),
+            bonsai_api_key.to_string(),
+            risc0_zkvm::get_version(),
+        )
+        .await?;
         let img_id = image_id.clone();
 
         upload_img(
