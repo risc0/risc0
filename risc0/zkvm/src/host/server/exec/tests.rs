@@ -31,7 +31,10 @@ use test_log::test;
 
 use crate::{
     host::server::{
-        exec::syscall::{Syscall, SyscallContext},
+        exec::{
+            executor::ExecutorError,
+            syscall::{Syscall, SyscallContext},
+        },
         testutils,
     },
     serde::{from_slice, to_vec},
@@ -667,7 +670,7 @@ fn session_limit() {
         loop_cycles: u32,
         segment_limit_po2: usize,
         session_count_limit: usize,
-    ) -> Result<Session> {
+    ) -> Result<Session, ExecutorError> {
         let session_cycles = (1 << segment_limit_po2) * session_count_limit;
         let spec = &to_vec(&MultiTestSpec::BusyLoop {
             cycles: loop_cycles,
@@ -705,7 +708,19 @@ fn session_limit() {
 
 #[test]
 fn memory_access() {
-    fn access_memory(addr: u32) -> Result<Session> {
+    fn session_faulted(session: Result<Session, ExecutorError>) -> bool {
+        if cfg!(feature = "enable-fault-proof") {
+            match session {
+                Err(ExecutorError::Fault(_)) => true,
+                _ => false,
+            }
+        } else {
+            // this will be removed once this feature is more mature
+            session.is_err()
+        }
+    }
+
+    fn access_memory(addr: u32) -> Result<Session, ExecutorError> {
         let spec = to_vec(&MultiTestSpec::OutOfBounds).unwrap();
         let addr = to_vec(&addr).unwrap();
         let env = ExecutorEnv::builder()
@@ -716,9 +731,9 @@ fn memory_access() {
         Executor::from_elf(env, MULTI_TEST_ELF).unwrap().run()
     }
 
-    access_memory(0x0000_0000).err().unwrap();
-    access_memory(0x0C00_0000).err().unwrap();
-    access_memory(0x0B00_0000).unwrap();
+    assert!(session_faulted(access_memory(0x0000_0000)));
+    assert!(session_faulted(access_memory(0x0C00_0000)));
+    assert!(!session_faulted(access_memory(0x0B00_0000)));
 }
 
 /// The post-state digest (i.e. the Merkle root of the memory state at the end
@@ -781,4 +796,15 @@ fn post_state_digest_randomization() {
         })
         .collect();
     assert_eq!(post_state_digests.len(), 1);
+}
+
+#[test]
+#[should_panic(expected = "cycle count too large")]
+fn too_many_sha() {
+    let spec = to_vec(&MultiTestSpec::TooManySha).unwrap();
+    let env = ExecutorEnv::builder().add_input(&spec).build().unwrap();
+    Executor::from_elf(env, MULTI_TEST_ELF)
+        .unwrap()
+        .run()
+        .unwrap();
 }

@@ -42,6 +42,8 @@ pub enum VerificationError {
     JournalDigestMismatch,
     UnexpectedExitCode,
     InvalidHashSuite,
+    FaultStateMismatch,
+    ValidFaultReceipt,
 }
 
 impl fmt::Debug for VerificationError {
@@ -66,6 +68,12 @@ impl fmt::Display for VerificationError {
             }
             VerificationError::UnexpectedExitCode => write!(f, "Unexpected exit_code"),
             VerificationError::InvalidHashSuite => write!(f, "Invalid hash suite"),
+            VerificationError::FaultStateMismatch => {
+                write!(f, "Fault checker generated incorrect guest state")
+            }
+            VerificationError::ValidFaultReceipt => {
+                write!(f, "Receipt is a valid fault proof")
+            }
         }
     }
 }

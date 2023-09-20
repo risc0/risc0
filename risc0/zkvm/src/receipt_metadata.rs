@@ -108,6 +108,10 @@ pub enum ExitCode {
     /// This indicates normal termination of a program with an interior exit
     /// code returned from the guest.
     Halted(u32),
+
+    /// This indicates termination of a program where the next instruction will
+    /// fail.
+    Fault,
 }
 
 impl ExitCode {
@@ -116,8 +120,9 @@ impl ExitCode {
             ExitCode::Halted(user_exit) => (0, user_exit),
             ExitCode::Paused(user_exit) => (1, user_exit),
             ExitCode::SystemSplit => (2, 0),
-            // DO NOT MERGE(victor): Confirm SessionLimit can have an associated exit code.
+            // DO NOT MERGE(victor): Confirm SessionLimit and Fault can have an associated exit code.
             ExitCode::SessionLimit => (3, 0),
+            ExitCode::Fault => (4, 0),
         }
     }
 
@@ -170,6 +175,7 @@ impl Output {
         )
     }
 
+    /// Hash the [Output] to get a digest of the struct.
     pub fn assumptions_digest(&self) -> Digest {
         Default::default()
     }

@@ -82,6 +82,7 @@ pub enum MultiTestSpec {
     Oom,
     OutOfBounds,
     RsaCompat,
+    TooManySha,
 }
 
 declare_syscall!(pub SYS_MULTI_TEST);
