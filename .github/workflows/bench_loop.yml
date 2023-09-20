@@ -82,8 +82,8 @@ jobs:
         run: |
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
-          git add datasheet/macOs-cpu.json
-          git add datasheet/macOs-apple_m2_pro.json
+          git add datasheet/macOS-cpu.json
+          git add datasheet/macOS-apple_m2_pro.json
           git add datasheet/Linux-nvidia_rtx_a5000.json
           git commit -m "Add build artifacts"
           git remote set-url origin https://${{ secrets.BENCHMARK_TOKEN }}@github.com/risc0/ghpages.git
