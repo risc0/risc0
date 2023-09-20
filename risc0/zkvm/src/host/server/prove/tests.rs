@@ -26,11 +26,11 @@ use risc0_zkvm_platform::{memory, WORD_SIZE};
 use serial_test::serial;
 use test_log::test;
 
-use super::{get_prover_impl, HalPair, ProverImpl};
+use super::{get_prover_server, HalPair, ProverImpl};
 use crate::{
     host::{server::testutils, CIRCUIT},
     serde::{from_slice, to_vec},
-    DynProverImpl, Executor, ExecutorEnv, ExitCode, ProverOpts, Receipt,
+    Executor, ExecutorEnv, ExitCode, ProverOpts, ProverServer, Receipt,
 };
 
 fn prove_nothing(hashfn: &str) -> Result<Receipt> {
@@ -39,7 +39,7 @@ fn prove_nothing(hashfn: &str) -> Result<Receipt> {
     let opts = ProverOpts {
         hashfn: hashfn.to_string(),
     };
-    get_prover_impl(&opts)
+    get_prover_server(&opts)
         .unwrap()
         .prove_elf(env, MULTI_TEST_ELF)
 }
@@ -304,7 +304,7 @@ mod riscv {
         use std::io::Read;
 
         use flate2::read::GzDecoder;
-        use risc0_zkvm_platform::{memory::MEM_SIZE, PAGE_SIZE};
+        use risc0_zkvm_platform::{memory::GUEST_MAX_MEM, PAGE_SIZE};
         use tar::Archive;
 
         let bytes = include_bytes!("../testdata/riscv-tests.tgz");
@@ -323,7 +323,7 @@ mod riscv {
             let mut elf = Vec::new();
             entry.read_to_end(&mut elf).unwrap();
 
-            let program = Program::load_elf(elf.as_slice(), MEM_SIZE as u32).unwrap();
+            let program = Program::load_elf(elf.as_slice(), GUEST_MAX_MEM as u32).unwrap();
             let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
 
             let env = ExecutorEnv::default();

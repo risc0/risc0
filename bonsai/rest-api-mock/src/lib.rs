@@ -93,7 +93,7 @@ mod test {
 
     use anyhow::{bail, Result};
     use bonsai_sdk::alpha_async as bonsai_sdk;
-    use risc0_zkvm::{MemoryImage, Program, MEM_SIZE, PAGE_SIZE};
+    use risc0_zkvm::{MemoryImage, Program, GUEST_MAX_MEM, PAGE_SIZE};
     use risc0_zkvm_methods::HELLO_COMMIT_ELF;
 
     use crate::serve;
@@ -107,7 +107,7 @@ mod test {
 
         // create the memoryImg, upload it and return the imageId
         let img_id = {
-            let program = Program::load_elf(method, MEM_SIZE as u32)?;
+            let program = Program::load_elf(method, GUEST_MAX_MEM as u32)?;
             let image = MemoryImage::new(&program, PAGE_SIZE as u32)?;
             let image_id = hex::encode(image.compute_id());
             let image = bincode::serialize(&image).expect("Failed to serialize memory img");

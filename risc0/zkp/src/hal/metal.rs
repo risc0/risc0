@@ -468,58 +468,62 @@ impl<MH: MetalHash> Hal for MetalHal<MH> {
     }
 
     #[tracing::instrument(skip_all)]
-    fn batch_expand(
+    fn batch_expand_into_evaluate_ntt(
         &self,
         output: &Self::Buffer<Self::Elem>,
         input: &Self::Buffer<Self::Elem>,
-        poly_count: usize,
+        count: usize,
+        expand_bits: usize,
     ) {
-        log::debug!(
-            "output: {}, input: {}, poly_count: {poly_count}",
-            output.size(),
-            input.size()
-        );
-        let out_size = output.size() / poly_count;
-        let in_size = input.size() / poly_count;
-        let expand_bits = log2_ceil(out_size / in_size);
-        assert_eq!(output.size(), out_size * poly_count);
-        assert_eq!(input.size(), in_size * poly_count);
-        assert_eq!(out_size, in_size * (1 << expand_bits));
-        let args = &[
-            output.as_arg(),
-            input.as_arg(),
-            KernelArg::Integer(poly_count as u32),
-            KernelArg::Integer(out_size as u32),
-            KernelArg::Integer(in_size as u32),
-            KernelArg::Integer(expand_bits as u32),
-        ];
-        self.dispatch_by_name("batch_expand", args, out_size as u64);
-    }
-
-    #[tracing::instrument(skip_all)]
-    fn batch_evaluate_ntt(&self, io: &Self::Buffer<Self::Elem>, count: usize, expand_bits: usize) {
-        log::debug!(
-            "io: {}, count: {count}, expand_bits: {expand_bits}",
-            io.size()
-        );
-        let row_size = io.size() / count;
-        assert_eq!(row_size * count, io.size());
-        let n_bits = log2_ceil(row_size);
-        assert_eq!(row_size, 1 << n_bits);
-        assert!(n_bits >= expand_bits);
-        assert!(n_bits < Self::Elem::MAX_ROU_PO2);
-        let rou = self.copy_from_elem("rou", Self::Elem::ROU_FWD);
-        let kernel = self.kernels.get("multi_ntt_fwd_step").unwrap();
-        for s_bits in 1 + expand_bits..=n_bits {
+        // batch_expand
+        {
+            log::debug!(
+                "output: {}, input: {}, count: {count}",
+                output.size(),
+                input.size()
+            );
+            let out_size = output.size() / count;
+            let in_size = input.size() / count;
+            let expand_bits = log2_ceil(out_size / in_size);
+            assert_eq!(output.size(), out_size * count);
+            assert_eq!(input.size(), in_size * count);
+            assert_eq!(out_size, in_size * (1 << expand_bits));
             let args = &[
-                io.as_arg(),
-                rou.as_arg(),
-                KernelArg::Integer(n_bits as u32),
-                KernelArg::Integer(s_bits as u32),
+                output.as_arg(),
+                input.as_arg(),
                 KernelArg::Integer(count as u32),
+                KernelArg::Integer(out_size as u32),
+                KernelArg::Integer(in_size as u32),
+                KernelArg::Integer(expand_bits as u32),
             ];
-            let params = compute_launch_params(n_bits as u32, s_bits as u32, count as u32);
-            self.dispatch(kernel, args, count as u64, Some(params));
+            self.dispatch_by_name("batch_expand", args, out_size as u64);
+        }
+
+        // batch_evaluate_ntt
+        {
+            log::debug!(
+                "output: {}, count: {count}, expand_bits: {expand_bits}",
+                output.size()
+            );
+            let row_size = output.size() / count;
+            assert_eq!(row_size * count, output.size());
+            let n_bits = log2_ceil(row_size);
+            assert_eq!(row_size, 1 << n_bits);
+            assert!(n_bits >= expand_bits);
+            assert!(n_bits < Self::Elem::MAX_ROU_PO2);
+            let rou = self.copy_from_elem("rou", Self::Elem::ROU_FWD);
+            let kernel = self.kernels.get("multi_ntt_fwd_step").unwrap();
+            for s_bits in 1 + expand_bits..=n_bits {
+                let args = &[
+                    output.as_arg(),
+                    rou.as_arg(),
+                    KernelArg::Integer(n_bits as u32),
+                    KernelArg::Integer(s_bits as u32),
+                    KernelArg::Integer(count as u32),
+                ];
+                let params = compute_launch_params(n_bits as u32, s_bits as u32, count as u32);
+                self.dispatch(kernel, args, count as u64, Some(params));
+            }
         }
     }
 
@@ -771,13 +775,8 @@ mod tests {
     }
 
     #[test]
-    fn batch_evaluate_ntt() {
-        testutil::batch_evaluate_ntt(MetalHalSha256::new());
-    }
-
-    #[test]
-    fn batch_expand() {
-        testutil::batch_expand(MetalHalSha256::new());
+    fn batch_expand_into_evaluate_ntt() {
+        testutil::batch_expand_into_evaluate_ntt(MetalHalSha256::new());
     }
 
     #[test]

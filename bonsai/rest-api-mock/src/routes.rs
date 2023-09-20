@@ -20,9 +20,10 @@ use axum::{
     Extension, Json,
 };
 use bonsai_sdk::alpha::responses::{
-    CreateSessRes, ImgUploadRes, ProofReq, SessionStatusRes, SnarkProof, SnarkReq, SnarkStatusRes,
-    UploadRes,
+    CreateSessRes, Groth16Seal, ImgUploadRes, ProofReq, SessionStatusRes, SnarkReceipt, SnarkReq,
+    SnarkStatusRes, UploadRes,
 };
+use risc0_zkvm::Receipt;
 use tracing::info;
 
 use crate::{
@@ -118,26 +119,46 @@ pub(crate) async fn session_status(
 }
 
 pub(crate) async fn create_snark(
-    Json(_request): Json<SnarkReq>,
+    Json(request): Json<SnarkReq>,
 ) -> Result<Json<CreateSessRes>, Error> {
     Ok(Json(CreateSessRes {
-        uuid: uuid::Uuid::new_v4().to_string(),
+        uuid: request.session_id,
     }))
 }
 
 pub(crate) async fn snark_status(
-    Path(_snark_id): Path<String>,
+    State(s): State<AppState>,
+    Path(snark_id): Path<String>,
 ) -> Result<Json<SnarkStatusRes>, Error> {
-    Ok(Json(SnarkStatusRes {
-        status: "SUCCEEDED".to_string(),
-        output: Some(SnarkProof {
-            a: vec![],
-            b: vec![vec![]],
-            c: vec![],
-            public: vec![],
-        }),
-        error_msg: None,
-    }))
+    let storage = s.read()?;
+    storage
+        .get_session(&snark_id)
+        .ok_or_else(|| anyhow::anyhow!("Snark status not found for snark id: {:?}", &snark_id))?;
+    let receipt = storage.get_receipt(&snark_id);
+    match receipt {
+        Some(bytes) => {
+            let receipt: Receipt = bincode::deserialize(&bytes)?;
+            Ok(Json(SnarkStatusRes {
+                status: "SUCCEEDED".to_string(),
+                output: Some(SnarkReceipt {
+                    snark: Groth16Seal {
+                        a: vec![],
+                        b: vec![],
+                        c: vec![],
+                        public: vec![],
+                    },
+                    post_state_digest: vec![],
+                    journal: receipt.journal,
+                }),
+                error_msg: None,
+            }))
+        }
+        None => Ok(Json(SnarkStatusRes {
+            status: "RUNNING".to_string(),
+            output: None,
+            error_msg: None,
+        })),
+    }
 }
 
 pub(crate) async fn get_receipt(

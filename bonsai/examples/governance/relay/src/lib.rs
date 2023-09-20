@@ -15,22 +15,14 @@
 use std::time::Duration;
 
 use anyhow::{anyhow, bail, Context, Result};
-use bonsai_sdk::alpha::{responses::SnarkProof, Client};
+use bonsai_sdk::alpha::{responses::SnarkReceipt, Client};
 use risc0_build::GuestListEntry;
-use risc0_zkvm::{
-    Executor, ExecutorEnv, MemoryImage, Program, Receipt, ReceiptMetadata, MEM_SIZE, PAGE_SIZE,
-};
+use risc0_zkvm::{Executor, ExecutorEnv, MemoryImage, Program, Receipt, GUEST_MAX_MEM, PAGE_SIZE};
 
 /// Result of executing a guest image, possibly containing a proof.
 pub enum Output {
-    Execution {
-        journal: Vec<u8>,
-    },
-    Bonsai {
-        journal: Vec<u8>,
-        receipt_metadata: ReceiptMetadata,
-        snark_proof: SnarkProof,
-    },
+    Execution { journal: Vec<u8> },
+    Bonsai { snark_receipt: SnarkReceipt },
 }
 
 /// Execute and prove the guest locally, on this machine, as opposed to sending
@@ -55,7 +47,7 @@ pub fn execute_locally(elf: &[u8], input: Vec<u8>) -> Result<Output> {
 pub const POLL_INTERVAL_SEC: u64 = 4;
 
 fn get_digest(elf: &[u8]) -> Result<String> {
-    let program = Program::load_elf(elf, MEM_SIZE as u32)?;
+    let program = Program::load_elf(elf, GUEST_MAX_MEM as u32)?;
     let image = MemoryImage::new(&program, PAGE_SIZE as u32)?;
     Ok(hex::encode(image.compute_id()))
 }
@@ -76,7 +68,7 @@ pub fn prove_alpha(elf: &[u8], input: Vec<u8>) -> Result<Output> {
         .context("Failed to create remote proving session")?;
 
     // Poll and await the result of the STARK rollup proving session.
-    let receipt: Receipt = (|| {
+    let _receipt: Receipt = (|| {
         loop {
             let res = match session.status(&client) {
                 Ok(res) => res,
@@ -111,10 +103,9 @@ pub fn prove_alpha(elf: &[u8], input: Vec<u8>) -> Result<Output> {
             }
         }
     })()?;
-    let metadata = receipt.get_metadata()?;
 
     let snark_session = client.create_snark(session.uuid)?;
-    let snark_proof: SnarkProof = (|| loop {
+    let snark_receipt: SnarkReceipt = (|| loop {
         let res = snark_session.status(&client)?;
         match res.status.as_str() {
             "RUNNING" => {
@@ -135,11 +126,7 @@ pub fn prove_alpha(elf: &[u8], input: Vec<u8>) -> Result<Output> {
         }
     })()?;
 
-    Ok(Output::Bonsai {
-        journal: receipt.journal,
-        receipt_metadata: metadata,
-        snark_proof,
-    })
+    Ok(Output::Bonsai { snark_receipt })
 }
 
 pub fn resolve_guest_entry<'a>(
