@@ -3401,7 +3401,6 @@ dependencies = [
  "rrs-lib",
  "serde",
  "sha2",
- "tempfile",
  "thiserror",
  "tracing",
  "typetag",
