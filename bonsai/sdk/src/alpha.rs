@@ -247,10 +247,18 @@ fn construct_req_client(api_key: &str, version: &str) -> Result<BlockingClient, 
 }
 
 impl Client {
-    /// Construct a [Client] from env var
+    /// Construct a [Client] from env vars
     ///
     /// Uses the BONSAI_API_URL and BONSAI_API_KEY environment variables to
-    /// construct a client
+    /// construct a client. The risc0_version should be the crate version of the risc0-zkvm crate
+    ///
+    /// # Example:
+    ///
+    /// ```
+    /// use bonsai_sdk::alpha as bonsai_sdk;
+    /// bonsai_sdk::from_env(risc0_zkvm::get_version())
+    ///     .expect("Failed to construct sdk client");
+    /// ```
     pub fn from_env(risc0_version: &str) -> Result<Self, SdkErr> {
         let api_url = std::env::var("BONSAI_API_URL").map_err(|_| SdkErr::MissingApiUrl)?;
         let api_url = api_url.strip_suffix('/').unwrap_or(&api_url);
@@ -264,7 +272,17 @@ impl Client {
         })
     }
 
-    /// Construct a [Client] from url + api key strings
+    /// Construct a [Client] from url, api key, and zkvm version
+    ///
+    /// # Example:
+    ///
+    /// ```
+    /// use bonsai_sdk::alpha as bonsai_sdk;
+    /// let url = "http://api.bonsai.xyz".to_string();
+    /// let api_key = "my_secret_key".to_string();
+    /// bonsai_sdk::from_parts(url, api_key, risc0_zkvm::get_version())
+    ///     .expect("Failed to construct sdk client");
+    /// ```
     pub fn from_parts(url: String, key: String, risc0_version: &str) -> Result<Self, SdkErr> {
         let client = construct_req_client(&key, risc0_version)?;
         let url = url.strip_suffix('/').unwrap_or(&url).to_string();

@@ -14,7 +14,7 @@ use risc0_zkvm::{
 use std::time::Duration;
 
 fn run_bonsai(input_data: Vec<u8>) -> Result<()> {
-    let client = bonsai_sdk::Client::from_env()?;
+    let client = bonsai_sdk::Client::from_env(risc0_zkvm::get_version())?;
 
     // create the memoryImg, upload it and return the imageId
     let img_id = {
