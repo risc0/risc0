@@ -16,12 +16,10 @@ extern crate alloc;
 
 use alloc::{collections::VecDeque, vec::Vec};
 
-use risc0_zkp::core::{
-    digest::{Digest, DIGEST_WORDS},
-    hash::sha::Sha256,
-};
+use risc0_zkp::core::{digest::Digest, hash::sha::Sha256};
 use serde::{Deserialize, Serialize};
 
+use crate::tagged_struct;
 #[cfg(not(target_os = "zkvm"))]
 use crate::MemoryImage;
 
@@ -68,35 +66,6 @@ impl From<&MemoryImage> for SystemState {
     }
 }
 
-/// Implementation of the struct hash described in the recursion predicates RFC.
-pub fn tagged_struct<S: Sha256>(tag: &str, down: &[Digest], data: &[u32]) -> Digest {
-    let tag_digest: Digest = *S::hash_bytes(tag.as_bytes());
-    let mut all = Vec::<u8>::new();
-    all.extend_from_slice(tag_digest.as_bytes());
-    for digest in down {
-        all.extend_from_slice(digest.as_ref());
-    }
-    for word in data.iter().copied() {
-        all.extend_from_slice(&word.to_le_bytes());
-    }
-    let down_count: u16 = down.len().try_into().unwrap();
-    all.extend_from_slice(&down_count.to_le_bytes());
-    *S::hash_bytes(&all)
-}
-
-/// TODO(victor)
-pub fn tagged_list<S: Sha256>(tag: &str, list: &[Digest]) -> Digest {
-    list.into_iter()
-        .fold(Digest::new([0u32; DIGEST_WORDS]), |list_digest, elem| {
-            tagged_list_cons::<S>(tag, elem.clone(), list_digest)
-        })
-}
-
-/// TODO(victor)
-pub fn tagged_list_cons<S: Sha256>(tag: &str, head: Digest, rest: Digest) -> Digest {
-    tagged_struct::<S>(tag, &[head, rest], &[])
-}
-
 pub fn read_sha_halfs(flat: &mut VecDeque<u32>) -> Digest {
     let mut bytes = Vec::<u8>::new();
     for half in flat.drain(0..16) {
@@ -126,28 +95,5 @@ pub fn write_sha_halfs(flat: &mut Vec<u32>, digest: &Digest) {
 fn write_u32_bytes(flat: &mut Vec<u32>, word: u32) {
     for x in word.to_le_bytes() {
         flat.push(x as u32);
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::tagged_struct;
-    use risc0_zkp::core::hash::sha::cpu;
-
-    #[test]
-    fn test_tagged_struct() {
-        let digest1 = tagged_struct::<cpu::Impl>("foo", &[], &[1, 2013265920, 3]);
-        let digest2 = tagged_struct::<cpu::Impl>("bar", &[digest1, digest1], &[2013265920, 5]);
-        let digest3 = tagged_struct::<cpu::Impl>(
-            "baz",
-            &[digest1, digest2, digest1],
-            &[6, 7, 2013265920, 9, 10],
-        );
-
-        println!("digest = {:?}", digest3);
-        assert_eq!(
-            digest3.to_string(),
-            "9ff20cc6d365efa2af09181772f49013d05cdee6da896851614cae23aa5dd442"
-        );
     }
 }

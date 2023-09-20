@@ -17,15 +17,15 @@
 #![cfg_attr(all(not(feature = "std"), not(test)), no_std)]
 
 mod elf;
+mod hash;
 #[cfg(not(target_os = "zkvm"))]
 mod image;
 mod sys_state;
 
 pub use crate::{
     elf::Program,
-    sys_state::{
-        read_sha_halfs, tagged_list, tagged_list_cons, tagged_struct, write_sha_halfs, SystemState,
-    },
+    hash::{tagged_list, tagged_list_cons, tagged_struct},
+    sys_state::{read_sha_halfs, write_sha_halfs, SystemState},
 };
 
 #[cfg(not(target_os = "zkvm"))]
