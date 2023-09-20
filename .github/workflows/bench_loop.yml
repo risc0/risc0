@@ -44,7 +44,7 @@ jobs:
       - run: cargo run -F $FEATURE --example loop -- --json | tee ${{ matrix.os }}-${{ matrix.device }}.json
         working-directory: risc0/zkvm
       - name: Upload benchmark result
-      - uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v2
         with:
           name: benchmark-result
           path: risc0/zkvm/${{ matrix.os }}-${{ matrix.device }}.json
