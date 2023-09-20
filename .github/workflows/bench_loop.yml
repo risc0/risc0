@@ -51,6 +51,31 @@ jobs:
         with:
           name: benchmark-result
           path: risc0/zkvm/${{ matrix.os }}-${{ matrix.device }}.json
+
+  push_to_ghpages:
+    needs: bench
+    runs-on: [self-hosted, prod, bench, "${{ matrix.os }}", "${{ matrix.device }}"]
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [Linux, macOS]
+        feature: [default]
+        device: [cpu]
+        include:
+          - os: Linux
+            feature: cuda
+            device: nvidia_rtx_a5000
+          - os: macOS
+            feature: metal
+            device: apple_m2_pro
+
+    env:
+      CUDA_LIBRARY_PATH: /usr/lib/cuda
+      FEATURE: ${{ matrix.feature }}
+      RUSTC_WRAPPER: sccache
+
+    steps:
       - name: Checkout gh-pages repository
         uses: actions/checkout@v3
         with:
