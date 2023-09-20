@@ -3,15 +3,15 @@
 
 ### Specify the crate name.
 ## Mandatory
-# name = "<crate-name>"
+name = 'lazy_static'
 
 ### Specify a list of versions to be built.
 ## Mandatory
-# versions = ["list", "of", "versions"]
+versions = ["1.4.0"]
 
 ### Instructs whether to use the standard library or not.
 ## Optional, default: false
-# std = true/false
+std = true
 
 ### Instructs whether to use the fast mode or not, by enabling
 ### `RISC0_EXPERIMENTAL_PREFLIGHT` feature.
@@ -35,15 +35,15 @@
 
 ### Injects a custom `main` function body into the crate.
 ## Optional, default: None
-# custom_main = 'println!("Hello, world!");'
+custom_main = 'assert_eq!(*EXAMPLE, 42);'
 
 ### Inject a top level scop string, e.g. `use lazy_static::lazy_static;`
 ## Optional, default: None
-# import_str = '<import-string>'
+import_str = 'use lazy_static::lazy_static;\nlazy_static! {\n\tstatic ref EXAMPLE: u8 = 42;\n}'
 
 ### Informs whether we should run the prover to test the guest crate.
 ## Optional, default: false
-# run_prover = true/false
+run_prover = true
 
 ### Informs whether we should expect the build/run steps to fail or not.
 ## Optional, default: false
