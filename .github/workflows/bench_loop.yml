@@ -52,7 +52,7 @@ jobs:
       - run: cargo run --bin cargo-risczero -- risczero install
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - run: cargo run -F $FEATURE --example loop -- --json | tee ${{ matrix.os }}-${{ matrix.device }}.json
+      - run: cargo run --release -F $FEATURE --example loop -- --json | tee ${{ matrix.os }}-${{ matrix.device }}.json
         working-directory: risc0/zkvm
       - name: Upload benchmark result
         uses: actions/upload-artifact@v2
