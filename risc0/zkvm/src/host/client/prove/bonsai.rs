@@ -47,7 +47,7 @@ impl Prover for BonsaiProver {
         _opts: &ProverOpts,
         image: MemoryImage,
     ) -> Result<Receipt> {
-        let client = Client::from_env()?;
+        let client = Client::from_env(crate::get_version())?;
 
         // upload the image
         let image_id = hex::encode(image.compute_id());

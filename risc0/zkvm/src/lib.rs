@@ -99,3 +99,8 @@ pub fn is_dev_mode() -> bool {
 
     cfg!(not(feature = "disable-dev-mode")) && is_env_set
 }
+
+/// returns the current zkvm version
+pub fn get_version() -> &'static str {
+    env!("CARGO_PKG_VERSION")
+}
