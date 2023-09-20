@@ -49,31 +49,12 @@ jobs:
       - name: Upload benchmark result
         uses: actions/upload-artifact@v2
         with:
-          name: benchmark-result
+          name: benchmark-result-${{ matrix.device }}
           path: risc0/zkvm/${{ matrix.os }}-${{ matrix.device }}.json
 
   push_to_ghpages:
     needs: bench
-    runs-on: [self-hosted, prod, bench, "${{ matrix.os }}", "${{ matrix.device }}"]
-
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [macOS]
-        feature: [default]
-        device: [cpu]
-        include:
-          - os: Linux
-            feature: cuda
-            device: nvidia_rtx_a5000
-          - os: macOS
-            feature: metal
-            device: apple_m2_pro
-
-    env:
-      CUDA_LIBRARY_PATH: /usr/lib/cuda
-      FEATURE: ${{ matrix.feature }}
-      RUSTC_WRAPPER: sccache
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout gh-pages repository
@@ -82,16 +63,28 @@ jobs:
           repository: risc0/ghpages
           ref: main
           token: ${{ secrets.BENCHMARK_TOKEN }}
-      - name: Download benchmark result
+      - name: Download benchmark cpu result
         uses: actions/download-artifact@v2
         with:
-          name: benchmark-result
+          name: benchmark-result-cpu
+          path: datasheet
+      - name: Download benchmark apple_m2_pro result
+        uses: actions/download-artifact@v2
+        with:
+          name: benchmark-result-apple_m2_pro
+          path: datasheet
+      - name: Download benchmark nvidia_rtx_a5000 result
+        uses: actions/download-artifact@v2
+        with:
+          name: benchmark-result-nvidia_rtx_a5000
           path: datasheet
       - name: Push benchmark result
         run: |
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
-          git add datasheet/${{ matrix.os }}-${{ matrix.device }}.json
+          git add datasheet/macOs-cpu.json
+          git add datasheet/macOs-apple_m2_pro.json
+          git add datasheet/Linux-nvidia_rtx_a5000.json
           git commit -m "Add build artifacts"
           git remote set-url origin https://${{ secrets.BENCHMARK_TOKEN }}@github.com/risc0/ghpages.git
           git push -f origin main
