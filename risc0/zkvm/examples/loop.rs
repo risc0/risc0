@@ -28,11 +28,11 @@ use tracing_subscriber::{prelude::*, EnvFilter};
 
 #[derive(serde::Serialize, Debug)]
 struct PerformanceData {
-    cycles: String,
-    duration: String,
-    ram: String,
-    seal: String,
-    speed: String,
+    cycles: usize,
+    duration: u128,
+    ram: usize,
+    seal: usize,
+    speed: f64,
 }
 
 #[derive(Parser)]
@@ -94,11 +94,11 @@ fn main() {
         if !args.quiet {
             if args.json {
                 let entry = PerformanceData {
-                    cycles: format!("{:}k", cycles / 1024),
-                    duration: duration.human_duration().to_string(),
-                    ram: usage.human_count_bytes().to_string(),
-                    seal: seal.human_count_bytes().to_string(),
-                    speed: format!("{:}Hz", throughput.human_count_bare().to_string()),
+                    cycles,
+                    duration: duration.as_nanos(),
+                    ram: usage,
+                    seal,
+                    speed: throughput,
                 };
                 match serde_json::to_string_pretty(&entry) {
                     Ok(json_str) => print!("{json_str}"),

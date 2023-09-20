@@ -22,7 +22,7 @@ required-features = ["prove"]
 
 [[example]]
 name = "loop"
-required-features = ["prove", "json"]
+required-features = ["prove"]
 
 [build-dependencies]
 prost-build = { version = "0.12", optional = true }
@@ -68,7 +68,6 @@ num-traits = { version = "0.2", default-features = false, optional = true }
 prost = { version = "0.12", optional = true }
 rand = { version = "0.8", optional = true }
 rayon = { version = "1.5", optional = true }
-serde_json = { version = "1.0", optional = true }
 sha2 = { version = "0.10", optional = true }
 tempfile = "3"
 thiserror = { version = "1.0", optional = true }
@@ -81,6 +80,7 @@ typetag = { version = "0.2", optional = true }
 clap = { version = "4", features = ["derive"] }
 criterion = { version = "0.5", features = ["html_reports"] }
 human-repr = "1.0"
+serde_json = "1.0"
 tracing-forest = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
@@ -105,7 +105,7 @@ client = [
 cuda = ["prove", "risc0-circuit-rv32im/cuda", "risc0-zkp/cuda"]
 dual = []
 metal = ["prove", "risc0-circuit-rv32im/metal", "risc0-zkp/metal"]
-default = ["client", "prove", "json"]
+default = ["client", "prove"]
 disable-dev-mode = []
 fault-proof = []
 profiler = [
@@ -137,9 +137,6 @@ prove = [
   "risc0-circuit-rv32im/prove",
   "risc0-zkp/prove",
   "std",
-]
-json = [
-  "dep:serde_json",
 ]
 std = [
   "anyhow/std",
