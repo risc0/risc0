@@ -9,8 +9,8 @@ on:
       - '.github/workflows/bench_*'
 
   # uncomment for only for testing changes to this workflow while in a PR
-  pull_request:
-    branches: [ main ]
+  # pull_request:
+  #   branches: [ main ]
 
   workflow_dispatch:
 
