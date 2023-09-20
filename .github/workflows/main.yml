@@ -85,6 +85,7 @@ jobs:
       - run: cargo test -F $FEATURE -F profiler
       - run: cargo test --workspace -F $FEATURE --tests -- --ignored --test-threads 1
       - run: cargo test -F $FEATURE -F disable-dev-mode -p risc0-r0vm
+      - run: cargo test -F $FEATURE -F enable-fault-proof -p risc0-zkvm -- tests::memory_io tests::memory_access
         if: matrix.device == 'cpu'
       - run: cargo check -F $FEATURE --benches
       - run: cargo check -p risc0-build
