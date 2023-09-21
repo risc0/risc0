@@ -174,7 +174,7 @@ mod tests {
             versions: Some(versions),
             std: true,
             fast_mode: true,
-            risc_zero_repository: RiscZeroRepo::Local("path".to_string()),
+            risc_zero_repository: Some(RiscZeroRepo::Local("path".to_string())),
             custom_main: Some("custom_main".to_string()),
             import_str: Some("import_str".to_string()),
             run_prover: true,

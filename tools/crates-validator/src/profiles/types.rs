@@ -45,8 +45,8 @@ pub struct ProfileSettings {
     pub std: bool,
     #[serde(default = "super::default_true")]
     pub fast_mode: bool,
-    #[serde(flatten)]
-    pub risc_zero_repository: RiscZeroRepo,
+    #[serde(flatten, default)]
+    pub risc_zero_repository: Option<RiscZeroRepo>,
     #[serde(default)]
     pub custom_main: Option<String>,
     #[serde(default)]

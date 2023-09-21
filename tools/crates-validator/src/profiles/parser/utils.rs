@@ -124,20 +124,20 @@ fn add_inject_cc_flags(item: &Mapping, profile: &mut Profile) {
 fn add_risc_zero_repository(item: &Mapping, profile: &mut Profile) -> Result<()> {
     match (item.get("risc0_gh_branch"), item.get("risc0_path")) {
         (Some(Value::String(git)), None) => {
-            profile.settings.risc_zero_repository = RiscZeroRepo::Github(git.to_string())
+            profile.settings.risc_zero_repository = Some(RiscZeroRepo::Github(git.to_string()))
         }
         (None, Some(Value::String(path))) => {
-            profile.settings.risc_zero_repository = RiscZeroRepo::Local(path.to_string())
+            profile.settings.risc_zero_repository = Some(RiscZeroRepo::Local(path.to_string()))
         }
         (Some(Value::String(_)), Some(Value::String(r))) => {
             warn!("Cannot specify both 'risc0_gh_branch' and 'risc0_path'");
             warn!("Using 'risc0_path' as default");
-            profile.settings.risc_zero_repository = RiscZeroRepo::Local(r.to_string())
+            profile.settings.risc_zero_repository = Some(RiscZeroRepo::Local(r.to_string()))
         }
         (_, _) => {
             warn!("No 'risc0_gh_branch' or 'risc0_path' specified");
             warn!("Using default 'risc0_gh_branch'");
-            profile.settings.risc_zero_repository = RiscZeroRepo::default();
+            profile.settings.risc_zero_repository = Some(RiscZeroRepo::default());
         }
     }
     Ok(())
