@@ -1,3 +1,4 @@
+use std::collections::HashSet;
 use std::{collections::HashMap};
 
 use anyhow::{anyhow, bail, Context, Result};
@@ -7,6 +8,10 @@ use serde_valid::Validate;
 use super::utils;
 use super::Profile;
 use super::ProfileSettings;
+
+pub(crate) fn parse(config: &Value) -> Result<HashSet<Profile>> {
+    todo!()
+}
 
 pub(crate) fn parse_batch_item(item: &Mapping) -> Result<HashMap<String, Profile>> {
     let mut map = HashMap::new();

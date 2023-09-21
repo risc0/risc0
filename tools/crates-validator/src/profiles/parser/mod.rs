@@ -9,11 +9,24 @@ use super::RiscZeroRepo;
 
 mod utils;
 mod batch;
+mod profiles;
 
 pub fn get_profiles(path: impl AsRef<str> + Display) -> Result<Vec<Profile>> {
+    // Read the whole configuration file
     let content = utils::read_profile(path)?;
-    let profiles = utils::parse_profiles(content)?;
-    Ok(profiles)
+
+    todo!()
+    // Parse batch configurations
+    // let batch_profiles = batch::parse(&content)?;
+
+    // Parse individual crate configurations
+    // let individual_profiles = profiles::parse(&content)?;
+
+    // Combine the two, overwriting batch profiles with individual profiles if
+    // crates are defined in both
+    // let profiles = utils::combine_profiles(batch_profiles, individual_profiles)?;
+
+    // Ok(profiles)
 }
 
 // fn parse_profile(content: impl AsRef<str> + Display) -> Result<Profile> {
