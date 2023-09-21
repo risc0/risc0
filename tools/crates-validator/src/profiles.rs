@@ -56,9 +56,11 @@ pub fn lookup_crate(crate_name: &str, mut profile: CrateProfile) -> CrateProfile
         | "ethers-core" | "h2" | "headers" | "hex" | "hyper" | "hyper-timeout" | "k256"
         | "md-5" | "multimap" | "openssl" | "rand" | "revm" | "revm-primitives" | "serde"
         | "serde_bytes" | "serde_cbor" | "serde_json" | "serde_urlencoded" | "serde_with"
-        | "serde_yaml" | "sha-1" | "sha1" | "sha2" | "sha3" | "string_cache" | "tinytemplate"
-        | "toml" | "tower" | "tracing" | "tracing-core" | "tracing-futures" | "tracing-log"
-        | "tracing-serde" | "tracing-subscriber" | "tungstenite" => profile.std = true,
+        | "serde_yaml" | "sha-1" | "sha1" | "sha2" | "sha3" | "string_cache" | "tfhe"
+        | "tinytemplate" | "toml" | "tower" | "tracing" | "tracing-core" | "tracing-futures"
+        | "tracing-log" | "tracing-serde" | "tracing-subscriber" | "tungstenite" => {
+            profile.std = true
+        }
         _ => profile.customized = false,
     }
     profile
