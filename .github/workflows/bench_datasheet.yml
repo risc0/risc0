@@ -63,13 +63,14 @@ jobs:
         working-directory: risc0/zkvm
       - name: Save commit hash to a file
         run: echo "${{ github.sha }}" > COMMIT_HASH.txt
+        working-directory: risc0/zkvm
       - name: Upload benchmark result
         uses: actions/upload-artifact@v2
         with:
           name: benchmark-result
           path: |
             risc0/zkvm/${{ matrix.os }}-${{ matrix.device }}.json
-            COMMIT_HASH.txt
+            risc0/zkvm/COMMIT_HASH.txt
 
   push_to_ghpages:
     needs: bench
