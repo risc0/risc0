@@ -97,6 +97,10 @@ jobs:
           git add datasheet/Linux-nvidia_rtx_a5000.json
           git add datasheet/Linux-cpu.json
           git add datasheet/COMMIT_HASH.txt
-          git commit -m "Add build artifacts"
-          git remote set-url origin https://${{ secrets.BENCHMARK_TOKEN }}@github.com/risc0/ghpages.git
-          git push -f origin dev
+          if git diff --cached --exit-code; then
+            echo "No changes to commit"
+          else
+            git commit -m "Add build artifacts"
+            git remote set-url origin https://${{ secrets.BENCHMARK_TOKEN }}@github.com/risc0/ghpages.git
+            git push -f origin dev
+          fi

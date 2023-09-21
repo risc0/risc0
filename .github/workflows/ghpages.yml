@@ -62,6 +62,10 @@ jobs:
           git add dev/bench/index.html
           git add dev/crate-validation/index.html
           git add README.md
-          git commit -m "Add build artifacts"
-          git remote set-url origin https://${{ secrets.BENCHMARK_TOKEN }}@github.com/risc0/ghpages.git
-          git push -f origin dev
+          if git diff --cached --exit-code; then
+            echo "No changes to commit"
+          else
+            git commit -m "Add build artifacts"
+            git remote set-url origin https://${{ secrets.BENCHMARK_TOKEN }}@github.com/risc0/ghpages.git
+            git push -f origin dev
+          fi
