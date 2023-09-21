@@ -26,6 +26,7 @@ use crate::{
         receipt::VerifierContext,
         recursion::{circuit_impl::CIRCUIT_CORE, control_id::RECURSION_CONTROL_IDS},
     },
+    sha::Digestable,
     ReceiptMetadata,
 };
 

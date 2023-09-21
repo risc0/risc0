@@ -24,7 +24,7 @@ mod sys_state;
 
 pub use crate::{
     elf::Program,
-    hash::{tagged_list, tagged_list_cons, tagged_struct},
+    hash::{tagged_list, tagged_list_cons, tagged_struct, Digestable},
     sys_state::{read_sha_halfs, write_sha_halfs, SystemState},
 };
 

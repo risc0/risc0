@@ -33,7 +33,7 @@ use crate::{
     serde::{Deserializer, Serializer, WordRead, WordWrite},
     sha::{
         rust_crypto::{Digest as _, Sha256},
-        Digest,
+        Digest, Digestable,
     },
     ReceiptMetadata,
 };

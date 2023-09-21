@@ -41,10 +41,11 @@ use super::{
 };
 use crate::{
     fault_ids::FAULT_CHECKER_ID,
+    receipt_metadata::MaybePruned,
     serde::from_slice,
     sha::{
-        self,
         rust_crypto::{Digest as _, Sha256},
+        Digestable, DIGEST_WORDS,
     },
     ExitCode, ReceiptMetadata,
 };
@@ -148,7 +149,7 @@ impl SegmentReceipts {
         // This closure is invoked on each receipt's metadata
         let mut is_fault_meta = |metadata: &ReceiptMetadata| -> Result<bool, VerificationError> {
             if cfg!(feature = "enable-fault-proof")
-                && metadata.pre.digest::<sha::Impl>() == FAULT_CHECKER_ID.into()
+                && metadata.pre.digest() == FAULT_CHECKER_ID.into()
             {
                 if fault_id_exists {
                     // If we get here, I means that we've already seen the fault checker's image ID.
@@ -172,21 +173,18 @@ impl SegmentReceipts {
             receipt.verify_with_context(ctx)?;
             let metadata = receipt.get_metadata()?;
             log::debug!("metadata: {metadata:#?}");
-            if prev_image_id != metadata.pre.digest::<crate::sha::Impl>()
-                && !is_fault_meta(&metadata)?
-            {
+            if prev_image_id != metadata.pre.digest() && !is_fault_meta(&metadata)? {
                 return Err(VerificationError::ImageVerificationError);
             }
             if metadata.exit_code != ExitCode::SystemSplit {
                 return Err(VerificationError::UnexpectedExitCode);
             }
-            prev_image_id = metadata.post.digest::<crate::sha::Impl>();
+            prev_image_id = metadata.post.digest();
         }
         final_receipt.verify_with_context(ctx)?;
         let metadata = final_receipt.get_metadata()?;
         log::debug!("final: {metadata:#?}");
-        if prev_image_id != metadata.pre.digest::<crate::sha::Impl>() && !is_fault_meta(&metadata)?
-        {
+        if prev_image_id != metadata.pre.digest() && !is_fault_meta(&metadata)? {
             return Err(VerificationError::ImageVerificationError);
         }
 
@@ -217,7 +215,7 @@ impl SegmentReceipts {
 
         let digest = Sha256::digest(journal);
         let digest_words: &[u32] = bytemuck::cast_slice(digest.as_slice());
-        let output_words = metadata.output.as_words();
+        let output_words: [u32; DIGEST_WORDS] = metadata.output.digest().into();
         let is_journal_valid = || {
             (journal.is_empty() && output_words.iter().all(|x| *x == 0))
                 || digest_words == output_words
@@ -227,7 +225,7 @@ impl SegmentReceipts {
                 "journal: \"{}\", digest: 0x{}, output: 0x{}, {:?}",
                 hex::encode(journal),
                 hex::encode(bytemuck::cast_slice(digest_words)),
-                hex::encode(bytemuck::cast_slice(output_words)),
+                hex::encode(bytemuck::cast_slice(&output_words)),
                 journal
             );
             return Err(VerificationError::JournalDigestMismatch);
@@ -452,11 +450,11 @@ fn decode_receipt_metadata_from_io(
     let exit_code =
         ExitCode::from_pair(sys_exit, user_exit).or(Err(VerificationError::ReceiptFormatError))?;
     Ok(ReceiptMetadata {
-        pre,
-        post,
+        pre: pre.into(),
+        post: post.into(),
         exit_code,
         input,
-        output,
+        output: MaybePruned::Pruned(output),
     })
 }
 

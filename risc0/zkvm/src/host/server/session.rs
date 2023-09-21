@@ -28,8 +28,9 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     host::server::exec::executor::SyscallRecord,
-    sha::{Digest, Sha256, DIGEST_WORDS},
-    ExitCode, MemoryImage, ReceiptMetadata,
+    receipt_metadata::{Assumptions, Output},
+    sha::{Digest, DIGEST_WORDS},
+    ExitCode, MemoryImage, ReceiptMetadata, SystemState,
 };
 
 #[derive(Clone, Default, Serialize, Deserialize, Debug)]
@@ -156,13 +157,17 @@ impl Session {
             .first()
             .ok_or_else(|| anyhow!("session has no segments"))?
             .resolve()?;
+        let output = Output {
+            journal: self.journal.clone().into(),
+            assumptions: Assumptions::new(vec![]).into(),
+        };
 
         Ok(ReceiptMetadata {
-            pre: first_segment.pre_image.borrow().into(),
-            post: self.post_image.borrow().into(),
+            pre: SystemState::from(first_segment.pre_image.borrow()).into(),
+            post: SystemState::from(self.post_image.borrow()).into(),
             exit_code: self.exit_code,
             input: Digest::new([0u32; DIGEST_WORDS]),
-            output: *crate::sha::Impl::hash_bytes(&self.journal),
+            output: output.into(),
         })
     }
 }

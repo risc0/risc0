@@ -15,11 +15,24 @@
 extern crate alloc;
 
 use alloc::vec::Vec;
+use core::ops::Deref;
 
 use risc0_zkp::core::{
     digest::{Digest, DIGEST_WORDS},
     hash::sha::Sha256,
 };
+
+/// Defines a collision resistant hash for the typed and structured data.
+pub trait Digestable {
+    /// Calculate a collision resistant hash for the typed and structured data.
+    fn digest<S: Sha256>(&self) -> Digest;
+}
+
+impl<T: Deref<Target = [u8]>> Digestable for T {
+    fn digest<S: Sha256>(&self) -> Digest {
+        *S::hash_bytes(self.deref())
+    }
+}
 
 /// A struct hashing routine, permiting tree-like opening of fields.
 ///

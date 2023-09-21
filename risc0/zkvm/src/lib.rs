@@ -30,7 +30,7 @@ mod fault_monitor;
 pub mod guest;
 #[cfg(not(target_os = "zkvm"))]
 mod host;
-mod receipt_metadata;
+pub mod receipt_metadata;
 pub mod serde;
 pub mod sha;
 

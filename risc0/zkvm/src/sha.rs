@@ -65,6 +65,28 @@ pub(crate) fn tagged_struct(tag: &str, down: &[Digest], data: &[u32]) -> Digest 
     risc0_binfmt::tagged_struct::<Impl>(tag, down, data)
 }
 
+pub(crate) fn tagged_list(tag: &str, list: &[Digest]) -> Digest {
+    risc0_binfmt::tagged_list::<Impl>(tag, list)
+}
+
+#[allow(unused)] // DO NOT MERGE
+pub(crate) fn tagged_list_cons(tag: &str, head: Digest, rest: Digest) -> Digest {
+    risc0_binfmt::tagged_list_cons::<Impl>(tag, head, rest)
+}
+
+/// Defines a collision resistant hash for the typed and structured data.
+pub trait Digestable {
+    /// Calculate a collision resistant hash for the typed and structured data.
+    fn digest(&self) -> Digest;
+}
+
+impl<D: risc0_binfmt::Digestable> Digestable for D {
+    /// Calculate a collision resistant hash for the typed and structured data.
+    fn digest(&self) -> Digest {
+        self.digest::<Impl>()
+    }
+}
+
 pub mod rust_crypto {
     //! [Rust Crypto] wrappers for the RISC0 Sha256 trait.
     //!

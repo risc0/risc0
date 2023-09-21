@@ -19,9 +19,9 @@ use alloc::{collections::VecDeque, vec::Vec};
 use risc0_zkp::core::{digest::Digest, hash::sha::Sha256};
 use serde::{Deserialize, Serialize};
 
-use crate::tagged_struct;
 #[cfg(not(target_os = "zkvm"))]
 use crate::MemoryImage;
+use crate::{tagged_struct, Digestable};
 
 /// Represents the public state of a segment, needed for continuations and
 /// receipt verification.
@@ -47,11 +47,11 @@ impl SystemState {
         write_u32_bytes(flat, self.pc);
         write_sha_halfs(flat, &self.merkle_root);
     }
+}
 
-    // DO NOT MERGE(victor): Consider how to avoid consumers of this method needing to supply the
-    // Sha256 implementation explicitly.
+impl Digestable for SystemState {
     /// Hash the [crate::SystemState] to get a digest of the struct.
-    pub fn digest<S: Sha256>(&self) -> Digest {
+    fn digest<S: Sha256>(&self) -> Digest {
         tagged_struct::<S>("risc0.SystemState", &[self.merkle_root], &[self.pc])
     }
 }
