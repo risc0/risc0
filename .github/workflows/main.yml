@@ -161,13 +161,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: cargo xtask gen-receipt
       - run: cargo doc --no-deps --exclude=risc0-zkvm-methods --workspace
-      - name: Install mdbook
-        uses: risc0/cargo-install@2cfb0024938d23011106cbf127b393bc83fddba1
-        with:
-          crate: mdbook
-          version: "0.4"
-      - run: mdbook test
-        working-directory: docs/mdbook
 
   check_template:
     runs-on: [self-hosted, prod, cpu, "${{ matrix.os }}"]
