@@ -222,7 +222,7 @@ mod test {
         );
         tester.compare_image_id(
             "risc0_zkvm_methods_guest/slice_io",
-            "a51a4b747f18b7e5f36a016bdd6f885e8293dbfca2759d6667a6df8edd5f2489",
+            "f5c6e9ed4296aff0db991f612794115010422465187a049ed72fb719ab94dcd9",
         );
     }
 }

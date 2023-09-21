@@ -94,8 +94,8 @@ pub mod responses {
         pub receipt_url: Option<String>,
         /// Session Error message
         ///
-        /// If the session is not `RUNNING` or `SUCCEEDED`, this is the error
-        /// raised from within bonsai, otherwise it is [None].
+        /// If the session is not `RUNNING` or `SUCCEEDED`, this is the error raised from within bonsai,
+        /// otherwise it is [None].
         pub error_msg: Option<String>,
         /// Session Proving State
         ///
@@ -164,8 +164,7 @@ pub mod responses {
         pub output: Option<SnarkReceipt>,
         /// Snark Error message
         ///
-        /// If the SNARK status is not `RUNNING` or `SUCCEEDED`, this is the
-        /// error raised from within bonsai.
+        /// If the SNARK status is not `RUNNING` or `SUCCEEDED`, this is the error raised from within bonsai.
         pub error_msg: Option<String>,
     }
 }

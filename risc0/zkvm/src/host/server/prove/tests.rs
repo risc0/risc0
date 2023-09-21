@@ -28,10 +28,7 @@ use test_log::test;
 
 use super::{get_prover_server, HalPair, ProverImpl};
 use crate::{
-    host::{
-        server::{exec::executor::ExecutorError, testutils},
-        CIRCUIT,
-    },
+    host::{server::testutils, CIRCUIT},
     serde::{from_slice, to_vec},
     Executor, ExecutorEnv, ExitCode, ProverOpts, ProverServer, Receipt,
 };
@@ -163,18 +160,6 @@ fn bigint_accel() {
 #[test]
 #[serial]
 fn memory_io() {
-    fn is_fault_proof(receipt: Result<Receipt>) -> bool {
-        // this if statement will be removed once this feature is more mature
-        if !cfg!(feature = "enable-fault-proof") {
-            return receipt.is_err();
-        }
-        let receipt = receipt.unwrap();
-        match receipt.verify(MULTI_TEST_ID) {
-            Err(VerificationError::ValidFaultReceipt) => true,
-            _ => false,
-        }
-    }
-
     fn run_memio(pairs: &[(usize, usize)]) -> Result<Receipt> {
         let spec = MultiTestSpec::ReadWriteMem {
             values: pairs
@@ -186,11 +171,7 @@ fn memory_io() {
         let input = to_vec(&spec)?;
         let env = ExecutorEnv::builder().add_input(&input).build().unwrap();
         let mut exec = Executor::from_elf(env, MULTI_TEST_ELF)?;
-        let session = match exec.run() {
-            Ok(session) => session,
-            Err(ExecutorError::Fault(session)) => session,
-            Err(ExecutorError::Error(e)) => return Err(e),
-        };
+        let session = exec.run()?;
         session.prove()
     }
 
@@ -202,22 +183,22 @@ fn memory_io() {
     );
 
     // Double writes are fine
-    assert!(!is_fault_proof(run_memio(&[(POS, 1), (POS, 1)])));
+    run_memio(&[(POS, 1), (POS, 1)]).unwrap();
 
     // Writes at different addresses are fine
-    assert!(!is_fault_proof(run_memio(&[(POS, 1), (POS + 4, 2)])));
+    run_memio(&[(POS, 1), (POS + 4, 2)]).unwrap();
 
     // Aligned write is fine
-    assert!(!is_fault_proof(run_memio(&[(POS, 1)])));
+    run_memio(&[(POS, 1)]).unwrap();
 
     // Unaligned write is bad
-    assert!(is_fault_proof(run_memio(&[(POS + 1001, 1)])));
+    run_memio(&[(POS + 1001, 1)]).unwrap_err();
 
     // Aligned read is fine
-    assert!(!is_fault_proof(run_memio(&[(POS, 0)])));
+    run_memio(&[(POS, 0)]).unwrap();
 
     // Unaligned read is bad
-    assert!(is_fault_proof(run_memio(&[(POS + 1, 0)])));
+    run_memio(&[(POS + 1, 0)]).unwrap_err();
 }
 
 #[test]
