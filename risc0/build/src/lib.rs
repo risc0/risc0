@@ -232,19 +232,7 @@ pub fn cargo_command(cargo_command: &str, rust_flags: &[&str]) -> Command {
     println!("Using rustc: {rustc}");
 
     let mut cmd = sanitized_cmd("cargo");
-    // DIFF: --manifest-path and --target-dir were removed here.
     let mut args = vec![cargo_command, "--target", "riscv32im-risc0-zkvm-elf"];
-
-    // DIFF: ---
-    //if !is_debug() {
-    //    args.push("--release");
-    //}
-
-    //let features_str = features.join(",");
-    //if !features.is_empty() {
-    //    args.push("--features");
-    //    args.push(&features_str);
-    //}
 
     let rust_src = get_env_var("RISC0_RUST_SRC");
     if !rust_src.is_empty() {
@@ -255,8 +243,6 @@ pub fn cargo_command(cargo_command: &str, rust_flags: &[&str]) -> Command {
         cmd.env("__CARGO_TESTS_ONLY_SRC_ROOT", rust_src);
     }
 
-    // DIFF: This println! no longer means what it did before.
-    //       The command is still missing some args.
     println!("Building guest package: cargo {}", args.join(" "));
 
     let rustflags_envvar = [

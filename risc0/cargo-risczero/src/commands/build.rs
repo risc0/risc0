@@ -40,6 +40,8 @@ impl AsRef<str> for BuildSubcommand {
     }
 }
 
+// TODO(victor): Provide some way to pass features.
+
 #[derive(Parser)]
 /// `cargo risczero build`
 pub struct BuildCommand {
@@ -108,11 +110,28 @@ impl BuildCommand {
                     "link_arg={}",
                     rust_runtime
                         .to_str()
-                        .expect("invalid path string for rust_runtime")
+                        .ok_or_else(|| anyhow!("invalid path string for rust_runtime"))?
                 ),
             ],
         );
+
         cmd.arg("--message-format=json");
+
+        cmd.args(&[
+            "--manifest-path",
+            manifest_path
+                .to_str()
+                .ok_or_else(|| anyhow!("invalid path string for manifest_path"))?,
+            "--target-dir",
+            target_dir
+                .to_str()
+                .ok_or_else(|| anyhow!("invalid path string for target_dir"))?,
+        ]);
+
+        // TODO(victor): Give the user a way to request a release build.
+        //if !is_debug() {
+        //    cmd.args(&["--release"]);
+        //}
 
         // Strip out --no-run if specified, since we always pass --no-run.
         let mut no_run_flag = false;
@@ -137,6 +156,8 @@ impl BuildCommand {
                 cmd.args(&self.args);
             }
         }
+
+        println!("Running command: {:?}", &cmd);
 
         // Start the cargo command as a subprocess.
         let mut child = cmd.stdout(Stdio::piped()).spawn()?;
