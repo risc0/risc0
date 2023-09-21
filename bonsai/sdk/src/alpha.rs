@@ -19,6 +19,7 @@ use thiserror::Error;
 
 use self::responses::{
     CreateSessRes, ImgUploadRes, ProofReq, SessionStatusRes, SnarkReq, SnarkStatusRes, UploadRes,
+    VersionInfo,
 };
 use crate::{API_KEY_HEADER, VERSION_HEADER};
 
@@ -166,6 +167,13 @@ pub mod responses {
         ///
         /// If the SNARK status is not `RUNNING` or `SUCCEEDED`, this is the error raised from within bonsai.
         pub error_msg: Option<String>,
+    }
+
+    /// Bonsai supported versions
+    #[derive(Deserialize, Serialize)]
+    pub struct VersionInfo {
+        /// Supported versions of the risc0-zkvm crate
+        pub risc0_zkvm: Vec<String>,
     }
 }
 
@@ -449,6 +457,19 @@ impl Client {
         let res: CreateSessRes = res.json()?;
 
         Ok(SnarkId::new(res.uuid))
+    }
+
+    // - /version
+
+    /// Fetches the current component versions from bonsai
+    ///
+    /// Fetches the risc0 zkvm supported versions as well as other sub-components of bonsai
+    pub fn version(&self) -> Result<VersionInfo, SdkErr> {
+        Ok(self
+            .client
+            .get(format!("{}/version", self.url))
+            .send()?
+            .json::<VersionInfo>()?)
     }
 }
 
@@ -740,5 +761,31 @@ mod tests {
         assert_eq!(status.output, None);
 
         create_mock.assert();
+    }
+
+    #[test]
+    fn version() {
+        let server = MockServer::start();
+
+        let response = VersionInfo {
+            risc0_zkvm: vec![TEST_VERSION.into()],
+        };
+
+        let get_mock = server.mock(|when, then| {
+            when.method(GET)
+                .path("/version")
+                .header(API_KEY_HEADER, TEST_KEY)
+                .header(VERSION_HEADER, TEST_VERSION);
+            then.status(200)
+                .header("content-type", "application/json")
+                .json_body_obj(&response);
+        });
+
+        let server_url = format!("http://{}", server.address());
+        let client = super::Client::from_parts(server_url, TEST_KEY.to_string(), TEST_VERSION)
+            .expect("Failed to construct client");
+        let info = client.version().expect("Failed to fetch version route");
+        assert_eq!(&info.risc0_zkvm[0], TEST_VERSION);
+        get_mock.assert();
     }
 }
