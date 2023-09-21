@@ -8,7 +8,6 @@ members = [
   "risc0/circuit/rv32im",
   "risc0/circuit/rv32im-sys",
   "risc0/core",
-  "risc0/fault",
   "risc0/r0vm",
   "risc0/sys",
   "risc0/tools",
