@@ -112,9 +112,7 @@ impl MemoryMonitor {
     }
 
     pub fn load_u16(&mut self, addr: u32) -> Result<u16> {
-        if addr % 2 != 0 {
-            bail!("unaligned load at 0x{addr:08x}");
-        }
+        assert_eq!(addr % 2, 0, "unaligned load");
         // log::trace!("load_u16: 0x{addr:08x}");
         let mut bytes = [0_u8; 2];
         self.load_bytes(addr, &mut bytes)?;
@@ -122,9 +120,7 @@ impl MemoryMonitor {
     }
 
     pub fn load_u32(&mut self, addr: u32) -> Result<u32> {
-        if addr % WORD_SIZE as u32 != 0 {
-            bail!("unaligned load at 0x{addr:08x}");
-        }
+        assert_eq!(addr % WORD_SIZE as u32, 0, "unaligned load");
         // log::trace!("load_u32: 0x{addr:08x}");
         let mut bytes = [0_u8; WORD_SIZE];
         self.load_bytes(addr, &mut bytes)?;

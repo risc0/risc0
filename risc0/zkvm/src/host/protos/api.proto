@@ -138,7 +138,6 @@ message ExitCode {
     uint32 paused = 2;
     google.protobuf.Empty system_split = 3;
     google.protobuf.Empty session_limit = 4;
-    google.protobuf.Empty fault = 5;
   }
 }
 

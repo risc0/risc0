@@ -18,8 +18,6 @@ use risc0_circuit_rv32im::{
     REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA,
 };
 use risc0_core::field::baby_bear::{BabyBear, Elem, ExtElem};
-#[cfg(feature = "enable-fault-proof")]
-use risc0_zkp::verify::VerificationError;
 use risc0_zkp::{
     adapter::TapsProvider,
     hal::{CircuitHal, Hal},
@@ -78,15 +76,8 @@ where
         let inner = InnerReceipt::Flat(SegmentReceipts(segments));
         let receipt = Receipt::new(inner, session.journal.clone());
         let image_id = session.segments[0].resolve()?.pre_image.compute_id();
-        match receipt.verify_with_context(ctx, image_id) {
-            Ok(()) => Ok(receipt),
-            // proof of fault is currently in an experimental stage. If this
-            // feature is disabled, then it means that attempting the verification verify at
-            // this stage should return an error rather than a receipt.
-            #[cfg(feature = "enable-fault-proof")]
-            Err(VerificationError::ValidFaultReceipt) => Ok(receipt),
-            Err(e) => return Err(e.into()),
-        }
+        receipt.verify_with_context(ctx, image_id)?;
+        Ok(receipt)
     }
 
     fn prove_segment(&self, ctx: &VerifierContext, segment: &Segment) -> Result<SegmentReceipt> {
