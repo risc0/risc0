@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Crate validation</title>
+  <style>
+    table,
+    th {
+      font-size: 16px;
+      font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+      border: 1px solid black;
+      border-collapse: collapse;
+      border-spacing: 0;
+    }
+
+    .column {
+      float: left;
+      width: 50%;
+    }
+
+    .column-follow {
+      position: fixed;
+      top: 20px;
+      width: 100%;
+    }
+
+    /* Clear floats after the columns */
+    .row:after {
+      content: "";
+      display: table;
+      clear: both;
+    }
+
+    textarea {
+      height: 800px;
+      width: 95%;
+      padding: 1%;
+      border: none;
+    }
+
+    #search-input {
+      width: 80%;
+      font-size: 16px;
+      padding: 12px 20px 12px 12px;
+      border: 1px solid #ddd;
+      margin-bottom: 12px;
+    }
+  </style>
+</head>
+
+<body>
+  <script>
+    var data = null;
+    function show_error(tcell) {
+      if (data === null) {
+        console.error("Clicked show_error before data loaded");
+      }
+      let crate_name = tcell.srcElement.parentElement.childNodes[0].innerText;
+
+      for (let profile of data.profiles) {
+        if (profile.name == crate_name) {
+          var textarea = document.getElementById("error-log");
+          var header = document.getElementById("error-log-name");
+          textarea.value = profile.results.build_errors;
+          textarea.setAttribute("value", profile.results.build_errors);
+          header.innerText = `Crate: ${crate_name}`;
+          return;
+        }
+      }
+      console.error(`Failed to find name: ${crate_name}`);
+    }
+
+    async function fetch_json() {
+      return await fetch("profiles.json")
+        .then(res => res.json())
+        .then(out => {
+          return out;
+        })
+        .catch(err => { console.error(err) });
+
+    }
+
+    const headers = ["name", "version", "status", "custom profile"];
+
+    async function render_results() {
+      data = await fetch_json();
+      var table = document.getElementById("result-table");
+      let thead = table.createTHead();
+      let hrow = thead.insertRow();
+
+      // Construct able header
+      for (const key of headers) {
+        let th = document.createElement("th");
+        let text = document.createTextNode(key);
+        th.appendChild(text);
+        hrow.appendChild(th);
+      }
+
+      var successes = 0;
+      var failed = 0;
+      var skipped = 0;
+      var customized = 0;
+      const total = data.profiles.length;
+
+      for (let profile of data.profiles) {
+        let row = table.insertRow();
+        for (key of headers) {
+          var table_data = "";
+          let cell = row.insertCell();
+          switch (key) {
+            case "name":
+              table_data = profile.name;
+              break;
+            case "version":
+              table_data = profile.version;
+              break;
+            case "status":
+              table_data = profile.results.status;
+              if (table_data == "Success") {
+                successes++;
+                cell.style.backgroundColor = "green";
+              } else if (table_data == "Skipped") {
+                skipped++;
+                cell.style.backgroundColor = "yellow";
+              } else {
+                failed++;
+                cell.onclick = show_error;
+                cell.style.backgroundColor = "red";
+              }
+              break;
+            case "custom profile":
+              if (profile.customized) {
+                table_data = "True";
+                customized++;
+              }
+              break;
+            default:
+              console.error(`Unknown header key: ${key}`);
+          }
+          let text = document.createTextNode(table_data);
+          cell.appendChild(text);
+        }
+      }
+      var summary_node = document.getElementById("res-summary");
+      var p_node = document.createElement("p");
+      summary_node.appendChild(p_node);
+
+      const success_rate = ((successes / total) * 100).toFixed(2);
+      const text_node = document.createTextNode(`Successes: ${successes}/${total} (${success_rate} %) | Skipped: ${skipped}/${total} | Failed: ${failed}/${total} | customized: ${customized}`);
+      p_node.appendChild(text_node);
+
+    }
+
+    function search_errors() {
+      const input_node = document.getElementById('search-input');
+      const search_str = input_node.value;
+
+      var result_str = "";
+      var counter = 0;
+
+      for (let profile of data.profiles) {
+        const err_str = profile.results.build_errors;
+        if (err_str === null || err_str.length == 0) {
+          continue;
+        }
+
+        if (err_str.includes(search_str)) {
+          result_str += profile.name + "\n";
+          counter++;
+        }
+      }
+
+      result_str = `Found: ${counter} crates matching:\n` + result_str;
+      var textarea = document.getElementById("error-log");
+      textarea.value = result_str;
+      textarea.setAttribute("value", result_str);
+      var header = document.getElementById("error-log-name");
+      header.innerText = "";
+    }
+
+    (async () => {
+      await render_results();
+    })();
+  </script>
+
+</body>
+
+<h2>Crate Results</h2>
+<p>
+  Each night, we test compatibility between each of the top 1000 Rust crates and the RISC Zero zkVM.
+  This page shows the results of those tests.
+</p>
+<div id="results">
+  <div id="res-summary"></div>
+  <div class="result-holder">
+    <div class="column">
+      <table id="result-table"></table>
+    </div>
+    <div class="column">
+      <div class="column-follow">
+        <input type="text" id="search-input" onkeyup="search_errors()" placeholder="Exact string match in build errors">
+        <h4>Build Errors</h4>
+        <p id="error-log-name"></p>
+        <textarea id="error-log"> </textarea>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</html>

@@ -1,4 +1,4 @@
-name: Benchmark datasheet
+name: Benchmark Datasheet
 
 on:
   push:
@@ -9,8 +9,12 @@ on:
       - '.github/workflows/bench_*'
 
   # uncomment for only for testing changes to this workflow while in a PR
-  # pull_request:
-  #   branches: [ main ]
+  pull_request:
+    branches: [ main ]
+    # Only run benchmarks on changes to following paths:
+    paths:
+      - 'risc0/**'
+      - '.github/workflows/bench_*'
 
   workflow_dispatch:
 
@@ -35,6 +39,9 @@ jobs:
           - os: macOS
             feature: default
             device: cpu
+          - os: Linux
+            feature: default
+            device: cpu
 
     env:
       CUDA_LIBRARY_PATH: /usr/lib/cuda
@@ -54,11 +61,15 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: cargo run --release -F $FEATURE --example loop -- --json | tee ${{ matrix.os }}-${{ matrix.device }}.json
         working-directory: risc0/zkvm
+      - name: Save commit hash to a file
+        run: echo "${{ github.sha }}" > COMMIT_HASH.txt
       - name: Upload benchmark result
         uses: actions/upload-artifact@v2
         with:
           name: benchmark-result
-          path: risc0/zkvm/${{ matrix.os }}-${{ matrix.device }}.json
+          path: |
+            risc0/zkvm/${{ matrix.os }}-${{ matrix.device }}.json
+            COMMIT_HASH.txt
 
   push_to_ghpages:
     needs: bench
@@ -69,7 +80,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           repository: risc0/ghpages
-          ref: main
+          ref: dev
           token: ${{ secrets.BENCHMARK_TOKEN }}
       - name: Download benchmark
         uses: actions/download-artifact@v2
@@ -83,6 +94,8 @@ jobs:
           git add datasheet/macOS-cpu.json
           git add datasheet/macOS-apple_m2_pro.json
           git add datasheet/Linux-nvidia_rtx_a5000.json
+          git add datasheet/Linux-cpu.json
+          git add datasheet/COMMIT_HASH.txt
           git commit -m "Add build artifacts"
           git remote set-url origin https://${{ secrets.BENCHMARK_TOKEN }}@github.com/risc0/ghpages.git
-          git push -f origin main
+          git push -f origin dev

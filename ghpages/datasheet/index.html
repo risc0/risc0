@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+    }
+
+    th,
+    td {
+      padding: 8px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+
+    th {
+      background-color: #f4f4f4;
+    }
+
+    h1 {
+      text-align: center;
+      margin: 20px;
+    }
+
+    h2 {
+      margin: 10px 0;
+    }
+
+    #commit-hash {
+      text-align: center;
+      margin: 10px;
+    }
+  </style>
+  <title>RISC Zero Datasheet</title>
+</head>
+
+<body>
+
+  <h1 style="text-align: center;">RISC Zero Datasheet</h1>
+  <p id="commit-hash">Commit hash: <span id="hash-content">Loading...</span></p>
+  <div id="table-container"></div>
+
+  <script>
+    // Function to format duration
+    function formatDuration(duration) {
+      const thresholds = [1000, 1000, 1000, 60, 60];
+      const units = ['ns', 'µs', 'ms', 's', 'min', 'h'];
+      let unitIndex = 0;
+      while (duration >= thresholds[unitIndex] && unitIndex < thresholds.length) {
+        duration /= thresholds[unitIndex];
+        unitIndex++;
+      }
+      return `${duration.toFixed(2)}${units[unitIndex]}`;
+    }
+
+    // Function to format bytes
+    function formatBytes(bytes) {
+      const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+      let unitIndex = 0;
+      while (bytes >= 1024 && unitIndex < units.length - 1) {
+        bytes /= 1024;
+        unitIndex++;
+      }
+      return `${bytes.toFixed(2)}${units[unitIndex]}`;
+    }
+
+    // Function to format heartz
+    function formatHz(heartz) {
+      const units = ['Hz', 'KHz', 'MHz', 'GHz'];
+      let unitIndex = 0;
+      while (heartz >= 1000 && unitIndex < units.length - 1) {
+        heartz /= 1000;
+        unitIndex++;
+      }
+      return `${heartz.toFixed(2)}${units[unitIndex]}`;
+    }
+
+    // Function to fetch and display commit hash
+    async function fetchCommitHash() {
+      try {
+        let response = await fetch('COMMIT_HASH.txt');
+        let data = await response.text();
+        if (!data.includes('This page could not be found')) {
+          document.getElementById('hash-content').textContent = data;
+        }
+      } catch (error) {
+        console.error('Error fetching commit hash:', error);
+      }
+    }
+
+    async function fetchData() {
+      const filenameToTitle = {
+        'macOS-apple_m2_pro.json': 'Metal on Apple M2 Pro',
+        'Linux-nvidia_rtx_a5000.json': 'CUDA on NVIDIA RTX A5000',
+        'macOS-cpu.json': 'CPU only on Apple M2 Pro',
+        'Linux-cpu.json': 'CPU only on TBD [Linux]',
+      };
+      try {
+        const urls = ['macOS-apple_m2_pro.json', 'Linux-nvidia_rtx_a5000.json', 'macOS-cpu.json', 'Linux-cpu.json'];
+
+        const dataPromises = urls.map(url =>
+          fetch(url)
+            .then(response => {
+              if (!response.ok) {
+                throw new Error(`Error fetching ${url}: ${response.statusText}`);
+              }
+              return response.json();
+            })
+            .catch(error => {
+              console.warn(`Failed fetching ${url}:`, error.message);
+              return null;  // Handle individual failures gracefully
+            })
+        );
+
+        const dataArrays = await Promise.all(dataPromises);
+
+        const tableContainer = document.getElementById('table-container');
+
+        dataArrays.forEach((dataArray, index) => {
+          // Skip if dataArray is null (due to fetch failure)
+          if (!dataArray) return;
+
+          const tableSection = document.createElement('div');
+
+          const filename = urls[index].split('/').pop();
+          const header = document.createElement('h2');
+          header.textContent = filenameToTitle[filename] || filename.replace(/\.[^/.]+$/, "");
+          tableSection.appendChild(header);
+
+          const table = document.createElement('table');
+          const tableHeader = `
+        <thead>
+            <tr>
+                <th>Cycles</th>
+                <th>Duration</th>
+                <th>RAM</th>
+                <th>Seal</th>
+                <th>Speed</th>
+            </tr>
+        </thead>`;
+          table.innerHTML = tableHeader;
+
+          const tableBody = document.createElement('tbody');
+
+          dataArray.forEach(item => {
+            const row = document.createElement('tr');
+            Object.keys(item).forEach(key => {
+              const cell = document.createElement('td');
+
+              let value = item[key];
+
+              // Apply formatting based on the key
+              if (key === 'cycles') {
+                value = `${value / 1024}k`;
+              } else if (key === 'duration') {
+                value = formatDuration(value);
+              } else if (key === 'ram' || key === 'seal') {
+                value = formatBytes(value);
+              } else if (key === 'speed') {
+                value = formatHz(value);
+              }
+
+              cell.textContent = value;
+              row.appendChild(cell);
+            });
+            tableBody.appendChild(row);
+          });
+
+          table.appendChild(tableBody);
+          tableSection.appendChild(table);
+          tableContainer.appendChild(tableSection);
+        });
+      } catch (error) {
+        console.error('Error processing data:', error);
+      }
+
+    }
+
+    fetchCommitHash();
+    fetchData();
+  </script>
+
+</body>
+
+</html>
