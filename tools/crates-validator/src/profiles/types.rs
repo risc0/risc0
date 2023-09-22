@@ -38,27 +38,21 @@ impl Combine for Profile {
     serde::Deserialize,
     serde_valid::Validate,
 )]
+#[serde(default)]
+#[serde(rename_all = "kebab-case")]
 pub struct ProfileSettings {
-    #[serde(default)]
-    pub versions: Option<Vec<Version>>,
-    #[serde(default)]
+    pub run_prover: bool,
+    pub should_fail: bool,
+    pub inject_cc_flags: bool,
     pub std: bool,
     #[serde(default = "super::default_true")]
     pub fast_mode: bool,
-    #[serde(flatten, default)]
-    pub risc_zero_repository: Option<RiscZeroRepo>,
-    #[serde(default)]
-    pub custom_main: Option<String>,
-    #[serde(default)]
-    pub import_str: Option<String>,
-    #[serde(default)]
-    pub run_prover: bool,
-    #[serde(default)]
-    pub should_fail: bool,
-    #[serde(default)]
-    pub inject_cc_flags: bool,
-    #[serde(default)]
     pub patch: Option<String>,
+    pub import_str: Option<String>,
+    pub custom_main: Option<String>,
+    #[serde(flatten)]
+    pub repo: Option<Repo>,
+    pub versions: Option<Vec<Version>>,
 }
 
 impl Combine for ProfileSettings {
@@ -89,15 +83,14 @@ impl Combine for ProfileSettings {
 
 /// The RISC Zero repository location containing templates and crate imports
 #[derive(Debug, Clone, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
-pub enum RiscZeroRepo {
-    #[serde(rename = "risc0_gh_branch")]
-    Github(String),
-    #[serde(rename = "risc0_path")]
+#[serde(rename_all = "kebab-case")]
+pub enum Repo {
+    Git(String),
     Local(String),
 }
 
-impl Default for RiscZeroRepo {
+impl Default for Repo {
     fn default() -> Self {
-        Self::Github("main".to_string())
+        Self::Git("main".to_string())
     }
 }

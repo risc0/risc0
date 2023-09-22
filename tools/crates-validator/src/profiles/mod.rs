@@ -14,15 +14,17 @@
 
 use crate::CrateProfile;
 
+pub mod constants;
 mod helpers;
 mod parser;
 mod types;
 
 // TODO(Cardosaum): Export specific functions
+pub use constants::*;
 pub use parser::get_profiles;
 pub use types::Profile;
 pub use types::ProfileSettings;
-pub use types::RiscZeroRepo;
+pub use types::Repo;
 
 use helpers::default_true;
 use types::Combine;

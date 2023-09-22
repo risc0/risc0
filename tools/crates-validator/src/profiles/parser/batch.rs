@@ -1,45 +1,82 @@
-use std::collections::HashSet;
-use std::{collections::HashMap};
-
-use anyhow::{anyhow, bail, Context, Result};
-use serde_yaml::{Mapping, Value};
-use serde_valid::Validate;
-
-use super::utils;
 use super::Profile;
 use super::ProfileSettings;
 
-pub(crate) fn parse(config: &Value) -> Result<HashSet<Profile>> {
-    todo!()
+#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+struct Batches {
+    batch: Vec<BatchConfig>,
 }
 
-pub(crate) fn parse_batch_item(item: &Mapping) -> Result<HashMap<String, Profile>> {
-    let mut map = HashMap::new();
-    let (_identifier, crates) = match (item.get("name"), item.get("crates")) {
-        (Some(Value::String(name)), Some(Value::Sequence(crates))) => (name, crates),
-        (None, _) => bail!("Missing batch identifier: Add 'name' field"),
-        (_, None) => bail!("Missing 'crates' field"),
-        (_, _) => bail!(
-            "Does not contain 'name' and 'crates' fields as `string` and `array` as expected."
-        ),
-    };
-    for c in crates {
-        let name = c
-            .as_str()
-            .ok_or_else(|| anyhow!("Invalid 'crates' field for crate: {c:?}"))?
-            .to_string();
-        let mut profile = Profile {
-            name: name.clone(),
-            settings: ProfileSettings::default(),
-        };
-        utils::add_profile_settings(item, &mut profile)?;
-        profile.validate().context("Invalid Profile file")?;
-        profile
-            .settings
-            .validate()
-            .context("Invalid Profile file")?;
-        map.insert(name, profile);
+#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+struct BatchConfig {
+    name: String,
+    crates: Vec<String>,
+    settings: ProfileSettings,
+}
+
+impl From<Batches> for Vec<Profile> {
+    fn from(value: Batches) -> Self {
+        value
+            .batch
+            .into_iter()
+            .flat_map(Vec::<Profile>::from)
+            .collect()
     }
-    Ok(map)
 }
 
+impl From<BatchConfig> for Vec<Profile> {
+    fn from(value: BatchConfig) -> Self {
+        value
+            .crates
+            .into_iter()
+            .map(|c| Profile {
+                name: c,
+                settings: value.settings.clone(),
+            })
+            .collect()
+    }
+}
+
+#[cfg(test)]
+
+mod tests {
+    use super::*;
+    use crate::profiles::parser::utils;
+    use crate::profiles::PATH_YAML_CONFIG;
+
+    #[test]
+    fn can_parse_file() {
+        let config = utils::read_profile(PATH_YAML_CONFIG).unwrap();
+        let batches = serde_yaml::from_value::<Batches>(config).unwrap();
+        let profiles: Vec<Profile> = batches.into();
+        assert!(!profiles.is_empty());
+    }
+
+    #[test]
+    fn can_parse_config() {
+        let config = r#"
+        batch:
+          - name: foo
+            settings:
+              std: true
+              fast-mode: true
+              patch: |
+                [patch.crates-io]
+                foo = { git = 'git://github.com/foo/foo.git' }
+            crates:
+              - bar
+              - baz
+          - name: bar
+            settings:
+              inject-cc-flags: true
+              patch: |
+                [patch.crates-io]
+                bar = { git = 'git://github.com/bar/bar.git' }
+            crates:
+              - foo
+              - baz
+        "#;
+        let batches = serde_yaml::from_str::<Batches>(config).unwrap();
+        let profiles: Vec<Profile> = batches.into();
+        assert_eq!(profiles.len(), 4);
+    }
+}

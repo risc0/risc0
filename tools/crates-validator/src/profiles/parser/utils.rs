@@ -1,15 +1,14 @@
+use std::collections::HashMap;
 use std::fmt::Display;
-use std::{collections::HashMap};
 
 use anyhow::{Context, Result};
 use semver::Version;
 use serde_yaml::{Mapping, Value};
 use tracing::warn;
 
-use super::batch;
-use super::Profile;
 use super::Combine;
-use super::RiscZeroRepo;
+use super::Profile;
+use super::Repo;
 
 pub(crate) fn read_profile(path: impl AsRef<str> + Display) -> Result<Value> {
     let content = std::fs::read_to_string(path.as_ref())
@@ -23,7 +22,7 @@ pub(crate) fn parse_profiles(raw: Value) -> Result<Vec<Profile>> {
     if let Some(Value::Sequence(batches)) = raw.get("batch") {
         for batch in batches {
             let mapping = batch.as_mapping().unwrap();
-            let parsed = batch::parse_batch_item(mapping)?;
+            let parsed = vec![]; // TODO(cardosaum): Change due to refactor in batch file // batch::parse_batch_item(mapping)?;
             for (name, profile) in parsed {
                 match profiles.get_mut(&name) {
                     Some(existing) => existing.combine(profile)?,
@@ -124,22 +123,21 @@ fn add_inject_cc_flags(item: &Mapping, profile: &mut Profile) {
 fn add_risc_zero_repository(item: &Mapping, profile: &mut Profile) -> Result<()> {
     match (item.get("risc0_gh_branch"), item.get("risc0_path")) {
         (Some(Value::String(git)), None) => {
-            profile.settings.risc_zero_repository = Some(RiscZeroRepo::Github(git.to_string()))
+            profile.settings.repo = Some(Repo::Git(git.to_string()))
         }
         (None, Some(Value::String(path))) => {
-            profile.settings.risc_zero_repository = Some(RiscZeroRepo::Local(path.to_string()))
+            profile.settings.repo = Some(Repo::Local(path.to_string()))
         }
         (Some(Value::String(_)), Some(Value::String(r))) => {
             warn!("Cannot specify both 'risc0_gh_branch' and 'risc0_path'");
             warn!("Using 'risc0_path' as default");
-            profile.settings.risc_zero_repository = Some(RiscZeroRepo::Local(r.to_string()))
+            profile.settings.repo = Some(Repo::Local(r.to_string()))
         }
         (_, _) => {
             warn!("No 'risc0_gh_branch' or 'risc0_path' specified");
             warn!("Using default 'risc0_gh_branch'");
-            profile.settings.risc_zero_repository = Some(RiscZeroRepo::default());
+            profile.settings.repo = Some(Repo::default());
         }
     }
     Ok(())
 }
-

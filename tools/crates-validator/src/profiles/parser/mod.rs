@@ -5,11 +5,11 @@ use anyhow::Result;
 use super::Combine;
 use super::Profile;
 use super::ProfileSettings;
-use super::RiscZeroRepo;
+use super::Repo;
 
-mod utils;
 mod batch;
 mod profiles;
+mod utils;
 
 pub fn get_profiles(path: impl AsRef<str> + Display) -> Result<Vec<Profile>> {
     // Read the whole configuration file
@@ -41,6 +41,8 @@ mod tests {
     use super::*;
     use rstest::*;
     use semver::Version;
+
+    use crate::profiles::PATH_YAML_CONFIG;
 
     //     const EXAMPLE_TOML_PATH: &str = "./profiles/example.toml";
     //     const EXAMPLE_TOML_STR: &str = r#"name = "example"
@@ -135,7 +137,7 @@ mod tests {
 
     #[test]
     fn can_parse_yaml() {
-        get_profiles("profiles/profiles.yaml").unwrap();
+        get_profiles(PATH_YAML_CONFIG).unwrap();
     }
 
     #[rstest]
@@ -174,7 +176,7 @@ mod tests {
             versions: Some(versions),
             std: true,
             fast_mode: true,
-            risc_zero_repository: Some(RiscZeroRepo::Local("path".to_string())),
+            repo: Some(Repo::Local("path".to_string())),
             custom_main: Some("custom_main".to_string()),
             import_str: Some("import_str".to_string()),
             run_prover: true,
