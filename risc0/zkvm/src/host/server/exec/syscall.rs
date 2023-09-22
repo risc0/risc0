@@ -31,8 +31,11 @@ use risc0_zkvm_platform::{
 };
 
 use crate::{
-    host::client::{env::ExecutorEnv, posix_io::PosixIo, slice_io::SliceIo},
-    sha::Digest,
+    host::{
+        client::{env::ExecutorEnv, posix_io::PosixIo, slice_io::SliceIo},
+        receipt::Assumption,
+    },
+    sha::{Digest, Digestable},
 };
 
 /// A host-side implementation of a system call.
@@ -216,7 +219,10 @@ impl Syscall for SysRandom {
     }
 }
 
-pub(crate) struct SysVerify;
+pub(crate) struct SysVerify {
+    pub(crate) assumptions: Vec<Assumption>,
+}
+
 impl Syscall for SysVerify {
     fn syscall(
         &mut self,
@@ -232,8 +238,18 @@ impl Syscall for SysVerify {
             let metadata_digest: Digest = from_guest
                 .try_into()
                 .map_err(|vec| anyhow!("failed to convert to [u8; DIGEST_BYTES]: {:?}", vec))?;
-            // DO NOT MERGE(victor): Implement checking of the receipt.
+
             log::debug!("SYS_VERIFY_METADATA: {}", hex::encode(&metadata_digest));
+            self.assumptions
+                .iter()
+                .find(|a| a.get_metadata()?.digest() == metadata_digest)
+                .ok_or_else(|| {
+                    anyhow!(
+                        "sys_verify_metadata: failed to resolve metadata digest: {}",
+                        metadata_digest
+                    )
+                })?;
+
             Ok((0, 0))
         } else if syscall == SYS_VERIFY.as_str() {
             if from_guest.len() != DIGEST_BYTES * 2 {

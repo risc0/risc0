@@ -137,14 +137,16 @@ pub mod responses {
 
     /// Snark Receipt object
     ///
-    /// All relevant data to verify both the snark proof an corresponding imageId on chain.
+    /// All relevant data to verify both the snark proof an corresponding
+    /// imageId on chain.
     #[derive(Debug, Deserialize, Serialize, PartialEq)]
     pub struct SnarkReceipt {
         /// Snark seal from snarkjs
         pub snark: Groth16Seal,
         /// Post State Digest
         ///
-        /// Collected from the STARK proof via `receipt.get_metadata().post.digest()`
+        /// Collected from the STARK proof via
+        /// `receipt.get_metadata().post.digest()`
         pub post_state_digest: Vec<u8>,
         /// Journal data from the risc-zkvm Receipt object
         pub journal: Vec<u8>,

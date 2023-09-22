@@ -53,7 +53,8 @@ pub(crate) fn init() {
 }
 
 pub(crate) fn finalize(halt: bool, user_exit: u8) {
-    // DO NOT MERGE(victor): Adjust the output definition to include the assumptions list.
+    // DO NOT MERGE(victor): Adjust the output definition to include the assumptions
+    // list.
     unsafe {
         let hasher = core::mem::take(&mut HASHER);
         let output = hasher.unwrap_unchecked().finalize();
@@ -90,9 +91,10 @@ pub fn syscall(syscall: SyscallName, to_host: &[u8], from_host: &mut [u32]) -> s
 
 /// Error encountered during a call to [crate::verify]
 ///
-/// Note that an error is only returned for "provable" errors. In particular, if the host fails to
-/// find a receipt matching the requested image_id and journal, this is not a provable error. In
-/// this case, the [crate::verify] will not return.
+/// Note that an error is only returned for "provable" errors. In particular, if
+/// the host fails to find a receipt matching the requested image_id and
+/// journal, this is not a provable error. In this case, the [crate::verify]
+/// will not return.
 #[derive(Debug)]
 pub enum VerifyError {}
 
@@ -105,10 +107,12 @@ impl fmt::Display for VerifyError {
 #[cfg(feature = "std")]
 impl std::error::Error for VerifyError {}
 
-/// Verify there exists a receipt for an execution with the given `image_id` and `journal`.
+/// Verify there exists a receipt for an execution with the given `image_id` and
+/// `journal`.
 ///
-/// In order to be valid, the [Receipt] must have have `ExitCode::Halted(0)`, an empty
-/// assumptions list, and an all-zeroes input hash. It may have any post [SystemState].
+/// In order to be valid, the [Receipt] must have have `ExitCode::Halted(0)`, an
+/// empty assumptions list, and an all-zeroes input hash. It may have any post
+/// [SystemState].
 pub fn verify(image_id: &Digest, journal: &[u8]) -> Result<(), VerifyError> {
     let journal_digest: Digest = Sha256::digest(journal).as_slice().try_into().unwrap();
     let mut post_state_digest = Digest::new([0u32; DIGEST_WORDS]); // TOOD(victor): Use
@@ -121,24 +125,27 @@ pub fn verify(image_id: &Digest, journal: &[u8]) -> Result<(), VerifyError> {
         )
     };
 
-    // DO NOT MERGE(victor): Calculate the ReceiptMetadata digest and add it to a running
-    // assumptions list.
+    // DO NOT MERGE(victor): Calculate the ReceiptMetadata digest and add it to a
+    // running assumptions list.
 
     Ok(())
 }
 
 /// Error encountered during a call to [crate::verify_metdata].
 ///
-/// Note that an error is only returned for "provable" errors. In particular, if the host fails to
-/// find a receipt matching the requested image_id and journal, this is not a provable error. In
-/// this case, the [crate::verify] will not return.
+/// Note that an error is only returned for "provable" errors. In particular, if
+/// the host fails to find a receipt matching the requested image_id and
+/// journal, this is not a provable error. In this case, the [crate::verify]
+/// will not return.
 #[derive(Debug)]
 pub enum VerifyMetadataError {
-    /// The provided [ReceiptMetadata] struct contained a non-empty asssumptions list.
+    /// The provided [ReceiptMetadata] struct contained a non-empty asssumptions
+    /// list.
     ///
-    /// This is a semantic error as only unconditional receipts can be verified inside the guest.
-    /// If there is a conditional receipt to verify, it's assumptions must first be verified to
-    /// make the receipt unconditional.
+    /// This is a semantic error as only unconditional receipts can be verified
+    /// inside the guest. If there is a conditional receipt to verify, it's
+    /// assumptions must first be verified to make the receipt
+    /// unconditional.
     NonEmptyAssumptionsList,
 }
 
@@ -155,12 +162,13 @@ impl fmt::Display for VerifyMetadataError {
 #[cfg(feature = "std")]
 impl std::error::Error for VerifyMetadataError {}
 
-/// Verify that there exists a valid receipt with the specified [ReceiptMetadata].
+/// Verify that there exists a valid receipt with the specified
+/// [ReceiptMetadata].
 pub fn verify_metadata(meta: &ReceiptMetadata) -> Result<(), VerifyMetadataError> {
     let meta_digest = meta.digest();
     unsafe { sys_verify_metadata(meta_digest.as_ref()) };
-    // DO NOT MERGE(victor): Calculate the ReceiptMetadata digest and add it to a running
-    // assumptions list.
+    // DO NOT MERGE(victor): Calculate the ReceiptMetadata digest and add it to a
+    // running assumptions list.
     Ok(())
 }
 

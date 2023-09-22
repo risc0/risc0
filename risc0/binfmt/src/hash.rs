@@ -54,7 +54,8 @@ pub fn tagged_struct<S: Sha256>(tag: &str, down: &[Digest], data: &[u32]) -> Dig
 
 /// A list hashing routine, permiting iterative opening over elements.
 ///
-/// Used for hashing of receipt metadata assumptions list, and in the recursion predicates.
+/// Used for hashing of receipt metadata assumptions list, and in the recursion
+/// predicates.
 pub fn tagged_list<S: Sha256>(tag: &str, list: &[Digest]) -> Digest {
     list.into_iter()
         .rev()
@@ -63,9 +64,11 @@ pub fn tagged_list<S: Sha256>(tag: &str, list: &[Digest]) -> Digest {
         })
 }
 
-/// Calculate the hash resulting from adding one element to a [tagged_list] digest.
+/// Calculate the hash resulting from adding one element to a [tagged_list]
+/// digest.
 ///
-/// This function logically pushes the element `head` onto the front of the list.
+/// This function logically pushes the element `head` onto the front of the
+/// list.
 ///
 /// ```rust
 /// use risc0_zkp::core::hash::sha::{cpu::Impl, Sha256};
@@ -87,8 +90,9 @@ pub fn tagged_list_cons<S: Sha256>(tag: &str, head: Digest, rest: Digest) -> Dig
 
 #[cfg(test)]
 mod tests {
-    use super::tagged_struct;
     use risc0_zkp::core::hash::sha::cpu;
+
+    use super::tagged_struct;
 
     #[test]
     fn test_tagged_struct() {

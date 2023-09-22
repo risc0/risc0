@@ -46,7 +46,7 @@ pub fn valid_control_ids() -> Vec<Digest> {
 
 /// This struct represents a receipt for one or more [crate::SegmentReceipt]s
 /// joined through recursion.
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct SuccinctReceipt {
     /// the cryptographic seal of this receipt
     pub seal: Vec<u32>,

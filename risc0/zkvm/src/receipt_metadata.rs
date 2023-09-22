@@ -14,49 +14,52 @@
 
 //! [ReceiptMetadata] and associated types and functions.
 //!
-//! A [ReceiptMetadata] struct contains the public claims about a zkVM guest execution, such as the
-//! journal committed to by the guest. It also includes important information such as the exit
-//! code and the starting and ending system state (i.e. the state of memory).
+//! A [ReceiptMetadata] struct contains the public claims about a zkVM guest
+//! execution, such as the journal committed to by the guest. It also includes
+//! important information such as the exit code and the starting and ending
+//! system state (i.e. the state of memory).
 
 use alloc::{collections::VecDeque, vec::Vec};
-use core::fmt;
+use core::{fmt, ops::Deref};
 
-use crate::{
-    sha::{tagged_list, tagged_struct, Digest, Digestable},
-    SystemState,
-};
 use anyhow::{anyhow, ensure};
 use risc0_binfmt::{read_sha_halfs, write_sha_halfs};
 use serde::{Deserialize, Serialize};
 
-/// A value that may either be the source value directly, or a hash digest of the value.
-#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
+use crate::{
+    sha::{tagged_list, tagged_struct, Digest, Digestable, DIGEST_WORDS},
+    SystemState,
+};
+
+/// A value that may either be the source value directly, or a hash digest of
+/// the value.
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub enum MaybePruned<T>
 where
-    T: Digestable + Clone + PartialEq + Serialize,
+    T: Digestable + Clone + Serialize,
 {
-    /// Unpruned source value.
-    Source(T),
-    /// Pruned value, which is a hash [Digest] of the source value.
+    /// Unpruned value.
+    Value(T),
+    /// Pruned value, which is a hash [Digest] of the value.
     Pruned(Digest),
 }
 
 impl<T> MaybePruned<T>
 where
-    T: Digestable + Clone + PartialEq + Serialize,
+    T: Digestable + Clone + Serialize,
 {
-    /// Unwrap the source value, or return an error.
-    pub fn source(self) -> Result<T, PrunedValueError> {
+    /// Unwrap the value, or return an error.
+    pub fn value(self) -> Result<T, PrunedValueError> {
         match self {
-            MaybePruned::Source(source) => Ok(source),
+            MaybePruned::Value(value) => Ok(value),
             MaybePruned::Pruned(digest) => Err(PrunedValueError(digest)),
         }
     }
 
-    /// Unwrap the source value as a reference, or return an error.k
-    pub fn as_source(&self) -> Result<&T, PrunedValueError> {
+    /// Unwrap the value as a reference, or return an error.k
+    pub fn as_value(&self) -> Result<&T, PrunedValueError> {
         match self {
-            MaybePruned::Source(ref source) => Ok(source),
+            MaybePruned::Value(ref value) => Ok(value),
             MaybePruned::Pruned(ref digest) => Err(PrunedValueError(digest.clone())),
         }
     }
@@ -64,20 +67,20 @@ where
 
 impl<T> From<T> for MaybePruned<T>
 where
-    T: Digestable + Clone + PartialEq + Serialize,
+    T: Digestable + Clone + Serialize,
 {
-    fn from(source: T) -> Self {
-        Self::Source(source)
+    fn from(value: T) -> Self {
+        Self::Value(value)
     }
 }
 
 impl<T> Digestable for MaybePruned<T>
 where
-    T: Digestable + Clone + PartialEq + Serialize + Deserialize<'static>,
+    T: Digestable + Clone + Serialize + Deserialize<'static>,
 {
     fn digest(&self) -> Digest {
         match self {
-            MaybePruned::Source(ref val) => val.digest(),
+            MaybePruned::Value(ref val) => val.digest(),
             MaybePruned::Pruned(digest) => digest.clone(),
         }
     }
@@ -89,14 +92,13 @@ pub struct PrunedValueError(Digest);
 
 impl fmt::Display for PrunedValueError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "source value is pruned: {}", &self.0)
+        write!(f, "value is pruned: {}", &self.0)
     }
 }
 
-// TOOD(victor): Remove PartialEq and see what happens.
 /// Data associated with a receipt which is used for both input and
 /// output of global state.
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ReceiptMetadata {
     /// The [SystemState] of a segment just before execution has begun.
     pub pre: MaybePruned<SystemState>,
@@ -110,7 +112,8 @@ pub struct ReceiptMetadata {
     /// A [Digest] of the input, from the viewpoint of the guest.
     pub input: Digest,
 
-    /// A [Output] of the guest, including the journal and assumptions set during execution.
+    /// A [Output] of the guest, including the journal and assumptions set
+    /// during execution.
     pub output: MaybePruned<Output>,
 }
 
@@ -134,12 +137,11 @@ impl ReceiptMetadata {
         })
     }
 
-    // TODO(victor): Consider returning () instead of Result<(), Infallible>
     /// Encode a [crate::ReceiptMetadata] to a list of [u32]'s
     pub fn encode(&self, flat: &mut Vec<u32>) -> Result<(), PrunedValueError> {
         write_sha_halfs(flat, &self.input);
-        self.pre.as_source()?.encode(flat);
-        self.post.as_source()?.encode(flat);
+        self.pre.as_value()?.encode(flat);
+        self.post.as_value()?.encode(flat);
         let (sys_exit, user_exit) = self.exit_code.into_pair();
         flat.push(sys_exit);
         flat.push(user_exit);
@@ -166,7 +168,7 @@ impl Digestable for ReceiptMetadata {
 }
 
 /// Indicates how a Segment or Session's execution has terminated
-#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq)]
 pub enum ExitCode {
     /// This indicates when a system-initiated split has occured due to the
     /// segment limit being exceeded.
@@ -194,7 +196,8 @@ impl ExitCode {
             ExitCode::Halted(user_exit) => (0, user_exit),
             ExitCode::Paused(user_exit) => (1, user_exit),
             ExitCode::SystemSplit => (2, 0),
-            // DO NOT MERGE(victor): Confirm SessionLimit and Fault can have an associated exit code.
+            // DO NOT MERGE(victor): Confirm SessionLimit and Fault can have an associated exit
+            // code.
             ExitCode::SessionLimit => (3, 0),
             ExitCode::Fault => (4, 0),
         }
@@ -215,7 +218,8 @@ impl ExitCode {
     }
 }
 
-/// Error returned when a (system, user) exit code pair is an invalid representation.
+/// Error returned when a (system, user) exit code pair is an invalid
+/// representation.
 #[derive(Debug, Copy, Clone)]
 pub struct InvalidExitCodeError(u32, u32);
 
@@ -225,19 +229,24 @@ impl fmt::Display for InvalidExitCodeError {
     }
 }
 
-/// Output field in the [crate::ReceiptMetadata], committing to a claimed journal and assumptions list.
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+/// Output field in the [crate::ReceiptMetadata], committing to a claimed
+/// journal and assumptions list.
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Output {
+    // TODO(victor): Reconsider whether this Journal type should exist.
     /// A SHA-256 digest of the journal committed to by the guest execution.
     pub journal: MaybePruned<Vec<u8>>,
 
-    /// An ordered list of [crate::ReceiptMetadata] digests corresponding to the calls to `env::verify`.
+    /// An ordered list of [crate::ReceiptMetadata] digests corresponding to the
+    /// calls to `env::verify`.
     ///
-    /// Verifying a [crate::Receipt] corresponding to a [crate::ReceiptMetadata] with a non-empty
-    /// assumptions list does not guarantee unconditionally any of the claims over the guest
-    /// execution (i.e. if the assumptions list is non-empty, then the journal digest cannot be
-    /// trusted to correspond to a genuine execution). The claims can be checked by additional
-    /// verifying a [crate::Receipt] for every digest in the assumptions list.
+    /// Verifying a [crate::Receipt] corresponding to a [crate::ReceiptMetadata]
+    /// with a non-empty assumptions list does not guarantee unconditionally
+    /// any of the claims over the guest execution (i.e. if the assumptions
+    /// list is non-empty, then the journal digest cannot be trusted to
+    /// correspond to a genuine execution). The claims can be checked by
+    /// additional verifying a [crate::Receipt] for every digest in the
+    /// assumptions list.
     pub assumptions: MaybePruned<Assumptions>,
 }
 
@@ -253,16 +262,17 @@ impl Digestable for Output {
 }
 
 /// A list of assumptions, each a [Digest] of a [ReceiptMetadata].
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-pub struct Assumptions(Vec<Digest>);
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct Assumptions(Vec<MaybePruned<ReceiptMetadata>>);
 
 impl Assumptions {
     /// Create a new assumptions list from the given list of digests.
-    pub fn new(list: Vec<Digest>) -> Self {
+    pub fn new(list: Vec<MaybePruned<ReceiptMetadata>>) -> Self {
         Self(list)
     }
 
-    /// Mark an assumption as resolved and return the assumption list with it removed.
+    /// Mark an assumption as resolved and return the assumption list with it
+    /// removed.
     ///
     /// Assumptions can only be removed from the head of the list.
     #[allow(unused)] // DO NOT MERGE
@@ -273,9 +283,10 @@ impl Assumptions {
             .ok_or_else(|| anyhow!("cannot resolve assumption from empty list"))?;
 
         ensure!(
-            head == &resolved,
-            "resolved assumption is not equal to the head of the list: {}",
-            head
+            head.digest() == resolved,
+            "resolved assumption is not equal to the head of the list: {} != {}",
+            resolved,
+            head.digest()
         );
 
         // Drop the head of the assumptions list.
@@ -284,18 +295,22 @@ impl Assumptions {
     }
 }
 
-impl Digestable for Assumptions {
-    /// Hash the [Output] to get a digest of the struct.
-    fn digest(&self) -> Digest {
-        tagged_list("risc0.Assumptions", &self.0)
+impl Deref for Assumptions {
+    type Target = [MaybePruned<ReceiptMetadata>];
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
     }
 }
 
-/// Error for when the resolved assumption is not the head of the list.
-#[derive(Debug, Clone)]
-pub struct InvalidAssumptionDigestError {
-    /// Digest of the [ReceiptMetadata] for the assumption marked as resolved.
-    pub resolved: Digest,
+impl Digestable for Assumptions {
+    /// Hash the [Output] to get a digest of the struct.
+    fn digest(&self) -> Digest {
+        tagged_list(
+            "risc0.Assumptions",
+            &self.0.iter().map(|a| a.digest()).collect::<Vec<_>>(),
+        )
+    }
 }
 
 impl fmt::Display for InvalidAssumptionDigestError {
@@ -307,3 +322,24 @@ impl fmt::Display for InvalidAssumptionDigestError {
         )
     }
 }
+
+impl MaybePruned<Assumptions> {
+    /// Check if the (possibly pruned) assumptions list is empty.
+    pub fn is_empty(&self) -> bool {
+        match self {
+            MaybePruned::Value(list) => list.is_empty(),
+            MaybePruned::Pruned(digest) => digest == &Digest::new([0u32; DIGEST_WORDS]),
+        }
+    }
+}
+
+/// Error for when the resolved assumption is not the head of the list.
+#[derive(Debug, Clone)]
+pub struct InvalidAssumptionDigestError {
+    /// Digest of the [ReceiptMetadata] for the assumption marked as resolved.
+    pub resolved: Digest,
+}
+
+// TODO(victor): Add tests that show every combination of pruned struct returns
+// the same digest. Check that the digest of an empty assumptions list is all
+// zeroes.

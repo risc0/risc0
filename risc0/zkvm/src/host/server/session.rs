@@ -16,8 +16,8 @@
 //! execution traces between the execution phase and the proving phase.
 
 use alloc::collections::BTreeSet;
-use std::borrow::Borrow;
 use std::{
+    borrow::Borrow,
     fs::File,
     io::{Read, Write},
     path::{Path, PathBuf},
@@ -149,8 +149,9 @@ impl Session {
         self.hooks.push(Box::new(hook));
     }
 
-    /// Calculate for the [ReceiptMetadata] associated with this [Session]. The [ReceiptMetadata]
-    /// is the claim that will be proven if this [Session] is passed to the [Prover].
+    /// Calculate for the [ReceiptMetadata] associated with this [Session]. The
+    /// [ReceiptMetadata] is the claim that will be proven if this [Session]
+    /// is passed to the [Prover].
     pub fn get_metadata(&self) -> Result<ReceiptMetadata> {
         let first_segment = &self
             .segments

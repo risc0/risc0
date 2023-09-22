@@ -106,7 +106,7 @@ use crate::{
 /// [serde](crate::serde) module, which can be used to read data from the
 /// journal as the same type it was written to the journal. If you prefer, you
 /// can also directly access the [Receipt::journal] as a `Vec<u8>`.
-#[derive(Debug, Deserialize, Serialize, PartialEq)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Receipt {
     /// The polymorphic [InnerReceipt].
     pub inner: InnerReceipt,
@@ -120,7 +120,7 @@ pub struct Receipt {
 
 /// An inner receipt can take the form of a [SegmentReceipts] collection or a
 /// [SuccinctReceipt].
-#[derive(Debug, Deserialize, Serialize, PartialEq)]
+#[derive(Debug, Deserialize, Serialize)]
 pub enum InnerReceipt {
     /// The [SegmentReceipts].
     Flat(SegmentReceipts),
@@ -323,12 +323,6 @@ pub struct SegmentReceipt {
     pub hashfn: String,
 }
 
-/// Context available to the verification process.
-pub struct VerifierContext {
-    /// A registry of hash functions to be used by the verification process.
-    pub suites: BTreeMap<String, HashSuite<BabyBear>>,
-}
-
 impl Receipt {
     /// Construct a new Receipt
     pub fn new(inner: InnerReceipt, journal: Vec<u8>) -> Self {
@@ -404,6 +398,37 @@ impl SegmentReceipt {
     pub fn get_seal_bytes(&self) -> &[u8] {
         bytemuck::cast_slice(&self.seal)
     }
+}
+
+/// An assumption associated with a guest call to `env::verify` or
+/// `env::verify_metdata`.
+pub enum Assumption {
+    /// A [Receipt] for a proven assumption.
+    Proven(Receipt),
+
+    /// [ReceiptMetadata] digest for an assumption that is not directly proven
+    /// to be true.
+    ///
+    /// Proving an execution with an unresolved assumption will result in a
+    /// conditional receipt. In order for the verifier to accept a
+    /// conditional receipt, they must be given a [Receipt] proving the
+    /// assumption, or explicitly accept the assumption without proof.
+    Unresolved(MaybePruned<ReceiptMetadata>),
+}
+
+impl Assumption {
+    pub fn get_metadata(&self) -> Result<MaybePruned<ReceiptMetadata>, VerificationError> {
+        match self {
+            Self::Proven(receipt) => Ok(receipt.get_metadata()?.into()),
+            Self::Unresolved(metadata) => Ok(metadata.clone()),
+        }
+    }
+}
+
+/// Context available to the verification process.
+pub struct VerifierContext {
+    /// A registry of hash functions to be used by the verification process.
+    pub suites: BTreeMap<String, HashSuite<BabyBear>>,
 }
 
 fn decode_system_state_from_io(

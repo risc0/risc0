@@ -22,11 +22,10 @@ mod hash;
 mod image;
 mod sys_state;
 
+#[cfg(not(target_os = "zkvm"))]
+pub use crate::image::{compute_image_id, MemoryImage};
 pub use crate::{
     elf::Program,
     hash::{tagged_list, tagged_list_cons, tagged_struct, Digestable},
     sys_state::{read_sha_halfs, write_sha_halfs, SystemState},
 };
-
-#[cfg(not(target_os = "zkvm"))]
-pub use crate::image::{compute_image_id, MemoryImage};

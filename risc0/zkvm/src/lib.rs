@@ -18,7 +18,6 @@
 #![deny(missing_docs)]
 
 pub use anyhow::Result;
-
 #[cfg(all(not(target_os = "zkvm"), any(feature = "client", feature = "prove")))]
 pub use bytes::Bytes;
 
@@ -34,12 +33,10 @@ pub mod receipt_metadata;
 pub mod serde;
 pub mod sha;
 
-pub use receipt_metadata::{ExitCode, Output, ReceiptMetadata};
-
 pub use fault_ids::{FAULT_CHECKER_ELF, FAULT_CHECKER_ID};
 #[cfg(feature = "fault-proof")]
 pub use fault_monitor::FaultCheckMonitor;
-
+pub use receipt_metadata::{ExitCode, Output, ReceiptMetadata};
 #[cfg(not(target_os = "zkvm"))]
 pub use risc0_binfmt::MemoryImage;
 pub use risc0_binfmt::{Program, SystemState};
