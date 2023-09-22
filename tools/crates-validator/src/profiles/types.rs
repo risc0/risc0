@@ -31,7 +31,7 @@ pub struct ProfileSettings {
     pub should_fail: bool,
     pub inject_cc_flags: bool,
     pub std: bool,
-    #[serde(default = "super::default_true")]
+    #[serde(default = "default_true")]
     pub fast_mode: bool,
     pub patch: Option<String>,
     pub import_str: Option<String>,
@@ -86,3 +86,7 @@ impl Default for Repo {
 //             .collect()
 //     }
 // }
+
+const fn default_true() -> bool {
+    true
+}

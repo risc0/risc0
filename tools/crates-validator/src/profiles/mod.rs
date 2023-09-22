@@ -15,7 +15,6 @@
 use crate::CrateProfile;
 
 pub mod constants;
-mod helpers;
 mod parser;
 mod types;
 
@@ -25,8 +24,6 @@ pub use parser::get_profiles;
 pub use types::Profile;
 pub use types::ProfileSettings;
 pub use types::Repo;
-
-use helpers::default_true;
 
 pub fn lookup_crate(crate_name: &str, mut profile: CrateProfile) -> CrateProfile {
     profile.customized = true;
