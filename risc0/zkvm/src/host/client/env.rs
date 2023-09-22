@@ -26,13 +26,14 @@ use bytemuck::Pod;
 use bytes::Bytes;
 use risc0_zkvm_platform::{self, fileno};
 
-use super::{
-    exec::TraceEvent,
-    posix_io::PosixIo,
-    slice_io::{slice_io_from_fn, SliceIo, SliceIoTable},
+use crate::host::{
+    client::{
+        exec::TraceEvent,
+        posix_io::PosixIo,
+        slice_io::{slice_io_from_fn, SliceIo, SliceIoTable},
+    },
+    receipt::Assumption,
 };
-// TODO(victor): Is importing this here an issue?
-use crate::host::receipt::Assumption;
 
 /// A builder pattern used to construct an [ExecutorEnv].
 #[derive(Clone, Default)]
@@ -240,6 +241,32 @@ impl<'a> ExecutorEnvBuilder<'a> {
             .with_handler(channel.as_ref(), slice_io_from_fn(callback));
         self
     }
+
+    /// Add an [Assumption] to the [ExecutorEnv] internal map of associated assumptions.
+    ///
+    /// During execution, when the guest calls `env::verify` or `env::verify_metadata`, this map
+    /// will be searched for an [Assumption] that corresponds the verification call.
+    pub fn add_assumption(&mut self, assumption: Assumption) -> &mut Self {
+        Rc::get_mut(&mut self.inner.assumptions)
+            .expect("assumptions list borrowed when it should not be possible")
+            .push(assumption);
+        self
+    }
+
+    /*
+    /// Provide an [AssumptionResolver] which will be used to lookup assumptions that cannot be
+    /// found in the local assumptions cache.
+    ///
+    /// This can be used to allow for the creation of a database of past receipts, such that
+    /// any previously proven claims can be used in new proofs. The local cache, populated by
+    /// `add_assumption` will always be checked before forwarding a query to the
+    /// [AssumptionResolver]. If no [AssumptionResolver] is provided, only the local cache of
+    /// assumptions will be used.
+    pub fn assumption_resolver(&mut self, resolver: Rc<dyn AssumptionResolver>) -> &mut Self {
+        Rc::get_mut(&mut self.inner.assumptions).expect("assumptions list borrowed when it should not be possible").push(assumption);
+        self
+    }
+    */
 
     /// Add a callback handler for raw trace messages.
     pub fn trace_callback(

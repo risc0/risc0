@@ -76,12 +76,26 @@ where
 
 impl<T> Digestable for MaybePruned<T>
 where
-    T: Digestable + Clone + Serialize + Deserialize<'static>,
+    T: Digestable + Clone + Serialize,
 {
     fn digest(&self) -> Digest {
         match self {
             MaybePruned::Value(ref val) => val.digest(),
             MaybePruned::Pruned(digest) => digest.clone(),
+        }
+    }
+}
+
+#[cfg(test)]
+impl<T> PartialEq for MaybePruned<T>
+where
+    T: Digestable + Clone + Serialize + PartialEq,
+{
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (Self::Value(a), Self::Value(b)) => a == b,
+            (Self::Pruned(a), Self::Pruned(b)) => a == b,
+            _ => false,
         }
     }
 }
@@ -102,6 +116,7 @@ impl std::error::Error for PrunedValueError {}
 /// Data associated with a receipt which is used for both input and
 /// output of global state.
 #[derive(Clone, Debug, Serialize, Deserialize)]
+#[cfg_attr(test, derive(PartialEq))]
 pub struct ReceiptMetadata {
     /// The [SystemState] of a segment just before execution has begun.
     pub pre: MaybePruned<SystemState>,
@@ -238,6 +253,7 @@ impl std::error::Error for InvalidExitCodeError {}
 /// Output field in the [crate::ReceiptMetadata], committing to a claimed
 /// journal and assumptions list.
 #[derive(Clone, Debug, Serialize, Deserialize)]
+#[cfg_attr(test, derive(PartialEq))]
 pub struct Output {
     // TODO(victor): Reconsider whether this Journal type should exist.
     /// A SHA-256 digest of the journal committed to by the guest execution.
@@ -269,6 +285,7 @@ impl Digestable for Output {
 
 /// A list of assumptions, each a [Digest] of a [ReceiptMetadata].
 #[derive(Clone, Debug, Serialize, Deserialize)]
+#[cfg_attr(test, derive(PartialEq))]
 pub struct Assumptions(Vec<MaybePruned<ReceiptMetadata>>);
 
 impl Assumptions {
