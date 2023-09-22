@@ -27,7 +27,6 @@ pub use types::ProfileSettings;
 pub use types::Repo;
 
 use helpers::default_true;
-use types::Combine;
 
 pub fn lookup_crate(crate_name: &str, mut profile: CrateProfile) -> CrateProfile {
     profile.customized = true;
