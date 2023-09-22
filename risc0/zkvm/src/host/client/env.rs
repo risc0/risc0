@@ -31,7 +31,6 @@ use super::{
     posix_io::PosixIo,
     slice_io::{slice_io_from_fn, SliceIo, SliceIoTable},
 };
-
 // TODO(victor): Is importing this here an issue?
 use crate::host::receipt::Assumption;
 

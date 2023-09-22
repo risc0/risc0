@@ -284,8 +284,8 @@ impl SysVerify {
             hex::encode(&journal_digest)
         );
 
-        // Iterate over the list looking for a matching assumption. If found, return the post
-        // state digest.
+        // Iterate over the list looking for a matching assumption. If found, return the
+        // post state digest.
         for assumption in self.assumptions.iter() {
             let assumption_metadata = assumption.get_metadata()?;
             let cmp_result: Result<Option<Digest>, PrunedValueError> = {
