@@ -49,6 +49,7 @@ enum Command {
     EcdsaVerify,
     Ed25519Verify,
     Fibonacci,
+    Zeth,
 }
 
 fn main() {
@@ -101,5 +102,9 @@ fn main() {
 
     if cli.command == Command::All || cli.command == Command::Fibonacci {
         run_jobs::<fibonacci::Job>(&cli.out, fibonacci::new_jobs());
+    }
+
+    if cli.command == Command::All || cli.command == Command::Zeth {
+        run_jobs::<zeth::Job>(&cli.out, zeth::new_jobs());
     }
 }

@@ -23,3 +23,4 @@ pub mod iter_blake2b;
 pub mod iter_blake3;
 pub mod iter_keccak;
 pub mod iter_sha2;
+pub mod zeth;
