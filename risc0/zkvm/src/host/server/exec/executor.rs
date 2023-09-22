@@ -14,7 +14,6 @@
 
 //! This module implements the Executor.
 
-use core::fmt;
 use std::{cell::RefCell, fmt::Debug, io::Write, mem::take, rc::Rc};
 
 use addr2line::{
@@ -53,9 +52,7 @@ use crate::{
         receipt::ExitCode,
         server::opcode::{MajorType, OpCode},
     },
-    serde::to_vec,
-    ExecutorEnv, FaultCheckMonitor, Loader, Segment, SegmentRef, Session, SimpleSegmentRef,
-    FAULT_CHECKER_ELF,
+    ExecutorEnv, Loader, Segment, SegmentRef, Session, SimpleSegmentRef,
 };
 
 /// The number of cycles required to compress a SHA-256 block.
@@ -100,35 +97,6 @@ impl OpCodeResult {
         }
     }
 }
-
-/// Error variants used in the Executor
-pub enum ExecutorError {
-    /// This variant represents an instance of Session that Faulted
-    Fault(Session),
-    /// This variant represents all other errors
-    Error(anyhow::Error),
-}
-
-use std::error::Error as StdError;
-unsafe impl Sync for ExecutorError {}
-unsafe impl Send for ExecutorError {}
-
-impl std::fmt::Debug for ExecutorError {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        fmt::Display::fmt(&self, f)
-    }
-}
-
-impl std::fmt::Display for ExecutorError {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        match self {
-            ExecutorError::Error(e) => write!(f, "{e}"),
-            ExecutorError::Fault(_) => write!(f, "Faulted Session",),
-        }
-    }
-}
-
-impl StdError for ExecutorError {}
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct SyscallRecord {
@@ -241,44 +209,13 @@ impl<'a> Executor<'a> {
 
     /// This will run the executor to get a [Session] which contain the results
     /// of the execution.
-    pub fn run(&mut self) -> Result<Session, ExecutorError> {
+    pub fn run(&mut self) -> Result<Session> {
         self.run_with_callback(|segment| Ok(Box::new(SimpleSegmentRef::new(segment))))
     }
 
     /// Run the executor until [ExitCode::Paused] or [ExitCode::Halted] is
     /// reached, producing a [Session] as a result.
-    pub fn run_with_callback<F>(&mut self, callback: F) -> Result<Session, ExecutorError>
-    where
-        F: FnMut(Segment) -> Result<Box<dyn SegmentRef>>,
-    {
-        let mut guest_session = match self.run_guest_only_with_callback(callback) {
-            Ok(session) => session,
-            Err(e) => return Err(ExecutorError::Error(e)),
-        };
-        match guest_session.exit_code {
-            ExitCode::Fault => {
-                let fault_checker_session = match self.run_fault_checker() {
-                    Ok(session) => session,
-                    Err(e) => return Err(ExecutorError::Error(e)),
-                };
-                for segment in fault_checker_session.segments {
-                    guest_session.segments.push(segment);
-                }
-                guest_session.journal = fault_checker_session.journal;
-                Err(ExecutorError::Fault(guest_session))
-            }
-            _ => Ok(guest_session),
-        }
-    }
-
-    /// Run the executor with the default callback.
-    pub fn run_guest_only(&mut self) -> Result<Session> {
-        self.run_guest_only_with_callback(|segment| Ok(Box::new(SimpleSegmentRef::new(segment))))
-    }
-
-    /// Run the executor until [ExitCode::Paused], [ExitCode::Halted], or
-    /// [ExitCode::Fault] is reached, producing a [Session] as a result.
-    pub fn run_guest_only_with_callback<F>(&mut self, mut callback: F) -> Result<Session>
+    pub fn run_with_callback<F>(&mut self, mut callback: F) -> Result<Session>
     where
         F: FnMut(Segment) -> Result<Box<dyn SegmentRef>>,
     {
@@ -333,11 +270,6 @@ impl<'a> Executor<'a> {
                             log::debug!("Halted({inner}): {}", self.segment_cycle);
                             return Ok(exit_code);
                         }
-                        ExitCode::Fault => {
-                            log::debug!("Fault: {}", self.segment_cycle);
-                            self.split(post_image)?;
-                            return Ok(exit_code);
-                        }
                     };
                 };
             }
@@ -350,28 +282,6 @@ impl<'a> Executor<'a> {
             journal.buf.take(),
             exit_code,
         ))
-    }
-
-    fn run_fault_checker(&mut self) -> Result<Session> {
-        let fault_monitor = FaultCheckMonitor {
-            pc: self.pc,
-            insn: self.monitor.load_u32(self.pc)?,
-            regs: self.monitor.load_registers(),
-            post_id: self.monitor.build_image(self.pc).compute_id(),
-        };
-        let env = ExecutorEnv::builder()
-            .add_input(&to_vec(&fault_monitor)?)
-            .build()?;
-
-        let mut exec = self::Executor::from_elf(env, FAULT_CHECKER_ELF).unwrap();
-        let session = exec.run_guest_only()?;
-        if session.exit_code != ExitCode::Halted(0) {
-            bail!(
-                "Fault checker returned with exit code: {:?}. Expected `ExitCode::Halted(0)` from fault checker",
-                session.exit_code
-            );
-        }
-        Ok(session)
     }
 
     fn split(&mut self, pre_image: MemoryImage) -> Result<()> {
@@ -444,25 +354,12 @@ impl<'a> Executor<'a> {
                 last_register_write: None,
             };
 
-            let mut inst_exec = InstructionExecutor {
+            InstructionExecutor {
                 mem: &mut self.monitor,
                 hart_state: &mut hart,
-            };
-            if let Err(err) = inst_exec.step() {
-                self.split_insn = Some(self.insn_counter);
-                log::debug!(
-                    "fault: [{}] pc: 0x{:08x} ({:?})",
-                    self.segment_cycle,
-                    self.pc,
-                    err
-                );
-                self.monitor.undo()?;
-                if cfg!(feature = "enable-fault-proof") {
-                    return Ok(Some(ExitCode::Fault));
-                } else {
-                    bail!("rrs instruction executor failed with {:?}", err);
-                }
             }
+            .step()
+            .map_err(|err| anyhow!("InstructionExecutor failure: {:?}", err))?;
 
             if let Some(idx) = hart.last_register_write {
                 self.monitor.store_register(idx, hart.registers[idx]);
