@@ -2,7 +2,7 @@ use super::Profile;
 use super::ProfileSettings;
 
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
-struct Batches {
+pub(crate) struct Batches {
     batch: Vec<BatchConfig>,
 }
 

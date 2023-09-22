@@ -6,25 +6,23 @@ use super::Profile;
 use super::ProfileSettings;
 
 mod batch;
-mod profiles;
+mod crates;
 mod utils;
 
 pub fn get_profiles(path: impl AsRef<str> + Display) -> Result<Vec<Profile>> {
-    // Read the whole configuration file
-    let content = utils::read_profile(path)?;
+    // Read the configuration file containing the profiles
+    let config = utils::read_profile(path)?;
 
-    todo!()
-    // Parse batch configurations
-    // let batch_profiles = batch::parse(&content)?;
+    // Parse crate profiles defined in batches
+    let batches = serde_yaml::from_value::<batch::Batches>(config.clone())?;
+    let batch_profiles: Vec<Profile> = batches.into();
 
-    // Parse individual crate configurations
-    // let individual_profiles = profiles::parse(&content)?;
+    // Parse crate profiles defined individually
+    let individual = serde_yaml::from_value::<crates::Crates>(config)?;
+    let individual_profiles: Vec<Profile> = individual.into();
 
-    // Combine the two, overwriting batch profiles with individual profiles if
-    // crates are defined in both
-    // let profiles = utils::combine_profiles(batch_profiles, individual_profiles)?;
-
-    // Ok(profiles)
+    // Merge the two sets of profiles
+    batch_profiles.merge(individual_profiles)
 }
 
 #[cfg(test)]

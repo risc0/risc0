@@ -1,3 +1,8 @@
+use std::collections::HashMap;
+
+pub(crate) type Profiles = Vec<Profile>;
+pub(crate) type GroupedProfiles = HashMap<String, Profiles>;
+
 #[derive(
     Debug, Clone, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize, serde_valid::Validate,
 )]
@@ -48,3 +53,36 @@ impl Default for Repo {
         Self::Git("main".to_string())
     }
 }
+
+// Find a way to merge Vec<Profile> with duplicated names into a single Profile
+// batch_profiles.chain(individual_profiles).merge()
+// -> This should return a Vec<Profile> with no duplicated crates, and if more
+// than one Profile for a single crate specify settings, they should be combined
+// in a sensible way.
+
+// pub(crate) trait Group {
+//     fn group(self, other: Self) -> GroupedProfiles;
+// }
+
+// impl Group for Profiles {
+//     fn group(self, other: Self) -> GroupedProfiles {
+//         self.into_iter()
+//             .chain(other.into_iter())
+//             .fold(GroupedProfiles::new(), |mut acc, p| {
+//                 acc.entry(p.name.clone()).or_default().push(p);
+//                 acc
+//             })
+//     }
+// }
+
+// pub(crate) trait Merge {
+//     fn merge(self) -> Profiles;
+// }
+
+// impl Merge for GroupedProfiles {
+//     fn merge(self) -> Profiles {
+//         self.into_iter()
+//             .flat_map(|(_, profiles)| profiles.into_iter())
+//             .collect()
+//     }
+// }
