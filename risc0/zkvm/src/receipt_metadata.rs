@@ -96,6 +96,9 @@ impl fmt::Display for PrunedValueError {
     }
 }
 
+#[cfg(feature = "std")]
+impl std::error::Error for PrunedValueError {}
+
 /// Data associated with a receipt which is used for both input and
 /// output of global state.
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -229,6 +232,9 @@ impl fmt::Display for InvalidExitCodeError {
     }
 }
 
+#[cfg(feature = "std")]
+impl std::error::Error for InvalidExitCodeError {}
+
 /// Output field in the [crate::ReceiptMetadata], committing to a claimed
 /// journal and assumptions list.
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -339,6 +345,9 @@ pub struct InvalidAssumptionDigestError {
     /// Digest of the [ReceiptMetadata] for the assumption marked as resolved.
     pub resolved: Digest,
 }
+
+#[cfg(feature = "std")]
+impl std::error::Error for InvalidAssumptionDigestError {}
 
 // TODO(victor): Add tests that show every combination of pruned struct returns
 // the same digest. Check that the digest of an empty assumptions list is all

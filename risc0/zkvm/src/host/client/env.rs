@@ -32,6 +32,9 @@ use super::{
     slice_io::{slice_io_from_fn, SliceIo, SliceIoTable},
 };
 
+// TODO(victor): Is importing this here an issue?
+use crate::host::receipt::Assumption;
+
 /// A builder pattern used to construct an [ExecutorEnv].
 #[derive(Clone, Default)]
 pub struct ExecutorEnvBuilder<'a> {
@@ -54,6 +57,7 @@ pub struct ExecutorEnv<'a> {
     pub(crate) slice_io: Rc<RefCell<SliceIoTable<'a>>>,
     pub(crate) input: Vec<u8>,
     pub(crate) trace: Option<Rc<RefCell<TraceCallback<'a>>>>,
+    pub(crate) assumptions: Rc<Vec<Assumption>>,
 }
 
 impl<'a> ExecutorEnv<'a> {

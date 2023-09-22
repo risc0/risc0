@@ -106,7 +106,7 @@ use crate::{
 /// [serde](crate::serde) module, which can be used to read data from the
 /// journal as the same type it was written to the journal. If you prefer, you
 /// can also directly access the [Receipt::journal] as a `Vec<u8>`.
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Receipt {
     /// The polymorphic [InnerReceipt].
     pub inner: InnerReceipt,
@@ -120,7 +120,7 @@ pub struct Receipt {
 
 /// An inner receipt can take the form of a [SegmentReceipts] collection or a
 /// [SuccinctReceipt].
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub enum InnerReceipt {
     /// The [SegmentReceipts].
     Flat(SegmentReceipts),
@@ -133,7 +133,7 @@ pub enum InnerReceipt {
 }
 
 /// A wrapper around `Vec<SegmentReceipt>`.
-#[derive(Debug, Deserialize, Serialize, PartialEq)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct SegmentReceipts(pub Vec<SegmentReceipt>);
 
 impl SegmentReceipts {
@@ -304,7 +304,7 @@ impl InnerReceipt {
 ///
 /// A SegmentReceipt attests that a [crate::Segment] was executed in a manner
 /// consistent with the [ReceiptMetadata] included in the receipt.
-#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct SegmentReceipt {
     /// The cryptographic data attesting to the validity of the code execution.
     ///
@@ -402,6 +402,7 @@ impl SegmentReceipt {
 
 /// An assumption associated with a guest call to `env::verify` or
 /// `env::verify_metdata`.
+#[derive(Clone, Debug)]
 pub enum Assumption {
     /// A [Receipt] for a proven assumption.
     Proven(Receipt),

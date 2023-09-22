@@ -35,6 +35,7 @@ use crate::{
         client::{env::ExecutorEnv, posix_io::PosixIo, slice_io::SliceIo},
         receipt::Assumption,
     },
+    receipt_metadata::PrunedValueError,
     sha::{Digest, Digestable},
 };
 
@@ -98,6 +99,10 @@ impl<'a> SyscallTable<'a> {
             inner: HashMap::new(),
         };
 
+        let sys_verify = SysVerify {
+            assumptions: env.assumptions.clone(),
+        };
+
         let posix_io = env.posix_io.clone();
         this.with_syscall(SYS_CYCLE_COUNT, SysCycleCount)
             .with_syscall(SYS_LOG, SysLog)
@@ -107,8 +112,8 @@ impl<'a> SyscallTable<'a> {
             .with_syscall(SYS_READ, posix_io.clone())
             .with_syscall(SYS_READ_AVAIL, posix_io.clone())
             .with_syscall(SYS_WRITE, posix_io)
-            .with_syscall(SYS_VERIFY, SysVerify)
-            .with_syscall(SYS_VERIFY_METADATA, SysVerify);
+            .with_syscall(SYS_VERIFY, sys_verify.clone())
+            .with_syscall(SYS_VERIFY_METADATA, sys_verify);
         for (syscall, handler) in env.slice_io.borrow().inner.iter() {
             let handler = SysSliceIo::new(handler.clone());
             this.inner
@@ -219,8 +224,111 @@ impl Syscall for SysRandom {
     }
 }
 
+#[derive(Clone)]
 pub(crate) struct SysVerify {
-    pub(crate) assumptions: Vec<Assumption>,
+    pub(crate) assumptions: Rc<Vec<Assumption>>,
+}
+
+impl SysVerify {
+    fn sys_verify(&self, from_guest: Vec<u8>) -> Result<(u32, u32)> {
+        let metadata_digest: Digest = from_guest
+            .try_into()
+            .map_err(|vec| anyhow!("failed to convert to [u8; DIGEST_BYTES]: {:?}", vec))?;
+
+        log::debug!("SYS_VERIFY_METADATA: {}", hex::encode(&metadata_digest));
+
+        // Iterate over the list looking for a matching assumption.
+        for assumption in self.assumptions.iter() {
+            if assumption.get_metadata()?.digest() == metadata_digest {
+                return Ok((0, 0));
+            }
+        }
+
+        Err(anyhow!(
+            "sys_verify_metadata: failed to resolve metadata digest: {}",
+            metadata_digest
+        ))
+    }
+
+    fn sys_verify_metadata(
+        &self,
+        mut from_guest: Vec<u8>,
+        to_guest: &mut [u32],
+    ) -> Result<(u32, u32)> {
+        if from_guest.len() != DIGEST_BYTES * 2 {
+            bail!(
+                "sys_verify call with input of lenth {} bytes; expected {}",
+                from_guest.len(),
+                DIGEST_BYTES * 2
+            );
+        }
+        if to_guest.len() != DIGEST_WORDS {
+            bail!(
+                "sys_verify call with output of lenth {} words; expected {}",
+                to_guest.len(),
+                DIGEST_WORDS
+            );
+        }
+
+        let journal_digest: Digest = from_guest
+            .split_off(DIGEST_BYTES)
+            .try_into()
+            .map_err(|vec| anyhow!("failed to convert to [u8; DIGEST_BYTES]: {:?}", vec))?;
+        let image_id: Digest = from_guest
+            .try_into()
+            .map_err(|vec| anyhow!("failed to convert to [u8; DIGEST_BYTES]: {:?}", vec))?;
+
+        log::debug!(
+            "SYS_VERIFY: {}, {}",
+            hex::encode(&image_id),
+            hex::encode(&journal_digest)
+        );
+
+        // Iterate over the list looking for a matching assumption. If found, return the post
+        // state digest.
+        for assumption in self.assumptions.iter() {
+            let assumption_metadata = assumption.get_metadata()?;
+            let cmp_result: Result<Option<Digest>, PrunedValueError> = {
+                let assumption_journal_digest = assumption_metadata
+                    .as_value()?
+                    .output
+                    .as_value()?
+                    .journal
+                    .digest();
+                let assumption_image_id = assumption_metadata.as_value()?.pre.digest();
+
+                if assumption_journal_digest == journal_digest && assumption_image_id == image_id {
+                    Ok(Some(assumption_metadata.as_value()?.post.digest()))
+                } else {
+                    Ok(None)
+                }
+            };
+
+            let post_state_digest = match cmp_result {
+                Ok(None) => continue,
+                // If the required values to compare were pruned, go the next assumption.
+                Err(e) => {
+                    log::debug!(
+                        "sys_verify: pruned values in assumption prevented comparison: {} : {:?}",
+                        e,
+                        assumption_metadata
+                    );
+                    continue;
+                }
+                Ok(Some(digest)) => digest,
+            };
+
+            // Return the post_state_digest and success code to the guest.
+            to_guest.copy_from_slice(post_state_digest.as_words());
+            return Ok((0, 0));
+        }
+
+        Err(anyhow!(
+            "sys_verify_metadata: failed to resolve journal_digest and image_id: {}, {}",
+            journal_digest,
+            image_id,
+        ))
+    }
 }
 
 impl Syscall for SysVerify {
@@ -232,60 +340,12 @@ impl Syscall for SysVerify {
     ) -> Result<(u32, u32)> {
         let from_guest_ptr = ctx.load_register(REG_A3);
         let from_guest_len = ctx.load_register(REG_A4);
-        let mut from_guest: Vec<u8> = ctx.load_region(from_guest_ptr, from_guest_len)?;
+        let from_guest: Vec<u8> = ctx.load_region(from_guest_ptr, from_guest_len)?;
 
         if syscall == SYS_VERIFY_METADATA.as_str() {
-            let metadata_digest: Digest = from_guest
-                .try_into()
-                .map_err(|vec| anyhow!("failed to convert to [u8; DIGEST_BYTES]: {:?}", vec))?;
-
-            log::debug!("SYS_VERIFY_METADATA: {}", hex::encode(&metadata_digest));
-            self.assumptions
-                .iter()
-                .find(|a| a.get_metadata()?.digest() == metadata_digest)
-                .ok_or_else(|| {
-                    anyhow!(
-                        "sys_verify_metadata: failed to resolve metadata digest: {}",
-                        metadata_digest
-                    )
-                })?;
-
-            Ok((0, 0))
+            self.sys_verify(from_guest)
         } else if syscall == SYS_VERIFY.as_str() {
-            if from_guest.len() != DIGEST_BYTES * 2 {
-                bail!(
-                    "sys_verify call with input of lenth {} bytes; expected {}",
-                    from_guest.len(),
-                    DIGEST_BYTES * 2
-                );
-            }
-            if to_guest.len() != DIGEST_WORDS {
-                bail!(
-                    "sys_verify call with output of lenth {} words; expected {}",
-                    to_guest.len(),
-                    DIGEST_WORDS
-                );
-            }
-
-            let journal_digest: Digest = from_guest
-                .split_off(DIGEST_BYTES)
-                .try_into()
-                .map_err(|vec| anyhow!("failed to convert to [u8; DIGEST_BYTES]: {:?}", vec))?;
-            let image_id: Digest = from_guest
-                .try_into()
-                .map_err(|vec| anyhow!("failed to convert to [u8; DIGEST_BYTES]: {:?}", vec))?;
-
-            // DO NOT MERGE(victor): Implement checking of the receipt.
-            log::debug!(
-                "SYS_VERIFY: {}, {}",
-                hex::encode(&image_id),
-                hex::encode(&journal_digest)
-            );
-
-            // DO NOT MERGE(victor): Actually look up and return the post state digest.
-            to_guest.copy_from_slice(&[0u32; DIGEST_WORDS]);
-
-            Ok((0, 0))
+            self.sys_verify_metadata(from_guest, to_guest)
         } else {
             bail!("SysVerify received unrecognized syscall: {}", syscall)
         }
