@@ -1,14 +1,24 @@
-use std::collections::HashMap;
+use std::{
+    collections::{HashMap, HashSet},
+    iter::Chain,
+    vec::IntoIter,
+};
+
+use semver::Version;
+use serde_valid::validation::Error as ValidationError;
 
 pub(crate) type Profiles = Vec<Profile>;
+pub(crate) type CrateName = String;
+pub(crate) type CrateNames = Vec<CrateName>;
 pub(crate) type GroupedProfiles = HashMap<String, Profiles>;
+type Versions = HashSet<Version>;
 
 #[derive(
-    Debug, Clone, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize, serde_valid::Validate,
+    Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize, serde_valid::Validate,
 )]
 pub struct Profile {
     #[validate(min_length = 1)]
-    pub name: String,
+    pub name: CrateName,
     #[serde(flatten)]
     pub settings: ProfileSettings,
 }
@@ -19,7 +29,6 @@ pub struct Profile {
     Clone,
     PartialEq,
     Eq,
-    Hash,
     serde::Serialize,
     serde::Deserialize,
     serde_valid::Validate,
@@ -38,7 +47,8 @@ pub struct ProfileSettings {
     pub custom_main: Option<String>,
     #[serde(flatten)]
     pub repo: Option<Repo>,
-    pub versions: Option<Vec<semver::Version>>,
+    #[validate(custom(validate_versions))]
+    pub versions: Option<Versions>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
@@ -54,39 +64,101 @@ impl Default for Repo {
     }
 }
 
-// Find a way to merge Vec<Profile> with duplicated names into a single Profile
-// batch_profiles.chain(individual_profiles).merge()
-// -> This should return a Vec<Profile> with no duplicated crates, and if more
-// than one Profile for a single crate specify settings, they should be combined
-// in a sensible way.
+trait Group {
+    fn group(self) -> GroupedProfiles;
+}
 
-// pub(crate) trait Group {
-//     fn group(self, other: Self) -> GroupedProfiles;
-// }
+impl Group for Chain<IntoIter<Profile>, IntoIter<Profile>> {
+    fn group(self) -> GroupedProfiles {
+        self.fold(GroupedProfiles::new(), |mut acc, p| {
+            acc.entry(p.name.clone()).or_default().push(p.clone());
+            acc
+        })
+    }
+}
 
-// impl Group for Profiles {
-//     fn group(self, other: Self) -> GroupedProfiles {
-//         self.into_iter()
-//             .chain(other.into_iter())
-//             .fold(GroupedProfiles::new(), |mut acc, p| {
-//                 acc.entry(p.name.clone()).or_default().push(p);
-//                 acc
-//             })
-//     }
-// }
+pub trait Merge {
+    fn merge(self, other: Self) -> Self;
+}
 
-// pub(crate) trait Merge {
-//     fn merge(self) -> Profiles;
-// }
+impl Merge for Profiles {
+    fn merge(self, other: Self) -> Self {
+        match (self.is_empty(), other.is_empty()) {
+            (true, true) => Profiles::new(),
+            (true, false) => self,
+            (false, true) => other,
+            (false, false) => self
+                .into_iter()
+                .chain(other)
+                .group()
+                .into_values()
+                .map(|profiles| {
+                    profiles
+                        .into_iter()
+                        .reduce(|acc, p| acc.merge(p))
+                        .expect("Should never be empty")
+                })
+                .collect(),
+        }
+    }
+}
 
-// impl Merge for GroupedProfiles {
-//     fn merge(self) -> Profiles {
-//         self.into_iter()
-//             .flat_map(|(_, profiles)| profiles.into_iter())
-//             .collect()
-//     }
-// }
+impl Merge for Profile {
+    fn merge(self, other: Self) -> Self {
+        assert_eq!(self.name, other.name);
+        Self {
+            name: self.name,
+            settings: self.settings.merge(other.settings),
+        }
+    }
+}
+
+impl Merge for ProfileSettings {
+    fn merge(self, other: Self) -> Self {
+        Self {
+            run_prover: self.run_prover || other.run_prover,
+            should_fail: self.should_fail || other.should_fail,
+            inject_cc_flags: self.inject_cc_flags || other.inject_cc_flags,
+            std: self.std || other.std,
+            fast_mode: self.fast_mode || other.fast_mode,
+            patch: self.patch.or(other.patch),
+            import_str: self.import_str.or(other.import_str),
+            custom_main: self.custom_main.or(other.custom_main),
+            repo: self.repo.or(other.repo),
+            versions: self.versions.merge(other.versions),
+        }
+    }
+}
+
+impl Merge for Option<Versions> {
+    fn merge(self, other: Self) -> Self {
+        self.unwrap_or_default()
+            .union(&other.unwrap_or_default())
+            .cloned()
+            .map(Some)
+            .collect()
+    }
+}
+
+pub trait Exclude {
+    fn exclude(self, other: Self) -> Self;
+}
+
+impl Exclude for Profiles {
+    fn exclude(self, other: Self) -> Self {
+        self.into_iter()
+            .filter(|p| !other.iter().any(|o| o.name == p.name))
+            .collect()
+    }
+}
 
 const fn default_true() -> bool {
     true
+}
+
+fn validate_versions(versions: &Option<Versions>) -> Result<bool, ValidationError> {
+    versions
+        .as_ref()
+        .map(|v| !v.is_empty())
+        .ok_or(ValidationError::Custom("No versions specified".into()))
 }

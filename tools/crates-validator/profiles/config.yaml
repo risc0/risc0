@@ -1,3 +1,8 @@
+skip-crates:
+  - windows-sys
+  - miow # Windows specific crate that depends on `windows-sys`
+  - redox_syscall # Tools for redox OS, not supported
+
 batch:
   - name: crossbeam-patch
     settings:
@@ -76,18 +81,18 @@ batch:
 crates:
   - name: lazy_static
     std: true
-    import_str: |
+    import-str: |
       use lazy_static::lazy_static;
       lazy_static! {
         static ref EXAMPLE: u8 = 42;
       }
-    custom_main: assert_eq!(*EXAMPLE, 42);
-    run_prover: true
+    custom-main: assert_eq!(*EXAMPLE, 42);
+    run-prover: true
   - name: ring
-    inject_cc_flags: true
+    inject-cc-flags: true
   - name: zip
     std: true
-    inject_cc_flags: true
+    inject-cc-flags: true
 
 
 

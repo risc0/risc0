@@ -1,5 +1,8 @@
+use crate::profiles::CrateName;
+
 use super::Profile;
 use super::ProfileSettings;
+use super::Profiles;
 
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub(crate) struct Batches {
@@ -8,22 +11,18 @@ pub(crate) struct Batches {
 
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 struct BatchConfig {
-    name: String,
+    name: CrateName,
     crates: Vec<String>,
     settings: ProfileSettings,
 }
 
-impl From<Batches> for Vec<Profile> {
+impl From<Batches> for Profiles {
     fn from(value: Batches) -> Self {
-        value
-            .batch
-            .into_iter()
-            .flat_map(Vec::<Profile>::from)
-            .collect()
+        value.batch.into_iter().flat_map(Profiles::from).collect()
     }
 }
 
-impl From<BatchConfig> for Vec<Profile> {
+impl From<BatchConfig> for Profiles {
     fn from(value: BatchConfig) -> Self {
         value
             .crates
@@ -46,8 +45,8 @@ mod tests {
     #[test]
     fn can_parse_file() {
         let config = utils::read_profile(PATH_YAML_CONFIG).unwrap();
-        let batches = serde_yaml::from_value::<Batches>(config).unwrap();
-        let profiles: Vec<Profile> = batches.into();
+        let batches = serde_yaml::from_str::<Batches>(&config).unwrap();
+        let profiles: Profiles = batches.into();
         assert!(!profiles.is_empty());
     }
 
@@ -76,7 +75,7 @@ mod tests {
               - baz
         "#;
         let batches = serde_yaml::from_str::<Batches>(config).unwrap();
-        let profiles: Vec<Profile> = batches.into();
+        let profiles: Profiles = batches.into();
         assert_eq!(profiles.len(), 4);
     }
 }

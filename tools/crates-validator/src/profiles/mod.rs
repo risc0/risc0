@@ -20,10 +20,7 @@ mod types;
 
 // TODO(Cardosaum): Export specific functions
 pub use constants::*;
-pub use parser::get_profiles;
-pub use types::Profile;
-pub use types::ProfileSettings;
-pub use types::Repo;
+pub use types::*;
 
 pub fn lookup_crate(crate_name: &str, mut profile: CrateProfile) -> CrateProfile {
     profile.customized = true;

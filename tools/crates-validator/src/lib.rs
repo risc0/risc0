@@ -28,7 +28,6 @@ use tempfile::tempdir;
 use tracing::{debug, error, info};
 
 pub mod profiles;
-pub mod skip_crates;
 
 /// Validation Results fields
 #[derive(Debug, Serialize, Deserialize)]
