@@ -333,7 +333,7 @@ fn filter_categories(
 }
 
 fn add_categories(
-    crates: &Vec<CrateRow>,
+    crates: &[CrateRow],
     categories: &HashMap<CategoryId, String>,
     filter: &Option<Vec<String>>,
     crates_categories: &HashMap<CrateId, CategoryId>,
