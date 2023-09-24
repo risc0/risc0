@@ -229,8 +229,7 @@ async fn main() -> Result<()> {
 
     let mut selected_crates = crates
         .iter()
-        .take(args.crate_count)
-        .map(|c| c.clone())
+        .take(args.crate_count).cloned()
         .collect::<Vec<_>>();
     // TODO(cardosaum): Replace this by using module `profile`
     // if let Some(json_files) = args.selected_crates {
@@ -309,8 +308,7 @@ fn filter_categories(
 
     let mut show_existent_categories = false;
     let existent_categories = categories
-        .values()
-        .map(|v| v.clone())
+        .values().cloned()
         .collect::<HashSet<_>>();
     let included_categories = filter
         .intersection(&existent_categories)
@@ -346,8 +344,7 @@ fn add_categories(
         .filter(|c| match crates_categories.get(&c.id) {
             Some(category_id) => filtered_categories.contains_key(category_id),
             None => false,
-        })
-        .map(|c| c.clone())
+        }).cloned()
         .collect()
 }
 
