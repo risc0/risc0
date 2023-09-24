@@ -14,8 +14,8 @@
 
 use crate::CrateProfile;
 
-pub mod constants;
-pub mod parser;
+pub(crate) mod constants;
+pub(crate) mod parser;
 mod types;
 
 // TODO(Cardosaum): Export specific functions
