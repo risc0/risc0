@@ -13,7 +13,9 @@ impl From<Individual> for Profiles {
 
 #[cfg(test)]
 mod tests {
-    use crate::profiles::{parser::utils, PATH_YAML_CONFIG};
+    use std::collections::HashSet;
+
+    use crate::profiles::{parser::utils, Profile, ProfileSettings, PATH_YAML_CONFIG};
 
     use super::*;
 
@@ -30,28 +32,67 @@ mod tests {
         let config = r#"
             crates:
                 - name: foo
-                  settings:
-                      std: false
-                      fast-mode: true
+                  std: false
+                  fast-mode: true
                 - name: bar
-                  settings:
-                      patch: |
-                          use std::io;
-                      inject-cc-flags: true
+                  patch: |
+                      use std::io;
+                  inject-cc-flags: true
                 - name: baz
-                  settings:
-                    custom-main: |
-                      fn main() {
-                          println!("Hello, world!");
-                      }
-                    run-prover: false
+                  custom-main: |
+                    fn main() {
+                        println!("Hello, world!");
+                    }
+                  run-prover: false
                 - name: qux
-                  settings:
-                    std: true
-                    fast-mode: true
+                  should-fail: true
+                  fast-mode: true
         "#;
+
+        let foo = Profile {
+            name: "foo".to_string(),
+            settings: ProfileSettings {
+                std: false,
+                fast_mode: true,
+                ..Default::default()
+            },
+        };
+        let bar = Profile {
+            name: "bar".to_string(),
+            settings: ProfileSettings {
+                patch: Some("use std::io;\n".to_string()),
+                inject_cc_flags: true,
+                ..Default::default()
+            },
+        };
+        let baz = Profile {
+            name: "baz".to_string(),
+            settings: ProfileSettings {
+                custom_main: Some(
+                    r#"fn main() {
+    println!("Hello, world!");
+}
+"#
+                    .to_string(),
+                ),
+                run_prover: false,
+                ..Default::default()
+            },
+        };
+        let qux = Profile {
+            name: "qux".to_string(),
+            settings: ProfileSettings {
+                should_fail: true,
+                fast_mode: true,
+                ..Default::default()
+            },
+        };
+        let expected_profiles: HashSet<Profile> = [foo, bar, baz, qux].into_iter().collect();
+
         let batches = serde_yaml::from_str::<Individual>(config).unwrap();
         let profiles: Profiles = batches.into();
+
         assert_eq!(profiles.len(), 4);
+        assert_eq!(expected_profiles, profiles.into_iter().collect());
     }
 }

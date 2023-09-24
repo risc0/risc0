@@ -1,5 +1,5 @@
 use std::{
-    collections::{HashMap, HashSet},
+    collections::{BTreeMap, BTreeSet, HashMap, HashSet},
     iter::Chain,
     vec::IntoIter,
 };
@@ -10,11 +10,11 @@ use serde_valid::validation::Error as ValidationError;
 pub(crate) type Profiles = Vec<Profile>;
 pub(crate) type CrateName = String;
 pub(crate) type CrateNames = Vec<CrateName>;
-pub(crate) type GroupedProfiles = HashMap<String, Profiles>;
-type Versions = HashSet<Version>;
+pub(crate) type GroupedProfiles = BTreeMap<String, Profiles>;
+type Versions = BTreeSet<Version>;
 
 #[derive(
-    Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize, serde_valid::Validate,
+    Debug, Clone, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize, serde_valid::Validate,
 )]
 pub struct Profile {
     #[validate(min_length = 1)]
@@ -24,14 +24,7 @@ pub struct Profile {
 }
 
 #[derive(
-    Default,
-    Debug,
-    Clone,
-    PartialEq,
-    Eq,
-    serde::Serialize,
-    serde::Deserialize,
-    serde_valid::Validate,
+    Debug, Clone, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize, serde_valid::Validate,
 )]
 #[serde(default)]
 #[serde(rename_all = "kebab-case")]
@@ -40,7 +33,6 @@ pub struct ProfileSettings {
     pub should_fail: bool,
     pub inject_cc_flags: bool,
     pub std: bool,
-    #[serde(default = "default_true")]
     pub fast_mode: bool,
     pub patch: Option<String>,
     pub import_str: Option<String>,
@@ -49,6 +41,23 @@ pub struct ProfileSettings {
     pub repo: Option<Repo>,
     #[validate(custom(validate_versions))]
     pub versions: Option<Versions>,
+}
+
+impl Default for ProfileSettings {
+    fn default() -> Self {
+        Self {
+            run_prover: false,
+            should_fail: false,
+            inject_cc_flags: false,
+            std: false,
+            fast_mode: true,
+            patch: None,
+            import_str: None,
+            custom_main: None,
+            repo: None,
+            versions: None,
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
@@ -150,10 +159,6 @@ impl Exclude for Profiles {
             .filter(|p| !other.iter().any(|o| o.name == p.name))
             .collect()
     }
-}
-
-const fn default_true() -> bool {
-    true
 }
 
 fn validate_versions(versions: &Option<Versions>) -> Result<bool, ValidationError> {

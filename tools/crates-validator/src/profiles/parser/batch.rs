@@ -38,9 +38,12 @@ impl From<BatchConfig> for Profiles {
 #[cfg(test)]
 
 mod tests {
+    use std::collections::HashSet;
+
     use super::*;
+    use crate::profiles::parser::test_helpers::profile_with_settings;
     use crate::profiles::parser::utils;
-    use crate::profiles::PATH_YAML_CONFIG;
+    use crate::profiles::{Merge, PATH_YAML_CONFIG};
 
     #[test]
     fn can_parse_file() {
@@ -62,8 +65,8 @@ mod tests {
                 [patch.crates-io]
                 foo = { git = 'git://github.com/foo/foo.git' }
             crates:
-              - bar
-              - baz
+              - foo1
+              - foo2
           - name: bar
             settings:
               inject-cc-flags: true
@@ -71,11 +74,52 @@ mod tests {
                 [patch.crates-io]
                 bar = { git = 'git://github.com/bar/bar.git' }
             crates:
-              - foo
-              - baz
+              - bar1
+              - bar2
         "#;
+
+        let foo_settings = ProfileSettings {
+            std: true,
+            fast_mode: true,
+            patch: Some(
+                r#"[patch.crates-io]
+foo = { git = 'git://github.com/foo/foo.git' }
+"#
+                    .into(),
+            ),
+            ..Default::default()
+        };
+
+        let bar_settings = ProfileSettings {
+            inject_cc_flags: true,
+            patch: Some(
+                r#"[patch.crates-io]
+bar = { git = 'git://github.com/bar/bar.git' }
+"#
+                .into(),
+            ),
+            ..Default::default()
+        };
+
+        let foo_batch = ["foo1", "foo2"]
+            .iter()
+            .map(|n| (n, foo_settings.clone()))
+            .map(profile_with_settings)
+            .collect::<Profiles>();
+        let bar_batch = ["bar1", "bar2"]
+            .iter()
+            .map(|n| (n, bar_settings.clone()))
+            .map(profile_with_settings)
+            .collect::<Profiles>();
+        let expected_profiles: HashSet<Profile> = foo_batch
+            .clone()
+            .merge(bar_batch.clone())
+            .into_iter()
+            .collect();
+
         let batches = serde_yaml::from_str::<Batches>(config).unwrap();
         let profiles: Profiles = batches.into();
         assert_eq!(profiles.len(), 4);
+        assert_eq!(expected_profiles, profiles.into_iter().collect());
     }
 }

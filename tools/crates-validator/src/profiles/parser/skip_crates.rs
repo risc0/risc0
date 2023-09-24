@@ -25,7 +25,10 @@ impl From<SkipCrates> for Profiles {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::profiles::{parser::utils, PATH_YAML_CONFIG};
+    use crate::profiles::{
+        parser::{test_helpers::profile_from_name, utils},
+        PATH_YAML_CONFIG,
+    };
 
     #[test]
     fn can_parse_file() {
@@ -44,8 +47,15 @@ mod tests {
               - baz
               - qux
         "#;
+        let expected_profiles: Profiles = ["foo", "bar", "baz", "qux"]
+            .iter()
+            .map(profile_from_name)
+            .collect();
+
         let batches = serde_yaml::from_str::<SkipCrates>(config).unwrap();
         let profiles: Profiles = batches.into();
+
         assert_eq!(profiles.len(), 4);
+        assert_eq!(profiles, expected_profiles);
     }
 }

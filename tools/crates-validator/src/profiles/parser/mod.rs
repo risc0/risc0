@@ -9,6 +9,9 @@ mod individual;
 mod skip_crates;
 mod utils;
 
+#[cfg(test)]
+mod test_helpers;
+
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub struct Parser {
     #[serde(flatten)]
