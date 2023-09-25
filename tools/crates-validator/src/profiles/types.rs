@@ -4,13 +4,17 @@ use std::{
     vec::IntoIter,
 };
 
+use anyhow::{ensure, Result};
 use semver::Version;
-use serde_valid::validation::Error as ValidationError;
+use serde_valid::{
+    validation::{Error as ValidationError, Errors as ValidationErrors},
+    Validate,
+};
 
-pub(crate) type Profiles = Vec<Profile>;
-pub(crate) type CrateName = String;
-pub(crate) type CrateNames = Vec<CrateName>;
-pub(crate) type GroupedProfiles = BTreeMap<String, Profiles>;
+pub type Profiles = Vec<Profile>;
+pub type CrateName = String;
+pub type CrateNames = Vec<CrateName>;
+pub type GroupedProfiles = BTreeMap<String, Profiles>;
 type Versions = BTreeSet<Version>;
 
 #[derive(
@@ -21,6 +25,19 @@ pub struct Profile {
     pub name: CrateName,
     #[serde(flatten)]
     pub settings: ProfileSettings,
+}
+
+impl TryFrom<String> for Profile {
+    type Error = anyhow::Error;
+
+    fn try_from(name: String) -> Result<Self, Self::Error> {
+        let profile = Self {
+            name,
+            settings: ProfileSettings::default(),
+        };
+        ensure!(profile.validate().is_ok(), "Invalid profile: {:?}", profile);
+        Ok(profile)
+    }
 }
 
 #[derive(
@@ -34,10 +51,14 @@ pub struct ProfileSettings {
     pub inject_cc_flags: bool,
     pub std: bool,
     pub fast_mode: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub patch: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub import_str: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub custom_main: Option<String>,
     #[serde(flatten)]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub repo: Option<Repo>,
     #[validate(custom(validate_versions))]
     pub versions: Option<Versions>,
@@ -158,6 +179,16 @@ impl Exclude for Profiles {
         self.into_iter()
             .filter(|p| !other.iter().any(|o| o.name == p.name))
             .collect()
+    }
+}
+
+pub trait IsValid {
+    fn is_valid(&self) -> Result<(), ValidationErrors>;
+}
+
+impl IsValid for Profiles {
+    fn is_valid(&self) -> Result<(), ValidationErrors> {
+        self.iter().try_for_each(|p| p.validate())
     }
 }
 

@@ -2,7 +2,7 @@ use std::fmt::Display;
 
 use super::types::*;
 
-use anyhow::Result;
+use anyhow::{ensure, Result};
 
 mod batch;
 mod individual;
@@ -25,10 +25,16 @@ pub struct Parser {
 impl Parser {
     pub fn parse(path: impl AsRef<str> + Display) -> Result<Profiles> {
         let config = utils::read_profile(path)?;
-        let profiles = serde_yaml::from_str::<Parser>(&config)?;
-        Ok(Profiles::from(profiles.batch)
-            .merge(profiles.individual.into())
-            .exclude(profiles.skip_crates.into()))
+        let parser = serde_yaml::from_str::<Parser>(&config)?;
+        let profiles = Profiles::from(parser.batch)
+            .merge(parser.individual.into())
+            .exclude(parser.skip_crates.into());
+        ensure!(
+            profiles.is_valid().is_ok(),
+            "Invalid profiles: {:?}",
+            profiles
+        );
+        Ok(profiles)
     }
 }
 

@@ -12,58 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::CrateProfile;
-
 pub(crate) mod constants;
-pub(crate) mod parser;
+// TODO(Cardosaum): change visibility to `pub(crate)`
+pub mod parser;
 mod types;
 
 // TODO(Cardosaum): Export specific functions
 pub use constants::*;
 pub use types::*;
-
-pub fn lookup_crate(crate_name: &str, mut profile: CrateProfile) -> CrateProfile {
-    profile.customized = true;
-    match crate_name {
-        "lazy_static" => {
-            profile.std = true;
-            profile.import_str = Some(
-                "use lazy_static::lazy_static;\nlazy_static! {\n\tstatic ref EXAMPLE: u8 = 42;\n}"
-                    .to_string(),
-            );
-            profile.custom_main = Some("assert_eq!(*EXAMPLE, 42);".to_string());
-            profile.run_prover = true;
-        }
-        // Requires CFLAGS for native code
-        "ring" => {
-            profile.inject_cc_flags = true;
-        }
-        "zip" => {
-            profile.std = true;
-            profile.inject_cc_flags = true;
-        }
-        "async-channel" | "async-executor" | "async-io" | "blocking" | "concurrent-queue"
-        | "crossbeam-deque" | "crossbeam-epoch" | "crossbeam-queue" | "rayon" | "rayon-core"
-        | "redox_users" | "vsdb" | "vsdbsled" => {
-            // NOTE: the crate 'crossbeam-utils'|'crossbeam-channel'|'crossbeam' itself
-            // still fails to build because you can't crates-io patch itself
-            profile.crossbeam_patch = true;
-        }
-        "criterion" => {
-            profile.crossbeam_patch = true;
-            profile.std = true;
-        }
-        // Just need 'std' block:
-        "anyhow" | "cargo_metadata" | "clap" | "crypto-bigint" | "csv" | "env_logger"
-        | "ethers-core" | "h2" | "headers" | "hex" | "hyper" | "hyper-timeout" | "k256"
-        | "md-5" | "multimap" | "openssl" | "rand" | "revm" | "revm-primitives" | "serde"
-        | "serde_bytes" | "serde_cbor" | "serde_json" | "serde_urlencoded" | "serde_with"
-        | "serde_yaml" | "sha-1" | "sha1" | "sha2" | "sha3" | "string_cache" | "tfhe"
-        | "tinytemplate" | "toml" | "tower" | "tracing" | "tracing-core" | "tracing-futures"
-        | "tracing-log" | "tracing-serde" | "tracing-subscriber" | "tungstenite" => {
-            profile.std = true
-        }
-        _ => profile.customized = false,
-    }
-    profile
-}
