@@ -96,6 +96,9 @@ jobs:
       - run: cargo check -F $FEATURE -p risc0-sys
       - run: cargo check -F $FEATURE -p risc0-zkp
       - run: cargo check -F $FEATURE -p risc0-zkvm
+      - run: cargo install --git https://github.com/SchmErik/cargo-no-std-check
+      # This check ensures that the zkvm without default featuers is no_std.
+      - run: cargo no-std-check -p risc0-zkvm --no-default-features
       - uses: risc0/clippy-action@main
         with:
           reporter: 'github-pr-check'
