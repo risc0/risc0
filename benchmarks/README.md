@@ -147,3 +147,11 @@ Verifies a given Ed25519 signature (on the ed25519 curve).
 ### `fibonacci`
 
 Computes the Fibonacci sequence of a given number.
+
+### `merkle-tree`
+
+Computes the membership proof for a given authenticated path from a leaf to a merkle tree root.
+
+### `zeth`
+
+Computes the proof for a given Ethereum block containing a given number of transactions.

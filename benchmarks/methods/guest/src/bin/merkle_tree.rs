@@ -12,16 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-pub mod big_blake2b;
-pub mod big_blake3;
-pub mod big_keccak;
-pub mod big_sha2;
-pub mod ecdsa_verify;
-pub mod ed25519_verify;
-pub mod fibonacci;
-pub mod iter_blake2b;
-pub mod iter_blake3;
-pub mod iter_keccak;
-pub mod iter_sha2;
-pub mod merkle_tree;
-pub mod zeth;
+#![no_main]
+
+use risc0_benchmark_lib::{Item, Proof, Sha256Hasher};
+use risc0_zkvm::guest::env;
+use typenum::{U0, U2};
+
+risc0_zkvm::entry!(main);
+
+pub fn main() {
+    let (lemma, path): (Vec<Item>, Vec<usize>) = env::read();
+    let proof: Proof<Item, U2> = Proof::new::<U0, U0>(None, lemma, path).unwrap();
+    assert!(proof
+        .validate::<Sha256Hasher>()
+        .expect("failed to validate"));
+    env::commit(&(proof.item(), proof.root()))
+}
