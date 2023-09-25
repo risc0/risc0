@@ -19,7 +19,6 @@ batch:
       - concurrent-queue
       - criterion
       - crossbeam-deque
-      - crossbeam-deque
       - crossbeam-epoch
       - crossbeam-queue
       - rayon
@@ -42,7 +41,6 @@ batch:
       - h2
       - headers
       - hex
-      - tfhe
       - hyper
       - hyper-timeout
       - k256
@@ -77,10 +75,15 @@ batch:
       - tracing-subscriber
       - tungstenite
       - zip
+  - name: inject-cc-flags
+    settings:
+      inject-cc-flags: true
+    crates:
+      - ring
+      - zip
 
 crates:
   - name: lazy_static
-    std: true
     import-str: |
       use lazy_static::lazy_static;
       lazy_static! {
@@ -88,11 +91,3 @@ crates:
       }
     custom-main: assert_eq!(*EXAMPLE, 42);
     run-prover: true
-  - name: ring
-    inject-cc-flags: true
-  - name: zip
-    std: true
-    inject-cc-flags: true
-
-
-
