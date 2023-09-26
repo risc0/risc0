@@ -428,7 +428,16 @@ ENV_VAR2=
 
 #[test]
 fn args() {
-    let test_cases = [vec![], vec!["grep", "-c", "foo bar", "-"], vec![""]];
+    let test_cases: [&[String]; 3] = [
+        &[String::default()],
+        &[
+            "grep".to_string(),
+            "-c".to_string(),
+            "foo bar".to_string(),
+            "-".to_string(),
+        ],
+        &[String::default()],
+    ];
     for args_arr in test_cases {
         let env = ExecutorEnv::builder()
             .env_var("TEST_MODE", "ARGS")

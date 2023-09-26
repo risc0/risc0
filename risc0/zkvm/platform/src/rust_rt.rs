@@ -70,7 +70,7 @@ struct BumpPointerAlloc;
 
 unsafe impl GlobalAlloc for BumpPointerAlloc {
     unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
-        syscall::sys_alloc_aligned(layout.align(), layout.size())
+        syscall::sys_alloc_aligned(layout.size(), layout.align())
     }
 
     unsafe fn dealloc(&self, _: *mut u8, _: Layout) {
