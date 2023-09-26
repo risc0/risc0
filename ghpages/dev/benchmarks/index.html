@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 0;
+    }
+
+    h1 {
+      margin: 20px;
+    }
+
+    #commit-hash {
+      margin: 10px;
+    }
+
+    table {
+      width: 80%;
+      margin: 20px auto;
+      border-collapse: collapse;
+    }
+
+    th,
+    td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #f4f4f4;
+    }
+  </style>
+  <title>RISC Zero Benchmarks</title>
+</head>
+
+<body>
+
+  <h1>RISC Zero Benchmarks</h1>
+  <p id="commit-hash">Commit hash: <span id="hash-content">Loading...</span>
+    <br></br>
+    Use <i>RUST_LOG=info cargo run --release -- --out metrics.csv all</i> from the benchmarks folder to collect data for
+    your
+    machine
+  </p>
+
+  <script>
+    // Function to format duration
+    function formatDuration(duration) {
+      const thresholds = [1000, 1000, 1000, 60, 60];
+      const units = ['ns', 'µs', 'ms', 's', 'min', 'h'];
+      let unitIndex = 0;
+      while (duration >= thresholds[unitIndex] && unitIndex < thresholds.length) {
+        duration /= thresholds[unitIndex];
+        unitIndex++;
+      }
+      return `${duration.toFixed(2)}${units[unitIndex]}`;
+    }
+
+    // Function to format bytes
+    function formatBytes(bytes) {
+      const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+      let unitIndex = 0;
+      while (bytes >= 1024 && unitIndex < units.length - 1) {
+        bytes /= 1024;
+        unitIndex++;
+      }
+      return `${bytes.toFixed(2)}${units[unitIndex]}`;
+    }
+
+    // Function to fetch and display commit hash
+    async function fetchCommitHash() {
+      try {
+        let response = await fetch('COMMIT_HASH.txt');
+        let data = await response.text();
+        if (!data.includes('This page could not be found')) {
+          document.getElementById('hash-content').textContent = data;
+        }
+      } catch (error) {
+        console.error('Error fetching commit hash:', error);
+      }
+    }
+
+    // Function to fetch and display CSV data
+    async function fetchCSV() {
+      const filenameToTitle = {
+        'macOS-apple_m2_pro.csv': 'Metal on Apple M2 Pro',
+        'Linux-nvidia_rtx_a5000.csv': 'CUDA on NVIDIA RTX A5000',
+        'macOS-cpu.csv': 'CPU only on Apple M2 Pro',
+        'Linux-cpu.csv': 'CPU only on TBD [Linux]'
+      };
+
+      const urls = ['macOS-apple_m2_pro.csv', 'Linux-nvidia_rtx_a5000.csv', 'macOS-cpu.csv', 'Linux-cpu.csv'];
+
+      for (let url of urls) {
+        try {
+          let response = await fetch(url);
+
+          // Check if the response status is okay
+          if (!response.ok) {
+            console.error(`Failed to fetch ${url}: ${response.statusText}`);
+            continue; // skip to the next URL
+          }
+
+          let data = await response.text();
+          let rows = data.split('\n').filter(row => row.trim().length > 0); // Filter out empty rows
+
+          // Create a table title using h2
+          let titleElement = document.createElement('h2');
+          titleElement.textContent = filenameToTitle[url];
+          document.body.appendChild(titleElement);
+
+          let table = document.createElement('table');
+          rows.forEach((row, rowIndex) => {
+            let tr = document.createElement('tr');
+            let cells = row.split(',');
+            cells.forEach((cell, index) => {
+              let cellElement;
+              if (rowIndex === 0) {
+                cellElement = document.createElement('th');
+              } else {
+                cellElement = document.createElement('td');
+              }
+              if (rowIndex !== 0) {
+                if (index === 2 || index === 3 || index === 4) {
+                  cellElement.textContent = formatDuration(Number(cell));
+                } else if (index === 7) {
+                  cellElement.textContent = formatBytes(Number(cell));
+                } else {
+                  cellElement.textContent = cell;
+                }
+              } else {
+                cellElement.textContent = cell;
+              }
+              tr.appendChild(cellElement);
+            });
+            table.appendChild(tr);
+          });
+          document.body.appendChild(table);
+        } catch (error) {
+          console.error(`Error fetching CSV data from ${url}:`, error);
+        }
+      }
+    }
+
+
+
+    fetchCommitHash();
+    fetchCSV();
+  </script>
+
+</body>
+
+</html>

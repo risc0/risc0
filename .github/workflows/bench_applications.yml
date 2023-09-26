@@ -1,0 +1,106 @@
+name: Benchmark Applications
+
+on:
+  push:
+    branches: [ main ]
+    # Only run benchmarks on changes to following paths:
+    paths:
+      - 'risc0/**'
+      - '.github/workflows/bench_*'
+
+  # uncomment for only for testing changes to this workflow while in a PR
+  pull_request:
+    branches: [ main ]
+    # Only run benchmarks on changes to following paths:
+    paths:
+      - 'risc0/**'
+      - '.github/workflows/bench_*'
+
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  bench:
+    runs-on: [self-hosted, prod, bench, "${{ matrix.os }}", "${{ matrix.device }}"]
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: Linux
+            feature: cuda
+            device: nvidia_rtx_a5000
+          - os: macOS
+            feature: metal
+            device: apple_m2_pro
+          - os: macOS
+            feature: default
+            device: cpu
+          - os: Linux
+            feature: default
+            device: cpu
+
+    env:
+      CUDA_LIBRARY_PATH: /usr/lib/cuda
+      FEATURE: ${{ matrix.feature }}
+      RUSTC_WRAPPER: sccache
+
+    steps:
+      # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
+      - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/rustup
+      - uses: ./.github/actions/sccache
+        with:
+          key: ${{ matrix.os }}-${{ matrix.feature }}
+      - run: cargo run --bin cargo-risczero -- risczero install
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: cargo run --release -F $FEATURE -- --out ${{ matrix.os }}-${{ matrix.device }}.csv all
+        working-directory: benchmarks
+      - name: Save commit hash to a file
+        run: echo "${{ github.sha }}" > COMMIT_HASH.txt
+        working-directory: benchmarks
+      - name: Upload benchmark result
+        uses: actions/upload-artifact@v2
+        with:
+          name: benchmarks
+          path: |
+            benchmarks/${{ matrix.os }}-${{ matrix.device }}.csv
+            benchmarks/COMMIT_HASH.txt
+
+  push_to_ghpages:
+    needs: bench
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout gh-pages repository
+        uses: actions/checkout@v3
+        with:
+          repository: risc0/ghpages
+          ref: dev
+          token: ${{ secrets.BENCHMARK_TOKEN }}
+      - name: Download benchmark
+        uses: actions/download-artifact@v2
+        with:
+          name: benchmarks
+          path: dev/benchmarks
+      - name: Push benchmark result
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add dev/benchmarks/macOS-cpu.csv
+          git add dev/benchmarks/macOS-apple_m2_pro.csv
+          git add dev/benchmarks/Linux-nvidia_rtx_a5000.csv
+          git add dev/benchmarks/Linux-cpu.csv
+          git add dev/benchmarks/COMMIT_HASH.txt
+          if git diff --cached --exit-code; then
+            echo "No changes to commit"
+          else
+            git commit -m "Add build artifacts"
+            git remote set-url origin https://${{ secrets.BENCHMARK_TOKEN }}@github.com/risc0/ghpages.git
+            git push -f origin dev
+          fi
