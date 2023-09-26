@@ -152,6 +152,10 @@ Computes the Fibonacci sequence of a given number.
 
 Computes the membership proof for a given authenticated path from a leaf to a merkle tree root.
 
+### `sudoku`
+
+Verifies a given Sudoku solution.
+
 ### `zeth`
 
 Computes the proof for a given Ethereum block containing a given number of transactions.
