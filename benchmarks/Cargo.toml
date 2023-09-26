@@ -44,6 +44,7 @@ tokio = { version = "1", features = ["full"] }
 [features]
 cuda = ["risc0-zkvm/cuda"]
 metal = ["risc0-zkvm/metal"]
+default = []
 
 # Always optimize; building and running the guest takes much longer without optimization.
 [profile.dev]
