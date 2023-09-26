@@ -120,6 +120,10 @@
       font-size: 1em;
     }
 
+    .footnote {
+      margin-top: -10px;
+    }
+
     /* Print-specific styles */
     @media print {
       body {
@@ -153,7 +157,7 @@
       }
 
       .container {
-        grid-row-gap: 10px;
+        row-gap: 10px;
       }
 
       .qrcode-container {
@@ -216,6 +220,11 @@
     <div class="box" id="table2"></div>
     <div class="box" id="table3"></div>
     <div class="box" id="table4"></div>
+  </div>
+
+  <div class="footnote">
+    <p>*this uses continuations, reducing the memory usage but producing more receipts (if not rolled up with Bonsai).
+    </p>
   </div>
 
   <div class="footer">
@@ -408,7 +417,7 @@
               let value = item[key];
 
               if (key === 'cycles') {
-                value = `${value / 1024}k`;
+                value = `${value / 1024}k${value >= 2048 * 1024 ? '*' : ''}`;
               } else if (key === 'duration') {
                 value = formatDuration(value);
               } else if (key === 'ram' || key === 'seal') {
