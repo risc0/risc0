@@ -23,7 +23,7 @@ use crate::{ExecutorEnv, ProverOpts, Receipt, VerifierContext};
 
 /// An implementation of a [Prover] that runs proof workloads via Bonsai.
 ///
-/// Requires a BONSAI_API_URL and BONSAI_API_KEY environment variables to
+/// Requires BONSAI_API_URL and BONSAI_API_KEY environment variables to
 /// submit proving sessions to Bonsai.
 pub struct BonsaiProver {
     name: String,
