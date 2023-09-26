@@ -17,10 +17,7 @@ use std::{fs::File, io::BufReader, path::PathBuf};
 use anyhow::{Context, Result};
 use clap::Parser;
 use colored::Colorize;
-use risc0_crates_validator::{
-    parser::types::{Profiles, Repo},
-    RunStatus, ValidatorBuilder,
-};
+use risc0_crates_validator::{Profiles, Repo, RunStatus, ValidatorBuilder};
 use tracing::info;
 use tracing_subscriber::EnvFilter;
 

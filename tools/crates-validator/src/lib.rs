@@ -13,6 +13,9 @@
 // limitations under the License.
 
 pub mod parser;
+pub mod types;
+
+pub use types::*;
 
 use std::{
     collections::BTreeMap,
@@ -25,7 +28,6 @@ use std::{
 
 use anyhow::{bail, Context, Result};
 use handlebars::Handlebars;
-use parser::types::{Profile, Profiles, Repo};
 use semver::Version;
 use serde::{Deserialize, Serialize};
 use tempfile::tempdir;

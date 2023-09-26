@@ -1,4 +1,4 @@
-use crate::parser::types::{CrateNames, Profile, ProfileSettings, Profiles};
+use crate::{CrateNames, Profile, ProfileSettings, Profiles};
 
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "kebab-case")]

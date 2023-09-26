@@ -1,4 +1,4 @@
-use crate::parser::types::Profiles;
+use crate::Profiles;
 
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub(crate) struct Individual {
@@ -15,11 +15,8 @@ impl From<Individual> for Profiles {
 mod tests {
     use std::collections::HashSet;
 
-    use crate::parser::{
-        constants::PATH_YAML_CONFIG,
-        types::{Profile, ProfileSettings},
-        utils,
-    };
+    use crate::parser::{constants::PATH_YAML_CONFIG, utils};
+    use crate::{Profile, ProfileSettings};
 
     use super::*;
 

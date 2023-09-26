@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-use types::{Profiles, Merge, Exclude, IsValid};
+use crate::{Profiles, Merge, Exclude, IsValid};
 use anyhow::{ensure, Result};
 
 mod batch;
@@ -8,7 +8,6 @@ mod individual;
 mod constants;
 mod skip_crates;
 mod utils;
-pub mod types;
 
 #[cfg(test)]
 mod test_helpers;

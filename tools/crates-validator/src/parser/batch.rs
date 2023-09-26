@@ -1,4 +1,4 @@
-use crate::parser::types::{CrateName, Profile, ProfileSettings, Profiles};
+use crate::{CrateName, Profile, ProfileSettings, Profiles};
 
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub(crate) struct Batches {
@@ -37,9 +37,8 @@ mod tests {
     use std::collections::HashSet;
 
     use super::*;
-    use crate::parser::{
-        constants::PATH_YAML_CONFIG, test_helpers::profile_with_settings, types::Merge, utils,
-    };
+    use crate::parser::{constants::PATH_YAML_CONFIG, test_helpers::profile_with_settings, utils};
+    use crate::Merge;
 
     #[test]
     fn can_parse_file() {
