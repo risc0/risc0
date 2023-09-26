@@ -21,15 +21,19 @@ use crate::alpha::{
 ///
 /// Uses the BONSAI_API_URL and BONSAI_API_KEY environment variables to
 /// construct a client
-pub async fn get_client_from_env() -> Result<Client, SdkErr> {
-    tokio::task::spawn_blocking(Client::from_env)
+pub async fn get_client_from_env(risc0_version: &'static str) -> Result<Client, SdkErr> {
+    tokio::task::spawn_blocking(|| Client::from_env(risc0_version))
         .await
         .map_err(|err| SdkErr::InternalServerErr(format!("{err}")))?
 }
 
 /// Construct a Bonsai SDK Client from url + api key strings
-pub async fn get_client_from_parts(url: String, api_key: String) -> Result<Client, SdkErr> {
-    tokio::task::spawn_blocking(move || Client::from_parts(url, api_key))
+pub async fn get_client_from_parts(
+    url: String,
+    api_key: String,
+    risc0_version: &'static str,
+) -> Result<Client, SdkErr> {
+    tokio::task::spawn_blocking(move || Client::from_parts(url, api_key, risc0_version))
         .await
         .map_err(|err| SdkErr::InternalServerErr(format!("{err}")))?
 }

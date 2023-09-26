@@ -44,7 +44,7 @@ pub(crate) async fn post_callback_request<S: Storage + Sync + Send + Clone>(
     State(s): State<ApiState<S>>,
     Bincode(request): Bincode<CallbackRequest>,
 ) -> Result<(), Error> {
-    let client = get_client_from_parts(s.bonsai_url, api_key).await?;
+    let client = get_client_from_parts(s.bonsai_url, api_key, risc0_zkvm::VERSION).await?;
     let proxy = ProxyCallbackProofRequestProcessor::new(client, s.storage, Some(s.notifier));
     proxy.process_event(request.into()).await
 }

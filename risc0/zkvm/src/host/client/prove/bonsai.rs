@@ -20,6 +20,7 @@ use risc0_binfmt::MemoryImage;
 
 use super::Prover;
 use crate::{ExecutorEnv, ProverOpts, Receipt, VerifierContext};
+use tracing::debug;
 
 /// An implementation of a [Prover] that runs proof workloads via Bonsai.
 ///
@@ -50,7 +51,7 @@ impl Prover for BonsaiProver {
         _opts: &ProverOpts,
         image: MemoryImage,
     ) -> Result<Receipt> {
-        let client = Client::from_env()?;
+        let client = Client::from_env(crate::VERSION)?;
 
         // upload the image
         let image_id = hex::encode(image.compute_id());
@@ -66,6 +67,7 @@ impl Prover for BonsaiProver {
         // By doing so, we can return a session ID so that the prover can use it to
         // retrieve the receipt.
         let session = client.create_session(image_id, input_id)?;
+        debug!("Bonsai proving SessionID: {}", session.uuid);
 
         loop {
             // The session has already been started in the executor. Poll bonsai to check if
