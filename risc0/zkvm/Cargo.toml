@@ -37,6 +37,7 @@ hex = { version = "0.4.3", default-features = false, features = ["alloc"] }
 libm = "0.2"
 risc0-zkp = { workspace = true }
 risc0-zkvm-platform = { workspace = true }
+semver = { version = "1.0", default-features = false }
 serde = { version = "1.0", default-features = false, features = [
   "alloc",
   "derive",
@@ -79,7 +80,6 @@ typetag = { version = "0.2", optional = true }
 clap = { version = "4", features = ["derive"] }
 criterion = { version = "0.5", features = ["html_reports"] }
 human-repr = "1.0"
-tempfile = "3"
 tracing-forest = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
@@ -89,6 +89,7 @@ flate2 = "1.0"
 risc0-zkvm-methods = { path = "methods" }
 serial_test = "2.0"
 tar = "0.4"
+tempfile = "3"
 test-log = { version = "0.2", features = ["trace"] }
 
 [features]
@@ -104,7 +105,7 @@ client = [
 cuda = ["prove", "risc0-circuit-rv32im/cuda", "risc0-zkp/cuda"]
 dual = []
 metal = ["prove", "risc0-circuit-rv32im/metal", "risc0-zkp/metal"]
-default = ["client", "prove"]
+default = ["client"]
 disable-dev-mode = []
 profiler = [
   "dep:addr2line",

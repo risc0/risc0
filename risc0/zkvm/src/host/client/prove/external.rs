@@ -38,6 +38,14 @@ impl ExternalProver {
 }
 
 impl Prover for ExternalProver {
+    fn execute(&self, _env: ExecutorEnv<'_>, _image: MemoryImage) -> Result<()> {
+        // let client = ApiClient::new_sub_process(&self.r0vm_path)?;
+        // let segments_out = AssetRequest::Path(self.get_work_path());
+        // let info = client.execute(&env, image.into(), segments_out, callback)?;
+        // Ok(())
+        todo!()
+    }
+
     fn prove(
         &self,
         env: ExecutorEnv<'_>,
@@ -49,7 +57,7 @@ impl Prover for ExternalProver {
 
         let image_id = image.compute_id();
         let client = ApiClient::new_sub_process(&self.r0vm_path)?;
-        let receipt = client.prove(&env, opts.clone(), image.try_into()?)?;
+        let receipt = client.prove(&env, opts.clone(), image.into())?;
         receipt.verify_with_context(ctx, image_id)?;
 
         Ok(receipt)

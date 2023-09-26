@@ -38,7 +38,7 @@ struct Args {
 
     /// Specify the segment po2
     #[arg(short, long, default_value_t = 20)]
-    po2: usize,
+    po2: u32,
 
     #[arg(long, short)]
     quiet: bool,
@@ -110,7 +110,7 @@ fn main() {
     }
 }
 
-fn run_with_iterations(iterations: usize, po2: usize) {
+fn run_with_iterations(iterations: usize, po2: u32) {
     let mut cmd = Command::new(std::env::current_exe().unwrap());
     if iterations == 0 {
         cmd.arg("--quiet");
@@ -127,7 +127,7 @@ fn run_with_iterations(iterations: usize, po2: usize) {
 }
 
 #[tracing::instrument(skip_all)]
-fn top(prover: Rc<dyn ProverServer>, iterations: u64, po2: usize) -> (Session, Receipt) {
+fn top(prover: Rc<dyn ProverServer>, iterations: u64, po2: u32) -> (Session, Receipt) {
     let spec = SpecWithIters(BenchmarkSpec::SimpleLoop, iterations);
     let env = ExecutorEnv::builder()
         .add_input(&to_vec(&spec).unwrap())

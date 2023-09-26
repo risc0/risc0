@@ -77,6 +77,20 @@ pub trait Prover {
     /// Return a name for this [Prover].
     fn get_name(&self) -> String;
 
+    /// Execute the specified [MemoryImage].
+    ///
+    /// This only executes the program and does not generate a receipt.
+    fn execute(&self, env: ExecutorEnv<'_>, image: MemoryImage) -> Result<()>;
+
+    /// Execute the specified ELF binary.
+    ///
+    /// This only executes the program and does not generate a receipt.
+    fn execute_elf(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<()> {
+        let program = Program::load_elf(elf, GUEST_MAX_MEM as u32)?;
+        let image = MemoryImage::new(&program, PAGE_SIZE as u32)?;
+        self.execute(env, image)
+    }
+
     /// Prove the specified [MemoryImage].
     fn prove(
         &self,
@@ -143,6 +157,8 @@ pub fn default_prover() -> Rc<dyn Prover> {
     Rc::new(ExternalProver::new("ipc", get_r0vm_path()))
 }
 
-fn get_r0vm_path() -> PathBuf {
-    todo!()
+pub(crate) fn get_r0vm_path() -> PathBuf {
+    std::env::var("RISC0_SERVER_PATH")
+        .unwrap_or("r0vm".to_string())
+        .into()
 }

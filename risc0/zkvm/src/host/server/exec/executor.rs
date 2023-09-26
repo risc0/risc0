@@ -63,7 +63,7 @@ const BIGINT_CYCLES: usize = 9;
 
 /// The default segment limit specified in powers of 2 cycles. Choose this value
 /// to try and fit with 8GB of RAM.
-const DEFAULT_SEGMENT_LIMIT_PO2: usize = 20; // 1M cycles
+const DEFAULT_SEGMENT_LIMIT_PO2: u32 = 20; // 1M cycles
 
 // Capture the journal output in a buffer that we can access afterwards.
 #[derive(Clone, Default)]
@@ -145,7 +145,7 @@ impl<'a> Executor<'a> {
         obj_ctx: Option<ObjectContext>,
     ) -> Result<Self> {
         // Enforce segment_limit_po2 bounds
-        let segment_limit_po2 = env.segment_limit_po2.unwrap_or(DEFAULT_SEGMENT_LIMIT_PO2);
+        let segment_limit_po2 = env.segment_limit_po2.unwrap_or(DEFAULT_SEGMENT_LIMIT_PO2) as usize;
         if segment_limit_po2 < MIN_CYCLES_PO2 || segment_limit_po2 > MAX_CYCLES_PO2 {
             bail!("Invalid segment_limit_po2: {}", segment_limit_po2);
         }
@@ -298,7 +298,7 @@ impl<'a> Executor<'a> {
     /// This can be directly used by debuggers.
     pub fn step(&mut self) -> Result<Option<ExitCode>> {
         if let Some(limit) = self.env.session_limit {
-            if self.session_cycle() >= limit {
+            if self.session_cycle() >= (limit as usize) {
                 return Ok(Some(ExitCode::SessionLimit));
             }
         }

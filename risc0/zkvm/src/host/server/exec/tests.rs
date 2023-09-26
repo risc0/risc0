@@ -625,8 +625,8 @@ fn oom() {
 fn session_limit() {
     fn run_session(
         loop_cycles: u32,
-        segment_limit_po2: usize,
-        session_count_limit: usize,
+        segment_limit_po2: u32,
+        session_count_limit: u64,
     ) -> Result<Session> {
         let session_cycles = (1 << segment_limit_po2) * session_count_limit;
         let spec = &to_vec(&MultiTestSpec::BusyLoop {

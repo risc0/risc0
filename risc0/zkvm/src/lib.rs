@@ -25,6 +25,8 @@ mod host;
 pub mod serde;
 pub mod sha;
 
+use semver::Version;
+
 /// Re-exports for recursion
 #[cfg(not(target_os = "zkvm"))]
 #[cfg(feature = "prove")]
@@ -44,19 +46,6 @@ pub use risc0_zkvm_platform::{declare_syscall, memory::GUEST_MAX_MEM, PAGE_SIZE}
 #[cfg(feature = "profiler")]
 pub use self::host::server::exec::profiler::Profiler;
 #[cfg(not(target_os = "zkvm"))]
-#[cfg(feature = "client")]
-pub use self::host::{
-    api::client::Client as ApiClient,
-    api::Connector,
-    client::{
-        env::{ExecutorEnv, ExecutorEnvBuilder},
-        exec::TraceEvent,
-        prove::{
-            bonsai::BonsaiProver, default_prover, external::ExternalProver, Prover, ProverOpts,
-        },
-    },
-};
-#[cfg(not(target_os = "zkvm"))]
 #[cfg(feature = "prove")]
 pub use self::host::{
     api::server::Server as ApiServer,
@@ -68,6 +57,18 @@ pub use self::host::{
     },
 };
 #[cfg(not(target_os = "zkvm"))]
+#[cfg(feature = "client")]
+pub use self::host::{
+    api::{client::Client as ApiClient, Binary, Connector},
+    client::{
+        env::{ExecutorEnv, ExecutorEnvBuilder},
+        exec::TraceEvent,
+        prove::{
+            bonsai::BonsaiProver, default_prover, external::ExternalProver, Prover, ProverOpts,
+        },
+    },
+};
+#[cfg(not(target_os = "zkvm"))]
 pub use self::host::{
     control_id::POSEIDON_CONTROL_ID,
     receipt::{
@@ -76,6 +77,14 @@ pub use self::host::{
     },
     recursion::ALLOWED_IDS_ROOT,
 };
+
+/// Reports the current version of this crate.
+pub const VERSION: &str = env!("CARGO_PKG_VERSION");
+
+/// Reports the current version of this crate as represented by a [semver::Version].
+pub fn get_version() -> Result<Version, semver::Error> {
+    Version::parse(VERSION)
+}
 
 /// Align the given address `addr` upwards to alignment `align`.
 ///

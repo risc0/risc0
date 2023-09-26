@@ -34,6 +34,10 @@ impl LocalProver {
 }
 
 impl Prover for LocalProver {
+    fn execute(&self, _env: ExecutorEnv<'_>, _image: MemoryImage) -> Result<()> {
+        unimplemented!()
+    }
+
     fn prove(
         &self,
         env: ExecutorEnv<'_>,

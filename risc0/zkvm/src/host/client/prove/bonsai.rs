@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use core::time::Duration;
+use std::time::Duration;
 
 use anyhow::{anyhow, bail, Result};
 use bonsai_sdk::alpha::Client;
@@ -38,6 +38,10 @@ impl BonsaiProver {
 impl Prover for BonsaiProver {
     fn get_name(&self) -> String {
         self.name.clone()
+    }
+
+    fn execute(&self, _env: ExecutorEnv<'_>, _image: MemoryImage) -> Result<()> {
+        unimplemented!()
     }
 
     fn prove(

@@ -48,8 +48,8 @@ pub type TraceCallback<'a> = dyn FnMut(TraceEvent) -> Result<()> + 'a;
 #[derive(Clone, Default)]
 pub struct ExecutorEnv<'a> {
     pub(crate) env_vars: HashMap<String, String>,
-    pub(crate) segment_limit_po2: Option<usize>,
-    pub(crate) session_limit: Option<usize>,
+    pub(crate) segment_limit_po2: Option<u32>,
+    pub(crate) session_limit: Option<u64>,
     pub(crate) posix_io: Rc<RefCell<PosixIo<'a>>>,
     pub(crate) slice_io: Rc<RefCell<SliceIoTable<'a>>>,
     pub(crate) input: Vec<u8>,
@@ -99,7 +99,7 @@ impl<'a> ExecutorEnvBuilder<'a> {
     ///
     /// Given value must be between [risc0_zkp::MIN_CYCLES_PO2] and
     /// [risc0_zkp::MAX_CYCLES_PO2] (inclusive).
-    pub fn segment_limit_po2(&mut self, limit: usize) -> &mut Self {
+    pub fn segment_limit_po2(&mut self, limit: u32) -> &mut Self {
         self.inner.segment_limit_po2 = Some(limit);
         self
     }
@@ -116,7 +116,7 @@ impl<'a> ExecutorEnvBuilder<'a> {
     ///     .build()
     ///     .unwrap();
     /// ```
-    pub fn session_limit(&mut self, limit: Option<usize>) -> &mut Self {
+    pub fn session_limit(&mut self, limit: Option<u64>) -> &mut Self {
         self.inner.session_limit = limit;
         self
     }
