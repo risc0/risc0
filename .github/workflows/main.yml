@@ -60,6 +60,7 @@ jobs:
     env:
       CUDA_LIBRARY_PATH: /usr/lib/cuda
       FEATURE: ${{ matrix.feature }}
+      RISC0_SERVER_PATH: ${{ github.workspace }}/target/release/r0vm
       RUST_BACKTRACE: full
       RUSTC_WRAPPER: sccache
     steps:
@@ -82,6 +83,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: cargo xtask install
       - run: cargo xtask gen-receipt
+      - run: cargo build --release -F $FEATURE -p risc0-r0vm
       - run: cargo test -F $FEATURE -F profiler
       - run: cargo test --workspace -F $FEATURE --tests -- --ignored --test-threads 1
       - run: cargo test -F $FEATURE -F disable-dev-mode -p risc0-r0vm
@@ -121,6 +123,7 @@ jobs:
     env:
       CUDA_LIBRARY_PATH: /usr/lib/cuda
       FEATURE: ${{ matrix.feature }}
+      RISC0_SERVER_PATH: ${{ github.workspace }}/target/release/r0vm
       RUST_BACKTRACE: full
       RUSTC_WRAPPER: sccache
     steps:
@@ -140,6 +143,7 @@ jobs:
       - run: cargo run --bin cargo-risczero -- risczero install
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: cargo build --release -F $FEATURE -p risc0-r0vm
       - run: cargo test -F $FEATURE
         working-directory: examples
 
