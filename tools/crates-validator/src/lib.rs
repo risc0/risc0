@@ -17,16 +17,22 @@ use std::{
     collections::BTreeMap,
     fs::File,
     io::{BufRead, BufReader, Write},
-    path::{Path, PathBuf},
+    path::{self, Path, PathBuf},
     process::Command,
+    vec,
 };
 
 use anyhow::{bail, Context, Result};
 use handlebars::Handlebars;
+use profiles::{Profile, Profiles};
+use semver::Version;
 use serde::{Deserialize, Serialize};
 use tempfile::tempdir;
 use tracing::{debug, error, info};
 
+use crate::profiles::Repo;
+
+pub mod gen_profiles;
 pub mod profiles;
 
 /// Validation Results fields
@@ -60,7 +66,7 @@ pub struct CrateProfile {
     pub name: String,
 
     /// Crate version
-    pub version: Option<String>,
+    pub version: String,
 
     /// Does the crate need 'std' feature
     pub std: bool,
@@ -108,16 +114,18 @@ pub struct CrateProfile {
 /// Defines the global variables for a given crates testing run.
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ProfileConfig {
-    /// Define which Github branch should be used for templates and crate
-    /// imports
-    pub risc0_gh_branch: Option<String>,
-    /// Directory where risc0 is for templates and crate imports
-    pub risc0_path: Option<String>,
-    /// Enables `RISC0_EXPERIMENTAL_PREFLIGHT`
-    #[serde(default = "bool::default")]
-    pub fast_mode: bool,
-    /// Array of [CrateProfile]
-    pub profiles: RefCell<Vec<CrateProfile>>,
+    #[serde(flatten)]
+    pub profiles: Profiles, // TODO(Cardosaum): Refactor
+                            // /// Define which Github branch should be used for templates and crate
+                            // /// imports
+                            // pub risc0_gh_branch: Option<String>,
+                            // /// Directory where risc0 is for templates and crate imports
+                            // pub risc0_path: Option<String>,
+                            // /// Enables `RISC0_EXPERIMENTAL_PREFLIGHT`
+                            // #[serde(default = "bool::default")]
+                            // pub fast_mode: bool,
+                            // /// Array of [CrateProfile]
+                            // pub profiles: RefCell<Vec<CrateProfile>>,
 }
 
 const CARGO_TOML_METHODS_TMP: &str = r#"
@@ -169,7 +177,7 @@ crossbeam-channel = { git = "https://github.com/risc0/crossbeam", rev = "b25eb50
 const MAX_ERROR_LINES: u64 = 200;
 
 pub struct Validator {
-    pub context: ProfileConfig,
+    // pub context: ProfileConfig,
     proj_out_dir: PathBuf,
 }
 
@@ -183,7 +191,7 @@ pub enum RunStatus {
 
 impl Validator {
     /// Uses [cargo-risczero] to generate a new base project
-    fn gen_initial_project(&self, profile: &CrateProfile) -> Result<PathBuf> {
+    fn gen_initial_project(&self, profile: &Profile) -> Result<PathBuf> {
         let project_name = "template_project";
         let output_path = self.proj_out_dir.join(project_name);
 
@@ -194,18 +202,16 @@ impl Validator {
 
         debug!("generating {}", profile.name);
 
-        let filtered_env: std::collections::HashMap<String, String> = std::env::vars()
-            .filter(|(k, _)| {
-                k == "TERM"
-                    || k == "TZ"
-                    || k == "USER"
-                    || k == "LANG"
-                    || k == "PATH"
-                    || k == "RUSTUP_HOME"
-                    || k == "RUST_VERSION"
-                    || k == "CARGO_HOME"
-            })
-            .collect();
+        let filtered_env = filter_flags(&[
+            "TERM",
+            "TZ",
+            "USER",
+            "LANG",
+            "PATH",
+            "RUSTUP_HOME",
+            "RUST_VERSION",
+            "CARGO_HOME",
+        ]);
 
         let mut cmd = std::process::Command::new("cargo");
         cmd.arg("risczero");
@@ -217,37 +223,29 @@ impl Validator {
         cmd.env_clear();
         cmd.envs(&filtered_env);
 
-        if profile.std {
+        if profile.settings.std {
             cmd.arg("--std");
         }
 
-        match (&self.context.risc0_path, &self.context.risc0_gh_branch) {
-            (None, None) => {
-                bail!("Profile must assign either 'risc0_template_path' or 'risc0_gh_branch'")
-            }
-            (Some(..), Some(..)) => bail!(
-                "Profile assigns both 'risc0_template_path' and 'risc0_gh_branch' pick just one"
-            ),
-            (Some(r0_path), None) => {
-                let r0_template_path = Path::new(r0_path).join("templates").join("rust-starter");
-                if !r0_template_path.exists() {
-                    bail!(
-                        "Failed to find {} on disk",
-                        r0_template_path.to_string_lossy()
-                    );
-                }
-                cmd.arg("--template");
-                cmd.arg(r0_template_path);
-                cmd.arg("--templ-subdir");
-                cmd.arg("");
-                cmd.arg("--path");
-                cmd.arg(r0_path);
-            }
-            (None, Some(branch)) => {
+        match &profile.settings.repo {
+            None => bail!("Profile must assign 'repo'"),
+            Some(Repo::Git(branch)) => {
                 cmd.arg("--branch");
                 cmd.arg(branch);
             }
-        };
+            Some(Repo::Local(path)) => {
+                let template_path = Path::new(path).join("templates").join("rust-starter");
+                if !template_path.exists() {
+                    bail!("Failed to find {} on disk", template_path.to_string_lossy());
+                }
+                cmd.arg("--template");
+                cmd.arg(template_path);
+                cmd.arg("--templ-subdir");
+                cmd.arg("");
+                cmd.arg("--path");
+                cmd.arg(path);
+            }
+        }
 
         debug!(
             "running: '{}{}'",
@@ -283,7 +281,12 @@ impl Validator {
     }
 
     /// Customizes the template with crate profile specifics
-    fn customize_guest(&self, profile: &CrateProfile, working_dir: &Path) -> Result<()> {
+    fn customize_guest(
+        &self,
+        profile: &Profile,
+        version: &Version,
+        working_dir: &Path,
+    ) -> Result<()> {
         let methods_dir = working_dir.join("methods");
         if !methods_dir.exists() {
             bail!(
@@ -313,12 +316,14 @@ impl Validator {
         let methods_toml = methods_dir.join("Cargo.toml");
 
         let mut vars = BTreeMap::new();
-        let risc0_build = if let Some(gh_branch) = &self.context.risc0_gh_branch {
-            format!("git = \"https://github.com/risc0/risc0.git\", branch = \"{gh_branch}\"")
-        } else if let Some(r0_path) = &self.context.risc0_path {
-            format!("path = \"{r0_path}/risc0/build\"")
-        } else {
-            bail!("Unsupported, missing risc0_path or risc0_gh_branch");
+        let risc0_build = match &profile.settings.repo {
+            None => bail!("Profile must assign 'repo'"),
+            Some(Repo::Git(branch)) => {
+                format!("git = \"https://github.com/risc0/risc0.git\", branch = \"{branch}\"")
+            }
+            Some(Repo::Local(path)) => {
+                format!("path = \"{path}/risc0/build\"")
+            }
         };
 
         vars.insert("risc0_build", risc0_build.as_str());
@@ -328,28 +333,26 @@ impl Validator {
         // Generate the methods/guest/Cargo.toml file
 
         let mut vars = BTreeMap::new();
-        let risc0_feature_std = if profile.std {
+        let risc0_feature_std = if profile.settings.std {
             ", features = ['std']"
         } else {
             ""
         };
 
-        let risc0_zkvm = if let Some(gh_branch) = &self.context.risc0_gh_branch {
-            format!("git = \"https://github.com/risc0/risc0.git\", branch = \"{gh_branch}\"")
-        } else if let Some(r0_path) = &self.context.risc0_path {
-            format!("path = \"{r0_path}/risc0/zkvm\"")
-        } else {
-            bail!("Unsupported, missing risc0_path or risc0_gh_branch");
+        let risc0_zkvm = match &profile.settings.repo {
+            None => bail!("Profile must assign 'repo'"),
+            Some(Repo::Git(branch)) => {
+                format!("git = \"https://github.com/risc0/risc0.git\", branch = \"{branch}\"")
+            }
+            Some(Repo::Local(path)) => format!("path = \"{path}/risc0/zkvm\""),
         };
 
-        let mut crate_line = format!(
-            "{} = {{ version = \"{}\" }}",
-            profile.name,
-            profile.version.as_ref().unwrap()
-        );
-        if profile.crossbeam_patch {
-            crate_line += CROSSBEAM_PATCH;
-        }
+        let mut crate_line = format!("{} = {{ version = \"{version}\" }}", profile.name,);
+
+        profile.settings.patch.as_ref().and_then(|patch| {
+            crate_line += patch;
+            Some(())
+        });
 
         vars.insert("risc0_feature_std", risc0_feature_std);
         vars.insert("crate_line", &crate_line);
@@ -360,10 +363,17 @@ impl Validator {
         // Generate the main.rs file
 
         let mut vars = BTreeMap::new();
-        vars.insert("no_std_line", if profile.std { "" } else { "#![no_std]" });
+        vars.insert(
+            "no_std_line",
+            if profile.settings.std {
+                ""
+            } else {
+                "#![no_std]"
+            },
+        );
         vars.insert(
             "use_lines",
-            if let Some(import_str) = &profile.import_str {
+            if let Some(import_str) = &profile.settings.import_str {
                 import_str
             } else {
                 ""
@@ -371,7 +381,7 @@ impl Validator {
         );
         vars.insert(
             "main_body",
-            if let Some(main_body) = &profile.custom_main {
+            if let Some(main_body) = &profile.settings.custom_main {
                 main_body
             } else {
                 ""
@@ -384,7 +394,7 @@ impl Validator {
     }
 
     // Builds the template project
-    fn build_project(&self, profile: &CrateProfile, working_dir: &Path) -> Result<(bool, String)> {
+    fn build_project(&self, profile: &Profile, working_dir: &Path) -> Result<(bool, String)> {
         debug!(
             "building {} - {}",
             profile.name,
@@ -396,14 +406,10 @@ impl Validator {
         // RUST_TOOLCHAIN env vars, here we strip out all the extra env vars so
         // the cargo subcommands will correctly dispatch to rustup to pick the
         // target project's rust-toolchain.toml.
-        let mut filtered_env: std::collections::HashMap<String, String> = std::env::vars()
-            .filter(|(k, _)| {
-                k == "TERM" || k == "TZ" || k == "CC" || k == "CXX" || k == "LANG" || k == "PATH"
-            })
-            .collect();
+        let mut filtered_env = filter_flags(&["TERM", "TZ", "CC", "CXX", "LANG", "PATH"]);
 
         // TODO: support GCC
-        if profile.inject_cc_flags {
+        if profile.settings.inject_cc_flags {
             filtered_env.insert("CC".to_string(), "clang".to_string());
             filtered_env.insert(
                 "CFLAGS_riscv32im_risc0_zkvm_elf".to_string(),
@@ -425,7 +431,7 @@ impl Validator {
             .output()?;
 
         let status = output.status;
-        let res = if status.success() || (!status.success() && profile.should_fail) {
+        let res = if status.success() || (!status.success() && profile.settings.should_fail) {
             info!("{} - build - SUCCESS", profile.name);
             (true, String::new())
         } else {
@@ -456,7 +462,7 @@ impl Validator {
     /// Run the prover a given [CrateProfile]
     ///
     /// Requires that the build step has been run before hand
-    fn run_prover(&self, profile: &CrateProfile, working_dir: &Path) -> Result<bool> {
+    fn run_prover(&self, profile: &Profile, working_dir: &Path) -> Result<bool> {
         let cmd = working_dir.join("target/debug/host");
         if !cmd.exists() {
             bail!("Could not find 'host' binary in working_dir build dir, did the build run?");
@@ -465,15 +471,15 @@ impl Validator {
         info!("running: {}", cmd.display());
         let mut cmd = Command::new(cmd);
         let mut cmd = cmd.current_dir(working_dir);
-        if self.context.fast_mode {
+        if profile.settings.fast_mode {
             cmd = cmd.env("RISC0_EXPERIMENTAL_PREFLIGHT", "1")
         }
 
         let output = cmd.output()?;
 
         let status = output.status;
-        let res = if (status.success() && !profile.should_fail)
-            || (!status.success() && profile.should_fail)
+        let res = if (status.success() && !profile.settings.should_fail)
+            || (!status.success() && profile.settings.should_fail)
         {
             info!("{} - run - SUCCESS", profile.name);
             true
@@ -489,7 +495,7 @@ impl Validator {
     }
 
     /// Run a given profile through the set of tests
-    fn run(&self, profile: &mut CrateProfile) -> Result<()> {
+    fn run(&self, profile: &mut Profile) -> Result<Vec<(String, ValidationResults)>> {
         // TODO(cardosaum): Replace logic with `skip_crates` module
         // if profiles::SKIP_CRATES.contains(&profile.name.as_str()) {
         //     warn!("Skipping {} due to SKIP_CRATES", profile.name);
@@ -497,55 +503,76 @@ impl Validator {
         //     return Ok(());
         // }
         let working_dir = self.gen_initial_project(profile)?;
-        self.customize_guest(profile, &working_dir)?;
-        let (build_success, build_errors) = self.build_project(profile, &working_dir)?;
-        if !build_success {
-            profile.results = Some(ValidationResults {
-                status: RunStatus::BuildFail,
-                build_errors: Some(build_errors),
-            });
-            return Ok(());
-        }
-        if profile.run_prover && !self.run_prover(profile, &working_dir)? {
-            profile.results = Some(ValidationResults::from(RunStatus::RunFail));
-            return Ok(());
+        let mut results = Vec::new();
+        for version in profile
+            .settings
+            .versions
+            .as_ref()
+            .expect("Missing versions")
+        {
+            self.customize_guest(profile, version, &working_dir)?;
+            let (build_success, build_errors) = self.build_project(profile, &working_dir)?;
+            if !build_success {
+                results.push((
+                    profile.name.clone(),
+                    ValidationResults {
+                        status: RunStatus::BuildFail,
+                        build_errors: Some(build_errors),
+                    },
+                ));
+                continue;
+            }
+            if profile.settings.run_prover && !self.run_prover(profile, &working_dir)? {
+                results.push((
+                    profile.name.clone(),
+                    ValidationResults::from(RunStatus::RunFail),
+                ));
+                continue;
+            }
+            results.push((
+                profile.name.clone(),
+                ValidationResults::from(RunStatus::Success),
+            ));
         }
 
-        profile.results = Some(ValidationResults::from(RunStatus::Success));
-        Ok(())
+        Ok(results)
     }
 
-    /// Run a single profile in the config by `name`
-    pub fn run_single(&self, name: &str) -> Result<()> {
-        for profile in self.context.profiles.borrow_mut().iter_mut() {
+    // Run a single profile in the config by `name`
+    pub fn run_single(
+        &self,
+        name: &str,
+        profiles: &mut Profiles,
+    ) -> Result<Vec<(String, ValidationResults)>> {
+        for profile in profiles.iter_mut() {
             if profile.name == name {
-                self.run(profile)?;
-                return Ok(());
+                return self.run(profile);
             }
         }
 
         bail!("Failed to find crate profile: {}", name)
     }
 
-    /// Run all profiles in config
-    pub fn run_all(&self) -> Result<()> {
-        for profile in self.context.profiles.borrow_mut().iter_mut() {
-            self.run(profile)?;
+    // Run all profiles in config
+    pub fn run_all(&self, profiles: &mut Profiles) -> Result<Vec<(String, ValidationResults)>> {
+        let mut results = vec![];
+        for profile in profiles.iter_mut() {
+            results.push(self.run(profile)?);
         }
 
-        Ok(())
+        Ok(results.into_iter().flatten().collect())
     }
 }
 
 pub struct ValidatorBuilder {
-    context: ProfileConfig,
+    // context: ProfileConfig,
     out_dir: Option<PathBuf>,
 }
 
 impl ValidatorBuilder {
-    pub fn new(context: ProfileConfig) -> Self {
+    pub fn new(/* _context: ProfileConfig */) -> Self {
         Self {
-            context,
+            // context,
             out_dir: None,
         }
     }
@@ -567,8 +594,14 @@ impl ValidatorBuilder {
         };
 
         Ok(Validator {
-            context: self.context,
+            // context: self.context,
             proj_out_dir: out_dir,
         })
     }
+}
+
+fn filter_flags(flags: &[&str]) -> BTreeMap<String, String> {
+    std::env::vars()
+        .filter(|(k, _)| flags.contains(&k.as_str()))
+        .collect()
 }

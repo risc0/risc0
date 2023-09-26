@@ -17,7 +17,10 @@ use std::{fs::File, io::BufReader, path::PathBuf};
 use anyhow::{Context, Result};
 use clap::Parser;
 use colored::Colorize;
-use risc0_crates_validator::{ProfileConfig, RunStatus, ValidatorBuilder};
+use risc0_crates_validator::{
+    profiles::{Profiles, Repo},
+    ProfileConfig, RunStatus, ValidatorBuilder,
+};
 use tracing::info;
 use tracing_subscriber::EnvFilter;
 
@@ -54,34 +57,32 @@ fn main() -> Result<()> {
 
     let file = File::open(args.profiles_path).context("Failed to open profiles_path file")?;
     let reader = BufReader::new(file);
-    let context: ProfileConfig = serde_json::from_reader(reader)?;
+    let mut profiles: Profiles = serde_yaml::from_reader(reader)?;
+    profiles.iter_mut().for_each(|p| {
+        if p.settings.repo.is_none() {
+            p.settings.repo = Some(Repo::Local("/Users/mcs/git/github/risc0/risc0/".into()));
+        }
+    });
 
-    info!(
-        "Starting run of {} profiles...",
-        context.profiles.borrow().len()
-    );
-    let validator = ValidatorBuilder::new(context)
+    info!("Starting run of {} profiles...", profiles.len());
+    let validator = ValidatorBuilder::new(/* context */)
         .out_dir(args.out_dir)
         .build()?;
 
-    if let Some(crate_name) = args.crate_name {
-        validator.run_single(&crate_name)?;
+    let results = if let Some(crate_name) = args.crate_name {
+        validator.run_single(&crate_name, &mut profiles)?
     } else {
-        validator.run_all()?;
-    }
+        validator.run_all(&mut profiles)?
+    };
 
     info!("Test results:");
     colored::control::set_override(true);
     let mut successful = 0;
-    for (idx, profile) in validator.context.profiles.borrow().iter().enumerate() {
-        let result = profile
-            .results
-            .as_ref()
-            .context(format!("crate {} does not have results", profile.name))?;
+    for (idx, (name, result)) in results.iter().enumerate() {
         let result_str = result.status.as_ref();
         info!(
             "{idx}: {} - {}",
-            profile.name,
+            name,
             match result.status {
                 RunStatus::Success => {
                     successful += 1;
@@ -93,18 +94,14 @@ fn main() -> Result<()> {
             }
         );
     }
+
     colored::control::unset_override();
-    info!(
-        "{}/{} successful",
-        successful,
-        validator.context.profiles.borrow().len()
-    );
+    info!("{}/{} successful", successful, results.len());
 
     if let Some(out_path) = args.json_output {
         std::fs::write(
             out_path,
-            serde_json::to_string(&validator.context)
-                .context("Failed to serialize Validator context")?,
+            serde_json::to_string(&results).context("Failed to serialize Validator context")?,
         )
         .context("Failed to write output json file")?;
     }
