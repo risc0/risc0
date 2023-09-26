@@ -1,22 +1,5 @@
 name: rustup toolchain install
 description: Install the Rust toolchain
-
-inputs:
-  toolchain:
-    description: 'Identifier of the rust toolchain to install'
-    required: false
-    default: 'stable'
-    type: string
-  targets:
-    description: 'Rust compiler targets to install, as a space-delimited list'
-    required: false
-    default: ''
-    type: string
-  components:
-    description: 'List of components to install via rustup, as a space-delimited list'
-    required: false
-    default: ''
-    type: string
 runs:
   using: composite
   steps:
@@ -27,15 +10,7 @@ runs:
         fi
       shell: bash
 
-    - run: rustup default ${{ inputs.toolchain }}
-      shell: bash
-
-    - if: ${{ inputs.targets != '' }}
-      run: rustup target add ${{ inputs.targets }}
-      shell: bash
-
-    - if: ${{ inputs.components != '' }}
-      run: rustup component add ${{ inputs.components }}
+    - run: rustup default stable
       shell: bash
 
     - run: echo CARGO_TERM_COLOR=always >> $GITHUB_ENV
