@@ -1017,6 +1017,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "69dde51e8fef5e12c1d65e0929b03d66e4c0c18282bc30ed2ca050ad6f44dd82"
 
 [[package]]
+name = "docker-generate"
+version = "0.1.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ccf673e0848ef09fa4aeeba78e681cf651c0c7d35f76ee38cec8e55bc32fa111"
+
+[[package]]
 name = "downcast-rs"
 version = "1.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3275,12 +3281,15 @@ dependencies = [
 name = "risc0-build"
 version = "0.18.0"
 dependencies = [
+ "anyhow",
  "cargo_metadata",
+ "docker-generate",
  "risc0-binfmt",
  "risc0-zkp",
  "risc0-zkvm-platform",
  "serde",
  "serde_json",
+ "tempfile",
 ]
 
 [[package]]

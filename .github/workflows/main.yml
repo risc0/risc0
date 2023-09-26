@@ -218,4 +218,4 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 18
-      - run: cargo test -p cargo-risczero -F docker
+      - run: cargo test -p risc0-build

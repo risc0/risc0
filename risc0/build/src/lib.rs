@@ -31,6 +31,8 @@ use risc0_binfmt::{MemoryImage, Program};
 use risc0_zkp::core::digest::{Digest, DIGEST_WORDS};
 use risc0_zkvm_platform::{memory, PAGE_SIZE};
 use serde::Deserialize;
+mod docker;
+pub use docker::docker_build;
 
 const RUSTUP_TOOLCHAIN_NAME: &str = "risc0";
 
