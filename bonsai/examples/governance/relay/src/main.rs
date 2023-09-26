@@ -254,7 +254,7 @@ async fn upload_images(
         let bonsai_client = get_client_from_parts(
             bonsai_api_url.to_string(),
             bonsai_api_key.to_string(),
-            risc0_zkvm::get_version(),
+            risc0_zkvm::VERSION,
         )
         .await?;
         let img_id = image_id.clone();

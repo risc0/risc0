@@ -263,7 +263,7 @@ impl Client {
     ///
     /// ```
     /// use bonsai_sdk::alpha as bonsai_sdk;
-    /// bonsai_sdk::from_env(risc0_zkvm::get_version())
+    /// bonsai_sdk::from_env(risc0_zkvm::VERSION)
     ///     .expect("Failed to construct sdk client");
     /// ```
     pub fn from_env(risc0_version: &str) -> Result<Self, SdkErr> {
@@ -287,7 +287,7 @@ impl Client {
     /// use bonsai_sdk::alpha as bonsai_sdk;
     /// let url = "http://api.bonsai.xyz".to_string();
     /// let api_key = "my_secret_key".to_string();
-    /// bonsai_sdk::from_parts(url, api_key, risc0_zkvm::get_version())
+    /// bonsai_sdk::from_parts(url, api_key, risc0_zkvm::VERSION)
     ///     .expect("Failed to construct sdk client");
     /// ```
     pub fn from_parts(url: String, key: String, risc0_version: &str) -> Result<Self, SdkErr> {

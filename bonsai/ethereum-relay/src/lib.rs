@@ -80,7 +80,7 @@ impl Relayer {
         let bonsai_client = get_client_from_parts(
             self.bonsai_api_url.clone(),
             self.bonsai_api_key.clone(),
-            risc0_zkvm::get_version(),
+            risc0_zkvm::VERSION,
         )
         .await
         .context("Failed to create Bonsai client.")?;

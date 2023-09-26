@@ -40,7 +40,7 @@ pub(crate) mod tests {
         let (proof_id, server) = get_test_bonsai_server().await;
 
         let bonsai_client =
-            get_client_from_parts(server.uri(), String::default(), risc0_zkvm::get_version())
+            get_client_from_parts(server.uri(), String::default(), risc0_zkvm::VERSION)
                 .await
                 .unwrap();
         let storage = InMemoryStorage::new();
@@ -116,7 +116,7 @@ pub(crate) mod tests {
             .expect("deployment should succeed");
 
         let bonsai_client =
-            get_client_from_parts(server.uri(), String::default(), risc0_zkvm::get_version())
+            get_client_from_parts(server.uri(), String::default(), risc0_zkvm::VERSION)
                 .await
                 .unwrap();
         let storage = InMemoryStorage::new();

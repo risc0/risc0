@@ -53,8 +53,8 @@ fn get_digest(elf: &[u8]) -> Result<String> {
 }
 
 pub fn prove_alpha(elf: &[u8], input: Vec<u8>) -> Result<Output> {
-    let client = Client::from_env(risc0_zkvm::get_version())
-        .context("Failed to create client from env var")?;
+    let client =
+        Client::from_env(risc0_zkvm::VERSION).context("Failed to create client from env var")?;
 
     let img_id = get_digest(elf).context("Failed to generate elf memory image")?;
 

@@ -103,12 +103,9 @@ mod test {
         bonsai_api_key: String,
         method: &[u8],
     ) -> Result<()> {
-        let client = bonsai_sdk::get_client_from_parts(
-            bonsai_api_url,
-            bonsai_api_key,
-            risc0_zkvm::get_version(),
-        )
-        .await?;
+        let client =
+            bonsai_sdk::get_client_from_parts(bonsai_api_url, bonsai_api_key, risc0_zkvm::VERSION)
+                .await?;
 
         // create the memoryImg, upload it and return the imageId
         let img_id = {
