@@ -167,12 +167,6 @@ pub fn main() {
 
 "#;
 
-const CROSSBEAM_PATCH: &str = r#"
-[patch.crates-io]
-crossbeam = { git = "https://github.com/risc0/crossbeam", rev = "b25eb50f8c193f36dacb6739692261ea96827bb7" }
-crossbeam-utils = { git = "https://github.com/risc0/crossbeam", rev = "b25eb50f8c193f36dacb6739692261ea96827bb7" }
-crossbeam-channel = { git = "https://github.com/risc0/crossbeam", rev = "b25eb50f8c193f36dacb6739692261ea96827bb7" }"#;
-
 const MAX_ERROR_LINES: u64 = 200;
 
 pub struct Validator {
@@ -348,10 +342,9 @@ impl Validator {
 
         let mut crate_line = format!("{} = {{ version = \"{version}\" }}", profile.name,);
 
-        profile.settings.patch.as_ref().and_then(|patch| {
+        if let Some(patch) = &profile.settings.patch {
             crate_line += patch;
-            Some(())
-        });
+        }
 
         vars.insert("risc0_feature_std", risc0_feature_std);
         vars.insert("crate_line", &crate_line);
@@ -563,19 +556,13 @@ impl Validator {
     }
 }
 
+#[derive(Default)]
 pub struct ValidatorBuilder {
     // context: ProfileConfig,
     out_dir: Option<PathBuf>,
 }
 
 impl ValidatorBuilder {
-    pub fn new(/* _context: ProfileConfig */) -> Self {
-        Self {
-            // context,
-            out_dir: None,
-        }
-    }
-
     pub fn out_dir_val(self, out_dir: PathBuf) -> Self {
         self.out_dir(Some(out_dir))
     }

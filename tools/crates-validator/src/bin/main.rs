@@ -65,9 +65,7 @@ fn main() -> Result<()> {
     });
 
     info!("Starting run of {} profiles...", profiles.len());
-    let validator = ValidatorBuilder::new(/* context */)
-        .out_dir(args.out_dir)
-        .build()?;
+    let validator = ValidatorBuilder::default().out_dir(args.out_dir).build()?;
 
     let results = if let Some(crate_name) = args.crate_name {
         validator.run_single(&crate_name, &mut profiles)?
