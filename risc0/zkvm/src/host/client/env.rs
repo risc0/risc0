@@ -151,7 +151,7 @@ impl<'a> ExecutorEnvBuilder<'a> {
     /// # use risc0_zkvm::ExecutorEnv;
     ///
     /// let env = ExecutorEnv::builder()
-    ///     .args(vec!["grep".to_string(), "-c".to_string(), "foo".to_string(), "-".to_string()])
+    ///     .args(&["grep".to_string(), "-c".to_string(), "foo".to_string(), "-".to_string()])
     ///     .build()
     ///     .unwrap();
     /// ```
