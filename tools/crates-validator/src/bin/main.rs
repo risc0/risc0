@@ -18,8 +18,8 @@ use anyhow::{Context, Result};
 use clap::Parser;
 use colored::Colorize;
 use risc0_crates_validator::{
-    profiles::{Profiles, Repo},
-    ProfileConfig, RunStatus, ValidatorBuilder,
+    parser::types::{Profiles, Repo},
+    RunStatus, ValidatorBuilder,
 };
 use tracing::info;
 use tracing_subscriber::EnvFilter;

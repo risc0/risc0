@@ -1,13 +1,14 @@
 use std::fmt::Display;
 
-use super::types::*;
-
+use types::{Profiles, Merge, Exclude, IsValid};
 use anyhow::{ensure, Result};
 
 mod batch;
 mod individual;
+mod constants;
 mod skip_crates;
 mod utils;
+pub mod types;
 
 #[cfg(test)]
 mod test_helpers;
@@ -42,7 +43,7 @@ impl Parser {
 mod tests {
     use super::*;
 
-    use crate::profiles::PATH_YAML_CONFIG;
+    use constants::PATH_YAML_CONFIG;
 
     #[test]
     fn can_parse_yaml() {

@@ -12,25 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+pub mod parser;
+
 use std::{
-    cell::RefCell,
     collections::BTreeMap,
     fs::File,
     io::{BufRead, BufReader, Write},
-    path::{self, Path, PathBuf},
+    path::{Path, PathBuf},
     process::Command,
     vec,
 };
 
 use anyhow::{bail, Context, Result};
 use handlebars::Handlebars;
-use profiles::{Profile, Profiles};
+use parser::types::{Profile, Profiles, Repo};
 use semver::Version;
 use serde::{Deserialize, Serialize};
 use tempfile::tempdir;
 use tracing::{debug, error, info};
-
-use crate::profiles::Repo;
 
 pub mod gen_profiles;
 pub mod profiles;

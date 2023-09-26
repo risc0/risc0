@@ -1,8 +1,4 @@
-use crate::profiles::CrateName;
-
-use super::Profile;
-use super::ProfileSettings;
-use super::Profiles;
+use crate::parser::types::{CrateName, Profile, ProfileSettings, Profiles};
 
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub(crate) struct Batches {
@@ -41,9 +37,9 @@ mod tests {
     use std::collections::HashSet;
 
     use super::*;
-    use crate::profiles::parser::test_helpers::profile_with_settings;
-    use crate::profiles::parser::utils;
-    use crate::profiles::{Merge, PATH_YAML_CONFIG};
+    use crate::parser::{
+        constants::PATH_YAML_CONFIG, test_helpers::profile_with_settings, types::Merge, utils,
+    };
 
     #[test]
     fn can_parse_file() {
@@ -85,7 +81,7 @@ mod tests {
                 r#"[patch.crates-io]
 foo = { git = 'git://github.com/foo/foo.git' }
 "#
-                    .into(),
+                .into(),
             ),
             ..Default::default()
         };

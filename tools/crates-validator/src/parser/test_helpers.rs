@@ -1,4 +1,4 @@
-use crate::profiles::{Profile, ProfileSettings};
+use crate::parser::types::{Profile, ProfileSettings};
 
 // Replace this by using `Profile::from` for a `impl ToString` type
 pub(crate) fn profile_from_name(name: impl ToString) -> Profile {

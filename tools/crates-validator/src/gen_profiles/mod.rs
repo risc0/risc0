@@ -7,7 +7,10 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use crate::profiles::{parser::Parser, Profile, ProfileSettings, Profiles};
+use crate::parser::{
+    types::{Profile, ProfileSettings, Profiles},
+    Parser,
+};
 
 use anyhow::{Context, Result};
 use db_dump::{

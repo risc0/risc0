@@ -36,6 +36,11 @@ impl TryFrom<String> for Profile {
             settings: ProfileSettings::default(),
         };
         ensure!(profile.validate().is_ok(), "Invalid profile: {:?}", profile);
+        ensure!(
+            profile.settings.validate().is_ok(),
+            "Invalid profile settings: {:?}",
+            profile.settings
+        );
         Ok(profile)
     }
 }

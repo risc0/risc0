@@ -1,7 +1,4 @@
-use super::CrateNames;
-use super::Profile;
-use super::ProfileSettings;
-use super::Profiles;
+use crate::parser::types::{CrateNames, Profile, ProfileSettings, Profiles};
 
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "kebab-case")]
@@ -25,10 +22,7 @@ impl From<SkipCrates> for Profiles {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::profiles::{
-        parser::{test_helpers::profile_from_name, utils},
-        PATH_YAML_CONFIG,
-    };
+    use crate::parser::{constants::PATH_YAML_CONFIG, test_helpers::profile_from_name, utils};
 
     #[test]
     fn can_parse_file() {
