@@ -1,3 +1,4 @@
+use crate::*;
 use crate::{CrateName, Profile, ProfileSettings, Profiles};
 
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
@@ -12,21 +13,29 @@ struct BatchConfig {
     settings: ProfileSettings,
 }
 
-impl From<Batches> for Profiles {
-    fn from(value: Batches) -> Self {
-        value.batch.into_iter().flat_map(Profiles::from).collect()
+impl TryFrom<Batches> for Profiles {
+    type Error = anyhow::Error;
+    fn try_from(value: Batches) -> Result<Self> {
+        value
+            .batch
+            .into_iter()
+            .map(Profiles::try_from)
+            .collect::<Result<Vec<Profiles>>>()?
+            .into_iter()
+            .flatten()
+            .map(Ok)
+            .collect::<Result<Self>>()
     }
 }
 
-impl From<BatchConfig> for Profiles {
-    fn from(value: BatchConfig) -> Self {
+impl TryFrom<BatchConfig> for Profiles {
+    type Error = anyhow::Error;
+    fn try_from(value: BatchConfig) -> Result<Self> {
         value
             .crates
             .into_iter()
-            .map(|c| Profile {
-                name: c,
-                settings: value.settings.clone(),
-            })
+            .map(|c| (c, value.settings.clone()))
+            .map(Profile::try_from)
             .collect()
     }
 }
@@ -44,7 +53,7 @@ mod tests {
     fn can_parse_file() {
         let config = utils::read_profile(PATH_YAML_CONFIG).unwrap();
         let batches = serde_yaml::from_str::<Batches>(&config).unwrap();
-        let profiles: Profiles = batches.into();
+        let profiles: Profiles = batches.try_into().unwrap();
         assert!(!profiles.is_empty());
     }
 
@@ -113,7 +122,7 @@ bar = { git = 'git://github.com/bar/bar.git' }
             .collect();
 
         let batches = serde_yaml::from_str::<Batches>(config).unwrap();
-        let profiles: Profiles = batches.into();
+        let profiles: Profiles = batches.try_into().unwrap();
         assert_eq!(profiles.len(), 4);
         assert_eq!(expected_profiles, profiles.into_iter().collect());
     }

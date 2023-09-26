@@ -50,25 +50,27 @@ mod tests {
                   fast-mode: true
         "#;
 
-        let foo = Profile {
-            name: "foo".to_string(),
-            settings: ProfileSettings {
+        let foo = Profile::new(
+            "foo".to_string(),
+            ProfileSettings {
                 std: false,
                 fast_mode: true,
                 ..Default::default()
             },
-        };
-        let bar = Profile {
-            name: "bar".to_string(),
-            settings: ProfileSettings {
+        )
+        .unwrap();
+        let bar = Profile::new(
+            "bar".to_string(),
+            ProfileSettings {
                 patch: Some("use std::io;\n".to_string()),
                 inject_cc_flags: true,
                 ..Default::default()
             },
-        };
-        let baz = Profile {
-            name: "baz".to_string(),
-            settings: ProfileSettings {
+        )
+        .unwrap();
+        let baz = Profile::new(
+            "baz".to_string(),
+            ProfileSettings {
                 custom_main: Some(
                     r#"fn main() {
     println!("Hello, world!");
@@ -79,15 +81,17 @@ mod tests {
                 run_prover: false,
                 ..Default::default()
             },
-        };
-        let qux = Profile {
-            name: "qux".to_string(),
-            settings: ProfileSettings {
+        )
+        .unwrap();
+        let qux = Profile::new(
+            "qux".to_string(),
+            ProfileSettings {
                 should_fail: true,
                 fast_mode: true,
                 ..Default::default()
             },
-        };
+        )
+        .unwrap();
         let expected_profiles: HashSet<Profile> = [foo, bar, baz, qux].into_iter().collect();
 
         let batches = serde_yaml::from_str::<Individual>(config).unwrap();

@@ -1,11 +1,11 @@
 use std::fmt::Display;
 
-use crate::{Profiles, Merge, Exclude, IsValid};
-use anyhow::{ensure, Result};
+use crate::{Exclude, Versions, Merge, Profiles, Repo};
+use anyhow::Result;
 
 mod batch;
-mod individual;
 mod constants;
+mod individual;
 mod skip_crates;
 mod utils;
 
@@ -20,20 +20,17 @@ pub struct Parser {
     individual: individual::Individual,
     #[serde(flatten)]
     skip_crates: skip_crates::SkipCrates,
+    #[serde(flatten)]
+    pub repo: Repo,
 }
 
 impl Parser {
     pub fn parse(path: impl AsRef<str> + Display) -> Result<Profiles> {
         let config = utils::read_profile(path)?;
         let parser = serde_yaml::from_str::<Parser>(&config)?;
-        let profiles = Profiles::from(parser.batch)
+        let profiles = Profiles::try_from(parser.batch)?
             .merge(parser.individual.into())
-            .exclude(parser.skip_crates.into());
-        ensure!(
-            profiles.is_valid().is_ok(),
-            "Invalid profiles: {:?}",
-            profiles
-        );
+            .exclude(parser.skip_crates.try_into()?);
         Ok(profiles)
     }
 }

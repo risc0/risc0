@@ -1,8 +1,6 @@
 use super::*;
 
-#[derive(
-    Debug, Clone, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize, serde_valid::Validate,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
 #[serde(default)]
 #[serde(rename_all = "kebab-case")]
 pub struct ProfileSettings {
@@ -17,11 +15,8 @@ pub struct ProfileSettings {
     pub import_str: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub custom_main: Option<String>,
-    #[serde(flatten)]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub repo: Option<Repo>,
-    #[validate(custom(validate_versions))]
-    pub versions: Option<Versions>,
+    #[serde(default = "Versions::default")]
+    pub versions: Versions,
 }
 
 impl Default for ProfileSettings {
@@ -35,8 +30,7 @@ impl Default for ProfileSettings {
             patch: None,
             import_str: None,
             custom_main: None,
-            repo: None,
-            versions: None,
+            versions: Version::Latest.into(),
         }
     }
 }
@@ -52,15 +46,7 @@ impl Merge for ProfileSettings {
             patch: self.patch.or(other.patch),
             import_str: self.import_str.or(other.import_str),
             custom_main: self.custom_main.or(other.custom_main),
-            repo: self.repo.or(other.repo),
             versions: self.versions.merge(other.versions),
         }
     }
-}
-
-fn validate_versions(versions: &Option<Versions>) -> Result<bool, ValidationError> {
-    versions
-        .as_ref()
-        .map(|v| !v.is_empty())
-        .ok_or(ValidationError::Custom("No versions specified".into()))
 }

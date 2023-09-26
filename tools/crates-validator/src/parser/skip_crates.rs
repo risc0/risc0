@@ -1,4 +1,5 @@
-use crate::{CrateNames, Profile, ProfileSettings, Profiles};
+use crate::*;
+use crate::{CrateNames, Profile, Profiles};
 
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "kebab-case")]
@@ -6,16 +7,14 @@ pub(crate) struct SkipCrates {
     skip_crates: CrateNames,
 }
 
-impl From<SkipCrates> for Profiles {
-    fn from(value: SkipCrates) -> Self {
+impl TryFrom<SkipCrates> for Profiles {
+    type Error = anyhow::Error;
+    fn try_from(value: SkipCrates) -> Result<Self> {
         value
             .skip_crates
             .into_iter()
-            .map(|c| Profile {
-                name: c,
-                settings: ProfileSettings::default(),
-            })
-            .collect()
+            .map(Profile::try_from)
+            .collect::<Result<Vec<Profile>>>()
     }
 }
 
@@ -28,7 +27,7 @@ mod tests {
     fn can_parse_file() {
         let config = utils::read_profile(PATH_YAML_CONFIG).unwrap();
         let batches = serde_yaml::from_str::<SkipCrates>(&config).unwrap();
-        let profiles: Profiles = batches.into();
+        let profiles: Profiles = batches.try_into().unwrap();
         assert!(!profiles.is_empty());
     }
 
@@ -47,7 +46,7 @@ mod tests {
             .collect();
 
         let batches = serde_yaml::from_str::<SkipCrates>(config).unwrap();
-        let profiles: Profiles = batches.into();
+        let profiles: Profiles = batches.try_into().unwrap();
 
         assert_eq!(profiles.len(), 4);
         assert_eq!(profiles, expected_profiles);

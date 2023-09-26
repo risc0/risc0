@@ -17,7 +17,7 @@ use std::{fs::File, io::BufReader, path::PathBuf};
 use anyhow::{Context, Result};
 use clap::Parser;
 use colored::Colorize;
-use risc0_crates_validator::{Profiles, Repo, RunStatus, ValidatorBuilder};
+use risc0_crates_validator::{RunStatus, ValidatorBuilder};
 use tracing::info;
 use tracing_subscriber::EnvFilter;
 
@@ -54,20 +54,22 @@ fn main() -> Result<()> {
 
     let file = File::open(args.profiles_path).context("Failed to open profiles_path file")?;
     let reader = BufReader::new(file);
-    let mut profiles: Profiles = serde_yaml::from_reader(reader)?;
-    profiles.iter_mut().for_each(|p| {
-        if p.settings.repo.is_none() {
-            p.settings.repo = Some(Repo::Local("/Users/mcs/git/github/risc0/risc0/".into()));
+    let validator_builder: ValidatorBuilder = serde_yaml::from_reader(reader)?;
+    let validator = validator_builder.out_dir(args.out_dir).build()?;
+    let profiles = validator.context().profiles();
+    let repo = validator.context().repo();
+    let profiles_num = validator.context().profiles().len();
+
+    info!("Starting run of {profiles_num} profiles...");
+    let results = match args.crate_name {
+        Some(crate_name) => {
+            info!("Running single crate: {crate_name}");
+            validator.run_single(&crate_name, profiles, repo)?
         }
-    });
-
-    info!("Starting run of {} profiles...", profiles.len());
-    let validator = ValidatorBuilder::default().out_dir(args.out_dir).build()?;
-
-    let results = if let Some(crate_name) = args.crate_name {
-        validator.run_single(&crate_name, &mut profiles)?
-    } else {
-        validator.run_all(&mut profiles)?
+        None => {
+            info!("Running all crates");
+            validator.run_all(profiles, repo)?
+        }
     };
 
     info!("Test results:");
@@ -91,7 +93,7 @@ fn main() -> Result<()> {
     }
 
     colored::control::unset_override();
-    info!("{}/{} successful", successful, results.len());
+    info!("{successful}/{profiles_num} successful");
 
     if let Some(out_path) = args.json_output {
         std::fs::write(

@@ -4,22 +4,11 @@ pub type Profiles = Vec<Profile>;
 pub type CrateName = String;
 pub type CrateNames = Vec<CrateName>;
 pub type GroupedProfiles = BTreeMap<String, Profiles>;
-pub type Versions = BTreeSet<Version>;
-
-impl Merge for Option<Versions> {
-    fn merge(self, other: Self) -> Self {
-        self.unwrap_or_default()
-            .union(&other.unwrap_or_default())
-            .cloned()
-            .map(Some)
-            .collect()
-    }
-}
 
 impl Exclude for Profiles {
     fn exclude(self, other: Self) -> Self {
         self.into_iter()
-            .filter(|p| !other.iter().any(|o| o.name == p.name))
+            .filter(|p| !other.iter().any(|o| o.name() == p.name()))
             .collect()
     }
 }

@@ -18,7 +18,6 @@ use db_dump::{
     versions::Row as VersionRow,
 };
 use indicatif::{ProgressBar, ProgressStyle};
-use serde_valid::Validate;
 use tokio_stream::StreamExt;
 use tracing::{debug, info, warn};
 
@@ -263,7 +262,7 @@ impl StateMachine<ProcessDatabase> {
         // Remove all crates in selected_crates that are also in self.state.profiles
         let selected_crates_profiles: Profiles = selected_crates_profiles
             .into_iter()
-            .filter(|p| !self.state.profiles.iter().any(|o| o.name == p.name))
+            .filter(|p| !self.state.profiles.iter().any(|o| o.has_same_name(p)))
             .collect();
 
         let profiles: Profiles = self
@@ -274,55 +273,32 @@ impl StateMachine<ProcessDatabase> {
             .cloned()
             .map(|p| match &p.settings.versions {
                 Some(v) if !v.is_empty() => p,
-                Some(_) => {
-                    let profile = Profile {
-                        name: p.name.clone(),
-                        settings: ProfileSettings {
-                            versions: {
-                                self.state
-                                    .crates
-                                    .iter()
-                                    .filter(|&c| c.name == p.name)
-                                    .filter_map(|c| {
-                                        self.state.versions.get(&c.id).map(|v| v.num.clone())
-                                    })
-                                    .map(Some)
-                                    .collect()
-                            },
-                            ..p.settings
+                Some(_) | None => {
+                    let settings = ProfileSettings {
+                        versions: {
+                            self.state
+                                .crates
+                                .iter()
+                                .filter(|&c| c.name == p.name())
+                                .filter_map(|c| {
+                                    self.state.versions.get(&c.id).map(|v| v.num.clone())
+                                })
+                                .map(Some)
+                                .collect()
                         },
+                        ..p.settings.clone()
                     };
-                    if profile.validate().is_err() {
-                        warn!("Invalid profile: {:?}", profile);
-                    } else {
-                        debug!("Profile: {:?}", profile);
+                    let profile = Profile::new(p.name().into(), settings);
+                    match profile {
+                        Ok(p) => {
+                            debug!("Profile: {:?}", p);
+                            p
+                        }
+                        Err(e) => {
+                            warn!("Invalid profile: {:?}", e);
+                            p
+                        }
                     }
-                    profile
-                }
-                None => {
-                    let profile = Profile {
-                        name: p.name.clone(),
-                        settings: ProfileSettings {
-                            versions: {
-                                self.state
-                                    .crates
-                                    .iter()
-                                    .filter(|&c| c.name == p.name)
-                                    .filter_map(|c| {
-                                        self.state.versions.get(&c.id).map(|v| v.num.clone())
-                                    })
-                                    .map(Some)
-                                    .collect()
-                            },
-                            ..p.settings
-                        },
-                    };
-                    if profile.validate().is_err() {
-                        warn!("Invalid profile: {:?}", profile);
-                    } else {
-                        debug!("Profile: {:?}", profile);
-                    }
-                    profile
                 }
             })
             .collect();
@@ -333,7 +309,7 @@ impl StateMachine<ProcessDatabase> {
                 Some(ref versions) => versions.is_empty(),
                 None => true,
             })
-            .for_each(|p| warn!("Profile '{}' has no versions", p.name));
+            .for_each(|p| warn!("Profile '{}' has no versions", p.name()));
 
         Ok(StateMachine {
             args: self.args,
