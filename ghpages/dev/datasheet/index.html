@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    .head-wrapper {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100px;
+    }
+
+    .logo {
+      position: absolute;
+      left: 20px;
+      width: 80px;
+      height: auto;
+    }
+
+    .head-content {
+      text-align: center;
+    }
+
+    .container {
+      display: grid;
+      /* Two columns */
+      grid-template-columns: repeat(2, 1fr);
+      gap: 30px;
+    }
+
+    .footer {
+      display: grid;
+      /* Three columns */
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .footer>div:nth-child(1) {
+      grid-column: span 2;
+    }
+
+    .box {
+      border: 1px solid black;
+      padding: 10px;
+      box-sizing: border-box;
+      border: none;
+    }
+
+    .text-box {
+      font-size: x-large;
+      margin-top: 15px;
+      padding: 10px;
+      border: none;
+    }
+
+    .qrcode-container {
+      display: none;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .qrcode-box {
+      border: 1px solid black;
+      padding: 10px;
+      box-sizing: border-box;
+      border: none;
+    }
+
+    .responsive {
+      /* Reducing the width to half */
+      width: 50%;
+      /* Keeping the aspect ratio intact */
+      height: auto;
+      /* To use margin auto for centering */
+      display: block;
+      /* Center the image horizontally */
+      margin: 0 auto;
+    }
+
+
+    /* Table base styles */
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 10px 0;
+    }
+
+    th,
+    td {
+      padding: 10px 10px;
+      border-bottom: 1px solid #ddd;
+    }
+
+    th {
+      background-color: #f7f7f7;
+      font-weight: 600;
+    }
+
+    /* Zebra stripe alternate rows */
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+
+    /* Highlight row on hover */
+    tr:hover {
+      background-color: #e6e6e6;
+    }
+
+    /* Header styles */
+    th {
+      text-align: left;
+      font-size: 1em;
+    }
+
+    /* Content styles */
+    td {
+      font-size: 1em;
+    }
+
+    .footnote {
+      margin-top: -10px;
+    }
+
+    /* Print-specific styles */
+    @media print {
+      body {
+        font-size: 10px;
+      }
+
+      .box {
+        padding: 10px;
+      }
+
+      table {
+        width: 100%;
+        /* Reduce font size for print */
+        font-size: 10px;
+      }
+
+      th,
+      td {
+        padding: 5px;
+        font-size: 10px;
+      }
+
+      table td,
+      table th {
+        padding: 3px 10px;
+      }
+
+      .text-box {
+        font-size: 12px;
+        margin-top: 10px;
+      }
+
+      .container {
+        row-gap: 10px;
+      }
+
+      .qrcode-container {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        margin-top: -10px;
+        justify-items: center;
+        align-items: center;
+      }
+
+      .qrcode-box {
+        justify-items: center;
+        align-items: center;
+      }
+
+      .qrcode-box img {
+        max-width: 100px;
+        max-height: 100px;
+      }
+
+      figcaption {
+        text-align: center;
+      }
+
+      figcaption>div,
+      figcaption>img {
+        display: inline-block;
+      }
+    }
+
+    /* Different styles for US Letter */
+    /* Using a min-width slightly below 216mm to target US Letter */
+    @media print and (min-width: 215mm) {
+
+      table td,
+      table th {
+        padding: 1px 10px;
+      }
+    }
+  </style>
+  <title>RISC Zero Datasheet</title>
+</head>
+
+<body>
+  <div class="head-wrapper">
+    <img src="static/RISC_Zero_Logo.jpeg" alt="Logo" class="logo">
+    <div class="head-content">
+      <h1>RISC Zero Datasheet</h1>
+      <p>
+        Commit hash: <span id="hash-content">Loading...</span>
+        <br></br>
+        Use cargo run —release —example loop in head of main to collect data for your machine
+      </p>
+    </div>
+  </div>
+
+  <div class="container">
+    <!-- The table containers for JavaScript to append benchmarks -->
+    <div class="box" id="table1"></div>
+    <div class="box" id="table2"></div>
+    <div class="box" id="table3"></div>
+    <div class="box" id="table4"></div>
+  </div>
+
+  <div class="footnote">
+    <p>*this uses continuations, reducing the memory usage but producing more receipts (if not rolled up with Bonsai).
+    </p>
+  </div>
+
+  <div class="footer">
+    <div class="text-box">
+      The performance of the prover depends on the number of execution cycles in the zkVM guest. We
+      therefore give
+      performance data for different guest execution lengths, as indicated in the "Cycles" column. For cryptographic
+      reasons, the
+      cycle count is always rounded up in length to the next highest power of two; thus, a program that requires 33000
+      cycles
+      will have the same performance as a program that requires 63000 cycles, as both will round up to 65536 (64 k)
+      cycles.
+      <br></br>
+      Initializing a zkVM guest requires over 16 k cycles. Combined with this power of two rounding, this means that no
+      program can be executed in fewer than 32 k cycles.
+      <br></br>
+      To give context for these numbers we have included a table indicating the size of each of our example programs in
+      cycles. Note that some programs vary in cycle count depending on input data. The cycle counts given here use the
+      default input data, or, for examples with no defaults, the input data suggested in the associated README file.
+      <br></br>
+    </div>
+    <div class="box">
+      <table>
+        <thead>
+          <tr>
+            <th>Example</th>
+            <th>Cycles</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Factors</td>
+            <td>32 k</td>
+          </tr>
+          <tr>
+            <td>Chess</td>
+            <td>256 k</td>
+          </tr>
+          <tr>
+            <td>Digital Signature</td>
+            <td>64 k</td>
+          </tr>
+          <tr>
+            <td>EVM</td>
+            <td>2048 k</td>
+          </tr>
+          <tr>
+            <td>JSON</td>
+            <td>64 k</td>
+          </tr>
+          <tr>
+            <td>Password Checker</td>
+            <td>64 k</td>
+          </tr>
+          <tr>
+            <td>SHA</td>
+            <td>64 k</td>
+          </tr>
+          <tr>
+            <td>Waldo</td>
+            <td>8192 k</td>
+          </tr>
+          <tr>
+            <td>Wordle</td>
+            <td>64 k</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="qrcode-container">
+    <div class="qrcode-box">
+      <figure>
+        <img src="static/risczero_qrcode.png" alt="Image 2">
+        <figcaption text-align: center;>www.RISCZero.com</figcaption>
+      </figure>
+    </div>
+    <div class="qrcode-box">
+      <figure>
+        <img src="static/zkvm_examples_qrcode.png" alt="Image 3">
+        <figcaption text-align: center;>zkVM Examples</figcaption>
+      </figure>
+    </div>
+  </div>
+
+  <script>
+    // Function to format duration
+    function formatDuration(duration) {
+      const thresholds = [1000, 1000, 1000, 60, 60];
+      const units = ['ns', 'µs', 'ms', 's', 'min', 'h'];
+      let unitIndex = 0;
+      while (duration >= thresholds[unitIndex] && unitIndex < thresholds.length) {
+        duration /= thresholds[unitIndex];
+        unitIndex++;
+      }
+      return `${duration.toFixed(2)}${units[unitIndex]}`;
+    }
+
+    // Function to format bytes
+    function formatBytes(bytes) {
+      const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+      let unitIndex = 0;
+      while (bytes >= 1024 && unitIndex < units.length - 1) {
+        bytes /= 1024;
+        unitIndex++;
+      }
+      return `${bytes.toFixed(2)}${units[unitIndex]}`;
+    }
+
+    // Function to format Hertz
+    function formatHz(hertz) {
+      const units = ['Hz', 'KHz', 'MHz', 'GHz'];
+      let unitIndex = 0;
+      while (hertz >= 1000 && unitIndex < units.length - 1) {
+        hertz /= 1000;
+        unitIndex++;
+      }
+      return `${hertz.toFixed(2)}${units[unitIndex]}`;
+    }
+
+    // Function to fetch and display commit hash
+    async function fetchCommitHash() {
+      try {
+        let response = await fetch('COMMIT_HASH.txt');
+        let data = await response.text();
+        if (!data.includes('This page could not be found')) {
+          document.getElementById('hash-content').textContent = data;
+        }
+      } catch (error) {
+        console.error('Error fetching commit hash:', error);
+      }
+    }
+
+    async function fetchData() {
+      const filenameToTitle = {
+        'macOS-apple_m2_pro.json': 'Metal on Apple M2 Pro',
+        'Linux-nvidia_rtx_a5000.json': 'CUDA on NVIDIA RTX A5000',
+        'macOS-cpu.json': 'CPU only on Apple M2 Pro',
+        'Linux-cpu.json': 'CPU only on TBD [Linux]'
+      };
+
+      try {
+        const urls = ['macOS-apple_m2_pro.json', 'Linux-nvidia_rtx_a5000.json', 'macOS-cpu.json', 'Linux-cpu.json'];
+        const dataPromises = urls.map(url =>
+          fetch(url)
+            .then(response => {
+              if (!response.ok) {
+                throw new Error(`Error fetching ${url}: ${response.statusText}`);
+              }
+              return response.json();
+            })
+            .catch(error => {
+              console.warn(`Failed fetching ${url}:`, error.message);
+              return null;  // Handle individual failures gracefully
+            })
+        );
+
+        const dataArrays = await Promise.all(dataPromises);
+
+        // Iterate through each dataArray and append them to the respective boxes.
+        dataArrays.forEach((dataArray, index) => {
+          if (!dataArray) return;
+
+          // Get the correct container for this table based on index
+          const tableContainer = document.getElementById(`table${index + 1}`);
+
+          const filename = urls[index].split('/').pop();
+          const header = document.createElement('h2');
+          header.textContent = filenameToTitle[filename] || filename.replace(/\.[^/.]+$/, "");
+          tableContainer.appendChild(header);
+
+          const table = document.createElement('table');
+          const tableHeader = `
+                <thead>
+                    <tr>
+                        <th>Cycles</th>
+                        <th>Duration</th>
+                        <th>RAM</th>
+                        <th>Seal</th>
+                        <th>Speed</th>
+                    </tr>
+                </thead>`;
+          table.innerHTML = tableHeader;
+
+          const tableBody = document.createElement('tbody');
+          dataArray.forEach(item => {
+            const row = document.createElement('tr');
+            Object.keys(item).forEach(key => {
+              const cell = document.createElement('td');
+              let value = item[key];
+
+              if (key === 'cycles') {
+                value = `${value / 1024}k${value >= 2048 * 1024 ? '*' : ''}`;
+              } else if (key === 'duration') {
+                value = formatDuration(value);
+              } else if (key === 'ram' || key === 'seal') {
+                value = formatBytes(value);
+              } else if (key === 'speed') {
+                value = formatHz(value);
+              }
+
+              cell.textContent = value;
+              row.appendChild(cell);
+            });
+            tableBody.appendChild(row);
+          });
+
+          table.appendChild(tableBody);
+          tableContainer.appendChild(table);
+        });
+
+        const logoDiv = document.createElement('div');
+        logoDiv.innerHTML = '<img src="static/RISC_Zero_Logo.jpeg" alt="RISC Zero Logo" class="responsive">';
+        document.getElementById('logo-container').appendChild(logoDiv);
+
+      } catch (error) {
+        console.error('Error processing data:', error);
+      }
+    }
+
+    // Invoke fetchCommitHash when the document is ready
+    document.addEventListener("DOMContentLoaded", fetchCommitHash);
+    // Invoke fetchData when the document is ready
+    document.addEventListener("DOMContentLoaded", fetchData);
+  </script>
+
+</body>
+
+</html>
