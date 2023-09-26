@@ -87,16 +87,16 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: benchmark-result
-          path: datasheet
+          path: dev/datasheet
       - name: Push benchmark result
         run: |
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
-          git add datasheet/macOS-cpu.json
-          git add datasheet/macOS-apple_m2_pro.json
-          git add datasheet/Linux-nvidia_rtx_a5000.json
-          git add datasheet/Linux-cpu.json
-          git add datasheet/COMMIT_HASH.txt
+          git add dev/datasheet/macOS-cpu.json
+          git add dev/datasheet/macOS-apple_m2_pro.json
+          git add dev/datasheet/Linux-nvidia_rtx_a5000.json
+          git add dev/datasheet/Linux-cpu.json
+          git add dev/datasheet/COMMIT_HASH.txt
           if git diff --cached --exit-code; then
             echo "No changes to commit"
           else
