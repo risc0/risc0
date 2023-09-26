@@ -35,8 +35,8 @@ jobs:
 
       - name: Install Foundry
         uses: risc0/foundry-toolchain@2fe7e70b520f62368a0e3c464f997df07ede420f
-        with:
-          version: nightly-ec3f9bd42795c9b2238b5f4c9f51997b22cc9e27
+        #with:
+        #  version: nightly-ec3f9bd42795c9b2238b5f4c9f51997b22cc9e27
 
       # Lint
       - name: check solidity code formatting in bonsai/ethereum
