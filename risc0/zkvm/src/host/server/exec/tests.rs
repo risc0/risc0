@@ -40,6 +40,9 @@ use crate::{
     ExecutorEnv, ExitCode, MemoryImage, Program, Session, TraceEvent,
 };
 
+#[cfg(feature = "test-exact-cycles")]
+use crate::TraceEvent;
+
 fn run_test(spec: MultiTestSpec) {
     let input = to_vec(&spec).unwrap();
     let env = ExecutorEnv::builder().add_input(&input).build().unwrap();

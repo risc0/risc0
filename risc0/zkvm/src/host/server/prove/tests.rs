@@ -30,8 +30,11 @@ use super::{get_prover_server, HalPair, ProverImpl};
 use crate::{
     host::{server::testutils, CIRCUIT},
     serde::{from_slice, to_vec},
-    Executor, ExecutorEnv, ExitCode, ProverOpts, ProverServer, Receipt,
+    Executor, ExecutorEnv, ProverOpts, ProverServer, Receipt,
 };
+
+#[cfg(feature = "test-exact-cycles")]
+use crate::ExitCode;
 
 fn prove_nothing(hashfn: &str) -> Result<Receipt> {
     let input = to_vec(&MultiTestSpec::DoNothing).unwrap();
