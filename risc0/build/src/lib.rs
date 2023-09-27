@@ -367,6 +367,49 @@ impl Default for GuestOptions {
     }
 }
 
+/// Embeds methods built for RISC-V for use by host-side dependencies using a docker build environment.
+pub fn embed_methods_with_docker() {
+    let out_dir_env = env::var_os("OUT_DIR").unwrap();
+    let out_dir = Path::new(&out_dir_env); // $ROOT/target/$profile/build/$crate/out
+    let guest_dir = out_dir
+        .parent() // out
+        .unwrap()
+        .parent() // $crate
+        .unwrap()
+        .parent() // build
+        .unwrap()
+        .parent() // $profile
+        .unwrap()
+        .join("riscv-guest");
+
+    let pkg = current_package();
+    let guest_packages = guest_packages(&pkg);
+    let methods_path = out_dir.join("methods.rs");
+    let mut methods_file = File::create(&methods_path).unwrap();
+
+    detect_toolchain(RUSTUP_TOOLCHAIN_NAME);
+
+    let mut manifest_path = env::var("CARGO_MANIFEST_DIR").unwrap();
+    manifest_path.push_str("/Cargo.toml");
+    docker_build(&PathBuf::from(manifest_path)).unwrap();
+
+    for guest_pkg in guest_packages {
+        for method in guest_methods(&guest_pkg, &guest_dir) {
+            methods_file
+                .write_all(method.rust_def().as_bytes())
+                .unwrap();
+        }
+    }
+
+    // HACK: It's not particularly practical to figure out all the
+    // files that all the guest crates transtively depend on.  So, we
+    // want to run the guest "cargo build" command each time we build.
+    //
+    // Since we generate methods.rs each time we run, it will always
+    // be changed.
+    println!("cargo:rerun-if-changed={}", methods_path.display());
+}
+
 /// Embeds methods built for RISC-V for use by host-side dependencies.
 /// Specify custom options for a guest package by defining its [GuestOptions].
 /// See [embed_methods].

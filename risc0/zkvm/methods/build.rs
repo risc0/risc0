@@ -14,7 +14,7 @@
 
 use std::{collections::HashMap, env};
 
-use risc0_build::{embed_methods_with_options, GuestOptions};
+use risc0_build::{embed_methods_with_docker, embed_methods_with_options, GuestOptions};
 
 fn main() {
     env_logger::init();
@@ -34,5 +34,10 @@ fn main() {
         ),
     ]);
 
-    embed_methods_with_options(map);
+    if cfg!(feature = "test-exact-cycles") {
+        std::env::set_current_dir("../../").unwrap();
+        embed_methods_with_docker();
+    } else {
+        embed_methods_with_options(map);
+    }
 }

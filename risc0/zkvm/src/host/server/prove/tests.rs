@@ -201,6 +201,7 @@ fn memory_io() {
     run_memio(&[(POS + 1, 0)]).unwrap_err();
 }
 
+#[cfg(feature = "test-exact-cycles")]
 #[test]
 #[cfg_attr(feature = "cuda", serial)]
 fn pause_continue() {
@@ -263,6 +264,7 @@ fn session_events() {
     assert_eq!(on_post_prove_segment_flag.take(), true);
 }
 
+#[cfg(feature = "test-exact-cycles")]
 #[test]
 #[cfg_attr(feature = "cuda", serial)]
 fn continuation() {

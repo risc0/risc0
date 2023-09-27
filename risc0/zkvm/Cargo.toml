@@ -145,3 +145,11 @@ std = [
   "risc0-zkp/std",
   "serde/std",
 ]
+
+# This flag uses the docker environment to build test guests such as multi-test
+# to ensure accurate cycle and segment counts. Tests that have been gated on
+# this flag measure cycles and segments. Without this flag, the rust build
+# system will generate binaries that not identical across all architectures.
+# While this is acceptable for most tests, the tests counting cycles and
+# segments will fail intermittently.
+test-exact-cycles = ["risc0-zkvm-methods/test-exact-cycles"]
