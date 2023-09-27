@@ -369,11 +369,15 @@ fn sys_verify() {
 
     let spec = to_vec(&MultiTestSpec::SysVerify {
         image_id: HELLO_COMMIT_ID.into(),
-        journal: hello_commit_session.journal,
+        journal: hello_commit_session.journal.clone(),
     })
     .unwrap();
 
-    let env = ExecutorEnv::builder().add_input(&spec).build().unwrap();
+    let env = ExecutorEnv::builder()
+        .add_input(&spec)
+        .add_assumption(hello_commit_session.get_metadata().unwrap().into())
+        .build()
+        .unwrap();
     Executor::from_elf(env, MULTI_TEST_ELF)
         .unwrap()
         .run()
@@ -393,7 +397,11 @@ fn sys_verify_metadata() {
     })
     .unwrap();
 
-    let env = ExecutorEnv::builder().add_input(&spec).build().unwrap();
+    let env = ExecutorEnv::builder()
+        .add_input(&spec)
+        .add_assumption(hello_commit_session.get_metadata().unwrap().into())
+        .build()
+        .unwrap();
     Executor::from_elf(env, MULTI_TEST_ELF)
         .unwrap()
         .run()

@@ -430,6 +430,27 @@ impl Assumption {
     }
 }
 
+impl From<Receipt> for Assumption {
+    /// Create a proven assumption from a [Receipt].
+    fn from(receipt: Receipt) -> Self {
+        Self::Proven(receipt)
+    }
+}
+
+impl From<MaybePruned<ReceiptMetadata>> for Assumption {
+    /// Create an unresolved assumption from a [MaybePruned] [ReceiptMetadata].
+    fn from(metadata: MaybePruned<ReceiptMetadata>) -> Self {
+        Self::Unresolved(metadata)
+    }
+}
+
+impl From<ReceiptMetadata> for Assumption {
+    /// Create an unresolved assumption from a [ReceiptMetadata].
+    fn from(metadata: ReceiptMetadata) -> Self {
+        Self::Unresolved(metadata.into())
+    }
+}
+
 /// Context available to the verification process.
 pub struct VerifierContext {
     /// A registry of hash functions to be used by the verification process.
