@@ -17,7 +17,7 @@ use risc0_zkvm::{default_executor, ExecutorEnv};
 
 // Simple main to load and run the benchmark binary in the RISC Zero Executor.
 fn main() {
-    let prover = default_executor();
     let env = ExecutorEnv::builder().build().unwrap();
-    std::hint::black_box(prover.execute_elf(env, BENCHMARK_ELF)).unwrap();
+    let exec = default_executor();
+    std::hint::black_box(exec.execute_elf(env, BENCHMARK_ELF)).unwrap();
 }
