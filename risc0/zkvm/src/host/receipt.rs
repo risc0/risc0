@@ -406,7 +406,7 @@ impl SegmentReceipt {
 
 /// An assumption associated with a guest call to `env::verify` or
 /// `env::verify_metdata`.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum Assumption {
     /// A [Receipt] for a proven assumption.
     Proven(Receipt),

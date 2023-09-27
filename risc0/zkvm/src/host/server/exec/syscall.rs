@@ -14,7 +14,7 @@
 
 //! Handlers for two-way private I/O between host and guest.
 
-use std::{cell::RefCell, cmp::min, collections::HashMap, rc::Rc, str::from_utf8};
+use std::{borrow::Cow, cell::RefCell, cmp::min, collections::HashMap, rc::Rc, str::from_utf8};
 
 use anyhow::{anyhow, bail, Result};
 use bytes::Bytes;
@@ -99,9 +99,7 @@ impl<'a> SyscallTable<'a> {
             inner: HashMap::new(),
         };
 
-        let sys_verify = SysVerify {
-            assumptions: env.assumptions.clone(),
-        };
+        let sys_verify = SysVerify::new(env.assumptions.clone());
 
         let posix_io = env.posix_io.clone();
         this.with_syscall(SYS_CYCLE_COUNT, SysCycleCount)
@@ -225,12 +223,20 @@ impl Syscall for SysRandom {
 }
 
 #[derive(Clone)]
-pub(crate) struct SysVerify {
+pub(crate) struct SysVerify<'a> {
     pub(crate) assumptions: Rc<Vec<Assumption>>,
+    pub(crate) resolved: Vec<Cow<'a, Assumption>>,
 }
 
-impl SysVerify {
-    fn sys_verify(&self, from_guest: Vec<u8>) -> Result<(u32, u32)> {
+impl<'a> SysVerify<'a> {
+    pub(crate) fn new(assumptions: Rc<Vec<Assumption>>) -> Self {
+        Self {
+            assumptions,
+            resolved: Default::default(),
+        }
+    }
+
+    fn sys_verify(&mut self, from_guest: Vec<u8>) -> Result<(u32, u32)> {
         let metadata_digest: Digest = from_guest
             .try_into()
             .map_err(|vec| anyhow!("failed to convert to [u8; DIGEST_BYTES]: {:?}", vec))?;
@@ -239,9 +245,12 @@ impl SysVerify {
 
         // Iterate over the list looking for a matching assumption.
         for assumption in self.assumptions.iter() {
-            if assumption.get_metadata()?.digest() == metadata_digest {
-                return Ok((0, 0));
+            if assumption.get_metadata()?.digest() != metadata_digest {
+                continue;
             }
+
+            self.resolved.push(Cow::Borrowed(assumption));
+            return Ok((0, 0));
         }
 
         Err(anyhow!(
@@ -251,7 +260,7 @@ impl SysVerify {
     }
 
     fn sys_verify_metadata(
-        &self,
+        &mut self,
         mut from_guest: Vec<u8>,
         to_guest: &mut [u32],
     ) -> Result<(u32, u32)> {
@@ -320,6 +329,7 @@ impl SysVerify {
 
             // Return the post_state_digest and success code to the guest.
             to_guest.copy_from_slice(post_state_digest.as_words());
+            self.resolved.push(Cow::Borrowed(assumption));
             return Ok((0, 0));
         }
 
@@ -331,7 +341,7 @@ impl SysVerify {
     }
 }
 
-impl Syscall for SysVerify {
+impl<'a> Syscall for SysVerify<'a> {
     fn syscall(
         &mut self,
         syscall: &str,

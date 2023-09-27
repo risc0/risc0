@@ -27,7 +27,7 @@ use anyhow::{anyhow, Result};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    host::server::exec::executor::SyscallRecord,
+    host::{receipt::Assumption, server::exec::executor::SyscallRecord},
     receipt_metadata::{Assumptions, Output},
     sha::{Digest, DIGEST_WORDS},
     ExitCode, MemoryImage, ReceiptMetadata, SystemState,
@@ -63,6 +63,9 @@ pub struct Session {
     // this.
     /// The final [MemoryState] at the end of execution.
     pub post_image: MemoryImage,
+
+    /// The list of assumptions made by the guest and resolved by the host.
+    pub assumptions: Vec<Assumption>,
 
     /// The hooks to be called during the proving phase.
     #[serde(skip)]
@@ -125,12 +128,14 @@ impl Session {
         journal: Vec<u8>,
         exit_code: ExitCode,
         post_image: MemoryImage,
+        assumptions: Vec<Assumption>,
     ) -> Self {
         Self {
             segments,
             journal,
             exit_code,
             post_image,
+            assumptions,
             hooks: Vec::new(),
         }
     }
@@ -177,7 +182,7 @@ impl Segment {
     /// Create a new [Segment] from its constituent components.
     #[allow(clippy::too_many_arguments)]
     pub(crate) fn new(
-        pre_image: MemoryImage,
+        pre_image: Box<MemoryImage>,
         post_image_id: Digest,
         faults: PageFaults,
         syscalls: Vec<SyscallRecord>,

@@ -141,7 +141,7 @@ pub struct SyscallRecord {
 pub struct Executor<'a> {
     env: ExecutorEnv<'a>,
     pub(crate) syscall_table: SyscallTable<'a>,
-    pre_image: Option<MemoryImage>,
+    pre_image: Option<Box<MemoryImage>>,
     monitor: MemoryMonitor,
     pc: u32,
     init_cycles: usize,
@@ -192,7 +192,7 @@ impl<'a> Executor<'a> {
         Ok(Self {
             env,
             syscall_table,
-            pre_image: Some(image),
+            pre_image: Some(Box::new(image)),
             monitor,
             pc,
             init_cycles,
@@ -213,6 +213,7 @@ impl<'a> Executor<'a> {
     /// Construct a new [Executor] from the ELF binary of the guest program
     /// you want to run and an [ExecutorEnv] containing relevant
     /// environmental configuration details.
+    ///
     /// # Example
     /// ```
     /// use risc0_zkvm::{serde::to_vec, Executor, ExecutorEnv, Session};
@@ -280,8 +281,11 @@ impl<'a> Executor<'a> {
     where
         F: FnMut(Segment) -> Result<Box<dyn SegmentRef>>,
     {
-        if let Some(ExitCode::Halted(_)) = self.exit_code {
-            bail!("cannot resume an execution which exited with ExitCode::Halted");
+        if let Some(ExitCode::Halted(_) | ExitCode::SessionLimit) = self.exit_code {
+            bail!(
+                "cannot resume an execution which exited with {:?}",
+                self.exit_code
+            );
         }
 
         self.monitor.clear_session()?;
@@ -322,12 +326,12 @@ impl<'a> Executor<'a> {
                     let segment_ref = callback(segment)?;
                     self.segments.push(segment_ref);
                     match exit_code {
-                        ExitCode::SystemSplit => self.split(Some(post_image))?,
+                        ExitCode::SystemSplit => self.split(Some(post_image.into()))?,
                         ExitCode::SessionLimit => bail!("Session limit exceeded"),
                         ExitCode::Paused(inner) => {
                             log::debug!("Paused({inner}): {}", self.segment_cycle);
                             // Set the pre_image so that the Executor can be run again to resume.
-                            self.split(Some(post_image.clone()))?;
+                            self.split(Some(post_image.clone().into()))?;
                             return Ok((exit_code, post_image));
                         }
                         ExitCode::Halted(inner) => {
@@ -337,7 +341,7 @@ impl<'a> Executor<'a> {
                         // TODO(victor): Revisit this case
                         ExitCode::Fault => {
                             log::debug!("Fault: {}", self.segment_cycle);
-                            self.split(Some(post_image.clone()))?;
+                            self.split(Some(post_image.clone().into()))?;
                             return Ok((exit_code, post_image));
                         }
                     };
@@ -377,7 +381,7 @@ impl<'a> Executor<'a> {
         Ok(session)
     }
 
-    fn split(&mut self, pre_image: Option<MemoryImage>) -> Result<()> {
+    fn split(&mut self, pre_image: Option<Box<MemoryImage>>) -> Result<()> {
         self.pre_image = pre_image;
         self.body_cycles = 0;
         self.split_insn = None;
