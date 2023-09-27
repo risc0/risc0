@@ -20,7 +20,7 @@ use prost::Message;
 
 use super::{
     malformed_err, pb, Asset, AssetRequest, Binary, ConnectionWrapper, Connector,
-    ParentProcessConnector,
+    ParentProcessConnector, SessionInfo,
 };
 use crate::{
     get_version,
@@ -104,7 +104,7 @@ impl Client {
         binary: Binary,
         segments_out: AssetRequest,
         callback: F,
-    ) -> Result<pb::api::SessionInfo>
+    ) -> Result<SessionInfo>
     where
         F: FnMut(pb::api::SegmentInfo) -> Result<()>,
     {
@@ -128,7 +128,10 @@ impl Client {
             bail!("Child finished with: {code}");
         }
 
-        result
+        match result {
+            Ok(info) => Ok(info.try_into()?),
+            Err(err) => Err(err),
+        }
     }
 
     /// TODO

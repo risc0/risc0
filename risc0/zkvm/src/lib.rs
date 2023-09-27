@@ -59,12 +59,13 @@ pub use self::host::{
 #[cfg(not(target_os = "zkvm"))]
 #[cfg(feature = "client")]
 pub use self::host::{
-    api::{client::Client as ApiClient, Binary, Connector},
+    api::{client::Client as ApiClient, Binary, Connector, SessionInfo},
     client::{
         env::{ExecutorEnv, ExecutorEnvBuilder},
         exec::TraceEvent,
         prove::{
-            bonsai::BonsaiProver, default_prover, external::ExternalProver, Prover, ProverOpts,
+            bonsai::BonsaiProver, default_executor, default_prover, external::ExternalProver,
+            Prover, ProverOpts,
         },
     },
 };

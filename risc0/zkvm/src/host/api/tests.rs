@@ -30,7 +30,7 @@ use test_log::test;
 use super::{pb, Asset, AssetRequest, Binary, ConnectionWrapper, Connector, TcpConnection};
 use crate::{
     serde::to_vec, ApiClient, ApiServer, ExecutorEnv, ProverOpts, Receipt, SegmentReceipt,
-    VerifierContext,
+    SessionInfo, VerifierContext,
 };
 
 struct TestClientConnector {
@@ -76,7 +76,7 @@ impl TestClient {
         self.work_dir.path().to_path_buf()
     }
 
-    fn execute(&mut self, env: ExecutorEnv<'_>, binary: Binary) -> Result<pb::api::SessionInfo> {
+    fn execute(&mut self, env: ExecutorEnv<'_>, binary: Binary) -> Result<SessionInfo> {
         with_server(self.addr, || {
             let segments_out = AssetRequest::Path(self.get_work_path());
             self.client.execute(&env, binary, segments_out, |segment| {

@@ -153,7 +153,7 @@ fn main() {
     }
 }
 
-fn run_with_iterations(iterations: usize, po2: usize, json: bool) {
+fn run_with_iterations(iterations: usize, po2: u32, json: bool) {
     let mut cmd = Command::new(std::env::current_exe().unwrap());
     if iterations == 0 {
         cmd.arg("--quiet");

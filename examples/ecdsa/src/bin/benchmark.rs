@@ -13,11 +13,11 @@
 // limitations under the License.
 
 use ecdsa_methods::BENCHMARK_ELF;
-use risc0_zkvm::{default_prover, ExecutorEnv};
+use risc0_zkvm::{default_executor, ExecutorEnv};
 
 // Simple main to load and run the benchmark binary in the RISC Zero Executor.
 fn main() {
-    let prover = default_prover();
+    let prover = default_executor();
     let env = ExecutorEnv::builder().build().unwrap();
     std::hint::black_box(prover.execute_elf(env, BENCHMARK_ELF)).unwrap();
 }

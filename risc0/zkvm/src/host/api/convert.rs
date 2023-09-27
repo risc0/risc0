@@ -25,7 +25,9 @@ use crate::{
     SegmentReceipt, SegmentReceipts, TraceEvent,
 };
 
-use super::{malformed_err, path_to_string, pb, Asset, AssetRequest, Binary, BinaryKind};
+use super::{
+    malformed_err, path_to_string, pb, Asset, AssetRequest, Binary, BinaryKind, SessionInfo,
+};
 
 mod ver {
     use super::pb::base::CompatVersion;
@@ -475,6 +477,18 @@ impl TryFrom<pb::core::SystemState> for SystemState {
         Ok(Self {
             pc: value.pc,
             merkle_root: value.merkle_root.ok_or(malformed_err())?.try_into()?,
+        })
+    }
+}
+
+impl TryFrom<pb::api::SessionInfo> for SessionInfo {
+    type Error = anyhow::Error;
+
+    fn try_from(value: pb::api::SessionInfo) -> Result<Self> {
+        Ok(Self {
+            segments: value.segments,
+            journal: value.journal.into(),
+            exit_code: value.exit_code.ok_or(malformed_err())?.try_into()?,
         })
     }
 }

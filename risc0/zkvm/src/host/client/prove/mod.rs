@@ -25,16 +25,16 @@ use risc0_zkvm_platform::{memory::GUEST_MAX_MEM, PAGE_SIZE};
 use serde::{Deserialize, Serialize};
 
 use self::{bonsai::BonsaiProver, external::ExternalProver};
-use crate::{is_dev_mode, ExecutorEnv, Receipt, VerifierContext};
+use crate::{is_dev_mode, ExecutorEnv, Receipt, SessionInfo, VerifierContext};
 
-/// A Prover can execute a given [MemoryImage] or ELF file and produce a
+/// A Prover can execute a given [MemoryImage] or ELF binary and produce a
 /// [Receipt] that can be used to verify correct computation.
 ///
 /// # Usage
 /// To produce a proof, you must minimally provide an [ExecutorEnv] and either
-/// an ELF file or a [MemoryImage]. See the
+/// an ELF binary or a [MemoryImage]. See the
 /// [risc0_build](https://docs.rs/risc0-build/latest/risc0_build/) crate for
-/// more information on producing ELF files from Rust source code.
+/// more information on producing ELF binaries from Rust source code.
 ///
 /// ```rust
 /// use risc0_zkvm::{
@@ -51,7 +51,7 @@ use crate::{is_dev_mode, ExecutorEnv, Receipt, VerifierContext};
 ///
 /// # #[cfg(not(feature = "cuda"))]
 /// # {
-/// // A straightforward case with an ELF file
+/// // A straightforward case with an ELF binary
 /// let env = ExecutorEnv::builder().add_input(&[20]).build().unwrap();
 /// let receipt = default_prover().prove_elf(env, FIB_ELF).unwrap();
 ///
@@ -63,7 +63,7 @@ use crate::{is_dev_mode, ExecutorEnv, Receipt, VerifierContext};
 /// let receipt = default_prover().prove_elf_with_ctx(env, &ctx, FIB_ELF, &opts).unwrap();
 ///
 /// // Or you can prove from a `MemoryImage`
-/// // (generating a `MemoryImage` from an ELF file in this way is equivalent
+/// // (generating a `MemoryImage` from an ELF binary in this way is equivalent
 /// // to the above code.)
 /// let program = Program::load_elf(FIB_ELF, GUEST_MAX_MEM as u32).unwrap();
 /// let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
@@ -76,20 +76,6 @@ use crate::{is_dev_mode, ExecutorEnv, Receipt, VerifierContext};
 pub trait Prover {
     /// Return a name for this [Prover].
     fn get_name(&self) -> String;
-
-    /// Execute the specified [MemoryImage].
-    ///
-    /// This only executes the program and does not generate a receipt.
-    fn execute(&self, env: ExecutorEnv<'_>, image: MemoryImage) -> Result<()>;
-
-    /// Execute the specified ELF binary.
-    ///
-    /// This only executes the program and does not generate a receipt.
-    fn execute_elf(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<()> {
-        let program = Program::load_elf(elf, GUEST_MAX_MEM as u32)?;
-        let image = MemoryImage::new(&program, PAGE_SIZE as u32)?;
-        self.execute(env, image)
-    }
 
     /// Prove the specified [MemoryImage].
     fn prove(
@@ -124,6 +110,23 @@ pub trait Prover {
     }
 }
 
+/// An Executor can execute a given [MemoryImage] or ELF binary.
+pub trait Executor {
+    /// Execute the specified [MemoryImage].
+    ///
+    /// This only executes the program and does not generate a receipt.
+    fn execute(&self, env: ExecutorEnv<'_>, image: MemoryImage) -> Result<SessionInfo>;
+
+    /// Execute the specified ELF binary.
+    ///
+    /// This only executes the program and does not generate a receipt.
+    fn execute_elf(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<SessionInfo> {
+        let program = Program::load_elf(elf, GUEST_MAX_MEM as u32)?;
+        let image = MemoryImage::new(&program, PAGE_SIZE as u32)?;
+        self.execute(env, image)
+    }
+}
+
 /// Options to configure a [Prover].
 #[derive(Clone, Serialize, Deserialize)]
 pub struct ProverOpts {
@@ -153,6 +156,16 @@ pub fn default_prover() -> Rc<dyn Prover> {
         return Rc::new(BonsaiProver::new("bonsai"));
     }
 
+    if cfg!(feature = "prove") {
+        #[cfg(feature = "prove")]
+        return Rc::new(self::local::LocalProver::new("local"));
+    }
+
+    Rc::new(ExternalProver::new("ipc", get_r0vm_path()))
+}
+
+/// Return a default [Executor].
+pub fn default_executor() -> Rc<dyn Executor> {
     if cfg!(feature = "prove") {
         #[cfg(feature = "prove")]
         return Rc::new(self::local::LocalProver::new("local"));

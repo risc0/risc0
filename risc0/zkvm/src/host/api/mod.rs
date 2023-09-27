@@ -37,6 +37,8 @@ use anyhow::{anyhow, Context, Result};
 use bytes::{Buf, BufMut, Bytes};
 use prost::Message;
 
+use crate::ExitCode;
+
 mod pb {
     pub(crate) mod api {
         pub use crate::host::protos::api::*;
@@ -125,8 +127,12 @@ struct ParentProcessConnector {
 
 impl ParentProcessConnector {
     pub fn new<P: AsRef<Path>>(server_path: P) -> Result<Self> {
+        let server_path = server_path.as_ref().to_path_buf();
+        let server_path = server_path
+            .canonicalize()
+            .context(server_path.to_string_lossy().to_string())?;
         Ok(Self {
-            server_path: server_path.as_ref().to_path_buf(),
+            server_path,
             listener: TcpListener::bind("127.0.0.1:0")?,
         })
     }
@@ -277,6 +283,18 @@ pub enum Asset {
 pub enum AssetRequest {
     Inline,
     Path(PathBuf),
+}
+
+/// Provides information about the result of execution.
+pub struct SessionInfo {
+    /// The number of segments.
+    pub segments: u32,
+
+    /// The data publicly committed by the guest program.
+    pub journal: Bytes,
+
+    /// The [ExitCode] of the session.
+    pub exit_code: ExitCode,
 }
 
 impl Binary {

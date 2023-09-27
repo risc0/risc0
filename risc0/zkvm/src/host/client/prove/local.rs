@@ -15,8 +15,8 @@
 use anyhow::Result;
 use risc0_binfmt::MemoryImage;
 
-use super::{Prover, ProverOpts};
-use crate::{get_prover_server, ExecutorEnv, Receipt, VerifierContext};
+use super::{Executor, Prover, ProverOpts};
+use crate::{get_prover_server, ExecutorEnv, Receipt, SessionInfo, VerifierContext};
 
 /// A [Prover] implementation that selects a [crate::ProverServer] by calling
 /// [get_prover_server].
@@ -34,10 +34,6 @@ impl LocalProver {
 }
 
 impl Prover for LocalProver {
-    fn execute(&self, _env: ExecutorEnv<'_>, _image: MemoryImage) -> Result<()> {
-        unimplemented!()
-    }
-
     fn prove(
         &self,
         env: ExecutorEnv<'_>,
@@ -50,5 +46,17 @@ impl Prover for LocalProver {
 
     fn get_name(&self) -> String {
         self.name.clone()
+    }
+}
+
+impl Executor for LocalProver {
+    fn execute(&self, env: ExecutorEnv<'_>, image: MemoryImage) -> Result<SessionInfo> {
+        let mut exec = crate::Executor::new(env, image)?;
+        let session = exec.run()?;
+        Ok(SessionInfo {
+            segments: session.segments.len() as u32,
+            journal: session.journal.into(),
+            exit_code: session.exit_code,
+        })
     }
 }
