@@ -37,7 +37,7 @@ use crate::{
         testutils,
     },
     serde::{from_slice, to_vec},
-    ExecutorEnv, ExitCode, MemoryImage, Program, Session, TraceEvent,
+    ExecutorEnv, ExitCode, MemoryImage, Program, Session,
 };
 
 #[cfg(feature = "test-exact-cycles")]
