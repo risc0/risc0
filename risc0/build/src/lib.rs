@@ -390,6 +390,8 @@ pub fn embed_methods_with_docker() {
     detect_toolchain(RUSTUP_TOOLCHAIN_NAME);
 
     let mut manifest_path = env::var("CARGO_MANIFEST_DIR").unwrap();
+    eprintln!("manifest path: {manifest_path}");
+
     manifest_path.push_str("/Cargo.toml");
     docker_build(&PathBuf::from(manifest_path)).unwrap();
 
