@@ -163,7 +163,7 @@ fn compute_image_id(elf_path: &Path) -> Result<String> {
 }
 
 // requires Docker to be installed
-#[cfg(feature = "repro")]
+#[cfg(feature = "docker")]
 #[cfg(test)]
 mod test {
     use std::path::PathBuf;
