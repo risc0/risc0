@@ -1,6 +1,7 @@
 [workspace]
 resolver = "2"
 members = [
+  "external/substrate",
   "risc0/binfmt",
   "risc0/build",
   "risc0/build_kernel",
@@ -18,7 +19,7 @@ members = [
   "risc0/zkvm/receipts",
   "xtask",
 ]
-exclude = ["tools/crates-validator"]
+exclude = ["external/substrate", "tools/crates-validator"]
 
 [workspace.package]
 version = "0.18.0"

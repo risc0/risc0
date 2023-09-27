@@ -96,6 +96,7 @@ jobs:
       - run: cargo check -F $FEATURE -p risc0-sys
       - run: cargo check -F $FEATURE -p risc0-zkp
       - run: cargo check -F $FEATURE -p risc0-zkvm
+      - run: cargo check -p substrate-minimal-runtime
       - uses: risc0/clippy-action@main
         with:
           reporter: 'github-pr-check'
