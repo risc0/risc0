@@ -1,6 +1,5 @@
 [package]
-# TODO: Rename this package to change the method name from METHOD_NAME
-name = "method_name"
+name = "ml_template"
 version = "0.1.0"
 edition = "2021"
 
@@ -8,3 +7,5 @@ edition = "2021"
 
 [dependencies]
 risc0-zkvm = { version = "0.18.0", default-features = false, features = ['std'] }
+smartcore = {version = "0.3.2", features = ['serde']}
+rmp-serde = "1.1.2"
