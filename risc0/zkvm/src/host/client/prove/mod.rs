@@ -141,6 +141,10 @@ impl Default for ProverOpts {
 
 /// Return a default [Prover] based on environment variables, falling back to a
 /// default CPU-based prover.
+///
+/// While not in `RISC0_DEV_MODE`, if the `BONSAI_API_URL` and `BONSAI_API_KEY` environment variables
+/// are set then it will select to the [BonsaiProver] remote proving backend. If not set then it will
+/// use the [local::LocalProver] (if the `prove` feature flag is set) or finally the [ExternalProver]
 pub fn default_prover() -> Rc<dyn Prover> {
     if !is_dev_mode()
         && std::env::var("BONSAI_API_URL").is_ok()
