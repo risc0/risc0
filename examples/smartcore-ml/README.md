@@ -1,11 +1,77 @@
-# RISC Zero Rust Starter Template
+# RISC Zero Rust SmartCore Machine Learning Template
 
-Welcome to the RISC Zero Rust Starter Template! This template is intended to give you a starting point for building a project using the RISC Zero zkVM. Throughout the template (including in this README), you'll find comments labelled `TODO` in places where you'll need to make changes.
-To better understand the concepts behind this template, check out our [Structure of a zkVM Application] explainer.
+This template is intended to give you a framework for using the RISC Zero ZKVM to perform verifiable inference using machine learning models from the Rust SmartCore library.  The following models are currently supported:
 
->TODO: Replace this README with a README for your project
+Classifiers: Logistic Regression, Decision Trees, Random Forests, K Nearest Neighbors, Naive Bayes, and Support Vector Machines.  (Support Vector Machine and Support Vector Regression are supported using a forked version of SmartCore.)
 
->TODO: Verify whether the included `.gitignore`, `LICENSE`, and `rust-toolchain` files are appropriate to your project
+Regression:  Linear Regression, Lasso, Ridge, and Elastic Net.
+
+Clutering:  K-Means, DBSCAN.
+
+Dimensionality Reduction:  PCA.
+
+Matrix Decomposition:  SVD, Eigenvalue Decomposition, QR, LU.
+
+The following folders are not part of the standard RISC Zero starter template and should be added if the user wishes to replicate the layout of this template:  res/ml-model, res/input-data, and train-model.  ml-model contains a json file of a trained decision tree model and input-data contains a json file of sample input data.  You can train and export your model along with any sample data in train-model/src/main.rs (note that this is excluded from the zkvm workspace).  
+
+res/ml-model and res/input-data come preloaded with a trained decision tree classifier.  You can replace the code in train-model to train and export any of the supported models listed above.
+
+## Model Types
+
+It is important to specificy the generic types for each model so that they can be succesfully deserialized.  The input data for a trained model is typically formatted as a DenseMatrix, so be sure to add the following import: 
+`use smartcore::linalg::basic::matrix::DenseMatrix;`
+when using KNN, be sure to add the following import:
+`use smartcore::metrics::distance::euclidian::Euclidian;`
+A list of the supported models with definitions for their respective types can be found below.  Note that {float} is a placeholder for either f32 or f64:
+
+```
+let model: DecisionTreeClassifier<{float}, u32, DenseMatrix<{float}>, Vec<u32>> = trained_model;
+```
+
+```
+let model: RandomForestClassifier<{float}, u8, DenseMatrix<{float}>, Vec<u8>> = trained_model;
+```
+
+```
+let model: GaussianNB<{float}, _, DenseMatrix<{float}>, _> = trained_model;
+```
+
+```
+let model: LogisticRegression<{flaot}, u32, DenseMatrix<{float}>, Vec<u32>> = trained_model;
+```
+
+```
+let model: LinearRegression< {float}, {float}, DenseMatrix<{float}>, Vec<{float}>> = trained_model;
+```
+
+```
+let model: KNNClassifier< {float}, u32, DenseMatrix<{float}>, Vec<u32>, Euclidian<{float}>> = trained_model;
+```
+
+```
+let model: KMeans<{float}, u8, DenseMatrix<{float}>, Vec<u8>> = trained_model;
+```
+
+```
+let model: PCA<{float}, DenseMatrix<{float}>> = trained_model;
+```
+
+NOTE:  For Support Vector Machine classifiers and regression models, you MUST use the following smartcore fork and import into you cargo.toml file:
+smartcore = { git = "https://github.com/Roee-87/smartcore.git", features = ["serde"]}
+Deserialization of SVC and SVR does not includes that SVCParametersmake field.  It must be added back into the model struct manually after deserialization.  The SVC and SVR fork have ammended the visbility of the model struct, making the parameters field public and thereby allowing the parameters field to be directly inserted into the model struct after dserialization.  You must insert the same parameters that were used when training the model.
+```
+let mut model: SVC<{float}, i32, DenseMatrix<{float}>, Vec<i32>> = deserialized_svc_trained;
+let params = &SVCParameters::default().with_c(200.0).with_kernel(Kernels::linear());
+model.parameters = Some(params);
+```
+
+```
+let mut model: SVR< '_, {float}, DenseMatrix<{float}>, Vec<{float}>> = deserialized_model;
+//make sure to use the same SVRParameters used to train the model
+let params = &SVRParameters::default().with_eps(2.0).with_c(10.0).with_kernel(Kernels::linear());
+model.parameters = params;
+```
+
 
 ## Quick Start
 
@@ -16,9 +82,6 @@ To build all methods and execute the method within the zkVM, run the following c
 ```
 cargo run
 ```
-
-This is an empty template, and so there is no expected output (until you modify the code).
-
 ### Running proofs remotely on Bonsai
 
 *Note: The Bonsai proving service is still in early Alpha; an API key is required for access. [Click here to request access].*
@@ -35,18 +98,13 @@ BONSAI_API_KEY="YOUR_API_KEY" BONSAI_API_URL="BONSAI_URL" cargo run
 
 ## How to create a project based on this template
 
-Search this template for the string `TODO`, and make the necessary changes to implement the required feature described by the `TODO` comment. Some of these changes will be complex, and so we have a number of instructional resources to assist you in learning how to write your own code for the RISC Zero zkVM:
- * The [RISC Zero Developer Docs](https://dev.risczero.com/zkvm) is a great place to get started.
- * Example projects are available in the [examples folder](https://github.com/risc0/risc0/tree/main/examples) of this repository.
- * Reference documentation for our Rust crates is available at [docs.rs], including the [RISC Zero zkVM crate](https://docs.rs/risc0-zkvm), the [cargo risczero crate](https://docs.rs/cargo-risczero), the [RISC Zero build crate](https://docs.rs/risc0-build), and others (the full list is available at [https://github.com/risc0/risc0/blob/main/README.md]).
- * Our [main repository](https://www.github.com/risc0/risc0).
+
 
 
 ## Contributor's Guide
 We welcome contributions to documentation and code via PRs and GitHub Issues on our [main repository](http://www.github.com/risc0) or any of our other repositories.
 
 ## Video Tutorial
-For a walk-through of how to build with this template, check out this [excerpt from our workshop at ZK HACK III](https://www.youtube.com/watch?v=Yg_BGqj_6lg&list=PLcPzhUaCxlCgig7ofeARMPwQ8vbuD6hC5&index=5).
 
 ## Questions, Feedback, and Collaborations
 We'd love to hear from you on [Discord](https://discord.gg/risczero) or [Twitter](https://twitter.com/risczero).
