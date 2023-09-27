@@ -218,5 +218,5 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 18
-      - run: cargo test -p risc0-build
+      - run: cargo test -p risc0-build -F docker
       - run: cargo test -F default -F profiler -F test-exact-cycles -p risc0-zkvm
