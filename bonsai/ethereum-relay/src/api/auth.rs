@@ -13,13 +13,14 @@
 // limitations under the License.
 
 use axum::{http::Request, middleware::Next, response::Response};
+use bonsai_sdk::API_KEY_HEADER;
 
 use super::{Error, Result};
 
 pub(crate) async fn authorize<B>(mut req: Request<B>, next: Next<B>) -> Result<Response> {
     if let Some(auth_header) = req
         .headers()
-        .get("x-api-key")
+        .get(API_KEY_HEADER)
         .and_then(|header| header.to_str().ok())
     {
         let owned_value = auth_header.to_owned();

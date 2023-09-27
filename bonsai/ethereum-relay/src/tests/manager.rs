@@ -39,9 +39,10 @@ pub(crate) mod tests {
         // Mock API server
         let (proof_id, server) = get_test_bonsai_server().await;
 
-        let bonsai_client = get_client_from_parts(server.uri(), String::default())
-            .await
-            .unwrap();
+        let bonsai_client =
+            get_client_from_parts(server.uri(), String::default(), risc0_zkvm::VERSION)
+                .await
+                .unwrap();
         let storage = InMemoryStorage::new();
         let notifier = Arc::new(Notify::new());
         let done_notifer = Arc::new(Notify::new());
@@ -114,9 +115,10 @@ pub(crate) mod tests {
             .await
             .expect("deployment should succeed");
 
-        let bonsai_client = get_client_from_parts(server.uri(), String::default())
-            .await
-            .unwrap();
+        let bonsai_client =
+            get_client_from_parts(server.uri(), String::default(), risc0_zkvm::VERSION)
+                .await
+                .unwrap();
         let storage = InMemoryStorage::new();
         let new_complete_proofs_notifier = Arc::new(Notify::new());
         let send_batch_notifier = Arc::new(Notify::new());

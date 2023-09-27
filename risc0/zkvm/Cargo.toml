@@ -37,6 +37,7 @@ hex = { version = "0.4.3", default-features = false, features = ["alloc"] }
 libm = "0.2"
 risc0-zkp = { workspace = true }
 risc0-zkvm-platform = { workspace = true }
+semver = { version = "1.0", default-features = false }
 serde = { version = "1.0", default-features = false, features = [
   "alloc",
   "derive",

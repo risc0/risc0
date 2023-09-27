@@ -599,6 +599,7 @@ dependencies = [
  "risc0-core",
  "risc0-zkp",
  "risc0-zkvm-platform",
+ "semver",
  "serde",
  "tracing",
 ]
