@@ -25,6 +25,8 @@ mod host;
 pub mod serde;
 pub mod sha;
 
+use semver::Version;
+
 /// Re-exports for recursion
 #[cfg(not(target_os = "zkvm"))]
 #[cfg(feature = "prove")]
@@ -76,6 +78,14 @@ pub use self::host::{
     },
     recursion::ALLOWED_IDS_ROOT,
 };
+
+/// Reports the current version of this crate.
+pub const VERSION: &str = env!("CARGO_PKG_VERSION");
+
+/// Reports the current version of this crate as represented by a [semver::Version].
+pub fn get_version() -> Result<Version, semver::Error> {
+    Version::parse(VERSION)
+}
 
 /// Align the given address `addr` upwards to alignment `align`.
 ///

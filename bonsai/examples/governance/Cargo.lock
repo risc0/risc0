@@ -3649,6 +3649,7 @@ dependencies = [
  "risc0-zkp",
  "risc0-zkvm-platform",
  "rrs-lib",
+ "semver",
  "serde",
  "sha2 0.10.7",
  "thiserror",

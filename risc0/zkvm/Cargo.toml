@@ -39,6 +39,7 @@ risc0-circuit-rv32im = { workspace = true }
 risc0-core = { workspace = true }
 risc0-zkp = { workspace = true }
 risc0-zkvm-platform = { workspace = true, features = ["rust-runtime", "export-getrandom"] }
+semver = { version = "1.0", default-features = false }
 serde = { version = "1.0", default-features = false, features = [
   "alloc",
   "derive",
@@ -81,6 +82,7 @@ typetag = { version = "0.2", optional = true }
 clap = { version = "4", features = ["derive"] }
 criterion = { version = "0.5", features = ["html_reports"] }
 human-repr = "1.0"
+serde_json = "1.0"
 tempfile = "3"
 tracing-forest = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }

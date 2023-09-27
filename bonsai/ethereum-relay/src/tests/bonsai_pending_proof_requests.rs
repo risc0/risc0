@@ -26,9 +26,10 @@ mod tests {
         // Mock API server
         let (proof_id, server) = get_test_bonsai_server().await;
 
-        let bonsai_client = get_client_from_parts(server.uri(), String::default())
-            .await
-            .unwrap();
+        let bonsai_client =
+            get_client_from_parts(server.uri(), String::default(), risc0_zkvm::VERSION)
+                .await
+                .unwrap();
         let pending_proof_request = PendingProofRequest::new(bonsai_client, proof_id.clone());
         let completed_proof_response = pending_proof_request.await;
         assert!(completed_proof_response.is_ok());
