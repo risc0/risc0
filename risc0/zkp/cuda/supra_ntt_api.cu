@@ -46,16 +46,11 @@ RustError::by_value batch_expand(fr_t* d_out, fr_t* d_in, uint32_t lg_domain_siz
     cudaDeviceSynchronize();
     const gpu_t& gpu = select_gpu();
 
-    // Determine the max power of 2 SM count
-    size_t kernel_sms = gpu.sm_count();
-    while (kernel_sms & (kernel_sms - 1))
-        kernel_sms -= (kernel_sms & (0 - kernel_sms));
-
     try {
         for (size_t c = 0; c < poly_count; c++) {
-            NTT::batch_expand(gpu, kernel_sms, &d_out[c * ext_domain_size],
+            NTT::LDE_expand(gpu, &d_out[c * ext_domain_size],
                               &d_in[c * domain_size], lg_domain_size,
-                              lg_blowup);
+                              lg_blowup, false);
         }
 
         gpu.sync();
@@ -149,7 +144,7 @@ RustError::by_value batch_zk_shift(fr_t* d_inout, uint32_t lg_domain_size,
 
     try {
         for (size_t c = 0; c < poly_count; c++) {
-            NTT::zk_shift(gpu, &d_inout[c * domain_size], lg_domain_size);
+            NTT::LDE_powers(gpu, &d_inout[c * domain_size], lg_domain_size);
         }
 
         gpu.sync();
