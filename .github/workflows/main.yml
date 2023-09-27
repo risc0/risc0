@@ -172,6 +172,9 @@ jobs:
       fail-fast: false
       matrix:
         os: [Linux, macOS]
+    env:
+      RISC0_SERVER_PATH: ${{ github.workspace }}/target/release/r0vm
+      RUSTC_WRAPPER: sccache
 
     steps:
       # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
@@ -181,6 +184,7 @@ jobs:
       - run: cargo run --bin cargo-risczero -- risczero install
         env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: cargo build --release -F $FEATURE -p risc0-r0vm
       - run: |
           cargo run -p cargo-risczero risczero new --template templates/rust-starter --templ-subdir="" --path $(pwd) --dest ${{ runner.temp }} template-test
         shell: bash

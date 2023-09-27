@@ -127,29 +127,33 @@ struct ParentProcessConnector {
 
 impl ParentProcessConnector {
     pub fn new<P: AsRef<Path>>(server_path: P) -> Result<Self> {
-        let server_path = server_path.as_ref().to_path_buf();
-        let server_path = server_path
-            .canonicalize()
-            .context(server_path.to_string_lossy().to_string())?;
         Ok(Self {
-            server_path,
+            server_path: server_path.as_ref().to_path_buf(),
             listener: TcpListener::bind("127.0.0.1:0")?,
         })
+    }
+
+    fn spawn_fail(&self) -> String {
+        format!(
+            "Could not launch zkvm: \"{}\". \n
+            Use `cargo risczero install` to install the latest zkvm.",
+            self.server_path.to_string_lossy()
+        )
     }
 }
 
 impl Connector for ParentProcessConnector {
     fn connect(&self) -> Result<ConnectionWrapper> {
         let addr = self.listener.local_addr()?;
-        let child = Command::new(&self.server_path)
+        let server_path = self
+            .server_path
+            .canonicalize()
+            .with_context(|| self.spawn_fail())?;
+        let child = Command::new(&server_path)
             .arg("--port")
             .arg(addr.port().to_string())
             .spawn()
-            .context(format!(
-                "Could not launch zkvm: \"{}\". \
-                Use `cargo risczero install` to install the latest zkvm.",
-                self.server_path.to_string_lossy()
-            ))?;
+            .with_context(|| self.spawn_fail())?;
 
         let shutdown = Arc::new(AtomicBool::new(false));
         let server_shutdown = shutdown.clone();
