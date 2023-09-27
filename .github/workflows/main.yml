@@ -184,9 +184,14 @@ jobs:
       - run: cargo run --bin cargo-risczero -- risczero install
         env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - run: cargo build --release -F $FEATURE -p risc0-r0vm
+      - run: cargo build --release -p risc0-r0vm
       - run: |
-          cargo run -p cargo-risczero risczero new --template templates/rust-starter --templ-subdir="" --path $(pwd) --dest ${{ runner.temp }} template-test
+          cargo run -p cargo-risczero risczero new \
+            --template templates/rust-starter \
+            --templ-subdir="" \
+            --path $(pwd) \
+            --dest ${{ runner.temp }} \
+            template-test
         shell: bash
       - run: cargo build --release --manifest-path ${{ runner.temp }}/template-test/Cargo.toml
       - run: ${{ runner.temp }}/template-test/target/release/host
