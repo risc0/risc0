@@ -57,7 +57,9 @@ let model: PCA<{float}, DenseMatrix<{float}>> = trained_model;
 ```
 
 NOTE:  For Support Vector Machine classifiers and regression models, you MUST use the following smartcore fork and import into you cargo.toml file:
+
 smartcore = { git = "https://github.com/Roee-87/smartcore.git", features = ["serde"]}
+
 Deserialization of SVC and SVR does not includes that SVCParametersmake field.  It must be added back into the model struct manually after deserialization.  The SVC and SVR fork have ammended the visbility of the model struct, making the parameters field public and thereby allowing the parameters field to be directly inserted into the model struct after dserialization.  You must insert the same parameters that were used when training the model.
 ```
 let mut model: SVC<{float}, i32, DenseMatrix<{float}>, Vec<i32>> = deserialized_svc_trained;
