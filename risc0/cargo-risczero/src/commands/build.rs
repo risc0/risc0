@@ -18,7 +18,8 @@ use anyhow::{anyhow, bail, Context};
 use cargo_metadata::{Artifact, ArtifactProfile, Message};
 use clap::Parser;
 use risc0_build::cargo_command;
-use risc0_zkvm::{Executor, ExecutorEnv};
+use risc0_zkvm::{Executor, ExecutorEnv, Segment, SegmentRef};
+use serde::{Deserialize, Serialize};
 use tempfile::{tempdir, TempDir};
 
 /// Subcommands of cargo that are supported by this cargo risczero command.
@@ -206,9 +207,21 @@ impl BuildCommand {
                     .build()?;
 
                 let mut exec = Executor::from_elf(env, &fs::read(t)?)?;
-                exec.run()?;
+                // Run the executor
+                exec.run_with_callback(|_| Ok(Box::new(EmptySegmentRef)))?;
             }
         };
         Ok(())
+    }
+}
+
+// TODO(victor): Code duplicated from host server code.
+#[derive(Clone, Serialize, Deserialize)]
+struct EmptySegmentRef;
+
+#[typetag::serde]
+impl SegmentRef for EmptySegmentRef {
+    fn resolve(&self) -> anyhow::Result<Segment> {
+        Err(anyhow!("Segment resolution not supported"))
     }
 }

@@ -38,6 +38,7 @@ tar = "0.4"
 tempfile = "3"
 tracing = { version = "0.1", default-features = false }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+typetag = { version = "0.2", optional = true }
 zip = "0.6"
 
 [build-dependencies]
@@ -47,4 +48,4 @@ zip = "0.6"
 
 [features]
 docker = []
-experimental = ["risc0-zkvm/prove"]
+experimental = ["risc0-zkvm/prove", "dep:typetag"]
