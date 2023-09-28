@@ -74,7 +74,7 @@ let params = &SVRParameters::default().with_eps(2.0).with_c(10.0).with_kernel(Ke
 model.parameters = params;
 ```
 
-SVM models support four kernels:  Gaussian (rbf), Linear, Polynomial, and Sigmoid.  Kernels are selected within the .with_kernel() function in the SVCParameters or SVRParameters.
+SVM models support four kernels:  Gaussian (rbf), Linear, Polynomial, and Sigmoid.  Kernels are selected within the `.with_kernel()` function in the `SVCParameters` or `SVRParameters`.
 Kernel::linear()
 Kernel::rbf()
 Kernel::polynomial()
