@@ -288,7 +288,6 @@ dependencies = [
  "risc0-core",
  "risc0-zkp",
  "risc0-zkvm-platform",
- "semver",
  "serde",
  "tracing",
 ]
@@ -296,6 +295,11 @@ dependencies = [
 [[package]]
 name = "risc0-zkvm-platform"
 version = "0.18.0"
+dependencies = [
+ "bytemuck",
+ "getrandom",
+ "libm",
+]
 
 [[package]]
 name = "search_json"
@@ -305,12 +309,6 @@ dependencies = [
  "json-core",
  "risc0-zkvm",
 ]
-
-[[package]]
-name = "semver"
-version = "1.0.18"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b0293b4b29daaf487284529cc2f5675b8e57c61f70167ba415a463651fd6a918"
 
 [[package]]
 name = "serde"

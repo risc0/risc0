@@ -30,12 +30,22 @@ reqwest = { version = "0.11", default-features = false, features = [
   "gzip",
 ] }
 risc0-binfmt = { workspace = true }
+risc0-build = { workspace = true }
+risc0-zkvm = { workspace = true }
 risc0-zkvm-platform = { workspace = true }
 serde = { version = "1", features = ["derive"] }
 tar = "0.4"
 tempfile = "3"
 tracing = { version = "0.1", default-features = false }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+typetag = { version = "0.2", optional = true }
+zip = "0.6"
+
+[build-dependencies]
+env_logger = "0.10"
+risc0-build = { workspace = true }
+zip = "0.6"
 
 [features]
 docker = []
+experimental = ["risc0-zkvm/prove", "dep:typetag"]

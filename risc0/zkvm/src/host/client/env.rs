@@ -48,6 +48,7 @@ pub type TraceCallback<'a> = dyn FnMut(TraceEvent) -> Result<()> + 'a;
 #[derive(Clone, Default)]
 pub struct ExecutorEnv<'a> {
     pub(crate) env_vars: HashMap<String, String>,
+    pub(crate) args: Vec<String>,
     pub(crate) segment_limit_po2: Option<u32>,
     pub(crate) session_limit: Option<u64>,
     pub(crate) posix_io: Rc<RefCell<PosixIo<'a>>>,
@@ -140,6 +141,22 @@ impl<'a> ExecutorEnvBuilder<'a> {
     /// ```
     pub fn env_vars(&mut self, vars: HashMap<String, String>) -> &mut Self {
         self.inner.env_vars = vars;
+        self
+    }
+
+    /// Add an argument array to the guest environment.
+    ///
+    /// # Example
+    /// ```
+    /// # use risc0_zkvm::ExecutorEnv;
+    ///
+    /// let env = ExecutorEnv::builder()
+    ///     .args(&["grep".to_string(), "-c".to_string(), "foo".to_string(), "-".to_string()])
+    ///     .build()
+    ///     .unwrap();
+    /// ```
+    pub fn args(&mut self, args: &[String]) -> &mut Self {
+        self.inner.args.extend_from_slice(args);
         self
     }
 
