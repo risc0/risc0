@@ -38,7 +38,10 @@ const TARGET_DIR: &str = "target/riscv-guest/riscv32im-risc0-zkvm-elf/docker";
 
 /// Build the package in the manifest path using a docker environment.
 pub fn docker_build(manifest_path: &PathBuf, features: Vec<String>) -> Result<()> {
-    let meta = MetadataCommand::new().manifest_path(manifest_path).exec()?;
+    let meta = MetadataCommand::new()
+        .manifest_path(manifest_path)
+        .exec()
+        .context("Manifest not found")?;
     let root_pkg = meta.root_package().context("failed to parse Cargo.toml")?;
     let pkg_name = &root_pkg.name;
 

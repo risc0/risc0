@@ -88,13 +88,13 @@ jobs:
       - run: cargo test --workspace -F $FEATURE --tests -- --ignored --test-threads 1
       - run: cargo test -F $FEATURE -F disable-dev-mode -p risc0-r0vm
         if: matrix.device == 'cpu'
+      - run: cargo test -F experimental -p cargo-risczero
+        if: matrix.device == 'cpu'
       - run: cargo check -F $FEATURE --benches
       - run: cargo check -p risc0-build
         if: matrix.device == 'cpu'
       - run: cargo check -F $FEATURE -p risc0-circuit-rv32im
       - run: cargo check -p risc0-core
-        if: matrix.device == 'cpu'
-      - run: cargo check -p cargo-risczero -F experimental
         if: matrix.device == 'cpu'
       - run: cargo check -F $FEATURE -p risc0-r0vm
       - run: cargo check -F $FEATURE -p risc0-sys
@@ -235,5 +235,5 @@ jobs:
         with:
           node-version: 18
       - run: cargo run --bin cargo-risczero -- risczero install
-      - run: cargo test -p risc0-build -F docker
-      - run: cargo test -F default -F profiler -F test-exact-cycles -p risc0-zkvm
+      - run: cargo test -F docker -p risc0-build
+      - run: cargo test -F test-exact-cycles -p risc0-zkvm
