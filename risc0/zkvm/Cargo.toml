@@ -106,7 +106,7 @@ client = [
 cuda = ["prove", "risc0-circuit-rv32im/cuda", "risc0-zkp/cuda"]
 dual = []
 metal = ["prove", "risc0-circuit-rv32im/metal", "risc0-zkp/metal"]
-default = ["client"]
+default = ["client", "prove"]
 disable-dev-mode = []
 profiler = [
   "dep:addr2line",
