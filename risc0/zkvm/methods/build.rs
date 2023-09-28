@@ -35,7 +35,7 @@ fn main() {
     ]);
 
     if cfg!(feature = "test-exact-cycles") {
-        std::env::set_current_dir("../../").unwrap();
+        std::env::set_current_dir("../../../").unwrap();
         embed_methods_with_docker();
     } else {
         embed_methods_with_options(map);

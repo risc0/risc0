@@ -401,9 +401,13 @@ pub fn embed_methods_with_docker() {
 
     detect_toolchain(RUSTUP_TOOLCHAIN_NAME);
 
-    for mut manifest_path in guest_manifest_paths {
-        manifest_path.push_str("/Cargo.toml");
-        eprintln!("Manifest path: {manifest_path}");
+    for mut path in guest_manifest_paths {
+        path.push_str("/Cargo.toml");
+        let mut manifest_path = Path::new(&path);
+        manifest_path = manifest_path
+            .strip_prefix(std::env::current_dir().unwrap())
+            .unwrap();
+        eprintln!("Manifest path: {:?}", manifest_path);
         docker_build(&PathBuf::from(manifest_path)).unwrap();
     }
 
