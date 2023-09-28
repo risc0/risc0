@@ -70,48 +70,28 @@
 
 #![deny(missing_docs)]
 
-mod alloc;
 pub mod env;
 pub mod sha;
 
 #[cfg(target_os = "zkvm")]
 use core::arch::asm;
 
-#[cfg(target_os = "zkvm")]
-use getrandom::{register_custom_getrandom, Error};
 use risc0_zkvm_platform::syscall::sys_panic;
-#[cfg(target_os = "zkvm")]
-use risc0_zkvm_platform::{syscall::sys_rand, WORD_SIZE};
 
 pub use crate::entry;
-
-/// This is a getrandom handler for the zkvm. It's intended to hook into a
-/// getrandom crate or a depdent of the getrandom crate used by the guest code.
-#[cfg(target_os = "zkvm")]
-pub fn zkvm_getrandom(dest: &mut [u8]) -> Result<(), Error> {
-    if dest.is_empty() {
-        return Ok(());
-    }
-
-    let words = (dest.len() + WORD_SIZE - 1) / WORD_SIZE;
-    let mut buf = ::alloc::vec![0u32; words];
-    unsafe {
-        sys_rand(buf.as_mut_ptr(), words);
-    }
-    dest.clone_from_slice(&bytemuck::cast_slice(buf.as_slice())[..dest.len()]);
-    Ok(())
-}
-
-#[cfg(target_os = "zkvm")]
-register_custom_getrandom!(zkvm_getrandom);
 
 #[cfg(target_os = "zkvm")]
 core::arch::global_asm!(include_str!("memset.s"));
 #[cfg(target_os = "zkvm")]
 core::arch::global_asm!(include_str!("memcpy.s"));
 
-#[cfg(target_os = "zkvm")]
-mod libm_extern;
+fn _fault() -> ! {
+    #[cfg(target_os = "zkvm")]
+    unsafe {
+        asm!("sw x0, 1(x0)")
+    };
+    unreachable!();
+}
 
 /// Aborts the guest with the given message.
 pub fn abort(msg: &str) -> ! {
@@ -119,17 +99,6 @@ pub fn abort(msg: &str) -> ! {
     // sys_panic will issue an invalid instruction for non-compliant hosts.
     unsafe {
         sys_panic(msg.as_ptr(), msg.len());
-    }
-}
-
-#[cfg(all(not(feature = "std"), target_os = "zkvm"))]
-mod handlers {
-    use core::panic::PanicInfo;
-
-    #[panic_handler]
-    fn panic_fault(panic_info: &PanicInfo) -> ! {
-        let msg = ::alloc::format!("{}", panic_info);
-        crate::guest::abort(&msg)
     }
 }
 
@@ -209,4 +178,13 @@ pub fn memory_barrier<T>(ptr: *const T) {
     }
     #[cfg(not(target_os = "zkvm"))]
     core::sync::atomic::fence(core::sync::atomic::Ordering::SeqCst)
+}
+
+// When std is not linked, register a panic handler here so the user does not have to.
+// If std is linked, it will define the panic handler instead. This panic handler must not be
+// included.
+#[cfg(all(target_os = "zkvm", not(feature = "std")))]
+#[panic_handler]
+fn panic_impl(panic_info: &core::panic::PanicInfo) -> ! {
+    risc0_zkvm_platform::rust_rt::panic_fault(panic_info);
 }

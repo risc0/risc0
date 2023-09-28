@@ -1945,6 +1945,7 @@ dependencies = [
  "hex-literal",
  "risc0-build",
  "risc0-zkvm",
+ "risc0-zkvm-platform",
 ]
 
 [[package]]
