@@ -6,7 +6,7 @@ Classifiers: Logistic Regression, Decision Trees, Random Forests, K Nearest Neig
 
 Regression:  Linear Regression, Lasso, Ridge, and Elastic Net.
 
-Clutering:  K-Means, DBSCAN.
+Clustering:  K-Means, DBSCAN.
 
 Dimensionality Reduction:  PCA.
 
