@@ -5,6 +5,6 @@ edition = "2021"
 
 [dependencies]
 methods = { path = "../methods" }
-risc0-zkvm = { version = "0.18.0" }
+risc0-zkvm = { path = "../../risc0/zkvm" }
 serde = "1.0"
 serde_json = "1.0.107"
