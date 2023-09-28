@@ -18,6 +18,7 @@ use std::{
     cell::RefCell,
     collections::HashMap,
     io::{BufRead, BufReader, Cursor, Read, Write},
+    mem,
     rc::Rc,
 };
 
@@ -38,11 +39,18 @@ use crate::host::{
 /// A builder pattern used to construct an [ExecutorEnv].
 #[derive(Default)]
 pub struct ExecutorEnvBuilder<'a> {
-    inner: RefCell<ExecutorEnv<'a>>,
+    inner: ExecutorEnv<'a>,
 }
 
 /// A callback used to collect [TraceEvent]s.
 pub type TraceCallback<'a> = dyn FnMut(TraceEvent) -> Result<()> + 'a;
+
+/// Container for assumptions in the executor environment.
+#[derive(Debug, Default)]
+pub(crate) struct Assumptions {
+    pub(crate) cached: Vec<Assumption>,
+    pub(crate) accessed: Vec<Assumption>,
+}
 
 /// The [crate::Executor] is configured from this object.
 ///
@@ -57,7 +65,7 @@ pub struct ExecutorEnv<'a> {
     pub(crate) slice_io: Rc<RefCell<SliceIoTable<'a>>>,
     pub(crate) input: Vec<u8>,
     pub(crate) trace: Option<Rc<RefCell<TraceCallback<'a>>>>,
-    pub(crate) assumptions: Rc<Vec<Assumption>>,
+    pub(crate) assumptions: Rc<RefCell<Assumptions>>,
 }
 
 impl<'a> ExecutorEnv<'a> {
@@ -88,7 +96,7 @@ impl<'a> ExecutorEnvBuilder<'a> {
     ///
     /// After calling `build`, the [ExecutorEnvBuilder] will be reset to default.
     pub fn build(&mut self) -> Result<ExecutorEnv<'a>> {
-        let inner = self.inner.take();
+        let inner = mem::take(&mut self.inner);
 
         if !inner.input.is_empty() {
             let reader = Cursor::new(inner.input.clone());
@@ -106,7 +114,7 @@ impl<'a> ExecutorEnvBuilder<'a> {
     /// Given value must be between [risc0_zkp::MIN_CYCLES_PO2] and
     /// [risc0_zkp::MAX_CYCLES_PO2] (inclusive).
     pub fn segment_limit_po2(&mut self, limit: usize) -> &mut Self {
-        self.inner.borrow_mut().segment_limit_po2 = Some(limit);
+        self.inner.segment_limit_po2 = Some(limit);
         self
     }
 
@@ -123,7 +131,7 @@ impl<'a> ExecutorEnvBuilder<'a> {
     ///     .unwrap();
     /// ```
     pub fn session_limit(&mut self, limit: Option<usize>) -> &mut Self {
-        self.inner.borrow_mut().session_limit = limit;
+        self.inner.session_limit = limit;
         self
     }
 
@@ -145,7 +153,7 @@ impl<'a> ExecutorEnvBuilder<'a> {
     ///     .unwrap();
     /// ```
     pub fn env_vars(&mut self, vars: HashMap<String, String>) -> &mut Self {
-        self.inner.borrow_mut().env_vars.extend(vars);
+        self.inner.env_vars = vars;
         self
     }
 
@@ -163,7 +171,6 @@ impl<'a> ExecutorEnvBuilder<'a> {
     /// ```
     pub fn env_var(&mut self, name: &str, val: &str) -> &mut Self {
         self.inner
-            .borrow_mut()
             .env_vars
             .insert(name.to_string(), val.to_string());
         self
@@ -191,7 +198,6 @@ impl<'a> ExecutorEnvBuilder<'a> {
     /// ```
     pub fn add_input<T: Pod>(&mut self, slice: &[T]) -> &mut Self {
         self.inner
-            .borrow_mut()
             .input
             .extend_from_slice(bytemuck::cast_slice(slice));
         self
@@ -214,28 +220,19 @@ impl<'a> ExecutorEnvBuilder<'a> {
 
     /// Add a posix-style file descriptor for reading.
     pub fn read_fd(&mut self, fd: u32, reader: impl BufRead + 'a) -> &mut Self {
-        self.inner
-            .borrow_mut()
-            .posix_io
-            .borrow_mut()
-            .with_read_fd(fd, reader);
+        self.inner.posix_io.borrow_mut().with_read_fd(fd, reader);
         self
     }
 
     /// Add a posix-style file descriptor for writing.
     pub fn write_fd(&mut self, fd: u32, writer: impl Write + 'a) -> &mut Self {
-        self.inner
-            .borrow_mut()
-            .posix_io
-            .borrow_mut()
-            .with_write_fd(fd, writer);
+        self.inner.posix_io.borrow_mut().with_write_fd(fd, writer);
         self
     }
 
     /// Add a handler for simple I/O handling.
     pub fn slice_io(&mut self, channel: &str, handler: impl SliceIo + 'a) -> &mut Self {
         self.inner
-            .borrow_mut()
             .slice_io
             .borrow_mut()
             .with_handler(channel, handler);
@@ -249,7 +246,6 @@ impl<'a> ExecutorEnvBuilder<'a> {
         callback: impl Fn(Bytes) -> Result<Bytes> + 'a,
     ) -> &mut Self {
         self.inner
-            .borrow_mut()
             .slice_io
             .borrow_mut()
             .with_handler(channel.as_ref(), slice_io_from_fn(callback));
@@ -261,9 +257,7 @@ impl<'a> ExecutorEnvBuilder<'a> {
     /// During execution, when the guest calls `env::verify` or `env::verify_metadata`, this map
     /// will be searched for an [Assumption] that corresponds the verification call.
     pub fn add_assumption(&mut self, assumption: Assumption) -> &mut Self {
-        Rc::get_mut(&mut self.inner.borrow_mut().assumptions)
-            .expect("assumptions list borrowed when it should not be possible")
-            .push(assumption);
+        self.inner.assumptions.borrow_mut().cached.push(assumption);
         self
     }
 
@@ -287,7 +281,7 @@ impl<'a> ExecutorEnvBuilder<'a> {
         &mut self,
         callback: impl FnMut(TraceEvent) -> Result<()> + 'a,
     ) -> &mut Self {
-        self.inner.borrow_mut().trace = Some(Rc::new(RefCell::new(callback)));
+        self.inner.trace = Some(Rc::new(RefCell::new(callback)));
         self
     }
 }

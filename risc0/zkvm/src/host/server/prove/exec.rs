@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use core::cmp;
+use core::{cmp, ops::Deref};
 use std::collections::{BTreeMap, BTreeSet, VecDeque};
 
 use anyhow::{anyhow, Result};
@@ -263,7 +263,7 @@ impl MachineContext {
             .map(|syscall| syscall.regs)
             .collect();
         MachineContext {
-            memory: MemoryState::new(segment.pre_image.clone()),
+            memory: MemoryState::new(segment.pre_image.deref().clone()),
             faults: segment.faults.clone(),
             syscall_out_data: VecDeque::from(syscall_out_data),
             syscall_out_regs: VecDeque::from(syscall_out_regs),

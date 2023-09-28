@@ -14,7 +14,7 @@
 
 //! Handlers for two-way private I/O between host and guest.
 
-use std::{borrow::Cow, cell::RefCell, cmp::min, collections::HashMap, rc::Rc, str::from_utf8};
+use std::{cell::RefCell, cmp::min, collections::HashMap, rc::Rc, str::from_utf8};
 
 use anyhow::{anyhow, bail, Result};
 use bytes::Bytes;
@@ -31,9 +31,10 @@ use risc0_zkvm_platform::{
 };
 
 use crate::{
-    host::{
-        client::{env::ExecutorEnv, posix_io::PosixIo, slice_io::SliceIo},
-        receipt::Assumption,
+    host::client::{
+        env::{Assumptions, ExecutorEnv},
+        posix_io::PosixIo,
+        slice_io::SliceIo,
     },
     receipt_metadata::PrunedValueError,
     sha::{Digest, Digestable},
@@ -223,17 +224,13 @@ impl Syscall for SysRandom {
 }
 
 #[derive(Clone)]
-pub(crate) struct SysVerify<'a> {
-    pub(crate) assumptions: Rc<Vec<Assumption>>,
-    pub(crate) resolved: Vec<Cow<'a, Assumption>>,
+pub(crate) struct SysVerify {
+    pub(crate) assumptions: Rc<RefCell<Assumptions>>,
 }
 
-impl<'a> SysVerify<'a> {
-    pub(crate) fn new(assumptions: Rc<Vec<Assumption>>) -> Self {
-        Self {
-            assumptions,
-            resolved: Default::default(),
-        }
+impl SysVerify {
+    pub(crate) fn new(assumptions: Rc<RefCell<Assumptions>>) -> Self {
+        Self { assumptions }
     }
 
     fn sys_verify(&mut self, from_guest: Vec<u8>) -> Result<(u32, u32)> {
@@ -244,12 +241,15 @@ impl<'a> SysVerify<'a> {
         log::debug!("SYS_VERIFY_METADATA: {}", hex::encode(&metadata_digest));
 
         // Iterate over the list looking for a matching assumption.
-        for assumption in self.assumptions.iter() {
+        for assumption in self.assumptions.borrow().cached.iter() {
             if assumption.get_metadata()?.digest() != metadata_digest {
                 continue;
             }
 
-            self.resolved.push(Cow::Borrowed(assumption));
+            self.assumptions
+                .borrow_mut()
+                .accessed
+                .push(assumption.clone());
             return Ok((0, 0));
         }
 
@@ -295,7 +295,7 @@ impl<'a> SysVerify<'a> {
 
         // Iterate over the list looking for a matching assumption. If found, return the
         // post state digest.
-        for assumption in self.assumptions.iter() {
+        for assumption in self.assumptions.borrow().cached.iter() {
             let assumption_metadata = assumption.get_metadata()?;
             let cmp_result: Result<Option<Digest>, PrunedValueError> = {
                 let assumption_journal_digest = assumption_metadata
@@ -329,7 +329,10 @@ impl<'a> SysVerify<'a> {
 
             // Return the post_state_digest and success code to the guest.
             to_guest.copy_from_slice(post_state_digest.as_words());
-            self.resolved.push(Cow::Borrowed(assumption));
+            self.assumptions
+                .borrow_mut()
+                .accessed
+                .push(assumption.clone());
             return Ok((0, 0));
         }
 
@@ -341,7 +344,7 @@ impl<'a> SysVerify<'a> {
     }
 }
 
-impl<'a> Syscall for SysVerify<'a> {
+impl Syscall for SysVerify {
     fn syscall(
         &mut self,
         syscall: &str,

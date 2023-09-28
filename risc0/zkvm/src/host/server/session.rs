@@ -59,8 +59,8 @@ pub struct Session {
     /// The [ExitCode] of the session.
     pub exit_code: ExitCode,
 
-    // DO NOT MERGE(victor): This makes the segment object much larger. Consider how to address
-    // this.
+    // DO NOT MERGE(victor): This makes the segment object much larger. Consider whether this is an
+    // issue.
     /// The final [MemoryState] at the end of execution.
     pub post_image: MemoryImage,
 
@@ -93,7 +93,7 @@ pub trait SegmentRef: Send {
 /// termination.
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Segment {
-    pub(crate) pre_image: MemoryImage,
+    pub(crate) pre_image: Box<MemoryImage>,
     pub(crate) post_image_id: Digest,
     pub(crate) faults: PageFaults,
     pub(crate) syscalls: Vec<SyscallRecord>,
