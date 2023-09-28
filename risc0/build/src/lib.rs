@@ -17,7 +17,7 @@
 #![deny(rustdoc::broken_intra_doc_links)]
 
 use std::{
-    collections::HashMap,
+    collections::{HashMap, HashSet},
     default::Default,
     env,
     fs::{self, File},
@@ -171,6 +171,17 @@ fn guest_packages(pkg: &Package) -> Vec<Package> {
         .methods
         .iter()
         .map(|inner| get_package(manifest_dir.join(inner)))
+        .collect()
+}
+
+/// Returns all inner package manifest paths
+fn guest_manifest_paths(pkg: &Package) -> HashSet<String> {
+    let manifest_dir = pkg.manifest_path.parent().unwrap();
+    Risc0Metadata::from_package(pkg)
+        .unwrap()
+        .methods
+        .iter()
+        .map(|inner| manifest_dir.join(inner).to_string())
         .collect()
 }
 
@@ -384,16 +395,17 @@ pub fn embed_methods_with_docker() {
 
     let pkg = current_package();
     let guest_packages = guest_packages(&pkg);
+    let guest_manifest_paths = guest_manifest_paths(&pkg);
     let methods_path = out_dir.join("methods.rs");
     let mut methods_file = File::create(&methods_path).unwrap();
 
     detect_toolchain(RUSTUP_TOOLCHAIN_NAME);
 
-    let mut manifest_path = env::var("CARGO_MANIFEST_DIR").unwrap();
-    eprintln!("manifest path: {manifest_path}");
-
-    manifest_path.push_str("/Cargo.toml");
-    docker_build(&PathBuf::from(manifest_path)).unwrap();
+    for mut manifest_path in guest_manifest_paths {
+        manifest_path.push_str("/Cargo.toml");
+        eprintln!("Manifest path: {manifest_path}");
+        docker_build(&PathBuf::from(manifest_path)).unwrap();
+    }
 
     for guest_pkg in guest_packages {
         for method in guest_methods(&guest_pkg, &guest_dir) {
