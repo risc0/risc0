@@ -7,17 +7,19 @@ license = { workspace = true }
 homepage = { workspace = true }
 repository = { workspace = true }
 
-# This crate is a potential dependency of the rust standard library.
-# As such, it should not depend on anything the rust standard library
-# doesn't.
-#
-# Also, it needs special trickery to work with the rust standard
-# library build scripts; see rustc-std-workspace-core/README.md in the
-# rust tree for details.
+# This crate should have as few dependencies as possible so it can be
+# used as many places as possible to share the platform definitions.
 [dependencies]
-compiler_builtins = { version = "0.1", optional = true }
-core = { optional = true, package = "rustc-std-workspace-core", version = "1.0.0" }
+bytemuck = { version = "1.13", optional = true }
+getrandom = { version = "0.2", features = ["custom"], optional = true }
+libm = { version = "0.2", optional = true }
 
 [features]
 default = []
-rustc-dep-of-std = ["core", "compiler_builtins"]
+# Build a rust runtime
+rust-runtime = ["export-syscalls", "export-libm"]
+panic-handler = []
+entrypoint = []
+export-syscalls = []
+export-libm = ["dep:libm"]
+export-getrandom = ["dep:getrandom", "dep:bytemuck"]
