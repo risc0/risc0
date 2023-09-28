@@ -17,7 +17,7 @@
 #![deny(rustdoc::broken_intra_doc_links)]
 
 use std::{
-    collections::{HashMap, HashSet},
+    collections::HashMap,
     default::Default,
     env,
     fs::{self, File},
@@ -174,17 +174,6 @@ fn guest_packages(pkg: &Package) -> Vec<Package> {
         .collect()
 }
 
-/// Returns all inner package manifest paths
-fn guest_manifest_paths(pkg: &Package) -> HashSet<String> {
-    let manifest_dir = pkg.manifest_path.parent().unwrap();
-    Risc0Metadata::from_package(pkg)
-        .unwrap()
-        .methods
-        .iter()
-        .map(|inner| manifest_dir.join(inner).to_string())
-        .collect()
-}
-
 fn is_debug() -> bool {
     get_env_var("RISC0_BUILD_DEBUG") == "1"
 }
@@ -204,6 +193,26 @@ where
                 .as_ref()
                 .join("riscv32im-risc0-zkvm-elf")
                 .join(profile)
+                .join(&target.name),
+        })
+        .collect()
+}
+
+/// Returns all methods associated with the given riscv guest package.
+fn guest_methods_docker<P>(pkg: &Package, target_dir: P) -> Vec<Risc0Method>
+where
+    P: AsRef<Path>,
+{
+    pkg.targets
+        .iter()
+        .filter(|target| target.kind.iter().any(|kind| kind == "bin"))
+        .map(|target| Risc0Method {
+            name: target.name.clone(),
+            elf_path: target_dir
+                .as_ref()
+                .join("riscv32im-risc0-zkvm-elf")
+                .join("docker")
+                .join(pkg.name.replace("-", "_"))
                 .join(&target.name),
         })
         .collect()
@@ -380,6 +389,14 @@ impl Default for GuestOptions {
 
 /// Embeds methods built for RISC-V for use by host-side dependencies using a docker build environment.
 pub fn embed_methods_with_docker() {
+    embed_methods_with_docker_with_options(HashMap::new())
+}
+
+/// Embeds methods built for RISC-V for use by host-side dependencies using a docker build environment.
+/// The guest options allow the user to specify features.
+pub fn embed_methods_with_docker_with_options(
+    mut guest_pkg_to_options: HashMap<&str, GuestOptions>,
+) {
     let out_dir_env = env::var_os("OUT_DIR").unwrap();
     let out_dir = Path::new(&out_dir_env); // $ROOT/target/$profile/build/$crate/out
     let guest_dir = out_dir
@@ -395,24 +412,22 @@ pub fn embed_methods_with_docker() {
 
     let pkg = current_package();
     let guest_packages = guest_packages(&pkg);
-    let guest_manifest_paths = guest_manifest_paths(&pkg);
     let methods_path = out_dir.join("methods.rs");
     let mut methods_file = File::create(&methods_path).unwrap();
 
     detect_toolchain(RUSTUP_TOOLCHAIN_NAME);
 
-    for mut path in guest_manifest_paths {
-        path.push_str("/Cargo.toml");
-        let mut manifest_path = Path::new(&path);
-        manifest_path = manifest_path
+    for guest_pkg in guest_packages {
+        let guest_options = guest_pkg_to_options
+            .remove(guest_pkg.name.as_str())
+            .unwrap_or_default();
+
+        let manifest_path = Path::new(&guest_pkg.manifest_path)
             .strip_prefix(std::env::current_dir().unwrap())
             .unwrap();
-        eprintln!("Manifest path: {:?}", manifest_path);
-        docker_build(&PathBuf::from(manifest_path)).unwrap();
-    }
+        docker_build(&PathBuf::from(manifest_path), guest_options.features).unwrap();
 
-    for guest_pkg in guest_packages {
-        for method in guest_methods(&guest_pkg, &guest_dir) {
+        for method in guest_methods_docker(&guest_pkg, &guest_dir) {
             methods_file
                 .write_all(method.rust_def().as_bytes())
                 .unwrap();

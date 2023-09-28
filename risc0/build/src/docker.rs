@@ -37,7 +37,7 @@ const DOCKER_IGNORE: &str = r#"
 const TARGET_DIR: &str = "target/riscv-guest/riscv32im-risc0-zkvm-elf/docker";
 
 /// Build the package in the manifest path using a docker environment.
-pub fn docker_build(manifest_path: &PathBuf) -> Result<()> {
+pub fn docker_build(manifest_path: &PathBuf, features: Vec<String>) -> Result<()> {
     let meta = MetadataCommand::new().manifest_path(manifest_path).exec()?;
     let root_pkg = meta.root_package().context("failed to parse Cargo.toml")?;
     let pkg_name = &root_pkg.name;
@@ -58,10 +58,9 @@ pub fn docker_build(manifest_path: &PathBuf) -> Result<()> {
     {
         let temp_dir = tempdir()?;
         let temp_path = temp_dir.path();
-        create_dockerfile(manifest_path, temp_path, pkg_name.as_str())?;
+        create_dockerfile(manifest_path, temp_path, pkg_name.as_str(), features)?;
         build(temp_path)?;
     }
-
     let target_dir = PathBuf::from(TARGET_DIR);
     println!("ELFs ready at:");
 
@@ -79,13 +78,28 @@ pub fn docker_build(manifest_path: &PathBuf) -> Result<()> {
 /// Create the dockerfile.
 ///
 /// Overwrites if a dockerfile already exists.
-fn create_dockerfile(manifest_path: &PathBuf, temp_dir: &Path, pkg_name: &str) -> Result<()> {
+fn create_dockerfile(
+    manifest_path: &PathBuf,
+    temp_dir: &Path,
+    pkg_name: &str,
+    features: Vec<String>,
+) -> Result<()> {
     let manifest_env = &[("CARGO_MANIFEST_PATH", manifest_path.to_str().unwrap())];
     let rustflags = format!(
         "-C passes=loweratomic -C link-arg=-Ttext=0x{TEXT_START:08X} -C link-arg=--fatal-warnings",
     );
     let rustflags_env = &[("RUSTFLAGS", rustflags.as_str())];
+    let mut build_command = "cargo +risc0 build \
+                    --locked \
+                    --release \
+                    --target riscv32im-risc0-zkvm-elf \
+                    --manifest-path $CARGO_MANIFEST_PATH"
+        .to_string();
 
+    let features_str = features.join(",");
+    if !features.is_empty() {
+        build_command.push_str(format!(" --features {}", features_str).as_str());
+    }
     let build = DockerFile::new()
         .from_alias("build", "risczero/risc0-guest-builder:v0.17")
         .workdir("/src")
@@ -101,13 +115,7 @@ fn create_dockerfile(manifest_path: &PathBuf, temp_dir: &Path, pkg_name: &str) -
                     --target riscv32im-risc0-zkvm-elf \
                     --manifest-path $CARGO_MANIFEST_PATH",
         )
-        .run(
-            "cargo +risc0 build \
-                    --locked \
-                    --release \
-                    --target riscv32im-risc0-zkvm-elf \
-                    --manifest-path $CARGO_MANIFEST_PATH",
-        );
+        .run(&build_command);
 
     let out_dir = format!("/{pkg_name}");
     let binary = DockerFile::new()
@@ -173,7 +181,7 @@ mod test {
 
     fn build(manifest_path: &str) {
         std::env::set_current_dir("../../").unwrap();
-        self::docker_build(&PathBuf::from(manifest_path)).unwrap();
+        self::docker_build(&PathBuf::from(manifest_path), vec![]).unwrap()
     }
 
     fn compare_image_id(bin_path: &str, expected: &str) {
