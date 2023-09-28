@@ -1945,7 +1945,6 @@ dependencies = [
  "hex-literal",
  "risc0-build",
  "risc0-zkvm",
- "risc0-zkvm-platform",
 ]
 
 [[package]]
@@ -3669,6 +3668,11 @@ dependencies = [
 [[package]]
 name = "risc0-zkvm-platform"
 version = "0.18.0"
+dependencies = [
+ "bytemuck",
+ "getrandom",
+ "libm",
+]
 
 [[package]]
 name = "rlp"
