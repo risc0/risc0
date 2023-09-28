@@ -37,8 +37,11 @@ use crate::{
         testutils,
     },
     serde::{from_slice, to_vec},
-    ExecutorEnv, ExitCode, MemoryImage, Program, Session, TraceEvent,
+    ExecutorEnv, ExitCode, MemoryImage, Program, Session,
 };
+
+#[cfg(feature = "test-exact-cycles")]
+use crate::TraceEvent;
 
 fn run_test(spec: MultiTestSpec) {
     let input = to_vec(&spec).unwrap();
@@ -579,6 +582,7 @@ fn profiler() {
     );
 }
 
+#[cfg(feature = "test-exact-cycles")]
 #[test]
 fn trace() {
     let mut events: Vec<TraceEvent> = Vec::new();
@@ -651,6 +655,7 @@ fn oom() {
     assert!(err.to_string().contains("Out of memory"), "{err:?}");
 }
 
+#[cfg(feature = "test-exact-cycles")]
 #[test]
 fn session_limit() {
     fn run_session(

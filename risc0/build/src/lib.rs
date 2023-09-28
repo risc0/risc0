@@ -31,6 +31,8 @@ use risc0_binfmt::{MemoryImage, Program};
 use risc0_zkp::core::digest::{Digest, DIGEST_WORDS};
 use risc0_zkvm_platform::{memory, PAGE_SIZE};
 use serde::Deserialize;
+mod docker;
+pub use docker::docker_build;
 
 const RUSTUP_TOOLCHAIN_NAME: &str = "risc0";
 
@@ -198,6 +200,26 @@ fn guest_methods(pkg: &Package, target_dir: impl AsRef<Path>) -> Vec<Risc0Method
                 .as_ref()
                 .join("riscv32im-risc0-zkvm-elf")
                 .join(profile)
+                .join(&target.name),
+        })
+        .collect()
+}
+
+/// Returns all methods associated with the given riscv guest package.
+fn guest_methods_docker<P>(pkg: &Package, target_dir: P) -> Vec<Risc0Method>
+where
+    P: AsRef<Path>,
+{
+    pkg.targets
+        .iter()
+        .filter(|target| target.kind.iter().any(|kind| kind == "bin"))
+        .map(|target| Risc0Method {
+            name: target.name.clone(),
+            elf_path: target_dir
+                .as_ref()
+                .join("riscv32im-risc0-zkvm-elf")
+                .join("docker")
+                .join(pkg.name.replace("-", "_"))
                 .join(&target.name),
         })
         .collect()
@@ -466,6 +488,53 @@ impl Default for GuestOptions {
     fn default() -> Self {
         GuestOptions { features: vec![] }
     }
+}
+
+/// Embeds methods built for RISC-V for use by host-side dependencies using a docker build environment.
+pub fn embed_methods_with_docker() {
+    embed_methods_with_docker_with_options(HashMap::new())
+}
+
+/// Embeds methods built for RISC-V for use by host-side dependencies using a docker build environment.
+/// The guest options allow the user to specify features.
+pub fn embed_methods_with_docker_with_options(
+    mut guest_pkg_to_options: HashMap<&str, GuestOptions>,
+) {
+    let out_dir_env = env::var_os("OUT_DIR").unwrap();
+    let out_dir = Path::new(&out_dir_env); // $ROOT/target/$profile/build/$crate/out
+    let guest_dir = get_guest_dir();
+
+    let pkg = current_package();
+    let guest_packages = guest_packages(&pkg);
+    let methods_path = out_dir.join("methods.rs");
+    let mut methods_file = File::create(&methods_path).unwrap();
+
+    detect_toolchain(RUSTUP_TOOLCHAIN_NAME);
+
+    for guest_pkg in guest_packages {
+        let guest_options = guest_pkg_to_options
+            .remove(guest_pkg.name.as_str())
+            .unwrap_or_default();
+
+        let manifest_path = Path::new(&guest_pkg.manifest_path)
+            .strip_prefix(std::env::current_dir().unwrap())
+            .unwrap();
+        docker_build(&PathBuf::from(manifest_path), guest_options.features).unwrap();
+
+        for method in guest_methods_docker(&guest_pkg, &guest_dir) {
+            methods_file
+                .write_all(method.rust_def().as_bytes())
+                .unwrap();
+        }
+    }
+
+    // HACK: It's not particularly practical to figure out all the
+    // files that all the guest crates transtively depend on.  So, we
+    // want to run the guest "cargo build" command each time we build.
+    //
+    // Since we generate methods.rs each time we run, it will always
+    // be changed.
+    println!("cargo:rerun-if-changed={}", methods_path.display());
 }
 
 fn get_guest_dir() -> PathBuf {
