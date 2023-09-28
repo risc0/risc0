@@ -32,6 +32,5 @@ pub fn main() {
         data: proven_val,
         hash: sha,
     };
-    println!("total cycle count: {}", env::get_cycle_count());
     env::commit(&out);
 }
