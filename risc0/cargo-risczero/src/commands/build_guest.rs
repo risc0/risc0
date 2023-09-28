@@ -29,6 +29,7 @@ pub struct BuildGuest {
 
 impl BuildGuest {
     pub fn run(&self) -> Result<()> {
-        risc0_build::docker_build(&self.manifest_path)
+        // TODO: support features
+        risc0_build::docker_build(&self.manifest_path, vec![])
     }
 }
