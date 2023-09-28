@@ -1,19 +1,10 @@
-[workspace]
-members = [
-    "host",
-    "methods",
-]
+[package]
+name = "host"
+version = "0.1.0"
+edition = "2021"
 
-# Always optimize; building and running the guest takes much longer without optimization.
-[profile.dev]
-opt-level = 3
-
-[profile.dev.build-override]
-opt-level = 3
-
-[profile.release]
-debug = 1
-lto = true
-
-[profile.release.build-override]
-opt-level = 3
+[dependencies]
+methods = { path = "../methods" }
+risc0-zkvm = { path = "../../risc0/zkvm" }
+serde = "1.0"
+serde_json = "1.0.107"
