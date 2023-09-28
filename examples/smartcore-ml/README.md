@@ -82,7 +82,7 @@ Kernel::sigmoid()
 
 ## Quick Start
 
-First, make sure [rustup](https://rustup.rs) is installed. This project uses a [nightly](https://doc.rust-lang.org/book/appendix-07-nightly-rust.html) version of [Rust](https://doc.rust-lang.org/book/ch01-01-installation.html). The [`rust-toolchain`](rust-toolchain) file will be used by `cargo` to automatically install the correct version.
+First, [install](https://dev.risczero.com/zkvm/install) RISC Zero's zkVM tools if you don't already have them.
 
 To build all methods and execute the method within the zkVM, run the following command:
 
