@@ -12,9 +12,9 @@ Dimensionality Reduction:  PCA.
 
 Matrix Decomposition:  SVD, Eigenvalue Decomposition, QR, LU.
 
-The following folders are not part of the standard RISC Zero starter template and should be added if the user wishes to replicate the layout of this template:  res/ml-model, res/input-data, and train-model.  ml-model contains a json file of a trained decision tree model and input-data contains a json file of sample input data.  You can train and export your model along with any sample data in train-model/src/main.rs (note that this is excluded from the zkvm workspace).  
+The following folders are not part of the standard RISC Zero starter template and should be added if the user wishes to replicate the layout of this template:  res/ml-model, res/input-data, the SmartCore Jupyter notebook, and the iris input data and classes CSV files.  The ml-model folder contains a json file of a trained decision tree model and input-data contains a json file of sample input data.  You can train and export your model along with any sample data in the Jupyter notebook.  
 
-res/ml-model and res/input-data come preloaded with a trained decision tree classifier.  You can replace the code in train-model to train and export any of the supported models listed above.
+res/ml-model and res/input-data come preloaded with a trained decision tree classifier.  You can replace the code in the Jupyter notebook to train and export any of the supported models listed above.
 
 ## Model Types
 
@@ -74,46 +74,14 @@ let params = &SVRParameters::default().with_eps(2.0).with_c(10.0).with_kernel(Ke
 model.parameters = params;
 ```
 
-SVM models support four kernels:  Gaussian (rbf), Linear, Polynomial, and Sigmoid.  Kernels are selected within the `.with_kernel()` function in the `SVCParameters` or `SVRParameters`.
-Kernel::linear()
-Kernel::rbf()
-Kernel::polynomial()
-Kernel::sigmoid()
+SVM models support four kernels:  Gaussian (rbf), Linear, Polynomial, and Sigmoid.  Kernels are selected within the `.with_kernel()` function in the `SVCParameters` or `SVRParameters`.  Specify the desired kernel as follows:
+* Kernel::linear()
+* Kernel::rbf()
+* Kernel::polynomial()
+* Kernel::sigmoid()
 
-## Quick Start
+## SmartCore
 
-First, [install](https://dev.risczero.com/zkvm/install) RISC Zero's zkVM tools if you don't already have them.
+The source code for SmartCore can be found here:  https://github.com/smartcorelib/smartcore
 
-To build all methods and execute the method within the zkVM, run the following command:
-
-```
-cargo run
-```
-### Running proofs remotely on Bonsai
-
-*Note: The Bonsai proving service is still in early Alpha; an API key is required for access. [Click here to request access].*
-
-If you have access to the URL and API key to Bonsai you can run your proofs
-remotely. To prove in Bonsai mode, invoke `cargo run` with two additional
-environment variables:
-
-```
-BONSAI_API_KEY="YOUR_API_KEY" BONSAI_API_URL="BONSAI_URL" cargo run
-```
-
-[Click here to request access]: https://bonsai.xyz/apply
-
-## How to create a project based on this template
-
-
-
-
-## Contributor's Guide
-We welcome contributions to documentation and code via PRs and GitHub Issues on our [main repository](http://www.github.com/risc0) or any of our other repositories.
-
-## Video Tutorial
-
-## Questions, Feedback, and Collaborations
-We'd love to hear from you on [Discord](https://discord.gg/risczero) or [Twitter](https://twitter.com/risczero).
-
-[Structure of a zkVM Application]: https://dev.risczero.com/zkvm/developer-guide/zkvm-app-structure
+You can find other model implementations and additional SmartCore features here:  https://github.com/smartcorelib/smartcore-jupyter/tree/main/notebooks

@@ -23,14 +23,16 @@ risc0_zkvm::guest::entry!(main);
 
 pub fn main() {
     // Import the trained model and the input data.  First we read in the length of the model and data arrays.
+    // We use env::read() since we are reading in serialized data and need to deserialize it.
     let model_length: usize = env::read();
     let data_length: usize = env::read();
 
     // Next, we construct buffers for the model and the input data using the corresponding lengths of their respective byte arrays.
+    // We will read in the data using env::read_slice().  
     let mut model_bytes: Vec<u8> = vec![0;model_length];
     let mut data_bytes: Vec<u8> = vec![0;data_length];
 
-   // The byte arrays are read in from the host
+   // The byte arrays are read in from the host.  There is no need to deserialize the data since they are passed to guest as byte arrays.
     env::read_slice(&mut model_bytes);
     env::read_slice(&mut data_bytes);
     

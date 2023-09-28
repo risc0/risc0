@@ -50,7 +50,13 @@ fn main() {
     let data_length = data_rmp.len();
     
     // We construct an executor environment and add the length data along with both byte arrays.
-    let env = ExecutorEnv::builder().add_input(&to_vec(&model_length).unwrap()).add_input(&to_vec(&data_length).unwrap()).add_input(&model_rmp).add_input(&data_rmp).build().unwrap();
+    // Note that model_rmp and data_rmp do not need to be serialized using to_vec().
+    let env = ExecutorEnv::builder()
+            .add_input(&to_vec(&model_length).unwrap())
+            .add_input(&to_vec(&data_length).unwrap())
+            .add_input(&model_rmp)
+            .add_input(&data_rmp)
+            .build().unwrap();
     
     // Obtain the default prover.  Note that for development purposes we do not need to run the prover.  To bypass the prover, use DEV_MODE = TRUE cargo run -r.
     let prover = default_prover();
