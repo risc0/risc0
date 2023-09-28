@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use risc0_benchmark::{exec_compute, get_image, Benchmark};
+use crate::{exec_compute, get_image, Benchmark};
 use risc0_zkvm::serde::from_slice;
 use risc0_zkvm::{
     serde::to_vec, sha::DIGEST_WORDS, ExecutorEnv, ExitCode, MemoryImage, Receipt, Session,

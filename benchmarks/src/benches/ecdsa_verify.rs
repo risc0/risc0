@@ -12,17 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use crate::{exec_compute, get_image, Benchmark, BenchmarkThin};
 use k256::{
     ecdsa::{signature::Signer, Signature, SigningKey},
     EncodedPoint,
 };
 use rand_core::OsRng;
-use risc0_benchmark::{exec_compute, get_image, Benchmark};
 use risc0_zkvm::{
+    default_prover,
     serde::{from_slice, to_vec},
     sha::DIGEST_WORDS,
-    ExecutorEnv, ExitCode, MemoryImage, Receipt, Session,
+    ExecutorEnv, ExitCode, LocalProver, MemoryImage, Prover, ProverOpts, Receipt, Session,
+    VerifierContext,
 };
+use std::rc::Rc;
 use std::time::Duration;
 
 pub struct Job<'a> {
@@ -30,6 +33,7 @@ pub struct Job<'a> {
     pub env: ExecutorEnv<'a>,
     pub image: MemoryImage,
     pub session: Session,
+    pub prover: Rc<dyn Prover>,
     pub verifying_key: EncodedPoint,
     pub message: Vec<u8>,
     pub signature: Signature,
@@ -81,12 +85,14 @@ impl Benchmark for Job<'_> {
             .unwrap();
 
         let session = Session::new(vec![], vec![], ExitCode::Halted(0));
+        let prover = Rc::new(LocalProver::new("local"));
 
         Job {
             spec,
             env,
             image,
             session,
+            prover,
             verifying_key,
             message,
             signature,
@@ -130,5 +136,59 @@ impl Benchmark for Job<'_> {
                 false
             }
         }
+    }
+}
+
+impl BenchmarkThin for Job<'_> {
+    const NAME: &'static str = "ecdsa";
+    type Spec = u32;
+
+    fn job_size(spec: &Self::Spec) -> u32 {
+        *spec
+    }
+
+    fn new(spec: Self::Spec) -> Self {
+        let image = get_image(METHOD_PATH);
+
+        // Generate a random secp256k1 keypair and sign the message.
+        let signing_key = SigningKey::random(&mut OsRng);
+        let verifying_key = signing_key.verifying_key().to_encoded_point(true);
+        let message =
+            b"This is a message that will be signed, and verified within the zkVM".to_vec();
+        let signature: Signature = signing_key.sign(&message);
+
+        let env = ExecutorEnv::builder()
+            .add_input(&to_vec(&(spec, verifying_key, message.clone(), signature)).unwrap())
+            .build()
+            .unwrap();
+
+        let session = Session::new(vec![], vec![], ExitCode::Halted(0));
+        let prover = default_prover();
+
+        Job {
+            spec,
+            env,
+            image,
+            session,
+            prover,
+            verifying_key,
+            message,
+            signature,
+        }
+    }
+
+    fn spec(&self) -> &Self::Spec {
+        &self.spec
+    }
+
+    fn guest_compute(&mut self) -> () {
+        self.prover
+            .prove(
+                self.env.clone(),
+                &VerifierContext::default(),
+                &ProverOpts::default(),
+                self.image.clone(),
+            )
+            .expect("receipt");
     }
 }

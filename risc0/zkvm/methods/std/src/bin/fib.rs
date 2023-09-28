@@ -20,12 +20,35 @@ pub fn main() {
     env::commit(&answer);
 }
 
-pub fn fibonacci(n: u32) -> u64 {
-    let (mut a, mut b) = (0, 1);
-    for _ in 0..n {
-        let c = a;
-        a = b;
-        b += c;
+fn fibonacci(n: u32) -> u32 {
+    let mut a = 0u32;
+    let mut b = 1u32;
+    if n <= 1 {
+        return n;
     }
-    a
+    let mut i = 2;
+    while i <= n {
+        if i + 10 <= n {
+            let c = a + b;
+            let d = b + c;
+            let e = c + d;
+            let f = d + e;
+            let g = e + f;
+            let h = f + g;
+            let j = g + h;
+            let k = h + j;
+            let l = j + k;
+            let m = k + l;
+            a = l;
+            b = m;
+            i += 10;
+        } else {
+            let c = a + b;
+            a = b;
+            b = c;
+            i += 1;
+        }
+    }
+
+    b
 }

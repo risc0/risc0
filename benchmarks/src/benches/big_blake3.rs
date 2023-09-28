@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use crate::{exec_compute, get_image, Benchmark};
 use rand::{rngs::StdRng, RngCore, SeedableRng};
-use risc0_benchmark::{exec_compute, get_image, Benchmark};
 use risc0_zkvm::{
     serde::to_vec,
     sha::{Digest, DIGEST_WORDS},

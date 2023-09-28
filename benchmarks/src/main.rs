@@ -21,7 +21,6 @@ use clap::{Parser, Subcommand};
 use risc0_benchmark::{init_logging, run_jobs};
 use std::path::PathBuf;
 
-mod benches;
 use benches::*;
 
 #[derive(Parser)]

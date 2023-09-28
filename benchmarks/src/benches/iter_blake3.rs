@@ -12,10 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use risc0_benchmark::{exec_compute, get_image, Benchmark};
+use crate::{exec_compute, get_image, Benchmark, BenchmarkThin};
 use risc0_zkvm::{
-    serde::to_vec, sha::DIGEST_WORDS, ExecutorEnv, ExitCode, MemoryImage, Receipt, Session,
+    default_prover, serde::to_vec, sha::DIGEST_WORDS, ExecutorEnv, ExitCode, LocalProver,
+    MemoryImage, Prover, ProverOpts, Receipt, Session, VerifierContext,
 };
+use std::rc::Rc;
 use std::time::Duration;
 
 pub struct Job<'a> {
@@ -23,6 +25,7 @@ pub struct Job<'a> {
     pub env: ExecutorEnv<'a>,
     pub image: MemoryImage,
     pub session: Session,
+    pub prover: Rc<dyn Prover>,
 }
 
 pub fn new_jobs() -> Vec<<Job<'static> as Benchmark>::Spec> {
@@ -70,12 +73,14 @@ impl Benchmark for Job<'_> {
             .unwrap();
 
         let session = Session::new(vec![], vec![], ExitCode::Halted(0));
+        let prover = Rc::new(LocalProver::new("local"));
 
         Job {
             spec,
             env,
             image,
             session,
+            prover,
         }
     }
 
@@ -122,5 +127,55 @@ impl Benchmark for Job<'_> {
                 false
             }
         }
+    }
+}
+
+impl BenchmarkThin for Job<'_> {
+    const NAME: &'static str = "blake3";
+    type Spec = u32;
+
+    fn job_size(spec: &Self::Spec) -> u32 {
+        *spec
+    }
+
+    fn new(spec: Self::Spec) -> Self {
+        let image = get_image(METHOD_PATH);
+
+        let mut guest_input = Vec::from([0u8; 36]);
+        guest_input[0] = spec as u8;
+        guest_input[1] = (spec >> 8) as u8;
+        guest_input[2] = (spec >> 16) as u8;
+        guest_input[3] = (spec >> 24) as u8;
+
+        let env = ExecutorEnv::builder()
+            .add_input(&to_vec(&guest_input).unwrap())
+            .build()
+            .unwrap();
+
+        let session = Session::new(vec![], vec![], ExitCode::Halted(0));
+        let prover = default_prover();
+
+        Job {
+            spec,
+            env,
+            image,
+            session,
+            prover,
+        }
+    }
+
+    fn spec(&self) -> &Self::Spec {
+        &self.spec
+    }
+
+    fn guest_compute(&mut self) -> () {
+        self.prover
+            .prove(
+                self.env.clone(),
+                &VerifierContext::default(),
+                &ProverOpts::default(),
+                self.image.clone(),
+            )
+            .expect("receipt");
     }
 }

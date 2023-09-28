@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use crate::{exec_compute, get_image, Benchmark};
 use byteorder::{ByteOrder, LittleEndian};
-use risc0_benchmark::{exec_compute, get_image, Benchmark};
 use risc0_zkvm::{
     serde::to_vec, sha::DIGEST_WORDS, ExecutorEnv, ExitCode, MemoryImage, Receipt, Session,
 };
@@ -36,7 +36,7 @@ const METHOD_PATH: &'static str = risc0_zkvm_methods::FIB_PATH;
 impl Benchmark for Job<'_> {
     const NAME: &'static str = "finbonacci";
     type Spec = u32;
-    type ComputeOut = u64;
+    type ComputeOut = u32;
     type ProofType = Receipt;
 
     fn job_size(spec: &Self::Spec) -> u32 {
@@ -98,7 +98,7 @@ impl Benchmark for Job<'_> {
 
     fn guest_compute(&mut self) -> (Self::ComputeOut, Self::ProofType) {
         let receipt = self.session.prove().expect("receipt");
-        let result = LittleEndian::read_u64(&receipt.journal);
+        let result = LittleEndian::read_u32(&receipt.journal);
         (result, receipt)
     }
 

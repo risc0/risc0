@@ -24,6 +24,8 @@ use risc0_zkvm::{
 };
 use serde::Serialize;
 
+pub mod benches;
+
 pub struct Metrics {
     pub job_name: String,
     pub job_size: u32,
@@ -61,6 +63,34 @@ impl Metrics {
         info!("{}insn_cycles:        {:?}", prefix, &self.insn_cycles);
         info!("{}output_bytes:       {:?}", prefix, &self.output_bytes);
         info!("{}proof_bytes:        {:?}", prefix, &self.proof_bytes);
+    }
+}
+
+pub struct MetricsThin {
+    pub job_name: String,
+    pub job_size: u32,
+    pub proof_duration: Duration,
+    pub single_duration: Duration,
+    pub ops_sec: f64,
+}
+
+impl MetricsThin {
+    pub fn new(job_name: String, job_size: u32) -> Self {
+        MetricsThin {
+            job_name,
+            job_size,
+            proof_duration: Duration::default(),
+            single_duration: Duration::default(),
+            ops_sec: 0.0,
+        }
+    }
+
+    pub fn println(&self, prefix: &str) {
+        info!("{}job_name:           {:?}", prefix, &self.job_name);
+        info!("{}job_size:           {:?}", prefix, &self.job_size);
+        info!("{}proof_duration:     {:?}", prefix, &self.proof_duration);
+        info!("{}single_duration:    {:?}", prefix, &self.single_duration);
+        info!("{}ops_sec:            {:?}", prefix, &self.ops_sec);
     }
 }
 
@@ -117,6 +147,29 @@ pub trait Benchmark {
     }
 }
 
+pub trait BenchmarkThin {
+    const NAME: &'static str;
+    type Spec;
+
+    fn job_size(spec: &Self::Spec) -> u32;
+    fn new(spec: Self::Spec) -> Self;
+    fn spec(&self) -> &Self::Spec;
+    fn guest_compute(&mut self) -> ();
+
+    fn run(&mut self) -> MetricsThin {
+        let mut metrics = MetricsThin::new(String::from(Self::NAME), Self::job_size(self.spec()));
+
+        let start = Instant::now();
+        self.guest_compute();
+        metrics.proof_duration = start.elapsed();
+
+        metrics.single_duration = metrics.proof_duration / metrics.job_size;
+        metrics.ops_sec = metrics.job_size as f64 / metrics.proof_duration.as_secs_f64();
+
+        metrics
+    }
+}
+
 pub fn get_image(path: &str) -> MemoryImage {
     let elf = std::fs::read(path).expect("elf");
     let program = Program::load_elf(&elf, GUEST_MAX_MEM as u32).unwrap();
@@ -168,6 +221,15 @@ struct CsvRow<'a> {
     proof_bytes: u32,
 }
 
+#[derive(Serialize)]
+struct CsvRowThin<'a> {
+    job_name: &'a str,
+    job_size: u32,
+    proof_duration: u128,
+    single_duration: u128,
+    ops_sec: f64,
+}
+
 pub fn run_jobs<B: Benchmark>(out_path: &PathBuf, specs: Vec<B::Spec>) -> Vec<Metrics> {
     info!("");
     info!(
@@ -209,6 +271,60 @@ pub fn run_jobs<B: Benchmark>(out_path: &PathBuf, specs: Vec<B::Spec>) -> Vec<Me
             prove_cycles: job_metrics.cycles,
             insn_cycles: job_metrics.insn_cycles,
             proof_bytes: job_metrics.proof_bytes,
+        })
+        .expect("Could not serialize");
+
+        info!("+ end job_number:     {}", job_number);
+        all_metrics.push(job_metrics);
+    }
+
+    out.flush().expect("Could not flush");
+    info!("Finished {} jobs", all_metrics.len());
+
+    all_metrics
+}
+
+pub fn run_jobs_thin<B: BenchmarkThin>(
+    out_path: &PathBuf,
+    specs: Vec<B::Spec>,
+) -> Vec<MetricsThin> {
+    info!("");
+    info!(
+        "Running {} jobs; saving output to {}",
+        specs.len(),
+        out_path.display()
+    );
+
+    let mut out = {
+        let out_file_exists = Path::new(out_path).exists();
+        let out_file = OpenOptions::new()
+            .write(true)
+            .append(true)
+            .create(true)
+            .open(out_path)
+            .unwrap();
+        csv::WriterBuilder::new()
+            .has_headers(!out_file_exists)
+            .from_writer(out_file)
+    };
+
+    let mut all_metrics: Vec<MetricsThin> = Vec::new();
+
+    for spec in specs {
+        let mut job = B::new(spec);
+        let job_number = all_metrics.len();
+
+        info!("");
+        info!("+ begin job_number:   {} {}", job_number, B::NAME);
+
+        let job_metrics = job.run();
+        job_metrics.println("+ ");
+        out.serialize(CsvRowThin {
+            job_name: &job_metrics.job_name,
+            job_size: job_metrics.job_size,
+            proof_duration: job_metrics.proof_duration.as_nanos(),
+            single_duration: job_metrics.single_duration.as_nanos(),
+            ops_sec: job_metrics.ops_sec,
         })
         .expect("Could not serialize");
 

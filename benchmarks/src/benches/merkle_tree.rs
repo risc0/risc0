@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use crate::{exec_compute, get_image, Benchmark};
 use merkletree::{merkle::MerkleTree, store::VecStore};
-use risc0_benchmark::{exec_compute, get_image, Benchmark};
 use risc0_benchmark_lib::{generate_vector_of_elements, Item, Sha256Hasher};
 use risc0_zkvm::{
     serde::{from_slice, to_vec},
