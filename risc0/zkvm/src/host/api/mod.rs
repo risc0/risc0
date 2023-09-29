@@ -22,10 +22,10 @@ use std::{
     net::{TcpListener, TcpStream},
     path::{Path, PathBuf},
     process::{Child, Command},
-    sync::Arc,
     sync::{
         atomic::{AtomicBool, Ordering},
         mpsc::channel,
+        Arc,
     },
     thread,
     time::Duration,
@@ -435,6 +435,7 @@ impl From<ExitCode> for pb::ExitCode {
                 ExitCode::SessionLimit => pb::exit_code::Kind::SessionLimit(()),
                 ExitCode::Paused(code) => pb::exit_code::Kind::Paused(code),
                 ExitCode::Halted(code) => pb::exit_code::Kind::Halted(code),
+                ExitCode::Fault => pb::exit_code::Kind::Fault(()),
             }),
         }
     }
