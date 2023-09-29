@@ -37,8 +37,11 @@ use crate::{
         testutils,
     },
     serde::{from_slice, to_vec},
-    ExecutorEnv, ExitCode, MemoryImage, Program, Session, TraceEvent,
+    ExecutorEnv, ExitCode, MemoryImage, Program, Session,
 };
+
+#[cfg(feature = "test-exact-cycles")]
+use crate::TraceEvent;
 
 fn run_test(spec: MultiTestSpec) {
     let input = to_vec(&spec).unwrap();
@@ -427,6 +430,36 @@ ENV_VAR2=
 }
 
 #[test]
+fn args() {
+    let test_cases: [&[String]; 3] = [
+        &[String::default()],
+        &[
+            "grep".to_string(),
+            "-c".to_string(),
+            "foo bar".to_string(),
+            "-".to_string(),
+        ],
+        &[String::default()],
+    ];
+    for args_arr in test_cases {
+        let env = ExecutorEnv::builder()
+            .env_var("TEST_MODE", "ARGS")
+            .args(&args_arr)
+            .build()
+            .unwrap();
+        let mut exec = Executor::from_elf(env, STANDARD_LIB_ELF).unwrap();
+        let session = exec.run().unwrap();
+        assert_eq!(
+            from_slice::<Vec<String>, _>(&session.journal).unwrap(),
+            args_arr
+                .into_iter()
+                .map(|s| s.to_string())
+                .collect::<Vec<String>>(),
+        );
+    }
+}
+
+#[test]
 fn commit_hello_world() {
     Executor::from_elf(ExecutorEnv::default(), HELLO_COMMIT_ELF)
         .unwrap()
@@ -549,6 +582,7 @@ fn profiler() {
     );
 }
 
+#[cfg(feature = "test-exact-cycles")]
 #[test]
 fn trace() {
     let mut events: Vec<TraceEvent> = Vec::new();
@@ -618,9 +652,10 @@ fn oom() {
     let env = ExecutorEnv::builder().add_input(&spec).build().unwrap();
     let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
     let err = exec.run().err().unwrap();
-    assert!(err.to_string().contains("Out of memory!"), "{err:?}");
+    assert!(err.to_string().contains("Out of memory"), "{err:?}");
 }
 
+#[cfg(feature = "test-exact-cycles")]
 #[test]
 fn session_limit() {
     fn run_session(
