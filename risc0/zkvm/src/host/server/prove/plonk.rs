@@ -17,26 +17,26 @@ use std::collections::VecDeque;
 use risc0_core::field::{Elem, ExtElem, Field};
 use risc0_zkp::MAX_CYCLES;
 
-// A MemoryOperationRow consists of 7 elements:
+// A RamOperationRow consists of 7 elements:
 // addr, cycle, isWrite, byte0, byte1, byte2, byte3
 #[derive(Ord, PartialOrd, Eq, PartialEq)]
-struct MemoryOperationRow {
+struct RamOperationRow {
     addr: u32,
     // (cycle << 2) | mem_op
     cycle_and_write_flag: u32,
     val: u32,
 }
 
-pub struct MemoryOperationTable {
-    main_ram: Vec<MemoryOperationRow>,
+pub struct RamOperationTable {
+    main_ram: Vec<RamOperationRow>,
 }
 
-impl MemoryOperationTable {
+impl RamOperationTable {
     pub fn new() -> Self {
         // Make sure cycle_and_write_flag won't overflow
         assert!(MAX_CYCLES < ((u32::MAX as usize) << 2));
 
-        MemoryOperationTable {
+        RamOperationTable {
             main_ram: Vec::new(),
         }
     }
@@ -54,7 +54,7 @@ impl MemoryOperationTable {
         for elem in &elems[3..] {
             debug_assert!(u32::from(*elem) < 256);
         }
-        self.main_ram.push(MemoryOperationRow {
+        self.main_ram.push(RamOperationRow {
             addr,
             cycle_and_write_flag,
             val: u32::from(elems[3])
