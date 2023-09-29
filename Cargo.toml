@@ -19,7 +19,7 @@ members = [
   "risc0/zkvm/receipts",
   "xtask",
 ]
-exclude = ["external/substrate", "tools/crates-validator"]
+exclude = ["tools/crates-validator"]
 
 [workspace.package]
 version = "0.18.0"
