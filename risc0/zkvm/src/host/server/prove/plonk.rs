@@ -27,16 +27,16 @@ struct MemoryOperationRow {
     val: u32,
 }
 
-pub struct MemoryPermutation {
+pub struct MemoryOperationTable {
     main_ram: Vec<MemoryOperationRow>,
 }
 
-impl MemoryPermutation {
+impl MemoryOperationTable {
     pub fn new() -> Self {
         // Make sure cycle_and_write_flag won't overflow
         assert!(MAX_CYCLES < ((u32::MAX as usize) << 2));
 
-        MemoryPermutation {
+        MemoryOperationTable {
             main_ram: Vec::new(),
         }
     }
