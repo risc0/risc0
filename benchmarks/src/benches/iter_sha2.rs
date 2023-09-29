@@ -109,15 +109,7 @@ impl Benchmark for Job<'_> {
     }
 
     fn guest_compute(&mut self) -> (Self::ComputeOut, Self::ProofType) {
-        let receipt = self
-            .prover
-            .prove(
-                self.env.clone(),
-                &VerifierContext::default(),
-                &ProverOpts::default(),
-                self.image.clone(),
-            )
-            .expect("receipt");
+        let receipt = self.session.prove().expect("receipt");
         let result = risc0_zkvm::sha::Digest::try_from(receipt.journal.clone())
             .unwrap()
             .try_into()
