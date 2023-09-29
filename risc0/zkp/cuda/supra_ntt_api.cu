@@ -18,6 +18,8 @@ RustError::by_value sppark_init()
     const gpu_t& gpu = select_gpu();
 
     try {
+        CUDA_OK(cudaDeviceSynchronize());
+
         NTT::Base(gpu, &inout[0], lg_domain_size, NTT::InputOutputOrder::NR,
                   NTT::Direction::forward, NTT::Type::standard);
         gpu.sync();
@@ -43,14 +45,14 @@ RustError::by_value batch_expand(fr_t* d_out, fr_t* d_in, uint32_t lg_domain_siz
     uint32_t domain_size = 1U << lg_domain_size;
     uint32_t ext_domain_size = domain_size << lg_blowup;
 
-    cudaDeviceSynchronize();
     const gpu_t& gpu = select_gpu();
 
     try {
+        CUDA_OK(cudaDeviceSynchronize());
+
         for (size_t c = 0; c < poly_count; c++) {
             NTT::LDE_expand(gpu, &d_out[c * ext_domain_size],
-                              &d_in[c * domain_size], lg_domain_size,
-                              lg_blowup, false);
+                            &d_in[c * domain_size], lg_domain_size, lg_blowup);
         }
 
         gpu.sync();
@@ -75,10 +77,11 @@ RustError::by_value batch_NTT(fr_t* d_inout, uint32_t lg_domain_size,
 
     uint32_t domain_size = 1U << lg_domain_size;
 
-    cudaDeviceSynchronize();
     const gpu_t& gpu = select_gpu();
 
     try {
+        CUDA_OK(cudaDeviceSynchronize());
+
         for (size_t c = 0; c < poly_count; c++) {
             NTT::Base_on_device(gpu, &d_inout[c * domain_size], lg_domain_size,
                                 NTT::InputOutputOrder::RN,
@@ -107,10 +110,11 @@ RustError::by_value batch_iNTT(fr_t* d_inout, uint32_t lg_domain_size,
 
     uint32_t domain_size = 1U << lg_domain_size;
 
-    cudaDeviceSynchronize();
     const gpu_t& gpu = select_gpu();
 
     try {
+        CUDA_OK(cudaDeviceSynchronize());
+
         for (size_t c = 0; c < poly_count; c++) {
             NTT::Base_on_device(gpu, &d_inout[c * domain_size], lg_domain_size,
                                 NTT::InputOutputOrder::NR,
@@ -139,10 +143,11 @@ RustError::by_value batch_zk_shift(fr_t* d_inout, uint32_t lg_domain_size,
 
     uint32_t domain_size = 1U << lg_domain_size;
 
-    cudaDeviceSynchronize();
     const gpu_t& gpu = select_gpu();
 
     try {
+        CUDA_OK(cudaDeviceSynchronize());
+
         for (size_t c = 0; c < poly_count; c++) {
             NTT::LDE_powers(gpu, &d_inout[c * domain_size], lg_domain_size);
         }
