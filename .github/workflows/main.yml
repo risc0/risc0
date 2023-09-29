@@ -12,6 +12,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
+env:
+  RISC0_BUILD_LOCKED: 1
+
 jobs:
   check:
     runs-on: ubuntu-latest
@@ -148,7 +151,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: cargo build --release -F $FEATURE -p risc0-r0vm
-      - run: cargo test -F $FEATURE
+      - run: cargo test --locked -F $FEATURE
         working-directory: examples
 
   doc:
