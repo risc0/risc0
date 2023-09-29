@@ -19,12 +19,12 @@ use risc0_core::field::{Elem, ExtElem, Field};
 
 use crate::adapter::CircuitStepHandler;
 
-/// Tracks grand product accumulations for PLONK-style permutation arguments.
+/// Tracks grand product accumulations for permutation and lookup arguments
 pub struct Accum<E: Elem> {
     /// Total number of cycles in this run.
     cycles: usize,
 
-    // We use two PLONK-style grand product accumulation checks;
+    // We use two grand product accumulation checks;
     // one for the memory permutation and a second for a lookup table.
     // We have two `kinds`: memory and bytes.
     kinds: BTreeMap<String, Vec<E>>,
