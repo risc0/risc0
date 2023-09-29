@@ -30,8 +30,11 @@ use super::{get_prover_server, HalPair, ProverImpl};
 use crate::{
     host::{server::testutils, CIRCUIT},
     serde::{from_slice, to_vec},
-    Executor, ExecutorEnv, ExitCode, ProverOpts, ProverServer, Receipt,
+    Executor, ExecutorEnv, ProverOpts, ProverServer, Receipt,
 };
+
+#[cfg(feature = "test-exact-cycles")]
+use crate::ExitCode;
 
 fn prove_nothing(hashfn: &str) -> Result<Receipt> {
     let input = to_vec(&MultiTestSpec::DoNothing).unwrap();
@@ -201,6 +204,7 @@ fn memory_io() {
     run_memio(&[(POS + 1, 0)]).unwrap_err();
 }
 
+#[cfg(feature = "test-exact-cycles")]
 #[test]
 #[cfg_attr(feature = "cuda", serial)]
 fn pause_continue() {
@@ -263,6 +267,7 @@ fn session_events() {
     assert_eq!(on_post_prove_segment_flag.take(), true);
 }
 
+#[cfg(feature = "test-exact-cycles")]
 #[test]
 #[cfg_attr(feature = "cuda", serial)]
 fn continuation() {
