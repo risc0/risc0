@@ -59,7 +59,7 @@ jobs:
       - run: cargo run --bin cargo-risczero -- risczero install
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - run: cargo run --release -F $FEATURE -- --out ${{ matrix.os }}-${{ matrix.device }}.csv all
+      - run: cargo run --release --bin risc0-benchmark -F $FEATURE -- --out ${{ matrix.os }}-${{ matrix.device }}.csv all
         working-directory: benchmarks
       - run: cargo run --release --bin thin -F $FEATURE -- --out ${{ matrix.os }}-${{ matrix.device }}.amortized.csv all
         working-directory: benchmarks
