@@ -16,7 +16,7 @@ We start from the [OpenZeppelin Governor] standard, which is used by DAOs such a
 
 Key to this design is offloading compute that is expensive on-chain to the [RISC Zero] zkVM guest, with execution and proving being handled by Bonsai.
 In particular, this design optimizes voting operations, especially when casting a signed vote, by deferring signature verification and double-voting checks to the zkVM.
-Instead of verifying the signature or adding the ballot to EVM state, both the `Governor.vote` and `Governor.voteBySig` methods simply log an `event` and add the ballot to a running hash accumulator.
+Instead of verifying the signature or adding the ballot to EVM state, both the `BonsaiGovernor.castVote` and `BonsaiGovernor.castVoteBySig` methods simply log an `event` and add the ballot to a running hash accumulator.
 These event logs are collected later, by anybody in the world, and passed to the zkVM for vote finalization with the results sent to the Bonsai Governor smart contract through the Bonsai relay.
 With this, we are able to reduce gas costs for voting, while maintaining the security guarantees of voting on L1.
 
