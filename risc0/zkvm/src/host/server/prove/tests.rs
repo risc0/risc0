@@ -168,7 +168,7 @@ fn bigint_accel() {
 fn memory_io() {
     fn is_fault_proof(receipt: Result<Receipt>) -> bool {
         // this if statement will be removed once this feature is more mature
-        if !cfg!(feature = "enable-fault-proof") {
+        if !cfg!(feature = "fault-proof") {
             return receipt.is_err();
         }
         let receipt = receipt.unwrap();

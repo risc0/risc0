@@ -18,7 +18,7 @@ use risc0_circuit_rv32im::{
     REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA,
 };
 use risc0_core::field::baby_bear::{BabyBear, Elem, ExtElem};
-#[cfg(feature = "enable-fault-proof")]
+#[cfg(feature = "fault-proof")]
 use risc0_zkp::verify::VerificationError;
 use risc0_zkp::{
     adapter::TapsProvider,
@@ -83,7 +83,7 @@ where
             // proof of fault is currently in an experimental stage. If this
             // feature is disabled, then it means that attempting the verification verify at
             // this stage should return an error rather than a receipt.
-            #[cfg(feature = "enable-fault-proof")]
+            #[cfg(feature = "fault-proof")]
             Err(VerificationError::ValidFaultReceipt) => Ok(receipt),
             Err(e) => return Err(e.into()),
         }

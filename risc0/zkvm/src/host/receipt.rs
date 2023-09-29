@@ -186,9 +186,7 @@ impl SegmentReceipts {
 
         // This closure is invoked on each receipt's metadata
         let mut is_fault_meta = |metadata: &ReceiptMetadata| -> Result<bool, VerificationError> {
-            if cfg!(feature = "enable-fault-proof")
-                && metadata.pre.digest() == FAULT_CHECKER_ID.into()
-            {
+            if cfg!(feature = "fault-proof") && metadata.pre.digest() == FAULT_CHECKER_ID.into() {
                 if fault_id_exists {
                     // If we get here, I means that we've already seen the fault checker's image ID.
                     // However, a sequence of receipts can only have up to 1 fault checker image ID.
@@ -236,10 +234,7 @@ impl SegmentReceipts {
         // Note: if the `image_id` were to match the fault checker, it indicates that
         // the fault checker program was run as the normal guest program. This case does
         // not indicate a proof of fault. It is normal proof generation.
-        if cfg!(feature = "enable-fault-proof")
-            && fault_id_exists
-            && image_id != FAULT_CHECKER_ID.into()
-        {
+        if cfg!(feature = "fault-proof") && fault_id_exists && image_id != FAULT_CHECKER_ID.into() {
             let digest: Digest = from_slice(&journal.clone()).unwrap();
             if digest != prev_image_id {
                 return Err(VerificationError::FaultStateMismatch);
@@ -269,10 +264,7 @@ impl SegmentReceipts {
             return Err(VerificationError::JournalDigestMismatch);
         }
 
-        if cfg!(feature = "enable-fault-proof")
-            && fault_id_exists
-            && image_id != FAULT_CHECKER_ID.into()
-        {
+        if cfg!(feature = "fault-proof") && fault_id_exists && image_id != FAULT_CHECKER_ID.into() {
             // This is a valid proof of fault. Return as a verification error rather than
             // `Ok(())`. This makes it more difficult for callers of this function to
             // mistakenly verify a fault receipt in situations where they do not want to

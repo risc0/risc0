@@ -457,7 +457,7 @@ impl<'a> Executor<'a> {
                     err
                 );
                 self.monitor.undo()?;
-                if cfg!(feature = "enable-fault-proof") {
+                if cfg!(feature = "fault-proof") {
                     return Ok(Some(ExitCode::Fault));
                 } else {
                     bail!("rrs instruction executor failed with {:?}", err);

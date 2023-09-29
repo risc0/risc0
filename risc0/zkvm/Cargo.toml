@@ -110,6 +110,8 @@ dual = []
 metal = ["prove", "risc0-circuit-rv32im/metal", "risc0-zkp/metal"]
 default = ["client", "prove"]
 disable-dev-mode = []
+# note: cfg!(feature = "fault-proof") is used as a temporary measure in addition
+# to it being used to expose functionality to the fault checker.
 fault-proof = []
 profiler = [
   "dep:addr2line",
@@ -157,6 +159,3 @@ std = [
 # While this is acceptable for most tests, the tests counting cycles and
 # segments will fail intermittently.
 test-exact-cycles = ["risc0-zkvm-methods/test-exact-cycles"]
-
-# this is a temporary feature that will be removed after proof of fault becomes more stable
-enable-fault-proof = []

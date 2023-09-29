@@ -704,7 +704,7 @@ fn session_limit() {
 #[test]
 fn memory_access() {
     fn session_faulted(session: Result<Session, ExecutorError>) -> bool {
-        if cfg!(feature = "enable-fault-proof") {
+        if cfg!(feature = "fault-proof") {
             match session {
                 Err(ExecutorError::Fault(_)) => true,
                 _ => false,
