@@ -12,60 +12,79 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use methods::{ML_TEMPLATE_ELF};
-use risc0_zkvm::{default_prover, ExecutorEnv};
-use risc0_zkvm::serde::{to_vec, from_slice};
-
-use std::fs::File;
-use std::io::{Read};
+use risc0_zkvm::{
+    default_prover,
+    serde::{from_slice, to_vec},
+    ExecutorEnv,
+};
 use serde_json;
+use smartcore::{
+    linalg::basic::matrix::DenseMatrix, tree::decision_tree_classifier::DecisionTreeClassifier,
+};
+use smartcore_ml_methods::ML_TEMPLATE_ELF;
 
-// The serialized trained model and input data are contained in files with the corresponding paths listed below.  
-// Alternatively, the model can be trained in the host and/or data can be manually inputted as a smartcore DenseMatrix.  If this
-// approach is desired, be sure to import the corresponding SmartCore modules and serialize the model and data to byte arrays before 
-// transfer to the guest.  
-const JSON_PATH_MODEL: &str = "./res/ml-model/tree_model_bytes.json";
-const JSON_PATH_DATA: &str = "./res/input-data/tree_model_data_bytes.json";
-
-// Helper function to import JSON files
-fn import_json(json: &str) -> String {
-    let mut data = String::new();
-    let mut f1 = File::open(json).expect("unable to open file");
-    f1.read_to_string(&mut data).expect("Unable to read string");
-    data
-}
+// The serialized trained model and input data are embedded from files
+// corresponding paths listed below. Alternatively, the model can be trained in
+// the host and/or data can be manually inputted as a smartcore DenseMatrix. If
+// this approach is desired, be sure to import the corresponding SmartCore
+// modules and serialize the model and data to byte arrays before transfer to
+// the guest.
+const JSON_MODEL: &str = include_str!("../res/ml-model/tree_model_bytes.json");
+const JSON_DATA: &str = include_str!("../res/input-data/tree_model_data_bytes.json");
 
 fn main() {
-    // Import the model and input data. 
-    let model = import_json(JSON_PATH_MODEL);
-    let x_data = import_json(JSON_PATH_DATA);
+    let result = predict();
+    println!("Prediction recorded in journal is: {:?}", &result);
+}
 
-    // Convert the model and input data from string format into byte arrays.
-    let model_rmp: Vec<u8> = serde_json::from_str(&model).unwrap();
-    let data_rmp: Vec<u8> = serde_json::from_str(&x_data).unwrap();
+fn predict() -> Vec<u32> {
+    // Convert the model and input data from JSON into byte arrays.
+    let model_bytes: Vec<u8> = serde_json::from_str(JSON_MODEL).unwrap();
+    let data_bytes: Vec<u8> = serde_json::from_str(JSON_DATA).unwrap();
 
-    // In order for the byte arrays to be transmitted to the guest, we need to construct buffers that the byte arrays can be read into. 
-    // So we must construct buffers with the correct length for both the model and data byte arrays. Note:  len() returns a usize so no casting is necessary here.
-    let model_length = model_rmp.len();
-    let data_length = data_rmp.len();
-    
-    // We construct an executor environment and add the length data along with both byte arrays.
-    // Note that model_rmp and data_rmp do not need to be serialized using to_vec().
+    // Deserialize the data from rmp into native rust types.
+    type Model = DecisionTreeClassifier<f64, u32, DenseMatrix<f64>, Vec<u32>>;
+    let model: Model =
+        rmp_serde::from_slice(&model_bytes).expect("model failed to deserialize byte array");
+    let data: DenseMatrix<f64> =
+        rmp_serde::from_slice(&data_bytes).expect("data filed to deserialize byte array");
+
     let env = ExecutorEnv::builder()
-            .add_input(&to_vec(&model_length).unwrap())
-            .add_input(&to_vec(&data_length).unwrap())
-            .add_input(&model_rmp)
-            .add_input(&data_rmp)
-            .build().unwrap();
-    
-    // Obtain the default prover.  Note that for development purposes we do not need to run the prover.  To bypass the prover, use DEV_MODE = TRUE cargo run -r.
+        .add_input(&to_vec(&model).expect("model failed to serialize"))
+        .add_input(&to_vec(&data).expect("data failed to serialize"))
+        .build()
+        .unwrap();
+
+    // Obtain the default prover.
+    // Note that for development purposes we do not need to run the prover. To
+    // bypass the prover, use:
+    // ```
+    // RISC0_DEV_MODE=1 cargo run -r
+    // ```
     let prover = default_prover();
 
-    // This initiates a session, runs the STARK prover on the resulting exection trace, and produces a receipt.
+    // This initiates a session, runs the STARK prover on the resulting exection
+    // trace, and produces a receipt.
     let receipt = prover.prove_elf(env, ML_TEMPLATE_ELF).unwrap();
 
-    // We read the result that the guest code committed to the journal.  The receipt can also be serialized and sent to a verifier.
-    let result: Vec<u32> = from_slice(&receipt.journal).unwrap();
+    // We read the result that the guest code committed to the journal. The
+    // receipt can also be serialized and sent to a verifier.
+    from_slice(&receipt.journal).unwrap()
+}
 
-    println!("Prediction sent to the host is: {:?}", &result);
+#[cfg(test)]
+mod test {
+    #[test]
+    fn basic() {
+        const EXPECTED: &[u32] = &[
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+            2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+            2, 2, 2, 2, 2,
+        ];
+        let result = super::predict();
+        assert_eq!(EXPECTED, result);
+    }
 }

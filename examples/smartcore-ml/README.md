@@ -12,13 +12,13 @@ Dimensionality Reduction:  PCA.
 
 Matrix Decomposition:  SVD, Eigenvalue Decomposition, QR, LU.
 
-The following folders are not part of the standard RISC Zero starter template and should be added if the user wishes to replicate the layout of this template:  res/ml-model, res/input-data, the SmartCore Jupyter notebook, and the iris input data and classes CSV files.  The ml-model folder contains a json file of a trained decision tree model and input-data contains a json file of sample input data.  You can train and export your model along with any sample data in the Jupyter notebook.  
+The following folders are not part of the standard RISC Zero starter template and should be added if the user wishes to replicate the layout of this template:  res/ml-model, res/input-data, the SmartCore Jupyter notebook, and the iris input data and classes CSV files.  The ml-model folder contains a json file of a trained decision tree model and input-data contains a json file of sample input data.  You can train and export your model along with any sample data in the Jupyter notebook.
 
 res/ml-model and res/input-data come preloaded with a trained decision tree classifier.  You can replace the code in the Jupyter notebook to train and export any of the supported models listed above.
 
 ## Model Types
 
-It is important to specificy the generic types for each model so that they can be succesfully deserialized.  The input data for a trained model is typically formatted as a DenseMatrix, so be sure to add the following import: 
+It is important to specificy the generic types for each model so that they can be succesfully deserialized.  The input data for a trained model is typically formatted as a DenseMatrix, so be sure to add the following import:
 `use smartcore::linalg::basic::matrix::DenseMatrix;`
 when using KNN, be sure to add the following import:
 `use smartcore::metrics::distance::euclidian::Euclidian;`
