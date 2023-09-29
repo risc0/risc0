@@ -1,20 +1,20 @@
 name: Benchmark Applications
 
 on:
-  # push:
-  #   branches: [ main ]
-  #   # Only run benchmarks on changes to following paths:
-  #   paths:
-  #     - 'risc0/**'
-  #     - '.github/workflows/bench_*'
+  push:
+    branches: [ main ]
+    # Only run benchmarks on changes to following paths:
+    paths:
+      - 'risc0/**'
+      - '.github/workflows/bench_*'
 
   # uncomment for only for testing changes to this workflow while in a PR
-  # pull_request:
-  #   branches: [ main ]
-  #   # Only run benchmarks on changes to following paths:
-  #   paths:
-  #     - 'risc0/**'
-  #     - '.github/workflows/bench_*'
+  pull_request:
+    branches: [ main ]
+    # Only run benchmarks on changes to following paths:
+    paths:
+      - 'risc0/**'
+      - '.github/workflows/bench_*'
 
   workflow_dispatch:
 
