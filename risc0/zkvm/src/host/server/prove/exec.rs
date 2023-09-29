@@ -62,7 +62,7 @@ pub struct MemoryState {
 
     // Tables for sorting using non-deterministic advice from the host.
     // The correctness of the sorting is checked using a permutation argument.
-    pub ram_table: plonk::MemoryTable,
+    pub ram_table: plonk::RamTable,
     pub bytes_table: plonk::BytesTable,
 
     // Grand product accumulations for compute_accum and verify_accum phases
@@ -73,7 +73,7 @@ impl MemoryState {
     pub(crate) fn new(image: MemoryImage) -> Self {
         Self {
             ram: image,
-            ram_table: plonk::MemoryTable::new(),
+            ram_table: plonk::RamTable::new(),
             bytes_table: plonk::BytesTable::new(),
             grand_product_accum: BTreeMap::new(),
         }
