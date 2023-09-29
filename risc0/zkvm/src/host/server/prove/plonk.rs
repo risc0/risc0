@@ -17,26 +17,26 @@ use std::collections::VecDeque;
 use risc0_core::field::{Elem, ExtElem, Field};
 use risc0_zkp::MAX_CYCLES;
 
-// Main RAM plonk rows have the following 7 plonk elements:
+// A MemoryOperationRow consists of 7 elements:
 // addr, cycle, isWrite, byte0, byte1, byte2, byte3
 #[derive(Ord, PartialOrd, Eq, PartialEq)]
-struct MainRamPlonkRow {
+struct MemoryOperationRow {
     addr: u32,
     // (cycle << 2) | mem_op
     cycle_and_write_flag: u32,
     val: u32,
 }
 
-pub struct RamPlonk {
-    main_ram: Vec<MainRamPlonkRow>,
+pub struct MemoryPermutation {
+    main_ram: Vec<MemoryOperationRow>,
 }
 
-impl RamPlonk {
+impl MemoryPermutation {
     pub fn new() -> Self {
         // Make sure cycle_and_write_flag won't overflow
         assert!(MAX_CYCLES < ((u32::MAX as usize) << 2));
 
-        RamPlonk {
+        MemoryPermutation {
             main_ram: Vec::new(),
         }
     }
@@ -54,7 +54,7 @@ impl RamPlonk {
         for elem in &elems[3..] {
             debug_assert!(u32::from(*elem) < 256);
         }
-        self.main_ram.push(MainRamPlonkRow {
+        self.main_ram.push(MemoryOperationRow {
             addr,
             cycle_and_write_flag,
             val: u32::from(elems[3])
@@ -65,7 +65,7 @@ impl RamPlonk {
     }
 
     pub fn sort(&mut self) {
-        // Reverse sort all plonk rows so we can pop them off the back in order.
+        // Reverse sort all rows of main_ram so we can pop them off the back in order.
         self.main_ram.sort_unstable_by(|a, b| b.cmp(a));
     }
 
@@ -87,18 +87,18 @@ impl RamPlonk {
     }
 }
 
-// Plonk for bytes.  Rows each have 2 byte elements, each of which is
+// Lookup table for bytes.  Rows each have 2 byte elements, each of which is
 // in [0, 256).  We construct these into a short, [0, 256*256), and
 // count how many of each row occurs.
-pub struct BytesPlonk {
+pub struct BytesLookupTable {
     counts: Box<[u32; 256 * 256]>,
 
     read_pos: usize,
 }
 
-impl BytesPlonk {
+impl BytesLookupTable {
     pub fn new() -> Self {
-        BytesPlonk {
+        BytesLookupTable {
             counts: Box::new([0; 256 * 256]),
             read_pos: 0,
         }
@@ -116,7 +116,7 @@ impl BytesPlonk {
     }
 
     pub fn sort(&mut self) {
-        // BytesPlonk is already sorted.
+        // BytesLookupTable is already sorted.
     }
 
     pub fn read<E: Elem>(&mut self, outs: &mut [E; 2]) {
@@ -133,14 +133,14 @@ impl BytesPlonk {
     }
 }
 
-/// Plonk accumulations.  Saves factors to compute prefix products.
-pub struct PlonkAccum<F: Field> {
+/// Grand Product accumulations.  Saves factors to compute prefix products.
+pub struct GrandProductAccum<F: Field> {
     elems: VecDeque<F::ExtElem>,
 }
 
-impl<F: Field> PlonkAccum<F> {
+impl<F: Field> GrandProductAccum<F> {
     pub fn new() -> Self {
-        PlonkAccum {
+        GrandProductAccum {
             elems: VecDeque::new(),
         }
     }
@@ -162,7 +162,7 @@ impl<F: Field> PlonkAccum<F> {
     }
 }
 
-impl<F: Field> Default for PlonkAccum<F> {
+impl<F: Field> Default for GrandProductAccum<F> {
     fn default() -> Self {
         Self::new()
     }
