@@ -33,12 +33,18 @@ use test_log::test;
 use super::executor::Executor;
 use crate::{
     host::server::{
-        exec::syscall::{Syscall, SyscallContext},
+        exec::{
+            executor::ExecutorError,
+            syscall::{Syscall, SyscallContext},
+        },
         testutils,
     },
     serde::{from_slice, to_vec},
-    ExecutorEnv, ExitCode, MemoryImage, Program, Session, TraceEvent,
+    ExecutorEnv, ExitCode, MemoryImage, Program, Session,
 };
+
+#[cfg(feature = "test-exact-cycles")]
+use crate::TraceEvent;
 
 fn run_test(spec: MultiTestSpec) {
     let input = to_vec(&spec).unwrap();
@@ -427,6 +433,36 @@ ENV_VAR2=
 }
 
 #[test]
+fn args() {
+    let test_cases: [&[String]; 3] = [
+        &[String::default()],
+        &[
+            "grep".to_string(),
+            "-c".to_string(),
+            "foo bar".to_string(),
+            "-".to_string(),
+        ],
+        &[String::default()],
+    ];
+    for args_arr in test_cases {
+        let env = ExecutorEnv::builder()
+            .env_var("TEST_MODE", "ARGS")
+            .args(&args_arr)
+            .build()
+            .unwrap();
+        let mut exec = Executor::from_elf(env, STANDARD_LIB_ELF).unwrap();
+        let session = exec.run().unwrap();
+        assert_eq!(
+            from_slice::<Vec<String>, _>(&session.journal).unwrap(),
+            args_arr
+                .into_iter()
+                .map(|s| s.to_string())
+                .collect::<Vec<String>>(),
+        );
+    }
+}
+
+#[test]
 fn commit_hello_world() {
     Executor::from_elf(ExecutorEnv::default(), HELLO_COMMIT_ELF)
         .unwrap()
@@ -549,6 +585,7 @@ fn profiler() {
     );
 }
 
+#[cfg(feature = "test-exact-cycles")]
 #[test]
 fn trace() {
     let mut events: Vec<TraceEvent> = Vec::new();
@@ -618,16 +655,17 @@ fn oom() {
     let env = ExecutorEnv::builder().add_input(&spec).build().unwrap();
     let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
     let err = exec.run().err().unwrap();
-    assert!(err.to_string().contains("Out of memory!"), "{err:?}");
+    assert!(err.to_string().contains("Out of memory"), "{err:?}");
 }
 
+#[cfg(feature = "test-exact-cycles")]
 #[test]
 fn session_limit() {
     fn run_session(
         loop_cycles: u32,
         segment_limit_po2: usize,
         session_count_limit: usize,
-    ) -> Result<Session> {
+    ) -> Result<Session, ExecutorError> {
         let session_cycles = (1 << segment_limit_po2) * session_count_limit;
         let spec = &to_vec(&MultiTestSpec::BusyLoop {
             cycles: loop_cycles,
@@ -665,7 +703,19 @@ fn session_limit() {
 
 #[test]
 fn memory_access() {
-    fn access_memory(addr: u32) -> Result<Session> {
+    fn session_faulted(session: Result<Session, ExecutorError>) -> bool {
+        if cfg!(feature = "fault-proof") {
+            match session {
+                Err(ExecutorError::Fault(_)) => true,
+                _ => false,
+            }
+        } else {
+            // this will be removed once this feature is more mature
+            session.is_err()
+        }
+    }
+
+    fn access_memory(addr: u32) -> Result<Session, ExecutorError> {
         let spec = to_vec(&MultiTestSpec::OutOfBounds).unwrap();
         let addr = to_vec(&addr).unwrap();
         let env = ExecutorEnv::builder()
@@ -676,9 +726,9 @@ fn memory_access() {
         Executor::from_elf(env, MULTI_TEST_ELF).unwrap().run()
     }
 
-    access_memory(0x0000_0000).err().unwrap();
-    access_memory(0x0C00_0000).err().unwrap();
-    access_memory(0x0B00_0000).unwrap();
+    assert!(session_faulted(access_memory(0x0000_0000)));
+    assert!(session_faulted(access_memory(0x0C00_0000)));
+    assert!(!session_faulted(access_memory(0x0B00_0000)));
 }
 
 /// The post-state digest (i.e. the Merkle root of the memory state at the end

@@ -85,12 +85,17 @@ jobs:
       - run: cargo test -F $FEATURE -F profiler
       - run: cargo test --workspace -F $FEATURE --tests -- --ignored --test-threads 1
       - run: cargo test -F $FEATURE -F disable-dev-mode -p risc0-r0vm
+      - run: cargo test -F $FEATURE -F fault-proof -p risc0-zkvm -- tests::memory_io tests::memory_access
         if: matrix.device == 'cpu'
       - run: cargo check -F $FEATURE --benches
       - run: cargo check -p risc0-build
         if: matrix.device == 'cpu'
       - run: cargo check -F $FEATURE -p risc0-circuit-rv32im
       - run: cargo check -p risc0-core
+        if: matrix.device == 'cpu'
+      - run: cargo check -p cargo-risczero
+        if: matrix.device == 'cpu'
+      - run: cargo check -p cargo-risczero -F experimental
         if: matrix.device == 'cpu'
       - run: cargo check -F $FEATURE -p risc0-r0vm
       - run: cargo check -F $FEATURE -p risc0-sys
@@ -218,4 +223,6 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 18
-      - run: cargo test -p cargo-risczero -F docker
+      - run: cargo run --bin cargo-risczero -- risczero install
+      - run: cargo test -p risc0-build -F docker
+      - run: cargo test -F default -F profiler -F test-exact-cycles -p risc0-zkvm
