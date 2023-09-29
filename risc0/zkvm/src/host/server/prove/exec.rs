@@ -217,11 +217,11 @@ impl CircuitStepHandler<Elem> for MachineContext {
                 self.table_read(extra, outs);
                 Ok(())
             }
-            "WriteAccum" => {
+            "WriteAccumulator" => {
                 self.table_write_accum(extra, args);
                 Ok(())
             }
-            "ReadAccum" => {
+            "ReadAccumulator" => {
                 self.table_read_accum(extra, outs);
                 Ok(())
             }

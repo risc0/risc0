@@ -101,7 +101,7 @@ impl<'a, F: Field> CircuitStepHandler<F::Elem> for Handler<'a, F> {
     ) -> Result<()> {
         assert!(cycle < self.cycles);
         match name {
-            "plonkWriteAccum" => {
+            "WriteAccumulator" => {
                 assert_eq!(args.len(), F::ExtElem::EXT_SIZE);
                 let elem = F::ExtElem::from_subelems(args.iter().copied());
                 let ptr = self.get_ptr(extra);
@@ -109,7 +109,7 @@ impl<'a, F: Field> CircuitStepHandler<F::Elem> for Handler<'a, F> {
                 // buffer.
                 unsafe { ptr.add(cycle).write(elem) };
             }
-            "plonkReadAccum" => {
+            "ReadAccumulator" => {
                 assert_eq!(outs.len(), F::ExtElem::EXT_SIZE);
                 let ptr = self.get_ptr(extra);
                 // Already checked that our cycle number is in range, so this offset is in the
