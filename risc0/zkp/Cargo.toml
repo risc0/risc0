@@ -12,7 +12,7 @@ name = "ntt"
 harness = false
 
 [dependencies]
-sppark = { git = "https://github.com/sandsentinel/sppark.git", optional = true }
+sppark = { git = "https://github.com/supranational/sppark.git", optional = true }
 anyhow = { version = "1.0", default-features = false }
 blake2 = { version = "0.10.6", default-features = false }
 bytemuck = { version = "1.12", features = ["derive"] }

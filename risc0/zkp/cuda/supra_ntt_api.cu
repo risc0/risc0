@@ -83,9 +83,9 @@ RustError::by_value batch_NTT(fr_t* d_inout, uint32_t lg_domain_size,
         CUDA_OK(cudaDeviceSynchronize());
 
         for (size_t c = 0; c < poly_count; c++) {
-            NTT::Base_on_device(gpu, &d_inout[c * domain_size], lg_domain_size,
-                                NTT::InputOutputOrder::RN,
-                                NTT::Direction::forward, NTT::Type::standard);
+            NTT::Base_dev_ptr(gpu, &d_inout[c * domain_size], lg_domain_size,
+                              NTT::InputOutputOrder::RN,
+                              NTT::Direction::forward, NTT::Type::standard);
         }
 
         gpu.sync();
@@ -116,9 +116,9 @@ RustError::by_value batch_iNTT(fr_t* d_inout, uint32_t lg_domain_size,
         CUDA_OK(cudaDeviceSynchronize());
 
         for (size_t c = 0; c < poly_count; c++) {
-            NTT::Base_on_device(gpu, &d_inout[c * domain_size], lg_domain_size,
-                                NTT::InputOutputOrder::NR,
-                                NTT::Direction::inverse, NTT::Type::standard);
+            NTT::Base_dev_ptr(gpu, &d_inout[c * domain_size], lg_domain_size,
+                              NTT::InputOutputOrder::NR,
+                              NTT::Direction::inverse, NTT::Type::standard);
         }
 
         gpu.sync();
