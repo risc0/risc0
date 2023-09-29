@@ -161,7 +161,7 @@ The following feature flags are present in one or more of the crates listed abov
 | Feature  | Target(s)         | Implies    | Description                                                                           | Crates                                      |
 | -------- | ----------------- | ---------- | ------------------------------------------------------------------------------------- | ------------------------------------------- |
 | cuda     |                   | prove, std | Turns on CUDA GPU acceleration for the prover. Requires CUDA toolkit to be installed. | risc0-circuit-rv32im, risc0-zkp, risc0-zkvm |
-| disable-dev-mode | all | | Disables dev mode so that the proving stage may not be skipped. For the verifier, enforces that dev mode receipts generated sans proving stage are invalid. | risc0-zkvm |
+| disable-dev-mode | all | | Disables dev mode so that the proving stage may not be skipped. For the verifier, enforces that [fake receipts](https://docs.rs/risc0-zkvm/0.18.0/risc0_zkvm/enum.InnerReceipt.html#variant.Fake) are invalid. Used to prevent a misplaced `RISC0_DEV_MODE` from breaking security in production systems. | risc0-zkvm |
 | metal    | macos             | prove, std | Turns on Metal GPU acceleration for the prover.                                       | risc0-circuit-rv32im, risc0-zkp, risc0-zkvm |
 | profiler | all               |            | Counts cycles during guest execution as an aid to code optimization.                  | risc0-zkvm                                  |
 | prove    | all except rv32im | std        | Enables the prover, incompatible within the zkvm guest.                               | risc0-circuit-rv32im, risc0-zkp, risc0-zkvm |
