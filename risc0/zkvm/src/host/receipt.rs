@@ -124,8 +124,8 @@ pub struct Receipt {
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[cfg_attr(test, derive(PartialEq))]
 pub enum InnerReceipt {
-    /// The [SegmentReceipts].
-    Flat(SegmentReceipts),
+    /// A non-succinct [CompositeReceipt].
+    Composite(CompositeReceipt),
 
     /// The [SuccinctReceipt].
     Succinct(SuccinctReceipt),
@@ -134,12 +134,19 @@ pub enum InnerReceipt {
     Fake,
 }
 
-/// A wrapper around `Vec<SegmentReceipt>`.
+/// A receipt composed of one or more [SegmentReceipt] structs proving a single execution with
+/// continuations, and zero or more [Receipt] stucts proving any assumptions.
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[cfg_attr(test, derive(PartialEq))]
-pub struct SegmentReceipts(pub Vec<SegmentReceipt>);
+pub struct CompositeReceipt {
+    /// Segment receipts forming the proof of a execution with continuations.
+    pub segments: Vec<SegmentReceipt>,
 
-impl SegmentReceipts {
+    /// Receipts proving the validity of assumptions made during execution, for composition.
+    pub assumptions: Vec<Receipt>,
+}
+
+impl CompositeReceipt {
     /// Verify the integrity of this receipt.
     pub fn verify_with_context(
         &self,
@@ -167,7 +174,7 @@ impl SegmentReceipts {
         };
 
         let (final_receipt, receipts) = self
-            .0
+            .segments
             .as_slice()
             .split_last()
             .ok_or(VerificationError::ReceiptFormatError)?;
@@ -270,7 +277,7 @@ impl InnerReceipt {
         journal: &[u8],
     ) -> Result<(), VerificationError> {
         match self {
-            InnerReceipt::Flat(x) => x.verify_with_context(ctx, image_id.into(), journal),
+            InnerReceipt::Composite(x) => x.verify_with_context(ctx, image_id.into(), journal),
             InnerReceipt::Succinct(x) => x.verify_with_context(ctx),
             InnerReceipt::Fake => Self::verify_fake(),
         }
@@ -284,10 +291,10 @@ impl InnerReceipt {
         Err(VerificationError::InvalidProof)
     }
 
-    /// Returns the [InnerReceipt::Flat] arm.
-    pub fn flat(&self) -> Result<&[SegmentReceipt], VerificationError> {
-        if let InnerReceipt::Flat(x) = self {
-            Ok(&x.0)
+    /// Returns the [InnerReceipt::Composite] arm.
+    pub fn composite(&self) -> Result<&CompositeReceipt, VerificationError> {
+        if let InnerReceipt::Composite(x) = self {
+            Ok(&x)
         } else {
             Err(VerificationError::ReceiptFormatError)
         }
@@ -360,12 +367,12 @@ impl Receipt {
     /// Extract the [ReceiptMetadata] from this receipt for an excution session.
     pub fn get_metadata(&self) -> Result<ReceiptMetadata, VerificationError> {
         match self.inner {
-            InnerReceipt::Flat(ref segment_receipts) => segment_receipts
-                .0
+            InnerReceipt::Composite(CompositeReceipt { ref segments, .. }) => segments
                 .iter()
                 .last()
                 .ok_or(VerificationError::ReceiptFormatError)?
-                .get_metadata(),
+                .get_metadata(), // DO NOT MERGE(victor): This is actually incorrect and
+            // incomplete.
             InnerReceipt::Succinct(ref succint_recipt) => Ok(succint_recipt.meta.clone()),
             InnerReceipt::Fake => unimplemented!("fake receipt does not implement metadata"),
         }

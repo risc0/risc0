@@ -69,8 +69,9 @@ fn main() {
 
         let seal = receipt
             .inner
-            .flat()
+            .composite()
             .unwrap()
+            .segments
             .iter()
             .fold(0, |acc, segment| acc + segment.get_seal_bytes().len());
 

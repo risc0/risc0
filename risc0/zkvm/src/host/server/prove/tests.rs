@@ -234,7 +234,7 @@ fn pause_continue() {
     assert_eq!(session.segments.len(), 1);
     assert_eq!(session.exit_code, ExitCode::Paused(0));
     let receipt = session.prove().unwrap();
-    let segments = receipt.inner.flat().unwrap();
+    let segments = &receipt.inner.composite().unwrap().segments;
     assert_eq!(segments.len(), 1);
     assert_eq!(segments[0].index, 0);
 
@@ -307,7 +307,14 @@ fn continuation() {
     assert_eq!(final_segment.exit_code, ExitCode::Halted(0));
 
     let receipt = session.prove().unwrap();
-    for (idx, receipt) in receipt.inner.flat().unwrap().iter().enumerate() {
+    for (idx, receipt) in receipt
+        .inner
+        .composite()
+        .unwrap()
+        .segments
+        .iter()
+        .enumerate()
+    {
         assert_eq!(receipt.index, idx as u32);
     }
 }

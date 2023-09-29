@@ -29,7 +29,7 @@ use risc0_zkp::{
 
 use super::{exec::MachineContext, HalPair, ProverServer};
 use crate::{
-    host::{receipt::SegmentReceipts, CIRCUIT},
+    host::{receipt::CompositeReceipt, CIRCUIT},
     InnerReceipt, Loader, Receipt, Segment, SegmentReceipt, Session, VerifierContext,
 };
 
@@ -75,7 +75,11 @@ where
                 hook.on_post_prove_segment(&segment);
             }
         }
-        let inner = InnerReceipt::Flat(SegmentReceipts(segments));
+        // TODO(victor): Add assumptions from the VerifierContext
+        let inner = InnerReceipt::Composite(CompositeReceipt {
+            segments,
+            assumptions: vec![],
+        });
         let receipt = Receipt::new(inner, session.journal.clone());
         let image_id = session.segments[0].resolve()?.pre_image.compute_id();
         match receipt.verify_with_context(ctx, image_id) {
