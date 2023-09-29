@@ -87,6 +87,7 @@ jobs:
       - run: cargo test -F $FEATURE -F profiler
       - run: cargo test --workspace -F $FEATURE --tests -- --ignored --test-threads 1
       - run: cargo test -F $FEATURE -F disable-dev-mode -p risc0-r0vm
+      - run: cargo test -F $FEATURE -F fault-proof -p risc0-zkvm -- tests::memory_io tests::memory_access
         if: matrix.device == 'cpu'
       - run: cargo test -F experimental -p cargo-risczero
         if: matrix.device == 'cpu'
@@ -100,6 +101,7 @@ jobs:
       - run: cargo check -F $FEATURE -p risc0-sys
       - run: cargo check -F $FEATURE -p risc0-zkp
       - run: cargo check -F $FEATURE -p risc0-zkvm
+      - run: cargo check -p substrate-minimal-runtime
       - uses: risc0/clippy-action@main
         with:
           reporter: 'github-pr-check'
