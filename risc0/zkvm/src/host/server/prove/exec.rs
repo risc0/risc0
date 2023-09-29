@@ -60,21 +60,22 @@ impl MemoryOp {
 pub struct MemoryState {
     pub ram: MemoryImage,
 
-    // Plonk tables for sorting plonks in proper order
-    pub ram_plonk: plonk::RamPlonk,
-    pub bytes_plonk: plonk::BytesPlonk,
+    // Tables for sorting using non-deterministic advice from the host.
+    // The correctness of the sorting is checked using a permutation argument.
+    pub memory_table: plonk::MemoryTable,
+    pub bytes_table: plonk::BytesTable,
 
-    // Plonk accumulations for compute_accum and verify_accum phases
-    pub plonk_accum: BTreeMap<String, plonk::PlonkAccum<BabyBear>>,
+    // Grand product accumulations for compute_accum and verify_accum phases
+    pub grand_product_accum: BTreeMap<String, plonk::GrandProductAccum<BabyBear>>,
 }
 
 impl MemoryState {
     pub(crate) fn new(image: MemoryImage) -> Self {
         Self {
             ram: image,
-            ram_plonk: plonk::RamPlonk::new(),
-            bytes_plonk: plonk::BytesPlonk::new(),
-            plonk_accum: BTreeMap::new(),
+            memory_table: plonk::MemoryTable::new(),
+            bytes_table: plonk::BytesTable::new(),
+            grand_product_accum: BTreeMap::new(),
         }
     }
 
@@ -208,20 +209,20 @@ impl CircuitStepHandler<Elem> for MachineContext {
                 (outs[0], outs[1], outs[2], outs[3]) = self.ram_read(cycle, args[0], args[1]);
                 Ok(())
             }
-            "plonkWrite" => {
-                self.plonk_write(extra, args);
+            "tableWrite" => {
+                self.table_write(extra, args);
                 Ok(())
             }
-            "plonkRead" => {
-                self.plonk_read(extra, outs);
+            "tableRead" => {
+                self.table_read(extra, outs);
                 Ok(())
             }
-            "plonkWriteAccum" => {
-                self.plonk_write_accum(extra, args);
+            "WriteAccum" => {
+                self.table_write_accum(extra, args);
                 Ok(())
             }
-            "plonkReadAccum" => {
-                self.plonk_read_accum(extra, outs);
+            "ReadAccum" => {
+                self.table_read_accum(extra, outs);
                 Ok(())
             }
             "log" => {
@@ -245,8 +246,8 @@ impl CircuitStepHandler<Elem> for MachineContext {
 
     #[tracing::instrument(skip(self))]
     fn sort(&mut self, _: &str) {
-        self.memory.ram_plonk.sort();
-        self.memory.bytes_plonk.sort();
+        self.memory.memory_table.sort();
+        self.memory.bytes_table.sort();
     }
 }
 
@@ -627,37 +628,37 @@ impl MachineContext {
         Ok(())
     }
 
-    fn plonk_read(&mut self, name: &str, outs: &mut [Elem]) {
+    fn table_read(&mut self, name: &str, outs: &mut [Elem]) {
         match name {
-            "ram" => self.memory.ram_plonk.read(outs.try_into().unwrap()),
-            "bytes" => self.memory.bytes_plonk.read(outs.try_into().unwrap()),
-            _ => panic!("Unknown plonk type {name}"),
+            "ram" => self.memory.memory_table.read(outs.try_into().unwrap()),
+            "bytes" => self.memory.bytes_table.read(outs.try_into().unwrap()),
+            _ => panic!("Unknown table type {name}"),
         }
     }
 
-    fn plonk_write(&mut self, name: &str, args: &[Elem]) {
+    fn table_write(&mut self, name: &str, args: &[Elem]) {
         match name {
-            "ram" => self.memory.ram_plonk.write(args.try_into().unwrap()),
-            "bytes" => self.memory.bytes_plonk.write(args.try_into().unwrap()),
-            _ => panic!("Unknown plonk type {name}"),
+            "ram" => self.memory.memory_table.write(args.try_into().unwrap()),
+            "bytes" => self.memory.bytes_table.write(args.try_into().unwrap()),
+            _ => panic!("Unknown table type {name}"),
         }
     }
 
-    fn plonk_read_accum(&mut self, name: &str, outs: &mut [Elem]) {
-        if let Some(entry) = self.memory.plonk_accum.get_mut(name) {
+    fn table_read_accum(&mut self, name: &str, outs: &mut [Elem]) {
+        if let Some(entry) = self.memory.grand_product_accum.get_mut(name) {
             entry.read(outs)
         } else {
-            panic!("Unknown plonk accum {}", name);
+            panic!("Unknown grand product accumulator {}", name);
         }
     }
 
-    fn plonk_write_accum(&mut self, name: &str, args: &[Elem]) {
-        if let Some(entry) = self.memory.plonk_accum.get_mut(name) {
+    fn table_write_accum(&mut self, name: &str, args: &[Elem]) {
+        if let Some(entry) = self.memory.grand_product_accum.get_mut(name) {
             entry.write(args);
         } else {
-            let mut accum = plonk::PlonkAccum::new();
+            let mut accum = plonk::GrandProductAccum::new();
             accum.write(args);
-            self.memory.plonk_accum.insert(name.to_string(), accum);
+            self.memory.grand_product_accum.insert(name.to_string(), accum);
         }
     }
 
