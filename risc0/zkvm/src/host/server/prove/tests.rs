@@ -28,10 +28,16 @@ use test_log::test;
 
 use super::{get_prover_server, HalPair, ProverImpl};
 use crate::{
-    host::{server::testutils, CIRCUIT},
+    host::{
+        server::{exec::executor::ExecutorError, testutils},
+        CIRCUIT,
+    },
     serde::{from_slice, to_vec},
-    Executor, ExecutorEnv, ExitCode, ProverOpts, ProverServer, Receipt,
+    Executor, ExecutorEnv, ProverOpts, ProverServer, Receipt,
 };
+
+#[cfg(feature = "test-exact-cycles")]
+use crate::ExitCode;
 
 fn prove_nothing(hashfn: &str) -> Result<Receipt> {
     let input = to_vec(&MultiTestSpec::DoNothing).unwrap();
@@ -160,6 +166,18 @@ fn bigint_accel() {
 #[test]
 #[serial]
 fn memory_io() {
+    fn is_fault_proof(receipt: Result<Receipt>) -> bool {
+        // this if statement will be removed once this feature is more mature
+        if !cfg!(feature = "fault-proof") {
+            return receipt.is_err();
+        }
+        let receipt = receipt.unwrap();
+        match receipt.verify(MULTI_TEST_ID) {
+            Err(VerificationError::ValidFaultReceipt) => true,
+            _ => false,
+        }
+    }
+
     fn run_memio(pairs: &[(usize, usize)]) -> Result<Receipt> {
         let spec = MultiTestSpec::ReadWriteMem {
             values: pairs
@@ -171,7 +189,11 @@ fn memory_io() {
         let input = to_vec(&spec)?;
         let env = ExecutorEnv::builder().add_input(&input).build().unwrap();
         let mut exec = Executor::from_elf(env, MULTI_TEST_ELF)?;
-        let session = exec.run()?;
+        let session = match exec.run() {
+            Ok(session) => session,
+            Err(ExecutorError::Fault(session)) => session,
+            Err(ExecutorError::Error(e)) => return Err(e),
+        };
         session.prove()
     }
 
@@ -183,24 +205,25 @@ fn memory_io() {
     );
 
     // Double writes are fine
-    run_memio(&[(POS, 1), (POS, 1)]).unwrap();
+    assert!(!is_fault_proof(run_memio(&[(POS, 1), (POS, 1)])));
 
     // Writes at different addresses are fine
-    run_memio(&[(POS, 1), (POS + 4, 2)]).unwrap();
+    assert!(!is_fault_proof(run_memio(&[(POS, 1), (POS + 4, 2)])));
 
     // Aligned write is fine
-    run_memio(&[(POS, 1)]).unwrap();
+    assert!(!is_fault_proof(run_memio(&[(POS, 1)])));
 
     // Unaligned write is bad
-    run_memio(&[(POS + 1001, 1)]).unwrap_err();
+    assert!(is_fault_proof(run_memio(&[(POS + 1001, 1)])));
 
     // Aligned read is fine
-    run_memio(&[(POS, 0)]).unwrap();
+    assert!(!is_fault_proof(run_memio(&[(POS, 0)])));
 
     // Unaligned read is bad
-    run_memio(&[(POS + 1, 0)]).unwrap_err();
+    assert!(is_fault_proof(run_memio(&[(POS + 1, 0)])));
 }
 
+#[cfg(feature = "test-exact-cycles")]
 #[test]
 #[cfg_attr(feature = "cuda", serial)]
 fn pause_continue() {
@@ -263,6 +286,7 @@ fn session_events() {
     assert_eq!(on_post_prove_segment_flag.take(), true);
 }
 
+#[cfg(feature = "test-exact-cycles")]
 #[test]
 #[cfg_attr(feature = "cuda", serial)]
 fn continuation() {

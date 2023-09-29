@@ -1,0 +1,15 @@
+[package]
+name = "risc0-fault"
+version = { workspace = true }
+edition = { workspace = true }
+
+[build-dependencies]
+risc0-build = { workspace = true }
+
+[package.metadata.release]
+release = false
+
+[package.metadata.risc0]
+methods = ["guest"]
+
+[dependencies]
