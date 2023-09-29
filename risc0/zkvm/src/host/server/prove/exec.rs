@@ -62,7 +62,7 @@ pub struct MemoryState {
 
     // Tables for sorting using non-deterministic advice from the host.
     // The correctness of the sorting is checked using a permutation argument.
-    pub memory_table: plonk::MemoryTable,
+    pub ram_table: plonk::MemoryTable,
     pub bytes_table: plonk::BytesTable,
 
     // Grand product accumulations for compute_accum and verify_accum phases
@@ -73,7 +73,7 @@ impl MemoryState {
     pub(crate) fn new(image: MemoryImage) -> Self {
         Self {
             ram: image,
-            memory_table: plonk::MemoryTable::new(),
+            ram_table: plonk::MemoryTable::new(),
             bytes_table: plonk::BytesTable::new(),
             grand_product_accum: BTreeMap::new(),
         }
@@ -246,7 +246,7 @@ impl CircuitStepHandler<Elem> for MachineContext {
 
     #[tracing::instrument(skip(self))]
     fn sort(&mut self, _: &str) {
-        self.memory.memory_table.sort();
+        self.memory.ram_table.sort();
         self.memory.bytes_table.sort();
     }
 }
@@ -630,7 +630,7 @@ impl MachineContext {
 
     fn table_read(&mut self, name: &str, outs: &mut [Elem]) {
         match name {
-            "ram" => self.memory.memory_table.read(outs.try_into().unwrap()),
+            "ram" => self.memory.ram_table.read(outs.try_into().unwrap()),
             "bytes" => self.memory.bytes_table.read(outs.try_into().unwrap()),
             _ => panic!("Unknown table type {name}"),
         }
@@ -638,7 +638,7 @@ impl MachineContext {
 
     fn table_write(&mut self, name: &str, args: &[Elem]) {
         match name {
-            "ram" => self.memory.memory_table.write(args.try_into().unwrap()),
+            "ram" => self.memory.ram_table.write(args.try_into().unwrap()),
             "bytes" => self.memory.bytes_table.write(args.try_into().unwrap()),
             _ => panic!("Unknown table type {name}"),
         }
