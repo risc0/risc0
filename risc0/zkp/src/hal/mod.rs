@@ -156,7 +156,7 @@ pub trait CircuitHal<H: Hal> {
     fn eval_check(
         &self,
         check: &H::Buffer<H::Elem>,
-        // Register groups, e.g. accum, code, data.  These should have one row for each cycle.
+        // Register groups, e.g. accum, control, data.  These should have one row for each cycle.
         groups: &[&H::Buffer<H::Elem>],
         // Globals.  These should have one row total.
         globals: &[&H::Buffer<H::Elem>],

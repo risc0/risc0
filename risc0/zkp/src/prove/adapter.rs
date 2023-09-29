@@ -62,7 +62,7 @@ where
         self.exec.circuit.get_taps()
     }
 
-    /// Perform initial 'execution' setting code + data.
+    /// Perform initial 'execution' setting control + data.
     /// Additionally, write any 'results' as needed.
     pub fn execute(&mut self, iop: &mut WriteIOP<F>) {
         iop.write_field_elem_slice(&self.exec.io.as_slice());
@@ -71,7 +71,7 @@ where
 
     fn compute_accum(&mut self) {
         let args = &[
-            self.exec.code.as_slice_sync(),
+            self.exec.control.as_slice_sync(),
             self.exec.io.as_slice_sync(),
             self.exec.data.as_slice_sync(),
             self.mix.as_slice_sync(),
@@ -152,8 +152,8 @@ where
         self.exec.po2 as u32
     }
 
-    pub fn get_code(&self) -> &CpuBuffer<F::Elem> {
-        &self.exec.code
+    pub fn get_control(&self) -> &CpuBuffer<F::Elem> {
+        &self.exec.control
     }
 
     pub fn get_data(&self) -> &CpuBuffer<F::Elem> {

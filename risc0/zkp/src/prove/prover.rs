@@ -181,7 +181,7 @@ impl<'a, H: Hal> Prover<'a, H> {
         let mut all_xs = Vec::new();
 
         // Now, we evaluate each group at the approriate points (relative to Z).
-        // From here on out, we always process groups in accum, code, data order,
+        // From here on out, we always process groups in accum, control, data order,
         // since this is the order used by the codegen system (alphabetical).
         // Sometimes it's a requirement for matching generated code, but even when
         // it's not we keep the order for consistency.

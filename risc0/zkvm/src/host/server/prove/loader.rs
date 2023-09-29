@@ -87,7 +87,7 @@ struct ControlGroup(Vec<BabyBearElem>);
 
 impl ControlGroup {
     fn new() -> Self {
-        Self(vec![BabyBearElem::ZERO; CIRCUIT.code_size()])
+        Self(vec![BabyBearElem::ZERO; CIRCUIT.control_size()])
     }
 
     fn reset(&mut self) {
@@ -114,7 +114,7 @@ where
     F: FnMut(&[BabyBearElem], usize) -> Result<bool>,
 {
     cycle: usize,
-    code: ControlGroup,
+    control: ControlGroup,
     step: F,
 }
 
@@ -125,7 +125,7 @@ where
     pub fn new(step: F) -> Self {
         Self {
             cycle: 0,
-            code: ControlGroup::new(),
+            control: ControlGroup::new(),
             step,
         }
     }
@@ -134,7 +134,7 @@ where
     pub fn bytes_init(&mut self) -> Result<bool> {
         debug!("BYTES_INIT");
         self.start();
-        self.code[ControlIndex::BytesInit] = BabyBearElem::ONE;
+        self.control[ControlIndex::BytesInit] = BabyBearElem::ONE;
         self.next()
     }
 
@@ -143,12 +143,12 @@ where
         debug!("BYTES_SETUP");
         for _ in 0..count - 1 {
             self.start();
-            self.code[ControlIndex::BytesSetup] = BabyBearElem::ONE;
+            self.control[ControlIndex::BytesSetup] = BabyBearElem::ONE;
             self.next()?;
         }
         self.start();
-        self.code[ControlIndex::BytesSetup] = BabyBearElem::ONE;
-        self.code[ControlIndex::Info] = BabyBearElem::ONE;
+        self.control[ControlIndex::BytesSetup] = BabyBearElem::ONE;
+        self.control[ControlIndex::Info] = BabyBearElem::ONE;
         self.next()
     }
 
@@ -156,7 +156,7 @@ where
     pub fn ram_init(&mut self) -> Result<bool> {
         debug!("RAM_INIT");
         self.start();
-        self.code[ControlIndex::RamInit] = BabyBearElem::ONE;
+        self.control[ControlIndex::RamInit] = BabyBearElem::ONE;
         self.next()
     }
 
@@ -165,19 +165,19 @@ where
     pub fn ram_load(&mut self, triple: &TripleWord) -> Result<bool> {
         trace!("RAM_LOAD[{}]: {triple:?}", self.cycle);
         self.start();
-        self.code[ControlIndex::RamLoad] = BabyBearElem::ONE;
-        self.code[ControlIndex::Info] = BabyBearElem::new(triple.addr);
+        self.control[ControlIndex::RamLoad] = BabyBearElem::ONE;
+        self.control[ControlIndex::Info] = BabyBearElem::new(triple.addr);
         (
-            self.code[ControlIndex::Data1Lo],
-            self.code[ControlIndex::Data1Hi],
+            self.control[ControlIndex::Data1Lo],
+            self.control[ControlIndex::Data1Hi],
         ) = split_word16(triple.data[0]);
         (
-            self.code[ControlIndex::Data2Lo],
-            self.code[ControlIndex::Data2Hi],
+            self.control[ControlIndex::Data2Lo],
+            self.control[ControlIndex::Data2Hi],
         ) = split_word16(triple.data[1]);
         (
-            self.code[ControlIndex::Data3Lo],
-            self.code[ControlIndex::Data3Hi],
+            self.control[ControlIndex::Data3Lo],
+            self.control[ControlIndex::Data3Hi],
         ) = split_word16(triple.data[2]);
         self.next()
     }
@@ -192,15 +192,15 @@ where
         };
         debug!("RESET");
         self.start();
-        self.code[ControlIndex::Reset] = BabyBearElem::ONE;
-        self.code[ControlIndex::Info] = BabyBearElem::ONE; // isFirst
-        self.code[phase_enum] = BabyBearElem::ONE;
+        self.control[ControlIndex::Reset] = BabyBearElem::ONE;
+        self.control[ControlIndex::Info] = BabyBearElem::ONE; // isFirst
+        self.control[phase_enum] = BabyBearElem::ONE;
         self.next()?;
 
         self.start();
-        self.code[ControlIndex::Reset] = BabyBearElem::ONE;
-        self.code[ControlIndex::Info] = BabyBearElem::ZERO; // isFirst
-        self.code[phase_enum] = BabyBearElem::ONE;
+        self.control[ControlIndex::Reset] = BabyBearElem::ONE;
+        self.control[ControlIndex::Info] = BabyBearElem::ZERO; // isFirst
+        self.control[phase_enum] = BabyBearElem::ONE;
         self.next()
     }
 
@@ -209,7 +209,7 @@ where
         debug!("BODY");
         loop {
             self.start();
-            self.code[ControlIndex::Body] = BabyBearElem::ONE;
+            self.control[ControlIndex::Body] = BabyBearElem::ONE;
             if !self.next_fini(FINI_TAILROOM)? {
                 break;
             }
@@ -221,29 +221,29 @@ where
     pub fn fini(&mut self) -> Result<bool> {
         debug!("FINI");
         self.start();
-        self.code[ControlIndex::RamFini] = BabyBearElem::ONE;
+        self.control[ControlIndex::RamFini] = BabyBearElem::ONE;
         self.next()?;
 
         self.start();
-        self.code[ControlIndex::BytesFini] = BabyBearElem::ONE;
+        self.control[ControlIndex::BytesFini] = BabyBearElem::ONE;
         self.next()
     }
 
     fn start(&mut self) {
-        self.code.reset();
-        self.code[ControlIndex::Cycle] = BabyBearElem::new(self.cycle as u32);
+        self.control.reset();
+        self.control[ControlIndex::Cycle] = BabyBearElem::new(self.cycle as u32);
     }
 
     fn next(&mut self) -> Result<bool> {
         self.cycle += 1;
-        let keep_going = (self.step)(&self.code.0, 0)?;
+        let keep_going = (self.step)(&self.control.0, 0)?;
         assert!(keep_going, "Premature halt, cycle: {}", self.cycle);
         Ok(keep_going)
     }
 
     fn next_fini(&mut self, fini: usize) -> Result<bool> {
         self.cycle += 1;
-        (self.step)(&self.code.0, fini)
+        (self.step)(&self.control.0, fini)
     }
 }
 
@@ -424,7 +424,7 @@ impl Loader {
 
     /// Compute the `ControlId` associated with the given HAL
     pub fn compute_control_id<H: Hal<Elem = BabyBearElem>>(&self, hal: &H) -> Vec<Digest> {
-        let code_size = CIRCUIT.code_size();
+        let control_size = CIRCUIT.control_size();
 
         // Start with an empty table
         let mut table = Vec::new();
@@ -434,27 +434,27 @@ impl Loader {
             let cycles = 1 << i;
             log::info!("po2: {i}");
             // Make a vector & set it up with the elf data
-            let mut code = vec![BabyBearElem::default(); cycles * code_size];
-            self.load_code(&mut code, cycles);
+            let mut control = vec![BabyBearElem::default(); cycles * control_size];
+            self.load_control(&mut control, cycles);
             // Copy into accel buffer
-            let coeffs = hal.copy_from_elem("coeffs", &code);
+            let coeffs = hal.copy_from_elem("coeffs", &control);
             // Do interpolate & shift
-            hal.batch_interpolate_ntt(&coeffs, code_size);
-            hal.zk_shift(&coeffs, code_size);
+            hal.batch_interpolate_ntt(&coeffs, control_size);
+            hal.zk_shift(&coeffs, control_size);
             // Make the poly-group & extract the root
-            let code_group = PolyGroup::new(hal, coeffs, code_size, cycles, "code");
-            table.push(*code_group.merkle.root());
+            let control_group = PolyGroup::new(hal, coeffs, control_size, cycles, "control");
+            table.push(*control_group.merkle.root());
         }
 
         table
     }
 
-    fn load_code(&self, code: &mut [BabyBearElem], max_cycles: usize) {
-        let code_size = CIRCUIT.code_size();
+    fn load_control(&self, control: &mut [BabyBearElem], max_cycles: usize) {
+        let control_size = CIRCUIT.control_size();
         let mut cycle = 0;
         self.load(|chunk, fini| {
-            for i in 0..code_size {
-                code[max_cycles * i + cycle] = chunk[i];
+            for i in 0..control_size {
+                control[max_cycles * i + cycle] = chunk[i];
             }
             let total = cycle + fini + ZK_CYCLES;
             if total < max_cycles {

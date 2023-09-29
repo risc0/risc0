@@ -26,7 +26,7 @@ pub use read_iop::ReadIOP;
 use risc0_core::field::{Elem, ExtElem, Field, RootsOfUnity};
 
 use crate::{
-    adapter::{CircuitCoreDef, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA},
+    adapter::{CircuitCoreDef, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CONTROL, REGISTER_GROUP_DATA},
     core::{digest::Digest, hash::HashSuite, log2_ceil},
     taps::TapSet,
     INV_RATE, MAX_CYCLES_PO2, QUERIES,
@@ -200,13 +200,13 @@ where
         ret
     }
 
-    fn verify<CheckCodeFn>(
+    fn verify<CheckControlFn>(
         &mut self,
         seal: &'a [u32],
-        check_code: CheckCodeFn,
+        check_control: CheckControlFn,
     ) -> Result<(), VerificationError>
     where
-        CheckCodeFn: Fn(u32, &Digest) -> Result<(), VerificationError>,
+        CheckControlFn: Fn(u32, &Digest) -> Result<(), VerificationError>,
     {
         if seal.is_empty() {
             return Err(VerificationError::ReceiptFormatError);
@@ -228,17 +228,17 @@ where
         // log::debug!("size = {size}, po2 = {po2}");
 
         // Get taps and compute sizes
-        let code_size = taps.group_size(REGISTER_GROUP_CODE);
+        let control_size = taps.group_size(REGISTER_GROUP_CONTROL);
         let data_size = taps.group_size(REGISTER_GROUP_DATA);
         let accum_size = taps.group_size(REGISTER_GROUP_ACCUM);
 
-        // Get merkle root for the code merkle tree.
-        // The code merkle tree contains the control instructions for the zkVM.
+        // Get merkle root for the control merkle tree.
+        // The control merkle tree contains the control instructions for the zkVM.
         #[cfg(not(target_os = "zkvm"))]
-        log::debug!("code_merkle");
-        let code_merkle = MerkleTreeVerifier::new(&mut iop, hashfn, domain, code_size, QUERIES);
-        // log::debug!("codeRoot = {}", code_merkle.root());
-        check_code(self.po2, code_merkle.root())?;
+        log::debug!("control_merkle");
+        let control_merkle = MerkleTreeVerifier::new(&mut iop, hashfn, domain, control_size, QUERIES);
+        // log::debug!("controlRoot = {}", control_merkle.root());
+        check_control(self.po2, control_merkle.root())?;
 
         // Get merkle root for the data merkle tree.
         // The data merkle tree contains the execution trace of the program being run,
@@ -399,7 +399,7 @@ where
             let x = gen.pow(idx);
             let rows = [
                 accum_merkle.verify(iop, hashfn, idx)?,
-                code_merkle.verify(iop, hashfn, idx)?,
+                control_merkle.verify(iop, hashfn, idx)?,
                 data_merkle.verify(iop, hashfn, idx)?,
             ];
             let check_row = check_merkle.verify(iop, hashfn, idx)?;
@@ -430,19 +430,19 @@ where
     }
 }
 
-/// Verify a seal is valid for the given circuit, and code checking function.
+/// Verify a seal is valid for the given circuit, and control checking function.
 #[must_use]
 #[tracing::instrument(skip_all)]
-pub fn verify<F, C, CheckCode>(
+pub fn verify<F, C, CheckControl>(
     circuit: &C,
     suite: &HashSuite<F>,
     seal: &[u32],
-    check_code: CheckCode,
+    check_control: CheckControl,
 ) -> Result<(), VerificationError>
 where
     F: Field,
     C: CircuitCoreDef<F>,
-    CheckCode: Fn(u32, &Digest) -> Result<(), VerificationError>,
+    CheckControl: Fn(u32, &Digest) -> Result<(), VerificationError>,
 {
-    Verifier::<F, C>::new(circuit, suite).verify(seal, check_code)
+    Verifier::<F, C>::new(circuit, suite).verify(seal, check_control)
 }

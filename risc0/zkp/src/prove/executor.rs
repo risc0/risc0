@@ -22,7 +22,7 @@ use risc0_core::field::{Elem, Field};
 
 use crate::{
     adapter::{
-        CircuitProveDef, CircuitStepContext, CircuitStepHandler, REGISTER_GROUP_CODE,
+        CircuitProveDef, CircuitStepContext, CircuitStepHandler, REGISTER_GROUP_CONTROL,
         REGISTER_GROUP_DATA,
     },
     hal::{
@@ -42,9 +42,9 @@ where
     // Circuit Step Handler
     pub handler: S,
     // Control Instructions
-    pub code: CpuBuffer<F::Elem>,
+    pub control: CpuBuffer<F::Elem>,
     // Number of columns used for control instructions
-    code_size: usize,
+    control_size: usize,
     // Execution Trace Data
     pub data: CpuBuffer<F::Elem>,
     // Number of columns used for execution trace data
@@ -78,16 +78,16 @@ where
     ) -> Self {
         let po2 = max(min_po2, MIN_PO2);
         let taps = circuit.get_taps();
-        let code_size = taps.group_size(REGISTER_GROUP_CODE);
+        let control_size = taps.group_size(REGISTER_GROUP_CONTROL);
         let data_size = taps.group_size(REGISTER_GROUP_DATA);
         let steps = 1 << po2;
-        debug!("po2: {po2}, steps: {steps}, code_size: {code_size}");
+        debug!("po2: {po2}, steps: {steps}, control_size: {control_size}");
         Executor {
             circuit,
             handler,
             // Initialize trace to min_po2 size
-            code: CpuBuffer::from_fn(steps * code_size, |_| F::Elem::ZERO),
-            code_size,
+            control: CpuBuffer::from_fn(steps * control_size, |_| F::Elem::ZERO),
+            control_size,
             data: CpuBuffer::from_fn(steps * data_size, |_| F::Elem::INVALID),
             data_size,
             io: CpuBuffer::from(Vec::from(io)),
@@ -99,8 +99,8 @@ where
         }
     }
 
-    pub fn step(&mut self, code: &[F::Elem], needed_fini: usize) -> Result<bool> {
-        // debug!("code: {:?}", code);
+    pub fn step(&mut self, control: &[F::Elem], needed_fini: usize) -> Result<bool> {
+        // debug!("control: {:?}", control);
         let next_cycles = self.cycle + needed_fini + ZK_CYCLES;
         if next_cycles >= self.steps {
             debug!(
@@ -113,16 +113,16 @@ where
             }
             self.expand()?;
         }
-        let code_buf = self.code.as_slice_sync();
-        for (i, code) in code.iter().enumerate().take(self.code_size) {
-            code_buf.set(self.steps * i + self.cycle, *code);
+        let control_buf = self.control.as_slice_sync();
+        for (i, control) in control.iter().enumerate().take(self.control_size) {
+            control_buf.set(self.steps * i + self.cycle, *control);
         }
         let ctx = CircuitStepContext {
             size: self.steps,
             cycle: self.cycle,
         };
         let args: &[SyncSlice<F::Elem>] =
-            &[code_buf, self.io.as_slice_sync(), self.data.as_slice_sync()];
+            &[control_buf, self.io.as_slice_sync(), self.data.as_slice_sync()];
         let result = self.circuit.step_exec(&ctx, &mut self.handler, args)?;
         // debug!("result: {:?}", result);
         self.halted = self.halted || result == F::Elem::ZERO;
@@ -136,8 +136,8 @@ where
         if self.steps >= (1 << self.max_po2) {
             bail!("Cannot expand, max po2 of {} reached.", self.max_po2);
         }
-        let new_code = self.expand_buf(&self.code, F::Elem::ZERO, self.code_size);
-        self.code = new_code;
+        let new_control = self.expand_buf(&self.control, F::Elem::ZERO, self.control_size);
+        self.control = new_control;
 
         let new_data = self.expand_buf(&self.data, F::Elem::INVALID, self.data_size);
         self.data = new_data;
@@ -167,21 +167,21 @@ where
 
     fn compute_verify(&mut self) {
         let mut rng = thread_rng();
-        let code_buf = self.code.as_slice_sync();
+        let control_buf = self.control.as_slice_sync();
         let io_buf = self.io.as_slice_sync();
         let data_buf = self.data.as_slice_sync();
 
-        // Make code be all zeros of zk cycles, and data be random
+        // Make control be all zeros of zk cycles, and data be random
         for i in self.cycle..self.steps {
-            for j in 0..self.code_size {
-                code_buf.set(j * self.steps + i, F::Elem::ZERO);
+            for j in 0..self.control_size {
+                control_buf.set(j * self.steps + i, F::Elem::ZERO);
             }
             for j in 0..self.data_size {
                 data_buf.set(j * self.steps + i, F::Elem::random(&mut rng));
             }
         }
         // Do the verify cycles
-        let args: &[SyncSlice<F::Elem>] = &[code_buf, io_buf, data_buf];
+        let args: &[SyncSlice<F::Elem>] = &[control_buf, io_buf, data_buf];
 
         self.handler.sort("ram");
         tracing::info_span!("step_verify_mem").in_scope(|| {
