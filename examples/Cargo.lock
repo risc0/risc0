@@ -2308,6 +2308,24 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e5ce46fe64a9d73be07dcbe690a38ce1b293be448fd8ce1e6c1b8062c9f72c6a"
 
 [[package]]
+name = "multisig"
+version = "0.12.0"
+dependencies = [
+ "clap 4.4.0",
+ "hex",
+ "multisig-methods",
+ "risc0-zkvm",
+ "serde",
+]
+
+[[package]]
+name = "multisig-methods"
+version = "0.1.0"
+dependencies = [
+ "risc0-build",
+]
+
+[[package]]
 name = "nanorand"
 version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"

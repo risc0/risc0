@@ -16,6 +16,7 @@ members = [
   "prorata",
   "prorata/core",
   "sha",
+  "multisig",
   "smartcore-ml",
   "waldo",
   "waldo/core",

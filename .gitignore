@@ -14,3 +14,7 @@ Dockerfile
 rust-project.json
 target/
 tmp/
+node_modules/
+**/node_modules/**
+examples/multisig/application/node_modules/**
+examples/multisig/application/package-lock.json

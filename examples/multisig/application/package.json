@@ -1,0 +1,17 @@
+{
+  "name": "risc0-merkle-tree",
+  "version": "1.0.0",
+  "description": "",
+  "main": "merkle_tree.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@openzeppelin/merkle-tree": "^1.0.5",
+    "keccak256": "^1.0.6",
+    "merkletreejs": "^0.3.10",
+    "secp256k1": "^5.0.0"
+  }
+}
