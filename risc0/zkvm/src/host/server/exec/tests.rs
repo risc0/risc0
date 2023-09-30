@@ -43,9 +43,6 @@ use crate::{
     ExecutorEnv, ExitCode, MemoryImage, Program, Session,
 };
 
-#[cfg(feature = "test-exact-cycles")]
-use crate::TraceEvent;
-
 fn run_test(spec: MultiTestSpec) {
     let input = to_vec(&spec).unwrap();
     let env = ExecutorEnv::builder().add_input(&input).build().unwrap();
@@ -585,70 +582,6 @@ fn profiler() {
     );
 }
 
-#[cfg(feature = "test-exact-cycles")]
-#[test]
-fn trace() {
-    let mut events: Vec<TraceEvent> = Vec::new();
-    {
-        let env = ExecutorEnv::builder()
-            .add_input(&to_vec(&MultiTestSpec::EventTrace).unwrap())
-            .trace_callback(|event| Ok(events.push(event)))
-            .build()
-            .unwrap();
-        ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
-            .unwrap()
-            .run()
-            .unwrap();
-    }
-    let occurances = events
-        .windows(4)
-        .filter_map(|window| {
-            if let &[TraceEvent::InstructionStart {
-                // li x5, 1337
-                cycle: cycle1,
-                pc: pc1,
-            }, TraceEvent::RegisterSet {
-                idx: 5,
-                value: 1337,
-            }, TraceEvent::InstructionStart {
-                // sw x5, 548(zero)
-                cycle: cycle2,
-                pc: pc2,
-            }, TraceEvent::RegisterSet {
-                idx: 6,
-                value: 0x08000000,
-            }] = window
-            {
-                // Note: it's possible that these instructions could lie between page
-                // boundaries. If that is the case, it means that the difference between cycle2
-                // and cycle1 could be multiples of page-in, which takes up 1094 cycles. Once we
-                // figure out a way to get reproducible builds, we should restrict the
-                // difference of cycles to a single number rather than taking the mod.
-                assert_eq!(
-                    (cycle2 - cycle1) % 1094,
-                    1,
-                    "li should take multiples of page-in cycles + 1: {:#?}",
-                    window
-                );
-                assert_eq!(
-                    pc1 + WORD_SIZE as u32,
-                    pc2,
-                    "program counter should advance one word: {:#?}",
-                    window
-                );
-                Some(())
-            } else {
-                None
-            }
-        })
-        .count();
-    assert_eq!(occurances, 1, "trace events: {:#?}", &events);
-    assert!(events.contains(&TraceEvent::MemorySet {
-        addr: 0x08000224,
-        value: 1337
-    }));
-}
-
 #[test]
 fn oom() {
     let spec = to_vec(&MultiTestSpec::Oom).unwrap();
@@ -656,49 +589,6 @@ fn oom() {
     let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
     let err = exec.run().err().unwrap();
     assert!(err.to_string().contains("Out of memory"), "{err:?}");
-}
-
-#[cfg(feature = "test-exact-cycles")]
-#[test]
-fn session_limit() {
-    fn run_session(
-        loop_cycles: u32,
-        segment_limit_po2: u32,
-        session_count_limit: u64,
-    ) -> Result<Session, ExecutorError> {
-        let session_cycles = (1 << segment_limit_po2) * session_count_limit;
-        let spec = &to_vec(&MultiTestSpec::BusyLoop {
-            cycles: loop_cycles,
-        })
-        .unwrap();
-        let env = ExecutorEnv::builder()
-            .add_input(&spec)
-            .segment_limit_po2(segment_limit_po2)
-            .session_limit(Some(session_cycles))
-            .build()
-            .unwrap();
-        ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap().run()
-    }
-
-    // This test should always fail if the last parameter is zero
-    let err = run_session(0, 16, 0).err().unwrap();
-    assert!(err.to_string().contains("Session limit exceeded"));
-
-    assert!(run_session(0, 16, 1).is_ok());
-
-    let err = run_session(1 << 16, 16, 1).err().unwrap();
-    assert!(err.to_string().contains("Session limit exceeded"));
-
-    // this should contain exactly 2 segments
-    assert!(run_session(1 << 16, 16, 2).is_ok());
-
-    // make sure that it's ok to run with a limit that's higher the actual count
-    assert!(run_session(1 << 16, 16, 10).is_ok());
-
-    let err = run_session(1 << 16, 15, 3).err().unwrap();
-    assert!(err.to_string().contains("Session limit exceeded"));
-
-    assert!(run_session(1 << 16, 15, 10).is_ok());
 }
 
 #[test]
@@ -803,4 +693,119 @@ fn too_many_sha() {
         .unwrap()
         .run()
         .unwrap();
+}
+
+#[cfg(feature = "docker")]
+mod docker {
+    use crate::{
+        host::server::exec::executor::ExecutorError, serde::to_vec, ExecutorEnv, ExecutorImpl,
+        Session, TraceEvent,
+    };
+    use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF};
+    use risc0_zkvm_platform::WORD_SIZE;
+
+    #[test]
+    fn trace() {
+        let mut events: Vec<TraceEvent> = Vec::new();
+        {
+            let env = ExecutorEnv::builder()
+                .add_input(&to_vec(&MultiTestSpec::EventTrace).unwrap())
+                .trace_callback(|event| Ok(events.push(event)))
+                .build()
+                .unwrap();
+            ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
+                .unwrap()
+                .run()
+                .unwrap();
+        }
+        let occurances = events
+            .windows(4)
+            .filter_map(|window| {
+                if let &[TraceEvent::InstructionStart {
+                    // li x5, 1337
+                    cycle: cycle1,
+                    pc: pc1,
+                }, TraceEvent::RegisterSet {
+                    idx: 5,
+                    value: 1337,
+                }, TraceEvent::InstructionStart {
+                    // sw x5, 548(zero)
+                    cycle: cycle2,
+                    pc: pc2,
+                }, TraceEvent::RegisterSet {
+                    idx: 6,
+                    value: 0x08000000,
+                }] = window
+                {
+                    // Note: it's possible that these instructions could lie between page
+                    // boundaries. If that is the case, it means that the difference between cycle2
+                    // and cycle1 could be multiples of page-in, which takes up 1094 cycles. Once we
+                    // figure out a way to get reproducible builds, we should restrict the
+                    // difference of cycles to a single number rather than taking the mod.
+                    assert_eq!(
+                        (cycle2 - cycle1) % 1094,
+                        1,
+                        "li should take multiples of page-in cycles + 1: {:#?}",
+                        window
+                    );
+                    assert_eq!(
+                        pc1 + WORD_SIZE as u32,
+                        pc2,
+                        "program counter should advance one word: {:#?}",
+                        window
+                    );
+                    Some(())
+                } else {
+                    None
+                }
+            })
+            .count();
+        assert_eq!(occurances, 1, "trace events: {:#?}", &events);
+        assert!(events.contains(&TraceEvent::MemorySet {
+            addr: 0x08000224,
+            value: 1337
+        }));
+    }
+
+    #[test]
+    fn session_limit() {
+        fn run_session(
+            loop_cycles: u32,
+            segment_limit_po2: u32,
+            session_count_limit: u64,
+        ) -> Result<Session, ExecutorError> {
+            let session_cycles = (1 << segment_limit_po2) * session_count_limit;
+            let spec = &to_vec(&MultiTestSpec::BusyLoop {
+                cycles: loop_cycles,
+            })
+            .unwrap();
+            let env = ExecutorEnv::builder()
+                .add_input(&spec)
+                .segment_limit_po2(segment_limit_po2)
+                .session_limit(Some(session_cycles))
+                .build()
+                .unwrap();
+            ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap().run()
+        }
+
+        // This test should always fail if the last parameter is zero
+        let err = run_session(0, 16, 0).err().unwrap();
+        assert!(err.to_string().contains("Session limit exceeded"));
+
+        assert!(run_session(0, 16, 1).is_ok());
+
+        let err = run_session(1 << 16, 16, 1).err().unwrap();
+        assert!(err.to_string().contains("Session limit exceeded"));
+
+        // this should contain exactly 2 segments
+        assert!(run_session(1 << 16, 16, 2).is_ok());
+
+        // make sure that it's ok to run with a limit that's higher the actual count
+        assert!(run_session(1 << 16, 16, 10).is_ok());
+
+        let err = run_session(1 << 16, 15, 3).err().unwrap();
+        assert!(err.to_string().contains("Session limit exceeded"));
+
+        assert!(run_session(1 << 16, 15, 10).is_ok());
+    }
 }

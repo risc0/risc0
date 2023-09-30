@@ -38,7 +38,10 @@ libm = "0.2"
 risc0-circuit-rv32im = { workspace = true }
 risc0-core = { workspace = true }
 risc0-zkp = { workspace = true }
-risc0-zkvm-platform = { workspace = true, features = ["rust-runtime", "export-getrandom"] }
+risc0-zkvm-platform = { workspace = true, features = [
+  "rust-runtime",
+  "export-getrandom",
+] }
 rrs-lib = "0.1"
 semver = { version = "1.0", default-features = false }
 serde = { version = "1.0", default-features = false, features = [
@@ -110,6 +113,13 @@ dual = []
 metal = ["prove", "risc0-circuit-rv32im/metal", "risc0-zkp/metal"]
 default = ["client", "prove"]
 disable-dev-mode = []
+# This flag uses the docker environment to build test guests such as multi-test
+# to ensure accurate cycle and segment counts. Tests that have been gated on
+# this flag measure cycles and segments. Without this flag, the rust build
+# system will generate binaries that not identical across all architectures.
+# While this is acceptable for most tests, the tests counting cycles and
+# segments will fail intermittently.
+docker = ["risc0-zkvm-methods/docker"]
 # note: cfg!(feature = "fault-proof") is used as a temporary measure in addition
 # to it being used to expose functionality to the fault checker.
 fault-proof = []
@@ -151,11 +161,3 @@ std = [
   "risc0-zkp/std",
   "serde/std",
 ]
-
-# This flag uses the docker environment to build test guests such as multi-test
-# to ensure accurate cycle and segment counts. Tests that have been gated on
-# this flag measure cycles and segments. Without this flag, the rust build
-# system will generate binaries that not identical across all architectures.
-# While this is acceptable for most tests, the tests counting cycles and
-# segments will fail intermittently.
-test-exact-cycles = ["risc0-zkvm-methods/test-exact-cycles"]
