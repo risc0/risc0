@@ -23,12 +23,12 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use anyhow::{anyhow, Result};
+use anyhow::{anyhow, ensure, Result};
 use serde::{Deserialize, Serialize};
 
 use crate::{
     host::{receipt::Assumption, server::exec::executor::SyscallRecord},
-    receipt_metadata::{Assumptions, Output},
+    receipt_metadata::{Assumptions, MaybePruned, Output},
     sha::{Digest, DIGEST_WORDS},
     ExitCode, MemoryImage, ReceiptMetadata, SystemState,
 };
@@ -163,9 +163,27 @@ impl Session {
             .first()
             .ok_or_else(|| anyhow!("session has no segments"))?
             .resolve()?;
-        let output = Output {
-            journal: self.journal.clone().into(),
-            assumptions: Assumptions::new(vec![]).into(),
+
+        // Construct the Output struct, checking that the Session is internally consistent.
+        let output = match self.exit_code {
+            ExitCode::Halted(_) | ExitCode::Paused(_) => Some(Output {
+                journal: self.journal.into(),
+                // DO NOT MERGE: Implement this.
+                assumptions: Assumptions::new(vec![]).into(),
+            }),
+            ExitCode::SystemSplit | ExitCode::SessionLimit | ExitCode::Fault => {
+                ensure!(
+                    self.journal.is_empty(),
+                    "Session with exit code {:?} has a journal",
+                    self.exit_code
+                );
+                ensure!(
+                    self.assumptions.is_empty(),
+                    "Session with exit code {:?} has encoded assumptions",
+                    self.exit_code
+                );
+                None
+            }
         };
 
         Ok(ReceiptMetadata {

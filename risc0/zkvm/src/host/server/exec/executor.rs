@@ -354,10 +354,19 @@ impl<'a> Executor<'a> {
         // Take (clear out) the list of accessed assumptions.
         // Leave the assumptions cache so that it can be used if execution is resumed from pause.
         let assumptions = mem::take(&mut self.env.assumptions.borrow_mut().accessed);
+        let session_journal = journal.buf.take();
+        if !exit_code.expects_output() && !session_journal.is_empty() {
+            log::debug!(
+                "dropping non-empty journal due to exit code {:?}: 0x{}",
+                exit_code,
+                hex::encode(journal.buf.borrow().as_slice())
+            );
+        };
         self.exit_code = Some(exit_code);
+
         Ok(Session::new(
             mem::take(&mut self.segments),
-            journal.buf.take(),
+            session_journal,
             exit_code,
             post_image,
             assumptions,

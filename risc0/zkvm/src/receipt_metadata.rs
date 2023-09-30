@@ -23,11 +23,11 @@ use alloc::{collections::VecDeque, vec::Vec};
 use core::{fmt, ops::Deref};
 
 use anyhow::{anyhow, ensure};
-use risc0_binfmt::{read_sha_halfs, write_sha_halfs};
+use risc0_binfmt::{read_sha_halfs, tagged_list, tagged_struct, write_sha_halfs};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    sha::{tagged_list, tagged_struct, Digest, Digestable, DIGEST_WORDS},
+    sha::{Digest, Digestable, Sha256, DIGEST_WORDS},
     SystemState,
 };
 
@@ -132,7 +132,7 @@ pub struct ReceiptMetadata {
 
     /// A [Output] of the guest, including the journal and assumptions set
     /// during execution.
-    pub output: MaybePruned<Output>,
+    pub output: MaybePruned<Option<Output>>,
 }
 
 impl ReceiptMetadata {
@@ -168,11 +168,11 @@ impl ReceiptMetadata {
     }
 }
 
-impl Digestable for ReceiptMetadata {
+impl risc0_binfmt::Digestable for ReceiptMetadata {
     /// Hash the [crate::ReceiptMetadata] to get a digest of the struct.
-    fn digest(&self) -> Digest {
+    fn digest<S: Sha256>(&self) -> Digest {
         let (sys_exit, user_exit) = self.exit_code.into_pair();
-        tagged_struct(
+        tagged_struct::<S>(
             "risc0.ReceiptMeta",
             &[
                 self.input,
@@ -234,6 +234,13 @@ impl ExitCode {
             _ => Err(InvalidExitCodeError(sys_exit, user_exit)),
         }
     }
+
+    pub fn expects_output(&self) -> bool {
+        match self {
+            ExitCode::Halted(_) | ExitCode::Paused(_) => true,
+            ExitCode::SystemSplit | ExitCode::SessionLimit | ExitCode::Fault => false,
+        }
+    }
 }
 
 /// Error returned when a (system, user) exit code pair is an invalid
@@ -272,10 +279,10 @@ pub struct Output {
     pub assumptions: MaybePruned<Assumptions>,
 }
 
-impl Digestable for Output {
+impl risc0_binfmt::Digestable for Output {
     /// Hash the [Output] to get a digest of the struct.
-    fn digest(&self) -> Digest {
-        tagged_struct(
+    fn digest<S: Sha256>(&self) -> Digest {
+        tagged_struct::<S>(
             "risc0.Output",
             &[self.journal.digest(), self.assumptions.digest()],
             &[],
@@ -326,10 +333,10 @@ impl Deref for Assumptions {
     }
 }
 
-impl Digestable for Assumptions {
+impl risc0_binfmt::Digestable for Assumptions {
     /// Hash the [Output] to get a digest of the struct.
-    fn digest(&self) -> Digest {
-        tagged_list(
+    fn digest<S: Sha256>(&self) -> Digest {
+        tagged_list::<S>(
             "risc0.Assumptions",
             &self.0.iter().map(|a| a.digest()).collect::<Vec<_>>(),
         )

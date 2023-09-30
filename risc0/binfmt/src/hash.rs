@@ -15,7 +15,6 @@
 extern crate alloc;
 
 use alloc::vec::Vec;
-use core::ops::Deref;
 
 use risc0_zkp::core::{
     digest::{Digest, DIGEST_WORDS},
@@ -28,9 +27,18 @@ pub trait Digestable {
     fn digest<S: Sha256>(&self) -> Digest;
 }
 
-impl<T: Deref<Target = [u8]>> Digestable for T {
+impl Digestable for Vec<u8> {
     fn digest<S: Sha256>(&self) -> Digest {
-        *S::hash_bytes(self.deref())
+        *S::hash_bytes(&self)
+    }
+}
+
+impl<T: Digestable> Digestable for Option<T> {
+    fn digest<S: Sha256>(&self) -> Digest {
+        match self {
+            Some(val) => val.digest::<S>(),
+            None => Digest::from([0u32; DIGEST_WORDS]),
+        }
     }
 }
 
