@@ -50,10 +50,12 @@ jobs:
 
       # Test
       - name: run cargo tests in bonsai
-        run: cargo test --locked --manifest-path bonsai/Cargo.toml --tests -- --include-ignored --nocapture
+        run: cargo test --locked --tests -- --include-ignored --nocapture
+        working-directory: bonsai
 
       - name: run cargo tests in bonsai/examples/governance
-        run: cargo test --locked --manifest-path bonsai/examples/governance/Cargo.toml
+        run: cargo test --locked
+        working-directory: bonsai/examples/governance
 
       - name: run forge tests in bonsai/ethereum
         run: forge test -vvv
