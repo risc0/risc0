@@ -32,7 +32,7 @@ pub fn main() {
     let signature_two_input: String = env::read(); // <ecdsa_sig_address_two + recovery_id>
     let merkle_proof_one_input: String = env::read(); // <proof_hashes + index_of_leaf>
     let merkle_proof_two_input: String = env::read(); // <proof_hashes + index_of_leaf>
-    let signed_message_input: String = env::read(); // <hash_of_transaction>
+    let signed_message_input: String = env::read(); // <signed_message>
     let all_leaves_input: String = env::read(); // <merkle_leaves>
 
     let all_leaves_bytes = Vec::<u8>::from_hex(all_leaves_input.trim()).expect("Failed to decode hex string");
