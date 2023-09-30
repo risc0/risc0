@@ -21,6 +21,8 @@ extern crate alloc;
 mod fault_ids;
 pub use fault_ids::{FAULT_CHECKER_ELF, FAULT_CHECKER_ID};
 
+#[cfg(feature = "fault-proof")]
+mod fault_monitor;
 pub mod guest;
 #[cfg(not(target_os = "zkvm"))]
 mod host;
@@ -37,17 +39,7 @@ pub mod recursion {
 }
 
 #[cfg(feature = "fault-proof")]
-mod fault_monitor;
-pub use anyhow::Result;
-#[cfg(not(target_os = "zkvm"))]
-#[cfg(any(feature = "client", feature = "prove"))]
-pub use bytes::Bytes;
-#[cfg(feature = "fault-proof")]
-pub use fault_monitor::FaultCheckMonitor;
-#[cfg(not(target_os = "zkvm"))]
-pub use risc0_binfmt::{MemoryImage, Program, SystemState};
-pub use risc0_zkvm_platform::{declare_syscall, memory::GUEST_MAX_MEM, PAGE_SIZE};
-
+pub use self::fault_monitor::FaultCheckMonitor;
 #[cfg(not(target_os = "zkvm"))]
 #[cfg(feature = "profiler")]
 pub use self::host::server::exec::profiler::Profiler;
@@ -57,7 +49,7 @@ pub use self::host::{
     api::server::Server as ApiServer,
     client::prove::local::LocalProver,
     server::{
-        exec::executor::Executor,
+        exec::executor::ExecutorImpl,
         prove::{get_prover_server, loader::Loader, HalPair, ProverServer},
         session::{FileSegmentRef, Segment, SegmentRef, Session, SessionEvents, SimpleSegmentRef},
     },
@@ -65,13 +57,13 @@ pub use self::host::{
 #[cfg(not(target_os = "zkvm"))]
 #[cfg(feature = "client")]
 pub use self::host::{
-    api::{client::Client as ApiClient, Binary, Connector, SessionInfo},
+    api::{client::Client as ApiClient, Binary, Connector, SegmentInfo, SessionInfo},
     client::{
         env::{ExecutorEnv, ExecutorEnvBuilder},
         exec::TraceEvent,
         prove::{
             bonsai::BonsaiProver, default_executor, default_prover, external::ExternalProver,
-            Prover, ProverOpts,
+            Executor, Prover, ProverOpts,
         },
     },
 };
@@ -84,6 +76,13 @@ pub use self::host::{
     },
     recursion::ALLOWED_IDS_ROOT,
 };
+pub use anyhow::Result;
+#[cfg(not(target_os = "zkvm"))]
+#[cfg(any(feature = "client", feature = "prove"))]
+pub use bytes::Bytes;
+#[cfg(not(target_os = "zkvm"))]
+pub use risc0_binfmt::{MemoryImage, Program, SystemState};
+pub use risc0_zkvm_platform::{declare_syscall, memory::GUEST_MAX_MEM, PAGE_SIZE};
 
 /// Reports the current version of this crate.
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");

@@ -130,6 +130,8 @@ jobs:
     env:
       CUDA_LIBRARY_PATH: /usr/lib/cuda
       FEATURE: ${{ matrix.feature }}
+      RISC0_EXECUTOR: ipc
+      RISC0_PROVER: ipc
       RISC0_SERVER_PATH: ${{ github.workspace }}/target/release/r0vm
       RUST_BACKTRACE: full
       RUSTC_WRAPPER: sccache

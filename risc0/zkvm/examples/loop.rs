@@ -17,7 +17,7 @@ use std::{process::Command, rc::Rc, time::Instant};
 use clap::Parser;
 use human_repr::{HumanCount, HumanDuration};
 use risc0_zkvm::{
-    get_prover_server, serde::to_vec, Executor, ExecutorEnv, ProverOpts, ProverServer, Receipt,
+    get_prover_server, serde::to_vec, ExecutorEnv, ExecutorImpl, ProverOpts, ProverServer, Receipt,
     Session, VerifierContext,
 };
 use risc0_zkvm_methods::{
@@ -28,7 +28,7 @@ use tracing_subscriber::{prelude::*, EnvFilter};
 
 #[derive(serde::Serialize, Debug)]
 struct PerformanceData {
-    cycles: usize,
+    cycles: u64,
     duration: u128,
     ram: usize,
     seal: usize,
@@ -74,12 +74,8 @@ fn main() {
 
         let start = Instant::now();
         let (session, receipt) = top(prover.clone(), iterations, args.po2);
-        let segments = session.resolve().unwrap();
         let duration = start.elapsed();
-
-        let cycles = segments
-            .iter()
-            .fold(0, |acc, segment| acc + (1 << segment.po2));
+        let (cycles, _) = session.get_cycles().unwrap();
 
         let seal = receipt
             .inner
@@ -180,7 +176,7 @@ fn top(prover: Rc<dyn ProverServer>, iterations: u64, po2: u32) -> (Session, Rec
         .segment_limit_po2(po2)
         .build()
         .unwrap();
-    let mut exec = Executor::from_elf(env, BENCH_ELF).unwrap();
+    let mut exec = ExecutorImpl::from_elf(env, BENCH_ELF).unwrap();
     let session = exec.run().unwrap();
     let ctx = VerifierContext::default();
     let receipt = prover.prove_session(&ctx, &session).unwrap();

@@ -24,7 +24,7 @@ use super::{
 };
 use crate::{
     get_version,
-    host::{client::prove::get_r0vm_path, recursion::SuccinctReceipt},
+    host::{api::SegmentInfo, client::prove::get_r0vm_path, recursion::SuccinctReceipt},
     ExecutorEnv, ProverOpts, Receipt, SegmentReceipt,
 };
 
@@ -63,7 +63,7 @@ impl Client {
         Self { connector }
     }
 
-    /// TODO
+    /// Prove the specified [Binary].
     pub fn prove(
         &self,
         env: &ExecutorEnv<'_>,
@@ -97,7 +97,7 @@ impl Client {
         receipt_pb.try_into()
     }
 
-    /// TODO
+    /// Execute the specified [Binary].
     pub fn execute<F>(
         &self,
         env: &ExecutorEnv<'_>,
@@ -128,13 +128,10 @@ impl Client {
             bail!("Child finished with: {code}");
         }
 
-        match result {
-            Ok(info) => Ok(info.try_into()?),
-            Err(err) => Err(err),
-        }
+        result
     }
 
-    /// TODO
+    /// Prove the specified segment.
     pub fn prove_segment(
         &self,
         opts: ProverOpts,
@@ -174,7 +171,7 @@ impl Client {
         result
     }
 
-    /// TODO
+    /// Lift a [SegmentReceipt] into a [SuccinctReceipt].
     pub fn lift(
         &self,
         opts: ProverOpts,
@@ -212,7 +209,7 @@ impl Client {
         result
     }
 
-    /// TODO
+    /// Recursively join two receipts into a [SuccinctReceipt].
     pub fn join(
         &self,
         opts: ProverOpts,
@@ -308,11 +305,12 @@ impl Client {
         callback: F,
         conn: &mut ConnectionWrapper,
         env: &ExecutorEnv<'_>,
-    ) -> Result<pb::api::SessionInfo>
+    ) -> Result<SessionInfo>
     where
         F: FnMut(pb::api::SegmentInfo) -> Result<()>,
     {
         let mut callback = callback;
+        let mut segments = Vec::new();
         loop {
             let reply: pb::api::ServerReply = conn.recv()?;
             log::debug!("rx: {reply:?}");
@@ -328,14 +326,30 @@ impl Client {
                         pb::api::client_callback::Kind::SegmentDone(segment) => {
                             let reply: pb::api::GenericReply = segment
                                 .segment
-                                .map_or_else(|| Err(malformed_err()), |segment| callback(segment))
+                                .map_or_else(
+                                    || Err(malformed_err()),
+                                    |segment| {
+                                        segments.push(SegmentInfo {
+                                            po2: segment.po2,
+                                            cycles: segment.cycles,
+                                        });
+                                        callback(segment)
+                                    },
+                                )
                                 .into();
                             log::debug!("tx: {reply:?}");
                             conn.send(reply)?;
                         }
                         pb::api::client_callback::Kind::SessionDone(session) => {
                             return match session.session {
-                                Some(session) => Ok(session),
+                                Some(session) => Ok(SessionInfo {
+                                    segments,
+                                    journal: session.journal.into(),
+                                    exit_code: session
+                                        .exit_code
+                                        .ok_or(malformed_err())?
+                                        .try_into()?,
+                                }),
                                 None => Err(malformed_err()),
                             }
                         }

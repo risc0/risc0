@@ -33,7 +33,7 @@ use crate::{
         CIRCUIT,
     },
     serde::{from_slice, to_vec},
-    Executor, ExecutorEnv, ProverOpts, ProverServer, Receipt,
+    ExecutorEnv, ExecutorImpl, ProverOpts, ProverServer, Receipt,
 };
 
 #[cfg(feature = "test-exact-cycles")]
@@ -98,7 +98,7 @@ fn sha_basics() {
     fn run_sha(msg: &str) -> String {
         let input = to_vec(&MultiTestSpec::ShaDigest { data: msg.into() }).unwrap();
         let env = ExecutorEnv::builder().add_input(&input).build().unwrap();
-        let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
+        let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
         let session = exec.run().unwrap();
         let receipt = session.prove().unwrap();
         hex::encode(Digest::try_from(receipt.journal).unwrap())
@@ -131,7 +131,7 @@ fn sha_iter() {
     })
     .unwrap();
     let env = ExecutorEnv::builder().add_input(&input).build().unwrap();
-    let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
+    let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
     let session = exec.run().unwrap();
     let receipt = session.prove().unwrap();
     let digest = Digest::try_from(receipt.journal).unwrap();
@@ -154,7 +154,7 @@ fn bigint_accel() {
         .unwrap();
 
         let env = ExecutorEnv::builder().add_input(&input).build().unwrap();
-        let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
+        let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
         let session = exec.run().unwrap();
         let receipt = session.prove().unwrap();
         let expected = case.expected();
@@ -188,7 +188,7 @@ fn memory_io() {
         };
         let input = to_vec(&spec)?;
         let env = ExecutorEnv::builder().add_input(&input).build().unwrap();
-        let mut exec = Executor::from_elf(env, MULTI_TEST_ELF)?;
+        let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)?;
         let session = match exec.run() {
             Ok(session) => session,
             Err(ExecutorError::Fault(session)) => session,
@@ -231,7 +231,7 @@ fn pause_continue() {
         .add_input(&to_vec(&MultiTestSpec::PauseContinue).unwrap())
         .build()
         .unwrap();
-    let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
+    let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
 
     // Run until sys_pause
     let session = exec.run().unwrap();
@@ -271,7 +271,7 @@ fn session_events() {
         }
     }
 
-    let mut exec = Executor::from_elf(ExecutorEnv::default(), HELLO_COMMIT_ELF).unwrap();
+    let mut exec = ExecutorImpl::from_elf(ExecutorEnv::default(), HELLO_COMMIT_ELF).unwrap();
     let mut session = exec.run().unwrap();
     let on_pre_prove_segment_flag = Rc::new(RefCell::new(false));
     let on_post_prove_segment_flag = Rc::new(RefCell::new(false));
@@ -300,7 +300,7 @@ fn continuation() {
         .segment_limit_po2(segment_limit_po2)
         .build()
         .unwrap();
-    let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
+    let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
     let session = exec.run().unwrap();
     let segments = session.resolve().unwrap();
     assert_eq!(segments.len(), COUNT);
@@ -322,7 +322,7 @@ fn continuation() {
 // They were built using the toolchain from:
 // https://github.com/risc0/toolchain/releases/tag/2022.03.25
 mod riscv {
-    use crate::{Executor, ExecutorEnv, MemoryImage, Program};
+    use crate::{ExecutorEnv, ExecutorImpl, MemoryImage, Program};
 
     fn run_test(test_name: &str) {
         use std::io::Read;
@@ -351,7 +351,7 @@ mod riscv {
             let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
 
             let env = ExecutorEnv::default();
-            let mut exec = Executor::new(env, image).unwrap();
+            let mut exec = ExecutorImpl::new(env, image).unwrap();
             let session = exec.run().unwrap();
             session.prove().unwrap();
         }

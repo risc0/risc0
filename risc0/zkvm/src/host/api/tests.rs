@@ -150,7 +150,7 @@ fn prove_segment_elf() {
     let mut client = TestClient::new();
 
     let session = client.execute(env, binary).unwrap();
-    assert_eq!(session.segments as usize, client.segments.len());
+    assert_eq!(session.segments.len(), client.segments.len());
 
     let ctx = VerifierContext::default();
     for segment in client.segments.iter() {

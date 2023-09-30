@@ -291,14 +291,24 @@ pub enum AssetRequest {
 
 /// Provides information about the result of execution.
 pub struct SessionInfo {
-    /// The number of segments.
-    pub segments: u32,
+    /// The number of user cycles for each segment.
+    pub segments: Vec<SegmentInfo>,
 
     /// The data publicly committed by the guest program.
     pub journal: Bytes,
 
     /// The [ExitCode] of the session.
     pub exit_code: ExitCode,
+}
+
+/// Provides information about a segment of execution.
+pub struct SegmentInfo {
+    /// The number of cycles used for proving in powers of 2.
+    pub po2: u32,
+
+    /// The number of user cycles without any overhead for continuations or po2
+    /// padding.
+    pub cycles: u32,
 }
 
 impl Binary {

@@ -123,7 +123,7 @@ message SessionInfo {
 message SegmentInfo {
   uint32 index = 1;
   uint32 po2 = 2;
-  uint32 insn_cycles = 3;
+  uint32 cycles = 3;
   Asset segment = 4;
 }
 

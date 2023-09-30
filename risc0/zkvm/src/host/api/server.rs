@@ -27,7 +27,7 @@ use serde::{Deserialize, Serialize};
 
 use super::{malformed_err, path_to_string, pb, ConnectionWrapper, Connector, TcpConnector};
 use crate::{
-    get_prover_server, get_version, host::client::slice_io::SliceIo, Executor, ExecutorEnv,
+    get_prover_server, get_version, host::client::slice_io::SliceIo, ExecutorEnv, ExecutorImpl,
     ProverOpts, Segment, SegmentRef, VerifierContext,
 };
 
@@ -175,18 +175,19 @@ impl SliceIo for SliceIoProxy {
 }
 
 impl Server {
-    /// TODO
+    /// Construct a new [Server] with the specified [Connector].
     pub fn new(connector: Box<dyn Connector>) -> Self {
         Self { connector }
     }
 
-    /// TODO
+    /// Construct a new [Server] which will connect to the specified TCP/IP
+    /// address.
     pub fn new_tcp<A: AsRef<str>>(addr: A) -> Self {
         let connector = TcpConnector::new(addr.as_ref());
         Self::new(Box::new(connector))
     }
 
-    /// TODO
+    /// Start the [Server] and run until all requests are complete.
     pub fn run(&self) -> Result<()> {
         log::debug!("connect");
         let mut conn = self.connector.connect()?;
@@ -246,7 +247,7 @@ impl Server {
         let image = binary.as_image()?;
         let segments_out = request.segments_out.ok_or(malformed_err())?;
 
-        let mut exec = Executor::new(env, image)?;
+        let mut exec = ExecutorImpl::new(env, image)?;
         let session = exec.run_with_callback(|segment| {
             let segment_bytes = bincode::serialize(&segment)?;
             let asset = pb::api::Asset::from_bytes(
@@ -260,8 +261,8 @@ impl Server {
                         pb::api::OnSegmentDone {
                             segment: Some(pb::api::SegmentInfo {
                                 index: segment.index,
-                                po2: segment.po2.try_into()?,
-                                insn_cycles: segment.insn_cycles.try_into()?,
+                                po2: segment.po2,
+                                cycles: segment.cycles,
                                 segment: Some(asset),
                             }),
                         },
