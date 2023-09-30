@@ -1,7 +1,6 @@
 # Zk Multisig Example
 
-This code demonstrates the creation of a private multisig wallet and the generation of zkVM Merkle proofs for its participants.
-The zkVM enforces that 2 unique participants of a 2 of X quorum must have signed the transaction data. The zkProof can be later used as a means to authorize a transaction or some other action. 
+In this zkVM system, a requirement is in place that mandates the involvement of two distinct participants from a larger quorum of 'X' in order to authorize a transaction. The zkProof generated in this process serves as a future authorization mechanism for transactions or other actions. Importantly, all participants in the multisig arrangement maintain their privacy throughout, facilitated by Merkle proofs.
 
 This is used for educational purposes only, and the provided Ethereum addresses and private keys should not be used for real assets.
 
