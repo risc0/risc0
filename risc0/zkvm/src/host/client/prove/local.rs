@@ -16,7 +16,10 @@ use anyhow::Result;
 use risc0_binfmt::MemoryImage;
 
 use super::{Executor, Prover, ProverOpts};
-use crate::{get_prover_server, ExecutorEnv, Receipt, SegmentInfo, SessionInfo, VerifierContext, ExecutorImpl};
+use crate::{
+    get_prover_server, ExecutorEnv, ExecutorImpl, Receipt, SegmentInfo, SessionInfo,
+    VerifierContext,
+};
 
 /// A [Prover] implementation that selects a [crate::ProverServer] by calling
 /// [get_prover_server].
