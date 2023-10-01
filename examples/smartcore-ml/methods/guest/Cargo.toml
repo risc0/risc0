@@ -9,4 +9,4 @@ edition = "2021"
 risc0-zkvm = { path = "../../../../risc0/zkvm", default-features = false, features = [
   "std",
 ] }
-smartcore = { version = "0.3", features = ['serde'] }
+smartcore = { git = "https://github.com/Roee-87/smartcore.git", features = ["serde"]}
