@@ -456,8 +456,7 @@ dependencies = [
 [[package]]
 name = "smartcore"
 version = "0.3.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c42ca1fcd851ada8834d3dfcd088850dc8c703bde50c2baccd89181b74dc3ade"
+source = "git+https://github.com/Roee-87/smartcore.git#95b3722193f4f318b9786638bc37cd6ec40e0720"
 dependencies = [
  "approx",
  "cfg-if",

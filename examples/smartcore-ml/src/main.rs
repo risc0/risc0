@@ -79,6 +79,19 @@ mod test {
         linalg::basic::matrix::DenseMatrix, svm::{Kernels, svc::{SVC, SVCParameters}},
     };
     #[test]
+    fn basic() {
+        const EXPECTED: &[u32] = &[
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+            2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+            2, 2, 2, 2, 2,
+        ];
+        let result = super::predict();
+        assert_eq!(EXPECTED, result);
+    }
+    #[test]
     fn svc() {
         // Create sample x and y data to train a SVM classifier
         let x = DenseMatrix::from_2d_array(&[
