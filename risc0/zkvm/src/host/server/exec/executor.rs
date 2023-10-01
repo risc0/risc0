@@ -217,7 +217,7 @@ impl<'a> ExecutorImpl<'a> {
     /// environmental configuration details.
     /// # Example
     /// ```
-    /// use risc0_zkvm::{serde::to_vec, Executor, ExecutorEnv, Session};
+    /// use risc0_zkvm::{serde::to_vec, ExecutorImpl, ExecutorEnv, Session};
     /// use risc0_zkvm_methods::{BENCH_ELF, bench::{BenchmarkSpec, SpecWithIters}};
     ///
     /// let spec = SpecWithIters(BenchmarkSpec::SimpleLoop, 1);

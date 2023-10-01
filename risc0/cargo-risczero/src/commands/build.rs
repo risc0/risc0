@@ -18,8 +18,7 @@ use anyhow::{anyhow, bail, Context};
 use cargo_metadata::{Artifact, ArtifactProfile, Message};
 use clap::Parser;
 use risc0_build::cargo_command;
-use risc0_zkvm::{Executor, ExecutorEnv, Segment, SegmentRef};
-use serde::{Deserialize, Serialize};
+use risc0_zkvm::{default_executor, ExecutorEnv};
 use tempfile::{tempdir, TempDir};
 
 /// Subcommands of cargo that are supported by this cargo risczero command.
@@ -199,29 +198,17 @@ impl BuildCommand {
         if subcommand == BuildSubcommand::Test && !no_run_flag {
             eprintln!("Running tests: {tests:?}");
 
-            for t in &tests {
-                eprintln!("Running test {t}");
+            for test in &tests {
+                eprintln!("Running test {test}");
                 let env = ExecutorEnv::builder()
                     .args(&test_args)
                     .env_var("RUST_TEST_NOCAPTURE", "1")
                     .build()?;
 
-                let mut exec = Executor::from_elf(env, &fs::read(t)?)?;
-                // Run the executor
-                exec.run_with_callback(|_| Ok(Box::new(EmptySegmentRef)))?;
+                let exec = default_executor();
+                exec.execute_elf(env, &fs::read(test)?)?;
             }
         };
         Ok(())
-    }
-}
-
-// TODO(victor): Code duplicated from host server code.
-#[derive(Clone, Serialize, Deserialize)]
-struct EmptySegmentRef;
-
-#[typetag::serde]
-impl SegmentRef for EmptySegmentRef {
-    fn resolve(&self) -> anyhow::Result<Segment> {
-        Err(anyhow!("Segment resolution not supported"))
     }
 }
