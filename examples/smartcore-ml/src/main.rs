@@ -74,17 +74,68 @@ fn predict() -> Vec<u32> {
 
 #[cfg(test)]
 mod test {
+    use serde_json;
+    use smartcore::{
+        linalg::basic::matrix::DenseMatrix, svm::{Kernels, svc::{SVC, SVCParameters}},
+    };
     #[test]
-    fn basic() {
-        const EXPECTED: &[u32] = &[
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1,
-            1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-            1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-            2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-            2, 2, 2, 2, 2,
-        ];
-        let result = super::predict();
-        assert_eq!(EXPECTED, result);
+    fn svc() {
+        // Create sample x and y data to train a SVM classifier
+        let x = DenseMatrix::from_2d_array(&[
+            &[5.1, 3.5, 1.4, 0.2],
+            &[4.9, 3.0, 1.4, 0.2],
+            &[4.7, 3.2, 1.3, 0.2],
+            &[4.6, 3.1, 1.5, 0.2],
+            &[5.0, 3.6, 1.4, 0.2],
+            &[5.4, 3.9, 1.7, 0.4],
+            &[4.6, 3.4, 1.4, 0.3],
+            &[5.0, 3.4, 1.5, 0.2],
+            &[4.4, 2.9, 1.4, 0.2],
+            &[4.9, 3.1, 1.5, 0.1],
+            &[7.0, 3.2, 4.7, 1.4],
+            &[6.4, 3.2, 4.5, 1.5],
+            &[6.9, 3.1, 4.9, 1.5],
+            &[5.5, 2.3, 4.0, 1.3],
+            &[6.5, 2.8, 4.6, 1.5],
+            &[5.7, 2.8, 4.5, 1.3],
+            &[6.3, 3.3, 4.7, 1.6],
+            &[4.9, 2.4, 3.3, 1.0],
+            &[6.6, 2.9, 4.6, 1.3],
+            &[5.2, 2.7, 3.9, 1.4],
+            ]);
+
+        let y: Vec<i32> = vec![
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+            ];
+        
+        //  We create the SVC params and train the SVC model.  These will NOT get serialized
+        let knl = Kernels::linear();
+        let params = &SVCParameters::default().with_c(200.0).with_kernel(knl);
+        let svc = SVC::fit(&x, &y, params).unwrap();
+
+        // Serialize the model to JSON
+        let svc_serialized = serde_json::to_string(&svc).unwrap();
+
+        // Deserialize the model.  The model must be mutable since we need to reinsert the missing parameters field
+        let mut svc_deserialized: SVC<f32, i32, DenseMatrix<f32>, Vec<i32>> =  serde_json::from_str(&svc_serialized).expect("Could not parse json");
+        
+        // Test to make sure that parameters field is empty, as exptected.
+        assert!(svc_deserialized.parameters.is_none());
+
+        // Calling predict on svc_deserialized will result in an error due to the missing parameters field.
+        // We need to recreate the same SVCParameters that we used to train the model
+        let params_same = &SVCParameters::default().with_c(200.0).with_kernel(Kernels::linear());
+
+        // Now we can update the model with params_same.  The fork changes the visbility of the parameters field of the SVM model struct to public to allow for this reinsertion
+        svc_deserialized.parameters = Some(params_same);
+
+        // Calling predict on svc_deserialized will now work.
+        let y_hats: Vec<f32> = svc_deserialized.predict(&x).unwrap();
+        
+        let y_expected: Vec<f32> = vec![
+            -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
+            ]; 
+
+        assert_eq!(y_hats, y_expected);
     }
 }
