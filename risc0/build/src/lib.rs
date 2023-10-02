@@ -242,7 +242,7 @@ fn sanitized_cmd(tool: &str) -> Command {
 
 /// Creates a std::process::Command to execute the given cargo
 /// command in an environment suitable for targeting the zkvm guest.
-pub fn cargo_command(cargo_command: &str, rust_flags: &[&str]) -> Command {
+pub fn cargo_command(subcmd: &str, rust_flags: &[&str]) -> Command {
     let rustc = sanitized_cmd("rustup")
         .args(["+risc0", "which", "rustc"])
         .output()
@@ -254,7 +254,11 @@ pub fn cargo_command(cargo_command: &str, rust_flags: &[&str]) -> Command {
     println!("Using rustc: {rustc}");
 
     let mut cmd = sanitized_cmd("cargo");
-    let mut args = vec![cargo_command, "--target", "riscv32im-risc0-zkvm-elf"];
+    let mut args = vec![subcmd, "--target", "riscv32im-risc0-zkvm-elf"];
+
+    if std::env::var("RISC0_BUILD_LOCKED").is_ok() {
+        args.push("--locked");
+    }
 
     let rust_src = get_env_var("RISC0_RUST_SRC");
     if !rust_src.is_empty() {

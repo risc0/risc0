@@ -11,7 +11,6 @@ ethers-providers = "2.0"
 log = "0.4"
 risc0-zkvm = { path = "../../risc0/zkvm" }
 serde = "1.0"
-tempfile = "3.5"
 tokio = "1.23"
 zkevm-core = { path = "core", features = ["ethers"] }
 zkevm-methods = { path = "methods" }

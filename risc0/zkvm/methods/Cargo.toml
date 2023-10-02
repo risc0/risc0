@@ -19,4 +19,4 @@ risc0-zkvm-platform = { workspace = true }
 serde = { version = "1.0", default-features = false, features = ["derive"] }
 
 [features]
-test-exact-cycles = []
+docker = []

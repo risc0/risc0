@@ -30,7 +30,7 @@ use risc0_zkvm_platform::{fileno, syscall::nr::SYS_RANDOM, PAGE_SIZE, WORD_SIZE}
 use sha2::{Digest as _, Sha256};
 use test_log::test;
 
-use super::executor::Executor;
+use super::executor::ExecutorImpl;
 use crate::{
     host::server::{
         exec::{
@@ -43,13 +43,10 @@ use crate::{
     ExecutorEnv, ExitCode, MemoryImage, Program, Session,
 };
 
-#[cfg(feature = "test-exact-cycles")]
-use crate::TraceEvent;
-
 fn run_test(spec: MultiTestSpec) {
     let input = to_vec(&spec).unwrap();
     let env = ExecutorEnv::builder().add_input(&input).build().unwrap();
-    Executor::from_elf(env, MULTI_TEST_ELF)
+    ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
         .unwrap()
         .run()
         .unwrap();
@@ -71,7 +68,7 @@ fn basic() {
     let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
     let pre_image_id = image.compute_id();
 
-    let mut exec = Executor::new(env, image).unwrap();
+    let mut exec = ExecutorImpl::new(env, image).unwrap();
     let session = exec.run().unwrap();
     let segments = session.resolve().unwrap();
 
@@ -105,7 +102,7 @@ fn system_split() {
     let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
     let pre_image_id = image.compute_id();
 
-    let mut exec = Executor::new(env, image).unwrap();
+    let mut exec = ExecutorImpl::new(env, image).unwrap();
     let session = exec.run().unwrap();
     let segments = session.resolve().unwrap();
 
@@ -151,7 +148,7 @@ fn host_syscall() {
         })
         .build()
         .unwrap();
-    Executor::from_elf(env, MULTI_TEST_ELF)
+    ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
         .unwrap()
         .run()
         .unwrap();
@@ -170,7 +167,7 @@ fn host_syscall_callback_panic() {
         })
         .build()
         .unwrap();
-    Executor::from_elf(env, MULTI_TEST_ELF)
+    ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
         .unwrap()
         .run()
         .unwrap();
@@ -204,7 +201,7 @@ fn bigint_accel() {
         .unwrap();
 
         let env = ExecutorEnv::builder().add_input(&input).build().unwrap();
-        let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
+        let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
         let session = exec.run().unwrap();
         assert_eq!(
             session.journal.as_slice(),
@@ -226,7 +223,7 @@ fn env_stdio() {
             .stdout(&mut stdout)
             .build()
             .unwrap();
-        Executor::from_elf(env, MULTI_TEST_ELF)
+        ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
             .unwrap()
             .run()
             .unwrap();
@@ -273,7 +270,7 @@ fn posix_style_read() {
             .add_input(&spec)
             .build()
             .unwrap();
-        let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
+        let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
         let session = exec.run().unwrap();
 
         let actual: Vec<u8> = from_slice(&session.journal).unwrap();
@@ -333,7 +330,7 @@ fn large_io_words() {
         .session_limit(Some(20_000_000))
         .build()
         .unwrap();
-    let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
+    let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
     let session = exec.run().unwrap();
 
     let actual: &[u32] = bytemuck::cast_slice(&session.journal);
@@ -354,7 +351,7 @@ fn large_io_bytes() {
             .stdout(&mut stdout)
             .build()
             .unwrap();
-        Executor::from_elf(env, MULTI_TEST_ELF)
+        ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
             .unwrap()
             .run()
             .unwrap();
@@ -369,7 +366,7 @@ fn large_sha() {
     let expected = hex::encode(Sha256::digest(&data));
     let input = to_vec(&MultiTestSpec::ShaDigest { data }).unwrap();
     let env = ExecutorEnv::builder().add_input(&input).build().unwrap();
-    let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
+    let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
     let session = exec.run().unwrap();
     let actual = hex::encode(Digest::try_from(session.journal).unwrap());
     assert_eq!(expected, actual);
@@ -395,7 +392,7 @@ fn std_stdio() {
             .stdout(&mut stdout)
             .build()
             .unwrap();
-        Executor::from_elf(env, STANDARD_LIB_ELF)
+        ExecutorImpl::from_elf(env, STANDARD_LIB_ELF)
             .unwrap()
             .run()
             .unwrap();
@@ -420,7 +417,7 @@ ENV_VAR3",
         )
         .build()
         .unwrap();
-    let mut exec = Executor::from_elf(env, STANDARD_LIB_ELF).unwrap();
+    let mut exec = ExecutorImpl::from_elf(env, STANDARD_LIB_ELF).unwrap();
     let session = exec.run().unwrap();
     let actual = session.journal.as_slice();
     assert_eq!(
@@ -450,7 +447,7 @@ fn args() {
             .args(&args_arr)
             .build()
             .unwrap();
-        let mut exec = Executor::from_elf(env, STANDARD_LIB_ELF).unwrap();
+        let mut exec = ExecutorImpl::from_elf(env, STANDARD_LIB_ELF).unwrap();
         let session = exec.run().unwrap();
         assert_eq!(
             from_slice::<Vec<String>, _>(&session.journal).unwrap(),
@@ -464,7 +461,7 @@ fn args() {
 
 #[test]
 fn commit_hello_world() {
-    Executor::from_elf(ExecutorEnv::default(), HELLO_COMMIT_ELF)
+    ExecutorImpl::from_elf(ExecutorEnv::default(), HELLO_COMMIT_ELF)
         .unwrap()
         .run()
         .unwrap();
@@ -483,7 +480,7 @@ fn slice_io() {
             .add_input(slice)
             .build()
             .unwrap();
-        let mut exec = Executor::from_elf(env, SLICE_IO_ELF).unwrap();
+        let mut exec = ExecutorImpl::from_elf(env, SLICE_IO_ELF).unwrap();
         let session = exec.run().unwrap();
         assert_eq!(session.journal, slice);
     };
@@ -498,7 +495,7 @@ fn slice_io() {
 fn fail() {
     let spec = to_vec(&MultiTestSpec::Fail).unwrap();
     let env = ExecutorEnv::builder().add_input(&spec).build().unwrap();
-    let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
+    let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
     let err = exec.run().err().unwrap();
     assert!(err.to_string().contains("MultiTestSpec::Fail invoked"));
 }
@@ -517,7 +514,7 @@ fn profiler() {
             .trace_callback(prof.make_trace_callback())
             .build()
             .unwrap();
-        Executor::from_elf(env, MULTI_TEST_ELF)
+        ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
             .unwrap()
             .run()
             .unwrap();
@@ -585,120 +582,13 @@ fn profiler() {
     );
 }
 
-#[cfg(feature = "test-exact-cycles")]
-#[test]
-fn trace() {
-    let mut events: Vec<TraceEvent> = Vec::new();
-    {
-        let env = ExecutorEnv::builder()
-            .add_input(&to_vec(&MultiTestSpec::EventTrace).unwrap())
-            .trace_callback(|event| Ok(events.push(event)))
-            .build()
-            .unwrap();
-        Executor::from_elf(env, MULTI_TEST_ELF)
-            .unwrap()
-            .run()
-            .unwrap();
-    }
-    let occurances = events
-        .windows(4)
-        .filter_map(|window| {
-            if let &[TraceEvent::InstructionStart {
-                // li x5, 1337
-                cycle: cycle1,
-                pc: pc1,
-            }, TraceEvent::RegisterSet {
-                idx: 5,
-                value: 1337,
-            }, TraceEvent::InstructionStart {
-                // sw x5, 548(zero)
-                cycle: cycle2,
-                pc: pc2,
-            }, TraceEvent::RegisterSet {
-                idx: 6,
-                value: 0x08000000,
-            }] = window
-            {
-                // Note: it's possible that these instructions could lie between page
-                // boundaries. If that is the case, it means that the difference between cycle2
-                // and cycle1 could be multiples of page-in, which takes up 1094 cycles. Once we
-                // figure out a way to get reproducible builds, we should restrict the
-                // difference of cycles to a single number rather than taking the mod.
-                assert_eq!(
-                    (cycle2 - cycle1) % 1094,
-                    1,
-                    "li should take multiples of page-in cycles + 1: {:#?}",
-                    window
-                );
-                assert_eq!(
-                    pc1 + WORD_SIZE as u32,
-                    pc2,
-                    "program counter should advance one word: {:#?}",
-                    window
-                );
-                Some(())
-            } else {
-                None
-            }
-        })
-        .count();
-    assert_eq!(occurances, 1, "trace events: {:#?}", &events);
-    assert!(events.contains(&TraceEvent::MemorySet {
-        addr: 0x08000224,
-        value: 1337
-    }));
-}
-
 #[test]
 fn oom() {
     let spec = to_vec(&MultiTestSpec::Oom).unwrap();
     let env = ExecutorEnv::builder().add_input(&spec).build().unwrap();
-    let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
+    let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
     let err = exec.run().err().unwrap();
     assert!(err.to_string().contains("Out of memory"), "{err:?}");
-}
-
-#[cfg(feature = "test-exact-cycles")]
-#[test]
-fn session_limit() {
-    fn run_session(
-        loop_cycles: u32,
-        segment_limit_po2: usize,
-        session_count_limit: usize,
-    ) -> Result<Session, ExecutorError> {
-        let session_cycles = (1 << segment_limit_po2) * session_count_limit;
-        let spec = &to_vec(&MultiTestSpec::BusyLoop {
-            cycles: loop_cycles,
-        })
-        .unwrap();
-        let env = ExecutorEnv::builder()
-            .add_input(&spec)
-            .segment_limit_po2(segment_limit_po2)
-            .session_limit(Some(session_cycles))
-            .build()
-            .unwrap();
-        Executor::from_elf(env, MULTI_TEST_ELF).unwrap().run()
-    }
-
-    // This test should always fail if the last parameter is zero
-    let err = run_session(0, 16, 0).err().unwrap();
-    assert!(err.to_string().contains("Session limit exceeded"));
-
-    assert!(run_session(0, 16, 1).is_ok());
-
-    let err = run_session(1 << 16, 16, 1).err().unwrap();
-    assert!(err.to_string().contains("Session limit exceeded"));
-
-    // this should contain exactly 2 segments
-    assert!(run_session(1 << 16, 16, 2).is_ok());
-
-    // make sure that it's ok to run with a limit that's higher the actual count
-    assert!(run_session(1 << 16, 16, 10).is_ok());
-
-    let err = run_session(1 << 16, 15, 3).err().unwrap();
-    assert!(err.to_string().contains("Session limit exceeded"));
-
-    assert!(run_session(1 << 16, 15, 10).is_ok());
 }
 
 #[test]
@@ -723,7 +613,7 @@ fn memory_access() {
             .add_input(&addr)
             .build()
             .unwrap();
-        Executor::from_elf(env, MULTI_TEST_ELF).unwrap().run()
+        ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap().run()
     }
 
     assert!(session_faulted(access_memory(0x0000_0000)));
@@ -742,7 +632,7 @@ fn post_state_digest_randomization() {
     let post_state_digests: HashSet<Digest> = (0..ITERATIONS)
         .map(|_| {
             // Run the guest and extract the post state digest.
-            Executor::from_elf(ExecutorEnv::default(), HELLO_COMMIT_ELF)
+            ExecutorImpl::from_elf(ExecutorEnv::default(), HELLO_COMMIT_ELF)
                 .unwrap()
                 .run()
                 .unwrap()
@@ -776,7 +666,8 @@ fn post_state_digest_randomization() {
     let post_state_digests: HashSet<Digest> = (0..ITERATIONS)
         .map(|_| {
             // Run the guest and extract the post state digest.
-            let mut exec = Executor::from_elf(ExecutorEnv::default(), HELLO_COMMIT_ELF).unwrap();
+            let mut exec =
+                ExecutorImpl::from_elf(ExecutorEnv::default(), HELLO_COMMIT_ELF).unwrap();
             // Override the default randomness syscall using crate-internal API.
             exec.syscall_table.with_syscall(SYS_RANDOM, RiggedRandom);
 
@@ -798,8 +689,123 @@ fn post_state_digest_randomization() {
 fn too_many_sha() {
     let spec = to_vec(&MultiTestSpec::TooManySha).unwrap();
     let env = ExecutorEnv::builder().add_input(&spec).build().unwrap();
-    Executor::from_elf(env, MULTI_TEST_ELF)
+    ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
         .unwrap()
         .run()
         .unwrap();
+}
+
+#[cfg(feature = "docker")]
+mod docker {
+    use crate::{
+        host::server::exec::executor::ExecutorError, serde::to_vec, ExecutorEnv, ExecutorImpl,
+        Session, TraceEvent,
+    };
+    use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF};
+    use risc0_zkvm_platform::WORD_SIZE;
+
+    #[test]
+    fn trace() {
+        let mut events: Vec<TraceEvent> = Vec::new();
+        {
+            let env = ExecutorEnv::builder()
+                .add_input(&to_vec(&MultiTestSpec::EventTrace).unwrap())
+                .trace_callback(|event| Ok(events.push(event)))
+                .build()
+                .unwrap();
+            ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
+                .unwrap()
+                .run()
+                .unwrap();
+        }
+        let occurances = events
+            .windows(4)
+            .filter_map(|window| {
+                if let &[TraceEvent::InstructionStart {
+                    // li x5, 1337
+                    cycle: cycle1,
+                    pc: pc1,
+                }, TraceEvent::RegisterSet {
+                    idx: 5,
+                    value: 1337,
+                }, TraceEvent::InstructionStart {
+                    // sw x5, 548(zero)
+                    cycle: cycle2,
+                    pc: pc2,
+                }, TraceEvent::RegisterSet {
+                    idx: 6,
+                    value: 0x08000000,
+                }] = window
+                {
+                    // Note: it's possible that these instructions could lie between page
+                    // boundaries. If that is the case, it means that the difference between cycle2
+                    // and cycle1 could be multiples of page-in, which takes up 1094 cycles. Once we
+                    // figure out a way to get reproducible builds, we should restrict the
+                    // difference of cycles to a single number rather than taking the mod.
+                    assert_eq!(
+                        (cycle2 - cycle1) % 1094,
+                        1,
+                        "li should take multiples of page-in cycles + 1: {:#?}",
+                        window
+                    );
+                    assert_eq!(
+                        pc1 + WORD_SIZE as u32,
+                        pc2,
+                        "program counter should advance one word: {:#?}",
+                        window
+                    );
+                    Some(())
+                } else {
+                    None
+                }
+            })
+            .count();
+        assert_eq!(occurances, 1, "trace events: {:#?}", &events);
+        assert!(events.contains(&TraceEvent::MemorySet {
+            addr: 0x08000224,
+            value: 1337
+        }));
+    }
+
+    #[test]
+    fn session_limit() {
+        fn run_session(
+            loop_cycles: u32,
+            segment_limit_po2: u32,
+            session_count_limit: u64,
+        ) -> Result<Session, ExecutorError> {
+            let session_cycles = (1 << segment_limit_po2) * session_count_limit;
+            let spec = &to_vec(&MultiTestSpec::BusyLoop {
+                cycles: loop_cycles,
+            })
+            .unwrap();
+            let env = ExecutorEnv::builder()
+                .add_input(&spec)
+                .segment_limit_po2(segment_limit_po2)
+                .session_limit(Some(session_cycles))
+                .build()
+                .unwrap();
+            ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap().run()
+        }
+
+        // This test should always fail if the last parameter is zero
+        let err = run_session(0, 16, 0).err().unwrap();
+        assert!(err.to_string().contains("Session limit exceeded"));
+
+        assert!(run_session(0, 16, 1).is_ok());
+
+        let err = run_session(1 << 16, 16, 1).err().unwrap();
+        assert!(err.to_string().contains("Session limit exceeded"));
+
+        // this should contain exactly 2 segments
+        assert!(run_session(1 << 16, 16, 2).is_ok());
+
+        // make sure that it's ok to run with a limit that's higher the actual count
+        assert!(run_session(1 << 16, 16, 10).is_ok());
+
+        let err = run_session(1 << 16, 15, 3).err().unwrap();
+        assert!(err.to_string().contains("Session limit exceeded"));
+
+        assert!(run_session(1 << 16, 15, 10).is_ok());
+    }
 }
