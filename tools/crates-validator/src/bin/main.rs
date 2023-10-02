@@ -35,14 +35,16 @@ struct Args {
     /// Output location to write temporary projects
     ///
     /// Defaults value is a new TempDir
-    #[arg(short = 'o', long)]
+    // TODO(Cardosaum): Change CI config to use different short flag
+    #[arg(short = 'd', long)]
     out_dir: Option<PathBuf>,
 
     /// Write profile data with results
     ///
     /// Optional: write out the profile data with all the validation results
-    #[arg(short = 'j', long)]
-    json_output: Option<PathBuf>,
+    // TODO(Cardosaum): Change CI config to use different short flag
+    #[arg(short = 'o', long)]
+    output: Option<PathBuf>,
 }
 
 fn main() -> Result<()> {
@@ -80,11 +82,11 @@ fn main() -> Result<()> {
     info!("Test results:");
     colored::control::set_override(true);
     let mut successful = 0;
-    for (idx, (name, result)) in results.iter().enumerate() {
+    for (idx, result) in results.iter().enumerate() {
         let result_str = result.status.as_ref();
         info!(
             "{idx}: {} - {}",
-            name,
+            result.name,
             match result.status {
                 RunStatus::Success => {
                     successful += 1;
@@ -100,7 +102,7 @@ fn main() -> Result<()> {
     colored::control::unset_override();
     info!("{successful}/{profiles_num} successful");
 
-    if let Some(out_path) = args.json_output {
+    if let Some(out_path) = args.output {
         std::fs::write(
             out_path,
             serde_json::to_string(&results).context("Failed to serialize Validator context")?,

@@ -39,6 +39,9 @@ pub mod profiles;
 /// Validation Results fields
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ValidationResults {
+    /// Holds the crate name
+    pub name: String,
+
     /// Holds the validator exit status
     pub status: RunStatus,
 
@@ -49,10 +52,11 @@ pub struct ValidationResults {
 }
 
 impl ValidationResults {
-    fn from(status: RunStatus) -> Self {
+    fn new(name: impl ToString, status: RunStatus, build_errors: Option<String>) -> Self {
         Self {
+            name: name.to_string(),
             status,
-            build_errors: None,
+            build_errors,
         }
     }
 }
@@ -117,16 +121,16 @@ pub struct CrateProfile {
 pub struct ProfileConfig {
     pub repo: Repo,
     pub profiles: Profiles, // TODO(Cardosaum): Refactor
-                        // /// Define which Github branch should be used for templates and crate
-                        // /// imports
-                        // pub risc0_gh_branch: Option<String>,
-                        // /// Directory where risc0 is for templates and crate imports
-                        // pub risc0_path: Option<String>,
-                        // /// Enables `RISC0_EXPERIMENTAL_PREFLIGHT`
-                        // #[serde(default = "bool::default")]
-                        // pub fast_mode: bool,
-                        // /// Array of [CrateProfile]
-                        // pub profiles: RefCell<Vec<CrateProfile>>,
+                            // /// Define which Github branch should be used for templates and crate
+                            // /// imports
+                            // pub risc0_gh_branch: Option<String>,
+                            // /// Directory where risc0 is for templates and crate imports
+                            // pub risc0_path: Option<String>,
+                            // /// Enables `RISC0_EXPERIMENTAL_PREFLIGHT`
+                            // #[serde(default = "bool::default")]
+                            // pub fast_mode: bool,
+                            // /// Array of [CrateProfile]
+                            // pub profiles: RefCell<Vec<CrateProfile>>,
 }
 
 impl ProfileConfig {
@@ -507,9 +511,13 @@ impl Validator {
     }
 
     /// Run a given profile through the set of tests
-    fn run(&self, profile: &Profile, repo: &Repo) -> Result<Vec<(String, ValidationResults)>> {
+    fn run(&self, profile: &Profile, repo: &Repo) -> Result<Vec<ValidationResults>> {
         // TODO(Cardosaum): Remove this
-        return Ok(vec![(profile.name().to_string(), ValidationResults::from(RunStatus::Success))]);
+        return Ok(vec![ValidationResults::new(
+            profile.name(),
+            RunStatus::Success,
+            None,
+        )]);
         // TODO(cardosaum): Replace logic with `skip_crates` module
         // if profiles::SKIP_CRATES.contains(&profile.name.as_str()) {
         //     warn!("Skipping {} due to SKIP_CRATES", profile.name);
@@ -527,25 +535,26 @@ impl Validator {
             )?;
             let (build_success, build_errors) = self.build_project(profile, &working_dir)?;
             if !build_success {
-                results.push((
-                    profile.name().to_string(),
-                    ValidationResults {
-                        status: RunStatus::BuildFail,
-                        build_errors: Some(build_errors),
-                    },
+                results.push(ValidationResults::new(
+                    profile.name(),
+                    RunStatus::BuildFail,
+                    Some(build_errors),
                 ));
                 continue;
             }
             if profile.settings.run_prover && !self.run_prover(profile, &working_dir)? {
-                results.push((
-                    profile.name().to_string(),
-                    ValidationResults::from(RunStatus::RunFail),
+                // TODO(Cardosaum): Check if build_errors is None
+                results.push(ValidationResults::new(
+                    profile.name(),
+                    RunStatus::RunFail,
+                    None,
                 ));
                 continue;
             }
-            results.push((
-                profile.name().to_string(),
-                ValidationResults::from(RunStatus::Success),
+            results.push(ValidationResults::new(
+                profile.name(),
+                RunStatus::Success,
+                None,
             ));
         }
 
@@ -558,7 +567,7 @@ impl Validator {
         name: &str,
         profiles: &[Profile],
         repo: &Repo,
-    ) -> Result<Vec<(String, ValidationResults)>> {
+    ) -> Result<Vec<ValidationResults>> {
         for profile in profiles {
             if profile.name() == name {
                 return self.run(profile, repo);
@@ -569,11 +578,7 @@ impl Validator {
     }
 
     // Run all profiles in config
-    pub fn run_all(
-        &self,
-        profiles: &[Profile],
-        repo: &Repo,
-    ) -> Result<Vec<(String, ValidationResults)>> {
+    pub fn run_all(&self, profiles: &[Profile], repo: &Repo) -> Result<Vec<ValidationResults>> {
         let mut results = vec![];
         for profile in profiles {
             results.push(self.run(profile, repo)?);
