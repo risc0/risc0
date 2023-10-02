@@ -29,7 +29,8 @@ pub struct BuildGuest {
 
 impl BuildGuest {
     pub fn run(&self) -> Result<()> {
+        let src_dir = std::env::current_dir().unwrap();
         // TODO: support features
-        risc0_build::docker_build(&self.manifest_path, vec![])
+        risc0_build::docker_build(&self.manifest_path, &src_dir, vec![])
     }
 }

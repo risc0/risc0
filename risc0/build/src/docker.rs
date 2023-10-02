@@ -18,7 +18,7 @@ use std::{
     process::Command,
 };
 
-use anyhow::{Context, Result};
+use anyhow::{bail, Context, Result};
 use cargo_metadata::MetadataCommand;
 use docker_generate::DockerFile;
 use risc0_binfmt::{MemoryImage, Program};
@@ -29,17 +29,25 @@ use risc0_zkvm_platform::{
 use tempfile::tempdir;
 
 const DOCKER_IGNORE: &str = r#"
-**/target
 **/Dockerfile
 **/.git
+**/node_modules
+**/target
+**/tmp
 "#;
 
 const TARGET_DIR: &str = "target/riscv-guest/riscv32im-risc0-zkvm-elf/docker";
 
 /// Build the package in the manifest path using a docker environment.
-pub fn docker_build(manifest_path: &PathBuf, features: Vec<String>) -> Result<()> {
+pub fn docker_build(manifest_path: &Path, src_dir: &Path, features: Vec<String>) -> Result<()> {
+    let manifest_path = manifest_path
+        .canonicalize()
+        .context(format!("manifest_path: {manifest_path:?}"))?;
+    let src_dir = src_dir.canonicalize().context("src_dir")?;
+    eprintln!("Docker context: {src_dir:?}");
+
     let meta = MetadataCommand::new()
-        .manifest_path(manifest_path)
+        .manifest_path(&manifest_path)
         .exec()
         .context("Manifest not found")?;
     let root_pkg = meta.root_package().context("failed to parse Cargo.toml")?;
@@ -47,13 +55,16 @@ pub fn docker_build(manifest_path: &PathBuf, features: Vec<String>) -> Result<()
 
     eprintln!("Building ELF binaries in {pkg_name} for riscv32im-risc0-zkvm-elf target...");
 
-    Command::new("docker")
-        .args(&["--version"])
-        .stdout(std::process::Stdio::piped())
-        .output()
-        .with_context(|| format!("Could not find or execute docker"))?;
+    if !Command::new("docker")
+        .arg("--version")
+        .status()
+        .context("Could not find or execute docker")?
+        .success()
+    {
+        bail!("`docker --version` failed");
+    }
 
-    if let Err(err) = check_cargo_lock(manifest_path) {
+    if let Err(err) = check_cargo_lock(&manifest_path) {
         eprintln!("{err}");
     }
 
@@ -61,8 +72,9 @@ pub fn docker_build(manifest_path: &PathBuf, features: Vec<String>) -> Result<()
     {
         let temp_dir = tempdir()?;
         let temp_path = temp_dir.path();
-        create_dockerfile(manifest_path, temp_path, pkg_name.as_str(), features)?;
-        build(temp_path)?;
+        let rel_manifest_path = manifest_path.strip_prefix(&src_dir)?;
+        create_dockerfile(&rel_manifest_path, temp_path, pkg_name.as_str(), features)?;
+        build(&src_dir, temp_path)?;
     }
     let target_dir = PathBuf::from(TARGET_DIR);
     println!("ELFs ready at:");
@@ -82,7 +94,7 @@ pub fn docker_build(manifest_path: &PathBuf, features: Vec<String>) -> Result<()
 ///
 /// Overwrites if a dockerfile already exists.
 fn create_dockerfile(
-    manifest_path: &PathBuf,
+    manifest_path: &Path,
     temp_dir: &Path,
     pkg_name: &str,
     features: Vec<String>,
@@ -140,19 +152,24 @@ fn create_dockerfile(
 /// Build the dockerfile and ouputs the ELF.
 ///
 /// Overwrites if an ELF with the same name already exists.
-fn build(temp_dir: &Path) -> Result<()> {
-    Command::new("docker")
+fn build(src_dir: &Path, temp_dir: &Path) -> Result<()> {
+    if Command::new("docker")
         .arg("build")
         .arg(format!("--output={TARGET_DIR}"))
         .arg("-f")
         .arg(temp_dir.join("Dockerfile"))
-        .arg(".")
-        .output()
-        .context("docker build failed")?;
-    Ok(())
+        .arg(src_dir)
+        .status()
+        .context("docker failed to execute")?
+        .success()
+    {
+        Ok(())
+    } else {
+        Err(anyhow::anyhow!("docker build failed"))
+    }
 }
 
-fn check_cargo_lock(manifest_path: &PathBuf) -> Result<()> {
+fn check_cargo_lock(manifest_path: &Path) -> Result<()> {
     let lock_file = manifest_path
         .parent()
         .context("invalid manifest path")?
@@ -177,14 +194,14 @@ fn compute_image_id(elf_path: &Path) -> Result<String> {
 #[cfg(feature = "docker")]
 #[cfg(test)]
 mod test {
-    use std::path::PathBuf;
+    use std::path::{Path, PathBuf};
 
-    use super::docker_build;
-    use super::TARGET_DIR;
+    use super::{docker_build, TARGET_DIR};
 
     fn build(manifest_path: &str) {
-        std::env::set_current_dir("../../").unwrap();
-        self::docker_build(&PathBuf::from(manifest_path), vec![]).unwrap()
+        let manifest_path = Path::new(manifest_path);
+        let src_dir = Path::new("../..");
+        self::docker_build(manifest_path, &src_dir, vec![]).unwrap()
     }
 
     fn compare_image_id(bin_path: &str, expected: &str) {
@@ -201,7 +218,7 @@ mod test {
     // `cargo risczero build --manifest-path risc0/zkvm/methods/guest/Cargo.toml`
     #[test]
     fn test_reproducible_methods_guest() {
-        build("risc0/zkvm/methods/guest/Cargo.toml");
+        build("../../risc0/zkvm/methods/guest/Cargo.toml");
         compare_image_id(
             "risc0_zkvm_methods_guest/multi_test",
             "ad6dfae83cfc5b8be6f9fd3695b89f6d369d176e4201c0e57c2d2074948b741b",
