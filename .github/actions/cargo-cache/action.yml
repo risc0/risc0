@@ -1,8 +1,6 @@
----
 name: cargo-cache
-
 runs:
-  using: "composite"
+  using: composite
   steps:
     - uses: actions/cache@v3
       with:

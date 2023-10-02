@@ -66,12 +66,7 @@ jobs:
       RUST_BACKTRACE: full
       RUSTC_WRAPPER: sccache
     steps:
-      # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
-      - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
-      - uses: actions/checkout@v4
-        with:
-          # Recursive checkout required to build Solidity contracts and bindings.
-          submodules: recursive
+      - uses: ./.github/actions/checkout
       - uses: ./.github/actions/cargo-cache
       - uses: ./.github/actions/rustup
       - uses: actions/setup-node@v3
@@ -136,12 +131,7 @@ jobs:
       RUST_BACKTRACE: full
       RUSTC_WRAPPER: sccache
     steps:
-      # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
-      - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
-      - uses: actions/checkout@v4
-        with:
-          # Recursive checkout required to build Solidity contracts and bindings.
-          submodules: recursive
+      - uses: ./.github/actions/checkout
       - uses: ./.github/actions/cargo-cache
       - uses: ./.github/actions/rustup
       - uses: actions/setup-node@v3
@@ -160,12 +150,7 @@ jobs:
   doc:
     runs-on: ubuntu-latest-8-cores
     steps:
-      # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
-      - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
-      - uses: actions/checkout@v4
-        with:
-          # Recursive checkout required to build Solidity contracts and bindings.
-          submodules: recursive
+      - uses: ./.github/actions/checkout
       - uses: ./.github/actions/cargo-cache
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
@@ -188,9 +173,7 @@ jobs:
       RUSTC_WRAPPER: sccache
 
     steps:
-      # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
-      - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
-      - uses: actions/checkout@v4
+      - uses: ./.github/actions/checkout
       - uses: ./.github/actions/cargo-cache
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
@@ -215,9 +198,7 @@ jobs:
       RISC0_BUILD_LOCKED: 1
       RUSTC_WRAPPER: sccache
     steps:
-      # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
-      - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
-      - uses: actions/checkout@v4
+      - uses: ./.github/actions/checkout
       - uses: browser-actions/setup-firefox@v1
       - run: firefox --version
       - uses: ./.github/actions/cargo-cache
@@ -239,9 +220,7 @@ jobs:
   reproducible-build:
     runs-on: [self-hosted, prod, Linux, X64, docker]
     steps:
-      # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
-      - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
-      - uses: actions/checkout@v4
+      - uses: ./.github/actions/checkout
       - uses: ./.github/actions/cargo-cache
       - uses: ./.github/actions/rustup
       - uses: actions/setup-node@v3
