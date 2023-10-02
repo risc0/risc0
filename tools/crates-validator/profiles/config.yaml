@@ -1,6 +1,3 @@
-repo:
-  git: main
-
 skip-crates:
   - windows-sys
   - miow # Windows specific crate that depends on `windows-sys`
