@@ -41,7 +41,7 @@ use risc0_zkvm_platform::{memory::GUEST_MAX_MEM, PAGE_SIZE, WORD_SIZE};
 
 use self::{dev_mode::DevModeProver, prover_impl::ProverImpl};
 use crate::{
-    is_dev_mode, Executor, ExecutorEnv, ProverOpts, Receipt, Segment, SegmentReceipt, Session,
+    is_dev_mode, ExecutorEnv, ExecutorImpl, ProverOpts, Receipt, Segment, SegmentReceipt, Session,
     VerifierContext,
 };
 
@@ -55,7 +55,7 @@ pub trait ProverServer {
         ctx: &VerifierContext,
         image: MemoryImage,
     ) -> Result<Receipt> {
-        let mut exec = Executor::new(env, image)?;
+        let mut exec = ExecutorImpl::new(env, image)?;
         let session = exec.run()?;
         self.prove_session(ctx, &session)
     }

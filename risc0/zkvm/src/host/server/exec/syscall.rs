@@ -21,8 +21,8 @@ use bytes::Bytes;
 use risc0_zkvm_platform::{
     syscall::{
         nr::{
-            SYS_CYCLE_COUNT, SYS_GETENV, SYS_LOG, SYS_PANIC, SYS_RANDOM, SYS_READ, SYS_READ_AVAIL,
-            SYS_WRITE,
+            SYS_ARGC, SYS_ARGV, SYS_CYCLE_COUNT, SYS_GETENV, SYS_LOG, SYS_PANIC, SYS_RANDOM,
+            SYS_READ, SYS_READ_AVAIL, SYS_WRITE,
         },
         reg_abi::{REG_A3, REG_A4, REG_A5},
         SyscallName,
@@ -100,7 +100,9 @@ impl<'a> SyscallTable<'a> {
             .with_syscall(SYS_GETENV, SysGetenv(env.env_vars.clone()))
             .with_syscall(SYS_READ, posix_io.clone())
             .with_syscall(SYS_READ_AVAIL, posix_io.clone())
-            .with_syscall(SYS_WRITE, posix_io);
+            .with_syscall(SYS_WRITE, posix_io)
+            .with_syscall(SYS_ARGC, Args(env.args.clone()))
+            .with_syscall(SYS_ARGV, Args(env.args.clone()));
         for (syscall, handler) in env.slice_io.borrow().inner.iter() {
             let handler = SysSliceIo::new(handler.clone());
             this.inner
@@ -208,6 +210,39 @@ impl Syscall for SysRandom {
         getrandom::getrandom(rand_buf.as_mut_slice())?;
         bytemuck::cast_slice_mut(to_guest).clone_from_slice(rand_buf.as_slice());
         Ok((0, 0))
+    }
+}
+
+#[derive(Clone)]
+pub(crate) struct Args(pub Vec<String>);
+
+impl Syscall for Args {
+    fn syscall(
+        &mut self,
+        syscall: &str,
+        ctx: &mut dyn SyscallContext,
+        to_guest: &mut [u32],
+    ) -> Result<(u32, u32)> {
+        if syscall == SYS_ARGC.as_str() {
+            Ok((self.0.len().try_into()?, 0))
+        } else if syscall == SYS_ARGV.as_str() {
+            // Get the arg or return an error if out of bounds.
+            let arg_index = ctx.load_register(REG_A3);
+            let arg_val = self.0.get(arg_index as usize).ok_or_else(|| {
+                anyhow!(
+                    "guest requested index {} from argv of len {}",
+                    arg_index,
+                    self.0.len()
+                )
+            })?;
+
+            let nbytes = min(to_guest.len() * WORD_SIZE, arg_val.as_bytes().len());
+            let to_guest_u8s: &mut [u8] = bytemuck::cast_slice_mut(to_guest);
+            to_guest_u8s[0..nbytes].clone_from_slice(&arg_val.as_bytes()[0..nbytes]);
+            Ok((arg_val.as_bytes().len() as u32, 0))
+        } else {
+            bail!("Unknown syscall {syscall}")
+        }
     }
 }
 

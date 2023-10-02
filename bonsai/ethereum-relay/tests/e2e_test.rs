@@ -79,7 +79,7 @@ mod tests {
 
     async fn get_bonsai_client(api_key: String) -> BonsaiClient {
         let bonsai_api_endpoint = get_bonsai_url();
-        get_client_from_parts(bonsai_api_endpoint, api_key)
+        get_client_from_parts(bonsai_api_endpoint, api_key, risc0_zkvm::VERSION)
             .await
             .unwrap()
     }

@@ -14,6 +14,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
+env:
+  RISC0_BUILD_LOCKED: 1
+
 jobs:
   bench:
     runs-on: [self-hosted, prod, bench, "${{ matrix.os }}", "${{ matrix.device }}"]
