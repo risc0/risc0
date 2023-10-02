@@ -22,7 +22,5 @@ pub fn main() {
 }
 
 fn fibonacci(n: u32) -> u64 {
-    let mut mat = Matrix2::new(1, 1, 1, 0);
-    mat = mat.pow(n - 1);
-    mat[(0, 0)]
+    Matrix2::new(1, 1, 1, 0).pow(n - 1)[(0, 0)]
 }
