@@ -16,11 +16,9 @@
 
 use hex::FromHex;
 use k256::ecdsa::{RecoveryId, Signature, VerifyingKey};
-use risc0_zkvm::{
-    guest::env
-};
+use risc0_zkvm::guest::env;
 use rs_merkle::{algorithms::Sha256, Hasher, MerkleProof, MerkleTree};
-use sha3::{Keccak256, Digest};
+use sha3::{Digest, Keccak256};
 
 risc0_zkvm::guest::entry!(main);
 
@@ -35,14 +33,16 @@ pub fn main() {
     let signed_message_input: String = env::read(); // <signed_message>
     let all_leaves_input: String = env::read(); // <merkle_leaves>
 
-    let all_leaves_bytes = Vec::<u8>::from_hex(all_leaves_input.trim()).expect("Failed to decode hex string");
+    let all_leaves_bytes =
+        Vec::<u8>::from_hex(all_leaves_input.trim()).expect("Failed to decode hex string");
 
-    let leaves: Vec<[u8; 32]> = all_leaves_bytes.chunks_exact(32)
-    .map(|chunk| {
-        let array: [u8; 32] = chunk.try_into().expect("Failed to convert chunk to array");
-        array
-    })
-    .collect();
+    let leaves: Vec<[u8; 32]> = all_leaves_bytes
+        .chunks_exact(32)
+        .map(|chunk| {
+            let array: [u8; 32] = chunk.try_into().expect("Failed to convert chunk to array");
+            array
+        })
+        .collect();
 
     let merkle_tree = MerkleTree::<Sha256>::from_leaves(&leaves);
     let new_root_hex = merkle_tree
@@ -84,7 +84,6 @@ pub fn main() {
     let merkle_proof_one_index_log_message =
         "Merkle Proof One Index: ".to_owned() + &merkle_proof_one_index_str;
     env::log(&merkle_proof_one_index_log_message);
-
 
     let indices_to_prove = vec![merkle_proof_one_index_value];
     let start_range = merkle_proof_one_index_value as usize;
@@ -231,13 +230,11 @@ pub fn main() {
         }
     };
 
-    
     let recovered_key = VerifyingKey::recover_from_digest(
         signed_message.clone(),
         &signature_res,
         recid_res,
     );
-
 
     let recovered_key_res = match recovered_key {
         Ok(value) => value,
@@ -246,7 +243,6 @@ pub fn main() {
             return;
         }
     };
-
 
     let encoded_point_pub_key_one = recovered_key_res.to_encoded_point(false);
     let encoded_point_pub_key_one_hex = encoded_point_pub_key_one.to_string().to_lowercase();
@@ -275,10 +271,10 @@ pub fn main() {
      let sig_two_rec_id_str = sig_two_rec_id_input.to_string();
      let sig_two_rec_id = sig_two_rec_id_str.parse::<u32>().unwrap() as u8;
      let sanitized_signature_two_input = &signature_two_input[..signature_two_input.len() - 1];
- 
+
      let signature_two_bytes = hex::decode(sanitized_signature_two_input).expect("Invalid hex string");
      let signature = Signature::try_from(signature_two_bytes.as_slice());
- 
+
      let signature_res = match signature {
          Ok(value) => value,
          Err(e) => {
@@ -286,7 +282,7 @@ pub fn main() {
              return;
          }
      };
- 
+
      let recid = RecoveryId::try_from(sig_two_rec_id);
      let recid_res = match recid {
          Ok(value) => value,
@@ -295,14 +291,13 @@ pub fn main() {
              return;
          }
      };
-     
+
      let recovered_key = VerifyingKey::recover_from_digest(
          signed_message.clone(),
          &signature_res,
          recid_res,
      );
- 
- 
+
      let recovered_key_res = match recovered_key {
          Ok(value) => value,
          Err(e) => {
@@ -310,10 +305,10 @@ pub fn main() {
              return;
          }
      };
- 
+
      let encoded_point_pub_key_two = recovered_key_res.to_encoded_point(false);
      let encoded_point_pub_key_two_hex = encoded_point_pub_key_two.to_string().to_lowercase();
- 
+
      let pubic_key_two_hash = Sha256::hash(encoded_point_pub_key_two_hex.as_bytes());
      let pubic_key_two_hash_hex = hex::encode(pubic_key_two_hash);
      let log_public_key_hash_two = "Recovered Public Key Hash Two: ".to_owned() + &pubic_key_two_hash_hex;
@@ -341,10 +336,9 @@ pub fn main() {
         env::log(&log_msg);
      }
 
-
     let final_hash = signed_message.finalize();
     let final_hash_bytes = final_hash.as_slice();
-    let message_bytes = hex::encode(final_hash_bytes); 
+    let message_bytes = hex::encode(final_hash_bytes);
     let commit_log_msg = "\n\nCommiting to hash: ".to_owned() + &message_bytes;
     env::log(&commit_log_msg);
     env::commit(&final_hash_bytes);
