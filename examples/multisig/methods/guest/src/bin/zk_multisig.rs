@@ -19,11 +19,23 @@ use k256::ecdsa::{RecoveryId, Signature, VerifyingKey};
 use risc0_zkvm::guest::env;
 use rs_merkle::{algorithms::Sha256, Hasher, MerkleProof, MerkleTree};
 use sha3::{Digest, Keccak256};
+// use serde::{Deserialize, Serialize};
 
 risc0_zkvm::guest::entry!(main);
 
 const TRUSTED_MERKLE_ROOT: &str =
     "1962fbc17a4440d383f544724e9a943773c0cc6eade89b66b724c31cf33d3f62";
+
+// TODO: Use encapsulation to simplify arguments passed to guest code.
+// #[derive(Debug, Serialize, Deserialize)]
+// pub struct PrivateInput {
+//     pub signature_one_input: String,
+//     pub signature_two_input: String,
+//     pub merkle_proof_one_input: String,
+//     pub merkle_proof_two_input: String,
+//     pub signed_message_input: String,
+//     pub all_leaves_input: String
+// }
 
 pub fn main() {
     let signature_one_input: String = env::read(); // <ecdsa_sig_address_one + recovery_id>
@@ -73,9 +85,7 @@ pub fn main() {
         return;
     }
 
-    /*
-     * Checking that the first merkle proof is valid
-     */
+    // Checking that the first merkle proof is valid
     let merkle_proof_one_index = merkle_proof_one_input.chars().last().unwrap();
     let merkle_proof_one_index_str = merkle_proof_one_index.to_string();
     let merkle_proof_one_index_value = merkle_proof_one_index_str.parse::<u32>().unwrap() as usize;
@@ -129,9 +139,7 @@ pub fn main() {
         }
     };
 
-    /*
-     * Checking that the second merkle proof is valid
-     */
+    // Checking that the second merkle proof is valid
     let merkle_proof_two_index = merkle_proof_two_input.chars().last().unwrap();
     let merkle_proof_two_index_str = merkle_proof_two_index.to_string();
     let merkle_proof_two_index_value = merkle_proof_two_index_str.parse::<u32>().unwrap() as usize;
@@ -185,9 +193,7 @@ pub fn main() {
         }
     };
 
-    /*
-     * Ensure both merkle proofs passed before progressing
-     */
+    // Ensure both merkle proofs passed before progressing
     if !merkle_proof_one_result {
         let log_msg = "❌ Merkle Proof One Failed: ".to_owned() + &merkle_proof_one_input;
         env::log(&log_msg);
@@ -202,9 +208,7 @@ pub fn main() {
 
     let signed_message = Keccak256::new_with_prefix(signed_message_input);
 
-    /*
-     * Recover address of first signature hash it and check if it's in the tree - use the index from the merkle proof to do this
-     */
+    // Recover address of first signature hash it and check if it's in the tree - use the index from the merkle proof to do this
     let sig_one_rec_id_input = signature_one_input.chars().last().unwrap();
     let sig_one_rec_id_str = sig_one_rec_id_input.to_string();
     let sig_one_rec_id = sig_one_rec_id_str.parse::<u32>().unwrap() as u8;
@@ -264,9 +268,7 @@ pub fn main() {
         env::log(&log_msg);
     }
 
-    /*
-     * Recover address of second signature hash it and check if it's in the tree - use the index from the merkle proof to do this
-     */
+     // Recover address of second signature hash it and check if it's in the tree - use the index from the merkle proof to do this
      let sig_two_rec_id_input = signature_two_input.chars().last().unwrap();
      let sig_two_rec_id_str = sig_two_rec_id_input.to_string();
      let sig_two_rec_id = sig_two_rec_id_str.parse::<u32>().unwrap() as u8;
@@ -324,9 +326,7 @@ pub fn main() {
         env::log(&log_msg);
     }
 
-    /*
-     * Check that both recovered keys are not the same
-     */
+     // Check that both recovered keys are not the same
      if pubic_key_one_hash_hex == pubic_key_two_hash_hex {
         let log_msg = "Cannot provide two signatures from the same signatory: ".to_owned() + &pubic_key_one_hash_hex;
         env::log(&log_msg);
