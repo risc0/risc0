@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use nalgebra::Matrix2;
 use risc0_zkvm::guest::env;
 
 pub fn main() {
@@ -20,35 +21,8 @@ pub fn main() {
     env::commit(&answer);
 }
 
-fn fibonacci(n: u32) -> u32 {
-    let mut a = 0u32;
-    let mut b = 1u32;
-    if n <= 1 {
-        return n;
-    }
-    let mut i = 2;
-    while i <= n {
-        if i + 10 <= n {
-            let c = a + b;
-            let d = b + c;
-            let e = c + d;
-            let f = d + e;
-            let g = e + f;
-            let h = f + g;
-            let j = g + h;
-            let k = h + j;
-            let l = j + k;
-            let m = k + l;
-            a = l;
-            b = m;
-            i += 10;
-        } else {
-            let c = a + b;
-            a = b;
-            b = c;
-            i += 1;
-        }
-    }
-
-    b
+fn fibonacci(n: u32) -> u64 {
+    let mut mat = Matrix2::new(1, 1, 1, 0);
+    mat = mat.pow(n - 1);
+    mat[(0, 0)]
 }

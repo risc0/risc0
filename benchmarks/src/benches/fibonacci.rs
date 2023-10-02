@@ -36,7 +36,7 @@ const METHOD_PATH: &'static str = risc0_zkvm_methods::FIB_PATH;
 impl Benchmark for Job<'_> {
     const NAME: &'static str = "finbonacci";
     type Spec = u32;
-    type ComputeOut = u32;
+    type ComputeOut = u64;
     type ProofType = Receipt;
 
     fn job_size(spec: &Self::Spec) -> u32 {
@@ -98,7 +98,7 @@ impl Benchmark for Job<'_> {
 
     fn guest_compute(&mut self) -> (Self::ComputeOut, Self::ProofType) {
         let receipt = self.session.prove().expect("receipt");
-        let result = LittleEndian::read_u32(&receipt.journal);
+        let result = LittleEndian::read_u64(&receipt.journal);
         (result, receipt)
     }
 

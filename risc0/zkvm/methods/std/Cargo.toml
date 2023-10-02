@@ -13,6 +13,7 @@ edition = "2021"
 
 [dependencies]
 bytemuck = "1.12"
+nalgebra = "0.32"
 risc0-zkp = { path = "../../../zkp", default-features = false }
 risc0-zkvm = { path = "../..", default-features = false, features = ["std"] }
 risc0-zkvm-methods = { path = "..", default-features = false }

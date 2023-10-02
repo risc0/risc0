@@ -4,6 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -35,6 +36,16 @@
     th {
       background-color: #f4f4f4;
     }
+
+    /* Zebra stripe alternate rows */
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+
+    /* Highlight row on hover */
+    tr:hover {
+      background-color: #e6e6e6;
+    }
   </style>
   <title>RISC Zero Benchmarks</title>
 </head>
@@ -48,8 +59,63 @@
     your
     machine
   </p>
+  <table id="comparison-table"></table>
 
   <script>
+    // Array of CSV file URLs
+    const csvFiles = ['macOS-cpu.amortized.csv', 'Linux-cpu.amortized.csv', 'macOS-apple_m2_pro.amortized.csv', 'Linux-nvidia_rtx_a5000.amortized.csv', 'Bonsai.amortized.csv'];
+
+    // Object to hold combined data
+    const combinedData = {};
+    const processFile = (fileUrl, index) => {
+      return new Promise((resolve) => {
+        Papa.parse(fileUrl, {
+          download: true,
+          header: true,
+          complete: (results) => {
+            results.data.forEach(row => {
+              if (!combinedData[row.job_name]) {
+                combinedData[row.job_name] = [];
+              }
+              combinedData[row.job_name][index] = row.ops_sec;
+            });
+            resolve();
+          }
+        });
+      });
+    };
+
+    Promise.all(csvFiles.map((fileUrl, index) => processFile(fileUrl, index)))
+      .then(() => {
+        displayTable();
+      })
+      .catch(error => {
+        console.error('Error processing files:', error);
+      });
+
+    // Function to display the combined table
+    const displayTable = () => {
+      const table = document.getElementById('comparison-table');
+      // Add header row
+      let headerRow = '<tr><th>Job Name</th>';
+      csvFiles.forEach((fileUrl, index) => {
+        const fileName = fileUrl.split('/').pop().split('.')[0];
+        headerRow += `<th>Ops/Sec (${fileName})</th>`;
+      });
+      headerRow += '</tr>';
+      table.innerHTML = headerRow;
+      // Add data rows
+      for (const jobName in combinedData) {
+        if (!jobName) continue;  // Skip if jobName is empty or undefined
+        let dataRow = `<tr><td>${jobName}</td>`;
+        combinedData[jobName].forEach(opsSec => {
+          dataRow += `<td>${parseFloat(opsSec).toFixed(2)}</td>`;
+        });
+        dataRow += '</tr>';
+        table.insertAdjacentHTML('beforeend', dataRow);
+      }
+    };
+
     // Function to format duration
     function formatDuration(duration) {
       const thresholds = [1000, 1000, 1000, 60, 60];
@@ -147,8 +213,6 @@
         }
       }
     }
-
-
 
     fetchCommitHash();
     fetchCSV();
