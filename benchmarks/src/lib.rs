@@ -32,6 +32,7 @@ pub struct Metrics {
     pub job_size: u32,
     pub exec_duration: Duration,
     pub proof_duration: Duration,
+    pub total_duration: Duration,
     pub verify_duration: Duration,
     pub cycles: u32,
     pub insn_cycles: u32,
@@ -46,6 +47,7 @@ impl Metrics {
             job_size,
             exec_duration: Duration::default(),
             proof_duration: Duration::default(),
+            total_duration: Duration::default(),
             verify_duration: Duration::default(),
             cycles: 0,
             insn_cycles: 0,
@@ -59,6 +61,7 @@ impl Metrics {
         info!("{}job_size:           {:?}", prefix, &self.job_size);
         info!("{}exec_duration:      {:?}", prefix, &self.exec_duration);
         info!("{}proof_duration:     {:?}", prefix, &self.proof_duration);
+        info!("{}total_duration:     {:?}", prefix, &self.total_duration);
         info!("{}verify_duration:    {:?}", prefix, &self.verify_duration);
         info!("{}cycles:             {:?}", prefix, &self.cycles);
         info!("{}insn_cycles:        {:?}", prefix, &self.insn_cycles);
@@ -216,6 +219,7 @@ struct CsvRow<'a> {
     job_size: u32,
     exec_duration: u128,
     proof_duration: u128,
+    total_duration: u128,
     verify_duration: u128,
     insn_cycles: u32,
     prove_cycles: u32,
@@ -268,6 +272,8 @@ pub fn run_jobs<B: Benchmark>(out_path: &PathBuf, specs: Vec<B::Spec>) -> Vec<Me
             job_size: job_metrics.job_size,
             exec_duration: job_metrics.exec_duration.as_nanos(),
             proof_duration: job_metrics.proof_duration.as_nanos(),
+            total_duration: job_metrics.exec_duration.as_nanos()
+                + job_metrics.proof_duration.as_nanos(),
             verify_duration: job_metrics.verify_duration.as_nanos(),
             prove_cycles: job_metrics.cycles,
             insn_cycles: job_metrics.insn_cycles,
