@@ -235,7 +235,7 @@ impl ExitCode {
         }
     }
 
-    pub fn expects_output(&self) -> bool {
+    pub(crate) fn expects_output(&self) -> bool {
         match self {
             ExitCode::Halted(_) | ExitCode::Paused(_) => true,
             ExitCode::SystemSplit | ExitCode::SessionLimit | ExitCode::Fault => false,
@@ -293,14 +293,9 @@ impl risc0_binfmt::Digestable for Output {
 /// A list of assumptions, each a [Digest] of a [ReceiptMetadata].
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[cfg_attr(test, derive(PartialEq))]
-pub struct Assumptions(Vec<MaybePruned<ReceiptMetadata>>);
+pub struct Assumptions(pub Vec<MaybePruned<ReceiptMetadata>>);
 
 impl Assumptions {
-    /// Create a new assumptions list from the given list of digests.
-    pub fn new(list: Vec<MaybePruned<ReceiptMetadata>>) -> Self {
-        Self(list)
-    }
-
     /// Mark an assumption as resolved and return the assumption list with it
     /// removed.
     ///

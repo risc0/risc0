@@ -302,6 +302,7 @@ impl SysVerify {
                     .as_value()?
                     .output
                     .as_value()?
+                    .as_ref()
                     .map(|o| o.journal.digest())
                     .unwrap_or(Digest::new([0u32; DIGEST_WORDS]));
                 let assumption_image_id = assumption_metadata.as_value()?.pre.digest();

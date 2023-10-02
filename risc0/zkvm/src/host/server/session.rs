@@ -28,7 +28,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     host::{receipt::Assumption, server::exec::executor::SyscallRecord},
-    receipt_metadata::{Assumptions, MaybePruned, Output},
+    receipt_metadata::{Assumptions, Output},
     sha::{Digest, DIGEST_WORDS},
     ExitCode, MemoryImage, ReceiptMetadata, SystemState,
 };
@@ -165,25 +165,29 @@ impl Session {
             .resolve()?;
 
         // Construct the Output struct, checking that the Session is internally consistent.
-        let output = match self.exit_code {
-            ExitCode::Halted(_) | ExitCode::Paused(_) => Some(Output {
-                journal: self.journal.into(),
-                // DO NOT MERGE: Implement this.
-                assumptions: Assumptions::new(vec![]).into(),
-            }),
-            ExitCode::SystemSplit | ExitCode::SessionLimit | ExitCode::Fault => {
-                ensure!(
-                    self.journal.is_empty(),
-                    "Session with exit code {:?} has a journal",
-                    self.exit_code
-                );
-                ensure!(
-                    self.assumptions.is_empty(),
-                    "Session with exit code {:?} has encoded assumptions",
-                    self.exit_code
-                );
-                None
-            }
+        let output = if self.exit_code.expects_output() {
+            Some(Output {
+                journal: self.journal.clone().into(),
+                assumptions: Assumptions(
+                    self.assumptions
+                        .iter()
+                        .map(|r| Ok(r.get_metadata()?.into()))
+                        .collect::<Result<Vec<_>>>()?,
+                )
+                .into(),
+            })
+        } else {
+            ensure!(
+                self.journal.is_empty(),
+                "Session with exit code {:?} has a journal",
+                self.exit_code
+            );
+            ensure!(
+                self.assumptions.is_empty(),
+                "Session with exit code {:?} has encoded assumptions",
+                self.exit_code
+            );
+            None
         };
 
         Ok(ReceiptMetadata {

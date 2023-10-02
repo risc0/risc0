@@ -187,7 +187,13 @@ impl CompositeReceipt {
         let expected_output = if metadata.exit_code.expects_output() {
             Some(Output {
                 journal: MaybePruned::Pruned(*sha::Impl::hash_bytes(journal)),
-                assumptions: Assumptions::new(vec![]).into(),
+                assumptions: Assumptions(
+                    self.assumptions
+                        .iter()
+                        .map(|r| Ok(r.get_metadata()?.into()))
+                        .collect::<Result<Vec<_>, _>>()?,
+                )
+                .into(),
             })
         } else {
             if !journal.is_empty() {
