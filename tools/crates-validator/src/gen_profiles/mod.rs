@@ -7,7 +7,10 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use crate::parser::Parser;
+use crate::{
+    parser::Parser,
+    types::version::{Version, Versions},
+};
 use crate::{Profile, ProfileSettings, Profiles};
 
 use anyhow::{Context, Result};
@@ -271,20 +274,21 @@ impl StateMachine<ProcessDatabase> {
             .iter()
             .chain(selected_crates_profiles.iter())
             .cloned()
-            .map(|p| match &p.settings.versions {
-                Some(v) if !v.is_empty() => p,
-                Some(_) | None => {
+            .map(|p| match p.settings.versions.is_empty() {
+                false => p,
+                true => {
                     let settings = ProfileSettings {
                         versions: {
                             self.state
                                 .crates
                                 .iter()
-                                .filter(|&c| c.name == p.name())
-                                .filter_map(|c| {
-                                    self.state.versions.get(&c.id).map(|v| v.num.clone())
+                                .filter(|&r| r.name == p.name())
+                                .map(|r| {
+                                    Version::from(
+                                        self.state.versions.get(&r.id).map(|v| v.num.clone()),
+                                    )
                                 })
-                                .map(Some)
-                                .collect()
+                                .collect::<Versions>()
                         },
                         ..p.settings.clone()
                     };
@@ -305,10 +309,7 @@ impl StateMachine<ProcessDatabase> {
 
         profiles
             .iter()
-            .filter(|p| match p.settings.versions {
-                Some(ref versions) => versions.is_empty(),
-                None => true,
-            })
+            .filter(|p| p.settings.versions.is_empty())
             .for_each(|p| warn!("Profile '{}' has no versions", p.name()));
 
         Ok(StateMachine {

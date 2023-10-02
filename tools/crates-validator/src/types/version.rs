@@ -1,25 +1,17 @@
+use anyhow::anyhow;
+
 use super::*;
 
-#[derive(
-    Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord, serde::Serialize, serde::Deserialize,
-)]
-pub struct Versions(BTreeSet<Version>);
+pub type Versions = BTreeSet<Version>;
 
-impl Versions {
-    pub fn inner(&self) -> &BTreeSet<Version> {
-        &self.0
-    }
-}
-
-impl Default for Versions {
-    fn default() -> Self {
-        Self::from(Version::default())
-    }
-}
+// #[derive(
+//     Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord, serde::Serialize, serde::Deserialize,
+// )]
+// pub struct Versions(BTreeSet<Version>);
 
 impl Merge for Versions {
     fn merge(self, other: Self) -> Self {
-        self.0.union(&other.0).cloned().collect()
+        self.union(&other).cloned().collect()
     }
 }
 
@@ -42,15 +34,28 @@ pub enum Version {
     Specific(semver::Version) = 0,
 }
 
-impl FromIterator<Version> for Versions {
-    fn from_iter<T: IntoIterator<Item = Version>>(iter: T) -> Self {
-        Self(iter.into_iter().collect())
-    }
-}
-
 impl From<Version> for Versions {
     fn from(value: Version) -> Self {
         Self::from_iter(vec![value])
+    }
+}
+
+impl From<Option<semver::Version>> for Version {
+    fn from(value: Option<semver::Version>) -> Self {
+        match value {
+            Some(v) => Self::Specific(v),
+            None => Self::Latest,
+        }
+    }
+}
+
+impl TryFrom<Version> for semver::Version {
+    type Error = anyhow::Error;
+    fn try_from(value: Version) -> std::result::Result<Self, Self::Error> {
+        match value {
+            Version::Specific(v) => Ok(v),
+            Version::Latest => Err(anyhow!("Cannot convert Version::Latest to semver::Version")),
+        }
     }
 }
 

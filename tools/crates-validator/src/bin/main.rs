@@ -17,7 +17,7 @@ use std::{fs::File, io::BufReader, path::PathBuf};
 use anyhow::{Context, Result};
 use clap::Parser;
 use colored::Colorize;
-use risc0_crates_validator::{RunStatus, ValidatorBuilder};
+use risc0_crates_validator::{ProfileConfig, Profiles, Repo, RunStatus, ValidatorBuilder};
 use tracing::info;
 use tracing_subscriber::EnvFilter;
 
@@ -54,8 +54,13 @@ fn main() -> Result<()> {
 
     let file = File::open(args.profiles_path).context("Failed to open profiles_path file")?;
     let reader = BufReader::new(file);
-    let validator_builder: ValidatorBuilder = serde_yaml::from_reader(reader)?;
-    let validator = validator_builder.out_dir(args.out_dir).build()?;
+    let profiles: Profiles = serde_yaml::from_reader(reader)?;
+    let profile_configs = ProfileConfig {
+        repo: Repo::Git("main".into()),
+        profiles,
+    };
+    let validator = ValidatorBuilder::new(profile_configs, args.out_dir).build()?;
+    // let validator = validator_builder.out_dir(args.out_dir).build()?;
     let profiles = validator.context().profiles();
     let repo = validator.context().repo();
     let profiles_num = validator.context().profiles().len();

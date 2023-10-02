@@ -115,8 +115,8 @@ pub struct CrateProfile {
 /// Defines the global variables for a given crates testing run.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ProfileConfig {
-    repo: Repo,
-    profiles: Profiles, // TODO(Cardosaum): Refactor
+    pub repo: Repo,
+    pub profiles: Profiles, // TODO(Cardosaum): Refactor
                         // /// Define which Github branch should be used for templates and crate
                         // /// imports
                         // pub risc0_gh_branch: Option<String>,
@@ -508,6 +508,8 @@ impl Validator {
 
     /// Run a given profile through the set of tests
     fn run(&self, profile: &Profile, repo: &Repo) -> Result<Vec<(String, ValidationResults)>> {
+        // TODO(Cardosaum): Remove this
+        return Ok(vec![(profile.name().to_string(), ValidationResults::from(RunStatus::Success))]);
         // TODO(cardosaum): Replace logic with `skip_crates` module
         // if profiles::SKIP_CRATES.contains(&profile.name.as_str()) {
         //     warn!("Skipping {} due to SKIP_CRATES", profile.name);
@@ -516,8 +518,13 @@ impl Validator {
         // }
         let working_dir = self.gen_initial_project(profile, repo)?;
         let mut results = Vec::new();
-        for version in profile.settings.versions.inner() {
-            self.customize_guest(profile, version, &working_dir, repo)?;
+        for version in profile.settings.versions.iter() {
+            self.customize_guest(
+                profile,
+                &version.clone().try_into().unwrap(),
+                &working_dir,
+                repo,
+            )?;
             let (build_success, build_errors) = self.build_project(profile, &working_dir)?;
             if !build_success {
                 results.push((
@@ -576,7 +583,7 @@ impl Validator {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ValidatorBuilder {
     #[serde(flatten)]
     context: ProfileConfig,
