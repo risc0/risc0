@@ -18,10 +18,8 @@
 use risc0_benchmark::init_gpu_kernel;
 
 use clap::{Parser, Subcommand};
-use risc0_benchmark::{init_logging, run_jobs_thin};
+use risc0_benchmark::{benches::*, init_logging, run_jobs_thin};
 use std::path::PathBuf;
-
-use risc0_benchmark::benches::*;
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
@@ -54,26 +52,62 @@ fn main() {
     let cli = Cli::parse();
 
     if cli.command == Command::All || cli.command == Command::Sha2 {
-        run_jobs_thin::<iter_sha2::Job>(&cli.out, vec![100000]);
+        let iterations: u32 = if bonsai_mode() {
+            100000 // ~64 segments on Bonsai
+        } else {
+            3000
+        };
+        run_jobs_thin::<iter_sha2::Job>(&cli.out, vec![iterations]);
     }
 
     if cli.command == Command::All || cli.command == Command::Blake2b {
-        run_jobs_thin::<iter_blake2b::Job>(&cli.out, vec![6800]);
+        let iterations: u32 = if bonsai_mode() {
+            6800 // ~64 segments on Bonsai
+        } else {
+            300
+        };
+        run_jobs_thin::<iter_blake2b::Job>(&cli.out, vec![iterations]);
     }
 
     if cli.command == Command::All || cli.command == Command::Blake3 {
-        run_jobs_thin::<iter_blake3::Job>(&cli.out, vec![25200]);
+        let iterations: u32 = if bonsai_mode() {
+            25200 // ~64 segments on Bonsai
+        } else {
+            300
+        };
+        run_jobs_thin::<iter_blake3::Job>(&cli.out, vec![iterations]);
     }
 
     if cli.command == Command::All || cli.command == Command::Keccak {
-        run_jobs_thin::<iter_keccak::Job>(&cli.out, vec![2500]);
+        let iterations: u32 = if bonsai_mode() {
+            2500 // ~64 segments on Bonsai
+        } else {
+            100
+        };
+        run_jobs_thin::<iter_keccak::Job>(&cli.out, vec![iterations]);
     }
 
     if cli.command == Command::All || cli.command == Command::EcdsaVerify {
-        run_jobs_thin::<ecdsa_verify::Job>(&cli.out, vec![62]);
+        let iterations: u32 = if bonsai_mode() {
+            62 // ~64 segments on Bonsai
+        } else {
+            3
+        };
+        run_jobs_thin::<ecdsa_verify::Job>(&cli.out, vec![iterations]);
     }
 
     if cli.command == Command::All || cli.command == Command::Ed25519Verify {
-        run_jobs_thin::<ed25519_verify::Job>(&cli.out, vec![68]);
+        let iterations: u32 = if bonsai_mode() {
+            68 // ~64 segments on Bonsai
+        } else {
+            3
+        };
+        run_jobs_thin::<ed25519_verify::Job>(&cli.out, vec![iterations]);
     }
+}
+
+fn bonsai_mode() -> bool {
+    let bonsai_api_url_set = std::env::var("BONSAI_API_URL").ok().is_some();
+    let bonsai_api_key_set = std::env::var("BONSAI_API_KEY").ok().is_some();
+    bonsai_api_url_set && bonsai_api_key_set
 }

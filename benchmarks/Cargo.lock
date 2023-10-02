@@ -1021,6 +1021,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "docker-generate"
+version = "0.1.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ccf673e0848ef09fa4aeeba78e681cf651c0c7d35f76ee38cec8e55bc32fa111"
+
+[[package]]
 name = "downcast-rs"
 version = "1.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3173,12 +3179,15 @@ dependencies = [
 name = "risc0-build"
 version = "0.18.0"
 dependencies = [
+ "anyhow",
  "cargo_metadata",
+ "docker-generate",
  "risc0-binfmt 0.18.0",
  "risc0-zkp 0.18.0",
  "risc0-zkvm-platform 0.18.0",
  "serde",
  "serde_json",
+ "tempfile",
 ]
 
 [[package]]
@@ -3342,6 +3351,7 @@ dependencies = [
  "risc0-zkp 0.18.0",
  "risc0-zkvm-platform 0.18.0",
  "rrs-lib",
+ "semver 1.0.19",
  "serde",
  "sha2",
  "thiserror",
@@ -3363,6 +3373,11 @@ dependencies = [
 [[package]]
 name = "risc0-zkvm-platform"
 version = "0.18.0"
+dependencies = [
+ "bytemuck",
+ "getrandom",
+ "libm",
+]
 
 [[package]]
 name = "risc0-zkvm-platform"

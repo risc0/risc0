@@ -20,7 +20,8 @@ use std::time::{Duration, Instant};
 
 use log::info;
 use risc0_zkvm::{
-    serde::to_vec, Executor, ExecutorEnv, MemoryImage, Program, Session, GUEST_MAX_MEM, PAGE_SIZE,
+    serde::to_vec, ExecutorEnv, ExecutorImpl, MemoryImage, Program, Session, GUEST_MAX_MEM,
+    PAGE_SIZE,
 };
 use serde::Serialize;
 
@@ -177,7 +178,7 @@ pub fn get_image(path: &str) -> MemoryImage {
 }
 
 pub fn exec_compute<'a>(image: MemoryImage, env: ExecutorEnv<'a>) -> (u32, u32, Duration, Session) {
-    let mut exec = Executor::new(env.clone(), image.clone()).unwrap();
+    let mut exec = ExecutorImpl::new(env.clone(), image.clone()).unwrap();
     let start = Instant::now();
     let session = exec.run().unwrap();
     let elapsed = start.elapsed();
@@ -187,7 +188,7 @@ pub fn exec_compute<'a>(image: MemoryImage, env: ExecutorEnv<'a>) -> (u32, u32, 
             .iter()
             .fold((0, 0), |(exec_cycles, prove_cycles), segment| {
                 (
-                    exec_cycles + segment.insn_cycles,
+                    exec_cycles + segment.cycles,
                     prove_cycles + (1 << segment.po2),
                 )
             });
