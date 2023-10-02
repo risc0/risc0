@@ -45,6 +45,7 @@ enum Command {
     IterKeccak,
     IterBlake2b,
     IterBlake3,
+    // IterPedersen,
     EcdsaVerify,
     Ed25519Verify,
     Fibonacci,
@@ -92,6 +93,10 @@ fn main() {
     if cli.command == Command::All || cli.command == Command::IterBlake3 {
         run_jobs::<iter_blake3::Job>(&cli.out, iter_blake3::new_jobs());
     }
+
+    // if cli.command == Command::All || cli.command == Command::IterPedersen {
+    //     run_jobs::<iter_pedersen::Job>(&cli.out, iter_pedersen::new_jobs());
+    // }
 
     if cli.command == Command::All || cli.command == Command::EcdsaVerify {
         run_jobs::<ecdsa_verify::Job>(&cli.out, ecdsa_verify::new_jobs());
