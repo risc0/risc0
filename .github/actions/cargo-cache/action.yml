@@ -1,0 +1,15 @@
+---
+name: cargo-cache
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cargo/bin/
+          ~/.cargo/registry/index/
+          ~/.cargo/registry/cache/
+          ~/.cargo/git/db/
+          target/
+        key: cargo-cache-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('**/Cargo.lock') }}
