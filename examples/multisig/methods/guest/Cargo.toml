@@ -13,7 +13,8 @@ ethabi = { version = "18.0", default-features = false }
 hex = "0.4"
 k256 = "0.13.1"
 sha3 = "0.10.8"
-# serde = "1.0"
+serde = "1.0"
+multisig-core = { path = "../../core" }
 
 [patch.crates-io]
 # Placing this patch statement in the workspace Cargo.toml will add RISC Zero SHA-256 accelerator

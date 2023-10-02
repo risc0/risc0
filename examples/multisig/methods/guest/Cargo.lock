@@ -322,6 +322,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "multisig-core"
+version = "0.1.0"
+dependencies = [
+ "serde",
+]
+
+[[package]]
 name = "num-derive"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -717,8 +724,10 @@ dependencies = [
  "ethabi",
  "hex",
  "k256",
+ "multisig-core",
  "risc0-zkvm",
  "rs_merkle",
+ "serde",
  "sha2",
  "sha3",
 ]

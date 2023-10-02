@@ -8,6 +8,7 @@ clap = "4.0"
 risc0-zkvm = { path = "../../risc0/zkvm" }
 serde = "1.0"
 multisig-methods = { path = "methods" }
+multisig-core = { path = "core" }
 
 [dev-dependencies]
 hex = "0.4"

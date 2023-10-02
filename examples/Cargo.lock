@@ -2313,8 +2313,16 @@ version = "0.12.0"
 dependencies = [
  "clap 4.4.0",
  "hex",
+ "multisig-core",
  "multisig-methods",
  "risc0-zkvm",
+ "serde",
+]
+
+[[package]]
+name = "multisig-core"
+version = "0.1.0"
+dependencies = [
  "serde",
 ]
 
