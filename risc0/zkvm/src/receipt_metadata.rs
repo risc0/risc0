@@ -36,7 +36,7 @@ use crate::{
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub enum MaybePruned<T>
 where
-    T: Digestable + Clone + Serialize,
+    T: Clone + Serialize,
 {
     /// Unpruned value.
     Value(T),
@@ -46,7 +46,7 @@ where
 
 impl<T> MaybePruned<T>
 where
-    T: Digestable + Clone + Serialize,
+    T: Clone + Serialize,
 {
     /// Unwrap the value, or return an error.
     pub fn value(self) -> Result<T, PrunedValueError> {
@@ -67,7 +67,7 @@ where
 
 impl<T> From<T> for MaybePruned<T>
 where
-    T: Digestable + Clone + Serialize,
+    T: Clone + Serialize,
 {
     fn from(value: T) -> Self {
         Self::Value(value)
@@ -86,10 +86,24 @@ where
     }
 }
 
+impl<T> MaybePruned<Option<T>>
+where
+    T: Clone + Serialize,
+{
+    /// Returns true is the value is None, or the value is pruned as the zero digest.
+    pub fn is_none(&self) -> bool {
+        match self {
+            MaybePruned::Value(Some(_)) => false,
+            MaybePruned::Value(None) => true,
+            MaybePruned::Pruned(digest) => digest == &Digest::new([0u32; DIGEST_WORDS]),
+        }
+    }
+}
+
 #[cfg(test)]
 impl<T> PartialEq for MaybePruned<T>
 where
-    T: Digestable + Clone + Serialize + PartialEq,
+    T: Clone + Serialize + PartialEq,
 {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {

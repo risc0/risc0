@@ -67,7 +67,7 @@ pub trait Digestable {
     fn digest(&self) -> Digest;
 }
 
-impl<D: risc0_binfmt::Digestable> Digestable for D {
+impl<D: ?Sized + risc0_binfmt::Digestable> Digestable for D {
     /// Calculate a collision resistant hash for the typed and structured data.
     fn digest(&self) -> Digest {
         self.digest::<Impl>()

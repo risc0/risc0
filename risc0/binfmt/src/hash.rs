@@ -27,6 +27,12 @@ pub trait Digestable {
     fn digest<S: Sha256>(&self) -> Digest;
 }
 
+impl Digestable for [u8] {
+    fn digest<S: Sha256>(&self) -> Digest {
+        *S::hash_bytes(&self)
+    }
+}
+
 impl Digestable for Vec<u8> {
     fn digest<S: Sha256>(&self) -> Digest {
         *S::hash_bytes(&self)

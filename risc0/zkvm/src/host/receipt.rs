@@ -39,11 +39,7 @@ use super::{
     control_id::{BLAKE2B_CONTROL_ID, POSEIDON_CONTROL_ID, SHA256_CONTROL_ID},
     recursion::SuccinctReceipt,
 };
-use crate::{
-    receipt_metadata::{Assumptions, MaybePruned, Output},
-    sha::{self, Digestable, Sha256},
-    ExitCode, ReceiptMetadata,
-};
+use crate::{receipt_metadata::MaybePruned, sha::Digestable, ExitCode, ReceiptMetadata};
 
 /// A receipt attesting to the execution of a Session.
 ///
@@ -138,10 +134,14 @@ pub struct CompositeReceipt {
     pub segments: Vec<SegmentReceipt>,
 
     /// Receipts proving the validity of assumptions made during execution, for composition.
+    // TODO(victor) Possibly rename this field. It is moreso a set (unordered) of corraborrating
+    // receipt that can be used to resolve assumptions made by the guest.
     pub assumptions: Vec<Receipt>,
 }
 
 impl CompositeReceipt {
+    // TODO(victor): Add a 'verify metadata` method that allows verification for unsuccessful
+    // execution.
     /// Verify the integrity of this receipt.
     pub fn verify_with_context(
         &self,
@@ -149,6 +149,7 @@ impl CompositeReceipt {
         image_id: Digest,
         journal: &[u8],
     ) -> Result<(), VerificationError> {
+        // Verify the continuation, by verifying every segment receipt in order.
         let (final_receipt, receipts) = self
             .segments
             .as_slice()
@@ -167,48 +168,42 @@ impl CompositeReceipt {
             if metadata.exit_code != ExitCode::SystemSplit {
                 return Err(VerificationError::UnexpectedExitCode);
             }
+            if !metadata.output.is_none() {
+                return Err(VerificationError::ReceiptFormatError);
+            }
             prev_image_id = metadata.post.digest();
         }
 
         // Verify the last receipt in the continuation.
         final_receipt.verify_with_context(ctx)?;
-        let metadata = final_receipt.get_metadata()?;
-        log::debug!("final: {metadata:#?}");
-        if prev_image_id != metadata.pre.digest() {
+        let final_receipt_metadata = final_receipt.get_metadata()?;
+        log::debug!("final: {final_receipt_metadata:#?}");
+        if prev_image_id != final_receipt_metadata.pre.digest() {
             return Err(VerificationError::ImageVerificationError);
         }
 
-        // TODO(victor): Tighten exit code checking? A non-empty journal is only valid for some
-        // exit codes. Should Halted(1) return Ok?
-        if metadata.exit_code == ExitCode::SystemSplit {
+        // Check the exit code. This verification method requires execution to be successful.
+        // TODO(victor) Align other implementations to use the same semantics.
+        if final_receipt_metadata.exit_code != ExitCode::Halted(0) {
             return Err(VerificationError::UnexpectedExitCode);
         }
 
-        let expected_output = if metadata.exit_code.expects_output() {
-            Some(Output {
-                journal: MaybePruned::Pruned(*sha::Impl::hash_bytes(journal)),
-                assumptions: Assumptions(
-                    self.assumptions
-                        .iter()
-                        .map(|r| Ok(r.get_metadata()?.into()))
-                        .collect::<Result<Vec<_>, _>>()?,
-                )
-                .into(),
-            })
-        } else {
-            if !journal.is_empty() {
-                return Err(VerificationError::JournalDigestMismatch);
-            }
-            None
-        };
-
-        let is_journal_valid = expected_output.digest() == metadata.output.digest();
+        // Finally check the journal hash in the metadata against the expected output.
+        let decoded_journal_digest = final_receipt_metadata
+            .output
+            .as_value()
+            .map_err(|_| VerificationError::ReceiptFormatError)?
+            .as_ref()
+            .ok_or_else(|| VerificationError::ReceiptFormatError)?
+            .journal
+            .digest();
+        let is_journal_valid = journal.digest() == decoded_journal_digest;
         if is_journal_valid {
             log::debug!(
-                "journal: 0x{}, expected output: 0x{}, decoded output: 0x{}, {:?}",
+                "journal: 0x{}, expected journal digest: 0x{}, decoded journal digest: 0x{}, {:?}",
                 hex::encode(journal),
-                hex::encode(expected_output.digest()),
-                hex::encode(metadata.output.digest()),
+                hex::encode(journal.digest()),
+                hex::encode(decoded_journal_digest),
                 journal
             );
             return Err(VerificationError::JournalDigestMismatch);
