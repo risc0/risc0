@@ -16,11 +16,12 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           # Full history is required by license-check.py
           fetch-depth: 0
       - uses: ./.github/actions/rustup
+      - uses: ./.github/actions/cargo-cache
       - name: Install cargo-sort
         uses: risc0/cargo-install@2cfb0024938d23011106cbf127b393bc83fddba1
         with:
@@ -67,15 +68,15 @@ jobs:
     steps:
       # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
       - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           # Recursive checkout required to build Solidity contracts and bindings.
           submodules: recursive
+      - uses: ./.github/actions/cargo-cache
       - uses: ./.github/actions/rustup
       - uses: actions/setup-node@v3
         with:
           node-version: 18
-      - uses: risc0/foundry-toolchain@2fe7e70b520f62368a0e3c464f997df07ede420f
       - uses: ./.github/actions/sccache
         with:
           key: ${{ matrix.os }}-${{ matrix.feature }}
@@ -137,10 +138,11 @@ jobs:
     steps:
       # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
       - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           # Recursive checkout required to build Solidity contracts and bindings.
           submodules: recursive
+      - uses: ./.github/actions/cargo-cache
       - uses: ./.github/actions/rustup
       - uses: actions/setup-node@v3
         with:
@@ -160,10 +162,11 @@ jobs:
     steps:
       # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
       - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           # Recursive checkout required to build Solidity contracts and bindings.
           submodules: recursive
+      - uses: ./.github/actions/cargo-cache
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
         with:
@@ -187,7 +190,8 @@ jobs:
     steps:
       # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
       - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/cargo-cache
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
       - run: cargo run --bin cargo-risczero -- risczero install
@@ -213,9 +217,10 @@ jobs:
     steps:
       # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
       - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: browser-actions/setup-firefox@v1
       - run: firefox --version
+      - uses: ./.github/actions/cargo-cache
       - uses: ./.github/actions/rustup
       - uses: actions/setup-node@v3
         with:
@@ -236,7 +241,8 @@ jobs:
     steps:
       # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
       - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/cargo-cache
       - uses: ./.github/actions/rustup
       - uses: actions/setup-node@v3
         with:

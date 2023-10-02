@@ -23,52 +23,34 @@ jobs:
       - name: checkout dummy commit (submodule bug workaround)
         run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
 
-      - name: checkout code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
-
-      # Install dependencies.
-      - name: install rust
-        uses: ./.github/actions/rustup
-
+      - uses: ./.github/actions/cargo-cache
+      - uses: ./.github/actions/rustup
       - run: cargo run --bin cargo-risczero -- risczero install
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Install Foundry
-        uses: risc0/foundry-toolchain@2fe7e70b520f62368a0e3c464f997df07ede420f
+      - uses: risc0/foundry-toolchain@2fe7e70b520f62368a0e3c464f997df07ede420f
 
       # Lint
-      - name: check solidity code formatting in bonsai/ethereum
-        run: forge fmt --check
+      - run: forge fmt --check
         working-directory: bonsai/ethereum
-
-      - name: check solidity code formatting in bonsai/examples/governance
-        run: forge fmt --check
+      - run: forge fmt --check
         working-directory: bonsai/examples/governance
 
       # Test
-      - name: run cargo tests in bonsai
-        run: cargo test --locked --tests -- --include-ignored --nocapture
+      - run: cargo test --locked --tests -- --include-ignored --nocapture
         working-directory: bonsai
-
-      - name: run cargo tests in bonsai/examples/governance
-        run: cargo test --locked
+      - run: cargo test --locked
         working-directory: bonsai/examples/governance
-
-      - name: run forge tests in bonsai/ethereum
-        run: forge test -vvv
+      - run: forge test -vvv
         working-directory: bonsai/ethereum
-
-      - name: run forge tests without the zkVM in bonsai/examples/governance
+      - run: forge test -vvv
         env:
           TEST_USE_ZKVM: false
-        run: forge test -vvv
         working-directory: bonsai/examples/governance
-
-      - name: run forge tests with the zkvm in bonsai/examples/governance
+      - run: forge test -vvv
         env:
           TEST_USE_ZKVM: true
-        run: forge test -vvv
         working-directory: bonsai/examples/governance
