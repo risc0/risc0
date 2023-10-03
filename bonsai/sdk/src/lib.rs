@@ -20,3 +20,8 @@ pub mod alpha;
 #[cfg(feature = "async")]
 /// Bonsai Alpha SDK async
 pub mod alpha_async;
+
+/// HTTP header key for the API key
+pub const API_KEY_HEADER: &str = "x-api-key";
+/// HTTP header for the risc0 version string
+pub const VERSION_HEADER: &str = "x-risc0-version";

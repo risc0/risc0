@@ -15,61 +15,47 @@
 use std::time::Duration;
 
 use anyhow::{anyhow, bail, Context, Result};
-use bonsai_sdk::alpha::{responses::SnarkProof, Client, SdkErr};
+use bonsai_sdk::alpha::{responses::SnarkReceipt, Client};
 use risc0_build::GuestListEntry;
 use risc0_zkvm::{
-    Executor, ExecutorEnv, MemoryImage, Program, Receipt, ReceiptMetadata, MEM_SIZE, PAGE_SIZE,
+    default_executor, ExecutorEnv, MemoryImage, Program, Receipt, GUEST_MAX_MEM, PAGE_SIZE,
 };
-
-/// Result of executing a guest image, possibly containing a proof.
-pub enum Output {
-    Execution {
-        journal: Vec<u8>,
-    },
-    Bonsai {
-        journal: Vec<u8>,
-        receipt_metadata: ReceiptMetadata,
-        snark_proof: SnarkProof,
-    },
-}
-
-/// Execute and prove the guest locally, on this machine, as opposed to sending
-/// the proof request to the Bonsai service.
-pub fn execute_locally(elf: &[u8], input: Vec<u8>) -> Result<Output> {
-    // Execute the guest program, generating the session trace needed to prove the
-    // computation.
-    let env = ExecutorEnv::builder()
-        .add_input(&input)
-        .build()
-        .context("Failed to build exec env")?;
-    let mut exec = Executor::from_elf(env, elf).context("Failed to instantiate executor")?;
-    let session = exec
-        .run()
-        .context(format!("Failed to run executor {:?}", &input))?;
-
-    Ok(Output::Execution {
-        journal: session.journal,
-    })
-}
 
 pub const POLL_INTERVAL_SEC: u64 = 4;
 
+/// Result of executing a guest image, possibly containing a proof.
+pub enum Output {
+    Execution { journal: Vec<u8> },
+    Bonsai { snark_receipt: SnarkReceipt },
+}
+
+/// Execute the guest locally, as opposed to sending the proof request to the
+/// Bonsai service.
+pub fn execute_locally(elf: &[u8], input: Vec<u8>) -> Result<Output> {
+    let env = ExecutorEnv::builder()
+        .add_input(&input)
+        .build()
+        .context("Failed to build ExecutorEnv")?;
+    let exec = default_executor();
+    let session = exec.execute_elf(env, elf).context("Execution failed")?;
+    Ok(Output::Execution {
+        journal: session.journal.into(),
+    })
+}
+
 fn get_digest(elf: &[u8]) -> Result<String> {
-    let program = Program::load_elf(elf, MEM_SIZE as u32)?;
+    let program = Program::load_elf(elf, GUEST_MAX_MEM as u32)?;
     let image = MemoryImage::new(&program, PAGE_SIZE as u32)?;
     Ok(hex::encode(image.compute_id()))
 }
 
 pub fn prove_alpha(elf: &[u8], input: Vec<u8>) -> Result<Output> {
-    let client = Client::from_env().context("Failed to create client from env var")?;
+    let client =
+        Client::from_env(risc0_zkvm::VERSION).context("Failed to create client from env var")?;
 
     let img_id = get_digest(elf).context("Failed to generate elf memory image")?;
 
-    match client.upload_img(&img_id, elf.to_vec()) {
-        Ok(()) => (),
-        Err(SdkErr::ImageIdExists) => (),
-        Err(err) => return Err(err.into()),
-    }
+    client.upload_img(&img_id, elf.to_vec())?;
 
     let input_id = client
         .upload_input(input)
@@ -80,7 +66,7 @@ pub fn prove_alpha(elf: &[u8], input: Vec<u8>) -> Result<Output> {
         .context("Failed to create remote proving session")?;
 
     // Poll and await the result of the STARK rollup proving session.
-    let receipt: Receipt = (|| {
+    let _receipt: Receipt = (|| {
         loop {
             let res = match session.status(&client) {
                 Ok(res) => res,
@@ -115,10 +101,9 @@ pub fn prove_alpha(elf: &[u8], input: Vec<u8>) -> Result<Output> {
             }
         }
     })()?;
-    let metadata = receipt.get_metadata()?;
 
     let snark_session = client.create_snark(session.uuid)?;
-    let snark_proof: SnarkProof = (|| loop {
+    let snark_receipt: SnarkReceipt = (|| loop {
         let res = snark_session.status(&client)?;
         match res.status.as_str() {
             "RUNNING" => {
@@ -139,11 +124,7 @@ pub fn prove_alpha(elf: &[u8], input: Vec<u8>) -> Result<Output> {
         }
     })()?;
 
-    Ok(Output::Bonsai {
-        journal: receipt.journal,
-        receipt_metadata: metadata,
-        snark_proof,
-    })
+    Ok(Output::Bonsai { snark_receipt })
 }
 
 pub fn resolve_guest_entry<'a>(

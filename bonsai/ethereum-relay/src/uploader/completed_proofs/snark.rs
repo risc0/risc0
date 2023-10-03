@@ -15,7 +15,7 @@
 use std::time::Duration;
 
 use bonsai_sdk::{
-    alpha::{responses::SnarkProof, Client, SessionId, SnarkId},
+    alpha::{responses::Groth16Seal, Client, SessionId, SnarkId},
     alpha_async::{create_snark, snark_status},
 };
 use ethers::{
@@ -40,11 +40,11 @@ pub(crate) async fn get_snark_id(
     Ok(snark_id)
 }
 
-pub(crate) async fn get_snark_proof(
+pub(crate) async fn get_snark_receipt(
     client: Client,
     snark_id: SnarkId,
     session_id: SessionId,
-) -> Result<bonsai_sdk::alpha::responses::SnarkProof, CompleteProofError> {
+) -> Result<bonsai_sdk::alpha::responses::SnarkReceipt, CompleteProofError> {
     // Hit the Bonsai API until the receipt is ready
     // TODO: This is not the most efficient way to do this. We should convert to
     // a Future implementation later.
@@ -57,7 +57,7 @@ pub(crate) async fn get_snark_proof(
             })?;
         match (snark.status.as_str(), snark.output) {
             ("RUNNING", _) => tokio::time::sleep(Duration::from_secs(1)).await,
-            ("SUCCEEDED", Some(snark_proof)) => break snark_proof,
+            ("SUCCEEDED", Some(snark_receipt)) => break snark_receipt,
             ("SUCCEEDED", None) => return Err(CompleteProofError::SnarkFailed { id: session_id }),
             ("FAILED", _) => return Err(CompleteProofError::SnarkFailed { id: session_id }),
             ("TIMED_OUT", _) => return Err(CompleteProofError::SnarkTimedOut { id: session_id }),
@@ -69,17 +69,7 @@ pub(crate) async fn get_snark_proof(
     Ok(proof)
 }
 
-/// Parse a slice of strings as a fixed array of uint256 tokens.
-pub(crate) fn parse_to_tokens(slice: &[String]) -> anyhow::Result<Token> {
-    Ok(Token::FixedArray(
-        slice
-            .iter()
-            .map(|s| -> anyhow::Result<_> { Ok(U256::from_str_radix(s, 16)?.into_token()) })
-            .collect::<Result<Vec<_>, _>>()?,
-    ))
-}
-
-pub(crate) fn tokenize_snark_proof(proof: &SnarkProof) -> anyhow::Result<Token> {
+pub fn tokenize_snark_receipt(proof: &Groth16Seal) -> anyhow::Result<Token> {
     if proof.b.len() != 2 {
         anyhow::bail!("hex-strings encoded proof is not well formed");
     }
@@ -89,11 +79,33 @@ pub(crate) fn tokenize_snark_proof(proof: &SnarkProof) -> anyhow::Result<Token> 
         }
     }
     Ok(Token::FixedArray(vec![
-        parse_to_tokens(&proof.a)?,
+        Token::FixedArray(
+            proof
+                .a
+                .iter()
+                .map(|elm| U256::from_big_endian(elm).into_token())
+                .collect(),
+        ),
         Token::FixedArray(vec![
-            parse_to_tokens(&proof.b[0])?,
-            parse_to_tokens(&proof.b[1])?,
+            Token::FixedArray(
+                proof.b[0]
+                    .iter()
+                    .map(|elm| U256::from_big_endian(elm).into_token())
+                    .collect(),
+            ),
+            Token::FixedArray(
+                proof.b[1]
+                    .iter()
+                    .map(|elm| U256::from_big_endian(elm).into_token())
+                    .collect(),
+            ),
         ]),
-        parse_to_tokens(&proof.c)?,
+        Token::FixedArray(
+            proof
+                .c
+                .iter()
+                .map(|elm| U256::from_big_endian(elm).into_token())
+                .collect(),
+        ),
     ]))
 }

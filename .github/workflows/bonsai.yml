@@ -12,6 +12,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
+env:
+  RISC0_BUILD_LOCKED: 1
+
 jobs:
   bonsai:
     runs-on: [self-hosted, prod, Linux, cpu]
@@ -47,10 +50,12 @@ jobs:
 
       # Test
       - name: run cargo tests in bonsai
-        run: cargo test --manifest-path bonsai/Cargo.toml
+        run: cargo test --locked --tests -- --include-ignored --nocapture
+        working-directory: bonsai
 
       - name: run cargo tests in bonsai/examples/governance
-        run: cargo test --manifest-path bonsai/examples/governance/Cargo.toml
+        run: cargo test --locked
+        working-directory: bonsai/examples/governance
 
       - name: run forge tests in bonsai/ethereum
         run: forge test -vvv

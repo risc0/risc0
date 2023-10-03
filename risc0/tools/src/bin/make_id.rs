@@ -25,7 +25,7 @@
 use std::fs;
 
 use clap::Parser;
-use risc0_zkvm::{MemoryImage, Program, MEM_SIZE, PAGE_SIZE};
+use risc0_zkvm::{MemoryImage, Program, GUEST_MAX_MEM, PAGE_SIZE};
 
 /// Generates an ImageID for a given RISC-V ELF binary.
 #[derive(Parser)]
@@ -41,7 +41,7 @@ struct Args {
 fn main() {
     let args = Args::parse();
     let elf_contents = fs::read(args.elf).unwrap();
-    let program = Program::load_elf(&elf_contents, MEM_SIZE as u32).unwrap();
+    let program = Program::load_elf(&elf_contents, GUEST_MAX_MEM as u32).unwrap();
     let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
     let image_id = image.compute_id();
     std::fs::write(args.out, image_id.as_bytes()).unwrap();

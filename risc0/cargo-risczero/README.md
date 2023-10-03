@@ -8,12 +8,17 @@ To install this Cargo subcommand, first you'll want to [install Rust][install-ru
 
 ```bash
 cargo install cargo-risczero
+
+## Installing from local source
+cargo install --path risc0/cargo-risczero
 ```
 
 After that you can verify it works via:
 ```bash
 cargo risczero --version
 ```
+### Docker
+In order to use the `build` command, you will need `docker` available in your PATH. For developer machines, this is simple with [Docker Desktop.](https://docs.docker.com/desktop/)
 
 ## install
 
@@ -39,7 +44,7 @@ If you'd like to install the toolchain on a host not listed above, you can use t
 
 ## new
 
-The `new` command will create a new project from an existing template. It defaults to the [rust-starter template] but can be used with other templates locally or hosted on github.
+The `new` command will create a new project from an existing template. It defaults to the [rust-starter template][rust-starter] but can be used with other templates locally or hosted on github.
 
 ### Examples
 
@@ -67,15 +72,22 @@ Use the `build-toolchain` command to build the toolchain locally for your host. 
 
 ## build
 
-Use the `build` command to build a guest code for the target `riscv32im-risc0-zkvm-elf`. The resulting ELF binary will be saved on `target/riscv-guest/riscv32im-risc0-zkvm-elf/docker/`. Warning: this requires having docker installed.
+Use the `build` command to build guest code for the zkVM target `riscv32im-risc0-zkvm-elf` deterministically.
 
-### Examples
+The compiled ELF is saved in: `./target/riscv-guest/riscv32im-risc0-zkvm-elf/docker/`
+
+With this containerized build process, we ensure that all builds of your guest code, regardless of the machine or local environment, will produce the same ImageID. The ImageID, and its importance to [security,](https://dev.risczero.com/tech_faq#security) is explained in more detail in our [developer FAQ.](https://dev.risczero.com/tech_faq#zkvm-application-design)
+
+Note: The build command requires the docker CLI installed and in your PATH.
+
+### Example
 
 ```bash
-# Build the factors example
-cargo risczero build --manifest-path examples/factors/methods/guest/Cargo.toml
+# Build the zkVM's test examples
+cargo risczero build --manifest-path risc0/zkvm/methods/guest/Cargo.toml
 
-# Build the chess example
-cargo risczero build --manifest-path examples/chess/methods/guest/Cargo.toml
-
+ELFs ready at:
+ImageID: 417778745b43c82a20db33a55c2b1d6e0805e0fa7eec80c9654e7321121e97af - "target/riscv-guest/riscv32im-risc0-zkvm-elf/docker/risc0_zkvm_methods_guest/multi_test"
+ImageID: c7c399c25ecf26b79e987ed060efce1f0836a594ad1059b138b6ed2f123dad38 - "target/riscv-guest/riscv32im-risc0-zkvm-elf/docker/risc0_zkvm_methods_guest/hello_commit"
+ImageID: a51a4b747f18b7e5f36a016bdd6f885e8293dbfca2759d6667a6df8edd5f2489 - "target/riscv-guest/riscv32im-risc0-zkvm-elf/docker/risc0_zkvm_methods_guest/slice_io"
 ```

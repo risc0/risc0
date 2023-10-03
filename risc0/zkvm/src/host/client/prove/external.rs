@@ -17,8 +17,10 @@ use std::path::{Path, PathBuf};
 use anyhow::Result;
 use risc0_binfmt::MemoryImage;
 
-use super::{Prover, ProverOpts};
-use crate::{ApiClient, ExecutorEnv, Receipt, VerifierContext};
+use super::{Executor, Prover, ProverOpts};
+use crate::{
+    host::api::AssetRequest, ApiClient, ExecutorEnv, Receipt, SessionInfo, VerifierContext,
+};
 
 /// An implementation of a [Prover] that runs proof workloads via an external
 /// `r0vm` process.
@@ -49,7 +51,7 @@ impl Prover for ExternalProver {
 
         let image_id = image.compute_id();
         let client = ApiClient::new_sub_process(&self.r0vm_path)?;
-        let receipt = client.prove(&env, opts.clone(), image.try_into()?)?;
+        let receipt = client.prove(&env, opts.clone(), image.into())?;
         receipt.verify_with_context(ctx, image_id)?;
 
         Ok(receipt)
@@ -57,5 +59,13 @@ impl Prover for ExternalProver {
 
     fn get_name(&self) -> String {
         self.name.clone()
+    }
+}
+
+impl Executor for ExternalProver {
+    fn execute(&self, env: ExecutorEnv<'_>, image: MemoryImage) -> Result<SessionInfo> {
+        let client = ApiClient::new_sub_process(&self.r0vm_path)?;
+        let segments_out = AssetRequest::Inline;
+        client.execute(&env, image.into(), segments_out, |_| Ok(()))
     }
 }

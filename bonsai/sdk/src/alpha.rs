@@ -19,14 +19,13 @@ use thiserror::Error;
 
 use self::responses::{
     CreateSessRes, ImgUploadRes, ProofReq, SessionStatusRes, SnarkReq, SnarkStatusRes, UploadRes,
+    VersionInfo,
 };
+use crate::{API_KEY_HEADER, VERSION_HEADER};
 
 /// Bonsai Alpha SDK error classes
 #[derive(Debug, Error)]
 pub enum SdkErr {
-    /// The API already has the supplied imageID
-    #[error("the supplied imageId already exists")]
-    ImageIdExists,
     /// Server side failure
     #[error("server error `{0}`")]
     InternalServerErr(String),
@@ -88,13 +87,31 @@ pub mod responses {
     pub struct SessionStatusRes {
         /// Current status
         ///
-        /// values: [RUNNING | SUCCEEDED | FAILED | TIMED_OUT | ABORTED |
-        /// SUCCEEDED]
+        /// values: `[ RUNNING | SUCCEEDED | FAILED | TIMED_OUT | ABORTED ]`
         pub status: String,
         /// Final receipt download URL
         ///
-        /// If the status == 'SUCCEEDED' then this should be present
+        /// If the status == `SUCCEEDED` then this should be present
         pub receipt_url: Option<String>,
+        /// Session Error message
+        ///
+        /// If the session is not `RUNNING` or `SUCCEEDED`, this is the error
+        /// raised from within bonsai, otherwise it is [None].
+        pub error_msg: Option<String>,
+        /// Session Proving State
+        ///
+        /// If the status is `RUNNING`, this is a indication of where in the
+        /// proving pipeline the session currently is, otherwise it is [None].
+        /// Possible states in order, include:
+        /// * `Setup`
+        /// * `Executor`
+        /// * `ProveSegments`
+        /// * `Planner`
+        /// * `Recursion`
+        /// * `RecursionJoin`
+        /// * `Finalize`
+        /// * `InProgress`
+        pub state: Option<String>,
     }
 
     /// Snark proof request object
@@ -105,16 +122,34 @@ pub mod responses {
     }
 
     /// Snark Proof object
+    ///
+    /// following the snarkjs calldata format:
+    /// <https://github.com/iden3/snarkjs#26-simulate-a-verification-call>
     #[derive(Debug, Deserialize, Serialize, PartialEq)]
-    pub struct SnarkProof {
+    pub struct Groth16Seal {
         /// Proof 'a' value
-        pub a: Vec<String>,
+        pub a: Vec<Vec<u8>>,
         /// Proof 'b' value
-        pub b: Vec<Vec<String>>,
+        pub b: Vec<Vec<Vec<u8>>>,
         /// Proof 'c' value
-        pub c: Vec<String>,
+        pub c: Vec<Vec<u8>>,
         /// Proof public outputs
-        pub public: Vec<String>,
+        pub public: Vec<Vec<u8>>,
+    }
+
+    /// Snark Receipt object
+    ///
+    /// All relevant data to verify both the snark proof an corresponding imageId on chain.
+    #[derive(Debug, Deserialize, Serialize, PartialEq)]
+    pub struct SnarkReceipt {
+        /// Snark seal from snarkjs
+        pub snark: Groth16Seal,
+        /// Post State Digest
+        ///
+        /// Collected from the STARK proof via `receipt.get_metadata().post.digest()`
+        pub post_state_digest: Vec<u8>,
+        /// Journal data from the risc-zkvm Receipt object
+        pub journal: Vec<u8>,
     }
 
     /// Session Status response
@@ -122,14 +157,24 @@ pub mod responses {
     pub struct SnarkStatusRes {
         /// Current status
         ///
-        /// values: [RUNNING | SUCCEEDED | FAILED | TIMED_OUT | ABORTED |
-        /// SUCCEEDED]
+        /// values: `[ RUNNING | SUCCEEDED | FAILED | TIMED_OUT | ABORTED ]`
         pub status: String,
-        /// SNARK proof output
+        /// SNARK receipt output
         ///
-        /// Generated snark proof, following the snarkjs calldata format:
-        /// <https://github.com/iden3/snarkjs#26-simulate-a-verification-call>
-        pub output: Option<SnarkProof>,
+        /// Generated snark receipt,
+        pub output: Option<SnarkReceipt>,
+        /// Snark Error message
+        ///
+        /// If the SNARK status is not `RUNNING` or `SUCCEEDED`, this is the
+        /// error raised from within bonsai.
+        pub error_msg: Option<String>,
+    }
+
+    /// Bonsai supported versions
+    #[derive(Deserialize, Serialize)]
+    pub struct VersionInfo {
+        /// Supported versions of the risc0-zkvm crate
+        pub risc0_zkvm: Vec<String>,
     }
 }
 
@@ -192,10 +237,16 @@ pub struct Client {
     pub(crate) client: BlockingClient,
 }
 
+enum ImageExistsOpt {
+    Exists,
+    New(ImgUploadRes),
+}
+
 /// Creates a [reqwest::Client] for internal connection pooling
-fn construct_req_client(api_key: &str) -> Result<BlockingClient, SdkErr> {
+fn construct_req_client(api_key: &str, version: &str) -> Result<BlockingClient, SdkErr> {
     let mut headers = header::HeaderMap::new();
-    headers.insert("x-api-key", header::HeaderValue::from_str(api_key)?);
+    headers.insert(API_KEY_HEADER, header::HeaderValue::from_str(api_key)?);
+    headers.insert(VERSION_HEADER, header::HeaderValue::from_str(version)?);
 
     Ok(BlockingClient::builder()
         .default_headers(headers)
@@ -204,16 +255,24 @@ fn construct_req_client(api_key: &str) -> Result<BlockingClient, SdkErr> {
 }
 
 impl Client {
-    /// Construct a [Client] from env var
+    /// Construct a [Client] from env vars
     ///
     /// Uses the BONSAI_API_URL and BONSAI_API_KEY environment variables to
-    /// construct a client
-    pub fn from_env() -> Result<Self, SdkErr> {
+    /// construct a client. The risc0_version should be the crate version of the risc0-zkvm crate
+    ///
+    /// # Example:
+    ///
+    /// ```
+    /// use bonsai_sdk::alpha as bonsai_sdk;
+    /// bonsai_sdk::from_env(risc0_zkvm::VERSION)
+    ///     .expect("Failed to construct sdk client");
+    /// ```
+    pub fn from_env(risc0_version: &str) -> Result<Self, SdkErr> {
         let api_url = std::env::var("BONSAI_API_URL").map_err(|_| SdkErr::MissingApiUrl)?;
         let api_url = api_url.strip_suffix('/').unwrap_or(&api_url);
         let api_key = std::env::var("BONSAI_API_KEY").map_err(|_| SdkErr::MissingApiKey)?;
 
-        let client = construct_req_client(&api_key)?;
+        let client = construct_req_client(&api_key, risc0_version)?;
 
         Ok(Self {
             url: api_url.to_string(),
@@ -221,9 +280,19 @@ impl Client {
         })
     }
 
-    /// Construct a [Client] from url + api key strings
-    pub fn from_parts(url: String, key: String) -> Result<Self, SdkErr> {
-        let client = construct_req_client(&key)?;
+    /// Construct a [Client] from url, api key, and zkvm version
+    ///
+    /// # Example:
+    ///
+    /// ```
+    /// use bonsai_sdk::alpha as bonsai_sdk;
+    /// let url = "http://api.bonsai.xyz".to_string();
+    /// let api_key = "my_secret_key".to_string();
+    /// bonsai_sdk::from_parts(url, api_key, risc0_zkvm::VERSION)
+    ///     .expect("Failed to construct sdk client");
+    /// ```
+    pub fn from_parts(url: String, key: String, risc0_version: &str) -> Result<Self, SdkErr> {
+        let client = construct_req_client(&key, risc0_version)?;
         let url = url.strip_suffix('/').unwrap_or(&url).to_string();
         Ok(Self { url, client })
     }
@@ -243,14 +312,14 @@ impl Client {
         Ok(res.json::<UploadRes>()?)
     }
 
-    fn get_image_upload_url(&self, image_id: &str) -> Result<ImgUploadRes, SdkErr> {
+    fn get_image_upload_url(&self, image_id: &str) -> Result<ImageExistsOpt, SdkErr> {
         let res = self
             .client
             .get(format!("{}/images/upload/{}", self.url, image_id))
             .send()?;
 
         if res.status() == 204 {
-            return Err(SdkErr::ImageIdExists);
+            return Ok(ImageExistsOpt::Exists);
         }
 
         if !res.status().is_success() {
@@ -258,7 +327,7 @@ impl Client {
             return Err(SdkErr::InternalServerErr(body));
         }
 
-        Ok(res.json::<ImgUploadRes>()?)
+        Ok(ImageExistsOpt::New(res.json::<ImgUploadRes>()?))
     }
 
     /// Upload body to a given URL
@@ -276,27 +345,39 @@ impl Client {
 
     /// Upload a image buffer to the /images/ route
     ///
-    /// The image data can be either:
-    /// * ELF file bytes
-    /// * bincode encoded MemoryImage
-    pub fn upload_img(&self, image_id: &str, buf: Vec<u8>) -> Result<(), SdkErr> {
-        let upload_res = self.get_image_upload_url(image_id)?;
-        self.put_data(&upload_res.url, buf)?;
-        Ok(())
-    }
-
-    /// Upload a image file to the /images/ route
+    /// The boolean return indicates if the image already exists in bonsai
     ///
     /// The image data can be either:
     /// * ELF file bytes
     /// * bincode encoded MemoryImage
-    pub fn upload_img_file(&self, image_id: &str, path: &Path) -> Result<(), SdkErr> {
-        let upload_data = self.get_image_upload_url(image_id)?;
+    pub fn upload_img(&self, image_id: &str, buf: Vec<u8>) -> Result<bool, SdkErr> {
+        let res_or_exists = self.get_image_upload_url(image_id)?;
+        match res_or_exists {
+            ImageExistsOpt::Exists => Ok(true),
+            ImageExistsOpt::New(upload_res) => {
+                self.put_data(&upload_res.url, buf)?;
+                Ok(false)
+            }
+        }
+    }
 
-        let fd = File::open(path)?;
-        self.put_data(&upload_data.url, fd)?;
-
-        Ok(())
+    /// Upload a image file to the /images/ route
+    ///
+    /// The boolean return indicates if the image already exists in bonsai
+    ///
+    /// The image data can be either:
+    /// * ELF file bytes
+    /// * bincode encoded MemoryImage
+    pub fn upload_img_file(&self, image_id: &str, path: &Path) -> Result<bool, SdkErr> {
+        let res_or_exists = self.get_image_upload_url(image_id)?;
+        match res_or_exists {
+            ImageExistsOpt::Exists => Ok(true),
+            ImageExistsOpt::New(upload_res) => {
+                let fd = File::open(path)?;
+                self.put_data(&upload_res.url, fd)?;
+                Ok(false)
+            }
+        }
     }
 
     // - /inputs
@@ -378,6 +459,19 @@ impl Client {
 
         Ok(SnarkId::new(res.uuid))
     }
+
+    // - /version
+
+    /// Fetches the current component versions from bonsai
+    ///
+    /// Fetches the risc0 zkvm supported versions as well as other sub-components of bonsai
+    pub fn version(&self) -> Result<VersionInfo, SdkErr> {
+        Ok(self
+            .client
+            .get(format!("{}/version", self.url))
+            .send()?
+            .json::<VersionInfo>()?)
+    }
 }
 
 #[cfg(test)]
@@ -389,12 +483,13 @@ mod tests {
 
     const TEST_KEY: &str = "TESTKEY";
     const TEST_ID: &str = "0x5891b5b522d5df086d0ff0b110fbd9d21bb4fc7163af34d08286a2e846f6be03";
+    const TEST_VERSION: &str = "0.1.0";
 
     #[test]
     fn client_from_parts() {
         let url = "http://127.0.0.1/stage".to_string();
         let apikey = TEST_KEY.to_string();
-        let client = super::Client::from_parts(url.clone(), apikey).unwrap();
+        let client = super::Client::from_parts(url.clone(), apikey, TEST_VERSION).unwrap();
 
         assert_eq!(client.url, url);
     }
@@ -409,7 +504,7 @@ mod tests {
                 ("BONSAI_API_KEY", Some(apikey)),
             ],
             || {
-                let client = super::Client::from_env().unwrap();
+                let client = super::Client::from_env(TEST_VERSION).unwrap();
                 assert_eq!(client.url, url);
             },
         );
@@ -425,7 +520,7 @@ mod tests {
                 ("BONSAI_API_KEY", Some(apikey)),
             ],
             || {
-                let client = super::Client::from_env().unwrap();
+                let client = super::Client::from_env(TEST_VERSION).unwrap();
                 assert_eq!(client.url, "http://127.0.0.1");
             },
         );
@@ -443,7 +538,8 @@ mod tests {
         let get_mock = server.mock(|when, then| {
             when.method(GET)
                 .path(format!("/images/upload/{TEST_ID}"))
-                .header("x-api-key", TEST_KEY);
+                .header(API_KEY_HEADER, TEST_KEY)
+                .header(VERSION_HEADER, TEST_VERSION);
             then.status(200)
                 .header("content-type", "application/json")
                 .json_body_obj(&response);
@@ -455,19 +551,19 @@ mod tests {
         });
 
         let server_url = format!("http://{}", server.address());
-        let client = super::Client::from_parts(server_url, TEST_KEY.to_string())
+        let client = super::Client::from_parts(server_url, TEST_KEY.to_string(), TEST_VERSION)
             .expect("Failed to construct client");
-        client
+        let exists = client
             .upload_img(TEST_ID, data)
             .expect("Failed to upload input");
+        assert!(!exists);
         get_mock.assert();
         put_mock.assert();
     }
 
     #[test]
-    #[should_panic(expected = "value: ImageIdExists")]
     fn image_upload_dup() {
-        let data = vec![];
+        let data = vec![0x41];
 
         let server = MockServer::start();
 
@@ -477,7 +573,8 @@ mod tests {
         server.mock(|when, then| {
             when.method(GET)
                 .path(format!("/images/upload/{TEST_ID}"))
-                .header("x-api-key", TEST_KEY);
+                .header(API_KEY_HEADER, TEST_KEY)
+                .header(VERSION_HEADER, TEST_VERSION);
             then.status(204).json_body_obj(&response);
         });
 
@@ -487,14 +584,15 @@ mod tests {
         });
 
         let server_url = format!("http://{}", server.address());
-        let client = super::Client::from_parts(server_url, TEST_KEY.to_string())
+        let client = super::Client::from_parts(server_url, TEST_KEY.to_string(), TEST_VERSION)
             .expect("Failed to construct client");
-        client.upload_img(TEST_ID, data).unwrap()
+        let exists = client.upload_img(TEST_ID, data).unwrap();
+        assert!(exists);
     }
 
     #[test]
     fn input_upload() {
-        env_logger::init();
+        // env_logger::init();
         let data = vec![];
 
         let server = MockServer::start();
@@ -509,7 +607,8 @@ mod tests {
         let get_mock = server.mock(|when, then| {
             when.method(GET)
                 .path("/inputs/upload")
-                .header("x-api-key", TEST_KEY);
+                .header(API_KEY_HEADER, TEST_KEY)
+                .header(VERSION_HEADER, TEST_VERSION);
             then.status(200)
                 .header("content-type", "application/json")
                 .json_body_obj(&response);
@@ -521,7 +620,7 @@ mod tests {
         });
 
         let server_url = format!("http://{}", server.address());
-        let client = super::Client::from_parts(server_url, TEST_KEY.to_string())
+        let client = super::Client::from_parts(server_url, TEST_KEY.to_string(), TEST_VERSION)
             .expect("Failed to construct client");
         let res = client.upload_input(data).expect("Failed to upload input");
 
@@ -547,7 +646,8 @@ mod tests {
             when.method(POST)
                 .path("/sessions/create")
                 .header("content-type", "application/json")
-                .header("x-api-key", TEST_KEY)
+                .header(API_KEY_HEADER, TEST_KEY)
+                .header(VERSION_HEADER, TEST_VERSION)
                 .json_body_obj(&request);
             then.status(200)
                 .header("content-type", "application/json")
@@ -555,7 +655,8 @@ mod tests {
         });
 
         let server_url = format!("http://{}", server.address());
-        let client = super::Client::from_parts(server_url, TEST_KEY.to_string()).unwrap();
+        let client =
+            super::Client::from_parts(server_url, TEST_KEY.to_string(), TEST_VERSION).unwrap();
 
         let res = client.create_session(request.img, request.input).unwrap();
         assert_eq!(res.uuid, response.uuid);
@@ -572,19 +673,23 @@ mod tests {
         let response = SessionStatusRes {
             status: "RUNNING".to_string(),
             receipt_url: None,
+            error_msg: None,
+            state: None,
         };
 
         let create_mock = server.mock(|when, then| {
             when.method(GET)
                 .path(format!("/sessions/status/{}", session_id.uuid))
-                .header("x-api-key", TEST_KEY);
+                .header(API_KEY_HEADER, TEST_KEY)
+                .header(VERSION_HEADER, TEST_VERSION);
             then.status(200)
                 .header("content-type", "application/json")
                 .json_body_obj(&response);
         });
 
         let server_url = format!("http://{}", server.address());
-        let client = super::Client::from_parts(server_url, TEST_KEY.to_string()).unwrap();
+        let client =
+            super::Client::from_parts(server_url, TEST_KEY.to_string(), TEST_VERSION).unwrap();
 
         let status = session_id.status(&client).unwrap();
         assert_eq!(status.status, response.status);
@@ -608,7 +713,8 @@ mod tests {
             when.method(POST)
                 .path("/snark/create")
                 .header("content-type", "application/json")
-                .header("x-api-key", TEST_KEY)
+                .header(API_KEY_HEADER, TEST_KEY)
+                .header(VERSION_HEADER, TEST_VERSION)
                 .json_body_obj(&request);
             then.status(200)
                 .header("content-type", "application/json")
@@ -616,7 +722,8 @@ mod tests {
         });
 
         let server_url = format!("http://{}", server.address());
-        let client = super::Client::from_parts(server_url, TEST_KEY.to_string()).unwrap();
+        let client =
+            super::Client::from_parts(server_url, TEST_KEY.to_string(), TEST_VERSION).unwrap();
 
         let res = client.create_snark(request.session_id).unwrap();
         assert_eq!(res.uuid, response.uuid);
@@ -633,24 +740,53 @@ mod tests {
         let response = SnarkStatusRes {
             status: "RUNNING".to_string(),
             output: None,
+            error_msg: None,
         };
 
         let create_mock = server.mock(|when, then| {
             when.method(GET)
                 .path(format!("/snark/status/{}", snark_id.uuid))
-                .header("x-api-key", TEST_KEY);
+                .header(API_KEY_HEADER, TEST_KEY)
+                .header(VERSION_HEADER, TEST_VERSION);
             then.status(200)
                 .header("content-type", "application/json")
                 .json_body_obj(&response);
         });
 
         let server_url = format!("http://{}", server.address());
-        let client = super::Client::from_parts(server_url, TEST_KEY.to_string()).unwrap();
+        let client =
+            super::Client::from_parts(server_url, TEST_KEY.to_string(), TEST_VERSION).unwrap();
 
         let status = snark_id.status(&client).unwrap();
         assert_eq!(status.status, response.status);
         assert_eq!(status.output, None);
 
         create_mock.assert();
+    }
+
+    #[test]
+    fn version() {
+        let server = MockServer::start();
+
+        let response = VersionInfo {
+            risc0_zkvm: vec![TEST_VERSION.into()],
+        };
+
+        let get_mock = server.mock(|when, then| {
+            when.method(GET)
+                .path("/version")
+                .header(API_KEY_HEADER, TEST_KEY)
+                .header(VERSION_HEADER, TEST_VERSION);
+            then.status(200)
+                .header("content-type", "application/json")
+                .json_body_obj(&response);
+        });
+
+        let server_url = format!("http://{}", server.address());
+        let client = super::Client::from_parts(server_url, TEST_KEY.to_string(), TEST_VERSION)
+            .expect("Failed to construct client");
+        let info = client.version().expect("Failed to fetch version route");
+        assert_eq!(&info.risc0_zkvm[0], TEST_VERSION);
+        get_mock.assert();
     }
 }

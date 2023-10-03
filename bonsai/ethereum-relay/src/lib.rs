@@ -38,6 +38,7 @@ use ethers::core::types::Address;
 use storage::{in_memory::InMemoryStorage, Storage};
 use tokio::sync::Notify;
 use tracing::info;
+pub use uploader::completed_proofs::snark::tokenize_snark_receipt;
 use uploader::{
     completed_proofs::manager::BonsaiCompleteProofManager,
     pending_proofs::manager::BonsaiPendingProofManager,
@@ -76,10 +77,13 @@ impl Relayer {
             .finish();
         let _ = ::tracing::subscriber::set_global_default(subscriber);
 
-        let bonsai_client =
-            get_client_from_parts(self.bonsai_api_url.clone(), self.bonsai_api_key.clone())
-                .await
-                .context("Failed to create Bonsai client.")?;
+        let bonsai_client = get_client_from_parts(
+            self.bonsai_api_url.clone(),
+            self.bonsai_api_key.clone(),
+            risc0_zkvm::VERSION,
+        )
+        .await
+        .context("Failed to create Bonsai client.")?;
 
         let storage = InMemoryStorage::new();
 

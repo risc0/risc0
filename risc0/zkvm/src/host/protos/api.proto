@@ -1,6 +1,7 @@
 syntax = "proto3";
 
 import "google/protobuf/empty.proto";
+import "base.proto";
 
 package protos.api;
 
@@ -15,7 +16,7 @@ message ServerRequest {
 }
 
 message HelloRequest {
-  Version version = 1;
+  protos.base.SemanticVersion version = 1;
 }
 
 message HelloReply {
@@ -26,7 +27,7 @@ message HelloReply {
 }
 
 message HelloResult {
-  Version version = 1;
+  protos.base.SemanticVersion version = 1;
 }
 
 message ExecuteRequest {
@@ -88,16 +89,14 @@ message JoinResult {
   Asset receipt = 1;
 }
 
-message Version {
-  uint32 version = 1;
-}
-
 message ExecutorEnv {
   Binary binary = 1;
   map<string, string> env_vars = 2;
   repeated string slice_ios = 3;
   repeated uint32 read_fds = 4;
   repeated uint32 write_fds = 5;
+  optional uint32 segment_limit_po2 = 6;
+  optional uint64 session_limit = 7;
 }
 
 message Binary {
@@ -118,27 +117,18 @@ message ProverOpts {
 message SessionInfo {
   uint32 segments = 1;
   bytes journal = 2;
-  ExitCode exit_code = 3;
+  protos.base.ExitCode exit_code = 3;
 }
 
 message SegmentInfo {
   uint32 index = 1;
   uint32 po2 = 2;
-  uint32 insn_cycles = 3;
+  uint32 cycles = 3;
   Asset segment = 4;
 }
 
 message ProveSegmentResult {
   Asset receipt = 1;
-}
-
-message ExitCode {
-  oneof kind {
-    uint32 halted = 1;
-    uint32 paused = 2;
-    google.protobuf.Empty system_split = 3;
-    google.protobuf.Empty session_limit = 4;
-  }
 }
 
 message Asset {

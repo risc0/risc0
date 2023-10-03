@@ -12,16 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use core::time::Duration;
+use std::time::Duration;
 
 use anyhow::{anyhow, bail, Result};
-use bonsai_sdk::alpha::{Client, SdkErr};
+use bonsai_sdk::alpha::Client;
 use risc0_binfmt::MemoryImage;
 
 use super::Prover;
 use crate::{ExecutorEnv, ProverOpts, Receipt, VerifierContext};
 
 /// An implementation of a [Prover] that runs proof workloads via Bonsai.
+///
+/// Requires `BONSAI_API_URL` and `BONSAI_API_KEY` environment variables to
+/// submit proving sessions to Bonsai.
 pub struct BonsaiProver {
     name: String,
 }
@@ -43,23 +46,19 @@ impl Prover for BonsaiProver {
     fn prove(
         &self,
         env: ExecutorEnv<'_>,
-        _ctx: &VerifierContext,
+        ctx: &VerifierContext,
         _opts: &ProverOpts,
         image: MemoryImage,
     ) -> Result<Receipt> {
-        let client = Client::from_env()?;
+        let client = Client::from_env(crate::VERSION)?;
 
         // upload the image
-        let image_id = hex::encode(image.compute_id());
+        let image_id = image.compute_id();
+        let image_id_hex = hex::encode(image.compute_id());
         let image = bincode::serialize(&image)?;
 
-        // ImageIdExists indicates that this image has already been uploaded to bonsai.
-        // If this is the case, simply move on to uploading the input.
-        match client.upload_img(&image_id, image) {
-            Ok(()) => (),
-            Err(SdkErr::ImageIdExists) => (),
-            Err(err) => return Err(err.into()),
-        }
+        // return value 'exists' is ignored here
+        client.upload_img(&image_id_hex, image)?;
 
         // upload input data
         let input_id = client.upload_input(env.input)?;
@@ -67,7 +66,8 @@ impl Prover for BonsaiProver {
         // While this is the executor, we want to start a session on the bonsai prover.
         // By doing so, we can return a session ID so that the prover can use it to
         // retrieve the receipt.
-        let session = client.create_session(image_id, input_id)?;
+        let session = client.create_session(image_id_hex, input_id)?;
+        log::debug!("Bonsai proving SessionID: {}", session.uuid);
 
         loop {
             // The session has already been started in the executor. Poll bonsai to check if
@@ -85,6 +85,7 @@ impl Prover for BonsaiProver {
 
                 let receipt_buf = client.download(&receipt_url)?;
                 let receipt: Receipt = bincode::deserialize(&receipt_buf)?;
+                receipt.verify_with_context(ctx, image_id)?;
                 return Ok(receipt);
             } else {
                 bail!("Bonsai prover workflow exited: {}", res.status);

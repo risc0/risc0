@@ -13,7 +13,10 @@ bincode = "1.3"
 bytemuck = "1.12"
 clap = { version = "4", features = ["derive"] }
 env_logger = "0.10"
-risc0-zkvm = { workspace = true, features = ["default"] }
+# Force any openssl dependencies to use the "vendored" feature.
+# This is to allow cross builds to work in any environment.
+openssl = { version = "0.10", features = ["vendored"] }
+risc0-zkvm = { workspace = true, features = ["prove"] }
 
 [dev-dependencies]
 anyhow = "1.0"

@@ -27,7 +27,7 @@ import {
     ExitCode,
     SystemExitCode
 } from "../contracts/IRiscZeroVerifier.sol";
-import {RiscZeroGroth16Verifier} from "../contracts/groth16/RiscZeroGroth16Verifier.sol";
+import {ControlID, RiscZeroGroth16Verifier} from "../contracts/groth16/RiscZeroGroth16Verifier.sol";
 
 contract RiscZeroGroth16VerifierTest is Test {
     using ReceiptMetadataLib for ReceiptMetadata;
@@ -55,7 +55,7 @@ contract RiscZeroGroth16VerifierTest is Test {
     IRiscZeroVerifier internal verifier;
 
     function setUp() external {
-        verifier = new RiscZeroGroth16Verifier();
+        verifier = new RiscZeroGroth16Verifier(ControlID.CONTROL_ID_0, ControlID.CONTROL_ID_1);
     }
 
     function testVerifyKnownGoodReceipt() external view {

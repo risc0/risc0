@@ -14,12 +14,14 @@
 
 //! Manages formatted binaries used by the RISC Zero zkVM
 
+#![cfg_attr(all(not(feature = "std"), not(test)), no_std)]
+
 mod elf;
 mod image;
 mod sys_state;
 
 pub use crate::{
     elf::Program,
-    image::{compute_image_id, MemoryImage},
+    image::{compute_image_id, MemoryImage, PageTableInfo},
     sys_state::{read_sha_halfs, tagged_struct, write_sha_halfs, SystemState},
 };

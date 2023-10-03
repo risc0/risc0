@@ -14,7 +14,9 @@
 
 use std::{collections::HashMap, env};
 
-use risc0_build::{embed_methods_with_options, GuestOptions};
+use risc0_build::{
+    embed_methods_with_docker_with_options, embed_methods_with_options, GuestOptions,
+};
 
 fn main() {
     env_logger::init();
@@ -34,5 +36,10 @@ fn main() {
         ),
     ]);
 
-    embed_methods_with_options(map);
+    if cfg!(feature = "docker") {
+        std::env::set_current_dir("../../../").unwrap();
+        embed_methods_with_docker_with_options(map);
+    } else {
+        embed_methods_with_options(map);
+    }
 }
