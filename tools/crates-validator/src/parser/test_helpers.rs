@@ -14,7 +14,6 @@
 
 use crate::types::{profile::Profile, profile_settings::ProfileSettings};
 
-// TODO: Replace this by using `Profile::from` for a `impl ToString` type
 pub(crate) fn profile_from_name(name: impl ToString) -> Profile {
     Profile::new(name.to_string(), ProfileSettings::default(), None).unwrap()
 }
