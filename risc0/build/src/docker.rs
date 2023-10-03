@@ -12,11 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{
-    fs,
-    path::{Path, PathBuf},
-    process::Command,
-};
+use std::{fs, path::Path, process::Command};
 
 use anyhow::{bail, Context, Result};
 use cargo_metadata::MetadataCommand;
@@ -76,14 +72,15 @@ pub fn docker_build(manifest_path: &Path, src_dir: &Path, features: &[String]) -
         create_dockerfile(&rel_manifest_path, temp_path, pkg_name.as_str(), features)?;
         build(&src_dir, temp_path)?;
     }
-    let target_dir = PathBuf::from(TARGET_DIR);
     println!("ELFs ready at:");
 
+    let target_dir = src_dir.join(TARGET_DIR);
     for target in root_pkg.targets.iter() {
         if target.is_bin() {
             let elf_path = target_dir.join(&pkg_name).join(&target.name);
             let image_id = compute_image_id(&elf_path)?;
-            println!("ImageID: {} - {:?}", image_id, elf_path);
+            let rel_elf_path = Path::new(TARGET_DIR).join(&pkg_name).join(&target.name);
+            println!("ImageID: {} - {:?}", image_id, rel_elf_path);
         }
     }
 
@@ -206,18 +203,21 @@ fn compute_image_id(elf_path: &Path) -> Result<String> {
 #[cfg(feature = "docker")]
 #[cfg(test)]
 mod test {
-    use std::path::{Path, PathBuf};
+    use std::path::Path;
 
     use super::{docker_build, TARGET_DIR};
 
+    const SRC_DIR: &str = "../..";
+
     fn build(manifest_path: &str) {
+        let src_dir = Path::new(SRC_DIR);
         let manifest_path = Path::new(manifest_path);
-        let src_dir = Path::new("../..");
         self::docker_build(manifest_path, &src_dir, &[]).unwrap()
     }
 
     fn compare_image_id(bin_path: &str, expected: &str) {
-        let target_dir = PathBuf::from(TARGET_DIR);
+        let src_dir = Path::new(SRC_DIR);
+        let target_dir = src_dir.join(TARGET_DIR);
         let elf_path = target_dir.join(bin_path);
         let actual = super::compute_image_id(&elf_path).unwrap();
         assert_eq!(expected, actual);
