@@ -1,5 +1,7 @@
 repo:
-  git: main
+  # NOTE: With `path` (passing a local folder), it works. The compilation step
+  # fails if we use either `branch` or `tag` though. Not sure how to solve this.
+  tag: v0.16.0
 
 skip-crates:
   - windows-sys
