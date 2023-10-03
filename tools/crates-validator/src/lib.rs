@@ -33,7 +33,6 @@ use tempfile::tempdir;
 use tracing::{debug, error, info, warn};
 
 pub mod gen_profiles;
-pub mod profiles;
 
 /// Validation Results fields
 #[derive(Debug, Serialize, Deserialize)]
