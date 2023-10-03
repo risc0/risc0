@@ -35,14 +35,12 @@ struct Args {
     /// Output location to write temporary projects
     ///
     /// Defaults value is a new TempDir
-    // TODO(Cardosaum): Change CI config to use different short flag
     #[arg(short = 'd', long)]
     out_dir: Option<PathBuf>,
 
     /// Write profile data with results
     ///
     /// Optional: write out the profile data with all the validation results
-    // TODO(Cardosaum): Change CI config to use different short flag
     #[arg(short = 'o', long)]
     output: Option<PathBuf>,
 
