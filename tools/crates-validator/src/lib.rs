@@ -556,15 +556,6 @@ impl Validator {
 
     /// Run a given profile through the set of tests
     fn run(&self, profile: &Profile, repo: &Repo) -> Result<Vec<ValidationResults>> {
-        // // TODO(Cardosaum): Remove this
-        // debug!(?profile, ?repo);
-        // return Ok(vec![ValidationResults::new(
-        //     profile.name(),
-        //     RunStatus::Success,
-        //     None,
-        // )]);
-
-        // TODO(cardosaum): Replace logic with `skip_crates` module
         if self.context().skip_crates_names().contains(profile.name()) {
             warn!("Skipping {}", profile.name());
             return Ok(vec![ValidationResults::new(
