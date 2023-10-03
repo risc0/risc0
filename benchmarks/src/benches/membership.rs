@@ -13,11 +13,11 @@
 // limitations under the License.
 
 use crate::{exec_compute, get_image, Benchmark};
-use merkletree::{merkle::MerkleTree, store::VecStore};
-use risc0_benchmark_lib::{generate_vector_of_elements, Item, Sha256Hasher};
+// use merkletree::{merkle::MerkleTree, store::VecStore};
+use risc0_benchmark_lib::generate_mock_proof;
 use risc0_zkvm::{
     serde::{from_slice, to_vec},
-    sha::DIGEST_WORDS,
+    sha::{Digest, DIGEST_WORDS},
     ExecutorEnv, ExitCode, MemoryImage, Receipt, Session,
 };
 use std::time::Duration;
@@ -30,7 +30,7 @@ pub struct Job<'a> {
 }
 
 pub fn new_jobs() -> Vec<<Job<'static> as Benchmark>::Spec> {
-    vec![1024, 32768, 1048576]
+    vec![10, 20]
 }
 
 const METHOD_ID: [u32; DIGEST_WORDS] = risc0_benchmark_methods::MERKLE_TREE_ID;
@@ -39,7 +39,7 @@ const METHOD_PATH: &'static str = risc0_benchmark_methods::MERKLE_TREE_PATH;
 impl Benchmark for Job<'_> {
     const NAME: &'static str = "merkle_tree";
     type Spec = u32;
-    type ComputeOut = (Item, Item);
+    type ComputeOut = (Digest, Digest);
     type ProofType = Receipt;
 
     fn job_size(spec: &Self::Spec) -> u32 {
@@ -62,14 +62,9 @@ impl Benchmark for Job<'_> {
     fn new(spec: Self::Spec) -> Self {
         let image = get_image(METHOD_PATH);
 
-        let data = generate_vector_of_elements::<Item>(spec.try_into().unwrap());
-        let tree = MerkleTree::<Item, Sha256Hasher, VecStore<Item>>::new(data).unwrap();
-        let proof = tree.gen_proof(0).unwrap();
-        let lemma = proof.lemma();
-        let path = proof.path();
-
+        let proof = generate_mock_proof(&[0u8; 32], spec);
         let env = ExecutorEnv::builder()
-            .add_input(&to_vec(&(lemma, path)).unwrap())
+            .add_input(&to_vec(&proof).unwrap())
             .build()
             .unwrap();
 
@@ -88,11 +83,9 @@ impl Benchmark for Job<'_> {
     }
 
     fn host_compute(&mut self) -> Option<Self::ComputeOut> {
-        let data = generate_vector_of_elements::<Item>(self.spec.try_into().unwrap());
-        let tree = MerkleTree::<Item, Sha256Hasher, VecStore<Item>>::new(data).unwrap();
-        let proof = tree.gen_proof(0).unwrap();
-        assert!(proof.validate::<Sha256Hasher>().unwrap());
-        Some((proof.item(), proof.root()))
+        let proof = generate_mock_proof(&[0u8; 32], self.spec);
+        assert!(proof.verify());
+        Some((proof.leaf, proof.root))
     }
 
     fn exec_compute(&mut self) -> (u32, u32, Duration) {
@@ -104,11 +97,11 @@ impl Benchmark for Job<'_> {
 
     fn guest_compute(&mut self) -> (Self::ComputeOut, Self::ProofType) {
         let receipt = self.session.prove().expect("receipt");
-        let (index, root) = from_slice::<(Item, Item), _>(&receipt.journal)
+        let (leaf, root) = from_slice::<(Digest, Digest), _>(&receipt.journal)
             .unwrap()
             .try_into()
             .unwrap();
-        ((index, root), receipt)
+        ((leaf, root), receipt)
     }
 
     fn verify_proof(&self, _output: &Self::ComputeOut, proof: &Self::ProofType) -> bool {

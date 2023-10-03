@@ -14,17 +14,13 @@
 
 #![no_main]
 
-use risc0_benchmark_lib::{Item, Proof, Sha256Hasher};
+use risc0_benchmark_lib::MembershipProof;
 use risc0_zkvm::guest::env;
-use typenum::{U0, U2};
 
 risc0_zkvm::entry!(main);
 
 pub fn main() {
-    let (lemma, path): (Vec<Item>, Vec<usize>) = env::read();
-    let proof: Proof<Item, U2> = Proof::new::<U0, U0>(None, lemma, path).unwrap();
-    assert!(proof
-        .validate::<Sha256Hasher>()
-        .expect("failed to validate"));
-    env::commit(&(proof.item(), proof.root()))
+    let proof: MembershipProof = env::read();
+    assert!(proof.verify());
+    env::commit(&(proof.leaf, proof.root))
 }

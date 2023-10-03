@@ -49,7 +49,7 @@ enum Command {
     EcdsaVerify,
     Ed25519Verify,
     Fibonacci,
-    MerkleTree,
+    Membership,
     Sudoku,
     Zeth,
 }
@@ -110,8 +110,8 @@ fn main() {
         run_jobs::<fibonacci::Job>(&cli.out, fibonacci::new_jobs());
     }
 
-    if cli.command == Command::All || cli.command == Command::MerkleTree {
-        run_jobs::<merkle_tree::Job>(&cli.out, merkle_tree::new_jobs());
+    if cli.command == Command::All || cli.command == Command::Membership {
+        run_jobs::<membership::Job>(&cli.out, membership::new_jobs());
     }
 
     if cli.command == Command::All || cli.command == Command::Sudoku {

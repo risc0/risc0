@@ -2151,21 +2151,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "merkletree"
-version = "0.23.0"
-source = "git+https://github.com/capossele/merkletree?branch=capossele/risc0#67087d47a5f4e6d8afc913003671f6c8a4f8f5a3"
-dependencies = [
- "anyhow",
- "arrayref",
- "log",
- "memmap2",
- "rayon",
- "serde",
- "tempfile",
- "typenum",
-]
-
-[[package]]
 name = "metal"
 version = "0.25.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3115,7 +3100,6 @@ dependencies = [
  "hex",
  "k256",
  "log",
- "merkletree",
  "rand",
  "rand_core",
  "risc0-benchmark-lib",
@@ -3137,7 +3121,7 @@ dependencies = [
 name = "risc0-benchmark-lib"
 version = "0.18.0"
 dependencies = [
- "merkletree",
+ "risc0-zkvm",
  "serde",
  "sha2",
 ]

@@ -135,6 +135,7 @@ pub trait Benchmark {
             assert_eq!(g_output, h_output);
         }
 
+        metrics.total_duration = metrics.exec_duration + metrics.proof_duration;
         metrics.output_bytes = Self::output_size_bytes(&g_output, &proof);
         metrics.proof_bytes = Self::proof_size_bytes(&proof);
 
@@ -272,8 +273,7 @@ pub fn run_jobs<B: Benchmark>(out_path: &PathBuf, specs: Vec<B::Spec>) -> Vec<Me
             job_size: job_metrics.job_size,
             exec_duration: job_metrics.exec_duration.as_nanos(),
             proof_duration: job_metrics.proof_duration.as_nanos(),
-            total_duration: job_metrics.exec_duration.as_nanos()
-                + job_metrics.proof_duration.as_nanos(),
+            total_duration: job_metrics.total_duration.as_nanos(),
             verify_duration: job_metrics.verify_duration.as_nanos(),
             prove_cycles: job_metrics.cycles,
             insn_cycles: job_metrics.insn_cycles,
