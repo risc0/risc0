@@ -18,7 +18,7 @@
 use risc0_benchmark::init_gpu_kernel;
 
 use clap::{Parser, Subcommand};
-use risc0_benchmark::{benches::*, init_logging, run_jobs_thin};
+use risc0_benchmark::{benches::*, init_logging, run_jobs_average};
 use std::path::PathBuf;
 
 #[derive(Parser)]
@@ -57,7 +57,7 @@ fn main() {
         } else {
             3000
         };
-        run_jobs_thin::<iter_sha2::Job>(&cli.out, vec![iterations]);
+        run_jobs_average::<iter_sha2::Job>(&cli.out, vec![iterations]);
     }
 
     if cli.command == Command::All || cli.command == Command::Blake2b {
@@ -66,7 +66,7 @@ fn main() {
         } else {
             300
         };
-        run_jobs_thin::<iter_blake2b::Job>(&cli.out, vec![iterations]);
+        run_jobs_average::<iter_blake2b::Job>(&cli.out, vec![iterations]);
     }
 
     if cli.command == Command::All || cli.command == Command::Blake3 {
@@ -75,7 +75,7 @@ fn main() {
         } else {
             300
         };
-        run_jobs_thin::<iter_blake3::Job>(&cli.out, vec![iterations]);
+        run_jobs_average::<iter_blake3::Job>(&cli.out, vec![iterations]);
     }
 
     if cli.command == Command::All || cli.command == Command::Keccak {
@@ -84,7 +84,7 @@ fn main() {
         } else {
             100
         };
-        run_jobs_thin::<iter_keccak::Job>(&cli.out, vec![iterations]);
+        run_jobs_average::<iter_keccak::Job>(&cli.out, vec![iterations]);
     }
 
     if cli.command == Command::All || cli.command == Command::EcdsaVerify {
@@ -93,7 +93,7 @@ fn main() {
         } else {
             3
         };
-        run_jobs_thin::<ecdsa_verify::Job>(&cli.out, vec![iterations]);
+        run_jobs_average::<ecdsa_verify::Job>(&cli.out, vec![iterations]);
     }
 
     if cli.command == Command::All || cli.command == Command::Ed25519Verify {
@@ -102,7 +102,7 @@ fn main() {
         } else {
             3
         };
-        run_jobs_thin::<ed25519_verify::Job>(&cli.out, vec![iterations]);
+        run_jobs_average::<ed25519_verify::Job>(&cli.out, vec![iterations]);
     }
 }
 

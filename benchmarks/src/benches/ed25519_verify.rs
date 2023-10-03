@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::{exec_compute, get_image, Benchmark, BenchmarkThin};
+use crate::{exec_compute, get_image, Benchmark, BenchmarkAverage};
 use ed25519_dalek::{Signature, Signer, SigningKey, VerifyingKey};
 use rand_core::OsRng;
 use risc0_zkvm::{
@@ -145,7 +145,7 @@ impl Benchmark for Job<'_> {
     }
 }
 
-impl BenchmarkThin for Job<'_> {
+impl BenchmarkAverage for Job<'_> {
     const NAME: &'static str = "ed25519";
     type Spec = u32;
 

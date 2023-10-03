@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::{exec_compute, get_image, Benchmark, BenchmarkThin};
+use crate::{exec_compute, get_image, Benchmark, BenchmarkAverage};
 use risc0_zkvm::{
     default_prover, serde::to_vec, sha::DIGEST_WORDS, ExecutorEnv, ExitCode, LocalProver,
     MemoryImage, Prover, ProverOpts, Receipt, Session, VerifierContext,
@@ -130,7 +130,7 @@ impl Benchmark for Job<'_> {
     }
 }
 
-impl BenchmarkThin for Job<'_> {
+impl BenchmarkAverage for Job<'_> {
     const NAME: &'static str = "blake3";
     type Spec = u32;
 

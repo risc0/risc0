@@ -70,21 +70,21 @@ impl Metrics {
     }
 }
 
-pub struct MetricsThin {
+pub struct MetricsAverage {
     pub job_name: String,
     pub job_size: u32,
-    pub proof_duration: Duration,
-    pub single_duration: Duration,
+    pub total_duration: Duration,
+    pub average_duration: Duration,
     pub ops_sec: f64,
 }
 
-impl MetricsThin {
+impl MetricsAverage {
     pub fn new(job_name: String, job_size: u32) -> Self {
-        MetricsThin {
+        MetricsAverage {
             job_name,
             job_size,
-            proof_duration: Duration::default(),
-            single_duration: Duration::default(),
+            total_duration: Duration::default(),
+            average_duration: Duration::default(),
             ops_sec: 0.0,
         }
     }
@@ -92,8 +92,11 @@ impl MetricsThin {
     pub fn println(&self, prefix: &str) {
         info!("{}job_name:           {:?}", prefix, &self.job_name);
         info!("{}job_size:           {:?}", prefix, &self.job_size);
-        info!("{}proof_duration:     {:?}", prefix, &self.proof_duration);
-        info!("{}single_duration:    {:?}", prefix, &self.single_duration);
+        info!("{}total_duration:     {:?}", prefix, &self.total_duration);
+        info!(
+            "{}average_duration:    {:?}",
+            prefix, &self.average_duration
+        );
         info!("{}ops_sec:            {:?}", prefix, &self.ops_sec);
     }
 }
@@ -152,7 +155,7 @@ pub trait Benchmark {
     }
 }
 
-pub trait BenchmarkThin {
+pub trait BenchmarkAverage {
     const NAME: &'static str;
     type Spec;
 
@@ -161,15 +164,16 @@ pub trait BenchmarkThin {
     fn spec(&self) -> &Self::Spec;
     fn guest_compute(&mut self) -> ();
 
-    fn run(&mut self) -> MetricsThin {
-        let mut metrics = MetricsThin::new(String::from(Self::NAME), Self::job_size(self.spec()));
+    fn run(&mut self) -> MetricsAverage {
+        let mut metrics =
+            MetricsAverage::new(String::from(Self::NAME), Self::job_size(self.spec()));
 
         let start = Instant::now();
         self.guest_compute();
-        metrics.proof_duration = start.elapsed();
+        metrics.total_duration = start.elapsed();
 
-        metrics.single_duration = metrics.proof_duration / metrics.job_size;
-        metrics.ops_sec = metrics.job_size as f64 / metrics.proof_duration.as_secs_f64();
+        metrics.average_duration = metrics.total_duration / metrics.job_size;
+        metrics.ops_sec = metrics.job_size as f64 / metrics.total_duration.as_secs_f64();
 
         metrics
     }
@@ -228,11 +232,11 @@ struct CsvRow<'a> {
 }
 
 #[derive(Serialize)]
-struct CsvRowThin<'a> {
+struct CsvRowAverage<'a> {
     job_name: &'a str,
     job_size: u32,
-    proof_duration: u128,
-    single_duration: u128,
+    total_duration: u128,
+    average_duration: u128,
     ops_sec: f64,
 }
 
@@ -291,10 +295,10 @@ pub fn run_jobs<B: Benchmark>(out_path: &PathBuf, specs: Vec<B::Spec>) -> Vec<Me
     all_metrics
 }
 
-pub fn run_jobs_thin<B: BenchmarkThin>(
+pub fn run_jobs_average<B: BenchmarkAverage>(
     out_path: &PathBuf,
     specs: Vec<B::Spec>,
-) -> Vec<MetricsThin> {
+) -> Vec<MetricsAverage> {
     info!("");
     info!(
         "Running {} jobs; saving output to {}",
@@ -315,7 +319,7 @@ pub fn run_jobs_thin<B: BenchmarkThin>(
             .from_writer(out_file)
     };
 
-    let mut all_metrics: Vec<MetricsThin> = Vec::new();
+    let mut all_metrics: Vec<MetricsAverage> = Vec::new();
 
     for spec in specs {
         let mut job = B::new(spec);
@@ -326,11 +330,11 @@ pub fn run_jobs_thin<B: BenchmarkThin>(
 
         let job_metrics = job.run();
         job_metrics.println("+ ");
-        out.serialize(CsvRowThin {
+        out.serialize(CsvRowAverage {
             job_name: &job_metrics.job_name,
             job_size: job_metrics.job_size,
-            proof_duration: job_metrics.proof_duration.as_nanos(),
-            single_duration: job_metrics.single_duration.as_nanos(),
+            total_duration: job_metrics.total_duration.as_nanos(),
+            average_duration: job_metrics.average_duration.as_nanos(),
             ops_sec: job_metrics.ops_sec,
         })
         .expect("Could not serialize");

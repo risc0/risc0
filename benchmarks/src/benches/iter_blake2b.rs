@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::{exec_compute, get_image, Benchmark, BenchmarkThin};
+use crate::{exec_compute, get_image, Benchmark, BenchmarkAverage};
 use blake2::{
     digest::{Update, VariableOutput},
     Blake2bVar,
@@ -136,7 +136,7 @@ impl Benchmark for Job<'_> {
     }
 }
 
-impl BenchmarkThin for Job<'_> {
+impl BenchmarkAverage for Job<'_> {
     const NAME: &'static str = "blake2b";
     type Spec = u32;
 
