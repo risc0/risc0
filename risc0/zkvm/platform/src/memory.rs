@@ -17,6 +17,11 @@ use super::WORD_SIZE;
 pub const MEM_BITS: usize = 28;
 pub const MEM_SIZE: usize = 1 << MEM_BITS;
 pub const GUEST_MAX_MEM: usize = SYSTEM.start;
+pub const GUEST_MIN_MEM: usize = 0x0000_0400;
+
+pub fn is_guest_memory(addr: u32) -> bool {
+    GUEST_MIN_MEM <= (addr as usize) && (addr as usize) < GUEST_MAX_MEM
+}
 
 pub struct Region {
     start: usize,

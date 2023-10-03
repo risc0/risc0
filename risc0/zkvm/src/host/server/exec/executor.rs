@@ -553,7 +553,7 @@ impl<'a> ExecutorImpl<'a> {
 
     fn ecall_halt(&mut self) -> Result<OpCodeResult> {
         let tot_reg = self.monitor.load_register(REG_A0);
-        let output_ptr = self.monitor.load_register(REG_A1);
+        let output_ptr = self.monitor.load_guest_addr_from_register(REG_A1)?; // TODO Fails basic() test
         let halt_type = tot_reg & 0xff;
         let user_exit = (tot_reg >> 8) & 0xff;
         self.monitor
@@ -576,17 +576,17 @@ impl<'a> ExecutorImpl<'a> {
 
     fn ecall_input(&mut self) -> Result<OpCodeResult> {
         log::debug!("ecall(input)");
-        let in_addr = self.monitor.load_register(REG_A0);
+        let in_addr = self.monitor.load_guest_addr_from_register(REG_A0)?;
         self.monitor
             .load_array::<{ DIGEST_WORDS * WORD_SIZE }>(in_addr)?;
         Ok(OpCodeResult::new(self.pc + WORD_SIZE as u32, None, 0))
     }
 
     fn ecall_sha(&mut self) -> Result<OpCodeResult> {
-        let out_state_ptr = self.monitor.load_register(REG_A0);
-        let in_state_ptr = self.monitor.load_register(REG_A1);
-        let mut block1_ptr = self.monitor.load_register(REG_A2);
-        let mut block2_ptr = self.monitor.load_register(REG_A3);
+        let out_state_ptr = self.monitor.load_guest_addr_from_register(REG_A0)?;
+        let in_state_ptr = self.monitor.load_guest_addr_from_register(REG_A1)?;
+        let mut block1_ptr = self.monitor.load_guest_addr_from_register(REG_A2)?;
+        let mut block2_ptr = self.monitor.load_guest_addr_from_register(REG_A3)?;
         let count = self.monitor.load_register(REG_A4);
 
         let in_state: [u8; DIGEST_BYTES] = self.monitor.load_array(in_state_ptr)?;
@@ -636,11 +636,11 @@ impl<'a> ExecutorImpl<'a> {
     // Take reads inputs x, y, and N and writes output z = x * y mod N.
     // Note that op is currently ignored but must be set to 0.
     fn ecall_bigint(&mut self) -> Result<OpCodeResult> {
-        let z_ptr = self.monitor.load_register(REG_A0);
+        let z_ptr = self.monitor.load_guest_addr_from_register(REG_A0)?;
         let op = self.monitor.load_register(REG_A1);
-        let x_ptr = self.monitor.load_register(REG_A2);
-        let y_ptr = self.monitor.load_register(REG_A3);
-        let n_ptr = self.monitor.load_register(REG_A4);
+        let x_ptr = self.monitor.load_guest_addr_from_register(REG_A2)?;
+        let y_ptr = self.monitor.load_guest_addr_from_register(REG_A3)?;
+        let n_ptr = self.monitor.load_guest_addr_from_register(REG_A4)?;
 
         let mut load_bigint_le_bytes = |ptr: u32| -> Result<[u8; bigint::WIDTH_BYTES]> {
             let mut arr = [0u32; bigint::WIDTH_WORDS];

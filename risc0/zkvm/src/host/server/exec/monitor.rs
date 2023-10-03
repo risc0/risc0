@@ -18,7 +18,7 @@ use anyhow::{bail, Result};
 use risc0_binfmt::MemoryImage;
 use risc0_zkp::core::hash::sha::BLOCK_BYTES;
 use risc0_zkvm_platform::{
-    memory::{SYSTEM, TEXT_START},
+    memory::{is_guest_memory, SYSTEM},
     syscall::reg_abi::REG_MAX,
     PAGE_SIZE, WORD_SIZE,
 };
@@ -204,6 +204,15 @@ impl MemoryMonitor {
     pub fn load_register(&self, idx: usize) -> u32 {
         // log::trace!("load_register: x{idx}");
         self.registers[idx]
+    }
+
+    pub fn load_guest_addr_from_register(&self, idx: usize) -> Result<u32> {
+        // log::trace!("load_register: x{idx}");
+        let addr = self.registers[idx];
+        match !is_guest_memory(addr) {
+            true => bail!("address 0x{addr:08x} is not a valid guest address"),
+            false => Ok(addr),
+        }
     }
 
     pub fn load_registers(&self) -> [u32; REG_MAX] {
@@ -426,7 +435,7 @@ impl MemoryMonitor {
 impl Memory for MemoryMonitor {
     fn read_mem(&mut self, addr: u32, size: MemAccessSize) -> Option<u32> {
         // log::trace!("read_mem: 0x{addr:08x}");
-        if addr < TEXT_START || addr as usize >= SYSTEM.start() {
+        if !is_guest_memory(addr) {
             return None;
         }
         match size {
@@ -438,7 +447,7 @@ impl Memory for MemoryMonitor {
 
     fn write_mem(&mut self, addr: u32, size: MemAccessSize, store_data: u32) -> bool {
         // log::trace!("write_mem: 0x{addr:08x} <= 0x{store_data:08x}");
-        if addr < TEXT_START || addr as usize >= SYSTEM.start() {
+        if !is_guest_memory(addr) {
             return false;
         }
         match size {
