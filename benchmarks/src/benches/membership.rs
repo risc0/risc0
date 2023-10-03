@@ -33,8 +33,8 @@ pub fn new_jobs() -> Vec<<Job<'static> as Benchmark>::Spec> {
     vec![10, 20]
 }
 
-const METHOD_ID: [u32; DIGEST_WORDS] = risc0_benchmark_methods::MERKLE_TREE_ID;
-const METHOD_PATH: &'static str = risc0_benchmark_methods::MERKLE_TREE_PATH;
+const METHOD_ID: [u32; DIGEST_WORDS] = risc0_benchmark_methods::MEMBERSHIP_ID;
+const METHOD_PATH: &'static str = risc0_benchmark_methods::MEMBERSHIP_PATH;
 
 impl Benchmark for Job<'_> {
     const NAME: &'static str = "merkle_tree";

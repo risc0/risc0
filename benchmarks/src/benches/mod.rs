@@ -24,6 +24,6 @@ pub mod iter_blake3;
 pub mod iter_keccak;
 pub mod iter_pedersen;
 pub mod iter_sha2;
-pub mod merkle_tree;
+pub mod membership;
 pub mod sudoku;
 pub mod zeth;
