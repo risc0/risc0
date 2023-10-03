@@ -16,6 +16,8 @@
 #![deny(missing_docs)]
 #![deny(rustdoc::broken_intra_doc_links)]
 
+mod docker;
+
 use std::{
     collections::HashMap,
     default::Default,
@@ -31,7 +33,7 @@ use risc0_binfmt::{MemoryImage, Program};
 use risc0_zkp::core::digest::{Digest, DIGEST_WORDS};
 use risc0_zkvm_platform::{memory, PAGE_SIZE};
 use serde::Deserialize;
-mod docker;
+
 pub use docker::docker_build;
 
 const RUSTUP_TOOLCHAIN_NAME: &str = "risc0";
@@ -381,7 +383,7 @@ fn build_staticlib(guest_pkg: &str, features: &[&str]) -> String {
 fn build_guest_package<P>(
     pkg: &Package,
     target_dir: P,
-    features: Vec<String>,
+    guest_opts: &GuestOptions,
     runtime_lib: Option<&str>,
 ) where
     P: AsRef<Path>,
@@ -398,8 +400,8 @@ fn build_guest_package<P>(
         cargo_command("build", &[])
     };
 
-    let features_str = features.join(",");
-    if !features.is_empty() {
+    let features_str = guest_opts.features.join(",");
+    if !features_str.is_empty() {
         cmd.args(&["--features", &features_str]);
     }
 
@@ -481,64 +483,23 @@ fn detect_toolchain(name: &str) {
     }
 }
 
+/// Options for configuring a docker build environment.
+pub struct DockerOptions {
+    /// Specify the root directory for docker builds.
+    ///
+    /// The current working directory is used if `None` is specified.
+    pub root_dir: Option<PathBuf>,
+}
+
 /// Options defining how to embed a guest package in
 /// [`embed_methods_with_options`].
+#[derive(Default)]
 pub struct GuestOptions {
     /// Features for cargo to build the guest with.
     pub features: Vec<String>,
-}
 
-impl Default for GuestOptions {
-    fn default() -> Self {
-        GuestOptions { features: vec![] }
-    }
-}
-
-/// Embeds methods built for RISC-V for use by host-side dependencies using a docker build environment.
-pub fn embed_methods_with_docker() {
-    embed_methods_with_docker_with_options(HashMap::new())
-}
-
-/// Embeds methods built for RISC-V for use by host-side dependencies using a docker build environment.
-/// The guest options allow the user to specify features.
-pub fn embed_methods_with_docker_with_options(
-    mut guest_pkg_to_options: HashMap<&str, GuestOptions>,
-) {
-    let out_dir_env = env::var_os("OUT_DIR").unwrap();
-    let out_dir = Path::new(&out_dir_env); // $ROOT/target/$profile/build/$crate/out
-    let guest_dir = get_guest_dir();
-
-    let pkg = current_package();
-    let guest_packages = guest_packages(&pkg);
-    let methods_path = out_dir.join("methods.rs");
-    let mut methods_file = File::create(&methods_path).unwrap();
-
-    detect_toolchain(RUSTUP_TOOLCHAIN_NAME);
-
-    for guest_pkg in guest_packages {
-        let guest_options = guest_pkg_to_options
-            .remove(guest_pkg.name.as_str())
-            .unwrap_or_default();
-
-        let manifest_path = Path::new(&guest_pkg.manifest_path)
-            .strip_prefix(std::env::current_dir().unwrap())
-            .unwrap();
-        docker_build(&PathBuf::from(manifest_path), guest_options.features).unwrap();
-
-        for method in guest_methods_docker(&guest_pkg, &guest_dir) {
-            methods_file
-                .write_all(method.rust_def().as_bytes())
-                .unwrap();
-        }
-    }
-
-    // HACK: It's not particularly practical to figure out all the
-    // files that all the guest crates transtively depend on.  So, we
-    // want to run the guest "cargo build" command each time we build.
-    //
-    // Since we generate methods.rs each time we run, it will always
-    // be changed.
-    println!("cargo:rerun-if-changed={}", methods_path.display());
+    /// Use a docker environment for building.
+    pub use_docker: Option<DockerOptions>,
 }
 
 fn get_guest_dir() -> PathBuf {
@@ -583,13 +544,27 @@ pub fn embed_methods_with_options(mut guest_pkg_to_options: HashMap<&str, GuestO
     for guest_pkg in guest_packages {
         println!("Building guest package {}.{}", pkg.name, guest_pkg.name);
 
-        let guest_options = guest_pkg_to_options
+        let guest_opts = guest_pkg_to_options
             .remove(guest_pkg.name.as_str())
             .unwrap_or_default();
 
-        build_guest_package(&guest_pkg, &guest_dir, guest_options.features, None);
+        let methods = if let Some(docker_opts) = guest_opts.use_docker {
+            let src_dir = docker_opts
+                .root_dir
+                .unwrap_or_else(|| std::env::current_dir().unwrap());
+            docker_build(
+                guest_pkg.manifest_path.as_std_path(),
+                &src_dir,
+                &guest_opts.features,
+            )
+            .unwrap();
+            guest_methods_docker(&guest_pkg, &guest_dir)
+        } else {
+            build_guest_package(&guest_pkg, &guest_dir, &guest_opts, None);
+            guest_methods(&guest_pkg, &guest_dir)
+        };
 
-        for method in guest_methods(&guest_pkg, &guest_dir) {
+        for method in methods {
             methods_file
                 .write_all(method.rust_def().as_bytes())
                 .unwrap();
