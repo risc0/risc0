@@ -12,8 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::*;
-use crate::{CrateNames, Profile, Profiles};
+use anyhow::Result;
+
+use crate::types::{aliases::{CrateNames, Profiles}, profile::Profile};
 
 #[derive(Debug, Default, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "kebab-case")]

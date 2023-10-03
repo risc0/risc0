@@ -22,7 +22,21 @@ pub enum Repo {
 }
 
 impl Repo {
-    pub fn path(&self) -> &str {
+    pub fn tag(tag: impl Into<String>) -> Self {
+        Self::Tag(TagRepo { tag: tag.into() })
+    }
+
+    pub fn branch(branch: impl Into<String>) -> Self {
+        Self::Branch(BranchRepo {
+            branch: branch.into(),
+        })
+    }
+
+    pub fn path(path: impl Into<String>) -> Self {
+        Self::Path(PathRepo { path: path.into() })
+    }
+
+    pub fn value(&self) -> &str {
         match self {
             Self::Tag(tag) => tag.tag.as_ref(),
             Self::Branch(git) => git.branch.as_ref(),

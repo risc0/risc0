@@ -12,7 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use super::*;
+use std::{iter::Chain, vec::IntoIter};
+
+use anyhow::{ensure, Result};
+use serde_valid::Validate;
+
+use super::{
+    aliases::{CrateName, GroupedProfiles},
+    profile_settings::ProfileSettings,
+    traits::{Group, Merge},
+    version::Versions,
+};
 
 #[derive(
     Debug, Clone, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize, serde_valid::Validate,

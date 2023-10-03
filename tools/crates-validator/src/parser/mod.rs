@@ -14,8 +14,12 @@
 
 use std::fmt::Display;
 
-use crate::{Merge, ProfileConfig, Profiles, Repo};
 use anyhow::Result;
+
+use crate::{
+    types::{aliases::Profiles, traits::Merge},
+    ProfileConfig,
+};
 
 mod batch;
 mod constants;
@@ -34,7 +38,6 @@ pub struct Parser {
     individual: individual::Individual,
     #[serde(flatten)]
     skip_crates: skip_crates::SkipCrates,
-    repo: Repo,
 }
 
 impl Parser {
@@ -56,10 +59,6 @@ impl Parser {
     pub fn skip_crates(&self) -> Result<Profiles> {
         self.skip_crates.clone().try_into()
     }
-
-    pub fn repo(&self) -> &Repo {
-        &self.repo
-    }
 }
 
 impl TryFrom<Parser> for ProfileConfig {
@@ -67,7 +66,6 @@ impl TryFrom<Parser> for ProfileConfig {
     fn try_from(value: Parser) -> anyhow::Result<Self> {
         Ok(Self {
             profiles: value.profiles()?,
-            repo: value.clone().repo,
             skip_crates: value.skip_crates()?,
         })
     }

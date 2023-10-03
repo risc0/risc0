@@ -409,9 +409,8 @@ fn add_categories(
 
 #[cfg(test)]
 mod tests {
-    use rstest::*;
-
     use super::*;
+    use rstest::*;
 
     type CategoryMap = HashMap<CategoryId, String>;
 

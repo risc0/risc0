@@ -12,7 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use super::*;
+use serde_valid::validation::Errors as ValidationErrors;
+
+use super::aliases::GroupedProfiles;
 
 pub trait Group {
     fn group(self) -> GroupedProfiles;

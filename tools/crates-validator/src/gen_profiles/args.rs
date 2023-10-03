@@ -43,7 +43,7 @@ pub struct Args {
 
     /// Specify the path for the configuration file containing custom
     /// instructions on how to generate the profile for crates.
-    #[arg(short, long, conflicts_with = "no_profiles")]
+    #[arg(short = 'P', long, conflicts_with = "no_profiles")]
     pub(crate) profiles_file: Option<String>,
 
     /// Add selected categories to the profile

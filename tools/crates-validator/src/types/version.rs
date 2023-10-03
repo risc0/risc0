@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::fmt::Display;
+use super::traits::Merge;
 
 use anyhow::anyhow;
 
-use super::*;
+use std::{collections::BTreeSet, fmt::Display};
 
 pub type Versions = BTreeSet<Version>;
 

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::{Profile, ProfileSettings};
+use crate::types::{profile::Profile, profile_settings::ProfileSettings};
 
 // TODO: Replace this by using `Profile::from` for a `impl ToString` type
 pub(crate) fn profile_from_name(name: impl ToString) -> Profile {

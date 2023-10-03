@@ -15,8 +15,6 @@
 pub mod parser;
 pub mod types;
 
-pub use types::*;
-
 use std::{
     collections::{BTreeMap, HashSet},
     fs::File,
@@ -31,6 +29,7 @@ use handlebars::Handlebars;
 use serde::{Deserialize, Serialize};
 use tempfile::tempdir;
 use tracing::{debug, error, info, warn};
+use types::{aliases::Profiles, profile::Profile, repo::Repo, version::Version};
 
 pub mod gen_profiles;
 
@@ -118,7 +117,6 @@ pub struct CrateProfile {
 /// Defines the global variables for a given crates testing run.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ProfileConfig {
-    pub repo: Repo,
     pub skip_crates: Profiles,
     pub profiles: Profiles, // TODO(Cardosaum): Refactor
                             // /// Define which Github branch should be used for templates and crate
@@ -136,10 +134,6 @@ pub struct ProfileConfig {
 impl ProfileConfig {
     pub fn profiles(&self) -> &[Profile] {
         self.profiles.as_ref()
-    }
-
-    pub fn repo(&self) -> &Repo {
-        &self.repo
     }
 
     pub fn skip_crates(&self) -> &[Profile] {
@@ -206,6 +200,7 @@ const MAX_ERROR_LINES: u64 = 200;
 pub struct Validator {
     context: ProfileConfig,
     proj_out_dir: PathBuf,
+    repo: Repo,
 }
 
 impl Validator {
@@ -215,6 +210,10 @@ impl Validator {
 
     pub fn proj_out_dir(&self) -> &PathBuf {
         &self.proj_out_dir
+    }
+
+    pub fn repo(&self) -> &Repo {
+        &self.repo
     }
 }
 
@@ -228,7 +227,7 @@ pub enum RunStatus {
 
 impl Validator {
     /// Uses [cargo-risczero] to generate a new base project
-    fn gen_initial_project(&self, profile: &Profile, repo: &Repo) -> Result<PathBuf> {
+    fn gen_initial_project(&self, profile: &Profile) -> Result<PathBuf> {
         let project_name = "template_project";
         let output_path = self.proj_out_dir.join(project_name);
 
@@ -264,17 +263,17 @@ impl Validator {
             cmd.arg("--std");
         }
 
-        match repo {
+        match self.repo() {
             Repo::Tag(_) => {
                 cmd.arg("--tag");
-                cmd.arg(repo.path());
+                cmd.arg(self.repo().value());
             }
             Repo::Branch(_) => {
                 cmd.arg("--branch");
-                cmd.arg(repo.path());
+                cmd.arg(self.repo().value());
             }
             Repo::Path(_) => {
-                let template_path = Path::new(repo.path())
+                let template_path = Path::new(self.repo().value())
                     .join("templates")
                     .join("rust-starter");
                 if !template_path.exists() {
@@ -285,7 +284,7 @@ impl Validator {
                 cmd.arg("--templ-subdir");
                 cmd.arg("");
                 cmd.arg("--path");
-                cmd.arg(repo.path());
+                cmd.arg(self.repo().value());
             }
         }
 
@@ -328,7 +327,6 @@ impl Validator {
         profile: &Profile,
         version: &Version,
         working_dir: &Path,
-        repo: &Repo,
     ) -> Result<()> {
         let methods_dir = working_dir.join("methods");
         if !methods_dir.exists() {
@@ -359,21 +357,21 @@ impl Validator {
         let methods_toml = methods_dir.join("Cargo.toml");
 
         let mut vars = BTreeMap::new();
-        let risc0_build = match repo {
+        let risc0_build = match self.repo() {
             Repo::Tag(_) => {
                 format!(
                     "git = \"https://github.com/risc0/risc0.git\", tag = \"{}\"",
-                    repo.path()
+                    self.repo().value()
                 )
             }
             Repo::Branch(_) => {
                 format!(
                     "git = \"https://github.com/risc0/risc0.git\", branch = \"{}\"",
-                    repo.path()
+                    self.repo().value()
                 )
             }
             Repo::Path(_) => {
-                format!("path = \"{}/risc0/build\"", repo.path())
+                format!("path = \"{}/risc0/build\"", self.repo().value())
             }
         };
 
@@ -390,20 +388,20 @@ impl Validator {
             ""
         };
 
-        let risc0_zkvm = match &repo {
+        let risc0_zkvm = match self.repo() {
             Repo::Tag(_) => {
                 format!(
                     "git = \"https://github.com/risc0/risc0.git\", tag = \"{}\"",
-                    repo.path()
+                    self.repo().value()
                 )
             }
             Repo::Branch(_) => {
                 format!(
                     "git = \"https://github.com/risc0/risc0.git\", branch = \"{}\"",
-                    repo.path()
+                    self.repo().value()
                 )
             }
-            Repo::Path(_) => format!("path = \"{}/risc0/zkvm\"", repo.path()),
+            Repo::Path(_) => format!("path = \"{}/risc0/zkvm\"", self.repo().value()),
         };
 
         let mut crate_line = format!("{} = {{ version = \"{version}\" }}", profile.name(),);
@@ -553,7 +551,7 @@ impl Validator {
     }
 
     /// Run a given profile through the set of tests
-    fn run(&self, profile: &Profile, repo: &Repo) -> Result<Vec<ValidationResults>> {
+    fn run(&self, profile: &Profile) -> Result<Vec<ValidationResults>> {
         if self.context().skip_crates_names().contains(profile.name()) {
             warn!("Skipping {}", profile.name());
             return Ok(vec![ValidationResults::new(
@@ -563,10 +561,10 @@ impl Validator {
             )]);
         }
 
-        let working_dir = self.gen_initial_project(profile, repo)?;
+        let working_dir = self.gen_initial_project(profile)?;
         let mut results = Vec::new();
         for version in profile.versions.iter() {
-            self.customize_guest(profile, &version.clone(), &working_dir, repo)?;
+            self.customize_guest(profile, &version.clone(), &working_dir)?;
             let (build_success, build_errors) = self.build_project(profile, &working_dir)?;
             if !build_success {
                 results.push(ValidationResults::new(
@@ -595,15 +593,10 @@ impl Validator {
     }
 
     // Run a single profile in the config by `name`
-    pub fn run_single(
-        &self,
-        name: &str,
-        profiles: &[Profile],
-        repo: &Repo,
-    ) -> Result<Vec<ValidationResults>> {
+    pub fn run_single(&self, name: &str, profiles: &[Profile]) -> Result<Vec<ValidationResults>> {
         for profile in profiles {
             if profile.name() == name {
-                return self.run(profile, repo);
+                return self.run(profile);
             }
         }
 
@@ -611,10 +604,10 @@ impl Validator {
     }
 
     // Run all profiles in config
-    pub fn run_all(&self, profiles: &[Profile], repo: &Repo) -> Result<Vec<ValidationResults>> {
+    pub fn run_all(&self, profiles: &[Profile]) -> Result<Vec<ValidationResults>> {
         let mut results = vec![];
         for profile in profiles {
-            results.push(self.run(profile, repo)?);
+            results.push(self.run(profile)?);
         }
 
         Ok(results.into_iter().flatten().collect())
@@ -626,11 +619,17 @@ pub struct ValidatorBuilder {
     #[serde(flatten)]
     context: ProfileConfig,
     out_dir: Option<PathBuf>,
+    #[serde(skip)]
+    repo: Repo,
 }
 
 impl ValidatorBuilder {
-    pub fn new(context: ProfileConfig, out_dir: Option<PathBuf>) -> Self {
-        Self { context, out_dir }
+    pub fn new(context: ProfileConfig, repo: Repo, out_dir: Option<PathBuf>) -> Self {
+        Self {
+            context,
+            repo,
+            out_dir,
+        }
     }
 
     pub fn out_dir_val(self, out_dir: PathBuf) -> Self {
@@ -650,6 +649,7 @@ impl ValidatorBuilder {
 
         Ok(Validator {
             context: self.context,
+            repo: self.repo,
             proj_out_dir,
         })
     }

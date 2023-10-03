@@ -12,8 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::*;
-use crate::{CrateName, Profile, ProfileSettings, Profiles};
+use crate::types::{
+    aliases::{CrateName, Profiles},
+    profile::Profile,
+    profile_settings::ProfileSettings,
+};
+use anyhow::Result;
 
 #[derive(Debug, Default, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub(crate) struct Batches {
@@ -60,8 +64,10 @@ mod tests {
     use std::collections::HashSet;
 
     use super::*;
-    use crate::parser::{constants::PATH_YAML_CONFIG, test_helpers::profile_with_settings, utils};
-    use crate::Merge;
+    use crate::{
+        parser::{constants::PATH_YAML_CONFIG, test_helpers::profile_with_settings, utils},
+        types::traits::Merge,
+    };
 
     #[test]
     fn can_parse_file() {
@@ -69,10 +75,13 @@ mod tests {
         let batches = serde_yaml::from_str::<Batches>(&config).unwrap();
         let profiles: Profiles = batches.try_into().unwrap();
 
-        profiles.iter().filter(|p| p.name() == "serde").for_each(|p| {
-            assert!(p.settings.std);
-            assert!(p.settings.fast_mode);
-        });
+        profiles
+            .iter()
+            .filter(|p| p.name() == "serde")
+            .for_each(|p| {
+                assert!(p.settings.std);
+                assert!(p.settings.fast_mode);
+            });
         assert!(!profiles.is_empty());
     }
 
