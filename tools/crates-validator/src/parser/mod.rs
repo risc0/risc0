@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-use crate::{Exclude, Merge, ProfileConfig, Profiles, Repo};
+use crate::{Merge, ProfileConfig, Profiles, Repo};
 use anyhow::Result;
 
 mod batch;

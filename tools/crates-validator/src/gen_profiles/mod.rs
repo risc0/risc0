@@ -10,9 +10,9 @@ use std::{
 use crate::{
     parser::Parser,
     types::version::{Version, Versions},
-    ProfileConfig, Repo,
+    ProfileConfig,
 };
-use crate::{Profile, ProfileSettings, Profiles};
+use crate::{Profile, Profiles};
 
 use anyhow::{Context, Result};
 use db_dump::{

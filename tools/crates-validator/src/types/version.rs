@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use anyhow::anyhow;
 
 use super::*;
@@ -51,6 +53,15 @@ impl TryFrom<Version> for semver::Version {
         match value {
             Version::Specific(v) => Ok(v),
             Version::Latest => Err(anyhow!("Cannot convert Version::Latest to semver::Version")),
+        }
+    }
+}
+
+impl Display for Version {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Version::Latest => write!(f, "latest"),
+            Version::Specific(v) => write!(f, "{}", v),
         }
     }
 }

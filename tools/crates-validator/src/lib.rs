@@ -28,7 +28,6 @@ use std::{
 
 use anyhow::{bail, Context, Result};
 use handlebars::Handlebars;
-use semver::Version;
 use serde::{Deserialize, Serialize};
 use tempfile::tempdir;
 use tracing::{debug, error, info, warn};
@@ -568,7 +567,7 @@ impl Validator {
         let working_dir = self.gen_initial_project(profile, repo)?;
         let mut results = Vec::new();
         for version in profile.versions.iter() {
-            self.customize_guest(profile, &version.clone().try_into()?, &working_dir, repo)?;
+            self.customize_guest(profile, &version.clone(), &working_dir, repo)?;
             let (build_success, build_errors) = self.build_project(profile, &working_dir)?;
             if !build_success {
                 results.push(ValidationResults::new(
