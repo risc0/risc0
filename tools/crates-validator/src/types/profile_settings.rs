@@ -18,10 +18,15 @@ use super::traits::Merge;
 #[serde(default)]
 #[serde(rename_all = "kebab-case")]
 pub struct ProfileSettings {
+    #[serde(skip_serializing_if = "is_false")]
     pub run_prover: bool,
+    #[serde(skip_serializing_if = "is_false")]
     pub should_fail: bool,
+    #[serde(skip_serializing_if = "is_false")]
     pub inject_cc_flags: bool,
+    #[serde(skip_serializing_if = "is_false")]
     pub std: bool,
+    #[serde(skip_serializing_if = "is_true")]
     pub fast_mode: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub patch: Option<String>,
@@ -59,4 +64,14 @@ impl Merge for ProfileSettings {
             custom_main: self.custom_main.or(other.custom_main),
         }
     }
+}
+
+#[inline]
+const fn is_true(b: &bool) -> bool {
+    *b
+}
+
+#[inline]
+const fn is_false(b: &bool) -> bool {
+    !(*b)
 }
