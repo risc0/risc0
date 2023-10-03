@@ -213,7 +213,7 @@ mod test {
     fn build(manifest_path: &str) {
         let manifest_path = Path::new(manifest_path);
         let src_dir = Path::new("../..");
-        self::docker_build(manifest_path, &src_dir, vec![]).unwrap()
+        self::docker_build(manifest_path, &src_dir, &[]).unwrap()
     }
 
     fn compare_image_id(bin_path: &str, expected: &str) {
