@@ -555,7 +555,7 @@ pub fn embed_methods_with_options(mut guest_pkg_to_options: HashMap<&str, GuestO
             docker_build(
                 guest_pkg.manifest_path.as_std_path(),
                 &src_dir,
-                guest_opts.features,
+                &guest_opts.features,
             )
             .unwrap();
             guest_methods_docker(&guest_pkg, &guest_dir)

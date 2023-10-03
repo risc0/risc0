@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{collections::HashMap, env, path::Path};
+use std::{collections::HashMap, env};
 
 use risc0_build::{embed_methods_with_options, DockerOptions, GuestOptions};
 
@@ -24,9 +24,8 @@ fn main() {
         return;
     }
 
-    let root_dir = Path::new("../../..").canonicalize().unwrap();
     let docker_opts = DockerOptions {
-        root_dir: Some(root_dir),
+        root_dir: Some("../../..".into()),
     };
 
     let use_docker = if env::var("RISC0_USE_DOCKER").is_ok() {

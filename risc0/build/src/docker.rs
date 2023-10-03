@@ -39,7 +39,7 @@ const DOCKER_IGNORE: &str = r#"
 const TARGET_DIR: &str = "target/riscv-guest/riscv32im-risc0-zkvm-elf/docker";
 
 /// Build the package in the manifest path using a docker environment.
-pub fn docker_build(manifest_path: &Path, src_dir: &Path, features: Vec<String>) -> Result<()> {
+pub fn docker_build(manifest_path: &Path, src_dir: &Path, features: &[String]) -> Result<()> {
     let manifest_path = manifest_path
         .canonicalize()
         .context(format!("manifest_path: {manifest_path:?}"))?;
@@ -97,24 +97,39 @@ fn create_dockerfile(
     manifest_path: &Path,
     temp_dir: &Path,
     pkg_name: &str,
-    features: Vec<String>,
+    features: &[String],
 ) -> Result<()> {
     let manifest_env = &[("CARGO_MANIFEST_PATH", manifest_path.to_str().unwrap())];
     let rustflags = format!(
         "-C passes=loweratomic -C link-arg=-Ttext=0x{TEXT_START:08X} -C link-arg=--fatal-warnings",
     );
     let rustflags_env = &[("RUSTFLAGS", rustflags.as_str())];
-    let mut build_command = "cargo +risc0 build \
-                    --locked \
-                    --release \
-                    --target riscv32im-risc0-zkvm-elf \
-                    --manifest-path $CARGO_MANIFEST_PATH"
-        .to_string();
 
+    let common_args = vec![
+        "--locked",
+        "--target",
+        "riscv32im-risc0-zkvm-elf",
+        "--manifest-path",
+        "$CARGO_MANIFEST_PATH",
+    ];
+
+    let mut build_args = common_args.clone();
     let features_str = features.join(",");
     if !features.is_empty() {
-        build_command.push_str(format!(" --features {}", features_str).as_str());
+        build_args.push("--features");
+        build_args.push(&features_str);
     }
+
+    let fetch_cmd = [&["cargo", "+risc0", "fetch"], common_args.as_slice()]
+        .concat()
+        .join(" ");
+    let build_cmd = [
+        &["cargo", "+risc0", "build", "--release"],
+        build_args.as_slice(),
+    ]
+    .concat()
+    .join(" ");
+
     let build = DockerFile::new()
         .from_alias("build", "risczero/risc0-guest-builder:v0.17")
         .workdir("/src")
@@ -124,13 +139,8 @@ fn create_dockerfile(
         .env(&[("CARGO_TARGET_DIR", "target")])
         // Fetching separately allows docker to cache the downloads, assuming the Cargo.lock
         // doesn't change.
-        .run(
-            "cargo +risc0 fetch \
-                    --locked \
-                    --target riscv32im-risc0-zkvm-elf \
-                    --manifest-path $CARGO_MANIFEST_PATH",
-        )
-        .run(&build_command);
+        .run(&fetch_cmd)
+        .run(&build_cmd);
 
     let out_dir = format!("/{pkg_name}");
     let binary = DockerFile::new()
@@ -153,9 +163,11 @@ fn create_dockerfile(
 ///
 /// Overwrites if an ELF with the same name already exists.
 fn build(src_dir: &Path, temp_dir: &Path) -> Result<()> {
+    let target_dir = src_dir.join(TARGET_DIR);
+    let target_dir = target_dir.to_str().unwrap();
     if Command::new("docker")
         .arg("build")
-        .arg(format!("--output={TARGET_DIR}"))
+        .arg(format!("--output={target_dir}"))
         .arg("-f")
         .arg(temp_dir.join("Dockerfile"))
         .arg(src_dir)
