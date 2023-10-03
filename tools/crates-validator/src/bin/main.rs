@@ -47,6 +47,7 @@ struct Args {
     output: Option<PathBuf>,
 }
 
+#[tracing::instrument(level = "trace")]
 fn main() -> Result<()> {
     tracing_subscriber::fmt()
         .with_env_filter(EnvFilter::from_default_env())
@@ -56,13 +57,8 @@ fn main() -> Result<()> {
 
     let file = File::open(args.profiles_path).context("Failed to open profiles_path file")?;
     let reader = BufReader::new(file);
-    let profiles: Profiles = serde_yaml::from_reader(reader)?;
-    let profile_configs = ProfileConfig {
-        repo: Repo::Git("main".into()),
-        profiles,
-    };
+    let profile_configs: ProfileConfig = serde_yaml::from_reader(reader)?;
     let validator = ValidatorBuilder::new(profile_configs, args.out_dir).build()?;
-    // let validator = validator_builder.out_dir(args.out_dir).build()?;
     let profiles = validator.context().profiles();
     let repo = validator.context().repo();
     let profiles_num = validator.context().profiles().len();
@@ -105,7 +101,7 @@ fn main() -> Result<()> {
     if let Some(out_path) = args.output {
         std::fs::write(
             out_path,
-            serde_json::to_string(&results).context("Failed to serialize Validator context")?,
+            serde_yaml::to_string(&results).context("Failed to serialize Validator context")?,
         )
         .context("Failed to write output json file")?;
     }

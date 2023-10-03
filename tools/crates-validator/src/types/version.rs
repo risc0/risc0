@@ -4,11 +4,6 @@ use super::*;
 
 pub type Versions = BTreeSet<Version>;
 
-// #[derive(
-//     Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord, serde::Serialize, serde::Deserialize,
-// )]
-// pub struct Versions(BTreeSet<Version>);
-
 impl Merge for Versions {
     fn merge(self, other: Self) -> Self {
         self.union(&other).cloned().collect()
@@ -28,6 +23,7 @@ impl Merge for Versions {
     serde::Deserialize,
 )]
 #[repr(u8)]
+#[serde(untagged)]
 pub enum Version {
     #[default]
     Latest = 1,

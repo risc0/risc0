@@ -1,10 +1,10 @@
 use crate::*;
 use crate::{CrateNames, Profile, Profiles};
 
-#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Default, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "kebab-case")]
 pub(crate) struct SkipCrates {
-    skip_crates: CrateNames,
+    pub skip_crates: CrateNames,
 }
 
 impl TryFrom<SkipCrates> for Profiles {

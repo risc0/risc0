@@ -1,8 +1,8 @@
 use crate::Profiles;
 
-#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Default, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub(crate) struct Individual {
-    crates: Profiles,
+    pub crates: Profiles,
 }
 
 impl From<Individual> for Profiles {
@@ -57,6 +57,7 @@ mod tests {
                 fast_mode: true,
                 ..Default::default()
             },
+            None,
         )
         .unwrap();
         let bar = Profile::new(
@@ -66,6 +67,7 @@ mod tests {
                 inject_cc_flags: true,
                 ..Default::default()
             },
+            None,
         )
         .unwrap();
         let baz = Profile::new(
@@ -81,6 +83,7 @@ mod tests {
                 run_prover: false,
                 ..Default::default()
             },
+            None,
         )
         .unwrap();
         let qux = Profile::new(
@@ -90,6 +93,7 @@ mod tests {
                 fast_mode: true,
                 ..Default::default()
             },
+            None,
         )
         .unwrap();
         let expected_profiles: HashSet<Profile> = [foo, bar, baz, qux].into_iter().collect();

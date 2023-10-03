@@ -18,7 +18,7 @@ pub mod types;
 pub use types::*;
 
 use std::{
-    collections::BTreeMap,
+    collections::{BTreeMap, HashSet},
     fs::File,
     io::{BufRead, BufReader, Write},
     path::{Path, PathBuf},
@@ -31,7 +31,7 @@ use handlebars::Handlebars;
 use semver::Version;
 use serde::{Deserialize, Serialize};
 use tempfile::tempdir;
-use tracing::{debug, error, info};
+use tracing::{debug, error, info, warn};
 
 pub mod gen_profiles;
 pub mod profiles;
@@ -48,6 +48,7 @@ pub struct ValidationResults {
     /// Holds a sample of the guest build stdout
     ///
     /// Holds the first 200 lines of of the guest build, if the build step fails
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub build_errors: Option<String>,
 }
 
@@ -120,6 +121,7 @@ pub struct CrateProfile {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ProfileConfig {
     pub repo: Repo,
+    pub skip_crates: Profiles,
     pub profiles: Profiles, // TODO(Cardosaum): Refactor
                             // /// Define which Github branch should be used for templates and crate
                             // /// imports
@@ -140,6 +142,24 @@ impl ProfileConfig {
 
     pub fn repo(&self) -> &Repo {
         &self.repo
+    }
+
+    pub fn skip_crates(&self) -> &[Profile] {
+        self.skip_crates.as_ref()
+    }
+
+    pub fn skip_crates_names(&self) -> HashSet<&str> {
+        self.skip_crates
+            .iter()
+            .map(|p| p.name())
+            .collect::<HashSet<&str>>()
+    }
+
+    pub fn replace_profiles(&self, profiles: Profiles) -> Self {
+        Self {
+            profiles,
+            ..self.clone()
+        }
     }
 }
 
@@ -247,12 +267,18 @@ impl Validator {
         }
 
         match repo {
-            Repo::Git(branch) => {
-                cmd.arg("--branch");
-                cmd.arg(branch);
+            Repo::Tag(_) => {
+                cmd.arg("--tag");
+                cmd.arg(repo.path());
             }
-            Repo::Local(path) => {
-                let template_path = Path::new(path).join("templates").join("rust-starter");
+            Repo::Branch(_) => {
+                cmd.arg("--branch");
+                cmd.arg(repo.path());
+            }
+            Repo::Path(_) => {
+                let template_path = Path::new(repo.path())
+                    .join("templates")
+                    .join("rust-starter");
                 if !template_path.exists() {
                     bail!("Failed to find {} on disk", template_path.to_string_lossy());
                 }
@@ -261,7 +287,7 @@ impl Validator {
                 cmd.arg("--templ-subdir");
                 cmd.arg("");
                 cmd.arg("--path");
-                cmd.arg(path);
+                cmd.arg(repo.path());
             }
         }
 
@@ -336,11 +362,20 @@ impl Validator {
 
         let mut vars = BTreeMap::new();
         let risc0_build = match repo {
-            Repo::Git(branch) => {
-                format!("git = \"https://github.com/risc0/risc0.git\", branch = \"{branch}\"")
+            Repo::Tag(_) => {
+                format!(
+                    "git = \"https://github.com/risc0/risc0.git\", tag = \"{}\"",
+                    repo.path()
+                )
             }
-            Repo::Local(path) => {
-                format!("path = \"{path}/risc0/build\"")
+            Repo::Branch(_) => {
+                format!(
+                    "git = \"https://github.com/risc0/risc0.git\", branch = \"{}\"",
+                    repo.path()
+                )
+            }
+            Repo::Path(_) => {
+                format!("path = \"{}/risc0/build\"", repo.path())
             }
         };
 
@@ -358,10 +393,19 @@ impl Validator {
         };
 
         let risc0_zkvm = match &repo {
-            Repo::Git(branch) => {
-                format!("git = \"https://github.com/risc0/risc0.git\", branch = \"{branch}\"")
+            Repo::Tag(_) => {
+                format!(
+                    "git = \"https://github.com/risc0/risc0.git\", tag = \"{}\"",
+                    repo.path()
+                )
             }
-            Repo::Local(path) => format!("path = \"{path}/risc0/zkvm\""),
+            Repo::Branch(_) => {
+                format!(
+                    "git = \"https://github.com/risc0/risc0.git\", branch = \"{}\"",
+                    repo.path()
+                )
+            }
+            Repo::Path(_) => format!("path = \"{}/risc0/zkvm\"", repo.path()),
         };
 
         let mut crate_line = format!("{} = {{ version = \"{version}\" }}", profile.name(),);
@@ -512,27 +556,28 @@ impl Validator {
 
     /// Run a given profile through the set of tests
     fn run(&self, profile: &Profile, repo: &Repo) -> Result<Vec<ValidationResults>> {
-        // TODO(Cardosaum): Remove this
-        return Ok(vec![ValidationResults::new(
-            profile.name(),
-            RunStatus::Success,
-            None,
-        )]);
+        // // TODO(Cardosaum): Remove this
+        // debug!(?profile, ?repo);
+        // return Ok(vec![ValidationResults::new(
+        //     profile.name(),
+        //     RunStatus::Success,
+        //     None,
+        // )]);
+
         // TODO(cardosaum): Replace logic with `skip_crates` module
-        // if profiles::SKIP_CRATES.contains(&profile.name.as_str()) {
-        //     warn!("Skipping {} due to SKIP_CRATES", profile.name);
-        //     profile.results = Some(ValidationResults::from(RunStatus::Skipped));
-        //     return Ok(());
-        // }
+        if self.context().skip_crates_names().contains(profile.name()) {
+            warn!("Skipping {}", profile.name());
+            return Ok(vec![ValidationResults::new(
+                profile.name(),
+                RunStatus::Skipped,
+                None,
+            )]);
+        }
+
         let working_dir = self.gen_initial_project(profile, repo)?;
         let mut results = Vec::new();
-        for version in profile.settings.versions.iter() {
-            self.customize_guest(
-                profile,
-                &version.clone().try_into().unwrap(),
-                &working_dir,
-                repo,
-            )?;
+        for version in profile.versions.iter() {
+            self.customize_guest(profile, &version.clone().try_into()?, &working_dir, repo)?;
             let (build_success, build_errors) = self.build_project(profile, &working_dir)?;
             if !build_success {
                 results.push(ValidationResults::new(
@@ -543,7 +588,6 @@ impl Validator {
                 continue;
             }
             if profile.settings.run_prover && !self.run_prover(profile, &working_dir)? {
-                // TODO(Cardosaum): Check if build_errors is None
                 results.push(ValidationResults::new(
                     profile.name(),
                     RunStatus::RunFail,

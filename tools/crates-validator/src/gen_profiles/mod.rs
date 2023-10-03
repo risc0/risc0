@@ -10,6 +10,7 @@ use std::{
 use crate::{
     parser::Parser,
     types::version::{Version, Versions},
+    ProfileConfig, Repo,
 };
 use crate::{Profile, ProfileSettings, Profiles};
 
@@ -38,21 +39,21 @@ pub struct StateMachine<S> {
 // States
 pub struct Initialize;
 pub struct ReadProfilesConfig {
-    profiles: Profiles,
+    profile_config: ProfileConfig,
 }
 pub struct DownloadDatabase {
-    profiles: Profiles,
+    profile_config: ProfileConfig,
     database_path: PathBuf,
 }
 pub struct ProcessDatabase {
-    profiles: Profiles,
+    profile_config: ProfileConfig,
     crates: Vec<CrateRow>,
     versions: BTreeMap<CrateId, VersionRow>,
     categories: HashMap<CategoryId, String>,
     crates_categories: HashMap<CrateId, CategoryId>,
 }
 pub struct FilterSelectedCrates {
-    profiles: Profiles,
+    profile_config: ProfileConfig,
 }
 pub struct WriteProfile;
 
@@ -72,15 +73,16 @@ impl StateMachine<Initialize> {
     #[tracing::instrument(skip_all)]
     pub fn read_profiles_config(self) -> Result<StateMachine<ReadProfilesConfig>> {
         debug!("Reading profiles config...");
-        let profiles = match &self.args.profiles_file {
-            Some(path) => Parser::parse(path)?,
-            None => Profiles::new(),
-        };
+        let profile_config: ProfileConfig = match &self.args.profiles_file {
+            Some(path) => Parser::new(path)?,
+            None => Parser::default(),
+        }
+        .try_into()?;
 
-        debug!("Loaded {} profiles", profiles.len());
+        debug!("Loaded {} profiles", profile_config.profiles().len());
         Ok(StateMachine {
             args: self.args,
-            state: ReadProfilesConfig { profiles },
+            state: ReadProfilesConfig { profile_config },
         })
     }
 }
@@ -100,7 +102,7 @@ impl StateMachine<ReadProfilesConfig> {
         let state = StateMachine {
             args: self.args,
             state: DownloadDatabase {
-                profiles: self.state.profiles,
+                profile_config: self.state.profile_config,
                 database_path: tar_file_path.to_path_buf(),
             },
         };
@@ -207,7 +209,7 @@ impl StateMachine<DownloadDatabase> {
         Ok(StateMachine {
             args: self.args,
             state: ProcessDatabase {
-                profiles: self.state.profiles,
+                profile_config: self.state.profile_config,
                 crates,
                 versions,
                 categories,
@@ -265,39 +267,38 @@ impl StateMachine<ProcessDatabase> {
         // Remove all crates in selected_crates that are also in self.state.profiles
         let selected_crates_profiles: Profiles = selected_crates_profiles
             .into_iter()
-            .filter(|p| !self.state.profiles.iter().any(|o| o.has_same_name(p)))
+            .filter(|p| {
+                !self
+                    .state
+                    .profile_config
+                    .profiles()
+                    .iter()
+                    .any(|o| o.has_same_name(p))
+            })
             .collect();
 
         let profiles: Profiles = self
             .state
-            .profiles
+            .profile_config
+            .profiles()
             .iter()
             .chain(selected_crates_profiles.iter())
             .cloned()
-            .map(|p| match p.settings.versions.is_empty() {
+            .map(|p| match p.versions.is_empty() {
                 false => p,
                 true => {
-                    let settings = ProfileSettings {
-                        versions: {
-                            self.state
-                                .crates
-                                .iter()
-                                .filter(|&r| r.name == p.name())
-                                .map(|r| {
-                                    Version::from(
-                                        self.state.versions.get(&r.id).map(|v| v.num.clone()),
-                                    )
-                                })
-                                .collect::<Versions>()
-                        },
-                        ..p.settings.clone()
-                    };
-                    let profile = Profile::new(p.name().into(), settings);
+                    let versions = self
+                        .state
+                        .crates
+                        .iter()
+                        .filter(|&r| r.name == p.name())
+                        .map(|r| {
+                            Version::from(self.state.versions.get(&r.id).map(|v| v.num.clone()))
+                        })
+                        .collect::<Versions>();
+                    let profile = Profile::new(p.name().into(), p.settings.clone(), Some(versions));
                     match profile {
-                        Ok(p) => {
-                            debug!("Profile: {:?}", p);
-                            p
-                        }
+                        Ok(p) => p,
                         Err(e) => {
                             warn!("Invalid profile: {:?}", e);
                             p
@@ -309,12 +310,15 @@ impl StateMachine<ProcessDatabase> {
 
         profiles
             .iter()
-            .filter(|p| p.settings.versions.is_empty())
+            .filter(|p| p.versions.is_empty())
             .for_each(|p| warn!("Profile '{}' has no versions", p.name()));
+
+        // Update profile_config with new profiles
+        let profile_config = self.state.profile_config.replace_profiles(profiles);
 
         Ok(StateMachine {
             args: self.args,
-            state: FilterSelectedCrates { profiles },
+            state: FilterSelectedCrates { profile_config },
         })
     }
 }
@@ -324,13 +328,11 @@ impl StateMachine<FilterSelectedCrates> {
     #[tracing::instrument(skip_all)]
     pub fn write_profile(self) -> Result<StateMachine<WriteProfile>> {
         debug!("Writing profile...");
+        let total_crates = self.state.profile_config.profiles().len();
         let mut output = File::create(&self.args.output_path)?;
-        output.write_all(serde_yaml::to_string(&self.state.profiles)?.as_bytes())?;
+        output.write_all(serde_yaml::to_string(&self.state.profile_config)?.as_bytes())?;
 
-        debug!(
-            "Total of {} crates included in the profile.",
-            self.state.profiles.len()
-        );
+        debug!("Total of {total_crates} crates included in the profile.",);
         info!(
             "Wrote profile to: {}",
             self.args.output_path.to_string_lossy()

@@ -1,16 +1,16 @@
 use crate::*;
 use crate::{CrateName, Profile, ProfileSettings, Profiles};
 
-#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Default, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub(crate) struct Batches {
-    batch: Vec<BatchConfig>,
+    pub batch: Vec<BatchConfig>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
-struct BatchConfig {
-    name: CrateName,
-    crates: Vec<String>,
-    settings: ProfileSettings,
+pub(crate) struct BatchConfig {
+    pub name: CrateName,
+    pub crates: Vec<String>,
+    pub settings: ProfileSettings,
 }
 
 impl TryFrom<Batches> for Profiles {
@@ -54,6 +54,11 @@ mod tests {
         let config = utils::read_profile(PATH_YAML_CONFIG).unwrap();
         let batches = serde_yaml::from_str::<Batches>(&config).unwrap();
         let profiles: Profiles = batches.try_into().unwrap();
+
+        profiles.iter().filter(|p| p.name() == "serde").for_each(|p| {
+            assert!(p.settings.std);
+            assert!(p.settings.fast_mode);
+        });
         assert!(!profiles.is_empty());
     }
 

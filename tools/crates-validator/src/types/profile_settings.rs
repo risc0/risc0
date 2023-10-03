@@ -15,8 +15,6 @@ pub struct ProfileSettings {
     pub import_str: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub custom_main: Option<String>,
-    #[serde(default = "Versions::default")]
-    pub versions: Versions,
 }
 
 impl Default for ProfileSettings {
@@ -30,7 +28,6 @@ impl Default for ProfileSettings {
             patch: None,
             import_str: None,
             custom_main: None,
-            versions: Version::Latest.into(),
         }
     }
 }
@@ -46,7 +43,6 @@ impl Merge for ProfileSettings {
             patch: self.patch.or(other.patch),
             import_str: self.import_str.or(other.import_str),
             custom_main: self.custom_main.or(other.custom_main),
-            versions: self.versions.merge(other.versions),
         }
     }
 }

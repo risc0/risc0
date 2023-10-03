@@ -8,11 +8,21 @@ pub struct Profile {
     name: CrateName,
     #[serde(flatten)]
     pub settings: ProfileSettings,
+    #[serde(default = "Versions::default")]
+    pub versions: Versions,
 }
 
 impl Profile {
-    pub fn new(name: CrateName, settings: ProfileSettings) -> Result<Self> {
-        let profile = Self { name, settings };
+    pub fn new(
+        name: CrateName,
+        settings: ProfileSettings,
+        versions: Option<Versions>,
+    ) -> Result<Self> {
+        let profile = Self {
+            name,
+            settings,
+            versions: versions.unwrap_or_default(),
+        };
         ensure!(profile.validate().is_ok(), "Invalid profile: {:?}", profile);
         Ok(profile)
     }
@@ -30,14 +40,14 @@ impl TryFrom<String> for Profile {
     type Error = anyhow::Error;
 
     fn try_from(name: String) -> Result<Self, Self::Error> {
-        Profile::new(name, ProfileSettings::default())
+        Profile::new(name, ProfileSettings::default(), None)
     }
 }
 
 impl TryFrom<(String, ProfileSettings)> for Profile {
     type Error = anyhow::Error;
     fn try_from(value: (String, ProfileSettings)) -> std::result::Result<Self, Self::Error> {
-        Profile::new(value.0, value.1)
+        Profile::new(value.0, value.1, None)
     }
 }
 
@@ -47,6 +57,7 @@ impl Merge for Profile {
         Self {
             name: self.name,
             settings: self.settings.merge(other.settings),
+            versions: self.versions.merge(other.versions),
         }
     }
 }
