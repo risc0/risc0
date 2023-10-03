@@ -249,6 +249,7 @@ impl ExitCode {
         }
     }
 
+    #[allow(dead_code)] // DO NOT MERGE(victor)
     pub(crate) fn expects_output(&self) -> bool {
         match self {
             ExitCode::Halted(_) | ExitCode::Paused(_) => true,

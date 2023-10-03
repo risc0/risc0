@@ -13,6 +13,7 @@
 // limitations under the License.
 
 use alloc::{collections::VecDeque, vec::Vec};
+use core::convert::Infallible;
 
 use risc0_binfmt::read_sha_halfs;
 use risc0_core::field::baby_bear::BabyBearElem;
@@ -61,8 +62,12 @@ pub struct SuccinctReceipt {
 }
 
 impl SuccinctReceipt {
-    /// Verify the integrity of this receipt.
-    pub fn verify_with_context(&self, ctx: &VerifierContext) -> Result<(), VerificationError> {
+    /// Verify the integrity of this receipt, ensuring the metadata is attested to by the seal.
+    pub fn verify_integrity_with_context(
+        &self,
+        ctx: &VerifierContext,
+    ) -> Result<(), VerificationError> {
+        // Assemble the list of control IDs, and therefore circuit variants, we will accept.
         let valid_ids = valid_control_ids();
         let check_code = |_, control_id: &Digest| -> Result<(), VerificationError> {
             valid_ids
@@ -71,19 +76,24 @@ impl SuccinctReceipt {
                 .map(|_| ())
                 .ok_or(VerificationError::ControlVerificationError)
         };
+
+        // All receipts from the recursion circuit use Poseidon as the FRI hash function.
         let suite = ctx
             .suites
             .get("poseidon")
             .ok_or(VerificationError::InvalidHashSuite)?;
-        // Verify the receipt itself is correct
+
+        // Verify the receipt itself is correct, and therefore the encoded globals are reliable.
         risc0_zkp::verify::verify(&CIRCUIT_CORE, suite, &self.seal, check_code)?;
-        // Extract the globals from the seal
+
+        // Extract the globals from the seal.
         let output_elems: &[BabyBearElem] =
             bytemuck::cast_slice(&self.seal[..CircuitImpl::OUTPUT_SIZE]);
         let mut seal_meta = VecDeque::new();
         for elem in output_elems {
             seal_meta.push_back(elem.as_u32())
         }
+
         // TODO: Read root hash
         seal_meta.drain(0..16);
         // Verify the output hash matches that data

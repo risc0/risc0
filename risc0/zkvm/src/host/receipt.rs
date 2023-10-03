@@ -39,7 +39,11 @@ use super::{
     control_id::{BLAKE2B_CONTROL_ID, POSEIDON_CONTROL_ID, SHA256_CONTROL_ID},
     recursion::SuccinctReceipt,
 };
-use crate::{receipt_metadata::MaybePruned, sha::Digestable, ExitCode, ReceiptMetadata};
+use crate::{
+    receipt_metadata::{Assumptions, MaybePruned, Output},
+    sha::Digestable,
+    ExitCode, ReceiptMetadata,
+};
 
 /// A receipt attesting to the execution of a Session.
 ///
@@ -125,124 +129,24 @@ pub enum InnerReceipt {
     Fake,
 }
 
-/// A receipt composed of one or more [SegmentReceipt] structs proving a single execution with
-/// continuations, and zero or more [Receipt] stucts proving any assumptions.
-#[derive(Clone, Debug, Deserialize, Serialize)]
-#[cfg_attr(test, derive(PartialEq))]
-pub struct CompositeReceipt {
-    /// Segment receipts forming the proof of a execution with continuations.
-    pub segments: Vec<SegmentReceipt>,
-
-    /// Receipts proving the validity of assumptions made during execution, for composition.
-    // TODO(victor) Possibly rename this field. It is moreso a set (unordered) of corraborrating
-    // receipt that can be used to resolve assumptions made by the guest.
-    pub assumptions: Vec<Receipt>,
-}
-
-impl CompositeReceipt {
-    // TODO(victor): Add a 'verify metadata` method that allows verification for unsuccessful
-    // execution.
-    /// Verify the integrity of this receipt.
-    pub fn verify_with_context(
-        &self,
-        ctx: &VerifierContext,
-        image_id: Digest,
-        journal: &[u8],
-    ) -> Result<(), VerificationError> {
-        // Verify the continuation, by verifying every segment receipt in order.
-        let (final_receipt, receipts) = self
-            .segments
-            .as_slice()
-            .split_last()
-            .ok_or(VerificationError::ReceiptFormatError)?;
-
-        // Verify each segment and its chaining to the next.
-        let mut prev_image_id = image_id;
-        for receipt in receipts {
-            receipt.verify_with_context(ctx)?;
-            let metadata = receipt.get_metadata()?;
-            log::debug!("metadata: {metadata:#?}");
-            if prev_image_id != metadata.pre.digest() {
-                return Err(VerificationError::ImageVerificationError);
-            }
-            if metadata.exit_code != ExitCode::SystemSplit {
-                return Err(VerificationError::UnexpectedExitCode);
-            }
-            if !metadata.output.is_none() {
-                return Err(VerificationError::ReceiptFormatError);
-            }
-            prev_image_id = metadata.post.digest();
-        }
-
-        // Verify the last receipt in the continuation.
-        final_receipt.verify_with_context(ctx)?;
-        let final_receipt_metadata = final_receipt.get_metadata()?;
-        log::debug!("final: {final_receipt_metadata:#?}");
-        if prev_image_id != final_receipt_metadata.pre.digest() {
-            return Err(VerificationError::ImageVerificationError);
-        }
-
-        // Check the exit code. This verification method requires execution to be successful.
-        // TODO(victor) Align other implementations to use the same semantics.
-        if final_receipt_metadata.exit_code != ExitCode::Halted(0) {
-            return Err(VerificationError::UnexpectedExitCode);
-        }
-
-        // Finally check the journal hash in the metadata against the expected output.
-        let decoded_journal_digest = final_receipt_metadata
-            .output
-            .as_value()
-            .map_err(|_| VerificationError::ReceiptFormatError)?
-            .as_ref()
-            .ok_or_else(|| VerificationError::ReceiptFormatError)?
-            .journal
-            .digest();
-        let is_journal_valid = journal.digest() == decoded_journal_digest;
-        if is_journal_valid {
-            log::debug!(
-                "journal: 0x{}, expected journal digest: 0x{}, decoded journal digest: 0x{}, {:?}",
-                hex::encode(journal),
-                hex::encode(journal.digest()),
-                hex::encode(decoded_journal_digest),
-                journal
-            );
-            return Err(VerificationError::JournalDigestMismatch);
-        }
-
-        Ok(())
-    }
-}
-
 impl InnerReceipt {
-    /// Verify the integrity of this receipt.
-    pub fn verify(
-        &self,
-        image_id: impl Into<Digest>,
-        journal: &[u8],
-    ) -> Result<(), VerificationError> {
-        self.verify_with_context(&VerifierContext::default(), image_id, journal)
-    }
-
-    /// Verify the integrity of this receipt.
-    pub fn verify_with_context(
+    /// Verify the integrity of this receipt, ensuring the metadata is attested to by the seal.
+    #[must_use]
+    pub fn verify_integrity_with_context(
         &self,
         ctx: &VerifierContext,
-        image_id: impl Into<Digest>,
-        journal: &[u8],
     ) -> Result<(), VerificationError> {
         match self {
-            InnerReceipt::Composite(x) => x.verify_with_context(ctx, image_id.into(), journal),
-            InnerReceipt::Succinct(x) => x.verify_with_context(ctx),
-            InnerReceipt::Fake => Self::verify_fake(),
+            InnerReceipt::Composite(x) => x.verify_integrity_with_context(ctx),
+            InnerReceipt::Succinct(x) => x.verify_integrity_with_context(ctx),
+            InnerReceipt::Fake => {
+                #[cfg(feature = "std")]
+                if crate::is_dev_mode() {
+                    return Ok(());
+                }
+                Err(VerificationError::InvalidProof)
+            }
         }
-    }
-
-    fn verify_fake() -> Result<(), VerificationError> {
-        #[cfg(feature = "std")]
-        if crate::is_dev_mode() {
-            return Ok(());
-        }
-        Err(VerificationError::InvalidProof)
     }
 
     /// Returns the [InnerReceipt::Composite] arm.
@@ -261,6 +165,140 @@ impl InnerReceipt {
         } else {
             Err(VerificationError::ReceiptFormatError)
         }
+    }
+
+    /// Extract the [ReceiptMetadata] from this receipt.
+    pub fn get_metadata(&self) -> Result<ReceiptMetadata, VerificationError> {
+        match self {
+            InnerReceipt::Composite(ref receipt) => receipt.get_metadata(),
+            InnerReceipt::Succinct(ref succint_recipt) => Ok(succint_recipt.meta.clone()),
+            InnerReceipt::Fake => unimplemented!("fake receipt does not implement metadata"),
+        }
+    }
+}
+
+/// A receipt composed of one or more [SegmentReceipt] structs proving a single execution with
+/// continuations, and zero or more [Receipt] stucts proving any assumptions.
+#[derive(Clone, Debug, Deserialize, Serialize)]
+#[cfg_attr(test, derive(PartialEq))]
+pub struct CompositeReceipt {
+    /// Segment receipts forming the proof of a execution with continuations.
+    pub segments: Vec<SegmentReceipt>,
+
+    /// An ordered list of assumptions, either proven or unresolved, made within the continuation
+    /// represented by the segment receipts. If any assumptions are unresolved, this receipt is
+    /// only _conditionally_ valid.
+    // TODO(victor): Allow for unresolved assumptions in this list.
+    pub assumptions: Vec<Receipt>,
+}
+
+impl CompositeReceipt {
+    // TODO(victor): Add a 'verify metadata` method that allows verification for unsuccessful
+    // execution.
+    /// Verify the integrity of this receipt, ensuring the metadata is attested to by the seal.
+    #[must_use]
+    pub fn verify_integrity_with_context(
+        &self,
+        ctx: &VerifierContext,
+    ) -> Result<(), VerificationError> {
+        // Verify the continuation, by verifying every segment receipt in order.
+        let (final_receipt, receipts) = self
+            .segments
+            .as_slice()
+            .split_last()
+            .ok_or(VerificationError::ReceiptFormatError)?;
+
+        // Verify each segment and its chaining to the next.
+        let mut prev_image_id = None;
+        for receipt in receipts {
+            receipt.verify_integrity_with_context(ctx)?;
+            let metadata = receipt.get_metadata()?;
+            log::debug!("metadata: {metadata:#?}");
+            if let Some(id) = prev_image_id {
+                if id != metadata.pre.digest() {
+                    return Err(VerificationError::ImageVerificationError);
+                }
+            }
+            if metadata.exit_code != ExitCode::SystemSplit {
+                return Err(VerificationError::UnexpectedExitCode);
+            }
+            if !metadata.output.is_none() {
+                return Err(VerificationError::ReceiptFormatError);
+            }
+            prev_image_id = Some(metadata.post.digest());
+        }
+
+        // Verify the last receipt in the continuation.
+        final_receipt.verify_integrity_with_context(ctx)?;
+        let final_receipt_metadata = final_receipt.get_metadata()?;
+        log::debug!("final: {final_receipt_metadata:#?}");
+        if let Some(id) = prev_image_id {
+            if id != final_receipt_metadata.pre.digest() {
+                return Err(VerificationError::ImageVerificationError);
+            }
+        }
+
+        // Verify all corroborating receipts attached to this composite receipt.
+        for receipt in self.assumptions.iter() {
+            receipt.verify_integrity_with_context(ctx)?;
+        }
+
+        // ============
+        // Check the exit code. This verification method requires execution to be successful.
+        // TODO(victor) Align other implementations to use the same semantics.
+        match final_receipt_metadata.exit_code {
+            ExitCode::Halted(0) | ExitCode::Paused(0) => {}
+            _ => return Err(VerificationError::UnexpectedExitCode),
+        }
+
+        // Finally check the output hash in the decoded metadata against the expected output.
+        let decoded_output_digest = final_receipt_metadata.output.digest();
+
+        let expected_assumptions = Assumptions(
+            self.assumptions
+                .iter()
+                .map(|a| Ok(a.get_metadata()?.into()))
+                .collect::<Result<Vec<_>, _>>()?,
+        );
+        let expected_output = Output {
+            journal: MaybePruned::Pruned(journal.digest()),
+            assumptions: MaybePruned::Pruned(expected_assumptions.digest()),
+        };
+
+        if decoded_output_digest != expected_output.digest() {
+            log::debug!(
+                "journal: 0x{}, assumptions: {:x?}, expected output digest: 0x{}, decoded output digest: 0x{}, {:?}",
+                hex::encode(journal),
+                expected_assumptions,
+                hex::encode(expected_output.digest()),
+                hex::encode(decoded_output_digest),
+                journal
+            );
+            return Err(VerificationError::JournalDigestMismatch);
+        }
+
+        Ok(())
+    }
+
+    /// Returns the [ReceiptMetadata] for this [CompositeReceipt].
+    pub fn get_metadata(&self) -> Result<ReceiptMetadata, VerificationError> {
+        let first_metadata = self
+            .segments
+            .first()
+            .ok_or(VerificationError::ReceiptFormatError)?
+            .get_metadata()?;
+        let last_metadata = self
+            .segments
+            .last()
+            .ok_or(VerificationError::ReceiptFormatError)?
+            .get_metadata()?;
+        Ok(ReceiptMetadata {
+            pre: first_metadata.pre,
+            post: last_metadata.post,
+            exit_code: last_metadata.exit_code,
+            input: first_metadata.input,
+            output: last_metadata.output,
+        })
     }
 }
 
@@ -300,42 +338,90 @@ impl Receipt {
     /// Segment has a valid receipt, and validates that these [SegmentReceipt]s
     /// stitch together correctly, and that the initial memory image matches the
     /// given `image_id` parameter.
+    #[must_use]
     pub fn verify(&self, image_id: impl Into<Digest>) -> Result<(), VerificationError> {
         self.verify_with_context(&VerifierContext::default(), image_id)
     }
 
+    // TODO(victor) Adjust this comment.
     /// Verify the integrity of this receipt.
     ///
     /// Uses the ZKP system to cryptographically verify that each constituent
     /// Segment has a valid receipt, and validates that these [SegmentReceipt]s
     /// stitch together correctly, and that the initial memory image matches the
     /// given `image_id` parameter.
+    #[must_use]
     pub fn verify_with_context(
         &self,
         ctx: &VerifierContext,
         image_id: impl Into<Digest>,
     ) -> Result<(), VerificationError> {
-        self.inner.verify_with_context(ctx, image_id, &self.journal)
+        self.inner
+            .verify_integrity_with_context(ctx, image_id, &self.journal)?;
+
+        // TODO(victor): These checks should cover all fields within the metadata and verify that
+        // the receipt represents a successful execution with the result of self.journal.
+        let metadata = self.inner.get_metadata()?;
+
+        if metadata.pre.digest() != image_id.into() {
+            return Err(VerificationError::ImageVerificationError);
+        }
+
+        // Check the exit code. This verification method requires execution to be successful.
+        match metadata.exit_code {
+            ExitCode::Halted(0) | ExitCode::Paused(0) => {}
+            _ => return Err(VerificationError::UnexpectedExitCode),
+        }
+
+        // Finally check the output hash in the decoded metadata against the expected output.
+        let decoded_output_digest = final_receipt_metadata.output.digest();
+
+        let expected_assumptions = Assumptions(
+            self.assumptions
+                .iter()
+                .map(|a| Ok(a.get_metadata()?.into()))
+                .collect::<Result<Vec<_>, _>>()?,
+        );
+        let expected_output = Output {
+            journal: MaybePruned::Pruned(journal.digest()),
+            assumptions: MaybePruned::Pruned(expected_assumptions.digest()),
+        };
+
+        if decoded_output_digest != expected_output.digest() {
+            log::debug!(
+                "journal: 0x{}, assumptions: {:x?}, expected output digest: 0x{}, decoded output digest: 0x{}, {:?}",
+                hex::encode(journal),
+                expected_assumptions,
+                hex::encode(expected_output.digest()),
+                hex::encode(decoded_output_digest),
+                journal
+            );
+            return Err(VerificationError::JournalDigestMismatch);
+        }
     }
 
-    /// Extract the [ReceiptMetadata] from this receipt for an excution session.
+    /// Verify the integrity of this receipt, ensuring the metadata is attested to by the seal.
+    #[must_use]
+    pub fn verify_integrity_with_context(
+        &self,
+        ctx: &VerifierContext,
+    ) -> Result<(), VerificationError> {
+        self.inner.verify_integrity_with_context(ctx)
+    }
+
+    /// Extract the [ReceiptMetadata] from this receipt.
     pub fn get_metadata(&self) -> Result<ReceiptMetadata, VerificationError> {
-        match self.inner {
-            InnerReceipt::Composite(CompositeReceipt { ref segments, .. }) => segments
-                .iter()
-                .last()
-                .ok_or(VerificationError::ReceiptFormatError)?
-                .get_metadata(), // DO NOT MERGE(victor): This is actually incorrect and
-            // incomplete.
-            InnerReceipt::Succinct(ref succint_recipt) => Ok(succint_recipt.meta.clone()),
-            InnerReceipt::Fake => unimplemented!("fake receipt does not implement metadata"),
-        }
+        self.inner.get_metadata()
     }
 }
 
 impl SegmentReceipt {
-    /// Verify the integrity of this receipt.
-    pub fn verify_with_context(&self, ctx: &VerifierContext) -> Result<(), VerificationError> {
+    /// Verify the integrity of this receipt, ensuring the metadata is attested to by the seal.
+    #[must_use]
+    pub fn verify_integrity_with_context(
+        &self,
+        ctx: &VerifierContext,
+    ) -> Result<(), VerificationError> {
         use hex::FromHex;
         let check_code = |_, control_id: &Digest| -> Result<(), VerificationError> {
             POSEIDON_CONTROL_ID
@@ -353,7 +439,6 @@ impl SegmentReceipt {
         risc0_zkp::verify::verify(&super::CIRCUIT, suite, &self.seal, check_code)
     }
 
-    // TODO(victor): Work on carfully understanding this function. How is the exit code set?
     /// Returns the [ReceiptMetadata] for this receipt.
     pub fn get_metadata(&self) -> Result<ReceiptMetadata, VerificationError> {
         let elems = bytemuck::cast_slice(&self.seal);
@@ -384,6 +469,7 @@ pub enum Assumption {
 }
 
 impl Assumption {
+    /// Returns the [ReceiptMetadata] for this [Assumption].
     pub fn get_metadata(&self) -> Result<MaybePruned<ReceiptMetadata>, VerificationError> {
         match self {
             Self::Proven(receipt) => Ok(receipt.get_metadata()?.into()),
@@ -435,6 +521,8 @@ fn decode_system_state_from_io(
     Ok(SystemState { pc, merkle_root })
 }
 
+// TODO(victor): Work on carefully understanding this function. How is the exit code set? Will
+// Fault and SystemSplit be distinct?
 fn decode_receipt_metadata_from_io(
     io: layout::OutBuffer,
 ) -> Result<ReceiptMetadata, VerificationError> {
@@ -448,20 +536,24 @@ fn decode_receipt_metadata_from_io(
         .pc
         .checked_sub(WORD_SIZE as u32)
         .ok_or(VerificationError::ReceiptFormatError)?;
+
     let input_bytes: Vec<u8> = io
         .tree(body.global.input)
         .get_bytes()
         .or(Err(VerificationError::ReceiptFormatError))?;
     let input = Digest::try_from(input_bytes).or(Err(VerificationError::ReceiptFormatError))?;
+
     let output_bytes: Vec<u8> = io
         .tree(body.global.output)
         .get_bytes()
         .or(Err(VerificationError::ReceiptFormatError))?;
     let output = Digest::try_from(output_bytes).or(Err(VerificationError::ReceiptFormatError))?;
+
     let sys_exit = io.get_u64(body.global.sys_exit_code) as u32;
     let user_exit = io.get_u64(body.global.user_exit_code) as u32;
     let exit_code =
         ExitCode::from_pair(sys_exit, user_exit).or(Err(VerificationError::ReceiptFormatError))?;
+
     Ok(ReceiptMetadata {
         pre: pre.into(),
         post: post.into(),
