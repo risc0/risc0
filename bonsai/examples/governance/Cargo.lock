@@ -3516,7 +3516,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-binfmt"
-version = "0.19.0-dev.1"
+version = "0.18.0"
 dependencies = [
  "anyhow",
  "elf",
@@ -3528,7 +3528,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build"
-version = "0.19.0-dev.1"
+version = "0.18.0"
 dependencies = [
  "anyhow",
  "cargo_metadata",
@@ -3543,7 +3543,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build-kernel"
-version = "0.19.0-dev.1"
+version = "0.18.0"
 dependencies = [
  "cc",
  "directories",
@@ -3555,7 +3555,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im"
-version = "0.19.0-dev.1"
+version = "0.18.0"
 dependencies = [
  "anyhow",
  "cust",
@@ -3573,7 +3573,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im-sys"
-version = "0.19.0-dev.1"
+version = "0.18.0"
 dependencies = [
  "glob",
  "risc0-build-kernel",
@@ -3583,7 +3583,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-core"
-version = "0.19.0-dev.1"
+version = "0.18.0"
 dependencies = [
  "bytemuck",
  "rand_core",
@@ -3591,7 +3591,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-sys"
-version = "0.19.0-dev.1"
+version = "0.18.0"
 dependencies = [
  "cc",
  "glob",
@@ -3601,7 +3601,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkp"
-version = "0.19.0-dev.1"
+version = "0.18.0"
 dependencies = [
  "anyhow",
  "blake2",
@@ -3628,7 +3628,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "0.19.0-dev.1"
+version = "0.18.0"
 dependencies = [
  "addr2line 0.20.0",
  "anyhow",
@@ -3667,7 +3667,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "0.19.0-dev.1"
+version = "0.18.0"
 dependencies = [
  "bytemuck",
  "getrandom",
