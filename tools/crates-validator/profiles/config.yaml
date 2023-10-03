@@ -3,11 +3,15 @@ repo:
   # fails if we use either `branch` or `tag` though. Not sure how to solve this.
   tag: v0.16.0
 
+
+# TODO(Cardosaum): Add a flag `skip` to `ProfileSettings`, and add this `skip-crates` group as a batch.
+# This way we re-use already implemented logic.
 skip-crates:
   - windows-sys
   - miow # Windows specific crate that depends on `windows-sys`
   - redox_syscall # Tools for redox OS, not supported
 
+# TODO(Cardosaum): Add batch for each group of selected crates defined at `crates/selected.json`
 batch:
   - name: crossbeam-patch
     settings:
