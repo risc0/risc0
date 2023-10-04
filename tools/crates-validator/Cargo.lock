@@ -1363,7 +1363,6 @@ dependencies = [
  "rstest",
  "semver",
  "serde",
- "serde_json",
  "serde_valid",
  "serde_yaml",
  "strum",
