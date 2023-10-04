@@ -34,3 +34,12 @@ pub mod fileno {
     pub const STDERR: u32 = 2;
     pub const JOURNAL: u32 = 3;
 }
+
+#[cfg(all(feature = "rust-runtime", target_os = "zkvm"))]
+pub mod rust_rt;
+
+#[cfg(all(feature = "export-getrandom", target_os = "zkvm"))]
+mod getrandom;
+
+#[cfg(all(feature = "export-libm", target_os = "zkvm"))]
+mod libm_extern;

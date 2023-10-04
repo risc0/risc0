@@ -18,8 +18,6 @@ use risc0_circuit_rv32im::{
     REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA,
 };
 use risc0_core::field::baby_bear::{BabyBear, Elem, ExtElem};
-#[cfg(feature = "enable-fault-proof")]
-use risc0_zkp::verify::VerificationError;
 use risc0_zkp::{
     adapter::TapsProvider,
     hal::{CircuitHal, Hal},
@@ -100,17 +98,18 @@ where
         use risc0_zkp::prove::executor::Executor;
 
         log::info!(
-            "prove_segment[{}]: po2: {}, insn_cycles: {}",
+            "prove_segment[{}]: po2: {}, cycles: {}",
             segment.index,
             segment.po2,
-            segment.insn_cycles,
+            segment.cycles,
         );
         let (hal, circuit_hal) = (self.hal_pair.hal.as_ref(), &self.hal_pair.circuit_hal);
         let hashfn = &hal.get_hash_suite().name;
 
         let io = segment.prepare_globals();
         let machine = MachineContext::new(segment);
-        let mut executor = Executor::new(&CIRCUIT, machine, segment.po2, segment.po2, &io);
+        let po2 = segment.po2 as usize;
+        let mut executor = Executor::new(&CIRCUIT, machine, po2, po2, &io);
 
         let loader = Loader::new();
         loader.load(|chunk, fini| executor.step(chunk, fini))?;

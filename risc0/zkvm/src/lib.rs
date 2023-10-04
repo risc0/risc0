@@ -18,60 +18,80 @@
 #![deny(missing_docs)]
 
 pub use anyhow::Result;
-#[cfg(all(not(target_os = "zkvm"), any(feature = "client", feature = "prove")))]
+#[cfg(not(target_os = "zkvm"))]
+#[cfg(any(feature = "client", feature = "prove"))]
 pub use bytes::Bytes;
 
 extern crate alloc;
 
 mod fault_ids;
+pub use fault_ids::{FAULT_CHECKER_ELF, FAULT_CHECKER_ID};
 #[cfg(feature = "fault-proof")]
 mod fault_monitor;
+#[cfg(feature = "fault-proof")]
+pub use self::fault_monitor::FaultCheckMonitor;
+
 pub mod guest;
 #[cfg(not(target_os = "zkvm"))]
 mod host;
-pub mod receipt_metadata;
 pub mod serde;
 pub mod sha;
 
-pub use fault_ids::{FAULT_CHECKER_ELF, FAULT_CHECKER_ID};
-#[cfg(feature = "fault-proof")]
-pub use fault_monitor::FaultCheckMonitor;
+pub mod receipt_metadata;
 pub use receipt_metadata::{ExitCode, Output, ReceiptMetadata};
-#[cfg(not(target_os = "zkvm"))]
-pub use risc0_binfmt::MemoryImage;
-pub use risc0_binfmt::{Program, SystemState};
-pub use risc0_zkvm_platform::{declare_syscall, memory::GUEST_MAX_MEM, PAGE_SIZE};
 
-#[cfg(all(not(target_os = "zkvm"), feature = "profiler"))]
+use semver::Version;
+
+/// Re-exports for recursion
+#[cfg(not(target_os = "zkvm"))]
+#[cfg(feature = "prove")]
+pub mod recursion {
+    pub use super::host::recursion::*;
+}
+
+#[cfg(not(target_os = "zkvm"))]
+#[cfg(feature = "profiler")]
 pub use self::host::server::exec::profiler::Profiler;
-#[cfg(all(not(target_os = "zkvm"), feature = "client"))]
-pub use self::host::{
-    api::client::Client as ApiClient,
-    api::Connector,
-    client::{
-        env::{ExecutorEnv, ExecutorEnvBuilder},
-        exec::TraceEvent,
-        prove::{
-            bonsai::BonsaiProver, default_prover, external::ExternalProver, Prover, ProverOpts,
-        },
-    },
-};
 #[cfg(all(not(target_os = "zkvm"), feature = "prove"))]
 pub use self::host::{
     api::server::Server as ApiServer,
     client::prove::local::LocalProver,
     server::{
-        exec::executor::Executor,
+        exec::executor::ExecutorImpl,
         prove::{get_prover_server, loader::Loader, HalPair, ProverServer},
         session::{FileSegmentRef, Segment, SegmentRef, Session, SessionEvents, SimpleSegmentRef},
+    },
+};
+#[cfg(all(not(target_os = "zkvm"), feature = "client"))]
+pub use self::host::{
+    api::{client::Client as ApiClient, Binary, Connector, SegmentInfo, SessionInfo},
+    client::{
+        env::{ExecutorEnv, ExecutorEnvBuilder},
+        exec::TraceEvent,
+        prove::{
+            bonsai::BonsaiProver, default_executor, default_prover, external::ExternalProver,
+            Executor, Prover, ProverOpts,
+        },
     },
 };
 #[cfg(not(target_os = "zkvm"))]
 pub use self::host::{
     control_id::POSEIDON_CONTROL_ID,
-    receipt::{CompositeReceipt, InnerReceipt, Receipt, SegmentReceipt, VerifierContext},
+    receipt::{InnerReceipt, Receipt, SegmentReceipt, VerifierContext},
     recursion::ALLOWED_IDS_ROOT,
 };
+#[cfg(not(target_os = "zkvm"))]
+pub use risc0_binfmt::MemoryImage;
+pub use risc0_binfmt::{Program, SystemState};
+pub use risc0_zkvm_platform::{declare_syscall, memory::GUEST_MAX_MEM, PAGE_SIZE};
+
+/// Reports the current version of this crate.
+pub const VERSION: &str = env!("CARGO_PKG_VERSION");
+
+/// Reports the current version of this crate as represented by a [semver::Version].
+pub fn get_version() -> Result<Version, semver::Error> {
+    Version::parse(VERSION)
+}
 
 /// Align the given address `addr` upwards to alignment `align`.
 ///

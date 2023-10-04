@@ -17,7 +17,11 @@ use std::time::Duration;
 use anyhow::{anyhow, bail, Context, Result};
 use bonsai_sdk::alpha::{responses::SnarkReceipt, Client};
 use risc0_build::GuestListEntry;
-use risc0_zkvm::{Executor, ExecutorEnv, MemoryImage, Program, Receipt, GUEST_MAX_MEM, PAGE_SIZE};
+use risc0_zkvm::{
+    default_executor, ExecutorEnv, MemoryImage, Program, Receipt, GUEST_MAX_MEM, PAGE_SIZE,
+};
+
+pub const POLL_INTERVAL_SEC: u64 = 4;
 
 /// Result of executing a guest image, possibly containing a proof.
 pub enum Output {
@@ -25,26 +29,19 @@ pub enum Output {
     Bonsai { snark_receipt: SnarkReceipt },
 }
 
-/// Execute and prove the guest locally, on this machine, as opposed to sending
-/// the proof request to the Bonsai service.
+/// Execute the guest locally, as opposed to sending the proof request to the
+/// Bonsai service.
 pub fn execute_locally(elf: &[u8], input: Vec<u8>) -> Result<Output> {
-    // Execute the guest program, generating the session trace needed to prove the
-    // computation.
     let env = ExecutorEnv::builder()
         .add_input(&input)
         .build()
-        .context("Failed to build exec env")?;
-    let mut exec = Executor::from_elf(env, elf).context("Failed to instantiate executor")?;
-    let session = exec
-        .run()
-        .context(format!("Failed to run executor {:?}", &input))?;
-
+        .context("Failed to build ExecutorEnv")?;
+    let exec = default_executor();
+    let session = exec.execute_elf(env, elf).context("Execution failed")?;
     Ok(Output::Execution {
-        journal: session.journal,
+        journal: session.journal.into(),
     })
 }
-
-pub const POLL_INTERVAL_SEC: u64 = 4;
 
 fn get_digest(elf: &[u8]) -> Result<String> {
     let program = Program::load_elf(elf, GUEST_MAX_MEM as u32)?;
@@ -53,7 +50,8 @@ fn get_digest(elf: &[u8]) -> Result<String> {
 }
 
 pub fn prove_alpha(elf: &[u8], input: Vec<u8>) -> Result<Output> {
-    let client = Client::from_env().context("Failed to create client from env var")?;
+    let client =
+        Client::from_env(risc0_zkvm::VERSION).context("Failed to create client from env var")?;
 
     let img_id = get_digest(elf).context("Failed to generate elf memory image")?;
 

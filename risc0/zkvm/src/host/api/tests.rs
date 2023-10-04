@@ -19,14 +19,18 @@ use std::{
 };
 
 use anyhow::Result;
-use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ID, MULTI_TEST_PATH};
+use risc0_binfmt::{MemoryImage, Program};
+use risc0_zkvm_methods::{
+    multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID, MULTI_TEST_PATH,
+};
+use risc0_zkvm_platform::{memory::GUEST_MAX_MEM, PAGE_SIZE};
 use tempfile::{tempdir, TempDir};
 use test_log::test;
 
 use super::{pb, Asset, AssetRequest, Binary, ConnectionWrapper, Connector, TcpConnection};
 use crate::{
     serde::to_vec, ApiClient, ApiServer, ExecutorEnv, ProverOpts, Receipt, SegmentReceipt,
-    VerifierContext,
+    SessionInfo, VerifierContext,
 };
 
 struct TestClientConnector {
@@ -52,7 +56,7 @@ struct TestClient {
     work_dir: TempDir,
     client: ApiClient,
     addr: SocketAddr,
-    segments: Vec<pb::SegmentInfo>,
+    segments: Vec<pb::api::SegmentInfo>,
 }
 
 impl TestClient {
@@ -72,7 +76,7 @@ impl TestClient {
         self.work_dir.path().to_path_buf()
     }
 
-    fn execute(&mut self, env: ExecutorEnv<'_>, binary: Binary) -> Result<pb::SessionInfo> {
+    fn execute(&mut self, env: ExecutorEnv<'_>, binary: Binary) -> Result<SessionInfo> {
         with_server(self.addr, || {
             let segments_out = AssetRequest::Path(self.get_work_path());
             self.client.execute(&env, binary, segments_out, |segment| {
@@ -110,7 +114,7 @@ fn with_server<T, F: FnOnce() -> Result<T>>(addr: SocketAddr, f: F) -> Result<T>
 }
 
 #[test]
-fn execute_basic() {
+fn execute_elf() {
     let input = to_vec(&MultiTestSpec::DoNothing).unwrap();
     let env = ExecutorEnv::builder().add_input(&input).build().unwrap();
     let binary = Binary::new_elf_path(MULTI_TEST_PATH);
@@ -118,7 +122,17 @@ fn execute_basic() {
 }
 
 #[test]
-fn prove_basic() {
+fn execute_image() {
+    let input = to_vec(&MultiTestSpec::DoNothing).unwrap();
+    let env = ExecutorEnv::builder().add_input(&input).build().unwrap();
+    let program = Program::load_elf(&MULTI_TEST_ELF, GUEST_MAX_MEM as u32).unwrap();
+    let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
+    let binary = image.into();
+    TestClient::new().execute(env, binary).unwrap();
+}
+
+#[test]
+fn prove_elf() {
     let input = to_vec(&MultiTestSpec::DoNothing).unwrap();
     let env = ExecutorEnv::builder().add_input(&input).build().unwrap();
     let binary = Binary::new_elf_path(MULTI_TEST_PATH);
@@ -128,7 +142,7 @@ fn prove_basic() {
 }
 
 #[test]
-fn prove_segment_basic() {
+fn prove_segment_elf() {
     let input = to_vec(&MultiTestSpec::DoNothing).unwrap();
     let env = ExecutorEnv::builder().add_input(&input).build().unwrap();
     let binary = Binary::new_elf_path(MULTI_TEST_PATH);
@@ -136,7 +150,7 @@ fn prove_segment_basic() {
     let mut client = TestClient::new();
 
     let session = client.execute(env, binary).unwrap();
-    assert_eq!(session.segments as usize, client.segments.len());
+    assert_eq!(session.segments.len(), client.segments.len());
 
     let ctx = VerifierContext::default();
     for segment in client.segments.iter() {

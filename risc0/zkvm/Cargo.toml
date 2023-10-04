@@ -35,9 +35,15 @@ cfg-if = "1.0"
 getrandom = { version = "0.2", features = ["custom"] }
 hex = { version = "0.4.3", default-features = false, features = ["alloc"] }
 libm = "0.2"
+risc0-circuit-rv32im = { workspace = true }
+risc0-core = { workspace = true }
 risc0-zkp = { workspace = true }
-risc0-zkvm-platform = { workspace = true }
+risc0-zkvm-platform = { workspace = true, features = [
+  "rust-runtime",
+  "export-getrandom",
+] }
 rrs-lib = "0.1"
+semver = { version = "1.0", default-features = false }
 serde = { version = "1.0", default-features = false, features = [
   "alloc",
   "derive",
@@ -69,7 +75,6 @@ prost = { version = "0.12", optional = true }
 rand = { version = "0.8", optional = true }
 rayon = { version = "1.5", optional = true }
 sha2 = { version = "0.10", optional = true }
-tempfile = "3"
 thiserror = { version = "1.0", optional = true }
 tracing = { version = "0.1", default-features = false, features = [
   "attributes",
@@ -87,8 +92,10 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 env_logger = "0.10"
 flate2 = "1.0"
 risc0-zkvm-methods = { workspace = true }
+serde_json = "1.0"
 serial_test = "2.0"
 tar = "0.4"
+tempfile = "3"
 test-log = { version = "0.2", features = ["trace"] }
 
 [features]
@@ -106,6 +113,15 @@ dual = []
 metal = ["prove", "risc0-circuit-rv32im/metal", "risc0-zkp/metal"]
 default = ["client", "prove"]
 disable-dev-mode = []
+# This flag uses the docker environment to build test guests such as multi-test
+# to ensure accurate cycle and segment counts. Tests that have been gated on
+# this flag measure cycles and segments. Without this flag, the rust build
+# system will generate binaries that not identical across all architectures.
+# While this is acceptable for most tests, the tests counting cycles and
+# segments will fail intermittently.
+docker = []
+# note: cfg!(feature = "fault-proof") is used as a temporary measure in addition
+# to it being used to expose functionality to the fault checker.
 fault-proof = []
 profiler = [
   "dep:addr2line",
@@ -145,6 +161,3 @@ std = [
   "risc0-zkp/std",
   "serde/std",
 ]
-
-# this is a temporary feature that will be removed after proof of fault becomes more stable
-enable-fault-proof = []

@@ -13,6 +13,8 @@
 // limitations under the License.
 
 use anyhow::Result;
+#[cfg(feature = "experimental")]
+use cargo_risczero::BuildSubcommand;
 use cargo_risczero::{Cargo, RisczeroCmd};
 use clap::Parser;
 use tracing_subscriber::EnvFilter;
@@ -28,5 +30,9 @@ fn main() -> Result<()> {
         RisczeroCmd::BuildToolchain(cmd) => cmd.run(),
         RisczeroCmd::Install(cmd) => cmd.run(),
         RisczeroCmd::New(cmd) => cmd.run(),
+        #[cfg(feature = "experimental")]
+        RisczeroCmd::BuildCrate(build) => build.run(BuildSubcommand::Build),
+        #[cfg(feature = "experimental")]
+        RisczeroCmd::Test(build) => build.run(BuildSubcommand::Test),
     }
 }

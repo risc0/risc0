@@ -481,9 +481,9 @@ impl SegmentReceipt {
         decode_receipt_metadata_from_io(layout::OutBuffer(elems))
     }
 
-    /// Return the seal for this receipt, as a slice of bytes.
-    pub fn get_seal_bytes(&self) -> &[u8] {
-        bytemuck::cast_slice(&self.seal)
+    /// Return the seal for this receipt, as a vector of bytes.
+    pub fn get_seal_bytes(&self) -> Vec<u8> {
+        self.seal.iter().flat_map(|x| x.to_le_bytes()).collect()
     }
 }
 

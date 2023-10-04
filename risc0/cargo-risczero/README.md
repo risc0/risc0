@@ -8,6 +8,9 @@ To install this Cargo subcommand, first you'll want to [install Rust][install-ru
 
 ```bash
 cargo install cargo-risczero
+
+## Installing from local source
+cargo install --path risc0/cargo-risczero
 ```
 
 After that you can verify it works via:

@@ -16,7 +16,7 @@ use std::rc::Rc;
 
 use clap::Parser;
 use risc0_zkvm::{
-    get_prover_server, Executor, ExecutorEnv, ProverOpts, ProverServer, VerifierContext,
+    get_prover_server, ExecutorEnv, ExecutorImpl, ProverOpts, ProverServer, VerifierContext,
 };
 use risc0_zkvm_methods::FIB_ELF;
 use tracing_subscriber::{prelude::*, EnvFilter};
@@ -40,8 +40,8 @@ struct Args {
 #[allow(unused)]
 struct Metrics {
     segments: usize,
-    insn_cycles: usize,
-    cycles: usize,
+    user_cycles: u64,
+    total_cycles: u64,
     seal: usize,
 }
 
@@ -67,19 +67,10 @@ fn top(prover: Rc<dyn ProverServer>, iterations: u32, skip_prover: bool) -> Metr
         .add_input(&[iterations])
         .build()
         .unwrap();
-    let mut exec = Executor::from_elf(env, FIB_ELF).unwrap();
+    let mut exec = ExecutorImpl::from_elf(env, FIB_ELF).unwrap();
     let session = exec.run().unwrap();
     let segments = session.resolve().unwrap();
-
-    let (cycles, insn_cycles) = segments
-        .iter()
-        .fold((0, 0), |(cycles, insn_cycles), segment| {
-            (
-                cycles + (1 << segment.po2),
-                insn_cycles + segment.insn_cycles,
-            )
-        });
-
+    let (total_cycles, user_cycles) = session.get_cycles().unwrap();
     let seal = if skip_prover {
         0
     } else {
@@ -97,8 +88,8 @@ fn top(prover: Rc<dyn ProverServer>, iterations: u32, skip_prover: bool) -> Metr
 
     Metrics {
         segments: segments.len(),
-        insn_cycles,
-        cycles,
+        user_cycles,
+        total_cycles,
         seal,
     }
 }

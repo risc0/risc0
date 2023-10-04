@@ -15,7 +15,6 @@ bonsai-rest-api-mock = { version = "0.1.0", default-features = false, path = "re
 bonsai-sdk = { version = "0.4.0", default-features = false, path = "sdk" }
 risc0-build = { version = "0.18.0", default-features = false, path = "../risc0/build" }
 risc0-zkvm = { version = "0.18.0", default-features = false, path = "../risc0/zkvm" }
-risc0-zkvm-platform = { version = "0.18.0", default-features = false, path = "../risc0/zkvm/platform" }
 
 [profile.bench]
 lto = true
