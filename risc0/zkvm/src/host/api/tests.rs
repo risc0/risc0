@@ -143,6 +143,6 @@ fn prove_segment_basic() {
         let opts = ProverOpts::default();
         let segment = segment.segment.clone().unwrap().try_into().unwrap();
         let receipt = client.prove_segment(opts, segment).unwrap();
-        receipt.verify_with_context(&ctx).unwrap();
+        receipt.verify_integrity_with_context(&ctx).unwrap();
     }
 }

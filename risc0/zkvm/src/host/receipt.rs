@@ -190,6 +190,11 @@ pub struct CompositeReceipt {
     /// only _conditionally_ valid.
     // TODO(victor): Allow for unresolved assumptions in this list.
     pub assumptions: Vec<Receipt>,
+
+    /// Digest of journal included in the final output of the continuation. Will be `None` if the
+    /// continuation has no output (e.g. it ended in `Fault`).
+    // NOTE: This field is needed in order to open the assumptions digest from the output digest.
+    pub journal_digest: Option<Digest>,
 }
 
 impl CompositeReceipt {
@@ -243,39 +248,8 @@ impl CompositeReceipt {
             receipt.verify_integrity_with_context(ctx)?;
         }
 
-        // ============
-        // Check the exit code. This verification method requires execution to be successful.
-        // TODO(victor) Align other implementations to use the same semantics.
-        match final_receipt_metadata.exit_code {
-            ExitCode::Halted(0) | ExitCode::Paused(0) => {}
-            _ => return Err(VerificationError::UnexpectedExitCode),
-        }
-
-        // Finally check the output hash in the decoded metadata against the expected output.
-        let decoded_output_digest = final_receipt_metadata.output.digest();
-
-        let expected_assumptions = Assumptions(
-            self.assumptions
-                .iter()
-                .map(|a| Ok(a.get_metadata()?.into()))
-                .collect::<Result<Vec<_>, _>>()?,
-        );
-        let expected_output = Output {
-            journal: MaybePruned::Pruned(journal.digest()),
-            assumptions: MaybePruned::Pruned(expected_assumptions.digest()),
-        };
-
-        if decoded_output_digest != expected_output.digest() {
-            log::debug!(
-                "journal: 0x{}, assumptions: {:x?}, expected output digest: 0x{}, decoded output digest: 0x{}, {:?}",
-                hex::encode(journal),
-                expected_assumptions,
-                hex::encode(expected_output.digest()),
-                hex::encode(decoded_output_digest),
-                journal
-            );
-            return Err(VerificationError::JournalDigestMismatch);
-        }
+        // Verify decoded output digest is consistent with the journal_digest and assumptions.
+        self.verify_output_consitency(&final_receipt_metadata)?;
 
         Ok(())
     }
@@ -292,13 +266,76 @@ impl CompositeReceipt {
             .last()
             .ok_or(VerificationError::ReceiptFormatError)?
             .get_metadata()?;
+
+        // After verifying the internally consistency of this receipt, we can use self.assumptions
+        // and self.journal_digest in place of last_metadata.output, which is equal.
+        self.verify_output_consitency(&last_metadata)?;
+        let output: Option<Output> = last_metadata
+            .exit_code
+            .expects_output()
+            .then(|| {
+                Ok(Output {
+                    journal: MaybePruned::Pruned(
+                        self.journal_digest
+                            .ok_or(VerificationError::ReceiptFormatError)?,
+                    ),
+                    // TODO(victor): Adjust this if unresolved assumptions are allowed on
+                    // CompositeReceipt.
+                    // NOTE: Proven assumptions are not included in the CompositeReceipt metadata.
+                    assumptions: Assumptions(vec![]).into(),
+                })
+            })
+            .transpose()?;
+
         Ok(ReceiptMetadata {
             pre: first_metadata.pre,
             post: last_metadata.post,
             exit_code: last_metadata.exit_code,
             input: first_metadata.input,
-            output: last_metadata.output,
+            output: output.into(),
         })
+    }
+
+    /// Check that the output fields in the given receipt metadata are consistent with the exit
+    /// code, and with the journal_digest and assumptions encoded on self.
+    fn verify_output_consitency(
+        &self,
+        metadata: &ReceiptMetadata,
+    ) -> Result<(), VerificationError> {
+        if metadata.exit_code.expects_output() {
+            let self_output = Output {
+                journal: MaybePruned::Pruned(
+                    self.journal_digest
+                        .ok_or(VerificationError::ReceiptFormatError)?,
+                ),
+                assumptions: self.assumptions_metadata()?.into(),
+            };
+            // If these digests do not match, this receipt is internally inconsistent.
+            if self_output.digest() != metadata.output.digest() {
+                return Err(VerificationError::ReceiptFormatError);
+            }
+        } else {
+            // Ensure all output fields are empty. If not, this receipt is internally inconsistent.
+            if !metadata.output.is_none() {
+                return Err(VerificationError::ReceiptFormatError);
+            }
+            if !self.assumptions.is_empty() {
+                return Err(VerificationError::ReceiptFormatError);
+            }
+            if !self.journal_digest.is_none() {
+                return Err(VerificationError::ReceiptFormatError);
+            }
+        }
+        Ok(())
+    }
+
+    fn assumptions_metadata(&self) -> Result<Assumptions, VerificationError> {
+        Ok(Assumptions(
+            self.assumptions
+                .iter()
+                .map(|a| Ok(a.get_metadata()?.into()))
+                .collect::<Result<Vec<_>, _>>()?,
+        ))
     }
 }
 
@@ -326,6 +363,7 @@ pub struct SegmentReceipt {
     pub hashfn: String,
 }
 
+// TODO(victor) Move this block up underneath the struct definition.
 impl Receipt {
     /// Construct a new Receipt
     pub fn new(inner: InnerReceipt, journal: Vec<u8>) -> Self {
@@ -356,11 +394,11 @@ impl Receipt {
         ctx: &VerifierContext,
         image_id: impl Into<Digest>,
     ) -> Result<(), VerificationError> {
-        self.inner
-            .verify_integrity_with_context(ctx, image_id, &self.journal)?;
+        self.inner.verify_integrity_with_context(ctx)?;
 
         // TODO(victor): These checks should cover all fields within the metadata and verify that
         // the receipt represents a successful execution with the result of self.journal.
+        // NOTE: Post-state digest and input digest are unconstrained by this method.
         let metadata = self.inner.get_metadata()?;
 
         if metadata.pre.digest() != image_id.into() {
@@ -374,30 +412,25 @@ impl Receipt {
         }
 
         // Finally check the output hash in the decoded metadata against the expected output.
-        let decoded_output_digest = final_receipt_metadata.output.digest();
+        let decoded_output_digest = metadata.output.digest();
 
-        let expected_assumptions = Assumptions(
-            self.assumptions
-                .iter()
-                .map(|a| Ok(a.get_metadata()?.into()))
-                .collect::<Result<Vec<_>, _>>()?,
-        );
         let expected_output = Output {
-            journal: MaybePruned::Pruned(journal.digest()),
-            assumptions: MaybePruned::Pruned(expected_assumptions.digest()),
+            journal: MaybePruned::Pruned(self.journal.digest()),
+            // It is expected that there are no (unresolved) assumptions.
+            assumptions: Assumptions(vec![]).into(),
         };
 
         if decoded_output_digest != expected_output.digest() {
             log::debug!(
-                "journal: 0x{}, assumptions: {:x?}, expected output digest: 0x{}, decoded output digest: 0x{}, {:?}",
-                hex::encode(journal),
-                expected_assumptions,
+                "journal: 0x{}, expected output digest: 0x{}, decoded output digest: 0x{}",
+                hex::encode(&self.journal),
                 hex::encode(expected_output.digest()),
                 hex::encode(decoded_output_digest),
-                journal
             );
             return Err(VerificationError::JournalDigestMismatch);
         }
+
+        Ok(())
     }
 
     /// Verify the integrity of this receipt, ensuring the metadata is attested to by the seal.

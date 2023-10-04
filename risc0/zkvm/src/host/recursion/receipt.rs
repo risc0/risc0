@@ -13,7 +13,6 @@
 // limitations under the License.
 
 use alloc::{collections::VecDeque, vec::Vec};
-use core::convert::Infallible;
 
 use risc0_binfmt::read_sha_halfs;
 use risc0_core::field::baby_bear::BabyBearElem;

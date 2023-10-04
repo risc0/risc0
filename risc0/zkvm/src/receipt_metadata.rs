@@ -249,7 +249,8 @@ impl ExitCode {
         }
     }
 
-    #[allow(dead_code)] // DO NOT MERGE(victor)
+    // Function is only used if client is enabled.
+    #[cfg(feature = "client")]
     pub(crate) fn expects_output(&self) -> bool {
         match self {
             ExitCode::Halted(_) | ExitCode::Paused(_) => true,

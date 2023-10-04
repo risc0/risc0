@@ -126,7 +126,7 @@ pub fn verify(image_id: &Digest, journal: &[u8]) -> Result<(), VerifyError> {
     };
 
     // DO NOT MERGE(victor): Calculate the ReceiptMetadata digest and add it to a
-    // running assumptions list.
+    // running assumptions list. Ensure the assumption does not itself have assumptions.
 
     Ok(())
 }
@@ -162,6 +162,7 @@ impl fmt::Display for VerifyMetadataError {
 #[cfg(feature = "std")]
 impl std::error::Error for VerifyMetadataError {}
 
+// TODO(victor): Rename verify_metdata to verify_integrity
 /// Verify that there exists a valid receipt with the specified
 /// [ReceiptMetadata].
 pub fn verify_metadata(meta: &ReceiptMetadata) -> Result<(), VerifyMetadataError> {

@@ -30,6 +30,7 @@ use risc0_zkp::{
 use super::{exec::MachineContext, HalPair, ProverServer};
 use crate::{
     host::{receipt::CompositeReceipt, CIRCUIT},
+    sha::Digestable,
     InnerReceipt, Loader, Receipt, Segment, SegmentReceipt, Session, VerifierContext,
 };
 
@@ -79,17 +80,19 @@ where
         let inner = InnerReceipt::Composite(CompositeReceipt {
             segments,
             assumptions: vec![],
+            journal_digest: session
+                .exit_code
+                .expects_output()
+                .then(|| session.journal.digest()),
         });
         let receipt = Receipt::new(inner, session.journal.clone());
         let image_id = session.segments[0].resolve()?.pre_image.compute_id();
+
+        // TODO(victor): This gives no way to get the receipt of a session that ended in failure.
+        // Consider how best to enable that functionality.
         match receipt.verify_with_context(ctx, image_id) {
             Ok(()) => Ok(receipt),
-            // proof of fault is currently in an experimental stage. If this
-            // feature is disabled, then it means that attempting the verification verify at
-            // this stage should return an error rather than a receipt.
-            #[cfg(feature = "enable-fault-proof")]
-            Err(VerificationError::ValidFaultReceipt) => Ok(receipt),
-            Err(e) => return Err(e.into()),
+            Err(e) => Err(e.into()),
         }
     }
 
@@ -147,7 +150,7 @@ where
             index: segment.index,
             hashfn: hashfn.clone(),
         };
-        receipt.verify_with_context(ctx)?;
+        receipt.verify_integrity_with_context(ctx)?;
 
         Ok(receipt)
     }
