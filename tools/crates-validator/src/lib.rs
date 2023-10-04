@@ -363,21 +363,19 @@ impl Validator {
         // Generate the methods/guest/Cargo.toml file
 
         let mut vars = BTreeMap::new();
-        let risc0_feature_std = if profile.settings.std {
-            ", features = ['std']"
-        } else {
-            ""
-        };
 
         let risc0_zkvm = self.repo.default_cargo_zkvm();
 
         let mut crate_line = format!("{} = {{ version = \"{version}\" }}", profile.name(),);
-
         if let Some(patch) = &profile.settings.patch {
             crate_line += patch;
         }
 
-        vars.insert("risc0_feature_std", risc0_feature_std);
+        profile
+            .settings
+            .std
+            .then(|| vars.insert("risc0_feature_std", ", features = ['std']"));
+
         vars.insert("crate_line", &crate_line);
         vars.insert("risc0_zkvm", &risc0_zkvm);
 
