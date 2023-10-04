@@ -104,6 +104,20 @@ impl MemoryMonitor {
         }
     }
 
+    fn check_guest_addr(addr: u32) -> Result<()> {
+        if !is_guest_memory(addr) {
+            bail!("address 0x{addr:08x} is an invalid guest address");
+        }
+        Ok(())
+    }
+
+    fn check_guest_addr_range(start_addr: u32, end_addr: u32) -> Result<()> {
+        if !is_guest_memory(start_addr) || !is_guest_memory(end_addr) {
+            bail!("address range 0x{start_addr:08x} - 0x{end_addr:08x} is outside of guest memory");
+        }
+        Ok(())
+    }
+
     pub fn load_u8(&mut self, addr: u32) -> Result<u8> {
         // log::trace!("load_u8: 0x{addr:08x}");
         let mut bytes = [0_u8];
@@ -132,9 +146,7 @@ impl MemoryMonitor {
     }
 
     pub fn load_u32_from_guest_addr(&mut self, addr: u32) -> Result<u32> {
-        if !is_guest_memory(addr) {
-            bail!("address 0x{addr:08x} is an invalid guest address");
-        }
+        Self::check_guest_addr(addr)?;
         self.load_u32(addr)
     }
 
@@ -209,10 +221,7 @@ impl MemoryMonitor {
     }
 
     pub fn load_array_from_guest_addr<const N: usize>(&mut self, addr: u32) -> Result<[u8; N]> {
-        let end_addr: u32 = addr + u32::try_from(N)?;
-        if !is_guest_memory(addr) || !is_guest_memory(end_addr) {
-            bail!("address range 0x{addr:08x} - 0x{end_addr:08x} is outside of guest memory");
-        }
+        Self::check_guest_addr_range(addr, addr + u32::try_from(N)?)?;
         self.load_array(addr)
     }
 
@@ -224,10 +233,8 @@ impl MemoryMonitor {
     pub fn load_guest_addr_from_register(&self, idx: usize) -> Result<u32> {
         // log::trace!("load_register: x{idx}");
         let addr = self.registers[idx];
-        match !is_guest_memory(addr) {
-            true => bail!("address 0x{addr:08x} is not a valid guest address"),
-            false => Ok(addr),
-        }
+        Self::check_guest_addr(addr)?;
+        Ok(addr)
     }
 
     pub fn load_registers(&self) -> [u32; REG_MAX] {
@@ -323,10 +330,7 @@ impl MemoryMonitor {
     }
 
     pub fn store_u32_to_guest_memory(&mut self, addr: u32, data: u32) -> Result<()> {
-        let end_addr: u32 = addr + 4;
-        if !is_guest_memory(addr) || !is_guest_memory(end_addr) {
-            bail!("address range 0x{addr:08x} - 0x{end_addr:08x} is outside of guest memory");
-        }
+        Self::check_guest_addr_range(addr, addr + 4)?;
         self.store_u32(addr, data)
     }
 
@@ -340,10 +344,7 @@ impl MemoryMonitor {
     }
 
     pub fn store_region_to_guest_memory(&mut self, addr: u32, slice: &[u8]) -> Result<()> {
-        let end_addr: u32 = addr + u32::try_from(slice.len())?;
-        if !is_guest_memory(addr) || !is_guest_memory(end_addr) {
-            bail!("address range 0x{addr:08x} - 0x{end_addr:08x} is outside of guest memory");
-        }
+        Self::check_guest_addr_range(addr, addr + u32::try_from(slice.len())?)?;
         self.store_region(addr, slice)
     }
 
