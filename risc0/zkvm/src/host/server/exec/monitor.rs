@@ -322,6 +322,14 @@ impl MemoryMonitor {
         Ok(())
     }
 
+    pub fn store_u32_to_guest_memory(&mut self, addr: u32, data: u32) -> Result<()> {
+        let end_addr: u32 = addr + 4;
+        if !is_guest_memory(addr) || !is_guest_memory(end_addr) {
+            bail!("address range 0x{addr:08x} - 0x{end_addr:08x} is outside of guest memory");
+        }
+        self.store_u32(addr, data)
+    }
+
     pub fn store_region(&mut self, addr: u32, slice: &[u8]) -> Result<()> {
         // log::trace!("store_region: 0x{addr:08x}");
         slice
@@ -329,6 +337,14 @@ impl MemoryMonitor {
             .enumerate()
             .try_for_each(|(i, x)| self.raw_store_u8(addr + i as u32, *x))?;
         Ok(())
+    }
+
+    pub fn store_region_to_guest_memory(&mut self, addr: u32, slice: &[u8]) -> Result<()> {
+        let end_addr: u32 = addr + u32::try_from(slice.len())?;
+        if !is_guest_memory(addr) || !is_guest_memory(end_addr) {
+            bail!("address range 0x{addr:08x} - 0x{end_addr:08x} is outside of guest memory");
+        }
+        self.store_region(addr, slice)
     }
 
     pub fn store_register(&mut self, idx: usize, data: u32) {

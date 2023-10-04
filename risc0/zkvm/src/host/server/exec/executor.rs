@@ -626,7 +626,7 @@ impl<'a> ExecutorImpl<'a> {
         }
 
         self.monitor
-            .store_region(out_state_ptr, bytemuck::cast_slice(&state))?;
+            .store_region_to_guest_memory(out_state_ptr, bytemuck::cast_slice(&state))?;
 
         Ok(OpCodeResult::new(
             self.pc + WORD_SIZE as u32,
@@ -681,7 +681,7 @@ impl<'a> ExecutorImpl<'a> {
             .enumerate()
         {
             self.monitor
-                .store_u32(z_ptr + (i * WORD_SIZE) as u32, word.to_le())?;
+                .store_u32_to_guest_memory(z_ptr + (i * WORD_SIZE) as u32, word.to_le())?;
         }
 
         Ok(OpCodeResult::new(
