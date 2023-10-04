@@ -131,6 +131,13 @@ impl MemoryMonitor {
         Ok(u32::from_le_bytes(bytes))
     }
 
+    pub fn load_u32_from_guest_addr(&mut self, addr: u32) -> Result<u32> {
+        if !is_guest_memory(addr) {
+            bail!("address 0x{addr:08x} is an invalid guest address");
+        }
+        self.load_u32(addr)
+    }
+
     fn get_page_index(&self, addr: u32) -> Result<u32> {
         let page_idx = self.image.info.get_page_index(addr);
         if self.num_pages <= page_idx as usize {
@@ -199,6 +206,14 @@ impl MemoryMonitor {
             vals.push(self.load_u8(addr + i as u32)?);
         }
         Ok(array::from_fn(|idx| vals[idx]))
+    }
+
+    pub fn load_array_from_guest_addr<const N: usize>(&mut self, addr: u32) -> Result<[u8; N]> {
+        let end_addr: u32 = addr + u32::try_from(N)?;
+        if !is_guest_memory(addr) || !is_guest_memory(end_addr) {
+            bail!("address range 0x{addr:08x} - 0x{end_addr:08x} is outside of guest memory");
+        }
+        self.load_array(addr)
     }
 
     pub fn load_register(&self, idx: usize) -> u32 {

@@ -553,11 +553,11 @@ impl<'a> ExecutorImpl<'a> {
 
     fn ecall_halt(&mut self) -> Result<OpCodeResult> {
         let tot_reg = self.monitor.load_register(REG_A0);
-        let output_ptr = self.monitor.load_guest_addr_from_register(REG_A1)?; // TODO Fails basic() test
+        let output_ptr = self.monitor.load_guest_addr_from_register(REG_A1)?;
         let halt_type = tot_reg & 0xff;
         let user_exit = (tot_reg >> 8) & 0xff;
         self.monitor
-            .load_array::<{ DIGEST_WORDS * WORD_SIZE }>(output_ptr)?;
+            .load_array_from_guest_addr::<{ DIGEST_WORDS * WORD_SIZE }>(output_ptr)?;
 
         match halt_type {
             halt::TERMINATE => Ok(OpCodeResult::new(
@@ -578,7 +578,7 @@ impl<'a> ExecutorImpl<'a> {
         log::debug!("ecall(input)");
         let in_addr = self.monitor.load_guest_addr_from_register(REG_A0)?;
         self.monitor
-            .load_array::<{ DIGEST_WORDS * WORD_SIZE }>(in_addr)?;
+            .load_array_from_guest_addr::<{ DIGEST_WORDS * WORD_SIZE }>(in_addr)?;
         Ok(OpCodeResult::new(self.pc + WORD_SIZE as u32, None, 0))
     }
 
@@ -589,7 +589,7 @@ impl<'a> ExecutorImpl<'a> {
         let mut block2_ptr = self.monitor.load_guest_addr_from_register(REG_A3)?;
         let count = self.monitor.load_register(REG_A4);
 
-        let in_state: [u8; DIGEST_BYTES] = self.monitor.load_array(in_state_ptr)?;
+        let in_state: [u8; DIGEST_BYTES] = self.monitor.load_array_from_guest_addr(in_state_ptr)?;
         let mut state: [u32; DIGEST_WORDS] = bytemuck::cast_slice(&in_state).try_into().unwrap();
         for word in &mut state {
             *word = word.to_be();
@@ -599,11 +599,14 @@ impl<'a> ExecutorImpl<'a> {
         for _ in 0..count {
             let mut block = [0u32; BLOCK_WORDS];
             for (i, word) in block.iter_mut().enumerate() {
-                *word = self.monitor.load_u32(block1_ptr + (i * WORD_SIZE) as u32)?;
+                *word = self
+                    .monitor
+                    .load_u32_from_guest_addr(block1_ptr + (i * WORD_SIZE) as u32)?;
             }
             for i in 0..DIGEST_WORDS {
-                block[DIGEST_WORDS + i] =
-                    self.monitor.load_u32(block2_ptr + (i * WORD_SIZE) as u32)?;
+                block[DIGEST_WORDS + i] = self
+                    .monitor
+                    .load_u32_from_guest_addr(block2_ptr + (i * WORD_SIZE) as u32)?;
             }
             log::debug!("Compressing block {block:02x?}");
             sha2::compress256(
@@ -645,7 +648,10 @@ impl<'a> ExecutorImpl<'a> {
         let mut load_bigint_le_bytes = |ptr: u32| -> Result<[u8; bigint::WIDTH_BYTES]> {
             let mut arr = [0u32; bigint::WIDTH_WORDS];
             for (i, word) in arr.iter_mut().enumerate() {
-                *word = self.monitor.load_u32(ptr + (i * WORD_SIZE) as u32)?.to_le();
+                *word = self
+                    .monitor
+                    .load_u32_from_guest_addr(ptr + (i * WORD_SIZE) as u32)?
+                    .to_le();
             }
             Ok(bytemuck::cast(arr))
         };
