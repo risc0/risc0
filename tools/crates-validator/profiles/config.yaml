@@ -1,9 +1,3 @@
-repo:
-  # NOTE: With `path` (passing a local folder), it works. The compilation step
-  # fails if we use either `branch` or `tag` though. Not sure how to solve this.
-  tag: v0.16.0
-
-
 # TODO(Cardosaum): Add a flag `skip` to `ProfileSettings`, and add this `skip-crates` group as a batch.
 # This way we re-use already implemented logic.
 skip-crates:
