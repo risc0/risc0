@@ -126,7 +126,10 @@ pub enum InnerReceipt {
     Succinct(SuccinctReceipt),
 
     /// A fake receipt for testing and development.
-    Fake,
+    Fake {
+        /// [ReceiptMetadata] for this fake receipt.
+        metadata: ReceiptMetadata,
+    },
 }
 
 impl InnerReceipt {
@@ -139,7 +142,7 @@ impl InnerReceipt {
         match self {
             InnerReceipt::Composite(x) => x.verify_integrity_with_context(ctx),
             InnerReceipt::Succinct(x) => x.verify_integrity_with_context(ctx),
-            InnerReceipt::Fake => {
+            InnerReceipt::Fake { .. } => {
                 #[cfg(feature = "std")]
                 if crate::is_dev_mode() {
                     return Ok(());
@@ -172,7 +175,7 @@ impl InnerReceipt {
         match self {
             InnerReceipt::Composite(ref receipt) => receipt.get_metadata(),
             InnerReceipt::Succinct(ref succint_recipt) => Ok(succint_recipt.meta.clone()),
-            InnerReceipt::Fake => unimplemented!("fake receipt does not implement metadata"),
+            InnerReceipt::Fake { metadata } => Ok(metadata.clone()),
         }
     }
 }

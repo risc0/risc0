@@ -52,7 +52,11 @@ impl ProverServer for DevModeProver {
             )
         }
 
-        Ok(Receipt::new(InnerReceipt::Fake, session.journal.clone()))
+        let metadata = session.get_metadata()?;
+        Ok(Receipt::new(
+            InnerReceipt::Fake { metadata },
+            session.journal.clone(),
+        ))
     }
 
     fn prove_segment(&self, _ctx: &VerifierContext, _segment: &Segment) -> Result<SegmentReceipt> {
