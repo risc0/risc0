@@ -118,17 +118,7 @@ pub struct CrateProfile {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ProfileConfig {
     pub skip_crates: Profiles,
-    pub profiles: Profiles, // TODO(Cardosaum): Refactor
-                            // /// Define which Github branch should be used for templates and crate
-                            // /// imports
-                            // pub risc0_gh_branch: Option<String>,
-                            // /// Directory where risc0 is for templates and crate imports
-                            // pub risc0_path: Option<String>,
-                            // /// Enables `RISC0_EXPERIMENTAL_PREFLIGHT`
-                            // #[serde(default = "bool::default")]
-                            // pub fast_mode: bool,
-                            // /// Array of [CrateProfile]
-                            // pub profiles: RefCell<Vec<CrateProfile>>,
+    pub profiles: Profiles,
 }
 
 impl ProfileConfig {
