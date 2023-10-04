@@ -20,6 +20,7 @@ use std::{
     collections::{BTreeMap, HashSet},
     fs::File,
     io::{BufRead, BufReader, Write},
+    ops::Not,
     path::{Path, PathBuf},
     process::Command,
     vec,
@@ -383,32 +384,22 @@ impl Validator {
         Self::render_file(&cargo_toml_file, CARGO_TOML_TEMPLATE, vars)?;
 
         // Generate the main.rs file
-
         let mut vars = BTreeMap::new();
-        vars.insert(
-            "no_std_line",
-            if profile.settings.std {
-                ""
-            } else {
-                "#![no_std]"
-            },
-        );
-        vars.insert(
-            "use_lines",
-            if let Some(import_str) = &profile.settings.import_str {
-                import_str
-            } else {
-                ""
-            },
-        );
-        vars.insert(
-            "main_body",
-            if let Some(main_body) = &profile.settings.custom_main {
-                main_body
-            } else {
-                ""
-            },
-        );
+        profile
+            .settings
+            .std
+            .not()
+            .then(|| vars.insert("no_std_line", "#![no_std]"));
+        profile
+            .settings
+            .import_str
+            .as_deref()
+            .map(|import_str| vars.insert("use_lines", import_str));
+        profile
+            .settings
+            .custom_main
+            .as_deref()
+            .map(|main_body| vars.insert("main_body", main_body));
 
         Self::render_file(&main_file, MAIN_RS_TEMPLATE, vars)?;
 
