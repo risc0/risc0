@@ -65,7 +65,8 @@ mod tests {
 
     use super::*;
     use crate::{
-        parser::{constants::PATH_YAML_CONFIG, test_helpers::profile_with_settings, utils},
+        constants::PATH_YAML_CONFIG,
+        parser::{test_helpers::profile_with_settings, utils},
         types::traits::Merge,
     };
 

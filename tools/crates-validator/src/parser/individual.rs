@@ -29,8 +29,11 @@ impl From<Individual> for Profiles {
 mod tests {
     use std::collections::HashSet;
 
-    use crate::{parser::{constants::PATH_YAML_CONFIG, utils}, types::{profile::Profile, profile_settings::ProfileSettings}};
-
+    use crate::{
+        constants::PATH_YAML_CONFIG,
+        parser::utils,
+        types::{profile::Profile, profile_settings::ProfileSettings},
+    };
 
     use super::*;
 

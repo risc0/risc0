@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+pub mod constants;
 pub mod parser;
 pub mod types;
 
@@ -29,7 +30,12 @@ use handlebars::Handlebars;
 use serde::{Deserialize, Serialize};
 use tempfile::tempdir;
 use tracing::{debug, error, info, warn};
-use types::{aliases::Profiles, profile::Profile, repo::Repo, version::Version};
+use types::{
+    aliases::Profiles,
+    profile::Profile,
+    repo::{Repo, RepoCargoString, Value as _},
+    version::Version,
+};
 
 pub mod gen_profiles;
 
@@ -347,23 +353,7 @@ impl Validator {
         let methods_toml = methods_dir.join("Cargo.toml");
 
         let mut vars = BTreeMap::new();
-        let risc0_build = match self.repo() {
-            Repo::Tag(_) => {
-                format!(
-                    "git = \"https://github.com/risc0/risc0.git\", tag = \"{}\"",
-                    self.repo().value()
-                )
-            }
-            Repo::Branch(_) => {
-                format!(
-                    "git = \"https://github.com/risc0/risc0.git\", branch = \"{}\"",
-                    self.repo().value()
-                )
-            }
-            Repo::Path(_) => {
-                format!("path = \"{}/risc0/build\"", self.repo().value())
-            }
-        };
+        let risc0_build = self.repo.default_cargo_build();
 
         vars.insert("risc0_build", risc0_build.as_str());
 
@@ -378,21 +368,7 @@ impl Validator {
             ""
         };
 
-        let risc0_zkvm = match self.repo() {
-            Repo::Tag(_) => {
-                format!(
-                    "git = \"https://github.com/risc0/risc0.git\", tag = \"{}\"",
-                    self.repo().value()
-                )
-            }
-            Repo::Branch(_) => {
-                format!(
-                    "git = \"https://github.com/risc0/risc0.git\", branch = \"{}\"",
-                    self.repo().value()
-                )
-            }
-            Repo::Path(_) => format!("path = \"{}/risc0/zkvm\"", self.repo().value()),
-        };
+        let risc0_zkvm = self.repo.default_cargo_zkvm();
 
         let mut crate_line = format!("{} = {{ version = \"{version}\" }}", profile.name(),);
 

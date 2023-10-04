@@ -36,7 +36,8 @@ impl TryFrom<SkipCrates> for Profiles {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::parser::{constants::PATH_YAML_CONFIG, test_helpers::profile_from_name, utils};
+    use crate::parser::{test_helpers::profile_from_name, utils};
+    use crate::constants::PATH_YAML_CONFIG;
 
     #[test]
     fn can_parse_file() {

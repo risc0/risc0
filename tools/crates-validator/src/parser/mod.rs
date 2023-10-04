@@ -22,7 +22,6 @@ use crate::{
 };
 
 mod batch;
-mod constants;
 mod individual;
 mod skip_crates;
 mod utils;
@@ -74,8 +73,7 @@ impl TryFrom<Parser> for ProfileConfig {
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    use constants::PATH_YAML_CONFIG;
+    use crate::constants::PATH_YAML_CONFIG;
 
     #[test]
     fn can_parse_yaml() {
