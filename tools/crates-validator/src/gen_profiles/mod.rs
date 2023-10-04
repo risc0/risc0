@@ -321,11 +321,6 @@ impl StateMachine<ProcessDatabase> {
             })
             .collect();
 
-        profiles
-            .iter()
-            .filter(|p| p.versions.is_empty())
-            .for_each(|p| warn!("Profile '{}' has no versions", p.name()));
-
         // Update profile_config with new profiles
         let profile_config = self.state.profile_config.replace_profiles(profiles);
 
