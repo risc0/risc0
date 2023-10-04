@@ -30,39 +30,62 @@ pub(crate) struct Bincode<T>(pub T);
 
 #[async_trait]
 impl<T, S, B> FromRequest<S, B> for Bincode<T>
-where
-    T: DeserializeOwned,
-    B: HttpBody + Send + 'static,
-    B::Data: Send,
-    B::Error: std::error::Error + Send + Sync,
-    S: Send + Sync,
+    where
+        T: DeserializeOwned,
+        B: HttpBody + Send + 'static,
+        B::Data: Send,
+        B::Error: std::error::Error + Send + Sync,
+        S: Send + Sync,
 {
     type Rejection = Response;
 
     async fn from_request(req: Request<B>, state: &S) -> Result<Self, Self::Rejection> {
-        if !octet_stream_content_type(req.headers()) {
-            return Err((
-                StatusCode::UNSUPPORTED_MEDIA_TYPE,
-                "Expected request with `Content-Type: application/octet-stream`",
-            )
-                .into_response());
+
+        if octet_stream_content_type(req.headers()) {
+            let bytes = Bytes::from_request(req, state).await.map_err(IntoResponse::into_response)?;
+
+            let result = bincode::deserialize(&bytes).context("failed to deserialize");
+
+            let value = result.map_err(|err: anyhow::Error| {
+                (
+                    StatusCode::BAD_REQUEST,
+                    format!("Failed to parse request body: {err}"),
+                ).into_response()
+            })?;
+
+            return Ok(Bincode(value));
         }
 
-        let bytes = Bytes::from_request(req, state)
-            .await
-            .map_err(IntoResponse::into_response)?;
+        if json_content_type(req.headers()) {
+            let bytes = Bytes::from_request(req, state).await.map_err(IntoResponse::into_response)?;
 
-        let result = bincode::deserialize(&bytes).context("failed to deserialize");
+            let bytes_vec = &bytes.to_vec();
 
-        let value = result.map_err(|err: anyhow::Error| {
-            (
+            let json_str = std::str::from_utf8(bytes_vec).map_err(|err| {(
                 StatusCode::BAD_REQUEST,
                 format!("Failed to parse request body: {err}"),
-            )
-                .into_response()
-        })?;
+            ).into_response()})?;
 
-        Ok(Bincode(value))
+            let result: Result<T, anyhow::Error> = serde_json
+                ::from_str(&json_str)
+                .context("failed to deserialize");
+
+            let value = result.map_err(|err: anyhow::Error| {
+                (
+                    StatusCode::BAD_REQUEST,
+                    format!("Failed to parse request body: {err}"),
+                ).into_response()
+            })?;
+
+            return Ok(Bincode(value));
+        }
+
+        Err(
+            (
+                StatusCode::UNSUPPORTED_MEDIA_TYPE,
+                "Expected request with `Content-Type: application/octet-stream`",
+            ).into_response()
+        )
     }
 }
 
@@ -71,4 +94,11 @@ fn octet_stream_content_type(headers: &HeaderMap) -> bool {
         return false;
     };
     content_type == "application/octet-stream"
+}
+
+fn json_content_type(headers: &HeaderMap) -> bool {
+    let Some(content_type) = headers.get(header::CONTENT_TYPE) else {
+        return false;
+    };
+    content_type == "application/json"
 }
