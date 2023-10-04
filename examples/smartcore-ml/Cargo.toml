@@ -7,8 +7,11 @@ edition = "2021"
 risc0-zkvm = { path = "../../risc0/zkvm" }
 rmp-serde = "1.1"
 serde_json = "1.0"
-smartcore = { path = "../../risc0/smartcore", features = ["serde"]}
+smartcore = { version = "0.3.2", features = ["serde"]}
 smartcore-ml-methods = { path = "methods" }
+
+[patch.crates-io]
+smartcore = { git = "https://github.com/risc0/smartcore.git" }
 
 [features]
 cuda = ["risc0-zkvm/cuda"]
