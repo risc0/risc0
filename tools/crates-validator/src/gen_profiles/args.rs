@@ -21,7 +21,7 @@ pub struct Args {
     #[arg(short, long)]
     pub(crate) db_path: Option<std::path::PathBuf>,
 
-    /// Sets the output location of the json [ProfileConfig]
+    /// Sets the output location of the yaml [ProfileConfig]
     #[arg(short, long)]
     pub(crate) output_path: std::path::PathBuf,
 

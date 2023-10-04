@@ -24,8 +24,8 @@ use tracing_subscriber::EnvFilter;
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
 struct Args {
-    /// Path to json version of [ProfileConfig]
-    #[arg(short = 'P', long, default_value = "./profiles/primary.json")]
+    /// Path to YAML version of [ProfileConfig]
+    #[arg(short = 'P', long, default_value = "./profiles/primary.yaml")]
     profiles_path: PathBuf,
 
     /// Run just a single crate from the [ProfileConfig]

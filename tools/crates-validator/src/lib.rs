@@ -113,7 +113,7 @@ pub struct CrateProfile {
 
 /// Top level profile config
 ///
-/// The primary body of the JSON version of the config.
+/// The primary body of the YAML version of the config.
 /// Defines the global variables for a given crates testing run.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ProfileConfig {
