@@ -175,11 +175,11 @@ impl RepoCargoString for PathRepo {
     }
 
     fn default_cargo_build(&self) -> String {
-        format!("path = \"{}/{}\"", RISC_ZERO_REPO_PATH_BUILD, self.path)
+        format!("path = \"{}/{}\"", self.path, RISC_ZERO_REPO_PATH_BUILD)
     }
 
     fn default_cargo_zkvm(&self) -> String {
-        format!("path = \"{}/{}\"", RISC_ZERO_REPO_PATH_ZKVM, self.path)
+        format!("path = \"{}/{}\"", self.path, RISC_ZERO_REPO_PATH_ZKVM)
     }
 }
 
@@ -214,5 +214,3 @@ impl Value for Repo {
         }
     }
 }
-
-//
