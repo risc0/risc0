@@ -15,7 +15,8 @@
 use anyhow::{bail, Result};
 
 use crate::{
-    InnerReceipt, ProverServer, Receipt, Segment, SegmentReceipt, Session, VerifierContext,
+    host::receipt::{InnerReceipt, SegmentReceipt},
+    ProverServer, Receipt, Segment, Session, VerifierContext,
 };
 
 /// An implementation of a [ProverServer] for development and testing purposes.

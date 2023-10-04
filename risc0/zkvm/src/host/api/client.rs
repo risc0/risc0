@@ -24,8 +24,9 @@ use super::{
 };
 use crate::{
     get_version,
-    host::{api::SegmentInfo, client::prove::get_r0vm_path, recursion::SuccinctReceipt},
-    ExecutorEnv, ProverOpts, Receipt, SegmentReceipt,
+    host::receipt::{SegmentReceipt, SuccinctReceipt},
+    host::{api::SegmentInfo, client::prove::get_r0vm_path},
+    ExecutorEnv, ProverOpts, Receipt,
 };
 
 /// A client implementation for interacting with a zkVM server.

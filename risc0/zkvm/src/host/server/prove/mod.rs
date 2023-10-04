@@ -41,8 +41,8 @@ use risc0_zkvm_platform::{memory::GUEST_MAX_MEM, PAGE_SIZE, WORD_SIZE};
 
 use self::{dev_mode::DevModeProver, prover_impl::ProverImpl};
 use crate::{
-    is_dev_mode, ExecutorEnv, ExecutorImpl, ProverOpts, Receipt, Segment, SegmentReceipt, Session,
-    VerifierContext,
+    host::receipt::SegmentReceipt, is_dev_mode, ExecutorEnv, ExecutorImpl, ProverOpts, Receipt,
+    Segment, Session, VerifierContext,
 };
 
 /// A ProverServer can execute a given [MemoryImage] and produce a [Receipt]

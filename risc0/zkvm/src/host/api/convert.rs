@@ -21,8 +21,9 @@ use risc0_binfmt::{MemoryImage, PageTableInfo, SystemState};
 use risc0_zkp::core::digest::Digest;
 
 use crate::{
-    host::recursion::SuccinctReceipt, CompositeReceipt, ExitCode, InnerReceipt, ProverOpts,
-    Receipt, ReceiptMetadata, SegmentReceipt, TraceEvent,
+    host::receipt::{CompositeReceipt, InnerReceipt, SegmentReceipt},
+    host::recursion::SuccinctReceipt,
+    ExitCode, ProverOpts, Receipt, ReceiptMetadata, TraceEvent,
 };
 
 use super::{malformed_err, path_to_string, pb, Asset, AssetRequest, Binary, BinaryKind};
@@ -374,11 +375,17 @@ impl From<InnerReceipt> for pb::core::InnerReceipt {
     fn from(value: InnerReceipt) -> Self {
         Self {
             kind: Some(match value {
-                InnerReceipt::Flat(inner) => pb::core::inner_receipt::Kind::Flat(inner.into()),
+                InnerReceipt::Composite(inner) => {
+                    pb::core::inner_receipt::Kind::Composite(inner.into())
+                }
                 InnerReceipt::Succinct(inner) => {
                     pb::core::inner_receipt::Kind::Succinct(inner.into())
                 }
-                InnerReceipt::Fake => pb::core::inner_receipt::Kind::Fake(pb::core::FakeReceipt {}),
+                InnerReceipt::Fake { metadata } => {
+                    pb::core::inner_receipt::Kind::Fake(pb::core::FakeReceipt {
+                        metadata: Some(metadata.into()),
+                    })
+                }
             }),
         }
     }
@@ -389,30 +396,42 @@ impl TryFrom<pb::core::InnerReceipt> for InnerReceipt {
 
     fn try_from(value: pb::core::InnerReceipt) -> Result<Self> {
         Ok(match value.kind.ok_or(malformed_err())? {
-            pb::core::inner_receipt::Kind::Flat(inner) => Self::Flat(inner.try_into()?),
+            pb::core::inner_receipt::Kind::Composite(inner) => Self::Composite(inner.try_into()?),
             pb::core::inner_receipt::Kind::Succinct(inner) => Self::Succinct(inner.try_into()?),
-            pb::core::inner_receipt::Kind::Fake(_) => Self::Fake,
+            pb::core::inner_receipt::Kind::Fake(inner) => Self::Fake {
+                metadata: inner.metadata.ok_or(malformed_err())?.try_into()?,
+            },
         })
     }
 }
 
-impl From<SegmentReceipts> for pb::core::SegmentReceipts {
-    fn from(value: SegmentReceipts) -> Self {
+impl From<CompositeReceipt> for pb::core::CompositeReceipt {
+    fn from(value: CompositeReceipt) -> Self {
         Self {
-            inner: value.0.iter().map(|x| (*x).clone().into()).collect(),
+            segments: value.segments.into_iter().map(|s| s.into()).collect(),
+            assumptions: value.assumptions.into_iter().map(|a| a.into()).collect(),
+            journal_digest: value.journal_digest.map(|d| d.into()),
         }
     }
 }
 
-impl TryFrom<pb::core::SegmentReceipts> for SegmentReceipts {
+impl TryFrom<pb::core::CompositeReceipt> for CompositeReceipt {
     type Error = anyhow::Error;
 
-    fn try_from(value: pb::core::SegmentReceipts) -> Result<Self> {
-        let mut inner = Vec::with_capacity(value.inner.len());
-        for item in value.inner {
-            inner.push(item.try_into()?);
-        }
-        Ok(Self(inner))
+    fn try_from(value: pb::core::CompositeReceipt) -> Result<Self> {
+        Ok(Self {
+            segments: value
+                .segments
+                .into_iter()
+                .map(|s| s.try_into())
+                .collect::<Result<Vec<_>>>()?,
+            assumptions: value
+                .assumptions
+                .into_iter()
+                .map(|a| a.try_into())
+                .collect::<Result<Vec<_>>>()?,
+            journal_digest: value.journal_digest.map(|d| d.try_into()).transpose()?,
+        })
     }
 }
 

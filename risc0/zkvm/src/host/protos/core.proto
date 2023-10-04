@@ -29,14 +29,16 @@ message Receipt {
 
 message InnerReceipt {
   oneof kind {
-    SegmentReceipts flat = 1;
+    CompositeReceipt composite = 1;
     SuccinctReceipt succinct = 2;
     FakeReceipt fake = 3;
   }
 }
 
-message SegmentReceipts {
-  repeated SegmentReceipt inner = 1;
+message CompositeReceipt {
+  repeated SegmentReceipt segments = 1;
+  repeated InnerReceipt assumptions = 2;
+  optional Digest journal_digest = 3;
 }
 
 message SegmentReceipt {
@@ -66,7 +68,9 @@ message SystemState {
   Digest merkle_root = 2;
 }
 
-message FakeReceipt {}
+message FakeReceipt {
+  ReceiptMetadata metadata = 1;
+}
 
 message Digest {
   repeated uint32 words = 1;

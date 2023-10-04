@@ -35,15 +35,15 @@ use risc0_zkp::{
 use risc0_zkvm_platform::WORD_SIZE;
 use serde::{Deserialize, Serialize};
 
-use super::{
-    control_id::{BLAKE2B_CONTROL_ID, POSEIDON_CONTROL_ID, SHA256_CONTROL_ID},
-    recursion::SuccinctReceipt,
-};
+use super::control_id::{BLAKE2B_CONTROL_ID, POSEIDON_CONTROL_ID, SHA256_CONTROL_ID};
 use crate::{
     receipt_metadata::{Assumptions, MaybePruned, Output},
     sha::Digestable,
     ExitCode, ReceiptMetadata,
 };
+
+// Make succint receipt available through this `receipt` module.
+pub use super::recursion::SuccinctReceipt;
 
 /// A receipt attesting to the execution of a Session.
 ///
@@ -112,6 +112,106 @@ pub struct Receipt {
     /// This data is cryptographically authenticated in
     /// [Receipt::verify].
     pub journal: Vec<u8>,
+}
+
+impl Receipt {
+    /// Construct a new Receipt
+    pub fn new(inner: InnerReceipt, journal: Vec<u8>) -> Self {
+        Self { inner, journal }
+    }
+
+    /// Verify the integrity of this receipt.
+    ///
+    /// Uses the ZKP system to cryptographically verify that each constituent
+    /// Segment has a valid receipt, and validates that these [SegmentReceipt]s
+    /// stitch together correctly, and that the initial memory image matches the
+    /// given `image_id` parameter.
+    #[must_use]
+    pub fn verify(&self, image_id: impl Into<Digest>) -> Result<(), VerificationError> {
+        self.verify_with_context(&VerifierContext::default(), image_id)
+    }
+
+    // TODO(victor) Adjust this comment.
+    /// Verify the integrity of this receipt.
+    ///
+    /// Uses the ZKP system to cryptographically verify that each constituent
+    /// Segment has a valid receipt, and validates that these [SegmentReceipt]s
+    /// stitch together correctly, and that the initial memory image matches the
+    /// given `image_id` parameter.
+    #[must_use]
+    pub fn verify_with_context(
+        &self,
+        ctx: &VerifierContext,
+        image_id: impl Into<Digest>,
+    ) -> Result<(), VerificationError> {
+        self.inner.verify_integrity_with_context(ctx)?;
+
+        // TODO(victor): These checks should cover all fields within the metadata and verify that
+        // the receipt represents a successful execution with the result of self.journal.
+        // NOTE: Post-state digest and input digest are unconstrained by this method.
+        let metadata = self.inner.get_metadata()?;
+
+        if metadata.pre.digest() != image_id.into() {
+            return Err(VerificationError::ImageVerificationError);
+        }
+
+        // Check the exit code. This verification method requires execution to be successful.
+        match metadata.exit_code {
+            ExitCode::Halted(0) | ExitCode::Paused(0) => {}
+            _ => return Err(VerificationError::UnexpectedExitCode),
+        }
+
+        // Finally check the output hash in the decoded metadata against the expected output.
+        let decoded_output_digest = metadata.output.digest();
+
+        let expected_output = Output {
+            journal: MaybePruned::Pruned(self.journal.digest()),
+            // It is expected that there are no (unresolved) assumptions.
+            assumptions: Assumptions(vec![]).into(),
+        };
+
+        if decoded_output_digest != expected_output.digest() {
+            log::debug!(
+                "journal: 0x{}, expected output digest: 0x{}, decoded output digest: 0x{}",
+                hex::encode(&self.journal),
+                hex::encode(expected_output.digest()),
+                hex::encode(decoded_output_digest),
+            );
+            return Err(VerificationError::JournalDigestMismatch);
+        }
+
+        Ok(())
+    }
+
+    /// Verify the integrity of this receipt, ensuring the metadata is attested to by the seal.
+    #[must_use]
+    pub fn verify_integrity_with_context(
+        &self,
+        ctx: &VerifierContext,
+    ) -> Result<(), VerificationError> {
+        self.inner.verify_integrity_with_context(ctx)?;
+
+        // Check that self.journal is attested to by the the inner receipt.
+        let metadata = self.inner.get_metadata()?;
+        let expected_output = metadata.exit_code.expects_output().then(|| Output {
+            journal: MaybePruned::Pruned(self.journal.digest()),
+            // TODO(victor): It would be reasonable for this method to allow integrity verification
+            // for receipts that have a non-empty assumptions list, but it is not supported here
+            // because we don't have a enough information to open the assumptions list unless we
+            // require it be empty.
+            assumptions: Assumptions(vec![]).into(),
+        });
+        if metadata.output.digest() != expected_output.digest() {
+            return Err(VerificationError::ReceiptFormatError);
+        }
+
+        Ok(())
+    }
+
+    /// Extract the [ReceiptMetadata] from this receipt.
+    pub fn get_metadata(&self) -> Result<ReceiptMetadata, VerificationError> {
+        self.inner.get_metadata()
+    }
 }
 
 /// An inner receipt can take the form of a [SegmentReceipts] collection or a
@@ -192,7 +292,7 @@ pub struct CompositeReceipt {
     /// represented by the segment receipts. If any assumptions are unresolved, this receipt is
     /// only _conditionally_ valid.
     // TODO(victor): Allow for unresolved assumptions in this list.
-    pub assumptions: Vec<Receipt>,
+    pub assumptions: Vec<InnerReceipt>,
 
     /// Digest of journal included in the final output of the continuation. Will be `None` if the
     /// continuation has no output (e.g. it ended in `Fault`).
@@ -364,91 +464,6 @@ pub struct SegmentReceipt {
 
     /// Name of the hash function used to create this receipt.
     pub hashfn: String,
-}
-
-// TODO(victor) Move this block up underneath the struct definition.
-impl Receipt {
-    /// Construct a new Receipt
-    pub fn new(inner: InnerReceipt, journal: Vec<u8>) -> Self {
-        Self { inner, journal }
-    }
-
-    /// Verify the integrity of this receipt.
-    ///
-    /// Uses the ZKP system to cryptographically verify that each constituent
-    /// Segment has a valid receipt, and validates that these [SegmentReceipt]s
-    /// stitch together correctly, and that the initial memory image matches the
-    /// given `image_id` parameter.
-    #[must_use]
-    pub fn verify(&self, image_id: impl Into<Digest>) -> Result<(), VerificationError> {
-        self.verify_with_context(&VerifierContext::default(), image_id)
-    }
-
-    // TODO(victor) Adjust this comment.
-    /// Verify the integrity of this receipt.
-    ///
-    /// Uses the ZKP system to cryptographically verify that each constituent
-    /// Segment has a valid receipt, and validates that these [SegmentReceipt]s
-    /// stitch together correctly, and that the initial memory image matches the
-    /// given `image_id` parameter.
-    #[must_use]
-    pub fn verify_with_context(
-        &self,
-        ctx: &VerifierContext,
-        image_id: impl Into<Digest>,
-    ) -> Result<(), VerificationError> {
-        self.inner.verify_integrity_with_context(ctx)?;
-
-        // TODO(victor): These checks should cover all fields within the metadata and verify that
-        // the receipt represents a successful execution with the result of self.journal.
-        // NOTE: Post-state digest and input digest are unconstrained by this method.
-        let metadata = self.inner.get_metadata()?;
-
-        if metadata.pre.digest() != image_id.into() {
-            return Err(VerificationError::ImageVerificationError);
-        }
-
-        // Check the exit code. This verification method requires execution to be successful.
-        match metadata.exit_code {
-            ExitCode::Halted(0) | ExitCode::Paused(0) => {}
-            _ => return Err(VerificationError::UnexpectedExitCode),
-        }
-
-        // Finally check the output hash in the decoded metadata against the expected output.
-        let decoded_output_digest = metadata.output.digest();
-
-        let expected_output = Output {
-            journal: MaybePruned::Pruned(self.journal.digest()),
-            // It is expected that there are no (unresolved) assumptions.
-            assumptions: Assumptions(vec![]).into(),
-        };
-
-        if decoded_output_digest != expected_output.digest() {
-            log::debug!(
-                "journal: 0x{}, expected output digest: 0x{}, decoded output digest: 0x{}",
-                hex::encode(&self.journal),
-                hex::encode(expected_output.digest()),
-                hex::encode(decoded_output_digest),
-            );
-            return Err(VerificationError::JournalDigestMismatch);
-        }
-
-        Ok(())
-    }
-
-    /// Verify the integrity of this receipt, ensuring the metadata is attested to by the seal.
-    #[must_use]
-    pub fn verify_integrity_with_context(
-        &self,
-        ctx: &VerifierContext,
-    ) -> Result<(), VerificationError> {
-        self.inner.verify_integrity_with_context(ctx)
-    }
-
-    /// Extract the [ReceiptMetadata] from this receipt.
-    pub fn get_metadata(&self) -> Result<ReceiptMetadata, VerificationError> {
-        self.inner.get_metadata()
-    }
 }
 
 impl SegmentReceipt {

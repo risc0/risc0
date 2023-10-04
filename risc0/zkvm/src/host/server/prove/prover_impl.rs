@@ -27,9 +27,12 @@ use risc0_zkp::{
 
 use super::{exec::MachineContext, HalPair, ProverServer};
 use crate::{
-    host::{receipt::CompositeReceipt, CIRCUIT},
+    host::{
+        receipt::{CompositeReceipt, InnerReceipt, SegmentReceipt},
+        CIRCUIT,
+    },
     sha::Digestable,
-    InnerReceipt, Loader, Receipt, Segment, SegmentReceipt, Session, VerifierContext,
+    Loader, Receipt, Segment, Session, VerifierContext,
 };
 
 /// An implementation of a Prover that runs locally.
