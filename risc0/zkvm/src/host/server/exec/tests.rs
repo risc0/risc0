@@ -688,12 +688,13 @@ fn post_state_digest_randomization() {
 #[test]
 #[should_panic(expected = "cycle count too large")]
 fn too_many_sha() {
-    let spec = to_vec(&MultiTestSpec::TooManySha).unwrap();
-    let env = ExecutorEnv::builder().add_input(&spec).build().unwrap();
-    ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
-        .unwrap()
-        .run()
-        .unwrap();
+    run_test(MultiTestSpec::TooManySha);
+}
+
+#[test]
+#[should_panic(expected = "is an invalid guest address")]
+fn out_of_bounds_ecall() {
+    run_test(MultiTestSpec::OutOfBoundsEcall);
 }
 
 #[cfg(feature = "docker")]
