@@ -14,9 +14,7 @@
 
 use std::{collections::HashMap, env};
 
-use risc0_build::{
-    embed_methods_with_docker_with_options, embed_methods_with_options, GuestOptions,
-};
+use risc0_build::{embed_methods_with_options, DockerOptions, GuestOptions};
 
 fn main() {
     env_logger::init();
@@ -26,20 +24,28 @@ fn main() {
         return;
     }
 
+    let docker_opts = DockerOptions {
+        root_dir: Some("../../..".into()),
+    };
+
+    let use_docker = if env::var("RISC0_USE_DOCKER").is_ok() {
+        Some(docker_opts)
+    } else {
+        None
+    };
+
     let map = HashMap::from([
         ("risc0-zkvm-methods-guest", GuestOptions::default()),
         (
             "risc0-zkvm-methods-std",
             GuestOptions {
                 features: vec!["test_feature1".to_string(), "test_feature2".to_string()],
+                use_docker,
             },
         ),
     ]);
 
-    if cfg!(feature = "docker") {
-        std::env::set_current_dir("../../../").unwrap();
-        embed_methods_with_docker_with_options(map);
-    } else {
-        embed_methods_with_options(map);
-    }
+    embed_methods_with_options(map);
+
+    println!("cargo:rerun-if-env-changed=RISC0_USE_DOCKER");
 }
