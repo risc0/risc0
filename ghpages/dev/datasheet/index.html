@@ -225,7 +225,7 @@
   </div>
 
   <div class="footnote">
-    <p>*this uses continuations, reducing the memory usage but producing more receipts (if not rolled up with Bonsai).
+    <p>*This uses continuations, reducing the memory usage but producing more receipts (if not rolled up with Bonsai).
     </p>
   </div>
 
@@ -235,13 +235,14 @@
       therefore give
       performance data for different guest execution lengths, as indicated in the "Cycles" column. For cryptographic
       reasons, the
-      cycle count is always rounded up in length to the next highest power of two; thus, a program that requires 33000
+      cycle count for each segment is always rounded up in length to the next highest power of two; thus, a program that
+      requires 33000
       cycles
       will have the same performance as a program that requires 63000 cycles, as both will round up to 65536 (64 k)
       cycles.
       <br></br>
       Initializing a zkVM guest requires over 16 k cycles. Combined with this power of two rounding, this means that no
-      program can be executed in fewer than 32 k cycles.
+      program can be executed in fewer than 64 k cycles.
       <br></br>
       To give context for these numbers we have included a table indicating the size of some of our example programs in
       cycles. Note that some programs vary in cycle count depending on input data. The cycle counts given here use the
