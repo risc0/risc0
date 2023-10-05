@@ -9,9 +9,8 @@ edition = "2021"
 risc0-zkvm = { path = "../../../../risc0/zkvm", default-features = false, features = [
   "std",
 ] }
-smartcore-ml-methods = { path = "methods" }
 
 smartcore = { version = "0.3.2", features = ["serde"]}
 
 [patch.crates-io]
-smartcore = { git = "https://github.com/risc0/smartcore.git" }
+smartcore = { git = "https://github.com/risc0/smartcore.git", features = ['serde'] }
