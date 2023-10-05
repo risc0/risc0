@@ -1,6 +1,7 @@
 syntax = "proto3";
 
 import "base.proto";
+import "google/protobuf/any.proto";
 
 package protos.core;
 
@@ -56,16 +57,32 @@ message SuccinctReceipt {
 }
 
 message ReceiptMetadata {
-  SystemState pre = 1;
-  SystemState post = 2;
+  MaybePruned pre = 1; // MaybePruned<SystemState>
+  MaybePruned post = 2; // MaybePruned<SystemState>
   protos.base.ExitCode exit_code = 3;
   Digest input = 4;
-  Digest output = 5;
+  MaybePruned output = 5; // MaybePruned<Option<Output>>
+}
+
+message MaybePruned {
+  oneof kind {
+    google.protobuf.Any value = 1;
+    Digest pruned = 2;
+  }
 }
 
 message SystemState {
   uint32 pc = 1;
   Digest merkle_root = 2;
+}
+
+message Output {
+    MaybePruned journal = 1; // MaybePruned<bytes>
+    MaybePruned assumptions = 2; // MaybePruned<Assumptions>
+}
+
+message Assumptions {
+  repeated MaybePruned inner = 1; // MaybePruned<ReceiptMetadata>
 }
 
 message FakeReceipt {

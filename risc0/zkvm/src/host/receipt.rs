@@ -14,7 +14,7 @@
 
 //! Manages the output and cryptographic data for a proven computation.
 
-use alloc::{collections::BTreeMap, string::String, vec::Vec};
+use alloc::{collections::BTreeMap, string::String, vec, vec::Vec};
 use core::fmt::Debug;
 
 use anyhow::Result;

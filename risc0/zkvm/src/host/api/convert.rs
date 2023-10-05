@@ -16,13 +16,15 @@ use std::collections::BTreeMap;
 use std::path::PathBuf;
 
 use anyhow::{anyhow, bail, Result};
-use prost::Message;
+use prost::{Message, Name};
+use prost_types::Any;
 use risc0_binfmt::{MemoryImage, PageTableInfo, SystemState};
 use risc0_zkp::core::digest::Digest;
 
 use crate::{
     host::receipt::{CompositeReceipt, InnerReceipt, SegmentReceipt},
     host::recursion::SuccinctReceipt,
+    receipt_metadata::{Assumptions, MaybePruned, Output},
     ExitCode, ProverOpts, Receipt, ReceiptMetadata, TraceEvent,
 };
 
@@ -454,6 +456,15 @@ impl TryFrom<pb::core::Digest> for Digest {
     }
 }
 
+impl Name for pb::core::ReceiptMetadata {
+    const PACKAGE: &'static str = "risc0.protos.core";
+    const NAME: &'static str = "ReceiptMetadata";
+}
+
+impl AssociatedMessage for ReceiptMetadata {
+    type Message = pb::core::ReceiptMetadata;
+}
+
 impl From<ReceiptMetadata> for pb::core::ReceiptMetadata {
     fn from(value: ReceiptMetadata) -> Self {
         Self {
@@ -461,7 +472,14 @@ impl From<ReceiptMetadata> for pb::core::ReceiptMetadata {
             post: Some(value.post.into()),
             exit_code: Some(value.exit_code.into()),
             input: Some(value.input.into()),
-            output: Some(value.output.into()),
+            // Translate MaybePruned<Option<Output>>> to Option<MaybePruned<Output>>.
+            output: match value.output {
+                MaybePruned::Value(x) => match x {
+                    Some(output) => Some(MaybePruned::Value(output).into()),
+                    None => None,
+                },
+                MaybePruned::Pruned(digest) => Some(MaybePruned::<Output>::Pruned(digest).into()),
+            },
         }
     }
 }
@@ -475,9 +493,25 @@ impl TryFrom<pb::core::ReceiptMetadata> for ReceiptMetadata {
             post: value.post.ok_or(malformed_err())?.try_into()?,
             exit_code: value.exit_code.ok_or(malformed_err())?.try_into()?,
             input: value.input.ok_or(malformed_err())?.try_into()?,
-            output: value.output.ok_or(malformed_err())?.try_into()?,
+            // Translate Option<MaybePruned<Output>> to MaybePruned<Option<Output>>.
+            output: match value.output {
+                None => MaybePruned::Value(None),
+                Some(x) => match MaybePruned::<Output>::try_from(x)? {
+                    MaybePruned::Value(output) => MaybePruned::Value(Some(output)),
+                    MaybePruned::Pruned(digest) => MaybePruned::Pruned(digest),
+                },
+            },
         })
     }
+}
+
+impl Name for pb::core::SystemState {
+    const PACKAGE: &'static str = "risc0.protos.core";
+    const NAME: &'static str = "SystemState";
+}
+
+impl AssociatedMessage for SystemState {
+    type Message = pb::core::SystemState;
 }
 
 impl From<SystemState> for pb::core::SystemState {
@@ -497,5 +531,169 @@ impl TryFrom<pb::core::SystemState> for SystemState {
             pc: value.pc,
             merkle_root: value.merkle_root.ok_or(malformed_err())?.try_into()?,
         })
+    }
+}
+
+impl Name for pb::core::Output {
+    const PACKAGE: &'static str = "risc0.protos.core";
+    const NAME: &'static str = "Output";
+}
+
+impl AssociatedMessage for Output {
+    type Message = pb::core::Output;
+}
+
+impl From<Output> for pb::core::Output {
+    fn from(value: Output) -> Self {
+        Self {
+            journal: Some(value.journal.into()),
+            assumptions: Some(value.assumptions.into()),
+        }
+    }
+}
+
+impl TryFrom<pb::core::Output> for Output {
+    type Error = anyhow::Error;
+
+    fn try_from(value: pb::core::Output) -> Result<Self> {
+        Ok(Self {
+            journal: value.journal.ok_or(malformed_err())?.try_into()?,
+            assumptions: value.assumptions.ok_or(malformed_err())?.try_into()?,
+        })
+    }
+}
+
+impl Name for pb::core::Assumptions {
+    const PACKAGE: &'static str = "risc0.protos.core";
+    const NAME: &'static str = "Assumptions";
+}
+
+impl AssociatedMessage for Assumptions {
+    type Message = pb::core::Assumptions;
+}
+
+impl From<Assumptions> for pb::core::Assumptions {
+    fn from(value: Assumptions) -> Self {
+        Self {
+            inner: value.0.into_iter().map(|a| a.into()).collect(),
+        }
+    }
+}
+
+impl TryFrom<pb::core::Assumptions> for Assumptions {
+    type Error = anyhow::Error;
+
+    fn try_from(value: pb::core::Assumptions) -> Result<Self> {
+        Ok(Self(
+            value
+                .inner
+                .into_iter()
+                .map(|a| a.try_into())
+                .collect::<Result<Vec<_>>>()?,
+        ))
+    }
+}
+
+impl<T> From<MaybePruned<T>> for pb::core::MaybePruned
+where
+    T: IntoAny + serde::Serialize + Clone,
+{
+    fn from(value: MaybePruned<T>) -> Self {
+        Self {
+            kind: Some(match value {
+                MaybePruned::Value(inner) => pb::core::maybe_pruned::Kind::Value(inner.into_any()),
+                MaybePruned::Pruned(digest) => pb::core::maybe_pruned::Kind::Pruned(digest.into()),
+            }),
+        }
+    }
+}
+
+impl<T> TryFrom<pb::core::MaybePruned> for MaybePruned<T>
+where
+    T: TryFromAny + serde::Serialize + Clone,
+{
+    type Error = anyhow::Error;
+
+    fn try_from(value: pb::core::MaybePruned) -> Result<Self> {
+        Ok(match value.kind.ok_or(malformed_err())? {
+            pb::core::maybe_pruned::Kind::Value(inner) => Self::Value(T::try_from_any(inner)?),
+            pb::core::maybe_pruned::Kind::Pruned(digest) => Self::Pruned(digest.try_into()?),
+        })
+    }
+}
+
+trait AssociatedMessage {
+    type Message: Message;
+}
+
+trait TryFromAny: Sized {
+    type Message: Message + TryInto<Self> + Default;
+
+    fn type_url() -> String;
+
+    fn try_from_any(any: Any) -> Result<Self> {
+        if any.type_url != Self::type_url() {
+            bail!(
+                "Failed to unpack google.protobuf.Any: expected type_url == {}; actual {}",
+                Self::type_url(),
+                any.type_url
+            );
+        }
+        Self::Message::decode(any.value.as_slice())?
+            .try_into()
+            .map_err(|_| anyhow!("failed to decode {}", Self::type_url()))
+    }
+}
+
+trait IntoAny: Sized {
+    type Message: Message + From<Self> + Sized;
+
+    fn type_url() -> String;
+
+    fn into_any(self) -> Any {
+        Any {
+            type_url: Self::type_url(),
+            value: Self::Message::from(self).encode_to_vec(),
+        }
+    }
+}
+
+impl<T> TryFromAny for T
+where
+    T: AssociatedMessage,
+    T::Message: Name + TryInto<Self, Error = anyhow::Error> + Default,
+{
+    type Message = T::Message;
+
+    fn type_url() -> String {
+        T::Message::type_url()
+    }
+}
+
+impl<T> IntoAny for T
+where
+    T: AssociatedMessage,
+    T::Message: Name + From<Self> + Sized,
+{
+    type Message = T::Message;
+
+    fn type_url() -> String {
+        T::Message::type_url()
+    }
+}
+
+impl IntoAny for Vec<u8> {
+    type Message = Self;
+
+    fn type_url() -> String {
+        "google.protobuf.BytesValue".to_string()
+    }
+}
+
+impl TryFromAny for Vec<u8> {
+    type Message = Self;
+
+    fn type_url() -> String {
+        "google.protobuf.BytesValue".to_string()
     }
 }

@@ -71,6 +71,7 @@ crypto-bigint = { version = "0.5", default-features = false, features = [
 ], optional = true }
 num-derive = "0.4"
 num-traits = { version = "0.2", default-features = false, optional = true }
+prost-types = { version = "0.12", optional = true }
 prost = { version = "0.12", optional = true }
 rand = { version = "0.8", optional = true }
 rayon = { version = "1.5", optional = true }
@@ -105,6 +106,7 @@ client = [
   "dep:bytes",
   "dep:prost",
   "dep:prost-build",
+  "dep:prost-types",
   "dep:protobuf-src",
   "std",
 ]
@@ -128,6 +130,7 @@ profiler = [
   "dep:gimli",
   "dep:prost",
   "dep:prost-build",
+  "dep:prost-types",
   "dep:protobuf-src",
 ]
 prove = [
@@ -143,6 +146,7 @@ prove = [
   "dep:lazy-regex",
   "dep:prost",
   "dep:prost-build",
+  "dep:prost-types",
   "dep:protobuf-src",
   "dep:rand",
   "dep:rayon",

@@ -141,7 +141,13 @@ pub struct ReceiptMetadata {
     /// The exit code for a segment
     pub exit_code: ExitCode,
 
-    /// A [Digest] of the input, from the viewpoint of the guest.
+    /// Input to the guest.
+    ///
+    /// NOTE: This field can only be constructed as a Digest because it is not yet
+    /// cryptographically bound by the RISC Zero proof system; the guest has not way to set the
+    /// input and it's value cannot be checked. In the future, it will be implemented with a
+    /// [MaybePruned] type.
+    // TODO(1.0): Determine the 1.0 status of input.
     pub input: Digest,
 
     /// A [Output] of the guest, including the journal and assumptions set
@@ -249,8 +255,7 @@ impl ExitCode {
         }
     }
 
-    // Function is only used if client is enabled.
-    #[cfg(feature = "client")]
+    #[cfg(not(target_os = "zkvm"))]
     pub(crate) fn expects_output(&self) -> bool {
         match self {
             ExitCode::Halted(_) | ExitCode::Paused(_) => true,
