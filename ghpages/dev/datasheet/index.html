@@ -4,6 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
   <style>
     .head-wrapper {
       position: relative;
@@ -132,6 +133,7 @@
 
       .box {
         padding: 10px;
+        margin-top: -5px;
       }
 
       table {
@@ -241,59 +243,12 @@
       Initializing a zkVM guest requires over 16 k cycles. Combined with this power of two rounding, this means that no
       program can be executed in fewer than 32 k cycles.
       <br></br>
-      To give context for these numbers we have included a table indicating the size of each of our example programs in
+      To give context for these numbers we have included a table indicating the size of some of our example programs in
       cycles. Note that some programs vary in cycle count depending on input data. The cycle counts given here use the
       default input data, or, for examples with no defaults, the input data suggested in the associated README file.
       <br></br>
     </div>
-    <div class="box">
-      <table>
-        <thead>
-          <tr>
-            <th>Example</th>
-            <th>Cycles</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Factors</td>
-            <td>32 k</td>
-          </tr>
-          <tr>
-            <td>Chess</td>
-            <td>256 k</td>
-          </tr>
-          <tr>
-            <td>Digital Signature</td>
-            <td>64 k</td>
-          </tr>
-          <tr>
-            <td>EVM</td>
-            <td>2048 k</td>
-          </tr>
-          <tr>
-            <td>JSON</td>
-            <td>64 k</td>
-          </tr>
-          <tr>
-            <td>Password Checker</td>
-            <td>64 k</td>
-          </tr>
-          <tr>
-            <td>SHA</td>
-            <td>64 k</td>
-          </tr>
-          <tr>
-            <td>Waldo</td>
-            <td>8192 k</td>
-          </tr>
-          <tr>
-            <td>Wordle</td>
-            <td>64 k</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    <div class="box" id="table_cycle_count"></div>
   </div>
   <div class="qrcode-container">
     <div class="qrcode-box">
@@ -356,6 +311,68 @@
       } catch (error) {
         console.error('Error fetching commit hash:', error);
       }
+    }
+
+    // Array of examples to include in the table
+    const includeExamples = [
+      "bevy",
+      "chess",
+      "digital-signature",
+      "ecdsa",
+      "hello-world",
+      "json",
+      "password-checker",
+      "prorata",
+      "sha",
+      "smartcore-ml",
+      "waldo",
+      "wasm",
+      "wordle"
+    ];
+
+    function cycleCountTable() {
+      // Parse the CSV file
+      Papa.parse('cycle_count.csv', {
+        download: true,
+        header: true,
+        complete: function (results) {
+          const data = results.data;
+
+          // Filter the data based on the includeExamples array
+          const filteredData = data.filter(item => includeExamples.includes(item.name));
+
+          // Get the correct container for this table
+          const tableContainer = document.getElementById(`table_cycle_count`);
+
+          // Create a table element
+          const table = document.createElement('table');
+
+          // Create and append the table header
+          const headerRow = document.createElement('tr');
+          const nameHeader = document.createElement('th');
+          nameHeader.textContent = 'Example';
+          const cyclesHeader = document.createElement('th');
+          cyclesHeader.textContent = 'Cycles';
+          headerRow.appendChild(nameHeader);
+          headerRow.appendChild(cyclesHeader);
+          table.appendChild(headerRow);
+
+          // Create and append the table rows
+          filteredData.forEach(item => {
+            const row = document.createElement('tr');
+            const nameCell = document.createElement('td');
+            nameCell.textContent = item.name;
+            const cyclesCell = document.createElement('td');
+            cyclesCell.textContent = `${item.cycles / 1024}k`;
+            row.appendChild(nameCell);
+            row.appendChild(cyclesCell);
+            table.appendChild(row);
+          });
+
+          // Append the table to the document body
+          tableContainer.appendChild(table);
+        }
+      });
     }
 
     async function fetchData() {
@@ -449,6 +466,8 @@
     document.addEventListener("DOMContentLoaded", fetchCommitHash);
     // Invoke fetchData when the document is ready
     document.addEventListener("DOMContentLoaded", fetchData);
+    // Invoke cycleCountTable when the document is ready
+    document.addEventListener("DOMContentLoaded", cycleCountTable);
   </script>
 
 </body>
