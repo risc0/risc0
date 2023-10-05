@@ -278,6 +278,20 @@ impl MemoryMonitor {
         String::from_utf8(s).map_err(anyhow::Error::msg)
     }
 
+    pub fn load_string_from_guest_memory(&mut self, mut addr: u32) -> Result<String> {
+        let start_addr = addr;
+        let mut len = 0;
+        loop {
+            if self.load_u8(addr)? == 0 {
+                break;
+            }
+            addr += 1;
+            len += 1;
+        }
+        Self::check_guest_addr_range(start_addr, start_addr + len)?;
+        self.load_string(start_addr)
+    }
+
     fn raw_store_u8(&mut self, addr: u32, data: u8) -> Result<()> {
         // log::trace!("raw_store_u8: 0x{addr:08x}");
         let old = self.load_u8(addr)?;

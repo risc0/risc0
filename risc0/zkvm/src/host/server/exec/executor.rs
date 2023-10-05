@@ -35,7 +35,7 @@ use risc0_zkp::{
 };
 use risc0_zkvm_platform::{
     fileno,
-    memory::GUEST_MAX_MEM,
+    memory::{is_guest_memory, GUEST_MAX_MEM},
     syscall::{
         bigint, ecall, halt,
         reg_abi::{REG_A0, REG_A1, REG_A2, REG_A3, REG_A4, REG_T0},
@@ -693,9 +693,12 @@ impl<'a> ExecutorImpl<'a> {
 
     fn ecall_software(&mut self) -> Result<OpCodeResult> {
         let to_guest_ptr = self.monitor.load_register(REG_A0);
+        if !is_guest_memory(to_guest_ptr) && to_guest_ptr != 0 {
+            bail!("address 0x{to_guest_ptr:08x} is an invalid guest address");
+        }
         let to_guest_words = self.monitor.load_register(REG_A1);
-        let name_ptr = self.monitor.load_register(REG_A2);
-        let syscall_name = self.monitor.load_string(name_ptr)?;
+        let name_ptr = self.monitor.load_guest_addr_from_register(REG_A2)?;
+        let syscall_name = self.monitor.load_string_from_guest_memory(name_ptr)?;
         log::trace!("Guest called syscall {syscall_name:?} requesting {to_guest_words} words back");
 
         let chunks = align_up(to_guest_words as usize, WORD_SIZE);
@@ -722,8 +725,15 @@ impl<'a> ExecutorImpl<'a> {
         };
 
         let (a0, a1) = syscall.regs;
-        self.monitor
-            .store_region(to_guest_ptr, bytemuck::cast_slice(&syscall.to_guest))?;
+        if to_guest_ptr != 0 {
+            // the guest pointer is set to null for cases where the guest is
+            // sending info to the host so there's no data to write to guest
+            // memory.
+            self.monitor.store_region_to_guest_memory(
+                to_guest_ptr,
+                bytemuck::cast_slice(&syscall.to_guest),
+            )?;
+        }
         self.monitor.store_register(REG_A0, a0);
         self.monitor.store_register(REG_A1, a1);
 
