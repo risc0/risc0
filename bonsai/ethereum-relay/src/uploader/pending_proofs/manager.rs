@@ -14,15 +14,16 @@
 
 use std::sync::Arc;
 
-use bonsai_sdk::alpha::Client;
+use bonsai_sdk::alpha::{Client, SdkErr};
 use futures::{stream::FuturesUnordered, StreamExt};
 use tokio::{
     sync::Notify,
     task::{JoinError, JoinHandle},
 };
-use tracing::info;
+use tracing::{error, info, warn};
 
 use crate::{
+    api::error::Error as BonsaiError,
     storage::{Error as StorageError, ProofRequestState, Storage},
     uploader::pending_proofs::pending_proof_request_future::{
         Error as PendingProofError, PendingProofRequest, ProofRequestID,
@@ -92,13 +93,36 @@ impl<S: Storage> BonsaiPendingProofManager<S> {
         &self,
         pending_proof_result: Result<ProofRequestID, PendingProofError>,
     ) -> Result<(), BonsaiPendingProofManagerError> {
-        let (completed_proof_id, state) = match pending_proof_result {
+        let (completed_proof_id, state) = match &pending_proof_result {
             Ok(session_id) => (session_id, ProofRequestState::Completed),
-            Err(err) => (err.get_proof_request_id(), ProofRequestState::Failed),
+            Err(PendingProofError::ClientAPI {
+                source: BonsaiError::Client(error),
+                id,
+            })
+            | Err(PendingProofError::ClientAPI {
+                source: BonsaiError::Bonsai(SdkErr::HttpErr(error)),
+                id,
+            }) => {
+                error!(?error, "Connection error.");
+                // TODO(Cardosaum): Add limit to number of retries
+                (id, ProofRequestState::New)
+            }
+            Err(PendingProofError::ClientAPI {
+                source: BonsaiError::SignerMiddleware(error),
+                id,
+            }) => {
+                error!(?error, "Signer middleware error.");
+                // TODO(Cardosaum): Add limit to number of retries
+                (id, ProofRequestState::New)
+            }
+            Err(PendingProofError::ClientAPI { id, .. })
+            | Err(PendingProofError::ProofRequestError { id, .. }) => {
+                (id, ProofRequestState::Failed)
+            }
         };
 
         self.storage
-            .transition_proof_request(completed_proof_id.clone(), ProofRequestState::Completed)
+            .transition_proof_request(completed_proof_id.clone(), state)
             .await?;
 
         let log_id = completed_proof_id.clone();
@@ -107,7 +131,19 @@ impl<S: Storage> BonsaiPendingProofManager<S> {
                 self.complete_proof_manager_notifier.notify_one();
                 info!(?log_id, "pending proof done");
             }
-            _ => info!(?log_id, "pending proof failed"),
+            ProofRequestState::New => {
+                self.new_pending_proof_request_notifier.notify_one();
+                warn!(?log_id, "pending proof failed, retrying...")
+            }
+            ProofRequestState::Failed => error!(?log_id, "pending proof failed"),
+            _ => {
+                error!(
+                    ?log_id,
+                    ?pending_proof_result,
+                    ?state,
+                    "unexpected state transition"
+                );
+            }
         }
 
         Ok(())
@@ -145,6 +181,8 @@ impl<S: Storage> BonsaiPendingProofManager<S> {
                     // Store the proof as new so that it can be retried.
                     //
                     // TODO: What do we do if this call to storage fails?
+
+                    // TODO: Is it right to transition to `New` here, assuming we got a PendingProofError::ProofRequestError?
                     self.storage
                         .transition_proof_request(
                             source.get_proof_request_id(),

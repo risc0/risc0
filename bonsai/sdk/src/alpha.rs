@@ -88,8 +88,7 @@ pub mod responses {
     pub struct SessionStatusRes {
         /// Current status
         ///
-        /// values: [RUNNING | SUCCEEDED | FAILED | TIMED_OUT | ABORTED |
-        /// SUCCEEDED]
+        /// values: [RUNNING | SUCCEEDED | FAILED | TIMED_OUT | ABORTED]
         pub status: String,
         /// Final receipt download URL
         ///
@@ -122,8 +121,7 @@ pub mod responses {
     pub struct SnarkStatusRes {
         /// Current status
         ///
-        /// values: [RUNNING | SUCCEEDED | FAILED | TIMED_OUT | ABORTED |
-        /// SUCCEEDED]
+        /// values: [RUNNING | SUCCEEDED | FAILED | TIMED_OUT | ABORTED]
         pub status: String,
         /// SNARK proof output
         ///

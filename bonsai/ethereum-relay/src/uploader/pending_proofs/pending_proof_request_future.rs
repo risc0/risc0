@@ -98,22 +98,41 @@ impl Future for PendingProofRequest {
                     let response = futures::ready!(bonsai_get_receipt_fut.as_mut().poll(ctx));
                     match response {
                         Ok(receipt_response) => {
-                            if receipt_response.status == "SUCCEEDED" {
-                                return Poll::Ready(Ok(this.pending_proof_id.clone()));
-                            }
+                            match (receipt_response.status.as_str(), receipt_response.receipt_url.is_some()) {
+                                ("SUCCEEDED", true) => {
+                                    return Poll::Ready(Ok(this.pending_proof_id.clone()))
+                                }
+                                ("SUCCEEDED", false) => {
+                                    // TODO: Should we consider this a failure
+                                    // and retry, or should we just return an
+                                    // error?
 
-                            if receipt_response.status == "RUNNING" {
-                                // Not done yet, still pending. Transition back to pending
-                                *this.state = PendingProofRequestState::Pending;
-                                ctx.waker().wake_by_ref();
-                                return Poll::Pending;
-                            }
+                                    // Bonsai returned the receipt in a inconsistent state,
+                                    // we should assume the proof failed and return an error
+                                    tracing::error!(
+                                        "Bonsai returned a receipt with status SUCCEEDED but no receipt URL"
+                                    );
+                                    return Poll::Ready(Err(Error::ProofRequestError {
+                                        status: receipt_response.status,
+                                        id: this.pending_proof_id.clone(),
+                                    }));
+                                }
+                                ("RUNNING", _) => {
+                                    // Not done yet, still pending. Transition back to pending
+                                    *this.state = PendingProofRequestState::Pending;
+                                    ctx.waker().wake_by_ref();
+                                    return Poll::Pending;
+                                }
+                                _ => {
+                                    // TODO: Should we consider 'TIMED_OUT' a failure, or should we retry?
 
-                            // The other status values indicate some type of error
-                            return Poll::Ready(Err(Error::ProofRequestError {
-                                status: receipt_response.status,
-                                id: this.pending_proof_id.clone(),
-                            }));
+                                    // The other status values indicate some type of error
+                                    return Poll::Ready(Err(Error::ProofRequestError {
+                                        status: receipt_response.status,
+                                        id: this.pending_proof_id.clone(),
+                                    }));
+                                }
+                            }
                         }
                         Err(err) => {
                             return Poll::Ready(Err(err));
