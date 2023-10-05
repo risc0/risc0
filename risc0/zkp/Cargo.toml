@@ -11,6 +11,10 @@ repository = { workspace = true }
 name = "ntt"
 harness = false
 
+[[bench]]
+name = "hash"
+harness = false
+
 [dependencies]
 anyhow = { version = "1.0", default-features = false }
 blake2 = { version = "0.10.6", default-features = false }

@@ -152,7 +152,7 @@ mod tests {
     use super::*;
     use crate::{
         core::{
-            hash::{poseidon::PoseidonHashSuite, sha::Sha256HashSuite, HashSuite},
+            hash::{poseidon::PoseidonHashSuite, sha::Sha256HashSuite, HashSuite, poseidon2::Poseidon2HashSuite},
             log2_ceil,
         },
         hal::cpu::CpuHal,
@@ -186,6 +186,7 @@ mod tests {
     fn bad_row_access_all(rows: usize, cols: usize, queries: usize) {
         bad_row_access(Sha256HashSuite::new_suite(), rows, cols, queries);
         bad_row_access(PoseidonHashSuite::new_suite(), rows, cols, queries);
+        bad_row_access(Poseidon2HashSuite::new_suite(), rows, cols, queries);
     }
 
     fn possibly_bad_verify(
@@ -274,6 +275,14 @@ mod tests {
         );
         possibly_bad_verify(
             PoseidonHashSuite::new_suite(),
+            rows,
+            cols,
+            queries,
+            bad_query,
+            manipulate_proof,
+        );
+        possibly_bad_verify(
+            Poseidon2HashSuite::new_suite(),
             rows,
             cols,
             queries,
