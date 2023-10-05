@@ -362,7 +362,7 @@ fn large_io_bytes() {
 // TODO(victor): Make sure to add tests to proving as well.
 #[test]
 fn sys_verify() {
-    let hello_commit_session = Executor::from_elf(ExecutorEnv::default(), HELLO_COMMIT_ELF)
+    let hello_commit_session = ExecutorImpl::from_elf(ExecutorEnv::default(), HELLO_COMMIT_ELF)
         .unwrap()
         .run()
         .unwrap();
@@ -378,7 +378,7 @@ fn sys_verify() {
         .add_assumption(hello_commit_session.get_metadata().unwrap().into())
         .build()
         .unwrap();
-    Executor::from_elf(env, MULTI_TEST_ELF)
+    ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
         .unwrap()
         .run()
         .unwrap();
@@ -386,7 +386,7 @@ fn sys_verify() {
 
 #[test]
 fn sys_verify_metadata() {
-    let hello_commit_session = Executor::from_elf(ExecutorEnv::default(), HELLO_COMMIT_ELF)
+    let hello_commit_session = ExecutorImpl::from_elf(ExecutorEnv::default(), HELLO_COMMIT_ELF)
         .unwrap()
         .run()
         .unwrap();
@@ -402,7 +402,7 @@ fn sys_verify_metadata() {
         .add_assumption(hello_commit_session.get_metadata().unwrap().into())
         .build()
         .unwrap();
-    Executor::from_elf(env, MULTI_TEST_ELF)
+    ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
         .unwrap()
         .run()
         .unwrap();
