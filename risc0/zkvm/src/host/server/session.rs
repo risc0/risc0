@@ -89,13 +89,14 @@ pub struct Segment {
     pub(crate) exit_code: ExitCode,
 
     /// The number of cycles in powers of 2.
-    pub po2: usize,
+    pub po2: u32,
 
     /// The index of this [Segment] within the [Session]
     pub index: u32,
 
-    /// The number of cycles used to execute instructions.
-    pub insn_cycles: usize,
+    /// The number of user cycles without any overhead for continuations or po2
+    /// padding.
+    pub cycles: u32,
 }
 
 /// The Events of [Session]
@@ -133,6 +134,25 @@ impl Session {
     pub fn add_hook<E: SessionEvents + 'static>(&mut self, hook: E) {
         self.hooks.push(Box::new(hook));
     }
+
+    /// Report cycle information for this [Session].
+    ///
+    /// Returns a tuple `(x, y)` where:
+    /// * `x`: Total number of cycles that a prover experiences. This includes
+    ///   overhead associated with continuations and padding up to the nearest
+    ///   power of 2.
+    /// * `y`: Total number of cycles used for executing user instructions.
+    pub fn get_cycles(&self) -> Result<(u64, u64)> {
+        let segments = self.resolve()?;
+        Ok(segments
+            .iter()
+            .fold((0, 0), |(total_cycles, user_cycles), segment| {
+                (
+                    total_cycles + (1 << segment.po2),
+                    user_cycles + segment.cycles as u64,
+                )
+            }))
+    }
 }
 
 impl Segment {
@@ -145,11 +165,11 @@ impl Segment {
         syscalls: Vec<SyscallRecord>,
         exit_code: ExitCode,
         split_insn: Option<u32>,
-        po2: usize,
+        po2: u32,
         index: u32,
-        insn_cycles: usize,
+        cycles: u32,
     ) -> Self {
-        log::info!("segment[{index}]> reads: {}, writes: {}, exit_code: {exit_code:?}, split_insn: {split_insn:?}, po2: {po2}, insn_cycles: {insn_cycles}",
+        log::info!("segment[{index}]> reads: {}, writes: {}, exit_code: {exit_code:?}, split_insn: {split_insn:?}, po2: {po2}, cycles: {cycles}",
             faults.reads.len(),
             faults.writes.len(),
         );
@@ -162,7 +182,7 @@ impl Segment {
             split_insn,
             po2,
             index,
-            insn_cycles,
+            cycles,
         }
     }
 }
@@ -194,8 +214,9 @@ impl SimpleSegmentRef {
 /// The [Segment] is stored in a user-specified file in this implementation,
 /// and the SegmentRef holds the filename.
 ///
-/// There is an example of using [FileSegmentRef] in [our EVM example]
-/// (<https://github.com/risc0/risc0/blob/main/examples/zkevm-demo/src/main.rs>).
+/// There is an example of using [FileSegmentRef] in our [EVM example][1]
+///
+/// [1]: https://github.com/risc0/risc0/blob/main/examples/zkevm-demo/src/main.rs
 #[derive(Clone, Serialize, Deserialize)]
 pub struct FileSegmentRef {
     path: PathBuf,

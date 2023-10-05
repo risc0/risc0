@@ -439,61 +439,65 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
     }
 
     #[tracing::instrument(skip_all)]
-    fn batch_expand(
+    fn batch_expand_into_evaluate_ntt(
         &self,
         output: &Self::Buffer<Self::Elem>,
         input: &Self::Buffer<Self::Elem>,
-        poly_count: usize,
+        count: usize,
+        expand_bits: usize,
     ) {
-        let out_size = output.size() / poly_count;
-        let in_size = input.size() / poly_count;
-        let expand_bits = log2_ceil(out_size / in_size);
-        assert_eq!(output.size(), out_size * poly_count);
-        assert_eq!(input.size(), in_size * poly_count);
-        assert_eq!(out_size, in_size * (1 << expand_bits));
+        // batch_expand
+        {
+            let out_size = output.size() / count;
+            let in_size = input.size() / count;
+            let expand_bits = log2_ceil(out_size / in_size);
+            assert_eq!(output.size(), out_size * count);
+            assert_eq!(input.size(), in_size * count);
+            assert_eq!(out_size, in_size * (1 << expand_bits));
 
-        let stream = Stream::new(StreamFlags::DEFAULT, None).unwrap();
-        let kernel = self.module.get_function("batch_expand").unwrap();
-        let params = self.compute_simple_params(out_size.try_into().unwrap());
-        unsafe {
-            launch!(kernel<<<params.0, params.1, 0, stream>>>(
-                output.as_device_ptr(),
-                input.as_device_ptr(),
-                poly_count as u32,
-                out_size as u32,
-                in_size as u32,
-                expand_bits as u32
-            ))
-            .unwrap();
-        }
-        stream.synchronize().unwrap();
-    }
-
-    #[tracing::instrument(skip_all)]
-    fn batch_evaluate_ntt(&self, io: &Self::Buffer<Self::Elem>, count: usize, expand_bits: usize) {
-        let row_size = io.size() / count;
-        assert_eq!(row_size * count, io.size());
-        let n_bits = log2_ceil(row_size);
-        assert_eq!(row_size, 1 << n_bits);
-        assert!(n_bits >= expand_bits);
-        assert!(n_bits < Self::Elem::MAX_ROU_PO2);
-        let rou = self.copy_from_elem("rou", Self::Elem::ROU_FWD);
-
-        let stream = Stream::new(StreamFlags::DEFAULT, None).unwrap();
-        let kernel = self.module.get_function("multi_ntt_fwd_step").unwrap();
-        for s_bits in 1 + expand_bits..=n_bits {
-            let params = self.compute_launch_params(n_bits as u32, s_bits as u32, count as u32);
+            let stream = Stream::new(StreamFlags::DEFAULT, None).unwrap();
+            let kernel = self.module.get_function("batch_expand").unwrap();
+            let params = self.compute_simple_params(out_size.try_into().unwrap());
             unsafe {
                 launch!(kernel<<<params.0, params.1, 0, stream>>>(
-                    io.as_device_ptr(),
-                    rou.as_device_ptr(),
-                    n_bits as u32,
-                    s_bits as u32,
-                    count as u32
+                    output.as_device_ptr(),
+                    input.as_device_ptr(),
+                    count as u32,
+                    out_size as u32,
+                    in_size as u32,
+                    expand_bits as u32
                 ))
                 .unwrap();
             }
             stream.synchronize().unwrap();
+        }
+
+        // batch_evaluate_ntt
+        {
+            let row_size = output.size() / count;
+            assert_eq!(row_size * count, output.size());
+            let n_bits = log2_ceil(row_size);
+            assert_eq!(row_size, 1 << n_bits);
+            assert!(n_bits >= expand_bits);
+            assert!(n_bits < Self::Elem::MAX_ROU_PO2);
+            let rou = self.copy_from_elem("rou", Self::Elem::ROU_FWD);
+
+            let stream = Stream::new(StreamFlags::DEFAULT, None).unwrap();
+            let kernel = self.module.get_function("multi_ntt_fwd_step").unwrap();
+            for s_bits in 1 + expand_bits..=n_bits {
+                let params = self.compute_launch_params(n_bits as u32, s_bits as u32, count as u32);
+                unsafe {
+                    launch!(kernel<<<params.0, params.1, 0, stream>>>(
+                        output.as_device_ptr(),
+                        rou.as_device_ptr(),
+                        n_bits as u32,
+                        s_bits as u32,
+                        count as u32
+                    ))
+                    .unwrap();
+                }
+                stream.synchronize().unwrap();
+            }
         }
     }
 
@@ -861,14 +865,8 @@ mod tests {
 
     #[test]
     #[serial]
-    fn batch_expand() {
-        testutil::batch_expand(CudaHalSha256::new());
-    }
-
-    #[test]
-    #[serial]
-    fn batch_evaluate_ntt() {
-        testutil::batch_evaluate_ntt(CudaHalSha256::new());
+    fn batch_expand_into_evaluate_ntt() {
+        testutil::batch_expand_into_evaluate_ntt(CudaHalSha256::new());
     }
 
     #[test]

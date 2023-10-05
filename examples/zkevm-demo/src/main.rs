@@ -19,10 +19,10 @@ use ethers_core::types::{H256, U256};
 use ethers_providers::Middleware;
 use log::info;
 use risc0_zkvm::{
+    default_prover,
     serde::{from_slice, to_vec},
-    Executor, ExecutorEnv, FileSegmentRef,
+    ExecutorEnv,
 };
-use tempfile::tempdir;
 use zkevm_core::{
     ether_trace::{Http, Provider},
     Env, EvmResult, EVM,
@@ -45,6 +45,7 @@ struct Args {
 #[tokio::main]
 async fn main() {
     env_logger::init();
+
     let args = Args::parse();
     let tx_hash = H256::from_str(&args.tx_hash).expect("Invalid transaction hash");
 
@@ -82,22 +83,17 @@ async fn main() {
     let zkdb = trace_db.create_zkdb();
 
     info!("Running zkvm...");
-    let env = ExecutorEnv::builder()
+    let exec_env = ExecutorEnv::builder()
         .add_input(&to_vec(&env).unwrap())
         .add_input(&to_vec(&zkdb).unwrap())
         .build()
         .unwrap();
-    let mut exec = Executor::from_elf(env, EVM_ELF).unwrap();
-    let segment_dir = tempdir().unwrap();
-    let session = exec
-        .run_with_callback(|segment| {
-            Ok(Box::new(FileSegmentRef::new(
-                &segment,
-                &segment_dir.path(),
-            )?))
-        })
-        .unwrap();
-    let receipt = session.prove().unwrap();
+
+    // Obtain the default prover.
+    let prover = default_prover();
+
+    // Produce a receipt by proving the specified ELF binary.
+    let receipt = prover.prove_elf(exec_env, EVM_ELF).unwrap();
 
     let res: EvmResult = from_slice(&receipt.journal).expect("Failed to deserialize EvmResult");
     info!("exit reason: {:?}", res.exit_reason);

@@ -131,10 +131,21 @@ pub fn main() {
         }
         MultiTestSpec::DoRandom => {
             // Test random number generation in the zkvm
-            let mut rand_buf = [0u8; 7];
-            getrandom(rand_buf.as_mut_slice()).expect("random number generation failed");
-            env::commit_slice(&rand_buf);
-            assert_ne!(rand_buf, vec![0u8; rand_buf.len()].as_slice());
+            // Test for a combination of lengths and data alignments to make sure all cases
+            // are handled.
+            for size in 0..=15 {
+                for alignment in 0..=usize::min(3, size) {
+                    let rand_buf = &mut vec![0u8; size][alignment..];
+                    getrandom(rand_buf).expect("random number generation failed");
+                    env::commit_slice(&rand_buf);
+
+                    // If we generated more than 2 bytes, make sure that they are at least not zero.
+                    // Only check for len > 2 to avoid false positives.
+                    if rand_buf.len() > 2 {
+                        assert_ne!(&rand_buf, &vec![0u8; rand_buf.len()].as_slice());
+                    }
+                }
+            }
         }
         MultiTestSpec::SysRead {
             mut buf,
@@ -232,6 +243,9 @@ pub fn main() {
             // Access memory outside of allowed boundaries. This is intended to cause a
             // fault
             asm!( "mv x6, {}", "sw x5, (x6)" , in(reg) addr, out("x5") _, out("x6") _);
+        },
+        MultiTestSpec::TooManySha => unsafe {
+            asm!("ecall", in("x5") 3, in("x10") 0, in("x11") 0, in("x12") 0, in("x13") 0, in("x14") 10000,);
         },
     }
 }

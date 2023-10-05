@@ -28,9 +28,12 @@ use test_log::test;
 
 use super::{get_prover_server, HalPair, ProverImpl};
 use crate::{
-    host::{server::testutils, CIRCUIT},
+    host::{
+        server::{exec::executor::ExecutorError, testutils},
+        CIRCUIT,
+    },
     serde::{from_slice, to_vec},
-    Executor, ExecutorEnv, ExitCode, ProverOpts, ProverServer, Receipt,
+    ExecutorEnv, ExecutorImpl, ProverOpts, ProverServer, Receipt,
 };
 
 fn prove_nothing(hashfn: &str) -> Result<Receipt> {
@@ -92,7 +95,7 @@ fn sha_basics() {
     fn run_sha(msg: &str) -> String {
         let input = to_vec(&MultiTestSpec::ShaDigest { data: msg.into() }).unwrap();
         let env = ExecutorEnv::builder().add_input(&input).build().unwrap();
-        let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
+        let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
         let session = exec.run().unwrap();
         let receipt = session.prove().unwrap();
         hex::encode(Digest::try_from(receipt.journal).unwrap())
@@ -125,7 +128,7 @@ fn sha_iter() {
     })
     .unwrap();
     let env = ExecutorEnv::builder().add_input(&input).build().unwrap();
-    let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
+    let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
     let session = exec.run().unwrap();
     let receipt = session.prove().unwrap();
     let digest = Digest::try_from(receipt.journal).unwrap();
@@ -148,7 +151,7 @@ fn bigint_accel() {
         .unwrap();
 
         let env = ExecutorEnv::builder().add_input(&input).build().unwrap();
-        let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
+        let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
         let session = exec.run().unwrap();
         let receipt = session.prove().unwrap();
         let expected = case.expected();
@@ -160,6 +163,18 @@ fn bigint_accel() {
 #[test]
 #[serial]
 fn memory_io() {
+    fn is_fault_proof(receipt: Result<Receipt>) -> bool {
+        // this if statement will be removed once this feature is more mature
+        if !cfg!(feature = "fault-proof") {
+            return receipt.is_err();
+        }
+        let receipt = receipt.unwrap();
+        match receipt.verify(MULTI_TEST_ID) {
+            Err(VerificationError::ValidFaultReceipt) => true,
+            _ => false,
+        }
+    }
+
     fn run_memio(pairs: &[(usize, usize)]) -> Result<Receipt> {
         let spec = MultiTestSpec::ReadWriteMem {
             values: pairs
@@ -170,8 +185,12 @@ fn memory_io() {
         };
         let input = to_vec(&spec)?;
         let env = ExecutorEnv::builder().add_input(&input).build().unwrap();
-        let mut exec = Executor::from_elf(env, MULTI_TEST_ELF)?;
-        let session = exec.run()?;
+        let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)?;
+        let session = match exec.run() {
+            Ok(session) => session,
+            Err(ExecutorError::Fault(session)) => session,
+            Err(ExecutorError::Error(e)) => return Err(e),
+        };
         session.prove()
     }
 
@@ -183,46 +202,22 @@ fn memory_io() {
     );
 
     // Double writes are fine
-    run_memio(&[(POS, 1), (POS, 1)]).unwrap();
+    assert!(!is_fault_proof(run_memio(&[(POS, 1), (POS, 1)])));
 
     // Writes at different addresses are fine
-    run_memio(&[(POS, 1), (POS + 4, 2)]).unwrap();
+    assert!(!is_fault_proof(run_memio(&[(POS, 1), (POS + 4, 2)])));
 
     // Aligned write is fine
-    run_memio(&[(POS, 1)]).unwrap();
+    assert!(!is_fault_proof(run_memio(&[(POS, 1)])));
 
     // Unaligned write is bad
-    run_memio(&[(POS + 1001, 1)]).unwrap_err();
+    assert!(is_fault_proof(run_memio(&[(POS + 1001, 1)])));
 
     // Aligned read is fine
-    run_memio(&[(POS, 0)]).unwrap();
+    assert!(!is_fault_proof(run_memio(&[(POS, 0)])));
 
     // Unaligned read is bad
-    run_memio(&[(POS + 1, 0)]).unwrap_err();
-}
-
-#[test]
-#[cfg_attr(feature = "cuda", serial)]
-fn pause_continue() {
-    let env = ExecutorEnv::builder()
-        .add_input(&to_vec(&MultiTestSpec::PauseContinue).unwrap())
-        .build()
-        .unwrap();
-    let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
-
-    // Run until sys_pause
-    let session = exec.run().unwrap();
-    assert_eq!(session.segments.len(), 1);
-    assert_eq!(session.exit_code, ExitCode::Paused(0));
-    let receipt = session.prove().unwrap();
-    let segments = receipt.inner.flat().unwrap();
-    assert_eq!(segments.len(), 1);
-    assert_eq!(segments[0].index, 0);
-
-    // Run until sys_halt
-    let session = exec.run().unwrap();
-    assert_eq!(session.exit_code, ExitCode::Halted(0));
-    session.prove().unwrap();
+    assert!(is_fault_proof(run_memio(&[(POS + 1, 0)])));
 }
 
 #[test]
@@ -248,7 +243,7 @@ fn session_events() {
         }
     }
 
-    let mut exec = Executor::from_elf(ExecutorEnv::default(), HELLO_COMMIT_ELF).unwrap();
+    let mut exec = ExecutorImpl::from_elf(ExecutorEnv::default(), HELLO_COMMIT_ELF).unwrap();
     let mut session = exec.run().unwrap();
     let on_pre_prove_segment_flag = Rc::new(RefCell::new(false));
     let on_post_prove_segment_flag = Rc::new(RefCell::new(false));
@@ -263,48 +258,18 @@ fn session_events() {
     assert_eq!(on_post_prove_segment_flag.take(), true);
 }
 
-#[test]
-#[cfg_attr(feature = "cuda", serial)]
-fn continuation() {
-    const COUNT: usize = 2; // Number of total chunks to aim for.
-    let segment_limit_po2 = 16; // 64k cycles
-    let cycles = 1 << segment_limit_po2;
-
-    let spec = &to_vec(&MultiTestSpec::BusyLoop { cycles }).unwrap();
-    let env = ExecutorEnv::builder()
-        .add_input(&spec)
-        .segment_limit_po2(segment_limit_po2)
-        .build()
-        .unwrap();
-    let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
-    let session = exec.run().unwrap();
-    let segments = session.resolve().unwrap();
-    assert_eq!(segments.len(), COUNT);
-
-    let (final_segment, segments) = segments.split_last().unwrap();
-    for segment in segments {
-        assert_eq!(segment.exit_code, ExitCode::SystemSplit);
-    }
-    assert_eq!(final_segment.exit_code, ExitCode::Halted(0));
-
-    let receipt = session.prove().unwrap();
-    for (idx, receipt) in receipt.inner.flat().unwrap().iter().enumerate() {
-        assert_eq!(receipt.index, idx as u32);
-    }
-}
-
 // These tests come from:
 // https://github.com/riscv-software-src/riscv-tests
 // They were built using the toolchain from:
 // https://github.com/risc0/toolchain/releases/tag/2022.03.25
 mod riscv {
-    use crate::{Executor, ExecutorEnv, MemoryImage, Program};
+    use crate::{ExecutorEnv, ExecutorImpl, MemoryImage, Program};
 
     fn run_test(test_name: &str) {
         use std::io::Read;
 
         use flate2::read::GzDecoder;
-        use risc0_zkvm_platform::{memory::MEM_SIZE, PAGE_SIZE};
+        use risc0_zkvm_platform::{memory::GUEST_MAX_MEM, PAGE_SIZE};
         use tar::Archive;
 
         let bytes = include_bytes!("../testdata/riscv-tests.tgz");
@@ -323,11 +288,11 @@ mod riscv {
             let mut elf = Vec::new();
             entry.read_to_end(&mut elf).unwrap();
 
-            let program = Program::load_elf(elf.as_slice(), MEM_SIZE as u32).unwrap();
+            let program = Program::load_elf(elf.as_slice(), GUEST_MAX_MEM as u32).unwrap();
             let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
 
             let env = ExecutorEnv::default();
-            let mut exec = Executor::new(env, image).unwrap();
+            let mut exec = ExecutorImpl::new(env, image).unwrap();
             let session = exec.run().unwrap();
             session.prove().unwrap();
         }
@@ -389,4 +354,62 @@ mod riscv {
     test_case!(sw);
     test_case!(xor);
     test_case!(xori);
+}
+
+#[cfg(feature = "docker")]
+mod docker {
+    use crate::{serde::to_vec, ExecutorEnv, ExecutorImpl, ExitCode};
+    use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF};
+
+    #[test]
+    fn pause_continue() {
+        let env = ExecutorEnv::builder()
+            .add_input(&to_vec(&MultiTestSpec::PauseContinue).unwrap())
+            .build()
+            .unwrap();
+        let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
+
+        // Run until sys_pause
+        let session = exec.run().unwrap();
+        assert_eq!(session.segments.len(), 1);
+        assert_eq!(session.exit_code, ExitCode::Paused(0));
+        let receipt = session.prove().unwrap();
+        let segments = receipt.inner.flat().unwrap();
+        assert_eq!(segments.len(), 1);
+        assert_eq!(segments[0].index, 0);
+
+        // Run until sys_halt
+        let session = exec.run().unwrap();
+        assert_eq!(session.exit_code, ExitCode::Halted(0));
+        session.prove().unwrap();
+    }
+
+    #[test]
+    fn continuation() {
+        const COUNT: usize = 2; // Number of total chunks to aim for.
+        let segment_limit_po2 = 16; // 64k cycles
+        let cycles = 1 << segment_limit_po2;
+
+        let spec = &to_vec(&MultiTestSpec::BusyLoop { cycles }).unwrap();
+        let env = ExecutorEnv::builder()
+            .add_input(&spec)
+            .segment_limit_po2(segment_limit_po2)
+            .build()
+            .unwrap();
+        let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
+        let session = exec.run().unwrap();
+        let segments = session.resolve().unwrap();
+        assert_eq!(segments.len(), COUNT);
+
+        let (final_segment, segments) = segments.split_last().unwrap();
+        for segment in segments {
+            assert_eq!(segment.exit_code, ExitCode::SystemSplit);
+        }
+        assert_eq!(final_segment.exit_code, ExitCode::Halted(0));
+
+        let receipt = session.prove().unwrap();
+        for (idx, receipt) in receipt.inner.flat().unwrap().iter().enumerate() {
+            assert_eq!(receipt.index, idx as u32);
+        }
+    }
 }

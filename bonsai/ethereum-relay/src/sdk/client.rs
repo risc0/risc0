@@ -15,6 +15,7 @@
 //! An asynchronous Client API.
 
 use anyhow::Context;
+use bonsai_sdk::API_KEY_HEADER;
 use reqwest::{header, Client as AsyncClient, Response};
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
@@ -79,7 +80,7 @@ impl Client {
         let mut auth_value =
             header::HeaderValue::from_str(&api_key).context("invalid API key value")?;
         auth_value.set_sensitive(true);
-        headers.insert("x-api-key", auth_value);
+        headers.insert(API_KEY_HEADER, auth_value);
 
         let client = AsyncClient::builder()
             .default_headers(headers)
@@ -98,7 +99,7 @@ impl Client {
         let mut auth_value =
             header::HeaderValue::from_str(&api_key).context("invalid API key value")?;
         auth_value.set_sensitive(true);
-        headers.insert("x-api-key", auth_value);
+        headers.insert(API_KEY_HEADER, auth_value);
 
         let client = AsyncClient::builder()
             .default_headers(headers)

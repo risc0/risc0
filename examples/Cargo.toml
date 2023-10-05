@@ -16,6 +16,7 @@ members = [
   "prorata",
   "prorata/core",
   "sha",
+  "smartcore-ml",
   "waldo",
   "waldo/core",
   "wasm",
