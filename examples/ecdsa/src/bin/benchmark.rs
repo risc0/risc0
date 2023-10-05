@@ -14,7 +14,7 @@
 
 use anyhow::{anyhow, bail};
 use ecdsa_methods::{BENCHMARK_ELF, BENCHMARK_PATH};
-use risc0_zkvm::{Executor, ExecutorEnv, Profiler};
+use risc0_zkvm::{default_executor, ExecutorEnv, Profiler};
 
 // Simple main to load and run the benchmark binary in the RISC Zero Executor.
 fn main() -> anyhow::Result<()> {
@@ -43,7 +43,8 @@ fn main() -> anyhow::Result<()> {
         };
 
         // Execute the benchmarks.
-        Executor::from_elf(env, BENCHMARK_ELF)?.run()?;
+        let exec = default_executor();
+        exec.execute_elf(env, BENCHMARK_ELF)?;
     }
 
     // Write out the pprof.

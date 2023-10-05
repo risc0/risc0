@@ -20,13 +20,6 @@ crypto-bigint = { git = "https://github.com/risc0/RustCrypto-crypto-bigint", tag
 [profile.release]
 # Empirically observed to result in the best performance for this binary (in particular, better than
 # "fat"). It's often a good idea to experiment with different optimization levels and options.
-# lto = "thin"
-opt-level = 0
-debug = true
-debug-assertions = false
-overflow-checks = false
-lto = false
-panic = 'unwind'
-incremental = true
-codegen-units = 256
-rpath = false
+lto = "thin"
+# Decomment the following when profiling
+# debug = true

@@ -9,12 +9,6 @@ edition = "2021"
 risc0-zkvm = { path = "../../../../risc0/zkvm", default-features = false }
 
 [profile.release]
-opt-level = 0
-debug = true
-debug-assertions = false
-overflow-checks = false
-lto = false
-panic = 'unwind'
-incremental = true
-codegen-units = 256
-rpath = false
+# Decomment the following when profiling
+# debug = true
+

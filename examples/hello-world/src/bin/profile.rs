@@ -15,7 +15,7 @@
 use anyhow::{anyhow, bail};
 use hello_world_methods::{MULTIPLY_ELF, MULTIPLY_PATH};
 use risc0_zkvm::serde::to_vec;
-use risc0_zkvm::{Executor, ExecutorEnv, Profiler};
+use risc0_zkvm::{default_executor, ExecutorEnv, Profiler};
 
 // Simple main to load and run the benchmark binary in the RISC Zero Executor.
 fn main() -> anyhow::Result<()> {
@@ -48,11 +48,11 @@ fn main() -> anyhow::Result<()> {
         };
 
         // Execute the example.
-        let session = Executor::from_elf(env, MULTIPLY_ELF)?.run()?;
-        let segments = session.resolve()?;
-        let mut cycles = 0usize;
-        for segment in segments {
-            cycles += segment.insn_cycles
+        let exec = default_executor();
+        let session = exec.execute_elf(env, MULTIPLY_ELF)?;
+        let mut cycles = 0u32;
+        for segment in session.segments {
+            cycles += segment.cycles
         }
         println!("{cycles}");
     }
