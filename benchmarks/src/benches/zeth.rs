@@ -76,7 +76,6 @@ impl Benchmark for Job<'_> {
         ));
 
         let init_spec = ETH_MAINNET_CHAIN_SPEC.clone();
-        // let runtime = tokio::runtime::Runtime::new().unwrap();
         let init = zeth_lib::host::get_initial_data::<EthereumStrategyBundle>(
             init_spec, rpc_cache, None, spec,
         )
