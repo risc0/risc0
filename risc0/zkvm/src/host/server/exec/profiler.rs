@@ -19,13 +19,6 @@
 //! top level stack frame.  (More than one stack frame may show up
 //! in the case of inlined functions).
 
-// TODO:
-//
-//   * Count the full stack instead of the top frame; the "gimli"
-//   crate's UnwindSection and Evaluation should help us do this
-//
-//  * Demangle symbols
-
 use std::collections::HashMap;
 use std::hash::{Hash, Hasher};
 
@@ -62,6 +55,8 @@ enum CallStackOp {
 /// Uses the rules in section 2.5 as guidelines for operations on the return
 /// address stack to determine whether a given JAL(R) instruction is a call, a
 /// return, or neither.
+///
+/// [RISC-V ISA manual]: https://riscv.org/wp-content/uploads/2017/05/riscv-spec-v2.2.pdf
 fn extract_call_stack_op(insn: u32) -> Option<CallStackOp> {
     let opcode: u32 = insn & 0x7f;
 
