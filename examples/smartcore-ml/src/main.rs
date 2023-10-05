@@ -121,7 +121,8 @@ mod test {
             -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
             ];
         
-        //  We create the SVC params and train the SVC model.  These will NOT get serialized
+        // We create the SVC params and train the SVC model.  
+        // The paramaters will NOT get serialized due to a serde_skip command in the source code for the SVC struct
         let knl = Kernels::linear();
         let params = &SVCParameters::default().with_c(200.0).with_kernel(knl);
         let svc = SVC::fit(&x, &y, params).unwrap();
