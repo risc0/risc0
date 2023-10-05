@@ -252,8 +252,11 @@ pub fn main() {
             // fault
             asm!( "mv x6, {}", "sw x5, (x6)" , in(reg) addr, out("x5") _, out("x6") _);
         },
+        MultiTestSpec::OutOfBoundsEcall => unsafe {
+            asm!("ecall", in("x5") 3, in("x10") 0x0, in("x11") 0x0, in("x12") 0x0, in("x13") 0x0, in("x14") 10000,);
+        },
         MultiTestSpec::TooManySha => unsafe {
-            asm!("ecall", in("x5") 3, in("x10") 0, in("x11") 0, in("x12") 0, in("x13") 0, in("x14") 10000,);
+            asm!("ecall", in("x5") 3, in("x10") 0x400, in("x11") 0x400, in("x12") 0x400, in("x13") 0x400, in("x14") 10000,);
         },
     }
 }

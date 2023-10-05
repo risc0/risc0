@@ -58,7 +58,8 @@ fn basic() {
         (0x4000, 0x1234b137), // lui x2, 0x1234b000
         (0x4004, 0xf387e1b7), // lui x3, 0xf387e000
         (0x4008, 0x003100b3), // add x1, x2, x3
-        (0x400c, 0x00000073), // ecall(halt)
+        (0x400c, 0x000055b7), // lui x11, 0x5
+        (0x4010, 0x00000073), // ecall(halt)
     ]);
     let program = Program {
         entry: 0x4000,
@@ -735,12 +736,13 @@ fn post_state_digest_randomization() {
 #[test]
 #[should_panic(expected = "cycle count too large")]
 fn too_many_sha() {
-    let spec = to_vec(&MultiTestSpec::TooManySha).unwrap();
-    let env = ExecutorEnv::builder().add_input(&spec).build().unwrap();
-    ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
-        .unwrap()
-        .run()
-        .unwrap();
+    run_test(MultiTestSpec::TooManySha);
+}
+
+#[test]
+#[should_panic(expected = "is an invalid guest address")]
+fn out_of_bounds_ecall() {
+    run_test(MultiTestSpec::OutOfBoundsEcall);
 }
 
 #[cfg(feature = "docker")]

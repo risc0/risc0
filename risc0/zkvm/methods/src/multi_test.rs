@@ -81,6 +81,7 @@ pub enum MultiTestSpec {
     LibM,
     Oom,
     OutOfBounds,
+    OutOfBoundsEcall,
     RsaCompat,
     TooManySha,
 }
