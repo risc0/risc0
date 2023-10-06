@@ -1,8 +1,55 @@
 steps:
-  - label: "rustup"
-    command: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-
-  - wait
-
   - label: "check"
-    command: .buildkite/check.sh
+    command: .buildkite/steps/check.sh
+
+  - label: "test"
+    command: .buildkite/steps/test.sh
+    agents:
+      queue: "builder-{{matrix.arch}}"
+    matrix:
+      setup:
+        os: [macos, linux]
+        feature: [default]
+        device: [cpu]
+      adjustments:
+        - with:
+          os: linux
+          feature: cuda
+          device: nvidia_rtx_a5000
+        - with:
+          os: macos
+          feature: metal
+          device: apple_m2_pro
+    env:
+      FEATURE: "{{matrix.feature}}"
+
+  - label: "examples"
+    command: .buildkite/steps/examples.sh
+    matrix:
+      setup:
+        os: [macos, linux]
+        feature: [default]
+        device: [cpu]
+      adjustments:
+        - with:
+          os: linux
+          feature: cuda
+          device: nvidia_rtx_a5000
+        - with:
+          os: macos
+          feature: metal
+          device: apple_m2_pro
+    env:
+      FEATURE: "{{matrix.feature}}"
+
+  - label: "check_template"
+    command: .buildkite/steps/check_template.sh
+
+  - label: "docs"
+    command: .buildkite/steps/docs.sh
+
+  - label: "web"
+    command: .buildkite/steps/web.sh
+
+  - label: "docker-build"
+    command: .buildkite/steps/docker-build.sh
