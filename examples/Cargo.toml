@@ -41,4 +41,4 @@ lto = true
 opt-level = 3
 
 [patch.crates-io]
-smartcore = { git = "https://github.com/risc0/smartcore.git" }
+smartcore = { git = "https://github.com/risc0/smartcore.git" , features = ["serde"]}
