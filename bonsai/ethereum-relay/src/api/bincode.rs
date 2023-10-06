@@ -30,12 +30,12 @@ pub(crate) struct Bincode<T>(pub T);
 
 #[async_trait]
 impl<T, S, B> FromRequest<S, B> for Bincode<T>
-    where
-        T: DeserializeOwned,
-        B: HttpBody + Send + 'static,
-        B::Data: Send,
-        B::Error: std::error::Error + Send + Sync,
-        S: Send + Sync,
+where
+    T: DeserializeOwned,
+    B: HttpBody + Send + 'static,
+    B::Data: Send,
+    B::Error: std::error::Error + Send + Sync,
+    S: Send + Sync,
 {
     type Rejection = Response;
 
