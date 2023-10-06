@@ -98,7 +98,10 @@ impl Future for PendingProofRequest {
                     let response = futures::ready!(bonsai_get_receipt_fut.as_mut().poll(ctx));
                     match response {
                         Ok(receipt_response) => {
-                            match (receipt_response.status.as_str(), receipt_response.receipt_url.is_some()) {
+                            match (
+                                receipt_response.status.as_str(),
+                                receipt_response.receipt_url.is_some(),
+                            ) {
                                 ("SUCCEEDED", true) => {
                                     return Poll::Ready(Ok(this.pending_proof_id.clone()))
                                 }
