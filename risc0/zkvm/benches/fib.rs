@@ -15,15 +15,15 @@
 use criterion::{
     black_box, criterion_group, criterion_main, BatchSize, BenchmarkId, Criterion, Throughput,
 };
-use risc0_zkvm::{get_prover_impl, Executor, ExecutorEnv, ProverOpts, VerifierContext};
+use risc0_zkvm::{get_prover_server, ExecutorEnv, ExecutorImpl, ProverOpts, VerifierContext};
 use risc0_zkvm_methods::FIB_ELF;
 
-fn setup(iterations: u32) -> Executor<'static> {
+fn setup(iterations: u32) -> ExecutorImpl<'static> {
     let env = ExecutorEnv::builder()
         .add_input(&[iterations])
         .build()
         .unwrap();
-    Executor::from_elf(env, FIB_ELF).unwrap()
+    ExecutorImpl::from_elf(env, FIB_ELF).unwrap()
 }
 
 enum Scope {
@@ -35,7 +35,7 @@ pub fn bench(c: &mut Criterion) {
     let mut group = c.benchmark_group("fib");
 
     let opts = ProverOpts::default();
-    let prover = get_prover_impl(&opts).unwrap();
+    let prover = get_prover_server(&opts).unwrap();
     let ctx = VerifierContext::default();
 
     for iterations in [100, 1000, 10_000] {
@@ -44,7 +44,7 @@ pub fn bench(c: &mut Criterion) {
         let segments = session.resolve().unwrap();
         let exec_cycles = segments
             .iter()
-            .fold(0, |exec_cycles, segment| exec_cycles + segment.insn_cycles);
+            .fold(0, |exec_cycles, segment| exec_cycles + segment.cycles);
         group.sample_size(10);
         let id = BenchmarkId::from_parameter(format!("{iterations}/execute"));
         group.throughput(Throughput::Elements(exec_cycles as u64));
@@ -67,7 +67,7 @@ pub fn bench(c: &mut Criterion) {
                     .iter()
                     .fold((0, 0), |(exec_cycles, prove_cycles), segment| {
                         (
-                            exec_cycles + segment.insn_cycles,
+                            exec_cycles + segment.cycles,
                             prove_cycles + (1 << segment.po2),
                         )
                     });

@@ -15,16 +15,13 @@
 use std::io::Write;
 
 use anyhow::Context;
-use bonsai_ethereum_relay::{EthersClientConfig, Relayer};
+use bonsai_ethereum_relay::{tokenize_snark_receipt, EthersClientConfig, Relayer};
 use bonsai_ethereum_relay_cli::{resolve_guest_entry, resolve_image_output, Output};
-use bonsai_sdk::{
-    alpha::{responses::SnarkProof, SdkErr},
-    alpha_async::{get_client_from_parts, put_image},
-};
+use bonsai_sdk::alpha_async::{get_client_from_parts, upload_img};
 use clap::{Args, Parser, Subcommand};
 use ethers::{
     abi::{Hash, Token, Tokenizable},
-    types::{Address, U256},
+    types::Address,
 };
 use methods::GUEST_LIST;
 use risc0_zkvm::sha::Digest;
@@ -117,35 +114,6 @@ pub struct App {
     command: Command,
 }
 
-/// Parse a slice of strings as a fixed array of uint256 tokens.
-fn parse_to_tokens(slice: &[String]) -> anyhow::Result<Token> {
-    Ok(Token::FixedArray(
-        slice
-            .iter()
-            .map(|s| -> anyhow::Result<_> { Ok(U256::from_str_radix(s, 16)?.into_token()) })
-            .collect::<Result<Vec<_>, _>>()?,
-    ))
-}
-
-fn tokenize_snark_proof(proof: &SnarkProof) -> anyhow::Result<Token> {
-    if proof.b.len() != 2 {
-        anyhow::bail!("hex-strings encoded proof is not well formed");
-    }
-    for pair in [&proof.a, &proof.c].into_iter().chain(proof.b.iter()) {
-        if pair.len() != 2 {
-            anyhow::bail!("hex-strings encoded proof is not well formed");
-        }
-    }
-    Ok(Token::FixedArray(vec![
-        parse_to_tokens(&proof.a)?,
-        Token::FixedArray(vec![
-            parse_to_tokens(&proof.b[0])?,
-            parse_to_tokens(&proof.b[1])?,
-        ]),
-        parse_to_tokens(&proof.c)?,
-    ]))
-}
-
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     let args = App::parse();
@@ -171,20 +139,12 @@ async fn main() -> anyhow::Result<()> {
                         (true, Output::Execution { journal }) => {
                             vec![Token::Bytes(journal)]
                         }
-                        (
-                            false,
-                            Output::Bonsai {
-                                journal,
-                                receipt_metadata,
-                                snark_proof,
-                            },
-                        ) => {
+                        (false, Output::Bonsai { snark_receipt }) => {
                             vec![
-                                Token::Bytes(journal),
-                                Hash::from(<[u8; 32]>::from(receipt_metadata.post.digest()))
-                                    .into_token(),
-                                Token::Bytes(ethers::abi::encode(&[tokenize_snark_proof(
-                                    &snark_proof,
+                                Token::Bytes(snark_receipt.journal),
+                                Token::FixedBytes(snark_receipt.post_state_digest),
+                                Token::Bytes(ethers::abi::encode(&[tokenize_snark_receipt(
+                                    &snark_receipt.snark,
                                 )?])),
                             ]
                         }
@@ -291,20 +251,20 @@ async fn upload_images(
         )));
 
         // upload binary to Bonsai
-        let bonsai_client =
-            get_client_from_parts(bonsai_api_url.to_string(), bonsai_api_key.to_string()).await?;
+        let bonsai_client = get_client_from_parts(
+            bonsai_api_url.to_string(),
+            bonsai_api_key.to_string(),
+            risc0_zkvm::VERSION,
+        )
+        .await?;
         let img_id = image_id.clone();
 
-        match put_image(
+        upload_img(
             bonsai_client.clone(),
             img_id.clone(),
             guest_entry.elf.to_vec(),
         )
-        .await
-        {
-            Ok(()) | Err(SdkErr::ImageIdExists) => Ok::<_, anyhow::Error>(()),
-            Err(err) => Err(err.into()),
-        }?;
+        .await?;
 
         image_ids.push(guest_entry.image_id.into());
     }

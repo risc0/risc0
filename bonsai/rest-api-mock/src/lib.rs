@@ -93,7 +93,7 @@ mod test {
 
     use anyhow::{bail, Result};
     use bonsai_sdk::alpha_async as bonsai_sdk;
-    use risc0_zkvm::{MemoryImage, Program, MEM_SIZE, PAGE_SIZE};
+    use risc0_zkvm::{MemoryImage, Program, GUEST_MAX_MEM, PAGE_SIZE};
     use risc0_zkvm_methods::HELLO_COMMIT_ELF;
 
     use crate::serve;
@@ -103,20 +103,22 @@ mod test {
         bonsai_api_key: String,
         method: &[u8],
     ) -> Result<()> {
-        let client = bonsai_sdk::get_client_from_parts(bonsai_api_url, bonsai_api_key).await?;
+        let client =
+            bonsai_sdk::get_client_from_parts(bonsai_api_url, bonsai_api_key, risc0_zkvm::VERSION)
+                .await?;
 
         // create the memoryImg, upload it and return the imageId
         let img_id = {
-            let program = Program::load_elf(method, MEM_SIZE as u32)?;
+            let program = Program::load_elf(method, GUEST_MAX_MEM as u32)?;
             let image = MemoryImage::new(&program, PAGE_SIZE as u32)?;
             let image_id = hex::encode(image.compute_id());
             let image = bincode::serialize(&image).expect("Failed to serialize memory img");
-            bonsai_sdk::put_image(client.clone(), image_id.clone(), image).await?;
+            bonsai_sdk::upload_img(client.clone(), image_id.clone(), image).await?;
             image_id
         };
 
         // Prepare input data and upload it.
-        let input_id = bonsai_sdk::put_input(client.clone(), vec![]).await?;
+        let input_id = bonsai_sdk::upload_input(client.clone(), vec![]).await?;
 
         // Start a session running the prover
         let session = bonsai_sdk::create_session(client.clone(), img_id, input_id).await?;

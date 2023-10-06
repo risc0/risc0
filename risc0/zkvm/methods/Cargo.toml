@@ -17,3 +17,6 @@ methods = ["guest", "std"]
 risc0-zkvm = { workspace = true }
 risc0-zkvm-platform = { workspace = true }
 serde = { version = "1.0", default-features = false, features = ["derive"] }
+
+[features]
+docker = []

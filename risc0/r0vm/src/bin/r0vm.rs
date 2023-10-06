@@ -16,7 +16,8 @@ use std::{fs, path::PathBuf, rc::Rc};
 
 use clap::{Args, Parser, ValueEnum};
 use risc0_zkvm::{
-    get_prover_impl, ApiServer, DynProverImpl, Executor, ExecutorEnv, ProverOpts, VerifierContext,
+    get_prover_server, ApiServer, ExecutorEnv, ExecutorImpl, ProverOpts, ProverServer,
+    VerifierContext,
 };
 
 /// Runs a RISC-V ELF binary within the RISC Zero ZKVM.
@@ -116,11 +117,11 @@ fn main() {
         let env = builder.build().unwrap();
         let mut exec = if let Some(ref elf_path) = args.mode.elf {
             let elf_contents = fs::read(elf_path).unwrap();
-            Executor::from_elf(env, &elf_contents).unwrap()
+            ExecutorImpl::from_elf(env, &elf_contents).unwrap()
         } else if let Some(ref image_path) = args.mode.image {
             let image_contents = fs::read(image_path).unwrap();
             let image = bincode::deserialize(&image_contents).unwrap();
-            Executor::new(env, image).unwrap()
+            ExecutorImpl::new(env, image).unwrap()
         } else {
             unreachable!()
         };
@@ -155,7 +156,7 @@ fn main() {
 }
 
 impl Cli {
-    fn get_prover(&self) -> Rc<dyn DynProverImpl> {
+    fn get_prover(&self) -> Rc<dyn ProverServer> {
         let hashfn = match self.hashfn {
             HashFn::Sha256 => "sha-256",
             HashFn::Poseidon => "poseidon",
@@ -164,7 +165,7 @@ impl Cli {
             hashfn: hashfn.to_string(),
         };
 
-        get_prover_impl(&opts).unwrap()
+        get_prover_server(&opts).unwrap()
     }
 }
 

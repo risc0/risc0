@@ -29,6 +29,10 @@ pub enum MultiTestSpec {
     ShaDigest {
         data: Vec<u8>,
     },
+    ShaDigestIter {
+        data: Vec<u8>,
+        num_iter: u32,
+    },
     EventTrace,
     Profiler,
     Fail,
@@ -70,6 +74,7 @@ pub enum MultiTestSpec {
     Oom,
     OutOfBounds,
     RsaCompat,
+    TooManySha,
 }
 
 declare_syscall!(pub SYS_MULTI_TEST);

@@ -1,0 +1,16 @@
+[package]
+name = "smartcore-ml"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+risc0-zkvm = { path = "../../risc0/zkvm" }
+rmp-serde = "1.1"
+serde_json = "1.0"
+smartcore = { version = "0.3", features = ['serde'] }
+smartcore-ml-methods = { path = "methods" }
+
+[features]
+cuda = ["risc0-zkvm/cuda"]
+default = []
+metal = ["risc0-zkvm/metal"]

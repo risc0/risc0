@@ -16,10 +16,10 @@
 pub(crate) mod tests {
     use bonsai_ethereum_contracts::i_bonsai_relay::CallbackRequestFilter;
     use bonsai_sdk::alpha::{
-        responses::{CreateSessRes, SessionStatusRes, SnarkProof, SnarkStatusRes},
+        responses::{CreateSessRes, Groth16Seal, SessionStatusRes, SnarkReceipt, SnarkStatusRes},
         SessionId,
     };
-    use ethers::types::{Address, Bytes, H256, U256};
+    use ethers::types::{Address, Bytes, H256};
     use risc0_zkvm::{InnerReceipt, Receipt};
     use uuid::Uuid;
     use wiremock::{
@@ -39,6 +39,8 @@ pub(crate) mod tests {
         let status_response = SessionStatusRes {
             status: "SUCCEEDED".to_string(),
             receipt_url: Some(format!("{}/fake/receipt/path", server.uri())),
+            error_msg: None,
+            state: None,
         };
 
         let receipt_data_response = Receipt {
@@ -49,23 +51,28 @@ pub(crate) mod tests {
         let create_snark_res = CreateSessRes {
             uuid: receipt_id.to_string(),
         };
-        let zeroes = &U256::zero().to_string();
-        let a = vec![zeroes.to_string(), zeroes.to_string()];
+        let zeroes = vec![0x0];
+        let a = vec![zeroes.clone(), zeroes.clone()];
         let b = vec![
-            vec![zeroes.to_string(), zeroes.to_string()],
-            vec![zeroes.to_string(), zeroes.to_string()],
+            vec![zeroes.clone(), zeroes.clone()],
+            vec![zeroes.clone(), zeroes.clone()],
         ];
-        let c = vec![zeroes.to_string(), zeroes.to_string()];
+        let c = vec![zeroes.clone(), zeroes.clone()];
         let public = vec![
-            zeroes.to_string(),
-            zeroes.to_string(),
-            zeroes.to_string(),
-            zeroes.to_string(),
+            zeroes.clone(),
+            zeroes.clone(),
+            zeroes.clone(),
+            zeroes.clone(),
         ];
-        let dummy_snark = Some(SnarkProof { a, b, c, public });
+        let dummy_snark = Some(SnarkReceipt {
+            snark: Groth16Seal { a, b, c, public },
+            post_state_digest: vec![],
+            journal: vec![],
+        });
         let snark_status_res = SnarkStatusRes {
             status: "SUCCEEDED".to_string(),
             output: dummy_snark,
+            error_msg: None,
         };
 
         Mock::given(method("POST"))

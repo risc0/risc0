@@ -1,0 +1,73 @@
+name: Update gh-pages
+
+on:
+  push:
+    branches: [ main ]
+    # Only on changes to following paths:
+    paths:
+      - 'ghpages/**'
+      - '.github/workflows/ghpages.yml'
+
+  pull_request:
+    branches: [ main ]
+    # Only on changes to following paths:
+    paths:
+      - 'ghpages/**'
+      - '.github/workflows/ghpages.yml'
+
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  upload_artifacts:
+    runs-on: ubuntu-latest
+
+    steps:
+      # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
+      - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
+      - uses: actions/checkout@v3
+      - name: Upload gh-pages
+        uses: actions/upload-artifact@v2
+        with:
+          name: gh-pages
+          path: |
+            ghpages/dev/
+            ghpages/README.md
+
+  push_to_ghpages:
+    needs: upload_artifacts
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout gh-pages repository
+        uses: actions/checkout@v3
+        with:
+          repository: risc0/ghpages
+          ref: dev
+          token: ${{ secrets.BENCHMARK_TOKEN }}
+      - name: Download ghpages
+        uses: actions/download-artifact@v2
+        with:
+          name: gh-pages
+          path: ./
+      - name: Push gh-pages
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add dev/datasheet/index.html
+          git add dev/datasheet/static/RISC_Zero_Logo.jpeg
+          git add dev/datasheet/static/risczero_qrcode.png
+          git add dev/datasheet/static/zkvm_examples_qrcode.png
+          git add dev/bench/index.html
+          git add dev/crate-validation/index.html
+          git add README.md
+          if git diff --cached --exit-code; then
+            echo "No changes to commit"
+          else
+            git commit -m "Add build artifacts"
+            git remote set-url origin https://${{ secrets.BENCHMARK_TOKEN }}@github.com/risc0/ghpages.git
+            git push -f origin dev
+          fi

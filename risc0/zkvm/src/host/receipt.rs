@@ -13,67 +13,6 @@
 // limitations under the License.
 
 //! Manages the output and cryptographic data for a proven computation.
-//!
-//! Receipts are zero-knowledge proofs of computation. They attest that specific
-//! code was executed to generate the information contained in the receipt. The
-//! prover can provide a receipt to an untrusting party to convince them that
-//! the results contained within the receipt came from running specific code.
-//! Conversely, a verify can inspect a receipt to confirm that its results must
-//! have been generated from the expected code, even when this code was run by
-//! an untrusted source.
-//!
-//! There are two types of receipt, a [Receipt] proving the execution
-//! of a [crate::Session], and a [SegmentReceipt] proving the execution of a
-//! [crate::Segment].
-//!
-//! Because [crate::Session]s are user-determined, whereas
-//! [crate::Segment]s are automatically generated, typical use cases will handle
-//! [Receipt]s directly and [SegmentReceipt]s only indirectly as part
-//! of the [Receipt]s that contain them (for instance, by calling
-//! [Receipt::verify], which will itself call
-//! [InnerReceipt::verify] for the interior [InnerReceipt]).
-//!
-//! # Example
-//!
-//! ```rust
-//! # #[cfg(feature = "prove")]
-//! use risc0_zkvm::{default_prover, ExecutorEnv};
-//! use risc0_zkvm_methods::FIB_ELF;
-//!
-//! # #[cfg(not(feature = "cuda"))]
-//! # #[cfg(feature = "prove")]
-//! # {
-//! let env = ExecutorEnv::builder().add_input(&[20]).build().unwrap();
-//! let receipt = default_prover().prove_elf(env, FIB_ELF).unwrap();
-//! # }
-//! ```
-//!
-//! To confirm that a [Receipt] was honestly generated, use
-//! [Receipt::verify] and supply the ImageID of the code that should
-//! have been executed as a parameter. (See
-//! [risc0_build](https://docs.rs/risc0-build/latest/risc0_build/) for more
-//! information about how ImageIDs are generated.)
-//! ```rust
-//! use risc0_zkvm::Receipt;
-//!
-//! # #[cfg(feature = "prove")]
-//! # use risc0_zkvm::{default_prover, ExecutorEnv};
-//! # use risc0_zkvm_methods::{FIB_ELF, FIB_ID};
-//!
-//! # #[cfg(not(feature = "cuda"))]
-//! # #[cfg(feature = "prove")]
-//! # {
-//! # let env = ExecutorEnv::builder().add_input(&[20]).build().unwrap();
-//! # let receipt = default_prover().prove_elf(env, FIB_ELF).unwrap();
-//! receipt.verify(FIB_ID).unwrap();
-//! # }
-//! ```
-//!
-//! The public outputs of the [Receipt] are contained in the
-//! [Receipt::journal]. We provide serialization tools in the zkVM
-//! [serde](crate::serde) module, which can be used to read data from the
-//! journal as the same type it was written to the journal. If you prefer, you
-//! can also directly access the [Receipt::journal] as a `Vec<u8>`.
 
 use alloc::{collections::BTreeMap, string::String, vec::Vec};
 use core::fmt::Debug;
@@ -100,7 +39,11 @@ use super::{
     control_id::{BLAKE2B_CONTROL_ID, POSEIDON_CONTROL_ID, SHA256_CONTROL_ID},
     recursion::SuccinctReceipt,
 };
-use crate::sha::rust_crypto::{Digest as _, Sha256};
+use crate::{
+    fault_ids::FAULT_CHECKER_ID,
+    serde::from_slice,
+    sha::rust_crypto::{Digest as _, Sha256},
+};
 
 /// Indicates how a Segment or Session's execution has terminated
 #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
@@ -119,6 +62,10 @@ pub enum ExitCode {
     /// This indicates normal termination of a program with an interior exit
     /// code returned from the guest.
     Halted(u32),
+
+    /// This indicates termination of a program where the next instruction will
+    /// fail.
+    Fault,
 }
 
 /// Data associated with a receipt which is used for both input and
@@ -143,10 +90,60 @@ pub struct ReceiptMetadata {
 
 /// A receipt attesting to the execution of a Session.
 ///
-/// A Receipt attests that the `journal` was produced by executing a
-/// [crate::Session] based on a specified memory image. This image is _not_
-/// included in the receipt and must be provided by the verifier when calling
-/// [Receipt::verify].
+/// A Receipt is a zero-knowledge proof of computation. It attests that the
+/// [Receipt::journal] was produced by executing a [crate::Session] based on a
+/// specified memory image. This image is _not_ included in the receipt; the
+/// verifier must provide an [ImageID](https://dev.risczero.com/terminology),
+/// a cryptographic hash corresponding to the expected image.
+///
+/// A prover can provide a Receipt to an untrusting party to convince them that
+/// the results contained within the Receipt (in the [Receipt::journal]) came
+/// from running specific code. Conversely, a verifier can inspect a receipt to
+/// confirm that its results must have been generated from the expected code,
+/// even when this code was run by an untrusted source.
+/// # Example
+///
+/// To create a [Receipt] attesting to the faithful execution of your code, run
+/// one of the `prove` functions from a [crate::Prover].
+///
+/// ```rust
+/// # #[cfg(feature = "prove")]
+/// use risc0_zkvm::{default_prover, ExecutorEnv};
+/// use risc0_zkvm_methods::FIB_ELF;
+///
+/// # #[cfg(not(feature = "cuda"))]
+/// # #[cfg(feature = "prove")]
+/// # {
+/// let env = ExecutorEnv::builder().add_input(&[20]).build().unwrap();
+/// let receipt = default_prover().prove_elf(env, FIB_ELF).unwrap();
+/// # }
+/// ```
+///
+/// To confirm that a [Receipt] was honestly generated, use
+/// [Receipt::verify] and supply the ImageID of the code that should
+/// have been executed as a parameter. (See
+/// [risc0_build](https://docs.rs/risc0-build/latest/risc0_build/) for more
+/// information about how ImageIDs are generated.)
+/// ```rust
+/// use risc0_zkvm::Receipt;
+/// # #[cfg(feature = "prove")]
+/// # use risc0_zkvm::{default_prover, ExecutorEnv};
+/// # use risc0_zkvm_methods::{FIB_ELF, FIB_ID};
+///
+/// # #[cfg(not(feature = "cuda"))]
+/// # #[cfg(feature = "prove")]
+/// # {
+/// # let env = ExecutorEnv::builder().add_input(&[20]).build().unwrap();
+/// # let receipt = default_prover().prove_elf(env, FIB_ELF).unwrap();
+/// receipt.verify(FIB_ID).unwrap();
+/// # }
+/// ```
+///
+/// The public outputs of the [Receipt] are contained in the
+/// [Receipt::journal]. We provide serialization tools in the zkVM
+/// [serde](crate::serde) module, which can be used to read data from the
+/// journal as the same type it was written to the journal. If you prefer, you
+/// can also directly access the [Receipt::journal] as a `Vec<u8>`.
 #[derive(Debug, Deserialize, Serialize, PartialEq)]
 pub struct Receipt {
     /// The polymorphic [InnerReceipt].
@@ -159,7 +156,7 @@ pub struct Receipt {
     pub journal: Vec<u8>,
 }
 
-/// An inner receipt can take the form of a collection of [SegmentReceipts] or a
+/// An inner receipt can take the form of a [SegmentReceipts] collection or a
 /// [SuccinctReceipt].
 #[derive(Debug, Deserialize, Serialize, PartialEq)]
 pub enum InnerReceipt {
@@ -185,6 +182,23 @@ impl SegmentReceipts {
         image_id: Digest,
         journal: &[u8],
     ) -> Result<(), VerificationError> {
+        let mut fault_id_exists = false;
+
+        // This closure is invoked on each receipt's metadata
+        let mut is_fault_meta = |metadata: &ReceiptMetadata| -> Result<bool, VerificationError> {
+            if cfg!(feature = "fault-proof") && metadata.pre.digest() == FAULT_CHECKER_ID.into() {
+                if fault_id_exists {
+                    // If we get here, I means that we've already seen the fault checker's image ID.
+                    // However, a sequence of receipts can only have up to 1 fault checker image ID.
+                    // If this is the case, it means that that the fault checker incurred a fault.
+                    return Err(VerificationError::ImageVerificationError);
+                }
+                fault_id_exists = true;
+                return Ok(true);
+            }
+            Ok(false)
+        };
+
         let (final_receipt, receipts) = self
             .0
             .as_slice()
@@ -195,7 +209,7 @@ impl SegmentReceipts {
             receipt.verify_with_context(ctx)?;
             let metadata = receipt.get_metadata()?;
             log::debug!("metadata: {metadata:#?}");
-            if prev_image_id != metadata.pre.digest() {
+            if prev_image_id != metadata.pre.digest() && !is_fault_meta(&metadata)? {
                 return Err(VerificationError::ImageVerificationError);
             }
             if metadata.exit_code != ExitCode::SystemSplit {
@@ -206,12 +220,30 @@ impl SegmentReceipts {
         final_receipt.verify_with_context(ctx)?;
         let metadata = final_receipt.get_metadata()?;
         log::debug!("final: {metadata:#?}");
-        if prev_image_id != metadata.pre.digest() {
+        if prev_image_id != metadata.pre.digest() && !is_fault_meta(&metadata)? {
             return Err(VerificationError::ImageVerificationError);
         }
 
         if metadata.exit_code == ExitCode::SystemSplit {
             return Err(VerificationError::UnexpectedExitCode);
+        }
+
+        // For receipts indicating proof of fault, the guest code should post the
+        // post-image ID of the original guest code to prove that the fault checker
+        // tried to execute the next instruction from the same state of the machine.
+        // Note: if the `image_id` were to match the fault checker, it indicates that
+        // the fault checker program was run as the normal guest program. This case does
+        // not indicate a proof of fault. It is normal proof generation.
+        if cfg!(feature = "fault-proof") && fault_id_exists && image_id != FAULT_CHECKER_ID.into() {
+            let digest: Digest = from_slice(&journal.clone()).unwrap();
+            if digest != prev_image_id {
+                return Err(VerificationError::FaultStateMismatch);
+            }
+            // fault checker should only terminate with a `ExitCode::Halted(0)`. Any other
+            // status indicates that something went wrong.
+            if metadata.exit_code != ExitCode::Halted(0) {
+                return Err(VerificationError::UnexpectedExitCode);
+            }
         }
 
         let digest = Sha256::digest(journal);
@@ -230,6 +262,17 @@ impl SegmentReceipts {
                 journal
             );
             return Err(VerificationError::JournalDigestMismatch);
+        }
+
+        if cfg!(feature = "fault-proof") && fault_id_exists && image_id != FAULT_CHECKER_ID.into() {
+            // This is a valid proof of fault. Return as a verification error rather than
+            // `Ok(())`. This makes it more difficult for callers of this function to
+            // mistakenly verify a fault receipt in situations where they do not want to
+            // verify fault receipts. Also, it is important to note that if image_id matches
+            // the fault checker, it's not considered a fault receipt. It means that the
+            // fault checker was run as if it were an ordinary guest program so we should
+            // return `Ok(())` in this case.
+            return Err(VerificationError::ValidFaultReceipt);
         }
 
         Ok(())
@@ -387,9 +430,9 @@ impl SegmentReceipt {
         ReceiptMetadata::decode_from_io(layout::OutBuffer(elems))
     }
 
-    /// Return the seal for this receipt, as a slice of bytes.
-    pub fn get_seal_bytes(&self) -> &[u8] {
-        bytemuck::cast_slice(&self.seal)
+    /// Return the seal for this receipt, as a vector of bytes.
+    pub fn get_seal_bytes(&self) -> Vec<u8> {
+        self.seal.iter().flat_map(|x| x.to_le_bytes()).collect()
     }
 }
 

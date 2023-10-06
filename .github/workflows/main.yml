@@ -60,6 +60,8 @@ jobs:
     env:
       CUDA_LIBRARY_PATH: /usr/lib/cuda
       FEATURE: ${{ matrix.feature }}
+      RISC0_BUILD_LOCKED: 1
+      RISC0_SERVER_PATH: ${{ github.workspace }}/target/release/r0vm
       RUST_BACKTRACE: full
       RUSTC_WRAPPER: sccache
     steps:
@@ -82,9 +84,13 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: cargo xtask install
       - run: cargo xtask gen-receipt
+      - run: cargo build --release -F $FEATURE -p risc0-r0vm
       - run: cargo test -F $FEATURE -F profiler
       - run: cargo test --workspace -F $FEATURE --tests -- --ignored --test-threads 1
       - run: cargo test -F $FEATURE -F disable-dev-mode -p risc0-r0vm
+      - run: cargo test -F $FEATURE -F fault-proof -p risc0-zkvm -- tests::memory_io tests::memory_access
+        if: matrix.device == 'cpu'
+      - run: cargo test -F experimental -p cargo-risczero
         if: matrix.device == 'cpu'
       - run: cargo check -F $FEATURE --benches
       - run: cargo check -p risc0-build
@@ -96,6 +102,7 @@ jobs:
       - run: cargo check -F $FEATURE -p risc0-sys
       - run: cargo check -F $FEATURE -p risc0-zkp
       - run: cargo check -F $FEATURE -p risc0-zkvm
+      - run: cargo check -p substrate-minimal-runtime
       - uses: risc0/clippy-action@main
         with:
           reporter: 'github-pr-check'
@@ -121,6 +128,10 @@ jobs:
     env:
       CUDA_LIBRARY_PATH: /usr/lib/cuda
       FEATURE: ${{ matrix.feature }}
+      RISC0_BUILD_LOCKED: 1
+      RISC0_EXECUTOR: ipc
+      RISC0_PROVER: ipc
+      RISC0_SERVER_PATH: ${{ github.workspace }}/target/release/r0vm
       RUST_BACKTRACE: full
       RUSTC_WRAPPER: sccache
     steps:
@@ -140,7 +151,8 @@ jobs:
       - run: cargo run --bin cargo-risczero -- risczero install
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - run: cargo test -F $FEATURE
+      - run: cargo build --release -F $FEATURE -p risc0-r0vm
+      - run: cargo test --locked -F $FEATURE
         working-directory: examples
 
   doc:
@@ -161,13 +173,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: cargo xtask gen-receipt
       - run: cargo doc --no-deps --exclude=risc0-zkvm-methods --workspace
-      - name: Install mdbook
-        uses: risc0/cargo-install@2cfb0024938d23011106cbf127b393bc83fddba1
-        with:
-          crate: mdbook
-          version: "0.4"
-      - run: mdbook test
-        working-directory: docs/mdbook
 
   check_template:
     runs-on: [self-hosted, prod, cpu, "${{ matrix.os }}"]
@@ -175,17 +180,27 @@ jobs:
       fail-fast: false
       matrix:
         os: [Linux, macOS]
+    env:
+      RISC0_SERVER_PATH: ${{ github.workspace }}/target/release/r0vm
+      RUSTC_WRAPPER: sccache
 
     steps:
       # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
       - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
       - uses: actions/checkout@v3
       - uses: ./.github/actions/rustup
+      - uses: ./.github/actions/sccache
       - run: cargo run --bin cargo-risczero -- risczero install
         env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: cargo build --release -p risc0-r0vm
       - run: |
-          cargo run -p cargo-risczero risczero new --template templates/rust-starter --templ-subdir="" --path $(pwd) --dest ${{ runner.temp }} template-test
+          cargo run -p cargo-risczero risczero new \
+            --template templates/rust-starter \
+            --templ-subdir="" \
+            --path $(pwd) \
+            --dest ${{ runner.temp }} \
+            template-test
         shell: bash
       - run: cargo build --release --manifest-path ${{ runner.temp }}/template-test/Cargo.toml
       - run: ${{ runner.temp }}/template-test/target/release/host
@@ -193,6 +208,7 @@ jobs:
   web:
     runs-on: ubuntu-latest-8-cores
     env:
+      RISC0_BUILD_LOCKED: 1
       RUSTC_WRAPPER: sccache
     steps:
       # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
@@ -225,4 +241,6 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 18
-      - run: cargo test -p cargo-risczero -F docker
+      - run: cargo run --bin cargo-risczero -- risczero install
+      - run: cargo test -F docker -p risc0-build
+      - run: cargo test -F docker -p risc0-zkvm -- "docker::"

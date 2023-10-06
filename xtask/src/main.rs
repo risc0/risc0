@@ -13,6 +13,7 @@
 // limitations under the License.
 
 mod bootstrap;
+mod bootstrap_fault;
 mod bootstrap_poseidon;
 mod gen_receipt;
 mod install;
@@ -20,8 +21,8 @@ mod install;
 use clap::{Parser, Subcommand};
 
 use self::{
-    bootstrap::Bootstrap, bootstrap_poseidon::BootstrapPoseidon, gen_receipt::GenReceipt,
-    install::Install,
+    bootstrap::Bootstrap, bootstrap_fault::BootstrapFault, bootstrap_poseidon::BootstrapPoseidon,
+    gen_receipt::GenReceipt, install::Install,
 };
 
 #[derive(Parser)]
@@ -33,6 +34,7 @@ struct Cli {
 #[derive(Subcommand)]
 enum Commands {
     Bootstrap(Bootstrap),
+    BootstrapFault(BootstrapFault),
     BootstrapPoseidon(BootstrapPoseidon),
     GenReceipt(GenReceipt),
     Install(Install),
@@ -42,6 +44,7 @@ impl Commands {
     fn run(&self) {
         match self {
             Commands::Bootstrap(cmd) => cmd.run(),
+            Commands::BootstrapFault(cmd) => cmd.run(),
             Commands::BootstrapPoseidon(cmd) => cmd.run(),
             Commands::Install(cmd) => cmd.run(),
             Commands::GenReceipt(cmd) => cmd.run(),

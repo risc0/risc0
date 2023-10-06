@@ -15,11 +15,14 @@
 use anyhow::Result;
 use risc0_binfmt::MemoryImage;
 
-use super::{Prover, ProverOpts};
-use crate::{get_prover_impl, ExecutorEnv, Receipt, VerifierContext};
+use super::{Executor, Prover, ProverOpts};
+use crate::{
+    get_prover_server, ExecutorEnv, ExecutorImpl, Receipt, SegmentInfo, SessionInfo,
+    VerifierContext,
+};
 
-/// A [Prover] implementation that selects a [crate::DynProverImpl] by calling
-/// [get_prover_impl].
+/// A [Prover] implementation that selects a [crate::ProverServer] by calling
+/// [get_prover_server].
 pub struct LocalProver {
     name: String,
 }
@@ -41,10 +44,30 @@ impl Prover for LocalProver {
         opts: &ProverOpts,
         image: MemoryImage,
     ) -> Result<Receipt> {
-        get_prover_impl(opts)?.prove(env, ctx, image)
+        get_prover_server(opts)?.prove(env, ctx, image)
     }
 
     fn get_name(&self) -> String {
         self.name.clone()
+    }
+}
+
+impl Executor for LocalProver {
+    fn execute(&self, env: ExecutorEnv<'_>, image: MemoryImage) -> Result<SessionInfo> {
+        let mut exec = ExecutorImpl::new(env, image)?;
+        let session = exec.run()?;
+        let mut segments = Vec::new();
+        for segment in session.segments {
+            let segment = segment.resolve()?;
+            segments.push(SegmentInfo {
+                po2: segment.po2,
+                cycles: segment.cycles,
+            })
+        }
+        Ok(SessionInfo {
+            segments,
+            journal: session.journal.into(),
+            exit_code: session.exit_code,
+        })
     }
 }

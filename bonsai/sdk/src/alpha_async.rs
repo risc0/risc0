@@ -21,21 +21,25 @@ use crate::alpha::{
 ///
 /// Uses the BONSAI_API_URL and BONSAI_API_KEY environment variables to
 /// construct a client
-pub async fn get_client_from_env() -> Result<Client, SdkErr> {
-    tokio::task::spawn_blocking(Client::from_env)
+pub async fn get_client_from_env(risc0_version: &'static str) -> Result<Client, SdkErr> {
+    tokio::task::spawn_blocking(|| Client::from_env(risc0_version))
         .await
         .map_err(|err| SdkErr::InternalServerErr(format!("{err}")))?
 }
 
 /// Construct a Bonsai SDK Client from url + api key strings
-pub async fn get_client_from_parts(url: String, api_key: String) -> Result<Client, SdkErr> {
-    tokio::task::spawn_blocking(move || Client::from_parts(url, api_key))
+pub async fn get_client_from_parts(
+    url: String,
+    api_key: String,
+    risc0_version: &'static str,
+) -> Result<Client, SdkErr> {
+    tokio::task::spawn_blocking(move || Client::from_parts(url, api_key, risc0_version))
         .await
         .map_err(|err| SdkErr::InternalServerErr(format!("{err}")))?
 }
 
 /// Upload a input buffer to the /inputs/ route
-pub async fn put_input(bonsai_client: Client, buf: Vec<u8>) -> Result<String, SdkErr> {
+pub async fn upload_input(bonsai_client: Client, buf: Vec<u8>) -> Result<String, SdkErr> {
     tokio::task::spawn_blocking(move || bonsai_client.upload_input(buf))
         .await
         .map_err(|err| SdkErr::InternalServerErr(format!("{err}")))?
@@ -43,14 +47,16 @@ pub async fn put_input(bonsai_client: Client, buf: Vec<u8>) -> Result<String, Sd
 
 /// Upload a image buffer to the /images/ route
 ///
+/// The boolean return indicates if the image already exists in bonsai
+///
 /// The image data can be either:
 /// * ELF file bytes
 /// * bincode encoded MemoryImage
-pub async fn put_image(
+pub async fn upload_img(
     bonsai_client: Client,
     image_id: String,
     image: Vec<u8>,
-) -> Result<(), SdkErr> {
+) -> Result<bool, SdkErr> {
     tokio::task::spawn_blocking(move || bonsai_client.upload_img(&image_id, image))
         .await
         .map_err(|err| SdkErr::InternalServerErr(format!("{err}")))?

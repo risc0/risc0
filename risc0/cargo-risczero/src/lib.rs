@@ -22,6 +22,10 @@ mod utils;
 use clap::{Parser, Subcommand};
 use commands::build_guest::BuildGuest;
 
+#[cfg(feature = "experimental")]
+use crate::commands::build::BuildCommand;
+#[cfg(feature = "experimental")]
+pub use crate::commands::build::BuildSubcommand;
 use crate::commands::{build_toolchain::BuildToolchain, install::Install, new::NewCommand};
 
 #[derive(Parser)]
@@ -52,6 +56,12 @@ pub enum RisczeroCmd {
     Install(Install),
     /// Creates a new risczero starter project.
     New(NewCommand),
+    /// Build a crate for RISC Zero.
+    #[cfg(feature = "experimental")]
+    BuildCrate(BuildCommand),
+    /// Build and test a crate for RISC Zero.
+    #[cfg(feature = "experimental")]
+    Test(BuildCommand),
 }
 
 #[cfg(test)]

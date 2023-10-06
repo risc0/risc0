@@ -19,7 +19,8 @@ use std::{
 
 use anyhow::Context;
 use risc0_zkvm::{
-    Executor, ExecutorEnv, InnerReceipt, MemoryImage, Program, Receipt, MEM_SIZE, PAGE_SIZE,
+    ExecutorEnv, ExecutorImpl, InnerReceipt, MemoryImage, Program, Receipt, GUEST_MAX_MEM,
+    PAGE_SIZE,
 };
 use tokio::sync::mpsc;
 
@@ -63,7 +64,7 @@ impl ProverHandle {
     }
 }
 
-const ELFMAGIC: [u8; 4] = [0x7f, 0x45, 0x4c, 0x46];
+const ELF_MAGIC: [u8; 4] = [0x7f, 0x45, 0x4c, 0x46];
 
 pub(crate) struct Prover {
     pub(crate) receiver: mpsc::Receiver<ProverMessage>,
@@ -85,9 +86,9 @@ impl Prover {
                 let image = self.get_image(task).await?;
                 let input = self.get_input(task).await?;
                 let mem_img = image.as_slice();
-                let mem_img = if mem_img[0..ELFMAGIC.len()] == ELFMAGIC {
-                    tracing::info!("Loading guest image form ELF file");
-                    let program = Program::load_elf(mem_img, MEM_SIZE as u32)?;
+                let mem_img = if mem_img[0..ELF_MAGIC.len()] == ELF_MAGIC {
+                    tracing::info!("Loading guest image from ELF binary");
+                    let program = Program::load_elf(mem_img, GUEST_MAX_MEM as u32)?;
                     MemoryImage::new(&program, PAGE_SIZE as u32)?
                 } else {
                     bincode::deserialize(mem_img).context("failed to decode memory image")?
@@ -101,8 +102,10 @@ impl Prover {
                     .map_err(|e| {
                         anyhow::anyhow!("failed to build executor environment: {:?}", e)
                     })?;
-                let mut exec = Executor::new(env, mem_img)?;
-                let session = exec.run()?;
+                let mut exec = ExecutorImpl::new(env, mem_img)?;
+                let session = exec
+                    .run()
+                    .context("Executor failed to generate a successful session")?;
 
                 let receipt = Receipt {
                     inner: InnerReceipt::Fake,
@@ -133,7 +136,7 @@ impl Prover {
                             .write()?
                             .put_session(task.session_id.clone(), "FAILED".to_string()),
                     };
-                    tracing::error!("Task {} failed! - {}", msg, err)
+                    tracing::error!("Task {} failed! - {:?}", msg, err)
                 }
             }
         }

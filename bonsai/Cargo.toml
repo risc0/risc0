@@ -1,14 +1,8 @@
 [workspace]
 resolver = "2"
-members = [
-  "ethereum",
-  "ethereum-relay",
-  "rest-api-mock",
-  "sdk",
-]
+members = ["ethereum", "ethereum-relay", "rest-api-mock", "sdk"]
 
 [workspace.package]
-version = "0.17.0"
 edition = "2021"
 license = "Apache-2.0"
 homepage = "https://risczero.com/"
@@ -18,10 +12,9 @@ repository = "https://github.com/risc0/risc0/"
 bonsai-ethereum-contracts = { version = "0.1.0", path = "ethereum" }
 bonsai-ethereum-relay = { version = "0.1.0", default-features = false, path = "ethereum-relay" }
 bonsai-rest-api-mock = { version = "0.1.0", default-features = false, path = "rest-api-mock" }
-bonsai-sdk = { version = "0.3.0", default-features = false, path = "sdk" }
-risc0-build = { version = "0.17.0", default-features = false, path = "../risc0/build" }
-risc0-zkvm = { version = "0.17.0", default-features = false, path = "../risc0/zkvm" }
-risc0-zkvm-platform = { version = "0.17.0", default-features = false, path = "../risc0/zkvm/platform" }
+bonsai-sdk = { version = "0.4.0", default-features = false, path = "sdk" }
+risc0-build = { version = "0.18.0", default-features = false, path = "../risc0/build" }
+risc0-zkvm = { version = "0.18.0", default-features = false, path = "../risc0/zkvm" }
 
 [profile.bench]
 lto = true
