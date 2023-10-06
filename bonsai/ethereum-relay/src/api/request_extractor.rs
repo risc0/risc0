@@ -40,9 +40,10 @@ where
     type Rejection = Response;
 
     async fn from_request(req: Request<B>, state: &S) -> Result<Self, Self::Rejection> {
-
         if octet_stream_content_type(req.headers()) {
-            let bytes = Bytes::from_request(req, state).await.map_err(IntoResponse::into_response)?;
+            let bytes = Bytes::from_request(req, state)
+                .await
+                .map_err(IntoResponse::into_response)?;
 
             let result = bincode::deserialize(&bytes).context("failed to deserialize");
 
@@ -50,31 +51,37 @@ where
                 (
                     StatusCode::BAD_REQUEST,
                     format!("Failed to parse request body as bincode: {err}"),
-                ).into_response()
+                )
+                    .into_response()
             })?;
 
             return Ok(RequestExtractor(value));
         }
 
         if json_content_type(req.headers()) {
-            let bytes = Bytes::from_request(req, state).await.map_err(IntoResponse::into_response)?;
+            let bytes = Bytes::from_request(req, state)
+                .await
+                .map_err(IntoResponse::into_response)?;
 
             let bytes_vec = &bytes.to_vec();
 
-            let json_str = std::str::from_utf8(bytes_vec).map_err(|err| {(
-                StatusCode::BAD_REQUEST,
-                format!("Failed to parse request body as utf8: {err}"),
-            ).into_response()})?;
+            let json_str = std::str::from_utf8(bytes_vec).map_err(|err| {
+                (
+                    StatusCode::BAD_REQUEST,
+                    format!("Failed to parse request body as utf8: {err}"),
+                )
+                    .into_response()
+            })?;
 
-            let result: Result<T, anyhow::Error> = serde_json
-                ::from_str(&json_str)
-                .context("failed to deserialize");
+            let result: Result<T, anyhow::Error> =
+                serde_json::from_str(&json_str).context("failed to deserialize");
 
             let value = result.map_err(|err: anyhow::Error| {
                 (
                     StatusCode::BAD_REQUEST,
                     format!("Failed to parse request body as json: {err}"),
-                ).into_response()
+                )
+                    .into_response()
             })?;
 
             return Ok(RequestExtractor(value));
@@ -108,7 +115,7 @@ mod tests {
     use super::*;
     use crate::sdk::CallbackRequest;
     use axum::http::{Method, Request};
-    use hyper::{Body, header::HeaderValue};
+    use hyper::{header::HeaderValue, Body};
     use serde::Serialize;
 
     async fn mock_request<T: Serialize + DeserializeOwned>(
@@ -127,8 +134,12 @@ mod tests {
             _ => panic!("Unsupported content type"),
         };
 
-        let req = Request::builder().method(Method::POST)
-            .header(header::CONTENT_TYPE, HeaderValue::from_str(content_type).unwrap())
+        let req = Request::builder()
+            .method(Method::POST)
+            .header(
+                header::CONTENT_TYPE,
+                HeaderValue::from_str(content_type).unwrap(),
+            )
             .body(body)
             .unwrap();
 
@@ -140,7 +151,9 @@ mod tests {
         let original = CallbackRequest {
             image_id: [0; 32],
             input: vec![1, 2, 3, 4],
-            callback_contract: "0x0000000000000000000000000000000000000000".parse().unwrap(),
+            callback_contract: "0x0000000000000000000000000000000000000000"
+                .parse()
+                .unwrap(),
             function_selector: [0; 4],
             gas_limit: 21000,
         };
@@ -158,12 +171,14 @@ mod tests {
         let original = CallbackRequest {
             image_id: [0; 32],
             input: vec![1, 2, 3, 4],
-            callback_contract: "0x0000000000000000000000000000000000000000".parse().unwrap(),
+            callback_contract: "0x0000000000000000000000000000000000000000"
+                .parse()
+                .unwrap(),
             function_selector: [0; 4],
             gas_limit: 21000,
         };
         let extractor = mock_request(original.clone(), "application/json").await;
-        
+
         assert_eq!(extractor.0.image_id, original.image_id);
         assert_eq!(extractor.0.input, original.input);
         assert_eq!(extractor.0.callback_contract, original.callback_contract);
