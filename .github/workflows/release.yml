@@ -4,7 +4,7 @@ on:
   push:
     tags:
       - "v*.*.*"
-  # for testing purposes!
+  # for testing purposes
   pull_request:
     branches: [ main ]
   workflow_dispatch:
