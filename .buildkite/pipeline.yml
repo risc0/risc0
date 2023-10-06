@@ -1,11 +1,15 @@
 steps:
   - label: "check"
     command: .buildkite/steps/check.sh
+    agents:
+      os: linux
+      device: cpu
 
   - label: "test"
     command: .buildkite/steps/test.sh
     agents:
-      queue: "builder-{{matrix.arch}}"
+      os: "{{matrix.os}}"
+      device: "{{matrix.device}}"
     matrix:
       setup:
         os: [macos, linux]
@@ -25,6 +29,9 @@ steps:
 
   - label: "examples"
     command: .buildkite/steps/examples.sh
+    agents:
+      os: "{{matrix.os}}"
+      device: "{{matrix.device}}"
     matrix:
       setup:
         os: [macos, linux]
@@ -44,12 +51,23 @@ steps:
 
   - label: "check_template"
     command: .buildkite/steps/check_template.sh
+    agents:
+      os: linux
+      device: cpu
 
   - label: "docs"
     command: .buildkite/steps/docs.sh
+    agents:
+      os: linux
+      device: cpu
 
   - label: "web"
     command: .buildkite/steps/web.sh
+    agents:
+      os: linux
+      device: cpu
 
   - label: "docker-build"
     command: .buildkite/steps/docker-build.sh
+    agents:
+      docker: true
