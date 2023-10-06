@@ -5,9 +5,9 @@ on:
     tags:
       - "v*.*.*"
   # for testing purposes
-  pull_request:
-    branches: [ main ]
-  workflow_dispatch:
+  # pull_request:
+  #   branches: [ main ]
+  # workflow_dispatch:
 
 jobs:
   release:
@@ -15,9 +15,8 @@ jobs:
     steps:
       - uses: softprops/action-gh-release@v1
         with:
-          name: v0.19.0-alpha.1
           draft: true
-          prerelease: true
+          generate_release_notes: true
 
   build:
     runs-on: [self-hosted, prod, "${{ matrix.os }}", "${{ matrix.device }}"]
@@ -55,7 +54,6 @@ jobs:
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: tmp/cargo-risczero-${{ matrix.target }}.tgz
-          tag: v0.19.0-alpha.1
 
   publish:
     runs-on: [self-hosted, prod, Linux, cpu]
