@@ -49,7 +49,7 @@ where
             let value = result.map_err(|err: anyhow::Error| {
                 (
                     StatusCode::BAD_REQUEST,
-                    format!("Failed to parse request body: {err}"),
+                    format!("Failed to parse request body as bincode: {err}"),
                 ).into_response()
             })?;
 
