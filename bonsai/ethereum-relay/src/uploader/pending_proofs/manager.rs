@@ -104,7 +104,6 @@ impl<S: Storage> BonsaiPendingProofManager<S> {
                 id,
             }) => {
                 error!(?error, "Connection error.");
-                // TODO(Cardosaum): Add limit to number of retries
                 (id, ProofRequestState::New)
             }
             Err(PendingProofError::ClientAPI {
@@ -112,7 +111,6 @@ impl<S: Storage> BonsaiPendingProofManager<S> {
                 id,
             }) => {
                 error!(?error, "Signer middleware error.");
-                // TODO(Cardosaum): Add limit to number of retries
                 (id, ProofRequestState::New)
             }
             Err(PendingProofError::ClientAPI { id, .. })

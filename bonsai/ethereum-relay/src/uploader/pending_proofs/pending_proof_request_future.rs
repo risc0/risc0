@@ -23,6 +23,7 @@ use futures::{
     Future,
 };
 use pin_project::pin_project;
+use tracing::error;
 
 use crate::{api, api::error::Error as BonsaiError};
 
@@ -112,7 +113,7 @@ impl Future for PendingProofRequest {
 
                                     // Bonsai returned the receipt in a inconsistent state,
                                     // we should assume the proof failed and return an error
-                                    tracing::error!(
+                                    error!(
                                         "Bonsai returned a receipt with status SUCCEEDED but no receipt URL"
                                     );
                                     return Poll::Ready(Err(Error::ProofRequestError {
