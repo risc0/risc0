@@ -61,7 +61,6 @@ jobs:
       CUDA_LIBRARY_PATH: /usr/lib/cuda
       FEATURE: ${{ matrix.feature }}
       RISC0_BUILD_LOCKED: 1
-      RISC0_SERVER_PATH: ${{ github.workspace }}/target/release/r0vm
       RUST_BACKTRACE: full
       RUSTC_WRAPPER: sccache
     steps:
@@ -82,7 +81,6 @@ jobs:
       - run: cargo run --bin cargo-risczero --no-default-features -- risczero install
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - run: cargo build --release -F $FEATURE -p risc0-r0vm
       - run: cargo test -F $FEATURE -F profiler
       - run: cargo test -F $FEATURE -F disable-dev-mode -p risc0-r0vm
       - run: cargo test -F $FEATURE -F fault-proof -p risc0-zkvm -- tests::memory_io tests::memory_access
