@@ -348,6 +348,10 @@ impl CompositeReceipt {
 
         // Verify all corroborating receipts attached to this composite receipt.
         for receipt in self.assumptions.iter() {
+            log::debug!(
+                "verifying assumption: {:?}",
+                receipt.get_metadata()?.digest()
+            );
             receipt.verify_integrity_with_context(ctx)?;
         }
 
@@ -405,6 +409,7 @@ impl CompositeReceipt {
         &self,
         metadata: &ReceiptMetadata,
     ) -> Result<(), VerificationError> {
+        log::debug!("checking output: exit_code = {:?}", metadata.exit_code);
         if metadata.exit_code.expects_output() {
             let self_output = Output {
                 journal: MaybePruned::Pruned(
@@ -415,6 +420,11 @@ impl CompositeReceipt {
             };
             // If these digests do not match, this receipt is internally inconsistent.
             if self_output.digest() != metadata.output.digest() {
+                log::debug!(
+                    "output digest does not match: expected {}; actual {}",
+                    self_output.digest(),
+                    metadata.output.digest()
+                );
                 return Err(VerificationError::ReceiptFormatError);
             }
         } else {

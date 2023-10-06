@@ -65,7 +65,12 @@ where
     C: CircuitHal<H>,
 {
     fn prove_session(&self, ctx: &VerifierContext, session: &Session) -> Result<Receipt> {
-        log::info!("prove_session: {}", self.name);
+        log::info!(
+            "prove_session: {}, exit_code = {:?}, journal = 0x{}",
+            self.name,
+            session.exit_code,
+            hex::encode(&session.journal)
+        );
         let mut segments = Vec::new();
         for segment_ref in session.segments.iter() {
             let segment = segment_ref.resolve()?;
