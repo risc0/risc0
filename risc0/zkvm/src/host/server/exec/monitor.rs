@@ -18,7 +18,7 @@ use anyhow::{bail, Result};
 use risc0_binfmt::MemoryImage;
 use risc0_zkp::core::hash::sha::BLOCK_BYTES;
 use risc0_zkvm_platform::{
-    memory::{SYSTEM, TEXT_START},
+    memory::{is_guest_memory, SYSTEM},
     syscall::reg_abi::REG_MAX,
     PAGE_SIZE, WORD_SIZE,
 };
@@ -104,6 +104,20 @@ impl MemoryMonitor {
         }
     }
 
+    fn check_guest_addr(addr: u32) -> Result<()> {
+        if !is_guest_memory(addr) {
+            bail!("address 0x{addr:08x} is an invalid guest address");
+        }
+        Ok(())
+    }
+
+    fn check_guest_addr_range(start_addr: u32, end_addr: u32) -> Result<()> {
+        if !is_guest_memory(start_addr) || !is_guest_memory(end_addr) {
+            bail!("address range 0x{start_addr:08x} - 0x{end_addr:08x} is outside of guest memory");
+        }
+        Ok(())
+    }
+
     pub fn load_u8(&mut self, addr: u32) -> Result<u8> {
         // log::trace!("load_u8: 0x{addr:08x}");
         let mut bytes = [0_u8];
@@ -129,6 +143,11 @@ impl MemoryMonitor {
         let mut bytes = [0_u8; WORD_SIZE];
         self.load_bytes(addr, &mut bytes)?;
         Ok(u32::from_le_bytes(bytes))
+    }
+
+    pub fn load_u32_from_guest_addr(&mut self, addr: u32) -> Result<u32> {
+        Self::check_guest_addr(addr)?;
+        self.load_u32(addr)
     }
 
     fn get_page_index(&self, addr: u32) -> Result<u32> {
@@ -201,9 +220,21 @@ impl MemoryMonitor {
         Ok(array::from_fn(|idx| vals[idx]))
     }
 
+    pub fn load_array_from_guest_addr<const N: usize>(&mut self, addr: u32) -> Result<[u8; N]> {
+        Self::check_guest_addr_range(addr, addr + u32::try_from(N)?)?;
+        self.load_array(addr)
+    }
+
     pub fn load_register(&self, idx: usize) -> u32 {
         // log::trace!("load_register: x{idx}");
         self.registers[idx]
+    }
+
+    pub fn load_guest_addr_from_register(&self, idx: usize) -> Result<u32> {
+        // log::trace!("load_register: x{idx}");
+        let addr = self.registers[idx];
+        Self::check_guest_addr(addr)?;
+        Ok(addr)
     }
 
     pub fn load_registers(&self) -> [u32; REG_MAX] {
@@ -245,6 +276,20 @@ impl MemoryMonitor {
             addr += 1;
         }
         String::from_utf8(s).map_err(anyhow::Error::msg)
+    }
+
+    pub fn load_string_from_guest_memory(&mut self, mut addr: u32) -> Result<String> {
+        let start_addr = addr;
+        let mut len = 0;
+        loop {
+            if self.load_u8(addr)? == 0 {
+                break;
+            }
+            addr += 1;
+            len += 1;
+        }
+        Self::check_guest_addr_range(start_addr, start_addr + len)?;
+        self.load_string(start_addr)
     }
 
     fn raw_store_u8(&mut self, addr: u32, data: u8) -> Result<()> {
@@ -298,6 +343,11 @@ impl MemoryMonitor {
         Ok(())
     }
 
+    pub fn store_u32_to_guest_memory(&mut self, addr: u32, data: u32) -> Result<()> {
+        Self::check_guest_addr_range(addr, addr + 4)?;
+        self.store_u32(addr, data)
+    }
+
     pub fn store_region(&mut self, addr: u32, slice: &[u8]) -> Result<()> {
         // log::trace!("store_region: 0x{addr:08x}");
         slice
@@ -305,6 +355,11 @@ impl MemoryMonitor {
             .enumerate()
             .try_for_each(|(i, x)| self.raw_store_u8(addr + i as u32, *x))?;
         Ok(())
+    }
+
+    pub fn store_region_to_guest_memory(&mut self, addr: u32, slice: &[u8]) -> Result<()> {
+        Self::check_guest_addr_range(addr, addr + u32::try_from(slice.len())?)?;
+        self.store_region(addr, slice)
     }
 
     pub fn store_register(&mut self, idx: usize, data: u32) {
@@ -426,7 +481,7 @@ impl MemoryMonitor {
 impl Memory for MemoryMonitor {
     fn read_mem(&mut self, addr: u32, size: MemAccessSize) -> Option<u32> {
         // log::trace!("read_mem: 0x{addr:08x}");
-        if addr < TEXT_START || addr as usize >= SYSTEM.start() {
+        if !is_guest_memory(addr) {
             return None;
         }
         match size {
@@ -438,7 +493,7 @@ impl Memory for MemoryMonitor {
 
     fn write_mem(&mut self, addr: u32, size: MemAccessSize, store_data: u32) -> bool {
         // log::trace!("write_mem: 0x{addr:08x} <= 0x{store_data:08x}");
-        if addr < TEXT_START || addr as usize >= SYSTEM.start() {
+        if !is_guest_memory(addr) {
             return false;
         }
         match size {
