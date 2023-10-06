@@ -63,7 +63,7 @@ where
 
             let json_str = std::str::from_utf8(bytes_vec).map_err(|err| {(
                 StatusCode::BAD_REQUEST,
-                format!("Failed to parse request body: {err}"),
+                format!("Failed to parse request body as utf8: {err}"),
             ).into_response()})?;
 
             let result: Result<T, anyhow::Error> = serde_json
