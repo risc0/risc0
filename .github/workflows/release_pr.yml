@@ -28,5 +28,4 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           version: ${{ inputs.version }}
           crate-release-all: true
-          pr-draft: true
           pr-release-notes: true
