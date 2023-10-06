@@ -110,6 +110,14 @@ jobs:
           reporter: 'github-pr-check'
           github_token: ${{ secrets.GITHUB_TOKEN }}
           clippy_flags: --features $FEATURE --all-targets
+      - run: cargo test --manifest-path tools/crates-validator/Cargo.toml
+        if: matrix.device == 'cpu'
+      - uses: risc0/clippy-action@main
+        if: matrix.device == 'cpu'
+        with:
+          reporter: 'github-pr-check'
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          clippy_flags: --manifest-path tools/crates-validator/Cargo.toml
       - run: sccache --show-stats
 
   examples:
@@ -205,27 +213,6 @@ jobs:
         shell: bash
       - run: cargo build --release --manifest-path ${{ runner.temp }}/template-test/Cargo.toml
       - run: ${{ runner.temp }}/template-test/target/release/host
-
-  crates-validator:
-    runs-on: [self-hosted, prod, cpu, "${{ matrix.os }}"]
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [Linux, macOS]
-    env:
-      RISC0_BUILD_LOCKED: 1
-      RUSTC_WRAPPER: sccache
-    steps:
-      # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
-      - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
-      - uses: actions/checkout@v3
-      - uses: ./.github/actions/rustup
-      - uses: ./.github/actions/sccache
-      - run: cargo run --bin cargo-risczero -- risczero install
-        env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - run: cargo check --manifest-path tools/crates-validator/Cargo.toml
-      - run: cargo test --manifest-path tools/crates-validator/Cargo.toml
 
   web:
     runs-on: ubuntu-latest-8-cores
