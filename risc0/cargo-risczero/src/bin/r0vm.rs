@@ -13,5 +13,6 @@
 // limitations under the License.
 
 fn main() {
+    #[cfg(feature = "r0vm")]
     risc0_r0vm::main()
 }
