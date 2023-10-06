@@ -91,12 +91,18 @@ impl ProofRequestState {
     }
 
     fn should_increment_retries(&self, new_state: &Self) -> bool {
-        match (self, new_state) {
+        matches!(
+            (self, new_state),
             (_, ProofRequestState::New)
-            | (ProofRequestState::PreparingOnchain, ProofRequestState::Completed)
-            | (ProofRequestState::PreparingOnchain, ProofRequestState::CompletedOnchain(_)) => true,
-            _ => false,
-        }
+                | (
+                    ProofRequestState::PreparingOnchain,
+                    ProofRequestState::Completed
+                )
+                | (
+                    ProofRequestState::PreparingOnchain,
+                    ProofRequestState::CompletedOnchain(_)
+                )
+        )
     }
 }
 
