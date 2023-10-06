@@ -1,12 +1,8 @@
 steps:
   - label: "rustup"
-    commands:
-      - curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-      - cargo install cargo-sort
+    command: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+
   - wait
-  - group: "check"
-    steps:
-      - command: cargo fmt --all --check
-      - command: cargo fmt --all --check --manifest-path examples/Cargo.toml
-      - command: cargo fmt --all --check --manifest-path bonsai/Cargo.toml
-      - command: cargo fmt --all --check --manifest-path bonsai/examples/governance/Cargo.toml
+
+  - label: "check"
+    command: .buildkite/check.sh
