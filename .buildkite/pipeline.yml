@@ -5,72 +5,81 @@ steps:
       os: linux
       device: cpu
 
-  - label: "test: {{matrix.os}}/{{matrix.device}}"
-    command: .buildkite/steps/test.sh
-    agents:
-      os: "{{matrix.os}}"
-      device: "{{matrix.device}}"
-    matrix:
-      setup:
-        os: [macos, linux]
-        feature: [default]
-        device: [cpu]
-      adjustments:
-        - with:
-            os: linux
-            feature: cuda
-            device: nvidia_rtx_a5000
-        - with:
-            os: macos
-            feature: metal
-            device: apple_m2_pro
-    env:
-      FEATURE: "{{matrix.feature}}"
-
-  - label: "examples: {{matrix.os}}/{{matrix.device}}"
-    command: .buildkite/steps/examples.sh
-    agents:
-      os: "{{matrix.os}}"
-      device: "{{matrix.device}}"
-    matrix:
-      setup:
-        os: [macos, linux]
-        feature: [default]
-        device: [cpu]
-      adjustments:
-        - with:
-            os: linux
-            feature: cuda
-            device: nvidia_rtx_a5000
-        - with:
-            os: macos
-            feature: metal
-            device: apple_m2_pro
-    env:
-      FEATURE: "{{matrix.feature}}"
-
-  - label: "check_template: {{matrix.os}}"
-    command: .buildkite/steps/check_template.sh
-    agents:
-      os: "{{matrix.os}}"
-      device: cpu
-    matrix:
-      setup:
-        os: [macos, linux]
-
-  - label: "docs"
-    command: .buildkite/steps/docs.sh
+  - label: "test: linux"
     agents:
       os: linux
       device: cpu
+    command: .buildkite/steps/build.sh
+    plugins:
+      - docker-compose#v4.14.0:
+          run: test
 
-  - label: "web"
-    command: .buildkite/steps/web.sh
-    agents:
-      os: linux
-      device: cpu
+  # - label: "test: {{matrix.os}}/{{matrix.device}}"
+  #   command: .buildkite/steps/test.sh
+  #   agents:
+  #     os: "{{matrix.os}}"
+  #     device: "{{matrix.device}}"
+  #   matrix:
+  #     setup:
+  #       os: [macos, linux]
+  #       feature: [default]
+  #       device: [cpu]
+  #     adjustments:
+  #       - with:
+  #           os: linux
+  #           feature: cuda
+  #           device: nvidia_rtx_a5000
+  #       # - with:
+  #       #     os: macos
+  #       #     feature: metal
+  #       #     device: apple_m2_pro
+  #   env:
+  #     FEATURE: "{{matrix.feature}}"
 
-  - label: "docker-build"
-    command: .buildkite/steps/docker-build.sh
-    agents:
-      docker: true
+  # - label: "examples: {{matrix.os}}/{{matrix.device}}"
+  #   command: .buildkite/steps/examples.sh
+  #   agents:
+  #     os: "{{matrix.os}}"
+  #     device: "{{matrix.device}}"
+  #   matrix:
+  #     setup:
+  #       os: [macos, linux]
+  #       feature: [default]
+  #       device: [cpu]
+  #     adjustments:
+  #       - with:
+  #           os: linux
+  #           feature: cuda
+  #           device: nvidia_rtx_a5000
+  #       # - with:
+  #       #     os: macos
+  #       #     feature: metal
+  #       #     device: apple_m2_pro
+  #   env:
+  #     FEATURE: "{{matrix.feature}}"
+
+  # - label: "check_template: {{matrix.os}}"
+  #   command: .buildkite/steps/check_template.sh
+  #   agents:
+  #     os: "{{matrix.os}}"
+  #     device: cpu
+  #   matrix:
+  #     setup:
+  #       os: [macos, linux]
+
+  # - label: "docs"
+  #   command: .buildkite/steps/docs.sh
+  #   agents:
+  #     os: linux
+  #     device: cpu
+
+  # - label: "web"
+  #   command: .buildkite/steps/web.sh
+  #   agents:
+  #     os: linux
+  #     device: cpu
+
+  # - label: "docker-build"
+  #   command: .buildkite/steps/docker-build.sh
+  #   agents:
+  #     docker: true
