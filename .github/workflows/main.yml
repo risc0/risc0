@@ -156,7 +156,7 @@ jobs:
         working-directory: examples
 
   doc:
-    runs-on: ubuntu-latest-8-cores
+    runs-on: [self-hosted, prod, Linux, X64]
     steps:
       # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
       - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
@@ -206,7 +206,7 @@ jobs:
       - run: ${{ runner.temp }}/template-test/target/release/host
 
   web:
-    runs-on: ubuntu-latest-8-cores
+    runs-on: [self-hosted, prod, Linux, X64]
     env:
       RISC0_BUILD_LOCKED: 1
       RUSTC_WRAPPER: sccache
