@@ -54,11 +54,11 @@ jobs:
       - uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: tmp/pkg/cargo-risczero-${{ matrix.target }}.tgz
+          file: tmp/cargo-risczero-${{ matrix.target }}.tgz
           tag: v0.19.0-alpha.1
 
   publish:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, prod, Linux, cpu]
     steps:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/rustup
@@ -67,4 +67,4 @@ jobs:
         with:
           crate: cargo-release
           version: "0.24"
-      - run: cargo release publish --no-confirm
+      - run: cargo release publish --no-confirm --execute
