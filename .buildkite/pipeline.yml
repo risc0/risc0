@@ -9,7 +9,7 @@ steps:
     agents:
       os: linux
       device: cpu
-    command: .buildkite/steps/test.sh
+    command: bash .buildkite/steps/test.sh
     plugins:
       - docker-compose#v4.14.0:
           run: test
