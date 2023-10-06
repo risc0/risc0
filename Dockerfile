@@ -22,3 +22,5 @@ RUN curl https://sh.rustup.rs -sSf | bash -s -- -y
 
 ENV CC=clang
 ENV CXX=clang++
+
+COPY . .
