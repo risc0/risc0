@@ -23,13 +23,13 @@ use axum::{
 use hyper::{body::HttpBody, header, HeaderMap};
 use serde::de::DeserializeOwned;
 
-/// Bincode extractor of the request body as a stream.
+/// Extractor of the callback request body. Uses bincode or json, depending on the Content-Type header
 /// When used as an extractor, it can deserialize request bodies into some type
-/// that implements [`serde::Deserialize`] using [`bincode`].
-pub(crate) struct Bincode<T>(pub T);
+/// that implements [`serde::Deserialize`] using [`bincode`, `serde_json`].
+pub(crate) struct RequestExtractor<T>(pub T);
 
 #[async_trait]
-impl<T, S, B> FromRequest<S, B> for Bincode<T>
+impl<T, S, B> FromRequest<S, B> for RequestExtractor<T>
 where
     T: DeserializeOwned,
     B: HttpBody + Send + 'static,
@@ -53,7 +53,7 @@ where
                 ).into_response()
             })?;
 
-            return Ok(Bincode(value));
+            return Ok(RequestExtractor(value));
         }
 
         if json_content_type(req.headers()) {
@@ -77,7 +77,7 @@ where
                 ).into_response()
             })?;
 
-            return Ok(Bincode(value));
+            return Ok(RequestExtractor(value));
         }
 
         Err(
@@ -101,4 +101,73 @@ fn json_content_type(headers: &HeaderMap) -> bool {
         return false;
     };
     content_type == "application/json"
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::sdk::CallbackRequest;
+    use axum::http::{Method, Request};
+    use hyper::{Body, header::HeaderValue};
+    use serde::Serialize;
+
+    async fn mock_request<T: Serialize + DeserializeOwned>(
+        value: T,
+        content_type: &str,
+    ) -> RequestExtractor<T> {
+        let body = match content_type {
+            "application/octet-stream" => {
+                let serialized = bincode::serialize(&value).unwrap();
+                Body::from(serialized)
+            }
+            "application/json" => {
+                let serialized = serde_json::to_string(&value).unwrap();
+                Body::from(serialized)
+            }
+            _ => panic!("Unsupported content type"),
+        };
+
+        let req = Request::builder().method(Method::POST)
+            .header(header::CONTENT_TYPE, HeaderValue::from_str(content_type).unwrap())
+            .body(body)
+            .unwrap();
+
+        RequestExtractor::from_request(req, &()).await.unwrap()
+    }
+
+    #[tokio::test]
+    async fn test_bincode_request() {
+        let original = CallbackRequest {
+            image_id: [0; 32],
+            input: vec![1, 2, 3, 4],
+            callback_contract: "0x0000000000000000000000000000000000000000".parse().unwrap(),
+            function_selector: [0; 4],
+            gas_limit: 21000,
+        };
+        let extractor = mock_request(original.clone(), "application/octet-stream").await;
+
+        assert_eq!(extractor.0.image_id, original.image_id);
+        assert_eq!(extractor.0.input, original.input);
+        assert_eq!(extractor.0.callback_contract, original.callback_contract);
+        assert_eq!(extractor.0.function_selector, original.function_selector);
+        assert_eq!(extractor.0.gas_limit, original.gas_limit);
+    }
+
+    #[tokio::test]
+    async fn test_json_request() {
+        let original = CallbackRequest {
+            image_id: [0; 32],
+            input: vec![1, 2, 3, 4],
+            callback_contract: "0x0000000000000000000000000000000000000000".parse().unwrap(),
+            function_selector: [0; 4],
+            gas_limit: 21000,
+        };
+        let extractor = mock_request(original.clone(), "application/json").await;
+        
+        assert_eq!(extractor.0.image_id, original.image_id);
+        assert_eq!(extractor.0.input, original.input);
+        assert_eq!(extractor.0.callback_contract, original.callback_contract);
+        assert_eq!(extractor.0.function_selector, original.function_selector);
+        assert_eq!(extractor.0.gas_limit, original.gas_limit);
+    }
 }

@@ -15,7 +15,7 @@
 use self::error::Error;
 
 pub(crate) mod auth;
-pub(crate) mod bincode;
+pub(crate) mod request_extractor;
 pub(crate) mod callback_request;
 pub(crate) mod error;
 pub(crate) mod server;
