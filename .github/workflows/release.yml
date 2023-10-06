@@ -21,7 +21,7 @@ jobs:
 
   build:
     runs-on: [self-hosted, prod, "${{ matrix.os }}", "${{ matrix.device }}"]
-    depends-on: [release]
+    needs: release
     strategy:
       fail-fast: false
       matrix:
