@@ -25,11 +25,15 @@ pub struct BuildGuest {
     /// This path is relative to the current directory.
     #[arg(long)]
     pub manifest_path: PathBuf,
+
+    /// Feature flags passed to cargo.
+    #[arg(long, value_delimiter = ',')]
+    pub features: Vec<String>,
 }
 
 impl BuildGuest {
     pub fn run(&self) -> Result<()> {
-        // TODO: support features
-        risc0_build::docker_build(&self.manifest_path, vec![])
+        let src_dir = std::env::current_dir().unwrap();
+        risc0_build::docker_build(&self.manifest_path, &src_dir, &self.features)
     }
 }
