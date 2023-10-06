@@ -34,7 +34,7 @@ const METHOD_ID: [u32; DIGEST_WORDS] = risc0_zkvm_methods::FIB_ID;
 const METHOD_PATH: &'static str = risc0_zkvm_methods::FIB_PATH;
 
 impl Benchmark for Job<'_> {
-    const NAME: &'static str = "finbonacci";
+    const NAME: &'static str = "fibonacci";
     type Spec = u32;
     type ComputeOut = u64;
     type ProofType = Receipt;
