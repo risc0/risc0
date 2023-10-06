@@ -9,6 +9,10 @@ description = "RISC Zero CLI tools"
 readme = "README.md"
 keywords = ["risc0", "risczero", "tool", "cli", "generate"]
 
+[[bin]]
+name = "r0vm"
+doc = false
+
 [dependencies]
 anyhow = { version = "1.0", features = ["backtrace"] }
 cargo-generate = "0.18"
