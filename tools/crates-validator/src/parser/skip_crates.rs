@@ -14,7 +14,10 @@
 
 use anyhow::Result;
 
-use crate::types::{aliases::{CrateNames, Profiles}, profile::Profile};
+use crate::types::{
+    aliases::{CrateNames, Profiles},
+    profile::Profile,
+};
 
 #[derive(Debug, Default, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "kebab-case")]
@@ -36,8 +39,8 @@ impl TryFrom<SkipCrates> for Profiles {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::parser::{test_helpers::profile_from_name, utils};
     use crate::constants::PATH_YAML_CONFIG;
+    use crate::parser::{test_helpers::profile_from_name, utils};
 
     #[test]
     fn can_parse_file() {
