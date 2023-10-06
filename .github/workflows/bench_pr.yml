@@ -1,18 +1,14 @@
 name: Benchmark Check
 
 on:
-  pull_request:
-    branches: [ main, 'release-*' ]
-    # Only run benchmarks on changes to following paths:
-    paths:
-      - 'risc0/**'
-      - '.github/workflows/bench_*'
-
   workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
+
+env:
+  RISC0_BUILD_LOCKED: 1
 
 jobs:
   bench:

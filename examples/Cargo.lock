@@ -5085,7 +5085,6 @@ dependencies = [
  "log",
  "risc0-zkvm",
  "serde",
- "tempfile",
  "tokio",
  "zkevm-core",
  "zkevm-methods",

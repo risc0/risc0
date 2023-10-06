@@ -38,7 +38,10 @@ libm = "0.2"
 risc0-circuit-rv32im = { workspace = true }
 risc0-core = { workspace = true }
 risc0-zkp = { workspace = true }
-risc0-zkvm-platform = { workspace = true, features = ["rust-runtime", "export-getrandom"] }
+risc0-zkvm-platform = { workspace = true, features = [
+  "rust-runtime",
+  "export-getrandom",
+] }
 rrs-lib = "0.1"
 semver = { version = "1.0", default-features = false }
 serde = { version = "1.0", default-features = false, features = [
@@ -82,8 +85,6 @@ typetag = { version = "0.2", optional = true }
 clap = { version = "4", features = ["derive"] }
 criterion = { version = "0.5", features = ["html_reports"] }
 human-repr = "1.0"
-serde_json = "1.0"
-tempfile = "3"
 tracing-forest = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
@@ -91,8 +92,10 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 env_logger = "0.10"
 flate2 = "1.0"
 risc0-zkvm-methods = { path = "methods" }
+serde_json = "1.0"
 serial_test = "2.0"
 tar = "0.4"
+tempfile = "3"
 test-log = { version = "0.2", features = ["trace"] }
 
 [features]
@@ -110,6 +113,13 @@ dual = []
 metal = ["prove", "risc0-circuit-rv32im/metal", "risc0-zkp/metal"]
 default = ["client", "prove"]
 disable-dev-mode = []
+# This flag uses the docker environment to build test guests such as multi-test
+# to ensure accurate cycle and segment counts. Tests that have been gated on
+# this flag measure cycles and segments. Without this flag, the rust build
+# system will generate binaries that not identical across all architectures.
+# While this is acceptable for most tests, the tests counting cycles and
+# segments will fail intermittently.
+docker = []
 # note: cfg!(feature = "fault-proof") is used as a temporary measure in addition
 # to it being used to expose functionality to the fault checker.
 fault-proof = []
@@ -151,11 +161,3 @@ std = [
   "risc0-zkp/std",
   "serde/std",
 ]
-
-# This flag uses the docker environment to build test guests such as multi-test
-# to ensure accurate cycle and segment counts. Tests that have been gated on
-# this flag measure cycles and segments. Without this flag, the rust build
-# system will generate binaries that not identical across all architectures.
-# While this is acceptable for most tests, the tests counting cycles and
-# segments will fail intermittently.
-test-exact-cycles = ["risc0-zkvm-methods/test-exact-cycles"]

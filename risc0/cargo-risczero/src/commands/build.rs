@@ -18,9 +18,10 @@ use anyhow::{anyhow, bail, Context};
 use cargo_metadata::{Artifact, ArtifactProfile, Message};
 use clap::Parser;
 use risc0_build::cargo_command;
-use risc0_zkvm::{Executor, ExecutorEnv, Segment, SegmentRef};
-use serde::{Deserialize, Serialize};
+use risc0_zkvm::{default_executor, ExecutorEnv};
 use tempfile::{tempdir, TempDir};
+
+const ZIP_CONTENTS: &[u8] = include_bytes!(concat!(env!("OUT_DIR"), "/cargo-risczero.zip"));
 
 /// Subcommands of cargo that are supported by this cargo risczero command.
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
@@ -43,8 +44,8 @@ impl AsRef<str> for BuildSubcommand {
 
 // TODO(victor): Provide some way to pass features.
 
-#[derive(Parser)]
 /// `cargo risczero build`
+#[derive(Parser)]
 pub struct BuildCommand {
     /// Path to the Cargo.toml file for the crate to be built.
     #[clap(long, default_value = "./Cargo.toml")]
@@ -59,8 +60,6 @@ pub struct BuildCommand {
     /// Additional arguments to pass to "cargo build" on the guest
     pub args: Vec<String>,
 }
-
-static ZIP_CONTENTS: &[u8] = include_bytes!(concat!(env!("OUT_DIR"), "/cargo-risczero.zip"));
 
 fn get_zip_file(dir: &TempDir, filename: &str) -> anyhow::Result<PathBuf> {
     let mut zip = zip::ZipArchive::new(io::Cursor::new(ZIP_CONTENTS))?;
@@ -199,29 +198,17 @@ impl BuildCommand {
         if subcommand == BuildSubcommand::Test && !no_run_flag {
             eprintln!("Running tests: {tests:?}");
 
-            for t in &tests {
-                eprintln!("Running test {t}");
+            for test in &tests {
+                eprintln!("Running test {test}");
                 let env = ExecutorEnv::builder()
                     .args(&test_args)
                     .env_var("RUST_TEST_NOCAPTURE", "1")
                     .build()?;
 
-                let mut exec = Executor::from_elf(env, &fs::read(t)?)?;
-                // Run the executor
-                exec.run_with_callback(|_| Ok(Box::new(EmptySegmentRef)))?;
+                let exec = default_executor();
+                exec.execute_elf(env, &fs::read(test)?)?;
             }
         };
         Ok(())
-    }
-}
-
-// TODO(victor): Code duplicated from host server code.
-#[derive(Clone, Serialize, Deserialize)]
-struct EmptySegmentRef;
-
-#[typetag::serde]
-impl SegmentRef for EmptySegmentRef {
-    fn resolve(&self) -> anyhow::Result<Segment> {
-        Err(anyhow!("Segment resolution not supported"))
     }
 }

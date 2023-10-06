@@ -28,6 +28,16 @@ mod protos {
         #![allow(non_snake_case)]
         include!(concat!(env!("OUT_DIR"), "/protos.api.rs"));
     }
+
+    pub(crate) mod base {
+        #![allow(non_snake_case)]
+        include!(concat!(env!("OUT_DIR"), "/protos.base.rs"));
+    }
+
+    pub(crate) mod core {
+        #![allow(non_snake_case)]
+        include!(concat!(env!("OUT_DIR"), "/protos.core.rs"));
+    }
 }
 
 const CIRCUIT: risc0_circuit_rv32im::CircuitImpl = risc0_circuit_rv32im::CircuitImpl::new();

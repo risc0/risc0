@@ -29,7 +29,7 @@ use rand::{
     distributions::{Distribution, Standard},
     Rng,
 };
-use risc0_zkvm::{serde::to_vec, Executor, ExecutorEnv};
+use risc0_zkvm::{serde::to_vec, ExecutorEnv, ExecutorImpl};
 use risc0_zkvm_methods::{
     bench::{BenchmarkSpec, SpecWithIters},
     BENCH_ELF,
@@ -40,7 +40,7 @@ fn run_guest(spec: SpecWithIters) -> Duration {
         .add_input(&to_vec(&spec).unwrap())
         .build()
         .unwrap();
-    let mut exec = Executor::from_elf(env, BENCH_ELF).unwrap();
+    let mut exec = ExecutorImpl::from_elf(env, BENCH_ELF).unwrap();
 
     let start = Instant::now();
     black_box(exec.run().unwrap());
