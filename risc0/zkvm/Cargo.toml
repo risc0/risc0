@@ -119,7 +119,7 @@ disable-dev-mode = []
 # system will generate binaries that not identical across all architectures.
 # While this is acceptable for most tests, the tests counting cycles and
 # segments will fail intermittently.
-docker = ["risc0-zkvm-methods/docker"]
+docker = []
 # note: cfg!(feature = "fault-proof") is used as a temporary measure in addition
 # to it being used to expose functionality to the fault checker.
 fault-proof = []
