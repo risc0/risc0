@@ -16,11 +16,11 @@ ENV \
   RUSTUP_HOME=/usr/local/rustup \
   CARGO_HOME=/usr/local/cargo \
   PATH=/usr/local/cargo/bin:$PATH \
-  RUST_VERSION=1.73.0
+  RUST_VERSION=1.73.0 \
+  CC=clang \
+  CXX=clang++
 
 RUN curl https://sh.rustup.rs -sSf | bash -s -- -y
 
-ENV CC=clang
-ENV CXX=clang++
 
-COPY . .
+COPY . /src
