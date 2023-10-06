@@ -83,7 +83,7 @@ impl<T, S, B> FromRequest<S, B> for Bincode<T>
         Err(
             (
                 StatusCode::UNSUPPORTED_MEDIA_TYPE,
-                "Expected request with `Content-Type: application/octet-stream`",
+                "Expected request with `Content-Type: application/octet-stream` or `Content-Type: application/json`",
             ).into_response()
         )
     }
