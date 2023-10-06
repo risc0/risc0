@@ -1,0 +1,56 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  # for testing purposes
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: softprops/action-gh-release@v1
+        with:
+          name: v0.19.0-alpha.1
+          draft: true
+          prerelease: true
+
+  build:
+    runs-on: [self-hosted, prod, "${{ matrix.os }}", "${{ matrix.device }}"]
+    depends-on: [release]
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: Linux
+            feature: cuda
+            device: nvidia_rtx_a5000
+            target:
+          - os: macOS
+            feature: metal
+            device: apple_m2_pro
+            target: aarch64-apple-darwin
+    env:
+      CUDA_LIBRARY_PATH: /usr/lib/cuda
+      FEATURE: ${{ matrix.feature }}
+      RUSTC_WRAPPER: sccache
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/rustup
+      - uses: ./.github/actions/sccache
+        with:
+          key: ${{ matrix.os }}-${{ matrix.feature }}
+      - run: cargo build -p cargo-risczero --release -F $FEATURE
+      - run: |
+          mkdir -p tmp/pkg
+          cp build/release/cargo-risczero tmp/pkg
+          cp build/release/r0vm tmp/pkg
+          cd tmp/pkg && tar cv * | gzip -9 > ../cargo-risczero-$TARGET.tgz
+      - uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: tmp/pkg/cargo-risczero-$TARGET.tgz
+          tag: v0.19.0-alpha.1
