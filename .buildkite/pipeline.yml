@@ -13,13 +13,13 @@ steps:
         device: [cpu]
       adjustments:
         - with:
-          os: linux
-          feature: cuda
-          device: nvidia_rtx_a5000
+            os: linux
+            feature: cuda
+            device: nvidia_rtx_a5000
         - with:
-          os: macos
-          feature: metal
-          device: apple_m2_pro
+            os: macos
+            feature: metal
+            device: apple_m2_pro
     env:
       FEATURE: "{{matrix.feature}}"
 
@@ -32,13 +32,13 @@ steps:
         device: [cpu]
       adjustments:
         - with:
-          os: linux
-          feature: cuda
-          device: nvidia_rtx_a5000
+            os: linux
+            feature: cuda
+            device: nvidia_rtx_a5000
         - with:
-          os: macos
-          feature: metal
-          device: apple_m2_pro
+            os: macos
+            feature: metal
+            device: apple_m2_pro
     env:
       FEATURE: "{{matrix.feature}}"
 
