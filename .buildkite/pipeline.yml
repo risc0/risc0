@@ -5,7 +5,7 @@ steps:
       os: linux
       device: cpu
 
-  - label: "test"
+  - label: "test: {{matrix.os}}/{{matrix.device}}"
     command: .buildkite/steps/test.sh
     agents:
       os: "{{matrix.os}}"
@@ -27,7 +27,7 @@ steps:
     env:
       FEATURE: "{{matrix.feature}}"
 
-  - label: "examples"
+  - label: "examples: {{matrix.os}}/{{matrix.device}}"
     command: .buildkite/steps/examples.sh
     agents:
       os: "{{matrix.os}}"
@@ -49,11 +49,14 @@ steps:
     env:
       FEATURE: "{{matrix.feature}}"
 
-  - label: "check_template"
+  - label: "check_template: {{matrix.os}}"
     command: .buildkite/steps/check_template.sh
     agents:
-      os: linux
+      os: "{{matrix.os}}"
       device: cpu
+    matrix:
+      setup:
+        os: [macos, linux]
 
   - label: "docs"
     command: .buildkite/steps/docs.sh
