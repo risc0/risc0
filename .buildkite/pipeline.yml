@@ -1,0 +1,7 @@
+steps:
+  - command: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+  - command: cargo install cargo-sort
+  - command: cargo fmt --all --check
+  - command: cargo fmt --all --check --manifest-path examples/Cargo.toml
+  - command: cargo fmt --all --check --manifest-path bonsai/Cargo.toml
+  - command: cargo fmt --all --check --manifest-path bonsai/examples/governance/Cargo.toml
