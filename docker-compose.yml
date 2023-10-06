@@ -5,4 +5,4 @@ services:
     build: .
     working_dir: /src
     volumes:
-      - .:/src
+      - .:/src:ro

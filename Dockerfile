@@ -1,5 +1,8 @@
 FROM nvidia/cuda:11.4.3-devel-ubuntu20.04
 
+ARG DEBIAN_FRONTEND=noninteractive
+ENV TZ="America/Los_Angeles"
+
 RUN apt-get -qq update && \
   apt-get install -y -q \
   build-essential \
