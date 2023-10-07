@@ -19,14 +19,16 @@ mod commands;
 mod toolchain;
 mod utils;
 
+#[cfg(feature = "experimental")]
+pub use self::commands::build::BuildSubcommand;
+
 use clap::{Parser, Subcommand};
-use commands::build_guest::BuildGuest;
 
 #[cfg(feature = "experimental")]
-use crate::commands::build::BuildCommand;
-#[cfg(feature = "experimental")]
-pub use crate::commands::build::BuildSubcommand;
-use crate::commands::{build_toolchain::BuildToolchain, install::Install, new::NewCommand};
+use self::commands::build::BuildCommand;
+use self::commands::{
+    build_guest::BuildGuest, build_toolchain::BuildToolchain, install::Install, new::NewCommand,
+};
 
 #[derive(Parser)]
 #[command(name = "cargo", bin_name = "cargo")]

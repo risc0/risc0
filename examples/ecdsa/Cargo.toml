@@ -6,7 +6,6 @@ edition = "2021"
 default-run = "ecdsa-example"
 
 [dependencies]
-clap = "4.4"
 ecdsa-methods = { path = "methods" }
 k256 = { version = "0.13", features = ["serde"] }
 rand_core = "0.6.4"
@@ -17,3 +16,4 @@ serde = "1.0"
 cuda = ["risc0-zkvm/cuda"]
 default = []
 metal = ["risc0-zkvm/metal"]
+prove = ["risc0-zkvm/prove"]

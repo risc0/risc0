@@ -13,6 +13,8 @@
 // limitations under the License.
 
 pub(crate) mod client;
+pub(crate) mod convert;
+#[cfg(feature = "prove")]
 pub(crate) mod server;
 #[cfg(test)]
 mod tests;
@@ -31,15 +33,22 @@ use std::{
     time::Duration,
 };
 
-use anyhow::{anyhow, Result};
+use anyhow::{anyhow, Context, Result};
 use bytes::{Buf, BufMut, Bytes};
 use prost::Message;
-use risc0_binfmt::MemoryImage;
 
-use crate::{ExitCode, ProverOpts, TraceEvent};
+use crate::ExitCode;
 
 mod pb {
-    pub use crate::host::protos::api::*;
+    pub(crate) mod api {
+        pub use crate::host::protos::api::*;
+    }
+    pub(crate) mod base {
+        pub use crate::host::protos::base::*;
+    }
+    pub(crate) mod core {
+        pub use crate::host::protos::core::*;
+    }
 }
 
 const CONNECT_TIMEOUT: Duration = Duration::from_secs(10);
@@ -57,17 +66,17 @@ pub struct ConnectionWrapper {
     buf: Vec<u8>,
 }
 
-impl RootMessage for pb::HelloRequest {}
-impl RootMessage for pb::HelloReply {}
-impl RootMessage for pb::ServerRequest {}
-impl RootMessage for pb::ServerReply {}
-impl RootMessage for pb::GenericReply {}
-impl RootMessage for pb::OnIoReply {}
-impl RootMessage for pb::ProveSegmentReply {}
-impl RootMessage for pb::LiftRequest {}
-impl RootMessage for pb::LiftReply {}
-impl RootMessage for pb::JoinRequest {}
-impl RootMessage for pb::JoinReply {}
+impl RootMessage for pb::api::HelloRequest {}
+impl RootMessage for pb::api::HelloReply {}
+impl RootMessage for pb::api::ServerRequest {}
+impl RootMessage for pb::api::ServerReply {}
+impl RootMessage for pb::api::GenericReply {}
+impl RootMessage for pb::api::OnIoReply {}
+impl RootMessage for pb::api::ProveSegmentReply {}
+impl RootMessage for pb::api::LiftRequest {}
+impl RootMessage for pb::api::LiftReply {}
+impl RootMessage for pb::api::JoinRequest {}
+impl RootMessage for pb::api::JoinReply {}
 
 impl ConnectionWrapper {
     fn new(inner: Box<dyn Connection>) -> Self {
@@ -99,6 +108,7 @@ impl ConnectionWrapper {
         self.inner.close()
     }
 
+    #[cfg(feature = "prove")]
     fn try_clone(&self) -> Result<Self> {
         Ok(Self::new(self.inner.try_clone()?))
     }
@@ -122,15 +132,28 @@ impl ParentProcessConnector {
             listener: TcpListener::bind("127.0.0.1:0")?,
         })
     }
+
+    fn spawn_fail(&self) -> String {
+        format!(
+            "Could not launch zkvm: \"{}\". \n
+            Use `cargo risczero install` to install the latest zkvm.",
+            self.server_path.to_string_lossy()
+        )
+    }
 }
 
 impl Connector for ParentProcessConnector {
     fn connect(&self) -> Result<ConnectionWrapper> {
         let addr = self.listener.local_addr()?;
-        let child = Command::new(&self.server_path)
+        let server_path = self
+            .server_path
+            .canonicalize()
+            .with_context(|| self.spawn_fail())?;
+        let child = Command::new(&server_path)
             .arg("--port")
             .arg(addr.port().to_string())
-            .spawn()?;
+            .spawn()
+            .with_context(|| self.spawn_fail())?;
 
         let shutdown = Arc::new(AtomicBool::new(false));
         let server_shutdown = shutdown.clone();
@@ -165,7 +188,8 @@ struct TcpConnector {
 }
 
 impl TcpConnector {
-    pub fn new(addr: &str) -> Self {
+    #[cfg(feature = "prove")]
+    pub(crate) fn new(addr: &str) -> Self {
         Self {
             addr: addr.to_string(),
         }
@@ -234,71 +258,17 @@ fn malformed_err() -> anyhow::Error {
     anyhow!("Malformed error")
 }
 
-impl pb::Asset {
+impl pb::api::Asset {
     fn as_bytes(&self) -> Result<Bytes> {
         let bytes = match self.kind.clone().ok_or(malformed_err())? {
-            pb::asset::Kind::Inline(bytes) => bytes,
-            pb::asset::Kind::Path(path) => std::fs::read(path)?,
+            pb::api::asset::Kind::Inline(bytes) => bytes,
+            pb::api::asset::Kind::Path(path) => std::fs::read(path)?,
         };
         Ok(bytes.into())
     }
 }
 
-impl From<Result<(), anyhow::Error>> for pb::GenericReply {
-    fn from(result: Result<(), anyhow::Error>) -> Self {
-        Self {
-            kind: Some(match result {
-                Ok(_) => pb::generic_reply::Kind::Ok(()),
-                Err(err) => pb::generic_reply::Kind::Error(err.into()),
-            }),
-        }
-    }
-}
-
-impl From<anyhow::Error> for pb::GenericError {
-    fn from(err: anyhow::Error) -> Self {
-        Self {
-            reason: err.to_string(),
-        }
-    }
-}
-
-impl From<pb::GenericError> for anyhow::Error {
-    fn from(err: pb::GenericError) -> Self {
-        anyhow::Error::msg(err.reason)
-    }
-}
-
-impl From<pb::ProverOpts> for ProverOpts {
-    fn from(opts: pb::ProverOpts) -> Self {
-        Self {
-            hashfn: opts.hashfn,
-        }
-    }
-}
-
-impl From<ProverOpts> for pb::ProverOpts {
-    fn from(opts: ProverOpts) -> Self {
-        Self {
-            hashfn: opts.hashfn,
-        }
-    }
-}
-
-impl TryFrom<Binary> for pb::Binary {
-    type Error = anyhow::Error;
-
-    fn try_from(binary: Binary) -> Result<Self> {
-        Ok(Self {
-            kind: match binary.kind {
-                BinaryKind::Elf => pb::binary::Kind::Elf,
-                BinaryKind::Image => pb::binary::Kind::Image,
-            } as i32,
-            asset: Some(binary.asset.try_into()?),
-        })
-    }
-}
-
+/// Represents a binary executable or image that a zkvm can execute.
 pub struct Binary {
     kind: BinaryKind,
     asset: Asset,
@@ -319,7 +289,30 @@ pub enum AssetRequest {
     Path(PathBuf),
 }
 
+/// Provides information about the result of execution.
+pub struct SessionInfo {
+    /// The number of user cycles for each segment.
+    pub segments: Vec<SegmentInfo>,
+
+    /// The data publicly committed by the guest program.
+    pub journal: Bytes,
+
+    /// The [ExitCode] of the session.
+    pub exit_code: ExitCode,
+}
+
+/// Provides information about a segment of execution.
+pub struct SegmentInfo {
+    /// The number of cycles used for proving in powers of 2.
+    pub po2: u32,
+
+    /// The number of user cycles without any overhead for continuations or po2
+    /// padding.
+    pub cycles: u32,
+}
+
 impl Binary {
+    /// Construct a [Binary] from raw ELF bytes.
     pub fn new_elf_inline(bytes: Bytes) -> Self {
         Self {
             kind: BinaryKind::Elf,
@@ -327,6 +320,7 @@ impl Binary {
         }
     }
 
+    /// Construct a [Binary] from an ELF on disk specified by the `path`.
     pub fn new_elf_path<P: AsRef<Path>>(path: P) -> Self {
         Self {
             kind: BinaryKind::Elf,
@@ -334,6 +328,7 @@ impl Binary {
         }
     }
 
+    /// Construct a [Binary] from an encoding of a [crate::MemoryImage] bytes.
     pub fn new_image_inline(bytes: Bytes) -> Self {
         Self {
             kind: BinaryKind::Image,
@@ -341,23 +336,13 @@ impl Binary {
         }
     }
 
+    /// Construct a [Binary] from a [crate::MemoryImage] stored on disk
+    /// specified by the `path`.
     pub fn new_image_path<P: AsRef<Path>>(path: P) -> Self {
         Self {
             kind: BinaryKind::Image,
             asset: Asset::Path(path.as_ref().to_path_buf()),
         }
-    }
-}
-
-impl TryFrom<MemoryImage> for Binary {
-    type Error = anyhow::Error;
-
-    fn try_from(image: MemoryImage) -> Result<Self> {
-        let bytes = bincode::serialize(&image)?;
-        Ok(Self {
-            kind: BinaryKind::Image,
-            asset: Asset::Inline(bytes.into()),
-        })
     }
 }
 
@@ -367,76 +352,4 @@ fn invalid_path() -> anyhow::Error {
 
 fn path_to_string<P: AsRef<Path>>(path: P) -> Result<String> {
     Ok(path.as_ref().to_str().ok_or(invalid_path())?.to_string())
-}
-
-impl TryFrom<AssetRequest> for pb::AssetRequest {
-    type Error = anyhow::Error;
-
-    fn try_from(value: AssetRequest) -> Result<Self> {
-        Ok(Self {
-            kind: Some(match value {
-                AssetRequest::Inline => pb::asset_request::Kind::Inline(()),
-                AssetRequest::Path(path) => pb::asset_request::Kind::Path(path_to_string(path)?),
-            }),
-        })
-    }
-}
-
-impl TryFrom<Asset> for pb::Asset {
-    type Error = anyhow::Error;
-
-    fn try_from(value: Asset) -> Result<Self> {
-        Ok(Self {
-            kind: match value {
-                Asset::Inline(bytes) => Some(pb::asset::Kind::Inline(bytes.into())),
-                Asset::Path(path) => Some(pb::asset::Kind::Path(path_to_string(path)?)),
-            },
-        })
-    }
-}
-
-impl TryFrom<pb::Asset> for Asset {
-    type Error = anyhow::Error;
-
-    fn try_from(value: pb::Asset) -> Result<Self> {
-        Ok(match value.kind.ok_or(malformed_err())? {
-            pb::asset::Kind::Inline(bytes) => Asset::Inline(bytes.into()),
-            pb::asset::Kind::Path(path) => Asset::Path(PathBuf::from(path)),
-        })
-    }
-}
-
-impl TryFrom<pb::TraceEvent> for TraceEvent {
-    type Error = anyhow::Error;
-
-    fn try_from(event: pb::TraceEvent) -> Result<Self> {
-        Ok(match event.kind.ok_or(malformed_err())? {
-            pb::trace_event::Kind::InsnStart(event) => TraceEvent::InstructionStart {
-                cycle: event.cycle,
-                pc: event.pc,
-            },
-            pb::trace_event::Kind::RegisterSet(event) => TraceEvent::RegisterSet {
-                idx: event.idx as usize,
-                value: event.value,
-            },
-            pb::trace_event::Kind::MemorySet(event) => TraceEvent::MemorySet {
-                addr: event.addr,
-                value: event.value,
-            },
-        })
-    }
-}
-
-impl From<ExitCode> for pb::ExitCode {
-    fn from(value: ExitCode) -> Self {
-        Self {
-            kind: Some(match value {
-                ExitCode::SystemSplit => pb::exit_code::Kind::SystemSplit(()),
-                ExitCode::SessionLimit => pb::exit_code::Kind::SessionLimit(()),
-                ExitCode::Paused(code) => pb::exit_code::Kind::Paused(code),
-                ExitCode::Halted(code) => pb::exit_code::Kind::Halted(code),
-                ExitCode::Fault => pb::exit_code::Kind::Fault(()),
-            }),
-        }
-    }
 }
