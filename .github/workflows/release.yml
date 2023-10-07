@@ -50,13 +50,14 @@ jobs:
       - uses: ./.github/actions/sccache
         with:
           key: ${{ matrix.os }}-${{ matrix.feature }}
-      - uses: actions/setup-python@v4
       - run: pip install ziglang
+        if: matrix.os == 'Linux'
       - name: Install cargo-zigbuild
         uses: risc0/cargo-install@2cfb0024938d23011106cbf127b393bc83fddba1
         with:
           crate: cargo-zigbuild
           version: "0.17"
+        if: matrix.os == 'Linux'
       - run: cargo $BUILD_CMD -p cargo-risczero --release -F $FEATURE --target $BUILD_TARGET
       - run: |
           mkdir -p tmp/pkg
