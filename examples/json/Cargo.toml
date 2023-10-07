@@ -4,7 +4,6 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-json = "0.12"
 json-core = { path = "core" }
 json-methods = { path = "methods" }
 risc0-zkvm = { path = "../../risc0/zkvm" }

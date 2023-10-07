@@ -34,7 +34,6 @@ bytemuck = { version = "1.13", features = ["extern_crate_alloc"] }
 cfg-if = "1.0"
 getrandom = { version = "0.2", features = ["custom"] }
 hex = { version = "0.4.3", default-features = false, features = ["alloc"] }
-libm = "0.2"
 risc0-circuit-rv32im = { workspace = true }
 risc0-core = { workspace = true }
 risc0-zkp = { workspace = true }
@@ -72,10 +71,7 @@ crypto-bigint = { version = "0.5", default-features = false, features = [
 num-derive = "0.4"
 num-traits = { version = "0.2", default-features = false, optional = true }
 prost = { version = "0.12", optional = true }
-rand = { version = "0.8", optional = true }
-rayon = { version = "1.5", optional = true }
 sha2 = { version = "0.10", optional = true }
-thiserror = { version = "1.0", optional = true }
 tracing = { version = "0.1", default-features = false, features = [
   "attributes",
 ] }
@@ -85,6 +81,7 @@ typetag = { version = "0.2", optional = true }
 clap = { version = "4", features = ["derive"] }
 criterion = { version = "0.5", features = ["html_reports"] }
 human-repr = "1.0"
+rand = "0.8"
 tracing-forest = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
@@ -144,10 +141,7 @@ prove = [
   "dep:prost",
   "dep:prost-build",
   "dep:protobuf-src",
-  "dep:rand",
-  "dep:rayon",
   "dep:sha2",
-  "dep:thiserror",
   "dep:typetag",
   "risc0-circuit-rv32im/prove",
   "risc0-zkp/prove",

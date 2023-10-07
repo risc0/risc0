@@ -8,4 +8,6 @@ edition = "2021"
 [dependencies]
 json = "0.12"
 json-core = { path = "../../core" }
-risc0-zkvm = { path = "../../../../risc0/zkvm", default-features = false, features = [ "std" ] }
+risc0-zkvm = { path = "../../../../risc0/zkvm", default-features = false, features = [
+  "std",
+] }
