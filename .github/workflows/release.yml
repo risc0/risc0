@@ -50,6 +50,7 @@ jobs:
       - uses: ./.github/actions/sccache
         with:
           key: ${{ matrix.os }}-${{ matrix.feature }}
+      - uses: actions/setup-python@v4
       - run: pip3 install ziglang
       - name: Install cargo-zigbuild
         uses: risc0/cargo-install@2cfb0024938d23011106cbf127b393bc83fddba1
