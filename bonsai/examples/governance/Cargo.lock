@@ -455,20 +455,14 @@ dependencies = [
  "pin-project",
  "reqwest",
  "risc0-zkvm",
- "rusoto_core",
- "rusoto_kms",
- "semver",
  "serde",
  "serde_json",
- "snafu",
  "thiserror",
  "tokio",
  "tokio-stream",
- "tokio-util",
  "tower-http",
  "tracing",
  "tracing-subscriber",
- "typed-builder",
  "utoipa",
  "utoipa-swagger-ui",
  "validator",
@@ -485,7 +479,6 @@ dependencies = [
  "bytemuck",
  "clap",
  "ethers",
- "ethers-signers",
  "governance-methods",
  "hex",
  "humantime",
@@ -502,18 +495,13 @@ dependencies = [
  "axum",
  "bincode",
  "bonsai-sdk",
- "displaydoc",
  "hex",
- "hyper",
  "risc0-zkvm",
- "serde",
  "serde_json",
  "thiserror",
  "tokio",
- "tokio-stream",
  "tower-http",
  "tracing",
- "tracing-subscriber",
  "uuid 1.4.1",
 ]
 
@@ -1130,12 +1118,6 @@ dependencies = [
  "quote",
  "syn 2.0.29",
 ]
-
-[[package]]
-name = "doc-comment"
-version = "0.3.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fea41bba32d969b513997752735605054bc0dfa92b4c56bf1189f2e174be7a10"
 
 [[package]]
 name = "docker-generate"
@@ -3548,7 +3530,6 @@ version = "0.19.0-alpha.1"
 dependencies = [
  "cc",
  "directories",
- "glob",
  "hex",
  "sha2 0.10.7",
  "tempfile",
@@ -3566,7 +3547,6 @@ dependencies = [
  "rayon",
  "risc0-circuit-rv32im-sys",
  "risc0-core",
- "risc0-sys",
  "risc0-zkp",
  "risc0-zkvm-platform",
  "tracing",
@@ -3579,7 +3559,6 @@ dependencies = [
  "glob",
  "risc0-build-kernel",
  "risc0-core",
- "risc0-sys",
 ]
 
 [[package]]
@@ -3594,10 +3573,7 @@ dependencies = [
 name = "risc0-sys"
 version = "0.19.0-alpha.1"
 dependencies = [
- "cc",
- "glob",
  "risc0-build-kernel",
- "risc0-core",
 ]
 
 [[package]]
@@ -3643,15 +3619,12 @@ dependencies = [
  "getrandom",
  "hex",
  "lazy-regex",
- "libm",
  "log",
  "num-derive",
  "num-traits",
  "prost",
  "prost-build",
  "protobuf-src",
- "rand",
- "rayon",
  "risc0-binfmt",
  "risc0-circuit-rv32im",
  "risc0-core",
@@ -3661,7 +3634,6 @@ dependencies = [
  "semver",
  "serde",
  "sha2 0.10.7",
- "thiserror",
  "tracing",
  "typetag",
 ]
@@ -4288,28 +4260,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "62bb4feee49fdd9f707ef802e22365a35de4b7b299de4763d44bfea899442ff9"
 
 [[package]]
-name = "snafu"
-version = "0.7.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e4de37ad025c587a29e8f3f5605c00f70b98715ef90b9061a815b9e59e9042d6"
-dependencies = [
- "doc-comment",
- "snafu-derive",
-]
-
-[[package]]
-name = "snafu-derive"
-version = "0.7.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "990079665f075b699031e9c08fd3ab99be5029b96f3b78dc0709e8f77e4efebf"
-dependencies = [
- "heck",
- "proc-macro2",
- "quote",
- "syn 1.0.109",
-]
-
-[[package]]
 name = "socket2"
 version = "0.4.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4880,17 +4830,6 @@ checksum = "97fee6b57c6a41524a810daee9286c02d7752c4253064d0b05472833a438f675"
 dependencies = [
  "cfg-if",
  "static_assertions",
-]
-
-[[package]]
-name = "typed-builder"
-version = "0.12.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6179333b981641242a768f30f371c9baccbfcc03749627000c500ab88bf4528b"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 1.0.109",
 ]
 
 [[package]]

@@ -852,7 +852,6 @@ dependencies = [
  "cfg-if",
  "getrandom",
  "hex",
- "libm",
  "log",
  "num-derive",
  "num-traits",
@@ -1210,7 +1209,6 @@ name = "zkevm-core"
 version = "0.1.0"
 dependencies = [
  "bytes",
- "getrandom",
  "primitive-types",
  "revm",
  "serde",

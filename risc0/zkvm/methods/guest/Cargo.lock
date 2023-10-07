@@ -597,7 +597,6 @@ dependencies = [
  "cfg-if",
  "getrandom",
  "hex",
- "libm",
  "log",
  "num-derive",
  "risc0-binfmt",
@@ -633,7 +632,6 @@ dependencies = [
  "risc0-zkvm-methods",
  "risc0-zkvm-platform",
  "rsa",
- "serde",
 ]
 
 [[package]]

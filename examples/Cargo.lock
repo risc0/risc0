@@ -397,7 +397,6 @@ dependencies = [
  "bincode",
  "risc0-zkvm",
  "risc0-zkvm-receipts",
- "wasm-bindgen",
  "wasm-bindgen-test",
 ]
 
@@ -561,33 +560,6 @@ checksum = "ec837a71355b28f6556dbd569b37b3f363091c0bd4b2e735674521b4c5fd9bc5"
 dependencies = [
  "android-tzdata",
  "num-traits",
-]
-
-[[package]]
-name = "ciborium"
-version = "0.2.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "effd91f6c78e5a4ace8a5d3c0b6bfaec9e2baaef55f3efc00e45fb2e477ee926"
-dependencies = [
- "ciborium-io",
- "ciborium-ll",
- "serde",
-]
-
-[[package]]
-name = "ciborium-io"
-version = "0.2.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cdf919175532b369853f5d5e20b26b43112613fd6fe7aee757e35f7a44642656"
-
-[[package]]
-name = "ciborium-ll"
-version = "0.2.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "defaa24ecc093c77630e6c15e17c51f5e187bf35ee514f4e2d67baaa96dae22b"
-dependencies = [
- "ciborium-io",
- "half 1.8.2",
 ]
 
 [[package]]
@@ -1047,7 +1019,6 @@ dependencies = [
 name = "ecdsa-example"
 version = "0.1.0"
 dependencies = [
- "clap 4.4.0",
  "ecdsa-methods",
  "k256",
  "rand_core",
@@ -1316,7 +1287,7 @@ checksum = "d1e481eb11a482815d3e9d618db8c42a93207134662873809335a92327440c18"
 dependencies = [
  "bit_field",
  "flume",
- "half 2.2.1",
+ "half",
  "lebe",
  "miniz_oxide",
  "rayon-core",
@@ -1698,12 +1669,6 @@ dependencies = [
 
 [[package]]
 name = "half"
-version = "1.8.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "eabb4a44450da02c90444cf74558da904edde8fb4e9035a9a6a4e15445af0bd7"
-
-[[package]]
-name = "half"
 version = "2.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "02b4af3693f1b705df946e9fe5631932443781d0aabb423b62fcd4d73f6d2fd0"
@@ -2059,12 +2024,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "json"
-version = "0.12.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "078e285eafdfb6c4b434e0d31e8cfcb5115b651496faca5749b88fafd4f23bfd"
-
-[[package]]
 name = "json-core"
 version = "0.1.0"
 dependencies = [
@@ -2076,7 +2035,6 @@ dependencies = [
 name = "json-example"
 version = "0.1.0"
 dependencies = [
- "json",
  "json-core",
  "json-methods",
  "risc0-zkvm",
@@ -2848,13 +2806,11 @@ name = "prorata-cli"
 version = "0.1.0"
 dependencies = [
  "bincode",
- "ciborium",
  "clap 4.4.0",
  "prorata-core",
  "prorata-methods",
  "risc0-zkvm",
  "rust_decimal",
- "rust_decimal_macros",
  "serde",
 ]
 
@@ -3298,7 +3254,6 @@ version = "0.19.0-alpha.1"
 dependencies = [
  "cc",
  "directories",
- "glob",
  "hex",
  "sha2",
  "tempfile",
@@ -3316,7 +3271,6 @@ dependencies = [
  "rayon",
  "risc0-circuit-rv32im-sys",
  "risc0-core",
- "risc0-sys",
  "risc0-zkp",
  "risc0-zkvm-platform",
  "tracing",
@@ -3329,7 +3283,6 @@ dependencies = [
  "glob",
  "risc0-build-kernel",
  "risc0-core",
- "risc0-sys",
 ]
 
 [[package]]
@@ -3344,10 +3297,7 @@ dependencies = [
 name = "risc0-sys"
 version = "0.19.0-alpha.1"
 dependencies = [
- "cc",
- "glob",
  "risc0-build-kernel",
- "risc0-core",
 ]
 
 [[package]]
@@ -3393,15 +3343,12 @@ dependencies = [
  "getrandom",
  "hex",
  "lazy-regex",
- "libm",
  "log",
  "num-derive",
  "num-traits",
  "prost",
  "prost-build",
  "protobuf-src",
- "rand",
- "rayon",
  "risc0-binfmt",
  "risc0-circuit-rv32im",
  "risc0-core",
@@ -3411,7 +3358,6 @@ dependencies = [
  "semver",
  "serde",
  "sha2",
- "thiserror",
  "tracing",
  "typetag",
 ]
@@ -5066,8 +5012,6 @@ dependencies = [
  "bytes",
  "ethers-core",
  "ethers-providers",
- "futures",
- "getrandom",
  "primitive-types",
  "revm",
  "serde",

@@ -264,7 +264,6 @@ dependencies = [
  "cfg-if",
  "getrandom",
  "hex",
- "libm",
  "log",
  "num-derive",
  "risc0-binfmt",

@@ -277,7 +277,6 @@ dependencies = [
  "cfg-if",
  "getrandom",
  "hex",
- "libm",
  "log",
  "num-derive",
  "num-traits",

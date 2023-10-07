@@ -470,7 +470,6 @@ dependencies = [
  "cfg-if",
  "getrandom",
  "hex",
- "libm",
  "log",
  "num-derive",
  "num-traits",
@@ -500,12 +499,8 @@ dependencies = [
 name = "risc0-zkvm-methods-std"
 version = "0.1.0"
 dependencies = [
- "bytemuck",
- "risc0-zkp",
  "risc0-zkvm",
  "risc0-zkvm-methods",
- "risc0-zkvm-platform",
- "serde",
 ]
 
 [[package]]
