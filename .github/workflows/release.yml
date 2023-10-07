@@ -5,22 +5,22 @@ on:
     tags:
       - "v*.*.*"
   # for testing purposes
-  pull_request:
-    branches: [ main ]
-  workflow_dispatch:
+  # pull_request:
+  #   branches: [ main ]
+  # workflow_dispatch:
 
 jobs:
-  # release:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: softprops/action-gh-release@v1
-  #       with:
-  #         draft: true
-  #         generate_release_notes: true
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: softprops/action-gh-release@v1
+        with:
+          draft: true
+          generate_release_notes: true
 
   build:
     runs-on: [self-hosted, prod, "${{ matrix.os }}", "${{ matrix.device }}"]
-    # needs: release
+    needs: release
     strategy:
       fail-fast: false
       matrix:
@@ -29,17 +29,11 @@ jobs:
             feature: cuda
             device: nvidia_rtx_a5000
             target: x86_64-unknown-linux-gnu
-            build_cmd: zigbuild
-            build_target: x86_64-unknown-linux-gnu.2.27
           - os: macOS
             feature: metal
             device: apple_m2_pro
             target: aarch64-apple-darwin
-            build_cmd: build
-            build_target: aarch64-apple-darwin
     env:
-      BUILD_CMD: ${{ matrix.build_cmd }}
-      BUILD_TARGET: ${{ matrix.build_target }}
       CUDA_LIBRARY_PATH: /usr/lib/cuda
       FEATURE: ${{ matrix.feature }}
       RUSTC_WRAPPER: sccache
@@ -50,38 +44,25 @@ jobs:
       - uses: ./.github/actions/sccache
         with:
           key: ${{ matrix.os }}-${{ matrix.feature }}
-      - uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
-          cache: 'pip'
-        if: matrix.os == 'Linux'
-      - run: pip install ziglang
-        if: matrix.os == 'Linux'
-      - name: Install cargo-zigbuild
-        uses: risc0/cargo-install@2cfb0024938d23011106cbf127b393bc83fddba1
-        with:
-          crate: cargo-zigbuild
-          version: "0.17"
-        if: matrix.os == 'Linux'
-      - run: cargo $BUILD_CMD -p cargo-risczero --release -F $FEATURE --target $BUILD_TARGET
+      - run: cargo build -p cargo-risczero --release -F $FEATURE
       - run: |
           mkdir -p tmp/pkg
-          cp target/$TARGET/release/cargo-risczero tmp/pkg
-          cp target/$TARGET/release/r0vm tmp/pkg
+          cp target/release/cargo-risczero tmp/pkg
+          cp target/release/r0vm tmp/pkg
           cd tmp/pkg && tar cv * | gzip -9 > ../cargo-risczero-$TARGET.tgz
-      # - uses: svenstaro/upload-release-action@v2
-      #   with:
-      #     repo_token: ${{ secrets.GITHUB_TOKEN }}
-      #     file: tmp/cargo-risczero-${{ matrix.target }}.tgz
+      - uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: tmp/cargo-risczero-${{ matrix.target }}.tgz
 
-  # publish:
-  #   runs-on: [self-hosted, prod, Linux, cpu]
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #     - uses: ./.github/actions/rustup
-  #     - name: Install cargo-release
-  #       uses: risc0/cargo-install@2cfb0024938d23011106cbf127b393bc83fddba1
-  #       with:
-  #         crate: cargo-release
-  #         version: "0.24"
-  #     - run: cargo release publish --no-confirm --execute
+  publish:
+    runs-on: [self-hosted, prod, Linux, cpu]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/rustup
+      - name: Install cargo-release
+        uses: risc0/cargo-install@2cfb0024938d23011106cbf127b393bc83fddba1
+        with:
+          crate: cargo-release
+          version: "0.24"
+      - run: cargo release publish --no-confirm --execute
