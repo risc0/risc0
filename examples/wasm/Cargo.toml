@@ -7,7 +7,7 @@ edition = "2021"
 risc0-zkvm = { path = "../../risc0/zkvm" }
 serde = "1.0"
 wasm-methods = { path = "methods" }
-wat = "1.0"
+wat = "<1.0.72"
 
 [features]
 cuda = ["risc0-zkvm/cuda"]
