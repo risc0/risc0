@@ -54,15 +54,3 @@ jobs:
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: tmp/cargo-risczero-${{ matrix.target }}.tgz
-
-  publish:
-    runs-on: [self-hosted, prod, Linux, cpu]
-    steps:
-      - uses: actions/checkout@v3
-      - uses: ./.github/actions/rustup
-      - name: Install cargo-release
-        uses: risc0/cargo-install@2cfb0024938d23011106cbf127b393bc83fddba1
-        with:
-          crate: cargo-release
-          version: "0.24"
-      - run: cargo release publish --no-confirm --execute

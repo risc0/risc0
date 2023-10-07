@@ -1,11 +1,9 @@
 name: bonsai
 
 on:
-  push:
-    branches: [ main, 'release-*' ]
+  merge_group:
   pull_request:
     branches: [ main, 'release-*' ]
-
   workflow_dispatch:
 
 concurrency:
