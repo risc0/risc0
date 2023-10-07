@@ -51,7 +51,7 @@ prove = [
   "dep:ndarray",
   "dep:rand",
   "dep:rayon",
-  "dep:risc0-sys",
+  "risc0-sys",
   "std",
 ]
 std = ["anyhow/std"]

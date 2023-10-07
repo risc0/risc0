@@ -19,7 +19,7 @@ hex = "0.4"
 risc0-zkvm = { workspace = true, features = ["prove"] }
 serde_json = "1.0"
 thiserror = "1.0"
-tokio = { version = "1.19", features = ["full", "sync"] }
+tokio = { version = "1", features = ["full", "sync"] }
 tower-http = { version = "0.4", features = ["trace"] }
 tracing = "0.1"
 uuid = { version = "1.4", features = ["v4", "serde"] }
