@@ -101,14 +101,8 @@ Rust][install-rust] if you don't already have it, then install the `cargo
 risczero` tool:
 
 ```
-cargo install cargo-risczero
-```
-
-For the above commands to build successfully you will need to have installed the
-required dependencies. On a Ubuntu system you can install them with:
-
-```bash
-sudo apt install curl build-essential libssl-dev pkgconf
+curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh | bash
+cargo binstall cargo-risczero
 ```
 
 Next we'll need to install the `risc0` toolchain with:
@@ -158,13 +152,14 @@ structured, and other resources useful to developers new to RISC Zero, see our
 
 The following feature flags are present in one or more of the crates listed above:
 
-| Feature  | Target(s)         | Implies    | Description                                                                           | Crates                                      |
-| -------- | ----------------- | ---------- | ------------------------------------------------------------------------------------- | ------------------------------------------- |
-| cuda     |                   | prove, std | Turns on CUDA GPU acceleration for the prover. Requires CUDA toolkit to be installed. | risc0-circuit-rv32im, risc0-zkp, risc0-zkvm |
-| metal    | macos             | prove, std | Turns on Metal GPU acceleration for the prover.                                       | risc0-circuit-rv32im, risc0-zkp, risc0-zkvm |
-| profiler | all               |            | Counts cycles during guest execution as an aid to code optimization.                  | risc0-zkvm                                  |
-| prove    | all except rv32im | std        | Enables the prover, incompatible within the zkvm guest.                               | risc0-circuit-rv32im, risc0-zkp, risc0-zkvm |
-| std      | all               |            | Support for the Rust stdlib.                                                          | risc0-circuit-rv32im, risc0-zkp, risc0-zkvm |
+| Feature          | Target(s)         | Implies    | Description                                                                                                                                                                                                                                                                                               | Crates                                      |
+| ---------------- | ----------------- | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
+| cuda             |                   | prove, std | Turns on CUDA GPU acceleration for the prover. Requires CUDA toolkit to be installed.                                                                                                                                                                                                                     | risc0-circuit-rv32im, risc0-zkp, risc0-zkvm |
+| disable-dev-mode | all               |            | Disables dev mode so that the proving stage may not be skipped. For the verifier, enforces that [fake receipts](https://docs.rs/risc0-zkvm/0.18.0/risc0_zkvm/enum.InnerReceipt.html#variant.Fake) are invalid. Used to prevent a misplaced `RISC0_DEV_MODE` from breaking security in production systems. | risc0-zkvm                                  |
+| metal            | macos             | prove, std | Turns on Metal GPU acceleration for the prover.                                                                                                                                                                                                                                                           | risc0-circuit-rv32im, risc0-zkp, risc0-zkvm |
+| profiler         | all               |            | Counts cycles during guest execution as an aid to code optimization.                                                                                                                                                                                                                                      | risc0-zkvm                                  |
+| prove            | all except rv32im | std        | Enables the prover, incompatible within the zkvm guest.                                                                                                                                                                                                                                                   | risc0-circuit-rv32im, risc0-zkp, risc0-zkvm |
+| std              | all               |            | Support for the Rust stdlib.                                                                                                                                                                                                                                                                              | risc0-circuit-rv32im, risc0-zkp, risc0-zkvm |
 
 ## License
 

@@ -39,6 +39,7 @@ snafu = "0.7"
 thiserror = "1.0"
 tokio = { version = "1.19", features = ["full", "sync"] }
 tokio-stream = "0.1"
+tokio-util = "0.7"
 tower-http = { version = "0.4", features = ["trace"] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
@@ -51,6 +52,7 @@ validator = { version = "0.16", features = ["derive"] }
 bincode = "1"
 bytemuck = "1.13"
 risc0-zkvm-methods = { path = "../../risc0/zkvm/methods", default-features = false }
+rstest = "0.18"
 time = "0.3"
 uuid = { version = "1.3", features = ["v4", "serde"] }
 wiremock = "0.5"

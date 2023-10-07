@@ -1,0 +1,31 @@
+name: Open a release PR
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Version to release
+        required: true
+        type: string
+
+jobs:
+  make-release-pr:
+    permissions:
+      id-token: write
+      pull-requests: write
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install cargo-release
+        uses: risc0/cargo-install@2cfb0024938d23011106cbf127b393bc83fddba1
+        with:
+          crate: cargo-release
+          version: "0.24"
+
+      - uses: cargo-bins/release-pr@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          version: ${{ inputs.version }}
+          crate-release-all: true
+          pr-release-notes: true
