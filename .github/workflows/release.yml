@@ -55,7 +55,7 @@ jobs:
         uses: risc0/cargo-install@2cfb0024938d23011106cbf127b393bc83fddba1
         with:
           crate: cargo-zigbuild
-          version: "0.27"
+          version: "0.17"
       - run: cargo $BUILD_CMD -p cargo-risczero --release -F $FEATURE --target $BUILD_TARGET
       - run: |
           mkdir -p tmp/pkg
