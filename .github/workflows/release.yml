@@ -50,6 +50,11 @@ jobs:
       - uses: ./.github/actions/sccache
         with:
           key: ${{ matrix.os }}-${{ matrix.feature }}
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+        if: matrix.os == 'Linux'
       - run: pip install ziglang
         if: matrix.os == 'Linux'
       - name: Install cargo-zigbuild
