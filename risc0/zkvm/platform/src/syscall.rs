@@ -134,7 +134,7 @@ pub mod nr {
     declare_syscall!(pub SYS_READ);
     declare_syscall!(pub SYS_WRITE);
     declare_syscall!(pub SYS_VERIFY);
-    declare_syscall!(pub SYS_VERIFY_METADATA);
+    declare_syscall!(pub SYS_VERIFY_INTEGRITY);
 }
 
 impl SyscallName {
@@ -735,11 +735,11 @@ pub unsafe extern "C" fn sys_verify(
 /// a0. The caller must encode the metadata_digest into a public assumptions
 /// list for inclusion in the guest output.
 #[no_mangle]
-pub unsafe extern "C" fn sys_verify_metadata(metadata_digest: *const [u32; DIGEST_WORDS]) {
+pub unsafe extern "C" fn sys_verify_integrity(metadata_digest: *const [u32; DIGEST_WORDS]) {
     let Return(a0, _) = unsafe {
         // Send the metadata_digest to the host via software ecall.
         syscall_2(
-            nr::SYS_VERIFY_METADATA,
+            nr::SYS_VERIFY_INTEGRITY,
             null_mut(),
             0,
             metadata_digest as u32,

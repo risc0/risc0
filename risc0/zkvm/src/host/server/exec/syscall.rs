@@ -22,7 +22,7 @@ use risc0_zkvm_platform::{
     syscall::{
         nr::{
             SYS_ARGC, SYS_ARGV, SYS_CYCLE_COUNT, SYS_GETENV, SYS_LOG, SYS_PANIC, SYS_RANDOM,
-            SYS_READ, SYS_READ_AVAIL, SYS_VERIFY, SYS_VERIFY_METADATA, SYS_WRITE,
+            SYS_READ, SYS_READ_AVAIL, SYS_VERIFY, SYS_VERIFY_INTEGRITY, SYS_WRITE,
         },
         reg_abi::{REG_A3, REG_A4, REG_A5},
         SyscallName, DIGEST_BYTES, DIGEST_WORDS,
@@ -112,7 +112,7 @@ impl<'a> SyscallTable<'a> {
             .with_syscall(SYS_READ_AVAIL, posix_io.clone())
             .with_syscall(SYS_WRITE, posix_io)
             .with_syscall(SYS_VERIFY, sys_verify.clone())
-            .with_syscall(SYS_VERIFY_METADATA, sys_verify)
+            .with_syscall(SYS_VERIFY_INTEGRITY, sys_verify)
             .with_syscall(SYS_ARGC, Args(env.args.clone()))
             .with_syscall(SYS_ARGV, Args(env.args.clone()));
         for (syscall, handler) in env.slice_io.borrow().inner.iter() {
@@ -240,7 +240,7 @@ impl SysVerify {
             .try_into()
             .map_err(|vec| anyhow!("failed to convert to [u8; DIGEST_BYTES]: {:?}", vec))?;
 
-        log::debug!("SYS_VERIFY_METADATA: {}", hex::encode(&metadata_digest));
+        log::debug!("SYS_VERIFY_INTEGRITY: {}", hex::encode(&metadata_digest));
 
         // Iterate over the list looking for a matching assumption.
         for assumption in self.assumptions.borrow().cached.iter() {
@@ -256,12 +256,12 @@ impl SysVerify {
         }
 
         Err(anyhow!(
-            "sys_verify_metadata: failed to resolve metadata digest: {}",
+            "sys_verify_integrity: failed to resolve metadata digest: {}",
             metadata_digest
         ))
     }
 
-    fn sys_verify_metadata(
+    fn sys_verify_integrity(
         &mut self,
         mut from_guest: Vec<u8>,
         to_guest: &mut [u32],
@@ -340,7 +340,7 @@ impl SysVerify {
         }
 
         Err(anyhow!(
-            "sys_verify_metadata: failed to resolve journal_digest and image_id: {}, {}",
+            "sys_verify_integrity: failed to resolve journal_digest and image_id: {}, {}",
             journal_digest,
             image_id,
         ))
@@ -358,10 +358,10 @@ impl Syscall for SysVerify {
         let from_guest_len = ctx.load_register(REG_A4);
         let from_guest: Vec<u8> = ctx.load_region(from_guest_ptr, from_guest_len)?;
 
-        if syscall == SYS_VERIFY_METADATA.as_str() {
+        if syscall == SYS_VERIFY.as_str() {
             self.sys_verify(from_guest)
-        } else if syscall == SYS_VERIFY.as_str() {
-            self.sys_verify_metadata(from_guest, to_guest)
+        } else if syscall == SYS_VERIFY_INTEGRITY.as_str() {
+            self.sys_verify_integrity(from_guest, to_guest)
         } else {
             bail!("SysVerify received unrecognized syscall: {}", syscall)
         }

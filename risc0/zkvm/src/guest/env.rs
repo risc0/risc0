@@ -21,7 +21,7 @@ use risc0_zkvm_platform::{
     fileno,
     syscall::{
         self, sys_alloc_words, sys_cycle_count, sys_halt, sys_log, sys_pause, sys_read,
-        sys_read_words, sys_verify, sys_verify_metadata, sys_write, syscall_2, SyscallName,
+        sys_read_words, sys_verify, sys_verify_integrity, sys_write, syscall_2, SyscallName,
         DIGEST_WORDS,
     },
     WORD_SIZE,
@@ -170,9 +170,9 @@ impl std::error::Error for VerifyMetadataError {}
 // TODO(victor): Rename verify_metdata to verify_integrity
 /// Verify that there exists a valid receipt with the specified
 /// [ReceiptMetadata].
-pub fn verify_metadata(meta: &ReceiptMetadata) -> Result<(), VerifyMetadataError> {
+pub fn verify_integrity(meta: &ReceiptMetadata) -> Result<(), VerifyMetadataError> {
     let meta_digest = meta.digest();
-    unsafe { sys_verify_metadata(meta_digest.as_ref()) };
+    unsafe { sys_verify_integrity(meta_digest.as_ref()) };
     // DO NOT MERGE(victor): Calculate the ReceiptMetadata digest and add it to a
     // running assumptions list.
     Ok(())

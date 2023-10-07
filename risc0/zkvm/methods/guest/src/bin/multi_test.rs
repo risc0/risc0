@@ -165,7 +165,7 @@ pub fn main() {
         }
         MultiTestSpec::SysVerifyMetadata { metadata_words } => {
             let meta: ReceiptMetadata = risc0_zkvm::serde::from_slice(&metadata_words).unwrap();
-            env::verify_metadata(&meta).unwrap();
+            env::verify_integrity(&meta).unwrap();
         }
         MultiTestSpec::PauseContinue => {
             env::log("before");

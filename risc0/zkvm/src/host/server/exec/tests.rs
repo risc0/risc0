@@ -386,7 +386,7 @@ fn sys_verify() {
 }
 
 #[test]
-fn sys_verify_metadata() {
+fn sys_verify_integrity() {
     let hello_commit_session = ExecutorImpl::from_elf(ExecutorEnv::default(), HELLO_COMMIT_ELF)
         .unwrap()
         .run()
