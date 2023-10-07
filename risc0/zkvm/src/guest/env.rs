@@ -30,6 +30,7 @@ use serde::{de::DeserializeOwned, Serialize};
 
 use crate::{
     align_up,
+    receipt_metadata::{MaybePruned, Output},
     serde::{Deserializer, Serializer, WordRead, WordWrite},
     sha::{
         rust_crypto::{Digest as _, Sha256},
@@ -57,13 +58,17 @@ pub(crate) fn finalize(halt: bool, user_exit: u8) {
     // list.
     unsafe {
         let hasher = core::mem::take(&mut HASHER);
-        let output = hasher.unwrap_unchecked().finalize();
-        let words: &[u32; 8] = bytemuck::cast_slice(output.as_slice()).try_into().unwrap();
+        let journal_digest: Digest = hasher.unwrap().finalize().as_slice().try_into().unwrap();
+        let output = Output {
+            journal: MaybePruned::Pruned(journal_digest),
+            assumptions: Default::default(), // TODO(victor): Encode a non-empty assumptions list
+        };
+        let words: [u32; 8] = output.digest().into();
 
         if halt {
-            sys_halt(user_exit, words)
+            sys_halt(user_exit, &words)
         } else {
-            sys_pause(user_exit, words)
+            sys_pause(user_exit, &words)
         }
     }
 }

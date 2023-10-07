@@ -162,22 +162,24 @@ impl Receipt {
         }
 
         // Finally check the output hash in the decoded metadata against the expected output.
-        let decoded_output_digest = metadata.output.digest();
-
         let expected_output = Output {
             journal: MaybePruned::Pruned(self.journal.digest()),
             // It is expected that there are no (unresolved) assumptions.
             assumptions: Assumptions(vec![]).into(),
         };
 
-        if decoded_output_digest != expected_output.digest() {
-            log::debug!(
-                "journal: 0x{}, expected output digest: 0x{}, decoded output digest: 0x{}",
-                hex::encode(&self.journal),
-                hex::encode(expected_output.digest()),
-                hex::encode(decoded_output_digest),
-            );
-            return Err(VerificationError::JournalDigestMismatch);
+        if metadata.output.digest() != expected_output.digest() {
+            let empty_output = metadata.output.is_none() && self.journal.is_empty();
+            if !empty_output {
+                log::debug!(
+                    "journal: 0x{}, expected output digest: 0x{}, decoded output digest: 0x{}",
+                    hex::encode(&self.journal),
+                    hex::encode(expected_output.digest()),
+                    hex::encode(metadata.output.digest()),
+                );
+                return Err(VerificationError::JournalDigestMismatch);
+            }
+            log::debug!("accepting zero digest for output of receipt with empty journal");
         }
 
         Ok(())
@@ -202,7 +204,10 @@ impl Receipt {
             assumptions: Assumptions(vec![]).into(),
         });
         if metadata.output.digest() != expected_output.digest() {
-            return Err(VerificationError::ReceiptFormatError);
+            let empty_output = metadata.output.is_none() && self.journal.is_empty();
+            if !empty_output {
+                return Err(VerificationError::ReceiptFormatError);
+            }
         }
 
         Ok(())
@@ -378,8 +383,8 @@ impl CompositeReceipt {
         // and self.journal_digest in place of last_metadata.output, which is equal.
         self.verify_output_consitency(&last_metadata)?;
         let output: Option<Output> = last_metadata
-            .exit_code
-            .expects_output()
+            .output
+            .is_some()
             .then(|| {
                 Ok(Output {
                     journal: MaybePruned::Pruned(
@@ -420,12 +425,16 @@ impl CompositeReceipt {
             };
             // If these digests do not match, this receipt is internally inconsistent.
             if self_output.digest() != metadata.output.digest() {
-                log::debug!(
-                    "output digest does not match: expected {}; actual {}",
-                    self_output.digest(),
-                    metadata.output.digest()
-                );
-                return Err(VerificationError::ReceiptFormatError);
+                let empty_output = metadata.output.is_none()
+                    && self.journal_digest.unwrap() == Vec::<u8>::new().digest();
+                if !empty_output {
+                    log::debug!(
+                        "output digest does not match: expected {}; actual {}",
+                        self_output.digest(),
+                        metadata.output.digest()
+                    );
+                    return Err(VerificationError::ReceiptFormatError);
+                }
             }
         } else {
             // Ensure all output fields are empty. If not, this receipt is internally inconsistent.

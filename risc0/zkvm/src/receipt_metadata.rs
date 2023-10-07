@@ -86,6 +86,15 @@ where
     }
 }
 
+impl<T> Default for MaybePruned<T>
+where
+    T: Digestable + Default + Clone + Serialize,
+{
+    fn default() -> Self {
+        MaybePruned::Value(Default::default())
+    }
+}
+
 impl<T> MaybePruned<Option<T>>
 where
     T: Clone + Serialize,
@@ -97,6 +106,11 @@ where
             MaybePruned::Value(None) => true,
             MaybePruned::Pruned(digest) => digest == &Digest::new([0u32; DIGEST_WORDS]),
         }
+    }
+
+    /// Returns true is the value is Some(_), or the value is pruned as a non-zero digest.
+    pub fn is_some(&self) -> bool {
+        !self.is_none()
     }
 }
 
@@ -312,7 +326,7 @@ impl risc0_binfmt::Digestable for Output {
 }
 
 /// A list of assumptions, each a [Digest] of a [ReceiptMetadata].
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Default, Debug, Serialize, Deserialize)]
 #[cfg_attr(test, derive(PartialEq))]
 pub struct Assumptions(pub Vec<MaybePruned<ReceiptMetadata>>);
 
