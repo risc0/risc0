@@ -616,6 +616,7 @@ dependencies = [
  "reqwest",
  "risc0-zkvm",
  "risc0-zkvm-methods",
+ "rstest",
  "rusoto_core",
  "rusoto_kms",
  "semver",
@@ -626,6 +627,7 @@ dependencies = [
  "time",
  "tokio",
  "tokio-stream",
+ "tokio-util",
  "tower-http",
  "tracing",
  "tracing-subscriber",
@@ -663,7 +665,7 @@ dependencies = [
 
 [[package]]
 name = "bonsai-sdk"
-version = "0.4.0"
+version = "0.5.0-alpha.1"
 dependencies = [
  "env_logger",
  "httpmock",
@@ -3770,6 +3772,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e5ea92a5b6195c6ef2a0295ea818b312502c6fc94dde986c5553242e18fd4ce2"
 
 [[package]]
+name = "relative-path"
+version = "1.9.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c707298afce11da2efef2f600116fa93ffa7a032b5d7b628aa17711ec81383ca"
+
+[[package]]
 name = "reqwest"
 version = "0.11.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3856,7 +3864,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-binfmt"
-version = "0.18.0"
+version = "0.19.0-alpha.1"
 dependencies = [
  "anyhow",
  "elf",
@@ -3868,7 +3876,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build"
-version = "0.18.0"
+version = "0.19.0-alpha.1"
 dependencies = [
  "anyhow",
  "cargo_metadata",
@@ -3883,7 +3891,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build-kernel"
-version = "0.18.0"
+version = "0.19.0-alpha.1"
 dependencies = [
  "cc",
  "directories",
@@ -3895,7 +3903,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im"
-version = "0.18.0"
+version = "0.19.0-alpha.1"
 dependencies = [
  "anyhow",
  "log",
@@ -3911,7 +3919,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im-sys"
-version = "0.18.0"
+version = "0.19.0-alpha.1"
 dependencies = [
  "glob",
  "risc0-build-kernel",
@@ -3921,7 +3929,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-core"
-version = "0.18.0"
+version = "0.19.0-alpha.1"
 dependencies = [
  "bytemuck",
  "rand_core 0.6.4",
@@ -3929,7 +3937,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-sys"
-version = "0.18.0"
+version = "0.19.0-alpha.1"
 dependencies = [
  "cc",
  "glob",
@@ -3939,7 +3947,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkp"
-version = "0.18.0"
+version = "0.19.0-alpha.1"
 dependencies = [
  "anyhow",
  "blake2",
@@ -3964,7 +3972,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "0.18.0"
+version = "0.19.0-alpha.1"
 dependencies = [
  "addr2line 0.20.0",
  "anyhow",
@@ -4003,7 +4011,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-methods"
-version = "0.18.0"
+version = "0.19.0-alpha.1"
 dependencies = [
  "env_logger",
  "risc0-build",
@@ -4014,7 +4022,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "0.18.0"
+version = "0.19.0-alpha.1"
 dependencies = [
  "bytemuck",
  "getrandom 0.2.10",
@@ -4051,6 +4059,35 @@ checksum = "b4382d3af3a4ebdae7f64ba6edd9114fff92c89808004c4943b393377a25d001"
 dependencies = [
  "downcast-rs",
  "paste",
+]
+
+[[package]]
+name = "rstest"
+version = "0.18.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "97eeab2f3c0a199bc4be135c36c924b6590b88c377d416494288c14f2db30199"
+dependencies = [
+ "futures",
+ "futures-timer",
+ "rstest_macros",
+ "rustc_version",
+]
+
+[[package]]
+name = "rstest_macros"
+version = "0.18.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d428f8247852f894ee1be110b375111b586d4fa431f6c46e64ba5a0dcccbe605"
+dependencies = [
+ "cfg-if",
+ "glob",
+ "proc-macro2",
+ "quote",
+ "regex",
+ "relative-path",
+ "rustc_version",
+ "syn 2.0.29",
+ "unicode-ident",
 ]
 
 [[package]]

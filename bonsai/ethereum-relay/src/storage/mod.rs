@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::sync::PoisonError;
+use std::{cmp::Ordering, sync::PoisonError};
 
 use bonsai_ethereum_contracts::i_bonsai_relay::CallbackRequestFilter;
 use ethers::types::H256;
@@ -27,6 +27,8 @@ pub(crate) type ProofID = SessionId;
 
 pub(crate) type Result<T, E = Error> = std::result::Result<T, E>;
 
+pub(crate) const MAX_PROOF_RETRIES: u64 = 5;
+
 #[derive(Debug, thiserror::Error)]
 pub(crate) enum Error {
     #[error("Failed to transition proof request")]
@@ -37,6 +39,10 @@ pub(crate) enum Error {
     // custom error type (?).
     #[error("Storage is poisoned")]
     Poisoned,
+    #[error("Max retries exceeded")]
+    MaxRetriesExceeded { id: ProofID },
+    #[error("Proof already exists")]
+    ProofAlreadyExists { id: ProofID },
 }
 
 impl<T> From<PoisonError<T>> for Error {
@@ -63,18 +69,40 @@ pub(crate) enum ProofRequestState {
 }
 
 impl ProofRequestState {
-    fn is_valid_state_transition(self, new_state: Self) -> bool {
-        match (self, new_state) {
-            (ProofRequestState::New, ProofRequestState::Pending)
-            | (ProofRequestState::Pending, ProofRequestState::Completed)
-            | (ProofRequestState::Pending, ProofRequestState::Failed)
-            | (ProofRequestState::Completed, ProofRequestState::PreparingOnchain)
+    fn is_valid_state_transition(self, new_state: Self, retries: u64) -> bool {
+        let cmp = retries.cmp(&MAX_PROOF_RETRIES);
+        match (cmp, self, new_state) {
+            // Ensure that we don't exceed the max retries
+            (Ordering::Equal, _, ProofRequestState::New)
+            | (Ordering::Greater, _, ProofRequestState::New) => false,
+            (_,ProofRequestState::New, ProofRequestState::Pending)
+            | (_, ProofRequestState::Pending, ProofRequestState::Completed)
+            | (_, ProofRequestState::Pending, ProofRequestState::Failed)
+            | (_, ProofRequestState::Completed, ProofRequestState::PreparingOnchain)
             // Allow a revert from PreparingOnchain to Completed. This is useful if the service
             // crashes while preparing a request for sending on chain.
-            | (ProofRequestState::PreparingOnchain, ProofRequestState::Completed)
-            | (ProofRequestState::PreparingOnchain, ProofRequestState::CompletedOnchain(_)) => true,
+            | (_, ProofRequestState::PreparingOnchain, ProofRequestState::Completed)
+            | (_, ProofRequestState::PreparingOnchain, ProofRequestState::CompletedOnchain(_))
+            // Allow a revert from Pending to New. This is useful if we get a network error while
+            // sending a request to Bonsai.
+            | (_, ProofRequestState::Pending, ProofRequestState::New) => true,
             _ => false,
         }
+    }
+
+    fn should_increment_retries(&self, new_state: &Self) -> bool {
+        matches!(
+            (self, new_state),
+            (_, ProofRequestState::New)
+                | (
+                    ProofRequestState::PreparingOnchain,
+                    ProofRequestState::Completed
+                )
+                | (
+                    ProofRequestState::PreparingOnchain,
+                    ProofRequestState::CompletedOnchain(_)
+                )
+        )
     }
 }
 

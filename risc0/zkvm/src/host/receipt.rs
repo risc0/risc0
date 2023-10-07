@@ -235,7 +235,7 @@ impl SegmentReceipts {
         // the fault checker program was run as the normal guest program. This case does
         // not indicate a proof of fault. It is normal proof generation.
         if cfg!(feature = "fault-proof") && fault_id_exists && image_id != FAULT_CHECKER_ID.into() {
-            let digest: Digest = from_slice(&journal.clone()).unwrap();
+            let digest: Digest = from_slice(&journal).unwrap();
             if digest != prev_image_id {
                 return Err(VerificationError::FaultStateMismatch);
             }

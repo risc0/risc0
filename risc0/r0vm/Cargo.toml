@@ -23,7 +23,6 @@ anyhow = "1.0"
 assert_cmd = "2.0"
 assert_fs = "1.0"
 risc0-zkvm-methods = { path = "../zkvm/methods" }
-risc0-zkvm-platform = { workspace = true }
 temp-env = "0.3"
 test-log = { version = "0.2", features = ["trace"] }
 tracing = "0.1"

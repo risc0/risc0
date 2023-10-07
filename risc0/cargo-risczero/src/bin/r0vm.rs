@@ -12,19 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use self::error::Error;
-
-pub(crate) mod auth;
-pub(crate) mod callback_request;
-pub(crate) mod error;
-pub(crate) mod request_extractor;
-pub(crate) mod server;
-pub(crate) mod state;
-
-/// The routes for the API.
-pub mod routes {
-    /// Route for `Callback` related APIs.
-    pub const CALLBACK_ROUTE: &str = "/v1/callbacks";
+fn main() {
+    #[cfg(feature = "r0vm")]
+    risc0_r0vm::main()
 }
-
-pub(crate) type Result<T, E = Error> = ::std::result::Result<T, E>;
