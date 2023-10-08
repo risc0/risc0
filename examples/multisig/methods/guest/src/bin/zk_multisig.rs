@@ -15,7 +15,10 @@
 #![no_main]
 
 use hex::FromHex;
-use k256::ecdsa::{RecoveryId, Signature, VerifyingKey};
+// use k256::ecdsa::{RecoveryId, Signature, VerifyingKey};
+use k256::{
+    ecdsa::{RecoveryId, Signature, VerifyingKey}
+};
 use multisig_core::PrivateInput;
 use risc0_zkvm::guest::env;
 use rs_merkle::{algorithms::Sha256, Hasher, MerkleProof, MerkleTree};
@@ -34,7 +37,7 @@ pub fn main() {
     let merkle_proof_one_input: String = private_input.merkle_proof_one_input; // <proof_hashes + index_of_leaf>
     let merkle_proof_two_input: String = private_input.merkle_proof_two_input; // <proof_hashes + index_of_leaf>
     let signed_message_input: String = private_input.signed_message_input; // <signed_message>
-    let all_leaves_input: String = private_input.all_leaves_input; // <merkle_leaves>
+    let all_leaves_input: String = private_input.all_leaves_input; // <merkle_leaves> // TODO: Must check that all these leave are unique to enforce participant uniqueness.
 
     let all_leaves_bytes =
         Vec::<u8>::from_hex(all_leaves_input.trim()).expect("Failed to decode hex string");
@@ -335,5 +338,6 @@ pub fn main() {
     let message_bytes = hex::encode(final_hash_bytes);
     let commit_log_msg = "\n\nCommiting to hash: ".to_owned() + &message_bytes;
     env::log(&commit_log_msg);
+    env::log("");
     env::commit(&final_hash_bytes);
 }
