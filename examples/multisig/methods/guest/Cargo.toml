@@ -7,7 +7,7 @@ edition = "2021"
 
 [dependencies]
 risc0-zkvm = { path = "../../../../risc0/zkvm", default-features = false, features = ["std"] }
-hex-literal = "0.4"
+# hex-literal = "0.4"
 k256 = { version = "=0.13.1", features = ["arithmetic", "serde", "expose-field", "std", "ecdsa"], default_features = false }
 sha2 = "0.10.6"
 rs_merkle = "1.4.1"
