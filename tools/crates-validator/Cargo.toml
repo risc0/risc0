@@ -18,7 +18,7 @@ serde_valid = { version = "0.16.3", features = ["yaml"] }
 serde_yaml = "0.9.25"
 strum = { version = "0.24", features = ["derive"] }
 tempfile = "3"
-tokio = { version = "1.13", features = ["full"] }
+tokio = { version = "1", features = ["full"] }
 tokio-stream = "0.1"
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }

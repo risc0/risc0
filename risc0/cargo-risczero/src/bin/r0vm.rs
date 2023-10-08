@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-mod complete_proof;
-pub(crate) mod error;
-pub(crate) mod manager;
-pub(crate) mod snark;
+fn main() {
+    #[cfg(feature = "r0vm")]
+    risc0_r0vm::main()
+}
