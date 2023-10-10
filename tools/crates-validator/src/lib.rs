@@ -129,12 +129,12 @@ pub struct ProfileConfig {
 }
 
 impl ProfileConfig {
-    pub fn profiles(&self) -> &[Profile] {
-        self.profiles.as_ref()
+    pub fn profiles(&self) -> &Profiles {
+        &self.profiles
     }
 
-    pub fn skip_crates(&self) -> &[Profile] {
-        self.skip_crates.as_ref()
+    pub fn skip_crates(&self) -> &Profiles {
+        &self.skip_crates
     }
 
     pub fn skip_crates_names(&self) -> HashSet<&str> {
@@ -548,7 +548,7 @@ impl Validator {
     }
 
     // Run a single profile in the config by `name`
-    pub fn run_single(&self, name: &str, profiles: &[Profile]) -> Result<Vec<ValidationResults>> {
+    pub fn run_single(&self, name: &str, profiles: &Profiles) -> Result<Vec<ValidationResults>> {
         for profile in profiles {
             if profile.name() == name {
                 return self.run(profile);
@@ -559,7 +559,7 @@ impl Validator {
     }
 
     // Run all profiles in config
-    pub fn run_all(&self, profiles: &[Profile]) -> Result<Vec<ValidationResults>> {
+    pub fn run_all(&self, profiles: &Profiles) -> Result<Vec<ValidationResults>> {
         let mut results = vec![];
         for profile in profiles {
             results.push(self.run(profile)?);

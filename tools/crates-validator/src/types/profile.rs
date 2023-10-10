@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{iter::Chain, vec::IntoIter};
+use std::{collections::btree_set::IntoIter, iter::Chain, str::FromStr};
 
 use anyhow::{ensure, Result};
 use serde_valid::Validate;
@@ -25,7 +25,16 @@ use super::{
 };
 
 #[derive(
-    Debug, Clone, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize, serde_valid::Validate,
+    Debug,
+    Clone,
+    PartialEq,
+    Eq,
+    Hash,
+    PartialOrd,
+    Ord,
+    serde::Serialize,
+    serde::Deserialize,
+    serde_valid::Validate,
 )]
 pub struct Profile {
     #[validate(min_length = 1)]
@@ -60,9 +69,16 @@ impl Profile {
     }
 }
 
+impl FromStr for Profile {
+    type Err = anyhow::Error;
+    fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
+        let name = CrateName::from_str(s)?;
+        Self::new(name, ProfileSettings::default(), None)
+    }
+}
+
 impl TryFrom<String> for Profile {
     type Error = anyhow::Error;
-
     fn try_from(name: String) -> Result<Self, Self::Error> {
         Profile::new(name, ProfileSettings::default(), None)
     }
@@ -89,7 +105,7 @@ impl Merge for Profile {
 impl Group for Chain<IntoIter<Profile>, IntoIter<Profile>> {
     fn group(self) -> GroupedProfiles {
         self.fold(GroupedProfiles::new(), |mut acc, p| {
-            acc.entry(p.name.clone()).or_default().push(p.clone());
+            acc.entry(p.name.clone()).or_default().insert(p.clone());
             acc
         })
     }

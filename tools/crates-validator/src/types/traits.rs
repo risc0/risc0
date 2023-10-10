@@ -24,6 +24,10 @@ pub trait Merge {
     fn merge(self, other: Self) -> Self;
 }
 
+pub trait Reduce {
+    fn reduce(self) -> Self;
+}
+
 pub trait Exclude {
     fn exclude(self, other: Self) -> Self;
 }

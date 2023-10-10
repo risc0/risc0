@@ -17,7 +17,10 @@ use std::fmt::Display;
 use anyhow::Result;
 
 use crate::{
-    types::{aliases::Profiles, traits::Merge},
+    types::{
+        aliases::Profiles,
+        traits::{Merge, Reduce},
+    },
     ProfileConfig,
 };
 
@@ -49,14 +52,17 @@ impl Parser {
     pub fn profiles(&self) -> Result<Profiles> {
         Profiles::try_from(self.batch.clone())?
             .merge(self.individual.clone().into())
-            // .exclude(self.skip_crates.clone().try_into()?)
             .into_iter()
             .map(Ok)
             .collect::<Result<Profiles>>()
+            .map(|p: Profiles| p.reduce())
     }
 
     pub fn skip_crates(&self) -> Result<Profiles> {
-        self.skip_crates.clone().try_into()
+        self.skip_crates
+            .clone()
+            .try_into()
+            .map(|p: Profiles| p.reduce())
     }
 }
 

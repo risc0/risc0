@@ -18,7 +18,9 @@ use super::traits::Merge;
 // always in sync with default values?
 // Maybe specifying a new type for each field, and adding a check
 // `skip_serializing_if = "is_default"`?
-#[derive(Debug, Clone, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
+#[derive(
+    Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord, serde::Serialize, serde::Deserialize,
+)]
 #[serde(default)]
 #[serde(rename_all = "kebab-case")]
 pub struct ProfileSettings {

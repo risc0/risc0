@@ -32,7 +32,7 @@ impl TryFrom<SkipCrates> for Profiles {
             .skip_crates
             .into_iter()
             .map(Profile::try_from)
-            .collect::<Result<Vec<Profile>>>()
+            .collect::<Result<Self>>()
     }
 }
 
