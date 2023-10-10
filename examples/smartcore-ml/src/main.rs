@@ -76,7 +76,11 @@ fn predict() -> Vec<u32> {
 mod test {
     use serde_json;
     use smartcore::{
-        linalg::basic::matrix::DenseMatrix, svm::{Kernels, svc::{SVC, SVCParameters}},
+        linalg::basic::matrix::DenseMatrix,
+        svm::{
+            svc::{SVCParameters, SVC},
+            Kernels,
+        },
     };
     #[test]
     fn basic() {
@@ -115,13 +119,13 @@ mod test {
             &[4.9, 2.4, 3.3, 1.0],
             &[6.6, 2.9, 4.6, 1.3],
             &[5.2, 2.7, 3.9, 1.4],
-            ]);
+        ]);
 
         let y: Vec<i32> = vec![
             -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-            ];
-        
-        // We create the SVC params and train the SVC model.  
+        ];
+
+        // We create the SVC params and train the SVC model.
         // The paramaters will NOT get serialized due to a serde_skip command in the source code for the SVC struct
         let knl = Kernels::linear();
         let params = &SVCParameters::default().with_c(200.0).with_kernel(knl);
@@ -131,24 +135,28 @@ mod test {
         let svc_serialized = serde_json::to_string(&svc).unwrap();
 
         // Deserialize the model.  The model must be mutable since we need to reinsert the missing parameters field
-        let mut svc_deserialized: SVC<f32, i32, DenseMatrix<f32>, Vec<i32>> =  serde_json::from_str(&svc_serialized).expect("Could not parse json");
-        
+        let mut svc_deserialized: SVC<f32, i32, DenseMatrix<f32>, Vec<i32>> =
+            serde_json::from_str(&svc_serialized).expect("Could not parse json");
+
         // Test to make sure that parameters field is empty, as exptected.
         assert!(svc_deserialized.parameters.is_none());
 
         // Calling predict on svc_deserialized will result in an error due to the missing parameters field.
         // We need to recreate the same SVCParameters that we used to train the model
-        let params_same = &SVCParameters::default().with_c(200.0).with_kernel(Kernels::linear());
+        let params_same = &SVCParameters::default()
+            .with_c(200.0)
+            .with_kernel(Kernels::linear());
 
         // Now we can update the model with params_same.  The fork changes the visbility of the parameters field of the SVM model struct to public to allow for this reinsertion
         svc_deserialized.parameters = Some(params_same);
 
         // Calling predict on svc_deserialized will now work.
         let y_hats: Vec<f32> = svc_deserialized.predict(&x).unwrap();
-        
+
         let y_expected: Vec<f32> = vec![
-            -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
-            ]; 
+            -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
+            1.0, 1.0, 1.0, 1.0, 1.0,
+        ];
 
         assert_eq!(y_hats, y_expected);
     }
