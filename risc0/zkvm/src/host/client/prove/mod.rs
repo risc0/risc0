@@ -77,6 +77,7 @@ pub trait Prover {
     /// Return a name for this [Prover].
     fn get_name(&self) -> String;
 
+    // TODO(victor): What are the right semantics for this function with regards to exit code?
     /// Prove the specified [MemoryImage].
     fn prove(
         &self,
@@ -132,6 +133,8 @@ pub trait Executor {
 pub struct ProverOpts {
     /// The hash function to use.
     pub hashfn: String,
+    // TODO(victor): Add an option to indicate that a proof should be produced even if the guest
+    // exited with a non-zero status.
 }
 
 impl Default for ProverOpts {
