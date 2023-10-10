@@ -81,3 +81,8 @@ SVM models support four kernels:  Gaussian (rbf), Linear, Polynomial, and Sigmoi
 The source code for SmartCore can be found here:  https://github.com/smartcorelib/smartcore
 
 You can find other model implementations and additional SmartCore features here:  https://github.com/smartcorelib/smartcore-jupyter/tree/main/notebooks
+
+## Jupyter notebook
+
+In order to run Rust code from a Jupyter notebook, you will need to have the Rust kernel installed.  Installations instructions for the kernel and for Jupyter can be found here:
+https://github.com/evcxr/evcxr/blob/main/evcxr_jupyter/README.md
