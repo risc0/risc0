@@ -16,6 +16,7 @@ use crate::types::{
     aliases::{CrateName, Profiles},
     profile::Profile,
     profile_settings::ProfileSettings,
+    traits::Reduce,
 };
 use anyhow::Result;
 
@@ -28,7 +29,7 @@ pub(crate) struct Batches {
 pub(crate) struct BatchConfig {
     pub name: CrateName,
     pub crates: Vec<String>,
-    pub settings: ProfileSettings,
+    pub settings: Option<ProfileSettings>,
 }
 
 impl TryFrom<Batches> for Profiles {
@@ -43,23 +44,25 @@ impl TryFrom<Batches> for Profiles {
             .flatten()
             .map(Ok)
             .collect::<Result<Self>>()
+            .map(|p: Profiles| p.reduce())
     }
 }
 
 impl TryFrom<BatchConfig> for Profiles {
     type Error = anyhow::Error;
     fn try_from(value: BatchConfig) -> Result<Self> {
+        let settings = value.settings.unwrap_or_default();
         value
             .crates
             .into_iter()
-            .map(|c| (c, value.settings.clone()))
+            .map(|c| (c, settings.clone()))
             .map(Profile::try_from)
-            .collect()
+            .collect::<Result<Self>>()
+            .map(|p: Profiles| p.reduce())
     }
 }
 
 #[cfg(test)]
-
 mod tests {
     use std::collections::HashSet;
 
@@ -76,13 +79,20 @@ mod tests {
         let batches = serde_yaml::from_str::<Batches>(&config).unwrap();
         let profiles: Profiles = batches.try_into().unwrap();
 
-        profiles
-            .iter()
-            .filter(|p| p.name() == "serde")
-            .for_each(|p| {
-                assert!(p.settings.std);
-                assert!(p.settings.fast_mode);
+        profiles.iter().for_each(|p| {
+            p.name().starts_with("crossbeam").then(|| {
+                assert!(p.settings.patch.is_some());
             });
+            (p.name().eq("zip") || p.name().eq("ring")).then(|| {
+                assert!(p.settings.inject_cc_flags);
+            });
+            p.name().starts_with("serde").then(|| {
+                assert!(p.settings.std);
+            });
+        });
+        profiles.contains(&"tfhe".parse().unwrap());
+        profiles.contains(&"openssl".parse().unwrap());
+
         assert!(!profiles.is_empty());
     }
 
@@ -152,6 +162,17 @@ bar = { git = 'git://github.com/bar/bar.git' }
 
         let batches = serde_yaml::from_str::<Batches>(config).unwrap();
         let profiles: Profiles = batches.try_into().unwrap();
+
+        profiles.iter().filter(|p| p.name() == "foo").for_each(|p| {
+            if p.name().starts_with("foo") {
+                assert_eq!(p.settings, foo_settings);
+            } else if p.name().starts_with("bar") {
+                assert_eq!(p.settings, bar_settings);
+            } else {
+                panic!("Unexpected profile: {:?}", p);
+            }
+        });
+
         assert_eq!(profiles.len(), 4);
         assert_eq!(expected_profiles, profiles.into_iter().collect());
     }

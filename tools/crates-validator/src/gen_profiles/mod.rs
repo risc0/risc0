@@ -22,7 +22,10 @@ use std::{
 
 use crate::{
     parser::Parser,
-    types::version::{Version, Versions},
+    types::{
+        traits::Reduce,
+        version::{Version, Versions},
+    },
     ProfileConfig,
 };
 use crate::{Profile, Profiles};
@@ -266,16 +269,13 @@ impl StateMachine<ProcessDatabase> {
         };
 
         // Ensure that we don't have any duplicates
-        let _selected_crates = crates_by_count
-            .union(&crates_by_category)
-            .cloned()
-            .collect::<Vec<_>>();
         let selected_crates_profiles: Profiles = crates_by_count
             .union(&crates_by_category)
             .cloned()
             .map(|r| r.name.clone())
             .map(Profile::try_from)
-            .collect::<Result<Profiles>>()?;
+            .collect::<Result<Profiles>>()?
+            .reduce();
 
         // Remove all crates in selected_crates that are also in self.state.profiles
         let selected_crates_profiles: Profiles = selected_crates_profiles

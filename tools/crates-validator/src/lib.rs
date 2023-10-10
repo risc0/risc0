@@ -17,7 +17,7 @@ pub mod parser;
 pub mod types;
 
 use std::{
-    collections::{BTreeMap, HashSet},
+    collections::BTreeMap,
     fs::File,
     io::{BufRead, BufReader, Write},
     ops::Not,
@@ -124,31 +124,16 @@ pub struct CrateProfile {
 /// Defines the global variables for a given crates testing run.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ProfileConfig {
-    pub skip_crates: Profiles,
     pub profiles: Profiles,
 }
 
 impl ProfileConfig {
-    pub fn profiles(&self) -> &[Profile] {
-        self.profiles.as_ref()
-    }
-
-    pub fn skip_crates(&self) -> &[Profile] {
-        self.skip_crates.as_ref()
-    }
-
-    pub fn skip_crates_names(&self) -> HashSet<&str> {
-        self.skip_crates
-            .iter()
-            .map(|p| p.name())
-            .collect::<HashSet<&str>>()
+    pub fn profiles(&self) -> &Profiles {
+        &self.profiles
     }
 
     pub fn replace_profiles(&self, profiles: Profiles) -> Self {
-        Self {
-            profiles,
-            ..self.clone()
-        }
+        Self { profiles }
     }
 }
 
@@ -507,7 +492,7 @@ impl Validator {
 
     /// Run a given profile through the set of tests
     fn run(&self, profile: &Profile) -> Result<Vec<ValidationResults>> {
-        if self.context().skip_crates_names().contains(profile.name()) {
+        if profile.should_skip() {
             warn!("Skipping {}", profile.name());
             return Ok(vec![ValidationResults::new(
                 profile.name(),
@@ -548,7 +533,7 @@ impl Validator {
     }
 
     // Run a single profile in the config by `name`
-    pub fn run_single(&self, name: &str, profiles: &[Profile]) -> Result<Vec<ValidationResults>> {
+    pub fn run_single(&self, name: &str, profiles: &Profiles) -> Result<Vec<ValidationResults>> {
         for profile in profiles {
             if profile.name() == name {
                 return self.run(profile);
@@ -559,7 +544,7 @@ impl Validator {
     }
 
     // Run all profiles in config
-    pub fn run_all(&self, profiles: &[Profile]) -> Result<Vec<ValidationResults>> {
+    pub fn run_all(&self, profiles: &Profiles) -> Result<Vec<ValidationResults>> {
         let mut results = vec![];
         for profile in profiles {
             results.push(self.run(profile)?);

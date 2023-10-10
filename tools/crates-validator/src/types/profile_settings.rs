@@ -18,7 +18,9 @@ use super::traits::Merge;
 // always in sync with default values?
 // Maybe specifying a new type for each field, and adding a check
 // `skip_serializing_if = "is_default"`?
-#[derive(Debug, Clone, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
+#[derive(
+    Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord, serde::Serialize, serde::Deserialize,
+)]
 #[serde(default)]
 #[serde(rename_all = "kebab-case")]
 pub struct ProfileSettings {
@@ -32,6 +34,8 @@ pub struct ProfileSettings {
     pub std: bool,
     #[serde(skip_serializing_if = "is_true")]
     pub fast_mode: bool,
+    #[serde(skip_serializing_if = "is_false")]
+    pub skip: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub patch: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -48,6 +52,7 @@ impl Default for ProfileSettings {
             inject_cc_flags: false,
             std: false,
             fast_mode: true,
+            skip: false,
             patch: None,
             import_str: None,
             custom_main: None,
@@ -63,6 +68,7 @@ impl Merge for ProfileSettings {
             inject_cc_flags: self.inject_cc_flags || other.inject_cc_flags,
             std: self.std || other.std,
             fast_mode: self.fast_mode || other.fast_mode,
+            skip: self.skip || other.skip,
             patch: self.patch.or(other.patch),
             import_str: self.import_str.or(other.import_str),
             custom_main: self.custom_main.or(other.custom_main),

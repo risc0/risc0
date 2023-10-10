@@ -13,14 +13,14 @@
 // limitations under the License.
 
 use serde_valid::{validation::Errors as ValidationErrors, Validate};
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 
 use super::{
     profile::Profile,
-    traits::{Exclude, Group, IsValid, Merge},
+    traits::{Exclude, Group, IsValid, Merge, Reduce},
 };
 
-pub type Profiles = Vec<Profile>;
+pub type Profiles = BTreeSet<Profile>;
 pub type CrateName = String;
 pub type CrateNames = Vec<CrateName>;
 pub type GroupedProfiles = BTreeMap<String, Profiles>;
@@ -43,20 +43,51 @@ impl Merge for Profiles {
     fn merge(self, other: Self) -> Self {
         match (self.is_empty(), other.is_empty()) {
             (true, true) => Profiles::new(),
-            (true, false) => self,
-            (false, true) => other,
-            (false, false) => self
-                .into_iter()
-                .chain(other)
-                .group()
-                .into_values()
-                .map(|profiles| {
-                    profiles
-                        .into_iter()
-                        .reduce(|acc, p| acc.merge(p))
-                        .expect("Should never be empty")
-                })
-                .collect(),
+            (false, true) => self.reduce(),
+            (true, false) => other.reduce(),
+            (false, false) => self.into_iter().chain(other).collect::<Self>().reduce(),
         }
+    }
+}
+
+impl Reduce for Profiles {
+    fn reduce(self) -> Self {
+        self.into_iter()
+            .chain::<Self>(Default::default())
+            .group()
+            .into_values()
+            .map(|profiles| {
+                profiles
+                    .into_iter()
+                    .reduce(|acc, p| acc.merge(p))
+                    .expect("Should never be empty")
+            })
+            .collect()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use rstest::*;
+
+    fn pn() -> Profiles {
+        Profiles::new()
+    }
+
+    fn p(name: &[&str]) -> Profiles {
+        name.iter()
+            .map(|n| Profile::try_from(n.to_string()).unwrap())
+            .collect()
+    }
+
+    #[rstest]
+    #[case::merge_empty(pn(), pn(), pn())]
+    #[case::merge_empty_left(pn(), p(&["foo"]), p(&["foo"]))]
+    #[case::merge_empty_right(p(&["foo"]), pn(), p(&["foo"]))]
+    #[case::merge_same_crates(p(&["foo"]), p(&["foo"]), p(&["foo"]))]
+    #[case::merge_different_crates(p(&["foo"]), p(&["bar"]), p(&["foo", "bar"]))]
+    fn test_merge(#[case] profiles: Profiles, #[case] other: Profiles, #[case] expected: Profiles) {
+        assert_eq!(profiles.merge(other), expected);
     }
 }
