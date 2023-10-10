@@ -88,11 +88,11 @@ impl Read for PosixIoProxy {
             })),
         };
 
-        log::debug!("tx: {request:?}");
+        log::trace!("tx: {request:?}");
         self.conn.send(request).map_io_err()?;
 
         let reply: pb::api::OnIoReply = self.conn.recv().map_io_err()?;
-        log::debug!("rx: {reply:?}");
+        log::trace!("rx: {reply:?}");
 
         let kind = reply.kind.ok_or("Malformed message").map_io_err()?;
         match kind {
@@ -121,11 +121,11 @@ impl Write for PosixIoProxy {
             })),
         };
 
-        log::debug!("tx: {request:?}");
+        log::trace!("tx: {request:?}");
         self.conn.send(request).map_io_err()?;
 
         let reply: pb::api::OnIoReply = self.conn.recv().map_io_err()?;
-        log::debug!("rx: {reply:?}");
+        log::trace!("rx: {reply:?}");
 
         let kind = reply.kind.ok_or("Malformed message").map_io_err()?;
         match kind {
@@ -167,7 +167,7 @@ impl SliceIo for SliceIoProxy {
                 })),
             })),
         };
-        log::debug!("tx: {request:?}");
+        log::trace!("tx: {request:?}");
         self.conn.send(request)?;
 
         Ok(Bytes::new())
@@ -195,7 +195,7 @@ impl Server {
         let server_version = get_version().map_err(|err| anyhow!(err))?;
 
         let request: pb::api::HelloRequest = conn.recv()?;
-        log::debug!("rx: {request:?}");
+        log::trace!("rx: {request:?}");
 
         let client_version: semver::Version = request
             .version
@@ -213,11 +213,11 @@ impl Server {
                 version: Some(server_version.into()),
             })),
         };
-        log::debug!("tx: {reply:?}");
+        log::trace!("tx: {reply:?}");
         conn.send(reply)?;
 
         let request: pb::api::ServerRequest = conn.recv()?;
-        log::debug!("rx: {request:?}");
+        log::trace!("rx: {request:?}");
         match request.kind.ok_or(malformed_err())? {
             pb::api::server_request::Kind::Prove(request) => {
                 self.on_prove(conn, request)?;
@@ -269,11 +269,11 @@ impl Server {
                     )),
                 })),
             };
-            log::debug!("tx: {msg:?}");
+            log::trace!("tx: {msg:?}");
             conn.send(msg)?;
 
             let reply: pb::api::GenericReply = conn.recv()?;
-            log::debug!("rx: {reply:?}");
+            log::trace!("rx: {reply:?}");
             let kind = reply.kind.ok_or(malformed_err())?;
             if let pb::api::generic_reply::Kind::Error(err) = kind {
                 bail!(err)
@@ -295,7 +295,7 @@ impl Server {
                 )),
             })),
         };
-        log::debug!("tx: {msg:?}");
+        log::trace!("tx: {msg:?}");
         conn.send(msg)?;
 
         Ok(())
@@ -330,7 +330,7 @@ impl Server {
                 )),
             })),
         };
-        log::debug!("tx: {msg:?}");
+        log::trace!("tx: {msg:?}");
         conn.send(msg)?;
 
         Ok(())
@@ -364,7 +364,7 @@ impl Server {
                 },
             )),
         };
-        log::debug!("tx: {msg:?}");
+        log::trace!("tx: {msg:?}");
         conn.send(msg)?;
 
         Ok(())
