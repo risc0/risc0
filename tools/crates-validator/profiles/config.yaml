@@ -1,11 +1,11 @@
-# TODO(Cardosaum): Add a flag `skip` to `ProfileSettings`, and add this `skip-crates` group as a batch.
-# This way we re-use already implemented logic.
-skip-crates:
-  - windows-sys
-  - miow # Windows specific crate that depends on `windows-sys`
-  - redox_syscall # Tools for redox OS, not supported
-
 batch:
+  - name: skip-crates
+    crates:
+      - windows-sys
+      - miow
+      - redox_syscall
+    settings:
+      skip: true
   - name: zeth-dependencies
     crates:
       - alloy-primitives
