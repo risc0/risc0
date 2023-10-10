@@ -26,7 +26,6 @@ use crate::{
 
 mod batch;
 mod individual;
-mod skip_crates;
 mod utils;
 
 #[cfg(test)]
@@ -38,8 +37,6 @@ pub struct Parser {
     batch: batch::Batches,
     #[serde(flatten)]
     individual: individual::Individual,
-    #[serde(flatten)]
-    skip_crates: skip_crates::SkipCrates,
 }
 
 impl Parser {
@@ -57,13 +54,6 @@ impl Parser {
             .collect::<Result<Profiles>>()
             .map(|p: Profiles| p.reduce())
     }
-
-    pub fn skip_crates(&self) -> Result<Profiles> {
-        self.skip_crates
-            .clone()
-            .try_into()
-            .map(|p: Profiles| p.reduce())
-    }
 }
 
 impl TryFrom<Parser> for ProfileConfig {
@@ -71,7 +61,6 @@ impl TryFrom<Parser> for ProfileConfig {
     fn try_from(value: Parser) -> anyhow::Result<Self> {
         Ok(Self {
             profiles: value.profiles()?,
-            skip_crates: value.skip_crates()?,
         })
     }
 }

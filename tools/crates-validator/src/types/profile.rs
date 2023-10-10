@@ -67,6 +67,10 @@ impl Profile {
     pub fn has_same_name(&self, other: &Self) -> bool {
         self.name == other.name
     }
+
+    pub fn should_skip(&self) -> bool {
+        self.settings.skip
+    }
 }
 
 impl FromStr for Profile {

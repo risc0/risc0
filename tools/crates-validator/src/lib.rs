@@ -17,7 +17,7 @@ pub mod parser;
 pub mod types;
 
 use std::{
-    collections::{BTreeMap, HashSet},
+    collections::BTreeMap,
     fs::File,
     io::{BufRead, BufReader, Write},
     ops::Not,
@@ -124,7 +124,6 @@ pub struct CrateProfile {
 /// Defines the global variables for a given crates testing run.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ProfileConfig {
-    pub skip_crates: Profiles,
     pub profiles: Profiles,
 }
 
@@ -133,22 +132,8 @@ impl ProfileConfig {
         &self.profiles
     }
 
-    pub fn skip_crates(&self) -> &Profiles {
-        &self.skip_crates
-    }
-
-    pub fn skip_crates_names(&self) -> HashSet<&str> {
-        self.skip_crates
-            .iter()
-            .map(|p| p.name())
-            .collect::<HashSet<&str>>()
-    }
-
     pub fn replace_profiles(&self, profiles: Profiles) -> Self {
-        Self {
-            profiles,
-            ..self.clone()
-        }
+        Self { profiles }
     }
 }
 
@@ -507,7 +492,7 @@ impl Validator {
 
     /// Run a given profile through the set of tests
     fn run(&self, profile: &Profile) -> Result<Vec<ValidationResults>> {
-        if self.context().skip_crates_names().contains(profile.name()) {
+        if profile.should_skip() {
             warn!("Skipping {}", profile.name());
             return Ok(vec![ValidationResults::new(
                 profile.name(),
