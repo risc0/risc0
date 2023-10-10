@@ -63,7 +63,6 @@ impl TryFrom<BatchConfig> for Profiles {
 }
 
 #[cfg(test)]
-
 mod tests {
     use std::collections::HashSet;
 
