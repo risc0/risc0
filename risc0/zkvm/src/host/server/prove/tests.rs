@@ -41,6 +41,7 @@ fn prove_nothing(hashfn: &str) -> Result<Receipt> {
     let env = ExecutorEnv::builder().add_input(&input).build().unwrap();
     let opts = ProverOpts {
         hashfn: hashfn.to_string(),
+        allow_guest_failure: false,
     };
     get_prover_server(&opts)
         .unwrap()

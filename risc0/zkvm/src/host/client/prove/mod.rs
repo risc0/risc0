@@ -133,14 +133,19 @@ pub trait Executor {
 pub struct ProverOpts {
     /// The hash function to use.
     pub hashfn: String,
-    // TODO(victor): Add an option to indicate that a proof should be produced even if the guest
-    // exited with a non-zero status.
+
+    /// When set to false, it is considered an error if the guest exists in an unsuccessfully state,
+    /// such as returning an exit code of `1` or encountering a fault. When set to true, this is
+    /// not considered an error and proving will continue. Default is false.
+    pub allow_guest_failure: bool,
 }
 
 impl Default for ProverOpts {
+    /// Return [ProverOpts] with the SHA-256 hash function and `allow_guest_failure` set to false.
     fn default() -> Self {
         Self {
             hashfn: "sha-256".to_string(),
+            allow_guest_failure: false,
         }
     }
 }

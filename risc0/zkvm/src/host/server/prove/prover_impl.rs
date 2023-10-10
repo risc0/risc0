@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use anyhow::Result;
+use anyhow::{bail, Result};
 use risc0_circuit_rv32im::{
     layout::{OutBuffer, LAYOUT},
     REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA,
@@ -92,14 +92,19 @@ where
                 .then(|| session.journal.digest()),
         });
         let receipt = Receipt::new(inner, session.journal.clone());
-        let image_id = session.segments[0].resolve()?.pre_image.compute_id();
 
-        // TODO(victor): This gives no way to get the receipt of a session that ended in failure.
-        // Consider how best to enable that functionality.
-        match receipt.verify_with_context(ctx, image_id) {
-            Ok(()) => Ok(receipt),
-            Err(e) => Err(e.into()),
+        receipt.verify_integrity_with_context(ctx)?;
+        if receipt.get_metadata()?.digest() != session.get_metadata()?.digest() {
+            log::debug!("receipt and session metadata do not match");
+            log::debug!("receipt metadata: {:#?}", receipt.get_metadata()?);
+            log::debug!("session metadata: {:#?}", session.get_metadata()?);
+            bail!(
+                "received unexpected metadata digest: expected {}, found {}",
+                hex::encode(&session.get_metadata()?.digest()),
+                hex::encode(&receipt.get_metadata()?.digest())
+            );
         }
+        Ok(receipt)
     }
 
     fn prove_segment(&self, ctx: &VerifierContext, segment: &Segment) -> Result<SegmentReceipt> {

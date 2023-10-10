@@ -167,7 +167,6 @@ impl fmt::Display for VerifyMetadataError {
 #[cfg(feature = "std")]
 impl std::error::Error for VerifyMetadataError {}
 
-// TODO(victor): Rename verify_metdata to verify_integrity
 /// Verify that there exists a valid receipt with the specified
 /// [ReceiptMetadata].
 pub fn verify_integrity(meta: &ReceiptMetadata) -> Result<(), VerifyMetadataError> {

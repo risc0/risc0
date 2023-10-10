@@ -35,6 +35,12 @@ struct Cli {
     #[arg(long, value_enum, default_value_t = HashFn::Sha256)]
     hashfn: HashFn,
 
+    /// When set to false, it is considered an error if the guest exists in an unsuccessfully state,
+    /// such as returning an exit code of `1` or encountering a fault. When set to true, this is
+    /// not considered an error and proving will continue. Default is false.
+    #[arg(long)]
+    allow_guest_failure: bool,
+
     /// File to read initial input from.
     #[arg(long)]
     initial_input: Option<PathBuf>,
@@ -163,6 +169,7 @@ impl Cli {
         };
         let opts = ProverOpts {
             hashfn: hashfn.to_string(),
+            allow_guest_failure: self.allow_guest_failure,
         };
 
         get_prover_server(&opts).unwrap()

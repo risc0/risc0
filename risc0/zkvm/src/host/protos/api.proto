@@ -112,6 +112,7 @@ message Binary {
 
 message ProverOpts {
   string hashfn = 1;
+  bool allow_guest_failure = 2;
 }
 
 message SessionInfo {

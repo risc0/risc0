@@ -303,8 +303,6 @@ pub struct CompositeReceipt {
 }
 
 impl CompositeReceipt {
-    // TODO(victor): Add a 'verify metadata` method that allows verification for unsuccessful
-    // execution.
     /// Verify the integrity of this receipt, ensuring the metadata is attested to by the seal.
     #[must_use]
     pub fn verify_integrity_with_context(

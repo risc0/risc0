@@ -166,6 +166,8 @@ impl Session {
             .resolve()?;
 
         // Construct the Output struct, checking that the Session is internally consistent.
+        // DO NOT MERGE(victor): An execution can end  with either a committed output equal to an
+        // empty hash, or all zeroes. I need some way to distinguish these two states.
         let output = if self.exit_code.expects_output() {
             Some(Output {
                 journal: self.journal.clone().into(),
