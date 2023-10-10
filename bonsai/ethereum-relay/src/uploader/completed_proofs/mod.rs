@@ -13,6 +13,6 @@
 // limitations under the License.
 
 mod complete_proof;
-mod error;
+pub(crate) mod error;
 pub(crate) mod manager;
 pub(crate) mod snark;

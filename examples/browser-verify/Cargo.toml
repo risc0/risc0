@@ -9,7 +9,6 @@ crate-type = ["cdylib"]
 [dependencies]
 risc0-zkvm = { path = "../../risc0/zkvm", default-features = false }
 risc0-zkvm-receipts = { path = "../../risc0/zkvm/receipts" }
-wasm-bindgen = "0.2"
 
 # These crates are used for running unit tests.
 [dev-dependencies]

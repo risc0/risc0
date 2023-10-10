@@ -9,6 +9,9 @@ on:
         description: 'How many crates (sorted by downloads) to test'
         default: 100
 
+env:
+  RISC0_BUILD_LOCKED: 1
+
 jobs:
   crates_validate:
     runs-on: [self-hosted, prod, Linux, cpu]

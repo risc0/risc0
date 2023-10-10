@@ -19,6 +19,12 @@
 pub mod memory;
 #[macro_use]
 pub mod syscall;
+#[cfg(all(feature = "export-getrandom", target_os = "zkvm"))]
+mod getrandom;
+#[cfg(all(feature = "export-libm", target_os = "zkvm"))]
+mod libm_extern;
+#[cfg(all(feature = "rust-runtime", target_os = "zkvm"))]
+pub mod rust_rt;
 
 /// Size of a zkVM machine word in bytes.
 /// 4 bytes (i.e. 32 bits) as the zkVM is an implementation of the rv32im ISA.
@@ -34,12 +40,3 @@ pub mod fileno {
     pub const STDERR: u32 = 2;
     pub const JOURNAL: u32 = 3;
 }
-
-#[cfg(all(feature = "rust-runtime", target_os = "zkvm"))]
-pub mod rust_rt;
-
-#[cfg(all(feature = "export-getrandom", target_os = "zkvm"))]
-mod getrandom;
-
-#[cfg(all(feature = "export-libm", target_os = "zkvm"))]
-mod libm_extern;
