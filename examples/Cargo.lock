@@ -3399,6 +3399,7 @@ dependencies = [
  "num-traits",
  "prost",
  "prost-build",
+ "prost-types",
  "protobuf-src",
  "rand",
  "rayon",

@@ -146,8 +146,6 @@ impl Receipt {
     ) -> Result<(), VerificationError> {
         self.inner.verify_integrity_with_context(ctx)?;
 
-        // TODO(victor): These checks should cover all fields within the metadata and verify that
-        // the receipt represents a successful execution with the result of self.journal.
         // NOTE: Post-state digest and input digest are unconstrained by this method.
         let metadata = self.inner.get_metadata()?;
 
@@ -156,10 +154,9 @@ impl Receipt {
         }
 
         // Check the exit code. This verification method requires execution to be successful.
-        match metadata.exit_code {
-            ExitCode::Halted(0) | ExitCode::Paused(0) => {}
-            _ => return Err(VerificationError::UnexpectedExitCode),
-        }
+        let (ExitCode::Halted(0) | ExitCode::Paused(0)) = metadata.exit_code else {
+            return Err(VerificationError::UnexpectedExitCode);
+        };
 
         // Finally check the output hash in the decoded metadata against the expected output.
         let expected_output = Output {
