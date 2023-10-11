@@ -103,6 +103,7 @@ impl OpCodeResult {
 
 /// Error variants used in the Executor
 pub enum ExecutorError {
+    // TODO(victor): After refactoring, is this variant still in use?
     /// This variant represents an instance of Session that Faulted
     Fault(Session),
     /// This variant represents all other errors
@@ -254,6 +255,8 @@ impl<'a> ExecutorImpl<'a> {
         self.run_with_callback(|segment| Ok(Box::new(SimpleSegmentRef::new(segment))))
     }
 
+    // TODO(victor) Prover returns Err if the guest fails, but this method does not. What should be
+    // the semantics of this method. Check that all tests are constraining the exit status.
     /// Run the executor until [ExitCode::Halted], [ExitCode::Paused], or [ExitCode::Fault] is
     /// reached, producing a [Session] as a result.
     pub fn run_with_callback<F>(&mut self, mut callback: F) -> Result<Session, ExecutorError>

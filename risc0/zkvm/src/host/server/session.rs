@@ -201,10 +201,13 @@ impl Session {
             None
         };
 
-        // DO NOT MERGE: post should match the final segment system state, but doesn't.
+        // DO NOT MERGE: post should match the final segment system state, but doesn't always.
         let post_state = SystemState {
             pc: self.post_image.pc,
-            merkle_root: last_segment.pre_image.compute_root_hash(),
+            merkle_root: match self.exit_code {
+                ExitCode::Halted(_) => last_segment.pre_image.compute_root_hash(),
+                _ => self.post_image.compute_root_hash(),
+            },
         };
 
         Ok(ReceiptMetadata {

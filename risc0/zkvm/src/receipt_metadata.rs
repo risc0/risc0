@@ -263,10 +263,10 @@ impl ExitCode {
             ExitCode::Halted(user_exit) => (0, user_exit),
             ExitCode::Paused(user_exit) => (1, user_exit),
             ExitCode::SystemSplit => (2, 0),
-            // DO NOT MERGE(victor): Confirm SessionLimit and Fault can have an associated exit
-            // code.
-            ExitCode::SessionLimit => (3, 0),
-            ExitCode::Fault => (4, 0),
+            // TODO(victor): SessionLimit and Fault result in the same exit code set by the rv32im
+            // circuit. As a result, this conversion is lossy.
+            ExitCode::SessionLimit => (2, 0),
+            ExitCode::Fault => (2, 0),
         }
     }
 
@@ -278,8 +278,6 @@ impl ExitCode {
             0 => Ok(ExitCode::Halted(user_exit)),
             1 => Ok(ExitCode::Paused(user_exit)),
             2 => Ok(ExitCode::SystemSplit),
-            3 => Ok(ExitCode::SessionLimit),
-            4 => Ok(ExitCode::Fault),
             _ => Err(InvalidExitCodeError(sys_exit, user_exit)),
         }
     }

@@ -28,12 +28,9 @@ use test_log::test;
 
 use super::{get_prover_server, HalPair, ProverImpl};
 use crate::{
-    host::{
-        server::{exec::executor::ExecutorError, testutils},
-        CIRCUIT,
-    },
+    host::{server::testutils, CIRCUIT},
     serde::{from_slice, to_vec},
-    ExecutorEnv, ExecutorImpl, ProverOpts, ProverServer, Receipt,
+    ExecutorEnv, ExecutorImpl, ExitCode, ProverOpts, ProverServer, Receipt, VerifierContext,
 };
 
 fn prove_nothing(hashfn: &str) -> Result<Receipt> {
@@ -164,19 +161,7 @@ fn bigint_accel() {
 #[test]
 #[serial]
 fn memory_io() {
-    fn is_fault_proof(receipt: Result<Receipt>) -> bool {
-        // this if statement will be removed once this feature is more mature
-        if !cfg!(feature = "fault-proof") {
-            return receipt.is_err();
-        }
-        let receipt = receipt.unwrap();
-        match receipt.verify(MULTI_TEST_ID) {
-            Err(VerificationError::ValidFaultReceipt) => true,
-            _ => false,
-        }
-    }
-
-    fn run_memio(pairs: &[(usize, usize)]) -> Result<Receipt> {
+    fn run_memio(pairs: &[(usize, usize)]) -> Result<ExitCode> {
         let spec = MultiTestSpec::ReadWriteMem {
             values: pairs
                 .iter()
@@ -187,12 +172,10 @@ fn memory_io() {
         let input = to_vec(&spec)?;
         let env = ExecutorEnv::builder().add_input(&input).build().unwrap();
         let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)?;
-        let session = match exec.run() {
-            Ok(session) => session,
-            Err(ExecutorError::Fault(session)) => session,
-            Err(ExecutorError::Error(e)) => return Err(e),
-        };
-        session.prove()
+        let session = exec.run()?;
+        let receipt = session.prove()?;
+        receipt.verify_integrity_with_context(&VerifierContext::default())?;
+        Ok(receipt.get_metadata()?.exit_code)
     }
 
     // Pick a memory position in the middle of the memory space, which is unlikely
@@ -203,22 +186,33 @@ fn memory_io() {
     );
 
     // Double writes are fine
-    assert!(!is_fault_proof(run_memio(&[(POS, 1), (POS, 1)])));
+    assert_eq!(
+        run_memio(&[(POS, 1), (POS, 1)]).unwrap(),
+        ExitCode::Halted(0)
+    );
 
     // Writes at different addresses are fine
-    assert!(!is_fault_proof(run_memio(&[(POS, 1), (POS + 4, 2)])));
+    assert_eq!(
+        run_memio(&[(POS, 1), (POS + 4, 2)]).unwrap(),
+        ExitCode::Halted(0)
+    );
 
     // Aligned write is fine
-    assert!(!is_fault_proof(run_memio(&[(POS, 1)])));
+    assert_eq!(run_memio(&[(POS, 1)]).unwrap(), ExitCode::Halted(0));
 
     // Unaligned write is bad
-    assert!(is_fault_proof(run_memio(&[(POS + 1001, 1)])));
+    // TODO(victor): Exit code is indicated as SystemSplit instead of Fault, which would be more
+    // ideal.
+    assert_eq!(
+        run_memio(&[(POS + 1001, 1)]).unwrap(),
+        ExitCode::SystemSplit
+    );
 
     // Aligned read is fine
-    assert!(!is_fault_proof(run_memio(&[(POS, 0)])));
+    assert_eq!(run_memio(&[(POS, 0)]).unwrap(), ExitCode::Halted(0));
 
     // Unaligned read is bad
-    assert!(is_fault_proof(run_memio(&[(POS + 1, 0)])));
+    assert_eq!(run_memio(&[(POS + 1, 0)]).unwrap(), ExitCode::SystemSplit);
 }
 
 #[test]
