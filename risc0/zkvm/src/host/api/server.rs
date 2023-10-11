@@ -288,7 +288,7 @@ impl Server {
                     pb::api::OnSessionDone {
                         session: Some(pb::api::SessionInfo {
                             segments: session.segments.len().try_into()?,
-                            journal: session.journal,
+                            journal: session.journal.unwrap_or_default(),
                             exit_code: Some(session.exit_code.into()),
                         }),
                     },

@@ -28,7 +28,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     host::{receipt::Assumption, server::exec::executor::SyscallRecord},
-    receipt_metadata::{Assumptions, Output},
+    receipt_metadata::{Assumptions, MaybePruned, Output},
     sha::{Digest, DIGEST_WORDS},
     ExitCode, MemoryImage, ReceiptMetadata, SystemState,
 };
@@ -54,7 +54,7 @@ pub struct Session {
     pub segments: Vec<Box<dyn SegmentRef>>,
 
     /// The data publicly committed by the guest program.
-    pub journal: Vec<u8>,
+    pub journal: Option<Vec<u8>>,
 
     /// The [ExitCode] of the session.
     pub exit_code: ExitCode,
@@ -126,7 +126,7 @@ impl Session {
     /// Construct a new [Session] from its constituent components.
     pub fn new(
         segments: Vec<Box<dyn SegmentRef>>,
-        journal: Vec<u8>,
+        journal: Option<Vec<u8>>,
         exit_code: ExitCode,
         post_image: MemoryImage,
         assumptions: Vec<Assumption>,
@@ -164,24 +164,32 @@ impl Session {
             .first()
             .ok_or_else(|| anyhow!("session has no segments"))?
             .resolve()?;
+        let last_segment = &self
+            .segments
+            .last()
+            .ok_or_else(|| anyhow!("session has no segments"))?
+            .resolve()?;
 
         // Construct the Output struct, checking that the Session is internally consistent.
-        // DO NOT MERGE(victor): An execution can end  with either a committed output equal to an
-        // empty hash, or all zeroes. I need some way to distinguish these two states.
         let output = if self.exit_code.expects_output() {
-            Some(Output {
-                journal: self.journal.clone().into(),
-                assumptions: Assumptions(
-                    self.assumptions
-                        .iter()
-                        .map(|r| Ok(r.get_metadata()?.into()))
-                        .collect::<Result<Vec<_>>>()?,
-                )
-                .into(),
-            })
+            self.journal
+                .as_ref()
+                .map(|journal| -> Result<_> {
+                    Ok(Output {
+                        journal: journal.clone().into(),
+                        assumptions: Assumptions(
+                            self.assumptions
+                                .iter()
+                                .map(|r| Ok(r.get_metadata()?.into()))
+                                .collect::<Result<Vec<_>>>()?,
+                        )
+                        .into(),
+                    })
+                })
+                .transpose()?
         } else {
             ensure!(
-                self.journal.is_empty(),
+                self.journal.is_none(),
                 "Session with exit code {:?} has a journal",
                 self.exit_code
             );
@@ -195,7 +203,8 @@ impl Session {
 
         Ok(ReceiptMetadata {
             pre: SystemState::from(first_segment.pre_image.borrow()).into(),
-            post: SystemState::from(self.post_image.borrow()).into(),
+            // DO NOT MERGE: This should match the final segment system state, but doesn't.
+            post: MaybePruned::Pruned(last_segment.post_image_id),
             exit_code: self.exit_code,
             input: Digest::new([0u32; DIGEST_WORDS]),
             output: output.into(),

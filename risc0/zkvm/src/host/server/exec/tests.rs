@@ -204,7 +204,7 @@ fn bigint_accel() {
         let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
         let session = exec.run().unwrap();
         assert_eq!(
-            session.journal.as_slice(),
+            session.journal.unwrap().as_slice(),
             bytemuck::cast_slice::<u32, u8>(case.expected().as_slice())
         );
     }
@@ -273,7 +273,7 @@ fn posix_style_read() {
         let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
         let session = exec.run().unwrap();
 
-        let actual: Vec<u8> = from_slice(&session.journal).unwrap();
+        let actual: Vec<u8> = from_slice(&session.journal.unwrap()).unwrap();
         assert_eq!(
             from_utf8(&actual).unwrap(),
             from_utf8(&expected).unwrap(),
@@ -333,7 +333,7 @@ fn large_io_words() {
     let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
     let session = exec.run().unwrap();
 
-    let actual: &[u32] = bytemuck::cast_slice(&session.journal);
+    let actual: &[u32] = bytemuck::cast_slice(&session.journal.as_ref().unwrap());
     assert_eq!(actual, expected);
 }
 
@@ -370,7 +370,7 @@ fn sys_verify() {
 
     let spec = to_vec(&MultiTestSpec::SysVerify {
         image_id: HELLO_COMMIT_ID.into(),
-        journal: hello_commit_session.journal.clone(),
+        journal: hello_commit_session.journal.clone().unwrap(),
     })
     .unwrap();
 
@@ -417,7 +417,7 @@ fn large_sha() {
     let env = ExecutorEnv::builder().add_input(&input).build().unwrap();
     let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
     let session = exec.run().unwrap();
-    let actual = hex::encode(Digest::try_from(session.journal).unwrap());
+    let actual = hex::encode(Digest::try_from(session.journal.unwrap()).unwrap());
     assert_eq!(expected, actual);
 }
 
@@ -468,7 +468,7 @@ ENV_VAR3",
         .unwrap();
     let mut exec = ExecutorImpl::from_elf(env, STANDARD_LIB_ELF).unwrap();
     let session = exec.run().unwrap();
-    let actual = session.journal.as_slice();
+    let actual = session.journal.as_ref().unwrap();
     assert_eq!(
         from_utf8(actual).unwrap(),
         r"ENV_VAR1=val1
@@ -499,7 +499,7 @@ fn args() {
         let mut exec = ExecutorImpl::from_elf(env, STANDARD_LIB_ELF).unwrap();
         let session = exec.run().unwrap();
         assert_eq!(
-            from_slice::<Vec<String>, _>(&session.journal).unwrap(),
+            from_slice::<Vec<String>, _>(&session.journal.unwrap()).unwrap(),
             args_arr
                 .into_iter()
                 .map(|s| s.to_string())
@@ -531,7 +531,7 @@ fn slice_io() {
             .unwrap();
         let mut exec = ExecutorImpl::from_elf(env, SLICE_IO_ELF).unwrap();
         let session = exec.run().unwrap();
-        assert_eq!(session.journal, slice);
+        assert_eq!(session.journal.unwrap(), slice);
     };
 
     run(b"");

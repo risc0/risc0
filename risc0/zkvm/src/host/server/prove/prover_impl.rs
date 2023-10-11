@@ -66,10 +66,10 @@ where
 {
     fn prove_session(&self, ctx: &VerifierContext, session: &Session) -> Result<Receipt> {
         log::info!(
-            "prove_session: {}, exit_code = {:?}, journal = 0x{}",
+            "prove_session: {}, exit_code = {:?}, journal = {:?}",
             self.name,
             session.exit_code,
-            hex::encode(&session.journal)
+            session.journal.as_ref().map(|x| hex::encode(x))
         );
         let mut segments = Vec::new();
         for segment_ref in session.segments.iter() {
@@ -91,7 +91,7 @@ where
                 .expects_output()
                 .then(|| session.journal.digest()),
         });
-        let receipt = Receipt::new(inner, session.journal.clone());
+        let receipt = Receipt::new(inner, session.journal.clone().unwrap_or_default());
 
         receipt.verify_integrity_with_context(ctx)?;
         if receipt.get_metadata()?.digest() != session.get_metadata()?.digest() {

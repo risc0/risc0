@@ -33,7 +33,7 @@ use crate::{
 
 /// A value that may either be the source value directly, or a hash digest of
 /// the value.
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Deserialize, Serialize)]
 pub enum MaybePruned<T>
 where
     T: Clone + Serialize,
@@ -125,6 +125,21 @@ where
             (Self::Pruned(a), Self::Pruned(b)) => a == b,
             _ => false,
         }
+    }
+}
+
+impl<T> fmt::Debug for MaybePruned<T>
+where
+    T: Clone + Serialize + risc0_binfmt::Digestable + fmt::Debug,
+{
+    /// Format [MaybePruned] values are if they were a struct with value and digest fields. Digest
+    /// field is always provided so that divergent trees of [MaybePruned] values can be compared.
+    fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let mut builder = fmt.debug_struct("MaybePruned");
+        if let MaybePruned::Value(value) = self {
+            builder.field("value", value);
+        }
+        builder.field("digest", &self.digest()).finish()
     }
 }
 

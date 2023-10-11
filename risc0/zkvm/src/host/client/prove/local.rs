@@ -66,7 +66,7 @@ impl Executor for LocalProver {
         }
         Ok(SessionInfo {
             segments,
-            journal: session.journal.into(),
+            journal: session.journal.unwrap_or_default().into(),
             exit_code: session.exit_code,
         })
     }

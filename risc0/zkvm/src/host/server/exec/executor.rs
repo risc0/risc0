@@ -53,6 +53,7 @@ use crate::{
         server::opcode::{MajorType, OpCode},
     },
     serde::to_vec,
+    sha::Digest,
     ExecutorEnv, ExitCode, FaultCheckMonitor, Loader, Segment, SegmentRef, Session,
     SimpleSegmentRef, FAULT_CHECKER_ELF,
 };
@@ -156,6 +157,7 @@ pub struct ExecutorImpl<'a> {
     syscalls: Vec<SyscallRecord>,
     exit_code: Option<ExitCode>,
     obj_ctx: Option<ObjectContext>,
+    output_digest: Option<Digest>,
 }
 
 impl<'a> ExecutorImpl<'a> {
@@ -207,6 +209,7 @@ impl<'a> ExecutorImpl<'a> {
             syscalls: Vec::new(),
             exit_code: None,
             obj_ctx,
+            output_digest: None,
         })
     }
 
@@ -356,8 +359,10 @@ impl<'a> ExecutorImpl<'a> {
         // Take (clear out) the list of accessed assumptions.
         // Leave the assumptions cache so that it can be used if execution is resumed from pause.
         let assumptions = mem::take(&mut self.env.assumptions.borrow_mut().accessed);
-        let session_journal = journal.buf.take();
-        if !exit_code.expects_output() && !session_journal.is_empty() {
+        let session_journal = self.output_digest.and_then(|output_digest| {
+            (output_digest != Digest::new([0u32; DIGEST_WORDS])).then(|| journal.buf.take())
+        });
+        if !exit_code.expects_output() && session_journal.is_some() {
             log::debug!(
                 "dropping non-empty journal due to exit code {:?}: 0x{}",
                 exit_code,
@@ -577,8 +582,8 @@ impl<'a> ExecutorImpl<'a> {
         let output_ptr = self.monitor.load_guest_addr_from_register(REG_A1)?;
         let halt_type = tot_reg & 0xff;
         let user_exit = (tot_reg >> 8) & 0xff;
-        self.monitor
-            .load_array_from_guest_addr::<{ DIGEST_WORDS * WORD_SIZE }>(output_ptr)?;
+        let output: [u8; DIGEST_BYTES] = self.monitor.load_array_from_guest_addr(output_ptr)?;
+        self.output_digest = Some(output.into());
 
         match halt_type {
             halt::TERMINATE => Ok(OpCodeResult::new(
