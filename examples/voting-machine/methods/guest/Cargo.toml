@@ -1,0 +1,10 @@
+[package]
+name = "voting-machine-methods-guest"
+version = "0.12.0"
+edition = "2021"
+
+[workspace]
+
+[dependencies]
+risc0-zkvm = { path = "../../../../risc0/zkvm", default-features = false }
+voting-machine-core = { path = "../../core" }
