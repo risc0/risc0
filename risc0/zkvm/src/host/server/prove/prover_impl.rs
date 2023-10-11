@@ -86,10 +86,7 @@ where
         let inner = InnerReceipt::Composite(CompositeReceipt {
             segments,
             assumptions: vec![],
-            journal_digest: session
-                .exit_code
-                .expects_output()
-                .then(|| session.journal.digest()),
+            journal_digest: session.journal.as_ref().map(|journal| journal.digest()),
         });
         let receipt = Receipt::new(inner, session.journal.clone().unwrap_or_default());
 

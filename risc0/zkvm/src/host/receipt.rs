@@ -410,7 +410,7 @@ impl CompositeReceipt {
         metadata: &ReceiptMetadata,
     ) -> Result<(), VerificationError> {
         log::debug!("checking output: exit_code = {:?}", metadata.exit_code);
-        if metadata.exit_code.expects_output() {
+        if metadata.exit_code.expects_output() && metadata.output.is_some() {
             let self_output = Output {
                 journal: MaybePruned::Pruned(
                     self.journal_digest
@@ -424,22 +424,34 @@ impl CompositeReceipt {
                     && self.journal_digest.unwrap() == Vec::<u8>::new().digest();
                 if !empty_output {
                     log::debug!(
-                        "output digest does not match: expected {}; actual {}",
-                        self_output.digest(),
-                        metadata.output.digest()
+                        "output does not match: expected {:?}; actual {:?}",
+                        &self_output,
+                        &metadata.output
                     );
                     return Err(VerificationError::ReceiptFormatError);
                 }
             }
         } else {
             // Ensure all output fields are empty. If not, this receipt is internally inconsistent.
-            if !metadata.output.is_none() {
+            if metadata.output.is_some() {
+                log::debug!(
+                    "unexpected non-empty metadata output: {:?}",
+                    &metadata.output
+                );
                 return Err(VerificationError::ReceiptFormatError);
             }
             if !self.assumptions.is_empty() {
+                log::debug!(
+                    "unexpected non-empty composite receipt assumptions: {:?}",
+                    &self.assumptions
+                );
                 return Err(VerificationError::ReceiptFormatError);
             }
-            if !self.journal_digest.is_none() {
+            if self.journal_digest.is_some() {
+                log::debug!(
+                    "unexpected non-empty composite receipt journal_digest: {:?}",
+                    &self.journal_digest
+                );
                 return Err(VerificationError::ReceiptFormatError);
             }
         }
