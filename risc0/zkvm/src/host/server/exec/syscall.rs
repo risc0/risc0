@@ -31,10 +31,13 @@ use risc0_zkvm_platform::{
 };
 
 use crate::{
-    host::client::{
-        env::{Assumptions, ExecutorEnv},
-        posix_io::PosixIo,
-        slice_io::SliceIo,
+    host::{
+        client::{
+            env::{Assumptions, ExecutorEnv},
+            posix_io::PosixIo,
+            slice_io::SliceIo,
+        },
+        receipt::Assumption,
     },
     receipt_metadata::PrunedValueError,
     sha::{Digest, Digestable},
@@ -235,7 +238,7 @@ impl SysVerify {
         Self { assumptions }
     }
 
-    fn sys_verify(&mut self, from_guest: Vec<u8>) -> Result<(u32, u32)> {
+    fn sys_verify_integrity(&mut self, from_guest: Vec<u8>) -> Result<(u32, u32)> {
         let metadata_digest: Digest = from_guest
             .try_into()
             .map_err(|vec| anyhow!("failed to convert to [u8; DIGEST_BYTES]: {:?}", vec))?;
@@ -243,29 +246,26 @@ impl SysVerify {
         log::debug!("SYS_VERIFY_INTEGRITY: {}", hex::encode(&metadata_digest));
 
         // Iterate over the list looking for a matching assumption.
-        for assumption in self.assumptions.borrow().cached.iter() {
-            if assumption.get_metadata()?.digest() != metadata_digest {
-                continue;
+        let mut assumption: Option<Assumption> = None;
+        for cached_assumption in self.assumptions.borrow().cached.iter() {
+            if cached_assumption.get_metadata()?.digest() == metadata_digest {
+                assumption = Some(cached_assumption.clone());
+                break;
             }
-
-            self.assumptions
-                .borrow_mut()
-                .accessed
-                .push(assumption.clone());
-            return Ok((0, 0));
         }
 
-        Err(anyhow!(
-            "sys_verify_integrity: failed to resolve metadata digest: {}",
-            metadata_digest
-        ))
+        let Some(assumption) = assumption else {
+            return Err(anyhow!(
+                "sys_verify_integrity: failed to resolve metadata digest: {}",
+                metadata_digest
+            ));
+        };
+
+        self.assumptions.borrow_mut().accessed.push(assumption);
+        return Ok((0, 0));
     }
 
-    fn sys_verify_integrity(
-        &mut self,
-        mut from_guest: Vec<u8>,
-        to_guest: &mut [u32],
-    ) -> Result<(u32, u32)> {
+    fn sys_verify(&mut self, mut from_guest: Vec<u8>, to_guest: &mut [u32]) -> Result<(u32, u32)> {
         if from_guest.len() != DIGEST_BYTES * 2 {
             bail!(
                 "sys_verify call with input of lenth {} bytes; expected {}",
@@ -297,8 +297,9 @@ impl SysVerify {
 
         // Iterate over the list looking for a matching assumption. If found, return the
         // post state digest.
-        for assumption in self.assumptions.borrow().cached.iter() {
-            let assumption_metadata = assumption.get_metadata()?;
+        let mut assumption: Option<Assumption> = None;
+        for cached_assumption in self.assumptions.borrow().cached.iter() {
+            let assumption_metadata = cached_assumption.get_metadata()?;
             let cmp_result: Result<Option<Digest>, PrunedValueError> = {
                 let assumption_journal_digest = assumption_metadata
                     .as_value()?
@@ -330,20 +331,23 @@ impl SysVerify {
                 Ok(Some(digest)) => digest,
             };
 
-            // Return the post_state_digest and success code to the guest.
+            // Write the post_state_digest to the guest buffer as a result.
             to_guest.copy_from_slice(post_state_digest.as_words());
-            self.assumptions
-                .borrow_mut()
-                .accessed
-                .push(assumption.clone());
-            return Ok((0, 0));
+            assumption = Some(cached_assumption.clone());
+            break;
         }
 
-        Err(anyhow!(
-            "sys_verify_integrity: failed to resolve journal_digest and image_id: {}, {}",
-            journal_digest,
-            image_id,
-        ))
+        let Some(assumption) = assumption else {
+            return Err(anyhow!(
+                "sys_verify_integrity: failed to resolve journal_digest and image_id: {}, {}",
+                journal_digest,
+                image_id,
+            ));
+        };
+
+        // Mark the assumption as accessed and return the success code.
+        self.assumptions.borrow_mut().accessed.push(assumption);
+        return Ok((0, 0));
     }
 }
 
@@ -359,9 +363,9 @@ impl Syscall for SysVerify {
         let from_guest: Vec<u8> = ctx.load_region(from_guest_ptr, from_guest_len)?;
 
         if syscall == SYS_VERIFY.as_str() {
-            self.sys_verify(from_guest)
+            self.sys_verify(from_guest, to_guest)
         } else if syscall == SYS_VERIFY_INTEGRITY.as_str() {
-            self.sys_verify_integrity(from_guest, to_guest)
+            self.sys_verify_integrity(from_guest)
         } else {
             bail!("SysVerify received unrecognized syscall: {}", syscall)
         }
