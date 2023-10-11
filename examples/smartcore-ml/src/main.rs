@@ -38,10 +38,10 @@ fn main() {
 }
 
 fn predict() -> Vec<u32> {
-    // We set a boolean to establish whether we are using a SVM model.  This will be passed to the guest and 
+    // We set a boolean to establish whether we are using a SVM model.  This will be passed to the guest and
     // is important for execution of the guest code.  SVM models require an extra step that is not required of other SmartCore models
     let is_svm: bool = false;
-    
+
     // Convert the model and input data from JSON into byte arrays.
     let model_bytes: Vec<u8> = serde_json::from_str(JSON_MODEL).unwrap();
     let data_bytes: Vec<u8> = serde_json::from_str(JSON_DATA).unwrap();
@@ -109,7 +109,7 @@ mod test {
     fn svc() {
         // We set is_svm equal to true
         let is_svm: bool = true;
-        
+
         // Create sample x and y data to train a SVM classifier
         let x = DenseMatrix::from_2d_array(&[
             &[5.1, 3.5, 1.4, 0.2],
@@ -146,14 +146,15 @@ mod test {
 
         // This simulates importing a serialized model
         let svc_serialized = serde_json::to_string(&svc).expect("failed to serialize");
-        let svc_deserialized:  SVC<f64, i32, DenseMatrix<f64>, Vec<i32>> = serde_json::from_str(&svc_serialized).expect("unable to deserialize JSON");
+        let svc_deserialized: SVC<f64, i32, DenseMatrix<f64>, Vec<i32>> =
+            serde_json::from_str(&svc_serialized).expect("unable to deserialize JSON");
 
         let env = ExecutorEnv::builder()
-        .add_input(&to_vec(&is_svm).expect("bool failed to serialize"))
-        .add_input(&to_vec(&svc_deserialized).expect("model failed to serialize"))
-        .add_input(&to_vec(&x).expect("data failed to serialize"))
-        .build()
-        .unwrap();
+            .add_input(&to_vec(&is_svm).expect("bool failed to serialize"))
+            .add_input(&to_vec(&svc_deserialized).expect("model failed to serialize"))
+            .add_input(&to_vec(&x).expect("data failed to serialize"))
+            .build()
+            .unwrap();
 
         let prover = default_prover();
 
