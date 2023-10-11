@@ -4892,6 +4892,34 @@ dependencies = [
 ]
 
 [[package]]
+name = "voting-machine"
+version = "0.12.0"
+dependencies = [
+ "env_logger",
+ "hex",
+ "log",
+ "risc0-zkvm",
+ "test-log",
+ "voting-machine-core",
+ "voting-machine-methods",
+]
+
+[[package]]
+name = "voting-machine-core"
+version = "0.12.0"
+dependencies = [
+ "risc0-zkp",
+ "serde",
+]
+
+[[package]]
+name = "voting-machine-methods"
+version = "0.12.0"
+dependencies = [
+ "risc0-build",
+]
+
+[[package]]
 name = "waldo"
 version = "0.1.0"
 dependencies = [
