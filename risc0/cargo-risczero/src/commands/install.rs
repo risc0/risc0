@@ -57,6 +57,9 @@ struct GithubAsset {
     name: String,
 }
 
+const TOKEN_MSG: &str =
+    "Setting the GITHUB_TOKEN environment variable is supported to avoid IP throttling by GitHub.";
+
 impl Install {
     pub fn run(&self) -> Result<()> {
         let root_dir = risc0_data()?;
@@ -141,7 +144,7 @@ impl Install {
         let dl = Download::new(&download_url);
         let results = downloader.download(&[dl])?;
         for result in results {
-            let summary = result?;
+            let summary = result.context(format!("Download failed. {TOKEN_MSG}"))?;
             let tarball = File::open(summary.file_name)?;
             eprintln!("Extracting...");
             let decoder = GzDecoder::new(BufReader::new(tarball));
@@ -195,7 +198,7 @@ impl Install {
             .send()
             .await?
             .error_for_status()
-            .context("Could not download release info")?
+            .context(format!("Could not download release info. {TOKEN_MSG}"))?
             .json()
             .await
             .context("Could not deserialize release info")?;
