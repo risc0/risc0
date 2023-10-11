@@ -31,15 +31,12 @@ use test_log::test;
 
 use crate::{
     host::server::{
-        exec::{
-            executor::ExecutorError,
-            syscall::{Syscall, SyscallContext},
-        },
+        exec::syscall::{Syscall, SyscallContext},
         testutils,
     },
     serde::{from_slice, to_vec},
     sha::Digest,
-    ExecutorEnv, ExecutorImpl, ExitCode, MemoryImage, Program, Session,
+    ExecutorEnv, ExecutorImpl, ExitCode, MemoryImage, Program,
 };
 
 fn run_test(spec: MultiTestSpec) {
@@ -642,19 +639,7 @@ fn oom() {
 
 #[test]
 fn memory_access() {
-    fn session_faulted(session: Result<Session, ExecutorError>) -> bool {
-        if cfg!(feature = "fault-proof") {
-            match session {
-                Err(ExecutorError::Fault(_)) => true,
-                _ => false,
-            }
-        } else {
-            // this will be removed once this feature is more mature
-            session.is_err()
-        }
-    }
-
-    fn access_memory(addr: u32) -> Result<Session, ExecutorError> {
+    fn access_memory(addr: u32) -> Result<ExitCode> {
         let spec = to_vec(&MultiTestSpec::OutOfBounds).unwrap();
         let addr = to_vec(&addr).unwrap();
         let env = ExecutorEnv::builder()
@@ -662,12 +647,13 @@ fn memory_access() {
             .add_input(&addr)
             .build()
             .unwrap();
-        ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap().run()
+        let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap().run()?;
+        Ok(session.exit_code)
     }
 
-    assert!(session_faulted(access_memory(0x0000_0000)));
-    assert!(session_faulted(access_memory(0x0C00_0000)));
-    assert!(!session_faulted(access_memory(0x0B00_0000)));
+    assert_eq!(access_memory(0x0000_0000).unwrap(), ExitCode::Fault);
+    assert_eq!(access_memory(0x0C00_0000).unwrap(), ExitCode::Fault);
+    assert_eq!(access_memory(0x0B00_0000).unwrap(), ExitCode::Halted(0));
 }
 
 /// The post-state digest (i.e. the Merkle root of the memory state at the end
