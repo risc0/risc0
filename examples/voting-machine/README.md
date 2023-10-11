@@ -20,7 +20,7 @@ way, voters can confirm that their vote was counted.
 ## Running the tests
 
 ```bash
-cargo test --release
+RUST_LOG=info cargo test --release -- --nocapture
 ```
 
 ```console
