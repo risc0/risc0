@@ -5,6 +5,7 @@ const lightCodeTheme = require("prism-react-renderer/themes/github");
 const darkCodeTheme = require("prism-react-renderer/themes/dracula");
 const math = require("remark-math");
 const katex = require("rehype-katex");
+const rustCode = require('./src/remark/rust');
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
@@ -45,7 +46,7 @@ const config = {
             const nextVersionDocsDirPath = "docs";
             return `https://github.com/risc0/website/edit/main/${nextVersionDocsDirPath}/${docPath}`;
           },
-          remarkPlugins: [math],
+          remarkPlugins: [math, rustCode],
           rehypePlugins: [katex],
         },
         blog: {},

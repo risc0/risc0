@@ -16,7 +16,7 @@ Welcome to the [zkVM] Quick Start page! Here are the steps between you and your 
 
 If you have already installed Rust via `rustup`, you can install our toolchain by running
 
-```sh
+```bash
 cargo install cargo-risczero
 cargo risczero install
 ```
@@ -28,7 +28,7 @@ If you need to install Rust or encounter problems, take a look at our [full inst
 Once you've installed the toolchain, you can initialize a new project using the [starter template] by running:
 [starter template]: https://github.com/risc0/risc0/tree/main/templates/rust-starter
 
-```
+```bash
 cargo risczero new my_project
 ```
 
@@ -45,7 +45,7 @@ Don't worry -- each `TODO` comes with instructions for what you need to do, and 
 The readme for your project includes instructions for how to run it, both locally or remotely.
 You can build your example and run the prover locally with:
 
-```
+```bash
 cargo run --release
 ```
 

@@ -31,10 +31,12 @@ The code shown below is the `main()` function for a very simple host program.
 Aside from the absence of any I/O during execution, the host performs exactly the actions described above.
 
 ```rust
-fn main() {
-    let env = ExecutorEnv::builder().build().unwrap();
-    let receipt = prover.prove_elf(env, METHOD_NAME_ELF).unwrap();
-}
+use risc0_zkvm::{default_prover, ExecutorEnv};
+# use risc0_zkvm_methods::HELLO_COMMIT_ELF as METHOD_NAME_ELF;
+
+let env = ExecutorEnv::builder().build().unwrap();
+let prover = default_prover();
+let receipt = prover.prove_elf(env, METHOD_NAME_ELF).unwrap();
 ```
 
 To see more complex examples, check out our [examples] folder on GitHub.
@@ -43,10 +45,16 @@ To see more complex examples, check out our [examples] folder on GitHub.
 
 The functionality for [verifying receipts] is also included in the [`risc0-zkvm` Rust crate].
 
-The standard workflow is for one party to generate a receipt and pass it to another party for verification, using syntax along these lines:
+The standard workflow is for one party to generate a receipt and pass it to another party for verification, along these lines:
 
 ```rust
-   receipt.verify(METHOD_NAME_ID.into()).unwrap();
+# use risc0_zkvm::{default_prover, ExecutorEnv};
+# use risc0_zkvm_methods::HELLO_COMMIT_ELF as METHOD_NAME_ELF;
+# use risc0_zkvm_methods::HELLO_COMMIT_ID as METHOD_NAME_ID;
+# let env = ExecutorEnv::builder().build().unwrap();
+# let prover = default_prover();
+# let receipt = prover.prove_elf(env, METHOD_NAME_ELF).unwrap();
+receipt.verify(METHOD_NAME_ID).unwrap();
 ```
 
 For more information on passing and verifying receipts, check out our page on [Receipts].
