@@ -28,7 +28,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     host::{receipt::Assumption, server::exec::executor::SyscallRecord},
-    receipt_metadata::{Assumptions, MaybePruned, Output},
+    receipt_metadata::{Assumptions, Output},
     sha::{Digest, DIGEST_WORDS},
     ExitCode, MemoryImage, ReceiptMetadata, SystemState,
 };
@@ -201,10 +201,15 @@ impl Session {
             None
         };
 
+        // DO NOT MERGE: post should match the final segment system state, but doesn't.
+        let post_state = SystemState {
+            pc: self.post_image.pc,
+            merkle_root: last_segment.pre_image.compute_root_hash(),
+        };
+
         Ok(ReceiptMetadata {
             pre: SystemState::from(first_segment.pre_image.borrow()).into(),
-            // DO NOT MERGE: This should match the final segment system state, but doesn't.
-            post: MaybePruned::Pruned(last_segment.post_image_id),
+            post: post_state.into(),
             exit_code: self.exit_code,
             input: Digest::new([0u32; DIGEST_WORDS]),
             output: output.into(),
