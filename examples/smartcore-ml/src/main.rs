@@ -38,6 +38,10 @@ fn main() {
 }
 
 fn predict() -> Vec<u32> {
+    // We set a boolean to establish whether we are using a SVM model.  This will be passed to the guest and 
+    // is important for execution of the guest code.  SVM models require an extra step that is not required of other SmartCore models
+    let is_svm: bool = false;
+    
     // Convert the model and input data from JSON into byte arrays.
     let model_bytes: Vec<u8> = serde_json::from_str(JSON_MODEL).unwrap();
     let data_bytes: Vec<u8> = serde_json::from_str(JSON_DATA).unwrap();
@@ -50,6 +54,7 @@ fn predict() -> Vec<u32> {
         rmp_serde::from_slice(&data_bytes).expect("data filed to deserialize byte array");
 
     let env = ExecutorEnv::builder()
+        .add_input(&to_vec(&is_svm).expect("bool failed to serialize"))
         .add_input(&to_vec(&model).expect("model failed to serialize"))
         .add_input(&to_vec(&data).expect("data failed to serialize"))
         .build()
@@ -74,7 +79,11 @@ fn predict() -> Vec<u32> {
 
 #[cfg(test)]
 mod test {
-    use serde_json;
+    use risc0_zkvm::{
+        default_prover,
+        serde::{from_slice, to_vec},
+        ExecutorEnv,
+    };
     use smartcore::{
         linalg::basic::matrix::DenseMatrix,
         svm::{
@@ -82,6 +91,7 @@ mod test {
             Kernels,
         },
     };
+    use smartcore_ml_methods::ML_TEMPLATE_ELF;
     #[test]
     fn basic() {
         const EXPECTED: &[u32] = &[
@@ -97,6 +107,9 @@ mod test {
     }
     #[test]
     fn svc() {
+        // We set is_svm equal to true
+        let is_svm: bool = true;
+        
         // Create sample x and y data to train a SVM classifier
         let x = DenseMatrix::from_2d_array(&[
             &[5.1, 3.5, 1.4, 0.2],
@@ -131,29 +144,28 @@ mod test {
         let params = &SVCParameters::default().with_c(200.0).with_kernel(knl);
         let svc = SVC::fit(&x, &y, params).unwrap();
 
-        // Serialize the model to JSON
-        let svc_serialized = serde_json::to_string(&svc).unwrap();
+        // This simulates importing a serialized model
+        let svc_serialized = serde_json::to_string(&svc).expect("failed to serialize");
+        let svc_deserialized:  SVC<f64, i32, DenseMatrix<f64>, Vec<i32>> = serde_json::from_str(&svc_serialized).expect("unable to deserialize JSON");
 
-        // Deserialize the model.  The model must be mutable since we need to reinsert the missing parameters field
-        let mut svc_deserialized: SVC<f32, i32, DenseMatrix<f32>, Vec<i32>> =
-            serde_json::from_str(&svc_serialized).expect("Could not parse json");
+        let env = ExecutorEnv::builder()
+        .add_input(&to_vec(&is_svm).expect("bool failed to serialize"))
+        .add_input(&to_vec(&svc_deserialized).expect("model failed to serialize"))
+        .add_input(&to_vec(&x).expect("data failed to serialize"))
+        .build()
+        .unwrap();
 
-        // Test to make sure that parameters field is empty, as exptected.
-        assert!(svc_deserialized.parameters.is_none());
+        let prover = default_prover();
 
-        // Calling predict on svc_deserialized will result in an error due to the missing parameters field.
-        // We need to recreate the same SVCParameters that we used to train the model
-        let params_same = &SVCParameters::default()
-            .with_c(200.0)
-            .with_kernel(Kernels::linear());
+        // This initiates a session, runs the STARK prover on the resulting exection
+        // trace, and produces a receipt.
+        let receipt = prover.prove_elf(env, ML_TEMPLATE_ELF).unwrap();
 
-        // Now we can update the model with params_same.  The fork changes the visbility of the parameters field of the SVM model struct to public to allow for this reinsertion
-        svc_deserialized.parameters = Some(params_same);
+        // We read the result that the guest code committed to the journal. The
+        // receipt can also be serialized and sent to a verifier.
+        let y_hats: Vec<f64> = from_slice(&receipt.journal).unwrap();
 
-        // Calling predict on svc_deserialized will now work.
-        let y_hats: Vec<f32> = svc_deserialized.predict(&x).unwrap();
-
-        let y_expected: Vec<f32> = vec![
+        let y_expected: Vec<f64> = vec![
             -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
             1.0, 1.0, 1.0, 1.0, 1.0,
         ];
