@@ -109,7 +109,8 @@ pub enum ExecutorError {
     Error(anyhow::Error),
 }
 
-use std::error::Error as StdError;
+// TODO(victor): This unsafe trait impl is indeed unsafe. It is required here because Session has
+// values inside that are not Sync and Send. This should be fixed rather than using unsafe here.
 unsafe impl Sync for ExecutorError {}
 unsafe impl Send for ExecutorError {}
 
@@ -128,7 +129,13 @@ impl std::fmt::Display for ExecutorError {
     }
 }
 
-impl StdError for ExecutorError {}
+impl std::error::Error for ExecutorError {}
+
+impl From<anyhow::Error> for ExecutorError {
+    fn from(error: anyhow::Error) -> Self {
+        Self::Error(error)
+    }
+}
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct SyscallRecord {
@@ -247,49 +254,19 @@ impl<'a> ExecutorImpl<'a> {
         self.run_with_callback(|segment| Ok(Box::new(SimpleSegmentRef::new(segment))))
     }
 
-    /// Run the executor until [ExitCode::Paused] or [ExitCode::Halted] is
+    /// Run the executor until [ExitCode::Halted], [ExitCode::Paused], or [ExitCode::Fault] is
     /// reached, producing a [Session] as a result.
-    pub fn run_with_callback<F>(&mut self, callback: F) -> Result<Session, ExecutorError>
+    pub fn run_with_callback<F>(&mut self, mut callback: F) -> Result<Session, ExecutorError>
     where
         F: FnMut(Segment) -> Result<Box<dyn SegmentRef>>,
     {
-        let mut guest_session = match self.run_guest_only_with_callback(callback) {
-            Ok(session) => session,
-            Err(e) => return Err(ExecutorError::Error(e)),
-        };
-        match guest_session.exit_code {
-            ExitCode::Fault => {
-                let fault_checker_session = match self.run_fault_checker() {
-                    Ok(session) => session,
-                    Err(e) => return Err(ExecutorError::Error(e)),
-                };
-                for segment in fault_checker_session.segments {
-                    guest_session.segments.push(segment);
-                }
-                guest_session.journal = fault_checker_session.journal;
-                Err(ExecutorError::Fault(guest_session))
-            }
-            _ => Ok(guest_session),
-        }
-    }
-
-    /// Run the executor with the default callback.
-    pub fn run_guest_only(&mut self) -> Result<Session> {
-        self.run_guest_only_with_callback(|segment| Ok(Box::new(SimpleSegmentRef::new(segment))))
-    }
-
-    /// Run the executor until [ExitCode::Paused], [ExitCode::Halted], or
-    /// [ExitCode::Fault] is reached, producing a [Session] as a result.
-    pub fn run_guest_only_with_callback<F>(&mut self, mut callback: F) -> Result<Session>
-    where
-        F: FnMut(Segment) -> Result<Box<dyn SegmentRef>>,
-    {
-        if let Some(ExitCode::Halted(_) | ExitCode::SessionLimit) = self.exit_code {
-            bail!(
+        let (Some(ExitCode::SystemSplit | ExitCode::Paused(_)) | None) = self.exit_code else {
+            return Err(anyhow!(
                 "cannot resume an execution which exited with {:?}",
                 self.exit_code
-            );
-        }
+            )
+            .into());
+        };
 
         self.monitor.clear_session()?;
 
@@ -343,10 +320,8 @@ impl<'a> ExecutorImpl<'a> {
                             log::debug!("Halted({inner}): {}", self.segment_cycle);
                             return Ok((exit_code, post_image));
                         }
-                        // TODO(victor): Revisit this case
                         ExitCode::Fault => {
                             log::debug!("Fault: {}", self.segment_cycle);
-                            self.split(Some(post_image.clone().into()))?;
                             return Ok((exit_code, post_image));
                         }
                     };
@@ -380,6 +355,7 @@ impl<'a> ExecutorImpl<'a> {
         ))
     }
 
+    #[allow(unused)] // DO NOT MERGE(victor)
     fn run_fault_checker(&mut self) -> Result<Session> {
         let fault_monitor = FaultCheckMonitor {
             pc: self.pc,
@@ -392,7 +368,7 @@ impl<'a> ExecutorImpl<'a> {
             .build()?;
 
         let mut exec = self::ExecutorImpl::from_elf(env, FAULT_CHECKER_ELF).unwrap();
-        let session = exec.run_guest_only()?;
+        let session = exec.run()?;
         if session.exit_code != ExitCode::Halted(0) {
             bail!(
                 "Fault checker returned with exit code: {:?}. Expected `ExitCode::Halted(0)` from fault checker",
