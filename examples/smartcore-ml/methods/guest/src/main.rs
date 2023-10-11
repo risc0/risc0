@@ -56,8 +56,6 @@ pub fn main() {
         // Read the input data into a DenseMatrix.
         let x_data: DenseMatrix<f64> = env::read();
 
-        println!("test makes it this far...");
-
         // Calling predict on a deserialized SVM model will result in an error due to the missing parameters field.
         // We need to use THE EXACT SAME SVCParameters that we used to train the model.  Adjust the code below in accordance with how you trained the SVC model.
         let params_same = &SVCParameters::default()
@@ -77,4 +75,15 @@ pub fn main() {
         // We commit the output to the journal.
         env::commit(&y_hat);
         }
+    // Logging the total cycle count is optional, though it's quite useful for benchmarking
+    // the various operations in the guest code. env::get_cycle_count() can be
+    // called anywhere in the guest, multiple times. So if we are interested in
+    // knowing how many cycles the inference computation takes, we can calculate
+    // total cycles before and after model.predict() and the difference between
+    // the two values equals the total cycle count for that section of the guest
+    // code.
+    println!(
+        "Total cycles for guest code execution: {}",
+        env::get_cycle_count()
+    );
 }

@@ -39,7 +39,7 @@ fn main() {
 
 fn predict() -> Vec<u32> {
     // We set a boolean to establish whether we are using a SVM model.  This will be passed to the guest and
-    // is important for execution of the guest code.  SVM models require an extra step that is not required of other SmartCore models
+    // is important for execution of the guest code.  SVM models require an extra step that is not required of other SmartCore models.
     let is_svm: bool = false;
 
     // Convert the model and input data from JSON into byte arrays.
@@ -107,10 +107,10 @@ mod test {
     }
     #[test]
     fn svc() {
-        // We set is_svm equal to true
+        // We set is_svm equal to true for a SVC model.
         let is_svm: bool = true;
 
-        // Create sample x and y data to train a SVM classifier
+        // Create sample x and y data to train a SVC.
         let x = DenseMatrix::from_2d_array(&[
             &[5.1, 3.5, 1.4, 0.2],
             &[4.9, 3.0, 1.4, 0.2],
