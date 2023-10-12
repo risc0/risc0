@@ -3,11 +3,7 @@
 /** @type {import('@docusaurus/plugin-content-docs').SidebarsConfig} */
 const sidebars = {
   GettingStartedSidebar: [
-    {
-      type: "doc",
-      label: "Introduction",
-      id: "introduction",
-    },
+    "introduction",
     {
       type: "category",
       label: "Bonsai",
