@@ -18,7 +18,7 @@ To generate benchmarks, first [install Rust and the RISC Zero toolchain][install
 Navigate to the risc0 source code directory and, if necessary, check out the branch or tag you wish to generate benchmarks for.
 Then run
 
-```
+```bash
 cargo run -r --example loop
 ```
 
@@ -32,7 +32,7 @@ To do this, use the following commands:
 
 We also have a Fibonacci computation benchmark, which you can run with
 
-```
+```bash
 cargo bench --bench fib
 ```
 

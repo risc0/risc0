@@ -81,7 +81,7 @@ jobs:
       - run: cargo run --bin cargo-risczero --no-default-features -- risczero install
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - run: cargo test -F $FEATURE -F profiler
+      - run: cargo test -F $FEATURE -F profiler --workspace --exclude doc-test
       - run: cargo test -F $FEATURE -F disable-dev-mode -p risc0-r0vm
       - run: cargo test -F $FEATURE -F fault-proof -p risc0-zkvm -- tests::memory_io tests::memory_access
         if: matrix.device == 'cpu'

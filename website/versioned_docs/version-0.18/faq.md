@@ -29,14 +29,14 @@ displayed_sidebar: GettingStartedSidebar
 <summary>
 Q: What is a zero-knowledge proof?
 </summary>
-A zero-knowledge proof (or ZKP) is <a href="https://en.wikipedia.org/wiki/Zero-knowledge_proof">"a method by which one party (the prover) can prove to another party (the verifier) that a given statement is true [without] conveying any additional information"</a>. 
+A zero-knowledge proof (or ZKP) is <a href="https://en.wikipedia.org/wiki/Zero-knowledge_proof">"a method by which one party (the prover) can prove to another party (the verifier) that a given statement is true [without] conveying any additional information"</a>.
 RISC Zero's zkVM makes it easy to produce ZKPs to prove the correct execution of arbitrary code. <br/>
 <br/>
-When Alice executes code inside the zkVM, Alice gets back a <a href="https://dev.risczero.com/terminology#receipt">receipt</a>. 
+When Alice executes code inside the zkVM, Alice gets back a <a href="https://dev.risczero.com/terminology#receipt">receipt</a>.
 Alice can pass the receipt to Bob, who can then <a href="https://dev.risczero.com/terminology#verify">verify</a> the receipt.
 <br/>
 <br/>
-By verifying the receipt, Bob can confirm that the expected code executed and produced the asserted results. 
+By verifying the receipt, Bob can confirm that the expected code executed and produced the asserted results.
 Any inputs Alice passes to the program during execution will be private unless Alice chooses to share them.
 </details>
  <br/>
@@ -51,7 +51,7 @@ Any inputs Alice passes to the program during execution will be private unless A
 <summary>
 Q: I'm running into build errors. Where should I look for help?
 </summary>
-A: Some known issues and workarounds are tracked on GitHub under the <a href="https://github.com/risc0/risc0/issues?q=is%3Aissue+is%3Aopen+label%3A%22rust+guest+workarounds%22">"rust guest workarounds"</a> tag. 
+A: Some known issues and workarounds are tracked on GitHub under the <a href="https://github.com/risc0/risc0/issues?q=is%3Aissue+is%3Aopen+label%3A%22rust+guest+workarounds%22">"rust guest workarounds"</a> tag.
 If you can't find your problem here you can open a <a href="https://github.com/risc0/risc0/issues">new issue</a> or reach out to us on <a href="https://discord.gg/risczero">Discord</a>.
 </details>
 <br/>
@@ -66,7 +66,7 @@ Q:
 What do I do with the receipt once I’ve created it?
 </summary>
 A:
-After Alice creates a <a href="https://dev.risczero.com/terminology#receipt">receipt</a>, she'll typically pass it to Bob who will want to <a href="https://dev.risczero.com/terminology#verify">verify</a> its authenticity. 
+After Alice creates a <a href="https://dev.risczero.com/terminology#receipt">receipt</a>, she'll typically pass it to Bob who will want to <a href="https://dev.risczero.com/terminology#verify">verify</a> its authenticity.
 At a minimum, Bob will need access to the <a href="https://dev.risczero.com/terminology#image-id">ImageID</a> of the expected program.
 For most cases, Bob will want to know what code was run, and will therefore also want the <a href="https://dev.risczero.com/terminology#elf-binary">ELF file</a> or the source code that generated it.
 Bob can verify the receipt was created by this code by constructing the <a href="https://dev.risczero.com/terminology#image-id">ImageID</a> from the given ELF file and using it for verification. <br/>
@@ -80,8 +80,8 @@ In our <a href="https://github.com/risc0/risc0/tree/v0.18.0/examples">examples</
 <summary>
 Q:  When can information be shared with the guest zkVM? How do you prevent buffer overflows?
 </summary>
-A: 
-Data can be sent during program execution from the host to the guest via a memory map. 
+A:
+Data can be sent during program execution from the host to the guest via a memory map.
 The host-writeable memory is write-once, meaning that adjacent memory regions cannot be overwritten and executed.
 </details>
 
@@ -94,8 +94,8 @@ How do I know which computations should be performed in the guest zkVM, and whic
 </summary>
 A: If you don't need to perform a computation securely, if others don't rely on it, and if it doesn't produce outputs that others rely on, it can probably be performed outside of the zkVM. <br/>
 <br/>
-However, consider that code run in the RISC Zero zkVM can be shown to behave as expected even on a host that is entirely untrusted. 
-To get the most value out of this guarantee, we recommend dividing the computational labor with an untrusted host in mind. 
+However, consider that code run in the RISC Zero zkVM can be shown to behave as expected even on a host that is entirely untrusted.
+To get the most value out of this guarantee, we recommend dividing the computational labor with an untrusted host in mind.
 That is, other parties should not need to trust the host's output or operations in order to benefit from the work done in the zkVM.
 </details>
 
@@ -109,7 +109,7 @@ A: The ImageID is a unique identifier given to a zkVM application. It cryptograp
 
 Specifically, the ImageID is a Merklization of the initial zkVM memory state, or MemoryImage, produced when the zkVM loads the application binary. The memory state is hashed to produce a single deterministic value via a pure function resembling:
 
-```rust
+```rust ignore
 fn compute_image_id(used_elf_pages, page_size, page_table_addr, pc) -> ImageID
 ```
 
@@ -137,9 +137,9 @@ A: Yes. We have a <a href="https://dev.risczero.com/datasheet.pdf">datasheet</a>
 <summary>
 Q: What languages can I use to develop zkVM applications?
 </summary>
-A: We recommend Rust for writing zkVM applications. 
-Although technically the zkVM can execute any RISC-V code, we only have documentation and API support for Rust development. 
-Development in C++ is also possible, but proceed at your own risk. 
+A: We recommend Rust for writing zkVM applications.
+Although technically the zkVM can execute any RISC-V code, we only have documentation and API support for Rust development.
+Development in C++ is also possible, but proceed at your own risk.
 You can reference the <a href="https://github.com/risc0/risc0/tree/v0.11.0/examples/cpp">examples in C++</a> that were included in the 0.11 release, although we've made substantial changes since that release, and we're available to answer questions on <a href="https://discord.gg/risczero"> Discord</a> as needed.
 </details>
 
@@ -150,7 +150,7 @@ You can reference the <a href="https://github.com/risc0/risc0/tree/v0.11.0/examp
 Q: What is the maximum execution length for a program running on the zkVM?
 </summary>
 A: Since we added support for <a href="https://www.risczero.com/news/continuations"> continuations</a>, the execution length can be very large.
-So far, we've made proofs for executions that exceed 4 billion cycles, and there's plenty of room to expand that further. 
+So far, we've made proofs for executions that exceed 4 billion cycles, and there's plenty of room to expand that further.
 </details>
 
 <a class="anchor" id="rust-crate"></a>
@@ -159,11 +159,11 @@ So far, we've made proofs for executions that exceed 4 billion cycles, and there
 <summary>
 Q: I have a specific Rust crate I'd like to use. Will it work inside the zkVM?
 </summary>
-A: Each night, we check the top 1000 Rust crates for zkVM compatibility. 
-You can see the results <a href="https://risc0.github.io/ghpages/dev/crate-validation/index.html"> here</a>. 
+A: Each night, we check the top 1000 Rust crates for zkVM compatibility.
+You can see the results <a href="https://risc0.github.io/ghpages/dev/crate-validation/index.html"> here</a>.
 As of this writing, 71% of the top 1000 Rust crates work inside the zkVM. <br/>
 <br/>
-If the crate you'd like to use isn't working, there may be a workaround <a href="https://github.com/risc0/risc0/issues?q=is%3Aissue+is%3Aopen+label%3A%22rust+guest+workarounds%22">here</a>. 
+If the crate you'd like to use isn't working, there may be a workaround <a href="https://github.com/risc0/risc0/issues?q=is%3Aissue+is%3Aopen+label%3A%22rust+guest+workarounds%22">here</a>.
 If there's not already a workaround, please <a href="https://github.com/risc0/risc0/issues/new">open an issue</a> or reach out on <a href="https://discord.gg/risczero">Discord.</a>
 </details>
 
@@ -175,7 +175,7 @@ Q:
 If I want the guest to process large volumes of data during execution, I might be constrained by space limitations. What are my options?
 </summary>
 A:
-If data is loaded from the host to restrict guest program size, the most significant limitation on zkVM data processing is a constraint on instruction cycles. 
+If data is loaded from the host to restrict guest program size, the most significant limitation on zkVM data processing is a constraint on instruction cycles.
 Loading data into the guest costs instruction cycles, as does data processing.
 
 There are workarounds for data limitations if the data is only included to ensure that its integrity becomes part of the proof of computation.
@@ -193,8 +193,8 @@ Q:
 I’d like to speed up the processing done inside the zkVM. What are my options?
 </summary>
 A:
-For cryptographic operations, it is possible to build ‘accelerator’ circuits such as our implementation of SHA26. 
-Fast cryptography is sufficient to support many ‘DeFi’ applications. 
+For cryptographic operations, it is possible to build ‘accelerator’ circuits such as our implementation of SHA26.
+Fast cryptography is sufficient to support many ‘DeFi’ applications.
 For many other applications, it is possible to perform most computation on the host (outside the zkVM) and then verify the results in the zkVM.
 </details>
 
@@ -206,8 +206,8 @@ For many other applications, it is possible to perform most computation on the h
 <summary>
 Q: Do I need to write a ZK circuit to build on RISC Zero?
 </summary>
-A: No! 
-We take care of the circuit building so that you can focus on building applications. 
+A: No!
+We take care of the circuit building so that you can focus on building applications.
 Everything you'll need to build is outlined in the <a href="https://dev.risczero.com/zkvm">zkVM docs</a> and the <a href="https://dev.risczero.com/bonsai">Bonsai docs</a>.
 </details>
 
