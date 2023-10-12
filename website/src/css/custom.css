@@ -1,0 +1,64 @@
+/**
+ * Any CSS included here will be global. The classic template
+ * bundles Infima by default. Infima is a CSS framework designed to
+ * work well for content-centric websites.
+ */
+
+/* You can override the default Infima variables here. */
+:root {
+  --ifm-color-primary: #8d4c4c;
+  --ifm-color-primary-dark: #8d4c4c;
+  --ifm-color-primary-darker: #8d4c4c;
+  --ifm-color-primary-darkest: #8d4c4c;
+  --ifm-color-primary-light: #8d4c4c;
+  --ifm-color-primary-lighter: #8d4c4c;
+  --ifm-color-primary-lightest: #8d4c4c;
+  --ifm-code-font-size: 95%;
+}
+
+/* For readability concerns, you should choose a lighter palette in dark mode. */
+[data-theme="dark"] {
+  --ifm-color-primary: #db8b8b;
+  --ifm-color-primary-dark: #db8b8b;
+  --ifm-color-primary-darker: #db8b8b;
+  --ifm-color-primary-darkest: #db8b8b;
+  --ifm-color-primary-light: #db8b8b;
+  --ifm-color-primary-lighter: #db8b8b;
+  --ifm-color-primary-lightest: #db8b8b;
+}
+
+.docusaurus-highlight-code-line {
+  background-color: rgba(0, 0, 0, 0.1);
+  display: block;
+  margin: 0 calc(-1 * var(--ifm-pre-padding));
+  padding: 0 var(--ifm-pre-padding);
+}
+
+[data-theme="dark"] .docusaurus-highlight-code-line {
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+/* Mermaid elements must be changed to be visible in dark mode */
+[data-theme="dark"] .mermaid .messageLine0,
+.messageLine1 {
+  filter: invert(51%) sepia(84%) saturate(405%) hue-rotate(21deg)
+    brightness(94%) contrast(91%) !important;
+}
+/* NOTE Must be a separate specification from the above or it won't toggle off */
+[data-theme="dark"] .mermaid .flowchart-link {
+  filter: invert(51%) sepia(84%) saturate(405%) hue-rotate(21deg)
+    brightness(94%) contrast(91%) !important;
+}
+[data-theme="dark"] .mermaid .cluster-label {
+  filter: invert(51%) sepia(84%) saturate(405%) hue-rotate(21deg)
+    brightness(94%) contrast(91%) !important;
+}
+[data-theme="dark"] .mermaid .messageText {
+  stroke: none !important;
+  fill: white !important;
+}
+
+/* Our additions */
+.anchor {
+  scroll-margin-top: 50pt;
+}
