@@ -32,10 +32,10 @@ use serde::{Deserialize, Serialize};
 use tempfile::tempdir;
 use tracing::{debug, error, info, warn};
 use types::{
-    aliases::Profiles,
+    aliases::{CrateName, Profiles},
     profile::Profile,
+    profile_settings::ProfileSettings,
     repo::{Repo, RepoCargoString, Value as _},
-    version::Version,
 };
 
 pub mod gen_profiles;
@@ -44,10 +44,19 @@ pub mod gen_profiles;
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ValidationResults {
     /// Holds the crate name
-    pub name: String,
+    pub name: CrateName,
+
+    /// Holds the profile settings
+    pub settings: ProfileSettings,
 
     /// Holds the validator exit status
     pub status: RunStatus,
+
+    /// Flag to represent if this profile has been customized
+    pub custom_profile: bool,
+
+    /// Holds the crate version
+    pub version: Option<semver::Version>,
 
     /// Holds a sample of the guest build stdout
     ///
@@ -57,9 +66,18 @@ pub struct ValidationResults {
 }
 
 impl ValidationResults {
-    fn new(name: impl ToString, status: RunStatus, build_errors: Option<String>) -> Self {
+    fn new(
+        name: impl ToString,
+        settings: ProfileSettings,
+        version: Option<semver::Version>,
+        status: RunStatus,
+        build_errors: Option<String>,
+    ) -> Self {
         Self {
+            custom_profile: settings.is_customized(),
             name: name.to_string(),
+            settings,
+            version,
             status,
             build_errors,
         }
@@ -307,7 +325,7 @@ impl Validator {
     fn customize_guest(
         &self,
         profile: &Profile,
-        version: &Version,
+        version: &semver::Version,
         working_dir: &Path,
     ) -> Result<()> {
         let methods_dir = working_dir.join("methods");
@@ -353,6 +371,7 @@ impl Validator {
 
         let mut crate_line = format!("{} = {{ version = \"{version}\" }}", profile.name(),);
         if let Some(patch) = &profile.settings.patch {
+            crate_line.push('\n');
             crate_line += patch;
         }
 
@@ -496,6 +515,8 @@ impl Validator {
             warn!("Skipping {}", profile.name());
             return Ok(vec![ValidationResults::new(
                 profile.name(),
+                profile.settings().clone(),
+                None,
                 RunStatus::Skipped,
                 None,
             )]);
@@ -503,30 +524,30 @@ impl Validator {
 
         let working_dir = self.gen_initial_project(profile)?;
         let mut results = Vec::new();
-        for version in profile.versions.iter() {
-            self.customize_guest(profile, &version.clone(), &working_dir)?;
+        for version in profile.versions() {
+            self.customize_guest(profile, &version, &working_dir)?;
             let (build_success, build_errors) = self.build_project(profile, &working_dir)?;
-            if !build_success {
-                results.push(ValidationResults::new(
+            let create_validation_results = |status: RunStatus, build_errors: Option<String>| {
+                ValidationResults::new(
                     profile.name(),
+                    profile.settings().clone(),
+                    Some(version.clone()),
+                    status,
+                    build_errors,
+                )
+            };
+            if !build_success {
+                results.push(create_validation_results(
                     RunStatus::BuildFail,
                     Some(build_errors),
                 ));
                 continue;
             }
             if profile.settings.run_prover && !self.run_prover(profile, &working_dir)? {
-                results.push(ValidationResults::new(
-                    profile.name(),
-                    RunStatus::RunFail,
-                    None,
-                ));
+                results.push(create_validation_results(RunStatus::RunFail, None));
                 continue;
             }
-            results.push(ValidationResults::new(
-                profile.name(),
-                RunStatus::Success,
-                None,
-            ));
+            results.push(create_validation_results(RunStatus::Success, None));
         }
 
         Ok(results)
