@@ -1,0 +1,21 @@
+name: website-test
+
+on:
+  merge_group:
+  pull_request:
+    branches: [main, "release-*"]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: [self-hosted, prod, Linux, cpu]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - run: cargo test -p doc-test
