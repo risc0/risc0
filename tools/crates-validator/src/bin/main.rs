@@ -127,7 +127,7 @@ fn main() -> Result<()> {
     if let Some(out_path) = args.output {
         std::fs::write(
             out_path,
-            serde_yaml::to_string(&results).context("Failed to serialize Validator context")?,
+            serde_json::to_string(&results).context("Failed to serialize Validator context")?,
         )
         .context("Failed to write output json file")?;
     }

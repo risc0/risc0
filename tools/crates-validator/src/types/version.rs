@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use super::traits::Merge;
+use super::traits::{GetVersions, Merge};
 
 use anyhow::anyhow;
 
@@ -23,6 +23,17 @@ pub type Versions = BTreeSet<Version>;
 impl Merge for Versions {
     fn merge(self, other: Self) -> Self {
         self.union(&other).cloned().collect()
+    }
+}
+
+impl GetVersions for Versions {
+    fn get_versions(&self) -> Vec<semver::Version> {
+        self.iter()
+            .filter_map(|v| match v {
+                Version::Specific(v) => Some(v.clone()),
+                Version::Latest => None,
+            })
+            .collect()
     }
 }
 
@@ -52,11 +63,20 @@ impl From<Version> for Versions {
     }
 }
 
+impl From<Version> for Option<semver::Version> {
+    fn from(value: Version) -> Self {
+        match value {
+            Version::Specific(v) => Some(v),
+            Version::Latest => None,
+        }
+    }
+}
+
 impl From<Option<semver::Version>> for Version {
     fn from(value: Option<semver::Version>) -> Self {
         match value {
-            Some(v) => Self::Specific(v),
-            None => Self::Latest,
+            Some(v) => Version::Specific(v),
+            None => Version::Latest,
         }
     }
 }
