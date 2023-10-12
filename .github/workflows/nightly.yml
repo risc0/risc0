@@ -53,7 +53,7 @@ jobs:
           target/release/main \
           -p ${{ github.workspace }} \
           -P ${{ runner.temp }}/crate-validation/profiles.yaml \
-          -o ${{ runner.temp }}/crate-validation/profile-results.json &> ${{ runner.temp }}/crate-validation/crate-results.log
+          -o ${{ runner.temp }}/crate-validation/profile-results.yaml &> ${{ runner.temp }}/crate-validation/crate-results.log
         shell: bash
         working-directory: tools/crates-validator/
 
@@ -74,7 +74,7 @@ jobs:
         run: |
           git clone "https://x-access-token:${{ secrets.BENCHMARK_TOKEN }}@github.com/risc0/ghpages.git" ${{ runner.temp }}/benchmarks/
           cd ${{ runner.temp }}/benchmarks/
-          cp ${{ runner.temp }}/crate-validation/profile-results.json ./dev/crate-validation/profiles.json
+          cp ${{ runner.temp }}/crate-validation/profile-results.yaml ./dev/crate-validation/profiles.yaml
           git add .
           git  -c "user.name=nightly-action" -c "user.email=github@users.noreply.github.com" commit -m "Added update at '$(date)'"
           git push origin main
