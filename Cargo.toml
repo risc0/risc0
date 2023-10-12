@@ -18,6 +18,7 @@ members = [
   "risc0/zkvm/methods",
   "risc0/zkvm/platform",
   "risc0/zkvm/receipts",
+  "website/doc-test",
   "xtask",
 ]
 exclude = ["tools/crates-validator"]

@@ -22,7 +22,7 @@ cargo risczero install
 
 If this is successful, it will finish by printing the message
 
-```
+```text
 The risc0 toolchain is now ready to use.
 ```
 

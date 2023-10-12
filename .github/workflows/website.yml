@@ -1,0 +1,23 @@
+name: website
+
+on:
+  merge_group:
+  pull_request:
+    branches: [main, "release-*"]
+    paths:
+      - "website/**"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - run: npx prettier website --check

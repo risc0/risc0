@@ -44,7 +44,7 @@ contract simulation_normal {
 }
 ```
 
-```
+```solidity
 // With Bonsai
 contract simulation_bonsai {
  function some_really_hard_work() {
