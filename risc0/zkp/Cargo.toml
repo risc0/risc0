@@ -8,10 +8,6 @@ homepage = { workspace = true }
 repository = { workspace = true }
 
 [[bench]]
-name = "ntt"
-harness = false
-
-[[bench]]
 name = "hash"
 harness = false
 
