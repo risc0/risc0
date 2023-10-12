@@ -39,4 +39,3 @@ pub trait GetVersions {
 pub trait IsValid {
     fn is_valid(&self) -> Result<(), ValidationErrors>;
 }
-
