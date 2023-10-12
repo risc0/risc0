@@ -138,7 +138,8 @@ They will be added to the top of our `main` function:
 fn main() {
     let a: u64 = 17;
     let b: u64 = 23;
-    //...snip...
+    // ...snip...
+}
 ```
 
 We'd like the host to make the values of `a` and `b` available to the guest prior to execution. We can do this by adding them to the the executor environment, which is responsible for managing guest-readable memory. When the prover executes the program, it will have access to these guest inputs.
