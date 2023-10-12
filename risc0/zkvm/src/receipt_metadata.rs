@@ -311,7 +311,6 @@ impl std::error::Error for InvalidExitCodeError {}
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[cfg_attr(test, derive(PartialEq))]
 pub struct Output {
-    // TODO(victor): Reconsider whether this Journal type should exist.
     /// A SHA-256 digest of the journal committed to by the guest execution.
     pub journal: MaybePruned<Vec<u8>>,
 

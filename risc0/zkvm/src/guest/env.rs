@@ -56,14 +56,12 @@ pub(crate) fn init() {
 }
 
 pub(crate) fn finalize(halt: bool, user_exit: u8) {
-    // DO NOT MERGE(victor): Adjust the output definition to include the assumptions
-    // list.
     unsafe {
         let hasher = core::mem::take(&mut HASHER);
         let journal_digest: Digest = hasher.unwrap().finalize().as_slice().try_into().unwrap();
         let output = Output {
             journal: MaybePruned::Pruned(journal_digest),
-            assumptions: Default::default(), // TODO(victor): Encode a non-empty assumptions list
+            assumptions: MaybePruned::Pruned(ASSUMPTIONS_DIGEST.digest()),
         };
         let words: [u32; 8] = output.digest().into();
 

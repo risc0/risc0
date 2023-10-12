@@ -110,7 +110,7 @@ pub enum ExecutorError {
     Error(anyhow::Error),
 }
 
-// TODO(victor): This unsafe trait impl is indeed unsafe. It is required here because Session has
+// DO NOT MERGE(victor): This unsafe trait impl is indeed unsafe. It is required here because Session has
 // values inside that are not Sync and Send. This should be fixed rather than using unsafe here.
 unsafe impl Sync for ExecutorError {}
 unsafe impl Send for ExecutorError {}

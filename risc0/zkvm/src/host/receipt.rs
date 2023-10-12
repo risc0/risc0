@@ -598,8 +598,6 @@ fn decode_system_state_from_io(
     Ok(SystemState { pc, merkle_root })
 }
 
-// TODO(victor): Work on carefully understanding this function. How is the exit code set? Will
-// Fault and SystemSplit be distinct?
 fn decode_receipt_metadata_from_io(
     io: layout::OutBuffer,
 ) -> Result<ReceiptMetadata, VerificationError> {
