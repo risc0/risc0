@@ -668,16 +668,8 @@ pub unsafe extern "C" fn sys_alloc_aligned(bytes: usize, align: usize) -> *mut u
     let ptr = heap_pos as *mut u8;
     heap_pos += bytes;
 
-    // Check to make sure we keep space between the heap and the
-    // stack so they don't accidentally step on each other.
-    let mut stack_pointer: usize;
-    #[cfg(target_os = "zkvm")]
-    unsafe {
-        asm!("add {stack_pointer}, sp, zero", stack_pointer = out(reg) stack_pointer)
-    };
-    #[cfg(not(target_os = "zkvm"))]
-    let stack_pointer: usize = crate::memory::STACK_TOP as usize;
-    if stack_pointer - (crate::memory::RESERVED_STACK as usize) < heap_pos {
+    // Check to make sure heap doesn't collide with SYSTEM memory.
+    if crate::memory::SYSTEM.start() < heap_pos {
         const MSG: &[u8] = "Out of memory!".as_bytes();
         unsafe { sys_panic(MSG.as_ptr(), MSG.len()) };
     }

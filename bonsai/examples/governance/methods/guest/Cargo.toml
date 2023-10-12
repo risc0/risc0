@@ -15,9 +15,9 @@ k256 = { version = "=0.13.1", features = [
   "std",
   "ecdsa",
 ], default_features = false }
-# Directly import radium to silence warning about unused patch. See https://github.com/risc0/risc0/issues/549
-radium = "=0.7.1"
-risc0-zkvm = { path = "../../../../../risc0/zkvm", default-features = false, features = ["std"] }
+risc0-zkvm = { path = "../../../../../risc0/zkvm", default-features = false, features = [
+  "std",
+] }
 tiny-keccak = { version = "2.0", features = ["keccak"] }
 
 [patch.crates-io]
@@ -26,7 +26,6 @@ tiny-keccak = { version = "2.0", features = ["keccak"] }
 sha2 = { git = "https://github.com/risc0/RustCrypto-hashes", tag = "sha2-v0.10.6-risczero.0" }
 k256 = { git = "https://github.com/risc0/RustCrypto-elliptic-curves", tag = "k256/v0.13.1-risczero.1" }
 crypto-bigint = { git = "https://github.com/risc0/RustCrypto-crypto-bigint", tag = "v0.5.2-risczero.0" }
-radium = { git = "https://github.com/bitvecto-rs/radium", rev = "723bed5abd75994ee4b7221b8b12c9f4e77ce408" }
 
 [profile.release]
 lto = "thin"

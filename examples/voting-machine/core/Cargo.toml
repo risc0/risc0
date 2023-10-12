@@ -1,0 +1,8 @@
+[package]
+name = "voting-machine-core"
+version = "0.12.0"
+edition = "2021"
+
+[dependencies]
+risc0-zkp = { path = "../../../risc0/zkp", default-features = false }
+serde = { version = "1.0", default-features = false }

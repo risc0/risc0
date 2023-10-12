@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::env;
-
 #[cfg(feature = "experimental")]
 mod runtime {
     use std::{env, fs, io, path::Path};
@@ -40,17 +38,9 @@ mod runtime {
 }
 
 fn main() {
-    env_logger::init();
-
-    if env::var("CARGO_CFG_TARGET_OS").unwrap().contains("zkvm") {
-        // Guest shouldn't recursively depend on itself.
-        return;
-    }
-
-    println!("V12!");
-
     #[cfg(feature = "experimental")]
     {
+        env_logger::init();
         runtime::build_and_zip_runtime();
     }
 }
