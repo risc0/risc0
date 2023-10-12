@@ -48,6 +48,11 @@ impl Digest {
         Self(data)
     }
 
+    /// Constant constructor for a digest of all zeroes.
+    pub const fn zero() -> Self {
+        Self::new([0u32; DIGEST_WORDS])
+    }
+
     /// Returns a reference to the [Digest] as a slice of words.
     pub fn as_words(&self) -> &[u32] {
         &self.0

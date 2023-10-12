@@ -161,9 +161,9 @@ pub fn main() {
             env::commit(&buf);
         }
         MultiTestSpec::SysVerify { image_id, journal } => {
-            env::verify(&image_id, &journal).unwrap();
+            env::verify(image_id, &journal).unwrap();
         }
-        MultiTestSpec::SysVerifyMetadata { metadata_words } => {
+        MultiTestSpec::SysVerifyIntegrity { metadata_words } => {
             let meta: ReceiptMetadata = risc0_zkvm::serde::from_slice(&metadata_words).unwrap();
             env::verify_integrity(&meta).unwrap();
         }

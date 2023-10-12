@@ -56,7 +56,7 @@ pub enum MultiTestSpec {
         image_id: Digest,
         journal: Vec<u8>,
     },
-    SysVerifyMetadata {
+    SysVerifyIntegrity {
         // Define this field as a serialized vector to avoid circular dependency issues.
         metadata_words: Vec<u32>,
     },

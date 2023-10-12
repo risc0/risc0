@@ -14,12 +14,11 @@
 
 extern crate alloc;
 
+use core::borrow::Borrow;
+
 use alloc::vec::Vec;
 
-use risc0_zkp::core::{
-    digest::{Digest, DIGEST_WORDS},
-    hash::sha::Sha256,
-};
+use risc0_zkp::core::{digest::Digest, hash::sha::Sha256};
 
 /// Defines a collision resistant hash for the typed and structured data.
 pub trait Digestable {
@@ -43,7 +42,7 @@ impl<T: Digestable> Digestable for Option<T> {
     fn digest<S: Sha256>(&self) -> Digest {
         match self {
             Some(val) => val.digest::<S>(),
-            None => Digest::from([0u32; DIGEST_WORDS]),
+            None => Digest::zero(),
         }
     }
 }
@@ -51,12 +50,12 @@ impl<T: Digestable> Digestable for Option<T> {
 /// A struct hashing routine, permiting tree-like opening of fields.
 ///
 /// Used for hashing of receipt metadata, and in the recursion predicates.
-pub fn tagged_struct<S: Sha256>(tag: &str, down: &[Digest], data: &[u32]) -> Digest {
+pub fn tagged_struct<S: Sha256>(tag: &str, down: &[impl Borrow<Digest>], data: &[u32]) -> Digest {
     let tag_digest: Digest = *S::hash_bytes(tag.as_bytes());
     let mut all = Vec::<u8>::new();
     all.extend_from_slice(tag_digest.as_bytes());
     for digest in down {
-        all.extend_from_slice(digest.as_ref());
+        all.extend_from_slice(digest.borrow().as_ref());
     }
     for word in data.iter().copied() {
         all.extend_from_slice(&word.to_le_bytes());
@@ -70,11 +69,11 @@ pub fn tagged_struct<S: Sha256>(tag: &str, down: &[Digest], data: &[u32]) -> Dig
 ///
 /// Used for hashing of receipt metadata assumptions list, and in the recursion
 /// predicates.
-pub fn tagged_list<S: Sha256>(tag: &str, list: &[Digest]) -> Digest {
+pub fn tagged_list<S: Sha256>(tag: &str, list: &[impl Borrow<Digest>]) -> Digest {
     list.into_iter()
         .rev()
-        .fold(Digest::new([0u32; DIGEST_WORDS]), |list_digest, elem| {
-            tagged_list_cons::<S>(tag, elem.clone(), list_digest)
+        .fold(Digest::zero(), |list_digest, elem| {
+            tagged_list_cons::<S>(tag, elem.borrow(), &list_digest)
         })
 }
 
@@ -98,7 +97,7 @@ pub fn tagged_list<S: Sha256>(tag: &str, list: &[Digest]) -> Digest {
 ///     tagged_list_cons::<Impl>("tag", a, tagged_list::<Impl>("tag", &[b, c])),
 /// );
 /// ```
-pub fn tagged_list_cons<S: Sha256>(tag: &str, head: Digest, rest: Digest) -> Digest {
+pub fn tagged_list_cons<S: Sha256>(tag: &str, head: &Digest, rest: &Digest) -> Digest {
     tagged_struct::<S>(tag, &[head, rest], &[])
 }
 

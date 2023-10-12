@@ -29,7 +29,7 @@ use serde::{Deserialize, Serialize};
 use crate::{
     host::{receipt::Assumption, server::exec::executor::SyscallRecord},
     receipt_metadata::{Assumptions, Output},
-    sha::{Digest, DIGEST_WORDS},
+    sha::Digest,
     ExitCode, MemoryImage, ReceiptMetadata, SystemState,
 };
 
@@ -214,7 +214,7 @@ impl Session {
             pre: SystemState::from(first_segment.pre_image.borrow()).into(),
             post: post_state.into(),
             exit_code: self.exit_code,
-            input: Digest::new([0u32; DIGEST_WORDS]),
+            input: Digest::zero(),
             output: output.into(),
         })
     }

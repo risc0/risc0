@@ -301,13 +301,14 @@ impl SysVerify {
         for cached_assumption in self.assumptions.borrow().cached.iter() {
             let assumption_metadata = cached_assumption.get_metadata()?;
             let cmp_result: Result<Option<Digest>, PrunedValueError> = {
+                // TODO(victor): Check here that the cached assumption has no assumptions?
                 let assumption_journal_digest = assumption_metadata
                     .as_value()?
                     .output
                     .as_value()?
                     .as_ref()
-                    .map(|o| o.journal.digest())
-                    .unwrap_or(Digest::new([0u32; DIGEST_WORDS]));
+                    .map(|output| output.journal.digest())
+                    .unwrap_or(Digest::zero());
                 let assumption_image_id = assumption_metadata.as_value()?.pre.digest();
 
                 if assumption_journal_digest == journal_digest && assumption_image_id == image_id {

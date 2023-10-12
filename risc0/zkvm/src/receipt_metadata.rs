@@ -23,11 +23,11 @@ use alloc::{collections::VecDeque, vec::Vec};
 use core::{fmt, ops::Deref};
 
 use anyhow::{anyhow, ensure};
-use risc0_binfmt::{read_sha_halfs, tagged_list, tagged_struct, write_sha_halfs};
+use risc0_binfmt::{read_sha_halfs, tagged_list, tagged_list_cons, tagged_struct, write_sha_halfs};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    sha::{Digest, Digestable, Sha256, DIGEST_WORDS},
+    sha::{self, Digest, Digestable, Sha256},
     SystemState,
 };
 
@@ -104,7 +104,7 @@ where
         match self {
             MaybePruned::Value(Some(_)) => false,
             MaybePruned::Value(None) => true,
-            MaybePruned::Pruned(digest) => digest == &Digest::new([0u32; DIGEST_WORDS]),
+            MaybePruned::Pruned(digest) => digest == &Digest::zero(),
         }
     }
 
@@ -145,7 +145,7 @@ where
 
 /// Error returned when the source value was pruned, and is not available.
 #[derive(Debug, Clone)]
-pub struct PrunedValueError(Digest);
+pub struct PrunedValueError(pub Digest);
 
 impl fmt::Display for PrunedValueError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -264,7 +264,8 @@ impl ExitCode {
             ExitCode::Paused(user_exit) => (1, user_exit),
             ExitCode::SystemSplit => (2, 0),
             // TODO(victor): SessionLimit and Fault result in the same exit code set by the rv32im
-            // circuit. As a result, this conversion is lossy.
+            // circuit. As a result, this conversion is lossy. This factoring results in Fault,
+            // SessionLimit, and SystemSplit all having the same digest.
             ExitCode::SessionLimit => (2, 0),
             ExitCode::Fault => (2, 0),
         }
@@ -344,19 +345,22 @@ impl risc0_binfmt::Digestable for Output {
 pub struct Assumptions(pub Vec<MaybePruned<ReceiptMetadata>>);
 
 impl Assumptions {
-    /// Mark an assumption as resolved and return the assumption list with it
-    /// removed.
+    /// Add an assumption to the head of the assumptions list.
+    pub fn add(&mut self, assumption: MaybePruned<ReceiptMetadata>) {
+        self.0.insert(0, assumption);
+    }
+
+    /// Mark an assumption as resolved and remove it from the list.
     ///
     /// Assumptions can only be removed from the head of the list.
-    #[allow(unused)] // DO NOT MERGE
-    pub(crate) fn resolve(mut self, resolved: Digest) -> anyhow::Result<Self> {
+    pub fn resolve(&mut self, resolved: &Digest) -> anyhow::Result<()> {
         let head = self
             .0
             .first()
             .ok_or_else(|| anyhow!("cannot resolve assumption from empty list"))?;
 
         ensure!(
-            head.digest() == resolved,
+            &head.digest() == resolved,
             "resolved assumption is not equal to the head of the list: {} != {}",
             resolved,
             head.digest()
@@ -364,7 +368,7 @@ impl Assumptions {
 
         // Drop the head of the assumptions list.
         self.0 = self.0.split_off(1);
-        Ok(self)
+        Ok(())
     }
 }
 
@@ -386,35 +390,56 @@ impl risc0_binfmt::Digestable for Assumptions {
     }
 }
 
-impl fmt::Display for InvalidAssumptionDigestError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(
-            f,
-            "resolved assumption is not the head of the assumption list: {:?}",
-            &self
-        )
-    }
-}
-
 impl MaybePruned<Assumptions> {
     /// Check if the (possibly pruned) assumptions list is empty.
     pub fn is_empty(&self) -> bool {
         match self {
             MaybePruned::Value(list) => list.is_empty(),
-            MaybePruned::Pruned(digest) => digest == &Digest::new([0u32; DIGEST_WORDS]),
+            MaybePruned::Pruned(digest) => digest == &Digest::zero(),
+        }
+    }
+
+    /// Add an assumption to the head of the assumptions list.
+    ///
+    ///If this value is pruned, then the result will also be a pruned value.
+    pub fn add(&mut self, assumption: MaybePruned<ReceiptMetadata>) {
+        match self {
+            MaybePruned::Value(list) => list.add(assumption),
+            MaybePruned::Pruned(list_digest) => {
+                *list_digest = tagged_list_cons::<sha::Impl>(
+                    "risc0.Assumptions",
+                    &assumption.digest(),
+                    &*list_digest,
+                );
+            }
+        }
+    }
+
+    /// Mark an assumption as resolved and remove it from the list.
+    ///
+    /// Assumptions can only be removed from the head of the list. If this value is pruned, then
+    /// the result will also be a pruned value. The `rest` parameter should be equal to the digest
+    /// of the the list after the resolved assumption is removed.
+    pub fn resolve(&mut self, resolved: &Digest, rest: &Digest) -> anyhow::Result<()> {
+        match self {
+            MaybePruned::Value(list) => list.resolve(resolved),
+            MaybePruned::Pruned(list_digest) => {
+                let reconstructed =
+                    tagged_list_cons::<sha::Impl>("risc0.Assumptions", resolved, rest);
+                ensure!(
+                    &reconstructed == list_digest,
+                    "reconstructed list digest does not match; expected {}, reconstructed {}",
+                    list_digest,
+                    reconstructed
+                );
+
+                // Set the pruned digest value to be equal to the rest parameter.
+                *list_digest = rest.clone();
+                Ok(())
+            }
         }
     }
 }
-
-/// Error for when the resolved assumption is not the head of the list.
-#[derive(Debug, Clone)]
-pub struct InvalidAssumptionDigestError {
-    /// Digest of the [ReceiptMetadata] for the assumption marked as resolved.
-    pub resolved: Digest,
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for InvalidAssumptionDigestError {}
 
 // TODO(victor): Add tests that show every combination of pruned struct returns
 // the same digest. Check that the digest of an empty assumptions list is all
