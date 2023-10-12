@@ -32,10 +32,6 @@ pub trait Exclude {
     fn exclude(self, other: Self) -> Self;
 }
 
-pub trait GetVersions {
-    fn get_versions(&self) -> Vec<semver::Version>;
-}
-
 pub trait IsValid {
     fn is_valid(&self) -> Result<(), ValidationErrors>;
 }

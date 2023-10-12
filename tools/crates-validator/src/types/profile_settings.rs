@@ -44,12 +44,6 @@ pub struct ProfileSettings {
     pub custom_main: Option<String>,
 }
 
-impl ProfileSettings {
-    pub fn is_customized(&self) -> bool {
-        self != &Self::default()
-    }
-}
-
 impl Default for ProfileSettings {
     fn default() -> Self {
         Self {
@@ -90,27 +84,4 @@ const fn is_true(b: &bool) -> bool {
 #[inline]
 const fn is_false(b: &bool) -> bool {
     !(*b)
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use rstest::*;
-
-    #[rstest]
-    #[case::default(ProfileSettings::default(), false)]
-    #[case::customized(ProfileSettings {
-        run_prover: true,
-        should_fail: true,
-        inject_cc_flags: true,
-        std: true,
-        fast_mode: false,
-        skip: true,
-        patch: Some("patch".to_string()),
-        import_str: Some("import_str".to_string()),
-        custom_main: Some("custom_main".to_string()),
-    }, true)]
-    fn is_customized(#[case] settings: ProfileSettings, #[case] expected: bool) {
-        assert_eq!(settings.is_customized(), expected);
-    }
 }
