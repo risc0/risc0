@@ -80,7 +80,7 @@ fn predict() -> Vec<u32> {
 #[cfg(test)]
 mod test {
     use risc0_zkvm::{
-        default_prover,
+        default_executor,
         serde::{from_slice, to_vec},
         ExecutorEnv,
     };
@@ -139,12 +139,12 @@ mod test {
         ];
 
         // We create the SVC params and train the SVC model.
-        // The paramaters will NOT get serialized due to a serde_skip command in the source code for the SVC struct
+        // The paramaters will NOT get serialized due to a serde_skip command in the source code for the SVC struct.
         let knl = Kernels::linear();
         let params = &SVCParameters::default().with_c(200.0).with_kernel(knl);
         let svc = SVC::fit(&x, &y, params).unwrap();
 
-        // This simulates importing a serialized model
+        // This simulates importing a serialized model.
         let svc_serialized = serde_json::to_string(&svc).expect("failed to serialize");
         let svc_deserialized: SVC<f64, i32, DenseMatrix<f64>, Vec<i32>> =
             serde_json::from_str(&svc_serialized).expect("unable to deserialize JSON");
@@ -156,21 +156,18 @@ mod test {
             .build()
             .unwrap();
 
-        let prover = default_prover();
+        // We run the executor and bypass the prover.
+        let exec = default_executor();
+        let session = exec.execute_elf(env, ML_TEMPLATE_ELF);
 
-        // This initiates a session, runs the STARK prover on the resulting exection
-        // trace, and produces a receipt.
-        let receipt = prover.prove_elf(env, ML_TEMPLATE_ELF).unwrap();
-
-        // We read the result that the guest code committed to the journal. The
-        // receipt can also be serialized and sent to a verifier.
-        let y_hats: Vec<f64> = from_slice(&receipt.journal).unwrap();
+        // We read the result commited to the journal by the guest code.
+        let result: Vec<f64> = from_slice(&(session.unwrap()).journal).unwrap();
 
         let y_expected: Vec<f64> = vec![
             -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
             1.0, 1.0, 1.0, 1.0, 1.0,
         ];
 
-        assert_eq!(y_hats, y_expected);
+        assert_eq!(result, y_expected);
     }
 }
