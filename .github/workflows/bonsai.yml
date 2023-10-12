@@ -3,7 +3,9 @@ name: bonsai
 on:
   merge_group:
   pull_request:
-    branches: [ main, 'release-*' ]
+    branches: [main, "release-*"]
+    paths-ignore:
+      - "website/**"
   workflow_dispatch:
 
 concurrency:
