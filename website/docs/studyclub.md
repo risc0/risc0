@@ -7,8 +7,14 @@ displayed_sidebar: GettingStartedSidebar
 RISC Zero's Study Club sessions aim to introduce the pre-requisite concepts necessary to understand our [technology](./introduction.md).
 
 ## Upcoming Sessions
+- **October 18**: Intro to Proximity Gaps & Applications to Succinct Proofs, with Ben Diamond from [Ulvetanna](https://twitter.com/UlvetannaHQ)
+- **October 25**: Intro to [Zeth](https://risczero.com/news/zeth-release), with Wolfgang Welz
+- **November 1**: Use cases for ZK in blockchain, with Steven Li
+- **November 8**: zkVM Performance Optimization, with Victor Graf
 
-We'll post announcements for upcoming talks on this page, on [Twitter](https://twitter.com/risczero), and on [Discord](https://discord.gg/risczero).
+All sessions are hosted at **9am Pacific / 4PM UTC**. <br/>
+Join the session: [Zoom link](https://www.google.com/url?q=https://zoom.us/j/99568015541?pwd%3DNCtpQXF3dDhOSzNqendnNVl2aFVuQT09&sa=D&source=calendar&ust=1697553118636452&usg=AOvVaw2mMXEEuZel34fjRYrxB5HP) <br/>
+Join the conversation: [Discord](https://discord.gg/risczero)
 
 ## Past Sessions
 
