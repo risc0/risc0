@@ -24,9 +24,7 @@ use risc0_core::field::{
     ExtElem,
 };
 
-use self::consts::{
-    M_INT_DIAG_ULVT, ROUNDS_HALF_FULL, ROUNDS_PARTIAL, ROUND_CONSTANTS,
-};
+use self::consts::{M_INT_DIAG_ULVT, ROUNDS_HALF_FULL, ROUNDS_PARTIAL, ROUND_CONSTANTS};
 pub use self::{consts::CELLS, rng::Poseidon2Rng};
 use super::{HashFn, HashSuite, Rng, RngFactory};
 use crate::core::digest::{Digest, DIGEST_WORDS};
@@ -131,14 +129,14 @@ fn multiply_by_m_int(cells: &mut [Elem; CELLS]) {
     }
 }
 
-fn multiply_by_4x4_circulant(x: & [Elem; 4]) -> [Elem; 4] {
+fn multiply_by_4x4_circulant(x: &[Elem; 4]) -> [Elem; 4] {
     // See appendix B of Poseidon2 paper.
     let t0 = x[0] + x[1];
     let t1 = x[2] + x[3];
-    let t2 = Elem::new(2)*x[1] + t1;
-    let t3 = Elem::new(2)*x[3] + t0;
-    let t4 = Elem::new(4)*t1 + t3;
-    let t5 = Elem::new(4)*t0 + t2;
+    let t2 = Elem::new(2) * x[1] + t1;
+    let t3 = Elem::new(2) * x[3] + t0;
+    let t4 = Elem::new(4) * t1 + t3;
+    let t5 = Elem::new(4) * t0 + t2;
     let t6 = t3 + t5;
     let t7 = t2 + t4;
     [t6, t5, t7, t4]
@@ -153,13 +151,18 @@ fn multiply_by_m_ext(cells: &mut [Elem; CELLS]) {
     }
     let mut tmp_sums = [Elem::new(0); 4];
 
-    for i in 0..CELLS/4 {
-        let chunk_array: [Elem; 4] = [old_cells[i*4], old_cells[i*4 + 1], old_cells[i*4 + 2], old_cells[i*4 + 3]];
+    for i in 0..CELLS / 4 {
+        let chunk_array: [Elem; 4] = [
+            old_cells[i * 4],
+            old_cells[i * 4 + 1],
+            old_cells[i * 4 + 2],
+            old_cells[i * 4 + 3],
+        ];
         let out = multiply_by_4x4_circulant(&chunk_array);
         for j in 0..4 {
-            let to_add = Elem::new_raw(1)*out[j];
+            let to_add = Elem::new_raw(1) * out[j];
             tmp_sums[j] += to_add;
-            cells[i*4 + j] += to_add;
+            cells[i * 4 + j] += to_add;
         }
     }
     for i in 0..CELLS {
@@ -230,8 +233,8 @@ where
 
 #[cfg(test)]
 mod tests {
-    use test_log::test;
     use crate::core::hash::poseidon2::consts::{_M_EXT, _M_EXT_MONTGOMERY};
+    use test_log::test;
 
     use super::*;
 
@@ -313,16 +316,18 @@ mod tests {
     #[test]
     fn poseidon2_test_vectors() {
         let mut buf: &mut [Elem; CELLS] = &mut baby_bear_array![
-            0x00000000, 0x00000001, 0x00000002, 0x00000003, 0x00000004, 0x00000005, 0x00000006, 0x00000007,
-            0x00000008, 0x00000009, 0x0000000A, 0x0000000B, 0x0000000C, 0x0000000D, 0x0000000E, 0x0000000F,
-            0x00000010, 0x00000011, 0x00000012, 0x00000013, 0x00000014, 0x00000015, 0x00000016, 0x00000017,
+            0x00000000, 0x00000001, 0x00000002, 0x00000003, 0x00000004, 0x00000005, 0x00000006,
+            0x00000007, 0x00000008, 0x00000009, 0x0000000A, 0x0000000B, 0x0000000C, 0x0000000D,
+            0x0000000E, 0x0000000F, 0x00000010, 0x00000011, 0x00000012, 0x00000013, 0x00000014,
+            0x00000015, 0x00000016, 0x00000017,
         ];
         log::debug!("input: {:?}", buf);
         poseidon2_mix(&mut buf);
         let goal: [u32; CELLS] = [
-            0x08007b06, 0x7670b735, 0x70312c6b, 0x2ee92f8e, 0x7206cd75, 0x4f4d5907, 0x72e7763c, 0x3bdf2875,
-            0x1b7f7564, 0x519d73f0, 0x114ff3d0, 0x3cb62b62, 0x69871e79, 0x5826dc02, 0x1d2512c7, 0x6d6d1f1b,
-            0x140d841a, 0x6b8e6bdc, 0x2f1c5867, 0x29591570, 0x656a3362, 0x21f7c0c0, 0x4426143a, 0x5a78bbb4
+            0x08007b06, 0x7670b735, 0x70312c6b, 0x2ee92f8e, 0x7206cd75, 0x4f4d5907, 0x72e7763c,
+            0x3bdf2875, 0x1b7f7564, 0x519d73f0, 0x114ff3d0, 0x3cb62b62, 0x69871e79, 0x5826dc02,
+            0x1d2512c7, 0x6d6d1f1b, 0x140d841a, 0x6b8e6bdc, 0x2f1c5867, 0x29591570, 0x656a3362,
+            0x21f7c0c0, 0x4426143a, 0x5a78bbb4,
         ];
         for i in 0..CELLS {
             assert_eq!(buf[i].as_u32(), goal[i]);
@@ -335,7 +340,10 @@ mod tests {
     fn poseidon2_ext_matrices_match() {
         for i in 0..CELLS {
             for j in 0..CELLS {
-                assert_eq!(_M_EXT[i * CELLS + j].as_u32(), _M_EXT_MONTGOMERY[i * CELLS + j].as_u32_montgomery());
+                assert_eq!(
+                    _M_EXT[i * CELLS + j].as_u32(),
+                    _M_EXT_MONTGOMERY[i * CELLS + j].as_u32_montgomery()
+                );
             }
         }
     }

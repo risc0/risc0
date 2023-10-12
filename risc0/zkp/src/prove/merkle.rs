@@ -152,7 +152,10 @@ mod tests {
     use super::*;
     use crate::{
         core::{
-            hash::{poseidon::PoseidonHashSuite, sha::Sha256HashSuite, HashSuite, poseidon2::Poseidon2HashSuite},
+            hash::{
+                poseidon::PoseidonHashSuite, poseidon2::Poseidon2HashSuite, sha::Sha256HashSuite,
+                HashSuite,
+            },
             log2_ceil,
         },
         hal::cpu::CpuHal,
