@@ -11,11 +11,9 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  check:
+  doc-test:
     runs-on: [self-hosted, prod, Linux, cpu]
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 18
+      - uses: ./.github/actions/rustup
       - run: cargo test -p doc-test
