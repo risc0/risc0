@@ -29,12 +29,7 @@ jobs:
       - name: Determine base URL
         id: baseurl
         run: |
-          if [ "${{ github.event_name }}" == "pull_request_target" ]; then
-            full="${{ env.PAGES_BASE }}/${{ github.repository }}/pr/${{ github.event.number }}"
-          else
-            full="${{ env.PAGES_BASE }}/${{ github.repository }}/branch/${{ github.ref_name }}"
-          fi
-
+          full="${{ env.PAGES_BASE }}/${{ github.repository }}/pr/${{ github.event.number }}"
           relative=/$(echo $full | cut -d/ -f4-)
 
           echo "full=$full" >> $GITHUB_OUTPUT
