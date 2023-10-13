@@ -120,24 +120,23 @@ impl Receipt {
         Self { inner, journal }
     }
 
-    /// Verify the integrity of this receipt.
+    /// Verify that this receipt proves a successful execution of the zkVM from the given image_id.
     ///
-    /// Uses the ZKP system to cryptographically verify that each constituent
-    /// Segment has a valid receipt, and validates that these [SegmentReceipt]s
-    /// stitch together correctly, and that the initial memory image matches the
-    /// given `image_id` parameter.
+    /// Uses the zero-knowledge proof system to verify the seal, and decodes the proven
+    /// [ReceiptMetadata]. This method additionally ensures that the guest exited with a successful
+    /// status code (e.g. `Halted(0)` or `Paused(0)`), the image ID is as expected, and the journal
+    /// has not been tampered with.
     #[must_use]
     pub fn verify(&self, image_id: impl Into<Digest>) -> Result<(), VerificationError> {
         self.verify_with_context(&VerifierContext::default(), image_id)
     }
 
-    // TODO(victor) Adjust this comment.
-    /// Verify the integrity of this receipt.
+    /// Verify that this receipt proves a successful execution of the zkVM from the given image_id.
     ///
-    /// Uses the ZKP system to cryptographically verify that each constituent
-    /// Segment has a valid receipt, and validates that these [SegmentReceipt]s
-    /// stitch together correctly, and that the initial memory image matches the
-    /// given `image_id` parameter.
+    /// Uses the zero-knowledge proof system to verify the seal, and decodes the proven
+    /// [ReceiptMetadata]. This method additionally ensures that the guest exited with a successful
+    /// status code (e.g. `Halted(0)` or `Paused(0)`), the image ID is as expected, and the journal
+    /// has not been tampered with.
     #[must_use]
     pub fn verify_with_context(
         &self,
@@ -190,8 +189,9 @@ impl Receipt {
     ) -> Result<(), VerificationError> {
         self.inner.verify_integrity_with_context(ctx)?;
 
-        // Check that self.journal is attested to by the the inner receipt.
+        // Check that self.journal is attested to by the inner receipt.
         let metadata = self.inner.get_metadata()?;
+
         let expected_output = metadata.exit_code.expects_output().then(|| Output {
             journal: MaybePruned::Pruned(self.journal.digest()),
             // TODO(victor): It would be reasonable for this method to allow integrity verification
@@ -200,11 +200,19 @@ impl Receipt {
             // require it be empty.
             assumptions: Assumptions(vec![]).into(),
         });
+
         if metadata.output.digest() != expected_output.digest() {
             let empty_output = metadata.output.is_none() && self.journal.is_empty();
             if !empty_output {
-                return Err(VerificationError::ReceiptFormatError);
+                log::debug!(
+                    "journal: 0x{}, expected output digest: 0x{}, decoded output digest: 0x{}",
+                    hex::encode(&self.journal),
+                    hex::encode(expected_output.digest()),
+                    hex::encode(metadata.output.digest()),
+                );
+                return Err(VerificationError::JournalDigestMismatch);
             }
+            log::debug!("accepting zero digest for output of receipt with empty journal");
         }
 
         Ok(())
