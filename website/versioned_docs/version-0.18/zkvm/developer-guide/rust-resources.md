@@ -35,6 +35,6 @@ You can see the latest results in our [Crate Validation Report].
 [Cargo Installation]: https://doc.rust-lang.org/cargo/getting-started/installation.html
 [Cargo Book]: https://doc.rust-lang.org/cargo/
 [Cargo]: https://doc.rust-lang.org/cargo/
-[`risc0-zkvm` crate]: https://docs.rs/risc0-zkvm/0.16/risc0_zkvm/
+[`risc0-zkvm` crate]: https://docs.rs/risc0-zkvm
 [Crate Validation Report]: https://risc0.github.io/ghpages/dev/crate-validation/index.html
 [other Rust crates]: https://github.com/risc0/risc0#rust-libraries

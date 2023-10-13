@@ -36,7 +36,7 @@ The details of the RISC Zero ZK-STARK are described in our [ZKP Whitepaper] and 
 
 - [STARKs reference doc](../reference-docs/about-starks.md)
 - STARK by Hand Tutorial
-  - [Website version](stark-by-hand.md)
+  - [Website version](./stark-by-hand.md)
   - [Google Sheet version](https://docs.google.com/spreadsheets/d/1Onr41OozD62y-B0jIL7bHAH5kf771-o4xvmnHUFpOyo/edit?usp=sharing)
   - [Printable Version](assets/fibonacci-stark.pdf)
 
@@ -51,21 +51,21 @@ The details of the RISC Zero ZK-STARK are described in our [ZKP Whitepaper] and 
   - [Intro to the FRI Protocol](https://www.youtube.com/watch?v=11DIflEwx50&list=PLcPzhUaCxlCjdhONxEYZ1dgKjZh3ZvPtl&index=1)
   - [Finite Field Implementation Options: Barrett & Montgomery Multiplication](https://www.youtube.com/watch?v=hUl8ZB6hpUM&list=PLcPzhUaCxlCjdhONxEYZ1dgKjZh3ZvPtl&index=6)
 
-[zkVM]: https://docs.rs/risc0-zkvm/0.17/risc0_zkvm/
-[Receipt]: https://docs.rs/risc0-zkvm/0.17.0/risc0_zkvm/receipt/struct.Receipt.html
-[ReceiptMetadata]: https://docs.rs/risc0-zkvm/0.17/risc0_zkvm/receipt/struct.ReceiptMetadata.html
-[SegmentReceipts]: https://docs.rs/risc0-zkvm/0.17.0/risc0_zkvm/receipt/struct.SegmentReceipts.html
-[SegmentReceipt]: https://docs.rs/risc0-zkvm/0.17.0/risc0_zkvm/receipt/struct.SegmentReceipt.html
-[SuccinctReceipt]: https://docs.rs/risc0-zkvm/0.17.0/risc0_zkvm/recursion/struct.SuccinctReceipt.html
-[Session]: https://docs.rs/risc0-zkvm/0.17/risc0_zkvm/struct.Session.html
-[Receipt::verify]: https://docs.rs/risc0-zkvm/0.17/risc0_zkvm/receipt/#usage
-[ImageID]: https://docs.rs/risc0-build/0.17/risc0_build/
-[journal]: https://docs.rs/risc0-zkvm/0.17.0/risc0_zkvm/receipt/struct.Receipt.html#structfield.journal
-[env::commit()]: https://docs.rs/risc0-zkvm/0.17/risc0_zkvm/guest/env/index.html#functions
-[env::commit_slice()]: https://docs.rs/risc0-zkvm/0.17/risc0_zkvm/guest/env/index.html#functions
-[guest]: https://docs.rs/risc0-zkvm/0.17/risc0_zkvm/guest/index.html
+[zkVM]: https://docs.rs/risc0-zkvm
+[Receipt]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Receipt.html
+[ReceiptMetadata]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.ReceiptMetadata.html
+[SegmentReceipts]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.SegmentReceipts.html
+[SegmentReceipt]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.SegmentReceipt.html
+[SuccinctReceipt]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/recursion/struct.SuccinctReceipt.html
+[Session]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Session.html
+[Receipt::verify]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Receipt.html#method.verify
+[ImageID]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.SystemState.html
+[journal]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Receipt.html#structfield.journal
+[env::commit()]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest/env/fn.commit.html
+[env::commit_slice()]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest/env/fn.commit_slice.html
+[guest]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest
 [ZK-STARK]: ../reference-docs/about-starks.md
-[Segment]: https://docs.rs/risc0-zkvm/0.17/risc0_zkvm/struct.Segment.html
+[Segment]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Segment.html
 [ZKP Whitepaper]: https://www.risczero.com/proof-system-in-detail.pdf
 [Sequence Diagram]: proof-system-sequence-diagram.md
 [RISC Zero Study Club]: https://dev.risczero.com/studyclub

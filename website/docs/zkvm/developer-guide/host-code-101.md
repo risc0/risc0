@@ -67,31 +67,31 @@ Hopefully, this guide and the [zkVM Quick Start] page will be sufficient for you
 If you run into problems, don't be a stranger!
 You can file an issue on [these docs] or the [examples], and we're happy to answer questions on [Discord].
 
-[Bonsai]: ../../bonsai/
+[Bonsai]: ../../bonsai/bonsai-overview.md
 [Discord]: https://discord.gg/risczero
-[examples]: https://github.com/risc0/risc0/tree/v0.18.0/examples/
-[execute]: ../key-terminology.md#execute
+[examples]: https://github.com/risc0/risc0/tree/v0.18.0/examples
+[execute]: ../../terminology.md#execute
 [execution environment]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.ExecutorEnv.html
-[executor]: ../key-terminology.md#executor
-[guest]: ../key-terminology.md#guest
-[`guest` module]: https://docs.rs/risc0-zkvm/0.16/risc0_zkvm/guest/index.html
-[guest program]: ../key-terminology.md#guest-program
+[executor]: ../../terminology.md#executor
+[guest]: ../../terminology.md#guest
+[`guest` module]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest
+[guest program]: ../../terminology.md#guest-program
 [Hello World demo]: https://github.com/risc0/risc0/tree/v0.18.0/examples/hello-world
-[Hello World Tutorial]: https://github.com/risc0/risc0/blob/v0.18.0/examples/hello-world/tutorial.md
-[host]: ../key-terminology.md#host
-[journal]: ../key-terminology.md#journal
+[Hello World Tutorial]: https://github.com/risc0/risc0/blob/v0.18.0/examples/hello-world/tutorial
+[host]: ../../terminology.md#host
+[journal]: ../../terminology.md#journal
 [JSON demo]: https://github.com/risc0/risc0/blob/main/examples/json/src/main.rs
-[method]: ../key-terminology.md#method
-[prove]: ../key-terminology.md#prove
-[Prover]: ../key-terminology.md#prover
-[proves]: ../key-terminology.md#validity-proof
-[receipt]: ../key-terminology.md#receipt
+[method]: ../../terminology.md#method
+[prove]: ../../terminology.md#prove
+[Prover]: ../../terminology.md#prover
+[proves]: ../../terminology.md#validity-proof
+[receipt]: ../../terminology.md#receipt
 [Receipts]: receipts.md
-[`risc0-zkvm` Rust crate]: https://docs.rs/risc0-zkvm/0.16/risc0_zkvm/index.html
+[`risc0-zkvm` Rust crate]: https://docs.rs/risc0-zkvm
 [these docs]: https://github.com/risc0/website
-[verifies]: ../key-terminology.md#verify
+[verifies]: ../../terminology.md#verify
 [verifying receipts]: https://docs.rs/risc0-zkvm/0.18.0/risc0_zkvm/struct.Receipt.html#method.verify
 [zkVM Quick Start]: ../quickstart.md
 [zkVM Overview]: ../zkvm_overview.md
-[zkVM Application]: ../
-[zkVM]: ../
+[zkVM Application]: ../zkvm_overview.md
+[zkVM]: ../zkvm_overview.md

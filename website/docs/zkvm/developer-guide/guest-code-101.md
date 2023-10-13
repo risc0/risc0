@@ -55,7 +55,7 @@ There are also a number of functions available to support with debugging and per
 [`env::get_cycle_count`]: https://docs.rs/risc0-zkvm/0.18.0/risc0_zkvm/guest/env/fn.get_cycle_count.html
 [`env::log`]: https://docs.rs/risc0-zkvm/0.18.0/risc0_zkvm/guest/env/fn.log.html
 
-For more information on optimization & performance, see our pages on [Cryptography Acceleration](acceleration) and [Benchmarking](../benchmarks).
+For more information on optimization & performance, see our pages on [Cryptography Acceleration](acceleration.md) and [Benchmarking](../benchmarks.md).
 
 ## Boilerplate before `main()`
 
@@ -77,22 +77,22 @@ Hopefully, this guide and the [zkVM Quick Start] page will be sufficient for you
 If you run into problems, don't be a stranger!
 You can file an issue on [these docs] or the [examples], and we're happy to answer questions on [Discord].
 
-[guest]: ../key-terminology.md#guest
-[guest code]: ../key-terminology.md#guest
-[`guest` module]: https://docs.rs/risc0-zkvm/0.16/risc0_zkvm/guest/index.html
-[host]: ../key-terminology.md#host
-[`risc0-zkvm` Rust crate]: https://docs.rs/risc0-zkvm/0.16/risc0_zkvm/index.html
-[journal]: ../key-terminology.md#journal
-[method]: ../key-terminology.md#method
+[guest]: ../../terminology.md#guest
+[guest code]: ../../terminology.md#guest
+[`guest` module]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest
+[host]: ../../terminology.md#host
+[`risc0-zkvm` Rust crate]: https://docs.rs/risc0-zkvm
+[journal]: ../../terminology.md#journal
+[method]: ../../terminology.md#method
 [zkVM Quick Start]: ../quickstart.md
 [zkVM Overview]: ../zkvm_overview.md
 [Hello World demo]: https://github.com/risc0/risc0/tree/main/examples/hello-world
-[risc0/examples]: https://github.com/risc0/risc0/tree/v0.18.0/examples/
+[risc0/examples]: https://github.com/risc0/risc0/tree/v0.18.0/examples
 [guest environment commands]: https://docs.rs/risc0-zkvm/0.18.0/risc0_zkvm/guest/index.html
-[zkVM Application]: ../
-[zkVM]: ../
-[Bonsai]: ../../bonsai/
+[zkVM Application]: ../zkvm_overview.md
+[zkVM]: ../zkvm_overview.md
+[Bonsai]: ../../bonsai/bonsai-overview.md
 [template]: https://github.com/risc0/risc0/tree/v0.18.0/templates/rust-starter
-[examples]: https://github.com/risc0/risc0/tree/v0.18.0/examples/
+[examples]: https://github.com/risc0/risc0/tree/v0.18.0/examples
 [these docs]: https://github.com/risc0/website
 [Discord]: https://discord.gg/risczero

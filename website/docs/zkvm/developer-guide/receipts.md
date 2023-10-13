@@ -58,24 +58,22 @@ Hopefully, these guides and the [zkVM Quick Start] page will be sufficient for y
 If you run into problems, don't be a stranger!
 You can file an issue on [these docs] or the [examples], and we're happy to answer questions on [Discord].
 
-[zkVM application]: ../
-[receipt]: ../../terminology#receipt
-[validity proof]: ../../terminology#proof
-[execution]: ../../terminology#execution-trace
-[verified]: ../../terminology#verify
-[journal]: ../../terminology#journal
-[seal]: ../../terminology#seal
-[guest program]: ../../terminology#guest-program
-[Image ID]: ../../terminology#image-id
-[SessionReceipt::verify()]: https://docs.rs/risc0-zkvm/0.16/risc0_zkvm/receipt/struct.SessionReceipt.html#method.verify
-[Sessions]: ../../terminology#session
-[segments]: ../../terminology#segment
-[SegmentReceipt::verify()]: https://docs.rs/risc0-zkvm/0.16/risc0_zkvm/receipt/struct.SegmentReceipt.html#method.verify
-[receipt.verify()]: https://docs.rs/risc0-zkvm/0.16/risc0_zkvm/receipt/struct.SessionReceipt.html#method.verify
-[receipt.journal]: https://docs.rs/risc0-zkvm/0.16/risc0_zkvm/receipt/struct.SessionReceipt.html#structfield.journal
-[verify]: ../../terminology#verify
-[Verifying]: ../../terminology#verify
-[examples]: https://github.com/risc0/risc0/tree/v0.18.0/examples/
+[zkVM application]: ../zkvm_overview.md
+[receipt]: ../../terminology.md#receipt
+[validity proof]: ../../terminology.md#proof
+[execution]: ../../terminology.md#execution-trace
+[verified]: ../../terminology.md#verify
+[journal]: ../../terminology.md#journal
+[seal]: ../../terminology.md#seal
+[guest program]: ../../terminology.md#guest-program
+[Image ID]: ../../terminology.md#image-id
+[Sessions]: ../../terminology.md#session
+[segments]: ../../terminology.md#segment
+[receipt.verify()]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Receipt.html#method.verify
+[receipt.journal]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Receipt.html#structfield.journal
+[verify]: ../../terminology.md#verify
+[Verifying]: ../../terminology.md#verify
+[examples]: https://github.com/risc0/risc0/tree/v0.18.0/examples
 [these docs]: https://github.com/risc0/website
 [Discord]: https://discord.gg/risczero
-[zkVM Quick Start]: ../quickstart
+[zkVM Quick Start]: ../quickstart.md

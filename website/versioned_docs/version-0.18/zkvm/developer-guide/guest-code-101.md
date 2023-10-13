@@ -77,13 +77,13 @@ Hopefully, this guide and the [zkVM Quick Start] page will be sufficient for you
 If you run into problems, don't be a stranger!
 You can file an issue on [these docs] or the [examples], and we're happy to answer questions on [Discord].
 
-[guest]: ../key-terminology.md#guest
-[guest code]: ../key-terminology.md#guest
-[`guest` module]: https://docs.rs/risc0-zkvm/0.16/risc0_zkvm/guest/index.html
-[host]: ../key-terminology.md#host
-[`risc0-zkvm` Rust crate]: https://docs.rs/risc0-zkvm/0.16/risc0_zkvm/index.html
-[journal]: ../key-terminology.md#journal
-[method]: ../key-terminology.md#method
+[guest]: ../../terminology.md#guest
+[guest code]: ../../terminology.md#guest
+[`guest` module]: https://docs.rs/risc0-zkvm/0.18/risc0_zkvm/guest
+[host]: ../../terminology.md#host
+[`risc0-zkvm` Rust crate]: https://docs.rs/risc0-zkvm
+[journal]: ../../terminology.md#journal
+[method]: ../../terminology.md#method
 [zkVM Quick Start]: ../quickstart.md
 [zkVM Overview]: ../zkvm_overview.md
 [Hello World demo]: https://github.com/risc0/risc0/tree/main/examples/hello-world
