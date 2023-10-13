@@ -43,4 +43,4 @@ For general references, we recommend the following:
 - [PLONK paper](https://eprint.iacr.org/2019/953)
 - [PLOOKUP paper](https://eprint.iacr.org/2020/315.pdf)
 
-[receipt]: https://docs.rs/risc0-zkvm/0.16/risc0_zkvm/receipt/
+[receipt]: https://docs.rs/risc0-zkvm/0.18/risc0_zkvm/struct.Receipt.html

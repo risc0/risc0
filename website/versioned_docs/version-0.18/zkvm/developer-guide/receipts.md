@@ -67,12 +67,10 @@ You can file an issue on [these docs] or the [examples], and we're happy to answ
 [seal]: ../../terminology#seal
 [guest program]: ../../terminology#guest-program
 [Image ID]: ../../terminology#image-id
-[SessionReceipt::verify()]: https://docs.rs/risc0-zkvm/0.16/risc0_zkvm/receipt/struct.SessionReceipt.html#method.verify
 [Sessions]: ../../terminology#session
 [segments]: ../../terminology#segment
-[SegmentReceipt::verify()]: https://docs.rs/risc0-zkvm/0.16/risc0_zkvm/receipt/struct.SegmentReceipt.html#method.verify
-[receipt.verify()]: https://docs.rs/risc0-zkvm/0.16/risc0_zkvm/receipt/struct.SessionReceipt.html#method.verify
-[receipt.journal]: https://docs.rs/risc0-zkvm/0.16/risc0_zkvm/receipt/struct.SessionReceipt.html#structfield.journal
+[receipt.verify()]: https://docs.rs/risc0-zkvm/0.18/risc0_zkvm/struct.Receipt.html#method.verify
+[receipt.journal]: https://docs.rs/risc0-zkvm/0.18/risc0_zkvm/struct.Receipt.html#structfield.journal
 [verify]: ../../terminology#verify
 [Verifying]: ../../terminology#verify
 [examples]: https://github.com/risc0/risc0/tree/v0.18.0/examples/
