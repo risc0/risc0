@@ -61,42 +61,34 @@ We describe this in more detail below, and refer readers to the [ZKP Whitepaper]
 
 ## Sequence Diagram
 
-<!-- prettier-ignore -->
 ```mermaid
 sequenceDiagram
-    Note over Prover,Verifier: Circuit Setup Phase <br/><br/> The Prover & Verifier agree on the public <br/> parameters for the zkVM circuit.
-    Note over Prover,Verifier: Image ID Setup Phase <br/><br/> Anyone with access to the binary file and the <br/>public parameters can reconstruct the Image ID.
-    Note over Prover: Prover executes the binary to <br/> construct the Main Execution Trace.
-    Note over Prover: Prover computes Low Degree <br/>Extension to construct the <br/>Extended Main Execution Trace.
-    Note over Prover: Prover Merklizes the <br/>Extended Main Execution Trace
-    Note right of Prover:  Prover sends Merkle Root(s) for<br/> Extended Main Execution Trace
-    Prover->>Verifier:
-    Note left of Verifier: Verifier returns numerous random<br/> extension field elements.<br/><br/>These are used for a <br/>permutation argument,<br/>a lookup argument, and <br/> a big integer accelerator.
-    Verifier->>Prover:
-    Note over Prover: Prover computes <br/>Extended Auxiliary Execution Trace.
-    Note over Prover: Prover Merklizes the <br/>Extended Auxiliary Execution Trace.
-    Note right of Prover:  Prover sends Merkle Root for<br/> Extended Auxiliary Execution Trace
-    Prover->>Verifier:
-    Note over Prover,Verifier: Begin DEEP-ALI Protocol
-    Note left of Verifier: Verifier returns random constraint <br/>mixing parameter, alpha
-    Verifier->>Prover:
-    Note over Prover: Prover uses powers of alpha to mix (i.e. linearly combine) <br/>Constraint Polynomials into a Mixed Constraint Polynomial.
-    Note over Prover: Prover divides by the Zeroes Polynomial <br/>to construct the High Degree Validity Polynomial<br/><br/>Degree(HDVP) = MaxConstraintDegree * TraceDegree
-    Note over Prover: Prover splits High Degree Validity Polynomial <br/>into a few Low Degree Validity Polynomials, <br/><br/>Degree(LDVP) = TraceDegree
-    Note over Prover: Prover Merklizes the <br/>Low Degree Validity Polynomials.
-    Note right of Prover: Prover sends Merkle Root <br/>for Low Degree Validity Polynomials
-    Prover->>Verifier:
-    Note left of Verifier: Verifier returns a random extension <br/> field element, which serves <br/> as an out-of-domain<br/>evaluation point.
-    Verifier->>Prover:
-    Note right of Prover: Prover sends "necessary evaluations" <br/>required to evaluate constraints <br/>at out-of-domain evaluation point<br/>and coefficients of DEEP polynomials
-    Prover->>Verifier:
-    Note left of Verifier: Verifier returns random <br/>extension field element <br/>for FRI batching
-    Verifier->>Prover:
-    Note over Prover: Prover uses FRI batching randomness to mix <br/> the DEEP polynomials, forming the FRI polynomial.
-    Note right of Prover: Prover sends Merkle Root <br/> for the FRI polynomial
-    Prover->>Verifier:
-    Note over Prover,Verifier: Begin FRI protocol.
-    Note over Prover,Verifier: Details of FRI are omitted for brevity.
+  participant P as Prover
+  participant V as Verifier
+  Note over P,V: Circuit Setup Phase<br/>The Prover & Verifier agree on the public<br/>parameters for the zkVM circuit.
+  Note over P,V: Image ID Setup Phase<br/>Anyone with access to the binary file and the<br/>public parameters can reconstruct the Image ID.
+  Note over P: Execute the binary to<br/>construct the Main Execution Trace.
+  Note over P: Compute Low Degree<br/>Extension to construct the<br/>Extended Main Execution Trace.
+  Note over P: Merklize Extended Main Execution Trace
+  P->>V: Send Merkle Root(s) for<br/>Extended Main Execution Trace
+  V->>P: Return numerous random<br/>extension field elements.<br/>These are used for a<br/>permutation argument,<br/>a lookup argument, and<br/>a big integer accelerator.
+  Note over P: Compute Extended Auxiliary Execution Trace.
+  Note over P: Merklize Extended Auxiliary Execution Trace.
+  P->>V: Send Merkle Root for<br/>Extended Auxiliary Execution Trace
+  Note over P,V: Begin DEEP-ALI Protocol
+  V->>P: Return random constraint<br/>mixing parameter, alpha
+  Note over P: Use powers of alpha to mix (i.e. linearly combine)<br/>Constraint Polynomials into a Mixed Constraint Polynomial.
+  Note over P: Divide by the Zeroes Polynomial<br/>to construct the High Degree Validity Polynomial<br/>Degree(HDVP) = MaxConstraintDegree * TraceDegree
+  Note over P: Split High Degree Validity Polynomial<br/>into a few Low Degree Validity Polynomials,<br/>Degree(LDVP) = TraceDegree
+  Note over P: Merklize Low Degree Validity Polynomials.
+  P->>V: Send Merkle Root<br/>for Low Degree Validity Polynomials
+  V->>P: Return a random extension<br/>field element, which serves<br/>as an out-of-domain<br/>evaluation point.
+  P->>V: Send "necessary evaluations"<br/>required to evaluate constraints<br/>at out-of-domain evaluation point<br/>and coefficients of DEEP polynomials
+  V->>P: Return random<br/>extension field element<br/>for FRI batching
+  Note over P: Use FRI batching randomness to mix<br/> the DEEP polynomials, forming the FRI polynomial.
+  P->>V: Send Merkle Root<br/>for the FRI polynomial
+  Note over P,V: Begin FRI protocol.
+  Note over P,V: Details of FRI are omitted for brevity.
 ```
 
 ## Detailed Step-by-Step Description

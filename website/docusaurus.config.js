@@ -142,9 +142,6 @@ const config = {
         links: [{}],
         copyright: `Copyright © ${new Date().getFullYear()} RISC Zero, Inc. Built with Docusaurus.`,
       },
-      mermaid: {
-        theme: { light: "neutral", dark: "forest" },
-      },
       prism: {
         additionalLanguages: ["bash", "rust", "toml"],
         theme: lightCodeTheme,
