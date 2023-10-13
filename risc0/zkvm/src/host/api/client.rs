@@ -474,14 +474,18 @@ impl From<Result<Bytes, anyhow::Error>> for pb::api::OnIoReply {
 }
 
 fn check_server_version(requested: &semver::Version, server: &semver::Version) -> bool {
-    let comparator = semver::Comparator {
-        op: semver::Op::Tilde,
-        major: requested.major,
-        minor: Some(requested.minor),
-        patch: Some(requested.patch),
-        pre: semver::Prerelease::EMPTY,
-    };
-    comparator.matches(server)
+    if requested.pre.is_empty() {
+        let comparator = semver::Comparator {
+            op: semver::Op::Tilde,
+            major: requested.major,
+            minor: Some(requested.minor),
+            patch: Some(requested.patch),
+            pre: semver::Prerelease::EMPTY,
+        };
+        comparator.matches(server)
+    } else {
+        requested == server
+    }
 }
 
 #[cfg(test)]
@@ -513,5 +517,8 @@ mod tests {
         assert!(!test("1.0.0", "0.18.0"));
         assert!(!test("1.0.0", "2.0.0"));
         assert!(!test("1.1.0", "1.0.0"));
+
+        assert!(test("0.19.0-alpha.1", "0.19.0-alpha.1"));
+        assert!(!test("0.19.0-alpha.1", "0.19.0-alpha.2"));
     }
 }

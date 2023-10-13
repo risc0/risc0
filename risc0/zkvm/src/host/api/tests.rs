@@ -76,7 +76,7 @@ impl TestClient {
         self.work_dir.path().to_path_buf()
     }
 
-    fn execute(&mut self, env: ExecutorEnv<'_>, binary: Binary) -> Result<SessionInfo> {
+    fn execute(&mut self, env: ExecutorEnv<'_>, binary: Binary) -> SessionInfo {
         with_server(self.addr, || {
             let segments_out = AssetRequest::Path(self.get_work_path());
             self.client.execute(&env, binary, segments_out, |segment| {
@@ -86,11 +86,11 @@ impl TestClient {
         })
     }
 
-    fn prove(&self, env: ExecutorEnv<'_>, opts: ProverOpts, binary: Binary) -> Result<Receipt> {
+    fn prove(&self, env: ExecutorEnv<'_>, opts: ProverOpts, binary: Binary) -> Receipt {
         with_server(self.addr, || self.client.prove(&env, opts, binary))
     }
 
-    fn prove_segment(&self, opts: ProverOpts, segment: Asset) -> Result<SegmentReceipt> {
+    fn prove_segment(&self, opts: ProverOpts, segment: Asset) -> SegmentReceipt {
         with_server(self.addr, || {
             let receipt_out = AssetRequest::Path(self.get_work_path());
             self.client.prove_segment(opts, segment, receipt_out)
@@ -98,7 +98,7 @@ impl TestClient {
     }
 }
 
-fn with_server<T, F: FnOnce() -> Result<T>>(addr: SocketAddr, f: F) -> Result<T> {
+fn with_server<T, F: FnOnce() -> Result<T>>(addr: SocketAddr, f: F) -> T {
     let addr = addr.to_string();
     let handle = thread::Builder::new()
         .name("server".into())
@@ -108,7 +108,7 @@ fn with_server<T, F: FnOnce() -> Result<T>>(addr: SocketAddr, f: F) -> Result<T>
         })
         .unwrap();
 
-    let result = f();
+    let result = f().unwrap();
     handle.join().unwrap();
     result
 }
@@ -118,7 +118,7 @@ fn execute_elf() {
     let input = to_vec(&MultiTestSpec::DoNothing).unwrap();
     let env = ExecutorEnv::builder().add_input(&input).build().unwrap();
     let binary = Binary::new_elf_path(MULTI_TEST_PATH);
-    TestClient::new().execute(env, binary).unwrap();
+    TestClient::new().execute(env, binary);
 }
 
 #[test]
@@ -128,7 +128,7 @@ fn execute_image() {
     let program = Program::load_elf(&MULTI_TEST_ELF, GUEST_MAX_MEM as u32).unwrap();
     let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
     let binary = image.into();
-    TestClient::new().execute(env, binary).unwrap();
+    TestClient::new().execute(env, binary);
 }
 
 #[test]
@@ -137,7 +137,7 @@ fn prove_elf() {
     let env = ExecutorEnv::builder().add_input(&input).build().unwrap();
     let binary = Binary::new_elf_path(MULTI_TEST_PATH);
     let opts = ProverOpts::default();
-    let receipt = TestClient::new().prove(env, opts, binary).unwrap();
+    let receipt = TestClient::new().prove(env, opts, binary);
     receipt.verify(MULTI_TEST_ID).unwrap();
 }
 
@@ -149,14 +149,14 @@ fn prove_segment_elf() {
 
     let mut client = TestClient::new();
 
-    let session = client.execute(env, binary).unwrap();
+    let session = client.execute(env, binary);
     assert_eq!(session.segments.len(), client.segments.len());
 
     let ctx = VerifierContext::default();
     for segment in client.segments.iter() {
         let opts = ProverOpts::default();
         let segment = segment.segment.clone().unwrap().try_into().unwrap();
-        let receipt = client.prove_segment(opts, segment).unwrap();
+        let receipt = client.prove_segment(opts, segment);
         receipt.verify_integrity_with_context(&ctx).unwrap();
     }
 }

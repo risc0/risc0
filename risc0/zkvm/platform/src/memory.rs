@@ -16,24 +16,21 @@ use super::WORD_SIZE;
 
 pub const MEM_BITS: usize = 28;
 pub const MEM_SIZE: usize = 1 << MEM_BITS;
-pub const GUEST_MAX_MEM: usize = SYSTEM.start;
 pub const GUEST_MIN_MEM: usize = 0x0000_0400;
+pub const GUEST_MAX_MEM: usize = SYSTEM.start;
 
-pub fn is_guest_memory(addr: u32) -> bool {
-    GUEST_MIN_MEM <= (addr as usize) && (addr as usize) < GUEST_MAX_MEM
-}
+/// Top of stack; stack grows down from this location.
+pub const STACK_TOP: u32 = 0x0020_0400;
+/// Program (text followed by data and then bss) gets loaded in
+/// starting at this location.  HEAP begins right afterwards.
+pub const TEXT_START: u32 = 0x0020_0800;
+pub const SYSTEM: Region = Region::new(0x0C00_0000, mb(16));
+pub const PAGE_TABLE: Region = Region::new(0x0D00_0000, mb(16));
+pub const PRE_LOAD: Region = Region::new(0x0D70_0000, mb(9));
 
 pub struct Region {
     start: usize,
     len_bytes: usize,
-}
-
-const fn kb(kb: usize) -> usize {
-    kb * 1024
-}
-
-const fn mb(mb: usize) -> usize {
-    kb(mb * 1024)
 }
 
 impl Region {
@@ -59,13 +56,15 @@ impl Region {
     }
 }
 
-/// Program (text followed by data and then bss) gets loaded in
-/// starting at this location.  HEAP begins right afterwards.
-pub const TEXT_START: u32 = 0x0000_0400;
-/// Top of stack; stack grows down from this location.
-pub const STACK_TOP: u32 = 0x0BF_FFC00;
-/// Minimum mount of room to leave for the stack when allocating from the heap.
-pub const RESERVED_STACK: u32 = mb(1) as u32;
-pub const SYSTEM: Region = Region::new(0x0C00_0000, mb(16));
-pub const PAGE_TABLE: Region = Region::new(0x0D00_0000, mb(16));
-pub const PRE_LOAD: Region = Region::new(0x0D70_0000, mb(9));
+const fn kb(kb: usize) -> usize {
+    kb * 1024
+}
+
+const fn mb(mb: usize) -> usize {
+    kb(mb * 1024)
+}
+
+/// Returns whether `addr` is within guest memory bounds.
+pub fn is_guest_memory(addr: u32) -> bool {
+    GUEST_MIN_MEM <= (addr as usize) && (addr as usize) < GUEST_MAX_MEM
+}

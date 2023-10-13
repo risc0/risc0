@@ -21,7 +21,7 @@ use risc0_zkvm::{declare_syscall, sha::Digest};
 use risc0_zkvm_platform::syscall::bigint;
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
 pub enum MultiTestSpec {
     DoNothing,
     ShaConforms,
