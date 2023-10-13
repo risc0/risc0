@@ -87,7 +87,7 @@ public:
   /// Construct an FP from a uint32_t, wrap if needed
   constexpr Fp(uint32_t val) : val(encode(val)) {}
 
-  /// Construct an FP from a raw value
+  /// Construct an Fp from an already-encoded raw value
   static constexpr Fp fromRaw(uint32_t val) { return Fp(val, true); }
 
   /// Convert to a uint32_t
