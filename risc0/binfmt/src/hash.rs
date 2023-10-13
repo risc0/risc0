@@ -105,11 +105,11 @@ pub fn tagged_list_cons<S: Sha256>(tag: &str, head: &Digest, rest: &Digest) -> D
 mod tests {
     use risc0_zkp::core::hash::sha::cpu;
 
-    use super::tagged_struct;
+    use super::{tagged_struct, Digest};
 
     #[test]
     fn test_tagged_struct() {
-        let digest1 = tagged_struct::<cpu::Impl>("foo", &[], &[1, 2013265920, 3]);
+        let digest1 = tagged_struct::<cpu::Impl>("foo", &Vec::<Digest>::new(), &[1, 2013265920, 3]);
         let digest2 = tagged_struct::<cpu::Impl>("bar", &[digest1, digest1], &[2013265920, 5]);
         let digest3 = tagged_struct::<cpu::Impl>(
             "baz",

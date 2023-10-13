@@ -82,10 +82,14 @@ where
                 hook.on_post_prove_segment(&segment);
             }
         }
-        // TODO(victor): Add assumptions from the VerifierContext
+        // TODO(#982): Support unresolved assumptions here.
         let inner = InnerReceipt::Composite(CompositeReceipt {
             segments,
-            assumptions: vec![],
+            assumptions: session
+                .assumptions
+                .iter()
+                .map(|a| Ok(a.as_receipt()?.inner.clone()))
+                .collect::<Result<Vec<_>>>()?,
             journal_digest: session.journal.as_ref().map(|journal| journal.digest()),
         });
         let receipt = Receipt::new(inner, session.journal.clone().unwrap_or_default());

@@ -137,7 +137,7 @@ pub fn verify(image_id: Digest, journal: &[u8]) -> Result<(), VerifyError> {
     let assumption_metadata = ReceiptMetadata {
         pre: MaybePruned::Pruned(image_id),
         post: MaybePruned::Pruned(post_state_digest),
-        exit_code: ExitCode::Halted(0),
+        exit_code: ExitCode::Halted(0), // TODO(victor): also support paused.
         input: Digest::zero(),
         output: Some(Output {
             journal: MaybePruned::Pruned(journal_digest),

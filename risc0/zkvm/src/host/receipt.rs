@@ -17,7 +17,7 @@
 use alloc::{collections::BTreeMap, string::String, vec, vec::Vec};
 use core::fmt::Debug;
 
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use risc0_binfmt::SystemState;
 use risc0_circuit_rv32im::layout;
 use risc0_core::field::baby_bear::BabyBear;
@@ -418,13 +418,14 @@ impl CompositeReceipt {
                 ),
                 assumptions: self.assumptions_metadata()?.into(),
             };
+
             // If these digests do not match, this receipt is internally inconsistent.
             if self_output.digest() != metadata.output.digest() {
                 let empty_output = metadata.output.is_none()
                     && self.journal_digest.unwrap() == Vec::<u8>::new().digest();
                 if !empty_output {
                     log::debug!(
-                        "output does not match: expected {:?}; actual {:?}",
+                        "output digest does not match: expected {:?}; decoded {:?}",
                         &self_output,
                         &metadata.output
                     );
@@ -551,6 +552,13 @@ impl Assumption {
         match self {
             Self::Proven(receipt) => Ok(receipt.get_metadata()?.into()),
             Self::Unresolved(metadata) => Ok(metadata.clone()),
+        }
+    }
+
+    pub fn as_receipt(&self) -> Result<&Receipt> {
+        match self {
+            Self::Proven(receipt) => Ok(receipt),
+            Self::Unresolved(_) => Err(anyhow!("no receipt available for unresolved assumption")),
         }
     }
 }

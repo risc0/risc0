@@ -180,8 +180,11 @@ impl Session {
                         assumptions: Assumptions(
                             self.assumptions
                                 .iter()
-                                .map(|r| Ok(r.get_metadata()?.into()))
-                                .collect::<Result<Vec<_>>>()?,
+                                .filter_map(|a| match a {
+                                    Assumption::Proven(_) => None,
+                                    Assumption::Unresolved(r) => Some(r.clone()),
+                                })
+                                .collect::<Vec<_>>(),
                         )
                         .into(),
                     })

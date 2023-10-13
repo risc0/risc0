@@ -408,3 +408,131 @@ mod docker {
         }
     }
 }
+
+mod sys_verify {
+    use risc0_zkvm_methods::{
+        multi_test::MultiTestSpec, HELLO_COMMIT_ELF, HELLO_COMMIT_ID, MULTI_TEST_ELF, MULTI_TEST_ID,
+    };
+    use test_log::test;
+
+    use super::get_prover_server;
+    use crate::{serde::to_vec, ExecutorEnv, ProverOpts, Receipt};
+
+    fn prove_hello_commit() -> Receipt {
+        let opts = ProverOpts {
+            hashfn: "sha-256".to_string(),
+            allow_guest_failure: false,
+        };
+
+        let hello_commit_receipt = get_prover_server(&opts)
+            .unwrap()
+            .prove_elf(ExecutorEnv::default(), HELLO_COMMIT_ELF)
+            .unwrap();
+
+        // Double check that the receipt verifies.
+        hello_commit_receipt.verify(HELLO_COMMIT_ID).unwrap();
+        hello_commit_receipt
+    }
+
+    lazy_static::lazy_static! {
+        static ref HELLO_COMMIT_RECEIPT: Receipt = prove_hello_commit();
+    }
+
+    #[test]
+    fn sys_verify() {
+        let opts = ProverOpts {
+            hashfn: "sha-256".to_string(),
+            allow_guest_failure: false,
+        };
+
+        let spec = to_vec(&MultiTestSpec::SysVerify {
+            image_id: HELLO_COMMIT_ID.into(),
+            journal: HELLO_COMMIT_RECEIPT.journal.clone(),
+        })
+        .unwrap();
+
+        // Test that providing the proven assumption results in an unconditional receipt.
+        let env = ExecutorEnv::builder()
+            .add_input(&spec)
+            .add_assumption(HELLO_COMMIT_RECEIPT.clone().into())
+            .build()
+            .unwrap();
+        get_prover_server(&opts)
+            .unwrap()
+            .prove_elf(env, MULTI_TEST_ELF)
+            .unwrap()
+            .verify(MULTI_TEST_ID)
+            .unwrap();
+
+        // Test that proving without a provided assumption results in an execution failure.
+        let env = ExecutorEnv::builder().add_input(&spec).build().unwrap();
+        assert!(get_prover_server(&opts)
+            .unwrap()
+            .prove_elf(env, MULTI_TEST_ELF)
+            .is_err());
+
+        // Test that providing an unresolved assumption results in a conditional receipt.
+        let env = ExecutorEnv::builder()
+            .add_input(&spec)
+            .add_assumption(HELLO_COMMIT_RECEIPT.get_metadata().unwrap().into())
+            .build()
+            .unwrap();
+        // TODO(#982) Conditional receipts currently return an error on verification.
+        assert!(get_prover_server(&opts)
+            .unwrap()
+            .prove_elf(env, MULTI_TEST_ELF)
+            .is_err());
+
+        // TODO(#982) With conditional receipts, implement the following cases.
+        // verify with proven corraboration in verifier success.
+        // verify with unresolved corraboration in verifier success.
+        // verify with no resolution results in verifier error.
+        // verify with wrong resolution results in verifier error.
+    }
+
+    #[test]
+    fn sys_verify_integrity() {
+        let opts = ProverOpts {
+            hashfn: "sha-256".to_string(),
+            allow_guest_failure: false,
+        };
+
+        // TODO(victor) Also execute with a receipt of failure.
+        let spec = to_vec(&MultiTestSpec::SysVerifyIntegrity {
+            metadata_words: to_vec(&HELLO_COMMIT_RECEIPT.get_metadata().unwrap()).unwrap(),
+        })
+        .unwrap();
+
+        // Test that providing the proven assumption results in an unconditional receipt.
+        let env = ExecutorEnv::builder()
+            .add_input(&spec)
+            .add_assumption(HELLO_COMMIT_RECEIPT.clone().into())
+            .build()
+            .unwrap();
+        get_prover_server(&opts)
+            .unwrap()
+            .prove_elf(env, MULTI_TEST_ELF)
+            .unwrap()
+            .verify(MULTI_TEST_ID)
+            .unwrap();
+
+        // Test that proving without a provided assumption results in an execution failure.
+        let env = ExecutorEnv::builder().add_input(&spec).build().unwrap();
+        assert!(get_prover_server(&opts)
+            .unwrap()
+            .prove_elf(env, MULTI_TEST_ELF)
+            .is_err());
+
+        // Test that providing an unresolved assumption results in a conditional receipt.
+        let env = ExecutorEnv::builder()
+            .add_input(&spec)
+            .add_assumption(HELLO_COMMIT_RECEIPT.get_metadata().unwrap().into())
+            .build()
+            .unwrap();
+        // TODO(#982) Conditional receipts currently return an error on verification.
+        assert!(get_prover_server(&opts)
+            .unwrap()
+            .prove_elf(env, MULTI_TEST_ELF)
+            .is_err());
+    }
+}
