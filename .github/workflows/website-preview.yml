@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-20.04
     env:
       PREVIEW_REPO: risc0/website-preview
-      PAGES_BASE: https://risc0.github.io/website-preview/
+      PAGES_BASE: https://risc0.github.io/website-preview
 
     steps:
       - uses: actions/checkout@v3
