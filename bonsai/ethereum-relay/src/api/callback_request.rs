@@ -16,7 +16,7 @@ use axum::{extract::State, Extension};
 use bonsai_ethereum_contracts::i_bonsai_relay::CallbackRequestFilter;
 use bonsai_sdk::alpha_async::get_client_from_parts;
 
-use super::{bincode::Bincode, state::ApiState, Error, Result};
+use super::{request_extractor::RequestExtractor, state::ApiState, Error, Result};
 use crate::{
     downloader::{
         event_processor::EventProcessor,
@@ -42,9 +42,9 @@ use crate::{
 pub(crate) async fn post_callback_request<S: Storage + Sync + Send + Clone>(
     Extension(api_key): Extension<String>,
     State(s): State<ApiState<S>>,
-    Bincode(request): Bincode<CallbackRequest>,
+    RequestExtractor(request): RequestExtractor<CallbackRequest>,
 ) -> Result<(), Error> {
-    let client = get_client_from_parts(s.bonsai_url, api_key).await?;
+    let client = get_client_from_parts(s.bonsai_url, api_key, risc0_zkvm::VERSION).await?;
     let proxy = ProxyCallbackProofRequestProcessor::new(client, s.storage, Some(s.notifier));
     proxy.process_event(request.into()).await
 }

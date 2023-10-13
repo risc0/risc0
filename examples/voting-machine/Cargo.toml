@@ -1,0 +1,20 @@
+[package]
+name = "voting-machine"
+version = "0.12.0"
+edition = "2021"
+
+[dependencies]
+log = "0.4"
+risc0-zkvm = { path = "../../risc0/zkvm" }
+voting-machine-core = { path = "core" }
+voting-machine-methods = { path = "methods" }
+
+[dev-dependencies]
+env_logger = "0.10"
+hex = "0.4"
+test-log = "0.2"
+
+[features]
+cuda = ["risc0-zkvm/cuda"]
+default = []
+metal = ["risc0-zkvm/metal"]

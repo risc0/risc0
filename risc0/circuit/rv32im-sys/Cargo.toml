@@ -10,7 +10,6 @@ links = "risc0-circuit-rv32im-sys"
 
 [dependencies]
 risc0-core = { workspace = true }
-risc0-sys = { workspace = true }
 
 [build-dependencies]
 glob = "0.3"

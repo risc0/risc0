@@ -1,0 +1,73 @@
+syntax = "proto3";
+
+import "base.proto";
+
+package protos.core;
+
+message MemoryImage {
+  protos.base.CompatVersion version = 1;
+  PageTableInfo info = 2;
+  uint32 pc = 3;
+  repeated PageEntry pages = 4;
+}
+
+message PageEntry {
+  uint32 addr = 1;
+  bytes data = 2;
+}
+
+message PageTableInfo {
+  uint32 page_size = 1;
+  uint32 page_table_addr = 2;
+}
+
+message Receipt {
+  protos.base.CompatVersion version = 1;
+  InnerReceipt inner = 2;
+  bytes journal = 3;
+}
+
+message InnerReceipt {
+  oneof kind {
+    SegmentReceipts flat = 1;
+    SuccinctReceipt succinct = 2;
+    FakeReceipt fake = 3;
+  }
+}
+
+message SegmentReceipts {
+  repeated SegmentReceipt inner = 1;
+}
+
+message SegmentReceipt {
+  protos.base.CompatVersion version = 1;
+  bytes seal = 2;
+  uint32 index = 3;
+  string hashfn = 4;
+}
+
+message SuccinctReceipt {
+  protos.base.CompatVersion version = 1;
+  bytes seal = 2;
+  Digest control_id = 3;
+  ReceiptMetadata meta = 4;
+}
+
+message ReceiptMetadata {
+  SystemState pre = 1;
+  SystemState post = 2;
+  protos.base.ExitCode exit_code = 3;
+  Digest input = 4;
+  Digest output = 5;
+}
+
+message SystemState {
+  uint32 pc = 1;
+  Digest merkle_root = 2;
+}
+
+message FakeReceipt {}
+
+message Digest {
+  repeated uint32 words = 1;
+}
