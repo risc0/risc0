@@ -18,7 +18,7 @@ Our Bonsai-ETH Relay acts as a middle-man between your app contract and the Bons
 ## Getting Started
 
 The [Bonsai Foundry Template] is the best place to get started building Bonsai applications for Ethereum.
-You may also want to check out our [Bonsai Quick Start](quickstart.md) page.
+You may also want to check out our [Bonsai Quick Start](quickstart) page.
 
 [verified proofs]: https://risczero.com/news/on-chain-verification
 [zk coprocessor]: https://twitter.com/RiscZero/status/1677316664772132864

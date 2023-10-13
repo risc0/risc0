@@ -9,7 +9,7 @@ displayed_sidebar: GettingStartedSidebar
 ### Circuit
 
 [circuit]: #circuit
-[Arithmetic Circuits]: ../reference-docs/about-arithmetic-circuits.md
+[Arithmetic Circuits]: reference-docs/about-arithmetic-circuits.md
 
 A mathematical construct that acts as the "CPU" of the [zkVM] in a manner that enables creating [proofs]. <br/>
 See also: [Arithmetic Circuits]
@@ -25,7 +25,7 @@ Generally, a single cycle corresponds to a single [RISC-V] operation. However, s
 ### Commit
 
 [commit]: #commit
-[env::commit()]: https://docs.rs/risc0-zkvm/0.16/risc0_zkvm/guest/env/fn.commit.html#
+[env::commit()]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest/env/fn.commit.html
 
 Append data to the [journal]. <br/>
 See also: [env::commit()]
@@ -58,7 +58,7 @@ Run a [method] inside the [zkVM] and produce an [execution trace] which can be u
 
 [executed]: #executor
 [executor]: #executor
-[Executor documentation]: https://docs.rs/risc0-zkvm/0.16/risc0_zkvm/trait.Executor.html
+[Executor documentation]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Executor.html
 
 The portion of the [zkVM] responsible for generating the [execution trace]. <br/>
 See also: [Executor documentation], [Prover]
@@ -213,9 +213,9 @@ Verifying [session] receipts requires checking the validity of each [segment] an
 A virtual machine that runs trusted code and generates proofs.
 RISC Zero's zkVM implements the RISC-V instruction set architecture and uses a [STARK]-based proof system.
 
-[About STARKs]: ../reference-docs/about-starks.md
-[ImageID documentation]: https://docs.rs/risc0-zkvm/0.16/risc0_zkvm/receipt/struct.SystemState.html#structfield.merkle_root
+[About STARKs]: ./reference-docs/about-starks.md
+[ImageID documentation]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.SystemState.html
 [ImageID excerpt from Study Club]: https://www.youtube.com/watch?v=QwzrBHHkzFE&list=PLcPzhUaCxlCirUkJY0ltpjdtzWcz5U_6y&index=4
 [RISC Zero's ZKP Whitepaper]: https://risczero.com/proof-system-in-detail.pdf
-[Rust crate for zkVM guest]: https://docs.rs/risc0-zkvm/0.16/risc0_zkvm/guest/index.html
-[Sequence Diagram for RISC Zero's STARK]: ../proof-system/proof-system-sequence-diagram.md
+[Rust crate for zkVM guest]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest
+[Sequence Diagram for RISC Zero's STARK]: ./proof-system/proof-system-sequence-diagram.md
