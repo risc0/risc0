@@ -440,7 +440,6 @@ mod testutil {
     }
 
     pub(crate) fn hash_rows<H: Hal<Elem = BabyBearElem>>(hal_gpu: H) {
-        log::debug!("Hello\n");
         let mut rng = thread_rng();
         let hal_cpu = CpuHal::new(hal_gpu.get_hash_suite().clone());
         let hal = DualHal::new(Rc::new(hal_cpu), Rc::new(hal_gpu));
