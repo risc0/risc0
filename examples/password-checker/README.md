@@ -9,32 +9,36 @@ The policy checker accepts a password string and a salt from the host driver and
 First, [install Rust] if you don't already have it.
 
 Next, install the `cargo-risczero` tool and install the toolchain with:
+
 ```bash
 cargo install cargo-risczero
 cargo risczero install
 ```
 
 Then, run the example with:
+
 ```bash
 cargo run --release
 ```
 
 [install Rust]: https://doc.rust-lang.org/cargo/getting-started/installation.html
 
-# Why use zkVM to run this?
+## Why use zkVM to run this?
 
-Our goal is to run our own password check locally without having to share our password directly with a recipient, preferring instead to share only a SHA-256 password hash. Because the validity-checking and hashing functionality runs on the zkVM, it generates a receipt that identifies which binary was executed (via the method ID), associates shared results with this particular execution (via the journal), and confirms its own integrity (via the cryptographic seal).
+Our goal is to run our own password check locally without having to share our password directly with a recipient, preferring instead to share only a PBKDF2 SHA-256 password hash.
+Because the validity-checking and hashing functionality runs on the zkVM, it generates a receipt that identifies which binary was executed (via the image ID), associates shared results with this particular execution (via the journal), and confirms its own integrity (via the cryptographic seal).
 
-# Project organization
+## Project organization
 
-The main program that calls a method in the guest ZKVM is in [src/main.rs](src/main.rs). The code that runs inside the ZKVM is in [methods/guest/src/bin/pw_checker.rs](methods/guest/src/bin/pw_checker.rs). The rest of the project is build support.
+The main program that calls a method in the guest zkVM is in [src/main.rs](src/main.rs).
+The code that runs inside the zkVM is in [methods/guest/src/bin/pw_checker.rs](methods/guest/src/bin/pw_checker.rs).
+The rest of the project is build support.
 
 For the main RISC Zero project, see [here](https://github.com/risc0/risc0).
 
-# And now, some fine print
+## And now, some fine print
 
 This is example code meant to illustrate the fundamentals of programming with the zkVM. The password policy (and broader protocol) implemented here is intended for educational purposes only.
-
 
 ## Video Tutorial
 
