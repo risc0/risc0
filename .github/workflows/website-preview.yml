@@ -26,8 +26,6 @@ jobs:
       - run: yarn install
         working-directory: website
 
-      # This will calculate the base URL for the website, based on the event that triggered the workflow.
-      # Leave this step as it is, unless you know what you're doing.
       - name: Determine base URL
         id: baseurl
         run: |
@@ -43,13 +41,11 @@ jobs:
           echo "relative=$relative" >> $GITHUB_OUTPUT
         shell: bash
 
-      # Run your usual build command, but make sure to use the correct base URL
-      # This example assumes you're using React, and that you're using the PUBLIC_URL env variable
       - name: Build
         run: yarn build
         working-directory: website
         env:
-          PUBLIC_URL: ${{ steps.baseurl.outputs.relative }}
+          BASE_URL: ${{ steps.baseurl.outputs.relative }}
 
       - uses: EndBug/pages-preview@v1
         with:

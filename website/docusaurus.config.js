@@ -6,6 +6,7 @@ const darkCodeTheme = require("prism-react-renderer/themes/dracula");
 const math = require("remark-math");
 const katex = require("rehype-katex");
 const rustCode = require("./src/remark/rust");
+const baseUrl = process.env.BASE_URL || '/';
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
@@ -14,7 +15,7 @@ const config = {
   favicon: "img/logo.png",
 
   url: "https://dev.risczero.com",
-  baseUrl: "/",
+  baseUrl: baseUrl,
 
   organizationName: "risc0",
   projectName: "devdocs",
