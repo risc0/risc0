@@ -67,6 +67,7 @@ pub struct ExecutorEnv<'a> {
     pub(crate) input: Vec<u8>,
     pub(crate) trace: Option<Rc<RefCell<TraceCallback<'a>>>>,
     pub(crate) assumptions: Rc<RefCell<Assumptions>>,
+    pub(crate) allow_guest_failure: bool,
 }
 
 impl<'a> ExecutorEnv<'a> {
@@ -278,27 +279,20 @@ impl<'a> ExecutorEnvBuilder<'a> {
         self
     }
 
-    /*
-    /// Provide an [AssumptionResolver] which will be used to lookup assumptions that cannot be
-    /// found in the local assumptions cache.
-    ///
-    /// This can be used to allow for the creation of a database of past receipts, such that
-    /// any previously proven claims can be used in new proofs. The local cache, populated by
-    /// `add_assumption` will always be checked before forwarding a query to the
-    /// [AssumptionResolver]. If no [AssumptionResolver] is provided, only the local cache of
-    /// assumptions will be used.
-    pub fn assumption_resolver(&mut self, resolver: Rc<dyn AssumptionResolver>) -> &mut Self {
-        Rc::get_mut(&mut self.inner.assumptions).expect("assumptions list borrowed when it should not be possible").push(assumption);
-        self
-    }
-    */
-
     /// Add a callback handler for raw trace messages.
     pub fn trace_callback(
         &mut self,
         callback: impl FnMut(TraceEvent) -> Result<()> + 'a,
     ) -> &mut Self {
         self.inner.trace = Some(Rc::new(RefCell::new(callback)));
+        self
+    }
+
+    /// Set whether or not to report an error if the guest execution ends in an unsuccessful state,
+    /// such as `ExitCode::Fault` or `ExitCode::Halted(1)`. If set to `false`, an error will be
+    /// returned for any exit code except `Halted(0)` or `Paused(0)`. Default is `false`.
+    pub fn allow_guest_failure(&mut self, allow: bool) -> &mut Self {
+        self.inner.allow_guest_failure = allow;
         self
     }
 }

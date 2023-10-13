@@ -394,6 +394,7 @@ impl Server {
             env_builder.segment_limit_po2(segment_limit_po2);
         }
         env_builder.session_limit(request.session_limit);
+        env_builder.allow_guest_failure(request.allow_guest_failure);
         // TODO: add trace callback proxy
         env_builder.build()
     }

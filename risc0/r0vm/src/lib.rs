@@ -169,7 +169,6 @@ impl Cli {
         };
         let opts = ProverOpts {
             hashfn: hashfn.to_string(),
-            allow_guest_failure: self.allow_guest_failure,
         };
 
         get_prover_server(&opts).unwrap()

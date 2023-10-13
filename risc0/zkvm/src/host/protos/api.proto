@@ -92,11 +92,13 @@ message JoinResult {
 message ExecutorEnv {
   Binary binary = 1;
   map<string, string> env_vars = 2;
+  repeated string args = 8;
   repeated string slice_ios = 3;
   repeated uint32 read_fds = 4;
   repeated uint32 write_fds = 5;
   optional uint32 segment_limit_po2 = 6;
   optional uint64 session_limit = 7;
+  bool allow_guest_failure = 9;
 }
 
 message Binary {
@@ -112,7 +114,6 @@ message Binary {
 
 message ProverOpts {
   string hashfn = 1;
-  bool allow_guest_failure = 2;
 }
 
 message SessionInfo {

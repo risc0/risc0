@@ -14,7 +14,6 @@
 
 //! This module implements the Executor.
 
-use core::fmt;
 use std::{cell::RefCell, fmt::Debug, io::Write, mem, rc::Rc};
 
 use addr2line::{
@@ -98,43 +97,6 @@ impl OpCodeResult {
             exit_code,
             extra_cycles,
         }
-    }
-}
-
-/// Error variants used in the Executor
-pub enum ExecutorError {
-    // TODO(victor): After refactoring, is this variant still in use?
-    /// This variant represents an instance of Session that Faulted
-    Fault(Session),
-    /// This variant represents all other errors
-    Error(anyhow::Error),
-}
-
-// DO NOT MERGE(victor): This unsafe trait impl is indeed unsafe. It is required here because Session has
-// values inside that are not Sync and Send. This should be fixed rather than using unsafe here.
-unsafe impl Sync for ExecutorError {}
-unsafe impl Send for ExecutorError {}
-
-impl std::fmt::Debug for ExecutorError {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        fmt::Display::fmt(&self, f)
-    }
-}
-
-impl std::fmt::Display for ExecutorError {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        match self {
-            ExecutorError::Error(e) => write!(f, "{e}"),
-            ExecutorError::Fault(_) => write!(f, "Faulted Session",),
-        }
-    }
-}
-
-impl std::error::Error for ExecutorError {}
-
-impl From<anyhow::Error> for ExecutorError {
-    fn from(error: anyhow::Error) -> Self {
-        Self::Error(error)
     }
 }
 
@@ -251,15 +213,13 @@ impl<'a> ExecutorImpl<'a> {
 
     /// This will run the executor to get a [Session] which contain the results
     /// of the execution.
-    pub fn run(&mut self) -> Result<Session, ExecutorError> {
+    pub fn run(&mut self) -> Result<Session> {
         self.run_with_callback(|segment| Ok(Box::new(SimpleSegmentRef::new(segment))))
     }
 
-    // TODO(victor) Prover returns Err if the guest fails, but this method does not. What should be
-    // the semantics of this method. Check that all tests are constraining the exit status.
     /// Run the executor until [ExitCode::Halted], [ExitCode::Paused], or [ExitCode::Fault] is
     /// reached, producing a [Session] as a result.
-    pub fn run_with_callback<F>(&mut self, mut callback: F) -> Result<Session, ExecutorError>
+    pub fn run_with_callback<F>(&mut self, mut callback: F) -> Result<Session>
     where
         F: FnMut(Segment) -> Result<Box<dyn SegmentRef>>,
     {
@@ -333,6 +293,12 @@ impl<'a> ExecutorImpl<'a> {
         };
 
         let (exit_code, post_image) = run_loop()?;
+
+        if !self.env.allow_guest_failure {
+            let (ExitCode::Halted(0) | ExitCode::Paused(0)) = exit_code else {
+                bail!("guest exited with unsuccessful status: {:?}", exit_code);
+            };
+        }
 
         // Take (clear out) the list of accessed assumptions.
         // Leave the assumptions cache so that it can be used if execution is resumed from pause.

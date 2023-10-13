@@ -47,7 +47,7 @@ impl Prover for BonsaiProver {
         &self,
         env: ExecutorEnv<'_>,
         ctx: &VerifierContext,
-        opts: &ProverOpts,
+        _opts: &ProverOpts,
         image: MemoryImage,
     ) -> Result<Receipt> {
         let client = Client::from_env(crate::VERSION)?;
@@ -86,7 +86,7 @@ impl Prover for BonsaiProver {
                 let receipt_buf = client.download(&receipt_url)?;
                 let receipt: Receipt = bincode::deserialize(&receipt_buf)?;
 
-                if opts.allow_guest_failure {
+                if env.allow_guest_failure {
                     receipt.verify_integrity_with_context(ctx)?;
                     ensure!(
                         receipt.get_metadata()?.pre.digest() == image_id,

@@ -293,11 +293,13 @@ impl Client {
         pb::api::ExecutorEnv {
             binary: Some(binary),
             env_vars: env.env_vars.clone(),
+            args: env.args.clone(),
             slice_ios: env.slice_io.borrow().inner.keys().cloned().collect(),
             read_fds: env.posix_io.borrow().read_fds.keys().cloned().collect(),
             write_fds: env.posix_io.borrow().write_fds.keys().cloned().collect(),
             segment_limit_po2: env.segment_limit_po2,
             session_limit: env.session_limit,
+            allow_guest_failure: env.allow_guest_failure,
         }
     }
 

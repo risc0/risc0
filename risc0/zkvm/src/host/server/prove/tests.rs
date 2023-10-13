@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// TODO(victor): Add tests with various exit codes.
+
 use std::rc::Rc;
 
 use anyhow::Result;
@@ -38,7 +40,6 @@ fn prove_nothing(hashfn: &str) -> Result<Receipt> {
     let env = ExecutorEnv::builder().add_input(&input).build().unwrap();
     let opts = ProverOpts {
         hashfn: hashfn.to_string(),
-        allow_guest_failure: false,
     };
     get_prover_server(&opts)
         .unwrap()
@@ -421,7 +422,6 @@ mod sys_verify {
     fn prove_hello_commit() -> Receipt {
         let opts = ProverOpts {
             hashfn: "sha-256".to_string(),
-            allow_guest_failure: false,
         };
 
         let hello_commit_receipt = get_prover_server(&opts)
@@ -442,7 +442,6 @@ mod sys_verify {
     fn sys_verify() {
         let opts = ProverOpts {
             hashfn: "sha-256".to_string(),
-            allow_guest_failure: false,
         };
 
         let spec = to_vec(&MultiTestSpec::SysVerify {
@@ -494,7 +493,6 @@ mod sys_verify {
     fn sys_verify_integrity() {
         let opts = ProverOpts {
             hashfn: "sha-256".to_string(),
-            allow_guest_failure: false,
         };
 
         // TODO(victor) Also execute with a receipt of failure.

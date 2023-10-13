@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// TODO(victor): Add tests with various exit codes.
+
 use std::{
     collections::{BTreeMap, HashSet},
     io::Cursor,
