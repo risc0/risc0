@@ -30,6 +30,7 @@ use crate::{
         digest::Digest,
         hash::{
             poseidon::{self, PoseidonHashSuite},
+            poseidon2::{self, Poseidon2HashSuite},
             sha::Sha256HashSuite,
             HashSuite,
         },
@@ -57,6 +58,8 @@ const KERNEL_NAMES: &[&str] = &[
     "sha_rows",
     "poseidon_fold",
     "poseidon_rows",
+    "poseidon2_fold",
+    "poseidon2_rows",
     "zk_shift",
 ];
 
@@ -186,6 +189,60 @@ impl MetalHash for MetalHashPoseidon {
     }
 }
 
+pub struct MetalHashPoseidon2 {
+    suite: HashSuite<BabyBear>,
+    round_constants: BufferImpl<BabyBearElem>,
+    m_int_diag_ulvt: BufferImpl<BabyBearElem>,
+}
+
+impl MetalHash for MetalHashPoseidon2 {
+    fn new(hal: &MetalHal<Self>) -> Self {
+        let round_constants =
+            hal.copy_from_elem("round_constants", poseidon2::consts::ROUND_CONSTANTS);
+        let m_int_diag_ulvt =
+            hal.copy_from_elem("m_int_diag_ulvt", poseidon2::consts::M_INT_DIAG_ULVT);
+        MetalHashPoseidon2 {
+            suite: Poseidon2HashSuite::new_suite(),
+            round_constants,
+            m_int_diag_ulvt,
+        }
+    }
+
+    fn hash_fold(&self, hal: &MetalHal<Self>, io: &BufferImpl<Digest>, output_size: usize) {
+        let args = &[
+            self.round_constants.as_arg(),
+            self.m_int_diag_ulvt.as_arg(),
+            io.as_arg_with_offset(output_size),
+            io.as_arg_with_offset(output_size * 2),
+        ];
+        hal.dispatch_by_name("poseidon2_fold", args, output_size as u64);
+    }
+
+    fn hash_rows(
+        &self,
+        hal: &MetalHal<Self>,
+        output: &BufferImpl<Digest>,
+        matrix: &BufferImpl<BabyBearElem>,
+    ) {
+        let row_size = output.size();
+        let col_size = matrix.size() / output.size();
+        assert_eq!(matrix.size(), col_size * row_size);
+        let args = &[
+            self.round_constants.as_arg(),
+            self.m_int_diag_ulvt.as_arg(),
+            output.as_arg(),
+            matrix.as_arg(),
+            KernelArg::Integer(row_size as u32),
+            KernelArg::Integer(col_size as u32),
+        ];
+        hal.dispatch_by_name("poseidon2_rows", args, row_size as u64);
+    }
+
+    fn get_hash_suite(&self) -> &HashSuite<BabyBear> {
+        &self.suite
+    }
+}
+
 #[derive(Debug)]
 pub struct MetalHal<Hash: MetalHash + ?Sized> {
     pub device: Device,
@@ -196,6 +253,7 @@ pub struct MetalHal<Hash: MetalHash + ?Sized> {
 
 pub type MetalHalSha256 = MetalHal<MetalHashSha256>;
 pub type MetalHalPoseidon = MetalHal<MetalHashPoseidon>;
+pub type MetalHalPoseidon2 = MetalHal<MetalHashPoseidon2>;
 
 #[derive(Clone, Debug)]
 struct TrackedBuffer(MetalBuffer);
@@ -761,7 +819,7 @@ fn compute_launch_params(n_bits: u32, s_bits: u32, c_size: u32) -> (MTLSize, MTL
 mod tests {
     use test_log::test;
 
-    use super::{MetalHalPoseidon, MetalHalSha256};
+    use super::{MetalHalPoseidon, MetalHalPoseidon2, MetalHalSha256};
     use crate::hal::testutil;
 
     #[test]
@@ -833,6 +891,16 @@ mod tests {
     #[test]
     fn hash_rows_poseidon() {
         testutil::hash_rows(MetalHalPoseidon::new());
+    }
+
+    #[test]
+    fn hash_fold_poseidon2() {
+        testutil::hash_fold(MetalHalPoseidon2::new());
+    }
+
+    #[test]
+    fn hash_rows_poseidon2() {
+        testutil::hash_rows(MetalHalPoseidon2::new());
     }
 
     #[test]
