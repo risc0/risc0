@@ -22,15 +22,14 @@
 use std::collections::HashMap;
 use std::hash::{Hash, Hasher};
 
-use addr2line::{
-    fallible_iterator::FallibleIterator,
-    object::{read::File, Object, ObjectSegment},
-    Context, LookupResult,
-};
+use addr2line::{fallible_iterator::FallibleIterator, Context, LookupResult};
 use anyhow::{anyhow, Result};
 use gimli::{EndianRcSlice, RunTimeEndian};
+use goblin::elf::Elf;
+use object::{read::File, Object, ObjectSegment};
 use prost::Message;
 use rrs_lib::instruction_formats::{IType, JType, OPCODE_JAL, OPCODE_JALR};
+use rustc_demangle::demangle;
 
 use crate::TraceEvent;
 
@@ -74,7 +73,7 @@ fn extract_call_stack_op(insn: u32) -> Option<CallStackOp> {
             let rd_link = (decode.rd | 0x04) == 0x5;
             let rs1_link = (decode.rs1 | 0x04) == 0x5;
             match (rd_link, rs1_link) {
-                (false, false) => None,
+                (false, false) => Some(CallStackOp::Push), // Custom push
                 (false, true) => Some(CallStackOp::Pop),
                 (true, false) => Some(CallStackOp::Push),
                 (true, true) if decode.rd != decode.rs1 => Some(CallStackOp::PopPush),
@@ -92,7 +91,6 @@ fn extract_call_stack_op(insn: u32) -> Option<CallStackOp> {
 #[derive(Clone, Debug, Default)]
 struct CallNode {
     /// Counter by program counter with the current call stack.
-    // TODO(victor): Is this horribly inefficient?
     pub(crate) counts: HashMap<u32, usize>,
 
     /// Nodes representing further calls from this context.
@@ -109,6 +107,9 @@ pub struct Profiler {
 
     // Cycle count when the last instruction started
     cycle: u32,
+
+    // Pop stack
+    pop_stack: Vec<u32>,
 
     // Path of the call stack as a series of program counters,
     // representing the journey to the current node from the root
@@ -158,6 +159,15 @@ fn lookup_pc(pc: u32, ctx: &Context<EndianRcSlice<RunTimeEndian>>) -> Vec<Frame>
         .unwrap()
 }
 
+fn demangle_name(s: String) -> String {
+    if let Some(index) = s.rfind("::") {
+        let truncated = &s[0..index];
+        return truncated.to_string();
+    } else {
+        return s;
+    }
+}
+
 impl Profiler {
     /// Return a new profile from the given RISCV ELF.
     pub fn new(filename: &str, elf_data: &[u8]) -> Result<Self> {
@@ -167,6 +177,7 @@ impl Profiler {
             pc: u32::MAX,
             insn: 0,
             cycle: 0,
+            pop_stack: Vec::new(),
             root: CallNode::default(),
             call_stack_path: Vec::new(),
             ctx,
@@ -183,8 +194,25 @@ impl Profiler {
                     memory_limit: segment.address() + segment.size(),
                     file_offset: segment.file_range().0,
                     filename: bin_name,
+                    has_functions: true,
+                    has_filenames: true,
+                    has_line_numbers: true,
+                    has_inline_frames: true,
                     ..Default::default()
                 });
+            }
+        }
+
+        let binary = Elf::parse(&elf_data)?;
+
+        for sym in &binary.syms {
+            // Check if symbol is a function
+            if sym.st_type() == goblin::elf::sym::STT_FUNC {
+                let name = binary.strtab.get_at(sym.st_name).unwrap();
+                profiler
+                    .profile
+                    .function_lookup
+                    .insert(sym.st_value, demangle(name).to_string());
             }
         }
 
@@ -197,6 +225,41 @@ impl Profiler {
         self.profile.iter()
     }
 
+    /// Returns the frames name at the given pc.
+    pub fn lookup_pc(&self, pc: u64) -> Vec<Frame> {
+        let frames = if let Some(s) = self.profile.function_lookup.get(&pc).as_deref().cloned() {
+            let mut dwarf_frames = lookup_pc(pc as u32, &self.ctx);
+            dwarf_frames.reverse();
+            let name = demangle_name(s).replace("&", "");
+            let mut lineno: i64 = 0;
+            let mut filename = "unknown".to_string();
+            if dwarf_frames.len() > 0 {
+                let debug_frame = &dwarf_frames[0];
+                let debug_name = debug_frame.name.replace("&", "");
+                if name == debug_name {
+                    lineno = debug_frame.lineno;
+                    filename = debug_frame.filename.clone();
+                }
+            }
+            let mut frames = vec![Frame {
+                name,
+                lineno,
+                filename,
+            }];
+            if dwarf_frames.len() > 1 {
+                for fr in dwarf_frames[1..].iter() {
+                    frames.push(fr.clone())
+                }
+            }
+            frames
+        } else {
+            // only used when debug is set. However, it currently misinterprets when no_std
+            // lookup_pc(pc as u32, &self.ctx)
+            vec![]
+        };
+        frames
+    }
+
     /// Returns a callback to populate this profiler, suitable for
     /// passing to ProverOpts::with_trace_callback.
     pub fn make_trace_callback(&mut self) -> impl FnMut(TraceEvent) -> anyhow::Result<()> + '_ {
@@ -207,35 +270,51 @@ impl Profiler {
                     let orig_pc = self.pc;
                     let orig_insn = self.insn;
 
-                    // We get a mutable reference to the deepest CallNode by following the call_stack_path
-                    let mut curr_node = &mut self.root;
-                    for &key in &self.call_stack_path {
-                        curr_node = curr_node.calls.entry(key).or_insert_with(CallNode::default);
-                    }
-
-                    curr_node
-                        .counts
-                        .entry(orig_pc)
-                        .and_modify(|e| *e += cycles as usize)
-                        .or_insert(cycles as usize);
-
                     if let Some(op) = extract_call_stack_op(orig_insn) {
                         match op {
                             CallStackOp::Push => {
-                                self.call_stack_path.push(orig_pc);
+                                self.call_stack_path.push(pc);
+                                self.pop_stack.push(orig_pc);
                             }
-                            CallStackOp::Pop => {
+                            CallStackOp::Pop => loop {
                                 self.call_stack_path.pop().ok_or_else(|| {
                                     anyhow!("attempted to follow a return with an empty call stack")
                                 })?;
-                            }
+                                let popped = self.pop_stack.pop().ok_or_else(|| {
+                                    anyhow!("attempted to follow a return with an empty call stack")
+                                })?;
+                                if pc - 4 == popped {
+                                    break;
+                                }
+                            },
                             CallStackOp::PopPush => {
-                                self.call_stack_path.pop().ok_or_else(|| {
-                                    anyhow!("attempted to follow a return with an empty call stack")
-                                })?;
-                                self.call_stack_path.push(orig_pc);
+                                loop {
+                                    self.call_stack_path.pop().ok_or_else(|| {
+                                        anyhow!(
+                                            "attempted to follow a return with an empty call stack"
+                                        )
+                                    })?;
+                                    let popped = self.pop_stack.pop().ok_or_else(|| {
+                                        anyhow!(
+                                            "attempted to follow a return with an empty call stack"
+                                        )
+                                    })?;
+                                    if pc - 4 == popped {
+                                        break;
+                                    }
+                                }
+                                self.call_stack_path.push(pc);
+                                self.pop_stack.push(orig_pc);
                             }
                         }
+                    }
+                    match self.lookup_pc(orig_pc.into()).is_empty() {
+                        true => {
+                            if let Some(&last) = self.call_stack_path.last() {
+                                self.update_call_stack(last, cycles);
+                            }
+                        }
+                        false => self.update_call_stack(orig_pc, cycles),
                     }
 
                     // Update pc, insn, and cycle
@@ -249,17 +328,35 @@ impl Profiler {
         }
     }
 
+    fn update_call_stack(&mut self, key: u32, cycles: u32) {
+        let mut curr_node = &mut self.root;
+        let len = self.call_stack_path.len();
+        for (i, &call_stack_key) in self.call_stack_path.iter().enumerate() {
+            if i == len - 1 {
+                curr_node
+                    .counts
+                    .entry(key)
+                    .and_modify(|e| *e += cycles as usize)
+                    .or_insert(cycles as usize);
+            }
+            curr_node = curr_node
+                .calls
+                .entry(call_stack_key)
+                .or_insert_with(CallNode::default);
+        }
+    }
+
     fn walk_stack(&mut self, node: &CallNode, stack: Vec<Frame>) {
         for (&pc, count) in &node.counts {
             let mut new_stack = stack.clone();
-
-            let frames = lookup_pc(pc, &self.ctx);
+            let frames = self.lookup_pc(pc.into());
             if !frames.is_empty() {
                 new_stack.extend(frames);
             }
 
-            let mut location_ids: Vec<_> = new_stack
+            let location_ids: Vec<_> = new_stack
                 .iter()
+                .rev()
                 .map(|fr| {
                     let func_id = self.profile.get_function(&fr.name, &fr.filename);
                     // println!("{} - {} - {} - {}", pc, count, func_id, fr.name);
@@ -274,15 +371,15 @@ impl Profiler {
                     self.profile.get_location(loc)
                 })
                 .collect();
-            location_ids.reverse();
             let sample = proto::Sample {
                 location_id: location_ids,
                 value: vec![*count as i64],
                 ..Default::default()
             };
-            // println!("{:?}", sample);
 
-            self.profile.add_sample(sample);
+            if sample.location_id.len() > 0 {
+                self.profile.add_sample(sample);
+            }
 
             if let Some(next_node) = node.calls.get(&pc) {
                 self.walk_stack(next_node, new_stack);
@@ -320,6 +417,8 @@ struct ProfileBuilder {
 
     locations: HashMap<LocationKey, u64>,
 
+    function_lookup: HashMap<u64, String>,
+
     profile: proto::Profile,
 }
 
@@ -330,6 +429,7 @@ impl ProfileBuilder {
             functions: HashMap::new(),
             locations: HashMap::new(),
             profile: Default::default(),
+            function_lookup: Default::default(),
         };
 
         // First string must always be the empty string
@@ -359,7 +459,7 @@ impl ProfileBuilder {
         let id = self.profile.location.len() as u64 + 1;
         loc.id = id;
         if !self.profile.mapping.is_empty() {
-            loc.mapping_id = 0; // TODO: check this
+            loc.mapping_id = 1;
         }
         self.profile.location.push(loc);
         self.locations.insert(key, id);
@@ -399,23 +499,25 @@ impl ProfileBuilder {
     }
 
     fn iter(&self) -> impl Iterator<Item = (Vec<Frame>, usize, usize)> + '_ {
-        self.profile.sample.iter().map(|sample| {
-            let loc = &self.profile.location[sample.location_id[0] as usize - 1];
-            (
-                loc.line
-                    .iter()
-                    .map(|line| {
-                        let func = &self.profile.function[line.function_id as usize - 1];
-                        Frame {
-                            name: self.profile.string_table[func.name as usize].clone(),
-                            lineno: line.line,
-                            filename: self.profile.string_table[func.filename as usize].clone(),
-                        }
-                    })
-                    .collect(),
-                loc.address as usize,
-                sample.value[0] as usize,
-            )
+        self.profile.sample.iter().flat_map(move |sample| {
+            sample.location_id.iter().map(move |id| {
+                let loc = &self.profile.location[*id as usize - 1];
+                (
+                    loc.line
+                        .iter()
+                        .map(|line| {
+                            let func = &self.profile.function[line.function_id as usize - 1];
+                            Frame {
+                                name: self.profile.string_table[func.name as usize].clone(),
+                                lineno: line.line,
+                                filename: self.profile.string_table[func.filename as usize].clone(),
+                            }
+                        })
+                        .collect(),
+                    loc.address as usize,
+                    sample.value[0] as usize,
+                )
+            })
         })
     }
 }
