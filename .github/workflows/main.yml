@@ -1,11 +1,11 @@
 name: CI
 
 on:
-  push:
-    branches: [ main, 'release-*' ]
+  merge_group:
   pull_request:
-    branches: [ main, 'release-*' ]
-
+    branches: [main, "release-*"]
+    paths-ignore:
+      - "website/**"
   workflow_dispatch:
 
 concurrency:
@@ -39,7 +39,7 @@ jobs:
       - run: cargo sort --workspace --check bonsai/examples/governance
       - uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
+          python-version: "3.10"
       - run: python license-check.py
 
   test:
@@ -61,7 +61,6 @@ jobs:
       CUDA_LIBRARY_PATH: /usr/lib/cuda
       FEATURE: ${{ matrix.feature }}
       RISC0_BUILD_LOCKED: 1
-      RISC0_SERVER_PATH: ${{ github.workspace }}/target/release/r0vm
       RUST_BACKTRACE: full
       RUSTC_WRAPPER: sccache
     steps:
@@ -79,14 +78,10 @@ jobs:
       - uses: ./.github/actions/sccache
         with:
           key: ${{ matrix.os }}-${{ matrix.feature }}
-      - run: cargo run --bin cargo-risczero -- risczero install
+      - run: cargo run --bin cargo-risczero --no-default-features -- risczero install
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - run: cargo xtask install
-      - run: cargo xtask gen-receipt
-      - run: cargo build --release -F $FEATURE -p risc0-r0vm
-      - run: cargo test -F $FEATURE -F profiler
-      - run: cargo test --workspace -F $FEATURE --tests -- --ignored --test-threads 1
+      - run: cargo test -F $FEATURE -F profiler --workspace --exclude doc-test
       - run: cargo test -F $FEATURE -F disable-dev-mode -p risc0-r0vm
       - run: cargo test -F $FEATURE -F fault-proof -p risc0-zkvm -- tests::memory_io tests::memory_access
         if: matrix.device == 'cpu'
@@ -105,7 +100,7 @@ jobs:
       - run: cargo check -p substrate-minimal-runtime
       - uses: risc0/clippy-action@main
         with:
-          reporter: 'github-pr-check'
+          reporter: "github-pr-check"
           github_token: ${{ secrets.GITHUB_TOKEN }}
           clippy_flags: --features $FEATURE --all-targets
       - run: sccache --show-stats
@@ -148,7 +143,7 @@ jobs:
       - uses: ./.github/actions/sccache
         with:
           key: ${{ matrix.os }}-${{ matrix.feature }}
-      - run: cargo run --bin cargo-risczero -- risczero install
+      - run: cargo run --bin cargo-risczero --no-default-features -- risczero install
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: cargo build --release -F $FEATURE -p risc0-r0vm
@@ -156,7 +151,7 @@ jobs:
         working-directory: examples
 
   doc:
-    runs-on: ubuntu-latest-8-cores
+    runs-on: [self-hosted, prod, Linux, X64]
     steps:
       # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
       - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
@@ -168,10 +163,9 @@ jobs:
       - uses: ./.github/actions/sccache
         with:
           key: Linux
-      - run: cargo run --bin cargo-risczero -- risczero install
+      - run: cargo run --bin cargo-risczero --no-default-features -- risczero install
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - run: cargo xtask gen-receipt
       - run: cargo doc --no-deps --exclude=risc0-zkvm-methods --workspace
 
   check_template:
@@ -192,10 +186,10 @@ jobs:
       - uses: ./.github/actions/sccache
       - run: cargo run --bin cargo-risczero -- risczero install
         env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: cargo build --release -p risc0-r0vm
       - run: |
-          cargo run -p cargo-risczero risczero new \
+          cargo run --bin cargo-risczero risczero new \
             --template templates/rust-starter \
             --templ-subdir="" \
             --path $(pwd) \
@@ -221,7 +215,7 @@ jobs:
         with:
           node-version: 18
       - uses: ./.github/actions/sccache
-      - run: cargo run --bin cargo-risczero -- risczero install
+      - run: cargo run --bin cargo-risczero --no-default-features -- risczero install
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: cargo xtask install
@@ -238,7 +232,7 @@ jobs:
       - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
       - uses: actions/checkout@v3
       - uses: ./.github/actions/rustup
-      - run: cargo run --bin cargo-risczero -- risczero install
+      - run: cargo run --bin cargo-risczero --no-default-features -- risczero install
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: cargo test -F docker -p risc0-build

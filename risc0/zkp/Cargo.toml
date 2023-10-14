@@ -8,7 +8,7 @@ homepage = { workspace = true }
 repository = { workspace = true }
 
 [[bench]]
-name = "ntt"
+name = "hash"
 harness = false
 
 [dependencies]
@@ -27,7 +27,9 @@ risc0-core = { workspace = true }
 risc0-sys = { workspace = true, optional = true }
 risc0-zkvm-platform = { workspace = true }
 serde = { version = "1.0", default-features = false, features = ["derive"] }
-tracing = { version = "0.1", default-features = false, features = ["attributes"] }
+tracing = { version = "0.1", default-features = false, features = [
+  "attributes",
+] }
 
 [target.'cfg(not(target_os = "zkvm"))'.dependencies]
 log = "0.4"
@@ -46,16 +48,8 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [features]
 default = ["prove"]
-cuda = [
-  "dep:cust",
-  "prove",
-  "risc0-sys/cuda",
-]
-metal = [
-  "dep:metal",
-  "prove",
-  "risc0-sys/metal",
-]
+cuda = ["dep:cust", "prove", "risc0-sys/cuda"]
+metal = ["dep:metal", "prove", "risc0-sys/metal"]
 prove = [
   "dep:ff",
   "dep:lazy_static",

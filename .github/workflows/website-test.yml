@@ -1,0 +1,22 @@
+name: website-test
+
+on:
+  merge_group:
+  pull_request:
+    branches: [main, "release-*"]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  doc-test:
+    runs-on: [self-hosted, prod, Linux, cpu]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/rustup
+      - run: cargo run --bin cargo-risczero --no-default-features -- risczero install
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: cargo test -p doc-test

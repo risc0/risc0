@@ -438,14 +438,18 @@ impl pb::api::Asset {
 }
 
 fn check_client_version(client: &semver::Version, server: &semver::Version) -> bool {
-    let comparator = semver::Comparator {
-        op: semver::Op::GreaterEq,
-        major: server.major,
-        minor: Some(server.minor),
-        patch: None,
-        pre: semver::Prerelease::EMPTY,
-    };
-    comparator.matches(client)
+    if server.pre.is_empty() {
+        let comparator = semver::Comparator {
+            op: semver::Op::GreaterEq,
+            major: server.major,
+            minor: Some(server.minor),
+            patch: None,
+            pre: semver::Prerelease::EMPTY,
+        };
+        comparator.matches(client)
+    } else {
+        client == server
+    }
 }
 
 #[cfg(test)]
@@ -472,5 +476,8 @@ mod tests {
 
         assert!(!test("0.18.0", "0.19.0"));
         assert!(!test("0.18.0", "1.0.0"));
+
+        assert!(test("0.19.0-alpha.1", "0.19.0-alpha.1"));
+        assert!(!test("0.19.0-alpha.1", "0.19.0-alpha.2"));
     }
 }

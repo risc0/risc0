@@ -21,6 +21,8 @@ use risc0_build::cargo_command;
 use risc0_zkvm::{default_executor, ExecutorEnv};
 use tempfile::{tempdir, TempDir};
 
+const ZIP_CONTENTS: &[u8] = include_bytes!(concat!(env!("OUT_DIR"), "/cargo-risczero.zip"));
+
 /// Subcommands of cargo that are supported by this cargo risczero command.
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum BuildSubcommand {
@@ -42,8 +44,8 @@ impl AsRef<str> for BuildSubcommand {
 
 // TODO(victor): Provide some way to pass features.
 
-#[derive(Parser)]
 /// `cargo risczero build`
+#[derive(Parser)]
 pub struct BuildCommand {
     /// Path to the Cargo.toml file for the crate to be built.
     #[clap(long, default_value = "./Cargo.toml")]
@@ -58,8 +60,6 @@ pub struct BuildCommand {
     /// Additional arguments to pass to "cargo build" on the guest
     pub args: Vec<String>,
 }
-
-static ZIP_CONTENTS: &[u8] = include_bytes!(concat!(env!("OUT_DIR"), "/cargo-risczero.zip"));
 
 fn get_zip_file(dir: &TempDir, filename: &str) -> anyhow::Result<PathBuf> {
     let mut zip = zip::ZipArchive::new(io::Cursor::new(ZIP_CONTENTS))?;

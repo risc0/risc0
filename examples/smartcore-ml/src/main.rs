@@ -38,6 +38,10 @@ fn main() {
 }
 
 fn predict() -> Vec<u32> {
+    // We set a boolean to establish whether we are using a SVM model.  This will be passed to the guest and
+    // is important for execution of the guest code.  SVM models require an extra step that is not required of other SmartCore models.
+    let is_svm: bool = false;
+
     // Convert the model and input data from JSON into byte arrays.
     let model_bytes: Vec<u8> = serde_json::from_str(JSON_MODEL).unwrap();
     let data_bytes: Vec<u8> = serde_json::from_str(JSON_DATA).unwrap();
@@ -50,6 +54,7 @@ fn predict() -> Vec<u32> {
         rmp_serde::from_slice(&data_bytes).expect("data filed to deserialize byte array");
 
     let env = ExecutorEnv::builder()
+        .add_input(&to_vec(&is_svm).expect("bool failed to serialize"))
         .add_input(&to_vec(&model).expect("model failed to serialize"))
         .add_input(&to_vec(&data).expect("data failed to serialize"))
         .build()
@@ -74,6 +79,19 @@ fn predict() -> Vec<u32> {
 
 #[cfg(test)]
 mod test {
+    use risc0_zkvm::{
+        default_executor,
+        serde::{from_slice, to_vec},
+        ExecutorEnv,
+    };
+    use smartcore::{
+        linalg::basic::matrix::DenseMatrix,
+        svm::{
+            svc::{SVCParameters, SVC},
+            Kernels,
+        },
+    };
+    use smartcore_ml_methods::ML_TEMPLATE_ELF;
     #[test]
     fn basic() {
         const EXPECTED: &[u32] = &[
@@ -86,5 +104,70 @@ mod test {
         ];
         let result = super::predict();
         assert_eq!(EXPECTED, result);
+    }
+    #[test]
+    fn svc() {
+        // We set is_svm equal to true for a SVC model.
+        let is_svm: bool = true;
+
+        // Create sample x and y data to train a SVC.
+        let x = DenseMatrix::from_2d_array(&[
+            &[5.1, 3.5, 1.4, 0.2],
+            &[4.9, 3.0, 1.4, 0.2],
+            &[4.7, 3.2, 1.3, 0.2],
+            &[4.6, 3.1, 1.5, 0.2],
+            &[5.0, 3.6, 1.4, 0.2],
+            &[5.4, 3.9, 1.7, 0.4],
+            &[4.6, 3.4, 1.4, 0.3],
+            &[5.0, 3.4, 1.5, 0.2],
+            &[4.4, 2.9, 1.4, 0.2],
+            &[4.9, 3.1, 1.5, 0.1],
+            &[7.0, 3.2, 4.7, 1.4],
+            &[6.4, 3.2, 4.5, 1.5],
+            &[6.9, 3.1, 4.9, 1.5],
+            &[5.5, 2.3, 4.0, 1.3],
+            &[6.5, 2.8, 4.6, 1.5],
+            &[5.7, 2.8, 4.5, 1.3],
+            &[6.3, 3.3, 4.7, 1.6],
+            &[4.9, 2.4, 3.3, 1.0],
+            &[6.6, 2.9, 4.6, 1.3],
+            &[5.2, 2.7, 3.9, 1.4],
+        ]);
+
+        let y: Vec<i32> = vec![
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        ];
+
+        // We create the SVC params and train the SVC model.
+        // The paramaters will NOT get serialized due to a serde_skip command in the source code for the SVC struct.
+        let knl = Kernels::linear();
+        let params = &SVCParameters::default().with_c(200.0).with_kernel(knl);
+        let svc = SVC::fit(&x, &y, params).unwrap();
+
+        // This simulates importing a serialized model.
+        let svc_serialized = serde_json::to_string(&svc).expect("failed to serialize");
+        let svc_deserialized: SVC<f64, i32, DenseMatrix<f64>, Vec<i32>> =
+            serde_json::from_str(&svc_serialized).expect("unable to deserialize JSON");
+
+        let env = ExecutorEnv::builder()
+            .add_input(&to_vec(&is_svm).expect("bool failed to serialize"))
+            .add_input(&to_vec(&svc_deserialized).expect("model failed to serialize"))
+            .add_input(&to_vec(&x).expect("data failed to serialize"))
+            .build()
+            .unwrap();
+
+        // We run the executor and bypass the prover.
+        let exec = default_executor();
+        let session = exec.execute_elf(env, ML_TEMPLATE_ELF);
+
+        // We read the result commited to the journal by the guest code.
+        let result: Vec<f64> = from_slice(&(session.unwrap()).journal).unwrap();
+
+        let y_expected: Vec<f64> = vec![
+            -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
+            1.0, 1.0, 1.0, 1.0, 1.0,
+        ];
+
+        assert_eq!(result, y_expected);
     }
 }

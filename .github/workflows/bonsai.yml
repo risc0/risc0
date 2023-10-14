@@ -1,11 +1,11 @@
 name: bonsai
 
 on:
-  push:
-    branches: [ main, 'release-*' ]
+  merge_group:
   pull_request:
-    branches: [ main, 'release-*' ]
-
+    branches: [main, "release-*"]
+    paths-ignore:
+      - "website/**"
   workflow_dispatch:
 
 concurrency:
@@ -32,7 +32,7 @@ jobs:
       - name: install rust
         uses: ./.github/actions/rustup
 
-      - run: cargo run --bin cargo-risczero -- risczero install
+      - run: cargo run --bin cargo-risczero --no-default-features -- risczero install
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

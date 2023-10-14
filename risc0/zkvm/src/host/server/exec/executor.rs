@@ -35,7 +35,7 @@ use risc0_zkp::{
 };
 use risc0_zkvm_platform::{
     fileno,
-    memory::GUEST_MAX_MEM,
+    memory::{is_guest_memory, GUEST_MAX_MEM},
     syscall::{
         bigint, ecall, halt,
         reg_abi::{REG_A0, REG_A1, REG_A2, REG_A3, REG_A4, REG_T0},
@@ -554,11 +554,11 @@ impl<'a> ExecutorImpl<'a> {
 
     fn ecall_halt(&mut self) -> Result<OpCodeResult> {
         let tot_reg = self.monitor.load_register(REG_A0);
-        let output_ptr = self.monitor.load_register(REG_A1);
+        let output_ptr = self.monitor.load_guest_addr_from_register(REG_A1)?;
         let halt_type = tot_reg & 0xff;
         let user_exit = (tot_reg >> 8) & 0xff;
         self.monitor
-            .load_array::<{ DIGEST_WORDS * WORD_SIZE }>(output_ptr)?;
+            .load_array_from_guest_addr::<{ DIGEST_WORDS * WORD_SIZE }>(output_ptr)?;
 
         match halt_type {
             halt::TERMINATE => Ok(OpCodeResult::new(
@@ -577,20 +577,20 @@ impl<'a> ExecutorImpl<'a> {
 
     fn ecall_input(&mut self) -> Result<OpCodeResult> {
         log::debug!("ecall(input)");
-        let in_addr = self.monitor.load_register(REG_A0);
+        let in_addr = self.monitor.load_guest_addr_from_register(REG_A0)?;
         self.monitor
-            .load_array::<{ DIGEST_WORDS * WORD_SIZE }>(in_addr)?;
+            .load_array_from_guest_addr::<{ DIGEST_WORDS * WORD_SIZE }>(in_addr)?;
         Ok(OpCodeResult::new(self.pc + WORD_SIZE as u32, None, 0))
     }
 
     fn ecall_sha(&mut self) -> Result<OpCodeResult> {
-        let out_state_ptr = self.monitor.load_register(REG_A0);
-        let in_state_ptr = self.monitor.load_register(REG_A1);
-        let mut block1_ptr = self.monitor.load_register(REG_A2);
-        let mut block2_ptr = self.monitor.load_register(REG_A3);
+        let out_state_ptr = self.monitor.load_guest_addr_from_register(REG_A0)?;
+        let in_state_ptr = self.monitor.load_guest_addr_from_register(REG_A1)?;
+        let mut block1_ptr = self.monitor.load_guest_addr_from_register(REG_A2)?;
+        let mut block2_ptr = self.monitor.load_guest_addr_from_register(REG_A3)?;
         let count = self.monitor.load_register(REG_A4);
 
-        let in_state: [u8; DIGEST_BYTES] = self.monitor.load_array(in_state_ptr)?;
+        let in_state: [u8; DIGEST_BYTES] = self.monitor.load_array_from_guest_addr(in_state_ptr)?;
         let mut state: [u32; DIGEST_WORDS] = bytemuck::cast_slice(&in_state).try_into().unwrap();
         for word in &mut state {
             *word = word.to_be();
@@ -600,11 +600,14 @@ impl<'a> ExecutorImpl<'a> {
         for _ in 0..count {
             let mut block = [0u32; BLOCK_WORDS];
             for (i, word) in block.iter_mut().enumerate() {
-                *word = self.monitor.load_u32(block1_ptr + (i * WORD_SIZE) as u32)?;
+                *word = self
+                    .monitor
+                    .load_u32_from_guest_addr(block1_ptr + (i * WORD_SIZE) as u32)?;
             }
             for i in 0..DIGEST_WORDS {
-                block[DIGEST_WORDS + i] =
-                    self.monitor.load_u32(block2_ptr + (i * WORD_SIZE) as u32)?;
+                block[DIGEST_WORDS + i] = self
+                    .monitor
+                    .load_u32_from_guest_addr(block2_ptr + (i * WORD_SIZE) as u32)?;
             }
             log::debug!("Compressing block {block:02x?}");
             sha2::compress256(
@@ -624,7 +627,7 @@ impl<'a> ExecutorImpl<'a> {
         }
 
         self.monitor
-            .store_region(out_state_ptr, bytemuck::cast_slice(&state))?;
+            .store_region_to_guest_memory(out_state_ptr, bytemuck::cast_slice(&state))?;
 
         Ok(OpCodeResult::new(
             self.pc + WORD_SIZE as u32,
@@ -637,16 +640,19 @@ impl<'a> ExecutorImpl<'a> {
     // Take reads inputs x, y, and N and writes output z = x * y mod N.
     // Note that op is currently ignored but must be set to 0.
     fn ecall_bigint(&mut self) -> Result<OpCodeResult> {
-        let z_ptr = self.monitor.load_register(REG_A0);
+        let z_ptr = self.monitor.load_guest_addr_from_register(REG_A0)?;
         let op = self.monitor.load_register(REG_A1);
-        let x_ptr = self.monitor.load_register(REG_A2);
-        let y_ptr = self.monitor.load_register(REG_A3);
-        let n_ptr = self.monitor.load_register(REG_A4);
+        let x_ptr = self.monitor.load_guest_addr_from_register(REG_A2)?;
+        let y_ptr = self.monitor.load_guest_addr_from_register(REG_A3)?;
+        let n_ptr = self.monitor.load_guest_addr_from_register(REG_A4)?;
 
         let mut load_bigint_le_bytes = |ptr: u32| -> Result<[u8; bigint::WIDTH_BYTES]> {
             let mut arr = [0u32; bigint::WIDTH_WORDS];
             for (i, word) in arr.iter_mut().enumerate() {
-                *word = self.monitor.load_u32(ptr + (i * WORD_SIZE) as u32)?.to_le();
+                *word = self
+                    .monitor
+                    .load_u32_from_guest_addr(ptr + (i * WORD_SIZE) as u32)?
+                    .to_le();
             }
             Ok(bytemuck::cast(arr))
         };
@@ -676,7 +682,7 @@ impl<'a> ExecutorImpl<'a> {
             .enumerate()
         {
             self.monitor
-                .store_u32(z_ptr + (i * WORD_SIZE) as u32, word.to_le())?;
+                .store_u32_to_guest_memory(z_ptr + (i * WORD_SIZE) as u32, word.to_le())?;
         }
 
         Ok(OpCodeResult::new(
@@ -688,9 +694,12 @@ impl<'a> ExecutorImpl<'a> {
 
     fn ecall_software(&mut self) -> Result<OpCodeResult> {
         let to_guest_ptr = self.monitor.load_register(REG_A0);
+        if !is_guest_memory(to_guest_ptr) && to_guest_ptr != 0 {
+            bail!("address 0x{to_guest_ptr:08x} is an invalid guest address");
+        }
         let to_guest_words = self.monitor.load_register(REG_A1);
-        let name_ptr = self.monitor.load_register(REG_A2);
-        let syscall_name = self.monitor.load_string(name_ptr)?;
+        let name_ptr = self.monitor.load_guest_addr_from_register(REG_A2)?;
+        let syscall_name = self.monitor.load_string_from_guest_memory(name_ptr)?;
         log::trace!("Guest called syscall {syscall_name:?} requesting {to_guest_words} words back");
 
         let chunks = align_up(to_guest_words as usize, WORD_SIZE);
@@ -717,8 +726,15 @@ impl<'a> ExecutorImpl<'a> {
         };
 
         let (a0, a1) = syscall.regs;
-        self.monitor
-            .store_region(to_guest_ptr, bytemuck::cast_slice(&syscall.to_guest))?;
+        if to_guest_ptr != 0 {
+            // the guest pointer is set to null for cases where the guest is
+            // sending info to the host so there's no data to write to guest
+            // memory.
+            self.monitor.store_region_to_guest_memory(
+                to_guest_ptr,
+                bytemuck::cast_slice(&syscall.to_guest),
+            )?;
+        }
         self.monitor.store_register(REG_A0, a0);
         self.monitor.store_register(REG_A1, a1);
 

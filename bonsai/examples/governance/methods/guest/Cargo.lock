@@ -49,7 +49,6 @@ name = "bonsai-governance-showcase-guest"
 version = "0.1.0"
 dependencies = [
  "k256",
- "radium",
  "risc0-zkvm",
  "tiny-keccak",
 ]
@@ -348,11 +347,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "radium"
-version = "0.7.1"
-source = "git+https://github.com/bitvecto-rs/radium?rev=723bed5abd75994ee4b7221b8b12c9f4e77ce408#723bed5abd75994ee4b7221b8b12c9f4e77ce408"
-
-[[package]]
 name = "rand_core"
 version = "0.6.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -373,7 +367,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-binfmt"
-version = "0.18.0"
+version = "0.19.0-alpha.1"
 dependencies = [
  "anyhow",
  "elf",
@@ -385,7 +379,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im"
-version = "0.18.0"
+version = "0.19.0-alpha.1"
 dependencies = [
  "anyhow",
  "log",
@@ -397,7 +391,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-core"
-version = "0.18.0"
+version = "0.19.0-alpha.1"
 dependencies = [
  "bytemuck",
  "rand_core",
@@ -405,7 +399,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkp"
-version = "0.18.0"
+version = "0.19.0-alpha.1"
 dependencies = [
  "anyhow",
  "blake2",
@@ -424,14 +418,13 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "0.18.0"
+version = "0.19.0-alpha.1"
 dependencies = [
  "anyhow",
  "bytemuck",
  "cfg-if",
  "getrandom",
  "hex",
- "libm",
  "log",
  "num-derive",
  "num-traits",
@@ -448,7 +441,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "0.18.0"
+version = "0.19.0-alpha.1"
 dependencies = [
  "bytemuck",
  "getrandom",
