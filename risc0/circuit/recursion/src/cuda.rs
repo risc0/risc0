@@ -32,7 +32,7 @@ use crate::{
     GLOBAL_MIX, GLOBAL_OUT, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA,
 };
 
-const KERNELS_FATBIN: &[u8] = include_bytes!(concat!(env!("OUT_DIR"), "/kernels.fatbin"));
+const KERNELS_FATBIN: &[u8] = include_bytes!(env!("RECURSION_CUDA_PATH"));
 
 pub struct CudaCircuitHal<CH: CudaHash> {
     hal: Rc<CudaHal<CH>>, // retain a reference to ensure the context remains valid
