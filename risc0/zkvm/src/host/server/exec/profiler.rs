@@ -265,7 +265,7 @@ impl Profiler {
     pub fn make_trace_callback(&mut self) -> impl FnMut(TraceEvent) -> anyhow::Result<()> + '_ {
         move |event| {
             match event {
-                TraceEvent::Instruction { cycle, pc, insn } => {
+                TraceEvent::InstructionStart { cycle, pc, insn } => {
                     let cycles = cycle - self.cycle;
                     let orig_pc = self.pc;
                     let orig_insn = self.insn;

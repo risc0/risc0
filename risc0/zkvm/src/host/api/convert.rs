@@ -80,7 +80,7 @@ impl TryFrom<pb::api::TraceEvent> for TraceEvent {
 
     fn try_from(event: pb::api::TraceEvent) -> Result<Self> {
         Ok(match event.kind.ok_or(malformed_err())? {
-            pb::api::trace_event::Kind::InsnStart(event) => TraceEvent::Instruction {
+            pb::api::trace_event::Kind::InsnStart(event) => TraceEvent::InstructionStart {
                 cycle: event.cycle,
                 pc: event.pc,
                 insn: event.insn,

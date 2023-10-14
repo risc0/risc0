@@ -505,7 +505,7 @@ impl<'a> ExecutorImpl<'a> {
 
     fn advance(&mut self, opcode: OpCode, op_result: OpCodeResult) -> Option<ExitCode> {
         if let Some(ref trace) = self.env.trace {
-            trace.borrow_mut()(TraceEvent::Instruction {
+            trace.borrow_mut()(TraceEvent::InstructionStart {
                 cycle: self.session_cycle() as u32,
                 pc: self.pc,
                 insn: opcode.insn,

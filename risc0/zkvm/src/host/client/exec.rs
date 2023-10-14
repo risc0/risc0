@@ -18,7 +18,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Clone, Eq, Ord, PartialEq, PartialOrd, Serialize, Deserialize)]
 pub enum TraceEvent {
     /// An instruction has started at the given program counter
-    Instruction {
+    InstructionStart {
         /// Cycle number since startup
         cycle: u32,
         /// Program counter of the instruction being executed
@@ -47,7 +47,7 @@ pub enum TraceEvent {
 impl std::fmt::Debug for TraceEvent {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match self {
-            Self::Instruction { cycle, pc, insn } => {
+            Self::InstructionStart { cycle, pc, insn } => {
                 write!(f, "Instruction({cycle}, 0x{pc:08X}, 0x{insn:08X})")
             }
             Self::RegisterSet { idx, value } => write!(f, "RegisterSet({idx}, 0x{value:08X})"),
