@@ -734,6 +734,7 @@ mod docker {
                     // li x5, 1337
                     cycle: cycle1,
                     pc: pc1,
+                    ..
                 }, TraceEvent::RegisterSet {
                     idx: 5,
                     value: 1337,
@@ -741,6 +742,7 @@ mod docker {
                     // sw x5, 548(zero)
                     cycle: cycle2,
                     pc: pc2,
+                    ..
                 }, TraceEvent::RegisterSet {
                     idx: 6,
                     value: 0x08000000,
