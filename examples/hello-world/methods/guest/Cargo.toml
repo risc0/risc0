@@ -7,8 +7,3 @@ edition = "2021"
 
 [dependencies]
 risc0-zkvm = { path = "../../../../risc0/zkvm", default-features = false }
-
-[profile.release]
-# Decomment the following when profiling
-# debug = true
-
