@@ -15,32 +15,44 @@
 #![no_main]
 
 use password_checker_core::PasswordRequest;
-use risc0_zkvm::guest::env;
-use risc0_zkvm::sha::{Impl, Sha256};
+use pbkdf2::pbkdf2_hmac_array;
+use risc0_zkvm::{guest::env, sha::Digest};
+use sha2::Sha256;
 
 risc0_zkvm::guest::entry!(main);
+
+/// Constant policy, compiled into the guest, for this example.
+///
+/// Note that the policy gets included in the program, and so is reflected in
+/// the image ID. If the policy is changed, it will change the image ID.
+const POLICY: PasswordPolicy = PasswordPolicy {
+    min_length: 3,
+    max_length: 64,
+    min_numeric: 2,
+    min_uppercase: 2,
+    min_lowercase: 2,
+    min_special_chars: 1,
+};
+
+/// Number of iterations used for PBKDF2. In this demo, it is set to a low value to keep proving
+/// times short. Using a higher iteration count would be required for a real deployment.
+const PBKDF2_SHA256_ITERATIONS: u32 = 10;
 
 pub fn main() {
     let request: PasswordRequest = env::read();
 
-    let policy = PasswordPolicy {
-        min_length: 3,
-        max_length: 64,
-        min_numeric: 2,
-        min_uppercase: 2,
-        min_lowercase: 2,
-        min_special_chars: 1,
-    };
-
-    if !policy.is_valid(&request.password) {
+    if !POLICY.is_valid(&request.password) {
         panic!("Password invalid. Please try again.");
     }
 
-    let mut salted_password = request.password.as_bytes().to_vec();
-    salted_password.extend(request.salt);
-    let password_hash = Impl::hash_bytes(&salted_password[..]);
+    let password_hash: Digest = pbkdf2_hmac_array::<Sha256, 32>(
+        &request.password.as_bytes(),
+        &request.salt,
+        PBKDF2_SHA256_ITERATIONS,
+    )
+    .into();
 
-    env::commit(&*password_hash);
+    env::commit(&password_hash);
     env::commit(&request.salt);
 }
 
