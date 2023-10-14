@@ -730,14 +730,14 @@ mod docker {
         let occurances = events
             .windows(4)
             .filter_map(|window| {
-                if let &[TraceEvent::InstructionStart {
+                if let &[TraceEvent::Instruction {
                     // li x5, 1337
                     cycle: cycle1,
                     pc: pc1,
                 }, TraceEvent::RegisterSet {
                     idx: 5,
                     value: 1337,
-                }, TraceEvent::InstructionStart {
+                }, TraceEvent::Instruction {
                     // sw x5, 548(zero)
                     cycle: cycle2,
                     pc: pc2,
