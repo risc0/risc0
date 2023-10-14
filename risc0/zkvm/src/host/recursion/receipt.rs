@@ -15,15 +15,15 @@
 use alloc::{collections::VecDeque, vec::Vec};
 
 use risc0_binfmt::{read_sha_halfs, tagged_struct, write_sha_halfs, SystemState};
+use risc0_circuit_recursion::{control_id::RECURSION_CONTROL_IDS, CircuitImpl};
 use risc0_core::field::baby_bear::BabyBearElem;
 use risc0_zkp::{adapter::CircuitInfo, core::digest::Digest, verify::VerificationError};
 use serde::{Deserialize, Serialize};
 
-use super::CircuitImpl;
+use super::CIRCUIT;
 use crate::host::{
     control_id::POSEIDON_CONTROL_ID,
     receipt::{ReceiptMetadata, VerifierContext},
-    recursion::{circuit_impl::CIRCUIT_CORE, control_id::RECURSION_CONTROL_IDS},
 };
 
 /// This function gets valid control IDs from the poseidon and recursion
@@ -119,7 +119,7 @@ impl SuccinctReceipt {
             .get("poseidon")
             .ok_or(VerificationError::InvalidHashSuite)?;
         // Verify the receipt itself is correct
-        risc0_zkp::verify::verify(&CIRCUIT_CORE, suite, &self.seal, check_code)?;
+        risc0_zkp::verify::verify(&CIRCUIT, suite, &self.seal, check_code)?;
         // Extract the globals from the seal
         let output_elems: &[BabyBearElem] =
             bytemuck::cast_slice(&self.seal[..CircuitImpl::OUTPUT_SIZE]);

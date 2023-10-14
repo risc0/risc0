@@ -20,7 +20,6 @@ metal = { version = "0.25", optional = true }
 paste = "1.0"
 rand_core = "0.6"
 risc0-core = { workspace = true }
-risc0-sys = { workspace = true, optional = true }
 risc0-zkvm-platform = { workspace = true }
 serde = { version = "1.0", default-features = false, features = ["derive"] }
 tracing = { version = "0.1", default-features = false, features = [
@@ -32,6 +31,7 @@ log = "0.4"
 ndarray = { version = "0.15", features = ["rayon"], optional = true }
 rand = { version = "0.8", optional = true }
 rayon = { version = "1.5", optional = true }
+risc0-sys = { workspace = true, optional = true }
 sha2 = { version = "0.10", default-features = false, features = ["compress"] }
 
 [dev-dependencies]
