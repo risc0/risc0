@@ -13,8 +13,7 @@
 // limitations under the License.
 
 use anyhow::{anyhow, bail};
-use hello_world_methods::{MULTIPLY_ELF, MULTIPLY_PATH};
-use risc0_zkvm::serde::to_vec;
+use ecdsa_methods::{BENCHMARK_ELF, BENCHMARK_PATH};
 use risc0_zkvm::{default_executor, ExecutorEnv, Profiler};
 
 // Simple main to load and run the benchmark binary in the RISC Zero Executor.
@@ -25,36 +24,27 @@ fn main() -> anyhow::Result<()> {
         Err(std::env::VarError::NotPresent) => None,
         Err(e) => bail!("malformed env var: {}", e),
     };
-    println!("{}", MULTIPLY_PATH);
+    println!("{}", BENCHMARK_PATH);
     let mut profiler = pprof_out
         .as_ref()
-        .map(|path| Profiler::new(&path, MULTIPLY_ELF))
+        .map(|path| Profiler::new(&path, BENCHMARK_ELF))
         .transpose()?;
 
     {
         // Build the executor env.
-        let a = 10u64;
-        let b: u64 = 11u64;
         let env = {
             let mut builder = ExecutorEnv::builder();
             if let Some(ref mut p) = profiler {
                 builder.trace_callback(p.make_trace_callback());
             }
             builder
-                .add_input(&to_vec(&a).unwrap())
-                .add_input(&to_vec(&b).unwrap())
                 .build()
                 .map_err(|e| anyhow!("environment build failed: {:?}", e))?
         };
 
-        // Execute the example.
+        // Execute the benchmarks.
         let exec = default_executor();
-        let session = exec.execute_elf(env, MULTIPLY_ELF)?;
-        let mut cycles = 0u32;
-        for segment in session.segments {
-            cycles += segment.cycles
-        }
-        println!("{cycles}");
+        exec.execute_elf(env, BENCHMARK_ELF)?;
     }
 
     // Write out the pprof.

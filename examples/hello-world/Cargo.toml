@@ -4,9 +4,8 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-anyhow = "1.0"
 hello-world-methods = { path = "methods" }
-risc0-zkvm = { path = "../../risc0/zkvm", features = ["profiler"] }
+risc0-zkvm = { path = "../../risc0/zkvm" }
 serde = "1.0"
 
 [features]
