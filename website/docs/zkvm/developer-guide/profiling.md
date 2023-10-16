@@ -60,6 +60,8 @@ let env = {
 let exec = default_executor();
 exec.execute_elf(env, FIBONACCI_ELF)?;
 ```
+This will only [execute] the guest code, without generating a [receipt].
+
 5. Write out the profile
 ```rust
 if let Some(ref mut p) = profiler {
@@ -84,7 +86,7 @@ Then, run the example with:
 RISC0_PPROF_OUT=./profile.pb cargo run --release
 ```
 
-The above command will run the Fibonacci computation for 1000 iterations and write the profiling output to profile.pb.
+The above command will [execute] the Fibonacci computation for 1000 iterations and write the profiling output to profile.pb.
 
 ### Step 3: Visualization
 To visualize the profiling data using `pprof`, run:
@@ -95,7 +97,7 @@ pprof -http=127.0.0.1:8089 ../target/riscv-guest/riscv32im-risc0-zkvm-elf/releas
 Then navigate to http://localhost:8089 in your browser.
 
 ## What to Expect
-When you visualize the profiling data, you should be able to see the relative performance of the three Fibonacci implementations. 
+When you visualize the profiling data, you should be able to see the relative performance in terms of [cycle count] of the three Fibonacci implementations. 
 This can be helpful in understanding the efficiency of various algorithms and their performance implications.
 
 ![Graph](../../img/profiling_graph.png)
@@ -108,9 +110,6 @@ This can be helpful in understanding the efficiency of various algorithms and th
 
 [profiling example]: https://github.com/risc0/risc0/examples/profiling
 [pprof]: https://github.com/google/pprof
+[receipt]: ../../terminology.md#receipt
 [cycle count]: ../../terminology.md#clock-cycles
-[datasheet]: https://dev.risczero.com/datasheet.pdf
-[execution]: ../../terminology.md#execute
-[install-toolchain]: ../install.md
-[proving]: ../../terminology.md#prover
-[risc0 repository]: https://github.com/risc0/risc0
+[execute]: ../../terminology.md#execute
