@@ -1,7 +1,7 @@
 # Profiling guest code
 
 In this guide, we'll explore how to effectively profile guest code within the RISC0 ZKVM, offering insights and tools to improve performance.
-We'll be using three different implementations of the Fibonacci sequence calculation to demonstrate how to profile guest code. 
+We'll be using three different implementations of the Fibonacci sequence calculation to demonstrate how to profile guest code.
 You can find all the code used as example in the [profiling example].
 
 ## Overview
@@ -21,15 +21,20 @@ The guest code reads the number of iterations from the host, computes the Fibona
 Here's are the step to enable profiling:
 
 1. Enable the `profile` feature of the `zkvm` in your `Cargo.toml`.
+
 ```toml
 risc0-zkvm = { version = "0.18", features = ["profiler"] }
 ```
+
 2. Initialize the profiler with your guest code.
+
 ```rust
 let mut profiler = Profiler::new("profile_output_path", FIBONACCI_ELF);
 ```
+
 This will initialize the profiler using the `FIBONACCI_ELF` as guest code, and will write the output of the profiling to `profile_output_path`.
 Alternatively, you can define the `profile_output_path` using an env variable:
+
 ```rust
 let pprof_out = match std::env::var("RISC0_PPROF_OUT") {
         Ok(val) => Some(val),
@@ -41,7 +46,9 @@ let mut profiler = pprof_out
     .map(|path| Profiler::new(&path, FIBONACCI_ELF))
     .transpose()?;
 ```
+
 3. Build the executor environment
+
 ```rust
 let iterations = 1000;
 let env = {
@@ -55,14 +62,18 @@ let env = {
         .map_err(|e| anyhow!("environment build failed: {:?}", e))?
 };
 ```
+
 4. Execute the guest code
+
 ```rust
 let exec = default_executor();
 exec.execute_elf(env, FIBONACCI_ELF)?;
 ```
+
 This will only [execute] the guest code, without generating a [receipt].
 
 5. Write out the profile
+
 ```rust
 if let Some(ref mut p) = profiler {
     p.finalize();
@@ -75,13 +86,17 @@ if let Some(ref mut p) = profiler {
 ## Usage
 
 ### Step 1: Prerequisites
+
 First, install the [pprof] tool with
+
 ```bash
 go install github.com/google/pprof@latest
 ```
 
 ### Step 2: Running
+
 Then, run the example with:
+
 ```bash
 RISC0_PPROF_OUT=./profile.pb cargo run --release
 ```
@@ -89,7 +104,9 @@ RISC0_PPROF_OUT=./profile.pb cargo run --release
 The above command will [execute] the Fibonacci computation for 1000 iterations and write the profiling output to profile.pb.
 
 ### Step 3: Visualization
+
 To visualize the profiling data using `pprof`, run:
+
 ```bash
 pprof -http=127.0.0.1:8089 ../target/riscv-guest/riscv32im-risc0-zkvm-elf/release/fibonacci profile.pb
 ```
@@ -97,13 +114,15 @@ pprof -http=127.0.0.1:8089 ../target/riscv-guest/riscv32im-risc0-zkvm-elf/releas
 Then navigate to http://localhost:8089 in your browser.
 
 ## What to Expect
-When you visualize the profiling data, you should be able to see the relative performance in terms of [cycle count] of the three Fibonacci implementations. 
+
+When you visualize the profiling data, you should be able to see the relative performance in terms of [cycle count] of the three Fibonacci implementations.
 This can be helpful in understanding the efficiency of various algorithms and their performance implications.
 
 ![Graph](../../img/profiling_graph.png)
 ![Flamegraph](../../img/profiling_flamegraph.png)
 
 ## Notes
+
 - Ensure that the environment variable `RISC0_PPROF_OUT` is set to the desired output path for the profiling data.
 - The Fibonacci functions are annotated with `#[inline(never)]` and `#[no_mangle]` to ensure that their symbols are easily recognizable in the profiling data.
 - The `black_box` function is used to prevent the compiler from optimizing out the calculations.
