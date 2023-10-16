@@ -78,13 +78,7 @@ jobs:
           mkdir -p ./dev/crate-validation/results
           cp ${{ runner.temp }}/crate-validation/profile-results.json ./dev/crate-validation/results/${{ github.sha }}.json
 
-          # If the index.json file does not exist, create it.
           [ ! -f ./dev/crate-validation/results/index.json ] && touch ./dev/crate-validation/results/index.json
-
-          # This script reads the index.json file and extracts all the JSON objects that have a "timestamp" and "hash" key-value pair.
-          # It then appends a new JSON object with the current timestamp and commit hash to the end of the extracted objects.
-          # The resulting JSON objects are then formatted into an array and written back to the index.json file.
-          # The script uses grep to extract the JSON objects, awk to append the new object and format the output, and tr to remove whitespace.
           grep -ohE '{\s*"timestamp":\s*\d+\s*,\s*"hash":\s*"[a-zA-Z0-9]+"\s*}' ./dev/crate-validation/results/index.json |\
           awk -v timestamp="$(date +%s)" -v hash="${{ github.sha }}" \
           'BEGIN{print "["} {print $0","} END{print "{\"timestamp\":"timestamp", \"hash\":\""hash"\"}" "\n]"}' |\
