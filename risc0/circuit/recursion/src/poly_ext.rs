@@ -2354,32 +2354,32 @@ PolyExtStep::True, // zirgen/circuit/recursion/recursion.cpp:17
 PolyExtStep::Get(17), // top(recursion::Top)/code(recursion::Code)/select(OneHot)/micro_ops(Reg)(components/mux.h:49)
 PolyExtStep::Get(16), // top(recursion::Top)/code(recursion::Code)/write_addr(Reg)(zirgen/circuit/recursion/top.cpp:22)
 PolyExtStep::Get(23), // top(recursion::Top)/code(recursion::Code)/inst(Mux)/micro_ops(recursion::MicroInsts)/inst[0](recursion::MicroInst)/opcode(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(448), // top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[0](recursion::MicroOp)/decode(OneHot)/add(Reg)(compiler/edsl/edsl.h:116)
-PolyExtStep::Get(454), // top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[0](recursion::MicroOp)/decode(OneHot)/sub(Reg)(compiler/edsl/edsl.h:116)
+PolyExtStep::Get(448), // top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[0](recursion::MicroOp)/decode(OneHot)/add(Reg)(compiler/edsl/edsl.h:117)
+PolyExtStep::Get(454), // top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[0](recursion::MicroOp)/decode(OneHot)/sub(Reg)(compiler/edsl/edsl.h:117)
 PolyExtStep::Mul(2330, 2), // components/onehot.h:46
 PolyExtStep::Add(2329, 2331), // components/onehot.h:46
-PolyExtStep::Get(456), // top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[0](recursion::MicroOp)/decode(OneHot)/mul(Reg)(compiler/edsl/edsl.h:116)
+PolyExtStep::Get(456), // top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[0](recursion::MicroOp)/decode(OneHot)/mul(Reg)(compiler/edsl/edsl.h:117)
 PolyExtStep::Mul(2333, 3), // components/onehot.h:46
 PolyExtStep::Add(2332, 2334), // components/onehot.h:46
-PolyExtStep::Get(458), // top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[0](recursion::MicroOp)/decode(OneHot)/inv(Reg)(compiler/edsl/edsl.h:116)
+PolyExtStep::Get(458), // top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[0](recursion::MicroOp)/decode(OneHot)/inv(Reg)(compiler/edsl/edsl.h:117)
 PolyExtStep::Mul(2336, 4), // components/onehot.h:46
 PolyExtStep::Add(2335, 2337), // components/onehot.h:46
-PolyExtStep::Get(464), // top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[0](recursion::MicroOp)/decode(OneHot)/eq(Reg)(compiler/edsl/edsl.h:116)
+PolyExtStep::Get(464), // top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[0](recursion::MicroOp)/decode(OneHot)/eq(Reg)(compiler/edsl/edsl.h:117)
 PolyExtStep::Mul(2339, 5), // components/onehot.h:46
 PolyExtStep::Add(2338, 2340), // components/onehot.h:46
-PolyExtStep::Get(470), // top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[0](recursion::MicroOp)/decode(OneHot)/read_iop_header(Reg)(compiler/edsl/edsl.h:116)
+PolyExtStep::Get(470), // top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[0](recursion::MicroOp)/decode(OneHot)/read_iop_header(Reg)(compiler/edsl/edsl.h:117)
 PolyExtStep::Mul(2342, 6), // components/onehot.h:46
 PolyExtStep::Add(2341, 2343), // components/onehot.h:46
-PolyExtStep::Get(476), // top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[0](recursion::MicroOp)/decode(OneHot)/read_iop_body(Reg)(compiler/edsl/edsl.h:116)
+PolyExtStep::Get(476), // top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[0](recursion::MicroOp)/decode(OneHot)/read_iop_body(Reg)(compiler/edsl/edsl.h:117)
 PolyExtStep::Mul(2345, 7), // components/onehot.h:46
 PolyExtStep::Add(2344, 2346), // components/onehot.h:46
-PolyExtStep::Get(482), // top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[0](recursion::MicroOp)/decode(OneHot)/mix_rng(Reg)(compiler/edsl/edsl.h:116)
+PolyExtStep::Get(482), // top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[0](recursion::MicroOp)/decode(OneHot)/mix_rng(Reg)(compiler/edsl/edsl.h:117)
 PolyExtStep::Mul(2348, 8), // components/onehot.h:46
 PolyExtStep::Add(2347, 2349), // components/onehot.h:46
-PolyExtStep::Get(488), // top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[0](recursion::MicroOp)/decode(OneHot)/select(Reg)(compiler/edsl/edsl.h:116)
+PolyExtStep::Get(488), // top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[0](recursion::MicroOp)/decode(OneHot)/select(Reg)(compiler/edsl/edsl.h:117)
 PolyExtStep::Mul(2351, 9), // components/onehot.h:46
 PolyExtStep::Add(2350, 2352), // components/onehot.h:46
-PolyExtStep::Get(494), // top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[0](recursion::MicroOp)/decode(OneHot)/extract(Reg)(compiler/edsl/edsl.h:116)
+PolyExtStep::Get(494), // top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[0](recursion::MicroOp)/decode(OneHot)/extract(Reg)(compiler/edsl/edsl.h:117)
 PolyExtStep::Mul(2354, 10), // components/onehot.h:46
 PolyExtStep::Add(2353, 2355), // components/onehot.h:46
 PolyExtStep::Sub(2356, 2328), // components/onehot.h:40
@@ -2627,32 +2627,32 @@ PolyExtStep::AndEqz(81, 2380), // zirgen/circuit/recursion/wom.cpp:49
 PolyExtStep::AndCond(77, 2354, 82), // zirgen/circuit/recursion/micro.cpp:129
 PolyExtStep::Add(2327, 1), // zirgen/circuit/recursion/micro.cpp:151
 PolyExtStep::Get(27), // top(recursion::Top)/code(recursion::Code)/inst(Mux)/micro_ops(recursion::MicroInsts)/inst[1](recursion::MicroInst)/opcode(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(512), // top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[1](recursion::MicroOp)/decode(OneHot)/add(Reg)(compiler/edsl/edsl.h:116)
-PolyExtStep::Get(518), // top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[1](recursion::MicroOp)/decode(OneHot)/sub(Reg)(compiler/edsl/edsl.h:116)
+PolyExtStep::Get(512), // top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[1](recursion::MicroOp)/decode(OneHot)/add(Reg)(compiler/edsl/edsl.h:117)
+PolyExtStep::Get(518), // top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[1](recursion::MicroOp)/decode(OneHot)/sub(Reg)(compiler/edsl/edsl.h:117)
 PolyExtStep::Mul(2520, 2), // components/onehot.h:46
 PolyExtStep::Add(2519, 2521), // components/onehot.h:46
-PolyExtStep::Get(524), // top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[1](recursion::MicroOp)/decode(OneHot)/mul(Reg)(compiler/edsl/edsl.h:116)
+PolyExtStep::Get(524), // top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[1](recursion::MicroOp)/decode(OneHot)/mul(Reg)(compiler/edsl/edsl.h:117)
 PolyExtStep::Mul(2523, 3), // components/onehot.h:46
 PolyExtStep::Add(2522, 2524), // components/onehot.h:46
-PolyExtStep::Get(530), // top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[1](recursion::MicroOp)/decode(OneHot)/inv(Reg)(compiler/edsl/edsl.h:116)
+PolyExtStep::Get(530), // top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[1](recursion::MicroOp)/decode(OneHot)/inv(Reg)(compiler/edsl/edsl.h:117)
 PolyExtStep::Mul(2526, 4), // components/onehot.h:46
 PolyExtStep::Add(2525, 2527), // components/onehot.h:46
-PolyExtStep::Get(536), // top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[1](recursion::MicroOp)/decode(OneHot)/eq(Reg)(compiler/edsl/edsl.h:116)
+PolyExtStep::Get(536), // top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[1](recursion::MicroOp)/decode(OneHot)/eq(Reg)(compiler/edsl/edsl.h:117)
 PolyExtStep::Mul(2529, 5), // components/onehot.h:46
 PolyExtStep::Add(2528, 2530), // components/onehot.h:46
-PolyExtStep::Get(542), // top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[1](recursion::MicroOp)/decode(OneHot)/read_iop_header(Reg)(compiler/edsl/edsl.h:116)
+PolyExtStep::Get(542), // top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[1](recursion::MicroOp)/decode(OneHot)/read_iop_header(Reg)(compiler/edsl/edsl.h:117)
 PolyExtStep::Mul(2532, 6), // components/onehot.h:46
 PolyExtStep::Add(2531, 2533), // components/onehot.h:46
-PolyExtStep::Get(548), // top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[1](recursion::MicroOp)/decode(OneHot)/read_iop_body(Reg)(compiler/edsl/edsl.h:116)
+PolyExtStep::Get(548), // top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[1](recursion::MicroOp)/decode(OneHot)/read_iop_body(Reg)(compiler/edsl/edsl.h:117)
 PolyExtStep::Mul(2535, 7), // components/onehot.h:46
 PolyExtStep::Add(2534, 2536), // components/onehot.h:46
-PolyExtStep::Get(554), // top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[1](recursion::MicroOp)/decode(OneHot)/mix_rng(Reg)(compiler/edsl/edsl.h:116)
+PolyExtStep::Get(554), // top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[1](recursion::MicroOp)/decode(OneHot)/mix_rng(Reg)(compiler/edsl/edsl.h:117)
 PolyExtStep::Mul(2538, 8), // components/onehot.h:46
 PolyExtStep::Add(2537, 2539), // components/onehot.h:46
-PolyExtStep::Get(560), // top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[1](recursion::MicroOp)/decode(OneHot)/select(Reg)(compiler/edsl/edsl.h:116)
+PolyExtStep::Get(560), // top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[1](recursion::MicroOp)/decode(OneHot)/select(Reg)(compiler/edsl/edsl.h:117)
 PolyExtStep::Mul(2541, 9), // components/onehot.h:46
 PolyExtStep::Add(2540, 2542), // components/onehot.h:46
-PolyExtStep::Get(566), // top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[1](recursion::MicroOp)/decode(OneHot)/extract(Reg)(compiler/edsl/edsl.h:116)
+PolyExtStep::Get(566), // top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[1](recursion::MicroOp)/decode(OneHot)/extract(Reg)(compiler/edsl/edsl.h:117)
 PolyExtStep::Mul(2544, 10), // components/onehot.h:46
 PolyExtStep::Add(2543, 2545), // components/onehot.h:46
 PolyExtStep::Sub(2546, 2518), // components/onehot.h:40
@@ -2900,32 +2900,32 @@ PolyExtStep::AndEqz(164, 2570), // zirgen/circuit/recursion/wom.cpp:49
 PolyExtStep::AndCond(160, 2544, 165), // zirgen/circuit/recursion/micro.cpp:129
 PolyExtStep::Add(2327, 2), // zirgen/circuit/recursion/micro.cpp:151
 PolyExtStep::Get(31), // top(recursion::Top)/code(recursion::Code)/inst(Mux)/micro_ops(recursion::MicroInsts)/inst[2](recursion::MicroInst)/opcode(Reg)(compiler/edsl/component.h:154)
-PolyExtStep::Get(583), // top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[2](recursion::MicroOp)/decode(OneHot)/add(Reg)(compiler/edsl/edsl.h:116)
-PolyExtStep::Get(588), // top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[2](recursion::MicroOp)/decode(OneHot)/sub(Reg)(compiler/edsl/edsl.h:116)
+PolyExtStep::Get(583), // top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[2](recursion::MicroOp)/decode(OneHot)/add(Reg)(compiler/edsl/edsl.h:117)
+PolyExtStep::Get(588), // top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[2](recursion::MicroOp)/decode(OneHot)/sub(Reg)(compiler/edsl/edsl.h:117)
 PolyExtStep::Mul(2710, 2), // components/onehot.h:46
 PolyExtStep::Add(2709, 2711), // components/onehot.h:46
-PolyExtStep::Get(593), // top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[2](recursion::MicroOp)/decode(OneHot)/mul(Reg)(compiler/edsl/edsl.h:116)
+PolyExtStep::Get(593), // top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[2](recursion::MicroOp)/decode(OneHot)/mul(Reg)(compiler/edsl/edsl.h:117)
 PolyExtStep::Mul(2713, 3), // components/onehot.h:46
 PolyExtStep::Add(2712, 2714), // components/onehot.h:46
-PolyExtStep::Get(598), // top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[2](recursion::MicroOp)/decode(OneHot)/inv(Reg)(compiler/edsl/edsl.h:116)
+PolyExtStep::Get(598), // top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[2](recursion::MicroOp)/decode(OneHot)/inv(Reg)(compiler/edsl/edsl.h:117)
 PolyExtStep::Mul(2716, 4), // components/onehot.h:46
 PolyExtStep::Add(2715, 2717), // components/onehot.h:46
-PolyExtStep::Get(603), // top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[2](recursion::MicroOp)/decode(OneHot)/eq(Reg)(compiler/edsl/edsl.h:116)
+PolyExtStep::Get(603), // top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[2](recursion::MicroOp)/decode(OneHot)/eq(Reg)(compiler/edsl/edsl.h:117)
 PolyExtStep::Mul(2719, 5), // components/onehot.h:46
 PolyExtStep::Add(2718, 2720), // components/onehot.h:46
-PolyExtStep::Get(608), // top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[2](recursion::MicroOp)/decode(OneHot)/read_iop_header(Reg)(compiler/edsl/edsl.h:116)
+PolyExtStep::Get(608), // top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[2](recursion::MicroOp)/decode(OneHot)/read_iop_header(Reg)(compiler/edsl/edsl.h:117)
 PolyExtStep::Mul(2722, 6), // components/onehot.h:46
 PolyExtStep::Add(2721, 2723), // components/onehot.h:46
-PolyExtStep::Get(613), // top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[2](recursion::MicroOp)/decode(OneHot)/read_iop_body(Reg)(compiler/edsl/edsl.h:116)
+PolyExtStep::Get(613), // top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[2](recursion::MicroOp)/decode(OneHot)/read_iop_body(Reg)(compiler/edsl/edsl.h:117)
 PolyExtStep::Mul(2725, 7), // components/onehot.h:46
 PolyExtStep::Add(2724, 2726), // components/onehot.h:46
-PolyExtStep::Get(618), // top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[2](recursion::MicroOp)/decode(OneHot)/mix_rng(Reg)(compiler/edsl/edsl.h:116)
+PolyExtStep::Get(618), // top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[2](recursion::MicroOp)/decode(OneHot)/mix_rng(Reg)(compiler/edsl/edsl.h:117)
 PolyExtStep::Mul(2728, 8), // components/onehot.h:46
 PolyExtStep::Add(2727, 2729), // components/onehot.h:46
-PolyExtStep::Get(623), // top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[2](recursion::MicroOp)/decode(OneHot)/select(Reg)(compiler/edsl/edsl.h:116)
+PolyExtStep::Get(623), // top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[2](recursion::MicroOp)/decode(OneHot)/select(Reg)(compiler/edsl/edsl.h:117)
 PolyExtStep::Mul(2731, 9), // components/onehot.h:46
 PolyExtStep::Add(2730, 2732), // components/onehot.h:46
-PolyExtStep::Get(628), // top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[2](recursion::MicroOp)/decode(OneHot)/extract(Reg)(compiler/edsl/edsl.h:116)
+PolyExtStep::Get(628), // top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[2](recursion::MicroOp)/decode(OneHot)/extract(Reg)(compiler/edsl/edsl.h:117)
 PolyExtStep::Mul(2734, 10), // components/onehot.h:46
 PolyExtStep::Add(2733, 2735), // components/onehot.h:46
 PolyExtStep::Sub(2736, 2708), // components/onehot.h:40
@@ -14040,7 +14040,7 @@ PolyExtStep::AndEqz(723, 13287), // zirgen/circuit/recursion/wom.cpp:66
 PolyExtStep::Sub(3097, 3118), // zirgen/circuit/recursion/wom.cpp:66
 PolyExtStep::AndEqz(724, 13288), // zirgen/circuit/recursion/wom.cpp:66
 PolyExtStep::AndCond(721, 13283, 725), // zirgen/circuit/recursion/wom.cpp:64
-PolyExtStep::Get(37), // top(recursion::Top)/recursion::WomHeader/recursion::impl::WomPlonkElement/addr(Reg)(compiler/edsl/edsl.h:116)
+PolyExtStep::Get(37), // top(recursion::Top)/recursion::WomHeader/recursion::impl::WomPlonkElement/addr(Reg)(compiler/edsl/edsl.h:117)
 PolyExtStep::Sub(13289, 3100), // zirgen/circuit/recursion/wom.cpp:60
 PolyExtStep::Sub(1, 13290), // zirgen/circuit/recursion/wom.cpp:62
 PolyExtStep::Mul(13290, 13291), // zirgen/circuit/recursion/wom.cpp:62
