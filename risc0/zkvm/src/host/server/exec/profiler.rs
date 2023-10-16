@@ -102,7 +102,7 @@ struct CallNode {
 
 impl CallNode {
     /// Returns a formatted CallNode useful for debugging.
-    pub fn fmt(&self, indent: usize, profiler: &Profiler) -> String {
+    fn fmt(&self, indent: usize, profiler: &Profiler) -> String {
         let mut output = String::new();
         let indent_str = " ".repeat(indent);
 
@@ -436,7 +436,7 @@ impl Profiler {
     /// returning the compiled profile protobuf.
     pub fn finalize(&mut self) {
         let root_ref = Rc::clone(&self.root);
-        // println!("{}", self.root.borrow().fmt(0, &self));
+        log::debug!("{}", self.root.borrow().fmt(0, &self));
         self.walk_stack(root_ref, Vec::new());
     }
 

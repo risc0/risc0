@@ -1,0 +1,13 @@
+[package]
+name = "fibonacci-guest"
+version = "0.1.0"
+edition = "2021"
+
+[workspace]
+
+[dependencies]
+nalgebra = "0.32"
+risc0-zkvm = { path = "../../../../risc0/zkvm", default-features = false, features = ["std"] }
+
+[profile.release]
+debug=1

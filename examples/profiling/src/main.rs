@@ -13,22 +13,24 @@
 // limitations under the License.
 
 use anyhow::{anyhow, bail};
-use ecdsa_methods::{BENCHMARK_ELF, BENCHMARK_PATH};
+use fibonacci_methods::{FIBONACCI_ELF, FIBONACCI_PATH};
 use risc0_zkvm::{default_executor, ExecutorEnv, Profiler};
 
-// Simple main to load and run the benchmark binary in the RISC Zero Executor.
 fn main() -> anyhow::Result<()> {
+    env_logger::init();
     // Get a profile path from an environment variable and build the profiler.
     let pprof_out = match std::env::var("RISC0_PPROF_OUT") {
         Ok(val) => Some(val),
         Err(std::env::VarError::NotPresent) => None,
         Err(e) => bail!("malformed env var: {}", e),
     };
-    println!("{}", BENCHMARK_PATH);
+    println!("{}", FIBONACCI_PATH);
     let mut profiler = pprof_out
         .as_ref()
-        .map(|path| Profiler::new(&path, BENCHMARK_ELF))
+        .map(|path| Profiler::new(&path, FIBONACCI_ELF))
         .transpose()?;
+
+    let iterations = 1000;
 
     {
         // Build the executor env.
@@ -38,16 +40,17 @@ fn main() -> anyhow::Result<()> {
                 builder.trace_callback(p.make_trace_callback());
             }
             builder
+                .add_input(&[iterations])
                 .build()
                 .map_err(|e| anyhow!("environment build failed: {:?}", e))?
         };
 
-        // Execute the benchmarks.
+        // Execute the guest code.
         let exec = default_executor();
-        exec.execute_elf(env, BENCHMARK_ELF)?;
+        exec.execute_elf(env, FIBONACCI_ELF)?;
     }
 
-    // Write out the pprof.
+    // Write out the profile.
     if let Some(ref mut p) = profiler {
         p.finalize();
         let report = p.encode_to_vec();
