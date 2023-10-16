@@ -107,6 +107,7 @@ This can be helpful in understanding the efficiency of various algorithms and th
 - Ensure that the environment variable `RISC0_PPROF_OUT` is set to the desired output path for the profiling data.
 - The Fibonacci functions are annotated with `#[inline(never)]` and `#[no_mangle]` to ensure that their symbols are easily recognizable in the profiling data.
 - The `black_box` function is used to prevent the compiler from optimizing out the calculations.
+- To maximize the number of nodes visualized by [pprof] you can add `-edgefraction 0 -nodefraction 0 -nodecount 100000` when starting [pprof].
 
 [profiling example]: https://github.com/risc0/risc0/examples/profiling
 [pprof]: https://github.com/google/pprof
