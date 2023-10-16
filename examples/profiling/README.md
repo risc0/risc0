@@ -46,9 +46,6 @@ pprof -http=127.0.0.1:8089 ../target/riscv-guest/riscv32im-risc0-zkvm-elf/releas
 
 Then navigate to http://localhost:8089 in your browser.
 
-[install Rust]: https://doc.rust-lang.org/cargo/getting-started/installation.html
-[pprof]: https://github.com/google/pprof
-
 ## What to Expect
 When you visualize the profiling data, you should be able to see the relative performance of the three Fibonacci implementations. This can be helpful in understanding the efficiency of various algorithms and their performance implications.
 
@@ -57,4 +54,5 @@ When you visualize the profiling data, you should be able to see the relative pe
 - The Fibonacci functions are annotated with `#[inline(never)]` and `#[no_mangle]` to ensure that their symbols are easily recognizable in the profiling data.
 - The `black_box` function is used to prevent the compiler from optimizing out the calculations.
 
-
+[install Rust]: https://doc.rust-lang.org/cargo/getting-started/installation.html
+[pprof]: https://github.com/google/pprof
