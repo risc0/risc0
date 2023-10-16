@@ -19,8 +19,11 @@
 //! top level stack frame.  (More than one stack frame may show up
 //! in the case of inlined functions).
 
+use std::cell::RefCell;
 use std::collections::HashMap;
+use std::fmt::Write;
 use std::hash::{Hash, Hasher};
+use std::rc::Rc;
 
 use addr2line::{fallible_iterator::FallibleIterator, Context, LookupResult};
 use anyhow::{anyhow, Result};
@@ -94,7 +97,33 @@ struct CallNode {
     pub(crate) counts: HashMap<u32, usize>,
 
     /// Nodes representing further calls from this context.
-    pub(crate) calls: HashMap<u32, CallNode>,
+    pub(crate) calls: HashMap<u32, Rc<RefCell<CallNode>>>,
+}
+
+impl CallNode {
+    /// Returns a formatted CallNode useful for debugging.
+    pub fn fmt(&self, indent: usize, profiler: &Profiler) -> String {
+        let mut output = String::new();
+        let indent_str = " ".repeat(indent);
+
+        writeln!(output, "{}Counts:", indent_str).unwrap();
+        for (key, value) in &self.counts {
+            let frames = &profiler.lookup_pc(*key as u64);
+            if !frames.is_empty() {
+                let name = &frames[0].name;
+                writeln!(output, "{}  {} ({}): {}", indent_str, name, key, value).unwrap();
+            }
+        }
+
+        writeln!(output, "{}Calls:", indent_str).unwrap();
+        for (key, node_ref) in &self.calls {
+            let node = node_ref.borrow();
+            writeln!(output, "{}  {} ({}):", indent_str, key, key).unwrap();
+            output.push_str(&node.fmt(indent + 2, profiler));
+        }
+
+        output
+    }
 }
 
 /// Manages profiling state
@@ -116,7 +145,13 @@ pub struct Profiler {
     call_stack_path: Vec<u32>,
 
     // Root of the tree used to store samples attributable to a call stack.
-    root: CallNode,
+    root: Rc<RefCell<CallNode>>,
+
+    // Current CallNode in the stack
+    current_node: Option<Rc<RefCell<CallNode>>>,
+
+    // Current CallNode key in the stack
+    current_key: u32,
 
     ctx: Context<EndianRcSlice<RunTimeEndian>>,
 
@@ -173,12 +208,15 @@ impl Profiler {
     pub fn new(filename: &str, elf_data: &[u8]) -> Result<Self> {
         let file = File::parse(elf_data)?;
         let ctx = Context::new(&file)?;
+        let root = Rc::new(RefCell::new(CallNode::default()));
         let mut profiler = Profiler {
             pc: u32::MAX,
             insn: 0,
             cycle: 0,
             pop_stack: Vec::new(),
-            root: CallNode::default(),
+            root: Rc::clone(&root),
+            current_node: Some(root),
+            current_key: 0,
             call_stack_path: Vec::new(),
             ctx,
             profile: ProfileBuilder::new(),
@@ -263,12 +301,25 @@ impl Profiler {
     /// Returns a callback to populate this profiler, suitable for
     /// passing to ProverOpts::with_trace_callback.
     pub fn make_trace_callback(&mut self) -> impl FnMut(TraceEvent) -> anyhow::Result<()> + '_ {
-        move |event| {
+        |event| {
             match event {
                 TraceEvent::InstructionStart { cycle, pc, insn } => {
                     let cycles = cycle - self.cycle;
                     let orig_pc = self.pc;
                     let orig_insn = self.insn;
+
+                    if self.call_stack_path.len() > 0 {
+                        let current_node = self
+                            .current_node
+                            .as_ref()
+                            .expect("current_node should always be Some after initialization");
+                        let mut current_node_borrowed = current_node.borrow_mut();
+                        current_node_borrowed
+                            .counts
+                            .entry(self.current_key)
+                            .and_modify(|e| *e += cycles as usize)
+                            .or_insert(cycles as usize);
+                    }
 
                     if let Some(op) = extract_call_stack_op(orig_insn) {
                         match op {
@@ -307,14 +358,26 @@ impl Profiler {
                                 self.pop_stack.push(orig_pc);
                             }
                         }
-                    }
-                    match self.lookup_pc(orig_pc.into()).is_empty() {
-                        true => {
-                            if let Some(&last) = self.call_stack_path.last() {
-                                self.update_call_stack(last, cycles);
+
+                        let mut curr_node = Rc::clone(&self.root);
+                        for (i, &call_stack_key) in self.call_stack_path.iter().enumerate() {
+                            if i == self.call_stack_path.len() - 1 {
+                                self.current_node = Some(Rc::clone(&curr_node));
+                                self.current_key =
+                                    *self.call_stack_path.last().ok_or_else(|| {
+                                        anyhow!("attempted to access an empty call stack")
+                                    })?;
                             }
+                            let next_node = {
+                                let mut curr_node_borrowed = curr_node.borrow_mut();
+                                curr_node_borrowed
+                                    .calls
+                                    .entry(call_stack_key)
+                                    .or_insert_with(|| Rc::new(RefCell::new(CallNode::default())))
+                                    .clone()
+                            };
+                            curr_node = next_node;
                         }
-                        false => self.update_call_stack(orig_pc, cycles),
                     }
 
                     // Update pc, insn, and cycle
@@ -328,25 +391,8 @@ impl Profiler {
         }
     }
 
-    fn update_call_stack(&mut self, key: u32, cycles: u32) {
-        let mut curr_node = &mut self.root;
-        let len = self.call_stack_path.len();
-        for (i, &call_stack_key) in self.call_stack_path.iter().enumerate() {
-            if i == len - 1 {
-                curr_node
-                    .counts
-                    .entry(key)
-                    .and_modify(|e| *e += cycles as usize)
-                    .or_insert(cycles as usize);
-            }
-            curr_node = curr_node
-                .calls
-                .entry(call_stack_key)
-                .or_insert_with(CallNode::default);
-        }
-    }
-
-    fn walk_stack(&mut self, node: &CallNode, stack: Vec<Frame>) {
+    fn walk_stack(&mut self, node_ref: Rc<RefCell<CallNode>>, stack: Vec<Frame>) {
+        let node = node_ref.borrow();
         for (&pc, count) in &node.counts {
             let mut new_stack = stack.clone();
             let frames = self.lookup_pc(pc.into());
@@ -359,7 +405,6 @@ impl Profiler {
                 .rev()
                 .map(|fr| {
                     let func_id = self.profile.get_function(&fr.name, &fr.filename);
-                    // println!("{} - {} - {} - {}", pc, count, func_id, fr.name);
                     let loc = proto::Location {
                         address: pc as u64,
                         line: vec![proto::Line {
@@ -377,12 +422,12 @@ impl Profiler {
                 ..Default::default()
             };
 
-            if sample.location_id.len() > 0 {
+            if !sample.location_id.is_empty() {
                 self.profile.add_sample(sample);
             }
 
-            if let Some(next_node) = node.calls.get(&pc) {
-                self.walk_stack(next_node, new_stack);
+            if let Some(next_node_ref) = node.calls.get(&pc) {
+                self.walk_stack(next_node_ref.clone(), new_stack);
             }
         }
     }
@@ -390,8 +435,9 @@ impl Profiler {
     /// Count and save the profiling samples, consuming the profiler and
     /// returning the compiled profile protobuf.
     pub fn finalize(&mut self) {
-        let root = self.root.clone();
-        self.walk_stack(&root, Vec::new());
+        let root_ref = Rc::clone(&self.root);
+        // println!("{}", self.root.borrow().fmt(0, &self));
+        self.walk_stack(root_ref, Vec::new());
     }
 
     /// Returns the result of this profiling run as a protobuf.
