@@ -294,12 +294,6 @@ impl<'a> ExecutorImpl<'a> {
 
         let (exit_code, post_image) = run_loop()?;
 
-        if !self.env.allow_guest_failure {
-            let (ExitCode::Halted(0) | ExitCode::Paused(0)) = exit_code else {
-                bail!("guest exited with unsuccessful status: {:?}", exit_code);
-            };
-        }
-
         // Take (clear out) the list of accessed assumptions.
         // Leave the assumptions cache so that it can be used if execution is resumed from pause.
         let assumptions = mem::take(&mut self.env.assumptions.borrow_mut().accessed);

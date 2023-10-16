@@ -286,12 +286,4 @@ impl<'a> ExecutorEnvBuilder<'a> {
         self.inner.trace = Some(Rc::new(RefCell::new(callback)));
         self
     }
-
-    /// Set whether or not to report an error if the guest execution ends in an unsuccessful state,
-    /// such as `ExitCode::Fault` or `ExitCode::Halted(1)`. If set to `false`, an error will be
-    /// returned for any exit code except `Halted(0)` or `Paused(0)`. Default is `false`.
-    pub fn allow_guest_failure(&mut self, allow: bool) -> &mut Self {
-        self.inner.allow_guest_failure = allow;
-        self
-    }
 }

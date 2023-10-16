@@ -53,7 +53,7 @@ impl Prover for ExternalProver {
         let image_id = image.compute_id();
         let client = ApiClient::new_sub_process(&self.r0vm_path)?;
         let receipt = client.prove(&env, opts.clone(), image.into())?;
-        if env.allow_guest_failure {
+        if opts.prove_guest_errors {
             receipt.verify_integrity_with_context(ctx)?;
             ensure!(
                 receipt.get_metadata()?.pre.digest() == image_id,

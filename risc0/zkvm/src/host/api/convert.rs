@@ -156,6 +156,7 @@ impl From<pb::api::ProverOpts> for ProverOpts {
     fn from(opts: pb::api::ProverOpts) -> Self {
         Self {
             hashfn: opts.hashfn,
+            prove_guest_errors: opts.prove_guest_errors,
         }
     }
 }
@@ -164,6 +165,7 @@ impl From<ProverOpts> for pb::api::ProverOpts {
     fn from(opts: ProverOpts) -> Self {
         Self {
             hashfn: opts.hashfn,
+            prove_guest_errors: opts.prove_guest_errors,
         }
     }
 }

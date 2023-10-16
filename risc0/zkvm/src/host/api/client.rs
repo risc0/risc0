@@ -299,7 +299,6 @@ impl Client {
             write_fds: env.posix_io.borrow().write_fds.keys().cloned().collect(),
             segment_limit_po2: env.segment_limit_po2,
             session_limit: env.session_limit,
-            allow_guest_failure: env.allow_guest_failure,
         }
     }
 

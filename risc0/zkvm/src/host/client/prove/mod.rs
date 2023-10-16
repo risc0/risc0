@@ -87,7 +87,7 @@ pub trait Prover {
         image: MemoryImage,
     ) -> Result<Receipt>;
 
-    /// Prove the specified ELF binary.
+    /// Prove zkVM execution starting from the specified ELF binary.
     fn prove_elf(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<Receipt> {
         self.prove_elf_with_ctx(
             env,
@@ -97,7 +97,8 @@ pub trait Prover {
         )
     }
 
-    /// Prove the specified [MemoryImage] with the specified [VerifierContext] and [ProverOpts].
+    /// Prove zkVM execution starting from the specified [MemoryImage] with the specified
+    /// [VerifierContext] and [ProverOpts].
     fn prove_elf_with_ctx(
         &self,
         env: ExecutorEnv<'_>,
@@ -133,13 +134,18 @@ pub trait Executor {
 pub struct ProverOpts {
     /// The hash function to use.
     pub hashfn: String,
+    /// When false, only prove execution sessions that end in a successful [ExitCode] (i.e.
+    /// `Halted(0)` or `Paused(0)`. When set to true, any completed execution session will be
+    /// proven, including indicated errors (e.g. `Halted(1)`) and sessions ending in `Fault`.
+    pub prove_guest_errors: bool,
 }
 
 impl Default for ProverOpts {
-    /// Return [ProverOpts] with the SHA-256 hash function and `allow_guest_failure` set to false.
+    /// Return [ProverOpts] with the SHA-256 hash function and `prove_guest_errors` set to false.
     fn default() -> Self {
         Self {
             hashfn: "sha-256".to_string(),
+            prove_guest_errors: false,
         }
     }
 }

@@ -98,7 +98,6 @@ message ExecutorEnv {
   repeated uint32 write_fds = 5;
   optional uint32 segment_limit_po2 = 6;
   optional uint64 session_limit = 7;
-  bool allow_guest_failure = 9;
 }
 
 message Binary {
@@ -114,6 +113,7 @@ message Binary {
 
 message ProverOpts {
   string hashfn = 1;
+  bool prove_guest_errors = 2;
 }
 
 message SessionInfo {
