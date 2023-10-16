@@ -70,14 +70,35 @@
       console.error(`Failed to find name: ${crate_name}`);
     }
 
-    async function fetch_json() {
-      return await fetch("profiles.json")
+    async function findMostRecentHash() {
+      return await fetch("results/index.json")
         .then(res => res.json())
-        .then(out => {
-          return out;
+        .then(data => {
+          // Find the most recent timestamp
+          let mostRecent = data.reduce((prev, current) => (prev.timestamp > current.timestamp) ? prev : current);
+          // Retrieve the hash related to the most recent timestamp
+          let mostRecentHash = mostRecent.hash;
+          return mostRecentHash;
         })
         .catch(err => { console.error(err) });
+    }
 
+    async function readContent(hash) {
+      let filename = `results/${hash}.json`;
+      return await fetch(filename)
+        .then(res => res.json())
+        .then(data => data)
+        .catch(err => { console.error(err) });
+    }
+
+    async function fetch_json() {
+      try {
+        const mostRecentHash = await findMostRecentHash();
+        const jsonData = await readContent(mostRecentHash);
+        return jsonData;
+      } catch (error) {
+        console.error(error);
+      }
     }
 
     const headers = ["name", "version", "status", "custom profile"];
