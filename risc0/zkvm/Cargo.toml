@@ -34,6 +34,7 @@ bytemuck = { version = "1.13", features = ["extern_crate_alloc"] }
 cfg-if = "1.0"
 getrandom = { version = "0.2", features = ["custom"] }
 hex = { version = "0.4.3", default-features = false, features = ["alloc"] }
+risc0-binfmt = { workspace = true }
 risc0-circuit-rv32im = { workspace = true }
 risc0-core = { workspace = true }
 risc0-zkp = { workspace = true }
@@ -47,7 +48,6 @@ serde = { version = "1.0", default-features = false, features = [
   "alloc",
   "derive",
 ] }
-risc0-binfmt = { workspace = true }
 
 # TODO(nils): Change these `target_os` checks to `target_vendor` checks when we
 # have a real target triple.
