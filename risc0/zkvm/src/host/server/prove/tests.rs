@@ -203,8 +203,8 @@ fn memory_io() {
     assert_eq!(run_memio(&[(POS, 1)]).unwrap(), ExitCode::Halted(0));
 
     // Unaligned write is bad
-    // TODO(victor): Exit code is indicated as SystemSplit instead of Fault, which would be more
-    // ideal.
+    // TODO(victor): Exit code is indicated as SystemSplit instead of Fault, which
+    // would be more ideal.
     assert_eq!(
         run_memio(&[(POS + 1001, 1)]).unwrap(),
         ExitCode::SystemSplit
@@ -355,8 +355,9 @@ mod riscv {
 
 #[cfg(feature = "docker")]
 mod docker {
-    use crate::{serde::to_vec, ExecutorEnv, ExecutorImpl, ExitCode};
     use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF};
+
+    use crate::{serde::to_vec, ExecutorEnv, ExecutorImpl, ExitCode};
 
     #[test]
     fn pause_continue() {
@@ -453,7 +454,8 @@ mod sys_verify {
         })
         .unwrap();
 
-        // Test that providing the proven assumption results in an unconditional receipt.
+        // Test that providing the proven assumption results in an unconditional
+        // receipt.
         let env = ExecutorEnv::builder()
             .add_input(&spec)
             .add_assumption(HELLO_COMMIT_RECEIPT.clone().into())
@@ -466,14 +468,16 @@ mod sys_verify {
             .verify(MULTI_TEST_ID)
             .unwrap();
 
-        // Test that proving without a provided assumption results in an execution failure.
+        // Test that proving without a provided assumption results in an execution
+        // failure.
         let env = ExecutorEnv::builder().add_input(&spec).build().unwrap();
         assert!(get_prover_server(&opts)
             .unwrap()
             .prove_elf(env, MULTI_TEST_ELF)
             .is_err());
 
-        // Test that providing an unresolved assumption results in a conditional receipt.
+        // Test that providing an unresolved assumption results in a conditional
+        // receipt.
         let env = ExecutorEnv::builder()
             .add_input(&spec)
             .add_assumption(HELLO_COMMIT_RECEIPT.get_metadata().unwrap().into())
@@ -505,7 +509,8 @@ mod sys_verify {
         })
         .unwrap();
 
-        // Test that providing the proven assumption results in an unconditional receipt.
+        // Test that providing the proven assumption results in an unconditional
+        // receipt.
         let env = ExecutorEnv::builder()
             .add_input(&spec)
             .add_assumption(HELLO_COMMIT_RECEIPT.clone().into())
@@ -518,14 +523,16 @@ mod sys_verify {
             .verify(MULTI_TEST_ID)
             .unwrap();
 
-        // Test that proving without a provided assumption results in an execution failure.
+        // Test that proving without a provided assumption results in an execution
+        // failure.
         let env = ExecutorEnv::builder().add_input(&spec).build().unwrap();
         assert!(get_prover_server(&opts)
             .unwrap()
             .prove_elf(env, MULTI_TEST_ELF)
             .is_err());
 
-        // Test that providing an unresolved assumption results in a conditional receipt.
+        // Test that providing an unresolved assumption results in a conditional
+        // receipt.
         let env = ExecutorEnv::builder()
             .add_input(&spec)
             .add_assumption(HELLO_COMMIT_RECEIPT.get_metadata().unwrap().into())

@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::collections::BTreeMap;
-use std::path::PathBuf;
+use std::{collections::BTreeMap, path::PathBuf};
 
 use anyhow::{anyhow, bail, Result};
 use prost::{Message, Name};
@@ -21,14 +20,15 @@ use prost_types::Any;
 use risc0_binfmt::{MemoryImage, PageTableInfo, SystemState};
 use risc0_zkp::core::digest::Digest;
 
+use super::{malformed_err, path_to_string, pb, Asset, AssetRequest, Binary, BinaryKind};
 use crate::{
-    host::receipt::{CompositeReceipt, InnerReceipt, SegmentReceipt},
-    host::recursion::SuccinctReceipt,
+    host::{
+        receipt::{CompositeReceipt, InnerReceipt, SegmentReceipt},
+        recursion::SuccinctReceipt,
+    },
     receipt_metadata::{Assumptions, MaybePruned, Output},
     ExitCode, ProverOpts, Receipt, ReceiptMetadata, TraceEvent,
 };
-
-use super::{malformed_err, path_to_string, pb, Asset, AssetRequest, Binary, BinaryKind};
 
 mod ver {
     use super::pb::base::CompatVersion;

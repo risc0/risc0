@@ -24,8 +24,11 @@ use super::{
 };
 use crate::{
     get_version,
-    host::receipt::{SegmentReceipt, SuccinctReceipt},
-    host::{api::SegmentInfo, client::prove::get_r0vm_path},
+    host::{
+        api::SegmentInfo,
+        client::prove::get_r0vm_path,
+        receipt::{SegmentReceipt, SuccinctReceipt},
+    },
     ExecutorEnv, ProverOpts, Receipt,
 };
 

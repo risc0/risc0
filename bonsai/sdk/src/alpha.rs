@@ -260,7 +260,8 @@ impl Client {
     /// Construct a [Client] from env vars
     ///
     /// Uses the BONSAI_API_URL and BONSAI_API_KEY environment variables to
-    /// construct a client. The risc0_version should be the crate version of the risc0-zkvm crate
+    /// construct a client. The risc0_version should be the crate version of the
+    /// risc0-zkvm crate
     ///
     /// # Example:
     ///
@@ -466,7 +467,8 @@ impl Client {
 
     /// Fetches the current component versions from bonsai
     ///
-    /// Fetches the risc0 zkvm supported versions as well as other sub-components of bonsai
+    /// Fetches the risc0 zkvm supported versions as well as other
+    /// sub-components of bonsai
     pub fn version(&self) -> Result<VersionInfo, SdkErr> {
         Ok(self
             .client

@@ -39,7 +39,6 @@ pub mod sha;
 
 pub mod receipt_metadata;
 pub use receipt_metadata::{ExitCode, Output, ReceiptMetadata};
-
 use semver::Version;
 
 /// Re-exports for recursion
@@ -47,6 +46,11 @@ use semver::Version;
 pub mod recursion {
     pub use super::host::recursion::*;
 }
+
+#[cfg(not(target_os = "zkvm"))]
+pub use risc0_binfmt::MemoryImage;
+pub use risc0_binfmt::{Program, SystemState};
+pub use risc0_zkvm_platform::{declare_syscall, memory::GUEST_MAX_MEM, PAGE_SIZE};
 
 #[cfg(all(not(target_os = "zkvm"), feature = "profiler"))]
 pub use self::host::server::exec::profiler::Profiler;
@@ -81,15 +85,12 @@ pub use self::host::{
     },
     recursion::ALLOWED_IDS_ROOT,
 };
-#[cfg(not(target_os = "zkvm"))]
-pub use risc0_binfmt::MemoryImage;
-pub use risc0_binfmt::{Program, SystemState};
-pub use risc0_zkvm_platform::{declare_syscall, memory::GUEST_MAX_MEM, PAGE_SIZE};
 
 /// Reports the current version of this crate.
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 
-/// Reports the current version of this crate as represented by a [semver::Version].
+/// Reports the current version of this crate as represented by a
+/// [semver::Version].
 pub fn get_version() -> Result<Version, semver::Error> {
     Version::parse(VERSION)
 }

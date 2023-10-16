@@ -36,14 +36,13 @@ use risc0_zkvm_platform::WORD_SIZE;
 use serde::{Deserialize, Serialize};
 
 use super::control_id::{BLAKE2B_CONTROL_ID, POSEIDON_CONTROL_ID, SHA256_CONTROL_ID};
+// Make succint receipt available through this `receipt` module.
+pub use super::recursion::SuccinctReceipt;
 use crate::{
     receipt_metadata::{Assumptions, MaybePruned, Output},
     sha::Digestable,
     ExitCode, ReceiptMetadata,
 };
-
-// Make succint receipt available through this `receipt` module.
-pub use super::recursion::SuccinctReceipt;
 
 /// A receipt attesting to the execution of a Session.
 ///
@@ -120,22 +119,26 @@ impl Receipt {
         Self { inner, journal }
     }
 
-    /// Verify that this receipt proves a successful execution of the zkVM from the given image_id.
+    /// Verify that this receipt proves a successful execution of the zkVM from
+    /// the given image_id.
     ///
-    /// Uses the zero-knowledge proof system to verify the seal, and decodes the proven
-    /// [ReceiptMetadata]. This method additionally ensures that the guest exited with a successful
-    /// status code (e.g. `Halted(0)` or `Paused(0)`), the image ID is as expected, and the journal
+    /// Uses the zero-knowledge proof system to verify the seal, and decodes the
+    /// proven [ReceiptMetadata]. This method additionally ensures that the
+    /// guest exited with a successful status code (e.g. `Halted(0)` or
+    /// `Paused(0)`), the image ID is as expected, and the journal
     /// has not been tampered with.
     #[must_use]
     pub fn verify(&self, image_id: impl Into<Digest>) -> Result<(), VerificationError> {
         self.verify_with_context(&VerifierContext::default(), image_id)
     }
 
-    /// Verify that this receipt proves a successful execution of the zkVM from the given image_id.
+    /// Verify that this receipt proves a successful execution of the zkVM from
+    /// the given image_id.
     ///
-    /// Uses the zero-knowledge proof system to verify the seal, and decodes the proven
-    /// [ReceiptMetadata]. This method additionally ensures that the guest exited with a successful
-    /// status code (e.g. `Halted(0)` or `Paused(0)`), the image ID is as expected, and the journal
+    /// Uses the zero-knowledge proof system to verify the seal, and decodes the
+    /// proven [ReceiptMetadata]. This method additionally ensures that the
+    /// guest exited with a successful status code (e.g. `Halted(0)` or
+    /// `Paused(0)`), the image ID is as expected, and the journal
     /// has not been tampered with.
     #[must_use]
     pub fn verify_with_context(
@@ -152,12 +155,14 @@ impl Receipt {
             return Err(VerificationError::ImageVerificationError);
         }
 
-        // Check the exit code. This verification method requires execution to be successful.
+        // Check the exit code. This verification method requires execution to be
+        // successful.
         let (ExitCode::Halted(0) | ExitCode::Paused(0)) = metadata.exit_code else {
             return Err(VerificationError::UnexpectedExitCode);
         };
 
-        // Finally check the output hash in the decoded metadata against the expected output.
+        // Finally check the output hash in the decoded metadata against the expected
+        // output.
         let expected_output = Output {
             journal: MaybePruned::Pruned(self.journal.digest()),
             // It is expected that there are no (unresolved) assumptions.
@@ -181,14 +186,17 @@ impl Receipt {
         Ok(())
     }
 
-    /// Verify the integrity of this receipt, ensuring the metadata is attested to by the seal.
+    /// Verify the integrity of this receipt, ensuring the metadata is attested
+    /// to by the seal.
     ///
-    /// NOTE: This does not verify the success of the guest execution. In particular, the guest
-    /// could have exited with an error (e.g. `ExitCode::Halted(1)`) or faulted state. It also does
-    /// not check the image ID, or otherwise constrain what guest was executed. After calling this
-    /// method, the caller should check the [ReceiptMetadata] fields relevant to their application.
-    /// If you need to verify a successful guest execution and access the journal, the `verify`
-    /// function is recommended.
+    /// NOTE: This does not verify the success of the guest execution. In
+    /// particular, the guest could have exited with an error (e.g.
+    /// `ExitCode::Halted(1)`) or faulted state. It also does not check the
+    /// image ID, or otherwise constrain what guest was executed. After calling
+    /// this method, the caller should check the [ReceiptMetadata] fields
+    /// relevant to their application. If you need to verify a successful
+    /// guest execution and access the journal, the `verify` function is
+    /// recommended.
     #[must_use]
     pub fn verify_integrity_with_context(
         &self,
@@ -250,7 +258,8 @@ pub enum InnerReceipt {
 }
 
 impl InnerReceipt {
-    /// Verify the integrity of this receipt, ensuring the metadata is attested to by the seal.
+    /// Verify the integrity of this receipt, ensuring the metadata is attested
+    /// to by the seal.
     #[must_use]
     pub fn verify_integrity_with_context(
         &self,
@@ -297,28 +306,32 @@ impl InnerReceipt {
     }
 }
 
-/// A receipt composed of one or more [SegmentReceipt] structs proving a single execution with
-/// continuations, and zero or more [Receipt] stucts proving any assumptions.
+/// A receipt composed of one or more [SegmentReceipt] structs proving a single
+/// execution with continuations, and zero or more [Receipt] stucts proving any
+/// assumptions.
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[cfg_attr(test, derive(PartialEq))]
 pub struct CompositeReceipt {
     /// Segment receipts forming the proof of a execution with continuations.
     pub segments: Vec<SegmentReceipt>,
 
-    /// An ordered list of assumptions, either proven or unresolved, made within the continuation
-    /// represented by the segment receipts. If any assumptions are unresolved, this receipt is
-    /// only _conditionally_ valid.
+    /// An ordered list of assumptions, either proven or unresolved, made within
+    /// the continuation represented by the segment receipts. If any
+    /// assumptions are unresolved, this receipt is only _conditionally_
+    /// valid.
     // TODO(victor): Allow for unresolved assumptions in this list.
     pub assumptions: Vec<InnerReceipt>,
 
-    /// Digest of journal included in the final output of the continuation. Will be `None` if the
-    /// continuation has no output (e.g. it ended in `Fault`).
+    /// Digest of journal included in the final output of the continuation. Will
+    /// be `None` if the continuation has no output (e.g. it ended in
+    /// `Fault`).
     // NOTE: This field is needed in order to open the assumptions digest from the output digest.
     pub journal_digest: Option<Digest>,
 }
 
 impl CompositeReceipt {
-    /// Verify the integrity of this receipt, ensuring the metadata is attested to by the seal.
+    /// Verify the integrity of this receipt, ensuring the metadata is attested
+    /// to by the seal.
     #[must_use]
     pub fn verify_integrity_with_context(
         &self,
@@ -370,7 +383,8 @@ impl CompositeReceipt {
             receipt.verify_integrity_with_context(ctx)?;
         }
 
-        // Verify decoded output digest is consistent with the journal_digest and assumptions.
+        // Verify decoded output digest is consistent with the journal_digest and
+        // assumptions.
         self.verify_output_consitency(&final_receipt_metadata)?;
 
         Ok(())
@@ -389,8 +403,9 @@ impl CompositeReceipt {
             .ok_or(VerificationError::ReceiptFormatError)?
             .get_metadata()?;
 
-        // After verifying the internally consistency of this receipt, we can use self.assumptions
-        // and self.journal_digest in place of last_metadata.output, which is equal.
+        // After verifying the internally consistency of this receipt, we can use
+        // self.assumptions and self.journal_digest in place of
+        // last_metadata.output, which is equal.
         self.verify_output_consitency(&last_metadata)?;
         let output: Option<Output> = last_metadata
             .output
@@ -418,8 +433,9 @@ impl CompositeReceipt {
         })
     }
 
-    /// Check that the output fields in the given receipt metadata are consistent with the exit
-    /// code, and with the journal_digest and assumptions encoded on self.
+    /// Check that the output fields in the given receipt metadata are
+    /// consistent with the exit code, and with the journal_digest and
+    /// assumptions encoded on self.
     fn verify_output_consitency(
         &self,
         metadata: &ReceiptMetadata,
@@ -448,7 +464,8 @@ impl CompositeReceipt {
                 }
             }
         } else {
-            // Ensure all output fields are empty. If not, this receipt is internally inconsistent.
+            // Ensure all output fields are empty. If not, this receipt is internally
+            // inconsistent.
             if metadata.output.is_some() {
                 log::debug!(
                     "unexpected non-empty metadata output: {:?}",
@@ -509,7 +526,8 @@ pub struct SegmentReceipt {
 }
 
 impl SegmentReceipt {
-    /// Verify the integrity of this receipt, ensuring the metadata is attested to by the seal.
+    /// Verify the integrity of this receipt, ensuring the metadata is attested
+    /// to by the seal.
     #[must_use]
     pub fn verify_integrity_with_context(
         &self,

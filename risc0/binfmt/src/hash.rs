@@ -14,9 +14,8 @@
 
 extern crate alloc;
 
-use core::borrow::Borrow;
-
 use alloc::vec::Vec;
+use core::borrow::Borrow;
 
 use risc0_zkp::core::{digest::Digest, hash::sha::Sha256};
 

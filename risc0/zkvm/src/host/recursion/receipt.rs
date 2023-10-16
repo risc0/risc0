@@ -61,12 +61,14 @@ pub struct SuccinctReceipt {
 }
 
 impl SuccinctReceipt {
-    /// Verify the integrity of this receipt, ensuring the metadata is attested to by the seal.
+    /// Verify the integrity of this receipt, ensuring the metadata is attested
+    /// to by the seal.
     pub fn verify_integrity_with_context(
         &self,
         ctx: &VerifierContext,
     ) -> Result<(), VerificationError> {
-        // Assemble the list of control IDs, and therefore circuit variants, we will accept.
+        // Assemble the list of control IDs, and therefore circuit variants, we will
+        // accept.
         let valid_ids = valid_control_ids();
         let check_code = |_, control_id: &Digest| -> Result<(), VerificationError> {
             valid_ids
@@ -76,13 +78,15 @@ impl SuccinctReceipt {
                 .ok_or(VerificationError::ControlVerificationError)
         };
 
-        // All receipts from the recursion circuit use Poseidon as the FRI hash function.
+        // All receipts from the recursion circuit use Poseidon as the FRI hash
+        // function.
         let suite = ctx
             .suites
             .get("poseidon")
             .ok_or(VerificationError::InvalidHashSuite)?;
 
-        // Verify the receipt itself is correct, and therefore the encoded globals are reliable.
+        // Verify the receipt itself is correct, and therefore the encoded globals are
+        // reliable.
         risc0_zkp::verify::verify(&CIRCUIT_CORE, suite, &self.seal, check_code)?;
 
         // Extract the globals from the seal.

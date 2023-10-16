@@ -12,12 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use std::{
+    collections::HashMap,
+    env,
+    fmt::{self, Write},
+    fs,
+    path::{Path, PathBuf},
+};
+
 use glob::glob;
-use std::collections::HashMap;
-use std::env;
-use std::fmt::{self, Write};
-use std::fs;
-use std::path::{Path, PathBuf};
 
 #[derive(Debug)]
 struct Level {
@@ -110,7 +113,8 @@ impl Level {
             write!(dst, "#[doc = include_str!(\"{}\")]\n", file.display())?;
             self.write_space(dst, level);
             write!(dst, "pub fn {}_md() {{}}\n", stem)?;
-            // write!(dst, "doc_comment!(include_str!(\"{}\"));\n", file.display())?;
+            // write!(dst, "doc_comment!(include_str!(\"{}\"));\n",
+            // file.display())?;
         }
 
         Ok(())

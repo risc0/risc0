@@ -129,7 +129,7 @@ impl BuildCommand {
         ]);
 
         // TODO(victor): Give the user a way to request a release build.
-        //if !is_debug() {
+        // if !is_debug() {
         //    cmd.args(&["--release"]);
         //}
 

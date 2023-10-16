@@ -168,7 +168,8 @@ impl Session {
             .ok_or_else(|| anyhow!("session has no segments"))?
             .resolve()?;
 
-        // Construct the Output struct, checking that the Session is internally consistent.
+        // Construct the Output struct, checking that the Session is internally
+        // consistent.
         let output = if self.exit_code.expects_output() {
             self.journal
                 .as_ref()
@@ -202,9 +203,9 @@ impl Session {
             None
         };
 
-        // DO NOT MERGE: post should match the final segment system state, but doesn't always.
-        // Prior to merging figure out what is happening here and what to do about it (possibly
-        // nothing).
+        // DO NOT MERGE: post should match the final segment system state, but doesn't
+        // always. Prior to merging figure out what is happening here and what
+        // to do about it (possibly nothing).
         let post_state = SystemState {
             pc: self.post_image.pc,
             merkle_root: match self.exit_code {

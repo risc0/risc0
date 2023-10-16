@@ -99,7 +99,8 @@ impl<T> MaybePruned<Option<T>>
 where
     T: Clone + Serialize,
 {
-    /// Returns true is the value is None, or the value is pruned as the zero digest.
+    /// Returns true is the value is None, or the value is pruned as the zero
+    /// digest.
     pub fn is_none(&self) -> bool {
         match self {
             MaybePruned::Value(Some(_)) => false,
@@ -108,7 +109,8 @@ where
         }
     }
 
-    /// Returns true is the value is Some(_), or the value is pruned as a non-zero digest.
+    /// Returns true is the value is Some(_), or the value is pruned as a
+    /// non-zero digest.
     pub fn is_some(&self) -> bool {
         !self.is_none()
     }
@@ -132,8 +134,9 @@ impl<T> fmt::Debug for MaybePruned<T>
 where
     T: Clone + Serialize + risc0_binfmt::Digestable + fmt::Debug,
 {
-    /// Format [MaybePruned] values are if they were a struct with value and digest fields. Digest
-    /// field is always provided so that divergent trees of [MaybePruned] values can be compared.
+    /// Format [MaybePruned] values are if they were a struct with value and
+    /// digest fields. Digest field is always provided so that divergent
+    /// trees of [MaybePruned] values can be compared.
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut builder = fmt.debug_struct("MaybePruned");
         if let MaybePruned::Value(value) = self {
@@ -172,10 +175,10 @@ pub struct ReceiptMetadata {
 
     /// Input to the guest.
     ///
-    /// NOTE: This field can only be constructed as a Digest because it is not yet
-    /// cryptographically bound by the RISC Zero proof system; the guest has not way to set the
-    /// input and it's value cannot be checked. In the future, it will be implemented with a
-    /// [MaybePruned] type.
+    /// NOTE: This field can only be constructed as a Digest because it is not
+    /// yet cryptographically bound by the RISC Zero proof system; the guest
+    /// has not way to set the input and it's value cannot be checked. In
+    /// the future, it will be implemented with a [MaybePruned] type.
     // TODO(1.0): Determine the 1.0 status of input.
     pub input: Digest,
 
@@ -400,7 +403,7 @@ impl MaybePruned<Assumptions> {
 
     /// Add an assumption to the head of the assumptions list.
     ///
-    ///If this value is pruned, then the result will also be a pruned value.
+    /// If this value is pruned, then the result will also be a pruned value.
     pub fn add(&mut self, assumption: MaybePruned<ReceiptMetadata>) {
         match self {
             MaybePruned::Value(list) => list.add(assumption),
@@ -416,9 +419,10 @@ impl MaybePruned<Assumptions> {
 
     /// Mark an assumption as resolved and remove it from the list.
     ///
-    /// Assumptions can only be removed from the head of the list. If this value is pruned, then
-    /// the result will also be a pruned value. The `rest` parameter should be equal to the digest
-    /// of the the list after the resolved assumption is removed.
+    /// Assumptions can only be removed from the head of the list. If this value
+    /// is pruned, then the result will also be a pruned value. The `rest`
+    /// parameter should be equal to the digest of the the list after the
+    /// resolved assumption is removed.
     pub fn resolve(&mut self, resolved: &Digest, rest: &Digest) -> anyhow::Result<()> {
         match self {
             MaybePruned::Value(list) => list.resolve(resolved),

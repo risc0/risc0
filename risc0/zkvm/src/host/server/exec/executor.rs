@@ -215,8 +215,8 @@ impl<'a> ExecutorImpl<'a> {
         self.run_with_callback(|segment| Ok(Box::new(SimpleSegmentRef::new(segment))))
     }
 
-    /// Run the executor until [ExitCode::Halted], [ExitCode::Paused], or [ExitCode::Fault] is
-    /// reached, producing a [Session] as a result.
+    /// Run the executor until [ExitCode::Halted], [ExitCode::Paused], or
+    /// [ExitCode::Fault] is reached, producing a [Session] as a result.
     pub fn run_with_callback<F>(&mut self, mut callback: F) -> Result<Session>
     where
         F: FnMut(Segment) -> Result<Box<dyn SegmentRef>>,
@@ -293,7 +293,8 @@ impl<'a> ExecutorImpl<'a> {
         let (exit_code, post_image) = run_loop()?;
 
         // Take (clear out) the list of accessed assumptions.
-        // Leave the assumptions cache so that it can be used if execution is resumed from pause.
+        // Leave the assumptions cache so that it can be used if execution is resumed
+        // from pause.
         let assumptions = mem::take(&mut self.env.assumptions.borrow_mut().accessed);
         let session_journal = self.output_digest.and_then(|output_digest| {
             (output_digest != Digest::zero()).then(|| journal.buf.take())
