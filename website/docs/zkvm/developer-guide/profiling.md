@@ -28,14 +28,14 @@ risc0-zkvm = { version = "0.18", features = ["profiler"] }
 
 2. Initialize the profiler with your guest code.
 
-```no_compile
+```rust no_compile
 let mut profiler = Profiler::new("profile_output_path", FIBONACCI_ELF);
 ```
 
 This will initialize the profiler using the `FIBONACCI_ELF` as guest code, and will write the output of the profiling to `profile_output_path`.
 Alternatively, you can define the `profile_output_path` using an env variable:
 
-```no_compile
+```rust no_compile
 let pprof_out = match std::env::var("RISC0_PPROF_OUT") {
         Ok(val) => Some(val),
         Err(std::env::VarError::NotPresent) => None,
@@ -49,7 +49,7 @@ let mut profiler = pprof_out
 
 3. Build the executor environment
 
-```no_compile
+```rust no_compile
 let iterations = 1000;
 let env = {
     let mut builder = ExecutorEnv::builder();
@@ -65,7 +65,7 @@ let env = {
 
 4. Execute the guest code
 
-```no_compile
+```rust no_compile
 let exec = default_executor();
 exec.execute_elf(env, FIBONACCI_ELF)?;
 ```
@@ -74,7 +74,7 @@ This will only [execute] the guest code, without generating a [receipt].
 
 5. Write out the profile
 
-```no_compile
+```rust no_compile
 if let Some(ref mut p) = profiler {
     p.finalize();
     let report = p.encode_to_vec();
