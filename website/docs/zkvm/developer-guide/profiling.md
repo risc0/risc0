@@ -28,28 +28,41 @@ risc0-zkvm = { version = "0.18", features = ["profiler"] }
 
 2. Initialize the profiler with your guest code.
 
-```rust ignore
+```rust
+# use fibonacci_methods::{FIBONACCI_ELF, FIBONACCI_PATH};
+# use risc0_zkvm::{default_executor, ExecutorEnv, Profiler};
 let mut profiler = Profiler::new("profile_output_path", FIBONACCI_ELF);
 ```
 
 This will initialize the profiler using the `FIBONACCI_ELF` as guest code, and will write the output of the profiling to `profile_output_path`.
 Alternatively, you can define the `profile_output_path` using an env variable:
 
-```rust ignore
+```rust
+# use fibonacci_methods::{FIBONACCI_ELF, FIBONACCI_PATH};
+# use risc0_zkvm::{default_executor, ExecutorEnv, Profiler};
 let pprof_out = match std::env::var("RISC0_PPROF_OUT") {
-        Ok(val) => Some(val),
-        Err(std::env::VarError::NotPresent) => None,
-        Err(e) => bail!("malformed env var: {}", e),
-    };
-let mut profiler = pprof_out
-    .as_ref()
-    .map(|path| Profiler::new(&path, FIBONACCI_ELF))
-    .transpose()?;
+    Ok(val) => Some(val),
+    Err(_) => None,
+};
+let mut profiler = match pprof_out {
+    Some(path) => Some(Profiler::new(&path, FIBONACCI_ELF).expect("profiler creation failed")),
+    None => None,
+};
 ```
 
 3. Build the executor environment
 
-```rust ignore
+```rust
+# use fibonacci_methods::{FIBONACCI_ELF, FIBONACCI_PATH};
+# use risc0_zkvm::{default_executor, ExecutorEnv, Profiler};
+# let pprof_out = match std::env::var("RISC0_PPROF_OUT") {
+#     Ok(val) => Some(val),
+#     Err(_) => None,
+# };
+# let mut profiler = match pprof_out {
+#     Some(path) => Some(Profiler::new(&path, FIBONACCI_ELF).expect("profiler creation failed")),
+#     None => None,
+# };
 let iterations = 1000;
 let env = {
     let mut builder = ExecutorEnv::builder();
@@ -59,28 +72,73 @@ let env = {
     builder
         .add_input(&[iterations])
         .build()
-        .map_err(|e| anyhow!("environment build failed: {:?}", e))?
+        .expect("environment build failed")
 };
 ```
 
 4. Execute the guest code
 
-```rust ignore
+```rust
+# use fibonacci_methods::{FIBONACCI_ELF, FIBONACCI_PATH};
+# use risc0_zkvm::{default_executor, ExecutorEnv, Profiler};
+# let pprof_out = match std::env::var("RISC0_PPROF_OUT") {
+#     Ok(val) => Some(val),
+#     Err(_) => None,
+# };
+# let mut profiler = match pprof_out {
+#     Some(path) => Some(Profiler::new(&path, FIBONACCI_ELF).expect("profiler creation failed")),
+#     None => None,
+# };
+# let iterations = 1000;
+# let env = {
+#     let mut builder = ExecutorEnv::builder();
+#     if let Some(ref mut p) = profiler {
+#         builder.trace_callback(p.make_trace_callback());
+#     }
+#     builder
+#         .add_input(&[iterations])
+#         .build()
+#         .expect("environment build failed")
+# };
 let exec = default_executor();
-exec.execute_elf(env, FIBONACCI_ELF)?;
+exec.execute_elf(env, FIBONACCI_ELF).expect("execution failed");
 ```
 
 This will only [execute] the guest code, without generating a [receipt].
 
 5. Write out the profile
 
-```rust ignore
+```rust
+# use fibonacci_methods::{FIBONACCI_ELF, FIBONACCI_PATH};
+# use risc0_zkvm::{default_executor, ExecutorEnv, Profiler};
+# let pprof_out = match std::env::var("RISC0_PPROF_OUT") {
+#     Ok(val) => Some(val),
+#     Err(_) => None,
+# };
+# let mut profiler = match &pprof_out {
+#     Some(path) => Some(Profiler::new(&path, FIBONACCI_ELF).expect("profiler creation failed")),
+#     None => None,
+# };
+# let iterations = 1000;
+# let env = {
+#     let mut builder = ExecutorEnv::builder();
+#     if let Some(ref mut p) = profiler {
+#         builder.trace_callback(p.make_trace_callback());
+#     }
+#     builder
+#         .add_input(&[iterations])
+#         .build()
+#         .expect("environment build failed")
+# };
+# let exec = default_executor();
+# exec.execute_elf(env, FIBONACCI_ELF).expect("execution failed");
 if let Some(ref mut p) = profiler {
     p.finalize();
     let report = p.encode_to_vec();
     std::fs::write(pprof_out.as_ref().unwrap(), &report)
         .expect("Unable to write profiling output");
 }
+
 ```
 
 ## Usage
