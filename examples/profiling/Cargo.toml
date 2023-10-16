@@ -6,9 +6,9 @@ edition = "2021"
 [dependencies]
 anyhow = "1.0"
 env_logger = "0.10"
+fibonacci-methods = { path = "methods" }
 risc0-zkvm = { path = "../../risc0/zkvm", features = ["profiler"] }
 serde = "1.0"
-fibonacci-methods = { path = "methods" }
 
 [features]
 cuda = ["risc0-zkvm/cuda"]
