@@ -3599,6 +3599,7 @@ dependencies = [
  "num-traits",
  "prost",
  "prost-build",
+ "prost-types",
  "protobuf-src",
  "risc0-binfmt",
  "risc0-circuit-rv32im",

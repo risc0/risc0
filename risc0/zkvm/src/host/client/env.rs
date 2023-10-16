@@ -67,7 +67,6 @@ pub struct ExecutorEnv<'a> {
     pub(crate) input: Vec<u8>,
     pub(crate) trace: Option<Rc<RefCell<TraceCallback<'a>>>>,
     pub(crate) assumptions: Rc<RefCell<Assumptions>>,
-    pub(crate) allow_guest_failure: bool,
 }
 
 impl<'a> ExecutorEnv<'a> {

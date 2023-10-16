@@ -78,7 +78,7 @@ pub trait Prover {
     fn get_name(&self) -> String;
 
     // TODO(victor): What are the right semantics for this function with regards to exit code?
-    /// Prove the specified [MemoryImage].
+    /// Prove zkVM execution starting from the specified [MemoryImage].
     fn prove(
         &self,
         env: ExecutorEnv<'_>,
@@ -97,7 +97,7 @@ pub trait Prover {
         )
     }
 
-    /// Prove the specified [MemoryImage] with the specified [VerifierContext].
+    /// Prove the specified [MemoryImage] with the specified [VerifierContext] and [ProverOpts].
     fn prove_elf_with_ctx(
         &self,
         env: ExecutorEnv<'_>,

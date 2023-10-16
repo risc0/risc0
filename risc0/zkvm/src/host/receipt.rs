@@ -182,6 +182,13 @@ impl Receipt {
     }
 
     /// Verify the integrity of this receipt, ensuring the metadata is attested to by the seal.
+    ///
+    /// NOTE: This does not verify the success of the guest execution. In particular, the guest
+    /// could have exited with an error (e.g. `ExitCode::Halted(1)`) or faulted state. It also does
+    /// not check the image ID, or otherwise constrain what guest was executed. After calling this
+    /// method, the caller should check the [ReceiptMetadata] fields relevant to their application.
+    /// If you need to verify a successful guest execution and access the journal, the `verify`
+    /// function is recommended.
     #[must_use]
     pub fn verify_integrity_with_context(
         &self,
