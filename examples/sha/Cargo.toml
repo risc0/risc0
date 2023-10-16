@@ -11,6 +11,7 @@ sha-methods = { path = "methods" }
 
 [dev-dependencies]
 hex = "0.4"
+serial_test = "2.0"
 
 [features]
 cuda = ["risc0-zkvm/cuda"]
