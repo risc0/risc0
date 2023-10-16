@@ -94,7 +94,7 @@ pub fn tagged_list<S: Sha256>(tag: &str, list: &[impl Borrow<Digest>]) -> Digest
 /// ];
 /// assert_eq!(
 ///     tagged_list::<Impl>("tag", &[a, b, c]),
-///     tagged_list_cons::<Impl>("tag", a, tagged_list::<Impl>("tag", &[b, c])),
+///     tagged_list_cons::<Impl>("tag", &a, &tagged_list::<Impl>("tag", &[b, c])),
 /// );
 /// ```
 pub fn tagged_list_cons<S: Sha256>(tag: &str, head: &Digest, rest: &Digest) -> Digest {

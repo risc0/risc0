@@ -43,14 +43,12 @@ pub use receipt_metadata::{ExitCode, Output, ReceiptMetadata};
 use semver::Version;
 
 /// Re-exports for recursion
-#[cfg(not(target_os = "zkvm"))]
-#[cfg(feature = "prove")]
+#[cfg(all(not(target_os = "zkvm"), feature = "prove"))]
 pub mod recursion {
     pub use super::host::recursion::*;
 }
 
-#[cfg(not(target_os = "zkvm"))]
-#[cfg(feature = "profiler")]
+#[cfg(all(not(target_os = "zkvm"), feature = "profiler"))]
 pub use self::host::server::exec::profiler::Profiler;
 #[cfg(all(not(target_os = "zkvm"), feature = "prove"))]
 pub use self::host::{
@@ -78,7 +76,8 @@ pub use self::host::{
 pub use self::host::{
     control_id::POSEIDON_CONTROL_ID,
     receipt::{
-        CompositeReceipt, InnerReceipt, Receipt, SegmentReceipt, SuccinctReceipt, VerifierContext,
+        Assumption, CompositeReceipt, InnerReceipt, Receipt, SegmentReceipt, SuccinctReceipt,
+        VerifierContext,
     },
     recursion::ALLOWED_IDS_ROOT,
 };

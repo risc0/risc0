@@ -51,10 +51,8 @@ use crate::{
         client::exec::TraceEvent,
         server::opcode::{MajorType, OpCode},
     },
-    serde::to_vec,
     sha::Digest,
-    ExecutorEnv, ExitCode, FaultCheckMonitor, Loader, Segment, SegmentRef, Session,
-    SimpleSegmentRef, FAULT_CHECKER_ELF,
+    ExecutorEnv, ExitCode, Loader, Segment, SegmentRef, Session, SimpleSegmentRef,
 };
 
 /// The number of cycles required to compress a SHA-256 block.
@@ -316,29 +314,6 @@ impl<'a> ExecutorImpl<'a> {
             post_image,
             assumptions,
         ))
-    }
-
-    #[allow(unused)] // DO NOT MERGE(victor)
-    fn run_fault_checker(&mut self) -> Result<Session> {
-        let fault_monitor = FaultCheckMonitor {
-            pc: self.pc,
-            insn: self.monitor.load_u32(self.pc)?,
-            regs: self.monitor.load_registers(),
-            post_id: self.monitor.build_image(self.pc).compute_id(),
-        };
-        let env = ExecutorEnv::builder()
-            .add_input(&to_vec(&fault_monitor)?)
-            .build()?;
-
-        let mut exec = self::ExecutorImpl::from_elf(env, FAULT_CHECKER_ELF).unwrap();
-        let session = exec.run()?;
-        if session.exit_code != ExitCode::Halted(0) {
-            bail!(
-                "Fault checker returned with exit code: {:?}. Expected `ExitCode::Halted(0)` from fault checker",
-                session.exit_code
-            );
-        }
-        Ok(session)
     }
 
     fn split(&mut self, pre_image: Option<Box<MemoryImage>>) -> Result<()> {

@@ -31,16 +31,14 @@ use risc0_zkvm_platform::{
 };
 
 use crate::{
-    host::{
-        client::{
-            env::{Assumptions, ExecutorEnv},
-            posix_io::PosixIo,
-            slice_io::SliceIo,
-        },
-        receipt::Assumption,
+    host::client::{
+        env::{Assumptions, ExecutorEnv},
+        posix_io::PosixIo,
+        slice_io::SliceIo,
     },
     receipt_metadata::PrunedValueError,
     sha::{Digest, Digestable},
+    Assumption,
 };
 
 /// A host-side implementation of a system call.

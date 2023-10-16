@@ -27,10 +27,10 @@ use anyhow::{anyhow, ensure, Result};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    host::{receipt::Assumption, server::exec::executor::SyscallRecord},
+    host::server::exec::executor::SyscallRecord,
     receipt_metadata::{Assumptions, Output},
     sha::Digest,
-    ExitCode, MemoryImage, ReceiptMetadata, SystemState,
+    Assumption, ExitCode, MemoryImage, ReceiptMetadata, SystemState,
 };
 
 #[derive(Clone, Default, Serialize, Deserialize, Debug)]
@@ -59,8 +59,6 @@ pub struct Session {
     /// The [ExitCode] of the session.
     pub exit_code: ExitCode,
 
-    // DO NOT MERGE(victor): This makes the segment object much larger. Consider whether this is an
-    // issue.
     /// The final [MemoryState] at the end of execution.
     pub post_image: MemoryImage,
 
@@ -205,6 +203,8 @@ impl Session {
         };
 
         // DO NOT MERGE: post should match the final segment system state, but doesn't always.
+        // Prior to merging figure out what is happening here and what to do about it (possibly
+        // nothing).
         let post_state = SystemState {
             pc: self.post_image.pc,
             merkle_root: match self.exit_code {

@@ -27,13 +27,13 @@ use bytemuck::Pod;
 use bytes::Bytes;
 use risc0_zkvm_platform::{self, fileno};
 
-use crate::host::{
-    client::{
+use crate::{
+    host::client::{
         exec::TraceEvent,
         posix_io::PosixIo,
         slice_io::{slice_io_from_fn, SliceIo, SliceIoTable},
     },
-    receipt::Assumption,
+    Assumption,
 };
 
 /// A builder pattern used to construct an [ExecutorEnv].

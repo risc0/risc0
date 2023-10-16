@@ -17,7 +17,7 @@
 use alloc::{collections::BTreeMap, string::String, vec, vec::Vec};
 use core::fmt::Debug;
 
-use anyhow::{anyhow, Result};
+use anyhow::Result;
 use risc0_binfmt::SystemState;
 use risc0_circuit_rv32im::layout;
 use risc0_core::field::baby_bear::BabyBear;
@@ -570,10 +570,13 @@ impl Assumption {
         }
     }
 
-    pub fn as_receipt(&self) -> Result<&Receipt> {
+    #[cfg(feature = "prove")]
+    pub(crate) fn as_receipt(&self) -> Result<&Receipt> {
         match self {
             Self::Proven(receipt) => Ok(receipt),
-            Self::Unresolved(_) => Err(anyhow!("no receipt available for unresolved assumption")),
+            Self::Unresolved(_) => Err(anyhow::anyhow!(
+                "no receipt available for unresolved assumption"
+            )),
         }
     }
 }
