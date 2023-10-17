@@ -37,6 +37,8 @@ impl CycleCounter for Job<'_> {
     fn new() -> Self {
         let image = get_image(METHOD_PATH);
         // Convert the model and input data from JSON into byte arrays.
+
+        let is_svm = false;
         let model_bytes: Vec<u8> = serde_json::from_str(JSON_MODEL).unwrap();
         let data_bytes: Vec<u8> = serde_json::from_str(JSON_DATA).unwrap();
 
@@ -48,6 +50,7 @@ impl CycleCounter for Job<'_> {
             rmp_serde::from_slice(&data_bytes).expect("data filed to deserialize byte array");
 
         let env = ExecutorEnv::builder()
+            .add_input(&to_vec(&is_svm).expect("bool failed to serialize"))
             .add_input(&to_vec(&model).expect("model failed to serialize"))
             .add_input(&to_vec(&data).expect("data failed to serialize"))
             .build()
