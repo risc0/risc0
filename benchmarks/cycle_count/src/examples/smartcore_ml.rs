@@ -37,6 +37,7 @@ impl CycleCounter for Job<'_> {
     fn new() -> Self {
         let image = get_image(METHOD_PATH);
         // Convert the model and input data from JSON into byte arrays.
+        let is_svm: bool = false;
         let model_bytes: Vec<u8> = serde_json::from_str(JSON_MODEL).unwrap();
         let data_bytes: Vec<u8> = serde_json::from_str(JSON_DATA).unwrap();
 
@@ -45,9 +46,11 @@ impl CycleCounter for Job<'_> {
         let model: Model =
             rmp_serde::from_slice(&model_bytes).expect("model failed to deserialize byte array");
         let data: DenseMatrix<f64> =
-            rmp_serde::from_slice(&data_bytes).expect("data filed to deserialize byte array");
+            rmp_serde::from_slice(&data_bytes).expect("data failed to deserialize byte array");
 
         let env = ExecutorEnv::builder()
+            .write(&is_svm)
+            .unwrap()
             .write(&model)
             .unwrap()
             .write(&data)
