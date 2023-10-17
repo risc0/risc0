@@ -57,12 +57,12 @@
       }
       let crate_name = tcell.srcElement.parentElement.childNodes[0].innerText;
 
-      for (let profile of data.profiles) {
+      for (let profile of data) {
         if (profile.name == crate_name) {
           var textarea = document.getElementById("error-log");
           var header = document.getElementById("error-log-name");
-          textarea.value = profile.results.build_errors;
-          textarea.setAttribute("value", profile.results.build_errors);
+          textarea.value = profile.build_errors;
+          textarea.setAttribute("value", profile.build_errors);
           header.innerText = `Crate: ${crate_name}`;
           return;
         }
@@ -70,14 +70,35 @@
       console.error(`Failed to find name: ${crate_name}`);
     }
 
-    async function fetch_json() {
-      return await fetch("profiles.json")
+    async function findMostRecentHash() {
+      return await fetch("results/index.json")
         .then(res => res.json())
-        .then(out => {
-          return out;
+        .then(data => {
+          // Find the most recent timestamp
+          let mostRecent = data.reduce((prev, current) => (prev.timestamp > current.timestamp) ? prev : current);
+          // Retrieve the hash related to the most recent timestamp
+          let mostRecentHash = mostRecent.hash;
+          return mostRecentHash;
         })
         .catch(err => { console.error(err) });
+    }
 
+    async function readContent(hash) {
+      let filename = `results/${hash}.json`;
+      return await fetch(filename)
+        .then(res => res.json())
+        .then(data => data)
+        .catch(err => { console.error(err) });
+    }
+
+    async function fetch_json() {
+      try {
+        const mostRecentHash = await findMostRecentHash();
+        const jsonData = await readContent(mostRecentHash);
+        return jsonData;
+      } catch (error) {
+        console.error(error);
+      }
     }
 
     const headers = ["name", "version", "status", "custom profile"];
@@ -100,9 +121,9 @@
       var failed = 0;
       var skipped = 0;
       var customized = 0;
-      const total = data.profiles.length;
+      const total = data.length;
 
-      for (let profile of data.profiles) {
+      for (let profile of data) {
         let row = table.insertRow();
         for (key of headers) {
           var table_data = "";
@@ -115,7 +136,7 @@
               table_data = profile.version;
               break;
             case "status":
-              table_data = profile.results.status;
+              table_data = profile.status;
               if (table_data == "Success") {
                 successes++;
                 cell.style.backgroundColor = "green";
@@ -129,7 +150,7 @@
               }
               break;
             case "custom profile":
-              if (profile.customized) {
+              if (profile.custom_profile) {
                 table_data = "True";
                 customized++;
               }
@@ -158,8 +179,8 @@
       var result_str = "";
       var counter = 0;
 
-      for (let profile of data.profiles) {
-        const err_str = profile.results.build_errors;
+      for (let profile of data) {
+        const err_str = profile.build_errors;
         if (err_str === null || err_str.length == 0) {
           continue;
         }

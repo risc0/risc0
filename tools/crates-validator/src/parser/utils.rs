@@ -12,27 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use anyhow::Result;
-use clap::Parser;
-use risc0_crates_validator::gen_profiles::{Args, GenProfiles};
+use std::{fmt::Display, fs};
 
-use tracing_subscriber::EnvFilter;
+use anyhow::{Context, Result};
 
-#[tokio::main]
-async fn main() -> Result<()> {
-    tracing_subscriber::fmt()
-        .with_env_filter(EnvFilter::from_default_env())
-        .init();
-
-    let args = Args::parse();
-
-    GenProfiles::new(args)
-        .read_profiles_config()?
-        .download_database()
-        .await?
-        .process_database()?
-        .filter_selected_crates()?
-        .write_profile()?;
-
-    Ok(())
+pub(crate) fn read_profile(path: impl AsRef<str> + Display) -> Result<String> {
+    fs::read_to_string(path.as_ref())
+        .with_context(|| format!("Failed to read profile file: {path}",))
 }

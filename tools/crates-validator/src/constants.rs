@@ -12,27 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use anyhow::Result;
-use clap::Parser;
-use risc0_crates_validator::gen_profiles::{Args, GenProfiles};
+pub const RISC_ZERO_REPO_GIT: &str = "https://github.com/risc0/risc0.git";
+pub const RISC_ZERO_REPO_PATH_BUILD: &str = "risc0/build";
+pub const RISC_ZERO_REPO_PATH_ZKVM: &str = "risc0/zkvm";
 
-use tracing_subscriber::EnvFilter;
-
-#[tokio::main]
-async fn main() -> Result<()> {
-    tracing_subscriber::fmt()
-        .with_env_filter(EnvFilter::from_default_env())
-        .init();
-
-    let args = Args::parse();
-
-    GenProfiles::new(args)
-        .read_profiles_config()?
-        .download_database()
-        .await?
-        .process_database()?
-        .filter_selected_crates()?
-        .write_profile()?;
-
-    Ok(())
-}
+#[cfg(test)]
+pub(crate) const PATH_YAML_CONFIG: &str = "profiles/config.yaml";
