@@ -38,6 +38,14 @@ pub mod recursion {
     pub use super::host::recursion::*;
 }
 
+pub use anyhow::Result;
+#[cfg(not(target_os = "zkvm"))]
+#[cfg(any(feature = "client", feature = "prove"))]
+pub use bytes::Bytes;
+#[cfg(not(target_os = "zkvm"))]
+pub use risc0_binfmt::{MemoryImage, Program, SystemState};
+pub use risc0_zkvm_platform::{declare_syscall, memory::GUEST_MAX_MEM, PAGE_SIZE};
+
 #[cfg(feature = "fault-proof")]
 pub use self::fault_monitor::FaultCheckMonitor;
 #[cfg(not(target_os = "zkvm"))]
@@ -76,18 +84,12 @@ pub use self::host::{
     },
     recursion::ALLOWED_IDS_ROOT,
 };
-pub use anyhow::Result;
-#[cfg(not(target_os = "zkvm"))]
-#[cfg(any(feature = "client", feature = "prove"))]
-pub use bytes::Bytes;
-#[cfg(not(target_os = "zkvm"))]
-pub use risc0_binfmt::{MemoryImage, Program, SystemState};
-pub use risc0_zkvm_platform::{declare_syscall, memory::GUEST_MAX_MEM, PAGE_SIZE};
 
 /// Reports the current version of this crate.
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 
-/// Reports the current version of this crate as represented by a [semver::Version].
+/// Reports the current version of this crate as represented by a
+/// [semver::Version].
 pub fn get_version() -> Result<Version, semver::Error> {
     Version::parse(VERSION)
 }

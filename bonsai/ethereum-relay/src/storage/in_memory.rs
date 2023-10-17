@@ -232,10 +232,11 @@ impl Storage for InMemoryStorage {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use bonsai_ethereum_contracts::i_bonsai_relay::CallbackRequestFilter;
     use ethers::types::{Address, Bytes, H256};
     use rstest::*;
+
+    use super::*;
 
     #[fixture]
     fn storage() -> InMemoryStorage {
