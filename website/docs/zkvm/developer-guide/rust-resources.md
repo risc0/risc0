@@ -26,15 +26,15 @@ You can see the latest results in our [Crate Validation Report].
 
 ![From Guest Code to Receipt](/diagrams/from-rust-to-receipt.png)
 
-[RISC Zero zkVM]: ../
-[zkVM application]: ../
-[zkVM applications]: ../
+[RISC Zero zkVM]: ../zkvm_overview.md
+[zkVM application]: ../zkvm_overview.md
+[zkVM applications]: ../zkvm_overview.md
 [Rust]: https://www.rust-lang.org/
 [Rust Installation]: https://www.rust-lang.org/tools/install
-[Rust Book]: https://doc.rust-lang.org/book/
+[Rust Book]: https://doc.rust-lang.org/book
 [Cargo Installation]: https://doc.rust-lang.org/cargo/getting-started/installation.html
-[Cargo Book]: https://doc.rust-lang.org/cargo/
-[Cargo]: https://doc.rust-lang.org/cargo/
-[`risc0-zkvm` crate]: https://docs.rs/risc0-zkvm/0.16/risc0_zkvm/
+[Cargo Book]: https://doc.rust-lang.org/cargo
+[Cargo]: https://doc.rust-lang.org/cargo
+[`risc0-zkvm` crate]: https://docs.rs/risc0-zkvm
 [Crate Validation Report]: https://risc0.github.io/ghpages/dev/crate-validation/index.html
 [other Rust crates]: https://github.com/risc0/risc0#rust-libraries

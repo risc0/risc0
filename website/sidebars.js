@@ -81,6 +81,11 @@ const sidebars = {
         },
         {
           type: "doc",
+          label: "Profiling",
+          id: "zkvm/developer-guide/profiling",
+        },
+        {
+          type: "doc",
           label: "Performance Benchmarks",
           id: "zkvm/benchmarks",
         },

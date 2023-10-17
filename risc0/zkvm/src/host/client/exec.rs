@@ -23,6 +23,8 @@ pub enum TraceEvent {
         cycle: u32,
         /// Program counter of the instruction being executed
         pc: u32,
+        /// Encoded instruction being executed.
+        insn: u32,
     },
 
     /// A register has been set
@@ -45,8 +47,8 @@ pub enum TraceEvent {
 impl std::fmt::Debug for TraceEvent {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match self {
-            Self::InstructionStart { cycle, pc } => {
-                write!(f, "InstructionStart({cycle}, 0x{pc:08X})")
+            Self::InstructionStart { cycle, pc, insn } => {
+                write!(f, "InstructionStart({cycle}, 0x{pc:08X}, 0x{insn:08X})")
             }
             Self::RegisterSet { idx, value } => write!(f, "RegisterSet({idx}, 0x{value:08X})"),
             Self::MemorySet { addr, value } => write!(f, "MemorySet(0x{addr:08X}, 0x{value:08X})"),

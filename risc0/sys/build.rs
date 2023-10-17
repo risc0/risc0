@@ -64,6 +64,7 @@ fn build_metal_kernels() {
             "mix.metal",
             "ntt.metal",
             "poseidon.metal",
+            "poseidon2.metal",
             "sha.metal",
             "zk.metal",
         ],

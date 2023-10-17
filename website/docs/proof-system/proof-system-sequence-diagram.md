@@ -5,7 +5,7 @@ sidebar_position: 4
 # Proof System Sequence Diagram and Spec
 
 _The implementation in code for the RISC Zero prover can be seen [here](https://github.com/risc0/risc0/blob/v0.18.0/risc0/zkp/src/prove/prover.rs).
-In this document, we present an overview to the protocol, as well as a sequence diagram and a detailed description below. The [STARK by Hand](stark-by-hand) explainer and the [RISC Zero ZKP Whitepaper](https://dev.risczero.com/proof-system-in-detail.pdf) are good companions to this document._
+In this document, we present an overview to the protocol, as well as a sequence diagram and a detailed description below. The [STARK by Hand](stark-by-hand.md) explainer and the [RISC Zero ZKP Whitepaper](https://dev.risczero.com/proof-system-in-detail.pdf) are good companions to this document._
 
 ## Overview
 
@@ -61,42 +61,34 @@ We describe this in more detail below, and refer readers to the [ZKP Whitepaper]
 
 ## Sequence Diagram
 
-<!-- prettier-ignore -->
 ```mermaid
 sequenceDiagram
-    Note over Prover,Verifier: Circuit Setup Phase <br/><br/> The Prover & Verifier agree on the public <br/> parameters for the zkVM circuit.
-    Note over Prover,Verifier: Image ID Setup Phase <br/><br/> Anyone with access to the binary file and the <br/>public parameters can reconstruct the Image ID.
-    Note over Prover: Prover executes the binary to <br/> construct the Main Execution Trace. 
-    Note over Prover: Prover computes Low Degree <br/>Extension to construct the <br/>Extended Main Execution Trace. 
-    Note over Prover: Prover Merklizes the <br/>Extended Main Execution Trace
-    Note right of Prover:  Prover sends Merkle Root(s) for<br/> Extended Main Execution Trace
-    Prover->>Verifier: 
-    Note left of Verifier: Verifier returns numerous random<br/> extension field elements.<br/><br/>These are used for a <br/>permutation argument,<br/>a lookup argument, and <br/> a big integer accelerator. 
-    Verifier->>Prover: 
-    Note over Prover: Prover computes <br/>Extended Auxiliary Execution Trace. 
-    Note over Prover: Prover Merklizes the <br/>Extended Auxiliary Execution Trace.
-    Note right of Prover:  Prover sends Merkle Root for<br/> Extended Auxiliary Execution Trace
-    Prover->>Verifier: 
-    Note over Prover,Verifier: Begin DEEP-ALI Protocol
-    Note left of Verifier: Verifier returns random constraint <br/>mixing parameter, alpha
-    Verifier->>Prover: 
-    Note over Prover: Prover uses powers of alpha to mix (i.e. linearly combine) <br/>Constraint Polynomials into a Mixed Constraint Polynomial.
-    Note over Prover: Prover divides by the Zeroes Polynomial <br/>to construct the High Degree Validity Polynomial<br/><br/>Degree(HDVP) = MaxConstraintDegree * TraceDegree
-    Note over Prover: Prover splits High Degree Validity Polynomial <br/>into a few Low Degree Validity Polynomials, <br/><br/>Degree(LDVP) = TraceDegree
-    Note over Prover: Prover Merklizes the <br/>Low Degree Validity Polynomials.
-    Note right of Prover: Prover sends Merkle Root <br/>for Low Degree Validity Polynomials
-    Prover->>Verifier: 
-    Note left of Verifier: Verifier returns a random extension <br/> field element, which serves <br/> as an out-of-domain<br/>evaluation point. 
-    Verifier->>Prover: 
-    Note right of Prover: Prover sends "necessary evaluations" <br/>required to evaluate constraints <br/>at out-of-domain evaluation point<br/>and coefficients of DEEP polynomials
-    Prover->>Verifier: 
-    Note left of Verifier: Verifier returns random <br/>extension field element <br/>for FRI batching
-    Verifier->>Prover: 
-    Note over Prover: Prover uses FRI batching randomness to mix <br/> the DEEP polynomials, forming the FRI polynomial. 
-    Note right of Prover: Prover sends Merkle Root <br/> for the FRI polynomial
-    Prover->>Verifier: 
-    Note over Prover,Verifier: Begin FRI protocol.
-    Note over Prover,Verifier: Details of FRI are omitted for brevity. 
+  participant P as Prover
+  participant V as Verifier
+  Note over P,V: Circuit Setup Phase<br/>The Prover & Verifier agree on the public<br/>parameters for the zkVM circuit.
+  Note over P,V: Image ID Setup Phase<br/>Anyone with access to the binary file and the<br/>public parameters can reconstruct the Image ID.
+  Note over P: Execute the binary to<br/>construct the Main Execution Trace.
+  Note over P: Compute Low Degree<br/>Extension to construct the<br/>Extended Main Execution Trace.
+  Note over P: Merklize Extended Main Execution Trace
+  P->>V: Send Merkle Root(s) for<br/>Extended Main Execution Trace
+  V->>P: Return numerous random<br/>extension field elements.<br/>These are used for a<br/>permutation argument,<br/>a lookup argument, and<br/>a big integer accelerator.
+  Note over P: Compute Extended Auxiliary Execution Trace.
+  Note over P: Merklize Extended Auxiliary Execution Trace.
+  P->>V: Send Merkle Root for<br/>Extended Auxiliary Execution Trace
+  Note over P,V: Begin DEEP-ALI Protocol
+  V->>P: Return random constraint<br/>mixing parameter, alpha
+  Note over P: Use powers of alpha to mix (i.e. linearly combine)<br/>Constraint Polynomials into a Mixed Constraint Polynomial.
+  Note over P: Divide by the Zeroes Polynomial<br/>to construct the High Degree Validity Polynomial<br/>Degree(HDVP) = MaxConstraintDegree * TraceDegree
+  Note over P: Split High Degree Validity Polynomial<br/>into a few Low Degree Validity Polynomials,<br/>Degree(LDVP) = TraceDegree
+  Note over P: Merklize Low Degree Validity Polynomials.
+  P->>V: Send Merkle Root<br/>for Low Degree Validity Polynomials
+  V->>P: Return a random extension<br/>field element, which serves<br/>as an out-of-domain<br/>evaluation point.
+  P->>V: Send "necessary evaluations"<br/>required to evaluate constraints<br/>at out-of-domain evaluation point<br/>and coefficients of DEEP polynomials
+  V->>P: Return random<br/>extension field element<br/>for FRI batching
+  Note over P: Use FRI batching randomness to mix<br/> the DEEP polynomials, forming the FRI polynomial.
+  P->>V: Send Merkle Root<br/>for the FRI polynomial
+  Note over P,V: Begin FRI protocol.
+  Note over P,V: Details of FRI are omitted for brevity.
 ```
 
 ## Detailed Step-by-Step Description
@@ -106,7 +98,7 @@ For a more formal articulation of the protocol, refer to the [ZKP Whitepaper].
 
 ### Extended Main Execution Trace
 
-- The Prover runs a computation in order to generate an [`Execution Trace`](what_is_a_trace.md).
+- The Prover runs a computation in order to generate an [`Execution Trace`](what_is_a_trace).
   - The `trace` is organized into `columns`, and the columns are categorized as `control columns`, `data columns`, and `auxiliary/accum columns`.
     - The `control columns` handle system initialization and shutdown, the initial program code to load into memory before execution, and other control signals that don't depend on the program execution.
     - The `data columns` contain the input and the computation data, both of which are private. These columns are committed in two orderings:
@@ -164,9 +156,9 @@ For a more formal articulation of the protocol, refer to the [ZKP Whitepaper].
 
 Thanks for reading! If you have questions or feedback, we'd love to hear from you on Discord or Twitter.
 
-[zkVM]: https://docs.rs/risc0-zkvm/0.18/risc0_zkvm/
-[Receipt]: https://docs.rs/risc0-zkvm/0.18.0/risc0_zkvm/struct.Receipt.html
-[Image ID]: ../../terminology#image-id
+[zkVM]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/
+[Receipt]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Receipt.html
+[Image ID]: ../terminology.md#image-id
 [STARK]: ../reference-docs/about-starks.md
 [Winterfell]: https://github.com/facebook/winterfell
 [DEEP-ALI & FRI]: ../reference-docs/about-fri.md
@@ -174,6 +166,6 @@ Thanks for reading! If you have questions or feedback, we'd love to hear from yo
 [From AIRs to RAPs]: https://hackmd.io/FLbS_DLxRpmcWHCBQx76Cw
 [log derivative]: https://eprint.iacr.org/2022/1530.pdf
 [PLOOKUP]: https://eprint.iacr.org/2020/315.pdf
-[receipts]: https://docs.rs/risc0-zkvm/0.18.0/risc0_zkvm/struct.Receipt.html
+[receipts]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Receipt.html
 [ZKP Whitepaper]: https://dev.risczero.com/proof-system-in-detail.pdf
 [fast cryptographic operations]: ../zkvm/developer-guide/acceleration.md

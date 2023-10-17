@@ -308,7 +308,7 @@ struct CppLanguageExporter;
 
 impl LanguageExporter for CppLanguageExporter {
     fn header() {
-        const CPP_HEADER: &str = r#"// Copyright (c) 2023 RISC Zero, Inc.
+        const CPP_HEADER: &str = r#"// Copyright 2023 RISC Zero, Inc.
 //
 // All rights reserved.
 

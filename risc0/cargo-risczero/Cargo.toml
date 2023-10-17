@@ -20,21 +20,19 @@ cargo_metadata = { version = "0.18", optional = true }
 clap = { version = "4", features = ["derive"] }
 const_format = "0.2"
 dirs = "5.0"
+downloader = "0.2"
 flate2 = "1"
 fs2 = "0.4"
-reqwest = { version = "0.11", default-features = false, features = [
-  "blocking",
-  "json",
-  "rustls-tls",
-  "gzip",
-] }
+reqwest = { version = "0.11", default-features = false, features = ["json"] }
+reqwest-middleware = "0.2"
+reqwest-retry = "0.3"
 risc0-build = { workspace = true }
 risc0-r0vm = { workspace = true, optional = true }
 risc0-zkvm = { workspace = true, optional = true }
 serde = { version = "1", features = ["derive"] }
 tar = "0.4"
 tempfile = "3"
-tracing = { version = "0.1", default-features = false }
+tokio = { version = "1", features = ["rt"] }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 zip = { version = "0.6", optional = true }
 

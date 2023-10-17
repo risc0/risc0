@@ -32,4 +32,4 @@ This error amplification means that even a single error in the execution trace c
 - The [Proximity Gaps for Reed-Solomon Codes](https://eprint.iacr.org/2020/654.pdf) paper is central to the soundness of the RISC Zero proof system.
   - See also [Dan Carmon's talk](https://www.youtube.com/watch?v=v0ZHUPzKotY) at the IEEE Symposium on the Foundations of Computer Science
 
-[receipt]: https://docs.rs/risc0-zkvm/0.16/risc0_zkvm/receipt/
+[receipt]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Receipt.html

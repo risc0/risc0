@@ -1,6 +1,6 @@
 # About Finite Fields
 
-_RISC Zero's [computational receipts] are built by converting an assertion of computational integrity into an assertion about polynomials over finite fields.
+_RISC Zero's [computational receipts][receipt] are built by converting an assertion of computational integrity into an assertion about polynomials over finite fields.
 This document serves as a minimal introduction to finite fields, targeted at folks who have some exposure to modular arithmetic and who are curious to learn more about the [math and cryptography behind RISC Zero](../proof-system/proof-system.md)._
 
 ## Finite Fields 101: Reciprocals, Exponents, and Generators
@@ -28,7 +28,7 @@ Most of your Algebra II knowledge about polynomials still holds in finite fields
 `Example: Consider` $f(x)=x^2-1\text{ mod }5$`.  Observe that ` $f(1)=f(4)=0.$
 `We say ` $f$ `has roots at 1 and 4, and we can factor in the familiar way:` $f(x)=(x-1)(x-4)$`.`
 
-`Example: 
+`Example:
 Given three ordered pairs modulo 5, we can interpolate a degree 2 polynomial that passes through each point.`
 
 FFTs still work over finite fields, although they're called NTTs.
@@ -44,7 +44,7 @@ $z$ is called an **$n^{th}$ Root of Unity** if $z^n=1$.
 Roots of unity come up constantly in a wide variety of applications: you'll most frequently see the $n^{th}$ root of unity written as $e^\frac{2\pi i}{n}$, and they come up so frequently because they give an easy way to describe rotations.
 This is what [Euler's Formula](https://www.youtube.com/watch?v=mvmuCPvRoWQ) is about.
 
-`Example: Multiplying by `$i$ `is a rotation of order 4 in` $\mathbb{C}$`. 
+`Example: Multiplying by `$i$ `is a rotation of order 4 in` $\mathbb{C}$`.
 More generally, multiplying by a 4th root of unity is a rotation of order 4.`
 
 ## Additional References:
@@ -55,4 +55,4 @@ More generally, multiplying by a 4th root of unity is a rotation of order 4.`
 - [A. Sutherland's notes on finite fields and integer arithmetic](https://math.mit.edu/classes/18.783/2017/LectureNotes3.pdf)
 - [Splitting $x^{n}-1$ over a finite field](https://math.stackexchange.com/questions/2511486/)
 
-[computational receipts]: https://docs.rs/risc0-zkvm/0.16/risc0_zkvm/receipt/
+[receipt]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Receipt.html

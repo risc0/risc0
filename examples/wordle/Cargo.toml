@@ -10,6 +10,9 @@ serde = "1.0"
 wordle-core = { path = "core" }
 wordle-methods = { path = "methods" }
 
+[dev-dependencies]
+serial_test = "2.0"
+
 [features]
 cuda = ["risc0-zkvm/cuda"]
 default = []

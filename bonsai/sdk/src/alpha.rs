@@ -139,14 +139,16 @@ pub mod responses {
 
     /// Snark Receipt object
     ///
-    /// All relevant data to verify both the snark proof an corresponding imageId on chain.
+    /// All relevant data to verify both the snark proof an corresponding
+    /// imageId on chain.
     #[derive(Debug, Deserialize, Serialize, PartialEq)]
     pub struct SnarkReceipt {
         /// Snark seal from snarkjs
         pub snark: Groth16Seal,
         /// Post State Digest
         ///
-        /// Collected from the STARK proof via `receipt.get_metadata().post.digest()`
+        /// Collected from the STARK proof via
+        /// `receipt.get_metadata().post.digest()`
         pub post_state_digest: Vec<u8>,
         /// Journal data from the risc-zkvm Receipt object
         pub journal: Vec<u8>,
@@ -258,7 +260,8 @@ impl Client {
     /// Construct a [Client] from env vars
     ///
     /// Uses the BONSAI_API_URL and BONSAI_API_KEY environment variables to
-    /// construct a client. The risc0_version should be the crate version of the risc0-zkvm crate
+    /// construct a client. The risc0_version should be the crate version of the
+    /// risc0-zkvm crate
     ///
     /// # Example:
     ///
@@ -464,7 +467,8 @@ impl Client {
 
     /// Fetches the current component versions from bonsai
     ///
-    /// Fetches the risc0 zkvm supported versions as well as other sub-components of bonsai
+    /// Fetches the risc0 zkvm supported versions as well as other
+    /// sub-components of bonsai
     pub fn version(&self) -> Result<VersionInfo, SdkErr> {
         Ok(self
             .client

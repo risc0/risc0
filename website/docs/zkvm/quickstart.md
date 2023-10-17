@@ -21,7 +21,7 @@ cargo install cargo-risczero
 cargo risczero install
 ```
 
-If you need to install Rust or encounter problems, take a look at our [full installation instructions](install).
+If you need to install Rust or encounter problems, take a look at our [full installation instructions](install.md).
 
 ## 2. Initialize a New Project
 
@@ -69,14 +69,14 @@ Additional information is available in the [starter template](https://github.com
 
 Options such as GPU acceleration and skipping the proof generation are documented in the [feature flags].
 
-[zkVM]: ../zkvm/
-[guest program]: ../../terminology#guest-program
-[Bonsai]: ../../bonsai/
+[zkVM]: ../zkvm/zkvm_overview.md
+[guest program]: ../terminology.md#guest-program
+[Bonsai]: ../bonsai/bonsai-overview.md
 [install]: ./install.md
 [feature flags]: https://github.com/risc0/risc0#feature-flags
-[zkVM demo applications]: https://github.com/risc0/risc0/tree/v0.18.0/examples/
-[cargo risczero]: https://docs.rs/cargo-risczero/0.16/cargo_risczero/
+[zkVM demo applications]: https://github.com/risc0/risc0/tree/v0.18.0/examples
+[cargo risczero]: https://docs.rs/cargo-risczero/*/cargo_risczero
 [Hello World tutorial]: https://github.com/risc0/risc0/tree/main/examples/hello-world/tutorial.md
 [demo applications]: https://github.com/risc0/risc0/tree/v0.18.0/examples
-[Bonsai Quick Start]: ../../bonsai/quickstart
+[Bonsai Quick Start]: ../bonsai/quickstart.md
 [request access]: https://bonsai.xyz/apply
