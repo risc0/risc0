@@ -15,13 +15,15 @@
 //! This module contains the components required to link a Rust binary.
 //!
 //! In particular:
-//! * It defines an entrypoint ensuring initialization and finalization are done properly.
+//! * It defines an entrypoint ensuring initialization and finalization are done
+//!   properly.
 //! * It includes a panic handler.
 //! * It includes an allocator.
 
-use core::alloc::{GlobalAlloc, Layout};
-
-use core::panic::PanicInfo;
+use core::{
+    alloc::{GlobalAlloc, Layout},
+    panic::PanicInfo,
+};
 
 use crate::syscall;
 

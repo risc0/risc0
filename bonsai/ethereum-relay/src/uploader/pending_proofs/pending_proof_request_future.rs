@@ -128,7 +128,8 @@ impl Future for PendingProofRequest {
                                     return Poll::Pending;
                                 }
                                 _ => {
-                                    // TODO: Should we consider 'TIMED_OUT' a failure, or should we retry?
+                                    // TODO: Should we consider 'TIMED_OUT' a failure, or should we
+                                    // retry?
 
                                     // The other status values indicate some type of error
                                     return Poll::Ready(Err(Error::ProofRequestError {

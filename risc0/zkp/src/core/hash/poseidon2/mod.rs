@@ -233,10 +233,10 @@ where
 
 #[cfg(test)]
 mod tests {
-    use crate::core::hash::poseidon2::consts::{_M_EXT, _M_EXT_MONTGOMERY};
     use test_log::test;
 
     use super::*;
+    use crate::core::hash::poseidon2::consts::{_M_EXT, _M_EXT_MONTGOMERY};
 
     fn do_partial_sboxes(cells: &mut [Elem; CELLS]) {
         cells[0] = sbox(cells[0]);
