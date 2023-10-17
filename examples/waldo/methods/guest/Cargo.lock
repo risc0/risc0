@@ -326,6 +326,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "risc0-circuit-recursion"
+version = "0.19.0-alpha.1"
+dependencies = [
+ "anyhow",
+ "bytemuck",
+ "log",
+ "risc0-core",
+ "risc0-zkp",
+ "tracing",
+]
+
+[[package]]
 name = "risc0-circuit-rv32im"
 version = "0.19.0-alpha.1"
 dependencies = [
@@ -377,6 +389,7 @@ dependencies = [
  "num-derive",
  "num-traits",
  "risc0-binfmt",
+ "risc0-circuit-recursion",
  "risc0-circuit-rv32im",
  "risc0-core",
  "risc0-zkp",

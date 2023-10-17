@@ -15,17 +15,14 @@
 use alloc::{collections::VecDeque, vec::Vec};
 
 use risc0_binfmt::read_sha_halfs;
+use risc0_circuit_recursion::{control_id::RECURSION_CONTROL_IDS, CircuitImpl};
 use risc0_core::field::baby_bear::BabyBearElem;
 use risc0_zkp::{adapter::CircuitInfo, core::digest::Digest, verify::VerificationError};
 use serde::{Deserialize, Serialize};
 
-use super::CircuitImpl;
+use super::CIRCUIT;
 use crate::{
-    host::{
-        control_id::POSEIDON_CONTROL_ID,
-        receipt::VerifierContext,
-        recursion::{circuit_impl::CIRCUIT_CORE, control_id::RECURSION_CONTROL_IDS},
-    },
+    host::{control_id::POSEIDON_CONTROL_ID, receipt::VerifierContext},
     sha::Digestable,
     ReceiptMetadata,
 };
@@ -87,9 +84,9 @@ impl SuccinctReceipt {
 
         // Verify the receipt itself is correct, and therefore the encoded globals are
         // reliable.
-        risc0_zkp::verify::verify(&CIRCUIT_CORE, suite, &self.seal, check_code)?;
+        risc0_zkp::verify::verify(&CIRCUIT, suite, &self.seal, check_code)?;
 
-        // Extract the globals from the seal.
+        // Extract the globals from the seal
         let output_elems: &[BabyBearElem] =
             bytemuck::cast_slice(&self.seal[..CircuitImpl::OUTPUT_SIZE]);
         let mut seal_meta = VecDeque::new();

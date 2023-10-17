@@ -12,26 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#![allow(dead_code)]
+
 use risc0_zkp::{
-    adapter::{CircuitCoreDef, TapsProvider},
-    field::baby_bear::BabyBear,
-    taps::TapSet,
+    field::{baby_bear::BabyBearElem, Elem},
+    layout_buffer,
 };
 
-use super::{taps::TAPSET, CircuitImpl};
+layout_buffer!(code, BabyBearElem);
+layout_buffer!(data, BabyBearElem);
+layout_buffer!(out, BabyBearElem);
 
-impl CircuitImpl {
-    const fn new() -> Self {
-        CircuitImpl
-    }
-}
-
-impl TapsProvider for CircuitImpl {
-    fn get_taps(&self) -> &'static TapSet<'static> {
-        TAPSET
-    }
-}
-
-impl CircuitCoreDef<BabyBear> for CircuitImpl {}
-
-pub(crate) const CIRCUIT_CORE: CircuitImpl = CircuitImpl::new();
+include! {"layout.rs.inc"}

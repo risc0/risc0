@@ -1029,6 +1029,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "dashmap"
+version = "5.5.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "978747c1d849a7d2ee5e8adc0159961c48fb7e5db2f06af6723b80123bb53856"
+dependencies = [
+ "cfg-if",
+ "hashbrown 0.14.1",
+ "lock_api",
+ "once_cell",
+ "parking_lot_core",
+]
+
+[[package]]
 name = "data-encoding"
 version = "2.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3512,6 +3525,33 @@ dependencies = [
 ]
 
 [[package]]
+name = "risc0-circuit-recursion"
+version = "0.19.0-alpha.1"
+dependencies = [
+ "anyhow",
+ "bytemuck",
+ "cust",
+ "log",
+ "metal",
+ "rand",
+ "rayon",
+ "risc0-circuit-recursion-sys",
+ "risc0-core",
+ "risc0-zkp",
+ "tracing",
+ "zip",
+]
+
+[[package]]
+name = "risc0-circuit-recursion-sys"
+version = "0.19.0-alpha.1"
+dependencies = [
+ "glob",
+ "risc0-build-kernel",
+ "risc0-core",
+]
+
+[[package]]
 name = "risc0-circuit-rv32im"
 version = "0.19.0-alpha.1"
 dependencies = [
@@ -3602,7 +3642,9 @@ dependencies = [
  "prost-build",
  "prost-types",
  "protobuf-src",
+ "rayon",
  "risc0-binfmt",
+ "risc0-circuit-recursion",
  "risc0-circuit-rv32im",
  "risc0-core",
  "risc0-zkp",
@@ -4055,6 +4097,31 @@ dependencies = [
 ]
 
 [[package]]
+name = "serial_test"
+version = "2.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0e56dd856803e253c8f298af3f4d7eb0ae5e23a737252cd90bb4f3b435033b2d"
+dependencies = [
+ "dashmap",
+ "futures",
+ "lazy_static",
+ "log",
+ "parking_lot",
+ "serial_test_derive",
+]
+
+[[package]]
+name = "serial_test_derive"
+version = "2.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "91d129178576168c589c9ec973feedf7d3126c01ac2bf08795109aa35b69fb8f"
+dependencies = [
+ "proc-macro2",
+ "quote 1.0.33",
+ "syn 2.0.38",
+]
+
+[[package]]
 name = "sha"
 version = "0.12.0"
 dependencies = [
@@ -4062,6 +4129,7 @@ dependencies = [
  "hex",
  "risc0-zkvm",
  "serde",
+ "serial_test",
  "sha-methods",
 ]
 
@@ -5333,6 +5401,7 @@ dependencies = [
  "rand",
  "risc0-zkvm",
  "serde",
+ "serial_test",
  "wordle-core",
  "wordle-methods",
 ]
@@ -5401,6 +5470,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "zip"
+version = "0.6.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "760394e246e4c28189f19d488c058bf16f564016aefac5d32bb1f3b51d5e9261"
+dependencies = [
+ "byteorder",
+ "crc32fast",
+ "crossbeam-utils",
+ "zstd",
+]
+
+[[package]]
 name = "zkevm-core"
 version = "0.1.0"
 dependencies = [
@@ -5434,6 +5515,35 @@ name = "zkevm-methods"
 version = "0.1.0"
 dependencies = [
  "risc0-build",
+]
+
+[[package]]
+name = "zstd"
+version = "0.11.2+zstd.1.5.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "20cc960326ece64f010d2d2107537f26dc589a6573a316bd5b1dba685fa5fde4"
+dependencies = [
+ "zstd-safe",
+]
+
+[[package]]
+name = "zstd-safe"
+version = "5.0.2+zstd.1.5.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1d2a5585e04f9eea4b2a3d1eca508c4dee9592a89ef6f450c11719da0726f4db"
+dependencies = [
+ "libc",
+ "zstd-sys",
+]
+
+[[package]]
+name = "zstd-sys"
+version = "2.0.9+zstd.1.5.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9e16efa8a874a0481a574084d34cc26fdb3b99627480f785888deb6386506656"
+dependencies = [
+ "cc",
+ "pkg-config",
 ]
 
 [[package]]

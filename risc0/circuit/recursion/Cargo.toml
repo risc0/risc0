@@ -1,0 +1,61 @@
+[package]
+name = "risc0-circuit-recursion"
+description = "RISC Zero circuit for recursion"
+version = { workspace = true }
+edition = { workspace = true }
+license = { workspace = true }
+homepage = { workspace = true }
+repository = { workspace = true }
+
+[dependencies]
+anyhow = { version = "1.0", default-features = false }
+risc0-core = { workspace = true }
+risc0-zkp = { workspace = true }
+tracing = { version = "0.1", default-features = false, features = [
+  "attributes",
+] }
+
+[target.'cfg(not(target_os = "zkvm"))'.dependencies]
+bytemuck = "1.12"
+cust = { version = "0.3", optional = true }
+log = "0.4"
+metal = { version = "0.25", optional = true }
+rand = { version = "0.8", optional = true }
+rayon = { version = "1.5", optional = true }
+risc0-circuit-recursion-sys = { workspace = true, optional = true }
+zip = { version = "0.6", default-features = false, optional = true, features = [
+  "zstd",
+] }
+
+[dev-dependencies]
+criterion = "0.5"
+env_logger = "0.10"
+test-log = "0.2"
+tracing-forest = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+[features]
+cuda = [
+  "dep:cust",
+  "prove",
+  "risc0-circuit-recursion-sys/cuda",
+  "risc0-zkp/cuda",
+  "std",
+]
+default = ["prove", "test"]
+metal = [
+  "dep:metal",
+  "prove",
+  "risc0-circuit-recursion-sys/metal",
+  "risc0-zkp/metal",
+]
+prove = [
+  "dep:rand",
+  "dep:rayon",
+  "dep:zip",
+  "risc0-zkp/prove",
+  "risc0-circuit-recursion-sys",
+  "std",
+]
+std = ["risc0-zkp/std"]
+test = []

@@ -41,6 +41,7 @@ fn main() {
         for entry in glob(&pattern).unwrap() {
             let path = entry.unwrap();
             let path = Path::new(&path).canonicalize().unwrap();
+            println!("cargo:rerun-if-changed={}", path.display());
             let rel = path.strip_prefix(&base).unwrap();
 
             let mut parts = vec![];

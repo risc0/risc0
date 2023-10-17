@@ -1,0 +1,35 @@
+// Copyright 2023 RISC Zero, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+use criterion::{criterion_group, criterion_main, Criterion};
+use risc0_core::field::{baby_bear::BabyBearElem, Elem};
+use risc0_zkp::core::hash::{
+    poseidon::{poseidon_mix, CELLS as POSEIDON_CELLS},
+    poseidon2::{poseidon2_mix, CELLS as POSEIDON2_CELLS},
+};
+
+fn benchmark_poseidon_mix(c: &mut Criterion) {
+    let mut rng = rand::thread_rng();
+    let mut cells = [BabyBearElem::random(&mut rng); POSEIDON_CELLS];
+    c.bench_function("poseidon_mix", |b| b.iter(|| poseidon_mix(&mut cells)));
+}
+
+fn benchmark_poseidon2_mix(c: &mut Criterion) {
+    let mut rng = rand::thread_rng();
+    let mut cells = [BabyBearElem::random(&mut rng); POSEIDON2_CELLS];
+    c.bench_function("poseidon2_mix", |b| b.iter(|| poseidon2_mix(&mut cells)));
+}
+
+criterion_group!(benches, benchmark_poseidon_mix, benchmark_poseidon2_mix);
+criterion_main!(benches);
