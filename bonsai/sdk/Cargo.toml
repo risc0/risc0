@@ -15,7 +15,7 @@ tokio = { version = "1", features = ["full", "sync"], optional = true }
 
 [dev-dependencies]
 env_logger = "0.10"
-httpmock = "0.6.8"
+httpmock = "0.6"
 temp-env = "0.3"
 uuid = { version = "1.3", features = ["v4"] }
 
