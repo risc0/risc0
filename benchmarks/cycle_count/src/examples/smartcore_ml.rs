@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use risc0_zkvm::{serde::to_vec, ExecutorEnv, MemoryImage};
+use risc0_zkvm::{ExecutorEnv, MemoryImage};
 use smartcore::{
     linalg::basic::matrix::DenseMatrix, tree::decision_tree_classifier::DecisionTreeClassifier,
 };
@@ -48,8 +48,10 @@ impl CycleCounter for Job<'_> {
             rmp_serde::from_slice(&data_bytes).expect("data filed to deserialize byte array");
 
         let env = ExecutorEnv::builder()
-            .add_input(&to_vec(&model).expect("model failed to serialize"))
-            .add_input(&to_vec(&data).expect("data failed to serialize"))
+            .write(&model)
+            .unwrap()
+            .write(&data)
+            .unwrap()
             .build()
             .unwrap();
 

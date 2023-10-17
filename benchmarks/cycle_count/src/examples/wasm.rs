@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use risc0_zkvm::{serde::to_vec, ExecutorEnv, MemoryImage};
+use risc0_zkvm::{ExecutorEnv, MemoryImage};
 
 use crate::{exec_compute, get_image, CycleCounter};
 
@@ -31,8 +31,10 @@ impl CycleCounter for Job<'_> {
         let wasm = wat2wasm().expect("Failed to parse_str");
         let iters: i32 = 100;
         let env = ExecutorEnv::builder()
-            .add_input(&to_vec(&wasm).unwrap())
-            .add_input(&to_vec(&iters).unwrap())
+            .write(&wasm)
+            .unwrap()
+            .write(&iters)
+            .unwrap()
             .build()
             .unwrap();
 

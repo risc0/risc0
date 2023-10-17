@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use risc0_zkvm::{serde::to_vec, ExecutorEnv, MemoryImage};
+use risc0_zkvm::{ExecutorEnv, MemoryImage};
 
 use crate::{exec_compute, get_image, CycleCounter};
 
@@ -31,8 +31,10 @@ impl CycleCounter for Job<'_> {
         let a: u64 = 17;
         let b: u64 = 23;
         let env = ExecutorEnv::builder()
-            .add_input(&to_vec(&a).unwrap())
-            .add_input(&to_vec(&b).unwrap())
+            .write(&a)
+            .unwrap()
+            .write(&b)
+            .unwrap()
             .build()
             .unwrap();
 

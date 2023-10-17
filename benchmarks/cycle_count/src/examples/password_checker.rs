@@ -14,7 +14,7 @@
 
 use password_checker_core::PasswordRequest;
 use rand::prelude::*;
-use risc0_zkvm::{serde::to_vec, ExecutorEnv, MemoryImage};
+use risc0_zkvm::{ExecutorEnv, MemoryImage};
 
 use crate::{exec_compute, get_image, CycleCounter};
 
@@ -38,7 +38,8 @@ impl CycleCounter for Job<'_> {
             salt,
         };
         let env = ExecutorEnv::builder()
-            .add_input(&to_vec(&request).unwrap())
+            .write(&request)
+            .unwrap()
             .build()
             .unwrap();
 

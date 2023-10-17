@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use image::{io::Reader as ImageReader, GenericImageView};
-use risc0_zkvm::{serde::to_vec, ExecutorEnv};
+use risc0_zkvm::ExecutorEnv;
 use waldo_core::{
     image::{ImageMask, ImageMerkleTree, IMAGE_CHUNK_SIZE},
     merkle::SYS_VECTOR_ORACLE,
@@ -62,7 +62,8 @@ impl CycleCounter for Job {
         };
 
         let env = ExecutorEnv::builder()
-            .add_input(&to_vec(&input).unwrap())
+            .write(&input)
+            .unwrap()
             .io_callback(SYS_VECTOR_ORACLE, img_merkle_tree.vector_oracle_callback())
             .build()
             .unwrap();

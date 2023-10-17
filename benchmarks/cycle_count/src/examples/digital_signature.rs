@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use digital_signature_core::{Message, Passphrase, SigningRequest};
-use risc0_zkvm::{serde::to_vec, ExecutorEnv, MemoryImage};
+use risc0_zkvm::{ExecutorEnv, MemoryImage};
 use sha2::{Digest, Sha256};
 
 use crate::{exec_compute, get_image, CycleCounter};
@@ -39,7 +39,8 @@ impl CycleCounter for Job<'_> {
             },
         };
         let env = ExecutorEnv::builder()
-            .add_input(&to_vec(&params).unwrap())
+            .write(&params)
+            .unwrap()
             .build()
             .unwrap();
 

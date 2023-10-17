@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use prorata_core::AllocationQuery;
-use risc0_zkvm::{serde::to_vec, ExecutorEnv, MemoryImage};
+use risc0_zkvm::{ExecutorEnv, MemoryImage};
 use rust_decimal::Decimal;
 
 use crate::{exec_compute, get_image, CycleCounter};
@@ -35,14 +35,12 @@ impl CycleCounter for Job<'_> {
         let target = "John Hammond".to_string();
         let amount = Decimal::from_str_radix("1000000000", 10).unwrap();
         let env = ExecutorEnv::builder()
-            .add_input(
-                &to_vec(&AllocationQuery {
-                    amount,
-                    recipients_csv,
-                    target,
-                })
-                .unwrap(),
-            )
+            .write(&AllocationQuery {
+                amount,
+                recipients_csv,
+                target,
+            })
+            .unwrap()
             .build()
             .unwrap();
 

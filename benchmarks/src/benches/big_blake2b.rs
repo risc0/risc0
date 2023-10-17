@@ -16,7 +16,6 @@ use std::time::Duration;
 
 use rand::{rngs::StdRng, RngCore, SeedableRng};
 use risc0_zkvm::{
-    serde::to_vec,
     sha::{Digest, DIGEST_WORDS},
     ExecutorEnv, ExitCode, MemoryImage, Receipt, Session,
 };
@@ -73,7 +72,8 @@ impl Benchmark for Job<'_> {
     fn new(guest_input: Self::Spec) -> Self {
         let image = get_image(METHOD_PATH);
         let env = ExecutorEnv::builder()
-            .add_input(&to_vec(&guest_input).unwrap())
+            .write(&guest_input)
+            .unwrap()
             .build()
             .unwrap();
         let session = Session::new(vec![], vec![], ExitCode::Halted(0));
