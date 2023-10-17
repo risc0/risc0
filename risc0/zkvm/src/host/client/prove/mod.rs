@@ -77,8 +77,6 @@ pub trait Prover {
     /// Return a name for this [Prover].
     fn get_name(&self) -> String;
 
-    // TODO(victor): What are the right semantics for this function with regards to
-    // exit code?
     /// Prove zkVM execution starting from the specified [MemoryImage].
     fn prove(
         &self,

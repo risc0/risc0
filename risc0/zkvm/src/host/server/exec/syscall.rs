@@ -299,7 +299,7 @@ impl SysVerify {
         for cached_assumption in self.assumptions.borrow().cached.iter() {
             let assumption_metadata = cached_assumption.get_metadata()?;
             let cmp_result: Result<Option<Digest>, PrunedValueError> = {
-                // TODO(victor): Check here that the cached assumption has no assumptions?
+                // TODO(#982): Check here that the cached assumption has no assumptions?
                 let assumption_journal_digest = assumption_metadata
                     .as_value()?
                     .output

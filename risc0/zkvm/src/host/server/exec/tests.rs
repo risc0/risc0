@@ -359,7 +359,6 @@ fn large_io_bytes() {
     assert_eq!(&buf, actual);
 }
 
-// TODO(victor): Make sure to add tests to proving as well.
 #[test]
 fn sys_verify() {
     let hello_commit_session = ExecutorImpl::from_elf(ExecutorEnv::default(), HELLO_COMMIT_ELF)

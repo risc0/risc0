@@ -209,7 +209,7 @@ impl Receipt {
 
         let expected_output = metadata.exit_code.expects_output().then(|| Output {
             journal: MaybePruned::Pruned(self.journal.digest()),
-            // TODO(victor): It would be reasonable for this method to allow integrity verification
+            // TODO(#982): It would be reasonable for this method to allow integrity verification
             // for receipts that have a non-empty assumptions list, but it is not supported here
             // because we don't have a enough information to open the assumptions list unless we
             // require it be empty.
@@ -319,7 +319,7 @@ pub struct CompositeReceipt {
     /// the continuation represented by the segment receipts. If any
     /// assumptions are unresolved, this receipt is only _conditionally_
     /// valid.
-    // TODO(victor): Allow for unresolved assumptions in this list.
+    // TODO(#982): Allow for unresolved assumptions in this list.
     pub assumptions: Vec<InnerReceipt>,
 
     /// Digest of journal included in the final output of the continuation. Will
@@ -416,7 +416,7 @@ impl CompositeReceipt {
                         self.journal_digest
                             .ok_or(VerificationError::ReceiptFormatError)?,
                     ),
-                    // TODO(victor): Adjust this if unresolved assumptions are allowed on
+                    // TODO(#982): Adjust this if unresolved assumptions are allowed on
                     // CompositeReceipt.
                     // NOTE: Proven assumptions are not included in the CompositeReceipt metadata.
                     assumptions: Assumptions(vec![]).into(),
