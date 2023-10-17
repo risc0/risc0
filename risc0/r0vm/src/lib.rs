@@ -35,10 +35,12 @@ struct Cli {
     #[arg(long, value_enum, default_value_t = HashFn::Sha256)]
     hashfn: HashFn,
 
-    /// When false, only prove execution sessions that end in a successful
-    /// [ExitCode] (i.e. `Halted(0)` or `Paused(0)`. When set to true, any
-    /// completed execution session will be proven, including indicated
-    /// errors (e.g. `Halted(1)`) and sessions ending in `Fault`.
+    /// Whether to prove exections ending in error status.
+    //
+    // When false, only prove execution sessions that end in a successful
+    // [ExitCode] (i.e. `Halted(0)` or `Paused(0)`. When set to true, any
+    // completed execution session will be proven, including indicated
+    // errors (e.g. `Halted(1)`) and sessions ending in `Fault`.
     #[arg(long)]
     prove_guest_errors: bool,
 
