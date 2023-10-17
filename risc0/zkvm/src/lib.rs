@@ -17,15 +17,11 @@
 #![deny(rustdoc::broken_intra_doc_links)]
 #![deny(missing_docs)]
 
-pub use anyhow::Result;
-#[cfg(not(target_os = "zkvm"))]
-#[cfg(any(feature = "client", feature = "prove"))]
-pub use bytes::Bytes;
-
 extern crate alloc;
 
 mod fault_ids;
 pub use fault_ids::{FAULT_CHECKER_ELF, FAULT_CHECKER_ID};
+
 #[cfg(feature = "fault-proof")]
 mod fault_monitor;
 #[cfg(feature = "fault-proof")]

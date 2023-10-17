@@ -86,6 +86,7 @@ impl TryFrom<pb::api::TraceEvent> for TraceEvent {
             pb::api::trace_event::Kind::InsnStart(event) => TraceEvent::InstructionStart {
                 cycle: event.cycle,
                 pc: event.pc,
+                insn: event.insn,
             },
             pb::api::trace_event::Kind::RegisterSet(event) => TraceEvent::RegisterSet {
                 idx: event.idx as usize,
