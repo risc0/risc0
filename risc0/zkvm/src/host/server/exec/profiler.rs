@@ -19,11 +19,13 @@
 //! top level stack frame.  (More than one stack frame may show up
 //! in the case of inlined functions).
 
-use std::cell::RefCell;
-use std::collections::HashMap;
-use std::fmt::Write;
-use std::hash::{Hash, Hasher};
-use std::rc::Rc;
+use std::{
+    cell::RefCell,
+    collections::HashMap,
+    fmt::Write,
+    hash::{Hash, Hasher},
+    rc::Rc,
+};
 
 use addr2line::{fallible_iterator::FallibleIterator, Context, LookupResult};
 use anyhow::{anyhow, Result};
@@ -34,9 +36,8 @@ use prost::Message;
 use rrs_lib::instruction_formats::{IType, JType, OPCODE_JAL, OPCODE_JALR};
 use rustc_demangle::demangle;
 
-use crate::TraceEvent;
-
 use self::proto::Line;
+use crate::TraceEvent;
 
 mod proto {
     // Generated proto interface.
