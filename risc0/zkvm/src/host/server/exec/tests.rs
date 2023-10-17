@@ -722,11 +722,12 @@ fn out_of_bounds_ecall() {
 
 #[cfg(feature = "docker")]
 mod docker {
+    use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF};
+    use risc0_zkvm_platform::WORD_SIZE;
+
     use crate::{
         host::server::exec::executor::ExecutorError, ExecutorEnv, ExecutorImpl, Session, TraceEvent,
     };
-    use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF};
-    use risc0_zkvm_platform::WORD_SIZE;
 
     #[test]
     fn trace() {

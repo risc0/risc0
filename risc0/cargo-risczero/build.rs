@@ -20,8 +20,8 @@ mod runtime {
     use zip::{write::FileOptions, CompressionMethod, ZipWriter};
 
     pub fn build_and_zip_runtime() {
-        // Build the risc0-zkvm-platform.a file and place it in a zip archive for inclusion in
-        // the cargo-risczero binary.
+        // Build the risc0-zkvm-platform.a file and place it in a zip archive for
+        // inclusion in the cargo-risczero binary.
         let out_dir_env = env::var_os("OUT_DIR").unwrap();
         let out_dir = Path::new(&out_dir_env); // $ROOT/target/$profile/build/$crate/out
 

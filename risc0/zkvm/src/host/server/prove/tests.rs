@@ -376,8 +376,9 @@ mod riscv {
 
 #[cfg(feature = "docker")]
 mod docker {
-    use crate::{ExecutorEnv, ExecutorImpl, ExitCode};
     use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF};
+
+    use crate::{ExecutorEnv, ExecutorImpl, ExitCode};
 
     #[test]
     fn pause_continue() {
