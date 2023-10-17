@@ -74,7 +74,16 @@ jobs:
         run: |
           git clone "https://x-access-token:${{ secrets.BENCHMARK_TOKEN }}@github.com/risc0/ghpages.git" ${{ runner.temp }}/benchmarks/
           cd ${{ runner.temp }}/benchmarks/
-          cp ${{ runner.temp }}/crate-validation/profile-results.json ./dev/crate-validation/profiles.json
+
+          mkdir -p ./dev/crate-validation/results
+          cp ${{ runner.temp }}/crate-validation/profile-results.json ./dev/crate-validation/results/${{ github.sha }}.json
+
+          [ ! -f ./dev/crate-validation/results/index.json ] && touch ./dev/crate-validation/results/index.json
+          grep -ohE '{\s*"timestamp":\s*\d+\s*,\s*"hash":\s*"[a-zA-Z0-9]+"\s*}' ./dev/crate-validation/results/index.json |\
+          awk -v timestamp="$(date +%s)" -v hash="${{ github.sha }}" \
+          'BEGIN{print "["} {print $0","} END{print "{\"timestamp\":"timestamp", \"hash\":\""hash"\"}" "\n]"}' |\
+          tr -d '[:space:]' | tee ./dev/crate-validation/results/index.json
+
           git add .
           git  -c "user.name=nightly-action" -c "user.email=github@users.noreply.github.com" commit -m "Added update at '$(date)'"
           git push origin main
