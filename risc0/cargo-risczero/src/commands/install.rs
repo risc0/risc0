@@ -14,14 +14,22 @@
 
 // This is based on cargo-wasix: https://github.com/wasix-org/cargo-wasix
 
-use std::path::{Path, PathBuf};
+use std::{
+    fs::File,
+    io::BufReader,
+    path::{Path, PathBuf},
+};
 
 use anyhow::{bail, Context, Result};
 use clap::Parser;
-use flate2::read::GzDecoder;
-use reqwest::{blocking::Client, header::HeaderMap};
+use downloader::{Download, Downloader};
+use flate2::bufread::GzDecoder;
+use reqwest::{header::HeaderMap, Client};
+use reqwest_middleware::{ClientBuilder, ClientWithMiddleware};
+use reqwest_retry::{policies::ExponentialBackoff, RetryTransientMiddleware};
 use serde::Deserialize;
 use tar::Archive;
+use tempfile::tempdir;
 
 use crate::{
     toolchain::{RustupToolchain, RUSTUP_TOOLCHAIN_NAME, RUST_REPO},
@@ -48,6 +56,9 @@ struct GithubAsset {
     browser_download_url: String,
     name: String,
 }
+
+const TOKEN_MSG: &str =
+    "Setting the GITHUB_TOKEN environment variable is supported to avoid IP throttling by GitHub.";
 
 impl Install {
     pub fn run(&self) -> Result<()> {
@@ -104,8 +115,18 @@ impl Install {
             .default_headers(headers)
             .user_agent("cargo-risczero")
             .build()?;
+        let temp_dir = tempdir()?;
+        let mut downloader = Downloader::builder()
+            .download_folder(temp_dir.path())
+            .build_with_client(client.clone())?;
 
-        let (tag_name, download_url) = self.get_download_url(&client, target)?;
+        let retry_policy = ExponentialBackoff::builder().build_with_max_retries(3);
+        let client = ClientBuilder::new(client)
+            .with(RetryTransientMiddleware::new_with_policy(retry_policy))
+            .build();
+        let rt = tokio::runtime::Runtime::new()?;
+
+        let (tag_name, download_url) = rt.block_on(self.get_download_url(&client, target))?;
 
         let toolchain_dir = toolchains_root_dir.join(format!("{target}_{}", tag_name));
         if toolchain_dir.is_dir() {
@@ -118,14 +139,18 @@ impl Install {
 
         // Download.
         eprintln!("Downloading Rust toolchain from url '{}'...", &download_url);
-        let res = client.get(&download_url).send()?.error_for_status()?;
-
-        eprintln!("Extracting...");
-        let decoder = GzDecoder::new(res);
-        let mut archive = Archive::new(decoder);
-
         let rust_dir = toolchain_dir.join("rust");
-        archive.unpack(&rust_dir)?;
+
+        let dl = Download::new(&download_url);
+        let results = downloader.download(&[dl])?;
+        for result in results {
+            let summary = result.context(format!("Download failed. {TOKEN_MSG}"))?;
+            let tarball = File::open(summary.file_name)?;
+            eprintln!("Extracting...");
+            let decoder = GzDecoder::new(BufReader::new(tarball));
+            let mut archive = Archive::new(decoder);
+            archive.unpack(&rust_dir)?;
+        }
 
         // Ensure permissions.
         #[cfg(target_family = "unix")]
@@ -151,7 +176,11 @@ impl Install {
         Ok(toolchain_dir)
     }
 
-    fn get_download_url(&self, client: &Client, target: &str) -> Result<(String, String)> {
+    async fn get_download_url(
+        &self,
+        client: &ClientWithMiddleware,
+        target: &str,
+    ) -> Result<(String, String)> {
         let tag = self
             .version
             .clone()
@@ -166,10 +195,12 @@ impl Install {
 
         let release: GithubReleaseData = client
             .get(&release_url)
-            .send()?
+            .send()
+            .await?
             .error_for_status()
-            .context("Could not download release info")?
+            .context(format!("Could not download release info. {TOKEN_MSG}"))?
             .json()
+            .await
             .context("Could not deserialize release info")?;
 
         // Try to find the asset for the wanted target triple.

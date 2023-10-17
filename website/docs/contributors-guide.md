@@ -12,10 +12,10 @@ _This page describes guidelines for community contributions to this [website](ht
 
 ## How To Contribute
 
-- All changes to this website are managed through GitHub pull requests, so you'll need a [GitHub Account](https://github.com/) to contribute.
+- All changes to this website are managed through GitHub pull requests, so you'll need a [GitHub Account](https://github.com) to contribute.
 - You can suggest an edit directly via the `Edit this Page` button at the bottom of each page.
 - To create a new page, you can use the [GitHub browser interface](https://www.github.com/risc0/website); the content is in `src/pages` and `docs`.
-  - Please read about [the navbar and sidebars](./contributors-guide.md/#navbar-and-sidebars) and [categories of documentation](./contributors-guide.md/#categories-of-documentation) before creating a new page.
+  - Please read about [the navbar and sidebars](./contributors-guide.md#navbar-and-sidebars) and [categories of documentation](./contributors-guide.md#categories-of-documentation) before creating a new page.
 - If you want to clone the repository and work locally, you may want to check out the [Docusaurus documentation](https://docusaurus.io/docs/installation).
   We like to use `yarn start` to run a local build, especially when we're working with changes that involve links or sidebars.
 
@@ -37,7 +37,7 @@ In order to achieve this objective, we rely on:
 
 ## Terminology Conventions
 
-[`RISC Zero Official Terminology`](./terminology)
+[`RISC Zero Official Terminology`](./terminology.md)
 
 Our terminology and naming conventions are subject to ongoing evaluation, and we encourage conversation and questions on these topics.
 Please let us know via a [`GitHub issue`](https://github.com/risc0/website/issues) when you encounter terms that don't seem quite right.

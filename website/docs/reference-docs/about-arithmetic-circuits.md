@@ -21,10 +21,10 @@ The circuit pictured above can be written as $C(x_1, x_2) = (x_1+x_2)\cdot x_2 \
 - Option 1: Build app-specific arithmetic circuits
 - Option 2: Build on top of a zero-knowledge virtual machine, which receives a binary file as an input and outputs a proof of execution.
 
-At RISC Zero, we adopt the latter approach: we've written a [RISC-V circuit](https://docs.rs/risc0-circuit-rv32im/0.16/risc0_circuit_rv32im/), which emulates rv32im.
+At RISC Zero, we adopt the latter approach: we've written a [RISC-V circuit](https://docs.rs/risc0-circuit-rv32im), which emulates rv32im.
 The rv32im circuit receives a RISC-V binary and some user specified input, and generates an [execution trace](../proof-system/what_is_a_trace.md).
 
-If the execution trace is valid, the [Prover](https://docs.rs/risc0-zkvm/0.16/risc0_zkvm/prove/index.html) generates a [receipt] that can be [verified] by a skeptical third party.
+If the execution trace is valid, the [Prover](https://docs.rs/risc0-zkvm/*/risc0_zkvm/trait.Prover.html) generates a [receipt] that can be [verified] by a skeptical third party.
 
 ## RISC Zero's Circuits
 
@@ -38,5 +38,5 @@ In addition to the rv32im circuit, we have built:
 - Wikipedia page on [arithmetic circuit complexity](https://en.wikipedia.org/wiki/Arithmetic_circuit_complexity)
 - [From programs to arithmetic circuits](https://www.youtube.com/watch?v=0M0pAubEjz8&list=PLBJMt6zV1c7Gh9Utg-Vng2V6EYVidTFCC&index=4): YouTube video from David Wong
 
-[verified]: https://docs.rs/risc0-zkvm/0.16/risc0_zkvm/receipt/#usage
-[receipt]: https://docs.rs/risc0-zkvm/0.16/risc0_zkvm/receipt/
+[verified]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Receipt.html#method.verify
+[receipt]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Receipt.html

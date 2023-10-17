@@ -12,26 +12,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use risc0_zkp::{
-    adapter::{CircuitCoreDef, TapsProvider},
-    field::baby_bear::BabyBear,
-    taps::TapSet,
-};
-
-use super::{taps::TAPSET, CircuitImpl};
-
-impl CircuitImpl {
-    const fn new() -> Self {
-        CircuitImpl
-    }
-}
-
-impl TapsProvider for CircuitImpl {
-    fn get_taps(&self) -> &'static TapSet<'static> {
-        TAPSET
-    }
-}
-
-impl CircuitCoreDef<BabyBear> for CircuitImpl {}
-
-pub(crate) const CIRCUIT_CORE: CircuitImpl = CircuitImpl::new();
+include!(concat!(env!("OUT_DIR"), "/methods.rs"));

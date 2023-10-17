@@ -16,7 +16,7 @@ Welcome to the [RISC Zero] documentation! This site contains documentation for:
 - **[The RISC Zero Proof System]**:
   The cryptographic techniques underlying the zkVM.
 
-We also have reference documentation for our Rust code, which can be found at [https://docs.rs/risc0-zkvm/](https://docs.rs/risc0-zkvm/) for the `risc0-zkvm` crate. For our other Rust crates, links to their reference docs can be found in [this list](https://github.com/risc0/risc0#rust-libraries).
+We also have reference documentation for our Rust code, which can be found at [https://docs.rs/risc0-zkvm/](https://docs.rs/risc0-zkvm) for the `risc0-zkvm` crate. For our other Rust crates, links to their reference docs can be found in [this list](https://github.com/risc0/risc0#rust-libraries).
 
 ---
 
@@ -42,7 +42,7 @@ To enable ZK builders to thrive, we're working on two core products: the [zkVM] 
 [zk coprocessors]: https://twitter.com/RiscZero/status/1677316664772132864
 [our work with Optimism]: https://www.theblock.co/post/240929/optimism-zk-proof-proposals?utm_source=twitter&utm_medium=social
 [RISC Zero]: https://risczero.com
-[zkVM]: ./zkvm/
+[zkVM]: ./zkvm/zkvm_overview.md
 
 ## Bonsai
 
@@ -72,11 +72,11 @@ These applications include:
 - **[ECDSA signature verification]**: prove the validity of an ECDSA signature
 
 [April 2022]: https://www.risczero.com/news/announce
-[JSON]: https://github.com/risc0/risc0/tree/v0.16.1/examples/json
+[JSON]: https://github.com/risc0/risc0/tree/main/examples/json
 [Where's Waldo]: https://risczero.com/news/waldo
-[ZK Checkmate]: https://github.com/risc0/risc0/tree/v0.16.1/examples/chess
+[ZK Checkmate]: https://github.com/risc0/risc0/tree/main/examples/chess
 [ZK Proof of Exploit]: https://risczero.com/news/zkpoex
-[ECDSA signature verification]: https://github.com/risc0/risc0/tree/v0.16.1/examples/ecdsa
+[ECDSA signature verification]: https://github.com/risc0/risc0/tree/main/examples/ecdsa
 
 These examples are all made possible by **leveraging a mature software ecosystem**: over 70% of the [top 1000 Rust crates] work out-of-the-box in the zkVM.
 Being able to import Rust crates is a game changer for the ZK software world: projects that would take months or years to build on other platforms can be solved trivially on our platform.
@@ -101,4 +101,4 @@ Follow us on [Twitter](https://twitter.com/risczero) and [YouTube](https://www.y
 [The RISC Zero zkVM]: zkvm/zkvm_overview.md
 [Bonsai]: bonsai/bonsai-overview.md
 [The RISC Zero Proof System]: proof-system/proof-system.md
-[computational receipt]: https://docs.rs/risc0-zkvm/0.16/risc0_zkvm/receipt/
+[computational receipt]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Receipt.html

@@ -7,7 +7,8 @@ homepage = { workspace = true }
 repository = { workspace = true }
 
 [dependencies]
-risc0-zkvm = { workspace = true, features = ["prove"] }
+fibonacci-methods = { path = "../../examples/profiling/methods" }
+risc0-zkvm = { workspace = true, features = ["prove", "profiler"] }
 risc0-zkvm-methods = { path = "../../risc0/zkvm/methods" }
 
 [build-dependencies]

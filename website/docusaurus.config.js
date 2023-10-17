@@ -1,11 +1,12 @@
 // @ts-check
-// Note: type annotations allow type checking and IDEs autocompletion
+// Note: type annotations allow type checking and IDEs autocompletion!
 
 const lightCodeTheme = require("prism-react-renderer/themes/github");
 const darkCodeTheme = require("prism-react-renderer/themes/dracula");
 const math = require("remark-math");
 const katex = require("rehype-katex");
 const rustCode = require("./src/remark/rust");
+const baseUrl = process.env.BASE_URL || "/";
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
@@ -14,7 +15,7 @@ const config = {
   favicon: "img/logo.png",
 
   url: "https://dev.risczero.com",
-  baseUrl: "/",
+  baseUrl: baseUrl,
 
   organizationName: "risc0",
   projectName: "devdocs",
@@ -140,9 +141,6 @@ const config = {
         style: "dark",
         links: [{}],
         copyright: `Copyright © ${new Date().getFullYear()} RISC Zero, Inc. Built with Docusaurus.`,
-      },
-      mermaid: {
-        theme: { light: "neutral", dark: "forest" },
       },
       prism: {
         additionalLanguages: ["bash", "rust", "toml"],

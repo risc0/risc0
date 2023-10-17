@@ -64,7 +64,7 @@ The Bonsai proving service can be used standalone or directly integrated with sm
 
 ### 3. Bonsai ETH Relay: Connecting off-chain proofs and on-chain applications
 
-_Status: Pre-Alpha, [documentation](/bonsai/bonsai-on-eth) and [Bonsai Foundry template](https://github.com/risc0/bonsai-foundry-template) available_
+_Status: Pre-Alpha, [documentation](bonsai-on-eth.md) and [Bonsai Foundry template](https://github.com/risc0/bonsai-foundry-template) available_
 
 The Bonsai ETH Relay connects your Ethereum dApps to Bonsai. Smart contract developers can call our proving service through an on-chain relay contract connected to the Bonsai proving service. If you'd prefer to engage with Bonsai proving service directly, we'll be rolling out the means to do so in the near future.
 
@@ -74,12 +74,12 @@ We're building technology that allows anyone to generate highly performant zero-
 
 [waitlist]: https://bonsai.xyz/apply
 [litepaper]: /litepaper
-[zkVM]: ../zkvm/
+[zkVM]: ../zkvm/zkvm_overview.md
 [Request access here]: https://bonsai.xyz/apply
 [`cargo risczero`]: https://docs.rs/cargo-risczero/latest/cargo_risczero/
 [Bonsai SDK]: https://crates.io/crates/bonsai-sdk
 [Bonsai REST API]: https://api.bonsai.xyz/swagger-ui/
-[Bonsai Quick Start]: ../bonsai/quickstart
+[Bonsai Quick Start]: quickstart.md
 [Bonsai as a zk coprocessor]: https://twitter.com/RiscZero/status/1677316664772132864
 [Bonfire Wallet]: https://twitter.com/RiscZero/status/1673692915401629698
 [Governance Showcase]: https://github.com/risc0/risc0/tree/main/bonsai/examples/governance#readme

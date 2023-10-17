@@ -4,8 +4,8 @@ sidebar_position: 3
 
 # STARK by Hand
 
-> When the RISC Zero [zkVM](../zkvm/zkvm_overview.md) executes, it generates a [receipt](https://docs.rs/risc0-zkvm/0.16/risc0_zkvm/receipt/) that allows third-parties to authenticate the validity of the execution.
-> The receipt contains a [zk-STARK](../reference-docs/about-starks.md) in the form of the [seal](https://docs.rs/risc0-zkvm/0.16/risc0_zkvm/receipt/struct.SegmentReceipt.html#structfield.seal).
+> When the RISC Zero [zkVM](../zkvm/zkvm_overview.md) executes, it generates a [receipt](https://docs.rs/risc0-zkvm/0.18/risc0_zkvm/struct.Receipt.html) that allows third-parties to authenticate the validity of the execution.
+> The receipt contains a [zk-STARK](../reference-docs/about-starks.md) in the form of the [seal](https://docs.rs/risc0-zkvm/0.18/risc0_zkvm/struct.SegmentReceipt.html#structfield.seal).
 > The zk-STARK that lives on the receipt is the crux of RISC Zero's technology.
 
 The construction of the RISC Zero STARK is highly technical, relying on several recent advances in the world of zero-knowledge cryptography.

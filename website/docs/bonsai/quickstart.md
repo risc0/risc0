@@ -21,4 +21,4 @@ While you wait, you can make use of the local proving option on the Bonsai Found
 [Bonsai REST API]: https://api.bonsai.xyz/swagger-ui/
 [Click here to request access]: https://bonsai.xyz/apply
 [request access]: https://bonsai.xyz/apply
-[zkVM]: ../zkvm
+[zkVM]: ../zkvm/zkvm_overview.md
