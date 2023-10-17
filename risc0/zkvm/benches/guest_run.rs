@@ -29,7 +29,7 @@ use rand::{
     distributions::{Distribution, Standard},
     Rng,
 };
-use risc0_zkvm::{serde::to_vec, ExecutorEnv, ExecutorImpl};
+use risc0_zkvm::{ExecutorEnv, ExecutorImpl};
 use risc0_zkvm_methods::{
     bench::{BenchmarkSpec, SpecWithIters},
     BENCH_ELF,
