@@ -716,7 +716,7 @@ pub unsafe extern "C" fn sys_verify(
     // This should always be the case. This check is included for
     // forwards-compatiblity.
     if a0 != 0 {
-        const MSG: &[u8] = "sys_resolve_guest_journal returned error result".as_bytes();
+        const MSG: &[u8] = "sys_verify returned error result".as_bytes();
         unsafe { sys_panic(MSG.as_ptr(), MSG.len()) };
     }
 }

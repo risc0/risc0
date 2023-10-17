@@ -36,7 +36,7 @@ struct Cli {
     hashfn: HashFn,
 
     /// When set to false, it is considered an error if the guest exists in an
-    /// unsuccessfully state, such as returning an exit code of `1` or
+    /// unsuccessful state, such as returning an exit code of `1` or
     /// encountering a fault. When set to true, this is not considered an
     /// error and proving will continue. Default is false.
     #[arg(long)]

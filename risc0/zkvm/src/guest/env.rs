@@ -116,7 +116,7 @@ impl std::error::Error for VerifyError {}
 /// Verify there exists a receipt for an execution with the given `image_id` and
 /// `journal`.
 ///
-/// In order to be valid, the [Receipt] must have have `ExitCode::Halted(0)`, an
+/// In order to be valid, the [Receipt] must have `ExitCode::Halted(0)`, an
 /// empty assumptions list, and an all-zeroes input hash. It may have any post
 /// [SystemState].
 pub fn verify(image_id: Digest, journal: &[u8]) -> Result<(), VerifyError> {
@@ -159,7 +159,7 @@ pub fn verify(image_id: Digest, journal: &[u8]) -> Result<(), VerifyError> {
 /// will not return.
 #[derive(Debug)]
 pub enum VerifyIntegrityError {
-    /// The provided [ReceiptMetadata] struct contained a non-empty asssumptions
+    /// The provided [ReceiptMetadata] struct contained a non-empty assumptions
     /// list.
     ///
     /// This is a semantic error as only unconditional receipts can be verified
@@ -220,7 +220,7 @@ pub fn verify_integrity(metadata: &ReceiptMetadata) -> Result<(), VerifyIntegrit
     Ok(())
 }
 
-/// Exhanges slices of plain old data with the host.
+/// Exchanges slices of plain old data with the host.
 ///
 /// This makes two calls to the given syscall; the first gets the length of the
 /// buffer to allocate for the return data, and the second actually

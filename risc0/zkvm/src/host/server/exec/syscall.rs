@@ -266,14 +266,14 @@ impl SysVerify {
     fn sys_verify(&mut self, mut from_guest: Vec<u8>, to_guest: &mut [u32]) -> Result<(u32, u32)> {
         if from_guest.len() != DIGEST_BYTES * 2 {
             bail!(
-                "sys_verify call with input of lenth {} bytes; expected {}",
+                "sys_verify call with input of length {} bytes; expected {}",
                 from_guest.len(),
                 DIGEST_BYTES * 2
             );
         }
         if to_guest.len() != DIGEST_WORDS {
             bail!(
-                "sys_verify call with output of lenth {} words; expected {}",
+                "sys_verify call with output of length {} words; expected {}",
                 to_guest.len(),
                 DIGEST_WORDS
             );
