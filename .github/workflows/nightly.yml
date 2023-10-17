@@ -43,22 +43,22 @@ jobs:
       - name: Generate the profile
         run: |
           target/release/gen-profiles \
-          -s crates/selected.json \
-          -r ${{ github.workspace }} \
-          -o ${{ runner.temp }}/crate-validation/profiles.json \
+          -P ${{ github.workspace }}/profiles/config.yaml \
+          -o ${{ runner.temp }}/crate-validation/profiles.yaml \
           -c $TOP_N_CRATES
         working-directory: tools/crates-validator/
 
       - name: Validate profiles
         run: |
           target/release/main \
-          -p ${{ runner.temp }}/crate-validation/profiles.json \
-          -j ${{ runner.temp }}/crate-validation/profile-results.json &> ${{ runner.temp }}/crate-validation/crate-results.log
+          -p ${{ github.workspace }} \
+          -P ${{ runner.temp }}/crate-validation/profiles.yaml \
+          -o ${{ runner.temp }}/crate-validation/profile-results.json &> ${{ runner.temp }}/crate-validation/crate-results.log
         shell: bash
         working-directory: tools/crates-validator/
 
       - name: Delete input profile
-        run: rm ${{ runner.temp }}/crate-validation/profiles.json
+        run: rm ${{ runner.temp }}/crate-validation/profiles.yaml
 
       - run: tail -n 1 ${{ runner.temp }}/crate-validation/crate-results.log
 
@@ -74,7 +74,16 @@ jobs:
         run: |
           git clone "https://x-access-token:${{ secrets.BENCHMARK_TOKEN }}@github.com/risc0/ghpages.git" ${{ runner.temp }}/benchmarks/
           cd ${{ runner.temp }}/benchmarks/
-          cp ${{ runner.temp }}/crate-validation/profile-results.json ./dev/crate-validation/profiles.json
+
+          mkdir -p ./dev/crate-validation/results
+          cp ${{ runner.temp }}/crate-validation/profile-results.json ./dev/crate-validation/results/${{ github.sha }}.json
+
+          [ ! -f ./dev/crate-validation/results/index.json ] && touch ./dev/crate-validation/results/index.json
+          grep -ohE '{\s*"timestamp":\s*\d+\s*,\s*"hash":\s*"[a-zA-Z0-9]+"\s*}' ./dev/crate-validation/results/index.json |\
+          awk -v timestamp="$(date +%s)" -v hash="${{ github.sha }}" \
+          'BEGIN{print "["} {print $0","} END{print "{\"timestamp\":"timestamp", \"hash\":\""hash"\"}" "\n]"}' |\
+          tr -d '[:space:]' | tee ./dev/crate-validation/results/index.json
+
           git add .
           git  -c "user.name=nightly-action" -c "user.email=github@users.noreply.github.com" commit -m "Added update at '$(date)'"
           git push origin main

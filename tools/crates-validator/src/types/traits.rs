@@ -12,27 +12,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use anyhow::Result;
-use clap::Parser;
-use risc0_crates_validator::gen_profiles::{Args, GenProfiles};
+use serde_valid::validation::Errors as ValidationErrors;
 
-use tracing_subscriber::EnvFilter;
+use super::aliases::GroupedProfiles;
 
-#[tokio::main]
-async fn main() -> Result<()> {
-    tracing_subscriber::fmt()
-        .with_env_filter(EnvFilter::from_default_env())
-        .init();
+pub trait Group {
+    fn group(self) -> GroupedProfiles;
+}
 
-    let args = Args::parse();
+pub trait Merge {
+    fn merge(self, other: Self) -> Self;
+}
 
-    GenProfiles::new(args)
-        .read_profiles_config()?
-        .download_database()
-        .await?
-        .process_database()?
-        .filter_selected_crates()?
-        .write_profile()?;
+pub trait Reduce {
+    fn reduce(self) -> Self;
+}
 
-    Ok(())
+pub trait Exclude {
+    fn exclude(self, other: Self) -> Self;
+}
+
+pub trait GetVersions {
+    fn get_versions(&self) -> Vec<semver::Version>;
+}
+
+pub trait IsValid {
+    fn is_valid(&self) -> Result<(), ValidationErrors>;
 }
