@@ -117,9 +117,11 @@ pub const ROUND_CONSTANTS: &[Elem] = &baby_bear_array![
 ];
 
 // External matrix output by the Sage script in https://github.com/HorizenLabs/poseidon2.git
-// External matrix chosen as per the recommendation in the original Poseidon2 paper 6x6 M4
+// External matrix chosen as per the recommendation in the original Poseidon2
+// paper 6x6 M4
 //
-// These parameters are not used.  See the definition of M_EXT_MONTGOMERY for further details.
+// These parameters are not used.  See the definition of M_EXT_MONTGOMERY for
+// further details.
 pub const _M_EXT: &[Elem] = &baby_bear_array![
     10, 14, 2, 6, 5, 7, 1, 3, 5, 7, 1, 3, 5, 7, 1, 3, 5, 7, 1, 3, 5, 7, 1, 3, 8, 12, 2, 2, 4, 6, 1,
     1, 4, 6, 1, 1, 4, 6, 1, 1, 4, 6, 1, 1, 4, 6, 1, 1, 2, 6, 10, 14, 1, 3, 5, 7, 1, 3, 5, 7, 1, 3,
@@ -142,22 +144,25 @@ pub const _M_EXT: &[Elem] = &baby_bear_array![
     4, 6, 1, 1, 4, 6, 1, 1, 4, 6, 1, 1, 4, 6, 2, 2, 8, 12,
 ];
 
-// To make hardware implementations more efficient, we interpret the external matrix elements as
-// montgomery form elements.  i.e. M_EXT_MONTGOMERY = (r^-1 I)*M_EXT.
+// To make hardware implementations more efficient, we interpret the external
+// matrix elements as montgomery form elements.  i.e. M_EXT_MONTGOMERY = (r^-1
+// I)*M_EXT.
 //
-// The only caveat with this approach is that we need to ensure the new matrix is also MDS.  In
-// other words, we need to show that every square submatrix has non-zero determinant.
+// The only caveat with this approach is that we need to ensure the new matrix
+// is also MDS.  In other words, we need to show that every square submatrix has
+// non-zero determinant.
 //
 // This can be shown directly using the multiplicative property of determinants:
 //
-// First, notice that for any k, the element (r^-1)^k is non-zero since there are no zero divisors
-// in a field.
+// First, notice that for any k, the element (r^-1)^k is non-zero since there
+// are no zero divisors in a field.
 //
-// Now let det(M_k) be the determinant of some k x k matrix of M_EXT.  Notice that:
-//  det((r^-1 I) * M_k) = det(r^-1 I) * det(M_k) = (r^-1)^k * det(M_k)
+// Now let det(M_k) be the determinant of some k x k matrix of M_EXT.  Notice
+// that:  det((r^-1 I) * M_k) = det(r^-1 I) * det(M_k) = (r^-1)^k * det(M_k)
 //
-// Since det(M_k) and (r^-1)^k are both non-zero, (r^-1)^k * det(M_k) is also non-zero.  Since
-// all square submatrices have non-zero determinant, M_EXT_MONTGOMERY is MDS.
+// Since det(M_k) and (r^-1)^k are both non-zero, (r^-1)^k * det(M_k) is also
+// non-zero.  Since all square submatrices have non-zero determinant,
+// M_EXT_MONTGOMERY is MDS.
 pub const _M_EXT_MONTGOMERY: &[Elem] = &baby_bear_array![
     0x527ffffc, 0x437ffffa, 0x70800000, 0x617ffffe, 0x293ffffe, 0x21bffffd, 0x38400000, 0x30bfffff,
     0x293ffffe, 0x21bffffd, 0x38400000, 0x30bfffff, 0x293ffffe, 0x21bffffd, 0x38400000, 0x30bfffff,
@@ -236,8 +241,8 @@ pub const _M_EXT_MONTGOMERY: &[Elem] = &baby_bear_array![
 // Outputted by a modified version of https://github.com/HorizenLabs/poseidon2.git
 // Computed by Ben Diamond at Ulvetanna.
 //
-// These parameters were chosen because they have low hamming weight in montgomery form which
-// makes them more efficient to implement in hardware.
+// These parameters were chosen because they have low hamming weight in
+// montgomery form which makes them more efficient to implement in hardware.
 //
 // The full matrix can be constructed by as follows:
 // - Initialize a matrix with all 1s.

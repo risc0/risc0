@@ -1,0 +1,63 @@
+[package]
+name = "risc0-benchmark"
+version = "0.19.0-alpha.1"
+edition = "2021"
+
+[workspace]
+members = [
+    "cycle_count"
+,
+    "methods",
+    "shared"]
+
+[workspace.dependencies]
+risc0-examples-cycle_counter = { path = "cycle_count" }
+risc0-benchmark-methods = { path = "methods" }
+risc0-benchmark-lib = { path = "shared" }
+risc0-build = { path = "../risc0/build" }
+
+[dependencies]
+blake2 = { version = "0.10.6", default-features = false }
+blake3 = { version = "1.4", default-features = false }
+byteorder = "1.4"
+clap = { version = "4.0", features = ["derive"] }
+csv = "1.1"
+ed25519-dalek = { version = "2.0.0-rc.3", default-features = false, features = ["rand_core"] }
+env_logger = "0.10"
+hex = "0.4"
+k256 = { version = "0.13", features = ["serde"] }
+log = "0.4"
+rand = "0.8"
+rand_core = "0.6.4"
+risc0-benchmark-lib = { workspace = true }
+risc0-benchmark-methods = { workspace = true }
+risc0-zkp = { path = "../risc0/zkp", default-features = false }
+risc0-zkvm = { path = "../risc0/zkvm", default-features = false, features = ["prove"] }
+risc0-zkvm-methods = { path = "../risc0/zkvm/methods" }
+serde = { version = "1.0", features = ["derive"] }
+sha2 = "0.10"
+sha3 = "0.10"
+starknet-crypto = "0.6"
+tokio = { version = "1", features = ["full"] }
+zeth-guests = { git = "https://github.com/risc0/zeth", package = "zeth-guests" }
+zeth-lib = { git = "https://github.com/risc0/zeth", package = "zeth-lib" }
+zeth-primitives = { git = "https://github.com/risc0/zeth", package = "zeth-primitives" }
+
+[features]
+cuda = ["risc0-zkvm/cuda"]
+metal = ["risc0-zkvm/metal"]
+default = []
+
+# Always optimize; building and running the guest takes much longer without optimization.
+[profile.dev]
+opt-level = 3
+
+[profile.dev.build-override]
+opt-level = 3
+
+[profile.release]
+debug = 1
+lto = true
+
+[profile.release.build-override]
+opt-level = 3
