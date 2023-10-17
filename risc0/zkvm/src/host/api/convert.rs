@@ -477,7 +477,9 @@ impl From<ReceiptMetadata> for pb::core::ReceiptMetadata {
             input: Some(value.input.into()),
             // Translate MaybePruned<Option<Output>>> to Option<MaybePruned<Output>>.
             output: match value.output {
-                MaybePruned::Value(optional) => optional.map(|output| MaybePruned::Value(output).into()),
+                MaybePruned::Value(optional) => {
+                    optional.map(|output| MaybePruned::Value(output).into())
+                }
                 MaybePruned::Pruned(digest) => Some(MaybePruned::<Output>::Pruned(digest).into()),
             },
         }
