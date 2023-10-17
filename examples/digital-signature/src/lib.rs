@@ -51,13 +51,13 @@ pub fn sign(pass_str: impl AsRef<[u8]>, msg_str: impl AsRef<[u8]>) -> Result<Sig
             msg: Sha256::digest(msg_str).try_into()?,
         },
     };
-    let env = ExecutorEnv::builder().write(&params)?.build().unwrap();
+    let env = ExecutorEnv::builder().write(&params)?.build()?;
 
     // Obtain the default prover.
     let prover = default_prover();
 
     // Produce a receipt by proving the specified ELF binary.
-    let receipt = prover.prove_elf(env, SIGN_ELF).unwrap();
+    let receipt = prover.prove_elf(env, SIGN_ELF)?;
 
     Ok(SignatureWithReceipt { receipt })
 }
