@@ -20,11 +20,7 @@ use std::{fs, path::PathBuf};
 use clap::{Parser, Subcommand};
 use prorata_core::{AllocationQuery, AllocationQueryResult};
 use prorata_methods::{PRORATA_GUEST_ELF, PRORATA_GUEST_ID};
-use risc0_zkvm::{
-    default_prover,
-    serde::{from_slice, to_vec},
-    ExecutorEnv, Receipt,
-};
+use risc0_zkvm::{default_prover, serde::from_slice, ExecutorEnv, Receipt};
 use rust_decimal::Decimal;
 
 #[derive(Parser)]
@@ -82,15 +78,14 @@ fn allocate(input: &str, output: &str, recipient: &str, amount: &Decimal) {
     println!("Query: {}", recipient);
     let recipients_csv = std::fs::read(&input).expect("Failed to read input file");
 
+    let query = AllocationQuery {
+        amount: *amount,
+        recipients_csv,
+        target: recipient.to_owned(),
+    };
     let env = ExecutorEnv::builder()
-        .add_input(
-            &to_vec(&AllocationQuery {
-                amount: *amount,
-                recipients_csv,
-                target: recipient.to_owned(),
-            })
-            .unwrap(),
-        )
+        .write(&query)
+        .unwrap()
         .build()
         .unwrap();
 

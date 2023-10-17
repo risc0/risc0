@@ -17,8 +17,8 @@ use std::{process::Command, rc::Rc, time::Instant};
 use clap::Parser;
 use human_repr::{HumanCount, HumanDuration};
 use risc0_zkvm::{
-    get_prover_server, serde::to_vec, ExecutorEnv, ExecutorImpl, ProverOpts, ProverServer, Receipt,
-    Session, VerifierContext,
+    get_prover_server, ExecutorEnv, ExecutorImpl, ProverOpts, ProverServer, Receipt, Session,
+    VerifierContext,
 };
 use risc0_zkvm_methods::{
     bench::{BenchmarkSpec, SpecWithIters},
@@ -170,9 +170,9 @@ fn run_with_iterations(iterations: usize, po2: u32, json: bool) {
 
 #[tracing::instrument(skip_all)]
 fn top(prover: Rc<dyn ProverServer>, iterations: u64, po2: u32) -> (Session, Receipt) {
-    let spec = SpecWithIters(BenchmarkSpec::SimpleLoop, iterations);
     let env = ExecutorEnv::builder()
-        .add_input(&to_vec(&spec).unwrap())
+        .write(&SpecWithIters(BenchmarkSpec::SimpleLoop, iterations))
+        .unwrap()
         .segment_limit_po2(po2)
         .build()
         .unwrap();

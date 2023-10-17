@@ -33,7 +33,7 @@ pub enum Output {
 /// Bonsai service.
 pub fn execute_locally(elf: &[u8], input: Vec<u8>) -> Result<Output> {
     let env = ExecutorEnv::builder()
-        .add_input(&input)
+        .write_slice(&input)
         .build()
         .context("Failed to build ExecutorEnv")?;
     let exec = default_executor();

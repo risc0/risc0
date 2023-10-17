@@ -12,11 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use risc0_zkvm::{
-    default_prover,
-    serde::{from_slice, to_vec},
-    ExecutorEnv,
-};
+use risc0_zkvm::{default_prover, serde::from_slice, ExecutorEnv};
 use wasm_methods::{WASM_INTERP_ELF, WASM_INTERP_ID};
 
 fn wat2wasm(wat: &str) -> Result<Vec<u8>, wat::Error> {
@@ -82,8 +78,10 @@ fn run_guest(iters: i32) -> i32 {
     let wasm = wat2wasm(&wat).expect("Failed to parse_str");
 
     let env = ExecutorEnv::builder()
-        .add_input(&to_vec(&wasm).unwrap())
-        .add_input(&to_vec(&iters).unwrap())
+        .write(&wasm)
+        .unwrap()
+        .write(&iters)
+        .unwrap()
         .build()
         .unwrap();
 

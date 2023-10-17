@@ -14,11 +14,7 @@
 
 pub use digital_signature_core::{Message, Passphrase, SignMessageCommit, SigningRequest};
 use digital_signature_methods::{SIGN_ELF, SIGN_ID};
-use risc0_zkvm::{
-    default_prover,
-    serde::{from_slice, to_vec},
-    ExecutorEnv, Receipt, Result,
-};
+use risc0_zkvm::{default_prover, serde::from_slice, ExecutorEnv, Receipt, Result};
 use sha2::{Digest, Sha256};
 
 pub struct SignatureWithReceipt {
@@ -55,8 +51,7 @@ pub fn sign(pass_str: impl AsRef<[u8]>, msg_str: impl AsRef<[u8]>) -> Result<Sig
             msg: Sha256::digest(msg_str).try_into()?,
         },
     };
-    let vec = to_vec(&params)?;
-    let env = ExecutorEnv::builder().add_input(&vec).build().unwrap();
+    let env = ExecutorEnv::builder().write(&params)?.build().unwrap();
 
     // Obtain the default prover.
     let prover = default_prover();

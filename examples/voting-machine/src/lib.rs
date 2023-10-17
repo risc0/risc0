@@ -12,11 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use risc0_zkvm::{
-    default_prover,
-    serde::{from_slice, to_vec},
-    ExecutorEnv, Receipt, Result,
-};
+use risc0_zkvm::{default_prover, serde::from_slice, ExecutorEnv, Receipt, Result};
 use voting_machine_core::{
     Ballot, FreezeVotingMachineCommit, FreezeVotingMachineParams, FreezeVotingMachineResult,
     InitializeVotingMachineCommit, SubmitBallotCommit, SubmitBallotParams, VotingMachineState,
@@ -80,9 +76,7 @@ impl PollingStation {
 
     pub fn init(&self) -> Result<InitMessage> {
         log::info!("init");
-        let env = ExecutorEnv::builder()
-            .add_input(&to_vec(&self.state)?)
-            .build()?;
+        let env = ExecutorEnv::builder().write(&self.state)?.build()?;
         let prover = default_prover();
         let receipt = prover.prove_elf(env, INIT_ELF)?;
         Ok(InitMessage { receipt })
@@ -93,7 +87,7 @@ impl PollingStation {
         let params = SubmitBallotParams::new(self.state.clone(), ballot.clone());
         let mut output = Vec::new();
         let env = ExecutorEnv::builder()
-            .add_input(&to_vec(&params)?)
+            .write(&params)?
             .stdout(&mut output)
             .build()?;
         let prover = default_prover();
@@ -107,7 +101,7 @@ impl PollingStation {
         let params = FreezeVotingMachineParams::new(self.state.clone());
         let mut output = Vec::new();
         let env = ExecutorEnv::builder()
-            .add_input(&to_vec(&params)?)
+            .write(&params)?
             .stdout(&mut output)
             .build()?;
         let prover = default_prover();

@@ -13,12 +13,7 @@
 // limitations under the License.
 
 use clap::{Arg, Command};
-use risc0_zkvm::{
-    default_prover,
-    serde::{from_slice, to_vec},
-    sha::Digest,
-    ExecutorEnv, Receipt,
-};
+use risc0_zkvm::{default_prover, serde::from_slice, sha::Digest, ExecutorEnv, Receipt};
 use sha_methods::{HASH_ELF, HASH_ID, HASH_RUST_CRYPTO_ELF};
 
 /// Hash the given bytes, returning the digest and a [Receipt] that can
@@ -33,7 +28,8 @@ use sha_methods::{HASH_ELF, HASH_ID, HASH_RUST_CRYPTO_ELF};
 /// everywhere the [sha2] crate is used.
 fn provably_hash(input: &str, use_rust_crypto: bool) -> (Digest, Receipt) {
     let env = ExecutorEnv::builder()
-        .add_input(&to_vec(input).unwrap())
+        .write(&input)
+        .unwrap()
         .build()
         .unwrap();
 

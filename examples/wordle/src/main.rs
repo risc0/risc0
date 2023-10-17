@@ -16,12 +16,7 @@ mod wordlist;
 
 use std::io;
 
-use risc0_zkvm::{
-    default_prover,
-    serde::{from_slice, to_vec},
-    sha::Digest,
-    ExecutorEnv, Receipt,
-};
+use risc0_zkvm::{default_prover, serde::from_slice, sha::Digest, ExecutorEnv, Receipt};
 use wordle_core::{GameState, WordFeedback, WORD_LENGTH};
 use wordle_methods::{WORDLE_GUEST_ELF, WORDLE_GUEST_ID};
 
@@ -45,8 +40,10 @@ impl<'a> Server<'a> {
 
     pub fn check_round(&self, guess_word: &str) -> Receipt {
         let env = ExecutorEnv::builder()
-            .add_input(&to_vec(self.secret_word).unwrap())
-            .add_input(&to_vec(&guess_word).unwrap())
+            .write(&self.secret_word)
+            .unwrap()
+            .write(&guess_word)
+            .unwrap()
             .build()
             .unwrap();
 
