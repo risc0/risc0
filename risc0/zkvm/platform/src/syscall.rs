@@ -744,7 +744,7 @@ pub unsafe extern "C" fn sys_verify_integrity(metadata_digest: *const [u32; DIGE
     // This should always be the case. This check is included for
     // forwards-compatiblity.
     if a0 != 0 {
-        const MSG: &[u8] = "sys_verify returned error result".as_bytes();
+        const MSG: &[u8] = "sys_verify_integrity returned error result".as_bytes();
         unsafe { sys_panic(MSG.as_ptr(), MSG.len()) };
     }
 }
