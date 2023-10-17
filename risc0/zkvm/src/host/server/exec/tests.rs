@@ -535,52 +535,59 @@ fn profiler() {
 
     let elf_mem = Program::load_elf(MULTI_TEST_ELF, u32::MAX).unwrap().image;
 
-    assert!(
-        occurences.iter().any(|(fr, addr, _count)| {
-            match fr.as_slice() {
-                [fr1 @ Frame {
-                    name: name1,
-                    filename: fn1,
-                    ..
-                }, fr2 @ Frame {
-                    name: name2,
-                    filename: fn2,
-                    ..
-                }] => {
-                    println!("Inspecting frames:\n{fr1:?}\n{fr2:?}\n");
-                    if name1 != "profile_test_func2" || name2 != "profile_test_func1" {
-                        println!("Names did not match: {}, {}", name1, name2);
-                        return false;
-                    }
-                    if !fn1.ends_with("multi_test.rs") || !fn2.ends_with("multi_test.rs") {
-                        println!("Filenames did not match: {}, {}", fn1, fn2);
-                        return false;
-                    }
-                    // Check to make sure we hit the "nop" instruction
-                    match elf_mem.get(&(*addr as u32)) {
-                        None => {
-                            println!("Addr {addr} not present in elf");
-                            return false;
-                        }
-                        Some(0x00_00_00_13) => (),
-                        Some(inst) => {
-                            println!("Looking for 'nop'; got 0x{inst:08x}");
-                            return false;
-                        }
-                    }
-
-                    // All checks passed; this is the occurence we were looking for.
-                    true
-                }
-                _ => {
-                    println!("{:#?}", fr);
-                    false
-                }
-            }
-        }),
-        "{:#?}",
-        occurences
+    // stitch frames together
+    let (fr, addr) = occurences.into_iter().fold(
+        (Vec::new(), 0),
+        |(mut acc_frames, _), (frames, addr, _count)| {
+            acc_frames.extend(frames);
+            (acc_frames, addr)
+        },
     );
+
+    let check = |fr: &Vec<Frame>, addr: usize| -> bool {
+        match fr.as_slice() {
+            [fr1 @ Frame {
+                name: name1,
+                filename: fn1,
+                ..
+            }, fr2 @ Frame {
+                name: name2,
+                filename: fn2,
+                ..
+            }] => {
+                println!("Inspecting frames:\n{fr1:?}\n{fr2:?}\n");
+                if name1 != "profile_test_func2" || name2 != "profile_test_func1" {
+                    println!("Names did not match: {}, {}", name1, name2);
+                    return false;
+                }
+                if !fn1.ends_with("multi_test.rs") || !fn2.ends_with("multi_test.rs") {
+                    println!("Filenames did not match: {}, {}", fn1, fn2);
+                    return false;
+                }
+                // Check to make sure we hit the "nop" instruction
+                match elf_mem.get(&(addr as u32)) {
+                    None => {
+                        println!("Addr {addr} not present in elf");
+                        return false;
+                    }
+                    Some(0x00_00_00_13) => (),
+                    Some(inst) => {
+                        println!("Looking for 'nop'; got 0x{inst:08x}");
+                        return false;
+                    }
+                }
+
+                // All checks passed; this is the occurence we were looking for.
+                true
+            }
+            _ => {
+                println!("{:#?}", fr);
+                false
+            }
+        }
+    };
+
+    assert!(check(&fr, addr), "{fr:#?} {addr}");
 }
 
 #[test]
@@ -728,6 +735,7 @@ mod docker {
                     // li x5, 1337
                     cycle: cycle1,
                     pc: pc1,
+                    ..
                 }, TraceEvent::RegisterSet {
                     idx: 5,
                     value: 1337,
@@ -735,6 +743,7 @@ mod docker {
                     // sw x5, 548(zero)
                     cycle: cycle2,
                     pc: pc2,
+                    ..
                 }, TraceEvent::RegisterSet {
                     idx: 6,
                     value: 0x08000000,
