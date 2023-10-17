@@ -62,12 +62,12 @@ cfg_if::cfg_if! {
 }
 
 /// Defines a collision resistant hash for the typed and structured data.
-pub trait Digestable {
+pub trait Digestible {
     /// Calculate a collision resistant hash for the typed and structured data.
     fn digest(&self) -> Digest;
 }
 
-impl<D: ?Sized + risc0_binfmt::Digestable> Digestable for D {
+impl<D: ?Sized + risc0_binfmt::Digestible> Digestible for D {
     /// Calculate a collision resistant hash for the typed and structured data.
     fn digest(&self) -> Digest {
         self.digest::<Impl>()

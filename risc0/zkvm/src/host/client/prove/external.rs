@@ -19,7 +19,7 @@ use risc0_binfmt::MemoryImage;
 
 use super::{Executor, Prover, ProverOpts};
 use crate::{
-    host::api::AssetRequest, sha::Digestable, ApiClient, ExecutorEnv, Receipt, SessionInfo,
+    host::api::AssetRequest, sha::Digestible, ApiClient, ExecutorEnv, Receipt, SessionInfo,
     VerifierContext,
 };
 

@@ -31,7 +31,7 @@ use crate::{
         receipt::{CompositeReceipt, InnerReceipt, SegmentReceipt},
         CIRCUIT,
     },
-    sha::Digestable,
+    sha::Digestible,
     Loader, Receipt, Segment, Session, VerifierContext,
 };
 

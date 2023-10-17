@@ -23,7 +23,7 @@ use serde::{Deserialize, Serialize};
 use super::CIRCUIT;
 use crate::{
     host::{control_id::POSEIDON_CONTROL_ID, receipt::VerifierContext},
-    sha::Digestable,
+    sha::Digestible,
     ReceiptMetadata,
 };
 

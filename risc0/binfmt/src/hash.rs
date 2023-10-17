@@ -20,24 +20,24 @@ use core::borrow::Borrow;
 use risc0_zkp::core::{digest::Digest, hash::sha::Sha256};
 
 /// Defines a collision resistant hash for the typed and structured data.
-pub trait Digestable {
+pub trait Digestible {
     /// Calculate a collision resistant hash for the typed and structured data.
     fn digest<S: Sha256>(&self) -> Digest;
 }
 
-impl Digestable for [u8] {
+impl Digestible for [u8] {
     fn digest<S: Sha256>(&self) -> Digest {
         *S::hash_bytes(&self)
     }
 }
 
-impl Digestable for Vec<u8> {
+impl Digestible for Vec<u8> {
     fn digest<S: Sha256>(&self) -> Digest {
         *S::hash_bytes(&self)
     }
 }
 
-impl<T: Digestable> Digestable for Option<T> {
+impl<T: Digestible> Digestible for Option<T> {
     fn digest<S: Sha256>(&self) -> Digest {
         match self {
             Some(val) => val.digest::<S>(),

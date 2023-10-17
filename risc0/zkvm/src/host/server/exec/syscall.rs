@@ -37,7 +37,7 @@ use crate::{
         slice_io::SliceIo,
     },
     receipt_metadata::PrunedValueError,
-    sha::{Digest, Digestable},
+    sha::{Digest, Digestible},
     Assumption,
 };
 

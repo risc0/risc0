@@ -40,7 +40,7 @@ use super::control_id::{BLAKE2B_CONTROL_ID, POSEIDON_CONTROL_ID, SHA256_CONTROL_
 pub use super::recursion::SuccinctReceipt;
 use crate::{
     receipt_metadata::{Assumptions, MaybePruned, Output},
-    sha::Digestable,
+    sha::Digestible,
     ExitCode, ReceiptMetadata,
 };
 

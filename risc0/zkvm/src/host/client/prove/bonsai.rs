@@ -19,7 +19,7 @@ use bonsai_sdk::alpha::Client;
 use risc0_binfmt::MemoryImage;
 
 use super::Prover;
-use crate::{sha::Digestable, ExecutorEnv, ProverOpts, Receipt, VerifierContext};
+use crate::{sha::Digestible, ExecutorEnv, ProverOpts, Receipt, VerifierContext};
 
 /// An implementation of a [Prover] that runs proof workloads via Bonsai.
 ///

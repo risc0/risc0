@@ -27,7 +27,7 @@ use risc0_binfmt::{read_sha_halfs, tagged_list, tagged_list_cons, tagged_struct,
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    sha::{self, Digest, Digestable, Sha256},
+    sha::{self, Digest, Digestible, Sha256},
     SystemState,
 };
 
@@ -74,9 +74,9 @@ where
     }
 }
 
-impl<T> Digestable for MaybePruned<T>
+impl<T> Digestible for MaybePruned<T>
 where
-    T: Digestable + Clone + Serialize,
+    T: Digestible + Clone + Serialize,
 {
     fn digest(&self) -> Digest {
         match self {
@@ -88,7 +88,7 @@ where
 
 impl<T> Default for MaybePruned<T>
 where
-    T: Digestable + Default + Clone + Serialize,
+    T: Digestible + Default + Clone + Serialize,
 {
     fn default() -> Self {
         MaybePruned::Value(Default::default())
@@ -132,7 +132,7 @@ where
 
 impl<T> fmt::Debug for MaybePruned<T>
 where
-    T: Clone + Serialize + risc0_binfmt::Digestable + fmt::Debug,
+    T: Clone + Serialize + risc0_binfmt::Digestible + fmt::Debug,
 {
     /// Format [MaybePruned] values are if they were a struct with value and
     /// digest fields. Digest field is always provided so that divergent
@@ -220,7 +220,7 @@ impl ReceiptMetadata {
     }
 }
 
-impl risc0_binfmt::Digestable for ReceiptMetadata {
+impl risc0_binfmt::Digestible for ReceiptMetadata {
     /// Hash the [crate::ReceiptMetadata] to get a digest of the struct.
     fn digest<S: Sha256>(&self) -> Digest {
         let (sys_exit, user_exit) = self.exit_code.into_pair();
@@ -330,7 +330,7 @@ pub struct Output {
     pub assumptions: MaybePruned<Assumptions>,
 }
 
-impl risc0_binfmt::Digestable for Output {
+impl risc0_binfmt::Digestible for Output {
     /// Hash the [Output] to get a digest of the struct.
     fn digest<S: Sha256>(&self) -> Digest {
         tagged_struct::<S>(
@@ -382,7 +382,7 @@ impl Deref for Assumptions {
     }
 }
 
-impl risc0_binfmt::Digestable for Assumptions {
+impl risc0_binfmt::Digestible for Assumptions {
     /// Hash the [Output] to get a digest of the struct.
     fn digest<S: Sha256>(&self) -> Digest {
         tagged_list::<S>(

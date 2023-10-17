@@ -26,6 +26,6 @@ mod sys_state;
 pub use crate::image::{compute_image_id, MemoryImage, PageTableInfo};
 pub use crate::{
     elf::Program,
-    hash::{tagged_list, tagged_list_cons, tagged_struct, Digestable},
+    hash::{tagged_list, tagged_list_cons, tagged_struct, Digestible},
     sys_state::{read_sha_halfs, write_sha_halfs, SystemState},
 };

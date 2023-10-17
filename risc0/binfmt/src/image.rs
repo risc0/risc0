@@ -27,7 +27,7 @@ use risc0_zkvm_platform::{
 };
 use serde::{Deserialize, Serialize};
 
-use crate::{elf::Program, Digestable, SystemState};
+use crate::{elf::Program, Digestible, SystemState};
 
 /// An image of a zkVM guest's memory
 ///

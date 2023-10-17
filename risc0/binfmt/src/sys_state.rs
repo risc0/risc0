@@ -21,7 +21,7 @@ use serde::{Deserialize, Serialize};
 
 #[cfg(not(target_os = "zkvm"))]
 use crate::MemoryImage;
-use crate::{tagged_struct, Digestable};
+use crate::{tagged_struct, Digestible};
 
 /// Represents the public state of a segment, needed for continuations and
 /// receipt verification.
@@ -49,7 +49,7 @@ impl SystemState {
     }
 }
 
-impl Digestable for SystemState {
+impl Digestible for SystemState {
     /// Hash the [crate::SystemState] to get a digest of the struct.
     fn digest<S: Sha256>(&self) -> Digest {
         tagged_struct::<S>("risc0.SystemState", &[self.merkle_root], &[self.pc])
