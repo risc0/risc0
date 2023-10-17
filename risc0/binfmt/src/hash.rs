@@ -59,7 +59,7 @@ pub fn tagged_struct<S: Sha256>(tag: &str, down: &[impl Borrow<Digest>], data: &
     for word in data.iter().copied() {
         all.extend_from_slice(&word.to_le_bytes());
     }
-    let down_count: u16 = down.len().try_into().unwrap();
+    let down_count: u16 = down.len().try_into().expect("struct defined with more than 2^16 fields");
     all.extend_from_slice(&down_count.to_le_bytes());
     *S::hash_bytes(&all)
 }
