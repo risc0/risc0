@@ -20,7 +20,7 @@ use serde_valid::Validate;
 use super::{
     aliases::{CrateName, GroupedProfiles},
     profile_settings::ProfileSettings,
-    traits::{Group, Merge},
+    traits::{GetVersions, Group, Merge},
     version::Versions,
 };
 
@@ -70,6 +70,14 @@ impl Profile {
 
     pub fn should_skip(&self) -> bool {
         self.settings.skip
+    }
+
+    pub fn settings(&self) -> &ProfileSettings {
+        &self.settings
+    }
+
+    pub fn versions(&self) -> Vec<semver::Version> {
+        self.versions.get_versions()
     }
 }
 
