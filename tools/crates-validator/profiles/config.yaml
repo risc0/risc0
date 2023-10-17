@@ -1,0 +1,121 @@
+batch:
+  - name: skip-crates
+    crates:
+      - windows-sys
+      - miow
+      - redox_syscall
+    settings:
+      skip: true
+  - name: zeth-dependencies
+    crates:
+      - alloy-primitives
+      - alloy-rlp
+      - alloy-rlp-derive
+      - anyhow
+      - bytes
+      - ethers-core
+      - hashbrown
+      - hex-literal
+      - k256
+      - once_cell
+      - revm
+      - revm-primitives
+      - rlp
+      - ruint
+      - serde
+      - sha2
+      - sha3
+      - thiserror
+  - name: cryptography
+    crates:
+      - openssl
+  - name: homomorphic-encryption
+    crates:
+      - tfhe
+  - name: crossbeam-patch
+    settings:
+      patch: |
+        [patch.crates-io]
+        crossbeam = { git = "https://github.com/risc0/crossbeam", rev = "b25eb50f8c193f36dacb6739692261ea96827bb7" }
+        crossbeam-utils = { git = "https://github.com/risc0/crossbeam", rev = "b25eb50f8c193f36dacb6739692261ea96827bb7" }
+        crossbeam-channel = { git = "https://github.com/risc0/crossbeam", rev = "b25eb50f8c193f36dacb6739692261ea96827bb7" }
+    crates:
+      - async-channel
+      - async-executor
+      - async-io
+      - blocking
+      - concurrent-queue
+      - criterion
+      - crossbeam-deque
+      - crossbeam-epoch
+      - crossbeam-queue
+      - rayon
+      - rayon-core
+      - redox_users
+      - vsdb
+      - vsdbsled
+  - name: use-std
+    settings:
+      std: true
+    crates:
+      - anyhow
+      - cargo_metadata
+      - clap
+      - criterion
+      - crypto-bigint
+      - csv
+      - env_logger
+      - ethers-core
+      - h2
+      - headers
+      - hex
+      - hyper
+      - hyper-timeout
+      - k256
+      - lazy_static
+      - md-5
+      - multimap
+      - openssl
+      - rand
+      - revm
+      - revm-primitives
+      - serde
+      - serde_bytes
+      - serde_cbor
+      - serde_json
+      - serde_urlencoded
+      - serde_with
+      - serde_yaml
+      - sha-1
+      - sha1
+      - sha2
+      - sha3
+      - string_cache
+      - tfhe
+      - tinytemplate
+      - toml
+      - tower
+      - tracing
+      - tracing-core
+      - tracing-futures
+      - tracing-log
+      - tracing-serde
+      - tracing-subscriber
+      - tungstenite
+      - zip
+  - name: inject-cc-flags
+    settings:
+      inject-cc-flags: true
+    crates:
+      - ring
+      - zip
+
+crates:
+  - name: lazy_static
+    import-str: |
+      use lazy_static::lazy_static;
+      lazy_static! {
+        static ref EXAMPLE: u8 = 42;
+      }
+    custom-main: assert_eq!(*EXAMPLE, 42);
+    run-prover: true

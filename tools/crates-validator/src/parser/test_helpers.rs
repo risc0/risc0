@@ -12,27 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use anyhow::Result;
-use clap::Parser;
-use risc0_crates_validator::gen_profiles::{Args, GenProfiles};
+use crate::types::{profile::Profile, profile_settings::ProfileSettings};
 
-use tracing_subscriber::EnvFilter;
-
-#[tokio::main]
-async fn main() -> Result<()> {
-    tracing_subscriber::fmt()
-        .with_env_filter(EnvFilter::from_default_env())
-        .init();
-
-    let args = Args::parse();
-
-    GenProfiles::new(args)
-        .read_profiles_config()?
-        .download_database()
-        .await?
-        .process_database()?
-        .filter_selected_crates()?
-        .write_profile()?;
-
-    Ok(())
+pub(crate) fn profile_with_settings(args: (impl ToString, ProfileSettings)) -> Profile {
+    Profile::new(args.0.to_string(), args.1, None).unwrap()
 }
