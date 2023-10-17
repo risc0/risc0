@@ -43,6 +43,11 @@ pub mod recursion {
     pub use super::host::recursion::*;
 }
 
+pub use anyhow::Result;
+#[cfg(not(target_os = "zkvm"))]
+#[cfg(any(feature = "client", feature = "prove"))]
+pub use bytes::Bytes;
+
 #[cfg(not(target_os = "zkvm"))]
 pub use risc0_binfmt::MemoryImage;
 pub use risc0_binfmt::{Program, SystemState};
