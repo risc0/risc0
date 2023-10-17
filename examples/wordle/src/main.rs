@@ -136,11 +136,13 @@ fn main() {
 
 #[cfg(test)]
 mod tests {
+    use serial_test::serial;
     use wordle_core::LetterFeedback;
 
     use crate::{Player, Server};
 
     #[test]
+    #[serial]
     fn main() {
         const TEST_GUESS_WRONG: &str = "roofs";
         const TEST_GUESS_RIGHT: &str = "proof";
@@ -167,6 +169,7 @@ mod tests {
     /// appear, and also in an incorrect position, the 'bonus' letter
     /// shouldn't flag yellow
     #[test]
+    #[serial]
     fn test_partial_match_false_positives() {
         let server = Server::new("spare");
         let player = Player {

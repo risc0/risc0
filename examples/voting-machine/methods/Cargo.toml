@@ -1,0 +1,10 @@
+[package]
+name = "voting-machine-methods"
+version = "0.12.0"
+edition = "2021"
+
+[package.metadata.risc0]
+methods = ["guest"]
+
+[build-dependencies]
+risc0-build = { path = "../../../risc0/build" }

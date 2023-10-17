@@ -101,7 +101,7 @@ Use this command any time you'd like to check your progress.
 ## Concept break: How do we run and prove the guest program?
 
 
-Our next objective is to provide the guest program with input. Before we implement this, let's take a closer look at how we run and prove the guest program in `hello-world/src/main.rs`.
+Our next objective is to provide the guest program with input. Before we implement this, let's take a closer look at how we run and prove the guest program in `hello-world/host/src/main.rs`.
 
 In the starter template project, our host driver program creates an executor environment before constructing a prover.  When `Prover::prove_elf()` is called, it will produce a receipt:
 
@@ -131,33 +131,37 @@ In the starter template project, our host driver program creates an executor env
 
 ## Step 5 (Host): Share two values with the guest
 
-In this step, we'll be continuing to modify `hello-world/src/main.rs`.
-Let's start by picking some aesthetically pleasing primes:
+In this step, we'll be continuing to modify `hello-world/host/src/main.rs`.
+Let's start by picking some aesthetically pleasing primes such as `17` and `23`.
+They will be added to the top of our `main` function:
 ```
 fn main() {
     let a: u64 = 17;
     let b: u64 = 23;
+    // ...snip...
 }
 ```
 
 We'd like the host to make the values of `a` and `b` available to the guest prior to execution. We can do this by adding them to the the executor environment, which is responsible for managing guest-readable memory. When the prover executes the program, it will have access to these guest inputs.
 
- We need to add these values as inputs before the executor environment is built:
+We need to add these values as inputs before the executor environment is built:
 
- ```rust
-    use hello_world_methods::{MULTIPLY_ELF, MULTIPLY_ID};
-    use risc0_zkvm::{serde::to_vec, ExecutorEnv};
+```rust
+use hello_world_methods::{MULTIPLY_ELF, MULTIPLY_ID};
+use risc0_zkvm::{default_prover, serde::to_vec, ExecutorEnv};
 
+fn main() {
     let a: u64 = 17;
     let b: u64 = 23;
 
     // First, we construct an executor environment
     let env = ExecutorEnv::builder()
-      // Send a & b to the guest
-      .add_input(&to_vec(&a).unwrap())
-      .add_input(&to_vec(&b).unwrap())
-      .build()
-      .unwrap();
+        // Send a & b to the guest
+        .add_input(&to_vec(&a).unwrap())
+        .add_input(&to_vec(&b).unwrap())
+        .build()
+        .unwrap();
+}
 ```
 
 You can confirm your work with `cargo run --release` — the program still won't do anything, but it should compile and run successfully.
@@ -228,6 +232,9 @@ For this step, we return to the main file for the host driver program at `hello-
 ```no_compile
     // Run the prover to produce a receipt.
     let receipt = prover.prove_elf(env, METHOD_NAME_ELF).unwrap();
+
+    // TODO: Implement code for transmitting or serializing the receipt for
+    // other parties to verify here
 ```
 
 In a real-world scenario, we'd want to hand the [receipt] to someone else, but reading it ourselves will be a nice way to check our project is working as expected.
@@ -269,7 +276,7 @@ Or, if you believe you've found a bug or other problem in our code, please open 
 
 If you're ready to start building more complex projects, we recommend taking a look at the other examples in our [examples directory] and looking through our further [Getting Started resources] for more project ideas that use zero-knowledge proofs.
 
-[examples directory]: https://github.com/risc0/risc0/tree/v0.16.3/examples
+[examples directory]: https://github.com/risc0/risc0/tree/main/examples
 [Getting Started resources]: https://dev.risczero.com/zkvm
 [Discord]: https://discord.gg/risczero
 [issue]: https://github.com/risc0/risc0/issues

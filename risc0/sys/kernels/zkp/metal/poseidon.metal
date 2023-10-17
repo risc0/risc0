@@ -25,6 +25,8 @@ using namespace metal;
 #define CELLS_RATE 16
 #define CELLS_OUT 8
 
+namespace {
+
 void add_round_constants(const device Fp* ROUND_CONSTANTS, thread Fp* cells, uint round) {
   for (uint i = 0; i < CELLS; i++) {
     cells[i] += ROUND_CONSTANTS[round * CELLS + i];
@@ -108,6 +110,8 @@ void poseidon_mix(const device Fp* ROUND_CONSTANTS,
     round++;
   }
 }
+
+}  // end namespace
 
 kernel void poseidon_fold(const device Fp* ROUND_CONSTANTS,
                      const device Fp* MDS,

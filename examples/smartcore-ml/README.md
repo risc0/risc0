@@ -56,11 +56,7 @@ let model: KMeans<{float}, u8, DenseMatrix<{float}>, Vec<u8>> = trained_model;
 let model: PCA<{float}, DenseMatrix<{float}>> = trained_model;
 ```
 
-NOTE:  For Support Vector Machine classifiers and regression models, you MUST use the following smartcore fork and import into you cargo.toml file:
-
-smartcore = { git = "https://github.com/Roee-87/smartcore.git", features = ["serde"]}
-
-Deserialization of SVC and SVR does not includes that `SVCParametersmake` field.  It must be added back into the model struct manually after deserialization.  The SVC and SVR forks have amended the visbility of the model `struct`, making the parameters field public and thereby allowing the parameters field to be directly inserted into the model struct after deserialization.  You must insert the same parameters that were used when training the model.
+NOTE:  Deserialization of SVC and SVR does not includes that `SVCParametersmake` field.  It must be added back into the model struct manually after deserialization.  The RISC Zero SmartCore fork has amended the visbility of the model `struct`, making the parameters field public and thereby allowing the parameters field to be directly inserted into the model struct after deserialization.  You must insert the same parameters that were used when training the model.
 ```
 let mut model: SVC<{float}, i32, DenseMatrix<{float}>, Vec<i32>> = deserialized_svc_trained;
 let params = &SVCParameters::default().with_c(200.0).with_kernel(Kernels::linear());
@@ -85,3 +81,8 @@ SVM models support four kernels:  Gaussian (rbf), Linear, Polynomial, and Sigmoi
 The source code for SmartCore can be found here:  https://github.com/smartcorelib/smartcore
 
 You can find other model implementations and additional SmartCore features here:  https://github.com/smartcorelib/smartcore-jupyter/tree/main/notebooks
+
+## Jupyter notebook
+
+In order to run Rust code from a Jupyter notebook, you will need to have the Rust kernel installed.  Installations instructions for the kernel and for Jupyter can be found here:
+https://github.com/evcxr/evcxr/blob/main/evcxr_jupyter/README.md

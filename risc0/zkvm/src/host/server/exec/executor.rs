@@ -508,6 +508,7 @@ impl<'a> ExecutorImpl<'a> {
             trace.borrow_mut()(TraceEvent::InstructionStart {
                 cycle: self.session_cycle() as u32,
                 pc: self.pc,
+                insn: opcode.insn,
             })
             .unwrap();
 

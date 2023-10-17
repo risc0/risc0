@@ -69,6 +69,6 @@ impl Bootstrap {
             control_id_blake2b[10],
         );
         println!("{contents}");
-        std::fs::write("risc0/zkvm/src/control_id.rs", contents).unwrap();
+        std::fs::write("risc0/zkvm/src/host/control_id.rs", contents).unwrap();
     }
 }

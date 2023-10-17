@@ -76,9 +76,11 @@ fn main() {
 
 #[cfg(test)]
 mod tests {
+    use serial_test::serial;
     use sha_methods::{HASH_ID, HASH_RUST_CRYPTO_ID};
 
     #[test]
+    #[serial]
     fn hash_abc() {
         let (digest, receipt) = super::provably_hash("abc", false);
         receipt.verify(HASH_ID).unwrap();
@@ -90,6 +92,7 @@ mod tests {
     }
 
     #[test]
+    #[serial]
     fn hash_abc_rust_crypto() {
         let (digest, receipt) = super::provably_hash("abc", true);
         receipt.verify(HASH_RUST_CRYPTO_ID).unwrap();
