@@ -120,7 +120,7 @@ impl std::error::Error for VerifyError {}
 /// empty assumptions list, and an all-zeroes input hash. It may have any post
 /// [SystemState].
 pub fn verify(image_id: Digest, journal: &[u8]) -> Result<(), VerifyError> {
-    let journal_digest: Digest = Sha256::digest(journal).as_slice().try_into().unwrap();
+    let journal_digest: Digest = journal.digest();
     let mut post_state_digest = Digest::zero(); // TOOD(victor): Use
                                                 // MaybeUninit?
     unsafe {

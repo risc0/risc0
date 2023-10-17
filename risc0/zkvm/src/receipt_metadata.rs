@@ -112,7 +112,7 @@ impl risc0_binfmt::Digestible for ReceiptMetadata {
 /// Indicates how a Segment or Session's execution has terminated
 #[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq)]
 pub enum ExitCode {
-    /// This indicates when a system-initiated split has occured due to the
+    /// This indicates when a system-initiated split has occurred due to the
     /// segment limit being exceeded.
     SystemSplit,
 

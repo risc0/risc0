@@ -36,7 +36,7 @@ use risc0_zkvm_platform::WORD_SIZE;
 use serde::{Deserialize, Serialize};
 
 use super::control_id::{BLAKE2B_CONTROL_ID, POSEIDON_CONTROL_ID, SHA256_CONTROL_ID};
-// Make succint receipt available through this `receipt` module.
+// Make succinct receipt available through this `receipt` module.
 pub use super::recursion::SuccinctReceipt;
 use crate::{
     receipt_metadata::{Assumptions, MaybePruned, Output},

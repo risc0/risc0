@@ -681,7 +681,7 @@ fn memory_access() {
 }
 
 /// The post-state digest (i.e. the Merkle root of the memory state at the end
-/// of the pogram) should be randomized on each execution to avoid potential
+/// of the program) should be randomized on each execution to avoid potential
 /// leakage of private information.
 #[test]
 fn post_state_digest_randomization() {
