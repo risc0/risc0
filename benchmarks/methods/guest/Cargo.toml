@@ -1,6 +1,6 @@
 [package]
 name = "risc0-benchmark-methods-guest"
-version = "0.18.0"
+version = "0.19.0-alpha.1"
 edition = "2021"
 
 [workspace]
@@ -10,6 +10,7 @@ blake3 = { version = "1.4", default-features = false }
 ed25519-dalek = {version = "2.0.0-rc.3", default-features = false}
 hex-literal = "0.4"
 k256 = { version = "=0.13.1", features = ["arithmetic", "serde", "expose-field", "std", "ecdsa"], default_features = false }
+nalgebra = "0.32"
 risc0-benchmark-lib = { path = "../../shared", default-features = false }
 risc0-zkvm = { path = "../../../risc0/zkvm", default-features = false, features = ["std"] }
 risc0-zkp = { path = "../../../risc0/zkp", default-features = false }

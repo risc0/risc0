@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use nalgebra::Matrix2;
 use risc0_zkvm::guest::env;
 
 pub fn main() {
@@ -21,11 +22,5 @@ pub fn main() {
 }
 
 pub fn fibonacci(n: u32) -> u64 {
-    let (mut a, mut b) = (0, 1);
-    for _ in 0..n {
-        let c = a;
-        a = b;
-        b += c;
-    }
-    a
+    Matrix2::new(1, 1, 1, 0).pow(n - 1)[(0, 0)]
 }

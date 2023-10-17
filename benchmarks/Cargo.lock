@@ -3452,7 +3452,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-benchmark"
-version = "0.18.0"
+version = "0.19.0-alpha.1"
 dependencies = [
  "blake2",
  "blake3",
@@ -3492,7 +3492,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-benchmark-methods"
-version = "0.18.0"
+version = "0.19.0-alpha.1"
 dependencies = [
  "risc0-build 0.19.0-alpha.1",
 ]
