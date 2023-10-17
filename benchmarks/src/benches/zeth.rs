@@ -12,16 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::{exec_compute, get_image, Benchmark};
-use risc0_zkvm::serde::from_slice;
-use risc0_zkvm::{
-    serde::to_vec, sha::DIGEST_WORDS, ExecutorEnv, ExitCode, MemoryImage, Receipt, Session,
-};
 use std::time::Duration;
-use zeth_lib::block_builder::{EthereumStrategyBundle, NetworkStrategyBundle};
-use zeth_lib::consts::ETH_MAINNET_CHAIN_SPEC;
-use zeth_lib::input::Input;
+
+use risc0_zkvm::{
+    serde::{from_slice, to_vec},
+    sha::DIGEST_WORDS,
+    ExecutorEnv, ExitCode, MemoryImage, Receipt, Session,
+};
+use zeth_lib::{
+    block_builder::{EthereumStrategyBundle, NetworkStrategyBundle},
+    consts::ETH_MAINNET_CHAIN_SPEC,
+    input::Input,
+};
 use zeth_primitives::BlockHash;
+
+use crate::{exec_compute, get_image, Benchmark};
 
 pub struct Job<'a> {
     pub spec: u64,

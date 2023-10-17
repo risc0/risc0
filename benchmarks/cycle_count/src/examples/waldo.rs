@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::{exec_compute, get_image, CycleCounter};
 use image::{io::Reader as ImageReader, GenericImageView};
 use risc0_zkvm::{serde::to_vec, ExecutorEnv};
 use waldo_core::{
@@ -20,6 +19,8 @@ use waldo_core::{
     merkle::SYS_VECTOR_ORACLE,
     PrivateInput,
 };
+
+use crate::{exec_compute, get_image, CycleCounter};
 
 pub struct Job {
     pub cycles: u32,

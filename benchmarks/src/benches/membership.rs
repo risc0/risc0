@@ -12,7 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::{exec_compute, get_image, Benchmark};
+use std::time::Duration;
+
 // use merkletree::{merkle::MerkleTree, store::VecStore};
 use risc0_benchmark_lib::generate_mock_proof;
 use risc0_zkvm::{
@@ -20,7 +21,8 @@ use risc0_zkvm::{
     sha::{Digest, DIGEST_WORDS},
     ExecutorEnv, ExitCode, MemoryImage, Receipt, Session,
 };
-use std::time::Duration;
+
+use crate::{exec_compute, get_image, Benchmark};
 
 pub struct Job<'a> {
     pub spec: u32,

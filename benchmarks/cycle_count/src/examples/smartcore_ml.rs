@@ -12,11 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::{exec_compute, get_image, CycleCounter};
 use risc0_zkvm::{serde::to_vec, ExecutorEnv, MemoryImage};
 use smartcore::{
     linalg::basic::matrix::DenseMatrix, tree::decision_tree_classifier::DecisionTreeClassifier,
 };
+
+use crate::{exec_compute, get_image, CycleCounter};
 
 pub struct Job<'a> {
     pub env: ExecutorEnv<'a>,

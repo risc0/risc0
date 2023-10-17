@@ -12,8 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::fs::OpenOptions;
-use std::path::{Path, PathBuf};
+use std::{
+    fs::OpenOptions,
+    path::{Path, PathBuf},
+};
 
 use log::info;
 use risc0_zkvm::{ExecutorEnv, ExecutorImpl, MemoryImage, Program, GUEST_MAX_MEM, PAGE_SIZE};

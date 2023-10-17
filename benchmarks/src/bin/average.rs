@@ -14,12 +14,12 @@
 
 // This is based on zk-benchmarking: https://github.com/delendum-xyz/zk-benchmarking
 
-#[cfg(any(feature = "metal", feature = "cuda"))]
-use risc0_benchmark::init_gpu_kernel;
+use std::path::PathBuf;
 
 use clap::{Parser, Subcommand};
+#[cfg(any(feature = "metal", feature = "cuda"))]
+use risc0_benchmark::init_gpu_kernel;
 use risc0_benchmark::{benches::*, init_logging, run_jobs_average};
-use std::path::PathBuf;
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]

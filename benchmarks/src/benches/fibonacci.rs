@@ -12,12 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::{exec_compute, get_image, Benchmark};
+use std::time::Duration;
+
 use byteorder::{ByteOrder, LittleEndian};
 use risc0_zkvm::{
     serde::to_vec, sha::DIGEST_WORDS, ExecutorEnv, ExitCode, MemoryImage, Receipt, Session,
 };
-use std::time::Duration;
+
+use crate::{exec_compute, get_image, Benchmark};
 
 pub struct Job<'a> {
     pub spec: u32,

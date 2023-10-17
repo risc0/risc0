@@ -12,7 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::{exec_compute, get_image, Benchmark, BenchmarkAverage};
+use std::{rc::Rc, time::Duration};
+
 use k256::{
     ecdsa::{signature::Signer, Signature, SigningKey},
     EncodedPoint,
@@ -25,8 +26,8 @@ use risc0_zkvm::{
     ExecutorEnv, ExitCode, LocalProver, MemoryImage, Prover, ProverOpts, Receipt, Session,
     VerifierContext,
 };
-use std::rc::Rc;
-use std::time::Duration;
+
+use crate::{exec_compute, get_image, Benchmark, BenchmarkAverage};
 
 pub struct Job<'a> {
     pub spec: u32,

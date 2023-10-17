@@ -12,11 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use clap::{Parser, Subcommand};
-use risc0_examples_cycle_counter::{init_logging, run_jobs};
 use std::path::PathBuf;
 
-use risc0_examples_cycle_counter::examples::*;
+use clap::{Parser, Subcommand};
+use risc0_examples_cycle_counter::{examples::*, init_logging, run_jobs};
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]

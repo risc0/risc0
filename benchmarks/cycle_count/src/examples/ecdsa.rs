@@ -12,10 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::{exec_compute, get_image, CycleCounter};
 use k256::ecdsa::{signature::Signer, Signature, SigningKey};
 use rand_core::OsRng;
 use risc0_zkvm::{serde::to_vec, ExecutorEnv, MemoryImage};
+
+use crate::{exec_compute, get_image, CycleCounter};
 
 pub struct Job<'a> {
     pub env: ExecutorEnv<'a>,

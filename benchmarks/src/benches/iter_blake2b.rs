@@ -12,7 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::{exec_compute, get_image, Benchmark, BenchmarkAverage};
+use std::{rc::Rc, time::Duration};
+
 use blake2::{
     digest::{Update, VariableOutput},
     Blake2bVar,
@@ -21,8 +22,8 @@ use risc0_zkvm::{
     default_prover, serde::to_vec, sha::DIGEST_WORDS, ExecutorEnv, ExitCode, LocalProver,
     MemoryImage, Prover, ProverOpts, Receipt, Session, VerifierContext,
 };
-use std::rc::Rc;
-use std::time::Duration;
+
+use crate::{exec_compute, get_image, Benchmark, BenchmarkAverage};
 
 pub struct Job<'a> {
     pub spec: u32,
