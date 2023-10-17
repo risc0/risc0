@@ -526,7 +526,7 @@ fn profiler() {
     // Gather up anything containing our profile_test functions.
     // If the test doesn't pass, we don't want to display the
     // whole profiling structure.
-    let occurences: Vec<_> = prof
+    let occurrences: Vec<_> = prof
         .iter()
         .filter(|(frames, _addr, _count)| frames.iter().any(|fr| fr.name.contains("profile_test")))
         .collect();
@@ -577,7 +577,7 @@ fn profiler() {
                     }
                 }
 
-                // All checks passed; this is the occurence we were looking for.
+                // All checks passed; this is the occurrence we were looking for.
                 true
             }
             _ => {
@@ -727,7 +727,7 @@ mod docker {
                 .run()
                 .unwrap();
         }
-        let occurances = events
+        let occurrences = events
             .windows(4)
             .filter_map(|window| {
                 if let &[TraceEvent::InstructionStart {
@@ -771,7 +771,7 @@ mod docker {
                 }
             })
             .count();
-        assert_eq!(occurances, 1, "trace events: {:#?}", &events);
+        assert_eq!(occurrences, 1, "trace events: {:#?}", &events);
         assert!(events.contains(&TraceEvent::MemorySet {
             addr: 0x08000224,
             value: 1337

@@ -118,7 +118,7 @@ pub struct ProverOpts {
 
 impl ProverOpts {
     /// If true, skip generating the seal in receipt.  This should
-    /// only be used for testing.  In this case, performace will be
+    /// only be used for testing.  In this case, performance will be
     /// much better but we will not be able to cryptographically
     /// verify the execution.
     pub fn with_skip_seal(self, skip_seal: bool) -> Self {
