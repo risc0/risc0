@@ -23,7 +23,7 @@ use risc0_circuit_rv32im_sys::ffi::{
 };
 use risc0_core::field::baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem};
 use risc0_zkp::{
-    adapter::{CircuitProveDef, CircuitStep, CircuitStepContext, CircuitStepHandler, PolyFp},
+    adapter::{CircuitDef, CircuitStep, CircuitStepContext, CircuitStepHandler, PolyFp},
     hal::cpu::SyncSlice,
 };
 
@@ -134,7 +134,7 @@ impl PolyFp<BabyBear> for CircuitImpl {
     }
 }
 
-impl CircuitProveDef<BabyBear> for CircuitImpl {}
+impl CircuitDef<BabyBear> for CircuitImpl {}
 
 pub(crate) fn call_step<S, F>(
     ctx: &CircuitStepContext,

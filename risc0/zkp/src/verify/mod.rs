@@ -26,7 +26,7 @@ pub use read_iop::ReadIOP;
 use risc0_core::field::{Elem, ExtElem, Field, RootsOfUnity};
 
 use crate::{
-    adapter::{CircuitCoreDef, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA},
+    adapter::{CircuitDef, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA},
     core::{digest::Digest, hash::HashSuite, log2_ceil},
     taps::TapSet,
     INV_RATE, MAX_CYCLES_PO2, QUERIES,
@@ -110,7 +110,7 @@ impl<'a, F: Field, C> VerifyParams<F> for Verifier<'a, F, C> {}
 impl<'a, F, C> Verifier<'a, F, C>
 where
     F: Field,
-    C: CircuitCoreDef<F>,
+    C: CircuitDef<F>,
 {
     fn new(circuit: &'a C, suite: &'a HashSuite<F>) -> Self {
         Self {
@@ -441,7 +441,7 @@ pub fn verify<F, C, CheckCode>(
 ) -> Result<(), VerificationError>
 where
     F: Field,
-    C: CircuitCoreDef<F>,
+    C: CircuitDef<F>,
     CheckCode: Fn(u32, &Digest) -> Result<(), VerificationError>,
 {
     Verifier::<F, C>::new(circuit, suite).verify(seal, check_code)

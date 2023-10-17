@@ -120,12 +120,9 @@ pub trait CircuitInfo {
     const MIX_SIZE: usize;
 }
 
-/// traits implemented by generated rust code used in both prover and verifier
-pub trait CircuitCoreDef<F: Field>: CircuitInfo + PolyExt<F> + TapsProvider {}
-
-/// traits implemented by generated rust code used in only the prover
-pub trait CircuitProveDef<F: Field>:
-    CircuitStep<F::Elem> + PolyFp<F> + CircuitCoreDef<F> + Sync
+/// traits implemented by generated rust code used in both the prover and verifier
+pub trait CircuitDef<F: Field>:
+    CircuitStep<F::Elem> + PolyFp<F> + CircuitInfo + PolyExt<F> + TapsProvider + Sync
 {
 }
 

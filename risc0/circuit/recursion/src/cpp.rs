@@ -22,7 +22,7 @@ use risc0_circuit_recursion_sys::ffi::{
     risc0_circuit_recursion_string_free, risc0_circuit_recursion_string_ptr, Callback, RawError,
 };
 use risc0_zkp::{
-    adapter::{CircuitProveDef, CircuitStep, CircuitStepContext, CircuitStepHandler, PolyFp},
+    adapter::{CircuitDef, CircuitStep, CircuitStepContext, CircuitStepHandler, PolyFp},
     field::baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
     hal::cpu::SyncSlice,
 };
@@ -142,7 +142,7 @@ impl PolyFp<BabyBear> for CircuitImpl {
     }
 }
 
-impl CircuitProveDef<BabyBear> for CircuitImpl {}
+impl CircuitDef<BabyBear> for CircuitImpl {}
 
 pub(crate) fn call_step<S, F>(
     ctx: &CircuitStepContext,

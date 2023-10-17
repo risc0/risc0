@@ -31,11 +31,7 @@ mod taps;
 pub mod zkr;
 
 use risc0_core::field::baby_bear::{BabyBearElem, BabyBearExtElem};
-use risc0_zkp::{
-    adapter::{CircuitCoreDef, TapsProvider},
-    field::baby_bear::BabyBear,
-    taps::TapSet,
-};
+use risc0_zkp::{adapter::TapsProvider, taps::TapSet};
 
 pub const REGISTER_GROUP_ACCUM: usize = 0;
 pub const REGISTER_GROUP_CODE: usize = 1;
@@ -59,8 +55,6 @@ impl TapsProvider for CircuitImpl {
         self::taps::TAPSET
     }
 }
-
-impl CircuitCoreDef<BabyBear> for CircuitImpl {}
 
 // Values for micro inst "opcode"
 pub mod micro_op {

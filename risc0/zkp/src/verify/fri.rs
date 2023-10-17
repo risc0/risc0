@@ -18,7 +18,7 @@ use risc0_core::field::{Elem, ExtElem, Field, RootsOfUnity};
 
 use super::Verifier;
 use crate::{
-    adapter::CircuitCoreDef,
+    adapter::CircuitDef,
     core::{
         hash::HashFn,
         log2_ceil,
@@ -57,7 +57,7 @@ impl<'a, F: Field> VerifyRoundInfo<'a, F> {
 impl<'a, F, C> Verifier<'a, F, C>
 where
     F: Field,
-    C: CircuitCoreDef<F>,
+    C: CircuitDef<F>,
 {
     fn verify_query(
         &self,
