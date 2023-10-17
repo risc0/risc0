@@ -29,12 +29,11 @@ use std::{
 };
 
 use cargo_metadata::{Message, MetadataCommand, Package};
+pub use docker::docker_build;
 use risc0_binfmt::{MemoryImage, Program};
 use risc0_zkp::core::digest::{Digest, DIGEST_WORDS};
 use risc0_zkvm_platform::{memory, PAGE_SIZE};
 use serde::Deserialize;
-
-pub use docker::docker_build;
 
 const RUSTUP_TOOLCHAIN_NAME: &str = "risc0";
 
@@ -232,7 +231,8 @@ fn get_env_var(name: &str) -> String {
     env::var(name).unwrap_or_default()
 }
 
-/// Build a [Command] with CARGO and RUSTUP_TOOLCHAIN environment variables removed.
+/// Build a [Command] with CARGO and RUSTUP_TOOLCHAIN environment variables
+/// removed.
 fn sanitized_cmd(tool: &str) -> Command {
     let mut cmd = Command::new(tool);
     for (key, _val) in env::vars().filter(|x| x.0.starts_with("CARGO")) {
@@ -306,7 +306,8 @@ pub fn cargo_command(subcmd: &str, rust_flags: &[&str]) -> Command {
 
 /// Builds a static library providing a rust runtime.
 ///
-/// This can be used to build programs for the zkvm which don't depend on risc0_zkvm.
+/// This can be used to build programs for the zkvm which don't depend on
+/// risc0_zkvm.
 pub fn build_rust_runtime() -> String {
     build_staticlib(
         "risc0-zkvm-platform",
@@ -346,7 +347,8 @@ fn build_staticlib(guest_pkg: &str, features: &[&str]) -> String {
 
     eprintln!("Building staticlib: {:?}", cmd);
 
-    // Run the build command and extract the name of the resulting staticlib artifact.
+    // Run the build command and extract the name of the resulting staticlib
+    // artifact.
     let mut child = cmd.stdout(Stdio::piped()).spawn().unwrap();
     let reader = std::io::BufReader::new(child.stdout.take().unwrap());
     let mut libs = Vec::new();

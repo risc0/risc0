@@ -38,8 +38,10 @@ fn main() {
 }
 
 fn predict() -> Vec<u32> {
-    // We set a boolean to establish whether we are using a SVM model.  This will be passed to the guest and
-    // is important for execution of the guest code.  SVM models require an extra step that is not required of other SmartCore models.
+    // We set a boolean to establish whether we are using a SVM model.  This will be
+    // passed to the guest and is important for execution of the guest code.
+    // SVM models require an extra step that is not required of other SmartCore
+    // models.
     let is_svm: bool = false;
 
     // Convert the model and input data from JSON into byte arrays.
@@ -139,7 +141,8 @@ mod test {
         ];
 
         // We create the SVC params and train the SVC model.
-        // The paramaters will NOT get serialized due to a serde_skip command in the source code for the SVC struct.
+        // The paramaters will NOT get serialized due to a serde_skip command in the
+        // source code for the SVC struct.
         let knl = Kernels::linear();
         let params = &SVCParameters::default().with_c(200.0).with_kernel(knl);
         let svc = SVC::fit(&x, &y, params).unwrap();
