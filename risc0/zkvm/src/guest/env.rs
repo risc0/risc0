@@ -151,7 +151,7 @@ pub fn verify(image_id: Digest, journal: &[u8]) -> Result<(), VerifyError> {
     Ok(())
 }
 
-/// Error encountered during a call to [crate::verify_metdata].
+/// Error encountered during a call to [crate::verify_integrity].
 ///
 /// Note that an error is only returned for "provable" errors. In particular, if
 /// the host fails to find a receipt matching the requested image_id and
