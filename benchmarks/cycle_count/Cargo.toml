@@ -1,6 +1,6 @@
 [package]
 name = "risc0-examples-cycle-counter"
-version = "0.18.0"
+version = "0.19.0-alpha.1"
 edition = "2021"
 
 [dependencies]
@@ -40,5 +40,5 @@ wat = "1.0"
 wordle-methods = { path = "../../examples/wordle/methods" }
 
 [features]
-cuda = []
-metal = []
+cuda = ["risc0-zkvm/cuda"]
+metal = ["risc0-zkvm/metal"]
