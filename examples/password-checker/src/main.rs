@@ -15,12 +15,7 @@
 use password_checker_core::PasswordRequest;
 use password_checker_methods::PW_CHECKER_ELF;
 use rand::prelude::*;
-use risc0_zkvm::{
-    default_prover,
-    serde::{from_slice, to_vec},
-    sha::Digest,
-    ExecutorEnv,
-};
+use risc0_zkvm::{default_prover, serde::from_slice, sha::Digest, ExecutorEnv};
 
 fn main() {
     let mut rng = StdRng::from_entropy();
@@ -38,7 +33,8 @@ fn main() {
 
 fn password_checker(request: PasswordRequest) -> Digest {
     let env = ExecutorEnv::builder()
-        .add_input(&to_vec(&request).unwrap())
+        .write(&request)
+        .unwrap()
         .build()
         .unwrap();
 

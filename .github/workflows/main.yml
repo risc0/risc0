@@ -31,11 +31,15 @@ jobs:
           node-version: 18
       - run: cargo fmt --all --check
       - run: cargo fmt --all --check --manifest-path examples/Cargo.toml
+      - run: cargo fmt --all --check --manifest-path benchmarks/Cargo.toml
       - run: cargo fmt --all --check --manifest-path bonsai/Cargo.toml
+      - run: cargo fmt --all --check --manifest-path tools/crates-validator/Cargo.toml
       - run: cargo fmt --all --check --manifest-path bonsai/examples/governance/Cargo.toml
       - run: cargo sort --workspace --check
       - run: cargo sort --workspace --check examples
+      - run: cargo sort --workspace --check benchmarks
       - run: cargo sort --workspace --check bonsai
+      - run: cargo sort --workspace --check tools/crates-validator
       - run: cargo sort --workspace --check bonsai/examples/governance
       - uses: actions/setup-python@v4
         with:
@@ -169,6 +173,24 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: cargo doc --no-deps --exclude=risc0-zkvm-methods --workspace
 
+  check-benchmarks:
+    runs-on: [self-hosted, prod, Linux, X64]
+    steps:
+      # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
+      - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/rustup
+      - uses: ./.github/actions/sccache
+        with:
+          key: Linux
+      - run: cargo run --bin cargo-risczero --no-default-features -- risczero install
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: cargo check
+        working-directory: benchmarks
+      - run: cargo check -p risc0-examples-cycle-counter
+        working-directory: benchmarks
+
   check_template:
     runs-on: [self-hosted, prod, cpu, "${{ matrix.os }}"]
     strategy:
@@ -178,7 +200,6 @@ jobs:
     env:
       RISC0_SERVER_PATH: ${{ github.workspace }}/target/release/r0vm
       RUSTC_WRAPPER: sccache
-
     steps:
       # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
       - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
@@ -199,6 +220,50 @@ jobs:
         shell: bash
       - run: cargo build --release --manifest-path ${{ runner.temp }}/template-test/Cargo.toml
       - run: ${{ runner.temp }}/template-test/target/release/host
+
+  changes:
+    runs-on: [self-hosted, prod, cpu, "${{ matrix.os }}"]
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [Linux, macOS]
+    outputs:
+      crates-validator: ${{ steps.filter.outputs.crates-validator }}
+    steps:
+      - uses: risc0/paths-filter@master
+        id: filter
+        with:
+          filters: |
+            crates-validator:
+              - tools/crates-validator/**
+
+  crates-validator:
+    needs: changes
+    if: ${{ needs.changes.outputs.crates-validator == 'true' }}
+    runs-on: [self-hosted, prod, cpu, "${{ matrix.os }}"]
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [Linux, macOS]
+    env:
+      RISC0_BUILD_LOCKED: 1
+      RUSTC_WRAPPER: sccache
+    steps:
+      # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
+      - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/rustup
+      - uses: ./.github/actions/sccache
+      - run: cargo run --bin cargo-risczero -- risczero install
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: risc0/clippy-action@main
+        with:
+          reporter: 'github-pr-check'
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          clippy_flags: --manifest-path tools/crates-validator/Cargo.toml
+      - run: cargo test
+        working-directory: tools/crates-validator
 
   web:
     runs-on: ubuntu-latest-8-cores

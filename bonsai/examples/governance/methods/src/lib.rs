@@ -40,7 +40,7 @@ mod test {
     #[test]
     fn process_basic_finalization_input() {
         let env = ExecutorEnv::builder()
-            .add_input(&TEST_INPUT)
+            .write_slice(&TEST_INPUT)
             .build()
             .unwrap();
         let exec = default_executor();

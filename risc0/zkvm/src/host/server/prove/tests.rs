@@ -37,8 +37,11 @@ use crate::{
 };
 
 fn prove_nothing(hashfn: &str) -> Result<Receipt> {
-    let input = to_vec(&MultiTestSpec::DoNothing).unwrap();
-    let env = ExecutorEnv::builder().add_input(&input).build().unwrap();
+    let env = ExecutorEnv::builder()
+        .write(&MultiTestSpec::DoNothing)
+        .unwrap()
+        .build()
+        .unwrap();
     let opts = ProverOpts {
         hashfn: hashfn.to_string(),
     };
@@ -59,8 +62,11 @@ fn hashfn_blake2b() {
         hal: Rc::new(CpuHal::new(Blake2bCpuHashSuite::new_suite())),
         circuit_hal: Rc::new(CpuCircuitHal::new(&CIRCUIT)),
     };
-    let input = to_vec(&MultiTestSpec::DoNothing).unwrap();
-    let env = ExecutorEnv::builder().add_input(&input).build().unwrap();
+    let env = ExecutorEnv::builder()
+        .write(&MultiTestSpec::DoNothing)
+        .unwrap()
+        .build()
+        .unwrap();
     let prover = ProverImpl::new("cpu:blake2b", hal_pair);
     prover.prove_elf(env, MULTI_TEST_ELF).unwrap();
 }
@@ -93,8 +99,11 @@ fn check_image_id() {
 #[serial]
 fn sha_basics() {
     fn run_sha(msg: &str) -> String {
-        let input = to_vec(&MultiTestSpec::ShaDigest { data: msg.into() }).unwrap();
-        let env = ExecutorEnv::builder().add_input(&input).build().unwrap();
+        let env = ExecutorEnv::builder()
+            .write(&MultiTestSpec::ShaDigest { data: msg.into() })
+            .unwrap()
+            .build()
+            .unwrap();
         let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
         let session = exec.run().unwrap();
         let receipt = session.prove().unwrap();
@@ -122,12 +131,15 @@ fn sha_basics() {
 #[test]
 #[serial]
 fn sha_iter() {
-    let input = to_vec(&MultiTestSpec::ShaDigestIter {
+    let input = MultiTestSpec::ShaDigestIter {
         data: Vec::from([0u8; 32]),
         num_iter: 1500,
-    })
-    .unwrap();
-    let env = ExecutorEnv::builder().add_input(&input).build().unwrap();
+    };
+    let env = ExecutorEnv::builder()
+        .write(&input)
+        .unwrap()
+        .build()
+        .unwrap();
     let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
     let session = exec.run().unwrap();
     let receipt = session.prove().unwrap();
@@ -143,14 +155,17 @@ fn bigint_accel() {
     let cases = testutils::generate_bigint_test_cases(&mut rand::thread_rng(), 10);
     for case in cases {
         println!("Running BigInt circuit test case: {:08x?}", case);
-        let input = to_vec(&MultiTestSpec::BigInt {
+        let input = MultiTestSpec::BigInt {
             x: case.x,
             y: case.y,
             modulus: case.modulus,
-        })
-        .unwrap();
+        };
 
-        let env = ExecutorEnv::builder().add_input(&input).build().unwrap();
+        let env = ExecutorEnv::builder()
+            .write(&input)
+            .unwrap()
+            .build()
+            .unwrap();
         let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
         let session = exec.run().unwrap();
         let receipt = session.prove().unwrap();
@@ -176,15 +191,18 @@ fn memory_io() {
     }
 
     fn run_memio(pairs: &[(usize, usize)]) -> Result<Receipt> {
-        let spec = MultiTestSpec::ReadWriteMem {
+        let input = MultiTestSpec::ReadWriteMem {
             values: pairs
                 .iter()
                 .cloned()
                 .map(|(addr, value)| (addr as u32, value as u32))
                 .collect(),
         };
-        let input = to_vec(&spec)?;
-        let env = ExecutorEnv::builder().add_input(&input).build().unwrap();
+        let env = ExecutorEnv::builder()
+            .write(&input)
+            .unwrap()
+            .build()
+            .unwrap();
         let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)?;
         let session = match exec.run() {
             Ok(session) => session,
@@ -360,12 +378,13 @@ mod riscv {
 mod docker {
     use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF};
 
-    use crate::{serde::to_vec, ExecutorEnv, ExecutorImpl, ExitCode};
+    use crate::{ExecutorEnv, ExecutorImpl, ExitCode};
 
     #[test]
     fn pause_continue() {
         let env = ExecutorEnv::builder()
-            .add_input(&to_vec(&MultiTestSpec::PauseContinue).unwrap())
+            .write(&MultiTestSpec::PauseContinue)
+            .unwrap()
             .build()
             .unwrap();
         let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
@@ -391,9 +410,9 @@ mod docker {
         let segment_limit_po2 = 16; // 64k cycles
         let cycles = 1 << segment_limit_po2;
 
-        let spec = &to_vec(&MultiTestSpec::BusyLoop { cycles }).unwrap();
         let env = ExecutorEnv::builder()
-            .add_input(&spec)
+            .write(&MultiTestSpec::BusyLoop { cycles })
+            .unwrap()
             .segment_limit_po2(segment_limit_po2)
             .build()
             .unwrap();

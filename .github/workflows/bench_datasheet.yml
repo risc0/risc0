@@ -64,6 +64,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: cargo run --release -F $FEATURE --example loop -- --json | tee ${{ matrix.os }}-${{ matrix.device }}.json
         working-directory: risc0/zkvm
+      - run: cargo run --release -- --out ../../risc0/zkvm/cycle_count.csv all
+        working-directory: benchmarks/cycle_count
+        if: matrix.feature == 'metal'
       - name: Save commit hash to a file
         run: echo "${{ github.sha }}" > COMMIT_HASH.txt
         working-directory: risc0/zkvm
@@ -74,6 +77,7 @@ jobs:
           path: |
             risc0/zkvm/${{ matrix.os }}-${{ matrix.device }}.json
             risc0/zkvm/COMMIT_HASH.txt
+            risc0/zkvm/cycle_count.csv
 
   push_to_ghpages:
     needs: bench
@@ -100,6 +104,7 @@ jobs:
           git add dev/datasheet/Linux-nvidia_rtx_a5000.json
           git add dev/datasheet/Linux-cpu.json
           git add dev/datasheet/COMMIT_HASH.txt
+          git add dev/datasheet/cycle_count.csv
           if git diff --cached --exit-code; then
             echo "No changes to commit"
           else

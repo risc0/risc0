@@ -29,8 +29,8 @@ use test_log::test;
 
 use super::{pb, Asset, AssetRequest, Binary, ConnectionWrapper, Connector, TcpConnection};
 use crate::{
-    serde::to_vec, ApiClient, ApiServer, ExecutorEnv, ProverOpts, Receipt, SegmentReceipt,
-    SessionInfo, VerifierContext,
+    ApiClient, ApiServer, ExecutorEnv, ProverOpts, Receipt, SegmentReceipt, SessionInfo,
+    VerifierContext,
 };
 
 struct TestClientConnector {
@@ -115,16 +115,22 @@ fn with_server<T, F: FnOnce() -> Result<T>>(addr: SocketAddr, f: F) -> T {
 
 #[test]
 fn execute_elf() {
-    let input = to_vec(&MultiTestSpec::DoNothing).unwrap();
-    let env = ExecutorEnv::builder().add_input(&input).build().unwrap();
+    let env = ExecutorEnv::builder()
+        .write(&MultiTestSpec::DoNothing)
+        .unwrap()
+        .build()
+        .unwrap();
     let binary = Binary::new_elf_path(MULTI_TEST_PATH);
     TestClient::new().execute(env, binary);
 }
 
 #[test]
 fn execute_image() {
-    let input = to_vec(&MultiTestSpec::DoNothing).unwrap();
-    let env = ExecutorEnv::builder().add_input(&input).build().unwrap();
+    let env = ExecutorEnv::builder()
+        .write(&MultiTestSpec::DoNothing)
+        .unwrap()
+        .build()
+        .unwrap();
     let program = Program::load_elf(&MULTI_TEST_ELF, GUEST_MAX_MEM as u32).unwrap();
     let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
     let binary = image.into();
@@ -133,8 +139,11 @@ fn execute_image() {
 
 #[test]
 fn prove_elf() {
-    let input = to_vec(&MultiTestSpec::DoNothing).unwrap();
-    let env = ExecutorEnv::builder().add_input(&input).build().unwrap();
+    let env = ExecutorEnv::builder()
+        .write(&MultiTestSpec::DoNothing)
+        .unwrap()
+        .build()
+        .unwrap();
     let binary = Binary::new_elf_path(MULTI_TEST_PATH);
     let opts = ProverOpts::default();
     let receipt = TestClient::new().prove(env, opts, binary);
@@ -143,8 +152,11 @@ fn prove_elf() {
 
 #[test]
 fn prove_segment_elf() {
-    let input = to_vec(&MultiTestSpec::DoNothing).unwrap();
-    let env = ExecutorEnv::builder().add_input(&input).build().unwrap();
+    let env = ExecutorEnv::builder()
+        .write(&MultiTestSpec::DoNothing)
+        .unwrap()
+        .build()
+        .unwrap();
     let binary = Binary::new_elf_path(MULTI_TEST_PATH);
 
     let mut client = TestClient::new();

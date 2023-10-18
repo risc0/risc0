@@ -14,11 +14,7 @@
 
 #[doc = include_str!("../README.md")]
 use hello_world_methods::MULTIPLY_ELF;
-use risc0_zkvm::{
-    default_prover,
-    serde::{from_slice, to_vec},
-    ExecutorEnv, Receipt,
-};
+use risc0_zkvm::{default_prover, serde::from_slice, ExecutorEnv, Receipt};
 
 // This is a Hello World demo for the RISC Zero zkVM.
 // By running the demo, Alice can produce a receipt that proves that she knows
@@ -29,8 +25,10 @@ use risc0_zkvm::{
 pub fn multiply(a: u64, b: u64) -> (Receipt, u64) {
     let env = ExecutorEnv::builder()
         // Send a & b to the guest
-        .add_input(&to_vec(&a).unwrap())
-        .add_input(&to_vec(&b).unwrap())
+        .write(&a)
+        .unwrap()
+        .write(&b)
+        .unwrap()
         .build()
         .unwrap();
 

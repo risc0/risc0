@@ -18,11 +18,7 @@ use clap::Parser;
 use ethers_core::types::{H256, U256};
 use ethers_providers::Middleware;
 use log::info;
-use risc0_zkvm::{
-    default_prover,
-    serde::{from_slice, to_vec},
-    ExecutorEnv,
-};
+use risc0_zkvm::{default_prover, serde::from_slice, ExecutorEnv};
 use zkevm_core::{
     ether_trace::{Http, Provider},
     Env, EvmResult, EVM,
@@ -84,8 +80,10 @@ async fn main() {
 
     info!("Running zkvm...");
     let exec_env = ExecutorEnv::builder()
-        .add_input(&to_vec(&env).unwrap())
-        .add_input(&to_vec(&zkdb).unwrap())
+        .write(&env)
+        .unwrap()
+        .write(&zkdb)
+        .unwrap()
         .build()
         .unwrap();
 
