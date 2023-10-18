@@ -300,7 +300,7 @@ impl InnerReceipt {
     pub fn get_metadata(&self) -> Result<ReceiptMetadata, VerificationError> {
         match self {
             InnerReceipt::Composite(ref receipt) => receipt.get_metadata(),
-            InnerReceipt::Succinct(ref succint_recipt) => Ok(succint_recipt.meta.clone()),
+            InnerReceipt::Succinct(ref succinct_recipt) => Ok(succinct_recipt.meta.clone()),
             InnerReceipt::Fake { metadata } => Ok(metadata.clone()),
         }
     }
@@ -385,7 +385,7 @@ impl CompositeReceipt {
 
         // Verify decoded output digest is consistent with the journal_digest and
         // assumptions.
-        self.verify_output_consitency(&final_receipt_metadata)?;
+        self.verify_output_consistency(&final_receipt_metadata)?;
 
         Ok(())
     }
@@ -406,7 +406,7 @@ impl CompositeReceipt {
         // After verifying the internally consistency of this receipt, we can use
         // self.assumptions and self.journal_digest in place of
         // last_metadata.output, which is equal.
-        self.verify_output_consitency(&last_metadata)?;
+        self.verify_output_consistency(&last_metadata)?;
         let output: Option<Output> = last_metadata
             .output
             .is_some()
@@ -436,7 +436,7 @@ impl CompositeReceipt {
     /// Check that the output fields in the given receipt metadata are
     /// consistent with the exit code, and with the journal_digest and
     /// assumptions encoded on self.
-    fn verify_output_consitency(
+    fn verify_output_consistency(
         &self,
         metadata: &ReceiptMetadata,
     ) -> Result<(), VerificationError> {
@@ -453,7 +453,10 @@ impl CompositeReceipt {
             // If these digests do not match, this receipt is internally inconsistent.
             if self_output.digest() != metadata.output.digest() {
                 let empty_output = metadata.output.is_none()
-                    && self.journal_digest.unwrap() == Vec::<u8>::new().digest();
+                    && self
+                        .journal_digest
+                        .ok_or(VerificationError::ReceiptFormatError)?
+                        == Vec::<u8>::new().digest();
                 if !empty_output {
                     log::debug!(
                         "output digest does not match: expected {:?}; decoded {:?}",
@@ -563,7 +566,7 @@ impl SegmentReceipt {
 }
 
 /// An assumption associated with a guest call to `env::verify` or
-/// `env::verify_metdata`.
+/// `env::verify_integrity`.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum Assumption {
     /// A [Receipt] for a proven assumption.
@@ -648,9 +651,9 @@ fn decode_receipt_metadata_from_io(
     let body = layout::LAYOUT.mux.body;
     let pre = decode_system_state_from_io(io, body.global.pre)?;
     let mut post = decode_system_state_from_io(io, body.global.post)?;
-    // In order to avoid extra logic in the rv32im circuit to perform arthimetic on
-    // the PC with carry, the PC is always recorded as the current PC +
-    // 4. Thus we need to adjust the decoded PC for the post SystemState.
+    // In order to avoid extra logic in the rv32im circuit to perform arithmetic on the PC with
+    // carry, the PC is always recorded as the current PC + 4. Thus we need to adjust the decoded
+    // PC for the post SystemState.
     post.pc = post
         .pc
         .checked_sub(WORD_SIZE as u32)
