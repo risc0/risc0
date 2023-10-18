@@ -20,6 +20,7 @@ pub(crate) mod tests {
         SessionId,
     };
     use ethers::types::{Address, Bytes, H256};
+    use risc0_zkvm::{receipt_metadata::MaybePruned, sha::Digest, ExitCode, ReceiptMetadata};
     use risc0_zkvm::{InnerReceipt, Receipt};
     use uuid::Uuid;
     use wiremock::{
@@ -45,7 +46,15 @@ pub(crate) mod tests {
 
         let receipt_data_response = Receipt {
             journal: vec![],
-            inner: InnerReceipt::Fake,
+            inner: InnerReceipt::Fake {
+                metadata: ReceiptMetadata {
+                    pre: MaybePruned::Pruned(Digest::zero()),
+                    post: MaybePruned::Pruned(Digest::zero()),
+                    exit_code: ExitCode::Halted(0),
+                    input: Digest::zero(),
+                    output: None.into(),
+                },
+            },
         };
 
         let create_snark_res = CreateSessRes {
