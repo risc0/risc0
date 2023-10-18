@@ -218,7 +218,7 @@ impl Session {
             pre: SystemState::from(first_segment.pre_image.borrow()).into(),
             post: post_state.into(),
             exit_code: self.exit_code,
-            input: Digest::zero(),
+            input: Digest::ZERO,
             output: output.into(),
         })
     }

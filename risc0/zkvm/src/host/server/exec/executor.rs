@@ -296,9 +296,9 @@ impl<'a> ExecutorImpl<'a> {
         // Leave the assumptions cache so that it can be used if execution is resumed
         // from pause.
         let assumptions = mem::take(&mut self.env.assumptions.borrow_mut().accessed);
-        let session_journal = self.output_digest.and_then(|output_digest| {
-            (output_digest != Digest::zero()).then(|| journal.buf.take())
-        });
+        let session_journal = self
+            .output_digest
+            .and_then(|output_digest| (output_digest != Digest::ZERO).then(|| journal.buf.take()));
         if !exit_code.expects_output() && session_journal.is_some() {
             log::debug!(
                 "dropping non-empty journal due to exit code {:?}: 0x{}",

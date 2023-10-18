@@ -48,10 +48,10 @@ pub(crate) mod tests {
             journal: vec![],
             inner: InnerReceipt::Fake {
                 metadata: ReceiptMetadata {
-                    pre: MaybePruned::Pruned(Digest::zero()),
-                    post: MaybePruned::Pruned(Digest::zero()),
+                    pre: MaybePruned::Pruned(Digest::ZERO),
+                    post: MaybePruned::Pruned(Digest::ZERO),
                     exit_code: ExitCode::Halted(0),
-                    input: Digest::zero(),
+                    input: Digest::ZERO,
                     output: None.into(),
                 },
             },

@@ -41,7 +41,7 @@ impl<T: Digestible> Digestible for Option<T> {
     fn digest<S: Sha256>(&self) -> Digest {
         match self {
             Some(val) => val.digest::<S>(),
-            None => Digest::zero(),
+            None => Digest::ZERO,
         }
     }
 }
@@ -74,7 +74,7 @@ pub fn tagged_struct<S: Sha256>(tag: &str, down: &[impl Borrow<Digest>], data: &
 pub fn tagged_list<S: Sha256>(tag: &str, list: &[impl Borrow<Digest>]) -> Digest {
     list.into_iter()
         .rev()
-        .fold(Digest::zero(), |list_digest, elem| {
+        .fold(Digest::ZERO, |list_digest, elem| {
             tagged_list_cons::<S>(tag, elem.borrow(), &list_digest)
         })
 }

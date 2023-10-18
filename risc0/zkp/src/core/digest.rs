@@ -43,14 +43,12 @@ pub const DIGEST_BYTES: usize = DIGEST_WORDS * WORD_SIZE;
 pub struct Digest([u32; DIGEST_WORDS]);
 
 impl Digest {
+    /// Digest of all zeroes.
+    pub const ZERO: Self = Self::new([0u32; DIGEST_WORDS]);
+
     /// Constant constructor
     pub const fn new(data: [u32; DIGEST_WORDS]) -> Self {
         Self(data)
-    }
-
-    /// Constant constructor for a digest of all zeroes.
-    pub const fn zero() -> Self {
-        Self::new([0u32; DIGEST_WORDS])
     }
 
     /// Returns a reference to the [Digest] as a slice of words.

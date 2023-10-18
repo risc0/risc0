@@ -269,7 +269,7 @@ impl MaybePruned<Assumptions> {
     pub fn is_empty(&self) -> bool {
         match self {
             MaybePruned::Value(list) => list.is_empty(),
-            MaybePruned::Pruned(digest) => digest == &Digest::zero(),
+            MaybePruned::Pruned(digest) => digest == &Digest::ZERO,
         }
     }
 
@@ -396,7 +396,7 @@ where
         match self {
             MaybePruned::Value(Some(_)) => false,
             MaybePruned::Value(None) => true,
-            MaybePruned::Pruned(digest) => digest == &Digest::zero(),
+            MaybePruned::Pruned(digest) => digest == &Digest::ZERO,
         }
     }
 

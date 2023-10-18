@@ -306,7 +306,7 @@ impl SysVerify {
                     .as_value()?
                     .as_ref()
                     .map(|output| output.journal.digest())
-                    .unwrap_or(Digest::zero());
+                    .unwrap_or(Digest::ZERO);
                 let assumption_image_id = assumption_metadata.as_value()?.pre.digest();
 
                 if assumption_journal_digest == journal_digest && assumption_image_id == image_id {
