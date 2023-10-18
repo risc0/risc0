@@ -5,13 +5,10 @@ edition = "2021"
 
 [workspace]
 members = [
-    "cycle_count"
-,
     "methods",
     "shared"]
 
 [workspace.dependencies]
-risc0-examples-cycle_counter = { path = "cycle_count" }
 risc0-benchmark-methods = { path = "methods" }
 risc0-benchmark-lib = { path = "shared" }
 risc0-build = { path = "../risc0/build" }

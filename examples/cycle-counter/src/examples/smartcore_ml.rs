@@ -17,23 +17,19 @@ use smartcore::{
     linalg::basic::matrix::DenseMatrix, tree::decision_tree_classifier::DecisionTreeClassifier,
 };
 
-use crate::{exec_compute, CycleCounter};
+use crate::{exec, CycleCounter, Metrics};
 
-pub struct Job<'a> {
-    pub env: ExecutorEnv<'a>,
-}
+pub struct Job {}
 
-const METHOD_ELF: &'static [u8] = smartcore_ml_methods::ML_TEMPLATE_ELF;
-
-const JSON_MODEL: &str =
-    include_str!("../../../../examples/smartcore-ml/res/ml-model/tree_model_bytes.json");
+const JSON_MODEL: &str = include_str!("../../../smartcore-ml/res/ml-model/tree_model_bytes.json");
 const JSON_DATA: &str =
-    include_str!("../../../../examples/smartcore-ml/res/input-data/tree_model_data_bytes.json");
+    include_str!("../../../smartcore-ml/res/input-data/tree_model_data_bytes.json");
 
-impl CycleCounter for Job<'_> {
+impl CycleCounter for Job {
     const NAME: &'static str = "smartcore-ml";
+    const METHOD_ELF: &'static [u8] = smartcore_ml_methods::ML_TEMPLATE_ELF;
 
-    fn new() -> Self {
+    fn run() -> Metrics {
         // Convert the model and input data from JSON into byte arrays.
         let is_svm = false;
         let model_bytes: Vec<u8> = serde_json::from_str(JSON_MODEL).unwrap();
@@ -56,10 +52,6 @@ impl CycleCounter for Job<'_> {
             .build()
             .unwrap();
 
-        Job { env }
-    }
-
-    fn exec_compute(&mut self) -> u32 {
-        exec_compute(METHOD_ELF, self.env.clone())
+        exec(Self::NAME, Self::METHOD_ELF, env)
     }
 }

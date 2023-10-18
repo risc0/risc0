@@ -65,7 +65,7 @@ jobs:
       - run: cargo run --release -F $FEATURE --example loop -- --json | tee ${{ matrix.os }}-${{ matrix.device }}.json
         working-directory: risc0/zkvm
       - run: cargo run --release -- --out ../../risc0/zkvm/cycle_count.csv all
-        working-directory: benchmarks/cycle_count
+        working-directory: examples/cycle-counter
         if: matrix.feature == 'metal'
       - name: Save commit hash to a file
         run: echo "${{ github.sha }}" > COMMIT_HASH.txt

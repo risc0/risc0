@@ -5,6 +5,7 @@ members = [
   "browser-verify",
   "chess",
   "chess/core",
+  "cycle-counter",
   "digital-signature",
   "digital-signature/core",
   "ecdsa",

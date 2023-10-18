@@ -12,39 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use password_checker_core::PasswordRequest;
-use rand::prelude::*;
 use risc0_zkvm::ExecutorEnv;
 
-use crate::{exec_compute, CycleCounter};
+use crate::{exec, CycleCounter, Metrics};
 
-pub struct Job<'a> {
-    pub env: ExecutorEnv<'a>,
-}
+pub struct Job {}
 
-const METHOD_ELF: &'static [u8] = password_checker_methods::PW_CHECKER_ELF;
+impl CycleCounter for Job {
+    const NAME: &'static str = "hello-world";
+    const METHOD_ELF: &'static [u8] = hello_world_methods::MULTIPLY_ELF;
 
-impl CycleCounter for Job<'_> {
-    const NAME: &'static str = "password-checker";
-
-    fn new() -> Self {
-        let mut rng = StdRng::from_entropy();
-        let mut salt = [0u8; 32];
-        rng.fill_bytes(&mut salt);
-        let request = PasswordRequest {
-            password: "S00perSecr1t!!!".into(),
-            salt,
-        };
+    fn run() -> Metrics {
+        let a: u64 = 17;
+        let b: u64 = 23;
         let env = ExecutorEnv::builder()
-            .write(&request)
+            .write(&a)
+            .unwrap()
+            .write(&b)
             .unwrap()
             .build()
             .unwrap();
 
-        Job { env }
-    }
-
-    fn exec_compute(&mut self) -> u32 {
-        exec_compute(METHOD_ELF, self.env.clone())
+        exec(Self::NAME, Self::METHOD_ELF, env)
     }
 }
