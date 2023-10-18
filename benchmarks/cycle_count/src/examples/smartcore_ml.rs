@@ -12,19 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use risc0_zkvm::{serde::to_vec, ExecutorEnv, MemoryImage};
+use risc0_zkvm::{serde::to_vec, ExecutorEnv};
 use smartcore::{
     linalg::basic::matrix::DenseMatrix, tree::decision_tree_classifier::DecisionTreeClassifier,
 };
 
-use crate::{exec_compute, get_image, CycleCounter};
+use crate::{exec_compute, CycleCounter};
 
 pub struct Job<'a> {
     pub env: ExecutorEnv<'a>,
-    pub image: MemoryImage,
 }
 
-const METHOD_PATH: &'static str = smartcore_ml_methods::ML_TEMPLATE_PATH;
+const METHOD_ELF: &'static [u8] = smartcore_ml_methods::ML_TEMPLATE_ELF;
 
 const JSON_MODEL: &str =
     include_str!("../../../../examples/smartcore-ml/res/ml-model/tree_model_bytes.json");
@@ -35,8 +34,9 @@ impl CycleCounter for Job<'_> {
     const NAME: &'static str = "smartcore-ml";
 
     fn new() -> Self {
-        let image = get_image(METHOD_PATH);
         // Convert the model and input data from JSON into byte arrays.
+
+        let is_svm = false;
         let model_bytes: Vec<u8> = serde_json::from_str(JSON_MODEL).unwrap();
         let data_bytes: Vec<u8> = serde_json::from_str(JSON_DATA).unwrap();
 
@@ -48,15 +48,16 @@ impl CycleCounter for Job<'_> {
             rmp_serde::from_slice(&data_bytes).expect("data filed to deserialize byte array");
 
         let env = ExecutorEnv::builder()
+            .add_input(&to_vec(&is_svm).expect("bool failed to serialize"))
             .add_input(&to_vec(&model).expect("model failed to serialize"))
             .add_input(&to_vec(&data).expect("data failed to serialize"))
             .build()
             .unwrap();
 
-        Job { env, image }
+        Job { env }
     }
 
     fn exec_compute(&mut self) -> u32 {
-        exec_compute(self.image.clone(), self.env.clone())
+        exec_compute(METHOD_ELF, self.env.clone())
     }
 }

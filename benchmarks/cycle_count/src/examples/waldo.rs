@@ -20,20 +20,18 @@ use waldo_core::{
     PrivateInput,
 };
 
-use crate::{exec_compute, get_image, CycleCounter};
+use crate::{exec_compute, CycleCounter};
 
 pub struct Job {
     pub cycles: u32,
 }
 
-const METHOD_PATH: &'static str = waldo_methods::IMAGE_CROP_PATH;
+const METHOD_ELF: &'static [u8] = waldo_methods::IMAGE_CROP_ELF;
 
 impl CycleCounter for Job {
     const NAME: &'static str = "waldo";
 
     fn new() -> Self {
-        let image = get_image(METHOD_PATH);
-
         // Read the image from disk.
         let img = ImageReader::open("../../examples/waldo/waldo.webp")
             .unwrap()
@@ -67,7 +65,7 @@ impl CycleCounter for Job {
             .build()
             .unwrap();
 
-        let cycles = exec_compute(image, env);
+        let cycles = exec_compute(METHOD_ELF, env);
         Job { cycles }
     }
 

@@ -12,31 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use risc0_zkvm::{serde::to_vec, ExecutorEnv, MemoryImage};
+use risc0_zkvm::{serde::to_vec, ExecutorEnv};
 
-use crate::{exec_compute, get_image, CycleCounter};
+use crate::{exec_compute, CycleCounter};
 
 pub struct Job<'a> {
     pub env: ExecutorEnv<'a>,
-    pub image: MemoryImage,
 }
 
-const METHOD_PATH: &'static str = sha_methods::HASH_PATH;
+const METHOD_ELF: &'static [u8] = sha_methods::HASH_ELF;
 
 impl CycleCounter for Job<'_> {
     const NAME: &'static str = "sha";
 
     fn new() -> Self {
-        let image = get_image(METHOD_PATH);
         let env = ExecutorEnv::builder()
             .add_input(&to_vec("").unwrap())
             .build()
             .unwrap();
 
-        Job { env, image }
+        Job { env }
     }
 
     fn exec_compute(&mut self) -> u32 {
-        exec_compute(self.image.clone(), self.env.clone())
+        exec_compute(METHOD_ELF, self.env.clone())
     }
 }

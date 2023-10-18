@@ -18,7 +18,7 @@ use std::{
 };
 
 use log::info;
-use risc0_zkvm::{ExecutorEnv, ExecutorImpl, MemoryImage, Program, GUEST_MAX_MEM, PAGE_SIZE};
+use risc0_zkvm::{default_executor, ExecutorEnv};
 use serde::Serialize;
 
 pub mod examples;
@@ -51,17 +51,11 @@ pub trait CycleCounter {
     }
 }
 
-pub fn get_image(path: &str) -> MemoryImage {
-    let elf = std::fs::read(path).expect("elf");
-    let program = Program::load_elf(&elf, GUEST_MAX_MEM as u32).unwrap();
-    MemoryImage::new(&program, PAGE_SIZE as u32).unwrap()
-}
-
-pub fn exec_compute<'a>(image: MemoryImage, env: ExecutorEnv<'a>) -> u32 {
-    let mut exec = ExecutorImpl::new(env.clone(), image.clone()).unwrap();
-    let session = exec.run().unwrap();
-    let segments = session.resolve().unwrap();
-    let cycles = segments
+pub fn exec_compute<'a>(elf: &[u8], env: ExecutorEnv<'a>) -> u32 {
+    let exec = default_executor();
+    let session_info = exec.execute_elf(env, elf).unwrap();
+    let cycles = session_info
+        .segments
         .iter()
         .fold(0, |cycles, segment| (cycles + (1 << segment.po2)));
     cycles as u32
