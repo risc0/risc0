@@ -544,12 +544,16 @@ fn profiler() {
         .filter(|(frames, _addr, _count)| frames.iter().any(|fr| fr.name.contains("profile_test")))
         .collect();
 
-    assert!(!occurences.is_empty(), "{:#?}", Vec::from_iter(prof.iter()));
+    assert!(
+        !occurrences.is_empty(),
+        "{:#?}",
+        Vec::from_iter(prof.iter())
+    );
 
     let elf_mem = Program::load_elf(MULTI_TEST_ELF, u32::MAX).unwrap().image;
 
     // stitch frames together
-    let (fr, addr) = occurences.into_iter().fold(
+    let (fr, addr) = occurrences.into_iter().fold(
         (Vec::new(), 0),
         |(mut acc_frames, _), (frames, addr, _count)| {
             acc_frames.extend(frames);
