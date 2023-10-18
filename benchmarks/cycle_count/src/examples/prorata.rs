@@ -13,23 +13,21 @@
 // limitations under the License.
 
 use prorata_core::AllocationQuery;
-use risc0_zkvm::{ExecutorEnv, MemoryImage};
+use risc0_zkvm::ExecutorEnv;
 use rust_decimal::Decimal;
 
-use crate::{exec_compute, get_image, CycleCounter};
+use crate::{exec_compute, CycleCounter};
 
 pub struct Job<'a> {
     pub env: ExecutorEnv<'a>,
-    pub image: MemoryImage,
 }
 
-const METHOD_PATH: &'static str = prorata_methods::PRORATA_GUEST_PATH;
+const METHOD_ELF: &'static [u8] = prorata_methods::PRORATA_GUEST_ELF;
 
 impl CycleCounter for Job<'_> {
     const NAME: &'static str = "prorata";
 
     fn new() -> Self {
-        let image = get_image(METHOD_PATH);
         let recipients_csv = std::fs::read("../../examples/prorata/sample/ingen.csv")
             .expect("Failed to read input file");
         let target = "John Hammond".to_string();
@@ -44,10 +42,10 @@ impl CycleCounter for Job<'_> {
             .build()
             .unwrap();
 
-        Job { env, image }
+        Job { env }
     }
 
     fn exec_compute(&mut self) -> u32 {
-        exec_compute(self.image.clone(), self.env.clone())
+        exec_compute(METHOD_ELF, self.env.clone())
     }
 }
