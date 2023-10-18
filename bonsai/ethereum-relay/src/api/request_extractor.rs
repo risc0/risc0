@@ -23,9 +23,10 @@ use axum::{
 use hyper::{body::HttpBody, header, HeaderMap};
 use serde::de::DeserializeOwned;
 
-/// Extractor of the callback request body. Uses bincode or json, depending on the Content-Type header
-/// When used as an extractor, it can deserialize request bodies into some type
-/// that implements [`serde::Deserialize`] using [`bincode`, `serde_json`].
+/// Extractor of the callback request body. Uses bincode or json, depending on
+/// the Content-Type header When used as an extractor, it can deserialize
+/// request bodies into some type that implements [`serde::Deserialize`] using
+/// [`bincode`, `serde_json`].
 pub(crate) struct RequestExtractor<T>(pub T);
 
 #[async_trait]
@@ -112,11 +113,12 @@ fn json_content_type(headers: &HeaderMap) -> bool {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use crate::sdk::CallbackRequest;
     use axum::http::{Method, Request};
     use hyper::{header::HeaderValue, Body};
     use serde::Serialize;
+
+    use super::*;
+    use crate::sdk::CallbackRequest;
 
     async fn mock_request<T: Serialize + DeserializeOwned>(
         value: T,

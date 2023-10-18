@@ -16,21 +16,22 @@
 
 use risc0_zkvm::guest::env;
 use smartcore::{
-    linalg::basic::matrix::DenseMatrix, tree::decision_tree_classifier::DecisionTreeClassifier, svm::{
+    linalg::basic::matrix::DenseMatrix,
+    svm::{
         svc::{SVCParameters, SVC},
         Kernels,
     },
+    tree::decision_tree_classifier::DecisionTreeClassifier,
 };
 
 risc0_zkvm::guest::entry!(main);
-
 
 pub fn main() {
     // Read in is_svm boolean to ensure the correct code block is executed
     let is_svm: bool = env::read();
 
     if !is_svm {
-        // Read the model from the host into a SmartCore Decesion Tree model object. 
+        // Read the model from the host into a SmartCore Decesion Tree model object.
         // We MUST explicitly declare the correct type in order for deserialization to be
         // successful.
         type Model = DecisionTreeClassifier<f64, u32, DenseMatrix<f64>, Vec<u32>>;
@@ -48,9 +49,8 @@ pub fn main() {
 
         // We commit the output to the journal.
         env::commit(&y_hat);
-    }
-    else {
-        // Read the model from the host into a SmartCore SVC object. 
+    } else {
+        // Read the model from the host into a SmartCore SVC object.
         let mut model: SVC<f64, i32, DenseMatrix<f64>, Vec<i32>> = env::read();
 
         // Read the input data into a DenseMatrix.
@@ -74,7 +74,7 @@ pub fn main() {
 
         // We commit the output to the journal.
         env::commit(&y_hat);
-        }
+    }
     // Logging the total cycle count is optional, though it's quite useful for benchmarking
     // the various operations in the guest code. env::get_cycle_count() can be
     // called anywhere in the guest, multiple times. So if we are interested in

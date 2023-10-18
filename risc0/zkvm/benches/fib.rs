@@ -20,7 +20,7 @@ use risc0_zkvm_methods::FIB_ELF;
 
 fn setup(iterations: u32) -> ExecutorImpl<'static> {
     let env = ExecutorEnv::builder()
-        .add_input(&[iterations])
+        .write_slice(&[iterations])
         .build()
         .unwrap();
     ExecutorImpl::from_elf(env, FIB_ELF).unwrap()

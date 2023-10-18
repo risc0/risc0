@@ -12,13 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+pub mod constants;
+pub mod parser;
+pub mod types;
+
 use std::{
-    cell::RefCell,
     collections::BTreeMap,
     fs::File,
     io::{BufRead, BufReader, Write},
+    ops::Not,
     path::{Path, PathBuf},
     process::Command,
+    vec,
 };
 
 use anyhow::{bail, Context, Result};
@@ -26,27 +31,55 @@ use handlebars::Handlebars;
 use serde::{Deserialize, Serialize};
 use tempfile::tempdir;
 use tracing::{debug, error, info, warn};
+use types::{
+    aliases::{CrateName, Profiles},
+    profile::Profile,
+    profile_settings::ProfileSettings,
+    repo::{Repo, RepoCargoString, Value as _},
+};
 
-pub mod profiles;
-pub mod selected_crates;
+pub mod gen_profiles;
 
 /// Validation Results fields
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ValidationResults {
+    /// Holds the crate name
+    pub name: CrateName,
+
+    /// Holds the profile settings
+    pub settings: ProfileSettings,
+
     /// Holds the validator exit status
     pub status: RunStatus,
+
+    /// Flag to represent if this profile has been customized
+    pub custom_profile: bool,
+
+    /// Holds the crate version
+    pub version: Option<semver::Version>,
 
     /// Holds a sample of the guest build stdout
     ///
     /// Holds the first 200 lines of of the guest build, if the build step fails
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub build_errors: Option<String>,
 }
 
 impl ValidationResults {
-    fn from(status: RunStatus) -> Self {
+    fn new(
+        name: impl ToString,
+        settings: ProfileSettings,
+        version: Option<semver::Version>,
+        status: RunStatus,
+        build_errors: Option<String>,
+    ) -> Self {
         Self {
+            custom_profile: settings.is_customized(),
+            name: name.to_string(),
+            settings,
+            version,
             status,
-            build_errors: None,
+            build_errors,
         }
     }
 }
@@ -61,7 +94,7 @@ pub struct CrateProfile {
     pub name: String,
 
     /// Crate version
-    pub version: Option<String>,
+    pub version: String,
 
     /// Does the crate need 'std' feature
     pub std: bool,
@@ -105,20 +138,21 @@ pub struct CrateProfile {
 
 /// Top level profile config
 ///
-/// The primary body of the JSON version of the config.
+/// The primary body of the YAML version of the config.
 /// Defines the global variables for a given crates testing run.
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ProfileConfig {
-    /// Define which Github branch should be used for templates and crate
-    /// imports
-    pub risc0_gh_branch: Option<String>,
-    /// Directory where risc0 is for templates and crate imports
-    pub risc0_path: Option<String>,
-    /// Enables `RISC0_EXPERIMENTAL_PREFLIGHT`
-    #[serde(default = "bool::default")]
-    pub fast_mode: bool,
-    /// Array of [CrateProfile]
-    pub profiles: RefCell<Vec<CrateProfile>>,
+    pub profiles: Profiles,
+}
+
+impl ProfileConfig {
+    pub fn profiles(&self) -> &Profiles {
+        &self.profiles
+    }
+
+    pub fn replace_profiles(&self, profiles: Profiles) -> Self {
+        Self { profiles }
+    }
 }
 
 const CARGO_TOML_METHODS_TMP: &str = r#"
@@ -161,17 +195,26 @@ pub fn main() {
 
 "#;
 
-const CROSSBEAM_PATCH: &str = r#"
-[patch.crates-io]
-crossbeam = { git = "https://github.com/risc0/crossbeam", rev = "b25eb50f8c193f36dacb6739692261ea96827bb7" }
-crossbeam-utils = { git = "https://github.com/risc0/crossbeam", rev = "b25eb50f8c193f36dacb6739692261ea96827bb7" }
-crossbeam-channel = { git = "https://github.com/risc0/crossbeam", rev = "b25eb50f8c193f36dacb6739692261ea96827bb7" }"#;
-
 const MAX_ERROR_LINES: u64 = 200;
 
 pub struct Validator {
-    pub context: ProfileConfig,
+    context: ProfileConfig,
     proj_out_dir: PathBuf,
+    repo: Repo,
+}
+
+impl Validator {
+    pub fn context(&self) -> &ProfileConfig {
+        &self.context
+    }
+
+    pub fn proj_out_dir(&self) -> &PathBuf {
+        &self.proj_out_dir
+    }
+
+    pub fn repo(&self) -> &Repo {
+        &self.repo
+    }
 }
 
 #[derive(strum::AsRefStr, Debug, Serialize, Deserialize)]
@@ -184,7 +227,7 @@ pub enum RunStatus {
 
 impl Validator {
     /// Uses [cargo-risczero] to generate a new base project
-    fn gen_initial_project(&self, profile: &CrateProfile) -> Result<PathBuf> {
+    fn gen_initial_project(&self, profile: &Profile) -> Result<PathBuf> {
         let project_name = "template_project";
         let output_path = self.proj_out_dir.join(project_name);
 
@@ -193,20 +236,18 @@ impl Validator {
             return Ok(output_path);
         }
 
-        debug!("generating {}", profile.name);
+        debug!("generating {}", profile.name());
 
-        let filtered_env: std::collections::HashMap<String, String> = std::env::vars()
-            .filter(|(k, _)| {
-                k == "TERM"
-                    || k == "TZ"
-                    || k == "USER"
-                    || k == "LANG"
-                    || k == "PATH"
-                    || k == "RUSTUP_HOME"
-                    || k == "RUST_VERSION"
-                    || k == "CARGO_HOME"
-            })
-            .collect();
+        let filtered_env = filter_flags(&[
+            "TERM",
+            "TZ",
+            "USER",
+            "LANG",
+            "PATH",
+            "RUSTUP_HOME",
+            "RUST_VERSION",
+            "CARGO_HOME",
+        ]);
 
         let mut cmd = std::process::Command::new("cargo");
         cmd.arg("risczero");
@@ -218,37 +259,34 @@ impl Validator {
         cmd.env_clear();
         cmd.envs(&filtered_env);
 
-        if profile.std {
+        if profile.settings.std {
             cmd.arg("--std");
         }
 
-        match (&self.context.risc0_path, &self.context.risc0_gh_branch) {
-            (None, None) => {
-                bail!("Profile must assign either 'risc0_template_path' or 'risc0_gh_branch'")
+        match self.repo() {
+            Repo::Tag(_) => {
+                cmd.arg("--tag");
+                cmd.arg(self.repo().value());
             }
-            (Some(..), Some(..)) => bail!(
-                "Profile assigns both 'risc0_template_path' and 'risc0_gh_branch' pick just one"
-            ),
-            (Some(r0_path), None) => {
-                let r0_template_path = Path::new(r0_path).join("templates").join("rust-starter");
-                if !r0_template_path.exists() {
-                    bail!(
-                        "Failed to find {} on disk",
-                        r0_template_path.to_string_lossy()
-                    );
+            Repo::Branch(_) => {
+                cmd.arg("--branch");
+                cmd.arg(self.repo().value());
+            }
+            Repo::Path(_) => {
+                let template_path = Path::new(self.repo().value())
+                    .join("templates")
+                    .join("rust-starter");
+                if !template_path.exists() {
+                    bail!("Failed to find {} on disk", template_path.to_string_lossy());
                 }
                 cmd.arg("--template");
-                cmd.arg(r0_template_path);
+                cmd.arg(template_path);
                 cmd.arg("--templ-subdir");
                 cmd.arg("");
                 cmd.arg("--path");
-                cmd.arg(r0_path);
+                cmd.arg(self.repo().value());
             }
-            (None, Some(branch)) => {
-                cmd.arg("--branch");
-                cmd.arg(branch);
-            }
-        };
+        }
 
         debug!(
             "running: '{}{}'",
@@ -284,7 +322,12 @@ impl Validator {
     }
 
     /// Customizes the template with crate profile specifics
-    fn customize_guest(&self, profile: &CrateProfile, working_dir: &Path) -> Result<()> {
+    fn customize_guest(
+        &self,
+        profile: &Profile,
+        version: &semver::Version,
+        working_dir: &Path,
+    ) -> Result<()> {
         let methods_dir = working_dir.join("methods");
         if !methods_dir.exists() {
             bail!(
@@ -314,13 +357,7 @@ impl Validator {
         let methods_toml = methods_dir.join("Cargo.toml");
 
         let mut vars = BTreeMap::new();
-        let risc0_build = if let Some(gh_branch) = &self.context.risc0_gh_branch {
-            format!("git = \"https://github.com/risc0/risc0.git\", branch = \"{gh_branch}\"")
-        } else if let Some(r0_path) = &self.context.risc0_path {
-            format!("path = \"{r0_path}/risc0/build\"")
-        } else {
-            bail!("Unsupported, missing risc0_path or risc0_gh_branch");
-        };
+        let risc0_build = self.repo.default_cargo_build();
 
         vars.insert("risc0_build", risc0_build.as_str());
 
@@ -329,55 +366,42 @@ impl Validator {
         // Generate the methods/guest/Cargo.toml file
 
         let mut vars = BTreeMap::new();
-        let risc0_feature_std = if profile.std {
-            ", features = ['std']"
-        } else {
-            ""
-        };
 
-        let risc0_zkvm = if let Some(gh_branch) = &self.context.risc0_gh_branch {
-            format!("git = \"https://github.com/risc0/risc0.git\", branch = \"{gh_branch}\"")
-        } else if let Some(r0_path) = &self.context.risc0_path {
-            format!("path = \"{r0_path}/risc0/zkvm\"")
-        } else {
-            bail!("Unsupported, missing risc0_path or risc0_gh_branch");
-        };
+        let risc0_zkvm = self.repo.default_cargo_zkvm();
 
-        let mut crate_line = format!(
-            "{} = {{ version = \"{}\" }}",
-            profile.name,
-            profile.version.as_ref().unwrap()
-        );
-        if profile.crossbeam_patch {
-            crate_line += CROSSBEAM_PATCH;
+        let mut crate_line = format!("{} = {{ version = \"{version}\" }}", profile.name(),);
+        if let Some(patch) = &profile.settings.patch {
+            crate_line.push('\n');
+            crate_line += patch;
         }
 
-        vars.insert("risc0_feature_std", risc0_feature_std);
+        profile
+            .settings
+            .std
+            .then(|| vars.insert("risc0_feature_std", ", features = ['std']"));
+
         vars.insert("crate_line", &crate_line);
         vars.insert("risc0_zkvm", &risc0_zkvm);
 
         Self::render_file(&cargo_toml_file, CARGO_TOML_TEMPLATE, vars)?;
 
         // Generate the main.rs file
-
         let mut vars = BTreeMap::new();
-        vars.insert("no_std_line", if profile.std { "" } else { "#![no_std]" });
-        vars.insert(
-            "use_lines",
-            if let Some(import_str) = &profile.import_str {
-                import_str
-            } else {
-                ""
-            },
-        );
-        vars.insert(
-            "main_body",
-            if let Some(main_body) = &profile.custom_main {
-                main_body
-            } else {
-                ""
-            },
-        );
+        profile
+            .settings
+            .std
+            .not()
+            .then(|| vars.insert("no_std_line", "#![no_std]"));
+        profile
+            .settings
+            .import_str
+            .as_deref()
+            .map(|import_str| vars.insert("use_lines", import_str));
+        profile
+            .settings
+            .custom_main
+            .as_deref()
+            .map(|main_body| vars.insert("main_body", main_body));
 
         Self::render_file(&main_file, MAIN_RS_TEMPLATE, vars)?;
 
@@ -385,10 +409,10 @@ impl Validator {
     }
 
     // Builds the template project
-    fn build_project(&self, profile: &CrateProfile, working_dir: &Path) -> Result<(bool, String)> {
+    fn build_project(&self, profile: &Profile, working_dir: &Path) -> Result<(bool, String)> {
         debug!(
             "building {} - {}",
-            profile.name,
+            profile.name(),
             working_dir.to_string_lossy()
         );
 
@@ -397,14 +421,10 @@ impl Validator {
         // RUST_TOOLCHAIN env vars, here we strip out all the extra env vars so
         // the cargo subcommands will correctly dispatch to rustup to pick the
         // target project's rust-toolchain.toml.
-        let mut filtered_env: std::collections::HashMap<String, String> = std::env::vars()
-            .filter(|(k, _)| {
-                k == "TERM" || k == "TZ" || k == "CC" || k == "CXX" || k == "LANG" || k == "PATH"
-            })
-            .collect();
+        let mut filtered_env = filter_flags(&["TERM", "TZ", "CC", "CXX", "LANG", "PATH"]);
 
         // TODO: support GCC
-        if profile.inject_cc_flags {
+        if profile.settings.inject_cc_flags {
             filtered_env.insert("CC".to_string(), "clang".to_string());
             filtered_env.insert(
                 "CFLAGS_riscv32im_risc0_zkvm_elf".to_string(),
@@ -426,8 +446,8 @@ impl Validator {
             .output()?;
 
         let status = output.status;
-        let res = if status.success() || (!status.success() && profile.should_fail) {
-            info!("{} - build - SUCCESS", profile.name);
+        let res = if status.success() || (!status.success() && profile.settings.should_fail) {
+            info!("{} - build - SUCCESS", profile.name());
             (true, String::new())
         } else {
             // Write out the build log to stderr
@@ -447,7 +467,7 @@ impl Validator {
             std::io::stdout().write_all(&output.stdout).unwrap();
             std::io::stderr().write_all(&output.stderr).unwrap();
 
-            error!("{} - build - FAILED", profile.name);
+            error!("{} - build - FAILED", profile.name());
             (false, build_log_trimmed)
         };
 
@@ -457,7 +477,7 @@ impl Validator {
     /// Run the prover a given [CrateProfile]
     ///
     /// Requires that the build step has been run before hand
-    fn run_prover(&self, profile: &CrateProfile, working_dir: &Path) -> Result<bool> {
+    fn run_prover(&self, profile: &Profile, working_dir: &Path) -> Result<bool> {
         let cmd = working_dir.join("target/debug/host");
         if !cmd.exists() {
             bail!("Could not find 'host' binary in working_dir build dir, did the build run?");
@@ -466,23 +486,23 @@ impl Validator {
         info!("running: {}", cmd.display());
         let mut cmd = Command::new(cmd);
         let mut cmd = cmd.current_dir(working_dir);
-        if self.context.fast_mode {
+        if profile.settings.fast_mode {
             cmd = cmd.env("RISC0_EXPERIMENTAL_PREFLIGHT", "1")
         }
 
         let output = cmd.output()?;
 
         let status = output.status;
-        let res = if (status.success() && !profile.should_fail)
-            || (!status.success() && profile.should_fail)
+        let res = if (status.success() && !profile.settings.should_fail)
+            || (!status.success() && profile.settings.should_fail)
         {
-            info!("{} - run - SUCCESS", profile.name);
+            info!("{} - run - SUCCESS", profile.name());
             true
         } else {
             std::io::stdout().write_all(&output.stdout).unwrap();
             std::io::stderr().write_all(&output.stderr).unwrap();
 
-            error!("{} - run - FAILED", profile.name);
+            error!("{} - run - FAILED", profile.name());
             false
         };
 
@@ -490,63 +510,86 @@ impl Validator {
     }
 
     /// Run a given profile through the set of tests
-    fn run(&self, profile: &mut CrateProfile) -> Result<()> {
-        if profiles::SKIP_CRATES.contains(&profile.name.as_str()) {
-            warn!("Skipping {} due to SKIP_CRATES", profile.name);
-            profile.results = Some(ValidationResults::from(RunStatus::Skipped));
-            return Ok(());
-        }
-        let working_dir = self.gen_initial_project(profile)?;
-        self.customize_guest(profile, &working_dir)?;
-        let (build_success, build_errors) = self.build_project(profile, &working_dir)?;
-        if !build_success {
-            profile.results = Some(ValidationResults {
-                status: RunStatus::BuildFail,
-                build_errors: Some(build_errors),
-            });
-            return Ok(());
-        }
-        if profile.run_prover && !self.run_prover(profile, &working_dir)? {
-            profile.results = Some(ValidationResults::from(RunStatus::RunFail));
-            return Ok(());
+    fn run(&self, profile: &Profile) -> Result<Vec<ValidationResults>> {
+        if profile.should_skip() {
+            warn!("Skipping {}", profile.name());
+            return Ok(vec![ValidationResults::new(
+                profile.name(),
+                profile.settings().clone(),
+                None,
+                RunStatus::Skipped,
+                None,
+            )]);
         }
 
-        profile.results = Some(ValidationResults::from(RunStatus::Success));
-        Ok(())
+        let working_dir = self.gen_initial_project(profile)?;
+        let mut results = Vec::new();
+        for version in profile.versions() {
+            self.customize_guest(profile, &version, &working_dir)?;
+            let (build_success, build_errors) = self.build_project(profile, &working_dir)?;
+            let create_validation_results = |status: RunStatus, build_errors: Option<String>| {
+                ValidationResults::new(
+                    profile.name(),
+                    profile.settings().clone(),
+                    Some(version.clone()),
+                    status,
+                    build_errors,
+                )
+            };
+            if !build_success {
+                results.push(create_validation_results(
+                    RunStatus::BuildFail,
+                    Some(build_errors),
+                ));
+                continue;
+            }
+            if profile.settings.run_prover && !self.run_prover(profile, &working_dir)? {
+                results.push(create_validation_results(RunStatus::RunFail, None));
+                continue;
+            }
+            results.push(create_validation_results(RunStatus::Success, None));
+        }
+
+        Ok(results)
     }
 
-    /// Run a single profile in the config by `name`
-    pub fn run_single(&self, name: &str) -> Result<()> {
-        for profile in self.context.profiles.borrow_mut().iter_mut() {
-            if profile.name == name {
-                self.run(profile)?;
-                return Ok(());
+    // Run a single profile in the config by `name`
+    pub fn run_single(&self, name: &str, profiles: &Profiles) -> Result<Vec<ValidationResults>> {
+        for profile in profiles {
+            if profile.name() == name {
+                return self.run(profile);
             }
         }
 
         bail!("Failed to find crate profile: {}", name)
     }
 
-    /// Run all profiles in config
-    pub fn run_all(&self) -> Result<()> {
-        for profile in self.context.profiles.borrow_mut().iter_mut() {
-            self.run(profile)?;
+    // Run all profiles in config
+    pub fn run_all(&self, profiles: &Profiles) -> Result<Vec<ValidationResults>> {
+        let mut results = vec![];
+        for profile in profiles {
+            results.push(self.run(profile)?);
         }
 
-        Ok(())
+        Ok(results.into_iter().flatten().collect())
     }
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ValidatorBuilder {
+    #[serde(flatten)]
     context: ProfileConfig,
     out_dir: Option<PathBuf>,
+    #[serde(skip)]
+    repo: Repo,
 }
 
 impl ValidatorBuilder {
-    pub fn new(context: ProfileConfig) -> Self {
+    pub fn new(context: ProfileConfig, repo: Repo, out_dir: Option<PathBuf>) -> Self {
         Self {
             context,
-            out_dir: None,
+            repo,
+            out_dir,
         }
     }
 
@@ -560,15 +603,28 @@ impl ValidatorBuilder {
     }
 
     pub fn build(self) -> Result<Validator> {
-        let out_dir = if let Some(dir) = self.out_dir {
-            dir
-        } else {
-            tempdir()?.path().to_path_buf()
+        let proj_out_dir = match self.out_dir {
+            Some(dir) => dir,
+            None => tempdir()?.path().to_path_buf(),
         };
 
         Ok(Validator {
             context: self.context,
-            proj_out_dir: out_dir,
+            repo: self.repo,
+            proj_out_dir,
         })
     }
+}
+
+impl TryFrom<ValidatorBuilder> for Validator {
+    type Error = anyhow::Error;
+    fn try_from(builder: ValidatorBuilder) -> Result<Self> {
+        builder.build()
+    }
+}
+
+fn filter_flags(flags: &[&str]) -> BTreeMap<String, String> {
+    std::env::vars()
+        .filter(|(k, _)| flags.contains(&k.as_str()))
+        .collect()
 }

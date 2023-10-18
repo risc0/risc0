@@ -14,18 +14,18 @@
 
 use std::{fs::File, io::BufReader, path::PathBuf};
 
-use anyhow::{Context, Result};
+use anyhow::{bail, Context, Result};
 use clap::Parser;
 use colored::Colorize;
-use risc0_crates_validator::{ProfileConfig, RunStatus, ValidatorBuilder};
+use risc0_crates_validator::{types::repo::Repo, ProfileConfig, RunStatus, ValidatorBuilder};
 use tracing::info;
 use tracing_subscriber::EnvFilter;
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
 struct Args {
-    /// Path to json version of [ProfileConfig]
-    #[arg(short = 'p', long, default_value = "./profiles/primary.json")]
+    /// Path to YAML version of [ProfileConfig]
+    #[arg(short = 'P', long, default_value = "./profiles/primary.yaml")]
     profiles_path: PathBuf,
 
     /// Run just a single crate from the [ProfileConfig]
@@ -35,16 +35,46 @@ struct Args {
     /// Output location to write temporary projects
     ///
     /// Defaults value is a new TempDir
-    #[arg(short = 'o', long)]
+    #[arg(short = 'd', long)]
     out_dir: Option<PathBuf>,
 
     /// Write profile data with results
     ///
     /// Optional: write out the profile data with all the validation results
-    #[arg(short = 'j', long)]
-    json_output: Option<PathBuf>,
+    #[arg(short = 'o', long)]
+    output: Option<PathBuf>,
+
+    // TODO: Maybe it'd be possible to use `clap_serde_derive` as a way to simplify argument parsing?
+    // (Doing this for each variant of the `Repo` enum - `path`, `branch` and `tag`)
+    /// Specify the RISC Zero repository path to use as source for templates and
+    /// crate imports.
+    #[arg(short, long, conflicts_with_all = &["branch", "tag"])]
+    path: Option<String>,
+
+    /// Specify the RISC Zero repository branch to use as source for templates and
+    /// crate imports.
+    #[arg(short, long, conflicts_with_all = &["path", "tag"])]
+    branch: Option<String>,
+
+    /// Specify the RISC Zero repository tag to use as source for templates and
+    /// crate imports.
+    #[arg(short, long, conflicts_with_all = &["path", "branch"])]
+    tag: Option<String>,
 }
 
+impl Args {
+    fn repo(&self) -> Result<Repo> {
+        match (self.path.as_ref(), self.branch.as_ref(), self.tag.as_ref()) {
+            (Some(path), None, None) => Ok(Repo::path(path.clone())),
+            (None, Some(branch), None) => Ok(Repo::branch(branch.clone())),
+            (None, None, Some(tag)) => Ok(Repo::tag(tag.clone())),
+            (None, None, None) => bail!("No repo specified"),
+            _ => bail!("Only one repo type can be specified"),
+        }
+    }
+}
+
+#[tracing::instrument(level = "trace")]
 fn main() -> Result<()> {
     tracing_subscriber::fmt()
         .with_env_filter(EnvFilter::from_default_env())
@@ -52,36 +82,33 @@ fn main() -> Result<()> {
 
     let args = Args::parse();
 
-    let file = File::open(args.profiles_path).context("Failed to open profiles_path file")?;
+    let file = File::open(&args.profiles_path).context("Failed to open profiles_path file")?;
     let reader = BufReader::new(file);
-    let context: ProfileConfig = serde_json::from_reader(reader)?;
+    let profile_configs: ProfileConfig = serde_yaml::from_reader(reader)?;
+    let validator = ValidatorBuilder::new(profile_configs, args.repo()?, args.out_dir).build()?;
+    let profiles = validator.context().profiles();
+    let profiles_num = validator.context().profiles().len();
 
-    info!(
-        "Starting run of {} profiles...",
-        context.profiles.borrow().len()
-    );
-    let validator = ValidatorBuilder::new(context)
-        .out_dir(args.out_dir)
-        .build()?;
-
-    if let Some(crate_name) = args.crate_name {
-        validator.run_single(&crate_name)?;
-    } else {
-        validator.run_all()?;
-    }
+    info!("Starting run of {profiles_num} profiles...");
+    let results = match args.crate_name {
+        Some(crate_name) => {
+            info!("Running single crate: {crate_name}");
+            validator.run_single(&crate_name, profiles)?
+        }
+        None => {
+            info!("Running all crates");
+            validator.run_all(profiles)?
+        }
+    };
 
     info!("Test results:");
     colored::control::set_override(true);
     let mut successful = 0;
-    for (idx, profile) in validator.context.profiles.borrow().iter().enumerate() {
-        let result = profile
-            .results
-            .as_ref()
-            .context(format!("crate {} does not have results", profile.name))?;
+    for (idx, result) in results.iter().enumerate() {
         let result_str = result.status.as_ref();
         info!(
             "{idx}: {} - {}",
-            profile.name,
+            result.name,
             match result.status {
                 RunStatus::Success => {
                     successful += 1;
@@ -93,18 +120,14 @@ fn main() -> Result<()> {
             }
         );
     }
-    colored::control::unset_override();
-    info!(
-        "{}/{} successful",
-        successful,
-        validator.context.profiles.borrow().len()
-    );
 
-    if let Some(out_path) = args.json_output {
+    colored::control::unset_override();
+    info!("{successful}/{profiles_num} successful");
+
+    if let Some(out_path) = args.output {
         std::fs::write(
             out_path,
-            serde_json::to_string(&validator.context)
-                .context("Failed to serialize Validator context")?,
+            serde_json::to_string(&results).context("Failed to serialize Validator context")?,
         )
         .context("Failed to write output json file")?;
     }

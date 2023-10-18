@@ -1,8 +1,10 @@
 # Tutorial: Building your first zkVM application
+
 Welcome!
 
 This tutorial will walk you through building your first [zkVM application].
 By following the steps in this guide, you will:
+
 - Use the [cargo risczero] tool to create a blank [starter template]
 - Make the handful of changes necessary to create a functional zkVM application
 - Finish the tutorial with an exact copy of the [host] and [guest] programs from the [hello-world] example.
@@ -33,7 +35,9 @@ cd wherever/you/want
 ## Create a project from our starter template
 cargo risczero new hello-world
 ```
+
 This will create a project named `hello-world` in the directory where you ran the [`cargo risczero new`] command. Now we can enter our new project's directory and start working on it!
+
 ```bash
 cd hello-world
 ```
@@ -62,9 +66,7 @@ use hello_world_methods::{METHOD_NAME_ELF, METHOD_NAME_ID};
 
 Take a moment to look inside the methods package directory. The `hello-world` project will call a program that executes on the guest zkVM whose source is found in `methods/guest/src/main.rs`. Our next step will be to name this guest program.
 
-
 Edit `methods/guest/Cargo.toml`, changing the line `name = "method_name"` to instead read `name = "multiply"`.
-
 
 In order to access guest code from the host driver program, the host program `host/src/main.rs` includes two guest methods: `METHOD_NAME_ELF` and `METHOD_NAME_ID`.
 
@@ -78,6 +80,7 @@ Both of these must be changed to reflect the new guest program name:
 ```
 use hello_world_methods::{MULTIPLY_ELF, MULTIPLY_ID};
 ```
+
 (As an aside, if you add more than one callable guest program to your next RISC Zero zkVM project, you'll need to include `ELF` and `ID` references once for each guest file.)
 
 While we're at it, let's update the references to `METHOD_NAME_ELF` and `METHOD_NAME_ID` in `hello-world/host/src/main.rs` to reflect our new program name. Don't worry about why these lines are included yet; for now, we're just being diligent not to leave dead references behind.
@@ -100,16 +103,15 @@ Use this command any time you'd like to check your progress.
 
 ## Concept break: How do we run and prove the guest program?
 
-
 Our next objective is to provide the guest program with input. Before we implement this, let's take a closer look at how we run and prove the guest program in `hello-world/host/src/main.rs`.
 
-In the starter template project, our host driver program creates an executor environment before constructing a prover.  When `Prover::prove_elf()` is called, it will produce a receipt:
+In the starter template project, our host driver program creates an executor environment before constructing a prover. When `Prover::prove_elf()` is called, it will produce a receipt:
 
 ```rust
     use hello_world_methods::{MULTIPLY_ELF, MULTIPLY_ID};
     use risc0_zkvm::{
       default_prover,
-      serde::{from_slice, to_vec},
+      serde::from_slice,
       ExecutorEnv,
     };
 
@@ -127,13 +129,12 @@ In the starter template project, our host driver program creates an executor env
     // receipt.verify(MULTIPLY_ID).unwrap();
 ```
 
-
-
 ## Step 5 (Host): Share two values with the guest
 
 In this step, we'll be continuing to modify `hello-world/host/src/main.rs`.
 Let's start by picking some aesthetically pleasing primes such as `17` and `23`.
 They will be added to the top of our `main` function:
+
 ```
 fn main() {
     let a: u64 = 17;
@@ -148,7 +149,7 @@ We need to add these values as inputs before the executor environment is built:
 
 ```rust
 use hello_world_methods::{MULTIPLY_ELF, MULTIPLY_ID};
-use risc0_zkvm::{default_prover, serde::to_vec, ExecutorEnv};
+use risc0_zkvm::{default_prover, ExecutorEnv};
 
 fn main() {
     let a: u64 = 17;
@@ -157,8 +158,8 @@ fn main() {
     // First, we construct an executor environment
     let env = ExecutorEnv::builder()
         // Send a & b to the guest
-        .add_input(&to_vec(&a).unwrap())
-        .add_input(&to_vec(&b).unwrap())
+        .write(&a).unwrap()
+        .write(&b).unwrap()
         .build()
         .unwrap();
 }
@@ -177,6 +178,7 @@ We'll then publicly commit their product to the [journal] portion of the [receip
 
 Here is the complete guest program.
 We'll break this down step by step below:
+
 ```no_compile
 pub fn main() {
     // Load the first number from the host
@@ -194,6 +196,7 @@ pub fn main() {
     env::commit(&product);
 }
 ```
+
 ### Load values from the host
 
 Use `env::read()` to load both numbers that the host provided:
@@ -202,9 +205,11 @@ Use `env::read()` to load both numbers that the host provided:
     let a: u64 = env::read();
     let b: u64 = env::read();
 ```
+
 ### Confirm that factors are non-trivial
 
 Next, we'll add a line that panics if either chosen value is 1. This will leave us with a guest program that only completes if the product of `a` and `b` is genuinely composite.
+
 ```no_compile
     // Verify that neither of them are 1 (i.e. nontrivial factors)
     if a == 1 || b == 1 {
@@ -215,10 +220,12 @@ Next, we'll add a line that panics if either chosen value is 1. This will leave 
 ## Compute and publish the product
 
 Now we can compute their product and `commit` it.
+
 ```no_compile
     let product = a.checked_mul(b).expect("Integer overflow");
     env::commit(&product);
 ```
+
 The `env::commit` function is used to commit public results to the [journal].
 Once committed to the journal, anyone with the [receipt] can read this value.
 
@@ -242,19 +249,15 @@ So, let's extract the [journal]'s contents by replacing the "`TODO`" in the abov
 
 ```rust
     use hello_world_methods::{MULTIPLY_ELF, MULTIPLY_ID};
-    use risc0_zkvm::{
-      default_prover,
-      ExecutorEnv,
-      serde::{from_slice, to_vec},
-    };
+    use risc0_zkvm::{default_prover, ExecutorEnv, serde::from_slice};
 
     let a: u64 = 17;
     let b: u64 = 23;
 
     let env = ExecutorEnv::builder()
       // Send a & b to the guest
-      .add_input(&to_vec(&a).unwrap())
-      .add_input(&to_vec(&b).unwrap())
+      .write(&a).unwrap()
+      .write(&b).unwrap()
       .build()
       .unwrap();
 

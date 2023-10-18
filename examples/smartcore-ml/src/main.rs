@@ -12,11 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use risc0_zkvm::{
-    default_prover,
-    serde::{from_slice, to_vec},
-    ExecutorEnv,
-};
+use risc0_zkvm::{default_prover, serde::from_slice, ExecutorEnv};
 use serde_json;
 use smartcore::{
     linalg::basic::matrix::DenseMatrix, tree::decision_tree_classifier::DecisionTreeClassifier,
@@ -38,8 +34,10 @@ fn main() {
 }
 
 fn predict() -> Vec<u32> {
-    // We set a boolean to establish whether we are using a SVM model.  This will be passed to the guest and
-    // is important for execution of the guest code.  SVM models require an extra step that is not required of other SmartCore models.
+    // We set a boolean to establish whether we are using a SVM model.  This will be
+    // passed to the guest and is important for execution of the guest code.
+    // SVM models require an extra step that is not required of other SmartCore
+    // models.
     let is_svm: bool = false;
 
     // Convert the model and input data from JSON into byte arrays.
@@ -54,9 +52,12 @@ fn predict() -> Vec<u32> {
         rmp_serde::from_slice(&data_bytes).expect("data filed to deserialize byte array");
 
     let env = ExecutorEnv::builder()
-        .add_input(&to_vec(&is_svm).expect("bool failed to serialize"))
-        .add_input(&to_vec(&model).expect("model failed to serialize"))
-        .add_input(&to_vec(&data).expect("data failed to serialize"))
+        .write(&is_svm)
+        .expect("bool failed to serialize")
+        .write(&model)
+        .expect("model failed to serialize")
+        .write(&data)
+        .expect("data failed to serialize")
         .build()
         .unwrap();
 
@@ -79,11 +80,7 @@ fn predict() -> Vec<u32> {
 
 #[cfg(test)]
 mod test {
-    use risc0_zkvm::{
-        default_executor,
-        serde::{from_slice, to_vec},
-        ExecutorEnv,
-    };
+    use risc0_zkvm::{default_executor, serde::from_slice, ExecutorEnv};
     use smartcore::{
         linalg::basic::matrix::DenseMatrix,
         svm::{
@@ -139,7 +136,8 @@ mod test {
         ];
 
         // We create the SVC params and train the SVC model.
-        // The paramaters will NOT get serialized due to a serde_skip command in the source code for the SVC struct.
+        // The paramaters will NOT get serialized due to a serde_skip command in the
+        // source code for the SVC struct.
         let knl = Kernels::linear();
         let params = &SVCParameters::default().with_c(200.0).with_kernel(knl);
         let svc = SVC::fit(&x, &y, params).unwrap();
@@ -150,9 +148,12 @@ mod test {
             serde_json::from_str(&svc_serialized).expect("unable to deserialize JSON");
 
         let env = ExecutorEnv::builder()
-            .add_input(&to_vec(&is_svm).expect("bool failed to serialize"))
-            .add_input(&to_vec(&svc_deserialized).expect("model failed to serialize"))
-            .add_input(&to_vec(&x).expect("data failed to serialize"))
+            .write(&is_svm)
+            .expect("bool failed to serialize")
+            .write(&svc_deserialized)
+            .expect("model failed to serialize")
+            .write(&x)
+            .expect("data failed to serialize")
             .build()
             .unwrap();
 

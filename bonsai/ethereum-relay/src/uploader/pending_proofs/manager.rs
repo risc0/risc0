@@ -180,7 +180,8 @@ impl<S: Storage> BonsaiPendingProofManager<S> {
                     //
                     // TODO: What do we do if this call to storage fails?
 
-                    // TODO: Is it right to transition to `New` here, assuming we got a PendingProofError::ProofRequestError?
+                    // TODO: Is it right to transition to `New` here, assuming we got a
+                    // PendingProofError::ProofRequestError?
                     self.storage
                         .transition_proof_request(
                             source.get_proof_request_id(),

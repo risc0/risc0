@@ -15,11 +15,7 @@
 use chess_core::Inputs;
 use chess_methods::{CHECKMATE_ELF, CHECKMATE_ID};
 use clap::{Arg, Command};
-use risc0_zkvm::{
-    default_prover,
-    serde::{from_slice, to_vec},
-    ExecutorEnv, Receipt,
-};
+use risc0_zkvm::{default_prover, serde::from_slice, ExecutorEnv, Receipt};
 use shakmaty::{fen::Fen, CastlingMode, Chess, FromSetup, Position, Setup};
 
 fn main() {
@@ -57,7 +53,8 @@ fn main() {
 
 fn chess(inputs: &Inputs) -> Receipt {
     let env = ExecutorEnv::builder()
-        .add_input(&to_vec(inputs).unwrap())
+        .write(inputs)
+        .unwrap()
         .build()
         .unwrap();
 

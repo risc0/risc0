@@ -53,7 +53,6 @@ use crate::{
         receipt::ExitCode,
         server::opcode::{MajorType, OpCode},
     },
-    serde::to_vec,
     ExecutorEnv, FaultCheckMonitor, Loader, Segment, SegmentRef, Session, SimpleSegmentRef,
     FAULT_CHECKER_ELF,
 };
@@ -217,12 +216,12 @@ impl<'a> ExecutorImpl<'a> {
     /// environmental configuration details.
     /// # Example
     /// ```
-    /// use risc0_zkvm::{serde::to_vec, ExecutorImpl, ExecutorEnv, Session};
+    /// use risc0_zkvm::{ExecutorImpl, ExecutorEnv, Session};
     /// use risc0_zkvm_methods::{BENCH_ELF, bench::{BenchmarkSpec, SpecWithIters}};
     ///
-    /// let spec = SpecWithIters(BenchmarkSpec::SimpleLoop, 1);
     /// let env = ExecutorEnv::builder()
-    ///     .add_input(&to_vec(&spec).unwrap())
+    ///     .write(&SpecWithIters(BenchmarkSpec::SimpleLoop, 1))
+    ///     .unwrap()
     ///     .build()
     ///     .unwrap();
     /// let mut exec = ExecutorImpl::from_elf(env, BENCH_ELF).unwrap();
@@ -361,9 +360,7 @@ impl<'a> ExecutorImpl<'a> {
             regs: self.monitor.load_registers(),
             post_id: self.monitor.build_image(self.pc).compute_id(),
         };
-        let env = ExecutorEnv::builder()
-            .add_input(&to_vec(&fault_monitor)?)
-            .build()?;
+        let env = ExecutorEnv::builder().write(&fault_monitor)?.build()?;
 
         let mut exec = self::ExecutorImpl::from_elf(env, FAULT_CHECKER_ELF).unwrap();
         let session = exec.run_guest_only()?;
