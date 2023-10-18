@@ -15,9 +15,7 @@
 use std::time::Duration;
 
 use risc0_zkvm::{
-    serde::{from_slice, to_vec},
-    sha::DIGEST_WORDS,
-    ExecutorEnv, ExitCode, MemoryImage, Receipt, Session,
+    serde::from_slice, sha::DIGEST_WORDS, ExecutorEnv, ExitCode, MemoryImage, Receipt, Session,
 };
 use zeth_lib::{
     block_builder::{EthereumStrategyBundle, NetworkStrategyBundle},
@@ -90,7 +88,8 @@ impl Benchmark for Job<'_> {
             init.clone().into();
 
         let env = ExecutorEnv::builder()
-            .add_input(&to_vec(&input).unwrap())
+            .write(&input)
+            .unwrap()
             .build()
             .unwrap();
 

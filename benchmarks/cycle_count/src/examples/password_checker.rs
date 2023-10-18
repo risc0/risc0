@@ -14,7 +14,7 @@
 
 use password_checker_core::PasswordRequest;
 use rand::prelude::*;
-use risc0_zkvm::{serde::to_vec, ExecutorEnv};
+use risc0_zkvm::ExecutorEnv;
 
 use crate::{exec_compute, CycleCounter};
 
@@ -36,7 +36,8 @@ impl CycleCounter for Job<'_> {
             salt,
         };
         let env = ExecutorEnv::builder()
-            .add_input(&to_vec(&request).unwrap())
+            .write(&request)
+            .unwrap()
             .build()
             .unwrap();
 

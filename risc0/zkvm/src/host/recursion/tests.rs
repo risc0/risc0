@@ -18,16 +18,16 @@ use test_log::test;
 
 use super::{identity_p254, join, lift, prove::poseidon254_hal_pair, Prover, ProverOpts};
 use crate::{
-    get_prover_server, serde::to_vec, ExecutorEnv, ExecutorImpl, InnerReceipt, Receipt,
-    SegmentReceipt, Session, VerifierContext,
+    get_prover_server, ExecutorEnv, ExecutorImpl, InnerReceipt, Receipt, SegmentReceipt, Session,
+    VerifierContext,
 };
 
 fn generate_segments(hashfn: &str) -> (Session, Vec<SegmentReceipt>) {
     let segment_limit_po2 = 16; // 64k cycles
     let cycles = 1 << segment_limit_po2;
-    let spec = &to_vec(&MultiTestSpec::BusyLoop { cycles }).unwrap();
     let env = ExecutorEnv::builder()
-        .add_input(&spec)
+        .write(&MultiTestSpec::BusyLoop { cycles })
+        .unwrap()
         .segment_limit_po2(segment_limit_po2)
         .build()
         .unwrap();

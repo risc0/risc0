@@ -25,12 +25,14 @@ use anyhow::Result;
 use bytemuck::Pod;
 use bytes::Bytes;
 use risc0_zkvm_platform::{self, fileno};
+use serde::Serialize;
 
 use super::{
     exec::TraceEvent,
     posix_io::PosixIo,
     slice_io::{slice_io_from_fn, SliceIo, SliceIoTable},
 };
+use crate::serde::to_vec;
 
 /// A builder pattern used to construct an [ExecutorEnv].
 #[derive(Clone, Default)]
@@ -179,27 +181,56 @@ impl<'a> ExecutorEnvBuilder<'a> {
         self
     }
 
-    /// Add initial input that can be read by the guest from stdin.
+    /// Write input data to the zkVM guest stdin.
     ///
-    /// Calling `add_input` iteratively concatenates inputs; the guest can
-    /// access each input using consecutive reads.
+    /// This function will serialize `data` using a zkVM-optimized codec that
+    /// can be deserialized in the guest with a corresponding `env::read` with
+    /// the same data type.
     ///
     /// # Example
     ///
     /// ```
     /// use risc0_zkvm::ExecutorEnv;
-    /// use risc0_zkvm::serde::to_vec;
+    /// use serde::Serialize;
     ///
-    /// let a: u64 = 400;
-    /// let b: u64 = 200;
+    /// #[derive(Serialize)]
+    /// struct Input {
+    ///     a: u32,
+    ///     b: u32,
+    /// }
     ///
+    /// let input1 = Input{ a: 1, b: 2 };
+    /// let input2 = Input{ a: 3, b: 4 };
     /// let env = ExecutorEnv::builder()
-    ///     .add_input(&to_vec(&a).unwrap())
-    ///     .add_input(&to_vec(&b).unwrap())
+    ///     .write(&input1).unwrap()
+    ///     .write(&input2).unwrap()
     ///     .build()
     ///     .unwrap();
     /// ```
-    pub fn add_input<T: Pod>(&mut self, slice: &[T]) -> &mut Self {
+    pub fn write<T: Serialize>(&mut self, data: &T) -> Result<&mut Self> {
+        Ok(self.write_slice(&to_vec(data)?))
+    }
+
+    /// Write input data to the zkVM guest stdin.
+    ///
+    /// This function writes a slice directly to the underlying buffer. A
+    /// corresponding `env::read_slice` can be used within the guest to read the
+    /// data.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use risc0_zkvm::ExecutorEnv;
+    ///
+    /// let slice1 = [0, 1, 2, 3];
+    /// let slice2 = [3, 2, 1, 0];
+    /// let env = ExecutorEnv::builder()
+    ///     .write_slice(&slice1)
+    ///     .write_slice(&slice2)
+    ///     .build()
+    ///     .unwrap();
+    /// ```
+    pub fn write_slice<T: Pod>(&mut self, slice: &[T]) -> &mut Self {
         self.inner
             .input
             .extend_from_slice(bytemuck::cast_slice(slice));

@@ -14,7 +14,7 @@
 
 use k256::ecdsa::{signature::Signer, Signature, SigningKey};
 use rand_core::OsRng;
-use risc0_zkvm::{serde::to_vec, ExecutorEnv};
+use risc0_zkvm::ExecutorEnv;
 
 use crate::{exec_compute, CycleCounter};
 
@@ -34,14 +34,12 @@ impl CycleCounter for Job<'_> {
         let signature: Signature = signing_key.sign(message);
         let verifying_key = signing_key.verifying_key();
         let env = ExecutorEnv::builder()
-            .add_input(
-                &to_vec(&(
-                    verifying_key.to_encoded_point(true),
-                    message.as_slice(),
-                    &signature,
-                ))
-                .unwrap(),
-            )
+            .write(&(
+                verifying_key.to_encoded_point(true),
+                message.as_slice(),
+                &signature,
+            ))
+            .unwrap()
             .build()
             .unwrap();
 

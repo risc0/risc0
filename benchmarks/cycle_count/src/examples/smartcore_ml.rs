@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use risc0_zkvm::{serde::to_vec, ExecutorEnv};
+use risc0_zkvm::ExecutorEnv;
 use smartcore::{
     linalg::basic::matrix::DenseMatrix, tree::decision_tree_classifier::DecisionTreeClassifier,
 };
@@ -35,7 +35,6 @@ impl CycleCounter for Job<'_> {
 
     fn new() -> Self {
         // Convert the model and input data from JSON into byte arrays.
-
         let is_svm = false;
         let model_bytes: Vec<u8> = serde_json::from_str(JSON_MODEL).unwrap();
         let data_bytes: Vec<u8> = serde_json::from_str(JSON_DATA).unwrap();
@@ -45,12 +44,15 @@ impl CycleCounter for Job<'_> {
         let model: Model =
             rmp_serde::from_slice(&model_bytes).expect("model failed to deserialize byte array");
         let data: DenseMatrix<f64> =
-            rmp_serde::from_slice(&data_bytes).expect("data filed to deserialize byte array");
+            rmp_serde::from_slice(&data_bytes).expect("data failed to deserialize byte array");
 
         let env = ExecutorEnv::builder()
-            .add_input(&to_vec(&is_svm).expect("bool failed to serialize"))
-            .add_input(&to_vec(&model).expect("model failed to serialize"))
-            .add_input(&to_vec(&data).expect("data failed to serialize"))
+            .write(&is_svm)
+            .unwrap()
+            .write(&model)
+            .unwrap()
+            .write(&data)
+            .unwrap()
             .build()
             .unwrap();
 

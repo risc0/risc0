@@ -14,11 +14,7 @@
 
 use json_core::Outputs;
 use json_methods::SEARCH_JSON_ELF;
-use risc0_zkvm::{
-    default_prover,
-    serde::{from_slice, to_vec},
-    ExecutorEnv,
-};
+use risc0_zkvm::{default_prover, serde::from_slice, ExecutorEnv};
 
 fn main() {
     let data = include_str!("../res/example.json");
@@ -33,7 +29,8 @@ fn main() {
 
 fn search_json(data: &str) -> Outputs {
     let env = ExecutorEnv::builder()
-        .add_input(&to_vec(&data).unwrap())
+        .write(&data)
+        .unwrap()
         .build()
         .unwrap();
 

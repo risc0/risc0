@@ -14,18 +14,15 @@
 
 use bevy_core::Outputs;
 use bevy_methods::{BEVY_GUEST_ELF, BEVY_GUEST_ID};
-use risc0_zkvm::{
-    default_prover,
-    serde::{from_slice, to_vec},
-    ExecutorEnv,
-};
+use risc0_zkvm::{default_prover, serde::from_slice, ExecutorEnv};
 
 fn main() {
     let turns: u32 = 3;
     // For this example, let's say that we want the primary entity to move 3 units
     // on the x-axis.
     let env = ExecutorEnv::builder()
-        .add_input(&to_vec(&turns).unwrap())
+        .write(&turns)
+        .unwrap()
         .build()
         .unwrap();
 

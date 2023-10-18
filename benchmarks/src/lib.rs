@@ -22,8 +22,7 @@ use std::{
 
 use log::info;
 use risc0_zkvm::{
-    serde::to_vec, ExecutorEnv, ExecutorImpl, MemoryImage, Program, Session, GUEST_MAX_MEM,
-    PAGE_SIZE,
+    ExecutorEnv, ExecutorImpl, MemoryImage, Program, Session, GUEST_MAX_MEM, PAGE_SIZE,
 };
 use serde::Serialize;
 
@@ -210,7 +209,8 @@ pub fn init_gpu_kernel() {
     let mut guest_input = Vec::from([0u8; 36]);
     guest_input[0] = 1u8;
     let env = ExecutorEnv::builder()
-        .add_input(&to_vec(&guest_input).unwrap())
+        .write(&guest_input)
+        .unwrap()
         .build()
         .unwrap();
     exec_compute(image, env);

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use risc0_zkvm::{serde::to_vec, ExecutorEnv};
+use risc0_zkvm::ExecutorEnv;
 
 use crate::{exec_compute, CycleCounter};
 
@@ -31,7 +31,8 @@ impl CycleCounter for Job<'_> {
             "r1bqkb1r/pppp1ppp/2n2n2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR w KQkq - 4 4".to_string();
         let input = chess_core::Inputs { board, mv };
         let env = ExecutorEnv::builder()
-            .add_input(&to_vec(&input).unwrap())
+            .write(&input)
+            .unwrap()
             .build()
             .unwrap();
 

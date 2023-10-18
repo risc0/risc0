@@ -9,13 +9,13 @@ fn main() {
     let env = ExecutorEnv::builder().build().unwrap();
 
     // TODO: add guest input to the executor environment using
-    // ExecutorEnvBuilder::add_input().
+    // ExecutorEnvBuilder::write().
     // To access this method, you'll need to use the alternate construction
     // ExecutorEnv::builder(), which creates an ExecutorEnvBuilder. When you're
     // done adding input, call ExecutorEnvBuilder::build().
 
     // For example:
-    // let env = ExecutorEnv::builder().add_input(&vec).build().unwrap();
+    // let env = ExecutorEnv::builder().write(&input).unwrap().build().unwrap();
 
     // Obtain the default prover.
     let prover = default_prover();
