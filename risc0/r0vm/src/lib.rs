@@ -32,7 +32,7 @@ struct Cli {
     receipt: Option<PathBuf>,
 
     /// The hash function to use to produce a proof.
-    #[arg(long, value_enum, default_value_t = HashFn::Sha256)]
+    #[arg(long, value_enum, default_value_t = HashFn::Poseidon)]
     hashfn: HashFn,
 
     /// File to read initial input from.
@@ -74,6 +74,7 @@ struct Mode {
 enum HashFn {
     #[value(name = "sha-256")]
     Sha256,
+    #[value(name = "poseidon")]
     Poseidon,
 }
 
