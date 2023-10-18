@@ -181,7 +181,7 @@ impl<'a> ExecutorEnvBuilder<'a> {
         self
     }
 
-    /// Write input data to a buffer that the zkVM guest can read from.
+    /// Write input data to the zkVM guest stdin.
     ///
     /// This function will serialize `data` using a zkVM-optimized codec that
     /// can be deserialized in the guest with a corresponding `env::read` with
