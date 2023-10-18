@@ -14,7 +14,7 @@
 
 //! Functions for interacting with the host environment.
 
-use core::fmt;
+use core::{fmt, mem::MaybeUninit};
 
 use bytemuck::Pod;
 use risc0_zkvm_platform::{
@@ -33,7 +33,7 @@ use crate::{
     serde::{Deserializer, Serializer, WordRead, WordWrite},
     sha::{
         rust_crypto::{Digest as _, Sha256},
-        Digest, Digestible,
+        Digest, Digestible, DIGEST_WORDS,
     },
     ExitCode, ReceiptMetadata,
 };
@@ -94,6 +94,46 @@ pub fn syscall(syscall: SyscallName, to_host: &[u8], from_host: &mut [u32]) -> s
     }
 }
 
+/// Verify there exists a receipt for an execution with the given `image_id` and
+/// `journal`.
+///
+/// In order to be valid, the [Receipt] must have `ExitCode::Halted(0)`, an
+/// empty assumptions list, and an all-zeroes input hash. It may have any post
+/// [SystemState].
+pub fn verify(image_id: Digest, journal: &[u8]) -> Result<(), VerifyError> {
+    let journal_digest: Digest = journal.digest();
+    let mut from_host_buf = MaybeUninit::<[u32; DIGEST_WORDS]>::uninit();
+
+    unsafe {
+        sys_verify(
+            image_id.as_ref(),
+            journal_digest.as_ref(),
+            from_host_buf.as_mut_ptr(),
+        )
+    };
+
+    let post_state_digest: Digest = unsafe { from_host_buf.assume_init() }.into();
+
+    // Construct the ReceiptMetadata for this assumption. Use the host provided
+    // post_state_digest and fix all fields that are required to have a certain
+    // value. This assumption will only be resolvable if there exists a receipt
+    // matching this metadata.
+    let assumption_metadata = ReceiptMetadata {
+        pre: MaybePruned::Pruned(image_id),
+        post: MaybePruned::Pruned(post_state_digest),
+        exit_code: ExitCode::Halted(0), // TODO(victor): also support paused.
+        input: Digest::zero(),
+        output: Some(Output {
+            journal: MaybePruned::Pruned(journal_digest),
+            assumptions: MaybePruned::Pruned(Digest::zero()),
+        })
+        .into(),
+    };
+    unsafe { ASSUMPTIONS_DIGEST.add(assumption_metadata.into()) };
+
+    Ok(())
+}
+
 // TODO(victor) Check these and any other doc links.
 /// Error encountered during a call to [crate::verify]
 ///
@@ -113,40 +153,27 @@ impl fmt::Display for VerifyError {
 #[cfg(feature = "std")]
 impl std::error::Error for VerifyError {}
 
-/// Verify there exists a receipt for an execution with the given `image_id` and
-/// `journal`.
-///
-/// In order to be valid, the [Receipt] must have `ExitCode::Halted(0)`, an
-/// empty assumptions list, and an all-zeroes input hash. It may have any post
-/// [SystemState].
-pub fn verify(image_id: Digest, journal: &[u8]) -> Result<(), VerifyError> {
-    let journal_digest: Digest = journal.digest();
-    let mut post_state_digest = Digest::zero(); // TOOD(victor): Use
-                                                // MaybeUninit?
-    unsafe {
-        sys_verify(
-            image_id.as_ref(),
-            journal_digest.as_ref(),
-            post_state_digest.as_mut(),
-        )
-    };
+/// Verify that there exists a valid receipt with the specified
+/// [ReceiptMetadata].
+pub fn verify_integrity(metadata: &ReceiptMetadata) -> Result<(), VerifyIntegrityError> {
+    // Check that the assumptions list is empty.
+    let assumptions_empty = metadata.output.is_none()
+        || metadata
+            .output
+            .as_value()?
+            .as_ref()
+            .map_or(true, |output| output.assumptions.is_empty());
 
-    // Construct the ReceiptMetadata for this assumption. Use the host provided
-    // post_state_digest and fix all fields that are required to have a certain
-    // value. This assumption will only be resolvable if there exists a receipt
-    // matching this metadata.
-    let assumption_metadata = ReceiptMetadata {
-        pre: MaybePruned::Pruned(image_id),
-        post: MaybePruned::Pruned(post_state_digest),
-        exit_code: ExitCode::Halted(0), // TODO(victor): also support paused.
-        input: Digest::zero(),
-        output: Some(Output {
-            journal: MaybePruned::Pruned(journal_digest),
-            assumptions: MaybePruned::Pruned(Digest::zero()),
-        })
-        .into(),
-    };
-    unsafe { ASSUMPTIONS_DIGEST.add(assumption_metadata.into()) };
+    if !assumptions_empty {
+        return Err(VerifyIntegrityError::NonEmptyAssumptionsList);
+    }
+
+    let metadata_digest = metadata.digest();
+
+    unsafe {
+        sys_verify_integrity(metadata_digest.as_ref());
+        ASSUMPTIONS_DIGEST.add(MaybePruned::Pruned(metadata_digest));
+    }
 
     Ok(())
 }
@@ -194,31 +221,6 @@ impl fmt::Display for VerifyIntegrityError {
 
 #[cfg(feature = "std")]
 impl std::error::Error for VerifyIntegrityError {}
-
-/// Verify that there exists a valid receipt with the specified
-/// [ReceiptMetadata].
-pub fn verify_integrity(metadata: &ReceiptMetadata) -> Result<(), VerifyIntegrityError> {
-    // Check that the assumptions list is empty.
-    let assumptions_empty = metadata.output.is_none()
-        || metadata
-            .output
-            .as_value()?
-            .as_ref()
-            .map_or(true, |output| output.assumptions.is_empty());
-
-    if !assumptions_empty {
-        return Err(VerifyIntegrityError::NonEmptyAssumptionsList);
-    }
-
-    let metadata_digest = metadata.digest();
-
-    unsafe {
-        sys_verify_integrity(metadata_digest.as_ref());
-        ASSUMPTIONS_DIGEST.add(MaybePruned::Pruned(metadata_digest));
-    }
-
-    Ok(())
-}
 
 /// Exchanges slices of plain old data with the host.
 ///
