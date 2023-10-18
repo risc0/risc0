@@ -211,7 +211,7 @@ impl<'a> ExecutorEnvBuilder<'a> {
         Ok(self.write_slice(&to_vec(data)?))
     }
 
-    /// Write input data to a buffer that the zkVM guest can read from.
+    /// Write input data to the zkVM guest stdin.
     ///
     /// This function writes a slice directly to the underlying buffer. A
     /// corresponding `env::read_slice` can be used within the guest to read the
