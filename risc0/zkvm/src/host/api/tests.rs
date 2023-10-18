@@ -19,6 +19,7 @@ use std::{
 };
 
 use anyhow::Result;
+use bytes::Bytes;
 use risc0_binfmt::{MemoryImage, Program};
 use risc0_zkvm_methods::{
     multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID, MULTI_TEST_PATH,
@@ -29,8 +30,8 @@ use test_log::test;
 
 use super::{pb, Asset, AssetRequest, Binary, ConnectionWrapper, Connector, TcpConnection};
 use crate::{
-    ApiClient, ApiServer, ExecutorEnv, ProverOpts, Receipt, SegmentReceipt, SessionInfo,
-    VerifierContext,
+    host::api::Asset::Inline, recursion::SuccinctReceipt, serde::to_vec, ApiClient, ApiServer,
+    ExecutorEnv, ProverOpts, Receipt, SegmentReceipt, SessionInfo, VerifierContext,
 };
 
 struct TestClientConnector {
@@ -94,6 +95,13 @@ impl TestClient {
         with_server(self.addr, || {
             let receipt_out = AssetRequest::Path(self.get_work_path());
             self.client.prove_segment(opts, segment, receipt_out)
+        })
+    }
+
+    fn lift(&self, opts: ProverOpts, receipt: Asset) -> SuccinctReceipt {
+        with_server(self.addr, || {
+            let receipt_out = AssetRequest::Path(self.get_work_path());
+            self.client.lift(opts, receipt, receipt_out)
         })
     }
 }
@@ -171,4 +179,33 @@ fn prove_segment_elf() {
         let receipt = client.prove_segment(opts, segment);
         receipt.verify_with_context(&ctx).unwrap();
     }
+}
+
+#[test]
+fn lift_join_identity() {
+    let input = to_vec(&MultiTestSpec::DoNothing).unwrap();
+    let env = ExecutorEnv::builder()
+        .write(&input)
+        .unwrap()
+        .build()
+        .unwrap();
+    let binary = Binary::new_elf_path(MULTI_TEST_PATH);
+
+    let mut client = TestClient::new();
+
+    let session = client.execute(env, binary);
+    assert_eq!(session.segments.len(), client.segments.len());
+
+    let opts = ProverOpts::default();
+
+    let segment = client.segments[0]
+        .segment
+        .clone()
+        .unwrap()
+        .try_into()
+        .unwrap();
+    let receipt = client.prove_segment(ProverOpts::default(), segment);
+    let receipt_bytes: Bytes = bincode::serialize(&receipt).unwrap().into();
+    let receipt: Asset = Inline(receipt_bytes);
+    let _rollup = client.lift(opts, receipt);
 }

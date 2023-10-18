@@ -29,7 +29,11 @@ use risc0_zkp::{
 
 use super::{exec::MachineContext, HalPair, ProverServer};
 use crate::{
-    host::{receipt::SegmentReceipts, CIRCUIT},
+    host::{
+        receipt::SegmentReceipts,
+        recursion::{join, lift, SuccinctReceipt},
+        CIRCUIT,
+    },
     InnerReceipt, Loader, Receipt, Segment, SegmentReceipt, Session, VerifierContext,
 };
 
@@ -151,5 +155,13 @@ where
 
     fn get_peak_memory_usage(&self) -> usize {
         self.hal_pair.hal.get_memory_usage()
+    }
+
+    fn lift(&self, receipt: &SegmentReceipt) -> Result<SuccinctReceipt> {
+        lift(receipt)
+    }
+
+    fn join(&self, a: &SuccinctReceipt, b: &SuccinctReceipt) -> Result<SuccinctReceipt> {
+        join(a, b)
     }
 }
