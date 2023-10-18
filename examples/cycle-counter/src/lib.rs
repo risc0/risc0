@@ -87,6 +87,8 @@ pub fn run_jobs<C: CycleCounter>(out_path: &PathBuf) -> Metrics {
             .from_writer(out_file)
     };
 
+    info!("");
+    info!("+ begin: {}", C::NAME);
     let job_metrics = C::run();
     job_metrics.println("+ ");
     out.serialize(CsvRow {
