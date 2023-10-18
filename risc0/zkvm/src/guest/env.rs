@@ -33,7 +33,7 @@ use crate::{
 
 static mut HASHER: Option<Sha256> = None;
 
-/// A random 16 byte value initalized to random data, provided by the host, on
+/// A random 16 byte value initialized to random data, provided by the host, on
 /// guest start and upon resuming from a pause. Setting this value ensures that
 /// the total memory image have at least 128-bits of entropy, preventing
 /// information leakage through the post-state digest.
@@ -130,7 +130,7 @@ pub fn commit_slice<T: Pod>(slice: &[T]) {
     journal().write_slice(slice);
 }
 
-/// Return the number of processor cycles that have occured since the guest
+/// Return the number of processor cycles that have occurred since the guest
 /// began.
 pub fn get_cycle_count() -> usize {
     sys_cycle_count()
