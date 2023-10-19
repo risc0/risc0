@@ -467,16 +467,16 @@ mod sys_verify {
             prove_guest_errors: false,
         };
 
-        let spec = to_vec(&MultiTestSpec::SysVerify {
+        let spec = &MultiTestSpec::SysVerify {
             image_id: HELLO_COMMIT_ID.into(),
             journal: HELLO_COMMIT_RECEIPT.journal.clone(),
-        })
-        .unwrap();
+        };
 
         // Test that providing the proven assumption results in an unconditional
         // receipt.
         let env = ExecutorEnv::builder()
-            .add_input(&spec)
+            .write(&spec)
+            .unwrap()
             .add_assumption(HELLO_COMMIT_RECEIPT.clone().into())
             .build()
             .unwrap();
@@ -489,7 +489,11 @@ mod sys_verify {
 
         // Test that proving without a provided assumption results in an execution
         // failure.
-        let env = ExecutorEnv::builder().add_input(&spec).build().unwrap();
+        let env = ExecutorEnv::builder()
+            .write(&spec)
+            .unwrap()
+            .build()
+            .unwrap();
         assert!(get_prover_server(&opts)
             .unwrap()
             .prove_elf(env, MULTI_TEST_ELF)
@@ -498,7 +502,8 @@ mod sys_verify {
         // Test that providing an unresolved assumption results in a conditional
         // receipt.
         let env = ExecutorEnv::builder()
-            .add_input(&spec)
+            .write(&spec)
+            .unwrap()
             .add_assumption(HELLO_COMMIT_RECEIPT.get_metadata().unwrap().into())
             .build()
             .unwrap();
@@ -523,15 +528,15 @@ mod sys_verify {
         };
 
         // TODO(victor) Also execute with a receipt of failure.
-        let spec = to_vec(&MultiTestSpec::SysVerifyIntegrity {
+        let spec = &MultiTestSpec::SysVerifyIntegrity {
             metadata_words: to_vec(&HELLO_COMMIT_RECEIPT.get_metadata().unwrap()).unwrap(),
-        })
-        .unwrap();
+        };
 
         // Test that providing the proven assumption results in an unconditional
         // receipt.
         let env = ExecutorEnv::builder()
-            .add_input(&spec)
+            .write(&spec)
+            .unwrap()
             .add_assumption(HELLO_COMMIT_RECEIPT.clone().into())
             .build()
             .unwrap();
@@ -544,7 +549,11 @@ mod sys_verify {
 
         // Test that proving without a provided assumption results in an execution
         // failure.
-        let env = ExecutorEnv::builder().add_input(&spec).build().unwrap();
+        let env = ExecutorEnv::builder()
+            .write(&spec)
+            .unwrap()
+            .build()
+            .unwrap();
         assert!(get_prover_server(&opts)
             .unwrap()
             .prove_elf(env, MULTI_TEST_ELF)
@@ -553,7 +562,8 @@ mod sys_verify {
         // Test that providing an unresolved assumption results in a conditional
         // receipt.
         let env = ExecutorEnv::builder()
-            .add_input(&spec)
+            .write(&spec)
+            .unwrap()
             .add_assumption(HELLO_COMMIT_RECEIPT.get_metadata().unwrap().into())
             .build()
             .unwrap();

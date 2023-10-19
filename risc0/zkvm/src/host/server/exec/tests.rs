@@ -372,15 +372,15 @@ fn sys_verify() {
         .run()
         .unwrap();
 
-    let spec = to_vec(&MultiTestSpec::SysVerify {
+    let spec = &MultiTestSpec::SysVerify {
         image_id: HELLO_COMMIT_ID.into(),
         journal: hello_commit_session.journal.clone().unwrap(),
-    })
-    .unwrap();
+    };
 
     // Test that it works when the assumption is added.
     let env = ExecutorEnv::builder()
-        .add_input(&spec)
+        .write(&spec)
+        .unwrap()
         .add_assumption(hello_commit_session.get_metadata().unwrap().into())
         .build()
         .unwrap();
@@ -390,7 +390,11 @@ fn sys_verify() {
         .unwrap();
 
     // Test that it does not work when the assumption is not added.
-    let env = ExecutorEnv::builder().add_input(&spec).build().unwrap();
+    let env = ExecutorEnv::builder()
+        .write(&spec)
+        .unwrap()
+        .build()
+        .unwrap();
     assert!(ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
         .unwrap()
         .run()
@@ -405,14 +409,14 @@ fn sys_verify_integrity() {
         .unwrap();
 
     // TODO(victor) Also execute with a receipt of failure.
-    let spec = to_vec(&MultiTestSpec::SysVerifyIntegrity {
+    let spec = &MultiTestSpec::SysVerifyIntegrity {
         metadata_words: to_vec(&hello_commit_session.get_metadata().unwrap()).unwrap(),
-    })
-    .unwrap();
+    };
 
     // Test that it works when the assumption is added.
     let env = ExecutorEnv::builder()
-        .add_input(&spec)
+        .write(&spec)
+        .unwrap()
         .add_assumption(hello_commit_session.get_metadata().unwrap().into())
         .build()
         .unwrap();
@@ -422,7 +426,11 @@ fn sys_verify_integrity() {
         .unwrap();
 
     // Test that it does not work when the assumption is not added.
-    let env = ExecutorEnv::builder().add_input(&spec).build().unwrap();
+    let env = ExecutorEnv::builder()
+        .write(&spec)
+        .unwrap()
+        .build()
+        .unwrap();
     assert!(ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
         .unwrap()
         .run()
