@@ -14,43 +14,32 @@
 
 use k256::ecdsa::{signature::Signer, Signature, SigningKey};
 use rand_core::OsRng;
-use risc0_zkvm::{serde::to_vec, ExecutorEnv, MemoryImage};
+use risc0_zkvm::ExecutorEnv;
 
-use crate::{exec_compute, get_image, CycleCounter};
+use crate::{exec, CycleCounter, Metrics};
 
-pub struct Job<'a> {
-    pub env: ExecutorEnv<'a>,
-    pub image: MemoryImage,
-}
+pub struct Job {}
 
-const METHOD_PATH: &'static str = ecdsa_methods::ECDSA_VERIFY_PATH;
-
-impl CycleCounter for Job<'_> {
+impl CycleCounter for Job {
     const NAME: &'static str = "ecdsa";
+    const METHOD_ELF: &'static [u8] = ecdsa_methods::ECDSA_VERIFY_ELF;
 
-    fn new() -> Self {
-        let image = get_image(METHOD_PATH);
+    fn run() -> Metrics {
         // Generate a random secp256k1 keypair and sign the message.
         let signing_key = SigningKey::random(&mut OsRng); // Serialize with `::to_bytes()`
         let message = b"This is a message that will be signed, and verified within the zkVM";
         let signature: Signature = signing_key.sign(message);
         let verifying_key = signing_key.verifying_key();
         let env = ExecutorEnv::builder()
-            .add_input(
-                &to_vec(&(
-                    verifying_key.to_encoded_point(true),
-                    message.as_slice(),
-                    &signature,
-                ))
-                .unwrap(),
-            )
+            .write(&(
+                verifying_key.to_encoded_point(true),
+                message.as_slice(),
+                &signature,
+            ))
+            .unwrap()
             .build()
             .unwrap();
 
-        Job { env, image }
-    }
-
-    fn exec_compute(self) -> u32 {
-        exec_compute(self.image, self.env)
+        exec(Self::NAME, Self::METHOD_ELF, env)
     }
 }

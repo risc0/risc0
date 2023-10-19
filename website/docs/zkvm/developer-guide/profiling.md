@@ -70,7 +70,7 @@ let env = {
         builder.trace_callback(p.make_trace_callback());
     }
     builder
-        .add_input(&[iterations])
+        .write_slice(&[iterations])
         .build()
         .expect("environment build failed")
 };
@@ -96,7 +96,7 @@ let env = {
 #         builder.trace_callback(p.make_trace_callback());
 #     }
 #     builder
-#         .add_input(&[iterations])
+#         .write_slice(&[iterations])
 #         .build()
 #         .expect("environment build failed")
 # };
@@ -126,7 +126,7 @@ This will only [execute] the guest code, without generating a [receipt].
 #         builder.trace_callback(p.make_trace_callback());
 #     }
 #     builder
-#         .add_input(&[iterations])
+#         .write_slice(&[iterations])
 #         .build()
 #         .expect("environment build failed")
 # };
@@ -138,7 +138,6 @@ if let Some(ref mut p) = profiler {
     std::fs::write(pprof_out.as_ref().unwrap(), &report)
         .expect("Unable to write profiling output");
 }
-
 ```
 
 ## Usage

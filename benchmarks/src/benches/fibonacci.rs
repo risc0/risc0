@@ -15,9 +15,7 @@
 use std::time::Duration;
 
 use byteorder::{ByteOrder, LittleEndian};
-use risc0_zkvm::{
-    serde::to_vec, sha::DIGEST_WORDS, ExecutorEnv, ExitCode, MemoryImage, Receipt, Session,
-};
+use risc0_zkvm::{sha::DIGEST_WORDS, ExecutorEnv, ExitCode, MemoryImage, Receipt, Session};
 
 use crate::{exec_compute, get_image, Benchmark};
 
@@ -63,7 +61,8 @@ impl Benchmark for Job<'_> {
 
         let guest_input = spec;
         let env = ExecutorEnv::builder()
-            .add_input(&to_vec(&guest_input).unwrap())
+            .write(&guest_input)
+            .unwrap()
             .build()
             .unwrap();
 

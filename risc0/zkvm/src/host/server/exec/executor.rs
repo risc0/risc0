@@ -187,12 +187,12 @@ impl<'a> ExecutorImpl<'a> {
     ///
     /// # Example
     /// ```
-    /// use risc0_zkvm::{serde::to_vec, ExecutorImpl, ExecutorEnv, Session};
+    /// use risc0_zkvm::{ExecutorImpl, ExecutorEnv, Session};
     /// use risc0_zkvm_methods::{BENCH_ELF, bench::{BenchmarkSpec, SpecWithIters}};
     ///
-    /// let spec = SpecWithIters(BenchmarkSpec::SimpleLoop, 1);
     /// let env = ExecutorEnv::builder()
-    ///     .add_input(&to_vec(&spec).unwrap())
+    ///     .write(&SpecWithIters(BenchmarkSpec::SimpleLoop, 1))
+    ///     .unwrap()
     ///     .build()
     ///     .unwrap();
     /// let mut exec = ExecutorImpl::from_elf(env, BENCH_ELF).unwrap();

@@ -95,7 +95,7 @@ impl Prover {
                 };
 
                 let env = ExecutorEnv::builder()
-                    .add_input(&input)
+                    .write_slice(&input)
                     .session_limit(None)
                     .segment_limit_po2(20)
                     .build()

@@ -13,29 +13,24 @@
 // limitations under the License.
 
 use image::{io::Reader as ImageReader, GenericImageView};
-use risc0_zkvm::{serde::to_vec, ExecutorEnv};
+use risc0_zkvm::ExecutorEnv;
 use waldo_core::{
     image::{ImageMask, ImageMerkleTree, IMAGE_CHUNK_SIZE},
     merkle::SYS_VECTOR_ORACLE,
     PrivateInput,
 };
 
-use crate::{exec_compute, get_image, CycleCounter};
+use crate::{exec, CycleCounter, Metrics};
 
-pub struct Job {
-    pub cycles: u32,
-}
-
-const METHOD_PATH: &'static str = waldo_methods::IMAGE_CROP_PATH;
+pub struct Job {}
 
 impl CycleCounter for Job {
     const NAME: &'static str = "waldo";
+    const METHOD_ELF: &'static [u8] = waldo_methods::IMAGE_CROP_ELF;
 
-    fn new() -> Self {
-        let image = get_image(METHOD_PATH);
-
+    fn run() -> Metrics {
         // Read the image from disk.
-        let img = ImageReader::open("../../examples/waldo/waldo.webp")
+        let img = ImageReader::open("../waldo/waldo.webp")
             .unwrap()
             .decode()
             .unwrap();
@@ -43,7 +38,7 @@ impl CycleCounter for Job {
         let crop_dimensions: (u32, u32) = (58, 70);
 
         // Read the image mask from disk.
-        let mask: ImageMask = ImageReader::open("../../examples/waldo/waldo_mask.png")
+        let mask: ImageMask = ImageReader::open("../waldo/waldo_mask.png")
             .unwrap()
             .decode()
             .unwrap()
@@ -62,16 +57,12 @@ impl CycleCounter for Job {
         };
 
         let env = ExecutorEnv::builder()
-            .add_input(&to_vec(&input).unwrap())
+            .write(&input)
+            .unwrap()
             .io_callback(SYS_VECTOR_ORACLE, img_merkle_tree.vector_oracle_callback())
             .build()
             .unwrap();
 
-        let cycles = exec_compute(image, env);
-        Job { cycles }
-    }
-
-    fn exec_compute(self) -> u32 {
-        self.cycles
+        exec(Self::NAME, Self::METHOD_ELF, env)
     }
 }

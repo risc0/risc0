@@ -52,12 +52,12 @@ use crate::{is_dev_mode, ExecutorEnv, Receipt, SessionInfo, VerifierContext};
 /// # #[cfg(not(feature = "cuda"))]
 /// # {
 /// // A straightforward case with an ELF binary
-/// let env = ExecutorEnv::builder().add_input(&[20]).build().unwrap();
+/// let env = ExecutorEnv::builder().write_slice(&[20]).build().unwrap();
 /// let receipt = default_prover().prove_elf(env, FIB_ELF).unwrap();
 ///
 /// // Or you can specify a context and options
 /// // (Using the defaults as we do here is equivalent to the above code.)
-/// let env = ExecutorEnv::builder().add_input(&[20]).build().unwrap();
+/// let env = ExecutorEnv::builder().write_slice(&[20]).build().unwrap();
 /// let ctx = VerifierContext::default();
 /// let opts = ProverOpts::default();
 /// let receipt = default_prover().prove_elf_with_ctx(env, &ctx, FIB_ELF, &opts).unwrap();
@@ -67,7 +67,7 @@ use crate::{is_dev_mode, ExecutorEnv, Receipt, SessionInfo, VerifierContext};
 /// // to the above code.)
 /// let program = Program::load_elf(FIB_ELF, GUEST_MAX_MEM as u32).unwrap();
 /// let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
-/// let env = ExecutorEnv::builder().add_input(&[20]).build().unwrap();
+/// let env = ExecutorEnv::builder().write_slice(&[20]).build().unwrap();
 /// let ctx = VerifierContext::default();
 /// let opts = ProverOpts::default();
 /// let receipt = default_prover().prove(env, &ctx, &opts, image).unwrap();
@@ -145,7 +145,7 @@ impl Default for ProverOpts {
     /// `prove_guest_errors` set to false.
     fn default() -> Self {
         Self {
-            hashfn: "sha-256".to_string(),
+            hashfn: "poseidon".to_string(),
             prove_guest_errors: false,
         }
     }

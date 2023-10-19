@@ -13,23 +13,18 @@
 // limitations under the License.
 
 use digital_signature_core::{Message, Passphrase, SigningRequest};
-use risc0_zkvm::{serde::to_vec, ExecutorEnv, MemoryImage};
+use risc0_zkvm::ExecutorEnv;
 use sha2::{Digest, Sha256};
 
-use crate::{exec_compute, get_image, CycleCounter};
+use crate::{exec, CycleCounter, Metrics};
 
-pub struct Job<'a> {
-    pub env: ExecutorEnv<'a>,
-    pub image: MemoryImage,
-}
+pub struct Job {}
 
-const METHOD_PATH: &'static str = digital_signature_methods::SIGN_PATH;
-
-impl CycleCounter for Job<'_> {
+impl CycleCounter for Job {
     const NAME: &'static str = "digital-signature";
+    const METHOD_ELF: &'static [u8] = digital_signature_methods::SIGN_ELF;
 
-    fn new() -> Self {
-        let image = get_image(METHOD_PATH);
+    fn run() -> Metrics {
         let params = SigningRequest {
             passphrase: Passphrase {
                 pass: Sha256::digest("passphrase").try_into().unwrap(),
@@ -39,14 +34,11 @@ impl CycleCounter for Job<'_> {
             },
         };
         let env = ExecutorEnv::builder()
-            .add_input(&to_vec(&params).unwrap())
+            .write(&params)
+            .unwrap()
             .build()
             .unwrap();
 
-        Job { env, image }
-    }
-
-    fn exec_compute(self) -> u32 {
-        exec_compute(self.image, self.env)
+        exec(Self::NAME, Self::METHOD_ELF, env)
     }
 }

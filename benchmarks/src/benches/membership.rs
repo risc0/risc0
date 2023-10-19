@@ -17,7 +17,7 @@ use std::time::Duration;
 // use merkletree::{merkle::MerkleTree, store::VecStore};
 use risc0_benchmark_lib::generate_mock_proof;
 use risc0_zkvm::{
-    serde::{from_slice, to_vec},
+    serde::from_slice,
     sha::{Digest, DIGEST_WORDS},
     ExecutorEnv, ExitCode, MemoryImage, Receipt, Session,
 };
@@ -66,7 +66,8 @@ impl Benchmark for Job<'_> {
 
         let proof = generate_mock_proof(&[0u8; 32], spec);
         let env = ExecutorEnv::builder()
-            .add_input(&to_vec(&proof).unwrap())
+            .write(&proof)
+            .unwrap()
             .build()
             .unwrap();
 

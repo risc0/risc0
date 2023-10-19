@@ -12,11 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use risc0_zkvm::{
-    default_prover,
-    serde::{from_slice, to_vec},
-    ExecutorEnv,
-};
+use risc0_zkvm::{default_prover, serde::from_slice, ExecutorEnv};
 use serde_json;
 use smartcore::{
     linalg::basic::matrix::DenseMatrix, tree::decision_tree_classifier::DecisionTreeClassifier,
@@ -56,9 +52,12 @@ fn predict() -> Vec<u32> {
         rmp_serde::from_slice(&data_bytes).expect("data filed to deserialize byte array");
 
     let env = ExecutorEnv::builder()
-        .add_input(&to_vec(&is_svm).expect("bool failed to serialize"))
-        .add_input(&to_vec(&model).expect("model failed to serialize"))
-        .add_input(&to_vec(&data).expect("data failed to serialize"))
+        .write(&is_svm)
+        .expect("bool failed to serialize")
+        .write(&model)
+        .expect("model failed to serialize")
+        .write(&data)
+        .expect("data failed to serialize")
         .build()
         .unwrap();
 
@@ -81,11 +80,7 @@ fn predict() -> Vec<u32> {
 
 #[cfg(test)]
 mod test {
-    use risc0_zkvm::{
-        default_executor,
-        serde::{from_slice, to_vec},
-        ExecutorEnv,
-    };
+    use risc0_zkvm::{default_executor, serde::from_slice, ExecutorEnv};
     use smartcore::{
         linalg::basic::matrix::DenseMatrix,
         svm::{
@@ -153,9 +148,12 @@ mod test {
             serde_json::from_str(&svc_serialized).expect("unable to deserialize JSON");
 
         let env = ExecutorEnv::builder()
-            .add_input(&to_vec(&is_svm).expect("bool failed to serialize"))
-            .add_input(&to_vec(&svc_deserialized).expect("model failed to serialize"))
-            .add_input(&to_vec(&x).expect("data failed to serialize"))
+            .write(&is_svm)
+            .expect("bool failed to serialize")
+            .write(&svc_deserialized)
+            .expect("model failed to serialize")
+            .write(&x)
+            .expect("data failed to serialize")
             .build()
             .unwrap();
 

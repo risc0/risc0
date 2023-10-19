@@ -12,34 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use risc0_zkvm::{serde::to_vec, ExecutorEnv, MemoryImage};
+use risc0_zkvm::ExecutorEnv;
 
-use crate::{exec_compute, get_image, CycleCounter};
+use crate::{exec, CycleCounter, Metrics};
 
-pub struct Job<'a> {
-    pub env: ExecutorEnv<'a>,
-    pub image: MemoryImage,
-}
+pub struct Job {}
 
-const METHOD_PATH: &'static str = hello_world_methods::MULTIPLY_PATH;
+impl CycleCounter for Job {
+    const NAME: &'static str = "json";
+    const METHOD_ELF: &'static [u8] = json_methods::SEARCH_JSON_ELF;
 
-impl CycleCounter for Job<'_> {
-    const NAME: &'static str = "hello-world";
-
-    fn new() -> Self {
-        let image = get_image(METHOD_PATH);
-        let a: u64 = 17;
-        let b: u64 = 23;
+    fn run() -> Metrics {
+        let data = include_str!("../../../json/res/example.json");
         let env = ExecutorEnv::builder()
-            .add_input(&to_vec(&a).unwrap())
-            .add_input(&to_vec(&b).unwrap())
+            .write(&data)
+            .unwrap()
             .build()
             .unwrap();
 
-        Job { env, image }
-    }
-
-    fn exec_compute(self) -> u32 {
-        exec_compute(self.image, self.env)
+        exec(Self::NAME, Self::METHOD_ELF, env)
     }
 }

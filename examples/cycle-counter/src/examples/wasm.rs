@@ -12,35 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use risc0_zkvm::{serde::to_vec, ExecutorEnv, MemoryImage};
+use risc0_zkvm::ExecutorEnv;
 
-use crate::{exec_compute, get_image, CycleCounter};
+use crate::{exec, CycleCounter, Metrics};
 
-pub struct Job<'a> {
-    pub env: ExecutorEnv<'a>,
-    pub image: MemoryImage,
-}
+pub struct Job {}
 
-const METHOD_PATH: &'static str = wasm_methods::WASM_INTERP_PATH;
-
-impl CycleCounter for Job<'_> {
+impl CycleCounter for Job {
     const NAME: &'static str = "wasm";
+    const METHOD_ELF: &'static [u8] = wasm_methods::WASM_INTERP_ELF;
 
-    fn new() -> Self {
-        let image = get_image(METHOD_PATH);
+    fn run() -> Metrics {
         let wasm = wat2wasm().expect("Failed to parse_str");
         let iters: i32 = 100;
         let env = ExecutorEnv::builder()
-            .add_input(&to_vec(&wasm).unwrap())
-            .add_input(&to_vec(&iters).unwrap())
+            .write(&wasm)
+            .unwrap()
+            .write(&iters)
+            .unwrap()
             .build()
             .unwrap();
 
-        Job { env, image }
-    }
-
-    fn exec_compute(self) -> u32 {
-        exec_compute(self.image, self.env)
+        exec(Self::NAME, Self::METHOD_ELF, env)
     }
 }
 

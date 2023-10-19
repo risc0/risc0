@@ -15,8 +15,8 @@
 use std::{rc::Rc, time::Duration};
 
 use risc0_zkvm::{
-    default_prover, serde::to_vec, sha::DIGEST_WORDS, ExecutorEnv, ExitCode, LocalProver,
-    MemoryImage, Prover, ProverOpts, Receipt, Session, VerifierContext,
+    default_prover, sha::DIGEST_WORDS, ExecutorEnv, ExitCode, LocalProver, MemoryImage, Prover,
+    ProverOpts, Receipt, Session, VerifierContext,
 };
 use starknet_crypto::FieldElement;
 
@@ -70,7 +70,8 @@ impl Benchmark for Job<'_> {
         guest_input[3] = (spec >> 24) as u8;
 
         let env = ExecutorEnv::builder()
-            .add_input(&to_vec(&guest_input).unwrap())
+            .write(&guest_input)
+            .unwrap()
             .build()
             .unwrap();
 
@@ -152,7 +153,8 @@ impl BenchmarkAverage for Job<'_> {
         guest_input[3] = (spec >> 24) as u8;
 
         let env = ExecutorEnv::builder()
-            .add_input(&to_vec(&guest_input).unwrap())
+            .write(&guest_input)
+            .unwrap()
             .build()
             .unwrap();
 

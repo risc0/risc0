@@ -15,9 +15,7 @@
 use std::time::Duration;
 
 use risc0_benchmark_lib::Sudoku;
-use risc0_zkvm::{
-    serde::to_vec, sha::DIGEST_WORDS, ExecutorEnv, ExitCode, MemoryImage, Receipt, Session,
-};
+use risc0_zkvm::{sha::DIGEST_WORDS, ExecutorEnv, ExitCode, MemoryImage, Receipt, Session};
 
 use crate::{exec_compute, get_image, Benchmark};
 
@@ -73,7 +71,8 @@ impl Benchmark for Job<'_> {
         ]);
 
         let env = ExecutorEnv::builder()
-            .add_input(&to_vec(&input).unwrap())
+            .write(&input)
+            .unwrap()
             .build()
             .unwrap();
 

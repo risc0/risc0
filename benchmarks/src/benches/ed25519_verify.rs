@@ -17,11 +17,8 @@ use std::{rc::Rc, time::Duration};
 use ed25519_dalek::{Signature, Signer, SigningKey, VerifyingKey};
 use rand_core::OsRng;
 use risc0_zkvm::{
-    default_prover,
-    serde::{from_slice, to_vec},
-    sha::DIGEST_WORDS,
-    ExecutorEnv, ExitCode, LocalProver, MemoryImage, Prover, ProverOpts, Receipt, Session,
-    VerifierContext,
+    default_prover, serde::from_slice, sha::DIGEST_WORDS, ExecutorEnv, ExitCode, LocalProver,
+    MemoryImage, Prover, ProverOpts, Receipt, Session, VerifierContext,
 };
 
 use crate::{exec_compute, get_image, Benchmark, BenchmarkAverage};
@@ -78,15 +75,13 @@ impl Benchmark for Job<'_> {
         let signature: Signature = signing_key.sign(&message);
 
         let env = ExecutorEnv::builder()
-            .add_input(
-                &to_vec(&(
-                    spec,
-                    verifying_key.as_bytes(),
-                    message.clone(),
-                    signature.to_bytes().to_vec(),
-                ))
-                .unwrap(),
-            )
+            .write(&(
+                spec,
+                verifying_key.as_bytes(),
+                message.clone(),
+                signature.to_bytes().to_vec(),
+            ))
+            .unwrap()
             .build()
             .unwrap();
 
@@ -165,15 +160,13 @@ impl BenchmarkAverage for Job<'_> {
         let signature: Signature = signing_key.sign(&message);
 
         let env = ExecutorEnv::builder()
-            .add_input(
-                &to_vec(&(
-                    spec,
-                    verifying_key.as_bytes(),
-                    message.clone(),
-                    signature.to_bytes().to_vec(),
-                ))
-                .unwrap(),
-            )
+            .write(&(
+                spec,
+                verifying_key.as_bytes(),
+                message.clone(),
+                signature.to_bytes().to_vec(),
+            ))
+            .unwrap()
             .build()
             .unwrap();
 

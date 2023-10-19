@@ -23,7 +23,7 @@ impl GenReceipt {
     pub fn run(&self) {
         let iterations = 100;
         let env = ExecutorEnv::builder()
-            .add_input(&[iterations])
+            .write_slice(&[iterations])
             .build()
             .unwrap();
         let opts = ProverOpts::default();

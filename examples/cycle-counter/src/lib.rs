@@ -18,7 +18,7 @@ use std::{
 };
 
 use log::info;
-use risc0_zkvm::{ExecutorEnv, ExecutorImpl, MemoryImage, Program, GUEST_MAX_MEM, PAGE_SIZE};
+use risc0_zkvm::{default_executor, ExecutorEnv};
 use serde::Serialize;
 
 pub mod examples;
@@ -39,34 +39,25 @@ impl Metrics {
     }
 }
 
-pub trait CycleCounter: Sized {
+pub trait CycleCounter {
     const NAME: &'static str;
+    const METHOD_ELF: &'static [u8];
 
-    fn new() -> Self;
-
-    fn exec_compute(self) -> u32;
-
-    fn run(self) -> Metrics {
-        let mut metrics = Metrics::new(String::from(Self::NAME));
-        metrics.cycles = self.exec_compute();
-        metrics
-    }
+    fn run() -> Metrics;
 }
 
-pub fn get_image(path: &str) -> MemoryImage {
-    let elf = std::fs::read(path).expect("elf");
-    let program = Program::load_elf(&elf, GUEST_MAX_MEM as u32).unwrap();
-    MemoryImage::new(&program, PAGE_SIZE as u32).unwrap()
-}
-
-pub fn exec_compute<'a>(image: MemoryImage, env: ExecutorEnv<'a>) -> u32 {
-    let mut exec = ExecutorImpl::new(env, image).unwrap();
-    let session = exec.run().unwrap();
-    let segments = session.resolve().unwrap();
-    let cycles = segments
+pub fn exec<'a>(name: &str, elf: &[u8], env: ExecutorEnv<'a>) -> Metrics {
+    let exec = default_executor();
+    let session_info = exec.execute_elf(env, elf).unwrap();
+    let cycles = session_info
+        .segments
         .iter()
         .fold(0, |cycles, segment| (cycles + (1 << segment.po2)));
-    cycles as u32
+    let cycles = cycles as u32;
+    Metrics {
+        name: name.to_string(),
+        cycles,
+    }
 }
 
 pub fn init_logging() {
@@ -96,11 +87,9 @@ pub fn run_jobs<C: CycleCounter>(out_path: &PathBuf) -> Metrics {
             .from_writer(out_file)
     };
 
-    let job = C::new();
     info!("");
     info!("+ begin: {}", C::NAME);
-
-    let job_metrics = job.run();
+    let job_metrics = C::run();
     job_metrics.println("+ ");
     out.serialize(CsvRow {
         name: &job_metrics.name,

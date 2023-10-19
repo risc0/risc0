@@ -64,7 +64,7 @@ fn main() {
 #[tracing::instrument(skip_all)]
 fn top(prover: Rc<dyn ProverServer>, iterations: u32, skip_prover: bool) -> Metrics {
     let env = ExecutorEnv::builder()
-        .add_input(&[iterations])
+        .write_slice(&[iterations])
         .build()
         .unwrap();
     let mut exec = ExecutorImpl::from_elf(env, FIB_ELF).unwrap();

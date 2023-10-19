@@ -42,8 +42,11 @@ use crate::{
 };
 
 fn run_test(spec: MultiTestSpec) {
-    let input = to_vec(&spec).unwrap();
-    let env = ExecutorEnv::builder().add_input(&input).build().unwrap();
+    let env = ExecutorEnv::builder()
+        .write(&spec)
+        .unwrap()
+        .build()
+        .unwrap();
     ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
         .unwrap()
         .run()
@@ -133,13 +136,13 @@ fn host_syscall() {
         "Hell".into(),
         "Hello".into(),
     ];
-    let input = to_vec(&MultiTestSpec::Syscall {
+    let input = MultiTestSpec::Syscall {
         count: expected.len() as u32 - 1,
-    })
-    .unwrap();
+    };
     let actual: Mutex<Vec<Bytes>> = Vec::new().into();
     let env = ExecutorEnv::builder()
-        .add_input(&input)
+        .write(&input)
+        .unwrap()
         .io_callback(SYS_MULTI_TEST, |buf| {
             let mut actual = actual.lock().unwrap();
             actual.push(buf);
@@ -158,9 +161,9 @@ fn host_syscall() {
 #[test]
 #[should_panic(expected = "I am panicking from here!")]
 fn host_syscall_callback_panic() {
-    let input = to_vec(&MultiTestSpec::Syscall { count: 5 }).unwrap();
     let env = ExecutorEnv::builder()
-        .add_input(&input)
+        .write(&MultiTestSpec::Syscall { count: 5 })
+        .unwrap()
         .io_callback(SYS_MULTI_TEST, |_| {
             panic!("I am panicking from here!");
         })
@@ -192,14 +195,17 @@ fn bigint_accel() {
     let cases = testutils::generate_bigint_test_cases(&mut rand::thread_rng(), 10);
     for case in cases {
         println!("Running BigInt circuit test case: {:x?}", case);
-        let input = to_vec(&MultiTestSpec::BigInt {
+        let input = MultiTestSpec::BigInt {
             x: case.x,
             y: case.y,
             modulus: case.modulus,
-        })
-        .unwrap();
+        };
 
-        let env = ExecutorEnv::builder().add_input(&input).build().unwrap();
+        let env = ExecutorEnv::builder()
+            .write(&input)
+            .unwrap()
+            .build()
+            .unwrap();
         let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
         let session = exec.run().unwrap();
         assert_eq!(
@@ -258,15 +264,15 @@ fn posix_style_read() {
             expected[pos..pos + len].clone_from_slice(this_read);
         }
 
-        let spec = to_vec(&MultiTestSpec::SysRead {
+        let spec = MultiTestSpec::SysRead {
             fd: FD,
             buf: buf.to_vec(),
             pos_and_len: pos_and_len.clone(),
-        })
-        .unwrap();
+        };
         let env = ExecutorEnv::builder()
             .read_fd(FD, readbuf.as_slice())
-            .add_input(&spec)
+            .write(&spec)
+            .unwrap()
             .build()
             .unwrap();
         let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
@@ -318,14 +324,14 @@ fn large_io_words() {
     const FD: u32 = 123;
     let buf: Vec<u32> = (0..400_000).collect();
     let expected = buf.clone();
-    let input = to_vec(&MultiTestSpec::EchoWords {
+    let input = MultiTestSpec::EchoWords {
         fd: FD,
         nwords: buf.len() as u32,
-    })
-    .unwrap();
+    };
     let env = ExecutorEnv::builder()
         .read_fd(FD, bytemuck::cast_slice(&buf))
-        .add_input(&input)
+        .write(&input)
+        .unwrap()
         .session_limit(Some(20_000_000))
         .build()
         .unwrap();
@@ -427,8 +433,11 @@ fn sys_verify_integrity() {
 fn large_sha() {
     let data = vec![0u8; 100_000];
     let expected = hex::encode(Sha256::digest(&data));
-    let input = to_vec(&MultiTestSpec::ShaDigest { data }).unwrap();
-    let env = ExecutorEnv::builder().add_input(&input).build().unwrap();
+    let env = ExecutorEnv::builder()
+        .write(&MultiTestSpec::ShaDigest { data })
+        .unwrap()
+        .build()
+        .unwrap();
     let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
     let session = exec.run().unwrap();
     let actual = hex::encode(Digest::try_from(session.journal.unwrap()).unwrap());
@@ -539,8 +548,8 @@ fn random() {
 fn slice_io() {
     let run = |slice: &[u8]| {
         let env = ExecutorEnv::builder()
-            .add_input(&[slice.len() as u32])
-            .add_input(slice)
+            .write_slice(&[slice.len() as u32])
+            .write_slice(slice)
             .build()
             .unwrap();
         let mut exec = ExecutorImpl::from_elf(env, SLICE_IO_ELF).unwrap();
@@ -556,8 +565,11 @@ fn slice_io() {
 // Check that a compliant host will fault.
 #[test]
 fn fail() {
-    let spec = to_vec(&MultiTestSpec::Fail).unwrap();
-    let env = ExecutorEnv::builder().add_input(&spec).build().unwrap();
+    let env = ExecutorEnv::builder()
+        .write(&MultiTestSpec::Fail)
+        .unwrap()
+        .build()
+        .unwrap();
     let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
     let err = exec.run().err().unwrap();
     assert!(err.to_string().contains("MultiTestSpec::Fail invoked"));
@@ -573,7 +585,8 @@ fn profiler() {
     let mut prof = Profiler::new("multi_test.elf", MULTI_TEST_ELF).unwrap();
     {
         let env = ExecutorEnv::builder()
-            .add_input(&to_vec(&MultiTestSpec::Profiler).unwrap())
+            .write(&MultiTestSpec::Profiler)
+            .unwrap()
             .trace_callback(prof.make_trace_callback())
             .build()
             .unwrap();
@@ -588,17 +601,21 @@ fn profiler() {
     // Gather up anything containing our profile_test functions.
     // If the test doesn't pass, we don't want to display the
     // whole profiling structure.
-    let occurences: Vec<_> = prof
+    let occurrences: Vec<_> = prof
         .iter()
         .filter(|(frames, _addr, _count)| frames.iter().any(|fr| fr.name.contains("profile_test")))
         .collect();
 
-    assert!(!occurences.is_empty(), "{:#?}", Vec::from_iter(prof.iter()));
+    assert!(
+        !occurrences.is_empty(),
+        "{:#?}",
+        Vec::from_iter(prof.iter())
+    );
 
     let elf_mem = Program::load_elf(MULTI_TEST_ELF, u32::MAX).unwrap().image;
 
     // stitch frames together
-    let (fr, addr) = occurences.into_iter().fold(
+    let (fr, addr) = occurrences.into_iter().fold(
         (Vec::new(), 0),
         |(mut acc_frames, _), (frames, addr, _count)| {
             acc_frames.extend(frames);
@@ -639,7 +656,7 @@ fn profiler() {
                     }
                 }
 
-                // All checks passed; this is the occurence we were looking for.
+                // All checks passed; this is the occurrence we were looking for.
                 true
             }
             _ => {
@@ -654,8 +671,11 @@ fn profiler() {
 
 #[test]
 fn oom() {
-    let spec = to_vec(&MultiTestSpec::Oom).unwrap();
-    let env = ExecutorEnv::builder().add_input(&spec).build().unwrap();
+    let env = ExecutorEnv::builder()
+        .write(&MultiTestSpec::Oom)
+        .unwrap()
+        .build()
+        .unwrap();
     let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
     let err = exec.run().err().unwrap();
     assert!(err.to_string().contains("Out of memory"), "{err:?}");
@@ -664,11 +684,11 @@ fn oom() {
 #[test]
 fn memory_access() {
     fn access_memory(addr: u32) -> Result<ExitCode> {
-        let spec = to_vec(&MultiTestSpec::OutOfBounds).unwrap();
-        let addr = to_vec(&addr).unwrap();
         let env = ExecutorEnv::builder()
-            .add_input(&spec)
-            .add_input(&addr)
+            .write(&MultiTestSpec::OutOfBounds)
+            .unwrap()
+            .write(&addr)
+            .unwrap()
             .build()
             .unwrap();
         let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap().run()?;
@@ -761,8 +781,7 @@ mod docker {
     use risc0_zkvm_platform::WORD_SIZE;
 
     use crate::{
-        host::server::exec::executor::ExecutorError, serde::to_vec, ExecutorEnv, ExecutorImpl,
-        Session, TraceEvent,
+        host::server::exec::executor::ExecutorError, ExecutorEnv, ExecutorImpl, Session, TraceEvent,
     };
 
     #[test]
@@ -770,7 +789,8 @@ mod docker {
         let mut events: Vec<TraceEvent> = Vec::new();
         {
             let env = ExecutorEnv::builder()
-                .add_input(&to_vec(&MultiTestSpec::EventTrace).unwrap())
+                .write(&MultiTestSpec::EventTrace)
+                .unwrap()
                 .trace_callback(|event| Ok(events.push(event)))
                 .build()
                 .unwrap();
@@ -779,7 +799,7 @@ mod docker {
                 .run()
                 .unwrap();
         }
-        let occurances = events
+        let occurrences = events
             .windows(4)
             .filter_map(|window| {
                 if let &[TraceEvent::InstructionStart {
@@ -823,7 +843,7 @@ mod docker {
                 }
             })
             .count();
-        assert_eq!(occurances, 1, "trace events: {:#?}", &events);
+        assert_eq!(occurrences, 1, "trace events: {:#?}", &events);
         assert!(events.contains(&TraceEvent::MemorySet {
             addr: 0x08000224,
             value: 1337
@@ -838,12 +858,12 @@ mod docker {
             session_count_limit: u64,
         ) -> Result<Session, ExecutorError> {
             let session_cycles = (1 << segment_limit_po2) * session_count_limit;
-            let spec = &to_vec(&MultiTestSpec::BusyLoop {
+            let spec = MultiTestSpec::BusyLoop {
                 cycles: loop_cycles,
-            })
-            .unwrap();
+            };
             let env = ExecutorEnv::builder()
-                .add_input(&spec)
+                .write(&spec)
+                .unwrap()
                 .segment_limit_po2(segment_limit_po2)
                 .session_limit(Some(session_cycles))
                 .build()

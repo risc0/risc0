@@ -12,31 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use risc0_zkvm::{serde::to_vec, ExecutorEnv, MemoryImage};
+use risc0_zkvm::ExecutorEnv;
 use smartcore::{
     linalg::basic::matrix::DenseMatrix, tree::decision_tree_classifier::DecisionTreeClassifier,
 };
 
-use crate::{exec_compute, get_image, CycleCounter};
+use crate::{exec, CycleCounter, Metrics};
 
-pub struct Job<'a> {
-    pub env: ExecutorEnv<'a>,
-    pub image: MemoryImage,
-}
+pub struct Job {}
 
-const METHOD_PATH: &'static str = smartcore_ml_methods::ML_TEMPLATE_PATH;
-
-const JSON_MODEL: &str =
-    include_str!("../../../../examples/smartcore-ml/res/ml-model/tree_model_bytes.json");
+const JSON_MODEL: &str = include_str!("../../../smartcore-ml/res/ml-model/tree_model_bytes.json");
 const JSON_DATA: &str =
-    include_str!("../../../../examples/smartcore-ml/res/input-data/tree_model_data_bytes.json");
+    include_str!("../../../smartcore-ml/res/input-data/tree_model_data_bytes.json");
 
-impl CycleCounter for Job<'_> {
+impl CycleCounter for Job {
     const NAME: &'static str = "smartcore-ml";
+    const METHOD_ELF: &'static [u8] = smartcore_ml_methods::ML_TEMPLATE_ELF;
 
-    fn new() -> Self {
-        let image = get_image(METHOD_PATH);
+    fn run() -> Metrics {
         // Convert the model and input data from JSON into byte arrays.
+        let is_svm = false;
         let model_bytes: Vec<u8> = serde_json::from_str(JSON_MODEL).unwrap();
         let data_bytes: Vec<u8> = serde_json::from_str(JSON_DATA).unwrap();
 
@@ -45,18 +40,18 @@ impl CycleCounter for Job<'_> {
         let model: Model =
             rmp_serde::from_slice(&model_bytes).expect("model failed to deserialize byte array");
         let data: DenseMatrix<f64> =
-            rmp_serde::from_slice(&data_bytes).expect("data filed to deserialize byte array");
+            rmp_serde::from_slice(&data_bytes).expect("data failed to deserialize byte array");
 
         let env = ExecutorEnv::builder()
-            .add_input(&to_vec(&model).expect("model failed to serialize"))
-            .add_input(&to_vec(&data).expect("data failed to serialize"))
+            .write(&is_svm)
+            .unwrap()
+            .write(&model)
+            .unwrap()
+            .write(&data)
+            .unwrap()
             .build()
             .unwrap();
 
-        Job { env, image }
-    }
-
-    fn exec_compute(self) -> u32 {
-        exec_compute(self.image, self.env)
+        exec(Self::NAME, Self::METHOD_ELF, env)
     }
 }

@@ -40,7 +40,7 @@ fn main() -> anyhow::Result<()> {
                 builder.trace_callback(p.make_trace_callback());
             }
             builder
-                .add_input(&[iterations])
+                .write_slice(&[iterations])
                 .build()
                 .map_err(|e| anyhow!("environment build failed: {:?}", e))?
         };

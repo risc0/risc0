@@ -18,11 +18,7 @@ use k256::{
     EncodedPoint,
 };
 use rand_core::OsRng;
-use risc0_zkvm::{
-    default_prover,
-    serde::{from_slice, to_vec},
-    ExecutorEnv, Receipt,
-};
+use risc0_zkvm::{default_prover, serde::from_slice, ExecutorEnv, Receipt};
 
 /// Given an secp256k1 verifier key (i.e. public key), message and signature,
 /// runs the ECDSA verifier inside the zkVM and returns a receipt, including a
@@ -33,8 +29,10 @@ fn prove_ecdsa_verification(
     message: &[u8],
     signature: &Signature,
 ) -> Receipt {
+    let input = (verifying_key.to_encoded_point(true), message, signature);
     let env = ExecutorEnv::builder()
-        .add_input(&to_vec(&(verifying_key.to_encoded_point(true), message, signature)).unwrap())
+        .write(&input)
+        .unwrap()
         .build()
         .unwrap();
 

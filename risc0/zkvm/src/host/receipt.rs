@@ -70,7 +70,7 @@ use crate::{
 /// # #[cfg(not(feature = "cuda"))]
 /// # #[cfg(feature = "prove")]
 /// # {
-/// let env = ExecutorEnv::builder().add_input(&[20]).build().unwrap();
+/// let env = ExecutorEnv::builder().write_slice(&[20]).build().unwrap();
 /// let receipt = default_prover().prove_elf(env, FIB_ELF).unwrap();
 /// # }
 /// ```
@@ -89,7 +89,7 @@ use crate::{
 /// # #[cfg(not(feature = "cuda"))]
 /// # #[cfg(feature = "prove")]
 /// # {
-/// # let env = ExecutorEnv::builder().add_input(&[20]).build().unwrap();
+/// # let env = ExecutorEnv::builder().write_slice(&[20]).build().unwrap();
 /// # let receipt = default_prover().prove_elf(env, FIB_ELF).unwrap();
 /// receipt.verify(FIB_ID).unwrap();
 /// # }

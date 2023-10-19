@@ -12,32 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use risc0_zkvm::{serde::to_vec, ExecutorEnv, MemoryImage};
+use risc0_zkvm::ExecutorEnv;
 
-use crate::{exec_compute, get_image, CycleCounter};
+use crate::{exec, CycleCounter, Metrics};
 
-pub struct Job<'a> {
-    pub env: ExecutorEnv<'a>,
-    pub image: MemoryImage,
-}
+pub struct Job {}
 
-const METHOD_PATH: &'static str = json_methods::SEARCH_JSON_PATH;
+impl CycleCounter for Job {
+    const NAME: &'static str = "chess";
+    const METHOD_ELF: &'static [u8] = chess_methods::CHECKMATE_ELF;
 
-impl CycleCounter for Job<'_> {
-    const NAME: &'static str = "json";
-
-    fn new() -> Self {
-        let image = get_image(METHOD_PATH);
-        let data = include_str!("../../../../examples/json/res/example.json");
+    fn run() -> Metrics {
+        let mv = "Qxf7".to_string();
+        let board =
+            "r1bqkb1r/pppp1ppp/2n2n2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR w KQkq - 4 4".to_string();
+        let input = chess_core::Inputs { board, mv };
         let env = ExecutorEnv::builder()
-            .add_input(&to_vec(&data).unwrap())
+            .write(&input)
+            .unwrap()
             .build()
             .unwrap();
 
-        Job { env, image }
-    }
-
-    fn exec_compute(self) -> u32 {
-        exec_compute(self.image, self.env)
+        exec(Self::NAME, Self::METHOD_ELF, env)
     }
 }
