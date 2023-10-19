@@ -188,8 +188,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: cargo check
         working-directory: benchmarks
-      - run: cargo check -p risc0-examples-cycle-counter
-        working-directory: benchmarks
 
   check_template:
     runs-on: [self-hosted, prod, cpu, "${{ matrix.os }}"]
