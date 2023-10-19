@@ -40,7 +40,7 @@ impl CycleCounter for Job<'_> {
         Job { env, image }
     }
 
-    fn exec_compute(&mut self) -> u32 {
-        exec_compute(self.image.clone(), self.env.clone())
+    fn exec_compute(self) -> u32 {
+        exec_compute(self.image, self.env)
     }
 }

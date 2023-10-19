@@ -1,6 +1,7 @@
 # Benchmarks
 
 ## How to update the ghpages
+
 On every PR merged to `main`, the benchmark results will be pushed to the https://github.com/risc0/ghpages/tree/dev branch. After reviewing the result, you should create a PR on the ghpages repo to publish on https://risc0.github.io/ghpages/dev/benchmarks/index.html.
 
 All `ghpages` static files reside in the `ghpages` folder of the `risc0` repo. Any modifications to `ghpages` should be made via the `risc0` repo henceforth.
@@ -31,8 +32,10 @@ $ RUST_LOG=info cargo run --release --bin risc0-benchmark -F cuda -- --out metri
 ```
 
 ## Running specific benchmark
+
 To run a specific benchmark replace the `all` option used in the previous command with one of the following:
 e.g.,
+
 ```console
 $ RUST_LOG=info cargo run --release -F metal -- --out metrics.csv big-sha2
 ```
@@ -94,6 +97,7 @@ Verifies a given Sudoku solution.
 Computes the proof for a given Ethereum block containing a given number of transactions.
 
 ## Average benchmark
+
 An average (i.e., a given job runs for several iterations, then the time to prove a single iteration is extracted as its average) version of this benchmark is available by running:
 
 ### CPU
@@ -115,6 +119,7 @@ $ RUST_LOG=info cargo run --release --bin average -F cuda -- --out metrics.csv a
 ```
 
 ### Bonsai
+
 ```console
 $ RISC0_DEV_MODE=false BONSAI_API_URL=<API> BONSAI_API_KEY=<API_KEY> RUST_LOG=debug cargo run --release --bin average -- --out metrics-bonsai.csv all
 ```

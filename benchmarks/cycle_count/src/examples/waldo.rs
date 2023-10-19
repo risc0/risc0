@@ -71,7 +71,7 @@ impl CycleCounter for Job {
         Job { cycles }
     }
 
-    fn exec_compute(&mut self) -> u32 {
+    fn exec_compute(self) -> u32 {
         self.cycles
     }
 }

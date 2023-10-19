@@ -39,12 +39,14 @@ impl Metrics {
     }
 }
 
-pub trait CycleCounter {
+pub trait CycleCounter: Sized {
     const NAME: &'static str;
 
     fn new() -> Self;
-    fn exec_compute(&mut self) -> u32;
-    fn run(&mut self) -> Metrics {
+
+    fn exec_compute(self) -> u32;
+
+    fn run(self) -> Metrics {
         let mut metrics = Metrics::new(String::from(Self::NAME));
         metrics.cycles = self.exec_compute();
         metrics
@@ -58,7 +60,7 @@ pub fn get_image(path: &str) -> MemoryImage {
 }
 
 pub fn exec_compute<'a>(image: MemoryImage, env: ExecutorEnv<'a>) -> u32 {
-    let mut exec = ExecutorImpl::new(env.clone(), image.clone()).unwrap();
+    let mut exec = ExecutorImpl::new(env, image).unwrap();
     let session = exec.run().unwrap();
     let segments = session.resolve().unwrap();
     let cycles = segments
@@ -94,7 +96,7 @@ pub fn run_jobs<C: CycleCounter>(out_path: &PathBuf) -> Metrics {
             .from_writer(out_file)
     };
 
-    let mut job = C::new();
+    let job = C::new();
     info!("");
     info!("+ begin: {}", C::NAME);
 
