@@ -19,7 +19,6 @@ use std::{
 };
 
 use anyhow::Result;
-use bytes::Bytes;
 use risc0_binfmt::{MemoryImage, Program};
 use risc0_zkvm_methods::{
     multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID, MULTI_TEST_PATH,
@@ -30,8 +29,8 @@ use test_log::test;
 
 use super::{pb, Asset, AssetRequest, Binary, ConnectionWrapper, Connector, TcpConnection};
 use crate::{
-    host::api::Asset::Inline, recursion::SuccinctReceipt, serde::to_vec, ApiClient, ApiServer,
-    ExecutorEnv, ProverOpts, Receipt, SegmentReceipt, SessionInfo, VerifierContext,
+    host::api::Asset::Inline, recursion::SuccinctReceipt, ApiClient, ApiServer, ExecutorEnv,
+    InnerReceipt, ProverOpts, Receipt, SegmentReceipt, SessionInfo, VerifierContext,
 };
 
 struct TestClientConnector {
@@ -102,6 +101,14 @@ impl TestClient {
         with_server(self.addr, || {
             let receipt_out = AssetRequest::Path(self.get_work_path());
             self.client.lift(opts, receipt, receipt_out)
+        })
+    }
+
+    fn join(&self, opts: ProverOpts, left_receipt: Asset, right_receipt: Asset) -> SuccinctReceipt {
+        with_server(self.addr, || {
+            let receipt_out = AssetRequest::Path(self.get_work_path());
+            self.client
+                .join(opts, left_receipt, right_receipt, receipt_out)
         })
     }
 }
@@ -183,10 +190,12 @@ fn prove_segment_elf() {
 
 #[test]
 fn lift_join_identity() {
-    let input = to_vec(&MultiTestSpec::DoNothing).unwrap();
+    let segment_limit_po2 = 16; // 64k cycles
+    let cycles = 1 << segment_limit_po2;
     let env = ExecutorEnv::builder()
-        .write(&input)
+        .write(&MultiTestSpec::BusyLoop { cycles })
         .unwrap()
+        .segment_limit_po2(segment_limit_po2)
         .build()
         .unwrap();
     let binary = Binary::new_elf_path(MULTI_TEST_PATH);
@@ -198,14 +207,34 @@ fn lift_join_identity() {
 
     let opts = ProverOpts::default();
 
-    let segment = client.segments[0]
-        .segment
-        .clone()
-        .unwrap()
-        .try_into()
-        .unwrap();
-    let receipt = client.prove_segment(ProverOpts::default(), segment);
-    let receipt_bytes: Bytes = bincode::serialize(&receipt).unwrap().into();
-    let receipt: Asset = Inline(receipt_bytes);
-    let _rollup = client.lift(opts, receipt);
+    let receipt = client.prove_segment(
+        opts.clone(),
+        client.segments[0]
+            .segment
+            .clone()
+            .unwrap()
+            .try_into()
+            .unwrap(),
+    );
+    let receipt: Asset = Inline((bincode::serialize(&receipt).unwrap()).into());
+    let mut rollup = client.lift(opts.clone(), receipt);
+
+    for segment in &client.segments[1..] {
+        let receipt = client.prove_segment(
+            opts.clone(),
+            segment.segment.clone().unwrap().try_into().unwrap(),
+        );
+        let receipt: Asset = Inline(bincode::serialize(&receipt).unwrap().into());
+        let rec_receipt = client.lift(opts.clone(), receipt);
+
+        let rec_receipt: Asset = Inline(bincode::serialize(&rec_receipt).unwrap().into());
+        let rollup_receipt: Asset = Inline(bincode::serialize(&rollup).unwrap().into());
+
+        rollup = client.join(opts.clone(), rollup_receipt, rec_receipt);
+        rollup
+            .verify_with_context(&VerifierContext::default())
+            .unwrap();
+    }
+    let rollup_receipt = Receipt::new(InnerReceipt::Succinct(rollup), session.journal.into());
+    rollup_receipt.verify(MULTI_TEST_ID).unwrap();
 }

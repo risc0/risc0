@@ -178,7 +178,7 @@ impl Client {
         receipt: Asset,
         receipt_out: AssetRequest,
     ) -> Result<SuccinctReceipt> {
-        let mut conn = self.connector.connect()?;
+        let mut conn = self.connect()?;
 
         let request = pb::api::ServerRequest {
             kind: Some(pb::api::server_request::Kind::Lift(pb::api::LiftRequest {
@@ -217,7 +217,7 @@ impl Client {
         right_receipt: Asset,
         receipt_out: AssetRequest,
     ) -> Result<SuccinctReceipt> {
-        let mut conn = self.connector.connect()?;
+        let mut conn = self.connect()?;
 
         let request = pb::api::ServerRequest {
             kind: Some(pb::api::server_request::Kind::Join(pb::api::JoinRequest {
