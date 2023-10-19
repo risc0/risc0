@@ -203,9 +203,9 @@ impl Session {
             None
         };
 
-        // DO NOT MERGE: post should match the final segment system state, but doesn't
-        // always. Prior to merging figure out what is happening here and what
-        // to do about it (possibly nothing).
+        // When a segment ends in a Halted(_) state, it does not update the post state digest. As a
+        // result, it will be the same are the pre_image. All other exit codes require the post
+        // state digest to reflect the final memory state.
         let post_state = SystemState {
             pc: self.post_image.pc,
             merkle_root: match self.exit_code {
