@@ -14,18 +14,15 @@
 
 use risc0_zkvm::ExecutorEnv;
 
-use crate::{exec_compute, CycleCounter};
+use crate::{exec, CycleCounter, Metrics};
 
-pub struct Job<'a> {
-    pub env: ExecutorEnv<'a>,
-}
+pub struct Job {}
 
-const METHOD_ELF: &'static [u8] = wasm_methods::WASM_INTERP_ELF;
-
-impl CycleCounter for Job<'_> {
+impl CycleCounter for Job {
     const NAME: &'static str = "wasm";
+    const METHOD_ELF: &'static [u8] = wasm_methods::WASM_INTERP_ELF;
 
-    fn new() -> Self {
+    fn run() -> Metrics {
         let wasm = wat2wasm().expect("Failed to parse_str");
         let iters: i32 = 100;
         let env = ExecutorEnv::builder()
@@ -36,11 +33,7 @@ impl CycleCounter for Job<'_> {
             .build()
             .unwrap();
 
-        Job { env }
-    }
-
-    fn exec_compute(&mut self) -> u32 {
-        exec_compute(METHOD_ELF, self.env.clone())
+        exec(Self::NAME, Self::METHOD_ELF, env)
     }
 }
 

@@ -14,29 +14,23 @@
 
 use risc0_zkvm::ExecutorEnv;
 
-use crate::{exec_compute, CycleCounter};
+use crate::{exec, CycleCounter, Metrics};
 
-pub struct Job<'a> {
-    pub env: ExecutorEnv<'a>,
-}
+pub struct Job {}
 
-const METHOD_ELF: &'static [u8] = json_methods::SEARCH_JSON_ELF;
+impl CycleCounter for Job {
+    const NAME: &'static str = "wordle";
+    const METHOD_ELF: &'static [u8] = wordle_methods::WORDLE_GUEST_ELF;
 
-impl CycleCounter for Job<'_> {
-    const NAME: &'static str = "json";
-
-    fn new() -> Self {
-        let data = include_str!("../../../../examples/json/res/example.json");
+    fn run() -> Metrics {
         let env = ExecutorEnv::builder()
-            .write(&data)
+            .write(&"fuzzy")
+            .unwrap()
+            .write(&"fuzzy")
             .unwrap()
             .build()
             .unwrap();
 
-        Job { env }
-    }
-
-    fn exec_compute(&mut self) -> u32 {
-        exec_compute(METHOD_ELF, self.env.clone())
+        exec(Self::NAME, Self::METHOD_ELF, env)
     }
 }
