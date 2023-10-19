@@ -18,6 +18,7 @@ use std::{
     cell::RefCell,
     collections::HashMap,
     io::{BufRead, BufReader, Cursor, Read, Write},
+    path::PathBuf,
     rc::Rc,
 };
 
@@ -57,6 +58,7 @@ pub struct ExecutorEnv<'a> {
     pub(crate) slice_io: Rc<RefCell<SliceIoTable<'a>>>,
     pub(crate) input: Vec<u8>,
     pub(crate) trace: Option<Rc<RefCell<TraceCallback<'a>>>>,
+    pub(crate) segment_path: Option<PathBuf>,
 }
 
 impl<'a> ExecutorEnv<'a> {

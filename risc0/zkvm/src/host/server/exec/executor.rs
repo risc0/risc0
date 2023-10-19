@@ -44,6 +44,7 @@ use risc0_zkvm_platform::{
 };
 use rrs_lib::{instruction_executor::InstructionExecutor, HartState};
 use serde::{Deserialize, Serialize};
+use tempfile::TempDir;
 
 use super::{monitor::MemoryMonitor, syscall::SyscallTable};
 use crate::{
@@ -53,7 +54,7 @@ use crate::{
         receipt::ExitCode,
         server::opcode::{MajorType, OpCode},
     },
-    ExecutorEnv, FaultCheckMonitor, Loader, Segment, SegmentRef, Session, SimpleSegmentRef,
+    ExecutorEnv, FaultCheckMonitor, FileSegmentRef, Loader, Segment, SegmentRef, Session,
     FAULT_CHECKER_ELF,
 };
 
@@ -241,7 +242,10 @@ impl<'a> ExecutorImpl<'a> {
     /// This will run the executor to get a [Session] which contain the results
     /// of the execution.
     pub fn run(&mut self) -> Result<Session, ExecutorError> {
-        self.run_with_callback(|segment| Ok(Box::new(SimpleSegmentRef::new(segment))))
+        let temp_dir = TempDir::new().map_err(|e| ExecutorError::Error(e.into()))?;
+        let path = temp_dir.into_path();
+        self.env.segment_path = Some(path.clone());
+        self.run_with_callback(|segment| Ok(Box::new(FileSegmentRef::new(&segment, &path)?)))
     }
 
     /// Run the executor until [ExitCode::Paused] or [ExitCode::Halted] is
@@ -272,7 +276,12 @@ impl<'a> ExecutorImpl<'a> {
 
     /// Run the executor with the default callback.
     pub fn run_guest_only(&mut self) -> Result<Session> {
-        self.run_guest_only_with_callback(|segment| Ok(Box::new(SimpleSegmentRef::new(segment))))
+        let temp_dir = TempDir::new().map_err(|e| ExecutorError::Error(e.into()))?;
+        let path = temp_dir.into_path();
+        self.env.segment_path = Some(path.clone());
+        self.run_guest_only_with_callback(|segment| {
+            Ok(Box::new(FileSegmentRef::new(&segment, &path)?))
+        })
     }
 
     /// Run the executor until [ExitCode::Paused], [ExitCode::Halted], or
