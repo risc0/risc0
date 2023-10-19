@@ -28,6 +28,7 @@ use bytes::Bytes;
 use risc0_zkvm_platform::{self, fileno};
 use serde::Serialize;
 
+use crate::serde::to_vec;
 use crate::{
     host::client::{
         exec::TraceEvent,
@@ -36,7 +37,6 @@ use crate::{
     },
     Assumption,
 };
-use crate::serde::to_vec;
 
 /// A builder pattern used to construct an [ExecutorEnv].
 #[derive(Default)]
