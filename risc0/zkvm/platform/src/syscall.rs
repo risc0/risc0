@@ -680,20 +680,19 @@ pub unsafe extern "C" fn sys_alloc_aligned(bytes: usize, align: usize) -> *mut u
     ptr
 }
 
-/// Send an image ID and journal hash to the host to request the post state
-/// digest from a matching ReceiptMetadata with successful exit status.
+/// Send an image ID and journal hash to the host to request the post state digest and system exit
+/// code from a matching ReceiptMetadata with successful exit status.
 ///
-/// A cooperative prover will only return if there is a verifying proof with
-/// successful exit status associated with the given image ID and journal
-/// digest; and will always return a result code of 0 to register a0. The caller
-/// must calculate the ReceiptMetadata digest, using the provided post state
-/// digest and encode the digest into a public assumptions list for inclusion in
-/// the guest output.
+/// A cooperative prover will only return if there is a verifying proof with successful exit status
+/// associated with the given image ID and journal digest; and will always return a result code of
+/// 0 to register a0. The caller must calculate the ReceiptMetadata digest, using the provided post
+/// state digest and encode the digest into a public assumptions list for inclusion in the guest
+/// output.
 #[no_mangle]
 pub unsafe extern "C" fn sys_verify(
     image_id: *const [u32; DIGEST_WORDS],
     journal_digest: *const [u32; DIGEST_WORDS],
-    post_state_digest_out: *mut [u32; DIGEST_WORDS],
+    from_host_buf: *mut [u32; DIGEST_WORDS + 1],
 ) {
     let mut to_host = [0u32; 2 * DIGEST_WORDS];
     to_host[..DIGEST_WORDS].copy_from_slice(unsafe { &*image_id });
@@ -705,8 +704,8 @@ pub unsafe extern "C" fn sys_verify(
         // digest for from a matching ReceiptMetadata.
         syscall_2(
             nr::SYS_VERIFY,
-            post_state_digest_out as *mut u32,
-            DIGEST_WORDS,
+            from_host_buf as *mut u32,
+            DIGEST_WORDS + 1,
             to_host.as_ptr() as u32,
             2 * DIGEST_BYTES as u32,
         )

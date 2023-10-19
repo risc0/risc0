@@ -29,7 +29,7 @@ use serde::{de::DeserializeOwned, Serialize};
 
 use crate::{
     align_up,
-    receipt_metadata::{Assumptions, MaybePruned, Output, PrunedValueError},
+    receipt_metadata::{Assumptions, InvalidExitCodeError, MaybePruned, Output, PrunedValueError},
     serde::{Deserializer, Serializer, WordRead, WordWrite},
     sha::{
         rust_crypto::{Digest as _, Sha256},
@@ -102,7 +102,7 @@ pub fn syscall(syscall: SyscallName, to_host: &[u8], from_host: &mut [u32]) -> s
 /// [SystemState].
 pub fn verify(image_id: Digest, journal: &[u8]) -> Result<(), VerifyError> {
     let journal_digest: Digest = journal.digest();
-    let mut from_host_buf = MaybeUninit::<[u32; DIGEST_WORDS]>::uninit();
+    let mut from_host_buf = MaybeUninit::<[u32; DIGEST_WORDS + 1]>::uninit();
 
     unsafe {
         sys_verify(
@@ -112,7 +112,23 @@ pub fn verify(image_id: Digest, journal: &[u8]) -> Result<(), VerifyError> {
         )
     };
 
-    let post_state_digest: Digest = unsafe { from_host_buf.assume_init() }.into();
+    // Split the host buffer into the Digest and system exit code portions. This is statically
+    // known to succeed, but the array APIs that would allow compile-time checked splitting are
+    // unstable.
+    let (post_state_digest, sys_exit_code): (Digest, u32) = {
+        let buf = unsafe { from_host_buf.assume_init() };
+        let (digest_buf, code_buf) = buf.split_at(DIGEST_WORDS);
+        (digest_buf.try_into().unwrap(), code_buf[0])
+    };
+
+    // Require that the exit code is either Halted(0) or Paused(0).
+    let exit_code = ExitCode::from_pair(sys_exit_code, 0)?;
+    let (ExitCode::Halted(0) | ExitCode::Paused(0)) = exit_code else {
+        return Err(VerifyError::BadExitCodeResponse(InvalidExitCodeError(
+            sys_exit_code,
+            0,
+        )));
+    };
 
     // Construct the ReceiptMetadata for this assumption. Use the host provided
     // post_state_digest and fix all fields that are required to have a certain
@@ -121,7 +137,7 @@ pub fn verify(image_id: Digest, journal: &[u8]) -> Result<(), VerifyError> {
     let assumption_metadata = ReceiptMetadata {
         pre: MaybePruned::Pruned(image_id),
         post: MaybePruned::Pruned(post_state_digest),
-        exit_code: ExitCode::Halted(0), // TODO(victor): also support paused.
+        exit_code,
         input: Digest::ZERO,
         output: Some(Output {
             journal: MaybePruned::Pruned(journal_digest),
@@ -142,11 +158,25 @@ pub fn verify(image_id: Digest, journal: &[u8]) -> Result<(), VerifyError> {
 /// journal, this is not a provable error. In this case, the [crate::verify]
 /// will not return.
 #[derive(Debug)]
-pub enum VerifyError {}
+#[non_exhaustive]
+pub enum VerifyError {
+    /// Error returned when the host responses to sys_verify with an invalid exit code.
+    BadExitCodeResponse(InvalidExitCodeError),
+}
+
+impl From<InvalidExitCodeError> for VerifyError {
+    fn from(err: InvalidExitCodeError) -> Self {
+        Self::BadExitCodeResponse(err)
+    }
+}
 
 impl fmt::Display for VerifyError {
-    fn fmt(&self, _f: &mut fmt::Formatter) -> fmt::Result {
-        unreachable!("VerifyError error enum is empty and cannot be constructed");
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Self::BadExitCodeResponse(err) => {
+                write!(f, "bad response from host to sys_verify: {}", err)
+            }
+        }
     }
 }
 
@@ -185,6 +215,7 @@ pub fn verify_integrity(metadata: &ReceiptMetadata) -> Result<(), VerifyIntegrit
 /// journal, this is not a provable error. In this case, the [crate::verify]
 /// will not return.
 #[derive(Debug)]
+#[non_exhaustive]
 pub enum VerifyIntegrityError {
     /// The provided [ReceiptMetadata] struct contained a non-empty assumptions
     /// list.

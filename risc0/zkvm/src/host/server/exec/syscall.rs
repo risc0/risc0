@@ -271,11 +271,11 @@ impl SysVerify {
                 DIGEST_BYTES * 2
             );
         }
-        if to_guest.len() != DIGEST_WORDS {
+        if to_guest.len() != DIGEST_WORDS + 1 {
             bail!(
                 "sys_verify call with output of length {} words; expected {}",
                 to_guest.len(),
-                DIGEST_WORDS
+                DIGEST_WORDS + 1
             );
         }
 
@@ -298,7 +298,7 @@ impl SysVerify {
         let mut assumption: Option<Assumption> = None;
         for cached_assumption in self.assumptions.borrow().cached.iter() {
             let assumption_metadata = cached_assumption.get_metadata()?;
-            let cmp_result: Result<Option<Digest>, PrunedValueError> = {
+            let cmp_result: Result<Option<_>, PrunedValueError> = {
                 // TODO(#982): Check here that the cached assumption has no assumptions?
                 let assumption_journal_digest = assumption_metadata
                     .as_value()?
@@ -310,13 +310,17 @@ impl SysVerify {
                 let assumption_image_id = assumption_metadata.as_value()?.pre.digest();
 
                 if assumption_journal_digest == journal_digest && assumption_image_id == image_id {
-                    Ok(Some(assumption_metadata.as_value()?.post.digest()))
+                    // Return the post stat digest and exit code.
+                    Ok(Some((
+                        assumption_metadata.as_value()?.post.digest(),
+                        assumption_metadata.as_value()?.exit_code.into_pair().0,
+                    )))
                 } else {
                     Ok(None)
                 }
             };
 
-            let post_state_digest = match cmp_result {
+            let (post_state_digest, sys_exit_code) = match cmp_result {
                 Ok(None) => continue,
                 // If the required values to compare were pruned, go the next assumption.
                 Err(e) => {
@@ -327,11 +331,12 @@ impl SysVerify {
                     );
                     continue;
                 }
-                Ok(Some(digest)) => digest,
+                Ok(Some(out)) => out,
             };
 
             // Write the post_state_digest to the guest buffer as a result.
-            to_guest.copy_from_slice(post_state_digest.as_words());
+            to_guest[..DIGEST_WORDS].copy_from_slice(post_state_digest.as_words());
+            to_guest[DIGEST_WORDS] = sys_exit_code;
             assumption = Some(cached_assumption.clone());
             break;
         }

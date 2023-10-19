@@ -170,7 +170,7 @@ impl ExitCode {
 /// Error returned when a (system, user) exit code pair is an invalid
 /// representation.
 #[derive(Debug, Copy, Clone)]
-pub struct InvalidExitCodeError(u32, u32);
+pub struct InvalidExitCodeError(pub u32, pub u32);
 
 impl fmt::Display for InvalidExitCodeError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
