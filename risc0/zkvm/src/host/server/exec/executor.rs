@@ -242,9 +242,12 @@ impl<'a> ExecutorImpl<'a> {
     /// This will run the executor to get a [Session] which contain the results
     /// of the execution.
     pub fn run(&mut self) -> Result<Session, ExecutorError> {
-        let temp_dir = TempDir::new().map_err(|e| ExecutorError::Error(e.into()))?;
-        let path = temp_dir.into_path();
-        self.env.segment_path = Some(path.clone());
+        if self.env.segment_path.is_none() {
+            let temp_dir = TempDir::new().map_err(|e| ExecutorError::Error(e.into()))?;
+            self.env.segment_path = Some(temp_dir.into_path());
+        }
+
+        let path = self.env.segment_path.clone().unwrap();
         self.run_with_callback(|segment| Ok(Box::new(FileSegmentRef::new(&segment, &path)?)))
     }
 
@@ -276,9 +279,12 @@ impl<'a> ExecutorImpl<'a> {
 
     /// Run the executor with the default callback.
     pub fn run_guest_only(&mut self) -> Result<Session> {
-        let temp_dir = TempDir::new().map_err(|e| ExecutorError::Error(e.into()))?;
-        let path = temp_dir.into_path();
-        self.env.segment_path = Some(path.clone());
+        if self.env.segment_path.is_none() {
+            let temp_dir = TempDir::new().map_err(|e| ExecutorError::Error(e.into()))?;
+            self.env.segment_path = Some(temp_dir.into_path());
+        }
+
+        let path = self.env.segment_path.clone().unwrap();
         self.run_guest_only_with_callback(|segment| {
             Ok(Box::new(FileSegmentRef::new(&segment, &path)?))
         })
