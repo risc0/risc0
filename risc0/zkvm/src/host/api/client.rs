@@ -249,6 +249,46 @@ impl Client {
         result
     }
 
+    /// Convert a [SuccinctReceipt] with a poseidon hash function that uses a 254-bit field
+    pub fn identity_p254(
+        &self,
+        opts: ProverOpts,
+        receipt: Asset,
+        receipt_out: AssetRequest,
+    ) -> Result<SuccinctReceipt> {
+        let mut conn = self.connect()?;
+
+        let request = pb::api::ServerRequest {
+            kind: Some(pb::api::server_request::Kind::IdentiyP254(
+                pb::api::IdentityP254Request {
+                    opts: Some(opts.into()),
+                    receipt: Some(receipt.try_into()?),
+                    receipt_out: Some(receipt_out.try_into()?),
+                },
+            )),
+        };
+        log::debug!("tx: {request:?}");
+        conn.send(request)?;
+
+        let reply: pb::api::IdentityP254Reply = conn.recv()?;
+
+        let result = match reply.kind.ok_or(malformed_err())? {
+            pb::api::identity_p254_reply::Kind::Ok(result) => {
+                let receipt_bytes = result.receipt.ok_or(malformed_err())?.as_bytes()?;
+                let receipt_pb = pb::core::SuccinctReceipt::decode(receipt_bytes)?;
+                receipt_pb.try_into()
+            }
+            pb::api::identity_p254_reply::Kind::Error(err) => Err(err.into()),
+        };
+
+        let code = conn.close()?;
+        if code != 0 {
+            bail!("Child finished with: {code}");
+        }
+
+        result
+    }
+
     fn connect(&self) -> Result<ConnectionWrapper> {
         let mut conn = self.connector.connect()?;
 

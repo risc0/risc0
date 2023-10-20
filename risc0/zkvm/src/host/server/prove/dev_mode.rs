@@ -71,4 +71,8 @@ impl ProverServer for DevModeProver {
     fn join(&self, _a: &SuccinctReceipt, _b: &SuccinctReceipt) -> Result<SuccinctReceipt> {
         unimplemented!("This is unsupported for dev mode.")
     }
+
+    fn identity_p254(&self, _a: &SuccinctReceipt) -> Result<SuccinctReceipt> {
+        unimplemented!("This is unsupported for dev mode.")
+    }
 }

@@ -91,6 +91,9 @@ pub trait ProverServer {
 
     /// Join two [SuccinctReceipt] into a [SuccinctReceipt]
     fn join(&self, a: &SuccinctReceipt, b: &SuccinctReceipt) -> Result<SuccinctReceipt>;
+
+    /// Convert a [SuccinctReceipt] with a poseidon hash function that uses a 254-bit field
+    fn identity_p254(&self, a: &SuccinctReceipt) -> Result<SuccinctReceipt>;
 }
 
 /// A pair of [Hal] and [CircuitHal].

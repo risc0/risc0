@@ -31,7 +31,7 @@ use super::{exec::MachineContext, HalPair, ProverServer};
 use crate::{
     host::{
         receipt::SegmentReceipts,
-        recursion::{join, lift, SuccinctReceipt},
+        recursion::{identity_p254, join, lift, SuccinctReceipt},
         CIRCUIT,
     },
     InnerReceipt, Loader, Receipt, Segment, SegmentReceipt, Session, VerifierContext,
@@ -163,5 +163,9 @@ where
 
     fn join(&self, a: &SuccinctReceipt, b: &SuccinctReceipt) -> Result<SuccinctReceipt> {
         join(a, b)
+    }
+
+    fn identity_p254(&self, a: &SuccinctReceipt) -> Result<SuccinctReceipt> {
+        identity_p254(a)
     }
 }

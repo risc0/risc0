@@ -111,6 +111,13 @@ impl TestClient {
                 .join(opts, left_receipt, right_receipt, receipt_out)
         })
     }
+
+    fn identity_p254(&self, opts: ProverOpts, receipt: Asset) -> SuccinctReceipt {
+        with_server(self.addr, || {
+            let receipt_out = AssetRequest::Path(self.get_work_path());
+            self.client.identity_p254(opts, receipt, receipt_out)
+        })
+    }
 }
 
 fn with_server<T, F: FnOnce() -> Result<T>>(addr: SocketAddr, f: F) -> T {
@@ -235,6 +242,9 @@ fn lift_join_identity() {
             .verify_with_context(&VerifierContext::default())
             .unwrap();
     }
+    let rollup_receipt: Asset = Inline(bincode::serialize(&rollup).unwrap().into());
+    client.identity_p254(opts, rollup_receipt);
+
     let rollup_receipt = Receipt::new(InnerReceipt::Succinct(rollup), session.journal.into());
     rollup_receipt.verify(MULTI_TEST_ID).unwrap();
 }
