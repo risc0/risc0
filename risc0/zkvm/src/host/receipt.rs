@@ -239,7 +239,7 @@ impl Receipt {
     }
 }
 
-/// An inner receipt can take the form of a [SegmentReceipts] collection or a
+/// An inner receipt can take the form of a [CompositeReceipt] collection or a
 /// [SuccinctReceipt].
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[cfg_attr(test, derive(PartialEq))]
@@ -514,10 +514,9 @@ pub struct SegmentReceipt {
     /// The cryptographic data attesting to the validity of the code execution.
     ///
     /// This data is used by the ZKP Verifier (as called by
-    /// [SegmentReceipt::verify_with_context]) to cryptographically prove that
-    /// this Segment was faithfully executed. It is largely opaque
-    /// cryptographic data, but contains a non-opaque metadata component,
-    /// which can be conveniently accessed with
+    /// [SegmentReceipt::verify_integrity_with_context]) to cryptographically prove that this
+    /// Segment was faithfully executed. It is largely opaque cryptographic data, but contains a
+    /// non-opaque metadata component, which can be conveniently accessed with
     /// [SegmentReceipt::get_metadata].
     pub seal: Vec<u32>,
 

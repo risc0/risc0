@@ -97,9 +97,9 @@ pub fn syscall(syscall: SyscallName, to_host: &[u8], from_host: &mut [u32]) -> s
 /// Verify there exists a receipt for an execution with the given `image_id` and
 /// `journal`.
 ///
-/// In order to be valid, the [Receipt] must have `ExitCode::Halted(0)`, an
+/// In order to be valid, the [crate::Receipt] must have `ExitCode::Halted(0)`, an
 /// empty assumptions list, and an all-zeroes input hash. It may have any post
-/// [SystemState].
+/// [crate::SystemState].
 pub fn verify(image_id: Digest, journal: &[u8]) -> Result<(), VerifyError> {
     let journal_digest: Digest = journal.digest();
     let mut from_host_buf = MaybeUninit::<[u32; DIGEST_WORDS + 1]>::uninit();
@@ -151,11 +151,11 @@ pub fn verify(image_id: Digest, journal: &[u8]) -> Result<(), VerifyError> {
 }
 
 // TODO(victor) Check these and any other doc links.
-/// Error encountered during a call to [crate::verify]
+/// Error encountered during a call to [verify]
 ///
 /// Note that an error is only returned for "provable" errors. In particular, if
 /// the host fails to find a receipt matching the requested image_id and
-/// journal, this is not a provable error. In this case, the [crate::verify]
+/// journal, this is not a provable error. In this case, the [verify]
 /// will not return.
 #[derive(Debug)]
 #[non_exhaustive]
@@ -208,12 +208,11 @@ pub fn verify_integrity(metadata: &ReceiptMetadata) -> Result<(), VerifyIntegrit
     Ok(())
 }
 
-/// Error encountered during a call to [crate::verify_integrity].
+/// Error encountered during a call to [verify_integrity].
 ///
-/// Note that an error is only returned for "provable" errors. In particular, if
-/// the host fails to find a receipt matching the requested image_id and
-/// journal, this is not a provable error. In this case, the [crate::verify]
-/// will not return.
+/// Note that an error is only returned for "provable" errors. In particular, if the host fails to
+/// find a receipt matching the requested image_id and journal, this is not a provable error. In
+/// this case, [verify_integrity] will not return.
 #[derive(Debug)]
 #[non_exhaustive]
 pub enum VerifyIntegrityError {

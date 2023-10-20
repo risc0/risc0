@@ -134,7 +134,7 @@ pub struct ProverOpts {
     /// The hash function to use.
     pub hashfn: String,
     /// When false, only prove execution sessions that end in a successful
-    /// [ExitCode] (i.e. `Halted(0)` or `Paused(0)`. When set to true, any
+    /// [crate::ExitCode] (i.e. `Halted(0)` or `Paused(0)`. When set to true, any
     /// completed execution session will be proven, including indicated
     /// errors (e.g. `Halted(1)`) and sessions ending in `Fault`.
     pub prove_guest_errors: bool,

@@ -59,7 +59,7 @@ pub struct Session {
     /// The [ExitCode] of the session.
     pub exit_code: ExitCode,
 
-    /// The final [MemoryState] at the end of execution.
+    /// The final [MemoryImage] at the end of execution.
     pub post_image: MemoryImage,
 
     /// The list of assumptions made by the guest and resolved by the host.
@@ -155,7 +155,7 @@ impl Session {
 
     /// Calculate for the [ReceiptMetadata] associated with this [Session]. The
     /// [ReceiptMetadata] is the claim that will be proven if this [Session]
-    /// is passed to the [Prover].
+    /// is passed to the [crate::Prover].
     pub fn get_metadata(&self) -> Result<ReceiptMetadata> {
         let first_segment = &self
             .segments
