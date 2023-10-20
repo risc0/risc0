@@ -29,8 +29,8 @@ use test_log::test;
 
 use super::{pb, Asset, AssetRequest, Binary, ConnectionWrapper, Connector, TcpConnection};
 use crate::{
-    host::api::Asset::Inline, recursion::SuccinctReceipt, ApiClient, ApiServer, ExecutorEnv,
-    InnerReceipt, ProverOpts, Receipt, SegmentReceipt, SessionInfo, VerifierContext,
+    recursion::SuccinctReceipt, ApiClient, ApiServer, ExecutorEnv, InnerReceipt, ProverOpts,
+    Receipt, SegmentReceipt, SessionInfo, VerifierContext,
 };
 
 struct TestClientConnector {
@@ -223,27 +223,25 @@ fn lift_join_identity() {
             .try_into()
             .unwrap(),
     );
-    let receipt: Asset = Inline((bincode::serialize(&receipt).unwrap()).into());
-    let mut rollup = client.lift(opts.clone(), receipt);
+    let mut rollup = client.lift(opts.clone(), receipt.try_into().unwrap());
 
     for segment in &client.segments[1..] {
         let receipt = client.prove_segment(
             opts.clone(),
             segment.segment.clone().unwrap().try_into().unwrap(),
         );
-        let receipt: Asset = Inline(bincode::serialize(&receipt).unwrap().into());
-        let rec_receipt = client.lift(opts.clone(), receipt);
+        let rec_receipt = client.lift(opts.clone(), receipt.try_into().unwrap());
 
-        let rec_receipt: Asset = Inline(bincode::serialize(&rec_receipt).unwrap().into());
-        let rollup_receipt: Asset = Inline(bincode::serialize(&rollup).unwrap().into());
-
-        rollup = client.join(opts.clone(), rollup_receipt, rec_receipt);
+        rollup = client.join(
+            opts.clone(),
+            rollup.try_into().unwrap(),
+            rec_receipt.try_into().unwrap(),
+        );
         rollup
             .verify_with_context(&VerifierContext::default())
             .unwrap();
     }
-    let rollup_receipt: Asset = Inline(bincode::serialize(&rollup).unwrap().into());
-    client.identity_p254(opts, rollup_receipt);
+    client.identity_p254(opts, rollup.clone().try_into().unwrap());
 
     let rollup_receipt = Receipt::new(InnerReceipt::Succinct(rollup), session.journal.into());
     rollup_receipt.verify(MULTI_TEST_ID).unwrap();
