@@ -20,20 +20,17 @@ use waldo_core::{
     PrivateInput,
 };
 
-use crate::{exec_compute, CycleCounter};
+use crate::{exec, CycleCounter, Metrics};
 
-pub struct Job {
-    pub cycles: u32,
-}
-
-const METHOD_ELF: &'static [u8] = waldo_methods::IMAGE_CROP_ELF;
+pub struct Job {}
 
 impl CycleCounter for Job {
     const NAME: &'static str = "waldo";
+    const METHOD_ELF: &'static [u8] = waldo_methods::IMAGE_CROP_ELF;
 
-    fn new() -> Self {
+    fn run() -> Metrics {
         // Read the image from disk.
-        let img = ImageReader::open("../../examples/waldo/waldo.webp")
+        let img = ImageReader::open("../waldo/waldo.webp")
             .unwrap()
             .decode()
             .unwrap();
@@ -41,7 +38,7 @@ impl CycleCounter for Job {
         let crop_dimensions: (u32, u32) = (58, 70);
 
         // Read the image mask from disk.
-        let mask: ImageMask = ImageReader::open("../../examples/waldo/waldo_mask.png")
+        let mask: ImageMask = ImageReader::open("../waldo/waldo_mask.png")
             .unwrap()
             .decode()
             .unwrap()
@@ -66,11 +63,6 @@ impl CycleCounter for Job {
             .build()
             .unwrap();
 
-        let cycles = exec_compute(METHOD_ELF, env);
-        Job { cycles }
-    }
-
-    fn exec_compute(&mut self) -> u32 {
-        self.cycles
+        exec(Self::NAME, Self::METHOD_ELF, env)
     }
 }

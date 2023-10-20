@@ -16,18 +16,15 @@ use digital_signature_core::{Message, Passphrase, SigningRequest};
 use risc0_zkvm::ExecutorEnv;
 use sha2::{Digest, Sha256};
 
-use crate::{exec_compute, CycleCounter};
+use crate::{exec, CycleCounter, Metrics};
 
-pub struct Job<'a> {
-    pub env: ExecutorEnv<'a>,
-}
+pub struct Job {}
 
-const METHOD_ELF: &'static [u8] = digital_signature_methods::SIGN_ELF;
-
-impl CycleCounter for Job<'_> {
+impl CycleCounter for Job {
     const NAME: &'static str = "digital-signature";
+    const METHOD_ELF: &'static [u8] = digital_signature_methods::SIGN_ELF;
 
-    fn new() -> Self {
+    fn run() -> Metrics {
         let params = SigningRequest {
             passphrase: Passphrase {
                 pass: Sha256::digest("passphrase").try_into().unwrap(),
@@ -42,10 +39,6 @@ impl CycleCounter for Job<'_> {
             .build()
             .unwrap();
 
-        Job { env }
-    }
-
-    fn exec_compute(&mut self) -> u32 {
-        exec_compute(METHOD_ELF, self.env.clone())
+        exec(Self::NAME, Self::METHOD_ELF, env)
     }
 }
