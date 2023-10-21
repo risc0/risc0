@@ -96,6 +96,9 @@ pub fn main() {
         MultiTestSpec::Fail => {
             panic!("MultiTestSpec::Fail invoked");
         }
+        MultiTestSpec::Halt(exit_code) => {
+            env::exit(exit_code);
+        }
         MultiTestSpec::ReadWriteMem { values } => {
             for (addr, value) in values.into_iter() {
                 if value != 0 {
@@ -167,9 +170,9 @@ pub fn main() {
             let meta: ReceiptMetadata = risc0_zkvm::serde::from_slice(&metadata_words).unwrap();
             env::verify_integrity(&meta).unwrap();
         }
-        MultiTestSpec::PauseContinue => {
+        MultiTestSpec::PauseContinue(exit_code) => {
             env::log("before");
-            env::pause();
+            env::pause(exit_code);
             env::log("after");
         }
         MultiTestSpec::EchoStdout { nbytes, fd } => {

@@ -36,6 +36,8 @@ pub enum MultiTestSpec {
     EventTrace,
     Profiler,
     Fail,
+    Halt(u8),
+    PauseContinue(u8),
     ReadWriteMem {
         /// Tuples of (address, value). Zero means read the value and
         /// output it; nonzero means write that value.
@@ -73,7 +75,6 @@ pub enum MultiTestSpec {
         y: [u32; bigint::WIDTH_WORDS],
         modulus: [u32; bigint::WIDTH_WORDS],
     },
-    PauseContinue,
     BusyLoop {
         /// Busy loop until the guest has run for at least this number of cycles
         cycles: u32,

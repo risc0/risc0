@@ -380,7 +380,7 @@ mod docker {
     #[test]
     fn pause_continue() {
         let env = ExecutorEnv::builder()
-            .write(&MultiTestSpec::PauseContinue)
+            .write(&MultiTestSpec::PauseContinue(0))
             .unwrap()
             .build()
             .unwrap();

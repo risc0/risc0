@@ -25,7 +25,7 @@ use anyhow::Result;
 use bytes::Bytes;
 use risc0_zkvm_methods::{
     multi_test::{MultiTestSpec, SYS_MULTI_TEST},
-    HELLO_COMMIT_ELF, HELLO_COMMIT_ID, MULTI_TEST_ELF, SLICE_IO_ELF, STANDARD_LIB_ELF,
+    HELLO_COMMIT_ELF, MULTI_TEST_ELF, SLICE_IO_ELF, STANDARD_LIB_ELF,
 };
 use risc0_zkvm_platform::{fileno, syscall::nr::SYS_RANDOM, PAGE_SIZE, WORD_SIZE};
 use sha2::{Digest as _, Sha256};
@@ -365,76 +365,114 @@ fn large_io_bytes() {
     assert_eq!(&buf, actual);
 }
 
-#[test]
-fn sys_verify() {
-    let hello_commit_session = ExecutorImpl::from_elf(ExecutorEnv::default(), HELLO_COMMIT_ELF)
-        .unwrap()
-        .run()
-        .unwrap();
-
-    let spec = &MultiTestSpec::SysVerify {
-        image_id: HELLO_COMMIT_ID.into(),
-        journal: hello_commit_session.journal.clone().unwrap(),
+mod sys_verify {
+    use risc0_zkvm_methods::{
+        multi_test::MultiTestSpec, HELLO_COMMIT_ELF, HELLO_COMMIT_ID, MULTI_TEST_ELF,
     };
+    use test_log::test;
 
-    // Test that it works when the assumption is added.
-    let env = ExecutorEnv::builder()
-        .write(&spec)
-        .unwrap()
-        .add_assumption(hello_commit_session.get_metadata().unwrap().into())
-        .build()
-        .unwrap();
-    ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
+    use crate::{serde::to_vec, ExecutorEnv, ExecutorEnvBuilder, ExecutorImpl, Session};
+
+    fn exec_hello_commit() -> Session {
+        ExecutorImpl::from_elf(ExecutorEnv::default(), HELLO_COMMIT_ELF)
+            .unwrap()
+            .run()
+            .unwrap()
+    }
+
+    fn exec_halt(exit_code: u8) -> Session {
+        ExecutorImpl::from_elf(
+            ExecutorEnvBuilder::default()
+                .write(&MultiTestSpec::Halt(exit_code))
+                .unwrap()
+                .build()
+                .unwrap(),
+            MULTI_TEST_ELF,
+        )
         .unwrap()
         .run()
-        .unwrap();
-
-    // Test that it does not work when the assumption is not added.
-    let env = ExecutorEnv::builder()
-        .write(&spec)
         .unwrap()
-        .build()
-        .unwrap();
-    assert!(ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
+    }
+
+    fn exec_pause(exit_code: u8) -> Session {
+        ExecutorImpl::from_elf(
+            ExecutorEnvBuilder::default()
+                .write(&MultiTestSpec::PauseContinue(exit_code))
+                .unwrap()
+                .build()
+                .unwrap(),
+            MULTI_TEST_ELF,
+        )
         .unwrap()
         .run()
-        .is_err());
-}
+        .unwrap()
+    }
 
-#[test]
-fn sys_verify_integrity() {
-    let hello_commit_session = ExecutorImpl::from_elf(ExecutorEnv::default(), HELLO_COMMIT_ELF)
-        .unwrap()
-        .run()
-        .unwrap();
+    #[test]
+    fn sys_verify() {
+        let hello_commit_session = exec_hello_commit();
 
-    // TODO(victor) Also execute with a receipt of failure.
-    let spec = &MultiTestSpec::SysVerifyIntegrity {
-        metadata_words: to_vec(&hello_commit_session.get_metadata().unwrap()).unwrap(),
-    };
+        let spec = &MultiTestSpec::SysVerify {
+            image_id: HELLO_COMMIT_ID.into(),
+            journal: hello_commit_session.journal.clone().unwrap(),
+        };
 
-    // Test that it works when the assumption is added.
-    let env = ExecutorEnv::builder()
-        .write(&spec)
-        .unwrap()
-        .add_assumption(hello_commit_session.get_metadata().unwrap().into())
-        .build()
-        .unwrap();
-    ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
-        .unwrap()
-        .run()
-        .unwrap();
+        // Test that it works when the assumption is added.
+        let env = ExecutorEnv::builder()
+            .write(&spec)
+            .unwrap()
+            .add_assumption(hello_commit_session.get_metadata().unwrap().into())
+            .build()
+            .unwrap();
+        ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
+            .unwrap()
+            .run()
+            .unwrap();
 
-    // Test that it does not work when the assumption is not added.
-    let env = ExecutorEnv::builder()
-        .write(&spec)
-        .unwrap()
-        .build()
-        .unwrap();
-    assert!(ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
-        .unwrap()
-        .run()
-        .is_err());
+        // Test that it does not work when the assumption is not added.
+        let env = ExecutorEnv::builder()
+            .write(&spec)
+            .unwrap()
+            .build()
+            .unwrap();
+        assert!(ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
+            .unwrap()
+            .run()
+            .is_err());
+    }
+
+    #[test]
+    fn sys_verify_integrity() {
+        let hello_commit_session = exec_hello_commit();
+
+        // TODO(victor) Also execute with a receipt of failure.
+        let spec = &MultiTestSpec::SysVerifyIntegrity {
+            metadata_words: to_vec(&hello_commit_session.get_metadata().unwrap()).unwrap(),
+        };
+
+        // Test that it works when the assumption is added.
+        let env = ExecutorEnv::builder()
+            .write(&spec)
+            .unwrap()
+            .add_assumption(hello_commit_session.get_metadata().unwrap().into())
+            .build()
+            .unwrap();
+        ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
+            .unwrap()
+            .run()
+            .unwrap();
+
+        // Test that it does not work when the assumption is not added.
+        let env = ExecutorEnv::builder()
+            .write(&spec)
+            .unwrap()
+            .build()
+            .unwrap();
+        assert!(ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
+            .unwrap()
+            .run()
+            .is_err());
+    }
 }
 
 #[test]

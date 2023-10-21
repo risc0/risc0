@@ -73,11 +73,20 @@ pub(crate) fn finalize(halt: bool, user_exit: u8) {
     }
 }
 
+/// Terminate execution of the zkvm.
+///
+/// Use an exit code of 0 to indicate success, and non-zero to indicate an error.
+pub fn exit(exit_code: u8) -> ! {
+    finalize(true, exit_code);
+    unreachable!();
+}
+
 /// Pause the execution of the zkvm.
 ///
 /// Execution may be continued at a later time.
-pub fn pause() {
-    finalize(false, 0);
+/// Use an exit code of 0 to indicate success, and non-zero to indicate an error.
+pub fn pause(exit_code: u8) {
+    finalize(false, exit_code);
     init();
 }
 
