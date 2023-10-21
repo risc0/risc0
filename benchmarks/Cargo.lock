@@ -1024,6 +1024,20 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9ea835d29036a4087793836fa931b08837ad5e957da9e23886b29586fb9b6650"
 
 [[package]]
+name = "downloader"
+version = "0.2.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d05213e96f184578b5f70105d4d0a644a168e99e12d7bea0b200c15d67b5c182"
+dependencies = [
+ "digest 0.10.7",
+ "futures",
+ "rand",
+ "reqwest",
+ "thiserror",
+ "tokio",
+]
+
+[[package]]
 name = "ecdsa"
 version = "0.16.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3182,6 +3196,7 @@ dependencies = [
  "anyhow",
  "bytemuck",
  "cust",
+ "downloader",
  "log",
  "metal",
  "rand",
@@ -3189,6 +3204,7 @@ dependencies = [
  "risc0-circuit-recursion-sys",
  "risc0-core 0.19.0-rc.1",
  "risc0-zkp 0.19.0-rc.1",
+ "sha2",
  "tracing",
  "zip",
 ]
