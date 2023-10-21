@@ -52,6 +52,12 @@ fn download_zkr() {
         let tgt_path = out_dir.join("recursion_zkr.zip");
         std::fs::copy(&src_path, &tgt_path).unwrap();
     } else {
+        fn decode_hex(s: &str) -> Result<Vec<u8>, std::num::ParseIntError> {
+            (0..s.len())
+                .step_by(2)
+                .map(|i| u8::from_str_radix(&s[i..i + 2], 16))
+                .collect()
+        }
         let mut downloader = Downloader::builder()
             .download_folder(out_dir)
             .build()
@@ -67,11 +73,4 @@ fn download_zkr() {
             eprintln!("{summary}");
         }
     }
-}
-
-fn decode_hex(s: &str) -> Result<Vec<u8>, std::num::ParseIntError> {
-    (0..s.len())
-        .step_by(2)
-        .map(|i| u8::from_str_radix(&s[i..i + 2], 16))
-        .collect()
 }
