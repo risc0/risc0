@@ -3726,6 +3726,7 @@ dependencies = [
  "semver 1.0.19",
  "serde",
  "sha2",
+ "tempfile",
  "tracing",
  "typetag",
 ]

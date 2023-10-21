@@ -3984,6 +3984,7 @@ dependencies = [
  "semver",
  "serde",
  "sha2 0.10.8",
+ "tempfile",
  "tracing",
  "typetag",
 ]
