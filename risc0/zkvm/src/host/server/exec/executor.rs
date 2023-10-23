@@ -299,9 +299,10 @@ impl<'a> ExecutorImpl<'a> {
         let (exit_code, post_image) = run_loop()?;
 
         // Take (clear out) the list of accessed assumptions.
-        // Leave the assumptions cache so that it can be used if execution is resumed
-        // from pause.
+        // Leave the assumptions cache so it can be used if execution is resumed from pause.
         let assumptions = mem::take(&mut self.env.assumptions.borrow_mut().accessed);
+
+        // Set the session_journal to the committed data iff the the guest set a non-zero output.
         let session_journal = self
             .output_digest
             .and_then(|output_digest| (output_digest != Digest::ZERO).then(|| journal.buf.take()));

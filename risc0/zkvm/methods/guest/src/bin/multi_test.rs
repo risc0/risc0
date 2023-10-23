@@ -93,9 +93,12 @@ pub fn main() {
             // Call an external function to make sure it's detected during profiling.
             profile_test_func1()
         }
-        MultiTestSpec::Fail => {
-            panic!("MultiTestSpec::Fail invoked");
+        MultiTestSpec::Panic => {
+            panic!("MultiTestSpec::Panic invoked");
         }
+        MultiTestSpec::Fault => unsafe {
+            asm!("sw x0, 1(x0)");
+        },
         MultiTestSpec::Halt(exit_code) => {
             env::exit(exit_code);
         }

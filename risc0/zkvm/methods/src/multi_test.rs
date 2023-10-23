@@ -35,7 +35,8 @@ pub enum MultiTestSpec {
     },
     EventTrace,
     Profiler,
-    Fail,
+    Panic,
+    Fault,
     Halt(u8),
     PauseContinue(u8),
     ReadWriteMem {
