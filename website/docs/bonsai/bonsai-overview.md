@@ -15,7 +15,7 @@ Check out our [Bonsai Quick Start] page, and start building!
 **Please note that Bonsai is still in early development. <br/>
 [Request access here], and do not use Bonsai in production.**
 
-![Bonsai ETH Relay overview](../img/eth-relay-diagram.jpg)
+![Bonsai ETH Relay overview]
 
 <!-- revise diagram with "you create"/"bonsai creates" colors -->
 
@@ -52,7 +52,7 @@ Stay tuned!
 
 ### 1. The RISC Zero zkVM: the proof engine behind Bonsai
 
-_Status: [Available and open source](https://github.com/risc0/risc0)_
+_Status: [Available and open source][risc0-repo]_
 
 Under the hood, Bonsai uses the RISC Zero zkVM to prove your programs. With the zkVM, you have access to recursive proofs, a general-purpose circuit (with a bespoke circuit compiler), state continuations, and continuous improvements to the proving algorithm.
 
@@ -60,11 +60,11 @@ Under the hood, Bonsai uses the RISC Zero zkVM to prove your programs. With the 
 
 _Status: Pre-Alpha_
 
-The Bonsai proving service can be used standalone or directly integrated with smart contracts and blockchains. If you're interested in Bonsai, learn more in our [litepaper] and [talks](https://youtu.be/nVAs2i-_Iyo?t=3044).
+The Bonsai proving service can be used standalone or directly integrated with smart contracts and blockchains. If you're interested in Bonsai, learn more in our [litepaper] and [talks][youtube-talks].
 
 ### 3. Bonsai ETH Relay: Connecting off-chain proofs and on-chain applications
 
-_Status: Pre-Alpha, [documentation](bonsai-on-eth.md) and [Bonsai Foundry template](https://github.com/risc0/bonsai-foundry-template) available_
+_Status: Pre-Alpha, [documentation][bonsai-on-eth] and [Bonsai Foundry template] available_
 
 The Bonsai ETH Relay connects your Ethereum dApps to Bonsai. Smart contract developers can call our proving service through an on-chain relay contract connected to the Bonsai proving service. If you'd prefer to engage with Bonsai proving service directly, we'll be rolling out the means to do so in the near future.
 
@@ -83,3 +83,8 @@ We're building technology that allows anyone to generate highly performant zero-
 [Bonsai as a zk coprocessor]: https://twitter.com/RiscZero/status/1677316664772132864
 [Bonfire Wallet]: https://twitter.com/RiscZero/status/1673692915401629698
 [Governance Showcase]: https://github.com/risc0/risc0/tree/main/bonsai/examples/governance#readme
+[Bonsai Foundry template]: https://github.com/risc0/bonsai-foundry-template
+[Bonsai ETH Relay overview]: ../img/eth-relay-diagram.jpg
+[risc0-repo]: https://github.com/risc0/risc0
+[bonsai-on-eth]: bonsai-on-eth.md
+[youtube-talks]: https://youtu.be/nVAs2i-_Iyo?t=3044

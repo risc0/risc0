@@ -6,7 +6,7 @@ Bonsai can be used as a [zk coprocessor] for Ethereum, allowing you to request a
 
 At a high level, here's how it works:
 
-![Bonsai ETH Relay overview](../img/eth-relay-diagram.jpg)
+![Bonsai ETH Relay overview]
 
 <!-- TODO: Highlight the relay sections of this diagram -->
 
@@ -18,10 +18,12 @@ Our Bonsai-ETH Relay acts as a middle-man between your app contract and the Bons
 ## Getting Started
 
 The [Bonsai Foundry Template] is the best place to get started building Bonsai applications for Ethereum.
-You may also want to check out our [Bonsai Quick Start](quickstart.md) page.
+You may also want to check out our [Bonsai Quick Start] page.
 
+[Bonsai Quick Start]: quickstart.md
 [verified proofs]: https://risczero.com/news/on-chain-verification
 [zk coprocessor]: https://twitter.com/RiscZero/status/1677316664772132864
 [Bonsai Foundry Template]: https://github.com/risc0/bonsai-foundry-template
 [smart contract]: https://github.com/risc0/bonsai-foundry-template/tree/main/contracts
 [program]: https://github.com/risc0/bonsai-foundry-template/tree/main/methods/guest/src/bin
+[Bonsai ETH Relay overview]: ../img/eth-relay-diagram.jpg
