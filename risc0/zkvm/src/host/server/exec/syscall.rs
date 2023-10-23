@@ -294,12 +294,11 @@ impl SysVerify {
         );
 
         // Iterate over the list looking for a matching assumption. If found, return the
-        // post state digest.
+        // post state digest and system exit code.
         let mut assumption: Option<Assumption> = None;
         for cached_assumption in self.assumptions.borrow().cached.iter() {
             let assumption_metadata = cached_assumption.get_metadata()?;
             let cmp_result = Self::sys_verify_cmp(&assumption_metadata, &image_id, &journal_digest);
-
             let (post_state_digest, sys_exit_code) = match cmp_result {
                 Ok(None) => continue,
                 // If the required values to compare were pruned, go the next assumption.

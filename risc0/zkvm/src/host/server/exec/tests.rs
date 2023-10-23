@@ -406,7 +406,6 @@ mod sys_verify {
         session
     }
 
-    #[allow(unused)] // DO NOT MERGE
     fn exec_pause(exit_code: u8) -> Session {
         let env = ExecutorEnvBuilder::default()
             .write(&MultiTestSpec::PauseContinue(exit_code))
@@ -471,6 +470,34 @@ mod sys_verify {
                 .write(&spec)
                 .unwrap()
                 .add_assumption(halt_session.get_metadata().unwrap().into())
+                .build()
+                .unwrap();
+            let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap().run();
+
+            if code == 0 {
+                assert_eq!(session.unwrap().exit_code, ExitCode::Halted(0));
+            } else {
+                assert!(session.is_err());
+            }
+        }
+    }
+
+    #[test]
+    fn sys_verify_pause_codes() {
+        for code in [0u8, 1, 2, 255] {
+            log::debug!("sys_verify_halt_codes: code = {code}");
+            let pause_session = exec_pause(code);
+
+            let spec = &MultiTestSpec::SysVerify {
+                image_id: MULTI_TEST_ID.into(),
+                journal: Vec::new(),
+            };
+
+            // Test that it works when the assumption is added.
+            let env = ExecutorEnv::builder()
+                .write(&spec)
+                .unwrap()
+                .add_assumption(pause_session.get_metadata().unwrap().into())
                 .build()
                 .unwrap();
             let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap().run();
