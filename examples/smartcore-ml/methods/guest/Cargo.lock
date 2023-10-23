@@ -468,7 +468,7 @@ dependencies = [
 [[package]]
 name = "smartcore"
 version = "0.3.2"
-source = "git+https://github.com/risc0/smartcore.git#4bd3cadd50ed988c45c239f5264c3e2c2af0a690"
+source = "git+https://github.com/risc0/smartcore.git?rev=4bd3cadd50ed988c45c239f5264c3e2c2af0a690#4bd3cadd50ed988c45c239f5264c3e2c2af0a690"
 dependencies = [
  "approx",
  "cfg-if",

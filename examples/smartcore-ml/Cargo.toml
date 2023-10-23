@@ -7,7 +7,7 @@ edition = "2021"
 risc0-zkvm = { path = "../../risc0/zkvm" }
 rmp-serde = "1.1"
 serde_json = "1.0"
-smartcore = { git = "https://github.com/risc0/smartcore.git", features = ["serde"] }
+smartcore = { git = "https://github.com/risc0/smartcore.git", rev = "4bd3cadd50ed988c45c239f5264c3e2c2af0a690", features = ["serde"] }
 smartcore-ml-methods = { path = "methods" }
 
 [features]
