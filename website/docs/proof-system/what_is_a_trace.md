@@ -18,8 +18,11 @@ to the program instructions and the underlying computer architecture.
 `RISC Zero's computational receipts use cutting-edge technology to audit an
 execution trace while preserving computational privacy.`
 
-_The core of a RISC Zero receipt is a
-[zk-STARK](../reference-docs/about-starks.md); for a more technical description
-of how we turn an execution trace into a zk-STARK, see the [proof system
-sequence diagram](proof-system-sequence-diagram.md) and our [STARK by
-Hand](stark-by-hand.md) explainer._
+_The core of a RISC Zero receipt is a [zk-STARK]; for a more technical
+description of how we turn an execution trace into a zk-STARK, see the [proof
+system sequence diagram] and our [STARK by Hand] explainer._
+
+
+[zk-STARK]: ../reference-docs/about-starks.md
+[proof system sequence diagram]: proof-system-sequence-diagram.md
+[STARK by Hand]: stark-by-hand.md

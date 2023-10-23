@@ -4,8 +4,8 @@ sidebar_position: 4
 
 # Proof System Sequence Diagram and Spec
 
-_The implementation in code for the RISC Zero prover can be seen [here](https://github.com/risc0/risc0/blob/v0.18.0/risc0/zkp/src/prove/prover.rs).
-In this document, we present an overview to the protocol, as well as a sequence diagram and a detailed description below. The [STARK by Hand](stark-by-hand.md) explainer and the [RISC Zero ZKP Whitepaper](https://dev.risczero.com/proof-system-in-detail.pdf) are good companions to this document._
+_The implementation in code for the RISC Zero prover can be seen [here][prover-code].
+In this document, we present an overview to the protocol, as well as a sequence diagram and a detailed description below. The [STARK by Hand] explainer and the RISC Zero [ZKP Whitepaper] are good companions to this document._
 
 ## Overview
 
@@ -40,10 +40,10 @@ These enhancements are described well in [From AIRs to RAPs].
 
 We use this Auxiliary Execution Trace to support:
 
-1. A permutation argument for [memory verification](https://www.youtube.com/watch?v=dYuEPvRLwLo&list=PLcPzhUaCxlCiLk_VjLUNbmfb2mB1Y_N9N&index=5)<br/>
-   The permutation argument is currently implemented as a grand product accumulator argument, as in [PLONK](https://eprint.iacr.org/2019/953.pdf).
+1. A permutation argument for [memory verification]<br/>
+   The permutation argument is currently implemented as a grand product accumulator argument, as in [PLONK].
    We plan to change this to a [log derivative] accumulator argument in the next version of the circuit.<br/>
-   Here, operations corresonding to memory are committed to the main trace both in the original ordering and the permuted ordering, and grand product accumulators are committed in the auxiliary trace.
+   Here, operations corresponding to memory are committed to the main trace both in the original ordering and the permuted ordering, and grand product accumulators are committed in the auxiliary trace.
 
 1. A lookup argument for range checks<br/>
    The lookup argument is currently implemented using the approach described in [PLOOKUP].
@@ -98,7 +98,7 @@ For a more formal articulation of the protocol, refer to the [ZKP Whitepaper].
 
 ### Extended Main Execution Trace
 
-- The Prover runs a computation in order to generate an [`Execution Trace`](what_is_a_trace).
+- The Prover runs a computation in order to generate an [`Execution Trace`].
   - The `trace` is organized into `columns`, and the columns are categorized as `control columns`, `data columns`, and `auxiliary/accum columns`.
     - The `control columns` handle system initialization and shutdown, the initial program code to load into memory before execution, and other control signals that don't depend on the program execution.
     - The `data columns` contain the input and the computation data, both of which are private. These columns are committed in two orderings:
@@ -169,3 +169,8 @@ Thanks for reading! If you have questions or feedback, we'd love to hear from yo
 [receipts]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Receipt.html
 [ZKP Whitepaper]: https://dev.risczero.com/proof-system-in-detail.pdf
 [fast cryptographic operations]: ../zkvm/developer-guide/acceleration.md
+[STARK by Hand]: stark-by-hand.md
+[prover-code]: https://github.com/risc0/risc0/blob/v0.18.0/risc0/zkp/src/prove/prover.rs
+[memory verification]: https://www.youtube.com/watch?v=dYuEPvRLwLo&list=PLcPzhUaCxlCiLk_VjLUNbmfb2mB1Y_N9N&index=5
+[PLONK]: https://eprint.iacr.org/2019/953.pdf
+[def]: what_is_a_trace
