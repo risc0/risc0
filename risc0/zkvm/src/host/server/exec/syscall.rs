@@ -36,9 +36,9 @@ use crate::{
         posix_io::PosixIo,
         slice_io::SliceIo,
     },
-    receipt_metadata::PrunedValueError,
+    receipt_metadata::{MaybePruned, PrunedValueError},
     sha::{Digest, Digestible},
-    Assumption,
+    Assumption, ExitCode, ReceiptMetadata,
 };
 
 /// A host-side implementation of a system call.
@@ -298,27 +298,7 @@ impl SysVerify {
         let mut assumption: Option<Assumption> = None;
         for cached_assumption in self.assumptions.borrow().cached.iter() {
             let assumption_metadata = cached_assumption.get_metadata()?;
-            let cmp_result: Result<Option<_>, PrunedValueError> = {
-                // TODO(#982): Check here that the cached assumption has no assumptions?
-                let assumption_journal_digest = assumption_metadata
-                    .as_value()?
-                    .output
-                    .as_value()?
-                    .as_ref()
-                    .map(|output| output.journal.digest())
-                    .unwrap_or(Digest::ZERO);
-                let assumption_image_id = assumption_metadata.as_value()?.pre.digest();
-
-                if assumption_journal_digest == journal_digest && assumption_image_id == image_id {
-                    // Return the post stat digest and exit code.
-                    Ok(Some((
-                        assumption_metadata.as_value()?.post.digest(),
-                        assumption_metadata.as_value()?.exit_code.into_pair().0,
-                    )))
-                } else {
-                    Ok(None)
-                }
-            };
+            let cmp_result = Self::sys_verify_cmp(&assumption_metadata, &image_id, &journal_digest);
 
             let (post_state_digest, sys_exit_code) = match cmp_result {
                 Ok(None) => continue,
@@ -352,6 +332,59 @@ impl SysVerify {
         // Mark the assumption as accessed and return the success code.
         self.assumptions.borrow_mut().accessed.push(assumption);
         return Ok((0, 0));
+    }
+
+    /// Check whether the metadata satisfies the requirements to return for sys_verify.
+    fn sys_verify_cmp(
+        metadata: &MaybePruned<ReceiptMetadata>,
+        image_id: &Digest,
+        journal_digest: &Digest,
+    ) -> Result<Option<(Digest, u32)>, PrunedValueError> {
+        // DO NOT MERGE: Check here that the cached assumption has no assumptions
+        let assumption_journal_digest = metadata
+            .as_value()?
+            .output
+            .as_value()?
+            .as_ref()
+            .map(|output| output.journal.digest())
+            .unwrap_or(Digest::ZERO);
+        let assumption_image_id = metadata.as_value()?.pre.digest();
+
+        if &assumption_journal_digest != journal_digest || &assumption_image_id != image_id {
+            return Ok(None);
+        }
+
+        // Check that the exit code is either Halted(0) or Paused(0).
+        let (ExitCode::Halted(0) | ExitCode::Paused(0)) = metadata.as_value()?.exit_code else {
+            log::debug!(
+                "sys_verify: ignoring matching metadata with error exit code: {:?}",
+                metadata
+            );
+            return Ok(None);
+        };
+
+        // Check that the assumption has no assumptions.
+        let assumption_assumptions_digest = metadata
+            .as_value()?
+            .output
+            .as_value()?
+            .as_ref()
+            .map(|output| output.assumptions.digest())
+            .unwrap_or(Digest::ZERO);
+
+        if assumption_assumptions_digest != Digest::ZERO {
+            log::debug!(
+                "sys_verify: ignoring matching metadata with non-empty assumptions: {:?}",
+                metadata
+            );
+            return Ok(None);
+        }
+
+        // Return the post state digest and exit code.
+        Ok(Some((
+            metadata.as_value()?.post.digest(),
+            metadata.as_value()?.exit_code.into_pair().0,
+        )))
     }
 }
 

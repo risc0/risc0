@@ -377,7 +377,7 @@ fn large_io_bytes() {
 
 mod sys_verify {
     use risc0_zkvm_methods::{
-        multi_test::MultiTestSpec, HELLO_COMMIT_ELF, HELLO_COMMIT_ID, MULTI_TEST_ELF,
+        multi_test::MultiTestSpec, HELLO_COMMIT_ELF, HELLO_COMMIT_ID, MULTI_TEST_ELF, MULTI_TEST_ID,
     };
     use test_log::test;
 
@@ -392,7 +392,6 @@ mod sys_verify {
         session
     }
 
-    #[allow(unused)] // DO NOT MERGE
     fn exec_halt(exit_code: u8) -> Session {
         let env = ExecutorEnvBuilder::default()
             .write(&MultiTestSpec::Halt(exit_code))
@@ -454,6 +453,34 @@ mod sys_verify {
             .unwrap()
             .run()
             .is_err());
+    }
+
+    #[test]
+    fn sys_verify_halt_codes() {
+        for code in [0u8, 1, 2, 255] {
+            log::debug!("sys_verify_halt_codes: code = {code}");
+            let halt_session = exec_halt(code);
+
+            let spec = &MultiTestSpec::SysVerify {
+                image_id: MULTI_TEST_ID.into(),
+                journal: Vec::new(),
+            };
+
+            // Test that it works when the assumption is added.
+            let env = ExecutorEnv::builder()
+                .write(&spec)
+                .unwrap()
+                .add_assumption(halt_session.get_metadata().unwrap().into())
+                .build()
+                .unwrap();
+            let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap().run();
+
+            if code == 0 {
+                assert_eq!(session.unwrap().exit_code, ExitCode::Halted(0));
+            } else {
+                assert!(session.is_err());
+            }
+        }
     }
 
     #[test]
