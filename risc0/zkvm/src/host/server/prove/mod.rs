@@ -41,8 +41,8 @@ use risc0_zkvm_platform::{memory::GUEST_MAX_MEM, PAGE_SIZE, WORD_SIZE};
 
 use self::{dev_mode::DevModeProver, prover_impl::ProverImpl};
 use crate::{
-    host::receipt::SegmentReceipt, is_dev_mode, ExecutorEnv, ExecutorImpl, ProverOpts, Receipt,
-    Segment, Session, VerifierContext,
+    host::receipt::{SegmentReceipt, SuccinctReceipt},
+    is_dev_mode, ExecutorEnv, ExecutorImpl, ProverOpts, Receipt, Segment, Session, VerifierContext,
 };
 
 /// A ProverServer can execute a given [MemoryImage] and produce a [Receipt]
@@ -85,6 +85,15 @@ pub trait ProverServer {
 
     /// Return the peak memory usage that this [ProverServer] has experienced.
     fn get_peak_memory_usage(&self) -> usize;
+
+    /// Lift a [SegmentReceipt] into a [SuccinctReceipt]
+    fn lift(&self, receipt: &SegmentReceipt) -> Result<SuccinctReceipt>;
+
+    /// Join two [SuccinctReceipt] into a [SuccinctReceipt]
+    fn join(&self, a: &SuccinctReceipt, b: &SuccinctReceipt) -> Result<SuccinctReceipt>;
+
+    /// Convert a [SuccinctReceipt] with a poseidon hash function that uses a 254-bit field
+    fn identity_p254(&self, a: &SuccinctReceipt) -> Result<SuccinctReceipt>;
 }
 
 /// A pair of [Hal] and [CircuitHal].

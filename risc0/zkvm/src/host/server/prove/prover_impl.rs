@@ -28,7 +28,8 @@ use risc0_zkp::{
 use super::{exec::MachineContext, HalPair, ProverServer};
 use crate::{
     host::{
-        receipt::{CompositeReceipt, InnerReceipt, SegmentReceipt},
+        receipt::{CompositeReceipt, InnerReceipt, SegmentReceipt, SuccinctReceipt},
+        recursion::{identity_p254, join, lift},
         CIRCUIT,
     },
     sha::Digestible,
@@ -170,5 +171,17 @@ where
 
     fn get_peak_memory_usage(&self) -> usize {
         self.hal_pair.hal.get_memory_usage()
+    }
+
+    fn lift(&self, receipt: &SegmentReceipt) -> Result<SuccinctReceipt> {
+        lift(receipt)
+    }
+
+    fn join(&self, a: &SuccinctReceipt, b: &SuccinctReceipt) -> Result<SuccinctReceipt> {
+        join(a, b)
+    }
+
+    fn identity_p254(&self, a: &SuccinctReceipt) -> Result<SuccinctReceipt> {
+        identity_p254(a)
     }
 }

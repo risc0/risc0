@@ -43,6 +43,7 @@ use risc0_zkvm_platform::{
 };
 use rrs_lib::{instruction_executor::InstructionExecutor, HartState};
 use serde::{Deserialize, Serialize};
+use tempfile::TempDir;
 
 use super::{monitor::MemoryMonitor, syscall::SyscallTable};
 use crate::{
@@ -52,7 +53,7 @@ use crate::{
         server::opcode::{MajorType, OpCode},
     },
     sha::Digest,
-    ExecutorEnv, ExitCode, Loader, Segment, SegmentRef, Session, SimpleSegmentRef,
+    ExecutorEnv, ExitCode, FileSegmentRef, Loader, Segment, SegmentRef, Session,
 };
 
 /// The number of cycles required to compress a SHA-256 block.
@@ -212,7 +213,12 @@ impl<'a> ExecutorImpl<'a> {
     /// This will run the executor to get a [Session] which contain the results
     /// of the execution.
     pub fn run(&mut self) -> Result<Session> {
-        self.run_with_callback(|segment| Ok(Box::new(SimpleSegmentRef::new(segment))))
+        if self.env.segment_path.is_none() {
+            self.env.segment_path = Some(TempDir::new()?.into_path());
+        }
+
+        let path = self.env.segment_path.clone().unwrap();
+        self.run_with_callback(|segment| Ok(Box::new(FileSegmentRef::new(&segment, &path)?)))
     }
 
     /// Run the executor until [ExitCode::Halted], [ExitCode::Paused], or

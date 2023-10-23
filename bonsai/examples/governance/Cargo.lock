@@ -489,7 +489,7 @@ dependencies = [
 
 [[package]]
 name = "bonsai-sdk"
-version = "0.5.0-alpha.1"
+version = "0.5.0-rc.1"
 dependencies = [
  "reqwest",
  "serde",
@@ -1104,6 +1104,20 @@ name = "downcast-rs"
 version = "1.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9ea835d29036a4087793836fa931b08837ad5e957da9e23886b29586fb9b6650"
+
+[[package]]
+name = "downloader"
+version = "0.2.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d05213e96f184578b5f70105d4d0a644a168e99e12d7bea0b200c15d67b5c182"
+dependencies = [
+ "digest 0.10.7",
+ "futures",
+ "rand",
+ "reqwest",
+ "thiserror",
+ "tokio",
+]
 
 [[package]]
 name = "dunce"
@@ -3468,7 +3482,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-binfmt"
-version = "0.19.0-alpha.1"
+version = "0.19.0-rc.1"
 dependencies = [
  "anyhow",
  "elf",
@@ -3480,7 +3494,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build"
-version = "0.19.0-alpha.1"
+version = "0.19.0-rc.1"
 dependencies = [
  "anyhow",
  "cargo_metadata",
@@ -3495,7 +3509,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build-kernel"
-version = "0.19.0-alpha.1"
+version = "0.19.0-rc.1"
 dependencies = [
  "cc",
  "directories",
@@ -3506,11 +3520,12 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion"
-version = "0.19.0-alpha.1"
+version = "0.19.0-rc.1"
 dependencies = [
  "anyhow",
  "bytemuck",
  "cust",
+ "downloader",
  "log",
  "metal",
  "rand",
@@ -3518,13 +3533,14 @@ dependencies = [
  "risc0-circuit-recursion-sys",
  "risc0-core",
  "risc0-zkp",
+ "sha2 0.10.8",
  "tracing",
  "zip",
 ]
 
 [[package]]
 name = "risc0-circuit-recursion-sys"
-version = "0.19.0-alpha.1"
+version = "0.19.0-rc.1"
 dependencies = [
  "glob",
  "risc0-build-kernel",
@@ -3533,7 +3549,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im"
-version = "0.19.0-alpha.1"
+version = "0.19.0-rc.1"
 dependencies = [
  "anyhow",
  "cust",
@@ -3550,7 +3566,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im-sys"
-version = "0.19.0-alpha.1"
+version = "0.19.0-rc.1"
 dependencies = [
  "glob",
  "risc0-build-kernel",
@@ -3559,7 +3575,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-core"
-version = "0.19.0-alpha.1"
+version = "0.19.0-rc.1"
 dependencies = [
  "bytemuck",
  "rand_core",
@@ -3567,14 +3583,14 @@ dependencies = [
 
 [[package]]
 name = "risc0-sys"
-version = "0.19.0-alpha.1"
+version = "0.19.0-rc.1"
 dependencies = [
  "risc0-build-kernel",
 ]
 
 [[package]]
 name = "risc0-zkp"
-version = "0.19.0-alpha.1"
+version = "0.19.0-rc.1"
 dependencies = [
  "anyhow",
  "blake2",
@@ -3601,7 +3617,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "0.19.0-alpha.1"
+version = "0.19.0-rc.1"
 dependencies = [
  "addr2line",
  "anyhow",
@@ -3633,13 +3649,14 @@ dependencies = [
  "semver",
  "serde",
  "sha2 0.10.8",
+ "tempfile",
  "tracing",
  "typetag",
 ]
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "0.19.0-alpha.1"
+version = "0.19.0-rc.1"
 dependencies = [
  "bytemuck",
  "getrandom",

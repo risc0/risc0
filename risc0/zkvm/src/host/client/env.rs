@@ -19,6 +19,7 @@ use std::{
     collections::HashMap,
     io::{BufRead, BufReader, Cursor, Read, Write},
     mem,
+    path::PathBuf,
     rc::Rc,
 };
 
@@ -69,6 +70,7 @@ pub struct ExecutorEnv<'a> {
     pub(crate) input: Vec<u8>,
     pub(crate) trace: Option<Rc<RefCell<TraceCallback<'a>>>>,
     pub(crate) assumptions: Rc<RefCell<Assumptions>>,
+    pub(crate) segment_path: Option<PathBuf>,
 }
 
 impl<'a> ExecutorEnv<'a> {

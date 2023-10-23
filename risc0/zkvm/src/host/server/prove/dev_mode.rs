@@ -15,7 +15,7 @@
 use anyhow::{bail, Result};
 
 use crate::{
-    host::receipt::{InnerReceipt, SegmentReceipt},
+    host::receipt::{InnerReceipt, SegmentReceipt, SuccinctReceipt},
     ProverServer, Receipt, Segment, Session, VerifierContext,
 };
 
@@ -66,5 +66,17 @@ impl ProverServer for DevModeProver {
 
     fn get_peak_memory_usage(&self) -> usize {
         0
+    }
+
+    fn lift(&self, _receipt: &SegmentReceipt) -> Result<SuccinctReceipt> {
+        unimplemented!("This is unsupported for dev mode.")
+    }
+
+    fn join(&self, _a: &SuccinctReceipt, _b: &SuccinctReceipt) -> Result<SuccinctReceipt> {
+        unimplemented!("This is unsupported for dev mode.")
+    }
+
+    fn identity_p254(&self, _a: &SuccinctReceipt) -> Result<SuccinctReceipt> {
+        unimplemented!("This is unsupported for dev mode.")
     }
 }
