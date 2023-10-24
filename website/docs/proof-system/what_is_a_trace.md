@@ -22,7 +22,6 @@ _The core of a RISC Zero receipt is a [zk-STARK]; for a more technical
 description of how we turn an execution trace into a zk-STARK, see the [proof
 system sequence diagram] and our [STARK by Hand] explainer._
 
-
 [zk-STARK]: ../reference-docs/about-starks.md
 [proof system sequence diagram]: proof-system-sequence-diagram.md
 [STARK by Hand]: stark-by-hand.md
