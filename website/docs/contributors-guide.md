@@ -1,22 +1,22 @@
 # Contributor's Guide
 
-_This page describes guidelines for community contributions to this [website](https://www.github.com/risc0/website); you may also be interested in contributing to the [main project codebase](https://github.com/risc0/risc0)._
+_This page describes guidelines for community contributions to this [website][risczero-website]; you may also be interested in contributing to the [main project codebase][risc0-repo]._
 
 > `RISC Zero welcomes community participation!`
 >
-> - Make suggestions or report bugs via [GitHub issues](https://github.com/risc0/website/issues)
-> - Contribute website content or give feedback on [open pull requests](https://github.com/risc0/website/pulls)
-> - Contribute to the [main zkVM project](https://github.com/risc0/risc0)
-> - Contribute to our tutorials and how-to guides for our [templates](https://github.com/risc0/risc0/tree/main/templates) and [Rust examples](https://github.com/risc0/risc0/tree/v0.18.0/examples)
-> - Ask questions on [Discord](https://discord.gg/risczero)
+> - Make suggestions or report bugs via [GitHub issues][website-issue]
+> - Contribute website content or give feedback on [open pull requests][website-pr]
+> - Contribute to the [main zkVM project][risc0-repo]
+> - Contribute to our tutorials and how-to guides for our [templates] and [Rust examples]
+> - Ask questions on [Discord]
 
 ## How To Contribute
 
-- All changes to this website are managed through GitHub pull requests, so you'll need a [GitHub Account](https://github.com) to contribute.
+- All changes to this website are managed through GitHub pull requests, so you'll need a [GitHub] account to contribute.
 - You can suggest an edit directly via the `Edit this Page` button at the bottom of each page.
-- To create a new page, you can use the [GitHub browser interface](https://www.github.com/risc0/website); the content is in `src/pages` and `docs`.
+- To create a new page, you can use the [GitHub browser interface][risczero-website]; the content is in `src/pages` and `docs`.
   - Please read about [the navbar and sidebars](./contributors-guide.md#navbar-and-sidebars) and [categories of documentation](./contributors-guide.md#categories-of-documentation) before creating a new page.
-- If you want to clone the repository and work locally, you may want to check out the [Docusaurus documentation](https://docusaurus.io/docs/installation).
+- If you want to clone the repository and work locally, you may want to check out the [Docusaurus documentation].
   We like to use `yarn start` to run a local build, especially when we're working with changes that involve links or sidebars.
 
 ## Style Guidelines
@@ -37,17 +37,17 @@ In order to achieve this objective, we rely on:
 
 ## Terminology Conventions
 
-[`RISC Zero Official Terminology`](./terminology.md)
+[RISC Zero Official Terminology][terminology]
 
 Our terminology and naming conventions are subject to ongoing evaluation, and we encourage conversation and questions on these topics.
-Please let us know via a [`GitHub issue`](https://github.com/risc0/website/issues) when you encounter terms that don't seem quite right.
+Please let us know via a [`GitHub issue`][website-issue] when you encounter terms that don't seem quite right.
 
 ## Navbar and Sidebars
 
 - The navbar is defined in `docusaurus.config.js`. Any changes require manual configuration.
-  - [How to edit the navbar](https://docusaurus.io/docs/api/docusaurus-config)
+  - [How to edit the navbar][docusaurus-config]
 - The sidebars are defined in `sidebars.js`. Any new docs require manual configuration.
-  - [How to edit the sidebar](https://docusaurus.io/docs/sidebar)
+  - [How to edit the sidebar][docusaurus-sidebar]
   - The default configuration (and our current configuration) is that `pages` do not have sidebars and `docs` do.
 
 ### Reference Docs
@@ -65,7 +65,7 @@ We typically organize reference docs according to the following sections; we use
 > - Content 3
 > - Suggested Reading
 
-_Changes to this organization can be proposed for discussion via a [GitHub issue](https://github.com/risc0/website/issues) or proposed for action via a PR on this page._
+_Changes to this organization can be proposed for discussion via a [GitHub issue][website-issue] or proposed for action via a PR on this page._
 
 ### Explainer Docs
 
@@ -78,4 +78,18 @@ We're excited about the engagement we've seen so far, and we're looking forward 
 
 ## Questions?
 
-Find us on [Discord](https://discord.gg/risczero).
+Find us on [Discord].
+
+
+[risczero-website]: https://www.github.com/risc0/website
+[risc0-repo]: https://github.com/risc0/risc0
+[Discord]: https://discord.gg/risczero
+[Rust examples]: https://github.com/risc0/risc0/tree/v0.18.0/examples
+[templates]: https://github.com/risc0/risc0/tree/main/templates
+[website-pr]: https://github.com/risc0/website/pulls
+[website-issue]: https://github.com/risc0/website/issues
+[GitHub]: https://github.com
+[Docusaurus documentation]: https://docusaurus.io/docs/installation
+[terminology]: ./terminology.md
+[docusaurus-config]: https://docusaurus.io/docs/api/docusaurus-config
+[docusaurus-sidebar]: https://docusaurus.io/docs/sidebar
