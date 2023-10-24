@@ -80,7 +80,6 @@ We're excited about the engagement we've seen so far, and we're looking forward 
 
 Find us on [Discord].
 
-
 [risczero-website]: https://www.github.com/risc0/website
 [risc0-repo]: https://github.com/risc0/risc0
 [Discord]: https://discord.gg/risczero
