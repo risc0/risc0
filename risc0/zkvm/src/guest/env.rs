@@ -109,7 +109,6 @@ pub fn syscall(syscall: SyscallName, to_host: &[u8], from_host: &mut [u32]) -> s
 /// In order to be valid, the [crate::Receipt] must have `ExitCode::Halted(0)`, an
 /// empty assumptions list, and an all-zeroes input hash. It may have any post
 /// [crate::SystemState].
-#[must_use]
 pub fn verify(image_id: Digest, journal: &[u8]) -> Result<(), VerifyError> {
     let journal_digest: Digest = journal.digest();
     let mut from_host_buf = MaybeUninit::<[u32; DIGEST_WORDS + 1]>::uninit();
@@ -199,7 +198,6 @@ impl std::error::Error for VerifyError {}
 /// additionally have no assumptions. Note that executions with no output (e.g. those ending in
 /// [ExitCode::SystemSplit]) will not have any encoded assumptions even if [verify] or
 /// [verify_integrity] is called.
-#[must_use]
 pub fn verify_integrity(metadata: &ReceiptMetadata) -> Result<(), VerifyIntegrityError> {
     // Check that the assumptions list is empty.
     let assumptions_empty = metadata.output.is_none()

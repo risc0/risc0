@@ -127,7 +127,6 @@ impl Receipt {
     /// guest exited with a successful status code (e.g. `Halted(0)` or
     /// `Paused(0)`), the image ID is as expected, and the journal
     /// has not been tampered with.
-    #[must_use]
     pub fn verify(&self, image_id: impl Into<Digest>) -> Result<(), VerificationError> {
         self.verify_with_context(&VerifierContext::default(), image_id)
     }
@@ -140,7 +139,6 @@ impl Receipt {
     /// guest exited with a successful status code (e.g. `Halted(0)` or
     /// `Paused(0)`), the image ID is as expected, and the journal
     /// has not been tampered with.
-    #[must_use]
     pub fn verify_with_context(
         &self,
         ctx: &VerifierContext,
@@ -197,7 +195,6 @@ impl Receipt {
     /// relevant to their application. If you need to verify a successful
     /// guest execution and access the journal, the `verify` function is
     /// recommended.
-    #[must_use]
     pub fn verify_integrity_with_context(
         &self,
         ctx: &VerifierContext,
@@ -260,7 +257,6 @@ pub enum InnerReceipt {
 impl InnerReceipt {
     /// Verify the integrity of this receipt, ensuring the metadata is attested
     /// to by the seal.
-    #[must_use]
     pub fn verify_integrity_with_context(
         &self,
         ctx: &VerifierContext,
@@ -332,7 +328,6 @@ pub struct CompositeReceipt {
 impl CompositeReceipt {
     /// Verify the integrity of this receipt, ensuring the metadata is attested
     /// to by the seal.
-    #[must_use]
     pub fn verify_integrity_with_context(
         &self,
         ctx: &VerifierContext,
@@ -530,7 +525,6 @@ pub struct SegmentReceipt {
 impl SegmentReceipt {
     /// Verify the integrity of this receipt, ensuring the metadata is attested
     /// to by the seal.
-    #[must_use]
     pub fn verify_integrity_with_context(
         &self,
         ctx: &VerifierContext,
