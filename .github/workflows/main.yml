@@ -186,7 +186,6 @@ jobs:
       - run: cargo doc --no-deps --exclude=risc0-zkvm-methods --workspace
 
   check-benchmarks:
-    if: false # Currently broken. See https://github.com/risc0/risc0/issues/1013
     runs-on: [self-hosted, prod, Linux, X64]
     steps:
       # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
