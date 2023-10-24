@@ -49,7 +49,6 @@ risc0-r0vm = { version = "0.19.0-rc.1", default-features = false, path = "risc0/
 risc0-sys = { version = "0.19.0-rc.1", default-features = false, path = "risc0/sys" }
 risc0-zkp = { version = "0.19.0-rc.1", default-features = false, path = "risc0/zkp" }
 risc0-zkvm = { version = "0.19.0-rc.1", default-features = false, path = "risc0/zkvm" }
-risc0-zkvm-methods = { version = "0.19.0-rc.1", default-features = false, path = "risc0/zkvm/methods" }
 risc0-zkvm-platform = { version = "0.19.0-rc.1", default-features = false, path = "risc0/zkvm/platform" }
 
 [profile.bench]
