@@ -38,7 +38,7 @@ The details of the RISC Zero ZK-STARK are described in our [ZKP Whitepaper] and 
 - STARK by Hand Tutorial
   - [Website version][stark-by-hand]
   - [Google Sheet version][stark-by-hand-sheet]
-  - [Printable Version][stark-by-hand-pdf]
+  - [Printable Version](assets/fibonacci-stark.pdf)
 
 ### About RISC Zero
 
@@ -78,6 +78,5 @@ The details of the RISC Zero ZK-STARK are described in our [ZKP Whitepaper] and 
 [Finite Field Implementation Options: Barrett & Montgomery Multiplication]: https://www.youtube.com/watch?v=hUl8ZB6hpUM&list=PLcPzhUaCxlCjdhONxEYZ1dgKjZh3ZvPtl&index=6
 [zkvm-explainer]: ../zkvm/zkvm_overview.md
 [zkHack video]: https://www.youtube.com/watch?v=8hwY88xJoyM&list=PLcPzhUaCxlCgig7ofeARMPwQ8vbuD6hC5&index=8
-[stark-by-hand]: ./stark-by-hand.md
+[stark-by-hand]: stark-by-hand.md
 [stark-by-hand-sheet]: https://docs.google.com/spreadsheets/d/1Onr41OozD62y-B0jIL7bHAH5kf771-o4xvmnHUFpOyo/edit?usp=sharing
-[stark-by-hand-pdf]: assets/fibonacci-stark.pdf
