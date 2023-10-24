@@ -173,4 +173,4 @@ Thanks for reading! If you have questions or feedback, we'd love to hear from yo
 [prover-code]: https://github.com/risc0/risc0/blob/v0.18.0/risc0/zkp/src/prove/prover.rs
 [memory verification]: https://www.youtube.com/watch?v=dYuEPvRLwLo&list=PLcPzhUaCxlCiLk_VjLUNbmfb2mB1Y_N9N&index=5
 [PLONK]: https://eprint.iacr.org/2019/953.pdf
-[def]: what_is_a_trace
+[`Execution Trace`]: what_is_a_trace.md
