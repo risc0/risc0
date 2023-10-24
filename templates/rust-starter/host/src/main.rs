@@ -1,6 +1,8 @@
 // These constants represent the RISC-V ELF and the image ID generate by risc0-build.
 // The ELF is used for proving and the ID is used for verification.
-use methods::{{{guest_elf}}, {{guest_id}}};
+use methods::{
+    {{guest_elf}}, {{guest_id}}
+};
 use risc0_zkvm::{default_prover, ExecutorEnv};
 
 fn main() {

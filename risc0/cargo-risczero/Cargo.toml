@@ -30,8 +30,10 @@ risc0-build = { workspace = true }
 risc0-r0vm = { workspace = true, optional = true }
 risc0-zkvm = { workspace = true, optional = true }
 serde = { version = "1", features = ["derive"] }
+syn = "2.0.38"
 tar = "0.4"
 tempfile = "3"
+text_io = "0.1.12"
 tokio = { version = "1", features = ["rt"] }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 zip = { version = "0.6", optional = true }
