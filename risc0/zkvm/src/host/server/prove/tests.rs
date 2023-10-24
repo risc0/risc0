@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// TODO(victor): Add tests with various exit codes.
-
 use std::rc::Rc;
 
 use anyhow::Result;
@@ -221,8 +219,6 @@ fn memory_io() {
     assert_eq!(run_memio(&[(POS, 1)]).unwrap(), ExitCode::Halted(0));
 
     // Unaligned write is bad
-    // TODO(victor): Exit code is indicated as SystemSplit instead of Fault, which
-    // would be more ideal.
     assert_eq!(
         run_memio(&[(POS + 1001, 1)]).unwrap(),
         ExitCode::SystemSplit

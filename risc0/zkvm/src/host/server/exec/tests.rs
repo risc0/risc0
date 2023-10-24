@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// TODO(victor): Add tests with various exit codes.
-
 use std::{
     collections::{BTreeMap, HashSet},
     io::Cursor,
@@ -381,7 +379,10 @@ mod sys_verify {
     };
     use test_log::test;
 
-    use crate::{serde::to_vec, ExecutorEnv, ExecutorEnvBuilder, ExecutorImpl, ExitCode, Session};
+    use crate::{
+        receipt_metadata::MaybePruned, serde::to_vec, sha::Digestible, ExecutorEnv,
+        ExecutorEnvBuilder, ExecutorImpl, ExitCode, ReceiptMetadata, Session,
+    };
 
     fn exec_hello_commit() -> Session {
         let session = ExecutorImpl::from_elf(ExecutorEnv::default(), HELLO_COMMIT_ELF)
@@ -417,6 +418,20 @@ mod sys_verify {
             .run()
             .unwrap();
         assert_eq!(session.exit_code, ExitCode::Paused(exit_code as u32));
+        session
+    }
+
+    fn exec_fault() -> Session {
+        let env = ExecutorEnvBuilder::default()
+            .write(&MultiTestSpec::Fault)
+            .unwrap()
+            .build()
+            .unwrap();
+        let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
+            .unwrap()
+            .run()
+            .unwrap();
+        assert_eq!(session.exit_code, ExitCode::Fault);
         session
     }
 
@@ -457,7 +472,7 @@ mod sys_verify {
     #[test]
     fn sys_verify_halt_codes() {
         for code in [0u8, 1, 2, 255] {
-            log::debug!("sys_verify_halt_codes: code = {code}");
+            log::debug!("sys_verify_pause_codes: code = {code}");
             let halt_session = exec_halt(code);
 
             let spec = &MultiTestSpec::SysVerify {
@@ -465,7 +480,6 @@ mod sys_verify {
                 journal: Vec::new(),
             };
 
-            // Test that it works when the assumption is added.
             let env = ExecutorEnv::builder()
                 .write(&spec)
                 .unwrap()
@@ -493,7 +507,6 @@ mod sys_verify {
                 journal: Vec::new(),
             };
 
-            // Test that it works when the assumption is added.
             let env = ExecutorEnv::builder()
                 .write(&spec)
                 .unwrap()
@@ -511,10 +524,32 @@ mod sys_verify {
     }
 
     #[test]
+    fn sys_verify_fault() {
+        // NOTE: ReceiptMetadata for this Session won't differentiate Fault and SystemSplit,
+        // since these cannot be distinguished from the circuit's point of view.
+        let fault_session = exec_fault();
+
+        let spec = &MultiTestSpec::SysVerify {
+            image_id: MULTI_TEST_ID.into(),
+            journal: Vec::new(),
+        };
+
+        let env = ExecutorEnv::builder()
+            .write(&spec)
+            .unwrap()
+            .add_assumption(fault_session.get_metadata().unwrap().into())
+            .build()
+            .unwrap();
+        assert!(ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
+            .unwrap()
+            .run()
+            .is_err());
+    }
+
+    #[test]
     fn sys_verify_integrity() {
         let hello_commit_session = exec_hello_commit();
 
-        // TODO(victor) Also execute with a receipt of failure.
         let spec = &MultiTestSpec::SysVerifyIntegrity {
             metadata_words: to_vec(&hello_commit_session.get_metadata().unwrap()).unwrap(),
         };
@@ -538,6 +573,105 @@ mod sys_verify {
             .unwrap()
             .build()
             .unwrap();
+        assert!(ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
+            .unwrap()
+            .run()
+            .is_err());
+    }
+
+    #[test]
+    fn sys_verify_integrity_halt_codes() {
+        for code in [0u8, 1, 2, 255] {
+            log::debug!("sys_verify_pause_codes: code = {code}");
+            let halt_session = exec_halt(code);
+
+            let spec = &MultiTestSpec::SysVerifyIntegrity {
+                metadata_words: to_vec(&halt_session.get_metadata().unwrap()).unwrap(),
+            };
+
+            let env = ExecutorEnv::builder()
+                .write(&spec)
+                .unwrap()
+                .add_assumption(halt_session.get_metadata().unwrap().into())
+                .build()
+                .unwrap();
+            let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
+                .unwrap()
+                .run()
+                .unwrap();
+            assert_eq!(session.exit_code, ExitCode::Halted(0));
+        }
+    }
+
+    #[test]
+    fn sys_verify_integrity_pause_codes() {
+        for code in [0u8, 1, 2, 255] {
+            log::debug!("sys_verify_halt_codes: code = {code}");
+            let pause_session = exec_pause(code);
+
+            let spec = &MultiTestSpec::SysVerifyIntegrity {
+                metadata_words: to_vec(&pause_session.get_metadata().unwrap()).unwrap(),
+            };
+
+            let env = ExecutorEnv::builder()
+                .write(&spec)
+                .unwrap()
+                .add_assumption(pause_session.get_metadata().unwrap().into())
+                .build()
+                .unwrap();
+            let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
+                .unwrap()
+                .run()
+                .unwrap();
+            assert_eq!(session.exit_code, ExitCode::Halted(0));
+        }
+    }
+
+    #[test]
+    fn sys_verify_integrity_fault() {
+        // NOTE: ReceiptMetadata for this Session won't differentiate Fault and SystemSplit,
+        // since these cannot be distinguished from the circuit's point of view.
+        let fault_session = exec_fault();
+
+        let spec = &MultiTestSpec::SysVerifyIntegrity {
+            metadata_words: to_vec(&fault_session.get_metadata().unwrap()).unwrap(),
+        };
+
+        let env = ExecutorEnv::builder()
+            .write(&spec)
+            .unwrap()
+            .add_assumption(fault_session.get_metadata().unwrap().into())
+            .build()
+            .unwrap();
+        let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
+            .unwrap()
+            .run()
+            .unwrap();
+        assert_eq!(session.exit_code, ExitCode::Halted(0));
+    }
+
+    #[test]
+    fn sys_verify_integrity_pruned_metadata() {
+        let hello_commit_session = exec_hello_commit();
+
+        // Prune the metadata before providing it as input so that it cannot be checked to have no
+        // assumptions.
+        let pruned_metadata = MaybePruned::<ReceiptMetadata>::Pruned(
+            hello_commit_session.get_metadata().unwrap().digest(),
+        );
+        let spec = &MultiTestSpec::SysVerifyIntegrity {
+            metadata_words: to_vec(&pruned_metadata).unwrap(),
+        };
+
+        // Test that it works when the assumption is added.
+        let env = ExecutorEnv::builder()
+            .write(&spec)
+            .unwrap()
+            .add_assumption(hello_commit_session.get_metadata().unwrap().into())
+            .build()
+            .unwrap();
+
+        // Result of execution should be a guest panic resulting from the pruned input.
         assert!(ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
             .unwrap()
             .run()

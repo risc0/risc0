@@ -138,7 +138,7 @@ impl ExitCode {
             ExitCode::Halted(user_exit) => (0, user_exit),
             ExitCode::Paused(user_exit) => (1, user_exit),
             ExitCode::SystemSplit => (2, 0),
-            // TODO(victor): SessionLimit and Fault result in the same exit code set by the rv32im
+            // NOTE: SessionLimit and Fault result in the same exit code set by the rv32im
             // circuit. As a result, this conversion is lossy. This factoring results in Fault,
             // SessionLimit, and SystemSplit all having the same digest.
             ExitCode::SessionLimit => (2, 0),
@@ -449,7 +449,3 @@ impl fmt::Display for PrunedValueError {
 
 #[cfg(feature = "std")]
 impl std::error::Error for PrunedValueError {}
-
-// TODO(victor): Add tests that show every combination of pruned struct returns
-// the same digest. Check that the digest of an empty assumptions list is all
-// zeroes.
