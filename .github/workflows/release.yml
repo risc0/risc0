@@ -20,29 +20,22 @@ jobs:
           tag_name: test-release-1 # only for testing
 
   build-linux:
-    runs-on: [self-hosted, prod, "${{ matrix.os }}", "${{ matrix.device }}"]
+    runs-on: [self-hosted, prod, Linux, docker, cpu]
     needs: release
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - os: Linux
-            feature: cuda
-            device: nvidia_rtx_a5000
-            target: x86_64-unknown-linux-gnu
     container:
       image: debian:buster
     env:
+      OS: Linux
       CUDA_LIBRARY_PATH: /usr/lib/cuda
-      FEATURE: ${{ matrix.feature }}
+      FEATURE: cuda
       RUSTC_WRAPPER: sccache
-      TARGET: ${{ matrix.target }}
+      TARGET: x86_64-unknown-linux-gnu
     steps:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
         with:
-          key: ${{ matrix.os }}-${{ matrix.feature }}
+          key: ${{ env.OS }}-${{ env.FEATURE }}
       - run: cargo build -p cargo-risczero --release
       - run: |
           mkdir -p tmp/pkg
@@ -55,30 +48,23 @@ jobs:
       - uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: tmp/cargo-risczero-${{ matrix.target }}.tgz
+          file: tmp/cargo-risczero-${{ env.TARGET }}.tgz
           tag: test-release-1 # only for testing
 
   build-macos:
-    runs-on: [self-hosted, prod, "${{ matrix.os }}", "${{ matrix.device }}"]
+    runs-on: [self-hosted, prod, macOS, apple_m2_pro]
     needs: release
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - os: macOS
-            feature: metal
-            device: apple_m2_pro
-            target: aarch64-apple-darwin
     env:
-      FEATURE: ${{ matrix.feature }}
+      OS: macOS
+      FEATURE: metal
       RUSTC_WRAPPER: sccache
-      TARGET: ${{ matrix.target }}
+      TARGET: aarch64-apple-darwin
     steps:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
         with:
-          key: ${{ matrix.os }}-${{ matrix.feature }}
+          key: ${{ env.OS }}-${{ env.FEATURE }}
       - run: cargo build -p cargo-risczero --release
       - run: |
           mkdir -p tmp/pkg
@@ -91,5 +77,5 @@ jobs:
       - uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: tmp/cargo-risczero-${{ matrix.target }}.tgz
+          file: tmp/cargo-risczero-${{ env.TARGET }}.tgz
           tag: test-release-1 # only for testing
