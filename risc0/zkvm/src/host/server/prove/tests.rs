@@ -434,7 +434,10 @@ mod sys_verify {
     use test_log::test;
 
     use super::get_prover_server;
-    use crate::{serde::to_vec, ExecutorEnv, ProverOpts, Receipt};
+    use crate::{
+        serde::to_vec, sha::Digestible, ExecutorEnv, ExecutorEnvBuilder, ExitCode, ProverOpts,
+        Receipt,
+    };
 
     fn prove_hello_commit() -> Receipt {
         let opts = ProverOpts {
@@ -450,6 +453,58 @@ mod sys_verify {
         // Double check that the receipt verifies.
         hello_commit_receipt.verify(HELLO_COMMIT_ID).unwrap();
         hello_commit_receipt
+    }
+
+    fn prove_halt(exit_code: u8) -> Receipt {
+        let opts = ProverOpts {
+            hashfn: "sha-256".to_string(),
+            prove_guest_errors: true,
+        };
+
+        let env = ExecutorEnvBuilder::default()
+            .write(&MultiTestSpec::Halt(exit_code))
+            .unwrap()
+            .build()
+            .unwrap();
+        let halt_receipt = get_prover_server(&opts)
+            .unwrap()
+            .prove_elf(env, MULTI_TEST_ELF)
+            .unwrap();
+
+        // Double check that the receipt verifies with the expected image ID and exit code.
+        halt_receipt
+            .verify_integrity_with_context(&Default::default())
+            .unwrap();
+        let halt_metadata = halt_receipt.get_metadata().unwrap();
+        assert_eq!(halt_metadata.pre.digest(), MULTI_TEST_ID.into());
+        assert_eq!(halt_metadata.exit_code, ExitCode::Halted(exit_code as u32));
+        halt_receipt
+    }
+
+    fn prove_fault() -> Receipt {
+        let opts = ProverOpts {
+            hashfn: "sha-256".to_string(),
+            prove_guest_errors: true,
+        };
+
+        let env = ExecutorEnvBuilder::default()
+            .write(&MultiTestSpec::Fault)
+            .unwrap()
+            .build()
+            .unwrap();
+        let fault_receipt = get_prover_server(&opts)
+            .unwrap()
+            .prove_elf(env, MULTI_TEST_ELF)
+            .unwrap();
+
+        // Double check that the receipt verifies with the expected image ID and exit code.
+        fault_receipt
+            .verify_integrity_with_context(&Default::default())
+            .unwrap();
+        let fault_metadata = fault_receipt.get_metadata().unwrap();
+        assert_eq!(fault_metadata.pre.digest(), MULTI_TEST_ID.into());
+        assert_eq!(fault_metadata.exit_code, ExitCode::SystemSplit);
+        fault_receipt
     }
 
     lazy_static::lazy_static! {
@@ -523,7 +578,6 @@ mod sys_verify {
             prove_guest_errors: false,
         };
 
-        // TODO(victor) Also execute with a receipt of failure.
         let spec = &MultiTestSpec::SysVerifyIntegrity {
             metadata_words: to_vec(&HELLO_COMMIT_RECEIPT.get_metadata().unwrap()).unwrap(),
         };
@@ -568,5 +622,66 @@ mod sys_verify {
             .unwrap()
             .prove_elf(env, MULTI_TEST_ELF)
             .is_err());
+    }
+
+    #[test]
+    fn sys_verify_integrity_halt_1() {
+        // Generate a receipt for a execution ending in a guest error indicated by
+        // ExitCode::Halted(1).
+        let halt_receipt = prove_halt(1);
+
+        let opts = ProverOpts {
+            hashfn: "sha-256".to_string(),
+            prove_guest_errors: false,
+        };
+
+        let spec = &MultiTestSpec::SysVerifyIntegrity {
+            metadata_words: to_vec(&halt_receipt.get_metadata().unwrap()).unwrap(),
+        };
+
+        // Test that proving results in a success execution and unconditional receipt.
+        let env = ExecutorEnv::builder()
+            .write(&spec)
+            .unwrap()
+            .add_assumption(halt_receipt.into())
+            .build()
+            .unwrap();
+        get_prover_server(&opts)
+            .unwrap()
+            .prove_elf(env, MULTI_TEST_ELF)
+            .unwrap()
+            .verify(MULTI_TEST_ID)
+            .unwrap();
+    }
+
+    #[test]
+    fn sys_verify_integrity_fault() {
+        // Generate a receipt for a execution ending in fault.
+        // NOTE: This is not really a "proof of fault". Instead it is simply verifying a receipt
+        // that ended in SystemSplit for which the host claims a fault is about to occur.
+        let fault_receipt = prove_fault();
+
+        let opts = ProverOpts {
+            hashfn: "sha-256".to_string(),
+            prove_guest_errors: false,
+        };
+
+        let spec = &MultiTestSpec::SysVerifyIntegrity {
+            metadata_words: to_vec(&fault_receipt.get_metadata().unwrap()).unwrap(),
+        };
+
+        // Test that proving results in a success execution and unconditional receipt.
+        let env = ExecutorEnv::builder()
+            .write(&spec)
+            .unwrap()
+            .add_assumption(fault_receipt.into())
+            .build()
+            .unwrap();
+        get_prover_server(&opts)
+            .unwrap()
+            .prove_elf(env, MULTI_TEST_ELF)
+            .unwrap()
+            .verify(MULTI_TEST_ID)
+            .unwrap();
     }
 }
