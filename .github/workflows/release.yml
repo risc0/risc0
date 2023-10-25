@@ -23,7 +23,7 @@ jobs:
     runs-on: [self-hosted, prod, Linux, docker, cpu]
     needs: release
     container:
-      image: debian:buster
+      image: rust:buster
     env:
       OS: Linux
       CUDA_LIBRARY_PATH: /usr/lib/cuda
@@ -32,7 +32,6 @@ jobs:
       TARGET: x86_64-unknown-linux-gnu
     steps:
       - uses: actions/checkout@v3
-      - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
         with:
           key: ${{ env.OS }}-${{ env.FEATURE }}
