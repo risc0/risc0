@@ -260,13 +260,13 @@ However, because the proving process is bypassed, receipts generated in dev mode
 
 **To keep this mode out of production environments, we recommend building production-ready projects with the "disable-dev-mode" [feature flag](https://github.com/risc0/risc0/#feature-flags); it is absent by default.**
 
-Only projects built without this flag may run dev mode. Enabling dev mode requires also that the environment variable "RISC0_DEV_MODE" be set.
+Only projects built without this flag may run dev mode. Enabling dev mode requires also that the environment variable `RISC0_DEV_MODE` be set.
 
 As additional protection, if the dev mode [environment variable](https://docs.rs/risc0-zkvm/0.18.0/risc0_zkvm/fn.is_dev_mode.html) is present alongside a project built with the "disable-dev-mode" feature flag, the project will panic.
 
 For further reference, take a look at the table below. To learn more about usage, see the [risc0 project README](https://github.com/risc0/risc0/#readme). For a closer look at implementation, take a look at the [dev mode source](https://github.com/risc0/risc0/blob/v0.19.0-rc.1/risc0/zkvm/src/host/server/prove/dev_mode.rs).
 
-|                               | Feature flag off         | Feature flag on          |
+| Dev mode env var              | Feature flag off         | Feature flag on          |
 | ----------------------------- | ------------------------ | ------------------------ |
 | RISC0_DEV_MODE=true           | Developer mode activated | Prover panic             |
 | RISCO_DEV_MODE={false, unset} | Default project behavior | Default project behavior |
