@@ -80,7 +80,7 @@ where
             }
         }
         let inner = InnerReceipt::Flat(SegmentReceipts(segments));
-        let receipt = Receipt::new(inner, session.journal.clone());
+        let receipt = Receipt::new(inner, session.journal.bytes.clone());
         let image_id = session.segments[0].resolve()?.pre_image.compute_id();
         match receipt.verify_with_context(ctx, image_id) {
             Ok(()) => Ok(receipt),

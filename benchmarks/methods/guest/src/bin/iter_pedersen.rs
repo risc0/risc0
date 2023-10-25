@@ -21,13 +21,7 @@ use starknet_crypto::FieldElement;
 risc0_zkvm::entry!(main);
 
 pub fn main() {
-    let data: Vec<u8> = env::read();
-
-    let mut num_iter: u32;
-    num_iter = data[0] as u32;
-    num_iter = num_iter | ((data[1] as u32) << 8);
-    num_iter = num_iter | ((data[2] as u32) << 16);
-    num_iter = num_iter | ((data[3] as u32) << 24);
+    let (num_iter, _data): (u32, Vec<u8>) = env::read();
 
     let e0 = FieldElement::from_hex_be(
         "0x03d937c035c878245caf64531a5756109c53068da139362728feb561405371cb",
@@ -42,12 +36,7 @@ pub fn main() {
         black_box(starknet_crypto::pedersen_hash(&e0, &e1));
     }
 
-    env::commit(
-        &Digest::try_from(
-            starknet_crypto::pedersen_hash(&e0, &e1)
-                .to_bytes_be()
-                .as_slice(),
-        )
-        .unwrap(),
-    )
+    let hash = starknet_crypto::pedersen_hash(&e0, &e1);
+    let digest = Digest::try_from(hash.to_bytes_be().as_slice()).unwrap();
+    env::commit(&digest)
 }

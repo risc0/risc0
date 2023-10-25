@@ -15,7 +15,7 @@
 #![no_main]
 
 // Also available as risc0_zkvm::sha::rust_crypto
-use risc0_zkvm::guest::env;
+use risc0_zkvm::{guest::env, sha::Digest};
 use sha2::{Digest as _, Sha256};
 
 risc0_zkvm::guest::entry!(main);
@@ -24,5 +24,6 @@ risc0_zkvm::guest::entry!(main);
 pub fn main() {
     let data: String = env::read();
     let digest = Sha256::digest(&data.as_bytes());
-    env::commit(&digest.as_slice());
+    let digest = Digest::try_from(digest.as_slice()).unwrap();
+    env::commit(&digest);
 }

@@ -109,11 +109,7 @@ In the starter template project, our host driver program creates an executor env
 
 ```rust
     use hello_world_methods::{MULTIPLY_ELF, MULTIPLY_ID};
-    use risc0_zkvm::{
-      default_prover,
-      serde::from_slice,
-      ExecutorEnv,
-    };
+    use risc0_zkvm::{default_prover, ExecutorEnv};
 
     // First, we construct an executor environment
     let env = ExecutorEnv::builder().build().unwrap();
@@ -166,7 +162,6 @@ fn main() {
 ```
 
 You can confirm your work with `cargo run --release` — the program still won't do anything, but it should compile and run successfully.
-You will get a warning about `from_slice` being unused; this function is needed when reading the [journal], but the guest hasn't written to it yet, so the host can't read from it yet.
 
 ## Step 6 (Guest): Multiply two values and commit their result
 
@@ -230,7 +225,7 @@ The `env::commit` function is used to commit public results to the [journal].
 Once committed to the journal, anyone with the [receipt] can read this value.
 
 Now you should be able to confirm your work again with `cargo run --release`.
-Once more, the program won't do anything, but it should run successfully and build with a single warning about `from_slice` being unused.
+Once more, the program won't do anything, but it should build and run successfully.
 
 ## Step 7 (Host): Generate a receipt and read its journal contents
 
@@ -249,24 +244,24 @@ So, let's extract the [journal]'s contents by replacing the "`TODO`" in the abov
 
 ```rust
     use hello_world_methods::{MULTIPLY_ELF, MULTIPLY_ID};
-    use risc0_zkvm::{default_prover, ExecutorEnv, serde::from_slice};
+    use risc0_zkvm::{default_prover, ExecutorEnv};
 
     let a: u64 = 17;
     let b: u64 = 23;
 
     let env = ExecutorEnv::builder()
-      // Send a & b to the guest
-      .write(&a).unwrap()
-      .write(&b).unwrap()
-      .build()
-      .unwrap();
+        // Send a & b to the guest
+        .write(&a).unwrap()
+        .write(&b).unwrap()
+        .build()
+        .unwrap();
 
     let prover = default_prover();
     let receipt = prover.prove_elf(env, MULTIPLY_ELF).unwrap();
     receipt.verify(MULTIPLY_ID).unwrap();
 
     // Extract journal of receipt (i.e. output c, where c = a * b)
-    let c: u64 = from_slice(&receipt.journal).unwrap();
+    let c: u64 = receipt.journal.decode().unwrap();
 
     // Print an assertion
     println!("Hello, world! I know the factors of {}, and I can prove it!", c);

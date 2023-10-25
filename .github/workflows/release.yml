@@ -5,9 +5,9 @@ on:
     tags:
       - "v*.*.*"
   # for testing purposes
-  # pull_request:
-  #   branches: [ main ]
-  # workflow_dispatch:
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   release:
@@ -44,11 +44,14 @@ jobs:
       - uses: ./.github/actions/sccache
         with:
           key: ${{ matrix.os }}-${{ matrix.feature }}
-      - run: cargo build -p cargo-risczero --release -F $FEATURE
+      - run: cargo build -p cargo-risczero --release
       - run: |
           mkdir -p tmp/pkg
           cp target/release/cargo-risczero tmp/pkg
-          cp target/release/r0vm tmp/pkg
+          cp target/release/r0vm tmp/pkg/r0vm
+      - run: cargo build -p cargo-risczero --release -F $FEATURE
+      - run: |
+          cp target/release/r0vm tmp/pkg/r0vm-$FEATURE
           cd tmp/pkg && tar cv * | gzip -9 > ../cargo-risczero-$TARGET.tgz
       - uses: svenstaro/upload-release-action@v2
         with:

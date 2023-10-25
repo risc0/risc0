@@ -25,7 +25,7 @@ pub struct InitMessage {
 
 impl InitMessage {
     pub fn get_state(&self) -> Result<InitializeVotingMachineCommit> {
-        Ok(from_slice(&self.receipt.journal)?)
+        Ok(self.receipt.journal.decode()?)
     }
 
     pub fn verify_and_get_commit(&self) -> Result<InitializeVotingMachineCommit> {
@@ -40,7 +40,7 @@ pub struct SubmitBallotMessage {
 
 impl SubmitBallotMessage {
     pub fn get_commit(&self) -> Result<SubmitBallotCommit> {
-        Ok(from_slice(&self.receipt.journal)?)
+        Ok(self.receipt.journal.decode()?)
     }
 
     pub fn verify_and_get_commit(&self) -> Result<SubmitBallotCommit> {
@@ -55,7 +55,7 @@ pub struct FreezeStationMessage {
 
 impl FreezeStationMessage {
     pub fn get_commit(&self) -> Result<FreezeVotingMachineCommit> {
-        Ok(from_slice(&self.receipt.journal)?)
+        Ok(self.receipt.journal.decode()?)
     }
 
     pub fn verify_and_get_commit(&self) -> Result<FreezeVotingMachineCommit> {
