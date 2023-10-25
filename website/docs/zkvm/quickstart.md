@@ -57,6 +57,7 @@ cargo run --release
 We recommend using [developer mode] while working on your project, as it will eliminate the time for verifying a receipt and consequently enabling faster iterations on the code. In order to enable developer mode, you need to set the environment variable `RISC0_DEV_MODE=1` when executing your project. (other possible values are `true` and `yes`). For more information about this mode, please see the FAQ on ['What is developer mode and how can I use it safely?'].
 
 Example:
+
 ```bash
 RISC0_DEV_MODE=1 cargo run --release
 ```
@@ -83,7 +84,6 @@ Options such as GPU acceleration and skipping the proof generation are documente
 
 > **Congratulations!**
 >
-> _You've built your first zkVM application!_
 > _That's all it takes to build and run a minimal RISC Zero application._
 
 [zkVM]: ../zkvm/zkvm_overview.md

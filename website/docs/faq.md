@@ -246,6 +246,7 @@ Because the data structures supporting all three of these need to match very car
 ## Security
 
 <a class="anchor" id="dev-mode"></a>
+
 <details closed>
 <summary>
 Q:
@@ -265,10 +266,11 @@ As additional protection, if the dev mode [environment variable](https://docs.rs
 
 For further reference, take a look at the table below. To learn more about usage, see the [risc0 project README](https://github.com/risc0/risc0/#readme). For a closer look at implementation, take a look at the [dev mode source](https://github.com/risc0/risc0/blob/v0.19.0-rc.1/risc0/zkvm/src/host/server/prove/dev_mode.rs).
 
-| | Feature flag off | Feature flag on|
-| --- | --- | --- |
-| RISC0_DEV_MODE=true| Developer mode activated | Prover panic |
-| RISCO_DEV_MODE={false, unset}| Default project behavior | Default project behavior |
+|                               | Feature flag off         | Feature flag on          |
+| ----------------------------- | ------------------------ | ------------------------ |
+| RISC0_DEV_MODE=true           | Developer mode activated | Prover panic             |
+| RISCO_DEV_MODE={false, unset} | Default project behavior | Default project behavior |
+
 </details>
 <a class="anchor" id="image-id-security"></a>
 <details closed>
