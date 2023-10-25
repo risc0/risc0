@@ -17,6 +17,7 @@ jobs:
         with:
           draft: true
           generate_release_notes: true
+          tag_name: test-release-1 # only for testing
 
   build:
     runs-on: [self-hosted, prod, "${{ matrix.os }}", "${{ matrix.device }}"]
@@ -48,7 +49,7 @@ jobs:
       - run: |
           mkdir -p tmp/pkg
           cp target/release/cargo-risczero tmp/pkg
-          cp target/release/r0vm tmp/pkg/r0vm
+          cp target/release/r0vm tmp/pkg
       - run: cargo build -p cargo-risczero --release -F $FEATURE
       - run: |
           cp target/release/r0vm tmp/pkg/r0vm-$FEATURE
@@ -57,3 +58,5 @@ jobs:
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: tmp/cargo-risczero-${{ matrix.target }}.tgz
+          tag: test-release-1 # only for testing
+
