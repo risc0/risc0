@@ -14,10 +14,11 @@
 
 use std::path::PathBuf;
 
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use cargo_generate::{GenerateArgs, TemplatePath, Vcs};
 use clap::Parser;
 use const_format::concatcp;
+use text_io::read;
 
 const RISC0_GH_REPO: &str = "https://github.com/risc0/risc0";
 const RISC0_TEMPLATE_DIR: &str = "templates/rust-starter";
@@ -80,6 +81,12 @@ pub struct NewCommand {
     /// Use a path dependency for risc0.
     #[arg(long)]
     pub path: Option<PathBuf>,
+
+    /// Name of the guest
+    ///
+    /// Sets the name of the guest method. This must be a valid rust identifier.
+    #[arg(long)]
+    pub guest_name: Option<String>,
 }
 
 impl NewCommand {
@@ -127,6 +134,33 @@ impl NewCommand {
             template_variables.push(format!("risc0_build={spec}"));
             template_variables.push(format!("risc0_zkvm={spec}"));
         }
+
+        let guest_name = match &self.guest_name {
+            Some(name) => name.clone(),
+            None => {
+                eprint!(
+                    "Guest name was not supplied through the --guest-name option. Please enter\
+                    package name for your template or press [enter] to use default guest package\
+                    name \"method\"\n\
+                    Enter package name > "
+                );
+                let input_name: String = read!("{}\n");
+                if input_name.is_empty() {
+                    "method".to_string()
+                } else {
+                    input_name.clone()
+                }
+            }
+        };
+
+        syn::parse_str::<syn::Ident>(guest_name.as_str()).map_err(|_e| {
+            anyhow!("guest name [{guest_name}] must be a rust valid rust identifier")
+        })?;
+
+        let guest_name_const = guest_name.replace("-", "_").to_ascii_uppercase();
+        template_variables.push(format!("guest_package_name=\"{guest_name}\""));
+        template_variables.push(format!("guest_id={guest_name_const}_ID"));
+        template_variables.push(format!("guest_elf={guest_name_const}_ELF"));
 
         if self.std {
             template_variables.push("risc0_std=true".to_string());
