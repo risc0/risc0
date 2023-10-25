@@ -12,28 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::time::Duration;
+use std::time::{Instant, Duration};
 
 use byteorder::{ByteOrder, LittleEndian};
-use risc0_zkvm::{sha::DIGEST_WORDS, ExecutorEnv, ExitCode, MemoryImage, Receipt, Session};
+use risc0_zkvm::{sha::DIGEST_WORDS, ExecutorEnv, ExecutorImpl, MemoryImage, Receipt, Session};
 
-use crate::{exec_compute, get_image, Benchmark};
+use crate::{get_cycles, get_image, Benchmark};
 
-pub struct Job<'a> {
+pub struct Job {
     pub spec: u32,
-    pub env: ExecutorEnv<'a>,
     pub image: MemoryImage,
-    pub session: Session,
+    pub session: Option<Session>,
 }
 
-pub fn new_jobs() -> Vec<<Job<'static> as Benchmark>::Spec> {
+pub fn new_jobs() -> Vec<<Job as Benchmark>::Spec> {
     vec![10, 1000, 10000]
 }
 
 const METHOD_ID: [u32; DIGEST_WORDS] = risc0_benchmark_methods::FIBONACCI_ID;
 const METHOD_PATH: &'static str = risc0_benchmark_methods::FIBONACCI_PATH;
 
-impl Benchmark for Job<'_> {
+impl Benchmark for Job {
     const NAME: &'static str = "fibonacci";
     type Spec = u32;
     type ComputeOut = u64;
@@ -50,27 +49,19 @@ impl Benchmark for Job<'_> {
     fn proof_size_bytes(proof: &Self::ProofType) -> u32 {
         (proof
             .inner
-            .flat()
+            .composite()
             .unwrap()
+            .segments
             .iter()
             .fold(0, |acc, segment| acc + segment.get_seal_bytes().len())) as u32
     }
 
     fn new(spec: Self::Spec) -> Self {
         let image = get_image(METHOD_PATH);
-
-        let guest_input = spec;
-        let env = ExecutorEnv::builder()
-            .write(&guest_input)
-            .unwrap()
-            .build()
-            .unwrap();
-
-        let session = Session::new(vec![], vec![], ExitCode::Halted(0));
+        let session = None;
 
         Job {
             spec,
-            env,
             image,
             session,
         }
@@ -91,14 +82,23 @@ impl Benchmark for Job<'_> {
     }
 
     fn exec_compute(&mut self) -> (u32, u32, Duration) {
-        let (cycles, insn_cycles, elapsed, session) =
-            exec_compute(self.image.clone(), self.env.clone());
-        self.session = session;
-        (cycles, insn_cycles, elapsed)
+       let env = ExecutorEnv::builder()
+            .write(&self.spec)
+            .unwrap()
+            .build()
+            .unwrap();
+        let mut exec = ExecutorImpl::new(env, self.image.clone()).unwrap();
+        let start = Instant::now();
+        let session = exec.run().unwrap();
+        let elapsed = start.elapsed();
+        let segments = session.resolve().unwrap();
+        let (exec_cycles, prove_cycles) = get_cycles(segments);
+        self.session = Some(session);
+        (prove_cycles as u32, exec_cycles as u32, elapsed)
     }
 
     fn guest_compute(&mut self) -> (Self::ComputeOut, Self::ProofType) {
-        let receipt = self.session.prove().expect("receipt");
+        let receipt = self.session.as_ref().unwrap().prove().expect("receipt");
         let result = LittleEndian::read_u64(&receipt.journal);
         (result, receipt)
     }

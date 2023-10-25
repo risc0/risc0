@@ -45,6 +45,11 @@ cuda = ["risc0-zkvm/cuda"]
 metal = ["risc0-zkvm/metal"]
 default = []
 
+[patch.crates-io]
+risc0-binfmt = { path = "../risc0/binfmt" }
+risc0-build = { path = "../risc0/build" }
+risc0-zkvm = { path = "../risc0/zkvm" }
+
 # Always optimize; building and running the guest takes much longer without optimization.
 [profile.dev]
 opt-level = 3

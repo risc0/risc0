@@ -55,8 +55,8 @@ enum Command {
 fn main() {
     init_logging();
 
-    #[cfg(any(feature = "metal", feature = "cuda"))]
-    init_gpu_kernel();
+    // #[cfg(any(feature = "metal", feature = "cuda"))]
+    // init_gpu_kernel();
 
     let cli = Cli::parse();
 
@@ -92,9 +92,9 @@ fn main() {
         run_jobs::<iter_blake3::Job>(&cli.out, iter_blake3::new_jobs());
     }
 
-    // if cli.command == Command::All || cli.command == Command::IterPedersen {
-    //     run_jobs::<iter_pedersen::Job>(&cli.out, iter_pedersen::new_jobs());
-    // }
+    // // if cli.command == Command::All || cli.command == Command::IterPedersen {
+    // //     run_jobs::<iter_pedersen::Job>(&cli.out, iter_pedersen::new_jobs());
+    // // }
 
     if cli.command == Command::All || cli.command == Command::EcdsaVerify {
         run_jobs::<ecdsa_verify::Job>(&cli.out, ecdsa_verify::new_jobs());

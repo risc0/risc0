@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{rc::Rc, time::Duration};
+use std::time::{Instant, Duration};
 
 use k256::{
     ecdsa::{signature::Signer, Signature, SigningKey},
@@ -20,31 +20,29 @@ use k256::{
 };
 use rand_core::OsRng;
 use risc0_zkvm::{
-    default_prover, serde::from_slice, sha::DIGEST_WORDS, ExecutorEnv, ExitCode, LocalProver,
-    MemoryImage, Prover, ProverOpts, Receipt, Session, VerifierContext,
+    default_prover, serde::from_slice, sha::DIGEST_WORDS, ExecutorEnv, ExecutorImpl,
+    MemoryImage, ProverOpts, Receipt, Session, VerifierContext,
 };
 
-use crate::{exec_compute, get_image, Benchmark, BenchmarkAverage};
+use crate::{get_cycles, get_image, Benchmark, BenchmarkAverage};
 
-pub struct Job<'a> {
+pub struct Job {
     pub spec: u32,
-    pub env: ExecutorEnv<'a>,
     pub image: MemoryImage,
-    pub session: Session,
-    pub prover: Rc<dyn Prover>,
+    pub session: Option<Session>,
     pub verifying_key: EncodedPoint,
     pub message: Vec<u8>,
     pub signature: Signature,
 }
 
-pub fn new_jobs() -> Vec<<Job<'static> as Benchmark>::Spec> {
+pub fn new_jobs() -> Vec<<Job as Benchmark>::Spec> {
     vec![1]
 }
 
 const METHOD_ID: [u32; DIGEST_WORDS] = risc0_benchmark_methods::ECDSA_VERIFY_ID;
 const METHOD_PATH: &'static str = risc0_benchmark_methods::ECDSA_VERIFY_PATH;
 
-impl Benchmark for Job<'_> {
+impl Benchmark for Job {
     const NAME: &'static str = "ecdsa_verify";
     type Spec = u32;
     type ComputeOut = (EncodedPoint, Vec<u8>);
@@ -61,8 +59,9 @@ impl Benchmark for Job<'_> {
     fn proof_size_bytes(proof: &Self::ProofType) -> u32 {
         (proof
             .inner
-            .flat()
+            .composite()
             .unwrap()
+            .segments
             .iter()
             .fold(0, |acc, segment| acc + segment.get_seal_bytes().len())) as u32
     }
@@ -77,21 +76,12 @@ impl Benchmark for Job<'_> {
             b"This is a message that will be signed, and verified within the zkVM".to_vec();
         let signature: Signature = signing_key.sign(&message);
 
-        let env = ExecutorEnv::builder()
-            .write(&(spec, verifying_key, message.clone(), signature))
-            .unwrap()
-            .build()
-            .unwrap();
-
-        let session = Session::new(vec![], vec![], ExitCode::Halted(0));
-        let prover = Rc::new(LocalProver::new("local"));
+        let session = None;
 
         Job {
             spec,
-            env,
             image,
             session,
-            prover,
             verifying_key,
             message,
             signature,
@@ -107,7 +97,7 @@ impl Benchmark for Job<'_> {
     }
 
     fn guest_compute(&mut self) -> (Self::ComputeOut, Self::ProofType) {
-        let receipt = self.session.prove().expect("receipt");
+        let receipt = self.session.as_ref().unwrap().prove().expect("receipt");
 
         let (receipt_verifying_key, receipt_message) =
             from_slice::<(EncodedPoint, Vec<u8>), _>(&receipt.journal)
@@ -119,10 +109,20 @@ impl Benchmark for Job<'_> {
     }
 
     fn exec_compute(&mut self) -> (u32, u32, Duration) {
-        let (cycles, insn_cycles, elapsed, session) =
-            exec_compute(self.image.clone(), self.env.clone());
-        self.session = session;
-        (cycles, insn_cycles, elapsed)
+        let env = ExecutorEnv::builder()
+            .write(&(self.spec, self.verifying_key, self.message.clone(), self.signature))
+            .unwrap()
+            .build()
+            .unwrap();
+
+        let mut exec = ExecutorImpl::new(env, self.image.clone()).unwrap();
+        let start = Instant::now();
+        let session = exec.run().unwrap();
+        let elapsed = start.elapsed();
+        let segments = session.resolve().unwrap();
+        let (exec_cycles, prove_cycles) = get_cycles(segments);
+        self.session = Some(session);
+        (prove_cycles as u32, exec_cycles as u32, elapsed)
     }
 
     fn verify_proof(&self, _output: &Self::ComputeOut, proof: &Self::ProofType) -> bool {
@@ -138,7 +138,7 @@ impl Benchmark for Job<'_> {
     }
 }
 
-impl BenchmarkAverage for Job<'_> {
+impl BenchmarkAverage for Job {
     const NAME: &'static str = "ecdsa";
     type Spec = u32;
 
@@ -155,22 +155,12 @@ impl BenchmarkAverage for Job<'_> {
         let message =
             b"This is a message that will be signed, and verified within the zkVM".to_vec();
         let signature: Signature = signing_key.sign(&message);
-
-        let env = ExecutorEnv::builder()
-            .write(&(spec, verifying_key, message.clone(), signature))
-            .unwrap()
-            .build()
-            .unwrap();
-
-        let session = Session::new(vec![], vec![], ExitCode::Halted(0));
-        let prover = default_prover();
+        let session = None;
 
         Job {
             spec,
-            env,
             image,
             session,
-            prover,
             verifying_key,
             message,
             signature,
@@ -181,14 +171,23 @@ impl BenchmarkAverage for Job<'_> {
         &self.spec
     }
 
-    fn guest_compute(&mut self) -> () {
-        self.prover
-            .prove(
-                self.env.clone(),
+    fn guest_compute(&mut self) -> Duration {
+        let env = ExecutorEnv::builder()
+            .write(&(self.spec, self.verifying_key, self.message.clone(), self.signature))
+            .unwrap()
+            .build()
+            .unwrap();
+
+        let prover = default_prover();
+        let start = Instant::now();
+        prover.prove(
+                env,
                 &VerifierContext::default(),
                 &ProverOpts::default(),
                 self.image.clone(),
             )
             .expect("receipt");
+        let elapsed = start.elapsed();
+        elapsed
     }
 }
