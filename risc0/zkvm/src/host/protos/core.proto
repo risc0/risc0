@@ -65,9 +65,9 @@ message ReceiptMetadata {
 
 message MaybePruned {
   oneof kind {
-    Digest pruned = 2;
     // Protobuf encoded bytes of the inner value.
-    bytes value = 3;
+    bytes value = 1;
+    Digest pruned = 2;
   }
 }
 
