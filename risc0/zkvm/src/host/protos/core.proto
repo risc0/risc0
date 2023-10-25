@@ -1,7 +1,6 @@
 syntax = "proto3";
 
 import "base.proto";
-import "google/protobuf/any.proto";
 
 package protos.core;
 
@@ -61,13 +60,14 @@ message ReceiptMetadata {
   MaybePruned post = 2; // MaybePruned<SystemState>
   protos.base.ExitCode exit_code = 3;
   Digest input = 4;
-  MaybePruned output = 5; // MaybePruned<Option<Output>>
+  optional MaybePruned output = 5; // Option<MaybePruned<Output>>
 }
 
 message MaybePruned {
   oneof kind {
-    google.protobuf.Any value = 1;
     Digest pruned = 2;
+    // Protobuf encoded bytes of the inner value.
+    bytes value = 3;
   }
 }
 

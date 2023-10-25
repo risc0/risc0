@@ -16,7 +16,6 @@ use std::{collections::BTreeMap, path::PathBuf};
 
 use anyhow::{anyhow, bail, Result};
 use prost::{Message, Name};
-use prost_types::Any;
 use risc0_binfmt::{MemoryImage, PageTableInfo, SystemState};
 use risc0_zkp::core::digest::Digest;
 
@@ -612,14 +611,21 @@ impl TryFrom<pb::core::Assumptions> for Assumptions {
     }
 }
 
+trait AssociatedMessage {
+    type Message: Message;
+}
+
 impl<T> From<MaybePruned<T>> for pb::core::MaybePruned
 where
-    T: IntoAny + serde::Serialize + Clone,
+    T: AssociatedMessage + serde::Serialize + Clone,
+    T::Message: From<T> + Sized,
 {
     fn from(value: MaybePruned<T>) -> Self {
         Self {
             kind: Some(match value {
-                MaybePruned::Value(inner) => pb::core::maybe_pruned::Kind::Value(inner.into_any()),
+                MaybePruned::Value(inner) => {
+                    pb::core::maybe_pruned::Kind::Value(T::Message::from(inner).encode_to_vec())
+                }
                 MaybePruned::Pruned(digest) => pb::core::maybe_pruned::Kind::Pruned(digest.into()),
             }),
         }
@@ -628,90 +634,45 @@ where
 
 impl<T> TryFrom<pb::core::MaybePruned> for MaybePruned<T>
 where
-    T: TryFromAny + serde::Serialize + Clone,
+    T: AssociatedMessage + serde::Serialize + Clone,
+    T::Message: TryInto<T, Error = anyhow::Error> + Default,
 {
     type Error = anyhow::Error;
 
     fn try_from(value: pb::core::MaybePruned) -> Result<Self> {
         Ok(match value.kind.ok_or(malformed_err())? {
-            pb::core::maybe_pruned::Kind::Value(inner) => Self::Value(T::try_from_any(inner)?),
+            pb::core::maybe_pruned::Kind::Value(inner) => {
+                Self::Value(T::Message::decode(inner.as_slice())?.try_into()?)
+            }
             pb::core::maybe_pruned::Kind::Pruned(digest) => Self::Pruned(digest.try_into()?),
         })
     }
 }
 
-trait AssociatedMessage {
-    type Message: Message;
-}
-
-trait TryFromAny: Sized {
-    type Message: Message + TryInto<Self> + Default;
-
-    fn type_url() -> String;
-
-    fn try_from_any(any: Any) -> Result<Self> {
-        if any.type_url != Self::type_url() {
-            bail!(
-                "Failed to unpack google.protobuf.Any: expected type_url == {}; actual {}",
-                Self::type_url(),
-                any.type_url
-            );
-        }
-        Self::Message::decode(any.value.as_slice())?
-            .try_into()
-            .map_err(|_| anyhow!("failed to decode {}", Self::type_url()))
-    }
-}
-
-trait IntoAny: Sized {
-    type Message: Message + From<Self> + Sized;
-
-    fn type_url() -> String;
-
-    fn into_any(self) -> Any {
-        Any {
-            type_url: Self::type_url(),
-            value: Self::Message::from(self).encode_to_vec(),
+// Specialized implementaion for Vec<u8> for work around challenges getting the generic
+// implementaion above to work for Vec<u8>.
+impl From<MaybePruned<Vec<u8>>> for pb::core::MaybePruned {
+    fn from(value: MaybePruned<Vec<u8>>) -> Self {
+        Self {
+            kind: Some(match value {
+                MaybePruned::Value(inner) => {
+                    pb::core::maybe_pruned::Kind::Value(inner.encode_to_vec())
+                }
+                MaybePruned::Pruned(digest) => pb::core::maybe_pruned::Kind::Pruned(digest.into()),
+            }),
         }
     }
 }
 
-impl<T> TryFromAny for T
-where
-    T: AssociatedMessage,
-    T::Message: Name + TryInto<Self, Error = anyhow::Error> + Default,
-{
-    type Message = T::Message;
+impl TryFrom<pb::core::MaybePruned> for MaybePruned<Vec<u8>> {
+    type Error = anyhow::Error;
 
-    fn type_url() -> String {
-        T::Message::type_url()
-    }
-}
-
-impl<T> IntoAny for T
-where
-    T: AssociatedMessage,
-    T::Message: Name + From<Self> + Sized,
-{
-    type Message = T::Message;
-
-    fn type_url() -> String {
-        T::Message::type_url()
-    }
-}
-
-impl IntoAny for Vec<u8> {
-    type Message = Self;
-
-    fn type_url() -> String {
-        "google.protobuf.BytesValue".to_string()
-    }
-}
-
-impl TryFromAny for Vec<u8> {
-    type Message = Self;
-
-    fn type_url() -> String {
-        "google.protobuf.BytesValue".to_string()
+    fn try_from(value: pb::core::MaybePruned) -> Result<Self> {
+        Ok(match value.kind.ok_or(malformed_err())? {
+            pb::core::maybe_pruned::Kind::Value(inner) => {
+                Self::Value(<Vec<u8> as Message>::decode(inner.as_slice())?)
+            }
+            pb::core::maybe_pruned::Kind::Pruned(digest) => Self::Pruned(digest.try_into()?),
+        })
     }
 }

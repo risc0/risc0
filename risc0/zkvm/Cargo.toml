@@ -78,7 +78,6 @@ crypto-bigint = { version = "0.5", default-features = false, features = [
 ], optional = true }
 num-derive = "0.4"
 num-traits = { version = "0.2", default-features = false, optional = true }
-prost-types = { version = "0.12", optional = true }
 prost = { version = "0.12", optional = true }
 sha2 = { version = "0.10", optional = true }
 tempfile = { version = "3", optional = true }
@@ -112,7 +111,6 @@ client = [
   "dep:bytes",
   "dep:prost",
   "dep:prost-build",
-  "dep:prost-types",
   "dep:protobuf-src",
   "std",
 ]
@@ -147,7 +145,6 @@ profiler = [
   "dep:object",
   "dep:prost",
   "dep:prost-build",
-  "dep:prost-types",
   "dep:protobuf-src",
   "dep:goblin",
   "dep:rustc-demangle"]
@@ -164,7 +161,6 @@ prove = [
   "dep:lazy-regex",
   "dep:prost",
   "dep:prost-build",
-  "dep:prost-types",
   "dep:protobuf-src",
   "dep:rayon",
   "dep:sha2",
