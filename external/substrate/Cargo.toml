@@ -4,6 +4,9 @@ version = "0.1.0"
 description = "Minimal Substrate runtime for testing compatibility"
 publish = false
 
+[package.metadata.release]
+release = false
+
 [package.metadata.docs.rs]
 targets = ["x86_64-unknown-linux-gnu"]
 
