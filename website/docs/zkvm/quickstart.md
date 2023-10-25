@@ -42,14 +42,26 @@ Don't worry -- each `TODO` comes with instructions for what you need to do, and 
 
 ## 4. Run your project, locally or remotely
 
-The readme for your project includes instructions for how to run it, both locally or remotely.
-You can build your example and run the prover locally with:
+The readme for your project includes instructions for how to run it, both locally or remotely. You can also get a better developer experience and smoother iteration on your code by using the developer mode.
+
+### Running your project
+
+To run your project locally, going through the full proof generation process, run:
 
 ```bash
 cargo run --release
 ```
 
-> **Congratulations!** <br/>_That's all it takes to build and run a minimal RISC Zero application._
+#### Tip: Leveraging Developer Mode
+
+We recommend using [developer mode] while working on your project, as it will eliminate the time for verifying a receipt and consequently enabling faster iterations on the code. In order to enable developer mode, you need to set the environment variable `RISC0_DEV_MODE=1` when executing your project. (other possible values are `true` and `yes`). For more information about this mode, please see the FAQ on ['What is developer mode and how can I use it safely?'].
+
+Example:
+```bash
+RISC0_DEV_MODE=1 cargo run --release
+```
+
+It's important to highlight that the developer mode is only meant to be used during development and testing. It should **never** be used in production.
 
 ## Local & Remote Proving
 
@@ -69,6 +81,11 @@ Additional information is available in the [starter template](https://github.com
 
 Options such as GPU acceleration and skipping the proof generation are documented in the [feature flags].
 
+> **Congratulations!**
+>
+> _You've built your first zkVM application!_
+> _That's all it takes to build and run a minimal RISC Zero application._
+
 [zkVM]: ../zkvm/zkvm_overview.md
 [guest program]: ../terminology.md#guest-program
 [Bonsai]: ../bonsai/bonsai-overview.md
@@ -80,3 +97,5 @@ Options such as GPU acceleration and skipping the proof generation are documente
 [demo applications]: https://github.com/risc0/risc0/tree/v0.18.0/examples
 [Bonsai Quick Start]: ../bonsai/quickstart.md
 [request access]: https://bonsai.xyz/apply
+['What is developer mode and how can I use it safely?']: ../faq.md#dev-mode
+[developer mode]: ../faq.md#dev-mode
