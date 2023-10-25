@@ -54,7 +54,7 @@ cargo run --release
 
 #### Tip: Leveraging Developer Mode
 
-We recommend using [developer mode] while working on your project, as it will eliminate the time for verifying a receipt and consequently enabling faster iterations on the code. In order to enable developer mode, you need to set the environment variable `RISC0_DEV_MODE=1` when executing your project. (other possible values are `true` and `yes`). For more information about this mode, please see the FAQ on ['What is developer mode and how can I use it safely?'].
+We recommend using [developer mode] while working on your project, as it will eliminate the time for proving a receipt and consequently enabling faster iterations on the code. In order to enable developer mode, you need to set the environment variable `RISC0_DEV_MODE=1` when executing your project. (other possible values are `true` and `yes`). For more information about this mode, please see the FAQ on ['What is developer mode and how can I use it safely?'].
 
 Example:
 
