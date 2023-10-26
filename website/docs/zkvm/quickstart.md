@@ -56,7 +56,7 @@ cargo run --release
 
 Depending on the length of execution, the `cargo run --release` command can take a long time to run. This command spends the majority of its time generating valid proofs. While it is important to produce proofs, waiting for while running code can slow down iteration during development. Rather than waiting for proofs on each iteration, developers can disable proof generation for development purposes and re-enable proving when they are done with each iteration.
 
-To address the issue of long execution times due to proof generation, we suggest utilizing [dev-mode] during your project development. This mode bypasses the time-consuming proof generation process, allowing for faster iterations of your code. To activate dev-mode, simply set the environment variable `RISC0_DEV_MODE=1` when executing your project (other acceptable values include `true` and `yes`). For a deeper understanding of dev-mode and its safe usage, please refer to our FAQ section ['What is dev-mode and how can I use it safely?'].
+To address the issue of long execution times due to proof generation, we suggest utilizing [dev-mode] during your project development. This mode bypasses the time-consuming proof generation process, allowing for faster iterations of your code. To activate dev-mode, simply set the environment variable `RISC0_DEV_MODE=1` when executing your project (other acceptable values include `true` and `yes`). For a deeper understanding of dev-mode and its safe usage, please refer to our page explaining [what is dev-mode].
 
 Example:
 
@@ -99,5 +99,5 @@ Options such as GPU acceleration and skipping the proof generation are documente
 [demo applications]: https://github.com/risc0/risc0/tree/v0.18.0/examples
 [Bonsai Quick Start]: ../bonsai/quickstart.md
 [request access]: https://bonsai.xyz/apply
-['What is dev-mode and how can I use it safely?']: ../faq.md#dev-mode
-[dev-mode]: ../faq.md#dev-mode
+[dev-mode]: ./dev-mode.md
+[what is dev-mode]: ./dev-mode.md
