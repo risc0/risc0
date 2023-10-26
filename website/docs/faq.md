@@ -254,10 +254,10 @@ What is dev-mode and how can I use it safely?
 </summary>
 A: We support a development-only mode for standalone risc0 projects in which code is executed but not proven. This adds efficiency to the development cycle during development stages where proving correct execution is not yet critical.
 
-A risc0 project in dev-mode supports ([fake](https://docs.rs/risc0-zkvm/0.19.0/risc0_zkvm/enum.InnerReceipt.html#variant.Fake)) receipt creation and pass-through (fake) 'verification' function, so that dev-mode may be switched on and off without impacting project workflows.
+A risc0 project, when run in dev-mode by setting the `RISC0_DEV_MODE` environment variable, supports ([fake](https://docs.rs/risc0-zkvm/0.19.0/risc0_zkvm/enum.InnerReceipt.html#variant.Fake)) receipt creation and pass-through (fake) 'verification' function, so that dev-mode may be switched on and off at runtime without impacting project workflows.
 In particular, receipts generated in dev-mode still include public outputs written to the [journal](https://dev.risczero.com/terminology#journal).
 
-However, because the proving process is bypassed, receipts generated in dev-mode will fail a standard receipt verification check. Only when the verifier is also built in dev-mode will it perform pass-through 'verification' of the fake receipt.
+However, because the proving process is bypassed, receipts generated when dev-mode is enabled will fail a standard receipt verification check. Only when the verifier is also run with dev-mode enabled will it perform pass-through 'verification' of the fake receipt.
 
 **To keep this mode out of production environments, we recommend building production-ready projects with the "disable-dev-mode" [feature flag](https://github.com/risc0/risc0/#feature-flags); it is absent by default.**
 
