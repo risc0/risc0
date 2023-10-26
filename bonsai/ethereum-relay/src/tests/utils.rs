@@ -125,7 +125,7 @@ pub(crate) mod tests {
         async fn process_event(
             &self,
             event: CallbackRequestFilter,
-        ) -> Result<(), crate::api::error::Error> {
+        ) -> Result<SessionId, crate::api::error::Error> {
             assert_eq!(event.account, self.expected_account);
             assert_eq!(H256::from(event.image_id), self.expected_image_id);
             assert_eq!(event.input, self.expected_input);
