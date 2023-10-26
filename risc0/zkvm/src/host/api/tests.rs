@@ -27,7 +27,7 @@ use risc0_zkvm_platform::{memory::GUEST_MAX_MEM, PAGE_SIZE};
 use tempfile::{tempdir, TempDir};
 use test_log::test;
 
-use super::{pb, Asset, AssetRequest, Binary, ConnectionWrapper, Connector, TcpConnection};
+use super::{Asset, AssetRequest, Binary, ConnectionWrapper, Connector, TcpConnection};
 use crate::{
     recursion::SuccinctReceipt, ApiClient, ApiServer, ExecutorEnv, InnerReceipt, ProverOpts,
     Receipt, SegmentReceipt, SessionInfo, VerifierContext,
@@ -56,7 +56,7 @@ struct TestClient {
     work_dir: TempDir,
     client: ApiClient,
     addr: SocketAddr,
-    segments: Vec<pb::api::SegmentInfo>,
+    segments: Vec<Asset>,
 }
 
 impl TestClient {
@@ -79,10 +79,11 @@ impl TestClient {
     fn execute(&mut self, env: ExecutorEnv<'_>, binary: Binary) -> SessionInfo {
         with_server(self.addr, || {
             let segments_out = AssetRequest::Path(self.get_work_path());
-            self.client.execute(&env, binary, segments_out, |segment| {
-                self.segments.push(segment);
-                Ok(())
-            })
+            self.client
+                .execute(&env, binary, segments_out, |_info, asset| {
+                    self.segments.push(asset);
+                    Ok(())
+                })
         })
     }
 
@@ -189,8 +190,7 @@ fn prove_segment_elf() {
     let ctx = VerifierContext::default();
     for segment in client.segments.iter() {
         let opts = ProverOpts::default();
-        let segment = segment.segment.clone().unwrap().try_into().unwrap();
-        let receipt = client.prove_segment(opts, segment);
+        let receipt = client.prove_segment(opts, segment.clone());
         receipt.verify_with_context(&ctx).unwrap();
     }
 }
@@ -214,22 +214,11 @@ fn lift_join_identity() {
 
     let opts = ProverOpts::default();
 
-    let receipt = client.prove_segment(
-        opts.clone(),
-        client.segments[0]
-            .segment
-            .clone()
-            .unwrap()
-            .try_into()
-            .unwrap(),
-    );
+    let receipt = client.prove_segment(opts.clone(), client.segments[0].clone());
     let mut rollup = client.lift(opts.clone(), receipt.try_into().unwrap());
 
     for segment in &client.segments[1..] {
-        let receipt = client.prove_segment(
-            opts.clone(),
-            segment.segment.clone().unwrap().try_into().unwrap(),
-        );
+        let receipt = client.prove_segment(opts.clone(), segment.clone());
         let rec_receipt = client.lift(opts.clone(), receipt.try_into().unwrap());
 
         rollup = client.join(
