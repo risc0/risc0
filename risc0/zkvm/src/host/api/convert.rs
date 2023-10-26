@@ -21,8 +21,8 @@ use risc0_zkp::core::digest::Digest;
 
 use super::{malformed_err, path_to_string, pb, Asset, AssetRequest, Binary, BinaryKind};
 use crate::{
-    host::recursion::SuccinctReceipt, ExitCode, InnerReceipt, ProverOpts, Receipt, ReceiptMetadata,
-    SegmentReceipt, SegmentReceipts, TraceEvent,
+    host::recursion::SuccinctReceipt, ExitCode, InnerReceipt, Journal, ProverOpts, Receipt,
+    ReceiptMetadata, SegmentReceipt, SegmentReceipts, TraceEvent,
 };
 
 mod ver {
@@ -294,7 +294,7 @@ impl From<Receipt> for pb::core::Receipt {
         Self {
             version: Some(ver::RECEIPT),
             inner: Some(value.inner.into()),
-            journal: value.journal,
+            journal: value.journal.bytes,
         }
     }
 }
@@ -309,7 +309,7 @@ impl TryFrom<pb::core::Receipt> for Receipt {
         }
         Ok(Self {
             inner: value.inner.ok_or(malformed_err())?.try_into()?,
-            journal: value.journal,
+            journal: Journal::new(value.journal),
         })
     }
 }

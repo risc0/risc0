@@ -20,7 +20,7 @@ pub(crate) mod tests {
         SessionId,
     };
     use ethers::types::{Address, Bytes, H256};
-    use risc0_zkvm::{InnerReceipt, Receipt};
+    use risc0_zkvm::{InnerReceipt, Journal, Receipt};
     use uuid::Uuid;
     use wiremock::{
         matchers::{method, path},
@@ -44,7 +44,7 @@ pub(crate) mod tests {
         };
 
         let receipt_data_response = Receipt {
-            journal: vec![],
+            journal: Journal::new(vec![]),
             inner: InnerReceipt::Fake,
         };
 
