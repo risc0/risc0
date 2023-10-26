@@ -1,8 +1,6 @@
 [workspace]
-members = [
-    "host",
-    "methods",
-]
+resolver = "2"
+members = ["host", "methods"]
 
 # Always optimize; building and running the guest takes much longer without optimization.
 [profile.dev]
