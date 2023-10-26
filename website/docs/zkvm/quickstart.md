@@ -54,7 +54,9 @@ cargo run --release
 
 #### Tip for Quick Development: Leveraging Dev Mode
 
-We recommend using [dev-mode] while working on your project, as it will eliminate the time for proving a receipt and consequently enabling faster iterations on the code. In order to enable dev-mode, you need to set the environment variable `RISC0_DEV_MODE=1` when executing your project. (other possible values are `true` and `yes`). For more information about this mode, please see the FAQ on ['What is dev-mode and how can I use it safely?'].
+Depending on the length of execution, the `cargo run --release` command can take a long time to run. This command spends the majority of its time generating valid proofs. While it is important to produce proofs, waiting for while running code can slow down iteration during development. Rather than waiting for proofs on each iteration, developers can disable proof generation for development purposes and re-enable proving when they are done with each iteration.
+
+To address the issue of long execution times due to proof generation, we suggest utilizing [dev-mode] during your project development. This mode bypasses the time-consuming proof generation process, allowing for faster iterations of your code. To activate dev-mode, simply set the environment variable `RISC0_DEV_MODE=1` when executing your project (other acceptable values include `true` and `yes`). For a deeper understanding of dev-mode and its safe usage, please refer to our FAQ section ['What is dev-mode and how can I use it safely?'].
 
 Example:
 
