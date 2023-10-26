@@ -21,6 +21,7 @@
 mod prove;
 mod receipt;
 #[cfg(test)]
+#[cfg(feature = "prove")]
 mod tests;
 
 pub use risc0_circuit_recursion::control_id::ALLOWED_IDS_ROOT;

@@ -50,6 +50,7 @@ pub use risc0_zkvm_platform::{declare_syscall, memory::GUEST_MAX_MEM, PAGE_SIZE}
 pub use self::fault_monitor::FaultCheckMonitor;
 #[cfg(not(target_os = "zkvm"))]
 #[cfg(feature = "profiler")]
+#[cfg(feature = "prove")]
 pub use self::host::server::exec::profiler::Profiler;
 #[cfg(not(target_os = "zkvm"))]
 #[cfg(feature = "prove")]

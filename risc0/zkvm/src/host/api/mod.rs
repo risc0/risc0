@@ -17,6 +17,7 @@ pub(crate) mod convert;
 #[cfg(feature = "prove")]
 pub(crate) mod server;
 #[cfg(test)]
+#[cfg(feature = "prove")]
 mod tests;
 
 use std::{
