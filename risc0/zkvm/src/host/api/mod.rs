@@ -37,7 +37,7 @@ use anyhow::{anyhow, Context, Result};
 use bytes::{Buf, BufMut, Bytes};
 use prost::Message;
 
-use crate::ExitCode;
+use crate::{ExitCode, Journal};
 
 mod pb {
     pub(crate) mod api {
@@ -77,6 +77,8 @@ impl RootMessage for pb::api::LiftRequest {}
 impl RootMessage for pb::api::LiftReply {}
 impl RootMessage for pb::api::JoinRequest {}
 impl RootMessage for pb::api::JoinReply {}
+impl RootMessage for pb::api::IdentityP254Request {}
+impl RootMessage for pb::api::IdentityP254Reply {}
 
 impl ConnectionWrapper {
     fn new(inner: Box<dyn Connection>) -> Self {
@@ -295,7 +297,7 @@ pub struct SessionInfo {
     pub segments: Vec<SegmentInfo>,
 
     /// The data publicly committed by the guest program.
-    pub journal: Bytes,
+    pub journal: Journal,
 
     /// The [ExitCode] of the session.
     pub exit_code: ExitCode,

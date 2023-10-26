@@ -17,8 +17,8 @@ use std::{rc::Rc, time::Duration};
 use ed25519_dalek::{Signature, Signer, SigningKey, VerifyingKey};
 use rand_core::OsRng;
 use risc0_zkvm::{
-    default_prover, serde::from_slice, sha::DIGEST_WORDS, ExecutorEnv, ExitCode, LocalProver,
-    MemoryImage, Prover, ProverOpts, Receipt, Session, VerifierContext,
+    default_prover, sha::DIGEST_WORDS, ExecutorEnv, ExitCode, LocalProver, MemoryImage, Prover,
+    ProverOpts, Receipt, Session, VerifierContext,
 };
 
 use crate::{exec_compute, get_image, Benchmark, BenchmarkAverage};
@@ -52,7 +52,7 @@ impl Benchmark for Job<'_> {
     }
 
     fn output_size_bytes(_output: &Self::ComputeOut, proof: &Self::ProofType) -> u32 {
-        (proof.journal.len()) as u32
+        proof.journal.bytes.len() as u32
     }
 
     fn proof_size_bytes(proof: &Self::ProofType) -> u32 {
@@ -111,11 +111,7 @@ impl Benchmark for Job<'_> {
     fn guest_compute(&mut self) -> (Self::ComputeOut, Self::ProofType) {
         let receipt = self.session.prove().expect("receipt");
 
-        let (encoded_verifying_key, receipt_message) =
-            from_slice::<([u8; 32], Vec<u8>), _>(&receipt.journal)
-                .unwrap()
-                .try_into()
-                .unwrap();
+        let (encoded_verifying_key, receipt_message) = receipt.journal.decode().unwrap();
         let verifying_key = VerifyingKey::from_bytes(&encoded_verifying_key).unwrap();
 
         ((verifying_key, receipt_message), receipt)

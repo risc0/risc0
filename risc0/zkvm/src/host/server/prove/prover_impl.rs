@@ -29,7 +29,11 @@ use risc0_zkp::{
 
 use super::{exec::MachineContext, HalPair, ProverServer};
 use crate::{
-    host::{receipt::SegmentReceipts, CIRCUIT},
+    host::{
+        receipt::SegmentReceipts,
+        recursion::{identity_p254, join, lift, SuccinctReceipt},
+        CIRCUIT,
+    },
     InnerReceipt, Loader, Receipt, Segment, SegmentReceipt, Session, VerifierContext,
 };
 
@@ -76,7 +80,7 @@ where
             }
         }
         let inner = InnerReceipt::Flat(SegmentReceipts(segments));
-        let receipt = Receipt::new(inner, session.journal.clone());
+        let receipt = Receipt::new(inner, session.journal.bytes.clone());
         let image_id = session.segments[0].resolve()?.pre_image.compute_id();
         match receipt.verify_with_context(ctx, image_id) {
             Ok(()) => Ok(receipt),
@@ -151,5 +155,17 @@ where
 
     fn get_peak_memory_usage(&self) -> usize {
         self.hal_pair.hal.get_memory_usage()
+    }
+
+    fn lift(&self, receipt: &SegmentReceipt) -> Result<SuccinctReceipt> {
+        lift(receipt)
+    }
+
+    fn join(&self, a: &SuccinctReceipt, b: &SuccinctReceipt) -> Result<SuccinctReceipt> {
+        join(a, b)
+    }
+
+    fn identity_p254(&self, a: &SuccinctReceipt) -> Result<SuccinctReceipt> {
+        identity_p254(a)
     }
 }

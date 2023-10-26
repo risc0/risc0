@@ -80,6 +80,7 @@ num-derive = "0.4"
 num-traits = { version = "0.2", default-features = false, optional = true }
 prost = { version = "0.12", optional = true }
 sha2 = { version = "0.10", optional = true }
+tempfile = { version = "3", optional = true }
 tracing = { version = "0.1", default-features = false, features = [
   "attributes",
 ] }
@@ -100,7 +101,6 @@ risc0-zkvm-methods = { path = "methods" }
 serde_json = "1.0"
 serial_test = "2.0"
 tar = "0.4"
-tempfile = "3"
 test-log = { version = "0.2", features = ["trace"] }
 
 [features]
@@ -163,6 +163,7 @@ prove = [
   "dep:protobuf-src",
   "dep:rayon",
   "dep:sha2",
+  "dep:tempfile",
   "dep:typetag",
   "risc0-circuit-recursion/prove",
   "risc0-circuit-rv32im/prove",

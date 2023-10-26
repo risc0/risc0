@@ -79,7 +79,7 @@ pub use self::host::{
 pub use self::host::{
     control_id::POSEIDON_CONTROL_ID,
     receipt::{
-        ExitCode, InnerReceipt, Receipt, ReceiptMetadata, SegmentReceipt, SegmentReceipts,
+        ExitCode, InnerReceipt, Journal, Receipt, ReceiptMetadata, SegmentReceipt, SegmentReceipts,
         VerifierContext,
     },
     recursion::ALLOWED_IDS_ROOT,
