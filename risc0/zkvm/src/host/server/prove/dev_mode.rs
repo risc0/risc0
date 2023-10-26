@@ -53,7 +53,10 @@ impl ProverServer for DevModeProver {
             )
         }
 
-        Ok(Receipt::new(InnerReceipt::Fake, session.journal.clone()))
+        Ok(Receipt::new(
+            InnerReceipt::Fake,
+            session.journal.bytes.clone(),
+        ))
     }
 
     fn prove_segment(&self, _ctx: &VerifierContext, _segment: &Segment) -> Result<SegmentReceipt> {

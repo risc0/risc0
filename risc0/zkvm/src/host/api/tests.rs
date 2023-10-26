@@ -243,6 +243,6 @@ fn lift_join_identity() {
     }
     client.identity_p254(opts, rollup.clone().try_into().unwrap());
 
-    let rollup_receipt = Receipt::new(InnerReceipt::Succinct(rollup), session.journal.into());
+    let rollup_receipt = Receipt::new(InnerReceipt::Succinct(rollup), session.journal.bytes.into());
     rollup_receipt.verify(MULTI_TEST_ID).unwrap();
 }

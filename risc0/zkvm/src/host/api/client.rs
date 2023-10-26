@@ -25,7 +25,7 @@ use super::{
 use crate::{
     get_version,
     host::{api::SegmentInfo, client::prove::get_r0vm_path, recursion::SuccinctReceipt},
-    ExecutorEnv, ProverOpts, Receipt, SegmentReceipt,
+    ExecutorEnv, Journal, ProverOpts, Receipt, SegmentReceipt,
 };
 
 /// A client implementation for interacting with a zkVM server.
@@ -384,7 +384,7 @@ impl Client {
                             return match session.session {
                                 Some(session) => Ok(SessionInfo {
                                     segments,
-                                    journal: session.journal.into(),
+                                    journal: Journal::new(session.journal.into()),
                                     exit_code: session
                                         .exit_code
                                         .ok_or(malformed_err())?

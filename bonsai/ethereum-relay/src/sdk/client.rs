@@ -15,7 +15,10 @@
 //! An asynchronous Client API.
 
 use anyhow::Context;
-use bonsai_sdk::API_KEY_HEADER;
+use bonsai_sdk::{
+    alpha::{responses::CreateSessRes, SessionId},
+    API_KEY_HEADER,
+};
 use reqwest::{header, Client as AsyncClient, Response};
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
@@ -116,7 +119,7 @@ impl Client {
     pub async fn callback_request(
         &self,
         request: impl Into<CallbackRequest>,
-    ) -> Result<(), ClientError> {
+    ) -> Result<SessionId, ClientError> {
         let res = self
             .client
             .post(format!("{}{CALLBACK_ROUTE}", self.url))
@@ -124,9 +127,10 @@ impl Client {
             .body(bincode::serialize(&request.into())?)
             .send()
             .await?;
-        error_for_status(res).await?;
-
-        Ok(())
+        let session_response = error_for_status(res).await?.json::<CreateSessRes>().await?;
+        Ok(SessionId {
+            uuid: session_response.uuid,
+        })
     }
 }
 

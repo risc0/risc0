@@ -15,7 +15,7 @@
 use chess_core::Inputs;
 use chess_methods::{CHECKMATE_ELF, CHECKMATE_ID};
 use clap::{Arg, Command};
-use risc0_zkvm::{default_prover, serde::from_slice, ExecutorEnv, Receipt};
+use risc0_zkvm::{default_prover, ExecutorEnv, Receipt};
 use shakmaty::{fen::Fen, CastlingMode, Chess, FromSetup, Position, Setup};
 
 fn main() {
@@ -38,7 +38,7 @@ fn main() {
 
     // Verify receipt and parse it for committed data
     receipt.verify(CHECKMATE_ID).unwrap();
-    let committed_state: String = from_slice(&receipt.journal).unwrap();
+    let committed_state: String = receipt.journal.decode().unwrap();
     assert_eq!(inputs.board, committed_state);
     let fen = Fen::from_ascii(committed_state.as_bytes()).unwrap();
     let setup = Setup::from(fen);

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use risc0_zkvm::{default_prover, serde::from_slice, ExecutorEnv};
+use risc0_zkvm::{default_prover, ExecutorEnv};
 use serde_json;
 use smartcore::{
     linalg::basic::matrix::DenseMatrix, tree::decision_tree_classifier::DecisionTreeClassifier,
@@ -75,12 +75,12 @@ fn predict() -> Vec<u32> {
 
     // We read the result that the guest code committed to the journal. The
     // receipt can also be serialized and sent to a verifier.
-    from_slice(&receipt.journal).unwrap()
+    receipt.journal.decode().unwrap()
 }
 
 #[cfg(test)]
 mod test {
-    use risc0_zkvm::{default_executor, serde::from_slice, ExecutorEnv};
+    use risc0_zkvm::{default_executor, ExecutorEnv};
     use smartcore::{
         linalg::basic::matrix::DenseMatrix,
         svm::{
@@ -159,10 +159,10 @@ mod test {
 
         // We run the executor and bypass the prover.
         let exec = default_executor();
-        let session = exec.execute_elf(env, ML_TEMPLATE_ELF);
+        let session = exec.execute_elf(env, ML_TEMPLATE_ELF).unwrap();
 
         // We read the result commited to the journal by the guest code.
-        let result: Vec<f64> = from_slice(&(session.unwrap()).journal).unwrap();
+        let result: Vec<f64> = session.journal.decode().unwrap();
 
         let y_expected: Vec<f64> = vec![
             -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 1.0, 1.0,

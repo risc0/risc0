@@ -27,7 +27,10 @@ use risc0_binfmt::MemoryImage;
 use risc0_zkp::core::digest::Digest;
 use serde::{Deserialize, Serialize};
 
-use crate::host::{receipt::ExitCode, server::exec::executor::SyscallRecord};
+use crate::{
+    host::{receipt::ExitCode, server::exec::executor::SyscallRecord},
+    Journal,
+};
 
 #[derive(Clone, Default, Serialize, Deserialize, Debug)]
 pub struct PageFaults {
@@ -50,7 +53,7 @@ pub struct Session {
     pub segments: Vec<Box<dyn SegmentRef>>,
 
     /// The data publicly committed by the guest program.
-    pub journal: Vec<u8>,
+    pub journal: Journal,
 
     /// The [ExitCode] of the session.
     pub exit_code: ExitCode,
@@ -115,7 +118,7 @@ impl Session {
     pub fn new(segments: Vec<Box<dyn SegmentRef>>, journal: Vec<u8>, exit_code: ExitCode) -> Self {
         Self {
             segments,
-            journal,
+            journal: Journal::new(journal),
             exit_code,
             hooks: Vec::new(),
         }

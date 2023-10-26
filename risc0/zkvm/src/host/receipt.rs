@@ -33,7 +33,7 @@ use risc0_zkp::{
     verify::VerificationError,
 };
 use risc0_zkvm_platform::WORD_SIZE;
-use serde::{Deserialize, Serialize};
+use serde::{de::DeserializeOwned, Deserialize, Serialize};
 
 use super::{
     control_id::{BLAKE2B_CONTROL_ID, POSEIDON_CONTROL_ID, SHA256_CONTROL_ID},
@@ -41,7 +41,7 @@ use super::{
 };
 use crate::{
     fault_ids::FAULT_CHECKER_ID,
-    serde::from_slice,
+    serde::{from_slice, Error},
     sha::rust_crypto::{Digest as _, Sha256},
 };
 
@@ -149,11 +149,30 @@ pub struct Receipt {
     /// The polymorphic [InnerReceipt].
     pub inner: InnerReceipt,
 
-    /// The public data written by the guest in this Session.
+    /// The public commitment written by the guest.
     ///
     /// This data is cryptographically authenticated in
     /// [Receipt::verify].
-    pub journal: Vec<u8>,
+    pub journal: Journal,
+}
+
+/// A journal is a record of all public commitments for a given proof session.
+#[derive(Debug, Deserialize, Serialize, PartialEq)]
+pub struct Journal {
+    /// The raw bytes of the journal.
+    pub bytes: Vec<u8>,
+}
+
+impl Journal {
+    /// Construct a new [Journal].
+    pub fn new(bytes: Vec<u8>) -> Self {
+        Self { bytes }
+    }
+
+    /// Decode the journal bytes by using the risc0 deserializer.
+    pub fn decode<T: DeserializeOwned>(&self) -> Result<T, Error> {
+        from_slice(&self.bytes)
+    }
 }
 
 /// An inner receipt can take the form of a [SegmentReceipts] collection or a
@@ -371,7 +390,10 @@ pub struct VerifierContext {
 impl Receipt {
     /// Construct a new Receipt
     pub fn new(inner: InnerReceipt, journal: Vec<u8>) -> Self {
-        Self { inner, journal }
+        Self {
+            inner,
+            journal: Journal::new(journal),
+        }
     }
 
     /// Verify the integrity of this receipt.
@@ -395,7 +417,8 @@ impl Receipt {
         ctx: &VerifierContext,
         image_id: impl Into<Digest>,
     ) -> Result<(), VerificationError> {
-        self.inner.verify_with_context(ctx, image_id, &self.journal)
+        self.inner
+            .verify_with_context(ctx, image_id, &self.journal.bytes)
     }
 
     /// Extract the [ReceiptMetadata] from this receipt for an excution session.
