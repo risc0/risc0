@@ -106,7 +106,7 @@ impl Client {
         callback: F,
     ) -> Result<SessionInfo>
     where
-        F: FnMut(pb::api::SegmentInfo) -> Result<()>,
+        F: FnMut(SegmentInfo, Asset) -> Result<()>,
     {
         let mut conn = self.connect()?;
 
@@ -347,7 +347,7 @@ impl Client {
         env: &ExecutorEnv<'_>,
     ) -> Result<SessionInfo>
     where
-        F: FnMut(pb::api::SegmentInfo) -> Result<()>,
+        F: FnMut(SegmentInfo, Asset) -> Result<()>,
     {
         let mut callback = callback;
         let mut segments = Vec::new();
@@ -369,11 +369,14 @@ impl Client {
                                 .map_or_else(
                                     || Err(malformed_err()),
                                     |segment| {
-                                        segments.push(SegmentInfo {
+                                        let asset =
+                                            segment.segment.ok_or(malformed_err())?.try_into()?;
+                                        let info = SegmentInfo {
                                             po2: segment.po2,
                                             cycles: segment.cycles,
-                                        });
-                                        callback(segment)
+                                        };
+                                        segments.push(info.clone());
+                                        callback(info, asset)
                                     },
                                 )
                                 .into();

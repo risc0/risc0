@@ -50,6 +50,7 @@ pub use risc0_zkvm_platform::{declare_syscall, memory::GUEST_MAX_MEM, PAGE_SIZE}
 pub use self::fault_monitor::FaultCheckMonitor;
 #[cfg(not(target_os = "zkvm"))]
 #[cfg(feature = "profiler")]
+#[cfg(feature = "prove")]
 pub use self::host::server::exec::profiler::Profiler;
 #[cfg(not(target_os = "zkvm"))]
 #[cfg(feature = "prove")]
@@ -65,7 +66,10 @@ pub use self::host::{
 #[cfg(not(target_os = "zkvm"))]
 #[cfg(feature = "client")]
 pub use self::host::{
-    api::{client::Client as ApiClient, Binary, Connector, SegmentInfo, SessionInfo},
+    api::{
+        client::Client as ApiClient, Asset, AssetRequest, Binary, Connector, SegmentInfo,
+        SessionInfo,
+    },
     client::{
         env::{ExecutorEnv, ExecutorEnvBuilder},
         exec::TraceEvent,
@@ -82,7 +86,7 @@ pub use self::host::{
         ExitCode, InnerReceipt, Journal, Receipt, ReceiptMetadata, SegmentReceipt, SegmentReceipts,
         VerifierContext,
     },
-    recursion::ALLOWED_IDS_ROOT,
+    recursion::{SuccinctReceipt, ALLOWED_IDS_ROOT},
 };
 
 /// Reports the current version of this crate.

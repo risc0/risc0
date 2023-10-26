@@ -12,6 +12,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
+env:
+  RISC0_TOOLCHAIN_VERSION: test-release-2
+
 jobs:
   changes:
     runs-on: ubuntu-latest
@@ -95,25 +98,25 @@ jobs:
       - uses: ./.github/actions/sccache
         with:
           key: ${{ matrix.os }}-${{ matrix.feature }}
-      - run: cargo run --bin cargo-risczero --no-default-features -- risczero install
+      - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: cargo test -F $FEATURE -F profiler --workspace --exclude doc-test
-      - run: cargo test -F $FEATURE -F disable-dev-mode -p risc0-r0vm
-      - run: cargo test -F $FEATURE -F fault-proof -p risc0-zkvm -- tests::memory_io tests::memory_access
+      - run: cargo test -p risc0-r0vm -F $FEATURE -F disable-dev-mode
+      - run: cargo test -p risc0-zkvm -F $FEATURE -F fault-proof -F prove -- tests::memory_io tests::memory_access
         if: matrix.device == 'cpu'
-      - run: cargo test -F experimental -p cargo-risczero
+      - run: cargo test -p cargo-risczero -F experimental
         if: matrix.device == 'cpu'
       - run: cargo check -F $FEATURE --benches
       - run: cargo check -p risc0-build
         if: matrix.device == 'cpu'
-      - run: cargo check -F $FEATURE -p risc0-circuit-rv32im
+      - run: cargo check -p risc0-circuit-rv32im -F $FEATURE
       - run: cargo check -p risc0-core
         if: matrix.device == 'cpu'
-      - run: cargo check -F $FEATURE -p risc0-r0vm
-      - run: cargo check -F $FEATURE -p risc0-sys
-      - run: cargo check -F $FEATURE -p risc0-zkp
-      - run: cargo check -F $FEATURE -p risc0-zkvm
+      - run: cargo check -p risc0-r0vm -F $FEATURE
+      - run: cargo check -p risc0-sys -F $FEATURE
+      - run: cargo check -p risc0-zkp -F $FEATURE
+      - run: cargo check -p risc0-zkvm -F $FEATURE
       - run: cargo check -p substrate-minimal-runtime
       - uses: risc0/clippy-action@main
         with:
@@ -160,10 +163,10 @@ jobs:
       - uses: ./.github/actions/sccache
         with:
           key: ${{ matrix.os }}-${{ matrix.feature }}
-      - run: cargo run --bin cargo-risczero --no-default-features -- risczero install
+      - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - run: cargo build --release -F $FEATURE -p risc0-r0vm
+      - run: cargo build --release -p risc0-r0vm -F $FEATURE
       - run: cargo test --locked -F $FEATURE
         working-directory: examples
 
@@ -180,7 +183,7 @@ jobs:
       - uses: ./.github/actions/sccache
         with:
           key: Linux
-      - run: cargo run --bin cargo-risczero --no-default-features -- risczero install
+      - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: cargo doc --no-deps --exclude=risc0-zkvm-methods --workspace
@@ -195,7 +198,7 @@ jobs:
       - uses: ./.github/actions/sccache
         with:
           key: Linux
-      - run: cargo run --bin cargo-risczero --no-default-features -- risczero install
+      - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: cargo check
@@ -216,7 +219,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
-      - run: cargo run --bin cargo-risczero -- risczero install
+      - run: cargo run --bin cargo-risczero -- risczero install --version $RISC0_TOOLCHAIN_VERSION
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: cargo build --release -p risc0-r0vm
@@ -249,7 +252,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
-      - run: cargo run --bin cargo-risczero -- risczero install
+      - run: cargo run --bin cargo-risczero -- risczero install --version $RISC0_TOOLCHAIN_VERSION
         env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: risc0/clippy-action@main
@@ -276,7 +279,7 @@ jobs:
         with:
           node-version: 18
       - uses: ./.github/actions/sccache
-      - run: cargo run --bin cargo-risczero --no-default-features -- risczero install
+      - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: cargo xtask install
@@ -293,10 +296,10 @@ jobs:
       - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
       - uses: actions/checkout@v3
       - uses: ./.github/actions/rustup
-      - run: cargo run --bin cargo-risczero --no-default-features -- risczero install
+      - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - run: cargo test -F docker -p risc0-build
-      - run: cargo test -F docker -p risc0-zkvm -- "docker::"
+      - run: cargo test -p risc0-build -F docker
+      - run: cargo test -p risc0-zkvm -F docker -F prove -- "docker::"
         env:
           RISC0_USE_DOCKER: "1"
