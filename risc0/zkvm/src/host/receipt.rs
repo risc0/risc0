@@ -120,7 +120,7 @@ impl Receipt {
     }
 
     /// Verify that this receipt proves a successful execution of the zkVM from
-    /// the given image_id.
+    /// the given `image_id`.
     ///
     /// Uses the zero-knowledge proof system to verify the seal, and decodes the
     /// proven [ReceiptMetadata]. This method additionally ensures that the
@@ -132,7 +132,7 @@ impl Receipt {
     }
 
     /// Verify that this receipt proves a successful execution of the zkVM from
-    /// the given image_id.
+    /// the given `image_id`.
     ///
     /// Uses the zero-knowledge proof system to verify the seal, and decodes the
     /// proven [ReceiptMetadata]. This method additionally ensures that the
@@ -184,10 +184,10 @@ impl Receipt {
         Ok(())
     }
 
-    /// Verify the integrity of this receipt, ensuring the metadata is attested
-    /// to by the seal.
+    /// Verify the integrity of this receipt, ensuring the metadata and jounral are attested to by
+    /// the seal.
     ///
-    /// NOTE: This does not verify the success of the guest execution. In
+    /// This does not verify the success of the guest execution. In
     /// particular, the guest could have exited with an error (e.g.
     /// `ExitCode::Halted(1)`) or faulted state. It also does not check the
     /// image ID, or otherwise constrain what guest was executed. After calling
@@ -236,8 +236,7 @@ impl Receipt {
     }
 }
 
-/// An inner receipt can take the form of a [CompositeReceipt] collection or a
-/// [SuccinctReceipt].
+/// An inner receipt can take the form of a [CompositeReceipt] or a [SuccinctReceipt].
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[cfg_attr(test, derive(PartialEq))]
 pub enum InnerReceipt {
@@ -558,7 +557,7 @@ impl SegmentReceipt {
     }
 }
 
-/// An assumption associated with a guest call to `env::verify` or
+/// An assumption attached with a guest execution as a result of calling `env::verify` or
 /// `env::verify_integrity`.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum Assumption {

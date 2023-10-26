@@ -31,8 +31,12 @@ use crate::{
     SystemState,
 };
 
-/// Data associated with a receipt which is used for both input and
-/// output of global state.
+/// Public claims about a zkVM guest execution, such as the journal committed to by the guest.
+///
+/// Also includes important information such as the exit code and the starting and ending system
+/// state (i.e. the state of memory). [ReceiptMetadata] is a "Merkle-ized struct" supporting
+/// partial openings of the underlying fields from a hash commitment to the full structure. Also
+/// see [MaybePruned].
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[cfg_attr(test, derive(PartialEq))]
 pub struct ReceiptMetadata {
@@ -47,10 +51,9 @@ pub struct ReceiptMetadata {
 
     /// Input to the guest.
     ///
-    /// NOTE: This field can only be constructed as a Digest because it is not
-    /// yet cryptographically bound by the RISC Zero proof system; the guest
-    /// has not way to set the input and it's value cannot be checked. In
-    /// the future, it will be implemented with a [MaybePruned] type.
+    /// NOTE: This field can only be constructed as a Digest because it is not yet
+    /// cryptographically bound by the RISC Zero proof system; the guest has no way to set the
+    /// input. In the future, it will be implemented with a [MaybePruned] type.
     // TODO(1.0): Determine the 1.0 status of input.
     pub input: Digest,
 
@@ -117,6 +120,10 @@ pub enum ExitCode {
     SystemSplit,
 
     /// This indicates that the session limit has been reached.
+    ///
+    /// NOTE: This state is reported by the host prover and results in the same proof as an
+    /// execution ending in `SystemSplit`.
+    // TODO(1.0): Refine how we handle the difference between proven and unproven exit codes.
     SessionLimit,
 
     /// A user may manually pause a session so that it can be resumed at a later
@@ -128,7 +135,11 @@ pub enum ExitCode {
     Halted(u32),
 
     /// This indicates termination of a program where the next instruction will
-    /// fail.
+    /// fail due to a machine fault (e.g. out of bounds memory read).
+    ///
+    /// NOTE: This state is reported by the host prover and results in the same proof as an
+    /// execution ending in `SystemSplit`.
+    // TODO(1.0): Refine how we handle the difference between proven and unproven exit codes.
     Fault,
 }
 
@@ -181,24 +192,21 @@ impl fmt::Display for InvalidExitCodeError {
 #[cfg(feature = "std")]
 impl std::error::Error for InvalidExitCodeError {}
 
-/// Output field in the [crate::ReceiptMetadata], committing to a claimed
-/// journal and assumptions list.
+/// Output field in the [ReceiptMetadata], committing to a claimed journal and assumptions list.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[cfg_attr(test, derive(PartialEq))]
 pub struct Output {
-    /// A SHA-256 digest of the journal committed to by the guest execution.
+    /// The journal committed to by the guest execution.
     pub journal: MaybePruned<Vec<u8>>,
 
-    /// An ordered list of [crate::ReceiptMetadata] digests corresponding to the
-    /// calls to `env::verify`.
+    /// An ordered list of [ReceiptMetadata] digests corresponding to the
+    /// calls to `env::verify` and `env::verify_integrity`.
     ///
-    /// Verifying a [crate::Receipt] corresponding to a [crate::ReceiptMetadata]
-    /// with a non-empty assumptions list does not guarantee unconditionally
-    /// any of the claims over the guest execution (i.e. if the assumptions
-    /// list is non-empty, then the journal digest cannot be trusted to
-    /// correspond to a genuine execution). The claims can be checked by
-    /// additional verifying a [crate::Receipt] for every digest in the
-    /// assumptions list.
+    /// Verifying the integrity of a [crate::Receipt] corresponding to a [ReceiptMetadata] with a
+    /// non-empty assumptions list does not guarantee unconditionally any of the claims over the
+    /// guest execution (i.e. if the assumptions list is non-empty, then the journal digest cannot
+    /// be trusted to correspond to a genuine execution). The claims can be checked by additional
+    /// verifying a [crate::Receipt] for every digest in the assumptions list.
     pub assumptions: MaybePruned<Assumptions>,
 }
 
@@ -293,7 +301,7 @@ impl MaybePruned<Assumptions> {
     ///
     /// Assumptions can only be removed from the head of the list. If this value
     /// is pruned, then the result will also be a pruned value. The `rest`
-    /// parameter should be equal to the digest of the the list after the
+    /// parameter should be equal to the digest of the list after the
     /// resolved assumption is removed.
     pub fn resolve(&mut self, resolved: &Digest, rest: &Digest) -> anyhow::Result<()> {
         match self {
@@ -316,7 +324,7 @@ impl MaybePruned<Assumptions> {
     }
 }
 
-/// Either a source value of a hash [Digest] of the source value.
+/// Either a source value or a hash [Digest] of the source value.
 ///
 /// This type supports creating "Merkle-ized structs". Each field of a Merkle-ized struct can have
 /// either the full value, or it can be "pruned" and replaced with a digest committing to that

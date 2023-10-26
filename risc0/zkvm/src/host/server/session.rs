@@ -203,7 +203,7 @@ impl Session {
             None
         };
 
-        // NOTE: When a segment ends in a Halted(_) state, it does not update the post state
+        // NOTE: When a segment ends in a Halted(_) state, it may not update the post state
         // digest. As a result, it will be the same are the pre_image. All other exit codes require
         // the post state digest to reflect the final memory state.
         let post_state = SystemState {

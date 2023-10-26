@@ -700,8 +700,8 @@ pub unsafe extern "C" fn sys_verify(
 
     let Return(a0, _) = unsafe {
         // Send the image_id and journal_digest to the host in a syscall.
-        // Expect in return that post_state_digest_out is populated with the post state
-        // digest for from a matching ReceiptMetadata.
+        // Expect in return that from_host_buf is populated with the post state
+        // digest and system exit code for from a matching ReceiptMetadata.
         syscall_2(
             nr::SYS_VERIFY,
             from_host_buf as *mut u32,

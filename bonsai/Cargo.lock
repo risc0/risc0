@@ -3972,7 +3972,6 @@ dependencies = [
  "num-traits",
  "prost",
  "prost-build",
- "prost-types",
  "protobuf-src",
  "rayon",
  "risc0-binfmt",

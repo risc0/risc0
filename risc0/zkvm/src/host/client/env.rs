@@ -303,11 +303,10 @@ impl<'a> ExecutorEnvBuilder<'a> {
         self
     }
 
-    /// Add an [Assumption] to the [ExecutorEnv] internal map of associated
-    /// assumptions.
+    /// Add an [Assumption] to the [ExecutorEnv] associated assumptions.
     ///
     /// During execution, when the guest calls `env::verify` or
-    /// `env::verify_integrity`, this map will be searched for an
+    /// `env::verify_integrity`, this collection will be searched for an
     /// [Assumption] that corresponds the verification call.
     pub fn add_assumption(&mut self, assumption: Assumption) -> &mut Self {
         self.inner.assumptions.borrow_mut().cached.push(assumption);

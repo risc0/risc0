@@ -102,6 +102,11 @@ pub fn main() {
         MultiTestSpec::Halt(exit_code) => {
             env::exit(exit_code);
         }
+        MultiTestSpec::PauseContinue(exit_code) => {
+            env::log("before");
+            env::pause(exit_code);
+            env::log("after");
+        }
         MultiTestSpec::ReadWriteMem { values } => {
             for (addr, value) in values.into_iter() {
                 if value != 0 {
@@ -172,11 +177,6 @@ pub fn main() {
         MultiTestSpec::SysVerifyIntegrity { metadata_words } => {
             let meta: ReceiptMetadata = risc0_zkvm::serde::from_slice(&metadata_words).unwrap();
             env::verify_integrity(&meta).unwrap();
-        }
-        MultiTestSpec::PauseContinue(exit_code) => {
-            env::log("before");
-            env::pause(exit_code);
-            env::log("after");
         }
         MultiTestSpec::EchoStdout { nbytes, fd } => {
             // Unaligned buffer size to exercise things a little bit.

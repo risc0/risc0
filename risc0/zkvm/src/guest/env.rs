@@ -63,12 +63,12 @@ pub(crate) fn finalize(halt: bool, user_exit: u8) {
             journal: MaybePruned::Pruned(journal_digest),
             assumptions: MaybePruned::Pruned(ASSUMPTIONS_DIGEST.digest()),
         };
-        let words: [u32; 8] = output.digest().into();
+        let output_words: [u32; 8] = output.digest().into();
 
         if halt {
-            sys_halt(user_exit, &words)
+            sys_halt(user_exit, &output_words)
         } else {
-            sys_pause(user_exit, &words)
+            sys_pause(user_exit, &output_words)
         }
     }
 }
@@ -103,12 +103,11 @@ pub fn syscall(syscall: SyscallName, to_host: &[u8], from_host: &mut [u32]) -> s
     }
 }
 
-/// Verify there exists a receipt for an execution with the given `image_id` and
-/// `journal`.
+/// Verify there exists a receipt for an execution with `image_id` and `journal`.
 ///
-/// In order to be valid, the [crate::Receipt] must have `ExitCode::Halted(0)`, an
-/// empty assumptions list, and an all-zeroes input hash. It may have any post
-/// [crate::SystemState].
+/// In order to be valid, the [crate::Receipt] must have `ExitCode::Halted(0)` or
+/// `ExitCode::Paused(0)`, an empty assumptions list, and an all-zeroes input hash. It may have any
+/// post [crate::SystemState].
 pub fn verify(image_id: Digest, journal: &[u8]) -> Result<(), VerifyError> {
     let journal_digest: Digest = journal.digest();
     let mut from_host_buf = MaybeUninit::<[u32; DIGEST_WORDS + 1]>::uninit();
@@ -159,16 +158,16 @@ pub fn verify(image_id: Digest, journal: &[u8]) -> Result<(), VerifyError> {
     Ok(())
 }
 
-/// Error encountered during a call to [verify]
+/// Error encountered during a call to [verify].
 ///
 /// Note that an error is only returned for "provable" errors. In particular, if
 /// the host fails to find a receipt matching the requested image_id and
-/// journal, this is not a provable error. In this case, the [verify]
+/// journal, this is not a provable error. In this case, the [verify] call
 /// will not return.
 #[derive(Debug)]
 #[non_exhaustive]
 pub enum VerifyError {
-    /// Error returned when the host responses to sys_verify with an invalid exit code.
+    /// Error returned when the host responds to sys_verify with an invalid exit code.
     BadExitCodeResponse(InvalidExitCodeError),
 }
 
@@ -224,13 +223,12 @@ pub fn verify_integrity(metadata: &ReceiptMetadata) -> Result<(), VerifyIntegrit
 /// Error encountered during a call to [verify_integrity].
 ///
 /// Note that an error is only returned for "provable" errors. In particular, if the host fails to
-/// find a receipt matching the requested image_id and journal, this is not a provable error. In
-/// this case, [verify_integrity] will not return.
+/// find a receipt matching the requested metadata digest, this is not a provable error. In this
+/// case, [verify_integrity] will not return.
 #[derive(Debug)]
 #[non_exhaustive]
 pub enum VerifyIntegrityError {
-    /// The provided [ReceiptMetadata] struct contained a non-empty assumptions
-    /// list.
+    /// Provided [ReceiptMetadata] struct contained a non-empty assumptions list.
     ///
     /// This is a semantic error as only unconditional receipts can be verified
     /// inside the guest. If there is a conditional receipt to verify, it's
