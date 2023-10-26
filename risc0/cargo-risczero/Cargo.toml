@@ -25,7 +25,7 @@ flate2 = "1"
 fs2 = "0.4"
 # Force any openssl dependencies to use the "vendored" feature.
 # This is to allow cross builds to work in any environment.
-openssl-sys = { version = "0.9", features = ["vendored"] }
+openssl = { version = "0.10", features = ["vendored"] }
 reqwest = { version = "0.11", default-features = false, features = ["json"] }
 reqwest-middleware = "0.2"
 reqwest-retry = "0.3"

@@ -35,7 +35,7 @@ jobs:
       - uses: ./.github/actions/sccache
         with:
           key: ${{ env.OS }}-${{ env.FEATURE }}
-      - run: yum -y install perl-core zlib-devel
+      - run: yum -y install openssl-devel perl-core zlib-devel
       - run: cargo build -p cargo-risczero --release
       - run: |
           mkdir -p tmp/pkg
