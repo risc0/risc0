@@ -26,7 +26,8 @@ Now, you can create a RISC Zero zkVM project from the command line:
 
 ```bash
 ## Install from crates.io
-cargo install cargo-risczero
+cargo install cargo-binstall
+cargo binstall cargo-risczero
 cargo risczero install
 
 # Navigate to where you want to create your project

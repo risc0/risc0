@@ -14,6 +14,7 @@ concurrency:
 
 env:
   RISC0_BUILD_LOCKED: 1
+  RISC0_TOOLCHAIN_VERSION: test-release-2
 
 jobs:
   bonsai:
@@ -32,7 +33,7 @@ jobs:
       - name: install rust
         uses: ./.github/actions/rustup
 
-      - run: cargo run --bin cargo-risczero --no-default-features -- risczero install
+      - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

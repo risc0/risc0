@@ -157,7 +157,7 @@ pub struct Receipt {
 }
 
 /// A journal is a record of all public commitments for a given proof session.
-#[derive(Debug, Deserialize, Serialize, PartialEq)]
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 pub struct Journal {
     /// The raw bytes of the journal.
     pub bytes: Vec<u8>,

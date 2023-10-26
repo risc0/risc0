@@ -44,7 +44,7 @@ use risc0_zkvm_platform::{
 };
 use rrs_lib::{instruction_executor::InstructionExecutor, HartState};
 use serde::{Deserialize, Serialize};
-use tempfile::TempDir;
+use tempfile::tempdir;
 
 use super::{monitor::MemoryMonitor, syscall::SyscallTable};
 use crate::{
@@ -243,7 +243,7 @@ impl<'a> ExecutorImpl<'a> {
     /// of the execution.
     pub fn run(&mut self) -> Result<Session, ExecutorError> {
         if self.env.segment_path.is_none() {
-            let temp_dir = TempDir::new().map_err(|e| ExecutorError::Error(e.into()))?;
+            let temp_dir = tempdir().map_err(|e| ExecutorError::Error(e.into()))?;
             self.env.segment_path = Some(temp_dir.into_path());
         }
 
@@ -280,7 +280,7 @@ impl<'a> ExecutorImpl<'a> {
     /// Run the executor with the default callback.
     pub fn run_guest_only(&mut self) -> Result<Session> {
         if self.env.segment_path.is_none() {
-            let temp_dir = TempDir::new().map_err(|e| ExecutorError::Error(e.into()))?;
+            let temp_dir = tempdir().map_err(|e| ExecutorError::Error(e.into()))?;
             self.env.segment_path = Some(temp_dir.into_path());
         }
 

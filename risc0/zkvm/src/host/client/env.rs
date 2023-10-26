@@ -18,7 +18,7 @@ use std::{
     cell::RefCell,
     collections::HashMap,
     io::{BufRead, BufReader, Cursor, Read, Write},
-    path::PathBuf,
+    path::{Path, PathBuf},
     rc::Rc,
 };
 
@@ -294,6 +294,12 @@ impl<'a> ExecutorEnvBuilder<'a> {
         callback: impl FnMut(TraceEvent) -> Result<()> + 'a,
     ) -> &mut Self {
         self.inner.trace = Some(Rc::new(RefCell::new(callback)));
+        self
+    }
+
+    /// Set the path where segments will be stored.
+    pub fn segment_path<P: AsRef<Path>>(&mut self, path: P) -> &mut Self {
+        self.inner.segment_path = Some(path.as_ref().to_path_buf());
         self
     }
 }
