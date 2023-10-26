@@ -14,8 +14,7 @@
 
 use std::time::Duration;
 
-use byteorder::{ByteOrder, LittleEndian};
-use risc0_zkvm::{sha::DIGEST_WORDS, ExecutorEnv, ExitCode, MemoryImage, Receipt, Session};
+use risc0_zkvm::{ExecutorEnv, ExitCode, MemoryImage, Receipt, Session};
 
 use crate::{exec_compute, get_image, Benchmark};
 
@@ -27,11 +26,8 @@ pub struct Job<'a> {
 }
 
 pub fn new_jobs() -> Vec<<Job<'static> as Benchmark>::Spec> {
-    vec![10, 1000, 10000]
+    vec![10, 50, 90]
 }
-
-const METHOD_ID: [u32; DIGEST_WORDS] = risc0_benchmark_methods::FIBONACCI_ID;
-const METHOD_PATH: &'static str = risc0_benchmark_methods::FIBONACCI_PATH;
 
 impl Benchmark for Job<'_> {
     const NAME: &'static str = "fibonacci";
@@ -44,7 +40,7 @@ impl Benchmark for Job<'_> {
     }
 
     fn output_size_bytes(_output: &Self::ComputeOut, proof: &Self::ProofType) -> u32 {
-        (proof.journal.len()) as u32
+        proof.journal.bytes.len() as u32
     }
 
     fn proof_size_bytes(proof: &Self::ProofType) -> u32 {
@@ -57,11 +53,10 @@ impl Benchmark for Job<'_> {
     }
 
     fn new(spec: Self::Spec) -> Self {
-        let image = get_image(METHOD_PATH);
+        let image = get_image(risc0_benchmark_methods::FIBONACCI_PATH);
 
-        let guest_input = spec;
         let env = ExecutorEnv::builder()
-            .write(&guest_input)
+            .write(&spec)
             .unwrap()
             .build()
             .unwrap();
@@ -99,12 +94,12 @@ impl Benchmark for Job<'_> {
 
     fn guest_compute(&mut self) -> (Self::ComputeOut, Self::ProofType) {
         let receipt = self.session.prove().expect("receipt");
-        let result = LittleEndian::read_u64(&receipt.journal);
+        let result = receipt.journal.decode().unwrap();
         (result, receipt)
     }
 
     fn verify_proof(&self, _output: &Self::ComputeOut, proof: &Self::ProofType) -> bool {
-        let result = proof.verify(METHOD_ID);
+        let result = proof.verify(risc0_benchmark_methods::FIBONACCI_ID);
 
         match result {
             Ok(_) => true,

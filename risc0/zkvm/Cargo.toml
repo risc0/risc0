@@ -102,6 +102,7 @@ risc0-zkvm-methods = { path = "methods" }
 serde_json = "1.0"
 serial_test = "2.0"
 tar = "0.4"
+tempfile = "3"
 test-log = { version = "0.2", features = ["trace"] }
 
 [features]
@@ -127,7 +128,7 @@ metal = [
   "risc0-circuit-rv32im/metal",
   "risc0-zkp/metal",
 ]
-default = ["client", "prove"]
+default = ["client"]
 disable-dev-mode = []
 # This flag uses the docker environment to build test guests such as multi-test
 # to ensure accurate cycle and segment counts. Tests that have been gated on
@@ -147,7 +148,8 @@ profiler = [
   "dep:prost-build",
   "dep:protobuf-src",
   "dep:goblin",
-  "dep:rustc-demangle"]
+  "dep:rustc-demangle",
+]
 prove = [
   "client",
   "fault-proof",

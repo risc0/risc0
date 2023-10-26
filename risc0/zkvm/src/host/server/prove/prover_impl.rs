@@ -93,7 +93,7 @@ where
                 .collect::<Result<Vec<_>>>()?,
             journal_digest: session.journal.as_ref().map(|journal| journal.digest()),
         });
-        let receipt = Receipt::new(inner, session.journal.clone().unwrap_or_default());
+        let receipt = Receipt::new(inner, session.journal.clone().unwrap_or_default().bytes);
 
         receipt.verify_integrity_with_context(ctx)?;
         if receipt.get_metadata()?.digest() != session.get_metadata()?.digest() {

@@ -321,4 +321,10 @@ impl<'a> ExecutorEnvBuilder<'a> {
         self.inner.trace = Some(Rc::new(RefCell::new(callback)));
         self
     }
+
+    /// Set the path where segments will be stored.
+    pub fn segment_path<P: AsRef<Path>>(&mut self, path: P) -> &mut Self {
+        self.inner.segment_path = Some(path.as_ref().to_path_buf());
+        self
+    }
 }

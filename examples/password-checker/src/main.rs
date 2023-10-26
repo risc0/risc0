@@ -15,7 +15,7 @@
 use password_checker_core::PasswordRequest;
 use password_checker_methods::PW_CHECKER_ELF;
 use rand::prelude::*;
-use risc0_zkvm::{default_prover, serde::from_slice, sha::Digest, ExecutorEnv};
+use risc0_zkvm::{default_prover, sha::Digest, ExecutorEnv};
 
 fn main() {
     let mut rng = StdRng::from_entropy();
@@ -44,7 +44,7 @@ fn password_checker(request: PasswordRequest) -> Digest {
     // Produce a receipt by proving the specified ELF binary.
     let receipt = prover.prove_elf(env, PW_CHECKER_ELF).unwrap();
 
-    from_slice(&receipt.journal).unwrap()
+    receipt.journal.decode().unwrap()
 }
 
 #[cfg(test)]

@@ -105,7 +105,7 @@ fn sha_basics() {
         let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
         let session = exec.run().unwrap();
         let receipt = session.prove().unwrap();
-        hex::encode(Digest::try_from(receipt.journal).unwrap())
+        hex::encode(Digest::try_from(receipt.journal.bytes).unwrap())
     }
 
     assert_eq!(
@@ -141,7 +141,7 @@ fn sha_iter() {
     let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
     let session = exec.run().unwrap();
     let receipt = session.prove().unwrap();
-    let digest = Digest::try_from(receipt.journal).unwrap();
+    let digest = Digest::try_from(receipt.journal.bytes).unwrap();
     assert_eq!(
         hex::encode(digest),
         "9d4d1940b5c0c6d09c10add9631806f9df9467884d3e9ce4a147113e27f5c02a"
@@ -169,7 +169,7 @@ fn bigint_accel() {
         let receipt = session.prove().unwrap();
         let expected = case.expected();
         let expected: &[u8] = bytemuck::cast_slice(expected.as_slice());
-        assert_eq!(receipt.journal, expected);
+        assert_eq!(receipt.journal.bytes, expected);
     }
 }
 

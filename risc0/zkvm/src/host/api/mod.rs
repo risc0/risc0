@@ -17,6 +17,7 @@ pub(crate) mod convert;
 #[cfg(feature = "prove")]
 pub(crate) mod server;
 #[cfg(test)]
+#[cfg(feature = "prove")]
 mod tests;
 
 use std::{
@@ -37,7 +38,7 @@ use anyhow::{anyhow, Context, Result};
 use bytes::{Buf, BufMut, Bytes};
 use prost::Message;
 
-use crate::ExitCode;
+use crate::{ExitCode, Journal};
 
 mod pb {
     pub(crate) mod api {
@@ -281,29 +282,41 @@ pub enum BinaryKind {
     Image,
 }
 
+/// Determines the format of an asset.
+#[derive(Clone)]
 pub enum Asset {
+    /// The asset is encoded inline.
     Inline(Bytes),
+
+    /// The asset is written to disk.
     Path(PathBuf),
 }
 
+/// Determines the format of an asset request.
+#[derive(Clone)]
 pub enum AssetRequest {
+    /// The asset is encoded inline.
     Inline,
+
+    /// The asset is written to disk.
     Path(PathBuf),
 }
 
 /// Provides information about the result of execution.
+#[derive(Clone)]
 pub struct SessionInfo {
     /// The number of user cycles for each segment.
     pub segments: Vec<SegmentInfo>,
 
     /// The data publicly committed by the guest program.
-    pub journal: Bytes,
+    pub journal: Journal,
 
     /// The [ExitCode] of the session.
     pub exit_code: ExitCode,
 }
 
 /// Provides information about a segment of execution.
+#[derive(Clone)]
 pub struct SegmentInfo {
     /// The number of cycles used for proving in powers of 2.
     pub po2: u32,
@@ -345,6 +358,16 @@ impl Binary {
             kind: BinaryKind::Image,
             asset: Asset::Path(path.as_ref().to_path_buf()),
         }
+    }
+}
+
+impl Asset {
+    /// Return the bytes for this asset.
+    pub fn as_bytes(&self) -> Result<Bytes> {
+        Ok(match self {
+            Asset::Inline(bytes) => bytes.clone(),
+            Asset::Path(path) => std::fs::read(path)?.into(),
+        })
     }
 }
 

@@ -26,7 +26,7 @@ use crate::{
         recursion::SuccinctReceipt,
     },
     receipt_metadata::{Assumptions, MaybePruned, Output},
-    ExitCode, ProverOpts, Receipt, ReceiptMetadata, TraceEvent,
+    ExitCode, Journal, ProverOpts, Receipt, ReceiptMetadata, TraceEvent,
 };
 
 mod ver {
@@ -300,7 +300,7 @@ impl From<Receipt> for pb::core::Receipt {
         Self {
             version: Some(ver::RECEIPT),
             inner: Some(value.inner.into()),
-            journal: value.journal,
+            journal: value.journal.bytes,
         }
     }
 }
@@ -315,7 +315,7 @@ impl TryFrom<pb::core::Receipt> for Receipt {
         }
         Ok(Self {
             inner: value.inner.ok_or(malformed_err())?.try_into()?,
-            journal: value.journal,
+            journal: Journal::new(value.journal),
         })
     }
 }

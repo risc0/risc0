@@ -56,7 +56,7 @@ impl ProverServer for DevModeProver {
         let metadata = session.get_metadata()?;
         Ok(Receipt::new(
             InnerReceipt::Fake { metadata },
-            session.journal.clone().unwrap_or_default(),
+            session.journal.clone().unwrap_or_default().bytes,
         ))
     }
 

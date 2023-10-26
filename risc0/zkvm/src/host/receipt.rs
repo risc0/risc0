@@ -33,13 +33,14 @@ use risc0_zkp::{
     verify::VerificationError,
 };
 use risc0_zkvm_platform::WORD_SIZE;
-use serde::{Deserialize, Serialize};
+use serde::{de::DeserializeOwned, Deserialize, Serialize};
 
 use super::control_id::{BLAKE2B_CONTROL_ID, POSEIDON_CONTROL_ID, SHA256_CONTROL_ID};
 // Make succinct receipt available through this `receipt` module.
 pub use super::recursion::SuccinctReceipt;
 use crate::{
     receipt_metadata::{Assumptions, MaybePruned, Output},
+    serde::{from_slice, Error},
     sha::Digestible,
     ExitCode, ReceiptMetadata,
 };
@@ -106,17 +107,20 @@ pub struct Receipt {
     /// The polymorphic [InnerReceipt].
     pub inner: InnerReceipt,
 
-    /// The public data written by the guest in this Session.
+    /// The public commitment written by the guest.
     ///
     /// This data is cryptographically authenticated in
     /// [Receipt::verify].
-    pub journal: Vec<u8>,
+    pub journal: Journal,
 }
 
 impl Receipt {
     /// Construct a new Receipt
     pub fn new(inner: InnerReceipt, journal: Vec<u8>) -> Self {
-        Self { inner, journal }
+        Self {
+            inner,
+            journal: Journal::new(journal),
+        }
     }
 
     /// Verify that this receipt proves a successful execution of the zkVM from
@@ -233,6 +237,25 @@ impl Receipt {
     /// Extract the [ReceiptMetadata] from this receipt.
     pub fn get_metadata(&self) -> Result<ReceiptMetadata, VerificationError> {
         self.inner.get_metadata()
+    }
+}
+
+/// A journal is a record of all public commitments for a given proof session.
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
+pub struct Journal {
+    /// The raw bytes of the journal.
+    pub bytes: Vec<u8>,
+}
+
+impl Journal {
+    /// Construct a new [Journal].
+    pub fn new(bytes: Vec<u8>) -> Self {
+        Self { bytes }
+    }
+
+    /// Decode the journal bytes by using the risc0 deserializer.
+    pub fn decode<T: DeserializeOwned>(&self) -> Result<T, Error> {
+        from_slice(&self.bytes)
     }
 }
 

@@ -30,7 +30,7 @@ use crate::{
     host::server::exec::executor::SyscallRecord,
     receipt_metadata::{Assumptions, Output},
     sha::Digest,
-    Assumption, ExitCode, MemoryImage, ReceiptMetadata, SystemState,
+    Assumption, ExitCode, Journal, MemoryImage, ReceiptMetadata, SystemState,
 };
 
 #[derive(Clone, Default, Serialize, Deserialize, Debug)]
@@ -54,7 +54,7 @@ pub struct Session {
     pub segments: Vec<Box<dyn SegmentRef>>,
 
     /// The data publicly committed by the guest program.
-    pub journal: Option<Vec<u8>>,
+    pub journal: Option<Journal>,
 
     /// The [ExitCode] of the session.
     pub exit_code: ExitCode,
@@ -131,7 +131,7 @@ impl Session {
     ) -> Self {
         Self {
             segments,
-            journal,
+            journal: Journal::new(journal),
             exit_code,
             post_image,
             assumptions,

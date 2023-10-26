@@ -14,7 +14,7 @@
 
 use bevy_core::Outputs;
 use bevy_methods::{BEVY_GUEST_ELF, BEVY_GUEST_ID};
-use risc0_zkvm::{default_prover, serde::from_slice, ExecutorEnv};
+use risc0_zkvm::{default_prover, ExecutorEnv};
 
 fn main() {
     let turns: u32 = 3;
@@ -36,8 +36,10 @@ fn main() {
     // again here. However, this is how other users would verify the receipt:
     receipt.verify(BEVY_GUEST_ID).unwrap();
 
-    let outputs: Outputs =
-        from_slice(&receipt.journal).expect("Journal should contain an outputs object");
+    let outputs: Outputs = receipt
+        .journal
+        .decode()
+        .expect("Journal should contain an outputs object");
 
     assert_eq!(outputs.position, turns as f32);
     println!(

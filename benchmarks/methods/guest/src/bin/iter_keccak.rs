@@ -20,20 +20,15 @@ use sha3::{Digest as _, Keccak256};
 risc0_zkvm::entry!(main);
 
 pub fn main() {
-    let data: Vec<u8> = env::read();
+    let (num_iter, data): (u32, Vec<u8>) = env::read();
 
-    let mut num_iter: u32;
-    num_iter = data[0] as u32;
-    num_iter = num_iter | ((data[1] as u32) << 8);
-    num_iter = num_iter | ((data[2] as u32) << 16);
-    num_iter = num_iter | ((data[3] as u32) << 24);
-
-    let mut hash = keccak(&data[4..]);
+    let mut hash = keccak(&data);
     for _ in 1..num_iter {
         hash = keccak(hash);
     }
 
-    env::commit(&Digest::try_from(hash).unwrap())
+    let digest = Digest::try_from(hash).unwrap();
+    env::commit(&digest)
 }
 
 #[inline]

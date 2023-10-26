@@ -7,9 +7,10 @@ Cargo extension to help create, manage, and test [RISC Zero][risc-zero] projects
 To install this Cargo subcommand, first you'll want to [install Rust][install-rust] and then you'll execute:
 
 ```bash
-cargo install cargo-risczero
+cargo install cargo-binstall
+cargo binstall cargo-risczero
 
-## Installing from local source
+## Installing from local source. Note: this can be very slow.
 cargo install --path risc0/cargo-risczero
 ```
 
