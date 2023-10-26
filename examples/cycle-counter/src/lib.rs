@@ -41,24 +41,23 @@ impl Metrics {
 
 pub trait CycleCounter {
     const NAME: &'static str;
+    const METHOD_ELF: &'static [u8];
 
-    fn new() -> Self;
-    fn exec_compute(&mut self) -> u32;
-    fn run(&mut self) -> Metrics {
-        let mut metrics = Metrics::new(String::from(Self::NAME));
-        metrics.cycles = self.exec_compute();
-        metrics
-    }
+    fn run() -> Metrics;
 }
 
-pub fn exec_compute<'a>(elf: &[u8], env: ExecutorEnv<'a>) -> u32 {
+pub fn exec<'a>(name: &str, elf: &[u8], env: ExecutorEnv<'a>) -> Metrics {
     let exec = default_executor();
     let session_info = exec.execute_elf(env, elf).unwrap();
     let cycles = session_info
         .segments
         .iter()
         .fold(0, |cycles, segment| (cycles + (1 << segment.po2)));
-    cycles as u32
+    let cycles = cycles as u32;
+    Metrics {
+        name: name.to_string(),
+        cycles,
+    }
 }
 
 pub fn init_logging() {
@@ -88,11 +87,9 @@ pub fn run_jobs<C: CycleCounter>(out_path: &PathBuf) -> Metrics {
             .from_writer(out_file)
     };
 
-    let mut job = C::new();
     info!("");
     info!("+ begin: {}", C::NAME);
-
-    let job_metrics = job.run();
+    let job_metrics = C::run();
     job_metrics.println("+ ");
     out.serialize(CsvRow {
         name: &job_metrics.name,

@@ -8,7 +8,7 @@ default-run = "main"
 anyhow = "1.0"
 clap = { version = "4.0", features = ["derive"] }
 colored = "2"
-db-dump = "0.4"
+db-dump = "~0.4.10"
 handlebars = "4.3"
 indicatif = "0.15"
 reqwest = { version = "0.11", features = ["stream"] }

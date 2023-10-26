@@ -1,6 +1,5 @@
 [package]
-# TODO: Rename this package to change the method name from METHOD_NAME
-name = "method_name"
+name = {{ guest_package_name }}
 version = "0.1.0"
 edition = "2021"
 

@@ -14,32 +14,16 @@
 
 use risc0_zkvm::ExecutorEnv;
 
-use crate::{exec_compute, CycleCounter};
+use crate::{exec, CycleCounter, Metrics};
 
-pub struct Job<'a> {
-    pub env: ExecutorEnv<'a>,
-}
+pub struct Job {}
 
-const METHOD_ELF: &'static [u8] = hello_world_methods::MULTIPLY_ELF;
+impl CycleCounter for Job {
+    const NAME: &'static str = "sha";
+    const METHOD_ELF: &'static [u8] = sha_methods::HASH_ELF;
 
-impl CycleCounter for Job<'_> {
-    const NAME: &'static str = "hello-world";
-
-    fn new() -> Self {
-        let a: u64 = 17;
-        let b: u64 = 23;
-        let env = ExecutorEnv::builder()
-            .write(&a)
-            .unwrap()
-            .write(&b)
-            .unwrap()
-            .build()
-            .unwrap();
-
-        Job { env }
-    }
-
-    fn exec_compute(&mut self) -> u32 {
-        exec_compute(METHOD_ELF, self.env.clone())
+    fn run() -> Metrics {
+        let env = ExecutorEnv::builder().write(&"").unwrap().build().unwrap();
+        exec(Self::NAME, Self::METHOD_ELF, env)
     }
 }

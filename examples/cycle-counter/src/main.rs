@@ -15,7 +15,7 @@
 use std::path::PathBuf;
 
 use clap::{Parser, Subcommand};
-use risc0_examples_cycle_counter::{examples::*, init_logging, run_jobs};
+use cycle_counter::{examples::*, init_logging, run_jobs};
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]

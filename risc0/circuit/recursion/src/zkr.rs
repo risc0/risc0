@@ -19,7 +19,7 @@ use std::io::Read;
 use anyhow::{Context, Result};
 use risc0_zkp::core::digest::Digest;
 
-const ZKR_ZIP: &[u8] = include_bytes!("recursion_zkr.zip");
+const ZKR_ZIP: &[u8] = include_bytes!(concat!(env!("OUT_DIR"), "/recursion_zkr.zip"));
 const CONTROL_ID_SUFFIX: &str = ".control_id";
 
 pub fn get_zkr(name: &str) -> Result<Vec<u32>> {

@@ -12,34 +12,32 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use password_checker_core::PasswordRequest;
+use rand::prelude::*;
 use risc0_zkvm::ExecutorEnv;
 
-use crate::{exec_compute, CycleCounter};
+use crate::{exec, CycleCounter, Metrics};
 
-pub struct Job<'a> {
-    pub env: ExecutorEnv<'a>,
-}
+pub struct Job {}
 
-const METHOD_ELF: &'static [u8] = chess_methods::CHECKMATE_ELF;
+impl CycleCounter for Job {
+    const NAME: &'static str = "password-checker";
+    const METHOD_ELF: &'static [u8] = password_checker_methods::PW_CHECKER_ELF;
 
-impl CycleCounter for Job<'_> {
-    const NAME: &'static str = "chess";
-
-    fn new() -> Self {
-        let mv = "Qxf7".to_string();
-        let board =
-            "r1bqkb1r/pppp1ppp/2n2n2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR w KQkq - 4 4".to_string();
-        let input = chess_core::Inputs { board, mv };
+    fn run() -> Metrics {
+        let mut rng = StdRng::from_entropy();
+        let mut salt = [0u8; 32];
+        rng.fill_bytes(&mut salt);
+        let request = PasswordRequest {
+            password: "S00perSecr1t!!!".into(),
+            salt,
+        };
         let env = ExecutorEnv::builder()
-            .write(&input)
+            .write(&request)
             .unwrap()
             .build()
             .unwrap();
 
-        Job { env }
-    }
-
-    fn exec_compute(&mut self) -> u32 {
-        exec_compute(METHOD_ELF, self.env.clone())
+        exec(Self::NAME, Self::METHOD_ELF, env)
     }
 }
