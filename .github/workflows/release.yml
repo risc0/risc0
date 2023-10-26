@@ -23,7 +23,7 @@ jobs:
     runs-on: [self-hosted, prod, Linux, docker, cpu]
     needs: release
     container:
-      image: nvidia/cuda:12.2.2-devel-centos7
+      image: nvidia/cuda:12.2.2-devel-ubi8
     env:
       OS: Linux
       FEATURE: cuda
