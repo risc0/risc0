@@ -45,7 +45,7 @@ const config = {
             // We want users to submit updates to the upstream/next version!
             // Otherwise we risk losing the update on the next release.
             const nextVersionDocsDirPath = "docs";
-            return `https://github.com/risc0/website/edit/main/${nextVersionDocsDirPath}/${docPath}`;
+            return `https://github.com/risc0/risc0/edit/main/website/${nextVersionDocsDirPath}/${docPath}`;
           },
           remarkPlugins: [math, rustCode],
           rehypePlugins: [katex],
