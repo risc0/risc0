@@ -250,25 +250,25 @@ Because the data structures supporting all three of these need to match very car
 <details closed>
 <summary>
 Q:
-What is developer mode and how can I use it safely?
+What is dev-mode and how can I use it safely?
 </summary>
 A: We support a development-only mode for standalone risc0 projects in which code is executed but not proven. This adds efficiency to the development cycle during development stages where proving correct execution is not yet critical.
 
-A risc0 project in dev mode supports ([fake](https://docs.rs/risc0-zkvm/0.18.0/risc0_zkvm/enum.InnerReceipt.html#variant.Fake)) receipt creation and pass-through (fake) 'verification' workflows, so that dev mode may be switched on and off without impacting project workflows. In particular, receipts generated in dev mode still include public outputs written to the [journal](https://dev.risczero.com/terminology#journal).
+A risc0 project in dev-mode supports ([fake](https://docs.rs/risc0-zkvm/0.18.0/risc0_zkvm/enum.InnerReceipt.html#variant.Fake)) receipt creation and pass-through (fake) 'verification' workflows, so that dev-mode may be switched on and off without impacting project workflows. In particular, receipts generated in dev-mode still include public outputs written to the [journal](https://dev.risczero.com/terminology#journal).
 
-However, because the proving process is bypassed, receipts generated in dev mode will fail a standard receipt verification check. Only when the verifier is also built in dev mode will it perform pass-through 'verification' of the fake receipt.
+However, because the proving process is bypassed, receipts generated in dev-mode will fail a standard receipt verification check. Only when the verifier is also built in dev-mode will it perform pass-through 'verification' of the fake receipt.
 
 **To keep this mode out of production environments, we recommend building production-ready projects with the "disable-dev-mode" [feature flag](https://github.com/risc0/risc0/#feature-flags); it is absent by default.**
 
-Only projects built without this flag may run dev mode. Enabling dev mode requires also that the environment variable `RISC0_DEV_MODE` be set.
+Only projects built without this flag may run dev-mode. Enabling dev-mode requires also that the environment variable `RISC0_DEV_MODE` be set.
 
-As additional protection, if the dev mode [environment variable](https://docs.rs/risc0-zkvm/0.18.0/risc0_zkvm/fn.is_dev_mode.html) is present alongside a project built with the "disable-dev-mode" feature flag, the project will panic.
+As additional protection, if the dev-mode [environment variable](https://docs.rs/risc0-zkvm/0.18.0/risc0_zkvm/fn.is_dev_mode.html) is present alongside a project built with the "disable-dev-mode" feature flag, the project will panic.
 
-For further reference, take a look at the table below. To learn more about usage, see the [risc0 project README](https://github.com/risc0/risc0/#readme). For a closer look at implementation, take a look at the [dev mode source](https://github.com/risc0/risc0/blob/v0.19.0-rc.1/risc0/zkvm/src/host/server/prove/dev_mode.rs).
+For further reference, take a look at the table below. To learn more about usage, see the [risc0 project README](https://github.com/risc0/risc0/#readme). For a closer look at implementation, take a look at the [dev-mode source](https://github.com/risc0/risc0/blob/v0.19.0-rc.1/risc0/zkvm/src/host/server/prove/dev_mode.rs).
 
-| Dev mode env var              | Feature flag off         | Feature flag on          |
+|                               | `disable-dev-mode` off   | `disable-dev-mode` on    |
 | ----------------------------- | ------------------------ | ------------------------ |
-| RISC0_DEV_MODE=true           | Developer mode activated | Prover panic             |
+| RISC0_DEV_MODE=true           | dev-mode activated       | Prover panic             |
 | RISCO_DEV_MODE={false, unset} | Default project behavior | Default project behavior |
 
 </details>
