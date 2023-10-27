@@ -18,6 +18,7 @@ use std::{
     cell::RefCell,
     collections::HashMap,
     io::{BufRead, BufReader, Cursor, Read, Write},
+    path::{Path, PathBuf},
     rc::Rc,
 };
 
@@ -57,6 +58,7 @@ pub struct ExecutorEnv<'a> {
     pub(crate) slice_io: Rc<RefCell<SliceIoTable<'a>>>,
     pub(crate) input: Vec<u8>,
     pub(crate) trace: Option<Rc<RefCell<TraceCallback<'a>>>>,
+    pub(crate) segment_path: Option<PathBuf>,
 }
 
 impl<'a> ExecutorEnv<'a> {
@@ -292,6 +294,12 @@ impl<'a> ExecutorEnvBuilder<'a> {
         callback: impl FnMut(TraceEvent) -> Result<()> + 'a,
     ) -> &mut Self {
         self.inner.trace = Some(Rc::new(RefCell::new(callback)));
+        self
+    }
+
+    /// Set the path where segments will be stored.
+    pub fn segment_path<P: AsRef<Path>>(&mut self, path: P) -> &mut Self {
+        self.inner.segment_path = Some(path.as_ref().to_path_buf());
         self
     }
 }

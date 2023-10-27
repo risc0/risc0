@@ -25,5 +25,5 @@ risc0_zkvm::guest::entry!(main);
 pub fn main() {
     let data: String = env::read();
     let digest = Impl::hash_bytes(&data.as_bytes());
-    env::commit(&digest.as_bytes());
+    env::commit(&digest);
 }

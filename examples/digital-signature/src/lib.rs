@@ -14,7 +14,7 @@
 
 pub use digital_signature_core::{Message, Passphrase, SignMessageCommit, SigningRequest};
 use digital_signature_methods::{SIGN_ELF, SIGN_ID};
-use risc0_zkvm::{default_prover, serde::from_slice, ExecutorEnv, Receipt, Result};
+use risc0_zkvm::{default_prover, ExecutorEnv, Receipt, Result};
 use sha2::{Digest, Sha256};
 
 pub struct SignatureWithReceipt {
@@ -23,7 +23,7 @@ pub struct SignatureWithReceipt {
 
 impl SignatureWithReceipt {
     pub fn get_commit(&self) -> Result<SignMessageCommit> {
-        Ok(from_slice(&self.receipt.journal).unwrap())
+        Ok(self.receipt.journal.decode()?)
     }
 
     pub fn get_identity(&self) -> Result<risc0_zkvm::sha::Digest> {

@@ -20,7 +20,7 @@ use std::{fs, path::PathBuf};
 use clap::{Parser, Subcommand};
 use prorata_core::{AllocationQuery, AllocationQueryResult};
 use prorata_methods::{PRORATA_GUEST_ELF, PRORATA_GUEST_ID};
-use risc0_zkvm::{default_prover, serde::from_slice, ExecutorEnv, Receipt};
+use risc0_zkvm::{default_prover, ExecutorEnv, Receipt};
 use rust_decimal::Decimal;
 
 #[derive(Parser)]
@@ -114,8 +114,10 @@ fn verify(input: &str) {
     match receipt.verify(PRORATA_GUEST_ID) {
         Ok(_) => {
             println!("Receipt is valid");
-            let result: AllocationQueryResult =
-                from_slice(&receipt.journal).expect("Failed to deserialize result");
+            let result: AllocationQueryResult = receipt
+                .journal
+                .decode()
+                .expect("Failed to deserialize result");
             print!("{}", result);
         }
         Err(e) => println!("Receipt is invalid: {}", e),

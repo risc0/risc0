@@ -15,8 +15,10 @@
 use std::{rc::Rc, time::Duration};
 
 use risc0_zkvm::{
-    default_prover, sha::DIGEST_WORDS, ExecutorEnv, ExitCode, LocalProver, MemoryImage, Prover,
-    ProverOpts, Receipt, Session, VerifierContext,
+    default_prover,
+    sha::{Digest, DIGEST_WORDS},
+    ExecutorEnv, ExitCode, LocalProver, MemoryImage, Prover, ProverOpts, Receipt, Session,
+    VerifierContext,
 };
 
 use crate::{exec_compute, get_image, Benchmark, BenchmarkAverage};
@@ -39,7 +41,7 @@ const METHOD_PATH: &'static str = risc0_benchmark_methods::ITER_BLAKE3_PATH;
 impl Benchmark for Job<'_> {
     const NAME: &'static str = "iter_blake3";
     type Spec = u32;
-    type ComputeOut = risc0_zkvm::sha::Digest;
+    type ComputeOut = Digest;
     type ProofType = Receipt;
 
     fn job_size(spec: &Self::Spec) -> u32 {
@@ -47,7 +49,7 @@ impl Benchmark for Job<'_> {
     }
 
     fn output_size_bytes(_output: &Self::ComputeOut, proof: &Self::ProofType) -> u32 {
-        (proof.journal.len()) as u32
+        proof.journal.bytes.len() as u32
     }
 
     fn proof_size_bytes(proof: &Self::ProofType) -> u32 {
@@ -62,12 +64,7 @@ impl Benchmark for Job<'_> {
     fn new(spec: Self::Spec) -> Self {
         let image = get_image(METHOD_PATH);
 
-        let mut guest_input = Vec::from([0u8; 36]);
-        guest_input[0] = spec as u8;
-        guest_input[1] = (spec >> 8) as u8;
-        guest_input[2] = (spec >> 16) as u8;
-        guest_input[3] = (spec >> 24) as u8;
-
+        let guest_input = (spec, vec![0u8; 32]);
         let env = ExecutorEnv::builder()
             .write(&guest_input)
             .unwrap()
@@ -99,7 +96,7 @@ impl Benchmark for Job<'_> {
             data = hash.as_bytes();
         }
 
-        Some(risc0_zkvm::sha::Digest::try_from(*data).unwrap())
+        Some(Digest::try_from(*data).unwrap())
     }
 
     fn exec_compute(&mut self) -> (u32, u32, Duration) {
@@ -111,11 +108,7 @@ impl Benchmark for Job<'_> {
 
     fn guest_compute(&mut self) -> (Self::ComputeOut, Self::ProofType) {
         let receipt = self.session.prove().expect("receipt");
-
-        let result = risc0_zkvm::sha::Digest::try_from(receipt.journal.clone())
-            .unwrap()
-            .try_into()
-            .unwrap();
+        let result = receipt.journal.decode().unwrap();
         (result, receipt)
     }
 
@@ -143,12 +136,7 @@ impl BenchmarkAverage for Job<'_> {
     fn new(spec: Self::Spec) -> Self {
         let image = get_image(METHOD_PATH);
 
-        let mut guest_input = Vec::from([0u8; 36]);
-        guest_input[0] = spec as u8;
-        guest_input[1] = (spec >> 8) as u8;
-        guest_input[2] = (spec >> 16) as u8;
-        guest_input[3] = (spec >> 24) as u8;
-
+        let guest_input = (spec, vec![0u8; 32]);
         let env = ExecutorEnv::builder()
             .write(&guest_input)
             .unwrap()

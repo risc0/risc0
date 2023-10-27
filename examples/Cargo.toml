@@ -43,6 +43,3 @@ lto = true
 
 [profile.release.build-override]
 opt-level = 3
-
-[patch.crates-io]
-smartcore = { git = "https://github.com/risc0/smartcore.git", features = ["serde"] }

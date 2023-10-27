@@ -12,6 +12,7 @@ message ServerRequest {
     ProveSegmentRequest prove_segment = 3;
     LiftRequest lift = 4;
     JoinRequest join = 5;
+    IdentityP254Request identiy_p254 = 6;
   }
 }
 
@@ -86,6 +87,23 @@ message JoinReply {
 }
 
 message JoinResult {
+  Asset receipt = 1;
+}
+
+message IdentityP254Request {
+  ProverOpts opts = 1;
+  Asset receipt = 2;
+  AssetRequest receipt_out = 3;
+}
+
+message IdentityP254Reply {
+  oneof kind {
+    IdentityP254Result ok = 1;
+    GenericError error = 2;
+  }
+}
+
+message IdentityP254Result {
   Asset receipt = 1;
 }
 

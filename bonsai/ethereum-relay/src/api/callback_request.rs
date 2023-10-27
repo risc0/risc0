@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use axum::{extract::State, Extension};
+use axum::{extract::State, Extension, Json};
 use bonsai_ethereum_contracts::i_bonsai_relay::CallbackRequestFilter;
-use bonsai_sdk::alpha_async::get_client_from_parts;
+use bonsai_sdk::{alpha::responses::CreateSessRes, alpha_async::get_client_from_parts};
 
 use super::{request_extractor::RequestExtractor, state::ApiState, Error, Result};
 use crate::{
@@ -28,13 +28,13 @@ use crate::{
 
 /// Publish a CallbackRequest to the Relayer.
 ///
-/// Return status 200 on success.
+/// Return status 200 with a body `CreateSessRes`on success.
 #[utoipa::path(
     post,
     path = "/v1/callbacks",
     request_body = CallbackRequest,
     responses(
-        (status = 200, description = "Callback request sent successfully"),
+        (status = 200, description = "Callback request sent successfully", body = [CreateSessRes]),
         (status = 400, description = "Bad request error"),
         (status = 500, description = "Internal server error"),
     )
@@ -43,10 +43,13 @@ pub(crate) async fn post_callback_request<S: Storage + Sync + Send + Clone>(
     Extension(api_key): Extension<String>,
     State(s): State<ApiState<S>>,
     RequestExtractor(request): RequestExtractor<CallbackRequest>,
-) -> Result<(), Error> {
+) -> Result<Json<CreateSessRes>, Error> {
     let client = get_client_from_parts(s.bonsai_url, api_key, risc0_zkvm::VERSION).await?;
     let proxy = ProxyCallbackProofRequestProcessor::new(client, s.storage, Some(s.notifier));
-    proxy.process_event(request.into()).await
+    let session_id = proxy.process_event(request.into()).await?;
+    Ok(Json(CreateSessRes {
+        uuid: session_id.uuid,
+    }))
 }
 
 impl From<CallbackRequest> for CallbackRequestFilter {

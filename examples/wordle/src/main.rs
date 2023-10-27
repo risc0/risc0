@@ -16,7 +16,7 @@ mod wordlist;
 
 use std::io;
 
-use risc0_zkvm::{default_prover, serde::from_slice, sha::Digest, ExecutorEnv, Receipt};
+use risc0_zkvm::{default_prover, sha::Digest, ExecutorEnv, Receipt};
 use wordle_core::{GameState, WordFeedback, WORD_LENGTH};
 use wordle_methods::{WORDLE_GUEST_ELF, WORDLE_GUEST_ID};
 
@@ -34,7 +34,7 @@ impl<'a> Server<'a> {
 
     pub fn get_secret_word_hash(&self) -> Digest {
         let receipt = self.check_round("_____");
-        let game_state: GameState = from_slice(&receipt.journal).unwrap();
+        let game_state: GameState = receipt.journal.decode().unwrap();
         game_state.correct_word_hash
     }
 
@@ -70,7 +70,7 @@ impl Player {
             .verify(WORDLE_GUEST_ID)
             .expect("receipt verification failed");
 
-        let game_state: GameState = from_slice(&receipt.journal).unwrap();
+        let game_state: GameState = receipt.journal.decode().unwrap();
         if game_state.correct_word_hash != self.hash {
             panic!("The hash mismatched, so the server cheated!");
         }

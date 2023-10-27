@@ -14,9 +14,7 @@
 
 use std::time::Duration;
 
-use risc0_zkvm::{
-    serde::from_slice, sha::DIGEST_WORDS, ExecutorEnv, ExitCode, MemoryImage, Receipt, Session,
-};
+use risc0_zkvm::{sha::DIGEST_WORDS, ExecutorEnv, ExitCode, MemoryImage, Receipt, Session};
 use zeth_lib::{
     block_builder::{EthereumStrategyBundle, NetworkStrategyBundle},
     consts::ETH_MAINNET_CHAIN_SPEC,
@@ -55,7 +53,7 @@ impl Benchmark for Job<'_> {
     }
 
     fn output_size_bytes(_output: &Self::ComputeOut, proof: &Self::ProofType) -> u32 {
-        (proof.journal.len()) as u32
+        proof.journal.bytes.len() as u32
     }
 
     fn proof_size_bytes(proof: &Self::ProofType) -> u32 {
@@ -123,7 +121,7 @@ impl Benchmark for Job<'_> {
 
     fn guest_compute(&mut self) -> (Self::ComputeOut, Self::ProofType) {
         let receipt = self.session.prove().expect("receipt");
-        let result: BlockHash = from_slice(&receipt.journal).unwrap();
+        let result: BlockHash = receipt.journal.decode().unwrap();
         (result, receipt)
     }
 
