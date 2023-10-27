@@ -387,7 +387,7 @@ mod docker {
         assert_eq!(session.segments.len(), 1);
         assert_eq!(session.exit_code, ExitCode::Paused(0));
         let receipt = session.prove().unwrap();
-        let segments = receipt.inner.flat().unwrap();
+        let segments = receipt.inner.composite().unwrap().segments;
         assert_eq!(segments.len(), 1);
         assert_eq!(segments[0].index, 0);
 

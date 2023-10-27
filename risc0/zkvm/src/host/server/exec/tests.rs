@@ -1043,9 +1043,7 @@ mod docker {
     use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF};
     use risc0_zkvm_platform::WORD_SIZE;
 
-    use crate::{
-        host::server::exec::executor::ExecutorError, ExecutorEnv, ExecutorImpl, Session, TraceEvent,
-    };
+    use crate::{host::server::exec::executor::ExecutorEnv, ExecutorImpl, Session, TraceEvent};
 
     #[test]
     fn trace() {
@@ -1119,7 +1117,7 @@ mod docker {
             loop_cycles: u32,
             segment_limit_po2: u32,
             session_count_limit: u64,
-        ) -> Result<Session, ExecutorError> {
+        ) -> Result<Session> {
             let session_cycles = (1 << segment_limit_po2) * session_count_limit;
             let spec = MultiTestSpec::BusyLoop {
                 cycles: loop_cycles,
