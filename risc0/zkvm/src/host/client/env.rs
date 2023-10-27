@@ -52,6 +52,7 @@ pub type TraceCallback<'a> = dyn FnMut(TraceEvent) -> Result<()> + 'a;
 #[derive(Debug, Default)]
 pub(crate) struct Assumptions {
     pub(crate) cached: Vec<Assumption>,
+    #[cfg(feature = "prove")]
     pub(crate) accessed: Vec<Assumption>,
 }
 
