@@ -1043,7 +1043,7 @@ mod docker {
     use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF};
     use risc0_zkvm_platform::WORD_SIZE;
 
-    use crate::{host::server::exec::executor::ExecutorEnv, ExecutorImpl, Session, TraceEvent};
+    use crate::{ExecutorEnv, ExecutorImpl, Session, TraceEvent};
 
     #[test]
     fn trace() {
