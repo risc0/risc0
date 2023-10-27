@@ -280,7 +280,10 @@ impl<'a> ExecutorImpl<'a> {
                         ExitCode::Paused(inner) => {
                             log::debug!("Paused({inner}): {}", self.segment_cycle);
                             // Set the pre_image so that the Executor can be run again to resume.
-                            self.split(Some(post_image.clone().into()))?;
+                            // Move the pc forward by WORD_SIZE because halt does not.
+                            let mut resume_pre_image = post_image.clone();
+                            resume_pre_image.pc += WORD_SIZE as u32;
+                            self.split(Some(resume_pre_image.into()))?;
                             return Ok((exit_code, post_image));
                         }
                         ExitCode::Halted(inner) => {
@@ -515,7 +518,7 @@ impl<'a> ExecutorImpl<'a> {
                 0,
             )),
             halt::PAUSE => Ok(OpCodeResult::new(
-                self.pc + WORD_SIZE as u32,
+                self.pc,
                 Some(ExitCode::Paused(user_exit)),
                 0,
             )),
