@@ -265,6 +265,14 @@ fn ecall_4(t0: u32, a0: u32, a1: u32, a2: u32, a3: u32, a4: u32) {
     }
 }
 
+/// # Safety
+///
+/// `out_state` must be aligned and dereferenceable.
+// [inline(never)] is added to mitigate potentially leaking information about program execution
+// through the final value of the program counter (pc) on halt where there is more than one
+// location in the program where `sys_halt` is called. As long as the halt instruction only exists
+// in one place within the program, the pc will always be the same invariant with input.
+#[inline(never)]
 #[cfg_attr(feature = "export-syscalls", no_mangle)]
 pub extern "C" fn sys_halt(user_exit: u8, out_state: *const [u32; DIGEST_WORDS]) -> ! {
     ecall_1(
@@ -278,6 +286,11 @@ pub extern "C" fn sys_halt(user_exit: u8, out_state: *const [u32; DIGEST_WORDS])
 /// # Safety
 ///
 /// `out_state` must be aligned and dereferenceable.
+// [inline(never)] is added to mitigate potentially leaking information about program execution
+// through the final value of the program counter (pc) on halt where there is more than one
+// location in the program where `sys_pause` is called. As long as the pause instruction only exists
+// in one place within the program, the pc will always be the same invariant with input.
+#[inline(never)]
 #[cfg_attr(feature = "export-syscalls", no_mangle)]
 pub unsafe extern "C" fn sys_pause(user_exit: u8, out_state: *const [u32; DIGEST_WORDS]) {
     ecall_1(
