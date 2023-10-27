@@ -5,6 +5,11 @@ use methods::{METHOD_NAME_ELF, METHOD_NAME_ID};
 use risc0_zkvm::{default_prover, ExecutorEnv};
 
 fn main() {
+    // Initialize tracing
+    tracing_subscriber::fmt()
+        .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
+        .init();
+
     // First, we construct an executor environment
     let env = ExecutorEnv::builder().build().unwrap();
 

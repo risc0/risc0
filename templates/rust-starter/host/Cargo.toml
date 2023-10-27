@@ -7,3 +7,4 @@ edition = "2021"
 methods = { path = "../methods" }
 risc0-zkvm = { {{ risc0_zkvm }} }
 serde = "1.0"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
