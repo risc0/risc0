@@ -307,12 +307,12 @@ impl<'a> ExecutorImpl<'a> {
                     execution_time: start.elapsed(),
                 };
 
-                    log::debug!(target: "RISC0_EXECUTION_STATS::total_cycles", "total_cycles = {}", execution_stats.total_cycles);
-                    log::debug!(target: "RISC0_EXECUTION_STATS::session_cycles", "session_cycles = {}", execution_stats.session_cycles);
-                    log::debug!(target: "RISC0_EXECUTION_STATS::segment_count", "segment_count = {}", execution_stats.segment_count);
-                    log::debug!(target: "RISC0_EXECUTION_STATS::execution_time", "execution_time = {:?}", execution_stats.execution_time);
-                    log::debug!(target: "RISC0_EXECUTION_STATS::raw_execution_stats", "raw_execution_stats = {:?}", execution_stats);
-                    log::debug!(target: "RISC0_EXECUTION_STATS", "{}", execution_stats);
+                    log::info!(target: "RISC0_EXECUTION_STATS::total_cycles", "total_cycles = {}", execution_stats.total_cycles);
+                    log::info!(target: "RISC0_EXECUTION_STATS::session_cycles", "session_cycles = {}", execution_stats.session_cycles);
+                    log::info!(target: "RISC0_EXECUTION_STATS::segment_count", "segment_count = {}", execution_stats.segment_count);
+                    log::info!(target: "RISC0_EXECUTION_STATS::execution_time", "execution_time = {:?}", execution_stats.execution_time);
+                    log::info!(target: "RISC0_EXECUTION_STATS::raw_execution_stats", "raw_execution_stats = {:?}", execution_stats);
+                    log::info!(target: "RISC0_EXECUTION_STATS", "{}", execution_stats);
                 }
         }
 
