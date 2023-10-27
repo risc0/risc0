@@ -100,6 +100,24 @@ impl OpCodeResult {
     }
 }
 
+#[derive(Debug)]
+struct ExecutionStats {
+    total_cycles: usize,
+    session_cycles: usize,
+    segment_count: usize,
+    execution_time: std::time::Duration,
+}
+
+impl std::fmt::Display for ExecutionStats {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "Execution Statistics:\nTotal Cycles: {}\nSession Cycles: {}\nSegment Count: {}\nExecution Time: {:?}",
+            self.total_cycles, self.session_cycles, self.segment_count, self.execution_time
+        )
+    }
+}
+
 /// Error variants used in the Executor
 pub enum ExecutorError {
     /// This variant represents an instance of Session that Faulted
@@ -282,10 +300,19 @@ impl<'a> ExecutorImpl<'a> {
         };
 
         if let Ok(ref session) = result {
-            tracing::debug!(total_cycles = ?self.total_cycles());
-            tracing::debug!(session_cycles = ?self.session_cycle());
-            tracing::debug!(segment_count = ?session.segments.len());
-            tracing::debug!(execution_time = ?start.elapsed());
+            let execution_stats = ExecutionStats {
+                total_cycles: self.total_cycles(),
+                session_cycles: self.session_cycle(),
+                segment_count: session.segments.len(),
+                execution_time: start.elapsed(),
+            };
+
+            tracing::debug!(total_cycles = ?execution_stats.total_cycles);
+            tracing::debug!(session_cycles = ?execution_stats.session_cycles);
+            tracing::debug!(segment_count = ?execution_stats.segment_count);
+            tracing::debug!(execution_time = ?execution_stats.execution_time);
+            tracing::debug!(raw_execution_stats = ?execution_stats);
+            tracing::debug!(%execution_stats);
         }
 
         result
