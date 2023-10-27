@@ -41,7 +41,7 @@ pub use super::recursion::SuccinctReceipt;
 use crate::{
     receipt_metadata::{Assumptions, MaybePruned, Output},
     serde::{from_slice, Error},
-    sha::Digestible,
+    sha::{Digestible, Sha256},
     ExitCode, ReceiptMetadata,
 };
 
@@ -172,11 +172,11 @@ impl Receipt {
         };
 
         if metadata.output.digest() != expected_output.digest() {
-            let empty_output = metadata.output.is_none() && self.journal.is_empty();
+            let empty_output = metadata.output.is_none() && self.journal.bytes.is_empty();
             if !empty_output {
                 log::debug!(
                     "journal: 0x{}, expected output digest: 0x{}, decoded output digest: 0x{}",
-                    hex::encode(&self.journal),
+                    hex::encode(&self.journal.bytes),
                     hex::encode(expected_output.digest()),
                     hex::encode(metadata.output.digest()),
                 );
@@ -218,11 +218,11 @@ impl Receipt {
         });
 
         if metadata.output.digest() != expected_output.digest() {
-            let empty_output = metadata.output.is_none() && self.journal.is_empty();
+            let empty_output = metadata.output.is_none() && self.journal.bytes.is_empty();
             if !empty_output {
                 log::debug!(
                     "journal: 0x{}, expected output digest: 0x{}, decoded output digest: 0x{}",
-                    hex::encode(&self.journal),
+                    hex::encode(&self.journal.bytes),
                     hex::encode(expected_output.digest()),
                     hex::encode(metadata.output.digest()),
                 );
@@ -241,7 +241,7 @@ impl Receipt {
 }
 
 /// A journal is a record of all public commitments for a given proof session.
-#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
+#[derive(Clone, Debug, Default, Deserialize, Serialize, PartialEq)]
 pub struct Journal {
     /// The raw bytes of the journal.
     pub bytes: Vec<u8>,
@@ -256,6 +256,18 @@ impl Journal {
     /// Decode the journal bytes by using the risc0 deserializer.
     pub fn decode<T: DeserializeOwned>(&self) -> Result<T, Error> {
         from_slice(&self.bytes)
+    }
+}
+
+impl risc0_binfmt::Digestible for Journal {
+    fn digest<S: Sha256>(&self) -> Digest {
+        *S::hash_bytes(&self.bytes)
+    }
+}
+
+impl AsRef<[u8]> for Journal {
+    fn as_ref(&self) -> &[u8] {
+        &self.bytes
     }
 }
 

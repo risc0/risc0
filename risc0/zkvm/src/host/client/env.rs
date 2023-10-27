@@ -19,7 +19,7 @@ use std::{
     collections::HashMap,
     io::{BufRead, BufReader, Cursor, Read, Write},
     mem,
-    path::PathBuf,
+    path::{Path, PathBuf},
     rc::Rc,
 };
 

@@ -131,7 +131,7 @@ impl Session {
     ) -> Self {
         Self {
             segments,
-            journal: Journal::new(journal),
+            journal: journal.map(|x| Journal::new(x)),
             exit_code,
             post_image,
             assumptions,
@@ -175,7 +175,7 @@ impl Session {
                 .as_ref()
                 .map(|journal| -> Result<_> {
                     Ok(Output {
-                        journal: journal.clone().into(),
+                        journal: journal.bytes.clone().into(),
                         assumptions: Assumptions(
                             self.assumptions
                                 .iter()
