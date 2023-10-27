@@ -421,7 +421,14 @@ mod docker {
         assert_eq!(final_segment.exit_code, ExitCode::Halted(0));
 
         let receipt = session.prove().unwrap();
-        for (idx, receipt) in receipt.inner.flat().unwrap().iter().enumerate() {
+        for (idx, receipt) in receipt
+            .inner
+            .composite()
+            .unwrap()
+            .segments
+            .iter()
+            .enumerate()
+        {
             assert_eq!(receipt.index, idx as u32);
         }
     }
