@@ -23,6 +23,16 @@ cargo run
 This is an empty template, and so there is no expected output (until you modify
 the code).
 
+### Executing the project locally in development mode
+
+During development, faster iteration upon code changes can be achieved by leveraging [dev-mode], we strongly this during your early development phase. Furthermore, you might want to get insights into the execution statistics of your project, and this can be achieved by specifying the environment variable `RUST_LOG=[{execution_stats}]=debug` before running your project.
+
+Put together, the command to run your project in development mode while getting execution statistics is:
+
+```bash
+RUST_LOG=[{execution_stats}] RISC0_DEV_MODE=1 cargo run
+```
+
 ### Running proofs remotely on Bonsai
 
 _Note: The Bonsai proving service is still in early Alpha; an API key is
@@ -88,6 +98,7 @@ We'd love to hear from you on [Discord][discord] or [Twitter][twitter].
 [cargo-risczero]: https://docs.rs/cargo-risczero
 [crates]: https://github.com/risc0/risc0/blob/main/README.md#rust-binaries
 [dev-docs]: https://dev.risczero.com
+[dev-mode]: https://dev.risczero.com/zkvm/dev-mode
 [discord]: https://discord.gg/risczero
 [docs.rs]: https://docs.rs/releases/search?query=risc0
 [examples]: https://github.com/risc0/risc0/tree/main/examples
