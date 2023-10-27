@@ -235,6 +235,11 @@ impl<'a> ExecutorImpl<'a> {
             .into());
         };
 
+        self.pc = self
+            .pre_image
+            .as_ref()
+            .ok_or_else(|| anyhow!("attempted to run the executor with no pre_image"))?
+            .pc;
         self.monitor.clear_session()?;
 
         let journal = Journal::default();

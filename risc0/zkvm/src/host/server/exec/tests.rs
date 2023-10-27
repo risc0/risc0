@@ -1150,6 +1150,6 @@ mod docker {
         let err = run_session(1 << 16, 15, 3).err().unwrap();
         assert!(err.to_string().contains("Session limit exceeded"));
 
-        assert!(run_session(1 << 16, 15, 10).is_ok());
+        assert!(run_session(1 << 16, 15, 16).is_ok());
     }
 }
