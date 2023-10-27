@@ -6,17 +6,21 @@ use methods::{
 use risc0_zkvm::{default_prover, ExecutorEnv};
 
 fn main() {
-    // First, we construct an executor environment
-    let env = ExecutorEnv::builder().build().unwrap();
-
-    // TODO: add guest input to the executor environment using
+    // An executor environment describes the configurations for the zkVM
+    // including program inputs.
+    // An default ExecutorEnv can be created like so:
+    // `let env = ExecutorEnv::builder().build().unwrap();`
+    // However, this `env` does not have any inputs.
+    //
+    // To add add guest input to the executor environment, use
     // ExecutorEnvBuilder::write().
-    // To access this method, you'll need to use the alternate construction
-    // ExecutorEnv::builder(), which creates an ExecutorEnvBuilder. When you're
-    // done adding input, call ExecutorEnvBuilder::build().
+    // To access this method, you'll need to use ExecutorEnv::builder(), which
+    // creates an ExecutorEnvBuilder. When you're done adding input, call
+    // ExecutorEnvBuilder::build().
 
     // For example:
-    // let env = ExecutorEnv::builder().write(&input).unwrap().build().unwrap();
+    let input: u32 = 15*2^27 + 1;
+    let env = ExecutorEnv::builder().write(&input).unwrap().build().unwrap();
 
     // Obtain the default prover.
     let prover = default_prover();
@@ -24,8 +28,10 @@ fn main() {
     // Produce a receipt by proving the specified ELF binary.
     let receipt = prover.prove_elf(env, {{guest_elf}}).unwrap();
 
-    // TODO: Implement code for transmitting or serializing the receipt for
-    // other parties to verify here
+    // TODO: Implement code for retrieving receipt journal here.
+
+    // For example:
+    let _output: u32 = receipt.journal.decode().unwrap();
 
     // Optional: Verify receipt to confirm that recipients will also be able to
     // verify your receipt
