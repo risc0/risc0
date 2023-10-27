@@ -26,7 +26,6 @@ jobs:
       image: nvidia/cuda:12.2.2-devel-ubi8
     env:
       OS: Linux
-      FEATURE: cuda
       RUSTC_WRAPPER: sccache
       TARGET: x86_64-unknown-linux-gnu
     steps:
@@ -34,16 +33,13 @@ jobs:
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
         with:
-          key: ${{ env.OS }}-${{ env.FEATURE }}
+          key: ${{ env.OS }}
       - run: yum -y install openssl-devel perl-core zlib-devel
       - run: cargo build -p cargo-risczero --release
       - run: |
           mkdir -p tmp/pkg
           cp target/release/cargo-risczero tmp/pkg
           cp target/release/r0vm tmp/pkg
-      - run: cargo build -p cargo-risczero --release -F $FEATURE
-      - run: |
-          cp target/release/r0vm tmp/pkg/r0vm-$FEATURE
           cd tmp/pkg && tar cv * | gzip -9 > ../cargo-risczero-$TARGET.tgz
       - uses: svenstaro/upload-release-action@v2
         with:
@@ -56,7 +52,6 @@ jobs:
     needs: release
     env:
       OS: macOS
-      FEATURE: metal
       RUSTC_WRAPPER: sccache
       TARGET: aarch64-apple-darwin
     steps:
@@ -64,15 +59,12 @@ jobs:
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
         with:
-          key: ${{ env.OS }}-${{ env.FEATURE }}
+          key: ${{ env.OS }}
       - run: cargo build -p cargo-risczero --release
       - run: |
           mkdir -p tmp/pkg
           cp target/release/cargo-risczero tmp/pkg
           cp target/release/r0vm tmp/pkg
-      - run: cargo build -p cargo-risczero --release -F $FEATURE
-      - run: |
-          cp target/release/r0vm tmp/pkg/r0vm-$FEATURE
           cd tmp/pkg && tar cv * | gzip -9 > ../cargo-risczero-$TARGET.tgz
       - uses: svenstaro/upload-release-action@v2
         with:
