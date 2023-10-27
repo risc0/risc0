@@ -1117,7 +1117,7 @@ mod docker {
             loop_cycles: u32,
             segment_limit_po2: u32,
             session_count_limit: u64,
-        ) -> Result<Session> {
+        ) -> anyhow::Result<Session> {
             let session_cycles = (1 << segment_limit_po2) * session_count_limit;
             let spec = MultiTestSpec::BusyLoop {
                 cycles: loop_cycles,
