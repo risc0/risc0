@@ -276,7 +276,6 @@ impl<'a> ExecutorImpl<'a> {
 
     /// Run the executor until [ExitCode::Paused] or [ExitCode::Halted] is
     /// reached, producing a [Session] as a result.
-    #[tracing::instrument(level = "trace", skip_all, err)]
     pub fn run_with_callback<F>(&mut self, callback: F) -> Result<Session, ExecutorError>
     where
         F: FnMut(Segment) -> Result<Box<dyn SegmentRef>>,
@@ -299,20 +298,22 @@ impl<'a> ExecutorImpl<'a> {
             _ => Ok(guest_session),
         };
 
-        if let Ok(ref session) = result {
-            let execution_stats = ExecutionStats {
-                total_cycles: self.total_cycles(),
-                session_cycles: self.session_cycle(),
-                segment_count: session.segments.len(),
-                execution_time: start.elapsed(),
-            };
+        if log::log_enabled!(target: "RISC0_EXECUTION_STATS", log::Level::Debug) {
+            if let Ok(ref session) = result {
+                let execution_stats = ExecutionStats {
+                    total_cycles: self.total_cycles(),
+                    session_cycles: self.session_cycle(),
+                    segment_count: session.segments.len(),
+                    execution_time: start.elapsed(),
+                };
 
-            tracing::debug!(total_cycles = ?execution_stats.total_cycles);
-            tracing::debug!(session_cycles = ?execution_stats.session_cycles);
-            tracing::debug!(segment_count = ?execution_stats.segment_count);
-            tracing::debug!(execution_time = ?execution_stats.execution_time);
-            tracing::debug!(raw_execution_stats = ?execution_stats);
-            tracing::debug!(%execution_stats);
+                    log::debug!(target: "RISC0_EXECUTION_STATS::total_cycles", "total_cycles = {}", execution_stats.total_cycles);
+                    log::debug!(target: "RISC0_EXECUTION_STATS::session_cycles", "session_cycles = {}", execution_stats.session_cycles);
+                    log::debug!(target: "RISC0_EXECUTION_STATS::segment_count", "segment_count = {}", execution_stats.segment_count);
+                    log::debug!(target: "RISC0_EXECUTION_STATS::execution_time", "execution_time = {:?}", execution_stats.execution_time);
+                    log::debug!(target: "RISC0_EXECUTION_STATS::raw_execution_stats", "raw_execution_stats = {:?}", execution_stats);
+                    log::debug!(target: "RISC0_EXECUTION_STATS", "{}", execution_stats);
+                }
         }
 
         result
@@ -325,7 +326,6 @@ impl<'a> ExecutorImpl<'a> {
 
     /// Run the executor until [ExitCode::Paused], [ExitCode::Halted], or
     /// [ExitCode::Fault] is reached, producing a [Session] as a result.
-    #[tracing::instrument(level = "trace", skip_all)]
     pub fn run_guest_only_with_callback<F>(&mut self, mut callback: F) -> Result<Session>
     where
         F: FnMut(Segment) -> Result<Box<dyn SegmentRef>>,
@@ -402,7 +402,6 @@ impl<'a> ExecutorImpl<'a> {
         ))
     }
 
-    #[tracing::instrument(level = "trace", skip_all)]
     fn run_fault_checker(&mut self) -> Result<Session> {
         let fault_monitor = FaultCheckMonitor {
             pc: self.pc,
