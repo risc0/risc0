@@ -441,7 +441,7 @@ mod sys_verify {
 
         let spec = &MultiTestSpec::SysVerify {
             image_id: HELLO_COMMIT_ID.into(),
-            journal: hello_commit_session.journal.clone().unwrap(),
+            journal: hello_commit_session.journal.clone().unwrap().bytes,
         };
 
         // Test that it works when the assumption is added.
@@ -741,7 +741,7 @@ ENV_VAR3",
         .unwrap();
     let mut exec = ExecutorImpl::from_elf(env, STANDARD_LIB_ELF).unwrap();
     let session = exec.run().unwrap();
-    let actual = session.journal.as_ref().unwrap().bytes;
+    let actual = &session.journal.as_ref().unwrap().bytes;
     assert_eq!(
         from_utf8(actual).unwrap(),
         r"ENV_VAR1=val1
@@ -771,7 +771,7 @@ fn args() {
             .unwrap();
         let mut exec = ExecutorImpl::from_elf(env, STANDARD_LIB_ELF).unwrap();
         let session = exec.run().unwrap();
-        let output: Vec<String> = session.journal.decode().unwrap();
+        let output: Vec<String> = session.journal.unwrap().decode().unwrap();
         assert_eq!(
             output,
             args_arr

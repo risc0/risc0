@@ -520,7 +520,7 @@ mod sys_verify {
 
         let spec = &MultiTestSpec::SysVerify {
             image_id: HELLO_COMMIT_ID.into(),
-            journal: HELLO_COMMIT_RECEIPT.journal.clone(),
+            journal: HELLO_COMMIT_RECEIPT.journal.bytes.clone(),
         };
 
         // Test that providing the proven assumption results in an unconditional
