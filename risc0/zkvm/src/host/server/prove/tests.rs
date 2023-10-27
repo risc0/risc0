@@ -370,6 +370,7 @@ mod riscv {
 #[cfg(feature = "docker")]
 mod docker {
     use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF};
+    use test_log::test;
 
     use crate::{ExecutorEnv, ExecutorImpl, ExitCode};
 

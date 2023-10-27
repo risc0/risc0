@@ -101,7 +101,7 @@ where
             log::debug!("receipt metadata: {:#?}", receipt.get_metadata()?);
             log::debug!("session metadata: {:#?}", session.get_metadata()?);
             bail!(
-                "received unexpected metadata digest: expected {}, found {}",
+                "session and receipt metadata do not match: session {}, receipt {}",
                 hex::encode(&session.get_metadata()?.digest()),
                 hex::encode(&receipt.get_metadata()?.digest())
             );

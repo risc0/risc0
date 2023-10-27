@@ -24,6 +24,7 @@ use std::{
 };
 
 use anyhow::{anyhow, ensure, Result};
+use risc0_zkvm_platform::WORD_SIZE;
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -206,11 +207,18 @@ impl Session {
         // NOTE: When a segment ends in a Halted(_) state, it may not update the post state
         // digest. As a result, it will be the same are the pre_image. All other exit codes require
         // the post state digest to reflect the final memory state.
-        let post_state = SystemState {
-            pc: self.post_image.pc,
-            merkle_root: match self.exit_code {
-                ExitCode::Halted(_) => last_segment.pre_image.compute_root_hash(),
-                _ => self.post_image.compute_root_hash(),
+        let post_state = match self.exit_code {
+            ExitCode::Halted(_) => SystemState {
+                merkle_root: last_segment.pre_image.compute_root_hash(),
+                pc: self.post_image.pc,
+            },
+            _ => SystemState {
+                merkle_root: self.post_image.compute_root_hash(),
+                pc: self
+                    .post_image
+                    .pc
+                    .checked_sub(WORD_SIZE as u32)
+                    .ok_or(anyhow!("underflow in subtracting pc"))?,
             },
         };
 
