@@ -287,7 +287,7 @@ pub extern "C" fn sys_halt(user_exit: u8, out_state: *const [u32; DIGEST_WORDS])
 ///
 /// `out_state` must be aligned and dereferenceable.
 // [inline(never)] is added to mitigate potentially leaking information about program execution
-// through the final value of the program counter (pc) on halt where there is more than one
+// through the final value of the program counter (pc) on pause where there is more than one
 // location in the program where `sys_pause` is called. As long as the pause instruction only exists
 // in one place within the program, the pc will always be the same invariant with input.
 #[inline(never)]
