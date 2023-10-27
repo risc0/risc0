@@ -108,6 +108,18 @@ pub enum ExecutorError {
     Error(anyhow::Error),
 }
 
+impl From<anyhow::Error> for ExecutorError {
+    fn from(e: anyhow::Error) -> Self {
+        Self::Error(e)
+    }
+}
+
+impl From<Session> for ExecutorError {
+    fn from(s: Session) -> Self {
+        Self::Fault(s)
+    }
+}
+
 use std::error::Error as StdError;
 unsafe impl Sync for ExecutorError {}
 unsafe impl Send for ExecutorError {}
@@ -246,28 +258,37 @@ impl<'a> ExecutorImpl<'a> {
 
     /// Run the executor until [ExitCode::Paused] or [ExitCode::Halted] is
     /// reached, producing a [Session] as a result.
+    #[tracing::instrument(level = "trace", skip_all, err)]
     pub fn run_with_callback<F>(&mut self, callback: F) -> Result<Session, ExecutorError>
     where
         F: FnMut(Segment) -> Result<Box<dyn SegmentRef>>,
     {
-        let mut guest_session = match self.run_guest_only_with_callback(callback) {
-            Ok(session) => session,
-            Err(e) => return Err(ExecutorError::Error(e)),
-        };
-        match guest_session.exit_code {
+        let start = std::time::Instant::now();
+        let mut guest_session = self
+            .run_guest_only_with_callback(callback)
+            .map_err(ExecutorError::from)?;
+        let result = match guest_session.exit_code {
             ExitCode::Fault => {
-                let fault_checker_session = match self.run_fault_checker() {
-                    Ok(session) => session,
-                    Err(e) => return Err(ExecutorError::Error(e)),
-                };
-                for segment in fault_checker_session.segments {
-                    guest_session.segments.push(segment);
-                }
-                guest_session.journal = fault_checker_session.journal;
-                Err(ExecutorError::Fault(guest_session))
+                let Session {
+                    segments, journal, ..
+                } = self.run_fault_checker().map_err(ExecutorError::from)?;
+                segments
+                    .into_iter()
+                    .for_each(|s| guest_session.segments.push(s));
+                guest_session.journal = journal;
+                Err(guest_session.into())
             }
             _ => Ok(guest_session),
+        };
+
+        if let Ok(ref session) = result {
+            tracing::debug!(total_cycles = ?self.total_cycles());
+            tracing::debug!(session_cycles = ?self.session_cycle());
+            tracing::debug!(segment_count = ?session.segments.len());
+            tracing::debug!(execution_time = ?start.elapsed());
         }
+
+        result
     }
 
     /// Run the executor with the default callback.
@@ -277,6 +298,7 @@ impl<'a> ExecutorImpl<'a> {
 
     /// Run the executor until [ExitCode::Paused], [ExitCode::Halted], or
     /// [ExitCode::Fault] is reached, producing a [Session] as a result.
+    #[tracing::instrument(level = "trace", skip_all)]
     pub fn run_guest_only_with_callback<F>(&mut self, mut callback: F) -> Result<Session>
     where
         F: FnMut(Segment) -> Result<Box<dyn SegmentRef>>,
@@ -353,6 +375,7 @@ impl<'a> ExecutorImpl<'a> {
         ))
     }
 
+    #[tracing::instrument(level = "trace", skip_all)]
     fn run_fault_checker(&mut self) -> Result<Session> {
         let fault_monitor = FaultCheckMonitor {
             pc: self.pc,
