@@ -206,7 +206,8 @@ impl Session {
 
         // NOTE: When a segment ends in a Halted(_) state, it may not update the post state
         // digest. As a result, it will be the same are the pre_image. All other exit codes require
-        // the post state digest to reflect the final memory state.
+        // the post state digest to reflect the final memory state. Additionally, the executor adds
+        // WORD_SIZE to the final pc for end states that are _not_ Haulted(_).
         let post_state = match self.exit_code {
             ExitCode::Halted(_) => SystemState {
                 merkle_root: last_segment.pre_image.compute_root_hash(),
