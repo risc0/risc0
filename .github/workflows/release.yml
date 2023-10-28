@@ -32,7 +32,7 @@ jobs:
         with:
           crate: cargo-release
           version: "0.24"
-      - run: cargo release publish --execute --no-confirm
+      # - run: cargo release publish --execute --no-confirm
 
   linux:
     runs-on: [self-hosted, prod, Linux, docker, cpu]
