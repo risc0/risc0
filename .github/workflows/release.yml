@@ -43,6 +43,7 @@ jobs:
       - uses: ./.github/actions/build-bins
         with:
           os: Linux
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
           target: x86_64-unknown-linux-gnu
           tag: ${{ env.TAG }} # only for testing
 
@@ -57,5 +58,6 @@ jobs:
       - uses: ./.github/actions/build-bins
         with:
           os: macOS
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
           target: aarch64-apple-darwin
           tag: ${{ env.TAG }} # only for testing
