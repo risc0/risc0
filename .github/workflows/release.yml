@@ -39,8 +39,6 @@ jobs:
           os: Linux
           target: x86_64-unknown-linux-gnu
           tag: ${{ env.TAG }} # only for testing
-        secrets:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   macos:
     runs-on: [self-hosted, prod, macOS, apple_m2_pro]
@@ -55,5 +53,3 @@ jobs:
           os: macOS
           target: aarch64-apple-darwin
           tag: ${{ env.TAG }} # only for testing
-        secrets:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
