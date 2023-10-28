@@ -11,6 +11,7 @@ on:
 
 env:
   TAG: v0.19.0-rc.3
+  VERSION: 0.19.0-rc.3
 
 jobs:
   release:
@@ -60,12 +61,12 @@ jobs:
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: tmp/cargo-risczero-${{ env.TARGET }}.tgz
-          tag: ${{ inputs.tag }}
+          tag: ${{ env.TAG }} # only for testing
       - uses: risc0/cargo-install@2cfb0024938d23011106cbf127b393bc83fddba1
         with:
           crate: cargo-binstall
           version: "1.4"
-      - run: cargo binstall --force cargo-risczero@${{ inputs.tag }}
+      - run: cargo binstall -y --force cargo-risczero@${{ env.VERSION }}
       - run: cargo run
         working-directory: tools/smoke-test
 
@@ -93,11 +94,11 @@ jobs:
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: tmp/cargo-risczero-${{ env.TARGET }}.tgz
-          tag: ${{ inputs.tag }}
+          tag: ${{ env.TAG }} # only for testing
       - uses: risc0/cargo-install@2cfb0024938d23011106cbf127b393bc83fddba1
         with:
           crate: cargo-binstall
           version: "1.4"
-      - run: cargo binstall --force cargo-risczero@${{ inputs.tag }}
+      - run: cargo binstall -y --force cargo-risczero@${{ env.VERSION }}
       - run: cargo run
         working-directory: tools/smoke-test
