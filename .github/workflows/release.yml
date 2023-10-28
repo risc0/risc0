@@ -39,25 +39,65 @@ jobs:
     needs: publish
     container:
       image: nvidia/cuda:12.2.2-devel-ubi8
+    env:
+      TARGET: x86_64-unknown-linux-gnu
     steps:
-      - uses: ./.github/actions/build-bins
+      - uses: actions/checkout@v3
         with:
-          os: Linux
+          lfs: true
+      - uses: ./.github/actions/rustup
+      - uses: ./.github/actions/sccache
+        with:
+          key: ${{ env.TARGET }}
+      - run: yum -y install openssl-devel perl-core zlib-devel
+      - run: cargo build -p cargo-risczero --release
+      - run: |
+          mkdir -p tmp/pkg
+          cp target/release/cargo-risczero tmp/pkg
+          cp target/release/r0vm tmp/pkg
+          cd tmp/pkg && tar cv * | gzip -9 > ../cargo-risczero-$TARGET.tgz
+      - uses: svenstaro/upload-release-action@v2
+        with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          target: x86_64-unknown-linux-gnu
-          tag: ${{ env.TAG }} # only for testing
+          file: tmp/cargo-risczero-${{ env.TARGET }}.tgz
+          tag: ${{ inputs.tag }}
+      - uses: risc0/cargo-install@2cfb0024938d23011106cbf127b393bc83fddba1
+        with:
+          crate: cargo-binstall
+          version: "1.4"
+      - run: cargo binstall --force cargo-risczero@${{ inputs.tag }}
+      - run: cargo run
+        working-directory: tools/smoke-test
 
   macos:
     runs-on: [self-hosted, prod, macOS, apple_m2_pro]
     needs: publish
     env:
-      OS: macOS
       RUSTC_WRAPPER: sccache
       TARGET: aarch64-apple-darwin
     steps:
-      - uses: ./.github/actions/build-bins
+      - uses: actions/checkout@v3
         with:
-          os: macOS
+          lfs: true
+      - uses: ./.github/actions/rustup
+      - uses: ./.github/actions/sccache
+        with:
+          key: ${{ env.TARGET }}
+      - run: cargo build -p cargo-risczero --release
+      - run: |
+          mkdir -p tmp/pkg
+          cp target/release/cargo-risczero tmp/pkg
+          cp target/release/r0vm tmp/pkg
+          cd tmp/pkg && tar cv * | gzip -9 > ../cargo-risczero-$TARGET.tgz
+      - uses: svenstaro/upload-release-action@v2
+        with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          target: aarch64-apple-darwin
-          tag: ${{ env.TAG }} # only for testing
+          file: tmp/cargo-risczero-${{ env.TARGET }}.tgz
+          tag: ${{ inputs.tag }}
+      - uses: risc0/cargo-install@2cfb0024938d23011106cbf127b393bc83fddba1
+        with:
+          crate: cargo-binstall
+          version: "1.4"
+      - run: cargo binstall --force cargo-risczero@${{ inputs.tag }}
+      - run: cargo run
+        working-directory: tools/smoke-test
