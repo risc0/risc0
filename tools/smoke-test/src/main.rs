@@ -35,6 +35,8 @@ fn main() {
         })
         .unwrap();
 
+    println!("Segments: {}", segments.len());
+
     let opts = ProverOpts::default();
     let rollup = segments
         .iter()
@@ -62,6 +64,7 @@ fn main() {
         })
         .unwrap();
 
+    // TODO: call verify on this receipt
     client
         .identity_p254(
             opts,

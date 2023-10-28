@@ -1,0 +1,39 @@
+name: build binaries
+inputs:
+  os:
+    required: true
+  target:
+    required: true
+  tag:
+    required: true
+    default: ${{ github.ref }}
+env:
+  RUSTC_WRAPPER: sccache
+  TAG: ${{ inputs.tag }}
+runs:
+  using: composite
+  steps:
+    - uses: actions/checkout@v3
+      with:
+        lfs: true
+    - uses: ./.github/actions/rustup
+    - uses: ./.github/actions/sccache
+      with:
+        key: ${{ inputs.os }}
+    - run: yum -y install openssl-devel perl-core zlib-devel
+      if: inputs.os == 'Linux'
+    - run: cargo build -p cargo-risczero --release
+    - run: |
+        mkdir -p tmp/pkg
+        cp target/release/cargo-risczero tmp/pkg
+        cp target/release/r0vm tmp/pkg
+        cd tmp/pkg && tar cv * | gzip -9 > ../cargo-risczero-${{ inputs.target }}.tgz
+    - uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: tmp/cargo-risczero-${{ inputs.target }}.tgz
+        tag: ${{ inputs.tag }}
+    - run: cargo install cargo-binstall
+    - run: cargo binstall --force cargo-risczero@$TAG
+    - run: cargo run
+      working-directory: tools/smoke-test
