@@ -90,36 +90,9 @@ const sidebars = {
           id: "zkvm/benchmarks",
         },
         {
-          type: "category",
-          label: "Demo applications",
-          collapsed: false,
-          items: [
-            {
-              type: "link",
-              label: "Hello World",
-              href: "https://github.com/risc0/risc0/tree/v0.18.0/examples/hello-world",
-            },
-            {
-              type: "link",
-              label: "JSON",
-              href: "https://github.com/risc0/risc0/tree/v0.18.0/examples/json",
-            },
-            {
-              type: "link",
-              label: "zkEVM",
-              href: "https://github.com/risc0/risc0/tree/v0.18.0/examples/zkevm-demo",
-            },
-            {
-              type: "link",
-              label: "ECDSA Signature",
-              href: "https://github.com/risc0/risc0/tree/v0.18.0/examples/ecdsa",
-            },
-            {
-              type: "link",
-              label: "Where's Waldo",
-              href: "https://github.com/risc0/risc0/tree/v0.18.0/examples/waldo",
-            },
-          ],
+          type: "doc",
+          label: "Examples",
+          id: "zkvm/examples",
         },
         {
           type: "link",
