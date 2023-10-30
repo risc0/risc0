@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::time::{Instant,Duration};
+use std::time::{Duration, Instant};
 
 use rand::{rngs::StdRng, RngCore, SeedableRng};
 use risc0_zkvm::{
     sha::{Digest, DIGEST_WORDS},
-    ExecutorImpl, ExecutorEnv, MemoryImage, Receipt, Session,
+    ExecutorEnv, ExecutorImpl, MemoryImage, Receipt, Session,
 };
 
 use crate::{get_cycles, get_image, Benchmark};
@@ -60,7 +60,7 @@ impl Benchmark for Job {
     }
 
     fn proof_size_bytes(proof: &Self::ProofType) -> u32 {
-       (proof
+        (proof
             .inner
             .composite()
             .unwrap()

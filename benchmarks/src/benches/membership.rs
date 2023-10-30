@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::time::{Instant, Duration};
+use std::time::{Duration, Instant};
 
 use risc0_benchmark_lib::{generate_mock_proof, MembershipProof};
 use risc0_zkvm::{

@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::time::{Instant, Duration};
+use std::time::{Duration, Instant};
 
 use ed25519_dalek::{Signature, Signer, SigningKey, VerifyingKey};
 use rand_core::OsRng;
 use risc0_zkvm::{
-    default_prover, sha::DIGEST_WORDS, ExecutorEnv, ExecutorImpl,
-    MemoryImage, ProverOpts, Receipt, Session, VerifierContext,
+    default_prover, sha::DIGEST_WORDS, ExecutorEnv, ExecutorImpl, MemoryImage, ProverOpts, Receipt,
+    Session, VerifierContext,
 };
 
 use crate::{get_cycles, get_image, Benchmark, BenchmarkAverage};
@@ -182,7 +182,8 @@ impl BenchmarkAverage for Job {
             .unwrap();
         let prover = default_prover();
         let start = Instant::now();
-        prover.prove(
+        prover
+            .prove(
                 env,
                 &VerifierContext::default(),
                 &ProverOpts::default(),

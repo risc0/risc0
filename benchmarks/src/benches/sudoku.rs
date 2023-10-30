@@ -12,10 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::time::{Instant, Duration};
+use std::time::{Duration, Instant};
 
 use risc0_benchmark_lib::Sudoku;
-use risc0_zkvm::{sha::{Digest, DIGEST_WORDS}, ExecutorEnv, ExecutorImpl, MemoryImage, Receipt, Session};
+use risc0_zkvm::{
+    sha::{Digest, DIGEST_WORDS},
+    ExecutorEnv, ExecutorImpl, MemoryImage, Receipt, Session,
+};
 
 use crate::{get_cycles, get_image, Benchmark};
 

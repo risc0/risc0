@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::time::{Instant, Duration};
+use std::time::{Duration, Instant};
 
 use risc0_zkvm::{sha::DIGEST_WORDS, ExecutorEnv, ExecutorImpl, MemoryImage, Receipt, Session};
 
@@ -81,7 +81,7 @@ impl Benchmark for Job {
     }
 
     fn exec_compute(&mut self) -> (u32, u32, Duration) {
-       let env = ExecutorEnv::builder()
+        let env = ExecutorEnv::builder()
             .write(&self.spec)
             .unwrap()
             .build()

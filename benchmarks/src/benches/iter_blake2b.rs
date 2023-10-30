@@ -12,15 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::time::{Instant, Duration};
+use std::time::{Duration, Instant};
 
 use blake2::{
     digest::{Update, VariableOutput},
     Blake2bVar,
 };
 use risc0_zkvm::{
-    default_prover, sha::{Digest, DIGEST_WORDS}, ExecutorEnv, ExecutorImpl, MemoryImage,
-    ProverOpts, Receipt, Session, VerifierContext,
+    default_prover,
+    sha::{Digest, DIGEST_WORDS},
+    ExecutorEnv, ExecutorImpl, MemoryImage, ProverOpts, Receipt, Session, VerifierContext,
 };
 
 use crate::{get_cycles, get_image, Benchmark, BenchmarkAverage};
@@ -99,7 +100,7 @@ impl Benchmark for Job {
             .build()
             .unwrap();
 
-         let mut exec = ExecutorImpl::new(env, self.image.clone()).unwrap();
+        let mut exec = ExecutorImpl::new(env, self.image.clone()).unwrap();
         let start = Instant::now();
         let session = exec.run().unwrap();
         let elapsed = start.elapsed();
@@ -161,7 +162,8 @@ impl BenchmarkAverage for Job {
 
         let prover = default_prover();
         let start = Instant::now();
-        prover.prove(
+        prover
+            .prove(
                 env,
                 &VerifierContext::default(),
                 &ProverOpts::default(),

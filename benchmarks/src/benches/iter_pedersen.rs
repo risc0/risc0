@@ -12,11 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::time::{Instant, Duration};
+use std::time::{Duration, Instant};
 
 use risc0_zkvm::{
-    default_prover, sha::{Digest, DIGEST_WORDS}, ExecutorEnv, ExecutorImpl, MemoryImage,
-    ProverOpts, Receipt, Session, VerifierContext,
+    default_prover,
+    sha::{Digest, DIGEST_WORDS},
+    ExecutorEnv, ExecutorImpl, MemoryImage, ProverOpts, Receipt, Session, VerifierContext,
 };
 use starknet_crypto::FieldElement;
 
@@ -59,7 +60,7 @@ impl Benchmark for Job {
             .fold(0, |acc, segment| acc + segment.get_seal_bytes().len())) as u32
     }
 
-     fn new(spec: Self::Spec) -> Self {
+    fn new(spec: Self::Spec) -> Self {
         let image = get_image(METHOD_PATH);
         let session = None;
 
@@ -97,7 +98,7 @@ impl Benchmark for Job {
             .build()
             .unwrap();
 
-         let mut exec = ExecutorImpl::new(env, self.image.clone()).unwrap();
+        let mut exec = ExecutorImpl::new(env, self.image.clone()).unwrap();
         let start = Instant::now();
         let session = exec.run().unwrap();
         let elapsed = start.elapsed();
@@ -158,7 +159,8 @@ impl BenchmarkAverage for Job {
 
         let prover = default_prover();
         let start = Instant::now();
-        prover.prove(
+        prover
+            .prove(
                 env,
                 &VerifierContext::default(),
                 &ProverOpts::default(),

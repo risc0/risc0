@@ -21,7 +21,7 @@ use std::{
 };
 
 use log::info;
-use risc0_zkvm::{MemoryImage, Program, GUEST_MAX_MEM, PAGE_SIZE, Segment};
+use risc0_zkvm::{MemoryImage, Program, Segment, GUEST_MAX_MEM, PAGE_SIZE};
 use serde::Serialize;
 
 pub mod benches;

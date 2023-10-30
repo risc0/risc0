@@ -20,7 +20,7 @@ use risc0_zkvm::{
     ExecutorEnv, ExecutorImpl, MemoryImage, Receipt, Session,
 };
 
-use crate::{get_image, get_cycles, Benchmark};
+use crate::{get_cycles, get_image, Benchmark};
 
 pub struct Job {
     pub guest_input: Vec<u8>,

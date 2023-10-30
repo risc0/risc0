@@ -12,11 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::time::{Instant, Duration};
+use std::time::{Duration, Instant};
 
 use risc0_zkvm::{
-    default_prover, sha::{Digest, DIGEST_WORDS}, ExecutorEnv, ExecutorImpl, MemoryImage,
-    ProverOpts, Receipt, Session, VerifierContext,
+    default_prover,
+    sha::{Digest, DIGEST_WORDS},
+    ExecutorEnv, ExecutorImpl, MemoryImage, ProverOpts, Receipt, Session, VerifierContext,
 };
 use sha3::{Digest as _, Keccak256};
 
@@ -94,7 +95,7 @@ impl Benchmark for Job {
             .build()
             .unwrap();
 
-         let mut exec = ExecutorImpl::new(env, self.image.clone()).unwrap();
+        let mut exec = ExecutorImpl::new(env, self.image.clone()).unwrap();
         let start = Instant::now();
         let session = exec.run().unwrap();
         let elapsed = start.elapsed();
@@ -156,7 +157,8 @@ impl BenchmarkAverage for Job {
 
         let prover = default_prover();
         let start = Instant::now();
-        prover.prove(
+        prover
+            .prove(
                 env,
                 &VerifierContext::default(),
                 &ProverOpts::default(),
