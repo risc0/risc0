@@ -78,9 +78,9 @@ crypto-bigint = { version = "0.5", default-features = false, features = [
 ], optional = true }
 num-derive = "0.4"
 num-traits = { version = "0.2", default-features = false, optional = true }
-prost-types = { version = "0.12", optional = true }
 prost = { version = "0.12", optional = true }
 sha2 = { version = "0.10", optional = true }
+tempfile = { version = "3", optional = true }
 tracing = { version = "0.1", default-features = false, features = [
   "attributes",
 ] }
@@ -98,7 +98,7 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 [target.'cfg(not(target_os = "zkvm"))'.dev-dependencies]
 env_logger = "0.10"
 flate2 = "1.0"
-risc0-zkvm-methods = { workspace = true }
+risc0-zkvm-methods = { path = "methods" }
 serde_json = "1.0"
 serial_test = "2.0"
 tar = "0.4"
@@ -112,7 +112,6 @@ client = [
   "dep:bytes",
   "dep:prost",
   "dep:prost-build",
-  "dep:prost-types",
   "dep:protobuf-src",
   "std",
 ]
@@ -129,7 +128,7 @@ metal = [
   "risc0-circuit-rv32im/metal",
   "risc0-zkp/metal",
 ]
-default = ["client", "prove"]
+default = ["client"]
 disable-dev-mode = []
 # This flag uses the docker environment to build test guests such as multi-test
 # to ensure accurate cycle and segment counts. Tests that have been gated on
@@ -147,10 +146,10 @@ profiler = [
   "dep:object",
   "dep:prost",
   "dep:prost-build",
-  "dep:prost-types",
   "dep:protobuf-src",
   "dep:goblin",
-  "dep:rustc-demangle"]
+  "dep:rustc-demangle",
+]
 prove = [
   "client",
   "fault-proof",
@@ -164,10 +163,10 @@ prove = [
   "dep:lazy-regex",
   "dep:prost",
   "dep:prost-build",
-  "dep:prost-types",
   "dep:protobuf-src",
   "dep:rayon",
   "dep:sha2",
+  "dep:tempfile",
   "dep:typetag",
   "risc0-circuit-recursion/prove",
   "risc0-circuit-rv32im/prove",

@@ -1,12 +1,10 @@
 [package]
 name = "risc0-benchmark"
-version = "0.19.0-alpha.1"
+version = "0.1.0"
 edition = "2021"
 
 [workspace]
-members = [
-    "methods",
-    "shared"]
+members = ["methods", "shared"]
 
 [workspace.dependencies]
 risc0-benchmark-methods = { path = "methods" }
@@ -14,12 +12,14 @@ risc0-benchmark-lib = { path = "shared" }
 risc0-build = { path = "../risc0/build" }
 
 [dependencies]
-blake2 = { version = "0.10.6", default-features = false }
+blake2 = { version = "0.10", default-features = false }
 blake3 = { version = "1.4", default-features = false }
 byteorder = "1.4"
 clap = { version = "4.0", features = ["derive"] }
 csv = "1.1"
-ed25519-dalek = { version = "2.0.0-rc.3", default-features = false, features = ["rand_core"] }
+ed25519-dalek = { version = "2.0.0-rc.3", default-features = false, features = [
+  "rand_core",
+] }
 env_logger = "0.10"
 hex = "0.4"
 k256 = { version = "0.13", features = ["serde"] }
@@ -29,7 +29,9 @@ rand_core = "0.6.4"
 risc0-benchmark-lib = { workspace = true }
 risc0-benchmark-methods = { workspace = true }
 risc0-zkp = { path = "../risc0/zkp", default-features = false }
-risc0-zkvm = { path = "../risc0/zkvm", default-features = false, features = ["prove"] }
+risc0-zkvm = { path = "../risc0/zkvm", default-features = false, features = [
+  "prove",
+] }
 risc0-zkvm-methods = { path = "../risc0/zkvm/methods" }
 serde = { version = "1.0", features = ["derive"] }
 sha2 = "0.10"

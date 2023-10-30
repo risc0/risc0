@@ -33,14 +33,15 @@ use risc0_zkp::{
     verify::VerificationError,
 };
 use risc0_zkvm_platform::WORD_SIZE;
-use serde::{Deserialize, Serialize};
+use serde::{de::DeserializeOwned, Deserialize, Serialize};
 
 use super::control_id::{BLAKE2B_CONTROL_ID, POSEIDON_CONTROL_ID, SHA256_CONTROL_ID};
 // Make succinct receipt available through this `receipt` module.
 pub use super::recursion::SuccinctReceipt;
 use crate::{
     receipt_metadata::{Assumptions, MaybePruned, Output},
-    sha::Digestible,
+    serde::{from_slice, Error},
+    sha::{Digestible, Sha256},
     ExitCode, ReceiptMetadata,
 };
 
@@ -106,41 +107,42 @@ pub struct Receipt {
     /// The polymorphic [InnerReceipt].
     pub inner: InnerReceipt,
 
-    /// The public data written by the guest in this Session.
+    /// The public commitment written by the guest.
     ///
     /// This data is cryptographically authenticated in
     /// [Receipt::verify].
-    pub journal: Vec<u8>,
+    pub journal: Journal,
 }
 
 impl Receipt {
     /// Construct a new Receipt
     pub fn new(inner: InnerReceipt, journal: Vec<u8>) -> Self {
-        Self { inner, journal }
+        Self {
+            inner,
+            journal: Journal::new(journal),
+        }
     }
 
     /// Verify that this receipt proves a successful execution of the zkVM from
-    /// the given image_id.
+    /// the given `image_id`.
     ///
     /// Uses the zero-knowledge proof system to verify the seal, and decodes the
     /// proven [ReceiptMetadata]. This method additionally ensures that the
     /// guest exited with a successful status code (e.g. `Halted(0)` or
     /// `Paused(0)`), the image ID is as expected, and the journal
     /// has not been tampered with.
-    #[must_use]
     pub fn verify(&self, image_id: impl Into<Digest>) -> Result<(), VerificationError> {
         self.verify_with_context(&VerifierContext::default(), image_id)
     }
 
     /// Verify that this receipt proves a successful execution of the zkVM from
-    /// the given image_id.
+    /// the given `image_id`.
     ///
     /// Uses the zero-knowledge proof system to verify the seal, and decodes the
     /// proven [ReceiptMetadata]. This method additionally ensures that the
     /// guest exited with a successful status code (e.g. `Halted(0)` or
     /// `Paused(0)`), the image ID is as expected, and the journal
     /// has not been tampered with.
-    #[must_use]
     pub fn verify_with_context(
         &self,
         ctx: &VerifierContext,
@@ -170,11 +172,11 @@ impl Receipt {
         };
 
         if metadata.output.digest() != expected_output.digest() {
-            let empty_output = metadata.output.is_none() && self.journal.is_empty();
+            let empty_output = metadata.output.is_none() && self.journal.bytes.is_empty();
             if !empty_output {
                 log::debug!(
                     "journal: 0x{}, expected output digest: 0x{}, decoded output digest: 0x{}",
-                    hex::encode(&self.journal),
+                    hex::encode(&self.journal.bytes),
                     hex::encode(expected_output.digest()),
                     hex::encode(metadata.output.digest()),
                 );
@@ -186,10 +188,10 @@ impl Receipt {
         Ok(())
     }
 
-    /// Verify the integrity of this receipt, ensuring the metadata is attested
-    /// to by the seal.
+    /// Verify the integrity of this receipt, ensuring the metadata and jounral are attested to by
+    /// the seal.
     ///
-    /// NOTE: This does not verify the success of the guest execution. In
+    /// This does not verify the success of the guest execution. In
     /// particular, the guest could have exited with an error (e.g.
     /// `ExitCode::Halted(1)`) or faulted state. It also does not check the
     /// image ID, or otherwise constrain what guest was executed. After calling
@@ -197,7 +199,6 @@ impl Receipt {
     /// relevant to their application. If you need to verify a successful
     /// guest execution and access the journal, the `verify` function is
     /// recommended.
-    #[must_use]
     pub fn verify_integrity_with_context(
         &self,
         ctx: &VerifierContext,
@@ -217,11 +218,11 @@ impl Receipt {
         });
 
         if metadata.output.digest() != expected_output.digest() {
-            let empty_output = metadata.output.is_none() && self.journal.is_empty();
+            let empty_output = metadata.output.is_none() && self.journal.bytes.is_empty();
             if !empty_output {
                 log::debug!(
                     "journal: 0x{}, expected output digest: 0x{}, decoded output digest: 0x{}",
-                    hex::encode(&self.journal),
+                    hex::encode(&self.journal.bytes),
                     hex::encode(expected_output.digest()),
                     hex::encode(metadata.output.digest()),
                 );
@@ -239,8 +240,38 @@ impl Receipt {
     }
 }
 
-/// An inner receipt can take the form of a [SegmentReceipts] collection or a
-/// [SuccinctReceipt].
+/// A journal is a record of all public commitments for a given proof session.
+#[derive(Clone, Debug, Default, Deserialize, Serialize, PartialEq)]
+pub struct Journal {
+    /// The raw bytes of the journal.
+    pub bytes: Vec<u8>,
+}
+
+impl Journal {
+    /// Construct a new [Journal].
+    pub fn new(bytes: Vec<u8>) -> Self {
+        Self { bytes }
+    }
+
+    /// Decode the journal bytes by using the risc0 deserializer.
+    pub fn decode<T: DeserializeOwned>(&self) -> Result<T, Error> {
+        from_slice(&self.bytes)
+    }
+}
+
+impl risc0_binfmt::Digestible for Journal {
+    fn digest<S: Sha256>(&self) -> Digest {
+        *S::hash_bytes(&self.bytes)
+    }
+}
+
+impl AsRef<[u8]> for Journal {
+    fn as_ref(&self) -> &[u8] {
+        &self.bytes
+    }
+}
+
+/// An inner receipt can take the form of a [CompositeReceipt] or a [SuccinctReceipt].
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[cfg_attr(test, derive(PartialEq))]
 pub enum InnerReceipt {
@@ -260,7 +291,6 @@ pub enum InnerReceipt {
 impl InnerReceipt {
     /// Verify the integrity of this receipt, ensuring the metadata is attested
     /// to by the seal.
-    #[must_use]
     pub fn verify_integrity_with_context(
         &self,
         ctx: &VerifierContext,
@@ -332,7 +362,6 @@ pub struct CompositeReceipt {
 impl CompositeReceipt {
     /// Verify the integrity of this receipt, ensuring the metadata is attested
     /// to by the seal.
-    #[must_use]
     pub fn verify_integrity_with_context(
         &self,
         ctx: &VerifierContext,
@@ -514,10 +543,9 @@ pub struct SegmentReceipt {
     /// The cryptographic data attesting to the validity of the code execution.
     ///
     /// This data is used by the ZKP Verifier (as called by
-    /// [SegmentReceipt::verify_with_context]) to cryptographically prove that
-    /// this Segment was faithfully executed. It is largely opaque
-    /// cryptographic data, but contains a non-opaque metadata component,
-    /// which can be conveniently accessed with
+    /// [SegmentReceipt::verify_integrity_with_context]) to cryptographically prove that this
+    /// Segment was faithfully executed. It is largely opaque cryptographic data, but contains a
+    /// non-opaque metadata component, which can be conveniently accessed with
     /// [SegmentReceipt::get_metadata].
     pub seal: Vec<u32>,
 
@@ -531,7 +559,6 @@ pub struct SegmentReceipt {
 impl SegmentReceipt {
     /// Verify the integrity of this receipt, ensuring the metadata is attested
     /// to by the seal.
-    #[must_use]
     pub fn verify_integrity_with_context(
         &self,
         ctx: &VerifierContext,
@@ -565,7 +592,7 @@ impl SegmentReceipt {
     }
 }
 
-/// An assumption associated with a guest call to `env::verify` or
+/// An assumption attached with a guest execution as a result of calling `env::verify` or
 /// `env::verify_integrity`.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum Assumption {

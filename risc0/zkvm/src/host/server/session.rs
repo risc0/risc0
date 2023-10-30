@@ -30,7 +30,7 @@ use crate::{
     host::server::exec::executor::SyscallRecord,
     receipt_metadata::{Assumptions, Output},
     sha::Digest,
-    Assumption, ExitCode, MemoryImage, ReceiptMetadata, SystemState,
+    Assumption, ExitCode, Journal, MemoryImage, ReceiptMetadata, SystemState,
 };
 
 #[derive(Clone, Default, Serialize, Deserialize, Debug)]
@@ -54,12 +54,12 @@ pub struct Session {
     pub segments: Vec<Box<dyn SegmentRef>>,
 
     /// The data publicly committed by the guest program.
-    pub journal: Option<Vec<u8>>,
+    pub journal: Option<Journal>,
 
     /// The [ExitCode] of the session.
     pub exit_code: ExitCode,
 
-    /// The final [MemoryState] at the end of execution.
+    /// The final [MemoryImage] at the end of execution.
     pub post_image: MemoryImage,
 
     /// The list of assumptions made by the guest and resolved by the host.
@@ -131,7 +131,7 @@ impl Session {
     ) -> Self {
         Self {
             segments,
-            journal,
+            journal: journal.map(|x| Journal::new(x)),
             exit_code,
             post_image,
             assumptions,
@@ -155,7 +155,7 @@ impl Session {
 
     /// Calculate for the [ReceiptMetadata] associated with this [Session]. The
     /// [ReceiptMetadata] is the claim that will be proven if this [Session]
-    /// is passed to the [Prover].
+    /// is passed to the [crate::Prover].
     pub fn get_metadata(&self) -> Result<ReceiptMetadata> {
         let first_segment = &self
             .segments
@@ -175,7 +175,7 @@ impl Session {
                 .as_ref()
                 .map(|journal| -> Result<_> {
                     Ok(Output {
-                        journal: journal.clone().into(),
+                        journal: journal.bytes.clone().into(),
                         assumptions: Assumptions(
                             self.assumptions
                                 .iter()
@@ -203,9 +203,9 @@ impl Session {
             None
         };
 
-        // DO NOT MERGE: post should match the final segment system state, but doesn't
-        // always. Prior to merging figure out what is happening here and what
-        // to do about it (possibly nothing).
+        // NOTE: When a segment ends in a Halted(_) state, it may not update the post state
+        // digest. As a result, it will be the same are the pre_image. All other exit codes require
+        // the post state digest to reflect the final memory state.
         let post_state = SystemState {
             pc: self.post_image.pc,
             merkle_root: match self.exit_code {

@@ -53,7 +53,7 @@ impl Benchmark for Job {
     }
 
     fn output_size_bytes(_output: &Self::ComputeOut, proof: &Self::ProofType) -> u32 {
-        (proof.journal.len()) as u32
+        proof.journal.bytes.len() as u32
     }
 
     fn proof_size_bytes(proof: &Self::ProofType) -> u32 {
@@ -98,13 +98,7 @@ impl Benchmark for Job {
 
     fn guest_compute(&mut self) -> (Self::ComputeOut, Self::ProofType) {
         let receipt = self.session.as_ref().unwrap().prove().expect("receipt");
-
-        let (receipt_verifying_key, receipt_message) =
-            from_slice::<(EncodedPoint, Vec<u8>), _>(&receipt.journal)
-                .unwrap()
-                .try_into()
-                .unwrap();
-
+        let (receipt_verifying_key, receipt_message) = receipt.journal.decode().unwrap();
         ((receipt_verifying_key, receipt_message), receipt)
     }
 

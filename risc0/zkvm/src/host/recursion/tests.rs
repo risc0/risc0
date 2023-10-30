@@ -114,6 +114,9 @@ fn test_recursion_e2e() {
     // std::fs::write("recursion.seal", seal);
 
     // Validate the Session rollup + journal data
-    let rollup_receipt = Receipt::new(InnerReceipt::Succinct(rollup), session.journal.unwrap());
+    let rollup_receipt = Receipt::new(
+        InnerReceipt::Succinct(rollup),
+        session.journal.unwrap().bytes,
+    );
     rollup_receipt.verify(MULTI_TEST_ID).unwrap();
 }

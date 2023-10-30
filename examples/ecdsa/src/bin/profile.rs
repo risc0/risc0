@@ -13,7 +13,9 @@
 // limitations under the License.
 
 use anyhow::{anyhow, bail};
-use ecdsa_methods::{BENCHMARK_ELF, BENCHMARK_PATH};
+use ecdsa_methods::{ECDSA_VERIFY_ELF, ECDSA_VERIFY_PATH};
+use k256::ecdsa::{signature::Signer, Signature, SigningKey};
+use rand_core::OsRng;
 use risc0_zkvm::{default_executor, ExecutorEnv, Profiler};
 
 // Simple main to load and run the benchmark binary in the RISC Zero Executor.
@@ -24,13 +26,23 @@ fn main() -> anyhow::Result<()> {
         Err(std::env::VarError::NotPresent) => None,
         Err(e) => bail!("malformed env var: {}", e),
     };
-    println!("{}", BENCHMARK_PATH);
+    println!("{}", ECDSA_VERIFY_PATH);
     let mut profiler = pprof_out
         .as_ref()
-        .map(|path| Profiler::new(&path, BENCHMARK_ELF))
+        .map(|path| Profiler::new(&path, ECDSA_VERIFY_ELF))
         .transpose()?;
 
     {
+        // Generate a random secp256k1 keypair and sign the message.
+        let signing_key = SigningKey::random(&mut OsRng); // Serialize with `::to_bytes()`
+        let message = b"This is a message that will be signed, and verified within the zkVM";
+        let signature: Signature = signing_key.sign(message);
+        let input = (
+            signing_key.verifying_key().to_encoded_point(true),
+            message.as_slice(),
+            &signature,
+        );
+
         // Build the executor env.
         let env = {
             let mut builder = ExecutorEnv::builder();
@@ -38,13 +50,14 @@ fn main() -> anyhow::Result<()> {
                 builder.trace_callback(p.make_trace_callback());
             }
             builder
+                .write(&input)?
                 .build()
                 .map_err(|e| anyhow!("environment build failed: {:?}", e))?
         };
 
         // Execute the benchmarks.
         let exec = default_executor();
-        exec.execute_elf(env, BENCHMARK_ELF)?;
+        exec.execute_elf(env, ECDSA_VERIFY_ELF)?;
     }
 
     // Write out the pprof.

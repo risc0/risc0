@@ -19,6 +19,7 @@ use std::{
     collections::HashMap,
     io::{BufRead, BufReader, Cursor, Read, Write},
     mem,
+    path::{Path, PathBuf},
     rc::Rc,
 };
 
@@ -51,6 +52,7 @@ pub type TraceCallback<'a> = dyn FnMut(TraceEvent) -> Result<()> + 'a;
 #[derive(Debug, Default)]
 pub(crate) struct Assumptions {
     pub(crate) cached: Vec<Assumption>,
+    #[cfg(feature = "prove")]
     pub(crate) accessed: Vec<Assumption>,
 }
 
@@ -69,6 +71,7 @@ pub struct ExecutorEnv<'a> {
     pub(crate) input: Vec<u8>,
     pub(crate) trace: Option<Rc<RefCell<TraceCallback<'a>>>>,
     pub(crate) assumptions: Rc<RefCell<Assumptions>>,
+    pub(crate) segment_path: Option<PathBuf>,
 }
 
 impl<'a> ExecutorEnv<'a> {
@@ -301,11 +304,10 @@ impl<'a> ExecutorEnvBuilder<'a> {
         self
     }
 
-    /// Add an [Assumption] to the [ExecutorEnv] internal map of associated
-    /// assumptions.
+    /// Add an [Assumption] to the [ExecutorEnv] associated assumptions.
     ///
     /// During execution, when the guest calls `env::verify` or
-    /// `env::verify_integrity`, this map will be searched for an
+    /// `env::verify_integrity`, this collection will be searched for an
     /// [Assumption] that corresponds the verification call.
     pub fn add_assumption(&mut self, assumption: Assumption) -> &mut Self {
         self.inner.assumptions.borrow_mut().cached.push(assumption);
@@ -318,6 +320,12 @@ impl<'a> ExecutorEnvBuilder<'a> {
         callback: impl FnMut(TraceEvent) -> Result<()> + 'a,
     ) -> &mut Self {
         self.inner.trace = Some(Rc::new(RefCell::new(callback)));
+        self
+    }
+
+    /// Set the path where segments will be stored.
+    pub fn segment_path<P: AsRef<Path>>(&mut self, path: P) -> &mut Self {
+        self.inner.segment_path = Some(path.as_ref().to_path_buf());
         self
     }
 }

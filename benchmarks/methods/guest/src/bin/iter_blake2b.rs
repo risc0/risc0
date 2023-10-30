@@ -20,18 +20,13 @@ use risc0_zkvm::{guest::env, sha::Digest};
 risc0_zkvm::entry!(main);
 
 pub fn main() {
-    let input: Vec<u8> = env::read();
+    let (num_iter, data): (u32, Vec<u8>) = env::read();
 
-    let mut num_iter: u32;
-    num_iter = input[0] as u32;
-    num_iter = num_iter | ((input[1] as u32) << 8);
-    num_iter = num_iter | ((input[2] as u32) << 16);
-    num_iter = num_iter | ((input[3] as u32) << 24);
-
-    let mut hash = Blake2bCpuImpl::blake2b(&input[4..]);
+    let mut hash = Blake2bCpuImpl::blake2b(&data);
     for _ in 1..num_iter {
         hash = Blake2bCpuImpl::blake2b(hash);
     }
 
-    env::commit(&Digest::try_from(hash).unwrap())
+    let digest: Digest = hash.into();
+    env::commit(&digest)
 }

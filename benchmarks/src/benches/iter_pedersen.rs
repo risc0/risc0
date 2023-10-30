@@ -38,7 +38,7 @@ const METHOD_PATH: &'static str = risc0_benchmark_methods::ITER_PEDERSEN_PATH;
 impl Benchmark for Job {
     const NAME: &'static str = "iter_pedersen";
     type Spec = u32;
-    type ComputeOut = risc0_zkvm::sha::Digest;
+    type ComputeOut = Digest;
     type ProofType = Receipt;
 
     fn job_size(spec: &Self::Spec) -> u32 {
@@ -46,7 +46,7 @@ impl Benchmark for Job {
     }
 
     fn output_size_bytes(_output: &Self::ComputeOut, proof: &Self::ProofType) -> u32 {
-        (proof.journal.len()) as u32
+        proof.journal.bytes.len() as u32
     }
 
     fn proof_size_bytes(proof: &Self::ProofType) -> u32 {
@@ -86,16 +86,11 @@ impl Benchmark for Job {
 
         let hash = starknet_crypto::pedersen_hash(&e0, &e1);
 
-        Some(risc0_zkvm::sha::Digest::try_from(hash.to_bytes_be().as_slice()).unwrap())
+        Some(Digest::try_from(hash.to_bytes_be().as_slice()).unwrap())
     }
 
     fn exec_compute(&mut self) -> (u32, u32, Duration) {
-        let mut guest_input = Vec::from([0u8; 36]);
-        guest_input[0] = self.spec as u8;
-        guest_input[1] = (self.spec >> 8) as u8;
-        guest_input[2] = (self.spec >> 16) as u8;
-        guest_input[3] = (self.spec >> 24) as u8;
-
+        let guest_input = (self.spec, vec![0u8; 32]);
         let env = ExecutorEnv::builder()
             .write(&guest_input)
             .unwrap()
@@ -114,10 +109,7 @@ impl Benchmark for Job {
 
     fn guest_compute(&mut self) -> (Self::ComputeOut, Self::ProofType) {
         let receipt = self.session.as_ref().unwrap().prove().expect("receipt");
-        let result = risc0_zkvm::sha::Digest::try_from(receipt.journal.clone())
-            .unwrap()
-            .try_into()
-            .unwrap();
+        let result = receipt.journal.decode().unwrap();
         (result, receipt)
     }
 
@@ -157,12 +149,7 @@ impl BenchmarkAverage for Job {
     }
 
     fn guest_compute(&mut self) -> Duration {
-        let mut guest_input = Vec::from([0u8; 36]);
-        guest_input[0] = self.spec as u8;
-        guest_input[1] = (self.spec >> 8) as u8;
-        guest_input[2] = (self.spec >> 16) as u8;
-        guest_input[3] = (self.spec >> 24) as u8;
-
+        let guest_input = (self.spec, vec![0u8; 32]);
         let env = ExecutorEnv::builder()
             .write(&guest_input)
             .unwrap()

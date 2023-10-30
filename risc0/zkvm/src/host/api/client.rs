@@ -29,7 +29,7 @@ use crate::{
         client::prove::get_r0vm_path,
         receipt::{SegmentReceipt, SuccinctReceipt},
     },
-    ExecutorEnv, ProverOpts, Receipt,
+    ExecutorEnv, Journal, ProverOpts, Receipt,
 };
 
 /// A client implementation for interacting with a zkVM server.
@@ -110,7 +110,7 @@ impl Client {
         callback: F,
     ) -> Result<SessionInfo>
     where
-        F: FnMut(pb::api::SegmentInfo) -> Result<()>,
+        F: FnMut(SegmentInfo, Asset) -> Result<()>,
     {
         let mut conn = self.connect()?;
 
@@ -182,7 +182,7 @@ impl Client {
         receipt: Asset,
         receipt_out: AssetRequest,
     ) -> Result<SuccinctReceipt> {
-        let mut conn = self.connector.connect()?;
+        let mut conn = self.connect()?;
 
         let request = pb::api::ServerRequest {
             kind: Some(pb::api::server_request::Kind::Lift(pb::api::LiftRequest {
@@ -221,7 +221,7 @@ impl Client {
         right_receipt: Asset,
         receipt_out: AssetRequest,
     ) -> Result<SuccinctReceipt> {
-        let mut conn = self.connector.connect()?;
+        let mut conn = self.connect()?;
 
         let request = pb::api::ServerRequest {
             kind: Some(pb::api::server_request::Kind::Join(pb::api::JoinRequest {
@@ -243,6 +243,46 @@ impl Client {
                 receipt_pb.try_into()
             }
             pb::api::join_reply::Kind::Error(err) => Err(err.into()),
+        };
+
+        let code = conn.close()?;
+        if code != 0 {
+            bail!("Child finished with: {code}");
+        }
+
+        result
+    }
+
+    /// Convert a [SuccinctReceipt] with a poseidon hash function that uses a 254-bit field
+    pub fn identity_p254(
+        &self,
+        opts: ProverOpts,
+        receipt: Asset,
+        receipt_out: AssetRequest,
+    ) -> Result<SuccinctReceipt> {
+        let mut conn = self.connect()?;
+
+        let request = pb::api::ServerRequest {
+            kind: Some(pb::api::server_request::Kind::IdentiyP254(
+                pb::api::IdentityP254Request {
+                    opts: Some(opts.into()),
+                    receipt: Some(receipt.try_into()?),
+                    receipt_out: Some(receipt_out.try_into()?),
+                },
+            )),
+        };
+        log::debug!("tx: {request:?}");
+        conn.send(request)?;
+
+        let reply: pb::api::IdentityP254Reply = conn.recv()?;
+
+        let result = match reply.kind.ok_or(malformed_err())? {
+            pb::api::identity_p254_reply::Kind::Ok(result) => {
+                let receipt_bytes = result.receipt.ok_or(malformed_err())?.as_bytes()?;
+                let receipt_pb = pb::core::SuccinctReceipt::decode(receipt_bytes)?;
+                receipt_pb.try_into()
+            }
+            pb::api::identity_p254_reply::Kind::Error(err) => Err(err.into()),
         };
 
         let code = conn.close()?;
@@ -312,7 +352,7 @@ impl Client {
         env: &ExecutorEnv<'_>,
     ) -> Result<SessionInfo>
     where
-        F: FnMut(pb::api::SegmentInfo) -> Result<()>,
+        F: FnMut(SegmentInfo, Asset) -> Result<()>,
     {
         let mut callback = callback;
         let mut segments = Vec::new();
@@ -334,11 +374,14 @@ impl Client {
                                 .map_or_else(
                                     || Err(malformed_err()),
                                     |segment| {
-                                        segments.push(SegmentInfo {
+                                        let asset =
+                                            segment.segment.ok_or(malformed_err())?.try_into()?;
+                                        let info = SegmentInfo {
                                             po2: segment.po2,
                                             cycles: segment.cycles,
-                                        });
-                                        callback(segment)
+                                        };
+                                        segments.push(info.clone());
+                                        callback(info, asset)
                                     },
                                 )
                                 .into();
@@ -349,7 +392,7 @@ impl Client {
                             return match session.session {
                                 Some(session) => Ok(SessionInfo {
                                     segments,
-                                    journal: session.journal.into(),
+                                    journal: Journal::new(session.journal.into()),
                                     exit_code: session
                                         .exit_code
                                         .ok_or(malformed_err())?

@@ -63,21 +63,30 @@ pub(crate) fn finalize(halt: bool, user_exit: u8) {
             journal: MaybePruned::Pruned(journal_digest),
             assumptions: MaybePruned::Pruned(ASSUMPTIONS_DIGEST.digest()),
         };
-        let words: [u32; 8] = output.digest().into();
+        let output_words: [u32; 8] = output.digest().into();
 
         if halt {
-            sys_halt(user_exit, &words)
+            sys_halt(user_exit, &output_words)
         } else {
-            sys_pause(user_exit, &words)
+            sys_pause(user_exit, &output_words)
         }
     }
+}
+
+/// Terminate execution of the zkvm.
+///
+/// Use an exit code of 0 to indicate success, and non-zero to indicate an error.
+pub fn exit(exit_code: u8) -> ! {
+    finalize(true, exit_code);
+    unreachable!();
 }
 
 /// Pause the execution of the zkvm.
 ///
 /// Execution may be continued at a later time.
-pub fn pause() {
-    finalize(false, 0);
+/// Use an exit code of 0 to indicate success, and non-zero to indicate an error.
+pub fn pause(exit_code: u8) {
+    finalize(false, exit_code);
     init();
 }
 
@@ -94,12 +103,11 @@ pub fn syscall(syscall: SyscallName, to_host: &[u8], from_host: &mut [u32]) -> s
     }
 }
 
-/// Verify there exists a receipt for an execution with the given `image_id` and
-/// `journal`.
+/// Verify there exists a receipt for an execution with `image_id` and `journal`.
 ///
-/// In order to be valid, the [Receipt] must have `ExitCode::Halted(0)`, an
-/// empty assumptions list, and an all-zeroes input hash. It may have any post
-/// [SystemState].
+/// In order to be valid, the [crate::Receipt] must have `ExitCode::Halted(0)` or
+/// `ExitCode::Paused(0)`, an empty assumptions list, and an all-zeroes input hash. It may have any
+/// post [crate::SystemState].
 pub fn verify(image_id: Digest, journal: &[u8]) -> Result<(), VerifyError> {
     let journal_digest: Digest = journal.digest();
     let mut from_host_buf = MaybeUninit::<[u32; DIGEST_WORDS + 1]>::uninit();
@@ -150,17 +158,16 @@ pub fn verify(image_id: Digest, journal: &[u8]) -> Result<(), VerifyError> {
     Ok(())
 }
 
-// TODO(victor) Check these and any other doc links.
-/// Error encountered during a call to [crate::verify]
+/// Error encountered during a call to [verify].
 ///
 /// Note that an error is only returned for "provable" errors. In particular, if
 /// the host fails to find a receipt matching the requested image_id and
-/// journal, this is not a provable error. In this case, the [crate::verify]
+/// journal, this is not a provable error. In this case, the [verify] call
 /// will not return.
 #[derive(Debug)]
 #[non_exhaustive]
 pub enum VerifyError {
-    /// Error returned when the host responses to sys_verify with an invalid exit code.
+    /// Error returned when the host responds to sys_verify with an invalid exit code.
     BadExitCodeResponse(InvalidExitCodeError),
 }
 
@@ -185,6 +192,11 @@ impl std::error::Error for VerifyError {}
 
 /// Verify that there exists a valid receipt with the specified
 /// [ReceiptMetadata].
+///
+/// In order for a receipt to be valid, it must have a verifying cryptographic seal and
+/// additionally have no assumptions. Note that executions with no output (e.g. those ending in
+/// [ExitCode::SystemSplit]) will not have any encoded assumptions even if [verify] or
+/// [verify_integrity] is called.
 pub fn verify_integrity(metadata: &ReceiptMetadata) -> Result<(), VerifyIntegrityError> {
     // Check that the assumptions list is empty.
     let assumptions_empty = metadata.output.is_none()
@@ -208,17 +220,15 @@ pub fn verify_integrity(metadata: &ReceiptMetadata) -> Result<(), VerifyIntegrit
     Ok(())
 }
 
-/// Error encountered during a call to [crate::verify_integrity].
+/// Error encountered during a call to [verify_integrity].
 ///
-/// Note that an error is only returned for "provable" errors. In particular, if
-/// the host fails to find a receipt matching the requested image_id and
-/// journal, this is not a provable error. In this case, the [crate::verify]
-/// will not return.
+/// Note that an error is only returned for "provable" errors. In particular, if the host fails to
+/// find a receipt matching the requested metadata digest, this is not a provable error. In this
+/// case, [verify_integrity] will not return.
 #[derive(Debug)]
 #[non_exhaustive]
 pub enum VerifyIntegrityError {
-    /// The provided [ReceiptMetadata] struct contained a non-empty assumptions
-    /// list.
+    /// Provided [ReceiptMetadata] struct contained a non-empty assumptions list.
     ///
     /// This is a semantic error as only unconditional receipts can be verified
     /// inside the guest. If there is a conditional receipt to verify, it's

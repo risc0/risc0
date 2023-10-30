@@ -53,7 +53,7 @@ pub use risc0_binfmt::MemoryImage;
 pub use risc0_binfmt::{Program, SystemState};
 pub use risc0_zkvm_platform::{declare_syscall, memory::GUEST_MAX_MEM, PAGE_SIZE};
 
-#[cfg(all(not(target_os = "zkvm"), feature = "profiler"))]
+#[cfg(all(not(target_os = "zkvm"), feature = "profiler", feature = "prove"))]
 pub use self::host::server::exec::profiler::Profiler;
 #[cfg(all(not(target_os = "zkvm"), feature = "prove"))]
 pub use self::host::{
@@ -67,7 +67,10 @@ pub use self::host::{
 };
 #[cfg(all(not(target_os = "zkvm"), feature = "client"))]
 pub use self::host::{
-    api::{client::Client as ApiClient, Binary, Connector, SegmentInfo, SessionInfo},
+    api::{
+        client::Client as ApiClient, Asset, AssetRequest, Binary, Connector, SegmentInfo,
+        SessionInfo,
+    },
     client::{
         env::{ExecutorEnv, ExecutorEnvBuilder},
         exec::TraceEvent,
@@ -81,8 +84,8 @@ pub use self::host::{
 pub use self::host::{
     control_id::POSEIDON_CONTROL_ID,
     receipt::{
-        Assumption, CompositeReceipt, InnerReceipt, Receipt, SegmentReceipt, SuccinctReceipt,
-        VerifierContext,
+        Assumption, CompositeReceipt, InnerReceipt, Journal, Receipt, SegmentReceipt,
+        SuccinctReceipt, VerifierContext,
     },
     recursion::ALLOWED_IDS_ROOT,
 };

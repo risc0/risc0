@@ -6,6 +6,9 @@ license = { workspace = true }
 homepage = { workspace = true }
 repository = { workspace = true }
 
+[package.metadata.release]
+release = false
+
 [dependencies]
 fibonacci-methods = { path = "../../examples/profiling/methods" }
 risc0-zkvm = { workspace = true, features = ["prove", "profiler"] }

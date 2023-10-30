@@ -28,7 +28,8 @@ use risc0_zkp::{
 use super::{exec::MachineContext, HalPair, ProverServer};
 use crate::{
     host::{
-        receipt::{CompositeReceipt, InnerReceipt, SegmentReceipt},
+        receipt::{CompositeReceipt, InnerReceipt, SegmentReceipt, SuccinctReceipt},
+        recursion::{identity_p254, join, lift},
         CIRCUIT,
     },
     sha::Digestible,
@@ -92,7 +93,7 @@ where
                 .collect::<Result<Vec<_>>>()?,
             journal_digest: session.journal.as_ref().map(|journal| journal.digest()),
         });
-        let receipt = Receipt::new(inner, session.journal.clone().unwrap_or_default());
+        let receipt = Receipt::new(inner, session.journal.clone().unwrap_or_default().bytes);
 
         receipt.verify_integrity_with_context(ctx)?;
         if receipt.get_metadata()?.digest() != session.get_metadata()?.digest() {
@@ -100,7 +101,7 @@ where
             log::debug!("receipt metadata: {:#?}", receipt.get_metadata()?);
             log::debug!("session metadata: {:#?}", session.get_metadata()?);
             bail!(
-                "received unexpected metadata digest: expected {}, found {}",
+                "session and receipt metadata do not match: session {}, receipt {}",
                 hex::encode(&session.get_metadata()?.digest()),
                 hex::encode(&receipt.get_metadata()?.digest())
             );
@@ -170,5 +171,17 @@ where
 
     fn get_peak_memory_usage(&self) -> usize {
         self.hal_pair.hal.get_memory_usage()
+    }
+
+    fn lift(&self, receipt: &SegmentReceipt) -> Result<SuccinctReceipt> {
+        lift(receipt)
+    }
+
+    fn join(&self, a: &SuccinctReceipt, b: &SuccinctReceipt) -> Result<SuccinctReceipt> {
+        join(a, b)
+    }
+
+    fn identity_p254(&self, a: &SuccinctReceipt) -> Result<SuccinctReceipt> {
+        identity_p254(a)
     }
 }

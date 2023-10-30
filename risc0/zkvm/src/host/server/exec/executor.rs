@@ -43,6 +43,7 @@ use risc0_zkvm_platform::{
 };
 use rrs_lib::{instruction_executor::InstructionExecutor, HartState};
 use serde::{Deserialize, Serialize};
+use tempfile::tempdir;
 
 use super::{monitor::MemoryMonitor, syscall::SyscallTable};
 use crate::{
@@ -52,7 +53,7 @@ use crate::{
         server::opcode::{MajorType, OpCode},
     },
     sha::Digest,
-    ExecutorEnv, ExitCode, Loader, Segment, SegmentRef, Session, SimpleSegmentRef,
+    ExecutorEnv, ExitCode, FileSegmentRef, Loader, Segment, SegmentRef, Session,
 };
 
 /// The number of cycles required to compress a SHA-256 block.
@@ -212,7 +213,12 @@ impl<'a> ExecutorImpl<'a> {
     /// This will run the executor to get a [Session] which contain the results
     /// of the execution.
     pub fn run(&mut self) -> Result<Session> {
-        self.run_with_callback(|segment| Ok(Box::new(SimpleSegmentRef::new(segment))))
+        if self.env.segment_path.is_none() {
+            self.env.segment_path = Some(tempdir()?.into_path());
+        }
+
+        let path = self.env.segment_path.clone().unwrap();
+        self.run_with_callback(|segment| Ok(Box::new(FileSegmentRef::new(&segment, &path)?)))
     }
 
     /// Run the executor until [ExitCode::Halted], [ExitCode::Paused], or
@@ -229,6 +235,11 @@ impl<'a> ExecutorImpl<'a> {
             .into());
         };
 
+        self.pc = self
+            .pre_image
+            .as_ref()
+            .ok_or_else(|| anyhow!("attempted to run the executor with no pre_image"))?
+            .pc;
         self.monitor.clear_session()?;
 
         let journal = Journal::default();
@@ -274,7 +285,10 @@ impl<'a> ExecutorImpl<'a> {
                         ExitCode::Paused(inner) => {
                             log::debug!("Paused({inner}): {}", self.segment_cycle);
                             // Set the pre_image so that the Executor can be run again to resume.
-                            self.split(Some(post_image.clone().into()))?;
+                            // Move the pc forward by WORD_SIZE because halt does not.
+                            let mut resume_pre_image = post_image.clone();
+                            resume_pre_image.pc += WORD_SIZE as u32;
+                            self.split(Some(resume_pre_image.into()))?;
                             return Ok((exit_code, post_image));
                         }
                         ExitCode::Halted(inner) => {
@@ -293,9 +307,10 @@ impl<'a> ExecutorImpl<'a> {
         let (exit_code, post_image) = run_loop()?;
 
         // Take (clear out) the list of accessed assumptions.
-        // Leave the assumptions cache so that it can be used if execution is resumed
-        // from pause.
+        // Leave the assumptions cache so it can be used if execution is resumed from pause.
         let assumptions = mem::take(&mut self.env.assumptions.borrow_mut().accessed);
+
+        // Set the session_journal to the committed data iff the the guest set a non-zero output.
         let session_journal = self
             .output_digest
             .and_then(|output_digest| (output_digest != Digest::ZERO).then(|| journal.buf.take()));
@@ -508,7 +523,7 @@ impl<'a> ExecutorImpl<'a> {
                 0,
             )),
             halt::PAUSE => Ok(OpCodeResult::new(
-                self.pc + WORD_SIZE as u32,
+                self.pc,
                 Some(ExitCode::Paused(user_exit)),
                 0,
             )),

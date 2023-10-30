@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// TODO(victor): Add tests with various exit codes.
-
 use std::rc::Rc;
 
 use anyhow::Result;
@@ -107,7 +105,7 @@ fn sha_basics() {
         let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
         let session = exec.run().unwrap();
         let receipt = session.prove().unwrap();
-        hex::encode(Digest::try_from(receipt.journal).unwrap())
+        hex::encode(Digest::try_from(receipt.journal.bytes).unwrap())
     }
 
     assert_eq!(
@@ -143,7 +141,7 @@ fn sha_iter() {
     let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
     let session = exec.run().unwrap();
     let receipt = session.prove().unwrap();
-    let digest = Digest::try_from(receipt.journal).unwrap();
+    let digest = Digest::try_from(receipt.journal.bytes).unwrap();
     assert_eq!(
         hex::encode(digest),
         "9d4d1940b5c0c6d09c10add9631806f9df9467884d3e9ce4a147113e27f5c02a"
@@ -171,7 +169,7 @@ fn bigint_accel() {
         let receipt = session.prove().unwrap();
         let expected = case.expected();
         let expected: &[u8] = bytemuck::cast_slice(expected.as_slice());
-        assert_eq!(receipt.journal, expected);
+        assert_eq!(receipt.journal.bytes, expected);
     }
 }
 
@@ -221,8 +219,6 @@ fn memory_io() {
     assert_eq!(run_memio(&[(POS, 1)]).unwrap(), ExitCode::Halted(0));
 
     // Unaligned write is bad
-    // TODO(victor): Exit code is indicated as SystemSplit instead of Fault, which
-    // would be more ideal.
     assert_eq!(
         run_memio(&[(POS + 1001, 1)]).unwrap(),
         ExitCode::SystemSplit
@@ -374,13 +370,14 @@ mod riscv {
 #[cfg(feature = "docker")]
 mod docker {
     use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF};
+    use test_log::test;
 
     use crate::{ExecutorEnv, ExecutorImpl, ExitCode};
 
     #[test]
     fn pause_continue() {
         let env = ExecutorEnv::builder()
-            .write(&MultiTestSpec::PauseContinue)
+            .write(&MultiTestSpec::PauseContinue(0))
             .unwrap()
             .build()
             .unwrap();
@@ -391,7 +388,7 @@ mod docker {
         assert_eq!(session.segments.len(), 1);
         assert_eq!(session.exit_code, ExitCode::Paused(0));
         let receipt = session.prove().unwrap();
-        let segments = receipt.inner.flat().unwrap();
+        let segments = &receipt.inner.composite().unwrap().segments;
         assert_eq!(segments.len(), 1);
         assert_eq!(segments[0].index, 0);
 
@@ -425,7 +422,14 @@ mod docker {
         assert_eq!(final_segment.exit_code, ExitCode::Halted(0));
 
         let receipt = session.prove().unwrap();
-        for (idx, receipt) in receipt.inner.flat().unwrap().iter().enumerate() {
+        for (idx, receipt) in receipt
+            .inner
+            .composite()
+            .unwrap()
+            .segments
+            .iter()
+            .enumerate()
+        {
             assert_eq!(receipt.index, idx as u32);
         }
     }
@@ -438,7 +442,10 @@ mod sys_verify {
     use test_log::test;
 
     use super::get_prover_server;
-    use crate::{serde::to_vec, ExecutorEnv, ProverOpts, Receipt};
+    use crate::{
+        serde::to_vec, sha::Digestible, ExecutorEnv, ExecutorEnvBuilder, ExitCode, ProverOpts,
+        Receipt,
+    };
 
     fn prove_hello_commit() -> Receipt {
         let opts = ProverOpts {
@@ -456,6 +463,58 @@ mod sys_verify {
         hello_commit_receipt
     }
 
+    fn prove_halt(exit_code: u8) -> Receipt {
+        let opts = ProverOpts {
+            hashfn: "sha-256".to_string(),
+            prove_guest_errors: true,
+        };
+
+        let env = ExecutorEnvBuilder::default()
+            .write(&MultiTestSpec::Halt(exit_code))
+            .unwrap()
+            .build()
+            .unwrap();
+        let halt_receipt = get_prover_server(&opts)
+            .unwrap()
+            .prove_elf(env, MULTI_TEST_ELF)
+            .unwrap();
+
+        // Double check that the receipt verifies with the expected image ID and exit code.
+        halt_receipt
+            .verify_integrity_with_context(&Default::default())
+            .unwrap();
+        let halt_metadata = halt_receipt.get_metadata().unwrap();
+        assert_eq!(halt_metadata.pre.digest(), MULTI_TEST_ID.into());
+        assert_eq!(halt_metadata.exit_code, ExitCode::Halted(exit_code as u32));
+        halt_receipt
+    }
+
+    fn prove_fault() -> Receipt {
+        let opts = ProverOpts {
+            hashfn: "sha-256".to_string(),
+            prove_guest_errors: true,
+        };
+
+        let env = ExecutorEnvBuilder::default()
+            .write(&MultiTestSpec::Fault)
+            .unwrap()
+            .build()
+            .unwrap();
+        let fault_receipt = get_prover_server(&opts)
+            .unwrap()
+            .prove_elf(env, MULTI_TEST_ELF)
+            .unwrap();
+
+        // Double check that the receipt verifies with the expected image ID and exit code.
+        fault_receipt
+            .verify_integrity_with_context(&Default::default())
+            .unwrap();
+        let fault_metadata = fault_receipt.get_metadata().unwrap();
+        assert_eq!(fault_metadata.pre.digest(), MULTI_TEST_ID.into());
+        assert_eq!(fault_metadata.exit_code, ExitCode::SystemSplit);
+        fault_receipt
+    }
+
     lazy_static::lazy_static! {
         static ref HELLO_COMMIT_RECEIPT: Receipt = prove_hello_commit();
     }
@@ -469,7 +528,7 @@ mod sys_verify {
 
         let spec = &MultiTestSpec::SysVerify {
             image_id: HELLO_COMMIT_ID.into(),
-            journal: HELLO_COMMIT_RECEIPT.journal.clone(),
+            journal: HELLO_COMMIT_RECEIPT.journal.bytes.clone(),
         };
 
         // Test that providing the proven assumption results in an unconditional
@@ -527,7 +586,6 @@ mod sys_verify {
             prove_guest_errors: false,
         };
 
-        // TODO(victor) Also execute with a receipt of failure.
         let spec = &MultiTestSpec::SysVerifyIntegrity {
             metadata_words: to_vec(&HELLO_COMMIT_RECEIPT.get_metadata().unwrap()).unwrap(),
         };
@@ -572,5 +630,66 @@ mod sys_verify {
             .unwrap()
             .prove_elf(env, MULTI_TEST_ELF)
             .is_err());
+    }
+
+    #[test]
+    fn sys_verify_integrity_halt_1() {
+        // Generate a receipt for a execution ending in a guest error indicated by
+        // ExitCode::Halted(1).
+        let halt_receipt = prove_halt(1);
+
+        let opts = ProverOpts {
+            hashfn: "sha-256".to_string(),
+            prove_guest_errors: false,
+        };
+
+        let spec = &MultiTestSpec::SysVerifyIntegrity {
+            metadata_words: to_vec(&halt_receipt.get_metadata().unwrap()).unwrap(),
+        };
+
+        // Test that proving results in a success execution and unconditional receipt.
+        let env = ExecutorEnv::builder()
+            .write(&spec)
+            .unwrap()
+            .add_assumption(halt_receipt.into())
+            .build()
+            .unwrap();
+        get_prover_server(&opts)
+            .unwrap()
+            .prove_elf(env, MULTI_TEST_ELF)
+            .unwrap()
+            .verify(MULTI_TEST_ID)
+            .unwrap();
+    }
+
+    #[test]
+    fn sys_verify_integrity_fault() {
+        // Generate a receipt for a execution ending in fault.
+        // NOTE: This is not really a "proof of fault". Instead it is simply verifying a receipt
+        // that ended in SystemSplit for which the host claims a fault is about to occur.
+        let fault_receipt = prove_fault();
+
+        let opts = ProverOpts {
+            hashfn: "sha-256".to_string(),
+            prove_guest_errors: false,
+        };
+
+        let spec = &MultiTestSpec::SysVerifyIntegrity {
+            metadata_words: to_vec(&fault_receipt.get_metadata().unwrap()).unwrap(),
+        };
+
+        // Test that proving results in a success execution and unconditional receipt.
+        let env = ExecutorEnv::builder()
+            .write(&spec)
+            .unwrap()
+            .add_assumption(fault_receipt.into())
+            .build()
+            .unwrap();
+        get_prover_server(&opts)
+            .unwrap()
+            .prove_elf(env, MULTI_TEST_ELF)
+            .unwrap()
+            .verify(MULTI_TEST_ID)
+            .unwrap();
     }
 }

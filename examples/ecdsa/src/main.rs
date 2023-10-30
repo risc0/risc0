@@ -18,7 +18,7 @@ use k256::{
     EncodedPoint,
 };
 use rand_core::OsRng;
-use risc0_zkvm::{default_prover, serde::from_slice, ExecutorEnv, Receipt};
+use risc0_zkvm::{default_prover, ExecutorEnv, Receipt};
 
 /// Given an secp256k1 verifier key (i.e. public key), message and signature,
 /// runs the ECDSA verifier inside the zkVM and returns a receipt, including a
@@ -54,11 +54,8 @@ fn main() {
 
     // Verify the receipt and then access the journal.
     receipt.verify(ECDSA_VERIFY_ID).unwrap();
-    let (receipt_verifying_key, receipt_message) =
-        from_slice::<(EncodedPoint, Vec<u8>), _>(&receipt.journal)
-            .unwrap()
-            .try_into()
-            .unwrap();
+    let (receipt_verifying_key, receipt_message): (EncodedPoint, Vec<u8>) =
+        receipt.journal.decode().unwrap();
 
     println!(
         "Verified the signature over message {:?} with key {}",

@@ -39,7 +39,7 @@ pub fn execute_locally(elf: &[u8], input: Vec<u8>) -> Result<Output> {
     let exec = default_executor();
     let session = exec.execute_elf(env, elf).context("Execution failed")?;
     Ok(Output::Execution {
-        journal: session.journal.into(),
+        journal: session.journal.bytes.into(),
     })
 }
 

@@ -36,7 +36,7 @@ const METHOD_PATH: &'static str = risc0_benchmark_methods::SUDOKU_PATH;
 impl Benchmark for Job {
     const NAME: &'static str = "sudoku";
     type Spec = u32;
-    type ComputeOut = risc0_zkvm::sha::Digest;
+    type ComputeOut = Digest;
     type ProofType = Receipt;
 
     fn job_size(spec: &Self::Spec) -> u32 {
@@ -44,7 +44,7 @@ impl Benchmark for Job {
     }
 
     fn output_size_bytes(_output: &Self::ComputeOut, proof: &Self::ProofType) -> u32 {
-        (proof.journal.len()) as u32
+        proof.journal.bytes.len() as u32
     }
 
     fn proof_size_bytes(proof: &Self::ProofType) -> u32 {
@@ -102,16 +102,12 @@ impl Benchmark for Job {
 
     fn guest_compute(&mut self) -> (Self::ComputeOut, Self::ProofType) {
         let receipt = self.session.as_ref().unwrap().prove().expect("receipt");
-        let result = risc0_zkvm::sha::Digest::try_from(receipt.journal.clone())
-            .unwrap()
-            .try_into()
-            .unwrap();
+        let result = receipt.journal.decode().unwrap();
         (result, receipt)
     }
 
     fn verify_proof(&self, _output: &Self::ComputeOut, proof: &Self::ProofType) -> bool {
         let result = proof.verify(METHOD_ID);
-
         match result {
             Ok(_) => true,
             Err(err) => {
