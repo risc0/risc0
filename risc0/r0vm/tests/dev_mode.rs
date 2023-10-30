@@ -14,10 +14,7 @@
 
 use assert_cmd::Command;
 use assert_fs::{fixture::PathChild, TempDir};
-use risc0_zkvm::{
-    serde::{from_slice, to_vec},
-    Receipt,
-};
+use risc0_zkvm::{serde::to_vec, Receipt};
 use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_PATH};
 
 fn run_dev_mode() -> Receipt {
@@ -36,7 +33,7 @@ fn run_dev_mode() -> Receipt {
     cmd.assert().success();
 
     let data = std::fs::read(receipt_file).unwrap();
-    from_slice(&data).unwrap()
+    bincode::deserialize(&data).unwrap()
 }
 
 #[test]
@@ -45,7 +42,10 @@ fn dev_mode() {
     let receipt = run_dev_mode();
     temp_env::with_var("RISC0_DEV_MODE", Some("1"), || {
         receipt.verify(risc0_zkvm_methods::MULTI_TEST_ID).unwrap();
-        assert_eq!(receipt.inner, risc0_zkvm::InnerReceipt::Fake);
+        match receipt.inner {
+            risc0_zkvm::InnerReceipt::Fake { .. } => {}
+            _ => panic!("expected a fake receipt"),
+        }
     });
 }
 

@@ -17,7 +17,7 @@ extern crate alloc;
 
 use alloc::vec::Vec;
 
-use risc0_zkvm::declare_syscall;
+use risc0_zkvm::{declare_syscall, sha::Digest};
 use risc0_zkvm_platform::syscall::bigint;
 use serde::{Deserialize, Serialize};
 
@@ -35,7 +35,10 @@ pub enum MultiTestSpec {
     },
     EventTrace,
     Profiler,
-    Fail,
+    Panic,
+    Fault,
+    Halt(u8),
+    PauseContinue(u8),
     ReadWriteMem {
         /// Tuples of (address, value). Zero means read the value and
         /// output it; nonzero means write that value.
@@ -52,6 +55,14 @@ pub enum MultiTestSpec {
         // Position and length to do reads
         pos_and_len: Vec<(u32, u32)>,
     },
+    SysVerify {
+        image_id: Digest,
+        journal: Vec<u8>,
+    },
+    SysVerifyIntegrity {
+        // Define this field as a serialized vector to avoid circular dependency issues.
+        metadata_words: Vec<u32>,
+    },
     EchoStdout {
         nbytes: u32,
         fd: u32,
@@ -65,7 +76,6 @@ pub enum MultiTestSpec {
         y: [u32; bigint::WIDTH_WORDS],
         modulus: [u32; bigint::WIDTH_WORDS],
     },
-    PauseContinue,
     BusyLoop {
         /// Busy loop until the guest has run for at least this number of cycles
         cycles: u32,
