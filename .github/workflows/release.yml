@@ -43,6 +43,7 @@ jobs:
     env:
       TARGET: x86_64-unknown-linux-gnu
     steps:
+      - run: yum -y install git openssl-devel perl-core zlib-devel
       - uses: actions/checkout@v3
         with:
           lfs: true
@@ -50,7 +51,6 @@ jobs:
       - uses: ./.github/actions/sccache
         with:
           key: ${{ env.TARGET }}
-      - run: yum -y install openssl-devel perl-core zlib-devel
       - run: cargo build -p cargo-risczero --release
       - run: |
           mkdir -p tmp/pkg
