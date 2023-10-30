@@ -47,7 +47,7 @@ test-log = "0.2"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [features]
-default = ["prove"]
+default = []
 cuda = ["dep:cust", "prove", "risc0-sys/cuda"]
 metal = ["dep:metal", "prove", "risc0-sys/metal"]
 prove = [

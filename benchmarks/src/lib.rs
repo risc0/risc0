@@ -109,7 +109,9 @@ pub trait Benchmark {
     type ProofType;
 
     fn job_size(spec: &Self::Spec) -> u32;
+
     fn output_size_bytes(output: &Self::ComputeOut, proof: &Self::ProofType) -> u32;
+
     fn proof_size_bytes(proof: &Self::ProofType) -> u32;
 
     fn new(spec: Self::Spec) -> Self;
@@ -119,8 +121,11 @@ pub trait Benchmark {
     fn host_compute(&mut self) -> Option<Self::ComputeOut> {
         None
     }
+
     fn exec_compute(&mut self) -> (u32, u32, Duration);
+
     fn guest_compute(&mut self) -> (Self::ComputeOut, Self::ProofType);
+
     fn verify_proof(&self, output: &Self::ComputeOut, proof: &Self::ProofType) -> bool;
 
     fn run(&mut self) -> Metrics {
@@ -128,24 +133,24 @@ pub trait Benchmark {
 
         (metrics.cycles, metrics.insn_cycles, metrics.exec_duration) = self.exec_compute();
 
-        let (g_output, proof) = {
+        let (guest_output, proof) = {
             let start = Instant::now();
             let result = self.guest_compute();
             metrics.proof_duration = start.elapsed();
             result
         };
 
-        if let Some(h_output) = self.host_compute() {
-            assert_eq!(g_output, h_output);
+        if let Some(host_output) = self.host_compute() {
+            assert_eq!(guest_output, host_output);
         }
 
         metrics.total_duration = metrics.exec_duration + metrics.proof_duration;
-        metrics.output_bytes = Self::output_size_bytes(&g_output, &proof);
+        metrics.output_bytes = Self::output_size_bytes(&guest_output, &proof);
         metrics.proof_bytes = Self::proof_size_bytes(&proof);
 
         let verify_proof = {
             let start = Instant::now();
-            let result = self.verify_proof(&g_output, &proof);
+            let result = self.verify_proof(&guest_output, &proof);
             metrics.verify_duration = start.elapsed();
             result
         };
@@ -161,8 +166,11 @@ pub trait BenchmarkAverage {
     type Spec;
 
     fn job_size(spec: &Self::Spec) -> u32;
+
     fn new(spec: Self::Spec) -> Self;
+
     fn spec(&self) -> &Self::Spec;
+
     fn guest_compute(&mut self) -> ();
 
     fn run(&mut self) -> MetricsAverage {

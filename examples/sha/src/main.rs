@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use clap::{Arg, Command};
-use risc0_zkvm::{default_prover, serde::from_slice, sha::Digest, ExecutorEnv, Receipt};
+use risc0_zkvm::{default_prover, sha::Digest, ExecutorEnv, Receipt};
 use sha_methods::{HASH_ELF, HASH_ID, HASH_RUST_CRYPTO_ELF};
 
 /// Hash the given bytes, returning the digest and a [Receipt] that can
@@ -45,10 +45,7 @@ fn provably_hash(input: &str, use_rust_crypto: bool) -> (Digest, Receipt) {
     // Produce a receipt by proving the specified ELF binary.
     let receipt = prover.prove_elf(env, elf).unwrap();
 
-    let digest = from_slice::<Vec<u8>, _>(&receipt.journal)
-        .unwrap()
-        .try_into()
-        .unwrap();
+    let digest = receipt.journal.decode().unwrap();
     (digest, receipt)
 }
 

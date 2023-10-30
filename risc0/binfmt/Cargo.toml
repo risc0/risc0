@@ -20,7 +20,10 @@ elf = { version = "0.7", default-features = false }
 log = "0.4"
 risc0-zkp = { workspace = true }
 risc0-zkvm-platform = { workspace = true }
-serde = { version = "1.0", default-features = false, features = ["derive", "alloc"] }
+serde = { version = "1.0", default-features = false, features = [
+  "derive",
+  "alloc",
+] }
 
 [features]
 default = ["std"]

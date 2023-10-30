@@ -18,7 +18,7 @@ use clap::Parser;
 use ethers_core::types::{H256, U256};
 use ethers_providers::Middleware;
 use log::info;
-use risc0_zkvm::{default_prover, serde::from_slice, ExecutorEnv};
+use risc0_zkvm::{default_prover, ExecutorEnv};
 use zkevm_core::{
     ether_trace::{Http, Provider},
     Env, EvmResult, EVM,
@@ -93,7 +93,10 @@ async fn main() {
     // Produce a receipt by proving the specified ELF binary.
     let receipt = prover.prove_elf(exec_env, EVM_ELF).unwrap();
 
-    let res: EvmResult = from_slice(&receipt.journal).expect("Failed to deserialize EvmResult");
+    let res: EvmResult = receipt
+        .journal
+        .decode()
+        .expect("Failed to deserialize EvmResult");
     info!("exit reason: {:?}", res.exit_reason);
     info!("state updates: {}", res.state.len());
 }

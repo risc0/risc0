@@ -44,6 +44,7 @@ use risc0_zkvm_platform::{
 };
 use rrs_lib::{instruction_executor::InstructionExecutor, HartState};
 use serde::{Deserialize, Serialize};
+use tempfile::tempdir;
 
 use super::{monitor::MemoryMonitor, syscall::SyscallTable};
 use crate::{
@@ -53,7 +54,7 @@ use crate::{
         receipt::ExitCode,
         server::opcode::{MajorType, OpCode},
     },
-    ExecutorEnv, FaultCheckMonitor, Loader, Segment, SegmentRef, Session, SimpleSegmentRef,
+    ExecutorEnv, FaultCheckMonitor, FileSegmentRef, Loader, Segment, SegmentRef, Session,
     FAULT_CHECKER_ELF,
 };
 
@@ -271,7 +272,13 @@ impl<'a> ExecutorImpl<'a> {
     /// This will run the executor to get a [Session] which contain the results
     /// of the execution.
     pub fn run(&mut self) -> Result<Session, ExecutorError> {
-        self.run_with_callback(|segment| Ok(Box::new(SimpleSegmentRef::new(segment))))
+        if self.env.segment_path.is_none() {
+            let temp_dir = tempdir().map_err(|e| ExecutorError::Error(e.into()))?;
+            self.env.segment_path = Some(temp_dir.into_path());
+        }
+
+        let path = self.env.segment_path.clone().unwrap();
+        self.run_with_callback(|segment| Ok(Box::new(FileSegmentRef::new(&segment, &path)?)))
     }
 
     /// Run the executor until [ExitCode::Paused] or [ExitCode::Halted] is
@@ -307,13 +314,13 @@ impl<'a> ExecutorImpl<'a> {
                     execution_time: start.elapsed(),
                 };
 
-                    log::info!(target: "RISC0_EXECUTION_STATS::total_cycles", "total_cycles = {}", execution_stats.total_cycles);
-                    log::info!(target: "RISC0_EXECUTION_STATS::session_cycles", "session_cycles = {}", execution_stats.session_cycles);
-                    log::info!(target: "RISC0_EXECUTION_STATS::segment_count", "segment_count = {}", execution_stats.segment_count);
-                    log::info!(target: "RISC0_EXECUTION_STATS::execution_time", "execution_time = {:?}", execution_stats.execution_time);
-                    log::info!(target: "RISC0_EXECUTION_STATS::raw_execution_stats", "raw_execution_stats = {:?}", execution_stats);
-                    log::info!(target: "RISC0_EXECUTION_STATS", "{}", execution_stats);
-                }
+                log::info!(target: "RISC0_EXECUTION_STATS::total_cycles", "total_cycles = {}", execution_stats.total_cycles);
+                log::info!(target: "RISC0_EXECUTION_STATS::session_cycles", "session_cycles = {}", execution_stats.session_cycles);
+                log::info!(target: "RISC0_EXECUTION_STATS::segment_count", "segment_count = {}", execution_stats.segment_count);
+                log::info!(target: "RISC0_EXECUTION_STATS::execution_time", "execution_time = {:?}", execution_stats.execution_time);
+                log::info!(target: "RISC0_EXECUTION_STATS::raw_execution_stats", "raw_execution_stats = {:?}", execution_stats);
+                log::info!(target: "RISC0_EXECUTION_STATS", "{}", execution_stats);
+            }
         }
 
         result
@@ -321,7 +328,15 @@ impl<'a> ExecutorImpl<'a> {
 
     /// Run the executor with the default callback.
     pub fn run_guest_only(&mut self) -> Result<Session> {
-        self.run_guest_only_with_callback(|segment| Ok(Box::new(SimpleSegmentRef::new(segment))))
+        if self.env.segment_path.is_none() {
+            let temp_dir = tempdir().map_err(|e| ExecutorError::Error(e.into()))?;
+            self.env.segment_path = Some(temp_dir.into_path());
+        }
+
+        let path = self.env.segment_path.clone().unwrap();
+        self.run_guest_only_with_callback(|segment| {
+            Ok(Box::new(FileSegmentRef::new(&segment, &path)?))
+        })
     }
 
     /// Run the executor until [ExitCode::Paused], [ExitCode::Halted], or

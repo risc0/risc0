@@ -17,7 +17,6 @@ use std::time::Duration;
 // use merkletree::{merkle::MerkleTree, store::VecStore};
 use risc0_benchmark_lib::generate_mock_proof;
 use risc0_zkvm::{
-    serde::from_slice,
     sha::{Digest, DIGEST_WORDS},
     ExecutorEnv, ExitCode, MemoryImage, Receipt, Session,
 };
@@ -49,7 +48,7 @@ impl Benchmark for Job<'_> {
     }
 
     fn output_size_bytes(_output: &Self::ComputeOut, proof: &Self::ProofType) -> u32 {
-        (proof.journal.len()) as u32
+        proof.journal.bytes.len() as u32
     }
 
     fn proof_size_bytes(proof: &Self::ProofType) -> u32 {
@@ -100,10 +99,7 @@ impl Benchmark for Job<'_> {
 
     fn guest_compute(&mut self) -> (Self::ComputeOut, Self::ProofType) {
         let receipt = self.session.prove().expect("receipt");
-        let (leaf, root) = from_slice::<(Digest, Digest), _>(&receipt.journal)
-            .unwrap()
-            .try_into()
-            .unwrap();
+        let (leaf, root) = receipt.journal.decode().unwrap();
         ((leaf, root), receipt)
     }
 

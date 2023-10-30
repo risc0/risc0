@@ -73,7 +73,8 @@ let request = CallbackRequest {
 };
 
 // Send the callback request to the Bonsai Relay.
-relay_client
+// On success, the Relay will return the Bonsai session ID.
+let session_id = relay_client
     .callback_request(request)
     .await
     .expect("Callback request failed");
@@ -83,6 +84,8 @@ relay_client
 ## Usage
 
 ```console
+A relayer to integrate Ethereum with Bonsai.
+
 Usage: bonsai-ethereum-relay [OPTIONS] --contract-address <CONTRACT_ADDRESS> --eth-node-url <ETH_NODE_URL> --wallet-key-identifier <WALLET_KEY_IDENTIFIER>
 
 Options:
@@ -98,8 +101,12 @@ Options:
           Ethereum chain ID [default: 5]
   -w, --wallet-key-identifier <WALLET_KEY_IDENTIFIER>
           Wallet Key Identifier. Can be a private key as a hex string, or an AWS KMS key identifier [env: WALLET_KEY_IDENTIFIER=]
-      --use-kms
-          Toggle to use a KMS client
+      --bonsai-api-url <BONSAI_API_URL>
+          Bonsai API URL [env: BONSAI_API_URL=http://localhost:8081] [default: http://localhost:8081]
+      --bonsai-api-key <BONSAI_API_KEY>
+          Bonsai API Key Defaults to empty, providing no authentication [env: BONSAI_API_KEY=none] [default: ]
+      --risc0-dev-mode
+          Toggle to enable dev_mode: only a local executor runs your zkVM program and no proof is generated [env: RISC0_DEV_MODE=]
   -h, --help
           Print help
   -V, --version
@@ -110,7 +117,7 @@ Options:
 
 To support faster development, the `Ethereum Bonsai Relay` provides a `dev-mode`.
 In `dev-mode`, a mock of the Bonsai proving service will be used provides only the journal of a given executing, without any cryptographic proof.
-Since execution is much faster than procing, this mode can be used to speed-up testing and debugging.
+Since execution is much faster than proving, this mode can be used to speed-up testing and debugging.
 
 Enable `dev-mode` setting the environmental variable `RISC0_DEV_MODE=true` when starting the relayer.
 Since there are no proofs within this mode, we also provide a [Bonsai Test Relay Contract](../ethereum/contracts/BonsaiTestRelay.sol) that skips the on-chain verification of the snark proof.

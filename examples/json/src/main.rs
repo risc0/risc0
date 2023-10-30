@@ -14,7 +14,7 @@
 
 use json_core::Outputs;
 use json_methods::SEARCH_JSON_ELF;
-use risc0_zkvm::{default_prover, serde::from_slice, ExecutorEnv};
+use risc0_zkvm::{default_prover, ExecutorEnv};
 
 fn main() {
     let data = include_str!("../res/example.json");
@@ -40,7 +40,7 @@ fn search_json(data: &str) -> Outputs {
     // Produce a receipt by proving the specified ELF binary.
     let receipt = prover.prove_elf(env, SEARCH_JSON_ELF).unwrap();
 
-    from_slice(&receipt.journal).unwrap()
+    receipt.journal.decode().unwrap()
 }
 
 #[cfg(test)]

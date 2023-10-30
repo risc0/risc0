@@ -31,7 +31,7 @@ mod tests {
     };
     use bonsai_sdk::{
         alpha::Client as BonsaiClient,
-        alpha_async::{get_client_from_parts, upload_img},
+        alpha_async::{get_client_from_parts, session_status, upload_img},
     };
     use ethers::types::{Bytes, H256 as ethers_H256, U256};
     use risc0_zkvm::{MemoryImage, Program, GUEST_MAX_MEM, PAGE_SIZE};
@@ -336,10 +336,15 @@ mod tests {
         let relay_client =
             Client::from_parts("http://localhost:8080".to_string(), get_api_key()).unwrap();
 
-        relay_client
+        let session_id = relay_client
             .callback_request(request)
             .await
             .expect("Callback request failed");
+
+        let session_status = session_status(bonsai_client.clone(), session_id)
+            .await
+            .expect("session status failed");
+        dbg!(session_status.status);
 
         let now = SystemTime::now();
         let max_seconds_to_wait = 120;

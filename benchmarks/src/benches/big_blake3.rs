@@ -57,7 +57,7 @@ impl Benchmark for Job<'_> {
     }
 
     fn output_size_bytes(_output: &Self::ComputeOut, proof: &Self::ProofType) -> u32 {
-        proof.journal.len() as u32
+        proof.journal.bytes.len() as u32
     }
 
     fn proof_size_bytes(proof: &Self::ProofType) -> u32 {
@@ -100,10 +100,7 @@ impl Benchmark for Job<'_> {
 
     fn guest_compute(&mut self) -> (Self::ComputeOut, Self::ProofType) {
         let receipt = self.session.prove().expect("receipt");
-        let guest_output: Digest = Digest::try_from(receipt.journal.clone())
-            .unwrap()
-            .try_into()
-            .unwrap();
+        let guest_output: Digest = receipt.journal.decode().unwrap();
         (guest_output, receipt)
     }
 

@@ -3,6 +3,9 @@ name = "fibonacci-methods"
 version = "0.1.0"
 edition = "2021"
 
+[package.metadata.release]
+release = false
+
 [build-dependencies]
 risc0-build = { path = "../../../risc0/build" }
 

@@ -6,6 +6,6 @@ RUN apt-get install -y --no-install-recommends ca-certificates clang curl libssl
 RUN curl --proto '=https' --tlsv1.2 --retry 10 --retry-connrefused -fsSL 'https://sh.rustup.rs' | sh -s -- -y
 ENV PATH="/root/.cargo/bin:${PATH}"
 RUN cargo install cargo-risczero
-RUN cargo risczero install
+RUN cargo risczero install --version test-release-2
 
 ENTRYPOINT [ "/bin/sh" ]

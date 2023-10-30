@@ -16,7 +16,7 @@ use std::sync::Arc;
 
 use bonsai_ethereum_contracts::i_bonsai_relay::CallbackRequestFilter;
 use bonsai_sdk::{
-    alpha::Client,
+    alpha::{Client, SessionId},
     alpha_async::{create_session, upload_input},
 };
 use tokio::sync::Notify;
@@ -51,7 +51,7 @@ impl<S: Storage + Sync + Send> EventProcessor for ProxyCallbackProofRequestProce
     async fn process_event(
         &self,
         event: CallbackRequestFilter,
-    ) -> Result<(), crate::api::error::Error> {
+    ) -> Result<SessionId, crate::api::error::Error> {
         let input_id =
             upload_input(self.bonsai_client.clone(), event.input.clone().to_vec()).await?;
         let bonsai_session_id = create_session(
@@ -64,7 +64,7 @@ impl<S: Storage + Sync + Send> EventProcessor for ProxyCallbackProofRequestProce
         // Store the request in storage
         self.storage
             .add_new_bonsai_proof_request(ProofRequestInformation {
-                proof_request_id: bonsai_session_id,
+                proof_request_id: bonsai_session_id.clone(),
                 callback_proof_request_event: event,
             })
             .await?;
@@ -74,6 +74,6 @@ impl<S: Storage + Sync + Send> EventProcessor for ProxyCallbackProofRequestProce
         }
 
         info!(?input_id, "sent new callback event to bonsai");
-        Ok(())
+        Ok(bonsai_session_id)
     }
 }
