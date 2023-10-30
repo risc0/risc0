@@ -89,13 +89,11 @@ impl<'a> ExecutorEnvBuilder<'a> {
     pub fn build(&mut self) -> Result<ExecutorEnv<'a>> {
         let inner = self.inner.clone();
 
-        if !inner.input.is_empty() {
-            let reader = Cursor::new(inner.input.clone());
-            inner
-                .posix_io
-                .borrow_mut()
-                .with_read_fd(fileno::STDIN, reader);
-        }
+        let reader = Cursor::new(inner.input.clone());
+        inner
+            .posix_io
+            .borrow_mut()
+            .with_read_fd(fileno::STDIN, reader);
 
         Ok(inner)
     }
