@@ -305,7 +305,7 @@ impl<'a> ExecutorImpl<'a> {
             _ => Ok(guest_session),
         };
 
-        if log::log_enabled!(target: "RISC0_EXECUTION_STATS", log::Level::Debug) {
+        if log::log_enabled!(target: "RISC0_EXECUTION_STATS", log::Level::Info) {
             if let Ok(ref session) = result {
                 let execution_stats = ExecutionStats {
                     total_cycles: self.total_cycles(),
