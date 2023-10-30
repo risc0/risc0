@@ -15,7 +15,7 @@
 use std::time::{Instant, Duration};
 
 use risc0_zkvm::{
-    default_prover, sha::DIGEST_WORDS, ExecutorEnv, ExecutorImpl, MemoryImage,
+    default_prover, sha::{Digest, DIGEST_WORDS}, ExecutorEnv, ExecutorImpl, MemoryImage,
     ProverOpts, Receipt, Session, VerifierContext,
 };
 

@@ -14,7 +14,6 @@
 
 use std::time::{Instant, Duration};
 
-use byteorder::{ByteOrder, LittleEndian};
 use risc0_zkvm::{sha::DIGEST_WORDS, ExecutorEnv, ExecutorImpl, MemoryImage, Receipt, Session};
 
 use crate::{get_cycles, get_image, Benchmark};
@@ -104,7 +103,7 @@ impl Benchmark for Job {
     }
 
     fn verify_proof(&self, _output: &Self::ComputeOut, proof: &Self::ProofType) -> bool {
-        let result = proof.verify(risc0_benchmark_methods::FIBONACCI_ID);
+        let result = proof.verify(METHOD_ID);
 
         match result {
             Ok(_) => true,

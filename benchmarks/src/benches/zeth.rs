@@ -15,7 +15,7 @@
 use std::time::{Instant, Duration};
 
 use risc0_zkvm::{
-    serde::from_slice, sha::DIGEST_WORDS, ExecutorEnv, ExecutorImpl, MemoryImage, Receipt, Session,
+    sha::DIGEST_WORDS, ExecutorEnv, ExecutorImpl, MemoryImage, Receipt, Session,
 };
 use zeth_lib::{
     block_builder::{EthereumStrategyBundle, NetworkStrategyBundle},
