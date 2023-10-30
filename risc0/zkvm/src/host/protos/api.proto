@@ -110,7 +110,6 @@ message IdentityP254Result {
 message ExecutorEnv {
   Binary binary = 1;
   map<string, string> env_vars = 2;
-  repeated string args = 8;
   repeated string slice_ios = 3;
   repeated uint32 read_fds = 4;
   repeated uint32 write_fds = 5;
@@ -131,7 +130,6 @@ message Binary {
 
 message ProverOpts {
   string hashfn = 1;
-  bool prove_guest_errors = 2;
 }
 
 message SessionInfo {

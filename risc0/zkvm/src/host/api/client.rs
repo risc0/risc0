@@ -24,12 +24,8 @@ use super::{
 };
 use crate::{
     get_version,
-    host::{
-        api::SegmentInfo,
-        client::prove::get_r0vm_path,
-        receipt::{SegmentReceipt, SuccinctReceipt},
-    },
-    ExecutorEnv, Journal, ProverOpts, Receipt,
+    host::{api::SegmentInfo, client::prove::get_r0vm_path, recursion::SuccinctReceipt},
+    ExecutorEnv, Journal, ProverOpts, Receipt, SegmentReceipt,
 };
 
 /// A client implementation for interacting with a zkVM server.
@@ -336,7 +332,6 @@ impl Client {
         pb::api::ExecutorEnv {
             binary: Some(binary),
             env_vars: env.env_vars.clone(),
-            args: env.args.clone(),
             slice_ios: env.slice_io.borrow().inner.keys().cloned().collect(),
             read_fds: env.posix_io.borrow().read_fds.keys().cloned().collect(),
             write_fds: env.posix_io.borrow().write_fds.keys().cloned().collect(),

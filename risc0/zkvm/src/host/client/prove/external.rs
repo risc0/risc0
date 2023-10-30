@@ -14,13 +14,12 @@
 
 use std::path::{Path, PathBuf};
 
-use anyhow::{ensure, Result};
+use anyhow::Result;
 use risc0_binfmt::MemoryImage;
 
 use super::{Executor, Prover, ProverOpts};
 use crate::{
-    host::api::AssetRequest, sha::Digestible, ApiClient, ExecutorEnv, Receipt, SessionInfo,
-    VerifierContext,
+    host::api::AssetRequest, ApiClient, ExecutorEnv, Receipt, SessionInfo, VerifierContext,
 };
 
 /// An implementation of a [Prover] that runs proof workloads via an external
@@ -53,17 +52,7 @@ impl Prover for ExternalProver {
         let image_id = image.compute_id();
         let client = ApiClient::new_sub_process(&self.r0vm_path)?;
         let receipt = client.prove(&env, opts.clone(), image.into())?;
-        if opts.prove_guest_errors {
-            receipt.verify_integrity_with_context(ctx)?;
-            ensure!(
-                receipt.get_metadata()?.pre.digest() == image_id,
-                "received unexpected image ID: expected {}, found {}",
-                hex::encode(&image_id),
-                hex::encode(&receipt.get_metadata()?.pre.digest())
-            );
-        } else {
-            receipt.verify_with_context(ctx, image_id)?;
-        }
+        receipt.verify_with_context(ctx, image_id)?;
 
         Ok(receipt)
     }

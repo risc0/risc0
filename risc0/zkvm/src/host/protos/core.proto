@@ -29,16 +29,14 @@ message Receipt {
 
 message InnerReceipt {
   oneof kind {
-    CompositeReceipt composite = 1;
+    SegmentReceipts flat = 1;
     SuccinctReceipt succinct = 2;
     FakeReceipt fake = 3;
   }
 }
 
-message CompositeReceipt {
-  repeated SegmentReceipt segments = 1;
-  repeated InnerReceipt assumptions = 2;
-  optional Digest journal_digest = 3;
+message SegmentReceipts {
+  repeated SegmentReceipt inner = 1;
 }
 
 message SegmentReceipt {
@@ -56,19 +54,11 @@ message SuccinctReceipt {
 }
 
 message ReceiptMetadata {
-  MaybePruned pre = 1; // MaybePruned<SystemState>
-  MaybePruned post = 2; // MaybePruned<SystemState>
+  SystemState pre = 1;
+  SystemState post = 2;
   protos.base.ExitCode exit_code = 3;
   Digest input = 4;
-  optional MaybePruned output = 5; // Option<MaybePruned<Output>>
-}
-
-message MaybePruned {
-  oneof kind {
-    // Protobuf encoded bytes of the inner value.
-    bytes value = 1;
-    Digest pruned = 2;
-  }
+  Digest output = 5;
 }
 
 message SystemState {
@@ -76,18 +66,7 @@ message SystemState {
   Digest merkle_root = 2;
 }
 
-message Output {
-    MaybePruned journal = 1; // MaybePruned<bytes>
-    MaybePruned assumptions = 2; // MaybePruned<Assumptions>
-}
-
-message Assumptions {
-  repeated MaybePruned inner = 1; // MaybePruned<ReceiptMetadata>
-}
-
-message FakeReceipt {
-  ReceiptMetadata metadata = 1;
-}
+message FakeReceipt {}
 
 message Digest {
   repeated uint32 words = 1;

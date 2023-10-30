@@ -18,27 +18,22 @@
 #![deny(missing_docs)]
 
 extern crate alloc;
-
 mod fault_ids;
 pub use fault_ids::{FAULT_CHECKER_ELF, FAULT_CHECKER_ID};
 
 #[cfg(feature = "fault-proof")]
 mod fault_monitor;
-#[cfg(feature = "fault-proof")]
-pub use self::fault_monitor::FaultCheckMonitor;
-
 pub mod guest;
 #[cfg(not(target_os = "zkvm"))]
 mod host;
 pub mod serde;
 pub mod sha;
 
-pub mod receipt_metadata;
-pub use receipt_metadata::{ExitCode, Output, ReceiptMetadata};
 use semver::Version;
 
 /// Re-exports for recursion
-#[cfg(all(not(target_os = "zkvm"), feature = "prove"))]
+#[cfg(not(target_os = "zkvm"))]
+#[cfg(feature = "prove")]
 pub mod recursion {
     pub use super::host::recursion::*;
 }
@@ -47,15 +42,18 @@ pub use anyhow::Result;
 #[cfg(not(target_os = "zkvm"))]
 #[cfg(any(feature = "client", feature = "prove"))]
 pub use bytes::Bytes;
-
 #[cfg(not(target_os = "zkvm"))]
-pub use risc0_binfmt::MemoryImage;
-pub use risc0_binfmt::{Program, SystemState};
+pub use risc0_binfmt::{MemoryImage, Program, SystemState};
 pub use risc0_zkvm_platform::{declare_syscall, memory::GUEST_MAX_MEM, PAGE_SIZE};
 
-#[cfg(all(not(target_os = "zkvm"), feature = "profiler", feature = "prove"))]
+#[cfg(feature = "fault-proof")]
+pub use self::fault_monitor::FaultCheckMonitor;
+#[cfg(not(target_os = "zkvm"))]
+#[cfg(feature = "profiler")]
+#[cfg(feature = "prove")]
 pub use self::host::server::exec::profiler::Profiler;
-#[cfg(all(not(target_os = "zkvm"), feature = "prove"))]
+#[cfg(not(target_os = "zkvm"))]
+#[cfg(feature = "prove")]
 pub use self::host::{
     api::server::Server as ApiServer,
     client::prove::local::LocalProver,
@@ -65,7 +63,8 @@ pub use self::host::{
         session::{FileSegmentRef, Segment, SegmentRef, Session, SessionEvents, SimpleSegmentRef},
     },
 };
-#[cfg(all(not(target_os = "zkvm"), feature = "client"))]
+#[cfg(not(target_os = "zkvm"))]
+#[cfg(feature = "client")]
 pub use self::host::{
     api::{
         client::Client as ApiClient, Asset, AssetRequest, Binary, Connector, SegmentInfo,
@@ -84,10 +83,10 @@ pub use self::host::{
 pub use self::host::{
     control_id::POSEIDON_CONTROL_ID,
     receipt::{
-        Assumption, CompositeReceipt, InnerReceipt, Journal, Receipt, SegmentReceipt,
-        SuccinctReceipt, VerifierContext,
+        ExitCode, InnerReceipt, Journal, Receipt, ReceiptMetadata, SegmentReceipt, SegmentReceipts,
+        VerifierContext,
     },
-    recursion::ALLOWED_IDS_ROOT,
+    recursion::{SuccinctReceipt, ALLOWED_IDS_ROOT},
 };
 
 /// Reports the current version of this crate.

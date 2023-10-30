@@ -108,10 +108,8 @@ impl Prover {
                     .context("Executor failed to generate a successful session")?;
 
                 let receipt = Receipt {
-                    inner: InnerReceipt::Fake {
-                        metadata: session.get_metadata()?,
-                    },
-                    journal: session.journal.unwrap_or_default(),
+                    inner: InnerReceipt::Fake,
+                    journal: session.journal,
                 };
                 let receipt_bytes = bincode::serialize(&receipt)?;
                 self.storage

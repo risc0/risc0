@@ -112,7 +112,7 @@ impl Sha256 for Impl {
             *word = word.to_be();
         }
 
-        // Reinterpret the RISC Zero blocks as GenericArray<u8, U64>.
+        // Reinterpret the RISC0 blocks as GenericArray<u8, U64>.
         // SAFETY: We know that the two types have the same memory layout, so this
         // conversion is known to be safe.
         match unsafe { blocks.align_to::<GenericArray<u8, U64>>() } {
