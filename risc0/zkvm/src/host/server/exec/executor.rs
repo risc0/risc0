@@ -101,24 +101,6 @@ impl OpCodeResult {
     }
 }
 
-#[derive(Debug)]
-struct ExecutionStats {
-    total_cycles: usize,
-    session_cycles: usize,
-    segment_count: usize,
-    execution_time: std::time::Duration,
-}
-
-impl std::fmt::Display for ExecutionStats {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "Execution Statistics:\nTotal Cycles: {}\nSession Cycles: {}\nSegment Count: {}\nExecution Time: {:?}",
-            self.total_cycles, self.session_cycles, self.segment_count, self.execution_time
-        )
-    }
-}
-
 /// Error variants used in the Executor
 pub enum ExecutorError {
     /// This variant represents an instance of Session that Faulted
@@ -287,10 +269,15 @@ impl<'a> ExecutorImpl<'a> {
     where
         F: FnMut(Segment) -> Result<Box<dyn SegmentRef>>,
     {
-        let start = std::time::Instant::now();
-        let mut guest_session = self
-            .run_guest_only_with_callback(callback)
-            .map_err(ExecutorError::from)?;
+        let (mut guest_session, elapsed) = {
+            let start = std::time::Instant::now();
+            let guest_session = self
+                .run_guest_only_with_callback(callback)
+                .map_err(ExecutorError::from)?;
+            let elapsed = start.elapsed();
+            (guest_session, elapsed)
+        };
+
         let result = match guest_session.exit_code {
             ExitCode::Fault => {
                 let Session {
@@ -305,22 +292,18 @@ impl<'a> ExecutorImpl<'a> {
             _ => Ok(guest_session),
         };
 
-        if log::log_enabled!(target: "RISC0_EXECUTION_STATS", log::Level::Info) {
-            if let Ok(ref session) = result {
-                let execution_stats = ExecutionStats {
-                    total_cycles: self.total_cycles(),
-                    session_cycles: self.session_cycle(),
-                    segment_count: session.segments.len(),
-                    execution_time: start.elapsed(),
-                };
+        if let Ok(ref session) = result {
+            let total_cycles = self.total_cycles();
+            let session_cycles = self.session_cycle();
+            let segment_count = session.segments.len();
+            let execution_time = elapsed;
 
-                log::info!(target: "RISC0_EXECUTION_STATS::total_cycles", "total_cycles = {}", execution_stats.total_cycles);
-                log::info!(target: "RISC0_EXECUTION_STATS::session_cycles", "session_cycles = {}", execution_stats.session_cycles);
-                log::info!(target: "RISC0_EXECUTION_STATS::segment_count", "segment_count = {}", execution_stats.segment_count);
-                log::info!(target: "RISC0_EXECUTION_STATS::execution_time", "execution_time = {:?}", execution_stats.execution_time);
-                log::info!(target: "RISC0_EXECUTION_STATS::raw_execution_stats", "raw_execution_stats = {:?}", execution_stats);
-                log::info!(target: "RISC0_EXECUTION_STATS", "{}", execution_stats);
-            }
+            log::info!("total_cycles = {}", total_cycles);
+            log::info!("session_cycles = {}", session_cycles);
+            log::info!("segment_count = {}", segment_count);
+            log::info!("execution_time = {:?}", execution_time);
+            log::info!("Execution Statistics:\nTotal Cycles: {}\nSession Cycles: {}\nSegment Count: {}\nExecution Time: {:?}",
+                        total_cycles, session_cycles, segment_count, execution_time);
         }
 
         result
