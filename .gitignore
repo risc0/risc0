@@ -7,7 +7,6 @@
 .dockerignore
 .DS_Store
 .idea/
-.vim/
 bazel-*
 Cargo.lock
 dist/

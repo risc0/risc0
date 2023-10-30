@@ -32,10 +32,8 @@ $ RUST_LOG=info cargo run --release --bin risc0-benchmark -F cuda -- --out metri
 ```
 
 ## Running specific benchmark
-
 To run a specific benchmark replace the `all` option used in the previous command with one of the following:
 e.g.,
-
 ```console
 $ RUST_LOG=info cargo run --release -F metal -- --out metrics.csv big-sha2
 ```

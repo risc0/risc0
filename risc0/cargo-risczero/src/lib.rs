@@ -19,13 +19,12 @@ mod commands;
 mod toolchain;
 mod utils;
 
-#[cfg(feature = "experimental")]
-pub use self::commands::build::BuildSubcommand;
-
 use clap::{Parser, Subcommand};
 
 #[cfg(feature = "experimental")]
 use self::commands::build::BuildCommand;
+#[cfg(feature = "experimental")]
+pub use self::commands::build::BuildSubcommand;
 use self::commands::{
     build_guest::BuildGuest, build_toolchain::BuildToolchain, install::Install, new::NewCommand,
 };

@@ -191,7 +191,7 @@ fn prove_segment_elf() {
     for segment in client.segments.iter() {
         let opts = ProverOpts::default();
         let receipt = client.prove_segment(opts, segment.clone());
-        receipt.verify_integrity_with_context(&ctx).unwrap();
+        receipt.verify_with_context(&ctx).unwrap();
     }
 }
 
@@ -227,7 +227,7 @@ fn lift_join_identity() {
             rec_receipt.try_into().unwrap(),
         );
         rollup
-            .verify_integrity_with_context(&VerifierContext::default())
+            .verify_with_context(&VerifierContext::default())
             .unwrap();
     }
     client.identity_p254(opts, rollup.clone().try_into().unwrap());

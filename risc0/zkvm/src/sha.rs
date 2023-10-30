@@ -61,19 +61,6 @@ cfg_if::cfg_if! {
     }
 }
 
-/// Defines a collision resistant hash for the typed and structured data.
-pub trait Digestible {
-    /// Calculate a collision resistant hash for the typed and structured data.
-    fn digest(&self) -> Digest;
-}
-
-impl<D: ?Sized + risc0_binfmt::Digestible> Digestible for D {
-    /// Calculate a collision resistant hash for the typed and structured data.
-    fn digest(&self) -> Digest {
-        self.digest::<Impl>()
-    }
-}
-
 pub mod rust_crypto {
     //! [Rust Crypto] wrappers for the RISC0 Sha256 trait.
     //!

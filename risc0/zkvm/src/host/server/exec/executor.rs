@@ -14,7 +14,8 @@
 
 //! This module implements the Executor.
 
-use std::{cell::RefCell, fmt::Debug, io::Write, mem, rc::Rc};
+use core::fmt;
+use std::{cell::RefCell, fmt::Debug, io::Write, mem::take, rc::Rc};
 
 use addr2line::{
     fallible_iterator::FallibleIterator,
@@ -50,10 +51,11 @@ use crate::{
     align_up,
     host::{
         client::exec::TraceEvent,
+        receipt::ExitCode,
         server::opcode::{MajorType, OpCode},
     },
-    sha::Digest,
-    ExecutorEnv, ExitCode, FileSegmentRef, Loader, Segment, SegmentRef, Session,
+    ExecutorEnv, FaultCheckMonitor, FileSegmentRef, Loader, Segment, SegmentRef, Session,
+    FAULT_CHECKER_ELF,
 };
 
 /// The number of cycles required to compress a SHA-256 block.
@@ -99,6 +101,35 @@ impl OpCodeResult {
     }
 }
 
+/// Error variants used in the Executor
+pub enum ExecutorError {
+    /// This variant represents an instance of Session that Faulted
+    Fault(Session),
+    /// This variant represents all other errors
+    Error(anyhow::Error),
+}
+
+use std::error::Error as StdError;
+unsafe impl Sync for ExecutorError {}
+unsafe impl Send for ExecutorError {}
+
+impl std::fmt::Debug for ExecutorError {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        fmt::Display::fmt(&self, f)
+    }
+}
+
+impl std::fmt::Display for ExecutorError {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        match self {
+            ExecutorError::Error(e) => write!(f, "{e}"),
+            ExecutorError::Fault(_) => write!(f, "Faulted Session",),
+        }
+    }
+}
+
+impl StdError for ExecutorError {}
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct SyscallRecord {
     pub to_guest: Vec<u32>,
@@ -111,7 +142,7 @@ pub struct SyscallRecord {
 pub struct ExecutorImpl<'a> {
     env: ExecutorEnv<'a>,
     pub(crate) syscall_table: SyscallTable<'a>,
-    pre_image: Option<Box<MemoryImage>>,
+    pre_image: MemoryImage,
     monitor: MemoryMonitor,
     pc: u32,
     init_cycles: usize,
@@ -126,7 +157,6 @@ pub struct ExecutorImpl<'a> {
     syscalls: Vec<SyscallRecord>,
     exit_code: Option<ExitCode>,
     obj_ctx: Option<ObjectContext>,
-    output_digest: Option<Digest>,
 }
 
 impl<'a> ExecutorImpl<'a> {
@@ -153,7 +183,8 @@ impl<'a> ExecutorImpl<'a> {
         }
 
         let pc = image.pc;
-        let monitor = MemoryMonitor::new(image.clone(), env.trace.is_some());
+        let pre_image = image.clone();
+        let monitor = MemoryMonitor::new(image, env.trace.is_some());
         let loader = Loader::new();
         let init_cycles = loader.init_cycles();
         let fini_cycles = loader.fini_cycles();
@@ -163,7 +194,7 @@ impl<'a> ExecutorImpl<'a> {
         Ok(Self {
             env,
             syscall_table,
-            pre_image: Some(Box::new(image)),
+            pre_image,
             monitor,
             pc,
             init_cycles,
@@ -178,14 +209,12 @@ impl<'a> ExecutorImpl<'a> {
             syscalls: Vec::new(),
             exit_code: None,
             obj_ctx,
-            output_digest: None,
         })
     }
 
     /// Construct a new [ExecutorImpl] from the ELF binary of the guest program
     /// you want to run and an [ExecutorEnv] containing relevant
     /// environmental configuration details.
-    ///
     /// # Example
     /// ```
     /// use risc0_zkvm::{ExecutorImpl, ExecutorEnv, Session};
@@ -212,34 +241,65 @@ impl<'a> ExecutorImpl<'a> {
 
     /// This will run the executor to get a [Session] which contain the results
     /// of the execution.
-    pub fn run(&mut self) -> Result<Session> {
+    pub fn run(&mut self) -> Result<Session, ExecutorError> {
         if self.env.segment_path.is_none() {
-            self.env.segment_path = Some(tempdir()?.into_path());
+            let temp_dir = tempdir().map_err(|e| ExecutorError::Error(e.into()))?;
+            self.env.segment_path = Some(temp_dir.into_path());
         }
 
         let path = self.env.segment_path.clone().unwrap();
         self.run_with_callback(|segment| Ok(Box::new(FileSegmentRef::new(&segment, &path)?)))
     }
 
-    /// Run the executor until [ExitCode::Halted], [ExitCode::Paused], or
-    /// [ExitCode::Fault] is reached, producing a [Session] as a result.
-    pub fn run_with_callback<F>(&mut self, mut callback: F) -> Result<Session>
+    /// Run the executor until [ExitCode::Paused] or [ExitCode::Halted] is
+    /// reached, producing a [Session] as a result.
+    pub fn run_with_callback<F>(&mut self, callback: F) -> Result<Session, ExecutorError>
     where
         F: FnMut(Segment) -> Result<Box<dyn SegmentRef>>,
     {
-        let (Some(ExitCode::SystemSplit | ExitCode::Paused(_)) | None) = self.exit_code else {
-            return Err(anyhow!(
-                "cannot resume an execution which exited with {:?}",
-                self.exit_code
-            )
-            .into());
+        let mut guest_session = match self.run_guest_only_with_callback(callback) {
+            Ok(session) => session,
+            Err(e) => return Err(ExecutorError::Error(e)),
         };
+        match guest_session.exit_code {
+            ExitCode::Fault => {
+                let fault_checker_session = match self.run_fault_checker() {
+                    Ok(session) => session,
+                    Err(e) => return Err(ExecutorError::Error(e)),
+                };
+                for segment in fault_checker_session.segments {
+                    guest_session.segments.push(segment);
+                }
+                guest_session.journal = fault_checker_session.journal;
+                Err(ExecutorError::Fault(guest_session))
+            }
+            _ => Ok(guest_session),
+        }
+    }
 
-        self.pc = self
-            .pre_image
-            .as_ref()
-            .ok_or_else(|| anyhow!("attempted to run the executor with no pre_image"))?
-            .pc;
+    /// Run the executor with the default callback.
+    pub fn run_guest_only(&mut self) -> Result<Session> {
+        if self.env.segment_path.is_none() {
+            let temp_dir = tempdir().map_err(|e| ExecutorError::Error(e.into()))?;
+            self.env.segment_path = Some(temp_dir.into_path());
+        }
+
+        let path = self.env.segment_path.clone().unwrap();
+        self.run_guest_only_with_callback(|segment| {
+            Ok(Box::new(FileSegmentRef::new(&segment, &path)?))
+        })
+    }
+
+    /// Run the executor until [ExitCode::Paused], [ExitCode::Halted], or
+    /// [ExitCode::Fault] is reached, producing a [Session] as a result.
+    pub fn run_guest_only_with_callback<F>(&mut self, mut callback: F) -> Result<Session>
+    where
+        F: FnMut(Segment) -> Result<Box<dyn SegmentRef>>,
+    {
+        if let Some(ExitCode::Halted(_)) = self.exit_code {
+            bail!("cannot resume an execution which exited with ExitCode::Halted");
+        }
+
         self.monitor.clear_session()?;
 
         let journal = Journal::default();
@@ -248,19 +308,17 @@ impl<'a> ExecutorImpl<'a> {
             .borrow_mut()
             .with_write_fd(fileno::JOURNAL, journal.clone());
 
-        let mut run_loop = || -> Result<(ExitCode, MemoryImage)> {
+        let mut run_loop = || -> Result<ExitCode> {
             loop {
                 if let Some(exit_code) = self.step()? {
                     let total_cycles = self.total_cycles();
                     log::debug!("exit_code: {exit_code:?}, total_cycles: {total_cycles}");
                     assert!(total_cycles <= self.segment_limit);
-                    let pre_image = self.pre_image.take().ok_or_else(|| {
-                        anyhow!("attempted to run the executor with no pre_image")
-                    })?;
+                    let pre_image = self.pre_image.clone();
                     let post_image = self.monitor.build_image(self.pc);
                     let post_image_id = post_image.compute_id();
-                    let syscalls = mem::take(&mut self.syscalls);
-                    let faults = mem::take(&mut self.monitor.faults);
+                    let syscalls = take(&mut self.syscalls);
+                    let faults = take(&mut self.monitor.faults);
                     let po2 = log2_ceil(total_cycles.next_power_of_two()).try_into()?;
                     let cycles = self.body_cycles.try_into()?;
                     let segment = Segment::new(
@@ -280,59 +338,57 @@ impl<'a> ExecutorImpl<'a> {
                     let segment_ref = callback(segment)?;
                     self.segments.push(segment_ref);
                     match exit_code {
-                        ExitCode::SystemSplit => self.split(Some(post_image.into()))?,
+                        ExitCode::SystemSplit => self.split(post_image)?,
                         ExitCode::SessionLimit => bail!("Session limit exceeded"),
                         ExitCode::Paused(inner) => {
                             log::debug!("Paused({inner}): {}", self.segment_cycle);
-                            // Set the pre_image so that the Executor can be run again to resume.
-                            // Move the pc forward by WORD_SIZE because halt does not.
-                            let mut resume_pre_image = post_image.clone();
-                            resume_pre_image.pc += WORD_SIZE as u32;
-                            self.split(Some(resume_pre_image.into()))?;
-                            return Ok((exit_code, post_image));
+                            self.split(post_image)?;
+                            return Ok(exit_code);
                         }
                         ExitCode::Halted(inner) => {
                             log::debug!("Halted({inner}): {}", self.segment_cycle);
-                            return Ok((exit_code, post_image));
+                            return Ok(exit_code);
                         }
                         ExitCode::Fault => {
                             log::debug!("Fault: {}", self.segment_cycle);
-                            return Ok((exit_code, post_image));
+                            self.split(post_image)?;
+                            return Ok(exit_code);
                         }
                     };
                 };
             }
         };
 
-        let (exit_code, post_image) = run_loop()?;
-
-        // Take (clear out) the list of accessed assumptions.
-        // Leave the assumptions cache so it can be used if execution is resumed from pause.
-        let assumptions = mem::take(&mut self.env.assumptions.borrow_mut().accessed);
-
-        // Set the session_journal to the committed data iff the the guest set a non-zero output.
-        let session_journal = self
-            .output_digest
-            .and_then(|output_digest| (output_digest != Digest::ZERO).then(|| journal.buf.take()));
-        if !exit_code.expects_output() && session_journal.is_some() {
-            log::debug!(
-                "dropping non-empty journal due to exit code {:?}: 0x{}",
-                exit_code,
-                hex::encode(journal.buf.borrow().as_slice())
-            );
-        };
+        let exit_code = run_loop()?;
         self.exit_code = Some(exit_code);
-
         Ok(Session::new(
-            mem::take(&mut self.segments),
-            session_journal,
+            take(&mut self.segments),
+            journal.buf.take(),
             exit_code,
-            post_image,
-            assumptions,
         ))
     }
 
-    fn split(&mut self, pre_image: Option<Box<MemoryImage>>) -> Result<()> {
+    fn run_fault_checker(&mut self) -> Result<Session> {
+        let fault_monitor = FaultCheckMonitor {
+            pc: self.pc,
+            insn: self.monitor.load_u32(self.pc)?,
+            regs: self.monitor.load_registers(),
+            post_id: self.monitor.build_image(self.pc).compute_id(),
+        };
+        let env = ExecutorEnv::builder().write(&fault_monitor)?.build()?;
+
+        let mut exec = self::ExecutorImpl::from_elf(env, FAULT_CHECKER_ELF).unwrap();
+        let session = exec.run_guest_only()?;
+        if session.exit_code != ExitCode::Halted(0) {
+            bail!(
+                "Fault checker returned with exit code: {:?}. Expected `ExitCode::Halted(0)` from fault checker",
+                session.exit_code
+            );
+        }
+        Ok(session)
+    }
+
+    fn split(&mut self, pre_image: MemoryImage) -> Result<()> {
         self.pre_image = pre_image;
         self.body_cycles = 0;
         self.split_insn = None;
@@ -513,8 +569,8 @@ impl<'a> ExecutorImpl<'a> {
         let output_ptr = self.monitor.load_guest_addr_from_register(REG_A1)?;
         let halt_type = tot_reg & 0xff;
         let user_exit = (tot_reg >> 8) & 0xff;
-        let output: [u8; DIGEST_BYTES] = self.monitor.load_array_from_guest_addr(output_ptr)?;
-        self.output_digest = Some(output.into());
+        self.monitor
+            .load_array_from_guest_addr::<{ DIGEST_WORDS * WORD_SIZE }>(output_ptr)?;
 
         match halt_type {
             halt::TERMINATE => Ok(OpCodeResult::new(
@@ -523,7 +579,7 @@ impl<'a> ExecutorImpl<'a> {
                 0,
             )),
             halt::PAUSE => Ok(OpCodeResult::new(
-                self.pc,
+                self.pc + WORD_SIZE as u32,
                 Some(ExitCode::Paused(user_exit)),
                 0,
             )),

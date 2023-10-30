@@ -11,10 +11,10 @@ risc0-build = { workspace = true, features = ["guest-list"] }
 
 [dependencies]
 risc0-build = { workspace = true, features = ["guest-list"] }
+risc0-zkvm = { workspace = true }
 
 [dev-dependencies]
 hex-literal = "0.4"
-risc0-zkvm = { workspace = true }
 
 [features]
 default = []

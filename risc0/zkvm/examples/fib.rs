@@ -79,9 +79,8 @@ fn top(prover: Rc<dyn ProverServer>, iterations: u32, skip_prover: bool) -> Metr
             .prove_session(&ctx, &session)
             .unwrap()
             .inner
-            .composite()
+            .flat()
             .unwrap()
-            .segments
             .iter()
             .fold(0, |acc, segment| acc + segment.get_seal_bytes().len())
     };

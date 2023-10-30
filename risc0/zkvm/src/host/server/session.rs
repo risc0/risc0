@@ -17,20 +17,19 @@
 
 use alloc::collections::BTreeSet;
 use std::{
-    borrow::Borrow,
     fs::File,
     io::{Read, Write},
     path::{Path, PathBuf},
 };
 
-use anyhow::{anyhow, ensure, Result};
+use anyhow::Result;
+use risc0_binfmt::MemoryImage;
+use risc0_zkp::core::digest::Digest;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    host::server::exec::executor::SyscallRecord,
-    receipt_metadata::{Assumptions, Output},
-    sha::Digest,
-    Assumption, ExitCode, Journal, MemoryImage, ReceiptMetadata, SystemState,
+    host::{receipt::ExitCode, server::exec::executor::SyscallRecord},
+    Journal,
 };
 
 #[derive(Clone, Default, Serialize, Deserialize, Debug)]
@@ -54,16 +53,10 @@ pub struct Session {
     pub segments: Vec<Box<dyn SegmentRef>>,
 
     /// The data publicly committed by the guest program.
-    pub journal: Option<Journal>,
+    pub journal: Journal,
 
     /// The [ExitCode] of the session.
     pub exit_code: ExitCode,
-
-    /// The final [MemoryImage] at the end of execution.
-    pub post_image: MemoryImage,
-
-    /// The list of assumptions made by the guest and resolved by the host.
-    pub assumptions: Vec<Assumption>,
 
     /// The hooks to be called during the proving phase.
     #[serde(skip)]
@@ -91,7 +84,7 @@ pub trait SegmentRef: Send {
 /// termination.
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Segment {
-    pub(crate) pre_image: Box<MemoryImage>,
+    pub(crate) pre_image: MemoryImage,
     pub(crate) post_image_id: Digest,
     pub(crate) faults: PageFaults,
     pub(crate) syscalls: Vec<SyscallRecord>,
@@ -122,19 +115,11 @@ pub trait SessionEvents {
 
 impl Session {
     /// Construct a new [Session] from its constituent components.
-    pub fn new(
-        segments: Vec<Box<dyn SegmentRef>>,
-        journal: Option<Vec<u8>>,
-        exit_code: ExitCode,
-        post_image: MemoryImage,
-        assumptions: Vec<Assumption>,
-    ) -> Self {
+    pub fn new(segments: Vec<Box<dyn SegmentRef>>, journal: Vec<u8>, exit_code: ExitCode) -> Self {
         Self {
             segments,
-            journal: journal.map(|x| Journal::new(x)),
+            journal: Journal::new(journal),
             exit_code,
-            post_image,
-            assumptions,
             hooks: Vec::new(),
         }
     }
@@ -151,76 +136,6 @@ impl Session {
     /// Add a hook to be called during the proving phase.
     pub fn add_hook<E: SessionEvents + 'static>(&mut self, hook: E) {
         self.hooks.push(Box::new(hook));
-    }
-
-    /// Calculate for the [ReceiptMetadata] associated with this [Session]. The
-    /// [ReceiptMetadata] is the claim that will be proven if this [Session]
-    /// is passed to the [crate::Prover].
-    pub fn get_metadata(&self) -> Result<ReceiptMetadata> {
-        let first_segment = &self
-            .segments
-            .first()
-            .ok_or_else(|| anyhow!("session has no segments"))?
-            .resolve()?;
-        let last_segment = &self
-            .segments
-            .last()
-            .ok_or_else(|| anyhow!("session has no segments"))?
-            .resolve()?;
-
-        // Construct the Output struct, checking that the Session is internally
-        // consistent.
-        let output = if self.exit_code.expects_output() {
-            self.journal
-                .as_ref()
-                .map(|journal| -> Result<_> {
-                    Ok(Output {
-                        journal: journal.bytes.clone().into(),
-                        assumptions: Assumptions(
-                            self.assumptions
-                                .iter()
-                                .filter_map(|a| match a {
-                                    Assumption::Proven(_) => None,
-                                    Assumption::Unresolved(r) => Some(r.clone()),
-                                })
-                                .collect::<Vec<_>>(),
-                        )
-                        .into(),
-                    })
-                })
-                .transpose()?
-        } else {
-            ensure!(
-                self.journal.is_none(),
-                "Session with exit code {:?} has a journal",
-                self.exit_code
-            );
-            ensure!(
-                self.assumptions.is_empty(),
-                "Session with exit code {:?} has encoded assumptions",
-                self.exit_code
-            );
-            None
-        };
-
-        // NOTE: When a segment ends in a Halted(_) state, it may not update the post state
-        // digest. As a result, it will be the same are the pre_image. All other exit codes require
-        // the post state digest to reflect the final memory state.
-        let post_state = SystemState {
-            pc: self.post_image.pc,
-            merkle_root: match self.exit_code {
-                ExitCode::Halted(_) => last_segment.pre_image.compute_root_hash(),
-                _ => self.post_image.compute_root_hash(),
-            },
-        };
-
-        Ok(ReceiptMetadata {
-            pre: SystemState::from(first_segment.pre_image.borrow()).into(),
-            post: post_state.into(),
-            exit_code: self.exit_code,
-            input: Digest::ZERO,
-            output: output.into(),
-        })
     }
 
     /// Report cycle information for this [Session].
@@ -247,7 +162,7 @@ impl Segment {
     /// Create a new [Segment] from its constituent components.
     #[allow(clippy::too_many_arguments)]
     pub(crate) fn new(
-        pre_image: Box<MemoryImage>,
+        pre_image: MemoryImage,
         post_image_id: Digest,
         faults: PageFaults,
         syscalls: Vec<SyscallRecord>,
