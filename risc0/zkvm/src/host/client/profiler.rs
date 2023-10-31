@@ -260,7 +260,8 @@ impl Profiler {
 
     /// Dereferences strings, etc. in the protobuf for testing purposes.
     /// Returns a tuple of (frames, program counter, cycles)
-    pub fn iter(&self) -> impl Iterator<Item = (Vec<Frame>, usize, usize)> + '_ {
+    #[cfg(test)]
+    pub(crate) fn iter(&self) -> impl Iterator<Item = (Vec<Frame>, usize, usize)> + '_ {
         self.profile.iter()
     }
 
@@ -392,10 +393,12 @@ impl Profiler {
         }
     }
 
-    fn walk_stack(&mut self, node_ref: Rc<RefCell<CallNode>>, stack: Vec<Frame>) {
+    /// Walk the profile tree rooted at node_ref, adding all call stacks in the profile to the
+    /// profile under construction. All call stacks encountered build on top of the base_stack.
+    fn walk_stacks(&mut self, node_ref: Rc<RefCell<CallNode>>, base_stack: Vec<Frame>) {
         let node = node_ref.borrow();
         for (&pc, count) in &node.counts {
-            let mut new_stack = stack.clone();
+            let mut new_stack = base_stack.clone();
             let frames = self.lookup_pc(pc.into());
             if !frames.is_empty() {
                 new_stack.extend(frames);
@@ -428,7 +431,7 @@ impl Profiler {
             }
 
             if let Some(next_node_ref) = node.calls.get(&pc) {
-                self.walk_stack(next_node_ref.clone(), new_stack);
+                self.walk_stacks(next_node_ref.clone(), new_stack);
             }
         }
     }
@@ -438,7 +441,7 @@ impl Profiler {
     pub fn finalize(&mut self) {
         let root_ref = Rc::clone(&self.root);
         log::debug!("{}", self.root.borrow().fmt(0, &self));
-        self.walk_stack(root_ref, Vec::new());
+        self.walk_stacks(root_ref, Vec::new());
     }
 
     /// Returns the result of this profiling run as a protobuf.
@@ -545,6 +548,7 @@ impl ProfileBuilder {
         self.profile.sample.push(sample)
     }
 
+    #[cfg(test)]
     fn iter(&self) -> impl Iterator<Item = (Vec<Frame>, usize, usize)> + '_ {
         self.profile.sample.iter().flat_map(move |sample| {
             sample.location_id.iter().map(move |id| {

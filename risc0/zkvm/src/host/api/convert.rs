@@ -89,6 +89,31 @@ impl TryFrom<pb::api::Asset> for Asset {
     }
 }
 
+impl From<TraceEvent> for pb::api::TraceEvent {
+    fn from(event: TraceEvent) -> Self {
+        match event {
+            TraceEvent::InstructionStart { cycle, pc, insn } => Self {
+                kind: Some(pb::api::trace_event::Kind::InsnStart(
+                    pb::api::trace_event::InstructionStart { cycle, pc, insn },
+                )),
+            },
+            TraceEvent::RegisterSet { idx, value } => Self {
+                kind: Some(pb::api::trace_event::Kind::RegisterSet(
+                    pb::api::trace_event::RegisterSet {
+                        idx: idx as u32,
+                        value,
+                    },
+                )),
+            },
+            TraceEvent::MemorySet { addr, value } => Self {
+                kind: Some(pb::api::trace_event::Kind::MemorySet(
+                    pb::api::trace_event::MemorySet { addr, value },
+                )),
+            },
+        }
+    }
+}
+
 impl TryFrom<pb::api::TraceEvent> for TraceEvent {
     type Error = anyhow::Error;
 

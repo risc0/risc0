@@ -28,8 +28,12 @@ use serde::{Deserialize, Serialize};
 use super::{malformed_err, path_to_string, pb, ConnectionWrapper, Connector, TcpConnector};
 use crate::{
     get_prover_server, get_version,
-    host::{client::slice_io::SliceIo, recursion::SuccinctReceipt},
-    ExecutorEnv, ExecutorImpl, ProverOpts, Segment, SegmentReceipt, SegmentRef, VerifierContext,
+    host::{
+        client::{env::TraceCallback, slice_io::SliceIo},
+        recursion::SuccinctReceipt,
+    },
+    ExecutorEnv, ExecutorImpl, ProverOpts, Segment, SegmentReceipt, SegmentRef, TraceEvent,
+    VerifierContext,
 };
 
 /// A server implementation for handling requests by clients of the zkVM.
@@ -172,6 +176,32 @@ impl SliceIo for SliceIoProxy {
         self.conn.send(request)?;
 
         Ok(Bytes::new())
+    }
+}
+
+struct TraceProxy {
+    conn: ConnectionWrapper,
+}
+
+impl TraceProxy {
+    fn new(conn: ConnectionWrapper) -> Self {
+        Self { conn }
+    }
+}
+
+impl TraceCallback for TraceProxy {
+    fn call(&mut self, event: TraceEvent) -> Result<()> {
+        let request = pb::api::ServerReply {
+            kind: Some(pb::api::server_reply::Kind::Ok(pb::api::ClientCallback {
+                kind: Some(pb::api::client_callback::Kind::Io(pb::api::OnIoRequest {
+                    kind: Some(pb::api::on_io_request::Kind::Trace(event.try_into()?)),
+                })),
+            })),
+        };
+        log::debug!("tx: {request:?}");
+        self.conn.send(request)?;
+
+        Ok(())
     }
 }
 
@@ -491,7 +521,10 @@ impl Server {
             env_builder.segment_limit_po2(segment_limit_po2);
         }
         env_builder.session_limit(request.session_limit);
-        // TODO: add trace callback proxy
+        if let Some(_) = request.trace_events {
+            let proxy = TraceProxy::new(conn.try_clone()?);
+            env_builder.trace_callback(proxy);
+        }
         env_builder.build()
     }
 }

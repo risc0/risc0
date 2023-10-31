@@ -337,6 +337,7 @@ impl Client {
             write_fds: env.posix_io.borrow().write_fds.keys().cloned().collect(),
             segment_limit_po2: env.segment_limit_po2,
             session_limit: env.session_limit,
+            trace_events: env.trace.is_some().then_some(()),
         }
     }
 
@@ -498,7 +499,7 @@ impl Client {
 
     fn on_trace(&self, env: &ExecutorEnv<'_>, event: pb::api::TraceEvent) -> Result<()> {
         if let Some(ref trace_callback) = env.trace {
-            trace_callback.borrow_mut()(event.try_into()?)?;
+            trace_callback.borrow_mut().call(event.try_into()?)?;
         }
         Ok(())
     }

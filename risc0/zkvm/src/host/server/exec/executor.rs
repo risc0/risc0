@@ -517,15 +517,17 @@ impl<'a> ExecutorImpl<'a> {
 
     fn advance(&mut self, opcode: OpCode, op_result: OpCodeResult) -> Option<ExitCode> {
         if let Some(ref trace) = self.env.trace {
-            trace.borrow_mut()(TraceEvent::InstructionStart {
-                cycle: self.session_cycle() as u32,
-                pc: self.pc,
-                insn: opcode.insn,
-            })
-            .unwrap();
+            trace
+                .borrow_mut()
+                .call(TraceEvent::InstructionStart {
+                    cycle: self.session_cycle() as u32,
+                    pc: self.pc,
+                    insn: opcode.insn,
+                })
+                .unwrap();
 
             for event in self.monitor.trace_events.iter() {
-                trace.borrow_mut()(event.clone()).unwrap();
+                trace.borrow_mut().call(event.clone()).unwrap();
             }
         }
 

@@ -115,6 +115,7 @@ message ExecutorEnv {
   repeated uint32 write_fds = 5;
   optional uint32 segment_limit_po2 = 6;
   optional uint64 session_limit = 7;
+  optional google.protobuf.Empty trace_events = 8;
 }
 
 message Binary {
