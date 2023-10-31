@@ -24,21 +24,9 @@ jobs:
           generate_release_notes: true
           # tag_name: ${{ env.TAG }} # only for testing
 
-  publish:
-    runs-on: [self-hosted, prod, Linux, cpu]
-    needs: release
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/rustup
-      - uses: risc0/cargo-install@2cfb0024938d23011106cbf127b393bc83fddba1
-        with:
-          crate: cargo-release
-          version: "0.24"
-      - run: cargo release publish --execute --no-confirm --allow-branch HEAD
-
   linux:
     runs-on: [self-hosted, prod, Linux, docker, cpu]
-    needs: publish
+    needs: release
     container:
       image: nvidia/cuda:12.2.2-devel-ubuntu20.04
     env:
@@ -83,7 +71,7 @@ jobs:
 
   macos:
     runs-on: [self-hosted, prod, macOS, apple_m2_pro]
-    needs: publish
+    needs: release
     env:
       RUSTC_WRAPPER: sccache
       TARGET: aarch64-apple-darwin
