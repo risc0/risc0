@@ -11,8 +11,8 @@ on:
 
 env:
   RISC0_TOOLCHAIN_VERSION: test-release-2
-  # TAG: v0.19.0-rc.4
-  VERSION: 0.19.0-rc.4
+  # TAG: v0.19.0
+  VERSION: "0.19.0"
 
 jobs:
   release:
@@ -66,8 +66,10 @@ jobs:
       - run: cargo risczero install --version $RISC0_TOOLCHAIN_VERSION
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - run: cargo run
-        working-directory: tools/smoke-test
+      # TODO: git lfs pull doesn't work within a github container.
+      # This smoke test will fail because the recursion ZKR will be an empty file at build time.
+      # - run: cargo run
+      #   working-directory: tools/smoke-test
 
   macos:
     runs-on: [self-hosted, prod, macOS, apple_m2_pro]
@@ -79,6 +81,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           lfs: true
+      - run: git lfs checkout
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
         with:
