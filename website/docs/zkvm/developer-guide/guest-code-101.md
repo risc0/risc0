@@ -24,23 +24,23 @@ To support various use cases, there are a number of functions that can be called
 - **Reading inputs** <br/>
   [`env::read`], [`env::read_slice`], and [`env::stdin`]
 
-[`env::read`]: https://docs.rs/risc0-zkvm/0.18.0/risc0_zkvm/guest/env/fn.read.html
-[`env::read_slice`]: https://docs.rs/risc0-zkvm/0.18.0/risc0_zkvm/guest/env/fn.read_slice.html
-[`env::stdin`]: https://docs.rs/risc0-zkvm/0.18.0/risc0_zkvm/guest/env/fn.stdin.html
+[`env::read`]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest/env/fn.read.html
+[`env::read_slice`]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest/env/fn.read_slice.html
+[`env::stdin`]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest/env/fn.stdin.html
 
 - **Writing private outputs to [host]**<br/>
   [`env::write`], [`env::write_slice`], [`env::stdout`], [`env::stderr`]
 
-[`env::write`]: https://docs.rs/risc0-zkvm/0.18.0/risc0_zkvm/guest/env/fn.write.html
-[`env::write_slice`]: https://docs.rs/risc0-zkvm/0.18.0/risc0_zkvm/guest/env/fn.write_slice.html
-[`env::stdout`]: https://docs.rs/risc0-zkvm/0.18.0/risc0_zkvm/guest/env/fn.stdout.html
-[`env::stderr`]: https://docs.rs/risc0-zkvm/0.18.0/risc0_zkvm/guest/env/fn.stderr.html
+[`env::write`]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest/env/fn.write.html
+[`env::write_slice`]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest/env/fn.write_slice.html
+[`env::stdout`]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest/env/fn.stdout.html
+[`env::stderr`]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest/env/fn.stderr.html
 
 - **Committing private outputs [journal]**<br/>
   `env::commit`, `env::commit_slice`
 
-[`env::commit`]: https://docs.rs/risc0-zkvm/0.18.0/risc0_zkvm/guest/env/fn.commit.html
-[`env::commit_slice`]: https://docs.rs/risc0-zkvm/0.18.0/risc0_zkvm/guest/env/fn.commit_slice.html
+[`env::commit`]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest/env/fn.commit.html
+[`env::commit_slice`]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest/env/fn.commit_slice.html
 
 ## Tools for Debugging & Optimization
 
@@ -52,8 +52,8 @@ There are also a number of functions available to support with debugging and per
 - **Print a debug message**<br/>
   [`env::log`]
 
-[`env::get_cycle_count`]: https://docs.rs/risc0-zkvm/0.18.0/risc0_zkvm/guest/env/fn.get_cycle_count.html
-[`env::log`]: https://docs.rs/risc0-zkvm/0.18.0/risc0_zkvm/guest/env/fn.log.html
+[`env::get_cycle_count`]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest/env/fn.get_cycle_count.html
+[`env::log`]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest/env/fn.log.html
 
 For more information on optimization & performance, see our pages on [Cryptography Acceleration](acceleration.md) and [Benchmarking](../benchmarks.md).
 
@@ -88,7 +88,7 @@ You can file an issue on [these docs] or the [examples], and we're happy to answ
 [zkVM Overview]: ../zkvm_overview.md
 [Hello World demo]: https://github.com/risc0/risc0/tree/main/examples/hello-world
 [risc0/examples]: https://github.com/risc0/risc0/tree/v0.18.0/examples
-[guest environment commands]: https://docs.rs/risc0-zkvm/0.18.0/risc0_zkvm/guest/index.html
+[guest environment commands]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest/index.html
 [zkVM Application]: ../zkvm_overview.md
 [zkVM]: ../zkvm_overview.md
 [Bonsai]: ../../bonsai/bonsai-overview.md
