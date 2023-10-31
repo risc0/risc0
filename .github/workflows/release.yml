@@ -9,6 +9,11 @@ on:
   #   branches: [ main ]
   # workflow_dispatch:
 
+env:
+  RISC0_TOOLCHAIN_VERSION: test-release-2
+  # TAG: v0.19.0
+  VERSION: "0.19.0"
+
 jobs:
   release:
     runs-on: ubuntu-latest
@@ -17,24 +22,31 @@ jobs:
         with:
           draft: true
           generate_release_notes: true
-          # tag_name: test-release-1 # only for testing
+          # tag_name: ${{ env.TAG }} # only for testing
 
-  build-linux:
+  linux:
     runs-on: [self-hosted, prod, Linux, docker, cpu]
     needs: release
     container:
-      image: nvidia/cuda:12.2.2-devel-ubi8
+      image: nvidia/cuda:12.2.2-devel-ubuntu20.04
     env:
-      OS: Linux
-      RUSTC_WRAPPER: sccache
       TARGET: x86_64-unknown-linux-gnu
     steps:
-      - uses: actions/checkout@v3
+      - run: apt update
+      - run: apt -y install curl git libssl-dev pkg-config
+        env:
+          DEBIAN_FRONTEND: noninteractive
+      - run: curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash
+      - run: apt -y install git-lfs
+        env:
+          DEBIAN_FRONTEND: noninteractive
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
         with:
-          key: ${{ env.OS }}
-      - run: yum -y install openssl-devel perl-core zlib-devel
+          key: ${{ env.TARGET }}
       - run: cargo build -p cargo-risczero --release
       - run: |
           mkdir -p tmp/pkg
@@ -45,21 +57,35 @@ jobs:
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: tmp/cargo-risczero-${{ env.TARGET }}.tgz
-          # tag: test-release-1 # only for testing
+          # tag: ${{ env.TAG }} # only for testing
+      - uses: risc0/cargo-install@2cfb0024938d23011106cbf127b393bc83fddba1
+        with:
+          crate: cargo-binstall
+          version: "1.4"
+      - run: cargo binstall -y --force cargo-risczero@${{ env.VERSION }}
+      - run: cargo risczero install --version $RISC0_TOOLCHAIN_VERSION
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # TODO: git lfs pull doesn't work within a github container.
+      # This smoke test will fail because the recursion ZKR will be an empty file at build time.
+      # - run: cargo run
+      #   working-directory: tools/smoke-test
 
-  build-macos:
+  macos:
     runs-on: [self-hosted, prod, macOS, apple_m2_pro]
     needs: release
     env:
-      OS: macOS
       RUSTC_WRAPPER: sccache
       TARGET: aarch64-apple-darwin
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - run: git lfs checkout
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
         with:
-          key: ${{ env.OS }}
+          key: ${{ env.TARGET }}
       - run: cargo build -p cargo-risczero --release
       - run: |
           mkdir -p tmp/pkg
@@ -70,4 +96,14 @@ jobs:
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: tmp/cargo-risczero-${{ env.TARGET }}.tgz
-          # tag: test-release-1 # only for testing
+          # tag: ${{ env.TAG }} # only for testing
+      - uses: risc0/cargo-install@2cfb0024938d23011106cbf127b393bc83fddba1
+        with:
+          crate: cargo-binstall
+          version: "1.4"
+      - run: cargo binstall -y --force cargo-risczero@${{ env.VERSION }}
+      - run: cargo risczero install --version $RISC0_TOOLCHAIN_VERSION
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: cargo run
+        working-directory: tools/smoke-test

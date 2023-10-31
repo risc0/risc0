@@ -1,0 +1,10 @@
+[package]
+name = "smoke-test"
+version = "0.1.0"
+edition = "2021"
+
+[workspace]
+
+[dependencies]
+risc0-zkvm = "0.19.0"
+methods = { path = "methods" }
