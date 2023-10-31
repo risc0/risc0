@@ -246,6 +246,7 @@ Because the data structures supporting all three of these need to match very car
 ## Security
 
 <a class="anchor" id="image-id-security"></a>
+
 <details closed>
 <summary>
 Q:

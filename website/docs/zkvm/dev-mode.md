@@ -23,4 +23,3 @@ For further reference, take a look at the table below. To learn more about usage
 | ----------------------------- | ------------------------ | ------------------------ |
 | RISC0_DEV_MODE=true           | dev-mode activated       | Prover panic             |
 | RISCO_DEV_MODE={false, unset} | Default project behavior | Default project behavior |
-
