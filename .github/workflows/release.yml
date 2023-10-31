@@ -45,12 +45,17 @@ jobs:
       TARGET: x86_64-unknown-linux-gnu
     steps:
       - run: apt update
-      - run: apt -y install curl git git-lfs libssl-dev pkg-config
+      - run: apt -y install curl git libssl-dev pkg-config
+        env:
+          DEBIAN_FRONTEND: noninteractive
+      - run: curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash
+      - run: apt update
+      - run: apt -y install git-lfs
         env:
           DEBIAN_FRONTEND: noninteractive
       - uses: actions/checkout@v3
-      - run: git lfs install
-      - run: git lfs pull
+          lfs: true
+      - run: git lfs checkout
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
         with:
