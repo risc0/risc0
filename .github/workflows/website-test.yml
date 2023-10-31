@@ -1,9 +1,9 @@
 name: website-test
 
 on:
-  merge_group:
-  pull_request:
-    branches: [main, "release-*"]
+  # merge_group:
+  # pull_request:
+  #   branches: [main, "release-*"]
   workflow_dispatch:
 
 concurrency:

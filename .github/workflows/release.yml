@@ -5,13 +5,13 @@ on:
     tags:
       - "v*.*.*"
   # for testing purposes
-  # pull_request:
-  #   branches: [ main ]
-  # workflow_dispatch:
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
 
 env:
   RISC0_TOOLCHAIN_VERSION: test-release-2
-  # TAG: v0.19.1-rc.1
+  TAG: v0.19.1-rc.1
   VERSION: "0.19.1-rc.1"
 
 jobs:
@@ -22,7 +22,7 @@ jobs:
         with:
           draft: true
           generate_release_notes: true
-          # tag_name: ${{ env.TAG }} # only for testing
+          tag_name: ${{ env.TAG }} # only for testing
 
   linux:
     runs-on: [self-hosted, prod, Linux, docker, cpu]
@@ -40,9 +40,9 @@ jobs:
       - run: apt -y install git-lfs
         env:
           DEBIAN_FRONTEND: noninteractive
-      - uses: actions/checkout@v4
-        with:
-          lfs: true
+      - run: git clone https://github.com/risc0/risc0 .
+      - run: git checkout ${{ github.sha }}
+      - run: git lfs pull
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
         with:
@@ -57,7 +57,7 @@ jobs:
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: tmp/cargo-risczero-${{ env.TARGET }}.tgz
-          # tag: ${{ env.TAG }} # only for testing
+          tag: ${{ env.TAG }} # only for testing
       - uses: risc0/cargo-install@2cfb0024938d23011106cbf127b393bc83fddba1
         with:
           crate: cargo-binstall
@@ -96,7 +96,7 @@ jobs:
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: tmp/cargo-risczero-${{ env.TARGET }}.tgz
-          # tag: ${{ env.TAG }} # only for testing
+          tag: ${{ env.TAG }} # only for testing
       - uses: risc0/cargo-install@2cfb0024938d23011106cbf127b393bc83fddba1
         with:
           crate: cargo-binstall
