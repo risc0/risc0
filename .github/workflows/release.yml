@@ -37,6 +37,7 @@ jobs:
       - run: apt -y install curl git libssl-dev pkg-config
       - run: curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash
       - run: apt -y install git-lfs
+      - run: rm -rf .git
       - run: git clone https://github.com/risc0/risc0 .
       - run: git config --global --add safe.directory $PWD
       - run: git checkout ${{ github.sha }}
