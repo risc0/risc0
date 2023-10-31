@@ -26,7 +26,6 @@ fn main() -> anyhow::Result<()> {
         Err(std::env::VarError::NotPresent) => None,
         Err(e) => bail!("malformed env var: {}", e),
     };
-    println!("{}", ECDSA_VERIFY_PATH);
     let mut profiler = pprof_out
         .as_ref()
         .map(|path| Profiler::new(&path, ECDSA_VERIFY_ELF))
