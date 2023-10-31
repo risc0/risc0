@@ -198,7 +198,7 @@ impl TraceCallback for TraceProxy {
                 })),
             })),
         };
-        log::debug!("tx: {request:?}");
+        log::trace!("tx: {request:?}");
         self.conn.send(request)?;
 
         Ok(())

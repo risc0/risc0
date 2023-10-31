@@ -29,7 +29,7 @@ fn main() -> anyhow::Result<()> {
         .map(|path| Profiler::new(&path, FIBONACCI_ELF))
         .transpose()?;
 
-    let iterations = 1000;
+    let iterations: u32 = 1000;
 
     {
         // Build the executor env.
@@ -39,7 +39,7 @@ fn main() -> anyhow::Result<()> {
                 builder.trace_callback(p.make_trace_callback());
             }
             builder
-                .write_slice(&[iterations])
+                .write(&iterations)?
                 .build()
                 .map_err(|e| anyhow!("environment build failed: {:?}", e))?
         };
