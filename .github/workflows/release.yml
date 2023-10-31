@@ -46,6 +46,8 @@ jobs:
     steps:
       - run: apt update
       - run: apt -y install curl git git-lfs libssl-dev pkg-config
+        env:
+          DEBIAN_FRONTEND: noninteractive
       - uses: actions/checkout@v3
         with:
           lfs: true
