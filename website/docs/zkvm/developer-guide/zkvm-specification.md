@@ -37,12 +37,12 @@ without preemption, so there is also no support for atomic instructions.
 
 The following table summarizes the layout of the zkVM memory
 
-| Address Range | name | Description |
-| --- | ----------- | --- |
-| `0x00000000 - 0x000003ff` | Invalid page | This page of memory is invalid, so that dereferencing a NULL address will result in a failure |
-| `0x00000400 - 0x0BFFFFFF` | Guest Memory | Contains code, heap, and stack of the guest program |
-| `0x0C000000 - 0x0CFFFFFF` | System Memory | Contains RISC-V registers and non-leaf merkle tree nodes for the page table |
-| `0x0D000000 - 0x0DFFFFFF` | Page Table | Contains the Page Table |
+| Address Range             | Name          | Description                                                                                   |
+| ------------------------- | ------------- | --------------------------------------------------------------------------------------------- |
+| `0x00000000 - 0x000003ff` | Invalid page  | This page of memory is invalid, so that dereferencing a NULL address will result in a failure |
+| `0x00000400 - 0x0BFFFFFF` | Guest Memory  | Contains code, heap, and stack of the guest program                                           |
+| `0x0C000000 - 0x0CFFFFFF` | System Memory | Contains RISC-V registers and non-leaf merkle tree nodes for the page table                   |
+| `0x0D000000 - 0x0DFFFFFF` | Page Table    | Contains the Page Table                                                                       |
 
 ## zkVM Memory Model
 
