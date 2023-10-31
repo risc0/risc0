@@ -1,4 +1,4 @@
-# zkVM Technical Fact Sheet
+# zkVM Technical Specification
 
 Like many other execution environments, the zkVM it has unique characteristics
 that developers may find helpful when programming. The following description of
