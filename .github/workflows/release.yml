@@ -11,8 +11,8 @@ on:
 
 env:
   RISC0_TOOLCHAIN_VERSION: test-release-2
-  # TAG: v0.19.0-rc.3
-  VERSION: 0.19.0-rc.3
+  # TAG: v0.19.0-rc.4
+  VERSION: 0.19.0-rc.4
 
 jobs:
   release:
