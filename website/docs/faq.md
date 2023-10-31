@@ -284,4 +284,5 @@ A: Like other zk-STARKs, RISC Zero’s implementation makes it cryptographically
 - If the binary is modified, then the receipt’s seal will not match the ImageID of the expected binary.
 - If the execution is modified, then the execution trace will be invalid.
 - If the output is modified, then the journal’s hash will not match the hash recorded in the receipt.
+
 </details>
