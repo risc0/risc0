@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use crate::alpha::{
-    responses::{SessionStatusRes, SnarkStatusRes},
+    responses::{Quotas, SessionStatusRes, SnarkStatusRes},
     Client, SdkErr, SessionId, SnarkId,
 };
 
@@ -108,6 +108,15 @@ pub async fn snark_status(bonsai_client: Client, snark: SnarkId) -> Result<Snark
 /// Useful to download a [SessionId] receipt_url
 pub async fn download(bonsai_client: Client, url: String) -> Result<Vec<u8>, SdkErr> {
     tokio::task::spawn_blocking(move || bonsai_client.download(&url))
+        .await
+        .map_err(|err| SdkErr::InternalServerErr(format!("{err}")))?
+}
+
+/// Fetches your current users quotas
+///
+/// Returns the [Quotas] structure with relevant data on cycle budget, quotas etc.
+pub async fn quotas(bonsai_client: Client) -> Result<Quotas, SdkErr> {
+    tokio::task::spawn_blocking(move || bonsai_client.quotas())
         .await
         .map_err(|err| SdkErr::InternalServerErr(format!("{err}")))?
 }
