@@ -54,6 +54,7 @@ jobs:
         env:
           DEBIAN_FRONTEND: noninteractive
       - uses: actions/checkout@v3
+        with:
           lfs: true
       - run: git lfs checkout
       - uses: ./.github/actions/rustup
