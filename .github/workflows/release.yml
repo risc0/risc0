@@ -34,7 +34,7 @@ jobs:
         with:
           crate: cargo-release
           version: "0.24"
-      - run: cargo release publish --execute --no-confirm
+      - run: cargo release publish --execute --no-confirm --allow-branch HEAD
 
   linux:
     runs-on: [self-hosted, prod, Linux, docker, cpu]
