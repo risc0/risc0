@@ -232,7 +232,7 @@ jobs:
             --guest-name test_method \
             template-test
         shell: bash
-      - run: cargo build --release --manifest-path ${{ runner.temp }}/template-test/Cargo.toml
+      - run: cargo run --release --manifest-path ${{ runner.temp }}/template-test/Cargo.toml
       - run: ${{ runner.temp }}/template-test/target/release/host
 
   crates-validator:

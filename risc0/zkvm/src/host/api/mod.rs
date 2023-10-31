@@ -139,7 +139,7 @@ impl ParentProcessConnector {
     fn spawn_fail(&self) -> String {
         format!(
             "Could not launch zkvm: \"{}\". \n
-            Use `cargo risczero install` to install the latest zkvm.",
+            Use `cargo binstall cargo-risczero` to install the latest zkvm.",
             self.server_path.to_string_lossy()
         )
     }
@@ -148,11 +148,7 @@ impl ParentProcessConnector {
 impl Connector for ParentProcessConnector {
     fn connect(&self) -> Result<ConnectionWrapper> {
         let addr = self.listener.local_addr()?;
-        let server_path = self
-            .server_path
-            .canonicalize()
-            .with_context(|| self.spawn_fail())?;
-        let child = Command::new(&server_path)
+        let child = Command::new(&self.server_path)
             .arg("--port")
             .arg(addr.port().to_string())
             .spawn()
