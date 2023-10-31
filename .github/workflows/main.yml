@@ -2,8 +2,6 @@ name: CI
 
 on:
   merge_group:
-  push:
-    branches: [morgan/s3-sccache]
   pull_request:
     branches: [main, "release-*"]
     paths-ignore:
