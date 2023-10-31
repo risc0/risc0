@@ -81,6 +81,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           lfs: true
+      - run: git lfs checkout
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
         with:
