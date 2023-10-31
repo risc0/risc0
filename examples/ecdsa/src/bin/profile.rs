@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use anyhow::{anyhow, bail};
-use ecdsa_methods::{ECDSA_VERIFY_ELF, ECDSA_VERIFY_PATH};
+use ecdsa_methods::ECDSA_VERIFY_ELF;
 use k256::ecdsa::{signature::Signer, Signature, SigningKey};
 use rand_core::OsRng;
 use risc0_zkvm::{default_executor, ExecutorEnv, Profiler};

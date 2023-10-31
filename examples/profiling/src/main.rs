@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use anyhow::{anyhow, bail};
-use fibonacci_methods::{FIBONACCI_ELF, FIBONACCI_PATH};
+use fibonacci_methods::FIBONACCI_ELF;
 use risc0_zkvm::{default_executor, ExecutorEnv, Profiler};
 
 fn main() -> anyhow::Result<()> {
