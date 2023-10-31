@@ -33,17 +33,23 @@ The zkVM does not support interrupts or exceptions and there is no built-in
 notion of a scheduler. The zkVM runs programs using a single-thread environment
 without preemption, so there is also no need for atomic instructions.
 
-## zkVM Memory Model
-
-The zkVM executes instruction in the order they appear in the ELF. In other words,
-instructions are never reordered and the zkVM's memory model is sequentially
-consistent. Unlike many processors, the zkVM has no notion of memory caches
-and cache-coherency protocols implemented in the zkVM.
-
 ## zkVM Memory Layout
 
+The following table summarizes the layout of the zkVM memory
 
-## zkVM ECALLS
+| Address Range | name | Description |
+| --- | ----------- | --- |
+| `0x00000000 - 0x000003ff` | Invalid page | This page of memory is invalid, so that dereferencing a NULL address will result in a failure |
+| `0x00000400 - 0x0BFFFFFF` | Guest Memory | Contains code, heap, and stack of the guest program |
+| `0x0C000000 - 0x0CFFFFFF` | System Memory | Contains RISC-V registers and non-leaf merkle tree nodes for the page table |
+| `0x0D000000 - 0x0DFFFFFF` | Page Table | Contains the Page Table |
 
+
+## zkVM Memory Model
+
+The zkVM executes instruction in the order they appear in the ELF. In other
+words, instructions are never reordered and the zkVM's memory model is
+sequentially consistent. Unlike many processors, the zkVM has no notion of
+memory caches and cache-coherency protocols implemented in the zkVM.
 
 [OsDevWiki]: https://wiki.osdev.org/Main_Page
