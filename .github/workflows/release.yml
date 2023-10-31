@@ -59,6 +59,7 @@ jobs:
       - uses: ./.github/actions/sccache
         with:
           key: ${{ env.TARGET }}
+      - run: git lfs checkout
       - run: cargo build -p cargo-risczero --release
       - run: |
           mkdir -p tmp/pkg
