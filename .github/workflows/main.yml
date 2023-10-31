@@ -3,7 +3,7 @@ name: CI
 on:
   merge_group:
   pull_request:
-    branches: [main, "release-*"]
+    branches: [main, "release-*", morgan/s3-sccache]
     paths-ignore:
       - "website/**"
   workflow_dispatch:
