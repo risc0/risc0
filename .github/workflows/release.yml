@@ -55,11 +55,12 @@ jobs:
       - uses: actions/checkout@v3
         with:
           lfs: true
+      - run: env
+      - run: git lfs checkout
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
         with:
           key: ${{ env.TARGET }}
-      - run: git lfs checkout
       - run: cargo build -p cargo-risczero --release
       - run: |
           mkdir -p tmp/pkg
