@@ -59,20 +59,20 @@ If you run into problems, don't be a stranger!
 You can file an issue on [these docs] or the [examples], and we're happy to answer questions on [Discord].
 
 [zkVM application]: ../
-[receipt]: ../../terminology#receipt
-[validity proof]: ../../terminology#proof
-[execution]: ../../terminology#execution-trace
-[verified]: ../../terminology#verify
-[journal]: ../../terminology#journal
-[seal]: ../../terminology#seal
-[guest program]: ../../terminology#guest-program
-[Image ID]: ../../terminology#image-id
-[Sessions]: ../../terminology#session
-[segments]: ../../terminology#segment
+[receipt]: /terminology#receipt
+[validity proof]: /terminology#proof
+[execution]: /terminology#execution-trace
+[verified]: /terminology#verify
+[journal]: /terminology#journal
+[seal]: /terminology#seal
+[guest program]: /terminology#guest-program
+[Image ID]: /terminology#image-id
+[Sessions]: /terminology#session
+[segments]: /terminology#segment
 [receipt.verify()]: https://docs.rs/risc0-zkvm/0.18/risc0_zkvm/struct.Receipt.html#method.verify
 [receipt.journal]: https://docs.rs/risc0-zkvm/0.18/risc0_zkvm/struct.Receipt.html#structfield.journal
-[verify]: ../../terminology#verify
-[Verifying]: ../../terminology#verify
+[verify]: /terminology#verify
+[Verifying]: /terminology#verify
 [examples]: https://github.com/risc0/risc0/tree/v0.18.0/examples/
 [these docs]: https://github.com/risc0/website
 [Discord]: https://discord.gg/risczero

@@ -1,6 +1,5 @@
 ---
 slug: /
-displayed_sidebar: GettingStartedSidebar
 ---
 
 # Introduction
@@ -100,5 +99,5 @@ Follow us on [Twitter](https://twitter.com/risczero) and [YouTube](https://www.y
 
 [The RISC Zero zkVM]: zkvm/zkvm_overview.md
 [Bonsai]: bonsai/bonsai-overview.md
-[The RISC Zero Proof System]: proof-system/proof-system.md
+[The RISC Zero Proof System]: /resources/proof-system/proof-system
 [computational receipt]: https://docs.rs/risc0-zkvm/0.18/risc0_zkvm/receipt

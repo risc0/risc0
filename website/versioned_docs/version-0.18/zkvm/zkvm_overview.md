@@ -83,26 +83,26 @@ _Curious about Zeth?_<br/>
 Read the [article](https://risczero.com/news/zeth-release).
 
 [cargo]: https://doc.rust-lang.org/cargo/index.html
-[imageID]: ../terminology#image-id
+[imageID]: /terminology#image-id
 [Bonsai]: ../bonsai/
 [receipt]: developer-guide/receipts
-[ELF binary]: ../terminology#elf-binary
-[execution trace]: ../terminology#execution-trace
-[executor]: ../terminology#executor
+[ELF binary]: /terminology#elf-binary
+[execution trace]: /terminology#execution-trace
+[executor]: /terminology#executor
 [feature flags]: https://github.com/risc0/risc0#feature-flags
 [guest program]: developer-guide/guest-code-101
 [guest programs]: developer-guide/guest-code-101
-[host]: ../terminology#host-program
+[host]: /terminology#host-program
 [host program]: developer-guide/host-code-101
 [performance benchmarks]: benchmarks
-[prove]: ../terminology#validity-proof
-[proofs]: ../terminology#validity-proof
-[prover]: ../terminology#prover
-[publicly shared outputs]: ../terminology#journal
-[verify]: ../terminology#verify
-[zero-knowledge virtual machine]: ../terminology#zero-knowledge-virtual-machine-zkvm
+[prove]: /terminology#validity-proof
+[proofs]: /terminology#validity-proof
+[prover]: /terminology#prover
+[publicly shared outputs]: /terminology#journal
+[verify]: /terminology#verify
+[zero-knowledge virtual machine]: /terminology#zero-knowledge-virtual-machine-zkvm
 [zkvm]: https://github.com/risc0/risc0#readme
 [zkVM Quick Start]: ./quickstart.md
 [zkVM example applications]: https://github.com/risc0/risc0/tree/v0.18.0/examples
-[session]: ../terminology#session
+[session]: /terminology#session
 [Host Code 101]: developer-guide/host-code-101

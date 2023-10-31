@@ -70,26 +70,26 @@ You can file an issue on [these docs] or the [examples], and we're happy to answ
 [Bonsai]: ../../bonsai/
 [Discord]: https://discord.gg/risczero
 [examples]: https://github.com/risc0/risc0/tree/v0.18.0/examples/
-[execute]: ../../terminology.md#execute
+[execute]: /terminology#execute
 [execution environment]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.ExecutorEnv.html
-[executor]: ../../terminology.md#executor
-[guest]: ../../terminology.md#guest
+[executor]: /terminology#executor
+[guest]: /terminology#guest
 [`guest` module]: https://docs.rs/risc0-zkvm/0.18/risc0_zkvm/guest
-[guest program]: ../../terminology.md#guest-program
+[guest program]: /terminology#guest-program
 [Hello World demo]: https://github.com/risc0/risc0/tree/v0.18.0/examples/hello-world
 [Hello World Tutorial]: https://github.com/risc0/risc0/blob/v0.18.0/examples/hello-world/tutorial.md
-[host]: ../../terminology.md#host
-[journal]: ../../terminology.md#journal
+[host]: /terminology#host
+[journal]: /terminology#journal
 [JSON demo]: https://github.com/risc0/risc0/blob/main/examples/json/src/main.rs
-[method]: ../../terminology.md#method
-[prove]: ../../terminology.md#prove
-[Prover]: ../../terminology.md#prover
-[proves]: ../../terminology.md#validity-proof
-[receipt]: ../../terminology.md#receipt
+[method]: /terminology#method
+[prove]: /terminology#prove
+[Prover]: /terminology#prover
+[proves]: /terminology#validity-proof
+[receipt]: /terminology#receipt
 [Receipts]: receipts.md
 [`risc0-zkvm` Rust crate]: https://docs.rs/risc0-zkvm
 [these docs]: https://github.com/risc0/website
-[verifies]: ../../terminology.md#verify
+[verifies]: /terminology#verify
 [verifying receipts]: https://docs.rs/risc0-zkvm/0.18.0/risc0_zkvm/struct.Receipt.html#method.verify
 [zkVM Quick Start]: ../quickstart.md
 [zkVM Overview]: ../zkvm_overview.md

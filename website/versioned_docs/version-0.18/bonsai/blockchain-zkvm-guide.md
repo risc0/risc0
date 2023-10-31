@@ -2,7 +2,7 @@
 
 _(To start building on [Bonsai], check out the [Bonsai Quick Start] page.)_
 
-In order to prove code using Bonsai, you need to write the code you want proven. That is, you'll need to write a [guest program] for the [zkVM](../terminology#zero-knowledge-virtual-machine-zkvm). This guide will focus on the core techniques a blockchain developer will need to write zkVM code to prove in Bonsai. We have [a number of guides](../zkvm) for developing for the zkVM more generally if you want to dive deeper!
+In order to prove code using Bonsai, you need to write the code you want proven. That is, you'll need to write a [guest program] for the [zkVM](/terminology#zero-knowledge-virtual-machine-zkvm). This guide will focus on the core techniques a blockchain developer will need to write zkVM code to prove in Bonsai. We have [a number of guides](../zkvm) for developing for the zkVM more generally if you want to dive deeper!
 
 ## The role of the zkVM in Bonsai
 
@@ -32,7 +32,7 @@ Because the zkVM supports general-purpose instructions, you can use standard Rus
 
 ## Why am I seeing errors?
 
-We have an [FAQ](../faq.md) that discusses some frequently encountered problems. You can also ask us questions on [Discord].
+We have an [FAQ](/faq) that discusses some frequently encountered problems. You can also ask us questions on [Discord].
 
 ## Diving deeper
 
@@ -45,13 +45,13 @@ We have [extensive resources](../zkvm) on writing zkVM code. Many of these resou
 [Rust]: https://www.rust-lang.org/
 [Bonsai Quick Start]: quickstart.md
 [Discord]: https://discord.gg/risczero
-[guest program]: ../terminology#guest-program
-[Guest programs]: ../terminology#guest-program
-[proves]: ../terminology#validity-proof
-[executed]: ../terminology#execute
-[verify]: ../terminology#verify
-[guest]: ../terminology#guest
-[host]: ../terminology#host
-[receipt]: ../terminology#receipt
-[committing]: ../terminology#commit
-[journal]: ../terminology#journal
+[guest program]: /terminology#guest-program
+[Guest programs]: /terminology#guest-program
+[proves]: /terminology#validity-proof
+[executed]: /terminology#execute
+[verify]: /terminology#verify
+[guest]: /terminology#guest
+[host]: /terminology#host
+[receipt]: /terminology#receipt
+[committing]: /terminology#commit
+[journal]: /terminology#journal

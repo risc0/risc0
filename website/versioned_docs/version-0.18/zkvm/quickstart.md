@@ -70,7 +70,7 @@ Additional information is available in the [starter template](https://github.com
 Options such as GPU acceleration and skipping the proof generation are documented in the [feature flags].
 
 [zkVM]: ../zkvm/
-[guest program]: ../terminology.md#guest-program
+[guest program]: /terminology#guest-program
 [Bonsai]: ../bonsai/bonsai-overview.md
 [install]: ./install.md
 [feature flags]: https://github.com/risc0/risc0#feature-flags
