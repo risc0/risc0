@@ -29,9 +29,11 @@ must be mapped to addresses divisible by `0x4`.
 We extend the `RV32IM` ISA by using the `ECALL` instruction. We do this in order
 to add instructions that are specific to zero knowledge computing.
 
-The zkVM does not support interrupts or exceptions and there is no built-in
-notion of a scheduler. The zkVM runs programs using a single-thread environment
-without preemption, so there is also no support for atomic instructions.
+The zkVM does not support interrupts and there is no built-in notion of a
+scheduler. The zkVM runs programs using a single-thread environment without
+preemption, so there is also no support for atomic instructions. If the
+execution raises an exception such as an unaligned access, the execution
+terminates without executing exception handlers.
 
 ## zkVM Memory Layout
 
