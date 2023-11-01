@@ -51,14 +51,14 @@ runs:
 
 
     - uses: risc0/actions-cache@v1
-        with:
-          #endpoint: play.min.io # optional, default s3.amazonaws.com
-          insecure: false # optional, use http instead of https. default false
-          accessKey: ${{ steps.aws-creds.outputs.aws-access-key-id }} # required
-          secretKey: ${{ steps.aws-creds.outputs.aws-secret-access-key }} # required
-          sessionToken: ${{ steps.creds.outputs.aws-session-token }} # optional
-          bucket: risc0-ci-cache # required
-          use-fallback: true # optional, use github actions cache fallback, default true
+      with:
+        #endpoint: play.min.io # optional, default s3.amazonaws.com
+        insecure: false # optional, use http instead of https. default false
+        accessKey: ${{ steps.aws-creds.outputs.aws-access-key-id }} # required
+        secretKey: ${{ steps.aws-creds.outputs.aws-secret-access-key }} # required
+        sessionToken: ${{ steps.creds.outputs.aws-session-token }} # optional
+        bucket: risc0-ci-cache # required
+        use-fallback: true # optional, use github actions cache fallback, default true
 
 #    - if: runner.os != 'macOS'
 #      name: Cache rust target + HAL_CACHE
