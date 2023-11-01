@@ -86,7 +86,6 @@ jobs:
       FEATURE: ${{ matrix.feature }}
       RISC0_BUILD_LOCKED: 1
       RUST_BACKTRACE: full
-      RUSTC_WRAPPER: sccache
     steps:
       # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
       - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
@@ -100,7 +99,7 @@ jobs:
         with:
           node-version: 18
       - uses: risc0/foundry-toolchain@2fe7e70b520f62368a0e3c464f997df07ede420f
-      - uses: ./.github/actions/sccache
+      - uses: ./.github/actions/s3-cache
         with:
           key: ${{ matrix.os }}-${{ matrix.feature }}
       - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
@@ -153,7 +152,6 @@ jobs:
       RISC0_PROVER: ipc
       RISC0_SERVER_PATH: ${{ github.workspace }}/target/release/r0vm
       RUST_BACKTRACE: full
-      RUSTC_WRAPPER: sccache
     steps:
       # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
       - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
@@ -165,7 +163,7 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 18
-      - uses: ./.github/actions/sccache
+      - uses: ./.github/actions/s3-cache
         with:
           key: ${{ matrix.os }}-${{ matrix.feature }}
       - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
@@ -185,7 +183,7 @@ jobs:
           # Recursive checkout required to build Solidity contracts and bindings.
           submodules: recursive
       - uses: ./.github/actions/rustup
-      - uses: ./.github/actions/sccache
+      - uses: ./.github/actions/s3-cache
         with:
           key: Linux
       - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
@@ -200,7 +198,7 @@ jobs:
       - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
       - uses: actions/checkout@v3
       - uses: ./.github/actions/rustup
-      - uses: ./.github/actions/sccache
+      - uses: ./.github/actions/s3-cache
         with:
           key: Linux
       - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
@@ -217,13 +215,12 @@ jobs:
         os: [Linux, macOS]
     env:
       RISC0_SERVER_PATH: ${{ github.workspace }}/target/release/r0vm
-      RUSTC_WRAPPER: sccache
     steps:
       # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
       - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
       - uses: actions/checkout@v3
       - uses: ./.github/actions/rustup
-      - uses: ./.github/actions/sccache
+      - uses: ./.github/actions/s3-cache
       - run: cargo run --bin cargo-risczero -- risczero install --version $RISC0_TOOLCHAIN_VERSION
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -250,13 +247,12 @@ jobs:
         os: [Linux, macOS]
     env:
       RISC0_BUILD_LOCKED: 1
-      RUSTC_WRAPPER: sccache
     steps:
       # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
       - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
       - uses: actions/checkout@v3
       - uses: ./.github/actions/rustup
-      - uses: ./.github/actions/sccache
+      - uses: ./.github/actions/s3-cache
       - run: cargo run --bin cargo-risczero -- risczero install --version $RISC0_TOOLCHAIN_VERSION
         env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -272,7 +268,6 @@ jobs:
     runs-on: ubuntu-latest-8-cores
     env:
       RISC0_BUILD_LOCKED: 1
-      RUSTC_WRAPPER: sccache
     steps:
       # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
       - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
@@ -283,7 +278,7 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 18
-      - uses: ./.github/actions/sccache
+      - uses: ./.github/actions/s3-cache
       - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
