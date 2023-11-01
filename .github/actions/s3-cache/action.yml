@@ -10,22 +10,22 @@ runs:
   steps:
     - if: runner.os == 'Linux' && runner.arch == 'X64'
       run: |
-        CACHE_ARCH="x86_64-unknown-linux-musl"
+        echo "CACHE_ARCH=x86_64-unknown-linux-musl" >> $GITHUB_ENV
       shell: bash
 
     - if: runner.os == 'macOS' && runner.arch == 'X64'
       run: |
-        CACHE_ARCH="x86_64-apple-darwin"
+        echo "CACHE_ARCH=x86_64-apple-darwin" >> $GITHUB_ENV
       shell: bash
 
     - if: runner.os == 'macOS' && runner.arch == 'ARM64'
       run: |
-        CACHE_ARCH="aarch64-apple-darwin"
+        echo "CACHE_ARCH=aarch64-apple-darwin" >> $GITHUB_ENV
       shell: bash
 
     - if: runner.os == 'Linux' &&  runner.arch == 'ARM64'
       run: |
-        CACHE_ARCH="aarch64-unknown-linux-musl"
+        echo "CACHE_ARCH=aarch64-unknown-linux-musl" >> $GITHUB_ENV
       shell: bash
 
     - name: Configure AWS Credentials
@@ -41,8 +41,8 @@ runs:
       with:
         path: |
           target/
-          ~/.cache/risc0
           ~/.cargo/
+          ~/.cache/risc0
         key: public/risc0-rust-cache-$CACHE_ARCH-${{ hashFiles('Cargo.lock') }}
         bucket: risc0-ci-cache
         accessKey: ${{ steps.ci-creds.outputs.aws-access-key-id }}
