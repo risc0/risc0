@@ -1,9 +1,9 @@
 // @ts-check
 // Note: type annotations allow type checking and IDEs autocompletion!
 
-import { themes as prismThemes } from 'prism-react-renderer';
-import katex from 'rehype-katex';
-import math from 'remark-math';
+import { themes as prismThemes } from "prism-react-renderer";
+import katex from "rehype-katex";
+import math from "remark-math";
 import rustCode from "./src/remark/rust";
 
 const baseUrl = process.env.BASE_URL ?? "/";
@@ -42,16 +42,10 @@ export default async function createConfigAsync() {
           docs: {
             routeBasePath: "/",
             sidebarPath: require.resolve("./sidebars.js"),
-            editUrl: ({ locale, docPath }) => {
-              // We want users to submit updates to the upstream/next version!
-              // Otherwise we risk losing the update on the next release.
-              const nextVersionDocsDirPath = "docs";
-              return `https://github.com/risc0/risc0/edit/main/website/${nextVersionDocsDirPath}/${docPath}`;
-            },
             remarkPlugins: [math, rustCode],
             rehypePlugins: [katex],
           },
-          blog: {},
+          blog: false,
           pages: {},
           theme: {
             customCss: require.resolve("./src/css/custom.css"),
@@ -62,14 +56,31 @@ export default async function createConfigAsync() {
 
     plugins: [
       [
-        '@docusaurus/plugin-content-docs',
+        "@docusaurus/plugin-content-docs",
         {
-          id: 'resources',
-          path: 'resources',
-          routeBasePath: 'resources',
-          sidebarPath: './sidebarsResources.js',
+          id: "api",
+          path: "api",
+          routeBasePath: "api",
+          sidebarPath: "./sidebarsApi.js",
           remarkPlugins: [math, rustCode],
           rehypePlugins: [katex],
+          editUrl: ({ locale, docPath }) => {
+            // We want users to submit updates to the upstream/next version!
+            // Otherwise we risk losing the update on the next release.
+            return `https://github.com/risc0/risc0/edit/main/website/api/${docPath}`;
+          },
+        },
+      ],
+
+      [
+        "@docusaurus/plugin-client-redirects",
+        {
+          createRedirects(routePath) {
+
+          },
+          redirects: [
+
+          ],
         },
       ],
     ],
@@ -101,27 +112,29 @@ export default async function createConfigAsync() {
           logo: {
             alt: "RISC Zero Logo",
             src: "img/logo.png",
+            href: "https://risczero.com/",
           },
           items: [
-            { to: "/", label: "Introduction", position: "left" },
+            { to: "/api/", label: "Introduction", position: "left" },
             {
               position: "left",
               label: "Terminology",
-              to: "/resources/terminology",
+              to: "/terminology",
             },
             {
               position: "left",
               label: "FAQ",
-              to: "/resources/faq",
+              to: "/faq",
             },
             {
               position: "left",
-              to: "/resources/studyclub",
               label: "Resources",
+              to: "/studyclub",
             },
             {
               type: "docsVersionDropdown",
               position: "right",
+              docsPluginId: "api",
             },
             {
               href: "https://github.com/risc0",

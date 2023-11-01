@@ -1,4 +1,4 @@
-import { visit } from 'unist-util-visit';
+import { visit } from "unist-util-visit";
 
 // Remove lines starting with `# `. This is code to make the doc tests pass
 // but should not be displayed.
