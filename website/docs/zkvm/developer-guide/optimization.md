@@ -235,7 +235,7 @@ In the host code, `ExecutorEnvBuilder::write` function is used to serialize and 
 ```rust
 let request: PasswordRequest = // ...
 let env = ExecutorEnv::builder()
-        .write(&request).unwrap())
+        .write(&request).unwrap()
         .build()
         .unwrap();
 ```
