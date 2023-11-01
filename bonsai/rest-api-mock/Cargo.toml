@@ -7,9 +7,6 @@ license = { workspace = true }
 homepage = { workspace = true }
 repository = { workspace = true }
 
-[package.metadata.release]
-release = false
-
 [dependencies]
 anyhow = "1.0"
 axum = { version = "0.6", features = ["macros", "headers"] }
