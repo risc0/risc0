@@ -90,7 +90,7 @@ You can file an issue on [these docs] or the [examples], and we're happy to answ
 [`risc0-zkvm` Rust crate]: https://docs.rs/risc0-zkvm
 [these docs]: https://github.com/risc0/website
 [verifies]: ../../terminology.md#verify
-[verifying receipts]: https://docs.rs/risc0-zkvm/0.18.0/risc0_zkvm/struct.Receipt.html#method.verify
+[verifying receipts]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Receipt.html#method.verify
 [zkVM Quick Start]: ../quickstart.md
 [zkVM Overview]: ../zkvm_overview.md
 [zkVM Application]: ../zkvm_overview.md
