@@ -71,18 +71,6 @@ export default async function createConfigAsync() {
           },
         },
       ],
-
-      [
-        "@docusaurus/plugin-client-redirects",
-        {
-          createRedirects(routePath) {
-
-          },
-          redirects: [
-
-          ],
-        },
-      ],
     ],
 
     stylesheets: [
