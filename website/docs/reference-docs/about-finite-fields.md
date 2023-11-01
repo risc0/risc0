@@ -55,4 +55,4 @@ More generally, multiplying by a 4th root of unity is a rotation of order 4.`
 - [A. Sutherland's notes on finite fields and integer arithmetic](https://math.mit.edu/classes/18.783/2017/LectureNotes3.pdf)
 - [Splitting $x^{n}-1$ over a finite field](https://math.stackexchange.com/questions/2511486/)
 
-[receipt]: https://docs.rs/risc0-zkvm/0.18/risc0_zkvm/struct.Receipt.html
+[receipt]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Receipt.html

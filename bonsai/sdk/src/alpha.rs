@@ -18,10 +18,10 @@ use reqwest::{blocking::Client as BlockingClient, header};
 use thiserror::Error;
 
 use self::responses::{
-    CreateSessRes, ImgUploadRes, ProofReq, SessionStatusRes, SnarkReq, SnarkStatusRes, UploadRes,
-    VersionInfo,
+    CreateSessRes, ImgUploadRes, ProofReq, Quotas, SessionStatusRes, SnarkReq, SnarkStatusRes,
+    UploadRes, VersionInfo,
 };
-use crate::{API_KEY_HEADER, VERSION_HEADER};
+use crate::{API_KEY_ENVVAR, API_KEY_HEADER, API_URL_ENVVAR, VERSION_HEADER};
 
 /// Bonsai Alpha SDK error classes
 #[derive(Debug, Error)]
@@ -178,6 +178,21 @@ pub mod responses {
         /// Supported versions of the risc0-zkvm crate
         pub risc0_zkvm: Vec<String>,
     }
+
+    /// User quotas and cycle budgets
+    #[derive(Deserialize, Serialize)]
+    pub struct Quotas {
+        /// Executor cycle limit, in millions of cycles
+        pub exec_cycle_limit: u64,
+        /// Max parallel proving units
+        pub max_parallelism: u64,
+        /// Max concurrent proofs
+        pub concurrent_proofs: u64,
+        /// Current cycle budget remaining
+        pub cycle_budget: u64,
+        /// Lifetime cycles used
+        pub cycle_usage: u64,
+    }
 }
 
 /// Proof Session representation
@@ -203,6 +218,25 @@ impl SessionId {
             return Err(SdkErr::InternalServerErr(body));
         }
         Ok(res.json::<SessionStatusRes>()?)
+    }
+
+    /// Fetches the zkvm guest logs for a session
+    ///
+    /// After the Execution phase of proving is completed, you can use this method
+    /// to download the logs of the zkvm guest. This is a merged log of stderr and stdout
+    /// <https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.ExecutorEnvBuilder.html#method.stdout>
+    ///
+    /// It should contain the output of all writes to those file descriptors. But does NOT include output
+    /// from `env::log`
+    pub fn logs(&self, client: &Client) -> Result<String, SdkErr> {
+        let url = format!("{}/sessions/logs/{}", client.url, self.uuid);
+        let res = client.client.get(url).send()?;
+
+        if !res.status().is_success() {
+            let body = res.text()?;
+            return Err(SdkErr::InternalServerErr(body));
+        }
+        Ok(res.text()?)
     }
 }
 
@@ -271,9 +305,9 @@ impl Client {
     ///     .expect("Failed to construct sdk client");
     /// ```
     pub fn from_env(risc0_version: &str) -> Result<Self, SdkErr> {
-        let api_url = std::env::var("BONSAI_API_URL").map_err(|_| SdkErr::MissingApiUrl)?;
+        let api_url = std::env::var(API_URL_ENVVAR).map_err(|_| SdkErr::MissingApiUrl)?;
         let api_url = api_url.strip_suffix('/').unwrap_or(&api_url);
-        let api_key = std::env::var("BONSAI_API_KEY").map_err(|_| SdkErr::MissingApiKey)?;
+        let api_key = std::env::var(API_KEY_ENVVAR).map_err(|_| SdkErr::MissingApiKey)?;
 
         let client = construct_req_client(&api_key, risc0_version)?;
 
@@ -476,6 +510,19 @@ impl Client {
             .send()?
             .json::<VersionInfo>()?)
     }
+
+    // - /user
+
+    /// Fetches your current users quotas
+    ///
+    /// Returns the [Quotas] structure with relevant data on cycle budget, quotas etc.
+    pub fn quotas(&self) -> Result<Quotas, SdkErr> {
+        Ok(self
+            .client
+            .get(format!("{}/user/quotas", self.url))
+            .send()?
+            .json::<Quotas>()?)
+    }
 }
 
 #[cfg(test)]
@@ -504,8 +551,8 @@ mod tests {
         let apikey = TEST_KEY.to_string();
         temp_env::with_vars(
             vec![
-                ("BONSAI_API_URL", Some(url.clone())),
-                ("BONSAI_API_KEY", Some(apikey)),
+                (API_URL_ENVVAR, Some(url.clone())),
+                (API_KEY_ENVVAR, Some(apikey)),
             ],
             || {
                 let client = super::Client::from_env(TEST_VERSION).unwrap();
@@ -519,10 +566,7 @@ mod tests {
         let url = "http://127.0.0.1/".to_string();
         let apikey = TEST_KEY.to_string();
         temp_env::with_vars(
-            vec![
-                ("BONSAI_API_URL", Some(url)),
-                ("BONSAI_API_KEY", Some(apikey)),
-            ],
+            vec![(API_URL_ENVVAR, Some(url)), (API_KEY_ENVVAR, Some(apikey))],
             || {
                 let client = super::Client::from_env(TEST_VERSION).unwrap();
                 assert_eq!(client.url, "http://127.0.0.1");
@@ -703,6 +747,35 @@ mod tests {
     }
 
     #[test]
+    fn session_logs() {
+        let server = MockServer::start();
+
+        let uuid = Uuid::new_v4().to_string();
+        let session_id = SessionId::new(uuid);
+        let response = "Hello\nWorld";
+
+        let create_mock = server.mock(|when, then| {
+            when.method(GET)
+                .path(format!("/sessions/logs/{}", session_id.uuid))
+                .header(API_KEY_HEADER, TEST_KEY)
+                .header(VERSION_HEADER, TEST_VERSION);
+            then.status(200)
+                .header("content-type", "text/plain")
+                .json_body_obj(&response);
+        });
+
+        let server_url = format!("http://{}", server.address());
+        let client =
+            super::Client::from_parts(server_url, TEST_KEY.to_string(), TEST_VERSION).unwrap();
+
+        let logs = session_id.logs(&client).unwrap();
+
+        assert_eq!(logs, "\"Hello\\nWorld\"");
+
+        create_mock.assert();
+    }
+
+    #[test]
     fn snark_create() {
         let server = MockServer::start();
 
@@ -791,6 +864,41 @@ mod tests {
             .expect("Failed to construct client");
         let info = client.version().expect("Failed to fetch version route");
         assert_eq!(&info.risc0_zkvm[0], TEST_VERSION);
+        get_mock.assert();
+    }
+
+    #[test]
+    fn quotas() {
+        let server = MockServer::start();
+
+        let response = Quotas {
+            concurrent_proofs: 10,
+            cycle_budget: 100000,
+            cycle_usage: 1000000,
+            exec_cycle_limit: 500,
+            max_parallelism: 2,
+        };
+
+        let get_mock = server.mock(|when, then| {
+            when.method(GET)
+                .path("/user/quotas")
+                .header(API_KEY_HEADER, TEST_KEY)
+                .header(VERSION_HEADER, TEST_VERSION);
+            then.status(200)
+                .header("content-type", "application/json")
+                .json_body_obj(&response);
+        });
+
+        let server_url = format!("http://{}", server.address());
+        let client = super::Client::from_parts(server_url, TEST_KEY.to_string(), TEST_VERSION)
+            .expect("Failed to construct client");
+        let quota = client.quotas().expect("Failed to fetch version route");
+        assert_eq!(quota.concurrent_proofs, response.concurrent_proofs);
+        assert_eq!(quota.cycle_budget, response.cycle_budget);
+        assert_eq!(quota.cycle_usage, response.cycle_usage);
+        assert_eq!(quota.exec_cycle_limit, response.exec_cycle_limit);
+        assert_eq!(quota.max_parallelism, response.max_parallelism);
+
         get_mock.assert();
     }
 }
