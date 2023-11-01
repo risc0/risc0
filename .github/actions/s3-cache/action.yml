@@ -1,9 +1,9 @@
 name: S3 Cache Install
 description: Install cargo cache in S3 Bucket `risc0-ci-cache/public`
-#inputs:
-#  key:
-#    required: true
-#    default: rust-cache-${{ runner.os }}-${{ runner.arch }}
+inputs:
+  key:
+    required: true
+    default: rust-cache-${{ runner.os }}-${{ runner.arch }}
 
 runs:
   using: composite
