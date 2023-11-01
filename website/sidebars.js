@@ -76,13 +76,18 @@ const sidebars = {
         },
         {
           type: "doc",
-          label: "Acceleration",
-          id: "zkvm/developer-guide/acceleration",
+          label: "Guest Optimization",
+          id: "zkvm/developer-guide/optimization",
         },
         {
           type: "doc",
           label: "Profiling",
           id: "zkvm/developer-guide/profiling",
+        },
+        {
+          type: "doc",
+          label: "Cryptography Acceleration",
+          id: "zkvm/developer-guide/acceleration",
         },
         {
           type: "doc",

@@ -1,6 +1,6 @@
-# Profiling guest code
+# Guest Profiling Guide
 
-In this guide, we'll explore how to effectively profile guest code within the RISC0 ZKVM, offering insights and tools to improve performance.
+In this guide, we'll explore how to effectively profile guest code within the RISC Zero zkVM, offering insights and tools to improve performance.
 We'll be using three different implementations of the Fibonacci sequence calculation to demonstrate how to profile guest code.
 You can find all the code used as example in the [profiling example].
 
