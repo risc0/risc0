@@ -130,7 +130,7 @@ Generate a [receipt] that serves as [proof] of correct execution of a [guest pro
 
 [proven]: #prover
 [prover]: #prover
-[Prover documentation]: https://docs.rs/risc0-zkvm/0.18/risc0_zkvm/trait.Prover.html
+[Prover documentation]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/trait.Prover.html
 
 The portion of the [zkVM] that [executes] and [proves] a [guest program], thereby constructing a [receipt]. <br/>
 See also: [Prover documentation], [Executor]

@@ -45,6 +45,11 @@ const sidebars = {
           id: "zkvm/quickstart",
         },
         {
+          type: "doc",
+          label: "Dev Mode",
+          id: "zkvm/dev-mode",
+        },
+        {
           type: "link",
           label: "API Reference Docs",
           href: "https://docs.rs/risc0-zkvm/",
@@ -123,7 +128,7 @@ const sidebars = {
         {
           type: "link",
           label: "Proof System Rust Crate",
-          href: "https://docs.rs/risc0-zkp/0.18/risc0_zkp/",
+          href: "https://docs.rs/risc0-zkp/*/risc0_zkp/",
         },
         {
           type: "link",

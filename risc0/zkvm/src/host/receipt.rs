@@ -186,6 +186,15 @@ pub enum InnerReceipt {
     Succinct(SuccinctReceipt),
 
     /// A fake receipt for testing and development.
+    ///
+    /// This receipt is not valid and will fail verification unless the
+    /// environment variable `RISC0_DEV_MODE` is set to `true`, in which case a
+    /// pass-through 'verification' will be performed, but it *does not*
+    /// represent any meaningful attestation of receipt's integrity.
+    ///
+    /// This type solely exists to improve development experience, for further
+    /// information about development-only mode see our [dev-mode
+    /// documentation](https://dev.risczero.com/zkvm/dev-mode).
     Fake,
 }
 

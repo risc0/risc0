@@ -61,7 +61,7 @@ abstract contract BonsaiTest is Test, BonsaiCheats {
         _;
     }
 
-    /// @notice Returns whether we are using the prover and verifier in dev mode, or fully verifying.
+    /// @notice Returns whether we are using the prover and verifier in dev-mode, or fully verifying.
     function devMode() internal returns (bool) {
         return vm.envOr("RISC0_DEV_MODE", true);
     }
