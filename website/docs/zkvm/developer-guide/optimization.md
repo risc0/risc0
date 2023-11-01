@@ -420,17 +420,24 @@ A short description and associated cycle counts are listed below.
 
 ---
 
-[^1] Modern processors have endlessly complex systems of pipelining, instruction-level parallelism, micro-ops and other details that bend the concept of “cycle” and make it impossible to say definitive how many “cycles” an operation takes. It is still an good intuitive starting point and working model.
+[^1]:
+    Modern processors have endlessly complex systems of pipelining, instruction-level parallelism, micro-ops and other details that bend the concept of “cycle” and make it impossible to say definitive how many “cycles” an operation takes.
+    It is still an good intuitive starting point and working model.
 
-[^2] Here “sampling” is in quotes because the profiler actually captures the call stack at every cycle of program execution. Capturing a call stack on every cycle of execution is not done in most programs on physical CPUs for a few reasons:
+[^2]: Here “sampling” is in quotes because the profiler actually captures the call stack at every cycle of program execution. Capturing a call stack on every cycle of execution is not done in most programs on physical CPUs for a few reasons:
 
-- It would be cost prohibitive to do so for all but quite short program executions.
-- Introducing such heavy profiling would actually alter the performance characteristics in significant ways.
+    - It would be cost prohibitive to do so for all but quite short program executions.
+    - Introducing such heavy profiling would actually alter the performance characteristics in significant ways.
 
-In zkVM execution, executions are generally short and all execution is synchronous and is not subject to any deviations in behavior due to measurement overhead.
+    In zkVM execution, executions are generally short and all execution is synchronous and is not subject to any deviations in behavior due to measurement overhead.
 
-[^3] An implementation of cycle-accounting for paging operations is implemented in the [Executor](https://github.com/risc0/risc0/blob/v0.19.0/risc0/zkvm/src/host/server/exec/monitor.rs#L30-L39). (Link is to v0.19.0)
+[^3]:
+    An implementation of cycle-accounting for paging operations is implemented in the [Executor](https://github.com/risc0/risc0/blob/v0.19.0/risc0/zkvm/src/host/server/exec/monitor.rs#L30-L39). (Link is to v0.19.0)
 
-[^4] This is similar to the cryptography support such as [AES-NI](https://en.wikipedia.org/wiki/AES_instruction_set#x86_architecture_processors) or the [SHA extensions](https://en.wikipedia.org/wiki/Intel_SHA_extensions) for x86 processors. In both cases, the circuitry is extended to compute otherwise expensive operations in fewer instruction cycles.
+[^4]:
+    This is similar to the cryptography support such as [AES-NI](https://en.wikipedia.org/wiki/AES_instruction_set#x86_architecture_processors) or the [SHA extensions](https://en.wikipedia.org/wiki/Intel_SHA_extensions) for x86 processors.
+    In both cases, the circuitry is extended to compute otherwise expensive operations in fewer instruction cycles.
 
-[^5] RISC Zero has an implementation for Apple’s Metal accelerators. Unfortunately, it is does not work with the latest versions of Metal as of October 2023. See https://github.com/risc0/risc0/issues/937
+[^5]:
+    RISC Zero has an implementation for Apple’s Metal accelerators.
+    Unfortunately, it is does not work with the latest versions of Metal as of October 2023. See https://github.com/risc0/risc0/issues/937
