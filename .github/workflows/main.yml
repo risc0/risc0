@@ -127,7 +127,6 @@ jobs:
           reporter: "github-pr-check"
           github_token: ${{ secrets.GITHUB_TOKEN }}
           clippy_flags: --features $FEATURE --all-targets
-      - run: sccache --show-stats
 
   examples:
     runs-on: [self-hosted, prod, "${{ matrix.os }}", "${{ matrix.device }}"]
