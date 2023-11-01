@@ -4,7 +4,6 @@ inputs:
   key:
     required: true
     default: rust-cache-${{ runner.os }}-${{ runner.arch }}
-
 runs:
   using: composite
   steps:
@@ -28,19 +27,9 @@ runs:
         echo "SCCACHE_ARCH=aarch64-unknown-linux-musl" >> $GITHUB_ENV
       shell: bash
 
-    - name: Configure AWS Credentials
-      id: aws-creds
-      uses: aws-actions/configure-aws-credentials@v4
-      with:
-        aws-region: 'us-west-2'
-        role-to-assume: arn:aws:iam::083632199359:role/gha_oidc_risc0_cache_public_access
-        output-credentials: true
-
     - env:
         SCCACHE_URL: https://github.com/mozilla/sccache/releases/download
         SCCACHE_VERSION: v0.5.0
-        SCCACHE_BUCKET: risc0-ci-cache
-        SCCACHE_REGION: us-west-2
       run: |
         SCCACHE_FILE=sccache-$SCCACHE_VERSION-$SCCACHE_ARCH
         curl -L "$SCCACHE_URL/$SCCACHE_VERSION/$SCCACHE_FILE.tar.gz" | tar xz
@@ -49,26 +38,14 @@ runs:
         echo "$HOME/.local/bin" >> $GITHUB_PATH
       shell: bash
 
-
-    - uses: risc0/actions-cache@v1
+    - if: runner.os != 'macOS'
+      name: Cache rust target + HAL_CACHE
+      uses: risc0/rust-cache@v2.5.1
+      id: rust-cache
       with:
-        path: |
-            ~/.cache/config
-        key: private/aws-${{ env.ACCOUNT_ID }}
-        bucket: risc0-ci-cache
-        accessKey: ${{ steps.aws-creds.outputs.aws-access-key-id }}
-        secretKey: ${{ steps.aws-creds.outputs.aws-secret-access-key }}
-        sessionToken: ${{ steps.creds.outputs.aws-session-token }}
-        use-fallback: true # optional, use github actions cache fallback, default true
-
-#    - if: runner.os != 'macOS'
-#      name: Cache rust target + HAL_CACHE
-#      uses: risc0/rust-cache@v2.5.1
-#      id: rust-cache
-#      with:
-#        key: ${{ inputs.key }}
-#        # TODO: this path will not work on windows.
-#        cache-directories: ~/.cache/risc0
+        key: ${{ inputs.key }}
+        # TODO: this path will not work on windows.
+        cache-directories: ~/.cache/risc0
 
     - run: rm -f $HOME/.cargo/config
       shell: bash
