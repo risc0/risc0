@@ -111,7 +111,6 @@ Documentation for `pprof`: [github.com/google/pprof](https://github.com/google/p
 [pprof]: https://github.com/google/pprof
 [perf]: https://perf.wiki.kernel.org/index.php/Main_Page
 [Sampling CPU profilers]: https://nikhilism.com/post/2018/sampling-profiler-internals-introduction/
-
 [flamegraph]: https://www.brendangregg.com/FlameGraphs/cpuflamegraphs.html
 [ECDSA verification example]: https://github.com/risc0/risc0/tree/v0.19.0/examples/ecdsa
 [installing Go]: https://go.dev/doc/install
@@ -340,7 +339,7 @@ When building the zkVM from source, a compatible version of the CUDA toolkit nee
 - [Profile your applications](./profiling) to find where cycles are being spent.
 - Try different [compiler settings]
   - Setting `lto = "thin"` is sometimes faster than `lto = "fat"` or `lto = true`.
-  - Sometimes `opt-level = 2` is faster than `3`. Try  `s` and `z` too.
+  - Sometimes `opt-level = 2` is faster than `3`. Try `s` and `z` too.
   - Try setting `codegen-units = 1`.
 - When you need a map, use `BTreeMap` instead of `HashMap`.
 - When you need to hash data, use the [accelerated implementation of SHA-256].
@@ -357,53 +356,53 @@ When building the zkVM from source, a compatible version of the CUDA toolkit nee
 
 Table from [https://mark.theis.site/riscv/](https://mark.theis.site/riscv/), with RISC Zero cycle counts added.
 
-| Assembly | Name | Pseudocode | RISC Zero Cycles |
-| --- | --- | --- | --- |
-| LUI rd,imm | Load Upper Immediate | rd ← imm | 1 |
-| AUIPC rd,offset | Add Upper Immediate to PC | rd ← pc + offset | 1 |
-| JAL rd,offset | Jump and Link | rd ← pc + length(inst)pc ← pc + offset | 1 |
-| JALR rd,rs1,offset | Jump and Link Register | rd ← pc + length(inst)pc ← (rs1 + offset) ∧ -2 | 1 |
-| BEQ rs1,rs2,offset | Branch Equal | if rs1 = rs2 then pc ← pc + offset | 1 |
-| BNE rs1,rs2,offset | Branch Not Equal | if rs1 ≠ rs2 then pc ← pc + offset | 1 |
-| BLT rs1,rs2,offset | Branch Less Than | if rs1 < rs2 then pc ← pc + offset | 1 |
-| BGE rs1,rs2,offset | Branch Greater than Equal | if rs1 ≥ rs2 then pc ← pc + offset | 1 |
-| BLTU rs1,rs2,offset | Branch Less Than Unsigned | if rs1 < rs2 then pc ← pc + offset | 1 |
-| BGEU rs1,rs2,offset | Branch Greater than Equal Unsigned | if rs1 ≥ rs2 then pc ← pc + offset | 1 |
-| LB rd,offset(rs1) | Load Byte | rd ← s8[rs1 + offset] | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
-| LH rd,offset(rs1) | Load Half | rd ← s16[rs1 + offset] | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
-| LW rd,offset(rs1) | Load Word | rd ← s32[rs1 + offset] | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
-| LBU rd,offset(rs1) | Load Byte Unsigned | rd ← u8[rs1 + offset] | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
-| LHU rd,offset(rs1) | Load Half Unsigned | rd ← u16[rs1 + offset] | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
-| SB rs2,offset(rs1) | Store Byte | u8[rs1 + offset] ← rs2 | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
-| SH rs2,offset(rs1) | Store Half | u16[rs1 + offset] ← rs2 | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
-| SW rs2,offset(rs1) | Store Word | u32[rs1 + offset] ← rs2 | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
-| ADDI rd,rs1,imm | Add Immediate | rd ← rs1 + sx(imm) | 1 |
-| SLTI rd,rs1,imm | Set Less Than Immediate | rd ← sx(rs1) < sx(imm) | 1 |
-| SLTIU rd,rs1,imm | Set Less Than Immediate Unsigned | rd ← ux(rs1) < ux(imm) | 1 |
-| XORI rd,rs1,imm | Xor Immediate | rd ← ux(rs1) ⊕ ux(imm) | 2 |
-| ORI rd,rs1,imm | Or Immediate | rd ← ux(rs1) ∨ ux(imm) | 2 |
-| ANDI rd,rs1,imm | And Immediate | rd ← ux(rs1) ∧ ux(imm) | 2 |
-| SLLI rd,rs1,imm | Shift Left Logical Immediate | rd ← ux(rs1) « ux(imm) | 1 |
-| SRLI rd,rs1,imm | Shift Right Logical Immediate | rd ← ux(rs1) » ux(imm) | 2 |
-| SRAI rd,rs1,imm | Shift Right Arithmetic Immediate | rd ← sx(rs1) » ux(imm) | 2 |
-| ADD rd,rs1,rs2 | Add | rd ← sx(rs1) + sx(rs2) | 1 |
-| SUB rd,rs1,rs2 | Subtract | rd ← sx(rs1) - sx(rs2) | 1 |
-| SLL rd,rs1,rs2 | Shift Left Logical | rd ← ux(rs1) « rs2 | 1 |
-| SLT rd,rs1,rs2 | Set Less Than | rd ← sx(rs1) < sx(rs2) | 1 |
-| SLTU rd,rs1,rs2 | Set Less Than Unsigned | rd ← ux(rs1) < ux(rs2) | 1 |
-| XOR rd,rs1,rs2 | Xor | rd ← ux(rs1) ⊕ ux(rs2) | 2 |
-| SRL rd,rs1,rs2 | Shift Right Logical | rd ← ux(rs1) » rs2 | 2 |
-| SRA rd,rs1,rs2 | Shift Right Arithmetic | rd ← sx(rs1) » rs2 | 2 |
-| OR rd,rs1,rs2 | Or | rd ← ux(rs1) ∨ ux(rs2) | 2 |
-| AND rd,rs1,rs2 | And | rd ← ux(rs1) ∧ ux(rs2) | 2 |
-| MUL rd,rs1,rs2 | Multiply | rd ← ux(rs1) × ux(rs2) | 1 |
-| MULH rd,rs1,rs2 | Multiply High Signed Signed | rd ← (sx(rs1) × sx(rs2)) » xlen | 1 |
-| MULHSU rd,rs1,rs2 | Multiply High Signed Unsigned | rd ← (sx(rs1) × ux(rs2)) » xlen | 1 |
-| MULHU rd,rs1,rs2 | Multiply High Unsigned Unsigned | rd ← (ux(rs1) × ux(rs2)) » xlen | 1 |
-| DIV rd,rs1,rs2 | Divide Signed | rd ← sx(rs1) ÷ sx(rs2) | 2 |
-| DIVU rd,rs1,rs2 | Divide Unsigned | rd ← ux(rs1) ÷ ux(rs2) | 2 |
-| REM rd,rs1,rs2 | Remainder Signed | rd ← sx(rs1) mod sx(rs2) | 2 |
-| REMU rd,rs1,rs2 | Remainder Unsigned | rd ← ux(rs1) mod ux(rs2) | 2 |
+| Assembly            | Name                               | Pseudocode                                     | RISC Zero Cycles                                |
+| ------------------- | ---------------------------------- | ---------------------------------------------- | ----------------------------------------------- |
+| LUI rd,imm          | Load Upper Immediate               | rd ← imm                                       | 1                                               |
+| AUIPC rd,offset     | Add Upper Immediate to PC          | rd ← pc + offset                               | 1                                               |
+| JAL rd,offset       | Jump and Link                      | rd ← pc + length(inst)pc ← pc + offset         | 1                                               |
+| JALR rd,rs1,offset  | Jump and Link Register             | rd ← pc + length(inst)pc ← (rs1 + offset) ∧ -2 | 1                                               |
+| BEQ rs1,rs2,offset  | Branch Equal                       | if rs1 = rs2 then pc ← pc + offset             | 1                                               |
+| BNE rs1,rs2,offset  | Branch Not Equal                   | if rs1 ≠ rs2 then pc ← pc + offset             | 1                                               |
+| BLT rs1,rs2,offset  | Branch Less Than                   | if rs1 < rs2 then pc ← pc + offset             | 1                                               |
+| BGE rs1,rs2,offset  | Branch Greater than Equal          | if rs1 ≥ rs2 then pc ← pc + offset             | 1                                               |
+| BLTU rs1,rs2,offset | Branch Less Than Unsigned          | if rs1 < rs2 then pc ← pc + offset             | 1                                               |
+| BGEU rs1,rs2,offset | Branch Greater than Equal Unsigned | if rs1 ≥ rs2 then pc ← pc + offset             | 1                                               |
+| LB rd,offset(rs1)   | Load Byte                          | rd ← s8[rs1 + offset]                          | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
+| LH rd,offset(rs1)   | Load Half                          | rd ← s16[rs1 + offset]                         | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
+| LW rd,offset(rs1)   | Load Word                          | rd ← s32[rs1 + offset]                         | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
+| LBU rd,offset(rs1)  | Load Byte Unsigned                 | rd ← u8[rs1 + offset]                          | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
+| LHU rd,offset(rs1)  | Load Half Unsigned                 | rd ← u16[rs1 + offset]                         | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
+| SB rs2,offset(rs1)  | Store Byte                         | u8[rs1 + offset] ← rs2                         | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
+| SH rs2,offset(rs1)  | Store Half                         | u16[rs1 + offset] ← rs2                        | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
+| SW rs2,offset(rs1)  | Store Word                         | u32[rs1 + offset] ← rs2                        | 1 if [paged-in](#paging) 1094 to 5130 otherwise |
+| ADDI rd,rs1,imm     | Add Immediate                      | rd ← rs1 + sx(imm)                             | 1                                               |
+| SLTI rd,rs1,imm     | Set Less Than Immediate            | rd ← sx(rs1) < sx(imm)                         | 1                                               |
+| SLTIU rd,rs1,imm    | Set Less Than Immediate Unsigned   | rd ← ux(rs1) < ux(imm)                         | 1                                               |
+| XORI rd,rs1,imm     | Xor Immediate                      | rd ← ux(rs1) ⊕ ux(imm)                         | 2                                               |
+| ORI rd,rs1,imm      | Or Immediate                       | rd ← ux(rs1) ∨ ux(imm)                         | 2                                               |
+| ANDI rd,rs1,imm     | And Immediate                      | rd ← ux(rs1) ∧ ux(imm)                         | 2                                               |
+| SLLI rd,rs1,imm     | Shift Left Logical Immediate       | rd ← ux(rs1) « ux(imm)                         | 1                                               |
+| SRLI rd,rs1,imm     | Shift Right Logical Immediate      | rd ← ux(rs1) » ux(imm)                         | 2                                               |
+| SRAI rd,rs1,imm     | Shift Right Arithmetic Immediate   | rd ← sx(rs1) » ux(imm)                         | 2                                               |
+| ADD rd,rs1,rs2      | Add                                | rd ← sx(rs1) + sx(rs2)                         | 1                                               |
+| SUB rd,rs1,rs2      | Subtract                           | rd ← sx(rs1) - sx(rs2)                         | 1                                               |
+| SLL rd,rs1,rs2      | Shift Left Logical                 | rd ← ux(rs1) « rs2                             | 1                                               |
+| SLT rd,rs1,rs2      | Set Less Than                      | rd ← sx(rs1) < sx(rs2)                         | 1                                               |
+| SLTU rd,rs1,rs2     | Set Less Than Unsigned             | rd ← ux(rs1) < ux(rs2)                         | 1                                               |
+| XOR rd,rs1,rs2      | Xor                                | rd ← ux(rs1) ⊕ ux(rs2)                         | 2                                               |
+| SRL rd,rs1,rs2      | Shift Right Logical                | rd ← ux(rs1) » rs2                             | 2                                               |
+| SRA rd,rs1,rs2      | Shift Right Arithmetic             | rd ← sx(rs1) » rs2                             | 2                                               |
+| OR rd,rs1,rs2       | Or                                 | rd ← ux(rs1) ∨ ux(rs2)                         | 2                                               |
+| AND rd,rs1,rs2      | And                                | rd ← ux(rs1) ∧ ux(rs2)                         | 2                                               |
+| MUL rd,rs1,rs2      | Multiply                           | rd ← ux(rs1) × ux(rs2)                         | 1                                               |
+| MULH rd,rs1,rs2     | Multiply High Signed Signed        | rd ← (sx(rs1) × sx(rs2)) » xlen                | 1                                               |
+| MULHSU rd,rs1,rs2   | Multiply High Signed Unsigned      | rd ← (sx(rs1) × ux(rs2)) » xlen                | 1                                               |
+| MULHU rd,rs1,rs2    | Multiply High Unsigned Unsigned    | rd ← (ux(rs1) × ux(rs2)) » xlen                | 1                                               |
+| DIV rd,rs1,rs2      | Divide Signed                      | rd ← sx(rs1) ÷ sx(rs2)                         | 2                                               |
+| DIVU rd,rs1,rs2     | Divide Unsigned                    | rd ← ux(rs1) ÷ ux(rs2)                         | 2                                               |
+| REM rd,rs1,rs2      | Remainder Signed                   | rd ← sx(rs1) mod sx(rs2)                       | 2                                               |
+| REMU rd,rs1,rs2     | Remainder Unsigned                 | rd ← ux(rs1) mod ux(rs2)                       | 2                                               |
 
 ### RISC Zero ECALL Operations
 
@@ -411,12 +410,12 @@ RISC-V specifies a mechanism for environment calls (ecalls), which may be specif
 In RISC Zero’s zkVM, ecalls are specified for a number of core operations.
 A short description and associated cycle counts are listed below.
 
-| Selector | Description | Operations | Cycles |
-| --- | --- | --- | --- |
-| HALT | Halt execution | Set system exit code to a0. Load 32-bytes output digest from [a1]. Set output digest global. Halt execution. | 1 + paging |
-| SOFTWARE | Receive data from the host | Write host-provided data to the memory range [a0 .. a0 + a1 * 4]  | 1 + ⌈ a1 / 4 ⌉ + paging |
-| SHA-256 | SHA-256 hash | Compute the Merkle–Damgård compression of the region [a2 .. a2 + a3 * 64] with initial state [a1]. Write the digest to [a0]. | 6 + 68 * a2 + paging |
-| BIGINT | 256-bit modular operation | if a1 = 0, [a0] ← [a2] ⋅ [a3] (mod [a4]) | 10 + paging |
+| Selector | Description                | Operations                                                                                                                   | Cycles                  |
+| -------- | -------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | ----------------------- |
+| HALT     | Halt execution             | Set system exit code to a0. Load 32-bytes output digest from [a1]. Set output digest global. Halt execution.                 | 1 + paging              |
+| SOFTWARE | Receive data from the host | Write host-provided data to the memory range [a0 .. a0 + a1 * 4]                                                             | 1 + ⌈ a1 / 4 ⌉ + paging |
+| SHA-256  | SHA-256 hash               | Compute the Merkle–Damgård compression of the region [a2 .. a2 + a3 * 64] with initial state [a1]. Write the digest to [a0]. | 6 + 68 \* a2 + paging   |
+| BIGINT   | 256-bit modular operation  | if a1 = 0, [a0] ← [a2] ⋅ [a3] (mod [a4])                                                                                     | 10 + paging             |
 
 ---
 
@@ -424,16 +423,15 @@ A short description and associated cycle counts are listed below.
     Modern processors have endlessly complex systems of pipelining, instruction-level parallelism, micro-ops and other details that bend the concept of “cycle” and make it impossible to say definitive how many “cycles” an operation takes.
     It is still an good intuitive starting point and working model.
 
-[^2]: Here “sampling” is in quotes because the profiler actually captures the call stack at every cycle of program execution. Capturing a call stack on every cycle of execution is not done in most programs on physical CPUs for a few reasons:
+[^2]:
+    Here “sampling” is in quotes because the profiler actually captures the call stack at every cycle of program execution. Capturing a call stack on every cycle of execution is not done in most programs on physical CPUs for a few reasons:
 
     - It would be cost prohibitive to do so for all but quite short program executions.
     - Introducing such heavy profiling would actually alter the performance characteristics in significant ways.
 
     In zkVM execution, executions are generally short and all execution is synchronous and is not subject to any deviations in behavior due to measurement overhead.
 
-[^3]:
-    An implementation of cycle-accounting for paging operations is implemented in the [Executor](https://github.com/risc0/risc0/blob/v0.19.0/risc0/zkvm/src/host/server/exec/monitor.rs#L30-L39). (Link is to v0.19.0)
-
+[^3]: An implementation of cycle-accounting for paging operations is implemented in the [Executor](https://github.com/risc0/risc0/blob/v0.19.0/risc0/zkvm/src/host/server/exec/monitor.rs#L30-L39). (Link is to v0.19.0)
 [^4]:
     This is similar to the cryptography support such as [AES-NI](https://en.wikipedia.org/wiki/AES_instruction_set#x86_architecture_processors) or the [SHA extensions](https://en.wikipedia.org/wiki/Intel_SHA_extensions) for x86 processors.
     In both cases, the circuitry is extended to compute otherwise expensive operations in fewer instruction cycles.
