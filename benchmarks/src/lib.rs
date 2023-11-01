@@ -189,24 +189,6 @@ pub fn get_image(path: &str) -> MemoryImage {
     MemoryImage::new(&program, PAGE_SIZE as u32).unwrap()
 }
 
-// pub fn exec_compute(image: MemoryImage) -> (u32, u32, Duration, Session) {
-//     let mut exec = ExecutorImpl::new(env.clone(), image.clone()).unwrap();
-//     let start = Instant::now();
-//     let session = exec.run().unwrap();
-//     let elapsed = start.elapsed();
-//     let segments = session.resolve().unwrap();
-//     let (exec_cycles, prove_cycles) =
-//         segments
-//             .iter()
-//             .fold((0, 0), |(exec_cycles, prove_cycles), segment| {
-//                 (
-//                     exec_cycles + segment.cycles,
-//                     prove_cycles + (1 << segment.po2),
-//                 )
-//             });
-//     (prove_cycles as u32, exec_cycles as u32, elapsed, session)
-// }
-
 pub fn get_cycles(segments: Vec<Segment>) -> (u32, u32) {
     let (exec_cycles, prove_cycles) =
         segments
@@ -219,18 +201,6 @@ pub fn get_cycles(segments: Vec<Segment>) -> (u32, u32) {
             });
     (prove_cycles as u32, exec_cycles as u32)
 }
-
-// pub fn init_gpu_kernel() {
-//     let image = get_image(risc0_benchmark_methods::ITER_SHA2_PATH);
-//     let mut guest_input = Vec::from([0u8; 36]);
-//     guest_input[0] = 1u8;
-//     let env = ExecutorEnv::builder()
-//         .write(&guest_input)
-//         .unwrap()
-//         .build()
-//         .unwrap();
-//     exec_compute(image, env);
-// }
 
 pub fn init_logging() {
     env_logger::init();

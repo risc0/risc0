@@ -17,8 +17,6 @@
 use std::path::PathBuf;
 
 use clap::{Parser, Subcommand};
-#[cfg(any(feature = "metal", feature = "cuda"))]
-use risc0_benchmark::init_gpu_kernel;
 use risc0_benchmark::{benches::*, init_logging, run_jobs};
 
 #[derive(Parser)]
@@ -54,9 +52,6 @@ enum Command {
 
 fn main() {
     init_logging();
-
-    // #[cfg(any(feature = "metal", feature = "cuda"))]
-    // init_gpu_kernel();
 
     let cli = Cli::parse();
 
@@ -100,9 +95,9 @@ fn main() {
         run_jobs::<iter_blake3::Job>(&cli.out, iter_blake3::new_jobs());
     }
 
-    // // if cli.command == Command::All || cli.command == Command::IterPedersen {
-    // //     run_jobs::<iter_pedersen::Job>(&cli.out, iter_pedersen::new_jobs());
-    // // }
+    // if cli.command == Command::All || cli.command == Command::IterPedersen {
+    //     run_jobs::<iter_pedersen::Job>(&cli.out, iter_pedersen::new_jobs());
+    // }
 
     if cli.command == Command::All || cli.command == Command::EcdsaVerify {
         println!("Benchmarking ecdsa-verify");
