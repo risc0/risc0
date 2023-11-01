@@ -4,6 +4,12 @@ inputs:
   key:
     required: true
     default: rust-cache-${{ runner.os }}-${{ runner.arch }}
+
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+
 runs:
   using: composite
   steps:
