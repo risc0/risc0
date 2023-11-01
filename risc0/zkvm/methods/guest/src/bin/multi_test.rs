@@ -27,6 +27,7 @@ use risc0_zkp::core::hash::sha::testutil::test_sha_impl;
 use risc0_zkvm::{
     guest::{env, memory_barrier, sha},
     sha::{Digest, Sha256},
+    ReceiptMetadata,
 };
 use risc0_zkvm_methods::multi_test::{MultiTestSpec, SYS_MULTI_TEST};
 use risc0_zkvm_platform::{
@@ -92,8 +93,19 @@ pub fn main() {
             // Call an external function to make sure it's detected during profiling.
             profile_test_func1()
         }
-        MultiTestSpec::Fail => {
-            panic!("MultiTestSpec::Fail invoked");
+        MultiTestSpec::Panic => {
+            panic!("MultiTestSpec::Panic invoked");
+        }
+        MultiTestSpec::Fault => unsafe {
+            asm!("sw x0, 1(x0)");
+        },
+        MultiTestSpec::Halt(exit_code) => {
+            env::exit(exit_code);
+        }
+        MultiTestSpec::PauseContinue(exit_code) => {
+            env::log("before");
+            env::pause(exit_code);
+            env::log("after");
         }
         MultiTestSpec::ReadWriteMem { values } => {
             for (addr, value) in values.into_iter() {
@@ -159,10 +171,12 @@ pub fn main() {
             }
             env::commit(&buf);
         }
-        MultiTestSpec::PauseContinue => {
-            env::log("before");
-            env::pause();
-            env::log("after");
+        MultiTestSpec::SysVerify { image_id, journal } => {
+            env::verify(image_id, &journal).unwrap();
+        }
+        MultiTestSpec::SysVerifyIntegrity { metadata_words } => {
+            let meta: ReceiptMetadata = risc0_zkvm::serde::from_slice(&metadata_words).unwrap();
+            env::verify_integrity(&meta).unwrap();
         }
         MultiTestSpec::EchoStdout { nbytes, fd } => {
             // Unaligned buffer size to exercise things a little bit.
