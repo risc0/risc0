@@ -29,7 +29,7 @@
 //! [`cargo-risczero`](https://crates.io/crates/cargo-risczero) tool:
 //!
 //! ```sh
-//! cargo install cargo-risczero
+//! cargo binstall cargo-risczero
 //! cargo risczero install
 //! ```
 //!
