@@ -20,7 +20,7 @@ This biggest difference is that the zkVM is implemented with [arithmetic circuit
 [RISC-V architecture]: /reference-docs/about-risc-v
 [x86]: https://en.wikipedia.org/wiki/X86
 [ARM]: https://en.wikipedia.org/wiki/ARM_architecture_family
-[arithmetic circuits]: https://dev.risczero.com/proof-system/stark-by-hand
+[arithmetic circuits]: /reference-docs/about-arithmetic-circuits
 
 ### What is a “cycle”?
 
@@ -46,7 +46,7 @@ If you are new to optimization, or new to Rust, we recommend you read this guide
 Performance is complex, in the zkVM as on a physical CPU.
 Don’t assume you know what the bottlenecks are. Measure and experiment.
 
-If you make a function 100x faster (or ∞x faster) but it only takes 1% of your execution time, you’ll see a &lt;1% improvement in performance.
+If you make a function 100x faster (or ∞x faster) but it only takes 1% of your execution time, you’ll see less than 1% improvement in performance.
 This is generally referred to as [Amdahl’s Law](https://en.wikipedia.org/wiki/Amdahl%27s_law), and practically it means you shouldn't waste your time optimizing something that's not the taking a significant portion of execution time.
 
 ### Measuring by printing to console
