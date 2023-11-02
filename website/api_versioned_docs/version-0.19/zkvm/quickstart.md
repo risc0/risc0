@@ -26,7 +26,7 @@ If you need to install Rust or encounter problems, take a look at our [full inst
 ## 2. Initialize a New Project
 
 Once you've installed the toolchain, you can initialize a new project using the [starter template] by running:
-[starter template]: https://github.com/risc0/risc0/tree/main/templates/rust-starter
+[starter template]: https://github.com/risc0/risc0/tree/release-0.19/templates/rust-starter
 
 ```bash
 cargo risczero new my_project
@@ -84,7 +84,7 @@ The readme files on the [zkVM demo applications] show `cargo` commands for local
 ### Remote Proving
 
 To run the zkVM remotely using [Bonsai], [request access] and set the environment variables `BONSAI_API_KEY=<YOUR_API_KEY>` and `BONSAI_API_URL=<BONSAI_URL>`.
-Additional information is available in the [starter template](https://github.com/risc0/risc0/tree/main/templates/rust-starter#running-proofs-remotely-on-bonsai)
+Additional information is available in the [starter template](https://github.com/risc0/risc0/tree/release-0.19/templates/rust-starter#running-proofs-remotely-on-bonsai)
 
 ### Other options
 
@@ -99,10 +99,10 @@ Options such as GPU acceleration and skipping the proof generation are documente
 [Bonsai]: ../bonsai/bonsai-overview.md
 [install]: ./install.md
 [feature flags]: https://github.com/risc0/risc0#feature-flags
-[zkVM demo applications]: https://github.com/risc0/risc0/tree/v0.19.0/examples
-[cargo risczero]: https://docs.rs/cargo-risczero/*/cargo_risczero
-[Hello World tutorial]: https://github.com/risc0/risc0/tree/main/examples/hello-world/tutorial.md
-[demo applications]: https://github.com/risc0/risc0/tree/v0.19.0/examples
+[zkVM demo applications]: https://github.com/risc0/risc0/tree/release-0.19/examples
+[cargo risczero]: https://docs.rs/cargo-risczero/0.19
+[Hello World tutorial]: https://github.com/risc0/risc0/tree/release-0.19/examples/hello-world/tutorial.md
+[demo applications]: https://github.com/risc0/risc0/tree/release-0.19/examples
 [Bonsai Quick Start]: ../bonsai/quickstart.md
 [request access]: https://bonsai.xyz/apply
 [dev-mode]: ./dev-mode.md
