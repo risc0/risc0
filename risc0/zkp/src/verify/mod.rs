@@ -33,6 +33,7 @@ use crate::{
 };
 
 #[derive(PartialEq)]
+#[non_exhaustive]
 pub enum VerificationError {
     ReceiptFormatError,
     ControlVerificationError,

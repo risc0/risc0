@@ -42,7 +42,6 @@ Then, the remaining steps will flow as above. The following example explains how
 The following example assumes that the Bonsai Relay is up and running with the server API enabled,
 and that the memory image of your `ELF` is already registered against Bonsai with a given `IMAGE_ID` as its identifier.
 
-<!-- TODO(victor): Rework this example to make it actually build and run -->
 ```rust,ignore
 // initialize a relay client
 let relay_client = Client::from_parts(

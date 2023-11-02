@@ -158,7 +158,7 @@ Thanks for reading! If you have questions or feedback, we'd love to hear from yo
 
 [zkVM]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/
 [Receipt]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Receipt.html
-[Image ID]: ../terminology.md#image-id
+[Image ID]: /terminology#image-id
 [STARK]: ../reference-docs/about-starks.md
 [Winterfell]: https://github.com/facebook/winterfell
 [DEEP-ALI & FRI]: ../reference-docs/about-fri.md
@@ -168,4 +168,4 @@ Thanks for reading! If you have questions or feedback, we'd love to hear from yo
 [PLOOKUP]: https://eprint.iacr.org/2020/315.pdf
 [receipts]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Receipt.html
 [ZKP Whitepaper]: https://dev.risczero.com/proof-system-in-detail.pdf
-[fast cryptographic operations]: ../zkvm/developer-guide/acceleration.md
+[fast cryptographic operations]: /api/zkvm/developer-guide/acceleration
