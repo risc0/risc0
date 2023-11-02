@@ -71,6 +71,20 @@ export default async function createConfigAsync() {
           },
         },
       ],
+      [
+        "@docusaurus/plugin-client-redirects",
+        {
+          createRedirects(path) {
+            if (path.includes("/api/bonsai")) {
+              return [path.replace("/api/bonsai", "/bonsai"),]
+            }
+            if (path.includes("/api/zkvm")) {
+              return [path.replace("/api/zkvm", "/zkvm")]
+            }
+            return undefined;
+          },
+        }
+      ]
     ],
 
     stylesheets: [
