@@ -10,22 +10,22 @@ runs:
   steps:
     - if: runner.os == 'Linux' && runner.arch == 'X64'
       run: |
-        echo "CACHE_ARCH=x86_64-unknown-linux-musl" >> $GITHUB_ENV
+        echo "SCCACHE_ARCH=x86_64-unknown-linux-musl" >> $GITHUB_ENV
       shell: bash
 
     - if: runner.os == 'macOS' && runner.arch == 'X64'
       run: |
-        echo "CACHE_ARCH=x86_64-apple-darwin" >> $GITHUB_ENV
+        echo "SCCACHE_ARCH=x86_64-apple-darwin" >> $GITHUB_ENV
       shell: bash
 
     - if: runner.os == 'macOS' && runner.arch == 'ARM64'
       run: |
-        echo "CACHE_ARCH=aarch64-apple-darwin" >> $GITHUB_ENV
+        echo "SCCACHE_ARCH=aarch64-apple-darwin" >> $GITHUB_ENV
       shell: bash
 
     - if: runner.os == 'Linux' &&  runner.arch == 'ARM64'
       run: |
-        echo "CACHE_ARCH=aarch64-unknown-linux-musl" >> $GITHUB_ENV
+        echo "SCCACHE_ARCH=aarch64-unknown-linux-musl" >> $GITHUB_ENV
       shell: bash
 
     - name: Configure AWS Credentials
@@ -48,7 +48,7 @@ runs:
         SCCACHE_URL: https://github.com/mozilla/sccache/releases/download
         SCCACHE_VERSION: v0.5.0
         SCCACHE_BUCKET: risc0-ci-cache
-        SCCACHE_S3_KEY_PREFIX: public/risc0-rust-cache-${{ env.CACHE_ARCH }}
+        SCCACHE_S3_KEY_PREFIX: public/risc0-rust-cache-${{ env.SCCACHE_ARCH }}
         SCCACHE_REGION: us-west-2
       run: |
 #        touch $HOME/.aws/credentials
@@ -57,7 +57,7 @@ runs:
 #        echo "aws_secret_access_key=${{ steps.aws-creds.outputs.aws-secret-access-key }}" >> $HOME/.aws/credentials
 #        echo "aws_session_token=${{ steps.aws-creds.outputs.aws-session-token }}" >> $HOME/.aws/credentials
 #        cat ~/.aws/credentials
-        SCCACHE_FILE=sccache-$SCCACHE_VERSION-$CACHE_ARCH
+        SCCACHE_FILE=sccache-$SCCACHE_VERSION-$SCCACHE_ARCH
         curl -L "$SCCACHE_URL/$SCCACHE_VERSION/$SCCACHE_FILE.tar.gz" | tar xz
         mkdir -p $HOME/.local/bin
         mv -f $SCCACHE_FILE/sccache $HOME/.local/bin/sccache
@@ -71,11 +71,11 @@ runs:
 #          target/
 #          ~/.cargo/
 #          ~/.cache/risc0
-#        key: public/risc0-rust-cache-${{ env.CACHE_ARCH }}
+#        key: public/risc0-rust-cache-${{ env.SCCACHE_ARCH }}
 #        bucket: risc0-ci-cache
 #        accessKey: ${{ steps.aws-creds.outputs.aws-access-key-id }}
 #        secretKey: ${{ steps.aws-creds.outputs.aws-secret-access-key }}
 #        sessionToken: ${{ steps.aws-creds.outputs.aws-session-token }}
 #        use-fallback: false
 #        restore-keys: |
-#          public/risc0-rust-cache-${{ env.CACHE_ARCH }}
+#          public/risc0-rust-cache-${{ env.SCCACHE_ARCH }}
