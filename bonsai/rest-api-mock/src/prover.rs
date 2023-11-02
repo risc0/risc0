@@ -19,8 +19,8 @@ use std::{
 
 use anyhow::Context;
 use risc0_zkvm::{
-    default_executor, ExecutorEnv, InnerReceipt, MemoryImage, Program, Receipt, GUEST_MAX_MEM,
-    PAGE_SIZE,
+    default_executor, receipt_metadata::MaybePruned, sha::Digest, ExecutorEnv, InnerReceipt,
+    MemoryImage, Program, Receipt, ReceiptMetadata, GUEST_MAX_MEM, PAGE_SIZE,
 };
 use tokio::sync::mpsc;
 
@@ -109,9 +109,15 @@ impl Prover {
 
                 let receipt = Receipt {
                     inner: InnerReceipt::Fake {
-                        metadata: session.get_metadata()?,
+                        metadata: ReceiptMetadata {
+                            pre: MaybePruned::Pruned(Digest::ZERO),
+                            post: MaybePruned::Pruned(Digest::ZERO),
+                            exit_code: session.exit_code,
+                            input: Digest::ZERO,
+                            output: None.into(),
+                        },
                     },
-                    journal: session.journal.unwrap_or_default(),
+                    journal: session.journal,
                 };
                 let receipt_bytes = bincode::serialize(&receipt)?;
                 self.storage
