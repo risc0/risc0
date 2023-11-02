@@ -1,7 +1,6 @@
 ---
 sidebar_position: 5
 slug: /terminology
-displayed_sidebar: GettingStartedSidebar
 ---
 
 # Key Terminology
@@ -9,7 +8,7 @@ displayed_sidebar: GettingStartedSidebar
 ### Circuit
 
 [circuit]: #circuit
-[Arithmetic Circuits]: reference-docs/about-arithmetic-circuits.md
+[Arithmetic Circuits]: /reference-docs/about-arithmetic-circuits
 
 A mathematical construct that acts as the "CPU" of the [zkVM] in a manner that enables creating [proofs]. <br/>
 See also: [Arithmetic Circuits]
