@@ -31,7 +31,7 @@
 [install-rust]: https://doc.rust-lang.org/cargo/getting-started/installation.html
 
 > WARNING: This software is still experimental, we do not recommend it for
-> production use (see Security section).
+> production usage (see Security section).
 
 RISC Zero is a zero-knowledge verifiable general computing platform based on
 [zk-STARKs][zk-proof] and the [RISC-V] microarchitecture.
@@ -55,7 +55,7 @@ entry point that runs the code of the method.  Additionally, one can compute for
 a given method its *image ID* which is a special type of cryptographic hash of
 the ELF file, and is required for verification.
 
-Next, the host program runs and proves the method inside the zkVM.  The logical
+Next, the host program runs and proves the method inside the zkVM. The logical
 RISC-V machine running inside the zkVM is called the *guest* and the prover
 running the zkVM is called the *host*.  The guest and the host can communicate
 with each other during the execution of the method, but the host cannot modify
@@ -166,4 +166,4 @@ The following feature flags are present in one or more of the crates listed abov
 
 ## License
 
-This project is licensed under the Apache2 license. See [LICENSE](LICENSE).
+This project is released under the Apache2 license. See [LICENSE](LICENSE).
