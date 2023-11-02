@@ -36,18 +36,41 @@ runs:
         role-to-assume: arn:aws:iam::083632199359:role/gha_oidc_risc0_cache_public_access
         output-credentials: true
 
-    - name: Set Up CI Cache
-      uses: risc0/actions-cache@v1
-      with:
-        path: |
-          target/
-          ~/.cargo/
-          ~/.cache/risc0
-        key: public/risc0-rust-cache-${{ env.CACHE_ARCH }}
-        bucket: risc0-ci-cache
-        accessKey: ${{ steps.aws-creds.outputs.aws-access-key-id }}
-        secretKey: ${{ steps.aws-creds.outputs.aws-secret-access-key }}
-        sessionToken: ${{ steps.aws-creds.outputs.aws-session-token }}
-        use-fallback: false
-        restore-keys: |
-          public/risc0-rust-cache-${{ env.CACHE_ARCH }}
+#    - name: Create AWS Credentials File
+#      run: |
+#        echo "[tempcreds]" >> ~/.aws/credentials
+#        echo "aws_access_key_id=${{ steps.aws-creds.outputs.aws-access-key-id }}" >> ~/.aws/credentials
+#        echo "aws_secret_access_key=${{ steps.aws-creds.outputs.aws-secret-access-key }}" >> ~/.aws/credentials
+#        echo "aws_session_token=${{ steps.aws-creds.outputs.aws-session-token }}" >> ~/.aws/credentials
+#      shell: bash
+
+    - env:
+        SCCACHE_URL: https://github.com/mozilla/sccache/releases/download
+        SCCACHE_VERSION: v0.5.0
+        SCCACHE_BUCKET: risc0-ci-cache
+        SCCACHE_S3_KEY_PREFIX: public/risc0-rust-cache-${{ env.CACHE_ARCH }}
+        SCCACHE_REGION: us-west-2
+      run: |
+        cat ~/.aws/credentials
+        SCCACHE_FILE=sccache-$SCCACHE_VERSION-$CACHE_ARCH
+        curl -L "$SCCACHE_URL/$SCCACHE_VERSION/$SCCACHE_FILE.tar.gz" | tar xz
+        mkdir -p $HOME/.local/bin
+        mv -f $SCCACHE_FILE/sccache $HOME/.local/bin/sccache
+        echo "$HOME/.local/bin" >> $GITHUB_PATH
+      shell: bash
+
+#    - name: Set Up CI Cache
+#      uses: risc0/actions-cache@v1
+#      with:
+#        path: |
+#          target/
+#          ~/.cargo/
+#          ~/.cache/risc0
+#        key: public/risc0-rust-cache-${{ env.CACHE_ARCH }}
+#        bucket: risc0-ci-cache
+#        accessKey: ${{ steps.aws-creds.outputs.aws-access-key-id }}
+#        secretKey: ${{ steps.aws-creds.outputs.aws-secret-access-key }}
+#        sessionToken: ${{ steps.aws-creds.outputs.aws-session-token }}
+#        use-fallback: false
+#        restore-keys: |
+#          public/risc0-rust-cache-${{ env.CACHE_ARCH }}
