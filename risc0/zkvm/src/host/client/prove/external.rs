@@ -77,6 +77,7 @@ impl Executor for ExternalProver {
     fn execute(&self, env: ExecutorEnv<'_>, image: MemoryImage) -> Result<SessionInfo> {
         let client = ApiClient::new_sub_process(&self.r0vm_path)?;
         let segments_out = AssetRequest::Inline;
-        client.execute(&env, image.into(), segments_out, |_, _| Ok(()))
+        // TODO(victor)
+        client.execute(&env, image.into(), segments_out, |_, _| Ok(()), None)
     }
 }

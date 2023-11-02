@@ -68,6 +68,7 @@ impl Executor for LocalProver {
             segments,
             journal: session.journal.unwrap_or_default().into(),
             exit_code: session.exit_code,
+            profile: None, // TODO(victor)
         })
     }
 }

@@ -259,8 +259,8 @@ fn malformed_err() -> anyhow::Error {
 
 impl pb::api::Asset {
     fn as_bytes(&self) -> Result<Bytes> {
-        let bytes = match self.kind.clone().ok_or(malformed_err())? {
-            pb::api::asset::Kind::Inline(bytes) => bytes,
+        let bytes = match self.kind.as_ref().ok_or(malformed_err())? {
+            pb::api::asset::Kind::Inline(bytes) => bytes.clone(),
             pb::api::asset::Kind::Path(path) => std::fs::read(path)?,
         };
         Ok(bytes.into())
@@ -309,6 +309,9 @@ pub struct SessionInfo {
 
     /// The [ExitCode] of the session.
     pub exit_code: ExitCode,
+
+    /// A pprof formatted profile of the execution, optionally returned by the executor.
+    pub profile: Option<Asset>,
 }
 
 /// Provides information about a segment of execution.

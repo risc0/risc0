@@ -34,6 +34,7 @@ message HelloResult {
 message ExecuteRequest {
   ExecutorEnv env = 1;
   AssetRequest segments_out = 2;
+  optional AssetRequest profile_out = 3;
 }
 
 message ProveRequest {
@@ -139,6 +140,7 @@ message SessionInfo {
   uint32 segments = 1;
   bytes journal = 2;
   protos.base.ExitCode exit_code = 3;
+  optional Asset profile = 4;
 }
 
 message SegmentInfo {

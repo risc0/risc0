@@ -107,7 +107,8 @@ impl Client {
         env: &ExecutorEnv<'_>,
         binary: Binary,
         segments_out: AssetRequest,
-        callback: F,
+        segment_callback: F,
+        profile_out: Option<AssetRequest>,
     ) -> Result<SessionInfo>
     where
         F: FnMut(SegmentInfo, Asset) -> Result<()>,
@@ -119,13 +120,14 @@ impl Client {
                 pb::api::ExecuteRequest {
                     env: Some(self.make_execute_env(env, binary.try_into()?)),
                     segments_out: Some(segments_out.try_into()?),
+                    profile_out: profile_out.map(|p| p.try_into()).transpose()?,
                 },
             )),
         };
         log::trace!("tx: {request:?}");
         conn.send(request)?;
 
-        let result = self.execute_handler(callback, &mut conn, env);
+        let result = self.execute_handler(segment_callback, &mut conn, env);
 
         let code = conn.close()?;
         if code != 0 {
@@ -348,14 +350,14 @@ impl Client {
 
     fn execute_handler<F>(
         &self,
-        callback: F,
+        segment_callback: F,
         conn: &mut ConnectionWrapper,
         env: &ExecutorEnv<'_>,
     ) -> Result<SessionInfo>
     where
         F: FnMut(SegmentInfo, Asset) -> Result<()>,
     {
-        let mut callback = callback;
+        let mut segment_callback = segment_callback;
         let mut segments = Vec::new();
         loop {
             let reply: pb::api::ServerReply = conn.recv()?;
@@ -382,7 +384,7 @@ impl Client {
                                             cycles: segment.cycles,
                                         };
                                         segments.push(info.clone());
-                                        callback(info, asset)
+                                        segment_callback(info, asset)
                                     },
                                 )
                                 .into();
@@ -398,6 +400,7 @@ impl Client {
                                         .exit_code
                                         .ok_or(malformed_err())?
                                         .try_into()?,
+                                    profile: session.profile.map(|p| p.try_into()).transpose()?,
                                 }),
                                 None => Err(malformed_err()),
                             }

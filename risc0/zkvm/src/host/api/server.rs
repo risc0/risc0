@@ -342,6 +342,7 @@ impl Server {
                             segments: session.segments.len().try_into()?,
                             journal: session.journal.unwrap_or_default().bytes,
                             exit_code: Some(session.exit_code.into()),
+                            profile: None, // TODO(victor)
                         }),
                     },
                 )),
