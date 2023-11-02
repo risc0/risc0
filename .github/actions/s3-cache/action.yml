@@ -36,13 +36,13 @@ runs:
         role-to-assume: arn:aws:iam::083632199359:role/gha_oidc_risc0_cache_public_access
         output-credentials: true
 
-#    - name: Create AWS Credentials File
-#      run: |
-#        echo "[tempcreds]" >> ~/.aws/credentials
-#        echo "aws_access_key_id=${{ steps.aws-creds.outputs.aws-access-key-id }}" >> ~/.aws/credentials
-#        echo "aws_secret_access_key=${{ steps.aws-creds.outputs.aws-secret-access-key }}" >> ~/.aws/credentials
-#        echo "aws_session_token=${{ steps.aws-creds.outputs.aws-session-token }}" >> ~/.aws/credentials
-#      shell: bash
+    - name: Create AWS Credentials File
+      run: |
+        echo "[temp_creds]" >> ~/.aws/credentials
+        echo "aws_access_key_id=${{ steps.aws-creds.outputs.aws-access-key-id }}" >> ~/.aws/credentials
+        echo "aws_secret_access_key=${{ steps.aws-creds.outputs.aws-secret-access-key }}" >> ~/.aws/credentials
+        echo "aws_session_token=${{ steps.aws-creds.outputs.aws-session-token }}" >> ~/.aws/credentials
+      shell: bash
 
     - env:
         SCCACHE_URL: https://github.com/mozilla/sccache/releases/download
