@@ -21,8 +21,8 @@ Our demos show how to:
 [revm]: https://github.com/bluealloy/revm
 [ethers]: https://github.com/ethers-io/ethers.js
 [alloy]: https://github.com/alloy-rs
-[prove mate-in-one]: https://github.com/risc0/risc0/tree/v0.18.0/examples/chess#zk-checkmate
-[proofs about private data]: https://github.com/risc0/risc0/tree/main/examples/json#json-example
+[prove mate-in-one]: https://github.com/risc0/risc0/tree/release-0.19/examples/chess#zk-checkmate
+[proofs about private data]: https://github.com/risc0/risc0/tree/release-0.19/examples/json#json-example
 [prove you can find Waldo]: https://www.risczero.com/news/waldo
 [prove correct construction of Ethereum blocks]: https://risczero.com/news/zeth-release
 
@@ -103,6 +103,6 @@ Read the [article](https://risczero.com/news/zeth-release).
 [zero-knowledge virtual machine]: /terminology#zero-knowledge-virtual-machine-zkvm
 [zkvm]: https://github.com/risc0/risc0#readme
 [zkVM Quick Start]: ./quickstart.md
-[zkVM example applications]: https://github.com/risc0/risc0/tree/v0.18.0/examples
+[zkVM example applications]: https://github.com/risc0/risc0/tree/release-0.19/examples
 [session]: /terminology#session
 [Host Code 101]: developer-guide/host-code-101.md
