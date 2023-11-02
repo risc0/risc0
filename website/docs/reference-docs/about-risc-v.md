@@ -5,7 +5,7 @@
 ## Relevance in RISC Zero
 
 The simplicity of RISC-V as well as the maturity of the RISC-V ecosystem makes it ideal for a zero-knowledge virtual machine.
-RISC Zero's [zkVM](../zkvm/zkvm_overview.md) implements the RISC-V rv32im specification, which consists of the rv32i base with the multiplication extension.
+RISC Zero's [zkVM](/api/zkvm) implements the RISC-V rv32im specification, which consists of the rv32i base with the multiplication extension.
 This means that developers can write code in languages such as Rust, Go, and C, compile the code to RISC-V assembly code, and execute it on the zkVM.
 
 ## Documentation
