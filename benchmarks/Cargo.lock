@@ -532,7 +532,7 @@ dependencies = [
 
 [[package]]
 name = "bonsai-sdk"
-version = "0.5.0-rc.3"
+version = "0.5.0"
 dependencies = [
  "reqwest",
  "serde",
@@ -3224,7 +3224,7 @@ dependencies = [
  "rand_core",
  "risc0-benchmark-lib",
  "risc0-benchmark-methods",
- "risc0-zkp 0.19.0-rc.3",
+ "risc0-zkp 0.19.0",
  "risc0-zkvm",
  "risc0-zkvm-methods",
  "serde",
@@ -3250,7 +3250,7 @@ dependencies = [
 name = "risc0-benchmark-methods"
 version = "0.1.0"
 dependencies = [
- "risc0-build 0.19.0-rc.3",
+ "risc0-build 0.19.0",
 ]
 
 [[package]]
@@ -3269,13 +3269,13 @@ dependencies = [
 
 [[package]]
 name = "risc0-binfmt"
-version = "0.19.0-rc.3"
+version = "0.19.0"
 dependencies = [
  "anyhow",
  "elf",
  "log",
- "risc0-zkp 0.19.0-rc.3",
- "risc0-zkvm-platform 0.19.0-rc.3",
+ "risc0-zkp 0.19.0",
+ "risc0-zkvm-platform 0.19.0",
  "serde",
 ]
 
@@ -3295,14 +3295,14 @@ dependencies = [
 
 [[package]]
 name = "risc0-build"
-version = "0.19.0-rc.3"
+version = "0.19.0"
 dependencies = [
  "anyhow",
  "cargo_metadata",
  "docker-generate",
- "risc0-binfmt 0.19.0-rc.3",
- "risc0-zkp 0.19.0-rc.3",
- "risc0-zkvm-platform 0.19.0-rc.3",
+ "risc0-binfmt 0.19.0",
+ "risc0-zkp 0.19.0",
+ "risc0-zkvm-platform 0.19.0",
  "serde",
  "serde_json",
  "tempfile",
@@ -3310,7 +3310,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build-kernel"
-version = "0.19.0-rc.3"
+version = "0.19.0"
 dependencies = [
  "cc",
  "directories",
@@ -3321,7 +3321,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion"
-version = "0.19.0-rc.3"
+version = "0.19.0"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -3332,8 +3332,8 @@ dependencies = [
  "rand",
  "rayon",
  "risc0-circuit-recursion-sys",
- "risc0-core 0.19.0-rc.3",
- "risc0-zkp 0.19.0-rc.3",
+ "risc0-core 0.19.0",
+ "risc0-zkp 0.19.0",
  "sha2",
  "tracing",
  "zip",
@@ -3341,16 +3341,16 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion-sys"
-version = "0.19.0-rc.3"
+version = "0.19.0"
 dependencies = [
  "glob",
  "risc0-build-kernel",
- "risc0-core 0.19.0-rc.3",
+ "risc0-core 0.19.0",
 ]
 
 [[package]]
 name = "risc0-circuit-rv32im"
-version = "0.19.0-rc.3"
+version = "0.19.0"
 dependencies = [
  "anyhow",
  "cust",
@@ -3359,19 +3359,19 @@ dependencies = [
  "rand",
  "rayon",
  "risc0-circuit-rv32im-sys",
- "risc0-core 0.19.0-rc.3",
- "risc0-zkp 0.19.0-rc.3",
- "risc0-zkvm-platform 0.19.0-rc.3",
+ "risc0-core 0.19.0",
+ "risc0-zkp 0.19.0",
+ "risc0-zkvm-platform 0.19.0",
  "tracing",
 ]
 
 [[package]]
 name = "risc0-circuit-rv32im-sys"
-version = "0.19.0-rc.3"
+version = "0.19.0"
 dependencies = [
  "glob",
  "risc0-build-kernel",
- "risc0-core 0.19.0-rc.3",
+ "risc0-core 0.19.0",
 ]
 
 [[package]]
@@ -3386,7 +3386,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-core"
-version = "0.19.0-rc.3"
+version = "0.19.0"
 dependencies = [
  "bytemuck",
  "rand_core",
@@ -3394,7 +3394,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-sys"
-version = "0.19.0-rc.3"
+version = "0.19.0"
 dependencies = [
  "risc0-build-kernel",
 ]
@@ -3422,7 +3422,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkp"
-version = "0.19.0-rc.3"
+version = "0.19.0"
 dependencies = [
  "anyhow",
  "blake2",
@@ -3439,9 +3439,9 @@ dependencies = [
  "rand",
  "rand_core",
  "rayon",
- "risc0-core 0.19.0-rc.3",
+ "risc0-core 0.19.0",
  "risc0-sys",
- "risc0-zkvm-platform 0.19.0-rc.3",
+ "risc0-zkvm-platform 0.19.0",
  "serde",
  "sha2",
  "tracing",
@@ -3449,7 +3449,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "0.19.0-rc.3"
+version = "0.19.0"
 dependencies = [
  "addr2line",
  "anyhow",
@@ -3470,12 +3470,12 @@ dependencies = [
  "prost-build",
  "protobuf-src",
  "rayon",
- "risc0-binfmt 0.19.0-rc.3",
+ "risc0-binfmt 0.19.0",
  "risc0-circuit-recursion",
  "risc0-circuit-rv32im",
- "risc0-core 0.19.0-rc.3",
- "risc0-zkp 0.19.0-rc.3",
- "risc0-zkvm-platform 0.19.0-rc.3",
+ "risc0-core 0.19.0",
+ "risc0-zkp 0.19.0",
+ "risc0-zkvm-platform 0.19.0",
  "rrs-lib",
  "semver 1.0.20",
  "serde",
@@ -3487,12 +3487,12 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-methods"
-version = "0.19.0-rc.3"
+version = "0.19.0"
 dependencies = [
  "env_logger",
- "risc0-build 0.19.0-rc.3",
+ "risc0-build 0.19.0",
  "risc0-zkvm",
- "risc0-zkvm-platform 0.19.0-rc.3",
+ "risc0-zkvm-platform 0.19.0",
  "serde",
 ]
 
@@ -3504,7 +3504,7 @@ checksum = "8524b46783b58b00e9b2a4712e837093c975b23cf25bfaf99e1cf69e9011bf6b"
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "0.19.0-rc.3"
+version = "0.19.0"
 dependencies = [
  "bytemuck",
  "getrandom",
