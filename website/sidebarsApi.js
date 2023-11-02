@@ -45,6 +45,11 @@ export default {
           id: "zkvm/quickstart",
         },
         {
+          type: "doc",
+          label: "Dev Mode",
+          id: "zkvm/dev-mode"
+        },
+        {
           type: "link",
           label: "API Reference Docs",
           href: "https://docs.rs/risc0-zkvm/",
