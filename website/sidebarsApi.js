@@ -47,7 +47,7 @@ export default {
         {
           type: "doc",
           label: "Dev Mode",
-          id: "zkvm/dev-mode"
+          id: "zkvm/dev-mode",
         },
         {
           type: "link",
