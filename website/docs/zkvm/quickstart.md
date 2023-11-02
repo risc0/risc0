@@ -17,6 +17,7 @@ Welcome to the [zkVM] Quick Start page! Here are the steps between you and your 
 If you have already installed Rust via `rustup`, you can install our toolchain by running
 
 ```bash
+cargo install cargo-binstall
 cargo binstall cargo-risczero
 cargo risczero install
 ```
