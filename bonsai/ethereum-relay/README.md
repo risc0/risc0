@@ -1,7 +1,7 @@
 # Bonsai Ethereum Relay
 
 This repository provides the `bonsai-ethereum-relay`, a tool to integrate Ethereum with Bonsai.
-It is coupled with an Ethereum Smart Contract able to relay the interaction from Ethereum to Bonsai and vice versa.
+It is coupled with an Ethereum Smart Contract, able to relay the interaction from Ethereum to Bonsai and vice versa.
 
 ## Overview
 
@@ -9,7 +9,7 @@ The picture below shows a simplified overview of how users can integrate Bonsai 
 
 ![Bonsai Relay Diagram](images/bonsai_relay.png)
 
-1. Some user's logic execution of a given user smart contract gets delegated to be executed and proven on Bonsai.
+1. Some user's logic execution of a given user's smart contract gets delegated to be executed and proven on Bonsai.
    The [Bonsai Relay Contract](../ethereum/contracts/BonsaiRelay.sol) exposes an interface `Request Callback` that triggers an event that is caught by the `Ethereum Bonsai Relayer`.
 2. The relayer forwards the proof request to Bonsai.
 3. The relayer queries Bonsai to get a Snark proof of the requested computation as well as its result embedded into a journal.
@@ -118,5 +118,5 @@ To support faster development, the `Ethereum Bonsai Relay` provides a `dev-mode`
 In `dev-mode`, a mock of the Bonsai proving service will be used provides only the journal of a given executing, without any cryptographic proof.
 Since execution is much faster than proving, this mode can be used to speed-up testing and debugging.
 
-Enable `dev-mode` setting the environmental variable `RISC0_DEV_MODE=true` when starting the relayer.
+Enable the `dev-mode` setting the environmental variable `RISC0_DEV_MODE=true` when starting the relayer.
 Since there are no proofs within this mode, we also provide a [Bonsai Test Relay Contract](../ethereum/contracts/BonsaiTestRelay.sol) that skips the on-chain verification of the snark proof.
