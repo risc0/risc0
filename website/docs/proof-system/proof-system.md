@@ -30,7 +30,7 @@ The details of the RISC Zero ZK-STARK are described in our [ZKP Whitepaper] and 
 ### About the zkVM
 
 - [Video Explainer from zkHack](https://www.youtube.com/watch?v=8hwY88xJoyM&list=PLcPzhUaCxlCgig7ofeARMPwQ8vbuD6hC5&index=8)
-- [Written Explainer](../zkvm/zkvm_overview.md)
+- [Written Explainer](/api/zkvm)
 
 ### About STARKs
 
@@ -67,6 +67,6 @@ The details of the RISC Zero ZK-STARK are described in our [ZKP Whitepaper] and 
 [ZK-STARK]: ../reference-docs/about-starks.md
 [Segment]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Segment.html
 [ZKP Whitepaper]: https://www.risczero.com/proof-system-in-detail.pdf
-[Sequence Diagram]: proof-system-sequence-diagram.md
+[Sequence Diagram]: ./proof-system-sequence-diagram.md
 [RISC Zero Study Club]: https://dev.risczero.com/studyclub
 [YouTube channel]: https://www.youtube.com/@risczero
