@@ -1,8 +1,3 @@
----
-id: tech_faq
-displayed_sidebar: GettingStartedSidebar
----
-
 # FAQ
 
 ---
@@ -252,7 +247,7 @@ Because the data structures supporting all three of these need to match very car
 Q:
 How can we use the ImageID to determine if an application is altered before execution?
 </summary>
-A: The ImageID is determined from an application's compiled binary (ELF),  explained in detail <a href="https://dev.risczero.com/tech_faq#image-id">above.</a>
+A: The ImageID is determined from an application's compiled binary (ELF),  explained in detail <a href="https://dev.risczero.com/faq#image-id">above.</a>
 
 Someone wishing to confirm that a receipt corresponds to specific Rust source code can locally reproduce a binary targeting the RISC Zero zkVM using our reproducible build tool and verify that the resulting ImageID matches the ImageID in the receipt.
 

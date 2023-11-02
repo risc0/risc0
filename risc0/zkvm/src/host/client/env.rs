@@ -67,6 +67,14 @@ pub(crate) struct Assumptions {
     pub(crate) accessed: Vec<Assumption>,
 }
 
+/// Container for assumptions in the executor environment.
+#[derive(Debug, Default)]
+pub(crate) struct Assumptions {
+    pub(crate) cached: Vec<Assumption>,
+    #[cfg(feature = "prove")]
+    pub(crate) accessed: Vec<Assumption>,
+}
+
 /// The [crate::Executor] is configured from this object.
 ///
 /// The executor environment holds configuration details that inform how the
