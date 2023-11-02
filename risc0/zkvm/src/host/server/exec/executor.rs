@@ -292,18 +292,13 @@ impl<'a> ExecutorImpl<'a> {
             _ => Ok(guest_session),
         };
 
-        if let Ok(ref session) = result {
-            let total_cycles = self.total_cycles();
-            let session_cycles = self.session_cycle();
-            let segment_count = session.segments.len();
-            let execution_time = elapsed;
-
-            log::info!("total_cycles = {}", total_cycles);
-            log::info!("session_cycles = {}", session_cycles);
-            log::info!("segment_count = {}", segment_count);
-            log::info!("execution_time = {:?}", execution_time);
-            log::info!("Execution Statistics:\nTotal Cycles: {}\nSession Cycles: {}\nSegment Count: {}\nExecution Time: {:?}",
-                        total_cycles, session_cycles, segment_count, execution_time);
+        if log::log_enabled!(target: "executor", log::Level::Info) {
+            if let Ok(ref session) = result {
+                log::info!(target: "executor", "total_cycles = {}", self.total_cycles());
+                log::info!(target: "executor", "session_cycles = {}", self.session_cycle());
+                log::info!(target: "executor", "segment_count = {}", session.segments.len());
+                log::info!(target: "executor", "execution_time = {:?}", elapsed);
+            }
         }
 
         result
