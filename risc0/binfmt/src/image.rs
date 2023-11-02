@@ -27,7 +27,7 @@ use risc0_zkvm_platform::{
 };
 use serde::{Deserialize, Serialize};
 
-use crate::{elf::Program, SystemState};
+use crate::{elf::Program, Digestible, SystemState};
 
 /// An image of a zkVM guest's memory
 ///
@@ -90,7 +90,7 @@ pub fn compute_image_id(merkle_root: &Digest, pc: u32) -> Digest {
         merkle_root: *merkle_root,
         pc,
     }
-    .digest()
+    .digest::<Impl>()
 }
 
 /// Compute `ceil(a / b)` via truncated integer division.
