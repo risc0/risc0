@@ -51,12 +51,12 @@ runs:
         SCCACHE_S3_KEY_PREFIX: public/risc0-rust-cache-${{ env.CACHE_ARCH }}
         SCCACHE_REGION: us-west-2
       run: |
-        touch $HOME/.aws/credentials
-        echo "[temp_creds]" >> $HOME/.aws/credentials
-        echo "aws_access_key_id=${{ steps.aws-creds.outputs.aws-access-key-id }}" >> $HOME/.aws/credentials
-        echo "aws_secret_access_key=${{ steps.aws-creds.outputs.aws-secret-access-key }}" >> $HOME/.aws/credentials
-        echo "aws_session_token=${{ steps.aws-creds.outputs.aws-session-token }}" >> $HOME/.aws/credentials
-        cat ~/.aws/credentials
+#        touch $HOME/.aws/credentials
+#        echo "[temp_creds]" >> $HOME/.aws/credentials
+#        echo "aws_access_key_id=${{ steps.aws-creds.outputs.aws-access-key-id }}" >> $HOME/.aws/credentials
+#        echo "aws_secret_access_key=${{ steps.aws-creds.outputs.aws-secret-access-key }}" >> $HOME/.aws/credentials
+#        echo "aws_session_token=${{ steps.aws-creds.outputs.aws-session-token }}" >> $HOME/.aws/credentials
+#        cat ~/.aws/credentials
         SCCACHE_FILE=sccache-$SCCACHE_VERSION-$CACHE_ARCH
         curl -L "$SCCACHE_URL/$SCCACHE_VERSION/$SCCACHE_FILE.tar.gz" | tar xz
         mkdir -p $HOME/.local/bin
