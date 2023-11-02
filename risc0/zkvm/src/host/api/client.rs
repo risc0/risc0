@@ -469,8 +469,7 @@ impl Client {
 
     fn on_posix_read(&self, env: &ExecutorEnv<'_>, fd: u32, nread: usize) -> Result<Bytes> {
         log::debug!("on_posix_read: {fd}, {nread}");
-        let mut from_host = Vec::with_capacity(nread);
-        from_host.resize(nread, 0);
+        let mut from_host = vec![0; nread];
         let posix_io = env.posix_io.borrow();
         let reader = posix_io
             .read_fds
