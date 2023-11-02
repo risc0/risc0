@@ -23,7 +23,7 @@ Here's are the step to enable profiling:
 1. Enable the `profile` feature of the `zkvm` in your `Cargo.toml`.
 
 ```toml
-risc0-zkvm = { version = "0.18", features = ["profiler"] }
+risc0-zkvm = { version = "0.19", features = ["profiler"] }
 ```
 
 2. Initialize the profiler with your guest code.
