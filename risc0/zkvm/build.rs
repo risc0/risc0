@@ -16,8 +16,11 @@ fn main() {
     #[cfg(feature = "profiler")]
     {
         std::env::set_var("PROTOC", protobuf_src::protoc());
-        prost_build::compile_protos(&["src/host/client/profile.proto"], &["src/host/client"])
-            .unwrap();
+        prost_build::compile_protos(
+            &["src/host/profiler/profile.proto"],
+            &["src/host/profiler/"],
+        )
+        .unwrap();
     }
     #[cfg(any(feature = "client", feature = "prove"))]
     {

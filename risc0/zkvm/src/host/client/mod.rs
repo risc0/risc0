@@ -15,7 +15,5 @@
 pub(crate) mod env;
 pub(crate) mod exec;
 pub(crate) mod posix_io;
-#[cfg(feature = "profiler")]
-pub(crate) mod profiler;
 pub(crate) mod prove;
 pub(crate) mod slice_io;
