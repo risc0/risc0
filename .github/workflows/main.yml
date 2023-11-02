@@ -86,6 +86,7 @@ jobs:
       FEATURE: ${{ matrix.feature }}
       RISC0_BUILD_LOCKED: 1
       RUST_BACKTRACE: full
+      RUSTC_WRAPPER: sccache
     steps:
       # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
       - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
@@ -127,6 +128,7 @@ jobs:
           reporter: "github-pr-check"
           github_token: ${{ secrets.GITHUB_TOKEN }}
           clippy_flags: --features $FEATURE --all-targets
+      - run: sccache --show-stats
 
   examples:
     runs-on: [self-hosted, prod, "${{ matrix.os }}", "${{ matrix.device }}"]
@@ -151,6 +153,7 @@ jobs:
       RISC0_PROVER: ipc
       RISC0_SERVER_PATH: ${{ github.workspace }}/target/release/r0vm
       RUST_BACKTRACE: full
+      RUSTC_WRAPPER: sccache
     steps:
       # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
       - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
@@ -214,6 +217,7 @@ jobs:
         os: [Linux, macOS]
     env:
       RISC0_SERVER_PATH: ${{ github.workspace }}/target/release/r0vm
+      RUSTC_WRAPPER: sccache
     steps:
       # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
       - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
@@ -246,6 +250,7 @@ jobs:
         os: [Linux, macOS]
     env:
       RISC0_BUILD_LOCKED: 1
+      RUSTC_WRAPPER: sccache
     steps:
       # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
       - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
@@ -267,6 +272,7 @@ jobs:
     runs-on: ubuntu-latest-8-cores
     env:
       RISC0_BUILD_LOCKED: 1
+      RUSTC_WRAPPER: sccache
     steps:
       # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
       - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
