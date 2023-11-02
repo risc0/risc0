@@ -18,6 +18,7 @@ use std::{
     cell::RefCell,
     collections::HashMap,
     io::{BufRead, BufReader, Cursor, Read, Write},
+    mem,
     path::{Path, PathBuf},
     rc::Rc,
 };
@@ -28,15 +29,18 @@ use bytes::Bytes;
 use risc0_zkvm_platform::{self, fileno};
 use serde::Serialize;
 
-use super::{
-    exec::TraceEvent,
-    posix_io::PosixIo,
-    slice_io::{slice_io_from_fn, SliceIo, SliceIoTable},
-};
 use crate::serde::to_vec;
+use crate::{
+    host::client::{
+        exec::TraceEvent,
+        posix_io::PosixIo,
+        slice_io::{slice_io_from_fn, SliceIo, SliceIoTable},
+    },
+    Assumption,
+};
 
 /// A builder pattern used to construct an [ExecutorEnv].
-#[derive(Clone, Default)]
+#[derive(Default)]
 pub struct ExecutorEnvBuilder<'a> {
     inner: ExecutorEnv<'a>,
 }
@@ -44,11 +48,19 @@ pub struct ExecutorEnvBuilder<'a> {
 /// A callback used to collect [TraceEvent]s.
 pub type TraceCallback<'a> = dyn FnMut(TraceEvent) -> Result<()> + 'a;
 
+/// Container for assumptions in the executor environment.
+#[derive(Debug, Default)]
+pub(crate) struct Assumptions {
+    pub(crate) cached: Vec<Assumption>,
+    #[cfg(feature = "prove")]
+    pub(crate) accessed: Vec<Assumption>,
+}
+
 /// The [crate::Executor] is configured from this object.
 ///
 /// The executor environment holds configuration details that inform how the
 /// guest environment is set up prior to guest program execution.
-#[derive(Clone, Default)]
+#[derive(Default)]
 pub struct ExecutorEnv<'a> {
     pub(crate) env_vars: HashMap<String, String>,
     pub(crate) args: Vec<String>,
@@ -58,6 +70,7 @@ pub struct ExecutorEnv<'a> {
     pub(crate) slice_io: Rc<RefCell<SliceIoTable<'a>>>,
     pub(crate) input: Vec<u8>,
     pub(crate) trace: Option<Rc<RefCell<TraceCallback<'a>>>>,
+    pub(crate) assumptions: Rc<RefCell<Assumptions>>,
     pub(crate) segment_path: Option<PathBuf>,
 }
 
@@ -86,8 +99,11 @@ impl<'a> ExecutorEnvBuilder<'a> {
     ///
     /// let env = ExecutorEnv::builder().build().unwrap();
     /// ```
+    ///
+    /// After calling `build`, the [ExecutorEnvBuilder] will be reset to
+    /// default.
     pub fn build(&mut self) -> Result<ExecutorEnv<'a>> {
-        let inner = self.inner.clone();
+        let inner = mem::take(&mut self.inner);
 
         if !inner.input.is_empty() {
             let reader = Cursor::new(inner.input.clone());
@@ -285,6 +301,16 @@ impl<'a> ExecutorEnvBuilder<'a> {
             .slice_io
             .borrow_mut()
             .with_handler(channel.as_ref(), slice_io_from_fn(callback));
+        self
+    }
+
+    /// Add an [Assumption] to the [ExecutorEnv] associated assumptions.
+    ///
+    /// During execution, when the guest calls `env::verify` or
+    /// `env::verify_integrity`, this collection will be searched for an
+    /// [Assumption] that corresponds the verification call.
+    pub fn add_assumption(&mut self, assumption: Assumption) -> &mut Self {
+        self.inner.assumptions.borrow_mut().cached.push(assumption);
         self
     }
 
