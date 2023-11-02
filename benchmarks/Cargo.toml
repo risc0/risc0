@@ -42,15 +42,14 @@ zeth-guests = { git = "https://github.com/risc0/zeth", package = "zeth-guests" }
 zeth-lib = { git = "https://github.com/risc0/zeth", package = "zeth-lib" }
 zeth-primitives = { git = "https://github.com/risc0/zeth", package = "zeth-primitives" }
 
+[patch.crates-io]
+risc0-build = { path = "../risc0/build" }
+risc0-zkvm = { path = "../risc0/zkvm" }
+
 [features]
 cuda = ["risc0-zkvm/cuda"]
 metal = ["risc0-zkvm/metal"]
 default = []
-
-[patch.crates-io]
-risc0-binfmt = { path = "../risc0/binfmt" }
-risc0-build = { path = "../risc0/build" }
-risc0-zkvm = { path = "../risc0/zkvm" }
 
 # Always optimize; building and running the guest takes much longer without optimization.
 [profile.dev]
