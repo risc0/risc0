@@ -43,14 +43,11 @@ runs:
           target/
           ~/.cargo/
           ~/.cache/risc0
-        key: public/risc0-rust-cache-${{ env.CACHE_ARCH }}-${{ hashFiles('Cargo.lock') }}
+        key: public/risc0-rust-cache-${{ env.CACHE_ARCH }}
         bucket: risc0-ci-cache
         accessKey: ${{ steps.aws-creds.outputs.aws-access-key-id }}
         secretKey: ${{ steps.aws-creds.outputs.aws-secret-access-key }}
         sessionToken: ${{ steps.aws-creds.outputs.aws-session-token }}
         use-fallback: false
         restore-keys: |
-          public/risc0-rust-cache-${{ env.CACHE_ARCH }}-
-
-    - run: rm -f $HOME/.cargo/config
-      shell: bash
+          public/risc0-rust-cache-${{ env.CACHE_ARCH }}
