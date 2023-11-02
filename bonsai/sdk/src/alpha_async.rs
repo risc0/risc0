@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use crate::alpha::{
-    responses::{SessionStatusRes, SnarkStatusRes},
+    responses::{Quotas, SessionStatusRes, SnarkStatusRes},
     Client, SdkErr, SessionId, SnarkId,
 };
 
@@ -86,6 +86,20 @@ pub async fn session_status(
         .map_err(|err| SdkErr::InternalServerErr(format!("{err}")))?
 }
 
+/// Fetches the zkvm guest logs for a session
+///
+/// After the Execution phase of proving is completed, you can use this method
+/// to download the logs of the zkvm guest. This is a merged log of stderr and stdout
+/// <https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.ExecutorEnvBuilder.html#method.stdout>
+///
+/// It should contain the output of all writes to those file descriptors. But does NOT include output
+/// from `env::log`
+pub async fn session_logs(bonsai_client: Client, session: SessionId) -> Result<String, SdkErr> {
+    tokio::task::spawn_blocking(move || session.logs(&bonsai_client))
+        .await
+        .map_err(|err| SdkErr::InternalServerErr(format!("{err}")))?
+}
+
 /// Requests a SNARK proof be created from a existing sessionId
 ///
 /// Supply a completed sessionId to convert the risc0 STARK proof into
@@ -108,6 +122,15 @@ pub async fn snark_status(bonsai_client: Client, snark: SnarkId) -> Result<Snark
 /// Useful to download a [SessionId] receipt_url
 pub async fn download(bonsai_client: Client, url: String) -> Result<Vec<u8>, SdkErr> {
     tokio::task::spawn_blocking(move || bonsai_client.download(&url))
+        .await
+        .map_err(|err| SdkErr::InternalServerErr(format!("{err}")))?
+}
+
+/// Fetches your current users quotas
+///
+/// Returns the [Quotas] structure with relevant data on cycle budget, quotas etc.
+pub async fn quotas(bonsai_client: Client) -> Result<Quotas, SdkErr> {
+    tokio::task::spawn_blocking(move || bonsai_client.quotas())
         .await
         .map_err(|err| SdkErr::InternalServerErr(format!("{err}")))?
 }
