@@ -87,12 +87,12 @@ You can file an issue on [these docs] or the [examples], and we're happy to answ
 [zkVM Quick Start]: ../quickstart.md
 [zkVM Overview]: ../zkvm_overview.md
 [Hello World demo]: https://github.com/risc0/risc0/tree/release-0.19/examples/hello-world
-[risc0/examples]: https://github.com/risc0/risc0/tree/v0.19/examples
+[risc0/examples]: https://github.com/risc0/risc0/tree/release-0.19/examples
 [guest environment commands]: https://docs.rs/risc0-zkvm/0.19/risc0_zkvm/guest/index.html
 [zkVM Application]: ../zkvm_overview.md
 [zkVM]: ../zkvm_overview.md
 [Bonsai]: ../../bonsai/bonsai-overview.md
-[template]: https://github.com/risc0/risc0/tree/v0.19/templates/rust-starter
-[examples]: https://github.com/risc0/risc0/tree/v0.19/examples
+[template]: https://github.com/risc0/risc0/tree/release-0.19/templates/rust-starter
+[examples]: https://github.com/risc0/risc0/tree/release-0.19/examples
 [these docs]: https://github.com/risc0/website
 [Discord]: https://discord.gg/risczero
