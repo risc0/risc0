@@ -48,7 +48,7 @@ The following table summarizes the layout of the zkVM memory
 
 ## zkVM Memory Model
 
-The zkVM executes instruction in the order they appear in the ELF. In other
+The zkVM executes instructions in order; in other
 words, instructions are never reordered and the zkVM's memory model is
 sequentially consistent. Unlike many processors, the zkVM has no notion of
 traditional memory caches and cache-coherency protocols implemented in the zkVM.
