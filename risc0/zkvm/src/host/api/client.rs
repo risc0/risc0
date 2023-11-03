@@ -119,7 +119,6 @@ impl Client {
                 pb::api::ExecuteRequest {
                     env: Some(self.make_execute_env(env, binary.try_into()?)),
                     segments_out: Some(segments_out.try_into()?),
-                    profile_out: profile_out.map(|p| p.try_into()).transpose()?,
                 },
             )),
         };
@@ -508,7 +507,7 @@ impl Client {
         for trace_callback in env.trace.iter() {
             trace_callback
                 .borrow_mut()
-                .call(event.clone().try_into()?)?;
+                .trace_callback(event.clone().try_into()?)?;
         }
         Ok(())
     }

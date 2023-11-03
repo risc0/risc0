@@ -37,7 +37,7 @@ use rrs_lib::instruction_formats::{IType, JType, OPCODE_JAL, OPCODE_JALR};
 use rustc_demangle::demangle;
 
 use self::proto::Line;
-use crate::TraceEvent;
+use crate::{host::client::env::TraceCallback, TraceEvent};
 
 mod proto {
     // Generated proto interface.
@@ -206,7 +206,7 @@ fn demangle_name(s: String) -> String {
 
 impl Profiler {
     /// Return a new profile from the given RISCV ELF.
-    pub fn new(filename: &str, elf_data: &[u8]) -> Result<Self> {
+    pub fn new(elf_data: &[u8], filename: Option<&str>) -> Result<Self> {
         let file = File::parse(elf_data)?;
         let ctx = Context::new(&file)?;
         let root = Rc::new(RefCell::new(CallNode::default()));
@@ -224,7 +224,7 @@ impl Profiler {
         };
 
         // Save the main binary name
-        let bin_name = profiler.profile.get_string(filename);
+        let bin_name = profiler.profile.get_string(filename.unwrap_or("unknown"));
         for segment in file.segments() {
             if segment.address() == risc0_zkvm_platform::memory::TEXT_START as u64 {
                 profiler.profile.profile.mapping.push(proto::Mapping {
@@ -234,7 +234,7 @@ impl Profiler {
                     file_offset: segment.file_range().0,
                     filename: bin_name,
                     has_functions: true,
-                    has_filenames: true,
+                    has_filenames: filename.is_some(),
                     has_line_numbers: true,
                     has_inline_frames: true,
                     ..Default::default()
@@ -256,13 +256,6 @@ impl Profiler {
         }
 
         Ok(profiler)
-    }
-
-    /// Dereferences strings, etc. in the protobuf for testing purposes.
-    /// Returns a tuple of (frames, program counter, cycles)
-    #[cfg(test)]
-    pub(crate) fn iter(&self) -> impl Iterator<Item = (Vec<Frame>, usize, usize)> + '_ {
-        self.profile.iter()
     }
 
     /// Returns the frames name at the given pc.
@@ -299,100 +292,6 @@ impl Profiler {
         };
         frames
     }
-
-    /// Returns a callback to populate this profiler, suitable for
-    /// passing to ProverOpts::with_trace_callback.
-    pub fn make_trace_callback(&mut self) -> impl FnMut(TraceEvent) -> anyhow::Result<()> + '_ {
-        |event| {
-            match event {
-                TraceEvent::InstructionStart { cycle, pc, insn } => {
-                    let cycles = cycle - self.cycle;
-                    let orig_pc = self.pc;
-                    let orig_insn = self.insn;
-
-                    if self.call_stack_path.len() > 0 {
-                        let current_node = self
-                            .current_node
-                            .as_ref()
-                            .expect("current_node should always be Some after initialization");
-                        let mut current_node_borrowed = current_node.borrow_mut();
-                        current_node_borrowed
-                            .counts
-                            .entry(self.current_key)
-                            .and_modify(|e| *e += cycles as usize)
-                            .or_insert(cycles as usize);
-                    }
-
-                    if let Some(op) = extract_call_stack_op(orig_insn) {
-                        match op {
-                            CallStackOp::Push => {
-                                self.call_stack_path.push(pc);
-                                self.pop_stack.push(orig_pc);
-                            }
-                            CallStackOp::Pop => loop {
-                                self.call_stack_path.pop().ok_or_else(|| {
-                                    anyhow!("attempted to follow a return with an empty call stack")
-                                })?;
-                                let popped = self.pop_stack.pop().ok_or_else(|| {
-                                    anyhow!("attempted to follow a return with an empty call stack")
-                                })?;
-                                if pc - 4 == popped {
-                                    break;
-                                }
-                            },
-                            CallStackOp::PopPush => {
-                                loop {
-                                    self.call_stack_path.pop().ok_or_else(|| {
-                                        anyhow!(
-                                            "attempted to follow a return with an empty call stack"
-                                        )
-                                    })?;
-                                    let popped = self.pop_stack.pop().ok_or_else(|| {
-                                        anyhow!(
-                                            "attempted to follow a return with an empty call stack"
-                                        )
-                                    })?;
-                                    if pc - 4 == popped {
-                                        break;
-                                    }
-                                }
-                                self.call_stack_path.push(pc);
-                                self.pop_stack.push(orig_pc);
-                            }
-                        }
-
-                        let mut curr_node = Rc::clone(&self.root);
-                        for (i, &call_stack_key) in self.call_stack_path.iter().enumerate() {
-                            if i == self.call_stack_path.len() - 1 {
-                                self.current_node = Some(Rc::clone(&curr_node));
-                                self.current_key =
-                                    *self.call_stack_path.last().ok_or_else(|| {
-                                        anyhow!("attempted to access an empty call stack")
-                                    })?;
-                            }
-                            let next_node = {
-                                let mut curr_node_borrowed = curr_node.borrow_mut();
-                                curr_node_borrowed
-                                    .calls
-                                    .entry(call_stack_key)
-                                    .or_insert_with(|| Rc::new(RefCell::new(CallNode::default())))
-                                    .clone()
-                            };
-                            curr_node = next_node;
-                        }
-                    }
-
-                    // Update pc, insn, and cycle
-                    self.pc = pc;
-                    self.insn = insn;
-                    self.cycle = cycle;
-                }
-                _ => (),
-            }
-            Ok(())
-        }
-    }
-
     /// Walk the profile tree rooted at node_ref, adding all call stacks in the profile to the
     /// profile under construction. All call stacks encountered build on top of the base_stack.
     fn walk_stacks(&mut self, node_ref: Rc<RefCell<CallNode>>, base_stack: Vec<Frame>) {
@@ -436,31 +335,122 @@ impl Profiler {
         }
     }
 
-    /// Count and save the profiling samples, consuming the profiler and
-    /// returning the compiled profile protobuf.
-    pub fn finalize(&mut self) {
+    /// Inner finalize method, unwrapping the inner non-public ProfileBuilder.
+    pub(crate) fn finalize(mut self) -> ProfileBuilder {
         let root_ref = Rc::clone(&self.root);
         log::debug!("{}", self.root.borrow().fmt(0, &self));
         self.walk_stacks(root_ref, Vec::new());
+        self.profile
     }
 
-    /// Returns the result of this profiling run as a protobuf.
-    pub fn as_protobuf(&self) -> &proto::Profile {
-        assert!(
-            !self.profile.profile.sample.is_empty(),
-            "Call finalize() first to generate the protobuf"
-        );
-        &self.profile.profile
+    /// Count and save the profiling samples, consuming the profiler and
+    /// returning the compiled profile protobuf.
+    pub fn finalize_to_proto(self) -> proto::Profile {
+        self.finalize().profile
     }
 
-    /// Returns the result of this profiling run, encoded and ready for writing
-    /// to a file.
-    pub fn encode_to_vec(&mut self) -> Vec<u8> {
-        self.as_protobuf().encode_to_vec()
+    /// Count and save the profiling samples, consuming the profiler and
+    /// returning the compiled profile protobuf, encoded as bytes.
+    pub fn finalize_to_vec(self) -> Vec<u8> {
+        self.finalize().profile.encode_to_vec()
     }
 }
 
-struct ProfileBuilder {
+impl TraceCallback for Profiler {
+    /// Interpret the provided trace event and add it to the ongoing profile of execution.
+    fn trace_callback(&mut self, event: TraceEvent) -> anyhow::Result<()> {
+        match event {
+            TraceEvent::InstructionStart { cycle, pc, insn } => {
+                let cycles = cycle - self.cycle;
+                let orig_pc = self.pc;
+                let orig_insn = self.insn;
+
+                if self.call_stack_path.len() > 0 {
+                    let current_node = self
+                        .current_node
+                        .as_ref()
+                        .expect("current_node should always be Some after initialization");
+                    let mut current_node_borrowed = current_node.borrow_mut();
+                    current_node_borrowed
+                        .counts
+                        .entry(self.current_key)
+                        .and_modify(|e| *e += cycles as usize)
+                        .or_insert(cycles as usize);
+                }
+
+                if let Some(op) = extract_call_stack_op(orig_insn) {
+                    match op {
+                        CallStackOp::Push => {
+                            self.call_stack_path.push(pc);
+                            self.pop_stack.push(orig_pc);
+                        }
+                        CallStackOp::Pop => loop {
+                            self.call_stack_path.pop().ok_or_else(|| {
+                                anyhow!("attempted to follow a return with an empty call stack")
+                            })?;
+                            let popped = self.pop_stack.pop().ok_or_else(|| {
+                                anyhow!("attempted to follow a return with an empty call stack")
+                            })?;
+                            if pc - 4 == popped {
+                                break;
+                            }
+                        },
+                        CallStackOp::PopPush => {
+                            loop {
+                                self.call_stack_path.pop().ok_or_else(|| {
+                                    anyhow!("attempted to follow a return with an empty call stack")
+                                })?;
+                                let popped = self.pop_stack.pop().ok_or_else(|| {
+                                    anyhow!("attempted to follow a return with an empty call stack")
+                                })?;
+                                if pc - 4 == popped {
+                                    break;
+                                }
+                            }
+                            self.call_stack_path.push(pc);
+                            self.pop_stack.push(orig_pc);
+                        }
+                    }
+
+                    let mut curr_node = Rc::clone(&self.root);
+                    for (i, &call_stack_key) in self.call_stack_path.iter().enumerate() {
+                        if i == self.call_stack_path.len() - 1 {
+                            self.current_node = Some(Rc::clone(&curr_node));
+                            self.current_key = *self.call_stack_path.last().ok_or_else(|| {
+                                anyhow!("attempted to access an empty call stack")
+                            })?;
+                        }
+                        let next_node = {
+                            let mut curr_node_borrowed = curr_node.borrow_mut();
+                            curr_node_borrowed
+                                .calls
+                                .entry(call_stack_key)
+                                .or_insert_with(|| Rc::new(RefCell::new(CallNode::default())))
+                                .clone()
+                        };
+                        curr_node = next_node;
+                    }
+                }
+
+                // Update pc, insn, and cycle
+                self.pc = pc;
+                self.insn = insn;
+                self.cycle = cycle;
+            }
+            _ => (),
+        }
+        Ok(())
+    }
+}
+
+impl TraceCallback for &mut Profiler {
+    /// Interpret the provided trace event and add it to the ongoing profile of execution.
+    fn trace_callback(&mut self, event: TraceEvent) -> anyhow::Result<()> {
+        (*self).trace_callback(event)
+    }
+}
+
+pub(crate) struct ProfileBuilder {
     strings: HashMap<String, i64>,
 
     functions: HashMap<(String, String), u64>,
@@ -548,8 +538,10 @@ impl ProfileBuilder {
         self.profile.sample.push(sample)
     }
 
+    /// Dereferences strings, etc. in the protobuf for testing purposes.
+    /// Returns a tuple of (frames, program counter, cycles)
     #[cfg(test)]
-    fn iter(&self) -> impl Iterator<Item = (Vec<Frame>, usize, usize)> + '_ {
+    pub(crate) fn iter(&self) -> impl Iterator<Item = (Vec<Frame>, usize, usize)> + '_ {
         self.profile.sample.iter().flat_map(move |sample| {
             sample.location_id.iter().map(move |id| {
                 let loc = &self.profile.location[*id as usize - 1];

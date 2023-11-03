@@ -463,7 +463,7 @@ impl<'a> ExecutorImpl<'a> {
         for trace in self.env.trace.iter() {
             trace
                 .borrow_mut()
-                .call(TraceEvent::InstructionStart {
+                .trace_callback(TraceEvent::InstructionStart {
                     cycle: self.session_cycle() as u32,
                     pc: self.pc,
                     insn: opcode.insn,
@@ -471,7 +471,7 @@ impl<'a> ExecutorImpl<'a> {
                 .unwrap();
 
             for event in self.monitor.trace_events.iter() {
-                trace.borrow_mut().call(event.clone()).unwrap();
+                trace.borrow_mut().trace_callback(event.clone()).unwrap();
             }
         }
 

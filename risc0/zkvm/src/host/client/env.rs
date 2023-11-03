@@ -47,14 +47,14 @@ pub struct ExecutorEnvBuilder<'a> {
 
 /// A callback used to collect [TraceEvent]s.
 pub trait TraceCallback {
-    fn call(&mut self, event: TraceEvent) -> Result<()>;
+    fn trace_callback(&mut self, event: TraceEvent) -> Result<()>;
 }
 
 impl<F> TraceCallback for F
 where
     F: FnMut(TraceEvent) -> Result<()>,
 {
-    fn call(&mut self, event: TraceEvent) -> Result<()> {
+    fn trace_callback(&mut self, event: TraceEvent) -> Result<()> {
         self(event)
     }
 }

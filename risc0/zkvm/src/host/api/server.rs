@@ -197,7 +197,7 @@ impl TraceProxy {
 }
 
 impl TraceCallback for TraceProxy {
-    fn call(&mut self, event: TraceEvent) -> Result<()> {
+    fn trace_callback(&mut self, event: TraceEvent) -> Result<()> {
         let request = pb::api::ServerReply {
             kind: Some(pb::api::server_reply::Kind::Ok(pb::api::ClientCallback {
                 kind: Some(pb::api::client_callback::Kind::Io(pb::api::OnIoRequest {

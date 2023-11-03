@@ -17,9 +17,9 @@ pub(crate) mod external;
 #[cfg(feature = "prove")]
 pub(crate) mod local;
 
-use std::{path::PathBuf, rc::Rc};
+use std::{cell::RefCell, path::PathBuf, rc::Rc};
 
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use risc0_binfmt::{MemoryImage, Program};
 use risc0_zkvm_platform::{memory::GUEST_MAX_MEM, PAGE_SIZE};
 use serde::{Deserialize, Serialize};
@@ -105,9 +105,30 @@ pub trait Prover {
         elf: &[u8],
         opts: &ProverOpts,
     ) -> Result<Receipt> {
+        #[cfg(feature = "profiler")]
+        let mut env = env;
+        #[cfg(feature = "profiler")]
+        let profiler = crate::host::env::pprof_path()
+            .map(|_| -> anyhow::Result<_> {
+                let profiler = Rc::new(RefCell::new(crate::Profiler::new(elf, None)?));
+                env.trace.push(profiler.clone());
+                Ok(profiler)
+            })
+            .transpose()?;
+
         let program = Program::load_elf(elf, GUEST_MAX_MEM as u32)?;
         let image = MemoryImage::new(&program, PAGE_SIZE as u32)?;
-        self.prove(env, ctx, opts, image)
+        let receipt = self.prove(env, ctx, opts, image)?;
+
+        #[cfg(feature = "profiler")]
+        if let Some(profiler) = profiler {
+            let unwrapped = Rc::into_inner(profiler)
+                .ok_or(anyhow!("failed to finalize profiler"))?
+                .into_inner();
+            crate::host::env::write_pprof_file(&unwrapped.finalize_to_vec())?;
+        }
+
+        Ok(receipt)
     }
 }
 
@@ -122,10 +143,30 @@ pub trait Executor {
     ///
     /// This only executes the program and does not generate a receipt.
     fn execute_elf(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<SessionInfo> {
-        // TODO(victor): Integrate the profile request here?
+        #[cfg(feature = "profiler")]
+        let mut env = env;
+        #[cfg(feature = "profiler")]
+        let profiler = crate::host::env::pprof_path()
+            .map(|_| -> anyhow::Result<_> {
+                let profiler = Rc::new(RefCell::new(crate::Profiler::new(elf, None)?));
+                env.trace.push(profiler.clone());
+                Ok(profiler)
+            })
+            .transpose()?;
+
         let program = Program::load_elf(elf, GUEST_MAX_MEM as u32)?;
         let image = MemoryImage::new(&program, PAGE_SIZE as u32)?;
-        self.execute(env, image)
+        let session_info = self.execute(env, image)?;
+
+        #[cfg(feature = "profiler")]
+        if let Some(profiler) = profiler {
+            let unwrapped = Rc::into_inner(profiler)
+                .ok_or(anyhow!("failed to finalize profiler"))?
+                .into_inner();
+            crate::host::env::write_pprof_file(&unwrapped.finalize_to_vec())?;
+        }
+
+        Ok(session_info)
     }
 }
 
