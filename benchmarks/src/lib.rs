@@ -17,10 +17,15 @@
 use std::{
     fs::OpenOptions,
     path::{Path, PathBuf},
+    sync::{
+        atomic::{AtomicBool, Ordering},
+        Arc,
+    },
     time::{Duration, Instant},
 };
 
 use log::info;
+use memory_stats::memory_stats;
 use risc0_zkvm::{
     ExecutorEnv, ExecutorImpl, MemoryImage, Program, Session, GUEST_MAX_MEM, PAGE_SIZE,
 };
@@ -39,6 +44,9 @@ pub struct Metrics {
     pub insn_cycles: u32,
     pub output_bytes: u32,
     pub proof_bytes: u32,
+    pub pmem_bytes: u32,
+    pub vmem_bytes: u32,
+    pub ops_sec: f64,
 }
 
 impl Metrics {
@@ -54,20 +62,43 @@ impl Metrics {
             insn_cycles: 0,
             output_bytes: 0,
             proof_bytes: 0,
+            pmem_bytes: 0,
+            vmem_bytes: 0,
+            ops_sec: 0.0,
         }
     }
 
     pub fn println(&self, prefix: &str) {
-        info!("{}job_name:           {:?}", prefix, &self.job_name);
-        info!("{}job_size:           {:?}", prefix, &self.job_size);
-        info!("{}exec_duration:      {:?}", prefix, &self.exec_duration);
-        info!("{}proof_duration:     {:?}", prefix, &self.proof_duration);
-        info!("{}total_duration:     {:?}", prefix, &self.total_duration);
-        info!("{}verify_duration:    {:?}", prefix, &self.verify_duration);
-        info!("{}cycles:             {:?}", prefix, &self.cycles);
-        info!("{}insn_cycles:        {:?}", prefix, &self.insn_cycles);
-        info!("{}output_bytes:       {:?}", prefix, &self.output_bytes);
-        info!("{}proof_bytes:        {:?}", prefix, &self.proof_bytes);
+        info!("{}job_name:        {:?}", prefix, &self.job_name);
+        info!("{}job_size:        {:?}", prefix, &self.job_size);
+        info!("{}exec_duration:   {:?}", prefix, &self.exec_duration);
+        info!("{}proof_duration:  {:?}", prefix, &self.proof_duration);
+        info!("{}total_duration:  {:?}", prefix, &self.total_duration);
+        info!("{}verify_duration: {:?}", prefix, &self.verify_duration);
+        info!("{}cycles:          {:?}", prefix, &self.cycles);
+        info!("{}insn_cycles:     {:?}", prefix, &self.insn_cycles);
+        info!("{}output_bytes:    {:?}", prefix, &self.output_bytes);
+        info!("{}proof_bytes:     {:?}", prefix, &self.proof_bytes);
+        info!("{}pmem_bytes:      {:?}", prefix, &self.pmem_bytes);
+        info!("{}vmem_bytes:      {:?}", prefix, &self.vmem_bytes);
+        info!("{}ops_sec:         {:?}", prefix, &round(self.ops_sec, 3));
+    }
+
+    pub fn to_csv_row(&self) -> CsvRow {
+        CsvRow {
+            job_name: &self.job_name,
+            job_size: self.job_size,
+            exec_duration_ms: self.exec_duration.as_micros(),
+            proof_duration_ms: self.proof_duration.as_micros(),
+            total_duration_ms: self.total_duration.as_micros(),
+            verify_duration_ms: self.verify_duration.as_micros(),
+            prove_cycles: self.cycles,
+            insn_cycles: self.insn_cycles,
+            proof_bytes: self.proof_bytes,
+            pmem_bytes: self.pmem_bytes,
+            vmem_bytes: self.vmem_bytes,
+            ops_sec: round(self.ops_sec, 3),
+        }
     }
 }
 
@@ -91,14 +122,11 @@ impl MetricsAverage {
     }
 
     pub fn println(&self, prefix: &str) {
-        info!("{}job_name:           {:?}", prefix, &self.job_name);
-        info!("{}job_size:           {:?}", prefix, &self.job_size);
-        info!("{}total_duration:     {:?}", prefix, &self.total_duration);
-        info!(
-            "{}average_duration:    {:?}",
-            prefix, &self.average_duration
-        );
-        info!("{}ops_sec:            {:?}", prefix, &self.ops_sec);
+        info!("{}job_name:         {:?}", prefix, &self.job_name);
+        info!("{}job_size:         {:?}", prefix, &self.job_size);
+        info!("{}total_duration:   {:?}", prefix, &self.total_duration);
+        info!("{}average_duration: {:?}", prefix, &self.average_duration);
+        info!("{}ops_sec:          {:?}", prefix, &self.ops_sec);
     }
 }
 
@@ -131,6 +159,7 @@ pub trait Benchmark {
     fn run(&mut self) -> Metrics {
         let mut metrics = Metrics::new(String::from(Self::NAME), Self::job_size(self.spec()));
 
+        let stop_monitoring_memory = monitor_cpu();
         (metrics.cycles, metrics.insn_cycles, metrics.exec_duration) = self.exec_compute();
 
         let (guest_output, proof) = {
@@ -140,6 +169,10 @@ pub trait Benchmark {
             result
         };
 
+        let (pmem_bytes, vmem_bytes) = stop_monitoring_memory().unwrap();
+        metrics.pmem_bytes = pmem_bytes as u32;
+        metrics.vmem_bytes = vmem_bytes as u32;
+
         if let Some(host_output) = self.host_compute() {
             assert_eq!(guest_output, host_output);
         }
@@ -147,6 +180,7 @@ pub trait Benchmark {
         metrics.total_duration = metrics.exec_duration + metrics.proof_duration;
         metrics.output_bytes = Self::output_size_bytes(&guest_output, &proof);
         metrics.proof_bytes = Self::proof_size_bytes(&proof);
+        metrics.ops_sec = metrics.job_size as f64 / metrics.total_duration.as_secs_f64();
 
         let verify_proof = {
             let start = Instant::now();
@@ -229,16 +263,19 @@ pub fn init_logging() {
 }
 
 #[derive(Serialize)]
-struct CsvRow<'a> {
+pub struct CsvRow<'a> {
     job_name: &'a str,
     job_size: u32,
-    exec_duration: u128,
-    proof_duration: u128,
-    total_duration: u128,
-    verify_duration: u128,
+    exec_duration_ms: u128,
+    proof_duration_ms: u128,
+    total_duration_ms: u128,
+    verify_duration_ms: u128,
     insn_cycles: u32,
     prove_cycles: u32,
     proof_bytes: u32,
+    pmem_bytes: u32,
+    vmem_bytes: u32,
+    ops_sec: f64,
 }
 
 #[derive(Serialize)]
@@ -282,18 +319,8 @@ pub fn run_jobs<B: Benchmark>(out_path: &PathBuf, specs: Vec<B::Spec>) -> Vec<Me
 
         let job_metrics = job.run();
         job_metrics.println("+ ");
-        out.serialize(CsvRow {
-            job_name: &job_metrics.job_name,
-            job_size: job_metrics.job_size,
-            exec_duration: job_metrics.exec_duration.as_nanos(),
-            proof_duration: job_metrics.proof_duration.as_nanos(),
-            total_duration: job_metrics.total_duration.as_nanos(),
-            verify_duration: job_metrics.verify_duration.as_nanos(),
-            prove_cycles: job_metrics.cycles,
-            insn_cycles: job_metrics.insn_cycles,
-            proof_bytes: job_metrics.proof_bytes,
-        })
-        .expect("Could not serialize");
+        out.serialize(job_metrics.to_csv_row())
+            .expect("Could not serialize");
 
         info!("+ end job_number:     {}", job_number);
         all_metrics.push(job_metrics);
@@ -357,4 +384,50 @@ pub fn run_jobs_average<B: BenchmarkAverage>(
     info!("Finished {} jobs", all_metrics.len());
 
     all_metrics
+}
+
+fn monitor_cpu() -> impl FnOnce() -> Option<(usize, usize)> {
+    let stop_signal = Arc::new(AtomicBool::new(false));
+    let handle = std::thread::spawn({
+        let stop_signal = Arc::clone(&stop_signal);
+
+        move || {
+            let start_memory_physical = memory_stats()?.physical_mem;
+            let mut max_memory_physical = start_memory_physical;
+            let start_memory_virtual = memory_stats()?.virtual_mem;
+            let mut max_memory_virtual = start_memory_virtual;
+            while !stop_signal.load(Ordering::Relaxed) {
+                let memory_physical = memory_stats()?.physical_mem;
+                let memory_virtual = memory_stats()?.virtual_mem;
+                if memory_physical > max_memory_physical {
+                    max_memory_physical = memory_physical;
+                }
+                if memory_virtual > max_memory_virtual {
+                    max_memory_virtual = memory_virtual;
+                }
+                std::thread::sleep(Duration::from_millis(1));
+            }
+            Some((
+                start_memory_physical,
+                max_memory_physical,
+                start_memory_virtual,
+                max_memory_virtual,
+            ))
+        }
+    });
+
+    move || {
+        stop_signal.store(true, Ordering::Relaxed);
+        let (start_memory_physical, max_memory_physical, start_memory_virtual, max_memory_virtual) =
+            handle.join().unwrap()?;
+        Some((
+            max_memory_physical - start_memory_physical,
+            max_memory_virtual - start_memory_virtual,
+        ))
+    }
+}
+
+fn round(x: f64, decimals: u32) -> f64 {
+    let y = 10i32.pow(decimals) as f64;
+    (x * y).round() / y
 }

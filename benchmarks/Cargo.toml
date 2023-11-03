@@ -24,6 +24,7 @@ env_logger = "0.10"
 hex = "0.4"
 k256 = { version = "0.13", features = ["serde"] }
 log = "0.4"
+memory-stats = "1.1"
 rand = "0.8"
 rand_core = "0.6.4"
 risc0-benchmark-lib = { workspace = true }

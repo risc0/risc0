@@ -14,7 +14,7 @@
 
 use std::time::Duration;
 
-use risc0_zkvm::{ExecutorEnv, ExitCode, MemoryImage, Receipt, Session};
+use risc0_zkvm::{sha::DIGEST_WORDS, ExecutorEnv, ExitCode, MemoryImage, Receipt, Session};
 
 use crate::{exec_compute, get_image, Benchmark};
 
@@ -28,6 +28,9 @@ pub struct Job<'a> {
 pub fn new_jobs() -> Vec<<Job<'static> as Benchmark>::Spec> {
     vec![10, 50, 90]
 }
+
+const METHOD_ID: [u32; DIGEST_WORDS] = risc0_benchmark_methods::FIBONACCI_ID;
+const METHOD_PATH: &'static str = risc0_benchmark_methods::FIBONACCI_PATH;
 
 impl Benchmark for Job<'_> {
     const NAME: &'static str = "fibonacci";
@@ -53,7 +56,7 @@ impl Benchmark for Job<'_> {
     }
 
     fn new(spec: Self::Spec) -> Self {
-        let image = get_image(risc0_benchmark_methods::FIBONACCI_PATH);
+        let image = get_image(METHOD_PATH);
 
         let env = ExecutorEnv::builder()
             .write(&spec)
@@ -99,7 +102,7 @@ impl Benchmark for Job<'_> {
     }
 
     fn verify_proof(&self, _output: &Self::ComputeOut, proof: &Self::ProofType) -> bool {
-        let result = proof.verify(risc0_benchmark_methods::FIBONACCI_ID);
+        let result = proof.verify(METHOD_ID);
 
         match result {
             Ok(_) => true,
