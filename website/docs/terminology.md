@@ -1,7 +1,6 @@
 ---
 sidebar_position: 5
 slug: /terminology
-displayed_sidebar: GettingStartedSidebar
 ---
 
 # Key Terminology
@@ -9,7 +8,7 @@ displayed_sidebar: GettingStartedSidebar
 ### Circuit
 
 [circuit]: #circuit
-[Arithmetic Circuits]: reference-docs/about-arithmetic-circuits.md
+[Arithmetic Circuits]: /reference-docs/about-arithmetic-circuits
 
 A mathematical construct that acts as the "CPU" of the [zkVM] in a manner that enables creating [proofs]. <br/>
 See also: [Arithmetic Circuits]
@@ -130,7 +129,7 @@ Generate a [receipt] that serves as [proof] of correct execution of a [guest pro
 
 [proven]: #prover
 [prover]: #prover
-[Prover documentation]: https://docs.rs/risc0-zkvm/0.18/risc0_zkvm/trait.Prover.html
+[Prover documentation]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/trait.Prover.html
 
 The portion of the [zkVM] that [executes] and [proves] a [guest program], thereby constructing a [receipt]. <br/>
 See also: [Prover documentation], [Executor]

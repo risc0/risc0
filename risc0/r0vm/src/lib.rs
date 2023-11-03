@@ -35,6 +35,15 @@ struct Cli {
     #[arg(long, value_enum, default_value_t = HashFn::Poseidon)]
     hashfn: HashFn,
 
+    /// Whether to prove exections ending in error status.
+    //
+    // When false, only prove execution sessions that end in a successful
+    // [ExitCode] (i.e. `Halted(0)` or `Paused(0)`. When set to true, any
+    // completed execution session will be proven, including indicated
+    // errors (e.g. `Halted(1)`) and sessions ending in `Fault`.
+    #[arg(long)]
+    prove_guest_errors: bool,
+
     /// File to read initial input from.
     #[arg(long)]
     initial_input: Option<PathBuf>,
@@ -164,6 +173,7 @@ impl Cli {
         };
         let opts = ProverOpts {
             hashfn: hashfn.to_string(),
+            prove_guest_errors: self.prove_guest_errors,
         };
 
         get_prover_server(&opts).unwrap()
