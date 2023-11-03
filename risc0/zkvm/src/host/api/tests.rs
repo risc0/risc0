@@ -235,3 +235,15 @@ fn lift_join_identity() {
     let rollup_receipt = Receipt::new(InnerReceipt::Succinct(rollup), session.journal.bytes.into());
     rollup_receipt.verify(MULTI_TEST_ID).unwrap();
 }
+
+#[test]
+#[should_panic(expected = "Guest panicked: panicked at 'MultiTestSpec::Panic invoked'")]
+fn guest_error_forwarding() {
+    let env = ExecutorEnv::builder()
+        .write(&MultiTestSpec::Panic)
+        .unwrap()
+        .build()
+        .unwrap();
+    let binary = Binary::new_elf_path(MULTI_TEST_PATH);
+    TestClient::new().execute(env, binary);
+}
