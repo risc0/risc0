@@ -77,6 +77,7 @@ impl Executor for ExternalProver {
     fn execute(&self, env: ExecutorEnv<'_>, image: MemoryImage) -> Result<SessionInfo> {
         let client = ApiClient::new_sub_process(&self.r0vm_path)?;
 
+        // TODO(victor)
         let pprof_req = env::pprof_path().map(|_| AssetRequest::Inline);
         let segments_out = AssetRequest::Inline;
         let session_info =

@@ -34,16 +34,12 @@ message HelloResult {
 message ExecuteRequest {
   ExecutorEnv env = 1;
   AssetRequest segments_out = 2;
-  // When non-empty, requests a pprof profile of the guest execution.
-  AssetRequest profile_out = 3;
 }
 
 message ProveRequest {
   ExecutorEnv env = 1;
   ProverOpts opts = 2;
   AssetRequest receipt_out = 3;
-  // When non-empty, requests a pprof profile of the guest execution.
-  AssetRequest profile_out = 4;
 }
 
 message ProveSegmentRequest {
@@ -144,8 +140,6 @@ message SessionInfo {
   uint32 segments = 1;
   bytes journal = 2;
   protos.base.ExitCode exit_code = 3;
-  // Optional pprof profile of the execution session.
-  Asset profile = 4;
 }
 
 message SegmentInfo {

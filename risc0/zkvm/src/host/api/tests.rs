@@ -79,16 +79,11 @@ impl TestClient {
     fn execute(&mut self, env: ExecutorEnv<'_>, binary: Binary) -> SessionInfo {
         with_server(self.addr, || {
             let segments_out = AssetRequest::Path(self.get_work_path());
-            self.client.execute(
-                &env,
-                binary,
-                segments_out,
-                |_info, asset| {
+            self.client
+                .execute(&env, binary, segments_out, |_info, asset| {
                     self.segments.push(asset);
                     Ok(())
-                },
-                None,
-            )
+                })
         })
     }
 

@@ -309,9 +309,6 @@ pub struct SessionInfo {
 
     /// The [ExitCode] of the session.
     pub exit_code: ExitCode,
-
-    /// A pprof formatted profile of the execution, optionally returned by the executor.
-    pub profile: Option<Asset>,
 }
 
 /// Provides information about a segment of execution.

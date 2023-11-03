@@ -84,8 +84,6 @@ impl Client {
                     receipt_out: Some(pb::api::AssetRequest {
                         kind: Some(pb::api::asset_request::Kind::Inline(())),
                     }),
-                    // TODO(victor)
-                    profile_out: None,
                 },
             )),
         };
@@ -110,7 +108,6 @@ impl Client {
         binary: Binary,
         segments_out: AssetRequest,
         segment_callback: F,
-        profile_out: Option<AssetRequest>,
     ) -> Result<SessionInfo>
     where
         F: FnMut(SegmentInfo, Asset) -> Result<()>,
@@ -402,7 +399,6 @@ impl Client {
                                         .exit_code
                                         .ok_or(malformed_err())?
                                         .try_into()?,
-                                    profile: session.profile.map(|p| p.try_into()).transpose()?,
                                 }),
                                 None => Err(malformed_err()),
                             }
@@ -437,12 +433,8 @@ impl Client {
                         pb::api::client_callback::Kind::SegmentDone(_) => {
                             return Err(anyhow!("Illegal client callback"))
                         }
-                        pb::api::client_callback::Kind::SessionDone(done) => {
-                            if let Some(session_info) = done.session {
-                                log::debug!(
-                                    "received completed session info from prover: {session_info:?}"
-                                )
-                            }
+                        pb::api::client_callback::Kind::SessionDone(_) => {
+                            return Err(anyhow!("Illegal client callback"))
                         }
                         pb::api::client_callback::Kind::ProveDone(done) => {
                             return Ok(done.receipt.ok_or(malformed_err())?)
