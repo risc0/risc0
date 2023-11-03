@@ -108,7 +108,7 @@ pub trait Prover {
         #[cfg(feature = "profiler")]
         let mut env = env;
         #[cfg(feature = "profiler")]
-        let profiler = crate::host::env::pprof_path()
+        let profiler = crate::host::profiler::env::pprof_path()
             .map(|_| -> anyhow::Result<_> {
                 let profiler = Rc::new(std::cell::RefCell::new(crate::Profiler::new(elf, None)?));
                 env.trace.push(profiler.clone());
@@ -125,7 +125,7 @@ pub trait Prover {
             let unwrapped = Rc::into_inner(profiler)
                 .ok_or(anyhow::anyhow!("failed to finalize profiler"))?
                 .into_inner();
-            crate::host::env::write_pprof_file(&unwrapped.finalize_to_vec())?;
+            crate::host::profiler::env::write_pprof_file(&unwrapped.finalize_to_vec())?;
         }
 
         Ok(receipt)
@@ -146,7 +146,7 @@ pub trait Executor {
         #[cfg(feature = "profiler")]
         let mut env = env;
         #[cfg(feature = "profiler")]
-        let profiler = crate::host::env::pprof_path()
+        let profiler = crate::host::profiler::env::pprof_path()
             .map(|_| -> anyhow::Result<_> {
                 let profiler = Rc::new(std::cell::RefCell::new(crate::Profiler::new(elf, None)?));
                 env.trace.push(profiler.clone());
@@ -163,7 +163,7 @@ pub trait Executor {
             let unwrapped = Rc::into_inner(profiler)
                 .ok_or(anyhow::anyhow!("failed to finalize profiler"))?
                 .into_inner();
-            crate::host::env::write_pprof_file(&unwrapped.finalize_to_vec())?;
+            crate::host::profiler::env::write_pprof_file(&unwrapped.finalize_to_vec())?;
         }
 
         Ok(session_info)

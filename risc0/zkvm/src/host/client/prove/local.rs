@@ -44,7 +44,6 @@ impl Prover for LocalProver {
         opts: &ProverOpts,
         image: MemoryImage,
     ) -> Result<Receipt> {
-        // TODO(victor): Break this up into execution and proving and extract profile.
         get_prover_server(opts)?.prove(env, ctx, image)
     }
 

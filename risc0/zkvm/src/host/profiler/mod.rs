@@ -19,6 +19,8 @@
 //! top level stack frame.  (More than one stack frame may show up
 //! in the case of inlined functions).
 
+pub(crate) mod env;
+
 use std::{
     cell::RefCell,
     collections::HashMap,

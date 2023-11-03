@@ -1,12 +1,7 @@
-#[cfg(feature = "profiler")]
 use anyhow::anyhow;
-#[cfg(feature = "profiler")]
 use std::path::PathBuf;
 
-// TODO(victor): Rename this file... too many envs.
-
 /// Return the requested pprof profile path, set via the RISC0_PPROF_OUT environment variable.
-#[cfg(feature = "profiler")]
 pub(crate) fn pprof_path() -> Option<PathBuf> {
     match std::env::var("RISC0_PPROF_OUT") {
         Ok(path) => {
@@ -22,7 +17,6 @@ pub(crate) fn pprof_path() -> Option<PathBuf> {
 }
 
 /// Write the given pprof profile pprof_path()
-#[cfg(feature = "profiler")]
 pub(crate) fn write_pprof_file(profile: &[u8]) -> anyhow::Result<()> {
     let path = pprof_path().ok_or(anyhow!("no path set to write pprof profile"))?;
     log::debug!("writing profile to: {}", path.display());
