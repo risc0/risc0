@@ -124,9 +124,7 @@ fn main() {
         run_jobs::<sudoku::Job>(&cli.out, sudoku::new_jobs());
     }
 
-    // TODO: re-enable once zeth gets updated
-    // if cli.command == Command::All ||
-    if cli.command == Command::Zeth {
+    if cli.command == Command::All || cli.command == Command::Zeth {
         println!("Benchmarking zeth");
         run_jobs::<zeth::Job>(&cli.out, zeth::new_jobs());
     }
