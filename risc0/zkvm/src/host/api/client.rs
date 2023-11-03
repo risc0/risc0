@@ -84,6 +84,8 @@ impl Client {
                     receipt_out: Some(pb::api::AssetRequest {
                         kind: Some(pb::api::asset_request::Kind::Inline(())),
                     }),
+                    // TODO(victor)
+                    profile_out: None,
                 },
             )),
         };
@@ -422,6 +424,8 @@ impl Client {
     ) -> Result<pb::api::Asset> {
         loop {
             let reply: pb::api::ServerReply = conn.recv()?;
+            log::trace!("rx: {reply:?}");
+
             match reply.kind.ok_or(malformed_err())? {
                 pb::api::server_reply::Kind::Ok(request) => {
                     match request.kind.ok_or(malformed_err())? {
@@ -433,8 +437,12 @@ impl Client {
                         pb::api::client_callback::Kind::SegmentDone(_) => {
                             return Err(anyhow!("Illegal client callback"))
                         }
-                        pb::api::client_callback::Kind::SessionDone(_) => {
-                            return Err(anyhow!("Illegal client callback"))
+                        pb::api::client_callback::Kind::SessionDone(done) => {
+                            if let Some(session_info) = done.session {
+                                log::debug!(
+                                    "received completed session info from prover: {session_info:?}"
+                                )
+                            }
                         }
                         pb::api::client_callback::Kind::ProveDone(done) => {
                             return Ok(done.receipt.ok_or(malformed_err())?)

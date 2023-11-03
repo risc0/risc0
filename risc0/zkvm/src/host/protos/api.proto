@@ -41,6 +41,7 @@ message ProveRequest {
   ExecutorEnv env = 1;
   ProverOpts opts = 2;
   AssetRequest receipt_out = 3;
+  optional AssetRequest profile_out = 4;
 }
 
 message ProveSegmentRequest {

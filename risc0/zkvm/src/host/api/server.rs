@@ -361,10 +361,30 @@ impl Server {
         let binary = env_request.binary.ok_or(malformed_err())?;
         let image = binary.as_image()?;
 
+        let session = ExecutorImpl::new(env, image)?.run()?;
+
+        // Send the SessionInfo back to the client as an intermediate result.
+        let msg = pb::api::ServerReply {
+            kind: Some(pb::api::server_reply::Kind::Ok(pb::api::ClientCallback {
+                kind: Some(pb::api::client_callback::Kind::SessionDone(
+                    pb::api::OnSessionDone {
+                        session: Some(pb::api::SessionInfo {
+                            segments: session.segments.len().try_into()?,
+                            journal: session.journal.clone().unwrap_or_default().bytes,
+                            exit_code: Some(session.exit_code.into()),
+                            profile: None, // TODO(victor)
+                        }),
+                    },
+                )),
+            })),
+        };
+        log::trace!("tx: {msg:?}");
+        conn.send(msg)?;
+
         let opts: ProverOpts = request.opts.ok_or(malformed_err())?.into();
         let prover = get_prover_server(&opts)?;
         let ctx = VerifierContext::default();
-        let receipt = prover.prove(env, &ctx, image)?;
+        let receipt = prover.prove_session(&ctx, &session)?;
 
         let receipt_pb: pb::core::Receipt = receipt.into();
         let receipt_bytes = receipt_pb.encode_to_vec();
