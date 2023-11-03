@@ -65,6 +65,15 @@ Once you've built a zkVM application, you can generate proofs on your own machin
 For local proof generation, we recommend a machine with at least 16GB of RAM.
 Options for generating proofs using GPU acceleration and skipping proof generation are documented in the [feature flags].
 
+## Key Features
+
+There are several key features that distinguish RISC Zero's zkVM from others. These features enable developers to more easily develop zk powerful applications.
+
+### Continuations for limitless computations
+
+Continuations allow the zkVM to do large computations by splitting the work into small, independent segments of the same size.
+This enables proofs generation on commodity hardware and makes zero knowledge computing widely accessible. To learn more, read the article on [continuations].
+
 ## Next Steps
 
 _Ready to start building zkVM applications?_ <br/>
@@ -83,6 +92,7 @@ _Curious about Zeth?_<br/>
 Read the [article](https://risczero.com/news/zeth-release).
 
 [cargo]: https://doc.rust-lang.org/cargo/index.html
+[continuations]: https://www.risczero.com/news/continuations
 [imageID]: /terminology#image-id
 [Bonsai]: ../bonsai/bonsai-overview.md
 [receipt]: developer-guide/receipts.md
