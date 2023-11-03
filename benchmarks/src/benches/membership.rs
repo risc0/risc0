@@ -98,7 +98,7 @@ impl Benchmark for Job<'_> {
     }
 
     fn guest_compute(&mut self) -> (Self::ComputeOut, Self::ProofType) {
-        let receipt = self.session.prove().expect("receipt issue");
+        let receipt = self.session.prove().expect("receipt");
         let (leaf, root) = receipt.journal.decode().unwrap();
         ((leaf, root), receipt)
     }
