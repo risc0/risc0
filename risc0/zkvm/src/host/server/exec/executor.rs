@@ -254,7 +254,7 @@ impl<'a> ExecutorImpl<'a> {
             loop {
                 if let Some(exit_code) = self.step()? {
                     let total_cycles = self.total_cycles();
-                    log::debug!("exit_code: {exit_code:?}, total_cycles: {total_cycles}");
+                    tracing::debug!("exit_code: {exit_code:?}, total_cycles: {total_cycles}");
                     assert!(total_cycles <= self.segment_limit);
                     let pre_image = self.pre_image.take().ok_or_else(|| {
                         anyhow!("attempted to run the executor with no pre_image")
@@ -285,7 +285,7 @@ impl<'a> ExecutorImpl<'a> {
                         ExitCode::SystemSplit => self.split(Some(post_image.into()))?,
                         ExitCode::SessionLimit => bail!("Session limit exceeded"),
                         ExitCode::Paused(inner) => {
-                            log::debug!("Paused({inner}): {}", self.segment_cycle);
+                            tracing::debug!("Paused({inner}): {}", self.segment_cycle);
                             // Set the pre_image so that the Executor can be run again to resume.
                             // Move the pc forward by WORD_SIZE because halt does not.
                             let mut resume_pre_image = post_image.clone();
@@ -294,11 +294,11 @@ impl<'a> ExecutorImpl<'a> {
                             return Ok((exit_code, post_image));
                         }
                         ExitCode::Halted(inner) => {
-                            log::debug!("Halted({inner}): {}", self.segment_cycle);
+                            tracing::debug!("Halted({inner}): {}", self.segment_cycle);
                             return Ok((exit_code, post_image));
                         }
                         ExitCode::Fault => {
-                            log::debug!("Fault: {}", self.segment_cycle);
+                            tracing::debug!("Fault: {}", self.segment_cycle);
                             return Ok((exit_code, post_image));
                         }
                     };
@@ -318,7 +318,7 @@ impl<'a> ExecutorImpl<'a> {
             .output_digest
             .and_then(|output_digest| (output_digest != Digest::ZERO).then(|| journal.buf.take()));
         if !exit_code.expects_output() && session_journal.is_some() {
-            log::debug!(
+            tracing::debug!(
                 "dropping non-empty journal due to exit code {:?}: 0x{}",
                 exit_code,
                 hex::encode(journal.buf.borrow().as_slice())
@@ -327,10 +327,10 @@ impl<'a> ExecutorImpl<'a> {
         self.exit_code = Some(exit_code);
 
         if log::log_enabled!(target: "executor", log::Level::Info) {
-            log::info!(target: "executor", "total_cycles = {}", self.total_cycles());
-            log::info!(target: "executor", "session_cycles = {}", self.session_cycle());
-            log::info!(target: "executor", "segment_count = {}", self.segments.len());
-            log::info!(target: "executor", "execution_time = {:?}", elapsed);
+            tracing::info!(target: "executor", "total_cycles = {}", self.total_cycles());
+            tracing::info!(target: "executor", "session_cycles = {}", self.session_cycle());
+            tracing::info!(target: "executor", "segment_count = {}", self.segments.len());
+            tracing::info!(target: "executor", "execution_time = {:?}", elapsed);
         }
 
         Ok(Session::new(
@@ -385,7 +385,7 @@ impl<'a> ExecutorImpl<'a> {
         };
 
         if let Some(frame) = frame {
-            log::trace!(
+            tracing::trace!(
                 "[{}] pc: 0x{:08x}, insn: 0x{:08x} => {:?}, {frame}",
                 self.segment_cycle,
                 self.pc,
@@ -393,7 +393,7 @@ impl<'a> ExecutorImpl<'a> {
                 opcode
             );
         } else {
-            log::trace!(
+            tracing::trace!(
                 "[{}] pc: 0x{:08x}, insn: 0x{:08x} => {:?}",
                 self.segment_cycle,
                 self.pc,
@@ -418,7 +418,7 @@ impl<'a> ExecutorImpl<'a> {
             };
             if let Err(err) = inst_exec.step() {
                 self.split_insn = Some(self.insn_counter);
-                log::debug!(
+                tracing::debug!(
                     "fault: [{}] pc: 0x{:08x} ({:?})",
                     self.segment_cycle,
                     self.pc,
@@ -446,7 +446,7 @@ impl<'a> ExecutorImpl<'a> {
         // * return ExitCode::SystemSplit
         // otherwise, commit memory and hart
         let total_pending_cycles = self.total_cycles() + opcode.cycles + op_result.extra_cycles;
-        // log::debug!(
+        // tracing::debug!(
         //     "cycle: {}, segment: {}, total: {}",
         //     self.segment_cycle,
         //     total_pending_cycles,
@@ -460,7 +460,7 @@ impl<'a> ExecutorImpl<'a> {
         }
         let exit_code = if total_pending_cycles > self.segment_limit {
             self.split_insn = Some(self.insn_counter);
-            log::debug!("split: [{}] pc: 0x{:08x}", self.segment_cycle, self.pc,);
+            tracing::debug!("split: [{}] pc: 0x{:08x}", self.segment_cycle, self.pc,);
             self.monitor.undo()?;
             Some(ExitCode::SystemSplit)
         } else {
@@ -487,7 +487,7 @@ impl<'a> ExecutorImpl<'a> {
         self.insn_counter += 1;
         self.body_cycles += opcode.cycles + op_result.extra_cycles;
         let page_read_cycles = self.monitor.page_read_cycles;
-        // log::debug!("page_read_cycles: {page_read_cycles}");
+        // tracing::debug!("page_read_cycles: {page_read_cycles}");
         self.segment_cycle = self.init_cycles + page_read_cycles + self.body_cycles;
         self.monitor.commit(self.session_cycle());
         if let Some(syscall) = self.pending_syscall.take() {
@@ -542,7 +542,7 @@ impl<'a> ExecutorImpl<'a> {
     }
 
     fn ecall_input(&mut self) -> Result<OpCodeResult> {
-        log::debug!("ecall(input)");
+        tracing::debug!("ecall(input)");
         let in_addr = self.monitor.load_guest_addr_from_register(REG_A0)?;
         self.monitor
             .load_array_from_guest_addr::<{ DIGEST_WORDS * WORD_SIZE }>(in_addr)?;
@@ -562,7 +562,7 @@ impl<'a> ExecutorImpl<'a> {
             *word = word.to_be();
         }
 
-        log::debug!("Initial sha state: {state:08x?}");
+        tracing::debug!("Initial sha state: {state:08x?}");
         for _ in 0..count {
             let mut block = [0u32; BLOCK_WORDS];
             for (i, word) in block.iter_mut().enumerate() {
@@ -575,7 +575,7 @@ impl<'a> ExecutorImpl<'a> {
                     .monitor
                     .load_u32_from_guest_addr(block2_ptr + (i * WORD_SIZE) as u32)?;
             }
-            log::debug!("Compressing block {block:02x?}");
+            tracing::debug!("Compressing block {block:02x?}");
             sha2::compress256(
                 &mut state,
                 &[*generic_array::GenericArray::from_slice(
@@ -586,7 +586,7 @@ impl<'a> ExecutorImpl<'a> {
             block1_ptr += BLOCK_BYTES as u32;
             block2_ptr += BLOCK_BYTES as u32;
         }
-        log::debug!("Final sha state: {state:08x?}");
+        tracing::debug!("Final sha state: {state:08x?}");
 
         for word in &mut state {
             *word = u32::from_be(*word);
@@ -666,12 +666,14 @@ impl<'a> ExecutorImpl<'a> {
         let to_guest_words = self.monitor.load_register(REG_A1);
         let name_ptr = self.monitor.load_guest_addr_from_register(REG_A2)?;
         let syscall_name = self.monitor.load_string_from_guest_memory(name_ptr)?;
-        log::trace!("Guest called syscall {syscall_name:?} requesting {to_guest_words} words back");
+        tracing::trace!(
+            "Guest called syscall {syscall_name:?} requesting {to_guest_words} words back"
+        );
 
         let chunks = align_up(to_guest_words as usize, WORD_SIZE);
 
         let syscall = if let Some(syscall) = self.pending_syscall.clone() {
-            log::debug!("Replay syscall: {syscall:?}");
+            tracing::debug!("Replay syscall: {syscall:?}");
             syscall
         } else {
             let mut to_guest = vec![0; to_guest_words as usize];
@@ -704,7 +706,7 @@ impl<'a> ExecutorImpl<'a> {
         self.monitor.store_register(REG_A0, a0);
         self.monitor.store_register(REG_A1, a1);
 
-        log::trace!("Syscall returned a0: {a0:#X}, a1: {a1:#X}, chunks: {chunks}");
+        tracing::trace!("Syscall returned a0: {a0:#X}, a1: {a1:#X}, chunks: {chunks}");
 
         // One cycle for the ecall cycle, then one for each chunk or
         // portion thereof then one to save output (a0, a1)

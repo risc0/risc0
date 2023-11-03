@@ -3089,7 +3089,6 @@ dependencies = [
  "env_logger",
  "hex",
  "k256",
- "log",
  "rand",
  "rand_core",
  "risc0-benchmark-lib",
@@ -3143,10 +3142,10 @@ version = "0.19.0"
 dependencies = [
  "anyhow",
  "elf",
- "log",
  "risc0-zkp 0.19.0",
  "risc0-zkvm-platform 0.19.0",
  "serde",
+ "tracing",
 ]
 
 [[package]]
@@ -3197,7 +3196,6 @@ dependencies = [
  "bytemuck",
  "cust",
  "downloader",
- "log",
  "metal",
  "rand",
  "rayon",
@@ -3224,7 +3222,6 @@ version = "0.19.0"
 dependencies = [
  "anyhow",
  "cust",
- "log",
  "metal",
  "rand",
  "rayon",
@@ -3302,7 +3299,6 @@ dependencies = [
  "ff",
  "hex",
  "lazy_static",
- "log",
  "metal",
  "ndarray",
  "paste",
@@ -3333,7 +3329,6 @@ dependencies = [
  "getrandom",
  "hex",
  "lazy-regex",
- "log",
  "num-derive",
  "num-traits",
  "prost",
@@ -4245,6 +4240,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8ce8c33a8d48bd45d624a6e523445fd21ec13d3653cd51f681abf67418f54eb8"
 dependencies = [
  "cfg-if",
+ "log",
  "pin-project-lite",
  "tracing-attributes",
  "tracing-core",

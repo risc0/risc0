@@ -20,7 +20,7 @@ use core::{
 };
 
 use anyhow::Result;
-use log::{debug, trace};
+use tracing::{debug, trace};
 use risc0_core::field::{baby_bear::BabyBearElem, Elem};
 use risc0_zkp::{
     adapter::TapsProvider,
@@ -432,7 +432,7 @@ impl Loader {
         // Make the digest for each level
         for i in MIN_CYCLES_PO2..MAX_CYCLES_PO2 {
             let cycles = 1 << i;
-            log::info!("po2: {i}");
+            tracing::info!("po2: {i}");
             // Make a vector & set it up with the elf data
             let mut code = vec![BabyBearElem::default(); cycles * code_size];
             self.load_code(&mut code, cycles);
@@ -461,7 +461,7 @@ impl Loader {
                 cycle += 1;
                 Ok(true)
             } else {
-                log::info!("Halting. {cycle} + {fini} + ZK_CYCLES ({total}) < {max_cycles}");
+                tracing::info!("Halting. {cycle} + {fini} + ZK_CYCLES ({total}) < {max_cycles}");
                 Ok(false)
             }
         })

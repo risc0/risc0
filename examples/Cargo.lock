@@ -1036,7 +1036,6 @@ dependencies = [
  "image",
  "json-methods",
  "k256",
- "log",
  "password-checker-core",
  "password-checker-methods",
  "prorata-core",
@@ -1147,7 +1146,6 @@ dependencies = [
  "digital-signature-core",
  "digital-signature-methods",
  "env_logger",
- "log",
  "risc0-zkvm",
  "serde",
  "sha2",
@@ -3560,10 +3558,10 @@ version = "0.19.0"
 dependencies = [
  "anyhow",
  "elf",
- "log",
  "risc0-zkp",
  "risc0-zkvm-platform",
  "serde",
+ "tracing",
 ]
 
 [[package]]
@@ -3600,7 +3598,6 @@ dependencies = [
  "bytemuck",
  "cust",
  "downloader",
- "log",
  "metal",
  "rand",
  "rayon",
@@ -3627,7 +3624,6 @@ version = "0.19.0"
 dependencies = [
  "anyhow",
  "cust",
- "log",
  "metal",
  "rand",
  "rayon",
@@ -3674,7 +3670,6 @@ dependencies = [
  "ff",
  "hex",
  "lazy_static",
- "log",
  "metal",
  "ndarray",
  "paste",
@@ -3707,7 +3702,6 @@ dependencies = [
  "goblin",
  "hex",
  "lazy-regex",
- "log",
  "num-derive",
  "num-traits",
  "object",
@@ -4843,6 +4837,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8ce8c33a8d48bd45d624a6e523445fd21ec13d3653cd51f681abf67418f54eb8"
 dependencies = [
  "cfg-if",
+ "log",
  "pin-project-lite",
  "tracing-attributes",
  "tracing-core",
@@ -5094,7 +5089,6 @@ version = "0.12.0"
 dependencies = [
  "env_logger",
  "hex",
- "log",
  "risc0-zkvm",
  "test-log",
  "voting-machine-core",
@@ -5631,7 +5625,6 @@ dependencies = [
  "env_logger",
  "ethers-core",
  "ethers-providers",
- "log",
  "risc0-zkvm",
  "serde",
  "tokio",

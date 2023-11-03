@@ -517,7 +517,7 @@ impl<MH: MetalHash> Hal for MetalHal<MH> {
         assert_eq!(row_size * count, io.size());
         let bits = log2_ceil(row_size);
         assert_eq!(row_size, 1 << bits);
-        log::debug!(
+        tracing::debug!(
             "io: {}, count: {count}, row_size: {row_size}, bits: {bits}",
             io.size()
         );
@@ -535,7 +535,7 @@ impl<MH: MetalHash> Hal for MetalHal<MH> {
     ) {
         // batch_expand
         {
-            log::debug!(
+            tracing::debug!(
                 "output: {}, input: {}, count: {count}",
                 output.size(),
                 input.size()
@@ -559,7 +559,7 @@ impl<MH: MetalHash> Hal for MetalHal<MH> {
 
         // batch_evaluate_ntt
         {
-            log::debug!(
+            tracing::debug!(
                 "output: {}, count: {count}, expand_bits: {expand_bits}",
                 output.size()
             );
@@ -587,7 +587,7 @@ impl<MH: MetalHash> Hal for MetalHal<MH> {
 
     #[tracing::instrument(skip_all)]
     fn batch_interpolate_ntt(&self, io: &Self::Buffer<Self::Elem>, count: usize) {
-        log::debug!("io: {}, count: {count}", io.size());
+        tracing::debug!("io: {}, count: {count}", io.size());
         let row_size = io.size() / count;
         assert_eq!(row_size * count, io.size());
         let n_bits = log2_ceil(row_size);
@@ -715,7 +715,7 @@ impl<MH: MetalHash> Hal for MetalHal<MH> {
         input_size: usize,
         count: usize,
     ) {
-        log::debug!(
+        tracing::debug!(
             "output: {}, input: {}, combos: {}, input_size: {input_size}, count: {count}",
             output.size(),
             input.size(),

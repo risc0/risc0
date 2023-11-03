@@ -17,8 +17,8 @@ use std::{str::FromStr, sync::Arc};
 use clap::Parser;
 use ethers_core::types::{H256, U256};
 use ethers_providers::Middleware;
-use log::info;
 use risc0_zkvm::{default_prover, ExecutorEnv};
+use tracing::info;
 use zkevm_core::{
     ether_trace::{Http, Provider},
     Env, EvmResult, EVM,

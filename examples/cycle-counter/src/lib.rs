@@ -17,9 +17,9 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use log::info;
 use risc0_zkvm::{default_executor, ExecutorEnv};
 use serde::Serialize;
+use tracing::info;
 
 pub mod examples;
 

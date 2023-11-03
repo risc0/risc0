@@ -20,11 +20,11 @@ use std::{
     time::{Duration, Instant},
 };
 
-use log::info;
 use risc0_zkvm::{
     ExecutorEnv, ExecutorImpl, MemoryImage, Program, Session, GUEST_MAX_MEM, PAGE_SIZE,
 };
 use serde::Serialize;
+use tracing::info;
 
 pub mod benches;
 

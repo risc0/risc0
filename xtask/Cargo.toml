@@ -6,7 +6,6 @@ edition = { workspace = true }
 [dependencies]
 bincode = "1.3"
 clap = { version = "4", features = ["derive"] }
-log = "0.4"
 regex = "1"
 risc0-core = { workspace = true }
 risc0-fault = { path = "../risc0/fault" }

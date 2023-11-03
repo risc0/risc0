@@ -472,7 +472,7 @@ mod sys_verify {
     #[test]
     fn sys_verify_halt_codes() {
         for code in [0u8, 1, 2, 255] {
-            log::debug!("sys_verify_pause_codes: code = {code}");
+            tracing::debug!("sys_verify_pause_codes: code = {code}");
             let halt_session = exec_halt(code);
 
             let spec = &MultiTestSpec::SysVerify {
@@ -499,7 +499,7 @@ mod sys_verify {
     #[test]
     fn sys_verify_pause_codes() {
         for code in [0u8, 1, 2, 255] {
-            log::debug!("sys_verify_halt_codes: code = {code}");
+            tracing::debug!("sys_verify_halt_codes: code = {code}");
             let pause_session = exec_pause(code);
 
             let spec = &MultiTestSpec::SysVerify {
@@ -582,7 +582,7 @@ mod sys_verify {
     #[test]
     fn sys_verify_integrity_halt_codes() {
         for code in [0u8, 1, 2, 255] {
-            log::debug!("sys_verify_pause_codes: code = {code}");
+            tracing::debug!("sys_verify_pause_codes: code = {code}");
             let halt_session = exec_halt(code);
 
             let spec = &MultiTestSpec::SysVerifyIntegrity {
@@ -606,7 +606,7 @@ mod sys_verify {
     #[test]
     fn sys_verify_integrity_pause_codes() {
         for code in [0u8, 1, 2, 255] {
-            log::debug!("sys_verify_halt_codes: code = {code}");
+            tracing::debug!("sys_verify_halt_codes: code = {code}");
             let pause_session = exec_pause(code);
 
             let spec = &MultiTestSpec::SysVerifyIntegrity {

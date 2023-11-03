@@ -437,7 +437,7 @@ impl Profiler {
     /// returning the compiled profile protobuf.
     pub fn finalize(&mut self) {
         let root_ref = Rc::clone(&self.root);
-        log::debug!("{}", self.root.borrow().fmt(0, &self));
+        tracing::debug!("{}", self.root.borrow().fmt(0, &self));
         self.walk_stack(root_ref, Vec::new());
     }
 

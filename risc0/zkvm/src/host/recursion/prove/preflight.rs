@@ -15,7 +15,6 @@
 use std::collections::BTreeMap;
 
 use anyhow::{bail, Result};
-use log::trace;
 use risc0_circuit_recursion::{
     layout::{CodeReg, RecursionMicroInst, LAYOUT},
     micro_op, Externs,
@@ -29,6 +28,7 @@ use risc0_zkp::{
     },
     field::Elem,
 };
+use tracing::trace;
 
 pub struct Preflight<'a, Ext: Externs> {
     externs: &'a mut Ext,
