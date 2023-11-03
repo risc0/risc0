@@ -92,7 +92,7 @@ export default {
         {
           type: "doc",
           label: "zkVM technical specification",
-          id: "zkvm/developer-guide/zkvm-specification"
+          id: "zkvm/developer-guide/zkvm-specification",
         },
         {
           type: "doc",
