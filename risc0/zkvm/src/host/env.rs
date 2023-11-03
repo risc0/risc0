@@ -1,4 +1,6 @@
+#[cfg(feature = "profiler")]
 use anyhow::anyhow;
+#[cfg(feature = "profiler")]
 use std::path::PathBuf;
 
 // TODO(victor): Rename this file... too many envs.

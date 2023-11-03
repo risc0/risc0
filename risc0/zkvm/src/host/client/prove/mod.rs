@@ -17,9 +17,9 @@ pub(crate) mod external;
 #[cfg(feature = "prove")]
 pub(crate) mod local;
 
-use std::{cell::RefCell, path::PathBuf, rc::Rc};
+use std::{path::PathBuf, rc::Rc};
 
-use anyhow::{anyhow, Result};
+use anyhow::Result;
 use risc0_binfmt::{MemoryImage, Program};
 use risc0_zkvm_platform::{memory::GUEST_MAX_MEM, PAGE_SIZE};
 use serde::{Deserialize, Serialize};
@@ -110,7 +110,7 @@ pub trait Prover {
         #[cfg(feature = "profiler")]
         let profiler = crate::host::env::pprof_path()
             .map(|_| -> anyhow::Result<_> {
-                let profiler = Rc::new(RefCell::new(crate::Profiler::new(elf, None)?));
+                let profiler = Rc::new(std::cell::RefCell::new(crate::Profiler::new(elf, None)?));
                 env.trace.push(profiler.clone());
                 Ok(profiler)
             })
@@ -123,7 +123,7 @@ pub trait Prover {
         #[cfg(feature = "profiler")]
         if let Some(profiler) = profiler {
             let unwrapped = Rc::into_inner(profiler)
-                .ok_or(anyhow!("failed to finalize profiler"))?
+                .ok_or(anyhow::anyhow!("failed to finalize profiler"))?
                 .into_inner();
             crate::host::env::write_pprof_file(&unwrapped.finalize_to_vec())?;
         }
@@ -148,7 +148,7 @@ pub trait Executor {
         #[cfg(feature = "profiler")]
         let profiler = crate::host::env::pprof_path()
             .map(|_| -> anyhow::Result<_> {
-                let profiler = Rc::new(RefCell::new(crate::Profiler::new(elf, None)?));
+                let profiler = Rc::new(std::cell::RefCell::new(crate::Profiler::new(elf, None)?));
                 env.trace.push(profiler.clone());
                 Ok(profiler)
             })
@@ -161,7 +161,7 @@ pub trait Executor {
         #[cfg(feature = "profiler")]
         if let Some(profiler) = profiler {
             let unwrapped = Rc::into_inner(profiler)
-                .ok_or(anyhow!("failed to finalize profiler"))?
+                .ok_or(anyhow::anyhow!("failed to finalize profiler"))?
                 .into_inner();
             crate::host::env::write_pprof_file(&unwrapped.finalize_to_vec())?;
         }
