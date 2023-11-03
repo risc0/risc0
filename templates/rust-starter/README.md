@@ -98,7 +98,7 @@ We'd love to hear from you on [Discord][discord] or [Twitter][twitter].
 [cargo-risczero]: https://docs.rs/cargo-risczero
 [crates]: https://github.com/risc0/risc0/blob/main/README.md#rust-binaries
 [dev-docs]: https://dev.risczero.com
-[dev-mode]: https://dev.risczero.com/zkvm/dev-mode
+[dev-mode]: https://dev.risczero.com/api/zkvm/dev-mode
 [discord]: https://discord.gg/risczero
 [docs.rs]: https://docs.rs/releases/search?query=risc0
 [examples]: https://github.com/risc0/risc0/tree/main/examples
