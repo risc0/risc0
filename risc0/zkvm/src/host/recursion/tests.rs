@@ -37,6 +37,7 @@ fn generate_segments(hashfn: &str) -> (Session, Vec<SegmentReceipt>) {
     log::info!("Got {} segments", segments.len());
     let opts = crate::ProverOpts {
         hashfn: hashfn.to_string(),
+        prove_guest_errors: false,
     };
     let prover = get_prover_server(&opts).unwrap();
     log::info!("Proving rv32im");
@@ -97,10 +98,10 @@ fn test_recursion_e2e() {
     for receipt in &segments[1..] {
         let rec_receipt = lift(receipt).unwrap();
         log::info!("Lift Meta = {:?}", rec_receipt.meta);
-        rec_receipt.verify_with_context(&ctx).unwrap();
+        rec_receipt.verify_integrity_with_context(&ctx).unwrap();
         rollup = join(&rollup, &rec_receipt).unwrap();
         log::info!("Join Meta = {:?}", rollup.meta);
-        rollup.verify_with_context(&ctx).unwrap();
+        rollup.verify_integrity_with_context(&ctx).unwrap();
     }
 
     // Check on stark-to-snark
@@ -113,6 +114,9 @@ fn test_recursion_e2e() {
     // std::fs::write("recursion.seal", seal);
 
     // Validate the Session rollup + journal data
-    let rollup_receipt = Receipt::new(InnerReceipt::Succinct(rollup), session.journal.bytes);
+    let rollup_receipt = Receipt::new(
+        InnerReceipt::Succinct(rollup),
+        session.journal.unwrap().bytes,
+    );
     rollup_receipt.verify(MULTI_TEST_ID).unwrap();
 }

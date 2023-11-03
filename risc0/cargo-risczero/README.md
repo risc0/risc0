@@ -77,7 +77,7 @@ Use the `build` command to build guest code for the zkVM target `riscv32im-risc0
 
 The compiled ELF is saved in: `./target/riscv-guest/riscv32im-risc0-zkvm-elf/docker/`
 
-With this containerized build process, we ensure that all builds of your guest code, regardless of the machine or local environment, will produce the same ImageID. The ImageID, and its importance to [security,](https://dev.risczero.com/tech_faq#security) is explained in more detail in our [developer FAQ.](https://dev.risczero.com/tech_faq#zkvm-application-design)
+With this containerized build process, we ensure that all builds of your guest code, regardless of the machine or local environment, will produce the same ImageID. The ImageID, and its importance to [security,](https://dev.risczero.com/faq#security) is explained in more detail in our [developer FAQ.](https://dev.risczero.com/faq#zkvm-application-design)
 
 Note: The build command requires the docker CLI installed and in your PATH.
 
