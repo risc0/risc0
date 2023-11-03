@@ -19,8 +19,8 @@ use risc0_binfmt::MemoryImage;
 
 use super::{Executor, Prover, ProverOpts};
 use crate::{
-    host::api::AssetRequest, sha::Digestible, ApiClient, ExecutorEnv, Receipt, SessionInfo,
-    VerifierContext,
+    host::api::AssetRequest, host::env, sha::Digestible, ApiClient, ExecutorEnv, Receipt,
+    SessionInfo, VerifierContext,
 };
 
 /// An implementation of a [Prover] that runs proof workloads via an external
@@ -76,8 +76,17 @@ impl Prover for ExternalProver {
 impl Executor for ExternalProver {
     fn execute(&self, env: ExecutorEnv<'_>, image: MemoryImage) -> Result<SessionInfo> {
         let client = ApiClient::new_sub_process(&self.r0vm_path)?;
+
+        let pprof_req = env::pprof_path().map(|_| AssetRequest::Inline);
         let segments_out = AssetRequest::Inline;
-        // TODO(victor)
-        client.execute(&env, image.into(), segments_out, |_, _| Ok(()), None)
+        let session_info =
+            client.execute(&env, image.into(), segments_out, |_, _| Ok(()), pprof_req)?;
+
+        if let Some(ref profile) = session_info.profile {
+            // NOTE: This is result in an Err if the server unexpectedly returned a profile.
+            env::write_pprof_file(&profile.as_bytes()?)?;
+        }
+
+        Ok(session_info)
     }
 }

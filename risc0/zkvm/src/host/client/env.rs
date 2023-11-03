@@ -80,7 +80,7 @@ pub struct ExecutorEnv<'a> {
     pub(crate) posix_io: Rc<RefCell<PosixIo<'a>>>,
     pub(crate) slice_io: Rc<RefCell<SliceIoTable<'a>>>,
     pub(crate) input: Vec<u8>,
-    pub(crate) trace: Option<Rc<RefCell<dyn TraceCallback + 'a>>>,
+    pub(crate) trace: Vec<Rc<RefCell<dyn TraceCallback + 'a>>>,
     pub(crate) assumptions: Rc<RefCell<Assumptions>>,
     pub(crate) segment_path: Option<PathBuf>,
 }
@@ -327,7 +327,7 @@ impl<'a> ExecutorEnvBuilder<'a> {
 
     /// Add a callback handler for raw trace messages.
     pub fn trace_callback(&mut self, callback: impl TraceCallback + 'a) -> &mut Self {
-        self.inner.trace = Some(Rc::new(RefCell::new(callback)));
+        self.inner.trace.push(Rc::new(RefCell::new(callback)));
         self
     }
 

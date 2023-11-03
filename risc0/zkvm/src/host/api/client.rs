@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::path::Path;
+use std::{ops::Not, path::Path};
 
 use anyhow::{anyhow, bail, Result};
 use bytes::Bytes;
@@ -346,7 +346,7 @@ impl Client {
             write_fds: env.posix_io.borrow().write_fds.keys().cloned().collect(),
             segment_limit_po2: env.segment_limit_po2,
             session_limit: env.session_limit,
-            trace_events: env.trace.is_some().then_some(()),
+            trace_events: env.trace.is_empty().not().then_some(()),
         }
     }
 
@@ -513,8 +513,10 @@ impl Client {
     }
 
     fn on_trace(&self, env: &ExecutorEnv<'_>, event: pb::api::TraceEvent) -> Result<()> {
-        if let Some(ref trace_callback) = env.trace {
-            trace_callback.borrow_mut().call(event.try_into()?)?;
+        for trace_callback in env.trace.iter() {
+            trace_callback
+                .borrow_mut()
+                .call(event.clone().try_into()?)?;
         }
         Ok(())
     }

@@ -122,6 +122,7 @@ pub trait Executor {
     ///
     /// This only executes the program and does not generate a receipt.
     fn execute_elf(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<SessionInfo> {
+        // TODO(victor): Integrate the profile request here?
         let program = Program::load_elf(elf, GUEST_MAX_MEM as u32)?;
         let image = MemoryImage::new(&program, PAGE_SIZE as u32)?;
         self.execute(env, image)

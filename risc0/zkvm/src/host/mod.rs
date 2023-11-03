@@ -17,6 +17,7 @@ pub(crate) mod api;
 #[cfg(feature = "client")]
 pub(crate) mod client;
 pub(crate) mod control_id;
+pub(crate) mod env;
 #[cfg(feature = "profiler")]
 pub(crate) mod profiler;
 pub(crate) mod receipt;
