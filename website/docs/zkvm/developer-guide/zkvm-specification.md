@@ -1,6 +1,6 @@
 # zkVM Technical Specification
 
-Like many other execution environments, the zkVM it has unique characteristics
+Like many other execution environments, the zkVM has unique characteristics
 that developers may find helpful when programming. The following description of
 zkVM characteristics assume familiarity with systems programming concepts. Those
 who are not familiar may want to consult additional resources such as
