@@ -15,6 +15,7 @@ hex = "0.4"
 test-log = "0.2"
 
 [features]
-cuda = ["risc0-zkvm/cuda"]
 default = []
-metal = ["risc0-zkvm/metal"]
+cuda = ["risc0-zkvm/cuda"]
+prove = ["risc0-zkvm/cuda"]
+profiler = ["risc0-zkvm/profiler"]

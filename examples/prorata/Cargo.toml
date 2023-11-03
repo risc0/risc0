@@ -13,6 +13,7 @@ rust_decimal = "1.29"
 serde = "1.0"
 
 [features]
-cuda = ["risc0-zkvm/cuda"]
 default = []
-metal = ["risc0-zkvm/metal"]
+cuda = ["risc0-zkvm/cuda"]
+prove = ["risc0-zkvm/cuda"]
+profiler = ["risc0-zkvm/profiler"]
