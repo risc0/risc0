@@ -53,12 +53,15 @@ jobs:
         with:
           key: Linux-default
 
-      - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Install Foundry
         uses: risc0/foundry-toolchain@2fe7e70b520f62368a0e3c464f997df07ede420f
+
+      - name: Cargo install cargo-risczero
+        run: cargo install --force --path risc0/cargo-risczero
+
+      - run: cargo risczero install --version $RISC0_TOOLCHAIN_VERSION
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # Lint
       - name: check solidity code formatting in bonsai/ethereum
