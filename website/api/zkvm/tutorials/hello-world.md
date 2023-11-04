@@ -64,8 +64,8 @@ Notice, by committing any private information to the journal, we make this priva
 
 Let's look at how the host generates a receipt and extracts the [journal]'s contents.
 We get a receipt, extract a journal from the receipt, and verify it.
-In a real-world scenario, we'd want to hand the [receipt] to someone else, but verifying it ourselves will be a nice way to check our project is working as expected.
-After receipt verification, let's print `Hello world` with the public output by adding this line to the host: `println!("Hello, world! I generated a proof of guest execution! {} is a public output from journal", _output);`
+In a real-world scenario, we'd want to hand the [receipt] to someone else for verification, and the `prove` function does internal verification of the receipt.
+After we extract journal from the receipt, let's print `Hello world` with the public output by adding this line to the host: `println!("Hello, world! I generated a proof of guest execution! {} is a public output from journal", _output);`
 
 ```rust ignore
 use methods::{HELLO_GUEST_ELF, HELLO_GUEST_ID};
@@ -81,8 +81,6 @@ fn main() {
 
     // Extract journal of receipt
     let _output: u32 = receipt.journal.decode().unwrap();
-
-    receipt.verify(HELLO_GUEST_ID).unwrap();
 
     // Print, notice, after committing to a journal, the private input became public
     println!("Hello, world! I generated a proof of guest execution! {} is a public output from journal ", _output);
