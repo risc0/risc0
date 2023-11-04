@@ -6,4 +6,5 @@ edition = "2021"
 [dependencies]
 methods = { path = "../methods" }
 risc0-zkvm = { {{ risc0_zkvm }} }
+env_logger = "0.10"
 serde = "1.0"
