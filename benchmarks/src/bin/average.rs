@@ -17,8 +17,6 @@
 use std::path::PathBuf;
 
 use clap::{Parser, Subcommand};
-#[cfg(any(feature = "metal", feature = "cuda"))]
-use risc0_benchmark::init_gpu_kernel;
 use risc0_benchmark::{benches::*, init_logging, run_jobs_average};
 
 #[derive(Parser)]
@@ -45,9 +43,6 @@ enum Command {
 
 fn main() {
     init_logging();
-
-    #[cfg(any(feature = "metal", feature = "cuda"))]
-    init_gpu_kernel();
 
     let cli = Cli::parse();
 
