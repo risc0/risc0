@@ -25,3 +25,7 @@ pub mod alpha_async;
 pub const API_KEY_HEADER: &str = "x-api-key";
 /// HTTP header for the risc0 version string
 pub const VERSION_HEADER: &str = "x-risc0-version";
+/// Environment variable name for the API url
+pub const API_URL_ENVVAR: &str = "BONSAI_API_URL";
+/// Environment variable name for the API key
+pub const API_KEY_ENVVAR: &str = "BONSAI_API_KEY";

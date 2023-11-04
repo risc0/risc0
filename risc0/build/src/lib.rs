@@ -479,7 +479,7 @@ fn detect_toolchain(name: &str) {
         eprintln!("The 'risc0' toolchain could not be found.");
         eprintln!("To install the risc0 toolchain, use cargo-risczero.");
         eprintln!("For example:");
-        eprintln!("  cargo install cargo-risczero");
+        eprintln!("  cargo binstall cargo-risczero");
         eprintln!("  cargo risczero install");
         std::process::exit(-1);
     }
