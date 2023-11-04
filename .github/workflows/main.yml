@@ -34,24 +34,24 @@ jobs:
               - .github/**
               - Cargo.toml
             crates-validator:
-              - *build
+              - *base
               - tools/crates-validator/**
             examples:
-              - *build
+              - *base
               - examples/**
               - risc0/**
             templates:
-              - *build
+              - *base
               - risc0/**
               - templates/**
             test:
-              - *build
+              - *base
               - benchmarks/**
               - bonsai/sdk/**
               - external/**
               - risc0/**
             web:
-              - *build
+              - *base
               - examples/browser-verify/**
               - risc0/**
               - xtask/**
