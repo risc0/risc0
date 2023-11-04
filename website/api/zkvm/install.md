@@ -2,7 +2,7 @@
 
 These instructions tell you how to install (or update) RISC Zero tools so you can build your own RISC Zero zkVM projects. By following these instructions, you will install the [`cargo risczero`] tool for creating and building RISC Zero zkVM projects, as well as the RISC Zero toolchain used to build zkVM guest programs in Rust.
 
-[`cargo risczero`]: https://docs.rs/cargo-risczero/*/cargo_risczero/index.html
+[`cargo risczero`]: https://crates.io/crates/cargo-risczero
 
 ## Prerequisites
 
@@ -35,7 +35,7 @@ rustup toolchain list --verbose | grep risc0
 
 which should list `risc0` along with its path.
 
-[`install` command]: https://docs.rs/cargo-risczero/*/cargo_risczero/index.html#install
+[`install` command]: https://crates.io/crates/cargo-risczero
 
 ## Update
 

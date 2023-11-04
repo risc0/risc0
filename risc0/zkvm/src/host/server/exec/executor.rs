@@ -300,6 +300,8 @@ impl<'a> ExecutorImpl<'a> {
             bail!("cannot resume an execution which exited with ExitCode::Halted");
         }
 
+        let start_time = std::time::Instant::now();
+
         self.monitor.clear_session()?;
 
         let journal = Journal::default();
@@ -360,7 +362,15 @@ impl<'a> ExecutorImpl<'a> {
         };
 
         let exit_code = run_loop()?;
+        let elapsed = start_time.elapsed();
         self.exit_code = Some(exit_code);
+
+        if log::log_enabled!(target: "executor", log::Level::Info) {
+            log::info!(target: "executor", "total_cycles = {}", self.total_cycles());
+            log::info!(target: "executor", "session_cycles = {}", self.session_cycle());
+            log::info!(target: "executor", "segment_count = {}", self.segments.len());
+            log::info!(target: "executor", "execution_time = {:?}", elapsed);
+        }
         Ok(Session::new(
             take(&mut self.segments),
             journal.buf.take(),
