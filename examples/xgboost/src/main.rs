@@ -32,9 +32,6 @@ fn predict() -> f64 {
     // We serialize the model to a byte array before transferring it to the guest.
     let model_bytes: Vec<u8> = rmp_serde::to_vec(&model).unwrap();
 
-    // // We measure the length of the array so that we can properly construct the buffer in the guest.
-    // let rmp_array_length = rmp_model.len();
-
     // We define an input value for the model (inputs are block number and numbe of transaction in that block.  Note we modify the block number to a f64 value).
     //**************************//
     // ADD YOUR INPUT DATA HERE //

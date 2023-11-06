@@ -24,16 +24,7 @@ pub fn main() {
     let input: Vec<f64> = env::read();
 
     let model_bytes: Vec<u8> = env::read();
-
-    // // read in the byte array length
-    // let length: usize = env::read();
-
-    // // create a buffer for the byte array
-    // let mut model_bytes: Vec<u8> = vec![0;length];
-
-    // // read in the byte array
-    // env::read_slice(&mut model_bytes);
-
+    
     // We deserialize the byte array into the trained model.  
     let xgboost_model: GradientBooster = rmp_serde::from_slice(&model_bytes).unwrap();
 
