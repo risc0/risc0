@@ -65,13 +65,13 @@ Once you've built a zkVM application, you can generate proofs on your own machin
 For local proof generation, we recommend a machine with at least 16GB of RAM.
 Options for generating proofs using GPU acceleration and skipping proof generation are documented in the [feature flags].
 
-## Key Features
+## Micro Architecture
 
-There are several key features that distinguish RISC Zero's zkVM from others. These features enable developers to more easily develop zk powerful applications.
+The zkVM is a verifiable computer that works like a real embedded RISC-V micro-processor. This enables developers to more easily develop zk powerful applications.
 
 ### Continuations for limitless computations
 
-Continuations allow the [zkVM] to do large computations by splitting the work into small, independent [segments] of the same size.
+Continuations allow the [zkVM][zkVM-term] to do large computations by splitting the work into small, independent [segments] of the same size.
 This enables proofs generation on commodity hardware and makes zero knowledge computing widely accessible. To learn more, read the article on [continuations].
 
 ## Next Steps
@@ -109,10 +109,12 @@ Read the [article](https://risczero.com/news/zeth-release).
 [proofs]: /terminology#validity-proof
 [prover]: /terminology#prover
 [publicly shared outputs]: /terminology#journal
+[segments]: /terminology#segment
 [verify]: /terminology#verify
 [zero-knowledge virtual machine]: /terminology#zero-knowledge-virtual-machine-zkvm
 [zkvm]: https://github.com/risc0/risc0#readme
 [zkVM Quick Start]: ./quickstart.md
 [zkVM example applications]: https://github.com/risc0/risc0/tree/v0.18.0/examples
+[zkVM-term]: /terminology#zero-knowledge-virtual-machine-zkvm
 [session]: /terminology#session
 [Host Code 101]: developer-guide/host-code-101.md
