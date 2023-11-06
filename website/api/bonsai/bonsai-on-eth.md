@@ -40,7 +40,7 @@ A typical flow works as follows:
 The following example assumes that the `Bonsai Relayer` is up and running with the server API enabled,
 and that the memory image of your `ELF` is already registered against Bonsai with a given `IMAGE_ID` as its identifier.
 
-```rust
+```rust,no_run
 use alloy_primitives::U256;
 use alloy_sol_types::SolValue;
 use anyhow::Context;
