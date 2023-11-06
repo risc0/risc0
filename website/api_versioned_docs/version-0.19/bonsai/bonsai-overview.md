@@ -41,7 +41,7 @@ Alternatively, you can use the [Bonsai SDK] or the [Bonsai REST API].
 
 The picture above shows a simplified overview of how users can integrate Bonsai into their Ethereum smart contracts:
 
-1. You can send proof requests to Bonsai via an *off-chain* REST API interface or *on-chain* via a smart contract.
+1. You can send proof requests to Bonsai via an _off-chain_ REST API interface or _on-chain_ via a smart contract.
 2. The `Bonsai Relayer` will forward your proof request to the Bonsai proving service.
 3. Bonsai will use the RISC Zero zkVM to generate a proof, and send the proof back to your contract via the `Bonsai Relay Contract`.
 

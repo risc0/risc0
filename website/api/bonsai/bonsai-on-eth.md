@@ -8,7 +8,7 @@ At a high level, here's how it works:
 
 ![Bonsai ETH Relay overview](/img/bonsai_ethereum.png)
 
-1. Users can delegate their smart contract's logic to Bonsai via a `Request Callback` interface. This interface is accessible both *off-chain* through the HTTP REST API of the `Bonsai Relayer` and *on-chain* via the [Bonsai Relay Contract].
+1. Users can delegate their smart contract's logic to Bonsai via a `Request Callback` interface. This interface is accessible both _off-chain_ through the HTTP REST API of the `Bonsai Relayer` and _on-chain_ via the [Bonsai Relay Contract].
 2. The `Bonsai Relayer` sends the proof request to Bonsai.
 3. Bonsai generates a [Groth16 SNARK proof] and its result, encapsulated in a journal.
 4. The `Bonsai Relayer` submits this proof and journal on-chain to the [Bonsai Relay Contract] for validation.
@@ -21,7 +21,7 @@ To integrate your application with Bonsai, you'll need to:
 
 ## Interfaces
 
-The Bonsai Ethereum Relay provides both an *off-chain* (vie the HTTP REST API of the `Bonsai Relayer`) and an *on-chain* (via the [Bonsai Relay Contract]) interface to send `Callback requests`.
+The Bonsai Ethereum Relay provides both an _off-chain_ (vie the HTTP REST API of the `Bonsai Relayer`) and an _on-chain_ (via the [Bonsai Relay Contract]) interface to send `Callback requests`.
 
 ### Off-chain
 
@@ -112,15 +112,20 @@ async fn main() -> anyhow::Result<()> {
 
 ### On-chain
 
-As an alternative to sending a `Callback request` from the REST API as described by step 5 of the previous section, the request can be sent via the *on-chain* `Callback request` interface provided by the [Bonsai Relay Contract]:
+As an alternative to sending a `Callback request` from the REST API as described by step 5 of the previous section, the request can be sent via the _on-chain_ `Callback request` interface provided by the [Bonsai Relay Contract]:
+
 - Send a transaction to Smart Contract `A` to trigger a `Callback request` event that the Bonsai Relay will catch and forward to Bonsai.
 
 #### Example
+
 Using [cast]:
+
 ```bash
 cast send --private-key 0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d --gas-limit 100000 "$APP_ADDRESS" 'calculateFibonacci(uint256)' 5
 ```
+
 where:
+
 - `$APP_ADDRESS` is an env variable containing the address of your Smart Contract `A`
 - `calculateFibonacci(uint256)` is the function selector of your Smart Contract `A` triggering the `Callback request`
 - `5` is the input for your FIBONACCI program

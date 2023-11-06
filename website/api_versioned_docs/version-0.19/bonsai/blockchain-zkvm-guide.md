@@ -66,7 +66,6 @@ We have [extensive resources](../zkvm/zkvm_overview.md) on writing zkVM code. Ma
 [committing]: /terminology#commit
 [journal]: /terminology#journal
 
-
 ## Writing Rust code
 
 [Guest programs] are written in [Rust]. If you're new to [Rust], we recommend their [official learning resources](https://www.rust-lang.org/learn).
