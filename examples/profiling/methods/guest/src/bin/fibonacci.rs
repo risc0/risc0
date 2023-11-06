@@ -14,7 +14,6 @@
 
 #![no_main]
 
-use core::hint::black_box;
 use nalgebra::Matrix2;
 use risc0_zkvm::guest::env;
 
@@ -22,16 +21,19 @@ risc0_zkvm::guest::entry!(main);
 
 pub fn main() {
     let iterations: u32 = env::read();
-    let answer_1 = black_box(fibonacci_1(iterations));
-    let answer_2 = black_box(fibonacci_2(iterations));
-    let answer_3 = black_box(fibonacci_3(iterations));
+    let answer_1 = fibonacci_1(iterations);
+    let answer_2 = fibonacci_2(iterations);
+    let answer_3 = fibonacci_3(iterations);
     assert_eq!(answer_1, answer_2);
     assert_eq!(answer_1, answer_3);
     env::commit(&answer_1);
 }
 
+/// Implementation #1 of the nth Fibonacci number calculation.
+///
+/// This implementation a straight-forward, closely following the standard description of the
+/// algorithm. It provides the baseline for comparison with any optimizations.
 #[inline(never)]
-#[no_mangle]
 pub fn fibonacci_1(n: u32) -> u64 {
     let (mut a, mut b) = (0, 1);
     if n <= 1 {
@@ -47,8 +49,12 @@ pub fn fibonacci_1(n: u32) -> u64 {
     b
 }
 
+/// Implementation #2 of the nth Fibonacci number calculation.
+///
+/// This implementation is equivalent to the first implementation, but has manual loop unrolling
+/// applied. Instead of computing one number in the sequence per iteration, it computes 5 numbers.
+/// This reduces the overhead of incrementing the loop counter relative to the useful work done.
 #[inline(never)]
-#[no_mangle]
 pub fn fibonacci_2(n: u32) -> u64 {
     let (mut a, mut b) = (0, 1);
     if n <= 1 {
@@ -75,8 +81,13 @@ pub fn fibonacci_2(n: u32) -> u64 {
     b
 }
 
+/// Implementation #3 of the nth Fibonacci number calculation.
+///
+/// This implementation leverages a translation of the problem of computing the nth Fibonacci
+/// number to an equivalent matrix exponentiation problem. This allows use to use repeated
+/// squaring, to calculate the nth Fibonacci number, requiring only log(n) steps. Instead of
+/// implementing matrix multiplication ourselves, we import a linear algebra library.
 #[inline(never)]
-#[no_mangle]
 fn fibonacci_3(n: u32) -> u64 {
     Matrix2::new(1, 1, 1, 0).pow(n - 1)[(0, 0)]
 }
