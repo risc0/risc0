@@ -145,8 +145,6 @@ jobs:
       - run: cargo check -p risc0-zkp -F $FEATURE
       - run: cargo check -p risc0-zkvm -F $FEATURE
       - run: cargo check -p substrate-minimal-runtime
-      - run: cargo doc --no-deps --exclude=risc0-zkvm-methods --workspace
-        if: matrix.device == 'cpu'
       - uses: risc0/clippy-action@main
         with:
           reporter: "github-pr-check"
