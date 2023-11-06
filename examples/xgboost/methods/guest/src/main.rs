@@ -15,7 +15,7 @@
 #![no_main]
 use risc0_zkvm::guest::env;
 use forust_ml::{GradientBooster, Matrix};
-//use rmp_serde;
+use rmp_serde;
 
 risc0_zkvm::guest::entry!(main);
 
@@ -23,18 +23,17 @@ pub fn main() {
     // read the input data
     let input: Vec<f64> = env::read();
 
-    let xgboost_model: GradientBooster = env::read();
-    // // read in the byte array length
-    // let length: usize = env::read();
+    // read in the byte array length
+    let length: usize = env::read();
 
-    // // create a buffer for the byte array
-    // let mut model_bytes: Vec<u8> = vec![0;length];
+    // create a buffer for the byte array
+    let mut model_bytes: Vec<u8> = vec![0;length];
 
-    // // read in the byte array
-    // env::read_slice(&mut model_bytes);
+    // read in the byte array
+    env::read_slice(&mut model_bytes);
 
-    // // We deserialize the byte array into the trained model.  
-    // let xgboost_model: GradientBooster = rmp_serde::from_slice(&model_bytes).unwrap();
+    // We deserialize the byte array into the trained model.  
+    let xgboost_model: GradientBooster = rmp_serde::from_slice(&model_bytes).unwrap();
 
     // In order for the trained model to make a prediction using the input data, the input data must be formatted as a forust_ml::Matrix type.
     // Note:  We cannot send the data from the host to the guest as a Matrix struct because the forust-ml crate does not enable serialization 
