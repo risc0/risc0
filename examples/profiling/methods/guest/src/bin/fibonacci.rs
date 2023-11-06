@@ -33,6 +33,8 @@ pub fn main() {
 ///
 /// This implementation a straight-forward, closely following the standard description of the
 /// algorithm. It provides the baseline for comparison with any optimizations.
+///
+/// NOTE: Marked with #[inline(never)] to make sure this function is easy to see in the profile.
 #[inline(never)]
 pub fn fibonacci_1(n: u32) -> u64 {
     let (mut a, mut b) = (0, 1);
@@ -54,6 +56,8 @@ pub fn fibonacci_1(n: u32) -> u64 {
 /// This implementation is equivalent to the first implementation, but has manual loop unrolling
 /// applied. Instead of computing one number in the sequence per iteration, it computes 5 numbers.
 /// This reduces the overhead of incrementing the loop counter relative to the useful work done.
+///
+/// NOTE: Marked with #[inline(never)] to make sure this function is easy to see in the profile.
 #[inline(never)]
 pub fn fibonacci_2(n: u32) -> u64 {
     let (mut a, mut b) = (0, 1);
@@ -87,7 +91,9 @@ pub fn fibonacci_2(n: u32) -> u64 {
 /// number to an equivalent matrix exponentiation problem. This allows use to use repeated
 /// squaring, to calculate the nth Fibonacci number, requiring only log(n) steps. Instead of
 /// implementing matrix multiplication ourselves, we import a linear algebra library.
+///
+/// NOTE: Marked with #[inline(never)] to make sure this function is easy to see in the profile.
 #[inline(never)]
-fn fibonacci_3(n: u32) -> u64 {
+pub fn fibonacci_3(n: u32) -> u64 {
     Matrix2::new(1, 1, 1, 0).pow(n - 1)[(0, 0)]
 }
