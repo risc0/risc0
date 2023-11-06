@@ -19,9 +19,9 @@ jobs:
     permissions:
       pull-requests: read
     outputs:
+      check_template: ${{ steps.filter.outputs.check_template }}
       crates-validator: ${{ steps.filter.outputs.crates-validator }}
       examples: ${{ steps.filter.outputs.examples }}
-      templates: ${{ steps.filter.outputs.templates }}
       test: ${{ steps.filter.outputs.test }}
       web: ${{ steps.filter.outputs.web }}
     steps:
@@ -37,6 +37,10 @@ jobs:
               - *base
               - benchmarks/**
               - risc0/**
+            check_template:
+              - *base
+              - risc0/**
+              - templates/**
             crates-validator:
               - *base
               - tools/crates-validator/**
@@ -48,10 +52,6 @@ jobs:
               - *base
               - examples/**
               - risc0/**
-            templates:
-              - *base
-              - risc0/**
-              - templates/**
             test:
               - *base
               - bonsai/sdk/**
@@ -227,8 +227,8 @@ jobs:
       - run: cargo check
         working-directory: benchmarks
 
-  templates:
-    if: needs.changes.outputs.templates == 'true'
+  check_template:
+    if: needs.changes.outputs.check_template == 'true'
     needs: changes
     runs-on: [self-hosted, prod, cpu, "${{ matrix.os }}"]
     strategy:
