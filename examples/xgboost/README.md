@@ -25,7 +25,7 @@ cargo run --release
 
 Instructions for installing Jupyter Notebooks can be found here:  https://jupyter.org/install
 
-### Running proofs remotely on Bonsai
+## Running proofs remotely on Bonsai
 
 _Note: The Bonsai proving service is still in early Alpha; an API key is
 required for access. [Click here to request access][bonsai access]._
