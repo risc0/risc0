@@ -77,7 +77,7 @@ We're building technology that allows anyone to generate highly performant zero-
 [litepaper]: /litepaper
 [zkVM]: ../zkvm/zkvm_overview.md
 [Request access here]: https://bonsai.xyz/apply
-[`cargo risczero`]: https://docs.rs/cargo-risczero/latest/cargo_risczero/
+[`cargo risczero`]: https://crates.io/crates/cargo-risczero
 [Bonsai SDK]: https://crates.io/crates/bonsai-sdk
 [Bonsai REST API]: https://api.bonsai.xyz/swagger-ui/
 [Bonsai Quick Start]: quickstart.md
