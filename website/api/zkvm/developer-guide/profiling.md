@@ -39,10 +39,10 @@ cargo risczero install
 Run the Fibonacci profiling example with:
 
 ```bash
-RISC0_PPROF_OUT=./profile.pprof cargo run
+RISC0_PPROF_OUT=./profile.pb cargo run
 ```
 
-The above command will run the Fibonacci computation for 1000 iterations and write the profiling output to `profile.pprof`.
+The above command will run the Fibonacci computation for 1000 iterations and write the profiling output to `profile.pb`.
 Use the environment variable `RISC0_PPROF_OUT` to set to the desired output path for the profiling data.
 
 ### Step 3: Visualization
@@ -50,7 +50,7 @@ Use the environment variable `RISC0_PPROF_OUT` to set to the desired output path
 To visualize the profile using `pprof`, run:
 
 ```bash
-go tool pprof -http=127.0.0.1:8000 profile.pprof
+go tool pprof -http=127.0.0.1:8000 profile.pb
 ```
 
 Then navigate to [http://localhost:8000](http://localhost:8000) in your browser.
