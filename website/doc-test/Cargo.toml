@@ -10,6 +10,12 @@ repository = { workspace = true }
 release = false
 
 [dependencies]
+alloy-primitives = "0.4"
+alloy-sol-types = "0.4"
+anyhow = "1.0"
+bonsai-ethereum-relay = { workspace = true }
+clap = { version = "4.4", features = ["derive", "env"] }
+ethers = { version = "2.0", features = ["rustls", "ws"] }
 fibonacci-methods = { path = "../../examples/profiling/methods" }
 risc0-zkvm = { workspace = true, features = ["prove", "profiler"] }
 risc0-zkvm-methods = { path = "../../risc0/zkvm/methods" }

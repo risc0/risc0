@@ -47,7 +47,7 @@ use anyhow::Context;
 use bonsai_ethereum_relay::sdk::client::{CallbackRequest, Client};
 use clap::Parser;
 use ethers::{types::Address, utils::id};
-use methods::FIBONACCI_ID;
+use fibonacci_methods::FIBONACCI_ID;
 use risc0_zkvm::sha::Digest;
 
 /// Exmaple code for sending a REST API request to the Bonsai relay service to
