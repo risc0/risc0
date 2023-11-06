@@ -14,7 +14,7 @@
 
 use forust_ml::GradientBooster;
 use risc0_zkvm::{default_prover, ExecutorEnv};
-use rmp_serde;
+//use rmp_serde;
 use serde_json;
 use xgboost_methods::XGBOOST_ELF;
 
@@ -29,11 +29,11 @@ fn predict() -> f64 {
     // We import the trained model
     let model: GradientBooster = serde_json::from_str(JSON_MODEL).unwrap();
 
-    // We serialize the model to a byte array before transferring it to the guest.
-    let rmp_model = rmp_serde::to_vec(&model).unwrap();
+    // // We serialize the model to a byte array before transferring it to the guest.
+    // let rmp_model = rmp_serde::to_vec(&model).unwrap();
 
-    // We measure the length of the array so that we can properly construct the buffer in the guest.
-    let rmp_array_length = rmp_model.len();
+    // // We measure the length of the array so that we can properly construct the buffer in the guest.
+    // let rmp_array_length = rmp_model.len();
 
     // We define an input value for the model (inputs are block number and numbe of transaction in that block.  Note we modify the block number to a f64 value).
     //**************************//
@@ -45,9 +45,8 @@ fn predict() -> f64 {
     let env = ExecutorEnv::builder()
         .write(&data)
         .unwrap()
-        .write(&rmp_array_length)
+        .write(&model)
         .unwrap()
-        .write_slice(&rmp_model)
         .build()
         .unwrap();
 
@@ -67,9 +66,6 @@ fn predict() -> f64 {
 
 #[cfg(test)]
 mod test {
-    use forust_ml::GradientBooster;
-    use methods::XGBOOST_ELF;
-    use risc0_zkvm::{default_executor, ExecutorEnv};
     #[test]
     fn basic() {
         const EXPECTED: f64 = 30.528042544062632;
