@@ -14,9 +14,9 @@
 
 use forust_ml::GradientBooster;
 use risc0_zkvm::{default_prover, ExecutorEnv};
+use rmp_serde;
 use serde_json;
 use xgboost_methods::XGBOOST_ELF;
-use rmp_serde;
 
 const JSON_MODEL: &str = include_str!("../res/trained_model.json");
 
