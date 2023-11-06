@@ -23,7 +23,7 @@ pub fn main() {
     // read the input data
     let input: Vec<f64> = env::read();
 
-    let model_bytes: GradientBooster = env::read();
+    let model_bytes: Vec<u8> = env::read();
 
     // // read in the byte array length
     // let length: usize = env::read();
