@@ -95,7 +95,7 @@ Generate this profile and flamegraph by [installing Go] and running the followin
 ```bash
 # In your clone of github.com/risc0/risc0
 cd examples/ecdsa
-RISC0_PPROF_OUT=ecdsa_verify.pprof cargo run --release --bin profile
+RISC0_PPROF_OUT=ecdsa_verify.pprof RISC0_DEV_MODE=true cargo run -F profiler
 go tool pprof -http 127.0.0.1:8000 ecdsa_verify.pprof
 ```
 

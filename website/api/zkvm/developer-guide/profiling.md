@@ -4,6 +4,19 @@ In this guide, we'll explore how to effectively profile guest code within the RI
 We'll be using three different implementations of the Fibonacci sequence calculation to demonstrate how to profile guest code.
 You can find all the code used as example in the [profiling example].
 
+## Background
+
+Profiling tools, like [pprof] and [perf], allow collecting performance information over the entire execution of your program, and help create visualizations for the performance of your program.
+RISC Zero has experimental support for generating pprof files for cycle counts.
+
+[Sampling CPU profilers], as implemented by pprof and perf, provide a view of where your program is spending its time.
+It does so by recording the current call stack at a sampling interval.
+RISC Zero provides a "sampling" [^1] CPU profiler for guest execution.
+
+[pprof]: https://github.com/google/pprof
+[perf]: https://perf.wiki.kernel.org/index.php/Main_Page
+[Sampling CPU profilers]: https://nikhilism.com/post/2018/sampling-profiler-internals-introduction/
+
 ## Overview
 
 ### Guest code
@@ -186,7 +199,14 @@ This can be helpful in understanding the efficiency of various algorithms and th
 - To maximize the number of nodes visualized by [pprof] you can add `-edgefraction 0 -nodefraction 0 -nodecount 100000` when starting [pprof].
 
 [profiling example]: https://github.com/risc0/risc0/examples/profiling
-[pprof]: https://github.com/google/pprof
 [receipt]: /terminology#receipt
 [cycle count]: /terminology#clock-cycles
 [execute]: /terminology#execute
+
+[^1]:
+    Here “sampling” is in quotes because the profiler actually captures the call stack at every cycle of program execution. Capturing a call stack on every cycle of execution is not done in most programs on physical CPUs for a few reasons:
+
+    - It would be cost prohibitive to do so for all but quite short program executions.
+    - Introducing such heavy profiling would actually alter the performance characteristics in significant ways.
+
+    In zkVM execution, executions are generally short and all execution is synchronous and is not subject to any deviations in behavior due to measurement overhead.
