@@ -179,7 +179,6 @@ jobs:
           # Recursive checkout required to build Solidity contracts and bindings.
           submodules: recursive
       - uses: ./.github/actions/rustup
-      - uses: risc0/foundry-toolchain@2fe7e70b520f62368a0e3c464f997df07ede420f
       - uses: ./.github/actions/sccache
         with:
           key: Linux

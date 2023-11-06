@@ -13,7 +13,7 @@ risc0-fault = { path = "../risc0/fault" }
 risc0-zkp = { workspace = true }
 risc0-zkvm = { workspace = true, features = ["prove"] }
 risc0-zkvm-methods = { path = "../risc0/zkvm/methods" }
-tempfile = "3.3"
+tempfile = "3.5"
 which = "5.0"
 xshell = "0.2"
 

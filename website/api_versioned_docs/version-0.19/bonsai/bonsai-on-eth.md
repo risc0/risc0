@@ -40,15 +40,15 @@ A typical flow works as follows:
 The following example assumes that the `Bonsai Relayer` is up and running with the server API enabled,
 and that the memory image of your `ELF` is already registered against Bonsai with a given `IMAGE_ID` as its identifier.
 
-```rust,no_run
-use alloy_primitives::U256;
-use alloy_sol_types::SolValue;
-use anyhow::Context;
-use bonsai_ethereum_relay::sdk::client::{CallbackRequest, Client};
-use clap::Parser;
-use ethers::{types::Address, utils::id};
-use fibonacci_methods::FIBONACCI_ID;
-use risc0_zkvm::sha::Digest;
+```rust no_run
+# use alloy_primitives::U256;
+# use alloy_sol_types::SolValue;
+# use anyhow::Context;
+# use bonsai_ethereum_relay::sdk::client::{CallbackRequest, Client};
+# use clap::Parser;
+# use ethers::{types::Address, utils::id};
+# use fibonacci_methods::FIBONACCI_ID;
+# use risc0_zkvm::sha::Digest;
 
 /// Exmaple code for sending a REST API request to the Bonsai relay service to
 /// requests, execution, proving, and on-chain callback for a zkVM guest
@@ -140,5 +140,5 @@ You may also want to check out our [Bonsai Quick Start](quickstart.md) page.
 [Bonsai Foundry Template]: https://github.com/risc0/bonsai-foundry-template
 [smart contract]: https://github.com/risc0/bonsai-foundry-template/tree/main/contracts
 [program]: https://github.com/risc0/bonsai-foundry-template/tree/main/methods/guest/src/bin
-[Bonsai Relay Contract]: https://github.com/risc0/risc0/bonsai/ethereum/contracts/BonsaiRelay.sol
+[Bonsai Relay Contract]: https://github.com/risc0/risc0/blob/main/bonsai/ethereum/contracts/BonsaiRelay.sol
 [Groth16 SNARK proof]: https://www.risczero.com/news/on-chain-verification
