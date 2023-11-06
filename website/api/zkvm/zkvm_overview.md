@@ -71,7 +71,7 @@ There are several key features that distinguish RISC Zero's zkVM from others. Th
 
 ### Continuations for limitless computations
 
-Continuations allow the zkVM to do large computations by splitting the work into small, independent segments of the same size.
+Continuations allow the [zkVM] to do large computations by splitting the work into small, independent [segments] of the same size.
 This enables proofs generation on commodity hardware and makes zero knowledge computing widely accessible. To learn more, read the article on [continuations].
 
 ## Next Steps
