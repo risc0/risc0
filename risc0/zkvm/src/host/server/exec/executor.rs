@@ -235,6 +235,8 @@ impl<'a> ExecutorImpl<'a> {
             .into());
         };
 
+        let start_time = std::time::Instant::now();
+
         self.pc = self
             .pre_image
             .as_ref()
@@ -305,6 +307,7 @@ impl<'a> ExecutorImpl<'a> {
         };
 
         let (exit_code, post_image) = run_loop()?;
+        let elapsed = start_time.elapsed();
 
         // Take (clear out) the list of accessed assumptions.
         // Leave the assumptions cache so it can be used if execution is resumed from pause.
@@ -322,6 +325,13 @@ impl<'a> ExecutorImpl<'a> {
             );
         };
         self.exit_code = Some(exit_code);
+
+        if log::log_enabled!(target: "executor", log::Level::Info) {
+            log::info!(target: "executor", "total_cycles = {}", self.total_cycles());
+            log::info!(target: "executor", "session_cycles = {}", self.session_cycle());
+            log::info!(target: "executor", "segment_count = {}", self.segments.len());
+            log::info!(target: "executor", "execution_time = {:?}", elapsed);
+        }
 
         Ok(Session::new(
             mem::take(&mut self.segments),
