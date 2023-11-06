@@ -28,7 +28,7 @@ fn main() {
 fn predict() -> f64 {
     // We import the trained model
     let model: GradientBooster = serde_json::from_str(JSON_MODEL).unwrap();
-    
+
     // We serialize the model to a byte array before transferring it to the guest.
     let rmp_model = rmp_serde::to_vec(&model).unwrap();
 
