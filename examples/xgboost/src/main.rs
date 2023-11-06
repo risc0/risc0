@@ -25,21 +25,27 @@ fn main() {
     println!("Prediction from the trained XGBoost model is: {}", &answer);
 }
 
-fn predict() -> f32 {
+fn predict() -> f64 {
     // We import the trained model
     let model: GradientBooster = serde_json::from_str(JSON_MODEL).unwrap();
+    
+    // We serialize the model to a byte array before transferring it to the guest.
     let rmp_model = rmp_serde::to_vec(&model).unwrap();
-    let model_length = rmp_model.len();
-    println!("rmp length: {}", &model_length);
+
+    // We measure the length of the array so that we can properly construct the buffer in the guest.
+    let rmp_array_length = rmp_model.len();
 
     // We define an input value for the model (inputs are block number and numbe of transaction in that block.  Note we modify the block number to a f64 value).
-    let data: Vec<f64> = vec![18511304.0, 2.1170];
+    //**************************//
+    // ADD YOUR INPUT DATA HERE //
+    //**************************//
+    let data: Vec<f64> = vec![18511304.0, 117.0];
 
-    // We transfer the model and input data over to the guest
+    // We transfer theinput  data, the rmp array length, and the serialized model over to the guest.
     let env = ExecutorEnv::builder()
         .write(&data)
         .unwrap()
-        .write(&model_length)
+        .write(&rmp_array_length)
         .unwrap()
         .write_slice(&rmp_model)
         .build()
@@ -55,7 +61,7 @@ fn predict() -> f32 {
     // Produce a receipt by proving the specified ELF binary.
     let receipt = prover.prove_elf(env, XGBOOST_ELF).unwrap();
 
-    // We return the inference value committed the journal
+    // We return the inference value committed the journal.
     receipt.journal.decode().unwrap()
 }
 
@@ -66,7 +72,7 @@ mod test {
     use risc0_zkvm::{default_executor, ExecutorEnv};
     #[test]
     fn basic() {
-        const EXPECTED: f32 = 32.80219;
+        const EXPECTED: f64 = 30.528042544062632;
         let result = super::predict();
         assert_eq!(result, EXPECTED);
     }
