@@ -19,7 +19,9 @@ to the program instructions and the underlying computer architecture.
 execution trace while preserving computational privacy.`
 
 _The core of a RISC Zero receipt is a
-[zk-STARK](../reference-docs/about-starks.md); for a more technical description
+[zk-STARK][0]; for a more technical description
 of how we turn an execution trace into a zk-STARK, see the [proof system
 sequence diagram](./proof-system-sequence-diagram) and our [STARK by
 Hand](./stark-by-hand) explainer._
+
+[0]: ../reference-docs/about-starks.md

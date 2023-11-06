@@ -148,7 +148,7 @@ the seal is the opaque blob that cryptographically attests to the validity of th
 [RISC-V]: #risc-v
 
 The 5th edition of UC Berkeley's reduced instruction set computer architecture.
-RISC Zero uses RISC-V, specifically the [rv32im instruction set](https://riscv.org/wp-content/uploads/2019/12/riscv-spec-20191213.pdf), as the basis for the RISC Zero zkVM.
+RISC Zero uses RISC-V, specifically the [rv32im instruction set][0], as the basis for the RISC Zero zkVM.
 
 ### Seal
 
@@ -218,3 +218,4 @@ RISC Zero's zkVM implements the RISC-V instruction set architecture and uses a [
 [RISC Zero's ZKP Whitepaper]: https://risczero.com/proof-system-in-detail.pdf
 [Rust crate for zkVM guest]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest
 [Sequence Diagram for RISC Zero's STARK]: ./proof-system/proof-system-sequence-diagram.md
+[0]: https://riscv.org/wp-content/uploads/2019/12/riscv-spec-20191213.pdf

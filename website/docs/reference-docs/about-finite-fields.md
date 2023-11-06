@@ -1,7 +1,7 @@
 # About Finite Fields
 
 _RISC Zero's [computational receipts][receipt] are built by converting an assertion of computational integrity into an assertion about polynomials over finite fields.
-This document serves as a minimal introduction to finite fields, targeted at folks who have some exposure to modular arithmetic and who are curious to learn more about the [math and cryptography behind RISC Zero](../proof-system/proof-system.md)._
+This document serves as a minimal introduction to finite fields, targeted at folks who have some exposure to modular arithmetic and who are curious to learn more about the [math and cryptography behind RISC Zero][0]._
 
 ## Finite Fields 101: Reciprocals, Exponents, and Generators
 
@@ -49,10 +49,17 @@ More generally, multiplying by a 4th root of unity is a rotation of order 4.`
 
 ## Additional References:
 
-- [Slides](https://drive.google.com/file/d/146BOC_hHH0703OcKT-LwjIb3S0NYkGh0/view?usp=share_link), [video recording](https://www.youtube.com/watch?v=BKViygqOW3I&list=PLcPzhUaCxlCjdhONxEYZ1dgKjZh3ZvPtl&index=3), and [practice problems](./about-finite-fields-exercises) from RISC Zero Study Club
-- [David Forney's Introduction to Finite Fields (Chapter 7)](https://ocw.mit.edu/courses/6-451-principles-of-digital-communication-ii-spring-2005/pages/readings-and-lecture-notes/)
-- [Guruswami's Basics of Finite Fields](http://www.cs.cmu.edu/~venkatg/teaching/codingtheory-au14/notes/finite-fields.pdf)
-- [A. Sutherland's notes on finite fields and integer arithmetic](https://math.mit.edu/classes/18.783/2017/LectureNotes3.pdf)
-- [Splitting $x^{n}-1$ over a finite field](https://math.stackexchange.com/questions/2511486/)
+- [Slides](https://drive.google.com/file/d/146BOC_hHH0703OcKT-LwjIb3S0NYkGh0/view?usp=share_link), [video recording](https://www.youtube.com/watch?v=BKViygqOW3I&list=PLcPzhUaCxlCjdhONxEYZ1dgKjZh3ZvPtl&index=3), and [practice problems][2] from RISC Zero Study Club
+- [David Forney's Introduction to Finite Fields (Chapter 7)][3]
+- [Guruswami's Basics of Finite Fields][4]
+- [A. Sutherland's notes on finite fields and integer arithmetic][5]
+- [Splitting $x^{n}-1$ over a finite field][6]
 
 [receipt]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Receipt.html
+[0]: ../proof-system/proof-system.md
+[1]: https://www.youtube.com/watch?v=mvmuCPvRoWQ
+[2]: ./about-finite-fields-exercises
+[3]: https://ocw.mit.edu/courses/6-451-principles-of-digital-communication-ii-spring-2005/pages/readings-and-lecture-notes/
+[4]: http://www.cs.cmu.edu/~venkatg/teaching/codingtheory-au14/notes/finite-fields.pdf
+[5]: https://math.mit.edu/classes/18.783/2017/LectureNotes3.pdf
+[6]: https://math.stackexchange.com/questions/2511486/

@@ -4,13 +4,13 @@ RISC Zero's Study Club sessions aim to introduce the pre-requisite concepts nece
 
 ## Upcoming Sessions
 
-- **October 25**: Intro to [Zeth](https://risczero.com/news/zeth-release), with Wolfgang Welz
+- **October 25**: Intro to [Zeth][0], with Wolfgang Welz
 - **November 1**: Use cases for ZK in blockchain, with Steven Li
 - **November 8**: zkVM Performance Optimization, with Victor Graf
 
 All sessions are hosted at **9am Pacific / 4PM UTC**. <br/>
 Join the session: [Zoom link] <br/>
-Join the conversation: [Discord](https://discord.gg/risczero)
+Join the conversation: [Discord][1]
 
 ## Past Sessions
 
@@ -41,3 +41,17 @@ You may also be interested in some of our other [talks and podcasts](https://www
 
 [Zoom Link]: https://zoom.us/j/95830917265
 [continuations]: https://www.risczero.com/news/continuations
+[0]: https://risczero.com/news/zeth-release
+[1]: https://discord.gg/risczero
+[2]: https://www.youtube.com/playlist?list=PLcPzhUaCxlCjdhONxEYZ1dgKjZh3ZvPtl
+[3]: https://www.youtube.com/watch?v=11DIflEwx50&list=PLcPzhUaCxlCjdhONxEYZ1dgKjZh3ZvPtl&index=5
+[4]: https://www.youtube.com/watch?v=h1qWnf-M5lo&list=PLcPzhUaCxlCjdhONxEYZ1dgKjZh3ZvPtl&index=9
+[5]: https://www.youtube.com/watch?v=g-GDvnJsZgg&list=PLcPzhUaCxlCiddOGuYdDbFlZhH8nwtR8D
+[6]: https://www.youtube.com/watch?v=hUl8ZB6hpUM&list=PLcPzhUaCxlCjdhONxEYZ1dgKjZh3ZvPtl&index=6
+[7]: https://www.youtube.com/watch?v=IFsxQUbI6x0&list=PLcPzhUaCxlChIKDDR_WghPQ1HeK01YHpa
+[8]: https://www.youtube.com/watch?v=NHAuw2mkg0o&list=PLcPzhUaCxlCgPFYnnhDbsE-7H3scbtjye
+[9]: https://www.youtube.com/watch?v=8AMiZdWA1eM&list=PLcPzhUaCxlCjdhONxEYZ1dgKjZh3ZvPtl&index=10
+[10]: https://www.youtube.com/watch?v=LgQQHd9SzMs&list=PLcPzhUaCxlCjdhONxEYZ1dgKjZh3ZvPtl&index=8&t=4s
+[11]: https://www.youtube.com/watch?v=YiYN6UgE8sQ&list=PLcPzhUaCxlCi6rRRiIlkzJ_YELUlKO4Mz
+[12]: https://www.youtube.com/watch?v=wqRuoyH3Mqk&list=PLcPzhUaCxlCjdhONxEYZ1dgKjZh3ZvPtl&index=8
+[13]: https://www.youtube.com/watch?v=saVD9qo3aJ0

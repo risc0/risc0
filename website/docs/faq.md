@@ -4,15 +4,15 @@
 
 ## Contents
 
-- [FAQ](#faq)
-  - [Contents](#contents)
-  - [ZK Basics](#zk-basics)
-  - [Building on the zkVM](#building-on-the-zkvm)
-    - [Code Troubleshooting](#code-troubleshooting)
-    - [zkVM Application Design](#zkvm-application-design)
-    - [Features, Performance, and Limitations](#features-performance-and-limitations)
-  - [The RISC Zero Circuits](#the-risc-zero-circuits)
-  - [Security](#security)
+- [FAQ][0]
+  - [Contents][1]
+  - [ZK Basics][2]
+  - [Building on the zkVM][3]
+    - [Code Troubleshooting][4]
+    - [zkVM Application Design][5]
+    - [Features, Performance, and Limitations][6]
+  - [The RISC Zero Circuits][7]
+  - [Security][8]
 
 ---
 
@@ -251,7 +251,7 @@ A: The ImageID is determined from an application's compiled binary (ELF),  expla
 
 Someone wishing to confirm that a receipt corresponds to specific Rust source code can locally reproduce a binary targeting the RISC Zero zkVM using our reproducible build tool and verify that the resulting ImageID matches the ImageID in the receipt.
 
-For example, building our [builtin zkVM test functions](https://github.com/risc0/risc0/tree/main/risc0/zkvm/methods/guest):
+For example, building our [builtin zkVM test functions][9]:
 
 ```bash
 cargo risczero build --manifest-path risc0/zkvm/methods/guest/Cargo.toml
@@ -266,7 +266,7 @@ ImageID: c7c399c25ecf26b79e987ed060efce1f0836a594ad1059b138b6ed2f123dad38 - "tar
 ImageID: a51a4b747f18b7e5f36a016bdd6f885e8293dbfca2759d6667a6df8edd5f2489 - "target/riscv-guest/riscv32im-risc0-zkvm-elf/docker/risc0_zkvm_methods_guest/slice_io"
 ```
 
-These ImageIDs will stay consistent across all builds due to a containerized process working together with Cargo working norms. You can find more about our reproducible builds and how we test them in this [pull request.](https://github.com/risc0/risc0/pull/799)
+These ImageIDs will stay consistent across all builds due to a containerized process working together with Cargo working norms. You can find more about our reproducible builds and how we test them in this [pull request.][10]
 
 </details>
 <a class="anchor" id="tampering-with-code"></a>
@@ -281,3 +281,15 @@ A: Like other zk-STARKs, RISC Zero’s implementation makes it cryptographically
 - If the output is modified, then the journal’s hash will not match the hash recorded in the receipt.
 
 </details>
+
+[0]: #faq
+[1]: #contents
+[2]: #zk-basics
+[3]: #building-on-the-zkvm
+[4]: #code-troubleshooting
+[5]: #zkvm-application-design
+[6]: #features-performance-and-limitations
+[7]: #the-risc-zero-circuits
+[8]: #security
+[9]: https://github.com/risc0/risc0/tree/main/risc0/zkvm/methods/guest
+[10]: https://github.com/risc0/risc0/pull/799

@@ -30,15 +30,15 @@ The details of the RISC Zero ZK-STARK are described in our [ZKP Whitepaper] and 
 ### About the zkVM
 
 - [Video Explainer from zkHack](https://www.youtube.com/watch?v=8hwY88xJoyM&list=PLcPzhUaCxlCgig7ofeARMPwQ8vbuD6hC5&index=8)
-- [Written Explainer](/api/zkvm)
+- [Written Explainer][1]
 
 ### About STARKs
 
-- [STARKs reference doc](../reference-docs/about-starks.md)
+- [STARKs reference doc][2]
 - STARK by Hand Tutorial
-  - [Website version](./stark-by-hand.md)
+  - [Website version][3]
   - [Google Sheet version](https://docs.google.com/spreadsheets/d/1Onr41OozD62y-B0jIL7bHAH5kf771-o4xvmnHUFpOyo/edit?usp=sharing)
-  - [Printable Version](assets/fibonacci-stark.pdf)
+  - [Printable Version][5]
 
 ### About RISC Zero
 
@@ -70,3 +70,15 @@ The details of the RISC Zero ZK-STARK are described in our [ZKP Whitepaper] and 
 [Sequence Diagram]: ./proof-system-sequence-diagram.md
 [RISC Zero Study Club]: https://dev.risczero.com/studyclub
 [YouTube channel]: https://www.youtube.com/@risczero
+[0]: https://www.youtube.com/watch?v=8hwY88xJoyM&list=PLcPzhUaCxlCgig7ofeARMPwQ8vbuD6hC5&index=8
+[1]: /api/zkvm
+[2]: ../reference-docs/about-starks.md
+[3]: ./stark-by-hand.md
+[4]: https://docs.google.com/spreadsheets/d/1Onr41OozD62y-B0jIL7bHAH5kf771-o4xvmnHUFpOyo/edit?usp=sharing
+[5]: assets/fibonacci-stark.pdf
+[6]: https://www.youtube.com/watch?v=11DIflEwx50&list=PLcPzhUaCxlCjdhONxEYZ1dgKjZh3ZvPtl&index=5
+[7]: https://www.youtube.com/watch?v=11DIflEwx50&list=PLcPzhUaCxlCjdhONxEYZ1dgKjZh3ZvPtl&index=2
+[8]: https://www.youtube.com/watch?v=11DIflEwx50&list=PLcPzhUaCxlCjdhONxEYZ1dgKjZh3ZvPtl&index=3
+[9]: https://www.youtube.com/watch?v=11DIflEwx50&list=PLcPzhUaCxlCjdhONxEYZ1dgKjZh3ZvPtl&index=4
+[10]: https://www.youtube.com/watch?v=11DIflEwx50&list=PLcPzhUaCxlCjdhONxEYZ1dgKjZh3ZvPtl&index=1
+[11]: https://www.youtube.com/watch?v=hUl8ZB6hpUM&list=PLcPzhUaCxlCjdhONxEYZ1dgKjZh3ZvPtl&index=6
