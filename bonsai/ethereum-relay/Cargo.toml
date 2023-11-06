@@ -38,8 +38,11 @@ utoipa-swagger-ui = { version = "3.0", features = ["axum", "debug-embed"] }
 validator = { version = "0.16", features = ["derive"] }
 
 [dev-dependencies]
+alloy-primitives = "0.4"
+alloy-sol-types = "0.4"
 bincode = "1"
 bytemuck = "1.13"
+fibonacci-methods = { path = "../../examples/profiling/methods" }
 risc0-zkvm-methods = { path = "../../risc0/zkvm/methods", default-features = false }
 rstest = "0.18"
 time = "0.3"

@@ -36,14 +36,14 @@ A typical flow works as follows:
 The following example assumes that the `Bonsai Relayer` is up and running with the server API enabled,
 and that the memory image of your `ELF` is already registered against Bonsai with a given `IMAGE_ID` as its identifier.
 
-```rust
+```rust,no_run
 use alloy_primitives::U256;
 use alloy_sol_types::SolValue;
 use anyhow::Context;
 use bonsai_ethereum_relay::sdk::client::{CallbackRequest, Client};
 use clap::Parser;
 use ethers::{types::Address, utils::id};
-use methods::FIBONACCI_ID;
+use fibonacci_methods::FIBONACCI_ID;
 use risc0_zkvm::sha::Digest;
 
 /// Exmaple code for sending a REST API request to the Bonsai relay service to
