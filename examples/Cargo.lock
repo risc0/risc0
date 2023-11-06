@@ -1692,6 +1692,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "forust-ml"
+version = "0.4.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e5b264080dd4088c518ffe8deb83165ebef3431cad2784a5addddc4ed25f3233"
+dependencies = [
+ "log",
+ "rand",
+ "rayon",
+ "serde",
+ "serde_json",
+ "thiserror",
+]
+
+[[package]]
 name = "funty"
 version = "2.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4158,9 +4172,9 @@ dependencies = [
 
 [[package]]
 name = "serde_json"
-version = "1.0.107"
+version = "1.0.108"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6b420ce6e3d8bd882e9b243c6eed35dbc9a6110c9769e74b584e0d68d1f20c65"
+checksum = "3d1c7e3eac408d115102c4c24ad393e0821bb3a5df4d506a80f85f7a742a526b"
 dependencies = [
  "indexmap 2.0.2",
  "itoa",
@@ -5576,6 +5590,25 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "05f360fc0b24296329c78fda852a1e9ae82de9cf7b27dae4b7f62f118f77b9ed"
 dependencies = [
  "tap",
+]
+
+[[package]]
+name = "xgboost"
+version = "0.1.0"
+dependencies = [
+ "forust-ml",
+ "risc0-zkvm",
+ "rmp-serde",
+ "serde",
+ "serde_json",
+ "xgboost-methods",
+]
+
+[[package]]
+name = "xgboost-methods"
+version = "0.1.0"
+dependencies = [
+ "risc0-build",
 ]
 
 [[package]]
