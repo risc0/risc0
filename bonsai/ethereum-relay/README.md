@@ -25,7 +25,7 @@ A typical flow works as follows:
 
 1. Deploy the `Bonsai Relay Contract` to Ethereum using address `0xB..`.
 2. Launch the `Bonsai Relayer`, setting `--contract-address` to `0xB..`.
-3. To delegate off-chain computation for Smart Contract `A` to Bonsai, register its `Image` or `ELF` (the binary executing the computation on RISC Zero ZKVM) with Bonsai.
+3. To delegate off-chain computation for a new Smart Contract `A` to Bonsai, register its `Image` or `ELF` (the binary executing the computation on RISC Zero ZKVM) with Bonsai.
 4. Use the generated `Image ID` and the `Bonsai Relay Contract` address 0xB.. to deploy Smart Contract `A` on Ethereum.
 5. Initiate a `Callback request` through the `Bonsai Relayer`'s off-chain REST API. This request is sent to Bonsai.
 6. After Bonsai produces an execution proof, the `Bonsai Relayer` relays the proof and computation result to the `Bonsai Relay Contract`.

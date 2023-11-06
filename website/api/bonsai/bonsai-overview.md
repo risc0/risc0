@@ -7,7 +7,7 @@ slug: ./
 Bonsai enables boundless computation on any blockchain.
 With Bonsai, instead of generating proofs on your own hardware, you can upload the program you need proven and request that Bonsai generates proofs for you as needed.
 
-Bonsai is highly parallelized, highly performant and can horizontally scale. To get a taste of what you can do with Bonsai, check out [Zeth], our[Governance Showcase], the [Bonfire Wallet] demo from the Hash Cloak team, and our twitter thread about using [Bonsai as a zk coprocessor].
+Bonsai is highly parallelized, highly performant and can horizontally scale. To get a taste of what you can do with Bonsai, check out [Zeth], our [Governance Showcase], the [Bonfire Wallet] demo from the Hash Cloak team, and our twitter thread about using [Bonsai as a zk coprocessor].
 
 Whether you're looking to take heavy computations off-chain or need to generate proofs for your trustless, verifiable software, Bonsai can help.
 Check out our [Bonsai Quick Start] page, and start building!
