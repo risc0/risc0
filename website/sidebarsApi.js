@@ -105,6 +105,22 @@ export default {
           id: "zkvm/benchmarks",
         },
         {
+          type: "category",
+          label: "Tutorials",
+          link: {
+            type: `doc`,
+            id: "zkvm/tutorials/overview",
+          },
+          collapsed: false,
+          items: [
+            {
+              type: "doc",
+              label: "Hello World Tutorial",
+              id: "zkvm/tutorials/hello-world",
+            },
+          ],
+        },
+        {
           type: "doc",
           label: "Examples",
           id: "zkvm/examples",
