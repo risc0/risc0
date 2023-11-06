@@ -140,5 +140,5 @@ You may also want to check out our [Bonsai Quick Start](quickstart.md) page.
 [Bonsai Foundry Template]: https://github.com/risc0/bonsai-foundry-template
 [smart contract]: https://github.com/risc0/bonsai-foundry-template/tree/main/contracts
 [program]: https://github.com/risc0/bonsai-foundry-template/tree/main/methods/guest/src/bin
-[Bonsai Relay Contract]: lib/risc0/bonsai/ethereum/contracts/BonsaiRelay.sol
+[Bonsai Relay Contract]: https://github.com/risc0/risc0/bonsai/ethereum/contracts/BonsaiRelay.sol
 [Groth16 SNARK proof]: https://www.risczero.com/news/on-chain-verification
