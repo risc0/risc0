@@ -40,5 +40,7 @@ wat = "1.0"
 wordle-methods = { path = "../wordle/methods" }
 
 [features]
+default = []
 cuda = ["risc0-zkvm/cuda"]
-metal = ["risc0-zkvm/metal"]
+prove = ["risc0-zkvm/cuda"]
+profiler = ["risc0-zkvm/profiler"]

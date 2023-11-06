@@ -17,8 +17,8 @@ fn main() {
     {
         std::env::set_var("PROTOC", protobuf_src::protoc());
         prost_build::compile_protos(
-            &["src/host/server/exec/profile.proto"],
-            &["src/host/server/exec"],
+            &["src/host/profiler/profile.proto"],
+            &["src/host/profiler/"],
         )
         .unwrap();
     }
