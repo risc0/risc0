@@ -33,9 +33,17 @@ jobs:
             base: &base
               - .github/**
               - Cargo.toml
+            check-benchmarks:
+              - *base
+              - benchmarks/**
+              - risc0/**
             crates-validator:
               - *base
               - tools/crates-validator/**
+            doc:
+              - *base
+              - bonsai/sdk/**
+              - risc0/**
             examples:
               - *base
               - examples/**
@@ -46,7 +54,6 @@ jobs:
               - templates/**
             test:
               - *base
-              - benchmarks/**
               - bonsai/sdk/**
               - external/**
               - risc0/**
@@ -140,9 +147,6 @@ jobs:
       - run: cargo check -p substrate-minimal-runtime
       - run: cargo doc --no-deps --exclude=risc0-zkvm-methods --workspace
         if: matrix.device == 'cpu'
-      - run: cargo check
-        if: matrix.device == 'cpu'
-        working-directory: benchmarks
       - uses: risc0/clippy-action@main
         with:
           reporter: "github-pr-check"
@@ -188,6 +192,41 @@ jobs:
       - run: cargo test --locked -F $FEATURE
         working-directory: examples
 
+  doc:
+    if: needs.changes.outputs.doc == 'true'
+    needs: changes
+    runs-on: [self-hosted, prod, macOS, cpu]
+    steps:
+      # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
+      - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/rustup
+      - uses: ./.github/actions/sccache
+        with:
+          key: macOS-default
+      - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: cargo doc --no-deps --exclude=risc0-zkvm-methods --workspace
+
+  check-benchmarks:
+    if: needs.changes.outputs.check-benchmarks == 'true'
+    needs: changes
+    runs-on: [self-hosted, prod, macOS, cpu]
+    steps:
+      # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
+      - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/rustup
+      - uses: ./.github/actions/sccache
+        with:
+          key: macOS-default
+      - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: cargo check
+        working-directory: benchmarks
+
   templates:
     if: needs.changes.outputs.templates == 'true'
     needs: changes
@@ -205,6 +244,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
+        with:
+          key: ${{ matrix.os }}-default
       - run: cargo run --bin cargo-risczero -- risczero install --version $RISC0_TOOLCHAIN_VERSION
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
