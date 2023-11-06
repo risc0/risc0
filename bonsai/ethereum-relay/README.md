@@ -9,76 +9,117 @@ The picture below shows a simplified overview of how users can integrate Bonsai 
 
 ![Bonsai Relay Diagram](images/bonsai_relay.png)
 
-1. Some user's logic execution of a given user smart contract gets delegated to be executed and proven on Bonsai.
-   The [Bonsai Relay Contract](../ethereum/contracts/BonsaiRelay.sol) exposes an interface `Request Callback` that triggers an event that is caught by the `Ethereum Bonsai Relayer`.
-2. The relayer forwards the proof request to Bonsai.
-3. The relayer queries Bonsai to get a Snark proof of the requested computation as well as its result embedded into a journal.
-4. Both proof and journal are sent on-chain to the `Bonsai Relay Contract`, that verifies the correctness of the proof.
-5. Upon successful verification, the journal gets sent to the user contract via the specified callback function.
+1. Users can delegate their smart contract's logic to Bonsai. The `Bonsai Relay` provides a `Request Callback` interface. This interface, accessible both *off-chain* (through HTTP REST API) and *on-chain*, emits an event detected by the `Ethereum Bonsai Relayer`.
+2. The `Ethereum Bonsai Relayer` sends the proof request to Bonsai.
+3. Bonsai generates a Snark proof and its result, encapsulated in a journal.
+4. The `Ethereum Bonsai Relayer` submits this proof and journal on-chain to the `Bonsai Relay Contract` for validation.
+5. If validated, the journal is dispatched to the user's smart contract via the specified callback.
 
 ## Interfaces
 
-The Bonsai Ethereum Relay provides both an *on-chain* (via Ethereum) and an *off-chain* (via HTTP REST API) interface to send `Callback requests`.
+The Bonsai Ethereum Relay provides both an *off-chain* (via HTTP REST API) and an *on-chain* (via Ethereum) interface to send `Callback requests`.
 
-### On-chain
+### Off-chain
 
 A typical flow works as follows:
 
-1. Deploy a Bonsai Relay Smart Contract on Ethereum at a given address `0xB..`.
-2. Start an instance of the relay tool configured with the option `--contract-address` defined as `0xB..`.
-3. Delegate some off-chain computation for a given Smart Contract `A` to Bonsai by registering the `Image` or `ELF` (i.e., the compiled binary responsible for executing the given computation on the RISC Zero ZKVM) to Bonsai.
-4. The corresponding `Image ID` and the Bonsai Relay Smart Contract `0xB..` can be used to construct and deploy the Smart Contract `A` to Ethereum.
-5. Send a transaction to Smart Contract `A` to trigger a `Callback request` event that the Bonsai Relay will catch and forward to Bonsai.
-6. Once Bonsai has generated a proof of execution, the Bonsai Relay will forward this proof along with the result of the computation to the Bonsai Relay Smart Contract.
-7. This triggers a verification of the proof on-chain, and only upon successful verification, the result of the computation will be forwarded to the original requester Smart Contract `A` via the `invoke_callback` function.
-
-### REST API
-
-As an alternative to sending a `Callback request` from Ethereum as described by step 5, the request can be sent directly to the Bonsai Relay via an HTTP REST API.
-Then, the remaining steps will flow as above. The following example explains how to do that.
+1. Deploy the `Bonsai Relay Contract` to Ethereum using address `0xB..`.
+2. Launch the `Bonsai Relayer`, setting `--contract-address` to `0xB..`.
+3. To delegate off-chain computation for Smart Contract `A` to Bonsai, register its `Image` or `ELF` (the binary executing the computation on RISC Zero ZKVM) with Bonsai.
+4. Use the generated `Image ID` and the `Bonsai Relay Contract` address 0xB.. to deploy Smart Contract `A` on Ethereum.
+5. Initiate a `Callback request` through the `Bonsai Relayer`'s off-chain REST API. This request is sent to Bonsai.
+6. After Bonsai produces an execution proof, the `Bonsai Relayer` relays the proof and computation result to the `Bonsai Relay Contract`.
+7. Ethereum verifies the proof on-chain. If validated, Smart Contract `A` receives the computation result via the `invoke_callback` function.
 
 #### Example
 
-The following example assumes that the Bonsai Relay is up and running with the server API enabled,
+The following example assumes that the `Bonsai Relayer` is up and running with the server API enabled,
 and that the memory image of your `ELF` is already registered against Bonsai with a given `IMAGE_ID` as its identifier.
 
-```rust,ignore
-// initialize a relay client
-let relay_client = Client::from_parts(
-        "http://localhost:8080".to_string(), // here goes the actual url of the Bonsai Relay
-        "BONSAI_API_KEY" // here goes the actual Bonsai API-Key
+```rust
+use alloy_primitives::U256;
+use alloy_sol_types::SolValue;
+use anyhow::Context;
+use bonsai_ethereum_relay::sdk::client::{CallbackRequest, Client};
+use clap::Parser;
+use ethers::{types::Address, utils::id};
+use methods::FIBONACCI_ID;
+use risc0_zkvm::sha::Digest;
+
+/// Exmaple code for sending a REST API request to the Bonsai relay service to
+/// requests, execution, proving, and on-chain callback for a zkVM guest
+/// application.
+#[derive(Parser, Debug)]
+#[command(author, version, about, long_about)]
+struct Args {
+    /// Adress for the BonsaiStarter application contract.
+    address: Address,
+
+    /// Input N for calculating the Nth Fibonacci number.
+    number: u32,
+
+    /// Bonsai Relay API URL.
+    #[arg(long, env, default_value = "http://localhost:8080")]
+    bonsai_relay_api_url: String,
+
+    /// Bonsai API key. Used by the relay to send requests to the Bonsai proving
+    /// service. Defaults to empty, providing no authentication.
+    #[arg(long, env, default_value = "")]
+    bonsai_api_key: String,
+}
+
+#[tokio::main]
+async fn main() -> anyhow::Result<()> {
+    let args = Args::parse();
+    // initialize a relay client
+    let relay_client = Client::from_parts(
+        args.bonsai_relay_api_url.clone(), // Set BONSAI_API_URL or replace this line.
+        args.bonsai_api_key.clone(),       // Set BONSAI_API_KEY or replace this line.
     )
-    .expect("Failed to initialize the relay client");
+    .context("Failed to initialize the relay client")?;
 
-// Initialize the input for the guest.
-// In this example we are sending a slice of bytes,
-// where the first 4 bytes represents the length
-// of the slice (in little endian).
-let mut input = vec![0; 36];
-input[0] = 32;
-input[35] = 100;
+    // Initialize the input for the FIBONACCI guest.
+    let input = U256::from(args.number).abi_encode();
 
-// Create a CallbackRequest for the your contract
-// example: (tests/contracts/Counter.sol).
-let image_id: [u8; 32] = bytemuck::cast(IMAGE_ID);
-let request = CallbackRequest {
-    callback_contract: counter.address(),
-    // you can use the command `solc --hashes tests/solidity/contracts/Counter.sol`
-    // to get the value for your actual contract
-    function_selector: [0xff, 0x58, 0x5c, 0xaf],
-    gas_limit: 3000000,
-    image_id,
-    input,
-};
+    // Set the function selector of the callback function.
+    let function_signature = "storeResult(uint256,uint256)";
+    let function_selector = id(function_signature);
 
-// Send the callback request to the Bonsai Relay.
-// On success, the Relay will return the Bonsai session ID.
-let session_id = relay_client
-    .callback_request(request)
-    .await
-    .expect("Callback request failed");
+    // Create a CallbackRequest for your contract
+    // example: (contracts/BonsaiStarter.sol).
+    let request = CallbackRequest {
+        callback_contract: args.address.into(),
+        function_selector,
+        gas_limit: 3000000,
+        image_id: Digest::from(FIBONACCI_ID).into(),
+        input,
+    };
+
+    // Send the callback request to the Bonsai Relay.
+    relay_client
+        .callback_request(request)
+        .await
+        .context("Callback request failed")?;
+
+    Ok(())
+}
 
 ```
+
+### On-chain
+
+As an alternative to sending a `Callback request` from the REST API as described by step 5 of the previous section, the request can be sent via the *on-chain* `Callback request` interface provided by the [Bonsai Relay Contract]:
+- Send a transaction to Smart Contract `A` to trigger a `Callback request` event that the Bonsai Relay will catch and forward to Bonsai.
+
+#### Example
+Using [cast]:
+```bash
+cast send --private-key 0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d --gas-limit 100000 "$APP_ADDRESS" 'calculateFibonacci(uint256)' 5
+```
+where:
+- `$APP_ADDRESS` is an env variable containing the address of your Smart Contract `A`
+- `calculateFibonacci(uint256)` is the function selector of your Smart Contract `A` triggering the `Callback request`
+- `5` is the input for your FIBONACCI program
 
 ## Usage
 
@@ -120,3 +161,7 @@ Since execution is much faster than proving, this mode can be used to speed-up t
 
 Enable `dev-mode` setting the environmental variable `RISC0_DEV_MODE=true` when starting the relayer.
 Since there are no proofs within this mode, we also provide a [Bonsai Test Relay Contract](../ethereum/contracts/BonsaiTestRelay.sol) that skips the on-chain verification of the snark proof.
+
+
+[Bonsai Relay Contract]: lib/risc0/bonsai/ethereum/contracts/BonsaiRelay.sol
+[cast]: https://book.getfoundry.sh/cast/#:~:text=Cast%20is%20Foundry%27s%20command%2Dline,all%20from%20your%20command%2Dline!
