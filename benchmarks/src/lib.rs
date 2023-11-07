@@ -20,9 +20,9 @@ use std::{
     time::{Duration, Instant},
 };
 
-use tracing::info;
 use risc0_zkvm::{MemoryImage, Program, Segment, GUEST_MAX_MEM, PAGE_SIZE};
 use serde::Serialize;
+use tracing::info;
 use tracing::info;
 
 pub mod benches;

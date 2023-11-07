@@ -20,7 +20,6 @@ use core::{
 };
 
 use anyhow::Result;
-use tracing::{debug, trace};
 use risc0_core::field::{baby_bear::BabyBearElem, Elem};
 use risc0_zkp::{
     adapter::TapsProvider,
@@ -33,6 +32,7 @@ use risc0_zkp::{
     MAX_CYCLES_PO2, MIN_CYCLES_PO2, ZK_CYCLES,
 };
 use risc0_zkvm_platform::{memory, WORD_SIZE};
+use tracing::{debug, trace};
 
 use crate::host::CIRCUIT;
 
