@@ -19,6 +19,7 @@ use std::{cell::RefCell, cmp::min, collections::HashMap, rc::Rc, str::from_utf8}
 use anyhow::{anyhow, bail, Result};
 use bytes::Bytes;
 use risc0_zkvm_platform::{
+    fileno,
     syscall::{
         nr::{
             SYS_ARGC, SYS_ARGV, SYS_CYCLE_COUNT, SYS_GETENV, SYS_LOG, SYS_PANIC, SYS_RANDOM,
@@ -105,7 +106,7 @@ impl<'a> SyscallTable<'a> {
 
         let posix_io = env.posix_io.clone();
         this.with_syscall(SYS_CYCLE_COUNT, SysCycleCount)
-            .with_syscall(SYS_LOG, SysLog)
+            .with_syscall(SYS_LOG, posix_io.clone())
             .with_syscall(SYS_PANIC, SysPanic)
             .with_syscall(SYS_RANDOM, SysRandom)
             .with_syscall(SYS_GETENV, SysGetenv(env.env_vars.clone()))
@@ -174,23 +175,6 @@ impl Syscall for SysGetenv {
                 Ok((val.as_bytes().len() as u32, 0))
             }
         }
-    }
-}
-
-pub(crate) struct SysLog;
-impl Syscall for SysLog {
-    fn syscall(
-        &mut self,
-        _syscall: &str,
-        ctx: &mut dyn SyscallContext,
-        _to_guest: &mut [u32],
-    ) -> Result<(u32, u32)> {
-        let buf_ptr = ctx.load_register(REG_A3);
-        let buf_len = ctx.load_register(REG_A4);
-        let from_guest = ctx.load_region(buf_ptr, buf_len)?;
-        let msg = from_utf8(&from_guest)?;
-        println!("R0VM[{}] {}", ctx.get_cycle(), msg);
-        Ok((0, 0))
     }
 }
 
@@ -513,6 +497,8 @@ impl<'a> Syscall for PosixIo<'a> {
             self.sys_read(ctx, to_guest)
         } else if syscall == SYS_WRITE.as_str() {
             self.sys_write(ctx)
+        } else if syscall == SYS_LOG.as_str() {
+            self.sys_log(ctx)
         } else {
             bail!("Unknown syscall {syscall}")
         }
@@ -622,6 +608,26 @@ impl<'a> PosixIo<'a> {
         log::debug!("Writing {buf_len} bytes to file descriptor {fd}");
 
         writer.borrow_mut().write_all(from_guest_bytes.as_slice())?;
+        Ok((0, 0))
+    }
+
+    fn sys_log(&mut self, ctx: &mut dyn SyscallContext) -> Result<(u32, u32)> {
+        let buf_ptr = ctx.load_register(REG_A3);
+        let buf_len = ctx.load_register(REG_A4);
+        let from_guest = ctx.load_region(buf_ptr, buf_len)?;
+        // write to stdout, but be sure to point it to where the file descriptor is pointing
+        let fd = ctx.load_register(REG_A3);
+        let writer = self
+            .write_fds
+            .get_mut(&fileno::STDOUT)
+            .ok_or(anyhow!("Bad write file descriptor {fd}"))?;
+
+        log::debug!("Writing {buf_len} bytes to file descriptor {fd}");
+
+        let msg = format!("R0VM LOG[{}] ", ctx.get_cycle().to_string());
+        writer
+            .borrow_mut()
+            .write_all(&[msg.as_bytes(), &from_guest].concat())?;
         Ok((0, 0))
     }
 }
