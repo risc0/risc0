@@ -16,7 +16,7 @@ While you wait, you can make use of the local proving option on the Bonsai Found
 
 [Bonsai Foundry Template]: https://github.com/risc0/bonsai-foundry-template/blob/main/README.md
 [readme]: https://github.com/risc0/bonsai-foundry-template/blob/main/README.md
-[cargo risczero]: https://docs.rs/cargo-risczero/latest/cargo_risczero/
+[cargo risczero]: https://crates.io/crates/cargo-risczero
 [Bonsai SDK]: https://crates.io/crates/bonsai-sdk
 [Bonsai REST API]: https://api.bonsai.xyz/swagger-ui/
 [Click here to request access]: https://bonsai.xyz/apply
