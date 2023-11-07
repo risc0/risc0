@@ -57,7 +57,7 @@ fn predict() -> f64 {
     // Produce a receipt by proving the specified ELF binary.
     let receipt = prover.prove_elf(env, XGBOOST_ELF).unwrap();
 
-    // We return the inference value committed the journal.
+    // We return the inference value committed to the journal.
     receipt.journal.decode().unwrap()
 }
 
