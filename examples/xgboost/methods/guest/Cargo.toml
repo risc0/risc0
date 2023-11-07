@@ -1,0 +1,11 @@
+[package]
+name = "xgboost"
+version = "0.1.0"
+edition = "2021"
+
+[workspace]
+
+[dependencies]
+risc0-zkvm = { path = "../../../../risc0/zkvm", default-features = false, features = ["std"] }
+forust-ml = "0.4.2"
+rmp-serde = "1.1.2"
