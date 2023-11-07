@@ -153,7 +153,7 @@ impl<'a> ExecutorImpl<'a> {
         }
 
         let pc = image.pc;
-        let monitor = MemoryMonitor::new(image.clone(), env.trace.is_some());
+        let monitor = MemoryMonitor::new(image.clone(), !env.trace.is_empty());
         let loader = Loader::new();
         let init_cycles = loader.init_cycles();
         let fini_cycles = loader.fini_cycles();
@@ -470,16 +470,18 @@ impl<'a> ExecutorImpl<'a> {
     }
 
     fn advance(&mut self, opcode: OpCode, op_result: OpCodeResult) -> Option<ExitCode> {
-        if let Some(ref trace) = self.env.trace {
-            trace.borrow_mut()(TraceEvent::InstructionStart {
-                cycle: self.session_cycle() as u32,
-                pc: self.pc,
-                insn: opcode.insn,
-            })
-            .unwrap();
+        for trace in self.env.trace.iter() {
+            trace
+                .borrow_mut()
+                .trace_callback(TraceEvent::InstructionStart {
+                    cycle: self.session_cycle() as u32,
+                    pc: self.pc,
+                    insn: opcode.insn,
+                })
+                .unwrap();
 
             for event in self.monitor.trace_events.iter() {
-                trace.borrow_mut()(event.clone()).unwrap();
+                trace.borrow_mut().trace_callback(event.clone()).unwrap();
             }
         }
 

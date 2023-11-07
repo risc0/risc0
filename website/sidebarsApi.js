@@ -81,7 +81,12 @@ export default {
         },
         {
           type: "doc",
-          label: "Acceleration",
+          label: "Guest Optimization",
+          id: "zkvm/developer-guide/optimization",
+        },
+        {
+          type: "doc",
+          label: "Cryptography Acceleration",
           id: "zkvm/developer-guide/acceleration",
         },
         {
