@@ -50,7 +50,7 @@ and that the memory image of your `ELF` is already registered against Bonsai wit
 # use fibonacci_methods::FIBONACCI_ID;
 # use risc0_zkvm::sha::Digest;
 
-/// Exmaple code for sending a REST API request to the Bonsai relay service to
+/// Example code for sending a REST API request to the Bonsai relay service to
 /// requests, execution, proving, and on-chain callback for a zkVM guest
 /// application.
 #[derive(Parser, Debug)]
