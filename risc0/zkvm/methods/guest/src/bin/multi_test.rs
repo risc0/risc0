@@ -30,8 +30,9 @@ use risc0_zkvm::{
 };
 use risc0_zkvm_methods::multi_test::{MultiTestSpec, SYS_MULTI_TEST};
 use risc0_zkvm_platform::{
-    fileno, memory,
-    syscall::{bigint, sys_bigint, sys_read, sys_read_words, sys_write},
+    fileno,
+    memory::{self, SYSTEM},
+    syscall::{bigint, sys_bigint, sys_log, sys_read, sys_read_words, sys_write},
 };
 
 risc0_zkvm::entry!(main);
@@ -247,6 +248,10 @@ pub fn main() {
         },
         MultiTestSpec::TooManySha => unsafe {
             asm!("ecall", in("x5") 3, in("x10") 0x400, in("x11") 0x400, in("x12") 0x400, in("x13") 0x400, in("x14") 10000,);
+        },
+        MultiTestSpec::SysLogInvalidAddr => unsafe {
+            let addr: *const u8 = SYSTEM.start() as _;
+            sys_log(addr, 100);
         },
     }
 }
