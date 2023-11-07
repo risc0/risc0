@@ -289,10 +289,8 @@ fn session_events() {
 // They were built using the toolchain from:
 // https://github.com/risc0/toolchain/releases/tag/2022.03.25
 mod riscv {
-    use crate::{
-        host::server::prove::tests::prove_session_fast, ExecutorEnv, ExecutorImpl, MemoryImage,
-        Program,
-    };
+    use super::prove_session_fast;
+    use crate::{ExecutorEnv, ExecutorImpl, MemoryImage, Program};
 
     fn run_test(test_name: &str) {
         use std::io::Read;
@@ -391,6 +389,7 @@ mod docker {
     use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF};
     use test_log::test;
 
+    use super::prove_session_fast;
     use crate::{ExecutorEnv, ExecutorImpl, ExitCode};
 
     #[test]
