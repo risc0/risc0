@@ -36,7 +36,7 @@ To support various use cases, there are a number of functions that can be called
 [`env::stdout`]: https://docs.rs/risc0-zkvm/0.19/risc0_zkvm/guest/env/fn.stdout.html
 [`env::stderr`]: https://docs.rs/risc0-zkvm/0.19/risc0_zkvm/guest/env/fn.stderr.html
 
-- **Committing private outputs [journal]**<br/>
+- **Committing public outputs to [journal]**<br/>
   `env::commit`, `env::commit_slice`
 
 [`env::commit`]: https://docs.rs/risc0-zkvm/0.19/risc0_zkvm/guest/env/fn.commit.html
