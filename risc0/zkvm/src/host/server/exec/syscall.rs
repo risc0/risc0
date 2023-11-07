@@ -616,15 +616,17 @@ impl<'a> PosixIo<'a> {
         let buf_len = ctx.load_register(REG_A4);
         let from_guest = ctx.load_region(buf_ptr, buf_len)?;
         // write to stdout, but be sure to point it to where the file descriptor is pointing
-        let fd = ctx.load_register(REG_A3);
         let writer = self
             .write_fds
             .get_mut(&fileno::STDOUT)
-            .ok_or(anyhow!("Bad write file descriptor {fd}"))?;
+            .ok_or(anyhow!("Bad write file descriptor {}", &fileno::STDOUT))?;
 
-        log::debug!("Writing {buf_len} bytes to file descriptor {fd}");
+        log::debug!(
+            "Writing {buf_len} bytes to STDOUT file descriptor {}",
+            &fileno::STDOUT
+        );
 
-        let msg = format!("R0VM LOG[{}] ", ctx.get_cycle().to_string());
+        let msg = format!("R0VM[{}] ", ctx.get_cycle().to_string());
         writer
             .borrow_mut()
             .write_all(&[msg.as_bytes(), &from_guest].concat())?;
