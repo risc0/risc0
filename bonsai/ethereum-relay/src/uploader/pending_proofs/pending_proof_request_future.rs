@@ -14,13 +14,14 @@
 
 use std::pin::Pin;
 
+use backoff::{future::retry, Error as BackoffError, ExponentialBackoff};
 use bonsai_sdk::{
     alpha::{responses::SessionStatusRes, Client, SessionId},
     alpha_async::session_status,
 };
 use futures::{
     task::{Context, Poll},
-    Future,
+    Future, FutureExt,
 };
 use pin_project::pin_project;
 use tracing::error;
@@ -50,8 +51,7 @@ impl Error {
     }
 }
 
-type PollingBonsaiFuture =
-    Pin<Box<dyn Future<Output = Result<SessionStatusRes, Error>> + Sync + Send>>;
+type PollingBonsaiFuture = Pin<Box<dyn Future<Output = Result<SessionStatusRes, Error>> + Send>>;
 
 enum PendingProofRequestState {
     // Inital state. The Proof Request has been submitted to Bonsai
@@ -86,26 +86,25 @@ impl Future for PendingProofRequest {
         loop {
             match this.state {
                 PendingProofRequestState::Pending => {
-                    // Transition state to ask Bonsai for the proof request's
-                    // status
-                    let bonsai_get_receipt_fut =
-                        get_receipt_info(this.bonsai_client.clone(), this.pending_proof_id.clone());
+                    // Clone necessary data for the async closure
+                    let bonsai_client_clone = this.bonsai_client.clone();
+                    let pending_proof_id_clone = this.pending_proof_id.clone();
 
-                    *this.state =
-                        PendingProofRequestState::PollingBonsai(Box::pin(bonsai_get_receipt_fut))
-                }
+                    // Set up the retry policy and create the future
+                    let retry_policy = ExponentialBackoff::default();
+                    let bonsai_get_receipt_fut = retry(retry_policy, move || {
+                        let client = bonsai_client_clone.clone();
+                        let id = pending_proof_id_clone.clone();
+                        async move {
+                            let receipt_response = get_receipt_info(client, id.clone())
+                                .await
+                                .map_err(BackoffError::permanent)?;
 
-                PendingProofRequestState::PollingBonsai(bonsai_get_receipt_fut) => {
-                    let response = futures::ready!(bonsai_get_receipt_fut.as_mut().poll(ctx));
-                    match response {
-                        Ok(receipt_response) => {
                             match (
                                 receipt_response.status.as_str(),
                                 receipt_response.receipt_url.is_some(),
                             ) {
-                                ("SUCCEEDED", true) => {
-                                    return Poll::Ready(Ok(this.pending_proof_id.clone()))
-                                }
+                                ("SUCCEEDED", true) => Ok(receipt_response),
                                 ("SUCCEEDED", false) => {
                                     // TODO: Should we consider this a failure
                                     // and retry, or should we just return an
@@ -113,35 +112,35 @@ impl Future for PendingProofRequest {
 
                                     // Bonsai returned the receipt in a inconsistent state,
                                     // we should assume the proof failed and return an error
-                                    error!(
-                                        "Bonsai returned a receipt with status SUCCEEDED but no receipt URL"
-                                    );
-                                    return Poll::Ready(Err(Error::ProofRequestError {
+                                    Err(BackoffError::permanent(Error::ProofRequestError {
                                         status: receipt_response.status,
-                                        id: this.pending_proof_id.clone(),
-                                    }));
+                                        id,
+                                    }))
                                 }
+                                // We treat "RUNNING" as a transient error to retry automatically
                                 ("RUNNING", _) => {
-                                    // Not done yet, still pending. Transition back to pending
-                                    *this.state = PendingProofRequestState::Pending;
-                                    ctx.waker().wake_by_ref();
-                                    return Poll::Pending;
+                                    Err(BackoffError::transient(Error::ProofRequestError {
+                                        status: "Proof request pending".to_string(),
+                                        id,
+                                    }))
                                 }
-                                _ => {
-                                    // TODO: Should we consider 'TIMED_OUT' a failure, or should we
-                                    // retry?
-
-                                    // The other status values indicate some type of error
-                                    return Poll::Ready(Err(Error::ProofRequestError {
-                                        status: receipt_response.status,
-                                        id: this.pending_proof_id.clone(),
-                                    }));
-                                }
+                                _ => Err(BackoffError::permanent(Error::ProofRequestError {
+                                    status: receipt_response.status,
+                                    id,
+                                })),
                             }
                         }
-                        Err(err) => {
-                            return Poll::Ready(Err(err));
-                        }
+                    })
+                    .boxed();
+
+                    // TODO this pending state does not need to be handled like this, refactor out
+                    *this.state = PendingProofRequestState::PollingBonsai(bonsai_get_receipt_fut);
+                }
+                PendingProofRequestState::PollingBonsai(ref mut bonsai_get_receipt_fut) => {
+                    let response = futures::ready!(bonsai_get_receipt_fut.as_mut().poll(ctx));
+                    match response {
+                        Ok(_) => return Poll::Ready(Ok(this.pending_proof_id.clone())),
+                        Err(e) => return Poll::Ready(Err(e)),
                     }
                 }
             }

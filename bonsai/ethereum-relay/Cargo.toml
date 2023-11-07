@@ -36,6 +36,7 @@ tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
 utoipa = { version = "3.0", features = ["axum_extras", "time", "uuid"] }
 utoipa-swagger-ui = { version = "3.0", features = ["axum", "debug-embed"] }
 validator = { version = "0.16", features = ["derive"] }
+backoff = { version = "0.4", features = ["tokio"] }
 
 [dev-dependencies]
 bincode = "1"
