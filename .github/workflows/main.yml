@@ -65,6 +65,26 @@ jobs:
               - risc0/**
               - xtask/**
 
+  # see: https://github.com/orgs/community/discussions/26822
+  main-status-check:
+    needs:
+      - check
+      - check-benchmarks
+      - check_template
+      - crates-validator
+      - doc
+      - examples
+      - reproducible-build
+      - test
+      - web
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check all job status
+        # see https://docs.github.com/en/actions/reference/context-and-expression-syntax-for-github-actions#needs-context
+        # see https://stackoverflow.com/a/67532120/4907315
+        if: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
+        run: exit 1
+
   check:
     runs-on: ubuntu-latest
     steps:
