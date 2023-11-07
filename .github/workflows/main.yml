@@ -214,7 +214,7 @@ jobs:
       - run: cargo build --release -p risc0-r0vm -F $FEATURE
       - run: cargo test --locked -F $FEATURE
         working-directory: examples
-      - run: cargo run --locked -F $FEATURE && ls ${{ github.workspace }}/fibonacci.pb
+      - run: 'cargo run --locked -F $FEATURE && ls "${{ github.workspace }}/fibonacci.pb"'
         env: { RISC0_PPROF_OUT: ${{ github.workspace }}/fibonacci.pb }
         working-directory: examples/profiling
 
