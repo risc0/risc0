@@ -173,7 +173,7 @@ mod cuda {
             "sha-256" => {
                 let hal = Rc::new(CudaHalSha256::new());
                 let circuit_hal = Rc::new(CudaCircuitHalSha256::new(hal.clone()));
-                Ok(Box::new(ProverImpl::new(
+                Ok(Rc::new(ProverImpl::new(
                     "cuda",
                     HalPair { hal, circuit_hal },
                 )))
@@ -181,7 +181,7 @@ mod cuda {
             "poseidon" => {
                 let hal = Rc::new(CudaHalPoseidon::new());
                 let circuit_hal = Rc::new(CudaCircuitHalPoseidon::new(hal.clone()));
-                Ok(Box::new(ProverImpl::new(
+                Ok(Rc::new(ProverImpl::new(
                     "cuda",
                     HalPair { hal, circuit_hal },
                 )))
@@ -209,7 +209,7 @@ mod metal {
             "sha-256" => {
                 let hal = Rc::new(MetalHalSha256::new());
                 let circuit_hal = Rc::new(MetalCircuitHal::<MetalHashSha256>::new(hal.clone()));
-                Ok(Box::new(ProverImpl::new(
+                Ok(Rc::new(ProverImpl::new(
                     "metal",
                     HalPair { hal, circuit_hal },
                 )))
@@ -217,7 +217,7 @@ mod metal {
             "poseidon" => {
                 let hal = Rc::new(MetalHalPoseidon::new());
                 let circuit_hal = Rc::new(MetalCircuitHal::<MetalHashPoseidon>::new(hal.clone()));
-                Ok(Box::new(ProverImpl::new(
+                Ok(Rc::new(ProverImpl::new(
                     "metal",
                     HalPair { hal, circuit_hal },
                 )))
@@ -241,7 +241,7 @@ mod cpu {
     use super::{HalPair, ProverImpl, ProverServer};
     use crate::{host::CIRCUIT, ProverOpts};
 
-    pub fn get_prover_server(opts: &ProverOpts) -> Result<Box<dyn ProverServer>> {
+    pub fn get_prover_server(opts: &ProverOpts) -> Result<Rc<dyn ProverServer>> {
         let suite = match opts.hashfn.as_str() {
             "sha-256" => Sha256HashSuite::new_suite(),
             "poseidon" => PoseidonHashSuite::new_suite(),
@@ -250,16 +250,16 @@ mod cpu {
         let hal = Rc::new(CpuHal::new(suite));
         let circuit_hal = Rc::new(CpuCircuitHal::new(&CIRCUIT));
         let hal_pair = HalPair { hal, circuit_hal };
-        Ok(Box::new(ProverImpl::new("cpu", hal_pair)))
+        Ok(Rc::new(ProverImpl::new("cpu", hal_pair)))
     }
 }
 
 /// Select a [ProverServer] based on the specified [ProverOpts] and currently
 /// compiled features.
-pub fn get_prover_server(opts: &ProverOpts) -> Result<Box<dyn ProverServer>> {
+pub fn get_prover_server(opts: &ProverOpts) -> Result<Rc<dyn ProverServer>> {
     if is_dev_mode() {
         eprintln!("WARNING: proving in dev mode. This will not generate valid, secure proofs.");
-        return Ok(Box::new(DevModeProver));
+        return Ok(Rc::new(DevModeProver));
     }
 
     cfg_if! {

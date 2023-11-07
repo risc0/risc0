@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{fs, path::PathBuf};
+use std::{fs, path::PathBuf, rc::Rc};
 
 use clap::{Args, Parser, ValueEnum};
 use risc0_zkvm::{
@@ -170,7 +170,7 @@ pub fn main() {
 }
 
 impl Cli {
-    fn get_prover(&self) -> Box<dyn ProverServer> {
+    fn get_prover(&self) -> Rc<dyn ProverServer> {
         let hashfn = match self.hashfn {
             HashFn::Sha256 => "sha-256",
             HashFn::Poseidon => "poseidon",
