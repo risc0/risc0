@@ -112,7 +112,7 @@ where
     fn prove_segment(&self, ctx: &VerifierContext, segment: &Segment) -> Result<SegmentReceipt> {
         use risc0_zkp::prove::executor::Executor;
 
-        log::info!(
+        log::debug!(
             "prove_segment[{}]: po2: {}, cycles: {}",
             segment.index,
             segment.po2,
