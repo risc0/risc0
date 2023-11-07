@@ -17,9 +17,14 @@ See also: [Arithmetic Circuits]
 
 [clock cycles]: #clock-cycles
 
-The smallest unit of compute in the zkVM [circuit], analogous to a clock cycle on a physical CPU. The complexity of a [guest program]'s [execution] is measured in clock cycles as they directly affect the memory, proof size, and time performance of the [zkVM].
+The smallest unit of compute in the zkVM [circuit], analogous to a clock cycle on a physical CPU.
+The complexity of a [guest program]'s [execution] is measured in clock cycles as they directly affect the memory, proof size, and time performance of the [zkVM].
 
 Generally, a single cycle corresponds to a single [RISC-V] operation. However, some operations require two cycles.
+
+<!-- TODO: Once the optimizaiton guide is in a release API doc, include this line.
+See the [Optimization Guide](/api/zkvm/developer-guide/optimization) for more information about the zkVM cycles and performance.
+-->
 
 ### Commit
 
