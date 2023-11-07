@@ -19,16 +19,11 @@ convince a verifier they know Waldo's location in a public Where's Waldo puzzle,
 without revealing Waldo's coordinates.
 
 ## Quick Start
-### External Dependencies
-First, [install Rust] if you don't already have it.
+### Installing Dependencies
 
-### RISC Zero Dependencies
-Next, install the `cargo-risczero` tool and install the toolchain with:
-```bash
-cargo install cargo-binstall
-cargo binstall cargo-risczero
-cargo risczero install
-```
+Follow the [installation guide] if you don't already have the RISC Zero tools installed.
+
+[installation guide]: https://dev.risczero.com/api/zkvm/quickstart
 
 ### Run the Prover to construct a Receipt
 Now, you're ready to construct a [receipt] that proves you know where Waldo is located. From the `waldo` folder, run:

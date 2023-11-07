@@ -17,19 +17,15 @@ The guest code reads the number of iterations from the host, computes the Fibona
 ## Usage
 
 ### Step 1: Prerequisites
-First, [install Rust] if you don't already have it.
 
-Next, install the `cargo-risczero` tool and install the toolchain with:
-```bash
-cargo install cargo-binstall
-cargo binstall cargo-risczero
-cargo risczero install
-```
+First, follow the [installation guide] if you don't already have the RISC Zero tools installed.
 
-Finally, install the [pprof] tool with
+Then, install the [pprof] tool with
 ```bash
 go install github.com/google/pprof@latest
 ```
+
+[installation guide]: https://dev.risczero.com/api/zkvm/quickstart
 
 ### Step 2: Running
 Then, run the example with:
