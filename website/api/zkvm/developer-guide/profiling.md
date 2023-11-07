@@ -6,6 +6,7 @@ We'll be using a guest program with three different implementations of the Fibon
 You can find all the code used as example in the [profiling example].
 
 <!-- NOTE: This content matches the README under examples/profiling/README.md -->
+
 ## Background
 
 Profiling tools, like [pprof] and [perf], allow collecting performance information over the entire execution of your program, and help create visualizations for the performance of your program.
@@ -87,6 +88,7 @@ Refer to the [pprof docs] for more inforamtion about the web interface.
 [flamegraph]: https://www.brendangregg.com/FlameGraphs/cpuflamegraphs.html
 [pprof docs]: https://github.com/google/pprof/blob/main/doc/README.md#web-interface-1
 
+<!-- prettier-ignore-start -->
 [^1]:
     Here “sampling” is in quotes because the profiler actually captures the call stack at every cycle of program execution. Capturing a call stack on every cycle of execution is not done in most programs on physical CPUs for a few reasons:
     <!-- HACK: This comment prevents the list below from being interpretted to be a code block -->
@@ -94,3 +96,4 @@ Refer to the [pprof docs] for more inforamtion about the web interface.
     - Introducing such heavy profiling would actually alter the performance characteristics in significant ways.
     <!-- -->
     In zkVM execution, executions are generally short and all execution is synchronous and is not subject to any deviations in behavior due to measurement overhead.
+<!-- prettier-ignore-end -->

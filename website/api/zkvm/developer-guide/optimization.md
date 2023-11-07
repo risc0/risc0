@@ -58,6 +58,7 @@ Using [`env::get_cycle_count()`] will tell you the current number of execution c
 As an example:
 
 <!-- NOTE: Ignored since we do not yet have a way to test guest code in docs -->
+
 ```rust no_run title="methods/guest/src/main.rs"
 # use risc0_zkvm::guest::env;
 fn my_operation_to_measure() {
@@ -436,6 +437,7 @@ A short description and associated cycle counts are listed below.
     Modern processors have endlessly complex systems of pipelining, instruction-level parallelism, micro-ops and other details that bend the concept of “cycle” and make it impossible to say definitive how many “cycles” an operation takes.
     It is still an good intuitive starting point and working model.
 
+<!-- prettier-ignore-start -->
 [^2]:
     Here “sampling” is in quotes because the profiler actually captures the call stack at every cycle of program execution. Capturing a call stack on every cycle of execution is not done in most programs on physical CPUs for a few reasons:
     <!-- HACK: This comment prevents the list below from being interpretted to be a code block -->
@@ -443,6 +445,7 @@ A short description and associated cycle counts are listed below.
     - Introducing such heavy profiling would actually alter the performance characteristics in significant ways.
     <!-- -->
     In zkVM execution, executions are generally short and all execution is synchronous and is not subject to any deviations in behavior due to measurement overhead.
+<!-- prettier-ignore-end -->
 
 [^3]: An implementation of cycle-accounting for paging operations is implemented in the [Executor](https://github.com/risc0/risc0/blob/v0.19.0/risc0/zkvm/src/host/server/exec/monitor.rs#L30-L39). (Link is to v0.19.0)
 [^4]:

@@ -29,6 +29,7 @@ risc0-zkvm = { version = "0.19", features = ["profiler"] }
 2. Initialize the profiler with your guest code.
 
 <!-- NOTE: Does not compile after PR #1065 -->
+
 ```rust ignore
 # use fibonacci_methods::{FIBONACCI_ELF, FIBONACCI_PATH};
 # use risc0_zkvm::{default_executor, ExecutorEnv, Profiler};
@@ -39,6 +40,7 @@ This will initialize the profiler using the `FIBONACCI_ELF` as guest code, and w
 Alternatively, you can define the `profile_output_path` using an env variable:
 
 <!-- NOTE: Does not compile after PR #1065 -->
+
 ```rust ignore
 # use fibonacci_methods::{FIBONACCI_ELF, FIBONACCI_PATH};
 # use risc0_zkvm::{default_executor, ExecutorEnv, Profiler};
@@ -55,6 +57,7 @@ let mut profiler = match pprof_out {
 3. Build the executor environment
 
 <!-- NOTE: Does not compile after PR #1065 -->
+
 ```rust ignore
 # use fibonacci_methods::{FIBONACCI_ELF, FIBONACCI_PATH};
 # use risc0_zkvm::{default_executor, ExecutorEnv, Profiler};
@@ -82,6 +85,7 @@ let env = {
 4. Execute the guest code
 
 <!-- NOTE: Does not compile after PR #1065 -->
+
 ```rust ignore
 # use fibonacci_methods::{FIBONACCI_ELF, FIBONACCI_PATH};
 # use risc0_zkvm::{default_executor, ExecutorEnv, Profiler};
@@ -113,6 +117,7 @@ This will only [execute] the guest code, without generating a [receipt].
 5. Write out the profile
 
 <!-- NOTE: Does not compile after PR #1065 -->
+
 ```rust ignore
 # use fibonacci_methods::{FIBONACCI_ELF, FIBONACCI_PATH};
 # use risc0_zkvm::{default_executor, ExecutorEnv, Profiler};
