@@ -33,8 +33,21 @@ use crate::{
         CIRCUIT,
     },
     serde::{from_slice, to_vec},
-    ExecutorEnv, ExecutorImpl, ProverOpts, ProverServer, Receipt,
+    ExecutorEnv, ExecutorImpl, ProverOpts, ProverServer, Receipt, Session, VerifierContext,
 };
+
+fn prover_opts_fast() -> ProverOpts {
+    ProverOpts {
+        hashfn: "sha-256".to_string(),
+    }
+}
+
+fn prove_session_fast(session: &Session) -> Receipt {
+    let prover = get_prover_server(&prover_opts_fast()).unwrap();
+    prover
+        .prove_session(&VerifierContext::default(), session)
+        .unwrap()
+}
 
 fn prove_nothing(hashfn: &str) -> Result<Receipt> {
     let env = ExecutorEnv::builder()
@@ -106,7 +119,7 @@ fn sha_basics() {
             .unwrap();
         let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
         let session = exec.run().unwrap();
-        let receipt = session.prove().unwrap();
+        let receipt = prove_session_fast(&session);
         hex::encode(Digest::try_from(receipt.journal.bytes).unwrap())
     }
 
@@ -142,7 +155,7 @@ fn sha_iter() {
         .unwrap();
     let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
     let session = exec.run().unwrap();
-    let receipt = session.prove().unwrap();
+    let receipt = prove_session_fast(&session);
     let digest = Digest::try_from(receipt.journal.bytes).unwrap();
     assert_eq!(
         hex::encode(digest),
@@ -168,7 +181,7 @@ fn bigint_accel() {
             .unwrap();
         let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
         let session = exec.run().unwrap();
-        let receipt = session.prove().unwrap();
+        let receipt = prove_session_fast(&session);
         let expected = case.expected();
         let expected: &[u8] = bytemuck::cast_slice(expected.as_slice());
         assert_eq!(receipt.journal.bytes, expected);
@@ -209,7 +222,7 @@ fn memory_io() {
             Err(ExecutorError::Fault(session)) => session,
             Err(ExecutorError::Error(e)) => return Err(e),
         };
-        session.prove()
+        Ok(prove_session_fast(&session))
     }
 
     // Pick a memory position in the middle of the memory space, which is unlikely
@@ -270,7 +283,7 @@ fn session_events() {
         on_post_prove_segment_flag: on_post_prove_segment_flag.clone(),
     };
     session.add_hook(logger);
-    session.prove().unwrap();
+    prove_session_fast(&session);
     assert_eq!(session.hooks.len(), 1);
     assert_eq!(on_pre_prove_segment_flag.take(), true);
     assert_eq!(on_post_prove_segment_flag.take(), true);
@@ -281,6 +294,7 @@ fn session_events() {
 // They were built using the toolchain from:
 // https://github.com/risc0/toolchain/releases/tag/2022.03.25
 mod riscv {
+    use super::prove_session_fast;
     use crate::{ExecutorEnv, ExecutorImpl, MemoryImage, Program};
 
     fn run_test(test_name: &str) {
@@ -312,7 +326,7 @@ mod riscv {
             let env = ExecutorEnv::default();
             let mut exec = ExecutorImpl::new(env, image).unwrap();
             let session = exec.run().unwrap();
-            session.prove().unwrap();
+            prove_session_fast(&session);
         }
     }
 
@@ -378,6 +392,7 @@ mod riscv {
 mod docker {
     use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF};
 
+    use super::prove_session_fast;
     use crate::{ExecutorEnv, ExecutorImpl, ExitCode};
 
     #[test]
@@ -393,7 +408,7 @@ mod docker {
         let session = exec.run().unwrap();
         assert_eq!(session.segments.len(), 1);
         assert_eq!(session.exit_code, ExitCode::Paused(0));
-        let receipt = session.prove().unwrap();
+        let receipt = prove_session_fast(&session);
         let segments = receipt.inner.flat().unwrap();
         assert_eq!(segments.len(), 1);
         assert_eq!(segments[0].index, 0);
@@ -401,7 +416,7 @@ mod docker {
         // Run until sys_halt
         let session = exec.run().unwrap();
         assert_eq!(session.exit_code, ExitCode::Halted(0));
-        session.prove().unwrap();
+        prove_session_fast(&session);
     }
 
     #[test]
@@ -427,7 +442,7 @@ mod docker {
         }
         assert_eq!(final_segment.exit_code, ExitCode::Halted(0));
 
-        let receipt = session.prove().unwrap();
+        let receipt = prove_session_fast(&session);
         for (idx, receipt) in receipt.inner.flat().unwrap().iter().enumerate() {
             assert_eq!(receipt.index, idx as u32);
         }
