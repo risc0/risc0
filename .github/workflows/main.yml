@@ -4,8 +4,6 @@ on:
   merge_group:
   pull_request:
     branches: [main, "release-*"]
-    paths-ignore:
-      - "website/**"
   workflow_dispatch:
 
 concurrency:
@@ -18,20 +16,57 @@ env:
 jobs:
   changes:
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
     outputs:
+      check_template: ${{ steps.filter.outputs.check_template }}
       crates-validator: ${{ steps.filter.outputs.crates-validator }}
+      examples: ${{ steps.filter.outputs.examples }}
+      test: ${{ steps.filter.outputs.test }}
+      web: ${{ steps.filter.outputs.web }}
     steps:
+      - uses: actions/checkout@v4
       - uses: risc0/paths-filter@4067d885736b84de7c414f582ac45897079b0a78
         id: filter
         with:
           filters: |
+            base: &base
+              - .github/**
+              - Cargo.toml
+            check-benchmarks:
+              - *base
+              - benchmarks/**
+              - risc0/**
+            check_template:
+              - *base
+              - risc0/**
+              - templates/**
             crates-validator:
+              - *base
               - tools/crates-validator/**
+            doc:
+              - *base
+              - bonsai/sdk/**
+              - risc0/**
+            examples:
+              - *base
+              - examples/**
+              - risc0/**
+            test:
+              - *base
+              - bonsai/sdk/**
+              - external/**
+              - risc0/**
+            web:
+              - *base
+              - examples/browser-verify/**
+              - risc0/**
+              - xtask/**
 
   check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           # Full history is required by license-check.py
           fetch-depth: 0
@@ -62,6 +97,8 @@ jobs:
       - run: python license-check.py
 
   test:
+    if: needs.changes.outputs.test == 'true'
+    needs: changes
     runs-on: [self-hosted, prod, "${{ matrix.os }}", "${{ matrix.device }}"]
     strategy:
       fail-fast: false
@@ -73,9 +110,6 @@ jobs:
           - os: Linux
             feature: cuda
             device: nvidia_rtx_a5000
-          - os: macOS
-            feature: metal
-            device: apple_m2_pro
     env:
       CUDA_LIBRARY_PATH: /usr/lib/cuda
       FEATURE: ${{ matrix.feature }}
@@ -85,16 +119,10 @@ jobs:
     steps:
       # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
       - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           lfs: true
-          # Recursive checkout required to build Solidity contracts and bindings.
-          submodules: recursive
       - uses: ./.github/actions/rustup
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 18
-      - uses: risc0/foundry-toolchain@2fe7e70b520f62368a0e3c464f997df07ede420f
       - uses: ./.github/actions/sccache
         with:
           key: ${{ matrix.os }}-${{ matrix.feature }}
@@ -125,6 +153,8 @@ jobs:
       - run: sccache --show-stats
 
   examples:
+    if: needs.changes.outputs.examples == 'true'
+    needs: changes
     runs-on: [self-hosted, prod, "${{ matrix.os }}", "${{ matrix.device }}"]
     strategy:
       fail-fast: false
@@ -136,9 +166,6 @@ jobs:
           - os: Linux
             feature: cuda
             device: nvidia_rtx_a5000
-          - os: macOS
-            feature: metal
-            device: apple_m2_pro
     env:
       CUDA_LIBRARY_PATH: /usr/lib/cuda
       FEATURE: ${{ matrix.feature }}
@@ -151,14 +178,8 @@ jobs:
     steps:
       # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
       - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
-      - uses: actions/checkout@v3
-        with:
-          # Recursive checkout required to build Solidity contracts and bindings.
-          submodules: recursive
+      - uses: actions/checkout@v4
       - uses: ./.github/actions/rustup
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 18
       - uses: ./.github/actions/sccache
         with:
           key: ${{ matrix.os }}-${{ matrix.feature }}
@@ -173,25 +194,26 @@ jobs:
         working-directory: examples/profiling
 
   doc:
-    runs-on: [self-hosted, prod, Linux, X64]
+    if: needs.changes.outputs.doc == 'true'
+    needs: changes
+    runs-on: [self-hosted, prod, macOS, cpu]
     steps:
       # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
       - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
-      - uses: actions/checkout@v3
-        with:
-          # Recursive checkout required to build Solidity contracts and bindings.
-          submodules: recursive
+      - uses: actions/checkout@v4
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
         with:
-          key: Linux
+          key: macOS-default
       - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: cargo doc --no-deps --exclude=risc0-zkvm-methods --workspace
 
   check-benchmarks:
-    runs-on: [self-hosted, prod, Linux, X64]
+    if: needs.changes.outputs.check-benchmarks == 'true'
+    needs: changes
+    runs-on: [self-hosted, prod, macOS, cpu]
     steps:
       # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
       - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
@@ -199,7 +221,7 @@ jobs:
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
         with:
-          key: Linux
+          key: macOS-default
       - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -207,6 +229,8 @@ jobs:
         working-directory: benchmarks
 
   check_template:
+    if: needs.changes.outputs.check_template == 'true'
+    needs: changes
     runs-on: [self-hosted, prod, cpu, "${{ matrix.os }}"]
     strategy:
       fail-fast: false
@@ -218,9 +242,11 @@ jobs:
     steps:
       # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
       - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
+        with:
+          key: ${{ matrix.os }}-default
       - run: cargo run --bin cargo-risczero -- risczero install --version $RISC0_TOOLCHAIN_VERSION
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -238,8 +264,8 @@ jobs:
       - run: ${{ runner.temp }}/template-test/target/release/host
 
   crates-validator:
+    if: needs.changes.outputs.crates-validator == 'true'
     needs: changes
-    if: ${{ needs.changes.outputs.crates-validator == 'true' }}
     runs-on: [self-hosted, prod, cpu, "${{ matrix.os }}"]
     strategy:
       fail-fast: false
@@ -251,12 +277,9 @@ jobs:
     steps:
       # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
       - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
-      - run: cargo run --bin cargo-risczero -- risczero install --version $RISC0_TOOLCHAIN_VERSION
-        env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: risc0/clippy-action@main
         with:
           reporter: 'github-pr-check'
@@ -266,6 +289,8 @@ jobs:
         working-directory: tools/crates-validator
 
   web:
+    if: needs.changes.outputs.web == 'true'
+    needs: changes
     runs-on: ubuntu-latest-8-cores
     env:
       RISC0_BUILD_LOCKED: 1
@@ -273,7 +298,7 @@ jobs:
     steps:
       # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
       - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: browser-actions/setup-firefox@v1
       - run: firefox --version
       - uses: ./.github/actions/rustup
@@ -292,11 +317,13 @@ jobs:
         working-directory: examples/browser-verify
 
   reproducible-build:
-    runs-on: [self-hosted, prod, Linux, X64, docker]
+    if: needs.changes.outputs.test == 'true'
+    needs: changes
+    runs-on: [self-hosted, prod, Linux, cpu, docker]
     steps:
       # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
       - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ./.github/actions/rustup
       - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
         env:
