@@ -57,7 +57,9 @@ Using [`env::get_cycle_count()`] will tell you the current number of execution c
 
 As an example:
 
-```rust title="methods/guest/src/main.rs"
+<!-- NOTE: Ignored since we do not yet have a way to test guest code in docs -->
+```rust no_run title="methods/guest/src/main.rs"
+# use risc0_zkvm::guest::env;
 fn my_operation_to_measure() {
   let start = env::get_cycle_count();
 
@@ -226,14 +228,22 @@ Additionally, if you are slicing into byte arrays, try to do so at word-aligned 
 When reading input into the guest, [`env::read`] is the main API to use.
 It automatically deserializes the input bytes into structs, like in this [snippet from the password checker example].
 
-```rust
+```rust no_run
+# use risc0_zkvm::guest::env;
+# use serde::Deserialize;
+# #[derive(Deserialize)]
+# struct PasswordRequest;
 let request: PasswordRequest = env::read();
 ```
 
 In the host code, `ExecutorEnvBuilder::write` function is used to serialize and write to input struct so that the guest can read it.
 
 ```rust
-let request: PasswordRequest = // ...
+# use risc0_zkvm::ExecutorEnv;
+# use serde::Serialize;
+# #[derive(Serialize)]
+# struct PasswordRequest {};
+let request = PasswordRequest { /* .. */ };
 let env = ExecutorEnv::builder()
         .write(&request).unwrap()
         .build()
@@ -248,7 +258,9 @@ Examples of when this may be useful are if you are reading in image data as byte
 
 Here is a [snippet from the Bonsai Governance example] showing how to read bytes.
 
-```rust
+```rust no_run
+# use std::io::Read;
+# use risc0_zkvm::guest::env;
 let mut input_bytes = Vec::<u8>::new();
 env::stdin().read_to_end(&mut input_bytes).unwrap();
 ```
@@ -256,7 +268,8 @@ env::stdin().read_to_end(&mut input_bytes).unwrap();
 On the host side, `ExecutorEnvBuilder::write_slice` is used to pass in the bytes.
 
 ```rust
-let input_bytes: Vec<u8> = // ...
+# use risc0_zkvm::ExecutorEnv;
+let input_bytes: Vec<u8> = b"INPUT DATA".to_vec();
 let env = ExecutorEnv::builder()
         .write_slice(&input_bytes)
         .build()
@@ -425,10 +438,10 @@ A short description and associated cycle counts are listed below.
 
 [^2]:
     Here “sampling” is in quotes because the profiler actually captures the call stack at every cycle of program execution. Capturing a call stack on every cycle of execution is not done in most programs on physical CPUs for a few reasons:
-
+    <!-- HACK: This comment prevents the list below from being interpretted to be a code block -->
     - It would be cost prohibitive to do so for all but quite short program executions.
     - Introducing such heavy profiling would actually alter the performance characteristics in significant ways.
-
+    <!-- -->
     In zkVM execution, executions are generally short and all execution is synchronous and is not subject to any deviations in behavior due to measurement overhead.
 
 [^3]: An implementation of cycle-accounting for paging operations is implemented in the [Executor](https://github.com/risc0/risc0/blob/v0.19.0/risc0/zkvm/src/host/server/exec/monitor.rs#L30-L39). (Link is to v0.19.0)
