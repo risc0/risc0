@@ -38,9 +38,9 @@ sha2 = "0.10"
 sha3 = "0.10"
 starknet-crypto = "0.6"
 tokio = { version = "1", features = ["full"] }
-zeth-guests = { git = "https://github.com/risc0/zeth", package = "zeth-guests" }
-zeth-lib = { git = "https://github.com/risc0/zeth", package = "zeth-lib" }
-zeth-primitives = { git = "https://github.com/risc0/zeth", package = "zeth-primitives" }
+zeth-guests = { git = "https://github.com/risc0/zeth", branch = "capossele/bump-risc0-f265059f", package = "zeth-guests" }
+zeth-lib = { git = "https://github.com/risc0/zeth", branch = "capossele/bump-risc0-f265059f", package = "zeth-lib" }
+zeth-primitives = { git = "https://github.com/risc0/zeth", branch = "capossele/bump-risc0-f265059f", package = "zeth-primitives" }
 
 [features]
 cuda = ["risc0-zkvm/cuda"]

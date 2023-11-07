@@ -4,21 +4,14 @@ A simple digital signature scheme built on the RISC Zero platform.
 
 ## Quick Start
 
-First, [install Rust] if you don't already have it.
-
-Next, install the `cargo-risczero` tool and install the toolchain with:
-```bash
-cargo install cargo-binstall
-cargo binstall cargo-risczero
-cargo risczero install
-```
+First, follow the [installation guide] if you don't already have the RISC Zero tools installed.
 
 Then, run the example with:
 ```bash
 cargo run --release -- "This is a signed message" --passphrase="passw0rd"
 ```
 
-[install Rust]: https://doc.rust-lang.org/cargo/getting-started/installation.html
+[installation guide]: https://dev.risczero.com/api/zkvm/quickstart
 
 ## Summary
 

@@ -233,7 +233,7 @@ mod test {
         build("../../risc0/zkvm/methods/guest/Cargo.toml");
         compare_image_id(
             "risc0_zkvm_methods_guest/multi_test",
-            "95d41d280894ed05aea3e8617c7b6e3666ea1de31945dde6402072edab99b8fb",
+            "b3108007988a3f1b5d33d5f1dd327b9c498a34d00eb60753f21b4dfe97700c9b",
         );
         compare_image_id(
             "risc0_zkvm_methods_guest/hello_commit",

@@ -45,6 +45,11 @@ export default {
           id: "zkvm/quickstart",
         },
         {
+          type: "doc",
+          label: "Dev Mode",
+          id: "zkvm/dev-mode",
+        },
+        {
           type: "link",
           label: "API Reference Docs",
           href: "https://docs.rs/risc0-zkvm/",
@@ -86,8 +91,29 @@ export default {
         },
         {
           type: "doc",
+          label: "zkVM technical specification",
+          id: "zkvm/developer-guide/zkvm-specification",
+        },
+        {
+          type: "doc",
           label: "Performance Benchmarks",
           id: "zkvm/benchmarks",
+        },
+        {
+          type: "category",
+          label: "Tutorials",
+          link: {
+            type: `doc`,
+            id: "zkvm/tutorials/overview",
+          },
+          collapsed: false,
+          items: [
+            {
+              type: "doc",
+              label: "Hello World Tutorial",
+              id: "zkvm/tutorials/hello-world",
+            },
+          ],
         },
         {
           type: "doc",

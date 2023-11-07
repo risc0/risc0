@@ -17,7 +17,8 @@ Welcome to the [zkVM] Quick Start page! Here are the steps between you and your 
 If you have already installed Rust via `rustup`, you can install our toolchain by running
 
 ```bash
-cargo install cargo-risczero
+cargo install cargo-binstall
+cargo binstall cargo-risczero
 cargo risczero install
 ```
 
@@ -26,7 +27,7 @@ If you need to install Rust or encounter problems, take a look at our [full inst
 ## 2. Initialize a New Project
 
 Once you've installed the toolchain, you can initialize a new project using the [starter template] by running:
-[starter template]: https://github.com/risc0/risc0/tree/main/templates/rust-starter
+[starter template]: https://github.com/risc0/risc0/tree/release-0.19/templates/rust-starter
 
 ```bash
 cargo risczero new my_project
@@ -86,6 +87,25 @@ The readme files on the [zkVM demo applications] show `cargo` commands for local
 To run the zkVM remotely using [Bonsai], [request access] and set the environment variables `BONSAI_API_KEY=<YOUR_API_KEY>` and `BONSAI_API_URL=<BONSAI_URL>`.
 Additional information is available in the [starter template](https://github.com/risc0/risc0/tree/main/templates/rust-starter#running-proofs-remotely-on-bonsai)
 
+### Executor Statistics
+
+To gain insights into your application's performance, you can obtain executor statistics by setting the `RUST_LOG` environment variable to `"executor=info"`.
+
+Setting this filter will print statistics about the execution before proof generation, so you can get a sense of how computationally expensive your application is. Since the statistics concern only the executor phase, it is recommended to run your application in dev-mode to avoid the overhead of proof generation:
+
+```bash
+RISC0_DEV_MODE=1 RUST_LOG="executor=info" cargo run --release
+```
+
+The statistics include:
+
+- Total Cycles
+- Session Cycle
+- Segments Count
+- Execution time
+
+Knowing these statistics is useful for estimating the cost of your application before submitting real workloads to Bonsai, as the cost of proof generation is proportional to the number of cycles and segments used.
+
 ### Other options
 
 Options such as GPU acceleration and skipping the proof generation are documented in the [feature flags].
@@ -99,10 +119,10 @@ Options such as GPU acceleration and skipping the proof generation are documente
 [Bonsai]: ../bonsai/bonsai-overview.md
 [install]: ./install.md
 [feature flags]: https://github.com/risc0/risc0#feature-flags
-[zkVM demo applications]: https://github.com/risc0/risc0/tree/v0.19.0/examples
-[cargo risczero]: https://docs.rs/cargo-risczero/*/cargo_risczero
-[Hello World tutorial]: https://github.com/risc0/risc0/tree/main/examples/hello-world/tutorial.md
-[demo applications]: https://github.com/risc0/risc0/tree/v0.19.0/examples
+[zkVM demo applications]: https://github.com/risc0/risc0/tree/release-0.19/examples
+[cargo risczero]: https://crates.io/crates/cargo-risczero
+[Hello World tutorial]: https://github.com/risc0/risc0/tree/release-0.19/examples/hello-world/tutorial.md
+[demo applications]: https://github.com/risc0/risc0/tree/release-0.19/examples
 [Bonsai Quick Start]: ../bonsai/quickstart.md
 [request access]: https://bonsai.xyz/apply
 [dev-mode]: ./dev-mode.md
