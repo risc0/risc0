@@ -19,8 +19,10 @@ jobs:
     permissions:
       pull-requests: read
     outputs:
+      check-benchmarks: ${{ steps.filter.outputs.check-benchmarks }}
       check_template: ${{ steps.filter.outputs.check_template }}
       crates-validator: ${{ steps.filter.outputs.crates-validator }}
+      doc: ${{ steps.filter.outputs.doc }}
       examples: ${{ steps.filter.outputs.examples }}
       test: ${{ steps.filter.outputs.test }}
       web: ${{ steps.filter.outputs.web }}
