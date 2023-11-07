@@ -14,5 +14,5 @@ shakmaty = "0.22"
 [features]
 default = []
 cuda = ["risc0-zkvm/cuda"]
-prove = ["risc0-zkvm/cuda"]
+prove = ["risc0-zkvm/prove"]
 profiler = ["risc0-zkvm/profiler"]

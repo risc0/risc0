@@ -11,5 +11,5 @@ serde = "1.0"
 [features]
 default = []
 cuda = ["risc0-zkvm/cuda"]
-prove = ["risc0-zkvm/cuda"]
+prove = ["risc0-zkvm/prove"]
 profiler = ["risc0-zkvm/profiler"]

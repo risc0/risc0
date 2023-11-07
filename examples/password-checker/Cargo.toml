@@ -12,5 +12,5 @@ risc0-zkvm = { path = "../../risc0/zkvm" }
 [features]
 default = []
 cuda = ["risc0-zkvm/cuda"]
-prove = ["risc0-zkvm/cuda"]
+prove = ["risc0-zkvm/prove"]
 profiler = ["risc0-zkvm/profiler"]
