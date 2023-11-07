@@ -55,7 +55,7 @@ There are also a number of functions available to support with debugging and per
 [`env::get_cycle_count`]: https://docs.rs/risc0-zkvm/0.18.0/risc0_zkvm/guest/env/fn.get_cycle_count.html
 [`env::log`]: https://docs.rs/risc0-zkvm/0.18.0/risc0_zkvm/guest/env/fn.log.html
 
-For more information on optimization & performance, see our pages on [Cryptography Acceleration](acceleration) and [Benchmarking](../benchmarks).
+For more information on optimization & performance, see our pages on [Cryptography Acceleration](./acceleration.md) and [Benchmarking](../benchmarks.md).
 
 ## Boilerplate before `main()`
 
