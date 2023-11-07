@@ -67,6 +67,7 @@ jobs:
 
   # see: https://github.com/orgs/community/discussions/26822
   main-status-check:
+    if: always()
     needs:
       - check
       - check-benchmarks
@@ -223,6 +224,7 @@ jobs:
       - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/rustup
+      - uses: risc0/foundry-toolchain@2fe7e70b520f62368a0e3c464f997df07ede420f
       - uses: ./.github/actions/sccache
         with:
           key: macOS-default
