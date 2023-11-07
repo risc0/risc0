@@ -62,7 +62,7 @@ fn main() {
 }
 
 #[tracing::instrument(skip_all)]
-fn top(prover: Rc<dyn ProverServer>, iterations: u32, skip_prover: bool) -> Metrics {
+fn top(prover: Box<dyn ProverServer>, iterations: u32, skip_prover: bool) -> Metrics {
     let env = ExecutorEnv::builder()
         .write_slice(&[iterations])
         .build()
