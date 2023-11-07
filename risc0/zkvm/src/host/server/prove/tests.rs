@@ -30,8 +30,23 @@ use super::{get_prover_server, HalPair, ProverImpl};
 use crate::{
     host::{server::testutils, CIRCUIT},
     serde::{from_slice, to_vec},
-    ExecutorEnv, ExecutorImpl, ExitCode, ProverOpts, ProverServer, Receipt, VerifierContext,
+    ExecutorEnv, ExecutorImpl, ExitCode, ProverOpts, ProverServer, Receipt, Session,
+    VerifierContext,
 };
+
+fn prover_opts_fast() -> ProverOpts {
+    ProverOpts {
+        hashfn: "sha-256".to_string(),
+        prove_guest_errors: false,
+    }
+}
+
+fn prove_session_fast(session: &Session) -> Receipt {
+    let prover = get_prover_server(&prover_opts_fast()).unwrap();
+    prover
+        .prove_session(&VerifierContext::default(), session)
+        .unwrap()
+}
 
 fn prove_nothing(hashfn: &str) -> Result<Receipt> {
     let env = ExecutorEnv::builder()
@@ -104,7 +119,7 @@ fn sha_basics() {
             .unwrap();
         let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
         let session = exec.run().unwrap();
-        let receipt = session.prove().unwrap();
+        let receipt = prove_session_fast(&session);
         hex::encode(Digest::try_from(receipt.journal.bytes).unwrap())
     }
 
@@ -140,7 +155,7 @@ fn sha_iter() {
         .unwrap();
     let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
     let session = exec.run().unwrap();
-    let receipt = session.prove().unwrap();
+    let receipt = prove_session_fast(&session);
     let digest = Digest::try_from(receipt.journal.bytes).unwrap();
     assert_eq!(
         hex::encode(digest),
@@ -166,7 +181,7 @@ fn bigint_accel() {
             .unwrap();
         let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
         let session = exec.run().unwrap();
-        let receipt = session.prove().unwrap();
+        let receipt = prove_session_fast(&session);
         let expected = case.expected();
         let expected: &[u8] = bytemuck::cast_slice(expected.as_slice());
         assert_eq!(receipt.journal.bytes, expected);
@@ -191,7 +206,7 @@ fn memory_io() {
             .unwrap();
         let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)?;
         let session = exec.run()?;
-        let receipt = session.prove()?;
+        let receipt = prove_session_fast(&session);
         receipt.verify_integrity_with_context(&VerifierContext::default())?;
         Ok(receipt.get_metadata()?.exit_code)
     }
@@ -263,7 +278,7 @@ fn session_events() {
         on_post_prove_segment_flag: on_post_prove_segment_flag.clone(),
     };
     session.add_hook(logger);
-    session.prove().unwrap();
+    prove_session_fast(&session);
     assert_eq!(session.hooks.len(), 1);
     assert_eq!(on_pre_prove_segment_flag.take(), true);
     assert_eq!(on_post_prove_segment_flag.take(), true);
@@ -274,6 +289,7 @@ fn session_events() {
 // They were built using the toolchain from:
 // https://github.com/risc0/toolchain/releases/tag/2022.03.25
 mod riscv {
+    use super::prove_session_fast;
     use crate::{ExecutorEnv, ExecutorImpl, MemoryImage, Program};
 
     fn run_test(test_name: &str) {
@@ -305,7 +321,8 @@ mod riscv {
             let env = ExecutorEnv::default();
             let mut exec = ExecutorImpl::new(env, image).unwrap();
             let session = exec.run().unwrap();
-            session.prove().unwrap();
+
+            prove_session_fast(&session);
         }
     }
 
@@ -372,6 +389,7 @@ mod docker {
     use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF};
     use test_log::test;
 
+    use super::prove_session_fast;
     use crate::{ExecutorEnv, ExecutorImpl, ExitCode};
 
     #[test]
@@ -387,7 +405,7 @@ mod docker {
         let session = exec.run().unwrap();
         assert_eq!(session.segments.len(), 1);
         assert_eq!(session.exit_code, ExitCode::Paused(0));
-        let receipt = session.prove().unwrap();
+        let receipt = prove_session_fast(&session);
         let segments = &receipt.inner.composite().unwrap().segments;
         assert_eq!(segments.len(), 1);
         assert_eq!(segments[0].index, 0);
@@ -395,7 +413,7 @@ mod docker {
         // Run until sys_halt
         let session = exec.run().unwrap();
         assert_eq!(session.exit_code, ExitCode::Halted(0));
-        session.prove().unwrap();
+        prove_session_fast(&session);
     }
 
     #[test]
@@ -421,7 +439,7 @@ mod docker {
         }
         assert_eq!(final_segment.exit_code, ExitCode::Halted(0));
 
-        let receipt = session.prove().unwrap();
+        let receipt = prove_session_fast(&session);
         for (idx, receipt) in receipt
             .inner
             .composite()
@@ -441,19 +459,14 @@ mod sys_verify {
     };
     use test_log::test;
 
-    use super::get_prover_server;
+    use super::{get_prover_server, prover_opts_fast};
     use crate::{
         serde::to_vec, sha::Digestible, ExecutorEnv, ExecutorEnvBuilder, ExitCode, ProverOpts,
         Receipt,
     };
 
     fn prove_hello_commit() -> Receipt {
-        let opts = ProverOpts {
-            hashfn: "sha-256".to_string(),
-            prove_guest_errors: false,
-        };
-
-        let hello_commit_receipt = get_prover_server(&opts)
+        let hello_commit_receipt = get_prover_server(&prover_opts_fast())
             .unwrap()
             .prove_elf(ExecutorEnv::default(), HELLO_COMMIT_ELF)
             .unwrap();
@@ -521,11 +534,6 @@ mod sys_verify {
 
     #[test]
     fn sys_verify() {
-        let opts = ProverOpts {
-            hashfn: "sha-256".to_string(),
-            prove_guest_errors: false,
-        };
-
         let spec = &MultiTestSpec::SysVerify {
             image_id: HELLO_COMMIT_ID.into(),
             journal: HELLO_COMMIT_RECEIPT.journal.bytes.clone(),
@@ -539,7 +547,7 @@ mod sys_verify {
             .add_assumption(HELLO_COMMIT_RECEIPT.clone().into())
             .build()
             .unwrap();
-        get_prover_server(&opts)
+        get_prover_server(&prover_opts_fast())
             .unwrap()
             .prove_elf(env, MULTI_TEST_ELF)
             .unwrap()
@@ -553,7 +561,7 @@ mod sys_verify {
             .unwrap()
             .build()
             .unwrap();
-        assert!(get_prover_server(&opts)
+        assert!(get_prover_server(&prover_opts_fast())
             .unwrap()
             .prove_elf(env, MULTI_TEST_ELF)
             .is_err());
@@ -567,7 +575,7 @@ mod sys_verify {
             .build()
             .unwrap();
         // TODO(#982) Conditional receipts currently return an error on verification.
-        assert!(get_prover_server(&opts)
+        assert!(get_prover_server(&prover_opts_fast())
             .unwrap()
             .prove_elf(env, MULTI_TEST_ELF)
             .is_err());
@@ -581,11 +589,6 @@ mod sys_verify {
 
     #[test]
     fn sys_verify_integrity() {
-        let opts = ProverOpts {
-            hashfn: "sha-256".to_string(),
-            prove_guest_errors: false,
-        };
-
         let spec = &MultiTestSpec::SysVerifyIntegrity {
             metadata_words: to_vec(&HELLO_COMMIT_RECEIPT.get_metadata().unwrap()).unwrap(),
         };
@@ -598,7 +601,7 @@ mod sys_verify {
             .add_assumption(HELLO_COMMIT_RECEIPT.clone().into())
             .build()
             .unwrap();
-        get_prover_server(&opts)
+        get_prover_server(&prover_opts_fast())
             .unwrap()
             .prove_elf(env, MULTI_TEST_ELF)
             .unwrap()
@@ -612,7 +615,7 @@ mod sys_verify {
             .unwrap()
             .build()
             .unwrap();
-        assert!(get_prover_server(&opts)
+        assert!(get_prover_server(&prover_opts_fast())
             .unwrap()
             .prove_elf(env, MULTI_TEST_ELF)
             .is_err());
@@ -626,7 +629,7 @@ mod sys_verify {
             .build()
             .unwrap();
         // TODO(#982) Conditional receipts currently return an error on verification.
-        assert!(get_prover_server(&opts)
+        assert!(get_prover_server(&prover_opts_fast())
             .unwrap()
             .prove_elf(env, MULTI_TEST_ELF)
             .is_err());
@@ -637,11 +640,6 @@ mod sys_verify {
         // Generate a receipt for a execution ending in a guest error indicated by
         // ExitCode::Halted(1).
         let halt_receipt = prove_halt(1);
-
-        let opts = ProverOpts {
-            hashfn: "sha-256".to_string(),
-            prove_guest_errors: false,
-        };
 
         let spec = &MultiTestSpec::SysVerifyIntegrity {
             metadata_words: to_vec(&halt_receipt.get_metadata().unwrap()).unwrap(),
@@ -654,7 +652,7 @@ mod sys_verify {
             .add_assumption(halt_receipt.into())
             .build()
             .unwrap();
-        get_prover_server(&opts)
+        get_prover_server(&prover_opts_fast())
             .unwrap()
             .prove_elf(env, MULTI_TEST_ELF)
             .unwrap()
@@ -669,11 +667,6 @@ mod sys_verify {
         // that ended in SystemSplit for which the host claims a fault is about to occur.
         let fault_receipt = prove_fault();
 
-        let opts = ProverOpts {
-            hashfn: "sha-256".to_string(),
-            prove_guest_errors: false,
-        };
-
         let spec = &MultiTestSpec::SysVerifyIntegrity {
             metadata_words: to_vec(&fault_receipt.get_metadata().unwrap()).unwrap(),
         };
@@ -685,7 +678,7 @@ mod sys_verify {
             .add_assumption(fault_receipt.into())
             .build()
             .unwrap();
-        get_prover_server(&opts)
+        get_prover_server(&prover_opts_fast())
             .unwrap()
             .prove_elf(env, MULTI_TEST_ELF)
             .unwrap()

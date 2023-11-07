@@ -19,8 +19,10 @@ jobs:
     permissions:
       pull-requests: read
     outputs:
+      check-benchmarks: ${{ steps.filter.outputs.check-benchmarks }}
       check_template: ${{ steps.filter.outputs.check_template }}
       crates-validator: ${{ steps.filter.outputs.crates-validator }}
+      doc: ${{ steps.filter.outputs.doc }}
       examples: ${{ steps.filter.outputs.examples }}
       test: ${{ steps.filter.outputs.test }}
       web: ${{ steps.filter.outputs.web }}
@@ -62,6 +64,26 @@ jobs:
               - examples/browser-verify/**
               - risc0/**
               - xtask/**
+
+  # see: https://github.com/orgs/community/discussions/26822
+  main-status-check:
+    needs:
+      - check
+      - check-benchmarks
+      - check_template
+      - crates-validator
+      - doc
+      - examples
+      - reproducible-build
+      - test
+      - web
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check all job status
+        # see https://docs.github.com/en/actions/reference/context-and-expression-syntax-for-github-actions#needs-context
+        # see https://stackoverflow.com/a/67532120/4907315
+        if: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
+        run: exit 1
 
   check:
     runs-on: ubuntu-latest
@@ -129,9 +151,8 @@ jobs:
       - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - run: cargo test -F $FEATURE -F profiler --workspace --exclude doc-test
+      - run: cargo test -F $FEATURE -F fault-proof -F profiler -F prove --workspace --exclude doc-test
       - run: cargo test -p risc0-r0vm -F $FEATURE -F disable-dev-mode
-      - run: cargo test -p risc0-zkvm -F $FEATURE -F fault-proof -F prove
       - run: cargo test -p cargo-risczero -F experimental
         if: matrix.device == 'cpu'
       - run: cargo check -F $FEATURE --benches
