@@ -20,16 +20,11 @@ RISC Zero provides a "sampling" [^1] CPU profiler for guest execution.
 
 ### Step 1: Prerequisites
 
-First, [install Rust] if you don't already have it.
+First, follow the [installation guide] if you don't already have the RISC Zero tools installed.
+
 Additionally, you will need to [install Go], which bundles with it the [pprof] tool.
 
-Next, install the `cargo-risczero` tool and install the toolchain with:
-
-```bash
-cargo install cargo-binstall
-cargo binstall cargo-risczero
-cargo risczero install
-```
+[installation guide]: https://dev.risczero.com/api/zkvm/quickstart
 
 ### Step 2: Running
 
@@ -74,7 +69,6 @@ This can be helpful in understanding the efficiency of various algorithms and th
 Use the pprof web interface to compare the performance of the 3 Fibonacci implementations.
 Refer to the [pprof docs] for more inforamtion about the web interface.
 
-[install Rust]: https://doc.rust-lang.org/cargo/getting-started/installation.html
 [install Go]: https://go.dev/doc/install
 [official pprof documentation]: https://github.com/google/pprof/blob/main/doc/README.md
 [cycle count]: https://dev.risczero.com/terminology#clock-cycles

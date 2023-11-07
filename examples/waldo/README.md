@@ -20,19 +20,11 @@ without revealing Waldo's coordinates.
 
 ## Quick Start
 
-### External Dependencies
+### Installing Dependencies
 
-First, [install Rust] if you don't already have it.
+Follow the [installation guide] if you don't already have the RISC Zero tools installed.
 
-### RISC Zero Dependencies
-
-Next, install the `cargo-risczero` tool and install the toolchain with:
-
-```bash
-cargo install cargo-binstall
-cargo binstall cargo-risczero
-cargo risczero install
-```
+[installation guide]: https://dev.risczero.com/api/zkvm/quickstart
 
 ### Run the Prover to construct a Receipt
 
@@ -56,7 +48,6 @@ cargo run --bin verify -- -i waldo.webp -r receipt.bin
 
 Running the verifier proves that the contents of the [journal] were indeed constructed by the binary file associated with the expected [ImageID].
 
-[install Rust]: https://doc.rust-lang.org/cargo/getting-started/installation.html
 [journal]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Receipt.html#structfield.journal
 [ImageID]: https://dev.risczero.com/terminology#image-id
 
