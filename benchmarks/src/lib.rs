@@ -20,7 +20,7 @@ use std::{
     time::{Duration, Instant},
 };
 
-use log::info;
+use tracing::info;
 use risc0_zkvm::{MemoryImage, Program, Segment, GUEST_MAX_MEM, PAGE_SIZE};
 use serde::Serialize;
 use tracing::info;

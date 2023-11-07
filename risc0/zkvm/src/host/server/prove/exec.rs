@@ -281,14 +281,14 @@ impl MachineContext {
             let pc: u32 = pc.into();
             match exit_code {
                 halt::TERMINATE => {
-                    log::debug!("HALT[{cycle}]> pc: 0x{pc:08x}");
+                    tracing::debug!("HALT[{cycle}]> pc: 0x{pc:08x}");
                 }
                 halt::PAUSE => {
-                    log::debug!("PAUSE[{cycle}]> pc: 0x{pc:08x}");
+                    tracing::debug!("PAUSE[{cycle}]> pc: 0x{pc:08x}");
                     self.is_flushing = true;
                 }
                 halt::SPLIT => {
-                    log::debug!("SPLIT[{cycle}]> pc: 0x{pc:08x}");
+                    tracing::debug!("SPLIT[{cycle}]> pc: 0x{pc:08x}");
                 }
                 _ => unimplemented!("Unsupported exit_code: {exit_code}"),
             }
@@ -319,7 +319,7 @@ impl MachineContext {
 
         if let Some(split_insn) = self.split_insn {
             if self.insn_counter == split_insn && !self.is_flushing {
-                log::debug!("FLUSH[{}]> pc: 0x{pc:08x}", self.insn_counter);
+                tracing::debug!("FLUSH[{}]> pc: 0x{pc:08x}", self.insn_counter);
                 self.is_flushing = true;
             }
         }

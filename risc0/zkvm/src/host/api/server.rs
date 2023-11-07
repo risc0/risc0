@@ -271,11 +271,11 @@ impl Server {
                         )),
                     })),
                 };
-                log::trace!("tx: {msg:?}");
+                tracing::trace!("tx: {msg:?}");
                 conn.send(msg)?;
 
                 let reply: pb::api::GenericReply = conn.recv()?;
-                log::trace!("rx: {reply:?}");
+                tracing::trace!("rx: {reply:?}");
                 let kind = reply.kind.ok_or(malformed_err())?;
                 if let pb::api::generic_reply::Kind::Error(err) = kind {
                     bail!(err)
@@ -305,7 +305,7 @@ impl Server {
             })),
         });
 
-        log::trace!("tx: {msg:?}");
+        tracing::trace!("tx: {msg:?}");
         conn.send(msg)
     }
 
@@ -350,7 +350,7 @@ impl Server {
             })),
         });
 
-        log::trace!("tx: {msg:?}");
+        tracing::trace!("tx: {msg:?}");
         conn.send(msg)
     }
 
@@ -393,7 +393,7 @@ impl Server {
             )),
         });
 
-        log::trace!("tx: {msg:?}");
+        tracing::trace!("tx: {msg:?}");
         conn.send(msg)
     }
 
@@ -427,7 +427,7 @@ impl Server {
             })),
         });
 
-        log::debug!("tx: {msg:?}");
+        tracing::debug!("tx: {msg:?}");
         conn.send(msg)
     }
 
@@ -464,7 +464,7 @@ impl Server {
             })),
         });
 
-        log::debug!("tx: {msg:?}");
+        tracing::debug!("tx: {msg:?}");
         conn.send(msg)
     }
 
@@ -506,7 +506,7 @@ impl Server {
             )),
         });
 
-        log::debug!("tx: {msg:?}");
+        tracing::debug!("tx: {msg:?}");
         conn.send(msg)
     }
 }
