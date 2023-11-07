@@ -75,6 +75,7 @@ pub enum MultiTestSpec {
     OutOfBounds,
     OutOfBoundsEcall,
     RsaCompat,
+    SysLogInvalidAddr,
     TooManySha,
 }
 
