@@ -125,6 +125,11 @@ impl MemoryMonitor {
         Ok(bytes[0])
     }
 
+    pub fn load_u8_from_guest_addr(&mut self, addr: u32) -> Result<u8> {
+        Self::check_guest_addr(addr)?;
+        self.load_u8(addr)
+    }
+
     pub fn load_u16(&mut self, addr: u32) -> Result<u16> {
         if addr % 2 != 0 {
             bail!("unaligned load at 0x{addr:08x}");
@@ -515,11 +520,11 @@ impl SyscallContext for MemoryMonitor {
     }
 
     fn load_u32(&mut self, addr: u32) -> Result<u32> {
-        MemoryMonitor::load_u32(self, addr)
+        MemoryMonitor::load_u32_from_guest_addr(self, addr)
     }
 
     fn load_u8(&mut self, addr: u32) -> Result<u8> {
-        MemoryMonitor::load_u8(self, addr)
+        MemoryMonitor::load_u8_from_guest_addr(self, addr)
     }
 }
 

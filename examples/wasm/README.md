@@ -4,18 +4,11 @@ Example of running WASM code within the ZKVM using the [wasmi](https://crates.io
 
 ## Quick Start
 
-First, [install Rust] if you don't already have it.
-
-Next, install the `cargo-risczero` tool and install the toolchain with:
-```bash
-cargo install cargo-binstall
-cargo binstall cargo-risczero
-cargo risczero install
-```
+First, follow the [installation guide] if you don't already have the RISC Zero tools installed.
 
 Then, run the example with:
 ```bash
 cargo run --release
 ```
 
-[install Rust]: https://doc.rust-lang.org/cargo/getting-started/installation.html
+[installation guide]: https://dev.risczero.com/api/zkvm/quickstart

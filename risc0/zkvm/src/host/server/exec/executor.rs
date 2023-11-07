@@ -326,10 +326,12 @@ impl<'a> ExecutorImpl<'a> {
         };
         self.exit_code = Some(exit_code);
 
-        tracing::info!("total_cycles = {}", self.total_cycles());
-        tracing::info!("session_cycles = {}", self.session_cycle());
-        tracing::info!("segment_count = {}", self.segments.len());
-        tracing::info!("execution_time = {:?}", elapsed);
+        if tracing::level_filters::LevelFilter::current().ge(&tracing::Level::INFO) {
+            tracing::info!("total_cycles = {}", self.total_cycles());
+            tracing::info!("session_cycles = {}", self.session_cycle());
+            tracing::info!("segment_count = {}", self.segments.len());
+            tracing::info!("execution_time = {:?}", elapsed);
+        }
 
         Ok(Session::new(
             mem::take(&mut self.segments),
