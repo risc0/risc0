@@ -3828,10 +3828,10 @@ version = "0.19.0"
 dependencies = [
  "anyhow",
  "elf",
- "log",
  "risc0-zkp",
  "risc0-zkvm-platform",
  "serde",
+ "tracing",
 ]
 
 [[package]]
@@ -3867,7 +3867,6 @@ dependencies = [
  "anyhow",
  "bytemuck",
  "downloader",
- "log",
  "rand 0.8.5",
  "rayon",
  "risc0-circuit-recursion-sys",
@@ -3892,7 +3891,6 @@ name = "risc0-circuit-rv32im"
 version = "0.19.0"
 dependencies = [
  "anyhow",
- "log",
  "rand 0.8.5",
  "rayon",
  "risc0-circuit-rv32im-sys",
@@ -3937,7 +3935,6 @@ dependencies = [
  "ff",
  "hex",
  "lazy_static",
- "log",
  "ndarray",
  "paste",
  "rand 0.8.5",
@@ -3967,7 +3964,6 @@ dependencies = [
  "getrandom 0.2.10",
  "hex",
  "lazy-regex",
- "log",
  "num-derive",
  "num-traits",
  "prost",

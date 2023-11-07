@@ -201,7 +201,7 @@ impl<'a> ExecutorImpl<'a> {
     pub fn from_elf(env: ExecutorEnv<'a>, elf: &[u8]) -> Result<Self> {
         let program = Program::load_elf(elf, GUEST_MAX_MEM as u32)?;
         let image = MemoryImage::new(&program, PAGE_SIZE as u32)?;
-        let obj_ctx = if log::log_enabled!(log::Level::Trace) {
+        let obj_ctx = if tracing::level_filters::LevelFilter::current().eq(&tracing::Level::TRACE) {
             let file = addr2line::object::read::File::parse(elf)?;
             Some(ObjectContext::new(&file)?)
         } else {
@@ -326,12 +326,10 @@ impl<'a> ExecutorImpl<'a> {
         };
         self.exit_code = Some(exit_code);
 
-        if log::log_enabled!(target: "executor", log::Level::Info) {
-            tracing::info!(target: "executor", "total_cycles = {}", self.total_cycles());
-            tracing::info!(target: "executor", "session_cycles = {}", self.session_cycle());
-            tracing::info!(target: "executor", "segment_count = {}", self.segments.len());
-            tracing::info!(target: "executor", "execution_time = {:?}", elapsed);
-        }
+        tracing::info!("total_cycles = {}", self.total_cycles());
+        tracing::info!("session_cycles = {}", self.session_cycle());
+        tracing::info!("segment_count = {}", self.segments.len());
+        tracing::info!("execution_time = {:?}", elapsed);
 
         Ok(Session::new(
             mem::take(&mut self.segments),

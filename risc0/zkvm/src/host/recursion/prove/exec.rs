@@ -84,8 +84,10 @@ impl<'a> MachineContext {
     }
 
     fn log(&mut self, msg: &str, args: &[BabyBearElem]) {
-        if log::max_level() < log::LevelFilter::Trace {
-            // Don't bother to format it if we're not even logging.
+        // Don't bother to format it if we're not even logging.
+        if tracing::level_filters::LevelFilter::current()
+            .eq(&tracing::level_filters::LevelFilter::OFF)
+        {
             return;
         }
 
