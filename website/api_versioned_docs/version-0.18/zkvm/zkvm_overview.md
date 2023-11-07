@@ -94,7 +94,7 @@ Read the [article](https://risczero.com/news/zeth-release).
 [guest programs]: developer-guide/guest-code-101
 [host]: /terminology#host-program
 [host program]: developer-guide/host-code-101
-[performance benchmarks]: benchmarks
+[performance benchmarks]: ./benchmarks.md
 [prove]: /terminology#validity-proof
 [proofs]: /terminology#validity-proof
 [prover]: /terminology#prover
