@@ -114,7 +114,7 @@ Read the [article](https://risczero.com/news/zeth-release).
 [zero-knowledge virtual machine]: /terminology#zero-knowledge-virtual-machine-zkvm
 [zkvm]: https://github.com/risc0/risc0#readme
 [zkVM Quick Start]: ./quickstart.md
-[zkVM example applications]: https://github.com/risc0/risc0/tree/v0.18.0/examples
+[zkVM example applications]: https://github.com/risc0/risc0/tree/main/examples
 [zkVM-term]: /terminology#zero-knowledge-virtual-machine-zkvm
 [session]: /terminology#session
 [Host Code 101]: developer-guide/host-code-101.md
