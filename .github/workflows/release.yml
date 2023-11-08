@@ -35,6 +35,10 @@ jobs:
         with:
           lfs: true
       - run: git lfs checkout
+      - uses: ./.github/actions/rustup
+      - uses: ./.github/actions/sccache
+        with:
+          key: ${{ env.TARGET }}
       - run: docker compose build release
       - run: docker compose run release
       - run: |
