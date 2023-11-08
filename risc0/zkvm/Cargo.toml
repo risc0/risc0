@@ -102,7 +102,7 @@ serde_json = "1.0"
 serial_test = "2.0"
 tar = "0.4"
 tempfile = "3"
-test-log = { version = "0.2", features = ["trace"] }
+test-log = { version = "0.2", default-features = false, features = ["trace"] }
 
 [features]
 client = [

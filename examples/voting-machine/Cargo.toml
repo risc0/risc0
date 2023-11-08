@@ -12,7 +12,7 @@ tracing = { version = "0.1", features = ["log"] }
 [dev-dependencies]
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 hex = "0.4"
-test-log = "0.2"
+test-log = { version = "0.2", default-features = false, features = ["trace"] }
 
 [features]
 default = []

@@ -10,7 +10,7 @@ repository = { workspace = true }
 [dev-dependencies]
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 risc0-zkvm-methods = { path = "../zkvm/methods" }
-test-log = "0.2"
+test-log = { version = "0.2", default-features = false, features = ["trace"] }
 
 [dependencies]
 anyhow = { version = "1.0", default-features = false }

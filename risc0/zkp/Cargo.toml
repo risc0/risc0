@@ -42,7 +42,7 @@ criterion = "0.5"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 rand = { version = "0.8", features = ["small_rng"] }
 serial_test = "2.0"
-test-log = "0.2"
+test-log = { version = "0.2", default-features = false, features = ["trace"] }
 
 [features]
 default = []
