@@ -42,7 +42,7 @@ jobs:
       - run: ls -la
       - run: git config --global --add safe.directory $PWD
       - run: git init
-      - run: git remote add origin ${{ github.repositoryUrl }}
+      - run: git remote add origin ${{ github.repositoryUrl }} || true
       - run: git fetch --no-tags --prune --no-recurse-submodules
       - run: git checkout --force ${{ github.ref }}
       - run: git lfs pull
