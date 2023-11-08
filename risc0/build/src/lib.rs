@@ -99,10 +99,12 @@ impl Risc0Method {
         let image_id: [u32; DIGEST_WORDS] = self.make_image_id().into();
         let elf_contents = std::fs::read(&self.elf_path).unwrap();
         format!(
-            r##"
-pub const {upper}_ELF: &[u8] = &{elf_contents:?};
-pub const {upper}_ID: [u32; 8] = {image_id:?};
+r##"/// Guest program ELF file path.
 pub const {upper}_PATH: &str = r#"{elf_path}"#;
+/// Guest program ELF file contents.
+pub const {upper}_ELF: &[u8] = &{elf_contents:?};
+/// Guest program *ImageID*.
+pub const {upper}_ID: [u32; 8] = {image_id:?};
 "##
         )
     }

@@ -22,11 +22,13 @@ cd hello-world
 In the project folder, `hello-world`, build and run the project using `cargo run --release`.
 Use this command any time you'd like to check your progress.
 
+You can also generate `rustdoc` pages for you project with `cargo doc`.
+
 ## Step 2 (Host): Share private data as input with the guest
 
 zkVM or a [prover] runs on the **[host]**. The host code is in `hello-world/host/src/main.rs`.
-The host creates an executor environment `ExecutorEnv` before constructing a prover.
-The host makes the value `input` available to the guest before execution. It does it by adding `input` to the executor environment, which is responsible for managing guest-readable memory. When the prover executes the program, it can access input:
+The host creates an executor environment [`ExecutorEnv`] before constructing a prover.
+The host makes the value `input` available to the guest before execution. It does so by adding `input` to the executor environment, which is responsible for managing guest-readable memory. The following piece of code demonstrates this:
 
 ```rust
 use risc0_zkvm::{default_prover, ExecutorEnv};
@@ -41,35 +43,50 @@ fn main() {
 
 Now, let's look at the guest code located in `methods/guest/src/main.rs`.
 This is the portion of the code that will be proven.
-In the code snippet below, the guest reads the `input` value from the host and then commits it to the [journal] portion of the [receipt].
+In the code snippet below, the guest reads the `input` value from the host and then commits some `output` to the [journal] portion of the [receipt].
+As this is just a template snippet, we commit some dummy `output`. In a real use case this should be the result of some calculations made over the `input` by the guest. 
 
-```rust ignore
+
+```rust title="hello-world/methods/guest/src/main.rs"
 use risc0_zkvm::guest::env;
 
-pub fn main() {
-    // read the input
-    let input: u32 = env::read();
+// Define a main entrypoint to the guest program.
+risc0_zkvm::guest::entry!(main);
 
-    // do something with the input
-    // write public output to the journal
-    env::commit(&input);
+pub fn main() {
+    // TODO: Implement your guest code here
+
+    // Read the input
+    // NOTE: The input is basically the only thing kept in secret from verifiers.
+    // It is not a good idea to make it public by outputting it to journal.
+    let _input: u32 = env::read();
+
+    // TODO: do something with the input
+    let output = "Hello, World!";
+
+    // Write public output to the journal.
+    env::commit(&output);
 }
 ```
 
-The `env::commit` function commits public results to the [journal]. Once committed to the journal, anyone with the [receipt] can read this value.
+The `env::commit` function commits public results to the [journal]. Once a value committed to the journal, anyone with the [receipt] can read it.
 
-Notice, by committing any private information to the journal, we make this private data public. We want to avoid committing sensitive data to public journal.
+:::warning 
+Notice, by committing any private information to the journal, we make this private data public. We want to avoid committing sensitive data to public journal. Guest program `input` is usually a **sensitive** kind data.
+:::
 
 ## Step 4 (Host): Generate a receipt and read its journal contents
 
 Let's look at how the host generates a receipt and extracts the [journal]'s contents.
 We get a receipt, extract a journal from the receipt, and verify it.
-In a real-world scenario, we'd want to hand the [receipt] to someone else for verification, and the `prove` function does internal verification of the receipt.
-After we extract journal from the receipt, let's print `Hello world` with the public output by adding this line to the host: `println!("Hello, world! I generated a proof of guest execution! {} is a public output from journal", _output);`
+
+After we extract the journal from the receipt, let's print the public output by adding `println!` to the host program.
+
+Last but not the least, we verify the receipt by invoking the [`risc0_zkvm::Receipt::verify()`] method on it. In a real-world scenario, we'd want to hand the [receipt] to someone else who would verify it.
 
 ```rust ignore
 use methods::{
-    HELLO_GUEST_ELF, HELLO_GUEST_ID
+    HELLO_GUEST_ELF, HELLO_GUEST_ID,
 };
 use risc0_zkvm::{default_prover, ExecutorEnv};
 
@@ -81,20 +98,44 @@ fn main() {
     // Produce a receipt by proving the specified ELF binary.
     let receipt = prover.prove_elf(env, HELLO_GUEST_ELF).unwrap();
 
-    // Extract journal of receipt
-    let _output: u32 = receipt.journal.decode().unwrap();
+    // Extract the journal from the receipt
+    let output: String = receipt.journal.decode().unwrap();
 
-    // Print, notice, after committing to a journal, the private input became public
-    println!("Hello, world! I generated a proof of guest execution! {} is a public output from journal ", _output);
+    // Print the extracted output
+    println!("Yay, I generated a proof of guest execution! \"{}\" is the public output from the journal.", &output);
+
+    // The receipt was verified at the end of proving. We give the below code is an
+    // example of how someone else could verify this receipt.
+    receipt.verify(HELLO_GUEST_ID).expect("Receipt verification failed!");
 }
 ```
 
-You should now be able to see your proof with `cargo run --release`.
-If your program printed the "Hello, world!" assertion and [receipt] verification was a success, congratulations!
-If not, we hope that troubleshooting will get you familiar with the system, and we'd love to chat with you on [Discord].
-Or, if you believe you've found a bug or other problem in our code, please open an [issue] describing the problem.
+You should now be able to see your proof with running the command:
+
+```bash
+cargo run --release
+```
+
+If your program printed the `"Hello, world!"` and the [receipt] verification was a success, **congratulations**!
+
+You can try how a verification fails by substituting the last line in the code above with: 
+
+```rust
+receipt.verify([42u32; 8]).expect("Receipt verification failed!");
+```
+
+And re-running the program, as *ImageID* provided to verifier is invalid, the verification should fail. Still, if you run the program with [dev-mode] turned on, that still would work as in this mode a [*fake*] receipt is generated which is always verified successfully:
+
+```bash
+RISC0_DEV_MODE=true cargo run --release
+```
+
+:::tip
+If you met any issues during this tutorial, we hope that troubleshooting will get you familiar with the system, and we'd love to chat with you on [Discord].
+Or, if you believe you've found a bug or other problem in our code, please feel free to open an [issue] describing the problem.
 
 If you're ready to start building more complex projects, we recommend taking a look at the other examples in our [examples directory] for more project ideas that use zero-knowledge proofs.
+:::
 
 [Installation]: ../install
 [cargo risczero]: https://docs.rs/cargo-risczero
@@ -107,3 +148,7 @@ If you're ready to start building more complex projects, we recommend taking a l
 [Discord]: https://discord.gg/risczero
 [issue]: https://github.com/risc0/risc0/issues
 [prover]: /terminology#prover
+[`ExecutorEnv`]: https://docs.rs/risc0-zkvm/0.19.0/risc0_zkvm/struct.ExecutorEnv.html
+[`risc0_zkvm::Receipt::verify()`]: https://docs.rs/risc0-zkvm/0.19.0/risc0_zkvm/struct.Receipt.html#method.verify
+[dev-mode]: /api/zkvm/dev-mode
+[*fake*]: https://docs.rs/risc0-zkvm/0.19.0/risc0_zkvm/enum.InnerReceipt.html#variant.Fake

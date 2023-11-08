@@ -15,6 +15,8 @@
 //!    However, default environment does not have any inputs.
 //!    To add [guest program] input to the executor environment, use builder to construct it like this:
 //!    ```
+//!    // Provide input to guest program.
+//!    let input: u32 = 15 * u32::pow(2, 27) + 1;
 //!    let env = ExecutorEnv::builder().write(&input).unwrap().build().unwrap();
 //!    ```
 //!
@@ -38,24 +40,20 @@ use methods::{
 use risc0_zkvm::{default_prover, ExecutorEnv};
 
 fn main() {
-    // Initialize tracing. In order to view logs, run `RUST_LOG=info cargo run`
-    env_logger::init();
-    // Provide input to guest program.
     let input: u32 = 15 * u32::pow(2, 27) + 1;
-    // Build executor environment with the input provided.
     let env = ExecutorEnv::builder().write(&input).unwrap().build().unwrap();
-
     // Obtain the default prover.
     let prover = default_prover();
-
     // Produce a receipt by proving the specified ELF binary.
-    let receipt = prover.prove_elf(env, {{guest_elf}}).unwrap();
+    let receipt = prover.prove_elf(env, HELLO_GUEST_ELF).unwrap();
 
-    // TODO: Implement code for retrieving receipt journal here.
-    // Hint:
-    // let output: u32 = receipt.journal.decode().unwrap();
+    // Extract the journal from the receipt
+    let output: String = receipt.journal.decode().unwrap();
 
-    // The receipt was verified at the end of proving, but the below code is an
+    // Print the extracted output
+    println!("Yay, I generated a proof of guest execution! \"{}\" is the public output from the journal.", &output);
+
+    // The receipt was verified at the end of proving. We give the below code is an
     // example of how someone else could verify this receipt.
     receipt.verify({{guest_id}}).unwrap();
 }
