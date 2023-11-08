@@ -75,7 +75,7 @@ Use the pprof web interface to compare the performance of the 3 Fibonacci implem
 Refer to the [pprof docs] for more inforamtion about the web interface.
 :::
 
-[profiling example]: https://github.com/risc0/risc0/examples/profiling
+[profiling example]: https://github.com/risc0/risc0/tree/main/examples/profiling
 [install Go]: https://go.dev/doc/install
 [official pprof documentation]: https://github.com/google/pprof/blob/main/doc/README.md
 [cycle count]: /terminology#clock-cycles
