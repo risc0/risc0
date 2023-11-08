@@ -38,12 +38,12 @@ tar = "0.4"
 tempfile = "3"
 text_io = "0.1.12"
 tokio = { version = "1", features = ["rt"] }
-tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+tracing-subscriber = { version = "0.3", features = ["env-filter"], optional = true }
 zip = { version = "0.6", optional = true }
 
 [build-dependencies]
-tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 risc0-build = { workspace = true, optional = true }
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 zip = { version = "0.6", optional = true }
 
 [features]
@@ -52,7 +52,7 @@ default = ["r0vm"]
 docker = []
 experimental = [
   "dep:cargo_metadata",
-  "dep:env_logger",
+  "dep:tracing-subscriber",
   "dep:risc0-build",
   "dep:zip",
   "risc0-zkvm/prove",

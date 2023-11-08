@@ -8,9 +8,9 @@ homepage = { workspace = true }
 repository = { workspace = true }
 
 [dev-dependencies]
-tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 risc0-zkvm-methods = { path = "../zkvm/methods" }
 test-log = { version = "0.2", default-features = false, features = ["trace"] }
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [dependencies]
 anyhow = { version = "1.0", default-features = false }

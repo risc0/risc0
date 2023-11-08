@@ -4,8 +4,8 @@ version = { workspace = true }
 edition = { workspace = true }
 
 [build-dependencies]
-tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 risc0-build = { workspace = true }
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [package.metadata.release]
 release = false

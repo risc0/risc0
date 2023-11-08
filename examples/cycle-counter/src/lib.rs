@@ -61,9 +61,10 @@ pub fn exec<'a>(name: &str, elf: &[u8], env: ExecutorEnv<'a>) -> Metrics {
 }
 
 pub fn init_logging() {
-        tracing_subscriber::fmt()
+    tracing_subscriber::fmt()
         .with_env_filter(tracing_subscriber::filter::EnvFilter::from_default_env())
-        .init();();
+        .init();
+    ();
 }
 
 #[derive(Serialize)]

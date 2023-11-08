@@ -31,8 +31,8 @@ risc0-zkvm-platform = { workspace = true }
 
 [dev-dependencies]
 criterion = "0.5"
-tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 test-log = { version = "0.2", default-features = false, features = ["trace"] }
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [features]
 cuda = [
