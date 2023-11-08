@@ -528,10 +528,10 @@ version = "0.19.0"
 dependencies = [
  "anyhow",
  "elf",
+ "log",
  "risc0-zkp",
  "risc0-zkvm-platform",
  "serde",
- "tracing",
 ]
 
 [[package]]
@@ -555,6 +555,7 @@ version = "0.19.0"
 dependencies = [
  "anyhow",
  "bytemuck",
+ "log",
  "risc0-core",
  "risc0-zkp",
  "tracing",
@@ -565,6 +566,7 @@ name = "risc0-circuit-rv32im"
 version = "0.19.0"
 dependencies = [
  "anyhow",
+ "log",
  "risc0-core",
  "risc0-zkp",
  "risc0-zkvm-platform",
@@ -588,6 +590,7 @@ dependencies = [
  "bytemuck",
  "digest",
  "hex",
+ "log",
  "paste",
  "rand_core",
  "risc0-core",
@@ -606,6 +609,7 @@ dependencies = [
  "cfg-if",
  "getrandom",
  "hex",
+ "log",
  "num-derive",
  "risc0-binfmt",
  "risc0-circuit-recursion",
