@@ -1,18 +1,18 @@
 # Ethereum Examples
 
-While all of the **[zkVM examples]** can be run on Bonsai by **[configuring Bonsai]** as your remote prover, those examples do not interact with or are intended to interact with Ethereum or any other blockchain. The references below are examples of how Bonsai and the zkVM can be integrated with Ethereum.
+While all of the [zkVM examples] can be run on Bonsai by [configuring Bonsai] as your remote prover, those examples do not interact with or are intended to interact with Ethereum or any other blockchain. The references below are examples of how Bonsai and the zkVM can be integrated with Ethereum.
 
 ### Zeth
 
-**[Zeth]** produces ZK validity proofs for Ethereum Virtual Machine blocks (EVM). This is accomplished by running **[revm]**, a Rust implementation of the EVM in the zkVM. The end result is an open-source zkEVM with high code reuse and minute, not hour, proving times on Bonsai. For more info check out **[Announcing Zeth: The first Type Zero zkEVM]**.
+[Zeth] produces ZK validity proofs for Ethereum Virtual Machine blocks (EVM). This is accomplished by running [revm], a Rust implementation of the EVM in the zkVM. The end result is an open-source zkEVM with high code reuse and minute, not hour, proving times on Bonsai. For more info check out [Announcing Zeth: The first Type Zero zkEVM].
 
 ### DAO Governance Example
 
-This **[example app]** uses Bonsai as an Ethereum coprocessor. The protocol, based on the OpenZeppelin **[Governor smart contract standard]**, batches signature verifications off-chain for a DAO governance vote. The end result is that in **[~160 lines of Rust]**, a gas savings of 66% is achieved with significant room for optimizations.
+This [example app] uses Bonsai as an Ethereum coprocessor. The protocol, based on the OpenZeppelin [Governor smart contract standard], batches signature verifications off-chain for a DAO governance vote. The end result is that in [~160 lines of Rust], a gas savings of 66% is achieved with significant room for optimizations.
 
 ### BonsaiStarter.sol
 
-This **[test contract]** in the **[Bonsai Foundry Template]** provides an example of two different ways Bonsai can be integrated with Ethereum smart contracts using the **[Bonsai Ethereum Relay]**.
+This [test contract] in the [Bonsai Foundry Template] provides an example of two different ways Bonsai can be integrated with Ethereum smart contracts using the [Bonsai Ethereum Relay].
 
 [zkVM examples]: /api/zkvm/examples
 [configuring Bonsai]: /api/zkvm/quickstart#remote-proving
