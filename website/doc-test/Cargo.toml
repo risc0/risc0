@@ -19,6 +19,7 @@ ethers = { version = "2.0", features = ["rustls", "ws"] }
 fibonacci-methods = { path = "../../examples/profiling/methods" }
 risc0-zkvm = { workspace = true, features = ["prove", "profiler"] }
 risc0-zkvm-methods = { path = "../../risc0/zkvm/methods" }
+serde = { version = "1.0", features = ["derive"] }
 tokio = { version = "1", features = ["full", "sync"] }
 
 [build-dependencies]

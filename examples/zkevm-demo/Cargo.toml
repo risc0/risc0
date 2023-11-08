@@ -15,5 +15,7 @@ zkevm-core = { path = "core", features = ["ethers"] }
 zkevm-methods = { path = "methods" }
 
 [features]
+default = []
 cuda = ["risc0-zkvm/cuda"]
-metal = ["risc0-zkvm/metal"]
+prove = ["risc0-zkvm/prove"]
+profiler = ["risc0-zkvm/profiler"]
