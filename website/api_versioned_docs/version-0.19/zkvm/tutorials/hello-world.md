@@ -19,10 +19,10 @@ cargo risczero new hello-world --guest-name hello_guest
 cd hello-world
 ```
 
-In the project folder, `hello-world`, build and run the project using `cargo run --release`.
+In the project folder, `hello-world`, you can build and run the project via `cargo run --release`.
 Use this command any time you'd like to check your progress.
 
-You can also generate `rustdoc` pages for you project with `cargo doc`.
+You can also generate `rustdoc` pages for your project with `cargo doc`.
 
 ## Step 2 (Host): Share private data as input with the guest
 
@@ -72,7 +72,7 @@ pub fn main() {
 The `env::commit` function commits public results to the [journal]. Once a value committed to the journal, anyone with the [receipt] can read it.
 
 :::warning 
-Notice, by committing any private information to the journal, we make this private data public. We want to avoid committing sensitive data to public journal. Guest program `input` is usually a **sensitive** kind data.
+Notice, by committing any information to the journal, we make this data **public**. We want to avoid committing sensitive data to public journal. Guest program `input` is usually a **sensitive** kind data.
 :::
 
 ## Step 4 (Host): Generate a receipt and read its journal contents
@@ -84,7 +84,7 @@ After we extract the journal from the receipt, let's print the public output by 
 
 Last but not the least, we verify the receipt by invoking the [`risc0_zkvm::Receipt::verify()`] method on it. In a real-world scenario, we'd want to hand the [receipt] to someone else who would verify it.
 
-```rust ignore
+```rust title="hello-world/host/src/main.rs"
 use methods::{
     HELLO_GUEST_ELF, HELLO_GUEST_ID,
 };
@@ -116,15 +116,15 @@ You should now be able to see your proof with running the command:
 cargo run --release
 ```
 
-If your program printed the `"Hello, world!"` and the [receipt] verification was a success, **congratulations**!
+If your program printed out the `"Hello, world!"` and the [receipt] verification was a success, **congratulations**!
 
-You can try how a verification fails by substituting the last line in the code above with: 
+You can try how a verification fails by adding the following line to the code above: 
 
 ```rust
 receipt.verify([42u32; 8]).expect("Receipt verification failed!");
 ```
 
-And re-running the program, as *ImageID* provided to verifier is invalid, the verification should fail. Still, if you run the program with [dev-mode] turned on, that still would work as in this mode a [*fake*] receipt is generated which is always verified successfully:
+When you re-run the program, as *ImageID* provided to verifier is invalid, it should panic because of the failed verification. However, if you run the program with [dev-mode] turned on, that still would work as in this mode a [*fake*] receipt is generated which is always verified successfully:
 
 ```bash
 RISC0_DEV_MODE=true cargo run --release

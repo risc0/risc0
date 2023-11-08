@@ -55,5 +55,5 @@ fn main() {
 
     // The receipt was verified at the end of proving. We give the below code is an
     // example of how someone else could verify this receipt.
-    receipt.verify({{guest_id}}).unwrap();
+    receipt.verify({{guest_id}}).expect("Receipt verification failed!");
 }
