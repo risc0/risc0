@@ -33,3 +33,10 @@ abigen!(
     RiscZeroGroth16Verifier,
     "$OUT_DIR/RiscZeroGroth16Verifier.sol/RiscZeroGroth16Verifier.json"
 );
+
+pub mod testutils {
+    use ethers::prelude::*;
+
+    abigen!(Counter, "$OUT_DIR/Counter.sol/Counter.json");
+    abigen!(Proxy, "$OUT_DIR/ProxyTest.sol/Proxy.json");
+}
