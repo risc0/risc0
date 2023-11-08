@@ -29,10 +29,9 @@ zip = { version = "0.6", default-features = false, optional = true, features = [
 
 [dev-dependencies]
 criterion = "0.5"
-env_logger = "0.10"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 test-log = "0.2"
 tracing-forest = "0.1"
-tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [build-dependencies]
 downloader = { version = "0.2", features = ["verify"], optional = true }

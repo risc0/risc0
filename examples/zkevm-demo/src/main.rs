@@ -40,7 +40,9 @@ struct Args {
 
 #[tokio::main]
 async fn main() {
-    env_logger::init();
+        tracing_subscriber::fmt()
+        .with_env_filter(tracing_subscriber::filter::EnvFilter::from_default_env())
+        .init();();
 
     let args = Args::parse();
     let tx_hash = H256::from_str(&args.tx_hash).expect("Invalid transaction hash");

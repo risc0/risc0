@@ -20,7 +20,7 @@ csv = "1.1"
 ed25519-dalek = { version = "2.0.0-rc.3", default-features = false, features = [
   "rand_core",
 ] }
-env_logger = "0.10"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 hex = "0.4"
 k256 = { version = "0.13", features = ["serde"] }
 rand = "0.8"

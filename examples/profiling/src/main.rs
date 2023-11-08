@@ -16,7 +16,9 @@ use fibonacci_methods::FIBONACCI_ELF;
 use risc0_zkvm::{default_executor, ExecutorEnv};
 
 fn main() -> anyhow::Result<()> {
-    env_logger::init();
+        tracing_subscriber::fmt()
+        .with_env_filter(tracing_subscriber::filter::EnvFilter::from_default_env())
+        .init();();
 
     let iterations: u32 = 1000;
 

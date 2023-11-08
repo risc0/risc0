@@ -40,7 +40,9 @@ mod runtime {
 fn main() {
     #[cfg(feature = "experimental")]
     {
-        env_logger::init();
+            tracing_subscriber::fmt()
+        .with_env_filter(tracing_subscriber::filter::EnvFilter::from_default_env())
+        .init();();
         runtime::build_and_zip_runtime();
     }
 }

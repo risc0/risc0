@@ -12,7 +12,7 @@ csv = "1.1"
 digital-signature-core = { path = "../digital-signature/core" }
 digital-signature-methods = { path = "../digital-signature/methods" }
 ecdsa-methods = { path = "../ecdsa/methods" }
-env_logger = "0.10"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 hello-world-methods = { path = "../hello-world/methods" }
 image = "0.24"
 json-methods = { path = "../json/methods" }
@@ -37,6 +37,7 @@ waldo-methods = { path = "../waldo/methods" }
 wasm-methods = { path = "../wasm/methods" }
 wat = "1.0"
 wordle-methods = { path = "../wordle/methods" }
+tracing = { version = "0.1", features = ["log"] }
 
 [features]
 default = []

@@ -16,8 +16,12 @@ use clap::{Arg, Command};
 use digital_signature::sign;
 use sha2::{Digest, Sha256};
 
+use tracing_subscriber::EnvFilter;
+
 fn main() {
-    env_logger::builder().filter_level(LevelFilter::Info).init();
+    tracing_subscriber::fmt()
+    .with_env_filter(EnvFilter::from_default_env())
+    .init();
 
     let matches = Command::new("sign")
         .version("0.1.0")

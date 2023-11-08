@@ -5,7 +5,7 @@ edition = "2021"
 
 [dependencies]
 clap = { version = "4.0", features = ["derive"] }
-env_logger = "0.10"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 ethers-core = "2.0"
 ethers-providers = "2.0"
 risc0-zkvm = { path = "../../risc0/zkvm" }
