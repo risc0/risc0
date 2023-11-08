@@ -6,7 +6,7 @@ on:
       - "v*.*.*"
   # for testing purposes
   pull_request:
-    branches: [ main ]
+    branches: [main, "release-*"]
   workflow_dispatch:
 
 env:
@@ -37,7 +37,9 @@ jobs:
       - run: apt -y install curl git libssl-dev pkg-config
       - run: curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash
       - run: apt -y install git-lfs
-      - run: find . -delete
+      - run: env
+      - run: echo $PWD
+      - run: ls -la
       - run: git clone https://github.com/risc0/risc0 .
       - run: git config --global --add safe.directory $PWD
       - run: git checkout ${{ github.sha }}
@@ -65,10 +67,8 @@ jobs:
       - run: cargo risczero install --version $RISC0_TOOLCHAIN_VERSION
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      # TODO: git lfs pull doesn't work within a github container.
-      # This smoke test will fail because the recursion ZKR will be an empty file at build time.
-      # - run: cargo run
-      #   working-directory: tools/smoke-test
+      - run: cargo run
+        working-directory: tools/smoke-test
 
   # macos:
   #   runs-on: [self-hosted, prod, macOS, apple_m2_pro]
@@ -80,7 +80,7 @@ jobs:
   #     - uses: actions/checkout@v4
   #       with:
   #         lfs: true
-  #     - run: git lfs pull
+  #     - run: git lfs checkout
   #     - uses: ./.github/actions/rustup
   #     - uses: ./.github/actions/sccache
   #       with:
