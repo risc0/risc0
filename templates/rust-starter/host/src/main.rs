@@ -45,7 +45,7 @@ fn main() {
     // Obtain the default prover.
     let prover = default_prover();
     // Produce a receipt by proving the specified ELF binary.
-    let receipt = prover.prove_elf(env, HELLO_GUEST_ELF).unwrap();
+    let receipt = prover.prove_elf(env, {{guest_elf}}).unwrap();
 
     // Extract the journal from the receipt
     let output: String = receipt.journal.decode().unwrap();
