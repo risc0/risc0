@@ -6,11 +6,9 @@ In order to prove code using Bonsai, you need to write the code you want proven.
 
 ## The role of the zkVM in Bonsai
 
-![Bonsai ETH Relay overview](/img/eth-relay-diagram.jpg)
+![Bonsai ETH Relay overview](/img/bonsai_ethereum.png)
 
-<!-- TODO: Modify the diagram to highlight the right zkVM portion. -->
-
-The zkVM is used as an internal component of Bonsai. It is what runs your program off-chain using inputs from your smart contract call, and it is what [proves] your code was [executed] in a way anyone can [verify]. Bonsai runs most of the zkVM for you: all you need to provide is the code you want proven, which we call the zkVM [guest program].
+The zkVM is used as an internal component of Bonsai. It is what runs your program off-chain and [proves] your code was [executed] in a way anyone can [verify]. Bonsai runs most of the zkVM for you: all you need to provide is the code you want proven, which we call the zkVM [guest program], and its input.
 
 ## Writing Rust code
 
@@ -39,7 +37,7 @@ We have an [FAQ](/faq) that discusses some frequently encountered problems. You 
 We have [extensive resources](../zkvm/zkvm_overview.md) on writing zkVM code. Many of these resources assume you are developing without the aid of Bonsai. Here are some differences you might encounter when reading these docs:
 
 - zkVM docs frequently refer to the [guest] and [host]. With Bonsai, you only write code for the [guest]; Bonsai itself runs the [host]. A partial exception is providing inputs and receiving the [receipt], which is handled by the [host] without Bonsai, whereas with the Bonsai ETH Relay your smart contract must handle these duties.
-- You might see our zkVM documentation refer to executors, sessions, and segments. These code-level concepts are related to [continuations](https://www.risczero.com/news/continuations), a feature that lets us design our zkVM program proof work to be parallelizable and not limited by the size of the program to be proven. Bonsai takes advantage of this feature to parallelize proofs about off-chain computation. If you're reading about these in zkVM documentation, you're almost certainly looking at host-side details that you don't need in order to write provable code.
+- You might see our zkVM documentation refer to sessions, and segments. These code-level concepts are related to [continuations](https://www.risczero.com/news/continuations), a feature that lets us design our zkVM program proof work to be parallelizable and not limited by the size of the program to be proven. Bonsai takes advantage of this feature to parallelize proofs about off-chain computation. If you're reading about these in zkVM documentation, you're almost certainly looking at host-side details that you don't need in order to write provable code.
 
 [Bonsai]: bonsai-overview.md
 [Rust]: https://www.rust-lang.org/

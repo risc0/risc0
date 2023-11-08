@@ -36,7 +36,7 @@ To support various use cases, there are a number of functions that can be called
 [`env::stdout`]: https://docs.rs/risc0-zkvm/0.18.0/risc0_zkvm/guest/env/fn.stdout.html
 [`env::stderr`]: https://docs.rs/risc0-zkvm/0.18.0/risc0_zkvm/guest/env/fn.stderr.html
 
-- **Committing private outputs [journal]**<br/>
+- **Committing public outputs to [journal]**<br/>
   `env::commit`, `env::commit_slice`
 
 [`env::commit`]: https://docs.rs/risc0-zkvm/0.18.0/risc0_zkvm/guest/env/fn.commit.html
@@ -55,7 +55,7 @@ There are also a number of functions available to support with debugging and per
 [`env::get_cycle_count`]: https://docs.rs/risc0-zkvm/0.18.0/risc0_zkvm/guest/env/fn.get_cycle_count.html
 [`env::log`]: https://docs.rs/risc0-zkvm/0.18.0/risc0_zkvm/guest/env/fn.log.html
 
-For more information on optimization & performance, see our pages on [Cryptography Acceleration](acceleration) and [Benchmarking](../benchmarks).
+For more information on optimization & performance, see our pages on [Cryptography Acceleration](./acceleration.md) and [Benchmarking](../benchmarks.md).
 
 ## Boilerplate before `main()`
 

@@ -139,8 +139,8 @@ impl NewCommand {
             Some(name) => name.clone(),
             None => {
                 eprint!(
-                    "Guest name was not supplied through the --guest-name option. Please enter \
-                    package name for your template or press [enter] to use default guest package \
+                    "Guest name was not supplied through the --guest-name option. Please enter\x20\
+                    package name for your template or press [enter] to use default guest package\x20\
                     name \"method\"\n\
                     Enter package name > "
                 );
@@ -234,7 +234,7 @@ mod tests {
 
     #[test]
     fn basic_new() {
-        let new = NewCommand::parse_from(["new", "my_project"]);
+        let new = NewCommand::parse_from(["new", "--guest-name", "method", "my_project"]);
         assert_eq!(new.name, "my_project");
     }
 
@@ -252,6 +252,8 @@ mod tests {
             "",
             "--dest",
             &tmpdir.path().to_string_lossy(),
+            "--guest-name",
+            "method",
             proj_name,
         ]);
 
@@ -289,6 +291,8 @@ mod tests {
             "--no-git",
             "--use-git-branch",
             "main",
+            "--guest-name",
+            "method",
             proj_name,
         ]);
 
@@ -319,6 +323,8 @@ mod tests {
             "--dest",
             &tmpdir.path().to_string_lossy(),
             "--std",
+            "--guest-name",
+            "method",
             proj_name,
         ]);
 

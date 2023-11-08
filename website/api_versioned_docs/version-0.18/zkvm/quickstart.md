@@ -21,7 +21,7 @@ cargo install cargo-risczero
 cargo risczero install
 ```
 
-If you need to install Rust or encounter problems, take a look at our [full installation instructions](install).
+If you need to install Rust or encounter problems, take a look at our [full installation instructions](./install.md).
 
 ## 2. Initialize a New Project
 
