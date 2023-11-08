@@ -122,7 +122,7 @@ impl Client {
                 },
             )),
         };
-        log::trace!("tx: {request:?}");
+        tracing::trace!("tx: {request:?}");
         conn.send(request)?;
 
         let result = self.execute_handler(segment_callback, &mut conn, env);
@@ -153,7 +153,7 @@ impl Client {
                 },
             )),
         };
-        log::trace!("tx: {request:?}");
+        tracing::trace!("tx: {request:?}");
         conn.send(request)?;
 
         let reply: pb::api::ProveSegmentReply = conn.recv()?;
@@ -191,7 +191,7 @@ impl Client {
                 receipt_out: Some(receipt_out.try_into()?),
             })),
         };
-        log::trace!("tx: {request:?}");
+        tracing::trace!("tx: {request:?}");
         conn.send(request)?;
 
         let reply: pb::api::LiftReply = conn.recv()?;
@@ -231,7 +231,7 @@ impl Client {
                 receipt_out: Some(receipt_out.try_into()?),
             })),
         };
-        log::trace!("tx: {request:?}");
+        tracing::trace!("tx: {request:?}");
         conn.send(request)?;
 
         let reply: pb::api::JoinReply = conn.recv()?;
@@ -271,7 +271,7 @@ impl Client {
                 },
             )),
         };
-        log::trace!("tx: {request:?}");
+        tracing::trace!("tx: {request:?}");
         conn.send(request)?;
 
         let reply: pb::api::IdentityP254Reply = conn.recv()?;
@@ -300,11 +300,11 @@ impl Client {
         let request = pb::api::HelloRequest {
             version: Some(client_version.clone().into()),
         };
-        log::trace!("tx: {request:?}");
+        tracing::trace!("tx: {request:?}");
         conn.send(request)?;
 
         let reply: pb::api::HelloReply = conn.recv()?;
-        log::trace!("rx: {reply:?}");
+        tracing::trace!("rx: {reply:?}");
         match reply.kind.ok_or(malformed_err())? {
             pb::api::hello_reply::Kind::Ok(reply) => {
                 let server_version: semver::Version = reply
@@ -314,7 +314,7 @@ impl Client {
                     .map_err(|err: semver::Error| anyhow!(err))?;
                 if !check_server_version(&client_version, &server_version) {
                     let msg = format!("incompatible server version: {server_version}");
-                    log::warn!("{msg}");
+                    tracing::warn!("{msg}");
                     bail!(msg);
                 }
             }
@@ -359,14 +359,14 @@ impl Client {
         let mut segments = Vec::new();
         loop {
             let reply: pb::api::ServerReply = conn.recv()?;
-            log::trace!("rx: {reply:?}");
+            tracing::trace!("rx: {reply:?}");
 
             match reply.kind.ok_or(malformed_err())? {
                 pb::api::server_reply::Kind::Ok(request) => {
                     match request.kind.ok_or(malformed_err())? {
                         pb::api::client_callback::Kind::Io(io) => {
                             let msg: pb::api::OnIoReply = self.on_io(env, io).into();
-                            log::trace!("tx: {msg:?}");
+                            tracing::trace!("tx: {msg:?}");
                             conn.send(msg)?;
                         }
                         pb::api::client_callback::Kind::SegmentDone(segment) => {
@@ -386,7 +386,7 @@ impl Client {
                                     },
                                 )
                                 .into();
-                            log::trace!("tx: {reply:?}");
+                            tracing::trace!("tx: {reply:?}");
                             conn.send(reply)?;
                         }
                         pb::api::client_callback::Kind::SessionDone(session) => {
@@ -419,14 +419,14 @@ impl Client {
     ) -> Result<pb::api::Asset> {
         loop {
             let reply: pb::api::ServerReply = conn.recv()?;
-            log::trace!("rx: {reply:?}");
+            tracing::trace!("rx: {reply:?}");
 
             match reply.kind.ok_or(malformed_err())? {
                 pb::api::server_reply::Kind::Ok(request) => {
                     match request.kind.ok_or(malformed_err())? {
                         pb::api::client_callback::Kind::Io(io) => {
                             let msg: pb::api::OnIoReply = self.on_io(env, io).into();
-                            log::trace!("tx: {msg:?}");
+                            tracing::trace!("tx: {msg:?}");
                             conn.send(msg)?;
                         }
                         pb::api::client_callback::Kind::SegmentDone(_) => {
@@ -470,7 +470,7 @@ impl Client {
     }
 
     fn on_posix_read(&self, env: &ExecutorEnv<'_>, fd: u32, nread: usize) -> Result<Bytes> {
-        log::debug!("on_posix_read: {fd}, {nread}");
+        tracing::debug!("on_posix_read: {fd}, {nread}");
         let mut from_host = vec![0; nread];
         let posix_io = env.posix_io.borrow();
         let reader = posix_io

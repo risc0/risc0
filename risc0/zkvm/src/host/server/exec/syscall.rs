@@ -621,7 +621,7 @@ impl<'a> PosixIo<'a> {
             .get_mut(&fileno::STDOUT)
             .ok_or(anyhow!("Bad write file descriptor {}", &fileno::STDOUT))?;
 
-        log::debug!(
+        tracing::debug!(
             "Writing {buf_len} bytes to STDOUT file descriptor {}",
             &fileno::STDOUT
         );

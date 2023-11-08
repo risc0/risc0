@@ -176,7 +176,7 @@ impl SliceIo for SliceIoProxy {
         self.conn.send(request)?;
 
         let reply: pb::api::OnIoReply = self.conn.recv().map_io_err()?;
-        log::trace!("rx: {reply:?}");
+        tracing::trace!("rx: {reply:?}");
 
         let kind = reply.kind.ok_or("Malformed message").map_io_err()?;
         match kind {
@@ -205,11 +205,11 @@ impl TraceCallback for TraceProxy {
                 })),
             })),
         };
-        log::trace!("tx: {request:?}");
+        tracing::trace!("tx: {request:?}");
         self.conn.send(request)?;
 
         let reply: pb::api::OnIoReply = self.conn.recv().map_io_err()?;
-        log::trace!("rx: {reply:?}");
+        tracing::trace!("rx: {reply:?}");
 
         let kind = reply.kind.ok_or("Malformed message").map_io_err()?;
         match kind {
