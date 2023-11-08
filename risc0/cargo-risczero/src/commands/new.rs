@@ -139,8 +139,8 @@ impl NewCommand {
             Some(name) => name.clone(),
             None => {
                 eprint!(
-                    "Guest name was not supplied through the --guest-name option. Please enter \
-                    package name for your template or press [enter] to use default guest package \
+                    "Guest name was not supplied through the --guest-name option. Please enter\x20\
+                    package name for your template or press [enter] to use default guest package\x20\
                     name \"method\"\n\
                     Enter package name > "
                 );
