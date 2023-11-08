@@ -27,30 +27,16 @@ jobs:
   linux:
     runs-on: [self-hosted, prod, Linux, docker, cpu]
     needs: release
-    container:
-      image: nvidia/cuda:12.2.2-devel-ubuntu20.04
     env:
-      DEBIAN_FRONTEND: noninteractive
+      COMPOSE_FILE: .github/containers/release/docker-compose.yml
       TARGET: x86_64-unknown-linux-gnu
     steps:
-      - run: apt update
-      - run: apt -y install curl git libssl-dev pkg-config
-      - run: curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash
-      - run: apt -y install git-lfs
-      - run: env
-      - run: echo $PWD
-      - run: ls -la
-      - run: git config --global --add safe.directory $PWD
-      - run: git init
-      - run: git remote add origin ${{ github.repositoryUrl }} || true
-      - run: git fetch --no-tags --prune --no-recurse-submodules
-      - run: git checkout --force ${{ github.ref }}
-      - run: git lfs pull
-      - uses: ./.github/actions/rustup
-      - uses: ./.github/actions/sccache
+      - uses: actions/checkout@v4
         with:
-          key: ${{ env.TARGET }}
-      - run: cargo build -p cargo-risczero --release
+          lfs: true
+      - run: git lfs checkout
+      - run: docker compose build release
+      - run: docker compose run release
       - run: |
           mkdir -p tmp/pkg
           cp target/release/cargo-risczero tmp/pkg
@@ -58,6 +44,7 @@ jobs:
           cd tmp/pkg && tar cv * | gzip -9 > ../cargo-risczero-$TARGET.tgz
       - uses: svenstaro/upload-release-action@v2
         with:
+          overwrite: true
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: tmp/cargo-risczero-${{ env.TARGET }}.tgz
           tag: ${{ env.TAG }} # only for testing
@@ -95,6 +82,7 @@ jobs:
   #         cd tmp/pkg && tar cv * | gzip -9 > ../cargo-risczero-$TARGET.tgz
   #     - uses: svenstaro/upload-release-action@v2
   #       with:
+  #         overwrite: true
   #         repo_token: ${{ secrets.GITHUB_TOKEN }}
   #         file: tmp/cargo-risczero-${{ env.TARGET }}.tgz
   #         tag: ${{ env.TAG }} # only for testing
