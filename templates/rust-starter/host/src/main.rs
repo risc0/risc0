@@ -36,7 +36,7 @@ fn main() {
     // For example:
     let _output: u32 = receipt.journal.decode().unwrap();
 
-    // Optional: Verify receipt to confirm that recipients will also be able to
-    // verify your receipt
+    // The receipt was verified at the end of proving, but the below code is an
+    // example of how someone else could verify this receipt.
     receipt.verify({{guest_id}}).unwrap();
 }
