@@ -65,6 +65,15 @@ Once you've built a zkVM application, you can generate proofs on your own machin
 For local proof generation, we recommend a machine with at least 16GB of RAM.
 Options for generating proofs using GPU acceleration and skipping proof generation are documented in the [feature flags].
 
+## Micro Architecture
+
+The zkVM is a verifiable computer that works like a real embedded RISC-V micro-processor. This enables developers to more easily develop zk powerful applications.
+
+### Continuations for limitless computations
+
+Continuations allow the [zkVM][zkVM-term] to do large computations by splitting the work into small, independent [segments] of the same size.
+This enables proofs generation on commodity hardware and makes zero knowledge computing widely accessible. To learn more, read the article on [continuations].
+
 ## Next Steps
 
 _Ready to start building zkVM applications?_ <br/>
@@ -83,6 +92,7 @@ _Curious about Zeth?_<br/>
 Read the [article](https://risczero.com/news/zeth-release).
 
 [cargo]: https://doc.rust-lang.org/cargo/index.html
+[continuations]: https://www.risczero.com/news/continuations
 [imageID]: /terminology#image-id
 [Bonsai]: ../bonsai/bonsai-overview.md
 [receipt]: developer-guide/receipts.md
@@ -99,10 +109,12 @@ Read the [article](https://risczero.com/news/zeth-release).
 [proofs]: /terminology#validity-proof
 [prover]: /terminology#prover
 [publicly shared outputs]: /terminology#journal
+[segments]: /terminology#segment
 [verify]: /terminology#verify
 [zero-knowledge virtual machine]: /terminology#zero-knowledge-virtual-machine-zkvm
 [zkvm]: https://github.com/risc0/risc0#readme
 [zkVM Quick Start]: ./quickstart.md
-[zkVM example applications]: https://github.com/risc0/risc0/tree/v0.18.0/examples
+[zkVM example applications]: https://github.com/risc0/risc0/tree/main/examples
+[zkVM-term]: /terminology#zero-knowledge-virtual-machine-zkvm
 [session]: /terminology#session
 [Host Code 101]: developer-guide/host-code-101.md
