@@ -3486,10 +3486,10 @@ version = "0.19.0"
 dependencies = [
  "anyhow",
  "elf",
- "log",
  "risc0-zkp",
  "risc0-zkvm-platform",
  "serde",
+ "tracing",
 ]
 
 [[package]]
@@ -3526,7 +3526,6 @@ dependencies = [
  "bytemuck",
  "cust",
  "downloader",
- "log",
  "metal",
  "rand",
  "rayon",
@@ -3553,7 +3552,6 @@ version = "0.19.0"
 dependencies = [
  "anyhow",
  "cust",
- "log",
  "metal",
  "rand",
  "rayon",
@@ -3600,7 +3598,6 @@ dependencies = [
  "ff",
  "hex",
  "lazy_static",
- "log",
  "metal",
  "ndarray",
  "paste",
@@ -3631,7 +3628,6 @@ dependencies = [
  "getrandom",
  "hex",
  "lazy-regex",
- "log",
  "num-derive",
  "num-traits",
  "prost",
