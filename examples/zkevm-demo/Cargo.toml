@@ -13,6 +13,7 @@ serde = "1.0"
 tokio = "1"
 zkevm-core = { path = "core", features = ["ethers"] }
 zkevm-methods = { path = "methods" }
+tracing = { version = "0.1", features = ["log"] }
 
 [features]
 default = []
