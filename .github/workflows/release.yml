@@ -40,9 +40,8 @@ jobs:
       - run: env
       - run: echo $PWD
       - run: ls -la
-      - run: git clone https://github.com/risc0/risc0 .
+      - run: git clone https://github.com/risc0/risc0 . -b ${{ github.sha }}
       - run: git config --global --add safe.directory $PWD
-      - run: git checkout ${{ github.sha }}
       - run: git lfs pull
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
