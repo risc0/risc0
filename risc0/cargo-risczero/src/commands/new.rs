@@ -138,11 +138,10 @@ impl NewCommand {
         let guest_name = match &self.guest_name {
             Some(name) => name.clone(),
             None => {
-                eprint!(
-                    "Guest name was not supplied through the --guest-name option. Please enter\x20\
-                    package name for your template or press [enter] to use default guest package\x20\
-                    name \"method\"\n\
-                    Enter package name > "
+                eprint!("Guest name was not supplied through the --guest-name option. Please enter \
+                         package name for your template or press [enter] to use default guest package \
+                         name \"method\".\n\
+                         Enter package name > "
                 );
                 let input_name: String = read!("{}\n");
                 if input_name.is_empty() {
