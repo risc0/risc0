@@ -21,9 +21,12 @@ use anyhow::Context;
 fn main() -> anyhow::Result<()> {
     let out_dir = std::env::var("OUT_DIR").unwrap();
     let out_dir = std::path::Path::new(&out_dir);
+    let cache_dir = out_dir.join(".cache");
 
     let mut forge_build = Command::new("forge")
         .arg("build")
+        .arg("--cache-path")
+        .arg(cache_dir)
         .arg("--out")
         .arg(out_dir)
         .spawn()
