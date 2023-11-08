@@ -28,6 +28,11 @@ export default {
           label: "A Blockchain Dev's Guide to zkVM Development",
           id: "bonsai/blockchain-zkvm-guide",
         },
+        {
+          type: "doc",
+          label: "Ethereum Examples",
+          id: "bonsai/eth-examples",
+        },
       ],
     },
     {
