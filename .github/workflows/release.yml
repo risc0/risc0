@@ -6,77 +6,27 @@ on:
       - "v*.*.*"
   # for testing purposes
   # pull_request:
-  #   branches: [ main ]
-  # workflow_dispatch:
+  #   branches: [main, "release-*"]
 
 env:
   RISC0_TOOLCHAIN_VERSION: test-release-2
-  # TAG: v0.19.0
-  VERSION: "0.19.0"
+  TAG: v0.20.0-rc.1
+  VERSION: "0.20.0-rc.1"
 
 jobs:
   release:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: softprops/action-gh-release@v1
-        with:
-          draft: true
-          generate_release_notes: true
-          # tag_name: ${{ env.TAG }} # only for testing
-
-  linux:
-    runs-on: [self-hosted, prod, Linux, docker, cpu]
-    needs: release
-    container:
-      image: nvidia/cuda:12.2.2-devel-ubuntu20.04
-    env:
-      TARGET: x86_64-unknown-linux-gnu
-    steps:
-      - run: apt update
-      - run: apt -y install curl git libssl-dev pkg-config
-        env:
-          DEBIAN_FRONTEND: noninteractive
-      - run: curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash
-      - run: apt -y install git-lfs
-        env:
-          DEBIAN_FRONTEND: noninteractive
-      - uses: actions/checkout@v4
-        with:
-          lfs: true
-      - uses: ./.github/actions/rustup
-      - uses: ./.github/actions/sccache
-        with:
-          key: ${{ env.TARGET }}
-      - run: cargo build -p cargo-risczero --release
-      - run: |
-          mkdir -p tmp/pkg
-          cp target/release/cargo-risczero tmp/pkg
-          cp target/release/r0vm tmp/pkg
-          cd tmp/pkg && tar cv * | gzip -9 > ../cargo-risczero-$TARGET.tgz
-      - uses: svenstaro/upload-release-action@v2
-        with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: tmp/cargo-risczero-${{ env.TARGET }}.tgz
-          # tag: ${{ env.TAG }} # only for testing
-      - uses: risc0/cargo-install@2cfb0024938d23011106cbf127b393bc83fddba1
-        with:
-          crate: cargo-binstall
-          version: "1.4"
-      - run: cargo binstall -y --force cargo-risczero@${{ env.VERSION }}
-      - run: cargo risczero install --version $RISC0_TOOLCHAIN_VERSION
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      # TODO: git lfs pull doesn't work within a github container.
-      # This smoke test will fail because the recursion ZKR will be an empty file at build time.
-      # - run: cargo run
-      #   working-directory: tools/smoke-test
-
-  macos:
-    runs-on: [self-hosted, prod, macOS, apple_m2_pro]
-    needs: release
+    runs-on: [self-hosted, prod, "${{ matrix.os }}", cpu]
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: Linux
+            target: x86_64-unknown-linux-gnu
+          - os: macOS
+            target: aarch64-apple-darwin
     env:
       RUSTC_WRAPPER: sccache
-      TARGET: aarch64-apple-darwin
+      TARGET: ${{ matrix.target }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -86,17 +36,27 @@ jobs:
       - uses: ./.github/actions/sccache
         with:
           key: ${{ env.TARGET }}
-      - run: cargo build -p cargo-risczero --release
-      - run: |
+      - if: matrix.os == 'Linux'
+        run: docker build -f .github/containers/release/Dockerfile --output tmp/pkg .
+      - if: matrix.os == 'macOS'
+        run: |
+          cargo build -p cargo-risczero --release
           mkdir -p tmp/pkg
           cp target/release/cargo-risczero tmp/pkg
           cp target/release/r0vm tmp/pkg
-          cd tmp/pkg && tar cv * | gzip -9 > ../cargo-risczero-$TARGET.tgz
+      - run: tar cv * | gzip -9 > ../cargo-risczero-$TARGET.tgz
+        working-directory: tmp/pkg
       - uses: svenstaro/upload-release-action@v2
         with:
+          overwrite: true
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: tmp/cargo-risczero-${{ env.TARGET }}.tgz
           # tag: ${{ env.TAG }} # only for testing
+
+      # wait for recently uploaded release asset to become available,
+      # otherwise cargo-binstall sometimes errors with 404.
+      - run: sleep 90
+
       - uses: risc0/cargo-install@2cfb0024938d23011106cbf127b393bc83fddba1
         with:
           crate: cargo-binstall
