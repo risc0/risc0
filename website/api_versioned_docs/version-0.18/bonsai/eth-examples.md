@@ -12,7 +12,7 @@ This [example app][governance-example] uses Bonsai as an Ethereum coprocessor. T
 
 ### BonsaiStarter.sol
 
-This [test contract][bonsai-starter.sol] in the [Bonsai Foundry Template] provides an example of two different ways Bonsai can be integrated with Ethereum smart contracts using the [Bonsai Ethereum Relay][eth-relay].
+This [test contract][bonsai-starter.sol] in the [Bonsai Foundry Template][foundry-template] provides an example of two different ways Bonsai can be integrated with Ethereum smart contracts using the [Bonsai Ethereum Relay][eth-relay].
 
 [zkvm-examples]: /api/zkvm/examples
 [remote-proving]: /api/zkvm/quickstart#remote-proving
