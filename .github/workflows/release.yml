@@ -5,8 +5,8 @@ on:
     tags:
       - "v*.*.*"
   # for testing purposes
-  pull_request:
-    branches: [main, "release-*"]
+  # pull_request:
+  #   branches: [main, "release-*"]
 
 env:
   RISC0_TOOLCHAIN_VERSION: test-release-2
