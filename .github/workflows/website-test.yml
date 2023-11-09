@@ -13,12 +13,17 @@ concurrency:
 jobs:
   doc-test:
     runs-on: [self-hosted, prod, Linux, cpu]
+    env:
+      RUSTC_WRAPPER: sccache
     steps:
       - uses: actions/checkout@v4
         with:
           # Recursive checkout required to build Solidity contracts and bindings.
           submodules: recursive
       - uses: ./.github/actions/rustup
+      - uses: ./.github/actions/sccache
+        with:
+          key: Linux-default
       - uses: risc0/foundry-toolchain@2fe7e70b520f62368a0e3c464f997df07ede420f
       - run: cargo run --bin cargo-risczero --no-default-features -- risczero install
         env:
