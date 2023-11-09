@@ -188,7 +188,7 @@ Q:
 I’d like to speed up the processing done inside the zkVM. What are my options?
 </summary>
 A:
-For cryptographic operations, it is possible to build ‘accelerator’ circuits such as our implementation of SHA26.
+For cryptographic operations, it is possible to build ‘accelerator’ circuits such as our implementation of SHA256.
 Fast cryptography is sufficient to support many ‘DeFi’ applications.
 For many other applications, it is possible to perform most computation on the host (outside the zkVM) and then verify the results in the zkVM.
 </details>
