@@ -25,7 +25,9 @@ jobs:
         with:
           key: Linux-default
       - uses: risc0/foundry-toolchain@2fe7e70b520f62368a0e3c464f997df07ede420f
+      - run: env | sort
       - run: cargo run --bin cargo-risczero --no-default-features -- risczero install
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: cargo test -p doc-test
+      - run: sccache --show-stats
