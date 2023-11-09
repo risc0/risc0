@@ -53,5 +53,11 @@ runs:
     #     # TODO: this path will not work on windows.
     #     cache-directories: ~/.cache/risc0
 
-    - run: rm -f $HOME/.cargo/config
-      shell: bash
+    # - run: rm -f $HOME/.cargo/config
+    #   shell: bash
+
+    - uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-region: 'us-west-2'
+        role-to-assume: arn:aws:iam::083632199359:role/gha_oidc_risc0_cache_public_access
+        output-credentials: true
