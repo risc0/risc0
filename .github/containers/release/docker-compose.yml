@@ -1,6 +1,0 @@
-services:
-  release:
-    build: .
-    volumes:
-      - ../../..:/src
-    command: cargo build -p cargo-risczero --release

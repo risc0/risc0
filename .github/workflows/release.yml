@@ -39,13 +39,9 @@ jobs:
       - uses: ./.github/actions/sccache
         with:
           key: ${{ env.TARGET }}
-      - run: docker compose build release
-      - run: docker compose run release
-      - run: |
-          mkdir -p tmp/pkg
-          cp target/release/cargo-risczero tmp/pkg
-          cp target/release/r0vm tmp/pkg
-          cd tmp/pkg && tar cv * | gzip -9 > ../cargo-risczero-$TARGET.tgz
+      - run: docker build -f .github/containers/release/Dockerfile --output tmp/pkg .
+      - run: tar cv * | gzip -9 > ../cargo-risczero-$TARGET.tgz
+        working-directory: tmp/pkg
       - uses: svenstaro/upload-release-action@v2
         with:
           overwrite: true
