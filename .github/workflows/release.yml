@@ -15,17 +15,7 @@ env:
 
 jobs:
   release:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: softprops/action-gh-release@v1
-        with:
-          draft: true
-          generate_release_notes: true
-          tag_name: ${{ env.TAG }} # only for testing
-
-  linux:
     runs-on: [self-hosted, prod, "${{ matrix.os }}", cpu]
-    needs: release
     strategy:
       fail-fast: false
       matrix:
