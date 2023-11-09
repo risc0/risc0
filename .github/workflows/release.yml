@@ -52,6 +52,7 @@ jobs:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: tmp/cargo-risczero-${{ env.TARGET }}.tgz
           tag: ${{ env.TAG }} # only for testing
+      - run: sleep 90
       - uses: risc0/cargo-install@2cfb0024938d23011106cbf127b393bc83fddba1
         with:
           crate: cargo-binstall
