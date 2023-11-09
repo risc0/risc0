@@ -88,7 +88,7 @@ Knowing these statistics is useful for estimating the cost of your application b
 > _That's all it takes to build and run a minimal RISC Zero application._
 
 [Bonsai]: ../bonsai/quickstart
-[dev-mode]: dev-mode.md
+[dev-mode]: ./dev-mode.md
 [feature flags]: https://github.com/risc0/risc0#feature-flags
 [Share private data]: tutorials/hello-world#step-2-host-share-private-data-as-input-with-the-guest
 [Share the guest's results]: tutorials/hello-world#step-3-guest-read-input-and-commit-output
