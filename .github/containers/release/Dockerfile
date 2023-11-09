@@ -10,9 +10,9 @@ WORKDIR /src
 
 FROM base AS builder
 COPY . .
-RUN --mount=type=cache,target=/root/.cache \
-    --mount=type=cache,target=/root/.cargo,from=base,source=/root/.cargo \
-    cargo build -p cargo-risczero --release
+RUN --mount=type=cache,id=release,target=/root/.cache \
+  --mount=type=cache,id=release,target=/root/.cargo,from=base,source=/root/.cargo \
+  cargo build -p cargo-risczero --release
 
 FROM scratch AS export
 COPY --from=builder /src/target/release/cargo-risczero /
