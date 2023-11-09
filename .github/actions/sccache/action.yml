@@ -39,6 +39,9 @@ runs:
         mkdir -p $HOME/.local/bin
         mv -f $SCCACHE_FILE/sccache $HOME/.local/bin/sccache
         echo "$HOME/.local/bin" >> $GITHUB_PATH
+        echo "SCCACHE_REGION=${{ env.SCCACHE_REGION }}" >> $GITHUB_ENV
+        echo "SCCACHE_BUCKET=${{ env.SCCACHE_BUCKET }}" >> $GITHUB_ENV
+        echo "SCCACHE_S3_KEY_PREFIX=${{ env.SCCACHE_S3_KEY_PREFIX }}" >> $GITHUB_ENV
       shell: bash
 
     # - if: runner.os != 'macOS'
