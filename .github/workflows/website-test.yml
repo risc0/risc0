@@ -10,6 +10,14 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
+# this is needed to gain access via OIDC to the S3 bucket for caching
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  RISC0_TOOLCHAIN_VERSION: test-release-2
+
 jobs:
   doc-test:
     runs-on: [self-hosted, prod, Linux, cpu]
@@ -19,8 +27,15 @@ jobs:
           # Recursive checkout required to build Solidity contracts and bindings.
           submodules: recursive
       - uses: ./.github/actions/rustup
+      - uses: ./.github/actions/sccache
+        with:
+          key: Linux-default
       - uses: risc0/foundry-toolchain@2fe7e70b520f62368a0e3c464f997df07ede420f
-      - run: cargo run --bin cargo-risczero --no-default-features -- risczero install
+      - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - run: cargo test -p doc-test
+      - name: build
+        run: cargo test -p doc-test --no-run
+      - name: test
+        run: cargo test -p doc-test
+      - run: sccache --show-stats
