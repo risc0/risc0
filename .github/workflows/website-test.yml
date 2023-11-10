@@ -40,8 +40,8 @@ jobs:
       - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - build:
-        run: cargo test -p doc-test --no-test
-      - test:
+      - name: build
+        run: cargo test -p doc-test --no-run
+      - name: test
         run: cargo test -p doc-test
       - run: sccache --show-stats

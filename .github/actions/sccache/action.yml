@@ -44,7 +44,7 @@ runs:
       env:
         SCCACHE_REGION: us-west-2
         SCCACHE_BUCKET: risc0-ci-cache
-        SCCACHE_S3_KEY_PREFIX: public/${{ runner.os }}/sccache
+        SCCACHE_S3_KEY_PREFIX: public/${{ inputs.key }}/sccache
       run: |
         echo "SCCACHE_REGION=${{ env.SCCACHE_REGION }}" >> $GITHUB_ENV
         echo "SCCACHE_BUCKET=${{ env.SCCACHE_BUCKET }}" >> $GITHUB_ENV
@@ -64,7 +64,7 @@ runs:
       with:
         path: |
           ~/.cache/risc0
-        key: public/${{ runner.os }}/actions-cache
+        key: public/${{ inputs.key }}/actions-cache
         bucket: risc0-ci-cache
         accessKey: ${{ steps.aws-creds.outputs.aws-access-key-id }}
         secretKey: ${{ steps.aws-creds.outputs.aws-secret-access-key }}
