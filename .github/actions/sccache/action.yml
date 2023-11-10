@@ -49,6 +49,7 @@ runs:
         echo "SCCACHE_REGION=${{ env.SCCACHE_REGION }}" >> $GITHUB_ENV
         echo "SCCACHE_BUCKET=${{ env.SCCACHE_BUCKET }}" >> $GITHUB_ENV
         echo "SCCACHE_S3_KEY_PREFIX=${{ env.SCCACHE_S3_KEY_PREFIX }}" >> $GITHUB_ENV
+      shell: bash
 
     - if: runner.os == 'Linux'
       uses: aws-actions/configure-aws-credentials@v4
