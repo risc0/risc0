@@ -228,6 +228,8 @@ jobs:
     if: needs.changes.outputs.doc == 'true'
     needs: changes
     runs-on: [self-hosted, prod, macOS, cpu]
+    env:
+      RUSTC_WRAPPER: sccache
     steps:
       # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
       - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
@@ -247,6 +249,8 @@ jobs:
     if: needs.changes.outputs.check-benchmarks == 'true'
     needs: changes
     runs-on: [self-hosted, prod, macOS, cpu]
+    env:
+      RUSTC_WRAPPER: sccache
     steps:
       # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
       - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
@@ -357,6 +361,8 @@ jobs:
     if: needs.changes.outputs.test == 'true'
     needs: changes
     runs-on: [self-hosted, prod, Linux, cpu, docker]
+    env:
+      RUSTC_WRAPPER: sccache
     steps:
       # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
       - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
