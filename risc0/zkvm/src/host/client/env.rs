@@ -46,7 +46,18 @@ pub struct ExecutorEnvBuilder<'a> {
 }
 
 /// A callback used to collect [TraceEvent]s.
-pub type TraceCallback<'a> = dyn FnMut(TraceEvent) -> Result<()> + 'a;
+pub trait TraceCallback {
+    fn trace_callback(&mut self, event: TraceEvent) -> Result<()>;
+}
+
+impl<F> TraceCallback for F
+where
+    F: FnMut(TraceEvent) -> Result<()>,
+{
+    fn trace_callback(&mut self, event: TraceEvent) -> Result<()> {
+        self(event)
+    }
+}
 
 /// Container for assumptions in the executor environment.
 #[derive(Debug, Default)]
@@ -69,7 +80,7 @@ pub struct ExecutorEnv<'a> {
     pub(crate) posix_io: Rc<RefCell<PosixIo<'a>>>,
     pub(crate) slice_io: Rc<RefCell<SliceIoTable<'a>>>,
     pub(crate) input: Vec<u8>,
-    pub(crate) trace: Option<Rc<RefCell<TraceCallback<'a>>>>,
+    pub(crate) trace: Vec<Rc<RefCell<dyn TraceCallback + 'a>>>,
     pub(crate) assumptions: Rc<RefCell<Assumptions>>,
     pub(crate) segment_path: Option<PathBuf>,
 }
@@ -315,11 +326,8 @@ impl<'a> ExecutorEnvBuilder<'a> {
     }
 
     /// Add a callback handler for raw trace messages.
-    pub fn trace_callback(
-        &mut self,
-        callback: impl FnMut(TraceEvent) -> Result<()> + 'a,
-    ) -> &mut Self {
-        self.inner.trace = Some(Rc::new(RefCell::new(callback)));
+    pub fn trace_callback(&mut self, callback: impl TraceCallback + 'a) -> &mut Self {
+        self.inner.trace.push(Rc::new(RefCell::new(callback)));
         self
     }
 

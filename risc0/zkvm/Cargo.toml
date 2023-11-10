@@ -141,6 +141,7 @@ docker = []
 # to it being used to expose functionality to the fault checker.
 fault-proof = []
 profiler = [
+  "client",
   "dep:addr2line",
   "dep:gimli",
   "dep:object",
