@@ -44,7 +44,7 @@ runs:
       env:
         SCCACHE_REGION: us-west-2
         SCCACHE_BUCKET: risc0-ci-cache
-        SCCACHE_S3_KEY_PREFIX: public/${{ inputs.key }}
+        SCCACHE_S3_KEY_PREFIX: public/${{ runner.os }}/sccache
       run: |
         echo "SCCACHE_REGION=${{ env.SCCACHE_REGION }}" >> $GITHUB_ENV
         echo "SCCACHE_BUCKET=${{ env.SCCACHE_BUCKET }}" >> $GITHUB_ENV
@@ -52,19 +52,21 @@ runs:
       shell: bash
 
     - if: runner.os == 'Linux'
+      id: aws-creds
       uses: aws-actions/configure-aws-credentials@v4
       with:
         aws-region: us-west-2
         role-to-assume: arn:aws:iam::083632199359:role/gha_oidc_risc0_cache_public_access
+        output-credentials: true
 
-    # - if: runner.os != 'macOS'
-    #   name: Cache rust target + HAL_CACHE
-    #   uses: risc0/rust-cache@v2.5.1
-    #   id: rust-cache
-    #   with:
-    #     key: ${{ inputs.key }}
-    #     # TODO: this path will not work on windows.
-    #     cache-directories: ~/.cache/risc0
-
-    # - run: rm -f $HOME/.cargo/config
-    #   shell: bash
+    - if: runner.os == 'Linux'
+      uses: risc0/actions-cache@v1
+      with:
+        path: |
+          ~/.cache/risc0
+        key: public/${{ runner.os }}/actions-cache
+        bucket: risc0-ci-cache
+        accessKey: ${{ steps.aws-creds.outputs.aws-access-key-id }}
+        secretKey: ${{ steps.aws-creds.outputs.aws-secret-access-key }}
+        sessionToken: ${{ steps.aws-creds.outputs.aws-session-token }}
+        use-fallback: false

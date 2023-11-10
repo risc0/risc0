@@ -16,7 +16,11 @@ permissions:
   contents: read
 
 env:
+  CARGO_INCREMENTAL: 0
+  CARGO_NET_RETRY: 10
+  CARGO_PROFILE_DEV_DEBUG: 0
   RISC0_TOOLCHAIN_VERSION: test-release-2
+  RUSTUP_MAX_RETRIES: 10
 
 jobs:
   changes:
@@ -25,7 +29,7 @@ jobs:
       pull-requests: read
     outputs:
       check-benchmarks: ${{ steps.filter.outputs.check-benchmarks }}
-      check_template: ${{ steps.filter.outputs.check_template }}
+      check-template: ${{ steps.filter.outputs.check-template }}
       crates-validator: ${{ steps.filter.outputs.crates-validator }}
       doc: ${{ steps.filter.outputs.doc }}
       examples: ${{ steps.filter.outputs.examples }}
@@ -44,7 +48,7 @@ jobs:
               - *base
               - benchmarks/**
               - risc0/**
-            check_template:
+            check-template:
               - *base
               - risc0/**
               - templates/**
@@ -76,7 +80,7 @@ jobs:
     needs:
       - check
       - check-benchmarks
-      - check_template
+      - check-template
       - crates-validator
       - doc
       - examples
@@ -160,12 +164,19 @@ jobs:
       - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - run: cargo test -F $FEATURE -F fault-proof -F profiler -F prove --workspace --exclude doc-test --timings
+      - name: build workspace
+        run: cargo test -F $FEATURE -F fault-proof -F profiler -F prove --workspace --exclude doc-test --timings --no-run
+      - name: test workspace
+        run: cargo test -F $FEATURE -F fault-proof -F profiler -F prove --workspace --exclude doc-test --timings
       - uses: actions/upload-artifact@v3
         with:
           name: cargo-timings-${{ matrix.os }}-${{ matrix.device }}
-          path: target/cargo-timings/cargo-timing.html
-      - run: cargo test -p risc0-r0vm -F $FEATURE -F disable-dev-mode
+          path: target/cargo-timings/
+          retention-days: 5
+      - name: build risc0-r0vm
+        run: cargo test -p risc0-r0vm -F $FEATURE -F disable-dev-mode --no-run
+      - name: test risc0-r0vm
+        run: cargo test -p risc0-r0vm -F $FEATURE -F disable-dev-mode
       - run: cargo test -p cargo-risczero -F experimental
         if: matrix.device == 'cpu'
       - run: cargo check -F $FEATURE --benches
@@ -203,6 +214,9 @@ jobs:
       CUDA_LIBRARY_PATH: /usr/lib/cuda
       FEATURE: ${{ matrix.feature }}
       RISC0_BUILD_LOCKED: 1
+      RISC0_EXECUTOR: ipc
+      RISC0_PROVER: ipc
+      RISC0_SERVER_PATH: ${{ github.workspace }}/target/release/r0vm
       RUST_BACKTRACE: full
       RUSTC_WRAPPER: sccache
     steps:
@@ -213,14 +227,19 @@ jobs:
       - uses: ./.github/actions/sccache
         with:
           key: ${{ matrix.os }}-${{ matrix.feature }}
-      - run: cargo install --force --path risc0/cargo-risczero
-      - run: cargo risczero install --version $RISC0_TOOLCHAIN_VERSION
+      - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - run: cargo test --locked -F $FEATURE
+      - run: cargo build --release -p risc0-r0vm -F $FEATURE
+      - name: build
+        run: cargo test --locked -F $FEATURE --no-run
         working-directory: examples
-      - run: cargo run --locked -F $FEATURE && ls "${{ github.workspace }}/fibonacci.pb"
-        env: { RISC0_PPROF_OUT: "${{ github.workspace }}/fibonacci.pb" }
+      - name: test
+        run: cargo test --locked -F $FEATURE
+        working-directory: examples
+      - run: cargo run --locked -F $FEATURE
+        env:
+          RISC0_PPROF_OUT: ${{ github.workspace }}/fibonacci.pb
         working-directory: examples/profiling
       - run: sccache --show-stats
 
@@ -266,8 +285,8 @@ jobs:
         working-directory: benchmarks
       - run: sccache --show-stats
 
-  check_template:
-    if: needs.changes.outputs.check_template == 'true'
+  check-template:
+    if: needs.changes.outputs.check-template == 'true'
     needs: changes
     runs-on: [self-hosted, prod, cpu, "${{ matrix.os }}"]
     strategy:
