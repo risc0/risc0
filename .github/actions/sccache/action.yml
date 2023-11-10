@@ -1,9 +1,15 @@
 name: sccache install
 description: Install sccache
+
 inputs:
   key:
     required: true
     default: rust-cache-${{ runner.os }}-${{ runner.arch }}
+
+permissions:
+  id-token: write
+  contents: read
+
 runs:
   using: composite
   steps:
@@ -58,6 +64,5 @@ runs:
 
     - uses: aws-actions/configure-aws-credentials@v4
       with:
-        aws-region: 'us-west-2'
+        aws-region: us-west-2
         role-to-assume: arn:aws:iam::083632199359:role/gha_oidc_risc0_cache_public_access
-        output-credentials: true
