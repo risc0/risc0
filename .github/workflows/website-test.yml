@@ -15,6 +15,9 @@ permissions:
   id-token: write
   contents: read
 
+env:
+  RISC0_TOOLCHAIN_VERSION: test-release-2
+
 jobs:
   doc-test:
     runs-on: [self-hosted, prod, Linux, cpu]
