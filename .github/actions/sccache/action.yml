@@ -32,19 +32,28 @@ runs:
     - env:
         SCCACHE_URL: https://github.com/mozilla/sccache/releases/download
         SCCACHE_VERSION: v0.7.1
-        SCCACHE_REGION: us-west-2
-        SCCACHE_BUCKET: risc0-ci-cache
-        SCCACHE_S3_KEY_PREFIX: public/risc0-rust-cache-${{ env.SCCACHE_ARCH }}
       run: |
         SCCACHE_FILE=sccache-$SCCACHE_VERSION-$SCCACHE_ARCH
         curl -L "$SCCACHE_URL/$SCCACHE_VERSION/$SCCACHE_FILE.tar.gz" | tar xz
         mkdir -p $HOME/.local/bin
         mv -f $SCCACHE_FILE/sccache $HOME/.local/bin/sccache
         echo "$HOME/.local/bin" >> $GITHUB_PATH
+      shell: bash
+
+    - if: runner.os == 'Linux'
+      env:
+        SCCACHE_REGION: us-west-2
+        SCCACHE_BUCKET: risc0-ci-cache
+        SCCACHE_S3_KEY_PREFIX: public/${{ inputs.key }}
         echo "SCCACHE_REGION=${{ env.SCCACHE_REGION }}" >> $GITHUB_ENV
         echo "SCCACHE_BUCKET=${{ env.SCCACHE_BUCKET }}" >> $GITHUB_ENV
         echo "SCCACHE_S3_KEY_PREFIX=${{ env.SCCACHE_S3_KEY_PREFIX }}" >> $GITHUB_ENV
-      shell: bash
+
+    - if: runner.os == 'Linux'
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-region: us-west-2
+        role-to-assume: arn:aws:iam::083632199359:role/gha_oidc_risc0_cache_public_access
 
     # - if: runner.os != 'macOS'
     #   name: Cache rust target + HAL_CACHE
@@ -57,8 +66,3 @@ runs:
 
     # - run: rm -f $HOME/.cargo/config
     #   shell: bash
-
-    - uses: aws-actions/configure-aws-credentials@v4
-      with:
-        aws-region: us-west-2
-        role-to-assume: arn:aws:iam::083632199359:role/gha_oidc_risc0_cache_public_access
