@@ -211,15 +211,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d468802bab17cbc0cc575e9b053f41e72aa36bfa6b7f55e3529ffa43161b97fa"
 
 [[package]]
-name = "autotools"
-version = "0.2.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "aef8da1805e028a172334c3b680f93e71126f2327622faef2ec3d893c0a4ad77"
-dependencies = [
- "cc",
-]
-
-[[package]]
 name = "axum"
 version = "0.6.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3228,12 +3219,13 @@ dependencies = [
 ]
 
 [[package]]
-name = "protobuf-src"
-version = "1.1.0+21.5"
+name = "protoc-prebuilt"
+version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c7ac8852baeb3cc6fb83b93646fb93c0ffe5d14bf138c945ceb4b9948ee0e3c1"
+checksum = "37aee930fb53074ec083bf049aa6133bb1a93cce8fc39f83e07f36a0937304dd"
 dependencies = [
- "autotools",
+ "ureq",
+ "zip",
 ]
 
 [[package]]
@@ -3636,7 +3628,7 @@ dependencies = [
  "num-traits",
  "prost",
  "prost-build",
- "protobuf-src",
+ "protoc-prebuilt",
  "rayon",
  "risc0-binfmt",
  "risc0-circuit-recursion",
@@ -4953,6 +4945,21 @@ name = "untrusted"
 version = "0.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8ecb6da28b8a351d773b68d5825ac39017e680750f980f3a1a85cd8dd28a47c1"
+
+[[package]]
+name = "ureq"
+version = "2.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f5ccd538d4a604753ebc2f17cd9946e89b77bf87f6a8e2309667c6f2e87855e3"
+dependencies = [
+ "base64 0.21.4",
+ "log",
+ "once_cell",
+ "rustls 0.21.7",
+ "rustls-webpki",
+ "url",
+ "webpki-roots",
+]
 
 [[package]]
 name = "url"
