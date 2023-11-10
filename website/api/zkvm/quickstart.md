@@ -7,16 +7,17 @@ slug: ./quickstart
 
 Welcome to the zkVM Quick Start page! Here are the steps to create your first proof:
 
-1. Install the `cargo-risczero` toolchain
+1. Install the `cargo-risczero` toolchain.
 2. Create a new project using the `cargo-risczero` tool.
-3. Familiarize yourself with the project's structure
-4. Run your project locally
+3. Familiarize yourself with the project's structure.
+4. Run your project in dev-mode.
+5. Run your project locally to generate a zk-proof.
 
 ## Concept break
 
 The zkVM provides a zero-knowledge proof of the correct execution of Rust-based program.
-The **[host]** is responsible for launching the zkVM (or a [prover]), and then the **[guest]** is the program that runs inside the zkVM.
-A proof of execution is a [receipt]; it contains a public part - a [journal] and an encryption part - a [seal].
+The **[host]** is responsible for launching the zkVM (or a **[prover]**), and then the **[guest]** is the program that runs inside the zkVM.
+A proof of execution is a **[receipt]**; it contains a public part - a **[journal]** and an encryption part - a **[seal]**.
 
 ## 1. Install the RISC Zero Toolchain
 
@@ -36,7 +37,7 @@ The `cargo-risczero` tool takes `--guest-name` parameter, a [guest] program that
 cargo risczero new my_project --guest-name guest_code_for_zk_proof
 ```
 
-There is a list of options in the [feature flags]. To create a proof with the zkVM on your own machine, we recommend at least 16 GB of RAM.
+There is a list of options in the [feature flags].
 
 ## 3. Project structure
 
@@ -62,7 +63,7 @@ Once you've reached a point where you're ready to generate real proofs, you can 
 RISC0_DEV_MODE=0 cargo run --release
 ```
 
-Note that since proofs are now being generated, the execution time will be significantly longer than when running in dev-mode. Consider using [Bonsai] to generate proofs remotely, as it will likely be significantly faster than running proofs locally. You can [request access] to Bonsai to set additional flags.
+Note that since proofs are now being generated, the execution time will be significantly longer than when running in dev-mode. To create a proof with the zkVM on your own machine, we recommend at least 16 GB of RAM. To avoid these hardware requirements, consider using [Bonsai] to generate proofs remotely, as it will be significantly faster than running proofs locally. You can [request access] to Bonsai to set additional flags.
 
 ### Executor Statistics
 
