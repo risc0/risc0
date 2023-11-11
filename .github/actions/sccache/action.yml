@@ -41,14 +41,20 @@ runs:
       shell: bash
 
     - if: runner.os == 'Linux'
-      env:
-        SCCACHE_REGION: us-west-2
-        SCCACHE_BUCKET: risc0-ci-cache
-        SCCACHE_S3_KEY_PREFIX: public/${{ inputs.key }}/sccache
       run: |
-        echo "SCCACHE_REGION=${{ env.SCCACHE_REGION }}" >> $GITHUB_ENV
-        echo "SCCACHE_BUCKET=${{ env.SCCACHE_BUCKET }}" >> $GITHUB_ENV
-        echo "SCCACHE_S3_KEY_PREFIX=${{ env.SCCACHE_S3_KEY_PREFIX }}" >> $GITHUB_ENV
+        echo "SCCACHE_REGION=us-west-2" >> $GITHUB_ENV
+        echo "SCCACHE_BUCKET=risc0-ci-cache" >> $GITHUB_ENV
+        echo "SCCACHE_S3_KEY_PREFIX=public/${{ inputs.key }}/sccache" >> $GITHUB_ENV
+      shell: bash
+
+    - run: |
+        echo "CARGO_INCREMENTAL=0" >> $GITHUB_ENV
+        echo "CARGO_PROFILE_DEV_DEBUG=0" >> $GITHUB_ENV
+        echo "CC=sccache clang" >> $GITHUB_ENV
+        echo "CMAKE_C_COMPILER_LAUNCHER=sccache" >> $GITHUB_ENV
+        echo "CMAKE_CXX_COMPILER_LAUNCHER=sccache" >> $GITHUB_ENV
+        echo "CXX=sccache clang++" >> $GITHUB_ENV
+        echo "RUSTC_WRAPPER=sccache" >> $GITHUB_ENV
       shell: bash
 
     - if: runner.os == 'Linux'

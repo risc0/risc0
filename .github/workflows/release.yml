@@ -30,7 +30,6 @@ jobs:
           - os: macOS
             target: aarch64-apple-darwin
     env:
-      RUSTC_WRAPPER: sccache
       TARGET: ${{ matrix.target }}
     steps:
       - uses: actions/checkout@v4

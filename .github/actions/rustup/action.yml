@@ -39,7 +39,10 @@ runs:
       run: rustup component add ${{ inputs.components }}
       shell: bash
 
-    - run: echo CARGO_TERM_COLOR=always >> $GITHUB_ENV
+    - run: |
+        echo "CARGO_NET_RETRY=10" >> $GITHUB_ENV
+        echo "CARGO_TERM_COLOR=always" >> $GITHUB_ENV
+        echo "RUSTUP_MAX_RETRIES=10" >> $GITHUB_ENV
       shell: bash
 
     - run: rustc --version --verbose
