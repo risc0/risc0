@@ -121,7 +121,7 @@ Options such as GPU acceleration and skipping the proof generation are documente
 [feature flags]: https://github.com/risc0/risc0#feature-flags
 [zkVM demo applications]: https://github.com/risc0/risc0/tree/main/examples
 [cargo risczero]: https://crates.io/crates/cargo-risczero
-[Hello World tutorial]: https://github.com/risc0/risc0/tree/main/examples/hello-world/tutorial.md
+[Hello World tutorial]: https://github.com/risc0/risc0/tree/main/examples/hello-world
 [demo applications]: https://github.com/risc0/risc0/tree/main/examples
 [Bonsai Quick Start]: ../bonsai/quickstart.md
 [request access]: https://bonsai.xyz/apply
