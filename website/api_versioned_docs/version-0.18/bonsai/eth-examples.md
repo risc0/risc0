@@ -22,6 +22,6 @@ This [test contract][bonsai-starter.sol] in the [Bonsai Foundry Template][foundr
 [governance-example]: https://github.com/risc0/risc0/tree/release-0.18/bonsai/examples/governance
 [Governor smart contract standard]: https://docs.openzeppelin.com/contracts/4.x/api/governance
 [signature-aggregation]: https://github.com/risc0/risc0/blob/release-0.18/bonsai/examples/governance/methods/guest/src/bin/finalize_votes.rs
-[bonsai-starter.sol]: https://github.com/risc0/bonsai-foundry-template/blob/main/contracts/BonsaiStarter.sol
+[bonsai-starter.sol]: https://github.com/risc0/bonsai-foundry-template/blob/release-0.18/contracts/BonsaiStarter.sol
 [foundry-template]: https://github.com/risc0/bonsai-foundry-template
 [eth-relay]: https://github.com/risc0/risc0/tree/release-0.18/bonsai/ethereum-relay
