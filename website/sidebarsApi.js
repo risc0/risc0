@@ -28,6 +28,27 @@ export default {
           label: "A Blockchain Dev's Guide to zkVM Development",
           id: "bonsai/blockchain-zkvm-guide",
         },
+        {
+          type: "doc",
+          label: "Ethereum Examples",
+          id: "bonsai/eth-examples",
+        },
+        {
+          type: "category",
+          label: "REST API",
+          link: {
+            type: `doc`,
+            id: "bonsai/rest-api",
+          },
+          collapsed: false,
+          items: [
+            {
+              type: "link",
+              label: "API Reference Docs",
+              href: "https://api.bonsai.xyz/swagger-ui/",
+            },
+          ],
+        },
       ],
     },
     {
