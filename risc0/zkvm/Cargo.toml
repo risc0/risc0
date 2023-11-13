@@ -30,7 +30,7 @@ required-features = ["prove"]
 
 [build-dependencies]
 prost-build = { version = "0.12", optional = true }
-protobuf-src = { version = "1.1", optional = true }
+protoc-prebuilt = { version = "0.2", optional = true }
 
 [dependencies]
 anyhow = { version = "1.0", default-features = false }
@@ -111,7 +111,7 @@ client = [
   "dep:bytes",
   "dep:prost",
   "dep:prost-build",
-  "dep:protobuf-src",
+  "dep:protoc-prebuilt",
   "std",
 ]
 cuda = [
@@ -146,7 +146,7 @@ profiler = [
   "dep:object",
   "dep:prost",
   "dep:prost-build",
-  "dep:protobuf-src",
+  "dep:protoc-prebuilt",
   "dep:goblin",
   "dep:rustc-demangle",
 ]
@@ -163,7 +163,7 @@ prove = [
   "dep:lazy-regex",
   "dep:prost",
   "dep:prost-build",
-  "dep:protobuf-src",
+  "dep:protoc-prebuilt",
   "dep:rayon",
   "dep:sha2",
   "dep:tempfile",

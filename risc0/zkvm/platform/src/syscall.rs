@@ -688,6 +688,7 @@ pub unsafe extern "C" fn sys_alloc_aligned(bytes: usize, align: usize) -> *mut u
 /// 0 to register a0. The caller must calculate the ReceiptMetadata digest, using the provided post
 /// state digest and encode the digest into a public assumptions list for inclusion in the guest
 /// output.
+#[cfg(feature = "export-syscalls")]
 #[no_mangle]
 pub unsafe extern "C" fn sys_verify(
     image_id: *const [u32; DIGEST_WORDS],
@@ -726,6 +727,7 @@ pub unsafe extern "C" fn sys_verify(
 /// associated with that metadata digest, and will always return a result code
 /// of 0 to register a0. The caller must encode the metadata_digest into a
 /// public assumptions list for inclusion in the guest output.
+#[cfg(feature = "export-syscalls")]
 #[no_mangle]
 pub unsafe extern "C" fn sys_verify_integrity(metadata_digest: *const [u32; DIGEST_WORDS]) {
     let Return(a0, _) = unsafe {

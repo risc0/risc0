@@ -8,6 +8,11 @@ on:
   # pull_request:
   #   branches: [main, "release-*"]
 
+# this is needed to gain access via OIDC to the S3 bucket for caching
+permissions:
+  id-token: write
+  contents: read
+
 env:
   RISC0_TOOLCHAIN_VERSION: test-release-2
   TAG: v0.20.0-rc.1
@@ -25,7 +30,6 @@ jobs:
           - os: macOS
             target: aarch64-apple-darwin
     env:
-      RUSTC_WRAPPER: sccache
       TARGET: ${{ matrix.target }}
     steps:
       - uses: actions/checkout@v4
