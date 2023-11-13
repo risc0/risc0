@@ -15,8 +15,12 @@
 use anyhow::{bail, Result};
 
 use crate::{
-    host::receipt::{InnerReceipt, SegmentReceipt, SuccinctReceipt},
-    ProverServer, Receipt, Segment, Session, VerifierContext,
+    host::{
+        receipt::{InnerReceipt, SegmentReceipt, SuccinctReceipt},
+        server::session::EmptySegmentRef,
+    },
+    ExecutorEnv, ExecutorImpl, MemoryImage, ProverServer, Receipt, Segment, Session,
+    VerifierContext,
 };
 
 /// An implementation of a [ProverServer] for development and testing purposes.
@@ -41,6 +45,26 @@ use crate::{
 pub struct DevModeProver;
 
 impl ProverServer for DevModeProver {
+    /// Prove the specified [MemoryImage].
+    ///
+    /// DevModeProver runs the Executor without saving the generated segments.
+    fn prove(
+        &self,
+        env: ExecutorEnv<'_>,
+        ctx: &VerifierContext,
+        image: MemoryImage,
+    ) -> Result<Receipt> {
+        if cfg!(feature = "disable-dev-mode") {
+            bail!(
+                "zkVM: dev mode is disabled. Unset RISC0_DEV_MODE environment variable to produce valid proofs"
+            )
+        }
+
+        let mut exec = ExecutorImpl::new(env, image)?;
+        let session = exec.run_with_callback(|_| Ok(Box::new(EmptySegmentRef)))?;
+        self.prove_session(ctx, &session)
+    }
+
     fn prove_session(&self, _ctx: &VerifierContext, session: &Session) -> Result<Receipt> {
         eprintln!(
             "WARNING: Proving in dev mode does not generate a valid receipt. \

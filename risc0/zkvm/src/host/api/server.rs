@@ -23,7 +23,6 @@ use bytes::Bytes;
 use prost::Message;
 use risc0_binfmt::{MemoryImage, Program};
 use risc0_zkvm_platform::{memory::GUEST_MAX_MEM, PAGE_SIZE};
-use serde::{Deserialize, Serialize};
 
 use super::{malformed_err, path_to_string, pb, ConnectionWrapper, Connector, TcpConnector};
 use crate::{
@@ -31,26 +30,15 @@ use crate::{
     host::{
         client::{env::TraceCallback, slice_io::SliceIo},
         recursion::SuccinctReceipt,
+        server::session::EmptySegmentRef,
     },
-    ExecutorEnv, ExecutorImpl, ProverOpts, Segment, SegmentReceipt, SegmentRef, TraceEvent,
-    VerifierContext,
+    ExecutorEnv, ExecutorImpl, ProverOpts, Segment, SegmentReceipt, TraceEvent, VerifierContext,
 };
 
 /// A server implementation for handling requests by clients of the zkVM.
 pub struct Server {
     connector: Box<dyn Connector>,
 }
-
-#[derive(Clone, Serialize, Deserialize)]
-struct EmptySegmentRef;
-
-#[typetag::serde]
-impl SegmentRef for EmptySegmentRef {
-    fn resolve(&self) -> Result<Segment> {
-        Err(anyhow!("Segment resolution not supported"))
-    }
-}
-
 impl pb::api::Binary {
     fn as_image(&self) -> Result<MemoryImage> {
         let bytes = self.asset.as_ref().ok_or(malformed_err())?.as_bytes()?;

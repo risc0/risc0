@@ -333,3 +333,13 @@ impl FileSegmentRef {
         Ok(Self { path })
     }
 }
+
+#[derive(Clone, Serialize, Deserialize)]
+pub(crate) struct EmptySegmentRef;
+
+#[typetag::serde]
+impl SegmentRef for EmptySegmentRef {
+    fn resolve(&self) -> Result<Segment> {
+        Err(anyhow!("Segment resolution not supported"))
+    }
+}
