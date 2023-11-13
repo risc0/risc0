@@ -16,6 +16,7 @@ permissions:
   contents: read
 
 env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   RISC0_TOOLCHAIN_VERSION: test-release-2
 
 jobs:
@@ -157,8 +158,6 @@ jobs:
         with:
           key: ${{ matrix.os }}-${{ matrix.feature }}
       - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: build workspace
         run: cargo test -F $FEATURE -F fault-proof -F profiler -F prove --workspace --exclude doc-test --timings --no-run
       - name: test workspace
@@ -218,12 +217,10 @@ jobs:
       - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/rustup
-      - uses: ./.github/actions/sccache
-        with:
-          key: ${{ matrix.os }}-${{ matrix.feature }}
+      # - uses: ./.github/actions/sccache
+      #   with:
+      #     key: ${{ matrix.os }}-${{ matrix.feature }}
       - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: cargo build --release -p risc0-r0vm -F $FEATURE
       - name: build
         run: cargo test --locked -F $FEATURE --no-run
@@ -235,7 +232,7 @@ jobs:
         env:
           RISC0_PPROF_OUT: ${{ github.workspace }}/fibonacci.pb
         working-directory: examples/profiling
-      - run: sccache --show-stats
+      # - run: sccache --show-stats
 
   doc:
     if: needs.changes.outputs.doc == 'true'
@@ -251,8 +248,6 @@ jobs:
         with:
           key: macOS-default
       - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: cargo doc --no-deps --exclude=risc0-zkvm-methods --workspace
       - run: sccache --show-stats
 
@@ -269,8 +264,6 @@ jobs:
         with:
           key: macOS-default
       - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: cargo check
         working-directory: benchmarks
       - run: sccache --show-stats
@@ -293,8 +286,6 @@ jobs:
           key: ${{ matrix.os }}-default
       - run: cargo install --force --path risc0/cargo-risczero
       - run: cargo risczero install --version $RISC0_TOOLCHAIN_VERSION
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: |
           cargo risczero new \
             --template templates/rust-starter \
@@ -351,8 +342,6 @@ jobs:
         with:
           key: Linux-default
       - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: cargo xtask install
       - run: cargo xtask gen-receipt
       - run: |
@@ -374,8 +363,6 @@ jobs:
         with:
           key: Linux-default
       - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: cargo test -p risc0-build -F docker
       - run: cargo test -p risc0-zkvm -F docker -F prove -- "docker::"
         env:
