@@ -77,7 +77,7 @@ pub trait Prover {
     /// Return a name for this [Prover].
     fn get_name(&self) -> String;
 
-    /// Prove the specified [MemoryImage].
+    /// Prove zkVM execution starting from the specified [MemoryImage].
     fn prove(
         &self,
         env: ExecutorEnv<'_>,
@@ -86,7 +86,7 @@ pub trait Prover {
         image: MemoryImage,
     ) -> Result<Receipt>;
 
-    /// Prove the specified ELF binary.
+    /// Prove zkVM execution starting from the specified ELF binary.
     fn prove_elf(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<Receipt> {
         self.prove_elf_with_ctx(
             env,
@@ -96,7 +96,8 @@ pub trait Prover {
         )
     }
 
-    /// Prove the specified [MemoryImage] with the specified [VerifierContext].
+    /// Prove zkVM execution starting from the specified [MemoryImage] with the
+    /// specified [VerifierContext] and [ProverOpts].
     fn prove_elf_with_ctx(
         &self,
         env: ExecutorEnv<'_>,
@@ -104,9 +105,30 @@ pub trait Prover {
         elf: &[u8],
         opts: &ProverOpts,
     ) -> Result<Receipt> {
+        #[cfg(feature = "profiler")]
+        let mut env = env;
+        #[cfg(feature = "profiler")]
+        let profiler = crate::host::profiler::env::pprof_path()
+            .map(|_| -> anyhow::Result<_> {
+                let profiler = Rc::new(std::cell::RefCell::new(crate::Profiler::new(elf, None)?));
+                env.trace.push(profiler.clone());
+                Ok(profiler)
+            })
+            .transpose()?;
+
         let program = Program::load_elf(elf, GUEST_MAX_MEM as u32)?;
         let image = MemoryImage::new(&program, PAGE_SIZE as u32)?;
-        self.prove(env, ctx, opts, image)
+        let receipt = self.prove(env, ctx, opts, image)?;
+
+        #[cfg(feature = "profiler")]
+        if let Some(profiler) = profiler {
+            let unwrapped = Rc::into_inner(profiler)
+                .ok_or(anyhow::anyhow!("failed to finalize profiler"))?
+                .into_inner();
+            crate::host::profiler::env::write_pprof_file(&unwrapped.finalize_to_vec())?;
+        }
+
+        Ok(receipt)
     }
 }
 
@@ -121,9 +143,30 @@ pub trait Executor {
     ///
     /// This only executes the program and does not generate a receipt.
     fn execute_elf(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<SessionInfo> {
+        #[cfg(feature = "profiler")]
+        let mut env = env;
+        #[cfg(feature = "profiler")]
+        let profiler = crate::host::profiler::env::pprof_path()
+            .map(|_| -> anyhow::Result<_> {
+                let profiler = Rc::new(std::cell::RefCell::new(crate::Profiler::new(elf, None)?));
+                env.trace.push(profiler.clone());
+                Ok(profiler)
+            })
+            .transpose()?;
+
         let program = Program::load_elf(elf, GUEST_MAX_MEM as u32)?;
         let image = MemoryImage::new(&program, PAGE_SIZE as u32)?;
-        self.execute(env, image)
+        let session_info = self.execute(env, image)?;
+
+        #[cfg(feature = "profiler")]
+        if let Some(profiler) = profiler {
+            let unwrapped = Rc::into_inner(profiler)
+                .ok_or(anyhow::anyhow!("failed to finalize profiler"))?
+                .into_inner();
+            crate::host::profiler::env::write_pprof_file(&unwrapped.finalize_to_vec())?;
+        }
+
+        Ok(session_info)
     }
 }
 
@@ -132,12 +175,20 @@ pub trait Executor {
 pub struct ProverOpts {
     /// The hash function to use.
     pub hashfn: String,
+    /// When false, only prove execution sessions that end in a successful
+    /// [crate::ExitCode] (i.e. `Halted(0)` or `Paused(0)`).
+    /// When set to true, any completed execution session will be proven, including indicated
+    /// errors (e.g. `Halted(1)`) and sessions ending in `Fault`.
+    pub prove_guest_errors: bool,
 }
 
 impl Default for ProverOpts {
+    /// Return [ProverOpts] with the SHA-256 hash function and
+    /// `prove_guest_errors` set to false.
     fn default() -> Self {
         Self {
             hashfn: "poseidon".to_string(),
+            prove_guest_errors: false,
         }
     }
 }

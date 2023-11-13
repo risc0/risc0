@@ -7,21 +7,14 @@ This code demonstrates a minimal example of how to use the [bevy] game engine in
 
 ## Quick Start
 
-First, [install Rust] if you don't already have it.
-
-Next, install the `cargo-risczero` tool and install the toolchain with:
-```bash
-cargo install cargo-binstall
-cargo binstall cargo-risczero
-cargo risczero install
-```
+First, follow the [installation guide] if you don't already have the RISC Zero tools installed.
 
 Then, run the example with:
 ```bash
 cargo run --release
 ```
 
-[install Rust]: https://doc.rust-lang.org/cargo/getting-started/installation.html
+[installation guide]: https://dev.risczero.com/api/zkvm/quickstart
 
 ## Use Cases
 By using this demo as part of a [Bonsai application], you could build an app where on-chain payment depends on off-chain gameplay.

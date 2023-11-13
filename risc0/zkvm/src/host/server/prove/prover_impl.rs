@@ -12,14 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use anyhow::Result;
+use anyhow::{bail, Result};
 use risc0_circuit_rv32im::{
     layout::{OutBuffer, LAYOUT},
     REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA,
 };
 use risc0_core::field::baby_bear::{BabyBear, Elem, ExtElem};
-#[cfg(feature = "fault-proof")]
-use risc0_zkp::verify::VerificationError;
 use risc0_zkp::{
     adapter::TapsProvider,
     hal::{CircuitHal, Hal},
@@ -30,11 +28,12 @@ use risc0_zkp::{
 use super::{exec::MachineContext, HalPair, ProverServer};
 use crate::{
     host::{
-        receipt::SegmentReceipts,
-        recursion::{identity_p254, join, lift, SuccinctReceipt},
+        receipt::{CompositeReceipt, InnerReceipt, SegmentReceipt, SuccinctReceipt},
+        recursion::{identity_p254, join, lift},
         CIRCUIT,
     },
-    InnerReceipt, Loader, Receipt, Segment, SegmentReceipt, Session, VerifierContext,
+    sha::Digestible,
+    Loader, Receipt, Segment, Session, VerifierContext,
 };
 
 /// An implementation of a Prover that runs locally.
@@ -67,7 +66,12 @@ where
     C: CircuitHal<H>,
 {
     fn prove_session(&self, ctx: &VerifierContext, session: &Session) -> Result<Receipt> {
-        log::info!("prove_session: {}", self.name);
+        log::info!(
+            "prove_session: {}, exit_code = {:?}, journal = {:?}",
+            self.name,
+            session.exit_code,
+            session.journal.as_ref().map(|x| hex::encode(x))
+        );
         let mut segments = Vec::new();
         for segment_ref in session.segments.iter() {
             let segment = segment_ref.resolve()?;
@@ -79,24 +83,36 @@ where
                 hook.on_post_prove_segment(&segment);
             }
         }
-        let inner = InnerReceipt::Flat(SegmentReceipts(segments));
-        let receipt = Receipt::new(inner, session.journal.bytes.clone());
-        let image_id = session.segments[0].resolve()?.pre_image.compute_id();
-        match receipt.verify_with_context(ctx, image_id) {
-            Ok(()) => Ok(receipt),
-            // proof of fault is currently in an experimental stage. If this
-            // feature is disabled, then it means that attempting the verification verify at
-            // this stage should return an error rather than a receipt.
-            #[cfg(feature = "fault-proof")]
-            Err(VerificationError::ValidFaultReceipt) => Ok(receipt),
-            Err(e) => return Err(e.into()),
+        // TODO(#982): Support unresolved assumptions here.
+        let inner = InnerReceipt::Composite(CompositeReceipt {
+            segments,
+            assumptions: session
+                .assumptions
+                .iter()
+                .map(|a| Ok(a.as_receipt()?.inner.clone()))
+                .collect::<Result<Vec<_>>>()?,
+            journal_digest: session.journal.as_ref().map(|journal| journal.digest()),
+        });
+        let receipt = Receipt::new(inner, session.journal.clone().unwrap_or_default().bytes);
+
+        receipt.verify_integrity_with_context(ctx)?;
+        if receipt.get_metadata()?.digest() != session.get_metadata()?.digest() {
+            log::debug!("receipt and session metadata do not match");
+            log::debug!("receipt metadata: {:#?}", receipt.get_metadata()?);
+            log::debug!("session metadata: {:#?}", session.get_metadata()?);
+            bail!(
+                "session and receipt metadata do not match: session {}, receipt {}",
+                hex::encode(&session.get_metadata()?.digest()),
+                hex::encode(&receipt.get_metadata()?.digest())
+            );
         }
+        Ok(receipt)
     }
 
     fn prove_segment(&self, ctx: &VerifierContext, segment: &Segment) -> Result<SegmentReceipt> {
         use risc0_zkp::prove::executor::Executor;
 
-        log::info!(
+        log::debug!(
             "prove_segment[{}]: po2: {}, cycles: {}",
             segment.index,
             segment.po2,
@@ -148,7 +164,7 @@ where
             index: segment.index,
             hashfn: hashfn.clone(),
         };
-        receipt.verify_with_context(ctx)?;
+        receipt.verify_integrity_with_context(ctx)?;
 
         Ok(receipt)
     }

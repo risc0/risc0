@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use core::cmp;
+use core::{cmp, ops::Deref};
 use std::collections::{BTreeMap, BTreeSet, VecDeque};
 
 use anyhow::{anyhow, Result};
@@ -263,7 +263,7 @@ impl MachineContext {
             .map(|syscall| syscall.regs)
             .collect();
         MachineContext {
-            memory: MemoryState::new(segment.pre_image.clone()),
+            memory: MemoryState::new(segment.pre_image.deref().clone()),
             faults: segment.faults.clone(),
             syscall_out_data: VecDeque::from(syscall_out_data),
             syscall_out_regs: VecDeque::from(syscall_out_regs),
@@ -281,14 +281,14 @@ impl MachineContext {
             let pc: u32 = pc.into();
             match exit_code {
                 halt::TERMINATE => {
-                    log::info!("HALT[{cycle}]> pc: 0x{pc:08x}");
+                    log::debug!("HALT[{cycle}]> pc: 0x{pc:08x}");
                 }
                 halt::PAUSE => {
-                    log::info!("PAUSE[{cycle}]> pc: 0x{pc:08x}");
+                    log::debug!("PAUSE[{cycle}]> pc: 0x{pc:08x}");
                     self.is_flushing = true;
                 }
                 halt::SPLIT => {
-                    log::info!("SPLIT[{cycle}]> pc: 0x{pc:08x}");
+                    log::debug!("SPLIT[{cycle}]> pc: 0x{pc:08x}");
                 }
                 _ => unimplemented!("Unsupported exit_code: {exit_code}"),
             }
@@ -319,7 +319,7 @@ impl MachineContext {
 
         if let Some(split_insn) = self.split_insn {
             if self.insn_counter == split_insn && !self.is_flushing {
-                log::info!("FLUSH[{}]> pc: 0x{pc:08x}", self.insn_counter);
+                log::debug!("FLUSH[{}]> pc: 0x{pc:08x}", self.insn_counter);
                 self.is_flushing = true;
             }
         }

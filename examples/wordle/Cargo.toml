@@ -14,6 +14,7 @@ wordle-methods = { path = "methods" }
 serial_test = "2.0"
 
 [features]
-cuda = ["risc0-zkvm/cuda"]
 default = []
-metal = ["risc0-zkvm/metal"]
+cuda = ["risc0-zkvm/cuda"]
+prove = ["risc0-zkvm/prove"]
+profiler = ["risc0-zkvm/profiler"]

@@ -29,7 +29,8 @@
 //! [`cargo-risczero`](https://crates.io/crates/cargo-risczero) tool:
 //!
 //! ```sh
-//! cargo install cargo-risczero
+//! cargo install cargo-binstall
+//! cargo binstall cargo-risczero
 //! cargo risczero install
 //! ```
 //!

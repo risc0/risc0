@@ -28,8 +28,12 @@ use serde::{Deserialize, Serialize};
 use super::{malformed_err, path_to_string, pb, ConnectionWrapper, Connector, TcpConnector};
 use crate::{
     get_prover_server, get_version,
-    host::{client::slice_io::SliceIo, recursion::SuccinctReceipt},
-    ExecutorEnv, ExecutorImpl, ProverOpts, Segment, SegmentReceipt, SegmentRef, VerifierContext,
+    host::{
+        client::{env::TraceCallback, slice_io::SliceIo},
+        recursion::SuccinctReceipt,
+    },
+    ExecutorEnv, ExecutorImpl, ProverOpts, Segment, SegmentReceipt, SegmentRef, TraceEvent,
+    VerifierContext,
 };
 
 /// A server implementation for handling requests by clients of the zkVM.
@@ -89,11 +93,11 @@ impl Read for PosixIoProxy {
             })),
         };
 
-        log::debug!("tx: {request:?}");
+        log::trace!("tx: {request:?}");
         self.conn.send(request).map_io_err()?;
 
         let reply: pb::api::OnIoReply = self.conn.recv().map_io_err()?;
-        log::debug!("rx: {reply:?}");
+        log::trace!("rx: {reply:?}");
 
         let kind = reply.kind.ok_or("Malformed message").map_io_err()?;
         match kind {
@@ -122,11 +126,11 @@ impl Write for PosixIoProxy {
             })),
         };
 
-        log::debug!("tx: {request:?}");
+        log::trace!("tx: {request:?}");
         self.conn.send(request).map_io_err()?;
 
         let reply: pb::api::OnIoReply = self.conn.recv().map_io_err()?;
-        log::debug!("rx: {reply:?}");
+        log::trace!("rx: {reply:?}");
 
         let kind = reply.kind.ok_or("Malformed message").map_io_err()?;
         match kind {
@@ -168,10 +172,50 @@ impl SliceIo for SliceIoProxy {
                 })),
             })),
         };
-        log::debug!("tx: {request:?}");
+        log::trace!("tx: {request:?}");
         self.conn.send(request)?;
 
-        Ok(Bytes::new())
+        let reply: pb::api::OnIoReply = self.conn.recv().map_io_err()?;
+        log::trace!("rx: {reply:?}");
+
+        let kind = reply.kind.ok_or("Malformed message").map_io_err()?;
+        match kind {
+            pb::api::on_io_reply::Kind::Ok(buf) => Ok(buf.into()),
+            pb::api::on_io_reply::Kind::Error(err) => Err(err.into()),
+        }
+    }
+}
+
+struct TraceProxy {
+    conn: ConnectionWrapper,
+}
+
+impl TraceProxy {
+    fn new(conn: ConnectionWrapper) -> Self {
+        Self { conn }
+    }
+}
+
+impl TraceCallback for TraceProxy {
+    fn trace_callback(&mut self, event: TraceEvent) -> Result<()> {
+        let request = pb::api::ServerReply {
+            kind: Some(pb::api::server_reply::Kind::Ok(pb::api::ClientCallback {
+                kind: Some(pb::api::client_callback::Kind::Io(pb::api::OnIoRequest {
+                    kind: Some(pb::api::on_io_request::Kind::Trace(event.try_into()?)),
+                })),
+            })),
+        };
+        log::trace!("tx: {request:?}");
+        self.conn.send(request)?;
+
+        let reply: pb::api::OnIoReply = self.conn.recv().map_io_err()?;
+        log::trace!("rx: {reply:?}");
+
+        let kind = reply.kind.ok_or("Malformed message").map_io_err()?;
+        match kind {
+            pb::api::on_io_reply::Kind::Ok(_) => Ok(()),
+            pb::api::on_io_reply::Kind::Error(err) => Err(err.into()),
+        }
     }
 }
 
@@ -196,7 +240,7 @@ impl Server {
         let server_version = get_version().map_err(|err| anyhow!(err))?;
 
         let request: pb::api::HelloRequest = conn.recv()?;
-        log::debug!("rx: {request:?}");
+        log::trace!("rx: {request:?}");
 
         let client_version: semver::Version = request
             .version
@@ -214,33 +258,23 @@ impl Server {
                 version: Some(server_version.into()),
             })),
         };
-        log::debug!("tx: {reply:?}");
+        log::trace!("tx: {reply:?}");
         conn.send(reply)?;
 
         let request: pb::api::ServerRequest = conn.recv()?;
-        log::debug!("rx: {request:?}");
+        log::trace!("rx: {request:?}");
         match request.kind.ok_or(malformed_err())? {
-            pb::api::server_request::Kind::Prove(request) => {
-                self.on_prove(conn, request)?;
-            }
-            pb::api::server_request::Kind::Execute(request) => {
-                self.on_execute(conn, request)?;
-            }
+            pb::api::server_request::Kind::Prove(request) => self.on_prove(conn, request),
+            pb::api::server_request::Kind::Execute(request) => self.on_execute(conn, request),
             pb::api::server_request::Kind::ProveSegment(request) => {
-                self.on_prove_segment(conn, request)?
+                self.on_prove_segment(conn, request)
             }
-            pb::api::server_request::Kind::Lift(request) => {
-                self.on_lift(conn, request)?;
-            }
-            pb::api::server_request::Kind::Join(request) => {
-                self.on_join(conn, request)?;
-            }
+            pb::api::server_request::Kind::Lift(request) => self.on_lift(conn, request),
+            pb::api::server_request::Kind::Join(request) => self.on_join(conn, request),
             pb::api::server_request::Kind::IdentiyP254(request) => {
-                self.on_identity_p254(conn, request)?;
+                self.on_identity_p254(conn, request)
             }
-        };
-
-        Ok(())
+        }
     }
 
     fn on_execute(
@@ -248,100 +282,120 @@ impl Server {
         mut conn: ConnectionWrapper,
         request: pb::api::ExecuteRequest,
     ) -> Result<()> {
-        let env_request = request.env.ok_or(malformed_err())?;
-        let env = self.build_env(&conn, &env_request)?;
+        fn inner(
+            conn: &mut ConnectionWrapper,
+            request: pb::api::ExecuteRequest,
+        ) -> Result<pb::api::ServerReply> {
+            let env_request = request.env.ok_or(malformed_err())?;
+            let env = build_env(&conn, &env_request)?;
 
-        let binary = env_request.binary.ok_or(malformed_err())?;
-        let image = binary.as_image()?;
-        let segments_out = request.segments_out.ok_or(malformed_err())?;
+            let binary = env_request.binary.ok_or(malformed_err())?;
+            let image = binary.as_image()?;
+            let segments_out = request.segments_out.ok_or(malformed_err())?;
 
-        let mut exec = ExecutorImpl::new(env, image)?;
-        let session = exec.run_with_callback(|segment| {
-            let segment_bytes = bincode::serialize(&segment)?;
-            let asset = pb::api::Asset::from_bytes(
-                &segments_out,
-                segment_bytes.into(),
-                format!("segment-{}", segment.index),
-            )?;
-            let msg = pb::api::ServerReply {
+            let mut exec = ExecutorImpl::new(env, image)?;
+            let session = exec.run_with_callback(|segment| {
+                let segment_bytes = bincode::serialize(&segment)?;
+                let asset = pb::api::Asset::from_bytes(
+                    &segments_out,
+                    segment_bytes.into(),
+                    format!("segment-{}", segment.index),
+                )?;
+                let msg = pb::api::ServerReply {
+                    kind: Some(pb::api::server_reply::Kind::Ok(pb::api::ClientCallback {
+                        kind: Some(pb::api::client_callback::Kind::SegmentDone(
+                            pb::api::OnSegmentDone {
+                                segment: Some(pb::api::SegmentInfo {
+                                    index: segment.index,
+                                    po2: segment.po2,
+                                    cycles: segment.cycles,
+                                    segment: Some(asset),
+                                }),
+                            },
+                        )),
+                    })),
+                };
+                log::trace!("tx: {msg:?}");
+                conn.send(msg)?;
+
+                let reply: pb::api::GenericReply = conn.recv()?;
+                log::trace!("rx: {reply:?}");
+                let kind = reply.kind.ok_or(malformed_err())?;
+                if let pb::api::generic_reply::Kind::Error(err) = kind {
+                    bail!(err)
+                }
+
+                Ok(Box::new(EmptySegmentRef))
+            })?;
+
+            Ok(pb::api::ServerReply {
                 kind: Some(pb::api::server_reply::Kind::Ok(pb::api::ClientCallback {
-                    kind: Some(pb::api::client_callback::Kind::SegmentDone(
-                        pb::api::OnSegmentDone {
-                            segment: Some(pb::api::SegmentInfo {
-                                index: segment.index,
-                                po2: segment.po2,
-                                cycles: segment.cycles,
-                                segment: Some(asset),
+                    kind: Some(pb::api::client_callback::Kind::SessionDone(
+                        pb::api::OnSessionDone {
+                            session: Some(pb::api::SessionInfo {
+                                segments: session.segments.len().try_into()?,
+                                journal: session.journal.unwrap_or_default().bytes,
+                                exit_code: Some(session.exit_code.into()),
                             }),
                         },
                     )),
                 })),
-            };
-            log::debug!("tx: {msg:?}");
-            conn.send(msg)?;
+            })
+        }
 
-            let reply: pb::api::GenericReply = conn.recv()?;
-            log::debug!("rx: {reply:?}");
-            let kind = reply.kind.ok_or(malformed_err())?;
-            if let pb::api::generic_reply::Kind::Error(err) = kind {
-                bail!(err)
-            }
-
-            Ok(Box::new(EmptySegmentRef))
-        })?;
-
-        let msg = pb::api::ServerReply {
-            kind: Some(pb::api::server_reply::Kind::Ok(pb::api::ClientCallback {
-                kind: Some(pb::api::client_callback::Kind::SessionDone(
-                    pb::api::OnSessionDone {
-                        session: Some(pb::api::SessionInfo {
-                            segments: session.segments.len().try_into()?,
-                            journal: session.journal.bytes,
-                            exit_code: Some(session.exit_code.into()),
-                        }),
-                    },
-                )),
+        let msg = inner(&mut conn, request).unwrap_or_else(|err| pb::api::ServerReply {
+            kind: Some(pb::api::server_reply::Kind::Error(pb::api::GenericError {
+                reason: err.to_string(),
             })),
-        };
-        log::debug!("tx: {msg:?}");
-        conn.send(msg)?;
+        });
 
-        Ok(())
+        log::trace!("tx: {msg:?}");
+        conn.send(msg)
     }
 
     fn on_prove(&self, mut conn: ConnectionWrapper, request: pb::api::ProveRequest) -> Result<()> {
-        let env_request = request.env.ok_or(malformed_err())?;
-        let env = self.build_env(&conn, &env_request)?;
+        fn inner(
+            conn: &mut ConnectionWrapper,
+            request: pb::api::ProveRequest,
+        ) -> Result<pb::api::ServerReply> {
+            let env_request = request.env.ok_or(malformed_err())?;
+            let env = build_env(&conn, &env_request)?;
 
-        let binary = env_request.binary.ok_or(malformed_err())?;
-        let image = binary.as_image()?;
+            let binary = env_request.binary.ok_or(malformed_err())?;
+            let image = binary.as_image()?;
 
-        let opts: ProverOpts = request.opts.ok_or(malformed_err())?.into();
-        let prover = get_prover_server(&opts)?;
-        let ctx = VerifierContext::default();
-        let receipt = prover.prove(env, &ctx, image)?;
+            let opts: ProverOpts = request.opts.ok_or(malformed_err())?.into();
+            let prover = get_prover_server(&opts)?;
+            let ctx = VerifierContext::default();
+            let receipt = prover.prove(env, &ctx, image)?;
 
-        let receipt_pb: pb::core::Receipt = receipt.into();
-        let receipt_bytes = receipt_pb.encode_to_vec();
-        let asset = pb::api::Asset::from_bytes(
-            &request.receipt_out.ok_or(malformed_err())?,
-            receipt_bytes.into(),
-            "receipt.zkp",
-        )?;
+            let receipt_pb: pb::core::Receipt = receipt.into();
+            let receipt_bytes = receipt_pb.encode_to_vec();
+            let asset = pb::api::Asset::from_bytes(
+                &request.receipt_out.ok_or(malformed_err())?,
+                receipt_bytes.into(),
+                "receipt.zkp",
+            )?;
 
-        let msg = pb::api::ServerReply {
-            kind: Some(pb::api::server_reply::Kind::Ok(pb::api::ClientCallback {
-                kind: Some(pb::api::client_callback::Kind::ProveDone(
-                    pb::api::OnProveDone {
-                        receipt: Some(asset),
-                    },
-                )),
+            Ok(pb::api::ServerReply {
+                kind: Some(pb::api::server_reply::Kind::Ok(pb::api::ClientCallback {
+                    kind: Some(pb::api::client_callback::Kind::ProveDone(
+                        pb::api::OnProveDone {
+                            receipt: Some(asset),
+                        },
+                    )),
+                })),
+            })
+        }
+
+        let msg = inner(&mut conn, request).unwrap_or_else(|err| pb::api::ServerReply {
+            kind: Some(pb::api::server_reply::Kind::Error(pb::api::GenericError {
+                reason: err.to_string(),
             })),
-        };
-        log::debug!("tx: {msg:?}");
-        conn.send(msg)?;
+        });
 
-        Ok(())
+        log::trace!("tx: {msg:?}");
+        conn.send(msg)
     }
 
     fn on_prove_segment(
@@ -349,89 +403,113 @@ impl Server {
         mut conn: ConnectionWrapper,
         request: pb::api::ProveSegmentRequest,
     ) -> Result<()> {
-        let opts: ProverOpts = request.opts.ok_or(malformed_err())?.into();
-        let segment_bytes = request.segment.ok_or(malformed_err())?.as_bytes()?;
-        let segment: Segment = bincode::deserialize(&segment_bytes)?;
+        fn inner(request: pb::api::ProveSegmentRequest) -> Result<pb::api::ProveSegmentReply> {
+            let opts: ProverOpts = request.opts.ok_or(malformed_err())?.into();
+            let segment_bytes = request.segment.ok_or(malformed_err())?.as_bytes()?;
+            let segment: Segment = bincode::deserialize(&segment_bytes)?;
 
-        let prover = get_prover_server(&opts)?;
-        let ctx = VerifierContext::default();
-        let receipt = prover.prove_segment(&ctx, &segment)?;
+            let prover = get_prover_server(&opts)?;
+            let ctx = VerifierContext::default();
+            let receipt = prover.prove_segment(&ctx, &segment)?;
 
-        let receipt_pb: pb::core::SegmentReceipt = receipt.into();
-        let receipt_bytes = receipt_pb.encode_to_vec();
-        let asset = pb::api::Asset::from_bytes(
-            &request.receipt_out.ok_or(malformed_err())?,
-            receipt_bytes.into(),
-            "receipt.zkp",
-        )?;
+            let receipt_pb: pb::core::SegmentReceipt = receipt.into();
+            let receipt_bytes = receipt_pb.encode_to_vec();
+            let asset = pb::api::Asset::from_bytes(
+                &request.receipt_out.ok_or(malformed_err())?,
+                receipt_bytes.into(),
+                "receipt.zkp",
+            )?;
 
-        let msg = pb::api::ProveSegmentReply {
-            kind: Some(pb::api::prove_segment_reply::Kind::Ok(
-                pb::api::ProveSegmentResult {
-                    receipt: Some(asset),
+            Ok(pb::api::ProveSegmentReply {
+                kind: Some(pb::api::prove_segment_reply::Kind::Ok(
+                    pb::api::ProveSegmentResult {
+                        receipt: Some(asset),
+                    },
+                )),
+            })
+        }
+
+        let msg = inner(request).unwrap_or_else(|err| pb::api::ProveSegmentReply {
+            kind: Some(pb::api::prove_segment_reply::Kind::Error(
+                pb::api::GenericError {
+                    reason: err.to_string(),
                 },
             )),
-        };
-        log::debug!("tx: {msg:?}");
-        conn.send(msg)?;
+        });
 
-        Ok(())
+        log::trace!("tx: {msg:?}");
+        conn.send(msg)
     }
 
     fn on_lift(&self, mut conn: ConnectionWrapper, request: pb::api::LiftRequest) -> Result<()> {
-        let opts: ProverOpts = request.opts.ok_or(malformed_err())?.into();
-        let receipt_bytes = request.receipt.ok_or(malformed_err())?.as_bytes()?;
-        let segment_receipt: SegmentReceipt = bincode::deserialize(&receipt_bytes)?;
+        fn inner(request: pb::api::LiftRequest) -> Result<pb::api::LiftReply> {
+            let opts: ProverOpts = request.opts.ok_or(malformed_err())?.into();
+            let receipt_bytes = request.receipt.ok_or(malformed_err())?.as_bytes()?;
+            let segment_receipt: SegmentReceipt = bincode::deserialize(&receipt_bytes)?;
 
-        let prover = get_prover_server(&opts)?;
-        let receipt = prover.lift(&segment_receipt)?;
+            let prover = get_prover_server(&opts)?;
+            let receipt = prover.lift(&segment_receipt)?;
 
-        let succinct_receipt_pb: pb::core::SuccinctReceipt = receipt.into();
-        let succinct_receipt_bytes = succinct_receipt_pb.encode_to_vec();
-        let asset = pb::api::Asset::from_bytes(
-            &request.receipt_out.ok_or(malformed_err())?,
-            succinct_receipt_bytes.into(),
-            "receipt.zkp",
-        )?;
+            let succinct_receipt_pb: pb::core::SuccinctReceipt = receipt.into();
+            let succinct_receipt_bytes = succinct_receipt_pb.encode_to_vec();
+            let asset = pb::api::Asset::from_bytes(
+                &request.receipt_out.ok_or(malformed_err())?,
+                succinct_receipt_bytes.into(),
+                "receipt.zkp",
+            )?;
 
-        let msg = pb::api::LiftReply {
-            kind: Some(pb::api::lift_reply::Kind::Ok(pb::api::LiftResult {
-                receipt: Some(asset),
+            Ok(pb::api::LiftReply {
+                kind: Some(pb::api::lift_reply::Kind::Ok(pb::api::LiftResult {
+                    receipt: Some(asset),
+                })),
+            })
+        }
+
+        let msg = inner(request).unwrap_or_else(|err| pb::api::LiftReply {
+            kind: Some(pb::api::lift_reply::Kind::Error(pb::api::GenericError {
+                reason: err.to_string(),
             })),
-        };
-        log::debug!("tx: {msg:?}");
-        conn.send(msg)?;
+        });
 
-        Ok(())
+        log::debug!("tx: {msg:?}");
+        conn.send(msg)
     }
 
     fn on_join(&self, mut conn: ConnectionWrapper, request: pb::api::JoinRequest) -> Result<()> {
-        let opts: ProverOpts = request.opts.ok_or(malformed_err())?.into();
-        let left_receipt_bytes = request.left_receipt.ok_or(malformed_err())?.as_bytes()?;
-        let left_succinct_receipt: SuccinctReceipt = bincode::deserialize(&left_receipt_bytes)?;
-        let right_receipt_bytes = request.right_receipt.ok_or(malformed_err())?.as_bytes()?;
-        let right_succinct_receipt: SuccinctReceipt = bincode::deserialize(&right_receipt_bytes)?;
+        fn inner(request: pb::api::JoinRequest) -> Result<pb::api::JoinReply> {
+            let opts: ProverOpts = request.opts.ok_or(malformed_err())?.into();
+            let left_receipt_bytes = request.left_receipt.ok_or(malformed_err())?.as_bytes()?;
+            let left_succinct_receipt: SuccinctReceipt = bincode::deserialize(&left_receipt_bytes)?;
+            let right_receipt_bytes = request.right_receipt.ok_or(malformed_err())?.as_bytes()?;
+            let right_succinct_receipt: SuccinctReceipt =
+                bincode::deserialize(&right_receipt_bytes)?;
 
-        let prover = get_prover_server(&opts)?;
-        let receipt = prover.join(&left_succinct_receipt, &right_succinct_receipt)?;
+            let prover = get_prover_server(&opts)?;
+            let receipt = prover.join(&left_succinct_receipt, &right_succinct_receipt)?;
 
-        let succinct_receipt_pb: pb::core::SuccinctReceipt = receipt.into();
-        let succinct_receipt_bytes = succinct_receipt_pb.encode_to_vec();
-        let asset = pb::api::Asset::from_bytes(
-            &request.receipt_out.ok_or(malformed_err())?,
-            succinct_receipt_bytes.into(),
-            "receipt.zkp",
-        )?;
+            let succinct_receipt_pb: pb::core::SuccinctReceipt = receipt.into();
+            let succinct_receipt_bytes = succinct_receipt_pb.encode_to_vec();
+            let asset = pb::api::Asset::from_bytes(
+                &request.receipt_out.ok_or(malformed_err())?,
+                succinct_receipt_bytes.into(),
+                "receipt.zkp",
+            )?;
 
-        let msg = pb::api::JoinReply {
-            kind: Some(pb::api::join_reply::Kind::Ok(pb::api::JoinResult {
-                receipt: Some(asset),
+            Ok(pb::api::JoinReply {
+                kind: Some(pb::api::join_reply::Kind::Ok(pb::api::JoinResult {
+                    receipt: Some(asset),
+                })),
+            })
+        }
+
+        let msg = inner(request).unwrap_or_else(|err| pb::api::JoinReply {
+            kind: Some(pb::api::join_reply::Kind::Error(pb::api::GenericError {
+                reason: err.to_string(),
             })),
-        };
-        log::debug!("tx: {msg:?}");
-        conn.send(msg)?;
+        });
 
-        Ok(())
+        log::debug!("tx: {msg:?}");
+        conn.send(msg)
     }
 
     fn on_identity_p254(
@@ -439,61 +517,72 @@ impl Server {
         mut conn: ConnectionWrapper,
         request: pb::api::IdentityP254Request,
     ) -> Result<()> {
-        let opts: ProverOpts = request.opts.ok_or(malformed_err())?.into();
-        let receipt_bytes = request.receipt.ok_or(malformed_err())?.as_bytes()?;
-        let succinct_receipt: SuccinctReceipt = bincode::deserialize(&receipt_bytes)?;
+        fn inner(request: pb::api::IdentityP254Request) -> Result<pb::api::IdentityP254Reply> {
+            let opts: ProverOpts = request.opts.ok_or(malformed_err())?.into();
+            let receipt_bytes = request.receipt.ok_or(malformed_err())?.as_bytes()?;
+            let succinct_receipt: SuccinctReceipt = bincode::deserialize(&receipt_bytes)?;
 
-        let prover = get_prover_server(&opts)?;
-        let receipt = prover.identity_p254(&succinct_receipt)?;
+            let prover = get_prover_server(&opts)?;
+            let receipt = prover.identity_p254(&succinct_receipt)?;
 
-        let succinct_receipt_pb: pb::core::SuccinctReceipt = receipt.into();
-        let succinct_receipt_bytes = succinct_receipt_pb.encode_to_vec();
-        let asset = pb::api::Asset::from_bytes(
-            &request.receipt_out.ok_or(malformed_err())?,
-            succinct_receipt_bytes.into(),
-            "receipt.zkp",
-        )?;
+            let succinct_receipt_pb: pb::core::SuccinctReceipt = receipt.into();
+            let succinct_receipt_bytes = succinct_receipt_pb.encode_to_vec();
+            let asset = pb::api::Asset::from_bytes(
+                &request.receipt_out.ok_or(malformed_err())?,
+                succinct_receipt_bytes.into(),
+                "receipt.zkp",
+            )?;
 
-        let msg = pb::api::IdentityP254Reply {
-            kind: Some(pb::api::identity_p254_reply::Kind::Ok(
-                pb::api::IdentityP254Result {
-                    receipt: Some(asset),
+            Ok(pb::api::IdentityP254Reply {
+                kind: Some(pb::api::identity_p254_reply::Kind::Ok(
+                    pb::api::IdentityP254Result {
+                        receipt: Some(asset),
+                    },
+                )),
+            })
+        }
+
+        let msg = inner(request).unwrap_or_else(|err| pb::api::IdentityP254Reply {
+            kind: Some(pb::api::identity_p254_reply::Kind::Error(
+                pb::api::GenericError {
+                    reason: err.to_string(),
                 },
             )),
-        };
+        });
+
         log::debug!("tx: {msg:?}");
-        conn.send(msg)?;
-
-        Ok(())
+        conn.send(msg)
     }
+}
 
-    fn build_env(
-        &self,
-        conn: &ConnectionWrapper,
-        request: &pb::api::ExecutorEnv,
-    ) -> Result<ExecutorEnv> {
-        let mut env_builder = ExecutorEnv::builder();
-        env_builder.env_vars(request.env_vars.clone());
-        for fd in request.read_fds.iter() {
-            let proxy = PosixIoProxy::new(*fd, conn.try_clone()?);
-            let reader = BufReader::new(proxy);
-            env_builder.read_fd(*fd, reader);
-        }
-        for fd in request.write_fds.iter() {
-            let proxy = PosixIoProxy::new(*fd, conn.try_clone()?);
-            env_builder.write_fd(*fd, proxy);
-        }
-        let proxy = SliceIoProxy::new(conn.try_clone()?);
-        for name in request.slice_ios.iter() {
-            env_builder.slice_io(&name, proxy.try_clone()?);
-        }
-        if let Some(segment_limit_po2) = request.segment_limit_po2 {
-            env_builder.segment_limit_po2(segment_limit_po2);
-        }
-        env_builder.session_limit(request.session_limit);
-        // TODO: add trace callback proxy
-        env_builder.build()
+fn build_env<'a>(
+    conn: &ConnectionWrapper,
+    request: &pb::api::ExecutorEnv,
+) -> Result<ExecutorEnv<'a>> {
+    let mut env_builder = ExecutorEnv::builder();
+    env_builder.env_vars(request.env_vars.clone());
+    for fd in request.read_fds.iter() {
+        let proxy = PosixIoProxy::new(*fd, conn.try_clone()?);
+        let reader = BufReader::new(proxy);
+        env_builder.read_fd(*fd, reader);
     }
+    for fd in request.write_fds.iter() {
+        let proxy = PosixIoProxy::new(*fd, conn.try_clone()?);
+        env_builder.write_fd(*fd, proxy);
+    }
+    let proxy = SliceIoProxy::new(conn.try_clone()?);
+    for name in request.slice_ios.iter() {
+        env_builder.slice_io(&name, proxy.try_clone()?);
+    }
+    if let Some(segment_limit_po2) = request.segment_limit_po2 {
+        env_builder.segment_limit_po2(segment_limit_po2);
+    }
+    env_builder.session_limit(request.session_limit);
+    if let Some(_) = request.trace_events {
+        let proxy = TraceProxy::new(conn.try_clone()?);
+        env_builder.trace_callback(proxy);
+    }
+    env_builder.build()
 }
 
 trait IoOtherError<T> {

@@ -7,11 +7,11 @@ edition = "2021"
 anyhow = "1.0"
 env_logger = "0.10"
 fibonacci-methods = { path = "methods" }
-risc0-zkvm = { path = "../../risc0/zkvm", features = ["profiler"] }
+risc0-zkvm = { path = "../../risc0/zkvm" }
 serde = "1.0"
 
 [features]
+default = ["profiler"]
 cuda = ["risc0-zkvm/cuda"]
-default = []
-metal = ["risc0-zkvm/metal"]
 prove = ["risc0-zkvm/prove"]
+profiler = ["risc0-zkvm/profiler"]

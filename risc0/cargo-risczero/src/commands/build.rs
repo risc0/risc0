@@ -42,8 +42,6 @@ impl AsRef<str> for BuildSubcommand {
     }
 }
 
-// TODO(victor): Provide some way to pass features.
-
 /// `cargo risczero build`
 #[derive(Parser)]
 pub struct BuildCommand {
@@ -128,7 +126,7 @@ impl BuildCommand {
                 .ok_or_else(|| anyhow!("invalid path string for target_dir"))?,
         ]);
 
-        // TODO(victor): Give the user a way to request a release build.
+        // TODO: Give the user a way to request a release build.
         // if !is_debug() {
         //    cmd.args(&["--release"]);
         //}

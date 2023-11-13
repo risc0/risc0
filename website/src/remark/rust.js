@@ -1,9 +1,9 @@
-const visit = require("unist-util-visit");
+import { visit } from "unist-util-visit";
 
 // Remove lines starting with `# `. This is code to make the doc tests pass
 // but should not be displayed.
-const remarkCodeRemoveSomeLines = () => {
-  return (tree) => {
+export default function plugin() {
+  return function transformer(tree) {
     visit(tree, "code", (node) => {
       const langs = ["rust", "rs"];
       if (node.lang && langs.includes(node.lang)) {
@@ -14,6 +14,4 @@ const remarkCodeRemoveSomeLines = () => {
       }
     });
   };
-};
-
-module.exports = remarkCodeRemoveSomeLines;
+}

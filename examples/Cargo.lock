@@ -330,15 +330,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d468802bab17cbc0cc575e9b053f41e72aa36bfa6b7f55e3529ffa43161b97fa"
 
 [[package]]
-name = "autotools"
-version = "0.2.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "aef8da1805e028a172334c3b680f93e71126f2327622faef2ec3d893c0a4ad77"
-dependencies = [
- "cc",
-]
-
-[[package]]
 name = "backtrace"
 version = "0.3.69"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -467,7 +458,7 @@ dependencies = [
 
 [[package]]
 name = "bonsai-sdk"
-version = "0.5.0-rc.3"
+version = "0.5.0"
 dependencies = [
  "reqwest",
  "serde",
@@ -1689,6 +1680,20 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a62bc1cf6f830c2ec14a513a9fb124d0a213a629668a4186f329db21fe045652"
 dependencies = [
  "percent-encoding",
+]
+
+[[package]]
+name = "forust-ml"
+version = "0.4.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e5b264080dd4088c518ffe8deb83165ebef3431cad2784a5addddc4ed25f3233"
+dependencies = [
+ "log",
+ "rand",
+ "rayon",
+ "serde",
+ "serde_json",
+ "thiserror",
 ]
 
 [[package]]
@@ -3214,12 +3219,13 @@ dependencies = [
 ]
 
 [[package]]
-name = "protobuf-src"
-version = "1.1.0+21.5"
+name = "protoc-prebuilt"
+version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c7ac8852baeb3cc6fb83b93646fb93c0ffe5d14bf138c945ceb4b9948ee0e3c1"
+checksum = "37aee930fb53074ec083bf049aa6133bb1a93cce8fc39f83e07f36a0937304dd"
 dependencies = [
- "autotools",
+ "ureq",
+ "zip",
 ]
 
 [[package]]
@@ -3556,7 +3562,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-binfmt"
-version = "0.19.0-rc.3"
+version = "0.19.0"
 dependencies = [
  "anyhow",
  "elf",
@@ -3568,7 +3574,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build"
-version = "0.19.0-rc.3"
+version = "0.19.0"
 dependencies = [
  "anyhow",
  "cargo_metadata",
@@ -3583,7 +3589,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build-kernel"
-version = "0.19.0-rc.3"
+version = "0.19.0"
 dependencies = [
  "cc",
  "directories",
@@ -3594,7 +3600,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion"
-version = "0.19.0-rc.3"
+version = "0.19.0"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -3614,7 +3620,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion-sys"
-version = "0.19.0-rc.3"
+version = "0.19.0"
 dependencies = [
  "glob",
  "risc0-build-kernel",
@@ -3623,7 +3629,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im"
-version = "0.19.0-rc.3"
+version = "0.19.0"
 dependencies = [
  "anyhow",
  "cust",
@@ -3640,7 +3646,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im-sys"
-version = "0.19.0-rc.3"
+version = "0.19.0"
 dependencies = [
  "glob",
  "risc0-build-kernel",
@@ -3649,7 +3655,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-core"
-version = "0.19.0-rc.3"
+version = "0.19.0"
 dependencies = [
  "bytemuck",
  "rand_core",
@@ -3657,14 +3663,14 @@ dependencies = [
 
 [[package]]
 name = "risc0-sys"
-version = "0.19.0-rc.3"
+version = "0.19.0"
 dependencies = [
  "risc0-build-kernel",
 ]
 
 [[package]]
 name = "risc0-zkp"
-version = "0.19.0-rc.3"
+version = "0.19.0"
 dependencies = [
  "anyhow",
  "blake2",
@@ -3691,7 +3697,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "0.19.0-rc.3"
+version = "0.19.0"
 dependencies = [
  "addr2line",
  "anyhow",
@@ -3713,7 +3719,7 @@ dependencies = [
  "object",
  "prost",
  "prost-build",
- "protobuf-src",
+ "protoc-prebuilt",
  "rayon",
  "risc0-binfmt",
  "risc0-circuit-recursion",
@@ -3733,7 +3739,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "0.19.0-rc.3"
+version = "0.19.0"
 dependencies = [
  "bytemuck",
  "getrandom",
@@ -3742,7 +3748,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-receipts"
-version = "0.19.0-rc.3"
+version = "0.19.0"
 
 [[package]]
 name = "rkyv"
@@ -4158,9 +4164,9 @@ dependencies = [
 
 [[package]]
 name = "serde_json"
-version = "1.0.107"
+version = "1.0.108"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6b420ce6e3d8bd882e9b243c6eed35dbc9a6110c9769e74b584e0d68d1f20c65"
+checksum = "3d1c7e3eac408d115102c4c24ad393e0821bb3a5df4d506a80f85f7a742a526b"
 dependencies = [
  "indexmap 2.0.2",
  "itoa",
@@ -5014,6 +5020,21 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a156c684c91ea7d62626509bce3cb4e1d9ed5c4d978f7b4352658f96a4c26b4a"
 
 [[package]]
+name = "ureq"
+version = "2.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f5ccd538d4a604753ebc2f17cd9946e89b77bf87f6a8e2309667c6f2e87855e3"
+dependencies = [
+ "base64 0.21.4",
+ "log",
+ "once_cell",
+ "rustls",
+ "rustls-webpki",
+ "url",
+ "webpki-roots",
+]
+
+[[package]]
 name = "url"
 version = "2.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5579,6 +5600,25 @@ dependencies = [
 ]
 
 [[package]]
+name = "xgboost"
+version = "0.1.0"
+dependencies = [
+ "forust-ml",
+ "risc0-zkvm",
+ "rmp-serde",
+ "serde",
+ "serde_json",
+ "xgboost-methods",
+]
+
+[[package]]
+name = "xgboost-methods"
+version = "0.1.0"
+dependencies = [
+ "risc0-build",
+]
+
+[[package]]
 name = "zeroize"
 version = "1.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5607,6 +5647,7 @@ dependencies = [
  "byteorder",
  "crc32fast",
  "crossbeam-utils",
+ "flate2",
  "zstd",
 ]
 
