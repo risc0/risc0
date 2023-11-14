@@ -2028,9 +2028,13 @@ dependencies = [
 name = "groth16-verifier-example"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "bincode",
  "bonsai-groth16-verifier",
  "bonsai-sdk",
+ "bytemuck",
+ "byteorder",
+ "hello-world-methods",
  "hex",
  "methods",
  "risc0-zkvm",
