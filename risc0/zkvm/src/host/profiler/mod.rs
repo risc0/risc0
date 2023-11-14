@@ -340,7 +340,7 @@ impl Profiler {
     /// Inner finalize method, unwrapping the inner non-public ProfileBuilder.
     pub(crate) fn finalize(mut self) -> ProfileBuilder {
         let root_ref = Rc::clone(&self.root);
-        log::debug!("{}", self.root.borrow().fmt(0, &self));
+        tracing::debug!("{}", self.root.borrow().fmt(0, &self));
         self.walk_stacks(root_ref, Vec::new());
         self.profile
     }

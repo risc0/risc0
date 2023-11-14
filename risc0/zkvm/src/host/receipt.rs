@@ -174,7 +174,7 @@ impl Receipt {
         if metadata.output.digest() != expected_output.digest() {
             let empty_output = metadata.output.is_none() && self.journal.bytes.is_empty();
             if !empty_output {
-                log::debug!(
+                tracing::debug!(
                     "journal: 0x{}, expected output digest: 0x{}, decoded output digest: 0x{}",
                     hex::encode(&self.journal.bytes),
                     hex::encode(expected_output.digest()),
@@ -182,7 +182,7 @@ impl Receipt {
                 );
                 return Err(VerificationError::JournalDigestMismatch);
             }
-            log::debug!("accepting zero digest for output of receipt with empty journal");
+            tracing::debug!("accepting zero digest for output of receipt with empty journal");
         }
 
         Ok(())
@@ -220,7 +220,7 @@ impl Receipt {
         if metadata.output.digest() != expected_output.digest() {
             let empty_output = metadata.output.is_none() && self.journal.bytes.is_empty();
             if !empty_output {
-                log::debug!(
+                tracing::debug!(
                     "journal: 0x{}, expected output digest: 0x{}, decoded output digest: 0x{}",
                     hex::encode(&self.journal.bytes),
                     hex::encode(expected_output.digest()),
@@ -228,7 +228,7 @@ impl Receipt {
                 );
                 return Err(VerificationError::JournalDigestMismatch);
             }
-            log::debug!("accepting zero digest for output of receipt with empty journal");
+            tracing::debug!("accepting zero digest for output of receipt with empty journal");
         }
 
         Ok(())
@@ -387,7 +387,7 @@ impl CompositeReceipt {
         for receipt in receipts {
             receipt.verify_integrity_with_context(ctx)?;
             let metadata = receipt.get_metadata()?;
-            log::debug!("metadata: {metadata:#?}");
+            tracing::debug!("metadata: {metadata:#?}");
             if let Some(id) = prev_image_id {
                 if id != metadata.pre.digest() {
                     return Err(VerificationError::ImageVerificationError);
@@ -405,7 +405,7 @@ impl CompositeReceipt {
         // Verify the last receipt in the continuation.
         final_receipt.verify_integrity_with_context(ctx)?;
         let final_receipt_metadata = final_receipt.get_metadata()?;
-        log::debug!("final: {final_receipt_metadata:#?}");
+        tracing::debug!("final: {final_receipt_metadata:#?}");
         if let Some(id) = prev_image_id {
             if id != final_receipt_metadata.pre.digest() {
                 return Err(VerificationError::ImageVerificationError);
@@ -414,7 +414,7 @@ impl CompositeReceipt {
 
         // Verify all corroborating receipts attached to this composite receipt.
         for receipt in self.assumptions.iter() {
-            log::debug!(
+            tracing::debug!(
                 "verifying assumption: {:?}",
                 receipt.get_metadata()?.digest()
             );
@@ -478,7 +478,7 @@ impl CompositeReceipt {
         &self,
         metadata: &ReceiptMetadata,
     ) -> Result<(), VerificationError> {
-        log::debug!("checking output: exit_code = {:?}", metadata.exit_code);
+        tracing::debug!("checking output: exit_code = {:?}", metadata.exit_code);
         if metadata.exit_code.expects_output() && metadata.output.is_some() {
             let self_output = Output {
                 journal: MaybePruned::Pruned(
@@ -496,7 +496,7 @@ impl CompositeReceipt {
                         .ok_or(VerificationError::ReceiptFormatError)?
                         == Vec::<u8>::new().digest();
                 if !empty_output {
-                    log::debug!(
+                    tracing::debug!(
                         "output digest does not match: expected {:?}; decoded {:?}",
                         &self_output,
                         &metadata.output
@@ -508,21 +508,21 @@ impl CompositeReceipt {
             // Ensure all output fields are empty. If not, this receipt is internally
             // inconsistent.
             if metadata.output.is_some() {
-                log::debug!(
+                tracing::debug!(
                     "unexpected non-empty metadata output: {:?}",
                     &metadata.output
                 );
                 return Err(VerificationError::ReceiptFormatError);
             }
             if !self.assumptions.is_empty() {
-                log::debug!(
+                tracing::debug!(
                     "unexpected non-empty composite receipt assumptions: {:?}",
                     &self.assumptions
                 );
                 return Err(VerificationError::ReceiptFormatError);
             }
             if self.journal_digest.is_some() {
-                log::debug!(
+                tracing::debug!(
                     "unexpected non-empty composite receipt journal_digest: {:?}",
                     &self.journal_digest
                 );

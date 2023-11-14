@@ -127,7 +127,7 @@ impl Segment {
 
     fn prepare_globals(&self) -> Vec<Elem> {
         let mut io = vec![Elem::INVALID; CircuitImpl::OUTPUT_SIZE];
-        log::debug!("run> pc: 0x{:08x}", self.pre_image.pc);
+        tracing::debug!("run> pc: 0x{:08x}", self.pre_image.pc);
 
         // initialize Input
         let mut offset = 0;

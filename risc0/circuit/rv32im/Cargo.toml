@@ -21,7 +21,6 @@ tracing = { version = "0.1", default-features = false, features = [
 
 [target.'cfg(not(target_os = "zkvm"))'.dependencies]
 cust = { version = "0.3", optional = true }
-log = "0.4"
 rand = { version = "0.8", optional = true }
 rayon = { version = "1.5", optional = true }
 metal = { version = "0.25", optional = true }
@@ -32,8 +31,7 @@ risc0-zkvm-platform = { workspace = true }
 
 [dev-dependencies]
 criterion = "0.5"
-env_logger = "0.10"
-test-log = "0.2"
+test-log = { version = "0.2", default-features = false, features = ["trace"] }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [features]

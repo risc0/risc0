@@ -14,8 +14,8 @@
 
 use alloc::vec::Vec;
 
-use log::debug;
 use risc0_core::field::ExtElem;
+use tracing::debug;
 
 use crate::{
     core::log2_ceil,
