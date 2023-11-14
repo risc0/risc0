@@ -119,17 +119,22 @@ impl MemoryMonitor {
     }
 
     pub fn load_u8(&mut self, addr: u32) -> Result<u8> {
-        // log::trace!("load_u8: 0x{addr:08x}");
+        // tracing::trace!("load_u8: 0x{addr:08x}");
         let mut bytes = [0_u8];
         self.load_bytes(addr, &mut bytes)?;
         Ok(bytes[0])
+    }
+
+    pub fn load_u8_from_guest_addr(&mut self, addr: u32) -> Result<u8> {
+        Self::check_guest_addr(addr)?;
+        self.load_u8(addr)
     }
 
     pub fn load_u16(&mut self, addr: u32) -> Result<u16> {
         if addr % 2 != 0 {
             bail!("unaligned load at 0x{addr:08x}");
         }
-        // log::trace!("load_u16: 0x{addr:08x}");
+        // tracing::trace!("load_u16: 0x{addr:08x}");
         let mut bytes = [0_u8; 2];
         self.load_bytes(addr, &mut bytes)?;
         Ok(u16::from_le_bytes(bytes))
@@ -139,7 +144,7 @@ impl MemoryMonitor {
         if addr % WORD_SIZE as u32 != 0 {
             bail!("unaligned load at 0x{addr:08x}");
         }
-        // log::trace!("load_u32: 0x{addr:08x}");
+        // tracing::trace!("load_u32: 0x{addr:08x}");
         let mut bytes = [0_u8; WORD_SIZE];
         self.load_bytes(addr, &mut bytes)?;
         Ok(u32::from_le_bytes(bytes))
@@ -169,7 +174,7 @@ impl MemoryMonitor {
             return Ok(());
         }
 
-        log::debug!("load_page: 0x{page_idx:08x}");
+        tracing::debug!("load_page: 0x{page_idx:08x}");
         let page_cycles = if page_idx == info.root_idx {
             let num_root_entries = info.num_root_entries as usize;
             cycles_per_page(num_root_entries / 2)
@@ -194,7 +199,7 @@ impl MemoryMonitor {
             return;
         }
 
-        log::debug!("mark_page: 0x{page_idx:08x}");
+        tracing::debug!("mark_page: 0x{page_idx:08x}");
         let page_cycles = if page_idx == info.root_idx {
             let num_root_entries = info.num_root_entries as usize;
             cycles_per_page(num_root_entries / 2)
@@ -212,7 +217,7 @@ impl MemoryMonitor {
     }
 
     pub fn load_array<const N: usize>(&mut self, addr: u32) -> Result<[u8; N]> {
-        // log::trace!("load_array: 0x{addr:08x}");
+        // tracing::trace!("load_array: 0x{addr:08x}");
         let mut vals = Vec::new();
         for i in 0..N {
             vals.push(self.load_u8(addr + i as u32)?);
@@ -226,12 +231,12 @@ impl MemoryMonitor {
     }
 
     pub fn load_register(&self, idx: usize) -> u32 {
-        // log::trace!("load_register: x{idx}");
+        // tracing::trace!("load_register: x{idx}");
         self.registers[idx]
     }
 
     pub fn load_guest_addr_from_register(&self, idx: usize) -> Result<u32> {
-        // log::trace!("load_register: x{idx}");
+        // tracing::trace!("load_register: x{idx}");
         let addr = self.registers[idx];
         Self::check_guest_addr(addr)?;
         Ok(addr)
@@ -265,7 +270,7 @@ impl MemoryMonitor {
     }
 
     pub fn load_string(&mut self, mut addr: u32) -> Result<String> {
-        // log::trace!("load_string: 0x{addr:08x}");
+        // tracing::trace!("load_string: 0x{addr:08x}");
         let mut s: Vec<u8> = Vec::new();
         loop {
             let bytes = self.load_u8(addr)?;
@@ -293,7 +298,7 @@ impl MemoryMonitor {
     }
 
     fn raw_store_u8(&mut self, addr: u32, data: u8) -> Result<()> {
-        // log::trace!("raw_store_u8: 0x{addr:08x}");
+        // tracing::trace!("raw_store_u8: 0x{addr:08x}");
         let old = self.load_u8(addr)?;
         self.pending_actions.push(Action::StoreU8(addr, old));
         self.store_bytes(addr, &[data])?;
@@ -302,7 +307,7 @@ impl MemoryMonitor {
     }
 
     pub fn store_u8(&mut self, addr: u32, data: u8) -> Result<()> {
-        // log::trace!("store_u8: 0x{addr:08x}");
+        // tracing::trace!("store_u8: 0x{addr:08x}");
         self.raw_store_u8(addr, data)?;
         if self.enable_trace {
             self.trace_events.insert(TraceEvent::MemorySet {
@@ -314,7 +319,7 @@ impl MemoryMonitor {
     }
 
     pub fn store_u16(&mut self, addr: u32, data: u16) -> Result<()> {
-        // log::trace!("store_u16: 0x{addr:08x}");
+        // tracing::trace!("store_u16: 0x{addr:08x}");
         assert_eq!(addr % 2, 0, "unaligned store");
         let old = self.load_u16(addr)?;
         self.pending_actions.push(Action::StoreU16(addr, old));
@@ -330,7 +335,7 @@ impl MemoryMonitor {
     }
 
     pub fn store_u32(&mut self, addr: u32, data: u32) -> Result<()> {
-        // log::trace!("store_u32: 0x{addr:08x}");
+        // tracing::trace!("store_u32: 0x{addr:08x}");
         assert_eq!(addr % WORD_SIZE as u32, 0, "unaligned store");
         let old = self.load_u32(addr)?;
         self.pending_actions.push(Action::StoreU32(addr, old));
@@ -349,7 +354,7 @@ impl MemoryMonitor {
     }
 
     pub fn store_region(&mut self, addr: u32, slice: &[u8]) -> Result<()> {
-        // log::trace!("store_region: 0x{addr:08x}");
+        // tracing::trace!("store_region: 0x{addr:08x}");
         slice
             .iter()
             .enumerate()
@@ -363,7 +368,7 @@ impl MemoryMonitor {
     }
 
     pub fn store_register(&mut self, idx: usize, data: u32) {
-        // log::trace!("store_register: x{idx} <= 0x{data:08x}");
+        // tracing::trace!("store_register: x{idx} <= 0x{data:08x}");
         let old = self.load_register(idx);
         self.pending_actions.push(Action::StoreReg(idx, old));
         self.registers[idx] = data;
@@ -391,31 +396,31 @@ impl MemoryMonitor {
         for action in pending_actions.iter().rev() {
             match action {
                 Action::PageRead(page_idx, cycles) => {
-                    log::debug!("undo: PageRead(0x{page_idx:08x}, {cycles})");
+                    tracing::debug!("undo: PageRead(0x{page_idx:08x}, {cycles})");
                     self.resident[*page_idx as usize] = false;
                     self.faults.reads.remove(page_idx);
                     self.page_read_cycles -= cycles;
                 }
                 Action::PageWrite(page_idx, cycles) => {
-                    log::debug!("undo: PageWrite(0x{page_idx:08x}, {cycles})");
+                    tracing::debug!("undo: PageWrite(0x{page_idx:08x}, {cycles})");
                     self.dirty[*page_idx as usize] = false;
                     self.faults.writes.remove(page_idx);
                     self.page_write_cycles -= cycles;
                 }
                 Action::StoreU8(addr, data) => {
-                    log::debug!("undo: StoreU8(0x{addr:08x}, {data})");
+                    tracing::debug!("undo: StoreU8(0x{addr:08x}, {data})");
                     self.store_bytes(*addr, &data.to_le_bytes())?;
                 }
                 Action::StoreU16(addr, data) => {
-                    log::debug!("undo: StoreU16(0x{addr:08x}, {data})");
+                    tracing::debug!("undo: StoreU16(0x{addr:08x}, {data})");
                     self.store_bytes(*addr, &data.to_le_bytes())?;
                 }
                 Action::StoreU32(addr, data) => {
-                    log::debug!("undo: StoreU32(0x{addr:08x}, {data})");
+                    tracing::debug!("undo: StoreU32(0x{addr:08x}, {data})");
                     self.store_bytes(*addr, &data.to_le_bytes())?;
                 }
                 Action::StoreReg(idx, data) => {
-                    log::debug!("undo: StoreReg(x{idx}, {data})");
+                    tracing::debug!("undo: StoreReg(x{idx}, {data})");
                     self.registers[*idx] = *data;
                 }
             }
@@ -454,7 +459,7 @@ impl MemoryMonitor {
         // Write all dirty pages back to the memory image.
         for page_idx in self.faults.writes.iter() {
             if let Some(page) = self.pages[*page_idx as usize].as_ref() {
-                log::debug!("flush page: 0x{page_idx:08x}");
+                tracing::debug!("flush page: 0x{page_idx:08x}");
                 let info = &self.image.info;
                 let addr = info.get_page_addr(*page_idx);
                 self.image.store_region_in_page(addr, &page.buf);
@@ -480,7 +485,7 @@ impl MemoryMonitor {
 
 impl Memory for MemoryMonitor {
     fn read_mem(&mut self, addr: u32, size: MemAccessSize) -> Option<u32> {
-        // log::trace!("read_mem: 0x{addr:08x}");
+        // tracing::trace!("read_mem: 0x{addr:08x}");
         if !is_guest_memory(addr) {
             return None;
         }
@@ -492,7 +497,7 @@ impl Memory for MemoryMonitor {
     }
 
     fn write_mem(&mut self, addr: u32, size: MemAccessSize, store_data: u32) -> bool {
-        // log::trace!("write_mem: 0x{addr:08x} <= 0x{store_data:08x}");
+        // tracing::trace!("write_mem: 0x{addr:08x} <= 0x{store_data:08x}");
         if !is_guest_memory(addr) {
             return false;
         }
@@ -515,11 +520,11 @@ impl SyscallContext for MemoryMonitor {
     }
 
     fn load_u32(&mut self, addr: u32) -> Result<u32> {
-        MemoryMonitor::load_u32(self, addr)
+        MemoryMonitor::load_u32_from_guest_addr(self, addr)
     }
 
     fn load_u8(&mut self, addr: u32) -> Result<u8> {
-        MemoryMonitor::load_u8(self, addr)
+        MemoryMonitor::load_u8_from_guest_addr(self, addr)
     }
 }
 
@@ -531,14 +536,14 @@ impl PageFaults {
 
     #[allow(dead_code)]
     fn dump(&self) {
-        log::debug!("PageFaultInfo");
-        log::debug!("  reads>");
+        tracing::debug!("PageFaultInfo");
+        tracing::debug!("  reads>");
         for idx in self.reads.iter().rev() {
-            log::debug!("  0x{:08X}", idx);
+            tracing::debug!("  0x{:08X}", idx);
         }
-        log::debug!("  writes>");
+        tracing::debug!("  writes>");
         for idx in self.writes.iter() {
-            log::debug!("  0x{:08X}", idx);
+            tracing::debug!("  0x{:08X}", idx);
         }
     }
 }

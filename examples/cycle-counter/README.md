@@ -4,18 +4,11 @@ The Cycle Counter is a utility to measure and report into a CSV the number of cy
 
 ## Quick Start
 
-First, [install Rust] if you don't already have it.
-
-Next, install the `cargo-risczero` tool and install the toolchain with:
-```bash
-cargo install cargo-binstall
-cargo binstall cargo-risczero
-cargo risczero install
-```
+First, follow the [installation guide] if you don't already have the RISC Zero tools installed.
 
 Then, run the example with:
 ```bash
 RUST_LOG=info cargo run --release -- --out count.csv all
 ```
 
-[install Rust]: https://doc.rust-lang.org/cargo/getting-started/installation.html
+[installation guide]: https://dev.risczero.com/api/zkvm/quickstart

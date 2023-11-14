@@ -1,9 +1,11 @@
 name: sccache install
 description: Install sccache
+
 inputs:
   key:
     required: true
     default: rust-cache-${{ runner.os }}-${{ runner.arch }}
+
 runs:
   using: composite
   steps:
@@ -29,7 +31,7 @@ runs:
 
     - env:
         SCCACHE_URL: https://github.com/mozilla/sccache/releases/download
-        SCCACHE_VERSION: v0.5.0
+        SCCACHE_VERSION: v0.7.1
       run: |
         SCCACHE_FILE=sccache-$SCCACHE_VERSION-$SCCACHE_ARCH
         curl -L "$SCCACHE_URL/$SCCACHE_VERSION/$SCCACHE_FILE.tar.gz" | tar xz
@@ -38,14 +40,39 @@ runs:
         echo "$HOME/.local/bin" >> $GITHUB_PATH
       shell: bash
 
-    - if: runner.os != 'macOS'
-      name: Cache rust target + HAL_CACHE
-      uses: risc0/rust-cache@v2.5.1
-      id: rust-cache
-      with:
-        key: ${{ inputs.key }}
-        # TODO: this path will not work on windows.
-        cache-directories: ~/.cache/risc0
-
-    - run: rm -f $HOME/.cargo/config
+    - if: runner.os == 'Linux'
+      run: |
+        echo "SCCACHE_REGION=us-west-2" >> $GITHUB_ENV
+        echo "SCCACHE_BUCKET=risc0-ci-cache" >> $GITHUB_ENV
+        echo "SCCACHE_S3_KEY_PREFIX=public/${{ inputs.key }}/sccache" >> $GITHUB_ENV
       shell: bash
+
+    - run: |
+        echo "CARGO_INCREMENTAL=0" >> $GITHUB_ENV
+        echo "CARGO_PROFILE_DEV_DEBUG=0" >> $GITHUB_ENV
+        echo "CC=sccache clang" >> $GITHUB_ENV
+        echo "CMAKE_C_COMPILER_LAUNCHER=sccache" >> $GITHUB_ENV
+        echo "CMAKE_CXX_COMPILER_LAUNCHER=sccache" >> $GITHUB_ENV
+        echo "CXX=sccache clang++" >> $GITHUB_ENV
+        echo "RUSTC_WRAPPER=sccache" >> $GITHUB_ENV
+      shell: bash
+
+    - if: runner.os == 'Linux'
+      id: aws-creds
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-region: us-west-2
+        role-to-assume: arn:aws:iam::083632199359:role/gha_oidc_risc0_cache_public_access
+        output-credentials: true
+
+    - if: runner.os == 'Linux'
+      uses: risc0/actions-cache@v1
+      with:
+        path: |
+          ~/.cache/risc0
+        key: public/${{ inputs.key }}/actions-cache
+        bucket: risc0-ci-cache
+        accessKey: ${{ steps.aws-creds.outputs.aws-access-key-id }}
+        secretKey: ${{ steps.aws-creds.outputs.aws-secret-access-key }}
+        sessionToken: ${{ steps.aws-creds.outputs.aws-session-token }}
+        use-fallback: false

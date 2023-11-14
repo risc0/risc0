@@ -211,15 +211,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d468802bab17cbc0cc575e9b053f41e72aa36bfa6b7f55e3529ffa43161b97fa"
 
 [[package]]
-name = "autotools"
-version = "0.2.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "aef8da1805e028a172334c3b680f93e71126f2327622faef2ec3d893c0a4ad77"
-dependencies = [
- "cc",
-]
-
-[[package]]
 name = "axum"
 version = "0.6.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -410,7 +401,7 @@ dependencies = [
 
 [[package]]
 name = "bonsai-ethereum-contracts"
-version = "0.1.0"
+version = "0.5.0"
 dependencies = [
  "anyhow",
  "ethers",
@@ -418,7 +409,7 @@ dependencies = [
 
 [[package]]
 name = "bonsai-ethereum-relay"
-version = "0.1.0"
+version = "0.5.0"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -471,7 +462,7 @@ dependencies = [
 
 [[package]]
 name = "bonsai-rest-api-mock"
-version = "0.1.0"
+version = "0.5.0"
 dependencies = [
  "anyhow",
  "axum",
@@ -3228,12 +3219,12 @@ dependencies = [
 ]
 
 [[package]]
-name = "protobuf-src"
-version = "1.1.0+21.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c7ac8852baeb3cc6fb83b93646fb93c0ffe5d14bf138c945ceb4b9948ee0e3c1"
+name = "protoc-prebuilt"
+version = "0.2.0"
+source = "git+https://github.com/risc0/protoc-prebuilt.git?rev=14be7456835318f0f2bfd2ee1f0eb9d7ed5ef701#14be7456835318f0f2bfd2ee1f0eb9d7ed5ef701"
 dependencies = [
- "autotools",
+ "ureq",
+ "zip",
 ]
 
 [[package]]
@@ -3486,10 +3477,10 @@ version = "0.19.0"
 dependencies = [
  "anyhow",
  "elf",
- "log",
  "risc0-zkp",
  "risc0-zkvm-platform",
  "serde",
+ "tracing",
 ]
 
 [[package]]
@@ -3526,7 +3517,6 @@ dependencies = [
  "bytemuck",
  "cust",
  "downloader",
- "log",
  "metal",
  "rand",
  "rayon",
@@ -3553,7 +3543,6 @@ version = "0.19.0"
 dependencies = [
  "anyhow",
  "cust",
- "log",
  "metal",
  "rand",
  "rayon",
@@ -3600,7 +3589,6 @@ dependencies = [
  "ff",
  "hex",
  "lazy_static",
- "log",
  "metal",
  "ndarray",
  "paste",
@@ -3631,12 +3619,11 @@ dependencies = [
  "getrandom",
  "hex",
  "lazy-regex",
- "log",
  "num-derive",
  "num-traits",
  "prost",
  "prost-build",
- "protobuf-src",
+ "protoc-prebuilt",
  "rayon",
  "risc0-binfmt",
  "risc0-circuit-recursion",
@@ -4953,6 +4940,21 @@ name = "untrusted"
 version = "0.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8ecb6da28b8a351d773b68d5825ac39017e680750f980f3a1a85cd8dd28a47c1"
+
+[[package]]
+name = "ureq"
+version = "2.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f5ccd538d4a604753ebc2f17cd9946e89b77bf87f6a8e2309667c6f2e87855e3"
+dependencies = [
+ "base64 0.21.4",
+ "log",
+ "once_cell",
+ "rustls 0.21.7",
+ "rustls-webpki",
+ "url",
+ "webpki-roots",
+]
 
 [[package]]
 name = "url"

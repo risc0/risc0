@@ -84,8 +84,10 @@ impl<'a> MachineContext {
     }
 
     fn log(&mut self, msg: &str, args: &[BabyBearElem]) {
-        if log::max_level() < log::LevelFilter::Trace {
-            // Don't bother to format it if we're not even logging.
+        // Don't bother to format it if we're not even logging.
+        if tracing::level_filters::LevelFilter::current()
+            .eq(&tracing::level_filters::LevelFilter::OFF)
+        {
             return;
         }
 
@@ -133,7 +135,7 @@ impl<'a> MachineContext {
             "Args missing formatting: {:?} in {msg}",
             args_left
         );
-        log::trace!("{}", formatted);
+        tracing::trace!("{}", formatted);
     }
 }
 
@@ -283,7 +285,7 @@ impl<'a> RecursionExecutor<'a> {
     #[tracing::instrument(skip_all)]
     pub fn run(&mut self) -> Result<usize> {
         let used_cycles = self.zkr.code_rows();
-        log::trace!(
+        tracing::trace!(
             "Starting recursion code of length {}/{}",
             used_cycles,
             self.executor.steps
@@ -416,7 +418,7 @@ impl<'a> CircuitStepHandler<BabyBearElem> for ParallelHandler<'a> {
                 // let addr = u32::from(args[0]) as usize;
                 // let val = BabyBearExtElem::from_subelems(args[1..5].into_iter().cloned());
                 // let goal = self.wom[addr];
-                // log::debug!("Cycle = {}, addr = {}, attempting to write = {:?}, should write
+                // tracing::debug!("Cycle = {}, addr = {}, attempting to write = {:?}, should write
                 // = {:?}", cycle, addr, val, goal);
                 // TODO, but harmless
                 Ok(())

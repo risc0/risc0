@@ -27,7 +27,7 @@ use risc0_zkvm_platform::{
 };
 use serde::{Deserialize, Serialize};
 
-use crate::{elf::Program, SystemState};
+use crate::{elf::Program, Digestible, SystemState};
 
 /// An image of a zkVM guest's memory
 ///
@@ -90,7 +90,7 @@ pub fn compute_image_id(merkle_root: &Digest, pc: u32) -> Digest {
         merkle_root: *merkle_root,
         pc,
     }
-    .digest()
+    .digest::<Impl>()
 }
 
 /// Compute `ceil(a / b)` via truncated integer division.
@@ -128,7 +128,7 @@ impl PageTableInfo {
         assert_eq!(root_idx, num_pages);
         let zero_page_hash = hash_page_bytes(&vec![0_u8; page_size as usize]);
 
-        log::debug!("root_page_addr: 0x{root_page_addr:08x}, root_addr: 0x{root_addr:08x}");
+        tracing::debug!("root_page_addr: 0x{root_page_addr:08x}, root_addr: 0x{root_addr:08x}");
 
         Self {
             page_size,
@@ -268,7 +268,7 @@ impl MemoryImage {
             let mut entry = [0_u8; DIGEST_BYTES];
             self.load_region_in_page(entry_addr, &mut entry);
             let actual = Digest::try_from(entry)?;
-            log::debug!(
+            tracing::debug!(
                 "page_idx: {page_idx}, page_addr: 0x{page_addr:08x} entry_addr: 0x{entry_addr:08x}"
             );
             if expected != actual {

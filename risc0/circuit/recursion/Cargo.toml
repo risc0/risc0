@@ -19,7 +19,6 @@ tracing = { version = "0.1", default-features = false, features = [
 [target.'cfg(not(target_os = "zkvm"))'.dependencies]
 bytemuck = "1.12"
 cust = { version = "0.3", optional = true }
-log = "0.4"
 metal = { version = "0.25", optional = true }
 rand = { version = "0.8", optional = true }
 rayon = { version = "1.5", optional = true }
@@ -30,8 +29,7 @@ zip = { version = "0.6", default-features = false, optional = true, features = [
 
 [dev-dependencies]
 criterion = "0.5"
-env_logger = "0.10"
-test-log = "0.2"
+test-log = { version = "0.2", default-features = false, features = ["trace"] }
 tracing-forest = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 

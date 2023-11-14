@@ -12,51 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use anyhow::{anyhow, bail};
-use fibonacci_methods::{FIBONACCI_ELF, FIBONACCI_PATH};
-use risc0_zkvm::{default_executor, ExecutorEnv, Profiler};
+use fibonacci_methods::FIBONACCI_ELF;
+use risc0_zkvm::{default_executor, ExecutorEnv};
 
 fn main() -> anyhow::Result<()> {
-    env_logger::init();
-    // Get a profile path from an environment variable and build the profiler.
-    let pprof_out = match std::env::var("RISC0_PPROF_OUT") {
-        Ok(val) => Some(val),
-        Err(std::env::VarError::NotPresent) => None,
-        Err(e) => bail!("malformed env var: {}", e),
-    };
-    println!("{}", FIBONACCI_PATH);
-    let mut profiler = pprof_out
-        .as_ref()
-        .map(|path| Profiler::new(&path, FIBONACCI_ELF))
-        .transpose()?;
+    tracing_subscriber::fmt()
+        .with_env_filter(tracing_subscriber::filter::EnvFilter::from_default_env())
+        .init();
+    ();
 
-    let iterations = 1000;
+    let iterations: u32 = 1000;
 
-    {
-        // Build the executor env.
-        let env = {
-            let mut builder = ExecutorEnv::builder();
-            if let Some(ref mut p) = profiler {
-                builder.trace_callback(p.make_trace_callback());
-            }
-            builder
-                .write_slice(&[iterations])
-                .build()
-                .map_err(|e| anyhow!("environment build failed: {:?}", e))?
-        };
-
-        // Execute the guest code.
-        let exec = default_executor();
-        exec.execute_elf(env, FIBONACCI_ELF)?;
-    }
-
-    // Write out the profile.
-    if let Some(ref mut p) = profiler {
-        p.finalize();
-        let report = p.encode_to_vec();
-        std::fs::write(pprof_out.as_ref().unwrap(), &report)
-            .expect("Unable to write profiling output");
-    }
+    // Execute the guest code.
+    let env = ExecutorEnv::builder().write(&iterations)?.build()?;
+    let exec = default_executor();
+    exec.execute_elf(env, FIBONACCI_ELF)?;
 
     Ok(())
 }

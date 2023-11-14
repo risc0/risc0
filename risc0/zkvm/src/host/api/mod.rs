@@ -197,7 +197,7 @@ impl TcpConnector {
 
 impl Connector for TcpConnector {
     fn connect(&self) -> Result<ConnectionWrapper> {
-        log::debug!("connect");
+        tracing::debug!("connect");
         let stream = TcpStream::connect(&self.addr)?;
         Ok(ConnectionWrapper::new(Box::new(TcpConnection::new(stream))))
     }
@@ -259,8 +259,8 @@ fn malformed_err() -> anyhow::Error {
 
 impl pb::api::Asset {
     fn as_bytes(&self) -> Result<Bytes> {
-        let bytes = match self.kind.clone().ok_or(malformed_err())? {
-            pb::api::asset::Kind::Inline(bytes) => bytes,
+        let bytes = match self.kind.as_ref().ok_or(malformed_err())? {
+            pb::api::asset::Kind::Inline(bytes) => bytes.clone(),
             pb::api::asset::Kind::Path(path) => std::fs::read(path)?,
         };
         Ok(bytes.into())

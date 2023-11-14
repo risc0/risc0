@@ -191,7 +191,7 @@ fn prove_segment_elf() {
     for segment in client.segments.iter() {
         let opts = ProverOpts::default();
         let receipt = client.prove_segment(opts, segment.clone());
-        receipt.verify_with_context(&ctx).unwrap();
+        receipt.verify_integrity_with_context(&ctx).unwrap();
     }
 }
 
@@ -227,11 +227,23 @@ fn lift_join_identity() {
             rec_receipt.try_into().unwrap(),
         );
         rollup
-            .verify_with_context(&VerifierContext::default())
+            .verify_integrity_with_context(&VerifierContext::default())
             .unwrap();
     }
     client.identity_p254(opts, rollup.clone().try_into().unwrap());
 
     let rollup_receipt = Receipt::new(InnerReceipt::Succinct(rollup), session.journal.bytes.into());
     rollup_receipt.verify(MULTI_TEST_ID).unwrap();
+}
+
+#[test]
+#[should_panic(expected = "Guest panicked: panicked at 'MultiTestSpec::Panic invoked'")]
+fn guest_error_forwarding() {
+    let env = ExecutorEnv::builder()
+        .write(&MultiTestSpec::Panic)
+        .unwrap()
+        .build()
+        .unwrap();
+    let binary = Binary::new_elf_path(MULTI_TEST_PATH);
+    TestClient::new().execute(env, binary);
 }
