@@ -613,13 +613,13 @@ dependencies = [
 name = "bonsai-sdk"
 version = "0.5.0"
 dependencies = [
- "env_logger",
  "httpmock",
  "reqwest",
  "serde",
  "temp-env",
  "thiserror",
  "tokio",
+ "tracing-subscriber",
  "uuid 1.4.1",
 ]
 
@@ -1303,19 +1303,6 @@ dependencies = [
  "serde",
  "sha3",
  "zeroize",
-]
-
-[[package]]
-name = "env_logger"
-version = "0.10.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "85cdab6a89accf66733ad5a1693a4dcced6aeff64602b634530dd73c1f3ee9f0"
-dependencies = [
- "humantime",
- "is-terminal",
- "log",
- "regex",
- "termcolor",
 ]
 
 [[package]]
@@ -2181,12 +2168,6 @@ dependencies = [
  "tokio",
  "url",
 ]
-
-[[package]]
-name = "humantime"
-version = "2.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9a3a5bfb195931eeb336b2a7b4d761daec841b97f947d34394601737a7bba5e4"
 
 [[package]]
 name = "hyper"
@@ -3642,10 +3623,10 @@ version = "0.19.0"
 dependencies = [
  "anyhow",
  "elf",
- "log",
  "risc0-zkp",
  "risc0-zkvm-platform",
  "serde",
+ "tracing",
 ]
 
 [[package]]
@@ -3669,7 +3650,6 @@ version = "0.19.0"
 dependencies = [
  "anyhow",
  "bytemuck",
- "log",
  "risc0-core",
  "risc0-zkp",
  "tracing",
@@ -3680,7 +3660,6 @@ name = "risc0-circuit-rv32im"
 version = "0.19.0"
 dependencies = [
  "anyhow",
- "log",
  "risc0-core",
  "risc0-zkp",
  "risc0-zkvm-platform",
@@ -3704,7 +3683,6 @@ dependencies = [
  "bytemuck",
  "digest 0.10.7",
  "hex",
- "log",
  "paste",
  "rand_core 0.6.4",
  "risc0-core",
@@ -3726,7 +3704,6 @@ dependencies = [
  "cfg-if",
  "getrandom 0.2.10",
  "hex",
- "log",
  "num-derive",
  "num-traits",
  "prost",
@@ -3748,11 +3725,11 @@ dependencies = [
 name = "risc0-zkvm-methods"
 version = "0.19.0"
 dependencies = [
- "env_logger",
  "risc0-build",
  "risc0-zkvm",
  "risc0-zkvm-platform",
  "serde",
+ "tracing-subscriber",
 ]
 
 [[package]]
@@ -4635,15 +4612,6 @@ dependencies = [
  "dirs-next",
  "rustversion",
  "winapi",
-]
-
-[[package]]
-name = "termcolor"
-version = "1.3.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6093bad37da69aab9d123a8091e4be0aa4a03e4d601ec641c327398315f62b64"
-dependencies = [
- "winapi-util",
 ]
 
 [[package]]

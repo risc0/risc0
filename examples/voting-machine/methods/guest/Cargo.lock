@@ -141,15 +141,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4ec2a862134d2a7d32d7983ddcdd1c4923530833c9f2ea1a44fc5fa473989058"
 
 [[package]]
-name = "log"
-version = "0.4.17"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "abb12e687cfb44aa40f41fc3978ef76448f9b6038cad6aef4259d3c095a2382e"
-dependencies = [
- "cfg-if",
-]
-
-[[package]]
 name = "num-derive"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -202,10 +193,10 @@ version = "0.19.0"
 dependencies = [
  "anyhow",
  "elf",
- "log",
  "risc0-zkp",
  "risc0-zkvm-platform",
  "serde",
+ "tracing",
 ]
 
 [[package]]
@@ -214,7 +205,6 @@ version = "0.19.0"
 dependencies = [
  "anyhow",
  "bytemuck",
- "log",
  "risc0-core",
  "risc0-zkp",
  "tracing",
@@ -225,7 +215,6 @@ name = "risc0-circuit-rv32im"
 version = "0.19.0"
 dependencies = [
  "anyhow",
- "log",
  "risc0-core",
  "risc0-zkp",
  "risc0-zkvm-platform",
@@ -249,7 +238,6 @@ dependencies = [
  "bytemuck",
  "digest",
  "hex",
- "log",
  "paste",
  "rand_core",
  "risc0-core",
@@ -268,7 +256,6 @@ dependencies = [
  "cfg-if",
  "getrandom",
  "hex",
- "log",
  "num-derive",
  "risc0-binfmt",
  "risc0-circuit-recursion",

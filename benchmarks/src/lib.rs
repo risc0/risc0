@@ -20,9 +20,9 @@ use std::{
     time::{Duration, Instant},
 };
 
-use log::info;
 use risc0_zkvm::{MemoryImage, Program, Segment, GUEST_MAX_MEM, PAGE_SIZE};
 use serde::Serialize;
+use tracing::info;
 
 pub mod benches;
 
@@ -203,7 +203,10 @@ pub fn get_cycles(segments: Vec<Segment>) -> (u32, u32) {
 }
 
 pub fn init_logging() {
-    env_logger::init();
+    tracing_subscriber::fmt()
+        .with_env_filter(tracing_subscriber::filter::EnvFilter::from_default_env())
+        .init();
+    ();
 }
 
 #[derive(Serialize)]

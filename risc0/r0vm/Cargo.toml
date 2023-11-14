@@ -13,6 +13,7 @@ bytemuck = "1.12"
 clap = { version = "4", features = ["derive", "env"] }
 env_logger = "0.10"
 risc0-zkvm = { workspace = true, features = ["prove"] }
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [dev-dependencies]
 anyhow = "1.0"
@@ -20,7 +21,7 @@ assert_cmd = "2.0"
 assert_fs = "1.0"
 risc0-zkvm-methods = { path = "../zkvm/methods" }
 temp-env = "0.3"
-test-log = { version = "0.2", features = ["trace"] }
+test-log = { version = "0.2", default-features = false, features = ["trace"] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
