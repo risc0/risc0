@@ -15,7 +15,7 @@
 use std::{fs::File, path::Path};
 
 use anyhow::anyhow;
-use bonsai_groth16::Groth16;
+use bonsai_groth16_verifier::Groth16;
 use reqwest::{blocking::Client as BlockingClient, header};
 use thiserror::Error;
 
@@ -53,7 +53,7 @@ pub enum SdkErr {
 
 /// Collection of serialization object for the REST api
 pub mod responses {
-    use bonsai_groth16::Groth16Seal;
+    use bonsai_groth16_verifier::Groth16Seal;
     use serde::{Deserialize, Serialize};
 
     /// Response of a upload request

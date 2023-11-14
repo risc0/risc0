@@ -1,6 +1,6 @@
 #![no_main]
 
-use bonsai_groth16::Groth16;
+use bonsai_groth16_verifier::Groth16;
 use risc0_zkvm::guest::env;
 
 risc0_zkvm::guest::entry!(main);

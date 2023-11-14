@@ -1,6 +1,6 @@
 [package]
 name = "bonsai-groth16-verifier"
-description = "A Groth16 over the curve bn_254 verifier."
+description = "A library to verify Groth16 proofs computed over the BN_254 curve."
 version = "0.5.0"
 edition = { workspace = true }
 license = { workspace = true }

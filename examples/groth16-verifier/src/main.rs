@@ -1,4 +1,4 @@
-use bonsai_groth16::{
+use bonsai_groth16_verifier::{
     raw::{RawProof, RawPublic, RawVKey},
     Digest, Groth16,
 };
