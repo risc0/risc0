@@ -72,7 +72,7 @@ fn main() -> Result<()> {
 
     // we run the prover to obtain a receipt of the zkVM groth16 verifier
     //
-    // Note: this step produces around 160 segments, thus proving without
+    // Note: this step requires around 150 milion cycles, thus proving without
     // using Bonsai or CUDA acceleration can slow. We recommend enabling
     // dev mode by setting the env variable `RISC0_DEV_MODE=true`
     println!(
