@@ -14,11 +14,12 @@
 
 use getrandom::{register_custom_getrandom, Error};
 
-use crate::{syscall::sys_rand, WORD_SIZE};
-
 /// This is a getrandom handler for the zkvm. It's intended to hook into a
 /// getrandom crate or a depdent of the getrandom crate used by the guest code.
+#[cfg(feature = "enable-getrandom")]
 pub fn zkvm_getrandom(dest: &mut [u8]) -> Result<(), Error> {
+    use crate::{syscall::sys_rand, WORD_SIZE};
+
     if dest.is_empty() {
         return Ok(());
     }
@@ -48,6 +49,14 @@ pub fn zkvm_getrandom(dest: &mut [u8]) -> Result<(), Error> {
         tail.copy_from_slice(&words[1].to_ne_bytes()[..tail.len()]);
     }
     Ok(())
+}
+
+#[cfg(not(feature = "enable-getrandom"))]
+pub fn zkvm_getrandom(dest: &mut [u8]) -> Result<(), Error> {
+    panic!(
+        "Guest code attempted to call getrandom but it was disabled. To enable getrandom, use the \
+        `enable-getrandom` feature in the guest crate's `risc0-zkvm` dependency."
+    );
 }
 
 register_custom_getrandom!(zkvm_getrandom);
