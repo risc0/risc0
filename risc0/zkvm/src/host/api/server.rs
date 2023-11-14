@@ -561,6 +561,7 @@ fn build_env<'a>(
 ) -> Result<ExecutorEnv<'a>> {
     let mut env_builder = ExecutorEnv::builder();
     env_builder.env_vars(request.env_vars.clone());
+    env_builder.args(&request.args);
     for fd in request.read_fds.iter() {
         let proxy = PosixIoProxy::new(*fd, conn.try_clone()?);
         let reader = BufReader::new(proxy);
