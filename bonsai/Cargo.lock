@@ -790,8 +790,6 @@ dependencies = [
  "ark-bn254",
  "ark-groth16",
  "ark-serialize",
- "bincode",
- "bytemuck",
  "ethereum-types",
  "hex",
  "risc0-zkvm",

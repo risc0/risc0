@@ -580,8 +580,6 @@ dependencies = [
  "ark-bn254",
  "ark-groth16",
  "ark-serialize 0.4.2",
- "bincode",
- "bytemuck",
  "ethereum-types",
  "hex",
  "serde",
@@ -2032,6 +2030,7 @@ version = "0.1.0"
 dependencies = [
  "bincode",
  "bonsai-groth16",
+ "bonsai-sdk",
  "hex",
  "methods",
  "risc0-zkvm",

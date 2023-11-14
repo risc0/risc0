@@ -14,7 +14,8 @@
 
 use std::{fs::File, path::Path};
 
-use bonsai_groth16::{Digest, Groth16};
+use anyhow::anyhow;
+use bonsai_groth16::Groth16;
 use reqwest::{blocking::Client as BlockingClient, header};
 use thiserror::Error;
 
@@ -45,7 +46,7 @@ pub enum SdkErr {
     /// Missing file
     #[error("failed to find file on disk")]
     FileNotFound(#[from] std::io::Error),
-    /// Snark receipt verification failed
+    /// Snark receipt verification error
     #[error("failed to verify the snark receipt")]
     SnarkVerificationErr(#[from] anyhow::Error),
 }
@@ -137,8 +138,8 @@ pub mod responses {
         /// Post State Digest
         ///
         /// Collected from the STARK proof via
-        /// `receipt.get_metadata().post.digest()`
-        pub post_state_digest: Vec<u8>,
+        /// `receipt.get_metadata().digest()`
+        pub receipt_meta_digest: Vec<u8>,
         /// Journal data from the risc-zkvm Receipt object
         pub journal: Vec<u8>,
     }
@@ -257,8 +258,14 @@ impl SnarkId {
 
 impl SnarkReceipt {
     /// Verify the snark receipt
-    pub fn verify(&self, receipt_meta_digest: Digest) -> Result<(), SdkErr> {
-        Ok(Groth16::from_seal(&self.snark, receipt_meta_digest)?.verify()?)
+    pub fn verify(&self) -> Result<(), SdkErr> {
+        Ok(Groth16::from_seal(
+            &self.snark,
+            self.receipt_meta_digest.clone().try_into().map_err(|_| {
+                SdkErr::SnarkVerificationErr(anyhow!("malformed post state digest"))
+            })?,
+        )?
+        .verify()?)
     }
 }
 
@@ -523,7 +530,6 @@ impl Client {
 
 #[cfg(test)]
 mod tests {
-    use hex::FromHex;
     use httpmock::prelude::*;
     use uuid::Uuid;
 
@@ -856,17 +862,14 @@ mod tests {
                     [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,207,29,214,20,178,62,196,218,167,244,197,95,239,64,43,255],
                     [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,86,246,102,224,24,131,128,68,162,253,108,219,190,247,101,102]]
             },
-            "post_state_digest":[108,107,210,61,26,87,87,187,84,180,46,107,73,109,231,100,142,184,141,194,227,160,20,41,58,220,97,202,181,31,1,4],
+            "receipt_meta_digest":[255,43,64,239,95,197,244,167,218,196,62,178,20,214,29,207,102,101,247,190,219,108,253,162,68,128,131,24,224,102,246,86],
             "journal":[1,0,0,0]
         }
         "#;
         let snark_receipt: SnarkReceipt =
             serde_json::from_str(snark_receipt_json).expect("Failed parse snark receipt");
-        let receipt_meta_digest =
-            Digest::from_hex("ff2b40ef5fc5f4a7dac43eb214d61dcf6665f7bedb6cfda244808318e066f656")
-                .expect("Failed parse receipt meta digest");
         snark_receipt
-            .verify(receipt_meta_digest)
+            .verify()
             .expect("Failed to verify snark receipt");
     }
 

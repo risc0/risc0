@@ -645,8 +645,6 @@ dependencies = [
  "ark-bn254",
  "ark-groth16",
  "ark-serialize 0.4.2",
- "bincode",
- "bytemuck",
  "ethereum-types",
  "hex",
  "serde",
