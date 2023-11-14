@@ -30,7 +30,7 @@ required-features = ["prove"]
 
 [build-dependencies]
 prost-build = { version = "0.12", optional = true }
-protoc-prebuilt = { version = "0.2", optional = true }
+protoc-prebuilt = { git = "https://github.com/risc0/protoc-prebuilt.git", rev = "14be7456835318f0f2bfd2ee1f0eb9d7ed5ef701", optional = true }
 
 [dependencies]
 anyhow = { version = "1.0", default-features = false }
@@ -72,7 +72,6 @@ gimli = { version = "0.28", optional = true }
 goblin = { version = "0.7", optional = true }
 object = { version = "0.32", optional = true }
 lazy-regex = { version = "2.4", optional = true }
-log = "0.4"
 crypto-bigint = { version = "0.5", default-features = false, features = [
   "rand",
 ], optional = true }
@@ -96,14 +95,14 @@ tracing-forest = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [target.'cfg(not(target_os = "zkvm"))'.dev-dependencies]
-env_logger = "0.10"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 flate2 = "1.0"
 risc0-zkvm-methods = { path = "methods" }
 serde_json = "1.0"
 serial_test = "2.0"
 tar = "0.4"
 tempfile = "3"
-test-log = { version = "0.2", features = ["trace"] }
+test-log = { version = "0.2", default-features = false, features = ["trace"] }
 
 [features]
 client = [

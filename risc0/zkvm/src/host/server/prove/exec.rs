@@ -80,7 +80,7 @@ impl MemoryState {
 
     #[track_caller]
     fn load_u32(&self, addr: u32) -> u32 {
-        // log::debug!("load_u32: 0x{addr:08X}");
+        // tracing::debug!("load_u32: 0x{addr:08X}");
         assert_eq!(addr % WORD_SIZE as u32, 0, "unaligned load");
         let mut bytes = [0u8; WORD_SIZE];
         self.ram.load_region_in_page(addr, &mut bytes);
@@ -93,13 +93,13 @@ impl MemoryState {
 
     #[track_caller]
     fn store_u8(&mut self, addr: u32, value: u8) {
-        // log::debug!("store_u8: 0x{addr:08X} <= 0x{value:08X}");
+        // tracing::debug!("store_u8: 0x{addr:08X} <= 0x{value:08X}");
         self.ram.store_region_in_page(addr, &[value]);
     }
 
     #[track_caller]
     fn store_region(&mut self, addr: u32, slice: &[u8]) {
-        // log::trace!("store_region: 0x{addr:08X} <= {} bytes", slice.len());
+        // tracing::trace!("store_region: 0x{addr:08X} <= {} bytes", slice.len());
         for (i, byte) in slice.iter().enumerate() {
             self.store_u8(addr + i as u32, *byte);
         }
@@ -107,7 +107,7 @@ impl MemoryState {
 
     #[track_caller]
     fn store_u32(&mut self, addr: u32, value: u32) {
-        // log::debug!("store_u32: 0x{addr:08X} <= 0x{value:08X}");
+        // tracing::debug!("store_u32: 0x{addr:08X} <= 0x{value:08X}");
         assert_eq!(addr % WORD_SIZE as u32, 0, "unaligned store");
         self.store_region(addr, &value.to_le_bytes());
     }
@@ -281,14 +281,14 @@ impl MachineContext {
             let pc: u32 = pc.into();
             match exit_code {
                 halt::TERMINATE => {
-                    log::debug!("HALT[{cycle}]> pc: 0x{pc:08x}");
+                    tracing::debug!("HALT[{cycle}]> pc: 0x{pc:08x}");
                 }
                 halt::PAUSE => {
-                    log::debug!("PAUSE[{cycle}]> pc: 0x{pc:08x}");
+                    tracing::debug!("PAUSE[{cycle}]> pc: 0x{pc:08x}");
                     self.is_flushing = true;
                 }
                 halt::SPLIT => {
-                    log::debug!("SPLIT[{cycle}]> pc: 0x{pc:08x}");
+                    tracing::debug!("SPLIT[{cycle}]> pc: 0x{pc:08x}");
                 }
                 _ => unimplemented!("Unsupported exit_code: {exit_code}"),
             }
@@ -307,7 +307,7 @@ impl MachineContext {
             if minor == ecall::HALT {
                 let mode = self.memory.load_register(REG_A0);
                 if mode == halt::PAUSE {
-                    log::debug!("sys_pause[{cycle}]> pc: 0x{pc:08x}");
+                    tracing::debug!("sys_pause[{cycle}]> pc: 0x{pc:08x}");
                     if self.faults.writes.is_empty() {
                         self.is_flushing = false;
                     } else {
@@ -319,7 +319,7 @@ impl MachineContext {
 
         if let Some(split_insn) = self.split_insn {
             if self.insn_counter == split_insn && !self.is_flushing {
-                log::debug!("FLUSH[{}]> pc: 0x{pc:08x}", self.insn_counter);
+                tracing::debug!("FLUSH[{}]> pc: 0x{pc:08x}", self.insn_counter);
                 self.is_flushing = true;
             }
         }
@@ -332,7 +332,7 @@ impl MachineContext {
             return Ok(MajorType::PageFault.as_u32().into());
         }
 
-        log::trace!(
+        tracing::trace!(
             "[{}] pc: 0x{:08x}, insn: 0x{:08x} => {:?}",
             cycle,
             pc,
@@ -346,13 +346,13 @@ impl MachineContext {
 
     fn page_info(&mut self, cycle: usize) -> (Elem, Elem, Elem) {
         if let Some(page_idx) = self.faults.reads.pop_last() {
-            log::debug!("[{cycle}] page_read: 0x{page_idx:08x}");
+            tracing::debug!("[{cycle}] page_read: 0x{page_idx:08x}");
             return (Elem::ONE, page_idx.into(), Elem::ZERO);
         }
 
         if self.is_flushing {
             if let Some(page_idx) = self.faults.writes.pop_first() {
-                log::debug!("[{cycle}] page_write: 0x{page_idx:08x}");
+                tracing::debug!("[{cycle}] page_write: 0x{page_idx:08x}");
                 return (Elem::ZERO, page_idx.into(), Elem::ZERO);
             }
         }
@@ -364,7 +364,7 @@ impl MachineContext {
         let mut numer = merge_word8(numer);
         let mut denom = merge_word8(denom);
         let sign: u32 = sign.into();
-        // log::debug!("divide: [{sign}] {numer} / {denom}");
+        // tracing::debug!("divide: [{sign}] {numer} / {denom}");
         let ones_comp = (sign == 2) as u32;
         let neg_numer = sign != 0 && (numer as i32) < 0;
         let neg_denom = sign == 1 && (denom as i32) < 0;
@@ -387,7 +387,7 @@ impl MachineContext {
         if neg_numer {
             rem = (!rem).overflowing_add(1 - ones_comp).0;
         }
-        // log::debug!("  quot: {quot}, rem: {rem}");
+        // tracing::debug!("  quot: {quot}, rem: {rem}");
         (split_word8(quot), split_word8(rem))
     }
 
@@ -532,8 +532,10 @@ impl MachineContext {
     }
 
     fn log(&mut self, msg: &str, args: &[Elem]) {
-        if log::max_level() < log::LevelFilter::Trace {
-            // Don't bother to format it if we're not even logging.
+        // Don't bother to format it if we're not even logging.
+        if tracing::level_filters::LevelFilter::current()
+            .eq(&tracing::level_filters::LevelFilter::OFF)
+        {
             return;
         }
 
@@ -584,7 +586,7 @@ impl MachineContext {
             "Args missing formatting: {:?} in {msg}",
             args_left
         );
-        log::trace!("{}", formatted);
+        tracing::trace!("{}", formatted);
     }
 
     fn ram_read(&mut self, cycle: usize, addr: Elem, op: Elem) -> Quad {
@@ -597,13 +599,13 @@ impl MachineContext {
             let addr = addr * WORD_SIZE as u32;
             let page_idx = info.get_page_index(addr);
             let entry_addr = info.get_page_entry_addr(page_idx);
-            log::debug!("[{cycle}] ram_read: 0x{addr:08x}, op: {op:?}, entry_addr: 0x{entry_addr:08x}, page_idx: {page_idx}");
+            tracing::debug!("[{cycle}] ram_read: 0x{addr:08x}, op: {op:?}, entry_addr: 0x{entry_addr:08x}, page_idx: {page_idx}");
             panic!("Memory read before page in: 0x{addr:08x}");
         }
 
         let addr = addr * WORD_SIZE as u32;
         let word = self.memory.load_u32(addr);
-        // log::debug!("ram_read: 0x{addr:08X} -> 0x{word:08X}");
+        // tracing::debug!("ram_read: 0x{addr:08X} -> 0x{word:08X}");
         split_word8(word)
     }
 
@@ -621,7 +623,7 @@ impl MachineContext {
 
         let data = merge_word8(data);
         let addr = addr * WORD_SIZE as u32;
-        // log::debug!("ram_write> 0x{:08X} <= 0x{:08X}", addr, data);
+        // tracing::debug!("ram_write> 0x{:08X} <= 0x{:08X}", addr, data);
         self.memory.store_u32(addr, data);
 
         Ok(())
@@ -670,7 +672,7 @@ impl MachineContext {
             .syscall_out_regs
             .pop_front()
             .ok_or(anyhow!("Invalid syscall records"))?;
-        log::trace!("syscall_fini: {:?}", syscall_out_regs);
+        tracing::trace!("syscall_fini: {:?}", syscall_out_regs);
         Ok(syscall_out_regs)
     }
 }

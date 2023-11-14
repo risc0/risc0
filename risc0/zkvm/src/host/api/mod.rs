@@ -197,7 +197,7 @@ impl TcpConnector {
 
 impl Connector for TcpConnector {
     fn connect(&self) -> Result<ConnectionWrapper> {
-        log::debug!("connect");
+        tracing::debug!("connect");
         let stream = TcpStream::connect(&self.addr)?;
         Ok(ConnectionWrapper::new(Box::new(TcpConnection::new(stream))))
     }

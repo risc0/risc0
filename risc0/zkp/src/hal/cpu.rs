@@ -414,7 +414,7 @@ impl<F: Field> Hal for CpuHal<F> {
         input_size: usize,
         count: usize,
     ) {
-        log::debug!(
+        tracing::debug!(
             "output: {}, input: {}, combos: {}, input_size: {input_size}, count: {count}",
             output.size(),
             input.size(),

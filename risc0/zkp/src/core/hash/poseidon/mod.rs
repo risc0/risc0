@@ -241,8 +241,8 @@ mod tests {
         // Try two versions
         poseidon_mix_naive(&mut test_in_1);
         poseidon_mix(&mut test_in_2);
-        log::debug!("test_in_1: {:?}", test_in_1);
-        log::debug!("test_in_2: {:?}", test_in_2);
+        tracing::debug!("test_in_1: {:?}", test_in_1);
+        tracing::debug!("test_in_2: {:?}", test_in_2);
         // Verify they are the same
         assert_eq!(test_in_1, test_in_2);
     }
@@ -253,7 +253,7 @@ mod tests {
         for i in 0..CELLS_RATE {
             buf[i] = Elem::new(i as u32);
         }
-        log::debug!("input: {:?}", buf);
+        tracing::debug!("input: {:?}", buf);
         poseidon_mix(&mut buf);
         let goal: [u32; CELLS] = [
             165799421, 446443103, 1242624592, 791266679, 1939888497, 1437820613, 893076101,
@@ -265,6 +265,6 @@ mod tests {
             assert_eq!(buf[i].as_u32(), goal[i]);
         }
 
-        log::debug!("output: {:?}", buf);
+        tracing::debug!("output: {:?}", buf);
     }
 }

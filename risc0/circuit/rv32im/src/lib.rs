@@ -146,11 +146,11 @@ pub mod testutil {
             let mix = random_fps(&mut rng, CircuitImpl::MIX_SIZE);
             let out = random_fps(&mut rng, CircuitImpl::OUTPUT_SIZE);
             let poly_mix = BabyBearExtElem::random(&mut rng);
-            log::debug!("code: {} bytes", code.len() * 4);
-            log::debug!("data: {} bytes", data.len() * 4);
-            log::debug!("accum: {} bytes", accum.len() * 4);
-            log::debug!("mix: {} bytes", mix.len() * 4);
-            log::debug!("out: {} bytes", out.len() * 4);
+            tracing::debug!("code: {} bytes", code.len() * 4);
+            tracing::debug!("data: {} bytes", data.len() * 4);
+            tracing::debug!("accum: {} bytes", accum.len() * 4);
+            tracing::debug!("mix: {} bytes", mix.len() * 4);
+            tracing::debug!("out: {} bytes", out.len() * 4);
             Self {
                 po2,
                 steps,

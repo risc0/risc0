@@ -1022,12 +1022,10 @@ dependencies = [
  "digital-signature-core",
  "digital-signature-methods",
  "ecdsa-methods",
- "env_logger",
  "hello-world-methods",
  "image",
  "json-methods",
  "k256",
- "log",
  "password-checker-core",
  "password-checker-methods",
  "prorata-core",
@@ -1043,6 +1041,8 @@ dependencies = [
  "sha2",
  "smartcore 0.3.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "smartcore-ml-methods",
+ "tracing",
+ "tracing-subscriber",
  "waldo-core",
  "waldo-methods",
  "wasm-methods",
@@ -1137,12 +1137,12 @@ dependencies = [
  "clap 3.2.25",
  "digital-signature-core",
  "digital-signature-methods",
- "env_logger",
- "log",
  "risc0-zkvm",
  "serde",
  "sha2",
  "test-log",
+ "tracing",
+ "tracing-subscriber",
 ]
 
 [[package]]
@@ -1331,19 +1331,6 @@ dependencies = [
  "proc-macro2",
  "quote 1.0.33",
  "syn 2.0.38",
-]
-
-[[package]]
-name = "env_logger"
-version = "0.10.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "85cdab6a89accf66733ad5a1693a4dcced6aeff64602b634530dd73c1f3ee9f0"
-dependencies = [
- "humantime",
- "is-terminal",
- "log",
- "regex",
- "termcolor",
 ]
 
 [[package]]
@@ -2069,12 +2056,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "df3b46402a9d5adb4c86a0cf463f42e19994e3ee891101b1841f30a545cb49a9"
 
 [[package]]
-name = "humantime"
-version = "2.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9a3a5bfb195931eeb336b2a7b4d761daec841b97f947d34394601737a7bba5e4"
-
-[[package]]
 name = "hyper"
 version = "0.14.27"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2232,17 +2213,6 @@ name = "ipnet"
 version = "2.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "28b29a3cd74f0f4598934efe3aeba42bae0eb4680554128851ebbecb02af14e6"
-
-[[package]]
-name = "is-terminal"
-version = "0.4.9"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cb0889898416213fab133e1d33a0e5858a48177452750691bde3666d0fdbaf8b"
-dependencies = [
- "hermit-abi 0.3.3",
- "rustix",
- "windows-sys 0.48.0",
-]
 
 [[package]]
 name = "itertools"
@@ -2446,6 +2416,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "matchers"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8263075bb86c5a1b1427b5ae862e8889656f126e9f77c484496e8b47cf5c5558"
+dependencies = [
+ "regex-automata 0.1.10",
+]
+
+[[package]]
 name = "matrixmultiply"
 version = "0.3.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2581,6 +2560,16 @@ dependencies = [
  "num-traits",
  "rawpointer",
  "rayon",
+]
+
+[[package]]
+name = "nu-ansi-term"
+version = "0.46.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "77a8165726e8236064dbb45459242600304b42a5ea24ee2948e18e023bf7ba84"
+dependencies = [
+ "overload",
+ "winapi",
 ]
 
 [[package]]
@@ -2829,6 +2818,12 @@ name = "os_str_bytes"
 version = "6.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4d5d9eb14b174ee9aa2ef96dc2b94637a2d4b6e7cb873c7e171f0c20c6cf3eac"
+
+[[package]]
+name = "overload"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b15813163c1d831bf4a13c3610c05c0d03b39feb07f7e09fa234dac9b15aaf39"
 
 [[package]]
 name = "parity-scale-codec"
@@ -3109,10 +3104,10 @@ name = "profiling"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "env_logger",
  "fibonacci-methods",
  "risc0-zkvm",
  "serde",
+ "tracing-subscriber",
 ]
 
 [[package]]
@@ -3127,7 +3122,7 @@ dependencies = [
  "rand",
  "rand_chacha",
  "rand_xorshift",
- "regex-syntax",
+ "regex-syntax 0.7.5",
  "unarray",
 ]
 
@@ -3221,8 +3216,7 @@ dependencies = [
 [[package]]
 name = "protoc-prebuilt"
 version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "37aee930fb53074ec083bf049aa6133bb1a93cce8fc39f83e07f36a0937304dd"
+source = "git+https://github.com/risc0/protoc-prebuilt.git?rev=14be7456835318f0f2bfd2ee1f0eb9d7ed5ef701#14be7456835318f0f2bfd2ee1f0eb9d7ed5ef701"
 dependencies = [
  "ureq",
  "zip",
@@ -3380,8 +3374,17 @@ checksum = "ebee201405406dbf528b8b672104ae6d6d63e6d118cb10e4d51abbc7b58044ff"
 dependencies = [
  "aho-corasick",
  "memchr",
- "regex-automata",
- "regex-syntax",
+ "regex-automata 0.3.9",
+ "regex-syntax 0.7.5",
+]
+
+[[package]]
+name = "regex-automata"
+version = "0.1.10"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6c230d73fb8d8c1b9c0b3135c5142a8acee3a0558fb8db5cf1cb65f8d7862132"
+dependencies = [
+ "regex-syntax 0.6.29",
 ]
 
 [[package]]
@@ -3392,8 +3395,14 @@ checksum = "59b23e92ee4318893fa3fe3e6fb365258efbfe6ac6ab30f090cdcbb7aa37efa9"
 dependencies = [
  "aho-corasick",
  "memchr",
- "regex-syntax",
+ "regex-syntax 0.7.5",
 ]
+
+[[package]]
+name = "regex-syntax"
+version = "0.6.29"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f162c6dd7b008981e4d40210aca20b4bd0f9b60ca9271061b07f78537722f2e1"
 
 [[package]]
 name = "regex-syntax"
@@ -3566,10 +3575,10 @@ version = "0.19.0"
 dependencies = [
  "anyhow",
  "elf",
- "log",
  "risc0-zkp",
  "risc0-zkvm-platform",
  "serde",
+ "tracing",
 ]
 
 [[package]]
@@ -3606,7 +3615,6 @@ dependencies = [
  "bytemuck",
  "cust",
  "downloader",
- "log",
  "metal",
  "rand",
  "rayon",
@@ -3633,7 +3641,6 @@ version = "0.19.0"
 dependencies = [
  "anyhow",
  "cust",
- "log",
  "metal",
  "rand",
  "rayon",
@@ -3680,7 +3687,6 @@ dependencies = [
  "ff",
  "hex",
  "lazy_static",
- "log",
  "metal",
  "ndarray",
  "paste",
@@ -3713,7 +3719,6 @@ dependencies = [
  "goblin",
  "hex",
  "lazy-regex",
- "log",
  "num-derive",
  "num-traits",
  "object",
@@ -4284,6 +4289,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "sharded-slab"
+version = "0.1.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f40ca3c46823713e0d4209592e8d6e826aa57e928f09752619fc696c499637f6"
+dependencies = [
+ "lazy_static",
+]
+
+[[package]]
 name = "signal-hook"
 version = "0.3.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4671,6 +4685,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "thread_local"
+version = "1.1.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3fdd6f064ccff2d6567adcb3873ca630700f00b5ad3f060c25b5dcfd9a4ce152"
+dependencies = [
+ "cfg-if",
+ "once_cell",
+]
+
+[[package]]
 name = "tiff"
 version = "0.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4849,6 +4873,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8ce8c33a8d48bd45d624a6e523445fd21ec13d3653cd51f681abf67418f54eb8"
 dependencies = [
  "cfg-if",
+ "log",
  "pin-project-lite",
  "tracing-attributes",
  "tracing-core",
@@ -4872,6 +4897,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0955b8137a1df6f1a2e9a37d8a6656291ff0297c1a97c24e0d8425fe2312f79a"
 dependencies = [
  "once_cell",
+ "valuable",
 ]
 
 [[package]]
@@ -4882,6 +4908,35 @@ checksum = "97d095ae15e245a057c8e8451bab9b3ee1e1f68e9ba2b4fbc18d0ac5237835f2"
 dependencies = [
  "pin-project",
  "tracing",
+]
+
+[[package]]
+name = "tracing-log"
+version = "0.1.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f751112709b4e791d8ce53e32c4ed2d353565a795ce84da2285393f41557bdf2"
+dependencies = [
+ "log",
+ "once_cell",
+ "tracing-core",
+]
+
+[[package]]
+name = "tracing-subscriber"
+version = "0.3.17"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "30a651bc37f915e81f087d86e62a18eec5f79550c7faff886f7090b4ea757c77"
+dependencies = [
+ "matchers",
+ "nu-ansi-term",
+ "once_cell",
+ "regex",
+ "sharded-slab",
+ "smallvec",
+ "thread_local",
+ "tracing",
+ "tracing-core",
+ "tracing-log",
 ]
 
 [[package]]
@@ -5113,11 +5168,11 @@ dependencies = [
 name = "voting-machine"
 version = "0.12.0"
 dependencies = [
- "env_logger",
  "hex",
- "log",
  "risc0-zkvm",
  "test-log",
+ "tracing",
+ "tracing-subscriber",
  "voting-machine-core",
  "voting-machine-methods",
 ]
@@ -5143,10 +5198,10 @@ version = "0.1.0"
 dependencies = [
  "bincode",
  "clap 4.4.6",
- "env_logger",
  "image",
  "risc0-zkvm",
  "serde",
+ "tracing-subscriber",
  "viuer",
  "waldo-core",
  "waldo-methods",
@@ -5669,13 +5724,13 @@ name = "zkevm-demo"
 version = "0.1.0"
 dependencies = [
  "clap 4.4.6",
- "env_logger",
  "ethers-core",
  "ethers-providers",
- "log",
  "risc0-zkvm",
  "serde",
  "tokio",
+ "tracing",
+ "tracing-subscriber",
  "zkevm-core",
  "zkevm-methods",
 ]

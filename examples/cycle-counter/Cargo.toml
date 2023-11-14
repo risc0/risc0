@@ -12,12 +12,10 @@ csv = "1.1"
 digital-signature-core = { path = "../digital-signature/core" }
 digital-signature-methods = { path = "../digital-signature/methods" }
 ecdsa-methods = { path = "../ecdsa/methods" }
-env_logger = "0.10"
 hello-world-methods = { path = "../hello-world/methods" }
 image = "0.24"
 json-methods = { path = "../json/methods" }
 k256 = { version = "0.13", features = ["serde"] }
-log = "0.4"
 password-checker-core = { path = "../password-checker/core" }
 password-checker-methods = { path = "../password-checker/methods" }
 prorata-core = { path = "../prorata/core" }
@@ -33,6 +31,8 @@ sha-methods = { path = "../sha/methods" }
 sha2 = "0.10"
 smartcore = { version = "0.3", features = ['serde'] }
 smartcore-ml-methods = { path = "../smartcore-ml/methods" }
+tracing = { version = "0.1", features = ["log"] }
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 waldo-core = { path = "../waldo/core" }
 waldo-methods = { path = "../waldo/methods" }
 wasm-methods = { path = "../wasm/methods" }
