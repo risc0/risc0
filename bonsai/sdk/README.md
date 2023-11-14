@@ -94,6 +94,9 @@ fn run_stark2snark(session_id: String) -> Result<()> {
             }
             "SUCCEEDED" => {
                 let snark_receipt = res.output;
+                snark_receipt
+                .verify(receipt.get_metadata().expect("Failed to get receipt metadata").digest())
+                .expect("Receipt verification failed");
                 eprintln!("Snark proof!: {snark_receipt:?}");
                 break;
             }

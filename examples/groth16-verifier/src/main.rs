@@ -11,6 +11,7 @@ const CIRCOM_PROOF: &str = include_str!("data/circom/proof.json");
 const CIRCOM_PUBLIC: &str = include_str!("data/circom/public.json");
 
 fn main() {
+    // digest of the receipt metadata
     let receipt_meta_digest = "ff2b40ef5fc5f4a7dac43eb214d61dcf6665f7bedb6cfda244808318e066f656";
 
     // Groth16 seal as received from a Bonsai SnarkReceipt
