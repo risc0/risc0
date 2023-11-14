@@ -50,8 +50,10 @@ runs:
     - run: |
         echo "CARGO_INCREMENTAL=0" >> $GITHUB_ENV
         echo "CARGO_PROFILE_DEV_DEBUG=0" >> $GITHUB_ENV
+        echo "CC=sccache clang" >> $GITHUB_ENV
         echo "CMAKE_C_COMPILER_LAUNCHER=sccache" >> $GITHUB_ENV
         echo "CMAKE_CXX_COMPILER_LAUNCHER=sccache" >> $GITHUB_ENV
+        echo "CXX=sccache clang++" >> $GITHUB_ENV
         echo "RUSTC_WRAPPER=sccache" >> $GITHUB_ENV
       shell: bash
 
