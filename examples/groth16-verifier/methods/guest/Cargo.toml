@@ -1,0 +1,13 @@
+[package]
+name = "groth16_verifier"
+version = "0.1.0"
+edition = "2021"
+
+[workspace]
+
+[dependencies]
+bonsai-groth16 = { path = "../../../../bonsai/groth16" }
+risc0-zkvm = { path = "../../../../risc0/zkvm", default-features = false, features = [ "std" ] }
+
+[patch.crates-io]
+sha2 = { git = "https://github.com/risc0/RustCrypto-hashes", tag = "sha2-v0.10.6-risczero.0" }
