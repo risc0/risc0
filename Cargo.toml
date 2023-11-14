@@ -35,7 +35,7 @@ repository = "https://github.com/risc0/risc0/"
 [workspace.dependencies]
 bonsai-ethereum-contracts = { version = "0.5.0", path = "bonsai/ethereum" }
 bonsai-ethereum-relay = { version = "0.5.0", default-features = false, path = "bonsai/ethereum-relay" }
-bonsai-groth16 = { version = "0.5.0", default-features = false, path = "bonsai/groth16" }
+bonsai-groth16-verifier = { version = "0.5.0", default-features = false, path = "bonsai/groth16" }
 bonsai-rest-api-mock = { version = "0.5.0", default-features = false, path = "bonsai/rest-api-mock" }
 bonsai-sdk = { version = "0.5.0", default-features = false, path = "bonsai/sdk" }
 risc0-binfmt = { version = "0.19.0", default-features = false, path = "risc0/binfmt" }

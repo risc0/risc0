@@ -6,7 +6,7 @@ edition = "2021"
 [workspace]
 
 [dependencies]
-bonsai-groth16 = { path = "../../../../bonsai/groth16" }
+bonsai-groth16-verifier = { path = "../../../../bonsai/groth16" }
 risc0-zkvm = { path = "../../../../risc0/zkvm", default-features = false, features = [ "std" ] }
 
 [patch.crates-io]

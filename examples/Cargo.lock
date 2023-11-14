@@ -573,7 +573,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "bonsai-groth16"
+name = "bonsai-groth16-verifier"
 version = "0.5.0"
 dependencies = [
  "anyhow",
@@ -592,7 +592,7 @@ name = "bonsai-sdk"
 version = "0.5.0"
 dependencies = [
  "anyhow",
- "bonsai-groth16",
+ "bonsai-groth16-verifier",
  "reqwest",
  "serde",
  "thiserror",
@@ -2029,7 +2029,7 @@ name = "groth16-verifier-example"
 version = "0.1.0"
 dependencies = [
  "bincode",
- "bonsai-groth16",
+ "bonsai-groth16-verifier",
  "bonsai-sdk",
  "hex",
  "methods",

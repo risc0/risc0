@@ -1,5 +1,5 @@
 [package]
-name = "bonsai-groth16"
+name = "bonsai-groth16-verifier"
 description = "A Groth16 over the curve bn_254 verifier."
 version = "0.5.0"
 edition = { workspace = true }
