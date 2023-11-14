@@ -17,8 +17,9 @@ use ark_bn254::{Bn254, Fr};
 use ark_groth16::{prepare_verifying_key, PreparedVerifyingKey, VerifyingKey};
 use serde::{Deserialize, Serialize};
 
-use crate::{convert_g1, convert_g2, from_u256};
+use crate::{from_u256, g1_from_bytes, g2_from_bytes};
 
+/// Groth16 Proof as encoded by Circom/SnarkJS
 #[derive(Serialize, Deserialize, Debug)]
 pub struct RawProof {
     pub pi_a: Vec<String>,
@@ -28,6 +29,7 @@ pub struct RawProof {
     pub curve: String,
 }
 
+/// Groth16 Verification Key as encoded by Circom/SnarkJS
 #[derive(Serialize, Deserialize, Debug)]
 pub struct RawVKey {
     pub protocol: String,
@@ -44,13 +46,20 @@ pub struct RawVKey {
 }
 
 impl RawVKey {
+    /// Computes the prepared verifying key
     pub fn pvk(&self) -> Result<PreparedVerifyingKey<Bn254>, Error> {
-        let alpha_g1 = convert_g1(&vec![
+        if self.vk_alpha_1.len() < 2 {
+            return Err(anyhow!("Malformed G1 element field: vk_alpha_1"));
+        }
+        let alpha_g1 = g1_from_bytes(&vec![
             from_u256(&self.vk_alpha_1[0])?,
             from_u256(&self.vk_alpha_1[1])?,
         ])?;
 
-        let beta_g2 = convert_g2(&vec![
+        if self.vk_beta_2.len() < 2 || self.vk_beta_2[0].len() < 2 || self.vk_beta_2[1].len() < 2 {
+            return Err(anyhow!("Malformed G2 element field: vk_beta_2"));
+        }
+        let beta_g2 = g2_from_bytes(&vec![
             vec![
                 from_u256(&self.vk_beta_2[0][1])?,
                 from_u256(&self.vk_beta_2[0][0])?,
@@ -60,7 +69,12 @@ impl RawVKey {
                 from_u256(&self.vk_beta_2[1][0])?,
             ],
         ])?;
-        let gamma_g2 = convert_g2(&vec![
+
+        if self.vk_gamma_2.len() < 2 || self.vk_gamma_2[0].len() < 2 || self.vk_gamma_2[1].len() < 2
+        {
+            return Err(anyhow!("Malformed G2 element field: vk_gamma_2"));
+        }
+        let gamma_g2 = g2_from_bytes(&vec![
             vec![
                 from_u256(&self.vk_gamma_2[0][1])?,
                 from_u256(&self.vk_gamma_2[0][0])?,
@@ -70,7 +84,12 @@ impl RawVKey {
                 from_u256(&self.vk_gamma_2[1][0])?,
             ],
         ])?;
-        let delta_g2 = convert_g2(&vec![
+
+        if self.vk_delta_2.len() < 2 || self.vk_delta_2[0].len() < 2 || self.vk_delta_2[1].len() < 2
+        {
+            return Err(anyhow!("Malformed G2 element field: vk_delta_2"));
+        }
+        let delta_g2 = g2_from_bytes(&vec![
             vec![
                 from_u256(&self.vk_delta_2[0][1])?,
                 from_u256(&self.vk_delta_2[0][0])?,
@@ -84,7 +103,13 @@ impl RawVKey {
         let gamma_abc_g1 = self
             .ic
             .iter()
-            .map(|ic| convert_g1(&[from_u256(&ic[0])?, from_u256(&ic[1])?]))
+            .enumerate()
+            .map(|(i, ic)| {
+                if ic.len() < 2 {
+                    return Err(anyhow!("Malformed G1 element field: IC_{i}"));
+                }
+                g1_from_bytes(&[from_u256(&ic[0])?, from_u256(&ic[1])?])
+            })
             .collect::<Result<Vec<_>, _>>()?;
 
         let vk = VerifyingKey::<Bn254> {
@@ -99,12 +124,14 @@ impl RawVKey {
     }
 }
 
+/// Groth16 Public witness as encoded by Circom/SnarkJS
 #[derive(Serialize, Deserialize, Debug)]
 pub struct RawPublic {
     pub values: Vec<String>,
 }
 
 impl RawPublic {
+    /// Converts public inputs to scalars over the field of the G1/G2 groups.
     pub fn public_inputs(&self) -> Result<Vec<Fr>, Error> {
         let mut parsed_inputs: Vec<Fr> = Vec::with_capacity(self.values.len());
         for input in self.values.clone() {

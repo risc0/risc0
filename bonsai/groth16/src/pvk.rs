@@ -15,7 +15,7 @@
 use ark_bn254::Bn254;
 use ark_groth16::{prepare_verifying_key, PreparedVerifyingKey, VerifyingKey};
 
-use crate::{convert_g1, convert_g2, from_u256};
+use crate::{from_u256, g1_from_bytes, g2_from_bytes};
 
 const ALPHA_X: &str =
     "20491192805390485299153009773594534940189261866228447918068658471970481763042";
@@ -57,26 +57,27 @@ const IC3_Y: &str = "17156131719875889332084290091263207055049222677188492681713
 const IC4_X: &str = "5195346330747727606774560791771406703229046454464300598774280139349802276261";
 const IC4_Y: &str = "16279160127031959334335024858510026085227931356896384961436876214395869945425";
 
+/// Computes the prepared verifying key used by Bonsai
 pub fn pvk() -> Result<PreparedVerifyingKey<Bn254>, anyhow::Error> {
-    let alpha_g1 = convert_g1(&vec![from_u256(ALPHA_X)?, from_u256(ALPHA_Y)?])?;
-    let beta_g2 = convert_g2(&vec![
+    let alpha_g1 = g1_from_bytes(&vec![from_u256(ALPHA_X)?, from_u256(ALPHA_Y)?])?;
+    let beta_g2 = g2_from_bytes(&vec![
         vec![from_u256(BETA_X1)?, from_u256(BETA_X2)?],
         vec![from_u256(BETA_Y1)?, from_u256(BETA_Y2)?],
     ])?;
-    let gamma_g2 = convert_g2(&vec![
+    let gamma_g2 = g2_from_bytes(&vec![
         vec![from_u256(GAMMA_X1)?, from_u256(GAMMA_X2)?],
         vec![from_u256(GAMMA_Y1)?, from_u256(GAMMA_Y2)?],
     ])?;
-    let delta_g2 = convert_g2(&vec![
+    let delta_g2 = g2_from_bytes(&vec![
         vec![from_u256(DELTA_X1)?, from_u256(DELTA_X2)?],
         vec![from_u256(DELTA_Y1)?, from_u256(DELTA_Y2)?],
     ])?;
 
-    let ic0 = convert_g1(&vec![from_u256(IC0_X)?, from_u256(IC0_Y)?])?;
-    let ic1 = convert_g1(&vec![from_u256(IC1_X)?, from_u256(IC1_Y)?])?;
-    let ic2 = convert_g1(&vec![from_u256(IC2_X)?, from_u256(IC2_Y)?])?;
-    let ic3 = convert_g1(&vec![from_u256(IC3_X)?, from_u256(IC3_Y)?])?;
-    let ic4 = convert_g1(&vec![from_u256(IC4_X)?, from_u256(IC4_Y)?])?;
+    let ic0 = g1_from_bytes(&vec![from_u256(IC0_X)?, from_u256(IC0_Y)?])?;
+    let ic1 = g1_from_bytes(&vec![from_u256(IC1_X)?, from_u256(IC1_Y)?])?;
+    let ic2 = g1_from_bytes(&vec![from_u256(IC2_X)?, from_u256(IC2_Y)?])?;
+    let ic3 = g1_from_bytes(&vec![from_u256(IC3_X)?, from_u256(IC3_Y)?])?;
+    let ic4 = g1_from_bytes(&vec![from_u256(IC4_X)?, from_u256(IC4_Y)?])?;
     let gamma_abc_g1 = vec![ic0, ic1, ic2, ic3, ic4];
 
     let vk = VerifyingKey::<Bn254> {
