@@ -71,7 +71,7 @@ getrandom = { version = "0.2", optional = true }
 gimli = { version = "0.28", optional = true }
 goblin = { version = "0.7", optional = true }
 object = { version = "0.32", optional = true }
-lazy-regex = { version = "2.4", optional = true }
+lazy-regex = { version = "3.1", optional = true }
 crypto-bigint = { version = "0.5", default-features = false, features = [
   "rand",
 ], optional = true }
