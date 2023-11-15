@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{fs, path::PathBuf, rc::Rc};
+use std::{fs, io, path::PathBuf, rc::Rc};
 
 use clap::{Args, Parser, ValueEnum};
 use risc0_zkvm::{
@@ -45,6 +45,8 @@ struct Cli {
     prove_guest_errors: bool,
 
     /// File to read initial input from.
+    ///
+    /// Reads input from stdin if an initial input file is not provided.
     #[arg(long)]
     initial_input: Option<PathBuf>,
 
@@ -122,6 +124,8 @@ pub fn main() {
 
         if let Some(input) = args.initial_input.as_ref() {
             builder.stdin(fs::File::open(input).unwrap());
+        } else {
+            builder.stdin(io::stdin());
         }
 
         #[cfg(feature = "profiler")]
