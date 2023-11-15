@@ -158,6 +158,12 @@ jobs:
         with:
           key: ${{ matrix.os }}-${{ matrix.feature }}
       - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
+      - env | sort
+      - if: matrix.feature == 'cuda'
+        run: |
+          which nvcc
+          nvcc --version
+          nvidia-smi
       - name: build workspace
         run: cargo test -F $FEATURE -F fault-proof -F profiler -F prove --workspace --exclude doc-test --timings --no-run
       - name: test workspace
