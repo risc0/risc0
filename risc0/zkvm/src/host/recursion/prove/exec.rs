@@ -17,7 +17,7 @@ use std::collections::{BTreeMap, VecDeque};
 use anyhow::Result;
 use lazy_regex::{regex, Captures};
 use rayon::prelude::*;
-use risc0_binfmt::recursion::RECURSION_PO2;
+use risc0_binfmt::recursion::{Program, RECURSION_PO2};
 use risc0_circuit_recursion::{CircuitImpl, Externs};
 use risc0_zkp::{
     adapter::{CircuitInfo, CircuitStep, CircuitStepContext, CircuitStepHandler},
@@ -30,7 +30,7 @@ use risc0_zkp::{
     ZK_CYCLES,
 };
 
-use super::{plonk, Program, CIRCUIT};
+use super::{plonk, CIRCUIT};
 
 pub struct MachineContext {
     // Contents of the write-only memory
@@ -277,7 +277,7 @@ impl<'a> RecursionExecutor<'a> {
         let po2 = RECURSION_PO2;
         let executor = Executor::new(circuit, machine, po2, po2, &io);
         Self {
-            zkr: zkr,
+            zkr,
             executor,
             split_points,
         }

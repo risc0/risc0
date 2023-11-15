@@ -16,7 +16,6 @@ mod exec;
 pub mod merkle;
 mod plonk;
 pub mod preflight;
-mod program;
 pub mod zkr;
 
 use std::{collections::VecDeque, mem::take, rc::Rc};
@@ -24,7 +23,7 @@ use std::{collections::VecDeque, mem::take, rc::Rc};
 use anyhow::Result;
 use hex::FromHex;
 use merkle::MerkleGroup;
-use risc0_binfmt::recursion::RECURSION_PO2;
+use risc0_binfmt::recursion::{Program, RECURSION_PO2};
 use risc0_circuit_recursion::{
     cpu::CpuCircuitHal, CircuitImpl, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA,
 };
@@ -45,7 +44,6 @@ use risc0_zkp::{
 };
 use serde::{Deserialize, Serialize};
 
-pub use self::program::Program;
 use super::CIRCUIT;
 use crate::{
     recursion::{valid_control_ids, SuccinctReceipt},

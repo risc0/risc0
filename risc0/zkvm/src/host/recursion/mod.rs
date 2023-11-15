@@ -27,7 +27,7 @@ mod tests;
 pub use risc0_circuit_recursion::control_id::ALLOWED_IDS_ROOT;
 
 #[cfg(feature = "prove")]
-pub use self::prove::{identity_p254, join, lift, poseidon_hal_pair, Program, Prover, ProverOpts};
+pub use self::prove::{identity_p254, join, lift, poseidon_hal_pair, Prover, ProverOpts};
 pub use self::receipt::{valid_control_ids, SuccinctReceipt};
 
 const CIRCUIT: risc0_circuit_recursion::CircuitImpl = risc0_circuit_recursion::CircuitImpl::new();
