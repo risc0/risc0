@@ -36,6 +36,7 @@ fn build_cuda_kernels() {
             "mix.cu",
             "ntt.cu",
             "poseidon.cu",
+            "poseidon2.cu",
             "sha.cu",
             "zk.cu",
             "sha256.h",

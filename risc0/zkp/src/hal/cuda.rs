@@ -33,6 +33,7 @@ use crate::{
         digest::Digest,
         hash::{
             poseidon::{self, PoseidonHashSuite},
+            poseidon2::{self, Poseidon2HashSuite},
             sha::Sha256HashSuite,
             HashSuite,
         },
@@ -224,6 +225,85 @@ impl CudaHash for CudaHashPoseidon {
     }
 }
 
+pub struct CudaHashPoseidon2 {
+    suite: HashSuite<BabyBear>,
+    round_constants: BufferImpl<BabyBearElem>,
+    m_int_diag_ulvt: BufferImpl<BabyBearElem>,
+}
+
+impl CudaHash for CudaHashPoseidon2 {
+    fn new(hal: &CudaHal<Self>) -> Self {
+        let stream = Stream::new(StreamFlags::DEFAULT, None).unwrap();
+        let round_constants =
+            hal.copy_from_elem("round_constants", poseidon2::consts::ROUND_CONSTANTS);
+        let m_int_diag_ulvt =
+            hal.copy_from_elem("m_int_diag_ulvt", poseidon2::consts::M_INT_DIAG_ULVT);
+        stream.synchronize().unwrap();
+        CudaHashPoseidon2 {
+            suite: Poseidon2HashSuite::new_suite(),
+            round_constants,
+            m_int_diag_ulvt,
+        }
+    }
+
+    fn hash_fold(&self, hal: &CudaHal<Self>, io: &BufferImpl<Digest>, output_size: usize) {
+        let stream = Stream::new(StreamFlags::DEFAULT, None).unwrap();
+        let kernel = hal.module.get_function("poseidon2_fold").unwrap();
+        let params = hal.compute_simple_params(output_size);
+        unsafe {
+            // DevicePointers require that the underlying type of the pointer implements the
+            // DeviceCopy trait. core::Digest does not implement this trait.
+            // TODO: refactor data types to allow safer copying.
+            // Here, we perform pointer arithmetic on the underlying device_pointer of type
+            // u8.
+            // TODO: modify type hierarchy to fit Rustacuda's memory model
+            // to allow for more type safe pointer arithmetic
+            let input = io.as_device_ptr_with_offset(2 * output_size);
+            let output = io.as_device_ptr_with_offset(output_size);
+            launch!(kernel<<<params.0, params.1, 0, stream>>>(
+                self.round_constants.as_device_ptr(),
+                self.m_int_diag_ulvt.as_device_ptr(),
+                output,
+                input,
+                output_size
+            ))
+            .unwrap();
+        }
+        stream.synchronize().unwrap();
+    }
+
+    fn hash_rows(
+        &self,
+        hal: &CudaHal<Self>,
+        output: &BufferImpl<Digest>,
+        matrix: &BufferImpl<BabyBearElem>,
+    ) {
+        let row_size = output.size();
+        let col_size = matrix.size() / output.size();
+        assert_eq!(matrix.size(), col_size * row_size);
+
+        let stream = Stream::new(StreamFlags::DEFAULT, None).unwrap();
+        let kernel = hal.module.get_function("poseidon2_rows").unwrap();
+        let params = hal.compute_simple_params(row_size);
+        unsafe {
+            launch!(kernel<<<params.0, params.1, 0, stream>>>(
+                self.round_constants.as_device_ptr(),
+                self.m_int_diag_ulvt.as_device_ptr(),
+                output.as_device_ptr(),
+                matrix.as_device_ptr(),
+                row_size,
+                col_size
+            ))
+            .unwrap();
+        }
+        stream.synchronize().unwrap();
+    }
+
+    fn get_hash_suite(&self) -> &HashSuite<BabyBear> {
+        &self.suite
+    }
+}
+
 pub struct CudaHal<Hash: CudaHash + ?Sized> {
     pub max_threads: u32,
     pub module: Module,
@@ -233,6 +313,7 @@ pub struct CudaHal<Hash: CudaHash + ?Sized> {
 
 pub type CudaHalSha256 = CudaHal<CudaHashSha256>;
 pub type CudaHalPoseidon = CudaHal<CudaHashPoseidon>;
+pub type CudaHalPoseidon2 = CudaHal<CudaHashPoseidon2>;
 
 struct RawBuffer {
     name: &'static str,
@@ -806,7 +887,7 @@ mod tests {
     use serial_test::serial;
     use test_log::test;
 
-    use super::{CudaHalPoseidon, CudaHalSha256};
+    use super::{CudaHalPoseidon, CudaHalPoseidon2, CudaHalSha256};
     use crate::hal::testutil;
 
     #[test]
@@ -855,6 +936,18 @@ mod tests {
     #[serial]
     fn hash_fold_poseidon() {
         testutil::hash_fold(CudaHalPoseidon::new());
+    }
+
+    #[test]
+    #[serial]
+    fn hash_rows_poseidon2() {
+        testutil::hash_rows(CudaHalPoseidon2::new());
+    }
+
+    #[test]
+    #[serial]
+    fn hash_fold_poseidon2() {
+        testutil::hash_fold(CudaHalPoseidon2::new());
     }
 
     #[test]
