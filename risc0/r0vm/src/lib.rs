@@ -46,7 +46,7 @@ struct Cli {
 
     /// File to read initial input from.
     ///
-    /// Reads input from stdin is an initial input file is not provided.
+    /// Reads input from stdin if an initial input file is not provided.
     #[arg(long)]
     initial_input: Option<PathBuf>,
 
