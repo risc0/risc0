@@ -171,6 +171,7 @@ prove = [
   "risc0-circuit-recursion/prove",
   "risc0-circuit-rv32im/prove",
   "risc0-zkp/prove",
+  "risc0-binfmt/recursion",
   "std",
 ]
 std = [

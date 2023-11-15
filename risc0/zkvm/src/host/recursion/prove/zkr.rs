@@ -13,13 +13,14 @@
 // limitations under the License.
 
 use anyhow::{bail, Result};
+use risc0_binfmt::recursion::RECURSION_CODE_SIZE;
 use risc0_circuit_recursion::REGISTER_GROUP_CODE;
 use risc0_zkp::{
     adapter::TapsProvider, core::digest::Digest, field::baby_bear::BabyBearElem, MAX_CYCLES_PO2,
     MIN_CYCLES_PO2,
 };
 
-use super::{Program, CIRCUIT, RECURSION_CODE_SIZE};
+use super::{Program, CIRCUIT};
 
 fn get_zkr(name: &str) -> Result<(Program, Digest)> {
     let u32s = risc0_circuit_recursion::zkr::get_zkr(name)?;

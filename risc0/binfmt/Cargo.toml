@@ -26,3 +26,4 @@ tracing = { version = "0.1", default-features = false }
 [features]
 default = ["std"]
 std = ["anyhow/std", "elf/std", "tracing/log", "tracing/std", "risc0-zkp/std", "serde/std"]
+recursion = ["std", "risc0-zkp/prove"]

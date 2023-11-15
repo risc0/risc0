@@ -19,7 +19,13 @@ use risc0_zkp::{
     prove::poly_group::PolyGroup,
 };
 
-use super::RECURSION_PO2;
+// TODO: Automatically generate this from the circuit somehow without
+// messing up bootstrap dependencies.
+/// Number of columns used in the recursion circuit's code section.
+pub const RECURSION_CODE_SIZE: usize = 21;
+
+/// Number of rows in the recursion circuit witness as a power of 2.
+pub const RECURSION_PO2: usize = 18;
 
 /// TODO
 #[derive(Clone)]

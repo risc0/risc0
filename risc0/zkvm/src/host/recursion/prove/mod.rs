@@ -24,6 +24,7 @@ use std::{collections::VecDeque, mem::take, rc::Rc};
 use anyhow::Result;
 use hex::FromHex;
 use merkle::MerkleGroup;
+use risc0_binfmt::recursion::RECURSION_PO2;
 use risc0_circuit_recursion::{
     cpu::CpuCircuitHal, CircuitImpl, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA,
 };
@@ -51,11 +52,7 @@ use crate::{
     HalPair, ReceiptMetadata, SegmentReceipt, POSEIDON_CONTROL_ID,
 };
 
-const RECURSION_PO2: usize = 18;
 const ALLOWED_CODE_MERKLE_DEPTH: usize = 8;
-// TODO: Automatically generate this from the circuit somehow without
-// messing up bootstrap dependencies.
-const RECURSION_CODE_SIZE: usize = 21;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct RecursionReceipt {

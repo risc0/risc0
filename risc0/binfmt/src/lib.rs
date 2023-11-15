@@ -29,3 +29,6 @@ pub use crate::{
     hash::{tagged_list, tagged_list_cons, tagged_struct, Digestible},
     sys_state::{read_sha_halfs, write_sha_halfs, SystemState},
 };
+
+#[cfg(all(not(target_os = "zkvm"), feature = "recursion"))]
+pub mod recursion;
