@@ -1,6 +1,6 @@
-pub type OutReg4LayoutArray = [&'static OutReg; 4];
+// circuit/rv32im/global.h:15
 pub struct U32Reg {
-    pub byte: &'static OutReg4LayoutArray,
+    pub byte: &'static [&'static OutReg; 4],
 }
 impl risc0_zkp::layout::Component for U32Reg {
     fn ty_name(&self) -> &'static str {
@@ -12,9 +12,10 @@ impl risc0_zkp::layout::Component for U32Reg {
         Ok(())
     }
 }
-pub type U32Reg8LayoutArray = [&'static U32Reg; 8];
+
+// circuit/rv32im/global.h:33
 pub struct GlobalDigest {
-    pub word: &'static U32Reg8LayoutArray,
+    pub word: &'static [&'static U32Reg; 8],
 }
 impl risc0_zkp::layout::Component for GlobalDigest {
     fn ty_name(&self) -> &'static str {
@@ -26,6 +27,8 @@ impl risc0_zkp::layout::Component for GlobalDigest {
         Ok(())
     }
 }
+
+// circuit/rv32im/global.h:35
 pub struct SystemState {
     pub image_id: &'static GlobalDigest,
     pub pc: &'static U32Reg,
@@ -41,6 +44,8 @@ impl risc0_zkp::layout::Component for SystemState {
         Ok(())
     }
 }
+
+// zirgen/circuit/rv32im/body.cpp:163
 pub struct Global {
     pub sys_exit_code: &'static OutReg,
     pub user_exit_code: &'static OutReg,
@@ -64,6 +69,8 @@ impl risc0_zkp::layout::Component for Global {
         Ok(())
     }
 }
+
+// :0
 pub struct BodyStep {
     pub global: &'static Global,
 }
@@ -77,6 +84,8 @@ impl risc0_zkp::layout::Component for BodyStep {
         Ok(())
     }
 }
+
+// :0
 pub struct BytesFiniStep {}
 impl risc0_zkp::layout::Component for BytesFiniStep {
     fn ty_name(&self) -> &'static str {
@@ -87,6 +96,8 @@ impl risc0_zkp::layout::Component for BytesFiniStep {
         Ok(())
     }
 }
+
+// zirgen/circuit/rv32im/top.cpp:60
 pub struct Mux {
     pub body: &'static BodyStep,
     pub bytes_fini: &'static BytesFiniStep,
@@ -114,6 +125,8 @@ impl risc0_zkp::layout::Component for Mux {
         Ok(())
     }
 }
+
+// compiler/edsl/component.h:142
 pub struct Top {
     pub halted: &'static DataReg,
     pub mux: &'static Mux,
@@ -129,313 +142,882 @@ impl risc0_zkp::layout::Component for Top {
         Ok(())
     }
 }
-pub static LAYOUT: Top = Top {
-    halted: &DataReg { offset: 2 },
-    mux: &Mux {
-        body: &BodyStep {
-            global: &Global {
-                sys_exit_code: &OutReg { offset: 104 },
-                user_exit_code: &OutReg { offset: 105 },
-                input: &GlobalDigest {
-                    word: &[
-                        &U32Reg {
-                            byte: &[
-                                &OutReg { offset: 0 },
-                                &OutReg { offset: 1 },
-                                &OutReg { offset: 2 },
-                                &OutReg { offset: 3 },
-                            ],
-                        },
-                        &U32Reg {
-                            byte: &[
-                                &OutReg { offset: 4 },
-                                &OutReg { offset: 5 },
-                                &OutReg { offset: 6 },
-                                &OutReg { offset: 7 },
-                            ],
-                        },
-                        &U32Reg {
-                            byte: &[
-                                &OutReg { offset: 8 },
-                                &OutReg { offset: 9 },
-                                &OutReg { offset: 10 },
-                                &OutReg { offset: 11 },
-                            ],
-                        },
-                        &U32Reg {
-                            byte: &[
-                                &OutReg { offset: 12 },
-                                &OutReg { offset: 13 },
-                                &OutReg { offset: 14 },
-                                &OutReg { offset: 15 },
-                            ],
-                        },
-                        &U32Reg {
-                            byte: &[
-                                &OutReg { offset: 16 },
-                                &OutReg { offset: 17 },
-                                &OutReg { offset: 18 },
-                                &OutReg { offset: 19 },
-                            ],
-                        },
-                        &U32Reg {
-                            byte: &[
-                                &OutReg { offset: 20 },
-                                &OutReg { offset: 21 },
-                                &OutReg { offset: 22 },
-                                &OutReg { offset: 23 },
-                            ],
-                        },
-                        &U32Reg {
-                            byte: &[
-                                &OutReg { offset: 24 },
-                                &OutReg { offset: 25 },
-                                &OutReg { offset: 26 },
-                                &OutReg { offset: 27 },
-                            ],
-                        },
-                        &U32Reg {
-                            byte: &[
-                                &OutReg { offset: 28 },
-                                &OutReg { offset: 29 },
-                                &OutReg { offset: 30 },
-                                &OutReg { offset: 31 },
-                            ],
-                        },
-                    ],
-                },
-                output: &GlobalDigest {
-                    word: &[
-                        &U32Reg {
-                            byte: &[
-                                &OutReg { offset: 106 },
-                                &OutReg { offset: 107 },
-                                &OutReg { offset: 108 },
-                                &OutReg { offset: 109 },
-                            ],
-                        },
-                        &U32Reg {
-                            byte: &[
-                                &OutReg { offset: 110 },
-                                &OutReg { offset: 111 },
-                                &OutReg { offset: 112 },
-                                &OutReg { offset: 113 },
-                            ],
-                        },
-                        &U32Reg {
-                            byte: &[
-                                &OutReg { offset: 114 },
-                                &OutReg { offset: 115 },
-                                &OutReg { offset: 116 },
-                                &OutReg { offset: 117 },
-                            ],
-                        },
-                        &U32Reg {
-                            byte: &[
-                                &OutReg { offset: 118 },
-                                &OutReg { offset: 119 },
-                                &OutReg { offset: 120 },
-                                &OutReg { offset: 121 },
-                            ],
-                        },
-                        &U32Reg {
-                            byte: &[
-                                &OutReg { offset: 122 },
-                                &OutReg { offset: 123 },
-                                &OutReg { offset: 124 },
-                                &OutReg { offset: 125 },
-                            ],
-                        },
-                        &U32Reg {
-                            byte: &[
-                                &OutReg { offset: 126 },
-                                &OutReg { offset: 127 },
-                                &OutReg { offset: 128 },
-                                &OutReg { offset: 129 },
-                            ],
-                        },
-                        &U32Reg {
-                            byte: &[
-                                &OutReg { offset: 130 },
-                                &OutReg { offset: 131 },
-                                &OutReg { offset: 132 },
-                                &OutReg { offset: 133 },
-                            ],
-                        },
-                        &U32Reg {
-                            byte: &[
-                                &OutReg { offset: 134 },
-                                &OutReg { offset: 135 },
-                                &OutReg { offset: 136 },
-                                &OutReg { offset: 137 },
-                            ],
-                        },
-                    ],
-                },
-                post: &SystemState {
-                    image_id: &GlobalDigest {
-                        word: &[
-                            &U32Reg {
-                                byte: &[
-                                    &OutReg { offset: 72 },
-                                    &OutReg { offset: 73 },
-                                    &OutReg { offset: 74 },
-                                    &OutReg { offset: 75 },
-                                ],
-                            },
-                            &U32Reg {
-                                byte: &[
-                                    &OutReg { offset: 76 },
-                                    &OutReg { offset: 77 },
-                                    &OutReg { offset: 78 },
-                                    &OutReg { offset: 79 },
-                                ],
-                            },
-                            &U32Reg {
-                                byte: &[
-                                    &OutReg { offset: 80 },
-                                    &OutReg { offset: 81 },
-                                    &OutReg { offset: 82 },
-                                    &OutReg { offset: 83 },
-                                ],
-                            },
-                            &U32Reg {
-                                byte: &[
-                                    &OutReg { offset: 84 },
-                                    &OutReg { offset: 85 },
-                                    &OutReg { offset: 86 },
-                                    &OutReg { offset: 87 },
-                                ],
-                            },
-                            &U32Reg {
-                                byte: &[
-                                    &OutReg { offset: 88 },
-                                    &OutReg { offset: 89 },
-                                    &OutReg { offset: 90 },
-                                    &OutReg { offset: 91 },
-                                ],
-                            },
-                            &U32Reg {
-                                byte: &[
-                                    &OutReg { offset: 92 },
-                                    &OutReg { offset: 93 },
-                                    &OutReg { offset: 94 },
-                                    &OutReg { offset: 95 },
-                                ],
-                            },
-                            &U32Reg {
-                                byte: &[
-                                    &OutReg { offset: 96 },
-                                    &OutReg { offset: 97 },
-                                    &OutReg { offset: 98 },
-                                    &OutReg { offset: 99 },
-                                ],
-                            },
-                            &U32Reg {
-                                byte: &[
-                                    &OutReg { offset: 100 },
-                                    &OutReg { offset: 101 },
-                                    &OutReg { offset: 102 },
-                                    &OutReg { offset: 103 },
-                                ],
-                            },
-                        ],
-                    },
-                    pc: &U32Reg {
-                        byte: &[
-                            &OutReg { offset: 68 },
-                            &OutReg { offset: 69 },
-                            &OutReg { offset: 70 },
-                            &OutReg { offset: 71 },
-                        ],
-                    },
-                },
-                pre: &SystemState {
-                    image_id: &GlobalDigest {
-                        word: &[
-                            &U32Reg {
-                                byte: &[
-                                    &OutReg { offset: 36 },
-                                    &OutReg { offset: 37 },
-                                    &OutReg { offset: 38 },
-                                    &OutReg { offset: 39 },
-                                ],
-                            },
-                            &U32Reg {
-                                byte: &[
-                                    &OutReg { offset: 40 },
-                                    &OutReg { offset: 41 },
-                                    &OutReg { offset: 42 },
-                                    &OutReg { offset: 43 },
-                                ],
-                            },
-                            &U32Reg {
-                                byte: &[
-                                    &OutReg { offset: 44 },
-                                    &OutReg { offset: 45 },
-                                    &OutReg { offset: 46 },
-                                    &OutReg { offset: 47 },
-                                ],
-                            },
-                            &U32Reg {
-                                byte: &[
-                                    &OutReg { offset: 48 },
-                                    &OutReg { offset: 49 },
-                                    &OutReg { offset: 50 },
-                                    &OutReg { offset: 51 },
-                                ],
-                            },
-                            &U32Reg {
-                                byte: &[
-                                    &OutReg { offset: 52 },
-                                    &OutReg { offset: 53 },
-                                    &OutReg { offset: 54 },
-                                    &OutReg { offset: 55 },
-                                ],
-                            },
-                            &U32Reg {
-                                byte: &[
-                                    &OutReg { offset: 56 },
-                                    &OutReg { offset: 57 },
-                                    &OutReg { offset: 58 },
-                                    &OutReg { offset: 59 },
-                                ],
-                            },
-                            &U32Reg {
-                                byte: &[
-                                    &OutReg { offset: 60 },
-                                    &OutReg { offset: 61 },
-                                    &OutReg { offset: 62 },
-                                    &OutReg { offset: 63 },
-                                ],
-                            },
-                            &U32Reg {
-                                byte: &[
-                                    &OutReg { offset: 64 },
-                                    &OutReg { offset: 65 },
-                                    &OutReg { offset: 66 },
-                                    &OutReg { offset: 67 },
-                                ],
-                            },
-                        ],
-                    },
-                    pc: &U32Reg {
-                        byte: &[
-                            &OutReg { offset: 32 },
-                            &OutReg { offset: 33 },
-                            &OutReg { offset: 34 },
-                            &OutReg { offset: 35 },
-                        ],
-                    },
-                },
-            },
-        },
-        bytes_fini: &BytesFiniStep {},
-        bytes_init: &BytesFiniStep {},
-        bytes_setup: &BytesFiniStep {},
-        ram_fini: &BytesFiniStep {},
-        ram_init: &BytesFiniStep {},
-        ram_load: &BytesFiniStep {},
-        reset: &BytesFiniStep {},
-    },
+
+// compiler/edsl/component.h:142
+pub const LAYOUT_HALTED: DataReg = DataReg { offset: 2 };
+
+// zirgen/circuit/rv32im/body.cpp:163
+pub const LAYOUT_MUX_BODY_GLOBAL_SYS_EXIT_CODE: OutReg = OutReg { offset: 104 };
+
+// zirgen/circuit/rv32im/body.cpp:163
+pub const LAYOUT_MUX_BODY_GLOBAL_USER_EXIT_CODE: OutReg = OutReg { offset: 105 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_0_BYTE_0_: OutReg = OutReg { offset: 0 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_0_BYTE_1_: OutReg = OutReg { offset: 1 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_0_BYTE_2_: OutReg = OutReg { offset: 2 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_0_BYTE_3_: OutReg = OutReg { offset: 3 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_0_: U32Reg = U32Reg {
+    byte: &[
+        &LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_0_BYTE_0_,
+        &LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_0_BYTE_1_,
+        &LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_0_BYTE_2_,
+        &LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_0_BYTE_3_,
+    ],
+};
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_1_BYTE_0_: OutReg = OutReg { offset: 4 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_1_BYTE_1_: OutReg = OutReg { offset: 5 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_1_BYTE_2_: OutReg = OutReg { offset: 6 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_1_BYTE_3_: OutReg = OutReg { offset: 7 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_1_: U32Reg = U32Reg {
+    byte: &[
+        &LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_1_BYTE_0_,
+        &LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_1_BYTE_1_,
+        &LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_1_BYTE_2_,
+        &LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_1_BYTE_3_,
+    ],
+};
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_2_BYTE_0_: OutReg = OutReg { offset: 8 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_2_BYTE_1_: OutReg = OutReg { offset: 9 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_2_BYTE_2_: OutReg = OutReg { offset: 10 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_2_BYTE_3_: OutReg = OutReg { offset: 11 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_2_: U32Reg = U32Reg {
+    byte: &[
+        &LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_2_BYTE_0_,
+        &LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_2_BYTE_1_,
+        &LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_2_BYTE_2_,
+        &LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_2_BYTE_3_,
+    ],
+};
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_3_BYTE_0_: OutReg = OutReg { offset: 12 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_3_BYTE_1_: OutReg = OutReg { offset: 13 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_3_BYTE_2_: OutReg = OutReg { offset: 14 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_3_BYTE_3_: OutReg = OutReg { offset: 15 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_3_: U32Reg = U32Reg {
+    byte: &[
+        &LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_3_BYTE_0_,
+        &LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_3_BYTE_1_,
+        &LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_3_BYTE_2_,
+        &LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_3_BYTE_3_,
+    ],
+};
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_4_BYTE_0_: OutReg = OutReg { offset: 16 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_4_BYTE_1_: OutReg = OutReg { offset: 17 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_4_BYTE_2_: OutReg = OutReg { offset: 18 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_4_BYTE_3_: OutReg = OutReg { offset: 19 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_4_: U32Reg = U32Reg {
+    byte: &[
+        &LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_4_BYTE_0_,
+        &LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_4_BYTE_1_,
+        &LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_4_BYTE_2_,
+        &LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_4_BYTE_3_,
+    ],
+};
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_5_BYTE_0_: OutReg = OutReg { offset: 20 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_5_BYTE_1_: OutReg = OutReg { offset: 21 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_5_BYTE_2_: OutReg = OutReg { offset: 22 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_5_BYTE_3_: OutReg = OutReg { offset: 23 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_5_: U32Reg = U32Reg {
+    byte: &[
+        &LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_5_BYTE_0_,
+        &LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_5_BYTE_1_,
+        &LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_5_BYTE_2_,
+        &LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_5_BYTE_3_,
+    ],
+};
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_6_BYTE_0_: OutReg = OutReg { offset: 24 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_6_BYTE_1_: OutReg = OutReg { offset: 25 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_6_BYTE_2_: OutReg = OutReg { offset: 26 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_6_BYTE_3_: OutReg = OutReg { offset: 27 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_6_: U32Reg = U32Reg {
+    byte: &[
+        &LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_6_BYTE_0_,
+        &LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_6_BYTE_1_,
+        &LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_6_BYTE_2_,
+        &LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_6_BYTE_3_,
+    ],
+};
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_7_BYTE_0_: OutReg = OutReg { offset: 28 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_7_BYTE_1_: OutReg = OutReg { offset: 29 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_7_BYTE_2_: OutReg = OutReg { offset: 30 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_7_BYTE_3_: OutReg = OutReg { offset: 31 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_7_: U32Reg = U32Reg {
+    byte: &[
+        &LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_7_BYTE_0_,
+        &LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_7_BYTE_1_,
+        &LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_7_BYTE_2_,
+        &LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_7_BYTE_3_,
+    ],
+};
+
+// circuit/rv32im/global.h:33
+pub const LAYOUT_MUX_BODY_GLOBAL_INPUT: GlobalDigest = GlobalDigest {
+    word: &[
+        &LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_0_,
+        &LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_1_,
+        &LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_2_,
+        &LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_3_,
+        &LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_4_,
+        &LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_5_,
+        &LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_6_,
+        &LAYOUT_MUX_BODY_GLOBAL_INPUT_WORD_7_,
+    ],
+};
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_0_BYTE_0_: OutReg = OutReg { offset: 106 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_0_BYTE_1_: OutReg = OutReg { offset: 107 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_0_BYTE_2_: OutReg = OutReg { offset: 108 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_0_BYTE_3_: OutReg = OutReg { offset: 109 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_0_: U32Reg = U32Reg {
+    byte: &[
+        &LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_0_BYTE_0_,
+        &LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_0_BYTE_1_,
+        &LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_0_BYTE_2_,
+        &LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_0_BYTE_3_,
+    ],
+};
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_1_BYTE_0_: OutReg = OutReg { offset: 110 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_1_BYTE_1_: OutReg = OutReg { offset: 111 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_1_BYTE_2_: OutReg = OutReg { offset: 112 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_1_BYTE_3_: OutReg = OutReg { offset: 113 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_1_: U32Reg = U32Reg {
+    byte: &[
+        &LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_1_BYTE_0_,
+        &LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_1_BYTE_1_,
+        &LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_1_BYTE_2_,
+        &LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_1_BYTE_3_,
+    ],
+};
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_2_BYTE_0_: OutReg = OutReg { offset: 114 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_2_BYTE_1_: OutReg = OutReg { offset: 115 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_2_BYTE_2_: OutReg = OutReg { offset: 116 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_2_BYTE_3_: OutReg = OutReg { offset: 117 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_2_: U32Reg = U32Reg {
+    byte: &[
+        &LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_2_BYTE_0_,
+        &LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_2_BYTE_1_,
+        &LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_2_BYTE_2_,
+        &LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_2_BYTE_3_,
+    ],
+};
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_3_BYTE_0_: OutReg = OutReg { offset: 118 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_3_BYTE_1_: OutReg = OutReg { offset: 119 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_3_BYTE_2_: OutReg = OutReg { offset: 120 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_3_BYTE_3_: OutReg = OutReg { offset: 121 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_3_: U32Reg = U32Reg {
+    byte: &[
+        &LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_3_BYTE_0_,
+        &LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_3_BYTE_1_,
+        &LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_3_BYTE_2_,
+        &LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_3_BYTE_3_,
+    ],
+};
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_4_BYTE_0_: OutReg = OutReg { offset: 122 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_4_BYTE_1_: OutReg = OutReg { offset: 123 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_4_BYTE_2_: OutReg = OutReg { offset: 124 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_4_BYTE_3_: OutReg = OutReg { offset: 125 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_4_: U32Reg = U32Reg {
+    byte: &[
+        &LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_4_BYTE_0_,
+        &LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_4_BYTE_1_,
+        &LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_4_BYTE_2_,
+        &LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_4_BYTE_3_,
+    ],
+};
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_5_BYTE_0_: OutReg = OutReg { offset: 126 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_5_BYTE_1_: OutReg = OutReg { offset: 127 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_5_BYTE_2_: OutReg = OutReg { offset: 128 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_5_BYTE_3_: OutReg = OutReg { offset: 129 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_5_: U32Reg = U32Reg {
+    byte: &[
+        &LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_5_BYTE_0_,
+        &LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_5_BYTE_1_,
+        &LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_5_BYTE_2_,
+        &LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_5_BYTE_3_,
+    ],
+};
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_6_BYTE_0_: OutReg = OutReg { offset: 130 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_6_BYTE_1_: OutReg = OutReg { offset: 131 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_6_BYTE_2_: OutReg = OutReg { offset: 132 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_6_BYTE_3_: OutReg = OutReg { offset: 133 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_6_: U32Reg = U32Reg {
+    byte: &[
+        &LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_6_BYTE_0_,
+        &LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_6_BYTE_1_,
+        &LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_6_BYTE_2_,
+        &LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_6_BYTE_3_,
+    ],
+};
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_7_BYTE_0_: OutReg = OutReg { offset: 134 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_7_BYTE_1_: OutReg = OutReg { offset: 135 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_7_BYTE_2_: OutReg = OutReg { offset: 136 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_7_BYTE_3_: OutReg = OutReg { offset: 137 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_7_: U32Reg = U32Reg {
+    byte: &[
+        &LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_7_BYTE_0_,
+        &LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_7_BYTE_1_,
+        &LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_7_BYTE_2_,
+        &LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_7_BYTE_3_,
+    ],
+};
+
+// circuit/rv32im/global.h:38
+pub const LAYOUT_MUX_BODY_GLOBAL_OUTPUT: GlobalDigest = GlobalDigest {
+    word: &[
+        &LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_0_,
+        &LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_1_,
+        &LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_2_,
+        &LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_3_,
+        &LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_4_,
+        &LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_5_,
+        &LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_6_,
+        &LAYOUT_MUX_BODY_GLOBAL_OUTPUT_WORD_7_,
+    ],
+};
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_0_BYTE_0_: OutReg = OutReg { offset: 72 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_0_BYTE_1_: OutReg = OutReg { offset: 73 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_0_BYTE_2_: OutReg = OutReg { offset: 74 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_0_BYTE_3_: OutReg = OutReg { offset: 75 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_0_: U32Reg = U32Reg {
+    byte: &[
+        &LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_0_BYTE_0_,
+        &LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_0_BYTE_1_,
+        &LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_0_BYTE_2_,
+        &LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_0_BYTE_3_,
+    ],
+};
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_1_BYTE_0_: OutReg = OutReg { offset: 76 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_1_BYTE_1_: OutReg = OutReg { offset: 77 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_1_BYTE_2_: OutReg = OutReg { offset: 78 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_1_BYTE_3_: OutReg = OutReg { offset: 79 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_1_: U32Reg = U32Reg {
+    byte: &[
+        &LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_1_BYTE_0_,
+        &LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_1_BYTE_1_,
+        &LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_1_BYTE_2_,
+        &LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_1_BYTE_3_,
+    ],
+};
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_2_BYTE_0_: OutReg = OutReg { offset: 80 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_2_BYTE_1_: OutReg = OutReg { offset: 81 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_2_BYTE_2_: OutReg = OutReg { offset: 82 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_2_BYTE_3_: OutReg = OutReg { offset: 83 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_2_: U32Reg = U32Reg {
+    byte: &[
+        &LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_2_BYTE_0_,
+        &LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_2_BYTE_1_,
+        &LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_2_BYTE_2_,
+        &LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_2_BYTE_3_,
+    ],
+};
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_3_BYTE_0_: OutReg = OutReg { offset: 84 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_3_BYTE_1_: OutReg = OutReg { offset: 85 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_3_BYTE_2_: OutReg = OutReg { offset: 86 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_3_BYTE_3_: OutReg = OutReg { offset: 87 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_3_: U32Reg = U32Reg {
+    byte: &[
+        &LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_3_BYTE_0_,
+        &LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_3_BYTE_1_,
+        &LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_3_BYTE_2_,
+        &LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_3_BYTE_3_,
+    ],
+};
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_4_BYTE_0_: OutReg = OutReg { offset: 88 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_4_BYTE_1_: OutReg = OutReg { offset: 89 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_4_BYTE_2_: OutReg = OutReg { offset: 90 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_4_BYTE_3_: OutReg = OutReg { offset: 91 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_4_: U32Reg = U32Reg {
+    byte: &[
+        &LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_4_BYTE_0_,
+        &LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_4_BYTE_1_,
+        &LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_4_BYTE_2_,
+        &LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_4_BYTE_3_,
+    ],
+};
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_5_BYTE_0_: OutReg = OutReg { offset: 92 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_5_BYTE_1_: OutReg = OutReg { offset: 93 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_5_BYTE_2_: OutReg = OutReg { offset: 94 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_5_BYTE_3_: OutReg = OutReg { offset: 95 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_5_: U32Reg = U32Reg {
+    byte: &[
+        &LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_5_BYTE_0_,
+        &LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_5_BYTE_1_,
+        &LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_5_BYTE_2_,
+        &LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_5_BYTE_3_,
+    ],
+};
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_6_BYTE_0_: OutReg = OutReg { offset: 96 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_6_BYTE_1_: OutReg = OutReg { offset: 97 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_6_BYTE_2_: OutReg = OutReg { offset: 98 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_6_BYTE_3_: OutReg = OutReg { offset: 99 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_6_: U32Reg = U32Reg {
+    byte: &[
+        &LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_6_BYTE_0_,
+        &LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_6_BYTE_1_,
+        &LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_6_BYTE_2_,
+        &LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_6_BYTE_3_,
+    ],
+};
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_7_BYTE_0_: OutReg = OutReg { offset: 100 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_7_BYTE_1_: OutReg = OutReg { offset: 101 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_7_BYTE_2_: OutReg = OutReg { offset: 102 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_7_BYTE_3_: OutReg = OutReg { offset: 103 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_7_: U32Reg = U32Reg {
+    byte: &[
+        &LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_7_BYTE_0_,
+        &LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_7_BYTE_1_,
+        &LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_7_BYTE_2_,
+        &LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_7_BYTE_3_,
+    ],
+};
+
+// circuit/rv32im/global.h:24
+pub const LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID: GlobalDigest = GlobalDigest {
+    word: &[
+        &LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_0_,
+        &LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_1_,
+        &LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_2_,
+        &LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_3_,
+        &LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_4_,
+        &LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_5_,
+        &LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_6_,
+        &LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID_WORD_7_,
+    ],
+};
+
+// circuit/rv32im/global.h:24
+pub const LAYOUT_MUX_BODY_GLOBAL_POST_PC_BYTE_0_: OutReg = OutReg { offset: 68 };
+
+// circuit/rv32im/global.h:24
+pub const LAYOUT_MUX_BODY_GLOBAL_POST_PC_BYTE_1_: OutReg = OutReg { offset: 69 };
+
+// circuit/rv32im/global.h:24
+pub const LAYOUT_MUX_BODY_GLOBAL_POST_PC_BYTE_2_: OutReg = OutReg { offset: 70 };
+
+// circuit/rv32im/global.h:24
+pub const LAYOUT_MUX_BODY_GLOBAL_POST_PC_BYTE_3_: OutReg = OutReg { offset: 71 };
+
+// circuit/rv32im/global.h:24
+pub const LAYOUT_MUX_BODY_GLOBAL_POST_PC: U32Reg = U32Reg {
+    byte: &[
+        &LAYOUT_MUX_BODY_GLOBAL_POST_PC_BYTE_0_,
+        &LAYOUT_MUX_BODY_GLOBAL_POST_PC_BYTE_1_,
+        &LAYOUT_MUX_BODY_GLOBAL_POST_PC_BYTE_2_,
+        &LAYOUT_MUX_BODY_GLOBAL_POST_PC_BYTE_3_,
+    ],
+};
+
+// circuit/rv32im/global.h:35
+pub const LAYOUT_MUX_BODY_GLOBAL_POST: SystemState = SystemState {
+    image_id: &LAYOUT_MUX_BODY_GLOBAL_POST_IMAGE_ID,
+    pc: &LAYOUT_MUX_BODY_GLOBAL_POST_PC,
+};
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_0_BYTE_0_: OutReg = OutReg { offset: 36 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_0_BYTE_1_: OutReg = OutReg { offset: 37 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_0_BYTE_2_: OutReg = OutReg { offset: 38 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_0_BYTE_3_: OutReg = OutReg { offset: 39 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_0_: U32Reg = U32Reg {
+    byte: &[
+        &LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_0_BYTE_0_,
+        &LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_0_BYTE_1_,
+        &LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_0_BYTE_2_,
+        &LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_0_BYTE_3_,
+    ],
+};
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_1_BYTE_0_: OutReg = OutReg { offset: 40 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_1_BYTE_1_: OutReg = OutReg { offset: 41 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_1_BYTE_2_: OutReg = OutReg { offset: 42 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_1_BYTE_3_: OutReg = OutReg { offset: 43 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_1_: U32Reg = U32Reg {
+    byte: &[
+        &LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_1_BYTE_0_,
+        &LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_1_BYTE_1_,
+        &LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_1_BYTE_2_,
+        &LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_1_BYTE_3_,
+    ],
+};
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_2_BYTE_0_: OutReg = OutReg { offset: 44 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_2_BYTE_1_: OutReg = OutReg { offset: 45 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_2_BYTE_2_: OutReg = OutReg { offset: 46 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_2_BYTE_3_: OutReg = OutReg { offset: 47 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_2_: U32Reg = U32Reg {
+    byte: &[
+        &LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_2_BYTE_0_,
+        &LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_2_BYTE_1_,
+        &LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_2_BYTE_2_,
+        &LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_2_BYTE_3_,
+    ],
+};
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_3_BYTE_0_: OutReg = OutReg { offset: 48 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_3_BYTE_1_: OutReg = OutReg { offset: 49 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_3_BYTE_2_: OutReg = OutReg { offset: 50 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_3_BYTE_3_: OutReg = OutReg { offset: 51 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_3_: U32Reg = U32Reg {
+    byte: &[
+        &LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_3_BYTE_0_,
+        &LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_3_BYTE_1_,
+        &LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_3_BYTE_2_,
+        &LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_3_BYTE_3_,
+    ],
+};
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_4_BYTE_0_: OutReg = OutReg { offset: 52 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_4_BYTE_1_: OutReg = OutReg { offset: 53 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_4_BYTE_2_: OutReg = OutReg { offset: 54 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_4_BYTE_3_: OutReg = OutReg { offset: 55 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_4_: U32Reg = U32Reg {
+    byte: &[
+        &LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_4_BYTE_0_,
+        &LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_4_BYTE_1_,
+        &LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_4_BYTE_2_,
+        &LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_4_BYTE_3_,
+    ],
+};
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_5_BYTE_0_: OutReg = OutReg { offset: 56 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_5_BYTE_1_: OutReg = OutReg { offset: 57 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_5_BYTE_2_: OutReg = OutReg { offset: 58 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_5_BYTE_3_: OutReg = OutReg { offset: 59 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_5_: U32Reg = U32Reg {
+    byte: &[
+        &LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_5_BYTE_0_,
+        &LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_5_BYTE_1_,
+        &LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_5_BYTE_2_,
+        &LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_5_BYTE_3_,
+    ],
+};
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_6_BYTE_0_: OutReg = OutReg { offset: 60 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_6_BYTE_1_: OutReg = OutReg { offset: 61 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_6_BYTE_2_: OutReg = OutReg { offset: 62 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_6_BYTE_3_: OutReg = OutReg { offset: 63 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_6_: U32Reg = U32Reg {
+    byte: &[
+        &LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_6_BYTE_0_,
+        &LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_6_BYTE_1_,
+        &LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_6_BYTE_2_,
+        &LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_6_BYTE_3_,
+    ],
+};
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_7_BYTE_0_: OutReg = OutReg { offset: 64 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_7_BYTE_1_: OutReg = OutReg { offset: 65 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_7_BYTE_2_: OutReg = OutReg { offset: 66 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_7_BYTE_3_: OutReg = OutReg { offset: 67 };
+
+// circuit/rv32im/global.h:15
+pub const LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_7_: U32Reg = U32Reg {
+    byte: &[
+        &LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_7_BYTE_0_,
+        &LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_7_BYTE_1_,
+        &LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_7_BYTE_2_,
+        &LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_7_BYTE_3_,
+    ],
+};
+
+// circuit/rv32im/global.h:24
+pub const LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID: GlobalDigest = GlobalDigest {
+    word: &[
+        &LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_0_,
+        &LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_1_,
+        &LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_2_,
+        &LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_3_,
+        &LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_4_,
+        &LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_5_,
+        &LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_6_,
+        &LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID_WORD_7_,
+    ],
+};
+
+// circuit/rv32im/global.h:24
+pub const LAYOUT_MUX_BODY_GLOBAL_PRE_PC_BYTE_0_: OutReg = OutReg { offset: 32 };
+
+// circuit/rv32im/global.h:24
+pub const LAYOUT_MUX_BODY_GLOBAL_PRE_PC_BYTE_1_: OutReg = OutReg { offset: 33 };
+
+// circuit/rv32im/global.h:24
+pub const LAYOUT_MUX_BODY_GLOBAL_PRE_PC_BYTE_2_: OutReg = OutReg { offset: 34 };
+
+// circuit/rv32im/global.h:24
+pub const LAYOUT_MUX_BODY_GLOBAL_PRE_PC_BYTE_3_: OutReg = OutReg { offset: 35 };
+
+// circuit/rv32im/global.h:24
+pub const LAYOUT_MUX_BODY_GLOBAL_PRE_PC: U32Reg = U32Reg {
+    byte: &[
+        &LAYOUT_MUX_BODY_GLOBAL_PRE_PC_BYTE_0_,
+        &LAYOUT_MUX_BODY_GLOBAL_PRE_PC_BYTE_1_,
+        &LAYOUT_MUX_BODY_GLOBAL_PRE_PC_BYTE_2_,
+        &LAYOUT_MUX_BODY_GLOBAL_PRE_PC_BYTE_3_,
+    ],
+};
+
+// circuit/rv32im/global.h:34
+pub const LAYOUT_MUX_BODY_GLOBAL_PRE: SystemState = SystemState {
+    image_id: &LAYOUT_MUX_BODY_GLOBAL_PRE_IMAGE_ID,
+    pc: &LAYOUT_MUX_BODY_GLOBAL_PRE_PC,
+};
+
+// zirgen/circuit/rv32im/body.cpp:163
+pub const LAYOUT_MUX_BODY_GLOBAL: Global = Global {
+    sys_exit_code: &LAYOUT_MUX_BODY_GLOBAL_SYS_EXIT_CODE,
+    user_exit_code: &LAYOUT_MUX_BODY_GLOBAL_USER_EXIT_CODE,
+    input: &LAYOUT_MUX_BODY_GLOBAL_INPUT,
+    output: &LAYOUT_MUX_BODY_GLOBAL_OUTPUT,
+    post: &LAYOUT_MUX_BODY_GLOBAL_POST,
+    pre: &LAYOUT_MUX_BODY_GLOBAL_PRE,
+};
+
+// :0
+pub const LAYOUT_MUX_BODY: BodyStep = BodyStep {
+    global: &LAYOUT_MUX_BODY_GLOBAL,
+};
+
+// :0
+pub const LAYOUT_MUX_BYTES_FINI: BytesFiniStep = BytesFiniStep {};
+
+// :0
+pub const LAYOUT_MUX_BYTES_INIT: BytesFiniStep = BytesFiniStep {};
+
+// :0
+pub const LAYOUT_MUX_BYTES_SETUP: BytesFiniStep = BytesFiniStep {};
+
+// :0
+pub const LAYOUT_MUX_RAM_FINI: BytesFiniStep = BytesFiniStep {};
+
+// :0
+pub const LAYOUT_MUX_RAM_INIT: BytesFiniStep = BytesFiniStep {};
+
+// :0
+pub const LAYOUT_MUX_RAM_LOAD: BytesFiniStep = BytesFiniStep {};
+
+// :0
+pub const LAYOUT_MUX_RESET: BytesFiniStep = BytesFiniStep {};
+
+// zirgen/circuit/rv32im/top.cpp:60
+pub const LAYOUT_MUX: Mux = Mux {
+    body: &LAYOUT_MUX_BODY,
+    bytes_fini: &LAYOUT_MUX_BYTES_FINI,
+    bytes_init: &LAYOUT_MUX_BYTES_INIT,
+    bytes_setup: &LAYOUT_MUX_BYTES_SETUP,
+    ram_fini: &LAYOUT_MUX_RAM_FINI,
+    ram_init: &LAYOUT_MUX_RAM_INIT,
+    ram_load: &LAYOUT_MUX_RAM_LOAD,
+    reset: &LAYOUT_MUX_RESET,
+};
+
+// compiler/edsl/component.h:142
+pub const LAYOUT: Top = Top {
+    halted: &LAYOUT_HALTED,
+    mux: &LAYOUT_MUX,
 };
