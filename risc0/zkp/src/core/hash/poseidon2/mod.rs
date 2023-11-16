@@ -307,6 +307,51 @@ mod tests {
         assert_eq!(test_in_1, test_in_2);
     }
 
+    #[test]
+    fn compare_m_ext_naive() {
+        // Make a fixed input
+        let mut test_in_1 = [Elem::new(1); CELLS];
+        // Copy it
+        let mut test_in_2 = test_in_1;
+        // Try two versions
+        multiply_by_m_ext_naive(&mut test_in_1);
+        multiply_by_m_ext(&mut test_in_2);
+        log::debug!("After m_ext test_in_1: {:?}", test_in_1);
+        log::debug!("After m_ext test_in_2: {:?}", test_in_2);
+        // Verify they are the same
+        assert_eq!(test_in_1, test_in_2);
+    }
+
+    #[test]
+    fn compare_m_int_naive() {
+        // Make a fixed input
+        let mut test_in_1 = [Elem::new(1); CELLS];
+        // Copy it
+        let mut test_in_2 = test_in_1;
+        // Try two versions
+        multiply_by_m_int_naive(&mut test_in_1);
+        multiply_by_m_int(&mut test_in_2);
+        log::debug!("After m_int test_in_1: {:?}", test_in_1);
+        log::debug!("After m_int test_in_2: {:?}", test_in_2);
+        // Verify they are the same
+        assert_eq!(test_in_1, test_in_2);
+    }
+
+    #[test]
+    fn test_partial_round() {
+        // Make a fixed input
+        let mut test_in_1 = [Elem::new(1); CELLS];
+        // Copy it
+        let mut test_in_2 = test_in_1;
+        // Try two versions
+        partial_round_naive(&mut test_in_1, 0);
+        partial_round(&mut test_in_2, 0);
+        log::debug!("After partial_round test_in_1: {:?}", test_in_1);
+        log::debug!("After partial_round test_in_2: {:?}", test_in_2);
+        // Verify they are the same
+        assert_eq!(test_in_1, test_in_2);
+    }
+
     macro_rules! baby_bear_array {
         [$($x:literal),* $(,)?] => {
             [$(Elem::new($x)),* ]
@@ -334,6 +379,30 @@ mod tests {
         }
 
         tracing::debug!("output: {:?}", buf);
+    }
+
+    #[test]
+    fn poseidon2_test_vectors_truncated() {
+        // Run the poseidon2 test with an input shortened to be nonzero on only the first 16
+        // elements, the length of the maximum hash input that calls mix only once.
+        let mut buf: &mut [Elem; CELLS] = &mut baby_bear_array![
+            0x00000000, 0x00000001, 0x00000002, 0x00000003, 0x00000004, 0x00000005, 0x00000006,
+            0x00000007, 0x00000008, 0x00000009, 0x0000000A, 0x0000000B, 0x0000000C, 0x0000000D,
+            0x0000000E, 0x0000000F, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
+            0x00000000, 0x00000000, 0x00000000,
+        ];
+        log::debug!("input: {:?}", buf);
+        poseidon2_mix(&mut buf);
+        let goal: [u32; CELLS] = [
+            1788147093, 424750707, 792432133, 743938054, 740412134, 1681430820, 792852974,
+            1035383056, 481195560, 1971011543, 1524837840, 120170589, 956981499, 741351196,
+            1761497130, 1910058788, 219912465, 487352332, 1109042016, 632611055, 68250708,
+            1499904731, 1779911081, 1109989840,
+        ];
+        log::debug!("output: {:?}", buf);
+        for i in 0..CELLS {
+            assert_eq!(buf[i].as_u32(), goal[i]);
+        }
     }
 
     #[test]
