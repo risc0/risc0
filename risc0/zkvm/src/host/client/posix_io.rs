@@ -15,7 +15,7 @@
 use std::{
     cell::RefCell,
     collections::BTreeMap,
-    io::{stderr, stdin, stdout, BufRead, BufReader, Write},
+    io::{stderr, stdout, BufRead, Cursor, Write},
     rc::Rc,
 };
 
@@ -34,7 +34,7 @@ impl<'a> Default for PosixIo<'a> {
             read_fds: Default::default(),
             write_fds: Default::default(),
         };
-        new.with_read_fd(fileno::STDIN, BufReader::new(stdin()))
+        new.with_read_fd(fileno::STDIN, Cursor::new(vec![]))
             .with_write_fd(fileno::STDOUT, stdout())
             .with_write_fd(fileno::STDERR, stderr());
         new
