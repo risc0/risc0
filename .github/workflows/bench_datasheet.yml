@@ -28,6 +28,7 @@ permissions:
   contents: read
 
 env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   RISC0_BUILD_LOCKED: 1
   RISC0_TOOLCHAIN_VERSION: test-release-2
 
@@ -53,20 +54,19 @@ jobs:
             device: cpu
 
     env:
-      CUDA_LIBRARY_PATH: /usr/lib/cuda
       FEATURE: ${{ matrix.feature }}
 
     steps:
       # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
       - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
       - uses: actions/checkout@v4
+      - if: matrix.feature == 'cuda'
+        uses: ./.github/actions/cuda
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
         with:
           key: ${{ matrix.os }}-${{ matrix.feature }}
       - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: cargo run --release -F $FEATURE --example loop -- --json | tee ${{ matrix.os }}-${{ matrix.device }}.json
         working-directory: risc0/zkvm
       - run: cargo run --release -- --out ../../risc0/zkvm/cycle_count.csv all
