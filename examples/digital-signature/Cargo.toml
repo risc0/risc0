@@ -14,7 +14,7 @@ tracing = { version = "0.1", features = ["log"] }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [dev-dependencies]
-test-log = { version = "0.2", default-features = false, features = ["trace"] }
+test-log = { version = "0.2", features = ["trace", "log"] }
 
 [features]
 default = []

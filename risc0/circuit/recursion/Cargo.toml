@@ -29,7 +29,7 @@ zip = { version = "0.6", default-features = false, optional = true, features = [
 
 [dev-dependencies]
 criterion = "0.5"
-test-log = { version = "0.2", default-features = false, features = ["trace"] }
+test-log = { version = "0.2", features = ["trace", "log"] }
 tracing-forest = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 

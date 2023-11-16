@@ -31,7 +31,7 @@ risc0-zkvm-platform = { workspace = true }
 
 [dev-dependencies]
 criterion = "0.5"
-test-log = { version = "0.2", default-features = false, features = ["trace"] }
+test-log = { version = "0.2", features = ["trace", "log"] }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [features]
