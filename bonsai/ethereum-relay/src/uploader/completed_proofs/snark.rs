@@ -16,13 +16,13 @@ use std::time::Duration;
 
 use bonsai_sdk::{
     alpha::{Client, SessionId, SnarkId},
-    alpha_async::{create_snark, download, snark_status},
+    alpha_async::{create_snark, snark_status},
 };
 use ethers::{
     abi::{Token, Tokenizable},
     types::U256,
 };
-use risc0_zkvm::{groth::Groth16Seal, Receipt};
+use risc0_zkvm::{groth16::Groth16Seal, Receipt};
 
 use super::error::CompleteProofError;
 use crate::api;
@@ -60,7 +60,7 @@ pub(crate) async fn get_snark_receipt(
             ("RUNNING", _) => tokio::time::sleep(Duration::from_secs(1)).await,
             ("SUCCEEDED", Some(bytes)) => {
                 break {
-                    let snark_receipt: Receipt = bincode::deserialize(&bytes).map_err(|err| {
+                    let snark_receipt: Receipt = bincode::deserialize(&bytes).map_err(|_err| {
                         CompleteProofError::SnarkFailed {
                             id: session_id.clone(),
                         }

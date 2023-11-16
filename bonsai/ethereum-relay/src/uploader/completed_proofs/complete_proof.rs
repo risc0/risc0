@@ -20,7 +20,7 @@ use bonsai_sdk::{
     alpha_async::session_status,
 };
 use ethers::abi;
-use risc0_zkvm::groth16::{Groth16, Groth16Seal};
+use risc0_zkvm::{groth16::Groth16Seal, sha::Digestible};
 
 use super::snark::tokenize_snark_receipt;
 use crate::{api, uploader::completed_proofs::error::CompleteProofError};
@@ -71,17 +71,20 @@ pub(crate) async fn get_complete_proof(
     };
 
     let post_state_digest: [u8; 32] = match dev_mode {
-        false => snark_receipt.post_state_digest.try_into().map_err(|_err| {
-            CompleteProofError::SnarkFailed {
+        false => snark_receipt
+            .get_metadata()
+            .map_err(|_err| CompleteProofError::SnarkFailed {
                 id: bonsai_proof_id.clone(),
-            }
-        })?,
+            })?
+            .post
+            .digest()
+            .into(),
         true => [0u8; 32],
     };
 
     let payload = [
         callback_request.function_selector.as_slice(),
-        snark_receipt.journal.as_slice(),
+        snark_receipt.journal.bytes.as_slice(),
         callback_request.image_id.as_slice(),
     ]
     .concat();
