@@ -13,6 +13,7 @@ permissions:
   contents: read
 
 env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   RISC0_BUILD_LOCKED: 1
   RISC0_TOOLCHAIN_VERSION: test-release-2
 
@@ -30,9 +31,6 @@ jobs:
           - os: Linux
             feature: cuda
             device: nvidia_rtx_a5000
-          - os: macOS
-            feature: metal
-            device: apple_m2_pro
 
     env:
       FEATURE: ${{ matrix.feature }}
@@ -48,8 +46,6 @@ jobs:
         with:
           key: ${{ matrix.os }}-${{ matrix.feature }}
       - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: risc0/criterion-compare-action@risc0
         id: criterion-cmp
         with:
