@@ -53,6 +53,16 @@ fn build_cuda_kernels() {
             .deps(dep_paths)
             .compile(&out);
     }
+
+    // This is a workaround for compilation errors when compiling with clang++.
+    std::env::set_var("CXX", "g++");
+
+    cc::Build::new()
+        .cuda(true)
+        .define("FEATURE_BABY_BEAR", None)
+        .file("kernels/zkp/cuda/supra_ntt_api.cu")
+        .include(env::var("DEP_SPPARK_ROOT").unwrap())
+        .compile("supra_ntt");
 }
 
 fn build_metal_kernels() {
