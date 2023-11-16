@@ -83,7 +83,7 @@ mod tests {
         let message = signing_receipt.get_message().unwrap();
         assert_eq!(msg_hash, message.msg);
 
-        log::info!("msg: {:?}", &msg_str);
-        log::info!("commit: {:?}", &message);
+        tracing::info!("msg: {:?}", &msg_str);
+        tracing::info!("commit: {:?}", &message);
     }
 }

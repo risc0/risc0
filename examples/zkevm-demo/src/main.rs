@@ -17,8 +17,8 @@ use std::{str::FromStr, sync::Arc};
 use clap::Parser;
 use ethers_core::types::{H256, U256};
 use ethers_providers::Middleware;
-use log::info;
 use risc0_zkvm::{default_prover, ExecutorEnv};
+use tracing::info;
 use zkevm_core::{
     ether_trace::{Http, Provider},
     Env, EvmResult, EVM,
@@ -40,7 +40,10 @@ struct Args {
 
 #[tokio::main]
 async fn main() {
-    env_logger::init();
+    tracing_subscriber::fmt()
+        .with_env_filter(tracing_subscriber::filter::EnvFilter::from_default_env())
+        .init();
+    ();
 
     let args = Args::parse();
     let tx_hash = H256::from_str(&args.tx_hash).expect("Invalid transaction hash");

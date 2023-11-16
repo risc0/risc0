@@ -61,7 +61,7 @@ impl Program {
         // Make the poly-group & extract the root
         let code_group = PolyGroup::new(&hal, coeffs, self.code_size, cycles, "code");
         let root = *code_group.merkle.root();
-        log::trace!("Computed recursion code: {root:?}");
+        tracing::trace!("Computed recursion code: {root:?}");
         root
     }
 }
