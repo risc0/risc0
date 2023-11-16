@@ -54,6 +54,9 @@ fn build_cuda_kernels() {
             .compile(&out);
     }
 
+    // This is a workaround for compilation errors when compiling with clang++.
+    std::env::set_var("CXX", "g++");
+
     cc::Build::new()
         .cuda(true)
         .define("FEATURE_BABY_BEAR", None)
