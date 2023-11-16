@@ -43,6 +43,8 @@ rand = { version = "0.8", features = ["small_rng"] }
 serial_test = "2.0"
 test-log = { version = "0.2", features = ["trace", "log"] }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+env_logger = "0.10"
+
 
 [features]
 default = []

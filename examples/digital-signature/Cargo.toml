@@ -15,6 +15,7 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [dev-dependencies]
 test-log = { version = "0.2", features = ["trace", "log"] }
+env_logger = "0.10"
 
 [features]
 default = []

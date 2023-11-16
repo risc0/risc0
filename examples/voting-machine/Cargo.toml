@@ -13,6 +13,7 @@ voting-machine-methods = { path = "methods" }
 hex = "0.4"
 test-log = { version = "0.2", features = ["trace", "log"] }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+env_logger = "0.10"
 
 [features]
 default = []

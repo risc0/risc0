@@ -31,6 +31,7 @@ zip = { version = "0.6", default-features = false, optional = true, features = [
 criterion = "0.5"
 test-log = { version = "0.2", features = ["trace", "log"] }
 tracing-forest = "0.1"
+env_logger = "0.10"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [build-dependencies]
