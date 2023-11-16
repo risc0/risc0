@@ -24,8 +24,9 @@ use cust::{
 use lazy_static::lazy_static;
 use risc0_core::field::{
     baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
-    Elem, ExtElem, RootsOfUnity,
+    ExtElem, RootsOfUnity,
 };
+use risc0_sys::cuda::*;
 
 use super::{Buffer, Hal, TRACKER};
 use crate::{
@@ -419,6 +420,11 @@ impl<T: Pod> Buffer<T> for BufferImpl<T> {
 impl<CH: CudaHash> CudaHal<CH> {
     #[tracing::instrument(name = "CudaHal::new", skip_all)]
     pub fn new() -> Self {
+        let err = unsafe { sppark_init() };
+        if err.code != 0 {
+            panic!("Failure during sppark_init: {err}");
+        }
+
         cust::init(CudaFlags::empty()).unwrap();
         let device = Device::get_device(0).unwrap();
         let max_threads = device
@@ -524,103 +530,71 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
         &self,
         output: &Self::Buffer<Self::Elem>,
         input: &Self::Buffer<Self::Elem>,
-        count: usize,
+        poly_count: usize,
         expand_bits: usize,
     ) {
         // batch_expand
         {
-            let out_size = output.size() / count;
-            let in_size = input.size() / count;
+            let out_size = output.size() / poly_count;
+            let in_size = input.size() / poly_count;
             let expand_bits = log2_ceil(out_size / in_size);
-            assert_eq!(output.size(), out_size * count);
-            assert_eq!(input.size(), in_size * count);
+            assert_eq!(output.size(), out_size * poly_count);
+            assert_eq!(input.size(), in_size * poly_count);
             assert_eq!(out_size, in_size * (1 << expand_bits));
-
-            let stream = Stream::new(StreamFlags::DEFAULT, None).unwrap();
-            let kernel = self.module.get_function("batch_expand").unwrap();
-            let params = self.compute_simple_params(out_size.try_into().unwrap());
-            unsafe {
-                launch!(kernel<<<params.0, params.1, 0, stream>>>(
+            let in_bits = log2_ceil(in_size);
+            let err = unsafe {
+                batch_expand(
                     output.as_device_ptr(),
                     input.as_device_ptr(),
-                    count as u32,
-                    out_size as u32,
-                    in_size as u32,
-                    expand_bits as u32
-                ))
-                .unwrap();
+                    in_bits.try_into().unwrap(),
+                    expand_bits.try_into().unwrap(),
+                    poly_count.try_into().unwrap(),
+                )
+            };
+            if err.code != 0 {
+                panic!("Failure during batch_expand: {err}");
             }
-            stream.synchronize().unwrap();
         }
 
         // batch_evaluate_ntt
         {
-            let row_size = output.size() / count;
-            assert_eq!(row_size * count, output.size());
+            let row_size = output.size() / poly_count;
+            assert_eq!(row_size * poly_count, output.size());
             let n_bits = log2_ceil(row_size);
             assert_eq!(row_size, 1 << n_bits);
             assert!(n_bits >= expand_bits);
             assert!(n_bits < Self::Elem::MAX_ROU_PO2);
-            let rou = self.copy_from_elem("rou", Self::Elem::ROU_FWD);
 
-            let stream = Stream::new(StreamFlags::DEFAULT, None).unwrap();
-            let kernel = self.module.get_function("multi_ntt_fwd_step").unwrap();
-            for s_bits in 1 + expand_bits..=n_bits {
-                let params = self.compute_launch_params(n_bits as u32, s_bits as u32, count as u32);
-                unsafe {
-                    launch!(kernel<<<params.0, params.1, 0, stream>>>(
-                        output.as_device_ptr(),
-                        rou.as_device_ptr(),
-                        n_bits as u32,
-                        s_bits as u32,
-                        count as u32
-                    ))
-                    .unwrap();
-                }
-                stream.synchronize().unwrap();
+            let err = unsafe {
+                batch_NTT(
+                    output.as_device_ptr(),
+                    n_bits.try_into().unwrap(),
+                    poly_count.try_into().unwrap(),
+                )
+            };
+            if err.code != 0 {
+                panic!("Failure during batch_evaluate_ntt: {err}");
             }
         }
     }
 
-    #[tracing::instrument(skip_all)]
     fn batch_interpolate_ntt(&self, io: &Self::Buffer<Self::Elem>, count: usize) {
         let row_size = io.size() / count;
         assert_eq!(row_size * count, io.size());
         let n_bits = log2_ceil(row_size);
         assert_eq!(row_size, 1 << n_bits);
         assert!(n_bits < Self::Elem::MAX_ROU_PO2);
-        let rou = self.copy_from_elem("rou", Self::Elem::ROU_REV);
 
-        let stream = Stream::new(StreamFlags::DEFAULT, None).unwrap();
-        let kernel = self.module.get_function("multi_ntt_rev_step").unwrap();
-        for s_bits in (1..=n_bits).rev() {
-            let params = self.compute_launch_params(n_bits as u32, s_bits as u32, count as u32);
-            unsafe {
-                launch!(kernel<<<params.0, params.1, 0, stream>>>(
-                    io.as_device_ptr(),
-                    rou.as_device_ptr(),
-                    n_bits as u32,
-                    s_bits as u32,
-                    count as u32
-                ))
-                .unwrap();
-            }
-            stream.synchronize().unwrap();
-        }
-
-        let io_size = io.size().try_into().unwrap();
-        let params = self.compute_simple_params(io_size);
-        let kernel = self.module.get_function("eltwise_mul_factor_fp").unwrap();
-        let norm = self.copy_from_elem("norm", &[Self::Elem::new(row_size as u32).inv()]);
-        unsafe {
-            launch!(kernel<<<params.0, params.1, 0, stream>>>(
+        let err = unsafe {
+            batch_iNTT(
                 io.as_device_ptr(),
-                norm.as_device_ptr(),
-                io_size
-            ))
-            .unwrap();
+                n_bits.try_into().unwrap(),
+                count.try_into().unwrap(),
+            )
+        };
+        if err.code != 0 {
+            panic!("Failure during batch_interpolate_ntt: {err}");
         }
-        stream.synchronize().unwrap();
     }
 
     #[tracing::instrument(skip_all)]
@@ -713,21 +687,18 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
     #[tracing::instrument(skip_all)]
     fn zk_shift(&self, io: &Self::Buffer<Self::Elem>, poly_count: usize) {
         let bits = log2_ceil(io.size() / poly_count);
-        let count = io.size();
         assert_eq!(io.size(), poly_count * (1 << bits));
 
-        let stream = Stream::new(StreamFlags::DEFAULT, None).unwrap();
-        let kernel = self.module.get_function("zk_shift").unwrap();
-        let params = self.compute_simple_params(count);
-        unsafe {
-            launch!(kernel<<<params.0, params.1, 0, stream>>>(
+        let err = unsafe {
+            batch_zk_shift(
                 io.as_device_ptr(),
-                bits,
-                count
-            ))
-            .unwrap();
+                bits.try_into().unwrap(),
+                poly_count.try_into().unwrap(),
+            )
+        };
+        if err.code != 0 {
+            panic!("Failure during zk_shift: {err}");
         }
-        stream.synchronize().unwrap();
     }
 
     fn mix_poly_coeffs(
