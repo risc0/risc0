@@ -1,12 +1,12 @@
 name: Benchmark Applications
 
 on:
-  push:
-    branches: [ main ]
-    # Only run benchmarks on changes to following paths:
-    paths:
-      - 'risc0/**'
-      - '.github/workflows/bench_*'
+  # push:
+  #   branches: [ main ]
+  #   # Only run benchmarks on changes to following paths:
+  #   paths:
+  #     - 'risc0/**'
+  #     - '.github/workflows/bench_*'
 
   # # uncomment for only for testing changes to this workflow while in a PR
   # pull_request:
@@ -28,6 +28,7 @@ permissions:
   contents: read
 
 env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   RISC0_TOOLCHAIN_VERSION: test-release-2
 
 jobs:
@@ -65,8 +66,6 @@ jobs:
         with:
           key: ${{ matrix.os }}-${{ matrix.feature }}
       - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: cargo run --release --bin risc0-benchmark -F $FEATURE -- --out ${{ matrix.os }}-${{ matrix.device }}.csv all
         working-directory: benchmarks
       - run: cargo run --release --bin average -F $FEATURE -- --out ${{ matrix.os }}-${{ matrix.device }}.average.csv all

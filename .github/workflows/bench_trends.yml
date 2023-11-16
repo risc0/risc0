@@ -22,6 +22,7 @@ permissions:
   contents: read
 
 env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   RISC0_BUILD_LOCKED: 1
   RISC0_TOOLCHAIN_VERSION: test-release-2
 
@@ -57,8 +58,6 @@ jobs:
         with:
           key: ${{ matrix.os }}-${{ matrix.feature }}
       - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: cargo bench -F $FEATURE --bench fib -- --output-format=bencher | tee output.txt
       - name: Store benchmark result
         uses: risc0/github-action-benchmark@risc0
