@@ -140,7 +140,6 @@ jobs:
             feature: cuda
             device: nvidia_rtx_a5000
     env:
-      CUDA_LIBRARY_PATH: /usr/lib/cuda
       FEATURE: ${{ matrix.feature }}
       RISC0_BUILD_LOCKED: 1
       RUST_BACKTRACE: full
@@ -211,7 +210,6 @@ jobs:
             feature: cuda
             device: nvidia_rtx_a5000
     env:
-      CUDA_LIBRARY_PATH: /usr/lib/cuda
       FEATURE: ${{ matrix.feature }}
       RISC0_BUILD_LOCKED: 1
       RISC0_EXECUTOR: ipc

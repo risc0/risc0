@@ -52,7 +52,6 @@ jobs:
             device: cpu
 
     env:
-      CUDA_LIBRARY_PATH: /usr/lib/cuda
       FEATURE: ${{ matrix.feature }}
 
     steps:
