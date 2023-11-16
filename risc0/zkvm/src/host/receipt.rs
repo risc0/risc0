@@ -359,9 +359,7 @@ impl InnerReceipt {
     }
 }
 
-/// A receipt composed of one or more [SegmentReceipt] structs proving a single
-/// execution with continuations, and zero or more [Receipt] stucts proving any
-/// assumptions.
+/// A receipt composed of Snark (Groth16 over the BN_254 curve)
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[cfg_attr(test, derive(PartialEq))]
 pub struct SnarkReceipt {
