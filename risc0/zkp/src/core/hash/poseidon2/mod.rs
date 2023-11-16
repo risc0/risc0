@@ -316,8 +316,8 @@ mod tests {
         // Try two versions
         multiply_by_m_ext_naive(&mut test_in_1);
         multiply_by_m_ext(&mut test_in_2);
-        log::debug!("After m_ext test_in_1: {:?}", test_in_1);
-        log::debug!("After m_ext test_in_2: {:?}", test_in_2);
+        tracing::debug!("After m_ext test_in_1: {:?}", test_in_1);
+        tracing::debug!("After m_ext test_in_2: {:?}", test_in_2);
         // Verify they are the same
         assert_eq!(test_in_1, test_in_2);
     }
@@ -331,8 +331,8 @@ mod tests {
         // Try two versions
         multiply_by_m_int_naive(&mut test_in_1);
         multiply_by_m_int(&mut test_in_2);
-        log::debug!("After m_int test_in_1: {:?}", test_in_1);
-        log::debug!("After m_int test_in_2: {:?}", test_in_2);
+        tracing::debug!("After m_int test_in_1: {:?}", test_in_1);
+        tracing::debug!("After m_int test_in_2: {:?}", test_in_2);
         // Verify they are the same
         assert_eq!(test_in_1, test_in_2);
     }
@@ -346,8 +346,8 @@ mod tests {
         // Try two versions
         partial_round_naive(&mut test_in_1, 0);
         partial_round(&mut test_in_2, 0);
-        log::debug!("After partial_round test_in_1: {:?}", test_in_1);
-        log::debug!("After partial_round test_in_2: {:?}", test_in_2);
+        tracing::debug!("After partial_round test_in_1: {:?}", test_in_1);
+        tracing::debug!("After partial_round test_in_2: {:?}", test_in_2);
         // Verify they are the same
         assert_eq!(test_in_1, test_in_2);
     }
@@ -391,7 +391,7 @@ mod tests {
             0x0000000E, 0x0000000F, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
             0x00000000, 0x00000000, 0x00000000,
         ];
-        log::debug!("input: {:?}", buf);
+        tracing::debug!("input: {:?}", buf);
         poseidon2_mix(&mut buf);
         let goal: [u32; CELLS] = [
             1788147093, 424750707, 792432133, 743938054, 740412134, 1681430820, 792852974,
@@ -399,7 +399,7 @@ mod tests {
             1761497130, 1910058788, 219912465, 487352332, 1109042016, 632611055, 68250708,
             1499904731, 1779911081, 1109989840,
         ];
-        log::debug!("output: {:?}", buf);
+        tracing::debug!("output: {:?}", buf);
         for i in 0..CELLS {
             assert_eq!(buf[i].as_u32(), goal[i]);
         }
