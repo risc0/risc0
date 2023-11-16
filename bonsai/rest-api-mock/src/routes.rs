@@ -12,18 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::vec;
-
 use axum::{
     body::Bytes,
     extract::{Path, State},
     Extension, Json,
 };
 use bonsai_sdk::alpha::responses::{
-    CreateSessRes, Groth16Seal, ImgUploadRes, ProofReq, SessionStatusRes, SnarkReceipt, SnarkReq,
-    SnarkStatusRes, UploadRes,
+    CreateSessRes, ImgUploadRes, ProofReq, SessionStatusRes, SnarkReq, SnarkStatusRes, UploadRes,
 };
-use risc0_zkvm::Receipt;
 use tracing::info;
 
 use crate::{
@@ -134,25 +130,13 @@ pub(crate) async fn snark_status(
     storage
         .get_session(&snark_id)
         .ok_or_else(|| anyhow::anyhow!("Snark status not found for snark id: {:?}", &snark_id))?;
-    let receipt = storage.get_receipt(&snark_id);
+    let receipt: Option<Vec<u8>> = storage.get_receipt(&snark_id);
     match receipt {
-        Some(bytes) => {
-            let receipt: Receipt = bincode::deserialize(&bytes)?;
-            Ok(Json(SnarkStatusRes {
-                status: "SUCCEEDED".to_string(),
-                output: Some(SnarkReceipt {
-                    snark: Groth16Seal {
-                        a: vec![],
-                        b: vec![],
-                        c: vec![],
-                        public: vec![],
-                    },
-                    post_state_digest: vec![],
-                    journal: receipt.journal.bytes,
-                }),
-                error_msg: None,
-            }))
-        }
+        Some(bytes) => Ok(Json(SnarkStatusRes {
+            status: "SUCCEEDED".to_string(),
+            output: Some(bytes),
+            error_msg: None,
+        })),
         None => Ok(Json(SnarkStatusRes {
             status: "RUNNING".to_string(),
             output: None,

@@ -27,6 +27,7 @@ mod fault_monitor;
 #[cfg(feature = "fault-proof")]
 pub use self::fault_monitor::FaultCheckMonitor;
 
+pub mod groth16;
 pub mod guest;
 #[cfg(not(target_os = "zkvm"))]
 mod host;
@@ -84,7 +85,7 @@ pub use self::host::{
 pub use self::host::{
     control_id::POSEIDON_CONTROL_ID,
     receipt::{
-        Assumption, CompositeReceipt, InnerReceipt, Journal, Receipt, SegmentReceipt,
+        Assumption, CompositeReceipt, InnerReceipt, Journal, Receipt, SegmentReceipt, SnarkReceipt,
         SuccinctReceipt, VerifierContext,
     },
     recursion::ALLOWED_IDS_ROOT,

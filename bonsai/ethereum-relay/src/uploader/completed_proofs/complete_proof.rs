@@ -20,6 +20,7 @@ use bonsai_sdk::{
     alpha_async::session_status,
 };
 use ethers::abi;
+use risc0_zkvm::groth16::{Groth16, Groth16Seal};
 
 use super::snark::tokenize_snark_receipt;
 use crate::{api, uploader::completed_proofs::error::CompleteProofError};
@@ -50,10 +51,22 @@ pub(crate) async fn get_complete_proof(
             .await?;
     let seal = match dev_mode {
         true => vec![],
-        false => abi::encode(&[tokenize_snark_receipt(&snark_receipt.snark).map_err(|_| {
-            CompleteProofError::SnarkFailed {
+        false => abi::encode(&[tokenize_snark_receipt(
+            &Groth16Seal::from_vec(
+                &snark_receipt
+                    .inner
+                    .snark()
+                    .map_err(|_| CompleteProofError::SnarkFailed {
+                        id: bonsai_proof_id.clone(),
+                    })?
+                    .seal,
+            )
+            .map_err(|_| CompleteProofError::SnarkFailed {
                 id: bonsai_proof_id.clone(),
-            }
+            })?,
+        )
+        .map_err(|_| CompleteProofError::SnarkFailed {
+            id: bonsai_proof_id.clone(),
         })?]),
     };
 

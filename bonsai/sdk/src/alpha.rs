@@ -14,14 +14,12 @@
 
 use std::{fs::File, path::Path};
 
-use anyhow::anyhow;
-use bonsai_groth16_verifier::Groth16;
 use reqwest::{blocking::Client as BlockingClient, header};
 use thiserror::Error;
 
 use self::responses::{
-    CreateSessRes, ImgUploadRes, ProofReq, Quotas, SessionStatusRes, SnarkReceipt, SnarkReq,
-    SnarkStatusRes, UploadRes, VersionInfo,
+    CreateSessRes, ImgUploadRes, ProofReq, Quotas, SessionStatusRes, SnarkReq, SnarkStatusRes,
+    UploadRes, VersionInfo,
 };
 use crate::{API_KEY_ENVVAR, API_KEY_HEADER, API_URL_ENVVAR, VERSION_HEADER};
 
@@ -46,14 +44,10 @@ pub enum SdkErr {
     /// Missing file
     #[error("failed to find file on disk")]
     FileNotFound(#[from] std::io::Error),
-    /// Snark receipt verification error
-    #[error("failed to verify the snark receipt")]
-    SnarkVerificationErr(#[from] anyhow::Error),
 }
 
 /// Collection of serialization object for the REST api
 pub mod responses {
-    use bonsai_groth16_verifier::Groth16Seal;
     use serde::{Deserialize, Serialize};
 
     /// Response of a upload request
@@ -127,23 +121,6 @@ pub mod responses {
         pub session_id: String,
     }
 
-    /// Snark Receipt object
-    ///
-    /// All relevant data to verify both the snark proof an corresponding
-    /// imageId on chain.
-    #[derive(Debug, Deserialize, Serialize, PartialEq)]
-    pub struct SnarkReceipt {
-        /// Snark seal from snarkjs
-        pub snark: Groth16Seal,
-        /// Post State Digest
-        ///
-        /// Collected from the STARK proof via
-        /// `receipt.get_metadata().digest()`
-        pub receipt_meta_digest: Vec<u8>,
-        /// Journal data from the risc-zkvm Receipt object
-        pub journal: Vec<u8>,
-    }
-
     /// Session Status response
     #[derive(Deserialize, Serialize)]
     pub struct SnarkStatusRes {
@@ -151,10 +128,10 @@ pub mod responses {
         ///
         /// values: `[ RUNNING | SUCCEEDED | FAILED | TIMED_OUT | ABORTED ]`
         pub status: String,
-        /// SNARK receipt output
+        /// SNARK receipt encoded with bincode
         ///
-        /// Generated snark receipt,
-        pub output: Option<SnarkReceipt>,
+        /// If the status == `SUCCEEDED` then this should be present
+        pub output: Option<Vec<u8>>,
         /// Snark Error message
         ///
         /// If the SNARK status is not `RUNNING` or `SUCCEEDED`, this is the
@@ -253,19 +230,6 @@ impl SnarkId {
             return Err(SdkErr::InternalServerErr(body));
         }
         Ok(res.json::<SnarkStatusRes>()?)
-    }
-}
-
-impl SnarkReceipt {
-    /// Verify the snark receipt
-    pub fn verify(&self) -> Result<(), SdkErr> {
-        Ok(Groth16::from_seal(
-            &self.snark,
-            self.receipt_meta_digest.clone().try_into().map_err(|_| {
-                SdkErr::SnarkVerificationErr(anyhow!("malformed post state digest"))
-            })?,
-        )?
-        .verify()?)
     }
 }
 
@@ -842,35 +806,6 @@ mod tests {
         assert_eq!(status.output, None);
 
         create_mock.assert();
-    }
-
-    #[test]
-    fn snark_receipt_verify() {
-        let snark_receipt_json = r#"
-        {
-            "snark":{
-                "a":[[26,63,155,211,133,192,185,234,51,172,152,49,113,248,13,45,155,140,75,98,171,225,72,44,133,246,88,199,37,103,28,56],
-                    [22,46,102,79,175,35,89,153,55,78,200,143,26,196,209,62,247,200,136,247,101,65,101,157,59,33,20,91,191,43,246,84]],
-                "b":[[[20,0,192,47,211,1,254,55,118,229,52,232,89,161,51,100,224,242,246,5,106,190,188,113,187,230,100,7,255,70,192,153],
-                    [9,206,194,232,36,249,103,125,57,1,189,209,245,133,230,79,219,98,176,253,221,160,20,78,189,142,46,52,171,1,162,203]],
-                    [[32,70,252,38,183,118,240,156,230,16,28,10,122,111,184,65,239,158,193,102,94,156,5,56,24,236,174,103,160,172,89,109],
-                    [4,151,70,37,225,160,65,7,230,206,172,247,41,192,58,149,244,201,31,171,7,137,232,107,29,143,227,49,96,29,198,35]]],
-                "c":[[20,112,216,216,113,186,224,139,117,16,31,102,238,29,76,150,58,216,254,75,147,172,89,147,216,138,41,130,172,106,148,8],
-                    [23,250,144,90,188,98,158,62,214,76,108,236,158,31,125,183,20,200,101,254,212,15,32,174,120,230,219,15,71,206,189,55]],
-                "public":[[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,104,228,45,139,61,220,73,159,78,23,153,167,103,5,42,179],
-                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,56,2,104,79,22,69,224,160,40,88,91,4,69,211,146,49],
-                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,207,29,214,20,178,62,196,218,167,244,197,95,239,64,43,255],
-                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,86,246,102,224,24,131,128,68,162,253,108,219,190,247,101,102]]
-            },
-            "receipt_meta_digest":[255,43,64,239,95,197,244,167,218,196,62,178,20,214,29,207,102,101,247,190,219,108,253,162,68,128,131,24,224,102,246,86],
-            "journal":[1,0,0,0]
-        }
-        "#;
-        let snark_receipt: SnarkReceipt =
-            serde_json::from_str(snark_receipt_json).expect("Failed parse snark receipt");
-        snark_receipt
-            .verify()
-            .expect("Failed to verify snark receipt");
     }
 
     #[test]

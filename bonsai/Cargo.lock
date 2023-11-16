@@ -154,7 +154,6 @@ dependencies = [
  "blake2",
  "derivative",
  "digest 0.10.7",
- "rayon",
  "sha2 0.10.6",
 ]
 
@@ -172,7 +171,6 @@ dependencies = [
  "hashbrown 0.13.2",
  "itertools 0.10.5",
  "num-traits",
- "rayon",
  "zeroize",
 ]
 
@@ -192,7 +190,6 @@ dependencies = [
  "num-bigint",
  "num-traits",
  "paste",
- "rayon",
  "rustc_version",
  "zeroize",
 ]
@@ -233,7 +230,6 @@ dependencies = [
  "ark-relations",
  "ark-serialize",
  "ark-std",
- "rayon",
 ]
 
 [[package]]
@@ -247,7 +243,6 @@ dependencies = [
  "ark-std",
  "derivative",
  "hashbrown 0.13.2",
- "rayon",
 ]
 
 [[package]]
@@ -259,7 +254,6 @@ dependencies = [
  "ark-ff",
  "ark-std",
  "tracing",
- "tracing-subscriber 0.2.25",
 ]
 
 [[package]]
@@ -305,7 +299,6 @@ checksum = "94893f1e0c6eeab764ade8dc4c0db24caf4fe7cbbaafc0eba0a9030f447b5185"
 dependencies = [
  "num-traits",
  "rand 0.8.5",
- "rayon",
 ]
 
 [[package]]
@@ -774,28 +767,12 @@ dependencies = [
  "tokio-stream",
  "tower-http",
  "tracing",
- "tracing-subscriber 0.3.17",
+ "tracing-subscriber",
  "utoipa",
  "utoipa-swagger-ui",
  "uuid 1.4.1",
  "validator",
  "wiremock",
-]
-
-[[package]]
-name = "bonsai-groth16-verifier"
-version = "0.5.0"
-dependencies = [
- "anyhow",
- "ark-bn254",
- "ark-groth16",
- "ark-serialize",
- "ethereum-types",
- "hex",
- "risc0-zkvm",
- "serde",
- "serde_json",
- "sha2 0.10.6",
 ]
 
 [[package]]
@@ -822,7 +799,6 @@ name = "bonsai-sdk"
 version = "0.5.0"
 dependencies = [
  "anyhow",
- "bonsai-groth16-verifier",
  "env_logger",
  "hex",
  "httpmock",
@@ -3950,11 +3926,15 @@ name = "risc0-zkvm"
 version = "0.19.0"
 dependencies = [
  "anyhow",
+ "ark-bn254",
+ "ark-groth16",
+ "ark-serialize",
  "bincode",
  "bonsai-sdk",
  "bytemuck",
  "bytes",
  "cfg-if",
+ "ethereum-types",
  "getrandom 0.2.10",
  "hex",
  "log",
@@ -3972,6 +3952,7 @@ dependencies = [
  "rrs-lib",
  "semver",
  "serde",
+ "sha2 0.10.6",
  "tracing",
 ]
 
@@ -5203,15 +5184,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bc6b213177105856957181934e4920de57730fc69bf42c37ee5bb664d406d9e1"
 dependencies = [
  "serde",
- "tracing-core",
-]
-
-[[package]]
-name = "tracing-subscriber"
-version = "0.2.25"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0e0d2eaa99c3c2e41547cfa109e910a68ea03823cccad4a0525dcbc9b01e8c71"
-dependencies = [
  "tracing-core",
 ]
 

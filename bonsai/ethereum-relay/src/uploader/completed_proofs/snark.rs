@@ -15,13 +15,14 @@
 use std::time::Duration;
 
 use bonsai_sdk::{
-    alpha::{responses::Groth16Seal, Client, SessionId, SnarkId},
-    alpha_async::{create_snark, snark_status},
+    alpha::{Client, SessionId, SnarkId},
+    alpha_async::{create_snark, download, snark_status},
 };
 use ethers::{
     abi::{Token, Tokenizable},
     types::U256,
 };
+use risc0_zkvm::{groth::Groth16Seal, Receipt};
 
 use super::error::CompleteProofError;
 use crate::api;
@@ -44,7 +45,7 @@ pub(crate) async fn get_snark_receipt(
     client: Client,
     snark_id: SnarkId,
     session_id: SessionId,
-) -> Result<bonsai_sdk::alpha::responses::SnarkReceipt, CompleteProofError> {
+) -> Result<Receipt, CompleteProofError> {
     // Hit the Bonsai API until the receipt is ready
     // TODO: This is not the most efficient way to do this. We should convert to
     // a Future implementation later.
@@ -57,7 +58,16 @@ pub(crate) async fn get_snark_receipt(
             })?;
         match (snark.status.as_str(), snark.output) {
             ("RUNNING", _) => tokio::time::sleep(Duration::from_secs(1)).await,
-            ("SUCCEEDED", Some(snark_receipt)) => break snark_receipt,
+            ("SUCCEEDED", Some(bytes)) => {
+                break {
+                    let snark_receipt: Receipt = bincode::deserialize(&bytes).map_err(|err| {
+                        CompleteProofError::SnarkFailed {
+                            id: session_id.clone(),
+                        }
+                    })?;
+                    snark_receipt
+                }
+            }
             ("SUCCEEDED", None) => return Err(CompleteProofError::SnarkFailed { id: session_id }),
             ("FAILED", _) => return Err(CompleteProofError::SnarkFailed { id: session_id }),
             ("TIMED_OUT", _) => return Err(CompleteProofError::SnarkTimedOut { id: session_id }),

@@ -15,9 +15,8 @@
 //! Manages the output and cryptographic data for a proven computation.
 
 use alloc::{collections::BTreeMap, string::String, vec, vec::Vec};
-use core::fmt::Debug;
-
 use anyhow::Result;
+use core::fmt::Debug;
 use risc0_binfmt::SystemState;
 use risc0_circuit_rv32im::layout;
 use risc0_core::field::baby_bear::BabyBear;
@@ -39,6 +38,7 @@ use super::control_id::{BLAKE2B_CONTROL_ID, POSEIDON_CONTROL_ID, SHA256_CONTROL_
 // Make succinct receipt available through this `receipt` module.
 pub use super::recursion::SuccinctReceipt;
 use crate::{
+    groth16::{Groth16, Groth16Seal},
     receipt_metadata::{Assumptions, MaybePruned, Output},
     serde::{from_slice, Error},
     sha::{Digestible, Sha256},
@@ -281,6 +281,9 @@ pub enum InnerReceipt {
     /// The [SuccinctReceipt].
     Succinct(SuccinctReceipt),
 
+    /// The [SnarkReceipt].
+    Snark(SnarkReceipt),
+
     /// A fake receipt for testing and development.
     ///
     /// This receipt is not valid and will fail verification unless the
@@ -306,6 +309,7 @@ impl InnerReceipt {
     ) -> Result<(), VerificationError> {
         match self {
             InnerReceipt::Composite(x) => x.verify_integrity_with_context(ctx),
+            InnerReceipt::Snark(x) => x.verify_integrity_with_context(ctx),
             InnerReceipt::Succinct(x) => x.verify_integrity_with_context(ctx),
             InnerReceipt::Fake { .. } => {
                 #[cfg(feature = "std")]
@@ -326,6 +330,15 @@ impl InnerReceipt {
         }
     }
 
+    /// Returns the [InnerReceipt::Snark] arm.
+    pub fn snark(&self) -> Result<&SnarkReceipt, VerificationError> {
+        if let InnerReceipt::Snark(x) = self {
+            Ok(&x)
+        } else {
+            Err(VerificationError::ReceiptFormatError)
+        }
+    }
+
     /// Returns the [InnerReceipt::Succinct] arm.
     pub fn succinct(&self) -> Result<&SuccinctReceipt, VerificationError> {
         if let InnerReceipt::Succinct(x) = self {
@@ -339,9 +352,42 @@ impl InnerReceipt {
     pub fn get_metadata(&self) -> Result<ReceiptMetadata, VerificationError> {
         match self {
             InnerReceipt::Composite(ref receipt) => receipt.get_metadata(),
+            InnerReceipt::Snark(ref snark_receipt) => Ok(snark_receipt.meta.clone()),
             InnerReceipt::Succinct(ref succinct_recipt) => Ok(succinct_recipt.meta.clone()),
             InnerReceipt::Fake { metadata } => Ok(metadata.clone()),
         }
+    }
+}
+
+/// A receipt composed of one or more [SegmentReceipt] structs proving a single
+/// execution with continuations, and zero or more [Receipt] stucts proving any
+/// assumptions.
+#[derive(Clone, Debug, Deserialize, Serialize)]
+#[cfg_attr(test, derive(PartialEq))]
+pub struct SnarkReceipt {
+    /// the Grtoh16 seal of this receipt
+    pub seal: Vec<u8>,
+
+    /// the receipt metadata containing states of the system during the segment
+    /// executions
+    pub meta: ReceiptMetadata,
+}
+
+impl SnarkReceipt {
+    /// Verify the integrity of this receipt, ensuring the metadata is attested
+    /// to by the seal.
+    pub fn verify_integrity_with_context(
+        &self,
+        _ctx: &VerifierContext,
+    ) -> Result<(), VerificationError> {
+        Groth16::from_seal(
+            &Groth16Seal::from_vec(&self.seal).map_err(|_| VerificationError::InvalidProof)?,
+            self.meta.digest().into(),
+        )
+        .map_err(|_| VerificationError::InvalidProof)?;
+
+        // Everything passed
+        Ok(())
     }
 }
 

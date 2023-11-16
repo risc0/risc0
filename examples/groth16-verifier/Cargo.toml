@@ -6,7 +6,6 @@ edition = "2021"
 [dependencies]
 anyhow = "1"
 bincode = "1.3"
-bonsai-groth16-verifier = { path = "../../bonsai/groth16" }
 bonsai-sdk = { path = "../../bonsai/sdk" }
 bytemuck = "1.14"
 byteorder = "1.4"

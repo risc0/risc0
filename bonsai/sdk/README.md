@@ -93,10 +93,8 @@ fn run_stark2snark(session_id: String) -> Result<()> {
                 continue;
             }
             "SUCCEEDED" => {
-                let snark_receipt = res.output;
-                snark_receipt
-                .verify(receipt.get_metadata().expect("Failed to get receipt metadata").digest())
-                .expect("Receipt verification failed");
+                let snark_receipt: Receipt = bincode::deserialize(&res.output
+                .expect("API error, missing receipt on completed snark session"));
                 eprintln!("Snark proof!: {snark_receipt:?}");
                 break;
             }

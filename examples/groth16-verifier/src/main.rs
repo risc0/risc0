@@ -12,16 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::bonsai_sdk::responses::SnarkReceipt;
 use anyhow::Result;
-use bonsai_groth16_verifier::{
-    raw::{RawProof, RawPublic, RawVKey},
-    Digest, Groth16,
-};
-use bonsai_sdk::alpha as bonsai_sdk;
 use groth16_verifier_example::*;
+use hello_world_methods::MULTIPLY_ID;
 use methods::{GROTH16_VERIFIER_ELF, GROTH16_VERIFIER_ID};
-use risc0_zkvm::{default_prover, ExecutorEnv};
+use risc0_zkvm::{
+    default_prover,
+    groth16::{Groth16, RawProof, RawPublic, RawVKey},
+    sha::Digest,
+    ExecutorEnv, Receipt,
+};
 
 const CIRCOM_VERIFICATION_KEY: &str = include_str!("data/circom/verification_key.json");
 const CIRCOM_PROOF: &str = include_str!("data/circom/proof.json");
@@ -30,15 +30,15 @@ const CIRCOM_PUBLIC: &str = include_str!("data/circom/public.json");
 fn main() -> Result<()> {
     // ----- Snark receipt verification from Bonsai --------
     //
-    // Generate a snark receipt for the hello-world example
-    let snark_receipt: SnarkReceipt = match dev_mode()? {
+    // Generate a snark receipt for the MULTIPLY ELF
+    let snark_receipt: Receipt = match dev_mode()? {
         true => run_bonsai_mock(),
         false => run_bonsai(u64s_to_vec(17, 23))?,
     };
 
     // SnarkReceipt verification
     snark_receipt
-        .verify()
+        .verify(MULTIPLY_ID)
         .expect("Failed snark receipt verification");
     println!("Verified the snark receipt from Bonsai");
     // -------------------------------------------------------------
