@@ -257,7 +257,7 @@ impl Segment {
         index: u32,
         cycles: u32,
     ) -> Self {
-        log::debug!("segment[{index}]> reads: {}, writes: {}, exit_code: {exit_code:?}, split_insn: {split_insn:?}, po2: {po2}, cycles: {cycles}",
+        tracing::debug!("segment[{index}]> reads: {}, writes: {}, exit_code: {exit_code:?}, split_insn: {split_insn:?}, po2: {po2}, cycles: {cycles}",
             faults.reads.len(),
             faults.writes.len(),
         );

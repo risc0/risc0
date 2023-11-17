@@ -67,7 +67,7 @@ impl Prover for BonsaiProver {
         // By doing so, we can return a session ID so that the prover can use it to
         // retrieve the receipt.
         let session = client.create_session(image_id_hex, input_id)?;
-        log::debug!("Bonsai proving SessionID: {}", session.uuid);
+        tracing::debug!("Bonsai proving SessionID: {}", session.uuid);
 
         loop {
             // The session has already been started in the executor. Poll bonsai to check if

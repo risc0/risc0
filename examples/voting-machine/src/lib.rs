@@ -75,7 +75,7 @@ impl PollingStation {
     }
 
     pub fn init(&self) -> Result<InitMessage> {
-        log::info!("init");
+        tracing::info!("init");
         let env = ExecutorEnv::builder().write(&self.state)?.build()?;
         let prover = default_prover();
         let receipt = prover.prove_elf(env, INIT_ELF)?;
@@ -83,7 +83,7 @@ impl PollingStation {
     }
 
     pub fn submit(&mut self, ballot: &Ballot) -> Result<SubmitBallotMessage> {
-        log::info!("submit: {:?}", ballot);
+        tracing::info!("submit: {:?}", ballot);
         let params = SubmitBallotParams::new(self.state.clone(), ballot.clone());
         let mut output = Vec::new();
         let env = ExecutorEnv::builder()
@@ -97,7 +97,7 @@ impl PollingStation {
     }
 
     pub fn freeze(&mut self) -> Result<FreezeStationMessage> {
-        log::info!("freeze");
+        tracing::info!("freeze");
         let params = FreezeVotingMachineParams::new(self.state.clone());
         let mut output = Vec::new();
         let env = ExecutorEnv::builder()
@@ -173,20 +173,20 @@ mod tests {
         let close_state = close_msg.verify_and_get_commit();
         let ballot_commit6 = ballot_msg6.verify_and_get_commit();
 
-        log::info!("initial commit: {:?}", init_state);
-        log::info!("ballot 1: {:?}", ballot1);
-        log::info!("ballot 1 commit: {:?}", ballot_commit1);
-        log::info!("ballot 2: {:?}", ballot2);
-        log::info!("ballot 2 commit: {:?}", ballot_commit2);
-        log::info!("ballot 3: {:?}", ballot3);
-        log::info!("ballot 3 commit: {:?}", ballot_commit3);
-        log::info!("ballot 4: {:?}", ballot4);
-        log::info!("ballot 4 commit: {:?}", ballot_commit4);
-        log::info!("ballot 5: {:?}", ballot5);
-        log::info!("ballot 5 commit: {:?}", ballot_commit5);
-        log::info!("freeze commit: {:?}", close_state);
-        log::info!("ballot 6: {:?}", ballot6);
-        log::info!("ballot 6 commit: {:?}", ballot_commit6);
-        log::info!("Final vote count: {:?}", polling_station.state.count);
+        tracing::info!("initial commit: {:?}", init_state);
+        tracing::info!("ballot 1: {:?}", ballot1);
+        tracing::info!("ballot 1 commit: {:?}", ballot_commit1);
+        tracing::info!("ballot 2: {:?}", ballot2);
+        tracing::info!("ballot 2 commit: {:?}", ballot_commit2);
+        tracing::info!("ballot 3: {:?}", ballot3);
+        tracing::info!("ballot 3 commit: {:?}", ballot_commit3);
+        tracing::info!("ballot 4: {:?}", ballot4);
+        tracing::info!("ballot 4 commit: {:?}", ballot_commit4);
+        tracing::info!("ballot 5: {:?}", ballot5);
+        tracing::info!("ballot 5 commit: {:?}", ballot_commit5);
+        tracing::info!("freeze commit: {:?}", close_state);
+        tracing::info!("ballot 6: {:?}", ballot6);
+        tracing::info!("ballot 6 commit: {:?}", ballot_commit6);
+        tracing::info!("Final vote count: {:?}", polling_station.state.count);
     }
 }

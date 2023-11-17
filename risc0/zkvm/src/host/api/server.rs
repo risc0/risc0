@@ -93,11 +93,11 @@ impl Read for PosixIoProxy {
             })),
         };
 
-        log::trace!("tx: {request:?}");
+        tracing::trace!("tx: {request:?}");
         self.conn.send(request).map_io_err()?;
 
         let reply: pb::api::OnIoReply = self.conn.recv().map_io_err()?;
-        log::trace!("rx: {reply:?}");
+        tracing::trace!("rx: {reply:?}");
 
         let kind = reply.kind.ok_or("Malformed message").map_io_err()?;
         match kind {
@@ -126,11 +126,11 @@ impl Write for PosixIoProxy {
             })),
         };
 
-        log::trace!("tx: {request:?}");
+        tracing::trace!("tx: {request:?}");
         self.conn.send(request).map_io_err()?;
 
         let reply: pb::api::OnIoReply = self.conn.recv().map_io_err()?;
-        log::trace!("rx: {reply:?}");
+        tracing::trace!("rx: {reply:?}");
 
         let kind = reply.kind.ok_or("Malformed message").map_io_err()?;
         match kind {
@@ -172,11 +172,11 @@ impl SliceIo for SliceIoProxy {
                 })),
             })),
         };
-        log::trace!("tx: {request:?}");
+        tracing::trace!("tx: {request:?}");
         self.conn.send(request)?;
 
         let reply: pb::api::OnIoReply = self.conn.recv().map_io_err()?;
-        log::trace!("rx: {reply:?}");
+        tracing::trace!("rx: {reply:?}");
 
         let kind = reply.kind.ok_or("Malformed message").map_io_err()?;
         match kind {
@@ -205,11 +205,11 @@ impl TraceCallback for TraceProxy {
                 })),
             })),
         };
-        log::trace!("tx: {request:?}");
+        tracing::trace!("tx: {request:?}");
         self.conn.send(request)?;
 
         let reply: pb::api::OnIoReply = self.conn.recv().map_io_err()?;
-        log::trace!("rx: {reply:?}");
+        tracing::trace!("rx: {reply:?}");
 
         let kind = reply.kind.ok_or("Malformed message").map_io_err()?;
         match kind {
@@ -234,13 +234,13 @@ impl Server {
 
     /// Start the [Server] and run until all requests are complete.
     pub fn run(&self) -> Result<()> {
-        log::debug!("connect");
+        tracing::debug!("connect");
         let mut conn = self.connector.connect()?;
 
         let server_version = get_version().map_err(|err| anyhow!(err))?;
 
         let request: pb::api::HelloRequest = conn.recv()?;
-        log::trace!("rx: {request:?}");
+        tracing::trace!("rx: {request:?}");
 
         let client_version: semver::Version = request
             .version
@@ -249,7 +249,7 @@ impl Server {
             .map_err(|err: semver::Error| anyhow!(err))?;
         if !check_client_version(&client_version, &server_version) {
             let msg = format!("incompatible client version: {client_version}");
-            log::debug!("{msg}");
+            tracing::debug!("{msg}");
             bail!(msg);
         }
 
@@ -258,11 +258,11 @@ impl Server {
                 version: Some(server_version.into()),
             })),
         };
-        log::trace!("tx: {reply:?}");
+        tracing::trace!("tx: {reply:?}");
         conn.send(reply)?;
 
         let request: pb::api::ServerRequest = conn.recv()?;
-        log::trace!("rx: {request:?}");
+        tracing::trace!("rx: {request:?}");
         match request.kind.ok_or(malformed_err())? {
             pb::api::server_request::Kind::Prove(request) => self.on_prove(conn, request),
             pb::api::server_request::Kind::Execute(request) => self.on_execute(conn, request),
@@ -315,11 +315,11 @@ impl Server {
                         )),
                     })),
                 };
-                log::trace!("tx: {msg:?}");
+                tracing::trace!("tx: {msg:?}");
                 conn.send(msg)?;
 
                 let reply: pb::api::GenericReply = conn.recv()?;
-                log::trace!("rx: {reply:?}");
+                tracing::trace!("rx: {reply:?}");
                 let kind = reply.kind.ok_or(malformed_err())?;
                 if let pb::api::generic_reply::Kind::Error(err) = kind {
                     bail!(err)
@@ -349,7 +349,7 @@ impl Server {
             })),
         });
 
-        log::trace!("tx: {msg:?}");
+        tracing::trace!("tx: {msg:?}");
         conn.send(msg)
     }
 
@@ -394,7 +394,7 @@ impl Server {
             })),
         });
 
-        log::trace!("tx: {msg:?}");
+        tracing::trace!("tx: {msg:?}");
         conn.send(msg)
     }
 
@@ -437,7 +437,7 @@ impl Server {
             )),
         });
 
-        log::trace!("tx: {msg:?}");
+        tracing::trace!("tx: {msg:?}");
         conn.send(msg)
     }
 
@@ -471,7 +471,7 @@ impl Server {
             })),
         });
 
-        log::debug!("tx: {msg:?}");
+        tracing::debug!("tx: {msg:?}");
         conn.send(msg)
     }
 
@@ -508,7 +508,7 @@ impl Server {
             })),
         });
 
-        log::debug!("tx: {msg:?}");
+        tracing::debug!("tx: {msg:?}");
         conn.send(msg)
     }
 
@@ -550,7 +550,7 @@ impl Server {
             )),
         });
 
-        log::debug!("tx: {msg:?}");
+        tracing::debug!("tx: {msg:?}");
         conn.send(msg)
     }
 }
@@ -561,6 +561,7 @@ fn build_env<'a>(
 ) -> Result<ExecutorEnv<'a>> {
     let mut env_builder = ExecutorEnv::builder();
     env_builder.env_vars(request.env_vars.clone());
+    env_builder.args(&request.args);
     for fd in request.read_fds.iter() {
         let proxy = PosixIoProxy::new(*fd, conn.try_clone()?);
         let reader = BufReader::new(proxy);

@@ -1,0 +1,8 @@
+name: CUDA toolkit setup
+description: Configure environment for CUDA toolkit
+
+runs:
+  using: composite
+  steps:
+    - run: echo "/usr/local/cuda/bin" >> $GITHUB_PATH
+      shell: bash

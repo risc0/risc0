@@ -48,7 +48,7 @@ impl Prover for ExternalProver {
         opts: &ProverOpts,
         image: MemoryImage,
     ) -> Result<Receipt> {
-        log::debug!("Launching {}", &self.r0vm_path.to_string_lossy());
+        tracing::debug!("Launching {}", &self.r0vm_path.to_string_lossy());
 
         let image_id = image.compute_id()?;
         let client = ApiClient::new_sub_process(&self.r0vm_path)?;

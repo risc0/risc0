@@ -260,7 +260,7 @@ mod tests {
         }
         iop.mix(&*hasher.hash_elem_slice(&input));
         output.push(BabyBearElem::from(iop.random_elem()));
-        log::info!("Output = {:?}", &output);
+        tracing::info!("Output = {:?}", &output);
         assert!(output[0].as_u32() == 5);
         assert!(output[1].as_u32() == 328085114);
         assert!(output[2].as_u32() == 726238606);

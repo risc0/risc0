@@ -34,19 +34,19 @@ fn generate_segments(hashfn: &str) -> (Session, Vec<SegmentReceipt>) {
     let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
     let session = exec.run().unwrap();
     let segments = session.resolve().unwrap();
-    log::info!("Got {} segments", segments.len());
+    tracing::info!("Got {} segments", segments.len());
     let opts = crate::ProverOpts {
         hashfn: hashfn.to_string(),
         prove_guest_errors: false,
     };
     let prover = get_prover_server(&opts).unwrap();
-    log::info!("Proving rv32im");
+    tracing::info!("Proving rv32im");
     let ctx = VerifierContext::default();
     let segment_receipts = segments
         .iter()
         .map(|x| prover.prove_segment(&ctx, x).unwrap())
         .collect();
-    log::info!("Done proving rv32im");
+    tracing::info!("Done proving rv32im");
     (session, segment_receipts)
 }
 
@@ -79,7 +79,7 @@ fn test_recursion() {
     // let seal : Vec<u8> = bytemuck::cast_slice(receipt.seal.as_slice()).into();
     // std::fs::write("recursion.seal", seal);
 
-    log::debug!("Receipt output: {:?}", receipt.output_digest);
+    tracing::debug!("Receipt output: {:?}", receipt.output_digest);
     assert_eq!(receipt.output_digest, *expected);
 }
 
@@ -93,14 +93,14 @@ fn test_recursion_e2e() {
     let (session, segments) = generate_segments("poseidon");
     // Lift and join them  all (and verify)
     let mut rollup = lift(&segments[0]).unwrap();
-    log::info!("Lift Meta = {:?}", rollup.meta);
+    tracing::info!("Lift Meta = {:?}", rollup.meta);
     let ctx = VerifierContext::default();
     for receipt in &segments[1..] {
         let rec_receipt = lift(receipt).unwrap();
-        log::info!("Lift Meta = {:?}", rec_receipt.meta);
+        tracing::info!("Lift Meta = {:?}", rec_receipt.meta);
         rec_receipt.verify_integrity_with_context(&ctx).unwrap();
         rollup = join(&rollup, &rec_receipt).unwrap();
-        log::info!("Join Meta = {:?}", rollup.meta);
+        tracing::info!("Join Meta = {:?}", rollup.meta);
         rollup.verify_integrity_with_context(&ctx).unwrap();
     }
 

@@ -15,7 +15,7 @@
 use alloc::vec::Vec;
 
 #[allow(unused_imports)]
-use log::debug;
+use tracing::debug;
 
 use crate::{
     core::digest::Digest,

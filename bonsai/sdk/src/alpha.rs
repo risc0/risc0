@@ -640,7 +640,6 @@ mod tests {
 
     #[test]
     fn input_upload() {
-        // env_logger::init();
         let data = vec![];
 
         let server = MockServer::start();
