@@ -264,6 +264,15 @@ impl<'de, 'a, R: WordRead + 'de> serde::Deserializer<'de> for &'a mut Deserializ
         visitor.visit_i64(self.try_take_dword()? as i64)
     }
 
+    fn deserialize_i128<V>(self, visitor: V) -> Result<V::Value>
+    where
+        V: Visitor<'de>,
+    {
+        let mut bytes = [0u8; 16];
+        self.reader.read_padded_bytes(&mut bytes)?;
+        visitor.visit_i128(i128::from_le_bytes(bytes))
+    }
+
     fn deserialize_u8<V>(self, visitor: V) -> Result<V::Value>
     where
         V: Visitor<'de>,
@@ -290,6 +299,15 @@ impl<'de, 'a, R: WordRead + 'de> serde::Deserializer<'de> for &'a mut Deserializ
         V: Visitor<'de>,
     {
         visitor.visit_u64(self.try_take_dword()?)
+    }
+
+    fn deserialize_u128<V>(self, visitor: V) -> Result<V::Value>
+    where
+        V: Visitor<'de>,
+    {
+        let mut bytes = [0u8; 16];
+        self.reader.read_padded_bytes(&mut bytes)?;
+        visitor.visit_u128(u128::from_le_bytes(bytes))
     }
 
     fn deserialize_f32<V>(self, visitor: V) -> Result<V::Value>
