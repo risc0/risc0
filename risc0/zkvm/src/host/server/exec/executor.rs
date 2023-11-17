@@ -260,7 +260,7 @@ impl<'a> ExecutorImpl<'a> {
                         anyhow!("attempted to run the executor with no pre_image")
                     })?;
                     let post_image = self.monitor.build_image(self.pc);
-                    let post_image_id = post_image.compute_id();
+                    let post_image_id = post_image.compute_id()?;
                     let syscalls = mem::take(&mut self.syscalls);
                     let faults = mem::take(&mut self.monitor.faults);
                     let po2 = log2_ceil(total_cycles.next_power_of_two()).try_into()?;

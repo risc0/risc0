@@ -50,7 +50,7 @@ impl Prover for ExternalProver {
     ) -> Result<Receipt> {
         log::debug!("Launching {}", &self.r0vm_path.to_string_lossy());
 
-        let image_id = image.compute_id();
+        let image_id = image.compute_id()?;
         let client = ApiClient::new_sub_process(&self.r0vm_path)?;
         let receipt = client.prove(&env, opts.clone(), image.into())?;
         if opts.prove_guest_errors {
