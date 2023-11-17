@@ -12,9 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+extern crate alloc;
+
+use alloc::vec::Vec;
+
+use risc0_zkp::field::baby_bear::BabyBearElem;
+
+#[cfg(feature = "prove")]
 use risc0_zkp::{
     core::{digest::Digest, hash::HashSuite},
-    field::baby_bear::{BabyBear, BabyBearElem},
+    field::baby_bear::BabyBear,
     hal::{cpu::CpuHal, Hal},
     prove::poly_group::PolyGroup,
 };
@@ -27,28 +34,39 @@ pub const RECURSION_CODE_SIZE: usize = 21;
 /// Number of rows in the recursion circuit witness as a power of 2.
 pub const RECURSION_PO2: usize = 18;
 
-/// TODO
+/// A Program for the recursion circuit (e.g. lift_20 or join).
+///
+/// The recursion circuit is an application specific virtual machine with a limited instruction
+/// set, no control flow operations, and a write-once memory tape. Although it is not general
+/// purpose, it can load and execute a program, similar to the rv32im zkVM.
+///
+/// Programs for the recursion circuit are loaded into the control columns, which is a set of
+/// public columns in the witness. Programs are therefore identified by their control ID, which is
+/// similar but not the same as the image ID used to identify rv32im programs.
 #[derive(Clone)]
 pub struct Program {
-    /// TODO
+    /// The code of the program, encoded as Baby Bear field elements.
     pub code: Vec<BabyBearElem>,
 
-    /// TODO
+    /// The number of code columns.
     pub code_size: usize,
 }
 
 impl Program {
-    /// TODO
+    /// Total number of rows in the code group for this program.
     pub fn code_rows(&self) -> usize {
         self.code.len() / self.code_size
     }
 
-    /// TODO
+    /// An iterator over the rows of the code group.
     pub fn code_by_row(&self) -> impl Iterator<Item = &[BabyBearElem]> {
         self.code.as_slice().chunks(self.code_size)
     }
 
-    /// TODO
+    /// Given a [Program] for the recursion circuit, compute the control ID as the FRI Merkle root
+    /// of the code group. This uniquely identifies the program running on the recursion circuit
+    /// (e.g. lift_20 or join)
+    #[cfg(feature = "prove")]
     pub fn compute_control_id(&self, hash_suite: HashSuite<BabyBear>) -> Digest {
         let hal = CpuHal::new(hash_suite);
         let cycles = 1 << RECURSION_PO2;
