@@ -30,5 +30,5 @@ pub use crate::{
     sys_state::{read_sha_halfs, write_sha_halfs, SystemState},
 };
 
-#[cfg(all(not(target_os = "zkvm"), feature = "recursion"))]
+#[cfg(all(not(target_os = "zkvm")))]
 pub mod recursion;
