@@ -38,7 +38,7 @@ use risc0_zkp::{
         Elem,
     },
     hal::{cpu::CpuHal, CircuitHal, Hal},
-    prove::{adapter::ProveAdapter, poly_group::PolyGroup},
+    prove::adapter::ProveAdapter,
     verify::ReadIOP,
     MIN_CYCLES_PO2, ZK_CYCLES,
 };
@@ -531,29 +531,4 @@ impl Prover {
         machine.iop_reads = preflight.iop_reads;
         Ok(machine)
     }
-}
-
-/// Given a [Program] for the recursion circuit, compute the control ID as the FRI Merkle root of
-/// the code group. This uniquely identifies the program running on the recursion circuit (e.g.
-/// lift_20 or join)
-pub fn compute_control_id(program: &Program, hash_suite: HashSuite<BabyBear>) -> Digest {
-    let hal = CpuHal::new(hash_suite);
-    let cycles = 1 << RECURSION_PO2;
-
-    let mut code = vec![BabyBearElem::default(); cycles * program.code_size];
-
-    for (cycle, row) in program.code_by_row().enumerate() {
-        for (i, elem) in row.iter().enumerate() {
-            code[cycles * i + cycle] = *elem;
-        }
-    }
-    let coeffs = hal.copy_from_elem("coeffs", &code);
-    // Do interpolate & shift
-    hal.batch_interpolate_ntt(&coeffs, program.code_size);
-    hal.zk_shift(&coeffs, program.code_size);
-    // Make the poly-group & extract the root
-    let code_group = PolyGroup::new(&hal, coeffs, program.code_size, cycles, "code");
-    let root = *code_group.merkle.root();
-    tracing::trace!("Computed recursion code: {root:?}");
-    root
 }

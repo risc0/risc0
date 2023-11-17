@@ -12,11 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-extern crate alloc;
-
-use alloc::vec::Vec;
-
-use risc0_zkp::field::baby_bear::BabyBearElem;
+use risc0_zkp::{
+    core::{digest::Digest, hash::HashSuite},
+    field::baby_bear::{BabyBear, BabyBearElem},
+    hal::{cpu::CpuHal, Hal},
+    prove::poly_group::PolyGroup,
+};
 
 // TODO: Automatically generate this from the circuit somehow without
 // messing up bootstrap dependencies.
@@ -45,5 +46,28 @@ impl Program {
     /// TODO
     pub fn code_by_row(&self) -> impl Iterator<Item = &[BabyBearElem]> {
         self.code.as_slice().chunks(self.code_size)
+    }
+
+    /// TODO
+    pub fn compute_control_id(&self, hash_suite: HashSuite<BabyBear>) -> Digest {
+        let hal = CpuHal::new(hash_suite);
+        let cycles = 1 << RECURSION_PO2;
+
+        let mut code = vec![BabyBearElem::default(); cycles * self.code_size];
+
+        for (cycle, row) in self.code_by_row().enumerate() {
+            for (i, elem) in row.iter().enumerate() {
+                code[cycles * i + cycle] = *elem;
+            }
+        }
+        let coeffs = hal.copy_from_elem("coeffs", &code);
+        // Do interpolate & shift
+        hal.batch_interpolate_ntt(&coeffs, self.code_size);
+        hal.zk_shift(&coeffs, self.code_size);
+        // Make the poly-group & extract the root
+        let code_group = PolyGroup::new(&hal, coeffs, self.code_size, cycles, "code");
+        let root = *code_group.merkle.root();
+        tracing::trace!("Computed recursion code: {root:?}");
+        root
     }
 }
