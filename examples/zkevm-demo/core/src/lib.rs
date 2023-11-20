@@ -94,7 +94,7 @@ pub mod ether_trace {
     use ethers_core::types::{BlockId, Transaction, H160 as EthersH160, U256 as EthersU256, U64};
     use ethers_providers::Middleware;
     pub use ethers_providers::{Http, Provider};
-    use revm::primitives::{Bytes, CreateScheme, TransactTo, TxEnv};
+    use revm::primitives::{CreateScheme, TransactTo, TxEnv};
     use tokio::runtime::Handle;
 
     use super::*;
@@ -115,7 +115,7 @@ pub mod ether_trace {
                 TransactTo::Create(CreateScheme::Create) // TODO: create2
             },
             value: from_ethers_u256(tx.value),
-            data: Bytes::from(tx.input.to_vec()), // TODO: gotta be a cleaner way
+            data: tx.input.0.into(),
             chain_id: tx.chain_id.map(|elm| elm.as_u64()),
             nonce: Some(tx.nonce.as_u64()),
             access_list: Vec::new(),
@@ -191,7 +191,7 @@ pub mod ether_trace {
                 .unwrap_or_else(|e| panic!("ethers get nonce error: {e:?}"))
                 .as_u64();
 
-            let bytecode = Bytecode::new_raw(Bytes(code.unwrap().0));
+            let bytecode = Bytecode::new_raw(code.unwrap().0.into());
             let res = Some(AccountInfo::new(
                 from_ethers_u256(balance),
                 nonce,
