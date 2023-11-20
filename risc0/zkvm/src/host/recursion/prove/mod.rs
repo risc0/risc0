@@ -92,6 +92,23 @@ pub fn join(a: &SuccinctReceipt, b: &SuccinctReceipt) -> Result<SuccinctReceipt>
 }
 
 /// TODO
+pub fn resolve(
+    conditional: &SuccinctReceipt,
+    corroborating: &SuccinctReceipt,
+) -> Result<SuccinctReceipt> {
+    let mut prover = Prover::new_resolve(conditional, corroborating, ProverOpts::default())?;
+    let receipt = prover.run()?;
+    let mut out_stream = VecDeque::<u32>::new();
+    out_stream.extend(receipt.output.iter());
+    let meta = ReceiptMetadata::decode(&mut out_stream)?;
+    Ok(SuccinctReceipt {
+        seal: receipt.seal,
+        control_id: receipt.control_id,
+        meta,
+    })
+}
+
+/// TODO
 pub fn identity_p254(a: &SuccinctReceipt) -> Result<SuccinctReceipt> {
     let hal_pair = poseidon254_hal_pair();
     let (hal, circuit_hal) = (hal_pair.hal.as_ref(), hal_pair.circuit_hal.as_ref());

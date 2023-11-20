@@ -12,43 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID};
+use risc0_zkvm_methods::{
+    multi_test::MultiTestSpec, HELLO_COMMIT_ELF, HELLO_COMMIT_ID, MULTI_TEST_ELF, MULTI_TEST_ID,
+};
 use serial_test::serial;
 use test_log::test;
 
-use super::{identity_p254, join, lift, prove::poseidon254_hal_pair, Prover, ProverOpts};
+use super::{identity_p254, join, lift, prove::poseidon254_hal_pair, resolve, Prover, ProverOpts};
 use crate::{
     get_prover_server, ExecutorEnv, ExecutorImpl, InnerReceipt, Receipt, SegmentReceipt, Session,
     VerifierContext,
 };
-
-fn generate_segments(hashfn: &str) -> (Session, Vec<SegmentReceipt>) {
-    let segment_limit_po2 = 16; // 64k cycles
-    let cycles = 1 << segment_limit_po2;
-    let env = ExecutorEnv::builder()
-        .write(&MultiTestSpec::BusyLoop { cycles })
-        .unwrap()
-        .segment_limit_po2(segment_limit_po2)
-        .build()
-        .unwrap();
-    let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
-    let session = exec.run().unwrap();
-    let segments = session.resolve().unwrap();
-    tracing::info!("Got {} segments", segments.len());
-    let opts = crate::ProverOpts {
-        hashfn: hashfn.to_string(),
-        prove_guest_errors: false,
-    };
-    let prover = get_prover_server(&opts).unwrap();
-    tracing::info!("Proving rv32im");
-    let ctx = VerifierContext::default();
-    let segment_receipts = segments
-        .iter()
-        .map(|x| prover.prove_segment(&ctx, x).unwrap())
-        .collect();
-    tracing::info!("Done proving rv32im");
-    (session, segment_receipts)
-}
 
 // Failure on older mac minis in the lab with Intel UHD 630 graphics:
 // (signal: 11, SIGSEGV: invalid memory reference)
@@ -83,14 +57,48 @@ fn test_recursion() {
     assert_eq!(receipt.output_digest, *expected);
 }
 
+fn generate_busy_loop_segments(hashfn: &str) -> (Session, Vec<SegmentReceipt>) {
+    let segment_limit_po2 = 16; // 64k cycles
+    let cycles = 1 << segment_limit_po2;
+    let env = ExecutorEnv::builder()
+        .write(&MultiTestSpec::BusyLoop { cycles })
+        .unwrap()
+        .segment_limit_po2(segment_limit_po2)
+        .build()
+        .unwrap();
+
+    tracing::info!("Executing rv32im");
+    let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
+    let session = exec.run().unwrap();
+    let segments = session.resolve().unwrap();
+    tracing::info!("Got {} segments", segments.len());
+
+    let opts = crate::ProverOpts {
+        hashfn: hashfn.to_string(),
+        prove_guest_errors: false,
+    };
+    let prover = get_prover_server(&opts).unwrap();
+
+    tracing::info!("Proving rv32im");
+    let ctx = VerifierContext::default();
+    let segment_receipts = segments
+        .iter()
+        .map(|x| prover.prove_segment(&ctx, x).unwrap())
+        .collect();
+    tracing::info!("Done proving rv32im");
+
+    (session, segment_receipts)
+}
+
 #[cfg_attr(
     not(all(feature = "metal", target_os = "macos", target_arch = "x86_64")),
     test
 )]
 #[serial]
-fn test_recursion_e2e() {
+fn test_recursion_lift_join_identity_e2e() {
     // Prove the base case
-    let (session, segments) = generate_segments("poseidon");
+    let (session, segments) = generate_busy_loop_segments("poseidon");
+
     // Lift and join them  all (and verify)
     let mut rollup = lift(&segments[0]).unwrap();
     tracing::info!("Lift Meta = {:?}", rollup.meta);
@@ -119,4 +127,81 @@ fn test_recursion_e2e() {
         session.journal.unwrap().bytes,
     );
     rollup_receipt.verify(MULTI_TEST_ID).unwrap();
+}
+
+fn generate_composition_receipt(hashfn: &str) -> Receipt {
+    let opts = crate::ProverOpts {
+        hashfn: hashfn.to_string(),
+        prove_guest_errors: false,
+    };
+    let prover = get_prover_server(&opts).unwrap();
+
+    tracing::info!("Proving rv32im: hello commit");
+    let assumption_receipt = prover
+        .prove_elf(ExecutorEnv::default(), HELLO_COMMIT_ELF)
+        .unwrap();
+    tracing::info!("Done proving rv32im: hello commit");
+
+    let env = ExecutorEnv::builder()
+        .add_assumption(assumption_receipt.clone().into())
+        .write(&MultiTestSpec::SysVerify {
+            image_id: HELLO_COMMIT_ID.into(),
+            journal: b"hello world".to_vec(),
+        })
+        .unwrap()
+        .build()
+        .unwrap();
+
+    tracing::info!("Proving rv32im: sys_verify");
+    let composition_receipt = prover.prove_elf(env, MULTI_TEST_ELF).unwrap();
+    tracing::info!("Done proving rv32im: sys_verify");
+
+    composition_receipt
+}
+
+#[cfg_attr(
+    not(all(feature = "metal", target_os = "macos", target_arch = "x86_64")),
+    test
+)]
+#[serial]
+fn test_recursion_lift_resolve_e2e() {
+    let receipt = generate_composition_receipt("poseidon");
+    let composition_receipt = receipt.inner.composite().unwrap().clone();
+    assert_eq!(composition_receipt.segments.len(), 1);
+    let conditional_segment_receipt = composition_receipt.segments[0].clone();
+
+    assert_eq!(composition_receipt.assumptions.len(), 1);
+    let assumption_receipt = composition_receipt.assumptions[0]
+        .composite()
+        .unwrap()
+        .clone();
+    assert_eq!(assumption_receipt.segments.len(), 1);
+    assert_eq!(assumption_receipt.assumptions.len(), 0);
+    let assumption_segment_receipt = assumption_receipt.segments[0].clone();
+
+    // Lift and join them  all (and verify)
+    tracing::info!("Lifting assumption");
+    let lifted_assumption = lift(&assumption_segment_receipt).unwrap();
+    lifted_assumption
+        .verify_integrity_with_context(&VerifierContext::default())
+        .unwrap();
+    tracing::info!("Lift assumption meta = {:?}", lifted_assumption.meta);
+
+    tracing::info!("Lifting conditional");
+    let lifted_conditional = lift(&conditional_segment_receipt).unwrap();
+    lifted_conditional
+        .verify_integrity_with_context(&VerifierContext::default())
+        .unwrap();
+    tracing::info!("Lift conditional meta = {:?}", lifted_conditional.meta);
+
+    tracing::info!("Resolve");
+    let resolved = resolve(&lifted_conditional, &lifted_assumption).unwrap();
+    resolved
+        .verify_integrity_with_context(&VerifierContext::default())
+        .unwrap();
+    tracing::info!("Resolve meta = {:?}", resolved.meta);
+
+    // Validate the Session rollup + journal data
+    let resolved_receipt = Receipt::new(InnerReceipt::Succinct(resolved), receipt.journal.bytes);
+    resolved_receipt.verify(MULTI_TEST_ID).unwrap();
 }
