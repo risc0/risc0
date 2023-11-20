@@ -52,6 +52,10 @@ pub fn join() -> Result<(Program, Digest)> {
     get_zkr("join.zkr")
 }
 
+pub fn resolve() -> Result<(Program, Digest)> {
+    get_zkr("resolve.zkr")
+}
+
 pub fn identity() -> Result<(Program, Digest)> {
     get_zkr("identity.zkr")
 }

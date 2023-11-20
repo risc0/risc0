@@ -20,7 +20,7 @@ pub mod zkr;
 
 use std::{collections::VecDeque, mem::take, rc::Rc};
 
-use anyhow::Result;
+use anyhow::{anyhow, Context, Result};
 use hex::FromHex;
 use merkle::MerkleGroup;
 use risc0_binfmt::recursion::{Program, RECURSION_PO2};
@@ -46,7 +46,9 @@ use serde::{Deserialize, Serialize};
 
 use super::CIRCUIT;
 use crate::{
+    receipt_metadata::Output,
     recursion::{valid_control_ids, SuccinctReceipt},
+    sha::Digestible,
     HalPair, ReceiptMetadata, SegmentReceipt, POSEIDON_CONTROL_ID,
 };
 
@@ -403,6 +405,52 @@ impl Prover {
         prover.add_input_digest(&merkle_root);
         prover.add_segment_receipt(a, &allowed_ids)?;
         prover.add_segment_receipt(b, &allowed_ids)?;
+        Ok(prover)
+    }
+
+    /// TODO
+    pub fn new_resolve(
+        cond: &SuccinctReceipt,
+        corr: &SuccinctReceipt,
+        opts: ProverOpts,
+    ) -> Result<Self> {
+        // Construct the Merkle tree of all acceptable recursion predicate control IDs.
+        let hashfn = opts.suite.hashfn.as_ref();
+        let allowed_ids = Self::make_allowed_tree();
+        let merkle_root = allowed_ids.calc_root(hashfn);
+
+        // Load the resolve predicate as a Program and construct the prover.
+        let (program, control_id) = zkr::resolve()?;
+        let mut prover = Prover::new(program, control_id, opts);
+
+        // Load the input values needed by the predicate.
+        // Resolve predicate needs both seals as input, and the journal and assumptions tail digest
+        // to compute the opening of the conditional receipt metadata to the first assumption.
+        prover.add_input_digest(&merkle_root);
+        prover.add_segment_receipt(cond, &allowed_ids)?;
+        prover.add_segment_receipt(corr, &allowed_ids)?;
+
+        let Output {
+            assumptions,
+            journal,
+        } = cond
+            .meta
+            .output
+            .as_value()
+            .context("cannot resolve conditional receipt with pruned output")?
+            .as_ref()
+            .ok_or(anyhow!("cannot resolve conditional receipt with no output"))?
+            .clone();
+
+        // Unwrap the MaybePruned assumptions list and resolve the corroborated assumption,
+        // removing the head and leaving the tail of the list.
+        let mut assumptions_tail = assumptions
+            .value()
+            .context("cannot resolve conditional receipt with pruned assumptions")?;
+        assumptions_tail.resolve(&corr.meta.digest())?;
+
+        prover.add_input_digest(&assumptions_tail.digest());
+        prover.add_input_digest(&journal.digest());
         Ok(prover)
     }
 

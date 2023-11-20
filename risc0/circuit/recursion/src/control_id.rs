@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-pub const RECURSION_CONTROL_IDS: [&str; 14] = [
+pub const RECURSION_CONTROL_IDS: [&str; 15] = [
     "3a8de34cd9c65059ff59a5311e038556d63345070749052e6110576d5e36c83c",
     "1987251f3589eb2eaac24f23dd35345c28e388752b49760a3dc80574f822891c",
     "26fdac1de5970b2b05d4b320a550fc47c942a960db500877bbe96c187a965a74",
@@ -26,9 +26,10 @@ pub const RECURSION_CONTROL_IDS: [&str; 14] = [
     "e569af067d234020b6d0d715d1bc0c5b82b54264255b272241a616573184fb47",
     "a69d8761f3ab76093195571860f0262635e8253bc2324771d6768266277e5d36",
     "b7068836a9f6ba4af9f9390cfdc5d24d14331a4a4feadb16f0ab332c1f667465",
+    "57813d021cdf3a39ad10fc1c5b05a71692bf2f7015d5fa6b6c03c3302aadce20",
     "93ddfd13ad326c73317033379bda035dd1e97a056aaed01c5beca909d764d213",
 ];
 
 /// Merkle root of the RECURSION_CONTROL_IDS
 pub const ALLOWED_IDS_ROOT: &str =
-    "b32a0567a799174e9f49dc3d8b2de4683192d345045b5828a0e045164f680238";
+    "b6a4531841ee2e4fe049e31273b88c6bd7684043a6f6f54d9f8f3f712922d94b";
