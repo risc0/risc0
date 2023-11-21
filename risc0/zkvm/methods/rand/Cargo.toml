@@ -7,25 +7,20 @@
 resolver = "2"
 
 [package]
-name = "risc0-zkvm-methods-guest"
+name = "risc0-zkvm-methods-rand"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-bytemuck = "1.12"
 getrandom = "0.2"
-risc0-zkp = { path = "../../../zkp", default-features = false }
-risc0-zkvm = { path = "../..", default-features = false, features = ["enable-getrandom"]}
-risc0-zkvm-methods = { path = "..", default-features = false }
-risc0-zkvm-platform = { path = "../../platform" }
-rsa = { version = "0.9", default-features = false, features = ["pem"] }
+risc0-zkvm = { path = "../..", default-features = false }
 
 [profile.release]
 lto = true
 opt-level = 3
 debug = 1
 
-[profile.release.package.risc0-zkvm-methods-guest]
+[profile.release.package.risc0-zkvm-methods-rand]
 # Include debug symbols so we can test the profiler.
 debug = 1
 
