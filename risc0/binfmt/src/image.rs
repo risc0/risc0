@@ -282,7 +282,7 @@ impl MemoryImage {
             let expected = self.hash_page(page_idx)?;
             let entry_addr = self.info.get_page_entry_addr(page_idx);
             let mut entry = [0_u8; DIGEST_BYTES];
-            self.load_region_in_page(entry_addr, &mut entry);
+            self.load_region_in_page(entry_addr, &mut entry)?;
             let actual = Digest::try_from(entry)?;
             tracing::debug!(
                 "page_idx: {page_idx}, page_addr: 0x{page_addr:08x} entry_addr: 0x{entry_addr:08x}"
@@ -296,7 +296,7 @@ impl MemoryImage {
         let root_page_addr = self.info.root_page_addr;
         let root_page_bytes = self.info.num_root_entries * DIGEST_BYTES as u32;
         let mut root_page = vec![0_u8; root_page_bytes as usize];
-        self.load_region_in_page(root_page_addr, &mut root_page);
+        self.load_region_in_page(root_page_addr, &mut root_page)?;
         let expected = hash_page_bytes(&root_page)?;
         let root = self.compute_root_hash()?;
         if expected != root {
@@ -347,7 +347,7 @@ mod tests {
     use crate::{elf::Program, image::PageTableInfo, MemoryImage};
 
     fn page_table_size(max_mem: u32, page_size: u32) -> u32 {
-        PageTableInfo::new(max_mem, page_size)._page_table_size
+        PageTableInfo::new(max_mem, page_size).unwrap()._page_table_size
     }
 
     #[test]
