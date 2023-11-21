@@ -332,7 +332,7 @@ impl InnerReceipt {
     }
 
     /// Returns the [InnerReceipt::Groth16] arm.
-    pub fn snark(&self) -> Result<&Groth16Receipt, VerificationError> {
+    pub fn groth16(&self) -> Result<&Groth16Receipt, VerificationError> {
         if let InnerReceipt::Groth16(x) = self {
             Ok(&x)
         } else {

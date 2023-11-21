@@ -34,9 +34,9 @@ protoc-prebuilt = { git = "https://github.com/risc0/protoc-prebuilt.git", rev = 
 
 [dependencies]
 anyhow = { version = "1.0", default-features = false }
-ark-bn254 = { version = "=0.4.0" }
-ark-groth16 = { version = "=0.4.0", default-features = false }
-ark-serialize = { version = "=0.4.2", default-features = false }
+ark-bn254 = { version = "0.4" }
+ark-groth16 = { version = "0.4", default-features = false }
+ark-serialize = { version = "0.4", default-features = false }
 bytemuck = { version = "1.13", features = ["extern_crate_alloc"] }
 cfg-if = "1.0"
 getrandom = { version = "0.2", features = ["custom"] }
@@ -77,7 +77,7 @@ lazy-regex = { version = "3.1", optional = true }
 crypto-bigint = { version = "0.5", default-features = false, features = [
   "rand",
 ], optional = true }
-num-bigint = "0.4"
+num-bigint = { version = "0.4", default-features = false }
 num-derive = "0.4"
 num-traits = { version = "0.2", default-features = false }
 prost = { version = "0.12", optional = true }

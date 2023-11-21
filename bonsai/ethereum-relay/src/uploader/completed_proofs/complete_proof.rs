@@ -55,7 +55,7 @@ pub(crate) async fn get_complete_proof(
             &Groth16Seal::from_vec(
                 &snark_receipt
                     .inner
-                    .snark()
+                    .groth16()
                     .map_err(|_| CompleteProofError::SnarkFailed {
                         id: bonsai_proof_id.clone(),
                     })?
