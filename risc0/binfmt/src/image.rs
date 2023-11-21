@@ -279,7 +279,7 @@ impl MemoryImage {
         let mut page_idx = self.info.get_page_index(addr);
         while page_idx < self.info.root_idx {
             let page_addr = self.info.get_page_addr(page_idx);
-            let expected = self.hash_page(page_idx);
+            let expected = self.hash_page(page_idx)?;
             let entry_addr = self.info.get_page_entry_addr(page_idx);
             let mut entry = [0_u8; DIGEST_BYTES];
             self.load_region_in_page(entry_addr, &mut entry);
@@ -297,8 +297,8 @@ impl MemoryImage {
         let root_page_bytes = self.info.num_root_entries * DIGEST_BYTES as u32;
         let mut root_page = vec![0_u8; root_page_bytes as usize];
         self.load_region_in_page(root_page_addr, &mut root_page);
-        let expected = hash_page_bytes(&root_page);
-        let root = self.compute_root_hash();
+        let expected = hash_page_bytes(&root_page)?;
+        let root = self.compute_root_hash()?;
         if expected != root {
             anyhow::bail!("Invalid root hash: {} != {}", expected, root);
         }
@@ -370,7 +370,7 @@ mod tests {
     #[test]
     fn page_table_info() {
         const PAGE_SIZE_1K: u32 = 1024;
-        let info = PageTableInfo::new(PAGE_TABLE.start() as u32, PAGE_SIZE_1K);
+        let info = PageTableInfo::new(PAGE_TABLE.start() as u32, PAGE_SIZE_1K).unwrap();
         assert_eq!(info._page_table_size, 7035584);
         assert_eq!(info._page_table_size / PAGE_SIZE_1K, 6870);
         assert_eq!(info._page_table_size / PAGE_SIZE_1K * PAGE_SIZE_1K, 7034880);
@@ -401,7 +401,7 @@ mod tests {
         // Layer 2:   8M / 1K =   8K pages =>   8K * 32 = 256K
         // Layer 3: 256K / 1K =  256 pages =>  256 * 32 =   8K
         // Layer 4:   8K / 1K =    8 pages =>    8 * 32 =  256
-        let info = PageTableInfo::new(256 * 1024 * 1024, PAGE_SIZE_1K);
+        let info = PageTableInfo::new(256 * 1024 * 1024, PAGE_SIZE_1K).unwrap();
         assert_eq!(
             info._layers,
             vec![8 * 1024 * 1024, 256 * 1024, 8 * 1024, 256]
@@ -431,7 +431,7 @@ mod tests {
         // Layer 1: 256M / 4K =  64K pages =>  64K * 32 =   2M
         // Layer 2:   2M / 4K =  512 pages =>  512 * 32 =  16K
         // Layer 3:  16K / 4K =    4 pages =>    4 * 32 =  128
-        let info = PageTableInfo::new(256 * 1024 * 1024, PAGE_SIZE_4K);
+        let info = PageTableInfo::new(256 * 1024 * 1024, PAGE_SIZE_4K).unwrap();
         assert_eq!(info._layers, vec![2 * 1024 * 1024, 16 * 1024, 128]);
         assert_eq!(info._page_table_size, 2 * 1024 * 1024 + 16 * 1024 + 128);
     }
@@ -459,7 +459,7 @@ mod tests {
         // 0x1AA0: P5
         // 0x1AC0: Root
 
-        let info = PageTableInfo::new(0x1A00, PAGE_SIZE_1K);
+        let info = PageTableInfo::new(0x1A00, PAGE_SIZE_1K).unwrap();
         assert_eq!(info._layers, vec![192]);
         assert_eq!(info._page_table_size, 192);
         assert_eq!(info.root_addr, 0x1AC0);
