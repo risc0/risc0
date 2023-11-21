@@ -362,12 +362,12 @@ jobs:
       - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/rustup
-      - uses: ./.github/actions/sccache
-        with:
-          key: Linux-default
+      # - uses: ./.github/actions/sccache
+      #   with:
+      #     key: Linux-default
       - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
       - run: cargo test -p risc0-build -F docker
       - run: cargo test -p risc0-zkvm -F docker -F prove -- "docker::"
         env:
           RISC0_USE_DOCKER: "1"
-      - run: sccache --show-stats
+      # - run: sccache --show-stats
