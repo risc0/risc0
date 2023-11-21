@@ -237,7 +237,7 @@ mod test {
         );
         compare_image_id(
             "risc0_zkvm_methods_guest/hello_commit",
-            "398933ef950f9d78fec92aa087f9ddaa124152729bc456582a62e2ea5de241fd",
+            "aa355bc739cb028024a0a89b740014f2997a730a13900c53cd20e6012ce49ad4",
         );
         compare_image_id(
             "risc0_zkvm_methods_guest/slice_io",
