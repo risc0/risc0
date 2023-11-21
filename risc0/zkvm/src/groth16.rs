@@ -21,7 +21,7 @@
 //! ```rust
 //! use anyhow::Result;
 //! use risc0_zkvm::groth16::{
-//!     raw::{RawProof, RawPublic, RawVKey},
+//!     RawProof, RawPublic, RawVKey,
 //!     Groth16,
 //! };
 //!
