@@ -81,7 +81,7 @@ num-bigint = { version = "0.4", default-features = false }
 num-derive = "0.4"
 num-traits = { version = "0.2", default-features = false }
 prost = { version = "0.12", optional = true }
-sha2 = { version = "0.10" }
+sha2 = { version = "0.10", default-features = false }
 tempfile = { version = "3", optional = true }
 tracing = { version = "0.1", default-features = false, features = [
   "attributes",
@@ -174,9 +174,15 @@ prove = [
 ]
 std = [
   "anyhow/std",
+  "ark-bn254/std",
+  "ark-groth16/std",
+  "ark-serialize/std",
+  "num-bigint/std",
+  "num-traits/std",
   "risc0-binfmt/std",
   "risc0-circuit-recursion/std",
   "risc0-circuit-rv32im/std",
   "risc0-zkp/std",
   "serde/std",
+  "sha2/std"
 ]
