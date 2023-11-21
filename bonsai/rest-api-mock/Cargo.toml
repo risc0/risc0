@@ -24,3 +24,9 @@ uuid = { version = "1.4", features = ["v4", "serde"] }
 [dev-dependencies]
 bonsai-sdk = { workspace = true, features = ["async"] }
 risc0-zkvm-methods = { path = "../../risc0/zkvm/methods", default-features = false }
+
+[features]
+cuda = ["risc0-zkvm/cuda"]
+default = []
+metal = ["risc0-zkvm/metal"]
+prove = ["risc0-zkvm/prove"]
