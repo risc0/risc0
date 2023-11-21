@@ -347,7 +347,9 @@ mod tests {
     use crate::{elf::Program, image::PageTableInfo, MemoryImage};
 
     fn page_table_size(max_mem: u32, page_size: u32) -> u32 {
-        PageTableInfo::new(max_mem, page_size).unwrap()._page_table_size
+        PageTableInfo::new(max_mem, page_size)
+            .unwrap()
+            ._page_table_size
     }
 
     #[test]

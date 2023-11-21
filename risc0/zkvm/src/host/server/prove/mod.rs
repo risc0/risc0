@@ -144,9 +144,7 @@ impl Segment {
         offset += WORD_SIZE;
 
         // initialize ImageID
-        let merkle_root = self
-            .pre_image
-            .compute_root_hash()?;
+        let merkle_root = self.pre_image.compute_root_hash()?;
         let merkle_root = merkle_root.as_words();
         for i in 0..DIGEST_WORDS {
             let bytes = merkle_root[i].to_le_bytes();
