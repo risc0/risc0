@@ -281,8 +281,8 @@ pub enum InnerReceipt {
     /// The [SuccinctReceipt].
     Succinct(SuccinctReceipt),
 
-    /// The [SnarkReceipt].
-    Snark(SnarkReceipt),
+    /// The [Groth16Receipt].
+    Groth16(Groth16Receipt),
 
     /// A fake receipt for testing and development.
     ///
@@ -309,7 +309,7 @@ impl InnerReceipt {
     ) -> Result<(), VerificationError> {
         match self {
             InnerReceipt::Composite(x) => x.verify_integrity_with_context(ctx),
-            InnerReceipt::Snark(x) => x.verify_integrity_with_context(ctx),
+            InnerReceipt::Groth16(x) => x.verify_integrity_with_context(ctx),
             InnerReceipt::Succinct(x) => x.verify_integrity_with_context(ctx),
             InnerReceipt::Fake { .. } => {
                 #[cfg(feature = "std")]
@@ -330,9 +330,9 @@ impl InnerReceipt {
         }
     }
 
-    /// Returns the [InnerReceipt::Snark] arm.
-    pub fn snark(&self) -> Result<&SnarkReceipt, VerificationError> {
-        if let InnerReceipt::Snark(x) = self {
+    /// Returns the [InnerReceipt::Groth16] arm.
+    pub fn snark(&self) -> Result<&Groth16Receipt, VerificationError> {
+        if let InnerReceipt::Groth16(x) = self {
             Ok(&x)
         } else {
             Err(VerificationError::ReceiptFormatError)
@@ -352,17 +352,17 @@ impl InnerReceipt {
     pub fn get_metadata(&self) -> Result<ReceiptMetadata, VerificationError> {
         match self {
             InnerReceipt::Composite(ref receipt) => receipt.get_metadata(),
-            InnerReceipt::Snark(ref snark_receipt) => Ok(snark_receipt.meta.clone()),
+            InnerReceipt::Groth16(ref groth16_receipt) => Ok(groth16_receipt.meta.clone()),
             InnerReceipt::Succinct(ref succinct_recipt) => Ok(succinct_recipt.meta.clone()),
             InnerReceipt::Fake { metadata } => Ok(metadata.clone()),
         }
     }
 }
 
-/// A receipt composed of Snark (Groth16 over the BN_254 curve)
+/// A receipt composed of a Groth16 over the BN_254 curve
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[cfg_attr(test, derive(PartialEq))]
-pub struct SnarkReceipt {
+pub struct Groth16Receipt {
     /// the Grtoh16 seal of this receipt
     pub seal: Vec<u8>,
 
@@ -371,7 +371,7 @@ pub struct SnarkReceipt {
     pub meta: ReceiptMetadata,
 }
 
-impl SnarkReceipt {
+impl Groth16Receipt {
     /// Verify the integrity of this receipt, ensuring the metadata is attested
     /// to by the seal.
     pub fn verify_integrity_with_context(

@@ -32,7 +32,7 @@ message InnerReceipt {
     CompositeReceipt composite = 1;
     SuccinctReceipt succinct = 2;
     FakeReceipt fake = 3;
-    SnarkReceipt snark = 4;
+    Groth16Receipt groth16 = 4;
   }
 }
 
@@ -56,7 +56,7 @@ message SuccinctReceipt {
   ReceiptMetadata meta = 4;
 }
 
-message SnarkReceipt {
+message Groth16Receipt {
   protos.base.CompatVersion version = 1;
   bytes seal = 2;
   ReceiptMetadata meta = 3;

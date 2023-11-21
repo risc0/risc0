@@ -12,31 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use anyhow::{anyhow, Result};
+use anyhow::Result;
 use bonsai_sdk::alpha as bonsai_sdk;
 use byteorder::{BigEndian, WriteBytesExt};
 use hello_world_methods::{MULTIPLY_ELF, MULTIPLY_ID};
 use risc0_zkvm::{
-    default_prover, groth16::Groth16Seal, serde::to_vec, ExecutorEnv, MemoryImage, Program,
-    Receipt, SnarkReceipt, GUEST_MAX_MEM, PAGE_SIZE,
+    default_prover, groth16::Groth16Seal, serde::to_vec, ExecutorEnv, Groth16Receipt, MemoryImage,
+    Program, Receipt, GUEST_MAX_MEM, PAGE_SIZE,
 };
 use std::time::Duration;
-
-/// Check for the RISC0_DEV_MODE environment variable:
-/// * Return true if the value is "true" or it is not set.
-/// * Return false if the value is "false".
-///
-/// NOTE: Default is true, since this is a test environment.
-pub fn dev_mode() -> Result<bool> {
-    match std::env::var("RISC0_DEV_MODE") {
-        Ok(ref val) if val == "false" => Ok(false),
-        Ok(ref val) if val == "true" => Ok(true),
-        Ok(ref val) if val.is_empty() => Ok(true),
-        Ok(ref val) => Err(anyhow!("invalid boolean value for RISC0_DEV_MODE: {}", val)),
-        Err(std::env::VarError::NotPresent) => Ok(true),
-        Err(e) => Err(e.into()),
-    }
-}
 
 // Run Bonsai for the hello world example
 pub fn run_bonsai(input_data: Vec<u8>) -> Result<Receipt> {
@@ -127,7 +111,7 @@ pub fn run_stark2snark(session_id: String) -> Result<Receipt> {
     }
 }
 
-// Mock a SnarkReceipt as received from Bonsai
+// Mock a Groth16Receipt as received from Bonsai
 pub fn run_bonsai_mock() -> Receipt {
     let groth16_seal = Groth16Seal {
         a: vec![
@@ -184,14 +168,14 @@ pub fn run_bonsai_mock() -> Receipt {
 
     let receipt = default_prover().prove_elf(env, MULTIPLY_ELF).unwrap();
 
-    let snark_receipt = Receipt::new(
-        risc0_zkvm::InnerReceipt::Snark(SnarkReceipt {
+    let groth16_receipt = Receipt::new(
+        risc0_zkvm::InnerReceipt::Groth16(Groth16Receipt {
             seal: groth16_seal.to_vec(),
             meta: receipt.get_metadata().unwrap(),
         }),
         receipt.journal.bytes,
     );
-    snark_receipt
+    groth16_receipt
 }
 
 pub fn u64s_to_vec(a: u64, b: u64) -> Vec<u8> {

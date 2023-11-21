@@ -85,8 +85,8 @@ pub use self::host::{
 pub use self::host::{
     control_id::POSEIDON_CONTROL_ID,
     receipt::{
-        Assumption, CompositeReceipt, InnerReceipt, Journal, Receipt, SegmentReceipt, SnarkReceipt,
-        SuccinctReceipt, VerifierContext,
+        Assumption, CompositeReceipt, Groth16Receipt, InnerReceipt, Journal, Receipt,
+        SegmentReceipt, SuccinctReceipt, VerifierContext,
     },
     recursion::ALLOWED_IDS_ROOT,
 };

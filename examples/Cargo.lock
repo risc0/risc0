@@ -1999,7 +1999,6 @@ dependencies = [
  "byteorder",
  "hello-world-methods",
  "hex",
- "methods",
  "risc0-zkvm",
  "serde_json",
 ]
@@ -2614,13 +2613,6 @@ dependencies = [
  "log",
  "objc",
  "paste",
-]
-
-[[package]]
-name = "methods"
-version = "0.1.0"
-dependencies = [
- "risc0-build",
 ]
 
 [[package]]
@@ -3852,13 +3844,13 @@ dependencies = [
  "bytes",
  "cfg-if",
  "crypto-bigint",
- "ethereum-types",
  "generic-array",
  "getrandom",
  "gimli",
  "goblin",
  "hex",
  "lazy-regex",
+ "num-bigint 0.4.4",
  "num-derive",
  "num-traits",
  "object",

@@ -12,15 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use anyhow::Result;
+use anyhow::{Ok, Result};
 use groth16_verifier_example::*;
 use hello_world_methods::MULTIPLY_ID;
-use methods::{GROTH16_VERIFIER_ELF, GROTH16_VERIFIER_ID};
 use risc0_zkvm::{
-    default_prover,
     groth16::{Groth16, RawProof, RawPublic, RawVKey},
-    sha::Digest,
-    ExecutorEnv, Receipt,
+    is_dev_mode, Receipt,
 };
 
 const CIRCOM_VERIFICATION_KEY: &str = include_str!("data/circom/verification_key.json");
@@ -28,18 +25,18 @@ const CIRCOM_PROOF: &str = include_str!("data/circom/proof.json");
 const CIRCOM_PUBLIC: &str = include_str!("data/circom/public.json");
 
 fn main() -> Result<()> {
-    // ----- Snark receipt verification from Bonsai --------
+    // ----- Groth16 receipt verification from Bonsai --------
     //
-    // Generate a snark receipt for the MULTIPLY ELF
-    let snark_receipt: Receipt = match dev_mode()? {
+    // Generate a groth16 receipt for the MULTIPLY ELF
+    let groth16_receipt: Receipt = match is_dev_mode() {
         true => run_bonsai_mock(),
         false => run_bonsai(u64s_to_vec(17, 23))?,
     };
 
-    // SnarkReceipt verification
-    snark_receipt
+    // Groth16Receipt verification
+    groth16_receipt
         .verify(MULTIPLY_ID)
-        .expect("Failed snark receipt verification");
+        .expect("Faileed Groth16 receipt verification");
     println!("Verified the snark receipt from Bonsai");
     // -------------------------------------------------------------
 
@@ -59,39 +56,6 @@ fn main() -> Result<()> {
     // groth16 proof verification
     groth16.verify().unwrap();
     println!("Verified the Groth16 proof from Circom");
-    // -------------------------------------------------------------
-
-    // ----- zkVM Groth16 proof verification from Circom/SnarkJS --------
-    //
-    // we build an ExecutorEnv using as input the previous groth16 instance
-    let env = ExecutorEnv::builder()
-        .write(&groth16)
-        .unwrap()
-        .build()
-        .unwrap();
-
-    // we run the prover to obtain a receipt of the zkVM groth16 verifier
-    //
-    // Note: this step requires around 150 milion cycles, thus proving without
-    // using Bonsai or CUDA acceleration can slow. We recommend enabling
-    // dev mode by setting the env variable `RISC0_DEV_MODE=true`
-    println!(
-        "Proving the Groth16 proof verification (input digest: {})",
-        hex::encode(groth16.digest())
-    );
-    let receipt = default_prover()
-        .prove_elf(env, GROTH16_VERIFIER_ELF)
-        .unwrap();
-
-    // We verify the receipt and make sure the output of the journal is
-    // equal to the digest of our input
-    receipt.verify(GROTH16_VERIFIER_ID).unwrap();
-    let journal_output: Digest = receipt.journal.decode().unwrap();
-    println!(
-        "Verified the Groth16 zkVM verification (output digest: {})",
-        hex::encode(journal_output)
-    );
-    assert_eq!(journal_output, groth16.digest());
     Ok(())
     // -------------------------------------------------------------
 }

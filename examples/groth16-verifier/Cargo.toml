@@ -11,7 +11,6 @@ bytemuck = "1.14"
 byteorder = "1.4"
 hello-world-methods = { path = "../hello-world/methods" }
 hex = "0.4"
-methods = { path = "methods" }
 risc0-zkvm = { path = "../../risc0/zkvm" }
 serde_json = "1.0"
 

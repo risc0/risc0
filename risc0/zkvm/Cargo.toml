@@ -64,7 +64,6 @@ addr2line = { version = "0.21", features = ["rustc-demangle"], optional = true }
 bincode = { version = "1.3", optional = true }
 bonsai-sdk = { workspace = true, optional = true }
 bytes = { version = "1.4", features = ["serde"], optional = true }
-ethereum-types = { version = "0.14", default_features = false }
 rayon = { version = "1.5", optional = true }
 risc0-circuit-recursion = { workspace = true }
 risc0-circuit-rv32im = { workspace = true }
@@ -79,8 +78,9 @@ lazy-regex = { version = "2.4", optional = true }
 crypto-bigint = { version = "0.5", default-features = false, features = [
   "rand",
 ], optional = true }
+num-bigint = "0.4"
 num-derive = "0.4"
-num-traits = { version = "0.2", default-features = false, optional = true }
+num-traits = { version = "0.2", default-features = false }
 prost = { version = "0.12", optional = true }
 sha2 = { version = "0.10" }
 tempfile = { version = "3", optional = true }
@@ -161,7 +161,6 @@ prove = [
   "dep:bincode",
   "dep:bytes",
   "dep:crypto-bigint",
-  "dep:num-traits",
   "dep:generic-array",
   "dep:getrandom",
   "dep:lazy-regex",
@@ -178,7 +177,6 @@ prove = [
 ]
 std = [
   "anyhow/std",
-  "num-traits?/std",
   "risc0-binfmt/std",
   "risc0-circuit-recursion/std",
   "risc0-circuit-rv32im/std",

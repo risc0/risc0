@@ -56,9 +56,11 @@ use ark_serialize::CanonicalDeserialize;
 #[cfg(not(target_os = "zkvm"))]
 use ark_serialize::CanonicalSerialize;
 #[cfg(not(target_os = "zkvm"))]
-use ethereum_types::U256;
+use core::str::FromStr;
 #[cfg(not(target_os = "zkvm"))]
 use hex::FromHex;
+#[cfg(not(target_os = "zkvm"))]
+use num_bigint::BigInt;
 use serde::{Deserialize, Serialize};
 
 #[cfg(not(target_os = "zkvm"))]
@@ -569,14 +571,29 @@ fn g2_from_bytes(elem: &Vec<Vec<Vec<u8>>>) -> Result<G2Affine, Error> {
 // Convert the U256 value to a byte array in big-endian format
 #[cfg(not(target_os = "zkvm"))]
 fn from_u256(value: &str) -> Result<Vec<u8>, Error> {
-    let mut bytes = [0u8; 32];
-    let value: U256 = if value.starts_with("0x") {
-        U256::from_str_radix(value, 16).map_err(|err| anyhow!(err))? //("Invalid number")?
+    let value = if value.starts_with("0x") {
+        to_fixed_array(
+            hex::decode(&value[2..]).map_err(|_| anyhow!("conversion from u256 failed"))?,
+        )
+        .to_vec()
     } else {
-        U256::from_dec_str(value).map_err(|err| anyhow!(err))? //("Invalid number")?
+        to_fixed_array(
+            BigInt::from_str(value)
+                .map_err(|_| anyhow!("conversion from u256 failed"))?
+                .to_bytes_be()
+                .1,
+        )
+        .to_vec()
     };
-    value.to_big_endian(&mut bytes);
-    Ok(bytes.to_vec())
+    Ok(value)
+}
+
+#[cfg(not(target_os = "zkvm"))]
+fn to_fixed_array(input: Vec<u8>) -> [u8; 32] {
+    let mut fixed_array = [0u8; 32];
+    let start = core::cmp::max(32, input.len()) - core::cmp::min(32, input.len());
+    fixed_array[start..].copy_from_slice(&input[input.len().saturating_sub(32)..]);
+    fixed_array
 }
 
 // Splits the digest in half returning a scalar field for each
