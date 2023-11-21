@@ -626,3 +626,80 @@ impl Merge for ReceiptMetadata {
         })
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use hex::FromHex;
+
+    use super::{ExitCode, MaybePruned, Merge, ReceiptMetadata, SystemState};
+    use crate::sha::Digest;
+
+    // TODO(victor): Improve testing here.
+    #[test]
+    fn merge_receipt_metadata() {
+        let left_metadata = ReceiptMetadata {
+            pre: SystemState {
+                pc: 2100484,
+                merkle_root: Digest::from_hex(
+                    "9095da07d84ccc170c5113e3dafdf0531700f0b3f0c627acc9f0329440d984fa",
+                )
+                .unwrap(),
+            }
+            .into(),
+            post: SystemState {
+                pc: 2297164,
+                merkle_root: Digest::from_hex(
+                    "223651656250c0cf2f1c3f8923ef3d2c8624a361830492ffec6450e1930fb07d",
+                )
+                .unwrap(),
+            }
+            .into(),
+            exit_code: ExitCode::Halted(0),
+            input: Digest::from_hex(
+                "0000000000000000000000000000000000000000000000000000000000000000",
+            )
+            .unwrap(),
+            output: MaybePruned::Pruned(
+                Digest::from_hex(
+                    "836f175c62c0f353831665427e8b0b34f6d1d21902764daeb406c6b83db575b0",
+                )
+                .unwrap(),
+            ),
+        };
+
+        let right_metadata = ReceiptMetadata {
+            pre: SystemState {
+                pc: 2100484,
+                merkle_root: Digest::from_hex(
+                    "9095da07d84ccc170c5113e3dafdf0531700f0b3f0c627acc9f0329440d984fa",
+                )
+                .unwrap(),
+            }
+            .into(),
+            post: SystemState {
+                pc: 2297164,
+                merkle_root: Digest::from_hex(
+                    "223651656250c0cf2f1c3f8923ef3d2c8624a361830492ffec6450e1930fb07d",
+                )
+                .unwrap(),
+            }
+            .into(),
+            exit_code: ExitCode::Halted(0),
+            input: Digest::from_hex(
+                "0000000000000000000000000000000000000000000000000000000000000000",
+            )
+            .unwrap(),
+            output: MaybePruned::Pruned(
+                Digest::from_hex(
+                    "836f175c62c0f353831665427e8b0b34f6d1d21902764daeb406c6b83db575b0",
+                )
+                .unwrap(),
+            ),
+        };
+
+        println!(
+            "merged: {:#?}",
+            left_metadata.merge(&right_metadata).unwrap()
+        );
+    }
+}
