@@ -584,7 +584,6 @@ dependencies = [
 name = "bonsai-sdk"
 version = "0.5.0"
 dependencies = [
- "anyhow",
  "reqwest",
  "serde",
  "thiserror",

@@ -15,8 +15,9 @@
 //! Manages the output and cryptographic data for a proven computation.
 
 use alloc::{collections::BTreeMap, string::String, vec, vec::Vec};
-use anyhow::Result;
 use core::fmt::Debug;
+
+use anyhow::Result;
 use risc0_binfmt::SystemState;
 use risc0_circuit_rv32im::layout;
 use risc0_core::field::baby_bear::BabyBear;
