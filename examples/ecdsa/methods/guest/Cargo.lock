@@ -370,23 +370,22 @@ dependencies = [
 
 [[package]]
 name = "risc0-binfmt"
-version = "0.19.0"
+version = "0.20.0-alpha.1"
 dependencies = [
  "anyhow",
  "elf",
- "log",
  "risc0-zkp",
  "risc0-zkvm-platform",
  "serde",
+ "tracing",
 ]
 
 [[package]]
 name = "risc0-circuit-recursion"
-version = "0.19.0"
+version = "0.20.0-alpha.1"
 dependencies = [
  "anyhow",
  "bytemuck",
- "log",
  "risc0-core",
  "risc0-zkp",
  "tracing",
@@ -394,10 +393,9 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im"
-version = "0.19.0"
+version = "0.20.0-alpha.1"
 dependencies = [
  "anyhow",
- "log",
  "risc0-core",
  "risc0-zkp",
  "risc0-zkvm-platform",
@@ -406,7 +404,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-core"
-version = "0.19.0"
+version = "0.20.0-alpha.1"
 dependencies = [
  "bytemuck",
  "rand_core",
@@ -414,14 +412,13 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkp"
-version = "0.19.0"
+version = "0.20.0-alpha.1"
 dependencies = [
  "anyhow",
  "blake2",
  "bytemuck",
  "digest",
  "hex",
- "log",
  "paste",
  "rand_core",
  "risc0-core",
@@ -433,14 +430,13 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "0.19.0"
+version = "0.20.0-alpha.1"
 dependencies = [
  "anyhow",
  "bytemuck",
  "cfg-if",
  "getrandom",
  "hex",
- "log",
  "num-derive",
  "num-traits",
  "risc0-binfmt",
@@ -457,7 +453,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "0.19.0"
+version = "0.20.0-alpha.1"
 dependencies = [
  "bytemuck",
  "getrandom",
@@ -590,6 +586,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8ce8c33a8d48bd45d624a6e523445fd21ec13d3653cd51f681abf67418f54eb8"
 dependencies = [
  "cfg-if",
+ "log",
  "pin-project-lite",
  "tracing-attributes",
  "tracing-core",
@@ -611,6 +608,9 @@ name = "tracing-core"
 version = "0.1.30"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "24eb03ba0eab1fd845050058ce5e616558e8f8d8fca633e6b163fe25c797213a"
+dependencies = [
+ "once_cell",
+]
 
 [[package]]
 name = "typenum"

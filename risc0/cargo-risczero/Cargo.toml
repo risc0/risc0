@@ -23,9 +23,6 @@ dirs = "5.0"
 downloader = "0.2"
 flate2 = "1"
 fs2 = "0.4"
-# Force any openssl dependencies to use the "vendored" feature.
-# This is to allow cross builds to work in any environment.
-openssl = { version = "0.10", features = ["vendored"] }
 reqwest = { version = "0.11", default-features = false, features = ["json"] }
 reqwest-middleware = "0.2"
 reqwest-retry = "0.3"
@@ -42,8 +39,8 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 zip = { version = "0.6", optional = true }
 
 [build-dependencies]
-env_logger = { version = "0.10", optional = true }
 risc0-build = { workspace = true, optional = true }
+tracing-subscriber = { version = "0.3", features = ["env-filter"], optional = true }
 zip = { version = "0.6", optional = true }
 
 [features]
@@ -52,10 +49,11 @@ default = ["r0vm"]
 docker = []
 experimental = [
   "dep:cargo_metadata",
-  "dep:env_logger",
+  "dep:tracing-subscriber",
   "dep:risc0-build",
   "dep:zip",
   "risc0-zkvm/prove",
 ]
 metal = ["risc0-zkvm/metal"]
 r0vm = ["dep:risc0-r0vm"]
+profiler = ["risc0-zkvm/profiler", "risc0-r0vm?/profiler"]

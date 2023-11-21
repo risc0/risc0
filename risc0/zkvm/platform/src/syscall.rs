@@ -267,6 +267,14 @@ fn ecall_4(t0: u32, a0: u32, a1: u32, a2: u32, a3: u32, a4: u32) {
     }
 }
 
+/// # Safety
+///
+/// `out_state` must be aligned and dereferenceable.
+// [inline(never)] is added to mitigate potentially leaking information about program execution
+// through the final value of the program counter (pc) on halt where there is more than one
+// location in the program where `sys_halt` is called. As long as the halt instruction only exists
+// in one place within the program, the pc will always be the same invariant with input.
+#[inline(never)]
 #[cfg_attr(feature = "export-syscalls", no_mangle)]
 pub extern "C" fn sys_halt(user_exit: u8, out_state: *const [u32; DIGEST_WORDS]) -> ! {
     ecall_1(
@@ -280,6 +288,11 @@ pub extern "C" fn sys_halt(user_exit: u8, out_state: *const [u32; DIGEST_WORDS])
 /// # Safety
 ///
 /// `out_state` must be aligned and dereferenceable.
+// [inline(never)] is added to mitigate potentially leaking information about program execution
+// through the final value of the program counter (pc) on pause where there is more than one
+// location in the program where `sys_pause` is called. As long as the pause instruction only exists
+// in one place within the program, the pc will always be the same invariant with input.
+#[inline(never)]
 #[cfg_attr(feature = "export-syscalls", no_mangle)]
 pub unsafe extern "C" fn sys_pause(user_exit: u8, out_state: *const [u32; DIGEST_WORDS]) {
     ecall_1(
@@ -688,6 +701,7 @@ pub unsafe extern "C" fn sys_alloc_aligned(bytes: usize, align: usize) -> *mut u
 /// 0 to register a0. The caller must calculate the ReceiptMetadata digest, using the provided post
 /// state digest and encode the digest into a public assumptions list for inclusion in the guest
 /// output.
+#[cfg(feature = "export-syscalls")]
 #[no_mangle]
 pub unsafe extern "C" fn sys_verify(
     image_id: *const [u32; DIGEST_WORDS],
@@ -726,6 +740,7 @@ pub unsafe extern "C" fn sys_verify(
 /// associated with that metadata digest, and will always return a result code
 /// of 0 to register a0. The caller must encode the metadata_digest into a
 /// public assumptions list for inclusion in the guest output.
+#[cfg(feature = "export-syscalls")]
 #[no_mangle]
 pub unsafe extern "C" fn sys_verify_integrity(metadata_digest: *const [u32; DIGEST_WORDS]) {
     let Return(a0, _) = unsafe {

@@ -19,6 +19,7 @@ use std::{cell::RefCell, cmp::min, collections::HashMap, rc::Rc, str::from_utf8}
 use anyhow::{anyhow, bail, Result};
 use bytes::Bytes;
 use risc0_zkvm_platform::{
+    fileno,
     syscall::{
         nr::{
             SYS_ARGC, SYS_ARGV, SYS_CYCLE_COUNT, SYS_GETENV, SYS_LOG, SYS_PANIC, SYS_RANDOM,
@@ -105,7 +106,7 @@ impl<'a> SyscallTable<'a> {
 
         let posix_io = env.posix_io.clone();
         this.with_syscall(SYS_CYCLE_COUNT, SysCycleCount)
-            .with_syscall(SYS_LOG, SysLog)
+            .with_syscall(SYS_LOG, posix_io.clone())
             .with_syscall(SYS_PANIC, SysPanic)
             .with_syscall(SYS_RANDOM, SysRandom)
             .with_syscall(SYS_GETENV, SysGetenv(env.env_vars.clone()))
@@ -177,23 +178,6 @@ impl Syscall for SysGetenv {
     }
 }
 
-pub(crate) struct SysLog;
-impl Syscall for SysLog {
-    fn syscall(
-        &mut self,
-        _syscall: &str,
-        ctx: &mut dyn SyscallContext,
-        _to_guest: &mut [u32],
-    ) -> Result<(u32, u32)> {
-        let buf_ptr = ctx.load_register(REG_A3);
-        let buf_len = ctx.load_register(REG_A4);
-        let from_guest = ctx.load_region(buf_ptr, buf_len)?;
-        let msg = from_utf8(&from_guest)?;
-        println!("R0VM[{}] {}", ctx.get_cycle(), msg);
-        Ok((0, 0))
-    }
-}
-
 pub(crate) struct SysPanic;
 impl Syscall for SysPanic {
     fn syscall(
@@ -218,7 +202,7 @@ impl Syscall for SysRandom {
         _ctx: &mut dyn SyscallContext,
         to_guest: &mut [u32],
     ) -> Result<(u32, u32)> {
-        log::debug!("SYS_RANDOM: {}", to_guest.len());
+        tracing::debug!("SYS_RANDOM: {}", to_guest.len());
         let mut rand_buf = vec![0u8; to_guest.len() * WORD_SIZE];
         getrandom::getrandom(rand_buf.as_mut_slice())?;
         bytemuck::cast_slice_mut(to_guest).clone_from_slice(rand_buf.as_slice());
@@ -241,7 +225,7 @@ impl SysVerify {
             .try_into()
             .map_err(|vec| anyhow!("failed to convert to [u8; DIGEST_BYTES]: {:?}", vec))?;
 
-        log::debug!("SYS_VERIFY_INTEGRITY: {}", hex::encode(&metadata_digest));
+        tracing::debug!("SYS_VERIFY_INTEGRITY: {}", hex::encode(&metadata_digest));
 
         // Iterate over the list looking for a matching assumption.
         let mut assumption: Option<Assumption> = None;
@@ -287,7 +271,7 @@ impl SysVerify {
             .try_into()
             .map_err(|vec| anyhow!("failed to convert to [u8; DIGEST_BYTES]: {:?}", vec))?;
 
-        log::debug!(
+        tracing::debug!(
             "SYS_VERIFY: {}, {}",
             hex::encode(&image_id),
             hex::encode(&journal_digest)
@@ -303,7 +287,7 @@ impl SysVerify {
                 Ok(None) => continue,
                 // If the required values to compare were pruned, go the next assumption.
                 Err(e) => {
-                    log::debug!(
+                    tracing::debug!(
                         "sys_verify: pruned values in assumption prevented comparison: {} : {:?}",
                         e,
                         assumption_metadata
@@ -355,7 +339,7 @@ impl SysVerify {
 
         // Check that the exit code is either Halted(0) or Paused(0).
         let (ExitCode::Halted(0) | ExitCode::Paused(0)) = metadata.as_value()?.exit_code else {
-            log::debug!(
+            tracing::debug!(
                 "sys_verify: ignoring matching metadata with error exit code: {:?}",
                 metadata
             );
@@ -372,7 +356,7 @@ impl SysVerify {
             .unwrap_or(Digest::ZERO);
 
         if assumption_assumptions_digest != Digest::ZERO {
-            log::debug!(
+            tracing::debug!(
                 "sys_verify: ignoring matching metadata with non-empty assumptions: {:?}",
                 metadata
             );
@@ -513,6 +497,8 @@ impl<'a> Syscall for PosixIo<'a> {
             self.sys_read(ctx, to_guest)
         } else if syscall == SYS_WRITE.as_str() {
             self.sys_write(ctx)
+        } else if syscall == SYS_LOG.as_str() {
+            self.sys_log(ctx)
         } else {
             bail!("Unknown syscall {syscall}")
         }
@@ -532,14 +518,14 @@ impl<'a> Syscall for Rc<RefCell<PosixIo<'a>>> {
 
 impl<'a> PosixIo<'a> {
     fn sys_read_avail(&mut self, ctx: &mut dyn SyscallContext) -> Result<(u32, u32)> {
-        log::debug!("sys_read_avail");
+        tracing::debug!("sys_read_avail");
         let fd = ctx.load_register(REG_A3);
         let reader = self
             .read_fds
             .get_mut(&fd)
             .ok_or(anyhow!("Bad read file descriptor {fd}"))?;
         let navail = reader.borrow_mut().fill_buf()?.len() as u32;
-        log::debug!("navail: {navail}");
+        tracing::debug!("navail: {navail}");
         Ok((navail, 0))
     }
 
@@ -551,7 +537,7 @@ impl<'a> PosixIo<'a> {
         let fd = ctx.load_register(REG_A3);
         let nbytes = ctx.load_register(REG_A4) as usize;
 
-        log::debug!(
+        tracing::debug!(
             "sys_read, attempting to read {nbytes} bytes from fd {fd}, to_guest: {}",
             to_guest.len()
         );
@@ -589,7 +575,7 @@ impl<'a> PosixIo<'a> {
             "Guest requested more data than was available"
         );
 
-        log::debug!(
+        tracing::debug!(
             "Main read got {nread_main} bytes out of requested {}",
             to_guest_u8.len()
         );
@@ -619,9 +605,31 @@ impl<'a> PosixIo<'a> {
             .get_mut(&fd)
             .ok_or(anyhow!("Bad write file descriptor {fd}"))?;
 
-        log::debug!("Writing {buf_len} bytes to file descriptor {fd}");
+        tracing::debug!("Writing {buf_len} bytes to file descriptor {fd}");
 
         writer.borrow_mut().write_all(from_guest_bytes.as_slice())?;
+        Ok((0, 0))
+    }
+
+    fn sys_log(&mut self, ctx: &mut dyn SyscallContext) -> Result<(u32, u32)> {
+        let buf_ptr = ctx.load_register(REG_A3);
+        let buf_len = ctx.load_register(REG_A4);
+        let from_guest = ctx.load_region(buf_ptr, buf_len)?;
+        // write to stdout, but be sure to point it to where the file descriptor is pointing
+        let writer = self
+            .write_fds
+            .get_mut(&fileno::STDOUT)
+            .ok_or(anyhow!("Bad write file descriptor {}", &fileno::STDOUT))?;
+
+        tracing::debug!(
+            "Writing {buf_len} bytes to STDOUT file descriptor {}",
+            &fileno::STDOUT
+        );
+
+        let msg = format!("R0VM[{}] ", ctx.get_cycle().to_string());
+        writer
+            .borrow_mut()
+            .write_all(&[msg.as_bytes(), &from_guest].concat())?;
         Ok((0, 0))
     }
 }

@@ -86,7 +86,7 @@ impl OpCode {
         let rs2 = (insn & 0x01f00000) >> 20;
         let funct3 = (insn & 0x00007000) >> 12;
         let funct7 = (insn & 0xfe000000) >> 25;
-        // log::debug!("decode: 0x{word:08X}");
+        // tracing::debug!("decode: 0x{word:08X}");
 
         let decode_error_str = || {
             format!("illegal instruction at {insn_pc:#x}: {insn:032b} ({opcode:07b}, {funct3:03b}, {rs2:05b}, {funct7:07b})")

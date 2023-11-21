@@ -122,13 +122,13 @@ mod tests {
             leaves: Vec::from([digest1, digest2, digest3]),
         };
         let root = grp.calc_root(hashfn);
-        log::trace!("Root: {root:?}");
+        tracing::trace!("Root: {root:?}");
         let proof1 = grp.get_proof_by_index(0, hashfn);
-        log::trace!("Proof1: {proof1:?}");
+        tracing::trace!("Proof1: {proof1:?}");
         let proof2 = grp.get_proof_by_index(1, hashfn);
-        log::trace!("Proof2: {proof2:?}");
+        tracing::trace!("Proof2: {proof2:?}");
         let proof3 = grp.get_proof_by_index(2, hashfn);
-        log::trace!("Proof3: {proof3:?}");
+        tracing::trace!("Proof3: {proof3:?}");
 
         // Digest1 and digest2 should share 3 levels of proof, whereas proof2 and proof3
         // should only share 2

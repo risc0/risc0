@@ -10,7 +10,13 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
+# this is needed to gain access via OIDC to the S3 bucket for caching
+permissions:
+  id-token: write
+  contents: read
+
 env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   RISC0_TOOLCHAIN_VERSION: test-release-2
 
 jobs:
@@ -20,7 +26,7 @@ jobs:
       pull-requests: read
     outputs:
       check-benchmarks: ${{ steps.filter.outputs.check-benchmarks }}
-      check_template: ${{ steps.filter.outputs.check_template }}
+      check-template: ${{ steps.filter.outputs.check-template }}
       crates-validator: ${{ steps.filter.outputs.crates-validator }}
       doc: ${{ steps.filter.outputs.doc }}
       examples: ${{ steps.filter.outputs.examples }}
@@ -39,7 +45,7 @@ jobs:
               - *base
               - benchmarks/**
               - risc0/**
-            check_template:
+            check-template:
               - *base
               - risc0/**
               - templates/**
@@ -71,7 +77,7 @@ jobs:
     needs:
       - check
       - check-benchmarks
-      - check_template
+      - check-template
       - crates-validator
       - doc
       - examples
@@ -134,11 +140,9 @@ jobs:
             feature: cuda
             device: nvidia_rtx_a5000
     env:
-      CUDA_LIBRARY_PATH: /usr/lib/cuda
       FEATURE: ${{ matrix.feature }}
       RISC0_BUILD_LOCKED: 1
       RUST_BACKTRACE: full
-      RUSTC_WRAPPER: sccache
     steps:
       # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
       - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
@@ -147,16 +151,27 @@ jobs:
           lfs: true
           # Recursive checkout required to build Solidity contracts and bindings.
           submodules: recursive
+      - if: matrix.feature == 'cuda'
+        uses: ./.github/actions/cuda
       - uses: ./.github/actions/rustup
       - uses: risc0/foundry-toolchain@2fe7e70b520f62368a0e3c464f997df07ede420f
       - uses: ./.github/actions/sccache
         with:
           key: ${{ matrix.os }}-${{ matrix.feature }}
       - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - run: cargo test -F $FEATURE -F fault-proof -F profiler -F prove --workspace --exclude doc-test
-      - run: cargo test -p risc0-r0vm -F $FEATURE -F disable-dev-mode
+      - name: build workspace
+        run: cargo test -F $FEATURE -F fault-proof -F profiler -F prove --workspace --exclude doc-test --timings --no-run
+      - name: test workspace
+        run: cargo test -F $FEATURE -F fault-proof -F profiler -F prove --workspace --exclude doc-test --timings
+      - uses: actions/upload-artifact@v3
+        with:
+          name: cargo-timings-${{ matrix.os }}-${{ matrix.device }}
+          path: target/cargo-timings/
+          retention-days: 5
+      - name: build risc0-r0vm
+        run: cargo test -p risc0-r0vm -F $FEATURE -F disable-dev-mode --no-run
+      - name: test risc0-r0vm
+        run: cargo test -p risc0-r0vm -F $FEATURE -F disable-dev-mode
       - run: cargo test -p cargo-risczero -F experimental
         if: matrix.device == 'cpu'
       - run: cargo check -F $FEATURE --benches
@@ -165,11 +180,11 @@ jobs:
       - run: cargo check -p risc0-circuit-rv32im -F $FEATURE
       - run: cargo check -p risc0-core
         if: matrix.device == 'cpu'
-      - run: cargo check -p risc0-r0vm -F $FEATURE
       - run: cargo check -p risc0-sys -F $FEATURE
       - run: cargo check -p risc0-zkp -F $FEATURE
       - run: cargo check -p risc0-zkvm -F $FEATURE
-      - run: cargo check -p substrate-minimal-runtime
+      - run: cargo check
+        working-directory: external/substrate
       - uses: risc0/clippy-action@main
         with:
           reporter: "github-pr-check"
@@ -192,28 +207,35 @@ jobs:
             feature: cuda
             device: nvidia_rtx_a5000
     env:
-      CUDA_LIBRARY_PATH: /usr/lib/cuda
       FEATURE: ${{ matrix.feature }}
       RISC0_BUILD_LOCKED: 1
       RISC0_EXECUTOR: ipc
       RISC0_PROVER: ipc
       RISC0_SERVER_PATH: ${{ github.workspace }}/target/release/r0vm
       RUST_BACKTRACE: full
-      RUSTC_WRAPPER: sccache
     steps:
       # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
       - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
       - uses: actions/checkout@v4
+      - if: matrix.feature == 'cuda'
+        uses: ./.github/actions/cuda
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
         with:
           key: ${{ matrix.os }}-${{ matrix.feature }}
       - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: cargo build --release -p risc0-r0vm -F $FEATURE
-      - run: cargo test --locked -F $FEATURE
+      - name: build
+        run: cargo test --locked -F $FEATURE --no-run
         working-directory: examples
+      - name: test
+        run: cargo test --locked -F $FEATURE
+        working-directory: examples
+      - run: cargo run --locked -F $FEATURE
+        env:
+          RISC0_PPROF_OUT: ${{ github.workspace }}/fibonacci.pb
+        working-directory: examples/profiling
+      - run: sccache --show-stats
 
   doc:
     if: needs.changes.outputs.doc == 'true'
@@ -229,9 +251,8 @@ jobs:
         with:
           key: macOS-default
       - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: cargo doc --no-deps --exclude=risc0-zkvm-methods --workspace
+      - run: sccache --show-stats
 
   check-benchmarks:
     if: needs.changes.outputs.check-benchmarks == 'true'
@@ -246,22 +267,18 @@ jobs:
         with:
           key: macOS-default
       - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: cargo check
         working-directory: benchmarks
+      - run: sccache --show-stats
 
-  check_template:
-    if: needs.changes.outputs.check_template == 'true'
+  check-template:
+    if: needs.changes.outputs.check-template == 'true'
     needs: changes
     runs-on: [self-hosted, prod, cpu, "${{ matrix.os }}"]
     strategy:
       fail-fast: false
       matrix:
         os: [Linux, macOS]
-    env:
-      RISC0_SERVER_PATH: ${{ github.workspace }}/target/release/r0vm
-      RUSTC_WRAPPER: sccache
     steps:
       # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
       - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
@@ -270,12 +287,10 @@ jobs:
       - uses: ./.github/actions/sccache
         with:
           key: ${{ matrix.os }}-default
-      - run: cargo run --bin cargo-risczero -- risczero install --version $RISC0_TOOLCHAIN_VERSION
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - run: cargo build --release -p risc0-r0vm
+      - run: cargo install --force --path risc0/cargo-risczero
+      - run: cargo risczero install --version $RISC0_TOOLCHAIN_VERSION
       - run: |
-          cargo run --bin cargo-risczero risczero new \
+          cargo risczero new \
             --template templates/rust-starter \
             --templ-subdir="" \
             --path $(pwd) \
@@ -285,24 +300,22 @@ jobs:
         shell: bash
       - run: cargo run --release --manifest-path ${{ runner.temp }}/template-test/Cargo.toml
       - run: ${{ runner.temp }}/template-test/target/release/host
+      - run: sccache --show-stats
 
   crates-validator:
     if: needs.changes.outputs.crates-validator == 'true'
     needs: changes
-    runs-on: [self-hosted, prod, cpu, "${{ matrix.os }}"]
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [Linux, macOS]
+    runs-on: [self-hosted, prod, macOS, cpu]
     env:
       RISC0_BUILD_LOCKED: 1
-      RUSTC_WRAPPER: sccache
     steps:
       # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
       - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
+        with:
+          key: macOS-default
       - uses: risc0/clippy-action@main
         with:
           reporter: 'github-pr-check'
@@ -310,6 +323,7 @@ jobs:
           clippy_flags: --manifest-path tools/crates-validator/Cargo.toml
       - run: cargo test
         working-directory: tools/crates-validator
+      - run: sccache --show-stats
 
   web:
     if: needs.changes.outputs.web == 'true'
@@ -317,7 +331,6 @@ jobs:
     runs-on: ubuntu-latest-8-cores
     env:
       RISC0_BUILD_LOCKED: 1
-      RUSTC_WRAPPER: sccache
     steps:
       # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
       - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
@@ -329,15 +342,16 @@ jobs:
         with:
           node-version: 18
       - uses: ./.github/actions/sccache
+        with:
+          key: Linux-default
       - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: cargo xtask install
       - run: cargo xtask gen-receipt
       - run: |
           npm install
           npm test -- --firefox
         working-directory: examples/browser-verify
+      - run: sccache --show-stats
 
   reproducible-build:
     if: needs.changes.outputs.test == 'true'
@@ -348,10 +362,12 @@ jobs:
       - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/rustup
+      - uses: ./.github/actions/sccache
+        with:
+          key: Linux-default
       - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: cargo test -p risc0-build -F docker
       - run: cargo test -p risc0-zkvm -F docker -F prove -- "docker::"
         env:
           RISC0_USE_DOCKER: "1"
+      - run: sccache --show-stats

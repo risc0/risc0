@@ -66,7 +66,7 @@ where
     C: CircuitHal<H>,
 {
     fn prove_session(&self, ctx: &VerifierContext, session: &Session) -> Result<Receipt> {
-        log::info!(
+        tracing::info!(
             "prove_session: {}, exit_code = {:?}, journal = {:?}",
             self.name,
             session.exit_code,
@@ -97,9 +97,9 @@ where
 
         receipt.verify_integrity_with_context(ctx)?;
         if receipt.get_metadata()?.digest() != session.get_metadata()?.digest() {
-            log::debug!("receipt and session metadata do not match");
-            log::debug!("receipt metadata: {:#?}", receipt.get_metadata()?);
-            log::debug!("session metadata: {:#?}", session.get_metadata()?);
+            tracing::debug!("receipt and session metadata do not match");
+            tracing::debug!("receipt metadata: {:#?}", receipt.get_metadata()?);
+            tracing::debug!("session metadata: {:#?}", session.get_metadata()?);
             bail!(
                 "session and receipt metadata do not match: session {}, receipt {}",
                 hex::encode(&session.get_metadata()?.digest()),
@@ -112,7 +112,7 @@ where
     fn prove_segment(&self, ctx: &VerifierContext, segment: &Segment) -> Result<SegmentReceipt> {
         use risc0_zkp::prove::executor::Executor;
 
-        log::debug!(
+        tracing::debug!(
             "prove_segment[{}]: po2: {}, cycles: {}",
             segment.index,
             segment.po2,
@@ -154,7 +154,7 @@ where
         let mix = hal.copy_from_elem("mix", &adapter.get_mix().as_slice());
         let out_slice = &adapter.get_io().as_slice();
 
-        log::debug!("Globals: {:?}", OutBuffer(out_slice).tree(&LAYOUT));
+        tracing::debug!("Globals: {:?}", OutBuffer(out_slice).tree(&LAYOUT));
         let out = hal.copy_from_elem("out", &adapter.get_io().as_slice());
 
         let seal = prover.finalize(&[&mix, &out], circuit_hal.as_ref());

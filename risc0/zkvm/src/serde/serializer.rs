@@ -147,6 +147,10 @@ impl<'a, W: WordWrite> serde::ser::Serializer for &'a mut Serializer<W> {
         self.serialize_u64(v as u64)
     }
 
+    fn serialize_i128(self, v: i128) -> Result<()> {
+        self.serialize_u128(v as u128)
+    }
+
     fn serialize_u8(self, v: u8) -> Result<()> {
         self.serialize_u32(v as u32)
     }
@@ -162,6 +166,10 @@ impl<'a, W: WordWrite> serde::ser::Serializer for &'a mut Serializer<W> {
     fn serialize_u64(self, v: u64) -> Result<()> {
         self.serialize_u32((v & 0xFFFFFFFF) as u32)?;
         self.serialize_u32(((v >> 32) & 0xFFFFFFFF) as u32)
+    }
+
+    fn serialize_u128(self, v: u128) -> Result<()> {
+        self.stream.write_padded_bytes(&v.to_le_bytes())
     }
 
     fn serialize_f32(self, v: f32) -> Result<()> {

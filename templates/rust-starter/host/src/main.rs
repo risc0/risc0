@@ -7,7 +7,9 @@ use risc0_zkvm::{default_prover, ExecutorEnv};
 
 fn main() {
     // Initialize tracing. In order to view logs, run `RUST_LOG=info cargo run`
-    env_logger::init();
+        tracing_subscriber::fmt()
+        .with_env_filter(tracing_subscriber::filter::EnvFilter::from_default_env())
+        .init();();
 
     // An executor environment describes the configurations for the zkVM
     // including program inputs.
@@ -22,7 +24,7 @@ fn main() {
     // ExecutorEnvBuilder::build().
 
     // For example:
-    let input: u32 = 15*2^27 + 1;
+    let input: u32 = 15 * u32::pow(2, 27) + 1;
     let env = ExecutorEnv::builder().write(&input).unwrap().build().unwrap();
 
     // Obtain the default prover.
@@ -36,7 +38,7 @@ fn main() {
     // For example:
     let _output: u32 = receipt.journal.decode().unwrap();
 
-    // Optional: Verify receipt to confirm that recipients will also be able to
-    // verify your receipt
+    // The receipt was verified at the end of proving, but the below code is an
+    // example of how someone else could verify this receipt.
     receipt.verify({{guest_id}}).unwrap();
 }

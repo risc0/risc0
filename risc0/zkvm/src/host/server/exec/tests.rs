@@ -472,7 +472,7 @@ mod sys_verify {
     #[test]
     fn sys_verify_halt_codes() {
         for code in [0u8, 1, 2, 255] {
-            log::debug!("sys_verify_pause_codes: code = {code}");
+            tracing::debug!("sys_verify_pause_codes: code = {code}");
             let halt_session = exec_halt(code);
 
             let spec = &MultiTestSpec::SysVerify {
@@ -499,7 +499,7 @@ mod sys_verify {
     #[test]
     fn sys_verify_pause_codes() {
         for code in [0u8, 1, 2, 255] {
-            log::debug!("sys_verify_halt_codes: code = {code}");
+            tracing::debug!("sys_verify_halt_codes: code = {code}");
             let pause_session = exec_pause(code);
 
             let spec = &MultiTestSpec::SysVerify {
@@ -582,7 +582,7 @@ mod sys_verify {
     #[test]
     fn sys_verify_integrity_halt_codes() {
         for code in [0u8, 1, 2, 255] {
-            log::debug!("sys_verify_pause_codes: code = {code}");
+            tracing::debug!("sys_verify_pause_codes: code = {code}");
             let halt_session = exec_halt(code);
 
             let spec = &MultiTestSpec::SysVerifyIntegrity {
@@ -606,7 +606,7 @@ mod sys_verify {
     #[test]
     fn sys_verify_integrity_pause_codes() {
         for code in [0u8, 1, 2, 255] {
-            log::debug!("sys_verify_halt_codes: code = {code}");
+            tracing::debug!("sys_verify_halt_codes: code = {code}");
             let pause_session = exec_pause(code);
 
             let spec = &MultiTestSpec::SysVerifyIntegrity {
@@ -843,28 +843,26 @@ fn fault() {
 fn profiler() {
     use risc0_binfmt::Program;
 
-    use crate::host::server::exec::profiler::{Frame, Profiler};
+    use crate::host::profiler::{Frame, Profiler};
 
-    let mut prof = Profiler::new("multi_test.elf", MULTI_TEST_ELF).unwrap();
-    {
-        let env = ExecutorEnv::builder()
-            .write(&MultiTestSpec::Profiler)
-            .unwrap()
-            .trace_callback(prof.make_trace_callback())
-            .build()
-            .unwrap();
-        ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
-            .unwrap()
-            .run()
-            .unwrap();
-    }
+    let mut profiler = Profiler::new(MULTI_TEST_ELF, Some("multi_test.elf")).unwrap();
+    let env = ExecutorEnv::builder()
+        .write(&MultiTestSpec::Profiler)
+        .unwrap()
+        .trace_callback(&mut profiler)
+        .build()
+        .unwrap();
+    ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
+        .unwrap()
+        .run()
+        .unwrap();
 
-    prof.finalize();
+    let profile = profiler.finalize();
 
     // Gather up anything containing our profile_test functions.
     // If the test doesn't pass, we don't want to display the
     // whole profiling structure.
-    let occurrences: Vec<_> = prof
+    let occurrences: Vec<_> = profile
         .iter()
         .filter(|(frames, _addr, _count)| frames.iter().any(|fr| fr.name.contains("profile_test")))
         .collect();
@@ -872,7 +870,7 @@ fn profiler() {
     assert!(
         !occurrences.is_empty(),
         "{:#?}",
-        Vec::from_iter(prof.iter())
+        Vec::from_iter(profile.iter())
     );
 
     let elf_mem = Program::load_elf(MULTI_TEST_ELF, u32::MAX).unwrap().image;

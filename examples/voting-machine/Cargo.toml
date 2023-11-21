@@ -4,17 +4,18 @@ version = "0.12.0"
 edition = "2021"
 
 [dependencies]
-log = "0.4"
 risc0-zkvm = { path = "../../risc0/zkvm" }
+tracing = { version = "0.1", features = ["log"] }
 voting-machine-core = { path = "core" }
 voting-machine-methods = { path = "methods" }
 
 [dev-dependencies]
-env_logger = "0.10"
 hex = "0.4"
-test-log = "0.2"
+test-log = { version = "0.2", default-features = false, features = ["trace"] }
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [features]
-cuda = ["risc0-zkvm/cuda"]
 default = []
-metal = ["risc0-zkvm/metal"]
+cuda = ["risc0-zkvm/cuda"]
+prove = ["risc0-zkvm/prove"]
+profiler = ["risc0-zkvm/profiler"]
