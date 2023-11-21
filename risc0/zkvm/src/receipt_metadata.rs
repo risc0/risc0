@@ -26,7 +26,6 @@ use anyhow::{anyhow, ensure};
 use risc0_binfmt::{
     read_sha_halfs, tagged_list, tagged_list_cons, tagged_struct, write_sha_halfs, Digestible,
 };
-use risc0_zkvm_platform::WORD_SIZE;
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -47,6 +46,12 @@ pub struct ReceiptMetadata {
     pub pre: MaybePruned<SystemState>,
 
     /// The [SystemState] of a segment just after execution has completed.
+    ///
+    /// NOTE: In order to avoid extra logic in the rv32im circuit to perform arithmetic on the PC
+    /// with carry, the post state PC is recorded as the current PC + 4. Subtract 4 to get the
+    /// "actual" final PC of the zkVM at the end of the segment. When the exit code is `Halted` or
+    /// `Paused`, this will be the address of the halt `ecall`. When the exit code is
+    /// `SystemSplit`, this will be the address of the next instruction to be executed.
     pub post: MaybePruned<SystemState>,
 
     /// The exit code for a segment
@@ -70,17 +75,11 @@ impl ReceiptMetadata {
     pub fn decode(flat: &mut VecDeque<u32>) -> Result<Self, InvalidExitCodeError> {
         let input = read_sha_halfs(flat);
         let pre = SystemState::decode(flat);
-        let mut post = SystemState::decode(flat);
+        let post = SystemState::decode(flat);
         let sys_exit = flat.pop_front().unwrap();
         let user_exit = flat.pop_front().unwrap();
         let exit_code = ExitCode::from_pair(sys_exit, user_exit)?;
         let output = read_sha_halfs(flat);
-
-        // In order to avoid extra logic in the rv32im circuit to perform arithmetic on the PC with
-        // carry, the PC is always recorded as the current PC + 4. Thus we need to adjust the decoded
-        // PC for the post SystemState.
-        // TODO(victor): Write up error handling here.
-        post.pc = post.pc.checked_sub(WORD_SIZE as u32).unwrap();
 
         Ok(Self {
             input,
@@ -93,16 +92,9 @@ impl ReceiptMetadata {
 
     /// Encode a [crate::ReceiptMetadata] to a list of [u32]'s
     pub fn encode(&self, flat: &mut Vec<u32>) -> Result<(), PrunedValueError> {
-        // In order to avoid extra logic in the rv32im circuit to perform arithmetic on the PC with
-        // carry, the PC is always recorded as the current PC + 4. Thus we need to adjust the post
-        // pc before encoding.
-        // TODO(victor): Write up error handling here.
-        let mut post = self.post.as_value()?.clone();
-        post.pc = post.pc.checked_add(WORD_SIZE as u32).unwrap();
-
         write_sha_halfs(flat, &self.input);
         self.pre.as_value()?.encode(flat);
-        post.encode(flat);
+        self.post.as_value()?.encode(flat);
         let (sys_exit, user_exit) = self.exit_code.into_pair();
         flat.push(sys_exit);
         flat.push(user_exit);

@@ -383,12 +383,12 @@ impl CompositeReceipt {
             .ok_or(VerificationError::ReceiptFormatError)?;
 
         // Verify each segment and its chaining to the next.
-        let mut prev_image_id = None;
+        let mut expected_pre_state_digest = None;
         for receipt in receipts {
             receipt.verify_integrity_with_context(ctx)?;
             let metadata = receipt.get_metadata()?;
             tracing::debug!("metadata: {metadata:#?}");
-            if let Some(id) = prev_image_id {
+            if let Some(id) = expected_pre_state_digest {
                 if id != metadata.pre.digest() {
                     return Err(VerificationError::ImageVerificationError);
                 }
@@ -399,14 +399,27 @@ impl CompositeReceipt {
             if !metadata.output.is_none() {
                 return Err(VerificationError::ReceiptFormatError);
             }
-            prev_image_id = Some(metadata.post.digest());
+            expected_pre_state_digest = Some({
+                // Post state PC is stored as the "actual" value plus 4. This matches the join
+                // predicateb implementation. See ReceiptMetadata for more detail.
+                let mut post = metadata
+                    .post
+                    .as_value()
+                    .map_err(|_| VerificationError::ReceiptFormatError)?
+                    .clone();
+                post.pc = post
+                    .pc
+                    .checked_sub(WORD_SIZE as u32)
+                    .ok_or(VerificationError::ReceiptFormatError)?;
+                post.digest()
+            });
         }
 
         // Verify the last receipt in the continuation.
         final_receipt.verify_integrity_with_context(ctx)?;
         let final_receipt_metadata = final_receipt.get_metadata()?;
         tracing::debug!("final: {final_receipt_metadata:#?}");
-        if let Some(id) = prev_image_id {
+        if let Some(id) = expected_pre_state_digest {
             if id != final_receipt_metadata.pre.digest() {
                 return Err(VerificationError::ImageVerificationError);
             }
@@ -686,15 +699,7 @@ fn decode_receipt_metadata_from_io(
 ) -> Result<ReceiptMetadata, VerificationError> {
     let body = layout::LAYOUT.mux.body;
     let pre = decode_system_state_from_io(io, body.global.pre)?;
-    let mut post = decode_system_state_from_io(io, body.global.post)?;
-    // In order to avoid extra logic in the rv32im circuit to perform arithmetic on the PC with
-    // carry, the PC is always recorded as the current PC + 4. Thus we need to adjust the decoded
-    // PC for the post SystemState.
-    post.pc = post
-        .pc
-        .checked_sub(WORD_SIZE as u32)
-        .ok_or(VerificationError::ReceiptFormatError)?;
-
+    let post = decode_system_state_from_io(io, body.global.post)?;
     let input_bytes: Vec<u8> = io
         .tree(body.global.input)
         .get_bytes()
