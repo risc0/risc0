@@ -20,7 +20,7 @@
 //!
 //! ```rust
 //! use anyhow::Result;
-//! use risc0_zkvm::groth16_verifier::{
+//! use risc0_zkvm::groth16::{
 //!     raw::{RawProof, RawPublic, RawVKey},
 //!     Groth16,
 //! };
