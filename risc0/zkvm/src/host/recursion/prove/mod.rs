@@ -46,7 +46,7 @@ use serde::{Deserialize, Serialize};
 
 use super::CIRCUIT;
 use crate::{
-    receipt_metadata::Output,
+    receipt_metadata::{Merge, Output},
     recursion::{valid_control_ids, SuccinctReceipt},
     sha::Digestible,
     HalPair, ReceiptMetadata, SegmentReceipt, POSEIDON_CONTROL_ID,
@@ -64,12 +64,12 @@ pub struct RecursionReceipt {
 }
 
 /// TODO
-pub fn lift(receipt: &SegmentReceipt) -> Result<SuccinctReceipt> {
-    let mut prover = Prover::new_lift(&receipt.seal, ProverOpts::default())?;
+pub fn lift(segment_receipt: &SegmentReceipt) -> Result<SuccinctReceipt> {
+    let mut prover = Prover::new_lift(&segment_receipt.seal, ProverOpts::default())?;
     let receipt = prover.run()?;
     let mut out_stream = VecDeque::<u32>::new();
     out_stream.extend(receipt.output.iter());
-    let meta = ReceiptMetadata::decode(&mut out_stream)?;
+    let meta = ReceiptMetadata::decode(&mut out_stream)?.merge(&segment_receipt.get_metadata()?)?;
     Ok(SuccinctReceipt {
         seal: receipt.seal,
         control_id: receipt.control_id,
@@ -83,7 +83,14 @@ pub fn join(a: &SuccinctReceipt, b: &SuccinctReceipt) -> Result<SuccinctReceipt>
     let receipt = prover.run()?;
     let mut out_stream = VecDeque::<u32>::new();
     out_stream.extend(receipt.output.iter());
-    let meta = ReceiptMetadata::decode(&mut out_stream)?;
+    let ab_meta = ReceiptMetadata {
+        pre: a.meta.pre.clone(),
+        post: b.meta.post.clone(),
+        exit_code: b.meta.exit_code,
+        input: a.meta.input.clone(),
+        output: b.meta.output.clone(),
+    };
+    let meta = ReceiptMetadata::decode(&mut out_stream)?.merge(&ab_meta)?;
     Ok(SuccinctReceipt {
         seal: receipt.seal,
         control_id: receipt.control_id,
@@ -100,7 +107,20 @@ pub fn resolve(
     let receipt = prover.run()?;
     let mut out_stream = VecDeque::<u32>::new();
     out_stream.extend(receipt.output.iter());
-    let meta = ReceiptMetadata::decode(&mut out_stream)?;
+
+    // Construct the resolved metadata by copying the conditional receipt metadata and resolving
+    // the head assumption. This should work since the resolve predicate ran successfully.
+    let mut resolved_meta = conditional.meta.clone();
+    resolved_meta
+        .output
+        .as_value_mut()?
+        .as_mut()
+        .ok_or(anyhow!("conditional receipt metadata cannot be none"))?
+        .assumptions
+        .as_value_mut()?
+        .resolve(&corroborating.meta.digest())?;
+
+    let meta = ReceiptMetadata::decode(&mut out_stream)?.merge(&resolved_meta)?;
     Ok(SuccinctReceipt {
         seal: receipt.seal,
         control_id: receipt.control_id,
@@ -116,7 +136,7 @@ pub fn identity_p254(a: &SuccinctReceipt) -> Result<SuccinctReceipt> {
     let receipt = prover.run_with_hal(hal, circuit_hal)?;
     let mut out_stream = VecDeque::<u32>::new();
     out_stream.extend(receipt.output.iter());
-    let meta = ReceiptMetadata::decode(&mut out_stream)?;
+    let meta = ReceiptMetadata::decode(&mut out_stream)?.merge(&a.meta)?;
     Ok(SuccinctReceipt {
         seal: receipt.seal,
         control_id: receipt.control_id,

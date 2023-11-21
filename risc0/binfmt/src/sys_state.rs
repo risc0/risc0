@@ -49,6 +49,8 @@ impl SystemState {
     }
 }
 
+impl Eq for SystemState {}
+
 impl Digestible for SystemState {
     /// Hash the [crate::SystemState] to get a digest of the struct.
     fn digest<S: Sha256>(&self) -> Digest {

@@ -23,11 +23,13 @@ use alloc::{collections::VecDeque, vec::Vec};
 use core::{fmt, ops::Deref};
 
 use anyhow::{anyhow, ensure};
-use risc0_binfmt::{read_sha_halfs, tagged_list, tagged_list_cons, tagged_struct, write_sha_halfs};
+use risc0_binfmt::{
+    read_sha_halfs, tagged_list, tagged_list_cons, tagged_struct, write_sha_halfs, Digestible,
+};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    sha::{self, Digest, Digestible, Sha256},
+    sha::{self, Digest, Sha256},
     SystemState,
 };
 
@@ -90,12 +92,12 @@ impl ReceiptMetadata {
         let (sys_exit, user_exit) = self.exit_code.into_pair();
         flat.push(sys_exit);
         flat.push(user_exit);
-        write_sha_halfs(flat, &self.output.digest());
+        write_sha_halfs(flat, &self.output.digest::<sha::Impl>());
         Ok(())
     }
 }
 
-impl risc0_binfmt::Digestible for ReceiptMetadata {
+impl Digestible for ReceiptMetadata {
     /// Hash the [crate::ReceiptMetadata] to get a digest of the struct.
     fn digest<S: Sha256>(&self) -> Digest {
         let (sys_exit, user_exit) = self.exit_code.into_pair();
@@ -103,9 +105,9 @@ impl risc0_binfmt::Digestible for ReceiptMetadata {
             "risc0.ReceiptMeta",
             &[
                 self.input,
-                self.pre.digest(),
-                self.post.digest(),
-                self.output.digest(),
+                self.pre.digest::<S>(),
+                self.post.digest::<S>(),
+                self.output.digest::<S>(),
             ],
             &[sys_exit, user_exit],
         )
@@ -178,6 +180,8 @@ impl ExitCode {
     }
 }
 
+impl Eq for ExitCode {}
+
 /// Error returned when a (system, user) exit code pair is an invalid
 /// representation.
 #[derive(Debug, Copy, Clone)]
@@ -210,12 +214,12 @@ pub struct Output {
     pub assumptions: MaybePruned<Assumptions>,
 }
 
-impl risc0_binfmt::Digestible for Output {
+impl Digestible for Output {
     /// Hash the [Output] to get a digest of the struct.
     fn digest<S: Sha256>(&self) -> Digest {
         tagged_struct::<S>(
             "risc0.Output",
-            &[self.journal.digest(), self.assumptions.digest()],
+            &[self.journal.digest::<S>(), self.assumptions.digest::<S>()],
             &[],
         )
     }
@@ -242,10 +246,10 @@ impl Assumptions {
             .ok_or_else(|| anyhow!("cannot resolve assumption from empty list"))?;
 
         ensure!(
-            &head.digest() == resolved,
+            &head.digest::<sha::Impl>() == resolved,
             "resolved assumption is not equal to the head of the list: {} != {}",
             resolved,
-            head.digest()
+            head.digest::<sha::Impl>()
         );
 
         // Drop the head of the assumptions list.
@@ -262,12 +266,12 @@ impl Deref for Assumptions {
     }
 }
 
-impl risc0_binfmt::Digestible for Assumptions {
+impl Digestible for Assumptions {
     /// Hash the [Output] to get a digest of the struct.
     fn digest<S: Sha256>(&self) -> Digest {
         tagged_list::<S>(
             "risc0.Assumptions",
-            &self.0.iter().map(|a| a.digest()).collect::<Vec<_>>(),
+            &self.0.iter().map(|a| a.digest::<S>()).collect::<Vec<_>>(),
         )
     }
 }
@@ -290,7 +294,7 @@ impl MaybePruned<Assumptions> {
             MaybePruned::Pruned(list_digest) => {
                 *list_digest = tagged_list_cons::<sha::Impl>(
                     "risc0.Assumptions",
-                    &assumption.digest(),
+                    &assumption.digest::<sha::Impl>(),
                     &*list_digest,
                 );
             }
@@ -355,10 +359,18 @@ where
         }
     }
 
-    /// Unwrap the value as a reference, or return an error.k
+    /// Unwrap the value as a reference, or return an error.
     pub fn as_value(&self) -> Result<&T, PrunedValueError> {
         match self {
             MaybePruned::Value(ref value) => Ok(value),
+            MaybePruned::Pruned(ref digest) => Err(PrunedValueError(digest.clone())),
+        }
+    }
+
+    /// Unwrap the value as a mutable reference, or return an error.
+    pub fn as_value_mut(&mut self) -> Result<&mut T, PrunedValueError> {
+        match self {
+            MaybePruned::Value(ref mut value) => Ok(value),
             MaybePruned::Pruned(ref digest) => Err(PrunedValueError(digest.clone())),
         }
     }
@@ -377,9 +389,9 @@ impl<T> Digestible for MaybePruned<T>
 where
     T: Digestible + Clone + Serialize,
 {
-    fn digest(&self) -> Digest {
+    fn digest<S: Sha256>(&self) -> Digest {
         match self {
-            MaybePruned::Value(ref val) => val.digest(),
+            MaybePruned::Value(ref val) => val.digest::<S>(),
             MaybePruned::Pruned(digest) => digest.clone(),
         }
     }
@@ -431,7 +443,7 @@ where
 
 impl<T> fmt::Debug for MaybePruned<T>
 where
-    T: Clone + Serialize + risc0_binfmt::Digestible + fmt::Debug,
+    T: Clone + Serialize + Digestible + fmt::Debug,
 {
     /// Format [MaybePruned] values are if they were a struct with value and
     /// digest fields. Digest field is always provided so that divergent
@@ -441,7 +453,9 @@ where
         if let MaybePruned::Value(value) = self {
             builder.field("value", value);
         }
-        builder.field("digest", &self.digest()).finish()
+        builder
+            .field("digest", &self.digest::<sha::Impl>())
+            .finish()
     }
 }
 
@@ -457,3 +471,144 @@ impl fmt::Display for PrunedValueError {
 
 #[cfg(feature = "std")]
 impl std::error::Error for PrunedValueError {}
+
+/// Merge two structured containing [MaybePruned] fields to produce a resulting structure with
+/// populated fields equal to the union of the two.
+///
+/// Viewing the two structs as Merkle trees, in which subtrees may be pruned, the result of this
+/// operation is a tree with a set of nodes equal to the union of the set of nodes for each input.
+pub(crate) trait Merge: Digestible + Sized {
+    /// Merge two structs to produce an output with a union of the fields populated in the inputs.
+    fn merge(&self, other: &Self) -> Result<Self, MergeInequalityError>;
+}
+
+/// Error returned when a merge it attempted with two values with unequal digests.
+#[derive(Debug, Clone)]
+pub struct MergeInequalityError(pub Digest, pub Digest);
+
+impl fmt::Display for MergeInequalityError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            f,
+            "cannot merge values; left and right are not diegst equal: left {}, right {}",
+            hex::encode(&self.0),
+            hex::encode(&self.1)
+        )
+    }
+}
+
+#[cfg(feature = "std")]
+impl std::error::Error for MergeInequalityError {}
+
+/// Private marker trait providing an implementation of merge to values which implement PartialEq and clone and do not contain Merge fields.
+trait MergeLeaf: Digestible + PartialEq + Clone + Sized {}
+
+impl MergeLeaf for SystemState {}
+impl MergeLeaf for Vec<u8> {}
+
+impl<T: MergeLeaf> Merge for T {
+    fn merge(&self, other: &Self) -> Result<Self, MergeInequalityError> {
+        if self != other {
+            return Err(MergeInequalityError(
+                self.digest::<sha::Impl>(),
+                other.digest::<sha::Impl>(),
+            ));
+        }
+
+        Ok(self.clone())
+    }
+}
+
+impl<T> Merge for MaybePruned<T>
+where
+    T: Merge + Serialize + Clone,
+{
+    fn merge(&self, other: &Self) -> Result<Self, MergeInequalityError> {
+        let check_eq = || {
+            if self.digest::<sha::Impl>() != other.digest::<sha::Impl>() {
+                Err(MergeInequalityError(
+                    self.digest::<sha::Impl>(),
+                    other.digest::<sha::Impl>(),
+                ))
+            } else {
+                Ok(())
+            }
+        };
+
+        Ok(match (self, other) {
+            (MaybePruned::Value(left), MaybePruned::Value(right)) => {
+                MaybePruned::Value(left.merge(&right)?)
+            }
+            (MaybePruned::Value(_), MaybePruned::Pruned(_)) => {
+                check_eq()?;
+                self.clone()
+            }
+            (MaybePruned::Pruned(_), MaybePruned::Value(_)) => {
+                check_eq()?;
+                other.clone()
+            }
+            (MaybePruned::Pruned(_), MaybePruned::Pruned(_)) => {
+                check_eq()?;
+                self.clone()
+            }
+        })
+    }
+}
+
+impl Merge for Assumptions {
+    fn merge(&self, other: &Self) -> Result<Self, MergeInequalityError> {
+        if self.0.len() != other.0.len() {
+            return Err(MergeInequalityError(
+                self.digest::<sha::Impl>(),
+                other.digest::<sha::Impl>(),
+            ));
+        }
+        Ok(Assumptions(
+            self.0
+                .iter()
+                .zip(other.0.iter())
+                .map(|(left, right)| left.merge(right))
+                .collect::<Result<Vec<_>, _>>()?,
+        ))
+    }
+}
+
+impl Merge for Output {
+    fn merge(&self, other: &Self) -> Result<Self, MergeInequalityError> {
+        Ok(Self {
+            journal: self.journal.merge(&other.journal)?,
+            assumptions: self.assumptions.merge(&other.assumptions)?,
+        })
+    }
+}
+
+impl Merge for Option<Output> {
+    fn merge(&self, other: &Self) -> Result<Self, MergeInequalityError> {
+        match (self, other) {
+            (Some(left), Some(right)) => Some(left.merge(right)).transpose(),
+            (None, None) => Ok(None),
+            _ => Err(MergeInequalityError(
+                self.digest::<sha::Impl>(),
+                other.digest::<sha::Impl>(),
+            )),
+        }
+    }
+}
+
+impl Merge for ReceiptMetadata {
+    fn merge(&self, other: &Self) -> Result<Self, MergeInequalityError> {
+        if self.exit_code != other.exit_code || self.input != other.input {
+            return Err(MergeInequalityError(
+                self.digest::<sha::Impl>(),
+                other.digest::<sha::Impl>(),
+            ));
+        }
+        Ok(Self {
+            pre: self.pre.merge(&other.pre)?,
+            post: self.post.merge(&other.post)?,
+            exit_code: self.exit_code,
+            input: self.input,
+            output: self.output.merge(&other.output)?,
+        })
+    }
+}
