@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::pin::Pin;
+use std::{pin::Pin, time::Duration};
 
-use backoff::{future::retry, Error as BackoffError, ExponentialBackoff};
+use backoff::{future::retry, Error as BackoffError, ExponentialBackoffBuilder};
 use bonsai_sdk::{
     alpha::{responses::SessionStatusRes, Client, SessionId},
     alpha_async::session_status,
@@ -54,7 +54,7 @@ impl Error {
 type PollingBonsaiFuture = Pin<Box<dyn Future<Output = Result<SessionStatusRes, Error>> + Send>>;
 
 enum PendingProofRequestState {
-    // Inital state. The Proof Request has been submitted to Bonsai
+    // Initial state. The Proof Request has been submitted to Bonsai
     Pending,
 
     PollingBonsai(PollingBonsaiFuture),
@@ -91,7 +91,11 @@ impl Future for PendingProofRequest {
                     let pending_proof_id_clone = this.pending_proof_id.clone();
 
                     // Set up the retry policy and create the future
-                    let retry_policy = ExponentialBackoff::default();
+                    let retry_policy = ExponentialBackoffBuilder::new()
+                        .with_max_interval(TEN_MINUTES)
+                        .with_max_elapsed_time(Some(ONE_DAY))
+                        .build();
+
                     let bonsai_get_receipt_fut = retry(retry_policy, move || {
                         let client = bonsai_client_clone.clone();
                         let id = pending_proof_id_clone.clone();
@@ -163,3 +167,6 @@ async fn get_receipt_info(
             id: session,
         })
 }
+
+const TEN_MINUTES: Duration = Duration::from_secs(10 * 60);
+const ONE_DAY: Duration = Duration::from_secs(24 * 60 * 60);
