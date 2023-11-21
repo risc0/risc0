@@ -24,6 +24,7 @@ use std::{
 };
 
 use anyhow::{anyhow, ensure, Result};
+use risc0_zkvm_platform::WORD_SIZE;
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -206,8 +207,13 @@ impl Session {
         // NOTE: When a segment ends in a Halted(_) state, it may not update the post state
         // digest. As a result, it will be the same are the pre_image. All other exit codes require
         // the post state digest to reflect the final memory state.
+        // NOTE: The PC on the the post state is stored "+ 4". See ReceiptMetadata for more detail.
         let post_state = SystemState {
-            pc: self.post_image.pc,
+            pc: self
+                .post_image
+                .pc
+                .checked_add(WORD_SIZE as u32)
+                .ok_or(anyhow!("invalid pc in session post image"))?,
             merkle_root: match self.exit_code {
                 ExitCode::Halted(_) => last_segment.pre_image.compute_root_hash(),
                 _ => self.post_image.compute_root_hash(),
