@@ -20,5 +20,5 @@ use risc0_zkvm::guest::env;
 risc0_zkvm::entry!(main);
 
 pub fn main() {
-    env::commit(b"hello world");
+    env::commit_slice(b"hello world");
 }
