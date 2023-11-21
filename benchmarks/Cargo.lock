@@ -2190,9 +2190,9 @@ dependencies = [
 
 [[package]]
 name = "lazy-regex"
-version = "2.5.0"
+version = "3.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ff63c423c68ea6814b7da9e88ce585f793c87ddd9e78f646970891769c8235d4"
+checksum = "5d12be4595afdf58bd19e4a9f4e24187da2a66700786ff660a418e9059937a4c"
 dependencies = [
  "lazy-regex-proc_macros",
  "once_cell",
@@ -2201,14 +2201,14 @@ dependencies = [
 
 [[package]]
 name = "lazy-regex-proc_macros"
-version = "2.4.1"
+version = "3.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8edfc11b8f56ce85e207e62ea21557cfa09bb24a8f6b04ae181b086ff8611c22"
+checksum = "44bcd58e6c97a7fcbaffcdc95728b393b8d98933bfadad49ed4097845b57ef0b"
 dependencies = [
  "proc-macro2",
  "quote",
  "regex",
- "syn 1.0.109",
+ "syn 2.0.38",
 ]
 
 [[package]]
@@ -3342,7 +3342,7 @@ dependencies = [
  "rand_core",
  "risc0-benchmark-lib",
  "risc0-benchmark-methods",
- "risc0-zkp 0.19.0",
+ "risc0-zkp 0.20.0-alpha.1",
  "risc0-zkvm",
  "risc0-zkvm-methods",
  "serde",
@@ -3370,19 +3370,7 @@ dependencies = [
 name = "risc0-benchmark-methods"
 version = "0.1.0"
 dependencies = [
- "risc0-build 0.19.0",
-]
-
-[[package]]
-name = "risc0-binfmt"
-version = "0.19.0"
-dependencies = [
- "anyhow",
- "elf",
- "risc0-zkp 0.19.0",
- "risc0-zkvm-platform 0.19.0",
- "serde",
- "tracing",
+ "risc0-build 0.20.0-alpha.1",
 ]
 
 [[package]]
@@ -3393,14 +3381,27 @@ dependencies = [
  "anyhow",
  "elf",
  "log",
- "risc0-zkp 0.19.0 (git+https://github.com/risc0/risc0)",
- "risc0-zkvm-platform 0.19.0 (git+https://github.com/risc0/risc0)",
+ "risc0-zkp 0.19.0",
+ "risc0-zkvm-platform 0.19.0",
  "serde",
+]
+
+[[package]]
+name = "risc0-binfmt"
+version = "0.20.0-alpha.1"
+dependencies = [
+ "anyhow",
+ "elf",
+ "risc0-zkp 0.20.0-alpha.1",
+ "risc0-zkvm-platform 0.20.0-alpha.1",
+ "serde",
+ "tracing",
 ]
 
 [[package]]
 name = "risc0-build"
 version = "0.19.0"
+source = "git+https://github.com/risc0/risc0#f265059f669cad11f20b93e27f9f1dc5b520d144"
 dependencies = [
  "anyhow",
  "cargo_metadata",
@@ -3415,15 +3416,14 @@ dependencies = [
 
 [[package]]
 name = "risc0-build"
-version = "0.19.0"
-source = "git+https://github.com/risc0/risc0#f265059f669cad11f20b93e27f9f1dc5b520d144"
+version = "0.20.0-alpha.1"
 dependencies = [
  "anyhow",
  "cargo_metadata",
  "docker-generate",
- "risc0-binfmt 0.19.0 (git+https://github.com/risc0/risc0)",
- "risc0-zkp 0.19.0 (git+https://github.com/risc0/risc0)",
- "risc0-zkvm-platform 0.19.0 (git+https://github.com/risc0/risc0)",
+ "risc0-binfmt 0.20.0-alpha.1",
+ "risc0-zkp 0.20.0-alpha.1",
+ "risc0-zkvm-platform 0.20.0-alpha.1",
  "serde",
  "serde_json",
  "tempfile",
@@ -3431,7 +3431,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build-kernel"
-version = "0.19.0"
+version = "0.20.0-alpha.1"
 dependencies = [
  "cc",
  "directories",
@@ -3442,7 +3442,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion"
-version = "0.19.0"
+version = "0.20.0-alpha.1"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -3452,8 +3452,8 @@ dependencies = [
  "rand",
  "rayon",
  "risc0-circuit-recursion-sys",
- "risc0-core 0.19.0",
- "risc0-zkp 0.19.0",
+ "risc0-core 0.20.0-alpha.1",
+ "risc0-zkp 0.20.0-alpha.1",
  "sha2",
  "tracing",
  "zip",
@@ -3461,16 +3461,16 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion-sys"
-version = "0.19.0"
+version = "0.20.0-alpha.1"
 dependencies = [
  "glob",
  "risc0-build-kernel",
- "risc0-core 0.19.0",
+ "risc0-core 0.20.0-alpha.1",
 ]
 
 [[package]]
 name = "risc0-circuit-rv32im"
-version = "0.19.0"
+version = "0.20.0-alpha.1"
 dependencies = [
  "anyhow",
  "cust",
@@ -3478,27 +3478,19 @@ dependencies = [
  "rand",
  "rayon",
  "risc0-circuit-rv32im-sys",
- "risc0-core 0.19.0",
- "risc0-zkp 0.19.0",
- "risc0-zkvm-platform 0.19.0",
+ "risc0-core 0.20.0-alpha.1",
+ "risc0-zkp 0.20.0-alpha.1",
+ "risc0-zkvm-platform 0.20.0-alpha.1",
  "tracing",
 ]
 
 [[package]]
 name = "risc0-circuit-rv32im-sys"
-version = "0.19.0"
+version = "0.20.0-alpha.1"
 dependencies = [
  "glob",
  "risc0-build-kernel",
- "risc0-core 0.19.0",
-]
-
-[[package]]
-name = "risc0-core"
-version = "0.19.0"
-dependencies = [
- "bytemuck",
- "rand_core",
+ "risc0-core 0.20.0-alpha.1",
 ]
 
 [[package]]
@@ -3511,8 +3503,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "risc0-core"
+version = "0.20.0-alpha.1"
+dependencies = [
+ "bytemuck",
+ "rand_core",
+]
+
+[[package]]
 name = "risc0-sys"
-version = "0.19.0"
+version = "0.20.0-alpha.1"
 dependencies = [
  "cc",
  "cust",
@@ -3523,6 +3523,26 @@ dependencies = [
 [[package]]
 name = "risc0-zkp"
 version = "0.19.0"
+source = "git+https://github.com/risc0/risc0#f265059f669cad11f20b93e27f9f1dc5b520d144"
+dependencies = [
+ "anyhow",
+ "blake2",
+ "bytemuck",
+ "digest 0.10.7",
+ "hex",
+ "log",
+ "paste",
+ "rand_core",
+ "risc0-core 0.19.0",
+ "risc0-zkvm-platform 0.19.0",
+ "serde",
+ "sha2",
+ "tracing",
+]
+
+[[package]]
+name = "risc0-zkp"
+version = "0.20.0-alpha.1"
 dependencies = [
  "anyhow",
  "blake2",
@@ -3538,29 +3558,9 @@ dependencies = [
  "rand",
  "rand_core",
  "rayon",
- "risc0-core 0.19.0",
+ "risc0-core 0.20.0-alpha.1",
  "risc0-sys",
- "risc0-zkvm-platform 0.19.0",
- "serde",
- "sha2",
- "tracing",
-]
-
-[[package]]
-name = "risc0-zkp"
-version = "0.19.0"
-source = "git+https://github.com/risc0/risc0#f265059f669cad11f20b93e27f9f1dc5b520d144"
-dependencies = [
- "anyhow",
- "blake2",
- "bytemuck",
- "digest 0.10.7",
- "hex",
- "log",
- "paste",
- "rand_core",
- "risc0-core 0.19.0 (git+https://github.com/risc0/risc0)",
- "risc0-zkvm-platform 0.19.0 (git+https://github.com/risc0/risc0)",
+ "risc0-zkvm-platform 0.20.0-alpha.1",
  "serde",
  "sha2",
  "tracing",
@@ -3568,7 +3568,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "0.19.0"
+version = "0.20.0-alpha.1"
 dependencies = [
  "addr2line",
  "anyhow",
@@ -3581,7 +3581,6 @@ dependencies = [
  "bytes",
  "cfg-if",
  "crypto-bigint",
- "generic-array",
  "getrandom",
  "hex",
  "lazy-regex",
@@ -3592,12 +3591,12 @@ dependencies = [
  "prost-build",
  "protoc-prebuilt",
  "rayon",
- "risc0-binfmt 0.19.0",
+ "risc0-binfmt 0.20.0-alpha.1",
  "risc0-circuit-recursion",
  "risc0-circuit-rv32im",
- "risc0-core 0.19.0",
- "risc0-zkp 0.19.0",
- "risc0-zkvm-platform 0.19.0",
+ "risc0-core 0.20.0-alpha.1",
+ "risc0-zkp 0.20.0-alpha.1",
+ "risc0-zkvm-platform 0.20.0-alpha.1",
  "rrs-lib",
  "semver 1.0.20",
  "serde",
@@ -3609,11 +3608,11 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-methods"
-version = "0.19.0"
+version = "0.20.0-alpha.1"
 dependencies = [
- "risc0-build 0.19.0",
+ "risc0-build 0.20.0-alpha.1",
  "risc0-zkvm",
- "risc0-zkvm-platform 0.19.0",
+ "risc0-zkvm-platform 0.20.0-alpha.1",
  "serde",
  "tracing-subscriber",
 ]
@@ -3621,16 +3620,16 @@ dependencies = [
 [[package]]
 name = "risc0-zkvm-platform"
 version = "0.19.0"
+source = "git+https://github.com/risc0/risc0#f265059f669cad11f20b93e27f9f1dc5b520d144"
+
+[[package]]
+name = "risc0-zkvm-platform"
+version = "0.20.0-alpha.1"
 dependencies = [
  "bytemuck",
  "getrandom",
  "libm",
 ]
-
-[[package]]
-name = "risc0-zkvm-platform"
-version = "0.19.0"
-source = "git+https://github.com/risc0/risc0#f265059f669cad11f20b93e27f9f1dc5b520d144"
 
 [[package]]
 name = "rlp"
@@ -4183,7 +4182,7 @@ dependencies = [
 [[package]]
 name = "sppark"
 version = "0.1.5"
-source = "git+https://github.com/supranational/sppark.git#656e1914432a3bc0c8041141f191d9ecc0f7c61c"
+source = "git+https://github.com/supranational/sppark.git?rev=17119848e21491244125d266b2d74f26be2514f0#17119848e21491244125d266b2d74f26be2514f0"
 dependencies = [
  "cc",
  "which",
@@ -5163,7 +5162,7 @@ name = "zeth-guests"
 version = "0.1.0"
 source = "git+https://github.com/risc0/zeth?branch=capossele/bump-risc0-f265059f#d1738ec56f7120fadd929c0b35a997c1281ff978"
 dependencies = [
- "risc0-build 0.19.0 (git+https://github.com/risc0/risc0)",
+ "risc0-build 0.19.0",
 ]
 
 [[package]]

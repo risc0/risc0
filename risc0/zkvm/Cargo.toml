@@ -69,12 +69,11 @@ risc0-circuit-recursion = { workspace = true }
 risc0-circuit-rv32im = { workspace = true }
 risc0-core = { workspace = true }
 rustc-demangle = { version = "0.1", optional = true }
-generic-array = { version = "0.14", default-features = false, optional = true }
 getrandom = { version = "0.2", optional = true }
 gimli = { version = "0.28", optional = true }
 goblin = { version = "0.7", optional = true }
 object = { version = "0.32", optional = true }
-lazy-regex = { version = "2.4", optional = true }
+lazy-regex = { version = "3.1", optional = true }
 crypto-bigint = { version = "0.5", default-features = false, features = [
   "rand",
 ], optional = true }
@@ -99,7 +98,6 @@ tracing-forest = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [target.'cfg(not(target_os = "zkvm"))'.dev-dependencies]
-tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 flate2 = "1.0"
 risc0-zkvm-methods = { path = "methods" }
 serde_json = "1.0"
@@ -161,7 +159,6 @@ prove = [
   "dep:bincode",
   "dep:bytes",
   "dep:crypto-bigint",
-  "dep:generic-array",
   "dep:getrandom",
   "dep:lazy-regex",
   "dep:prost",

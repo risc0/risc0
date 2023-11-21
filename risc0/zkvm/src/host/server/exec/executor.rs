@@ -43,6 +43,7 @@ use risc0_zkvm_platform::{
 };
 use rrs_lib::{instruction_executor::InstructionExecutor, HartState};
 use serde::{Deserialize, Serialize};
+use sha2::digest::generic_array::GenericArray;
 use tempfile::tempdir;
 
 use super::{monitor::MemoryMonitor, syscall::SyscallTable};
@@ -580,9 +581,7 @@ impl<'a> ExecutorImpl<'a> {
             tracing::debug!("Compressing block {block:02x?}");
             sha2::compress256(
                 &mut state,
-                &[*generic_array::GenericArray::from_slice(
-                    bytemuck::cast_slice(&block),
-                )],
+                &[*GenericArray::from_slice(bytemuck::cast_slice(&block))],
             );
 
             block1_ptr += BLOCK_BYTES as u32;
