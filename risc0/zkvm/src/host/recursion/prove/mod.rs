@@ -65,20 +65,28 @@ pub struct RecursionReceipt {
 
 /// TODO
 pub fn lift(segment_receipt: &SegmentReceipt) -> Result<SuccinctReceipt> {
+    let segment_receipt_meta = segment_receipt.get_metadata()?;
+    tracing::debug!("Proving lift: metadata = {:#?}", segment_receipt_meta);
     let mut prover = Prover::new_lift(&segment_receipt.seal, ProverOpts::default())?;
     let receipt = prover.run()?;
     let mut out_stream = VecDeque::<u32>::new();
     out_stream.extend(receipt.output.iter());
-    let meta = ReceiptMetadata::decode(&mut out_stream)?.merge(&segment_receipt.get_metadata()?)?;
+    let meta_decoded = ReceiptMetadata::decode(&mut out_stream)?;
+    tracing::debug!(
+        "Proving lift finished: decoded metadata = {:#?}",
+        meta_decoded
+    );
     Ok(SuccinctReceipt {
         seal: receipt.seal,
         control_id: receipt.control_id,
-        meta,
+        meta: meta_decoded.merge(&segment_receipt_meta)?,
     })
 }
 
 /// TODO
 pub fn join(a: &SuccinctReceipt, b: &SuccinctReceipt) -> Result<SuccinctReceipt> {
+    tracing::debug!("Proving join: a.meta = {:#?}", a.meta,);
+    tracing::debug!("Proving join: b.meta = {:#?}", b.meta,);
     let mut prover = Prover::new_join(a, b, ProverOpts::default())?;
     let receipt = prover.run()?;
     let mut out_stream = VecDeque::<u32>::new();
@@ -90,11 +98,15 @@ pub fn join(a: &SuccinctReceipt, b: &SuccinctReceipt) -> Result<SuccinctReceipt>
         input: a.meta.input.clone(),
         output: b.meta.output.clone(),
     };
-    let meta = ReceiptMetadata::decode(&mut out_stream)?.merge(&ab_meta)?;
+    let meta_decoded = ReceiptMetadata::decode(&mut out_stream)?;
+    tracing::debug!(
+        "Proving join finished: decoded metadata = {:#?}",
+        meta_decoded
+    );
     Ok(SuccinctReceipt {
         seal: receipt.seal,
         control_id: receipt.control_id,
-        meta,
+        meta: meta_decoded.merge(&ab_meta)?,
     })
 }
 
@@ -103,6 +115,14 @@ pub fn resolve(
     conditional: &SuccinctReceipt,
     corroborating: &SuccinctReceipt,
 ) -> Result<SuccinctReceipt> {
+    tracing::debug!(
+        "Proving resolve: conditional.meta = {:#?}",
+        conditional.meta,
+    );
+    tracing::debug!(
+        "Proving resolve: corroborating.meta = {:#?}",
+        corroborating.meta,
+    );
     let mut prover = Prover::new_resolve(conditional, corroborating, ProverOpts::default())?;
     let receipt = prover.run()?;
     let mut out_stream = VecDeque::<u32>::new();
@@ -120,11 +140,15 @@ pub fn resolve(
         .as_value_mut()?
         .resolve(&corroborating.meta.digest())?;
 
-    let meta = ReceiptMetadata::decode(&mut out_stream)?.merge(&resolved_meta)?;
+    let meta_decoded = ReceiptMetadata::decode(&mut out_stream)?;
+    tracing::debug!(
+        "Proving resolve finished: decoded metadata = {:#?}",
+        meta_decoded
+    );
     Ok(SuccinctReceipt {
         seal: receipt.seal,
         control_id: receipt.control_id,
-        meta,
+        meta: meta_decoded.merge(&resolved_meta)?,
     })
 }
 

@@ -36,6 +36,7 @@ pub struct SystemState {
 }
 
 impl SystemState {
+    // TODO(victor): Revise these read and decode functions to return Result<_, _>
     pub fn decode(flat: &mut VecDeque<u32>) -> Self {
         Self {
             pc: read_u32_bytes(flat),
@@ -68,6 +69,7 @@ impl From<&MemoryImage> for SystemState {
     }
 }
 
+// TODO(victor): Revise these read and decode functions to return Result<_, _>
 pub fn read_sha_halfs(flat: &mut VecDeque<u32>) -> Digest {
     let mut bytes = Vec::<u8>::new();
     for half in flat.drain(0..16) {
@@ -77,6 +79,7 @@ pub fn read_sha_halfs(flat: &mut VecDeque<u32>) -> Digest {
     bytes.try_into().unwrap()
 }
 
+// TODO(victor): Revise these read and decode functions to return Result<_, _>
 fn read_u32_bytes(flat: &mut VecDeque<u32>) -> u32 {
     u32::from_le_bytes(
         flat.drain(0..4)
