@@ -279,6 +279,11 @@ impl Segment {
             cycles,
         }
     }
+
+    pub fn get_metadata(&self) -> ReceiptMetadata {
+        //    ReceiptMetadata { pre: (), post: (), exit_code: (), input: (), output: () }
+        unimplemented!();
+    }
 }
 
 /// A very basic implementation of a [SegmentRef].

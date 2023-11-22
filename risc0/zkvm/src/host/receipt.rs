@@ -339,7 +339,7 @@ impl InnerReceipt {
     pub fn get_metadata(&self) -> Result<ReceiptMetadata, VerificationError> {
         match self {
             InnerReceipt::Composite(ref receipt) => receipt.get_metadata(),
-            InnerReceipt::Succinct(ref succinct_recipt) => Ok(succinct_recipt.meta.clone()),
+            InnerReceipt::Succinct(ref succinct_recipt) => Ok(succinct_recipt.metadata.clone()),
             InnerReceipt::Fake { metadata } => Ok(metadata.clone()),
         }
     }
@@ -386,23 +386,23 @@ impl CompositeReceipt {
         let mut expected_pre_state_digest = None;
         for receipt in receipts {
             receipt.verify_integrity_with_context(ctx)?;
-            let metadata = receipt.get_metadata()?;
-            tracing::debug!("metadata: {metadata:#?}");
+            tracing::debug!("metadata: {:#?}", receipt.metadata);
             if let Some(id) = expected_pre_state_digest {
-                if id != metadata.pre.digest() {
+                if id != receipt.metadata.pre.digest() {
                     return Err(VerificationError::ImageVerificationError);
                 }
             }
-            if metadata.exit_code != ExitCode::SystemSplit {
+            if receipt.metadata.exit_code != ExitCode::SystemSplit {
                 return Err(VerificationError::UnexpectedExitCode);
             }
-            if !metadata.output.is_none() {
+            if !receipt.metadata.output.is_none() {
                 return Err(VerificationError::ReceiptFormatError);
             }
             expected_pre_state_digest = Some({
                 // Post state PC is stored as the "actual" value plus 4. This matches the join
                 // predicateb implementation. See ReceiptMetadata for more detail.
-                let mut post = metadata
+                let mut post = receipt
+                    .metadata
                     .post
                     .as_value()
                     .map_err(|_| VerificationError::ReceiptFormatError)?
@@ -417,10 +417,9 @@ impl CompositeReceipt {
 
         // Verify the last receipt in the continuation.
         final_receipt.verify_integrity_with_context(ctx)?;
-        let final_receipt_metadata = final_receipt.get_metadata()?;
-        tracing::debug!("final: {final_receipt_metadata:#?}");
+        tracing::debug!("final: {:#?}", final_receipt.metadata);
         if let Some(id) = expected_pre_state_digest {
-            if id != final_receipt_metadata.pre.digest() {
+            if id != final_receipt.metadata.pre.digest() {
                 return Err(VerificationError::ImageVerificationError);
             }
         }
@@ -436,7 +435,7 @@ impl CompositeReceipt {
 
         // Verify decoded output digest is consistent with the journal_digest and
         // assumptions.
-        self.verify_output_consistency(&final_receipt_metadata)?;
+        self.verify_output_consistency(&final_receipt.metadata)?;
 
         Ok(())
     }
@@ -447,16 +446,17 @@ impl CompositeReceipt {
             .segments
             .first()
             .ok_or(VerificationError::ReceiptFormatError)?
-            .get_metadata()?;
+            .metadata;
         let last_metadata = self
             .segments
             .last()
             .ok_or(VerificationError::ReceiptFormatError)?
-            .get_metadata()?;
+            .metadata;
 
         // After verifying the internally consistency of this receipt, we can use
         // self.assumptions and self.journal_digest in place of
         // last_metadata.output, which is equal.
+        // TODO(victor): See if maybe you don't need this logic anymore.
         self.verify_output_consistency(&last_metadata)?;
         let output: Option<Output> = last_metadata
             .output
@@ -576,6 +576,9 @@ pub struct SegmentReceipt {
 
     /// Name of the hash function used to create this receipt.
     pub hashfn: String,
+
+    /// [ReceiptMetadata] containing information about the execution that this receipt proves.
+    pub metadata: ReceiptMetadata,
 }
 
 impl SegmentReceipt {
@@ -599,13 +602,21 @@ impl SegmentReceipt {
             .suites
             .get(&self.hashfn)
             .ok_or(VerificationError::InvalidHashSuite)?;
-        risc0_zkp::verify::verify(&super::CIRCUIT, suite, &self.seal, check_code)
-    }
+        risc0_zkp::verify::verify(&super::CIRCUIT, suite, &self.seal, check_code)?;
 
-    /// Returns the [ReceiptMetadata] for this receipt.
-    pub fn get_metadata(&self) -> Result<ReceiptMetadata, VerificationError> {
+        // Receipt is consistent with the metadata encoded on the seal. Now check against the
+        // metadata on the struct.
         let elems = bytemuck::cast_slice(&self.seal);
-        decode_receipt_metadata_from_io(layout::OutBuffer(elems))
+        let decoded_metadata = decode_receipt_metadata_from_io(layout::OutBuffer(elems))?;
+        if decoded_metadata.digest() != self.metadata.digest() {
+            tracing::debug!(
+                "decoded segment receipt metadata does not match metadata field: decoded: {:#?}, expected: {:#?}",
+                decoded_metadata,
+                self.metadata,
+            );
+            return Err(VerificationError::ReceiptFormatError);
+        }
+        Ok(())
     }
 
     /// Return the seal for this receipt, as a vector of bytes.

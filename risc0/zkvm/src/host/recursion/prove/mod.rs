@@ -65,8 +65,7 @@ pub struct RecursionReceipt {
 
 /// TODO
 pub fn lift(segment_receipt: &SegmentReceipt) -> Result<SuccinctReceipt> {
-    let segment_receipt_meta = segment_receipt.get_metadata()?;
-    tracing::debug!("Proving lift: metadata = {:#?}", segment_receipt_meta);
+    tracing::debug!("Proving lift: metadata = {:#?}", segment_receipt.metadata);
     let mut prover = Prover::new_lift(&segment_receipt.seal, ProverOpts::default())?;
     let receipt = prover.run()?;
     let mut out_stream = VecDeque::<u32>::new();
@@ -79,24 +78,24 @@ pub fn lift(segment_receipt: &SegmentReceipt) -> Result<SuccinctReceipt> {
     Ok(SuccinctReceipt {
         seal: receipt.seal,
         control_id: receipt.control_id,
-        meta: meta_decoded.merge(&segment_receipt_meta)?,
+        metadata: meta_decoded.merge(&segment_receipt.metadata)?,
     })
 }
 
 /// TODO
 pub fn join(a: &SuccinctReceipt, b: &SuccinctReceipt) -> Result<SuccinctReceipt> {
-    tracing::debug!("Proving join: a.meta = {:#?}", a.meta,);
-    tracing::debug!("Proving join: b.meta = {:#?}", b.meta,);
+    tracing::debug!("Proving join: a.metadata = {:#?}", a.metadata,);
+    tracing::debug!("Proving join: b.metadata = {:#?}", b.metadata,);
     let mut prover = Prover::new_join(a, b, ProverOpts::default())?;
     let receipt = prover.run()?;
     let mut out_stream = VecDeque::<u32>::new();
     out_stream.extend(receipt.output.iter());
     let ab_meta = ReceiptMetadata {
-        pre: a.meta.pre.clone(),
-        post: b.meta.post.clone(),
-        exit_code: b.meta.exit_code,
-        input: a.meta.input.clone(),
-        output: b.meta.output.clone(),
+        pre: a.metadata.pre.clone(),
+        post: b.metadata.post.clone(),
+        exit_code: b.metadata.exit_code,
+        input: a.metadata.input.clone(),
+        output: b.metadata.output.clone(),
     };
     let meta_decoded = ReceiptMetadata::decode(&mut out_stream)?;
     tracing::debug!(
@@ -106,7 +105,7 @@ pub fn join(a: &SuccinctReceipt, b: &SuccinctReceipt) -> Result<SuccinctReceipt>
     Ok(SuccinctReceipt {
         seal: receipt.seal,
         control_id: receipt.control_id,
-        meta: meta_decoded.merge(&ab_meta)?,
+        metadata: meta_decoded.merge(&ab_meta)?,
     })
 }
 
@@ -116,12 +115,12 @@ pub fn resolve(
     corroborating: &SuccinctReceipt,
 ) -> Result<SuccinctReceipt> {
     tracing::debug!(
-        "Proving resolve: conditional.meta = {:#?}",
-        conditional.meta,
+        "Proving resolve: conditional.metadata = {:#?}",
+        conditional.metadata,
     );
     tracing::debug!(
-        "Proving resolve: corroborating.meta = {:#?}",
-        corroborating.meta,
+        "Proving resolve: corroborating.metadata = {:#?}",
+        corroborating.metadata,
     );
     let mut prover = Prover::new_resolve(conditional, corroborating, ProverOpts::default())?;
     let receipt = prover.run()?;
@@ -130,7 +129,7 @@ pub fn resolve(
 
     // Construct the resolved metadata by copying the conditional receipt metadata and resolving
     // the head assumption. This should work since the resolve predicate ran successfully.
-    let mut resolved_meta = conditional.meta.clone();
+    let mut resolved_meta = conditional.metadata.clone();
     resolved_meta
         .output
         .as_value_mut()?
@@ -138,7 +137,7 @@ pub fn resolve(
         .ok_or(anyhow!("conditional receipt metadata cannot be none"))?
         .assumptions
         .as_value_mut()?
-        .resolve(&corroborating.meta.digest())?;
+        .resolve(&corroborating.metadata.digest())?;
 
     let meta_decoded = ReceiptMetadata::decode(&mut out_stream)?;
     tracing::debug!(
@@ -148,7 +147,7 @@ pub fn resolve(
     Ok(SuccinctReceipt {
         seal: receipt.seal,
         control_id: receipt.control_id,
-        meta: meta_decoded.merge(&resolved_meta)?,
+        metadata: meta_decoded.merge(&resolved_meta)?,
     })
 }
 
@@ -160,11 +159,11 @@ pub fn identity_p254(a: &SuccinctReceipt) -> Result<SuccinctReceipt> {
     let receipt = prover.run_with_hal(hal, circuit_hal)?;
     let mut out_stream = VecDeque::<u32>::new();
     out_stream.extend(receipt.output.iter());
-    let meta = ReceiptMetadata::decode(&mut out_stream)?.merge(&a.meta)?;
+    let metadata = ReceiptMetadata::decode(&mut out_stream)?.merge(&a.metadata)?;
     Ok(SuccinctReceipt {
         seal: receipt.seal,
         control_id: receipt.control_id,
-        meta,
+        metadata,
     })
 }
 
@@ -448,7 +447,7 @@ impl Prover {
     ) -> Result<()> {
         self.add_seal(&a.seal, &a.control_id, &allowed_ids)?;
         let mut data = Vec::<u32>::new();
-        a.meta.encode(&mut data)?;
+        a.metadata.encode(&mut data)?;
         let data_fp: Vec<BabyBearElem> = data.iter().map(|x| BabyBearElem::new(*x)).collect();
         self.add_input(bytemuck::cast_slice(&data_fp));
         Ok(())
@@ -495,7 +494,7 @@ impl Prover {
             assumptions,
             journal,
         } = cond
-            .meta
+            .metadata
             .output
             .as_value()
             .context("cannot resolve conditional receipt with pruned output")?
@@ -508,7 +507,7 @@ impl Prover {
         let mut assumptions_tail = assumptions
             .value()
             .context("cannot resolve conditional receipt with pruned assumptions")?;
-        assumptions_tail.resolve(&corr.meta.digest())?;
+        assumptions_tail.resolve(&corr.metadata.digest())?;
 
         prover.add_input_digest(&assumptions_tail.digest());
         prover.add_input_digest(&journal.digest());

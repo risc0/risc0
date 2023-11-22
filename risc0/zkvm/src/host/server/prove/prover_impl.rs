@@ -163,6 +163,7 @@ where
             seal,
             index: segment.index,
             hashfn: hashfn.clone(),
+            metadata: segment.get_metadata(),
         };
         receipt.verify_integrity_with_context(ctx)?;
 

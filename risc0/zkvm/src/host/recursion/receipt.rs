@@ -27,7 +27,7 @@ use crate::{
     ReceiptMetadata,
 };
 
-/// This function gets valid control IDs from the poseidon and recursion
+/// This function gets valid control IDs from the Poseidon and recursion
 /// circuits
 pub fn valid_control_ids() -> Vec<Digest> {
     use hex::FromHex;
@@ -41,20 +41,24 @@ pub fn valid_control_ids() -> Vec<Digest> {
     all_ids
 }
 
-/// This struct represents a receipt for one or more [crate::SegmentReceipt]s
-/// joined through recursion.
+/// A succinct receipt, produced via recursion, proving the execution of the zkVM.
+///
+/// Using recursion a [CompositeReceipt] can be compressed to form a [SuccinctReceipt]. In this
+/// way, a constant sized proof can be generated for arbitrarily long continuations, and with an
+/// arbitrary number of executions linked via composition.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[cfg_attr(test, derive(PartialEq))]
 pub struct SuccinctReceipt {
-    /// the cryptographic seal of this receipt
+    /// The cryptographic seal of this receipt. This seal is a STARK proving an execution of the
+    /// recursion circuit.
     pub seal: Vec<u32>,
 
-    /// the control ID of this receipt
+    /// The control ID of this receipt, identifying the recursion program that was run (e.g. lift,
+    /// join, or resolve).
     pub control_id: Digest,
 
-    /// the receipt metadata containing states of the system during the segment
-    /// executions
-    pub meta: ReceiptMetadata,
+    /// [ReceiptMetadata] containing information about the execution that this receipt proves.
+    pub metadata: ReceiptMetadata,
 }
 
 impl SuccinctReceipt {
@@ -98,7 +102,12 @@ impl SuccinctReceipt {
         seal_meta.drain(0..16);
         // Verify the output hash matches that data
         let output_hash = read_sha_halfs(&mut seal_meta);
-        if output_hash != self.meta.digest() {
+        if output_hash != self.metadata.digest() {
+            tracing::debug!(
+                "succinct receipt metadata does not recursion output digest: metadata: {:#?}, digest expected: {:?}",
+                self.metadata,
+                output_hash,
+            );
             return Err(VerificationError::JournalDigestMismatch);
         }
         // Everything passed

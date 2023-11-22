@@ -352,6 +352,7 @@ impl From<SegmentReceipt> for pb::core::SegmentReceipt {
             seal: value.get_seal_bytes().into(),
             index: value.index,
             hashfn: value.hashfn,
+            metadata: Some(value.metadata.into()),
         }
     }
 }
@@ -362,6 +363,8 @@ impl TryFrom<pb::core::SegmentReceipt> for SegmentReceipt {
     fn try_from(value: pb::core::SegmentReceipt) -> Result<Self> {
         const WORD_SIZE: usize = std::mem::size_of::<u32>();
 
+        // TODO(victor): Does adding the metadata field require the version number to be
+        // incremented?
         let version = value.version.ok_or(malformed_err())?.value;
         if version > ver::SEGMENT_RECEIPT.value {
             bail!("Incompatible SegmentReceipt version: {version}");
@@ -377,6 +380,7 @@ impl TryFrom<pb::core::SegmentReceipt> for SegmentReceipt {
             seal,
             index: value.index,
             hashfn: value.hashfn,
+            metadata: value.metadata.ok_or(malformed_err()).try_into()?,
         })
     }
 }
@@ -387,7 +391,7 @@ impl From<SuccinctReceipt> for pb::core::SuccinctReceipt {
             version: Some(ver::SUCCINCT_RECEIPT),
             seal: value.get_seal_bytes(),
             control_id: Some(value.control_id.into()),
-            meta: Some(value.meta.into()),
+            metadata: Some(value.metadata.into()),
         }
     }
 }
@@ -411,7 +415,7 @@ impl TryFrom<pb::core::SuccinctReceipt> for SuccinctReceipt {
         Ok(Self {
             seal,
             control_id: value.control_id.ok_or(malformed_err())?.try_into()?,
-            meta: value.meta.ok_or(malformed_err())?.try_into()?,
+            metadata: value.metadata.ok_or(malformed_err())?.try_into()?,
         })
     }
 }
