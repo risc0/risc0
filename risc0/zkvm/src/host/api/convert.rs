@@ -380,7 +380,7 @@ impl TryFrom<pb::core::SegmentReceipt> for SegmentReceipt {
             seal,
             index: value.index,
             hashfn: value.hashfn,
-            metadata: value.metadata.ok_or(malformed_err()).try_into()?,
+            metadata: value.metadata.ok_or(malformed_err())?.try_into()?,
         })
     }
 }

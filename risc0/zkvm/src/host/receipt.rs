@@ -442,12 +442,12 @@ impl CompositeReceipt {
 
     /// Returns the [ReceiptMetadata] for this [CompositeReceipt].
     pub fn get_metadata(&self) -> Result<ReceiptMetadata, VerificationError> {
-        let first_metadata = self
+        let first_metadata = &self
             .segments
             .first()
             .ok_or(VerificationError::ReceiptFormatError)?
             .metadata;
-        let last_metadata = self
+        let last_metadata = &self
             .segments
             .last()
             .ok_or(VerificationError::ReceiptFormatError)?
@@ -456,8 +456,9 @@ impl CompositeReceipt {
         // After verifying the internally consistency of this receipt, we can use
         // self.assumptions and self.journal_digest in place of
         // last_metadata.output, which is equal.
-        // TODO(victor): See if maybe you don't need this logic anymore.
-        self.verify_output_consistency(&last_metadata)?;
+        // TODO(victor): See if maybe you don't need this logic anymore, since the last segment
+        // will have a populated output.
+        self.verify_output_consistency(last_metadata)?;
         let output: Option<Output> = last_metadata
             .output
             .is_some()
@@ -476,10 +477,10 @@ impl CompositeReceipt {
             .transpose()?;
 
         Ok(ReceiptMetadata {
-            pre: first_metadata.pre,
-            post: last_metadata.post,
+            pre: first_metadata.pre.clone(),
+            post: last_metadata.post.clone(),
             exit_code: last_metadata.exit_code,
-            input: first_metadata.input,
+            input: first_metadata.input.clone(),
             output: output.into(),
         })
     }
