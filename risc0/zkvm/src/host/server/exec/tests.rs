@@ -1038,10 +1038,17 @@ fn out_of_bounds_ecall() {
 
 #[cfg(feature = "docker")]
 mod docker {
+    use risc0_binfmt::{MemoryImage, Program};
     use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF};
-    use risc0_zkvm_platform::WORD_SIZE;
+    use risc0_zkvm_platform::{memory::GUEST_MAX_MEM, PAGE_SIZE, WORD_SIZE};
 
     use crate::{ExecutorEnv, ExecutorImpl, Session, TraceEvent};
+
+    fn compute_image_id(elf: &[u8]) -> String {
+        let program = Program::load_elf(&elf, GUEST_MAX_MEM as u32).unwrap();
+        let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
+        image.compute_id().to_string()
+    }
 
     #[test]
     fn trace() {
@@ -1130,6 +1137,7 @@ mod docker {
             ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap().run()
         }
 
+        println!("{}", compute_image_id(MULTI_TEST_ELF));
         // This test should always fail if the last parameter is zero
         let err = run_session(0, 16, 0).err().unwrap();
         assert!(err.to_string().contains("Session limit exceeded"));
