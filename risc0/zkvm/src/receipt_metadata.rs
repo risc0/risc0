@@ -310,15 +310,15 @@ impl MaybePruned<Assumptions> {
     /// Mark an assumption as resolved and remove it from the list.
     ///
     /// Assumptions can only be removed from the head of the list. If this value
-    /// is pruned, then the result will also be a pruned value. The `rest`
+    /// is pruned, then the result will also be a pruned value. The `tail`
     /// parameter should be equal to the digest of the list after the
     /// resolved assumption is removed.
-    pub fn resolve(&mut self, resolved: &Digest, rest: &Digest) -> anyhow::Result<()> {
+    pub fn resolve(&mut self, resolved: &Digest, tail: &Digest) -> anyhow::Result<()> {
         match self {
             MaybePruned::Value(list) => list.resolve(resolved),
             MaybePruned::Pruned(list_digest) => {
                 let reconstructed =
-                    tagged_list_cons::<sha::Impl>("risc0.Assumptions", resolved, rest);
+                    tagged_list_cons::<sha::Impl>("risc0.Assumptions", resolved, tail);
                 ensure!(
                     &reconstructed == list_digest,
                     "reconstructed list digest does not match; expected {}, reconstructed {}",
@@ -327,7 +327,7 @@ impl MaybePruned<Assumptions> {
                 );
 
                 // Set the pruned digest value to be equal to the rest parameter.
-                *list_digest = rest.clone();
+                *list_digest = tail.clone();
                 Ok(())
             }
         }

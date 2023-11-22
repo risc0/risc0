@@ -23,7 +23,10 @@ use std::{collections::VecDeque, mem::take, rc::Rc};
 use anyhow::{anyhow, Context, Result};
 use hex::FromHex;
 use merkle::MerkleGroup;
-use risc0_binfmt::recursion::{Program, RECURSION_PO2};
+use risc0_binfmt::{
+    recursion::{Program, RECURSION_PO2},
+    write_sha_halfs,
+};
 use risc0_circuit_recursion::{
     cpu::CpuCircuitHal, CircuitImpl, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA,
 };
@@ -88,6 +91,8 @@ pub fn lift(segment_receipt: &SegmentReceipt) -> Result<SuccinctReceipt> {
 }
 
 /// Run the join program to compress two receipts of the same continuation into one.
+///
+/// By repeated application of the join program TODO
 pub fn join(a: &SuccinctReceipt, b: &SuccinctReceipt) -> Result<SuccinctReceipt> {
     tracing::debug!("Proving join: a.metadata = {:#?}", a.metadata,);
     tracing::debug!("Proving join: b.metadata = {:#?}", b.metadata,);
@@ -118,7 +123,10 @@ pub fn join(a: &SuccinctReceipt, b: &SuccinctReceipt) -> Result<SuccinctReceipt>
     })
 }
 
-/// TODO
+/// Run the resolve program to remove an assumption from a conditional receipt upon verifying a
+/// corroborating receipt for the assumption.
+///
+/// The resolve program TODO
 pub fn resolve(
     conditional: &SuccinctReceipt,
     corroborating: &SuccinctReceipt,
@@ -523,8 +531,18 @@ impl Prover {
             .context("cannot resolve conditional receipt with pruned assumptions")?;
         assumptions_tail.resolve(&corr.metadata.digest())?;
 
-        prover.add_input_digest(&assumptions_tail.digest());
-        prover.add_input_digest(&journal.digest());
+        let encode_sha_digest = |digest: Digest| -> Result<_> {
+            let mut data = Vec::<u32>::new();
+            write_sha_halfs(&mut data, &digest);
+            let data_fp: Vec<_> = data
+                .iter()
+                .map(|x| bytemuck::cast(BabyBearElem::new(*x)))
+                .collect();
+            Ok(data_fp)
+        };
+
+        prover.add_input(&encode_sha_digest(assumptions_tail.digest())?);
+        prover.add_input(&encode_sha_digest(journal.digest())?);
         Ok(prover)
     }
 
