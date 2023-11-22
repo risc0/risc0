@@ -63,7 +63,12 @@ pub struct RecursionReceipt {
     pub output: Vec<u32>,
 }
 
-/// TODO
+/// Run the lift program to transform an rv32im segment receipt into a recursion receipt.
+///
+/// The lift program is verifies the rv32im circuit STARK proof inside the recursion circuit,
+/// resulting in a recursion circuit STARK proof. This recursion proof is a has a single
+/// constant-time verification procedure, with respect to the original segment length, and is then
+/// used as the input to all other recursion programs (e.g. join, resolve, and identity_p254).
 pub fn lift(segment_receipt: &SegmentReceipt) -> Result<SuccinctReceipt> {
     tracing::debug!("Proving lift: metadata = {:#?}", segment_receipt.metadata);
     let mut prover = Prover::new_lift(&segment_receipt.seal, ProverOpts::default())?;
@@ -82,14 +87,17 @@ pub fn lift(segment_receipt: &SegmentReceipt) -> Result<SuccinctReceipt> {
     })
 }
 
-/// TODO
+/// Run the join program to compress two receipts of the same continuation into one.
 pub fn join(a: &SuccinctReceipt, b: &SuccinctReceipt) -> Result<SuccinctReceipt> {
     tracing::debug!("Proving join: a.metadata = {:#?}", a.metadata,);
     tracing::debug!("Proving join: b.metadata = {:#?}", b.metadata,);
+
     let mut prover = Prover::new_join(a, b, ProverOpts::default())?;
     let receipt = prover.run()?;
     let mut out_stream = VecDeque::<u32>::new();
     out_stream.extend(receipt.output.iter());
+
+    // Construct the expected metadata that should have result from the join.
     let ab_meta = ReceiptMetadata {
         pre: a.metadata.pre.clone(),
         post: b.metadata.post.clone(),
@@ -97,6 +105,7 @@ pub fn join(a: &SuccinctReceipt, b: &SuccinctReceipt) -> Result<SuccinctReceipt>
         input: a.metadata.input.clone(),
         output: b.metadata.output.clone(),
     };
+
     let meta_decoded = ReceiptMetadata::decode(&mut out_stream)?;
     tracing::debug!(
         "Proving join finished: decoded metadata = {:#?}",
@@ -122,22 +131,27 @@ pub fn resolve(
         "Proving resolve: corroborating.metadata = {:#?}",
         corroborating.metadata,
     );
+
+    // Construct the resolved metadata by copying the conditional receipt metadata and resolving
+    // the head assumption. If this fails, then so would the resolve program.
+    let mut resolved_meta = conditional.metadata.clone();
+    resolved_meta
+        .output
+        .as_value_mut()
+        .context("conditional receipt output is pruned")?
+        .as_mut()
+        .ok_or(anyhow!(
+            "conditional receipt has empty output and no assumptions"
+        ))?
+        .assumptions
+        .as_value_mut()
+        .context("conditional receipt assumptions are pruned")?
+        .resolve(&corroborating.metadata.digest())?;
+
     let mut prover = Prover::new_resolve(conditional, corroborating, ProverOpts::default())?;
     let receipt = prover.run()?;
     let mut out_stream = VecDeque::<u32>::new();
     out_stream.extend(receipt.output.iter());
-
-    // Construct the resolved metadata by copying the conditional receipt metadata and resolving
-    // the head assumption. This should work since the resolve predicate ran successfully.
-    let mut resolved_meta = conditional.metadata.clone();
-    resolved_meta
-        .output
-        .as_value_mut()?
-        .as_mut()
-        .ok_or(anyhow!("conditional receipt metadata cannot be none"))?
-        .assumptions
-        .as_value_mut()?
-        .resolve(&corroborating.metadata.digest())?;
 
     let meta_decoded = ReceiptMetadata::decode(&mut out_stream)?;
     tracing::debug!(
