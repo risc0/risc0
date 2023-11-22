@@ -93,6 +93,8 @@ pub trait SegmentRef: Send {
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Segment {
     pub(crate) pre_image: Box<MemoryImage>,
+    // NOTE: segment.post_state is NOT EQUAL to segment.get_metadata()?.post. This is because the
+    // post SystemState on the ReceiptMetadata struct has a PC that is shifted forward by 4.
     pub(crate) post_state: SystemState,
     pub(crate) output: Option<Output>,
     pub(crate) faults: PageFaults,
