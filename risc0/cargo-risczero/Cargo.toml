@@ -38,6 +38,9 @@ tokio = { version = "1", features = ["rt"] }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 zip = { version = "0.6", optional = true }
 
+[patch.crates-io]
+faster-hex = { git = "https://github.com/nervosnetwork/faster-hex.git", ref = "7ae3424" }
+
 [build-dependencies]
 risc0-build = { workspace = true, optional = true }
 tracing-subscriber = { version = "0.3", features = ["env-filter"], optional = true }
