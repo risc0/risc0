@@ -38,7 +38,13 @@ fn main() {
     };
 
     let map = HashMap::from([
-        ("risc0-zkvm-methods-guest", GuestOptions::default()),
+        (
+            "risc0-zkvm-methods-guest",
+            GuestOptions {
+                features: vec![],
+                use_docker: use_docker.clone(),
+            },
+        ),
         (
             "risc0-zkvm-methods-std",
             GuestOptions {

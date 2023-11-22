@@ -486,6 +486,7 @@ fn detect_toolchain(name: &str) {
 }
 
 /// Options for configuring a docker build environment.
+#[derive(Clone)]
 pub struct DockerOptions {
     /// Specify the root directory for docker builds.
     ///
