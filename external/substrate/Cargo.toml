@@ -4,6 +4,8 @@ version = "0.1.0"
 description = "Minimal Substrate runtime for testing compatibility"
 publish = false
 
+[workspace]
+
 [package.metadata.release]
 release = false
 
