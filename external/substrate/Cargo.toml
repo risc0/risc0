@@ -13,14 +13,14 @@ release = false
 targets = ["x86_64-unknown-linux-gnu"]
 
 [dependencies]
-frame-support = { git = "https://github.com/paritytech/polkadot-sdk/", branch = "release-polkadot-v1.1.0", default-features = false }
+frame-support = { git = "https://github.com/paritytech/polkadot-sdk/", branch = "release-polkadot-v1.4.0", default-features = false }
 risc0-zkvm = { path = "../../risc0/zkvm", default-features = false }
-sp-runtime = { git = "https://github.com/paritytech/polkadot-sdk/", branch = "release-polkadot-v1.1.0", default-features = false, features = [
+sp-runtime = { git = "https://github.com/paritytech/polkadot-sdk/", branch = "release-polkadot-v1.4.0", default-features = false, features = [
   "serde",
 ] }
 
 [build-dependencies]
-substrate-wasm-builder = { git = "https://github.com/paritytech/polkadot-sdk/", branch = "release-polkadot-v1.1.0", optional = true }
+substrate-wasm-builder = { git = "https://github.com/paritytech/polkadot-sdk/", branch = "release-polkadot-v1.4.0", optional = true }
 
 [features]
 default = ["std"]
