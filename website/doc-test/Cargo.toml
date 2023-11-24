@@ -10,7 +10,7 @@ repository = { workspace = true }
 release = false
 
 [dependencies]
-alloy-primitives = "0.4"
+alloy-primitives = "0.5"
 alloy-sol-types = "0.4"
 anyhow = "1.0"
 bonsai-ethereum-relay = { workspace = true }
