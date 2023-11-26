@@ -44,7 +44,7 @@ Any voting system needs to achieve two very important properties:
 1. It must not be possible for any actor to commit *fraud* by casting more votes than authorized.
 2. Every voter must be able to ensure their voter is counted, i.e. that their vote *cannot be censored*.
 
-OpenZeppelin's Governor standard provides prevents fraud as long as the L1 execution is sound, a property ensured by the robust Ethereum full-node community.
+OpenZeppelin's Governor standard prevents fraud as long as the L1 execution is sound, a property ensured by the robust Ethereum full-node community.
 It is also censorship resistant as long as Ethereum is censorship-resistant, which is provided by the [mechanisms of Ethereum consensus].
 
 [mechanisms of Ethereum consensus]: https://notes.ethereum.org/@vbuterin/pbs_censorship_resistance
