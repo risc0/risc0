@@ -62,9 +62,7 @@ crypto-bigint = { version = "0.5", default-features = false, features = [
   "rand",
 ], optional = true }
 elf = { version = "0.7", default-features = false, optional = true }
-gimli = { version = "0.28", optional = true }
 lazy-regex = { version = "3.1", optional = true }
-object = { version = "0.32", optional = true }
 num-derive = "0.4"
 num-traits = { version = "0.2", default-features = false, optional = true }
 prost = { version = "0.12", optional = true }
@@ -140,10 +138,8 @@ prove = [
   "dep:bytes",
   "dep:crypto-bigint",
   "dep:elf",
-  "dep:gimli",
   "dep:lazy-regex",
   "dep:num-traits",
-  "dep:object",
   "dep:prost",
   "dep:prost-build",
   "dep:protoc-prebuilt",

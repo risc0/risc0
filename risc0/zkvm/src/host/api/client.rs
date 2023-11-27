@@ -342,7 +342,7 @@ impl Client {
             write_fds: env.posix_io.borrow().write_fds.keys().cloned().collect(),
             segment_limit_po2: env.segment_limit_po2,
             session_limit: env.session_limit,
-            trace_events: env.trace.is_some().then_some(()),
+            trace_events: (!env.trace.is_empty()).then_some(()),
         }
     }
 

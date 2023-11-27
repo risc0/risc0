@@ -2233,7 +2233,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6fb8d784f27acf97159b40fc4db5ecd8aa23b9ad5ef69cdd136d3bc80665f0c0"
 dependencies = [
  "fallible-iterator",
- "indexmap",
  "stable_deref_trait",
 ]
 
@@ -4271,12 +4270,10 @@ dependencies = [
  "crypto-bigint",
  "elf",
  "getrandom 0.2.11",
- "gimli",
  "hex",
  "lazy-regex",
  "num-derive",
  "num-traits",
- "object",
  "prost",
  "prost-build",
  "protoc-prebuilt",

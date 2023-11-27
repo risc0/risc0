@@ -19,8 +19,6 @@
 //! top level stack frame.  (More than one stack frame may show up
 //! in the case of inlined functions).
 
-// pub(crate) mod env;
-
 use std::{
     cell::RefCell,
     collections::HashMap,
@@ -29,11 +27,14 @@ use std::{
     rc::Rc,
 };
 
-use addr2line::{fallible_iterator::FallibleIterator, Context, LookupResult};
+use addr2line::{
+    fallible_iterator::FallibleIterator,
+    gimli::{EndianRcSlice, RunTimeEndian},
+    object::{File, Object, ObjectSegment},
+    LookupResult, ObjectContext,
+};
 use anyhow::{anyhow, Result};
 use elf::{abi::STT_FUNC, endian::LittleEndian, ElfBytes};
-use gimli::{EndianRcSlice, RunTimeEndian};
-use object::{read::File, Object, ObjectSegment};
 use prost::Message;
 use risc0_zkvm_platform::memory::TEXT_START;
 use rrs_lib::instruction_formats::{IType, JType, OPCODE_JAL, OPCODE_JALR};
@@ -157,7 +158,7 @@ pub struct Profiler {
     // Current CallNode key in the stack
     current_key: u32,
 
-    ctx: Context<EndianRcSlice<RunTimeEndian>>,
+    ctx: ObjectContext,
 
     profile: ProfileBuilder,
 }
@@ -184,7 +185,7 @@ fn decode_frame(fr: addr2line::Frame<EndianRcSlice<RunTimeEndian>>) -> Option<Fr
     })
 }
 
-fn lookup_pc(pc: u32, ctx: &Context<EndianRcSlice<RunTimeEndian>>) -> Vec<Frame> {
+fn lookup_pc(pc: u32, ctx: &ObjectContext) -> Vec<Frame> {
     let frames = match ctx.find_frames(pc as u64) {
         LookupResult::Output(result) => result.unwrap(),
         LookupResult::Load {
@@ -211,7 +212,7 @@ impl Profiler {
     /// Return a new profile from the given RISC-V ELF.
     pub fn new(elf_data: &[u8], filename: Option<&str>) -> Result<Self> {
         let file = File::parse(elf_data)?;
-        let ctx = Context::new(&file)?;
+        let ctx = ObjectContext::new(&file)?;
         let root = Rc::new(RefCell::new(CallNode::default()));
         let mut profiler = Profiler {
             pc: u32::MAX,
@@ -340,7 +341,8 @@ impl Profiler {
         }
     }
 
-    /// Inner finalize method, unwrapping the inner non-public ProfileBuilder.
+    /// Count and save the profiling samples, write the results to `output_path`.
+    #[cfg(test)]
     pub(crate) fn finalize(mut self) -> ProfileBuilder {
         let root_ref = Rc::clone(&self.root);
         tracing::debug!("{}", self.root.borrow().fmt(0, &self));
@@ -349,15 +351,12 @@ impl Profiler {
     }
 
     /// Count and save the profiling samples, consuming the profiler and
-    /// returning the compiled profile protobuf.
-    pub fn finalize_to_proto(self) -> proto::Profile {
-        self.finalize().profile
-    }
-
-    /// Count and save the profiling samples, consuming the profiler and
     /// returning the compiled profile protobuf, encoded as bytes.
-    pub fn finalize_to_vec(self) -> Vec<u8> {
-        self.finalize().profile.encode_to_vec()
+    pub fn finalize_to_vec(&mut self) -> Vec<u8> {
+        let root_ref = Rc::clone(&self.root);
+        tracing::debug!("{}", self.root.borrow().fmt(0, &self));
+        self.walk_stacks(root_ref, Vec::new());
+        self.profile.profile.encode_to_vec()
     }
 }
 

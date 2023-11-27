@@ -45,8 +45,9 @@ use rrs_lib::{instruction_executor::InstructionExecutor, HartState};
 use serde::{Deserialize, Serialize};
 use sha2::digest::generic_array::GenericArray;
 use tempfile::tempdir;
+use tracing::{level_filters::LevelFilter, Level};
 
-use super::{monitor::MemoryMonitor, syscall::SyscallTable};
+use super::{monitor::MemoryMonitor, profiler::Profiler, syscall::SyscallTable};
 use crate::{
     align_up,
     host::{
@@ -128,6 +129,7 @@ pub struct ExecutorImpl<'a> {
     exit_code: Option<ExitCode>,
     obj_ctx: Option<ObjectContext>,
     output_digest: Option<Digest>,
+    profiler: Option<Rc<RefCell<Profiler>>>,
 }
 
 impl<'a> ExecutorImpl<'a> {
@@ -139,13 +141,14 @@ impl<'a> ExecutorImpl<'a> {
     /// the guest program is executed to determine how its proof should be
     /// divided into subparts.
     pub fn new(env: ExecutorEnv<'a>, image: MemoryImage) -> Result<Self> {
-        Self::with_obj_ctx(env, image, None)
+        Self::with_details(env, image, None, None)
     }
 
-    fn with_obj_ctx(
+    fn with_details(
         env: ExecutorEnv<'a>,
         image: MemoryImage,
         obj_ctx: Option<ObjectContext>,
+        profiler: Option<Rc<RefCell<Profiler>>>,
     ) -> Result<Self> {
         // Enforce segment_limit_po2 bounds
         let segment_limit_po2 = env.segment_limit_po2.unwrap_or(DEFAULT_SEGMENT_LIMIT_PO2) as usize;
@@ -154,7 +157,7 @@ impl<'a> ExecutorImpl<'a> {
         }
 
         let pc = image.pc;
-        let monitor = MemoryMonitor::new(image.clone(), env.trace.is_some());
+        let monitor = MemoryMonitor::new(image.clone(), !env.trace.is_empty());
         let loader = Loader::new();
         let init_cycles = loader.init_cycles();
         let fini_cycles = loader.fini_cycles();
@@ -180,6 +183,7 @@ impl<'a> ExecutorImpl<'a> {
             exit_code: None,
             obj_ctx,
             output_digest: None,
+            profiler,
         })
     }
 
@@ -199,16 +203,26 @@ impl<'a> ExecutorImpl<'a> {
     ///     .unwrap();
     /// let mut exec = ExecutorImpl::from_elf(env, BENCH_ELF).unwrap();
     /// ```
-    pub fn from_elf(env: ExecutorEnv<'a>, elf: &[u8]) -> Result<Self> {
+    pub fn from_elf(mut env: ExecutorEnv<'a>, elf: &[u8]) -> Result<Self> {
         let program = Program::load_elf(elf, GUEST_MAX_MEM as u32)?;
         let image = MemoryImage::new(&program, PAGE_SIZE as u32)?;
-        let obj_ctx = if tracing::level_filters::LevelFilter::current().eq(&tracing::Level::TRACE) {
+
+        let obj_ctx = if LevelFilter::current().eq(&Level::TRACE) {
             let file = addr2line::object::read::File::parse(elf)?;
             Some(ObjectContext::new(&file)?)
         } else {
             None
         };
-        Self::with_obj_ctx(env, image, obj_ctx)
+
+        let profiler = if env.pprof_out.is_some() {
+            let profiler = Rc::new(RefCell::new(Profiler::new(elf, None)?));
+            env.trace.push(profiler.clone());
+            Some(profiler)
+        } else {
+            None
+        };
+
+        Self::with_details(env, image, obj_ctx, profiler)
     }
 
     /// This will run the executor to get a [Session] which contain the results
@@ -330,6 +344,11 @@ impl<'a> ExecutorImpl<'a> {
         tracing::info!("total_cycles = {}", self.total_cycles());
         tracing::info!("segment_count = {}", self.segments.len());
         tracing::info!("execution_time = {:?}", elapsed);
+
+        if let Some(profiler) = self.profiler.take() {
+            let report = profiler.borrow_mut().finalize_to_vec();
+            std::fs::write(self.env.pprof_out.as_ref().unwrap(), report)?;
+        }
 
         Ok(Session::new(
             mem::take(&mut self.segments),
@@ -468,7 +487,7 @@ impl<'a> ExecutorImpl<'a> {
     }
 
     fn advance(&mut self, opcode: OpCode, op_result: OpCodeResult) -> Option<ExitCode> {
-        if let Some(ref trace) = self.env.trace {
+        for trace in self.env.trace.iter() {
             trace
                 .borrow_mut()
                 .trace_callback(TraceEvent::InstructionStart {
