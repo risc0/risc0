@@ -160,9 +160,9 @@ jobs:
           key: ${{ matrix.os }}-${{ matrix.feature }}
       - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
       - name: build workspace
-        run: cargo test -F $FEATURE -F fault-proof -F profiler -F prove --workspace --exclude doc-test --timings --no-run
+        run: cargo test -F $FEATURE -F fault-proof -F prove --workspace --exclude doc-test --timings --no-run
       - name: test workspace
-        run: cargo test -F $FEATURE -F fault-proof -F profiler -F prove --workspace --exclude doc-test --timings
+        run: cargo test -F $FEATURE -F fault-proof -F prove --workspace --exclude doc-test --timings
       - uses: actions/upload-artifact@v3
         with:
           name: cargo-timings-${{ matrix.os }}-${{ matrix.device }}

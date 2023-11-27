@@ -61,7 +61,6 @@ struct Cli {
     /// Write "pprof" protobuf output of the guest's run to this file.
     /// You can use google's pprof (<https://github.com/google/pprof>)
     /// to read it.
-    #[cfg(feature = "profiler")]
     #[arg(long, env = "RISC0_PPROF_OUT")]
     pprof_out: Option<PathBuf>,
 }
@@ -101,16 +100,14 @@ pub fn main() {
         return;
     }
 
-    #[cfg(feature = "profiler")]
-    let mut profiler: Option<risc0_zkvm::Profiler> = None;
-    #[cfg(feature = "profiler")]
-    if args.pprof_out.is_some() {
-        let elf_path = args.mode.elf.clone().unwrap();
-        let elf_contents = fs::read(&elf_path).unwrap();
-        profiler = Some(
-            risc0_zkvm::Profiler::new(&elf_contents, Some(elf_path.to_str().unwrap())).unwrap(),
-        );
-    }
+    // let mut profiler: Option<risc0_zkvm::Profiler> = None;
+    // if args.pprof_out.is_some() {
+    //     let elf_path = args.mode.elf.clone().unwrap();
+    //     let elf_contents = fs::read(&elf_path).unwrap();
+    //     profiler = Some(
+    //         risc0_zkvm::Profiler::new(&elf_contents, Some(elf_path.to_str().unwrap())).unwrap(),
+    //     );
+    // }
 
     let env = {
         let mut builder = ExecutorEnv::builder();
@@ -128,10 +125,9 @@ pub fn main() {
             builder.stdin(io::stdin());
         }
 
-        #[cfg(feature = "profiler")]
-        if let Some(ref mut profiler) = profiler {
-            builder.trace_callback(profiler);
-        }
+        // if let Some(ref mut profiler) = profiler {
+        //     builder.trace_callback(profiler);
+        // }
 
         builder.build().unwrap()
     };
@@ -151,12 +147,11 @@ pub fn main() {
     };
 
     // Now that we're done with the prover, we can collect the guest profiling data.
-    #[cfg(feature = "profiler")]
-    if let Some(profiler) = profiler {
-        let report = profiler.finalize_to_vec();
-        fs::write(args.pprof_out.as_ref().unwrap(), &report)
-            .expect("Unable to write profiling output");
-    }
+    // if let Some(profiler) = profiler {
+    //     let report = profiler.finalize_to_vec();
+    //     fs::write(args.pprof_out.as_ref().unwrap(), &report)
+    //         .expect("Unable to write profiling output");
+    // }
 
     let prover = args.get_prover();
     let ctx = VerifierContext::default();

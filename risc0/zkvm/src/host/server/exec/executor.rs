@@ -154,7 +154,7 @@ impl<'a> ExecutorImpl<'a> {
         }
 
         let pc = image.pc;
-        let monitor = MemoryMonitor::new(image.clone(), !env.trace.is_empty());
+        let monitor = MemoryMonitor::new(image.clone(), env.trace.is_some());
         let loader = Loader::new();
         let init_cycles = loader.init_cycles();
         let fini_cycles = loader.fini_cycles();
@@ -327,12 +327,9 @@ impl<'a> ExecutorImpl<'a> {
         };
         self.exit_code = Some(exit_code);
 
-        if tracing::level_filters::LevelFilter::current().ge(&tracing::Level::INFO) {
-            tracing::info!("total_cycles = {}", self.total_cycles());
-            tracing::info!("session_cycles = {}", self.session_cycle());
-            tracing::info!("segment_count = {}", self.segments.len());
-            tracing::info!("execution_time = {:?}", elapsed);
-        }
+        tracing::info!("total_cycles = {}", self.total_cycles());
+        tracing::info!("segment_count = {}", self.segments.len());
+        tracing::info!("execution_time = {:?}", elapsed);
 
         Ok(Session::new(
             mem::take(&mut self.segments),
@@ -471,7 +468,7 @@ impl<'a> ExecutorImpl<'a> {
     }
 
     fn advance(&mut self, opcode: OpCode, op_result: OpCodeResult) -> Option<ExitCode> {
-        for trace in self.env.trace.iter() {
+        if let Some(ref trace) = self.env.trace {
             trace
                 .borrow_mut()
                 .trace_callback(TraceEvent::InstructionStart {
