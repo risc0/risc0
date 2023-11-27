@@ -25,4 +25,4 @@ export-libm = ["dep:libm"]
 # exports a `getrandom` implementation that panics
 export-getrandom = ["dep:getrandom", "dep:bytemuck"]
 # exports a `getrandom` implementation that uses sys_random
-enable-getrandom = ["export-getrandom"]
+getrandom = ["export-getrandom"]
