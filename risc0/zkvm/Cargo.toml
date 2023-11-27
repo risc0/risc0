@@ -136,7 +136,7 @@ disable-dev-mode = []
 docker = []
 # The zkVM exposes a getrandom implementation that panics by default. This will
 # expose a getrandom implementation that uses the `sys_random` ecall.
-enable-getrandom = ["risc0-zkvm-platform/enable-getrandom"]
+getrandom = ["risc0-zkvm-platform/getrandom"]
 # note: cfg!(feature = "fault-proof") is used as a temporary measure in addition
 # to it being used to expose functionality to the fault checker.
 fault-proof = []
