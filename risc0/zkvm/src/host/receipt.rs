@@ -39,7 +39,7 @@ use super::control_id::{BLAKE2B_CONTROL_ID, POSEIDON_CONTROL_ID, SHA256_CONTROL_
 // Make succinct receipt available through this `receipt` module.
 pub use super::recursion::SuccinctReceipt;
 use crate::{
-    groth16::{Groth16, Groth16Seal},
+    groth16::{Groth16Proof, Groth16Seal},
     receipt_metadata::{Assumptions, MaybePruned, Output},
     serde::{from_slice, Error},
     sha::{Digestible, Sha256},
@@ -379,7 +379,7 @@ impl Groth16Receipt {
         &self,
         _ctx: &VerifierContext,
     ) -> Result<(), VerificationError> {
-        Groth16::from_seal(
+        Groth16Proof::from_seal(
             &Groth16Seal::from_vec(&self.seal).map_err(|_| VerificationError::InvalidProof)?,
             self.meta.digest().into(),
         )

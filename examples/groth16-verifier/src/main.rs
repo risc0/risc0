@@ -16,7 +16,7 @@ use anyhow::{Ok, Result};
 use groth16_verifier_example::*;
 use hello_world_methods::MULTIPLY_ID;
 use risc0_zkvm::{
-    groth16::{Groth16, RawProof, RawPublic, RawVKey},
+    groth16::{CircomProof, CircomPublic, CircomVKey, Groth16Proof},
     is_dev_mode, Receipt,
 };
 
@@ -44,17 +44,17 @@ fn main() -> Result<()> {
     //
     // verification_key, proof and public witness generated with SnarkJS using Groth16 over BN254
     // (https://docs.circom.io/getting-started/proving-circuits/)
-    let raw_vkey: RawVKey = serde_json::from_str(CIRCOM_VERIFICATION_KEY).unwrap();
-    let raw_proof: RawProof = serde_json::from_str(CIRCOM_PROOF).unwrap();
-    let raw_public = RawPublic {
+    let circom_vkey: CircomVKey = serde_json::from_str(CIRCOM_VERIFICATION_KEY).unwrap();
+    let circom_proof: CircomProof = serde_json::from_str(CIRCOM_PROOF).unwrap();
+    let circom_public = CircomPublic {
         values: serde_json::from_str(CIRCOM_PUBLIC).unwrap(),
     };
 
-    // we build a groth16 instance from the raw material collected from SnarkJS
-    let groth16 = Groth16::from_raw(raw_vkey, raw_proof, raw_public).unwrap();
+    // we build a groth16 proof from the circom material collected from SnarkJS
+    let proof = Groth16Proof::from_circom(circom_vkey, circom_proof, circom_public).unwrap();
 
     // groth16 proof verification
-    groth16.verify().unwrap();
+    proof.verify().unwrap();
     println!("Verified the Groth16 proof from Circom");
     Ok(())
     // -------------------------------------------------------------
