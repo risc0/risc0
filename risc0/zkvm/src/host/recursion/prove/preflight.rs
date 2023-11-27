@@ -28,6 +28,7 @@ use risc0_zkp::{
     },
     field::Elem,
 };
+use sha2::digest::generic_array::GenericArray;
 use tracing::trace;
 
 pub struct Preflight<'a, Ext: Externs> {
@@ -260,10 +261,7 @@ impl<'a, Ext: Externs> Preflight<'a, Ext> {
                 trace!("sha_fini: in={:x?}", self.sha_load);
                 let u8s: &[u8] = bytemuck::cast_slice(&self.sha_load);
 
-                sha2::compress256(
-                    &mut self.sha_state,
-                    &[*generic_array::GenericArray::from_slice(u8s)],
-                );
+                sha2::compress256(&mut self.sha_state, &[*GenericArray::from_slice(u8s)]);
                 trace!("sha_fini: out={:x?}", self.sha_state);
                 // for (size_t i = 0; i < 4; i++) {
                 //   addMacro(/*outs=*/0, MacroOpcode::SHA_FINI, out + 3 - i, out + 7 - i);
