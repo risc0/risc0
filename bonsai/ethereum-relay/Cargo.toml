@@ -17,8 +17,8 @@ bonsai-rest-api-mock = { workspace = true }
 bonsai-sdk = { workspace = true, features = ["async"] }
 clap = { version = "4.1", features = ["derive", "env"] }
 displaydoc = "0.2"
-ethers = { version = "2.0", features = ["rustls", "ws", "ethers-solc"] }
-ethers-signers = { version = "2.0", features = ["aws"] }
+ethers = { workspace = true, features = ["rustls", "ws", "ethers-solc"] }
+ethers-signers = { workspace = true, features = ["aws"] }
 futures = "0.3"
 hex = "0.4"
 hyper = "0.14"

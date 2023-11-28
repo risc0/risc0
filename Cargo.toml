@@ -36,6 +36,8 @@ bonsai-ethereum-contracts = { version = "0.5.0", path = "bonsai/ethereum" }
 bonsai-ethereum-relay = { version = "0.5.0", default-features = false, path = "bonsai/ethereum-relay" }
 bonsai-rest-api-mock = { version = "0.5.0", default-features = false, path = "bonsai/rest-api-mock" }
 bonsai-sdk = { version = "0.5.0", default-features = false, path = "bonsai/sdk" }
+ethers = { version = "2.0",  default-features = false }
+ethers-signers = { version = "2.0", default-features = false }
 risc0-binfmt = { version = "0.20.0-alpha.1", default-features = false, path = "risc0/binfmt" }
 risc0-build = { version = "0.20.0-alpha.1", default-features = false, path = "risc0/build" }
 risc0-build-kernel = { version = "0.20.0-alpha.1", default-features = false, path = "risc0/build_kernel" }
@@ -49,6 +51,10 @@ risc0-sys = { version = "0.20.0-alpha.1", default-features = false, path = "risc
 risc0-zkp = { version = "0.20.0-alpha.1", default-features = false, path = "risc0/zkp" }
 risc0-zkvm = { version = "0.20.0-alpha.1", default-features = false, path = "risc0/zkvm" }
 risc0-zkvm-platform = { version = "0.20.0-alpha.1", default-features = false, path = "risc0/zkvm/platform" }
+
+[patch.crates-io]
+ethers = { git = "https://github.com/gakonst/ethers-rs", rev = "8175f0f97070ad69abd5dfa7b8df31f1c1dcc3d6" }
+ethers-signers = { git = "https://github.com/gakonst/ethers-rs", rev = "8175f0f97070ad69abd5dfa7b8df31f1c1dcc3d6" }
 
 [profile.bench]
 lto = true

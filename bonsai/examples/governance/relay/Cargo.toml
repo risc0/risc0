@@ -20,6 +20,9 @@ risc0-zkvm = { workspace = true, default-features = false, features = [
 ] }
 tokio = { version = "1", features = ["full", "sync"] }
 
+[patch.crates-io]
+ethers = { git = "https://github.com/gakonst/ethers-rs", rev = "8175f0f97070ad69abd5dfa7b8df31f1c1dcc3d6" }
+
 [features]
 default = []
 metal = ["risc0-zkvm/metal"]

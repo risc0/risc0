@@ -5,8 +5,8 @@ edition = "2021"
 
 [dependencies]
 clap = { version = "4.0", features = ["derive"] }
-ethers-core = "2.0"
-ethers-providers = "2.0"
+ethers-core = { git = "https://github.com/gakonst/ethers-rs", rev = "8175f0f97070ad69abd5dfa7b8df31f1c1dcc3d6" }
+ethers-providers = { git = "https://github.com/gakonst/ethers-rs", rev = "8175f0f97070ad69abd5dfa7b8df31f1c1dcc3d6" }
 risc0-zkvm = { path = "../../risc0/zkvm" }
 serde = "1.0"
 tokio = "1"
