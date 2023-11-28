@@ -15,7 +15,7 @@
 use std::time::Duration;
 
 use anyhow::{anyhow, bail, Context, Result};
-use bonsai_sdk::alpha::Client;
+use bonsai_sdk::alpha::{responses::SnarkReceipt, Client};
 use risc0_build::GuestListEntry;
 use risc0_zkvm::{
     default_executor, ExecutorEnv, MemoryImage, Program, Receipt, GUEST_MAX_MEM, PAGE_SIZE,
@@ -26,7 +26,7 @@ pub const POLL_INTERVAL_SEC: u64 = 4;
 /// Result of executing a guest image, possibly containing a proof.
 pub enum Output {
     Execution { journal: Vec<u8> },
-    Bonsai { snark_receipt: Receipt },
+    Bonsai { snark_receipt: SnarkReceipt },
 }
 
 /// Execute the guest locally, as opposed to sending the proof request to the
@@ -103,7 +103,7 @@ pub fn prove_alpha(elf: &[u8], input: Vec<u8>) -> Result<Output> {
     })()?;
 
     let snark_session = client.create_snark(session.uuid)?;
-    let snark_receipt = (|| loop {
+    let snark_receipt: SnarkReceipt = (|| loop {
         let res = snark_session.status(&client)?;
         match res.status.as_str() {
             "RUNNING" => {
@@ -111,12 +111,9 @@ pub fn prove_alpha(elf: &[u8], input: Vec<u8>) -> Result<Output> {
             }
             "SUCCEEDED" => {
                 // eprintln!("Completed SNARK proof on bonsai alpha backend!");
-                let receipt = bincode::deserialize::<Receipt>(
-                    &res.output
-                        .context("output expected to be non-empty on success")?,
-                )
-                .map_err(|_| anyhow!("failed to deserialize receipt"));
-                return receipt;
+                return res
+                    .output
+                    .ok_or(anyhow!("output expected to be non-empty on success"));
             }
             _ => {
                 bail!(

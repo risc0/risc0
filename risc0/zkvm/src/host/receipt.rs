@@ -39,7 +39,7 @@ use super::control_id::{BLAKE2B_CONTROL_ID, POSEIDON_CONTROL_ID, SHA256_CONTROL_
 // Make succinct receipt available through this `receipt` module.
 pub use super::recursion::SuccinctReceipt;
 use crate::{
-    groth16::{Groth16Proof, Groth16Seal},
+    host::groth16::{Groth16Proof, Groth16Seal},
     receipt_metadata::{Assumptions, MaybePruned, Output},
     serde::{from_slice, Error},
     sha::{Digestible, Sha256},
@@ -310,7 +310,7 @@ impl InnerReceipt {
     ) -> Result<(), VerificationError> {
         match self {
             InnerReceipt::Composite(x) => x.verify_integrity_with_context(ctx),
-            InnerReceipt::Groth16(x) => x.verify_integrity_with_context(ctx),
+            InnerReceipt::Groth16(x) => x.verify(),
             InnerReceipt::Succinct(x) => x.verify_integrity_with_context(ctx),
             InnerReceipt::Fake { .. } => {
                 #[cfg(feature = "std")]
@@ -364,21 +364,17 @@ impl InnerReceipt {
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[cfg_attr(test, derive(PartialEq))]
 pub struct Groth16Receipt {
-    /// the Grtoh16 seal of this receipt
+    /// A Groth16 proof of a zkVM execution with the associated metadata.
     pub seal: Vec<u8>,
 
-    /// the receipt metadata containing states of the system during the segment
-    /// executions
+    /// [ReceiptMetadata] containing information about the execution that this receipt proves.
     pub meta: ReceiptMetadata,
 }
 
 impl Groth16Receipt {
     /// Verify the integrity of this receipt, ensuring the metadata is attested
     /// to by the seal.
-    pub fn verify_integrity_with_context(
-        &self,
-        _ctx: &VerifierContext,
-    ) -> Result<(), VerificationError> {
+    pub fn verify(&self) -> Result<(), VerificationError> {
         Groth16Proof::from_seal(
             &Groth16Seal::from_vec(&self.seal).map_err(|_| VerificationError::InvalidProof)?,
             self.meta.digest().into(),

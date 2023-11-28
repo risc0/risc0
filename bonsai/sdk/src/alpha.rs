@@ -121,6 +121,39 @@ pub mod responses {
         pub session_id: String,
     }
 
+    /// Snark Proof object
+    ///
+    /// following the snarkjs calldata format:
+    /// <https://github.com/iden3/snarkjs#26-simulate-a-verification-call>
+    #[derive(Debug, Deserialize, Serialize, PartialEq)]
+    pub struct Groth16Seal {
+        /// Proof 'a' value
+        pub a: Vec<Vec<u8>>,
+        /// Proof 'b' value
+        pub b: Vec<Vec<Vec<u8>>>,
+        /// Proof 'c' value
+        pub c: Vec<Vec<u8>>,
+        /// Proof public outputs
+        pub public: Vec<Vec<u8>>,
+    }
+
+    /// Snark Receipt object
+    ///
+    /// All relevant data to verify both the snark proof an corresponding
+    /// imageId on chain.
+    #[derive(Debug, Deserialize, Serialize, PartialEq)]
+    pub struct SnarkReceipt {
+        /// Snark seal from snarkjs
+        pub snark: Groth16Seal,
+        /// Post State Digest
+        ///
+        /// Collected from the STARK proof via
+        /// `receipt.get_metadata().post.digest()`
+        pub post_state_digest: Vec<u8>,
+        /// Journal data from the risc-zkvm Receipt object
+        pub journal: Vec<u8>,
+    }
+
     /// Session Status response
     #[derive(Deserialize, Serialize)]
     pub struct SnarkStatusRes {
@@ -128,10 +161,10 @@ pub mod responses {
         ///
         /// values: `[ RUNNING | SUCCEEDED | FAILED | TIMED_OUT | ABORTED ]`
         pub status: String,
-        /// SNARK receipt encoded with bincode
+        /// SNARK receipt output
         ///
-        /// If the status == `SUCCEEDED` then this should be present
-        pub output: Option<Vec<u8>>,
+        /// Generated snark receipt,
+        pub output: Option<SnarkReceipt>,
         /// Snark Error message
         ///
         /// If the SNARK status is not `RUNNING` or `SUCCEEDED`, this is the

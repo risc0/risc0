@@ -567,7 +567,6 @@ dependencies = [
  "rrs-lib",
  "semver",
  "serde",
- "sha2",
  "tracing",
 ]
 
