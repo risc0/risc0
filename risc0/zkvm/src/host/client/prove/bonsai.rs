@@ -53,8 +53,8 @@ impl Prover for BonsaiProver {
         let client = Client::from_env(crate::VERSION)?;
 
         // upload the image
-        let image_id = image.compute_id();
-        let image_id_hex = hex::encode(image.compute_id());
+        let image_id = image.compute_id()?;
+        let image_id_hex = hex::encode(image_id.clone());
         let image = bincode::serialize(&image)?;
 
         // return value 'exists' is ignored here
