@@ -16,7 +16,7 @@ extern crate alloc;
 
 use alloc::{collections::BTreeMap, vec, vec::Vec};
 
-use anyhow::Result;
+use anyhow::{ensure, Result};
 use risc0_zkp::core::{
     digest::Digest,
     hash::sha::{cpu::Impl, Sha256, BLOCK_BYTES, SHA256_INIT},
@@ -71,9 +71,18 @@ pub struct PageTableInfo {
 
 impl From<PersistentPageTableInfo> for PageTableInfo {
     fn from(value: PersistentPageTableInfo) -> Self {
-        PageTableInfo::new(value.page_table_addr, value.page_size)
+        PageTableInfo::new(value.page_table_addr, value.page_size).expect("Invalid page table")
     }
 }
+
+// TODO: Decide between TryFrom and From
+// impl TryFrom<PersistentPageTableInfo> for PageTableInfo {
+//     type Error = anyhow::Error;
+
+//     fn try_from(value: PersistentPageTableInfo) -> Result<Self, Self::Error> {
+//         PageTableInfo::new(value.page_table_addr, value.page_size)
+//     }
+// }
 
 impl From<PageTableInfo> for PersistentPageTableInfo {
     fn from(value: PageTableInfo) -> Self {
@@ -104,10 +113,13 @@ const fn round_up(a: u32, b: u32) -> u32 {
 }
 
 impl PageTableInfo {
-    pub fn new(page_table_addr: u32, page_size: u32) -> Self {
+    pub fn new(page_table_addr: u32, page_size: u32) -> Result<Self> {
         let max_mem = page_table_addr;
-        assert!(max_mem >= page_size);
-        assert!(page_size > 0 && (page_size & (page_size - 1)) == 0);
+        ensure!(max_mem >= page_size, "Max memory must be at least one page");
+        ensure!(
+            page_size > 0 && (page_size & (page_size - 1)) == 0,
+            "Page size must be a power of 2"
+        );
 
         let mut layers = Vec::new();
         let mut page_table_size = 0u32;
@@ -125,12 +137,12 @@ impl PageTableInfo {
         let root_idx = root_addr / page_size;
         let root_page_addr = root_idx * page_size;
         let num_root_entries = (root_addr - root_page_addr) / DIGEST_BYTES as u32;
-        assert_eq!(root_idx, num_pages);
-        let zero_page_hash = hash_page_bytes(&vec![0_u8; page_size as usize]);
+        ensure!(root_idx == num_pages, "Invalid root index");
+        let zero_page_hash = hash_page_bytes(&vec![0_u8; page_size as usize])?;
 
         tracing::debug!("root_page_addr: 0x{root_page_addr:08x}, root_addr: 0x{root_addr:08x}");
 
-        Self {
+        Ok(Self {
             page_size,
             page_size_po2: page_size.ilog2(),
             page_table_addr,
@@ -142,7 +154,7 @@ impl PageTableInfo {
             num_root_entries,
             _layers: layers,
             zero_page_hash,
-        }
+        })
     }
 
     pub fn get_page_addr(&self, page_idx: u32) -> u32 {
@@ -166,7 +178,7 @@ impl MemoryImage {
     /// constructed.
     pub fn new(program: &Program, page_size: u32) -> Result<Self> {
         // Compute the page table hashes except for the very last root hash.
-        let info = PageTableInfo::new(PAGE_TABLE.start() as u32, page_size);
+        let info = PageTableInfo::new(PAGE_TABLE.start() as u32, page_size)?;
         let mut img = Self {
             pages: BTreeMap::new(),
             info,
@@ -181,7 +193,7 @@ impl MemoryImage {
             img.store_region_in_page(addr, &data.to_le_bytes());
         }
 
-        img.hash_pages();
+        img.hash_pages()?;
         Ok(img)
     }
 
@@ -213,44 +225,48 @@ impl MemoryImage {
     /// Reads the given byte array in this memory image at the given
     /// address  The caller is responsible for ensuring the bytes do
     /// not overlap a page boundry.
-    pub fn load_region_in_page(&self, addr: u32, bytes: &mut [u8]) {
+    pub fn load_region_in_page(&self, addr: u32, bytes: &mut [u8]) -> Result<()> {
         let page_idx = self.info.get_page_index(addr);
         let page_start = self.info.get_page_addr(page_idx);
 
-        if let Some(page) = self.pages.get(&page_idx) {
-            bytes.clone_from_slice(
-                &page[(addr - page_start) as usize..(addr - page_start) as usize + bytes.len()],
-            );
-        } else {
-            assert!(
-                addr as usize <= MEM_SIZE,
-                "address {addr:08X} outside MEM_SIZE ({MEM_SIZE:08X})"
-            );
-            bytes.fill(0);
-        }
+        match self.pages.get(&page_idx) {
+            None => {
+                ensure!(
+                    addr as usize <= MEM_SIZE,
+                    "address {addr:08X} outside MEM_SIZE ({MEM_SIZE:08X})"
+                );
+                bytes.fill(0);
+            }
+            Some(page) => {
+                bytes.clone_from_slice(
+                    &page[(addr - page_start) as usize..(addr - page_start) as usize + bytes.len()],
+                );
+            }
+        };
+        Ok(())
     }
 
     /// Calculate and update the image merkle tree within this image.
-    pub fn hash_pages(&mut self) {
-        self.hash_pages_iter(0..self.info.num_pages);
+    pub fn hash_pages(&mut self) -> Result<()> {
+        self.hash_pages_iter(0..self.info.num_pages)
     }
 
     /// Calculate and update the image merkle tree within this image based on
     /// the supplied page indicies.
-    pub fn hash_pages_iter<I: Iterator<Item = u32>>(&mut self, iter: I) {
-        for page_idx in iter {
-            let digest = self.hash_page(page_idx);
-            let entry_addr = self.info.get_page_entry_addr(page_idx);
-            self.store_region_in_page(entry_addr, digest.as_bytes());
-        }
+    pub fn hash_pages_iter<I: Iterator<Item = u32>>(&mut self, iter: I) -> Result<()> {
+        iter.into_iter().try_for_each(|page_idx| {
+            self.hash_page(page_idx).map(|digest| {
+                let entry_addr = self.info.get_page_entry_addr(page_idx);
+                self.store_region_in_page(entry_addr, digest.as_bytes());
+            })
+        })
     }
 
-    fn hash_page(&self, page_idx: u32) -> Digest {
-        if let Some(page) = self.pages.get(&page_idx) {
-            hash_page_bytes(page)
-        } else {
-            self.info.zero_page_hash
-        }
+    fn hash_page(&self, page_idx: u32) -> Result<Digest> {
+        self.pages.get(&page_idx).map_or_else(
+            || Ok(self.info.zero_page_hash),
+            |page| hash_page_bytes(page),
+        )
     }
 
     /// Verify the integrity of the MemoryImage.
@@ -263,10 +279,10 @@ impl MemoryImage {
         let mut page_idx = self.info.get_page_index(addr);
         while page_idx < self.info.root_idx {
             let page_addr = self.info.get_page_addr(page_idx);
-            let expected = self.hash_page(page_idx);
+            let expected = self.hash_page(page_idx)?;
             let entry_addr = self.info.get_page_entry_addr(page_idx);
             let mut entry = [0_u8; DIGEST_BYTES];
-            self.load_region_in_page(entry_addr, &mut entry);
+            self.load_region_in_page(entry_addr, &mut entry)?;
             let actual = Digest::try_from(entry)?;
             tracing::debug!(
                 "page_idx: {page_idx}, page_addr: 0x{page_addr:08x} entry_addr: 0x{entry_addr:08x}"
@@ -280,9 +296,9 @@ impl MemoryImage {
         let root_page_addr = self.info.root_page_addr;
         let root_page_bytes = self.info.num_root_entries * DIGEST_BYTES as u32;
         let mut root_page = vec![0_u8; root_page_bytes as usize];
-        self.load_region_in_page(root_page_addr, &mut root_page);
-        let expected = hash_page_bytes(&root_page);
-        let root = self.compute_root_hash();
+        self.load_region_in_page(root_page_addr, &mut root_page)?;
+        let expected = hash_page_bytes(&root_page)?;
+        let root = self.compute_root_hash()?;
         if expected != root {
             anyhow::bail!("Invalid root hash: {} != {}", expected, root);
         }
@@ -291,7 +307,7 @@ impl MemoryImage {
     }
 
     /// Compute and return the root merkle entry of this image.
-    pub fn compute_root_hash(&self) -> Digest {
+    pub fn compute_root_hash(&self) -> Result<Digest> {
         let root_page = self
             .pages
             .get(&self.info.root_idx)
@@ -300,20 +316,23 @@ impl MemoryImage {
     }
 
     /// Compute and return the ImageID of this image.
-    pub fn compute_id(&self) -> Digest {
-        compute_image_id(&self.compute_root_hash(), self.pc)
+    pub fn compute_id(&self) -> Result<Digest> {
+        Ok(compute_image_id(&self.compute_root_hash()?, self.pc))
     }
 }
 
-fn hash_page_bytes(page: &[u8]) -> Digest {
+fn hash_page_bytes(page: &[u8]) -> Result<Digest> {
     let mut state = SHA256_INIT;
-    assert!(page.len() % BLOCK_BYTES == 0);
+    ensure!(
+        page.len() % BLOCK_BYTES == 0,
+        "Page size must be a multiple of BLOCK_BYTES"
+    );
     for block in page.chunks_exact(BLOCK_BYTES) {
         let block1 = Digest::try_from(&block[0..DIGEST_BYTES]).unwrap();
         let block2 = Digest::try_from(&block[DIGEST_BYTES..BLOCK_BYTES]).unwrap();
         state = *Impl::compress(&state, &block1, &block2);
     }
-    state
+    Ok(state)
 }
 
 #[cfg(test)]
@@ -328,7 +347,9 @@ mod tests {
     use crate::{elf::Program, image::PageTableInfo, MemoryImage};
 
     fn page_table_size(max_mem: u32, page_size: u32) -> u32 {
-        PageTableInfo::new(max_mem, page_size)._page_table_size
+        PageTableInfo::new(max_mem, page_size)
+            .unwrap()
+            ._page_table_size
     }
 
     #[test]
@@ -351,7 +372,7 @@ mod tests {
     #[test]
     fn page_table_info() {
         const PAGE_SIZE_1K: u32 = 1024;
-        let info = PageTableInfo::new(PAGE_TABLE.start() as u32, PAGE_SIZE_1K);
+        let info = PageTableInfo::new(PAGE_TABLE.start() as u32, PAGE_SIZE_1K).unwrap();
         assert_eq!(info._page_table_size, 7035584);
         assert_eq!(info._page_table_size / PAGE_SIZE_1K, 6870);
         assert_eq!(info._page_table_size / PAGE_SIZE_1K * PAGE_SIZE_1K, 7034880);
@@ -382,7 +403,7 @@ mod tests {
         // Layer 2:   8M / 1K =   8K pages =>   8K * 32 = 256K
         // Layer 3: 256K / 1K =  256 pages =>  256 * 32 =   8K
         // Layer 4:   8K / 1K =    8 pages =>    8 * 32 =  256
-        let info = PageTableInfo::new(256 * 1024 * 1024, PAGE_SIZE_1K);
+        let info = PageTableInfo::new(256 * 1024 * 1024, PAGE_SIZE_1K).unwrap();
         assert_eq!(
             info._layers,
             vec![8 * 1024 * 1024, 256 * 1024, 8 * 1024, 256]
@@ -412,7 +433,7 @@ mod tests {
         // Layer 1: 256M / 4K =  64K pages =>  64K * 32 =   2M
         // Layer 2:   2M / 4K =  512 pages =>  512 * 32 =  16K
         // Layer 3:  16K / 4K =    4 pages =>    4 * 32 =  128
-        let info = PageTableInfo::new(256 * 1024 * 1024, PAGE_SIZE_4K);
+        let info = PageTableInfo::new(256 * 1024 * 1024, PAGE_SIZE_4K).unwrap();
         assert_eq!(info._layers, vec![2 * 1024 * 1024, 16 * 1024, 128]);
         assert_eq!(info._page_table_size, 2 * 1024 * 1024 + 16 * 1024 + 128);
     }
@@ -440,7 +461,7 @@ mod tests {
         // 0x1AA0: P5
         // 0x1AC0: Root
 
-        let info = PageTableInfo::new(0x1A00, PAGE_SIZE_1K);
+        let info = PageTableInfo::new(0x1A00, PAGE_SIZE_1K).unwrap();
         assert_eq!(info._layers, vec![192]);
         assert_eq!(info._page_table_size, 192);
         assert_eq!(info.root_addr, 0x1AC0);
