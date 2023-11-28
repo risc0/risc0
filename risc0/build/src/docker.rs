@@ -196,7 +196,7 @@ fn compute_image_id(elf_path: &Path) -> Result<String> {
     let program = Program::load_elf(&elf, GUEST_MAX_MEM as u32).context("unable to load elf")?;
     let image =
         MemoryImage::new(&program, PAGE_SIZE as u32).context("unable to create memory image")?;
-    Ok(image.compute_id().to_string())
+    Ok(image.compute_id()?.to_string())
 }
 
 // requires Docker to be installed
@@ -233,15 +233,15 @@ mod test {
         build("../../risc0/zkvm/methods/guest/Cargo.toml");
         compare_image_id(
             "risc0_zkvm_methods_guest/multi_test",
-            "c541adb07e6c53006cc7da7b359eb6e9841017d993e273948ba599eb4b6ba50f",
+            "f0ae48f047b2bb534a6a9d7a6c2cdd5ff78b91ce56ed02ac866c99504286acd2",
         );
         compare_image_id(
             "risc0_zkvm_methods_guest/hello_commit",
-            "ca91229dc6b2ffcca545a13a13b914ab84486be7963752e8ed5a098ab8b0918b",
+            "398933ef950f9d78fec92aa087f9ddaa124152729bc456582a62e2ea5de241fd",
         );
         compare_image_id(
             "risc0_zkvm_methods_guest/slice_io",
-            "1f6704f568b11cbee1d8f8a0c73959e844e8f78579ce3b6c4930f71531dab902",
+            "d2859b2cfa045d5eb283f964a287929ee66fa08011a9d60eda56c0e4dadcee6e",
         );
     }
 }

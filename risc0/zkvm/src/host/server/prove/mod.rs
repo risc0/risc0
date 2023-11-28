@@ -125,7 +125,7 @@ impl Segment {
         prover.prove_segment(ctx, self)
     }
 
-    fn prepare_globals(&self) -> Vec<Elem> {
+    fn prepare_globals(&self) -> Result<Vec<Elem>> {
         let mut io = vec![Elem::INVALID; CircuitImpl::OUTPUT_SIZE];
         tracing::debug!("run> pc: 0x{:08x}", self.pre_image.pc);
 
@@ -144,7 +144,7 @@ impl Segment {
         offset += WORD_SIZE;
 
         // initialize ImageID
-        let merkle_root = self.pre_image.compute_root_hash();
+        let merkle_root = self.pre_image.compute_root_hash()?;
         let merkle_root = merkle_root.as_words();
         for i in 0..DIGEST_WORDS {
             let bytes = merkle_root[i].to_le_bytes();
@@ -153,7 +153,7 @@ impl Segment {
             }
         }
 
-        io
+        Ok(io)
     }
 }
 
