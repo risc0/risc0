@@ -16,6 +16,7 @@ Join the conversation: [Discord](https://discord.gg/risczero)
 Full recordings and slides from past sessions are available [here](https://www.youtube.com/playlist?list=PLcPzhUaCxlCjdhONxEYZ1dgKjZh3ZvPtl)
 
 ### Showcases & Use Cases
+
 - [Unlocking the ZK Future: Uses Cases for ZK](https://www.youtube.com/watch?v=J4YHSdG0KnA&list=PLcPzhUaCxlCjdhONxEYZ1dgKjZh3ZvPtl&index=1)
 - [Intro to Zeth: a block prover for Ethereum (built on Bonsai)](https://www.youtube.com/watch?v=4pBmf839eOA&list=PLcPzhUaCxlCjdhONxEYZ1dgKjZh3ZvPtl&index=2)
 
