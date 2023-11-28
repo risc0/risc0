@@ -13,7 +13,7 @@ bonsai-ethereum-contracts = { version = "0.5.0", path = "ethereum" }
 bonsai-ethereum-relay = { version = "0.5.0", default-features = false, path = "ethereum-relay" }
 bonsai-rest-api-mock = { version = "0.5.0", default-features = false, path = "rest-api-mock" }
 bonsai-sdk = { version = "0.5.0", default-features = false, path = "sdk" }
-ethers = { version = "2.0",  default-features = false }
+ethers = { version = "2.0", default-features = false }
 ethers-signers = { version = "2.0", default-features = false }
 risc0-build = { version = "0.20.0-alpha.1", default-features = false, path = "../risc0/build" }
 risc0-zkvm = { version = "0.20.0-alpha.1", default-features = false, path = "../risc0/zkvm" }
