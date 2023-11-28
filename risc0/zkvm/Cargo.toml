@@ -184,5 +184,5 @@ std = [
   "risc0-circuit-rv32im/std",
   "risc0-zkp/std",
   "serde/std",
-  "sha2/std"
+  "sha2?/std"
 ]
