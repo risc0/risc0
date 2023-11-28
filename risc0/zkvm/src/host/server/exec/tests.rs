@@ -67,7 +67,7 @@ fn basic() {
         image,
     };
     let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
-    let pre_image_id = image.compute_id();
+    let pre_image_id = image.compute_id().unwrap();
 
     let mut exec = ExecutorImpl::new(env, image).unwrap();
     let session = exec.run().unwrap();
@@ -76,7 +76,7 @@ fn basic() {
 
     assert_eq!(segments.len(), 1);
     assert_eq!(segments[0].exit_code, ExitCode::Halted(0));
-    assert_eq!(segments[0].pre_image.compute_id(), pre_image_id);
+    assert_eq!(segments[0].pre_image.compute_id().unwrap(), pre_image_id);
     assert_ne!(segments[0].post_image_id, pre_image_id);
     assert_eq!(segments[0].index, 0);
 }
@@ -102,7 +102,7 @@ fn system_split() {
 
     let program = Program { entry, image };
     let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
-    let pre_image_id = image.compute_id();
+    let pre_image_id = image.compute_id().unwrap();
 
     let mut exec = ExecutorImpl::new(env, image).unwrap();
     let session = exec.run().unwrap();
@@ -111,11 +111,11 @@ fn system_split() {
 
     assert_eq!(segments.len(), 2);
     assert_eq!(segments[0].exit_code, ExitCode::SystemSplit);
-    assert_eq!(segments[0].pre_image.compute_id(), pre_image_id);
+    assert_eq!(segments[0].pre_image.compute_id().unwrap(), pre_image_id);
     assert_ne!(segments[0].post_image_id, pre_image_id);
     assert_eq!(segments[1].exit_code, ExitCode::Halted(0));
     assert_eq!(
-        segments[1].pre_image.compute_id(),
+        segments[1].pre_image.compute_id().unwrap(),
         segments[0].post_image_id
     );
     assert_eq!(segments[0].index, 0);

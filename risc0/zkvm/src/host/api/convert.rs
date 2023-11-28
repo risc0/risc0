@@ -290,7 +290,7 @@ impl TryFrom<pb::core::PageTableInfo> for PageTableInfo {
     type Error = anyhow::Error;
 
     fn try_from(value: pb::core::PageTableInfo) -> Result<Self> {
-        Ok(Self::new(value.page_table_addr, value.page_size))
+        Self::new(value.page_table_addr, value.page_size)
     }
 }
 

@@ -79,15 +79,15 @@ impl MemoryState {
     }
 
     #[track_caller]
-    fn load_u32(&self, addr: u32) -> u32 {
+    fn load_u32(&self, addr: u32) -> Result<u32> {
         // tracing::debug!("load_u32: 0x{addr:08X}");
         assert_eq!(addr % WORD_SIZE as u32, 0, "unaligned load");
         let mut bytes = [0u8; WORD_SIZE];
-        self.ram.load_region_in_page(addr, &mut bytes);
-        u32::from_le_bytes(bytes)
+        self.ram.load_region_in_page(addr, &mut bytes)?;
+        Ok(u32::from_le_bytes(bytes))
     }
 
-    fn load_register(&self, idx: usize) -> u32 {
+    fn load_register(&self, idx: usize) -> Result<u32> {
         self.load_u32(get_register_addr(idx))
     }
 
@@ -205,7 +205,7 @@ impl CircuitStepHandler<Elem> for MachineContext {
                 Ok(())
             }
             "ramRead" => {
-                (outs[0], outs[1], outs[2], outs[3]) = self.ram_read(cycle, args[0], args[1]);
+                (outs[0], outs[1], outs[2], outs[3]) = self.ram_read(cycle, args[0], args[1])?;
                 Ok(())
             }
             "plonkWrite" => {
@@ -299,13 +299,13 @@ impl MachineContext {
     fn get_major(&mut self, cycle: Elem, pc: Elem) -> Result<Elem> {
         let cycle: u32 = cycle.into();
         let pc: u32 = pc.into();
-        let insn = self.memory.load_u32(pc);
+        let insn = self.memory.load_u32(pc)?;
         let opcode = OpCode::decode(insn, pc)?;
 
         if opcode.major == MajorType::ECall {
-            let minor = self.memory.load_register(REG_T0);
+            let minor = self.memory.load_register(REG_T0)?;
             if minor == ecall::HALT {
-                let mode = self.memory.load_register(REG_A0);
+                let mode = self.memory.load_register(REG_A0)?;
                 if mode == halt::PAUSE {
                     tracing::debug!("sys_pause[{cycle}]> pc: 0x{pc:08x}");
                     if self.faults.writes.is_empty() {
@@ -589,7 +589,7 @@ impl MachineContext {
         tracing::trace!("{}", formatted);
     }
 
-    fn ram_read(&mut self, cycle: usize, addr: Elem, op: Elem) -> Quad {
+    fn ram_read(&mut self, cycle: usize, addr: Elem, op: Elem) -> Result<Quad> {
         let addr: u32 = addr.into();
         let op: u32 = op.into();
         let info = &self.memory.ram.info;
@@ -604,9 +604,9 @@ impl MachineContext {
         }
 
         let addr = addr * WORD_SIZE as u32;
-        let word = self.memory.load_u32(addr);
+        let word = self.memory.load_u32(addr)?;
         // tracing::debug!("ram_read: 0x{addr:08X} -> 0x{word:08X}");
-        split_word8(word)
+        Ok(split_word8(word))
     }
 
     fn ram_write(&mut self, addr: Elem, data: Quad, op: Elem) -> Result<()> {
