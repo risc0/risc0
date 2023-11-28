@@ -120,7 +120,7 @@ impl CallNode {
             }
         }
 
-        writeln!(output, "{}Calls:", indent_str).unwrap();
+        writeln!(output, "{indent_str}Calls:").unwrap();
         for (key, node_ref) in &self.calls {
             let node = node_ref.borrow();
             writeln!(output, "{indent_str}  {key} ({key}):").unwrap();
@@ -163,8 +163,7 @@ pub struct Profiler {
     profile: ProfileBuilder,
 }
 
-/// Represents a frame. Prefer to export the whole profiler proto using
-/// profiler.as_protobuf().
+/// Represents a frame.
 #[derive(Clone, Debug)]
 pub struct Frame {
     /// Function name
