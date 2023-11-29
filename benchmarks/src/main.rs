@@ -47,7 +47,6 @@ enum Command {
     Fibonacci,
     Membership,
     Sudoku,
-    Zeth,
 }
 
 fn main() {
@@ -122,10 +121,5 @@ fn main() {
     if cli.command == Command::All || cli.command == Command::Sudoku {
         println!("Benchmarking sudoku");
         run_jobs::<sudoku::Job>(&cli.out, sudoku::new_jobs());
-    }
-
-    if cli.command == Command::All || cli.command == Command::Zeth {
-        println!("Benchmarking zeth");
-        run_jobs::<zeth::Job>(&cli.out, zeth::new_jobs());
     }
 }

@@ -17,7 +17,6 @@ rustflags = [
   "-Doverflowing_literals",
   "-Dpath_statements",
   "-Dpatterns_in_fns_without_body",
-  "-Dprivate_in_public",
   "-Dtrivial_numeric_casts",
   "-Dunconditional_recursion",
   "-Dunused_allocation",

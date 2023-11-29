@@ -4,11 +4,10 @@ RISC Zero's Study Club sessions aim to introduce the pre-requisite concepts nece
 
 ## Upcoming Sessions
 
-- **October 25**: Intro to [Zeth](https://risczero.com/news/zeth-release), with Wolfgang Welz
-- **November 1**: Use cases for ZK in blockchain, with Steven Li
-- **November 8**: zkVM Performance Optimization, with Victor Graf
+- **December 13**: zkML on RISC Zero
+- **December 20**: Bonsai under the hood
 
-All sessions are hosted at **9am Pacific / 4PM UTC**. <br/>
+All sessions are hosted at **9am Pacific / 5PM UTC**. <br/>
 Join the session: [Zoom link] <br/>
 Join the conversation: [Discord](https://discord.gg/risczero)
 
@@ -16,10 +15,16 @@ Join the conversation: [Discord](https://discord.gg/risczero)
 
 Full recordings and slides from past sessions are available [here](https://www.youtube.com/playlist?list=PLcPzhUaCxlCjdhONxEYZ1dgKjZh3ZvPtl)
 
-### Zero-Knowledge Virtual Machines
+### Showcases & Use Cases
+
+- [Unlocking the ZK Future: Uses Cases for ZK](https://www.youtube.com/watch?v=J4YHSdG0KnA&list=PLcPzhUaCxlCjdhONxEYZ1dgKjZh3ZvPtl&index=1)
+- [Intro to Zeth: a block prover for Ethereum (built on Bonsai)](https://www.youtube.com/watch?v=4pBmf839eOA&list=PLcPzhUaCxlCjdhONxEYZ1dgKjZh3ZvPtl&index=2)
+
+### zkVMs & Developer Tooling
 
 - [What RISC-V has to do with RISC Zero's zkVM](https://www.youtube.com/watch?v=11DIflEwx50&list=PLcPzhUaCxlCjdhONxEYZ1dgKjZh3ZvPtl&index=5)
 - [Continuations: Scaling in zkVM](https://www.youtube.com/watch?v=h1qWnf-M5lo&list=PLcPzhUaCxlCjdhONxEYZ1dgKjZh3ZvPtl&index=9)
+- [zkVM Performance Tips & Tricks](https://www.youtube.com/watch?v=MckieUBpakw&list=PLcPzhUaCxlCjdhONxEYZ1dgKjZh3ZvPtl&index=1)
 
 ### Mathematical Primitives
 
@@ -40,4 +45,3 @@ Full recordings and slides from past sessions are available [here](https://www.y
 You may also be interested in some of our other [talks and podcasts](https://www.youtube.com/watch?v=MYYb5TXdm4c&list=PLcPzhUaCxlCgCvzkkaBWzVuHdBRsTNxj1) or our developer-focused workshops from [ZKHack III](https://www.youtube.com/watch?v=ZFVjooWdXVE&list=PLcPzhUaCxlCgig7ofeARMPwQ8vbuD6hC5) and [ZKHack Lisbon](https://www.youtube.com/watch?v=saVD9qo3aJ0).
 
 [Zoom Link]: https://zoom.us/j/95830917265
-[continuations]: https://www.risczero.com/news/continuations
