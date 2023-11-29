@@ -776,8 +776,13 @@ impl Default for VerifierContext {
 
 #[cfg(test)]
 mod tests {
-    const RISC0_RECEIPT_META_DIGEST: &str =
-        "ff2b40ef5fc5f4a7dac43eb214d61dcf6665f7bedb6cfda244808318e066f656";
+    use crate::receipt_metadata::MaybePruned;
+    use crate::ExitCode::Halted;
+
+    const IMAGE_ID: [u32; 8] = [
+        3877313773, 4166950669, 1851257837, 1474316178, 3714943358, 2342301681, 2883381307,
+        234838297,
+    ];
 
     const RISC0_GROTH16_SEAL: &str = r#"
     {
@@ -792,14 +797,42 @@ mod tests {
     }
     "#;
 
+    use hex::FromHex;
+
     use super::*;
 
     #[test]
-    fn test_from_seal() {
+    fn test_groth16_receipt() {
         let seal: Groth16Seal = serde_json::from_str(RISC0_GROTH16_SEAL).unwrap();
-        let groth16 =
-            Groth16Proof::from_seal(&seal, Digest::from_hex(RISC0_RECEIPT_META_DIGEST).unwrap())
-                .unwrap();
-        groth16.verify().unwrap();
+        let meta: ReceiptMetadata = ReceiptMetadata {
+            pre: MaybePruned::Value(SystemState {
+                pc: 2103560,
+                merkle_root: Digest::from_hex(
+                    "5bcc4b8e50095f5a5e28f324170ef29d25ee52d966ad996159644c63f3b11eba",
+                )
+                .unwrap(),
+            }),
+            post: MaybePruned::Value(SystemState {
+                pc: 2111560,
+                merkle_root: Digest::from_hex(
+                    "5bcc4b8e50095f5a5e28f324170ef29d25ee52d966ad996159644c63f3b11eba",
+                )
+                .unwrap(),
+            }),
+            exit_code: Halted(0),
+            input: Digest::default(),
+            output: MaybePruned::Value(Some(Output {
+                journal: MaybePruned::Value(vec![135u8, 1, 0, 0, 0, 0, 0, 0]),
+                assumptions: MaybePruned::Value(Assumptions(vec![])),
+            })),
+        };
+        let receipt = Receipt::new(
+            InnerReceipt::Groth16(Groth16Receipt {
+                seal: seal.to_vec(),
+                meta,
+            }),
+            vec![],
+        );
+        receipt.verify(IMAGE_ID).unwrap();
     }
 }
