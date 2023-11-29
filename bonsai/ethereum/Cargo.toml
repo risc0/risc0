@@ -11,7 +11,7 @@ repository = { workspace = true }
 anyhow = "1.0"
 
 [dependencies]
-ethers = { version = "=2.0.10", features = ["rustls", "ws"] }
+ethers = { version = "2.0", features = ["rustls", "ws"] }
 hex = { version = "0.4", optional = true }
 risc0-zkvm = { workspace = true, default-features = false, optional = true }
 
