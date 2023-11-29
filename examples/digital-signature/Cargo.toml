@@ -20,4 +20,3 @@ test-log = { version = "0.2", default-features = false, features = ["trace"] }
 default = []
 cuda = ["risc0-zkvm/cuda"]
 prove = ["risc0-zkvm/cuda"]
-profiler = ["risc0-zkvm/profiler"]

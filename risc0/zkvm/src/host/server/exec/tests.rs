@@ -23,7 +23,7 @@ use anyhow::Result;
 use bytes::Bytes;
 use risc0_zkvm_methods::{
     multi_test::{MultiTestSpec, SYS_MULTI_TEST},
-    HELLO_COMMIT_ELF, MULTI_TEST_ELF, SLICE_IO_ELF, STANDARD_LIB_ELF,
+    HELLO_COMMIT_ELF, MULTI_TEST_ELF, RAND_ELF, SLICE_IO_ELF, STANDARD_LIB_ELF,
 };
 use risc0_zkvm_platform::{fileno, syscall::nr::SYS_RANDOM, PAGE_SIZE, WORD_SIZE};
 use sha2::{Digest as _, Sha256};
@@ -31,7 +31,10 @@ use test_log::test;
 
 use crate::{
     host::server::{
-        exec::syscall::{Syscall, SyscallContext},
+        exec::{
+            profiler::{Frame, Profiler},
+            syscall::{Syscall, SyscallContext},
+        },
         testutils,
     },
     serde::to_vec,
@@ -796,6 +799,16 @@ fn random() {
 }
 
 #[test]
+#[should_panic(expected = "Guest code attempted to call getrandom but it was disabled")]
+fn getrandom_panic() {
+    let env = ExecutorEnv::builder().build().unwrap();
+    let _session = ExecutorImpl::from_elf(env, RAND_ELF)
+        .unwrap()
+        .run()
+        .unwrap();
+}
+
+#[test]
 fn slice_io() {
     let run = |slice: &[u8]| {
         let env = ExecutorEnv::builder()
@@ -838,12 +851,9 @@ fn fault() {
     assert_eq!(session.exit_code, ExitCode::Fault);
 }
 
-#[cfg(feature = "profiler")]
 #[test]
 fn profiler() {
     use risc0_binfmt::Program;
-
-    use crate::host::profiler::{Frame, Profiler};
 
     let mut profiler = Profiler::new(MULTI_TEST_ELF, Some("multi_test.elf")).unwrap();
     let env = ExecutorEnv::builder()

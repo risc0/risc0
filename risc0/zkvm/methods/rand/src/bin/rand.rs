@@ -12,15 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//! The execution phase is implemented by this module.
-//!
-//! The result of the execution phase is a [crate::Session]. Each
-//! [crate::Session] contains one or more [crate::Segment]s, each of which
-//! contains an execution trace of the specified program.
+#![no_std]
+#![no_main]
 
-pub(crate) mod executor;
-mod monitor;
-pub(crate) mod profiler;
-pub(crate) mod syscall;
-#[cfg(test)]
-mod tests;
+extern crate alloc;
+
+use alloc::vec;
+
+use getrandom::getrandom;
+
+risc0_zkvm::entry!(main);
+
+pub fn main() {
+    // This should panic
+    let rand_buf = &mut vec![0u8; 8];
+    let _res = getrandom(rand_buf);
+}
