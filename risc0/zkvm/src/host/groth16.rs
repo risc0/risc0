@@ -86,7 +86,7 @@ impl Groth16Seal {
 
     /// Serialize the Groth16 seal into Vec<u8>
     pub fn to_vec(&self) -> Vec<u8> {
-        let mut result = Vec::new();
+        let mut result = Vec::with_capacity(Self::SIZE);
 
         // Serialize 'a'
         for item in &self.a {
