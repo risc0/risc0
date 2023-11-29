@@ -64,10 +64,16 @@ bytes = { version = "1.4", features = ["serde"], optional = true }
 crypto-bigint = { version = "0.5", default-features = false, features = [
   "rand",
 ], optional = true }
+elf = { version = "0.7", default-features = false, optional = true }
+lazy-regex = { version = "3.1", optional = true }
 num-bigint = { version = "0.4", default-features = false }
 num-derive = "0.4"
-num-traits = { version = "0.2", default-features = false }
+num-traits = { version = "0.2", default-features = false, optional = true }
 prost = { version = "0.12", optional = true }
+rayon = { version = "1.5", optional = true }
+risc0-circuit-recursion = { workspace = true }
+risc0-circuit-rv32im = { workspace = true }
+rustc-demangle = { version = "0.1", optional = true }
 sha2 = { version = "0.10", default-features = false }
 tempfile = { version = "3", optional = true }
 tracing = { version = "0.1", default-features = false, features = [
@@ -138,13 +144,14 @@ prove = [
   "dep:bincode",
   "dep:bytes",
   "dep:crypto-bigint",
-  "dep:getrandom",
+  "dep:elf",
   "dep:lazy-regex",
   "dep:num-traits",
   "dep:prost",
   "dep:prost-build",
   "dep:protoc-prebuilt",
   "dep:rayon",
+  "dep:rustc-demangle",
   "dep:tempfile",
   "dep:typetag",
   "risc0-circuit-recursion/prove",
