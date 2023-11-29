@@ -1,1 +1,2 @@
 *.zip filter=lfs diff=lfs merge=lfs -text
+compact_proof/groth16/verify.circom filter=lfs diff=lfs merge=lfs -text

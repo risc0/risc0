@@ -39,6 +39,7 @@ fn main() {
 
     let map = HashMap::from([
         ("risc0-zkvm-methods-guest", GuestOptions::default()),
+        ("risc0-zkvm-methods-rand", GuestOptions::default()),
         (
             "risc0-zkvm-methods-std",
             GuestOptions {
