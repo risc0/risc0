@@ -209,8 +209,8 @@ impl Session {
         let post_state = SystemState {
             pc: self.post_image.pc,
             merkle_root: match self.exit_code {
-                ExitCode::Halted(_) => last_segment.pre_image.compute_root_hash(),
-                _ => self.post_image.compute_root_hash(),
+                ExitCode::Halted(_) => last_segment.pre_image.compute_root_hash()?,
+                _ => self.post_image.compute_root_hash()?,
             },
         };
 

@@ -159,7 +159,7 @@ async fn e2e_test_counter() {
             Program::load_elf(SLICE_IO_ELF, GUEST_MAX_MEM as u32).expect("unable to load elf");
         let image =
             MemoryImage::new(&program, PAGE_SIZE as u32).expect("unable to create memory image");
-        let image_id = hex::encode(image.compute_id());
+        let image_id = hex::encode(image.compute_id().unwrap());
         let image = bincode::serialize(&image).expect("Failed to serialize memory img");
         upload_img(bonsai_client.clone(), image_id.clone(), image)
             .await
@@ -303,7 +303,7 @@ async fn e2e_test_counter_publish_mode() {
         Program::load_elf(SLICE_IO_ELF, GUEST_MAX_MEM as u32).expect("unable to load elf");
     let image =
         MemoryImage::new(&program, PAGE_SIZE as u32).expect("unable to create memory image");
-    let image_id = hex::encode(image.compute_id());
+    let image_id = hex::encode(image.compute_id().unwrap());
     let image = bincode::serialize(&image).expect("Failed to serialize memory img");
     upload_img(bonsai_client.clone(), image_id.clone(), image)
         .await

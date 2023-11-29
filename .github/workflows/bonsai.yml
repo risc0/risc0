@@ -60,6 +60,8 @@ jobs:
 
       - name: Install Foundry
         uses: risc0/foundry-toolchain@2fe7e70b520f62368a0e3c464f997df07ede420f
+        with:
+          version: nightly-34f684ddfacc5b2ed371353ba6f730c485616ffe
 
       - name: Cargo install cargo-risczero
         run: cargo install --force --path risc0/cargo-risczero
