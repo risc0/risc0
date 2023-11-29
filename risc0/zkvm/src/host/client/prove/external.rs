@@ -80,7 +80,7 @@ impl Prover for ExternalProver {
 
         let program = Program::load_elf(elf, GUEST_MAX_MEM as u32)?;
         let image = MemoryImage::new(&program, PAGE_SIZE as u32)?;
-        let image_id = image.compute_id();
+        let image_id = image.compute_id()?;
         let client = ApiClient::new_sub_process(&self.r0vm_path)?;
         let binary = Binary::new_elf_inline(elf.to_vec().into());
         let receipt = client.prove(&env, opts.clone(), binary)?;
