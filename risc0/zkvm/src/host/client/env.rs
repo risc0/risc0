@@ -83,6 +83,7 @@ pub struct ExecutorEnv<'a> {
     pub(crate) trace: Vec<Rc<RefCell<dyn TraceCallback + 'a>>>,
     pub(crate) assumptions: Rc<RefCell<Assumptions>>,
     pub(crate) segment_path: Option<PathBuf>,
+    pub(crate) pprof_out: Option<PathBuf>,
 }
 
 impl<'a> ExecutorEnv<'a> {
@@ -114,7 +115,7 @@ impl<'a> ExecutorEnvBuilder<'a> {
     /// After calling `build`, the [ExecutorEnvBuilder] will be reset to
     /// default.
     pub fn build(&mut self) -> Result<ExecutorEnv<'a>> {
-        let inner = mem::take(&mut self.inner);
+        let mut inner = mem::take(&mut self.inner);
 
         if !inner.input.is_empty() {
             let reader = Cursor::new(inner.input.clone());
@@ -122,6 +123,12 @@ impl<'a> ExecutorEnvBuilder<'a> {
                 .posix_io
                 .borrow_mut()
                 .with_read_fd(fileno::STDIN, reader);
+        }
+
+        if inner.pprof_out.is_none() {
+            if let Ok(env_var) = std::env::var("RISC0_PPROF_OUT") {
+                inner.pprof_out = Some(env_var.into());
+            }
         }
 
         Ok(inner)
@@ -334,6 +341,12 @@ impl<'a> ExecutorEnvBuilder<'a> {
     /// Set the path where segments will be stored.
     pub fn segment_path<P: AsRef<Path>>(&mut self, path: P) -> &mut Self {
         self.inner.segment_path = Some(path.as_ref().to_path_buf());
+        self
+    }
+
+    /// Enable the profiler and output results to the specified path.
+    pub fn enable_profiler<P: AsRef<Path>>(&mut self, path: P) -> &mut Self {
+        self.inner.pprof_out = Some(path.as_ref().to_path_buf());
         self
     }
 }
