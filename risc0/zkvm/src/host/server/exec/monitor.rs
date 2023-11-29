@@ -453,7 +453,7 @@ impl MemoryMonitor {
         Ok(())
     }
 
-    pub fn build_image(&mut self, pc: u32) -> MemoryImage {
+    pub fn build_image(&mut self, pc: u32) -> Result<MemoryImage> {
         // self.faults.dump();
 
         // Write all dirty pages back to the memory image.
@@ -477,9 +477,9 @@ impl MemoryMonitor {
 
         // Update the merkle tree and PC.
         self.image
-            .hash_pages_iter(self.faults.writes.iter().cloned());
+            .hash_pages_iter(self.faults.writes.iter().cloned())?;
         self.image.pc = pc;
-        self.image.clone()
+        Ok(self.image.clone())
     }
 }
 

@@ -46,7 +46,7 @@ pub fn execute_locally(elf: &[u8], input: Vec<u8>) -> Result<Output> {
 fn get_digest(elf: &[u8]) -> Result<String> {
     let program = Program::load_elf(elf, GUEST_MAX_MEM as u32)?;
     let image = MemoryImage::new(&program, PAGE_SIZE as u32)?;
-    Ok(hex::encode(image.compute_id()))
+    Ok(hex::encode(image.compute_id()?))
 }
 
 pub fn prove_alpha(elf: &[u8], input: Vec<u8>) -> Result<Output> {
