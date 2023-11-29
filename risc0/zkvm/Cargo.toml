@@ -173,6 +173,7 @@ prove = [
 ]
 std = [
   "anyhow/std",
+  "hex/std",
   "num-traits?/std",
   "risc0-binfmt/std",
   "risc0-circuit-recursion/std",

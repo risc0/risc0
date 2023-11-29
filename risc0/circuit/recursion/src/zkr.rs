@@ -17,10 +17,8 @@
 use std::io::Read;
 
 use anyhow::{Context, Result};
-use risc0_zkp::core::digest::Digest;
 
 const ZKR_ZIP: &[u8] = include_bytes!(concat!(env!("OUT_DIR"), "/recursion_zkr.zip"));
-const CONTROL_ID_SUFFIX: &str = ".control_id";
 
 /// Lookup and return the zkr recursion program as a vector of words.
 ///
@@ -47,22 +45,12 @@ pub fn get_zkr(name: &str) -> Result<Vec<u32>> {
 /// ```
 pub fn get_all_zkrs() -> Result<Vec<(String, Vec<u32>)>> {
     let mut zip = zip::ZipArchive::new(std::io::Cursor::new(ZKR_ZIP)).unwrap();
-    let files: Result<Vec<Option<String>>> = (0..zip.len())
-        .map(|idx| {
-            let f = zip.by_index(idx)?;
-            let name = f.name().to_string();
+    let files: Vec<String> = (0..zip.len())
+        .map(|idx| Ok(zip.by_index(idx)?.name().to_string()))
+        .collect::<Result<_>>()?;
 
-            if name.ends_with(CONTROL_ID_SUFFIX) {
-                Ok(None)
-            } else {
-                Ok(Some(name))
-            }
-        })
-        .collect();
-
-    files?
+    files
         .into_iter()
-        .flatten()
         .map(|name| {
             let mut f = zip.by_name(&name)?;
 
@@ -72,15 +60,4 @@ pub fn get_all_zkrs() -> Result<Vec<(String, Vec<u32>)>> {
             Ok((name, Vec::from(bytemuck::cast_slice(u8vec.as_slice()))))
         })
         .collect()
-}
-
-/// Lookup the control ID for a ZKR given its filename.
-///
-/// ```rust
-/// let control_id = risc0_circuit_recursion::zkr::get_control_id("lift_20.zkr").unwrap();
-/// ```
-pub fn get_control_id(name: &str) -> Result<Digest> {
-    Ok(Digest::try_from(
-        get_zkr(&format!("{name}{CONTROL_ID_SUFFIX}"))?.as_slice(),
-    )?)
 }

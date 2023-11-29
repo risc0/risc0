@@ -50,6 +50,7 @@ use crate::{
     HalPair, ReceiptMetadata, SegmentReceipt, POSEIDON_CONTROL_ID,
 };
 
+/// TODO
 const ALLOWED_CODE_MERKLE_DEPTH: usize = 8;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
