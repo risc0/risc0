@@ -31,7 +31,10 @@ use test_log::test;
 
 use crate::{
     host::server::{
-        exec::syscall::{Syscall, SyscallContext},
+        exec::{
+            profiler::{Frame, Profiler},
+            syscall::{Syscall, SyscallContext},
+        },
         testutils,
     },
     serde::to_vec,
@@ -848,12 +851,9 @@ fn fault() {
     assert_eq!(session.exit_code, ExitCode::Fault);
 }
 
-#[cfg(feature = "profiler")]
 #[test]
 fn profiler() {
     use risc0_binfmt::Program;
-
-    use crate::host::profiler::{Frame, Profiler};
 
     let mut profiler = Profiler::new(MULTI_TEST_ELF, Some("multi_test.elf")).unwrap();
     let env = ExecutorEnv::builder()

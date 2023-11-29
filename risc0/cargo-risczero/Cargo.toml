@@ -40,7 +40,9 @@ zip = { version = "0.6", optional = true }
 
 [build-dependencies]
 risc0-build = { workspace = true, optional = true }
-tracing-subscriber = { version = "0.3", features = ["env-filter"], optional = true }
+tracing-subscriber = { version = "0.3", features = [
+  "env-filter",
+], optional = true }
 zip = { version = "0.6", optional = true }
 
 [features]
@@ -56,4 +58,3 @@ experimental = [
 ]
 metal = ["risc0-zkvm/metal"]
 r0vm = ["dep:risc0-r0vm"]
-profiler = ["risc0-zkvm/profiler", "risc0-r0vm?/profiler"]

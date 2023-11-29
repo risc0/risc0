@@ -105,30 +105,9 @@ pub trait Prover {
         elf: &[u8],
         opts: &ProverOpts,
     ) -> Result<Receipt> {
-        #[cfg(feature = "profiler")]
-        let mut env = env;
-        #[cfg(feature = "profiler")]
-        let profiler = crate::host::profiler::env::pprof_path()
-            .map(|_| -> anyhow::Result<_> {
-                let profiler = Rc::new(std::cell::RefCell::new(crate::Profiler::new(elf, None)?));
-                env.trace.push(profiler.clone());
-                Ok(profiler)
-            })
-            .transpose()?;
-
         let program = Program::load_elf(elf, GUEST_MAX_MEM as u32)?;
         let image = MemoryImage::new(&program, PAGE_SIZE as u32)?;
-        let receipt = self.prove(env, ctx, opts, image)?;
-
-        #[cfg(feature = "profiler")]
-        if let Some(profiler) = profiler {
-            let unwrapped = Rc::into_inner(profiler)
-                .ok_or(anyhow::anyhow!("failed to finalize profiler"))?
-                .into_inner();
-            crate::host::profiler::env::write_pprof_file(&unwrapped.finalize_to_vec())?;
-        }
-
-        Ok(receipt)
+        self.prove(env, ctx, opts, image)
     }
 }
 
@@ -143,30 +122,9 @@ pub trait Executor {
     ///
     /// This only executes the program and does not generate a receipt.
     fn execute_elf(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<SessionInfo> {
-        #[cfg(feature = "profiler")]
-        let mut env = env;
-        #[cfg(feature = "profiler")]
-        let profiler = crate::host::profiler::env::pprof_path()
-            .map(|_| -> anyhow::Result<_> {
-                let profiler = Rc::new(std::cell::RefCell::new(crate::Profiler::new(elf, None)?));
-                env.trace.push(profiler.clone());
-                Ok(profiler)
-            })
-            .transpose()?;
-
         let program = Program::load_elf(elf, GUEST_MAX_MEM as u32)?;
         let image = MemoryImage::new(&program, PAGE_SIZE as u32)?;
-        let session_info = self.execute(env, image)?;
-
-        #[cfg(feature = "profiler")]
-        if let Some(profiler) = profiler {
-            let unwrapped = Rc::into_inner(profiler)
-                .ok_or(anyhow::anyhow!("failed to finalize profiler"))?
-                .into_inner();
-            crate::host::profiler::env::write_pprof_file(&unwrapped.finalize_to_vec())?;
-        }
-
-        Ok(session_info)
+        self.execute(env, image)
     }
 }
 
