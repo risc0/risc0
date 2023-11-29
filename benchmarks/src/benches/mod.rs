@@ -26,4 +26,3 @@ pub mod iter_pedersen;
 pub mod iter_sha2;
 pub mod membership;
 pub mod sudoku;
-pub mod zeth;
