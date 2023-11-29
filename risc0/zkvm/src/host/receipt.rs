@@ -776,6 +776,9 @@ impl Default for VerifierContext {
 
 #[cfg(test)]
 mod tests {
+    use hex::FromHex;
+
+    use super::*;
     use crate::receipt_metadata::MaybePruned;
     use crate::ExitCode::Halted;
 
@@ -797,32 +800,26 @@ mod tests {
     }
     "#;
 
-    use hex::FromHex;
-
-    use super::*;
-
     #[test]
     fn test_groth16_receipt() {
         let seal: Groth16Seal = serde_json::from_str(RISC0_GROTH16_SEAL).unwrap();
+        let journal: Vec<u8> = vec![135, 1, 0, 0, 0, 0, 0, 0];
+        let merkle_root =
+            Digest::from_hex("5bcc4b8e50095f5a5e28f324170ef29d25ee52d966ad996159644c63f3b11eba")
+                .unwrap();
         let meta: ReceiptMetadata = ReceiptMetadata {
             pre: MaybePruned::Value(SystemState {
                 pc: 2103560,
-                merkle_root: Digest::from_hex(
-                    "5bcc4b8e50095f5a5e28f324170ef29d25ee52d966ad996159644c63f3b11eba",
-                )
-                .unwrap(),
+                merkle_root,
             }),
             post: MaybePruned::Value(SystemState {
                 pc: 2111560,
-                merkle_root: Digest::from_hex(
-                    "5bcc4b8e50095f5a5e28f324170ef29d25ee52d966ad996159644c63f3b11eba",
-                )
-                .unwrap(),
+                merkle_root,
             }),
             exit_code: Halted(0),
             input: Digest::default(),
             output: MaybePruned::Value(Some(Output {
-                journal: MaybePruned::Value(vec![135u8, 1, 0, 0, 0, 0, 0, 0]),
+                journal: MaybePruned::Value(journal.clone()),
                 assumptions: MaybePruned::Value(Assumptions(vec![])),
             })),
         };
@@ -831,7 +828,7 @@ mod tests {
                 seal: seal.to_vec(),
                 meta,
             }),
-            vec![],
+            journal,
         );
         receipt.verify(IMAGE_ID).unwrap();
     }
