@@ -100,17 +100,6 @@ tempfile = "3"
 test-log = { version = "0.2", default-features = false, features = ["trace"] }
 
 [features]
-verify = [
-  "ark-bn254",
-  "ark-groth16",
-  "ark-serialize",
-  "num-bigint",
-  "num-derive",
-  "risc0-circuit-recursion",
-  "risc0-circuit-rv32im",
-  "sha2",
-  "tracing"
-]
 client = [
   "dep:bincode",
   "dep:bonsai-sdk",
@@ -172,6 +161,11 @@ prove = [
   "risc0-zkp/prove",
   "std",
 ]
+std = [
+  "risc0-binfmt/std",
+  "risc0-zkp/std",
+  "serde/std",
+]
 std-verify = [
   "ark-bn254/std",
   "ark-groth16/std",
@@ -182,8 +176,14 @@ std-verify = [
   "risc0-circuit-rv32im/std",
   "sha2/std"
 ]
-std = [
-  "risc0-binfmt/std",
-  "risc0-zkp/std",
-  "serde/std",
+verify = [
+  "dep:ark-bn254",
+  "dep:ark-groth16",
+  "dep:ark-serialize",
+  "dep:num-bigint",
+  "dep:num-derive",
+  "dep:risc0-circuit-recursion",
+  "dep:risc0-circuit-rv32im",
+  "dep:sha2",
+  "dep:tracing"
 ]
