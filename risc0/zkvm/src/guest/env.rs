@@ -48,11 +48,16 @@ static mut ASSUMPTIONS_DIGEST: MaybePruned<Assumptions> = MaybePruned::Pruned(Di
 /// guest start and upon resuming from a pause. Setting this value ensures that
 /// the total memory image has at least 128 bits of entropy, preventing
 /// information leakage through the post-state digest.
-static mut MEMORY_IMAGE_ENTROPY: [u8; 16] = [0u8; 16];
+static mut MEMORY_IMAGE_ENTROPY: [u32; 4] = [0u32; 4];
 
 pub(crate) fn init() {
-    unsafe { HASHER = Some(Sha256::new()) };
-    unsafe { getrandom::getrandom(&mut MEMORY_IMAGE_ENTROPY).unwrap() };
+    unsafe {
+        HASHER = Some(Sha256::new());
+        syscall::sys_rand(
+            MEMORY_IMAGE_ENTROPY.as_mut_ptr(),
+            MEMORY_IMAGE_ENTROPY.len(),
+        )
+    }
 }
 
 pub(crate) fn finalize(halt: bool, user_exit: u8) {

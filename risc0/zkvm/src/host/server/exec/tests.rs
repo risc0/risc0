@@ -23,7 +23,7 @@ use anyhow::Result;
 use bytes::Bytes;
 use risc0_zkvm_methods::{
     multi_test::{MultiTestSpec, SYS_MULTI_TEST},
-    HELLO_COMMIT_ELF, MULTI_TEST_ELF, SLICE_IO_ELF, STANDARD_LIB_ELF,
+    HELLO_COMMIT_ELF, MULTI_TEST_ELF, RAND_ELF, SLICE_IO_ELF, STANDARD_LIB_ELF,
 };
 use risc0_zkvm_platform::{fileno, syscall::nr::SYS_RANDOM, PAGE_SIZE, WORD_SIZE};
 use sha2::{Digest as _, Sha256};
@@ -796,6 +796,16 @@ fn commit_hello_world() {
 #[test]
 fn random() {
     run_test(MultiTestSpec::DoRandom);
+}
+
+#[test]
+#[should_panic(expected = "Guest code attempted to call getrandom but it was disabled")]
+fn getrandom_panic() {
+    let env = ExecutorEnv::builder().build().unwrap();
+    let _session = ExecutorImpl::from_elf(env, RAND_ELF)
+        .unwrap()
+        .run()
+        .unwrap();
 }
 
 #[test]

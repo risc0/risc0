@@ -22,4 +22,7 @@ panic-handler = []
 entrypoint = []
 export-syscalls = []
 export-libm = ["dep:libm"]
+# exports a `getrandom` implementation that panics
 export-getrandom = ["dep:getrandom", "dep:bytemuck"]
+# exports a `getrandom` implementation that uses sys_random
+getrandom = ["export-getrandom"]
