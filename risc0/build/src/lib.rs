@@ -82,7 +82,8 @@ impl Risc0Method {
         let elf = fs::read(&self.elf_path).unwrap();
         let program = Program::load_elf(&elf, memory::GUEST_MAX_MEM as u32).unwrap();
         let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
-        image.compute_id()
+        // TODO: Should we panic here?
+        image.compute_id().expect("Failed to compute image ID")
     }
 
     fn rust_def(&self) -> String {

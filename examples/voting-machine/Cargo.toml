@@ -18,4 +18,3 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 default = []
 cuda = ["risc0-zkvm/cuda"]
 prove = ["risc0-zkvm/prove"]
-profiler = ["risc0-zkvm/profiler"]

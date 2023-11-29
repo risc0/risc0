@@ -18,8 +18,6 @@ pub(crate) mod api;
 pub(crate) mod client;
 pub(crate) mod control_id;
 pub(crate) mod groth16;
-#[cfg(feature = "profiler")]
-pub(crate) mod profiler;
 pub(crate) mod receipt;
 pub(crate) mod recursion;
 #[cfg(feature = "prove")]

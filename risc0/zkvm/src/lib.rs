@@ -52,8 +52,6 @@ pub use risc0_binfmt::MemoryImage;
 pub use risc0_binfmt::{Program, SystemState};
 pub use risc0_zkvm_platform::{declare_syscall, memory::GUEST_MAX_MEM, PAGE_SIZE};
 
-#[cfg(all(not(target_os = "zkvm"), feature = "profiler"))]
-pub use self::host::profiler::Profiler;
 #[cfg(all(not(target_os = "zkvm"), feature = "prove"))]
 pub use self::host::{
     api::server::Server as ApiServer,
