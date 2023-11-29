@@ -1,1 +1,2 @@
 *.zip filter=lfs diff=lfs merge=lfs -text
+stark2snark/verify.circom filter=lfs diff=lfs merge=lfs -text
