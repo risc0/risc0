@@ -189,8 +189,8 @@ impl Receipt {
         Ok(())
     }
 
-    /// Verify the integrity of this receipt, ensuring the metadata and jounral are attested to by
-    /// the seal.
+    /// Verify the integrity of this receipt, ensuring the metadata and jounral
+    /// are attested to by the seal.
     ///
     /// This does not verify the success of the guest execution. In
     /// particular, the guest could have exited with an error (e.g.
@@ -272,7 +272,8 @@ impl AsRef<[u8]> for Journal {
     }
 }
 
-/// An inner receipt can take the form of a [CompositeReceipt] or a [SuccinctReceipt].
+/// An inner receipt can take the form of a [CompositeReceipt] or a
+/// [SuccinctReceipt].
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[cfg_attr(test, derive(PartialEq))]
 pub enum InnerReceipt {
@@ -367,7 +368,8 @@ pub struct Groth16Receipt {
     /// A Groth16 proof of a zkVM execution with the associated metadata.
     pub seal: Vec<u8>,
 
-    /// [ReceiptMetadata] containing information about the execution that this receipt proves.
+    /// [ReceiptMetadata] containing information about the execution that this
+    /// receipt proves.
     pub meta: ReceiptMetadata,
 }
 
@@ -593,9 +595,10 @@ pub struct SegmentReceipt {
     /// The cryptographic data attesting to the validity of the code execution.
     ///
     /// This data is used by the ZKP Verifier (as called by
-    /// [SegmentReceipt::verify_integrity_with_context]) to cryptographically prove that this
-    /// Segment was faithfully executed. It is largely opaque cryptographic data, but contains a
-    /// non-opaque metadata component, which can be conveniently accessed with
+    /// [SegmentReceipt::verify_integrity_with_context]) to cryptographically
+    /// prove that this Segment was faithfully executed. It is largely
+    /// opaque cryptographic data, but contains a non-opaque metadata
+    /// component, which can be conveniently accessed with
     /// [SegmentReceipt::get_metadata].
     pub seal: Vec<u32>,
 
@@ -642,8 +645,8 @@ impl SegmentReceipt {
     }
 }
 
-/// An assumption attached with a guest execution as a result of calling `env::verify` or
-/// `env::verify_integrity`.
+/// An assumption attached with a guest execution as a result of calling
+/// `env::verify` or `env::verify_integrity`.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum Assumption {
     /// A [Receipt] for a proven assumption.
@@ -728,9 +731,9 @@ fn decode_receipt_metadata_from_io(
     let body = layout::LAYOUT.mux.body;
     let pre = decode_system_state_from_io(io, body.global.pre)?;
     let mut post = decode_system_state_from_io(io, body.global.post)?;
-    // In order to avoid extra logic in the rv32im circuit to perform arithmetic on the PC with
-    // carry, the PC is always recorded as the current PC + 4. Thus we need to adjust the decoded
-    // PC for the post SystemState.
+    // In order to avoid extra logic in the rv32im circuit to perform arithmetic on
+    // the PC with carry, the PC is always recorded as the current PC + 4. Thus
+    // we need to adjust the decoded PC for the post SystemState.
     post.pc = post
         .pc
         .checked_sub(WORD_SIZE as u32)
@@ -779,8 +782,7 @@ mod tests {
     use hex::FromHex;
 
     use super::*;
-    use crate::receipt_metadata::MaybePruned;
-    use crate::ExitCode::Halted;
+    use crate::{receipt_metadata::MaybePruned, ExitCode::Halted};
 
     const IMAGE_ID: [u32; 8] = [
         3877313773, 4166950669, 1851257837, 1474316178, 3714943358, 2342301681, 2883381307,

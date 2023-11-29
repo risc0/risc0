@@ -676,8 +676,8 @@ where
     }
 }
 
-// Specialized implementaion for Vec<u8> for work around challenges getting the generic
-// implementaion above to work for Vec<u8>.
+// Specialized implementaion for Vec<u8> for work around challenges getting the
+// generic implementaion above to work for Vec<u8>.
 impl From<MaybePruned<Vec<u8>>> for pb::core::MaybePruned {
     fn from(value: MaybePruned<Vec<u8>>) -> Self {
         Self {

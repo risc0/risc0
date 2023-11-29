@@ -13,19 +13,19 @@
 // limitations under the License.
 
 use alloc::{format, vec, vec::Vec};
+use core::str::FromStr;
+
 use anyhow::{anyhow, bail, Error, Result};
 use ark_bn254::{Bn254, Fr, G1Affine, G1Projective, G2Affine};
 use ark_groth16::{
     prepare_verifying_key, Groth16 as ark_Groth16, PreparedVerifyingKey, Proof, VerifyingKey,
 };
 use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
-use core::str::FromStr;
 use hex::FromHex;
 use num_bigint::BigInt;
 use serde::{Deserialize, Serialize};
 
-use crate::sha::Digest;
-use crate::ALLOWED_IDS_ROOT;
+use crate::{sha::Digest, ALLOWED_IDS_ROOT};
 
 const ALPHA_X: &str =
     "20491192805390485299153009773594534940189261866228447918068658471970481763042";
