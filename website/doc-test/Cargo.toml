@@ -15,7 +15,7 @@ alloy-sol-types = "0.4"
 anyhow = "1.0"
 bonsai-ethereum-relay = { workspace = true }
 clap = { version = "4.1", features = ["derive", "env"] }
-ethers = { version = "2.0", features = ["rustls", "ws"] }
+ethers = { version = "=2.0.10", features = ["rustls", "ws"] }
 fibonacci-methods = { path = "../../examples/profiling/methods" }
 risc0-zkvm = { workspace = true, features = ["prove"] }
 risc0-zkvm-methods = { path = "../../risc0/zkvm/methods" }
