@@ -35,7 +35,7 @@ pub fn valid_control_ids() -> Vec<Digest> {
     for digest_str in POSEIDON_CONTROL_ID {
         all_ids.push(Digest::from_hex(digest_str).unwrap());
     }
-    for digest_str in RECURSION_CONTROL_IDS {
+    for (_, digest_str) in RECURSION_CONTROL_IDS {
         all_ids.push(Digest::from_hex(digest_str).unwrap());
     }
     all_ids

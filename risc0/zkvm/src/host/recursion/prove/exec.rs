@@ -276,7 +276,7 @@ impl<'a> RecursionExecutor<'a> {
         let po2 = RECURSION_PO2;
         let executor = Executor::new(circuit, machine, po2, po2, &io);
         Self {
-            zkr: zkr,
+            zkr,
             executor,
             split_points,
         }
