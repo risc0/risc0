@@ -151,7 +151,6 @@ prove = [
   "dep:sha2",
   "dep:tempfile",
   "dep:typetag",
-  "risc0-binfmt/prove",
   "risc0-circuit-recursion/prove",
   "risc0-circuit-rv32im/prove",
   "risc0-zkp/prove",

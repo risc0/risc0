@@ -31,7 +31,7 @@ pub struct Bootstrap;
 
 impl Bootstrap {
     pub fn run(&self) {
-        //Self::generate_rv32im_control_ids();
+        Self::generate_rv32im_control_ids();
         Self::generate_recursion_control_ids();
     }
 
