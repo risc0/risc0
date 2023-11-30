@@ -26,15 +26,27 @@ use risc0_zkp::{
 use risc0_zkvm::{recursion::Program, Loader};
 
 #[derive(Parser)]
-pub struct Bootstrap;
+pub struct Bootstrap {
+    /// Skip running bootstrap for the rv32im circuit.
+    #[arg(long, default_value_t = true)]
+    no_rv32im: bool,
+
+    /// Skip running bootstrap for the recursion circuit.
+    #[arg(long, default_value_t = true)]
+    no_recursion: bool,
+}
 
 const CONTROL_ID_PATH_RV32IM: &str = "risc0/zkvm/src/host/control_id.rs";
 const CONTROL_ID_PATH_RECURSION: &str = "risc0/circuit/recursion/src/control_id.rs";
 
 impl Bootstrap {
     pub fn run(&self) {
-        Self::generate_rv32im_control_ids();
-        Self::generate_recursion_control_ids();
+        if !self.no_rv32im {
+            Self::generate_rv32im_control_ids();
+        }
+        if !self.no_recursion {
+            Self::generate_recursion_control_ids();
+        }
     }
 
     fn generate_rv32im_control_ids() {
