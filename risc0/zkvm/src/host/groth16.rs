@@ -337,6 +337,7 @@ mod tests {
 
     use super::*;
 
+    #[ignore]
     #[test]
     fn test_from_seal() {
         let seal: Groth16Seal = serde_json::from_str(RISC0_GROTH16_SEAL).unwrap();

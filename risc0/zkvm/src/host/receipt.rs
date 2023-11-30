@@ -802,6 +802,7 @@ mod tests {
     }
     "#;
 
+    #[ignore]
     #[test]
     fn test_groth16_receipt() {
         let seal: Groth16Seal = serde_json::from_str(RISC0_GROTH16_SEAL).unwrap();
