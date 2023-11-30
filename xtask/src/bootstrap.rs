@@ -83,7 +83,6 @@ impl Bootstrap {
     }
 
     fn generate_recursion_control_ids() {
-        // TODO: Avoid parsing the zip twice?
         let zkrs = risc0_circuit_recursion::zkr::get_all_zkrs().unwrap();
         let zkr_control_ids: Vec<(String, Digest)> = zkrs
             .into_iter()
