@@ -20,7 +20,7 @@ use risc0_zkp::{
         digest::Digest,
         hash::{blake2b::Blake2bCpuHashSuite, poseidon::PoseidonHashSuite, sha::Sha256HashSuite},
     },
-    field::baby_bear::{BabyBear, BabyBearElem},
+    field::baby_bear::BabyBear,
     hal::cpu::CpuHal,
 };
 use risc0_zkvm::{recursion::Program, Loader};

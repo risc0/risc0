@@ -43,7 +43,7 @@ impl Program {
     /// Create a [Program] from a stream of data encoded by Zirgen.
     pub fn from_encoded(encoded: &[u32]) -> Self {
         let prog = Self {
-            code: encoded.into_iter().map(BabyBearElem::from).collect(),
+            code: encoded.iter().copied().map(BabyBearElem::from).collect(),
             code_size: RECURSION_CODE_SIZE,
         };
         assert_eq!(prog.code.len() % RECURSION_CODE_SIZE, 0);
