@@ -162,6 +162,8 @@ prove = [
   "std",
 ]
 std = [
+  "anyhow/std",
+  "hex/std",
   "risc0-binfmt/std",
   "risc0-zkp/std",
   "serde/std",
