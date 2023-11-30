@@ -23,10 +23,7 @@ use risc0_zkp::{
     field::baby_bear::{BabyBear, BabyBearElem},
     hal::cpu::CpuHal,
 };
-use risc0_zkvm::{
-    recursion::{Program, RECURSION_CODE_SIZE},
-    Loader,
-};
+use risc0_zkvm::{recursion::Program, Loader};
 
 #[derive(Parser)]
 pub struct Bootstrap;
@@ -37,7 +34,6 @@ impl Bootstrap {
         Self::generate_recursion_control_ids();
     }
 
-    #[allow(unused)]
     fn generate_rv32im_control_ids() {
         let loader = Loader::new();
         let control_id_sha256 =
