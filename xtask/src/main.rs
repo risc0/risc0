@@ -54,7 +54,6 @@ impl Commands {
 }
 
 fn main() {
-    // TODO: Add some logging to the bootstrap process
     tracing_subscriber::registry()
         .with(EnvFilter::from_default_env())
         .init();
