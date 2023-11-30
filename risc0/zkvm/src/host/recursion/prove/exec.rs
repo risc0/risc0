@@ -17,7 +17,6 @@ use std::collections::{BTreeMap, VecDeque};
 use anyhow::Result;
 use lazy_regex::{regex, Captures};
 use rayon::prelude::*;
-use risc0_binfmt::recursion::{Program, RECURSION_PO2};
 use risc0_circuit_recursion::{CircuitImpl, Externs};
 use risc0_zkp::{
     adapter::{CircuitInfo, CircuitStep, CircuitStepContext, CircuitStepHandler},
@@ -30,7 +29,7 @@ use risc0_zkp::{
     ZK_CYCLES,
 };
 
-use super::{plonk, CIRCUIT};
+use super::{plonk, Program, CIRCUIT, RECURSION_PO2};
 
 pub struct MachineContext {
     // Contents of the write-only memory

@@ -12,16 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-extern crate alloc;
-
-use alloc::vec::Vec;
-
-use risc0_zkp::field::baby_bear::BabyBearElem;
-
-#[cfg(feature = "prove")]
 use risc0_zkp::{
     core::{digest::Digest, hash::HashSuite},
-    field::baby_bear::BabyBear,
+    field::baby_bear::{BabyBear, BabyBearElem},
     hal::{cpu::CpuHal, Hal},
     prove::poly_group::PolyGroup,
 };
@@ -66,7 +59,6 @@ impl Program {
     /// Given a [Program] for the recursion circuit, compute the control ID as the FRI Merkle root
     /// of the code group. This uniquely identifies the program running on the recursion circuit
     /// (e.g. lift_20 or join)
-    #[cfg(feature = "prove")]
     pub fn compute_control_id(&self, hash_suite: HashSuite<BabyBear>) -> Digest {
         let hal = CpuHal::new(hash_suite);
         let cycles = 1 << RECURSION_PO2;

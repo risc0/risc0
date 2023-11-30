@@ -15,7 +15,6 @@
 use std::{io::Write, process::Command};
 
 use clap::Parser;
-use risc0_binfmt::recursion::{Program, RECURSION_CODE_SIZE};
 use risc0_zkp::{
     core::{
         digest::Digest,
@@ -24,7 +23,10 @@ use risc0_zkp::{
     field::baby_bear::{BabyBear, BabyBearElem},
     hal::cpu::CpuHal,
 };
-use risc0_zkvm::Loader;
+use risc0_zkvm::{
+    recursion::{Program, RECURSION_CODE_SIZE},
+    Loader,
+};
 
 #[derive(Parser)]
 pub struct Bootstrap;
