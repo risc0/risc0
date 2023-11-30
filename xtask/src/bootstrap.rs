@@ -28,6 +28,9 @@ use risc0_zkvm::{recursion::Program, Loader};
 #[derive(Parser)]
 pub struct Bootstrap;
 
+const CONTROL_ID_PATH_RV32IM: &str = "risc0/zkvm/src/host/control_id.rs";
+const CONTROL_ID_PATH_RECURSION: &str = "risc0/circuit/recursion/src/control_id.rs";
+
 impl Bootstrap {
     pub fn run(&self) {
         Self::generate_rv32im_control_ids();
@@ -36,12 +39,16 @@ impl Bootstrap {
 
     fn generate_rv32im_control_ids() {
         let loader = Loader::new();
+        tracing::info!("computing control IDs with SHA-256");
         let control_id_sha256 =
             loader.compute_control_id(&CpuHal::new(Sha256HashSuite::<BabyBear>::new_suite()));
+        tracing::info!("computing control IDs with Poseidon");
         let control_id_poseidon =
             loader.compute_control_id(&CpuHal::new(PoseidonHashSuite::new_suite()));
+        tracing::info!("computing control IDs with Blake2b");
         let control_id_blake2b =
             loader.compute_control_id(&CpuHal::new(Blake2bCpuHashSuite::new_suite()));
+
         let contents = format!(
             include_str!("templates/control_id_rv32im.rs"),
             control_id_sha256[0],
@@ -78,26 +85,37 @@ impl Bootstrap {
             control_id_blake2b[9],
             control_id_blake2b[10],
         );
-        println!("{contents}");
-        std::fs::write("risc0/zkvm/src/host/control_id.rs", contents).unwrap();
+        tracing::debug!("contents of rv32im control_id.rs:\n{contents}");
+
+        tracing::info!("writing control ids to {CONTROL_ID_PATH_RV32IM}");
+        std::fs::write(CONTROL_ID_PATH_RV32IM, contents).unwrap();
+
+        // Use rustfmt to format the file.
+        Command::new("rustfmt")
+            .arg(CONTROL_ID_PATH_RV32IM)
+            .status()
+            .expect("failed to format {CONTROL_ID_PATH_RV32IM}");
     }
 
     fn generate_recursion_control_ids() {
+        tracing::info!("unzipping recursion programs (zkrs)");
         let zkrs = risc0_circuit_recursion::zkr::get_all_zkrs().unwrap();
         let zkr_control_ids: Vec<(String, Digest)> = zkrs
             .into_iter()
             .map(|(name, encoded_program)| {
                 let prog = Program::from_encoded(&encoded_program);
+
+                tracing::info!("computing control ID for {name} with Poseidon");
                 let control_id = prog.compute_control_id(PoseidonHashSuite::new_suite());
 
-                tracing::info!("{name} control id: {control_id:?}");
+                tracing::debug!("{name} control id: {control_id:?}");
                 (name, control_id)
             })
             .collect();
 
         // Generate the tree of acceptable control IDs.
-        let output_path = "risc0/circuit/recursion/src/control_id.rs";
-        let mut cntlf = std::fs::File::create(&output_path).unwrap();
+        tracing::info!("writing control ids to {CONTROL_ID_PATH_RECURSION}");
+        let mut cntlf = std::fs::File::create(CONTROL_ID_PATH_RECURSION).unwrap();
         let license = r#"
         // Copyright 2023 RISC Zero, Inc.
         //
@@ -141,8 +159,8 @@ impl Bootstrap {
 
         // Use rustfmt to format the file.
         Command::new("rustfmt")
-            .arg(&output_path)
+            .arg(CONTROL_ID_PATH_RECURSION)
             .status()
-            .expect("failed to format {output_path}");
+            .expect("failed to format {CONTROL_ID_PATH_RECURSION}");
     }
 }
