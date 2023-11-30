@@ -490,7 +490,7 @@ pub(crate) trait Merge: Digestible + Sized {
 
 /// Error returned when a merge it attempted with two values with unequal digests.
 #[derive(Debug, Clone)]
-pub struct MergeInequalityError(pub Digest, pub Digest);
+pub(crate) struct MergeInequalityError(pub Digest, pub Digest);
 
 impl fmt::Display for MergeInequalityError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
