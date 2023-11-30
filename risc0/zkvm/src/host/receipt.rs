@@ -400,7 +400,7 @@ impl CompositeReceipt {
             }
             expected_pre_state_digest = Some({
                 // Post state PC is stored as the "actual" value plus 4. This matches the join
-                // predicateb implementation. See ReceiptMetadata for more detail.
+                // predicate implementation. See [ReceiptMetadata] for more detail.
                 let mut post = receipt
                     .metadata
                     .post
