@@ -16,6 +16,7 @@ mod exec;
 pub mod merkle;
 mod plonk;
 pub mod preflight;
+mod program;
 pub mod zkr;
 
 use std::{collections::VecDeque, mem::take, rc::Rc};
@@ -23,10 +24,7 @@ use std::{collections::VecDeque, mem::take, rc::Rc};
 use anyhow::{anyhow, Context, Result};
 use hex::FromHex;
 use merkle::MerkleGroup;
-use risc0_binfmt::{
-    recursion::{Program, RECURSION_PO2},
-    write_sha_halfs,
-};
+use risc0_binfmt::write_sha_halfs;
 use risc0_circuit_recursion::{
     cpu::CpuCircuitHal, CircuitImpl, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA,
 };
@@ -47,6 +45,7 @@ use risc0_zkp::{
 };
 use serde::{Deserialize, Serialize};
 
+pub use self::program::Program;
 use super::CIRCUIT;
 use crate::{
     receipt_metadata::{Merge, Output},
@@ -55,7 +54,17 @@ use crate::{
     HalPair, ReceiptMetadata, SegmentReceipt, POSEIDON_CONTROL_ID,
 };
 
+// TODO: Automatically generate these constants from the circuit somehow without
+// messing up bootstrap dependencies.
+/// Number of rows to use for the recursion circuit witness as a power of 2.
+const RECURSION_PO2: usize = 18;
+/// Depth of the Merkle tree to use for encoding the set of allowed control IDs.
+/// NOTE: Changing this constant must be coordinated with the circuit. In order to avoid needing to
+/// change the circuit later, this is set to 8 which allows for enough control IDs to be ecoded
+/// that we are unlikely to need more.
 const ALLOWED_CODE_MERKLE_DEPTH: usize = 8;
+/// Size of the code group in the taps of the recursion circuit.
+const RECURSION_CODE_SIZE: usize = 21;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct RecursionReceipt {

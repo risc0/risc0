@@ -15,12 +15,12 @@
 use std::{str::FromStr, sync::Arc};
 
 use clap::Parser;
-use ethers_core::types::{H256, U256};
+use ethers_core::types::H256;
 use ethers_providers::Middleware;
 use risc0_zkvm::{default_prover, ExecutorEnv};
 use tracing::info;
 use zkevm_core::{
-    ether_trace::{Http, Provider},
+    ether_trace::{from_ethers_u256, Http, Provider},
     Env, EvmResult, EVM,
 };
 use zkevm_methods::EVM_ELF;
@@ -61,7 +61,7 @@ async fn main() {
     info!("Running TX: 0x{:x} at block {}", tx_hash, block_numb);
 
     let mut env = Env::default();
-    env.block.number = U256::from(block_numb).into();
+    env.block.number = from_ethers_u256(block_numb.into());
     env.tx = zkevm_core::ether_trace::txenv_from_tx(tx);
     let trace_db = zkevm_core::ether_trace::TraceTx::new(client, Some(block_numb)).unwrap();
 

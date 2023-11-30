@@ -12,27 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-extern crate alloc;
-
-use alloc::vec::Vec;
-
-use risc0_zkp::field::baby_bear::BabyBearElem;
-
-#[cfg(feature = "prove")]
 use risc0_zkp::{
     core::{digest::Digest, hash::HashSuite},
-    field::baby_bear::BabyBear,
+    field::baby_bear::{BabyBear, BabyBearElem},
     hal::{cpu::CpuHal, Hal},
     prove::poly_group::PolyGroup,
 };
 
-// TODO: Automatically generate this from the circuit somehow without
-// messing up bootstrap dependencies.
-/// Number of columns used in the recursion circuit's code section.
-pub const RECURSION_CODE_SIZE: usize = 21;
-
-/// Number of rows in the recursion circuit witness as a power of 2.
-pub const RECURSION_PO2: usize = 18;
+use super::{RECURSION_CODE_SIZE, RECURSION_PO2};
 
 /// A Program for the recursion circuit (e.g. lift_20 or join).
 ///
@@ -53,6 +40,16 @@ pub struct Program {
 }
 
 impl Program {
+    /// Create a [Program] from a stream of data encoded by Zirgen.
+    pub fn from_encoded(encoded: &[u32]) -> Self {
+        let prog = Self {
+            code: encoded.iter().copied().map(BabyBearElem::from).collect(),
+            code_size: RECURSION_CODE_SIZE,
+        };
+        assert_eq!(prog.code.len() % RECURSION_CODE_SIZE, 0);
+        prog
+    }
+
     /// Total number of rows in the code group for this program.
     pub fn code_rows(&self) -> usize {
         self.code.len() / self.code_size
@@ -66,7 +63,6 @@ impl Program {
     /// Given a [Program] for the recursion circuit, compute the control ID as the FRI Merkle root
     /// of the code group. This uniquely identifies the program running on the recursion circuit
     /// (e.g. lift_20 or join)
-    #[cfg(feature = "prove")]
     pub fn compute_control_id(&self, hash_suite: HashSuite<BabyBear>) -> Digest {
         let hal = CpuHal::new(hash_suite);
         let cycles = 1 << RECURSION_PO2;

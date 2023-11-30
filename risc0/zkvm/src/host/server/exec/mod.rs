@@ -20,6 +20,7 @@
 
 pub(crate) mod executor;
 mod monitor;
+pub(crate) mod profiler;
 pub(crate) mod syscall;
 #[cfg(test)]
 mod tests;

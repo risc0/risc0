@@ -219,8 +219,8 @@ impl Session {
                 .checked_add(WORD_SIZE as u32)
                 .ok_or(anyhow!("invalid pc in session post image"))?,
             merkle_root: match self.exit_code {
-                ExitCode::Halted(_) => last_segment.pre_image.compute_root_hash(),
-                _ => self.post_image.compute_root_hash(),
+                ExitCode::Halted(_) => last_segment.pre_image.compute_root_hash()?,
+                _ => self.post_image.compute_root_hash()?,
             },
         };
 

@@ -18,7 +18,7 @@ fn run_bonsai(input_data: Vec<u8>) -> Result<()> {
     let img_id = {
         let program = Program::load_elf(METHOD_NAME_ELF, GUEST_MAX_MEM as u32)?;
         let image = MemoryImage::new(&program, PAGE_SIZE as u32)?;
-        let image_id = hex::encode(image.compute_id());
+        let image_id = hex::encode(image.compute_id()?);
         let image = bincode::serialize(&image).expect("Failed to serialize memory img");
         client.upload_img(&image_id, image)?;
         image_id

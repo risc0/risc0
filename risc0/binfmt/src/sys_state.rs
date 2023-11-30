@@ -64,7 +64,9 @@ impl From<&MemoryImage> for SystemState {
     fn from(image: &MemoryImage) -> Self {
         Self {
             pc: image.pc,
-            merkle_root: image.compute_root_hash(),
+            merkle_root: image
+                .compute_root_hash()
+                .expect("failed to compute root hash"),
         }
     }
 }

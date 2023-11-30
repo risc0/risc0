@@ -121,7 +121,7 @@ where
         let (hal, circuit_hal) = (self.hal_pair.hal.as_ref(), &self.hal_pair.circuit_hal);
         let hashfn = &hal.get_hash_suite().name;
 
-        let io = segment.prepare_globals();
+        let io = segment.prepare_globals()?;
         let machine = MachineContext::new(segment);
         let po2 = segment.po2 as usize;
         let mut executor = Executor::new(&CIRCUIT, machine, po2, po2, &io);
