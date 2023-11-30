@@ -92,15 +92,7 @@ impl Bootstrap {
         let zkr_control_ids: Vec<(String, Digest)> = zkrs
             .into_iter()
             .map(|(name, encoded_program)| {
-                let prog = Program {
-                    code: encoded_program
-                        .into_iter()
-                        .map(BabyBearElem::from)
-                        .collect(),
-                    code_size: RECURSION_CODE_SIZE,
-                };
-                assert_eq!(prog.code.len() % RECURSION_CODE_SIZE, 0);
-
+                let prog = Program::from_encoded(&encoded_program);
                 let control_id = prog.compute_control_id(PoseidonHashSuite::new_suite());
 
                 tracing::info!("{name} control id: {control_id:?}");

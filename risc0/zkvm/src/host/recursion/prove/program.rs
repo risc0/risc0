@@ -19,13 +19,7 @@ use risc0_zkp::{
     prove::poly_group::PolyGroup,
 };
 
-// TODO: Automatically generate this from the circuit somehow without
-// messing up bootstrap dependencies.
-/// Number of columns used in the recursion circuit's code section.
-pub const RECURSION_CODE_SIZE: usize = 21;
-
-/// Number of rows in the recursion circuit witness as a power of 2.
-pub const RECURSION_PO2: usize = 18;
+use super::{RECURSION_CODE_SIZE, RECURSION_PO2};
 
 /// A Program for the recursion circuit (e.g. lift_20 or join).
 ///
@@ -46,6 +40,16 @@ pub struct Program {
 }
 
 impl Program {
+    /// Create a [Program] from a stream of data encoded by Zirgen.
+    pub fn from_encoded(encoded: &[u32]) -> Self {
+        let prog = Self {
+            code: encoded.into_iter().map(BabyBearElem::from).collect(),
+            code_size: RECURSION_CODE_SIZE,
+        };
+        assert_eq!(prog.code.len() % RECURSION_CODE_SIZE, 0);
+        prog
+    }
+
     /// Total number of rows in the code group for this program.
     pub fn code_rows(&self) -> usize {
         self.code.len() / self.code_size
