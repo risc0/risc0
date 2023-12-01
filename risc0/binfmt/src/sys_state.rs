@@ -118,7 +118,7 @@ fn write_u32_bytes(flat: &mut Vec<u32>, word: u32) {
 pub enum DecodeError {
     /// End of stream was reached when more data was expected.
     EndOfStream,
-    /// Value in the stream as outside the expected range.
+    /// Value in the stream is outside the expected range.
     OutOfRange,
 }
 
