@@ -26,7 +26,6 @@ pub use fault_ids::{FAULT_CHECKER_ELF, FAULT_CHECKER_ID};
 mod fault_monitor;
 #[cfg(feature = "fault-proof")]
 pub use self::fault_monitor::FaultCheckMonitor;
-
 pub mod guest;
 #[cfg(not(target_os = "zkvm"))]
 mod host;
@@ -47,7 +46,6 @@ pub use anyhow::Result;
 #[cfg(not(target_os = "zkvm"))]
 #[cfg(any(feature = "client", feature = "prove"))]
 pub use bytes::Bytes;
-
 #[cfg(not(target_os = "zkvm"))]
 pub use risc0_binfmt::MemoryImage;
 pub use risc0_binfmt::{Program, SystemState};
@@ -81,9 +79,10 @@ pub use self::host::{
 #[cfg(not(target_os = "zkvm"))]
 pub use self::host::{
     control_id::POSEIDON_CONTROL_ID,
+    groth16::{Groth16Proof, Groth16Seal},
     receipt::{
-        Assumption, CompositeReceipt, InnerReceipt, Journal, Receipt, SegmentReceipt,
-        SuccinctReceipt, VerifierContext,
+        Assumption, CompositeReceipt, Groth16Receipt, InnerReceipt, Journal, Receipt,
+        SegmentReceipt, SuccinctReceipt, VerifierContext,
     },
     recursion::ALLOWED_IDS_ROOT,
 };

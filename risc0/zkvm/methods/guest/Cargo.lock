@@ -334,17 +334,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "num-derive"
-version = "0.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9e6a0fd4f737c707bd9086cc16c925f294943eb62eb71499e9fd4cf71f8b9f4e"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn",
-]
-
-[[package]]
 name = "num-integer"
 version = "0.1.45"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -560,28 +549,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "risc0-circuit-recursion"
-version = "0.20.0-alpha.1"
-dependencies = [
- "anyhow",
- "bytemuck",
- "risc0-core",
- "risc0-zkp",
- "tracing",
-]
-
-[[package]]
-name = "risc0-circuit-rv32im"
-version = "0.20.0-alpha.1"
-dependencies = [
- "anyhow",
- "risc0-core",
- "risc0-zkp",
- "risc0-zkvm-platform",
- "tracing",
-]
-
-[[package]]
 name = "risc0-core"
 version = "0.20.0-alpha.1"
 dependencies = [
@@ -616,17 +583,13 @@ dependencies = [
  "cfg-if",
  "getrandom",
  "hex",
- "num-derive",
  "risc0-binfmt",
- "risc0-circuit-recursion",
- "risc0-circuit-rv32im",
  "risc0-core",
  "risc0-zkp",
  "risc0-zkvm-platform",
  "rrs-lib",
  "semver",
  "serde",
- "tracing",
 ]
 
 [[package]]
