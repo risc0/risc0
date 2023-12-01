@@ -441,6 +441,7 @@ impl From<InnerReceipt> for pb::core::InnerReceipt {
                         metadata: Some(metadata.into()),
                     })
                 }
+                InnerReceipt::Groth16(_) => unimplemented!(),
             }),
         }
     }
@@ -452,6 +453,7 @@ impl TryFrom<pb::core::InnerReceipt> for InnerReceipt {
     fn try_from(value: pb::core::InnerReceipt) -> Result<Self> {
         Ok(match value.kind.ok_or(malformed_err())? {
             pb::core::inner_receipt::Kind::Composite(inner) => Self::Composite(inner.try_into()?),
+            pb::core::inner_receipt::Kind::Groth16(_) => unimplemented!(),
             pb::core::inner_receipt::Kind::Succinct(inner) => Self::Succinct(inner.try_into()?),
             pb::core::inner_receipt::Kind::Fake(inner) => Self::Fake {
                 metadata: inner.metadata.ok_or(malformed_err())?.try_into()?,
@@ -684,8 +686,8 @@ where
     }
 }
 
-// Specialized implementaion for Vec<u8> for work around challenges getting the generic
-// implementaion above to work for Vec<u8>.
+// Specialized implementaion for Vec<u8> for work around challenges getting the
+// generic implementaion above to work for Vec<u8>.
 impl From<MaybePruned<Vec<u8>>> for pb::core::MaybePruned {
     fn from(value: MaybePruned<Vec<u8>>) -> Self {
         Self {
