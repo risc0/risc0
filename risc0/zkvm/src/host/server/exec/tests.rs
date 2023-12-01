@@ -56,6 +56,21 @@ fn run_test(spec: MultiTestSpec) {
 }
 
 #[test]
+#[should_panic(expected = "cycle count too large")]
+fn insufficient_segment_limit() {
+    let env = ExecutorEnv::builder()
+        .segment_limit_po2(14)
+        .write(&MultiTestSpec::DoNothing)
+        .unwrap()
+        .build()
+        .unwrap();
+    ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
+        .unwrap()
+        .run()
+        .unwrap();
+}
+
+#[test]
 fn basic() {
     let env = ExecutorEnv::default();
     let image = BTreeMap::from([

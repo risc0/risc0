@@ -469,8 +469,17 @@ impl<'a> ExecutorImpl<'a> {
         //     total_pending_cycles,
         //     self.total_cycles()
         // );
-        if total_pending_cycles - pre_cycles > self.segment_limit {
-            // some instructions could be invoked with parameters that increase the cycle
+
+        // Check if the current instruction being executed is larger than the
+        // segment's cycle limit. The first instruction of a segment always has
+        // a little bit of cycle overhead from the segment's initialization and
+        // must be accounted for in the current segment. In other words,
+        // instruction, `total_pending_cycles` represents the cost of the first
+        // instruction of the segment.
+        if (total_pending_cycles - pre_cycles > self.segment_limit)
+            || (total_pending_cycles > self.segment_limit && self.insn_counter == 0)
+        {
+            // Some instructions could be invoked with parameters that increase the cycle
             // count over the segment limit. If this is the case, doing a system split won't
             // do anything so halt the executor.
             bail!("execution of instruction at pc [0x{:08x}] resulted in a cycle count too large to fit into a single segment.", self.pc);
