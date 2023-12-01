@@ -57,13 +57,13 @@ runs:
         echo "RUSTC_WRAPPER=sccache" >> $GITHUB_ENV
       shell: bash
 
-    # - if: runner.os == 'Linux'
-    #   id: aws-creds
-    #   uses: aws-actions/configure-aws-credentials@v4
-    #   with:
-    #     aws-region: us-west-2
-    #     role-to-assume: arn:aws:iam::083632199359:role/gha_oidc_risc0_cache_public_access
-    #     output-credentials: true
+    - if: runner.os == 'Linux'
+      id: aws-creds
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        # aws-region: us-west-2
+        role-to-assume: arn:aws:iam::083632199359:role/gha_oidc_risc0_cache_public_access
+        output-credentials: true
 
     - if: runner.os == 'Linux'
       uses: risc0/actions-cache@v1
@@ -72,7 +72,7 @@ runs:
           ~/.cache/risc0
         key: public/${{ inputs.key }}/actions-cache
         bucket: risc0-ci-cache
-        # accessKey: ${{ steps.aws-creds.outputs.aws-access-key-id }}
-        # secretKey: ${{ steps.aws-creds.outputs.aws-secret-access-key }}
+        accessKey: ${{ steps.aws-creds.outputs.aws-access-key-id }}
+        secretKey: ${{ steps.aws-creds.outputs.aws-secret-access-key }}
         # sessionToken: ${{ steps.aws-creds.outputs.aws-session-token }}
         use-fallback: false
