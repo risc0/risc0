@@ -105,7 +105,7 @@ impl SuccinctReceipt {
             read_sha_halfs(&mut seal_meta).map_err(|_| VerificationError::ReceiptFormatError)?;
         if output_hash != self.metadata.digest() {
             tracing::debug!(
-                "succinct receipt metadata does not recursion output digest: metadata: {:#?}, digest expected: {:?}",
+                "succinct receipt metadata does not match the output digest: metadata: {:#?}, digest expected: {:?}",
                 self.metadata,
                 output_hash,
             );
