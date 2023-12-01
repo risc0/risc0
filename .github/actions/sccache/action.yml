@@ -74,5 +74,5 @@ runs:
         bucket: risc0-ci-cache
         accessKey: ${{ steps.aws-creds.outputs.aws-access-key-id }}
         secretKey: ${{ steps.aws-creds.outputs.aws-secret-access-key }}
-        # sessionToken: ${{ steps.aws-creds.outputs.aws-session-token }}
+        sessionToken: ${{ steps.aws-creds.outputs.aws-session-token }}
         use-fallback: false
