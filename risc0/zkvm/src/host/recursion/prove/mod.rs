@@ -74,7 +74,7 @@ pub struct RecursionReceipt {
 
 /// Run the lift program to transform an rv32im segment receipt into a recursion receipt.
 ///
-/// The lift program is verifies the rv32im circuit STARK proof inside the recursion circuit,
+/// The lift program verifies the rv32im circuit STARK proof inside the recursion circuit,
 /// resulting in a recursion circuit STARK proof. This recursion proof has a single
 /// constant-time verification procedure, with respect to the original segment length, and is then
 /// used as the input to all other recursion programs (e.g. join, resolve, and identity_p254).
