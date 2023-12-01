@@ -404,7 +404,11 @@ impl Prover {
         }
     }
 
-    /// TODO
+    /// Construct a Merkle tree encoding the set of accepted control IDs.
+    ///
+    /// This set of control IDs forms the closure of recursion programs that can be applied to the
+    /// receipts. Verifiers will use the root of this tree to constrain the Prover to only apply
+    /// those programs in it's processing of receipts.
     pub fn make_allowed_tree() -> MerkleGroup {
         MerkleGroup {
             depth: ALLOWED_CODE_MERKLE_DEPTH,
@@ -412,7 +416,8 @@ impl Prover {
         }
     }
 
-    /// TODO
+    /// Initialize a recursion prover with the test recursion program. This program is used in
+    /// testing the basic correctness of the recursion circuit.
     pub fn new_test_recursion_circuit(digests: [&Digest; 2], opts: ProverOpts) -> Result<Self> {
         let (program, control_id) = zkr::test_recursion_circuit()?;
         let mut prover = Prover::new(program, control_id, opts);
@@ -424,7 +429,7 @@ impl Prover {
         Ok(prover)
     }
 
-    /// TODO
+    /// Add a recursion seal (i.e. STARK proof) to input tape of the recursion program.
     pub fn add_seal(
         &mut self,
         seal: &[u32],
@@ -449,7 +454,14 @@ impl Prover {
         Ok(())
     }
 
-    /// TODO
+    /// Initialize a recursion prover with the lift program to transform an rv32im segment receipt
+    /// into a recursion receipt.
+    ///
+    /// The lift program is verifies the rv32im circuit STARK proof inside the recursion circuit,
+    /// resulting in a recursion circuit STARK proof. This recursion proof has a single
+    /// constant-time verification procedure, with respect to the original segment length, and is
+    /// then used as the input to all other recursion programs (e.g. join, resolve, and
+    /// identity_p254).
     pub fn new_lift(seal: &[u32], opts: ProverOpts) -> Result<Self> {
         let hashfn = opts.suite.hashfn.as_ref();
         let allowed_ids = Self::make_allowed_tree();
@@ -484,7 +496,11 @@ impl Prover {
         Ok(())
     }
 
-    /// TODO
+    /// Initialize a recursion prover with the join program to compress two receipts of the same
+    /// session into one.
+    ///
+    /// By repeated application of the join program, any number of receipts for execution spans
+    /// within the same session can be compressed into a single receipt for the entire session.
     pub fn new_join(a: &SuccinctReceipt, b: &SuccinctReceipt, opts: ProverOpts) -> Result<Self> {
         let hashfn = opts.suite.hashfn.as_ref();
         let allowed_ids = Self::make_allowed_tree();
@@ -499,7 +515,12 @@ impl Prover {
         Ok(prover)
     }
 
-    /// TODO
+    /// Initialize a recursion prover with the resolve program to remove an assumption from a
+    /// conditional receipt upon verifying a corroborating receipt for the assumption.
+    ///
+    /// By applying the resolve program, a conditional receipt (i.e. a receipt for an execution
+    /// using the `env::verify` API to logically verify a receipt) can be made into an
+    /// unconditional receipt.
     pub fn new_resolve(
         cond: &SuccinctReceipt,
         corr: &SuccinctReceipt,
@@ -545,7 +566,10 @@ impl Prover {
         Ok(prover)
     }
 
-    /// TODO
+    /// Prove the verification of a recursion receipt, applying no changes to [ReceiptMetadata].
+    ///
+    /// The primary use for this program is to transform the receipt itself, e.g. using a different
+    /// hash function for FRI. See [identity_p254] for more information.
     pub fn new_identity(a: &SuccinctReceipt, opts: ProverOpts) -> Result<Self> {
         let hashfn = opts.suite.hashfn.as_ref();
         let allowed_ids = Self::make_allowed_tree();
