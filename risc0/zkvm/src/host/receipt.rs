@@ -607,8 +607,7 @@ impl SegmentReceipt {
 
         // Receipt is consistent with the metadata encoded on the seal. Now check against the
         // metadata on the struct.
-        let elems = bytemuck::cast_slice(&self.seal);
-        let decoded_metadata = decode_receipt_metadata_from_io(layout::OutBuffer(elems))?;
+        let decoded_metadata = decode_receipt_metadata_from_seal(&self.seal)?;
         if decoded_metadata.digest() != self.metadata.digest() {
             tracing::debug!(
                 "decoded segment receipt metadata does not match metadata field: decoded: {:#?}, expected: {:#?}",
@@ -706,9 +705,11 @@ fn decode_system_state_from_io(
     Ok(SystemState { pc, merkle_root })
 }
 
-fn decode_receipt_metadata_from_io(
-    io: layout::OutBuffer,
+pub(crate) fn decode_receipt_metadata_from_seal(
+    seal: &[u32],
 ) -> Result<ReceiptMetadata, VerificationError> {
+    let elems = bytemuck::cast_slice(seal);
+    let io = layout::OutBuffer(elems);
     let body = layout::LAYOUT.mux.body;
     let pre = decode_system_state_from_io(io, body.global.pre)?;
     let post = decode_system_state_from_io(io, body.global.post)?;

@@ -22,7 +22,9 @@ use risc0_zkp::core::digest::Digest;
 use super::{malformed_err, path_to_string, pb, Asset, AssetRequest, Binary, BinaryKind};
 use crate::{
     host::{
-        receipt::{CompositeReceipt, InnerReceipt, SegmentReceipt},
+        receipt::{
+            decode_receipt_metadata_from_seal, CompositeReceipt, InnerReceipt, SegmentReceipt,
+        },
         recursion::SuccinctReceipt,
     },
     receipt_metadata::{Assumptions, MaybePruned, Output},
@@ -363,8 +365,6 @@ impl TryFrom<pb::core::SegmentReceipt> for SegmentReceipt {
     fn try_from(value: pb::core::SegmentReceipt) -> Result<Self> {
         const WORD_SIZE: usize = std::mem::size_of::<u32>();
 
-        // TODO(victor): Does adding the metadata field require the version number to be
-        // incremented?
         let version = value.version.ok_or(malformed_err())?.value;
         if version > ver::SEGMENT_RECEIPT.value {
             bail!("Incompatible SegmentReceipt version: {version}");
@@ -376,11 +376,17 @@ impl TryFrom<pb::core::SegmentReceipt> for SegmentReceipt {
             seal.push(word);
         }
 
+        // If the metadata field is not included, decode metadata from the seal.
+        let metadata = value
+            .metadata
+            .map(|m| m.try_into())
+            .unwrap_or_else(|| Ok(decode_receipt_metadata_from_seal(&seal)?))?;
+
         Ok(Self {
+            metadata,
             seal,
             index: value.index,
             hashfn: value.hashfn,
-            metadata: value.metadata.ok_or(malformed_err())?.try_into()?,
         })
     }
 }
