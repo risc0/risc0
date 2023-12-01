@@ -365,6 +365,8 @@ pub struct CompositeReceipt {
     /// be `None` if the continuation has no output (e.g. it ended in
     /// `Fault`).
     // NOTE: This field is needed in order to open the assumptions digest from the output digest.
+    // TODO(1.0): This field can potentially be removed since it can be included in the metadata on
+    // the last segment receipt instead.
     pub journal_digest: Option<Digest>,
 }
 
@@ -456,8 +458,6 @@ impl CompositeReceipt {
         // After verifying the internally consistency of this receipt, we can use
         // self.assumptions and self.journal_digest in place of
         // last_metadata.output, which is equal.
-        // TODO(victor): See if maybe you don't need this logic anymore, since the last segment
-        // will have a populated output.
         self.verify_output_consistency(last_metadata)?;
         let output: Option<Output> = last_metadata
             .output
