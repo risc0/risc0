@@ -74,7 +74,7 @@ rayon = { version = "1.5", optional = true }
 risc0-circuit-recursion = { workspace = true, optional = true }
 risc0-circuit-rv32im = { workspace = true, optional = true }
 rustc-demangle = { version = "0.1", optional = true }
-sha2 = { version = "0.10", default-features = false, optional = true }
+sha2 = { version = "0.10", optional = true }
 tempfile = { version = "3", optional = true }
 tracing = { version = "0.1", default-features = false, features = [
   "attributes",
@@ -108,8 +108,7 @@ client = [
   "dep:prost-build",
   "dep:protoc-prebuilt",
   "verify",
-  "std-verify",
-  "std"
+  "std",
 ]
 cuda = [
   "prove",
@@ -154,6 +153,7 @@ prove = [
   "dep:protoc-prebuilt",
   "dep:rayon",
   "dep:rustc-demangle",
+  "dep:sha2",
   "dep:tempfile",
   "dep:typetag",
   "risc0-circuit-recursion/prove",
@@ -168,16 +168,6 @@ std = [
   "risc0-zkp/std",
   "serde/std",
 ]
-std-verify = [
-  "ark-bn254/std",
-  "ark-groth16/std",
-  "ark-serialize/std",
-  "num-bigint/std",
-  "num-traits/std",
-  "risc0-circuit-recursion/std",
-  "risc0-circuit-rv32im/std",
-  "sha2/std"
-]
 verify = [
   "dep:ark-bn254",
   "dep:ark-groth16",
@@ -186,6 +176,5 @@ verify = [
   "dep:num-derive",
   "dep:risc0-circuit-recursion",
   "dep:risc0-circuit-rv32im",
-  "dep:sha2",
-  "dep:tracing"
+  "dep:tracing",
 ]
