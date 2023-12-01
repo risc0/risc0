@@ -381,6 +381,8 @@ impl Groth16Receipt {
             &Groth16Seal::from_vec(&self.seal).map_err(|_| VerificationError::InvalidProof)?,
             self.meta.digest().into(),
         )
+        .map_err(|_| VerificationError::InvalidProof)?
+        .verify()
         .map_err(|_| VerificationError::InvalidProof)?;
 
         // Everything passed
