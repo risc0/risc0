@@ -12,6 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use risc0_circuit_recursion::CircuitImpl;
+use risc0_zkp::{
+    adapter::CircuitInfo,
+    core::digest::{Digest, DIGEST_WORDS},
+    field::baby_bear::BabyBearElem,
+};
 use risc0_zkvm_methods::{
     multi_test::MultiTestSpec, HELLO_COMMIT_ELF, HELLO_COMMIT_ID, MULTI_TEST_ELF, MULTI_TEST_ID,
 };
@@ -53,8 +59,25 @@ fn test_recursion() {
     // let seal : Vec<u8> = bytemuck::cast_slice(receipt.seal.as_slice()).into();
     // std::fs::write("recursion.seal", seal);
 
-    tracing::debug!("Receipt output: {:?}", receipt.output_digest);
-    assert_eq!(receipt.output_digest, *expected);
+    const DIGEST_SHORTS: usize = DIGEST_WORDS * 2;
+    assert_eq!(CircuitImpl::OUTPUT_SIZE, DIGEST_SHORTS * 2);
+    let output_elems: &[BabyBearElem] =
+        bytemuck::cast_slice(&receipt.seal[..CircuitImpl::OUTPUT_SIZE]);
+    let output_digest = shorts_to_digest(&output_elems[DIGEST_SHORTS..2 * DIGEST_SHORTS]);
+
+    tracing::debug!("Receipt output: {:?}", output_digest);
+    assert_eq!(output_digest, *expected);
+}
+
+fn shorts_to_digest(elems: &[BabyBearElem]) -> Digest {
+    let words: Vec<u32> = elems
+        .chunks_exact(2)
+        .map(|shortpair| {
+            let [a, b] = shortpair else { unreachable!() };
+            ((u64::from(*b) << 16) + u64::from(*a)) as u32
+        })
+        .collect();
+    Digest::try_from(words.as_slice()).unwrap()
 }
 
 fn generate_busy_loop_segments(hashfn: &str) -> (Session, Vec<SegmentReceipt>) {

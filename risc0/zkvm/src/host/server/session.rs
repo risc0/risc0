@@ -301,7 +301,7 @@ impl Segment {
                 .checked_add(WORD_SIZE as u32)
                 .ok_or(anyhow!("invalid pc in segment post state"))?,
             merkle_root: match self.exit_code {
-                ExitCode::Halted(_) => self.pre_image.compute_root_hash(),
+                ExitCode::Halted(_) => self.pre_image.compute_root_hash()?,
                 _ => self.post_state.merkle_root.clone(),
             },
         };

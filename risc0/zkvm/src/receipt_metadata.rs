@@ -72,14 +72,18 @@ pub struct ReceiptMetadata {
 
 impl ReceiptMetadata {
     /// Decode a [crate::ReceiptMetadata] from a list of [u32]'s
-    pub fn decode(flat: &mut VecDeque<u32>) -> Result<Self, InvalidExitCodeError> {
-        let input = read_sha_halfs(flat);
-        let pre = SystemState::decode(flat);
-        let post = SystemState::decode(flat);
-        let sys_exit = flat.pop_front().unwrap();
-        let user_exit = flat.pop_front().unwrap();
+    pub fn decode(flat: &mut VecDeque<u32>) -> Result<Self, DecodeError> {
+        let input = read_sha_halfs(flat)?;
+        let pre = SystemState::decode(flat)?;
+        let post = SystemState::decode(flat)?;
+        let sys_exit = flat
+            .pop_front()
+            .ok_or(risc0_binfmt::DecodeError::EndOfStream)?;
+        let user_exit = flat
+            .pop_front()
+            .ok_or(risc0_binfmt::DecodeError::EndOfStream)?;
         let exit_code = ExitCode::from_pair(sys_exit, user_exit)?;
-        let output = read_sha_halfs(flat);
+        let output = read_sha_halfs(flat)?;
 
         Ok(Self {
             input,
@@ -119,6 +123,39 @@ impl Digestible for ReceiptMetadata {
         )
     }
 }
+
+/// Error returned when decoding [ReceiptMetadata] fails.
+#[derive(Debug, Copy, Clone)]
+pub enum DecodeError {
+    /// Decoding failure due to an invalid exit code.
+    InvalidExitCode(InvalidExitCodeError),
+    /// Decoding failure due to an inner decoding failure.
+    Decode(risc0_binfmt::DecodeError),
+}
+
+impl fmt::Display for DecodeError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Self::InvalidExitCode(e) => write!(f, "failed to decode receipt metadata: {}", e),
+            Self::Decode(e) => write!(f, "failed to decode receipt metadata: {}", e),
+        }
+    }
+}
+
+impl From<risc0_binfmt::DecodeError> for DecodeError {
+    fn from(e: risc0_binfmt::DecodeError) -> Self {
+        Self::Decode(e)
+    }
+}
+
+impl From<InvalidExitCodeError> for DecodeError {
+    fn from(e: InvalidExitCodeError) -> Self {
+        Self::InvalidExitCode(e)
+    }
+}
+
+#[cfg(feature = "std")]
+impl std::error::Error for DecodeError {}
 
 /// Indicates how a Segment or Session's execution has terminated
 #[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq)]
@@ -623,13 +660,84 @@ impl Merge for ReceiptMetadata {
 mod tests {
     use hex::FromHex;
 
-    use super::{ExitCode, MaybePruned, Merge, ReceiptMetadata, SystemState};
-    use crate::sha::Digest;
+    use super::{Assumptions, ExitCode, MaybePruned, Merge, Output, ReceiptMetadata, SystemState};
+    use crate::sha::{Digest, Digestible};
 
-    // TODO(victor): Improve testing here.
+    /// Testing utility for randomly pruning structs.
+    trait RandPrune {
+        fn rand_prune(&self) -> Self;
+    }
+
+    impl RandPrune for MaybePruned<ReceiptMetadata> {
+        fn rand_prune(&self) -> Self {
+            match (self, rand::random::<bool>()) {
+                (Self::Value(x), true) => Self::Pruned(x.digest()),
+                (Self::Value(x), false) => ReceiptMetadata {
+                    pre: x.pre.rand_prune(),
+                    post: x.post.rand_prune(),
+                    exit_code: x.exit_code,
+                    input: x.input,
+                    output: x.output.rand_prune(),
+                }
+                .into(),
+                (Self::Pruned(x), _) => Self::Pruned(x.clone()),
+            }
+        }
+    }
+
+    impl RandPrune for MaybePruned<SystemState> {
+        fn rand_prune(&self) -> Self {
+            match (self, rand::random::<bool>()) {
+                (Self::Value(x), true) => Self::Pruned(x.digest()),
+                (Self::Value(x), false) => SystemState {
+                    pc: x.pc,
+                    merkle_root: x.merkle_root,
+                }
+                .into(),
+                (Self::Pruned(x), _) => Self::Pruned(x.clone()),
+            }
+        }
+    }
+
+    impl RandPrune for MaybePruned<Option<Output>> {
+        fn rand_prune(&self) -> Self {
+            match (self, rand::random::<bool>()) {
+                (Self::Value(x), true) => Self::Pruned(x.digest()),
+                (Self::Value(x), false) => x
+                    .as_ref()
+                    .map(|o| Output {
+                        journal: o.journal.rand_prune(),
+                        assumptions: o.assumptions.rand_prune(),
+                    })
+                    .into(),
+                (Self::Pruned(x), _) => Self::Pruned(x.clone()),
+            }
+        }
+    }
+
+    impl RandPrune for MaybePruned<Vec<u8>> {
+        fn rand_prune(&self) -> Self {
+            match (self, rand::random::<bool>()) {
+                (Self::Value(x), true) => Self::Pruned(x.digest()),
+                (Self::Value(x), false) => x.clone().into(),
+                (Self::Pruned(x), _) => Self::Pruned(x.clone()),
+            }
+        }
+    }
+
+    impl RandPrune for MaybePruned<Assumptions> {
+        fn rand_prune(&self) -> Self {
+            match (self, rand::random::<bool>()) {
+                (Self::Value(x), true) => Self::Pruned(x.digest()),
+                (Self::Value(x), false) => x.clone().into(),
+                (Self::Pruned(x), _) => Self::Pruned(x.clone()),
+            }
+        }
+    }
+
     #[test]
     fn merge_receipt_metadata() {
-        let left_metadata = ReceiptMetadata {
+        let metadata = MaybePruned::Value(ReceiptMetadata {
             pre: SystemState {
                 pc: 2100484,
                 merkle_root: Digest::from_hex(
@@ -647,51 +755,22 @@ mod tests {
             }
             .into(),
             exit_code: ExitCode::Halted(0),
-            input: Digest::from_hex(
-                "0000000000000000000000000000000000000000000000000000000000000000",
-            )
-            .unwrap(),
-            output: MaybePruned::Pruned(
-                Digest::from_hex(
-                    "836f175c62c0f353831665427e8b0b34f6d1d21902764daeb406c6b83db575b0",
-                )
-                .unwrap(),
-            ),
-        };
+            input: Digest::ZERO,
+            output: MaybePruned::Value(Some(Output {
+                journal: MaybePruned::Value(b"hello world".to_vec()),
+                assumptions: MaybePruned::Value(Assumptions(vec![
+                    MaybePruned::Pruned(Digest::ZERO),
+                    MaybePruned::Pruned(Digest::ZERO),
+                ])),
+            })),
+        });
 
-        let right_metadata = ReceiptMetadata {
-            pre: SystemState {
-                pc: 2100484,
-                merkle_root: Digest::from_hex(
-                    "9095da07d84ccc170c5113e3dafdf0531700f0b3f0c627acc9f0329440d984fa",
-                )
-                .unwrap(),
-            }
-            .into(),
-            post: SystemState {
-                pc: 2297164,
-                merkle_root: Digest::from_hex(
-                    "223651656250c0cf2f1c3f8923ef3d2c8624a361830492ffec6450e1930fb07d",
-                )
-                .unwrap(),
-            }
-            .into(),
-            exit_code: ExitCode::Halted(0),
-            input: Digest::from_hex(
-                "0000000000000000000000000000000000000000000000000000000000000000",
-            )
-            .unwrap(),
-            output: MaybePruned::Pruned(
-                Digest::from_hex(
-                    "836f175c62c0f353831665427e8b0b34f6d1d21902764daeb406c6b83db575b0",
-                )
-                .unwrap(),
-            ),
-        };
+        // Run the test to 10k times to reach every combination with high probability.
+        for _ in 0..10000 {
+            let left = metadata.rand_prune();
+            let right = metadata.rand_prune();
 
-        println!(
-            "merged: {:#?}",
-            left_metadata.merge(&right_metadata).unwrap()
-        );
+            assert_eq!(left.merge(&right).unwrap().digest(), metadata.digest());
+        }
     }
 }

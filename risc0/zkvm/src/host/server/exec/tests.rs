@@ -115,7 +115,7 @@ fn system_split() {
     assert_eq!(segments.len(), 2);
     assert_eq!(segments[0].exit_code, ExitCode::SystemSplit);
     assert_eq!(segments[0].pre_image.compute_id().unwrap(), pre_image_id);
-    assert_ne!(segments[0].post_image_id, pre_image_id);
+    assert_ne!(segments[0].post_state.digest(), pre_image_id);
     assert_eq!(segments[1].exit_code, ExitCode::Halted(0));
     assert_eq!(
         segments[1].pre_image.compute_id().unwrap(),

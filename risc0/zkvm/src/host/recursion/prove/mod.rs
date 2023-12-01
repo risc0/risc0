@@ -24,14 +24,13 @@ use std::{collections::VecDeque, mem::take, rc::Rc};
 use anyhow::{anyhow, Context, Result};
 use hex::FromHex;
 use merkle::MerkleGroup;
-use risc0_binfmt::write_sha_halfs;
 use risc0_circuit_recursion::{
     cpu::CpuCircuitHal, CircuitImpl, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA,
 };
 use risc0_zkp::{
     adapter::{CircuitInfo, CircuitStepContext, TapsProvider},
     core::{
-        digest::{Digest, DIGEST_WORDS},
+        digest::Digest,
         hash::{poseidon::PoseidonHashSuite, HashSuite},
     },
     field::{
@@ -69,8 +68,6 @@ const RECURSION_CODE_SIZE: usize = 21;
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct RecursionReceipt {
     pub control_id: Digest,
-    pub allowed_code: Digest,
-    pub output_digest: Digest,
     pub seal: Vec<u32>,
     pub output: Vec<u32>,
 }
@@ -101,7 +98,8 @@ pub fn lift(segment_receipt: &SegmentReceipt) -> Result<SuccinctReceipt> {
 
 /// Run the join program to compress two receipts of the same session into one.
 ///
-/// By repeated application of the join program TODO
+/// By repeated application of the join program, any number of receipts for execution spans within
+/// the same session can be compressed into a single receipt for the entire session.
 pub fn join(a: &SuccinctReceipt, b: &SuccinctReceipt) -> Result<SuccinctReceipt> {
     tracing::debug!("Proving join: a.metadata = {:#?}", a.metadata,);
     tracing::debug!("Proving join: b.metadata = {:#?}", b.metadata,);
@@ -135,7 +133,8 @@ pub fn join(a: &SuccinctReceipt, b: &SuccinctReceipt) -> Result<SuccinctReceipt>
 /// Run the resolve program to remove an assumption from a conditional receipt upon verifying a
 /// corroborating receipt for the assumption.
 ///
-/// The resolve program TODO
+/// By applying the resolve program, a conditional receipt (i.e. a receipt for an execution using
+/// the `env::verify` API to logically verify a receipt) can be made into an unconditional receipt.
 pub fn resolve(
     conditional: &SuccinctReceipt,
     corroborating: &SuccinctReceipt,
@@ -182,7 +181,11 @@ pub fn resolve(
     })
 }
 
-/// TODO
+/// Prove the verification of a recursion receipt using the Poseidon254 hash function for FRI.
+///
+/// The identity_p254 program is used as the last step in the prover pipeline before running the
+/// Groth16 prover. In Groth16 over BN254, it is much more efficient to verify a STARK that was
+/// produced with Poseidon over the BN254 base field compared to using Posidon over BabyBear.
 pub fn identity_p254(a: &SuccinctReceipt) -> Result<SuccinctReceipt> {
     let hal_pair = poseidon254_hal_pair();
     let (hal, circuit_hal) = (hal_pair.hal.as_ref(), hal_pair.circuit_hal.as_ref());
@@ -223,7 +226,7 @@ impl Default for ProverOpts {
     }
 }
 
-/// TODO
+/// Prover for the recursion circuit.
 pub struct Prover {
     program: Program,
     control_id: Digest,
@@ -381,15 +384,12 @@ cfg_if::cfg_if! {
     }
 }
 
-fn shorts_to_digest(elems: &[BabyBearElem]) -> Digest {
-    let words: Vec<u32> = elems
-        .chunks_exact(2)
-        .map(|shortpair| {
-            let [a, b] = shortpair else { unreachable!() };
-            ((u64::from(*b) << 16) + u64::from(*a)) as u32
-        })
-        .collect();
-    Digest::try_from(words.as_slice()).unwrap()
+/// Kinds of digests recognized by the recursion program language.
+// NOTE: Default is additionally a recognized type in the recursion program language. It's not
+// yet supported here because some of the code in this module assumes Poseidon is Default.
+enum DigestKind {
+    Poseidon,
+    Sha256,
 }
 
 impl Prover {
@@ -418,7 +418,7 @@ impl Prover {
         let mut prover = Prover::new(program, control_id, opts);
 
         for digest in digests {
-            prover.add_input_digest(digest);
+            prover.add_input_digest(digest, DigestKind::Poseidon);
         }
 
         Ok(prover)
@@ -440,7 +440,7 @@ impl Prover {
         )]));
         for digest in proof.digests {
             tracing::debug!("path = {:?}", digest);
-            self.add_input_digest(&digest);
+            self.add_input_digest(&digest, DigestKind::Poseidon);
         }
         tracing::debug!(
             "root = {:?}",
@@ -462,7 +462,7 @@ impl Prover {
         let (program, control_id) = zkr::lift(po2)?;
         let mut prover = Prover::new(program, control_id, opts);
 
-        prover.add_input_digest(&merkle_root);
+        prover.add_input_digest(&merkle_root, DigestKind::Poseidon);
 
         let which = po2 - MIN_CYCLES_PO2;
         let inner_control_id = Digest::from_hex(POSEIDON_CONTROL_ID[which]).unwrap();
@@ -493,7 +493,7 @@ impl Prover {
         let (program, control_id) = zkr::join()?;
         let mut prover = Prover::new(program, control_id, opts);
 
-        prover.add_input_digest(&merkle_root);
+        prover.add_input_digest(&merkle_root, DigestKind::Poseidon);
         prover.add_segment_receipt(a, &allowed_ids)?;
         prover.add_segment_receipt(b, &allowed_ids)?;
         Ok(prover)
@@ -517,7 +517,7 @@ impl Prover {
         // Load the input values needed by the predicate.
         // Resolve predicate needs both seals as input, and the journal and assumptions tail digest
         // to compute the opening of the conditional receipt metadata to the first assumption.
-        prover.add_input_digest(&merkle_root);
+        prover.add_input_digest(&merkle_root, DigestKind::Poseidon);
         prover.add_segment_receipt(cond, &allowed_ids)?;
         prover.add_segment_receipt(corr, &allowed_ids)?;
 
@@ -540,18 +540,8 @@ impl Prover {
             .context("cannot resolve conditional receipt with pruned assumptions")?;
         assumptions_tail.resolve(&corr.metadata.digest())?;
 
-        let encode_sha_digest = |digest: Digest| -> Result<_> {
-            let mut data = Vec::<u32>::new();
-            write_sha_halfs(&mut data, &digest);
-            let data_fp: Vec<_> = data
-                .iter()
-                .map(|x| bytemuck::cast(BabyBearElem::new(*x)))
-                .collect();
-            Ok(data_fp)
-        };
-
-        prover.add_input(&encode_sha_digest(assumptions_tail.digest())?);
-        prover.add_input(&encode_sha_digest(journal.digest())?);
+        prover.add_input_digest(&assumptions_tail.digest(), DigestKind::Sha256);
+        prover.add_input_digest(&journal.digest(), DigestKind::Sha256);
         Ok(prover)
     }
 
@@ -564,7 +554,7 @@ impl Prover {
         let (program, control_id) = zkr::identity()?;
         let mut prover = Prover::new(program, control_id, opts);
 
-        prover.add_input_digest(&merkle_root);
+        prover.add_input_digest(&merkle_root, DigestKind::Poseidon);
         prover.add_segment_receipt(a, &allowed_ids)?;
         Ok(prover)
     }
@@ -573,11 +563,26 @@ impl Prover {
         self.input.extend(input);
     }
 
-    fn add_input_digest(&mut self, digest: &Digest) {
-        self.add_input(digest.as_words())
+    /// Add a digest to the input for the recursion program.
+    fn add_input_digest(&mut self, digest: &Digest, kind: DigestKind) {
+        match kind {
+            // Poseidon digests consist of  BabyBear field elems and do not need to be split.
+            DigestKind::Poseidon => self.add_input(digest.as_words()),
+            // SHA-256 digests need to be split into 16-bit half words to avoid overflowing.
+            DigestKind::Sha256 => self.add_input(bytemuck::cast_slice(
+                &digest
+                    .as_words()
+                    .iter()
+                    .copied()
+                    .flat_map(|x| [x & 0xffff, x >> 16])
+                    .map(BabyBearElem::new)
+                    .collect::<Vec<_>>(),
+            )),
+        }
     }
 
-    /// TODO
+    /// Run the prover, producing a receipt of execution for the recursion circuit over the loaded
+    /// program and input.
     #[tracing::instrument(skip_all)]
     pub fn run(&mut self) -> Result<RecursionReceipt> {
         let hal_pair = poseidon_hal_pair();
@@ -585,7 +590,8 @@ impl Prover {
         self.run_with_hal(hal, circuit_hal)
     }
 
-    /// TODO
+    /// Run the prover, producing a receipt of execution for the recursion circuit over the loaded
+    /// program and input, using the specified HAL.
     #[tracing::instrument(skip_all)]
     pub fn run_with_hal<H, C>(&mut self, hal: &H, circuit_hal: &C) -> Result<RecursionReceipt>
     where
@@ -632,18 +638,8 @@ impl Prover {
             prover.finalize(&[&mix, &out], circuit_hal)
         };
 
-        let output_elems: &[BabyBearElem] = bytemuck::cast_slice(&seal[..CircuitImpl::OUTPUT_SIZE]);
-
-        const DIGEST_SHORTS: usize = DIGEST_WORDS * 2;
-        assert_eq!(CircuitImpl::OUTPUT_SIZE, DIGEST_SHORTS * 2);
-
-        let allowed_code = shorts_to_digest(&output_elems[0..DIGEST_SHORTS]);
-        let output_digest = shorts_to_digest(&output_elems[DIGEST_SHORTS..2 * DIGEST_SHORTS]);
-
         Ok(RecursionReceipt {
             control_id: self.control_id,
-            allowed_code,
-            output_digest,
             seal: seal.into(),
             output: self.output.clone(),
         })
