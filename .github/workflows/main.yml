@@ -332,7 +332,7 @@ jobs:
   web:
     if: needs.changes.outputs.web == 'true'
     needs: changes
-    runs-on: ubuntu-latest-8-cores
+    runs-on: [self-hosted, prod, Linux, cpu]
     env:
       RISC0_BUILD_LOCKED: 1
     steps:
