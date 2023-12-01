@@ -408,7 +408,7 @@ impl Prover {
     ///
     /// This set of control IDs forms the closure of recursion programs that can be applied to the
     /// receipts. Verifiers will use the root of this tree to constrain the Prover to only apply
-    /// those programs in it's processing of receipts.
+    /// those programs in its processing of receipts.
     pub fn make_allowed_tree() -> MerkleGroup {
         MerkleGroup {
             depth: ALLOWED_CODE_MERKLE_DEPTH,
