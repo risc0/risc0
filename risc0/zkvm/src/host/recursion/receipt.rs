@@ -43,7 +43,7 @@ pub fn valid_control_ids() -> Vec<Digest> {
 
 /// A succinct receipt, produced via recursion, proving the execution of the zkVM.
 ///
-/// Using recursion, a [CompositeReceipt] can be compressed to form a [SuccinctReceipt]. In this
+/// Using recursion, a [crate::CompositeReceipt] can be compressed to form a [SuccinctReceipt]. In this
 /// way, a constant sized proof can be generated for arbitrarily long computations, and with an
 /// arbitrary number of segments linked via composition.
 #[derive(Clone, Debug, Serialize, Deserialize)]

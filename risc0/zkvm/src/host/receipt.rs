@@ -569,7 +569,7 @@ pub struct SegmentReceipt {
     /// [SegmentReceipt::verify_integrity_with_context]) to cryptographically prove that this
     /// Segment was faithfully executed. It is largely opaque cryptographic data, but contains a
     /// non-opaque metadata component, which can be conveniently accessed with
-    /// [SegmentReceipt::get_metadata].
+    /// [SegmentReceipt::metadata].
     pub seal: Vec<u32>,
 
     /// Segment index within the [Receipt]
