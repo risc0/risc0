@@ -311,7 +311,6 @@ dependencies = [
  "ark-ff",
  "ark-std",
  "tracing",
- "tracing-subscriber 0.2.25",
 ]
 
 [[package]]
@@ -1188,7 +1187,7 @@ dependencies = [
  "smartcore 0.3.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "smartcore-ml-methods",
  "tracing",
- "tracing-subscriber 0.3.18",
+ "tracing-subscriber",
  "waldo-core",
  "waldo-methods",
  "wasm-methods",
@@ -1282,7 +1281,7 @@ dependencies = [
  "sha2",
  "test-log",
  "tracing",
- "tracing-subscriber 0.3.18",
+ "tracing-subscriber",
 ]
 
 [[package]]
@@ -3255,7 +3254,7 @@ dependencies = [
  "fibonacci-methods",
  "risc0-zkvm",
  "serde",
- "tracing-subscriber 0.3.18",
+ "tracing-subscriber",
 ]
 
 [[package]]
@@ -5081,15 +5080,6 @@ dependencies = [
 
 [[package]]
 name = "tracing-subscriber"
-version = "0.2.25"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0e0d2eaa99c3c2e41547cfa109e910a68ea03823cccad4a0525dcbc9b01e8c71"
-dependencies = [
- "tracing-core",
-]
-
-[[package]]
-name = "tracing-subscriber"
 version = "0.3.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ad0f048c97dbd9faa9b7df56362b8ebcaa52adb06b498c050d2f4e32f90a7a8b"
@@ -5339,7 +5329,7 @@ dependencies = [
  "risc0-zkvm",
  "test-log",
  "tracing",
- "tracing-subscriber 0.3.18",
+ "tracing-subscriber",
  "voting-machine-core",
  "voting-machine-methods",
 ]
@@ -5368,7 +5358,7 @@ dependencies = [
  "image",
  "risc0-zkvm",
  "serde",
- "tracing-subscriber 0.3.18",
+ "tracing-subscriber",
  "viuer",
  "waldo-core",
  "waldo-methods",
@@ -5918,7 +5908,7 @@ dependencies = [
  "serde",
  "tokio",
  "tracing",
- "tracing-subscriber 0.3.18",
+ "tracing-subscriber",
  "zkevm-core",
  "zkevm-methods",
 ]
