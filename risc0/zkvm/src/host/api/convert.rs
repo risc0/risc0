@@ -22,7 +22,9 @@ use risc0_zkp::core::digest::Digest;
 use super::{malformed_err, path_to_string, pb, Asset, AssetRequest, Binary, BinaryKind};
 use crate::{
     host::{
-        receipt::{CompositeReceipt, InnerReceipt, SegmentReceipt},
+        receipt::{
+            decode_receipt_metadata_from_seal, CompositeReceipt, InnerReceipt, SegmentReceipt,
+        },
         recursion::SuccinctReceipt,
     },
     receipt_metadata::{Assumptions, MaybePruned, Output},
@@ -352,6 +354,7 @@ impl From<SegmentReceipt> for pb::core::SegmentReceipt {
             seal: value.get_seal_bytes().into(),
             index: value.index,
             hashfn: value.hashfn,
+            metadata: Some(value.metadata.into()),
         }
     }
 }
@@ -373,7 +376,14 @@ impl TryFrom<pb::core::SegmentReceipt> for SegmentReceipt {
             seal.push(word);
         }
 
+        // If the metadata field is not included, decode metadata from the seal.
+        let metadata = value
+            .metadata
+            .map(|m| m.try_into())
+            .unwrap_or_else(|| Ok(decode_receipt_metadata_from_seal(&seal)?))?;
+
         Ok(Self {
+            metadata,
             seal,
             index: value.index,
             hashfn: value.hashfn,
@@ -387,7 +397,7 @@ impl From<SuccinctReceipt> for pb::core::SuccinctReceipt {
             version: Some(ver::SUCCINCT_RECEIPT),
             seal: value.get_seal_bytes(),
             control_id: Some(value.control_id.into()),
-            meta: Some(value.meta.into()),
+            metadata: Some(value.metadata.into()),
         }
     }
 }
@@ -411,7 +421,7 @@ impl TryFrom<pb::core::SuccinctReceipt> for SuccinctReceipt {
         Ok(Self {
             seal,
             control_id: value.control_id.ok_or(malformed_err())?.try_into()?,
-            meta: value.meta.ok_or(malformed_err())?.try_into()?,
+            metadata: value.metadata.ok_or(malformed_err())?.try_into()?,
         })
     }
 }
