@@ -38,7 +38,7 @@ use crate::{
         testutils,
     },
     serde::to_vec,
-    sha::Digest,
+    sha::{Digest, Digestible},
     ExecutorEnv, ExecutorImpl, ExitCode, MemoryImage, Program,
 };
 
@@ -95,7 +95,7 @@ fn basic() {
     assert_eq!(segments.len(), 1);
     assert_eq!(segments[0].exit_code, ExitCode::Halted(0));
     assert_eq!(segments[0].pre_image.compute_id().unwrap(), pre_image_id);
-    assert_ne!(segments[0].post_image_id, pre_image_id);
+    assert_ne!(segments[0].post_state.digest(), pre_image_id);
     assert_eq!(segments[0].index, 0);
 }
 
@@ -130,11 +130,11 @@ fn system_split() {
     assert_eq!(segments.len(), 2);
     assert_eq!(segments[0].exit_code, ExitCode::SystemSplit);
     assert_eq!(segments[0].pre_image.compute_id().unwrap(), pre_image_id);
-    assert_ne!(segments[0].post_image_id, pre_image_id);
+    assert_ne!(segments[0].post_state.digest(), pre_image_id);
     assert_eq!(segments[1].exit_code, ExitCode::Halted(0));
     assert_eq!(
         segments[1].pre_image.compute_id().unwrap(),
-        segments[0].post_image_id
+        segments[0].post_state.digest()
     );
     assert_eq!(segments[0].index, 0);
     assert_eq!(segments[1].index, 1);
@@ -1006,7 +1006,8 @@ fn post_state_digest_randomization() {
                 .unwrap()
                 .resolve()
                 .unwrap()
-                .post_image_id
+                .post_state
+                .digest()
         })
         .collect();
     assert_eq!(post_state_digests.len(), ITERATIONS);
@@ -1043,7 +1044,8 @@ fn post_state_digest_randomization() {
                 .unwrap()
                 .resolve()
                 .unwrap()
-                .post_image_id
+                .post_state
+                .digest()
         })
         .collect();
     assert_eq!(post_state_digests.len(), 1);

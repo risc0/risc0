@@ -99,8 +99,8 @@ pub fn tagged_list<S: Sha256>(tag: &str, list: &[impl Borrow<Digest>]) -> Digest
 ///     tagged_list_cons::<Impl>("tag", &a, &tagged_list::<Impl>("tag", &[b, c])),
 /// );
 /// ```
-pub fn tagged_list_cons<S: Sha256>(tag: &str, head: &Digest, rest: &Digest) -> Digest {
-    tagged_struct::<S>(tag, &[head, rest], &[])
+pub fn tagged_list_cons<S: Sha256>(tag: &str, head: &Digest, tail: &Digest) -> Digest {
+    tagged_struct::<S>(tag, &[head, tail], &[])
 }
 
 #[cfg(test)]

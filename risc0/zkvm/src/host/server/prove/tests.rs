@@ -234,16 +234,13 @@ fn memory_io() {
     assert_eq!(run_memio(&[(POS, 1)]).unwrap(), ExitCode::Halted(0));
 
     // Unaligned write is bad
-    assert_eq!(
-        run_memio(&[(POS + 1001, 1)]).unwrap(),
-        ExitCode::SystemSplit
-    );
+    assert_eq!(run_memio(&[(POS + 1001, 1)]).unwrap(), ExitCode::Fault);
 
     // Aligned read is fine
     assert_eq!(run_memio(&[(POS, 0)]).unwrap(), ExitCode::Halted(0));
 
     // Unaligned read is bad
-    assert_eq!(run_memio(&[(POS + 1, 0)]).unwrap(), ExitCode::SystemSplit);
+    assert_eq!(run_memio(&[(POS + 1, 0)]).unwrap(), ExitCode::Fault);
 }
 
 #[test]
@@ -524,7 +521,7 @@ mod sys_verify {
             .unwrap();
         let fault_metadata = fault_receipt.get_metadata().unwrap();
         assert_eq!(fault_metadata.pre.digest(), MULTI_TEST_ID.into());
-        assert_eq!(fault_metadata.exit_code, ExitCode::SystemSplit);
+        assert_eq!(fault_metadata.exit_code, ExitCode::Fault);
         fault_receipt
     }
 

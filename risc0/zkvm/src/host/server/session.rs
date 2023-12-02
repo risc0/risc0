@@ -24,6 +24,7 @@ use std::{
 };
 
 use anyhow::{anyhow, ensure, Result};
+use risc0_zkvm_platform::WORD_SIZE;
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -92,7 +93,10 @@ pub trait SegmentRef: Send {
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Segment {
     pub(crate) pre_image: Box<MemoryImage>,
-    pub(crate) post_image_id: Digest,
+    // NOTE: segment.post_state is NOT EQUAL to segment.get_metadata()?.post. This is because the
+    // post SystemState on the ReceiptMetadata struct has a PC that is shifted forward by 4.
+    pub(crate) post_state: SystemState,
+    pub(crate) output: Option<Output>,
     pub(crate) faults: PageFaults,
     pub(crate) syscalls: Vec<SyscallRecord>,
     pub(crate) split_insn: Option<u32>,
@@ -168,8 +172,9 @@ impl Session {
             .ok_or_else(|| anyhow!("session has no segments"))?
             .resolve()?;
 
-        // Construct the Output struct, checking that the Session is internally
-        // consistent.
+        // Construct the Output struct for the session, checking internal consistency.
+        // NOTE: The Session output if distinct from the final Segment output because in the
+        // Session output any proven assumptions are not included.
         let output = if self.exit_code.expects_output() {
             self.journal
                 .as_ref()
@@ -206,8 +211,13 @@ impl Session {
         // NOTE: When a segment ends in a Halted(_) state, it may not update the post state
         // digest. As a result, it will be the same are the pre_image. All other exit codes require
         // the post state digest to reflect the final memory state.
+        // NOTE: The PC on the the post state is stored "+ 4". See ReceiptMetadata for more detail.
         let post_state = SystemState {
-            pc: self.post_image.pc,
+            pc: self
+                .post_image
+                .pc
+                .checked_add(WORD_SIZE as u32)
+                .ok_or(anyhow!("invalid pc in session post image"))?,
             merkle_root: match self.exit_code {
                 ExitCode::Halted(_) => last_segment.pre_image.compute_root_hash()?,
                 _ => self.post_image.compute_root_hash()?,
@@ -248,7 +258,8 @@ impl Segment {
     #[allow(clippy::too_many_arguments)]
     pub(crate) fn new(
         pre_image: Box<MemoryImage>,
-        post_image_id: Digest,
+        post_state: SystemState,
+        output: Option<Output>,
         faults: PageFaults,
         syscalls: Vec<SyscallRecord>,
         exit_code: ExitCode,
@@ -263,7 +274,8 @@ impl Segment {
         );
         Self {
             pre_image,
-            post_image_id,
+            post_state,
+            output,
             faults,
             syscalls,
             exit_code,
@@ -272,6 +284,35 @@ impl Segment {
             index,
             cycles,
         }
+    }
+
+    /// Calculate for the [ReceiptMetadata] associated with this [Segment]. The
+    /// [ReceiptMetadata] is the claim that will be proven if this [Segment]
+    /// is passed to the [crate::Prover].
+    pub fn get_metadata(&self) -> Result<ReceiptMetadata> {
+        // NOTE: When a segment ends in a Halted(_) state, it may not update the post state
+        // digest. As a result, it will be the same are the pre_image. All other exit codes require
+        // the post state digest to reflect the final memory state.
+        // NOTE: The PC on the the post state is stored "+ 4". See ReceiptMetadata for more detail.
+        let post_state = SystemState {
+            pc: self
+                .post_state
+                .pc
+                .checked_add(WORD_SIZE as u32)
+                .ok_or(anyhow!("invalid pc in segment post state"))?,
+            merkle_root: match self.exit_code {
+                ExitCode::Halted(_) => self.pre_image.compute_root_hash()?,
+                _ => self.post_state.merkle_root.clone(),
+            },
+        };
+
+        Ok(ReceiptMetadata {
+            pre: SystemState::from(&*self.pre_image).into(),
+            post: post_state.into(),
+            exit_code: self.exit_code,
+            input: Digest::ZERO,
+            output: self.output.clone().into(),
+        })
     }
 }
 

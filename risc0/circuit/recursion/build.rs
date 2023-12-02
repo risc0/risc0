@@ -36,6 +36,7 @@ fn main() {
 #[cfg(feature = "prove")]
 fn download_zkr() {
     use std::{
+        num::ParseIntError,
         path::{Path, PathBuf},
         str::FromStr,
     };
@@ -43,7 +44,7 @@ fn download_zkr() {
     use downloader::{verify, Download, DownloadSummary, Downloader};
 
     const SRC_PATH: &str = "src/recursion_zkr.zip";
-    const GIT_COMMIT: &str = "505295b963c97db2afffe58f4b0cb4721e396b90";
+    const SHA256_HASH: &str = "566c10a9254d7ac185fd6bb807714bfb6852f2ee4241bc6478409444239fab46";
 
     let src_path = PathBuf::from_str(SRC_PATH).unwrap();
     let out_dir = env::var("OUT_DIR").unwrap();
@@ -52,7 +53,7 @@ fn download_zkr() {
         let tgt_path = out_dir.join("recursion_zkr.zip");
         std::fs::copy(&src_path, &tgt_path).unwrap();
     } else {
-        fn decode_hex(s: &str) -> Result<Vec<u8>, std::num::ParseIntError> {
+        fn decode_hex(s: &str) -> Result<Vec<u8>, ParseIntError> {
             (0..s.len())
                 .step_by(2)
                 .map(|i| u8::from_str_radix(&s[i..i + 2], 16))
@@ -62,10 +63,11 @@ fn download_zkr() {
             .download_folder(out_dir)
             .build()
             .unwrap();
-        let url = format!("https://github.com/risc0/risc0/raw/{GIT_COMMIT}/risc0/circuit/recursion/src/recursion_zkr.zip");
+        let url =
+            format!("https://risc0-artifacts.s3.us-west-2.amazonaws.com/zkr/{SHA256_HASH}.zip");
         eprintln!("Downloading {url}");
         let dl = Download::new(&url).verify(verify::with_digest::<sha2::Sha256>(
-            decode_hex("a01d63a6d87cd914fff6f70477565905e824a8108052199e4f432b381f7e7567").unwrap(),
+            decode_hex(SHA256_HASH).unwrap(),
         ));
         let results = downloader.download(&[dl]).unwrap();
         for result in results {

@@ -23,11 +23,13 @@ use alloc::{collections::VecDeque, vec::Vec};
 use core::{fmt, ops::Deref};
 
 use anyhow::{anyhow, ensure};
-use risc0_binfmt::{read_sha_halfs, tagged_list, tagged_list_cons, tagged_struct, write_sha_halfs};
+use risc0_binfmt::{
+    read_sha_halfs, tagged_list, tagged_list_cons, tagged_struct, write_sha_halfs, Digestible,
+};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    sha::{self, Digest, Digestible, Sha256},
+    sha::{self, Digest, Sha256},
     SystemState,
 };
 
@@ -44,6 +46,12 @@ pub struct ReceiptMetadata {
     pub pre: MaybePruned<SystemState>,
 
     /// The [SystemState] of a segment just after execution has completed.
+    ///
+    /// NOTE: In order to avoid extra logic in the rv32im circuit to perform arithmetic on the PC
+    /// with carry, the post state PC is recorded as the current PC + 4. Subtract 4 to get the
+    /// "actual" final PC of the zkVM at the end of the segment. When the exit code is `Halted` or
+    /// `Paused`, this will be the address of the halt `ecall`. When the exit code is
+    /// `SystemSplit`, this will be the address of the next instruction to be executed.
     pub post: MaybePruned<SystemState>,
 
     /// The exit code for a segment
@@ -64,14 +72,18 @@ pub struct ReceiptMetadata {
 
 impl ReceiptMetadata {
     /// Decode a [crate::ReceiptMetadata] from a list of [u32]'s
-    pub fn decode(flat: &mut VecDeque<u32>) -> Result<Self, InvalidExitCodeError> {
-        let input = read_sha_halfs(flat);
-        let pre = SystemState::decode(flat);
-        let post = SystemState::decode(flat);
-        let sys_exit = flat.pop_front().unwrap();
-        let user_exit = flat.pop_front().unwrap();
+    pub fn decode(flat: &mut VecDeque<u32>) -> Result<Self, DecodeError> {
+        let input = read_sha_halfs(flat)?;
+        let pre = SystemState::decode(flat)?;
+        let post = SystemState::decode(flat)?;
+        let sys_exit = flat
+            .pop_front()
+            .ok_or(risc0_binfmt::DecodeError::EndOfStream)?;
+        let user_exit = flat
+            .pop_front()
+            .ok_or(risc0_binfmt::DecodeError::EndOfStream)?;
         let exit_code = ExitCode::from_pair(sys_exit, user_exit)?;
-        let output = read_sha_halfs(flat);
+        let output = read_sha_halfs(flat)?;
 
         Ok(Self {
             input,
@@ -90,12 +102,12 @@ impl ReceiptMetadata {
         let (sys_exit, user_exit) = self.exit_code.into_pair();
         flat.push(sys_exit);
         flat.push(user_exit);
-        write_sha_halfs(flat, &self.output.digest());
+        write_sha_halfs(flat, &self.output.digest::<sha::Impl>());
         Ok(())
     }
 }
 
-impl risc0_binfmt::Digestible for ReceiptMetadata {
+impl Digestible for ReceiptMetadata {
     /// Hash the [crate::ReceiptMetadata] to get a digest of the struct.
     fn digest<S: Sha256>(&self) -> Digest {
         let (sys_exit, user_exit) = self.exit_code.into_pair();
@@ -103,14 +115,47 @@ impl risc0_binfmt::Digestible for ReceiptMetadata {
             "risc0.ReceiptMeta",
             &[
                 self.input,
-                self.pre.digest(),
-                self.post.digest(),
-                self.output.digest(),
+                self.pre.digest::<S>(),
+                self.post.digest::<S>(),
+                self.output.digest::<S>(),
             ],
             &[sys_exit, user_exit],
         )
     }
 }
+
+/// Error returned when decoding [ReceiptMetadata] fails.
+#[derive(Debug, Copy, Clone)]
+pub enum DecodeError {
+    /// Decoding failure due to an invalid exit code.
+    InvalidExitCode(InvalidExitCodeError),
+    /// Decoding failure due to an inner decoding failure.
+    Decode(risc0_binfmt::DecodeError),
+}
+
+impl fmt::Display for DecodeError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Self::InvalidExitCode(e) => write!(f, "failed to decode receipt metadata: {}", e),
+            Self::Decode(e) => write!(f, "failed to decode receipt metadata: {}", e),
+        }
+    }
+}
+
+impl From<risc0_binfmt::DecodeError> for DecodeError {
+    fn from(e: risc0_binfmt::DecodeError) -> Self {
+        Self::Decode(e)
+    }
+}
+
+impl From<InvalidExitCodeError> for DecodeError {
+    fn from(e: InvalidExitCodeError) -> Self {
+        Self::InvalidExitCode(e)
+    }
+}
+
+#[cfg(feature = "std")]
+impl std::error::Error for DecodeError {}
 
 /// Indicates how a Segment or Session's execution has terminated
 #[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq)]
@@ -178,6 +223,8 @@ impl ExitCode {
     }
 }
 
+impl Eq for ExitCode {}
+
 /// Error returned when a (system, user) exit code pair is an invalid
 /// representation.
 #[derive(Debug, Copy, Clone)]
@@ -210,12 +257,12 @@ pub struct Output {
     pub assumptions: MaybePruned<Assumptions>,
 }
 
-impl risc0_binfmt::Digestible for Output {
+impl Digestible for Output {
     /// Hash the [Output] to get a digest of the struct.
     fn digest<S: Sha256>(&self) -> Digest {
         tagged_struct::<S>(
             "risc0.Output",
-            &[self.journal.digest(), self.assumptions.digest()],
+            &[self.journal.digest::<S>(), self.assumptions.digest::<S>()],
             &[],
         )
     }
@@ -242,10 +289,10 @@ impl Assumptions {
             .ok_or_else(|| anyhow!("cannot resolve assumption from empty list"))?;
 
         ensure!(
-            &head.digest() == resolved,
+            &head.digest::<sha::Impl>() == resolved,
             "resolved assumption is not equal to the head of the list: {} != {}",
             resolved,
-            head.digest()
+            head.digest::<sha::Impl>()
         );
 
         // Drop the head of the assumptions list.
@@ -262,12 +309,12 @@ impl Deref for Assumptions {
     }
 }
 
-impl risc0_binfmt::Digestible for Assumptions {
+impl Digestible for Assumptions {
     /// Hash the [Output] to get a digest of the struct.
     fn digest<S: Sha256>(&self) -> Digest {
         tagged_list::<S>(
             "risc0.Assumptions",
-            &self.0.iter().map(|a| a.digest()).collect::<Vec<_>>(),
+            &self.0.iter().map(|a| a.digest::<S>()).collect::<Vec<_>>(),
         )
     }
 }
@@ -290,7 +337,7 @@ impl MaybePruned<Assumptions> {
             MaybePruned::Pruned(list_digest) => {
                 *list_digest = tagged_list_cons::<sha::Impl>(
                     "risc0.Assumptions",
-                    &assumption.digest(),
+                    &assumption.digest::<sha::Impl>(),
                     &*list_digest,
                 );
             }
@@ -300,15 +347,15 @@ impl MaybePruned<Assumptions> {
     /// Mark an assumption as resolved and remove it from the list.
     ///
     /// Assumptions can only be removed from the head of the list. If this value
-    /// is pruned, then the result will also be a pruned value. The `rest`
+    /// is pruned, then the result will also be a pruned value. The `tail`
     /// parameter should be equal to the digest of the list after the
     /// resolved assumption is removed.
-    pub fn resolve(&mut self, resolved: &Digest, rest: &Digest) -> anyhow::Result<()> {
+    pub fn resolve(&mut self, resolved: &Digest, tail: &Digest) -> anyhow::Result<()> {
         match self {
             MaybePruned::Value(list) => list.resolve(resolved),
             MaybePruned::Pruned(list_digest) => {
                 let reconstructed =
-                    tagged_list_cons::<sha::Impl>("risc0.Assumptions", resolved, rest);
+                    tagged_list_cons::<sha::Impl>("risc0.Assumptions", resolved, tail);
                 ensure!(
                     &reconstructed == list_digest,
                     "reconstructed list digest does not match; expected {}, reconstructed {}",
@@ -317,7 +364,7 @@ impl MaybePruned<Assumptions> {
                 );
 
                 // Set the pruned digest value to be equal to the rest parameter.
-                *list_digest = rest.clone();
+                *list_digest = tail.clone();
                 Ok(())
             }
         }
@@ -355,10 +402,18 @@ where
         }
     }
 
-    /// Unwrap the value as a reference, or return an error.k
+    /// Unwrap the value as a reference, or return an error.
     pub fn as_value(&self) -> Result<&T, PrunedValueError> {
         match self {
             MaybePruned::Value(ref value) => Ok(value),
+            MaybePruned::Pruned(ref digest) => Err(PrunedValueError(digest.clone())),
+        }
+    }
+
+    /// Unwrap the value as a mutable reference, or return an error.
+    pub fn as_value_mut(&mut self) -> Result<&mut T, PrunedValueError> {
+        match self {
+            MaybePruned::Value(ref mut value) => Ok(value),
             MaybePruned::Pruned(ref digest) => Err(PrunedValueError(digest.clone())),
         }
     }
@@ -377,9 +432,9 @@ impl<T> Digestible for MaybePruned<T>
 where
     T: Digestible + Clone + Serialize,
 {
-    fn digest(&self) -> Digest {
+    fn digest<S: Sha256>(&self) -> Digest {
         match self {
-            MaybePruned::Value(ref val) => val.digest(),
+            MaybePruned::Value(ref val) => val.digest::<S>(),
             MaybePruned::Pruned(digest) => digest.clone(),
         }
     }
@@ -431,7 +486,7 @@ where
 
 impl<T> fmt::Debug for MaybePruned<T>
 where
-    T: Clone + Serialize + risc0_binfmt::Digestible + fmt::Debug,
+    T: Clone + Serialize + Digestible + fmt::Debug,
 {
     /// Format [MaybePruned] values are if they were a struct with value and
     /// digest fields. Digest field is always provided so that divergent
@@ -441,7 +496,9 @@ where
         if let MaybePruned::Value(value) = self {
             builder.field("value", value);
         }
-        builder.field("digest", &self.digest()).finish()
+        builder
+            .field("digest", &self.digest::<sha::Impl>())
+            .finish()
     }
 }
 
@@ -457,3 +514,263 @@ impl fmt::Display for PrunedValueError {
 
 #[cfg(feature = "std")]
 impl std::error::Error for PrunedValueError {}
+
+/// Merge two structured containing [MaybePruned] fields to produce a resulting structure with
+/// populated fields equal to the union of the two.
+///
+/// Viewing the two structs as Merkle trees, in which subtrees may be pruned, the result of this
+/// operation is a tree with a set of nodes equal to the union of the set of nodes for each input.
+pub(crate) trait Merge: Digestible + Sized {
+    /// Merge two structs to produce an output with a union of the fields populated in the inputs.
+    fn merge(&self, other: &Self) -> Result<Self, MergeInequalityError>;
+}
+
+/// Error returned when a merge it attempted with two values with unequal digests.
+#[derive(Debug, Clone)]
+pub(crate) struct MergeInequalityError(pub Digest, pub Digest);
+
+impl fmt::Display for MergeInequalityError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            f,
+            "cannot merge values; left and right are not diegst equal: left {}, right {}",
+            hex::encode(&self.0),
+            hex::encode(&self.1)
+        )
+    }
+}
+
+#[cfg(feature = "std")]
+impl std::error::Error for MergeInequalityError {}
+
+/// Private marker trait providing an implementation of merge to values which implement PartialEq and clone and do not contain Merge fields.
+trait MergeLeaf: Digestible + PartialEq + Clone + Sized {}
+
+impl MergeLeaf for SystemState {}
+impl MergeLeaf for Vec<u8> {}
+
+impl<T: MergeLeaf> Merge for T {
+    fn merge(&self, other: &Self) -> Result<Self, MergeInequalityError> {
+        if self != other {
+            return Err(MergeInequalityError(
+                self.digest::<sha::Impl>(),
+                other.digest::<sha::Impl>(),
+            ));
+        }
+
+        Ok(self.clone())
+    }
+}
+
+impl<T> Merge for MaybePruned<T>
+where
+    T: Merge + Serialize + Clone,
+{
+    fn merge(&self, other: &Self) -> Result<Self, MergeInequalityError> {
+        let check_eq = || {
+            if self.digest::<sha::Impl>() != other.digest::<sha::Impl>() {
+                Err(MergeInequalityError(
+                    self.digest::<sha::Impl>(),
+                    other.digest::<sha::Impl>(),
+                ))
+            } else {
+                Ok(())
+            }
+        };
+
+        Ok(match (self, other) {
+            (MaybePruned::Value(left), MaybePruned::Value(right)) => {
+                MaybePruned::Value(left.merge(&right)?)
+            }
+            (MaybePruned::Value(_), MaybePruned::Pruned(_)) => {
+                check_eq()?;
+                self.clone()
+            }
+            (MaybePruned::Pruned(_), MaybePruned::Value(_)) => {
+                check_eq()?;
+                other.clone()
+            }
+            (MaybePruned::Pruned(_), MaybePruned::Pruned(_)) => {
+                check_eq()?;
+                self.clone()
+            }
+        })
+    }
+}
+
+impl Merge for Assumptions {
+    fn merge(&self, other: &Self) -> Result<Self, MergeInequalityError> {
+        if self.0.len() != other.0.len() {
+            return Err(MergeInequalityError(
+                self.digest::<sha::Impl>(),
+                other.digest::<sha::Impl>(),
+            ));
+        }
+        Ok(Assumptions(
+            self.0
+                .iter()
+                .zip(other.0.iter())
+                .map(|(left, right)| left.merge(right))
+                .collect::<Result<Vec<_>, _>>()?,
+        ))
+    }
+}
+
+impl Merge for Output {
+    fn merge(&self, other: &Self) -> Result<Self, MergeInequalityError> {
+        Ok(Self {
+            journal: self.journal.merge(&other.journal)?,
+            assumptions: self.assumptions.merge(&other.assumptions)?,
+        })
+    }
+}
+
+impl Merge for Option<Output> {
+    fn merge(&self, other: &Self) -> Result<Self, MergeInequalityError> {
+        match (self, other) {
+            (Some(left), Some(right)) => Some(left.merge(right)).transpose(),
+            (None, None) => Ok(None),
+            _ => Err(MergeInequalityError(
+                self.digest::<sha::Impl>(),
+                other.digest::<sha::Impl>(),
+            )),
+        }
+    }
+}
+
+impl Merge for ReceiptMetadata {
+    fn merge(&self, other: &Self) -> Result<Self, MergeInequalityError> {
+        if self.exit_code != other.exit_code || self.input != other.input {
+            return Err(MergeInequalityError(
+                self.digest::<sha::Impl>(),
+                other.digest::<sha::Impl>(),
+            ));
+        }
+        Ok(Self {
+            pre: self.pre.merge(&other.pre)?,
+            post: self.post.merge(&other.post)?,
+            exit_code: self.exit_code,
+            input: self.input,
+            output: self.output.merge(&other.output)?,
+        })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use hex::FromHex;
+
+    use super::{Assumptions, ExitCode, MaybePruned, Merge, Output, ReceiptMetadata, SystemState};
+    use crate::sha::{Digest, Digestible};
+
+    /// Testing utility for randomly pruning structs.
+    trait RandPrune {
+        fn rand_prune(&self) -> Self;
+    }
+
+    impl RandPrune for MaybePruned<ReceiptMetadata> {
+        fn rand_prune(&self) -> Self {
+            match (self, rand::random::<bool>()) {
+                (Self::Value(x), true) => Self::Pruned(x.digest()),
+                (Self::Value(x), false) => ReceiptMetadata {
+                    pre: x.pre.rand_prune(),
+                    post: x.post.rand_prune(),
+                    exit_code: x.exit_code,
+                    input: x.input,
+                    output: x.output.rand_prune(),
+                }
+                .into(),
+                (Self::Pruned(x), _) => Self::Pruned(x.clone()),
+            }
+        }
+    }
+
+    impl RandPrune for MaybePruned<SystemState> {
+        fn rand_prune(&self) -> Self {
+            match (self, rand::random::<bool>()) {
+                (Self::Value(x), true) => Self::Pruned(x.digest()),
+                (Self::Value(x), false) => SystemState {
+                    pc: x.pc,
+                    merkle_root: x.merkle_root,
+                }
+                .into(),
+                (Self::Pruned(x), _) => Self::Pruned(x.clone()),
+            }
+        }
+    }
+
+    impl RandPrune for MaybePruned<Option<Output>> {
+        fn rand_prune(&self) -> Self {
+            match (self, rand::random::<bool>()) {
+                (Self::Value(x), true) => Self::Pruned(x.digest()),
+                (Self::Value(x), false) => x
+                    .as_ref()
+                    .map(|o| Output {
+                        journal: o.journal.rand_prune(),
+                        assumptions: o.assumptions.rand_prune(),
+                    })
+                    .into(),
+                (Self::Pruned(x), _) => Self::Pruned(x.clone()),
+            }
+        }
+    }
+
+    impl RandPrune for MaybePruned<Vec<u8>> {
+        fn rand_prune(&self) -> Self {
+            match (self, rand::random::<bool>()) {
+                (Self::Value(x), true) => Self::Pruned(x.digest()),
+                (Self::Value(x), false) => x.clone().into(),
+                (Self::Pruned(x), _) => Self::Pruned(x.clone()),
+            }
+        }
+    }
+
+    impl RandPrune for MaybePruned<Assumptions> {
+        fn rand_prune(&self) -> Self {
+            match (self, rand::random::<bool>()) {
+                (Self::Value(x), true) => Self::Pruned(x.digest()),
+                (Self::Value(x), false) => x.clone().into(),
+                (Self::Pruned(x), _) => Self::Pruned(x.clone()),
+            }
+        }
+    }
+
+    #[test]
+    fn merge_receipt_metadata() {
+        let metadata = MaybePruned::Value(ReceiptMetadata {
+            pre: SystemState {
+                pc: 2100484,
+                merkle_root: Digest::from_hex(
+                    "9095da07d84ccc170c5113e3dafdf0531700f0b3f0c627acc9f0329440d984fa",
+                )
+                .unwrap(),
+            }
+            .into(),
+            post: SystemState {
+                pc: 2297164,
+                merkle_root: Digest::from_hex(
+                    "223651656250c0cf2f1c3f8923ef3d2c8624a361830492ffec6450e1930fb07d",
+                )
+                .unwrap(),
+            }
+            .into(),
+            exit_code: ExitCode::Halted(0),
+            input: Digest::ZERO,
+            output: MaybePruned::Value(Some(Output {
+                journal: MaybePruned::Value(b"hello world".to_vec()),
+                assumptions: MaybePruned::Value(Assumptions(vec![
+                    MaybePruned::Pruned(Digest::ZERO),
+                    MaybePruned::Pruned(Digest::ZERO),
+                ])),
+            })),
+        });
+
+        // Run the test to 10k times to reach every combination with high probability.
+        for _ in 0..10000 {
+            let left = metadata.rand_prune();
+            let right = metadata.rand_prune();
+
+            assert_eq!(left.merge(&right).unwrap().digest(), metadata.digest());
+        }
+    }
+}
