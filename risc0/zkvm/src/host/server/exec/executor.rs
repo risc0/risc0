@@ -377,7 +377,6 @@ impl<'a> ExecutorImpl<'a> {
                 return Ok(Some(ExitCode::SessionLimit));
             }
         }
-        let pre_cycles = self.total_cycles();
 
         let insn = self.monitor.load_u32(self.pc)?;
         let opcode = OpCode::decode(insn, self.pc)?;
@@ -470,21 +469,12 @@ impl<'a> ExecutorImpl<'a> {
         //     self.total_cycles()
         // );
 
-        // Check if the current instruction's cycle count exceeds the segment's
-        // cycle limit. The first instruction of a segment always has a little
-        // bit of cycle overhead from the initialization of registers and
-        // must be accounted for in the current segment. In other words,
-        // instruction, `total_pending_cycles` represents the cost of the first
-        // instruction of the segment.
-        if (total_pending_cycles - pre_cycles > self.segment_limit)
-            || (total_pending_cycles > self.segment_limit && self.insn_counter == 0)
-        {
-            // Some instructions could be invoked with parameters that increase the cycle
-            // count over the segment limit. If this is the case, doing a system split won't
-            // do anything so halt the executor.
-            bail!("execution of instruction at pc [0x{:08x}] resulted in a cycle count too large to fit into a single segment.", self.pc);
-        }
         let exit_code = if total_pending_cycles > self.segment_limit {
+            if self.insn_counter == 0 {
+                // splitting on the first instruction of the segment means that
+                // it's too large to fit into a signle cycle.
+                bail!("execution of instruction at pc [0x{:08x}] resulted in a cycle count too large to fit into a single segment.", self.pc);
+            }
             self.split_insn = Some(self.insn_counter);
             tracing::debug!("split: [{}] pc: 0x{:08x}", self.segment_cycle, self.pc,);
             self.monitor.undo()?;
