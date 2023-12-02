@@ -470,9 +470,9 @@ impl<'a> ExecutorImpl<'a> {
         //     self.total_cycles()
         // );
 
-        // Check if the current instruction being executed is larger than the
-        // segment's cycle limit. The first instruction of a segment always has
-        // a little bit of cycle overhead from the segment's initialization and
+        // Check if the current instruction's cycle count exceeds the segment's
+        // cycle limit. The first instruction of a segment always has a little
+        // bit of cycle overhead from the initialization of registers and
         // must be accounted for in the current segment. In other words,
         // instruction, `total_pending_cycles` represents the cost of the first
         // instruction of the segment.
