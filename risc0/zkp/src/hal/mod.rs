@@ -48,7 +48,7 @@ pub trait Buffer<T>: Clone {
 
 pub trait Hal {
     type Field: Field<Elem = Self::Elem, ExtElem = Self::ExtElem>;
-    type Elem: Elem + RootsOfUnity;
+    type Elem: Elem + RootsOfUnity + Sync;
     type ExtElem: ExtElem<SubElem = Self::Elem>;
     type Buffer<T: Clone + Debug + PartialEq + Pod>: Buffer<T>;
 
