@@ -30,7 +30,6 @@ EXTENSIONS = [
 
 SKIP_DIRS = [
     str(Path.cwd()) + "/templates/rust-starter",
-    # Groth16 verifier implementaion uses circom generated code under GPL3.
     str(Path.cwd()) + "/bonsai/ethereum/contracts/groth16",
 ]
 
@@ -43,10 +42,20 @@ def check_header(expected_year, lines_actual):
 
 
 def check_file(root, file):
-    cmd = ['git', 'log', '-1', '--format=%ad', '--date=format:%Y', file]
-    expected_year = subprocess.check_output(cmd, encoding='UTF-8').strip()
+    try:
+        cmd = ['git', 'log', '-1', '--format=%ad', '--date=format:%Y', str(file)]
+        expected_year = subprocess.check_output(cmd, encoding='UTF-8').strip()
+    except subprocess.CalledProcessError as e:
+        print(f'Error executing git command: {e}')
+        return 1
+
     rel_path = file.relative_to(root)
-    lines = file.read_text().splitlines()
+    try:
+        lines = file.read_text().splitlines()
+    except IOError as e:
+        print(f'Error reading file {rel_path}: {e}')
+        return 1
+
     result = check_header(expected_year, lines)
     if result:
         print(f'{rel_path}: invalid header!')
@@ -57,17 +66,23 @@ def check_file(root, file):
 
 
 def repo_root():
-    """Return an absolute Path to the repo root"""
-    cmd = ["git", "rev-parse", "--show-toplevel"]
-    return Path(subprocess.check_output(cmd, encoding='UTF-8').strip())
+    try:
+        cmd = ["git", "rev-parse", "--show-toplevel"]
+        return Path(subprocess.check_output(cmd, encoding='UTF-8').strip())
+    except subprocess.CalledProcessError as e:
+        print(f'Error finding repo root: {e}')
+        sys.exit(1)
 
 
 def tracked_files():
-    """Yield all file paths tracked by git"""
-    cmd = ["git", "ls-tree", "--full-tree", "--name-only", "-r", "HEAD"]
-    tree = subprocess.check_output(cmd, encoding='UTF-8').strip()
-    for path in tree.splitlines():
-        yield (repo_root() / Path(path)).absolute()
+    try:
+        cmd = ["git", "ls-tree", "--full-tree", "--name-only", "-r", "HEAD"]
+        tree = subprocess.check_output(cmd, encoding='UTF-8').strip()
+        for path in tree.splitlines():
+            yield (repo_root() / Path(path)).absolute()
+    except subprocess.CalledProcessError as e:
+        print(f'Error listing tracked files: {e}')
+        sys.exit(1)
 
 
 def main():
