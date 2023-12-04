@@ -57,10 +57,10 @@ impl Prover for ExternalProver {
         if opts.prove_guest_errors {
             receipt.verify_integrity_with_context(ctx)?;
             ensure!(
-                receipt.get_metadata()?.pre.digest() == image_id,
+                receipt.get_claim()?.pre.digest() == image_id,
                 "received unexpected image ID: expected {}, found {}",
                 hex::encode(&image_id),
-                hex::encode(&receipt.get_metadata()?.pre.digest())
+                hex::encode(&receipt.get_claim()?.pre.digest())
             );
         } else {
             receipt.verify_with_context(ctx, image_id)?;
@@ -87,10 +87,10 @@ impl Prover for ExternalProver {
         if opts.prove_guest_errors {
             receipt.verify_integrity_with_context(ctx)?;
             ensure!(
-                receipt.get_metadata()?.pre.digest() == image_id,
+                receipt.get_claim()?.pre.digest() == image_id,
                 "received unexpected image ID: expected {}, found {}",
                 hex::encode(&image_id),
-                hex::encode(&receipt.get_metadata()?.pre.digest())
+                hex::encode(&receipt.get_claim()?.pre.digest())
             );
         } else {
             receipt.verify_with_context(ctx, image_id)?;

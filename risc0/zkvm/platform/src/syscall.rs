@@ -694,11 +694,11 @@ pub unsafe extern "C" fn sys_alloc_aligned(bytes: usize, align: usize) -> *mut u
 }
 
 /// Send an image ID and journal hash to the host to request the post state digest and system exit
-/// code from a matching ReceiptMetadata with successful exit status.
+/// code from a matching ReceiptClaim with successful exit status.
 ///
 /// A cooperative prover will only return if there is a verifying proof with successful exit status
 /// associated with the given image ID and journal digest; and will always return a result code of
-/// 0 to register a0. The caller must calculate the ReceiptMetadata digest, using the provided post
+/// 0 to register a0. The caller must calculate the ReceiptClaim digest, using the provided post
 /// state digest and encode the digest into a public assumptions list for inclusion in the guest
 /// output.
 #[cfg(feature = "export-syscalls")]
@@ -715,7 +715,7 @@ pub unsafe extern "C" fn sys_verify(
     let Return(a0, _) = unsafe {
         // Send the image_id and journal_digest to the host in a syscall.
         // Expect in return that from_host_buf is populated with the post state
-        // digest and system exit code for from a matching ReceiptMetadata.
+        // digest and system exit code for from a matching ReceiptClaim.
         syscall_2(
             nr::SYS_VERIFY,
             from_host_buf as *mut u32,
@@ -734,10 +734,10 @@ pub unsafe extern "C" fn sys_verify(
     }
 }
 
-/// Send a ReceiptMetadata digest to the host to request verification.
+/// Send a ReceiptClaim digest to the host to request verification.
 ///
 /// A cooperative prover will only return if there is a verifying proof
-/// associated with that metadata digest, and will always return a result code
+/// associated with that claim digest, and will always return a result code
 /// of 0 to register a0. The caller must encode the metadata_digest into a
 /// public assumptions list for inclusion in the guest output.
 #[cfg(feature = "export-syscalls")]

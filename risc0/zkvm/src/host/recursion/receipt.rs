@@ -24,7 +24,7 @@ use super::CIRCUIT;
 use crate::{
     host::{control_id::POSEIDON_CONTROL_ID, receipt::VerifierContext},
     sha::Digestible,
-    ReceiptMetadata,
+    ReceiptClaim,
 };
 
 /// This function gets valid control IDs from the Poseidon and recursion
@@ -57,12 +57,12 @@ pub struct SuccinctReceipt {
     /// join, or resolve).
     pub control_id: Digest,
 
-    /// [ReceiptMetadata] containing information about the execution that this receipt proves.
-    pub metadata: ReceiptMetadata,
+    /// [ReceiptClaim] containing information about the execution that this receipt proves.
+    pub claim: ReceiptClaim,
 }
 
 impl SuccinctReceipt {
-    /// Verify the integrity of this receipt, ensuring the metadata is attested
+    /// Verify the integrity of this receipt, ensuring the claim is attested
     /// to by the seal.
     pub fn verify_integrity_with_context(
         &self,
@@ -93,21 +93,20 @@ impl SuccinctReceipt {
         // Extract the globals from the seal
         let output_elems: &[BabyBearElem] =
             bytemuck::cast_slice(&self.seal[..CircuitImpl::OUTPUT_SIZE]);
-        let mut seal_meta = VecDeque::new();
+        let mut seal_claim = VecDeque::new();
         for elem in output_elems {
-            seal_meta.push_back(elem.as_u32())
+            seal_claim.push_back(elem.as_u32())
         }
 
         // TODO: Read root hash
-        seal_meta.drain(0..16);
+        seal_claim.drain(0..16);
         // Verify the output hash matches that data
         let output_hash =
-            read_sha_halfs(&mut seal_meta).map_err(|_| VerificationError::ReceiptFormatError)?;
-        if output_hash != self.metadata.digest() {
+            read_sha_halfs(&mut seal_claim).map_err(|_| VerificationError::ReceiptFormatError)?;
+        if output_hash != self.claim.digest() {
             tracing::debug!(
-                "succinct receipt metadata does not match the output digest: metadata: {:#?}, digest expected: {:?}",
-                self.metadata,
-                output_hash,
+                "succinct receipt claim does not match the output digest: claim: {:#?}, digest expected: {output_hash:?}",
+                self.claim,
             );
             return Err(VerificationError::JournalDigestMismatch);
         }
