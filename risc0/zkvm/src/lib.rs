@@ -20,21 +20,14 @@
 extern crate alloc;
 
 mod fault_ids;
-pub use fault_ids::{FAULT_CHECKER_ELF, FAULT_CHECKER_ID};
-
 #[cfg(feature = "fault-proof")]
 mod fault_monitor;
-#[cfg(feature = "fault-proof")]
-pub use self::fault_monitor::FaultCheckMonitor;
 pub mod guest;
 #[cfg(not(target_os = "zkvm"))]
 mod host;
+mod receipt_claim;
 pub mod serde;
 pub mod sha;
-
-pub mod receipt_metadata;
-pub use receipt_metadata::{ExitCode, Output, ReceiptMetadata};
-use semver::Version;
 
 /// Re-exports for recursion
 #[cfg(all(not(target_os = "zkvm"), feature = "prove"))]
@@ -42,15 +35,10 @@ pub mod recursion {
     pub use super::host::recursion::*;
 }
 
-pub use anyhow::Result;
-#[cfg(not(target_os = "zkvm"))]
-#[cfg(any(feature = "client", feature = "prove"))]
-pub use bytes::Bytes;
-#[cfg(not(target_os = "zkvm"))]
-pub use risc0_binfmt::MemoryImage;
-pub use risc0_binfmt::{Program, SystemState};
-pub use risc0_zkvm_platform::{declare_syscall, memory::GUEST_MAX_MEM, PAGE_SIZE};
+use semver::Version;
 
+#[cfg(feature = "fault-proof")]
+pub use self::fault_monitor::FaultCheckMonitor;
 #[cfg(all(not(target_os = "zkvm"), feature = "prove"))]
 pub use self::host::{
     api::server::Server as ApiServer,
@@ -86,6 +74,22 @@ pub use self::host::{
     },
     recursion::ALLOWED_IDS_ROOT,
 };
+pub use self::{
+    fault_ids::{FAULT_CHECKER_ELF, FAULT_CHECKER_ID},
+    receipt_claim::{
+        Assumptions, ExitCode, InvalidExitCodeError, MaybePruned, Output, PrunedValueError,
+        ReceiptClaim,
+    },
+};
+
+pub use anyhow::Result;
+#[cfg(not(target_os = "zkvm"))]
+#[cfg(any(feature = "client", feature = "prove"))]
+pub use bytes::Bytes;
+#[cfg(not(target_os = "zkvm"))]
+pub use risc0_binfmt::MemoryImage;
+pub use risc0_binfmt::{Program, SystemState};
+pub use risc0_zkvm_platform::{declare_syscall, memory::GUEST_MAX_MEM, PAGE_SIZE};
 
 /// Reports the current version of this crate.
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");

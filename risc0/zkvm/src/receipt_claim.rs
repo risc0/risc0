@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//! [ReceiptMetadata] and associated types and functions.
+//! [ReceiptClaim] and associated types and functions.
 //!
-//! A [ReceiptMetadata] struct contains the public claims about a zkVM guest
+//! A [ReceiptClaim] struct contains the public claims about a zkVM guest
 //! execution, such as the journal committed to by the guest. It also includes
 //! important information such as the exit code and the starting and ending
 //! system state (i.e. the state of memory).
@@ -36,12 +36,12 @@ use crate::{
 /// Public claims about a zkVM guest execution, such as the journal committed to by the guest.
 ///
 /// Also includes important information such as the exit code and the starting and ending system
-/// state (i.e. the state of memory). [ReceiptMetadata] is a "Merkle-ized struct" supporting
+/// state (i.e. the state of memory). [ReceiptClaim] is a "Merkle-ized struct" supporting
 /// partial openings of the underlying fields from a hash commitment to the full structure. Also
 /// see [MaybePruned].
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[cfg_attr(test, derive(PartialEq))]
-pub struct ReceiptMetadata {
+pub struct ReceiptClaim {
     /// The [SystemState] of a segment just before execution has begun.
     pub pre: MaybePruned<SystemState>,
 
@@ -70,8 +70,8 @@ pub struct ReceiptMetadata {
     pub output: MaybePruned<Option<Output>>,
 }
 
-impl ReceiptMetadata {
-    /// Decode a [crate::ReceiptMetadata] from a list of [u32]'s
+impl ReceiptClaim {
+    /// Decode a [ReceiptClaim] from a list of [u32]'s
     pub fn decode(flat: &mut VecDeque<u32>) -> Result<Self, DecodeError> {
         let input = read_sha_halfs(flat)?;
         let pre = SystemState::decode(flat)?;
@@ -94,7 +94,7 @@ impl ReceiptMetadata {
         })
     }
 
-    /// Encode a [crate::ReceiptMetadata] to a list of [u32]'s
+    /// Encode a [ReceiptClaim] to a list of [u32]'s
     pub fn encode(&self, flat: &mut Vec<u32>) -> Result<(), PrunedValueError> {
         write_sha_halfs(flat, &self.input);
         self.pre.as_value()?.encode(flat);
@@ -107,12 +107,12 @@ impl ReceiptMetadata {
     }
 }
 
-impl Digestible for ReceiptMetadata {
-    /// Hash the [crate::ReceiptMetadata] to get a digest of the struct.
+impl Digestible for ReceiptClaim {
+    /// Hash the [ReceiptClaim] to get a digest of the struct.
     fn digest<S: Sha256>(&self) -> Digest {
         let (sys_exit, user_exit) = self.exit_code.into_pair();
         tagged_struct::<S>(
-            "risc0.ReceiptMeta",
+            "risc0.ReceiptClaim",
             &[
                 self.input,
                 self.pre.digest::<S>(),
@@ -124,7 +124,7 @@ impl Digestible for ReceiptMetadata {
     }
 }
 
-/// Error returned when decoding [ReceiptMetadata] fails.
+/// Error returned when decoding [ReceiptClaim] fails.
 #[derive(Debug, Copy, Clone)]
 pub enum DecodeError {
     /// Decoding failure due to an invalid exit code.
@@ -136,8 +136,8 @@ pub enum DecodeError {
 impl fmt::Display for DecodeError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            Self::InvalidExitCode(e) => write!(f, "failed to decode receipt metadata: {}", e),
-            Self::Decode(e) => write!(f, "failed to decode receipt metadata: {}", e),
+            Self::InvalidExitCode(e) => write!(f, "failed to decode receipt claim: {e}"),
+            Self::Decode(e) => write!(f, "failed to decode receipt claim: {e}"),
         }
     }
 }
@@ -239,17 +239,17 @@ impl fmt::Display for InvalidExitCodeError {
 #[cfg(feature = "std")]
 impl std::error::Error for InvalidExitCodeError {}
 
-/// Output field in the [ReceiptMetadata], committing to a claimed journal and assumptions list.
+/// Output field in the [ReceiptClaim], committing to a claimed journal and assumptions list.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[cfg_attr(test, derive(PartialEq))]
 pub struct Output {
     /// The journal committed to by the guest execution.
     pub journal: MaybePruned<Vec<u8>>,
 
-    /// An ordered list of [ReceiptMetadata] digests corresponding to the
+    /// An ordered list of [ReceiptClaim] digests corresponding to the
     /// calls to `env::verify` and `env::verify_integrity`.
     ///
-    /// Verifying the integrity of a [crate::Receipt] corresponding to a [ReceiptMetadata] with a
+    /// Verifying the integrity of a [crate::Receipt] corresponding to a [ReceiptClaim] with a
     /// non-empty assumptions list does not guarantee unconditionally any of the claims over the
     /// guest execution (i.e. if the assumptions list is non-empty, then the journal digest cannot
     /// be trusted to correspond to a genuine execution). The claims can be checked by additional
@@ -268,14 +268,14 @@ impl Digestible for Output {
     }
 }
 
-/// A list of assumptions, each a [Digest] of a [ReceiptMetadata].
+/// A list of assumptions, each a [Digest] of a [ReceiptClaim].
 #[derive(Clone, Default, Debug, Serialize, Deserialize)]
 #[cfg_attr(test, derive(PartialEq))]
-pub struct Assumptions(pub Vec<MaybePruned<ReceiptMetadata>>);
+pub struct Assumptions(pub Vec<MaybePruned<ReceiptClaim>>);
 
 impl Assumptions {
     /// Add an assumption to the head of the assumptions list.
-    pub fn add(&mut self, assumption: MaybePruned<ReceiptMetadata>) {
+    pub fn add(&mut self, assumption: MaybePruned<ReceiptClaim>) {
         self.0.insert(0, assumption);
     }
 
@@ -302,7 +302,7 @@ impl Assumptions {
 }
 
 impl Deref for Assumptions {
-    type Target = [MaybePruned<ReceiptMetadata>];
+    type Target = [MaybePruned<ReceiptClaim>];
 
     fn deref(&self) -> &Self::Target {
         &self.0
@@ -331,7 +331,7 @@ impl MaybePruned<Assumptions> {
     /// Add an assumption to the head of the assumptions list.
     ///
     /// If this value is pruned, then the result will also be a pruned value.
-    pub fn add(&mut self, assumption: MaybePruned<ReceiptMetadata>) {
+    pub fn add(&mut self, assumption: MaybePruned<ReceiptClaim>) {
         match self {
             MaybePruned::Value(list) => list.add(assumption),
             MaybePruned::Pruned(list_digest) => {
@@ -378,7 +378,7 @@ impl MaybePruned<Assumptions> {
 /// value. One way to think of this is as a special Merkle tree of a predefined shape. Each field
 /// is a child node. Any field/node in the tree can be opened by providing the Merkle inclusion
 /// proof. When a subtree is pruned, the digest commits to the value of all contained fields.
-/// [ReceiptMetadata] is the motivating example of this type of Merkle-ized struct.
+/// [ReceiptClaim] is the motivating example of this type of Merkle-ized struct.
 #[derive(Clone, Deserialize, Serialize)]
 pub enum MaybePruned<T>
 where
@@ -638,7 +638,7 @@ impl Merge for Option<Output> {
     }
 }
 
-impl Merge for ReceiptMetadata {
+impl Merge for ReceiptClaim {
     fn merge(&self, other: &Self) -> Result<Self, MergeInequalityError> {
         if self.exit_code != other.exit_code || self.input != other.input {
             return Err(MergeInequalityError(
@@ -660,7 +660,7 @@ impl Merge for ReceiptMetadata {
 mod tests {
     use hex::FromHex;
 
-    use super::{Assumptions, ExitCode, MaybePruned, Merge, Output, ReceiptMetadata, SystemState};
+    use super::{Assumptions, ExitCode, MaybePruned, Merge, Output, ReceiptClaim, SystemState};
     use crate::sha::{Digest, Digestible};
 
     /// Testing utility for randomly pruning structs.
@@ -668,11 +668,11 @@ mod tests {
         fn rand_prune(&self) -> Self;
     }
 
-    impl RandPrune for MaybePruned<ReceiptMetadata> {
+    impl RandPrune for MaybePruned<ReceiptClaim> {
         fn rand_prune(&self) -> Self {
             match (self, rand::random::<bool>()) {
                 (Self::Value(x), true) => Self::Pruned(x.digest()),
-                (Self::Value(x), false) => ReceiptMetadata {
+                (Self::Value(x), false) => ReceiptClaim {
                     pre: x.pre.rand_prune(),
                     post: x.post.rand_prune(),
                     exit_code: x.exit_code,
@@ -736,8 +736,8 @@ mod tests {
     }
 
     #[test]
-    fn merge_receipt_metadata() {
-        let metadata = MaybePruned::Value(ReceiptMetadata {
+    fn merge_receipt_claim() {
+        let claim = MaybePruned::Value(ReceiptClaim {
             pre: SystemState {
                 pc: 2100484,
                 merkle_root: Digest::from_hex(
@@ -767,10 +767,10 @@ mod tests {
 
         // Run the test to 10k times to reach every combination with high probability.
         for _ in 0..10000 {
-            let left = metadata.rand_prune();
-            let right = metadata.rand_prune();
+            let left = claim.rand_prune();
+            let right = claim.rand_prune();
 
-            assert_eq!(left.merge(&right).unwrap().digest(), metadata.digest());
+            assert_eq!(left.merge(&right).unwrap().digest(), claim.digest());
         }
     }
 }

@@ -13,7 +13,7 @@ The [Receipt] includes a [journal], which contains the public outputs of the [Se
 The contents of the [journal] are specified by calling [env::commit()] and [env::commit_slice()] in the [guest] code.
 
 In addition to the journal, a receipt makes a number of claims about the program execution.
-These claims are summarized in the [ReceiptMetadata].
+These claims are summarized in the [ReceiptClaim].
 
 A [Receipt] can take two main forms:
 
@@ -53,7 +53,7 @@ The details of the RISC Zero ZK-STARK are described in our [ZKP Whitepaper] and 
 
 [zkVM]: https://docs.rs/risc0-zkvm
 [Receipt]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Receipt.html
-[ReceiptMetadata]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.ReceiptMetadata.html
+[ReceiptClaim]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.ReceiptClaim.html
 [SegmentReceipts]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.SegmentReceipts.html
 [SegmentReceipt]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.SegmentReceipt.html
 [SuccinctReceipt]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/recursion/struct.SuccinctReceipt.html

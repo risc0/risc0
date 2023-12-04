@@ -19,8 +19,8 @@ use std::{
 
 use anyhow::Context;
 use risc0_zkvm::{
-    default_executor, receipt_metadata::MaybePruned, sha::Digest, ExecutorEnv, InnerReceipt,
-    MemoryImage, Program, Receipt, ReceiptMetadata, GUEST_MAX_MEM, PAGE_SIZE,
+    default_executor, sha::Digest, ExecutorEnv, InnerReceipt, MaybePruned, MemoryImage, Program,
+    Receipt, ReceiptClaim, GUEST_MAX_MEM, PAGE_SIZE,
 };
 use tokio::sync::mpsc;
 
@@ -109,7 +109,7 @@ impl Prover {
 
                 let receipt = Receipt {
                     inner: InnerReceipt::Fake {
-                        metadata: ReceiptMetadata {
+                        claim: ReceiptClaim {
                             pre: MaybePruned::Pruned(Digest::ZERO),
                             post: MaybePruned::Pruned(Digest::ZERO),
                             exit_code: session.exit_code,

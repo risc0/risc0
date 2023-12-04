@@ -37,9 +37,8 @@ use crate::{
         posix_io::PosixIo,
         slice_io::SliceIo,
     },
-    receipt_metadata::{MaybePruned, PrunedValueError},
     sha::{Digest, Digestible},
-    Assumption, ExitCode, ReceiptMetadata,
+    Assumption, ExitCode, MaybePruned, PrunedValueError, ReceiptClaim,
 };
 
 /// A host-side implementation of a system call.
@@ -221,16 +220,16 @@ impl SysVerify {
     }
 
     fn sys_verify_integrity(&mut self, from_guest: Vec<u8>) -> Result<(u32, u32)> {
-        let metadata_digest: Digest = from_guest
+        let claim_digest: Digest = from_guest
             .try_into()
-            .map_err(|vec| anyhow!("failed to convert to [u8; DIGEST_BYTES]: {:?}", vec))?;
+            .map_err(|vec| anyhow!("failed to convert to [u8; DIGEST_BYTES]: {vec:?}"))?;
 
-        tracing::debug!("SYS_VERIFY_INTEGRITY: {}", hex::encode(&metadata_digest));
+        tracing::debug!("SYS_VERIFY_INTEGRITY: {}", hex::encode(&claim_digest));
 
         // Iterate over the list looking for a matching assumption.
         let mut assumption: Option<Assumption> = None;
         for cached_assumption in self.assumptions.borrow().cached.iter() {
-            if cached_assumption.get_metadata()?.digest() == metadata_digest {
+            if cached_assumption.get_claim()?.digest() == claim_digest {
                 assumption = Some(cached_assumption.clone());
                 break;
             }
@@ -238,8 +237,7 @@ impl SysVerify {
 
         let Some(assumption) = assumption else {
             return Err(anyhow!(
-                "sys_verify_integrity: failed to resolve metadata digest: {}",
-                metadata_digest
+                "sys_verify_integrity: failed to resolve claim digest: {claim_digest}"
             ));
         };
 
@@ -266,10 +264,10 @@ impl SysVerify {
         let journal_digest: Digest = from_guest
             .split_off(DIGEST_BYTES)
             .try_into()
-            .map_err(|vec| anyhow!("failed to convert to [u8; DIGEST_BYTES]: {:?}", vec))?;
+            .map_err(|vec| anyhow!("failed to convert to [u8; DIGEST_BYTES]: {vec:?}"))?;
         let image_id: Digest = from_guest
             .try_into()
-            .map_err(|vec| anyhow!("failed to convert to [u8; DIGEST_BYTES]: {:?}", vec))?;
+            .map_err(|vec| anyhow!("failed to convert to [u8; DIGEST_BYTES]: {vec:?}"))?;
 
         tracing::debug!(
             "SYS_VERIFY: {}, {}",
@@ -281,16 +279,14 @@ impl SysVerify {
         // post state digest and system exit code.
         let mut assumption: Option<Assumption> = None;
         for cached_assumption in self.assumptions.borrow().cached.iter() {
-            let assumption_metadata = cached_assumption.get_metadata()?;
-            let cmp_result = Self::sys_verify_cmp(&assumption_metadata, &image_id, &journal_digest);
+            let assumption_claim = cached_assumption.get_claim()?;
+            let cmp_result = Self::sys_verify_cmp(&assumption_claim, &image_id, &journal_digest);
             let (post_state_digest, sys_exit_code) = match cmp_result {
                 Ok(None) => continue,
                 // If the required values to compare were pruned, go the next assumption.
                 Err(e) => {
                     tracing::debug!(
-                        "sys_verify: pruned values in assumption prevented comparison: {} : {:?}",
-                        e,
-                        assumption_metadata
+                        "sys_verify: pruned values in assumption prevented comparison: {e} : {assumption_claim:?}"
                     );
                     continue;
                 }
@@ -306,9 +302,7 @@ impl SysVerify {
 
         let Some(assumption) = assumption else {
             return Err(anyhow!(
-                "sys_verify_integrity: failed to resolve journal_digest and image_id: {}, {}",
-                journal_digest,
-                image_id,
+                "sys_verify_integrity: failed to resolve journal_digest and image_id: {journal_digest}, {image_id}"
             ));
         };
 
@@ -317,37 +311,34 @@ impl SysVerify {
         return Ok((0, 0));
     }
 
-    /// Check whether the metadata satisfies the requirements to return for sys_verify.
+    /// Check whether the claim satisfies the requirements to return for sys_verify.
     fn sys_verify_cmp(
-        metadata: &MaybePruned<ReceiptMetadata>,
+        claim: &MaybePruned<ReceiptClaim>,
         image_id: &Digest,
         journal_digest: &Digest,
     ) -> Result<Option<(Digest, u32)>, PrunedValueError> {
         // DO NOT MERGE: Check here that the cached assumption has no assumptions
-        let assumption_journal_digest = metadata
+        let assumption_journal_digest = claim
             .as_value()?
             .output
             .as_value()?
             .as_ref()
             .map(|output| output.journal.digest())
             .unwrap_or(Digest::ZERO);
-        let assumption_image_id = metadata.as_value()?.pre.digest();
+        let assumption_image_id = claim.as_value()?.pre.digest();
 
         if &assumption_journal_digest != journal_digest || &assumption_image_id != image_id {
             return Ok(None);
         }
 
         // Check that the exit code is either Halted(0) or Paused(0).
-        let (ExitCode::Halted(0) | ExitCode::Paused(0)) = metadata.as_value()?.exit_code else {
-            tracing::debug!(
-                "sys_verify: ignoring matching metadata with error exit code: {:?}",
-                metadata
-            );
+        let (ExitCode::Halted(0) | ExitCode::Paused(0)) = claim.as_value()?.exit_code else {
+            tracing::debug!("sys_verify: ignoring matching claim with error exit code: {claim:?}");
             return Ok(None);
         };
 
         // Check that the assumption has no assumptions.
-        let assumption_assumptions_digest = metadata
+        let assumption_assumptions_digest = claim
             .as_value()?
             .output
             .as_value()?
@@ -357,16 +348,15 @@ impl SysVerify {
 
         if assumption_assumptions_digest != Digest::ZERO {
             tracing::debug!(
-                "sys_verify: ignoring matching metadata with non-empty assumptions: {:?}",
-                metadata
+                "sys_verify: ignoring matching claim with non-empty assumptions: {claim:?}"
             );
             return Ok(None);
         }
 
         // Return the post state digest and exit code.
         Ok(Some((
-            metadata.as_value()?.post.digest(),
-            metadata.as_value()?.exit_code.into_pair().0,
+            claim.as_value()?.post.digest(),
+            claim.as_value()?.exit_code.into_pair().0,
         )))
     }
 }
@@ -387,7 +377,7 @@ impl Syscall for SysVerify {
         } else if syscall == SYS_VERIFY_INTEGRITY.as_str() {
             self.sys_verify_integrity(from_guest)
         } else {
-            bail!("SysVerify received unrecognized syscall: {}", syscall)
+            bail!("SysVerify received unrecognized syscall: {syscall}")
         }
     }
 }
@@ -409,8 +399,7 @@ impl Syscall for Args {
             let arg_index = ctx.load_register(REG_A3);
             let arg_val = self.0.get(arg_index as usize).ok_or_else(|| {
                 anyhow!(
-                    "guest requested index {} from argv of len {}",
-                    arg_index,
+                    "guest requested index {arg_index} from argv of len {}",
                     self.0.len()
                 )
             })?;

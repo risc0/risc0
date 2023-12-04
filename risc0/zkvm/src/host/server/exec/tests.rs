@@ -398,8 +398,8 @@ mod sys_verify {
     use test_log::test;
 
     use crate::{
-        receipt_metadata::MaybePruned, serde::to_vec, sha::Digestible, ExecutorEnv,
-        ExecutorEnvBuilder, ExecutorImpl, ExitCode, ReceiptMetadata, Session,
+        serde::to_vec, sha::Digestible, ExecutorEnv, ExecutorEnvBuilder, ExecutorImpl, ExitCode,
+        MaybePruned, ReceiptClaim, Session,
     };
 
     fn exec_hello_commit() -> Session {
@@ -466,7 +466,7 @@ mod sys_verify {
         let env = ExecutorEnv::builder()
             .write(&spec)
             .unwrap()
-            .add_assumption(hello_commit_session.get_metadata().unwrap().into())
+            .add_assumption(hello_commit_session.get_claim().unwrap().into())
             .build()
             .unwrap();
         let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
@@ -501,7 +501,7 @@ mod sys_verify {
             let env = ExecutorEnv::builder()
                 .write(&spec)
                 .unwrap()
-                .add_assumption(halt_session.get_metadata().unwrap().into())
+                .add_assumption(halt_session.get_claim().unwrap().into())
                 .build()
                 .unwrap();
             let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap().run();
@@ -528,7 +528,7 @@ mod sys_verify {
             let env = ExecutorEnv::builder()
                 .write(&spec)
                 .unwrap()
-                .add_assumption(pause_session.get_metadata().unwrap().into())
+                .add_assumption(pause_session.get_claim().unwrap().into())
                 .build()
                 .unwrap();
             let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap().run();
@@ -543,7 +543,7 @@ mod sys_verify {
 
     #[test]
     fn sys_verify_fault() {
-        // NOTE: ReceiptMetadata for this Session won't differentiate Fault and SystemSplit,
+        // NOTE: ReceiptClaim for this Session won't differentiate Fault and SystemSplit,
         // since these cannot be distinguished from the circuit's point of view.
         let fault_session = exec_fault();
 
@@ -555,7 +555,7 @@ mod sys_verify {
         let env = ExecutorEnv::builder()
             .write(&spec)
             .unwrap()
-            .add_assumption(fault_session.get_metadata().unwrap().into())
+            .add_assumption(fault_session.get_claim().unwrap().into())
             .build()
             .unwrap();
         assert!(ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
@@ -569,14 +569,14 @@ mod sys_verify {
         let hello_commit_session = exec_hello_commit();
 
         let spec = &MultiTestSpec::SysVerifyIntegrity {
-            metadata_words: to_vec(&hello_commit_session.get_metadata().unwrap()).unwrap(),
+            claim_words: to_vec(&hello_commit_session.get_claim().unwrap()).unwrap(),
         };
 
         // Test that it works when the assumption is added.
         let env = ExecutorEnv::builder()
             .write(&spec)
             .unwrap()
-            .add_assumption(hello_commit_session.get_metadata().unwrap().into())
+            .add_assumption(hello_commit_session.get_claim().unwrap().into())
             .build()
             .unwrap();
         let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
@@ -604,13 +604,13 @@ mod sys_verify {
             let halt_session = exec_halt(code);
 
             let spec = &MultiTestSpec::SysVerifyIntegrity {
-                metadata_words: to_vec(&halt_session.get_metadata().unwrap()).unwrap(),
+                claim_words: to_vec(&halt_session.get_claim().unwrap()).unwrap(),
             };
 
             let env = ExecutorEnv::builder()
                 .write(&spec)
                 .unwrap()
-                .add_assumption(halt_session.get_metadata().unwrap().into())
+                .add_assumption(halt_session.get_claim().unwrap().into())
                 .build()
                 .unwrap();
             let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
@@ -628,13 +628,13 @@ mod sys_verify {
             let pause_session = exec_pause(code);
 
             let spec = &MultiTestSpec::SysVerifyIntegrity {
-                metadata_words: to_vec(&pause_session.get_metadata().unwrap()).unwrap(),
+                claim_words: to_vec(&pause_session.get_claim().unwrap()).unwrap(),
             };
 
             let env = ExecutorEnv::builder()
                 .write(&spec)
                 .unwrap()
-                .add_assumption(pause_session.get_metadata().unwrap().into())
+                .add_assumption(pause_session.get_claim().unwrap().into())
                 .build()
                 .unwrap();
             let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
@@ -647,18 +647,18 @@ mod sys_verify {
 
     #[test]
     fn sys_verify_integrity_fault() {
-        // NOTE: ReceiptMetadata for this Session won't differentiate Fault and SystemSplit,
+        // NOTE: ReceiptClaim for this Session won't differentiate Fault and SystemSplit,
         // since these cannot be distinguished from the circuit's point of view.
         let fault_session = exec_fault();
 
         let spec = &MultiTestSpec::SysVerifyIntegrity {
-            metadata_words: to_vec(&fault_session.get_metadata().unwrap()).unwrap(),
+            claim_words: to_vec(&fault_session.get_claim().unwrap()).unwrap(),
         };
 
         let env = ExecutorEnv::builder()
             .write(&spec)
             .unwrap()
-            .add_assumption(fault_session.get_metadata().unwrap().into())
+            .add_assumption(fault_session.get_claim().unwrap().into())
             .build()
             .unwrap();
         let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
@@ -669,23 +669,22 @@ mod sys_verify {
     }
 
     #[test]
-    fn sys_verify_integrity_pruned_metadata() {
+    fn sys_verify_integrity_pruned_claim() {
         let hello_commit_session = exec_hello_commit();
 
-        // Prune the metadata before providing it as input so that it cannot be checked to have no
+        // Prune the claim before providing it as input so that it cannot be checked to have no
         // assumptions.
-        let pruned_metadata = MaybePruned::<ReceiptMetadata>::Pruned(
-            hello_commit_session.get_metadata().unwrap().digest(),
-        );
+        let pruned_claim =
+            MaybePruned::<ReceiptClaim>::Pruned(hello_commit_session.get_claim().unwrap().digest());
         let spec = &MultiTestSpec::SysVerifyIntegrity {
-            metadata_words: to_vec(&pruned_metadata).unwrap(),
+            claim_words: to_vec(&pruned_claim).unwrap(),
         };
 
         // Test that it works when the assumption is added.
         let env = ExecutorEnv::builder()
             .write(&spec)
             .unwrap()
-            .add_assumption(hello_commit_session.get_metadata().unwrap().into())
+            .add_assumption(hello_commit_session.get_claim().unwrap().into())
             .build()
             .unwrap();
 
