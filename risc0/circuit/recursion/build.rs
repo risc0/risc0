@@ -45,7 +45,8 @@ fn download_zkr() {
     const SRC_PATH: &str = "src/recursion_zkr.zip";
     const GIT_COMMIT: &str = "505295b963c97db2afffe58f4b0cb4721e396b90";
 
-    let src_path = PathBuf::from_str(SRC_PATH).unwrap();
+    let src_path = env::var("RECURSION_SRC_PATH").unwrap_or(SRC_PATH.to_string());
+    let src_path = PathBuf::from_str(src_path.as_str()).unwrap();
     let out_dir = env::var("OUT_DIR").unwrap();
     let out_dir = Path::new(&out_dir);
     if std::fs::metadata(&src_path).is_ok() {
