@@ -24,6 +24,7 @@ use std::{
 };
 
 use anyhow::{anyhow, ensure, Result};
+use risc0_binfmt::{MemoryImage, SystemState};
 use risc0_zkvm_platform::WORD_SIZE;
 use serde::{Deserialize, Serialize};
 
@@ -31,7 +32,7 @@ use crate::{
     host::server::exec::executor::SyscallRecord,
     receipt_metadata::{Assumptions, Output},
     sha::Digest,
-    Assumption, ExitCode, Journal, MemoryImage, ReceiptMetadata, SystemState,
+    Assumption, ExitCode, Journal, ReceiptMetadata,
 };
 
 #[derive(Clone, Default, Serialize, Deserialize, Debug)]

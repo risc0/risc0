@@ -46,9 +46,7 @@ pub use anyhow::Result;
 #[cfg(not(target_os = "zkvm"))]
 #[cfg(any(feature = "client", feature = "prove"))]
 pub use bytes::Bytes;
-#[cfg(not(target_os = "zkvm"))]
-pub use risc0_binfmt::MemoryImage;
-pub use risc0_binfmt::{Program, SystemState};
+pub use risc0_binfmt::SystemState;
 pub use risc0_zkvm_platform::{declare_syscall, memory::GUEST_MAX_MEM, PAGE_SIZE};
 
 #[cfg(all(not(target_os = "zkvm"), feature = "prove"))]
@@ -63,10 +61,7 @@ pub use self::host::{
 };
 #[cfg(all(not(target_os = "zkvm"), feature = "client"))]
 pub use self::host::{
-    api::{
-        client::Client as ApiClient, Asset, AssetRequest, Binary, Connector, SegmentInfo,
-        SessionInfo,
-    },
+    api::{client::Client as ApiClient, Asset, AssetRequest, Connector, SegmentInfo, SessionInfo},
     client::{
         env::{ExecutorEnv, ExecutorEnvBuilder},
         exec::TraceEvent,
@@ -75,6 +70,7 @@ pub use self::host::{
             Executor, Prover, ProverOpts,
         },
     },
+    compute_image_id,
 };
 #[cfg(not(target_os = "zkvm"))]
 pub use self::host::{

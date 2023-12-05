@@ -287,13 +287,12 @@ fn session_events() {
 // https://github.com/risc0/toolchain/releases/tag/2022.03.25
 mod riscv {
     use super::prove_session_fast;
-    use crate::{ExecutorEnv, ExecutorImpl, MemoryImage, Program};
+    use crate::{ExecutorEnv, ExecutorImpl};
 
     fn run_test(test_name: &str) {
         use std::io::Read;
 
         use flate2::read::GzDecoder;
-        use risc0_zkvm_platform::{memory::GUEST_MAX_MEM, PAGE_SIZE};
         use tar::Archive;
 
         let bytes = include_bytes!("../testdata/riscv-tests.tgz");
@@ -312,11 +311,8 @@ mod riscv {
             let mut elf = Vec::new();
             entry.read_to_end(&mut elf).unwrap();
 
-            let program = Program::load_elf(elf.as_slice(), GUEST_MAX_MEM as u32).unwrap();
-            let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
-
             let env = ExecutorEnv::default();
-            let mut exec = ExecutorImpl::new(env, image).unwrap();
+            let mut exec = ExecutorImpl::from_elf(env, &elf).unwrap();
             let session = exec.run().unwrap();
 
             prove_session_fast(&session);

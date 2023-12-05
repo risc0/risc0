@@ -21,6 +21,7 @@ use std::{
 
 use anyhow::Result;
 use bytes::Bytes;
+use risc0_binfmt::{MemoryImage, Program};
 use risc0_zkvm_methods::{
     multi_test::{MultiTestSpec, SYS_MULTI_TEST},
     HELLO_COMMIT_ELF, MULTI_TEST_ELF, RAND_ELF, SLICE_IO_ELF, STANDARD_LIB_ELF,
@@ -39,7 +40,7 @@ use crate::{
     },
     serde::to_vec,
     sha::{Digest, Digestible},
-    ExecutorEnv, ExecutorImpl, ExitCode, MemoryImage, Program,
+    ExecutorEnv, ExecutorImpl, ExitCode,
 };
 
 fn run_test(spec: MultiTestSpec) {

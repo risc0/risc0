@@ -19,7 +19,7 @@ use prost::{Message, Name};
 use risc0_binfmt::{MemoryImage, PageTableInfo, SystemState};
 use risc0_zkp::core::digest::Digest;
 
-use super::{malformed_err, path_to_string, pb, Asset, AssetRequest, Binary, BinaryKind};
+use super::{malformed_err, path_to_string, pb, Asset, AssetRequest};
 use crate::{
     host::{
         receipt::{
@@ -209,31 +209,6 @@ impl From<ProverOpts> for pb::api::ProverOpts {
         Self {
             hashfn: opts.hashfn,
             prove_guest_errors: opts.prove_guest_errors,
-        }
-    }
-}
-
-impl TryFrom<Binary> for pb::api::Binary {
-    type Error = anyhow::Error;
-
-    fn try_from(binary: Binary) -> Result<Self> {
-        Ok(Self {
-            kind: match binary.kind {
-                BinaryKind::Elf => pb::api::binary::Kind::Elf,
-                BinaryKind::Image => pb::api::binary::Kind::Image,
-            } as i32,
-            asset: Some(binary.asset.try_into()?),
-        })
-    }
-}
-
-impl From<MemoryImage> for Binary {
-    fn from(image: MemoryImage) -> Self {
-        let image_pb: pb::core::MemoryImage = image.into();
-        let image_bytes = image_pb.encode_to_vec();
-        Self {
-            kind: BinaryKind::Image,
-            asset: Asset::Inline(image_bytes.into()),
         }
     }
 }

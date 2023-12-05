@@ -26,7 +26,6 @@ use std::rc::Rc;
 
 use anyhow::Result;
 use cfg_if::cfg_if;
-use risc0_binfmt::{MemoryImage, Program};
 use risc0_circuit_rv32im::CircuitImpl;
 use risc0_core::field::{
     baby_bear::{BabyBear, Elem, ExtElem},
@@ -37,7 +36,7 @@ use risc0_zkp::{
     core::digest::DIGEST_WORDS,
     hal::{CircuitHal, Hal},
 };
-use risc0_zkvm_platform::{memory::GUEST_MAX_MEM, PAGE_SIZE, WORD_SIZE};
+use risc0_zkvm_platform::WORD_SIZE;
 
 use self::{dev_mode::DevModeProver, prover_impl::ProverImpl};
 use crate::{
@@ -48,18 +47,6 @@ use crate::{
 /// A ProverServer can execute a given [MemoryImage] and produce a [Receipt]
 /// that can be used to verify correct computation.
 pub trait ProverServer {
-    /// Prove the specified [MemoryImage].
-    fn prove(
-        &self,
-        env: ExecutorEnv<'_>,
-        ctx: &VerifierContext,
-        image: MemoryImage,
-    ) -> Result<Receipt> {
-        let mut exec = ExecutorImpl::new(env, image)?;
-        let session = exec.run()?;
-        self.prove_session(ctx, &session)
-    }
-
     /// Prove the specified ELF binary.
     fn prove_elf(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<Receipt> {
         self.prove_elf_with_ctx(env, &VerifierContext::default(), elf)
@@ -72,9 +59,9 @@ pub trait ProverServer {
         ctx: &VerifierContext,
         elf: &[u8],
     ) -> Result<Receipt> {
-        let program = Program::load_elf(elf, GUEST_MAX_MEM as u32)?;
-        let image = MemoryImage::new(&program, PAGE_SIZE as u32)?;
-        self.prove(env, ctx, image)
+        let mut exec = ExecutorImpl::from_elf(env, elf)?;
+        let session = exec.run()?;
+        self.prove_session(ctx, &session)
     }
 
     /// Prove the specified [Session].

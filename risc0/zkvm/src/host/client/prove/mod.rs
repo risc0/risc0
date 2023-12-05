@@ -20,8 +20,6 @@ pub(crate) mod local;
 use std::{path::PathBuf, rc::Rc};
 
 use anyhow::Result;
-use risc0_binfmt::{MemoryImage, Program};
-use risc0_zkvm_platform::{memory::GUEST_MAX_MEM, PAGE_SIZE};
 use serde::{Deserialize, Serialize};
 
 use self::{bonsai::BonsaiProver, external::ExternalProver};
@@ -40,10 +38,6 @@ use crate::{is_dev_mode, ExecutorEnv, Receipt, SessionInfo, VerifierContext};
 /// use risc0_zkvm::{
 ///     default_prover,
 ///     ExecutorEnv,
-///     GUEST_MAX_MEM,
-///     MemoryImage,
-///     PAGE_SIZE,
-///     Program,
 ///     ProverOpts,
 ///     VerifierContext,
 /// };
@@ -61,30 +55,11 @@ use crate::{is_dev_mode, ExecutorEnv, Receipt, SessionInfo, VerifierContext};
 /// let ctx = VerifierContext::default();
 /// let opts = ProverOpts::default();
 /// let receipt = default_prover().prove_elf_with_ctx(env, &ctx, FIB_ELF, &opts).unwrap();
-///
-/// // Or you can prove from a `MemoryImage`
-/// // (generating a `MemoryImage` from an ELF binary in this way is equivalent
-/// // to the above code.)
-/// let program = Program::load_elf(FIB_ELF, GUEST_MAX_MEM as u32).unwrap();
-/// let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
-/// let env = ExecutorEnv::builder().write_slice(&[20]).build().unwrap();
-/// let ctx = VerifierContext::default();
-/// let opts = ProverOpts::default();
-/// let receipt = default_prover().prove(env, &ctx, &opts, image).unwrap();
 /// # }
 /// ```
 pub trait Prover {
     /// Return a name for this [Prover].
     fn get_name(&self) -> String;
-
-    /// Prove zkVM execution starting from the specified [MemoryImage].
-    fn prove(
-        &self,
-        env: ExecutorEnv<'_>,
-        ctx: &VerifierContext,
-        opts: &ProverOpts,
-        image: MemoryImage,
-    ) -> Result<Receipt>;
 
     /// Prove zkVM execution starting from the specified ELF binary.
     fn prove_elf(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<Receipt> {
@@ -104,28 +79,15 @@ pub trait Prover {
         ctx: &VerifierContext,
         elf: &[u8],
         opts: &ProverOpts,
-    ) -> Result<Receipt> {
-        let program = Program::load_elf(elf, GUEST_MAX_MEM as u32)?;
-        let image = MemoryImage::new(&program, PAGE_SIZE as u32)?;
-        self.prove(env, ctx, opts, image)
-    }
+    ) -> Result<Receipt>;
 }
 
 /// An Executor can execute a given [MemoryImage] or ELF binary.
 pub trait Executor {
-    /// Execute the specified [MemoryImage].
-    ///
-    /// This only executes the program and does not generate a receipt.
-    fn execute(&self, env: ExecutorEnv<'_>, image: MemoryImage) -> Result<SessionInfo>;
-
     /// Execute the specified ELF binary.
     ///
     /// This only executes the program and does not generate a receipt.
-    fn execute_elf(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<SessionInfo> {
-        let program = Program::load_elf(elf, GUEST_MAX_MEM as u32)?;
-        let image = MemoryImage::new(&program, PAGE_SIZE as u32)?;
-        self.execute(env, image)
-    }
+    fn execute_elf(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<SessionInfo>;
 }
 
 /// Options to configure a [Prover].
