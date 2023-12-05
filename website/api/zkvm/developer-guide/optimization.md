@@ -98,7 +98,7 @@ Generate this profile and flamegraph by [installing Go] and running the followin
 ```bash
 # In your clone of github.com/risc0/risc0
 cd examples/ecdsa
-RISC0_PPROF_OUT=ecdsa_verify.pb RISC0_DEV_MODE=true cargo run -F profiler
+RISC0_PPROF_OUT=ecdsa_verify.pb RISC0_DEV_MODE=true cargo run
 go tool pprof -http 127.0.0.1:8000 ecdsa_verify.pb
 ```
 
@@ -424,12 +424,12 @@ RISC-V specifies a mechanism for environment calls (ecalls), which may be specif
 In RISC Zero’s zkVM, ecalls are specified for a number of core operations.
 A short description and associated cycle counts are listed below.
 
-| Selector | Description                | Operations                                                                                                                   | Cycles                  |
-| -------- | -------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | ----------------------- |
-| HALT     | Halt execution             | Set system exit code to a0. Load 32-bytes output digest from [a1]. Set output digest global. Halt execution.                 | 1 + paging              |
-| SOFTWARE | Receive data from the host | Write host-provided data to the memory range [a0 .. a0 + a1 * 4]                                                             | 1 + ⌈ a1 / 4 ⌉ + paging |
-| SHA-256  | SHA-256 hash               | Compute the Merkle–Damgård compression of the region [a2 .. a2 + a3 * 64] with initial state [a1]. Write the digest to [a0]. | 6 + 68 \* a2 + paging   |
-| BIGINT   | 256-bit modular operation  | if a1 = 0, [a0] ← [a2] ⋅ [a3] (mod [a4])                                                                                     | 10 + paging             |
+| Selector | Description                | Operations                                                                                                                       | Cycles                  |
+| -------- | -------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ----------------------- |
+| HALT     | Halt execution             | Set system exit code to a0. Load 32-bytes output digest from \[a1\]. Set output digest global. Halt execution.                   | 1 + paging              |
+| SOFTWARE | Receive data from the host | Write host-provided data to the memory range [a0 .. a0 + a1 * 4]                                                                 | 1 + ⌈ a1 / 4 ⌉ + paging |
+| SHA-256  | SHA-256 hash               | Compute the Merkle–Damgård compression of the region [a2 .. a2 + a3 * 64] with initial state \[a1\]. Write the digest to \[a0\]. | 6 + 68 \* a2 + paging   |
+| BIGINT   | 256-bit modular operation  | if a1 = 0, \[a0\] ← \[a2\] ⋅ \[a3\] (mod \[a4\])                                                                                 | 10 + paging             |
 
 ---
 

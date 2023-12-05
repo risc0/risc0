@@ -53,9 +53,9 @@ impl ProverServer for DevModeProver {
             )
         }
 
-        let metadata = session.get_metadata()?;
+        let claim = session.get_claim()?;
         Ok(Receipt::new(
-            InnerReceipt::Fake { metadata },
+            InnerReceipt::Fake { claim },
             session.journal.clone().unwrap_or_default().bytes,
         ))
     }

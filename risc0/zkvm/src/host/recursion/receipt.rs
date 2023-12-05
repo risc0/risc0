@@ -24,10 +24,10 @@ use super::CIRCUIT;
 use crate::{
     host::{control_id::POSEIDON_CONTROL_ID, receipt::VerifierContext},
     sha::Digestible,
-    ReceiptMetadata,
+    ReceiptClaim,
 };
 
-/// This function gets valid control IDs from the poseidon and recursion
+/// This function gets valid control IDs from the Poseidon and recursion
 /// circuits
 pub fn valid_control_ids() -> Vec<Digest> {
     use hex::FromHex;
@@ -41,24 +41,28 @@ pub fn valid_control_ids() -> Vec<Digest> {
     all_ids
 }
 
-/// This struct represents a receipt for one or more [crate::SegmentReceipt]s
-/// joined through recursion.
+/// A succinct receipt, produced via recursion, proving the execution of the zkVM.
+///
+/// Using recursion, a [crate::CompositeReceipt] can be compressed to form a [SuccinctReceipt]. In this
+/// way, a constant sized proof can be generated for arbitrarily long computations, and with an
+/// arbitrary number of segments linked via composition.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[cfg_attr(test, derive(PartialEq))]
 pub struct SuccinctReceipt {
-    /// the cryptographic seal of this receipt
+    /// The cryptographic seal of this receipt. This seal is a STARK proving an execution of the
+    /// recursion circuit.
     pub seal: Vec<u32>,
 
-    /// the control ID of this receipt
+    /// The control ID of this receipt, identifying the recursion program that was run (e.g. lift,
+    /// join, or resolve).
     pub control_id: Digest,
 
-    /// the receipt metadata containing states of the system during the segment
-    /// executions
-    pub meta: ReceiptMetadata,
+    /// [ReceiptClaim] containing information about the execution that this receipt proves.
+    pub claim: ReceiptClaim,
 }
 
 impl SuccinctReceipt {
-    /// Verify the integrity of this receipt, ensuring the metadata is attested
+    /// Verify the integrity of this receipt, ensuring the claim is attested
     /// to by the seal.
     pub fn verify_integrity_with_context(
         &self,
@@ -89,16 +93,21 @@ impl SuccinctReceipt {
         // Extract the globals from the seal
         let output_elems: &[BabyBearElem] =
             bytemuck::cast_slice(&self.seal[..CircuitImpl::OUTPUT_SIZE]);
-        let mut seal_meta = VecDeque::new();
+        let mut seal_claim = VecDeque::new();
         for elem in output_elems {
-            seal_meta.push_back(elem.as_u32())
+            seal_claim.push_back(elem.as_u32())
         }
 
         // TODO: Read root hash
-        seal_meta.drain(0..16);
+        seal_claim.drain(0..16);
         // Verify the output hash matches that data
-        let output_hash = read_sha_halfs(&mut seal_meta);
-        if output_hash != self.meta.digest() {
+        let output_hash =
+            read_sha_halfs(&mut seal_claim).map_err(|_| VerificationError::ReceiptFormatError)?;
+        if output_hash != self.claim.digest() {
+            tracing::debug!(
+                "succinct receipt claim does not match the output digest: claim: {:#?}, digest expected: {output_hash:?}",
+                self.claim,
+            );
             return Err(VerificationError::JournalDigestMismatch);
         }
         // Everything passed

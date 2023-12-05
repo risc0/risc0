@@ -28,12 +28,12 @@ use risc0_zkvm::{recursion::Program, Loader};
 #[derive(Parser)]
 pub struct Bootstrap {
     /// Skip running bootstrap for the rv32im circuit.
-    #[arg(long, default_value_t = true)]
-    no_rv32im: bool,
+    #[arg(long, default_value_t = false)]
+    skip_rv32im: bool,
 
     /// Skip running bootstrap for the recursion circuit.
-    #[arg(long, default_value_t = true)]
-    no_recursion: bool,
+    #[arg(long, default_value_t = false)]
+    skip_recursion: bool,
 }
 
 const CONTROL_ID_PATH_RV32IM: &str = "risc0/zkvm/src/host/control_id.rs";
@@ -41,10 +41,10 @@ const CONTROL_ID_PATH_RECURSION: &str = "risc0/circuit/recursion/src/control_id.
 
 impl Bootstrap {
     pub fn run(&self) {
-        if !self.no_rv32im {
+        if !self.skip_rv32im {
             Self::generate_rv32im_control_ids();
         }
-        if !self.no_recursion {
+        if !self.skip_recursion {
             Self::generate_recursion_control_ids();
         }
     }
@@ -142,7 +142,7 @@ impl Bootstrap {
         // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
         // See the License for the specific language governing permissions and
         // limitations under the License."#;
-        writeln!(&mut cntlf, "{}", license).unwrap();
+        writeln!(&mut cntlf, "{license}").unwrap();
         writeln!(&mut cntlf, "").unwrap();
 
         // Add all of the known and allowed controled IDs to the control_id.rs file.
@@ -153,7 +153,7 @@ impl Bootstrap {
         )
         .unwrap();
         for (name, digest) in zkr_control_ids {
-            writeln!(&mut cntlf, r#"("{}", "{}"),"#, name, digest).unwrap();
+            writeln!(&mut cntlf, r#"("{name}", "{digest}"),"#).unwrap();
         }
         writeln!(&mut cntlf, "];").unwrap();
         writeln!(&mut cntlf, "").unwrap();
@@ -166,7 +166,7 @@ impl Bootstrap {
 
         writeln!(&mut cntlf, "/// Merkle root of the RECURSION_CONTROL_IDS").unwrap();
         writeln!(&mut cntlf, "pub const ALLOWED_IDS_ROOT: &str = ").unwrap();
-        writeln!(&mut cntlf, r#""{}";"#, allowed_ids_root).unwrap();
+        writeln!(&mut cntlf, r#""{allowed_ids_root}";"#).unwrap();
         cntlf.sync_all().unwrap();
 
         // Use rustfmt to format the file.
