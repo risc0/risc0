@@ -29,10 +29,8 @@ use risc0_zkvm_platform::WORD_SIZE;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    host::server::exec::executor::SyscallRecord,
-    receipt_metadata::{Assumptions, Output},
-    sha::Digest,
-    Assumption, ExitCode, Journal, ReceiptMetadata,
+    host::server::exec::executor::SyscallRecord, sha::Digest, Assumption, Assumptions, ExitCode,
+    Journal, Output, ReceiptClaim,
 };
 
 #[derive(Clone, Default, Serialize, Deserialize, Debug)]
@@ -94,8 +92,8 @@ pub trait SegmentRef: Send {
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Segment {
     pub(crate) pre_image: Box<MemoryImage>,
-    // NOTE: segment.post_state is NOT EQUAL to segment.get_metadata()?.post. This is because the
-    // post SystemState on the ReceiptMetadata struct has a PC that is shifted forward by 4.
+    // NOTE: segment.post_state is NOT EQUAL to segment.get_claim()?.post. This is because the
+    // post SystemState on the ReceiptClaim struct has a PC that is shifted forward by 4.
     pub(crate) post_state: SystemState,
     pub(crate) output: Option<Output>,
     pub(crate) faults: PageFaults,
@@ -158,10 +156,10 @@ impl Session {
         self.hooks.push(Box::new(hook));
     }
 
-    /// Calculate for the [ReceiptMetadata] associated with this [Session]. The
-    /// [ReceiptMetadata] is the claim that will be proven if this [Session]
+    /// Calculate for the [ReceiptClaim] associated with this [Session]. The
+    /// [ReceiptClaim] is the claim that will be proven if this [Session]
     /// is passed to the [crate::Prover].
-    pub fn get_metadata(&self) -> Result<ReceiptMetadata> {
+    pub fn get_claim(&self) -> Result<ReceiptClaim> {
         let first_segment = &self
             .segments
             .first()
@@ -212,7 +210,7 @@ impl Session {
         // NOTE: When a segment ends in a Halted(_) state, it may not update the post state
         // digest. As a result, it will be the same are the pre_image. All other exit codes require
         // the post state digest to reflect the final memory state.
-        // NOTE: The PC on the the post state is stored "+ 4". See ReceiptMetadata for more detail.
+        // NOTE: The PC on the the post state is stored "+ 4". See ReceiptClaim for more detail.
         let post_state = SystemState {
             pc: self
                 .post_image
@@ -225,7 +223,7 @@ impl Session {
             },
         };
 
-        Ok(ReceiptMetadata {
+        Ok(ReceiptClaim {
             pre: SystemState::from(first_segment.pre_image.borrow()).into(),
             post: post_state.into(),
             exit_code: self.exit_code,
@@ -287,14 +285,14 @@ impl Segment {
         }
     }
 
-    /// Calculate for the [ReceiptMetadata] associated with this [Segment]. The
-    /// [ReceiptMetadata] is the claim that will be proven if this [Segment]
+    /// Calculate for the [ReceiptClaim] associated with this [Segment]. The
+    /// [ReceiptClaim] is the claim that will be proven if this [Segment]
     /// is passed to the [crate::Prover].
-    pub fn get_metadata(&self) -> Result<ReceiptMetadata> {
+    pub fn get_claim(&self) -> Result<ReceiptClaim> {
         // NOTE: When a segment ends in a Halted(_) state, it may not update the post state
         // digest. As a result, it will be the same are the pre_image. All other exit codes require
         // the post state digest to reflect the final memory state.
-        // NOTE: The PC on the the post state is stored "+ 4". See ReceiptMetadata for more detail.
+        // NOTE: The PC on the the post state is stored "+ 4". See ReceiptClaim for more detail.
         let post_state = SystemState {
             pc: self
                 .post_state
@@ -307,7 +305,7 @@ impl Segment {
             },
         };
 
-        Ok(ReceiptMetadata {
+        Ok(ReceiptClaim {
             pre: SystemState::from(&*self.pre_image).into(),
             post: post_state.into(),
             exit_code: self.exit_code,

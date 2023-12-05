@@ -124,14 +124,14 @@ fn test_recursion_lift_join_identity_e2e() {
 
     // Lift and join them  all (and verify)
     let mut rollup = lift(&segments[0]).unwrap();
-    tracing::info!("Lift metadata = {:?}", rollup.metadata);
+    tracing::info!("Lift claim = {:?}", rollup.claim);
     let ctx = VerifierContext::default();
     for receipt in &segments[1..] {
         let rec_receipt = lift(receipt).unwrap();
-        tracing::info!("Lift metadata = {:?}", rec_receipt.metadata);
+        tracing::info!("Lift claim = {:?}", rec_receipt.claim);
         rec_receipt.verify_integrity_with_context(&ctx).unwrap();
         rollup = join(&rollup, &rec_receipt).unwrap();
-        tracing::info!("Join metadata = {:?}", rollup.metadata);
+        tracing::info!("Join claim = {:?}", rollup.claim);
         rollup.verify_integrity_with_context(&ctx).unwrap();
     }
 
@@ -208,27 +208,21 @@ fn test_recursion_lift_resolve_e2e() {
     lifted_assumption
         .verify_integrity_with_context(&VerifierContext::default())
         .unwrap();
-    tracing::info!(
-        "Lift assumption metadata = {:?}",
-        lifted_assumption.metadata
-    );
+    tracing::info!("Lift assumption claim = {:?}", lifted_assumption.claim);
 
     tracing::info!("Lifting conditional");
     let lifted_conditional = lift(&conditional_segment_receipt).unwrap();
     lifted_conditional
         .verify_integrity_with_context(&VerifierContext::default())
         .unwrap();
-    tracing::info!(
-        "Lift conditional metadata = {:?}",
-        lifted_conditional.metadata
-    );
+    tracing::info!("Lift conditional claim = {:?}", lifted_conditional.claim);
 
     tracing::info!("Resolve");
     let resolved = resolve(&lifted_conditional, &lifted_assumption).unwrap();
     resolved
         .verify_integrity_with_context(&VerifierContext::default())
         .unwrap();
-    tracing::info!("Resolve metadata = {:?}", resolved.metadata);
+    tracing::info!("Resolve claim = {:?}", resolved.claim);
 
     // Validate the Session rollup + journal data
     let resolved_receipt = Receipt::new(InnerReceipt::Succinct(resolved), receipt.journal.bytes);

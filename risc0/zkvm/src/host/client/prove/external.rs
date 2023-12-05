@@ -20,8 +20,8 @@ use risc0_zkvm_platform::{memory::GUEST_MAX_MEM, PAGE_SIZE};
 
 use super::{Executor, Prover, ProverOpts};
 use crate::{
-    host::api::AssetRequest, sha::Digestible, ApiClient, Asset, ExecutorEnv, Receipt, SessionInfo,
-    VerifierContext,
+    compute_image_id, host::api::AssetRequest, sha::Digestible, ApiClient, Asset, ExecutorEnv,
+    Receipt, SessionInfo, VerifierContext,
 };
 
 /// An implementation of a [Prover] that runs proof workloads via an external
@@ -51,19 +51,17 @@ impl Prover for ExternalProver {
     ) -> Result<Receipt> {
         tracing::debug!("Launching {}", &self.r0vm_path.to_string_lossy());
 
-        let program = Program::load_elf(elf, GUEST_MAX_MEM as u32)?;
-        let image = MemoryImage::new(&program, PAGE_SIZE as u32)?;
-        let image_id = image.compute_id()?;
+        let image_id = compute_image_id(elf)?;
         let client = ApiClient::new_sub_process(&self.r0vm_path)?;
         let binary = Asset::Inline(elf.to_vec().into());
         let receipt = client.prove(&env, opts.clone(), binary)?;
         if opts.prove_guest_errors {
             receipt.verify_integrity_with_context(ctx)?;
             ensure!(
-                receipt.get_metadata()?.pre.digest() == image_id,
+                receipt.get_claim()?.pre.digest() == image_id,
                 "received unexpected image ID: expected {}, found {}",
                 hex::encode(&image_id),
-                hex::encode(&receipt.get_metadata()?.pre.digest())
+                hex::encode(&receipt.get_claim()?.pre.digest())
             );
         } else {
             receipt.verify_with_context(ctx, image_id)?;

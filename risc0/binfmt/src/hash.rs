@@ -48,7 +48,7 @@ impl<T: Digestible> Digestible for Option<T> {
 
 /// A struct hashing routine, permiting tree-like opening of fields.
 ///
-/// Used for hashing of receipt metadata, and in the recursion predicates.
+/// Used for hashing of the receipt claim, and in the recursion predicates.
 pub fn tagged_struct<S: Sha256>(tag: &str, down: &[impl Borrow<Digest>], data: &[u32]) -> Digest {
     let tag_digest: Digest = *S::hash_bytes(tag.as_bytes());
     let mut all = Vec::<u8>::new();
@@ -69,7 +69,7 @@ pub fn tagged_struct<S: Sha256>(tag: &str, down: &[impl Borrow<Digest>], data: &
 
 /// A list hashing routine, permiting iterative opening over elements.
 ///
-/// Used for hashing of receipt metadata assumptions list, and in the recursion
+/// Used for hashing of the receipt claim assumptions list, and in the recursion
 /// predicates.
 pub fn tagged_list<S: Sha256>(tag: &str, list: &[impl Borrow<Digest>]) -> Digest {
     list.into_iter()

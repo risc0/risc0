@@ -61,7 +61,7 @@ pub enum MultiTestSpec {
     },
     SysVerifyIntegrity {
         // Define this field as a serialized vector to avoid circular dependency issues.
-        metadata_words: Vec<u32>,
+        claim_words: Vec<u32>,
     },
     EchoStdout {
         nbytes: u32,
