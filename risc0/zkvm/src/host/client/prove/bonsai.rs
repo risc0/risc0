@@ -16,11 +16,9 @@ use std::time::Duration;
 
 use anyhow::{anyhow, bail, ensure, Result};
 use bonsai_sdk::alpha::Client;
-use risc0_binfmt::{MemoryImage, Program};
-use risc0_zkvm_platform::{memory::GUEST_MAX_MEM, PAGE_SIZE};
 
 use super::Prover;
-use crate::{sha::Digestible, ExecutorEnv, ProverOpts, Receipt, VerifierContext};
+use crate::{compute_image_id, sha::Digestible, ExecutorEnv, ProverOpts, Receipt, VerifierContext};
 
 /// An implementation of a [Prover] that runs proof workloads via Bonsai.
 ///
@@ -53,15 +51,9 @@ impl Prover for BonsaiProver {
     ) -> Result<Receipt> {
         let client = Client::from_env(crate::VERSION)?;
 
-        // create the image
-        let program = Program::load_elf(elf, GUEST_MAX_MEM as u32)?;
-        let image = MemoryImage::new(&program, PAGE_SIZE as u32)?;
-
-        // upload the image
-        let image_id = image.compute_id()?;
+        // Compute the ImageID and upload the ELF binary
+        let image_id = compute_image_id(elf)?;
         let image_id_hex = hex::encode(image_id.clone());
-
-        // return value 'exists' is ignored here
         client.upload_img(&image_id_hex, elf.to_vec())?;
 
         // upload input data

@@ -15,8 +15,6 @@
 use std::path::{Path, PathBuf};
 
 use anyhow::{ensure, Result};
-use risc0_binfmt::{MemoryImage, Program};
-use risc0_zkvm_platform::{memory::GUEST_MAX_MEM, PAGE_SIZE};
 
 use super::{Executor, Prover, ProverOpts};
 use crate::{

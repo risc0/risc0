@@ -868,8 +868,6 @@ fn fault() {
 
 #[test]
 fn profiler() {
-    use risc0_binfmt::Program;
-
     let mut profiler = Profiler::new(MULTI_TEST_ELF, Some("multi_test.elf")).unwrap();
     let env = ExecutorEnv::builder()
         .write(&MultiTestSpec::Profiler)
