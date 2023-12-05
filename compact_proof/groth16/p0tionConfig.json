@@ -14,7 +14,7 @@
       },
       "template": {
         "source": "https://github.com/risc0/risc0",
-        "commitHash": "60b9a10d381c5c027e40c8e7a7f71cfbdd0f4e78",
+        "commitHash": "41a0997a68ae288f5456238ca9ae9c2b68c37421",
         "paramsConfiguration": []
       },
       "verification": {

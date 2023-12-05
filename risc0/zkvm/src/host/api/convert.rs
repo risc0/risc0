@@ -22,11 +22,11 @@ use risc0_zkp::core::digest::Digest;
 use super::{malformed_err, path_to_string, pb, Asset, AssetRequest, Binary, BinaryKind};
 use crate::{
     host::{
-        receipt::{CompositeReceipt, InnerReceipt, SegmentReceipt},
+        receipt::{decode_receipt_claim_from_seal, CompositeReceipt, InnerReceipt, SegmentReceipt},
         recursion::SuccinctReceipt,
     },
-    receipt_metadata::{Assumptions, MaybePruned, Output},
-    ExitCode, Journal, ProverOpts, Receipt, ReceiptMetadata, TraceEvent,
+    Assumptions, ExitCode, Journal, MaybePruned, Output, ProverOpts, Receipt, ReceiptClaim,
+    TraceEvent,
 };
 
 mod ver {
@@ -352,6 +352,7 @@ impl From<SegmentReceipt> for pb::core::SegmentReceipt {
             seal: value.get_seal_bytes().into(),
             index: value.index,
             hashfn: value.hashfn,
+            claim: Some(value.claim.into()),
         }
     }
 }
@@ -373,7 +374,14 @@ impl TryFrom<pb::core::SegmentReceipt> for SegmentReceipt {
             seal.push(word);
         }
 
+        // If the claim field is not included, decode claim from the seal.
+        let claim = value
+            .claim
+            .map(|m| m.try_into())
+            .unwrap_or_else(|| Ok(decode_receipt_claim_from_seal(&seal)?))?;
+
         Ok(Self {
+            claim,
             seal,
             index: value.index,
             hashfn: value.hashfn,
@@ -387,7 +395,7 @@ impl From<SuccinctReceipt> for pb::core::SuccinctReceipt {
             version: Some(ver::SUCCINCT_RECEIPT),
             seal: value.get_seal_bytes(),
             control_id: Some(value.control_id.into()),
-            meta: Some(value.meta.into()),
+            claim: Some(value.claim.into()),
         }
     }
 }
@@ -411,7 +419,7 @@ impl TryFrom<pb::core::SuccinctReceipt> for SuccinctReceipt {
         Ok(Self {
             seal,
             control_id: value.control_id.ok_or(malformed_err())?.try_into()?,
-            meta: value.meta.ok_or(malformed_err())?.try_into()?,
+            claim: value.claim.ok_or(malformed_err())?.try_into()?,
         })
     }
 }
@@ -426,11 +434,12 @@ impl From<InnerReceipt> for pb::core::InnerReceipt {
                 InnerReceipt::Succinct(inner) => {
                     pb::core::inner_receipt::Kind::Succinct(inner.into())
                 }
-                InnerReceipt::Fake { metadata } => {
+                InnerReceipt::Fake { claim } => {
                     pb::core::inner_receipt::Kind::Fake(pb::core::FakeReceipt {
-                        metadata: Some(metadata.into()),
+                        claim: Some(claim.into()),
                     })
                 }
+                InnerReceipt::Groth16(_) => unimplemented!(),
             }),
         }
     }
@@ -442,9 +451,10 @@ impl TryFrom<pb::core::InnerReceipt> for InnerReceipt {
     fn try_from(value: pb::core::InnerReceipt) -> Result<Self> {
         Ok(match value.kind.ok_or(malformed_err())? {
             pb::core::inner_receipt::Kind::Composite(inner) => Self::Composite(inner.try_into()?),
+            pb::core::inner_receipt::Kind::Groth16(_) => unimplemented!(),
             pb::core::inner_receipt::Kind::Succinct(inner) => Self::Succinct(inner.try_into()?),
             pb::core::inner_receipt::Kind::Fake(inner) => Self::Fake {
-                metadata: inner.metadata.ok_or(malformed_err())?.try_into()?,
+                claim: inner.claim.ok_or(malformed_err())?.try_into()?,
             },
         })
     }
@@ -499,17 +509,17 @@ impl TryFrom<pb::core::Digest> for Digest {
     }
 }
 
-impl Name for pb::core::ReceiptMetadata {
+impl Name for pb::core::ReceiptClaim {
     const PACKAGE: &'static str = "risc0.protos.core";
-    const NAME: &'static str = "ReceiptMetadata";
+    const NAME: &'static str = "ReceiptClaim";
 }
 
-impl AssociatedMessage for ReceiptMetadata {
-    type Message = pb::core::ReceiptMetadata;
+impl AssociatedMessage for ReceiptClaim {
+    type Message = pb::core::ReceiptClaim;
 }
 
-impl From<ReceiptMetadata> for pb::core::ReceiptMetadata {
-    fn from(value: ReceiptMetadata) -> Self {
+impl From<ReceiptClaim> for pb::core::ReceiptClaim {
+    fn from(value: ReceiptClaim) -> Self {
         Self {
             pre: Some(value.pre.into()),
             post: Some(value.post.into()),
@@ -526,10 +536,10 @@ impl From<ReceiptMetadata> for pb::core::ReceiptMetadata {
     }
 }
 
-impl TryFrom<pb::core::ReceiptMetadata> for ReceiptMetadata {
+impl TryFrom<pb::core::ReceiptClaim> for ReceiptClaim {
     type Error = anyhow::Error;
 
-    fn try_from(value: pb::core::ReceiptMetadata) -> Result<Self> {
+    fn try_from(value: pb::core::ReceiptClaim) -> Result<Self> {
         Ok(Self {
             pre: value.pre.ok_or(malformed_err())?.try_into()?,
             post: value.post.ok_or(malformed_err())?.try_into()?,
@@ -674,8 +684,8 @@ where
     }
 }
 
-// Specialized implementaion for Vec<u8> for work around challenges getting the generic
-// implementaion above to work for Vec<u8>.
+// Specialized implementaion for Vec<u8> for work around challenges getting the
+// generic implementaion above to work for Vec<u8>.
 impl From<MaybePruned<Vec<u8>>> for pb::core::MaybePruned {
     fn from(value: MaybePruned<Vec<u8>>) -> Self {
         Self {

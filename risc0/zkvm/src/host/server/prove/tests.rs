@@ -208,7 +208,7 @@ fn memory_io() {
         let session = exec.run()?;
         let receipt = prove_session_fast(&session);
         receipt.verify_integrity_with_context(&VerifierContext::default())?;
-        Ok(receipt.get_metadata()?.exit_code)
+        Ok(receipt.get_claim()?.exit_code)
     }
 
     // Pick a memory position in the middle of the memory space, which is unlikely
@@ -234,16 +234,13 @@ fn memory_io() {
     assert_eq!(run_memio(&[(POS, 1)]).unwrap(), ExitCode::Halted(0));
 
     // Unaligned write is bad
-    assert_eq!(
-        run_memio(&[(POS + 1001, 1)]).unwrap(),
-        ExitCode::SystemSplit
-    );
+    assert_eq!(run_memio(&[(POS + 1001, 1)]).unwrap(), ExitCode::Fault);
 
     // Aligned read is fine
     assert_eq!(run_memio(&[(POS, 0)]).unwrap(), ExitCode::Halted(0));
 
     // Unaligned read is bad
-    assert_eq!(run_memio(&[(POS + 1, 0)]).unwrap(), ExitCode::SystemSplit);
+    assert_eq!(run_memio(&[(POS + 1, 0)]).unwrap(), ExitCode::Fault);
 }
 
 #[test]
@@ -496,9 +493,9 @@ mod sys_verify {
         halt_receipt
             .verify_integrity_with_context(&Default::default())
             .unwrap();
-        let halt_metadata = halt_receipt.get_metadata().unwrap();
-        assert_eq!(halt_metadata.pre.digest(), MULTI_TEST_ID.into());
-        assert_eq!(halt_metadata.exit_code, ExitCode::Halted(exit_code as u32));
+        let halt_claim = halt_receipt.get_claim().unwrap();
+        assert_eq!(halt_claim.pre.digest(), MULTI_TEST_ID.into());
+        assert_eq!(halt_claim.exit_code, ExitCode::Halted(exit_code as u32));
         halt_receipt
     }
 
@@ -522,9 +519,9 @@ mod sys_verify {
         fault_receipt
             .verify_integrity_with_context(&Default::default())
             .unwrap();
-        let fault_metadata = fault_receipt.get_metadata().unwrap();
-        assert_eq!(fault_metadata.pre.digest(), MULTI_TEST_ID.into());
-        assert_eq!(fault_metadata.exit_code, ExitCode::SystemSplit);
+        let fault_claim = fault_receipt.get_claim().unwrap();
+        assert_eq!(fault_claim.pre.digest(), MULTI_TEST_ID.into());
+        assert_eq!(fault_claim.exit_code, ExitCode::Fault);
         fault_receipt
     }
 
@@ -571,7 +568,7 @@ mod sys_verify {
         let env = ExecutorEnv::builder()
             .write(&spec)
             .unwrap()
-            .add_assumption(HELLO_COMMIT_RECEIPT.get_metadata().unwrap().into())
+            .add_assumption(HELLO_COMMIT_RECEIPT.get_claim().unwrap().into())
             .build()
             .unwrap();
         // TODO(#982) Conditional receipts currently return an error on verification.
@@ -590,7 +587,7 @@ mod sys_verify {
     #[test]
     fn sys_verify_integrity() {
         let spec = &MultiTestSpec::SysVerifyIntegrity {
-            metadata_words: to_vec(&HELLO_COMMIT_RECEIPT.get_metadata().unwrap()).unwrap(),
+            claim_words: to_vec(&HELLO_COMMIT_RECEIPT.get_claim().unwrap()).unwrap(),
         };
 
         // Test that providing the proven assumption results in an unconditional
@@ -625,7 +622,7 @@ mod sys_verify {
         let env = ExecutorEnv::builder()
             .write(&spec)
             .unwrap()
-            .add_assumption(HELLO_COMMIT_RECEIPT.get_metadata().unwrap().into())
+            .add_assumption(HELLO_COMMIT_RECEIPT.get_claim().unwrap().into())
             .build()
             .unwrap();
         // TODO(#982) Conditional receipts currently return an error on verification.
@@ -642,7 +639,7 @@ mod sys_verify {
         let halt_receipt = prove_halt(1);
 
         let spec = &MultiTestSpec::SysVerifyIntegrity {
-            metadata_words: to_vec(&halt_receipt.get_metadata().unwrap()).unwrap(),
+            claim_words: to_vec(&halt_receipt.get_claim().unwrap()).unwrap(),
         };
 
         // Test that proving results in a success execution and unconditional receipt.
@@ -668,7 +665,7 @@ mod sys_verify {
         let fault_receipt = prove_fault();
 
         let spec = &MultiTestSpec::SysVerifyIntegrity {
-            metadata_words: to_vec(&fault_receipt.get_metadata().unwrap()).unwrap(),
+            claim_words: to_vec(&fault_receipt.get_claim().unwrap()).unwrap(),
         };
 
         // Test that proving results in a success execution and unconditional receipt.

@@ -23,7 +23,7 @@ use addr2line::{
 };
 use anyhow::{anyhow, bail, Context, Result};
 use crypto_bigint::{CheckedMul, Encoding, NonZero, U256, U512};
-use risc0_binfmt::{MemoryImage, Program};
+use risc0_binfmt::{MemoryImage, Program, SystemState};
 use risc0_zkp::{
     core::{
         digest::{DIGEST_BYTES, DIGEST_WORDS},
@@ -52,10 +52,12 @@ use crate::{
     align_up,
     host::{
         client::exec::TraceEvent,
+        receipt::Assumption,
         server::opcode::{MajorType, OpCode},
     },
     sha::Digest,
-    ExecutorEnv, ExitCode, FileSegmentRef, Loader, Segment, SegmentRef, Session,
+    Assumptions, ExecutorEnv, ExitCode, FileSegmentRef, Loader, Output, Segment, SegmentRef,
+    Session,
 };
 
 /// The number of cycles required to compress a SHA-256 block.
@@ -265,7 +267,7 @@ impl<'a> ExecutorImpl<'a> {
             .borrow_mut()
             .with_write_fd(fileno::JOURNAL, journal.clone());
 
-        let mut run_loop = || -> Result<(ExitCode, MemoryImage)> {
+        let mut run_loop = || -> Result<(ExitCode, Segment, MemoryImage)> {
             loop {
                 if let Some(exit_code) = self.step()? {
                     let total_cycles = self.total_cycles();
@@ -275,14 +277,15 @@ impl<'a> ExecutorImpl<'a> {
                         anyhow!("attempted to run the executor with no pre_image")
                     })?;
                     let post_image = self.monitor.build_image(self.pc)?;
-                    let post_image_id = post_image.compute_id()?;
                     let syscalls = mem::take(&mut self.syscalls);
                     let faults = mem::take(&mut self.monitor.faults);
                     let po2 = log2_ceil(total_cycles.next_power_of_two()).try_into()?;
                     let cycles = self.body_cycles.try_into()?;
                     let segment = Segment::new(
                         pre_image,
-                        post_image_id,
+                        SystemState::from(&post_image),
+                        // NOTE: On the last segment, the output is added outside this loop.
+                        None,
                         faults,
                         syscalls,
                         exit_code,
@@ -294,11 +297,17 @@ impl<'a> ExecutorImpl<'a> {
                             .context("Too many segments to fit in u32")?,
                         cycles,
                     );
-                    let segment_ref = callback(segment)?;
-                    self.segments.push(segment_ref);
                     match exit_code {
-                        ExitCode::SystemSplit => self.split(Some(post_image.into()))?,
-                        ExitCode::SessionLimit => bail!("Session limit exceeded"),
+                        ExitCode::SystemSplit => {
+                            let segment_ref = callback(segment)?;
+                            self.segments.push(segment_ref);
+                            self.split(Some(post_image.into()))?
+                        }
+                        ExitCode::SessionLimit => {
+                            let segment_ref = callback(segment)?;
+                            self.segments.push(segment_ref);
+                            bail!("Session limit exceeded")
+                        }
                         ExitCode::Paused(inner) => {
                             tracing::debug!("Paused({inner}): {}", self.segment_cycle);
                             // Set the pre_image so that the Executor can be run again to resume.
@@ -306,22 +315,22 @@ impl<'a> ExecutorImpl<'a> {
                             let mut resume_pre_image = post_image.clone();
                             resume_pre_image.pc += WORD_SIZE as u32;
                             self.split(Some(resume_pre_image.into()))?;
-                            return Ok((exit_code, post_image));
+                            return Ok((exit_code, segment, post_image));
                         }
                         ExitCode::Halted(inner) => {
                             tracing::debug!("Halted({inner}): {}", self.segment_cycle);
-                            return Ok((exit_code, post_image));
+                            return Ok((exit_code, segment, post_image));
                         }
                         ExitCode::Fault => {
                             tracing::debug!("Fault: {}", self.segment_cycle);
-                            return Ok((exit_code, post_image));
+                            return Ok((exit_code, segment, post_image));
                         }
                     };
                 };
             }
         };
 
-        let (exit_code, post_image) = run_loop()?;
+        let (exit_code, mut final_segment, post_image) = run_loop()?;
         let elapsed = start_time.elapsed();
 
         // Take (clear out) the list of accessed assumptions.
@@ -340,6 +349,35 @@ impl<'a> ExecutorImpl<'a> {
             );
         };
         self.exit_code = Some(exit_code);
+
+        // Construct the Output struct for the final segment.
+        final_segment.output = exit_code
+            .expects_output()
+            .then(|| -> Option<Result<_>> {
+                session_journal.as_ref().map(|journal| {
+                    Ok(Output {
+                        journal: journal.clone().into(),
+                        assumptions: Assumptions(
+                            assumptions
+                                .iter()
+                                .map(|a| {
+                                    Ok(match a {
+                                        Assumption::Proven(r) => r.get_claim()?.into(),
+                                        Assumption::Unresolved(r) => r.clone(),
+                                    })
+                                })
+                                .collect::<Result<Vec<_>>>()?,
+                        )
+                        .into(),
+                    })
+                })
+            })
+            .flatten()
+            .transpose()?;
+
+        // Now that the Output has been populated, call the segment ref callback.
+        let segment_ref = callback(final_segment)?;
+        self.segments.push(segment_ref);
 
         tracing::info!("total_cycles = {}", self.total_cycles());
         tracing::info!("segment_count = {}", self.segments.len());
@@ -377,7 +415,6 @@ impl<'a> ExecutorImpl<'a> {
                 return Ok(Some(ExitCode::SessionLimit));
             }
         }
-        let pre_cycles = self.total_cycles();
 
         let insn = self.monitor.load_u32(self.pc)?;
         let opcode = OpCode::decode(insn, self.pc)?;
@@ -469,13 +506,13 @@ impl<'a> ExecutorImpl<'a> {
         //     total_pending_cycles,
         //     self.total_cycles()
         // );
-        if total_pending_cycles - pre_cycles > self.segment_limit {
-            // some instructions could be invoked with parameters that increase the cycle
-            // count over the segment limit. If this is the case, doing a system split won't
-            // do anything so halt the executor.
-            bail!("execution of instruction at pc [0x{:08x}] resulted in a cycle count too large to fit into a single segment.", self.pc);
-        }
+
         let exit_code = if total_pending_cycles > self.segment_limit {
+            if self.insn_counter == 0 {
+                // splitting on the first instruction of the segment means that
+                // it's too large to fit into a signle cycle.
+                bail!("execution of instruction at pc [0x{:08x}] resulted in a cycle count too large to fit into a single segment.", self.pc);
+            }
             self.split_insn = Some(self.insn_counter);
             tracing::debug!("split: [{}] pc: 0x{:08x}", self.segment_cycle, self.pc,);
             self.monitor.undo()?;

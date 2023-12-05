@@ -96,14 +96,14 @@ where
         let receipt = Receipt::new(inner, session.journal.clone().unwrap_or_default().bytes);
 
         receipt.verify_integrity_with_context(ctx)?;
-        if receipt.get_metadata()?.digest() != session.get_metadata()?.digest() {
-            tracing::debug!("receipt and session metadata do not match");
-            tracing::debug!("receipt metadata: {:#?}", receipt.get_metadata()?);
-            tracing::debug!("session metadata: {:#?}", session.get_metadata()?);
+        if receipt.get_claim()?.digest() != session.get_claim()?.digest() {
+            tracing::debug!("receipt and session claim do not match");
+            tracing::debug!("receipt claim: {:#?}", receipt.get_claim()?);
+            tracing::debug!("session claim: {:#?}", session.get_claim()?);
             bail!(
-                "session and receipt metadata do not match: session {}, receipt {}",
-                hex::encode(&session.get_metadata()?.digest()),
-                hex::encode(&receipt.get_metadata()?.digest())
+                "session and receipt claim do not match: session {}, receipt {}",
+                hex::encode(&session.get_claim()?.digest()),
+                hex::encode(&receipt.get_claim()?.digest())
             );
         }
         Ok(receipt)
@@ -163,6 +163,7 @@ where
             seal,
             index: segment.index,
             hashfn: hashfn.clone(),
+            claim: segment.get_claim()?,
         };
         receipt.verify_integrity_with_context(ctx)?;
 
