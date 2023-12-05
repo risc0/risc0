@@ -24,8 +24,9 @@ use cust::{
 use lazy_static::lazy_static;
 use risc0_core::field::{
     baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
-    Elem, ExtElem, RootsOfUnity,
+    ExtElem, RootsOfUnity,
 };
+use risc0_sys::cuda::*;
 
 use super::{Buffer, Hal, TRACKER};
 use crate::{
@@ -33,6 +34,7 @@ use crate::{
         digest::Digest,
         hash::{
             poseidon::{self, PoseidonHashSuite},
+            poseidon2::{self, Poseidon2HashSuite},
             sha::Sha256HashSuite,
             HashSuite,
         },
@@ -224,6 +226,85 @@ impl CudaHash for CudaHashPoseidon {
     }
 }
 
+pub struct CudaHashPoseidon2 {
+    suite: HashSuite<BabyBear>,
+    round_constants: BufferImpl<BabyBearElem>,
+    m_int_diag_ulvt: BufferImpl<BabyBearElem>,
+}
+
+impl CudaHash for CudaHashPoseidon2 {
+    fn new(hal: &CudaHal<Self>) -> Self {
+        let stream = Stream::new(StreamFlags::DEFAULT, None).unwrap();
+        let round_constants =
+            hal.copy_from_elem("round_constants", poseidon2::consts::ROUND_CONSTANTS);
+        let m_int_diag_ulvt =
+            hal.copy_from_elem("m_int_diag_ulvt", poseidon2::consts::M_INT_DIAG_ULVT);
+        stream.synchronize().unwrap();
+        CudaHashPoseidon2 {
+            suite: Poseidon2HashSuite::new_suite(),
+            round_constants,
+            m_int_diag_ulvt,
+        }
+    }
+
+    fn hash_fold(&self, hal: &CudaHal<Self>, io: &BufferImpl<Digest>, output_size: usize) {
+        let stream = Stream::new(StreamFlags::DEFAULT, None).unwrap();
+        let kernel = hal.module.get_function("poseidon2_fold").unwrap();
+        let params = hal.compute_simple_params(output_size);
+        unsafe {
+            // DevicePointers require that the underlying type of the pointer implements the
+            // DeviceCopy trait. core::Digest does not implement this trait.
+            // TODO: refactor data types to allow safer copying.
+            // Here, we perform pointer arithmetic on the underlying device_pointer of type
+            // u8.
+            // TODO: modify type hierarchy to fit Rustacuda's memory model
+            // to allow for more type safe pointer arithmetic
+            let input = io.as_device_ptr_with_offset(2 * output_size);
+            let output = io.as_device_ptr_with_offset(output_size);
+            launch!(kernel<<<params.0, params.1, 0, stream>>>(
+                self.round_constants.as_device_ptr(),
+                self.m_int_diag_ulvt.as_device_ptr(),
+                output,
+                input,
+                output_size
+            ))
+            .unwrap();
+        }
+        stream.synchronize().unwrap();
+    }
+
+    fn hash_rows(
+        &self,
+        hal: &CudaHal<Self>,
+        output: &BufferImpl<Digest>,
+        matrix: &BufferImpl<BabyBearElem>,
+    ) {
+        let row_size = output.size();
+        let col_size = matrix.size() / output.size();
+        assert_eq!(matrix.size(), col_size * row_size);
+
+        let stream = Stream::new(StreamFlags::DEFAULT, None).unwrap();
+        let kernel = hal.module.get_function("poseidon2_rows").unwrap();
+        let params = hal.compute_simple_params(row_size);
+        unsafe {
+            launch!(kernel<<<params.0, params.1, 0, stream>>>(
+                self.round_constants.as_device_ptr(),
+                self.m_int_diag_ulvt.as_device_ptr(),
+                output.as_device_ptr(),
+                matrix.as_device_ptr(),
+                row_size,
+                col_size
+            ))
+            .unwrap();
+        }
+        stream.synchronize().unwrap();
+    }
+
+    fn get_hash_suite(&self) -> &HashSuite<BabyBear> {
+        &self.suite
+    }
+}
+
 pub struct CudaHal<Hash: CudaHash + ?Sized> {
     pub max_threads: u32,
     pub module: Module,
@@ -233,6 +314,7 @@ pub struct CudaHal<Hash: CudaHash + ?Sized> {
 
 pub type CudaHalSha256 = CudaHal<CudaHashSha256>;
 pub type CudaHalPoseidon = CudaHal<CudaHashPoseidon>;
+pub type CudaHalPoseidon2 = CudaHal<CudaHashPoseidon2>;
 
 struct RawBuffer {
     name: &'static str,
@@ -241,7 +323,7 @@ struct RawBuffer {
 
 impl RawBuffer {
     pub fn new(name: &'static str, size: usize) -> Self {
-        log::debug!("alloc: {size} bytes, {name}");
+        tracing::debug!("alloc: {size} bytes, {name}");
         TRACKER.lock().unwrap().alloc(size);
         Self {
             name,
@@ -252,7 +334,7 @@ impl RawBuffer {
 
 impl Drop for RawBuffer {
     fn drop(&mut self) {
-        log::debug!("free: {} bytes, {}", self.buf.len(), self.name);
+        tracing::debug!("free: {} bytes, {}", self.buf.len(), self.name);
         TRACKER.lock().unwrap().free(self.buf.len());
     }
 }
@@ -338,6 +420,11 @@ impl<T: Pod> Buffer<T> for BufferImpl<T> {
 impl<CH: CudaHash> CudaHal<CH> {
     #[tracing::instrument(name = "CudaHal::new", skip_all)]
     pub fn new() -> Self {
+        let err = unsafe { sppark_init() };
+        if err.code != 0 {
+            panic!("Failure during sppark_init: {err}");
+        }
+
         cust::init(CudaFlags::empty()).unwrap();
         let device = Device::get_device(0).unwrap();
         let max_threads = device
@@ -443,103 +530,71 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
         &self,
         output: &Self::Buffer<Self::Elem>,
         input: &Self::Buffer<Self::Elem>,
-        count: usize,
+        poly_count: usize,
         expand_bits: usize,
     ) {
         // batch_expand
         {
-            let out_size = output.size() / count;
-            let in_size = input.size() / count;
+            let out_size = output.size() / poly_count;
+            let in_size = input.size() / poly_count;
             let expand_bits = log2_ceil(out_size / in_size);
-            assert_eq!(output.size(), out_size * count);
-            assert_eq!(input.size(), in_size * count);
+            assert_eq!(output.size(), out_size * poly_count);
+            assert_eq!(input.size(), in_size * poly_count);
             assert_eq!(out_size, in_size * (1 << expand_bits));
-
-            let stream = Stream::new(StreamFlags::DEFAULT, None).unwrap();
-            let kernel = self.module.get_function("batch_expand").unwrap();
-            let params = self.compute_simple_params(out_size.try_into().unwrap());
-            unsafe {
-                launch!(kernel<<<params.0, params.1, 0, stream>>>(
+            let in_bits = log2_ceil(in_size);
+            let err = unsafe {
+                batch_expand(
                     output.as_device_ptr(),
                     input.as_device_ptr(),
-                    count as u32,
-                    out_size as u32,
-                    in_size as u32,
-                    expand_bits as u32
-                ))
-                .unwrap();
+                    in_bits.try_into().unwrap(),
+                    expand_bits.try_into().unwrap(),
+                    poly_count.try_into().unwrap(),
+                )
+            };
+            if err.code != 0 {
+                panic!("Failure during batch_expand: {err}");
             }
-            stream.synchronize().unwrap();
         }
 
         // batch_evaluate_ntt
         {
-            let row_size = output.size() / count;
-            assert_eq!(row_size * count, output.size());
+            let row_size = output.size() / poly_count;
+            assert_eq!(row_size * poly_count, output.size());
             let n_bits = log2_ceil(row_size);
             assert_eq!(row_size, 1 << n_bits);
             assert!(n_bits >= expand_bits);
             assert!(n_bits < Self::Elem::MAX_ROU_PO2);
-            let rou = self.copy_from_elem("rou", Self::Elem::ROU_FWD);
 
-            let stream = Stream::new(StreamFlags::DEFAULT, None).unwrap();
-            let kernel = self.module.get_function("multi_ntt_fwd_step").unwrap();
-            for s_bits in 1 + expand_bits..=n_bits {
-                let params = self.compute_launch_params(n_bits as u32, s_bits as u32, count as u32);
-                unsafe {
-                    launch!(kernel<<<params.0, params.1, 0, stream>>>(
-                        output.as_device_ptr(),
-                        rou.as_device_ptr(),
-                        n_bits as u32,
-                        s_bits as u32,
-                        count as u32
-                    ))
-                    .unwrap();
-                }
-                stream.synchronize().unwrap();
+            let err = unsafe {
+                batch_NTT(
+                    output.as_device_ptr(),
+                    n_bits.try_into().unwrap(),
+                    poly_count.try_into().unwrap(),
+                )
+            };
+            if err.code != 0 {
+                panic!("Failure during batch_evaluate_ntt: {err}");
             }
         }
     }
 
-    #[tracing::instrument(skip_all)]
     fn batch_interpolate_ntt(&self, io: &Self::Buffer<Self::Elem>, count: usize) {
         let row_size = io.size() / count;
         assert_eq!(row_size * count, io.size());
         let n_bits = log2_ceil(row_size);
         assert_eq!(row_size, 1 << n_bits);
         assert!(n_bits < Self::Elem::MAX_ROU_PO2);
-        let rou = self.copy_from_elem("rou", Self::Elem::ROU_REV);
 
-        let stream = Stream::new(StreamFlags::DEFAULT, None).unwrap();
-        let kernel = self.module.get_function("multi_ntt_rev_step").unwrap();
-        for s_bits in (1..=n_bits).rev() {
-            let params = self.compute_launch_params(n_bits as u32, s_bits as u32, count as u32);
-            unsafe {
-                launch!(kernel<<<params.0, params.1, 0, stream>>>(
-                    io.as_device_ptr(),
-                    rou.as_device_ptr(),
-                    n_bits as u32,
-                    s_bits as u32,
-                    count as u32
-                ))
-                .unwrap();
-            }
-            stream.synchronize().unwrap();
-        }
-
-        let io_size = io.size().try_into().unwrap();
-        let params = self.compute_simple_params(io_size);
-        let kernel = self.module.get_function("eltwise_mul_factor_fp").unwrap();
-        let norm = self.copy_from_elem("norm", &[Self::Elem::new(row_size as u32).inv()]);
-        unsafe {
-            launch!(kernel<<<params.0, params.1, 0, stream>>>(
+        let err = unsafe {
+            batch_iNTT(
                 io.as_device_ptr(),
-                norm.as_device_ptr(),
-                io_size
-            ))
-            .unwrap();
+                n_bits.try_into().unwrap(),
+                count.try_into().unwrap(),
+            )
+        };
+        if err.code != 0 {
+            panic!("Failure during batch_interpolate_ntt: {err}");
         }
-        stream.synchronize().unwrap();
     }
 
     #[tracing::instrument(skip_all)]
@@ -632,21 +687,18 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
     #[tracing::instrument(skip_all)]
     fn zk_shift(&self, io: &Self::Buffer<Self::Elem>, poly_count: usize) {
         let bits = log2_ceil(io.size() / poly_count);
-        let count = io.size();
         assert_eq!(io.size(), poly_count * (1 << bits));
 
-        let stream = Stream::new(StreamFlags::DEFAULT, None).unwrap();
-        let kernel = self.module.get_function("zk_shift").unwrap();
-        let params = self.compute_simple_params(count);
-        unsafe {
-            launch!(kernel<<<params.0, params.1, 0, stream>>>(
+        let err = unsafe {
+            batch_zk_shift(
                 io.as_device_ptr(),
-                bits,
-                count
-            ))
-            .unwrap();
+                bits.try_into().unwrap(),
+                poly_count.try_into().unwrap(),
+            )
+        };
+        if err.code != 0 {
+            panic!("Failure during zk_shift: {err}");
         }
-        stream.synchronize().unwrap();
     }
 
     fn mix_poly_coeffs(
@@ -806,7 +858,7 @@ mod tests {
     use serial_test::serial;
     use test_log::test;
 
-    use super::{CudaHalPoseidon, CudaHalSha256};
+    use super::{CudaHalPoseidon, CudaHalPoseidon2, CudaHalSha256};
     use crate::hal::testutil;
 
     #[test]
@@ -855,6 +907,18 @@ mod tests {
     #[serial]
     fn hash_fold_poseidon() {
         testutil::hash_fold(CudaHalPoseidon::new());
+    }
+
+    #[test]
+    #[serial]
+    fn hash_rows_poseidon2() {
+        testutil::hash_rows(CudaHalPoseidon2::new());
+    }
+
+    #[test]
+    #[serial]
+    fn hash_fold_poseidon2() {
+        testutil::hash_fold(CudaHalPoseidon2::new());
     }
 
     #[test]

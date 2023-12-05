@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{fs, path::PathBuf, rc::Rc};
+use std::{fs, io, path::PathBuf, rc::Rc};
 
 use clap::{Args, Parser, ValueEnum};
 use risc0_zkvm::{
@@ -35,7 +35,18 @@ struct Cli {
     #[arg(long, value_enum, default_value_t = HashFn::Poseidon)]
     hashfn: HashFn,
 
+    /// Whether to prove exections ending in error status.
+    //
+    // When false, only prove execution sessions that end in a successful
+    // [ExitCode] (i.e. `Halted(0)` or `Paused(0)`. When set to true, any
+    // completed execution session will be proven, including indicated
+    // errors (e.g. `Halted(1)`) and sessions ending in `Fault`.
+    #[arg(long)]
+    prove_guest_errors: bool,
+
     /// File to read initial input from.
+    ///
+    /// Reads input from stdin if an initial input file is not provided.
     #[arg(long)]
     initial_input: Option<PathBuf>,
 
@@ -50,8 +61,7 @@ struct Cli {
     /// Write "pprof" protobuf output of the guest's run to this file.
     /// You can use google's pprof (<https://github.com/google/pprof>)
     /// to read it.
-    #[cfg(feature = "profiler")]
-    #[arg(long)]
+    #[arg(long, env = "RISC0_PPROF_OUT")]
     pprof_out: Option<PathBuf>,
 }
 
@@ -79,7 +89,10 @@ enum HashFn {
 }
 
 pub fn main() {
-    env_logger::init();
+    tracing_subscriber::fmt()
+        .with_env_filter(tracing_subscriber::filter::EnvFilter::from_default_env())
+        .init();
+    ();
 
     let args = Cli::parse();
     if let Some(port) = args.mode.port {
@@ -87,16 +100,7 @@ pub fn main() {
         return;
     }
 
-    #[cfg(feature = "profiler")]
-    let mut guest_prof: Option<risc0_zkvm::Profiler> = None;
-    #[cfg(feature = "profiler")]
-    if args.pprof_out.is_some() {
-        let elf = args.mode.elf.clone().unwrap();
-        let elf_contents = fs::read(&elf).unwrap();
-        guest_prof = Some(risc0_zkvm::Profiler::new(elf.to_str().unwrap(), &elf_contents).unwrap());
-    }
-
-    let session = {
+    let env = {
         let mut builder = ExecutorEnv::builder();
 
         for var in args.env.iter() {
@@ -108,14 +112,18 @@ pub fn main() {
 
         if let Some(input) = args.initial_input.as_ref() {
             builder.stdin(fs::File::open(input).unwrap());
+        } else {
+            builder.stdin(io::stdin());
         }
 
-        #[cfg(feature = "profiler")]
-        if let Some(ref mut profiler) = guest_prof {
-            builder.trace_callback(profiler.make_trace_callback());
+        if let Some(pprof_out) = args.pprof_out.as_ref() {
+            builder.enable_profiler(pprof_out);
         }
 
-        let env = builder.build().unwrap();
+        builder.build().unwrap()
+    };
+
+    let session = {
         let mut exec = if let Some(ref elf_path) = args.mode.elf {
             let elf_contents = fs::read(elf_path).unwrap();
             ExecutorImpl::from_elf(env, &elf_contents).unwrap()
@@ -128,15 +136,6 @@ pub fn main() {
         };
         exec.run().unwrap()
     };
-
-    // Now that we're done with the prover, we can collect the guest profiling data.
-    #[cfg(feature = "profiler")]
-    if let Some(ref mut profiler) = guest_prof.as_mut() {
-        profiler.finalize();
-        let report = profiler.encode_to_vec();
-        fs::write(args.pprof_out.as_ref().unwrap(), &report)
-            .expect("Unable to write profiling output");
-    }
 
     let prover = args.get_prover();
     let ctx = VerifierContext::default();
@@ -164,6 +163,7 @@ impl Cli {
         };
         let opts = ProverOpts {
             hashfn: hashfn.to_string(),
+            prove_guest_errors: self.prove_guest_errors,
         };
 
         get_prover_server(&opts).unwrap()

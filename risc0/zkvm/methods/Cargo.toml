@@ -4,14 +4,14 @@ version = { workspace = true }
 edition = { workspace = true }
 
 [build-dependencies]
-env_logger = "0.10"
 risc0-build = { workspace = true }
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [package.metadata.release]
 release = false
 
 [package.metadata.risc0]
-methods = ["guest", "std"]
+methods = ["guest", "rand", "std"]
 
 [dependencies]
 risc0-zkvm = { workspace = true }

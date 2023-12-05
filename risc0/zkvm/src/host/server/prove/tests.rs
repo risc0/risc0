@@ -28,13 +28,25 @@ use test_log::test;
 
 use super::{get_prover_server, HalPair, ProverImpl};
 use crate::{
-    host::{
-        server::{exec::executor::ExecutorError, testutils},
-        CIRCUIT,
-    },
+    host::{server::testutils, CIRCUIT},
     serde::{from_slice, to_vec},
-    ExecutorEnv, ExecutorImpl, ProverOpts, ProverServer, Receipt,
+    ExecutorEnv, ExecutorImpl, ExitCode, ProverOpts, ProverServer, Receipt, Session,
+    VerifierContext,
 };
+
+fn prover_opts_fast() -> ProverOpts {
+    ProverOpts {
+        hashfn: "sha-256".to_string(),
+        prove_guest_errors: false,
+    }
+}
+
+fn prove_session_fast(session: &Session) -> Receipt {
+    let prover = get_prover_server(&prover_opts_fast()).unwrap();
+    prover
+        .prove_session(&VerifierContext::default(), session)
+        .unwrap()
+}
 
 fn prove_nothing(hashfn: &str) -> Result<Receipt> {
     let env = ExecutorEnv::builder()
@@ -44,6 +56,7 @@ fn prove_nothing(hashfn: &str) -> Result<Receipt> {
         .unwrap();
     let opts = ProverOpts {
         hashfn: hashfn.to_string(),
+        prove_guest_errors: false,
     };
     get_prover_server(&opts)
         .unwrap()
@@ -106,7 +119,7 @@ fn sha_basics() {
             .unwrap();
         let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
         let session = exec.run().unwrap();
-        let receipt = session.prove().unwrap();
+        let receipt = prove_session_fast(&session);
         hex::encode(Digest::try_from(receipt.journal.bytes).unwrap())
     }
 
@@ -142,7 +155,7 @@ fn sha_iter() {
         .unwrap();
     let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
     let session = exec.run().unwrap();
-    let receipt = session.prove().unwrap();
+    let receipt = prove_session_fast(&session);
     let digest = Digest::try_from(receipt.journal.bytes).unwrap();
     assert_eq!(
         hex::encode(digest),
@@ -168,7 +181,7 @@ fn bigint_accel() {
             .unwrap();
         let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
         let session = exec.run().unwrap();
-        let receipt = session.prove().unwrap();
+        let receipt = prove_session_fast(&session);
         let expected = case.expected();
         let expected: &[u8] = bytemuck::cast_slice(expected.as_slice());
         assert_eq!(receipt.journal.bytes, expected);
@@ -178,19 +191,7 @@ fn bigint_accel() {
 #[test]
 #[serial]
 fn memory_io() {
-    fn is_fault_proof(receipt: Result<Receipt>) -> bool {
-        // this if statement will be removed once this feature is more mature
-        if !cfg!(feature = "fault-proof") {
-            return receipt.is_err();
-        }
-        let receipt = receipt.unwrap();
-        match receipt.verify(MULTI_TEST_ID) {
-            Err(VerificationError::ValidFaultReceipt) => true,
-            _ => false,
-        }
-    }
-
-    fn run_memio(pairs: &[(usize, usize)]) -> Result<Receipt> {
+    fn run_memio(pairs: &[(usize, usize)]) -> Result<ExitCode> {
         let input = MultiTestSpec::ReadWriteMem {
             values: pairs
                 .iter()
@@ -204,12 +205,10 @@ fn memory_io() {
             .build()
             .unwrap();
         let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)?;
-        let session = match exec.run() {
-            Ok(session) => session,
-            Err(ExecutorError::Fault(session)) => session,
-            Err(ExecutorError::Error(e)) => return Err(e),
-        };
-        session.prove()
+        let session = exec.run()?;
+        let receipt = prove_session_fast(&session);
+        receipt.verify_integrity_with_context(&VerifierContext::default())?;
+        Ok(receipt.get_claim()?.exit_code)
     }
 
     // Pick a memory position in the middle of the memory space, which is unlikely
@@ -220,22 +219,28 @@ fn memory_io() {
     );
 
     // Double writes are fine
-    assert!(!is_fault_proof(run_memio(&[(POS, 1), (POS, 1)])));
+    assert_eq!(
+        run_memio(&[(POS, 1), (POS, 1)]).unwrap(),
+        ExitCode::Halted(0)
+    );
 
     // Writes at different addresses are fine
-    assert!(!is_fault_proof(run_memio(&[(POS, 1), (POS + 4, 2)])));
+    assert_eq!(
+        run_memio(&[(POS, 1), (POS + 4, 2)]).unwrap(),
+        ExitCode::Halted(0)
+    );
 
     // Aligned write is fine
-    assert!(!is_fault_proof(run_memio(&[(POS, 1)])));
+    assert_eq!(run_memio(&[(POS, 1)]).unwrap(), ExitCode::Halted(0));
 
     // Unaligned write is bad
-    assert!(is_fault_proof(run_memio(&[(POS + 1001, 1)])));
+    assert_eq!(run_memio(&[(POS + 1001, 1)]).unwrap(), ExitCode::Fault);
 
     // Aligned read is fine
-    assert!(!is_fault_proof(run_memio(&[(POS, 0)])));
+    assert_eq!(run_memio(&[(POS, 0)]).unwrap(), ExitCode::Halted(0));
 
     // Unaligned read is bad
-    assert!(is_fault_proof(run_memio(&[(POS + 1, 0)])));
+    assert_eq!(run_memio(&[(POS + 1, 0)]).unwrap(), ExitCode::Fault);
 }
 
 #[test]
@@ -270,7 +275,7 @@ fn session_events() {
         on_post_prove_segment_flag: on_post_prove_segment_flag.clone(),
     };
     session.add_hook(logger);
-    session.prove().unwrap();
+    prove_session_fast(&session);
     assert_eq!(session.hooks.len(), 1);
     assert_eq!(on_pre_prove_segment_flag.take(), true);
     assert_eq!(on_post_prove_segment_flag.take(), true);
@@ -281,6 +286,7 @@ fn session_events() {
 // They were built using the toolchain from:
 // https://github.com/risc0/toolchain/releases/tag/2022.03.25
 mod riscv {
+    use super::prove_session_fast;
     use crate::{ExecutorEnv, ExecutorImpl, MemoryImage, Program};
 
     fn run_test(test_name: &str) {
@@ -312,7 +318,8 @@ mod riscv {
             let env = ExecutorEnv::default();
             let mut exec = ExecutorImpl::new(env, image).unwrap();
             let session = exec.run().unwrap();
-            session.prove().unwrap();
+
+            prove_session_fast(&session);
         }
     }
 
@@ -377,13 +384,15 @@ mod riscv {
 #[cfg(feature = "docker")]
 mod docker {
     use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF};
+    use test_log::test;
 
+    use super::prove_session_fast;
     use crate::{ExecutorEnv, ExecutorImpl, ExitCode};
 
     #[test]
     fn pause_continue() {
         let env = ExecutorEnv::builder()
-            .write(&MultiTestSpec::PauseContinue)
+            .write(&MultiTestSpec::PauseContinue(0))
             .unwrap()
             .build()
             .unwrap();
@@ -393,15 +402,15 @@ mod docker {
         let session = exec.run().unwrap();
         assert_eq!(session.segments.len(), 1);
         assert_eq!(session.exit_code, ExitCode::Paused(0));
-        let receipt = session.prove().unwrap();
-        let segments = receipt.inner.flat().unwrap();
+        let receipt = prove_session_fast(&session);
+        let segments = &receipt.inner.composite().unwrap().segments;
         assert_eq!(segments.len(), 1);
         assert_eq!(segments[0].index, 0);
 
         // Run until sys_halt
         let session = exec.run().unwrap();
         assert_eq!(session.exit_code, ExitCode::Halted(0));
-        session.prove().unwrap();
+        prove_session_fast(&session);
     }
 
     #[test]
@@ -427,9 +436,250 @@ mod docker {
         }
         assert_eq!(final_segment.exit_code, ExitCode::Halted(0));
 
-        let receipt = session.prove().unwrap();
-        for (idx, receipt) in receipt.inner.flat().unwrap().iter().enumerate() {
+        let receipt = prove_session_fast(&session);
+        for (idx, receipt) in receipt
+            .inner
+            .composite()
+            .unwrap()
+            .segments
+            .iter()
+            .enumerate()
+        {
             assert_eq!(receipt.index, idx as u32);
         }
+    }
+}
+
+mod sys_verify {
+    use risc0_zkvm_methods::{
+        multi_test::MultiTestSpec, HELLO_COMMIT_ELF, HELLO_COMMIT_ID, MULTI_TEST_ELF, MULTI_TEST_ID,
+    };
+    use test_log::test;
+
+    use super::{get_prover_server, prover_opts_fast};
+    use crate::{
+        serde::to_vec, sha::Digestible, ExecutorEnv, ExecutorEnvBuilder, ExitCode, ProverOpts,
+        Receipt,
+    };
+
+    fn prove_hello_commit() -> Receipt {
+        let hello_commit_receipt = get_prover_server(&prover_opts_fast())
+            .unwrap()
+            .prove_elf(ExecutorEnv::default(), HELLO_COMMIT_ELF)
+            .unwrap();
+
+        // Double check that the receipt verifies.
+        hello_commit_receipt.verify(HELLO_COMMIT_ID).unwrap();
+        hello_commit_receipt
+    }
+
+    fn prove_halt(exit_code: u8) -> Receipt {
+        let opts = ProverOpts {
+            hashfn: "sha-256".to_string(),
+            prove_guest_errors: true,
+        };
+
+        let env = ExecutorEnvBuilder::default()
+            .write(&MultiTestSpec::Halt(exit_code))
+            .unwrap()
+            .build()
+            .unwrap();
+        let halt_receipt = get_prover_server(&opts)
+            .unwrap()
+            .prove_elf(env, MULTI_TEST_ELF)
+            .unwrap();
+
+        // Double check that the receipt verifies with the expected image ID and exit code.
+        halt_receipt
+            .verify_integrity_with_context(&Default::default())
+            .unwrap();
+        let halt_claim = halt_receipt.get_claim().unwrap();
+        assert_eq!(halt_claim.pre.digest(), MULTI_TEST_ID.into());
+        assert_eq!(halt_claim.exit_code, ExitCode::Halted(exit_code as u32));
+        halt_receipt
+    }
+
+    fn prove_fault() -> Receipt {
+        let opts = ProverOpts {
+            hashfn: "sha-256".to_string(),
+            prove_guest_errors: true,
+        };
+
+        let env = ExecutorEnvBuilder::default()
+            .write(&MultiTestSpec::Fault)
+            .unwrap()
+            .build()
+            .unwrap();
+        let fault_receipt = get_prover_server(&opts)
+            .unwrap()
+            .prove_elf(env, MULTI_TEST_ELF)
+            .unwrap();
+
+        // Double check that the receipt verifies with the expected image ID and exit code.
+        fault_receipt
+            .verify_integrity_with_context(&Default::default())
+            .unwrap();
+        let fault_claim = fault_receipt.get_claim().unwrap();
+        assert_eq!(fault_claim.pre.digest(), MULTI_TEST_ID.into());
+        assert_eq!(fault_claim.exit_code, ExitCode::Fault);
+        fault_receipt
+    }
+
+    lazy_static::lazy_static! {
+        static ref HELLO_COMMIT_RECEIPT: Receipt = prove_hello_commit();
+    }
+
+    #[test]
+    fn sys_verify() {
+        let spec = &MultiTestSpec::SysVerify {
+            image_id: HELLO_COMMIT_ID.into(),
+            journal: HELLO_COMMIT_RECEIPT.journal.bytes.clone(),
+        };
+
+        // Test that providing the proven assumption results in an unconditional
+        // receipt.
+        let env = ExecutorEnv::builder()
+            .write(&spec)
+            .unwrap()
+            .add_assumption(HELLO_COMMIT_RECEIPT.clone().into())
+            .build()
+            .unwrap();
+        get_prover_server(&prover_opts_fast())
+            .unwrap()
+            .prove_elf(env, MULTI_TEST_ELF)
+            .unwrap()
+            .verify(MULTI_TEST_ID)
+            .unwrap();
+
+        // Test that proving without a provided assumption results in an execution
+        // failure.
+        let env = ExecutorEnv::builder()
+            .write(&spec)
+            .unwrap()
+            .build()
+            .unwrap();
+        assert!(get_prover_server(&prover_opts_fast())
+            .unwrap()
+            .prove_elf(env, MULTI_TEST_ELF)
+            .is_err());
+
+        // Test that providing an unresolved assumption results in a conditional
+        // receipt.
+        let env = ExecutorEnv::builder()
+            .write(&spec)
+            .unwrap()
+            .add_assumption(HELLO_COMMIT_RECEIPT.get_claim().unwrap().into())
+            .build()
+            .unwrap();
+        // TODO(#982) Conditional receipts currently return an error on verification.
+        assert!(get_prover_server(&prover_opts_fast())
+            .unwrap()
+            .prove_elf(env, MULTI_TEST_ELF)
+            .is_err());
+
+        // TODO(#982) With conditional receipts, implement the following cases.
+        // verify with proven corraboration in verifier success.
+        // verify with unresolved corraboration in verifier success.
+        // verify with no resolution results in verifier error.
+        // verify with wrong resolution results in verifier error.
+    }
+
+    #[test]
+    fn sys_verify_integrity() {
+        let spec = &MultiTestSpec::SysVerifyIntegrity {
+            claim_words: to_vec(&HELLO_COMMIT_RECEIPT.get_claim().unwrap()).unwrap(),
+        };
+
+        // Test that providing the proven assumption results in an unconditional
+        // receipt.
+        let env = ExecutorEnv::builder()
+            .write(&spec)
+            .unwrap()
+            .add_assumption(HELLO_COMMIT_RECEIPT.clone().into())
+            .build()
+            .unwrap();
+        get_prover_server(&prover_opts_fast())
+            .unwrap()
+            .prove_elf(env, MULTI_TEST_ELF)
+            .unwrap()
+            .verify(MULTI_TEST_ID)
+            .unwrap();
+
+        // Test that proving without a provided assumption results in an execution
+        // failure.
+        let env = ExecutorEnv::builder()
+            .write(&spec)
+            .unwrap()
+            .build()
+            .unwrap();
+        assert!(get_prover_server(&prover_opts_fast())
+            .unwrap()
+            .prove_elf(env, MULTI_TEST_ELF)
+            .is_err());
+
+        // Test that providing an unresolved assumption results in a conditional
+        // receipt.
+        let env = ExecutorEnv::builder()
+            .write(&spec)
+            .unwrap()
+            .add_assumption(HELLO_COMMIT_RECEIPT.get_claim().unwrap().into())
+            .build()
+            .unwrap();
+        // TODO(#982) Conditional receipts currently return an error on verification.
+        assert!(get_prover_server(&prover_opts_fast())
+            .unwrap()
+            .prove_elf(env, MULTI_TEST_ELF)
+            .is_err());
+    }
+
+    #[test]
+    fn sys_verify_integrity_halt_1() {
+        // Generate a receipt for a execution ending in a guest error indicated by
+        // ExitCode::Halted(1).
+        let halt_receipt = prove_halt(1);
+
+        let spec = &MultiTestSpec::SysVerifyIntegrity {
+            claim_words: to_vec(&halt_receipt.get_claim().unwrap()).unwrap(),
+        };
+
+        // Test that proving results in a success execution and unconditional receipt.
+        let env = ExecutorEnv::builder()
+            .write(&spec)
+            .unwrap()
+            .add_assumption(halt_receipt.into())
+            .build()
+            .unwrap();
+        get_prover_server(&prover_opts_fast())
+            .unwrap()
+            .prove_elf(env, MULTI_TEST_ELF)
+            .unwrap()
+            .verify(MULTI_TEST_ID)
+            .unwrap();
+    }
+
+    #[test]
+    fn sys_verify_integrity_fault() {
+        // Generate a receipt for a execution ending in fault.
+        // NOTE: This is not really a "proof of fault". Instead it is simply verifying a receipt
+        // that ended in SystemSplit for which the host claims a fault is about to occur.
+        let fault_receipt = prove_fault();
+
+        let spec = &MultiTestSpec::SysVerifyIntegrity {
+            claim_words: to_vec(&fault_receipt.get_claim().unwrap()).unwrap(),
+        };
+
+        // Test that proving results in a success execution and unconditional receipt.
+        let env = ExecutorEnv::builder()
+            .write(&spec)
+            .unwrap()
+            .add_assumption(fault_receipt.into())
+            .build()
+            .unwrap();
+        get_prover_server(&prover_opts_fast())
+            .unwrap()
+            .prove_elf(env, MULTI_TEST_ELF)
+            .unwrap()
+            .verify(MULTI_TEST_ID)
+            .unwrap();
     }
 }

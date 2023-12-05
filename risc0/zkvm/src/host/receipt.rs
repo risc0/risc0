@@ -14,7 +14,7 @@
 
 //! Manages the output and cryptographic data for a proven computation.
 
-use alloc::{collections::BTreeMap, string::String, vec::Vec};
+use alloc::{collections::BTreeMap, string::String, vec, vec::Vec};
 use core::fmt::Debug;
 
 use anyhow::Result;
@@ -35,58 +35,15 @@ use risc0_zkp::{
 use risc0_zkvm_platform::WORD_SIZE;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 
-use super::{
-    control_id::{BLAKE2B_CONTROL_ID, POSEIDON_CONTROL_ID, SHA256_CONTROL_ID},
-    recursion::SuccinctReceipt,
-};
+use super::control_id::{BLAKE2B_CONTROL_ID, POSEIDON_CONTROL_ID, SHA256_CONTROL_ID};
+// Make succinct receipt available through this `receipt` module.
+pub use super::recursion::SuccinctReceipt;
 use crate::{
-    fault_ids::FAULT_CHECKER_ID,
+    host::groth16::{Groth16Proof, Groth16Seal},
     serde::{from_slice, Error},
-    sha::rust_crypto::{Digest as _, Sha256},
+    sha::{Digestible, Sha256},
+    Assumptions, ExitCode, MaybePruned, Output, ReceiptClaim,
 };
-
-/// Indicates how a Segment or Session's execution has terminated
-#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
-pub enum ExitCode {
-    /// This indicates when a system-initiated split has occured due to the
-    /// segment limit being exceeded.
-    SystemSplit,
-
-    /// This indicates that the session limit has been reached.
-    SessionLimit,
-
-    /// A user may manually pause a session so that it can be resumed at a later
-    /// time, along with the user returned code.
-    Paused(u32),
-
-    /// This indicates normal termination of a program with an interior exit
-    /// code returned from the guest.
-    Halted(u32),
-
-    /// This indicates termination of a program where the next instruction will
-    /// fail.
-    Fault,
-}
-
-/// Data associated with a receipt which is used for both input and
-/// output of global state.
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
-pub struct ReceiptMetadata {
-    /// The [SystemState] of a segment just before execution has begun.
-    pub pre: SystemState,
-
-    /// The [SystemState] of a segment just after execution has completed.
-    pub post: SystemState,
-
-    /// The exit code for a segment
-    pub exit_code: ExitCode,
-
-    /// A [Digest] of the input, from the viewpoint of the guest.
-    pub input: Digest,
-
-    /// A [Digest] of the journal, from the viewpoint of the guest.
-    pub output: Digest,
-}
 
 /// A receipt attesting to the execution of a Session.
 ///
@@ -144,7 +101,8 @@ pub struct ReceiptMetadata {
 /// [serde](crate::serde) module, which can be used to read data from the
 /// journal as the same type it was written to the journal. If you prefer, you
 /// can also directly access the [Receipt::journal] as a `Vec<u8>`.
-#[derive(Debug, Deserialize, Serialize, PartialEq)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
+#[cfg_attr(test, derive(PartialEq))]
 pub struct Receipt {
     /// The polymorphic [InnerReceipt].
     pub inner: InnerReceipt,
@@ -156,8 +114,133 @@ pub struct Receipt {
     pub journal: Journal,
 }
 
+impl Receipt {
+    /// Construct a new Receipt
+    pub fn new(inner: InnerReceipt, journal: Vec<u8>) -> Self {
+        Self {
+            inner,
+            journal: Journal::new(journal),
+        }
+    }
+
+    /// Verify that this receipt proves a successful execution of the zkVM from
+    /// the given `image_id`.
+    ///
+    /// Uses the zero-knowledge proof system to verify the seal, and decodes the
+    /// proven [ReceiptClaim]. This method additionally ensures that the
+    /// guest exited with a successful status code (e.g. `Halted(0)` or
+    /// `Paused(0)`), the image ID is as expected, and the journal
+    /// has not been tampered with.
+    pub fn verify(&self, image_id: impl Into<Digest>) -> Result<(), VerificationError> {
+        self.verify_with_context(&VerifierContext::default(), image_id)
+    }
+
+    /// Verify that this receipt proves a successful execution of the zkVM from
+    /// the given `image_id`.
+    ///
+    /// Uses the zero-knowledge proof system to verify the seal, and decodes the
+    /// proven [ReceiptClaim]. This method additionally ensures that the
+    /// guest exited with a successful status code (e.g. `Halted(0)` or
+    /// `Paused(0)`), the image ID is as expected, and the journal
+    /// has not been tampered with.
+    pub fn verify_with_context(
+        &self,
+        ctx: &VerifierContext,
+        image_id: impl Into<Digest>,
+    ) -> Result<(), VerificationError> {
+        self.inner.verify_integrity_with_context(ctx)?;
+
+        // NOTE: Post-state digest and input digest are unconstrained by this method.
+        let claim = self.inner.get_claim()?;
+        if claim.pre.digest() != image_id.into() {
+            return Err(VerificationError::ImageVerificationError);
+        }
+
+        // Check the exit code. This verification method requires execution to be
+        // successful.
+        let (ExitCode::Halted(0) | ExitCode::Paused(0)) = claim.exit_code else {
+            return Err(VerificationError::UnexpectedExitCode);
+        };
+
+        // Finally check the output hash in the decoded claim against the expected
+        // output.
+        let expected_output = Output {
+            journal: MaybePruned::Pruned(self.journal.digest()),
+            // It is expected that there are no (unresolved) assumptions.
+            assumptions: Assumptions(vec![]).into(),
+        };
+
+        if claim.output.digest() != expected_output.digest() {
+            let empty_output = claim.output.is_none() && self.journal.bytes.is_empty();
+            if !empty_output {
+                tracing::debug!(
+                    "journal: 0x{}, expected output digest: 0x{}, decoded output digest: 0x{}",
+                    hex::encode(&self.journal.bytes),
+                    hex::encode(expected_output.digest()),
+                    hex::encode(claim.output.digest()),
+                );
+                return Err(VerificationError::JournalDigestMismatch);
+            }
+            tracing::debug!("accepting zero digest for output of receipt with empty journal");
+        }
+
+        Ok(())
+    }
+
+    /// Verify the integrity of this receipt, ensuring the claim and jounral
+    /// are attested to by the seal.
+    ///
+    /// This does not verify the success of the guest execution. In
+    /// particular, the guest could have exited with an error (e.g.
+    /// `ExitCode::Halted(1)`) or faulted state. It also does not check the
+    /// image ID, or otherwise constrain what guest was executed. After calling
+    /// this method, the caller should check the [ReceiptClaim] fields
+    /// relevant to their application. If you need to verify a successful
+    /// guest execution and access the journal, the `verify` function is
+    /// recommended.
+    pub fn verify_integrity_with_context(
+        &self,
+        ctx: &VerifierContext,
+    ) -> Result<(), VerificationError> {
+        self.inner.verify_integrity_with_context(ctx)?;
+
+        // Check that self.journal is attested to by the inner receipt.
+        let claim = self.inner.get_claim()?;
+
+        let expected_output = claim.exit_code.expects_output().then(|| Output {
+            journal: MaybePruned::Pruned(self.journal.digest()),
+            // TODO(#982): It would be reasonable for this method to allow integrity verification
+            // for receipts that have a non-empty assumptions list, but it is not supported here
+            // because we don't have a enough information to open the assumptions list unless we
+            // require it be empty.
+            assumptions: Assumptions(vec![]).into(),
+        });
+
+        if claim.output.digest() != expected_output.digest() {
+            let empty_output = claim.output.is_none() && self.journal.bytes.is_empty();
+            if !empty_output {
+                tracing::debug!(
+                    "journal: 0x{}, expected output digest: 0x{}, decoded output digest: 0x{}",
+                    hex::encode(&self.journal.bytes),
+                    hex::encode(expected_output.digest()),
+                    hex::encode(claim.output.digest()),
+                );
+                return Err(VerificationError::JournalDigestMismatch);
+            }
+            tracing::debug!("accepting zero digest for output of receipt with empty journal");
+        }
+
+        Ok(())
+    }
+
+    /// Extract the [ReceiptClaim] from this receipt.
+    pub fn get_claim(&self) -> Result<ReceiptClaim, VerificationError> {
+        self.inner.get_claim()
+    }
+}
+
 /// A journal is a record of all public commitments for a given proof session.
-#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
+#[derive(Clone, Debug, Default, Deserialize, Serialize, PartialEq)]
 pub struct Journal {
     /// The raw bytes of the journal.
     pub bytes: Vec<u8>,
@@ -175,165 +258,82 @@ impl Journal {
     }
 }
 
-/// An inner receipt can take the form of a [SegmentReceipts] collection or a
+impl risc0_binfmt::Digestible for Journal {
+    fn digest<S: Sha256>(&self) -> Digest {
+        *S::hash_bytes(&self.bytes)
+    }
+}
+
+impl AsRef<[u8]> for Journal {
+    fn as_ref(&self) -> &[u8] {
+        &self.bytes
+    }
+}
+
+/// An inner receipt can take the form of a [CompositeReceipt] or a
 /// [SuccinctReceipt].
-#[derive(Debug, Deserialize, Serialize, PartialEq)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
+#[cfg_attr(test, derive(PartialEq))]
 pub enum InnerReceipt {
-    /// The [SegmentReceipts].
-    Flat(SegmentReceipts),
+    /// A non-succinct [CompositeReceipt].
+    Composite(CompositeReceipt),
 
     /// The [SuccinctReceipt].
     Succinct(SuccinctReceipt),
 
+    /// The [Groth16Receipt].
+    Groth16(Groth16Receipt),
+
     /// A fake receipt for testing and development.
-    Fake,
-}
-
-/// A wrapper around `Vec<SegmentReceipt>`.
-#[derive(Debug, Deserialize, Serialize, PartialEq)]
-pub struct SegmentReceipts(pub Vec<SegmentReceipt>);
-
-impl SegmentReceipts {
-    /// Verify the integrity of this receipt.
-    pub fn verify_with_context(
-        &self,
-        ctx: &VerifierContext,
-        image_id: Digest,
-        journal: &[u8],
-    ) -> Result<(), VerificationError> {
-        let mut fault_id_exists = false;
-
-        // This closure is invoked on each receipt's metadata
-        let mut is_fault_meta = |metadata: &ReceiptMetadata| -> Result<bool, VerificationError> {
-            if cfg!(feature = "fault-proof") && metadata.pre.digest() == FAULT_CHECKER_ID.into() {
-                if fault_id_exists {
-                    // If we get here, I means that we've already seen the fault checker's image ID.
-                    // However, a sequence of receipts can only have up to 1 fault checker image ID.
-                    // If this is the case, it means that that the fault checker incurred a fault.
-                    return Err(VerificationError::ImageVerificationError);
-                }
-                fault_id_exists = true;
-                return Ok(true);
-            }
-            Ok(false)
-        };
-
-        let (final_receipt, receipts) = self
-            .0
-            .as_slice()
-            .split_last()
-            .ok_or(VerificationError::ReceiptFormatError)?;
-        let mut prev_image_id = image_id;
-        for receipt in receipts {
-            receipt.verify_with_context(ctx)?;
-            let metadata = receipt.get_metadata()?;
-            log::debug!("metadata: {metadata:#?}");
-            if prev_image_id != metadata.pre.digest() && !is_fault_meta(&metadata)? {
-                return Err(VerificationError::ImageVerificationError);
-            }
-            if metadata.exit_code != ExitCode::SystemSplit {
-                return Err(VerificationError::UnexpectedExitCode);
-            }
-            prev_image_id = metadata.post.digest();
-        }
-        final_receipt.verify_with_context(ctx)?;
-        let metadata = final_receipt.get_metadata()?;
-        log::debug!("final: {metadata:#?}");
-        if prev_image_id != metadata.pre.digest() && !is_fault_meta(&metadata)? {
-            return Err(VerificationError::ImageVerificationError);
-        }
-
-        if metadata.exit_code == ExitCode::SystemSplit {
-            return Err(VerificationError::UnexpectedExitCode);
-        }
-
-        // For receipts indicating proof of fault, the guest code should post the
-        // post-image ID of the original guest code to prove that the fault checker
-        // tried to execute the next instruction from the same state of the machine.
-        // Note: if the `image_id` were to match the fault checker, it indicates that
-        // the fault checker program was run as the normal guest program. This case does
-        // not indicate a proof of fault. It is normal proof generation.
-        if cfg!(feature = "fault-proof") && fault_id_exists && image_id != FAULT_CHECKER_ID.into() {
-            let digest: Digest = from_slice(&journal).unwrap();
-            if digest != prev_image_id {
-                return Err(VerificationError::FaultStateMismatch);
-            }
-            // fault checker should only terminate with a `ExitCode::Halted(0)`. Any other
-            // status indicates that something went wrong.
-            if metadata.exit_code != ExitCode::Halted(0) {
-                return Err(VerificationError::UnexpectedExitCode);
-            }
-        }
-
-        let digest = Sha256::digest(journal);
-        let digest_words: &[u32] = bytemuck::cast_slice(digest.as_slice());
-        let output_words = metadata.output.as_words();
-        let is_journal_valid = || {
-            (journal.is_empty() && output_words.iter().all(|x| *x == 0))
-                || digest_words == output_words
-        };
-        if !is_journal_valid() {
-            log::debug!(
-                "journal: \"{}\", digest: 0x{}, output: 0x{}, {:?}",
-                hex::encode(journal),
-                hex::encode(bytemuck::cast_slice(digest_words)),
-                hex::encode(bytemuck::cast_slice(output_words)),
-                journal
-            );
-            return Err(VerificationError::JournalDigestMismatch);
-        }
-
-        if cfg!(feature = "fault-proof") && fault_id_exists && image_id != FAULT_CHECKER_ID.into() {
-            // This is a valid proof of fault. Return as a verification error rather than
-            // `Ok(())`. This makes it more difficult for callers of this function to
-            // mistakenly verify a fault receipt in situations where they do not want to
-            // verify fault receipts. Also, it is important to note that if image_id matches
-            // the fault checker, it's not considered a fault receipt. It means that the
-            // fault checker was run as if it were an ordinary guest program so we should
-            // return `Ok(())` in this case.
-            return Err(VerificationError::ValidFaultReceipt);
-        }
-
-        Ok(())
-    }
+    ///
+    /// This receipt is not valid and will fail verification unless the
+    /// environment variable `RISC0_DEV_MODE` is set to `true`, in which case a
+    /// pass-through 'verification' will be performed, but it *does not*
+    /// represent any meaningful attestation of receipt's integrity.
+    ///
+    /// This type solely exists to improve development experience, for further
+    /// information about development-only mode see our [dev-mode
+    /// documentation](https://dev.risczero.com/zkvm/dev-mode).
+    Fake {
+        /// [ReceiptClaim] for this fake receipt.
+        claim: ReceiptClaim,
+    },
 }
 
 impl InnerReceipt {
-    /// Verify the integrity of this receipt.
-    pub fn verify(
-        &self,
-        image_id: impl Into<Digest>,
-        journal: &[u8],
-    ) -> Result<(), VerificationError> {
-        self.verify_with_context(&VerifierContext::default(), image_id, journal)
-    }
-
-    /// Verify the integrity of this receipt.
-    pub fn verify_with_context(
+    /// Verify the integrity of this receipt, ensuring the claim is attested
+    /// to by the seal.
+    pub fn verify_integrity_with_context(
         &self,
         ctx: &VerifierContext,
-        image_id: impl Into<Digest>,
-        journal: &[u8],
     ) -> Result<(), VerificationError> {
         match self {
-            InnerReceipt::Flat(x) => x.verify_with_context(ctx, image_id.into(), journal),
-            InnerReceipt::Succinct(x) => x.verify_with_context(ctx),
-            InnerReceipt::Fake => Self::verify_fake(),
+            InnerReceipt::Composite(x) => x.verify_integrity_with_context(ctx),
+            InnerReceipt::Groth16(x) => x.verify_integrity(),
+            InnerReceipt::Succinct(x) => x.verify_integrity_with_context(ctx),
+            InnerReceipt::Fake { .. } => {
+                #[cfg(feature = "std")]
+                if crate::is_dev_mode() {
+                    return Ok(());
+                }
+                Err(VerificationError::InvalidProof)
+            }
         }
     }
 
-    fn verify_fake() -> Result<(), VerificationError> {
-        #[cfg(feature = "std")]
-        if crate::is_dev_mode() {
-            return Ok(());
+    /// Returns the [InnerReceipt::Composite] arm.
+    pub fn composite(&self) -> Result<&CompositeReceipt, VerificationError> {
+        if let InnerReceipt::Composite(x) = self {
+            Ok(&x)
+        } else {
+            Err(VerificationError::ReceiptFormatError)
         }
-        Err(VerificationError::InvalidProof)
     }
 
-    /// Returns the [InnerReceipt::Flat] arm.
-    pub fn flat(&self) -> Result<&[SegmentReceipt], VerificationError> {
-        if let InnerReceipt::Flat(x) = self {
-            Ok(&x.0)
+    /// Returns the [InnerReceipt::Groth16] arm.
+    pub fn groth16(&self) -> Result<&Groth16Receipt, VerificationError> {
+        if let InnerReceipt::Groth16(x) = self {
+            Ok(&x)
         } else {
             Err(VerificationError::ReceiptFormatError)
         }
@@ -347,22 +347,263 @@ impl InnerReceipt {
             Err(VerificationError::ReceiptFormatError)
         }
     }
+
+    /// Extract the [ReceiptClaim] from this receipt.
+    pub fn get_claim(&self) -> Result<ReceiptClaim, VerificationError> {
+        match self {
+            InnerReceipt::Composite(ref receipt) => receipt.get_claim(),
+            InnerReceipt::Groth16(ref groth16_receipt) => Ok(groth16_receipt.claim.clone()),
+            InnerReceipt::Succinct(ref succinct_recipt) => Ok(succinct_recipt.claim.clone()),
+            InnerReceipt::Fake { claim } => Ok(claim.clone()),
+        }
+    }
+}
+
+/// A receipt composed of a Groth16 over the BN_254 curve
+#[derive(Clone, Debug, Deserialize, Serialize)]
+#[cfg_attr(test, derive(PartialEq))]
+pub struct Groth16Receipt {
+    /// A Groth16 proof of a zkVM execution with the associated claim.
+    pub seal: Vec<u8>,
+
+    /// [ReceiptClaim] containing information about the execution that this
+    /// receipt proves.
+    pub claim: ReceiptClaim,
+}
+
+impl Groth16Receipt {
+    /// Verify the integrity of this receipt, ensuring the claim is attested
+    /// to by the seal.
+    pub fn verify_integrity(&self) -> Result<(), VerificationError> {
+        Groth16Proof::from_seal(
+            &Groth16Seal::from_vec(&self.seal).map_err(|_| VerificationError::InvalidProof)?,
+            self.claim.digest().into(),
+        )
+        .map_err(|_| VerificationError::InvalidProof)?
+        .verify()
+        .map_err(|_| VerificationError::InvalidProof)?;
+
+        // Everything passed
+        Ok(())
+    }
+}
+
+/// A receipt composed of one or more [SegmentReceipt] structs proving a single
+/// execution with continuations, and zero or more [Receipt] stucts proving any
+/// assumptions.
+#[derive(Clone, Debug, Deserialize, Serialize)]
+#[cfg_attr(test, derive(PartialEq))]
+pub struct CompositeReceipt {
+    /// Segment receipts forming the proof of a execution with continuations.
+    pub segments: Vec<SegmentReceipt>,
+
+    /// An ordered list of assumptions, either proven or unresolved, made within
+    /// the continuation represented by the segment receipts. If any
+    /// assumptions are unresolved, this receipt is only _conditionally_
+    /// valid.
+    // TODO(#982): Allow for unresolved assumptions in this list.
+    pub assumptions: Vec<InnerReceipt>,
+
+    /// Digest of journal included in the final output of the continuation. Will
+    /// be `None` if the continuation has no output (e.g. it ended in
+    /// `Fault`).
+    // NOTE: This field is needed in order to open the assumptions digest from the output digest.
+    // TODO(1.0): This field can potentially be removed since it can be included in the claim on
+    // the last segment receipt instead.
+    pub journal_digest: Option<Digest>,
+}
+
+impl CompositeReceipt {
+    /// Verify the integrity of this receipt, ensuring the claim is attested
+    /// to by the seal.
+    pub fn verify_integrity_with_context(
+        &self,
+        ctx: &VerifierContext,
+    ) -> Result<(), VerificationError> {
+        // Verify the continuation, by verifying every segment receipt in order.
+        let (final_receipt, receipts) = self
+            .segments
+            .as_slice()
+            .split_last()
+            .ok_or(VerificationError::ReceiptFormatError)?;
+
+        // Verify each segment and its chaining to the next.
+        let mut expected_pre_state_digest = None;
+        for receipt in receipts {
+            receipt.verify_integrity_with_context(ctx)?;
+            tracing::debug!("claim: {:#?}", receipt.claim);
+            if let Some(id) = expected_pre_state_digest {
+                if id != receipt.claim.pre.digest() {
+                    return Err(VerificationError::ImageVerificationError);
+                }
+            }
+            if receipt.claim.exit_code != ExitCode::SystemSplit {
+                return Err(VerificationError::UnexpectedExitCode);
+            }
+            if !receipt.claim.output.is_none() {
+                return Err(VerificationError::ReceiptFormatError);
+            }
+            expected_pre_state_digest = Some({
+                // Post state PC is stored as the "actual" value plus 4. This matches the join
+                // predicate implementation. See [ReceiptClaim] for more detail.
+                let mut post = receipt
+                    .claim
+                    .post
+                    .as_value()
+                    .map_err(|_| VerificationError::ReceiptFormatError)?
+                    .clone();
+                post.pc = post
+                    .pc
+                    .checked_sub(WORD_SIZE as u32)
+                    .ok_or(VerificationError::ReceiptFormatError)?;
+                post.digest()
+            });
+        }
+
+        // Verify the last receipt in the continuation.
+        final_receipt.verify_integrity_with_context(ctx)?;
+        tracing::debug!("final: {:#?}", final_receipt.claim);
+        if let Some(id) = expected_pre_state_digest {
+            if id != final_receipt.claim.pre.digest() {
+                return Err(VerificationError::ImageVerificationError);
+            }
+        }
+
+        // Verify all corroborating receipts attached to this composite receipt.
+        for receipt in self.assumptions.iter() {
+            tracing::debug!("verifying assumption: {:?}", receipt.get_claim()?.digest());
+            receipt.verify_integrity_with_context(ctx)?;
+        }
+
+        // Verify decoded output digest is consistent with the journal_digest and
+        // assumptions.
+        self.verify_output_consistency(&final_receipt.claim)?;
+
+        Ok(())
+    }
+
+    /// Returns the [ReceiptClaim] for this [CompositeReceipt].
+    pub fn get_claim(&self) -> Result<ReceiptClaim, VerificationError> {
+        let first_claim = &self
+            .segments
+            .first()
+            .ok_or(VerificationError::ReceiptFormatError)?
+            .claim;
+        let last_claim = &self
+            .segments
+            .last()
+            .ok_or(VerificationError::ReceiptFormatError)?
+            .claim;
+
+        // After verifying the internally consistency of this receipt, we can use
+        // self.assumptions and self.journal_digest in place of
+        // last_claim.output, which is equal.
+        self.verify_output_consistency(last_claim)?;
+        let output: Option<Output> = last_claim
+            .output
+            .is_some()
+            .then(|| {
+                Ok(Output {
+                    journal: MaybePruned::Pruned(
+                        self.journal_digest
+                            .ok_or(VerificationError::ReceiptFormatError)?,
+                    ),
+                    // TODO(#982): Adjust this if unresolved assumptions are allowed on
+                    // CompositeReceipt.
+                    // NOTE: Proven assumptions are not included in the CompositeReceipt claim.
+                    assumptions: Assumptions(vec![]).into(),
+                })
+            })
+            .transpose()?;
+
+        Ok(ReceiptClaim {
+            pre: first_claim.pre.clone(),
+            post: last_claim.post.clone(),
+            exit_code: last_claim.exit_code,
+            input: first_claim.input.clone(),
+            output: output.into(),
+        })
+    }
+
+    /// Check that the output fields in the given receipt claim are
+    /// consistent with the exit code, and with the journal_digest and
+    /// assumptions encoded on self.
+    fn verify_output_consistency(&self, claim: &ReceiptClaim) -> Result<(), VerificationError> {
+        tracing::debug!("checking output: exit_code = {:?}", claim.exit_code);
+        if claim.exit_code.expects_output() && claim.output.is_some() {
+            let self_output = Output {
+                journal: MaybePruned::Pruned(
+                    self.journal_digest
+                        .ok_or(VerificationError::ReceiptFormatError)?,
+                ),
+                assumptions: self.assumptions_claim()?.into(),
+            };
+
+            // If these digests do not match, this receipt is internally inconsistent.
+            if self_output.digest() != claim.output.digest() {
+                let empty_output = claim.output.is_none()
+                    && self
+                        .journal_digest
+                        .ok_or(VerificationError::ReceiptFormatError)?
+                        == Vec::<u8>::new().digest();
+                if !empty_output {
+                    tracing::debug!(
+                        "output digest does not match: expected {:?}; decoded {:?}",
+                        &self_output,
+                        &claim.output
+                    );
+                    return Err(VerificationError::ReceiptFormatError);
+                }
+            }
+        } else {
+            // Ensure all output fields are empty. If not, this receipt is internally
+            // inconsistent.
+            if claim.output.is_some() {
+                tracing::debug!("unexpected non-empty claim output: {:?}", &claim.output);
+                return Err(VerificationError::ReceiptFormatError);
+            }
+            if !self.assumptions.is_empty() {
+                tracing::debug!(
+                    "unexpected non-empty composite receipt assumptions: {:?}",
+                    &self.assumptions
+                );
+                return Err(VerificationError::ReceiptFormatError);
+            }
+            if self.journal_digest.is_some() {
+                tracing::debug!(
+                    "unexpected non-empty composite receipt journal_digest: {:?}",
+                    &self.journal_digest
+                );
+                return Err(VerificationError::ReceiptFormatError);
+            }
+        }
+        Ok(())
+    }
+
+    fn assumptions_claim(&self) -> Result<Assumptions, VerificationError> {
+        Ok(Assumptions(
+            self.assumptions
+                .iter()
+                .map(|a| Ok(a.get_claim()?.into()))
+                .collect::<Result<Vec<_>, _>>()?,
+        ))
+    }
 }
 
 /// A receipt attesting to the execution of a Segment.
 ///
 /// A SegmentReceipt attests that a [crate::Segment] was executed in a manner
-/// consistent with the [ReceiptMetadata] included in the receipt.
-#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
+/// consistent with the [ReceiptClaim] included in the receipt.
+#[derive(Clone, Debug, Deserialize, Serialize)]
+#[cfg_attr(test, derive(PartialEq))]
 pub struct SegmentReceipt {
     /// The cryptographic data attesting to the validity of the code execution.
     ///
     /// This data is used by the ZKP Verifier (as called by
-    /// [SegmentReceipt::verify_with_context]) to cryptographically prove that
-    /// this Segment was faithfully executed. It is largely opaque
-    /// cryptographic data, but contains a non-opaque metadata component,
-    /// which can be conveniently accessed with
-    /// [SegmentReceipt::get_metadata].
+    /// [SegmentReceipt::verify_integrity_with_context]) to cryptographically prove that this
+    /// Segment was faithfully executed. It is largely opaque cryptographic data, but contains a
+    /// non-opaque claim component, which can be conveniently accessed with
+    /// [SegmentReceipt::claim].
     pub seal: Vec<u32>,
 
     /// Segment index within the [Receipt]
@@ -370,66 +611,18 @@ pub struct SegmentReceipt {
 
     /// Name of the hash function used to create this receipt.
     pub hashfn: String,
-}
 
-/// Context available to the verification process.
-pub struct VerifierContext {
-    /// A registry of hash functions to be used by the verification process.
-    pub suites: BTreeMap<String, HashSuite<BabyBear>>,
-}
-
-impl Receipt {
-    /// Construct a new Receipt
-    pub fn new(inner: InnerReceipt, journal: Vec<u8>) -> Self {
-        Self {
-            inner,
-            journal: Journal::new(journal),
-        }
-    }
-
-    /// Verify the integrity of this receipt.
-    ///
-    /// Uses the ZKP system to cryptographically verify that each constituent
-    /// Segment has a valid receipt, and validates that these [SegmentReceipt]s
-    /// stitch together correctly, and that the initial memory image matches the
-    /// given `image_id` parameter.
-    pub fn verify(&self, image_id: impl Into<Digest>) -> Result<(), VerificationError> {
-        self.verify_with_context(&VerifierContext::default(), image_id)
-    }
-
-    /// Verify the integrity of this receipt.
-    ///
-    /// Uses the ZKP system to cryptographically verify that each constituent
-    /// Segment has a valid receipt, and validates that these [SegmentReceipt]s
-    /// stitch together correctly, and that the initial memory image matches the
-    /// given `image_id` parameter.
-    pub fn verify_with_context(
-        &self,
-        ctx: &VerifierContext,
-        image_id: impl Into<Digest>,
-    ) -> Result<(), VerificationError> {
-        self.inner
-            .verify_with_context(ctx, image_id, &self.journal.bytes)
-    }
-
-    /// Extract the [ReceiptMetadata] from this receipt for an excution session.
-    pub fn get_metadata(&self) -> Result<ReceiptMetadata, VerificationError> {
-        match self.inner {
-            InnerReceipt::Flat(ref segment_receipts) => segment_receipts
-                .0
-                .iter()
-                .last()
-                .ok_or(VerificationError::ReceiptFormatError)?
-                .get_metadata(),
-            InnerReceipt::Succinct(ref succint_recipt) => Ok(succint_recipt.meta.clone()),
-            InnerReceipt::Fake => unimplemented!("fake receipt does not implement metadata"),
-        }
-    }
+    /// [ReceiptClaim] containing information about the execution that this receipt proves.
+    pub claim: ReceiptClaim,
 }
 
 impl SegmentReceipt {
-    /// Verify the integrity of this receipt.
-    pub fn verify_with_context(&self, ctx: &VerifierContext) -> Result<(), VerificationError> {
+    /// Verify the integrity of this receipt, ensuring the claim is attested
+    /// to by the seal.
+    pub fn verify_integrity_with_context(
+        &self,
+        ctx: &VerifierContext,
+    ) -> Result<(), VerificationError> {
         use hex::FromHex;
         let check_code = |_, control_id: &Digest| -> Result<(), VerificationError> {
             POSEIDON_CONTROL_ID
@@ -444,19 +637,90 @@ impl SegmentReceipt {
             .suites
             .get(&self.hashfn)
             .ok_or(VerificationError::InvalidHashSuite)?;
-        risc0_zkp::verify::verify(&super::CIRCUIT, suite, &self.seal, check_code)
-    }
+        risc0_zkp::verify::verify(&super::CIRCUIT, suite, &self.seal, check_code)?;
 
-    /// Returns the [ReceiptMetadata] for this receipt.
-    pub fn get_metadata(&self) -> Result<ReceiptMetadata, VerificationError> {
-        let elems = bytemuck::cast_slice(&self.seal);
-        ReceiptMetadata::decode_from_io(layout::OutBuffer(elems))
+        // Receipt is consistent with the claim encoded on the seal. Now check against the
+        // claim on the struct.
+        let decoded_claim = decode_receipt_claim_from_seal(&self.seal)?;
+        if decoded_claim.digest() != self.claim.digest() {
+            tracing::debug!(
+                "decoded segment receipt claim does not match claim field: decoded: {:#?}, expected: {:#?}",
+                decoded_claim,
+                self.claim,
+            );
+            return Err(VerificationError::ReceiptFormatError);
+        }
+        Ok(())
     }
 
     /// Return the seal for this receipt, as a vector of bytes.
     pub fn get_seal_bytes(&self) -> Vec<u8> {
         self.seal.iter().flat_map(|x| x.to_le_bytes()).collect()
     }
+}
+
+/// An assumption attached with a guest execution as a result of calling
+/// `env::verify` or `env::verify_integrity`.
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub enum Assumption {
+    /// A [Receipt] for a proven assumption.
+    Proven(Receipt),
+
+    /// [ReceiptClaim] digest for an assumption that is not directly proven
+    /// to be true.
+    ///
+    /// Proving an execution with an unresolved assumption will result in a
+    /// conditional receipt. In order for the verifier to accept a
+    /// conditional receipt, they must be given a [Receipt] proving the
+    /// assumption, or explicitly accept the assumption without proof.
+    Unresolved(MaybePruned<ReceiptClaim>),
+}
+
+impl Assumption {
+    /// Returns the [ReceiptClaim] for this [Assumption].
+    pub fn get_claim(&self) -> Result<MaybePruned<ReceiptClaim>, VerificationError> {
+        match self {
+            Self::Proven(receipt) => Ok(receipt.get_claim()?.into()),
+            Self::Unresolved(claim) => Ok(claim.clone()),
+        }
+    }
+
+    #[cfg(feature = "prove")]
+    pub(crate) fn as_receipt(&self) -> Result<&Receipt> {
+        match self {
+            Self::Proven(receipt) => Ok(receipt),
+            Self::Unresolved(_) => Err(anyhow::anyhow!(
+                "no receipt available for unresolved assumption"
+            )),
+        }
+    }
+}
+
+impl From<Receipt> for Assumption {
+    /// Create a proven assumption from a [Receipt].
+    fn from(receipt: Receipt) -> Self {
+        Self::Proven(receipt)
+    }
+}
+
+impl From<MaybePruned<ReceiptClaim>> for Assumption {
+    /// Create an unresolved assumption from a [MaybePruned] [ReceiptClaim].
+    fn from(claim: MaybePruned<ReceiptClaim>) -> Self {
+        Self::Unresolved(claim)
+    }
+}
+
+impl From<ReceiptClaim> for Assumption {
+    /// Create an unresolved assumption from a [ReceiptClaim].
+    fn from(claim: ReceiptClaim) -> Self {
+        Self::Unresolved(claim.into())
+    }
+}
+
+/// Context available to the verification process.
+pub struct VerifierContext {
+    /// A registry of hash functions to be used by the verification process.
+    pub suites: BTreeMap<String, HashSuite<BabyBear>>,
 }
 
 fn decode_system_state_from_io(
@@ -475,61 +739,39 @@ fn decode_system_state_from_io(
     Ok(SystemState { pc, merkle_root })
 }
 
-impl ReceiptMetadata {
-    fn decode_from_io(io: layout::OutBuffer) -> Result<Self, VerificationError> {
-        let body = layout::LAYOUT.mux.body;
-        let pre = decode_system_state_from_io(io, body.global.pre)?;
-        let mut post = decode_system_state_from_io(io, body.global.post)?;
-        // In order to avoid extra logic in the rv32im circuit to perform arthimetic on
-        // the PC with carry, the PC is always recorded as the current PC +
-        // 4. Thus we need to adjust the decoded PC for the post SystemState.
-        post.pc = post
-            .pc
-            .checked_sub(WORD_SIZE as u32)
-            .ok_or(VerificationError::ReceiptFormatError)?;
-        let input_bytes: Vec<u8> = io
-            .tree(body.global.input)
-            .get_bytes()
-            .or(Err(VerificationError::ReceiptFormatError))?;
-        let input = Digest::try_from(input_bytes).or(Err(VerificationError::ReceiptFormatError))?;
-        let output_bytes: Vec<u8> = io
-            .tree(body.global.output)
-            .get_bytes()
-            .or(Err(VerificationError::ReceiptFormatError))?;
-        let output =
-            Digest::try_from(output_bytes).or(Err(VerificationError::ReceiptFormatError))?;
-        let sys_exit = io.get_u64(body.global.sys_exit_code) as u32;
-        let user_exit = io.get_u64(body.global.user_exit_code) as u32;
-        let exit_code = ReceiptMetadata::make_exit_code(sys_exit, user_exit)?;
-        Ok(Self {
-            pre,
-            post,
-            exit_code,
-            input,
-            output,
-        })
-    }
+pub(crate) fn decode_receipt_claim_from_seal(
+    seal: &[u32],
+) -> Result<ReceiptClaim, VerificationError> {
+    let elems = bytemuck::cast_slice(seal);
+    let io = layout::OutBuffer(elems);
+    let body = layout::LAYOUT.mux.body;
+    let pre = decode_system_state_from_io(io, body.global.pre)?;
+    let post = decode_system_state_from_io(io, body.global.post)?;
 
-    pub(crate) fn get_exit_code_pairs(&self) -> Result<(u32, u32), VerificationError> {
-        match self.exit_code {
-            ExitCode::Halted(user_exit) => Ok((0, user_exit)),
-            ExitCode::Paused(user_exit) => Ok((1, user_exit)),
-            ExitCode::SystemSplit => Ok((2, 0)),
-            _ => Err(VerificationError::ReceiptFormatError),
-        }
-    }
+    let input_bytes: Vec<u8> = io
+        .tree(body.global.input)
+        .get_bytes()
+        .or(Err(VerificationError::ReceiptFormatError))?;
+    let input = Digest::try_from(input_bytes).or(Err(VerificationError::ReceiptFormatError))?;
 
-    pub(crate) fn make_exit_code(
-        sys_exit: u32,
-        user_exit: u32,
-    ) -> Result<ExitCode, VerificationError> {
-        match sys_exit {
-            0 => Ok(ExitCode::Halted(user_exit)),
-            1 => Ok(ExitCode::Paused(user_exit)),
-            2 => Ok(ExitCode::SystemSplit),
-            _ => Err(VerificationError::ReceiptFormatError),
-        }
-    }
+    let output_bytes: Vec<u8> = io
+        .tree(body.global.output)
+        .get_bytes()
+        .or(Err(VerificationError::ReceiptFormatError))?;
+    let output = Digest::try_from(output_bytes).or(Err(VerificationError::ReceiptFormatError))?;
+
+    let sys_exit = io.get_u64(body.global.sys_exit_code) as u32;
+    let user_exit = io.get_u64(body.global.user_exit_code) as u32;
+    let exit_code =
+        ExitCode::from_pair(sys_exit, user_exit).or(Err(VerificationError::ReceiptFormatError))?;
+
+    Ok(ReceiptClaim {
+        pre: pre.into(),
+        post: post.into(),
+        exit_code,
+        input,
+        output: MaybePruned::Pruned(output),
+    })
 }
 
 impl Default for VerifierContext {
@@ -541,5 +783,65 @@ impl Default for VerifierContext {
                 ("sha-256".into(), Sha256HashSuite::new_suite()),
             ]),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use hex::FromHex;
+
+    use super::*;
+    use crate::{receipt_claim::MaybePruned, ExitCode::Halted};
+
+    const IMAGE_ID: [u32; 8] = [
+        3877313773, 4166950669, 1851257837, 1474316178, 3714943358, 2342301681, 2883381307,
+        234838297,
+    ];
+
+    const RISC0_GROTH16_SEAL: &str = r#"
+    {
+        "a":[[26,63,155,211,133,192,185,234,51,172,152,49,113,248,13,45,155,140,75,98,171,225,72,44,133,246,88,199,37,103,28,56],
+            [22,46,102,79,175,35,89,153,55,78,200,143,26,196,209,62,247,200,136,247,101,65,101,157,59,33,20,91,191,43,246,84]],
+        "b":[[[20,0,192,47,211,1,254,55,118,229,52,232,89,161,51,100,224,242,246,5,106,190,188,113,187,230,100,7,255,70,192,153],
+            [9,206,194,232,36,249,103,125,57,1,189,209,245,133,230,79,219,98,176,253,221,160,20,78,189,142,46,52,171,1,162,203]],
+            [[32,70,252,38,183,118,240,156,230,16,28,10,122,111,184,65,239,158,193,102,94,156,5,56,24,236,174,103,160,172,89,109],
+            [4,151,70,37,225,160,65,7,230,206,172,247,41,192,58,149,244,201,31,171,7,137,232,107,29,143,227,49,96,29,198,35]]],
+        "c":[[20,112,216,216,113,186,224,139,117,16,31,102,238,29,76,150,58,216,254,75,147,172,89,147,216,138,41,130,172,106,148,8],
+            [23,250,144,90,188,98,158,62,214,76,108,236,158,31,125,183,20,200,101,254,212,15,32,174,120,230,219,15,71,206,189,55]]
+    }
+    "#;
+
+    #[ignore]
+    #[test]
+    fn test_groth16_receipt() {
+        let seal: Groth16Seal = serde_json::from_str(RISC0_GROTH16_SEAL).unwrap();
+        let journal: Vec<u8> = vec![135, 1, 0, 0, 0, 0, 0, 0];
+        let merkle_root =
+            Digest::from_hex("5bcc4b8e50095f5a5e28f324170ef29d25ee52d966ad996159644c63f3b11eba")
+                .unwrap();
+        let claim: ReceiptClaim = ReceiptClaim {
+            pre: MaybePruned::Value(SystemState {
+                pc: 2103560,
+                merkle_root,
+            }),
+            post: MaybePruned::Value(SystemState {
+                pc: 2111560,
+                merkle_root,
+            }),
+            exit_code: Halted(0),
+            input: Digest::default(),
+            output: MaybePruned::Value(Some(Output {
+                journal: MaybePruned::Value(journal.clone()),
+                assumptions: MaybePruned::Value(Assumptions(vec![])),
+            })),
+        };
+        let receipt = Receipt::new(
+            InnerReceipt::Groth16(Groth16Receipt {
+                seal: seal.to_vec(),
+                claim,
+            }),
+            journal,
+        );
+        receipt.verify(IMAGE_ID).unwrap();
     }
 }

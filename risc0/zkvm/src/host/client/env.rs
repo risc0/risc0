@@ -18,6 +18,7 @@ use std::{
     cell::RefCell,
     collections::HashMap,
     io::{BufRead, BufReader, Cursor, Read, Write},
+    mem,
     path::{Path, PathBuf},
     rc::Rc,
 };
@@ -28,27 +29,49 @@ use bytes::Bytes;
 use risc0_zkvm_platform::{self, fileno};
 use serde::Serialize;
 
-use super::{
-    exec::TraceEvent,
-    posix_io::PosixIo,
-    slice_io::{slice_io_from_fn, SliceIo, SliceIoTable},
-};
 use crate::serde::to_vec;
+use crate::{
+    host::client::{
+        exec::TraceEvent,
+        posix_io::PosixIo,
+        slice_io::{slice_io_from_fn, SliceIo, SliceIoTable},
+    },
+    Assumption,
+};
 
 /// A builder pattern used to construct an [ExecutorEnv].
-#[derive(Clone, Default)]
+#[derive(Default)]
 pub struct ExecutorEnvBuilder<'a> {
     inner: ExecutorEnv<'a>,
 }
 
 /// A callback used to collect [TraceEvent]s.
-pub type TraceCallback<'a> = dyn FnMut(TraceEvent) -> Result<()> + 'a;
+pub trait TraceCallback {
+    fn trace_callback(&mut self, event: TraceEvent) -> Result<()>;
+}
+
+impl<F> TraceCallback for F
+where
+    F: FnMut(TraceEvent) -> Result<()>,
+{
+    fn trace_callback(&mut self, event: TraceEvent) -> Result<()> {
+        self(event)
+    }
+}
+
+/// Container for assumptions in the executor environment.
+#[derive(Debug, Default)]
+pub(crate) struct Assumptions {
+    pub(crate) cached: Vec<Assumption>,
+    #[cfg(feature = "prove")]
+    pub(crate) accessed: Vec<Assumption>,
+}
 
 /// The [crate::Executor] is configured from this object.
 ///
 /// The executor environment holds configuration details that inform how the
 /// guest environment is set up prior to guest program execution.
-#[derive(Clone, Default)]
+#[derive(Default)]
 pub struct ExecutorEnv<'a> {
     pub(crate) env_vars: HashMap<String, String>,
     pub(crate) args: Vec<String>,
@@ -57,8 +80,10 @@ pub struct ExecutorEnv<'a> {
     pub(crate) posix_io: Rc<RefCell<PosixIo<'a>>>,
     pub(crate) slice_io: Rc<RefCell<SliceIoTable<'a>>>,
     pub(crate) input: Vec<u8>,
-    pub(crate) trace: Option<Rc<RefCell<TraceCallback<'a>>>>,
+    pub(crate) trace: Vec<Rc<RefCell<dyn TraceCallback + 'a>>>,
+    pub(crate) assumptions: Rc<RefCell<Assumptions>>,
     pub(crate) segment_path: Option<PathBuf>,
+    pub(crate) pprof_out: Option<PathBuf>,
 }
 
 impl<'a> ExecutorEnv<'a> {
@@ -86,8 +111,11 @@ impl<'a> ExecutorEnvBuilder<'a> {
     ///
     /// let env = ExecutorEnv::builder().build().unwrap();
     /// ```
+    ///
+    /// After calling `build`, the [ExecutorEnvBuilder] will be reset to
+    /// default.
     pub fn build(&mut self) -> Result<ExecutorEnv<'a>> {
-        let inner = self.inner.clone();
+        let mut inner = mem::take(&mut self.inner);
 
         if !inner.input.is_empty() {
             let reader = Cursor::new(inner.input.clone());
@@ -95,6 +123,12 @@ impl<'a> ExecutorEnvBuilder<'a> {
                 .posix_io
                 .borrow_mut()
                 .with_read_fd(fileno::STDIN, reader);
+        }
+
+        if inner.pprof_out.is_none() {
+            if let Ok(env_var) = std::env::var("RISC0_PPROF_OUT") {
+                inner.pprof_out = Some(env_var.into());
+            }
         }
 
         Ok(inner)
@@ -288,18 +322,31 @@ impl<'a> ExecutorEnvBuilder<'a> {
         self
     }
 
+    /// Add an [Assumption] to the [ExecutorEnv] associated assumptions.
+    ///
+    /// During execution, when the guest calls `env::verify` or
+    /// `env::verify_integrity`, this collection will be searched for an
+    /// [Assumption] that corresponds the verification call.
+    pub fn add_assumption(&mut self, assumption: Assumption) -> &mut Self {
+        self.inner.assumptions.borrow_mut().cached.push(assumption);
+        self
+    }
+
     /// Add a callback handler for raw trace messages.
-    pub fn trace_callback(
-        &mut self,
-        callback: impl FnMut(TraceEvent) -> Result<()> + 'a,
-    ) -> &mut Self {
-        self.inner.trace = Some(Rc::new(RefCell::new(callback)));
+    pub fn trace_callback(&mut self, callback: impl TraceCallback + 'a) -> &mut Self {
+        self.inner.trace.push(Rc::new(RefCell::new(callback)));
         self
     }
 
     /// Set the path where segments will be stored.
     pub fn segment_path<P: AsRef<Path>>(&mut self, path: P) -> &mut Self {
         self.inner.segment_path = Some(path.as_ref().to_path_buf());
+        self
+    }
+
+    /// Enable the profiler and output results to the specified path.
+    pub fn enable_profiler<P: AsRef<Path>>(&mut self, path: P) -> &mut Self {
+        self.inner.pprof_out = Some(path.as_ref().to_path_buf());
         self
     }
 }

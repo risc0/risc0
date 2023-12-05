@@ -63,7 +63,7 @@ impl<'a, CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
         let accum = groups[REGISTER_GROUP_ACCUM];
         let mix = globals[GLOBAL_MIX];
         let out = globals[GLOBAL_OUT];
-        log::debug!(
+        tracing::debug!(
             "check: {}, code: {}, data: {}, accum: {}, mix: {} out: {}",
             check.size(),
             code.size(),
@@ -72,7 +72,7 @@ impl<'a, CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
             mix.size(),
             out.size()
         );
-        log::debug!(
+        tracing::debug!(
             "total: {}",
             (check.size() + code.size() + data.size() + accum.size() + mix.size() + out.size()) * 4
         );

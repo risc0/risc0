@@ -111,7 +111,7 @@ mod test {
         let img_id = {
             let program = Program::load_elf(method, GUEST_MAX_MEM as u32)?;
             let image = MemoryImage::new(&program, PAGE_SIZE as u32)?;
-            let image_id = hex::encode(image.compute_id());
+            let image_id = hex::encode(image.compute_id()?);
             let image = bincode::serialize(&image).expect("Failed to serialize memory img");
             bonsai_sdk::upload_img(client.clone(), image_id.clone(), image).await?;
             image_id

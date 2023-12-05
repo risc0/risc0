@@ -301,8 +301,8 @@ mod tests {
         // Try two versions
         poseidon2_mix_naive(&mut test_in_1);
         poseidon2_mix(&mut test_in_2);
-        log::debug!("test_in_1: {:?}", test_in_1);
-        log::debug!("test_in_2: {:?}", test_in_2);
+        tracing::debug!("test_in_1: {:?}", test_in_1);
+        tracing::debug!("test_in_2: {:?}", test_in_2);
         // Verify they are the same
         assert_eq!(test_in_1, test_in_2);
     }
@@ -321,7 +321,7 @@ mod tests {
             0x0000000E, 0x0000000F, 0x00000010, 0x00000011, 0x00000012, 0x00000013, 0x00000014,
             0x00000015, 0x00000016, 0x00000017,
         ];
-        log::debug!("input: {:?}", buf);
+        tracing::debug!("input: {:?}", buf);
         poseidon2_mix(&mut buf);
         let goal: [u32; CELLS] = [
             0x08007b06, 0x7670b735, 0x70312c6b, 0x2ee92f8e, 0x7206cd75, 0x4f4d5907, 0x72e7763c,
@@ -333,7 +333,7 @@ mod tests {
             assert_eq!(buf[i].as_u32(), goal[i]);
         }
 
-        log::debug!("output: {:?}", buf);
+        tracing::debug!("output: {:?}", buf);
     }
 
     #[test]

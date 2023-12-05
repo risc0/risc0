@@ -133,6 +133,8 @@ pub mod nr {
     declare_syscall!(pub SYS_READ_AVAIL);
     declare_syscall!(pub SYS_READ);
     declare_syscall!(pub SYS_WRITE);
+    declare_syscall!(pub SYS_VERIFY);
+    declare_syscall!(pub SYS_VERIFY_INTEGRITY);
 }
 
 impl SyscallName {
@@ -265,6 +267,14 @@ fn ecall_4(t0: u32, a0: u32, a1: u32, a2: u32, a3: u32, a4: u32) {
     }
 }
 
+/// # Safety
+///
+/// `out_state` must be aligned and dereferenceable.
+// [inline(never)] is added to mitigate potentially leaking information about program execution
+// through the final value of the program counter (pc) on halt where there is more than one
+// location in the program where `sys_halt` is called. As long as the halt instruction only exists
+// in one place within the program, the pc will always be the same invariant with input.
+#[inline(never)]
 #[cfg_attr(feature = "export-syscalls", no_mangle)]
 pub extern "C" fn sys_halt(user_exit: u8, out_state: *const [u32; DIGEST_WORDS]) -> ! {
     ecall_1(
@@ -278,6 +288,11 @@ pub extern "C" fn sys_halt(user_exit: u8, out_state: *const [u32; DIGEST_WORDS])
 /// # Safety
 ///
 /// `out_state` must be aligned and dereferenceable.
+// [inline(never)] is added to mitigate potentially leaking information about program execution
+// through the final value of the program counter (pc) on pause where there is more than one
+// location in the program where `sys_pause` is called. As long as the pause instruction only exists
+// in one place within the program, the pc will always be the same invariant with input.
+#[inline(never)]
 #[cfg_attr(feature = "export-syscalls", no_mangle)]
 pub unsafe extern "C" fn sys_pause(user_exit: u8, out_state: *const [u32; DIGEST_WORDS]) {
     ecall_1(
@@ -676,6 +691,76 @@ pub unsafe extern "C" fn sys_alloc_aligned(bytes: usize, align: usize) -> *mut u
 
     unsafe { HEAP_POS = heap_pos };
     ptr
+}
+
+/// Send an image ID and journal hash to the host to request the post state digest and system exit
+/// code from a matching ReceiptClaim with successful exit status.
+///
+/// A cooperative prover will only return if there is a verifying proof with successful exit status
+/// associated with the given image ID and journal digest; and will always return a result code of
+/// 0 to register a0. The caller must calculate the ReceiptClaim digest, using the provided post
+/// state digest and encode the digest into a public assumptions list for inclusion in the guest
+/// output.
+#[cfg(feature = "export-syscalls")]
+#[no_mangle]
+pub unsafe extern "C" fn sys_verify(
+    image_id: *const [u32; DIGEST_WORDS],
+    journal_digest: *const [u32; DIGEST_WORDS],
+    from_host_buf: *mut [u32; DIGEST_WORDS + 1],
+) {
+    let mut to_host = [0u32; 2 * DIGEST_WORDS];
+    to_host[..DIGEST_WORDS].copy_from_slice(unsafe { &*image_id });
+    to_host[DIGEST_WORDS..].copy_from_slice(unsafe { &*journal_digest });
+
+    let Return(a0, _) = unsafe {
+        // Send the image_id and journal_digest to the host in a syscall.
+        // Expect in return that from_host_buf is populated with the post state
+        // digest and system exit code for from a matching ReceiptClaim.
+        syscall_2(
+            nr::SYS_VERIFY,
+            from_host_buf as *mut u32,
+            DIGEST_WORDS + 1,
+            to_host.as_ptr() as u32,
+            2 * DIGEST_BYTES as u32,
+        )
+    };
+
+    // Check to ensure the host indicated success by returning 0.
+    // This should always be the case. This check is included for
+    // forwards-compatiblity.
+    if a0 != 0 {
+        const MSG: &[u8] = "sys_verify returned error result".as_bytes();
+        unsafe { sys_panic(MSG.as_ptr(), MSG.len()) };
+    }
+}
+
+/// Send a ReceiptClaim digest to the host to request verification.
+///
+/// A cooperative prover will only return if there is a verifying proof
+/// associated with that claim digest, and will always return a result code
+/// of 0 to register a0. The caller must encode the metadata_digest into a
+/// public assumptions list for inclusion in the guest output.
+#[cfg(feature = "export-syscalls")]
+#[no_mangle]
+pub unsafe extern "C" fn sys_verify_integrity(metadata_digest: *const [u32; DIGEST_WORDS]) {
+    let Return(a0, _) = unsafe {
+        // Send the metadata_digest to the host via software ecall.
+        syscall_2(
+            nr::SYS_VERIFY_INTEGRITY,
+            null_mut(),
+            0,
+            metadata_digest as u32,
+            DIGEST_BYTES as u32,
+        )
+    };
+
+    // Check to ensure the host indicated success by returning 0.
+    // This should always be the case. This check is included for
+    // forwards-compatiblity.
+    if a0 != 0 {
+        const MSG: &[u8] = "sys_verify_integrity returned error result".as_bytes();
+        unsafe { sys_panic(MSG.as_ptr(), MSG.len()) };
+    }
 }
 
 // Make sure we only get one of these since it's stateful.

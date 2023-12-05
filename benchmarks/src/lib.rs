@@ -20,11 +20,9 @@ use std::{
     time::{Duration, Instant},
 };
 
-use log::info;
-use risc0_zkvm::{
-    ExecutorEnv, ExecutorImpl, MemoryImage, Program, Session, GUEST_MAX_MEM, PAGE_SIZE,
-};
+use risc0_zkvm::{MemoryImage, Program, Segment, GUEST_MAX_MEM, PAGE_SIZE};
 use serde::Serialize;
+use tracing::info;
 
 pub mod benches;
 
@@ -170,16 +168,13 @@ pub trait BenchmarkAverage {
     fn new(spec: Self::Spec) -> Self;
 
     fn spec(&self) -> &Self::Spec;
-
-    fn guest_compute(&mut self) -> ();
+    fn guest_compute(&mut self) -> Duration;
 
     fn run(&mut self) -> MetricsAverage {
         let mut metrics =
             MetricsAverage::new(String::from(Self::NAME), Self::job_size(self.spec()));
 
-        let start = Instant::now();
-        self.guest_compute();
-        metrics.total_duration = start.elapsed();
+        metrics.total_duration = self.guest_compute();
 
         metrics.average_duration = metrics.total_duration / metrics.job_size;
         metrics.ops_sec = metrics.job_size as f64 / metrics.total_duration.as_secs_f64();
@@ -194,12 +189,7 @@ pub fn get_image(path: &str) -> MemoryImage {
     MemoryImage::new(&program, PAGE_SIZE as u32).unwrap()
 }
 
-pub fn exec_compute<'a>(image: MemoryImage, env: ExecutorEnv<'a>) -> (u32, u32, Duration, Session) {
-    let mut exec = ExecutorImpl::new(env.clone(), image.clone()).unwrap();
-    let start = Instant::now();
-    let session = exec.run().unwrap();
-    let elapsed = start.elapsed();
-    let segments = session.resolve().unwrap();
+pub fn get_cycles(segments: Vec<Segment>) -> (u32, u32) {
     let (exec_cycles, prove_cycles) =
         segments
             .iter()
@@ -209,23 +199,14 @@ pub fn exec_compute<'a>(image: MemoryImage, env: ExecutorEnv<'a>) -> (u32, u32, 
                     prove_cycles + (1 << segment.po2),
                 )
             });
-    (prove_cycles as u32, exec_cycles as u32, elapsed, session)
-}
-
-pub fn init_gpu_kernel() {
-    let image = get_image(risc0_benchmark_methods::ITER_SHA2_PATH);
-    let mut guest_input = Vec::from([0u8; 36]);
-    guest_input[0] = 1u8;
-    let env = ExecutorEnv::builder()
-        .write(&guest_input)
-        .unwrap()
-        .build()
-        .unwrap();
-    exec_compute(image, env);
+    (prove_cycles as u32, exec_cycles as u32)
 }
 
 pub fn init_logging() {
-    env_logger::init();
+    tracing_subscriber::fmt()
+        .with_env_filter(tracing_subscriber::filter::EnvFilter::from_default_env())
+        .init();
+    ();
 }
 
 #[derive(Serialize)]

@@ -27,11 +27,13 @@ use risc0_zkp::core::hash::sha::testutil::test_sha_impl;
 use risc0_zkvm::{
     guest::{env, memory_barrier, sha},
     sha::{Digest, Sha256},
+    ReceiptClaim,
 };
 use risc0_zkvm_methods::multi_test::{MultiTestSpec, SYS_MULTI_TEST};
 use risc0_zkvm_platform::{
-    fileno, memory,
-    syscall::{bigint, sys_bigint, sys_read, sys_read_words, sys_write},
+    fileno,
+    memory::{self, SYSTEM},
+    syscall::{bigint, sys_bigint, sys_log, sys_read, sys_read_words, sys_write},
 };
 
 risc0_zkvm::entry!(main);
@@ -92,8 +94,19 @@ pub fn main() {
             // Call an external function to make sure it's detected during profiling.
             profile_test_func1()
         }
-        MultiTestSpec::Fail => {
-            panic!("MultiTestSpec::Fail invoked");
+        MultiTestSpec::Panic => {
+            panic!("MultiTestSpec::Panic invoked");
+        }
+        MultiTestSpec::Fault => unsafe {
+            asm!("sw x0, 1(x0)");
+        },
+        MultiTestSpec::Halt(exit_code) => {
+            env::exit(exit_code);
+        }
+        MultiTestSpec::PauseContinue(exit_code) => {
+            env::log("before");
+            env::pause(exit_code);
+            env::log("after");
         }
         MultiTestSpec::ReadWriteMem { values } => {
             for (addr, value) in values.into_iter() {
@@ -159,10 +172,12 @@ pub fn main() {
             }
             env::commit(&buf);
         }
-        MultiTestSpec::PauseContinue => {
-            env::log("before");
-            env::pause();
-            env::log("after");
+        MultiTestSpec::SysVerify { image_id, journal } => {
+            env::verify(image_id, &journal).unwrap();
+        }
+        MultiTestSpec::SysVerifyIntegrity { claim_words } => {
+            let claim: ReceiptClaim = risc0_zkvm::serde::from_slice(&claim_words).unwrap();
+            env::verify_integrity(&claim).unwrap();
         }
         MultiTestSpec::EchoStdout { nbytes, fd } => {
             // Unaligned buffer size to exercise things a little bit.
@@ -247,6 +262,10 @@ pub fn main() {
         },
         MultiTestSpec::TooManySha => unsafe {
             asm!("ecall", in("x5") 3, in("x10") 0x400, in("x11") 0x400, in("x12") 0x400, in("x13") 0x400, in("x14") 10000,);
+        },
+        MultiTestSpec::SysLogInvalidAddr => unsafe {
+            let addr: *const u8 = SYSTEM.start() as _;
+            sys_log(addr, 100);
         },
     }
 }

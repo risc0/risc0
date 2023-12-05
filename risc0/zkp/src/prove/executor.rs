@@ -15,10 +15,10 @@
 use core::cmp::max;
 
 use anyhow::{bail, Result};
-use log::debug;
 use rand::thread_rng;
 use rayon::prelude::*;
 use risc0_core::field::{Elem, Field};
+use tracing::debug;
 
 use crate::{
     adapter::{

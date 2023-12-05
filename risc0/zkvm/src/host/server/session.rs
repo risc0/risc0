@@ -17,19 +17,19 @@
 
 use alloc::collections::BTreeSet;
 use std::{
+    borrow::Borrow,
     fs::File,
     io::{Read, Write},
     path::{Path, PathBuf},
 };
 
-use anyhow::Result;
-use risc0_binfmt::MemoryImage;
-use risc0_zkp::core::digest::Digest;
+use anyhow::{anyhow, ensure, Result};
+use risc0_zkvm_platform::WORD_SIZE;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    host::{receipt::ExitCode, server::exec::executor::SyscallRecord},
-    Journal,
+    host::server::exec::executor::SyscallRecord, sha::Digest, Assumption, Assumptions, ExitCode,
+    Journal, MemoryImage, Output, ReceiptClaim, SystemState,
 };
 
 #[derive(Clone, Default, Serialize, Deserialize, Debug)]
@@ -53,10 +53,16 @@ pub struct Session {
     pub segments: Vec<Box<dyn SegmentRef>>,
 
     /// The data publicly committed by the guest program.
-    pub journal: Journal,
+    pub journal: Option<Journal>,
 
     /// The [ExitCode] of the session.
     pub exit_code: ExitCode,
+
+    /// The final [MemoryImage] at the end of execution.
+    pub post_image: MemoryImage,
+
+    /// The list of assumptions made by the guest and resolved by the host.
+    pub assumptions: Vec<Assumption>,
 
     /// The hooks to be called during the proving phase.
     #[serde(skip)]
@@ -84,8 +90,11 @@ pub trait SegmentRef: Send {
 /// termination.
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Segment {
-    pub(crate) pre_image: MemoryImage,
-    pub(crate) post_image_id: Digest,
+    pub(crate) pre_image: Box<MemoryImage>,
+    // NOTE: segment.post_state is NOT EQUAL to segment.get_claim()?.post. This is because the
+    // post SystemState on the ReceiptClaim struct has a PC that is shifted forward by 4.
+    pub(crate) post_state: SystemState,
+    pub(crate) output: Option<Output>,
     pub(crate) faults: PageFaults,
     pub(crate) syscalls: Vec<SyscallRecord>,
     pub(crate) split_insn: Option<u32>,
@@ -115,11 +124,19 @@ pub trait SessionEvents {
 
 impl Session {
     /// Construct a new [Session] from its constituent components.
-    pub fn new(segments: Vec<Box<dyn SegmentRef>>, journal: Vec<u8>, exit_code: ExitCode) -> Self {
+    pub fn new(
+        segments: Vec<Box<dyn SegmentRef>>,
+        journal: Option<Vec<u8>>,
+        exit_code: ExitCode,
+        post_image: MemoryImage,
+        assumptions: Vec<Assumption>,
+    ) -> Self {
         Self {
             segments,
-            journal: Journal::new(journal),
+            journal: journal.map(|x| Journal::new(x)),
             exit_code,
+            post_image,
+            assumptions,
             hooks: Vec::new(),
         }
     }
@@ -136,6 +153,82 @@ impl Session {
     /// Add a hook to be called during the proving phase.
     pub fn add_hook<E: SessionEvents + 'static>(&mut self, hook: E) {
         self.hooks.push(Box::new(hook));
+    }
+
+    /// Calculate for the [ReceiptClaim] associated with this [Session]. The
+    /// [ReceiptClaim] is the claim that will be proven if this [Session]
+    /// is passed to the [crate::Prover].
+    pub fn get_claim(&self) -> Result<ReceiptClaim> {
+        let first_segment = &self
+            .segments
+            .first()
+            .ok_or_else(|| anyhow!("session has no segments"))?
+            .resolve()?;
+        let last_segment = &self
+            .segments
+            .last()
+            .ok_or_else(|| anyhow!("session has no segments"))?
+            .resolve()?;
+
+        // Construct the Output struct for the session, checking internal consistency.
+        // NOTE: The Session output if distinct from the final Segment output because in the
+        // Session output any proven assumptions are not included.
+        let output = if self.exit_code.expects_output() {
+            self.journal
+                .as_ref()
+                .map(|journal| -> Result<_> {
+                    Ok(Output {
+                        journal: journal.bytes.clone().into(),
+                        assumptions: Assumptions(
+                            self.assumptions
+                                .iter()
+                                .filter_map(|a| match a {
+                                    Assumption::Proven(_) => None,
+                                    Assumption::Unresolved(r) => Some(r.clone()),
+                                })
+                                .collect::<Vec<_>>(),
+                        )
+                        .into(),
+                    })
+                })
+                .transpose()?
+        } else {
+            ensure!(
+                self.journal.is_none(),
+                "Session with exit code {:?} has a journal",
+                self.exit_code
+            );
+            ensure!(
+                self.assumptions.is_empty(),
+                "Session with exit code {:?} has encoded assumptions",
+                self.exit_code
+            );
+            None
+        };
+
+        // NOTE: When a segment ends in a Halted(_) state, it may not update the post state
+        // digest. As a result, it will be the same are the pre_image. All other exit codes require
+        // the post state digest to reflect the final memory state.
+        // NOTE: The PC on the the post state is stored "+ 4". See ReceiptClaim for more detail.
+        let post_state = SystemState {
+            pc: self
+                .post_image
+                .pc
+                .checked_add(WORD_SIZE as u32)
+                .ok_or(anyhow!("invalid pc in session post image"))?,
+            merkle_root: match self.exit_code {
+                ExitCode::Halted(_) => last_segment.pre_image.compute_root_hash()?,
+                _ => self.post_image.compute_root_hash()?,
+            },
+        };
+
+        Ok(ReceiptClaim {
+            pre: SystemState::from(first_segment.pre_image.borrow()).into(),
+            post: post_state.into(),
+            exit_code: self.exit_code,
+            input: Digest::ZERO,
+            output: output.into(),
+        })
     }
 
     /// Report cycle information for this [Session].
@@ -162,8 +255,9 @@ impl Segment {
     /// Create a new [Segment] from its constituent components.
     #[allow(clippy::too_many_arguments)]
     pub(crate) fn new(
-        pre_image: MemoryImage,
-        post_image_id: Digest,
+        pre_image: Box<MemoryImage>,
+        post_state: SystemState,
+        output: Option<Output>,
         faults: PageFaults,
         syscalls: Vec<SyscallRecord>,
         exit_code: ExitCode,
@@ -172,13 +266,14 @@ impl Segment {
         index: u32,
         cycles: u32,
     ) -> Self {
-        log::info!("segment[{index}]> reads: {}, writes: {}, exit_code: {exit_code:?}, split_insn: {split_insn:?}, po2: {po2}, cycles: {cycles}",
+        tracing::debug!("segment[{index}]> reads: {}, writes: {}, exit_code: {exit_code:?}, split_insn: {split_insn:?}, po2: {po2}, cycles: {cycles}",
             faults.reads.len(),
             faults.writes.len(),
         );
         Self {
             pre_image,
-            post_image_id,
+            post_state,
+            output,
             faults,
             syscalls,
             exit_code,
@@ -187,6 +282,35 @@ impl Segment {
             index,
             cycles,
         }
+    }
+
+    /// Calculate for the [ReceiptClaim] associated with this [Segment]. The
+    /// [ReceiptClaim] is the claim that will be proven if this [Segment]
+    /// is passed to the [crate::Prover].
+    pub fn get_claim(&self) -> Result<ReceiptClaim> {
+        // NOTE: When a segment ends in a Halted(_) state, it may not update the post state
+        // digest. As a result, it will be the same are the pre_image. All other exit codes require
+        // the post state digest to reflect the final memory state.
+        // NOTE: The PC on the the post state is stored "+ 4". See ReceiptClaim for more detail.
+        let post_state = SystemState {
+            pc: self
+                .post_state
+                .pc
+                .checked_add(WORD_SIZE as u32)
+                .ok_or(anyhow!("invalid pc in segment post state"))?,
+            merkle_root: match self.exit_code {
+                ExitCode::Halted(_) => self.pre_image.compute_root_hash()?,
+                _ => self.post_state.merkle_root.clone(),
+            },
+        };
+
+        Ok(ReceiptClaim {
+            pre: SystemState::from(&*self.pre_image).into(),
+            post: post_state.into(),
+            exit_code: self.exit_code,
+            input: Digest::ZERO,
+            output: self.output.clone().into(),
+        })
     }
 }
 

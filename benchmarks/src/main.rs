@@ -17,8 +17,6 @@
 use std::path::PathBuf;
 
 use clap::{Parser, Subcommand};
-#[cfg(any(feature = "metal", feature = "cuda"))]
-use risc0_benchmark::init_gpu_kernel;
 use risc0_benchmark::{benches::*, init_logging, run_jobs};
 
 #[derive(Parser)]
@@ -49,14 +47,10 @@ enum Command {
     Fibonacci,
     Membership,
     Sudoku,
-    Zeth,
 }
 
 fn main() {
     init_logging();
-
-    #[cfg(any(feature = "metal", feature = "cuda"))]
-    init_gpu_kernel();
 
     let cli = Cli::parse();
 
@@ -127,10 +121,5 @@ fn main() {
     if cli.command == Command::All || cli.command == Command::Sudoku {
         println!("Benchmarking sudoku");
         run_jobs::<sudoku::Job>(&cli.out, sudoku::new_jobs());
-    }
-
-    if cli.command == Command::All || cli.command == Command::Zeth {
-        println!("Benchmarking zeth");
-        run_jobs::<zeth::Job>(&cli.out, zeth::new_jobs());
     }
 }

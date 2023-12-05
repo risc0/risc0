@@ -4,7 +4,7 @@ sidebar_position: 3
 
 # STARK by Hand
 
-> When the RISC Zero [zkVM](../zkvm/zkvm_overview.md) executes, it generates a [receipt](https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Receipt.html) that allows third-parties to authenticate the validity of the execution.
+> When the RISC Zero [zkVM](/api/zkvm) executes, it generates a [receipt](https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Receipt.html) that allows third-parties to authenticate the validity of the execution.
 > The receipt contains a [zk-STARK](../reference-docs/about-starks.md) in the form of the [seal](https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.SegmentReceipt.html#structfield.seal).
 > The zk-STARK that lives on the receipt is the crux of RISC Zero's technology.
 
@@ -23,7 +23,7 @@ The [proof system sequence diagram](proof-system-sequence-diagram.md) describes 
 
 ## Lesson 1: The Execution Trace
 
-> When any code executes in the RISC Zero virtual machine, each step of that execution is recorded in an [`Execution Trace`](what_is_a_trace.md).
+> When any code executes in the RISC Zero virtual machine, each step of that execution is recorded in an [`Execution Trace`](./what_is_a_trace.md).
 
 We show a simplified example, computing 4 steps of a Fibonacci sequence modulo 97, using two user-specified inputs.
 

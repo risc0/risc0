@@ -17,7 +17,10 @@ use std::{collections::HashMap, env};
 use risc0_build::{embed_methods_with_options, DockerOptions, GuestOptions};
 
 fn main() {
-    env_logger::init();
+    tracing_subscriber::fmt()
+        .with_env_filter(tracing_subscriber::filter::EnvFilter::from_default_env())
+        .init();
+    ();
 
     if env::var("CARGO_CFG_TARGET_OS").unwrap().contains("zkvm") {
         // Guest shouldn't recursively depend on itself.
@@ -35,12 +38,18 @@ fn main() {
     };
 
     let map = HashMap::from([
-        ("risc0-zkvm-methods-guest", GuestOptions::default()),
+        (
+            "risc0-zkvm-methods-guest",
+            GuestOptions {
+                features: vec![],
+                use_docker,
+            },
+        ),
         (
             "risc0-zkvm-methods-std",
             GuestOptions {
                 features: vec!["test_feature1".to_string(), "test_feature2".to_string()],
-                use_docker,
+                use_docker: None,
             },
         ),
     ]);

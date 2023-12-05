@@ -14,12 +14,14 @@
 
 use std::path::{Path, PathBuf};
 
-use anyhow::Result;
-use risc0_binfmt::MemoryImage;
+use anyhow::{ensure, Result};
+use risc0_binfmt::{MemoryImage, Program};
+use risc0_zkvm_platform::{memory::GUEST_MAX_MEM, PAGE_SIZE};
 
 use super::{Executor, Prover, ProverOpts};
 use crate::{
-    host::api::AssetRequest, ApiClient, ExecutorEnv, Receipt, SessionInfo, VerifierContext,
+    host::api::AssetRequest, sha::Digestible, ApiClient, Binary, ExecutorEnv, Receipt, SessionInfo,
+    VerifierContext,
 };
 
 /// An implementation of a [Prover] that runs proof workloads via an external
@@ -47,12 +49,52 @@ impl Prover for ExternalProver {
         opts: &ProverOpts,
         image: MemoryImage,
     ) -> Result<Receipt> {
-        log::debug!("Launching {}", &self.r0vm_path.to_string_lossy());
+        tracing::debug!("Launching {}", &self.r0vm_path.to_string_lossy());
 
-        let image_id = image.compute_id();
+        let image_id = image.compute_id()?;
         let client = ApiClient::new_sub_process(&self.r0vm_path)?;
         let receipt = client.prove(&env, opts.clone(), image.into())?;
-        receipt.verify_with_context(ctx, image_id)?;
+        if opts.prove_guest_errors {
+            receipt.verify_integrity_with_context(ctx)?;
+            ensure!(
+                receipt.get_claim()?.pre.digest() == image_id,
+                "received unexpected image ID: expected {}, found {}",
+                hex::encode(&image_id),
+                hex::encode(&receipt.get_claim()?.pre.digest())
+            );
+        } else {
+            receipt.verify_with_context(ctx, image_id)?;
+        }
+
+        Ok(receipt)
+    }
+
+    fn prove_elf_with_ctx(
+        &self,
+        env: ExecutorEnv<'_>,
+        ctx: &VerifierContext,
+        elf: &[u8],
+        opts: &ProverOpts,
+    ) -> Result<Receipt> {
+        tracing::debug!("Launching {}", &self.r0vm_path.to_string_lossy());
+
+        let program = Program::load_elf(elf, GUEST_MAX_MEM as u32)?;
+        let image = MemoryImage::new(&program, PAGE_SIZE as u32)?;
+        let image_id = image.compute_id()?;
+        let client = ApiClient::new_sub_process(&self.r0vm_path)?;
+        let binary = Binary::new_elf_inline(elf.to_vec().into());
+        let receipt = client.prove(&env, opts.clone(), binary)?;
+        if opts.prove_guest_errors {
+            receipt.verify_integrity_with_context(ctx)?;
+            ensure!(
+                receipt.get_claim()?.pre.digest() == image_id,
+                "received unexpected image ID: expected {}, found {}",
+                hex::encode(&image_id),
+                hex::encode(&receipt.get_claim()?.pre.digest())
+            );
+        } else {
+            receipt.verify_with_context(ctx, image_id)?;
+        }
 
         Ok(receipt)
     }
@@ -67,5 +109,12 @@ impl Executor for ExternalProver {
         let client = ApiClient::new_sub_process(&self.r0vm_path)?;
         let segments_out = AssetRequest::Inline;
         client.execute(&env, image.into(), segments_out, |_, _| Ok(()))
+    }
+
+    fn execute_elf(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<SessionInfo> {
+        let binary = Binary::new_elf_inline(elf.to_vec().into());
+        let client = ApiClient::new_sub_process(&self.r0vm_path)?;
+        let segments_out = AssetRequest::Inline;
+        client.execute(&env, binary, segments_out, |_, _| Ok(()))
     }
 }

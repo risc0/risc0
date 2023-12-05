@@ -15,8 +15,8 @@
 use anyhow::{bail, Result};
 
 use crate::{
-    host::recursion::SuccinctReceipt, InnerReceipt, ProverServer, Receipt, Segment, SegmentReceipt,
-    Session, VerifierContext,
+    host::receipt::{InnerReceipt, SegmentReceipt, SuccinctReceipt},
+    ProverServer, Receipt, Segment, Session, VerifierContext,
 };
 
 /// An implementation of a [ProverServer] for development and testing purposes.
@@ -53,9 +53,10 @@ impl ProverServer for DevModeProver {
             )
         }
 
+        let claim = session.get_claim()?;
         Ok(Receipt::new(
-            InnerReceipt::Fake,
-            session.journal.bytes.clone(),
+            InnerReceipt::Fake { claim },
+            session.journal.clone().unwrap_or_default().bytes,
         ))
     }
 

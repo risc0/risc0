@@ -20,7 +20,6 @@
 
 pub(crate) mod executor;
 mod monitor;
-#[cfg(feature = "profiler")]
 pub(crate) mod profiler;
 pub(crate) mod syscall;
 #[cfg(test)]

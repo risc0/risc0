@@ -15,8 +15,8 @@
 use alloc::string::{String, ToString};
 use core::fmt::{Display, Formatter};
 
-#[derive(Clone, Debug, Eq, PartialEq)]
 /// Errors used by Serde
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub enum Error {
     /// A custom error
     Custom(String),

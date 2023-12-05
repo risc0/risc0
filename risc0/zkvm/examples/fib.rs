@@ -22,14 +22,13 @@ use risc0_zkvm_methods::FIB_ELF;
 use tracing_subscriber::{prelude::*, EnvFilter};
 
 #[derive(Parser)]
-#[command()]
 struct Args {
     /// Number of iterations.
     #[arg(short, long)]
     iterations: u32,
 
     /// Specify the hash function to use.
-    #[arg(short, long)]
+    #[arg(short = 'f', long)]
     hashfn: Option<String>,
 
     #[arg(short, long, default_value_t = false)]
@@ -79,8 +78,9 @@ fn top(prover: Rc<dyn ProverServer>, iterations: u32, skip_prover: bool) -> Metr
             .prove_session(&ctx, &session)
             .unwrap()
             .inner
-            .flat()
+            .composite()
             .unwrap()
+            .segments
             .iter()
             .fold(0, |acc, segment| acc + segment.get_seal_bytes().len())
     };

@@ -231,17 +231,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "num-derive"
-version = "0.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9e6a0fd4f737c707bd9086cc16c925f294943eb62eb71499e9fd4cf71f8b9f4e"
-dependencies = [
- "proc-macro2",
- "quote 1.0.29",
- "syn 2.0.26",
-]
-
-[[package]]
 name = "num-integer"
 version = "0.1.45"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -264,12 +253,18 @@ dependencies = [
 
 [[package]]
 name = "num-traits"
-version = "0.2.15"
+version = "0.2.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "578ede34cf02f8924ab9447f50c28075b4d3e5b269972345e7e0372b38c6cdcd"
+checksum = "39e3200413f237f41ab11ad6d161bc7239c84dcb631773ccd7de3dfe4b5c267c"
 dependencies = [
  "autocfg",
 ]
+
+[[package]]
+name = "once_cell"
+version = "1.18.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "dd8b5dd2ae5ed71462c540258bedcb51965123ad7e7ccf4b9a8cafaa4a63576d"
 
 [[package]]
 name = "paste"
@@ -285,9 +280,9 @@ checksum = "e0a7ae3ac2f1173085d398531c705756c94a4c56843785df85a60c1a0afac116"
 
 [[package]]
 name = "proc-macro2"
-version = "1.0.63"
+version = "1.0.69"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7b368fba921b0dce7e60f5e04ec15e565b3303972b42bcfde1d0713b881959eb"
+checksum = "134c189feb4956b20f6f547d2cf727d4c0fe06722b20a0eec87ed445a97f92da"
 dependencies = [
  "unicode-ident",
 ]
@@ -315,43 +310,19 @@ checksum = "ec0be4795e2f6a28069bec0b5ff3e2ac9bafc99e6a9a7dc3547996c5c816922c"
 
 [[package]]
 name = "risc0-binfmt"
-version = "0.19.0"
+version = "0.20.0-alpha.1"
 dependencies = [
  "anyhow",
  "elf",
- "log",
  "risc0-zkp",
  "risc0-zkvm-platform",
  "serde",
-]
-
-[[package]]
-name = "risc0-circuit-recursion"
-version = "0.19.0"
-dependencies = [
- "anyhow",
- "bytemuck",
- "log",
- "risc0-core",
- "risc0-zkp",
- "tracing",
-]
-
-[[package]]
-name = "risc0-circuit-rv32im"
-version = "0.19.0"
-dependencies = [
- "anyhow",
- "log",
- "risc0-core",
- "risc0-zkp",
- "risc0-zkvm-platform",
  "tracing",
 ]
 
 [[package]]
 name = "risc0-core"
-version = "0.19.0"
+version = "0.20.0-alpha.1"
 dependencies = [
  "bytemuck",
  "rand_core",
@@ -359,14 +330,13 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkp"
-version = "0.19.0"
+version = "0.20.0-alpha.1"
 dependencies = [
  "anyhow",
  "blake2",
  "bytemuck",
  "digest",
  "hex",
- "log",
  "paste",
  "rand_core",
  "risc0-core",
@@ -378,31 +348,25 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "0.19.0"
+version = "0.20.0-alpha.1"
 dependencies = [
  "anyhow",
  "bytemuck",
  "cfg-if",
  "getrandom",
  "hex",
- "log",
- "num-derive",
- "num-traits",
  "risc0-binfmt",
- "risc0-circuit-recursion",
- "risc0-circuit-rv32im",
  "risc0-core",
  "risc0-zkp",
  "risc0-zkvm-platform",
  "rrs-lib",
  "semver",
  "serde",
- "tracing",
 ]
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "0.19.0"
+version = "0.20.0-alpha.1"
 dependencies = [
  "bytemuck",
  "getrandom",
@@ -442,7 +406,7 @@ checksum = "389894603bd18c46fa56231694f8d827779c0951a667087194cf9de94ed24682"
 dependencies = [
  "proc-macro2",
  "quote 1.0.29",
- "syn 2.0.26",
+ "syn 2.0.39",
 ]
 
 [[package]]
@@ -492,9 +456,9 @@ dependencies = [
 
 [[package]]
 name = "syn"
-version = "2.0.26"
+version = "2.0.39"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "45c3457aacde3c65315de5031ec191ce46604304d2446e803d71ade03308d970"
+checksum = "23e78b90f2fcf45d3e842032ce32e3f2d1545ba6636271dcbf24fa306d87be7a"
 dependencies = [
  "proc-macro2",
  "quote 1.0.29",
@@ -517,6 +481,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8ce8c33a8d48bd45d624a6e523445fd21ec13d3653cd51f681abf67418f54eb8"
 dependencies = [
  "cfg-if",
+ "log",
  "pin-project-lite",
  "tracing-attributes",
  "tracing-core",
@@ -538,6 +503,9 @@ name = "tracing-core"
 version = "0.1.30"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "24eb03ba0eab1fd845050058ce5e616558e8f8d8fca633e6b163fe25c797213a"
+dependencies = [
+ "once_cell",
+]
 
 [[package]]
 name = "typenum"

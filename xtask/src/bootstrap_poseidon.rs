@@ -101,7 +101,7 @@ fn run_sage() -> String {
     let temp_dir = tempdir().unwrap();
 
     // Checkout the 'official' sagemath code
-    log::info!("Checking out hadeshash repo");
+    tracing::info!("Checking out hadeshash repo");
     let status = Command::new("git")
         .current_dir(temp_dir.path())
         .arg("clone")
@@ -117,7 +117,7 @@ fn run_sage() -> String {
     fs::create_dir_all(&sage_dir).unwrap();
 
     // Move the correct commit
-    log::info!("Setting commit");
+    tracing::info!("Setting commit");
     let status = Command::new("git")
         .current_dir(&sage_dir)
         .arg("checkout")
@@ -133,7 +133,7 @@ fn run_sage() -> String {
     fs::create_dir_all(&code_dir).unwrap();
 
     // Run sage math with the right parameters
-    log::info!("Running some math, please wait about 2 minutes");
+    tracing::info!("Running some math, please wait about 2 minutes");
     let sage_child = Command::new("sage")
         .current_dir(code_dir)
         .arg("generate_params_poseidon.sage")

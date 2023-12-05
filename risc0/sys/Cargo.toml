@@ -9,9 +9,14 @@ repository = { workspace = true }
 links = "risc0-sys"
 
 [build-dependencies]
+cc = "1.0"
 risc0-build-kernel = { workspace = true }
+
+[dependencies]
+cust = { version = "0.3", optional = true }
+sppark = { git = "https://github.com/supranational/sppark.git", rev = "17119848e21491244125d266b2d74f26be2514f0", optional = true }
 
 [features]
 default = []
-cuda = []
+cuda = ["dep:cust", "dep:sppark"]
 metal = []

@@ -82,7 +82,8 @@ impl Risc0Method {
         let elf = fs::read(&self.elf_path).unwrap();
         let program = Program::load_elf(&elf, memory::GUEST_MAX_MEM as u32).unwrap();
         let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
-        image.compute_id()
+        // TODO: Should we panic here?
+        image.compute_id().expect("Failed to compute image ID")
     }
 
     fn rust_def(&self) -> String {
@@ -479,13 +480,14 @@ fn detect_toolchain(name: &str) {
         eprintln!("The 'risc0' toolchain could not be found.");
         eprintln!("To install the risc0 toolchain, use cargo-risczero.");
         eprintln!("For example:");
-        eprintln!("  cargo install cargo-risczero");
+        eprintln!("  cargo binstall cargo-risczero");
         eprintln!("  cargo risczero install");
         std::process::exit(-1);
     }
 }
 
 /// Options for configuring a docker build environment.
+#[derive(Clone)]
 pub struct DockerOptions {
     /// Specify the root directory for docker builds.
     ///
