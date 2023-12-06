@@ -25,14 +25,13 @@ use serde::{Deserialize, Serialize};
 use self::{bonsai::BonsaiProver, external::ExternalProver};
 use crate::{is_dev_mode, ExecutorEnv, Receipt, SessionInfo, VerifierContext};
 
-/// A Prover can execute a given [MemoryImage] or ELF binary and produce a
+/// A Prover can execute a given ELF binary and produce a
 /// [Receipt] that can be used to verify correct computation.
 ///
 /// # Usage
-/// To produce a proof, you must minimally provide an [ExecutorEnv] and either
-/// an ELF binary or a [MemoryImage]. See the
-/// [risc0_build](https://docs.rs/risc0-build/latest/risc0_build/) crate for
-/// more information on producing ELF binaries from Rust source code.
+/// To produce a proof, you must minimally provide an [ExecutorEnv] and an ELF
+/// binary. See the [risc0_build](https://docs.rs/risc0-build/*/risc0_build)
+/// crate for more information on producing ELF binaries from Rust source code.
 ///
 /// ```rust
 /// use risc0_zkvm::{
@@ -71,7 +70,7 @@ pub trait Prover {
         )
     }
 
-    /// Prove zkVM execution starting from the specified [MemoryImage] with the
+    /// Prove zkVM execution starting from the specified ELF binary with the
     /// specified [VerifierContext] and [ProverOpts].
     fn prove_elf_with_ctx(
         &self,
@@ -82,7 +81,7 @@ pub trait Prover {
     ) -> Result<Receipt>;
 }
 
-/// An Executor can execute a given [MemoryImage] or ELF binary.
+/// An Executor can execute a given ELF binary.
 pub trait Executor {
     /// Execute the specified ELF binary.
     ///

@@ -67,10 +67,10 @@ pub use self::host::{
             Executor, Prover, ProverOpts,
         },
     },
-    compute_image_id,
 };
 #[cfg(not(target_os = "zkvm"))]
 pub use self::host::{
+    compute_image_id,
     control_id::POSEIDON_CONTROL_ID,
     groth16::{Groth16Proof, Groth16Seal},
     receipt::{

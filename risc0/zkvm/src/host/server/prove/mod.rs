@@ -44,7 +44,7 @@ use crate::{
     is_dev_mode, ExecutorEnv, ExecutorImpl, ProverOpts, Receipt, Segment, Session, VerifierContext,
 };
 
-/// A ProverServer can execute a given [MemoryImage] and produce a [Receipt]
+/// A ProverServer can execute a given ELF binary and produce a [Receipt]
 /// that can be used to verify correct computation.
 pub trait ProverServer {
     /// Prove the specified ELF binary.
@@ -52,7 +52,7 @@ pub trait ProverServer {
         self.prove_elf_with_ctx(env, &VerifierContext::default(), elf)
     }
 
-    /// Prove the specified [MemoryImage] using the specified [VerifierContext].
+    /// Prove the specified ELF binary using the specified [VerifierContext].
     fn prove_elf_with_ctx(
         &self,
         env: ExecutorEnv<'_>,
