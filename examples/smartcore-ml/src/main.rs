@@ -71,7 +71,7 @@ fn predict() -> Vec<u32> {
 
     // This initiates a session, runs the STARK prover on the resulting exection
     // trace, and produces a receipt.
-    let receipt = prover.prove_elf(env, ML_TEMPLATE_ELF).unwrap();
+    let receipt = prover.prove(env, ML_TEMPLATE_ELF).unwrap();
 
     // We read the result that the guest code committed to the journal. The
     // receipt can also be serialized and sent to a verifier.
@@ -159,7 +159,7 @@ mod test {
 
         // We run the executor and bypass the prover.
         let exec = default_executor();
-        let session = exec.execute_elf(env, ML_TEMPLATE_ELF).unwrap();
+        let session = exec.execute(env, ML_TEMPLATE_ELF).unwrap();
 
         // We read the result commited to the journal by the guest code.
         let result: Vec<f64> = session.journal.decode().unwrap();

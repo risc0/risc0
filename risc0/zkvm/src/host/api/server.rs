@@ -351,7 +351,7 @@ impl Server {
             let opts: ProverOpts = request.opts.ok_or(malformed_err())?.into();
             let prover = get_prover_server(&opts)?;
             let ctx = VerifierContext::default();
-            let receipt = prover.prove_elf_with_ctx(env, &ctx, &bytes)?;
+            let receipt = prover.prove_with_ctx(env, &ctx, &bytes)?;
 
             let receipt_pb: pb::core::Receipt = receipt.into();
             let receipt_bytes = receipt_pb.encode_to_vec();

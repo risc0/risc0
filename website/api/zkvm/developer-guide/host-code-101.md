@@ -36,7 +36,7 @@ use risc0_zkvm::{default_prover, ExecutorEnv};
 
 let env = ExecutorEnv::builder().build().unwrap();
 let prover = default_prover();
-let receipt = prover.prove_elf(env, METHOD_NAME_ELF).unwrap();
+let receipt = prover.prove(env, METHOD_NAME_ELF).unwrap();
 ```
 
 To see more complex examples, check out our [examples] folder on GitHub.
@@ -53,7 +53,7 @@ The standard workflow is for one party to generate a receipt and pass it to anot
 # use risc0_zkvm_methods::HELLO_COMMIT_ID as METHOD_NAME_ID;
 # let env = ExecutorEnv::builder().build().unwrap();
 # let prover = default_prover();
-# let receipt = prover.prove_elf(env, METHOD_NAME_ELF).unwrap();
+# let receipt = prover.prove(env, METHOD_NAME_ELF).unwrap();
 receipt.verify(METHOD_NAME_ID).unwrap();
 ```
 

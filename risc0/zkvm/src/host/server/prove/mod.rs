@@ -48,12 +48,12 @@ use crate::{
 /// that can be used to verify correct computation.
 pub trait ProverServer {
     /// Prove the specified ELF binary.
-    fn prove_elf(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<Receipt> {
-        self.prove_elf_with_ctx(env, &VerifierContext::default(), elf)
+    fn prove(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<Receipt> {
+        self.prove_with_ctx(env, &VerifierContext::default(), elf)
     }
 
     /// Prove the specified ELF binary using the specified [VerifierContext].
-    fn prove_elf_with_ctx(
+    fn prove_with_ctx(
         &self,
         env: ExecutorEnv<'_>,
         ctx: &VerifierContext,

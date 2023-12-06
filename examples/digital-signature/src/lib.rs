@@ -57,7 +57,7 @@ pub fn sign(pass_str: impl AsRef<[u8]>, msg_str: impl AsRef<[u8]>) -> Result<Sig
     let prover = default_prover();
 
     // Produce a receipt by proving the specified ELF binary.
-    let receipt = prover.prove_elf(env, SIGN_ELF)?;
+    let receipt = prover.prove(env, SIGN_ELF)?;
 
     Ok(SignatureWithReceipt { receipt })
 }

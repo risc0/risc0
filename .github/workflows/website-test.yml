@@ -35,8 +35,26 @@ jobs:
         with:
           version: nightly-34f684ddfacc5b2ed371353ba6f730c485616ffe
       - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
-      - name: build
-        run: cargo test -p doc-test --no-run
-      - name: test
-        run: cargo test -p doc-test
+
+      - name: build main
+        run: cargo test --release --no-run
+        working-directory: website/doc-test/main
+      - name: test main
+        run: cargo test --release
+        working-directory: website/doc-test/main
+
+      - name: build version-0.19
+        run: cargo test --release --no-run
+        working-directory: website/doc-test/version-0.19
+      - name: test version-0.19
+        run: cargo test --release
+        working-directory: website/doc-test/version-0.19
+
+      - name: build version-0.18
+        run: cargo test --release --no-run
+        working-directory: website/doc-test/version-0.18
+      - name: test version-0.18
+        run: cargo test --release
+        working-directory: website/doc-test/version-0.18
+
       - run: sccache --show-stats

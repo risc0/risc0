@@ -135,7 +135,7 @@ fn with_server<T, F: FnOnce() -> Result<T>>(addr: SocketAddr, f: F) -> T {
 }
 
 #[test]
-fn execute_elf() {
+fn execute() {
     let env = ExecutorEnv::builder()
         .write(&MultiTestSpec::DoNothing)
         .unwrap()
@@ -146,7 +146,7 @@ fn execute_elf() {
 }
 
 #[test]
-fn prove_elf() {
+fn prove() {
     let env = ExecutorEnv::builder()
         .write(&MultiTestSpec::DoNothing)
         .unwrap()
