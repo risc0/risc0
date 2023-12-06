@@ -29,6 +29,7 @@ members = [
   "xgboost",
   "zkevm-demo",
   "zkevm-demo/core",
+  "proof-composition,
 ]
 
 # Always optimize; otherwise tests take excessively long.
