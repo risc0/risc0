@@ -19,8 +19,7 @@ use std::{
 
 use anyhow::Context;
 use risc0_zkvm::{
-    default_executor, sha::Digest, ExecutorEnv, InnerReceipt, MaybePruned, MemoryImage, Program,
-    Receipt, ReceiptClaim, GUEST_MAX_MEM, PAGE_SIZE,
+    default_executor, sha::Digest, ExecutorEnv, InnerReceipt, MaybePruned, Receipt, ReceiptClaim,
 };
 use tokio::sync::mpsc;
 
@@ -64,8 +63,6 @@ impl ProverHandle {
     }
 }
 
-const ELF_MAGIC: [u8; 4] = [0x7f, 0x45, 0x4c, 0x46];
-
 pub(crate) struct Prover {
     pub(crate) receiver: mpsc::Receiver<ProverMessage>,
     pub(crate) storage: Arc<RwLock<BonsaiState>>,
@@ -85,14 +82,7 @@ impl Prover {
                 tracing::info!("Running task...");
                 let image = self.get_image(task).await?;
                 let input = self.get_input(task).await?;
-                let mem_img = image.as_slice();
-                let mem_img = if mem_img[0..ELF_MAGIC.len()] == ELF_MAGIC {
-                    tracing::info!("Loading guest image from ELF binary");
-                    let program = Program::load_elf(mem_img, GUEST_MAX_MEM as u32)?;
-                    MemoryImage::new(&program, PAGE_SIZE as u32)?
-                } else {
-                    bincode::deserialize(mem_img).context("failed to decode memory image")?
-                };
+                let elf = image.as_slice();
 
                 let env = ExecutorEnv::builder()
                     .write_slice(&input)
@@ -104,7 +94,7 @@ impl Prover {
                     })?;
                 let exec = default_executor();
                 let session = exec
-                    .execute(env, mem_img)
+                    .execute_elf(env, elf)
                     .context("Executor failed to generate a successful session")?;
 
                 let receipt = Receipt {

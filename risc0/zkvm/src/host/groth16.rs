@@ -84,7 +84,7 @@ impl Groth16Seal {
     const G2_GROUP_SIZE: usize = Self::ELEMENT_SIZE * 4;
     const SIZE: usize = Self::G1_GROUP_SIZE * 2 + Self::G2_GROUP_SIZE;
 
-    /// Serialize the Groth16 seal into Vec<u8>
+    /// Serialize the Groth16 seal into `Vec<u8>`
     pub fn to_vec(&self) -> Vec<u8> {
         let mut result = Vec::with_capacity(Self::SIZE);
 
@@ -108,7 +108,7 @@ impl Groth16Seal {
         result
     }
 
-    /// Method to convert back from Vec<u8>
+    /// Method to convert back from `Vec<u8>`
     pub fn from_vec(data: &[u8]) -> Result<Groth16Seal, Error> {
         if data.len() != Self::SIZE {
             bail!("Data length mismatch");

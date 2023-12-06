@@ -18,7 +18,10 @@
 #![feature(slice_flatten)]
 
 use risc0_benchmark_lib::Sudoku;
-use risc0_zkvm::{guest::env, sha, sha::Sha256};
+use risc0_zkvm::{
+    guest::env,
+    sha::{Impl, Sha256},
+};
 
 risc0_zkvm::guest::entry!(main);
 
@@ -27,10 +30,10 @@ pub fn main() {
 
     if !valid_solution(&puzzle) {
         panic!("invalid solution");
-    } else {
-        let solution_hash = sha::Impl::hash_bytes(&puzzle.0.flatten()).as_bytes();
-        env::commit(&solution_hash);
     }
+
+    let digest = Impl::hash_bytes(&puzzle.0.flatten());
+    env::commit(&digest);
 }
 
 fn valid_solution(sudoku: &Sudoku) -> bool {

@@ -19,8 +19,8 @@ use bytes::Bytes;
 use prost::Message;
 
 use super::{
-    malformed_err, pb, Asset, AssetRequest, Binary, ConnectionWrapper, Connector,
-    ParentProcessConnector, SessionInfo,
+    malformed_err, pb, Asset, AssetRequest, ConnectionWrapper, Connector, ParentProcessConnector,
+    SessionInfo,
 };
 use crate::{
     get_version,
@@ -67,13 +67,8 @@ impl Client {
         Self { connector }
     }
 
-    /// Prove the specified [Binary].
-    pub fn prove(
-        &self,
-        env: &ExecutorEnv<'_>,
-        opts: ProverOpts,
-        binary: Binary,
-    ) -> Result<Receipt> {
+    /// Prove the specified ELF binary.
+    pub fn prove(&self, env: &ExecutorEnv<'_>, opts: ProverOpts, binary: Asset) -> Result<Receipt> {
         let mut conn = self.connect()?;
 
         let request = pb::api::ServerRequest {
@@ -101,11 +96,11 @@ impl Client {
         receipt_pb.try_into()
     }
 
-    /// Execute the specified [Binary].
+    /// Execute the specified ELF binary.
     pub fn execute<F>(
         &self,
         env: &ExecutorEnv<'_>,
-        binary: Binary,
+        binary: Asset,
         segments_out: AssetRequest,
         segment_callback: F,
     ) -> Result<SessionInfo>
@@ -331,7 +326,7 @@ impl Client {
     fn make_execute_env(
         &self,
         env: &ExecutorEnv<'_>,
-        binary: pb::api::Binary,
+        binary: pb::api::Asset,
     ) -> pb::api::ExecutorEnv {
         pb::api::ExecutorEnv {
             binary: Some(binary),
