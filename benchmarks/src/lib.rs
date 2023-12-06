@@ -97,30 +97,6 @@ impl MetricsAverage {
     }
 }
 
-pub trait BenchmarkAverage {
-    const NAME: &'static str;
-    type Spec;
-
-    fn job_size(spec: &Self::Spec) -> u32;
-
-    fn new(spec: Self::Spec) -> Self;
-
-    fn spec(&self) -> &Self::Spec;
-    fn guest_compute(&mut self) -> Duration;
-
-    fn run(&mut self) -> MetricsAverage {
-        let mut metrics =
-            MetricsAverage::new(String::from(Self::NAME), Self::job_size(self.spec()));
-
-        metrics.total_duration = self.guest_compute();
-
-        metrics.average_duration = metrics.total_duration / metrics.job_size;
-        metrics.ops_sec = metrics.job_size as f64 / metrics.total_duration.as_secs_f64();
-
-        metrics
-    }
-}
-
 pub struct Job {
     name: String,
     elf: Vec<u8>,
