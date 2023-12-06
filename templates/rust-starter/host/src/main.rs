@@ -8,7 +8,6 @@ fn main() {
     tracing_subscriber::fmt()
         .with_env_filter(tracing_subscriber::filter::EnvFilter::from_default_env())
         .init();
-    ();
 
     // An executor environment describes the configurations for the zkVM
     // including program inputs.
