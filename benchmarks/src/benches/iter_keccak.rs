@@ -29,4 +29,3 @@ pub fn new_jobs() -> Vec<Job> {
     }
     jobs
 }
-
