@@ -11,6 +11,7 @@ serde = "1.0"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [features]
-default = []
 cuda = ["risc0-zkvm/cuda"]
+default = []
+metal = ["risc0-zkvm/metal"]
 prove = ["risc0-zkvm/prove"]
