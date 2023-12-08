@@ -19,7 +19,6 @@ pragma solidity ^0.8.13;
 import {GovernorCountingSimple} from "openzeppelin/contracts/governance/extensions/GovernorCountingSimple.sol";
 import {IGovernor} from "openzeppelin/contracts/governance/IGovernor.sol";
 import {ECDSA} from "openzeppelin/contracts/utils/cryptography/ECDSA.sol";
-import {SafeMath} from "openzeppelin/contracts/utils/math/SafeMath.sol";
 
 import {Vm} from "forge-std/Vm.sol";
 import {Test} from "forge-std/Test.sol";
@@ -124,7 +123,6 @@ struct VoteCounts {
 }
 
 contract Scenario {
-    using SafeMath for uint256;
     using VoteLib for Vote;
 
     IBonsaiGovernor internal gov;
@@ -157,14 +155,13 @@ contract Scenario {
     }
 
     function castVotes(uint256 proposalId) public {
-        for (uint256 i = 0; i < votes.length; i = i.add(1)) {
+        for (uint256 i = 0; i < votes.length; i = i + 1) {
             votes[i].cast(proposalId);
         }
     }
 }
 
 abstract contract GovernorTest is Test {
-    using SafeMath for uint256;
     using VoteLib for Vote;
 
     event ProposalCallbackCalled();
@@ -270,7 +267,6 @@ abstract contract BaselineGovernorTest is GovernorTest {
 }
 
 abstract contract BonsaiGovernorTest is GovernorTest, BonsaiTest {
-    using SafeMath for uint256;
     using BytesLib for bytes;
     using VoteLib for Vote;
 
@@ -329,7 +325,7 @@ abstract contract BonsaiGovernorTest is GovernorTest, BonsaiTest {
 
         // Retrieve the recorded events. Note that this consumes them.
         Vm.Log[] memory entries = vm.getRecordedLogs();
-        for (uint256 i = 0; i < entries.length; i = i.add(1)) {
+        for (uint256 i = 0; i < entries.length; i = i + 1) {
             Vm.Log memory entry = entries[i];
             if (entry.topics[0] != CommittedBallot.selector) {
                 continue;
@@ -360,7 +356,7 @@ abstract contract BonsaiGovernorTest is GovernorTest, BonsaiTest {
         box.commit = bytes32(proposalId);
 
         // Iterate over chunks of 100-bytes and decode the input ballots.
-        for (uint256 offset = 32; offset < guestInput.length; offset = offset.add(100)) {
+        for (uint256 offset = 32; offset < guestInput.length; offset = offset + 100) {
             bytes memory encodedBallot = guestInput.slice(offset, 100);
 
             // Decode the custom encoding format for ballots.
@@ -397,15 +393,15 @@ abstract contract BonsaiGovernorTest is GovernorTest, BonsaiTest {
             box.support[voter] = support;
         }
 
-        bytes memory encodedBallots = new bytes(box.voters.length.mul(24));
-        for (uint256 i = 0; i < box.voters.length; i = i.add(1)) {
+        bytes memory encodedBallots = new bytes(box.voters.length * 24);
+        for (uint256 i = 0; i < box.voters.length; i = i + 1) {
             address voter = box.voters[i];
             uint8 support = box.support[voter];
 
             // Encode the address and support to 24 bytes and then copy it into the encoded array.
             bytes24 ballot = bytes24((uint192(support) << 160) | uint192(uint160(voter)));
-            uint256 offset = i.mul(24);
-            for (uint256 j = 0; j < 24; j = j.add(1)) {
+            uint256 offset = i * 24;
+            for (uint256 j = 0; j < 24; j = j + 1) {
                 encodedBallots[offset + j] = ballot[j];
             }
         }
@@ -545,8 +541,6 @@ abstract contract NoQuorumScenario is GovernorTest {
 }
 
 abstract contract BenchScenario is GovernorTest {
-    using SafeMath for uint256;
-
     uint256 internal voteCount;
 
     constructor(uint256 voteCount_) {
@@ -557,7 +551,7 @@ abstract contract BenchScenario is GovernorTest {
         scene = new Scenario(gov, token, true, VoteCounts(uint256(0), uint256(10) * voteCount, uint256(0)));
 
         Voter voter;
-        for (uint256 i = 0; i < voteCount; i = i.add(1)) {
+        for (uint256 i = 0; i < voteCount; i = i + 1) {
             voter = scene.addVoter(true, 10);
             scene.addVote(voter, true, GovernorCountingSimple.VoteType.For);
         }
