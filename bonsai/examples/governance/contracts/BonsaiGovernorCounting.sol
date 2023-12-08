@@ -22,7 +22,6 @@ import {Governor} from "openzeppelin/contracts/governance/Governor.sol";
  * @dev Implementation of of vote counting for the BonsaiGovernor, based on GovernorCountingSimple.
  */
 abstract contract BonsaiGovernorCounting is Governor {
-
     /// @notice Emitted when a ballot is committed to the ballot box.
     /// @param encoded ballot encoded as bytes exactly as included in the hash.
     event CommittedBallot(uint256 indexed proposalId, bytes encoded);
