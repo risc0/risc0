@@ -15,12 +15,13 @@
 #![no_main]
 
 use risc0_zkp::core::hash::blake2b::{Blake2b, Blake2bCpuImpl};
-use risc0_zkvm::guest::env;
+use risc0_zkvm::{guest::env, sha::Digest};
 
 risc0_zkvm::entry!(main);
 
 pub fn main() {
     let data: Vec<u8> = env::read();
     let hash = Blake2bCpuImpl::blake2b(&data);
-    env::commit(&hash)
+    let digest: Digest = hash.into();
+    env::commit(&digest)
 }

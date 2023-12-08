@@ -17,7 +17,8 @@
 use std::path::PathBuf;
 
 use clap::{Parser, Subcommand};
-use risc0_benchmark::{benches::*, init_logging, run_jobs};
+use enum_iterator::Sequence;
+use risc0_benchmark::{benches::*, init_logging, run_jobs, Job};
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
@@ -30,96 +31,52 @@ struct Cli {
     command: Command,
 }
 
-#[derive(Eq, PartialEq, Subcommand)]
+#[derive(Eq, PartialEq, Subcommand, Sequence)]
 enum Command {
     All,
-    BigSha2,
     BigBlake2b,
     BigBlake3,
     BigKeccak,
-    IterSha2,
-    IterKeccak,
-    IterBlake2b,
-    IterBlake3,
-    // IterPedersen,
+    BigSha2,
     EcdsaVerify,
     Ed25519Verify,
     Fibonacci,
+    IterBlake2b,
+    IterBlake3,
+    IterKeccak,
+    IterSha2,
     Membership,
     Sudoku,
+}
+
+impl Command {
+    fn get_jobs(&self) -> Vec<Job> {
+        match self {
+            Command::All => enum_iterator::all::<Command>()
+                .skip_while(|x| *x == Command::All)
+                .flat_map(|x| x.get_jobs())
+                .collect(),
+            Command::BigBlake2b => big_blake2b::new_jobs(),
+            Command::BigBlake3 => big_blake3::new_jobs(),
+            Command::BigKeccak => big_keccak::new_jobs(),
+            Command::BigSha2 => big_sha2::new_jobs(),
+            Command::EcdsaVerify => ecdsa_verify::new_jobs(),
+            Command::Ed25519Verify => ed25519_verify::new_jobs(),
+            Command::Fibonacci => fibonacci::new_jobs(),
+            Command::IterBlake2b => iter_blake2b::new_jobs(),
+            Command::IterBlake3 => iter_blake3::new_jobs(),
+            Command::IterKeccak => iter_keccak::new_jobs(),
+            Command::IterSha2 => iter_sha2::new_jobs(),
+            Command::Membership => membership::new_jobs(),
+            Command::Sudoku => sudoku::new_jobs(),
+        }
+    }
 }
 
 fn main() {
     init_logging();
 
     let cli = Cli::parse();
-
-    if cli.command == Command::All || cli.command == Command::BigSha2 {
-        println!("Benchmarking big-sha2");
-        run_jobs::<big_sha2::Job>(&cli.out, big_sha2::new_jobs());
-    }
-
-    if cli.command == Command::All || cli.command == Command::BigKeccak {
-        println!("Benchmarking big-keccak");
-        run_jobs::<big_keccak::Job>(&cli.out, big_keccak::new_jobs());
-    }
-
-    if cli.command == Command::All || cli.command == Command::BigBlake2b {
-        println!("Benchmarking big-blake2b");
-        run_jobs::<big_blake2b::Job>(&cli.out, big_blake2b::new_jobs());
-    }
-
-    if cli.command == Command::All || cli.command == Command::BigBlake3 {
-        println!("Benchmarking big-blake3");
-        run_jobs::<big_blake3::Job>(&cli.out, big_blake3::new_jobs());
-    }
-
-    if cli.command == Command::All || cli.command == Command::IterSha2 {
-        println!("Benchmarking iter-sha2");
-        run_jobs::<iter_sha2::Job>(&cli.out, iter_sha2::new_jobs());
-    }
-
-    if cli.command == Command::All || cli.command == Command::IterKeccak {
-        println!("Benchmarking iter-keccak");
-        run_jobs::<iter_keccak::Job>(&cli.out, iter_keccak::new_jobs());
-    }
-
-    if cli.command == Command::All || cli.command == Command::IterBlake2b {
-        println!("Benchmarking iter-blake2b");
-        run_jobs::<iter_blake2b::Job>(&cli.out, iter_blake2b::new_jobs());
-    }
-
-    if cli.command == Command::All || cli.command == Command::IterBlake3 {
-        println!("Benchmarking iter-blake3");
-        run_jobs::<iter_blake3::Job>(&cli.out, iter_blake3::new_jobs());
-    }
-
-    // if cli.command == Command::All || cli.command == Command::IterPedersen {
-    //     run_jobs::<iter_pedersen::Job>(&cli.out, iter_pedersen::new_jobs());
-    // }
-
-    if cli.command == Command::All || cli.command == Command::EcdsaVerify {
-        println!("Benchmarking ecdsa-verify");
-        run_jobs::<ecdsa_verify::Job>(&cli.out, ecdsa_verify::new_jobs());
-    }
-
-    if cli.command == Command::All || cli.command == Command::Ed25519Verify {
-        println!("Benchmarking ed25519-verify");
-        run_jobs::<ed25519_verify::Job>(&cli.out, ed25519_verify::new_jobs());
-    }
-
-    if cli.command == Command::All || cli.command == Command::Fibonacci {
-        println!("Benchmarking fibonacci");
-        run_jobs::<fibonacci::Job>(&cli.out, fibonacci::new_jobs());
-    }
-
-    if cli.command == Command::All || cli.command == Command::Membership {
-        println!("Benchmarking membership");
-        run_jobs::<membership::Job>(&cli.out, membership::new_jobs());
-    }
-
-    if cli.command == Command::All || cli.command == Command::Sudoku {
-        println!("Benchmarking sudoku");
-        run_jobs::<sudoku::Job>(&cli.out, sudoku::new_jobs());
-    }
+    let jobs = cli.command.get_jobs();
+    run_jobs(&cli.out, jobs);
 }

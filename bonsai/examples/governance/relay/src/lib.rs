@@ -17,9 +17,7 @@ use std::time::Duration;
 use anyhow::{anyhow, bail, Context, Result};
 use bonsai_sdk::alpha::{responses::SnarkReceipt, Client};
 use risc0_build::GuestListEntry;
-use risc0_zkvm::{
-    default_executor, ExecutorEnv, MemoryImage, Program, Receipt, GUEST_MAX_MEM, PAGE_SIZE,
-};
+use risc0_zkvm::{compute_image_id, default_executor, ExecutorEnv, Receipt};
 
 pub const POLL_INTERVAL_SEC: u64 = 4;
 
@@ -44,9 +42,7 @@ pub fn execute_locally(elf: &[u8], input: Vec<u8>) -> Result<Output> {
 }
 
 fn get_digest(elf: &[u8]) -> Result<String> {
-    let program = Program::load_elf(elf, GUEST_MAX_MEM as u32)?;
-    let image = MemoryImage::new(&program, PAGE_SIZE as u32)?;
-    Ok(hex::encode(image.compute_id()?))
+    Ok(hex::encode(compute_image_id(elf)?))
 }
 
 pub fn prove_alpha(elf: &[u8], input: Vec<u8>) -> Result<Output> {
