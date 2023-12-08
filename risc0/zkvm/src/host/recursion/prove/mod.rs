@@ -229,10 +229,12 @@ pub struct Prover {
 
 #[cfg(feature = "cuda")]
 mod cuda {
-    pub use risc0_circuit_recursion::cuda::{CudaCircuitHalPoseidon, CudaCircuitHalSha256};
+    pub use risc0_circuit_recursion::cuda::{
+        CudaCircuitHalPoseidon, CudaCircuitHalPoseidon2, CudaCircuitHalSha256,
+    };
     pub use risc0_zkp::{
         core::hash::poseidon_254::Poseidon254HashSuite,
-        hal::cuda::{CudaHalPoseidon, CudaHalSha256},
+        hal::cuda::{CudaHalPoseidon, CudaHalPoseidon2, CudaHalSha256},
     };
 
     use super::{BabyBear, CircuitImpl, CpuCircuitHal, CpuHal, HalPair, Rc, CIRCUIT};
@@ -249,6 +251,12 @@ mod cuda {
         HalPair { hal, circuit_hal }
     }
 
+    pub fn poseidon2_hal_pair() -> HalPair<CudaHalPoseidon, CudaCircuitHalPoseidon2> {
+        let hal = Rc::new(CudaHalPoseidon2::new());
+        let circuit_hal = Rc::new(CudaCircuitHalPoseidon2::new(hal.clone()));
+        HalPair { hal, circuit_hal }
+    }
+
     pub fn poseidon254_hal_pair() -> HalPair<CpuHal<BabyBear>, CpuCircuitHal<'static, CircuitImpl>>
     {
         let hal = Rc::new(CpuHal::new(Poseidon254HashSuite::new_suite()));
@@ -262,7 +270,10 @@ mod metal {
     pub use risc0_circuit_recursion::metal::MetalCircuitHal;
     pub use risc0_zkp::{
         core::hash::poseidon_254::Poseidon254HashSuite,
-        hal::metal::{MetalHalPoseidon, MetalHalSha256, MetalHashPoseidon, MetalHashSha256},
+        hal::metal::{
+            MetalHalPoseidon, MetalHalPoseidon2, MetalHalSha256, MetalHashPoseidon,
+            MetalHashPoseidon2, MetalHashSha256,
+        },
     };
 
     use super::{BabyBear, CircuitImpl, CpuCircuitHal, CpuHal, HalPair, Rc, CIRCUIT};
@@ -276,6 +287,12 @@ mod metal {
     pub fn poseidon_hal_pair() -> HalPair<MetalHalPoseidon, MetalCircuitHal<MetalHashPoseidon>> {
         let hal = Rc::new(MetalHalPoseidon::new());
         let circuit_hal = Rc::new(MetalCircuitHal::<MetalHashPoseidon>::new(hal.clone()));
+        HalPair { hal, circuit_hal }
+    }
+
+    pub fn poseidon2_hal_pair() -> HalPair<MetalHalPoseidon2, MetalCircuitHal<MetalHashPoseidon2>> {
+        let hal = Rc::new(MetalHalPoseidon2::new());
+        let circuit_hal = Rc::new(MetalCircuitHal::<MetalHashPoseidon2>::new(hal.clone()));
         HalPair { hal, circuit_hal }
     }
 
@@ -309,6 +326,13 @@ mod cpu {
     }
 
     #[allow(dead_code)]
+    pub fn poseidon2_hal_pair() -> HalPair<CpuHal<BabyBear>, CpuCircuitHal<'static, CircuitImpl>> {
+        let hal = Rc::new(CpuHal::new(Poseidon2HashSuite::new_suite()));
+        let circuit_hal = Rc::new(CpuCircuitHal::new(&CIRCUIT));
+        HalPair { hal, circuit_hal }
+    }
+
+    #[allow(dead_code)]
     pub fn poseidon254_hal_pair() -> HalPair<CpuHal<BabyBear>, CpuCircuitHal<'static, CircuitImpl>>
     {
         let hal = Rc::new(CpuHal::new(Poseidon254HashSuite::new_suite()));
@@ -333,6 +357,12 @@ cfg_if::cfg_if! {
 
         /// TODO
         #[allow(dead_code)]
+        pub fn poseidon2_hal_pair() -> HalPair<cuda::CudaHalPoseidon2, cuda::CudaCircuitHalPoseidon2> {
+            cuda::poseidon2_hal_pair()
+        }
+
+        /// TODO
+        #[allow(dead_code)]
         pub fn poseidon254_hal_pair() -> HalPair<CpuHal<BabyBear>, CpuCircuitHal<'static, CircuitImpl>> {
             cuda::poseidon254_hal_pair()
         }
@@ -351,6 +381,12 @@ cfg_if::cfg_if! {
 
         /// TODO
         #[allow(dead_code)]
+        pub fn poseidon2_hal_pair() -> HalPair<metal::MetalHalPoseidon2, metal::MetalCircuitHal<metal::MetalHashPoseidon2>> {
+            metal::poseidon2_hal_pair()
+        }
+
+        /// TODO
+        #[allow(dead_code)]
         pub fn poseidon254_hal_pair() -> HalPair<CpuHal<BabyBear>, CpuCircuitHal<'static, CircuitImpl>> {
             metal::poseidon254_hal_pair()
         }
@@ -365,6 +401,12 @@ cfg_if::cfg_if! {
         #[allow(dead_code)]
         pub fn poseidon_hal_pair() -> HalPair<CpuHal<BabyBear>, CpuCircuitHal<'static, CircuitImpl>> {
             cpu::poseidon_hal_pair()
+        }
+
+        /// TODO
+        #[allow(dead_code)]
+        pub fn poseidon2_hal_pair() -> HalPair<CpuHal<BabyBear>, CpuCircuitHal<'static, CircuitImpl>> {
+            cpu::poseidon2_hal_pair()
         }
 
         /// TODO
