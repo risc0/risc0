@@ -27,7 +27,7 @@ use risc0_zkp::core::hash::sha::testutil::test_sha_impl;
 use risc0_zkvm::{
     guest::{env, memory_barrier, sha},
     sha::{Digest, Sha256},
-    ReceiptMetadata,
+    ReceiptClaim,
 };
 use risc0_zkvm_methods::multi_test::{MultiTestSpec, SYS_MULTI_TEST};
 use risc0_zkvm_platform::{
@@ -175,9 +175,9 @@ pub fn main() {
         MultiTestSpec::SysVerify { image_id, journal } => {
             env::verify(image_id, &journal).unwrap();
         }
-        MultiTestSpec::SysVerifyIntegrity { metadata_words } => {
-            let meta: ReceiptMetadata = risc0_zkvm::serde::from_slice(&metadata_words).unwrap();
-            env::verify_integrity(&meta).unwrap();
+        MultiTestSpec::SysVerifyIntegrity { claim_words } => {
+            let claim: ReceiptClaim = risc0_zkvm::serde::from_slice(&claim_words).unwrap();
+            env::verify_integrity(&claim).unwrap();
         }
         MultiTestSpec::EchoStdout { nbytes, fd } => {
             // Unaligned buffer size to exercise things a little bit.

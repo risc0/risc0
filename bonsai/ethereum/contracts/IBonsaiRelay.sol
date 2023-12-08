@@ -22,7 +22,7 @@ struct CallbackAuthorization {
     bytes seal;
     /// @notice Digest of the zkVM SystemState after execution.
     /// @dev The relay does not additionally check any property of this digest, but needs the
-    /// digest in order to reconstruct the ReceiptMetadata hash to which the proof is linked.
+    /// digest in order to reconstruct the ReceiptClaim hash to which the proof is linked.
     bytes32 postStateDigest;
 }
 

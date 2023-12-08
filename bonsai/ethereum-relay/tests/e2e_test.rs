@@ -31,7 +31,7 @@ use bonsai_sdk::{
 };
 use ethers::prelude::*;
 use ethers::types::{Bytes, H256 as ethers_H256, U256};
-use risc0_zkvm::{MemoryImage, Program, GUEST_MAX_MEM, PAGE_SIZE};
+use risc0_zkvm::compute_image_id;
 use risc0_zkvm_methods::{SLICE_IO_ELF, SLICE_IO_ID};
 use tokio::time::{sleep, Duration};
 
@@ -155,15 +155,14 @@ async fn e2e_test_counter() {
     let bonsai_client = get_bonsai_client(get_api_key()).await;
     // create the memoryImg, upload it and return the imageId
     let image_key = {
-        let program =
-            Program::load_elf(SLICE_IO_ELF, GUEST_MAX_MEM as u32).expect("unable to load elf");
-        let image =
-            MemoryImage::new(&program, PAGE_SIZE as u32).expect("unable to create memory image");
-        let image_id = hex::encode(image.compute_id().unwrap());
-        let image = bincode::serialize(&image).expect("Failed to serialize memory img");
-        upload_img(bonsai_client.clone(), image_id.clone(), image)
-            .await
-            .expect("unable to upload result");
+        let image_id = hex::encode(compute_image_id(SLICE_IO_ELF).unwrap());
+        upload_img(
+            bonsai_client.clone(),
+            image_id.clone(),
+            SLICE_IO_ELF.to_vec(),
+        )
+        .await
+        .expect("unable to upload result");
         image_id
     };
     dbg!(&image_key);
@@ -299,15 +298,14 @@ async fn e2e_test_counter_publish_mode() {
     // register elf
     let bonsai_client = get_bonsai_client(get_api_key()).await;
     // create the memoryImg, upload it and return the imageId
-    let program =
-        Program::load_elf(SLICE_IO_ELF, GUEST_MAX_MEM as u32).expect("unable to load elf");
-    let image =
-        MemoryImage::new(&program, PAGE_SIZE as u32).expect("unable to create memory image");
-    let image_id = hex::encode(image.compute_id().unwrap());
-    let image = bincode::serialize(&image).expect("Failed to serialize memory img");
-    upload_img(bonsai_client.clone(), image_id.clone(), image)
-        .await
-        .expect("unable to upload result");
+    let image_id = hex::encode(compute_image_id(SLICE_IO_ELF).unwrap());
+    upload_img(
+        bonsai_client.clone(),
+        image_id.clone(),
+        SLICE_IO_ELF.to_vec(),
+    )
+    .await
+    .expect("unable to upload result");
 
     // Since we are using the True Elf, the first 4 bytes need to be the length
     // of the slice (in little endian)

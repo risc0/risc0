@@ -12,7 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use anyhow::{bail, Result};
+use anyhow::{anyhow, bail, Context, Result};
+use hex::FromHex;
 use risc0_circuit_recursion::REGISTER_GROUP_CODE;
 use risc0_zkp::{
     adapter::TapsProvider, core::digest::Digest, field::baby_bear::BabyBearElem, MAX_CYCLES_PO2,
@@ -31,7 +32,15 @@ fn get_zkr(name: &str) -> Result<(Program, Digest)> {
             code: u32s.iter().cloned().map(BabyBearElem::from).collect(),
             code_size,
         },
-        risc0_circuit_recursion::zkr::get_control_id(name)?,
+        risc0_circuit_recursion::control_id::RECURSION_CONTROL_IDS
+            .iter()
+            .copied()
+            .find_map(|(n, id)| {
+                (n == name)
+                    .then_some(id)
+                    .map(|hex| Digest::from_hex(hex).context("malformed entry in control id list"))
+            })
+            .ok_or(anyhow!("failed to find {name} in the list of control IDs"))??,
     ))
 }
 
@@ -49,6 +58,10 @@ pub fn lift(po2: usize) -> Result<(Program, Digest)> {
 
 pub fn join() -> Result<(Program, Digest)> {
     get_zkr("join.zkr")
+}
+
+pub fn resolve() -> Result<(Program, Digest)> {
+    get_zkr("resolve.zkr")
 }
 
 pub fn identity() -> Result<(Program, Digest)> {
