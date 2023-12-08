@@ -108,7 +108,7 @@ message IdentityP254Result {
 }
 
 message ExecutorEnv {
-  Binary binary = 1;
+  Asset binary = 1;
   map<string, string> env_vars = 2;
   repeated string slice_ios = 3;
   repeated uint32 read_fds = 4;
@@ -119,17 +119,6 @@ message ExecutorEnv {
   // When present, trace events will be sent back to the client.
   google.protobuf.Empty trace_events = 9;
   string pprof_out = 10;
-}
-
-message Binary {
-  enum Kind {
-    UNSPECIFIED = 0;
-    IMAGE = 1;
-    ELF = 2;
-  }
-
-  Kind kind = 1;
-  Asset asset = 2;
 }
 
 message ProverOpts {

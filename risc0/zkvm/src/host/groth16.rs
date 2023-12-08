@@ -84,7 +84,7 @@ impl Groth16Seal {
     const G2_GROUP_SIZE: usize = Self::ELEMENT_SIZE * 4;
     const SIZE: usize = Self::G1_GROUP_SIZE * 2 + Self::G2_GROUP_SIZE;
 
-    /// Serialize the Groth16 seal into Vec<u8>
+    /// Serialize the Groth16 seal into `Vec<u8>`
     pub fn to_vec(&self) -> Vec<u8> {
         let mut result = Vec::with_capacity(Self::SIZE);
 
@@ -108,7 +108,7 @@ impl Groth16Seal {
         result
     }
 
-    /// Method to convert back from Vec<u8>
+    /// Method to convert back from `Vec<u8>`
     pub fn from_vec(data: &[u8]) -> Result<Groth16Seal, Error> {
         if data.len() != Self::SIZE {
             bail!("Data length mismatch");
@@ -154,9 +154,9 @@ pub struct Groth16Proof {
 }
 
 impl Groth16Proof {
-    /// Creates a Groth16 instance from a `Groth16Seal` and the metadata digest
+    /// Creates a Groth16 instance from a `Groth16Seal` and the claim digest
     /// of the original RISC Zero receipt
-    pub fn from_seal(groth16_seal: &Groth16Seal, receipt_meta: Digest) -> Result<Self, Error> {
+    pub fn from_seal(groth16_seal: &Groth16Seal, receipt_claim: Digest) -> Result<Self, Error> {
         let mut pvk_bytes = Vec::new();
         let public_key_verification = Self::pvk()?;
         public_key_verification
@@ -176,7 +176,7 @@ impl Groth16Proof {
         let mut prepared_inputs_bytes = Vec::new();
         let (c1, c2) =
             split_digest(Digest::from_hex(ALLOWED_IDS_ROOT).map_err(|err| anyhow!(err))?)?;
-        let (m1, m2) = split_digest(receipt_meta)?;
+        let (m1, m2) = split_digest(receipt_claim)?;
         let public_inputs = vec![c2, c1, m2, m1];
         let prepared_inputs =
             ark_Groth16::<Bn254>::prepare_inputs(&public_key_verification, &public_inputs)
@@ -319,7 +319,7 @@ fn split_digest(d: Digest) -> Result<(Fr, Fr), Error> {
 
 #[cfg(test)]
 mod tests {
-    const RISC0_RECEIPT_META_DIGEST: &str =
+    const RISC0_RECEIPT_CLAIM_DIGEST: &str =
         "ff2b40ef5fc5f4a7dac43eb214d61dcf6665f7bedb6cfda244808318e066f656";
 
     const RISC0_GROTH16_SEAL: &str = r#"
@@ -342,7 +342,7 @@ mod tests {
     fn test_from_seal() {
         let seal: Groth16Seal = serde_json::from_str(RISC0_GROTH16_SEAL).unwrap();
         let groth16 =
-            Groth16Proof::from_seal(&seal, Digest::from_hex(RISC0_RECEIPT_META_DIGEST).unwrap())
+            Groth16Proof::from_seal(&seal, Digest::from_hex(RISC0_RECEIPT_CLAIM_DIGEST).unwrap())
                 .unwrap();
         groth16.verify().unwrap();
     }

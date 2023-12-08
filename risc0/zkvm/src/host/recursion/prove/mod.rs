@@ -47,10 +47,10 @@ use serde::{Deserialize, Serialize};
 pub use self::program::Program;
 use super::CIRCUIT;
 use crate::{
-    receipt_metadata::{Merge, Output},
+    receipt_claim::{Merge, Output},
     recursion::{valid_control_ids, SuccinctReceipt},
     sha::Digestible,
-    HalPair, ReceiptMetadata, SegmentReceipt, POSEIDON_CONTROL_ID,
+    HalPair, ReceiptClaim, SegmentReceipt, POSEIDON_CONTROL_ID,
 };
 
 // TODO: Automatically generate these constants from the circuit somehow without
@@ -79,20 +79,17 @@ pub struct RecursionReceipt {
 /// constant-time verification procedure, with respect to the original segment length, and is then
 /// used as the input to all other recursion programs (e.g. join, resolve, and identity_p254).
 pub fn lift(segment_receipt: &SegmentReceipt) -> Result<SuccinctReceipt> {
-    tracing::debug!("Proving lift: metadata = {:#?}", segment_receipt.metadata);
+    tracing::debug!("Proving lift: claim = {:#?}", segment_receipt.claim);
     let mut prover = Prover::new_lift(&segment_receipt.seal, ProverOpts::default())?;
     let receipt = prover.run()?;
     let mut out_stream = VecDeque::<u32>::new();
     out_stream.extend(receipt.output.iter());
-    let meta_decoded = ReceiptMetadata::decode(&mut out_stream)?;
-    tracing::debug!(
-        "Proving lift finished: decoded metadata = {:#?}",
-        meta_decoded
-    );
+    let claim_decoded = ReceiptClaim::decode(&mut out_stream)?;
+    tracing::debug!("Proving lift finished: decoded claim = {claim_decoded:#?}");
     Ok(SuccinctReceipt {
         seal: receipt.seal,
         control_id: receipt.control_id,
-        metadata: meta_decoded.merge(&segment_receipt.metadata)?,
+        claim: claim_decoded.merge(&segment_receipt.claim)?,
     })
 }
 
@@ -101,32 +98,29 @@ pub fn lift(segment_receipt: &SegmentReceipt) -> Result<SuccinctReceipt> {
 /// By repeated application of the join program, any number of receipts for execution spans within
 /// the same session can be compressed into a single receipt for the entire session.
 pub fn join(a: &SuccinctReceipt, b: &SuccinctReceipt) -> Result<SuccinctReceipt> {
-    tracing::debug!("Proving join: a.metadata = {:#?}", a.metadata,);
-    tracing::debug!("Proving join: b.metadata = {:#?}", b.metadata,);
+    tracing::debug!("Proving join: a.claim = {:#?}", a.claim);
+    tracing::debug!("Proving join: b.claim = {:#?}", b.claim);
 
     let mut prover = Prover::new_join(a, b, ProverOpts::default())?;
     let receipt = prover.run()?;
     let mut out_stream = VecDeque::<u32>::new();
     out_stream.extend(receipt.output.iter());
 
-    // Construct the expected metadata that should have result from the join.
-    let ab_meta = ReceiptMetadata {
-        pre: a.metadata.pre.clone(),
-        post: b.metadata.post.clone(),
-        exit_code: b.metadata.exit_code,
-        input: a.metadata.input.clone(),
-        output: b.metadata.output.clone(),
+    // Construct the expected claim that should have result from the join.
+    let ab_claim = ReceiptClaim {
+        pre: a.claim.pre.clone(),
+        post: b.claim.post.clone(),
+        exit_code: b.claim.exit_code,
+        input: a.claim.input.clone(),
+        output: b.claim.output.clone(),
     };
 
-    let meta_decoded = ReceiptMetadata::decode(&mut out_stream)?;
-    tracing::debug!(
-        "Proving join finished: decoded metadata = {:#?}",
-        meta_decoded
-    );
+    let claim_decoded = ReceiptClaim::decode(&mut out_stream)?;
+    tracing::debug!("Proving join finished: decoded claim = {claim_decoded:#?}");
     Ok(SuccinctReceipt {
         seal: receipt.seal,
         control_id: receipt.control_id,
-        metadata: meta_decoded.merge(&ab_meta)?,
+        claim: claim_decoded.merge(&ab_claim)?,
     })
 }
 
@@ -140,18 +134,18 @@ pub fn resolve(
     corroborating: &SuccinctReceipt,
 ) -> Result<SuccinctReceipt> {
     tracing::debug!(
-        "Proving resolve: conditional.metadata = {:#?}",
-        conditional.metadata,
+        "Proving resolve: conditional.claim = {:#?}",
+        conditional.claim,
     );
     tracing::debug!(
-        "Proving resolve: corroborating.metadata = {:#?}",
-        corroborating.metadata,
+        "Proving resolve: corroborating.claim = {:#?}",
+        corroborating.claim,
     );
 
-    // Construct the resolved metadata by copying the conditional receipt metadata and resolving
+    // Construct the resolved claim by copying the conditional receipt claim and resolving
     // the head assumption. If this fails, then so would the resolve program.
-    let mut resolved_meta = conditional.metadata.clone();
-    resolved_meta
+    let mut resolved_claim = conditional.claim.clone();
+    resolved_claim
         .output
         .as_value_mut()
         .context("conditional receipt output is pruned")?
@@ -162,22 +156,19 @@ pub fn resolve(
         .assumptions
         .as_value_mut()
         .context("conditional receipt assumptions are pruned")?
-        .resolve(&corroborating.metadata.digest())?;
+        .resolve(&corroborating.claim.digest())?;
 
     let mut prover = Prover::new_resolve(conditional, corroborating, ProverOpts::default())?;
     let receipt = prover.run()?;
     let mut out_stream = VecDeque::<u32>::new();
     out_stream.extend(receipt.output.iter());
 
-    let meta_decoded = ReceiptMetadata::decode(&mut out_stream)?;
-    tracing::debug!(
-        "Proving resolve finished: decoded metadata = {:#?}",
-        meta_decoded
-    );
+    let claim_decoded = ReceiptClaim::decode(&mut out_stream)?;
+    tracing::debug!("Proving resolve finished: decoded claim = {claim_decoded:#?}");
     Ok(SuccinctReceipt {
         seal: receipt.seal,
         control_id: receipt.control_id,
-        metadata: meta_decoded.merge(&resolved_meta)?,
+        claim: claim_decoded.merge(&resolved_claim)?,
     })
 }
 
@@ -193,11 +184,11 @@ pub fn identity_p254(a: &SuccinctReceipt) -> Result<SuccinctReceipt> {
     let receipt = prover.run_with_hal(hal, circuit_hal)?;
     let mut out_stream = VecDeque::<u32>::new();
     out_stream.extend(receipt.output.iter());
-    let metadata = ReceiptMetadata::decode(&mut out_stream)?.merge(&a.metadata)?;
+    let claim = ReceiptClaim::decode(&mut out_stream)?.merge(&a.claim)?;
     Ok(SuccinctReceipt {
         seal: receipt.seal,
         control_id: receipt.control_id,
-        metadata,
+        claim,
     })
 }
 
@@ -490,7 +481,7 @@ impl Prover {
     ) -> Result<()> {
         self.add_seal(&a.seal, &a.control_id, &allowed_ids)?;
         let mut data = Vec::<u32>::new();
-        a.metadata.encode(&mut data)?;
+        a.claim.encode(&mut data)?;
         let data_fp: Vec<BabyBearElem> = data.iter().map(|x| BabyBearElem::new(*x)).collect();
         self.add_input(bytemuck::cast_slice(&data_fp));
         Ok(())
@@ -537,7 +528,7 @@ impl Prover {
 
         // Load the input values needed by the predicate.
         // Resolve predicate needs both seals as input, and the journal and assumptions tail digest
-        // to compute the opening of the conditional receipt metadata to the first assumption.
+        // to compute the opening of the conditional receipt claim to the first assumption.
         prover.add_input_digest(&merkle_root, DigestKind::Poseidon);
         prover.add_segment_receipt(cond, &allowed_ids)?;
         prover.add_segment_receipt(corr, &allowed_ids)?;
@@ -546,7 +537,7 @@ impl Prover {
             assumptions,
             journal,
         } = cond
-            .metadata
+            .claim
             .output
             .as_value()
             .context("cannot resolve conditional receipt with pruned output")?
@@ -559,14 +550,14 @@ impl Prover {
         let mut assumptions_tail = assumptions
             .value()
             .context("cannot resolve conditional receipt with pruned assumptions")?;
-        assumptions_tail.resolve(&corr.metadata.digest())?;
+        assumptions_tail.resolve(&corr.claim.digest())?;
 
         prover.add_input_digest(&assumptions_tail.digest(), DigestKind::Sha256);
         prover.add_input_digest(&journal.digest(), DigestKind::Sha256);
         Ok(prover)
     }
 
-    /// Prove the verification of a recursion receipt, applying no changes to [ReceiptMetadata].
+    /// Prove the verification of a recursion receipt, applying no changes to [ReceiptClaim].
     ///
     /// The primary use for this program is to transform the receipt itself, e.g. using a different
     /// hash function for FRI. See [identity_p254] for more information.

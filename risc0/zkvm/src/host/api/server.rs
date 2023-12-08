@@ -275,15 +275,8 @@ impl Server {
             let binary = env_request.binary.ok_or(malformed_err())?;
 
             let segments_out = request.segments_out.ok_or(malformed_err())?;
-            let bytes = binary.asset.as_ref().ok_or(malformed_err())?.as_bytes()?;
-            let mut exec = match binary.kind() {
-                pb::api::binary::Kind::Unspecified => Err(malformed_err()),
-                pb::api::binary::Kind::Image => {
-                    let image = pb::core::MemoryImage::decode(bytes)?.try_into()?;
-                    ExecutorImpl::new(env, image)
-                }
-                pb::api::binary::Kind::Elf => ExecutorImpl::from_elf(env, &bytes),
-            }?;
+            let bytes = binary.as_bytes()?;
+            let mut exec = ExecutorImpl::from_elf(env, &bytes)?;
 
             let session = exec.run_with_callback(|segment| {
                 let segment_bytes = bincode::serialize(&segment)?;
@@ -353,19 +346,12 @@ impl Server {
             let env = build_env(&conn, &env_request)?;
 
             let binary = env_request.binary.ok_or(malformed_err())?;
-            let bytes = binary.asset.as_ref().ok_or(malformed_err())?.as_bytes()?;
+            let bytes = binary.as_bytes()?;
 
             let opts: ProverOpts = request.opts.ok_or(malformed_err())?.into();
             let prover = get_prover_server(&opts)?;
             let ctx = VerifierContext::default();
-            let receipt = match binary.kind() {
-                pb::api::binary::Kind::Unspecified => Err(malformed_err()),
-                pb::api::binary::Kind::Image => {
-                    let image = pb::core::MemoryImage::decode(bytes)?.try_into()?;
-                    prover.prove(env, &ctx, image)
-                }
-                pb::api::binary::Kind::Elf => prover.prove_elf_with_ctx(env, &ctx, &bytes),
-            }?;
+            let receipt = prover.prove_elf_with_ctx(env, &ctx, &bytes)?;
 
             let receipt_pb: pb::core::Receipt = receipt.into();
             let receipt_bytes = receipt_pb.encode_to_vec();

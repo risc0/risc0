@@ -29,13 +29,13 @@ use serde::{de::DeserializeOwned, Serialize};
 
 use crate::{
     align_up,
-    receipt_metadata::{Assumptions, InvalidExitCodeError, MaybePruned, Output, PrunedValueError},
     serde::{Deserializer, Serializer, WordRead, WordWrite},
     sha::{
         rust_crypto::{Digest as _, Sha256},
         Digest, Digestible, DIGEST_WORDS,
     },
-    ExitCode, ReceiptMetadata,
+    Assumptions, ExitCode, InvalidExitCodeError, MaybePruned, Output, PrunedValueError,
+    ReceiptClaim,
 };
 
 static mut HASHER: Option<Sha256> = None;
@@ -143,11 +143,11 @@ pub fn verify(image_id: Digest, journal: &[u8]) -> Result<(), VerifyError> {
         )));
     };
 
-    // Construct the ReceiptMetadata for this assumption. Use the host provided
+    // Construct the ReceiptClaim for this assumption. Use the host provided
     // post_state_digest and fix all fields that are required to have a certain
     // value. This assumption will only be resolvable if there exists a receipt
-    // matching this metadata.
-    let assumption_metadata = ReceiptMetadata {
+    // matching this claim.
+    let assumption_claim = ReceiptClaim {
         pre: MaybePruned::Pruned(image_id),
         post: MaybePruned::Pruned(post_state_digest),
         exit_code,
@@ -158,7 +158,7 @@ pub fn verify(image_id: Digest, journal: &[u8]) -> Result<(), VerifyError> {
         })
         .into(),
     };
-    unsafe { ASSUMPTIONS_DIGEST.add(assumption_metadata.into()) };
+    unsafe { ASSUMPTIONS_DIGEST.add(assumption_claim.into()) };
 
     Ok(())
 }
@@ -196,16 +196,16 @@ impl fmt::Display for VerifyError {
 impl std::error::Error for VerifyError {}
 
 /// Verify that there exists a valid receipt with the specified
-/// [ReceiptMetadata].
+/// [ReceiptClaim].
 ///
 /// In order for a receipt to be valid, it must have a verifying cryptographic seal and
 /// additionally have no assumptions. Note that executions with no output (e.g. those ending in
 /// [ExitCode::SystemSplit]) will not have any encoded assumptions even if [verify] or
 /// [verify_integrity] is called.
-pub fn verify_integrity(metadata: &ReceiptMetadata) -> Result<(), VerifyIntegrityError> {
+pub fn verify_integrity(claim: &ReceiptClaim) -> Result<(), VerifyIntegrityError> {
     // Check that the assumptions list is empty.
-    let assumptions_empty = metadata.output.is_none()
-        || metadata
+    let assumptions_empty = claim.output.is_none()
+        || claim
             .output
             .as_value()?
             .as_ref()
@@ -215,11 +215,11 @@ pub fn verify_integrity(metadata: &ReceiptMetadata) -> Result<(), VerifyIntegrit
         return Err(VerifyIntegrityError::NonEmptyAssumptionsList);
     }
 
-    let metadata_digest = metadata.digest();
+    let claim_digest = claim.digest();
 
     unsafe {
-        sys_verify_integrity(metadata_digest.as_ref());
-        ASSUMPTIONS_DIGEST.add(MaybePruned::Pruned(metadata_digest));
+        sys_verify_integrity(claim_digest.as_ref());
+        ASSUMPTIONS_DIGEST.add(MaybePruned::Pruned(claim_digest));
     }
 
     Ok(())
@@ -228,12 +228,12 @@ pub fn verify_integrity(metadata: &ReceiptMetadata) -> Result<(), VerifyIntegrit
 /// Error encountered during a call to [verify_integrity].
 ///
 /// Note that an error is only returned for "provable" errors. In particular, if the host fails to
-/// find a receipt matching the requested metadata digest, this is not a provable error. In this
+/// find a receipt matching the requested claim digest, this is not a provable error. In this
 /// case, [verify_integrity] will not return.
 #[derive(Debug)]
 #[non_exhaustive]
 pub enum VerifyIntegrityError {
-    /// Provided [ReceiptMetadata] struct contained a non-empty assumptions list.
+    /// Provided [ReceiptClaim] struct contained a non-empty assumptions list.
     ///
     /// This is a semantic error as only unconditional receipts can be verified
     /// inside the guest. If there is a conditional receipt to verify, it's
@@ -259,7 +259,7 @@ impl fmt::Display for VerifyIntegrityError {
                 write!(f, "assumptions list is not empty")
             }
             VerifyIntegrityError::PrunedValueError(err) => {
-                write!(f, "metadata output is pruned and non-zero: {}", err.0)
+                write!(f, "claim output is pruned and non-zero: {}", err.0)
             }
         }
     }

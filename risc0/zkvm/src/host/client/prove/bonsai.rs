@@ -16,10 +16,9 @@ use std::time::Duration;
 
 use anyhow::{anyhow, bail, ensure, Result};
 use bonsai_sdk::alpha::Client;
-use risc0_binfmt::MemoryImage;
 
 use super::Prover;
-use crate::{sha::Digestible, ExecutorEnv, ProverOpts, Receipt, VerifierContext};
+use crate::{compute_image_id, sha::Digestible, ExecutorEnv, ProverOpts, Receipt, VerifierContext};
 
 /// An implementation of a [Prover] that runs proof workloads via Bonsai.
 ///
@@ -43,22 +42,19 @@ impl Prover for BonsaiProver {
         self.name.clone()
     }
 
-    fn prove(
+    fn prove_elf_with_ctx(
         &self,
         env: ExecutorEnv<'_>,
         ctx: &VerifierContext,
+        elf: &[u8],
         opts: &ProverOpts,
-        image: MemoryImage,
     ) -> Result<Receipt> {
         let client = Client::from_env(crate::VERSION)?;
 
-        // upload the image
-        let image_id = image.compute_id()?;
+        // Compute the ImageID and upload the ELF binary
+        let image_id = compute_image_id(elf)?;
         let image_id_hex = hex::encode(image_id.clone());
-        let image = bincode::serialize(&image)?;
-
-        // return value 'exists' is ignored here
-        client.upload_img(&image_id_hex, image)?;
+        client.upload_img(&image_id_hex, elf.to_vec())?;
 
         // upload input data
         let input_id = client.upload_input(env.input)?;
@@ -89,10 +85,10 @@ impl Prover for BonsaiProver {
                 if opts.prove_guest_errors {
                     receipt.verify_integrity_with_context(ctx)?;
                     ensure!(
-                        receipt.get_metadata()?.pre.digest() == image_id,
+                        receipt.get_claim()?.pre.digest() == image_id,
                         "received unexpected image ID: expected {}, found {}",
                         hex::encode(&image_id),
-                        hex::encode(&receipt.get_metadata()?.pre.digest())
+                        hex::encode(&receipt.get_claim()?.pre.digest())
                     );
                 } else {
                     receipt.verify_with_context(ctx, image_id)?;

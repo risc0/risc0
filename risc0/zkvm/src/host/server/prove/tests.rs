@@ -208,7 +208,7 @@ fn memory_io() {
         let session = exec.run()?;
         let receipt = prove_session_fast(&session);
         receipt.verify_integrity_with_context(&VerifierContext::default())?;
-        Ok(receipt.get_metadata()?.exit_code)
+        Ok(receipt.get_claim()?.exit_code)
     }
 
     // Pick a memory position in the middle of the memory space, which is unlikely
@@ -287,13 +287,12 @@ fn session_events() {
 // https://github.com/risc0/toolchain/releases/tag/2022.03.25
 mod riscv {
     use super::prove_session_fast;
-    use crate::{ExecutorEnv, ExecutorImpl, MemoryImage, Program};
+    use crate::{ExecutorEnv, ExecutorImpl};
 
     fn run_test(test_name: &str) {
         use std::io::Read;
 
         use flate2::read::GzDecoder;
-        use risc0_zkvm_platform::{memory::GUEST_MAX_MEM, PAGE_SIZE};
         use tar::Archive;
 
         let bytes = include_bytes!("../testdata/riscv-tests.tgz");
@@ -312,11 +311,8 @@ mod riscv {
             let mut elf = Vec::new();
             entry.read_to_end(&mut elf).unwrap();
 
-            let program = Program::load_elf(elf.as_slice(), GUEST_MAX_MEM as u32).unwrap();
-            let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
-
             let env = ExecutorEnv::default();
-            let mut exec = ExecutorImpl::new(env, image).unwrap();
+            let mut exec = ExecutorImpl::from_elf(env, &elf).unwrap();
             let session = exec.run().unwrap();
 
             prove_session_fast(&session);
@@ -493,9 +489,9 @@ mod sys_verify {
         halt_receipt
             .verify_integrity_with_context(&Default::default())
             .unwrap();
-        let halt_metadata = halt_receipt.get_metadata().unwrap();
-        assert_eq!(halt_metadata.pre.digest(), MULTI_TEST_ID.into());
-        assert_eq!(halt_metadata.exit_code, ExitCode::Halted(exit_code as u32));
+        let halt_claim = halt_receipt.get_claim().unwrap();
+        assert_eq!(halt_claim.pre.digest(), MULTI_TEST_ID.into());
+        assert_eq!(halt_claim.exit_code, ExitCode::Halted(exit_code as u32));
         halt_receipt
     }
 
@@ -519,9 +515,9 @@ mod sys_verify {
         fault_receipt
             .verify_integrity_with_context(&Default::default())
             .unwrap();
-        let fault_metadata = fault_receipt.get_metadata().unwrap();
-        assert_eq!(fault_metadata.pre.digest(), MULTI_TEST_ID.into());
-        assert_eq!(fault_metadata.exit_code, ExitCode::Fault);
+        let fault_claim = fault_receipt.get_claim().unwrap();
+        assert_eq!(fault_claim.pre.digest(), MULTI_TEST_ID.into());
+        assert_eq!(fault_claim.exit_code, ExitCode::Fault);
         fault_receipt
     }
 
@@ -568,7 +564,7 @@ mod sys_verify {
         let env = ExecutorEnv::builder()
             .write(&spec)
             .unwrap()
-            .add_assumption(HELLO_COMMIT_RECEIPT.get_metadata().unwrap().into())
+            .add_assumption(HELLO_COMMIT_RECEIPT.get_claim().unwrap().into())
             .build()
             .unwrap();
         // TODO(#982) Conditional receipts currently return an error on verification.
@@ -587,7 +583,7 @@ mod sys_verify {
     #[test]
     fn sys_verify_integrity() {
         let spec = &MultiTestSpec::SysVerifyIntegrity {
-            metadata_words: to_vec(&HELLO_COMMIT_RECEIPT.get_metadata().unwrap()).unwrap(),
+            claim_words: to_vec(&HELLO_COMMIT_RECEIPT.get_claim().unwrap()).unwrap(),
         };
 
         // Test that providing the proven assumption results in an unconditional
@@ -622,7 +618,7 @@ mod sys_verify {
         let env = ExecutorEnv::builder()
             .write(&spec)
             .unwrap()
-            .add_assumption(HELLO_COMMIT_RECEIPT.get_metadata().unwrap().into())
+            .add_assumption(HELLO_COMMIT_RECEIPT.get_claim().unwrap().into())
             .build()
             .unwrap();
         // TODO(#982) Conditional receipts currently return an error on verification.
@@ -639,7 +635,7 @@ mod sys_verify {
         let halt_receipt = prove_halt(1);
 
         let spec = &MultiTestSpec::SysVerifyIntegrity {
-            metadata_words: to_vec(&halt_receipt.get_metadata().unwrap()).unwrap(),
+            claim_words: to_vec(&halt_receipt.get_claim().unwrap()).unwrap(),
         };
 
         // Test that proving results in a success execution and unconditional receipt.
@@ -665,7 +661,7 @@ mod sys_verify {
         let fault_receipt = prove_fault();
 
         let spec = &MultiTestSpec::SysVerifyIntegrity {
-            metadata_words: to_vec(&fault_receipt.get_metadata().unwrap()).unwrap(),
+            claim_words: to_vec(&fault_receipt.get_claim().unwrap()).unwrap(),
         };
 
         // Test that proving results in a success execution and unconditional receipt.

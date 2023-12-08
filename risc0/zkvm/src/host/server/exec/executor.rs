@@ -55,9 +55,9 @@ use crate::{
         receipt::Assumption,
         server::opcode::{MajorType, OpCode},
     },
-    receipt_metadata::{Assumptions, Output},
     sha::Digest,
-    ExecutorEnv, ExitCode, FileSegmentRef, Loader, Segment, SegmentRef, Session,
+    Assumptions, ExecutorEnv, ExitCode, FileSegmentRef, Loader, Output, Segment, SegmentRef,
+    Session,
 };
 
 /// The number of cycles required to compress a SHA-256 block.
@@ -362,7 +362,7 @@ impl<'a> ExecutorImpl<'a> {
                                 .iter()
                                 .map(|a| {
                                     Ok(match a {
-                                        Assumption::Proven(r) => r.get_metadata()?.into(),
+                                        Assumption::Proven(r) => r.get_claim()?.into(),
                                         Assumption::Unresolved(r) => r.clone(),
                                     })
                                 })
