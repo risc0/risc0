@@ -45,9 +45,23 @@ jobs:
               - website/api_versioned_docs/version-0.19/**
               - website/doc-test/version-0.19/**
 
+  # see: https://github.com/orgs/community/discussions/26822
   doc-test:
+    if: always()
+    needs:
+      - matrix
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check all job status
+        # see https://docs.github.com/en/actions/reference/context-and-expression-syntax-for-github-actions#needs-context
+        # see https://stackoverflow.com/a/67532120/4907315
+        if: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
+        run: exit 1
+
+  matrix:
     needs: changes
     strategy:
+      fail-fast: false
       matrix:
         version: ${{ fromJSON(needs.changes.outputs.versions) }}
     runs-on: ubuntu-latest
@@ -63,7 +77,14 @@ jobs:
       - uses: risc0/foundry-toolchain@2fe7e70b520f62368a0e3c464f997df07ede420f
         with:
           version: nightly-34f684ddfacc5b2ed371353ba6f730c485616ffe
-      - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
+      - uses: risc0/cargo-install@2cfb0024938d23011106cbf127b393bc83fddba1
+        with:
+          crate: cargo-binstall
+          version: "1.4"
+      - run: cargo binstall -y --force cargo-risczero@0.19
+      - run: cargo risczero install --version $RISC0_TOOLCHAIN_VERSION
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: build ${{ matrix.version }}
         run: cargo test --release --no-run
