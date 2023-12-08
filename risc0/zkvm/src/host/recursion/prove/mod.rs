@@ -251,7 +251,7 @@ mod cuda {
         HalPair { hal, circuit_hal }
     }
 
-    pub fn poseidon2_hal_pair() -> HalPair<CudaHalPoseidon, CudaCircuitHalPoseidon2> {
+    pub fn poseidon2_hal_pair() -> HalPair<CudaHalPoseidon2, CudaCircuitHalPoseidon2> {
         let hal = Rc::new(CudaHalPoseidon2::new());
         let circuit_hal = Rc::new(CudaCircuitHalPoseidon2::new(hal.clone()));
         HalPair { hal, circuit_hal }
