@@ -308,7 +308,8 @@ mod cpu {
     use risc0_zkp::core::hash::{poseidon_254::Poseidon254HashSuite, sha::Sha256HashSuite};
 
     use super::{
-        BabyBear, CircuitImpl, CpuCircuitHal, CpuHal, HalPair, PoseidonHashSuite, Rc, CIRCUIT,
+        BabyBear, CircuitImpl, CpuCircuitHal, CpuHal, HalPair, Poseidon2HashSuite,
+        PoseidonHashSuite, Rc, CIRCUIT,
     };
 
     #[allow(dead_code)]
