@@ -332,26 +332,28 @@ jobs:
   web:
     if: needs.changes.outputs.web == 'true'
     needs: changes
-    runs-on: [self-hosted, prod, macOS, cpu]
+    runs-on: [self-hosted, prod, Linux, cpu]
     env:
       RISC0_BUILD_LOCKED: 1
     steps:
       # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
       - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
       - uses: actions/checkout@v4
+      - uses: browser-actions/setup-firefox@v1
+      - run: firefox --version
       - uses: ./.github/actions/rustup
       - uses: actions/setup-node@v3
         with:
           node-version: 18
       - uses: ./.github/actions/sccache
         with:
-          key: macOS-default
+          key: Linux-default
       - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
       - run: cargo xtask install
       - run: cargo xtask gen-receipt
       - run: |
           npm install
-          npm test -- --safari
+          npm test -- --firefox
         working-directory: examples/browser-verify
       - run: sccache --show-stats
 
