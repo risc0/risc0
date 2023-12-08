@@ -93,35 +93,27 @@ mod test {
 
     use anyhow::{bail, Result};
     use bonsai_sdk::alpha_async as bonsai_sdk;
-    use risc0_zkvm::{MemoryImage, Program, GUEST_MAX_MEM, PAGE_SIZE};
+    use risc0_zkvm::compute_image_id;
     use risc0_zkvm_methods::HELLO_COMMIT_ELF;
 
     use crate::serve;
 
-    async fn run_bonsai(
-        bonsai_api_url: String,
-        bonsai_api_key: String,
-        method: &[u8],
-    ) -> Result<()> {
+    async fn run_bonsai(bonsai_api_url: String, bonsai_api_key: String, elf: &[u8]) -> Result<()> {
         let client =
             bonsai_sdk::get_client_from_parts(bonsai_api_url, bonsai_api_key, risc0_zkvm::VERSION)
                 .await?;
 
-        // create the memoryImg, upload it and return the imageId
-        let img_id = {
-            let program = Program::load_elf(method, GUEST_MAX_MEM as u32)?;
-            let image = MemoryImage::new(&program, PAGE_SIZE as u32)?;
-            let image_id = hex::encode(image.compute_id());
-            let image = bincode::serialize(&image).expect("Failed to serialize memory img");
-            bonsai_sdk::upload_img(client.clone(), image_id.clone(), image).await?;
-            image_id
-        };
+        // Compute the image_id, then upload the ELF with the image_id as its key.
+        // TODO: it would be nice if `bonsai_sdk::upload_img` only took the ELF
+        // so that the image_id can be computed server-side.
+        let image_id = hex::encode(compute_image_id(elf)?);
+        bonsai_sdk::upload_img(client.clone(), image_id.clone(), elf.to_vec()).await?;
 
         // Prepare input data and upload it.
         let input_id = bonsai_sdk::upload_input(client.clone(), vec![]).await?;
 
         // Start a session running the prover
-        let session = bonsai_sdk::create_session(client.clone(), img_id, input_id).await?;
+        let session = bonsai_sdk::create_session(client.clone(), image_id, input_id).await?;
         loop {
             let res = bonsai_sdk::session_status(client.clone(), session.clone()).await?;
             if res.status == "RUNNING" {

@@ -11,11 +11,11 @@ clap = "4.4"
 ecdsa-methods = { path = "methods" }
 k256 = { version = "0.13", features = ["serde"] }
 rand_core = "0.6.4"
-risc0-zkvm = { path = "../../risc0/zkvm", features = ["profiler"] }
+risc0-zkvm = { path = "../../risc0/zkvm" }
 serde = "1.0"
 
 [features]
-default = []
 cuda = ["risc0-zkvm/cuda"]
+default = []
+metal = ["risc0-zkvm/metal"]
 prove = ["risc0-zkvm/prove"]
-profiler = ["risc0-zkvm/profiler"]

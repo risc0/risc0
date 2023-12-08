@@ -12,108 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::time::{Duration, Instant};
+use risc0_benchmark_lib::generate_mock_proof;
+use risc0_zkvm::serde::to_vec;
 
-use risc0_benchmark_lib::{generate_mock_proof, MembershipProof};
-use risc0_zkvm::{
-    sha::{Digest, DIGEST_WORDS},
-    ExecutorEnv, ExecutorImpl, MemoryImage, Receipt, Session,
-};
+use crate::Job;
 
-use crate::{get_cycles, get_image, Benchmark};
-
-pub struct Job {
-    pub spec: u32,
-    pub input: MembershipProof,
-    pub image: MemoryImage,
-    pub session: Option<Session>,
-}
-
-pub fn new_jobs() -> Vec<<Job as Benchmark>::Spec> {
-    vec![10, 20]
-}
-
-const METHOD_ID: [u32; DIGEST_WORDS] = risc0_benchmark_methods::MEMBERSHIP_ID;
-const METHOD_PATH: &'static str = risc0_benchmark_methods::MEMBERSHIP_PATH;
-
-impl Benchmark for Job {
-    const NAME: &'static str = "merkle_tree";
-    type Spec = u32;
-    type ComputeOut = (Digest, Digest);
-    type ProofType = Receipt;
-
-    fn job_size(spec: &Self::Spec) -> u32 {
-        *spec
+pub fn new_jobs() -> Vec<Job> {
+    let mut jobs = Vec::new();
+    for n in [10, 20] {
+        let input = generate_mock_proof(&[0u8; 32], n);
+        jobs.push(Job::new(
+            format!("membership-{n}"),
+            risc0_benchmark_methods::MEMBERSHIP_ELF,
+            risc0_benchmark_methods::MEMBERSHIP_ID.into(),
+            to_vec(&input).unwrap(),
+        ));
     }
-
-    fn output_size_bytes(_output: &Self::ComputeOut, proof: &Self::ProofType) -> u32 {
-        proof.journal.bytes.len() as u32
-    }
-
-    fn proof_size_bytes(proof: &Self::ProofType) -> u32 {
-        (proof
-            .inner
-            .composite()
-            .unwrap()
-            .segments
-            .iter()
-            .fold(0, |acc, segment| acc + segment.get_seal_bytes().len())) as u32
-    }
-
-    fn new(spec: Self::Spec) -> Self {
-        let image = get_image(METHOD_PATH);
-        let input = generate_mock_proof(&[0u8; 32], spec);
-        let session = None;
-
-        Job {
-            spec,
-            input,
-            image,
-            session,
-        }
-    }
-
-    fn spec(&self) -> &Self::Spec {
-        &self.spec
-    }
-
-    fn host_compute(&mut self) -> Option<Self::ComputeOut> {
-        let proof = generate_mock_proof(&[0u8; 32], self.spec);
-        assert!(proof.verify());
-        Some((proof.leaf, proof.root))
-    }
-
-    fn exec_compute(&mut self) -> (u32, u32, Duration) {
-        let env = ExecutorEnv::builder()
-            .write(&self.input)
-            .unwrap()
-            .build()
-            .unwrap();
-        let mut exec = ExecutorImpl::new(env, self.image.clone()).unwrap();
-        let start = Instant::now();
-        let session = exec.run().unwrap();
-        let elapsed = start.elapsed();
-        let segments = session.resolve().unwrap();
-        let (exec_cycles, prove_cycles) = get_cycles(segments);
-        self.session = Some(session);
-        (prove_cycles as u32, exec_cycles as u32, elapsed)
-    }
-
-    fn guest_compute(&mut self) -> (Self::ComputeOut, Self::ProofType) {
-        let receipt = self.session.as_ref().unwrap().prove().expect("receipt");
-        let (leaf, root) = receipt.journal.decode().unwrap();
-        ((leaf, root), receipt)
-    }
-
-    fn verify_proof(&self, _output: &Self::ComputeOut, proof: &Self::ProofType) -> bool {
-        let result = proof.verify(METHOD_ID);
-
-        match result {
-            Ok(_) => true,
-            Err(err) => {
-                println!("{}", err);
-                false
-            }
-        }
-    }
+    jobs
 }

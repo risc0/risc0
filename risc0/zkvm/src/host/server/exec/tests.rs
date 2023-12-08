@@ -21,9 +21,10 @@ use std::{
 
 use anyhow::Result;
 use bytes::Bytes;
+use risc0_binfmt::{MemoryImage, Program};
 use risc0_zkvm_methods::{
     multi_test::{MultiTestSpec, SYS_MULTI_TEST},
-    HELLO_COMMIT_ELF, MULTI_TEST_ELF, SLICE_IO_ELF, STANDARD_LIB_ELF,
+    HELLO_COMMIT_ELF, MULTI_TEST_ELF, RAND_ELF, SLICE_IO_ELF, STANDARD_LIB_ELF,
 };
 use risc0_zkvm_platform::{fileno, syscall::nr::SYS_RANDOM, PAGE_SIZE, WORD_SIZE};
 use sha2::{Digest as _, Sha256};
@@ -31,12 +32,15 @@ use test_log::test;
 
 use crate::{
     host::server::{
-        exec::syscall::{Syscall, SyscallContext},
+        exec::{
+            profiler::{Frame, Profiler},
+            syscall::{Syscall, SyscallContext},
+        },
         testutils,
     },
     serde::to_vec,
-    sha::Digest,
-    ExecutorEnv, ExecutorImpl, ExitCode, MemoryImage, Program,
+    sha::{Digest, Digestible},
+    ExecutorEnv, ExecutorImpl, ExitCode,
 };
 
 fn run_test(spec: MultiTestSpec) {
@@ -50,6 +54,21 @@ fn run_test(spec: MultiTestSpec) {
         .run()
         .unwrap();
     assert_eq!(session.exit_code, ExitCode::Halted(0));
+}
+
+#[test]
+#[should_panic(expected = "cycle count too large")]
+fn insufficient_segment_limit() {
+    let env = ExecutorEnv::builder()
+        .segment_limit_po2(14)
+        .write(&MultiTestSpec::DoNothing)
+        .unwrap()
+        .build()
+        .unwrap();
+    ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
+        .unwrap()
+        .run()
+        .unwrap();
 }
 
 #[test]
@@ -67,7 +86,7 @@ fn basic() {
         image,
     };
     let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
-    let pre_image_id = image.compute_id();
+    let pre_image_id = image.compute_id().unwrap();
 
     let mut exec = ExecutorImpl::new(env, image).unwrap();
     let session = exec.run().unwrap();
@@ -76,8 +95,8 @@ fn basic() {
 
     assert_eq!(segments.len(), 1);
     assert_eq!(segments[0].exit_code, ExitCode::Halted(0));
-    assert_eq!(segments[0].pre_image.compute_id(), pre_image_id);
-    assert_ne!(segments[0].post_image_id, pre_image_id);
+    assert_eq!(segments[0].pre_image.compute_id().unwrap(), pre_image_id);
+    assert_ne!(segments[0].post_state.digest(), pre_image_id);
     assert_eq!(segments[0].index, 0);
 }
 
@@ -102,7 +121,7 @@ fn system_split() {
 
     let program = Program { entry, image };
     let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
-    let pre_image_id = image.compute_id();
+    let pre_image_id = image.compute_id().unwrap();
 
     let mut exec = ExecutorImpl::new(env, image).unwrap();
     let session = exec.run().unwrap();
@@ -111,12 +130,12 @@ fn system_split() {
 
     assert_eq!(segments.len(), 2);
     assert_eq!(segments[0].exit_code, ExitCode::SystemSplit);
-    assert_eq!(segments[0].pre_image.compute_id(), pre_image_id);
-    assert_ne!(segments[0].post_image_id, pre_image_id);
+    assert_eq!(segments[0].pre_image.compute_id().unwrap(), pre_image_id);
+    assert_ne!(segments[0].post_state.digest(), pre_image_id);
     assert_eq!(segments[1].exit_code, ExitCode::Halted(0));
     assert_eq!(
-        segments[1].pre_image.compute_id(),
-        segments[0].post_image_id
+        segments[1].pre_image.compute_id().unwrap(),
+        segments[0].post_state.digest()
     );
     assert_eq!(segments[0].index, 0);
     assert_eq!(segments[1].index, 1);
@@ -380,8 +399,8 @@ mod sys_verify {
     use test_log::test;
 
     use crate::{
-        receipt_metadata::MaybePruned, serde::to_vec, sha::Digestible, ExecutorEnv,
-        ExecutorEnvBuilder, ExecutorImpl, ExitCode, ReceiptMetadata, Session,
+        serde::to_vec, sha::Digestible, ExecutorEnv, ExecutorEnvBuilder, ExecutorImpl, ExitCode,
+        MaybePruned, ReceiptClaim, Session,
     };
 
     fn exec_hello_commit() -> Session {
@@ -448,7 +467,7 @@ mod sys_verify {
         let env = ExecutorEnv::builder()
             .write(&spec)
             .unwrap()
-            .add_assumption(hello_commit_session.get_metadata().unwrap().into())
+            .add_assumption(hello_commit_session.get_claim().unwrap().into())
             .build()
             .unwrap();
         let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
@@ -483,7 +502,7 @@ mod sys_verify {
             let env = ExecutorEnv::builder()
                 .write(&spec)
                 .unwrap()
-                .add_assumption(halt_session.get_metadata().unwrap().into())
+                .add_assumption(halt_session.get_claim().unwrap().into())
                 .build()
                 .unwrap();
             let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap().run();
@@ -510,7 +529,7 @@ mod sys_verify {
             let env = ExecutorEnv::builder()
                 .write(&spec)
                 .unwrap()
-                .add_assumption(pause_session.get_metadata().unwrap().into())
+                .add_assumption(pause_session.get_claim().unwrap().into())
                 .build()
                 .unwrap();
             let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap().run();
@@ -525,7 +544,7 @@ mod sys_verify {
 
     #[test]
     fn sys_verify_fault() {
-        // NOTE: ReceiptMetadata for this Session won't differentiate Fault and SystemSplit,
+        // NOTE: ReceiptClaim for this Session won't differentiate Fault and SystemSplit,
         // since these cannot be distinguished from the circuit's point of view.
         let fault_session = exec_fault();
 
@@ -537,7 +556,7 @@ mod sys_verify {
         let env = ExecutorEnv::builder()
             .write(&spec)
             .unwrap()
-            .add_assumption(fault_session.get_metadata().unwrap().into())
+            .add_assumption(fault_session.get_claim().unwrap().into())
             .build()
             .unwrap();
         assert!(ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
@@ -551,14 +570,14 @@ mod sys_verify {
         let hello_commit_session = exec_hello_commit();
 
         let spec = &MultiTestSpec::SysVerifyIntegrity {
-            metadata_words: to_vec(&hello_commit_session.get_metadata().unwrap()).unwrap(),
+            claim_words: to_vec(&hello_commit_session.get_claim().unwrap()).unwrap(),
         };
 
         // Test that it works when the assumption is added.
         let env = ExecutorEnv::builder()
             .write(&spec)
             .unwrap()
-            .add_assumption(hello_commit_session.get_metadata().unwrap().into())
+            .add_assumption(hello_commit_session.get_claim().unwrap().into())
             .build()
             .unwrap();
         let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
@@ -586,13 +605,13 @@ mod sys_verify {
             let halt_session = exec_halt(code);
 
             let spec = &MultiTestSpec::SysVerifyIntegrity {
-                metadata_words: to_vec(&halt_session.get_metadata().unwrap()).unwrap(),
+                claim_words: to_vec(&halt_session.get_claim().unwrap()).unwrap(),
             };
 
             let env = ExecutorEnv::builder()
                 .write(&spec)
                 .unwrap()
-                .add_assumption(halt_session.get_metadata().unwrap().into())
+                .add_assumption(halt_session.get_claim().unwrap().into())
                 .build()
                 .unwrap();
             let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
@@ -610,13 +629,13 @@ mod sys_verify {
             let pause_session = exec_pause(code);
 
             let spec = &MultiTestSpec::SysVerifyIntegrity {
-                metadata_words: to_vec(&pause_session.get_metadata().unwrap()).unwrap(),
+                claim_words: to_vec(&pause_session.get_claim().unwrap()).unwrap(),
             };
 
             let env = ExecutorEnv::builder()
                 .write(&spec)
                 .unwrap()
-                .add_assumption(pause_session.get_metadata().unwrap().into())
+                .add_assumption(pause_session.get_claim().unwrap().into())
                 .build()
                 .unwrap();
             let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
@@ -629,18 +648,18 @@ mod sys_verify {
 
     #[test]
     fn sys_verify_integrity_fault() {
-        // NOTE: ReceiptMetadata for this Session won't differentiate Fault and SystemSplit,
+        // NOTE: ReceiptClaim for this Session won't differentiate Fault and SystemSplit,
         // since these cannot be distinguished from the circuit's point of view.
         let fault_session = exec_fault();
 
         let spec = &MultiTestSpec::SysVerifyIntegrity {
-            metadata_words: to_vec(&fault_session.get_metadata().unwrap()).unwrap(),
+            claim_words: to_vec(&fault_session.get_claim().unwrap()).unwrap(),
         };
 
         let env = ExecutorEnv::builder()
             .write(&spec)
             .unwrap()
-            .add_assumption(fault_session.get_metadata().unwrap().into())
+            .add_assumption(fault_session.get_claim().unwrap().into())
             .build()
             .unwrap();
         let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
@@ -651,23 +670,22 @@ mod sys_verify {
     }
 
     #[test]
-    fn sys_verify_integrity_pruned_metadata() {
+    fn sys_verify_integrity_pruned_claim() {
         let hello_commit_session = exec_hello_commit();
 
-        // Prune the metadata before providing it as input so that it cannot be checked to have no
+        // Prune the claim before providing it as input so that it cannot be checked to have no
         // assumptions.
-        let pruned_metadata = MaybePruned::<ReceiptMetadata>::Pruned(
-            hello_commit_session.get_metadata().unwrap().digest(),
-        );
+        let pruned_claim =
+            MaybePruned::<ReceiptClaim>::Pruned(hello_commit_session.get_claim().unwrap().digest());
         let spec = &MultiTestSpec::SysVerifyIntegrity {
-            metadata_words: to_vec(&pruned_metadata).unwrap(),
+            claim_words: to_vec(&pruned_claim).unwrap(),
         };
 
         // Test that it works when the assumption is added.
         let env = ExecutorEnv::builder()
             .write(&spec)
             .unwrap()
-            .add_assumption(hello_commit_session.get_metadata().unwrap().into())
+            .add_assumption(hello_commit_session.get_claim().unwrap().into())
             .build()
             .unwrap();
 
@@ -796,6 +814,16 @@ fn random() {
 }
 
 #[test]
+#[should_panic(expected = "Guest code attempted to call getrandom but it was disabled")]
+fn getrandom_panic() {
+    let env = ExecutorEnv::builder().build().unwrap();
+    let _session = ExecutorImpl::from_elf(env, RAND_ELF)
+        .unwrap()
+        .run()
+        .unwrap();
+}
+
+#[test]
 fn slice_io() {
     let run = |slice: &[u8]| {
         let env = ExecutorEnv::builder()
@@ -838,13 +866,8 @@ fn fault() {
     assert_eq!(session.exit_code, ExitCode::Fault);
 }
 
-#[cfg(feature = "profiler")]
 #[test]
 fn profiler() {
-    use risc0_binfmt::Program;
-
-    use crate::host::profiler::{Frame, Profiler};
-
     let mut profiler = Profiler::new(MULTI_TEST_ELF, Some("multi_test.elf")).unwrap();
     let env = ExecutorEnv::builder()
         .write(&MultiTestSpec::Profiler)
@@ -981,7 +1004,8 @@ fn post_state_digest_randomization() {
                 .unwrap()
                 .resolve()
                 .unwrap()
-                .post_image_id
+                .post_state
+                .digest()
         })
         .collect();
     assert_eq!(post_state_digests.len(), ITERATIONS);
@@ -1018,7 +1042,8 @@ fn post_state_digest_randomization() {
                 .unwrap()
                 .resolve()
                 .unwrap()
-                .post_image_id
+                .post_state
+                .digest()
         })
         .collect();
     assert_eq!(post_state_digests.len(), 1);

@@ -17,7 +17,7 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 test-log = { version = "0.2", default-features = false, features = ["trace"] }
 
 [features]
-default = []
 cuda = ["risc0-zkvm/cuda"]
-prove = ["risc0-zkvm/cuda"]
-profiler = ["risc0-zkvm/profiler"]
+default = []
+metal = ["risc0-zkvm/metal"]
+prove = ["risc0-zkvm/prove"]

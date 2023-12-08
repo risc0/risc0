@@ -11,7 +11,7 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 release = false
 
 [package.metadata.risc0]
-methods = ["guest", "std"]
+methods = ["guest", "rand", "std"]
 
 [dependencies]
 risc0-zkvm = { workspace = true }
