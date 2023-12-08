@@ -20,8 +20,9 @@ pub(crate) mod tests {
         SessionId,
     };
     use ethers::types::{Address, Bytes, H256};
-    use risc0_zkvm::{receipt_metadata::MaybePruned, sha::Digest, ExitCode, ReceiptMetadata};
-    use risc0_zkvm::{InnerReceipt, Journal, Receipt};
+    use risc0_zkvm::{
+        sha::Digest, ExitCode, InnerReceipt, Journal, MaybePruned, Receipt, ReceiptClaim,
+    };
     use uuid::Uuid;
     use wiremock::{
         matchers::{method, path},
@@ -47,7 +48,7 @@ pub(crate) mod tests {
         let receipt_data_response = Receipt {
             journal: Journal::new(vec![]),
             inner: InnerReceipt::Fake {
-                metadata: ReceiptMetadata {
+                claim: ReceiptClaim {
                     pre: MaybePruned::Pruned(Digest::ZERO),
                     post: MaybePruned::Pruned(Digest::ZERO),
                     exit_code: ExitCode::Halted(0),

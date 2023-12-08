@@ -12,7 +12,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-risc0-zkvm = { path = "../..", default-features = false, features = ["std"] }
+risc0-zkvm = { path = "../..", default-features = false, features = ["std", "getrandom"] }
 risc0-zkvm-methods = { path = "..", default-features = false }
 
 [profile.release]

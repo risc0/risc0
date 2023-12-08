@@ -21,8 +21,6 @@ use std::{
 use anyhow::{anyhow, bail, Result};
 use bytes::Bytes;
 use prost::Message;
-use risc0_binfmt::{MemoryImage, Program};
-use risc0_zkvm_platform::{memory::GUEST_MAX_MEM, PAGE_SIZE};
 use serde::{Deserialize, Serialize};
 
 use super::{malformed_err, path_to_string, pb, ConnectionWrapper, Connector, TcpConnector};
@@ -48,21 +46,6 @@ struct EmptySegmentRef;
 impl SegmentRef for EmptySegmentRef {
     fn resolve(&self) -> Result<Segment> {
         Err(anyhow!("Segment resolution not supported"))
-    }
-}
-
-impl pb::api::Binary {
-    fn as_image(&self) -> Result<MemoryImage> {
-        let bytes = self.asset.as_ref().ok_or(malformed_err())?.as_bytes()?;
-        let image = match self.kind() {
-            pb::api::binary::Kind::Unspecified => bail!(malformed_err()),
-            pb::api::binary::Kind::Image => pb::core::MemoryImage::decode(bytes)?.try_into()?,
-            pb::api::binary::Kind::Elf => {
-                let program = Program::load_elf(&bytes, GUEST_MAX_MEM as u32)?;
-                MemoryImage::new(&program, PAGE_SIZE as u32)?
-            }
-        };
-        Ok(image)
     }
 }
 
@@ -290,10 +273,11 @@ impl Server {
             let env = build_env(&conn, &env_request)?;
 
             let binary = env_request.binary.ok_or(malformed_err())?;
-            let image = binary.as_image()?;
-            let segments_out = request.segments_out.ok_or(malformed_err())?;
 
-            let mut exec = ExecutorImpl::new(env, image)?;
+            let segments_out = request.segments_out.ok_or(malformed_err())?;
+            let bytes = binary.as_bytes()?;
+            let mut exec = ExecutorImpl::from_elf(env, &bytes)?;
+
             let session = exec.run_with_callback(|segment| {
                 let segment_bytes = bincode::serialize(&segment)?;
                 let asset = pb::api::Asset::from_bytes(
@@ -362,12 +346,12 @@ impl Server {
             let env = build_env(&conn, &env_request)?;
 
             let binary = env_request.binary.ok_or(malformed_err())?;
-            let image = binary.as_image()?;
+            let bytes = binary.as_bytes()?;
 
             let opts: ProverOpts = request.opts.ok_or(malformed_err())?.into();
             let prover = get_prover_server(&opts)?;
             let ctx = VerifierContext::default();
-            let receipt = prover.prove(env, &ctx, image)?;
+            let receipt = prover.prove_elf_with_ctx(env, &ctx, &bytes)?;
 
             let receipt_pb: pb::core::Receipt = receipt.into();
             let receipt_bytes = receipt_pb.encode_to_vec();
@@ -582,6 +566,9 @@ fn build_env<'a>(
     if let Some(_) = request.trace_events {
         let proxy = TraceProxy::new(conn.try_clone()?);
         env_builder.trace_callback(proxy);
+    }
+    if !request.pprof_out.is_empty() {
+        env_builder.enable_profiler(Path::new(&request.pprof_out));
     }
     env_builder.build()
 }

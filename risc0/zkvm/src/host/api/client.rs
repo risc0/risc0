@@ -12,15 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{ops::Not, path::Path};
+use std::path::Path;
 
 use anyhow::{anyhow, bail, Result};
 use bytes::Bytes;
 use prost::Message;
 
 use super::{
-    malformed_err, pb, Asset, AssetRequest, Binary, ConnectionWrapper, Connector,
-    ParentProcessConnector, SessionInfo,
+    malformed_err, pb, Asset, AssetRequest, ConnectionWrapper, Connector, ParentProcessConnector,
+    SessionInfo,
 };
 use crate::{
     get_version,
@@ -67,13 +67,8 @@ impl Client {
         Self { connector }
     }
 
-    /// Prove the specified [Binary].
-    pub fn prove(
-        &self,
-        env: &ExecutorEnv<'_>,
-        opts: ProverOpts,
-        binary: Binary,
-    ) -> Result<Receipt> {
+    /// Prove the specified ELF binary.
+    pub fn prove(&self, env: &ExecutorEnv<'_>, opts: ProverOpts, binary: Asset) -> Result<Receipt> {
         let mut conn = self.connect()?;
 
         let request = pb::api::ServerRequest {
@@ -101,11 +96,11 @@ impl Client {
         receipt_pb.try_into()
     }
 
-    /// Execute the specified [Binary].
+    /// Execute the specified ELF binary.
     pub fn execute<F>(
         &self,
         env: &ExecutorEnv<'_>,
-        binary: Binary,
+        binary: Asset,
         segments_out: AssetRequest,
         segment_callback: F,
     ) -> Result<SessionInfo>
@@ -331,7 +326,7 @@ impl Client {
     fn make_execute_env(
         &self,
         env: &ExecutorEnv<'_>,
-        binary: pb::api::Binary,
+        binary: pb::api::Asset,
     ) -> pb::api::ExecutorEnv {
         pb::api::ExecutorEnv {
             binary: Some(binary),
@@ -342,7 +337,12 @@ impl Client {
             write_fds: env.posix_io.borrow().write_fds.keys().cloned().collect(),
             segment_limit_po2: env.segment_limit_po2,
             session_limit: env.session_limit,
-            trace_events: env.trace.is_empty().not().then_some(()),
+            trace_events: (!env.trace.is_empty()).then_some(()),
+            pprof_out: env
+                .pprof_out
+                .as_ref()
+                .map(|x| x.to_string_lossy().into())
+                .unwrap_or_default(),
         }
     }
 

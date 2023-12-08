@@ -20,6 +20,7 @@ csv = "1.1"
 ed25519-dalek = { version = "2.0.0-rc.3", default-features = false, features = [
   "rand_core",
 ] }
+enum-iterator = "1.4"
 hex = "0.4"
 k256 = { version = "0.13", features = ["serde"] }
 rand = "0.8"
@@ -38,9 +39,6 @@ starknet-crypto = "0.6"
 tokio = { version = "1", features = ["full"] }
 tracing = { version = "0.1", default-features = false }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
-zeth-guests = { git = "https://github.com/risc0/zeth", branch = "capossele/bump-risc0-f265059f", package = "zeth-guests" }
-zeth-lib = { git = "https://github.com/risc0/zeth", branch = "capossele/bump-risc0-f265059f", package = "zeth-lib" }
-zeth-primitives = { git = "https://github.com/risc0/zeth", branch = "capossele/bump-risc0-f265059f", package = "zeth-primitives" }
 
 [features]
 cuda = ["risc0-zkvm/cuda"]

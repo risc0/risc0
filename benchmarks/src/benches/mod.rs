@@ -22,8 +22,6 @@ pub mod fibonacci;
 pub mod iter_blake2b;
 pub mod iter_blake3;
 pub mod iter_keccak;
-pub mod iter_pedersen;
 pub mod iter_sha2;
 pub mod membership;
 pub mod sudoku;
-pub mod zeth;

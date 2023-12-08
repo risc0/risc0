@@ -19,15 +19,13 @@ use std::{
 };
 
 use anyhow::Result;
-use risc0_binfmt::{MemoryImage, Program};
 use risc0_zkvm_methods::{
     multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID, MULTI_TEST_PATH,
 };
-use risc0_zkvm_platform::{memory::GUEST_MAX_MEM, PAGE_SIZE};
 use tempfile::{tempdir, TempDir};
 use test_log::test;
 
-use super::{Asset, AssetRequest, Binary, ConnectionWrapper, Connector, TcpConnection};
+use super::{Asset, AssetRequest, ConnectionWrapper, Connector, TcpConnection};
 use crate::{
     recursion::SuccinctReceipt, ApiClient, ApiServer, ExecutorEnv, InnerReceipt, ProverOpts,
     Receipt, SegmentReceipt, SessionInfo, VerifierContext,
@@ -76,7 +74,7 @@ impl TestClient {
         self.work_dir.path().to_path_buf()
     }
 
-    fn execute(&mut self, env: ExecutorEnv<'_>, binary: Binary) -> SessionInfo {
+    fn execute(&mut self, env: ExecutorEnv<'_>, binary: Asset) -> SessionInfo {
         with_server(self.addr, || {
             let segments_out = AssetRequest::Path(self.get_work_path());
             self.client
@@ -87,7 +85,7 @@ impl TestClient {
         })
     }
 
-    fn prove(&self, env: ExecutorEnv<'_>, opts: ProverOpts, binary: Binary) -> Receipt {
+    fn prove(&self, env: ExecutorEnv<'_>, opts: ProverOpts, binary: Asset) -> Receipt {
         with_server(self.addr, || self.client.prove(&env, opts, binary))
     }
 
@@ -143,20 +141,7 @@ fn execute_elf() {
         .unwrap()
         .build()
         .unwrap();
-    let binary = Binary::new_elf_path(MULTI_TEST_PATH);
-    TestClient::new().execute(env, binary);
-}
-
-#[test]
-fn execute_image() {
-    let env = ExecutorEnv::builder()
-        .write(&MultiTestSpec::DoNothing)
-        .unwrap()
-        .build()
-        .unwrap();
-    let program = Program::load_elf(&MULTI_TEST_ELF, GUEST_MAX_MEM as u32).unwrap();
-    let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
-    let binary = image.into();
+    let binary = Asset::Inline(MULTI_TEST_ELF.into());
     TestClient::new().execute(env, binary);
 }
 
@@ -167,7 +152,7 @@ fn prove_elf() {
         .unwrap()
         .build()
         .unwrap();
-    let binary = Binary::new_elf_path(MULTI_TEST_PATH);
+    let binary = Asset::Path(MULTI_TEST_PATH.into());
     let opts = ProverOpts::default();
     let receipt = TestClient::new().prove(env, opts, binary);
     receipt.verify(MULTI_TEST_ID).unwrap();
@@ -180,7 +165,7 @@ fn prove_segment_elf() {
         .unwrap()
         .build()
         .unwrap();
-    let binary = Binary::new_elf_path(MULTI_TEST_PATH);
+    let binary = Asset::Inline(MULTI_TEST_ELF.into());
 
     let mut client = TestClient::new();
 
@@ -205,7 +190,7 @@ fn lift_join_identity() {
         .segment_limit_po2(segment_limit_po2)
         .build()
         .unwrap();
-    let binary = Binary::new_elf_path(MULTI_TEST_PATH);
+    let binary = Asset::Inline(MULTI_TEST_ELF.into());
 
     let mut client = TestClient::new();
 
@@ -244,6 +229,6 @@ fn guest_error_forwarding() {
         .unwrap()
         .build()
         .unwrap();
-    let binary = Binary::new_elf_path(MULTI_TEST_PATH);
+    let binary = Asset::Inline(MULTI_TEST_ELF.into());
     TestClient::new().execute(env, binary);
 }

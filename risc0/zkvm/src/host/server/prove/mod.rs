@@ -26,7 +26,6 @@ use std::rc::Rc;
 
 use anyhow::Result;
 use cfg_if::cfg_if;
-use risc0_binfmt::{MemoryImage, Program};
 use risc0_circuit_rv32im::CircuitImpl;
 use risc0_core::field::{
     baby_bear::{BabyBear, Elem, ExtElem},
@@ -37,7 +36,7 @@ use risc0_zkp::{
     core::digest::DIGEST_WORDS,
     hal::{CircuitHal, Hal},
 };
-use risc0_zkvm_platform::{memory::GUEST_MAX_MEM, PAGE_SIZE, WORD_SIZE};
+use risc0_zkvm_platform::WORD_SIZE;
 
 use self::{dev_mode::DevModeProver, prover_impl::ProverImpl};
 use crate::{
@@ -45,36 +44,24 @@ use crate::{
     is_dev_mode, ExecutorEnv, ExecutorImpl, ProverOpts, Receipt, Segment, Session, VerifierContext,
 };
 
-/// A ProverServer can execute a given [MemoryImage] and produce a [Receipt]
+/// A ProverServer can execute a given ELF binary and produce a [Receipt]
 /// that can be used to verify correct computation.
 pub trait ProverServer {
-    /// Prove the specified [MemoryImage].
-    fn prove(
-        &self,
-        env: ExecutorEnv<'_>,
-        ctx: &VerifierContext,
-        image: MemoryImage,
-    ) -> Result<Receipt> {
-        let mut exec = ExecutorImpl::new(env, image)?;
-        let session = exec.run()?;
-        self.prove_session(ctx, &session)
-    }
-
     /// Prove the specified ELF binary.
     fn prove_elf(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<Receipt> {
         self.prove_elf_with_ctx(env, &VerifierContext::default(), elf)
     }
 
-    /// Prove the specified [MemoryImage] using the specified [VerifierContext].
+    /// Prove the specified ELF binary using the specified [VerifierContext].
     fn prove_elf_with_ctx(
         &self,
         env: ExecutorEnv<'_>,
         ctx: &VerifierContext,
         elf: &[u8],
     ) -> Result<Receipt> {
-        let program = Program::load_elf(elf, GUEST_MAX_MEM as u32)?;
-        let image = MemoryImage::new(&program, PAGE_SIZE as u32)?;
-        self.prove(env, ctx, image)
+        let mut exec = ExecutorImpl::from_elf(env, elf)?;
+        let session = exec.run()?;
+        self.prove_session(ctx, &session)
     }
 
     /// Prove the specified [Session].
@@ -125,7 +112,7 @@ impl Segment {
         prover.prove_segment(ctx, self)
     }
 
-    fn prepare_globals(&self) -> Vec<Elem> {
+    fn prepare_globals(&self) -> Result<Vec<Elem>> {
         let mut io = vec![Elem::INVALID; CircuitImpl::OUTPUT_SIZE];
         tracing::debug!("run> pc: 0x{:08x}", self.pre_image.pc);
 
@@ -144,7 +131,7 @@ impl Segment {
         offset += WORD_SIZE;
 
         // initialize ImageID
-        let merkle_root = self.pre_image.compute_root_hash();
+        let merkle_root = self.pre_image.compute_root_hash()?;
         let merkle_root = merkle_root.as_words();
         for i in 0..DIGEST_WORDS {
             let bytes = merkle_root[i].to_le_bytes();
@@ -153,7 +140,7 @@ impl Segment {
             }
         }
 
-        io
+        Ok(io)
     }
 }
 

@@ -20,30 +20,23 @@ pub(crate) mod local;
 use std::{path::PathBuf, rc::Rc};
 
 use anyhow::Result;
-use risc0_binfmt::{MemoryImage, Program};
-use risc0_zkvm_platform::{memory::GUEST_MAX_MEM, PAGE_SIZE};
 use serde::{Deserialize, Serialize};
 
 use self::{bonsai::BonsaiProver, external::ExternalProver};
 use crate::{is_dev_mode, ExecutorEnv, Receipt, SessionInfo, VerifierContext};
 
-/// A Prover can execute a given [MemoryImage] or ELF binary and produce a
+/// A Prover can execute a given ELF binary and produce a
 /// [Receipt] that can be used to verify correct computation.
 ///
 /// # Usage
-/// To produce a proof, you must minimally provide an [ExecutorEnv] and either
-/// an ELF binary or a [MemoryImage]. See the
-/// [risc0_build](https://docs.rs/risc0-build/latest/risc0_build/) crate for
-/// more information on producing ELF binaries from Rust source code.
+/// To produce a proof, you must minimally provide an [ExecutorEnv] and an ELF
+/// binary. See the [risc0_build](https://docs.rs/risc0-build/*/risc0_build)
+/// crate for more information on producing ELF binaries from Rust source code.
 ///
 /// ```rust
 /// use risc0_zkvm::{
 ///     default_prover,
 ///     ExecutorEnv,
-///     GUEST_MAX_MEM,
-///     MemoryImage,
-///     PAGE_SIZE,
-///     Program,
 ///     ProverOpts,
 ///     VerifierContext,
 /// };
@@ -61,30 +54,11 @@ use crate::{is_dev_mode, ExecutorEnv, Receipt, SessionInfo, VerifierContext};
 /// let ctx = VerifierContext::default();
 /// let opts = ProverOpts::default();
 /// let receipt = default_prover().prove_elf_with_ctx(env, &ctx, FIB_ELF, &opts).unwrap();
-///
-/// // Or you can prove from a `MemoryImage`
-/// // (generating a `MemoryImage` from an ELF binary in this way is equivalent
-/// // to the above code.)
-/// let program = Program::load_elf(FIB_ELF, GUEST_MAX_MEM as u32).unwrap();
-/// let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
-/// let env = ExecutorEnv::builder().write_slice(&[20]).build().unwrap();
-/// let ctx = VerifierContext::default();
-/// let opts = ProverOpts::default();
-/// let receipt = default_prover().prove(env, &ctx, &opts, image).unwrap();
 /// # }
 /// ```
 pub trait Prover {
     /// Return a name for this [Prover].
     fn get_name(&self) -> String;
-
-    /// Prove zkVM execution starting from the specified [MemoryImage].
-    fn prove(
-        &self,
-        env: ExecutorEnv<'_>,
-        ctx: &VerifierContext,
-        opts: &ProverOpts,
-        image: MemoryImage,
-    ) -> Result<Receipt>;
 
     /// Prove zkVM execution starting from the specified ELF binary.
     fn prove_elf(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<Receipt> {
@@ -96,7 +70,7 @@ pub trait Prover {
         )
     }
 
-    /// Prove zkVM execution starting from the specified [MemoryImage] with the
+    /// Prove zkVM execution starting from the specified ELF binary with the
     /// specified [VerifierContext] and [ProverOpts].
     fn prove_elf_with_ctx(
         &self,
@@ -104,70 +78,15 @@ pub trait Prover {
         ctx: &VerifierContext,
         elf: &[u8],
         opts: &ProverOpts,
-    ) -> Result<Receipt> {
-        #[cfg(feature = "profiler")]
-        let mut env = env;
-        #[cfg(feature = "profiler")]
-        let profiler = crate::host::profiler::env::pprof_path()
-            .map(|_| -> anyhow::Result<_> {
-                let profiler = Rc::new(std::cell::RefCell::new(crate::Profiler::new(elf, None)?));
-                env.trace.push(profiler.clone());
-                Ok(profiler)
-            })
-            .transpose()?;
-
-        let program = Program::load_elf(elf, GUEST_MAX_MEM as u32)?;
-        let image = MemoryImage::new(&program, PAGE_SIZE as u32)?;
-        let receipt = self.prove(env, ctx, opts, image)?;
-
-        #[cfg(feature = "profiler")]
-        if let Some(profiler) = profiler {
-            let unwrapped = Rc::into_inner(profiler)
-                .ok_or(anyhow::anyhow!("failed to finalize profiler"))?
-                .into_inner();
-            crate::host::profiler::env::write_pprof_file(&unwrapped.finalize_to_vec())?;
-        }
-
-        Ok(receipt)
-    }
+    ) -> Result<Receipt>;
 }
 
-/// An Executor can execute a given [MemoryImage] or ELF binary.
+/// An Executor can execute a given ELF binary.
 pub trait Executor {
-    /// Execute the specified [MemoryImage].
-    ///
-    /// This only executes the program and does not generate a receipt.
-    fn execute(&self, env: ExecutorEnv<'_>, image: MemoryImage) -> Result<SessionInfo>;
-
     /// Execute the specified ELF binary.
     ///
     /// This only executes the program and does not generate a receipt.
-    fn execute_elf(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<SessionInfo> {
-        #[cfg(feature = "profiler")]
-        let mut env = env;
-        #[cfg(feature = "profiler")]
-        let profiler = crate::host::profiler::env::pprof_path()
-            .map(|_| -> anyhow::Result<_> {
-                let profiler = Rc::new(std::cell::RefCell::new(crate::Profiler::new(elf, None)?));
-                env.trace.push(profiler.clone());
-                Ok(profiler)
-            })
-            .transpose()?;
-
-        let program = Program::load_elf(elf, GUEST_MAX_MEM as u32)?;
-        let image = MemoryImage::new(&program, PAGE_SIZE as u32)?;
-        let session_info = self.execute(env, image)?;
-
-        #[cfg(feature = "profiler")]
-        if let Some(profiler) = profiler {
-            let unwrapped = Rc::into_inner(profiler)
-                .ok_or(anyhow::anyhow!("failed to finalize profiler"))?
-                .into_inner();
-            crate::host::profiler::env::write_pprof_file(&unwrapped.finalize_to_vec())?;
-        }
-
-        Ok(session_info)
-    }
+    fn execute_elf(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<SessionInfo>;
 }
 
 /// Options to configure a [Prover].

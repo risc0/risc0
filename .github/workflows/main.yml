@@ -155,14 +155,16 @@ jobs:
         uses: ./.github/actions/cuda
       - uses: ./.github/actions/rustup
       - uses: risc0/foundry-toolchain@2fe7e70b520f62368a0e3c464f997df07ede420f
+        with:
+          version: nightly-34f684ddfacc5b2ed371353ba6f730c485616ffe
       - uses: ./.github/actions/sccache
         with:
           key: ${{ matrix.os }}-${{ matrix.feature }}
       - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
       - name: build workspace
-        run: cargo test -F $FEATURE -F fault-proof -F profiler -F prove --workspace --exclude doc-test --timings --no-run
+        run: cargo test -F $FEATURE -F fault-proof -F prove --workspace --exclude doc-test --timings --no-run
       - name: test workspace
-        run: cargo test -F $FEATURE -F fault-proof -F profiler -F prove --workspace --exclude doc-test --timings
+        run: cargo test -F $FEATURE -F fault-proof -F prove --workspace --exclude doc-test --timings
       - uses: actions/upload-artifact@v3
         with:
           name: cargo-timings-${{ matrix.os }}-${{ matrix.device }}
@@ -247,6 +249,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/rustup
       - uses: risc0/foundry-toolchain@2fe7e70b520f62368a0e3c464f997df07ede420f
+        with:
+          version: nightly-34f684ddfacc5b2ed371353ba6f730c485616ffe
       - uses: ./.github/actions/sccache
         with:
           key: macOS-default
@@ -328,7 +332,7 @@ jobs:
   web:
     if: needs.changes.outputs.web == 'true'
     needs: changes
-    runs-on: ubuntu-latest-8-cores
+    runs-on: [self-hosted, prod, Linux, cpu]
     env:
       RISC0_BUILD_LOCKED: 1
     steps:
