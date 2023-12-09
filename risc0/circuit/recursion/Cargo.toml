@@ -34,7 +34,10 @@ tracing-forest = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [build-dependencies]
-downloader = { version = "0.2", features = ["verify"], optional = true }
+downloader = { version = "0.2", default-features = false, features = [
+  "rustls-tls",
+  "verify",
+], optional = true }
 sha2 = { version = "0.10", optional = true }
 
 [features]
