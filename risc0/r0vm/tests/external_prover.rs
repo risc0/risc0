@@ -25,7 +25,7 @@ fn prove_nothing() -> Result<Receipt> {
         .unwrap();
     let r0vm_path = cargo_bin("r0vm");
     let prover = ExternalProver::new("r0vm", r0vm_path);
-    prover.prove_elf(env, MULTI_TEST_ELF)
+    prover.prove(env, MULTI_TEST_ELF)
 }
 
 #[test_log::test]

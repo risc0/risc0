@@ -93,7 +93,7 @@ fn allocate(input: &str, output: &str, recipient: &str, amount: &Decimal) {
     let prover = default_prover();
 
     // Produce a receipt by proving the specified ELF binary.
-    let receipt = prover.prove_elf(env, PRORATA_GUEST_ELF).unwrap();
+    let receipt = prover.prove(env, PRORATA_GUEST_ELF).unwrap();
 
     // Verify receipt to confirm that it is correctly formed. Not strictly
     // necessary.

@@ -36,14 +36,14 @@ impl LocalProver {
 }
 
 impl Prover for LocalProver {
-    fn prove_elf_with_ctx(
+    fn prove_with_ctx(
         &self,
         env: ExecutorEnv<'_>,
         ctx: &VerifierContext,
         elf: &[u8],
         opts: &ProverOpts,
     ) -> Result<Receipt> {
-        get_prover_server(opts)?.prove_elf_with_ctx(env, ctx, elf)
+        get_prover_server(opts)?.prove_with_ctx(env, ctx, elf)
     }
 
     fn get_name(&self) -> String {
@@ -52,7 +52,7 @@ impl Prover for LocalProver {
 }
 
 impl Executor for LocalProver {
-    fn execute_elf(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<SessionInfo> {
+    fn execute(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<SessionInfo> {
         let mut exec = ExecutorImpl::from_elf(env, elf)?;
         let session = exec.run()?;
         let mut segments = Vec::new();

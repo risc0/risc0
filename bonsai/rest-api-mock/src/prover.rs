@@ -94,7 +94,7 @@ impl Prover {
                     })?;
                 let exec = default_executor();
                 let session = exec
-                    .execute_elf(env, elf)
+                    .execute(env, elf)
                     .context("Executor failed to generate a successful session")?;
 
                 let receipt = Receipt {

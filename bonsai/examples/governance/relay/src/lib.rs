@@ -35,7 +35,7 @@ pub fn execute_locally(elf: &[u8], input: Vec<u8>) -> Result<Output> {
         .build()
         .context("Failed to build ExecutorEnv")?;
     let exec = default_executor();
-    let session = exec.execute_elf(env, elf).context("Execution failed")?;
+    let session = exec.execute(env, elf).context("Execution failed")?;
     Ok(Output::Execution {
         journal: session.journal.bytes.into(),
     })

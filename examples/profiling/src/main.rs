@@ -26,7 +26,7 @@ fn main() -> anyhow::Result<()> {
     // Execute the guest code.
     let env = ExecutorEnv::builder().write(&iterations)?.build()?;
     let exec = default_executor();
-    exec.execute_elf(env, FIBONACCI_ELF)?;
+    exec.execute(env, FIBONACCI_ELF)?;
 
     Ok(())
 }

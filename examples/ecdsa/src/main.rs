@@ -40,7 +40,7 @@ fn prove_ecdsa_verification(
     let prover = default_prover();
 
     // Produce a receipt by proving the specified ELF binary.
-    prover.prove_elf(env, ECDSA_VERIFY_ELF).unwrap()
+    prover.prove(env, ECDSA_VERIFY_ELF).unwrap()
 }
 
 fn main() {

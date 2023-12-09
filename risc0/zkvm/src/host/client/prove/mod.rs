@@ -46,14 +46,14 @@ use crate::{is_dev_mode, ExecutorEnv, Receipt, SessionInfo, VerifierContext};
 /// # {
 /// // A straightforward case with an ELF binary
 /// let env = ExecutorEnv::builder().write_slice(&[20]).build().unwrap();
-/// let receipt = default_prover().prove_elf(env, FIB_ELF).unwrap();
+/// let receipt = default_prover().prove(env, FIB_ELF).unwrap();
 ///
 /// // Or you can specify a context and options
 /// // (Using the defaults as we do here is equivalent to the above code.)
 /// let env = ExecutorEnv::builder().write_slice(&[20]).build().unwrap();
 /// let ctx = VerifierContext::default();
 /// let opts = ProverOpts::default();
-/// let receipt = default_prover().prove_elf_with_ctx(env, &ctx, FIB_ELF, &opts).unwrap();
+/// let receipt = default_prover().prove_with_ctx(env, &ctx, FIB_ELF, &opts).unwrap();
 /// # }
 /// ```
 pub trait Prover {
@@ -61,8 +61,8 @@ pub trait Prover {
     fn get_name(&self) -> String;
 
     /// Prove zkVM execution starting from the specified ELF binary.
-    fn prove_elf(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<Receipt> {
-        self.prove_elf_with_ctx(
+    fn prove(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<Receipt> {
+        self.prove_with_ctx(
             env,
             &VerifierContext::default(),
             elf,
@@ -72,7 +72,7 @@ pub trait Prover {
 
     /// Prove zkVM execution starting from the specified ELF binary with the
     /// specified [VerifierContext] and [ProverOpts].
-    fn prove_elf_with_ctx(
+    fn prove_with_ctx(
         &self,
         env: ExecutorEnv<'_>,
         ctx: &VerifierContext,
@@ -86,7 +86,7 @@ pub trait Executor {
     /// Execute the specified ELF binary.
     ///
     /// This only executes the program and does not generate a receipt.
-    fn execute_elf(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<SessionInfo>;
+    fn execute(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<SessionInfo>;
 }
 
 /// Options to configure a [Prover].
