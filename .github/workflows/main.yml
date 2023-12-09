@@ -157,18 +157,18 @@ jobs:
           key: ${{ matrix.os }}-${{ matrix.feature }}
       - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
       - name: build workspace
-        run: >
-          cargo test -F $FEATURE -F fault-proof -F prove --workspace --timings --no-run
-            --exclude doc-test
-            --exclude bonsai-ethereum-contracts
-            --exclude bonsai-ethereum-relay
+        run: |
+          cargo test -F $FEATURE -F fault-proof -F prove --workspace --timings --no-run \
+            --exclude doc-test \
+            --exclude bonsai-ethereum-contracts \
+            --exclude bonsai-ethereum-relay \
             --exclude bonsai-rest-api-mock
       - name: test workspace
-        run: >
-          cargo test -F $FEATURE -F fault-proof -F prove --workspace --timings
-            --exclude doc-test
-            --exclude bonsai-ethereum-contracts
-            --exclude bonsai-ethereum-relay
+        run: |
+          cargo test -F $FEATURE -F fault-proof -F prove --workspace --timings \
+            --exclude doc-test \
+            --exclude bonsai-ethereum-contracts \
+            --exclude bonsai-ethereum-relay \
             --exclude bonsai-rest-api-mock
       - uses: actions/upload-artifact@v3
         with:
