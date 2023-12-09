@@ -40,7 +40,7 @@ impl ExternalProver {
 }
 
 impl Prover for ExternalProver {
-    fn prove_elf_with_ctx(
+    fn prove_with_ctx(
         &self,
         env: ExecutorEnv<'_>,
         ctx: &VerifierContext,
@@ -74,7 +74,7 @@ impl Prover for ExternalProver {
 }
 
 impl Executor for ExternalProver {
-    fn execute_elf(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<SessionInfo> {
+    fn execute(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<SessionInfo> {
         let binary = Asset::Inline(elf.to_vec().into());
         let client = ApiClient::new_sub_process(&self.r0vm_path)?;
         let segments_out = AssetRequest::Inline;

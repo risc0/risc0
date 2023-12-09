@@ -206,7 +206,7 @@ fn generate_composition_receipt(hashfn: &str) -> Receipt {
 
     tracing::info!("Proving rv32im: hello commit");
     let assumption_receipt = prover
-        .prove_elf(ExecutorEnv::default(), HELLO_COMMIT_ELF)
+        .prove(ExecutorEnv::default(), HELLO_COMMIT_ELF)
         .unwrap();
     tracing::info!("Done proving rv32im: hello commit");
 
@@ -221,7 +221,7 @@ fn generate_composition_receipt(hashfn: &str) -> Receipt {
         .unwrap();
 
     tracing::info!("Proving rv32im: sys_verify");
-    let composition_receipt = prover.prove_elf(env, MULTI_TEST_ELF).unwrap();
+    let composition_receipt = prover.prove(env, MULTI_TEST_ELF).unwrap();
     tracing::info!("Done proving rv32im: sys_verify");
 
     composition_receipt

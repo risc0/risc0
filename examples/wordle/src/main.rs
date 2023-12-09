@@ -51,7 +51,7 @@ impl<'a> Server<'a> {
         let prover = default_prover();
 
         // Produce a receipt by proving the specified ELF binary.
-        prover.prove_elf(env, WORDLE_GUEST_ELF).unwrap()
+        prover.prove(env, WORDLE_GUEST_ELF).unwrap()
     }
 }
 
