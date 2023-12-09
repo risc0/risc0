@@ -182,7 +182,7 @@ jobs:
       - run: cargo test -p cargo-risczero -F experimental
         if: matrix.device == 'cpu'
       - run: |
-          cargo check -F $FEATURE --benches \
+          cargo check -F $FEATURE --benches --workspace \
             --exclude doc-test \
             --exclude bonsai-ethereum-contracts \
             --exclude bonsai-ethereum-relay \
