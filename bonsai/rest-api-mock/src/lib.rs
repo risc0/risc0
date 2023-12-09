@@ -25,7 +25,7 @@ use axum::{
     routing::{get, post, put},
     Extension, Router,
 };
-use tokio::sync::mpsc;
+use tokio::{net::TcpListener, sync::mpsc};
 use tower_http::trace::{DefaultOnRequest, TraceLayer};
 use tracing::{info, Level};
 
@@ -61,9 +61,10 @@ fn app(state: Arc<RwLock<BonsaiState>>, prover_handle: ProverHandle) -> Router {
 /// REST API of Bonsai alpha.
 ///
 /// Note that this mock only performs execution, no proving.
-pub async fn serve(port: String) -> anyhow::Result<()> {
-    let local_url = format!("http://localhost:{port}");
-    let bind_address = format!("0.0.0.0:{port}");
+pub async fn serve(listener: TcpListener) -> anyhow::Result<()> {
+    let local_addr = listener.local_addr().unwrap();
+    let port = local_addr.port();
+    let local_url = format!("http://127.0.0.1:{port}");
     let state = Arc::new(RwLock::new(BonsaiState::new(local_url)));
 
     let (sender, receiver) = mpsc::channel(8);
@@ -73,16 +74,11 @@ pub async fn serve(port: String) -> anyhow::Result<()> {
 
     tokio::spawn(async move { prover.run().await });
 
-    let listener = tokio::net::TcpListener::bind(&bind_address).await.unwrap();
-
-    let local_addr = listener.local_addr().unwrap();
     info!("Local Bonsai started on {local_addr}");
 
     axum::serve(listener, app(state, prover_handle))
         .await
-        .context(format!(
-            "failed to serve Local Bonsai API on {bind_address}"
-        ))
+        .context(format!("failed to serve Local Bonsai API on {local_addr}"))
 }
 
 #[cfg(test)]
@@ -93,6 +89,7 @@ mod test {
     use bonsai_sdk::alpha_async as bonsai_sdk;
     use risc0_zkvm::compute_image_id;
     use risc0_zkvm_methods::HELLO_COMMIT_ELF;
+    use tokio::net::TcpListener;
 
     use crate::serve;
 
@@ -140,12 +137,15 @@ mod test {
     async fn local_bonsai() {
         use std::{thread::sleep, time::Duration};
 
-        let local_bonsai_handle = tokio::spawn(async move { serve("8989".to_string()).await });
+        let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let local_addr = listener.local_addr().unwrap();
+        let local_bonsai_handle = tokio::spawn(async move { serve(listener).await });
+
         // wait for the service to be up
         sleep(Duration::from_secs(1));
 
         run_bonsai(
-            "http://localhost:8989".to_string(),
+            format!("http://{local_addr}"),
             "test_key".to_string(),
             HELLO_COMMIT_ELF,
         )
@@ -159,12 +159,15 @@ mod test {
     async fn local_bonsai_wrong_elf() {
         use std::{thread::sleep, time::Duration};
 
-        let local_bonsai_handle = tokio::spawn(async move { serve("8999".to_string()).await });
+        let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let local_addr = listener.local_addr().unwrap();
+        let local_bonsai_handle = tokio::spawn(async move { serve(listener).await });
+
         // wait for the service to be up
         sleep(Duration::from_secs(1));
 
         assert!(run_bonsai(
-            "http://localhost:8999".to_string(),
+            format!("http://{local_addr}"),
             "test_key".to_string(),
             b"wrong ELF"
         )

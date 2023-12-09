@@ -22,10 +22,15 @@ use bonsai_sdk::API_KEY_HEADER;
 
 pub(crate) async fn authorize(
     headers: HeaderMap,
-    req: Request,
+    mut req: Request,
     next: Next,
 ) -> Result<Response, StatusCode> {
-    if headers.contains_key(API_KEY_HEADER) {
+    if let Some(api_key) = headers
+        .get(API_KEY_HEADER)
+        .and_then(|x| x.to_str().ok())
+        .and_then(|x| Some(x.to_string()))
+    {
+        req.extensions_mut().insert(api_key);
         Ok(next.run(req).await)
     } else {
         Err(StatusCode::UNAUTHORIZED)

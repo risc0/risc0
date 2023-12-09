@@ -12,9 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#[cfg(test)]
-pub(crate) mod tests {
-
 use crate::downloader::proxy_callback_proof_request_stream::ProxyCallbackProofRequestStream;
 use ethers::types::{Bytes, H160, H256};
 
@@ -80,5 +77,4 @@ async fn integration_test_proxy_stream_runner() {
         }
         _ => false,
     });
-}
 }
