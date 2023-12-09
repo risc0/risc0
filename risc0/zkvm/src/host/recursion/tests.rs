@@ -24,7 +24,10 @@ use risc0_zkvm_methods::{
 use serial_test::serial;
 use test_log::test;
 
-use super::{identity_p254, join, lift, prove::poseidon254_hal_pair, resolve, Prover, ProverOpts};
+use super::{
+    identity_p254, join, lift, prove::poseidon254_hal_pair, prove::poseidon2_hal_pair, resolve,
+    Prover, ProverOpts,
+};
 use crate::{
     get_prover_server, ExecutorEnv, ExecutorImpl, InnerReceipt, Receipt, SegmentReceipt, Session,
     VerifierContext,
@@ -54,6 +57,48 @@ fn test_recursion() {
     let receipt = prover
         .run_with_hal(hal, circuit_hal)
         .expect("Running prover failed");
+
+    // Uncomment to write seal...
+    // let seal : Vec<u8> = bytemuck::cast_slice(receipt.seal.as_slice()).into();
+    // std::fs::write("recursion.seal", seal);
+
+    const DIGEST_SHORTS: usize = DIGEST_WORDS * 2;
+    assert_eq!(CircuitImpl::OUTPUT_SIZE, DIGEST_SHORTS * 2);
+    let output_elems: &[BabyBearElem] =
+        bytemuck::cast_slice(&receipt.seal[..CircuitImpl::OUTPUT_SIZE]);
+    let output_digest = shorts_to_digest(&output_elems[DIGEST_SHORTS..2 * DIGEST_SHORTS]);
+
+    tracing::debug!("Receipt output: {:?}", output_digest);
+    assert_eq!(output_digest, *expected);
+}
+
+// Failure on older mac minis in the lab with Intel UHD 630 graphics:
+// (signal: 11, SIGSEGV: invalid memory reference)
+#[cfg_attr(
+    not(all(feature = "metal", target_os = "macos", target_arch = "x86_64")),
+    test
+)]
+#[serial]
+fn test_recursion_poseidon2() {
+    use risc0_zkp::core::{digest::Digest, hash::poseidon::PoseidonHashSuite};
+
+    let suite = PoseidonHashSuite::new_suite();
+    let hal_pair = poseidon2_hal_pair();
+    let (hal, circuit_hal) = (hal_pair.hal.as_ref(), hal_pair.circuit_hal.as_ref());
+
+    // First, run the simple test of the recursion circuit.  This
+    // control tree just combines two hashes.
+    let digest1 = Digest::from([0, 1, 2, 3, 4, 5, 6, 7]);
+    let digest2 = Digest::from([8, 9, 10, 11, 12, 13, 14, 15]);
+    let expected = suite.hashfn.hash_pair(&digest1, &digest2);
+    let mut prover =
+        Prover::new_test_recursion_circuit([&digest1, &digest2], ProverOpts::default()).unwrap();
+
+    tracing::info!("Begin");
+    let receipt = prover
+        .run_with_hal(hal, circuit_hal)
+        .expect("Running prover failed");
+    tracing::info!("End");
 
     // Uncomment to write seal...
     // let seal : Vec<u8> = bytemuck::cast_slice(receipt.seal.as_slice()).into();
@@ -161,7 +206,7 @@ fn generate_composition_receipt(hashfn: &str) -> Receipt {
 
     tracing::info!("Proving rv32im: hello commit");
     let assumption_receipt = prover
-        .prove_elf(ExecutorEnv::default(), HELLO_COMMIT_ELF)
+        .prove(ExecutorEnv::default(), HELLO_COMMIT_ELF)
         .unwrap();
     tracing::info!("Done proving rv32im: hello commit");
 
@@ -176,7 +221,7 @@ fn generate_composition_receipt(hashfn: &str) -> Receipt {
         .unwrap();
 
     tracing::info!("Proving rv32im: sys_verify");
-    let composition_receipt = prover.prove_elf(env, MULTI_TEST_ELF).unwrap();
+    let composition_receipt = prover.prove(env, MULTI_TEST_ELF).unwrap();
     tracing::info!("Done proving rv32im: sys_verify");
 
     composition_receipt

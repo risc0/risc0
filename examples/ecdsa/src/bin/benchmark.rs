@@ -19,5 +19,5 @@ use risc0_zkvm::{default_executor, ExecutorEnv};
 fn main() {
     let env = ExecutorEnv::builder().build().unwrap();
     let exec = default_executor();
-    std::hint::black_box(exec.execute_elf(env, BENCHMARK_ELF)).unwrap();
+    std::hint::black_box(exec.execute(env, BENCHMARK_ELF)).unwrap();
 }

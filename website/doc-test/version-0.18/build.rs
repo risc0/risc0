@@ -33,9 +33,9 @@ fn main() {
 
     let mut level = Level::new();
 
-    for root_dir in ["docs", "api", "api_versioned_docs"] {
-        let pattern = format!("{home}/../{root_dir}/**/*.md");
-        let base = format!("{home}/../{root_dir}",);
+    for root_dir in ["api_versioned_docs/version-0.18"] {
+        let pattern = format!("{home}/../../{root_dir}/**/*.md");
+        let base = format!("{home}/../../{root_dir}",);
         let base = Path::new(&base).canonicalize().unwrap();
 
         for entry in glob(&pattern).unwrap() {

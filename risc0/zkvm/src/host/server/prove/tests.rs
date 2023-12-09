@@ -58,9 +58,7 @@ fn prove_nothing(hashfn: &str) -> Result<Receipt> {
         hashfn: hashfn.to_string(),
         prove_guest_errors: false,
     };
-    get_prover_server(&opts)
-        .unwrap()
-        .prove_elf(env, MULTI_TEST_ELF)
+    get_prover_server(&opts).unwrap().prove(env, MULTI_TEST_ELF)
 }
 
 #[test]
@@ -81,7 +79,7 @@ fn hashfn_blake2b() {
         .build()
         .unwrap();
     let prover = ProverImpl::new("cpu:blake2b", hal_pair);
-    prover.prove_elf(env, MULTI_TEST_ELF).unwrap();
+    prover.prove(env, MULTI_TEST_ELF).unwrap();
 }
 
 #[test]
@@ -287,13 +285,12 @@ fn session_events() {
 // https://github.com/risc0/toolchain/releases/tag/2022.03.25
 mod riscv {
     use super::prove_session_fast;
-    use crate::{ExecutorEnv, ExecutorImpl, MemoryImage, Program};
+    use crate::{ExecutorEnv, ExecutorImpl};
 
     fn run_test(test_name: &str) {
         use std::io::Read;
 
         use flate2::read::GzDecoder;
-        use risc0_zkvm_platform::{memory::GUEST_MAX_MEM, PAGE_SIZE};
         use tar::Archive;
 
         let bytes = include_bytes!("../testdata/riscv-tests.tgz");
@@ -312,11 +309,8 @@ mod riscv {
             let mut elf = Vec::new();
             entry.read_to_end(&mut elf).unwrap();
 
-            let program = Program::load_elf(elf.as_slice(), GUEST_MAX_MEM as u32).unwrap();
-            let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
-
             let env = ExecutorEnv::default();
-            let mut exec = ExecutorImpl::new(env, image).unwrap();
+            let mut exec = ExecutorImpl::from_elf(env, &elf).unwrap();
             let session = exec.run().unwrap();
 
             prove_session_fast(&session);
@@ -465,7 +459,7 @@ mod sys_verify {
     fn prove_hello_commit() -> Receipt {
         let hello_commit_receipt = get_prover_server(&prover_opts_fast())
             .unwrap()
-            .prove_elf(ExecutorEnv::default(), HELLO_COMMIT_ELF)
+            .prove(ExecutorEnv::default(), HELLO_COMMIT_ELF)
             .unwrap();
 
         // Double check that the receipt verifies.
@@ -486,7 +480,7 @@ mod sys_verify {
             .unwrap();
         let halt_receipt = get_prover_server(&opts)
             .unwrap()
-            .prove_elf(env, MULTI_TEST_ELF)
+            .prove(env, MULTI_TEST_ELF)
             .unwrap();
 
         // Double check that the receipt verifies with the expected image ID and exit code.
@@ -512,7 +506,7 @@ mod sys_verify {
             .unwrap();
         let fault_receipt = get_prover_server(&opts)
             .unwrap()
-            .prove_elf(env, MULTI_TEST_ELF)
+            .prove(env, MULTI_TEST_ELF)
             .unwrap();
 
         // Double check that the receipt verifies with the expected image ID and exit code.
@@ -546,7 +540,7 @@ mod sys_verify {
             .unwrap();
         get_prover_server(&prover_opts_fast())
             .unwrap()
-            .prove_elf(env, MULTI_TEST_ELF)
+            .prove(env, MULTI_TEST_ELF)
             .unwrap()
             .verify(MULTI_TEST_ID)
             .unwrap();
@@ -560,7 +554,7 @@ mod sys_verify {
             .unwrap();
         assert!(get_prover_server(&prover_opts_fast())
             .unwrap()
-            .prove_elf(env, MULTI_TEST_ELF)
+            .prove(env, MULTI_TEST_ELF)
             .is_err());
 
         // Test that providing an unresolved assumption results in a conditional
@@ -574,7 +568,7 @@ mod sys_verify {
         // TODO(#982) Conditional receipts currently return an error on verification.
         assert!(get_prover_server(&prover_opts_fast())
             .unwrap()
-            .prove_elf(env, MULTI_TEST_ELF)
+            .prove(env, MULTI_TEST_ELF)
             .is_err());
 
         // TODO(#982) With conditional receipts, implement the following cases.
@@ -600,7 +594,7 @@ mod sys_verify {
             .unwrap();
         get_prover_server(&prover_opts_fast())
             .unwrap()
-            .prove_elf(env, MULTI_TEST_ELF)
+            .prove(env, MULTI_TEST_ELF)
             .unwrap()
             .verify(MULTI_TEST_ID)
             .unwrap();
@@ -614,7 +608,7 @@ mod sys_verify {
             .unwrap();
         assert!(get_prover_server(&prover_opts_fast())
             .unwrap()
-            .prove_elf(env, MULTI_TEST_ELF)
+            .prove(env, MULTI_TEST_ELF)
             .is_err());
 
         // Test that providing an unresolved assumption results in a conditional
@@ -628,7 +622,7 @@ mod sys_verify {
         // TODO(#982) Conditional receipts currently return an error on verification.
         assert!(get_prover_server(&prover_opts_fast())
             .unwrap()
-            .prove_elf(env, MULTI_TEST_ELF)
+            .prove(env, MULTI_TEST_ELF)
             .is_err());
     }
 
@@ -651,7 +645,7 @@ mod sys_verify {
             .unwrap();
         get_prover_server(&prover_opts_fast())
             .unwrap()
-            .prove_elf(env, MULTI_TEST_ELF)
+            .prove(env, MULTI_TEST_ELF)
             .unwrap()
             .verify(MULTI_TEST_ID)
             .unwrap();
@@ -677,7 +671,7 @@ mod sys_verify {
             .unwrap();
         get_prover_server(&prover_opts_fast())
             .unwrap()
-            .prove_elf(env, MULTI_TEST_ELF)
+            .prove(env, MULTI_TEST_ELF)
             .unwrap()
             .verify(MULTI_TEST_ID)
             .unwrap();

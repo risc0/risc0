@@ -14,17 +14,17 @@
 
 // This is based on zk-benchmarking: https://github.com/delendum-xyz/zk-benchmarking
 
+pub mod benches;
+
 use std::{
     fs::OpenOptions,
-    path::{Path, PathBuf},
+    path::Path,
     time::{Duration, Instant},
 };
 
-use risc0_zkvm::{MemoryImage, Program, Segment, GUEST_MAX_MEM, PAGE_SIZE};
+use risc0_zkvm::{sha::Digest, ExecutorEnv, ExecutorImpl, Receipt, Segment, Session};
 use serde::Serialize;
 use tracing::info;
-
-pub mod benches;
 
 pub struct Metrics {
     pub job_name: String,
@@ -56,16 +56,16 @@ impl Metrics {
     }
 
     pub fn println(&self, prefix: &str) {
-        info!("{}job_name:           {:?}", prefix, &self.job_name);
-        info!("{}job_size:           {:?}", prefix, &self.job_size);
-        info!("{}exec_duration:      {:?}", prefix, &self.exec_duration);
-        info!("{}proof_duration:     {:?}", prefix, &self.proof_duration);
-        info!("{}total_duration:     {:?}", prefix, &self.total_duration);
-        info!("{}verify_duration:    {:?}", prefix, &self.verify_duration);
-        info!("{}cycles:             {:?}", prefix, &self.cycles);
-        info!("{}insn_cycles:        {:?}", prefix, &self.insn_cycles);
-        info!("{}output_bytes:       {:?}", prefix, &self.output_bytes);
-        info!("{}proof_bytes:        {:?}", prefix, &self.proof_bytes);
+        info!("{prefix}job_name:           {:?}", &self.job_name);
+        info!("{prefix}job_size:           {:?}", &self.job_size);
+        info!("{prefix}exec_duration:      {:?}", &self.exec_duration);
+        info!("{prefix}proof_duration:     {:?}", &self.proof_duration);
+        info!("{prefix}total_duration:     {:?}", &self.total_duration);
+        info!("{prefix}verify_duration:    {:?}", &self.verify_duration);
+        info!("{prefix}cycles:             {:?}", &self.cycles);
+        info!("{prefix}insn_cycles:        {:?}", &self.insn_cycles);
+        info!("{prefix}output_bytes:       {:?}", &self.output_bytes);
+        info!("{prefix}proof_bytes:        {:?}", &self.proof_bytes);
     }
 }
 
@@ -89,104 +89,101 @@ impl MetricsAverage {
     }
 
     pub fn println(&self, prefix: &str) {
-        info!("{}job_name:           {:?}", prefix, &self.job_name);
-        info!("{}job_size:           {:?}", prefix, &self.job_size);
-        info!("{}total_duration:     {:?}", prefix, &self.total_duration);
-        info!(
-            "{}average_duration:    {:?}",
-            prefix, &self.average_duration
-        );
-        info!("{}ops_sec:            {:?}", prefix, &self.ops_sec);
+        info!("{prefix}job_name:           {:?}", &self.job_name);
+        info!("{prefix}job_size:           {:?}", &self.job_size);
+        info!("{prefix}total_duration:     {:?}", &self.total_duration);
+        info!("{prefix}average_duration:   {:?}", &self.average_duration);
+        info!("{prefix}ops_sec:            {:?}", &self.ops_sec);
     }
 }
 
-pub trait Benchmark {
-    const NAME: &'static str;
-    type Spec;
-    type ComputeOut: Eq + core::fmt::Debug;
-    type ProofType;
+pub struct Job {
+    name: String,
+    elf: Vec<u8>,
+    input: Vec<u32>,
+    image_id: Digest,
+}
 
-    fn job_size(spec: &Self::Spec) -> u32;
-
-    fn output_size_bytes(output: &Self::ComputeOut, proof: &Self::ProofType) -> u32;
-
-    fn proof_size_bytes(proof: &Self::ProofType) -> u32;
-
-    fn new(spec: Self::Spec) -> Self;
-
-    fn spec(&self) -> &Self::Spec;
-
-    fn host_compute(&mut self) -> Option<Self::ComputeOut> {
-        None
+impl Job {
+    fn new(name: String, elf: &[u8], image_id: Digest, input: Vec<u32>) -> Self {
+        Self {
+            name,
+            elf: elf.to_vec(),
+            input,
+            image_id,
+        }
     }
 
-    fn exec_compute(&mut self) -> (u32, u32, Duration);
+    fn job_size(&self) -> u32 {
+        self.input.len() as u32
+    }
 
-    fn guest_compute(&mut self) -> (Self::ComputeOut, Self::ProofType);
+    fn exec_compute(&self) -> (Session, u32, u32, Duration) {
+        let env = ExecutorEnv::builder()
+            .write_slice(&self.input)
+            .build()
+            .unwrap();
+        let mut exec = ExecutorImpl::from_elf(env, &self.elf).unwrap();
+        let start = Instant::now();
+        let session = exec.run().unwrap();
+        let elapsed = start.elapsed();
+        let segments = session.resolve().unwrap();
+        let (exec_cycles, prove_cycles) = get_cycles(segments);
+        (session, prove_cycles as u32, exec_cycles as u32, elapsed)
+    }
 
-    fn verify_proof(&self, output: &Self::ComputeOut, proof: &Self::ProofType) -> bool;
+    fn verify_proof(&self, receipt: &Receipt) -> bool {
+        match receipt.verify(self.image_id) {
+            Ok(_) => true,
+            Err(err) => {
+                println!("{err}");
+                false
+            }
+        }
+    }
 
-    fn run(&mut self) -> Metrics {
-        let mut metrics = Metrics::new(String::from(Self::NAME), Self::job_size(self.spec()));
+    fn run(&self) -> Metrics {
+        let mut metrics = Metrics::new(self.name.clone(), self.job_size());
 
-        (metrics.cycles, metrics.insn_cycles, metrics.exec_duration) = self.exec_compute();
+        let (session, cycles, insn_cycles, duration) = self.exec_compute();
 
-        let (guest_output, proof) = {
+        metrics.cycles = cycles;
+        metrics.insn_cycles = insn_cycles;
+        metrics.exec_duration = duration;
+
+        let receipt = {
             let start = Instant::now();
-            let result = self.guest_compute();
+            let receipt = session.prove().unwrap();
             metrics.proof_duration = start.elapsed();
-            result
+            receipt
         };
 
-        if let Some(host_output) = self.host_compute() {
-            assert_eq!(guest_output, host_output);
-        }
-
         metrics.total_duration = metrics.exec_duration + metrics.proof_duration;
-        metrics.output_bytes = Self::output_size_bytes(&guest_output, &proof);
-        metrics.proof_bytes = Self::proof_size_bytes(&proof);
+        metrics.output_bytes = receipt.journal.bytes.len() as u32;
+        metrics.proof_bytes = receipt
+            .inner
+            .composite()
+            .unwrap()
+            .segments
+            .iter()
+            .fold(0, |acc, segment| acc + segment.get_seal_bytes().len())
+            as u32;
 
         let verify_proof = {
             let start = Instant::now();
-            let result = self.verify_proof(&guest_output, &proof);
+            let result = self.verify_proof(&receipt);
             metrics.verify_duration = start.elapsed();
             result
         };
 
-        assert_eq!(verify_proof, true);
+        assert!(verify_proof);
 
         metrics
     }
 }
 
-pub trait BenchmarkAverage {
-    const NAME: &'static str;
-    type Spec;
-
-    fn job_size(spec: &Self::Spec) -> u32;
-
-    fn new(spec: Self::Spec) -> Self;
-
-    fn spec(&self) -> &Self::Spec;
-    fn guest_compute(&mut self) -> Duration;
-
-    fn run(&mut self) -> MetricsAverage {
-        let mut metrics =
-            MetricsAverage::new(String::from(Self::NAME), Self::job_size(self.spec()));
-
-        metrics.total_duration = self.guest_compute();
-
-        metrics.average_duration = metrics.total_duration / metrics.job_size;
-        metrics.ops_sec = metrics.job_size as f64 / metrics.total_duration.as_secs_f64();
-
-        metrics
-    }
-}
-
-pub fn get_image(path: &str) -> MemoryImage {
-    let elf = std::fs::read(path).expect("elf");
-    let program = Program::load_elf(&elf, GUEST_MAX_MEM as u32).unwrap();
-    MemoryImage::new(&program, PAGE_SIZE as u32).unwrap()
+pub fn get_image(path: &str) -> Vec<u8> {
+    std::fs::read(path).unwrap()
 }
 
 pub fn get_cycles(segments: Vec<Segment>) -> (u32, u32) {
@@ -231,16 +228,16 @@ struct CsvRowAverage<'a> {
     ops_sec: f64,
 }
 
-pub fn run_jobs<B: Benchmark>(out_path: &PathBuf, specs: Vec<B::Spec>) -> Vec<Metrics> {
+pub fn run_jobs(out_path: &Path, jobs: Vec<Job>) -> Vec<Metrics> {
     info!("");
     info!(
         "Running {} jobs; saving output to {}",
-        specs.len(),
+        jobs.len(),
         out_path.display()
     );
 
     let mut out = {
-        let out_file_exists = Path::new(out_path).exists();
+        let out_file_exists = out_path.exists();
         let out_file = OpenOptions::new()
             .write(true)
             .append(true)
@@ -254,12 +251,11 @@ pub fn run_jobs<B: Benchmark>(out_path: &PathBuf, specs: Vec<B::Spec>) -> Vec<Me
 
     let mut all_metrics: Vec<Metrics> = Vec::new();
 
-    for spec in specs {
-        let mut job = B::new(spec);
+    for job in jobs {
         let job_number = all_metrics.len();
 
-        info!("");
-        info!("+ begin job_number:   {} {}", job_number, B::NAME);
+        println!("Benchmarking {}", job.name);
+        info!("+ begin job_number:   {job_number} {}", job.name);
 
         let job_metrics = job.run();
         job_metrics.println("+ ");
@@ -276,61 +272,7 @@ pub fn run_jobs<B: Benchmark>(out_path: &PathBuf, specs: Vec<B::Spec>) -> Vec<Me
         })
         .expect("Could not serialize");
 
-        info!("+ end job_number:     {}", job_number);
-        all_metrics.push(job_metrics);
-    }
-
-    out.flush().expect("Could not flush");
-    info!("Finished {} jobs", all_metrics.len());
-
-    all_metrics
-}
-
-pub fn run_jobs_average<B: BenchmarkAverage>(
-    out_path: &PathBuf,
-    specs: Vec<B::Spec>,
-) -> Vec<MetricsAverage> {
-    info!("");
-    info!(
-        "Running {} jobs; saving output to {}",
-        specs.len(),
-        out_path.display()
-    );
-
-    let mut out = {
-        let out_file_exists = Path::new(out_path).exists();
-        let out_file = OpenOptions::new()
-            .write(true)
-            .append(true)
-            .create(true)
-            .open(out_path)
-            .unwrap();
-        csv::WriterBuilder::new()
-            .has_headers(!out_file_exists)
-            .from_writer(out_file)
-    };
-
-    let mut all_metrics: Vec<MetricsAverage> = Vec::new();
-
-    for spec in specs {
-        let mut job = B::new(spec);
-        let job_number = all_metrics.len();
-
-        info!("");
-        info!("+ begin job_number:   {} {}", job_number, B::NAME);
-
-        let job_metrics = job.run();
-        job_metrics.println("+ ");
-        out.serialize(CsvRowAverage {
-            job_name: &job_metrics.job_name,
-            job_size: job_metrics.job_size,
-            total_duration: job_metrics.total_duration.as_nanos(),
-            average_duration: job_metrics.average_duration.as_nanos(),
-            ops_sec: job_metrics.ops_sec,
-        })
-        .expect("Could not serialize");
-
-        info!("+ end job_number:     {}", job_number);
+        info!("+ end job_number:     {job_number}");
         all_metrics.push(job_metrics);
     }
 

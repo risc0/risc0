@@ -48,7 +48,7 @@ pub trait CycleCounter {
 
 pub fn exec<'a>(name: &str, elf: &[u8], env: ExecutorEnv<'a>) -> Metrics {
     let exec = default_executor();
-    let session_info = exec.execute_elf(env, elf).unwrap();
+    let session_info = exec.execute(env, elf).unwrap();
     let cycles = session_info
         .segments
         .iter()

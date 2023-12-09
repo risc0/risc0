@@ -13,7 +13,6 @@
 // limitations under the License.
 
 use anyhow::Result;
-use risc0_binfmt::MemoryImage;
 
 use super::{Executor, Prover, ProverOpts};
 use crate::{
@@ -37,24 +36,14 @@ impl LocalProver {
 }
 
 impl Prover for LocalProver {
-    fn prove(
-        &self,
-        env: ExecutorEnv<'_>,
-        ctx: &VerifierContext,
-        opts: &ProverOpts,
-        image: MemoryImage,
-    ) -> Result<Receipt> {
-        get_prover_server(opts)?.prove(env, ctx, image)
-    }
-
-    fn prove_elf_with_ctx(
+    fn prove_with_ctx(
         &self,
         env: ExecutorEnv<'_>,
         ctx: &VerifierContext,
         elf: &[u8],
         opts: &ProverOpts,
     ) -> Result<Receipt> {
-        get_prover_server(opts)?.prove_elf_with_ctx(env, ctx, elf)
+        get_prover_server(opts)?.prove_with_ctx(env, ctx, elf)
     }
 
     fn get_name(&self) -> String {
@@ -63,25 +52,7 @@ impl Prover for LocalProver {
 }
 
 impl Executor for LocalProver {
-    fn execute(&self, env: ExecutorEnv<'_>, image: MemoryImage) -> Result<SessionInfo> {
-        let mut exec = ExecutorImpl::new(env, image)?;
-        let session = exec.run()?;
-        let mut segments = Vec::new();
-        for segment in session.segments {
-            let segment = segment.resolve()?;
-            segments.push(SegmentInfo {
-                po2: segment.po2,
-                cycles: segment.cycles,
-            })
-        }
-        Ok(SessionInfo {
-            segments,
-            journal: session.journal.unwrap_or_default().into(),
-            exit_code: session.exit_code,
-        })
-    }
-
-    fn execute_elf(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<SessionInfo> {
+    fn execute(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<SessionInfo> {
         let mut exec = ExecutorImpl::from_elf(env, elf)?;
         let session = exec.run()?;
         let mut segments = Vec::new();
