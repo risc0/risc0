@@ -39,7 +39,7 @@ jobs:
         with:
           filters: |
             base: &base
-              - .github/**
+              - .github/actions/**
               - Cargo.toml
             check-benchmarks:
               - *base
