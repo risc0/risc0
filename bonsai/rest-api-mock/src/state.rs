@@ -33,9 +33,9 @@ pub(crate) struct BonsaiState {
 }
 
 impl BonsaiState {
-    pub(crate) fn new(local_address: String) -> Self {
+    pub(crate) fn new(local_url: String) -> Self {
         Self {
-            local_url: local_address,
+            local_url,
             images: HashMap::new(),
             inputs: HashMap::new(),
             sessions: HashMap::new(),

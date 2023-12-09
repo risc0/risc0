@@ -4,7 +4,7 @@ version = "0.12.0"
 edition = "2021"
 
 [dependencies]
-clap = "4.0"
+clap = { version = "4.0", features = ["derive"] }
 risc0-zkvm = { path = "../../risc0/zkvm" }
 serde = "1.0"
 sha-methods = { path = "methods" }

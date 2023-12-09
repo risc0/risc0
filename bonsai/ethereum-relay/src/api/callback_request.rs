@@ -41,11 +41,12 @@ use crate::{
 )]
 pub(crate) async fn post_callback_request<S: Storage + Sync + Send + Clone>(
     Extension(api_key): Extension<String>,
-    State(s): State<ApiState<S>>,
+    State(state): State<ApiState<S>>,
     RequestExtractor(request): RequestExtractor<CallbackRequest>,
 ) -> Result<Json<CreateSessRes>, Error> {
-    let client = get_client_from_parts(s.bonsai_url, api_key, risc0_zkvm::VERSION).await?;
-    let proxy = ProxyCallbackProofRequestProcessor::new(client, s.storage, Some(s.notifier));
+    let client = get_client_from_parts(state.bonsai_url, api_key, risc0_zkvm::VERSION).await?;
+    let proxy =
+        ProxyCallbackProofRequestProcessor::new(client, state.storage, Some(state.notifier));
     let session_id = proxy.process_event(request.into()).await?;
     Ok(Json(CreateSessRes {
         uuid: session_id.uuid,
