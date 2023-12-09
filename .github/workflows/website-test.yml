@@ -35,15 +35,18 @@ jobs:
         with:
           filters: |
             main:
+              - .github/actions/**
               - bonsai/**
               - risc0/**
               - website/api/**
               - website/doc-test/main/**
               - website/docs/**
             version-0_18:
+              - .github/actions/**
               - website/api_versioned_docs/version-0.18/**
               - website/doc-test/version-0.18/**
             version-0_19:
+              - .github/actions/**
               - website/api_versioned_docs/version-0.19/**
               - website/doc-test/version-0.19/**
 
