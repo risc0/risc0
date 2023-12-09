@@ -62,7 +62,7 @@ jobs:
         if: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
         run: exit 1
 
-   main:
+  main:
     if: needs.changes.outputs.main == 'true'
     needs: changes
     runs-on: ubuntu-latest
@@ -96,7 +96,7 @@ jobs:
 
       - run: sccache --show-stats
 
-   version-0.18:
+  version-0.18:
     if: needs.changes.outputs.version-0.18 == 'true'
     needs: changes
     runs-on: ubuntu-latest
@@ -130,7 +130,7 @@ jobs:
 
       - run: sccache --show-stats
 
-   version-0.19:
+  version-0.19:
     if: needs.changes.outputs.version-0.19 == 'true'
     needs: changes
     runs-on: ubuntu-latest
