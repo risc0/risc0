@@ -12,23 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use axum::{http::Request, middleware::Next, response::Response};
+use axum::{
+    extract::Request,
+    http::{HeaderMap, StatusCode},
+    middleware::Next,
+    response::Response,
+};
 use bonsai_sdk::API_KEY_HEADER;
 
-use super::{Error, Result};
-
-pub(crate) async fn authorize<B>(mut req: Request<B>, next: Next<B>) -> Result<Response> {
-    if let Some(auth_header) = req
-        .headers()
-        .get(API_KEY_HEADER)
-        .and_then(|header| header.to_str().ok())
-    {
-        let owned_value = auth_header.to_owned();
-        // insert the current user into a request extension so the handler can
-        // extract it
-        req.extensions_mut().insert(owned_value);
+pub(crate) async fn authorize(
+    headers: HeaderMap,
+    req: Request,
+    next: Next,
+) -> Result<Response, StatusCode> {
+    if headers.contains_key(API_KEY_HEADER) {
         Ok(next.run(req).await)
     } else {
-        Err(Error::Unauthorized)
+        Err(StatusCode::UNAUTHORIZED)
     }
 }

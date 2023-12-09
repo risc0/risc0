@@ -63,7 +63,7 @@ fn app(state: Arc<RwLock<BonsaiState>>, prover_handle: ProverHandle) -> Router {
 /// Note that this mock only performs execution, no proving.
 pub async fn serve(port: String) -> anyhow::Result<()> {
     let local_url = format!("http://localhost:{port}");
-    let bind_address = &format!("0.0.0.0:{port}");
+    let bind_address = format!("0.0.0.0:{port}");
     let state = Arc::new(RwLock::new(BonsaiState::new(local_url)));
 
     let (sender, receiver) = mpsc::channel(8);
@@ -73,18 +73,16 @@ pub async fn serve(port: String) -> anyhow::Result<()> {
 
     tokio::spawn(async move { prover.run().await });
 
-    let handle = axum::Server::bind(
-        &bind_address
-            .parse()
-            .context("failed to parse bind address")?,
-    )
-    .serve(app(state, prover_handle).into_make_service());
+    let listener = tokio::net::TcpListener::bind(&bind_address).await.unwrap();
 
-    info!("Local Bonsai started on {bind_address}");
+    let local_addr = listener.local_addr().unwrap();
+    info!("Local Bonsai started on {local_addr}");
 
-    handle.await.context(format!(
-        "failed to serve Local Bonsai API on {bind_address}"
-    ))
+    axum::serve(listener, app(state, prover_handle))
+        .await
+        .context(format!(
+            "failed to serve Local Bonsai API on {bind_address}"
+        ))
 }
 
 #[cfg(test)]
