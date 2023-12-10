@@ -51,6 +51,7 @@ serde = { version = "1.0", default-features = false, features = [
   "alloc",
   "derive",
 ] }
+sysinfo = "0.29.1"
 
 # TODO(nils): Change these `target_os` checks to `target_vendor` checks when we
 # have a real target triple.

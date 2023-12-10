@@ -44,6 +44,17 @@ use crate::{
     host::receipt::{SegmentReceipt, SuccinctReceipt},
     is_dev_mode, ExecutorEnv, ExecutorImpl, ProverOpts, Receipt, Segment, Session, VerifierContext,
 };
+use std::time::Instant;
+use sysinfo::{self, Pid};
+use sysinfo::{ProcessExt, System, SystemExt};
+
+fn get_memory_usage() -> Result<u64, Box<dyn std::error::Error>> {
+    let mut sys = System::new_all();
+    sys.refresh_processes();
+    let current_pid = Pid::from(std::process::id() as usize);
+    let proc_mem = sys.process(current_pid).unwrap().memory();
+    Ok(proc_mem)
+}
 
 /// A ProverServer can execute a given [MemoryImage] and produce a [Receipt]
 /// that can be used to verify correct computation.
@@ -56,8 +67,27 @@ pub trait ProverServer {
         image: MemoryImage,
     ) -> Result<Receipt> {
         let mut exec = ExecutorImpl::new(env, image)?;
+
+        println!("Memory used before exec: {:?}", get_memory_usage());
+        let mut start = Instant::now();
         let session = exec.run()?;
-        self.prove_session(ctx, &session)
+        println!("Memory used after exec: {:?}", get_memory_usage());
+        println!(
+            "exec elapse = {} ms",
+            start.elapsed().as_millis()
+        );
+
+        start = Instant::now();
+        let receipt = self.prove_session(ctx, &session);
+        println!("Memory usage after proving: {:?}", get_memory_usage());
+        let usage = self.get_peak_memory_usage();
+
+        println!(
+            "proving peak mem = {}, prove elapse = {} ms",
+            usage,
+            start.elapsed().as_millis()
+        );
+        receipt
     }
 
     /// Prove the specified ELF binary.
