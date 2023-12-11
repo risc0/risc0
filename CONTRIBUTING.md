@@ -34,6 +34,7 @@ cargo risczero install
 ```
 
 Optionally, you can specify which version of `cargo-risczero` to install with:
+
 ```console
 cargo binstall cargo-risczero@<version>
 ```
