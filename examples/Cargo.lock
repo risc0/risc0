@@ -1149,7 +1149,7 @@ dependencies = [
  "serde_json",
  "sha-methods",
  "sha2",
- "smartcore 0.3.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "smartcore",
  "smartcore-ml-methods",
  "tracing",
  "tracing-subscriber",
@@ -4319,21 +4319,6 @@ checksum = "4dccd0940a2dcdf68d092b8cbab7dc0ad8fa938bf95787e1b916b0e3d0e8e970"
 [[package]]
 name = "smartcore"
 version = "0.3.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c42ca1fcd851ada8834d3dfcd088850dc8c703bde50c2baccd89181b74dc3ade"
-dependencies = [
- "approx",
- "cfg-if",
- "num",
- "num-traits",
- "rand",
- "serde",
- "typetag",
-]
-
-[[package]]
-name = "smartcore"
-version = "0.3.2"
 source = "git+https://github.com/risc0/smartcore.git?rev=4bd3cadd50ed988c45c239f5264c3e2c2af0a690#4bd3cadd50ed988c45c239f5264c3e2c2af0a690"
 dependencies = [
  "approx",
@@ -4352,7 +4337,7 @@ dependencies = [
  "risc0-zkvm",
  "rmp-serde",
  "serde_json",
- "smartcore 0.3.2 (git+https://github.com/risc0/smartcore.git?rev=4bd3cadd50ed988c45c239f5264c3e2c2af0a690)",
+ "smartcore",
  "smartcore-ml-methods",
 ]
 
