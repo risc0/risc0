@@ -43,11 +43,11 @@ fn main() {
     let receipt = prover.prove(env, VALIDATOR_ELF).unwrap();
 
     receipt.verify(VALIDATOR_ID).unwrap();
-    //
-    // let _output: u32 = receipt
-    //     .journal
-    //     .decode()
-    //     .expect("Journal should contain an outputs object");
 
-    // assert_eq!(output, claims.subject);
+    let output: String = receipt
+        .journal
+        .decode()
+        .expect("Journal should contain an outputs object");
+
+    assert_eq!(output, claims.subject);
 }
