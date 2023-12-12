@@ -61,7 +61,7 @@ fn main() {
     let output: String = receipt
         .journal
         .decode()
-        .expect("Journal should contain an outputs object");
+        .expect("Journal should decode to string.");
 
     assert_eq!(output, claims.subject);
 }
