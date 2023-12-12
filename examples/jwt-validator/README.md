@@ -1,112 +1,66 @@
-# RISC Zero Rust Starter Template
+# JSON Web Token Validation
 
-Welcome to the RISC Zero Rust Starter Template! This template is intended to
-give you a starting point for building a project using the RISC Zero zkVM.
-Throughout the template (including in this README), you'll find comments
-labelled `TODO` in places where you'll need to make changes. To better
-understand the concepts behind this template, check out the [zkVM
-Overview][zkvm-overview].
+This code provides a minimal example for using RISC Zero's [zkVM] to create zero-knowledge proofs that confirm the integrity of a signed JSON Web Token (JWT). It leverages the [jwt-compact] crate to verify the RS256 JWT signature and claim within the [zkVM].
 
 ## Quick Start
 
-First, make sure [rustup] is installed. The
-[`rust-toolchain.toml`][rust-toolchain] file will be used by `cargo` to
-automatically install the correct version.
+First, follow the [installation guide] if you don't already have the RISC Zero tools installed.
 
-To build all methods and execute the method within the zkVM, run the following
-command:
-
+Then, run the example with:
 ```bash
-cargo run
+cargo run --release
 ```
 
-This is an empty template, and so there is no expected output (until you modify
-the code).
+Congratulations! You've successfully constructed a zero-knowledge proof attesting to the validity of an issued JWT, verified against a public key.
 
-### Executing the project locally in development mode
+## Use Cases
 
-During development, faster iteration upon code changes can be achieved by leveraging [dev-mode], we strongly suggest activating it during your early development phase. Furthermore, you might want to get insights into the execution statistics of your project, and this can be achieved by specifying the environment variable `RUST_LOG="executor=info"` before running your project.
+By using this demo as part of a [Bonsai application], you could build an app where an onchain application would like to verify an offchain account.
+For example, you might want an identity provider to issue a JWT through a sign-in web-application, whereby a proof of the issued authentication or session token can be used to validate the users connected wallet address and account ownership for later onchain use.
 
-Put together, the command to run your project in development mode while getting execution statistics is:
+To learn more about this use case, check out our Twitter thread about using Bonsai as a [zk coprocessor] or its direct implementation in our [Bonsai Pay Demonstration Application] using Google's Sign-In-with-Google SDK.
 
-```bash
-RUST_LOG="executor=info" RISC0_DEV_MODE=1 cargo run
-```
+[Bonsai application]: https://dev.bonsai.xyz
+[zk coprocessor]: https://twitter.com/RiscZero/status/1677316664772132864
+[Bonsai Pay Demonstration Application]: https://github.com/risc0/demos/tree/main/bonsai-pay
 
-### Running proofs remotely on Bonsai
+## Project Organization
 
-_Note: The Bonsai proving service is still in early Alpha; an API key is
-required for access. [Click here to request access][bonsai access]._
+zkVM applications consist of a [host program] and a [guest program]. The host program resides in [`src/main.rs`], and the guest program is in [`methods/guest/src/main.rs`]. The foundational JWT issuing/validation library is located in [`core/src/lib.rs`].
 
-If you have access to the URL and API key to Bonsai you can run your proofs
-remotely. To prove in Bonsai mode, invoke `cargo run` with two additional
-environment variables:
+The [host] executes the guest program, then proves this execution to generate a [receipt]. This receipt, when presented to a third party, allows them to inspect the [journal] for the program's outputs and verify the receipt, confirming the [guest program]'s execution integrity. In this instance, the JWT's integrity is validated against a public key in the guest, and the decoded token subject is committed to the [journal] for demonstration.
 
-```bash
-BONSAI_API_KEY="YOUR_API_KEY" BONSAI_API_URL="BONSAI_URL" cargo run
-```
+## Approach
 
-## How to create a project based on this template
+This zkVM application showcases how to utilize existing Rust crates and libraries. It employs the [jwt-compact] crate for issuing and validating JWTs using RSA key pairs. This process is encapsulated in a higher-level JWT crate to distinctly demonstrate symmetric key verification.
 
-Search this template for the string `TODO`, and make the necessary changes to
-implement the required feature described by the `TODO` comment. Some of these
-changes will be complex, and so we have a number of instructional resources to
-assist you in learning how to write your own code for the RISC Zero zkVM:
+For more insights into using Rust crates within the zkVM, visit our [Rust Resources] page.
 
-- The [RISC Zero Developer Docs][dev-docs] is a great place to get started.
-- Example projects are available in the [examples folder][examples] of
-  [`risc0`][risc0-repo] repository.
-- Reference documentation is available at [https://docs.rs][docs.rs], including
-  [`risc0-zkvm`][risc0-zkvm], [`cargo-risczero`][cargo-risczero],
-  [`risc0-build`][risc0-build], and [others][crates].
+The [guest code] confirms the JWT's integrity using the public key and records the decoded JWT claim subject if successful. Meanwhile, the [host code] is responsible for generating and signing the JWT, including the claim subject string, with the private key.
 
-## Directory Structure
+## More Resources
 
-It is possible to organize the files for these components in various ways.
-However, in this starter template we use a standard directory structure for zkVM
-applications, which we think is a good starting point for your applications.
+- For more information about building, running, and testing zkVM applications, see our [developer docs].
 
-```text
-project_name
-├── Cargo.toml
-├── host
-│   ├── Cargo.toml
-│   └── src
-│       └── main.rs                        <-- [Host code goes here]
-└── methods
-    ├── Cargo.toml
-    ├── build.rs
-    ├── guest
-    │   ├── Cargo.toml
-    │   └── src
-    │       └── bin
-    │           └── method_name.rs         <-- [Guest code goes here]
-    └── src
-        └── lib.rs
-```
-
-## Video Tutorial
-
-For a walk-through of how to build with this template, check out this [excerpt
-from our workshop at ZK HACK III][zkhack-iii].
-
-## Questions, Feedback, and Collaborations
-
-We'd love to hear from you on [Discord][discord] or [Twitter][twitter].
-
-[bonsai access]: https://bonsai.xyz/apply
-[cargo-risczero]: https://docs.rs/cargo-risczero
-[crates]: https://github.com/risc0/risc0/blob/main/README.md#rust-binaries
-[dev-docs]: https://dev.risczero.com
-[dev-mode]: https://dev.risczero.com/api/zkvm/dev-mode
-[discord]: https://discord.gg/risczero
-[docs.rs]: https://docs.rs/releases/search?query=risc0
-[examples]: https://github.com/risc0/risc0/tree/main/examples
-[risc0-build]: https://docs.rs/risc0-build
-[risc0-repo]: https://www.github.com/risc0/risc0
-[risc0-zkvm]: https://docs.rs/risc0-zkvm
-[rustup]: https://rustup.rs
-[rust-toolchain]: rust-toolchain.toml
-[twitter]: https://twitter.com/risczero
-[zkvm-overview]: https://dev.risczero.com/zkvm
-[zkhack-iii]: https://www.youtube.com/watch?v=Yg_BGqj_6lg&list=PLcPzhUaCxlCgig7ofeARMPwQ8vbuD6hC5&index=5
+[`src/main.rs`]: src/main.rs
+[`methods/guest/src/main.rs`]: methods/guest/src/main.rs
+[`core/src/lib.rs`]: core/src/lib.rs
+[host]: https://dev.risczero.com/terminology#host
+[executes]: https://dev.risczero.com/terminology#execute
+[guest program]: https://dev.risczero.com/terminology#guest-program
+[host program]: https://dev.risczero.com/terminology#host-program
+[proves the execution]: https://dev.risczero.com/terminology#prove
+[receipt]: https://dev.risczero.com/terminology#receipt
+[verify]: https://dev.risczero.com/terminology#verify
+[journal]: https://dev.risczero.com/terminology#journal
+[installation guide]: https://dev.risczero.com/api/zkvm/quickstart
+[here]: https://github.com/risc0/risc0/blob/main/examples/chess/src/main.rs#L29
+[zkVM]: https://dev.risczero.com/zkvm
+[shakmaty]: https://docs.rs/shakmaty/latest/shakmaty/
+[Rust Resources]: https://dev.risczero.com/zkvm/developer-guide/rust-resources
+[guest code]: https://github.com/risc0/risc0-rust-examples/blob/main/chess/methods/guest/src/bin/checkmate.rs
+[host code]: https://github.com/risc0/risc0/blob/main/examples/chess/methods/guest/src/main.rs
+[journal]: https://dev.risczero.com/terminology#journal
+[developer docs]: https://dev.risczero.com
+[excerpt from our workshop at ZK HACK III]: https://www.youtube.com/watch?v=vxqxRiTXGBI&list=PLcPzhUaCxlCgig7ofeARMPwQ8vbuD6hC5&index=9
+[jwt-compact]: https://github.com/slowli/jwt-compact
