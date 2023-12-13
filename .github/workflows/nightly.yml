@@ -76,10 +76,16 @@ jobs:
           git clone "https://x-access-token:${{ secrets.BENCHMARK_TOKEN }}@github.com/risc0/ghpages.git" ${{ runner.temp }}/benchmarks/
           cd ${{ runner.temp }}/benchmarks/
 
+          echo "Creating directory for ${{ github.sha }}"
           mkdir -p ./dev/crate-validation/results
+
+          echo "Copying results"
           cp ${{ runner.temp }}/crate-validation/profile-results.json ./dev/crate-validation/results/${{ github.sha }}.json
 
+          echo "Optionally creating index"
           [ ! -f ./dev/crate-validation/results/index.json ] && touch ./dev/crate-validation/results/index.json
+
+          echo "Updating index"
           grep -ohE '{\s*"timestamp":\s*\d+\s*,\s*"hash":\s*"[a-zA-Z0-9]+"\s*}' ./dev/crate-validation/results/index.json |\
           awk -v timestamp="$(date +%s)" -v hash="${{ github.sha }}" \
           'BEGIN{print "["} {print $0","} END{print "{\"timestamp\":"timestamp", \"hash\":\""hash"\"}" "\n]"}' |\
@@ -87,6 +93,7 @@ jobs:
 
           tree -sh --du ./dev/crate-validation
 
+          echo "Committing results"
           echo git add .
           echo git  -c "user.name=nightly-action" -c "user.email=github@users.noreply.github.com" commit -m "Added update at '$(date)'"
           echo git push origin main
