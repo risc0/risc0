@@ -39,20 +39,32 @@ pub fn panic_fault(panic_info: &PanicInfo) -> ! {
 
 #[cfg(feature = "entrypoint")]
 mod entrypoint {
-    // Entry point; sets up global pointer and stack pointer and passes
-    // to __start.  TODO: when asm_const is stablized, use that here
-    // instead of defining a symbol and dereferencing it.
-    //
-    // This version of _start is marked as "weak" so it only gets used if
-    // start isn't already defined by e.g. risc0_zkvm::guest which needs
-    // to initialize things like the journal.
+    #[no_mangle]
+    unsafe extern "C" fn __start() -> ! {
+        // This definition of __start differs from risc0_zkvm::guest in that it does not initialize the
+        // journal and will halt with empty output. It also assumes main follows the standard C
+        // convention, and uses the returned i32 value as the user exit code for halt.
+        let exit_code = {
+            extern "C" {
+                fn main(argc: i32, argv: *const *const u8) -> i32;
+            }
+
+            main(0, core::ptr::null())
+        };
+
+        const EMPTY_OUTPUT: [u32; 8] = [0; 8];
+        syscall::sys_halt(exit_code as u8, &EMPTY_OUTPUT);
+    }
 
     static STACK_TOP: u32 = crate::memory::STACK_TOP;
 
+    // Entry point; sets up global pointer and stack pointer and passes
+    // to __start.  TODO: when asm_const is stablized, use that here
+    // instead of defining a symbol and dereferencing it.
     core::arch::global_asm!(
         r#"
     .section .text._start
-    .weak _start
+    .globl _start
     _start:
         .option push;
         .option norelax
@@ -60,9 +72,7 @@ mod entrypoint {
         .option pop
         la sp, {0}
         lw sp, 0(sp)
-        call main
-        li a1, 0
-        call sys_halt
+        jal ra, __start;
     "#,
         sym STACK_TOP
     );
