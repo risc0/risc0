@@ -231,7 +231,9 @@ impl Server {
             .try_into()
             .map_err(|err: semver::Error| anyhow!(err))?;
         if !check_client_version(&client_version, &server_version) {
-            let msg = format!("incompatible client version: {client_version}");
+            let msg = format!(
+                "incompatible client version: {client_version}, server version: {server_version}"
+            );
             tracing::debug!("{msg}");
             bail!(msg);
         }
