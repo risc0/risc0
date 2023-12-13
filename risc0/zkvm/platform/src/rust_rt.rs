@@ -25,9 +25,7 @@ use core::{
     panic::PanicInfo,
 };
 
-use crate::syscall::sys_alloc_aligned;
-#[cfg(feature = "panic-handler")]
-use crate::syscall::sys_panic;
+use crate::syscall::{sys_alloc_aligned, sys_panic};
 
 extern crate alloc;
 
