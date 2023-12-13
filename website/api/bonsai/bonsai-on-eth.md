@@ -69,7 +69,7 @@ The Bonsai Relay also accepts requests on-chain using the [`BonsaiRelay` contrac
 
 On-chain requests can be useful for reducing the amount of code you need to maintain.
 When submitting requests off-chain, some client or indexer needs to be written to assemble the inputs and make the request to the Bonsai Relay.
-With on-chain requests, the application smart contract can directly issue requests, and so no client or indexer needs to be written or maintained.
+In contrast, with on-chain requests, the application's smart contract can directly issue these requests, eliminating the need to write or maintain any client or indexer.
 
 An example of sending a request on-chain can be found in the [starter contract of the Bonsai Foundry Template].
 
