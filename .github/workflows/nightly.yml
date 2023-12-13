@@ -86,14 +86,15 @@ jobs:
           [ ! -f ./dev/crate-validation/results/index.json ] && touch ./dev/crate-validation/results/index.json
 
           echo "Getting original folder overview"
-          tree -sh --du ./dev/crate-validation
+          CRATE_VALIDATOR_ORIGINAL_FILES=$(ls -Rlh ./dev/crate-validation)
+          echo $CRATE_VALIDATOR_ORIGINAL_FILES
 
           echo "Filtering out old results"
           CRATE_VALIDATOR_PAST_VALUES=$(grep -ohE '{\s*"timestamp":\s*\d+\s*,\s*"hash":\s*"[a-zA-Z0-9]+"\s*}' ./dev/crate-validation/results/index.json)
           echo $CRATE_VALIDATOR_PAST_VALUES
 
           echo "Processing results"
-          CRATE_VALIDATOR_PROCESSED_VALUES=$(echo $CRATE_VALIDATOR_PAST_VALUES | awk -v timestamp="$(date +%s)" -v hash="${{ github.sha }}" 'BEGIN{print "["} {print $0","} END{print "{\"timestamp\":"timestamp", \"hash\":\""hash"\"}" "\n]"}'
+          CRATE_VALIDATOR_PROCESSED_VALUES=$(echo $CRATE_VALIDATOR_PAST_VALUES | awk -v timestamp="$(date +%s)" -v hash="${{ github.sha }}" 'BEGIN{print "["} {print $0","} END{print "{\"timestamp\":"timestamp", \"hash\":\""hash"\"}" "\n]"}')
           echo $CRATE_VALIDATOR_PROCESSED_VALUES
 
           echo "Removing whitespace"
@@ -107,7 +108,8 @@ jobs:
           echo $CRATE_VALIDATOR_FINAL_VALUES | tee ./dev/crate-validation/results/index.json
 
           echo "Getting new folder overview"
-          tree -sh --du ./dev/crate-validation
+          CRATE_VALIDATOR_FINAL_FILES=$(ls -Rlh ./dev/crate-validation)
+          echo $CRATE_VALIDATOR_FINAL_FILES
 
           echo "Committing results"
           echo git add .
