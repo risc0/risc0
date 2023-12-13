@@ -53,7 +53,7 @@ struct PersistentPageTableInfo {
 }
 
 #[derive(Clone, Serialize, Deserialize)]
-#[serde(from = "PersistentPageTableInfo", into = "PersistentPageTableInfo")]
+#[serde(try_from = "PersistentPageTableInfo", into = "PersistentPageTableInfo")]
 pub struct PageTableInfo {
     pub page_size: u32,
     page_size_po2: u32,
@@ -69,20 +69,13 @@ pub struct PageTableInfo {
     zero_page_hash: Digest,
 }
 
-impl From<PersistentPageTableInfo> for PageTableInfo {
-    fn from(value: PersistentPageTableInfo) -> Self {
-        PageTableInfo::new(value.page_table_addr, value.page_size).expect("Invalid page table")
+impl TryFrom<PersistentPageTableInfo> for PageTableInfo {
+    type Error = anyhow::Error;
+
+    fn try_from(value: PersistentPageTableInfo) -> Result<Self, Self::Error> {
+        PageTableInfo::new(value.page_table_addr, value.page_size)
     }
 }
-
-// TODO: Decide between TryFrom and From
-// impl TryFrom<PersistentPageTableInfo> for PageTableInfo {
-//     type Error = anyhow::Error;
-
-//     fn try_from(value: PersistentPageTableInfo) -> Result<Self, Self::Error> {
-//         PageTableInfo::new(value.page_table_addr, value.page_size)
-//     }
-// }
 
 impl From<PageTableInfo> for PersistentPageTableInfo {
     fn from(value: PageTableInfo) -> Self {
