@@ -25,7 +25,9 @@ use core::{
     panic::PanicInfo,
 };
 
-use crate::syscall;
+use crate::syscall::sys_alloc_aligned;
+#[cfg(feature = "panic-handler")]
+use crate::syscall::sys_panic;
 
 extern crate alloc;
 
@@ -34,11 +36,13 @@ extern crate alloc;
 pub fn panic_fault(panic_info: &PanicInfo) -> ! {
     let msg = alloc::format!("{}", panic_info);
     let msg_bytes = msg.as_bytes();
-    unsafe { syscall::sys_panic(msg.as_ptr(), msg.len()) }
+    unsafe { sys_panic(msg.as_ptr(), msg.len()) }
 }
 
 #[cfg(feature = "entrypoint")]
 mod entrypoint {
+    use crate::syscall::sys_halt;
+
     #[no_mangle]
     unsafe extern "C" fn __start() -> ! {
         // This definition of __start differs from risc0_zkvm::guest in that it does not initialize the
@@ -53,7 +57,7 @@ mod entrypoint {
         };
 
         const EMPTY_OUTPUT: [u32; 8] = [0; 8];
-        syscall::sys_halt(exit_code as u8, &EMPTY_OUTPUT);
+        sys_halt(exit_code as u8, &EMPTY_OUTPUT);
     }
 
     static STACK_TOP: u32 = crate::memory::STACK_TOP;
@@ -82,7 +86,7 @@ struct BumpPointerAlloc;
 
 unsafe impl GlobalAlloc for BumpPointerAlloc {
     unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
-        syscall::sys_alloc_aligned(layout.size(), layout.align())
+        sys_alloc_aligned(layout.size(), layout.align())
     }
 
     unsafe fn dealloc(&self, _: *mut u8, _: Layout) {
