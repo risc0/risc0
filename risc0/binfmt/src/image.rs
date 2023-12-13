@@ -222,20 +222,18 @@ impl MemoryImage {
         let page_idx = self.info.get_page_index(addr);
         let page_start = self.info.get_page_addr(page_idx);
 
-        match self.pages.get(&page_idx) {
-            None => {
-                ensure!(
-                    addr as usize <= MEM_SIZE,
-                    "address {addr:08X} outside MEM_SIZE ({MEM_SIZE:08X})"
-                );
-                bytes.fill(0);
-            }
-            Some(page) => {
-                bytes.clone_from_slice(
-                    &page[(addr - page_start) as usize..(addr - page_start) as usize + bytes.len()],
-                );
-            }
-        };
+        if let Some(page) = self.pages.get(&page_idx) {
+            bytes.clone_from_slice(
+                &page[(addr - page_start) as usize..(addr - page_start) as usize + bytes.len()],
+            );
+        } else {
+            assert!(
+                addr as usize <= MEM_SIZE,
+                "address {addr:08X} outside MEM_SIZE ({MEM_SIZE:08X})"
+            );
+            bytes.fill(0);
+        }
+
         Ok(())
     }
 
