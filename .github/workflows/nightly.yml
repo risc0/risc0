@@ -85,7 +85,9 @@ jobs:
           'BEGIN{print "["} {print $0","} END{print "{\"timestamp\":"timestamp", \"hash\":\""hash"\"}" "\n]"}' |\
           tr -d '[:space:]' | tee ./dev/crate-validation/results/index.json
 
-          git add .
-          git  -c "user.name=nightly-action" -c "user.email=github@users.noreply.github.com" commit -m "Added update at '$(date)'"
-          git push origin main
+          tree -sh --du ./dev/crate-validation
+
+          echo git add .
+          echo git  -c "user.name=nightly-action" -c "user.email=github@users.noreply.github.com" commit -m "Added update at '$(date)'"
+          echo git push origin main
         shell: bash
