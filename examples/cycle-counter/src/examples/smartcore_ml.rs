@@ -21,9 +21,10 @@ use crate::{exec, CycleCounter, Metrics};
 
 pub struct Job {}
 
-const JSON_MODEL: &str = include_str!("../../../smartcore-ml/res/ml-model/tree_model_bytes.json");
-const JSON_DATA: &str =
-    include_str!("../../../smartcore-ml/res/input-data/tree_model_data_bytes.json");
+const MODEL_SERIALIZED: &str =
+    include_str!("../../../smartcore-ml/res/ml-model/tree_model_bytes.bin");
+const DATA_SERIALIZED: &str =
+    include_str!("../../../smartcore-ml/res/input-data/tree_model_data_bytes.bin");
 
 impl CycleCounter for Job {
     const NAME: &'static str = "smartcore-ml";
@@ -32,15 +33,13 @@ impl CycleCounter for Job {
     fn run() -> Metrics {
         // Convert the model and input data from JSON into byte arrays.
         let is_svm = false;
-        let model_bytes: Vec<u8> = serde_json::from_str(JSON_MODEL).unwrap();
-        let data_bytes: Vec<u8> = serde_json::from_str(JSON_DATA).unwrap();
 
         // Deserialize the data from rmp into native rust types.
         type Model = DecisionTreeClassifier<f64, u32, DenseMatrix<f64>, Vec<u32>>;
-        let model: Model =
-            rmp_serde::from_slice(&model_bytes).expect("model failed to deserialize byte array");
+        let model: Model = rmp_serde::from_slice(&MODEL_SERIALIZED)
+            .expect("model failed to deserialize byte array");
         let data: DenseMatrix<f64> =
-            rmp_serde::from_slice(&data_bytes).expect("data failed to deserialize byte array");
+            rmp_serde::from_slice(&DATA_SERIALIZED).expect("data failed to deserialize byte array");
 
         let env = ExecutorEnv::builder()
             .write(&is_svm)
