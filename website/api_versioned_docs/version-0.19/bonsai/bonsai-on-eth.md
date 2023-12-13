@@ -20,14 +20,14 @@ At a high level, here's how it works:
 ![Bonsai ETH Relay overview](/img/bonsai_ethereum.png)
 
 1. Your application sends a request to run your zkVM guest to the Bonsai Relay. You can either:
-    - Send your request on-chain, by calling `requestCallback` on the [`BonsaiRelay` contract].
-    - Send your request off-chain, by sending a request to the Bonsai Relay REST API.
+   - Send your request on-chain, by calling `requestCallback` on the [`BonsaiRelay` contract].
+   - Send your request off-chain, by sending a request to the Bonsai Relay REST API.
 2. The Bonsai Relay sends the proof request to the Bonsai proving service.
 3. Bonsai generates a [Groth16 SNARK] proof of the guest execution, and submits the [receipt] to the [`BonsaiRelay` contract].
 4. The [`BonsaiRelay` contract]:
-    1. Verifies the [receipt] by using an [`IRiscZeroVerifier` contract]
-    2. Extracts the journal from the verified [receipt].
-    3. Sends the journal and image ID in a callback to your application contract.
+   1. Verifies the [receipt] by using an [`IRiscZeroVerifier` contract]
+   2. Extracts the journal from the verified [receipt].
+   3. Sends the journal and image ID in a callback to your application contract.
 
 [Groth16 SNARK]: https://www.risczero.com/news/on-chain-verification
 [`BonsaiRelay` contract]: https://github.com/risc0/risc0/blob/main/bonsai/ethereum/contracts/BonsaiRelay.sol
