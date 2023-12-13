@@ -13,15 +13,15 @@ There are two main ways to integrate your RISC Zero application with Ethereum:
 
 ## Bonsai Relay
 
-The Bonsai Relay is a service makes it simpler to integrate RISC Zero into your applications, leveraging the [zk coprocessor] model.
+The Bonsai Relay is a service that simplifies the integration of RISC Zero into your applications, leveraging the [zk coprocessor] model.
 
 At a high level, here's how it works:
 
 ![Bonsai ETH Relay overview](/img/bonsai_ethereum.png)
 
 1. Your application sends a request to run your zkVM guest to the Bonsai Relay. You can either:
-   - Send your request on-chain, by calling `requestCallback` on the [`BonsaiRelay` contract].
-   - Send your request off-chain, by sending a request to the Bonsai Relay REST API.
+   - Send your request [on-chain](#on-chain-requests), by calling `requestCallback` on the [`BonsaiRelay` contract].
+   - Send your request [off-chain](#off-chain-requests), by sending a request to the Bonsai Relay REST API.
 2. The Bonsai Relay sends the proof request to the Bonsai proving service.
 3. Bonsai generates a [Groth16 SNARK] proof of the guest execution, and submits the [receipt] to the [`BonsaiRelay` contract].
 4. The [`BonsaiRelay` contract]:
@@ -54,7 +54,7 @@ This involves running a service binary provided by RISC Zero, and deploying the 
 The Bonsai Relay accepts requests off-chain using its [REST] API.
 
 Using the off-chain API allows for including data not available to smart contracts in the EVM, and avoids needing to pay transaction fees on Ethereum to initiate a request.
-When inputs to your [guest program] and large (e.g. more than a few kilobytes) sending requests on-chain can be cost-prohibitive, while sending large inputs (e.g. up to tens of megabytes) via the REST API has no additional cost.
+When inputs to your [guest program] are large (e.g. more than a few kilobytes) sending requests on-chain can be cost-prohibitive, while sending large inputs (e.g. up to tens of megabytes) via the REST API has no additional cost.
 
 The [Bonsai Relay SDK] provides a Rust interface for interacting with the Bonsai Relay.
 An example for sending a callback request via the REST API can be found in the [relay directory of the Bonsai Foundry Template].
@@ -69,7 +69,7 @@ The Bonsai Relay also accepts requests on-chain using the [`BonsaiRelay` contrac
 
 On-chain requests can be useful for reducing the amount of code you need to maintain.
 When submitting requests off-chain, some client or indexer needs to be written to assemble the inputs and make the request to the Bonsai Relay.
-With on-chain requests, the application smart contract can directly issue requests, and so no client or indexer needs to be written or maintained.
+In contrast, with on-chain requests, the application's smart contract can directly issue these requests, eliminating the need to write or maintain any client or indexer.
 
 An example of sending a request on-chain can be found in the [starter contract of the Bonsai Foundry Template].
 
