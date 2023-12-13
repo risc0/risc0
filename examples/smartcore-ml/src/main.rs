@@ -138,9 +138,9 @@ mod test {
         let svc = SVC::fit(&x, &y, params).unwrap();
 
         // This simulates importing a serialized model.
-        let svc_serialized = serde_json::to_string(&svc).expect("failed to serialize");
+        let svc_serialized = rmp_serde::to_vec(&svc).expect("failed to serialize");
         let svc_deserialized: SVC<f64, i32, DenseMatrix<f64>, Vec<i32>> =
-            serde_json::from_str(&svc_serialized).expect("unable to deserialize JSON");
+            rmp_serde::from_slice(&svc_serialized).expect("unable to deserialize JSON");
 
         let env = ExecutorEnv::builder()
             .write(&is_svm)
