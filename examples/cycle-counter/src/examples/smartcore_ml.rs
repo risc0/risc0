@@ -21,10 +21,10 @@ use crate::{exec, CycleCounter, Metrics};
 
 pub struct Job {}
 
-const MODEL_SERIALIZED: &str =
-    include_str!("../../../smartcore-ml/res/ml-model/tree_model_bytes.bin");
-const DATA_SERIALIZED: &str =
-    include_str!("../../../smartcore-ml/res/input-data/tree_model_data_bytes.bin");
+const MODEL_SERIALIZED: &[u8] =
+    include_bytes!("../../../smartcore-ml/res/ml-model/tree_model_bytes.bin");
+const DATA_SERIALIZED: &[u8] =
+    include_bytes!("../../../smartcore-ml/res/input-data/tree_model_data_bytes.bin");
 
 impl CycleCounter for Job {
     const NAME: &'static str = "smartcore-ml";
