@@ -227,7 +227,7 @@ impl MemoryImage {
                 &page[(addr - page_start) as usize..(addr - page_start) as usize + bytes.len()],
             );
         } else {
-            assert!(
+            ensure!(
                 addr as usize <= MEM_SIZE,
                 "address {addr:08X} outside MEM_SIZE ({MEM_SIZE:08X})"
             );
