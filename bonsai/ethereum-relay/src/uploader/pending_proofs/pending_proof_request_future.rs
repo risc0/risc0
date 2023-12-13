@@ -110,10 +110,6 @@ impl Future for PendingProofRequest {
                             ) {
                                 ("SUCCEEDED", true) => Ok(receipt_response),
                                 ("SUCCEEDED", false) => {
-                                    // TODO: Should we consider this a failure
-                                    // and retry, or should we just return an
-                                    // error?
-
                                     // Bonsai returned the receipt in a inconsistent state,
                                     // we should assume the proof failed and return an error
                                     Err(BackoffError::permanent(Error::ProofRequestError {
