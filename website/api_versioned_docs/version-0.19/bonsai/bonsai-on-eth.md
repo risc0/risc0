@@ -30,8 +30,8 @@ At a high level, here's how it works:
    3. Sends the journal and image ID in a callback to your application contract.
 
 [Groth16 SNARK]: https://www.risczero.com/news/on-chain-verification
-[`BonsaiRelay` contract]: https://github.com/risc0/risc0/blob/main/bonsai/ethereum/contracts/BonsaiRelay.sol
-[`IRiscZeroVerifier` contract]: https://github.com/risc0/risc0/blob/main/bonsai/ethereum/contracts/IRiscZeroVerifier.sol
+[`BonsaiRelay` contract]: https://github.com/risc0/risc0/blob/release-0.19/bonsai/ethereum/contracts/BonsaiRelay.sol
+[`IRiscZeroVerifier` contract]: https://github.com/risc0/risc0/blob/release-0.19/bonsai/ethereum/contracts/IRiscZeroVerifier.sol
 [guest program]: /terminology#guest-program
 [receipt]: /terminology#receipt
 [zk coprocessor]: https://twitter.com/RiscZero/status/1677316664772132864
@@ -61,7 +61,7 @@ An example for sending a callback request via the REST API can be found in the [
 
 [REST]: https://en.wikipedia.org/wiki/REST
 [Bonsai Relay SDK]: https://docs.rs/crate/bonsai-ethereum-relay/latest
-[relay directory of the Bonsai Foundry Template]: https://github.com/risc0/bonsai-foundry-template/blob/main/relay/examples/offchain_request.rs
+[relay directory of the Bonsai Foundry Template]: https://github.com/risc0/bonsai-foundry-template/blob/release-0.19/relay/examples/offchain_request.rs
 
 ### On-chain Requests
 
@@ -73,7 +73,7 @@ With on-chain requests, the application smart contract can directly issue reques
 
 An example of sending a request on-chain can be found in the [starter contract of the Bonsai Foundry Template].
 
-[starter contract of the Bonsai Foundry Template]: https://github.com/risc0/bonsai-foundry-template/blob/main/contracts/BonsaiStarter.sol#L60-L68
+[starter contract of the Bonsai Foundry Template]: https://github.com/risc0/bonsai-foundry-template/blob/release-0.19/contracts/BonsaiStarter.sol#L60-L68
 
 ## Verifier Contract
 
@@ -93,6 +93,6 @@ The [Bonsai SDK] provides support for sending requests to the Bonsai proving ser
 You may also want to check out our [Bonsai Quick Start](quickstart.md) page and/or the [Bonsai Overview](../bonsai).
 
 [Bonsai SDK]: https://docs.rs/bonsai-sdk/latest/bonsai_sdk/
-[`IRiscZeroVerifier` interface]: https://github.com/risc0/risc0/blob/main/bonsai/ethereum/contracts/IRiscZeroVerifier.sol
-[`RiscZeroGroth16Verifier` contract]: https://github.com/risc0/risc0/blob/main/bonsai/ethereum/contracts/groth16/RiscZeroGroth16Verifier.sol
+[`IRiscZeroVerifier` interface]: https://github.com/risc0/risc0/blob/release-0.19/bonsai/ethereum/contracts/IRiscZeroVerifier.sol
+[`RiscZeroGroth16Verifier` contract]: https://github.com/risc0/risc0/blob/release-0.19/bonsai/ethereum/contracts/groth16/RiscZeroGroth16Verifier.sol
 [described above]: #bonsai-relay

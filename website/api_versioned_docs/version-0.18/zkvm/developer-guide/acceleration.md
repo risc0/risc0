@@ -26,7 +26,7 @@ sha2 = { git = "https://github.com/risc0/RustCrypto-hashes", tag = "sha2-v0.10.6
 
 When using cryptography indirectly, e.g. via the `cookie`, `oauth2`, or `revm`, crates it may be possible to enable acceleration support without code changes by applying a [Cargo patch system](https://doc.rust-lang.org/cargo/reference/overriding-dependencies.html#the-patch-section).
 
-An example of how to use these crates to accelerate ECDSA signature verification can be in the [ECDSA example](https://github.com/risc0/risc0/tree/v0.18.0/examples/ecdsa). Note the [use of the patched versions](https://github.com/risc0/risc0/blob/v0.18.0/examples/ecdsa/methods/guest/Cargo.toml#L13-L18) of `sha2`, `crypto-bigint` and `k256` crates used in the guest's `Cargo.toml`.
+An example of how to use these crates to accelerate ECDSA signature verification can be in the [ECDSA example](https://github.com/risc0/risc0/tree/release-0.18/examples/ecdsa). Note the [use of the patched versions](https://github.com/risc0/risc0/blob/release-0.18/examples/ecdsa/methods/guest/Cargo.toml#L13-L18) of `sha2`, `crypto-bigint` and `k256` crates used in the guest's `Cargo.toml`.
 
 ## Adding Accelerator Support To Crates
 

@@ -82,4 +82,4 @@ We're building technology that allows anyone to generate highly performant zero-
 [Bonsai Quick Start]: ../bonsai/quickstart
 [Bonsai as a zk coprocessor]: https://twitter.com/RiscZero/status/1677316664772132864
 [Bonfire Wallet]: https://twitter.com/RiscZero/status/1673692915401629698
-[Governance Showcase]: https://github.com/risc0/risc0/tree/main/bonsai/examples/governance#readme
+[Governance Showcase]: https://github.com/risc0/risc0/tree/release-0.18/bonsai/examples/governance#readme
