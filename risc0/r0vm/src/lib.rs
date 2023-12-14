@@ -16,7 +16,7 @@ use std::{fs, io, path::PathBuf, rc::Rc};
 
 use clap::{Args, Parser, ValueEnum};
 use risc0_zkvm::{
-    get_prover_server, ApiServer, ExecutorEnv, ExecutorImpl, ProverOpts, ProverServer,
+    get_prover_server, hashfn, ApiServer, ExecutorEnv, ExecutorImpl, ProverOpts, ProverServer,
     VerifierContext,
 };
 
@@ -82,9 +82,9 @@ struct Mode {
 
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
 enum HashFn {
-    #[value(name = "sha-256")]
+    #[value(name = hashfn::SHA_256)]
     Sha256,
-    #[value(name = "poseidon")]
+    #[value(name = hashfn::POSEIDON)]
     Poseidon,
 }
 
@@ -158,8 +158,8 @@ pub fn main() {
 impl Cli {
     fn get_prover(&self) -> Rc<dyn ProverServer> {
         let hashfn = match self.hashfn {
-            HashFn::Sha256 => "sha-256",
-            HashFn::Poseidon => "poseidon",
+            HashFn::Sha256 => hashfn::SHA_256,
+            HashFn::Poseidon => hashfn::POSEIDON,
         };
         let opts = ProverOpts {
             hashfn: hashfn.to_string(),

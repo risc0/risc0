@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use alloc::collections::BTreeMap;
-use core::{
+use std::{
+    collections::BTreeMap,
     fmt::Debug,
     iter::Peekable,
     ops::{Index, IndexMut},
@@ -34,7 +34,7 @@ use risc0_zkp::{
 use risc0_zkvm_platform::{memory, WORD_SIZE};
 use tracing::{debug, trace};
 
-use crate::host::CIRCUIT;
+use crate::CIRCUIT;
 
 // TODO: get from circuit
 const SETUP_STEP_REGS: usize = 84;
@@ -282,7 +282,7 @@ impl Debug for TripleWord {
 }
 
 struct TripleWordIter<'a> {
-    it: Peekable<alloc::collections::btree_map::Iter<'a, u32, u32>>,
+    it: Peekable<std::collections::btree_map::Iter<'a, u32, u32>>,
 }
 
 impl<'a> TripleWordIter<'a> {
@@ -471,7 +471,7 @@ impl Loader {
 
 #[cfg(test)]
 mod tests {
-    use alloc::collections::BTreeMap;
+    use std::collections::BTreeMap;
 
     use test_log::test;
 

@@ -15,9 +15,6 @@
 //! Run the zkVM guest and prove its results.
 
 mod dev_mode;
-mod exec;
-pub(crate) mod loader;
-mod plonk;
 mod prover_impl;
 #[cfg(test)]
 mod tests;
@@ -149,15 +146,18 @@ mod cuda {
     use std::rc::Rc;
 
     use anyhow::{bail, Result};
-    use risc0_circuit_rv32im::cuda::{CudaCircuitHalPoseidon, CudaCircuitHalSha256};
-    use risc0_zkp::hal::cuda::{CudaHalPoseidon, CudaHalSha256};
+    use risc0_circuit_rv32im::prove::cuda::{CudaCircuitHalPoseidon, CudaCircuitHalSha256};
+    use risc0_zkp::{
+        core::hash::hashfn,
+        hal::cuda::{CudaHalPoseidon, CudaHalSha256},
+    };
 
     use super::{HalPair, ProverImpl, ProverServer};
     use crate::ProverOpts;
 
     pub fn get_prover_server(opts: &ProverOpts) -> Result<Rc<dyn ProverServer>> {
         match opts.hashfn.as_str() {
-            "sha-256" => {
+            hashfn::SHA_256 => {
                 let hal = Rc::new(CudaHalSha256::new());
                 let circuit_hal = Rc::new(CudaCircuitHalSha256::new(hal.clone()));
                 Ok(Rc::new(ProverImpl::new(
@@ -165,7 +165,7 @@ mod cuda {
                     HalPair { hal, circuit_hal },
                 )))
             }
-            "poseidon" => {
+            hashfn::POSEIDON => {
                 let hal = Rc::new(CudaHalPoseidon::new());
                 let circuit_hal = Rc::new(CudaCircuitHalPoseidon::new(hal.clone()));
                 Ok(Rc::new(ProverImpl::new(
@@ -183,9 +183,10 @@ mod metal {
     use std::rc::Rc;
 
     use anyhow::{bail, Result};
-    use risc0_circuit_rv32im::metal::MetalCircuitHal;
-    use risc0_zkp::hal::metal::{
-        MetalHalPoseidon, MetalHalSha256, MetalHashPoseidon, MetalHashSha256,
+    use risc0_circuit_rv32im::prove::metal::MetalCircuitHal;
+    use risc0_zkp::{
+        core::hash::hashfn,
+        hal::metal::{MetalHalPoseidon, MetalHalSha256, MetalHashPoseidon, MetalHashSha256},
     };
 
     use super::{HalPair, ProverImpl, ProverServer};
@@ -193,7 +194,7 @@ mod metal {
 
     pub fn get_prover_server(opts: &ProverOpts) -> Result<Rc<dyn ProverServer>> {
         match opts.hashfn.as_str() {
-            "sha-256" => {
+            hashfn::SHA_256 => {
                 let hal = Rc::new(MetalHalSha256::new());
                 let circuit_hal = Rc::new(MetalCircuitHal::<MetalHashSha256>::new(hal.clone()));
                 Ok(Rc::new(ProverImpl::new(
@@ -201,7 +202,7 @@ mod metal {
                     HalPair { hal, circuit_hal },
                 )))
             }
-            "poseidon" => {
+            hashfn::POSEIDON => {
                 let hal = Rc::new(MetalHalPoseidon::new());
                 let circuit_hal = Rc::new(MetalCircuitHal::<MetalHashPoseidon>::new(hal.clone()));
                 Ok(Rc::new(ProverImpl::new(
@@ -219,23 +220,23 @@ mod cpu {
     use std::rc::Rc;
 
     use anyhow::{bail, Result};
-    use risc0_circuit_rv32im::cpu::CpuCircuitHal;
+    use risc0_circuit_rv32im::prove::cpu::CpuCircuitHal;
     use risc0_zkp::{
-        core::hash::{poseidon::PoseidonHashSuite, sha::Sha256HashSuite},
+        core::hash::{hashfn, poseidon::PoseidonHashSuite, sha::Sha256HashSuite},
         hal::cpu::CpuHal,
     };
 
     use super::{HalPair, ProverImpl, ProverServer};
-    use crate::{host::CIRCUIT, ProverOpts};
+    use crate::ProverOpts;
 
     pub fn get_prover_server(opts: &ProverOpts) -> Result<Rc<dyn ProverServer>> {
         let suite = match opts.hashfn.as_str() {
-            "sha-256" => Sha256HashSuite::new_suite(),
-            "poseidon" => PoseidonHashSuite::new_suite(),
+            hashfn::SHA_256 => Sha256HashSuite::new_suite(),
+            hashfn::POSEIDON => PoseidonHashSuite::new_suite(),
             _ => bail!("Unsupported hashfn: {}", opts.hashfn),
         };
         let hal = Rc::new(CpuHal::new(suite));
-        let circuit_hal = Rc::new(CpuCircuitHal::new(&CIRCUIT));
+        let circuit_hal = Rc::new(CpuCircuitHal::new());
         let hal_pair = HalPair { hal, circuit_hal };
         Ok(Rc::new(ProverImpl::new("cpu", hal_pair)))
     }

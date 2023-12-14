@@ -16,7 +16,6 @@
 pub(crate) mod api;
 #[cfg(feature = "client")]
 pub(crate) mod client;
-pub(crate) mod control_id;
 pub(crate) mod groth16;
 pub(crate) mod receipt;
 pub(crate) mod recursion;
@@ -46,8 +45,6 @@ mod protos {
         include!(concat!(env!("OUT_DIR"), "/protos.core.rs"));
     }
 }
-
-const CIRCUIT: risc0_circuit_rv32im::CircuitImpl = risc0_circuit_rv32im::CircuitImpl::new();
 
 /// Compute and return the ImageID of the specified ELF binary.
 pub fn compute_image_id(elf: &[u8]) -> Result<Digest> {

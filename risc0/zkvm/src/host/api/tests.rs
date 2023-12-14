@@ -28,7 +28,7 @@ use test_log::test;
 use super::{Asset, AssetRequest, ConnectionWrapper, Connector, TcpConnection};
 use crate::{
     recursion::SuccinctReceipt, ApiClient, ApiServer, ExecutorEnv, InnerReceipt, ProverOpts,
-    Receipt, SegmentReceipt, SessionInfo, VerifierContext,
+    Receipt, SegmentReceipt, SessionInfo,
 };
 
 struct TestClientConnector {
@@ -172,11 +172,10 @@ fn prove_segment_elf() {
     let session = client.execute(env, binary);
     assert_eq!(session.segments.len(), client.segments.len());
 
-    let ctx = VerifierContext::default();
     for segment in client.segments.iter() {
         let opts = ProverOpts::default();
         let receipt = client.prove_segment(opts, segment.clone());
-        receipt.verify_integrity_with_context(&ctx).unwrap();
+        receipt.verify_integrity().unwrap();
     }
 }
 
@@ -211,9 +210,7 @@ fn lift_join_identity() {
             rollup.try_into().unwrap(),
             rec_receipt.try_into().unwrap(),
         );
-        rollup
-            .verify_integrity_with_context(&VerifierContext::default())
-            .unwrap();
+        rollup.verify_integrity().unwrap();
     }
     client.identity_p254(opts, rollup.clone().try_into().unwrap());
 

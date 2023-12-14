@@ -127,14 +127,13 @@ mod tests {
     };
     use test_log::test;
 
-    use crate::{cpu::CpuCircuitHal, CircuitImpl};
+    use crate::cpu::CpuCircuitHal;
 
     #[test]
     fn eval_check() {
         const PO2: usize = 4;
-        let circuit = CircuitImpl::new();
         let cpu_hal: CpuHal<BabyBear> = CpuHal::new(Sha256HashSuite::new_suite());
-        let cpu_eval = CpuCircuitHal::new(&circuit);
+        let cpu_eval = CpuCircuitHal::new();
         let gpu_hal = Rc::new(CudaHalSha256::new());
         let gpu_eval = super::CudaCircuitHalSha256::new(gpu_hal.clone());
         crate::testutil::eval_check(&cpu_hal, cpu_eval, gpu_hal.as_ref(), gpu_eval, PO2);

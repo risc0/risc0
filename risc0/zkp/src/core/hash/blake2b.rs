@@ -83,7 +83,7 @@ impl<T: Blake2b + 'static> Blake2bHashSuite<T> {
     /// Create a new HashSuite
     pub fn new_suite() -> HashSuite<BabyBear> {
         HashSuite {
-            name: "blake2b".into(),
+            name: super::hashfn::BLAKE2B.into(),
             hashfn: Rc::new(Blake2bHashFn::<T>::new()),
             rng: Rc::new(Blake2bRngFactory::<T>::new()),
         }

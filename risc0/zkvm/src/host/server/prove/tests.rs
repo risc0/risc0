@@ -15,28 +15,34 @@
 use std::rc::Rc;
 
 use anyhow::Result;
-use risc0_circuit_rv32im::cpu::CpuCircuitHal;
+use risc0_circuit_rv32im::prove::cpu::CpuCircuitHal;
 use risc0_zkp::{
-    core::{digest::Digest, hash::blake2b::Blake2bCpuHashSuite},
+    core::{
+        digest::Digest,
+        hash::{blake2b::Blake2bCpuHashSuite, hashfn},
+    },
     hal::cpu::CpuHal,
     verify::VerificationError,
 };
-use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID};
+use risc0_zkvm_methods::{
+    multi_test::MultiTestSpec, HELLO_COMMIT_ELF, HELLO_COMMIT_ID, MULTI_TEST_ELF, MULTI_TEST_ID,
+};
 use risc0_zkvm_platform::{memory, WORD_SIZE};
 use serial_test::serial;
 use test_log::test;
 
 use super::{get_prover_server, HalPair, ProverImpl};
 use crate::{
-    host::{server::testutils, CIRCUIT},
+    host::server::testutils,
     serde::{from_slice, to_vec},
-    ExecutorEnv, ExecutorImpl, ExitCode, ProverOpts, ProverServer, Receipt, Session,
-    VerifierContext,
+    sha::Digestible,
+    ExecutorEnv, ExecutorEnvBuilder, ExecutorImpl, ExitCode, ProverOpts, ProverServer, Receipt,
+    Session, VerifierContext,
 };
 
 fn prover_opts_fast() -> ProverOpts {
     ProverOpts {
-        hashfn: "sha-256".to_string(),
+        hashfn: hashfn::SHA_256.to_string(),
         prove_guest_errors: false,
     }
 }
@@ -64,14 +70,14 @@ fn prove_nothing(hashfn: &str) -> Result<Receipt> {
 #[test]
 #[cfg_attr(feature = "cuda", serial)]
 fn hashfn_poseidon() {
-    prove_nothing("poseidon").unwrap();
+    prove_nothing(hashfn::POSEIDON).unwrap();
 }
 
 #[test]
 fn hashfn_blake2b() {
     let hal_pair = HalPair {
         hal: Rc::new(CpuHal::new(Blake2bCpuHashSuite::new_suite())),
-        circuit_hal: Rc::new(CpuCircuitHal::new(&CIRCUIT)),
+        circuit_hal: Rc::new(CpuCircuitHal::new()),
     };
     let env = ExecutorEnv::builder()
         .write(&MultiTestSpec::DoNothing)
@@ -85,7 +91,7 @@ fn hashfn_blake2b() {
 #[test]
 #[cfg_attr(feature = "cuda", serial)]
 fn receipt_serde() {
-    let receipt = prove_nothing("sha-256").unwrap();
+    let receipt = prove_nothing(hashfn::SHA_256).unwrap();
     let encoded: Vec<u32> = to_vec(&receipt).unwrap();
     let decoded: Receipt = from_slice(&encoded).unwrap();
     assert_eq!(decoded, receipt);
@@ -95,7 +101,7 @@ fn receipt_serde() {
 #[test]
 #[cfg_attr(feature = "cuda", serial)]
 fn check_image_id() {
-    let receipt = prove_nothing("sha-256").unwrap();
+    let receipt = prove_nothing(hashfn::SHA_256).unwrap();
     let mut image_id: Digest = MULTI_TEST_ID.into();
     for word in image_id.as_mut_words() {
         *word = word.wrapping_add(1);
@@ -205,7 +211,7 @@ fn memory_io() {
         let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)?;
         let session = exec.run()?;
         let receipt = prove_session_fast(&session);
-        receipt.verify_integrity_with_context(&VerifierContext::default())?;
+        receipt.verify_integrity()?;
         Ok(receipt.get_claim()?.exit_code)
     }
 
@@ -444,236 +450,219 @@ mod docker {
     }
 }
 
-mod sys_verify {
-    use risc0_zkvm_methods::{
-        multi_test::MultiTestSpec, HELLO_COMMIT_ELF, HELLO_COMMIT_ID, MULTI_TEST_ELF, MULTI_TEST_ID,
+fn prove_hello_commit() -> Receipt {
+    let hello_commit_receipt = get_prover_server(&prover_opts_fast())
+        .unwrap()
+        .prove(ExecutorEnv::default(), HELLO_COMMIT_ELF)
+        .unwrap();
+
+    // Double check that the receipt verifies.
+    hello_commit_receipt.verify(HELLO_COMMIT_ID).unwrap();
+    hello_commit_receipt
+}
+
+fn prove_halt(exit_code: u8) -> Receipt {
+    let opts = ProverOpts {
+        hashfn: hashfn::SHA_256.to_string(),
+        prove_guest_errors: true,
     };
-    use test_log::test;
 
-    use super::{get_prover_server, prover_opts_fast};
-    use crate::{
-        serde::to_vec, sha::Digestible, ExecutorEnv, ExecutorEnvBuilder, ExitCode, ProverOpts,
-        Receipt,
+    let env = ExecutorEnvBuilder::default()
+        .write(&MultiTestSpec::Halt(exit_code))
+        .unwrap()
+        .build()
+        .unwrap();
+    let halt_receipt = get_prover_server(&opts)
+        .unwrap()
+        .prove(env, MULTI_TEST_ELF)
+        .unwrap();
+
+    // Double check that the receipt verifies with the expected image ID and exit code.
+    halt_receipt.verify_integrity().unwrap();
+    let halt_claim = halt_receipt.get_claim().unwrap();
+    assert_eq!(halt_claim.pre.digest(), MULTI_TEST_ID.into());
+    assert_eq!(halt_claim.exit_code, ExitCode::Halted(exit_code as u32));
+    halt_receipt
+}
+
+fn prove_fault() -> Receipt {
+    let opts = ProverOpts {
+        hashfn: hashfn::SHA_256.to_string(),
+        prove_guest_errors: true,
     };
 
-    fn prove_hello_commit() -> Receipt {
-        let hello_commit_receipt = get_prover_server(&prover_opts_fast())
-            .unwrap()
-            .prove(ExecutorEnv::default(), HELLO_COMMIT_ELF)
-            .unwrap();
+    let env = ExecutorEnvBuilder::default()
+        .write(&MultiTestSpec::Fault)
+        .unwrap()
+        .build()
+        .unwrap();
+    let fault_receipt = get_prover_server(&opts)
+        .unwrap()
+        .prove(env, MULTI_TEST_ELF)
+        .unwrap();
 
-        // Double check that the receipt verifies.
-        hello_commit_receipt.verify(HELLO_COMMIT_ID).unwrap();
-        hello_commit_receipt
-    }
+    // Double check that the receipt verifies with the expected image ID and exit code.
+    fault_receipt.verify_integrity().unwrap();
+    let fault_claim = fault_receipt.get_claim().unwrap();
+    assert_eq!(fault_claim.pre.digest(), MULTI_TEST_ID.into());
+    assert_eq!(fault_claim.exit_code, ExitCode::Fault);
+    fault_receipt
+}
 
-    fn prove_halt(exit_code: u8) -> Receipt {
-        let opts = ProverOpts {
-            hashfn: "sha-256".to_string(),
-            prove_guest_errors: true,
-        };
+lazy_static::lazy_static! {
+    static ref HELLO_COMMIT_RECEIPT: Receipt = prove_hello_commit();
+}
 
-        let env = ExecutorEnvBuilder::default()
-            .write(&MultiTestSpec::Halt(exit_code))
-            .unwrap()
-            .build()
-            .unwrap();
-        let halt_receipt = get_prover_server(&opts)
-            .unwrap()
-            .prove(env, MULTI_TEST_ELF)
-            .unwrap();
+#[test]
+fn sys_verify() {
+    let spec = &MultiTestSpec::SysVerify {
+        image_id: HELLO_COMMIT_ID.into(),
+        journal: HELLO_COMMIT_RECEIPT.journal.bytes.clone(),
+    };
 
-        // Double check that the receipt verifies with the expected image ID and exit code.
-        halt_receipt
-            .verify_integrity_with_context(&Default::default())
-            .unwrap();
-        let halt_claim = halt_receipt.get_claim().unwrap();
-        assert_eq!(halt_claim.pre.digest(), MULTI_TEST_ID.into());
-        assert_eq!(halt_claim.exit_code, ExitCode::Halted(exit_code as u32));
-        halt_receipt
-    }
+    // Test that providing the proven assumption results in an unconditional
+    // receipt.
+    let env = ExecutorEnv::builder()
+        .write(&spec)
+        .unwrap()
+        .add_assumption(HELLO_COMMIT_RECEIPT.clone().into())
+        .build()
+        .unwrap();
+    get_prover_server(&prover_opts_fast())
+        .unwrap()
+        .prove(env, MULTI_TEST_ELF)
+        .unwrap()
+        .verify(MULTI_TEST_ID)
+        .unwrap();
 
-    fn prove_fault() -> Receipt {
-        let opts = ProverOpts {
-            hashfn: "sha-256".to_string(),
-            prove_guest_errors: true,
-        };
+    // Test that proving without a provided assumption results in an execution
+    // failure.
+    let env = ExecutorEnv::builder()
+        .write(&spec)
+        .unwrap()
+        .build()
+        .unwrap();
+    assert!(get_prover_server(&prover_opts_fast())
+        .unwrap()
+        .prove(env, MULTI_TEST_ELF)
+        .is_err());
 
-        let env = ExecutorEnvBuilder::default()
-            .write(&MultiTestSpec::Fault)
-            .unwrap()
-            .build()
-            .unwrap();
-        let fault_receipt = get_prover_server(&opts)
-            .unwrap()
-            .prove(env, MULTI_TEST_ELF)
-            .unwrap();
+    // Test that providing an unresolved assumption results in a conditional
+    // receipt.
+    let env = ExecutorEnv::builder()
+        .write(&spec)
+        .unwrap()
+        .add_assumption(HELLO_COMMIT_RECEIPT.get_claim().unwrap().into())
+        .build()
+        .unwrap();
+    // TODO(#982) Conditional receipts currently return an error on verification.
+    assert!(get_prover_server(&prover_opts_fast())
+        .unwrap()
+        .prove(env, MULTI_TEST_ELF)
+        .is_err());
 
-        // Double check that the receipt verifies with the expected image ID and exit code.
-        fault_receipt
-            .verify_integrity_with_context(&Default::default())
-            .unwrap();
-        let fault_claim = fault_receipt.get_claim().unwrap();
-        assert_eq!(fault_claim.pre.digest(), MULTI_TEST_ID.into());
-        assert_eq!(fault_claim.exit_code, ExitCode::Fault);
-        fault_receipt
-    }
+    // TODO(#982) With conditional receipts, implement the following cases.
+    // verify with proven corraboration in verifier success.
+    // verify with unresolved corraboration in verifier success.
+    // verify with no resolution results in verifier error.
+    // verify with wrong resolution results in verifier error.
+}
 
-    lazy_static::lazy_static! {
-        static ref HELLO_COMMIT_RECEIPT: Receipt = prove_hello_commit();
-    }
+#[test]
+fn sys_verify_integrity() {
+    let spec = &MultiTestSpec::SysVerifyIntegrity {
+        claim_words: to_vec(&HELLO_COMMIT_RECEIPT.get_claim().unwrap()).unwrap(),
+    };
 
-    #[test]
-    fn sys_verify() {
-        let spec = &MultiTestSpec::SysVerify {
-            image_id: HELLO_COMMIT_ID.into(),
-            journal: HELLO_COMMIT_RECEIPT.journal.bytes.clone(),
-        };
+    // Test that providing the proven assumption results in an unconditional
+    // receipt.
+    let env = ExecutorEnv::builder()
+        .write(&spec)
+        .unwrap()
+        .add_assumption(HELLO_COMMIT_RECEIPT.clone().into())
+        .build()
+        .unwrap();
+    get_prover_server(&prover_opts_fast())
+        .unwrap()
+        .prove(env, MULTI_TEST_ELF)
+        .unwrap()
+        .verify(MULTI_TEST_ID)
+        .unwrap();
 
-        // Test that providing the proven assumption results in an unconditional
-        // receipt.
-        let env = ExecutorEnv::builder()
-            .write(&spec)
-            .unwrap()
-            .add_assumption(HELLO_COMMIT_RECEIPT.clone().into())
-            .build()
-            .unwrap();
-        get_prover_server(&prover_opts_fast())
-            .unwrap()
-            .prove(env, MULTI_TEST_ELF)
-            .unwrap()
-            .verify(MULTI_TEST_ID)
-            .unwrap();
+    // Test that proving without a provided assumption results in an execution
+    // failure.
+    let env = ExecutorEnv::builder()
+        .write(&spec)
+        .unwrap()
+        .build()
+        .unwrap();
+    assert!(get_prover_server(&prover_opts_fast())
+        .unwrap()
+        .prove(env, MULTI_TEST_ELF)
+        .is_err());
 
-        // Test that proving without a provided assumption results in an execution
-        // failure.
-        let env = ExecutorEnv::builder()
-            .write(&spec)
-            .unwrap()
-            .build()
-            .unwrap();
-        assert!(get_prover_server(&prover_opts_fast())
-            .unwrap()
-            .prove(env, MULTI_TEST_ELF)
-            .is_err());
+    // Test that providing an unresolved assumption results in a conditional
+    // receipt.
+    let env = ExecutorEnv::builder()
+        .write(&spec)
+        .unwrap()
+        .add_assumption(HELLO_COMMIT_RECEIPT.get_claim().unwrap().into())
+        .build()
+        .unwrap();
+    // TODO(#982) Conditional receipts currently return an error on verification.
+    assert!(get_prover_server(&prover_opts_fast())
+        .unwrap()
+        .prove(env, MULTI_TEST_ELF)
+        .is_err());
+}
 
-        // Test that providing an unresolved assumption results in a conditional
-        // receipt.
-        let env = ExecutorEnv::builder()
-            .write(&spec)
-            .unwrap()
-            .add_assumption(HELLO_COMMIT_RECEIPT.get_claim().unwrap().into())
-            .build()
-            .unwrap();
-        // TODO(#982) Conditional receipts currently return an error on verification.
-        assert!(get_prover_server(&prover_opts_fast())
-            .unwrap()
-            .prove(env, MULTI_TEST_ELF)
-            .is_err());
+#[test]
+fn sys_verify_integrity_halt_1() {
+    // Generate a receipt for a execution ending in a guest error indicated by
+    // ExitCode::Halted(1).
+    let halt_receipt = prove_halt(1);
 
-        // TODO(#982) With conditional receipts, implement the following cases.
-        // verify with proven corraboration in verifier success.
-        // verify with unresolved corraboration in verifier success.
-        // verify with no resolution results in verifier error.
-        // verify with wrong resolution results in verifier error.
-    }
+    let spec = &MultiTestSpec::SysVerifyIntegrity {
+        claim_words: to_vec(&halt_receipt.get_claim().unwrap()).unwrap(),
+    };
 
-    #[test]
-    fn sys_verify_integrity() {
-        let spec = &MultiTestSpec::SysVerifyIntegrity {
-            claim_words: to_vec(&HELLO_COMMIT_RECEIPT.get_claim().unwrap()).unwrap(),
-        };
+    // Test that proving results in a success execution and unconditional receipt.
+    let env = ExecutorEnv::builder()
+        .write(&spec)
+        .unwrap()
+        .add_assumption(halt_receipt.into())
+        .build()
+        .unwrap();
+    get_prover_server(&prover_opts_fast())
+        .unwrap()
+        .prove(env, MULTI_TEST_ELF)
+        .unwrap()
+        .verify(MULTI_TEST_ID)
+        .unwrap();
+}
 
-        // Test that providing the proven assumption results in an unconditional
-        // receipt.
-        let env = ExecutorEnv::builder()
-            .write(&spec)
-            .unwrap()
-            .add_assumption(HELLO_COMMIT_RECEIPT.clone().into())
-            .build()
-            .unwrap();
-        get_prover_server(&prover_opts_fast())
-            .unwrap()
-            .prove(env, MULTI_TEST_ELF)
-            .unwrap()
-            .verify(MULTI_TEST_ID)
-            .unwrap();
+#[test]
+fn sys_verify_integrity_fault() {
+    // Generate a receipt for a execution ending in fault.
+    // NOTE: This is not really a "proof of fault". Instead it is simply verifying a receipt
+    // that ended in SystemSplit for which the host claims a fault is about to occur.
+    let fault_receipt = prove_fault();
 
-        // Test that proving without a provided assumption results in an execution
-        // failure.
-        let env = ExecutorEnv::builder()
-            .write(&spec)
-            .unwrap()
-            .build()
-            .unwrap();
-        assert!(get_prover_server(&prover_opts_fast())
-            .unwrap()
-            .prove(env, MULTI_TEST_ELF)
-            .is_err());
+    let spec = &MultiTestSpec::SysVerifyIntegrity {
+        claim_words: to_vec(&fault_receipt.get_claim().unwrap()).unwrap(),
+    };
 
-        // Test that providing an unresolved assumption results in a conditional
-        // receipt.
-        let env = ExecutorEnv::builder()
-            .write(&spec)
-            .unwrap()
-            .add_assumption(HELLO_COMMIT_RECEIPT.get_claim().unwrap().into())
-            .build()
-            .unwrap();
-        // TODO(#982) Conditional receipts currently return an error on verification.
-        assert!(get_prover_server(&prover_opts_fast())
-            .unwrap()
-            .prove(env, MULTI_TEST_ELF)
-            .is_err());
-    }
-
-    #[test]
-    fn sys_verify_integrity_halt_1() {
-        // Generate a receipt for a execution ending in a guest error indicated by
-        // ExitCode::Halted(1).
-        let halt_receipt = prove_halt(1);
-
-        let spec = &MultiTestSpec::SysVerifyIntegrity {
-            claim_words: to_vec(&halt_receipt.get_claim().unwrap()).unwrap(),
-        };
-
-        // Test that proving results in a success execution and unconditional receipt.
-        let env = ExecutorEnv::builder()
-            .write(&spec)
-            .unwrap()
-            .add_assumption(halt_receipt.into())
-            .build()
-            .unwrap();
-        get_prover_server(&prover_opts_fast())
-            .unwrap()
-            .prove(env, MULTI_TEST_ELF)
-            .unwrap()
-            .verify(MULTI_TEST_ID)
-            .unwrap();
-    }
-
-    #[test]
-    fn sys_verify_integrity_fault() {
-        // Generate a receipt for a execution ending in fault.
-        // NOTE: This is not really a "proof of fault". Instead it is simply verifying a receipt
-        // that ended in SystemSplit for which the host claims a fault is about to occur.
-        let fault_receipt = prove_fault();
-
-        let spec = &MultiTestSpec::SysVerifyIntegrity {
-            claim_words: to_vec(&fault_receipt.get_claim().unwrap()).unwrap(),
-        };
-
-        // Test that proving results in a success execution and unconditional receipt.
-        let env = ExecutorEnv::builder()
-            .write(&spec)
-            .unwrap()
-            .add_assumption(fault_receipt.into())
-            .build()
-            .unwrap();
-        get_prover_server(&prover_opts_fast())
-            .unwrap()
-            .prove(env, MULTI_TEST_ELF)
-            .unwrap()
-            .verify(MULTI_TEST_ID)
-            .unwrap();
-    }
+    // Test that proving results in a success execution and unconditional receipt.
+    let env = ExecutorEnv::builder()
+        .write(&spec)
+        .unwrap()
+        .add_assumption(fault_receipt.into())
+        .build()
+        .unwrap();
+    get_prover_server(&prover_opts_fast())
+        .unwrap()
+        .prove(env, MULTI_TEST_ELF)
+        .unwrap()
+        .verify(MULTI_TEST_ID)
+        .unwrap();
 }

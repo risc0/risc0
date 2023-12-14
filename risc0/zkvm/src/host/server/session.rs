@@ -15,7 +15,6 @@
 //! This module defines [Session] and [Segment] which provides a way to share
 //! execution traces between the execution phase and the proving phase.
 
-use alloc::collections::BTreeSet;
 use std::{
     borrow::Borrow,
     fs::File,
@@ -24,20 +23,11 @@ use std::{
 };
 
 use anyhow::{anyhow, ensure, Result};
-use risc0_binfmt::{MemoryImage, SystemState};
+use risc0_binfmt::{MemoryImage, PageFaults, SyscallRecord, SystemState};
 use risc0_zkvm_platform::WORD_SIZE;
 use serde::{Deserialize, Serialize};
 
-use crate::{
-    host::server::exec::executor::SyscallRecord, sha::Digest, Assumption, Assumptions, ExitCode,
-    Journal, Output, ReceiptClaim,
-};
-
-#[derive(Clone, Default, Serialize, Deserialize, Debug)]
-pub struct PageFaults {
-    pub(crate) reads: BTreeSet<u32>,
-    pub(crate) writes: BTreeSet<u32>,
-}
+use crate::{sha::Digest, Assumption, Assumptions, ExitCode, Journal, Output, ReceiptClaim};
 
 /// The execution trace of a program.
 ///

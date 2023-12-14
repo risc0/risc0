@@ -19,7 +19,9 @@ use risc0_zkp::{
     prove::poly_group::PolyGroup,
 };
 
-use super::{RECURSION_CODE_SIZE, RECURSION_PO2};
+use crate::CIRCUIT;
+
+use super::RECURSION_PO2;
 
 /// A Program for the recursion circuit (e.g. lift_20 or join).
 ///
@@ -44,9 +46,9 @@ impl Program {
     pub fn from_encoded(encoded: &[u32]) -> Self {
         let prog = Self {
             code: encoded.iter().copied().map(BabyBearElem::from).collect(),
-            code_size: RECURSION_CODE_SIZE,
+            code_size: CIRCUIT.code_size(),
         };
-        assert_eq!(prog.code.len() % RECURSION_CODE_SIZE, 0);
+        assert_eq!(prog.code.len() % CIRCUIT.code_size(), 0);
         prog
     }
 

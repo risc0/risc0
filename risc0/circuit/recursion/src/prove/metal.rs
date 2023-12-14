@@ -15,12 +15,12 @@
 use std::rc::Rc;
 
 use metal::ComputePipelineDescriptor;
-use risc0_core::field::{
-    baby_bear::{BabyBearElem, BabyBearExtElem},
-    RootsOfUnity,
-};
 use risc0_zkp::{
     core::log2_ceil,
+    field::{
+        baby_bear::{BabyBearElem, BabyBearExtElem},
+        RootsOfUnity,
+    },
     hal::{
         metal::{BufferImpl as MetalBuffer, MetalHal, MetalHash},
         CircuitHal,
@@ -28,7 +28,7 @@ use risc0_zkp::{
     INV_RATE,
 };
 
-const METAL_LIB: &[u8] = include_bytes!(env!("RV32IM_METAL_PATH"));
+const METAL_LIB: &[u8] = include_bytes!(env!("RECURSION_METAL_PATH"));
 
 use crate::{
     GLOBAL_MIX, GLOBAL_OUT, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA,
@@ -102,7 +102,7 @@ mod tests {
     };
     use test_log::test;
 
-    use crate::cpu::CpuCircuitHal;
+    use crate::prove::cpu::CpuCircuitHal;
 
     // TODO: figure out a better way to test this.
     #[test]
@@ -110,9 +110,8 @@ mod tests {
     fn eval_check() {
         // The number of cycles, choose a number that doesn't make tests take too long.
         const PO2: usize = 4;
-        let circuit = crate::CircuitImpl::new();
-        let cpu_hal = CpuHal::new(Sha256HashSuite::<BabyBear>::new_suite());
-        let cpu_eval = CpuCircuitHal::new(&circuit);
+        let cpu_hal: CpuHal<BabyBear> = CpuHal::new(Sha256HashSuite::new_suite());
+        let cpu_eval = CpuCircuitHal::new();
         let gpu_hal = Rc::new(MetalHalSha256::new());
         let gpu_eval = super::MetalCircuitHal::new(gpu_hal.clone());
         crate::testutil::eval_check(&cpu_hal, cpu_eval, gpu_hal.as_ref(), gpu_eval, PO2);

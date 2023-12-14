@@ -15,31 +15,16 @@
 use alloc::{collections::VecDeque, vec::Vec};
 
 use risc0_binfmt::read_sha_halfs;
-use risc0_circuit_recursion::{control_id::RECURSION_CONTROL_IDS, CircuitImpl};
+use risc0_circuit_recursion::{valid_control_ids, CircuitImpl, CIRCUIT};
 use risc0_core::field::baby_bear::BabyBearElem;
-use risc0_zkp::{adapter::CircuitInfo, core::digest::Digest, verify::VerificationError};
+use risc0_zkp::{
+    adapter::CircuitInfo,
+    core::{digest::Digest, hash::hashfn},
+    verify::VerificationError,
+};
 use serde::{Deserialize, Serialize};
 
-use super::CIRCUIT;
-use crate::{
-    host::{control_id::POSEIDON_CONTROL_ID, receipt::VerifierContext},
-    sha::Digestible,
-    ReceiptClaim,
-};
-
-/// This function gets valid control IDs from the Poseidon and recursion
-/// circuits
-pub fn valid_control_ids() -> Vec<Digest> {
-    use hex::FromHex;
-    let mut all_ids = Vec::<Digest>::new();
-    for digest_str in POSEIDON_CONTROL_ID {
-        all_ids.push(Digest::from_hex(digest_str).unwrap());
-    }
-    for (_, digest_str) in RECURSION_CONTROL_IDS {
-        all_ids.push(Digest::from_hex(digest_str).unwrap());
-    }
-    all_ids
-}
+use crate::{host::receipt::VerifierContext, sha::Digestible, ReceiptClaim};
 
 /// A succinct receipt, produced via recursion, proving the execution of the zkVM.
 ///
@@ -64,6 +49,12 @@ pub struct SuccinctReceipt {
 impl SuccinctReceipt {
     /// Verify the integrity of this receipt, ensuring the claim is attested
     /// to by the seal.
+    pub fn verify_integrity(&self) -> Result<(), VerificationError> {
+        self.verify_integrity_with_context(&VerifierContext::default())
+    }
+
+    /// Verify the integrity of this receipt, ensuring the claim is attested
+    /// to by the seal.
     pub fn verify_integrity_with_context(
         &self,
         ctx: &VerifierContext,
@@ -83,7 +74,7 @@ impl SuccinctReceipt {
         // function.
         let suite = ctx
             .suites
-            .get("poseidon")
+            .get(hashfn::POSEIDON)
             .ok_or(VerificationError::InvalidHashSuite)?;
 
         // Verify the receipt itself is correct, and therefore the encoded globals are

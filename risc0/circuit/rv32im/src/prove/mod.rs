@@ -12,22 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//! Manages formatted binaries used by the RISC Zero zkVM
-
-#![cfg_attr(all(not(feature = "std"), not(test)), no_std)]
-
-mod elf;
-mod hash;
-#[cfg(not(target_os = "zkvm"))]
-mod image;
-mod sys_state;
-
-#[cfg(not(target_os = "zkvm"))]
-pub use self::image::{
-    compute_image_id, MemoryImage, PageFaults, PageTableInfo, SegmentRecord, SyscallRecord,
-};
-pub use self::{
-    elf::Program,
-    hash::{tagged_list, tagged_list_cons, tagged_struct, Digestible},
-    sys_state::{read_sha_halfs, write_sha_halfs, DecodeError, SystemState},
-};
+mod cpp;
+pub mod cpu;
+#[cfg(feature = "cuda")]
+pub mod cuda;
+#[cfg(feature = "metal")]
+pub mod metal;
+pub mod testutil;
+pub mod vm;

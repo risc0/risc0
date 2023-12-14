@@ -13,27 +13,19 @@
 // limitations under the License.
 
 use anyhow::{bail, Result};
-use risc0_circuit_rv32im::{
-    layout::{OutBuffer, LAYOUT},
-    REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA,
-};
+use risc0_binfmt::SegmentRecord;
+use risc0_circuit_rv32im::prove::vm::prove_segment;
 use risc0_core::field::baby_bear::{BabyBear, Elem, ExtElem};
-use risc0_zkp::{
-    adapter::TapsProvider,
-    hal::{CircuitHal, Hal},
-    layout::Buffer,
-    prove::adapter::ProveAdapter,
-};
+use risc0_zkp::hal::{CircuitHal, Hal};
 
-use super::{exec::MachineContext, HalPair, ProverServer};
+use super::{HalPair, ProverServer};
 use crate::{
     host::{
         receipt::{CompositeReceipt, InnerReceipt, SegmentReceipt, SuccinctReceipt},
         recursion::{identity_p254, join, lift},
-        CIRCUIT,
     },
     sha::Digestible,
-    Loader, Receipt, Segment, Session, VerifierContext,
+    Receipt, Segment, Session, VerifierContext,
 };
 
 /// An implementation of a Prover that runs locally.
@@ -96,22 +88,22 @@ where
         let receipt = Receipt::new(inner, session.journal.clone().unwrap_or_default().bytes);
 
         receipt.verify_integrity_with_context(ctx)?;
-        if receipt.get_claim()?.digest() != session.get_claim()?.digest() {
+        let receipt_claim = receipt.get_claim()?;
+        let session_claim = session.get_claim()?;
+        if receipt_claim.digest() != session_claim.digest() {
             tracing::debug!("receipt and session claim do not match");
-            tracing::debug!("receipt claim: {:#?}", receipt.get_claim()?);
-            tracing::debug!("session claim: {:#?}", session.get_claim()?);
+            tracing::debug!("receipt claim: {receipt_claim:#?}");
+            tracing::debug!("session claim: {session_claim:#?}");
             bail!(
                 "session and receipt claim do not match: session {}, receipt {}",
-                hex::encode(&session.get_claim()?.digest()),
-                hex::encode(&receipt.get_claim()?.digest())
+                hex::encode(&session_claim.digest()),
+                hex::encode(&receipt_claim.digest())
             );
         }
         Ok(receipt)
     }
 
     fn prove_segment(&self, ctx: &VerifierContext, segment: &Segment) -> Result<SegmentReceipt> {
-        use risc0_zkp::prove::executor::Executor;
-
         tracing::debug!(
             "prove_segment[{}]: po2: {}, cycles: {}",
             segment.index,
@@ -122,42 +114,20 @@ where
         let hashfn = &hal.get_hash_suite().name;
 
         let io = segment.prepare_globals()?;
-        let machine = MachineContext::new(segment);
-        let po2 = segment.po2 as usize;
-        let mut executor = Executor::new(&CIRCUIT, machine, po2, po2, &io);
+        let segment_record = SegmentRecord {
+            pre_image: *(segment.pre_image).clone(),
+            faults: segment.faults.clone(),
+            syscalls: segment.syscalls.clone(),
+            split_insn: segment.split_insn,
+        };
 
-        let loader = Loader::new();
-        loader.load(|chunk, fini| executor.step(chunk, fini))?;
-        executor.finalize();
-
-        let mut adapter = ProveAdapter::new(&mut executor);
-        let mut prover = risc0_zkp::prove::Prover::new(hal, CIRCUIT.get_taps());
-
-        adapter.execute(prover.iop());
-
-        prover.set_po2(adapter.po2() as usize);
-
-        prover.commit_group(
-            REGISTER_GROUP_CODE,
-            hal.copy_from_elem("code", &adapter.get_code().as_slice()),
-        );
-        prover.commit_group(
-            REGISTER_GROUP_DATA,
-            hal.copy_from_elem("data", &adapter.get_data().as_slice()),
-        );
-        adapter.accumulate(prover.iop());
-        prover.commit_group(
-            REGISTER_GROUP_ACCUM,
-            hal.copy_from_elem("accum", &adapter.get_accum().as_slice()),
-        );
-
-        let mix = hal.copy_from_elem("mix", &adapter.get_mix().as_slice());
-        let out_slice = &adapter.get_io().as_slice();
-
-        tracing::debug!("Globals: {:?}", OutBuffer(out_slice).tree(&LAYOUT));
-        let out = hal.copy_from_elem("out", &adapter.get_io().as_slice());
-
-        let seal = prover.finalize(&[&mix, &out], circuit_hal.as_ref());
+        let seal = prove_segment(
+            hal,
+            circuit_hal.as_ref(),
+            segment_record,
+            segment.po2 as usize,
+            &io,
+        )?;
 
         let receipt = SegmentReceipt {
             seal,

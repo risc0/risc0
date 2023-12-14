@@ -24,7 +24,8 @@ use bytes::Bytes;
 use risc0_binfmt::{MemoryImage, Program};
 use risc0_zkvm_methods::{
     multi_test::{MultiTestSpec, SYS_MULTI_TEST},
-    HELLO_COMMIT_ELF, MULTI_TEST_ELF, RAND_ELF, SLICE_IO_ELF, STANDARD_LIB_ELF,
+    HELLO_COMMIT_ELF, HELLO_COMMIT_ID, MULTI_TEST_ELF, MULTI_TEST_ID, RAND_ELF, SLICE_IO_ELF,
+    STANDARD_LIB_ELF,
 };
 use risc0_zkvm_platform::{fileno, syscall::nr::SYS_RANDOM, PAGE_SIZE, WORD_SIZE};
 use sha2::{Digest as _, Sha256};
@@ -40,7 +41,7 @@ use crate::{
     },
     serde::to_vec,
     sha::{Digest, Digestible},
-    ExecutorEnv, ExecutorImpl, ExitCode,
+    ExecutorEnv, ExecutorEnvBuilder, ExecutorImpl, ExitCode, MaybePruned, ReceiptClaim, Session,
 };
 
 fn run_test(spec: MultiTestSpec) {
@@ -392,161 +393,96 @@ fn large_io_bytes() {
     assert_eq!(&buf, actual);
 }
 
-mod sys_verify {
-    use risc0_zkvm_methods::{
-        multi_test::MultiTestSpec, HELLO_COMMIT_ELF, HELLO_COMMIT_ID, MULTI_TEST_ELF, MULTI_TEST_ID,
+fn exec_hello_commit() -> Session {
+    let session = ExecutorImpl::from_elf(ExecutorEnv::default(), HELLO_COMMIT_ELF)
+        .unwrap()
+        .run()
+        .unwrap();
+    assert_eq!(session.exit_code, ExitCode::Halted(0));
+    session
+}
+
+fn exec_halt(exit_code: u8) -> Session {
+    let env = ExecutorEnvBuilder::default()
+        .write(&MultiTestSpec::Halt(exit_code))
+        .unwrap()
+        .build()
+        .unwrap();
+    let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
+        .unwrap()
+        .run()
+        .unwrap();
+    assert_eq!(session.exit_code, ExitCode::Halted(exit_code as u32));
+    session
+}
+
+fn exec_pause(exit_code: u8) -> Session {
+    let env = ExecutorEnvBuilder::default()
+        .write(&MultiTestSpec::PauseContinue(exit_code))
+        .unwrap()
+        .build()
+        .unwrap();
+    let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
+        .unwrap()
+        .run()
+        .unwrap();
+    assert_eq!(session.exit_code, ExitCode::Paused(exit_code as u32));
+    session
+}
+
+fn exec_fault() -> Session {
+    let env = ExecutorEnvBuilder::default()
+        .write(&MultiTestSpec::Fault)
+        .unwrap()
+        .build()
+        .unwrap();
+    let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
+        .unwrap()
+        .run()
+        .unwrap();
+    assert_eq!(session.exit_code, ExitCode::Fault);
+    session
+}
+
+#[test]
+fn sys_verify() {
+    let hello_commit_session = exec_hello_commit();
+
+    let spec = &MultiTestSpec::SysVerify {
+        image_id: HELLO_COMMIT_ID.into(),
+        journal: hello_commit_session.journal.clone().unwrap().bytes,
     };
-    use test_log::test;
 
-    use crate::{
-        serde::to_vec, sha::Digestible, ExecutorEnv, ExecutorEnvBuilder, ExecutorImpl, ExitCode,
-        MaybePruned, ReceiptClaim, Session,
-    };
+    // Test that it works when the assumption is added.
+    let env = ExecutorEnv::builder()
+        .write(&spec)
+        .unwrap()
+        .add_assumption(hello_commit_session.get_claim().unwrap().into())
+        .build()
+        .unwrap();
+    let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
+        .unwrap()
+        .run()
+        .unwrap();
+    assert_eq!(session.exit_code, ExitCode::Halted(0));
 
-    fn exec_hello_commit() -> Session {
-        let session = ExecutorImpl::from_elf(ExecutorEnv::default(), HELLO_COMMIT_ELF)
-            .unwrap()
-            .run()
-            .unwrap();
-        assert_eq!(session.exit_code, ExitCode::Halted(0));
-        session
-    }
+    // Test that it does not work when the assumption is not added.
+    let env = ExecutorEnv::builder()
+        .write(&spec)
+        .unwrap()
+        .build()
+        .unwrap();
+    assert!(ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
+        .unwrap()
+        .run()
+        .is_err());
+}
 
-    fn exec_halt(exit_code: u8) -> Session {
-        let env = ExecutorEnvBuilder::default()
-            .write(&MultiTestSpec::Halt(exit_code))
-            .unwrap()
-            .build()
-            .unwrap();
-        let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
-            .unwrap()
-            .run()
-            .unwrap();
-        assert_eq!(session.exit_code, ExitCode::Halted(exit_code as u32));
-        session
-    }
-
-    fn exec_pause(exit_code: u8) -> Session {
-        let env = ExecutorEnvBuilder::default()
-            .write(&MultiTestSpec::PauseContinue(exit_code))
-            .unwrap()
-            .build()
-            .unwrap();
-        let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
-            .unwrap()
-            .run()
-            .unwrap();
-        assert_eq!(session.exit_code, ExitCode::Paused(exit_code as u32));
-        session
-    }
-
-    fn exec_fault() -> Session {
-        let env = ExecutorEnvBuilder::default()
-            .write(&MultiTestSpec::Fault)
-            .unwrap()
-            .build()
-            .unwrap();
-        let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
-            .unwrap()
-            .run()
-            .unwrap();
-        assert_eq!(session.exit_code, ExitCode::Fault);
-        session
-    }
-
-    #[test]
-    fn sys_verify() {
-        let hello_commit_session = exec_hello_commit();
-
-        let spec = &MultiTestSpec::SysVerify {
-            image_id: HELLO_COMMIT_ID.into(),
-            journal: hello_commit_session.journal.clone().unwrap().bytes,
-        };
-
-        // Test that it works when the assumption is added.
-        let env = ExecutorEnv::builder()
-            .write(&spec)
-            .unwrap()
-            .add_assumption(hello_commit_session.get_claim().unwrap().into())
-            .build()
-            .unwrap();
-        let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
-            .unwrap()
-            .run()
-            .unwrap();
-        assert_eq!(session.exit_code, ExitCode::Halted(0));
-
-        // Test that it does not work when the assumption is not added.
-        let env = ExecutorEnv::builder()
-            .write(&spec)
-            .unwrap()
-            .build()
-            .unwrap();
-        assert!(ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
-            .unwrap()
-            .run()
-            .is_err());
-    }
-
-    #[test]
-    fn sys_verify_halt_codes() {
-        for code in [0u8, 1, 2, 255] {
-            tracing::debug!("sys_verify_pause_codes: code = {code}");
-            let halt_session = exec_halt(code);
-
-            let spec = &MultiTestSpec::SysVerify {
-                image_id: MULTI_TEST_ID.into(),
-                journal: Vec::new(),
-            };
-
-            let env = ExecutorEnv::builder()
-                .write(&spec)
-                .unwrap()
-                .add_assumption(halt_session.get_claim().unwrap().into())
-                .build()
-                .unwrap();
-            let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap().run();
-
-            if code == 0 {
-                assert_eq!(session.unwrap().exit_code, ExitCode::Halted(0));
-            } else {
-                assert!(session.is_err());
-            }
-        }
-    }
-
-    #[test]
-    fn sys_verify_pause_codes() {
-        for code in [0u8, 1, 2, 255] {
-            tracing::debug!("sys_verify_halt_codes: code = {code}");
-            let pause_session = exec_pause(code);
-
-            let spec = &MultiTestSpec::SysVerify {
-                image_id: MULTI_TEST_ID.into(),
-                journal: Vec::new(),
-            };
-
-            let env = ExecutorEnv::builder()
-                .write(&spec)
-                .unwrap()
-                .add_assumption(pause_session.get_claim().unwrap().into())
-                .build()
-                .unwrap();
-            let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap().run();
-
-            if code == 0 {
-                assert_eq!(session.unwrap().exit_code, ExitCode::Halted(0));
-            } else {
-                assert!(session.is_err());
-            }
-        }
-    }
-
-    #[test]
-    fn sys_verify_fault() {
-        // NOTE: ReceiptClaim for this Session won't differentiate Fault and SystemSplit,
-        // since these cannot be distinguished from the circuit's point of view.
-        let fault_session = exec_fault();
+#[test]
+fn sys_verify_halt_codes() {
+    for code in [0u8, 1, 2, 255] {
+        tracing::debug!("sys_verify_pause_codes: code = {code}");
+        let halt_session = exec_halt(code);
 
         let spec = &MultiTestSpec::SysVerify {
             image_id: MULTI_TEST_ID.into(),
@@ -556,28 +492,116 @@ mod sys_verify {
         let env = ExecutorEnv::builder()
             .write(&spec)
             .unwrap()
-            .add_assumption(fault_session.get_claim().unwrap().into())
+            .add_assumption(halt_session.get_claim().unwrap().into())
             .build()
             .unwrap();
-        assert!(ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
-            .unwrap()
-            .run()
-            .is_err());
+        let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap().run();
+
+        if code == 0 {
+            assert_eq!(session.unwrap().exit_code, ExitCode::Halted(0));
+        } else {
+            assert!(session.is_err());
+        }
     }
+}
 
-    #[test]
-    fn sys_verify_integrity() {
-        let hello_commit_session = exec_hello_commit();
+#[test]
+fn sys_verify_pause_codes() {
+    for code in [0u8, 1, 2, 255] {
+        tracing::debug!("sys_verify_halt_codes: code = {code}");
+        let pause_session = exec_pause(code);
 
-        let spec = &MultiTestSpec::SysVerifyIntegrity {
-            claim_words: to_vec(&hello_commit_session.get_claim().unwrap()).unwrap(),
+        let spec = &MultiTestSpec::SysVerify {
+            image_id: MULTI_TEST_ID.into(),
+            journal: Vec::new(),
         };
 
-        // Test that it works when the assumption is added.
         let env = ExecutorEnv::builder()
             .write(&spec)
             .unwrap()
-            .add_assumption(hello_commit_session.get_claim().unwrap().into())
+            .add_assumption(pause_session.get_claim().unwrap().into())
+            .build()
+            .unwrap();
+        let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap().run();
+
+        if code == 0 {
+            assert_eq!(session.unwrap().exit_code, ExitCode::Halted(0));
+        } else {
+            assert!(session.is_err());
+        }
+    }
+}
+
+#[test]
+fn sys_verify_fault() {
+    // NOTE: ReceiptClaim for this Session won't differentiate Fault and SystemSplit,
+    // since these cannot be distinguished from the circuit's point of view.
+    let fault_session = exec_fault();
+
+    let spec = &MultiTestSpec::SysVerify {
+        image_id: MULTI_TEST_ID.into(),
+        journal: Vec::new(),
+    };
+
+    let env = ExecutorEnv::builder()
+        .write(&spec)
+        .unwrap()
+        .add_assumption(fault_session.get_claim().unwrap().into())
+        .build()
+        .unwrap();
+    assert!(ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
+        .unwrap()
+        .run()
+        .is_err());
+}
+
+#[test]
+fn sys_verify_integrity() {
+    let hello_commit_session = exec_hello_commit();
+
+    let spec = &MultiTestSpec::SysVerifyIntegrity {
+        claim_words: to_vec(&hello_commit_session.get_claim().unwrap()).unwrap(),
+    };
+
+    // Test that it works when the assumption is added.
+    let env = ExecutorEnv::builder()
+        .write(&spec)
+        .unwrap()
+        .add_assumption(hello_commit_session.get_claim().unwrap().into())
+        .build()
+        .unwrap();
+    let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
+        .unwrap()
+        .run()
+        .unwrap();
+    assert_eq!(session.exit_code, ExitCode::Halted(0));
+
+    // Test that it does not work when the assumption is not added.
+    let env = ExecutorEnv::builder()
+        .write(&spec)
+        .unwrap()
+        .build()
+        .unwrap();
+    assert!(ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
+        .unwrap()
+        .run()
+        .is_err());
+}
+
+#[test]
+fn sys_verify_integrity_halt_codes() {
+    for code in [0u8, 1, 2, 255] {
+        tracing::debug!("sys_verify_pause_codes: code = {code}");
+        let halt_session = exec_halt(code);
+
+        let spec = &MultiTestSpec::SysVerifyIntegrity {
+            claim_words: to_vec(&halt_session.get_claim().unwrap()).unwrap(),
+        };
+
+        let env = ExecutorEnv::builder()
+            .write(&spec)
+            .unwrap()
+            .add_assumption(halt_session.get_claim().unwrap().into())
             .build()
             .unwrap();
         let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
@@ -585,81 +609,23 @@ mod sys_verify {
             .run()
             .unwrap();
         assert_eq!(session.exit_code, ExitCode::Halted(0));
-
-        // Test that it does not work when the assumption is not added.
-        let env = ExecutorEnv::builder()
-            .write(&spec)
-            .unwrap()
-            .build()
-            .unwrap();
-        assert!(ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
-            .unwrap()
-            .run()
-            .is_err());
     }
+}
 
-    #[test]
-    fn sys_verify_integrity_halt_codes() {
-        for code in [0u8, 1, 2, 255] {
-            tracing::debug!("sys_verify_pause_codes: code = {code}");
-            let halt_session = exec_halt(code);
-
-            let spec = &MultiTestSpec::SysVerifyIntegrity {
-                claim_words: to_vec(&halt_session.get_claim().unwrap()).unwrap(),
-            };
-
-            let env = ExecutorEnv::builder()
-                .write(&spec)
-                .unwrap()
-                .add_assumption(halt_session.get_claim().unwrap().into())
-                .build()
-                .unwrap();
-            let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
-                .unwrap()
-                .run()
-                .unwrap();
-            assert_eq!(session.exit_code, ExitCode::Halted(0));
-        }
-    }
-
-    #[test]
-    fn sys_verify_integrity_pause_codes() {
-        for code in [0u8, 1, 2, 255] {
-            tracing::debug!("sys_verify_halt_codes: code = {code}");
-            let pause_session = exec_pause(code);
-
-            let spec = &MultiTestSpec::SysVerifyIntegrity {
-                claim_words: to_vec(&pause_session.get_claim().unwrap()).unwrap(),
-            };
-
-            let env = ExecutorEnv::builder()
-                .write(&spec)
-                .unwrap()
-                .add_assumption(pause_session.get_claim().unwrap().into())
-                .build()
-                .unwrap();
-            let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
-                .unwrap()
-                .run()
-                .unwrap();
-            assert_eq!(session.exit_code, ExitCode::Halted(0));
-        }
-    }
-
-    #[test]
-    fn sys_verify_integrity_fault() {
-        // NOTE: ReceiptClaim for this Session won't differentiate Fault and SystemSplit,
-        // since these cannot be distinguished from the circuit's point of view.
-        let fault_session = exec_fault();
+#[test]
+fn sys_verify_integrity_pause_codes() {
+    for code in [0u8, 1, 2, 255] {
+        tracing::debug!("sys_verify_halt_codes: code = {code}");
+        let pause_session = exec_pause(code);
 
         let spec = &MultiTestSpec::SysVerifyIntegrity {
-            claim_words: to_vec(&fault_session.get_claim().unwrap()).unwrap(),
+            claim_words: to_vec(&pause_session.get_claim().unwrap()).unwrap(),
         };
 
         let env = ExecutorEnv::builder()
             .write(&spec)
             .unwrap()
-            .add_assumption(fault_session.get_claim().unwrap().into())
+            .add_assumption(pause_session.get_claim().unwrap().into())
             .build()
             .unwrap();
         let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
@@ -668,33 +634,56 @@ mod sys_verify {
             .unwrap();
         assert_eq!(session.exit_code, ExitCode::Halted(0));
     }
+}
 
-    #[test]
-    fn sys_verify_integrity_pruned_claim() {
-        let hello_commit_session = exec_hello_commit();
+#[test]
+fn sys_verify_integrity_fault() {
+    // NOTE: ReceiptClaim for this Session won't differentiate Fault and SystemSplit,
+    // since these cannot be distinguished from the circuit's point of view.
+    let fault_session = exec_fault();
 
-        // Prune the claim before providing it as input so that it cannot be checked to have no
-        // assumptions.
-        let pruned_claim =
-            MaybePruned::<ReceiptClaim>::Pruned(hello_commit_session.get_claim().unwrap().digest());
-        let spec = &MultiTestSpec::SysVerifyIntegrity {
-            claim_words: to_vec(&pruned_claim).unwrap(),
-        };
+    let spec = &MultiTestSpec::SysVerifyIntegrity {
+        claim_words: to_vec(&fault_session.get_claim().unwrap()).unwrap(),
+    };
 
-        // Test that it works when the assumption is added.
-        let env = ExecutorEnv::builder()
-            .write(&spec)
-            .unwrap()
-            .add_assumption(hello_commit_session.get_claim().unwrap().into())
-            .build()
-            .unwrap();
+    let env = ExecutorEnv::builder()
+        .write(&spec)
+        .unwrap()
+        .add_assumption(fault_session.get_claim().unwrap().into())
+        .build()
+        .unwrap();
+    let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
+        .unwrap()
+        .run()
+        .unwrap();
+    assert_eq!(session.exit_code, ExitCode::Halted(0));
+}
 
-        // Result of execution should be a guest panic resulting from the pruned input.
-        assert!(ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
-            .unwrap()
-            .run()
-            .is_err());
-    }
+#[test]
+fn sys_verify_integrity_pruned_claim() {
+    let hello_commit_session = exec_hello_commit();
+
+    // Prune the claim before providing it as input so that it cannot be checked to have no
+    // assumptions.
+    let pruned_claim =
+        MaybePruned::<ReceiptClaim>::Pruned(hello_commit_session.get_claim().unwrap().digest());
+    let spec = &MultiTestSpec::SysVerifyIntegrity {
+        claim_words: to_vec(&pruned_claim).unwrap(),
+    };
+
+    // Test that it works when the assumption is added.
+    let env = ExecutorEnv::builder()
+        .write(&spec)
+        .unwrap()
+        .add_assumption(hello_commit_session.get_claim().unwrap().into())
+        .build()
+        .unwrap();
+
+    // Result of execution should be a guest panic resulting from the pruned input.
+    assert!(ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
+        .unwrap()
+        .run()
+        .is_err());
 }
 
 #[test]

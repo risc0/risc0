@@ -19,14 +19,17 @@ use core::fmt::Debug;
 
 use anyhow::Result;
 use risc0_binfmt::SystemState;
-use risc0_circuit_rv32im::layout;
+use risc0_circuit_rv32im::{
+    control_id::{BLAKE2B_CONTROL_ID, POSEIDON_CONTROL_ID, SHA256_CONTROL_ID},
+    layout, CIRCUIT,
+};
 use risc0_core::field::baby_bear::BabyBear;
 use risc0_zkp::{
     core::{
         digest::Digest,
         hash::{
-            blake2b::Blake2bCpuHashSuite, poseidon::PoseidonHashSuite, sha::Sha256HashSuite,
-            HashSuite,
+            blake2b::Blake2bCpuHashSuite, hashfn, poseidon::PoseidonHashSuite,
+            sha::Sha256HashSuite, HashSuite,
         },
     },
     layout::Buffer,
@@ -35,15 +38,15 @@ use risc0_zkp::{
 use risc0_zkvm_platform::WORD_SIZE;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 
-use super::control_id::{BLAKE2B_CONTROL_ID, POSEIDON_CONTROL_ID, SHA256_CONTROL_ID};
-// Make succinct receipt available through this `receipt` module.
-pub use super::recursion::SuccinctReceipt;
 use crate::{
     host::groth16::{Groth16Proof, Groth16Seal},
     serde::{from_slice, Error},
     sha::{Digestible, Sha256},
     Assumptions, ExitCode, MaybePruned, Output, ReceiptClaim,
 };
+
+// Make succinct receipt available through this `receipt` module.
+pub use super::recursion::SuccinctReceipt;
 
 /// A receipt attesting to the execution of a Session.
 ///
@@ -185,6 +188,21 @@ impl Receipt {
         }
 
         Ok(())
+    }
+
+    /// Verify the integrity of this receipt, ensuring the claim and jounral
+    /// are attested to by the seal.
+    ///
+    /// This does not verify the success of the guest execution. In
+    /// particular, the guest could have exited with an error (e.g.
+    /// `ExitCode::Halted(1)`) or faulted state. It also does not check the
+    /// image ID, or otherwise constrain what guest was executed. After calling
+    /// this method, the caller should check the [ReceiptClaim] fields
+    /// relevant to their application. If you need to verify a successful
+    /// guest execution and access the journal, the `verify` function is
+    /// recommended.
+    pub fn verify_integrity(&self) -> Result<(), VerificationError> {
+        self.verify_integrity_with_context(&VerifierContext::default())
     }
 
     /// Verify the integrity of this receipt, ensuring the claim and jounral
@@ -619,6 +637,12 @@ pub struct SegmentReceipt {
 impl SegmentReceipt {
     /// Verify the integrity of this receipt, ensuring the claim is attested
     /// to by the seal.
+    pub fn verify_integrity(&self) -> Result<(), VerificationError> {
+        self.verify_integrity_with_context(&VerifierContext::default())
+    }
+
+    /// Verify the integrity of this receipt, ensuring the claim is attested
+    /// to by the seal.
     pub fn verify_integrity_with_context(
         &self,
         ctx: &VerifierContext,
@@ -637,7 +661,7 @@ impl SegmentReceipt {
             .suites
             .get(&self.hashfn)
             .ok_or(VerificationError::InvalidHashSuite)?;
-        risc0_zkp::verify::verify(&super::CIRCUIT, suite, &self.seal, check_code)?;
+        risc0_zkp::verify::verify(&CIRCUIT, suite, &self.seal, check_code)?;
 
         // Receipt is consistent with the claim encoded on the seal. Now check against the
         // claim on the struct.
@@ -778,9 +802,9 @@ impl Default for VerifierContext {
     fn default() -> Self {
         Self {
             suites: BTreeMap::from([
-                ("blake2b".into(), Blake2bCpuHashSuite::new_suite()),
-                ("poseidon".into(), PoseidonHashSuite::new_suite()),
-                ("sha-256".into(), Sha256HashSuite::new_suite()),
+                (hashfn::BLAKE2B.into(), Blake2bCpuHashSuite::new_suite()),
+                (hashfn::POSEIDON.into(), PoseidonHashSuite::new_suite()),
+                (hashfn::SHA_256.into(), Sha256HashSuite::new_suite()),
             ]),
         }
     }

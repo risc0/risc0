@@ -15,10 +15,6 @@
 use std::collections::BTreeMap;
 
 use anyhow::{bail, Result};
-use risc0_circuit_recursion::{
-    layout::{CodeReg, RecursionMicroInst, LAYOUT},
-    micro_op, Externs,
-};
 use risc0_core::field::baby_bear::{BabyBearElem as Fp, BabyBearExtElem as Fp4};
 use risc0_zkp::{
     adapter::CircuitStepContext,
@@ -30,6 +26,11 @@ use risc0_zkp::{
 };
 use sha2::digest::generic_array::GenericArray;
 use tracing::trace;
+
+use crate::{
+    layout::{CodeReg, RecursionMicroInst, LAYOUT},
+    micro_op, Externs,
+};
 
 pub struct Preflight<'a, Ext: Externs> {
     externs: &'a mut Ext,
@@ -91,12 +92,7 @@ impl<'a, Ext: Externs> Preflight<'a, Ext> {
             let keep_state = self.get(code, inst.keep_state).as_u32();
             let group = (self.get(code, inst.group.g1).as_u32()
                 + self.get(code, inst.group.g2).as_u32() * 2) as usize;
-            trace!(
-                "Poseidon Load: group = {}, add_consts = {}, keep_state = {}",
-                group,
-                add_consts,
-                keep_state
-            );
+            trace!("Poseidon Load: group = {group}, add_consts = {add_consts}, keep_state = {keep_state}");
             if keep_state != 1 {
                 self.poseidon_state = [Fp::new(0); CELLS];
             }
@@ -125,7 +121,7 @@ impl<'a, Ext: Externs> Preflight<'a, Ext> {
             let do_mont = self.get(code, inst.do_mont).as_u32();
             let group = (self.get(code, inst.group.g1).as_u32()
                 + self.get(code, inst.group.g2).as_u32() * 2) as usize;
-            trace!("Poseidon store, group = {}", group);
+            trace!("Poseidon store, group = {group}");
             let write_addr = self.get(code, LAYOUT.code.write_addr).as_u32() as usize;
             for i in 0..8 {
                 let addr = Fp::new((write_addr + i) as u32);
@@ -134,7 +130,7 @@ impl<'a, Ext: Externs> Preflight<'a, Ext> {
                     // Convert to montgomery form
                     store = store * Fp::from(268435454u32);
                 }
-                self.externs.wom_write(addr, Fp4::from(store));
+                self.externs.wom_write(addr, store.into());
             }
             self.set_not_splittable(ctx);
         }

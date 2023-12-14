@@ -14,7 +14,7 @@
 
 //! This module implements the Executor.
 
-use std::{cell::RefCell, fmt::Debug, io::Write, mem, rc::Rc};
+use std::{cell::RefCell, io::Write, mem, rc::Rc};
 
 use addr2line::{
     fallible_iterator::FallibleIterator,
@@ -23,7 +23,11 @@ use addr2line::{
 };
 use anyhow::{anyhow, bail, Context, Result};
 use crypto_bigint::{CheckedMul, Encoding, NonZero, U256, U512};
-use risc0_binfmt::{MemoryImage, Program, SystemState};
+use risc0_binfmt::{MemoryImage, Program, SyscallRecord, SystemState};
+use risc0_circuit_rv32im::prove::vm::{
+    loader::Loader,
+    opcode::{MajorType, OpCode},
+};
 use risc0_zkp::{
     core::{
         digest::{DIGEST_BYTES, DIGEST_WORDS},
@@ -42,22 +46,16 @@ use risc0_zkvm_platform::{
     PAGE_SIZE, WORD_SIZE,
 };
 use rrs_lib::{instruction_executor::InstructionExecutor, HartState};
-use serde::{Deserialize, Serialize};
 use sha2::digest::generic_array::GenericArray;
 use tempfile::tempdir;
 use tracing::{level_filters::LevelFilter, Level};
 
-use super::{monitor::MemoryMonitor, profiler::Profiler, syscall::SyscallTable};
+use super::{super::opcode_str, monitor::MemoryMonitor, profiler::Profiler, syscall::SyscallTable};
 use crate::{
     align_up,
-    host::{
-        client::exec::TraceEvent,
-        receipt::Assumption,
-        server::opcode::{MajorType, OpCode},
-    },
+    host::{client::exec::TraceEvent, receipt::Assumption},
     sha::Digest,
-    Assumptions, ExecutorEnv, ExitCode, FileSegmentRef, Loader, Output, Segment, SegmentRef,
-    Session,
+    Assumptions, ExecutorEnv, ExitCode, FileSegmentRef, Output, Segment, SegmentRef, Session,
 };
 
 /// The number of cycles required to compress a SHA-256 block.
@@ -101,12 +99,6 @@ impl OpCodeResult {
             extra_cycles,
         }
     }
-}
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct SyscallRecord {
-    pub to_guest: Vec<u32>,
-    pub regs: (u32, u32),
 }
 
 /// The Executor provides an implementation for the execution phase.
@@ -444,7 +436,7 @@ impl<'a> ExecutorImpl<'a> {
                 self.segment_cycle,
                 self.pc,
                 opcode.insn,
-                opcode
+                opcode_str(&opcode)
             );
         } else {
             tracing::trace!(
@@ -452,7 +444,7 @@ impl<'a> ExecutorImpl<'a> {
                 self.segment_cycle,
                 self.pc,
                 opcode.insn,
-                opcode
+                opcode_str(&opcode)
             );
         }
 

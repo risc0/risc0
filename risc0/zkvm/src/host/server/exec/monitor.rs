@@ -15,7 +15,7 @@
 use std::{array, collections::BTreeSet, mem::take};
 
 use anyhow::{bail, Result};
-use risc0_binfmt::MemoryImage;
+use risc0_binfmt::{MemoryImage, PageFaults};
 use risc0_zkp::core::hash::sha::BLOCK_BYTES;
 use risc0_zkvm_platform::{
     memory::{is_guest_memory, SYSTEM},
@@ -25,7 +25,7 @@ use risc0_zkvm_platform::{
 use rrs_lib::{MemAccessSize, Memory};
 
 use super::syscall::SyscallContext;
-use crate::host::{client::exec::TraceEvent, server::session::PageFaults};
+use crate::host::client::exec::TraceEvent;
 
 /// The number of blocks that fit within a single page.
 const BLOCKS_PER_PAGE: usize = PAGE_SIZE / BLOCK_BYTES;
@@ -525,25 +525,5 @@ impl SyscallContext for MemoryMonitor {
 
     fn load_u8(&mut self, addr: u32) -> Result<u8> {
         MemoryMonitor::load_u8_from_guest_addr(self, addr)
-    }
-}
-
-impl PageFaults {
-    fn clear(&mut self) {
-        self.reads.clear();
-        self.writes.clear();
-    }
-
-    #[allow(dead_code)]
-    fn dump(&self) {
-        tracing::debug!("PageFaultInfo");
-        tracing::debug!("  reads>");
-        for idx in self.reads.iter().rev() {
-            tracing::debug!("  0x{:08X}", idx);
-        }
-        tracing::debug!("  writes>");
-        for idx in self.writes.iter() {
-            tracing::debug!("  0x{:08X}", idx);
-        }
     }
 }

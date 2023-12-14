@@ -14,7 +14,6 @@
 
 use anyhow::{bail, Result};
 use num_traits::FromPrimitive;
-use rrs_lib::{instruction_string_outputter::InstructionStringOutputter, process_instruction};
 
 #[allow(dead_code)]
 #[derive(Copy, Clone, Debug, num_derive::FromPrimitive, PartialEq)]
@@ -173,28 +172,5 @@ impl OpCode {
             },
             _ => bail!("{}", decode_error_str()),
         })
-    }
-
-    #[allow(dead_code)]
-    pub fn debug(&self, cycle: usize, insn_pc: u32) -> String {
-        let mut outputter = InstructionStringOutputter { insn_pc };
-        let desc = process_instruction(&mut outputter, self.insn);
-        format!(
-            "[{}] pc: 0x{:08x}, insn: 0x{:08x} => {}",
-            cycle,
-            insn_pc,
-            self.insn,
-            desc.unwrap_or(self.mnemonic.into())
-        )
-    }
-}
-
-impl core::fmt::Debug for OpCode {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        let mut outputter = InstructionStringOutputter {
-            insn_pc: self.insn_pc,
-        };
-        let desc = process_instruction(&mut outputter, self.insn);
-        f.write_fmt(format_args!("{}", desc.unwrap_or(self.mnemonic.into())))
     }
 }

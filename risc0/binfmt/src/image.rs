@@ -14,7 +14,11 @@
 
 extern crate alloc;
 
-use alloc::{collections::BTreeMap, vec, vec::Vec};
+use alloc::{
+    collections::{BTreeMap, BTreeSet},
+    vec,
+    vec::Vec,
+};
 
 use anyhow::{ensure, Result};
 use risc0_zkp::core::{
@@ -28,6 +32,26 @@ use risc0_zkvm_platform::{
 use serde::{Deserialize, Serialize};
 
 use crate::{elf::Program, Digestible, SystemState};
+
+#[derive(Clone, Default, Serialize, Deserialize, Debug)]
+pub struct PageFaults {
+    pub reads: BTreeSet<u32>,
+    pub writes: BTreeSet<u32>,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct SyscallRecord {
+    pub to_guest: Vec<u32>,
+    pub regs: (u32, u32),
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+pub struct SegmentRecord {
+    pub pre_image: MemoryImage,
+    pub faults: PageFaults,
+    pub syscalls: Vec<SyscallRecord>,
+    pub split_insn: Option<u32>,
+}
 
 /// An image of a zkVM guest's memory
 ///
@@ -110,6 +134,25 @@ const fn div_ceil(a: u32, b: u32) -> u32 {
 /// Round `a` up to the nearest multipe of `b`.
 const fn round_up(a: u32, b: u32) -> u32 {
     div_ceil(a, b) * b
+}
+
+impl PageFaults {
+    pub fn clear(&mut self) {
+        self.reads.clear();
+        self.writes.clear();
+    }
+
+    pub fn dump(&self) {
+        tracing::debug!("PageFaultInfo");
+        tracing::debug!("  reads>");
+        for idx in self.reads.iter().rev() {
+            tracing::debug!("  0x{:08X}", idx);
+        }
+        tracing::debug!("  writes>");
+        for idx in self.writes.iter() {
+            tracing::debug!("  0x{:08X}", idx);
+        }
+    }
 }
 
 impl PageTableInfo {

@@ -17,7 +17,6 @@ use std::collections::{BTreeMap, VecDeque};
 use anyhow::Result;
 use lazy_regex::{regex, Captures};
 use rayon::prelude::*;
-use risc0_circuit_recursion::{CircuitImpl, Externs};
 use risc0_zkp::{
     adapter::{CircuitInfo, CircuitStep, CircuitStepContext, CircuitStepHandler},
     field::{
@@ -29,17 +28,22 @@ use risc0_zkp::{
     ZK_CYCLES,
 };
 
-use super::{plonk, Program, CIRCUIT, RECURSION_PO2};
+use super::{
+    memory_argument::{PlonkAccum, WomPlonk},
+    program::Program,
+    RECURSION_PO2,
+};
+use crate::{CircuitImpl, Externs, CIRCUIT};
 
 pub struct MachineContext {
     // Contents of the write-only memory
     wom: Vec<BabyBearExtElem>,
 
     // Plonk table for sorting plonk elements in proper order
-    wom_plonk: plonk::WomPlonk,
+    wom_plonk: WomPlonk,
 
     // Plonk accumulations for compute_accum and verify_accum phases
-    plonk_accum: plonk::PlonkAccum<BabyBear>,
+    plonk_accum: PlonkAccum<BabyBear>,
 
     iop_input: VecDeque<u32>,
     cur_iop_body: VecDeque<Vec<BabyBearElem>>,
@@ -53,8 +57,8 @@ impl<'a> MachineContext {
             wom: Vec::new(),
             iop_input,
             cur_iop_body: VecDeque::new(),
-            plonk_accum: plonk::PlonkAccum::new(),
-            wom_plonk: plonk::WomPlonk::new(),
+            plonk_accum: PlonkAccum::new(),
+            wom_plonk: WomPlonk::new(),
             iop_reads: BTreeMap::new(),
         }
     }
@@ -139,7 +143,7 @@ impl<'a> MachineContext {
     }
 }
 
-impl risc0_circuit_recursion::Externs for MachineContext {
+impl crate::Externs for MachineContext {
     fn wom_write(&mut self, addr: BabyBearElem, val: BabyBearExtElem) {
         let addr = u32::from(addr) as usize;
 
@@ -266,15 +270,10 @@ pub struct RecursionExecutor<'a> {
 }
 
 impl<'a> RecursionExecutor<'a> {
-    pub fn new(
-        circuit: &'static CircuitImpl,
-        zkr: &'a Program,
-        machine: MachineContext,
-        split_points: Vec<usize>,
-    ) -> Self {
+    pub fn new(zkr: &'a Program, machine: MachineContext, split_points: Vec<usize>) -> Self {
         let io = vec![BabyBearElem::INVALID; CircuitImpl::OUTPUT_SIZE];
         let po2 = RECURSION_PO2;
-        let executor = Executor::new(circuit, machine, po2, po2, &io);
+        let executor = Executor::new(&CIRCUIT, machine, po2, po2, &io);
         Self {
             zkr,
             executor,

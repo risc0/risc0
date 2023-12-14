@@ -12,12 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use core::{cmp, ops::Deref};
-use std::collections::{BTreeMap, BTreeSet, VecDeque};
+use std::{
+    cmp,
+    collections::{BTreeMap, BTreeSet, VecDeque},
+};
 
 use anyhow::{anyhow, Result};
 use lazy_regex::{regex, Captures};
-use risc0_binfmt::MemoryImage;
+use risc0_binfmt::{MemoryImage, PageFaults, SegmentRecord};
 use risc0_core::field::{
     baby_bear::{BabyBear, BabyBearElem as Elem},
     Elem as _,
@@ -32,13 +34,9 @@ use risc0_zkvm_platform::{
     WORD_SIZE,
 };
 
-use super::plonk;
-use crate::{
-    host::server::{
-        opcode::{MajorType, OpCode},
-        session::PageFaults,
-    },
-    Segment,
+use super::{
+    memory_argument::{BytesPlonk, PlonkAccum, RamPlonk},
+    opcode::{MajorType, OpCode},
 };
 
 type Quad = (Elem, Elem, Elem, Elem);
@@ -61,19 +59,19 @@ pub struct MemoryState {
     pub ram: MemoryImage,
 
     // Plonk tables for sorting plonks in proper order
-    pub ram_plonk: plonk::RamPlonk,
-    pub bytes_plonk: plonk::BytesPlonk,
+    pub ram_plonk: RamPlonk,
+    pub bytes_plonk: BytesPlonk,
 
     // Plonk accumulations for compute_accum and verify_accum phases
-    pub plonk_accum: BTreeMap<String, plonk::PlonkAccum<BabyBear>>,
+    pub plonk_accum: BTreeMap<String, PlonkAccum<BabyBear>>,
 }
 
 impl MemoryState {
     pub(crate) fn new(image: MemoryImage) -> Self {
         Self {
             ram: image,
-            ram_plonk: plonk::RamPlonk::new(),
-            bytes_plonk: plonk::BytesPlonk::new(),
+            ram_plonk: RamPlonk::new(),
+            bytes_plonk: BytesPlonk::new(),
             plonk_accum: BTreeMap::new(),
         }
     }
@@ -251,7 +249,7 @@ impl CircuitStepHandler<Elem> for MachineContext {
 }
 
 impl MachineContext {
-    pub fn new(segment: &Segment) -> Self {
+    pub fn new(segment: SegmentRecord) -> Self {
         let syscall_out_data: Vec<u32> = segment
             .syscalls
             .iter()
@@ -263,10 +261,10 @@ impl MachineContext {
             .map(|syscall| syscall.regs)
             .collect();
         MachineContext {
-            memory: MemoryState::new(segment.pre_image.deref().clone()),
-            faults: segment.faults.clone(),
-            syscall_out_data: VecDeque::from(syscall_out_data),
-            syscall_out_regs: VecDeque::from(syscall_out_regs),
+            memory: MemoryState::new(segment.pre_image),
+            faults: segment.faults,
+            syscall_out_data: syscall_out_data.into(),
+            syscall_out_regs: syscall_out_regs.into(),
             is_halted: false,
             is_flushing: false,
             resident_words: BTreeSet::new(),
@@ -337,7 +335,7 @@ impl MachineContext {
             cycle,
             pc,
             insn,
-            opcode
+            "", // TODO: opcode_str(&opcode)
         );
         self.insn_counter += 1;
 
@@ -657,7 +655,7 @@ impl MachineContext {
         if let Some(entry) = self.memory.plonk_accum.get_mut(name) {
             entry.write(args);
         } else {
-            let mut accum = plonk::PlonkAccum::new();
+            let mut accum = PlonkAccum::new();
             accum.write(args);
             self.memory.plonk_accum.insert(name.to_string(), accum);
         }

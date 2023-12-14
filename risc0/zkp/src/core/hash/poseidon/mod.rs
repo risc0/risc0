@@ -80,7 +80,7 @@ impl PoseidonHashSuite {
     /// Construct a new PoseidonHashSuite
     pub fn new_suite() -> HashSuite<BabyBear> {
         HashSuite {
-            name: "poseidon".into(),
+            name: super::hashfn::POSEIDON.into(),
             hashfn: Rc::new(PoseidonHashFn {}),
             rng: Rc::new(PoseidonRngFactory {}),
         }

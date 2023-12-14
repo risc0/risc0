@@ -3324,11 +3324,11 @@ dependencies = [
 
 [[package]]
 name = "metal"
-version = "0.25.0"
+version = "0.27.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "550b24b0cd4cf923f36bae78eca457b3a10d8a6a14a9c84cb2687b527e6a84af"
+checksum = "c43f73953f8cbe511f021b58f18c3ce1c3d1ae13fe953293e13345bf83217f25"
 dependencies = [
- "bitflags 1.3.2",
+ "bitflags 2.4.1",
  "block",
  "core-graphics-types",
  "foreign-types",
@@ -4392,12 +4392,16 @@ version = "0.20.0-alpha.1"
 dependencies = [
  "anyhow",
  "bytemuck",
+ "cfg-if",
  "cust",
  "downloader",
+ "hex",
+ "lazy-regex",
  "metal",
  "rand 0.8.5",
  "rayon",
  "risc0-circuit-recursion-sys",
+ "risc0-circuit-rv32im",
  "risc0-core",
  "risc0-zkp",
  "sha2 0.10.8",
@@ -4420,9 +4424,13 @@ version = "0.20.0-alpha.1"
 dependencies = [
  "anyhow",
  "cust",
+ "lazy-regex",
  "metal",
+ "num-derive",
+ "num-traits",
  "rand 0.8.5",
  "rayon",
+ "risc0-binfmt",
  "risc0-circuit-rv32im-sys",
  "risc0-core",
  "risc0-zkp",
@@ -4503,8 +4511,6 @@ dependencies = [
  "hex",
  "lazy-regex",
  "num-bigint 0.4.4",
- "num-derive",
- "num-traits",
  "prost",
  "prost-build",
  "protoc-prebuilt",

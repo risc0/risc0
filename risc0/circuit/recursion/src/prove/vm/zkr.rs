@@ -14,25 +14,22 @@
 
 use anyhow::{anyhow, bail, Context, Result};
 use hex::FromHex;
-use risc0_circuit_recursion::REGISTER_GROUP_CODE;
 use risc0_zkp::{
-    adapter::TapsProvider, core::digest::Digest, field::baby_bear::BabyBearElem, MAX_CYCLES_PO2,
-    MIN_CYCLES_PO2,
+    core::digest::Digest, field::baby_bear::BabyBearElem, MAX_CYCLES_PO2, MIN_CYCLES_PO2,
 };
 
-use super::{Program, CIRCUIT, RECURSION_CODE_SIZE};
+use super::Program;
+use crate::{control_id::RECURSION_CONTROL_IDS, prove::zkr, CIRCUIT};
 
 fn get_zkr(name: &str) -> Result<(Program, Digest)> {
-    let u32s = risc0_circuit_recursion::zkr::get_zkr(name)?;
-    let code_size = CIRCUIT.get_taps().group_size(REGISTER_GROUP_CODE);
-    assert_eq!(code_size, RECURSION_CODE_SIZE);
+    let u32s = zkr::get_zkr(name)?;
 
     Ok((
         Program {
-            code: u32s.iter().cloned().map(BabyBearElem::from).collect(),
-            code_size,
+            code: u32s.into_iter().map(BabyBearElem::from).collect(),
+            code_size: CIRCUIT.code_size(),
         },
-        risc0_circuit_recursion::control_id::RECURSION_CONTROL_IDS
+        RECURSION_CONTROL_IDS
             .iter()
             .copied()
             .find_map(|(n, id)| {

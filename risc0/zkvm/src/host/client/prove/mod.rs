@@ -20,6 +20,7 @@ pub(crate) mod local;
 use std::{path::PathBuf, rc::Rc};
 
 use anyhow::Result;
+use risc0_zkp::core::hash::hashfn;
 use serde::{Deserialize, Serialize};
 
 use self::{bonsai::BonsaiProver, external::ExternalProver};
@@ -94,6 +95,7 @@ pub trait Executor {
 pub struct ProverOpts {
     /// The hash function to use.
     pub hashfn: String,
+
     /// When false, only prove execution sessions that end in a successful
     /// [crate::ExitCode] (i.e. `Halted(0)` or `Paused(0)`).
     /// When set to true, any completed execution session will be proven, including indicated
@@ -106,7 +108,7 @@ impl Default for ProverOpts {
     /// `prove_guest_errors` set to false.
     fn default() -> Self {
         Self {
-            hashfn: "poseidon".to_string(),
+            hashfn: hashfn::POSEIDON.to_string(),
             prove_guest_errors: false,
         }
     }

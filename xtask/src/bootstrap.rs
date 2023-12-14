@@ -23,7 +23,6 @@ use risc0_zkp::{
     field::baby_bear::BabyBear,
     hal::cpu::CpuHal,
 };
-use risc0_zkvm::{recursion::Program, Loader};
 
 #[derive(Parser)]
 pub struct Bootstrap {
@@ -36,7 +35,7 @@ pub struct Bootstrap {
     skip_recursion: bool,
 }
 
-const CONTROL_ID_PATH_RV32IM: &str = "risc0/zkvm/src/host/control_id.rs";
+const CONTROL_ID_PATH_RV32IM: &str = "risc0/circuit/rv32im/src/control_id.rs";
 const CONTROL_ID_PATH_RECURSION: &str = "risc0/circuit/recursion/src/control_id.rs";
 
 impl Bootstrap {
@@ -50,6 +49,8 @@ impl Bootstrap {
     }
 
     fn generate_rv32im_control_ids() {
+        use risc0_circuit_rv32im::prove::vm::loader::Loader;
+
         let loader = Loader::new();
         tracing::info!("computing control IDs with SHA-256");
         let control_id_sha256 =
@@ -110,8 +111,13 @@ impl Bootstrap {
     }
 
     fn generate_recursion_control_ids() {
+        use risc0_circuit_recursion::prove::{
+            vm::{program::Program, Prover},
+            zkr::get_all_zkrs,
+        };
+
         tracing::info!("unzipping recursion programs (zkrs)");
-        let zkrs = risc0_circuit_recursion::zkr::get_all_zkrs().unwrap();
+        let zkrs = get_all_zkrs().unwrap();
         let zkr_control_ids: Vec<(String, Digest)> = zkrs
             .into_iter()
             .map(|(name, encoded_program)| {
@@ -161,7 +167,7 @@ impl Bootstrap {
         // Calculuate a Merkle root for the allowed control IDs and add it to the file.
         let hash_suite = PoseidonHashSuite::new_suite();
         let hashfn = hash_suite.hashfn.as_ref();
-        let allowed_ids = risc0_zkvm::recursion::Prover::make_allowed_tree();
+        let allowed_ids = Prover::make_allowed_tree();
         let allowed_ids_root = allowed_ids.calc_root(hashfn);
 
         writeln!(&mut cntlf, "/// Merkle root of the RECURSION_CONTROL_IDS").unwrap();

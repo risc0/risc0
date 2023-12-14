@@ -42,6 +42,7 @@ pub use anyhow::Result;
 #[cfg(any(feature = "client", feature = "prove"))]
 pub use bytes::Bytes;
 pub use risc0_binfmt::SystemState;
+pub use risc0_zkp::core::hash::hashfn;
 pub use risc0_zkvm_platform::{declare_syscall, memory::GUEST_MAX_MEM, PAGE_SIZE};
 
 #[cfg(feature = "fault-proof")]
@@ -52,7 +53,7 @@ pub use self::host::{
     client::prove::local::LocalProver,
     server::{
         exec::executor::ExecutorImpl,
-        prove::{get_prover_server, loader::Loader, HalPair, ProverServer},
+        prove::{get_prover_server, HalPair, ProverServer},
         session::{FileSegmentRef, Segment, SegmentRef, Session, SessionEvents, SimpleSegmentRef},
     },
 };
@@ -71,7 +72,6 @@ pub use self::host::{
 #[cfg(not(target_os = "zkvm"))]
 pub use self::host::{
     compute_image_id,
-    control_id::POSEIDON_CONTROL_ID,
     groth16::{Groth16Proof, Groth16Seal},
     receipt::{
         Assumption, CompositeReceipt, Groth16Receipt, InnerReceipt, Journal, Receipt,

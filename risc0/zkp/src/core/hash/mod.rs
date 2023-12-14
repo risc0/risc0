@@ -86,3 +86,15 @@ impl<F: Field> Clone for HashSuite<F> {
         }
     }
 }
+
+/// Well known hashing functions.
+pub mod hashfn {
+    /// The identifier for the Blake2b hashing function.
+    pub const BLAKE2B: &str = "blake2b";
+
+    /// The identifier for the Poseidon hashing function.
+    pub const POSEIDON: &str = "poseidon";
+
+    /// The identifier for the SHA-256 hashing function.
+    pub const SHA_256: &str = "sha-256";
+}

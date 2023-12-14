@@ -12,10 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use risc0_circuit_recursion::CircuitImpl;
+use risc0_circuit_recursion::{
+    prove::vm::{poseidon254_hal_pair, poseidon2_hal_pair, Prover, ProverOpts},
+    CircuitImpl,
+};
 use risc0_zkp::{
     adapter::CircuitInfo,
-    core::digest::{Digest, DIGEST_WORDS},
+    core::{
+        digest::{Digest, DIGEST_WORDS},
+        hash::hashfn,
+    },
     field::baby_bear::BabyBearElem,
 };
 use risc0_zkvm_methods::{
@@ -24,10 +30,7 @@ use risc0_zkvm_methods::{
 use serial_test::serial;
 use test_log::test;
 
-use super::{
-    identity_p254, join, lift, prove::poseidon254_hal_pair, prove::poseidon2_hal_pair, resolve,
-    Prover, ProverOpts,
-};
+use super::{identity_p254, join, lift, resolve};
 use crate::{
     get_prover_server, ExecutorEnv, ExecutorImpl, InnerReceipt, Receipt, SegmentReceipt, Session,
     VerifierContext,
@@ -165,19 +168,18 @@ fn generate_busy_loop_segments(hashfn: &str) -> (Session, Vec<SegmentReceipt>) {
 #[serial]
 fn test_recursion_lift_join_identity_e2e() {
     // Prove the base case
-    let (session, segments) = generate_busy_loop_segments("poseidon");
+    let (session, segments) = generate_busy_loop_segments(hashfn::POSEIDON);
 
     // Lift and join them  all (and verify)
     let mut rollup = lift(&segments[0]).unwrap();
     tracing::info!("Lift claim = {:?}", rollup.claim);
-    let ctx = VerifierContext::default();
     for receipt in &segments[1..] {
         let rec_receipt = lift(receipt).unwrap();
         tracing::info!("Lift claim = {:?}", rec_receipt.claim);
-        rec_receipt.verify_integrity_with_context(&ctx).unwrap();
+        rec_receipt.verify_integrity().unwrap();
         rollup = join(&rollup, &rec_receipt).unwrap();
         tracing::info!("Join claim = {:?}", rollup.claim);
-        rollup.verify_integrity_with_context(&ctx).unwrap();
+        rollup.verify_integrity().unwrap();
     }
 
     // Check on stark-to-snark
@@ -233,7 +235,7 @@ fn generate_composition_receipt(hashfn: &str) -> Receipt {
 )]
 #[serial]
 fn test_recursion_lift_resolve_e2e() {
-    let receipt = generate_composition_receipt("poseidon");
+    let receipt = generate_composition_receipt(hashfn::POSEIDON);
     let composition_receipt = receipt.inner.composite().unwrap().clone();
     assert_eq!(composition_receipt.segments.len(), 1);
     let conditional_segment_receipt = composition_receipt.segments[0].clone();
@@ -250,23 +252,17 @@ fn test_recursion_lift_resolve_e2e() {
     // Lift and join them  all (and verify)
     tracing::info!("Lifting assumption");
     let lifted_assumption = lift(&assumption_segment_receipt).unwrap();
-    lifted_assumption
-        .verify_integrity_with_context(&VerifierContext::default())
-        .unwrap();
+    lifted_assumption.verify_integrity().unwrap();
     tracing::info!("Lift assumption claim = {:?}", lifted_assumption.claim);
 
     tracing::info!("Lifting conditional");
     let lifted_conditional = lift(&conditional_segment_receipt).unwrap();
-    lifted_conditional
-        .verify_integrity_with_context(&VerifierContext::default())
-        .unwrap();
+    lifted_conditional.verify_integrity().unwrap();
     tracing::info!("Lift conditional claim = {:?}", lifted_conditional.claim);
 
     tracing::info!("Resolve");
     let resolved = resolve(&lifted_conditional, &lifted_assumption).unwrap();
-    resolved
-        .verify_integrity_with_context(&VerifierContext::default())
-        .unwrap();
+    resolved.verify_integrity().unwrap();
     tracing::info!("Resolve claim = {:?}", resolved.claim);
 
     // Validate the Session rollup + journal data

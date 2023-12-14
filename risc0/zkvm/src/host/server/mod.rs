@@ -13,9 +13,18 @@
 // limitations under the License.
 
 pub(crate) mod exec;
-pub(crate) mod opcode;
-#[cfg(feature = "prove")]
 pub(crate) mod prove;
 pub(crate) mod session;
 #[cfg(test)]
 mod testutils;
+
+use risc0_circuit_rv32im::prove::vm::opcode::OpCode;
+use rrs_lib::{instruction_string_outputter::InstructionStringOutputter, process_instruction};
+
+fn opcode_str(opcode: &OpCode) -> String {
+    let mut outputter = InstructionStringOutputter {
+        insn_pc: opcode.insn_pc,
+    };
+    let desc = process_instruction(&mut outputter, opcode.insn);
+    format!("{}", desc.unwrap_or(opcode.mnemonic.into()))
+}
