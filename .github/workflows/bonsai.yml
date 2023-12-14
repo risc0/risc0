@@ -34,7 +34,7 @@ jobs:
         with:
           filters: |
             bonsai:
-              - .github/**
+              - .github/actions/**
               - bonsai/**
               - risc0/**
 

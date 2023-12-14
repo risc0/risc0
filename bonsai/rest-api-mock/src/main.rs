@@ -12,7 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use tokio::net::TcpListener;
+
 #[tokio::main]
 async fn main() {
-    let _ = bonsai_rest_api_mock::serve("8081".to_string()).await;
+    let listener = TcpListener::bind("0.0.0.0:8081").await.unwrap();
+    let _ = bonsai_rest_api_mock::serve(listener).await;
 }

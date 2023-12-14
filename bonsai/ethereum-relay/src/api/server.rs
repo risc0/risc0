@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use anyhow::Context;
-use axum::{extract::DefaultBodyLimit, middleware::from_fn, routing::post, Router};
+use axum::{extract::DefaultBodyLimit, middleware, routing::post, Router};
 use tower_http::trace::{DefaultOnRequest, TraceLayer};
 use tracing::Level;
 use utoipa::OpenApi;
@@ -37,7 +37,7 @@ pub(crate) fn app<S: Storage + Sync + Send + Clone + 'static>(state: ApiState<S>
 
     Router::new()
         .route(CALLBACK_ROUTE, post(post_callback_request))
-        .layer(from_fn(authorize))
+        .route_layer(middleware::from_fn(authorize))
         .with_state(state)
         .layer(DefaultBodyLimit::max(256 * 1024 * 1024))
         .layer(TraceLayer::new_for_http().on_request(
@@ -54,13 +54,9 @@ pub(crate) async fn serve<S: Storage + Sync + Send + Clone + 'static>(
     state: ApiState<S>,
     port: String,
 ) -> anyhow::Result<()> {
-    let bind_address = &format!("0.0.0.0:{port}");
-    axum::Server::bind(
-        &bind_address
-            .parse()
-            .context("failed to parse bind address")?,
-    )
-    .serve(app(state).into_make_service())
-    .await
-    .context(format!("failed to serve API on {bind_address}"))
+    let bind_address = format!("0.0.0.0:{port}");
+    let listener = tokio::net::TcpListener::bind(&bind_address).await.unwrap();
+    axum::serve(listener, app(state))
+        .await
+        .context(format!("failed to serve API on {bind_address}"))
 }

@@ -15,16 +15,16 @@
 #![no_main]
 #![no_std]
 
+use digital_signature_core::{SignMessageCommit, SigningRequest};
 use risc0_zkvm::guest::env;
 use risc0_zkvm::sha::{Impl, Sha256};
-use digital_signature_core::{SignMessageCommit, SigningRequest};
 
 risc0_zkvm::guest::entry!(main);
 
 pub fn main() {
     let request: SigningRequest = env::read();
     env::commit(&SignMessageCommit {
-        identity: *Impl::hash_bytes(&request.passphrase.pass),
+        identity: *Impl::hash_bytes(request.passphrase.as_bytes()),
         msg: request.msg,
     });
 }

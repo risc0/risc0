@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use clap::{Arg, Command};
+use clap::Parser;
 use risc0_zkvm::{default_prover, sha::Digest, ExecutorEnv, Receipt};
 use sha_methods::{HASH_ELF, HASH_ID, HASH_RUST_CRYPTO_ELF};
 
@@ -43,21 +43,24 @@ fn provably_hash(input: &str, use_rust_crypto: bool) -> (Digest, Receipt) {
     let prover = default_prover();
 
     // Produce a receipt by proving the specified ELF binary.
-    let receipt = prover.prove_elf(env, elf).unwrap();
+    let receipt = prover.prove(env, elf).unwrap();
 
     let digest = receipt.journal.decode().unwrap();
     (digest, receipt)
 }
 
+#[derive(Parser)]
+struct Cli {
+    #[arg(default_value = "")]
+    message: String,
+}
+
 fn main() {
     // Parse command line
-    let matches = Command::new("hash")
-        .arg(Arg::new("message").default_value(""))
-        .get_matches();
-    let message = matches.get_one::<String>("message").unwrap();
+    let args = Cli::parse();
 
     // Prove hash the message.
-    let (digest, receipt) = provably_hash(message, false);
+    let (digest, receipt) = provably_hash(&args.message, false);
 
     // Verify the receipt, ensuring the prover knows a valid SHA-256 preimage.
     receipt

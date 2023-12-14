@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-clap = "3.1"
+clap = { version = "4.4", features = ["derive"] }
 digital-signature-core = { path = "core" }
 digital-signature-methods = { path = "methods" }
 risc0-zkvm = { path = "../../risc0/zkvm" }
@@ -17,6 +17,7 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 test-log = { version = "0.2", default-features = false, features = ["trace"] }
 
 [features]
-default = []
 cuda = ["risc0-zkvm/cuda"]
-prove = ["risc0-zkvm/cuda"]
+default = []
+metal = ["risc0-zkvm/metal"]
+prove = ["risc0-zkvm/prove"]

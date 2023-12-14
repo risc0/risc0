@@ -42,7 +42,7 @@ impl Prover for BonsaiProver {
         self.name.clone()
     }
 
-    fn prove_elf_with_ctx(
+    fn prove_with_ctx(
         &self,
         env: ExecutorEnv<'_>,
         ctx: &VerifierContext,

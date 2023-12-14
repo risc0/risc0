@@ -18,7 +18,7 @@ res/ml-model and res/input-data come preloaded with a trained decision tree clas
 
 ## Model Types
 
-It is important to specificy the generic types for each model so that they can be succesfully deserialized.  The input data for a trained model is typically formatted as a DenseMatrix, so be sure to add the following import:
+It is important to specify the generic types for each model so that they can be successfully deserialized.  The input data for a trained model is typically formatted as a DenseMatrix, so be sure to add the following import:
 `use smartcore::linalg::basic::matrix::DenseMatrix;`
 when using KNN, be sure to add the following import:
 `use smartcore::metrics::distance::euclidian::Euclidian;`
@@ -37,7 +37,7 @@ let model: GaussianNB<{float}, _, DenseMatrix<{float}>, _> = trained_model;
 ```
 
 ```
-let model: LogisticRegression<{flaot}, u32, DenseMatrix<{float}>, Vec<u32>> = trained_model;
+let model: LogisticRegression<{float}, u32, DenseMatrix<{float}>, Vec<u32>> = trained_model;
 ```
 
 ```

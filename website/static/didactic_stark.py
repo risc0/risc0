@@ -32,14 +32,14 @@ class EvaluationDomain:
     @classmethod
     def from_shift_generator_size(self, shift, generator, size):
         return EvaluationDomain(
-            np.array([(shift * (generator**i)) % _field_size for i in range(size)])
+            np.array([(shift * mod_pow(generator, i)) % _field_size for i in range(size)])
         )
 
     # Method to construct evaluation matrix for the given domain
     def as_vandermonde_matrix(self):
         self.evaluationmatrix = np.array(
             [
-                [self.domain[j] ** i % _field_size for i in range(self.size)]
+                [mod_pow(self.domain[j], i) for i in range(self.size)]
                 for j in range(self.size)
             ]
         )
@@ -52,6 +52,9 @@ class EvaluationDomain:
         )
         return self.commitment
 
+# A function that performs modular exponentiation
+def mod_pow(base, exp):
+   return pow(int(base), exp, _field_size)
 
 # A function that returns the reciprocal modulo _field_size
 def field_reciprocal(x):
@@ -80,7 +83,7 @@ def extendarray(short_array, length):
 # A function that evaluates a polynomial at a given input
 def evaluate_at_point(coeffs, x):
     # We evaluate f(x) as the dot product of [coefficients] and [powers]=[1, x, x^2, ...]
-    powers = np.array([x**i % _field_size for i in range(len(coeffs))])
+    powers = np.array([mod_pow(x, i) for i in range(len(coeffs))])
     eval = np.dot(coeffs, powers)
     return eval
 
@@ -91,7 +94,7 @@ def mix(array, parameter):
     for i in range(len(array)):
         assert len(array[i]) == len(array[0])
         mixed_array = (
-            mixed_array + (np.array(array[i]) * parameter**i)
+            mixed_array + (np.array(array[i]) * mod_pow(parameter,i))
         ) % _field_size
     return mixed_array
 
@@ -798,7 +801,7 @@ def main():
     # Specifying query location
     print("The verifier specifies a query location g_super_(3) from D_super_(3)")
     g_super_3_index = 25
-    g_super_3 = 5**g_super_3_index % 97
+    g_super_3 = mod_pow(5, g_super_3_index)
     print("Choose g_super_(3) = 5^{} = {}.\n".format(g_super_3_index, g_super_3))
 
     print("Now, the prover provides 2 evaluations from f_super_(2).")
@@ -818,8 +821,8 @@ def main():
     )
     C_super_2 = EvaluationDomain(
         [
-            5 ** ((g_super_3_index - 1) // 2 + 1) % 97,
-            5 ** ((g_super_3_index - 1) // 2 + (_field_size + 1) // 2) % 97,
+            mod_pow(5, ((g_super_3_index - 1) // 2 + 1)),
+            mod_pow(5, ((g_super_3_index - 1) // 2 + (_field_size + 1) // 2)),
         ]
     )
     print("")

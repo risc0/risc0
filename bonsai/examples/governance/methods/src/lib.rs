@@ -44,7 +44,7 @@ mod test {
             .build()
             .unwrap();
         let exec = default_executor();
-        let session = exec.execute_elf(env, FINALIZE_VOTES_ELF).unwrap();
+        let session = exec.execute(env, FINALIZE_VOTES_ELF).unwrap();
         assert_eq!(&session.journal.bytes, TEST_OUTPUT);
     }
 }

@@ -4,10 +4,6 @@ This code demonstrates a minimal example of how to use the RISC Zero [zkVM] to m
 
 The demo uses the [shakmaty] crate to prove that a chess position has a checkmate without revealing what that checkmate is.
 
-[zkVM]: https://dev.risczero.com/zkvm
-[shakmaty]: https://docs.rs/shakmaty/latest/shakmaty/
-
-
 ## Quick Start
 
 First, follow the [installation guide] if you don't already have the RISC Zero tools installed.
@@ -18,9 +14,6 @@ cargo run --release
 ```
 
 Congratulations! You just constructed a zero-knowledge proof that the position defined [here] includes a mate-in-one.
-
-[installation guide]: https://dev.risczero.com/api/zkvm/quickstart
-[here]: https://github.com/risc0/risc0/blob/main/examples/chess/src/main.rs#L29
 
 ## Use Cases
 
@@ -40,20 +33,9 @@ The host program can be found in [`src/main.rs`], and the guest program can be f
 The [host] first [executes] the guest program and then [proves the execution] to construct a [receipt].
 The receipt can be passed to a third party, who can examine the [journal] to check the program's outputs and can [verify] the [receipt] to ensure the integrity of the [guest program]'s execution.
 
-[`src/main.rs`]: src/main.rs
-[`methods/guest/src/main.rs`]: methods/guest/src/main.rs
-[host]: https://dev.risczero.com/terminology#host
-[executes]: https://dev.risczero.com/terminology#execute
-[guest program]: https://dev.risczero.com/terminology#guest-program
-[host program]: https://dev.risczero.com/terminology#host-program
-[proves the execution]: https://dev.risczero.com/terminology#prove
-[receipt]: https://dev.risczero.com/terminology#receipt
-[verify]: https://dev.risczero.com/terminology#verify
-[journal]: https://dev.risczero.com/terminology#journal
-
 ## Approach
 
-This is a simple [zkVM application] that demonstrates how to use a Rust crate inside the [zkVM].
+This is a simple zkVM application that demonstrates how to use a Rust crate inside the [zkVM].
 Here, we use the [shakmaty] crate, which makes it possible to handle chess notation and chess logic.
 To learn more about using Rust crates inside the zkVM, check out our [Rust Resources] page.
 
@@ -64,18 +46,30 @@ The [host code] supplies a move that the [guest code] keeps private and an initi
 
 The [guest code] checks that applying the move to the initial board state is legal and results in a checkmate. If not, the [guest code] asserts and no [journal] is produced.
 
-[Rust Resources]: https://dev.risczero.com/zkvm/developer-guide/rust-resources
-[zkVM application]: https://dev.risczero.com/zkvm/developer-guide/zkvm-app-structure
-[shakmaty]: https://docs.rs/shakmaty/latest/shakmaty/
-[guest code]: https://github.com/risc0/risc0-rust-examples/blob/main/chess/methods/guest/src/bin/checkmate.rs
-[host code]: https://github.com/risc0/risc0/blob/main/examples/chess/methods/guest/src/main.rs
-[journal]: https://dev.risczero.com/terminology#journal
 
 ## More Resources
 
 - For a video walk-through of this example, check out this [excerpt from our workshop at ZK HACK III].
 - For more information about building, running, and testing zkVM applications, see our [developer docs].
 
-[developer docs]: https://dev.risczero.com/zkvm
+[`src/main.rs`]: src/main.rs
+[`methods/guest/src/main.rs`]: methods/guest/src/main.rs
+[host]: https://dev.risczero.com/terminology#host
+[executes]: https://dev.risczero.com/terminology#execute
+[guest program]: https://dev.risczero.com/terminology#guest-program
+[host program]: https://dev.risczero.com/terminology#host-program
+[proves the execution]: https://dev.risczero.com/terminology#prove
+[receipt]: https://dev.risczero.com/terminology#receipt
+[verify]: https://dev.risczero.com/terminology#verify
+[journal]: https://dev.risczero.com/terminology#journal
+[installation guide]: https://dev.risczero.com/api/zkvm/quickstart
+[here]: https://github.com/risc0/risc0/blob/main/examples/chess/src/main.rs#L29
+[zkVM]: https://dev.risczero.com/zkvm
+[shakmaty]: https://docs.rs/shakmaty/latest/shakmaty/
+[Rust Resources]: https://dev.risczero.com/zkvm/developer-guide/rust-resources
+[shakmaty]: https://docs.rs/shakmaty/latest/shakmaty/
+[guest code]: https://github.com/risc0/risc0-rust-examples/blob/main/chess/methods/guest/src/bin/checkmate.rs
+[host code]: https://github.com/risc0/risc0/blob/main/examples/chess/methods/guest/src/main.rs
+[journal]: https://dev.risczero.com/terminology#journal
+[developer docs]: https://dev.risczero.com
 [excerpt from our workshop at ZK HACK III]: https://www.youtube.com/watch?v=vxqxRiTXGBI&list=PLcPzhUaCxlCgig7ofeARMPwQ8vbuD6hC5&index=9
-

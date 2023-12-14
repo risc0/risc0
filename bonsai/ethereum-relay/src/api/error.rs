@@ -30,8 +30,6 @@ use validator::ValidationErrors;
 
 #[derive(Debug, thiserror::Error)]
 pub(crate) enum Error {
-    #[error("Unauthorized")]
-    Unauthorized,
     #[error("Bonsai SDK error: {0}")]
     Bonsai(#[from] SdkErr),
     #[error("Client error: {0}")]
@@ -64,7 +62,6 @@ impl Error {
             Error::Validation { .. } | Error::Bonsai { .. } | Error::Client { .. } => {
                 StatusCode::BAD_REQUEST
             }
-            Error::Unauthorized { .. } => StatusCode::UNAUTHORIZED,
             Error::Bincode { .. }
             | Error::Storage { .. }
             | Error::SignerMiddleware { .. }
@@ -135,7 +132,11 @@ mod tests {
     use std::io;
 
     use anyhow::{anyhow, Context};
-    use axum::{body::HttpBody, http::StatusCode, response::IntoResponse};
+    use axum::{
+        body::to_bytes,
+        http::StatusCode,
+        response::{IntoResponse, Response},
+    };
     use validator::{ValidationError, ValidationErrors};
 
     use super::*;
@@ -168,24 +169,32 @@ mod tests {
         );
     }
 
+    async fn to_string(resp: Response) -> String {
+        String::from_utf8(
+            to_bytes(resp.into_body(), usize::MAX)
+                .await
+                .unwrap()
+                .to_vec(),
+        )
+        .unwrap()
+    }
+
     #[tokio::test]
     async fn test_to_response() {
         // IO is an internal server error, so it should only return the type
         let resp = io_err("mocked").into_response();
         assert_eq!(resp.status(), StatusCode::INTERNAL_SERVER_ERROR);
-        let data = resp.into_body().data().await.unwrap().unwrap();
-        assert_eq!(data, "IO error");
+        assert_eq!(to_string(resp).await, "IO error");
 
         // Validation is a bad request, it should return the colon-separated chain
         let mut validation_err = ValidationErrors::new();
         validation_err.add("test", ValidationError::new("mock"));
         let resp = Error::from(validation_err).into_response();
         assert_eq!(resp.status(), StatusCode::BAD_REQUEST);
-        let data = resp.into_body().data().await.unwrap().unwrap();
+        let data = to_string(resp).await;
         assert!(
-            data.starts_with(b"Validation error: test"),
-            "expected Body \"A: B\", actual {:?}",
-            data
+            data.starts_with("Validation error: test"),
+            "expected Body \"A: B\", actual {data:?}"
         );
     }
 }
