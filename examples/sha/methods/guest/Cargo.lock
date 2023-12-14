@@ -253,6 +253,7 @@ dependencies = [
  "rrs-lib",
  "semver",
  "serde",
+ "tracing",
 ]
 
 [[package]]

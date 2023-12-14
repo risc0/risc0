@@ -26,7 +26,7 @@ metal = { version = "0.27", optional = true }
 rand = { version = "0.8", optional = true }
 rayon = { version = "1.5", optional = true }
 risc0-circuit-recursion-sys = { workspace = true, optional = true }
-risc0-circuit-rv32im = { workspace = true, optional = true }
+risc0-circuit-rv32im = { workspace = true }
 sha2 = { version = "0.10", optional = true }
 zip = { version = "0.6", default-features = false, optional = true, features = [
   "zstd",
@@ -51,7 +51,6 @@ cuda = [
   "prove",
   "risc0-circuit-recursion-sys/cuda",
   "risc0-zkp/cuda",
-  "std",
 ]
 default = ["prove", "test"]
 metal = [
@@ -66,7 +65,6 @@ prove = [
   "dep:rand",
   "dep:rayon",
   "dep:risc0-circuit-recursion-sys",
-  "dep:risc0-circuit-rv32im",
   "dep:sha2",
   "dep:zip",
   "risc0-zkp/prove",

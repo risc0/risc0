@@ -14,6 +14,8 @@
 
 #![cfg_attr(not(feature = "std"), no_std)]
 
+extern crate alloc;
+
 pub mod control_id;
 mod info;
 pub mod layout;
@@ -21,6 +23,8 @@ mod poly_ext;
 #[cfg(feature = "prove")]
 pub mod prove;
 mod taps;
+
+use alloc::vec::Vec;
 
 use hex::FromHex;
 use risc0_circuit_rv32im::control_id::POSEIDON_CONTROL_ID;
