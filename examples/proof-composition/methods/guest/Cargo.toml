@@ -7,7 +7,13 @@ edition = "2021"
 
 [dependencies]
 risc0-groth16 = { path = "../../groth16" }
-risc0-zkvm = { path = "../../../../risc0/zkvm", default-features = false, features = ["std", "verify"] }
+risc0-zkvm = { path = "../../../../risc0/zkvm", default-features = false, features = ["std", "verify", "getrandom"] }
+halo2-core = {path = "../../core"}
+halo2_proofs ={git = "https://github.com/privacy-scaling-explorations/halo2.git" }
+ff = "0.13"
+halo2curves = { version = "0.1.0" }
+rand_core = "0.6.4"
+assert_matches = "1.5"
 
 [patch.crates-io]
 sha2 = { git = "https://github.com/risc0/RustCrypto-hashes", tag = "sha2-v0.10.6-risczero.0" }
