@@ -69,18 +69,18 @@ You can file an issue on [these docs] or the [examples], and we're happy to answ
 
 [Bonsai]: ../../bonsai/
 [Discord]: https://discord.gg/risczero
-[examples]: https://github.com/risc0/risc0/tree/v0.18.0/examples/
+[examples]: https://github.com/risc0/risc0/tree/release-0.18/examples/
 [execute]: /terminology#execute
 [execution environment]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.ExecutorEnv.html
 [executor]: /terminology#executor
 [guest]: /terminology#guest
 [`guest` module]: https://docs.rs/risc0-zkvm/0.18/risc0_zkvm/guest
 [guest program]: /terminology#guest-program
-[Hello World demo]: https://github.com/risc0/risc0/tree/v0.18.0/examples/hello-world
-[Hello World Tutorial]: https://github.com/risc0/risc0/blob/v0.18.0/examples/hello-world/tutorial.md
+[Hello World demo]: https://github.com/risc0/risc0/tree/release-0.18/examples/hello-world
+[Hello World Tutorial]: https://github.com/risc0/risc0/blob/release-0.18/examples/hello-world/tutorial.md
 [host]: /terminology#host
 [journal]: /terminology#journal
-[JSON demo]: https://github.com/risc0/risc0/blob/main/examples/json/src/main.rs
+[JSON demo]: https://github.com/risc0/risc0/blob/release-0.18/examples/json/src/main.rs
 [method]: /terminology#method
 [prove]: /terminology#prove
 [Prover]: /terminology#prover
