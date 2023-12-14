@@ -211,6 +211,7 @@ dependencies = [
  "blake2",
  "derivative",
  "digest",
+ "rayon",
  "sha2",
 ]
 
@@ -228,6 +229,7 @@ dependencies = [
  "hashbrown 0.13.2",
  "itertools 0.10.5",
  "num-traits",
+ "rayon",
  "zeroize",
 ]
 
@@ -247,6 +249,7 @@ dependencies = [
  "num-bigint 0.4.4",
  "num-traits",
  "paste",
+ "rayon",
  "rustc_version",
  "zeroize",
 ]
@@ -287,6 +290,7 @@ dependencies = [
  "ark-relations",
  "ark-serialize",
  "ark-std",
+ "rayon",
 ]
 
 [[package]]
@@ -300,6 +304,7 @@ dependencies = [
  "ark-std",
  "derivative",
  "hashbrown 0.13.2",
+ "rayon",
 ]
 
 [[package]]
@@ -311,6 +316,7 @@ dependencies = [
  "ark-ff",
  "ark-std",
  "tracing",
+ "tracing-subscriber 0.2.25",
 ]
 
 [[package]]
@@ -356,6 +362,7 @@ checksum = "94893f1e0c6eeab764ade8dc4c0db24caf4fe7cbbaafc0eba0a9030f447b5185"
 dependencies = [
  "num-traits",
  "rand",
+ "rayon",
 ]
 
 [[package]]
@@ -1152,7 +1159,7 @@ dependencies = [
  "smartcore 0.3.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "smartcore-ml-methods",
  "tracing",
- "tracing-subscriber",
+ "tracing-subscriber 0.3.18",
  "waldo-core",
  "waldo-methods",
  "wasm-methods",
@@ -1246,7 +1253,7 @@ dependencies = [
  "sha2",
  "test-log",
  "tracing",
- "tracing-subscriber",
+ "tracing-subscriber 0.3.18",
 ]
 
 [[package]]
@@ -1933,6 +1940,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "groth16-verifier"
+version = "0.1.0"
+dependencies = [
+ "methods",
+ "risc0-groth16",
+ "risc0-zkvm",
+ "serde_json",
+]
+
+[[package]]
 name = "group"
 version = "0.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2544,6 +2561,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "methods"
+version = "0.1.0"
+dependencies = [
+ "risc0-build",
+]
+
+[[package]]
 name = "mime"
 version = "0.3.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3104,7 +3128,7 @@ dependencies = [
  "fibonacci-methods",
  "risc0-zkvm",
  "serde",
- "tracing-subscriber",
+ "tracing-subscriber 0.3.18",
 ]
 
 [[package]]
@@ -3662,6 +3686,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "risc0-groth16"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "ark-bn254",
+ "ark-groth16",
+ "ark-serialize",
+ "bincode",
+ "bytemuck",
+ "ethereum-types",
+ "hex",
+ "risc0-zkvm",
+ "serde",
+ "serde_json",
+ "sha2",
+]
+
+[[package]]
 name = "risc0-sys"
 version = "0.20.0-alpha.1"
 dependencies = [
@@ -4192,9 +4234,9 @@ dependencies = [
 
 [[package]]
 name = "sha2"
-version = "0.10.8"
+version = "0.10.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "793db75ad2bcafc3ffa7c68b215fee268f537982cd901d132f89c6343f3a3dc8"
+checksum = "82e6b795fe2e3b1e845bafcb27aa35405c4d47cdfc92af5fc8d3002f76cebdc0"
 dependencies = [
  "cfg-if",
  "cpufeatures",
@@ -4595,7 +4637,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6159ab4116165c99fc88cce31f99fa2c9dbe08d3691cb38da02fc3b45f357d2b"
 dependencies = [
  "test-log-macros",
- "tracing-subscriber",
+ "tracing-subscriber 0.3.18",
 ]
 
 [[package]]
@@ -4889,6 +4931,15 @@ dependencies = [
 
 [[package]]
 name = "tracing-subscriber"
+version = "0.2.25"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0e0d2eaa99c3c2e41547cfa109e910a68ea03823cccad4a0525dcbc9b01e8c71"
+dependencies = [
+ "tracing-core",
+]
+
+[[package]]
+name = "tracing-subscriber"
 version = "0.3.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ad0f048c97dbd9faa9b7df56362b8ebcaa52adb06b498c050d2f4e32f90a7a8b"
@@ -5132,7 +5183,7 @@ dependencies = [
  "risc0-zkvm",
  "test-log",
  "tracing",
- "tracing-subscriber",
+ "tracing-subscriber 0.3.18",
  "voting-machine-core",
  "voting-machine-methods",
 ]
@@ -5161,7 +5212,7 @@ dependencies = [
  "image",
  "risc0-zkvm",
  "serde",
- "tracing-subscriber",
+ "tracing-subscriber 0.3.18",
  "viuer",
  "waldo-core",
  "waldo-methods",
@@ -5777,7 +5828,7 @@ dependencies = [
  "serde",
  "tokio",
  "tracing",
- "tracing-subscriber",
+ "tracing-subscriber 0.3.18",
  "zkevm-core",
  "zkevm-methods",
 ]

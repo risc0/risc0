@@ -1,6 +1,13 @@
-[workspace]
-resolver = "2"
-members = ["groth16", "host", "methods"]
+[package]
+name = "groth16-verifier"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+methods = { path = "methods" }
+risc0-groth16 = { path = "groth16" }
+risc0-zkvm = { path = "../../risc0/zkvm", features =["prove"] }
+serde_json = "1.0"
 
 # Always optimize; building and running the guest takes much longer without optimization.
 [profile.dev]
