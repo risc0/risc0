@@ -10,7 +10,6 @@ members = [
   "digital-signature/core",
   "ecdsa",
   "groth16-verifier",
-  "groth16-verifier/groth16",
   "hello-world",
   "json",
   "json/core",

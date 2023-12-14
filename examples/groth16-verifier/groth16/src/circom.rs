@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 use crate::{convert_g1, convert_g2, from_u256};
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct RawProof {
+pub struct CircomProof {
     pub pi_a: Vec<String>,
     pub pi_b: Vec<Vec<String>>,
     pub pi_c: Vec<String>,
@@ -15,7 +15,7 @@ pub struct RawProof {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct RawVKey {
+pub struct CircomVKey {
     pub protocol: String,
     pub curve: String,
     #[serde(rename = "nPublic")]
@@ -29,7 +29,7 @@ pub struct RawVKey {
     pub ic: Vec<Vec<String>>,
 }
 
-impl RawVKey {
+impl CircomVKey {
     pub fn pvk(&self) -> Result<PreparedVerifyingKey<Bn254>, Error> {
         let alpha_g1 = convert_g1(&vec![
             from_u256(&self.vk_alpha_1[0])?,
@@ -86,11 +86,11 @@ impl RawVKey {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct RawPublic {
+pub struct CircomPublic {
     pub values: Vec<String>,
 }
 
-impl RawPublic {
+impl CircomPublic {
     pub fn public_inputs(&self) -> Result<Vec<Fr>, Error> {
         let mut parsed_inputs: Vec<Fr> = Vec::with_capacity(self.values.len());
         for input in self.values.clone() {
@@ -140,7 +140,8 @@ mod tests {
         }
     "#;
 
-        let proof: RawProof = serde_json::from_str(json_data).expect("JSON was not well-formatted");
+        let proof: CircomProof =
+            serde_json::from_str(json_data).expect("JSON was not well-formatted");
         assert_eq!(proof.protocol, "groth16");
         assert_eq!(proof.curve, "bn128");
         println!("{:?}", proof);
@@ -245,7 +246,7 @@ mod tests {
         }
         "#;
 
-        let vk: RawVKey = serde_json::from_str(json_data).expect("JSON was not well-formatted");
+        let vk: CircomVKey = serde_json::from_str(json_data).expect("JSON was not well-formatted");
         assert_eq!(vk.protocol, "groth16");
         assert_eq!(vk.curve, "bn128");
         assert_eq!(vk.n_public, 1);

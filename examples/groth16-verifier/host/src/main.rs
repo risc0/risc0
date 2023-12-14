@@ -1,6 +1,6 @@
 use methods::{GROTH16_VERIFIER_ELF, GROTH16_VERIFIER_ID};
 use risc0_groth16::{
-    raw::{RawProof, RawPublic, RawVKey},
+    circom::{CircomProof, CircomPublic, CircomVKey},
     Groth16,
 };
 use risc0_zkvm::{default_prover, ExecutorEnv};
@@ -10,25 +10,36 @@ const CIRCOM_PROOF: &str = include_str!("data/circom/proof.json");
 const CIRCOM_PUBLIC: &str = include_str!("data/circom/public.json");
 
 fn main() {
-    // verification_key, proof and public witness generated with snarkjs using Groth16 over BN254
+    // verification_key, proof and public witness generated with circom and snarkjs using Groth16 over BN254
     // (https://docs.circom.io/getting-started/proving-circuits/)
-    let raw_vkey: RawVKey = serde_json::from_str(CIRCOM_VERIFICATION_KEY).unwrap();
-    let raw_proof: RawProof = serde_json::from_str(CIRCOM_PROOF).unwrap();
-    let raw_public = RawPublic {
+    let circom_vkey: CircomVKey = serde_json::from_str(CIRCOM_VERIFICATION_KEY).unwrap();
+    let circom_proof: CircomProof = serde_json::from_str(CIRCOM_PROOF).unwrap();
+    let circom_public = CircomPublic {
         values: serde_json::from_str(CIRCOM_PUBLIC).unwrap(),
     };
 
-    let groth16 = Groth16::from_raw(raw_vkey, raw_proof, raw_public).unwrap();
-    groth16.verify().unwrap();
+    // we parse a groth16 proof from the circom material collected from SnarkJS
+    let groth16_proof = Groth16::from_circom(circom_vkey, circom_proof, circom_public).unwrap();
 
+    // groth16 proof verification
+    groth16_proof.verify().unwrap();
+
+    // we configure an Executor with the groth16 proof
     let env = ExecutorEnv::builder()
-        .write(&groth16)
+        .write(&groth16_proof)
         .unwrap()
         .build()
         .unwrap();
 
-    let receipt = default_prover()
-        .prove_elf(env, GROTH16_VERIFIER_ELF)
-        .unwrap();
+    // we run the prover to generate a receipt of correct verification
+    let receipt = default_prover().prove(env, GROTH16_VERIFIER_ELF).unwrap();
+
+    // we verify the final receipt
     receipt.verify(GROTH16_VERIFIER_ID).unwrap();
+
+    // we compare the committed hash to the original proof
+    let output_digest: [u8; 32] = receipt.journal.decode().unwrap();
+    assert_eq!(output_digest, groth16_proof.digest());
+
+    println!("Verification: OK!");
 }
