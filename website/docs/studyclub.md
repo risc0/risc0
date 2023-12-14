@@ -5,7 +5,6 @@ RISC Zero's Study Club sessions aim to introduce the pre-requisite concepts nece
 ## Upcoming Sessions
 
 - **December 13**: zkML on RISC Zero
-- **December 20**: Bonsai under the hood
 
 All sessions are hosted at **9am Pacific / 5PM UTC**. <br/>
 Join the session: [Zoom link] <br/>
