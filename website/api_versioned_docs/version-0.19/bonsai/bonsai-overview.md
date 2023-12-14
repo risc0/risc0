@@ -7,7 +7,7 @@ slug: ./
 Bonsai enables boundless computation on any blockchain.
 With Bonsai, instead of generating proofs on your own hardware, you can upload the program you need proven and request that Bonsai generates proofs for you as needed.
 
-Bonsai is highly parallelized, highly performant and can horizontally scale. To get a taste of what you can do with Bonsai, check out [Zeth], our [Governance Showcase], the [Bonfire Wallet] demo from the Hash Cloak team, and our twitter thread about using [Bonsai as a zk coprocessor].
+Bonsai is highly parallelized, highly performant and can horizontally scale. To get a taste of what you can do with Bonsai, check out [Zeth], our [Governance Showcase], [Bonsai Pay], and our twitter thread about using [Bonsai as a zk coprocessor].
 
 Whether you're looking to take heavy computations off-chain or need to generate proofs for your trustless, verifiable software, Bonsai can help.
 Check out our [Bonsai Quick Start] page, and start building!
@@ -73,18 +73,16 @@ The `Bonsai Relayer` and the `Bonsay Relay Contract` let your Ethereum dApps con
 
 We're building technology that allows anyone to generate highly performant zero-knowledge proofs for a variety of applications. We want to make zero-knowledge proof integration into Ethereum, L1 blockchains, Cosmos app chains, L2 rollups, and dApps possible with minimal development effort. To learn more, read our [litepaper].
 
-[waitlist]: https://bonsai.xyz/apply
 [litepaper]: /litepaper
-[zkVM]: ../zkvm/zkvm_overview.md
 [Request access here]: https://bonsai.xyz/apply
 [`cargo risczero`]: https://crates.io/crates/cargo-risczero
 [Bonsai SDK]: https://crates.io/crates/bonsai-sdk
 [Bonsai REST API]: https://api.bonsai.xyz/swagger-ui/
 [Bonsai Quick Start]: quickstart.md
 [Bonsai as a zk coprocessor]: https://twitter.com/RiscZero/status/1677316664772132864
-[Bonfire Wallet]: https://twitter.com/RiscZero/status/1673692915401629698
-[Governance Showcase]: https://github.com/risc0/risc0/tree/main/bonsai/examples/governance#readme
+[Governance Showcase]: https://github.com/risc0/risc0/tree/release-0.19/bonsai/examples/governance#readme
 [Zeth]: https://www.risczero.com/news/zeth-release
 [guest program]: /terminology#guest-program
 [receipt]: /terminology#receipt
 [journal]: /terminology#journal
+[Bonsai Pay]: https://www.risczero.com/news/bonsai-pay
