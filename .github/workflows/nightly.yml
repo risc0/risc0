@@ -44,9 +44,9 @@ jobs:
       - name: Generate the profile
         run: |
           target/release/gen-profiles \
-          -n sha2 \
           -P ${{ github.workspace }}/tools/crates-validator/profiles/config.yaml \
-          -o ${{ runner.temp }}/crate-validation/profiles.yaml
+          -o ${{ runner.temp }}/crate-validation/profiles.yaml \
+          -c $TOP_N_CRATES
         working-directory: tools/crates-validator/
 
       - name: Validate profiles
@@ -76,18 +76,11 @@ jobs:
           git clone "https://x-access-token:${{ secrets.BENCHMARK_TOKEN }}@github.com/risc0/ghpages.git" ${{ runner.temp }}/benchmarks/
           cd ${{ runner.temp }}/benchmarks/
 
-          echo "Creating directory for ${{ github.sha }}"
           mkdir -p ./dev/crate-validation/results
 
-          echo "Copying results"
           cp ${{ runner.temp }}/crate-validation/profile-results.json ./dev/crate-validation/results/${{ github.sha }}.json
 
-          echo "Ensuring index exists"
           touch ./dev/crate-validation/results/index.json
-
-          echo "Getting original folder overview"
-          CRATE_VALIDATOR_ORIGINAL_FILES=$(ls -Rlh ./dev/crate-validation)
-          echo $CRATE_VALIDATOR_ORIGINAL_FILES
 
           echo "Filtering out old results"
           CRATE_VALIDATOR_PAST_VALUES=$(grep -ohE '{\s*"timestamp":\s*\d+\s*,\s*"hash":\s*"[a-zA-Z0-9]+"\s*}' ./dev/crate-validation/results/index.json || true)
@@ -107,12 +100,8 @@ jobs:
           echo "Updating index"
           echo $CRATE_VALIDATOR_FINAL_VALUES | tee ./dev/crate-validation/results/index.json
 
-          echo "Getting new folder overview"
-          CRATE_VALIDATOR_FINAL_FILES=$(ls -Rlh ./dev/crate-validation)
-          echo $CRATE_VALIDATOR_FINAL_FILES
-
           echo "Committing results"
-          echo git add .
-          echo git  -c "user.name=nightly-action" -c "user.email=github@users.noreply.github.com" commit -m "Added update at '$(date)'"
-          echo git push origin main
+          git add .
+          git  -c "user.name=nightly-action" -c "user.email=github@users.noreply.github.com" commit -m "Added update at '$(date)'"
+          git push origin main
         shell: bash
