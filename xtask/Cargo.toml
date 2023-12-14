@@ -7,8 +7,8 @@ edition = { workspace = true }
 bincode = "1.3"
 clap = { version = "4", features = ["derive"] }
 regex = "1"
-risc0-circuit-rv32im = { workspace = true, features = ["prove"] }
 risc0-circuit-recursion = { workspace = true, features = ["prove"] }
+risc0-circuit-rv32im = { workspace = true, features = ["prove"] }
 risc0-core = { workspace = true }
 risc0-fault = { path = "../risc0/fault" }
 risc0-zkp = { workspace = true }
