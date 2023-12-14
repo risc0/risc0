@@ -90,7 +90,7 @@ jobs:
           echo $CRATE_VALIDATOR_ORIGINAL_FILES
 
           echo "Filtering out old results"
-          CRATE_VALIDATOR_PAST_VALUES=$(grep -ohE '{\s*"timestamp":\s*\d+\s*,\s*"hash":\s*"[a-zA-Z0-9]+"\s*}' ./dev/crate-validation/results/index.json)
+          CRATE_VALIDATOR_PAST_VALUES=$(grep -ohE '{\s*"timestamp":\s*\d+\s*,\s*"hash":\s*"[a-zA-Z0-9]+"\s*}' ./dev/crate-validation/results/index.json || true)
           echo $CRATE_VALIDATOR_PAST_VALUES
 
           echo "Processing results"
