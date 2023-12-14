@@ -6,7 +6,7 @@ edition = "2021"
 [dependencies]
 methods = { path = "methods" }
 risc0-groth16 = { path = "groth16" }
-risc0-zkvm = { path = "../../risc0/zkvm", features =["prove"] }
+risc0-zkvm = { path = "../../risc0/zkvm", features = ["prove"] }
 serde_json = "1.0"
 
 # Always optimize; building and running the guest takes much longer without optimization.
