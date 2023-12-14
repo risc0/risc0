@@ -961,8 +961,6 @@ dependencies = [
 name = "host"
 version = "0.1.0"
 dependencies = [
- "bincode",
- "hex",
  "methods",
  "risc0-groth16",
  "risc0-zkvm",
