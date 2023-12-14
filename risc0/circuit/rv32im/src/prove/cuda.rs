@@ -123,7 +123,7 @@ mod tests {
     };
     use test_log::test;
 
-    use crate::cpu::CpuCircuitHal;
+    use crate::prove::cpu::CpuCircuitHal;
 
     #[test]
     fn eval_check() {
