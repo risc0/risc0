@@ -11,7 +11,7 @@ This page serves as an introduction to writing RISC Zero [guest code], to help y
 
 The full functionality of the guest is documented in the [`guest` module] of the [`risc0-zkvm` Rust crate].
 
-## Basic Guest Funtionality: Reading, Writing, and Committing
+## Basic Guest Functionality: Reading, Writing, and Committing
 
 To build a zkVM application, we need our guest program to be able to:
 
