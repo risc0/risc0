@@ -5,10 +5,12 @@ RISC Zero's Study Club sessions aim to introduce the pre-requisite concepts nece
 ## Upcoming Sessions
 
 Stay tuned for 2024 sessions!
+
 <!---
 All sessions are hosted at **9am Pacific / 5PM UTC**. <br/>
 Join the session: [Zoom link] <br/>
 --->
+
 Join the conversation on [Discord](https://discord.gg/risczero).
 
 ## Past Sessions
@@ -21,14 +23,17 @@ Full recordings and slides from past sessions are available [here](https://www.y
 - [Intro to Zeth: a block prover for Ethereum (built on Bonsai)](https://www.youtube.com/watch?v=4pBmf839eOA&list=PLcPzhUaCxlCjdhONxEYZ1dgKjZh3ZvPtl&index=2)
 
 ### Developer Tooling
+
 - [zkVM Performance Tips & Tricks](https://www.youtube.com/watch?v=MckieUBpakw&list=PLcPzhUaCxlCjdhONxEYZ1dgKjZh3ZvPtl&index=1)
 - [zkML on RISC Zero](https://www.youtube.com/watch?v=yslyWRiCFCE&list=PLcPzhUaCxlCjdhONxEYZ1dgKjZh3ZvPtl&index=1)
 
 ### zkVM Architecture
+
 - [What RISC-V has to do with RISC Zero's zkVM](https://www.youtube.com/watch?v=11DIflEwx50&list=PLcPzhUaCxlCjdhONxEYZ1dgKjZh3ZvPtl&index=5)
 - [Continuations: Scaling in zkVM](https://www.youtube.com/watch?v=h1qWnf-M5lo&list=PLcPzhUaCxlCjdhONxEYZ1dgKjZh3ZvPtl&index=9)
 
 ### Mathematical Primitives
+
 - [Intro Finite Fields](https://www.youtube.com/watch?v=g-GDvnJsZgg&list=PLcPzhUaCxlCiddOGuYdDbFlZhH8nwtR8D)
 - [Finite Field Implementations: Algorithms for Fast Multiplication](https://www.youtube.com/watch?v=hUl8ZB6hpUM&list=PLcPzhUaCxlCjdhONxEYZ1dgKjZh3ZvPtl&index=6)
 - [Intro to Number Theoretic Transforms (NTTs)](https://www.youtube.com/watch?v=IFsxQUbI6x0&list=PLcPzhUaCxlChIKDDR_WghPQ1HeK01YHpa)
