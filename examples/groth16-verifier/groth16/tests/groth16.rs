@@ -14,7 +14,6 @@
 
 #[cfg(test)]
 mod tests {
-    use hex::FromHex;
     use risc0_groth16::{
         circom::{CircomProof, CircomPublic, CircomVKey},
         Groth16,
