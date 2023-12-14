@@ -9,6 +9,8 @@ members = [
   "digital-signature",
   "digital-signature/core",
   "ecdsa",
+  "groth16-verifier",
+  "groth16-verifier/groth16",
   "hello-world",
   "json",
   "json/core",
@@ -29,7 +31,6 @@ members = [
   "xgboost",
   "zkevm-demo",
   "zkevm-demo/core",
-  "proof-composition,
 ]
 
 # Always optimize; otherwise tests take excessively long.

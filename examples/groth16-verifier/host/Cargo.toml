@@ -10,7 +10,4 @@ methods = { path = "../methods" }
 risc0-groth16 = { path = "../groth16" }
 risc0-zkvm = { path = "../../../risc0/zkvm", features =["prove"] }
 serde_json = "1.0"
-halo2-core = {path = "../core"}
-rmp-serde = "1.1.2"
-serde = {version = "1.0", features = ["derive"]}
 
