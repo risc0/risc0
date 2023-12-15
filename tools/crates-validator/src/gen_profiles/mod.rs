@@ -14,7 +14,6 @@
 
 pub mod args;
 
-// TODO(Cardosaum): Check how to export only the functions that are needed
 use std::{
     collections::{btree_map::Entry, BTreeMap, HashMap, HashSet},
     fs::File,
