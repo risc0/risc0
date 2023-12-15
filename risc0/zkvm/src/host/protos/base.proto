@@ -16,6 +16,40 @@ message CompatVersion {
   uint32 value = 1;
 }
 
+message Digest {
+  repeated uint32 words = 1;
+}
+
+message ReceiptClaim {
+  MaybePruned pre = 1;  // MaybePruned<SystemState>
+  MaybePruned post = 2; // MaybePruned<SystemState>
+  protos.base.ExitCode exit_code = 3;
+  Digest input = 4;
+  MaybePruned output = 5; // Option<MaybePruned<Output>>
+}
+
+message MaybePruned {
+  oneof kind {
+    // Protobuf encoded bytes of the inner value.
+    bytes value = 1;
+    Digest pruned = 2;
+  }
+}
+
+message SystemState {
+  uint32 pc = 1;
+  Digest merkle_root = 2;
+}
+
+message Output {
+  MaybePruned journal = 1;     // MaybePruned<bytes>
+  MaybePruned assumptions = 2; // MaybePruned<Assumptions>
+}
+
+message Assumptions {
+  repeated MaybePruned inner = 1; // MaybePruned<ReceiptClaim>
+}
+
 message ExitCode {
   oneof kind {
     uint32 halted = 1;

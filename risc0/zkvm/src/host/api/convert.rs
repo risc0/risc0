@@ -465,7 +465,7 @@ impl TryFrom<pb::core::CompositeReceipt> for CompositeReceipt {
     }
 }
 
-impl From<Digest> for pb::core::Digest {
+impl From<Digest> for pb::base::Digest {
     fn from(value: Digest) -> Self {
         Self {
             words: value.as_words().to_vec(),
@@ -473,10 +473,10 @@ impl From<Digest> for pb::core::Digest {
     }
 }
 
-impl TryFrom<pb::core::Digest> for Digest {
+impl TryFrom<pb::base::Digest> for Digest {
     type Error = anyhow::Error;
 
-    fn try_from(value: pb::core::Digest) -> Result<Self> {
+    fn try_from(value: pb::base::Digest) -> Result<Self> {
         value
             .words
             .try_into()
@@ -484,16 +484,16 @@ impl TryFrom<pb::core::Digest> for Digest {
     }
 }
 
-impl Name for pb::core::ReceiptClaim {
+impl Name for pb::base::ReceiptClaim {
     const PACKAGE: &'static str = "risc0.protos.core";
     const NAME: &'static str = "ReceiptClaim";
 }
 
 impl AssociatedMessage for ReceiptClaim {
-    type Message = pb::core::ReceiptClaim;
+    type Message = pb::base::ReceiptClaim;
 }
 
-impl From<ReceiptClaim> for pb::core::ReceiptClaim {
+impl From<ReceiptClaim> for pb::base::ReceiptClaim {
     fn from(value: ReceiptClaim) -> Self {
         Self {
             pre: Some(value.pre.into()),
@@ -511,10 +511,10 @@ impl From<ReceiptClaim> for pb::core::ReceiptClaim {
     }
 }
 
-impl TryFrom<pb::core::ReceiptClaim> for ReceiptClaim {
+impl TryFrom<pb::base::ReceiptClaim> for ReceiptClaim {
     type Error = anyhow::Error;
 
-    fn try_from(value: pb::core::ReceiptClaim) -> Result<Self> {
+    fn try_from(value: pb::base::ReceiptClaim) -> Result<Self> {
         Ok(Self {
             pre: value.pre.ok_or(malformed_err())?.try_into()?,
             post: value.post.ok_or(malformed_err())?.try_into()?,
@@ -532,16 +532,16 @@ impl TryFrom<pb::core::ReceiptClaim> for ReceiptClaim {
     }
 }
 
-impl Name for pb::core::SystemState {
+impl Name for pb::base::SystemState {
     const PACKAGE: &'static str = "risc0.protos.core";
     const NAME: &'static str = "SystemState";
 }
 
 impl AssociatedMessage for SystemState {
-    type Message = pb::core::SystemState;
+    type Message = pb::base::SystemState;
 }
 
-impl From<SystemState> for pb::core::SystemState {
+impl From<SystemState> for pb::base::SystemState {
     fn from(value: SystemState) -> Self {
         Self {
             pc: value.pc,
@@ -550,10 +550,10 @@ impl From<SystemState> for pb::core::SystemState {
     }
 }
 
-impl TryFrom<pb::core::SystemState> for SystemState {
+impl TryFrom<pb::base::SystemState> for SystemState {
     type Error = anyhow::Error;
 
-    fn try_from(value: pb::core::SystemState) -> Result<Self> {
+    fn try_from(value: pb::base::SystemState) -> Result<Self> {
         Ok(Self {
             pc: value.pc,
             merkle_root: value.merkle_root.ok_or(malformed_err())?.try_into()?,
@@ -561,16 +561,16 @@ impl TryFrom<pb::core::SystemState> for SystemState {
     }
 }
 
-impl Name for pb::core::Output {
+impl Name for pb::base::Output {
     const PACKAGE: &'static str = "risc0.protos.core";
     const NAME: &'static str = "Output";
 }
 
 impl AssociatedMessage for Output {
-    type Message = pb::core::Output;
+    type Message = pb::base::Output;
 }
 
-impl From<Output> for pb::core::Output {
+impl From<Output> for pb::base::Output {
     fn from(value: Output) -> Self {
         Self {
             journal: Some(value.journal.into()),
@@ -579,10 +579,10 @@ impl From<Output> for pb::core::Output {
     }
 }
 
-impl TryFrom<pb::core::Output> for Output {
+impl TryFrom<pb::base::Output> for Output {
     type Error = anyhow::Error;
 
-    fn try_from(value: pb::core::Output) -> Result<Self> {
+    fn try_from(value: pb::base::Output) -> Result<Self> {
         Ok(Self {
             journal: value.journal.ok_or(malformed_err())?.try_into()?,
             assumptions: value.assumptions.ok_or(malformed_err())?.try_into()?,
@@ -590,16 +590,16 @@ impl TryFrom<pb::core::Output> for Output {
     }
 }
 
-impl Name for pb::core::Assumptions {
+impl Name for pb::base::Assumptions {
     const PACKAGE: &'static str = "risc0.protos.core";
     const NAME: &'static str = "Assumptions";
 }
 
 impl AssociatedMessage for Assumptions {
-    type Message = pb::core::Assumptions;
+    type Message = pb::base::Assumptions;
 }
 
-impl From<Assumptions> for pb::core::Assumptions {
+impl From<Assumptions> for pb::base::Assumptions {
     fn from(value: Assumptions) -> Self {
         Self {
             inner: value.0.into_iter().map(|a| a.into()).collect(),
@@ -607,10 +607,10 @@ impl From<Assumptions> for pb::core::Assumptions {
     }
 }
 
-impl TryFrom<pb::core::Assumptions> for Assumptions {
+impl TryFrom<pb::base::Assumptions> for Assumptions {
     type Error = anyhow::Error;
 
-    fn try_from(value: pb::core::Assumptions) -> Result<Self> {
+    fn try_from(value: pb::base::Assumptions) -> Result<Self> {
         Ok(Self(
             value
                 .inner
@@ -625,7 +625,7 @@ trait AssociatedMessage {
     type Message: Message;
 }
 
-impl<T> From<MaybePruned<T>> for pb::core::MaybePruned
+impl<T> From<MaybePruned<T>> for pb::base::MaybePruned
 where
     T: AssociatedMessage + serde::Serialize + Clone,
     T::Message: From<T> + Sized,
@@ -634,55 +634,55 @@ where
         Self {
             kind: Some(match value {
                 MaybePruned::Value(inner) => {
-                    pb::core::maybe_pruned::Kind::Value(T::Message::from(inner).encode_to_vec())
+                    pb::base::maybe_pruned::Kind::Value(T::Message::from(inner).encode_to_vec())
                 }
-                MaybePruned::Pruned(digest) => pb::core::maybe_pruned::Kind::Pruned(digest.into()),
+                MaybePruned::Pruned(digest) => pb::base::maybe_pruned::Kind::Pruned(digest.into()),
             }),
         }
     }
 }
 
-impl<T> TryFrom<pb::core::MaybePruned> for MaybePruned<T>
+impl<T> TryFrom<pb::base::MaybePruned> for MaybePruned<T>
 where
     T: AssociatedMessage + serde::Serialize + Clone,
     T::Message: TryInto<T, Error = anyhow::Error> + Default,
 {
     type Error = anyhow::Error;
 
-    fn try_from(value: pb::core::MaybePruned) -> Result<Self> {
+    fn try_from(value: pb::base::MaybePruned) -> Result<Self> {
         Ok(match value.kind.ok_or(malformed_err())? {
-            pb::core::maybe_pruned::Kind::Value(inner) => {
+            pb::base::maybe_pruned::Kind::Value(inner) => {
                 Self::Value(T::Message::decode(inner.as_slice())?.try_into()?)
             }
-            pb::core::maybe_pruned::Kind::Pruned(digest) => Self::Pruned(digest.try_into()?),
+            pb::base::maybe_pruned::Kind::Pruned(digest) => Self::Pruned(digest.try_into()?),
         })
     }
 }
 
 // Specialized implementaion for Vec<u8> for work around challenges getting the
 // generic implementaion above to work for Vec<u8>.
-impl From<MaybePruned<Vec<u8>>> for pb::core::MaybePruned {
+impl From<MaybePruned<Vec<u8>>> for pb::base::MaybePruned {
     fn from(value: MaybePruned<Vec<u8>>) -> Self {
         Self {
             kind: Some(match value {
                 MaybePruned::Value(inner) => {
-                    pb::core::maybe_pruned::Kind::Value(inner.encode_to_vec())
+                    pb::base::maybe_pruned::Kind::Value(inner.encode_to_vec())
                 }
-                MaybePruned::Pruned(digest) => pb::core::maybe_pruned::Kind::Pruned(digest.into()),
+                MaybePruned::Pruned(digest) => pb::base::maybe_pruned::Kind::Pruned(digest.into()),
             }),
         }
     }
 }
 
-impl TryFrom<pb::core::MaybePruned> for MaybePruned<Vec<u8>> {
+impl TryFrom<pb::base::MaybePruned> for MaybePruned<Vec<u8>> {
     type Error = anyhow::Error;
 
-    fn try_from(value: pb::core::MaybePruned) -> Result<Self> {
+    fn try_from(value: pb::base::MaybePruned) -> Result<Self> {
         Ok(match value.kind.ok_or(malformed_err())? {
-            pb::core::maybe_pruned::Kind::Value(inner) => {
+            pb::base::maybe_pruned::Kind::Value(inner) => {
                 Self::Value(<Vec<u8> as Message>::decode(inner.as_slice())?)
             }
-            pb::core::maybe_pruned::Kind::Pruned(digest) => Self::Pruned(digest.try_into()?),
+            pb::base::maybe_pruned::Kind::Pruned(digest) => Self::Pruned(digest.try_into()?),
         })
     }
 }

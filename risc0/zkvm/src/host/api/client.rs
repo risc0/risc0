@@ -27,7 +27,7 @@ use crate::{
     host::{
         api::SegmentInfo,
         client::prove::get_r0vm_path,
-        receipt::{SegmentReceipt, SuccinctReceipt},
+        receipt::{Assumption, SegmentReceipt, SuccinctReceipt},
     },
     ExecutorEnv, Journal, ProverOpts, Receipt,
 };
@@ -74,7 +74,7 @@ impl Client {
         let request = pb::api::ServerRequest {
             kind: Some(pb::api::server_request::Kind::Prove(
                 pb::api::ProveRequest {
-                    env: Some(self.make_execute_env(env, binary.try_into()?)),
+                    env: Some(self.make_execute_env(env, binary.try_into()?)?),
                     opts: Some(opts.into()),
                     receipt_out: Some(pb::api::AssetRequest {
                         kind: Some(pb::api::asset_request::Kind::Inline(())),
@@ -112,7 +112,7 @@ impl Client {
         let request = pb::api::ServerRequest {
             kind: Some(pb::api::server_request::Kind::Execute(
                 pb::api::ExecuteRequest {
-                    env: Some(self.make_execute_env(env, binary.try_into()?)),
+                    env: Some(self.make_execute_env(env, binary.try_into()?)?),
                     segments_out: Some(segments_out.try_into()?),
                 },
             )),
@@ -327,8 +327,8 @@ impl Client {
         &self,
         env: &ExecutorEnv<'_>,
         binary: pb::api::Asset,
-    ) -> pb::api::ExecutorEnv {
-        pb::api::ExecutorEnv {
+    ) -> Result<pb::api::ExecutorEnv> {
+        Ok(pb::api::ExecutorEnv {
             binary: Some(binary),
             env_vars: env.env_vars.clone(),
             args: env.args.clone(),
@@ -343,7 +343,30 @@ impl Client {
                 .as_ref()
                 .map(|x| x.to_string_lossy().into())
                 .unwrap_or_default(),
-        }
+            assumptions: env
+                .assumptions
+                .borrow()
+                .cached
+                .iter()
+                .map(|a| {
+                    Ok(match a {
+                        Assumption::Proven(receipt) => pb::api::Assumption {
+                            kind: Some(pb::api::assumption::Kind::Proven(
+                                Asset::Inline(
+                                    pb::core::Receipt::from(receipt.clone())
+                                        .encode_to_vec()
+                                        .into(),
+                                )
+                                .try_into()?,
+                            )),
+                        },
+                        Assumption::Unresolved(claim) => pb::api::Assumption {
+                            kind: Some(pb::api::assumption::Kind::Unresolved(claim.clone().into())),
+                        },
+                    })
+                })
+                .collect::<Result<_>>()?,
+        })
     }
 
     fn execute_handler<F>(
