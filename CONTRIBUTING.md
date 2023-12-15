@@ -8,6 +8,15 @@ If you have any questions about contributing, or about the project in general, p
 
 To run the test suite, the following dependencies are needed:
 
+#### [Git Large File Storage](https://docs.github.com/en/repositories/working-with-files/managing-large-files/installing-git-large-file-storage)
+
+Once installed, run:
+
+```console
+git lfs install
+git lfs pull
+```
+
 #### [Rust](https://www.rust-lang.org/tools/install)
 
 ```console
@@ -40,15 +49,6 @@ cargo binstall cargo-risczero@<version>
 ```
 
 > NOTE: It is only important that you install `cargo-risczero` with a matching version of the `zkvm` crate when interacting with the proof system as a separate, pre-built process ([`ExternalProver`](https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.ExternalProver.html)), which is currently the default. If you are using the `prove` feature on the `risc0-zkvm` crate for the host, this will compile the proving system into the host binary.
-
-#### [Git Large File Storage](https://docs.github.com/en/repositories/working-with-files/managing-large-files/installing-git-large-file-storage)
-
-Once installed, run:
-
-```console
-git lfs install
-git lfs pull
-```
 
 #### [Foundry](https://book.getfoundry.sh/getting-started/installation)
 
