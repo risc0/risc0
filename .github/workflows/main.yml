@@ -204,6 +204,7 @@ jobs:
           clippy_flags: --features $FEATURE --all-targets
           #filter_mode: nofilter
           fail_on_error: true
+          workdir: 
       - run: sccache --show-stats
 
   examples:
@@ -332,6 +333,7 @@ jobs:
       - uses: ./.github/actions/sccache
         with:
           key: macOS-default
+      - run: pwd && ls -lh
       - uses: risc0/clippy-action@main
         with:
           reporter: 'github-pr-check'
