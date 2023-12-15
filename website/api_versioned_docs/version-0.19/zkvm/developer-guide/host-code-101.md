@@ -80,7 +80,7 @@ You can file an issue on [these docs] or the [examples], and we're happy to answ
 [Hello World Tutorial]: https://github.com/risc0/risc0/blob/release-0.19/examples/hello-world/tutorial
 [host]: /terminology#host
 [journal]: /terminology#journal
-[JSON demo]: https://github.com/risc0/risc0/blob/main/examples/json/src/main.rs
+[JSON demo]: https://github.com/risc0/risc0/blob/release-0.19/examples/json/src/main.rs
 [method]: /terminology#method
 [prove]: /terminology#prove
 [Prover]: /terminology#prover

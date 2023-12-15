@@ -13,7 +13,6 @@
 // limitations under the License.
 
 use risc0_zkvm::{default_prover, ExecutorEnv};
-use serde_json;
 use smartcore::{
     linalg::basic::matrix::DenseMatrix, tree::decision_tree_classifier::DecisionTreeClassifier,
 };
@@ -25,8 +24,8 @@ use smartcore_ml_methods::ML_TEMPLATE_ELF;
 // this approach is desired, be sure to import the corresponding SmartCore
 // modules and serialize the model and data to byte arrays before transfer to
 // the guest.
-const JSON_MODEL: &str = include_str!("../res/ml-model/tree_model_bytes.json");
-const JSON_DATA: &str = include_str!("../res/input-data/tree_model_data_bytes.json");
+const MODEL_SERIALIZED: &[u8] = include_bytes!("../res/ml-model/tree_model_bytes.bin");
+const DATA_SERIALIZED: &[u8] = include_bytes!("../res/input-data/tree_model_data_bytes.bin");
 
 fn main() {
     let result = predict();
@@ -40,16 +39,12 @@ fn predict() -> Vec<u32> {
     // models.
     let is_svm: bool = false;
 
-    // Convert the model and input data from JSON into byte arrays.
-    let model_bytes: Vec<u8> = serde_json::from_str(JSON_MODEL).unwrap();
-    let data_bytes: Vec<u8> = serde_json::from_str(JSON_DATA).unwrap();
-
     // Deserialize the data from rmp into native rust types.
     type Model = DecisionTreeClassifier<f64, u32, DenseMatrix<f64>, Vec<u32>>;
     let model: Model =
-        rmp_serde::from_slice(&model_bytes).expect("model failed to deserialize byte array");
+        rmp_serde::from_slice(&MODEL_SERIALIZED).expect("model failed to deserialize byte array");
     let data: DenseMatrix<f64> =
-        rmp_serde::from_slice(&data_bytes).expect("data filed to deserialize byte array");
+        rmp_serde::from_slice(&DATA_SERIALIZED).expect("data filed to deserialize byte array");
 
     let env = ExecutorEnv::builder()
         .write(&is_svm)
@@ -143,9 +138,9 @@ mod test {
         let svc = SVC::fit(&x, &y, params).unwrap();
 
         // This simulates importing a serialized model.
-        let svc_serialized = serde_json::to_string(&svc).expect("failed to serialize");
+        let svc_serialized = rmp_serde::to_vec(&svc).expect("failed to serialize");
         let svc_deserialized: SVC<f64, i32, DenseMatrix<f64>, Vec<i32>> =
-            serde_json::from_str(&svc_serialized).expect("unable to deserialize JSON");
+            rmp_serde::from_slice(&svc_serialized).expect("unable to deserialize JSON");
 
         let env = ExecutorEnv::builder()
             .write(&is_svm)
