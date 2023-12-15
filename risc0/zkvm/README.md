@@ -36,10 +36,9 @@ Note that in order to use `risc0-zkvm` in the guest, you must disable the "prove
 
 | Feature          | Target(s)         | Implies            | Description                                                                                                                                                  |
 | ---------------- | ----------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| client           | all except rv32im | std, verify        | Enables the client API.                                                                                                                                      |
-| cuda             |                   | prove, std, verify | Enables CUDA GPU acceleration for the prover. Requires CUDA toolkit to be installed.                                                                         |
+| client           | all except rv32im | std        | Enables the client API.                                                                                                                                      |
+| cuda             |                   | prove, std | Enables CUDA GPU acceleration for the prover. Requires CUDA toolkit to be installed.                                                                         |
 | disable-dev-mode | all except rv32im |                    | Disables dev mode so that proving and verifying may not be faked. Used to prevent a misplaced `RISC0_DEV_MODE` from breaking security in production systems. |
-| metal            | macos             | prove, std, verify | Enables Metal GPU acceleration for the prover.                                                                                                               |
-| prove            | all except rv32im | std, verify        | Enables the prover, incompatible within the zkvm guest.                                                                                                      |
+| metal            | macos             | prove, std | Enables Metal GPU acceleration for the prover.                                                                                                               |
+| prove            | all except rv32im | std        | Enables the prover, incompatible within the zkvm guest.                                                                                                      |
 | std              | all               |                    | Support for the Rust stdlib.                                                                                                                                 |
-| verify           | all               |                    | Enables the verifier.                                                                                                                                        |

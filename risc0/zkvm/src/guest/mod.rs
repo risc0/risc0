@@ -131,7 +131,7 @@ macro_rules! entry {
 
 #[cfg(target_os = "zkvm")]
 #[no_mangle]
-unsafe extern "C" fn __start() {
+unsafe extern "C" fn __start() -> ! {
     env::init();
 
     {
@@ -142,6 +142,7 @@ unsafe extern "C" fn __start() {
     }
 
     env::finalize(true, 0);
+    unreachable!();
 }
 
 #[cfg(target_os = "zkvm")]
