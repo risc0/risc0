@@ -14,27 +14,34 @@
 
 use jwt_compact::{
     alg::{Rsa, RsaPrivateKey, RsaPublicKey},
-    jwk::JsonWebKey,
-    AlgorithmExt, Claims, Header, Token, UntrustedToken,
+    jwk::{JsonWebKey, JwkError},
+    AlgorithmExt, Claims, CreationError, Header, ParseError, Token, UntrustedToken,
+    ValidationError,
 };
 use serde::{Deserialize, Serialize};
+use std::str::FromStr;
 use thiserror::Error;
 
 #[derive(Error, Debug)]
-pub enum TokenError {
+pub enum Err {
     #[error("Failed to generate token: {0}")]
-    TokenGenerationError(#[from] jwt_compact::CreationError),
+    TokenGenerationError(#[from] CreationError),
 
     #[error("Failed to validate token: {0}")]
-    TokenValidationError(#[from] jwt_compact::ValidationError),
+    TokenValidationError(#[from] ValidationError),
 
     #[error("Failed to parse token: {0}")]
-    TokenParseError(#[from] jwt_compact::ParseError),
+    TokenParseError(#[from] ParseError),
+
+    #[error("Failed to parse jwk: {0}")]
+    JwkParseError(#[from] JwkError),
+
+    #[error("Failed to parse key string: {0}")]
+    KeyParseError(#[from] serde_json::Error),
 }
 
-#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[derive(Deserialize, Serialize)]
 pub struct CustomClaims {
-    #[serde(rename = "sub")]
     pub subject: String,
 }
 
@@ -45,21 +52,24 @@ pub struct Issuer {
 }
 
 impl Issuer {
-    pub fn new(jwk_str: &str) -> Self {
-        let jwk = serde_json::from_str::<JsonWebKey>(jwk_str).unwrap();
-        let alg = Rsa::rs256();
-        let s_k = RsaPrivateKey::try_from(&jwk).unwrap();
-        let p_k = RsaPublicKey::try_from(&jwk).unwrap();
-        Self { alg, s_k, p_k }
-    }
-
-    pub fn generate_token(&self, claims: &CustomClaims) -> Result<String, TokenError> {
+    pub fn generate_token(&self, claims: &CustomClaims) -> Result<String, Err> {
         let header = Header::empty();
         let claims = Claims::new(claims);
 
         self.alg
             .token(&header, &claims, &self.s_k)
-            .map_err(TokenError::TokenGenerationError)
+            .map_err(Err::TokenGenerationError)
+    }
+}
+
+impl FromStr for Issuer {
+    type Err = Err;
+    fn from_str(jwk_str: &str) -> Result<Self, Self::Err> {
+        let jwk = serde_json::from_str::<JsonWebKey>(jwk_str)?;
+        let alg = Rsa::rs256();
+        let s_k = RsaPrivateKey::try_from(&jwk)?;
+        let p_k = RsaPublicKey::try_from(&jwk)?;
+        Ok(Self { alg, s_k, p_k })
     }
 }
 
@@ -69,28 +79,30 @@ pub struct Validator {
 }
 
 impl Validator {
-    pub fn new(jwt_str: &str) -> Self {
-        let jwk = serde_json::from_str::<JsonWebKey>(jwt_str).unwrap();
-        let alg = Rsa::rs256();
-        let p_k = RsaPublicKey::try_from(&jwk).unwrap();
-        Self { alg, p_k }
-    }
-
-    pub fn validate_token_integrity(&self, token: &str) -> Result<Token<CustomClaims>, TokenError> {
-        let token: UntrustedToken =
-            UntrustedToken::new(token).map_err(TokenError::TokenParseError)?;
+    pub fn validate_token_integrity(&self, token: &str) -> Result<Token<CustomClaims>, Err> {
+        let token: UntrustedToken = UntrustedToken::new(token).map_err(Err::TokenParseError)?;
 
         self.alg
             .validator(&self.p_k)
             .validate(&token)
-            .map_err(TokenError::TokenValidationError)
+            .map_err(Err::TokenValidationError)
+    }
+}
+
+impl FromStr for Validator {
+    type Err = Err;
+    fn from_str(jwk_str: &str) -> Result<Self, Self::Err> {
+        let jwk = serde_json::from_str::<JsonWebKey>(jwk_str)?;
+        let alg = Rsa::rs256();
+        let p_k = RsaPublicKey::try_from(&jwk)?;
+        Ok(Self { alg, p_k })
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    const S_KEY: &str = r#"
+    const SECRET_KEY: &str = r#"
     {
       "alg": "RS256",
       "d": "YuO1XZkYSwDRgauXQe6q1u8fET3S7x7g4N8uE49rdt7g3-O9q-Hwn_nQNiRr9o7Uslf7X8sL6txraQy7TdPUuSkaULpRNo2FoVLLoO2eACWwPtCG4n9wuvjnz7qCh9s3tfgOKxMA_riKkS8O7BxPH54rd7Ry1i6HN3TSYKYwxZxG4HFLhcewX6Q1KdGXdP7xVAsZ5lEpCQbhY5IKUzBZ5WIZpSTk10AadkVuwS622QT-9efk6PBWDyM48_udMdDo1HEcHsAdxrUMRdw_5uzVajQzZhNAmALXHCPT79P0qahzdYlUSHauT1XxU7z-KoCYVqt3z6epgYDcKmLzGkqIkSXUHxcVN-MTSGNET_dhio0tHG-jV3wB5jfsgayoIZCeTPF-F-nDwn8Cyz18uee_Y7U53NTtEXGqB9npZyu7SibTztwSeLs6zH965d1VTmUCxH8CWqizugfQY8ibNgVCd42naAuWbOmxYEjyelmHf_BS0Vb7NwpW9cuaODOjpjCz",
@@ -110,7 +122,7 @@ mod tests {
     }
     "#;
 
-    const P_KEY: &str = r#"
+    const PUBLIC_KEY: &str = r#"
     {
       "alg": "RS256",
       "e": "AQAB",
@@ -130,10 +142,10 @@ mod tests {
             subject: "Hello, world!".to_string(),
         };
 
-        let iss = Issuer::new(S_KEY);
-        let validator = Validator::new(P_KEY);
+        let iss = SECRET_KEY.parse::<Issuer>().unwrap();
         let token = iss.generate_token(&claims).unwrap();
 
+        let validator = PUBLIC_KEY.parse::<Validator>().unwrap();
         let valid_token = validator.validate_token_integrity(&token).unwrap();
 
         assert_eq!(valid_token.claims().custom.subject, "Hello, world!");
@@ -145,13 +157,13 @@ mod tests {
             subject: "Test Subject".to_string(),
         };
 
-        let issuer = Issuer::new(S_KEY);
-        let mut token = issuer.generate_token(&claims).unwrap();
+        let iss = SECRET_KEY.parse::<Issuer>().unwrap();
+        let mut token = iss.generate_token(&claims).unwrap();
 
         // Break the token integrity
         token.replace_range(0..10, "INVALIDSTR");
 
-        let validator = Validator::new(P_KEY);
+        let validator = PUBLIC_KEY.parse::<Validator>().unwrap();
 
         let result = validator.validate_token_integrity(&token);
         assert!(

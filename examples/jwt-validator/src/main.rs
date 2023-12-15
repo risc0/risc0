@@ -15,7 +15,7 @@
 use jwt_methods::{VALIDATOR_ELF, VALIDATOR_ID};
 use risc0_zkvm::{default_prover, ExecutorEnv};
 
-use jwt_core;
+use jwt_core::{CustomClaims, Issuer};
 
 static SECRET_KEY: &str = r#"
     {
@@ -38,23 +38,26 @@ static SECRET_KEY: &str = r#"
 "#;
 
 fn main() {
-    let claims = jwt_core::CustomClaims {
+    let iss = SECRET_KEY
+        .parse::<Issuer>()
+        .expect("failed to create issuer from secret key");
+
+    let claims = CustomClaims {
         subject: "Hello, world!".to_string(),
     };
 
-    let iss = jwt_core::Issuer::new(SECRET_KEY);
-
+    // Generate the signed token
     let token = iss.generate_token(&claims).unwrap();
 
     let env = ExecutorEnv::builder()
         .write(&token.as_str())
         .unwrap()
         .build()
-        .unwrap();
+        .expect("failed to build env");
 
     let prover = default_prover();
 
-    let receipt = prover.prove(env, VALIDATOR_ELF).unwrap();
+    let receipt = prover.prove(env, VALIDATOR_ELF).expect("failed to prove");
 
     receipt.verify(VALIDATOR_ID).unwrap();
 
