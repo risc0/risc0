@@ -244,6 +244,7 @@ dependencies = [
  "ark-ff",
  "ark-std",
  "tracing",
+ "tracing-subscriber 0.2.25",
 ]
 
 [[package]]
@@ -2198,7 +2199,7 @@ dependencies = [
  "starknet-crypto",
  "tokio",
  "tracing",
- "tracing-subscriber",
+ "tracing-subscriber 0.3.18",
 ]
 
 [[package]]
@@ -2402,7 +2403,7 @@ dependencies = [
  "risc0-zkvm",
  "risc0-zkvm-platform",
  "serde",
- "tracing-subscriber",
+ "tracing-subscriber 0.3.18",
 ]
 
 [[package]]
@@ -3006,6 +3007,15 @@ checksum = "ee855f1f400bd0e5c02d150ae5de3840039a3f54b025156404e34c23c03f47c3"
 dependencies = [
  "log",
  "once_cell",
+ "tracing-core",
+]
+
+[[package]]
+name = "tracing-subscriber"
+version = "0.2.25"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0e0d2eaa99c3c2e41547cfa109e910a68ea03823cccad4a0525dcbc9b01e8c71"
+dependencies = [
  "tracing-core",
 ]
 
