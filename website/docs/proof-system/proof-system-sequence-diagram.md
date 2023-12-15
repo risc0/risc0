@@ -108,8 +108,8 @@ For a more formal articulation of the protocol, refer to the [ZKP Whitepaper].
   - After computing the `data columns` and `auxiliary/accum columns,` the Prover adds some random `noise` to the end of those columns in order to ensure that the protocol is zero-knowledge.
 - The Prover encodes the `trace` as follows:
   - The Prover converts each `column` into a polynomial using an `iNTT`. We'll refer to these as `Trace Polynomials`, denoted $P_i(x)$.
-  - The Prover evaluates the `data polynomials` and the `control polynomials` over an expanded domain. The evaluations of the `data polynomials` and the `control polynomials` over this larger domain is called the `Extended Main Exeution Trace`.
-  - The Prover commits the `Extended Main Exeuction Trace` into two separate Merkle Trees, sending the roots to the Verifier.
+  - The Prover evaluates the `data polynomials` and the `control polynomials` over an expanded domain. The evaluations of the `data polynomials` and the `control polynomials` over this larger domain is called the `Extended Main Execution Trace`.
+  - The Prover commits the `Extended Main Execution Trace` into two separate Merkle Trees, sending the roots to the Verifier.
 
 ### Extended Auxiliary Execution Trace
 

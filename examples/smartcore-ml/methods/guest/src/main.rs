@@ -62,7 +62,7 @@ pub fn main() {
             .with_c(200.0)
             .with_kernel(Kernels::linear());
 
-        // Now we can update the model with params_same.  The RISC Zero fork changes the visbility of the parameters field of the SVC and SVR model structs to public to allow for this reinsertion
+        // Now we can update the model with params_same.  The RISC Zero fork changes the visibility of the parameters field of the SVC and SVR model structs to public to allow for this reinsertion
         model.parameters = Some(params_same);
 
         // Now that the parameters have been loaded back into the SVC model struct, we can call predict on the model.
