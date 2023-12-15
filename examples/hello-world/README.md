@@ -62,7 +62,7 @@ Thus, Alice proves that the number written in `receipt.journal` is composite —
 For a step-by-step guide to building first zkVM application, we recommend [this tutorial]. For more materials, check out the [developer docs].
 
 [RISC Zero]: https://risczero.com
-[this tutorial]: https://github.com/risc0/risc0/tree/main/examples/hello-world/tutorial.md
+[this tutorial]: https://github.com/risc0/risc0/blob/main/website/api/zkvm/tutorials/hello-world.md
 [developer docs]: https://dev.risczero.com/zkvm
 
 
