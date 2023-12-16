@@ -1050,6 +1050,11 @@ fn post_state_digest_randomization() {
 }
 
 #[test]
+fn aligned_alloc() {
+    run_test(MultiTestSpec::AlignedAlloc);
+}
+
+#[test]
 #[should_panic(expected = "cycle count too large")]
 fn too_many_sha() {
     run_test(MultiTestSpec::TooManySha);
