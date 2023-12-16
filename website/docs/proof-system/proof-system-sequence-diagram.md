@@ -35,7 +35,7 @@ Then, the prover computes and commits the _Extended Auxiliary Execution Trace_ w
 
 Compared to [ethSTARK], our protocol adds an additional round of interaction to support constraints beyond basic AIR constraints.
 Using constraints that may span both the main trace and the auxiliary trace, we proceed with [DEEP-ALI & FRI] as described in [ethSTARK].
-Ading an Auxiliary Execution Trace enables various enhancements, relative to a Vanilla STARK protocol.
+Adding an Auxiliary Execution Trace enables various enhancements, relative to a Vanilla STARK protocol.
 These enhancements are described well in [From AIRs to RAPs].
 
 We use this Auxiliary Execution Trace to support:
