@@ -256,6 +256,7 @@ impl Validator {
         cmd.arg("--no-git");
         cmd.arg("--dest");
         cmd.arg(&self.proj_out_dir);
+        cmd.arg("--guest-name=method_name");
         cmd.env_clear();
         cmd.envs(&filtered_env);
 
