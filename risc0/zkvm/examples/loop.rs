@@ -12,12 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{process::Command, rc::Rc, time::Instant};
+use std::{
+    process::Command,
+    rc::Rc,
+    time::{Duration, Instant},
+};
 
 use clap::Parser;
 use human_repr::{HumanCount, HumanDuration};
 use risc0_zkvm::{
-    get_prover_server, ExecutorEnv, ExecutorImpl, ProverOpts, ProverServer, Receipt, Session,
+    get_prover_server,
+    recursion::{join, lift},
+    ExecutorEnv, ExecutorImpl, ProverOpts, ProverServer, SegmentReceipt, Session, SuccinctReceipt,
     VerifierContext,
 };
 use risc0_zkvm_methods::{
@@ -26,13 +32,13 @@ use risc0_zkvm_methods::{
 };
 use tracing_subscriber::{prelude::*, EnvFilter};
 
-#[derive(serde::Serialize, Debug)]
+#[derive(serde::Serialize, Debug, Default)]
 struct PerformanceData {
     cycles: u64,
-    duration: u128,
+    duration: Duration,
     ram: usize,
-    seal: usize,
     speed: f64,
+    seal: usize,
 }
 
 #[derive(Parser)]
@@ -56,12 +62,27 @@ struct Args {
     /// Print results in json format.
     #[arg(long, short)]
     json: bool,
+
+    /// Lift proofs.
+    #[arg(long)]
+    lift: bool,
+
+    /// Join proofs.
+    #[arg(long)]
+    join: bool,
 }
 
 fn main() {
     let args = Args::parse();
     if let Some(iterations) = args.iterations {
         tracing_subscriber::registry()
+            .with(
+                tracing_subscriber::fmt::layer().event_format(
+                    tracing_subscriber::fmt::format()
+                        .with_line_number(true)
+                        .with_file(true),
+                ),
+            )
             .with(EnvFilter::from_default_env())
             .with(tracing_forest::ForestLayer::default())
             .init();
@@ -72,43 +93,22 @@ fn main() {
         }
         let prover = get_prover_server(&opts).unwrap();
 
-        let start = Instant::now();
-        let (session, receipt) = top(prover.clone(), iterations, args.po2);
-        let duration = start.elapsed();
-        let (cycles, _) = session.get_cycles().unwrap();
-
-        let seal = receipt
-            .inner
-            .composite()
-            .unwrap()
-            .segments
-            .iter()
-            .fold(0, |acc, segment| acc + segment.get_seal_bytes().len());
-
-        let usage = prover.get_peak_memory_usage();
-        let throughput = (cycles as f64) / duration.as_secs_f64();
+        let perf = top(prover.clone(), iterations, args.po2, args.lift, args.join);
 
         if !args.quiet {
             if args.json {
-                let entry = PerformanceData {
-                    cycles,
-                    duration: duration.as_nanos(),
-                    ram: usage,
-                    seal,
-                    speed: throughput,
-                };
-                match serde_json::to_string_pretty(&entry) {
+                match serde_json::to_string_pretty(&perf) {
                     Ok(json_str) => print!("{json_str}"),
                     Err(e) => println!("Error serializing to JSON: {}", e),
                 }
             } else {
                 println!(
                     "| {:>9}k | {:>10} | {:>10} | {:>10} | {:>8}hz |",
-                    cycles / 1024,
-                    duration.human_duration().to_string(),
-                    usage.human_count_bytes().to_string(),
-                    seal.human_count_bytes().to_string(),
-                    throughput.human_count_bare().to_string()
+                    perf.cycles / 1024,
+                    perf.duration.human_duration().to_string(),
+                    perf.ram.human_count_bytes().to_string(),
+                    perf.seal.human_count_bytes().to_string(),
+                    perf.speed.human_count_bare().to_string()
                 );
             }
         }
@@ -170,7 +170,77 @@ fn run_with_iterations(iterations: usize, po2: u32, json: bool) {
 }
 
 #[tracing::instrument(skip_all)]
-fn top(prover: Rc<dyn ProverServer>, iterations: u64, po2: u32) -> (Session, Receipt) {
+fn top(
+    prover: Rc<dyn ProverServer>,
+    iterations: u64,
+    po2: u32,
+    lift: bool,
+    join: bool,
+) -> PerformanceData {
+    let (session, executor_duration, cycles) = top_executor(iterations, po2);
+    let (segment_receipts, proofs_duration, _num_segments, seal) =
+        top_prover(prover.clone(), &session);
+    let lift_result = (lift || join).then(|| top_lift(segment_receipts));
+    let join_result = join.then(|| lift_result.as_ref().map(|(s, _)| top_join(s)));
+
+    let duration = executor_duration
+        + proofs_duration.iter().sum::<Duration>()
+        + lift_result.map_or_else(|| Duration::default(), |(_, d)| d.iter().sum())
+        + join_result
+            .flatten()
+            .map_or_else(|| Duration::default(), |(_, d)| d);
+    let ram = prover.get_peak_memory_usage();
+    let speed = cycles as f64 / duration.as_secs_f64();
+
+    PerformanceData {
+        ram,
+        speed,
+        duration,
+        cycles,
+        seal,
+    }
+}
+
+#[tracing::instrument(skip_all)]
+fn top_join(proofs: &Vec<SuccinctReceipt>) -> (SuccinctReceipt, Duration) {
+    proofs
+        .iter()
+        .cloned()
+        .map(|p| (p, Duration::ZERO))
+        .reduce(|(p1, pd1), (p2, pd2)| {
+            let (receipt, join_duration) = with_duration(|| join(&p1, &p2).unwrap());
+            (receipt, pd1 + pd2 + join_duration)
+        })
+        .unwrap()
+}
+
+#[tracing::instrument(skip_all)]
+fn top_lift(segment_receipts: Vec<SegmentReceipt>) -> (Vec<SuccinctReceipt>, Vec<Duration>) {
+    segment_receipts
+        .into_iter()
+        .map(|s| with_duration(|| lift(&s).unwrap()))
+        .unzip()
+}
+
+#[tracing::instrument(skip_all)]
+fn top_prover(
+    prover: Rc<dyn ProverServer>,
+    session: &Session,
+) -> (Vec<SegmentReceipt>, Vec<Duration>, usize, usize) {
+    let ctx = VerifierContext::default();
+    let segments = session.resolve().unwrap();
+    let num_segments = segments.len();
+    let (proofs, proofs_duration): (Vec<SegmentReceipt>, Vec<Duration>) = segments
+        .into_iter()
+        .map(|s| with_duration(|| prover.prove_segment(&ctx, &s).unwrap()))
+        .unzip();
+    let seal = proofs.iter().map(|p| p.get_seal_bytes().len()).sum();
+
+    (proofs, proofs_duration, num_segments, seal)
+}
+
+#[tracing::instrument(skip_all)]
+fn top_executor(iterations: u64, po2: u32) -> (Session, Duration, u64) {
     let env = ExecutorEnv::builder()
         .write(&SpecWithIters(BenchmarkSpec::SimpleLoop, iterations))
         .unwrap()
@@ -178,8 +248,15 @@ fn top(prover: Rc<dyn ProverServer>, iterations: u64, po2: u32) -> (Session, Rec
         .build()
         .unwrap();
     let mut exec = ExecutorImpl::from_elf(env, BENCH_ELF).unwrap();
-    let session = exec.run().unwrap();
-    let ctx = VerifierContext::default();
-    let receipt = prover.prove_session(&ctx, &session).unwrap();
-    (session, receipt)
+    let (session, duration) = with_duration(|| exec.run().unwrap());
+    let cycles = session.get_cycles().unwrap().0;
+    (session, duration, cycles)
+}
+
+#[tracing::instrument(skip_all)]
+fn with_duration<T, F: FnOnce() -> T>(f: F) -> (T, Duration) {
+    let start = Instant::now();
+    let result = f();
+    let duration = start.elapsed();
+    (result, duration)
 }
