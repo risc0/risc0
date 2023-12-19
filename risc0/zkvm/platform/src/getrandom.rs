@@ -53,7 +53,8 @@ pub fn zkvm_getrandom(dest: &mut [u8]) -> Result<(), Error> {
 
 #[cfg(not(feature = "getrandom"))]
 pub fn zkvm_getrandom(dest: &mut [u8]) -> Result<(), Error> {
-    panic!(r#"
+    panic!(
+        r#"
 
 WARNING: `getrandom()` called from guest.
 =========================================
