@@ -74,7 +74,7 @@ pub struct Session {
 ///
 /// This allows implementors to determine the best way to represent this in an
 /// pluggable manner. See the [SimpleSegmentRef] for a very basic
-/// implmentation.
+/// implementation.
 #[typetag::serde(tag = "type")]
 pub trait SegmentRef: Send {
     /// Resolve this reference into an actual [Segment].
