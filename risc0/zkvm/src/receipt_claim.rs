@@ -42,10 +42,10 @@ use crate::{
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[cfg_attr(test, derive(PartialEq))]
 pub struct ReceiptClaim {
-    /// The [SystemState] of a segment just before execution has begun.
+    /// The [SystemState] just before execution has begun.
     pub pre: MaybePruned<SystemState>,
 
-    /// The [SystemState] of a segment just after execution has completed.
+    /// The [SystemState] just after execution has completed.
     ///
     /// NOTE: In order to avoid extra logic in the rv32im circuit to perform arithmetic on the PC
     /// with carry, the post state PC is recorded as the current PC + 4. Subtract 4 to get the
@@ -54,7 +54,7 @@ pub struct ReceiptClaim {
     /// `SystemSplit`, this will be the address of the next instruction to be executed.
     pub post: MaybePruned<SystemState>,
 
-    /// The exit code for a segment
+    /// The exit code for the execution.
     pub exit_code: ExitCode,
 
     /// Input to the guest.
@@ -65,7 +65,7 @@ pub struct ReceiptClaim {
     // TODO(1.0): Determine the 1.0 status of input.
     pub input: Digest,
 
-    /// A [Output] of the guest, including the journal and assumptions set
+    /// [Output] of the guest, including the journal and assumptions set
     /// during execution.
     pub output: MaybePruned<Option<Output>>,
 }

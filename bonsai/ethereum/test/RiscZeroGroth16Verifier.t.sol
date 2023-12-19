@@ -62,7 +62,7 @@ contract RiscZeroGroth16VerifierTest is Test {
     }
 
     function testVerifyKnownGoodReceipt() external view {
-        require(verifier.verify(TEST_RECEIPT), "verification failed");
+        require(verifier.verify_integrity(TEST_RECEIPT), "verification failed");
     }
 
     function testVerifyKnownGoodImageIdAndJournal() external view {
@@ -77,30 +77,30 @@ contract RiscZeroGroth16VerifierTest is Test {
         RiscZeroReceipt memory mangled = TEST_RECEIPT;
 
         mangled.seal[0] ^= bytes1(uint8(1));
-        require(!verifier.verify(mangled), "verification passed on mangled seal value");
+        require(!verifier.verify_integrity(mangled), "verification passed on mangled seal value");
         mangled = TEST_RECEIPT;
 
         mangled.claim.preStateDigest ^= bytes32(uint256(1));
-        require(!verifier.verify(mangled), "verification passed on mangled preStateDigest value");
+        require(!verifier.verify_integrity(mangled), "verification passed on mangled preStateDigest value");
         mangled = TEST_RECEIPT;
 
         mangled.claim.postStateDigest ^= bytes32(uint256(1));
-        require(!verifier.verify(mangled), "verification passed on mangled postStateDigest value");
+        require(!verifier.verify_integrity(mangled), "verification passed on mangled postStateDigest value");
         mangled = TEST_RECEIPT;
 
         mangled.claim.exitCode = ExitCode(SystemExitCode.SystemSplit, 0);
-        require(!verifier.verify(mangled), "verification passed on mangled exitCode value");
+        require(!verifier.verify_integrity(mangled), "verification passed on mangled exitCode value");
         mangled = TEST_RECEIPT;
 
         mangled.claim.input ^= bytes32(uint256(1));
-        require(!verifier.verify(mangled), "verification passed on mangled input value");
+        require(!verifier.verify_integrity(mangled), "verification passed on mangled input value");
         mangled = TEST_RECEIPT;
 
         mangled.claim.output ^= bytes32(uint256(1));
-        require(!verifier.verify(mangled), "verification passed on mangled input value");
+        require(!verifier.verify_integrity(mangled), "verification passed on mangled input value");
         mangled = TEST_RECEIPT;
 
         // Just a quick sanity check
-        require(verifier.verify(mangled), "verification failed");
+        require(verifier.verify_integrity(mangled), "verification failed");
     }
 }

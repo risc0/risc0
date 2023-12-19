@@ -21,11 +21,13 @@ import {SafeCast} from "openzeppelin/contracts/utils/math/SafeCast.sol";
 
 import {Groth16Verifier} from "./Groth16Verifier.sol";
 import {
+    ExitCode,
     IRiscZeroVerifier,
+    Output,
+    OutputLib,
     Receipt,
     ReceiptClaim,
     ReceiptClaimLib,
-    ExitCode,
     SystemExitCode
 } from "../IRiscZeroVerifier.sol";
 
@@ -87,8 +89,10 @@ library ControlID {
 
 contract RiscZeroGroth16Verifier is IRiscZeroVerifier, Groth16Verifier {
     using ReceiptClaimLib for ReceiptClaim;
+    using OutputLib for Output;
     using SafeCast for uint256;
 
+    // TODO(victor): Is this comment accurate? Or is it actually the root hash for the program set.
     // Control ID hash for the identity_p254 predicate decomposed as implemented by splitDigest.
     uint256 public immutable CONTROL_ID_0;
     uint256 public immutable CONTROL_ID_1;
@@ -107,38 +111,39 @@ contract RiscZeroGroth16Verifier is IRiscZeroVerifier, Groth16Verifier {
         return (uint256(uint128(uint256(reversed))), uint256(reversed >> 128));
     }
 
-    /// @notice verify that the given receipt is a valid Groth16 RISC Zero recursion receipt.
-    /// @return true if the receipt passes the verification checks.
-    function verify(Receipt memory receipt) public view returns (bool) {
-        (uint256 claim0, uint256 claim1) = splitDigest(receipt.claim.digest());
-        Seal memory seal = abi.decode(receipt.seal, (Seal));
-        return this.verifyProof(seal.a, seal.b, seal.c, [CONTROL_ID_0, CONTROL_ID_1, claim0, claim1]);
-    }
-
-    /// @notice verifies that the given seal is a valid Groth16 RISC Zero proof of execution over the
-    ///     given image ID, post-state digest, and journal hash. Asserts that the input hash
-    //      is all-zeros (i.e. no committed input) and the exit code is (Halted, 0).
-    /// @return true if the receipt passes the verification checks.
-    function verify(bytes memory seal, bytes32 imageId, bytes32 postStateDigest, bytes32 journalHash)
+    /// @notice verifies that the given seal is a valid RISC Zero proof of execution over the
+    ///     given image ID, post-state digest, and journal digest.
+    /// @dev `journalDigest` must be the SHA-256 digest of the journal bytes. Asserts that the input
+    /// hash is all-zeros (i.e. no committed input), the exit code is (Halted, 0), and there are no
+    /// assumptions (i.e. the receipt is unconditional).
+    /// @return true if the receipt passes the verification checks, ensuring
+    /// the `seal` is a cryptographic proof of the execution with the given image ID and journal.
+    function verify(bytes calldata seal, bytes32 imageId, bytes32 postStateDigest, bytes32 journalDigest)
         public
         view
         returns (bool)
     {
         Receipt memory receipt = Receipt(
-            seal, ReceiptClaim(imageId, postStateDigest, ExitCode(SystemExitCode.Halted, 0), bytes32(0), journalHash)
+            seal, ReceiptClaim(
+                imageId,
+                postStateDigest,
+                ExitCode(SystemExitCode.Halted, 0),
+                bytes32(0),
+                Output(
+                    journalDigest,
+                    bytes32(0)
+                ).digest()
+            )
         );
-        return verify(receipt);
+        return verify_integrity(receipt);
     }
 
-    /// @notice verifies that the given seal is a valid Groth16 RISC Zero proof of execution over the
-    ///     given image ID, post-state digest, and full journal. Asserts that the input hash
-    //      is all-zeros (i.e. no committed input) and the exit code is (Halted, 0).
-    /// @return true if the receipt passes the verification checks.
-    function verify(bytes memory seal, bytes32 imageId, bytes32 postStateDigest, bytes calldata journal)
-        public
-        view
-        returns (bool)
-    {
-        return verify(seal, imageId, postStateDigest, sha256(journal));
+    /// @notice verify that the given receipt is a valid RISC Zero receipt.
+    /// @return true if the receipt passes the verification checks, ensuring
+    /// the `seal` is a cryptographic proof of the claims in `claim`.
+    function verify_integrity(Receipt memory receipt) public view returns (bool) {
+        (uint256 claim0, uint256 claim1) = splitDigest(receipt.claim.digest());
+        Seal memory seal = abi.decode(receipt.seal, (Seal));
+        return this.verifyProof(seal.a, seal.b, seal.c, [CONTROL_ID_0, CONTROL_ID_1, claim0, claim1]);
     }
 }
