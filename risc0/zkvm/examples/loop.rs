@@ -33,7 +33,7 @@ use risc0_zkvm_methods::{
 };
 use tracing_subscriber::{prelude::*, EnvFilter};
 
-#[derive(serde::Serialize, Debug, Default)]
+#[derive(serde::Serialize, Debug)]
 struct PerformanceData {
     cycles: u64,
     segments: usize,
@@ -41,6 +41,72 @@ struct PerformanceData {
     ram: usize,
     speed: f64,
     seal: usize,
+}
+
+impl PerformanceData {
+    fn header() -> String {
+        format!(
+            "| {:>10} | {:>10} | {:>10} | {:>10} | {:>10} | {:>10} |",
+            "Cycles", "Segments", "Duration", "RAM", "Seal", "Speed"
+        )
+    }
+
+    fn row(&self) -> String {
+        format!(
+            "| {:>10} | {:>10} | {:>10} | {:>10} | {:>10} | {:>10} |",
+            self.cycles.div(1024).human_count_bare().to_string(),
+            self.segments.human_count_bare().to_string(),
+            self.duration.human_duration().to_string(),
+            self.ram.human_count_bytes().to_string(),
+            self.seal.human_count_bytes().to_string(),
+            self.speed.human_count("hz").to_string()
+        )
+    }
+}
+
+#[derive(serde::Serialize)]
+struct TopExecutor {
+    /// Cycles as reported by [Session::get_cycles].
+    cycles: (u64, u64),
+    session: Session,
+    duration: Duration,
+}
+
+#[derive(serde::Serialize, Debug)]
+struct TopProver {
+    /// Proofs for each segment.
+    proofs: Vec<SegmentReceipt>,
+    /// Proving duration for each segment.
+    duration: Vec<Duration>,
+    /// Number of segments.
+    segments: usize,
+    /// Seal size.
+    seal: usize,
+}
+
+#[derive(serde::Serialize, Debug)]
+struct TopLift {
+    proofs: Vec<SuccinctReceipt>,
+    duration: Vec<Duration>,
+}
+
+impl From<(Vec<SuccinctReceipt>, Vec<Duration>)> for TopLift {
+    fn from((proofs, duration): (Vec<SuccinctReceipt>, Vec<Duration>)) -> Self {
+        Self { proofs, duration }
+    }
+}
+
+#[derive(serde::Serialize, Debug)]
+struct TopJoin {
+    // TODO: Should we it `proof` or `receipt`?
+    proof: SuccinctReceipt,
+    duration: Duration,
+}
+
+impl From<(SuccinctReceipt, Duration)> for TopJoin {
+    fn from((proof, duration): (SuccinctReceipt, Duration)) -> Self {
+        Self { proof, duration }
+    }
 }
 
 #[derive(Parser)]
@@ -97,25 +163,14 @@ fn main() {
                     Err(e) => println!("Error serializing to JSON: {}", e),
                 }
             } else {
-                println!(
-                    "| {:>10} | {:>10} | {:>10} | {:>10} | {:>10} | {:>10} |",
-                    perf.cycles.div(1024).human_count_bare().to_string(),
-                    perf.segments.human_count_bare().to_string(),
-                    perf.duration.human_duration().to_string(),
-                    perf.ram.human_count_bytes().to_string(),
-                    perf.seal.human_count_bytes().to_string(),
-                    perf.speed.human_count("hz").to_string()
-                );
+                println!("{}", perf.row());
             }
         }
     } else {
         if args.json {
             println!("[");
         } else {
-            println!(
-                "| {:>10} | {:>10} | {:>10} | {:>10} | {:>10} | {:>10} |",
-                "Cycles", "Segments", "Duration", "RAM", "Seal", "Speed"
-            );
+            println!("{}", PerformanceData::header());
         }
 
         let input = [
@@ -179,17 +234,28 @@ fn top(
     lift: bool,
     join: bool,
 ) -> PerformanceData {
-    let (session, executor_duration, cycles) = top_executor(iterations, po2);
-    let (segment_receipts, proofs_duration, segments, seal) = top_prover(prover.clone(), &session);
+    let TopExecutor {
+        session,
+        duration: executor_duration,
+        cycles,
+    } = top_executor(iterations, po2);
+
+    let TopProver {
+        proofs: segment_receipts,
+        duration: proofs_duration,
+        segments,
+        seal,
+    } = top_prover(prover.clone(), &session);
+
     let lift_result = (lift || join).then(|| top_lift(segment_receipts));
     let join_result = join.then(|| lift_result.as_ref().map(|(s, _)| top_join(s)));
 
     let duration = executor_duration
         + proofs_duration.iter().sum::<Duration>()
-        + lift_result.map_or_else(|| Duration::default(), |(_, d)| d.iter().sum())
+        + lift_result.map_or_else(|| Duration::default(), |l| l.duration.iter().sum())
         + join_result
             .flatten()
-            .map_or_else(|| Duration::default(), |(_, d)| d);
+            .map_or_else(|| Duration::default(), |j| j.duration);
     let ram = prover.get_peak_memory_usage();
     let speed = cycles as f64 / duration.as_secs_f64();
 
@@ -204,7 +270,7 @@ fn top(
 }
 
 #[tracing::instrument(skip_all)]
-fn top_executor(iterations: u64, po2: u32) -> (Session, Duration, u64) {
+fn top_executor(iterations: u64, po2: u32) -> TopExecutor {
     let env = ExecutorEnv::builder()
         .write(&SpecWithIters(BenchmarkSpec::SimpleLoop, iterations))
         .unwrap()
@@ -213,37 +279,45 @@ fn top_executor(iterations: u64, po2: u32) -> (Session, Duration, u64) {
         .unwrap();
     let mut exec = ExecutorImpl::from_elf(env, BENCH_ELF).unwrap();
     let (session, duration) = with_duration(|| exec.run().unwrap());
-    let cycles = session.get_cycles().unwrap().0;
-    (session, duration, cycles)
+    let cycles = session.get_cycles().unwrap();
+
+    TopExecutor {
+        cycles,
+        session,
+        duration,
+    }
 }
 
 #[tracing::instrument(skip_all)]
-fn top_prover(
-    prover: Rc<dyn ProverServer>,
-    session: &Session,
-) -> (Vec<SegmentReceipt>, Vec<Duration>, usize, usize) {
+fn top_prover(prover: Rc<dyn ProverServer>, session: &Session) -> TopProver {
     let ctx = VerifierContext::default();
     let segments = session.resolve().unwrap();
     let num_segments = segments.len();
-    let (proofs, proofs_duration): (Vec<SegmentReceipt>, Vec<Duration>) = segments
+    let (proofs, duration): (Vec<SegmentReceipt>, Vec<Duration>) = segments
         .into_iter()
         .map(|s| with_duration(|| prover.prove_segment(&ctx, &s).unwrap()))
         .unzip();
     let seal = proofs.iter().map(|p| p.get_seal_bytes().len()).sum();
 
-    (proofs, proofs_duration, num_segments, seal)
+    TopProver {
+        proofs,
+        duration,
+        seal,
+        segments: num_segments,
+    }
 }
 
 #[tracing::instrument(skip_all)]
-fn top_lift(segment_receipts: Vec<SegmentReceipt>) -> (Vec<SuccinctReceipt>, Vec<Duration>) {
+fn top_lift(segment_receipts: Vec<SegmentReceipt>) -> TopLift {
     segment_receipts
         .into_iter()
         .map(|s| with_duration(|| lift(&s).unwrap()))
         .unzip()
+        .into()
 }
 
 #[tracing::instrument(skip_all)]
-fn top_join(proofs: &Vec<SuccinctReceipt>) -> (SuccinctReceipt, Duration) {
+fn top_join(proofs: &Vec<SuccinctReceipt>) -> TopJoin {
     proofs
         .iter()
         .cloned()
@@ -253,6 +327,7 @@ fn top_join(proofs: &Vec<SuccinctReceipt>) -> (SuccinctReceipt, Duration) {
             (receipt, pd1 + pd2 + join_duration)
         })
         .unwrap()
+        .into()
 }
 
 #[tracing::instrument(skip_all)]
