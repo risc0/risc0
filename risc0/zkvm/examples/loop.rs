@@ -59,7 +59,10 @@ impl PerformanceData {
     fn row(&self) -> String {
         format!(
             "| {:>15} | {:>15} | {:>15} | {:>15} | {:>15} | {:>15} | {:>15} |",
-            self.executor_cycles.div(1024).human_count_bare().to_string(),
+            self.executor_cycles
+                .div(1024)
+                .human_count_bare()
+                .to_string(),
             self.prover_cycles.div(1024).human_count_bare().to_string(),
             self.segments.human_count_bare().to_string(),
             self.duration.human_duration().to_string(),
