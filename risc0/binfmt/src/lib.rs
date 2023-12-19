@@ -23,9 +23,19 @@ mod image;
 mod sys_state;
 
 #[cfg(not(target_os = "zkvm"))]
-pub use crate::image::{compute_image_id, MemoryImage, PageTableInfo};
+pub use crate::image::{MemoryImage, PageTableInfo};
 pub use crate::{
     elf::Program,
     hash::{tagged_list, tagged_list_cons, tagged_struct, Digestible},
     sys_state::{read_sha_halfs, write_sha_halfs, DecodeError, SystemState},
 };
+
+/// Compute and return the ImageID of the specified ELF binary.
+#[cfg(not(target_os = "zkvm"))]
+pub fn compute_image_id(elf: &[u8]) -> anyhow::Result<risc0_zkp::core::digest::Digest> {
+    use risc0_zkvm_platform::{memory::GUEST_MAX_MEM, PAGE_SIZE};
+
+    let program = Program::load_elf(elf, GUEST_MAX_MEM as u32)?;
+    let image = MemoryImage::new(&program, PAGE_SIZE as u32)?;
+    image.compute_id()
+}

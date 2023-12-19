@@ -35,8 +35,6 @@ pub mod recursion {
     pub use super::host::recursion::*;
 }
 
-use semver::Version;
-
 pub use anyhow::Result;
 #[cfg(not(target_os = "zkvm"))]
 #[cfg(any(feature = "client", feature = "prove"))]
@@ -68,17 +66,6 @@ pub use self::host::{
         },
     },
 };
-#[cfg(not(target_os = "zkvm"))]
-pub use self::host::{
-    compute_image_id,
-    control_id::POSEIDON_CONTROL_ID,
-    groth16::{Groth16Proof, Groth16Seal},
-    receipt::{
-        Assumption, CompositeReceipt, Groth16Receipt, InnerReceipt, Journal, Receipt,
-        SegmentReceipt, SuccinctReceipt, VerifierContext,
-    },
-    recursion::ALLOWED_IDS_ROOT,
-};
 pub use self::{
     fault_ids::{FAULT_CHECKER_ELF, FAULT_CHECKER_ID},
     receipt_claim::{
@@ -86,6 +73,21 @@ pub use self::{
         ReceiptClaim,
     },
 };
+#[cfg(not(target_os = "zkvm"))]
+pub use {
+    self::host::{
+        control_id::POSEIDON_CONTROL_ID,
+        groth16::{Groth16Proof, Groth16Seal},
+        receipt::{
+            Assumption, CompositeReceipt, Groth16Receipt, InnerReceipt, Journal, Receipt,
+            SegmentReceipt, SuccinctReceipt, VerifierContext,
+        },
+        recursion::ALLOWED_IDS_ROOT,
+    },
+    risc0_binfmt::compute_image_id,
+};
+
+use semver::Version;
 
 /// Reports the current version of this crate.
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");

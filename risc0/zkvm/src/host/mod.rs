@@ -23,12 +23,6 @@ pub(crate) mod recursion;
 #[cfg(feature = "prove")]
 pub(crate) mod server;
 
-use anyhow::Result;
-use risc0_binfmt::{MemoryImage, Program};
-use risc0_zkvm_platform::{memory::GUEST_MAX_MEM, PAGE_SIZE};
-
-use crate::sha::Digest;
-
 #[cfg(any(feature = "client", feature = "prove"))]
 mod protos {
     pub(crate) mod api {
@@ -48,10 +42,3 @@ mod protos {
 }
 
 const CIRCUIT: risc0_circuit_rv32im::CircuitImpl = risc0_circuit_rv32im::CircuitImpl::new();
-
-/// Compute and return the ImageID of the specified ELF binary.
-pub fn compute_image_id(elf: &[u8]) -> Result<Digest> {
-    let program = Program::load_elf(elf, GUEST_MAX_MEM as u32)?;
-    let image = MemoryImage::new(&program, PAGE_SIZE as u32)?;
-    image.compute_id()
-}
