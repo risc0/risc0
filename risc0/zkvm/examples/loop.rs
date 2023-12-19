@@ -13,6 +13,7 @@
 // limitations under the License.
 
 use std::{
+    ops::Div,
     process::Command,
     rc::Rc,
     time::{Duration, Instant},
@@ -35,6 +36,7 @@ use tracing_subscriber::{prelude::*, EnvFilter};
 #[derive(serde::Serialize, Debug, Default)]
 struct PerformanceData {
     cycles: u64,
+    segments: usize,
     duration: Duration,
     ram: usize,
     speed: f64,
@@ -96,12 +98,13 @@ fn main() {
                 }
             } else {
                 println!(
-                    "| {:>9}k | {:>10} | {:>10} | {:>10} | {:>8}hz |",
-                    perf.cycles / 1024,
+                    "| {:>10} | {:>10} | {:>10} | {:>10} | {:>10} | {:>10} |",
+                    perf.cycles.div(1024).human_count_bare().to_string(),
+                    perf.segments.human_count_bare().to_string(),
                     perf.duration.human_duration().to_string(),
                     perf.ram.human_count_bytes().to_string(),
                     perf.seal.human_count_bytes().to_string(),
-                    perf.speed.human_count_bare().to_string()
+                    perf.speed.human_count("hz").to_string()
                 );
             }
         }
@@ -110,8 +113,8 @@ fn main() {
             println!("[");
         } else {
             println!(
-                "| {:>10} | {:>10} | {:>10} | {:>10} | {:>10} |",
-                "Cycles", "Duration", "RAM", "Seal", "Speed"
+                "| {:>10} | {:>10} | {:>10} | {:>10} | {:>10} | {:>10} |",
+                "Cycles", "Segments", "Duration", "RAM", "Seal", "Speed"
             );
         }
 
@@ -130,7 +133,7 @@ fn main() {
         let len = input.len();
 
         for (index, &iteration) in input.iter().enumerate() {
-            run_with_iterations(iteration, args.po2, args.json);
+            run_with_iterations(iteration, &args);
 
             if args.json {
                 if index == len - 1 {
@@ -143,19 +146,25 @@ fn main() {
     }
 }
 
-fn run_with_iterations(iterations: usize, po2: u32, json: bool) {
+fn run_with_iterations(iterations: usize, args: &Args) {
     let mut cmd = Command::new(std::env::current_exe().unwrap());
     if iterations == 0 {
         cmd.arg("--quiet");
     }
-    if json {
+    if args.json {
         cmd.arg("--json");
+    }
+    if args.lift {
+        cmd.arg("--lift");
+    }
+    if args.join {
+        cmd.arg("--join");
     }
     let ok = cmd
         .arg("--iterations")
         .arg(iterations.to_string())
         .arg("--po2")
-        .arg(po2.to_string())
+        .arg(args.po2.to_string())
         .status()
         .unwrap()
         .success();
@@ -171,8 +180,7 @@ fn top(
     join: bool,
 ) -> PerformanceData {
     let (session, executor_duration, cycles) = top_executor(iterations, po2);
-    let (segment_receipts, proofs_duration, _num_segments, seal) =
-        top_prover(prover.clone(), &session);
+    let (segment_receipts, proofs_duration, segments, seal) = top_prover(prover.clone(), &session);
     let lift_result = (lift || join).then(|| top_lift(segment_receipts));
     let join_result = join.then(|| lift_result.as_ref().map(|(s, _)| top_join(s)));
 
@@ -190,29 +198,23 @@ fn top(
         speed,
         duration,
         cycles,
+        segments,
         seal,
     }
 }
 
 #[tracing::instrument(skip_all)]
-fn top_join(proofs: &Vec<SuccinctReceipt>) -> (SuccinctReceipt, Duration) {
-    proofs
-        .iter()
-        .cloned()
-        .map(|p| (p, Duration::ZERO))
-        .reduce(|(p1, pd1), (p2, pd2)| {
-            let (receipt, join_duration) = with_duration(|| join(&p1, &p2).unwrap());
-            (receipt, pd1 + pd2 + join_duration)
-        })
+fn top_executor(iterations: u64, po2: u32) -> (Session, Duration, u64) {
+    let env = ExecutorEnv::builder()
+        .write(&SpecWithIters(BenchmarkSpec::SimpleLoop, iterations))
         .unwrap()
-}
-
-#[tracing::instrument(skip_all)]
-fn top_lift(segment_receipts: Vec<SegmentReceipt>) -> (Vec<SuccinctReceipt>, Vec<Duration>) {
-    segment_receipts
-        .into_iter()
-        .map(|s| with_duration(|| lift(&s).unwrap()))
-        .unzip()
+        .segment_limit_po2(po2)
+        .build()
+        .unwrap();
+    let mut exec = ExecutorImpl::from_elf(env, BENCH_ELF).unwrap();
+    let (session, duration) = with_duration(|| exec.run().unwrap());
+    let cycles = session.get_cycles().unwrap().0;
+    (session, duration, cycles)
 }
 
 #[tracing::instrument(skip_all)]
@@ -233,17 +235,24 @@ fn top_prover(
 }
 
 #[tracing::instrument(skip_all)]
-fn top_executor(iterations: u64, po2: u32) -> (Session, Duration, u64) {
-    let env = ExecutorEnv::builder()
-        .write(&SpecWithIters(BenchmarkSpec::SimpleLoop, iterations))
+fn top_lift(segment_receipts: Vec<SegmentReceipt>) -> (Vec<SuccinctReceipt>, Vec<Duration>) {
+    segment_receipts
+        .into_iter()
+        .map(|s| with_duration(|| lift(&s).unwrap()))
+        .unzip()
+}
+
+#[tracing::instrument(skip_all)]
+fn top_join(proofs: &Vec<SuccinctReceipt>) -> (SuccinctReceipt, Duration) {
+    proofs
+        .iter()
+        .cloned()
+        .map(|p| (p, Duration::ZERO))
+        .reduce(|(p1, pd1), (p2, pd2)| {
+            let (receipt, join_duration) = with_duration(|| join(&p1, &p2).unwrap());
+            (receipt, pd1 + pd2 + join_duration)
+        })
         .unwrap()
-        .segment_limit_po2(po2)
-        .build()
-        .unwrap();
-    let mut exec = ExecutorImpl::from_elf(env, BENCH_ELF).unwrap();
-    let (session, duration) = with_duration(|| exec.run().unwrap());
-    let cycles = session.get_cycles().unwrap().0;
-    (session, duration, cycles)
 }
 
 #[tracing::instrument(skip_all)]
