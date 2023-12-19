@@ -76,13 +76,6 @@ fn main() {
     let args = Args::parse();
     if let Some(iterations) = args.iterations {
         tracing_subscriber::registry()
-            .with(
-                tracing_subscriber::fmt::layer().event_format(
-                    tracing_subscriber::fmt::format()
-                        .with_line_number(true)
-                        .with_file(true),
-                ),
-            )
             .with(EnvFilter::from_default_env())
             .with(tracing_forest::ForestLayer::default())
             .init();
