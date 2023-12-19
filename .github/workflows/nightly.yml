@@ -71,37 +71,16 @@ jobs:
           path: ${{ runner.temp }}/crate-validation/
           retention-days: 2
 
-      - name: Commit results to risc0/ghpages
+      - name: Clone ghpages repo
+        run: git clone "https://x-access-token:${{ secrets.BENCHMARK_TOKEN }}@github.com/risc0/ghpages.git" ${{ runner.temp }}/benchmarks/
+
+      - name: Export environment variable
         run: |
-          git clone "https://x-access-token:${{ secrets.BENCHMARK_TOKEN }}@github.com/risc0/ghpages.git" ${{ runner.temp }}/benchmarks/
-          cd ${{ runner.temp }}/benchmarks/
+          echo "TEMP_DIR=${{ runner.temp }}" >> $GITHUB_ENV
+          echo "GITHUB_SHA=${{ github.sha }}" >> $GITHUB_ENV
 
-          mkdir -p ./dev/crate-validation/results
-
-          cp ${{ runner.temp }}/crate-validation/profile-results.json ./dev/crate-validation/results/${{ github.sha }}.json
-
-          touch ./dev/crate-validation/results/index.json
-
-          echo "Filtering out old results"
-          CRATE_VALIDATOR_PAST_VALUES=$(grep -ohE '{\s*"timestamp":\s*\d+\s*,\s*"hash":\s*"[a-zA-Z0-9]+"\s*}' ./dev/crate-validation/results/index.json || true)
-          echo $CRATE_VALIDATOR_PAST_VALUES
-
-          echo "Processing results"
-          CRATE_VALIDATOR_PROCESSED_VALUES=$(echo $CRATE_VALIDATOR_PAST_VALUES | awk -v timestamp="$(date +%s)" -v hash="${{ github.sha }}" 'BEGIN{print "["} {print $0","} END{print "{\"timestamp\":"timestamp", \"hash\":\""hash"\"}" "\n]"}')
-          echo $CRATE_VALIDATOR_PROCESSED_VALUES
-
-          echo "Removing whitespace"
-          CRATE_VALIDATOR_FINAL_VALUES=$(echo $CRATE_VALIDATOR_PROCESSED_VALUES | tr -d '[:space:]')
-          echo $CRATE_VALIDATOR_FINAL_VALUES
-
-          echo "Checking old index"
-          cat ./dev/crate-validation/results/index.json
-
-          echo "Updating index"
-          echo $CRATE_VALIDATOR_FINAL_VALUES | tee ./dev/crate-validation/results/index.json
-
-          echo "Committing results"
-          git add .
-          git  -c "user.name=nightly-action" -c "user.email=github@users.noreply.github.com" commit -m "Added update at '$(date)'"
-          git push origin main
-        shell: bash
+      - name: Commit results to risc0/ghpages
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+        run: bash ./parse_profile_compilation_results.sh
+        working-directory: ./.github/scripts
