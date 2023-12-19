@@ -53,7 +53,7 @@ This is generally referred to as [Amdahl’s Law](https://en.wikipedia.org/wiki/
 
 Starting simple, measure by adding an `eprintln!` line to your guest code to measure how long an operation takes, and how many times it is called.
 
-Using [`env::get_cycle_count()`] will tell you the current number of execution cycles that have occurred in your program.
+Using [`env::cycle_count()`] will tell you the current number of execution cycles that have occurred in your program.
 
 As an example:
 
@@ -62,12 +62,12 @@ As an example:
 ```rust no_run title="methods/guest/src/main.rs"
 # use risc0_zkvm::guest::env;
 fn my_operation_to_measure() {
-  let start = env::get_cycle_count();
+  let start = env::cycle_count();
 
   // potentially expensive or frequently called code
   // ...
 
-  let end = env::get_cycle_count();
+  let end = env::cycle_count();
   eprintln!("my_operation_to_measure: {}", end - start);
 }
 ```
@@ -75,7 +75,7 @@ fn my_operation_to_measure() {
 When you run your guest, you’ll see a printout of the cycle count each time that function is called.
 You can then analyze this data easily with a tool like [`counts`].
 
-[`env::get_cycle_count()`]: https://docs.rs/risc0-zkvm/0.19/risc0_zkvm/guest/env/fn.get_cycle_count.html
+[`env::cycle_count()`]: https://docs.rs/risc0-zkvm/0.19/risc0_zkvm/guest/env/fn.cycle_count.html
 [`counts`]: https://github.com/nnethercote/counts/
 
 ### Profiling

@@ -60,13 +60,13 @@ pub fn main() {
             // see when it's a custom circuit.
             let a: &Digest = &Digest::from([1, 2, 3, 4, 5, 6, 7, 8]);
 
-            let count1 = env::get_cycle_count();
+            let count1 = env::cycle_count();
             memory_barrier(&count1);
-            let count2 = env::get_cycle_count();
+            let count2 = env::cycle_count();
             memory_barrier(&count2);
             let result = sha::Impl::hash_pair(a, a);
             memory_barrier(&result);
-            let count3 = env::get_cycle_count();
+            let count3 = env::cycle_count();
             memory_barrier(&count3);
 
             let overhead = count2 - count1;
@@ -197,14 +197,14 @@ pub fn main() {
             env::commit_slice(&buf);
         }
         MultiTestSpec::BusyLoop { cycles } => {
-            let mut last_cycles = env::get_cycle_count();
+            let mut last_cycles = env::cycle_count();
 
             // Count all the cycles that have happened so far before we got to this point.
             env::log("Busy loop starting!");
             let mut tot_cycles = last_cycles;
 
             while tot_cycles < cycles as usize {
-                let now_cycles = env::get_cycle_count();
+                let now_cycles = env::cycle_count();
                 if now_cycles <= last_cycles {
                     // Cycle count may have reset or wrapped around.
                     // Since we don't know which, just start counting
