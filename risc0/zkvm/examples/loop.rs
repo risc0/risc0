@@ -35,7 +35,12 @@ use tracing_subscriber::{prelude::*, EnvFilter};
 
 #[derive(serde::Serialize, Debug)]
 struct PerformanceData {
-    cycles: u64,
+    // TODO: Should we present the distinction between prover and executor cycles?
+    // Also, how should we compute the `speed`? Based on prover or executor cycles?
+    // We're currently using executor cycles, should we change?
+    prover_cycles: u64,
+    executor_cycles: u64,
+
     segments: usize,
     duration: Duration,
     ram: usize,
@@ -46,15 +51,16 @@ struct PerformanceData {
 impl PerformanceData {
     fn header() -> String {
         format!(
-            "| {:>10} | {:>10} | {:>10} | {:>10} | {:>10} | {:>10} |",
-            "Cycles", "Segments", "Duration", "RAM", "Seal", "Speed"
+            "| {:>15} | {:>15} | {:>15} | {:>15} | {:>15} | {:>15} | {:>15} |",
+            "Executor Cycles", "Prover Cycles", "Segments", "Duration", "RAM", "Seal", "Speed"
         )
     }
 
     fn row(&self) -> String {
         format!(
-            "| {:>10} | {:>10} | {:>10} | {:>10} | {:>10} | {:>10} |",
-            self.cycles.div(1024).human_count_bare().to_string(),
+            "| {:>15} | {:>15} | {:>15} | {:>15} | {:>15} | {:>15} | {:>15} |",
+            self.executor_cycles.div(1024).human_count_bare().to_string(),
+            self.prover_cycles.div(1024).human_count_bare().to_string(),
             self.segments.human_count_bare().to_string(),
             self.duration.human_duration().to_string(),
             self.ram.human_count_bytes().to_string(),
@@ -248,7 +254,7 @@ fn top(
     } = top_prover(prover.clone(), &session);
 
     let lift_result = (lift || join).then(|| top_lift(segment_receipts));
-    let join_result = join.then(|| lift_result.as_ref().map(|(s, _)| top_join(s)));
+    let join_result = join.then(|| lift_result.as_ref().map(|l| top_join(&l.proofs)));
 
     let duration = executor_duration
         + proofs_duration.iter().sum::<Duration>()
@@ -257,15 +263,19 @@ fn top(
             .flatten()
             .map_or_else(|| Duration::default(), |j| j.duration);
     let ram = prover.get_peak_memory_usage();
-    let speed = cycles as f64 / duration.as_secs_f64();
+    // TODO: We're using executor cycles for the speed, should we change?
+    let speed = cycles.0 as f64 / duration.as_secs_f64();
 
     PerformanceData {
         ram,
         speed,
         duration,
-        cycles,
         segments,
         seal,
+
+        // TODO: Should we display the prover cycles or the executor cycles separately?
+        executor_cycles: cycles.0,
+        prover_cycles: cycles.1,
     }
 }
 
