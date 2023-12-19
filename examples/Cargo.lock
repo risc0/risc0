@@ -406,6 +406,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d468802bab17cbc0cc575e9b053f41e72aa36bfa6b7f55e3529ffa43161b97fa"
 
 [[package]]
+name = "autotools"
+version = "0.2.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "aef8da1805e028a172334c3b680f93e71126f2327622faef2ec3d893c0a4ad77"
+dependencies = [
+ "cc",
+]
+
+[[package]]
 name = "backtrace"
 version = "0.3.69"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -572,7 +581,7 @@ dependencies = [
 
 [[package]]
 name = "bonsai-sdk"
-version = "0.5.0"
+version = "0.6.0-rc.1"
 dependencies = [
  "reqwest",
  "serde",
@@ -3212,12 +3221,12 @@ dependencies = [
 ]
 
 [[package]]
-name = "protoc-prebuilt"
-version = "0.2.0"
-source = "git+https://github.com/risc0/protoc-prebuilt.git?rev=14be7456835318f0f2bfd2ee1f0eb9d7ed5ef701#14be7456835318f0f2bfd2ee1f0eb9d7ed5ef701"
+name = "protobuf-src"
+version = "1.1.0+21.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c7ac8852baeb3cc6fb83b93646fb93c0ffe5d14bf138c945ceb4b9948ee0e3c1"
 dependencies = [
- "ureq",
- "zip",
+ "autotools",
 ]
 
 [[package]]
@@ -3565,7 +3574,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-binfmt"
-version = "0.20.0-alpha.1"
+version = "0.20.0-rc.1"
 dependencies = [
  "anyhow",
  "elf",
@@ -3577,7 +3586,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build"
-version = "0.20.0-alpha.1"
+version = "0.20.0-rc.1"
 dependencies = [
  "anyhow",
  "cargo_metadata",
@@ -3592,7 +3601,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build-kernel"
-version = "0.20.0-alpha.1"
+version = "0.20.0-rc.1"
 dependencies = [
  "cc",
  "directories",
@@ -3603,7 +3612,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion"
-version = "0.20.0-alpha.1"
+version = "0.20.0-rc.1"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -3622,7 +3631,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion-sys"
-version = "0.20.0-alpha.1"
+version = "0.20.0-rc.1"
 dependencies = [
  "glob",
  "risc0-build-kernel",
@@ -3631,7 +3640,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im"
-version = "0.20.0-alpha.1"
+version = "0.20.0-rc.1"
 dependencies = [
  "anyhow",
  "cust",
@@ -3647,7 +3656,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im-sys"
-version = "0.20.0-alpha.1"
+version = "0.20.0-rc.1"
 dependencies = [
  "glob",
  "risc0-build-kernel",
@@ -3656,25 +3665,35 @@ dependencies = [
 
 [[package]]
 name = "risc0-core"
-version = "0.20.0-alpha.1"
+version = "0.20.0-rc.1"
 dependencies = [
  "bytemuck",
  "rand_core",
 ]
 
 [[package]]
+name = "risc0-sppark"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5be1d1ff7fe501c9f420654bc1ff7461909b85e7f8fb3698a8812c0a8a787306"
+dependencies = [
+ "cc",
+ "which",
+]
+
+[[package]]
 name = "risc0-sys"
-version = "0.20.0-alpha.1"
+version = "0.20.0-rc.1"
 dependencies = [
  "cc",
  "cust",
  "risc0-build-kernel",
- "sppark",
+ "risc0-sppark",
 ]
 
 [[package]]
 name = "risc0-zkp"
-version = "0.20.0-alpha.1"
+version = "0.20.0-rc.1"
 dependencies = [
  "anyhow",
  "blake2",
@@ -3700,7 +3719,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "0.20.0-alpha.1"
+version = "0.20.0-rc.1"
 dependencies = [
  "addr2line",
  "anyhow",
@@ -3722,7 +3741,7 @@ dependencies = [
  "num-traits",
  "prost",
  "prost-build",
- "protoc-prebuilt",
+ "protobuf-src",
  "rayon",
  "risc0-binfmt",
  "risc0-circuit-recursion",
@@ -3742,7 +3761,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "0.20.0-alpha.1"
+version = "0.20.0-rc.1"
 dependencies = [
  "bytemuck",
  "getrandom",
@@ -3751,7 +3770,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-receipts"
-version = "0.20.0-alpha.1"
+version = "0.20.0-rc.1"
 
 [[package]]
 name = "rkyv"
@@ -4418,15 +4437,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "sppark"
-version = "0.1.5"
-source = "git+https://github.com/supranational/sppark.git?rev=17119848e21491244125d266b2d74f26be2514f0#17119848e21491244125d266b2d74f26be2514f0"
-dependencies = [
- "cc",
- "which",
-]
-
-[[package]]
 name = "stable_deref_trait"
 version = "1.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5048,21 +5058,6 @@ name = "untrusted"
 version = "0.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8ecb6da28b8a351d773b68d5825ac39017e680750f980f3a1a85cd8dd28a47c1"
-
-[[package]]
-name = "ureq"
-version = "2.9.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f8cdd25c339e200129fe4de81451814e5228c9b771d57378817d6117cc2b3f97"
-dependencies = [
- "base64 0.21.5",
- "log",
- "once_cell",
- "rustls",
- "rustls-webpki",
- "url",
- "webpki-roots",
-]
 
 [[package]]
 name = "url"
@@ -5758,7 +5753,6 @@ dependencies = [
  "byteorder",
  "crc32fast",
  "crossbeam-utils",
- "flate2",
  "zstd",
 ]
 
