@@ -672,13 +672,14 @@ pub unsafe extern "C" fn sys_alloc_aligned(bytes: usize, align: usize) -> *mut u
         heap_pos = unsafe { (&_end) as *const u8 as usize };
     }
 
+    // Honor requested alignment if larger than word size.
+    // Note: align is typically a power of two.
+    let align = usize::max(align, WORD_SIZE);
+
     let offset = heap_pos & (align - 1);
     if offset != 0 {
         heap_pos += align - offset;
     }
-
-    // Ensure all allocations are minimally aligned to a word boundary.
-    let align = usize::min(align, WORD_SIZE);
 
     let ptr = heap_pos as *mut u8;
     heap_pos += bytes;

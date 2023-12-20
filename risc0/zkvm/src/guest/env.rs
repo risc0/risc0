@@ -329,7 +329,9 @@ pub fn commit_slice<T: Pod>(slice: &[T]) {
 
 /// Return the number of processor cycles that have occurred since the guest
 /// began.
-pub fn get_cycle_count() -> usize {
+///
+/// WARNING: The cycle count is provided by the host and is not checked by the zkVM circuit.
+pub fn cycle_count() -> usize {
     sys_cycle_count()
 }
 

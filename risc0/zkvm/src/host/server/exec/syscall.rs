@@ -618,7 +618,7 @@ impl<'a> PosixIo<'a> {
         let msg = format!("R0VM[{}] ", ctx.get_cycle().to_string());
         writer
             .borrow_mut()
-            .write_all(&[msg.as_bytes(), &from_guest].concat())?;
+            .write_all(&[msg.as_bytes(), &from_guest, b"\n"].concat())?;
         Ok((0, 0))
     }
 }

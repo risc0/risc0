@@ -11,12 +11,12 @@ on:
 # this is needed to gain access via OIDC to the S3 bucket for caching
 permissions:
   id-token: write
-  contents: read
+  contents: write
 
 env:
   RISC0_TOOLCHAIN_VERSION: test-release-2
-  TAG: v0.20.0-rc.1
-  VERSION: "0.20.0-rc.1"
+  TAG: v0.21.0-alpha.1
+  VERSION: "0.21.0-alpha.1"
 
 jobs:
   release:

@@ -87,7 +87,7 @@ impl From<PageTableInfo> for PersistentPageTableInfo {
 }
 
 /// Compute and return the ImageID of the given `(merkle_root, pc)` pair.
-pub fn compute_image_id(merkle_root: &Digest, pc: u32) -> Digest {
+fn compute_image_id(merkle_root: &Digest, pc: u32) -> Digest {
     SystemState {
         merkle_root: *merkle_root,
         pc,

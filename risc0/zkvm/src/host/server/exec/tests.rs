@@ -814,7 +814,7 @@ fn random() {
 }
 
 #[test]
-#[should_panic(expected = "Guest code attempted to call getrandom but it was disabled")]
+#[should_panic(expected = "WARNING: `getrandom()` called from guest.")]
 fn getrandom_panic() {
     let env = ExecutorEnv::builder().build().unwrap();
     let _session = ExecutorImpl::from_elf(env, RAND_ELF)
@@ -1050,6 +1050,11 @@ fn post_state_digest_randomization() {
 }
 
 #[test]
+fn aligned_alloc() {
+    run_test(MultiTestSpec::AlignedAlloc);
+}
+
+#[test]
 #[should_panic(expected = "cycle count too large")]
 fn too_many_sha() {
     run_test(MultiTestSpec::TooManySha);
@@ -1159,7 +1164,7 @@ mod docker {
         let err = run_session(0, 16, 0).err().unwrap();
         assert!(err.to_string().contains("Session limit exceeded"));
 
-        assert!(run_session(0, 16, 1).is_ok());
+        assert!(run_session(0, 16, 2).is_ok());
 
         let err = run_session(1 << 16, 16, 1).err().unwrap();
         assert!(err.to_string().contains("Session limit exceeded"));
