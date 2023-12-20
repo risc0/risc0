@@ -72,7 +72,7 @@ This can be helpful in understanding the efficiency of various algorithms and th
 
 :::tip[Explore]
 Use the pprof web interface to compare the performance of the 3 Fibonacci implementations.
-Refer to the [pprof docs] for more inforamtion about the web interface.
+Refer to the [pprof docs] for more information about the web interface.
 :::
 
 [profiling example]: https://github.com/risc0/risc0/tree/main/examples/profiling
