@@ -124,8 +124,8 @@ message ExecutorEnv {
 
 message Assumption {
   oneof kind {
-    Asset proven = 1;
-    protos.base.MaybePruned unresolved = 2; // MaybePruned<ReceiptClaim>
+    Asset proven = 1; // Receipt
+    Asset unresolved = 2; // MaybePruned<ReceiptClaim>
   }
 }
 

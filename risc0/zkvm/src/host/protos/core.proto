@@ -39,7 +39,7 @@ message InnerReceipt {
 message CompositeReceipt {
   repeated SegmentReceipt segments = 1;
   repeated InnerReceipt assumptions = 2;
-  protos.base.Digest journal_digest = 3;
+  Digest journal_digest = 3;
 }
 
 message SegmentReceipt {

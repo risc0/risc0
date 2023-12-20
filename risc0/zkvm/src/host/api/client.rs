@@ -361,7 +361,14 @@ impl Client {
                             )),
                         },
                         Assumption::Unresolved(claim) => pb::api::Assumption {
-                            kind: Some(pb::api::assumption::Kind::Unresolved(claim.clone().into())),
+                            kind: Some(pb::api::assumption::Kind::Unresolved(
+                                Asset::Inline(
+                                    pb::core::ReceiptClaim::from(claim.clone())
+                                        .encode_to_vec()
+                                        .into(),
+                                )
+                                .try_into()?,
+                            )),
                         },
                     })
                 })
