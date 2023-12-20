@@ -203,7 +203,7 @@
 // obstacle to adoption, that text has been removed.
 	.text
 	.attribute	4, 16
-	.attribute	5, "rv32i2p0_m2p0"
+	.attribute	5, "rv32im"
 	.file	"musl_memset.c"
 	.globl	memset
 	.p2align	2

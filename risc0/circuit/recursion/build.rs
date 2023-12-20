@@ -43,6 +43,7 @@ fn download_zkr() {
 
     use downloader::{verify, Download, DownloadSummary, Downloader};
 
+    const FILENAME: &str = "recursion_zkr.zip";
     const SRC_PATH: &str = "src/recursion_zkr.zip";
     const SHA256_HASH: &str = "af7843e15818ef2ebd04fb455caeb42aaa3b70582f519a040adb870318797990";
 
@@ -51,7 +52,7 @@ fn download_zkr() {
     let out_dir = env::var("OUT_DIR").unwrap();
     let out_dir = Path::new(&out_dir);
     if std::fs::metadata(&src_path).is_ok() {
-        let tgt_path = out_dir.join("recursion_zkr.zip");
+        let tgt_path = out_dir.join(FILENAME);
         std::fs::copy(&src_path, &tgt_path).unwrap();
     } else {
         fn decode_hex(s: &str) -> Result<Vec<u8>, ParseIntError> {
@@ -67,9 +68,11 @@ fn download_zkr() {
         let url =
             format!("https://risc0-artifacts.s3.us-west-2.amazonaws.com/zkr/{SHA256_HASH}.zip");
         eprintln!("Downloading {url}");
-        let dl = Download::new(&url).verify(verify::with_digest::<sha2::Sha256>(
-            decode_hex(SHA256_HASH).unwrap(),
-        ));
+        let dl = Download::new(&url)
+            .file_name(&PathBuf::from_str(FILENAME).unwrap())
+            .verify(verify::with_digest::<sha2::Sha256>(
+                decode_hex(SHA256_HASH).unwrap(),
+            ));
         let results = downloader.download(&[dl]).unwrap();
         for result in results {
             let summary: DownloadSummary = result.unwrap();

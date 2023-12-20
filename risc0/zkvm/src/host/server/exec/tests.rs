@@ -814,7 +814,7 @@ fn random() {
 }
 
 #[test]
-#[should_panic(expected = "Guest code attempted to call getrandom but it was disabled")]
+#[should_panic(expected = "WARNING: `getrandom()` called from guest.")]
 fn getrandom_panic() {
     let env = ExecutorEnv::builder().build().unwrap();
     let _session = ExecutorImpl::from_elf(env, RAND_ELF)
