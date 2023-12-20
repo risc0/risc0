@@ -87,6 +87,7 @@ pub enum MultiTestSpec {
     RsaCompat,
     SysLogInvalidAddr,
     TooManySha,
+    AlignedAlloc,
 }
 
 declare_syscall!(pub SYS_MULTI_TEST);
