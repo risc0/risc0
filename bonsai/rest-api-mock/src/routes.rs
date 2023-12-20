@@ -85,6 +85,7 @@ pub(crate) async fn create_session(
         image_id: request.img,
         input_id: request.input,
         session_id: session_id.to_string(),
+        assumptions: request.assumptions,
     };
     prover_handle.execute(task).await;
 
