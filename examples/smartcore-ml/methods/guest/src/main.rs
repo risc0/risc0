@@ -76,7 +76,7 @@ pub fn main() {
         env::commit(&y_hat);
     }
     // Logging the total cycle count is optional, though it's quite useful for benchmarking
-    // the various operations in the guest code. env::get_cycle_count() can be
+    // the various operations in the guest code. env::cycle_count() can be
     // called anywhere in the guest, multiple times. So if we are interested in
     // knowing how many cycles the inference computation takes, we can calculate
     // total cycles before and after model.predict() and the difference between
@@ -84,6 +84,6 @@ pub fn main() {
     // code.
     println!(
         "Total cycles for guest code execution: {}",
-        env::get_cycle_count()
+        env::cycle_count()
     );
 }

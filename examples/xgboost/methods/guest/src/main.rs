@@ -51,5 +51,5 @@ pub fn main() {
     env::commit(&answer);
 
     // If you want to obtain total cycle count to bechnmark performance, you can use the code below.
-    println!("cycles: {}", env::get_cycle_count());
+    println!("cycles: {}", env::cycle_count());
 }
