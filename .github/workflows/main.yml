@@ -175,6 +175,10 @@ jobs:
           name: cargo-timings-${{ matrix.os }}-${{ matrix.device }}
           path: target/cargo-timings/
           retention-days: 5
+      - name: test risc0-zkvm with ipc server
+        run: cargo test -p risc0-zkvm -F prove -- exec::tests
+        env:
+          RISC0_EXECUTOR: ipc
       - name: build risc0-r0vm
         run: cargo test -p risc0-r0vm -F $FEATURE -F disable-dev-mode --no-run
       - name: test risc0-r0vm

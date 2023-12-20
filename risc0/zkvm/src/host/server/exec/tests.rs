@@ -31,6 +31,7 @@ use sha2::{Digest as _, Sha256};
 use test_log::test;
 
 use crate::{
+    default_executor,
     host::server::{
         exec::{
             profiler::{Frame, Profiler},
@@ -49,11 +50,8 @@ fn run_test(spec: MultiTestSpec) {
         .unwrap()
         .build()
         .unwrap();
-    let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
-        .unwrap()
-        .run()
-        .unwrap();
-    assert_eq!(session.exit_code, ExitCode::Halted(0));
+    let session_info = default_executor().execute(env, MULTI_TEST_ELF).unwrap();
+    assert_eq!(session_info.exit_code, ExitCode::Halted(0));
 }
 
 #[test]
@@ -65,10 +63,7 @@ fn insufficient_segment_limit() {
         .unwrap()
         .build()
         .unwrap();
-    ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
-        .unwrap()
-        .run()
-        .unwrap();
+    default_executor().execute(env, MULTI_TEST_ELF).unwrap();
 }
 
 #[test]
@@ -88,6 +83,7 @@ fn basic() {
     let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
     let pre_image_id = image.compute_id().unwrap();
 
+    // NOTE: ExecutorImpl is used directly to access the pre and post images.
     let mut exec = ExecutorImpl::new(env, image).unwrap();
     let session = exec.run().unwrap();
     assert_eq!(session.exit_code, ExitCode::Halted(0));
@@ -123,6 +119,7 @@ fn system_split() {
     let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
     let pre_image_id = image.compute_id().unwrap();
 
+    // NOTE: ExecutorImpl is used directly to access the pre and post images.
     let mut exec = ExecutorImpl::new(env, image).unwrap();
     let session = exec.run().unwrap();
     assert_eq!(session.exit_code, ExitCode::Halted(0));
@@ -170,10 +167,7 @@ fn host_syscall() {
         })
         .build()
         .unwrap();
-    let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
-        .unwrap()
-        .run()
-        .unwrap();
+    let session = default_executor().execute(env, MULTI_TEST_ELF).unwrap();
     assert_eq!(session.exit_code, ExitCode::Halted(0));
     assert_eq!(*actual.lock().unwrap(), expected[..expected.len() - 1]);
 }
@@ -190,10 +184,7 @@ fn host_syscall_callback_panic() {
         })
         .build()
         .unwrap();
-    let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
-        .unwrap()
-        .run()
-        .unwrap();
+    let session = default_executor().execute(env, MULTI_TEST_ELF).unwrap();
     assert_eq!(session.exit_code, ExitCode::Halted(0));
 }
 
@@ -228,11 +219,10 @@ fn bigint_accel() {
             .unwrap()
             .build()
             .unwrap();
-        let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
-        let session = exec.run().unwrap();
-        assert_eq!(session.exit_code, ExitCode::Halted(0));
+        let session_info = default_executor().execute(env, MULTI_TEST_ELF).unwrap();
+        assert_eq!(session_info.exit_code, ExitCode::Halted(0));
         assert_eq!(
-            session.journal.unwrap().bytes.as_slice(),
+            session_info.journal.bytes.as_slice(),
             bytemuck::cast_slice::<u32, u8>(case.expected().as_slice())
         );
     }
@@ -251,10 +241,7 @@ fn env_stdio() {
             .stdout(&mut stdout)
             .build()
             .unwrap();
-        let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
-            .unwrap()
-            .run()
-            .unwrap();
+        let session = default_executor().execute(env, MULTI_TEST_ELF).unwrap();
         assert_eq!(session.exit_code, ExitCode::Halted(0));
     }
     assert_eq!(MSG, from_utf8(&stdout).unwrap());
@@ -299,11 +286,10 @@ fn posix_style_read() {
             .unwrap()
             .build()
             .unwrap();
-        let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
-        let session = exec.run().unwrap();
-        assert_eq!(session.exit_code, ExitCode::Halted(0));
+        let session_info = default_executor().execute(env, MULTI_TEST_ELF).unwrap();
+        assert_eq!(session_info.exit_code, ExitCode::Halted(0));
 
-        let actual: Vec<u8> = session.journal.unwrap().decode().unwrap();
+        let actual: Vec<u8> = session_info.journal.decode().unwrap();
         assert_eq!(
             from_utf8(&actual).unwrap(),
             from_utf8(&expected).unwrap(),
@@ -360,11 +346,10 @@ fn large_io_words() {
         .session_limit(Some(20_000_000))
         .build()
         .unwrap();
-    let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
-    let session = exec.run().unwrap();
-    assert_eq!(session.exit_code, ExitCode::Halted(0));
+    let session_info = default_executor().execute(env, MULTI_TEST_ELF).unwrap();
+    assert_eq!(session_info.exit_code, ExitCode::Halted(0));
 
-    let actual: &[u32] = bytemuck::cast_slice(&session.journal.as_ref().unwrap().bytes);
+    let actual: &[u32] = bytemuck::cast_slice(&session_info.journal.bytes);
     assert_eq!(actual, expected);
 }
 
@@ -382,10 +367,7 @@ fn large_io_bytes() {
             .stdout(&mut stdout)
             .build()
             .unwrap();
-        let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
-            .unwrap()
-            .run()
-            .unwrap();
+        let session = default_executor().execute(env, MULTI_TEST_ELF).unwrap();
         assert_eq!(session.exit_code, ExitCode::Halted(0));
     }
     let actual: &[u32] = bytemuck::cast_slice(&stdout);
@@ -399,11 +381,12 @@ mod sys_verify {
     use test_log::test;
 
     use crate::{
-        serde::to_vec, sha::Digestible, ExecutorEnv, ExecutorEnvBuilder, ExecutorImpl, ExitCode,
-        MaybePruned, ReceiptClaim, Session,
+        default_executor, serde::to_vec, sha::Digestible, ExecutorEnv, ExecutorEnvBuilder,
+        ExecutorImpl, ExitCode, MaybePruned, ReceiptClaim, Session,
     };
 
     fn exec_hello_commit() -> Session {
+        // NOTE: ExecutorImpl is used directly because SessionInfo does not contain ReceiptClaim.
         let session = ExecutorImpl::from_elf(ExecutorEnv::default(), HELLO_COMMIT_ELF)
             .unwrap()
             .run()
@@ -418,6 +401,7 @@ mod sys_verify {
             .unwrap()
             .build()
             .unwrap();
+        // NOTE: ExecutorImpl is used directly because SessionInfo does not contain ReceiptClaim.
         let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
             .unwrap()
             .run()
@@ -432,6 +416,7 @@ mod sys_verify {
             .unwrap()
             .build()
             .unwrap();
+        // NOTE: ExecutorImpl is used directly because SessionInfo does not contain ReceiptClaim.
         let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
             .unwrap()
             .run()
@@ -446,6 +431,7 @@ mod sys_verify {
             .unwrap()
             .build()
             .unwrap();
+        // NOTE: ExecutorImpl is used directly because SessionInfo does not contain ReceiptClaim.
         let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
             .unwrap()
             .run()
@@ -470,10 +456,7 @@ mod sys_verify {
             .add_assumption(hello_commit_session.get_claim().unwrap().into())
             .build()
             .unwrap();
-        let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
-            .unwrap()
-            .run()
-            .unwrap();
+        let session = default_executor().execute(env, MULTI_TEST_ELF).unwrap();
         assert_eq!(session.exit_code, ExitCode::Halted(0));
 
         // Test that it does not work when the assumption is not added.
@@ -482,10 +465,7 @@ mod sys_verify {
             .unwrap()
             .build()
             .unwrap();
-        assert!(ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
-            .unwrap()
-            .run()
-            .is_err());
+        assert!(default_executor().execute(env, MULTI_TEST_ELF).is_err());
     }
 
     #[test]
@@ -505,7 +485,7 @@ mod sys_verify {
                 .add_assumption(halt_session.get_claim().unwrap().into())
                 .build()
                 .unwrap();
-            let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap().run();
+            let session = default_executor().execute(env, MULTI_TEST_ELF);
 
             if code == 0 {
                 assert_eq!(session.unwrap().exit_code, ExitCode::Halted(0));
@@ -532,7 +512,7 @@ mod sys_verify {
                 .add_assumption(pause_session.get_claim().unwrap().into())
                 .build()
                 .unwrap();
-            let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap().run();
+            let session = default_executor().execute(env, MULTI_TEST_ELF);
 
             if code == 0 {
                 assert_eq!(session.unwrap().exit_code, ExitCode::Halted(0));
@@ -559,10 +539,7 @@ mod sys_verify {
             .add_assumption(fault_session.get_claim().unwrap().into())
             .build()
             .unwrap();
-        assert!(ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
-            .unwrap()
-            .run()
-            .is_err());
+        assert!(default_executor().execute(env, MULTI_TEST_ELF).is_err());
     }
 
     #[test]
@@ -580,10 +557,7 @@ mod sys_verify {
             .add_assumption(hello_commit_session.get_claim().unwrap().into())
             .build()
             .unwrap();
-        let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
-            .unwrap()
-            .run()
-            .unwrap();
+        let session = default_executor().execute(env, MULTI_TEST_ELF).unwrap();
         assert_eq!(session.exit_code, ExitCode::Halted(0));
 
         // Test that it does not work when the assumption is not added.
@@ -592,10 +566,7 @@ mod sys_verify {
             .unwrap()
             .build()
             .unwrap();
-        assert!(ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
-            .unwrap()
-            .run()
-            .is_err());
+        assert!(default_executor().execute(env, MULTI_TEST_ELF).is_err());
     }
 
     #[test]
@@ -614,10 +585,7 @@ mod sys_verify {
                 .add_assumption(halt_session.get_claim().unwrap().into())
                 .build()
                 .unwrap();
-            let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
-                .unwrap()
-                .run()
-                .unwrap();
+            let session = default_executor().execute(env, MULTI_TEST_ELF).unwrap();
             assert_eq!(session.exit_code, ExitCode::Halted(0));
         }
     }
@@ -638,10 +606,7 @@ mod sys_verify {
                 .add_assumption(pause_session.get_claim().unwrap().into())
                 .build()
                 .unwrap();
-            let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
-                .unwrap()
-                .run()
-                .unwrap();
+            let session = default_executor().execute(env, MULTI_TEST_ELF).unwrap();
             assert_eq!(session.exit_code, ExitCode::Halted(0));
         }
     }
@@ -662,10 +627,7 @@ mod sys_verify {
             .add_assumption(fault_session.get_claim().unwrap().into())
             .build()
             .unwrap();
-        let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
-            .unwrap()
-            .run()
-            .unwrap();
+        let session = default_executor().execute(env, MULTI_TEST_ELF).unwrap();
         assert_eq!(session.exit_code, ExitCode::Halted(0));
     }
 
@@ -690,10 +652,7 @@ mod sys_verify {
             .unwrap();
 
         // Result of execution should be a guest panic resulting from the pruned input.
-        assert!(ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
-            .unwrap()
-            .run()
-            .is_err());
+        assert!(default_executor().execute(env, MULTI_TEST_ELF).is_err());
     }
 }
 
@@ -706,9 +665,8 @@ fn large_sha() {
         .unwrap()
         .build()
         .unwrap();
-    let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
-    let session = exec.run().unwrap();
-    let actual = hex::encode(Digest::try_from(session.journal.unwrap().bytes).unwrap());
+    let session_info = default_executor().execute(env, MULTI_TEST_ELF).unwrap();
+    let actual = hex::encode(Digest::try_from(session_info.journal.bytes).unwrap());
     assert_eq!(expected, actual);
 }
 
@@ -732,10 +690,7 @@ fn std_stdio() {
             .stdout(&mut stdout)
             .build()
             .unwrap();
-        ExecutorImpl::from_elf(env, STANDARD_LIB_ELF)
-            .unwrap()
-            .run()
-            .unwrap();
+        default_executor().execute(env, STANDARD_LIB_ELF).unwrap();
     }
     assert_eq!(from_utf8(&stdout).unwrap(), expected_stdout());
     assert_eq!(from_utf8(&stderr).unwrap(), EXPECTED_STDERR);
@@ -757,9 +712,8 @@ ENV_VAR3",
         )
         .build()
         .unwrap();
-    let mut exec = ExecutorImpl::from_elf(env, STANDARD_LIB_ELF).unwrap();
-    let session = exec.run().unwrap();
-    let actual = &session.journal.as_ref().unwrap().bytes;
+    let session_info = default_executor().execute(env, STANDARD_LIB_ELF).unwrap();
+    let actual = &session_info.journal.bytes;
     assert_eq!(
         from_utf8(actual).unwrap(),
         r"ENV_VAR1=val1
@@ -787,9 +741,8 @@ fn args() {
             .args(&args_arr)
             .build()
             .unwrap();
-        let mut exec = ExecutorImpl::from_elf(env, STANDARD_LIB_ELF).unwrap();
-        let session = exec.run().unwrap();
-        let output: Vec<String> = session.journal.unwrap().decode().unwrap();
+        let session_info = default_executor().execute(env, STANDARD_LIB_ELF).unwrap();
+        let output: Vec<String> = session_info.journal.decode().unwrap();
         assert_eq!(
             output,
             args_arr
@@ -802,9 +755,8 @@ fn args() {
 
 #[test]
 fn commit_hello_world() {
-    ExecutorImpl::from_elf(ExecutorEnv::default(), HELLO_COMMIT_ELF)
-        .unwrap()
-        .run()
+    default_executor()
+        .execute(ExecutorEnv::default(), HELLO_COMMIT_ELF)
         .unwrap();
 }
 
@@ -817,10 +769,7 @@ fn random() {
 #[should_panic(expected = "WARNING: `getrandom()` called from guest.")]
 fn getrandom_panic() {
     let env = ExecutorEnv::builder().build().unwrap();
-    let _session = ExecutorImpl::from_elf(env, RAND_ELF)
-        .unwrap()
-        .run()
-        .unwrap();
+    let _session = default_executor().execute(env, RAND_ELF).unwrap();
 }
 
 #[test]
@@ -831,9 +780,8 @@ fn slice_io() {
             .write_slice(slice)
             .build()
             .unwrap();
-        let mut exec = ExecutorImpl::from_elf(env, SLICE_IO_ELF).unwrap();
-        let session = exec.run().unwrap();
-        assert_eq!(session.journal.unwrap().bytes, slice);
+        let session_info = default_executor().execute(env, SLICE_IO_ELF).unwrap();
+        assert_eq!(&session_info.journal.bytes, slice);
     };
 
     run(b"");
@@ -849,8 +797,7 @@ fn panic() {
         .unwrap()
         .build()
         .unwrap();
-    let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
-    let err = exec.run().err().unwrap();
+    let err = default_executor().execute(env, MULTI_TEST_ELF).unwrap_err();
     assert!(err.to_string().contains("MultiTestSpec::Panic invoked"));
 }
 
@@ -861,9 +808,8 @@ fn fault() {
         .unwrap()
         .build()
         .unwrap();
-    let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
-    let session = exec.run().unwrap();
-    assert_eq!(session.exit_code, ExitCode::Fault);
+    let session_info = default_executor().execute(env, MULTI_TEST_ELF).unwrap();
+    assert_eq!(session_info.exit_code, ExitCode::Fault);
 }
 
 #[test]
@@ -875,10 +821,7 @@ fn profiler() {
         .trace_callback(&mut profiler)
         .build()
         .unwrap();
-    ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
-        .unwrap()
-        .run()
-        .unwrap();
+    default_executor().execute(env, MULTI_TEST_ELF).unwrap();
 
     let profile = profiler.finalize();
 
@@ -960,8 +903,7 @@ fn oom() {
         .unwrap()
         .build()
         .unwrap();
-    let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
-    let err = exec.run().err().unwrap();
+    let err = default_executor().execute(env, MULTI_TEST_ELF).unwrap_err();
     assert!(err.to_string().contains("Out of memory"), "{err:?}");
 }
 
@@ -975,7 +917,7 @@ fn memory_access() {
             .unwrap()
             .build()
             .unwrap();
-        let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap().run()?;
+        let session = default_executor().execute(env, MULTI_TEST_ELF)?;
         Ok(session.exit_code)
     }
 
@@ -995,17 +937,13 @@ fn post_state_digest_randomization() {
     let post_state_digests: HashSet<Digest> = (0..ITERATIONS)
         .map(|_| {
             // Run the guest and extract the post state digest.
-            ExecutorImpl::from_elf(ExecutorEnv::default(), HELLO_COMMIT_ELF)
+            // NOTE: ExecutorImpl is used directly here so we can have access to the post-state.
+            let session = ExecutorImpl::from_elf(ExecutorEnv::default(), HELLO_COMMIT_ELF)
                 .unwrap()
                 .run()
-                .unwrap()
-                .segments
-                .last()
-                .unwrap()
-                .resolve()
-                .unwrap()
-                .post_state
-                .digest()
+                .unwrap();
+            let last_segment = session.segments.last().unwrap().resolve().unwrap();
+            last_segment.post_state.digest()
         })
         .collect();
     assert_eq!(post_state_digests.len(), ITERATIONS);
@@ -1030,6 +968,7 @@ fn post_state_digest_randomization() {
     let post_state_digests: HashSet<Digest> = (0..ITERATIONS)
         .map(|_| {
             // Run the guest and extract the post state digest.
+            // NOTE: ExecutorImpl is used directly here so we can manipulate the syscall table.
             let mut exec =
                 ExecutorImpl::from_elf(ExecutorEnv::default(), HELLO_COMMIT_ELF).unwrap();
             // Override the default randomness syscall using crate-internal API.
@@ -1071,7 +1010,7 @@ mod docker {
     use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF};
     use risc0_zkvm_platform::WORD_SIZE;
 
-    use crate::{ExecutorEnv, ExecutorImpl, Session, TraceEvent};
+    use crate::{ExecutorEnv, Session, TraceEvent};
 
     #[test]
     fn trace() {
@@ -1083,10 +1022,7 @@ mod docker {
                 .trace_callback(|event| Ok(events.push(event)))
                 .build()
                 .unwrap();
-            ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
-                .unwrap()
-                .run()
-                .unwrap();
+            default_executor().execute(env, MULTI_TEST_ELF).unwrap();
         }
         let occurrences = events
             .windows(4)
@@ -1157,16 +1093,16 @@ mod docker {
                 .session_limit(Some(session_cycles))
                 .build()
                 .unwrap();
-            ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap().run()
+            default_executor().execute(env, MULTI_TEST_ELF)
         }
 
         // This test should always fail if the last parameter is zero
-        let err = run_session(0, 16, 0).err().unwrap();
+        let err = run_session(0, 16, 0).unwrap_err();
         assert!(err.to_string().contains("Session limit exceeded"));
 
         assert!(run_session(0, 16, 2).is_ok());
 
-        let err = run_session(1 << 16, 16, 1).err().unwrap();
+        let err = run_session(1 << 16, 16, 1).unwrap_err();
         assert!(err.to_string().contains("Session limit exceeded"));
 
         // this should contain exactly 2 segments
@@ -1175,7 +1111,7 @@ mod docker {
         // make sure that it's ok to run with a limit that's higher the actual count
         assert!(run_session(1 << 16, 16, 10).is_ok());
 
-        let err = run_session(1 << 16, 15, 3).err().unwrap();
+        let err = run_session(1 << 16, 15, 3).unwrap_err();
         assert!(err.to_string().contains("Session limit exceeded"));
 
         assert!(run_session(1 << 16, 15, 16).is_ok());
