@@ -171,3 +171,14 @@ pub(crate) async fn get_receipt(
         .ok_or_else(|| anyhow::anyhow!("Receipt not found for session id: {:?}", &session_id))?;
     Ok(receipt)
 }
+
+pub(crate) async fn get_receipt_upload(
+    State(s): State<AppState>,
+) -> Result<Json<UploadRes>, Error> {
+    let state = &s.read()?;
+    let receipt_id = uuid::Uuid::new_v4();
+    Ok(Json(UploadRes {
+        url: format!("{}/receipts/{}", state.local_url, receipt_id),
+        uuid: receipt_id.to_string(),
+    }))
+}
