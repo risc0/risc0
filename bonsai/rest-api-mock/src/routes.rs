@@ -182,3 +182,12 @@ pub(crate) async fn get_receipt_upload(
         uuid: receipt_id.to_string(),
     }))
 }
+
+pub(crate) async fn put_receipt(
+    State(s): State<AppState>,
+    Path(receipt_id): Path<String>,
+    body: Bytes,
+) -> Result<(), Error> {
+    s.write()?.put_receipt(receipt_id.clone(), body.to_vec());
+    Ok(())
+}
