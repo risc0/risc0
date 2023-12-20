@@ -32,11 +32,11 @@ fn bench<T>(name: &str, func: impl Fn() -> T) {
     // order to exclude paged-in operations from the benchmark count.
     black_box(func());
 
-    let start = env::get_cycle_count();
+    let start = env::cycle_count();
 
     black_box(func());
 
-    let end = env::get_cycle_count();
+    let end = env::cycle_count();
     println!("{}: {} cycles", name, end - start)
 }
 
