@@ -35,7 +35,7 @@ Then, the prover computes and commits the _Extended Auxiliary Execution Trace_ w
 
 Compared to [ethSTARK], our protocol adds an additional round of interaction to support constraints beyond basic AIR constraints.
 Using constraints that may span both the main trace and the auxiliary trace, we proceed with [DEEP-ALI & FRI] as described in [ethSTARK].
-Ading an Auxiliary Execution Trace enables various enhancements, relative to a Vanilla STARK protocol.
+Adding an Auxiliary Execution Trace enables various enhancements, relative to a Vanilla STARK protocol.
 These enhancements are described well in [From AIRs to RAPs].
 
 We use this Auxiliary Execution Trace to support:
@@ -43,7 +43,7 @@ We use this Auxiliary Execution Trace to support:
 1. A permutation argument for [memory verification](https://www.youtube.com/watch?v=dYuEPvRLwLo&list=PLcPzhUaCxlCiLk_VjLUNbmfb2mB1Y_N9N&index=5)<br/>
    The permutation argument is currently implemented as a grand product accumulator argument, as in [PLONK](https://eprint.iacr.org/2019/953.pdf).
    We plan to change this to a [log derivative] accumulator argument in the next version of the circuit.<br/>
-   Here, operations corresonding to memory are committed to the main trace both in the original ordering and the permuted ordering, and grand product accumulators are committed in the auxiliary trace.
+   Here, operations corresponding to memory are committed to the main trace both in the original ordering and the permuted ordering, and grand product accumulators are committed in the auxiliary trace.
 
 1. A lookup argument for range checks<br/>
    The lookup argument is currently implemented using the approach described in [PLOOKUP].
