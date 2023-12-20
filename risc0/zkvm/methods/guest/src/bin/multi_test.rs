@@ -32,7 +32,7 @@ use risc0_zkvm::{
 use risc0_zkvm_methods::multi_test::{MultiTestSpec, SYS_MULTI_TEST};
 use risc0_zkvm_platform::{
     fileno,
-    memory::{self, SYSTEM},
+    memory::{self, SYSTEM}, PAGE_SIZE,
     syscall::{bigint, sys_bigint, sys_log, sys_read, sys_read_words, sys_write},
 };
 
@@ -60,13 +60,13 @@ pub fn main() {
             // see when it's a custom circuit.
             let a: &Digest = &Digest::from([1, 2, 3, 4, 5, 6, 7, 8]);
 
-            let count1 = env::get_cycle_count();
+            let count1 = env::cycle_count();
             memory_barrier(&count1);
-            let count2 = env::get_cycle_count();
+            let count2 = env::cycle_count();
             memory_barrier(&count2);
             let result = sha::Impl::hash_pair(a, a);
             memory_barrier(&result);
-            let count3 = env::get_cycle_count();
+            let count3 = env::cycle_count();
             memory_barrier(&count3);
 
             let overhead = count2 - count1;
@@ -197,14 +197,14 @@ pub fn main() {
             env::commit_slice(&buf);
         }
         MultiTestSpec::BusyLoop { cycles } => {
-            let mut last_cycles = env::get_cycle_count();
+            let mut last_cycles = env::cycle_count();
 
             // Count all the cycles that have happened so far before we got to this point.
             env::log("Busy loop starting!");
             let mut tot_cycles = last_cycles;
 
             while tot_cycles < cycles as usize {
-                let now_cycles = env::get_cycle_count();
+                let now_cycles = env::cycle_count();
                 if now_cycles <= last_cycles {
                     // Cycle count may have reset or wrapped around.
                     // Since we don't know which, just start counting
@@ -266,6 +266,20 @@ pub fn main() {
         MultiTestSpec::SysLogInvalidAddr => unsafe {
             let addr: *const u8 = SYSTEM.start() as _;
             sys_log(addr, 100);
+        },
+        MultiTestSpec::AlignedAlloc => {
+            #[repr(align(1024))]
+            struct AlignTest1 { pub _test: u32 }
+
+            impl AlignTest1 {
+                pub fn new(_test: u32) -> Self {
+                    AlignTest1{_test}
+                }
+            }
+
+            let a = &AlignTest1::new(54) as *const _;
+            let b = &AlignTest1::new(60) as *const _;
+            assert_eq!(PAGE_SIZE, b as usize - a as usize);
         },
     }
 }
