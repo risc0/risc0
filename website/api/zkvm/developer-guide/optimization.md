@@ -53,7 +53,7 @@ This is generally referred to as [Amdahl’s Law](https://en.wikipedia.org/wiki/
 
 Starting simple, measure by adding an `eprintln!` line to your guest code to measure how long an operation takes, and how many times it is called.
 
-Using [`env::get_cycle_count()`] will tell you the current number of execution cycles that have occurred in your program.
+Using [`env::cycle_count()`] will tell you the current number of execution cycles that have occurred in your program.
 
 As an example:
 
@@ -62,12 +62,12 @@ As an example:
 ```rust no_run title="methods/guest/src/main.rs"
 # use risc0_zkvm::guest::env;
 fn my_operation_to_measure() {
-  let start = env::get_cycle_count();
+  let start = env::cycle_count();
 
   // potentially expensive or frequently called code
   // ...
 
-  let end = env::get_cycle_count();
+  let end = env::cycle_count();
   eprintln!("my_operation_to_measure: {}", end - start);
 }
 ```
@@ -75,7 +75,7 @@ fn my_operation_to_measure() {
 When you run your guest, you’ll see a printout of the cycle count each time that function is called.
 You can then analyze this data easily with a tool like [`counts`].
 
-[`env::get_cycle_count()`]: https://docs.rs/risc0-zkvm/0.19/risc0_zkvm/guest/env/fn.get_cycle_count.html
+[`env::cycle_count()`]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest/env/fn.cycle_count.html
 [`counts`]: https://github.com/nnethercote/counts/
 
 ### Profiling
@@ -115,7 +115,7 @@ Documentation for `pprof`: [github.com/google/pprof](https://github.com/google/p
 [perf]: https://perf.wiki.kernel.org/index.php/Main_Page
 [Sampling CPU profilers]: https://nikhilism.com/post/2018/sampling-profiler-internals-introduction/
 [flamegraph]: https://www.brendangregg.com/FlameGraphs/cpuflamegraphs.html
-[ECDSA verification example]: https://github.com/risc0/risc0/tree/v0.19.0/examples/ecdsa
+[ECDSA verification example]: https://github.com/risc0/risc0/tree/main/examples/ecdsa
 [installing Go]: https://go.dev/doc/install
 
 ## Key Differences
@@ -278,10 +278,10 @@ let env = ExecutorEnv::builder()
 ```
 
 [`env::read`]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/guest/env/fn.read.html
-[snippet from the password checker example]: https://github.com/risc0/risc0/blob/v0.19.0/examples/password-checker/methods/guest/src/main.rs#L24
-[`env::read_slice`]: https://docs.rs/risc0-zkvm/0.19/risc0_zkvm/guest/env/fn.read_slice.html
+[snippet from the password checker example]: https://github.com/risc0/risc0/blob/main/examples/password-checker/methods/guest/src/main.rs#L24
+[`env::read_slice`]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest/env/fn.read_slice.html
 [CBOR]: https://cbor.io/
-[snippet from the Bonsai Governance example]: https://github.com/risc0/risc0/blob/v0.19.0/bonsai/examples/governance/methods/guest/src/bin/finalize_votes.rs#L88-L90
+[snippet from the Bonsai Governance example]: https://github.com/risc0/risc0/blob/main/bonsai/examples/governance/methods/guest/src/bin/finalize_votes.rs#L88-L90
 
 ### When you only need part of the input data, try Merklizing it
 
@@ -294,7 +294,7 @@ The guest verifies that the chunk is indeed part of the image by verifying the M
 If you are writing a guest with a large input, and only part of it is needed for the computation, consider splitting it into some notion of a chunks and building it as a Merkle tree.
 You can use the [code for Where’s Waldo] as a starting point.
 
-[Where’s Waldo]: https://github.com/risc0/risc0/tree/v0.19.0/examples/waldo
+[Where’s Waldo]: https://github.com/risc0/risc0/tree/main/examples/waldo
 [code for Where’s Waldo]: https://github.com/risc0/risc0/blob/main/examples/waldo/core/src/merkle.rs
 
 ### Cryptography in the guest can utilize accelerator circuits
@@ -447,7 +447,7 @@ A short description and associated cycle counts are listed below.
     In zkVM execution, executions are generally short and all execution is synchronous and is not subject to any deviations in behavior due to measurement overhead.
 <!-- prettier-ignore-end -->
 
-[^3]: An implementation of cycle-accounting for paging operations is implemented in the [Executor](https://github.com/risc0/risc0/blob/v0.19.0/risc0/zkvm/src/host/server/exec/monitor.rs#L30-L39). (Link is to v0.19.0)
+[^3]: An implementation of cycle-accounting for paging operations is implemented in the [Executor](https://github.com/risc0/risc0/blob/main/risc0/zkvm/src/host/server/exec/monitor.rs#L30-L39).
 [^4]:
     This is similar to the cryptography support such as [AES-NI](https://en.wikipedia.org/wiki/AES_instruction_set#x86_architecture_processors) or the [SHA extensions](https://en.wikipedia.org/wiki/Intel_SHA_extensions) for x86 processors.
     In both cases, the circuitry is extended to compute otherwise expensive operations in fewer instruction cycles.
