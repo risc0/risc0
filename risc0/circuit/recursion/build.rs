@@ -45,7 +45,7 @@ fn download_zkr() {
 
     const FILENAME: &str = "recursion_zkr.zip";
     const SRC_PATH: &str = "src/recursion_zkr.zip";
-    const SHA256_HASH: &str = "af7843e15818ef2ebd04fb455caeb42aaa3b70582f519a040adb870318797990";
+    const SHA256_HASH: &str = "3eaa695b8b7be395da9750b9bdf71aa5d7c2ce4656cb44ef68b839469a3c63d9";
 
     let src_path = env::var("RECURSION_SRC_PATH").unwrap_or(SRC_PATH.to_string());
     let src_path = PathBuf::from_str(src_path.as_str()).unwrap();
