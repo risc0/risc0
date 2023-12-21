@@ -155,7 +155,7 @@ jobs:
       - uses: ./.github/actions/sccache
         with:
           key: ${{ matrix.os }}-${{ matrix.feature }}
-      - run: cargo build -p cargo-risczero -p risc0-r0vm -F $FEATURE
+      - run: cargo build -p risc0-r0vm -F $FEATURE
       - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
       - name: build workspace
         run: |
