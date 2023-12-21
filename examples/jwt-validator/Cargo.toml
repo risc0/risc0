@@ -1,0 +1,17 @@
+[package]
+name = "jwt-validator"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+jwt-core = { path = "core" }
+jwt-methods = { path = "methods" }
+risc0-zkvm = { path = "../../risc0/zkvm" }
+
+[features]
+cuda = ["risc0-zkvm/cuda"]
+default = []
+metal = ["risc0-zkvm/metal"]
+prove = ["risc0-zkvm/prove"]
+
+
