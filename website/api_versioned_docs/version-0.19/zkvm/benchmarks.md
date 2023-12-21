@@ -46,7 +46,7 @@ cargo bench --bench fib
 ```
 
 This will compute the 100th, 1000th, and 10000th Fibonacci numbers modulo 2^64 (ten times for each).
-It will report both time and throughput (how many numbers were added per second) with separate statisics for [execution] and [proving].
+It will report both time and throughput (how many numbers were added per second) with separate statistics for [execution] and [proving].
 As with the loop benchmark, the Fibonacci benchmark will use the CPU by default, and you can benchmark a CUDA or Metal GPU by setting the appropriate feature flag.
 
 [cycle count]: /terminology#clock-cycles
