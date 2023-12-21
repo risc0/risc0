@@ -1,0 +1,10 @@
+[package]
+name = "validator"
+version = "0.1.0"
+edition = "2021"
+
+[workspace]
+
+[dependencies]
+jwt-core = { path = "../../core/" }
+risc0-zkvm = { path = "../../../../risc0/zkvm", default-features = false, features = ["std"] }
