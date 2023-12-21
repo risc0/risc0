@@ -179,6 +179,7 @@ jobs:
         run: cargo test -p risc0-zkvm -F prove -- exec::tests
         env:
           RISC0_EXECUTOR: ipc
+          RISC0_SERVER_PATH: target/release/r0vm
       - name: build risc0-r0vm
         run: cargo test -p risc0-r0vm -F $FEATURE -F disable-dev-mode --no-run
       - name: test risc0-r0vm
