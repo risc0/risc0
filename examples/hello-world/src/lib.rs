@@ -12,7 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#[doc = include_str!("../README.md")]
+#![doc = include_str!("../README.md")]
+
 use hello_world_methods::MULTIPLY_ELF;
 use risc0_zkvm::{default_prover, ExecutorEnv, Receipt};
 

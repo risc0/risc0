@@ -113,7 +113,8 @@ pub fn syscall(syscall: SyscallName, to_host: &[u8], from_host: &mut [u32]) -> s
 /// In order to be valid, the [crate::Receipt] must have `ExitCode::Halted(0)` or
 /// `ExitCode::Paused(0)`, an empty assumptions list, and an all-zeroes input hash. It may have any
 /// post [crate::SystemState].
-pub fn verify(image_id: Digest, journal: &[u8]) -> Result<(), VerifyError> {
+pub fn verify(image_id: impl Into<Digest>, journal: &[u8]) -> Result<(), VerifyError> {
+    let image_id: Digest = image_id.into();
     let journal_digest: Digest = journal.digest();
     let mut from_host_buf = MaybeUninit::<[u32; DIGEST_WORDS + 1]>::uninit();
 
