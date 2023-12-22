@@ -58,7 +58,7 @@ pub fn prove_alpha(elf: &[u8], input: Vec<u8>) -> Result<Output> {
         .context("Failed to upload input data")?;
 
     let session = client
-        .create_session(img_id, input_id)
+        .create_session(img_id, input_id, vec![])
         .context("Failed to create remote proving session")?;
 
     // Poll and await the result of the STARK rollup proving session.
