@@ -1,72 +1,45 @@
 # Composition Example
-<!-- TODO(victor): Fill in this docs -->
 
-Welcome!
+This example demonstrates a basic usage of composition feature.
+It builds upon the [hello world example](../hello-world), where the [guest program] verified the prover knows a factorization of a composite number.
 
-This `hello-world` demo is a minimal application for the RISC Zero [zkVM], designed to help you get started building zkVM applications.
-
-For a step-by-step guide to building your first zkVM application, we recommend [this tutorial].
+See the [`src/main.rs`] file for the [host] side implementation of composition, and [`methods/guest/src/main.rs`] for the guest side.
 
 ## Quick Start
 
 First, follow the [installation guide] if you don't already have the RISC Zero tools installed.
 
 Then, run the example with:
+
 ```bash
 cargo run --release
 ```
-
-Congratulations! You just constructed a zero-knowledge proof that you know the factors of 391.
 
 [installation guide]: https://dev.risczero.com/api/zkvm/quickstart
 
 ## Use Cases
 
-Writing an application for the RISC Zero [zkVM] is the easiest way for software developers to produce zero-knowledge proofs.
-Whether or not you're [building for blockchains], RISC Zero offers the most flexible and mature ecosystem for developing applications that involve ZKPs.
+Composition is a feature of the zkVM supporting verification of RISC Zero [receipts] in a guest program.
+With this, multiply zkVM programs can be _composed_ and produce a single receipt that verifies all computation done to reach the final result.
 
-You can run the zkVM locally and your secrets will never leave your own machine, or you can upload your program & inputs to [Bonsai] for remote proving.
+Composition is supported through the [`env::verify`] method in the [guest program].
+The result of an earlier proof can be used as input to this method, allowing the verified results of another guest to be used in a new computation.
 
-## Project Organization
-zkVM applications are organized into a [host program] and a [guest program].
-The host program can be found in [`src/main.rs`](src/main.rs) and the guest program can be found in [`methods/guest/src/main.rs`](methods/guest/src/main.rs).
+### Examples
 
-The [host] first [executes] the guest program and then [proves the execution] to construct a [receipt].
-The receipt can be passed to a third party, who can examine the [journal] to check the program's outputs and can [verify] the [receipt] to ensure the integrity of the [guest program]'s execution.
+Some use cases for composition include:
+
+* Splitting a program into multiple parts, proven by different parties, to preserve privacy and data ownership of each party.
+  * E.g. Produce a proof for a database query by joining receipts from the query over each privately held shard.
+* Aggregating many proofs into one for efficeint batch verification.
+  * E.g. Produce a proof for a block of transactions, where each trasaction is itself verified by a proof.
+* Creating a single receipt for a workflow that make be split into many different operations.
+  * E.g. Produce a single receipt for the result of an image processing pipeline, where different filters are in their own guests.
+
+[`env::verify`]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest/env/fn.verify.html
 
 [`src/main.rs`]: /src/main.rs
 [`methods/guest/src/main.rs`]: methods/guest/src/main.rs
 [host]: https://dev.risczero.com/terminology#host
-[executes]: https://dev.risczero.com/terminology#execute
 [guest program]: https://dev.risczero.com/terminology#guest-program
-[host program]: https://dev.risczero.com/terminology#host-program
-[proves the execution]: https://dev.risczero.com/terminology#prove
-[receipt]: https://dev.risczero.com/terminology#receipt
-[verify]: https://dev.risczero.com/terminology#verify
-[journal]: https://dev.risczero.com/terminology#journal
-
-### What gets proven?
-The [receipt] proves that the [guest program] was executed correctly, and that the contents of `receipt.journal` match what was written by `env::commit()` during the execution of the guest program.
-
-By running the demo, Alice demonstrates that she knows two integers that multiply to give the number written in `receipt.journal`.
-Thus, Alice proves that the number written in `receipt.journal` is composite — and that she knows the factors — without revealing any further information.
-
-[receipt]: https://dev.risczero.com/terminology#receipt
-[journal]: https://dev.risczero.com/terminology#journal
-[guest program]: https://dev.risczero.com/terminology#guest-program
-[zkVM]: https://dev.risczero.com/zkvm
-[building for blockchains]: https://twitter.com/RiscZero/status/1677316664772132864
-[application]: https://dev.risczero.com/zkvm/developer-guide/zkvm-app-structure
-[Bonsai]: https://dev.bonsai.xyz
-
-## Tutorial: Building your first zkVM Application
-For a step-by-step guide to building first zkVM application, we recommend [this tutorial]. For more materials, check out the [developer docs].
-
-[RISC Zero]: https://risczero.com
-[this tutorial]: https://github.com/risc0/risc0/tree/main/examples/hello-world/tutorial.md
-[developer docs]: https://dev.risczero.com/zkvm
-
-
-
-
-
+[receipts]: https://dev.risczero.com/terminology#receipt
