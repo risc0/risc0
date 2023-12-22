@@ -138,6 +138,14 @@ message ExecutorEnv {
   // When present, trace events will be sent back to the client.
   google.protobuf.Empty trace_events = 9;
   string pprof_out = 10;
+  repeated Assumption assumptions = 11;
+}
+
+message Assumption {
+  oneof kind {
+    Asset proven = 1; // Receipt
+    Asset unresolved = 2; // MaybePruned<ReceiptClaim>
+  }
 }
 
 message ProverOpts {
