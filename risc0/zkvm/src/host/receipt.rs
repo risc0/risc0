@@ -353,7 +353,7 @@ impl InnerReceipt {
         match self {
             InnerReceipt::Composite(ref receipt) => receipt.get_claim(),
             InnerReceipt::Groth16(ref groth16_receipt) => Ok(groth16_receipt.claim.clone()),
-            InnerReceipt::Succinct(ref succinct_recipt) => Ok(succinct_recipt.claim.clone()),
+            InnerReceipt::Succinct(ref succinct_receipt) => Ok(succinct_receipt.claim.clone()),
             InnerReceipt::Fake { claim } => Ok(claim.clone()),
         }
     }
