@@ -256,6 +256,7 @@ impl Server {
             }
             pb::api::server_request::Kind::Lift(request) => self.on_lift(conn, request),
             pb::api::server_request::Kind::Join(request) => self.on_join(conn, request),
+            pb::api::server_request::Kind::Resolve(request) => self.on_resolve(conn, request),
             pb::api::server_request::Kind::IdentiyP254(request) => {
                 self.on_identity_p254(conn, request)
             }
@@ -490,6 +491,57 @@ impl Server {
 
         let msg = inner(request).unwrap_or_else(|err| pb::api::JoinReply {
             kind: Some(pb::api::join_reply::Kind::Error(pb::api::GenericError {
+                reason: err.to_string(),
+            })),
+        });
+
+        tracing::debug!("tx: {msg:?}");
+        conn.send(msg)
+    }
+
+    fn on_resolve(
+        &self,
+        mut conn: ConnectionWrapper,
+        request: pb::api::ResolveRequest,
+    ) -> Result<()> {
+        fn inner(request: pb::api::ResolveRequest) -> Result<pb::api::ResolveReply> {
+            let opts: ProverOpts = request.opts.ok_or(malformed_err())?.into();
+            let conditional_receipt_bytes = request
+                .conditional_receipt
+                .ok_or(malformed_err())?
+                .as_bytes()?;
+            let conditional_succinct_receipt: SuccinctReceipt =
+                bincode::deserialize(&conditional_receipt_bytes)?;
+            let corroborating_receipt_bytes = request
+                .corroborating_receipt
+                .ok_or(malformed_err())?
+                .as_bytes()?;
+            let corroborating_succinct_receipt: SuccinctReceipt =
+                bincode::deserialize(&corroborating_receipt_bytes)?;
+
+            let prover = get_prover_server(&opts)?;
+            let receipt = prover.resolve(
+                &conditional_succinct_receipt,
+                &corroborating_succinct_receipt,
+            )?;
+
+            let succinct_receipt_pb: pb::core::SuccinctReceipt = receipt.into();
+            let succinct_receipt_bytes = succinct_receipt_pb.encode_to_vec();
+            let asset = pb::api::Asset::from_bytes(
+                &request.receipt_out.ok_or(malformed_err())?,
+                succinct_receipt_bytes.into(),
+                "receipt.zkp",
+            )?;
+
+            Ok(pb::api::ResolveReply {
+                kind: Some(pb::api::resolve_reply::Kind::Ok(pb::api::ResolveResult {
+                    receipt: Some(asset),
+                })),
+            })
+        }
+
+        let msg = inner(request).unwrap_or_else(|err| pb::api::ResolveReply {
+            kind: Some(pb::api::resolve_reply::Kind::Error(pb::api::GenericError {
                 reason: err.to_string(),
             })),
         });
