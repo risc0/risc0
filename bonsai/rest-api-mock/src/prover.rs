@@ -30,6 +30,7 @@ pub(crate) struct Task {
     pub session_id: String,
     pub image_id: String,
     pub input_id: String,
+    pub assumptions: Vec<String>,
 }
 
 #[derive(Debug)]
@@ -82,9 +83,19 @@ impl Prover {
                 tracing::info!("Running task...");
                 let image = self.get_image(task).await?;
                 let input = self.get_input(task).await?;
+                let receipts = self.get_receipts(task).await?;
                 let elf = image.as_slice();
 
-                let env = ExecutorEnv::builder()
+                let mut env = ExecutorEnv::builder();
+                for receipt in receipts {
+                    if receipt.len() < 1 {
+                        continue;
+                    }
+                    let deserialized_receipt: Receipt = bincode::deserialize(&receipt)?;
+                    env.add_assumption(deserialized_receipt.into());
+                }
+
+                let env = env
                     .write_slice(&input)
                     .session_limit(None)
                     .segment_limit_po2(20)
@@ -155,5 +166,20 @@ impl Prover {
             .read()?
             .get_input(&task.input_id)
             .ok_or_else(|| anyhow::anyhow!("Failed to get input for ID: {:?}", task.input_id))?)
+    }
+
+    async fn get_receipts(&self, task: &Task) -> Result<Vec<Vec<u8>>, Error> {
+        let mut assumptions: Vec<Vec<u8>> = vec![];
+        for receipt_id in &task.assumptions {
+            let receipt = self
+                .storage
+                .read()?
+                .get_receipt(receipt_id)
+                .ok_or_else(|| {
+                    anyhow::anyhow!("Failed to get input for ID: {:?}", task.input_id)
+                })?;
+            assumptions.push(receipt);
+        }
+        Ok(assumptions)
     }
 }
