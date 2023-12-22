@@ -22,7 +22,7 @@ use risc0_zkvm::guest::{env, env::Read};
 
 risc0_zkvm::entry!(main);
 
-pub fn main() {
+fn main() {
     let mut len: u32 = 0;
     env::stdin().read_slice(core::slice::from_mut(&mut len));
     let mut slice = vec![0u8; len as usize];

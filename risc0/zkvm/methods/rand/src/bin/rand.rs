@@ -23,7 +23,7 @@ use getrandom::getrandom;
 
 risc0_zkvm::entry!(main);
 
-pub fn main() {
+fn main() {
     // This should panic
     let rand_buf = &mut vec![0u8; 8];
     let _res = getrandom(rand_buf);

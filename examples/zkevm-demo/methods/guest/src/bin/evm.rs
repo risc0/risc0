@@ -12,15 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#![no_main]
-#![allow(unused_imports)]
-
 use risc0_zkvm::guest::env;
 use zkevm_core::{Env, EvmResult, ExecutionResult, ZkDb, EVM};
 
-risc0_zkvm::guest::entry!(main);
-
-pub fn main() {
+fn main() {
     let env: Env = env::read();
     let db: ZkDb = env::read();
 

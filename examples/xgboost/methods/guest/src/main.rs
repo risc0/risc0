@@ -12,12 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#![no_main]
 use forust_ml::{GradientBooster, Matrix};
 use risc0_zkvm::guest::env;
 use rmp_serde;
-
-risc0_zkvm::guest::entry!(main);
 
 pub fn main() {
     // read the input data

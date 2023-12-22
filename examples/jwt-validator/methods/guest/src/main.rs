@@ -12,12 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#![no_main]
-
 use jwt_core::Validator;
 use risc0_zkvm::guest::env;
-
-risc0_zkvm::guest::entry!(main);
 
 static PUBLIC_KEY: &str = r#"
     {
