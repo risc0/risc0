@@ -155,7 +155,6 @@ jobs:
       - uses: ./.github/actions/sccache
         with:
           key: ${{ matrix.os }}-${{ matrix.feature }}
-      - run: cargo build -p risc0-r0vm -F $FEATURE
       - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
       - name: build workspace
         run: |
@@ -176,12 +175,6 @@ jobs:
           name: cargo-timings-${{ matrix.os }}-${{ matrix.device }}
           path: target/cargo-timings/
           retention-days: 5
-      - name: test risc0-zkvm with ipc server
-        # NOTE: Use all the same features as above to try to avoid rebuilding.
-        run: cargo test -p risc0-zkvm -F $FEATURE -F fault-proof -F prove -- exec::tests
-        env:
-          RISC0_EXECUTOR: ipc
-          RISC0_SERVER_PATH: ${{ github.workspace }}/target/debug/r0vm
       - name: build risc0-r0vm
         run: cargo test -p risc0-r0vm -F $FEATURE -F disable-dev-mode --no-run
       - name: test risc0-r0vm
