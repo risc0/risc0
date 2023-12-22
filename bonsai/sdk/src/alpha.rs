@@ -80,6 +80,8 @@ pub mod responses {
         pub img: String,
         /// Input UUID
         pub input: String,
+        /// List of receipt UUIDs
+        pub assumptions: Vec<String>,
     }
 
     /// Session Status response
@@ -436,18 +438,43 @@ impl Client {
         Ok(upload_data.uuid)
     }
 
+    // - /receipts
+
+    /// Upload a receipt buffer to the /receipts/ route
+    pub fn upload_receipt(&self, buf: Vec<u8>) -> Result<String, SdkErr> {
+        let upload_data = self.get_upload_url("receipts")?;
+        self.put_data(&upload_data.url, buf)?;
+        Ok(upload_data.uuid)
+    }
+
+    /// Upload a receipt file to the /receipts/ route
+    pub fn upload_receipt_file(&self, path: &Path) -> Result<String, SdkErr> {
+        let upload_data = self.get_upload_url("receipts")?;
+
+        let fd = File::open(path)?;
+        self.put_data(&upload_data.url, fd)?;
+
+        Ok(upload_data.uuid)
+    }
+
     // - /sessions
 
     /// Create a new proof request Session
     ///
     /// Supply the image_id and input_id created from uploading those files in
     /// previous steps
-    pub fn create_session(&self, img_id: String, input_id: String) -> Result<SessionId, SdkErr> {
+    pub fn create_session(
+        &self,
+        img_id: String,
+        input_id: String,
+        assumptions: Vec<String>,
+    ) -> Result<SessionId, SdkErr> {
         let url = format!("{}/sessions/create", self.url);
 
         let req = ProofReq {
             img: img_id,
             input: input_id,
+            assumptions,
         };
 
         let res = self.client.post(url).json(&req).send()?;
@@ -678,12 +705,54 @@ mod tests {
     }
 
     #[test]
+    fn receipt_upload() {
+        let data = vec![];
+
+        let server = MockServer::start();
+
+        let receipt_uuid = Uuid::new_v4();
+        let put_url = format!("http://{}/upload/{}", server.address(), receipt_uuid);
+        let response = UploadRes {
+            url: put_url,
+            uuid: receipt_uuid.to_string(),
+        };
+
+        let get_mock = server.mock(|when, then| {
+            when.method(GET)
+                .path("/receipts/upload")
+                .header(API_KEY_HEADER, TEST_KEY)
+                .header(VERSION_HEADER, TEST_VERSION);
+            then.status(200)
+                .header("content-type", "application/json")
+                .json_body_obj(&response);
+        });
+
+        let put_mock = server.mock(|when, then| {
+            when.method(PUT).path(format!("/upload/{}", receipt_uuid));
+            then.status(200);
+        });
+
+        let server_url = format!("http://{}", server.address());
+        let client = super::Client::from_parts(server_url, TEST_KEY.to_string(), TEST_VERSION)
+            .expect("Failed to construct client");
+        let res = client
+            .upload_receipt(data)
+            .expect("Failed to upload receipt");
+
+        assert_eq!(res, response.uuid);
+
+        get_mock.assert();
+        put_mock.assert();
+    }
+
+    #[test]
     fn session_create() {
         let server = MockServer::start();
 
         let request = ProofReq {
             img: TEST_ID.to_string(),
             input: Uuid::new_v4().to_string(),
+            assumptions: vec![],
         };
         let response = CreateSessRes {
             uuid: Uuid::new_v4().to_string(),
@@ -705,7 +774,9 @@ mod tests {
         let client =
             super::Client::from_parts(server_url, TEST_KEY.to_string(), TEST_VERSION).unwrap();
 
-        let res = client.create_session(request.img, request.input).unwrap();
+        let res = client
+            .create_session(request.img, request.input, request.assumptions)
+            .unwrap();
         assert_eq!(res.uuid, response.uuid);
 
         create_mock.assert();
