@@ -353,12 +353,12 @@ impl MemoryMonitor {
         self.store_u32(addr, data)
     }
 
-    pub fn store_region(&mut self, addr: u32, slice: &[u8]) -> Result<()> {
+    fn store_region(&mut self, addr: u32, slice: &[u8]) -> Result<()> {
         // tracing::trace!("store_region: 0x{addr:08x}");
         slice
             .iter()
             .enumerate()
-            .try_for_each(|(i, x)| self.raw_store_u8(addr + i as u32, *x))?;
+            .try_for_each(|(i, x)| self.store_u8(addr + i as u32, *x))?;
         Ok(())
     }
 
