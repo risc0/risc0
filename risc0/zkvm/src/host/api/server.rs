@@ -30,8 +30,9 @@ use crate::{
         client::{env::TraceCallback, slice_io::SliceIo},
         recursion::SuccinctReceipt,
     },
-    ExecutorEnv, ExecutorImpl, ProverOpts, Segment, SegmentReceipt, SegmentRef, TraceEvent,
-    VerifierContext,
+    receipt_claim::{MaybePruned, ReceiptClaim},
+    ExecutorEnv, ExecutorImpl, ProverOpts, Receipt, Segment, SegmentReceipt, SegmentRef,
+    TraceEvent, VerifierContext,
 };
 
 /// A server implementation for handling requests by clients of the zkVM.
@@ -623,6 +624,19 @@ fn build_env<'a>(
     }
     if !request.pprof_out.is_empty() {
         env_builder.enable_profiler(Path::new(&request.pprof_out));
+    }
+    for assumption in request.assumptions.iter() {
+        match assumption.kind.as_ref().ok_or(malformed_err())? {
+            pb::api::assumption::Kind::Proven(asset) => {
+                let receipt: Receipt = pb::core::Receipt::decode(asset.as_bytes()?)?.try_into()?;
+                env_builder.add_assumption(receipt.into())
+            }
+            pb::api::assumption::Kind::Unresolved(asset) => {
+                let claim: MaybePruned<ReceiptClaim> =
+                    pb::core::MaybePruned::decode(asset.as_bytes()?)?.try_into()?;
+                env_builder.add_assumption(claim.into())
+            }
+        };
     }
     env_builder.build()
 }
