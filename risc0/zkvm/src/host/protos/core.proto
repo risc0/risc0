@@ -39,7 +39,7 @@ message InnerReceipt {
 message CompositeReceipt {
   repeated SegmentReceipt segments = 1;
   repeated InnerReceipt assumptions = 2;
-  optional Digest journal_digest = 3;
+  Digest journal_digest = 3;
 }
 
 message SegmentReceipt {
@@ -68,7 +68,7 @@ message ReceiptClaim {
   MaybePruned post = 2; // MaybePruned<SystemState>
   protos.base.ExitCode exit_code = 3;
   Digest input = 4;
-  optional MaybePruned output = 5; // Option<MaybePruned<Output>>
+  MaybePruned output = 5; // Option<MaybePruned<Output>>
 }
 
 message MaybePruned {
