@@ -16,7 +16,7 @@ use forust_ml::{GradientBooster, Matrix};
 use risc0_zkvm::guest::env;
 use rmp_serde;
 
-pub fn main() {
+fn main() {
     // read the input data
     let input: Vec<f64> = env::read();
 

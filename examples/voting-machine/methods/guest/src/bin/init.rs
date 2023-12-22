@@ -24,7 +24,7 @@ use voting_machine_core::{InitializeVotingMachineCommit, VotingMachineState};
 
 risc0_zkvm::guest::entry!(main);
 
-pub fn main() {
+fn main() {
     let state: VotingMachineState = env::read();
     env::commit(&InitializeVotingMachineCommit {
         polls_open: state.polls_open,

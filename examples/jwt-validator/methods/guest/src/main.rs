@@ -29,7 +29,7 @@ static PUBLIC_KEY: &str = r#"
     }
 "#;
 
-pub fn main() {
+fn main() {
     // read the token input
     let token: String = env::read();
 

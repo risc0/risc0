@@ -40,7 +40,7 @@ fn movement(mut query: Query<(&mut Position, &Velocity)>) {
     }
 }
 
-pub fn main() {
+fn main() {
     let turns: u32 = env::read();
     let mut world = World::new();
     let entity = world

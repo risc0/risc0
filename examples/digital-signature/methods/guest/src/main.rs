@@ -21,7 +21,7 @@ use risc0_zkvm::sha::{Impl, Sha256};
 
 risc0_zkvm::guest::entry!(main);
 
-pub fn main() {
+fn main() {
     let request: SigningRequest = env::read();
     env::commit(&SignMessageCommit {
         identity: *Impl::hash_bytes(request.passphrase.as_bytes()),

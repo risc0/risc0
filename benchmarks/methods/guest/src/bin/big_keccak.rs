@@ -12,14 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#![no_main]
-
 use risc0_zkvm::{guest::env, sha::Digest};
 use sha3::{Digest as _, Keccak256};
 
-risc0_zkvm::entry!(main);
-
-pub fn main() {
+fn main() {
     let data: Vec<u8> = env::read();
     let hash = keccak(&data);
     let digest = Digest::try_from(hash).unwrap();

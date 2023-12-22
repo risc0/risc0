@@ -20,7 +20,7 @@ use risc0_zkvm::guest::env;
 
 risc0_zkvm::guest::entry!(main);
 
-pub fn main() {
+fn main() {
     let iterations: u32 = env::read();
 
     let mut sum = 0;

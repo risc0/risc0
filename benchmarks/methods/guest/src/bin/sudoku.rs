@@ -25,7 +25,7 @@ use risc0_zkvm::{
 
 risc0_zkvm::guest::entry!(main);
 
-pub fn main() {
+fn main() {
     let puzzle: Sudoku = env::read();
 
     if !valid_solution(&puzzle) {

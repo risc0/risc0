@@ -19,7 +19,7 @@ use risc0_zkvm::{
     sha::{Impl, Sha256},
 };
 
-pub fn main() {
+fn main() {
     let data: String = env::read();
     let sha = *Impl::hash_bytes(&data.as_bytes());
     let data = parse(&data).unwrap();

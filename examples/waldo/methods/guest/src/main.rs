@@ -19,7 +19,7 @@ use waldo_core::{
     Journal, PrivateInput,
 };
 
-pub fn main() {
+fn main() {
     // Read a Merkle proof from the host.
     let input: PrivateInput = env::read();
 

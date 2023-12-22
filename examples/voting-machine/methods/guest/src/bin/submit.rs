@@ -24,7 +24,7 @@ use voting_machine_core::{SubmitBallotCommit, SubmitBallotParams};
 
 risc0_zkvm::guest::entry!(main);
 
-pub fn main() {
+fn main() {
     let params: SubmitBallotParams = env::read();
     let result = params.process();
     env::write(&result.state);

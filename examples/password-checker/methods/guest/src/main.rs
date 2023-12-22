@@ -34,7 +34,7 @@ const POLICY: PasswordPolicy = PasswordPolicy {
 /// times short. Using a higher iteration count would be required for a real deployment.
 const PBKDF2_SHA256_ITERATIONS: u32 = 10;
 
-pub fn main() {
+fn main() {
     let request: PasswordRequest = env::read();
 
     if !POLICY.is_valid(&request.password) {
