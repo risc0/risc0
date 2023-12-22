@@ -58,6 +58,7 @@ impl<S: Storage + Sync + Send> EventProcessor for ProxyCallbackProofRequestProce
             self.bonsai_client.clone(),
             hex::encode(event.image_id),
             input_id.clone(),
+            vec![], // TODO: add composition to ethereum crates
         )
         .await?;
 
