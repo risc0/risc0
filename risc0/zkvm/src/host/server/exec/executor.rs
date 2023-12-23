@@ -396,19 +396,10 @@ impl<'a> ExecutorImpl<'a> {
 
         match ExecutorStats::try_from((&session, elapsed)) {
             Ok(stats) => stats.log(),
-            Err(error) => tracing::error!("failed to log executor stats: {}", error),
+            Err(error) => tracing::error!(?error, "failed to log executor stats"),
         }
 
         Ok(session)
-
-        // Returns a tuple `(x, y)` where:
-        // * `x`: Total number of cycles that a prover experiences. This includes
-        //   overhead associated with continuations and padding up to the nearest
-        //   power of 2. -> "total prover cycles: "
-        // * `y`: Total number of cycles used for executing user instructions. -> "user instruction cycles: "
-
-        // ratio of available computation used
-        // (both for individual segments and for the entire session)
     }
 
     fn split(&mut self, pre_image: Option<Box<MemoryImage>>) -> Result<()> {
