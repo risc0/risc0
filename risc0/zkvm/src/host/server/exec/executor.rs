@@ -14,6 +14,7 @@
 
 //! This module implements the Executor.
 
+use core::time::Duration;
 use std::{cell::RefCell, fmt::Debug, io::Write, mem, rc::Rc};
 
 use addr2line::{
@@ -23,6 +24,7 @@ use addr2line::{
 };
 use anyhow::{anyhow, bail, Context, Result};
 use crypto_bigint::{CheckedMul, Encoding, NonZero, U256, U512};
+use human_repr::{HumanCount, HumanDuration};
 use risc0_binfmt::{MemoryImage, Program, SystemState};
 use risc0_zkp::{
     core::{
@@ -45,7 +47,7 @@ use rrs_lib::{instruction_executor::InstructionExecutor, HartState};
 use serde::{Deserialize, Serialize};
 use sha2::digest::generic_array::GenericArray;
 use tempfile::tempdir;
-use tracing::{level_filters::LevelFilter, Level};
+use tracing::{instrument, level_filters::LevelFilter, Level};
 
 use super::{monitor::MemoryMonitor, profiler::Profiler, syscall::SyscallTable};
 use crate::{
@@ -379,22 +381,34 @@ impl<'a> ExecutorImpl<'a> {
         let segment_ref = callback(final_segment)?;
         self.segments.push(segment_ref);
 
-        tracing::info!("total_cycles = {}", self.total_cycles());
-        tracing::info!("segment_count = {}", self.segments.len());
-        tracing::info!("execution_time = {:?}", elapsed);
-
         if let Some(profiler) = self.profiler.take() {
             let report = profiler.borrow_mut().finalize_to_vec();
             std::fs::write(self.env.pprof_out.as_ref().unwrap(), report)?;
         }
 
-        Ok(Session::new(
+        let session = Session::new(
             mem::take(&mut self.segments),
             session_journal,
             exit_code,
             post_image,
             assumptions,
-        ))
+        );
+
+        match ExecutorStats::try_from((&session, elapsed)) {
+            Ok(stats) => stats.log(),
+            Err(error) => tracing::error!("failed to log executor stats: {}", error),
+        }
+
+        Ok(session)
+
+        // Returns a tuple `(x, y)` where:
+        // * `x`: Total number of cycles that a prover experiences. This includes
+        //   overhead associated with continuations and padding up to the nearest
+        //   power of 2. -> "total prover cycles: "
+        // * `y`: Total number of cycles used for executing user instructions. -> "user instruction cycles: "
+
+        // ratio of available computation used
+        // (both for individual segments and for the entire session)
     }
 
     fn split(&mut self, pre_image: Option<Box<MemoryImage>>) -> Result<()> {
@@ -769,5 +783,60 @@ impl<'a> ExecutorImpl<'a> {
             None,
             1 + chunks + 1,
         ))
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct ExecutorStats {
+    execution_time: Duration,
+    segment_count: usize,
+    total_prover_cycles: u64,
+    user_instruction_cycles: u64,
+    cycles_used_ratio: f64,
+}
+
+impl ExecutorStats {
+    fn new(session: &Session, elapsed: Duration) -> Result<Self> {
+        let (total_prover_cycles, user_instruction_cycles) = session.get_cycles()?;
+        let cycles_used_ratio = user_instruction_cycles as f64 / total_prover_cycles as f64 * 100.0;
+        let segment_count = session.resolve()?.len();
+
+        Ok(Self {
+            total_prover_cycles,
+            user_instruction_cycles,
+            cycles_used_ratio,
+            segment_count,
+            execution_time: elapsed,
+        })
+    }
+
+    #[instrument(name = "executor", skip(self))]
+    fn log(&self) {
+        tracing::info!("execution time: {}", self.execution_time.human_duration());
+        tracing::info!(
+            "number of segments: {}",
+            self.segment_count.human_count_bare()
+        );
+        tracing::info!(
+            "total prover cycles: {}",
+            self.total_prover_cycles.human_count_bare()
+        );
+        tracing::info!(
+            "user instruction cycles: {}",
+            self.user_instruction_cycles.human_count_bare()
+        );
+        tracing::info!(
+            "available computation used: {}%",
+            self.cycles_used_ratio.human_count_bare()
+        );
+
+        tracing::debug!(executor_stats = ?self);
+    }
+}
+
+impl TryFrom<(&Session, Duration)> for ExecutorStats {
+    type Error = anyhow::Error;
+    fn try_from(value: (&Session, Duration)) -> Result<Self, Self::Error> {
+        Self::new(value.0, value.1)
     }
 }
