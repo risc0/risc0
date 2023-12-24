@@ -19,6 +19,7 @@ members = [
   "risc0/zkvm/methods",
   "risc0/zkvm/platform",
   "risc0/zkvm/receipts",
+  "risc0/macros",
   "website/doc-test/main",
   "xtask",
 ]
