@@ -19,8 +19,8 @@ use risc0_zkvm::{
     sha::{Impl, Sha256},
 };
 
-#[risc0_zkvm::entry]
 // Example of using the risc0_zkvm::sha module to hash data.
+#[risc0_zkvm::entry]
 pub fn main() {
     let data: String = env::read();
     let digest = Impl::hash_bytes(&data.as_bytes());

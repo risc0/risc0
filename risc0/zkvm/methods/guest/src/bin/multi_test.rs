@@ -37,7 +37,6 @@ use risc0_zkvm_platform::{
     PAGE_SIZE,
 };
 
-#[risc0_zkvm::entry]
 #[inline(never)]
 #[no_mangle]
 fn profile_test_func1() {
@@ -50,6 +49,7 @@ fn profile_test_func2() {
     unsafe { asm!("nop") }
 }
 
+#[risc0_zkvm::entry]
 pub fn main() {
     let impl_select: MultiTestSpec = env::read();
     match impl_select {
