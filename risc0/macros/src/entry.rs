@@ -69,12 +69,12 @@ mod tests {
         };
 
         let expected = quote! {
-            const __ZKVM_ENTRY: fn() = foo;
+            const ZKVM_ENTRY: fn() = foo;
 
-            mod __zkvm_generated_main {
+            mod zkvm_generated_main {
                 #[no_mangle]
                 fn main() {
-                    super::__ZKVM_ENTRY()
+                    super::ZKVM_ENTRY()
                 }
             }
 
@@ -95,12 +95,12 @@ mod tests {
         };
 
         let expected = quote! {
-            const __ZKVM_ENTRY: fn() = foo;
+            const ZKVM_ENTRY: fn() = foo;
 
-            mod __zkvm_generated_main {
+            mod zkvm_generated_main {
                 #[no_mangle]
                 fn main() {
-                    super::__ZKVM_ENTRY()
+                    super::ZKVM_ENTRY()
                 }
             }
 
