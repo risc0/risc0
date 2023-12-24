@@ -15,10 +15,10 @@
 #![no_main]
 #![allow(unused_imports)]
 
-#[risc0_zkvm::entry]
 use risc0_zkvm::guest::env;
 use wasmi::{Caller, Engine, Func, Linker, Module, Store};
 
+#[risc0_zkvm::entry]
 pub fn main() {
     let engine = Engine::default();
 

@@ -40,14 +40,14 @@ pub(super) fn function(input: ItemFn) -> TokenStream {
 
     let result = quote_spanned! {input.sig.span()=>
         // Type check the given path
-        const __ZKVM_ENTRY: fn() = #fn_name;
+        const ZKVM_ENTRY: fn() = #fn_name;
 
         // Include generated main in a module so we don't conflict
         // with any other definitions of "main" in this file.
-        mod __zkvm_generated_main {
+        mod zkvm_generated_main {
             #[no_mangle]
             fn main() {
-                super::__ZKVM_ENTRY()
+                super::ZKVM_ENTRY()
             }
         }
         #input

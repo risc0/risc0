@@ -19,7 +19,6 @@ use pbkdf2::pbkdf2_hmac_array;
 use risc0_zkvm::{guest::env, sha::Digest};
 use sha2::Sha256;
 
-#[risc0_zkvm::entry]
 /// Constant policy, compiled into the guest, for this example.
 ///
 /// Note that the policy gets included in the program, and so is reflected in
@@ -37,6 +36,7 @@ const POLICY: PasswordPolicy = PasswordPolicy {
 /// times short. Using a higher iteration count would be required for a real deployment.
 const PBKDF2_SHA256_ITERATIONS: u32 = 10;
 
+#[risc0_zkvm::entry]
 pub fn main() {
     let request: PasswordRequest = env::read();
 

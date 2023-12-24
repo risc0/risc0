@@ -13,7 +13,7 @@
 // limitations under the License.
 
 #![no_main]
-#[risc0_zkvm::entry]
+
 use risc0_zkvm::guest::env;
 
 use bevy_core::Outputs;
@@ -42,6 +42,7 @@ fn movement(mut query: Query<(&mut Position, &Velocity)>) {
     }
 }
 
+#[risc0_zkvm::entry]
 pub fn main() {
     let turns: u32 = env::read();
     let mut world = World::new();

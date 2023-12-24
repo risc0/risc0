@@ -17,7 +17,6 @@
 use jwt_core::Validator;
 use risc0_zkvm::guest::env;
 
-#[risc0_zkvm::entry]
 static PUBLIC_KEY: &str = r#"
     {
       "alg": "RS256",
@@ -32,6 +31,7 @@ static PUBLIC_KEY: &str = r#"
     }
 "#;
 
+#[risc0_zkvm::entry]
 pub fn main() {
     // read the token input
     let token: String = env::read();

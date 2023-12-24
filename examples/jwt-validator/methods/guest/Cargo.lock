@@ -768,6 +768,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "risc0-macros"
+version = "0.21.0-alpha.1"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.40",
+]
+
+[[package]]
 name = "risc0-zkp"
 version = "0.21.0-alpha.1"
 dependencies = [
@@ -804,6 +813,7 @@ dependencies = [
  "risc0-circuit-recursion",
  "risc0-circuit-rv32im",
  "risc0-core",
+ "risc0-macros",
  "risc0-zkp",
  "risc0-zkvm-platform",
  "rrs-lib",

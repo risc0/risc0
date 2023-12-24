@@ -16,7 +16,6 @@
 
 use std::{collections::BTreeMap, io::Read};
 
-#[risc0_zkvm::entry]
 use k256::{
     ecdsa::{RecoveryId, Signature, VerifyingKey},
     elliptic_curve::sec1::ToEncodedPoint,
@@ -84,6 +83,7 @@ fn ecrecover(v: u8, rs: [u8; 64], digest: [u8; 32]) -> [u8; 20] {
         .unwrap()
 }
 
+#[risc0_zkvm::entry]
 fn main() {
     // Read data sent from the application contract.
     let mut input_bytes = Vec::<u8>::new();
