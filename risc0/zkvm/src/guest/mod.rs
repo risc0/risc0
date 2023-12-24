@@ -16,7 +16,7 @@
 //!
 //! Code that is validated by the [RISC Zero zkVM](crate) is run inside the
 //! guest. In the minimal case, an entrypoint (the guest's "`main`" function)
-//! must be provided by using the [entry! macro](entry). In almost all
+//! must be provided by using the [entry macro](entry). In almost all
 //! practical cases, the guest will want to read private input data from the
 //! host and write public data to the journal. In the simplest case, this can be
 //! done with [env::read] and [env::commit], respectively; additional I/O
@@ -42,8 +42,7 @@
 //! ```ignore
 //! use risc0_zkvm::guest::env;
 //!
-//! risc0_zkvm::entry!(main);
-//!
+//! #[risc0_zkvm::entry]
 //! pub fn main() {
 //!     // Load the first number from the host
 //!     let a: u64 = env::read();
@@ -58,7 +57,7 @@
 //!     env::commit(&product);
 //! }
 //! ```
-//! Notice how the [entry! macro](entry) is used to indicate the
+//! Notice how the [entry macro](entry) is used to indicate the
 //! entrypoint, [env::read] is used to load the two factors, and [env::commit]
 //! is used to make their composite product publically available.
 //!
@@ -79,7 +78,7 @@ use core::arch::asm;
 
 use risc0_zkvm_platform::syscall::sys_panic;
 
-pub use crate::entry;
+pub use risc0_macros::entry;
 
 #[cfg(target_os = "zkvm")]
 core::arch::global_asm!(include_str!("memset.s"));
@@ -101,32 +100,6 @@ pub fn abort(msg: &str) -> ! {
     unsafe {
         sys_panic(msg.as_ptr(), msg.len());
     }
-}
-
-/// Used for defining a main entrypoint.
-///
-/// # Example
-///
-/// ```ignore
-/// risc0_zkvm::entry!(main);
-///
-/// fn main() { }
-/// ```
-#[macro_export]
-macro_rules! entry {
-    ($path:path) => {
-        // Type check the given path
-        const ZKVM_ENTRY: fn() = $path;
-
-        // Include generated main in a module so we don't conflict
-        // with any other definitions of "main" in this file.
-        mod zkvm_generated_main {
-            #[no_mangle]
-            fn main() {
-                super::ZKVM_ENTRY()
-            }
-        }
-    };
 }
 
 #[cfg(target_os = "zkvm")]

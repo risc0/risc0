@@ -19,8 +19,7 @@ use pbkdf2::pbkdf2_hmac_array;
 use risc0_zkvm::{guest::env, sha::Digest};
 use sha2::Sha256;
 
-risc0_zkvm::guest::entry!(main);
-
+#[risc0_zkvm::entry]
 /// Constant policy, compiled into the guest, for this example.
 ///
 /// Note that the policy gets included in the program, and so is reflected in

@@ -22,8 +22,7 @@ use risc0_zkvm::{
 };
 use voting_machine_core::{FreezeVotingMachineCommit, FreezeVotingMachineParams};
 
-risc0_zkvm::guest::entry!(main);
-
+#[risc0_zkvm::entry]
 pub fn main() {
     let params: FreezeVotingMachineParams = env::read();
     let result = params.process();

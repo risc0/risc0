@@ -22,8 +22,7 @@ use risc0_zkvm::{
 };
 use voting_machine_core::{InitializeVotingMachineCommit, VotingMachineState};
 
-risc0_zkvm::guest::entry!(main);
-
+#[risc0_zkvm::entry]
 pub fn main() {
     let state: VotingMachineState = env::read();
     env::commit(&InitializeVotingMachineCommit {

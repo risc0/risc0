@@ -18,8 +18,7 @@ use risc0_zkvm::guest::env;
 use risc0_zkvm::sha::{Impl, Sha256};
 use wordle_core::{GameState, LetterFeedback, WordFeedback, WORD_LENGTH};
 
-risc0_zkvm::guest::entry!(main);
-
+#[risc0_zkvm::entry]
 pub fn main() {
     let secret: String = env::read();
     let guess: String = env::read();
@@ -45,7 +44,7 @@ pub fn main() {
     for i in 0..WORD_LENGTH {
         if secret.as_bytes()[i] != guess.as_bytes()[i] {
             secret_unmatched.push(secret.as_bytes()[i] as char);
-       }
+        }
     }
 
     // second round for distinguishing partial matches from misses

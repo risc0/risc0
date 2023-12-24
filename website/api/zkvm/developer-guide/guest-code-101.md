@@ -67,8 +67,8 @@ In our [template] and [examples], there's a bit of boilerplate code before `main
 - `#![no_main]` <br/>
   The guest code is never launched as a standalone Rust executable, so we specify `#![no_main]`.
 
-- `risc0_zkvm_guest::entry!(main);` <br/>
-  We must make the guest code available for the host to launch, and to do that we must specify which function to call when the host starts executing this guest code. We use the `risc0_zkvm_guest::entry!` macro to indicate the initial guest function to call, which in this case is `main`.
+- `#[risc0_zkvm::entry]` <br/>
+  We must make the guest code available for the host to launch, and to do that we must specify which function to call when the host starts executing this guest code. We use the `entry` attribute macro to indicate the initial guest function to call, which in this case is `main`.
 
 ## Happy Building!
 

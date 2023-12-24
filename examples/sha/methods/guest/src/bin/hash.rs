@@ -19,8 +19,7 @@ use risc0_zkvm::{
     sha::{Impl, Sha256},
 };
 
-risc0_zkvm::guest::entry!(main);
-
+#[risc0_zkvm::entry]
 // Example of using the risc0_zkvm::sha module to hash data.
 pub fn main() {
     let data: String = env::read();

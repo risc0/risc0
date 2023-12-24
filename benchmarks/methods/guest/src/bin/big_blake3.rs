@@ -16,8 +16,7 @@
 
 use risc0_zkvm::{guest::env, sha::Digest};
 
-risc0_zkvm::entry!(main);
-
+#[risc0_zkvm::entry]
 pub fn main() {
     let data: Vec<u8> = env::read();
     let hash = blake3::hash(&data);

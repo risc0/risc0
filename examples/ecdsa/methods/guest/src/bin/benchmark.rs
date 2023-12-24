@@ -106,8 +106,7 @@ fn benchmark_group() {
     });
 }
 
-risc0_zkvm::guest::entry!(main);
-
+#[risc0_zkvm::entry]
 fn main() {
     benchmark_field();
     benchmark_scalar();

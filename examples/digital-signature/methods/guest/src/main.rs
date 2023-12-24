@@ -19,8 +19,7 @@ use digital_signature_core::{SignMessageCommit, SigningRequest};
 use risc0_zkvm::guest::env;
 use risc0_zkvm::sha::{Impl, Sha256};
 
-risc0_zkvm::guest::entry!(main);
-
+#[risc0_zkvm::entry]
 pub fn main() {
     let request: SigningRequest = env::read();
     env::commit(&SignMessageCommit {

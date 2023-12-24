@@ -187,8 +187,7 @@ const MAIN_RS_TEMPLATE: &str = r#"
 
 {{ use_lines }}
 
-risc0_zkvm::guest::entry!(main);
-
+#[risc0_zkvm::entry]
 pub fn main() {
     {{ main_body }}
 }

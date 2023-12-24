@@ -20,8 +20,7 @@ use alloc::vec;
 
 use risc0_zkvm::guest::{env, env::Read};
 
-risc0_zkvm::entry!(main);
-
+#[risc0_zkvm::entry]
 pub fn main() {
     let mut len: u32 = 0;
     env::stdin().read_slice(core::slice::from_mut(&mut len));

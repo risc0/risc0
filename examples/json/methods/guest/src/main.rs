@@ -21,8 +21,7 @@ use risc0_zkvm::{
     sha::{Impl, Sha256},
 };
 
-risc0_zkvm::guest::entry!(main);
-
+#[risc0_zkvm::entry]
 pub fn main() {
     let data: String = env::read();
     let sha = *Impl::hash_bytes(&data.as_bytes());

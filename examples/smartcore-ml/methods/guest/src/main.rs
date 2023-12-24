@@ -24,8 +24,7 @@ use smartcore::{
     tree::decision_tree_classifier::DecisionTreeClassifier,
 };
 
-risc0_zkvm::guest::entry!(main);
-
+#[risc0_zkvm::entry]
 pub fn main() {
     // Read in is_svm boolean to ensure the correct code block is executed
     let is_svm: bool = env::read();

@@ -17,8 +17,7 @@
 use risc0_benchmark_lib::MembershipProof;
 use risc0_zkvm::guest::env;
 
-risc0_zkvm::entry!(main);
-
+#[risc0_zkvm::entry]
 pub fn main() {
     let proof: MembershipProof = env::read();
     assert!(proof.verify());

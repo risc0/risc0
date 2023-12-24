@@ -17,8 +17,7 @@
 use prorata_core::AllocationQuery;
 use risc0_zkvm::guest::env;
 
-risc0_zkvm::guest::entry!(main);
-
+#[risc0_zkvm::entry]
 pub fn main() {
     // Load the amount, recipients, and target user sent from the host:
     let query: AllocationQuery = env::read();

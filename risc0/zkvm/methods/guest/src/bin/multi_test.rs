@@ -32,12 +32,12 @@ use risc0_zkvm::{
 use risc0_zkvm_methods::multi_test::{MultiTestSpec, SYS_MULTI_TEST};
 use risc0_zkvm_platform::{
     fileno,
-    memory::{self, SYSTEM}, PAGE_SIZE,
+    memory::{self, SYSTEM},
     syscall::{bigint, sys_bigint, sys_log, sys_read, sys_read_words, sys_write},
+    PAGE_SIZE,
 };
 
-risc0_zkvm::entry!(main);
-
+#[risc0_zkvm::entry]
 #[inline(never)]
 #[no_mangle]
 fn profile_test_func1() {
@@ -269,17 +269,19 @@ pub fn main() {
         },
         MultiTestSpec::AlignedAlloc => {
             #[repr(align(1024))]
-            struct AlignTest1 { pub _test: u32 }
+            struct AlignTest1 {
+                pub _test: u32,
+            }
 
             impl AlignTest1 {
                 pub fn new(_test: u32) -> Self {
-                    AlignTest1{_test}
+                    AlignTest1 { _test }
                 }
             }
 
             let a = &AlignTest1::new(54) as *const _;
             let b = &AlignTest1::new(60) as *const _;
             assert_eq!(PAGE_SIZE, b as usize - a as usize);
-        },
+        }
     }
 }

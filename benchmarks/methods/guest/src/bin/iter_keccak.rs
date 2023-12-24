@@ -17,8 +17,7 @@
 use risc0_zkvm::{guest::env, sha::Digest};
 use sha3::{Digest as _, Keccak256};
 
-risc0_zkvm::entry!(main);
-
+#[risc0_zkvm::entry]
 pub fn main() {
     let (num_iter, data): (u32, Vec<u8>) = env::read();
 

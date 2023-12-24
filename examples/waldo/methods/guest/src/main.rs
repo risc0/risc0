@@ -21,8 +21,7 @@ use waldo_core::{
     Journal, PrivateInput,
 };
 
-risc0_zkvm::guest::entry!(main);
-
+#[risc0_zkvm::entry]
 pub fn main() {
     // Read a Merkle proof from the host.
     let input: PrivateInput = env::read();

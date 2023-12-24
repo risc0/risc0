@@ -17,8 +17,7 @@
 use jwt_core::Validator;
 use risc0_zkvm::guest::env;
 
-risc0_zkvm::guest::entry!(main);
-
+#[risc0_zkvm::entry]
 static PUBLIC_KEY: &str = r#"
     {
       "alg": "RS256",

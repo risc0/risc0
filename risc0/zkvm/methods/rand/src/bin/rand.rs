@@ -21,8 +21,7 @@ use alloc::vec;
 
 use getrandom::getrandom;
 
-risc0_zkvm::entry!(main);
-
+#[risc0_zkvm::entry]
 pub fn main() {
     // This should panic
     let rand_buf = &mut vec![0u8; 8];

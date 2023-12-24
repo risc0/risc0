@@ -15,8 +15,7 @@
 #![no_main]
 #![allow(unused_imports)]
 
-risc0_zkvm::guest::entry!(main);
-
+#[risc0_zkvm::entry]
 use risc0_zkvm::guest::env;
 use wasmi::{Caller, Engine, Func, Linker, Module, Store};
 

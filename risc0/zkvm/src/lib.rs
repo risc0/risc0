@@ -42,6 +42,9 @@ pub use bytes::Bytes;
 pub use risc0_binfmt::SystemState;
 pub use risc0_zkvm_platform::{declare_syscall, memory::GUEST_MAX_MEM, PAGE_SIZE};
 
+// Re-export to match previous export from having delcarative macro defined in this crate
+pub use self::guest::entry;
+
 #[cfg(feature = "fault-proof")]
 pub use self::fault_monitor::FaultCheckMonitor;
 #[cfg(all(not(target_os = "zkvm"), feature = "prove"))]

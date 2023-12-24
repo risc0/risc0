@@ -17,8 +17,7 @@
 use risc0_zkp::core::hash::blake2b::{Blake2b, Blake2bCpuImpl};
 use risc0_zkvm::{guest::env, sha::Digest};
 
-risc0_zkvm::entry!(main);
-
+#[risc0_zkvm::entry]
 pub fn main() {
     let (num_iter, data): (u32, Vec<u8>) = env::read();
 

@@ -17,8 +17,7 @@
 use ed25519_dalek::{Signature, Verifier, VerifyingKey};
 use risc0_zkvm::guest::env;
 
-risc0_zkvm::guest::entry!(main);
-
+#[risc0_zkvm::entry]
 fn main() {
     // Decode the verifying key, message, and signature from the inputs.
     let (iterations, encoded_verifying_key, message, signature_bytes): (

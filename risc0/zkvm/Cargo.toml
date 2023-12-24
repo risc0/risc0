@@ -40,6 +40,7 @@ getrandom = { version = "0.2", features = ["custom"] }
 hex = { version = "0.4.3", default-features = false, features = ["alloc"] }
 risc0-binfmt = { workspace = true }
 risc0-core = { workspace = true }
+risc0-macros = { workspace = true }
 risc0-zkp = { workspace = true }
 risc0-zkvm-platform = { workspace = true, features = [
   "rust-runtime",

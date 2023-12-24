@@ -13,8 +13,7 @@
 // limitations under the License.
 
 #![no_main]
-risc0_zkvm::guest::entry!(main);
-
+#[risc0_zkvm::entry]
 use risc0_zkvm::guest::env;
 
 use bevy_core::Outputs;

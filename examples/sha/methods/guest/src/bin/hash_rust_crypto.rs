@@ -18,8 +18,7 @@
 use risc0_zkvm::{guest::env, sha::Digest};
 use sha2::{Digest as _, Sha256};
 
-risc0_zkvm::guest::entry!(main);
-
+#[risc0_zkvm::entry]
 // Example of using RustCrypto with RISC Zero accelerator support.
 pub fn main() {
     let data: String = env::read();

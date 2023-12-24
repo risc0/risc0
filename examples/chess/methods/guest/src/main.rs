@@ -18,8 +18,7 @@ use chess_core::Inputs;
 use risc0_zkvm::guest::env;
 use shakmaty::{fen::Fen, san::San, CastlingMode, Chess, FromSetup, Move, Position, Setup};
 
-risc0_zkvm::guest::entry!(main);
-
+#[risc0_zkvm::entry]
 pub fn main() {
     let inputs: Inputs = env::read();
     let mv: String = inputs.mv;

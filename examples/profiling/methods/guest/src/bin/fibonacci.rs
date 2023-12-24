@@ -17,8 +17,7 @@
 use nalgebra::Matrix2;
 use risc0_zkvm::guest::env;
 
-risc0_zkvm::guest::entry!(main);
-
+#[risc0_zkvm::entry]
 pub fn main() {
     let iterations: u32 = env::read();
     let answer_1 = fibonacci_1(iterations);

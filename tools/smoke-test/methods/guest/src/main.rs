@@ -18,8 +18,7 @@
 use core::hint::black_box;
 use risc0_zkvm::guest::env;
 
-risc0_zkvm::guest::entry!(main);
-
+#[risc0_zkvm::entry]
 pub fn main() {
     let iterations: u32 = env::read();
 

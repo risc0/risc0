@@ -18,8 +18,7 @@
 use risc0_zkvm::guest::env;
 use zkevm_core::{Env, EvmResult, ExecutionResult, ZkDb, EVM};
 
-risc0_zkvm::guest::entry!(main);
-
+#[risc0_zkvm::entry]
 pub fn main() {
     let env: Env = env::read();
     let db: ZkDb = env::read();
