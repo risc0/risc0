@@ -51,7 +51,7 @@ use super::{monitor::MemoryMonitor, profiler::Profiler, syscall::SyscallTable};
 use crate::{
     align_up,
     host::{
-        client::exec::TraceEvent,
+        client::{env::DirectoryPath, exec::TraceEvent},
         receipt::Assumption,
         server::opcode::{MajorType, OpCode},
     },
@@ -231,11 +231,11 @@ impl<'a> ExecutorImpl<'a> {
     /// of the execution.
     pub fn run(&mut self) -> Result<Session> {
         if self.env.segment_path.is_none() {
-            self.env.segment_path = Some(tempdir()?.into_path());
+            self.env.segment_path = Some(Rc::new(DirectoryPath::TempDir(tempdir()?)));
         }
 
-        let path = self.env.segment_path.clone().unwrap();
-        self.run_with_callback(|segment| Ok(Box::new(FileSegmentRef::new(&segment, &path)?)))
+        let dir = self.env.segment_path.clone().unwrap();
+        self.run_with_callback(|segment| Ok(Box::new(FileSegmentRef::new(&segment, dir.path())?)))
     }
 
     /// Run the executor until [ExitCode::Halted], [ExitCode::Paused], or

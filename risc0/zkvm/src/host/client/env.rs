@@ -28,6 +28,7 @@ use bytemuck::Pod;
 use bytes::Bytes;
 use risc0_zkvm_platform::{self, fileno};
 use serde::Serialize;
+use tempfile::TempDir;
 
 use crate::serde::to_vec;
 use crate::{
@@ -67,6 +68,20 @@ pub(crate) struct Assumptions {
     pub(crate) accessed: Vec<Assumption>,
 }
 
+pub(crate) enum DirectoryPath {
+    TempDir(TempDir),
+    Path(PathBuf),
+}
+
+impl DirectoryPath {
+    pub(crate) fn path(&self) -> &Path {
+        match self {
+            Self::TempDir(dir) => dir.path(),
+            Self::Path(path) => path.as_path(),
+        }
+    }
+}
+
 /// The [crate::Executor] is configured from this object.
 ///
 /// The executor environment holds configuration details that inform how the
@@ -82,7 +97,7 @@ pub struct ExecutorEnv<'a> {
     pub(crate) input: Vec<u8>,
     pub(crate) trace: Vec<Rc<RefCell<dyn TraceCallback + 'a>>>,
     pub(crate) assumptions: Rc<RefCell<Assumptions>>,
-    pub(crate) segment_path: Option<PathBuf>,
+    pub(crate) segment_path: Option<Rc<DirectoryPath>>,
     pub(crate) pprof_out: Option<PathBuf>,
 }
 
@@ -340,7 +355,7 @@ impl<'a> ExecutorEnvBuilder<'a> {
 
     /// Set the path where segments will be stored.
     pub fn segment_path<P: AsRef<Path>>(&mut self, path: P) -> &mut Self {
-        self.inner.segment_path = Some(path.as_ref().to_path_buf());
+        self.inner.segment_path = Some(Rc::new(DirectoryPath::Path(path.as_ref().to_path_buf())));
         self
     }
 
