@@ -621,7 +621,7 @@ impl<'a> ExecutorImpl<'a> {
         tracing::debug!("Initial sha state: {state:08x?}");
         for _ in 0..count {
             let mut block = [0u32; BLOCK_WORDS];
-            for (i, word) in block.iter_mut().enumerate() {
+            for (i, word) in block.iter_mut().take(DIGEST_WORDS).enumerate() {
                 *word = self
                     .monitor
                     .load_u32_from_guest_addr(block1_ptr + (i * WORD_SIZE) as u32)?;
