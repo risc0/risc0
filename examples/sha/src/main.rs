@@ -43,7 +43,7 @@ fn provably_hash(input: &str, use_rust_crypto: bool) -> (Digest, Receipt) {
     let prover = default_prover();
 
     // Produce a receipt by proving the specified ELF binary.
-    let receipt = prover.prove(env, elf).unwrap();
+    let receipt = prover.prove_elf(env, elf).unwrap();
 
     let digest = receipt.journal.decode().unwrap();
     (digest, receipt)

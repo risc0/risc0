@@ -36,7 +36,7 @@ fn main() {
 
     // Produce a receipt by proving the specified ELF binary.
     let receipt = prover
-        .prove(env, {{guest_elf}})
+        .prove_elf(env, {{guest_elf}})
         .unwrap();
 
     // TODO: Implement code for retrieving receipt journal here.

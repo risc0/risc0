@@ -29,7 +29,7 @@ impl GenReceipt {
         let opts = ProverOpts::default();
         let receipt = get_prover_server(&opts)
             .unwrap()
-            .prove(env, FIB_ELF)
+            .prove_elf(env, FIB_ELF)
             .unwrap();
         let receipt_bytes = bincode::serialize(&receipt).unwrap();
 

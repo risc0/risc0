@@ -57,7 +57,7 @@ fn main() {
 
     let prover = default_prover();
 
-    let receipt = prover.prove(env, VALIDATOR_ELF).expect("failed to prove");
+    let receipt = prover.prove_elf(env, VALIDATOR_ELF).expect("failed to prove");
 
     receipt.verify(VALIDATOR_ID).unwrap();
 
