@@ -293,11 +293,6 @@ fn posix_style_read() {
             buf: buf.to_vec(),
             pos_and_len: pos_and_len.clone(),
         };
-        println!(
-            "buf: {} pos_and_len: {:?}",
-            std::str::from_utf8(&buf).unwrap(),
-            pos_and_len
-        );
         let env = ExecutorEnv::builder()
             .read_fd(FD, readbuf.as_slice())
             .write(&spec)
