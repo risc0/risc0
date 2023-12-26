@@ -455,6 +455,9 @@ pub unsafe extern "C" fn sys_read(fd: u32, recv_ptr: *mut u8, nrequested: usize)
     // Find out how many bytes to actually read, given how many we requested.
     let nread = nrequested;
 
+    // TODO can probably make this cleaner to avoid keeping a count
+    let mut total_read = 0;
+
     // Determine how many bytes at the beginning of the buffer we have
     // to read in order to become word-aligned.
     let ptr_offset = (recv_ptr as usize) & (WORD_SIZE - 1);
@@ -465,6 +468,7 @@ pub unsafe extern "C" fn sys_read(fd: u32, recv_ptr: *mut u8, nrequested: usize)
         // Read unaligned bytes into "firstword".
         let Return(nread_first, firstword) =
             syscall_2(nr::SYS_READ, null_mut(), 0, fd, unaligned_at_start as u32);
+        total_read += nread_first as usize;
         debug_assert_eq!(nread_first as usize, unaligned_at_start);
 
         // Align up to a word boundry to do the main copy.
@@ -480,6 +484,7 @@ pub unsafe extern "C" fn sys_read(fd: u32, recv_ptr: *mut u8, nrequested: usize)
     let main_words = main_requested / WORD_SIZE;
     let (nread_main, lastword) =
         sys_read_internal(fd, main_ptr as *mut u32, main_words, main_requested);
+    total_read += nread_main;
     let read_words = nread_main / WORD_SIZE;
     // debug_assert_eq!(nread_main, main_requested);
 
@@ -492,7 +497,7 @@ pub unsafe extern "C" fn sys_read(fd: u32, recv_ptr: *mut u8, nrequested: usize)
         unaligned_at_end,
     );
 
-    nread_main
+    total_read
 }
 
 /// Reads up to the given number of words into the buffer [recv_buf,
