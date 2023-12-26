@@ -453,8 +453,7 @@ pub unsafe extern "C" fn sys_read(fd: u32, recv_ptr: *mut u8, nrequested: usize)
     }
 
     // Find out how many bytes to actually read, given how many we requested.
-    let Return(navail, _) = syscall_1(nr::SYS_READ_AVAIL, null_mut(), 0, fd);
-    let nread = min(nrequested, navail as usize);
+    let nread = nrequested;
 
     // Determine how many bytes at the beginning of the buffer we have
     // to read in order to become word-aligned.
@@ -481,17 +480,19 @@ pub unsafe extern "C" fn sys_read(fd: u32, recv_ptr: *mut u8, nrequested: usize)
     let main_words = main_requested / WORD_SIZE;
     let (nread_main, lastword) =
         sys_read_internal(fd, main_ptr as *mut u32, main_words, main_requested);
-    debug_assert_eq!(nread_main, main_requested);
+    let read_words = nread_main / WORD_SIZE;
+    // debug_assert_eq!(nread_main, main_requested);
 
     // Copy in individual bytes after the word-aligned section.
     let unaligned_at_end = main_requested % WORD_SIZE;
     fill_from_word(
-        main_ptr.add(main_words * WORD_SIZE),
+        // TODO this seems like it could just be updated in sys_read_internal. Maybe good to avoid side effects?
+        main_ptr.add(read_words * WORD_SIZE),
         lastword,
         unaligned_at_end,
     );
 
-    nread
+    nread_main
 }
 
 /// Reads up to the given number of words into the buffer [recv_buf,
@@ -530,13 +531,14 @@ fn sys_read_internal(fd: u32, recv_ptr: *mut u32, nwords: usize, nbytes: usize) 
             final_word == 0,
             "host returned non-zero final word on a fully aligned read"
         );
+        let chunk_bytes_len = min(nbytes_remain, MAX_BUF_BYTES) as u32;
         let Return(nread_bytes, last_word) = unsafe {
             syscall_2(
                 nr::SYS_READ,
                 recv_ptr,
                 min(nwords_remain, MAX_BUF_WORDS),
                 fd,
-                min(nbytes_remain, MAX_BUF_BYTES) as u32,
+                chunk_bytes_len,
             )
         };
         let nread_bytes = nread_bytes as usize;
@@ -546,6 +548,11 @@ fn sys_read_internal(fd: u32, recv_ptr: *mut u32, nwords: usize, nbytes: usize) 
         nbytes_remain -= nread_bytes;
         nread_total_bytes += nread_bytes;
         final_word = last_word;
+        // TODO cleaner way to do this
+        if nread_bytes < chunk_bytes_len as usize {
+            // We've reached EOF, and the host has returned a partial word.
+            break;
+        }
     }
     (nread_total_bytes, final_word)
 }

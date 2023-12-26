@@ -465,6 +465,8 @@ impl WordRead for FdReader {
 #[cfg(feature = "std")]
 impl std::io::Read for FdReader {
     fn read(&mut self, buf: &mut [u8]) -> std::io::Result<usize> {
+        // TODO this is sending an extra request to sys_read with the unfilled buffer after a short
+        //      read, see if this is an assumption of io::Read or a bug in the impl.
         Ok(self.read_bytes(buf))
     }
 }
