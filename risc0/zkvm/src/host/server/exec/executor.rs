@@ -619,8 +619,8 @@ impl<'a> ExecutorImpl<'a> {
         }
 
         tracing::debug!("Initial sha state: {state:08x?}");
+        let mut block = [0u32; BLOCK_WORDS];
         for _ in 0..count {
-            let mut block = [0u32; BLOCK_WORDS];
             let (digest1, digest2) = block.split_at_mut(DIGEST_WORDS);
             for (i, word) in digest1.iter_mut().enumerate() {
                 *word = self
