@@ -37,7 +37,11 @@ use tracing_subscriber::{prelude::*, EnvFilter};
 struct PerformanceData {
     cycles: u64,
     segments: usize,
-    duration: Duration,
+    exec_duration: Duration,
+    prove_duration: Duration,
+    lift_duration: Duration,
+    join_duration: Duration,
+    total_duration: Duration,
     ram: usize,
     speed: f64,
     seal: usize,
@@ -46,17 +50,21 @@ struct PerformanceData {
 impl PerformanceData {
     fn header() -> String {
         format!(
-            "| {:>10} | {:>10} | {:>10} | {:>10} | {:>10} | {:>10} |",
-            "Cycles", "Segments", "Duration", "RAM", "Seal", "Speed"
+            "| {:>10} | {:>10} | {:>10} | {:>10} | {:>10} | {:>10} | {:>10} | {:>10} | {:>10} | {:>10} |",
+            "Cycles", "Segments", "Exec", "Prove", "Lift", "Join", "Duration", "RAM", "Seal", "Speed"
         )
     }
 
     fn row(&self) -> String {
         format!(
-            "| {:>10} | {:>10} | {:>10} | {:>10} | {:>10} | {:>10} |",
+            "| {:>10} | {:>10} | {:>10} | {:>10} | {:>10} | {:>10} | {:>10} | {:>10} | {:>10} | {:>10} |",
             self.cycles.div(1024).human_count_bare().to_string(),
             self.segments.human_count_bare().to_string(),
-            self.duration.human_duration().to_string(),
+            self.exec_duration.human_duration().to_string(),
+            self.prove_duration.human_duration().to_string(),
+            self.lift_duration.human_duration().to_string(),
+            self.join_duration.human_duration().to_string(),
+            self.total_duration.human_duration().to_string(),
             self.ram.human_count_bytes().to_string(),
             self.seal.human_count_bytes().to_string(),
             self.speed.human_count("hz").to_string()
@@ -98,7 +106,6 @@ impl From<(Vec<SuccinctReceipt>, Vec<Duration>)> for TopLift {
 
 #[derive(serde::Serialize, Debug)]
 struct TopJoin {
-    // TODO: Should we it `proof` or `receipt`?
     proof: SuccinctReceipt,
     duration: Duration,
 }
@@ -236,7 +243,7 @@ fn top(
 ) -> PerformanceData {
     let TopExecutor {
         session,
-        duration: executor_duration,
+        duration: exec_duration,
         cycles,
     } = top_executor(iterations, po2);
 
@@ -250,22 +257,28 @@ fn top(
     let lift_result = (lift || join).then(|| top_lift(segment_receipts));
     let join_result = join.then(|| lift_result.as_ref().map(|l| top_join(&l.proofs)));
 
-    let duration = executor_duration
-        + proofs_duration.iter().sum::<Duration>()
-        + lift_result.map_or_else(|| Duration::default(), |l| l.duration.iter().sum())
-        + join_result
-            .flatten()
-            .map_or_else(|| Duration::default(), |j| j.duration);
+    let prove_duration = proofs_duration.iter().sum();
+    let lift_duration =
+        lift_result.map_or_else(|| Duration::default(), |l| l.duration.iter().sum());
+    let join_duration = join_result
+        .flatten()
+        .map_or_else(|| Duration::default(), |j| j.duration);
+
+    let total_duration = exec_duration + prove_duration + lift_duration + join_duration;
     let ram = prover.get_peak_memory_usage();
-    let speed = cycles as f64 / duration.as_secs_f64();
+    let speed = cycles as f64 / total_duration.as_secs_f64();
 
     PerformanceData {
         ram,
         speed,
-        duration,
         segments,
         seal,
         cycles,
+        exec_duration,
+        prove_duration,
+        lift_duration,
+        join_duration,
+        total_duration
     }
 }
 
