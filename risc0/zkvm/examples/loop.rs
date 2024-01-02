@@ -35,12 +35,7 @@ use tracing_subscriber::{prelude::*, EnvFilter};
 
 #[derive(serde::Serialize, Debug)]
 struct PerformanceData {
-    // TODO: Should we present the distinction between prover and executor cycles?
-    // Also, how should we compute the `speed`? Based on prover or executor cycles?
-    // We're currently using executor cycles, should we change?
-    prover_cycles: u64,
-    executor_cycles: u64,
-
+    cycles: u64,
     segments: usize,
     duration: Duration,
     ram: usize,
@@ -51,19 +46,15 @@ struct PerformanceData {
 impl PerformanceData {
     fn header() -> String {
         format!(
-            "| {:>15} | {:>15} | {:>15} | {:>15} | {:>15} | {:>15} | {:>15} |",
-            "Executor Cycles", "Prover Cycles", "Segments", "Duration", "RAM", "Seal", "Speed"
+            "| {:>10} | {:>10} | {:>10} | {:>10} | {:>10} | {:>10} |",
+            "Cycles", "Segments", "Duration", "RAM", "Seal", "Speed"
         )
     }
 
     fn row(&self) -> String {
         format!(
-            "| {:>15} | {:>15} | {:>15} | {:>15} | {:>15} | {:>15} | {:>15} |",
-            self.executor_cycles
-                .div(1024)
-                .human_count_bare()
-                .to_string(),
-            self.prover_cycles.div(1024).human_count_bare().to_string(),
+            "| {:>10} | {:>10} | {:>10} | {:>10} | {:>10} | {:>10} |",
+            self.cycles.div(1024).human_count_bare().to_string(),
             self.segments.human_count_bare().to_string(),
             self.duration.human_duration().to_string(),
             self.ram.human_count_bytes().to_string(),
@@ -75,8 +66,8 @@ impl PerformanceData {
 
 #[derive(serde::Serialize)]
 struct TopExecutor {
-    /// Cycles as reported by [Session::get_cycles].
-    cycles: (u64, u64),
+    /// Total number of cycles as reported by [Session::get_cycles].
+    cycles: u64,
     session: Session,
     duration: Duration,
 }
@@ -266,8 +257,7 @@ fn top(
             .flatten()
             .map_or_else(|| Duration::default(), |j| j.duration);
     let ram = prover.get_peak_memory_usage();
-    // TODO: We're using executor cycles for the speed, should we change?
-    let speed = cycles.0 as f64 / duration.as_secs_f64();
+    let speed = cycles as f64 / duration.as_secs_f64();
 
     PerformanceData {
         ram,
@@ -275,10 +265,7 @@ fn top(
         duration,
         segments,
         seal,
-
-        // TODO: Should we display the prover cycles or the executor cycles separately?
-        executor_cycles: cycles.0,
-        prover_cycles: cycles.1,
+        cycles,
     }
 }
 
@@ -292,7 +279,7 @@ fn top_executor(iterations: u64, po2: u32) -> TopExecutor {
         .unwrap();
     let mut exec = ExecutorImpl::from_elf(env, BENCH_ELF).unwrap();
     let (session, duration) = with_duration(|| exec.run().unwrap());
-    let cycles = session.get_cycles().unwrap();
+    let (cycles, _) = session.get_cycles().unwrap();
 
     TopExecutor {
         cycles,
