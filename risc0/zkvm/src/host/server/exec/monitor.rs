@@ -297,18 +297,13 @@ impl MemoryMonitor {
         self.load_string(start_addr)
     }
 
-    fn raw_store_u8(&mut self, addr: u32, data: u8) -> Result<()> {
-        // tracing::trace!("raw_store_u8: 0x{addr:08x}");
+    pub fn store_u8(&mut self, addr: u32, data: u8) -> Result<()> {
+        // tracing::trace!("store_u8: 0x{addr:08x}");
         let old = self.load_u8(addr)?;
         self.pending_actions.push(Action::StoreU8(addr, old));
         self.store_bytes(addr, &[data])?;
         self.mark_page(addr);
-        Ok(())
-    }
 
-    pub fn store_u8(&mut self, addr: u32, data: u8) -> Result<()> {
-        // tracing::trace!("store_u8: 0x{addr:08x}");
-        self.raw_store_u8(addr, data)?;
         if self.enable_trace {
             self.trace_events.insert(TraceEvent::MemorySet {
                 addr,
