@@ -78,6 +78,8 @@ impl RootMessage for pb::api::LiftRequest {}
 impl RootMessage for pb::api::LiftReply {}
 impl RootMessage for pb::api::JoinRequest {}
 impl RootMessage for pb::api::JoinReply {}
+impl RootMessage for pb::api::ResolveRequest {}
+impl RootMessage for pb::api::ResolveReply {}
 impl RootMessage for pb::api::IdentityP254Request {}
 impl RootMessage for pb::api::IdentityP254Reply {}
 
@@ -288,7 +290,7 @@ pub enum AssetRequest {
 }
 
 /// Provides information about the result of execution.
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SessionInfo {
     /// The number of user cycles for each segment.
     pub segments: Vec<SegmentInfo>,
@@ -301,7 +303,7 @@ pub struct SessionInfo {
 }
 
 /// Provides information about a segment of execution.
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SegmentInfo {
     /// The number of cycles used for proving in powers of 2.
     pub po2: u32,
