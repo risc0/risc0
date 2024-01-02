@@ -2715,6 +2715,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "human-repr"
+version = "1.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f58b778a5761513caf593693f8951c97a5b610841e754788400f32102eefdff1"
+
+[[package]]
 name = "hyper"
 version = "0.14.27"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4521,6 +4527,7 @@ dependencies = [
  "elf",
  "getrandom 0.2.11",
  "hex",
+ "human-repr",
  "lazy-regex",
  "num-bigint 0.4.4",
  "num-derive",
