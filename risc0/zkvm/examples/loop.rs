@@ -278,7 +278,7 @@ fn top(
         prove_duration,
         lift_duration,
         join_duration,
-        total_duration
+        total_duration,
     }
 }
 
