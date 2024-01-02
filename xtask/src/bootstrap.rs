@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -129,7 +129,7 @@ impl Bootstrap {
         tracing::info!("writing control ids to {CONTROL_ID_PATH_RECURSION}");
         let mut cntlf = std::fs::File::create(CONTROL_ID_PATH_RECURSION).unwrap();
         let license = r#"
-        // Copyright 2023 RISC Zero, Inc.
+        // Copyright 2024 RISC Zero, Inc.
         //
         // Licensed under the Apache License, Version 2.0 (the "License");
         // you may not use this file except in compliance with the License.
