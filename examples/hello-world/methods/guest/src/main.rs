@@ -19,7 +19,7 @@ use risc0_zkvm::guest::env;
 
 risc0_zkvm::guest::entry!(main);
 
-pub fn main() {
+fn main() {
     // Load the first number from the host
     let a: u64 = env::read();
     // Load the second number from the host

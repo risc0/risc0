@@ -12,14 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#![no_main]
-
 use risc0_benchmark_lib::MembershipProof;
 use risc0_zkvm::guest::env;
 
-risc0_zkvm::entry!(main);
-
-pub fn main() {
+fn main() {
     let proof: MembershipProof = env::read();
     assert!(proof.verify());
     env::commit(&(proof.leaf, proof.root))

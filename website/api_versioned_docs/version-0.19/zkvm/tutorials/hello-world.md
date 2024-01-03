@@ -46,7 +46,7 @@ In the code snippet below, the guest reads the `input` value from the host and t
 ```rust ignore
 use risc0_zkvm::guest::env;
 
-pub fn main() {
+fn main() {
     // read the input
     let input: u32 = env::read();
 
