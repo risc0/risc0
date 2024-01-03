@@ -12,14 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#![no_main]
-
 use password_checker_core::PasswordRequest;
 use pbkdf2::pbkdf2_hmac_array;
 use risc0_zkvm::{guest::env, sha::Digest};
 use sha2::Sha256;
-
-risc0_zkvm::guest::entry!(main);
 
 /// Constant policy, compiled into the guest, for this example.
 ///
@@ -38,7 +34,7 @@ const POLICY: PasswordPolicy = PasswordPolicy {
 /// times short. Using a higher iteration count would be required for a real deployment.
 const PBKDF2_SHA256_ITERATIONS: u32 = 10;
 
-pub fn main() {
+fn main() {
     let request: PasswordRequest = env::read();
 
     if !POLICY.is_valid(&request.password) {

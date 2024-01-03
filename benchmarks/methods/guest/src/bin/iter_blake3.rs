@@ -11,13 +11,10 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#![no_main]
 
 use risc0_zkvm::{guest::env, sha::Digest};
 
-risc0_zkvm::entry!(main);
-
-pub fn main() {
+fn main() {
     let (num_iter, data): (u32, Vec<u8>) = env::read();
 
     let mut output = blake3::hash(&data);
