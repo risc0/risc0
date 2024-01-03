@@ -37,37 +37,49 @@ use tracing_subscriber::{prelude::*, EnvFilter};
 struct PerformanceData {
     cycles: u64,
     segments: usize,
-    exec_duration: Duration,
-    prove_duration: Duration,
-    lift_duration: Duration,
-    join_duration: Duration,
-    total_duration: Duration,
     ram: usize,
-    speed: f64,
     seal: usize,
+    exec_t: Duration,
+    prove_t: Duration,
+    lift_t: Duration,
+    join_t: Duration,
+    duration: Duration,
+    exec_s: f64,
+    prove_s: f64,
+    lift_s: f64,
+    join_s: f64,
+    speed: f64,
 }
 
 impl PerformanceData {
+    const W: usize = 12;
+
     fn header() -> String {
         format!(
-            "| {:>10} | {:>10} | {:>10} | {:>10} | {:>10} | {:>10} | {:>10} | {:>10} | {:>10} | {:>10} |",
-            "Cycles", "Segments", "Exec", "Prove", "Lift", "Join", "Duration", "RAM", "Seal", "Speed"
+            "| {:>W$} | {:>W$} | {:>W$} | {:>W$} | {:>W$} | {:>W$} | {:>W$} | {:>W$} | {:>W$} | {:>W$} | {:>W$} | {:>W$} | {:>W$} | {:>W$} |",
+            "Cycles", "Segments", "RAM", "Seal", "Exec time", "Prove time", "Lift time", "Join time", "Total time", "Exec speed", "Prove speed", "Lift speed", "Join speed", "Total Speed",
+            W = PerformanceData::W
         )
     }
 
     fn row(&self) -> String {
         format!(
-            "| {:>10} | {:>10} | {:>10} | {:>10} | {:>10} | {:>10} | {:>10} | {:>10} | {:>10} | {:>10} |",
+            "| {:>W$} | {:>W$} | {:>W$} | {:>W$} | {:>W$} | {:>W$} | {:>W$} | {:>W$} | {:>W$} | {:>W$} | {:>W$} | {:>W$} | {:>W$} | {:>W$} |",
             self.cycles.div(1024).human_count_bare().to_string(),
             self.segments.human_count_bare().to_string(),
-            self.exec_duration.human_duration().to_string(),
-            self.prove_duration.human_duration().to_string(),
-            self.lift_duration.human_duration().to_string(),
-            self.join_duration.human_duration().to_string(),
-            self.total_duration.human_duration().to_string(),
             self.ram.human_count_bytes().to_string(),
             self.seal.human_count_bytes().to_string(),
-            self.speed.human_count("hz").to_string()
+            self.exec_t.human_duration().to_string(),
+            self.prove_t.human_duration().to_string(),
+            self.lift_t.human_duration().to_string(),
+            self.join_t.human_duration().to_string(),
+            self.duration.human_duration().to_string(),
+            self.exec_s.human_count("hz").to_string(),
+            self.prove_s.human_count("hz").to_string(),
+            self.lift_s.human_count("hz").to_string(),
+            self.join_s.human_count("hz").to_string(),
+            self.speed.human_count("hz").to_string(),
+            W = PerformanceData::W
         )
     }
 }
@@ -264,9 +276,11 @@ fn top(
         .flatten()
         .map_or_else(|| Duration::default(), |j| j.duration);
 
-    let total_duration = exec_duration + prove_duration + lift_duration + join_duration;
+    let duration = exec_duration + prove_duration + lift_duration + join_duration;
     let ram = prover.get_peak_memory_usage();
-    let speed = cycles as f64 / total_duration.as_secs_f64();
+    let speed = cycles as f64 / duration.as_secs_f64();
+
+    let s = |duration: Duration| cycles as f64 / duration.as_secs_f64();
 
     PerformanceData {
         ram,
@@ -274,11 +288,15 @@ fn top(
         segments,
         seal,
         cycles,
-        exec_duration,
-        prove_duration,
-        lift_duration,
-        join_duration,
-        total_duration,
+        duration,
+        exec_s: s(exec_duration),
+        prove_s: s(prove_duration),
+        lift_s: s(lift_duration),
+        join_s: s(join_duration),
+        exec_t: exec_duration,
+        prove_t: prove_duration,
+        lift_t: lift_duration,
+        join_t: join_duration,
     }
 }
 
