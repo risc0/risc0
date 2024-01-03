@@ -12,14 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#![no_main]
-
 use prorata_core::AllocationQuery;
 use risc0_zkvm::guest::env;
 
-risc0_zkvm::guest::entry!(main);
-
-pub fn main() {
+fn main() {
     // Load the amount, recipients, and target user sent from the host:
     let query: AllocationQuery = env::read();
 
