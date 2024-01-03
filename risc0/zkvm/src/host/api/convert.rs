@@ -109,9 +109,9 @@ impl From<TraceEvent> for pb::api::TraceEvent {
                     },
                 )),
             },
-            TraceEvent::MemorySet { addr, value } => Self {
+            TraceEvent::MemorySet { addr, region } => Self {
                 kind: Some(pb::api::trace_event::Kind::MemorySet(
-                    pb::api::trace_event::MemorySet { addr, value },
+                    pb::api::trace_event::MemorySet { addr, region },
                 )),
             },
         }
@@ -134,7 +134,7 @@ impl TryFrom<pb::api::TraceEvent> for TraceEvent {
             },
             pb::api::trace_event::Kind::MemorySet(event) => TraceEvent::MemorySet {
                 addr: event.addr,
-                value: event.value,
+                region: event.region,
             },
         })
     }

@@ -239,7 +239,7 @@ message TraceEvent {
 
   message MemorySet {
     uint32 addr = 1;
-    uint32 value = 2;
+    bytes region = 2;
   }
 
   oneof kind {
