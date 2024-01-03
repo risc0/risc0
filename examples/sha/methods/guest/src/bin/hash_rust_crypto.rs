@@ -12,16 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#![no_main]
-
 // Also available as risc0_zkvm::sha::rust_crypto
 use risc0_zkvm::{guest::env, sha::Digest};
 use sha2::{Digest as _, Sha256};
 
-risc0_zkvm::guest::entry!(main);
-
 // Example of using RustCrypto with RISC Zero accelerator support.
-pub fn main() {
+fn main() {
     let data: String = env::read();
     let digest = Sha256::digest(&data.as_bytes());
     let digest = Digest::try_from(digest.as_slice()).unwrap();

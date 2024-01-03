@@ -12,15 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#![no_main]
-
 use core::hint::black_box;
 use risc0_zkvm::{guest::env, sha::Digest};
 use starknet_crypto::FieldElement;
 
-risc0_zkvm::entry!(main);
-
-pub fn main() {
+fn main() {
     let (num_iter, _data): (u32, Vec<u8>) = env::read();
 
     let e0 = FieldElement::from_hex_be(

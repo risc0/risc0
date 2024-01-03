@@ -18,7 +18,7 @@ use risc0_zkvm::{
 };
 use risc0_zkvm_methods::bench::{BenchmarkSpec, SpecWithIters};
 
-pub fn main() {
+fn main() {
     let SpecWithIters(spec, iters) = env::read();
     match spec {
         BenchmarkSpec::SimpleLoop => {

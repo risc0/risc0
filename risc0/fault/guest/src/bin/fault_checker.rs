@@ -15,7 +15,7 @@
 use risc0_zkvm::{guest::env, FaultCheckMonitor};
 use rrs_lib::{instruction_executor::InstructionExecutor, HartState};
 
-pub fn main() {
+fn main() {
     let fault_monitor: FaultCheckMonitor = env::read();
 
     let mut instruction_executor = InstructionExecutor {

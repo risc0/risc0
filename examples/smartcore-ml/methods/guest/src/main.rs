@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#![no_main]
-
 use risc0_zkvm::guest::env;
 use smartcore::{
     linalg::basic::matrix::DenseMatrix,
@@ -24,9 +22,7 @@ use smartcore::{
     tree::decision_tree_classifier::DecisionTreeClassifier,
 };
 
-risc0_zkvm::guest::entry!(main);
-
-pub fn main() {
+fn main() {
     // Read in is_svm boolean to ensure the correct code block is executed
     let is_svm: bool = env::read();
 
