@@ -41,18 +41,18 @@ struct PerformanceData {
     seal: usize,
     exec_t: Duration,
     prove_t: Duration,
-    lift_t: Duration,
-    join_t: Duration,
+    lift_t: Option<Duration>,
+    join_t: Option<Duration>,
     duration: Duration,
     exec_s: f64,
     prove_s: f64,
-    lift_s: f64,
-    join_s: f64,
+    lift_s: Option<f64>,
+    join_s: Option<f64>,
     speed: f64,
 }
 
 impl PerformanceData {
-    const W: usize = 12;
+    const W: usize = 11;
 
     fn header() -> String {
         format!(
@@ -71,13 +71,13 @@ impl PerformanceData {
             self.seal.human_count_bytes().to_string(),
             self.exec_t.human_duration().to_string(),
             self.prove_t.human_duration().to_string(),
-            self.lift_t.human_duration().to_string(),
-            self.join_t.human_duration().to_string(),
+            self.lift_t.map_or("N/A".to_string(), |v| v.human_duration().to_string()),
+            self.join_t.map_or("N/A".to_string(), |v| v.human_duration().to_string()),
             self.duration.human_duration().to_string(),
             self.exec_s.human_count("hz").to_string(),
             self.prove_s.human_count("hz").to_string(),
-            self.lift_s.human_count("hz").to_string(),
-            self.join_s.human_count("hz").to_string(),
+            self.lift_s.map_or("N/A".to_string(), |v| v.human_count("hz").to_string()),
+            self.join_s.map_or("N/A".to_string(), |v| v.human_count("hz").to_string()),
             self.speed.human_count("hz").to_string(),
             W = PerformanceData::W
         )
@@ -270,17 +270,19 @@ fn top(
     let join_result = join.then(|| lift_result.as_ref().map(|l| top_join(&l.proofs)));
 
     let prove_duration = proofs_duration.iter().sum();
-    let lift_duration =
-        lift_result.map_or_else(|| Duration::default(), |l| l.duration.iter().sum());
+    let lift_duration = lift_result.map(|l| l.duration.iter().sum());
     let join_duration = join_result
-        .flatten()
-        .map_or_else(|| Duration::default(), |j| j.duration);
+    .flatten().map(|j| j.duration).filter(|d| !d.is_zero());
 
-    let duration = exec_duration + prove_duration + lift_duration + join_duration;
+    let duration = exec_duration
+        + prove_duration
+        + lift_duration.unwrap_or_default()
+        + join_duration.unwrap_or_default();
     let ram = prover.get_peak_memory_usage();
     let speed = cycles as f64 / duration.as_secs_f64();
 
     let s = |duration: Duration| cycles as f64 / duration.as_secs_f64();
+    let so = |duration: Option<Duration>| duration.map(|d| cycles as f64 / d.as_secs_f64());
 
     PerformanceData {
         ram,
@@ -291,8 +293,8 @@ fn top(
         duration,
         exec_s: s(exec_duration),
         prove_s: s(prove_duration),
-        lift_s: s(lift_duration),
-        join_s: s(join_duration),
+        lift_s: so(lift_duration),
+        join_s: so(join_duration),
         exec_t: exec_duration,
         prove_t: prove_duration,
         lift_t: lift_duration,
