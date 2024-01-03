@@ -12,9 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#![no_main]
-risc0_zkvm::guest::entry!(main);
-
 use risc0_zkvm::guest::env;
 
 use bevy_core::Outputs;
@@ -43,7 +40,7 @@ fn movement(mut query: Query<(&mut Position, &Velocity)>) {
     }
 }
 
-pub fn main() {
+fn main() {
     let turns: u32 = env::read();
     let mut world = World::new();
     let entity = world

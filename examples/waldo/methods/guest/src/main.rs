@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#![no_main]
-
 use image::{imageops, GenericImageView};
 use risc0_zkvm::guest::env;
 use waldo_core::{
@@ -21,9 +19,7 @@ use waldo_core::{
     Journal, PrivateInput,
 };
 
-risc0_zkvm::guest::entry!(main);
-
-pub fn main() {
+fn main() {
     // Read a Merkle proof from the host.
     let input: PrivateInput = env::read();
 

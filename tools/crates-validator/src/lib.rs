@@ -189,7 +189,7 @@ const MAIN_RS_TEMPLATE: &str = r#"
 
 risc0_zkvm::guest::entry!(main);
 
-pub fn main() {
+fn main() {
     {{ main_body }}
 }
 

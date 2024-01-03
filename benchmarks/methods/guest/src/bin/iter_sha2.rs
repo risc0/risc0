@@ -12,13 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#![no_main]
-
 use risc0_zkvm::{guest::env, sha, sha::Sha256};
 
-risc0_zkvm::entry!(main);
-
-pub fn main() {
+fn main() {
     let (num_iter, data): (u32, Vec<u8>) = env::read();
 
     let mut hash = sha::Impl::hash_bytes(&data);
