@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -170,7 +170,12 @@ impl Client {
         result
     }
 
-    /// Lift a [SegmentReceipt] into a [SuccinctReceipt].
+    /// Run the lift program to transform a [SegmentReceipt] into a [SuccinctReceipt].
+    ///
+    /// The lift program verifies the rv32im circuit STARK proof inside the recursion circuit,
+    /// resulting in a recursion circuit STARK proof. This recursion proof has a single
+    /// constant-time verification procedure, with respect to the original segment length, and is then
+    /// used as the input to all other recursion programs (e.g. join, resolve, and identity_p254).
     pub fn lift(
         &self,
         opts: ProverOpts,
@@ -208,7 +213,10 @@ impl Client {
         result
     }
 
-    /// Recursively join two receipts into a [SuccinctReceipt].
+    /// Run the join program to compress two [SuccinctReceipt]s in the same session into one.
+    ///
+    /// By repeated application of the join program, any number of receipts for execution spans within
+    /// the same session can be compressed into a single receipt for the entire session.
     pub fn join(
         &self,
         opts: ProverOpts,
@@ -248,7 +256,58 @@ impl Client {
         result
     }
 
-    /// Convert a [SuccinctReceipt] with a poseidon hash function that uses a 254-bit field
+    /// Run the resolve program to remove an assumption from a conditional [SuccinctReceipt] upon
+    /// verifying a corroborating [SuccinctReceipt] for the assumption.
+    ///
+    /// By applying the resolve program, a conditional receipt (i.e. a receipt for an execution
+    /// using the `env::verify` API to logically verify a receipt) can be made into an
+    /// unconditional receipt.
+    pub fn resolve(
+        &self,
+        opts: ProverOpts,
+        conditional_receipt: Asset,
+        corroborating_receipt: Asset,
+        receipt_out: AssetRequest,
+    ) -> Result<SuccinctReceipt> {
+        let mut conn = self.connect()?;
+
+        let request = pb::api::ServerRequest {
+            kind: Some(pb::api::server_request::Kind::Resolve(
+                pb::api::ResolveRequest {
+                    opts: Some(opts.into()),
+                    conditional_receipt: Some(conditional_receipt.try_into()?),
+                    corroborating_receipt: Some(corroborating_receipt.try_into()?),
+                    receipt_out: Some(receipt_out.try_into()?),
+                },
+            )),
+        };
+        tracing::trace!("tx: {request:?}");
+        conn.send(request)?;
+
+        let reply: pb::api::ResolveReply = conn.recv()?;
+
+        let result = match reply.kind.ok_or(malformed_err())? {
+            pb::api::resolve_reply::Kind::Ok(result) => {
+                let receipt_bytes = result.receipt.ok_or(malformed_err())?.as_bytes()?;
+                let receipt_pb = pb::core::SuccinctReceipt::decode(receipt_bytes)?;
+                receipt_pb.try_into()
+            }
+            pb::api::resolve_reply::Kind::Error(err) => Err(err.into()),
+        };
+
+        let code = conn.close()?;
+        if code != 0 {
+            bail!("Child finished with: {code}");
+        }
+
+        result
+    }
+
+    /// Prove the verification of a recursion receipt using the Poseidon254 hash function for FRI.
+    ///
+    /// The identity_p254 program is used as the last step in the prover pipeline before running the
+    /// Groth16 prover. In Groth16 over BN254, it is much more efficient to verify a STARK that was
+    /// produced with Poseidon over the BN254 base field compared to using Posidon over BabyBear.
     pub fn identity_p254(
         &self,
         opts: ProverOpts,
