@@ -24,9 +24,11 @@ use std::{
 };
 
 use anyhow::{anyhow, ensure, Result};
+use human_repr::HumanCount;
 use risc0_binfmt::{MemoryImage, SystemState};
 use risc0_zkvm_platform::WORD_SIZE;
 use serde::{Deserialize, Serialize};
+use tracing::{info, instrument};
 
 use crate::{
     host::server::exec::executor::SyscallRecord, sha::Digest, Assumption, Assumptions, ExitCode,
@@ -249,6 +251,34 @@ impl Session {
                     user_cycles + segment.cycles as u64,
                 )
             }))
+    }
+
+    /// Log cycle information for this [Session].
+    ///
+    /// This logs the total and user cycles for this [Session] at the INFO level.
+    #[instrument(name = "executor", skip(self))]
+    pub fn log(&self) -> anyhow::Result<()> {
+        let (total_prover_cycles, user_instruction_cycles) = self.get_cycles()?;
+        let cycles_used_ratio = user_instruction_cycles as f64 / total_prover_cycles as f64 * 100.0;
+
+        info!(
+            "number of segments: {}",
+            self.segments.len().human_count_bare()
+        );
+        info!(
+            "total prover cycles: {}",
+            total_prover_cycles.human_count_bare()
+        );
+        info!(
+            "user instruction cycles: {}",
+            user_instruction_cycles.human_count_bare()
+        );
+        info!(
+            "cycle efficiency: {}%",
+            cycles_used_ratio.human_count_bare()
+        );
+
+        Ok(())
     }
 }
 
