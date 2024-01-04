@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,12 +15,12 @@
 use nalgebra::Matrix2;
 use risc0_zkvm::guest::env;
 
-pub fn main() {
+fn main() {
     let iterations: u32 = env::read();
     let answer = fibonacci(iterations);
     env::commit(&answer);
 }
 
-pub fn fibonacci(n: u32) -> u64 {
+fn fibonacci(n: u32) -> u64 {
     Matrix2::new(1, 1, 1, 0).pow(n - 1)[(0, 0)]
 }

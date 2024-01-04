@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -32,8 +32,9 @@ use risc0_zkvm::{
 use risc0_zkvm_methods::multi_test::{MultiTestSpec, SYS_MULTI_TEST};
 use risc0_zkvm_platform::{
     fileno,
-    memory::{self, SYSTEM}, PAGE_SIZE,
+    memory::{self, SYSTEM},
     syscall::{bigint, sys_bigint, sys_log, sys_read, sys_read_words, sys_write},
+    PAGE_SIZE,
 };
 
 risc0_zkvm::entry!(main);
@@ -50,7 +51,7 @@ fn profile_test_func2() {
     unsafe { asm!("nop") }
 }
 
-pub fn main() {
+fn main() {
     let impl_select: MultiTestSpec = env::read();
     match impl_select {
         MultiTestSpec::DoNothing => {}
@@ -269,17 +270,19 @@ pub fn main() {
         },
         MultiTestSpec::AlignedAlloc => {
             #[repr(align(1024))]
-            struct AlignTest1 { pub _test: u32 }
+            struct AlignTest1 {
+                pub _test: u32,
+            }
 
             impl AlignTest1 {
                 pub fn new(_test: u32) -> Self {
-                    AlignTest1{_test}
+                    AlignTest1 { _test }
                 }
             }
 
             let a = &AlignTest1::new(54) as *const _;
             let b = &AlignTest1::new(60) as *const _;
             assert_eq!(PAGE_SIZE, b as usize - a as usize);
-        },
+        }
     }
 }

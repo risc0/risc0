@@ -37,7 +37,7 @@ To support various use cases, there are a number of functions that can be called
 [`env::stderr`]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest/env/fn.stderr.html
 
 - **Committing public outputs to [journal]**<br/>
-  `env::commit`, `env::commit_slice`
+  [`env::commit`], [`env::commit_slice`]
 
 [`env::commit`]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest/env/fn.commit.html
 [`env::commit_slice`]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest/env/fn.commit_slice.html
@@ -83,12 +83,8 @@ You can file an issue on [these docs] or the [examples], and we're happy to answ
 [host]: /terminology#host
 [`risc0-zkvm` Rust crate]: https://docs.rs/risc0-zkvm
 [journal]: /terminology#journal
-[method]: /terminology#method
 [zkVM Quick Start]: ../quickstart.md
-[zkVM Overview]: ../zkvm_overview.md
 [Hello World demo]: https://github.com/risc0/risc0/tree/main/examples/hello-world
-[risc0/examples]: https://github.com/risc0/risc0/tree/v0.18.0/examples
-[guest environment commands]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest/index.html
 [zkVM Application]: ../zkvm_overview.md
 [zkVM]: ../zkvm_overview.md
 [Bonsai]: ../../bonsai/bonsai-overview.md

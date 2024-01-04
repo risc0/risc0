@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,9 +11,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
-#![no_main]
-risc0_zkvm::guest::entry!(main);
 
 use risc0_zkvm::guest::env;
 
@@ -43,7 +40,7 @@ fn movement(mut query: Query<(&mut Position, &Velocity)>) {
     }
 }
 
-pub fn main() {
+fn main() {
     let turns: u32 = env::read();
     let mut world = World::new();
     let entity = world

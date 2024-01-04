@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,14 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#![no_main]
-
 use nalgebra::Matrix2;
 use risc0_zkvm::guest::env;
 
-risc0_zkvm::guest::entry!(main);
-
-pub fn main() {
+fn main() {
     let iterations: u32 = env::read();
     let answer_1 = fibonacci_1(iterations);
     let answer_2 = fibonacci_2(iterations);
