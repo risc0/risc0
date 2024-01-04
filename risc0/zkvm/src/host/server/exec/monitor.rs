@@ -312,7 +312,7 @@ impl MemoryMonitor {
         if self.enable_trace {
             self.trace_events.insert(TraceEvent::MemorySet {
                 addr,
-                value: data as u32,
+                region: vec![data],
             });
         }
         Ok(())
@@ -328,7 +328,7 @@ impl MemoryMonitor {
         if self.enable_trace {
             self.trace_events.insert(TraceEvent::MemorySet {
                 addr,
-                value: data as u32,
+                region: data.to_le_bytes().to_vec(),
             });
         }
         Ok(())
@@ -342,8 +342,10 @@ impl MemoryMonitor {
         self.store_bytes(addr, &data.to_le_bytes())?;
         self.mark_page(addr);
         if self.enable_trace {
-            self.trace_events
-                .insert(TraceEvent::MemorySet { addr, value: data });
+            self.trace_events.insert(TraceEvent::MemorySet {
+                addr,
+                region: data.to_le_bytes().to_vec(),
+            });
         }
         Ok(())
     }
@@ -353,12 +355,18 @@ impl MemoryMonitor {
         self.store_u32(addr, data)
     }
 
-    pub fn store_region(&mut self, addr: u32, slice: &[u8]) -> Result<()> {
+    fn store_region(&mut self, addr: u32, slice: &[u8]) -> Result<()> {
         // tracing::trace!("store_region: 0x{addr:08x}");
         slice
             .iter()
             .enumerate()
             .try_for_each(|(i, x)| self.raw_store_u8(addr + i as u32, *x))?;
+        if self.enable_trace {
+            self.trace_events.insert(TraceEvent::MemorySet {
+                addr,
+                region: slice.to_vec(),
+            });
+        }
         Ok(())
     }
 
