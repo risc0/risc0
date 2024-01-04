@@ -393,10 +393,12 @@ impl<'a> ExecutorImpl<'a> {
             assumptions,
         );
 
-        tracing::info!("execution time: {}", elapsed.human_duration());
-        if let Err(error) = session.log() {
-            tracing::error!(?error, "failed to log session");
-        }
+        tracing::info_span!("executor").in_scope(|| {
+            tracing::info!("execution time: {}", elapsed.human_duration());
+            if let Err(error) = session.log() {
+                tracing::error!(?error, "failed to log session");
+            }
+        });
 
         Ok(session)
     }
