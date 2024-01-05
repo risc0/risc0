@@ -204,7 +204,7 @@ jobs:
           clippy_flags: --features $FEATURE --all-targets
           #filter_mode: nofilter
           fail_on_error: true
-          #workdir: 
+          workdir: tools/
       - run: sccache --show-stats
 
   examples:
