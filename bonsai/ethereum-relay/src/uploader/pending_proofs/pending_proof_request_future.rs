@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -110,10 +110,6 @@ impl Future for PendingProofRequest {
                             ) {
                                 ("SUCCEEDED", true) => Ok(receipt_response),
                                 ("SUCCEEDED", false) => {
-                                    // TODO: Should we consider this a failure
-                                    // and retry, or should we just return an
-                                    // error?
-
                                     // Bonsai returned the receipt in a inconsistent state,
                                     // we should assume the proof failed and return an error
                                     Err(BackoffError::permanent(Error::ProofRequestError {

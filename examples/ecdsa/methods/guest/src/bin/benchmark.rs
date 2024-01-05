@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,8 +11,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
-#![no_main]
 
 use core::{hint::black_box, ops::Add};
 
@@ -32,11 +30,11 @@ fn bench<T>(name: &str, func: impl Fn() -> T) {
     // order to exclude paged-in operations from the benchmark count.
     black_box(func());
 
-    let start = env::get_cycle_count();
+    let start = env::cycle_count();
 
     black_box(func());
 
-    let end = env::get_cycle_count();
+    let end = env::cycle_count();
     println!("{}: {} cycles", name, end - start)
 }
 
@@ -105,8 +103,6 @@ fn benchmark_group() {
         .to_affine()
     });
 }
-
-risc0_zkvm::guest::entry!(main);
 
 fn main() {
     benchmark_field();

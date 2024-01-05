@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,7 +20,8 @@ use std::{
 
 use anyhow::Result;
 use risc0_zkvm_methods::{
-    multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID, MULTI_TEST_PATH,
+    multi_test::MultiTestSpec, HELLO_COMMIT_ELF, HELLO_COMMIT_ID, MULTI_TEST_ELF, MULTI_TEST_ID,
+    MULTI_TEST_PATH,
 };
 use tempfile::{tempdir, TempDir};
 use test_log::test;
@@ -108,6 +109,23 @@ impl TestClient {
             let receipt_out = AssetRequest::Path(self.get_work_path());
             self.client
                 .join(opts, left_receipt, right_receipt, receipt_out)
+        })
+    }
+
+    fn resolve(
+        &self,
+        opts: ProverOpts,
+        conditional_receipt: Asset,
+        corroborating_receipt: Asset,
+    ) -> SuccinctReceipt {
+        with_server(self.addr, || {
+            let receipt_out = AssetRequest::Path(self.get_work_path());
+            self.client.resolve(
+                opts,
+                conditional_receipt,
+                corroborating_receipt,
+                receipt_out,
+            )
         })
     }
 
@@ -219,6 +237,76 @@ fn lift_join_identity() {
 
     let rollup_receipt = Receipt::new(InnerReceipt::Succinct(rollup), session.journal.bytes.into());
     rollup_receipt.verify(MULTI_TEST_ID).unwrap();
+}
+
+#[test]
+fn lift_resolve() {
+    let mut client = TestClient::new();
+
+    // Execute the hello commit guest to use as an assumption.
+    let hello_commit_binary = Asset::Inline(HELLO_COMMIT_ELF.into());
+    let assumption_session = client.execute(ExecutorEnv::default(), hello_commit_binary);
+    assert_eq!(assumption_session.segments.len(), 1);
+    assert_eq!(client.segments.len(), 1);
+
+    let opts = ProverOpts::default();
+
+    // Prove and lift the assumption.
+    let assumption_segment_receipt = client.prove_segment(opts.clone(), client.segments[0].clone());
+    assumption_segment_receipt
+        .verify_integrity_with_context(&VerifierContext::default())
+        .unwrap();
+    let assumption_succinct_receipt =
+        client.lift(opts.clone(), assumption_segment_receipt.try_into().unwrap());
+    assumption_succinct_receipt
+        .verify_integrity_with_context(&VerifierContext::default())
+        .unwrap();
+
+    // Drop the old client and create a new one to reset the segment list.
+    let mut client = TestClient::new();
+
+    // Execute the composition multitest
+    let env = ExecutorEnv::builder()
+        .add_assumption(assumption_succinct_receipt.claim.clone().into())
+        .write(&MultiTestSpec::SysVerify {
+            image_id: HELLO_COMMIT_ID.into(),
+            journal: b"hello world".to_vec(),
+        })
+        .unwrap()
+        .build()
+        .unwrap();
+    let multi_test_binary = Asset::Inline(MULTI_TEST_ELF.into());
+    let composition_session = client.execute(env, multi_test_binary);
+    assert_eq!(assumption_session.segments.len(), 1);
+    assert_eq!(client.segments.len(), 1);
+
+    // Prove and lift the composition
+    let composition_segment_receipt =
+        client.prove_segment(opts.clone(), client.segments[0].clone());
+    composition_segment_receipt
+        .verify_integrity_with_context(&VerifierContext::default())
+        .unwrap();
+    let composition_succinct_receipt = client.lift(
+        opts.clone(),
+        composition_segment_receipt.try_into().unwrap(),
+    );
+    composition_succinct_receipt
+        .verify_integrity_with_context(&VerifierContext::default())
+        .unwrap();
+
+    // Use resolve to create an unconditional succinct receipt
+    let succint_receipt = client.resolve(
+        opts.clone(),
+        composition_succinct_receipt.try_into().unwrap(),
+        assumption_succinct_receipt.try_into().unwrap(),
+    );
+
+    // Wrap into a Receipt and verify
+    let receipt = Receipt::new(
+        InnerReceipt::Succinct(succint_receipt),
+        composition_session.journal.bytes,
+    );
+    receipt.verify(MULTI_TEST_ID).unwrap();
 }
 
 #[test]

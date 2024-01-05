@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -33,7 +33,8 @@ use crate::{
     prover::{Prover, ProverHandle},
     routes::{
         create_session, create_snark, get_image_upload, get_input_upload, get_receipt,
-        put_image_upload, put_input_upload, session_status, snark_status,
+        get_receipt_upload, put_image_upload, put_input_upload, put_receipt, session_status,
+        snark_status,
     },
     state::BonsaiState,
 };
@@ -49,6 +50,8 @@ fn app(state: Arc<RwLock<BonsaiState>>, prover_handle: ProverHandle) -> Router {
         .route("/snark/create", post(create_snark))
         .route("/snark/status/:snark_id", get(snark_status))
         .route("/receipts/:session_id", get(get_receipt))
+        .route("/receipts/:session_id", put(put_receipt))
+        .route("/receipts/upload", get(get_receipt_upload))
         .layer(Extension(prover_handle))
         .with_state(state)
         .layer(DefaultBodyLimit::max(256 * 1024 * 1024))
@@ -107,8 +110,12 @@ mod test {
         // Prepare input data and upload it.
         let input_id = bonsai_sdk::upload_input(client.clone(), vec![]).await?;
 
+        // Prepare symbolic list of receipt data and upload it.
+        let receipts_ids = vec![bonsai_sdk::upload_receipt(client.clone(), vec![]).await?];
+
         // Start a session running the prover
-        let session = bonsai_sdk::create_session(client.clone(), image_id, input_id).await?;
+        let session =
+            bonsai_sdk::create_session(client.clone(), image_id, input_id, receipts_ids).await?;
         loop {
             let res = bonsai_sdk::session_status(client.clone(), session.clone()).await?;
             if res.status == "RUNNING" {

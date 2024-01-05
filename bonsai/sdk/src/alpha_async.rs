@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -45,6 +45,13 @@ pub async fn upload_input(bonsai_client: Client, buf: Vec<u8>) -> Result<String,
         .map_err(|err| SdkErr::InternalServerErr(format!("{err}")))?
 }
 
+/// Upload a receipt buffer to the /receipts/ route
+pub async fn upload_receipt(bonsai_client: Client, buf: Vec<u8>) -> Result<String, SdkErr> {
+    tokio::task::spawn_blocking(move || bonsai_client.upload_receipt(buf))
+        .await
+        .map_err(|err| SdkErr::InternalServerErr(format!("{err}")))?
+}
+
 /// Upload a image buffer to the /images/ route
 ///
 /// The boolean return indicates if the image already exists in bonsai
@@ -70,8 +77,9 @@ pub async fn create_session(
     bonsai_client: Client,
     img_id: String,
     input_id: String,
+    assumptions: Vec<String>,
 ) -> Result<SessionId, SdkErr> {
-    tokio::task::spawn_blocking(move || bonsai_client.create_session(img_id, input_id))
+    tokio::task::spawn_blocking(move || bonsai_client.create_session(img_id, input_id, assumptions))
         .await
         .map_err(|err| SdkErr::InternalServerErr(format!("{err}")))?
 }

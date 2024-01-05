@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ struct PersistentPageTableInfo {
 }
 
 #[derive(Clone, Serialize, Deserialize)]
-#[serde(from = "PersistentPageTableInfo", into = "PersistentPageTableInfo")]
+#[serde(try_from = "PersistentPageTableInfo", into = "PersistentPageTableInfo")]
 pub struct PageTableInfo {
     pub page_size: u32,
     page_size_po2: u32,
@@ -69,20 +69,13 @@ pub struct PageTableInfo {
     zero_page_hash: Digest,
 }
 
-impl From<PersistentPageTableInfo> for PageTableInfo {
-    fn from(value: PersistentPageTableInfo) -> Self {
-        PageTableInfo::new(value.page_table_addr, value.page_size).expect("Invalid page table")
+impl TryFrom<PersistentPageTableInfo> for PageTableInfo {
+    type Error = anyhow::Error;
+
+    fn try_from(value: PersistentPageTableInfo) -> Result<Self, Self::Error> {
+        PageTableInfo::new(value.page_table_addr, value.page_size)
     }
 }
-
-// TODO: Decide between TryFrom and From
-// impl TryFrom<PersistentPageTableInfo> for PageTableInfo {
-//     type Error = anyhow::Error;
-
-//     fn try_from(value: PersistentPageTableInfo) -> Result<Self, Self::Error> {
-//         PageTableInfo::new(value.page_table_addr, value.page_size)
-//     }
-// }
 
 impl From<PageTableInfo> for PersistentPageTableInfo {
     fn from(value: PageTableInfo) -> Self {
@@ -94,7 +87,7 @@ impl From<PageTableInfo> for PersistentPageTableInfo {
 }
 
 /// Compute and return the ImageID of the given `(merkle_root, pc)` pair.
-pub fn compute_image_id(merkle_root: &Digest, pc: u32) -> Digest {
+fn compute_image_id(merkle_root: &Digest, pc: u32) -> Digest {
     SystemState {
         merkle_root: *merkle_root,
         pc,
@@ -107,7 +100,7 @@ const fn div_ceil(a: u32, b: u32) -> u32 {
     (a + b - 1) / b
 }
 
-/// Round `a` up to the nearest multipe of `b`.
+/// Round `a` up to the nearest multiple of `b`.
 const fn round_up(a: u32, b: u32) -> u32 {
     div_ceil(a, b) * b
 }
@@ -208,7 +201,7 @@ impl MemoryImage {
 
     /// Writes the given byte array in this memory image at the given
     /// address.  The caller is responsible for ensuring the bytes do
-    /// not overlap a page boundry.
+    /// not overlap a page boundary.
     pub fn store_region_in_page(&mut self, addr: u32, bytes: &[u8]) {
         let page_idx = self.info.get_page_index(addr);
         let page = self.pages.entry(page_idx).or_insert_with(|| {
@@ -224,25 +217,23 @@ impl MemoryImage {
 
     /// Reads the given byte array in this memory image at the given
     /// address  The caller is responsible for ensuring the bytes do
-    /// not overlap a page boundry.
+    /// not overlap a page boundary.
     pub fn load_region_in_page(&self, addr: u32, bytes: &mut [u8]) -> Result<()> {
         let page_idx = self.info.get_page_index(addr);
         let page_start = self.info.get_page_addr(page_idx);
 
-        match self.pages.get(&page_idx) {
-            None => {
-                ensure!(
-                    addr as usize <= MEM_SIZE,
-                    "address {addr:08X} outside MEM_SIZE ({MEM_SIZE:08X})"
-                );
-                bytes.fill(0);
-            }
-            Some(page) => {
-                bytes.clone_from_slice(
-                    &page[(addr - page_start) as usize..(addr - page_start) as usize + bytes.len()],
-                );
-            }
-        };
+        if let Some(page) = self.pages.get(&page_idx) {
+            bytes.clone_from_slice(
+                &page[(addr - page_start) as usize..(addr - page_start) as usize + bytes.len()],
+            );
+        } else {
+            ensure!(
+                addr as usize <= MEM_SIZE,
+                "address {addr:08X} outside MEM_SIZE ({MEM_SIZE:08X})"
+            );
+            bytes.fill(0);
+        }
+
         Ok(())
     }
 
@@ -252,7 +243,7 @@ impl MemoryImage {
     }
 
     /// Calculate and update the image merkle tree within this image based on
-    /// the supplied page indicies.
+    /// the supplied page indices.
     pub fn hash_pages_iter<I: Iterator<Item = u32>>(&mut self, iter: I) -> Result<()> {
         iter.into_iter().try_for_each(|page_idx| {
             self.hash_page(page_idx).map(|digest| {

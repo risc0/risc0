@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -59,10 +59,21 @@ impl Prover for BonsaiProver {
         // upload input data
         let input_id = client.upload_input(env.input)?;
 
+        // upload receipts
+        let mut receipts_ids: Vec<String> = vec![];
+        for assumption in &env.assumptions.borrow().cached {
+            let serialized_receipt = match assumption {
+                crate::Assumption::Proven(receipt) => bincode::serialize(receipt)?,
+                crate::Assumption::Unresolved(_) => bail!("Only proven receipts can be uploaded."), //TODO: improve the message
+            };
+            let receipt_id = client.upload_receipt(serialized_receipt)?;
+            receipts_ids.push(receipt_id);
+        }
+
         // While this is the executor, we want to start a session on the bonsai prover.
         // By doing so, we can return a session ID so that the prover can use it to
         // retrieve the receipt.
-        let session = client.create_session(image_id_hex, input_id)?;
+        let session = client.create_session(image_id_hex, input_id, receipts_ids)?;
         tracing::debug!("Bonsai proving SessionID: {}", session.uuid);
 
         loop {

@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ use super::{exec::MachineContext, HalPair, ProverServer};
 use crate::{
     host::{
         receipt::{CompositeReceipt, InnerReceipt, SegmentReceipt, SuccinctReceipt},
-        recursion::{identity_p254, join, lift},
+        recursion::{identity_p254, join, lift, resolve},
         CIRCUIT,
     },
     sha::Digestible,
@@ -180,6 +180,14 @@ where
 
     fn join(&self, a: &SuccinctReceipt, b: &SuccinctReceipt) -> Result<SuccinctReceipt> {
         join(a, b)
+    }
+
+    fn resolve(
+        &self,
+        conditional: &SuccinctReceipt,
+        corroborating: &SuccinctReceipt,
+    ) -> Result<SuccinctReceipt> {
+        resolve(conditional, corroborating)
     }
 
     fn identity_p254(&self, a: &SuccinctReceipt) -> Result<SuccinctReceipt> {

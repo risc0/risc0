@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -329,7 +329,9 @@ pub fn commit_slice<T: Pod>(slice: &[T]) {
 
 /// Return the number of processor cycles that have occurred since the guest
 /// began.
-pub fn get_cycle_count() -> usize {
+///
+/// WARNING: The cycle count is provided by the host and is not checked by the zkVM circuit.
+pub fn cycle_count() -> usize {
     sys_cycle_count()
 }
 

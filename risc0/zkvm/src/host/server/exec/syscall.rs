@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -618,7 +618,7 @@ impl<'a> PosixIo<'a> {
         let msg = format!("R0VM[{}] ", ctx.get_cycle().to_string());
         writer
             .borrow_mut()
-            .write_all(&[msg.as_bytes(), &from_guest].concat())?;
+            .write_all(&[msg.as_bytes(), &from_guest, b"\n"].concat())?;
         Ok((0, 0))
     }
 }

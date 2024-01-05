@@ -114,6 +114,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "android-tzdata"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e999941b234f3131b00bc13c22d06e8c5ff726d1b6318ac7eb276997bbb4fef0"
+
+[[package]]
+name = "android_system_properties"
+version = "0.1.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "819e7219dbd41043ac279b19830f2efc897156490d7fd6ea916720117ee66311"
+dependencies = [
+ "libc",
+]
+
+[[package]]
 name = "ansi_colours"
 version = "1.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -412,6 +427,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d468802bab17cbc0cc575e9b053f41e72aa36bfa6b7f55e3529ffa43161b97fa"
 
 [[package]]
+name = "autotools"
+version = "0.2.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "aef8da1805e028a172334c3b680f93e71126f2327622faef2ec3d893c0a4ad77"
+dependencies = [
+ "cc",
+]
+
+[[package]]
 name = "backtrace"
 version = "0.3.69"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -578,7 +602,7 @@ dependencies = [
 
 [[package]]
 name = "bonsai-sdk"
-version = "0.5.0"
+version = "0.6.0-rc.1"
 dependencies = [
  "reqwest",
  "serde",
@@ -807,7 +831,37 @@ version = "0.4.31"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7f2c685bad3eb3d45a01354cedb7d5faa66194d1d58ba6e267a8de788f79db38"
 dependencies = [
+ "android-tzdata",
+ "iana-time-zone",
  "num-traits",
+ "windows-targets 0.48.5",
+]
+
+[[package]]
+name = "ciborium"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "effd91f6c78e5a4ace8a5d3c0b6bfaec9e2baaef55f3efc00e45fb2e477ee926"
+dependencies = [
+ "ciborium-io",
+ "ciborium-ll",
+ "serde",
+]
+
+[[package]]
+name = "ciborium-io"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cdf919175532b369853f5d5e20b26b43112613fd6fe7aee757e35f7a44642656"
+
+[[package]]
+name = "ciborium-ll"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "defaa24ecc093c77630e6c15e17c51f5e187bf35ee514f4e2d67baaa96dae22b"
+dependencies = [
+ "ciborium-io",
+ "half 1.8.2",
 ]
 
 [[package]]
@@ -1589,7 +1643,7 @@ checksum = "832a761f35ab3e6664babfbdc6cef35a4860e816ec3916dcfd0882954e98a8a8"
 dependencies = [
  "bit_field",
  "flume",
- "half",
+ "half 2.2.1",
  "lebe",
  "miniz_oxide",
  "rayon-core",
@@ -1981,6 +2035,12 @@ dependencies = [
 
 [[package]]
 name = "half"
+version = "1.8.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "eabb4a44450da02c90444cf74558da904edde8fb4e9035a9a6a4e15445af0bd7"
+
+[[package]]
+name = "half"
 version = "2.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "02b4af3693f1b705df946e9fe5631932443781d0aabb423b62fcd4d73f6d2fd0"
@@ -2157,6 +2217,29 @@ dependencies = [
  "rustls",
  "tokio",
  "tokio-rustls",
+]
+
+[[package]]
+name = "iana-time-zone"
+version = "0.1.58"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8326b86b6cff230b97d0d312a6c40a60726df3332e721f72a1b035f451663b20"
+dependencies = [
+ "android_system_properties",
+ "core-foundation-sys",
+ "iana-time-zone-haiku",
+ "js-sys",
+ "wasm-bindgen",
+ "windows-core",
+]
+
+[[package]]
+name = "iana-time-zone-haiku"
+version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f31827a206f56af32e590ba56d5d2d085f558508192593743f16b2306495269f"
+dependencies = [
+ "cc",
 ]
 
 [[package]]
@@ -2345,6 +2428,53 @@ dependencies = [
  "serde",
  "serde_json",
  "simple_asn1",
+]
+
+[[package]]
+name = "jwt-compact"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "25cb2458ca54de48ef237ac0d68d4e80e512ae81d6aeb9775f4c835da0d193d3"
+dependencies = [
+ "anyhow",
+ "base64ct",
+ "chrono",
+ "ciborium",
+ "hmac",
+ "rand_core",
+ "rsa",
+ "serde",
+ "serde_json",
+ "sha2",
+ "smallvec",
+ "subtle",
+ "zeroize",
+]
+
+[[package]]
+name = "jwt-core"
+version = "0.1.0"
+dependencies = [
+ "jwt-compact",
+ "serde",
+ "serde_json",
+ "thiserror",
+]
+
+[[package]]
+name = "jwt-methods"
+version = "0.1.0"
+dependencies = [
+ "risc0-build",
+]
+
+[[package]]
+name = "jwt-validator"
+version = "0.1.0"
+dependencies = [
+ "jwt-core",
+ "jwt-methods",
+ "risc0-zkvm",
 ]
 
 [[package]]
@@ -2684,6 +2814,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "num-bigint-dig"
+version = "0.8.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "dc84195820f291c7697304f3cbdadd1cb7199c0efc917ff5eafd71225c136151"
+dependencies = [
+ "byteorder",
+ "lazy_static",
+ "libm",
+ "num-integer",
+ "num-iter",
+ "num-traits",
+ "rand",
+ "smallvec",
+ "zeroize",
+]
+
+[[package]]
 name = "num-complex"
 version = "0.4.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3003,6 +3150,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8b870d8c151b6f2fb93e84a13146138f05d02ed11c7e7c54f8826aaaf7c9f184"
 
 [[package]]
+name = "pkcs1"
+version = "0.7.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c8ffb9f10fa047879315e6625af03c164b16962a5368d724ed16323b68ace47f"
+dependencies = [
+ "der",
+ "pkcs8",
+ "spki",
+]
+
+[[package]]
 name = "pkcs8"
 version = "0.10.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3011,12 +3169,6 @@ dependencies = [
  "der",
  "spki",
 ]
-
-[[package]]
-name = "pkg-config"
-version = "0.3.27"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "26072860ba924cbfa98ea39c8c19b4dd6a4a25423dbdf219c1eca91aa0cf6964"
 
 [[package]]
 name = "png"
@@ -3235,12 +3387,12 @@ dependencies = [
 ]
 
 [[package]]
-name = "protoc-prebuilt"
-version = "0.2.0"
-source = "git+https://github.com/risc0/protoc-prebuilt.git?rev=14be7456835318f0f2bfd2ee1f0eb9d7ed5ef701#14be7456835318f0f2bfd2ee1f0eb9d7ed5ef701"
+name = "protobuf-src"
+version = "1.1.0+21.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c7ac8852baeb3cc6fb83b93646fb93c0ffe5d14bf138c945ceb4b9948ee0e3c1"
 dependencies = [
- "ureq",
- "zip",
+ "autotools",
 ]
 
 [[package]]
@@ -3588,7 +3740,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-binfmt"
-version = "0.20.0-alpha.1"
+version = "0.21.0-alpha.1"
 dependencies = [
  "anyhow",
  "elf",
@@ -3600,7 +3752,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build"
-version = "0.20.0-alpha.1"
+version = "0.21.0-alpha.1"
 dependencies = [
  "anyhow",
  "cargo_metadata",
@@ -3615,7 +3767,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build-kernel"
-version = "0.20.0-alpha.1"
+version = "0.21.0-alpha.1"
 dependencies = [
  "cc",
  "directories",
@@ -3626,7 +3778,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion"
-version = "0.20.0-alpha.1"
+version = "0.21.0-alpha.1"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -3645,7 +3797,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion-sys"
-version = "0.20.0-alpha.1"
+version = "0.21.0-alpha.1"
 dependencies = [
  "glob",
  "risc0-build-kernel",
@@ -3654,7 +3806,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im"
-version = "0.20.0-alpha.1"
+version = "0.21.0-alpha.1"
 dependencies = [
  "anyhow",
  "cust",
@@ -3670,7 +3822,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im-sys"
-version = "0.20.0-alpha.1"
+version = "0.21.0-alpha.1"
 dependencies = [
  "glob",
  "risc0-build-kernel",
@@ -3679,7 +3831,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-core"
-version = "0.20.0-alpha.1"
+version = "0.21.0-alpha.1"
 dependencies = [
  "bytemuck",
  "rand_core",
@@ -3704,18 +3856,28 @@ dependencies = [
 ]
 
 [[package]]
+name = "risc0-sppark"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5be1d1ff7fe501c9f420654bc1ff7461909b85e7f8fb3698a8812c0a8a787306"
+dependencies = [
+ "cc",
+ "which",
+]
+
+[[package]]
 name = "risc0-sys"
-version = "0.20.0-alpha.1"
+version = "0.21.0-alpha.1"
 dependencies = [
  "cc",
  "cust",
  "risc0-build-kernel",
- "sppark",
+ "risc0-sppark",
 ]
 
 [[package]]
 name = "risc0-zkp"
-version = "0.20.0-alpha.1"
+version = "0.21.0-alpha.1"
 dependencies = [
  "anyhow",
  "blake2",
@@ -3741,7 +3903,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "0.20.0-alpha.1"
+version = "0.21.0-alpha.1"
 dependencies = [
  "addr2line",
  "anyhow",
@@ -3763,7 +3925,7 @@ dependencies = [
  "num-traits",
  "prost",
  "prost-build",
- "protoc-prebuilt",
+ "protobuf-src",
  "rayon",
  "risc0-binfmt",
  "risc0-circuit-recursion",
@@ -3783,7 +3945,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "0.20.0-alpha.1"
+version = "0.21.0-alpha.1"
 dependencies = [
  "bytemuck",
  "getrandom",
@@ -3792,7 +3954,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-receipts"
-version = "0.20.0-alpha.1"
+version = "0.21.0-alpha.1"
 
 [[package]]
 name = "rkyv"
@@ -3874,6 +4036,26 @@ checksum = "b4382d3af3a4ebdae7f64ba6edd9114fff92c89808004c4943b393377a25d001"
 dependencies = [
  "downcast-rs",
  "paste",
+]
+
+[[package]]
+name = "rsa"
+version = "0.9.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5d0e5124fcb30e76a7e79bfee683a2746db83784b86289f6251b54b7950a0dfc"
+dependencies = [
+ "const-oid",
+ "digest",
+ "num-bigint-dig",
+ "num-integer",
+ "num-traits",
+ "pkcs1",
+ "pkcs8",
+ "rand_core",
+ "signature",
+ "spki",
+ "subtle",
+ "zeroize",
 ]
 
 [[package]]
@@ -4393,7 +4575,6 @@ version = "0.1.0"
 dependencies = [
  "risc0-zkvm",
  "rmp-serde",
- "serde_json",
  "smartcore 0.3.2 (git+https://github.com/risc0/smartcore.git?rev=4bd3cadd50ed988c45c239f5264c3e2c2af0a690)",
  "smartcore-ml-methods",
 ]
@@ -4457,15 +4638,6 @@ checksum = "d91ed6c858b01f942cd56b37a94b3e0a1798290327d1236e4d9cf4eaca44d29d"
 dependencies = [
  "base64ct",
  "der",
-]
-
-[[package]]
-name = "sppark"
-version = "0.1.5"
-source = "git+https://github.com/supranational/sppark.git?rev=17119848e21491244125d266b2d74f26be2514f0#17119848e21491244125d266b2d74f26be2514f0"
-dependencies = [
- "cc",
- "which",
 ]
 
 [[package]]
@@ -5092,21 +5264,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8ecb6da28b8a351d773b68d5825ac39017e680750f980f3a1a85cd8dd28a47c1"
 
 [[package]]
-name = "ureq"
-version = "2.9.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f8cdd25c339e200129fe4de81451814e5228c9b771d57378817d6117cc2b3f97"
-dependencies = [
- "base64 0.21.5",
- "log",
- "once_cell",
- "rustls",
- "rustls-webpki",
- "url",
- "webpki-roots",
-]
-
-[[package]]
 name = "url"
 version = "2.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5461,6 +5618,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "712e227841d057c1ee1cd2fb22fa7e5a5461ae8e48fa2ca79ec42cfc1931183f"
 
 [[package]]
+name = "windows-core"
+version = "0.51.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f1f8cf84f35d2db49a46868f947758c7a1138116f7fac3bc844f43ade1292e64"
+dependencies = [
+ "windows-targets 0.48.5",
+]
+
+[[package]]
 name = "windows-sys"
 version = "0.45.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5801,7 +5967,6 @@ dependencies = [
  "crc32fast",
  "crossbeam-utils",
  "flate2",
- "zstd",
 ]
 
 [[package]]
@@ -5838,35 +6003,6 @@ name = "zkevm-methods"
 version = "0.1.0"
 dependencies = [
  "risc0-build",
-]
-
-[[package]]
-name = "zstd"
-version = "0.11.2+zstd.1.5.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "20cc960326ece64f010d2d2107537f26dc589a6573a316bd5b1dba685fa5fde4"
-dependencies = [
- "zstd-safe",
-]
-
-[[package]]
-name = "zstd-safe"
-version = "5.0.2+zstd.1.5.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1d2a5585e04f9eea4b2a3d1eca508c4dee9592a89ef6f450c11719da0726f4db"
-dependencies = [
- "libc",
- "zstd-sys",
-]
-
-[[package]]
-name = "zstd-sys"
-version = "2.0.9+zstd.1.5.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9e16efa8a874a0481a574084d34cc26fdb3b99627480f785888deb6386506656"
-dependencies = [
- "cc",
- "pkg-config",
 ]
 
 [[package]]

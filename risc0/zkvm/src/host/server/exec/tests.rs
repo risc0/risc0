@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -814,7 +814,7 @@ fn random() {
 }
 
 #[test]
-#[should_panic(expected = "Guest code attempted to call getrandom but it was disabled")]
+#[should_panic(expected = "WARNING: `getrandom()` called from guest.")]
 fn getrandom_panic() {
     let env = ExecutorEnv::builder().build().unwrap();
     let _session = ExecutorImpl::from_elf(env, RAND_ELF)
@@ -1050,6 +1050,11 @@ fn post_state_digest_randomization() {
 }
 
 #[test]
+fn aligned_alloc() {
+    run_test(MultiTestSpec::AlignedAlloc);
+}
+
+#[test]
 #[should_panic(expected = "cycle count too large")]
 fn too_many_sha() {
     run_test(MultiTestSpec::TooManySha);
@@ -1130,7 +1135,7 @@ mod docker {
         assert_eq!(occurrences, 1, "trace events: {:#?}", &events);
         assert!(events.contains(&TraceEvent::MemorySet {
             addr: 0x08000224,
-            value: 1337
+            region: 1337_u32.to_le_bytes().to_vec()
         }));
     }
 
@@ -1159,7 +1164,7 @@ mod docker {
         let err = run_session(0, 16, 0).err().unwrap();
         assert!(err.to_string().contains("Session limit exceeded"));
 
-        assert!(run_session(0, 16, 1).is_ok());
+        assert!(run_session(0, 16, 2).is_ok());
 
         let err = run_session(1 << 16, 16, 1).err().unwrap();
         assert!(err.to_string().contains("Session limit exceeded"));
