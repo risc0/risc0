@@ -201,10 +201,10 @@ jobs:
         with:
           reporter: 'github-pr-check'
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          clippy_flags: --features $FEATURE --all-targets
+          #clippy_flags: --features $FEATURE --all-targets
           #filter_mode: nofilter
           fail_on_error: true
-          workdir: fake-folder/
+          #workdir: fake-folder/
       - run: sccache --show-stats
 
   examples:
