@@ -199,12 +199,12 @@ jobs:
         working-directory: external/substrate
       - uses: risc0/clippy-action@main
         with:
-          reporter: "github-pr-check"
+          reporter: 'github-pr-check'
           github_token: ${{ secrets.GITHUB_TOKEN }}
           clippy_flags: --features $FEATURE --all-targets
           #filter_mode: nofilter
           fail_on_error: true
-          workdir: 
+          #workdir: 
       - run: sccache --show-stats
 
   examples:
