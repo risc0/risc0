@@ -256,6 +256,8 @@ impl Session {
     ///
     /// This logs the total and user cycles for this [Session] at the INFO level.
     pub fn log(&self) -> anyhow::Result<()> {
+        // TODO: Refactor this call to `get_cycles` to avoid the costly `resolve` call.
+        // reference: <https://github.com/risc0/risc0/pull/1276#issuecomment-1877792024>
         let (total_prover_cycles, user_instruction_cycles) = self.get_cycles()?;
         let cycles_used_ratio = user_instruction_cycles as f64 / total_prover_cycles as f64 * 100.0;
 
