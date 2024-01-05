@@ -41,7 +41,7 @@ use crate::{
 /// 2) The points evaluated on the domain in question (for the 'col' part of
 /// merkle proofs) 3) The Merkle tree itself.
 ///
-/// PolyGroups are constructed from two basic sources: steps of a computations,
+/// PolyGroups are constructed from two basic sources: steps of computations,
 /// and a single higher degree polynomial that has been split into lower degree
 /// parts.  In the case of computations, the resulting steps must be padded
 /// (possibly with randomized data), which is presumed to be done by the caller.

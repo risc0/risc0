@@ -365,12 +365,12 @@ const fn decode(a: u32) -> u32 {
 const EXT_SIZE: usize = 4;
 
 /// Instances of `ExtElem` are elements of a finite field `F_p^4`. They are
-/// represented as elements of `F_p[X] / (X^4 + 11)`. This large
+/// represented as elements of `F_p[X] / (X^4 - 11)`. This large
 /// finite field (about `2^128` elements) is used when the security of
 /// operations depends on the size of the field. The field extension `ExtElem`
 /// has `Elem` as a subfield, so operations on elements of each are compatible.
-/// The irreducible polynomial `x^4 + 11` was chosen because `11` is
-/// the simplest choice of `BETA` for `x^4 + BETA` that makes this polynomial
+/// The irreducible polynomial `x^4 - 11` was chosen because `11` is
+/// the smallest choice of `B` for `x^4 - B` that makes this polynomial
 /// irreducible.
 #[derive(Eq, Clone, Copy, Pod, Zeroable)]
 #[repr(transparent)]

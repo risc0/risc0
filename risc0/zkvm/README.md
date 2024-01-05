@@ -1,9 +1,9 @@
 The RISC Zero zkVM is a RISC-V virtual machine that produces [zero-knowledge
 proofs](https://en.wikipedia.org/wiki/Zero-knowledge_proof) of code it executes.
-By using the zkVM, a cryptographic [receipt](Receipt) is produced which
-anyone can [verify](Receipt::verify) was produced by the zkVM's guest
+By using the zkVM, a cryptographic [receipt](receipts), which can be verified
+by anyone, is produced as the proof of the correct execution of the zkVM's guest
 code. No additional information about the code execution (such as, for example,
-the inputs provided) is revealed by publishing the [receipt](Receipt).
+the inputs provided) is revealed by publishing the [receipt](receipts).
 
 In addition to [our reference documentation on
 docs.rs](https://docs.rs/risc0-zkvm), we have additional (non-reference)
@@ -11,10 +11,11 @@ resources for using our zkVM that you may also find helpful, especially if
 you're new to the RISC Zero zkVM. These include:
 
 * Our [Hello World](https://github.com/risc0/risc0/tree/main/examples/hello-world) demo -- a minimal zkVM application that works out-of-the-box.
-* Our [zkVM Tutorial](https://github.com/risc0/risc0/tree/main/examples/hello-world/tutorial.md), which walks you through writing your first zkVM project.
+* Our [zkVM Tutorial](https://github.com/risc0/risc0/blob/v0.19.0/examples/hello-world/tutorial.md), which walks you through writing your first zkVM project.
 * The [`cargo risczero` tool](https://crates.io/crates/cargo-risczero). It
 includes a `new` command which generates code for building and launching a zkVM
-guest and guidance on where projects most commonly modify host and guest code.
+guest and a guidance on the most common locations for modifying host and guest
+code in a project.
 * The [examples
 folder](https://github.com/risc0/risc0/tree/main/examples), which contains
 various examples using our zkVM.
