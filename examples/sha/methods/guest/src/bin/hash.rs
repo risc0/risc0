@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,17 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#![no_main]
-
 use risc0_zkvm::{
     guest::env,
     sha::{Impl, Sha256},
 };
 
-risc0_zkvm::guest::entry!(main);
-
 // Example of using the risc0_zkvm::sha module to hash data.
-pub fn main() {
+fn main() {
     let data: String = env::read();
     let digest = Impl::hash_bytes(&data.as_bytes());
     env::commit(&digest);

@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@ use std::io::{stdin, stdout, Read, Write};
 
 use risc0_zkvm as _;
 
-pub fn main() {
+fn main() {
     let test_mode = std::env::var("TEST_MODE").unwrap();
 
     match test_mode.as_str() {
