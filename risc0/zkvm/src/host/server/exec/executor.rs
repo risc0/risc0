@@ -619,15 +619,16 @@ impl<'a> ExecutorImpl<'a> {
         }
 
         tracing::debug!("Initial sha state: {state:08x?}");
+        let mut block = [0u32; BLOCK_WORDS];
         for _ in 0..count {
-            let mut block = [0u32; BLOCK_WORDS];
-            for (i, word) in block.iter_mut().enumerate() {
+            let (digest1, digest2) = block.split_at_mut(DIGEST_WORDS);
+            for (i, word) in digest1.iter_mut().enumerate() {
                 *word = self
                     .monitor
                     .load_u32_from_guest_addr(block1_ptr + (i * WORD_SIZE) as u32)?;
             }
-            for i in 0..DIGEST_WORDS {
-                block[DIGEST_WORDS + i] = self
+            for (i, word) in digest2.iter_mut().enumerate() {
+                *word = self
                     .monitor
                     .load_u32_from_guest_addr(block2_ptr + (i * WORD_SIZE) as u32)?;
             }
