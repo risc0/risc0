@@ -27,8 +27,8 @@ use clap::{Parser, Subcommand};
 #[cfg(feature = "experimental")]
 use self::commands::build::BuildCommand;
 use self::commands::{
-    build_guest::BuildGuest, build_toolchain::BuildToolchain, install::Install, new::NewCommand,
-    benchmark::BenchmarkCommand,
+    benchmark::BenchmarkCommand, build_guest::BuildGuest, build_toolchain::BuildToolchain,
+    install::Install, new::NewCommand,
 };
 
 #[derive(Parser)]

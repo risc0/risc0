@@ -48,7 +48,10 @@ impl BenchmarkCommand {
     /// Execute this command.
     pub fn run(&self) -> Result<()> {
         // TODO: Handle the case where the user does not specify the number of iterations
-        let iterations = SpecWithIters(BenchmarkSpec::SimpleLoop, self.iterations.unwrap_or(4 * 1024));
+        let iterations = SpecWithIters(
+            BenchmarkSpec::SimpleLoop,
+            self.iterations.unwrap_or(4 * 1024),
+        );
         let env = ExecutorEnv::builder()
             .write(&iterations)?
             .segment_limit_po2(self.po2)
@@ -71,7 +74,8 @@ impl BenchmarkCommand {
 
         // Prove and Lift
         for segment in segments.iter() {
-            let (receipt, receipt_duration) = with_duration(|| prover.prove_segment(&ctx, segment))?;
+            let (receipt, receipt_duration) =
+                with_duration(|| prover.prove_segment(&ctx, segment))?;
             prove_durations.push(receipt_duration);
 
             let (lift, lift_duration) = with_duration(|| lift(&receipt))?;
