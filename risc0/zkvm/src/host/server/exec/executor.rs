@@ -23,6 +23,7 @@ use addr2line::{
 };
 use anyhow::{anyhow, bail, Context, Result};
 use crypto_bigint::{CheckedMul, Encoding, NonZero, U256, U512};
+use human_repr::HumanDuration;
 use risc0_binfmt::{MemoryImage, Program, SystemState};
 use risc0_zkp::{
     core::{
@@ -379,22 +380,27 @@ impl<'a> ExecutorImpl<'a> {
         let segment_ref = callback(final_segment)?;
         self.segments.push(segment_ref);
 
-        tracing::info!("total_cycles = {}", self.total_cycles());
-        tracing::info!("segment_count = {}", self.segments.len());
-        tracing::info!("execution_time = {:?}", elapsed);
-
         if let Some(profiler) = self.profiler.take() {
             let report = profiler.borrow_mut().finalize_to_vec();
             std::fs::write(self.env.pprof_out.as_ref().unwrap(), report)?;
         }
 
-        Ok(Session::new(
+        let session = Session::new(
             mem::take(&mut self.segments),
             session_journal,
             exit_code,
             post_image,
             assumptions,
-        ))
+        );
+
+        tracing::info_span!("executor").in_scope(|| {
+            tracing::info!("execution time: {}", elapsed.human_duration());
+            if let Err(error) = session.log() {
+                tracing::error!(?error, "failed to log session");
+            }
+        });
+
+        Ok(session)
     }
 
     fn split(&mut self, pre_image: Option<Box<MemoryImage>>) -> Result<()> {

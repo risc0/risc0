@@ -67,12 +67,12 @@ Note that since proofs are now being generated, the execution time will be signi
 
 ### Executor Statistics
 
-To gain insights into your application's performance, you can obtain executor statistics by setting the `RUST_LOG` environment variable to `"executor=info"`.
+To gain insights into your application's performance, you can obtain executor statistics by setting the `RUST_LOG` environment variable to `"[executor]=info"`.
 
 Setting this filter will print statistics about the execution before proof generation, so you can understand how computationally expensive your application is. Since the statistics concern only the executor phase, it is recommended to run your application in dev-mode to avoid the overhead of proof generation:
 
 ```bash
-RISC0_DEV_MODE=1 RUST_LOG="executor=info" cargo run --release
+RISC0_DEV_MODE=1 RUST_LOG="[executor]=info" cargo run --release
 ```
 
 The statistics include:
