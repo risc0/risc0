@@ -334,6 +334,7 @@ jobs:
         with:
           key: macOS-default
       - run: pwd && ls -lh
+      - run: cd tools/crates-validator/
       - run: cargo clippy --all --all-targets
       - uses: risc0/clippy-action@main
         with:
