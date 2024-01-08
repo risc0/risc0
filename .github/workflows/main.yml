@@ -334,11 +334,11 @@ jobs:
         with:
           key: macOS-default
       - run: pwd && ls -lh
+      - run: cargo clippy --all --all-targets
       - uses: risc0/clippy-action@main
         with:
           reporter: 'github-pr-check'
-          github_token: ${{ github.token }}
-          #github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           clippy_flags: --all --all-targets
           #clippy_flags: --manifest-path tools/crates-validator/Cargo.toml
           #filter_mode: nofilter
