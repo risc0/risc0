@@ -334,8 +334,7 @@ jobs:
         with:
           key: macOS-default
       - run: pwd && ls -lh
-      - run: cd tools/crates-validator/
-      - run: cargo clippy --all --all-targets
+      - run: cargo clippy --manifest-path tools/crates-validator/Cargo.toml
       - uses: risc0/clippy-action@main
         with:
           reporter: 'github-pr-check'
