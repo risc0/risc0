@@ -16,11 +16,9 @@ use hello_world_methods::MULTIPLY_ID;
 use risc0_zkvm::{guest::env, serde};
 
 fn main() {
-    let n: u64 = env::read();
-    let e: u64 = env::read();
-
+    // n and e are the public modulus and exponent respectively.
     // x value that will be kept private.
-    let x: u64 = env::read();
+    let (n, e, x): (u64, u64, u64) = env::read();
 
     // Verify that n has a known factorization.
     env::verify(

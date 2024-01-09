@@ -17,27 +17,28 @@ use hello_world::multiply;
 use risc0_zkvm::{default_prover, ExecutorEnv};
 
 fn main() {
-    // Pick two numbers and multiply them, with a receipt.
+    // Some party "Alice" picks two numbers and multiplies them, producing a receipt that attests
+    // the fact that Alice knows the factorization of the product. This is similar to RSA keygen.
     let (multiply_receipt, n) = multiply(17, 23);
 
-    // Here is where one would send 'receipt' over the network to a second prover that might not
-    // know the factors, but wants to do additional work with the proven composite number.
+    // Alice might then send to "Bob" the product and the receipt that proves Alice knows the
+    // factorization. Bob then raises a secret number to a public exponent mod the composite number
+    // chosen by Alice. This is like an RSA encryption from Bob to Alice, verified by the zkVM.
     let env = ExecutorEnv::builder()
         // add_assumption makes the receipt to be verified available to the prover.
         .add_assumption(multiply_receipt.into())
-        .write(&n)
-        .unwrap()
-        .write(&9u64)
-        .unwrap()
-        .write(&100u64)
+        .write(&(n, 9u64, 100u64))
         .unwrap()
         .build()
         .unwrap();
 
     let receipt = default_prover().prove(env, EXPONENTIATE_ELF).unwrap();
 
-    // Here the receipt might be sent to a third party that is interested in the exponentiation
-    // under a known composite. This is similar to a verifiable RSA encryption under a public key.
+    // Anybody who receives the receipt for the exponentiation is assured both that:
+    // A) The modulus n included in the journal has a known factorization.
+    // B) The number c is the result of exponentiation of some known secret x ^ e mod n.
+    //
+    // These two statements are proven with a single receipt via composition.
     receipt.verify(EXPONENTIATE_ID).unwrap();
 
     // Decode the receipt to get (n, e, and c = x^e mod n).
