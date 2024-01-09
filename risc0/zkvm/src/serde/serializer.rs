@@ -80,8 +80,8 @@ impl<W: WordWrite + ?Sized> WordWrite for &mut W {
     }
 
     #[inline]
-    fn set_buffered_word(&mut self, last_word: u32) -> Result<()> {
-        (**self).set_buffered_word(last_word)
+    fn set_buffered_word(&mut self, word: u32) -> Result<()> {
+        (**self).set_buffered_word(word)
     }
 
     #[inline]
