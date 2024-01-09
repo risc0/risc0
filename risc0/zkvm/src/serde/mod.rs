@@ -91,10 +91,10 @@ mod tests {
     #[test]
     fn test_mixed_struct() {
         #[derive(Debug, Serialize, PartialEq, Eq, Deserialize)]
-        pub struct WrappedU8(pub u8);
+        struct WrappedU8(pub u8);
 
         #[derive(Default, Debug, PartialEq, Eq, Serialize, Deserialize)]
-        pub struct TestType {
+        struct TestType {
             pub wrapped_u8_seq: Vec<WrappedU8>,
             pub u16_seq: Vec<u16>,
             pub u32_seq: Vec<u32>,
@@ -142,5 +142,29 @@ mod tests {
 
         let output: TestType = from_slice(&data).unwrap();
         assert_eq!(input, output);
+    }
+
+    #[test]
+    fn test_edge_cases() {
+        #[derive(PartialEq, Eq, Debug, Default, Serialize, Deserialize)]
+        struct U8SeqThenU32(Vec<u8>, u32);
+        #[derive(PartialEq, Eq, Debug, Default, Serialize, Deserialize)]
+        struct U32ThenU8SeqT(u32, Vec<u8>);
+
+        for i in 0..=5 {
+            let mut input = U8SeqThenU32::default();
+            input.0 = vec![127u8; i];
+            let data = to_vec(&input).unwrap();
+            let output: U8SeqThenU32 = from_slice(&data).unwrap();
+            assert_eq!(input, output);
+        }
+
+        for i in 0..=5 {
+            let mut input = U32ThenU8SeqT::default();
+            input.1 = vec![127u8; i];
+            let data = to_vec(&input).unwrap();
+            let output: U32ThenU8SeqT = from_slice(&data).unwrap();
+            assert_eq!(input, output);
+        }
     }
 }
