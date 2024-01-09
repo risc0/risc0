@@ -13,7 +13,7 @@
 // limitations under the License.
 
 #include "fp.h"
-#include "fp4.h"
+#include "fpext.h"
 
 using namespace metal;
 
@@ -36,31 +36,31 @@ kernel void multi_bit_reverse(device Fp* io,
   }
 }
 
-kernel void multi_poly_eval(device Fp4* out,
+kernel void multi_poly_eval(device FpExt* out,
                             const device Fp* coeffs,
                             const device uint32_t* which,
-                            const device Fp4* xs,
+                            const device FpExt* xs,
                             const device uint32_t& deg,
                             uint3 blockIdx [[threadgroup_position_in_grid]],
                             uint3 threadIdx [[thread_position_in_threadgroup]]) {
   device const Fp* cur_poly = coeffs + which[blockIdx.x] * deg;
-  Fp4 x = xs[blockIdx.x];
-  Fp4 stepx = pow(x, 256);
-  Fp4 powx = pow(x, threadIdx.x);
-  Fp4 tot;
+  FpExt x = xs[blockIdx.x];
+  FpExt stepx = pow(x, 256);
+  FpExt powx = pow(x, threadIdx.x);
+  FpExt tot;
   for (size_t i = threadIdx.x; i < deg; i += 256) {
     tot += powx * cur_poly[i];
     powx *= stepx;
   }
   threadgroup uint32_t totsBuf[256 * 4];
-  threadgroup Fp4* tots = reinterpret_cast<threadgroup Fp4*>(totsBuf);
+  threadgroup FpExt* tots = reinterpret_cast<threadgroup FpExt*>(totsBuf);
   tots[threadIdx.x] = tot;
   threadgroup_barrier(mem_flags::mem_threadgroup);
   unsigned cur = 256;
   while (cur) {
     cur /= 2;
     if (threadIdx.x < cur) {
-      tots[threadIdx.x] = Fp4(tots[threadIdx.x]) + Fp4(tots[threadIdx.x + cur]);
+      tots[threadIdx.x] = FpExt(tots[threadIdx.x]) + FpExt(tots[threadIdx.x + cur]);
     }
     threadgroup_barrier(mem_flags::mem_threadgroup);
   }
