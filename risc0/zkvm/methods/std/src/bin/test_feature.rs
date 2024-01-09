@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ use std::compile_error;
 
 use risc0_zkvm as _;
 
-pub fn main() {
+fn main() {
     #[cfg(not(all(feature = "test_feature1", feature = "test_feature2")))]
     compile_error!("Test feature was not found.");
 }

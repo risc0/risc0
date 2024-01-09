@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ use voting_machine_core::{FreezeVotingMachineCommit, FreezeVotingMachineParams};
 
 risc0_zkvm::guest::entry!(main);
 
-pub fn main() {
+fn main() {
     let params: FreezeVotingMachineParams = env::read();
     let result = params.process();
     env::write(&result.state);

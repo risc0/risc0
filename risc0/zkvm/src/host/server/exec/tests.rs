@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -1135,7 +1135,7 @@ mod docker {
         assert_eq!(occurrences, 1, "trace events: {:#?}", &events);
         assert!(events.contains(&TraceEvent::MemorySet {
             addr: 0x08000224,
-            value: 1337
+            region: 1337_u32.to_le_bytes().to_vec()
         }));
     }
 

@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -353,7 +353,7 @@ impl InnerReceipt {
         match self {
             InnerReceipt::Composite(ref receipt) => receipt.get_claim(),
             InnerReceipt::Groth16(ref groth16_receipt) => Ok(groth16_receipt.claim.clone()),
-            InnerReceipt::Succinct(ref succinct_recipt) => Ok(succinct_recipt.claim.clone()),
+            InnerReceipt::Succinct(ref succinct_receipt) => Ok(succinct_receipt.claim.clone()),
             InnerReceipt::Fake { claim } => Ok(claim.clone()),
         }
     }
