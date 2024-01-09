@@ -526,8 +526,8 @@ impl<F: Fn(&[u8])> WordWrite for FdWriter<F> {
         Ok(self.buffered_word.unwrap())
     }
 
-    fn set_buffered_word(&mut self, last_word: u32) -> crate::serde::Result<()> {
-        self.buffered_word = Some(last_word);
+    fn set_buffered_word(&mut self, word: u32) -> crate::serde::Result<()> {
+        self.buffered_word = Some(word);
         Ok(())
     }
 
