@@ -160,18 +160,6 @@ impl<W: WordWrite> Serializer<W> {
             byte_handler: ByteHandler::default(),
         }
     }
-
-    /// Ask the byte handler to serialize a byte
-    #[inline]
-    pub fn handle_byte(&mut self, val: u8) -> Result<()> {
-        self.byte_handler.handle(&mut self.stream, val)
-    }
-
-    /// Reset the byte handler
-    #[inline]
-    pub fn reset_byte_handler(&mut self) {
-        self.byte_handler.reset();
-    }
 }
 
 impl<'a, W: WordWrite> serde::ser::Serializer for &'a mut Serializer<W> {
@@ -221,7 +209,7 @@ impl<'a, W: WordWrite> serde::ser::Serializer for &'a mut Serializer<W> {
     }
 
     fn serialize_u8(self, v: u8) -> Result<()> {
-        self.handle_byte(v)
+        self.byte_handler.handle(&mut self.stream, v)
     }
 
     fn serialize_u16(self, v: u16) -> Result<()> {
@@ -229,7 +217,7 @@ impl<'a, W: WordWrite> serde::ser::Serializer for &'a mut Serializer<W> {
     }
 
     fn serialize_u32(self, v: u32) -> Result<()> {
-        self.reset_byte_handler();
+        self.byte_handler.reset();
         self.stream.write_words(&[v])
     }
 
@@ -239,7 +227,7 @@ impl<'a, W: WordWrite> serde::ser::Serializer for &'a mut Serializer<W> {
     }
 
     fn serialize_u128(self, v: u128) -> Result<()> {
-        self.reset_byte_handler();
+        self.byte_handler.reset();
         self.stream.write_padded_bytes(&v.to_le_bytes())
     }
 
