@@ -20,10 +20,10 @@ use super::err::{Error, Result};
 
 /// A writer for writing streams preferring word-based data.
 pub trait WordWrite {
-    /// Access the last word
+    /// Access the buffered word
     fn get_buffered_word(&self) -> Result<u32>;
 
-    /// Modify the last word
+    /// Modify the buffered word
     fn set_buffered_word(&mut self, last_word: u32) -> Result<()>;
 
     /// Write the given words to the stream.
