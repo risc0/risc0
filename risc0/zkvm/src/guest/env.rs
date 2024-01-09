@@ -504,7 +504,18 @@ impl<F: Fn(&[u8])> FdWriter<F> {
         }
     }
 
+    fn flush(&mut self) {
+        if self.buffered_word.is_some() {
+            let words = [self.buffered_word.unwrap()];
+            self.buffered_word = None;
+            let buffer_bytes = bytemuck::cast_slice(&words);
+            unsafe { sys_write(self.fd, buffer_bytes.as_ptr(), WORD_SIZE) }
+            (self.hook)(buffer_bytes);
+        }
+    }
+
     fn write_bytes(&mut self, bytes: &[u8]) {
+        self.flush();
         unsafe { sys_write(self.fd, bytes.as_ptr(), bytes.len()) }
         (self.hook)(bytes);
     }
@@ -521,6 +532,12 @@ impl<F: Fn(&[u8])> Write for FdWriter<F> {
 }
 
 impl<F: Fn(&[u8])> WordWrite for FdWriter<F> {
+    fn start_new_buffered_word(&mut self) -> crate::serde::Result<()> {
+        self.flush();
+        self.buffered_word = Some(0u32);
+        Ok(())
+    }
+
     fn get_buffered_word(&self) -> crate::serde::Result<u32> {
         assert!(self.buffered_word.is_some());
         Ok(self.buffered_word.unwrap())
@@ -532,19 +549,11 @@ impl<F: Fn(&[u8])> WordWrite for FdWriter<F> {
     }
 
     fn write_words(&mut self, words: &[u32]) -> crate::serde::Result<()> {
-        if self.buffered_word.is_some() {
-            self.write_bytes(bytemuck::cast_slice(&[self.buffered_word.unwrap()]));
-            self.buffered_word = None;
-        }
         self.write_bytes(bytemuck::cast_slice(words));
         Ok(())
     }
 
     fn write_padded_bytes(&mut self, bytes: &[u8]) -> crate::serde::Result<()> {
-        if self.buffered_word.is_some() {
-            self.write_bytes(bytemuck::cast_slice(&[self.buffered_word.unwrap()]));
-            self.buffered_word = None;
-        }
         self.write_bytes(bytes);
         let unaligned = bytes.len() % WORD_SIZE;
         if unaligned != 0 {
@@ -557,10 +566,7 @@ impl<F: Fn(&[u8])> WordWrite for FdWriter<F> {
 
 impl<F: Fn(&[u8])> Drop for FdWriter<F> {
     fn drop(&mut self) {
-        if self.buffered_word.is_some() {
-            self.write_bytes(bytemuck::cast_slice(&[self.buffered_word.unwrap()]));
-            self.buffered_word = None;
-        }
+        self.flush();
     }
 }
 

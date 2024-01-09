@@ -20,6 +20,9 @@ use super::err::{Error, Result};
 
 /// A writer for writing streams preferring word-based data.
 pub trait WordWrite {
+    /// Initialize the buffered word
+    fn start_new_buffered_word(&mut self) -> Result<()>;
+
     /// Access the buffered word
     fn get_buffered_word(&self) -> Result<u32>;
 
@@ -39,6 +42,12 @@ pub trait WordWrite {
 }
 
 impl WordWrite for Vec<u32> {
+    #[inline]
+    fn start_new_buffered_word(&mut self) -> Result<()> {
+        self.push(0u32);
+        Ok(())
+    }
+
     #[inline]
     fn get_buffered_word(&self) -> Result<u32> {
         let len = self.len();
@@ -74,6 +83,11 @@ impl WordWrite for Vec<u32> {
 
 // Allow borrowed WordWrites to work transparently.
 impl<W: WordWrite + ?Sized> WordWrite for &mut W {
+    #[inline]
+    fn start_new_buffered_word(&mut self) -> Result<()> {
+        (**self).start_new_buffered_word()
+    }
+
     #[inline]
     fn get_buffered_word(&self) -> Result<u32> {
         (**self).get_buffered_word()
@@ -135,7 +149,8 @@ impl ByteHandler {
 
     fn handle<W: WordWrite>(&mut self, stream: &mut W, v: u8) -> Result<()> {
         if self.status == 0 {
-            stream.write_words(&[v as u32])?;
+            stream.start_new_buffered_word()?;
+            stream.set_buffered_word(v as u32)?;
             self.status = 1;
         } else {
             let w = stream.get_buffered_word()?;
