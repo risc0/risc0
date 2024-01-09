@@ -3,25 +3,25 @@
 #include <metal_stdlib>
 
 #include "fp.h"
-#include "fp4.h"
+#include "fpext.h"
 
 using namespace metal;
 
 constant size_t INV_RATE = 4;
 
 struct MixState {
-    Fp4 tot;
-    Fp4 mul;
+    FpExt tot;
+    FpExt mul;
 };
 
-Fp4 poly_fp(uint idx,
+FpExt poly_fp(uint idx,
             uint size,
             const device Fp* code,
             const device Fp* out,
             const device Fp* data,
             const device Fp* mix,
             const device Fp* accum,
-            const device Fp4& poly_mix) {
+            const device FpExt& poly_mix) {
     uint mask = size - 1;
     Fp x5(1);
     Fp x6(0);
@@ -104,7 +104,7 @@ Fp4 poly_fp(uint idx,
     Fp x83(67108863);
     Fp x84(33554431);
     Fp x85(2013265910);
-    MixState x86{Fp4(0), Fp4(1)};
+    MixState x86{FpExt(0), FpExt(1)};
     Fp x87 = code[2 * size + ((idx - INV_RATE * 0) & mask)];
     Fp x88 = code[2 * size + ((idx - INV_RATE * 1) & mask)];
     Fp x89 = x5 - x88;
@@ -18792,15 +18792,15 @@ kernel void eval_check(device Fp* check,
                        const device Fp* accum,
                        const device Fp* mix,
                        const device Fp* out,
-                       const device Fp4& poly_mix,
+                       const device FpExt& poly_mix,
                        const device Fp& rou,
                        const device uint32_t& po2,
                        const device uint32_t& domain,
                        uint cycle [[thread_position_in_grid]]) {
-    Fp4 tot = poly_fp(cycle, domain, code, out, data, mix, accum, poly_mix);
+    FpExt tot = poly_fp(cycle, domain, code, out, data, mix, accum, poly_mix);
     Fp x = pow(rou, cycle);
     Fp y = pow(Fp(3) * x, 1 << po2);
-    Fp4 ret = tot * inv(y - Fp(1));
+    FpExt ret = tot * inv(y - Fp(1));
     check[domain * 0 + cycle] = ret.elems[0];
     check[domain * 1 + cycle] = ret.elems[1];
     check[domain * 2 + cycle] = ret.elems[2];
