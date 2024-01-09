@@ -123,22 +123,24 @@ where
 }
 
 #[derive(Default)]
-struct ByteHandler(pub u8);
+struct ByteHandler {
+    pub status: u8,
+}
 
 impl ByteHandler {
     #[inline(always)]
     fn reset(&mut self) {
-        self.0 = 0;
+        self.status = 0;
     }
 
     fn handle<W: WordWrite>(&mut self, stream: &mut W, v: u8) -> Result<()> {
-        if self.0 == 0 {
+        if self.status == 0 {
             stream.write_words(&[v as u32])?;
-            self.0 = 1;
+            self.status = 1;
         } else {
             let w = stream.get_buffered_word()?;
-            stream.set_buffered_word(w | ((v as u32) << (self.0 as usize * 8)))?;
-            self.0 = (self.0 + 1) % 4;
+            stream.set_buffered_word(w | ((v as u32) << (self.status as usize * 8)))?;
+            self.status = (self.status + 1) % 4;
         }
         Ok(())
     }
