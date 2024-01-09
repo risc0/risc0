@@ -13,19 +13,18 @@
 // limitations under the License.
 
 #include "fp.h"
-#include "fp4.h"
+#include "fpext.h"
 
-extern "C" __global__
-void mix_poly_coeffs(Fp4* out,
-                     const Fp* in,
-                     const uint32_t* combos,
-                     const Fp4& mixStart,
-                     const Fp4& mix,
-                     const uint32_t inputSize,
-                     const uint32_t count) {
+extern "C" __global__ void mix_poly_coeffs(FpExt* out,
+                                           const Fp* in,
+                                           const uint32_t* combos,
+                                           const FpExt& mixStart,
+                                           const FpExt& mix,
+                                           const uint32_t inputSize,
+                                           const uint32_t count) {
   uint idx = blockIdx.x * blockDim.x + threadIdx.x;
   if (idx < count) {
-    Fp4 cur = mixStart;
+    FpExt cur = mixStart;
     for (size_t i = 0; i < inputSize; i++) {
       size_t id = combos[i];
       out[count * id + idx] += cur * in[count * i + idx];

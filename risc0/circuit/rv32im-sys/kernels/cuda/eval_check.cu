@@ -1,26 +1,26 @@
 // This code is automatically generated
 
 #include "fp.h"
-#include "fp4.h"
+#include "fpext.h"
 
 #include <cstdint>
 
 constexpr size_t INV_RATE = 4;
 
 struct MixState {
-  Fp4 tot;
-  Fp4 mul;
+  FpExt tot;
+  FpExt mul;
 };
 
 __device__
-Fp4 poly_fp(uint32_t idx,
+FpExt poly_fp(uint32_t idx,
             uint32_t size,
             const Fp* code,
             const Fp* out,
             const Fp* data,
             const Fp* mix,
             const Fp* accum,
-            const Fp4& poly_mix) {
+            const FpExt& poly_mix) {
   uint32_t mask = size - 1;
   Fp x5(1);
   Fp x6(0);
@@ -103,7 +103,7 @@ Fp4 poly_fp(uint32_t idx,
   Fp x83(67108863);
   Fp x84(33554431);
   Fp x85(2013265910);
-  MixState x86{Fp4(0), Fp4(1)};
+  MixState x86{FpExt(0), FpExt(1)};
   Fp x87 = code[2 * size + ((idx - INV_RATE * 0) & mask)];
   Fp x88 = code[2 * size + ((idx - INV_RATE * 1) & mask)];
   Fp x89 = x5 - x88;
@@ -18792,16 +18792,16 @@ void eval_check(Fp* check,
                 const Fp* accum,
                 const Fp* mix,
                 const Fp* out,
-                const Fp4& poly_mix,
+                const FpExt& poly_mix,
                 const Fp& rou,
                 const uint32_t& po2,
                 const uint32_t& domain) {
   uint32_t cycle = blockDim.x * blockIdx.x + threadIdx.x;
   if (cycle < domain) {
-    Fp4 tot = poly_fp(cycle, domain, code, out, data, mix, accum, poly_mix);
+    FpExt tot = poly_fp(cycle, domain, code, out, data, mix, accum, poly_mix);
     Fp x = pow(rou, cycle);
     Fp y = pow(Fp(3) * x, 1 << po2);
-    Fp4 ret = tot * inv(y - Fp(1));
+    FpExt ret = tot * inv(y - Fp(1));
     check[domain * 0 + cycle] = ret.elems[0];
     check[domain * 1 + cycle] = ret.elems[1];
     check[domain * 2 + cycle] = ret.elems[2];

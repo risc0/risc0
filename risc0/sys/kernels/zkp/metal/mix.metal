@@ -13,19 +13,19 @@
 // limitations under the License.
 
 #include "fp.h"
-#include "fp4.h"
+#include "fpext.h"
 
 using namespace metal;
 
-kernel void mix_poly_coeffs(device Fp4* out,
+kernel void mix_poly_coeffs(device FpExt* out,
                             const device Fp* in,
                             const device uint32_t* combos,
-                            const device Fp4& mixStart,
-                            const device Fp4& mix,
+                            const device FpExt& mixStart,
+                            const device FpExt& mix,
                             const device uint32_t& inputSize,
                             const device uint32_t& count,
                             uint gid [[thread_position_in_grid]]) {
-  Fp4 cur = mixStart;
+  FpExt cur = mixStart;
   for (size_t i = 0; i < inputSize; i++) {
     size_t id = combos[i];
     out[count * id + gid] += cur * in[count * i + gid];

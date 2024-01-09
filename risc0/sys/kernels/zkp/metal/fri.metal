@@ -13,7 +13,7 @@
 // limitations under the License.
 
 #include "fp.h"
-#include "fp4.h"
+#include "fpext.h"
 
 using namespace metal;
 
@@ -30,15 +30,15 @@ inline constexpr size_t log2Ceil(size_t in) {
 
 kernel void fri_fold(device Fp* out,
                      const device Fp* in,
-                     const device Fp4& mix,
+                     const device FpExt& mix,
                      const device uint32_t& count,
                      uint gid [[thread_position_in_grid]]) {
-  Fp4 tot;
-  Fp4 curMix(1);
+  FpExt tot;
+  FpExt curMix(1);
   for (uint32_t i = 0; i < kFriFold; i++) {
     size_t rev_i = reverse_bits(i) >> (32 - log2Ceil(kFriFold));
     size_t rev_idx = rev_i * count + gid;
-    Fp4 factor(in[0 * count * kFriFold + rev_idx],
+    FpExt factor(in[0 * count * kFriFold + rev_idx],
                in[1 * count * kFriFold + rev_idx],
                in[2 * count * kFriFold + rev_idx],
                in[3 * count * kFriFold + rev_idx]);
