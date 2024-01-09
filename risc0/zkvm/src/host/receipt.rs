@@ -644,7 +644,7 @@ impl SegmentReceipt {
         let decoded_claim = decode_receipt_claim_from_seal(&self.seal)?;
         if decoded_claim.digest() != self.claim.digest() {
             tracing::debug!(
-                "decoded segment receipt claim does not match claim field: decoded: {:#?}, expected: {:#?}",
+                "decoded segment receipt claim does not match claim field:\ndecoded: {:#?},\nexpected: {:#?}",
                 decoded_claim,
                 self.claim,
             );
