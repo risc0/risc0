@@ -14,7 +14,7 @@
 
 #include "ffi.h"
 #include "fp.h"
-#include "fp4.h"
+#include "fpext.h"
 
 #include <cstdint>
 #include <stdexcept>
@@ -120,6 +120,7 @@ extern "C" uint32_t risc0_circuit_rv32im_step_verify_mem(risc0_error* err,
 #pragma clang diagnostic ignored "-Wreturn-type-c-linkage"
 #endif
 
-extern "C" Fp4 risc0_circuit_rv32im_poly_fp(size_t cycle, size_t steps, Fp4* poly_mix, Fp** args) {
+extern "C" FpExt
+risc0_circuit_rv32im_poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   return circuit::rv32im::poly_fp(cycle, steps, poly_mix, args);
 }
