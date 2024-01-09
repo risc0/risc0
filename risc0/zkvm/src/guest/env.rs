@@ -541,6 +541,10 @@ impl<F: Fn(&[u8])> WordWrite for FdWriter<F> {
     }
 
     fn write_padded_bytes(&mut self, bytes: &[u8]) -> crate::serde::Result<()> {
+        if self.buffered_word.is_some() {
+            self.write_bytes(bytemuck::cast_slice(&[self.buffered_word.unwrap()]));
+            self.buffered_word = None;
+        }
         self.write_bytes(bytes);
         let unaligned = bytes.len() % WORD_SIZE;
         if unaligned != 0 {
