@@ -492,30 +492,14 @@ impl<W: Write + ?Sized> Write for &mut W {
 pub struct FdWriter<F: Fn(&[u8])> {
     fd: u32,
     hook: F,
-    buffered_word: Option<u32>,
 }
 
 impl<F: Fn(&[u8])> FdWriter<F> {
     fn new(fd: u32, hook: F) -> Self {
-        FdWriter {
-            fd,
-            hook,
-            buffered_word: None,
-        }
-    }
-
-    fn flush(&mut self) {
-        if self.buffered_word.is_some() {
-            let words = [self.buffered_word.unwrap()];
-            self.buffered_word = None;
-            let buffer_bytes = bytemuck::cast_slice(&words);
-            unsafe { sys_write(self.fd, buffer_bytes.as_ptr(), WORD_SIZE) }
-            (self.hook)(buffer_bytes);
-        }
+        FdWriter { fd, hook }
     }
 
     fn write_bytes(&mut self, bytes: &[u8]) {
-        self.flush();
         unsafe { sys_write(self.fd, bytes.as_ptr(), bytes.len()) }
         (self.hook)(bytes);
     }
@@ -532,22 +516,6 @@ impl<F: Fn(&[u8])> Write for FdWriter<F> {
 }
 
 impl<F: Fn(&[u8])> WordWrite for FdWriter<F> {
-    fn start_new_buffered_word(&mut self) -> crate::serde::Result<()> {
-        self.flush();
-        self.buffered_word = Some(0u32);
-        Ok(())
-    }
-
-    fn get_buffered_word(&self) -> crate::serde::Result<u32> {
-        assert!(self.buffered_word.is_some());
-        Ok(self.buffered_word.unwrap())
-    }
-
-    fn set_buffered_word(&mut self, word: u32) -> crate::serde::Result<()> {
-        self.buffered_word = Some(word);
-        Ok(())
-    }
-
     fn write_words(&mut self, words: &[u32]) -> crate::serde::Result<()> {
         self.write_bytes(bytemuck::cast_slice(words));
         Ok(())
@@ -561,12 +529,6 @@ impl<F: Fn(&[u8])> WordWrite for FdWriter<F> {
             self.write_bytes(&[0u8; WORD_SIZE][..pad_bytes]);
         }
         Ok(())
-    }
-}
-
-impl<F: Fn(&[u8])> Drop for FdWriter<F> {
-    fn drop(&mut self) {
-        self.flush();
     }
 }
 
