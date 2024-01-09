@@ -13,7 +13,7 @@
 // limitations under the License.
 
 #include "fp.h"
-#include "fp4.h"
+#include "fpext.h"
 
 constexpr size_t kFriFold = 16;
 
@@ -26,22 +26,18 @@ __device__ inline constexpr size_t log2Ceil(size_t in) {
   return r;
 }
 
-extern "C" __global__
-void fri_fold(Fp* out,
-              const Fp* in,
-              const Fp4& mix,
-              const uint32_t count) {
+extern "C" __global__ void fri_fold(Fp* out, const Fp* in, const FpExt& mix, const uint32_t count) {
   uint idx = blockIdx.x * blockDim.x + threadIdx.x;
   if (idx < count) {
-    Fp4 tot;
-    Fp4 curMix(1);
+    FpExt tot;
+    FpExt curMix(1);
     for (uint32_t i = 0; i < kFriFold; i++) {
       size_t rev_i = __brev(i) >> (32 - log2Ceil(kFriFold));
       size_t rev_idx = rev_i * count + idx;
-      Fp4 factor(in[0 * count * kFriFold + rev_idx],
-                 in[1 * count * kFriFold + rev_idx],
-                 in[2 * count * kFriFold + rev_idx],
-                 in[3 * count * kFriFold + rev_idx]);
+      FpExt factor(in[0 * count * kFriFold + rev_idx],
+                   in[1 * count * kFriFold + rev_idx],
+                   in[2 * count * kFriFold + rev_idx],
+                   in[3 * count * kFriFold + rev_idx]);
       tot += curMix * factor;
       curMix *= mix;
     }

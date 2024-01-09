@@ -23,12 +23,12 @@ use tempfile::tempdir_in;
 
 const CUDA_INCS: &[(&str, &str)] = &[
     ("fp.h", include_str!("../kernels/cuda/fp.h")),
-    ("fp4.h", include_str!("../kernels/cuda/fp4.h")),
+    ("fpext.h", include_str!("../kernels/cuda/fpext.h")),
 ];
 
 const METAL_INCS: &[(&str, &str)] = &[
     ("fp.h", include_str!("../kernels/metal/fp.h")),
-    ("fp4.h", include_str!("../kernels/metal/fp4.h")),
+    ("fpext.h", include_str!("../kernels/metal/fpext.h")),
 ];
 
 #[derive(Eq, PartialEq, Hash)]
