@@ -88,9 +88,56 @@ pub fn from_slice<T: DeserializeOwned, P: Pod>(slice: &[P]) -> Result<T> {
     }
 }
 
+#[derive(Default)]
+struct ByteHandler {
+    pub status: usize,
+    pub buffer: [u8; 3],
+}
+
+impl ByteHandler {
+    #[inline]
+    fn reset(&mut self) -> Result<()> {
+        if self.status == 1 {
+            if self.buffer[0] != 0 || self.buffer[1] != 0 || self.buffer[2] != 0 {
+                return Err(Error::DeserializeBadByte);
+            }
+        } else if self.status == 2 {
+            if self.buffer[1] != 0 || self.buffer[2] != 0 {
+                return Err(Error::DeserializeBadByte);
+            }
+        } else if self.status == 3 {
+            if self.buffer[2] != 0 {
+                return Err(Error::DeserializeBadByte);
+            }
+        }
+        self.status = 0;
+        Ok(())
+    }
+
+    #[inline]
+    fn handle_byte<R: WordRead>(&mut self, reader: &mut R) -> Result<u8> {
+        if self.status != 0 {
+            let res = self.buffer[self.status - 1];
+            self.status = (self.status + 1) % 4;
+            Ok(res)
+        } else {
+            let mut val = 0u32;
+            reader.read_words(core::slice::from_mut(&mut val))?;
+            self.buffer = [
+                (val >> 8 & 0xff) as u8,
+                (val >> 16 & 0xff) as u8,
+                (val >> 24 & 0xff) as u8,
+            ];
+            self.status = 1;
+            Ok((val & 0xff) as u8)
+        }
+    }
+}
+
 /// Enables deserializing from a WordRead
 pub struct Deserializer<'de, R: WordRead + 'de> {
     reader: R,
+    byte_handler: ByteHandler,
     phantom: core::marker::PhantomData<&'de ()>,
 }
 
@@ -193,11 +240,13 @@ impl<'de, R: WordRead + 'de> Deserializer<'de, R> {
     pub fn new(reader: R) -> Self {
         Deserializer {
             reader,
+            byte_handler: ByteHandler::default(),
             phantom: core::marker::PhantomData,
         }
     }
 
     fn try_take_word(&mut self) -> Result<u32> {
+        self.byte_handler.reset()?;
         let mut val = 0u32;
         self.reader.read_words(core::slice::from_mut(&mut val))?;
         Ok(val)
@@ -228,7 +277,7 @@ impl<'de, 'a, R: WordRead + 'de> serde::Deserializer<'de> for &'a mut Deserializ
     where
         V: Visitor<'de>,
     {
-        let val = match self.try_take_word()? {
+        let val = match self.byte_handler.handle_byte(&mut self.reader)? {
             0 => false,
             1 => true,
             _ => return Err(Error::DeserializeBadBool),
@@ -268,6 +317,7 @@ impl<'de, 'a, R: WordRead + 'de> serde::Deserializer<'de> for &'a mut Deserializ
     where
         V: Visitor<'de>,
     {
+        self.byte_handler.reset()?;
         let mut bytes = [0u8; 16];
         self.reader.read_padded_bytes(&mut bytes)?;
         visitor.visit_i128(i128::from_le_bytes(bytes))
@@ -277,7 +327,7 @@ impl<'de, 'a, R: WordRead + 'de> serde::Deserializer<'de> for &'a mut Deserializ
     where
         V: Visitor<'de>,
     {
-        visitor.visit_u32(self.try_take_word()?)
+        visitor.visit_u8(self.byte_handler.handle_byte(&mut self.reader)?)
     }
 
     fn deserialize_u16<V>(self, visitor: V) -> Result<V::Value>
@@ -305,6 +355,7 @@ impl<'de, 'a, R: WordRead + 'de> serde::Deserializer<'de> for &'a mut Deserializ
     where
         V: Visitor<'de>,
     {
+        self.byte_handler.reset()?;
         let mut bytes = [0u8; 16];
         self.reader.read_padded_bytes(&mut bytes)?;
         visitor.visit_u128(u128::from_le_bytes(bytes))

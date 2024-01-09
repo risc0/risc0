@@ -20,6 +20,12 @@ use super::err::{Error, Result};
 
 /// A writer for writing streams preferring word-based data.
 pub trait WordWrite {
+    /// Access the last word
+    fn get_buffered_word(&self) -> Result<u32>;
+
+    /// Modify the last word
+    fn set_buffered_word(&mut self, last_word: u32) -> Result<()>;
+
     /// Write the given words to the stream.
     fn write_words(&mut self, words: &[u32]) -> Result<()>;
 
@@ -33,6 +39,21 @@ pub trait WordWrite {
 }
 
 impl WordWrite for Vec<u32> {
+    #[inline]
+    fn get_buffered_word(&self) -> Result<u32> {
+        let len = self.len();
+        assert_ne!(len, 0);
+        Ok(self[len - 1])
+    }
+
+    #[inline]
+    fn set_buffered_word(&mut self, last_word: u32) -> Result<()> {
+        let len = self.len();
+        assert_ne!(len, 0);
+        self[len - 1] = last_word;
+        Ok(())
+    }
+
     fn write_words(&mut self, words: &[u32]) -> Result<()> {
         self.extend_from_slice(words);
         Ok(())
@@ -53,6 +74,16 @@ impl WordWrite for Vec<u32> {
 
 // Allow borrowed WordWrites to work transparently.
 impl<W: WordWrite + ?Sized> WordWrite for &mut W {
+    #[inline]
+    fn get_buffered_word(&self) -> Result<u32> {
+        (**self).get_buffered_word()
+    }
+
+    #[inline]
+    fn set_buffered_word(&mut self, last_word: u32) -> Result<()> {
+        (**self).set_buffered_word(last_word)
+    }
+
     #[inline]
     fn write_words(&mut self, words: &[u32]) -> Result<()> {
         (**self).write_words(words)
@@ -91,9 +122,32 @@ where
     Ok(vec)
 }
 
+#[derive(Default)]
+struct ByteHandler(pub u8);
+
+impl ByteHandler {
+    #[inline(always)]
+    fn reset(&mut self) {
+        self.0 = 0;
+    }
+
+    fn handle<W: WordWrite>(&mut self, stream: &mut W, v: u8) -> Result<()> {
+        if self.0 == 0 {
+            stream.write_words(&[v as u32])?;
+            self.0 = 1;
+        } else {
+            let w = stream.get_buffered_word()?;
+            stream.set_buffered_word(w | ((v as u32) << (self.0 as usize * 8)))?;
+            self.0 = (self.0 + 1) % 4;
+        }
+        Ok(())
+    }
+}
+
 /// Enables serializing to a stream
 pub struct Serializer<W: WordWrite> {
     stream: W,
+    byte_handler: ByteHandler,
 }
 
 impl<W: WordWrite> Serializer<W> {
@@ -101,7 +155,22 @@ impl<W: WordWrite> Serializer<W> {
     ///
     /// Creates a serializer that writes to `stream`.
     pub fn new(stream: W) -> Self {
-        Serializer { stream }
+        Serializer {
+            stream,
+            byte_handler: ByteHandler::default(),
+        }
+    }
+
+    /// Ask the byte handler to serialize a byte
+    #[inline]
+    pub fn handle_byte(&mut self, val: u8) -> Result<()> {
+        self.byte_handler.handle(&mut self.stream, val)
+    }
+
+    /// Reset the byte handler
+    #[inline]
+    pub fn reset_byte_handler(&mut self) {
+        self.byte_handler.reset();
     }
 }
 
@@ -152,7 +221,7 @@ impl<'a, W: WordWrite> serde::ser::Serializer for &'a mut Serializer<W> {
     }
 
     fn serialize_u8(self, v: u8) -> Result<()> {
-        self.serialize_u32(v as u32)
+        self.handle_byte(v)
     }
 
     fn serialize_u16(self, v: u16) -> Result<()> {
@@ -160,6 +229,7 @@ impl<'a, W: WordWrite> serde::ser::Serializer for &'a mut Serializer<W> {
     }
 
     fn serialize_u32(self, v: u32) -> Result<()> {
+        self.reset_byte_handler();
         self.stream.write_words(&[v])
     }
 
@@ -169,6 +239,7 @@ impl<'a, W: WordWrite> serde::ser::Serializer for &'a mut Serializer<W> {
     }
 
     fn serialize_u128(self, v: u128) -> Result<()> {
+        self.reset_byte_handler();
         self.stream.write_padded_bytes(&v.to_le_bytes())
     }
 
