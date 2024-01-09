@@ -525,10 +525,10 @@ mod sys_verify {
 
     #[test]
     fn sys_verify() {
-        let spec = &MultiTestSpec::SysVerify {
-            image_id: HELLO_COMMIT_ID.into(),
-            journal: HELLO_COMMIT_RECEIPT.journal.bytes.clone(),
-        };
+        let spec = &MultiTestSpec::SysVerify(vec![(
+            HELLO_COMMIT_ID.into(),
+            HELLO_COMMIT_RECEIPT.journal.bytes.clone(),
+        )]);
 
         // Test that providing the proven assumption results in an unconditional
         // receipt.

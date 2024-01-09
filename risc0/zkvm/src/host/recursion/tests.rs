@@ -18,9 +18,7 @@ use risc0_zkp::{
     core::digest::{Digest, DIGEST_WORDS},
     field::baby_bear::BabyBearElem,
 };
-use risc0_zkvm_methods::{
-    multi_test::MultiTestSpec, HELLO_COMMIT_ELF, HELLO_COMMIT_ID, MULTI_TEST_ELF, MULTI_TEST_ID,
-};
+use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID};
 use serial_test::serial;
 use test_log::test;
 
@@ -204,18 +202,35 @@ fn generate_composition_receipt(hashfn: &str) -> Receipt {
     };
     let prover = get_prover_server(&opts).unwrap();
 
-    tracing::info!("Proving rv32im: hello commit");
-    let assumption_receipt = prover
-        .prove(ExecutorEnv::default(), HELLO_COMMIT_ELF)
+    tracing::info!("Proving rv32im: echo 'execution A'");
+    let env = ExecutorEnv::builder()
+        .write(&MultiTestSpec::Echo {
+            bytes: b"execution A".to_vec(),
+        })
+        .unwrap()
+        .build()
         .unwrap();
-    tracing::info!("Done proving rv32im: hello commit");
+    let assumption_receipt_a = prover.prove(env, MULTI_TEST_ELF).unwrap();
+    tracing::info!("Done proving rv32im: echo 'execution A'");
+
+    tracing::info!("Proving rv32im: echo 'execution B'");
+    let env = ExecutorEnv::builder()
+        .write(&MultiTestSpec::Echo {
+            bytes: b"execution B".to_vec(),
+        })
+        .unwrap()
+        .build()
+        .unwrap();
+    let assumption_receipt_b = prover.prove(env, MULTI_TEST_ELF).unwrap();
+    tracing::info!("Done proving rv32im: echo 'execution B'");
 
     let env = ExecutorEnv::builder()
-        .add_assumption(assumption_receipt.clone().into())
-        .write(&MultiTestSpec::SysVerify {
-            image_id: HELLO_COMMIT_ID.into(),
-            journal: b"hello world".to_vec(),
-        })
+        .add_assumption(assumption_receipt_a.clone().into())
+        .add_assumption(assumption_receipt_b.clone().into())
+        .write(&MultiTestSpec::SysVerify(vec![
+            (MULTI_TEST_ID.into(), b"execution A".to_vec()),
+            (MULTI_TEST_ID.into(), b"execution B".to_vec()),
+        ]))
         .unwrap()
         .build()
         .unwrap();
@@ -238,22 +253,27 @@ fn test_recursion_lift_resolve_e2e() {
     assert_eq!(composition_receipt.segments.len(), 1);
     let conditional_segment_receipt = composition_receipt.segments[0].clone();
 
-    assert_eq!(composition_receipt.assumptions.len(), 1);
-    let assumption_receipt = composition_receipt.assumptions[0]
-        .composite()
-        .unwrap()
-        .clone();
-    assert_eq!(assumption_receipt.segments.len(), 1);
-    assert_eq!(assumption_receipt.assumptions.len(), 0);
-    let assumption_segment_receipt = assumption_receipt.segments[0].clone();
+    assert_eq!(composition_receipt.assumptions.len(), 2);
+    let lifted_assumptions = composition_receipt
+        .assumptions
+        .iter()
+        .map(|receipt| {
+            let assumption_receipt = receipt.composite().unwrap().clone();
+            assert_eq!(assumption_receipt.segments.len(), 1);
+            assert_eq!(assumption_receipt.assumptions.len(), 0);
+            let assumption_segment_receipt = assumption_receipt.segments[0].clone();
 
-    // Lift and join them  all (and verify)
-    tracing::info!("Lifting assumption");
-    let lifted_assumption = lift(&assumption_segment_receipt).unwrap();
-    lifted_assumption
-        .verify_integrity_with_context(&VerifierContext::default())
-        .unwrap();
-    tracing::info!("Lift assumption claim = {:?}", lifted_assumption.claim);
+            // Lift the assumption receipt.
+            tracing::info!("Lifting assumption");
+            let lifted_assumption = lift(&assumption_segment_receipt).unwrap();
+            lifted_assumption
+                .verify_integrity_with_context(&VerifierContext::default())
+                .unwrap();
+            tracing::info!("Lift assumption claim = {:?}", lifted_assumption.claim);
+
+            lifted_assumption
+        })
+        .collect::<Vec<_>>();
 
     tracing::info!("Lifting conditional");
     let lifted_conditional = lift(&conditional_segment_receipt).unwrap();
@@ -262,12 +282,19 @@ fn test_recursion_lift_resolve_e2e() {
         .unwrap();
     tracing::info!("Lift conditional claim = {:?}", lifted_conditional.claim);
 
-    tracing::info!("Resolve");
-    let resolved = resolve(&lifted_conditional, &lifted_assumption).unwrap();
-    resolved
-        .verify_integrity_with_context(&VerifierContext::default())
-        .unwrap();
-    tracing::info!("Resolve claim = {:?}", resolved.claim);
+    let resolved =
+        lifted_assumptions
+            .into_iter()
+            .fold(lifted_conditional, |conditional, corroborating| {
+                tracing::info!("Resolve");
+                let resolved = resolve(&conditional, &corroborating).unwrap();
+                resolved
+                    .verify_integrity_with_context(&VerifierContext::default())
+                    .unwrap();
+                tracing::info!("Resolve claim = {:?}", resolved.claim);
+
+                resolved
+            });
 
     // Validate the Session rollup + journal data
     let resolved_receipt = Receipt::new(InnerReceipt::Succinct(resolved), receipt.journal.bytes);
