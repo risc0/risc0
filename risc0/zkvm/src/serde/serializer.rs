@@ -24,7 +24,7 @@ pub trait WordWrite {
     fn get_buffered_word(&self) -> Result<u32>;
 
     /// Modify the buffered word
-    fn set_buffered_word(&mut self, last_word: u32) -> Result<()>;
+    fn set_buffered_word(&mut self, word: u32) -> Result<()>;
 
     /// Write the given words to the stream.
     fn write_words(&mut self, words: &[u32]) -> Result<()>;
@@ -47,10 +47,10 @@ impl WordWrite for Vec<u32> {
     }
 
     #[inline]
-    fn set_buffered_word(&mut self, last_word: u32) -> Result<()> {
+    fn set_buffered_word(&mut self, word: u32) -> Result<()> {
         let len = self.len();
         assert_ne!(len, 0);
-        self[len - 1] = last_word;
+        self[len - 1] = word;
         Ok(())
     }
 
