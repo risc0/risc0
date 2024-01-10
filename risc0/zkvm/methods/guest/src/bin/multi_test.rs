@@ -173,12 +173,17 @@ fn main() {
             }
             env::commit(&buf);
         }
-        MultiTestSpec::SysVerify { image_id, journal } => {
-            env::verify(image_id, &journal).unwrap();
+        MultiTestSpec::SysVerify(pairs) => {
+            for (image_id, journal) in pairs.into_iter() {
+                env::verify(image_id, &journal).unwrap();
+            }
         }
         MultiTestSpec::SysVerifyIntegrity { claim_words } => {
             let claim: ReceiptClaim = risc0_zkvm::serde::from_slice(&claim_words).unwrap();
             env::verify_integrity(&claim).unwrap();
+        }
+        MultiTestSpec::Echo { bytes } => {
+            env::commit_slice(&bytes);
         }
         MultiTestSpec::EchoStdout { nbytes, fd } => {
             // Unaligned buffer size to exercise things a little bit.
