@@ -268,10 +268,10 @@ fn lift_resolve() {
     // Execute the composition multitest
     let env = ExecutorEnv::builder()
         .add_assumption(assumption_succinct_receipt.claim.clone().into())
-        .write(&MultiTestSpec::SysVerify {
-            image_id: HELLO_COMMIT_ID.into(),
-            journal: b"hello world".to_vec(),
-        })
+        .write(&MultiTestSpec::SysVerify(vec![(
+            HELLO_COMMIT_ID.into(),
+            b"hello world".to_vec(),
+        )]))
         .unwrap()
         .build()
         .unwrap();

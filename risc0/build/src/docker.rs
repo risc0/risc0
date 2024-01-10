@@ -233,7 +233,7 @@ mod test {
         build("../../risc0/zkvm/methods/guest/Cargo.toml");
         compare_image_id(
             "risc0_zkvm_methods_guest/multi_test",
-            "0577d5559d28d3856d000fc5a7e77f5e376d9cd412729677ff0462919a1ebf8c",
+            "148ca00c1ee06658f13ba18834987ce8bf07dca4c2fa6a4d1f063cfb75567a17",
         );
         compare_image_id(
             "risc0_zkvm_methods_guest/hello_commit",
@@ -241,7 +241,7 @@ mod test {
         );
         compare_image_id(
             "risc0_zkvm_methods_guest/slice_io",
-            "6ac797046e2287c3526eb8e111a6c31c6eacbe9f37a4cdc8d2b727170de51904",
+            "5df8f220affcab0dfbf3d5aee6cb2c6f0c5e7d2df69ad377c1595ea4d7a89b97",
         );
     }
 }
