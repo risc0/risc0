@@ -1,0 +1,11 @@
+[package]
+name = "exponentiate"
+version = "0.1.0"
+edition = "2021"
+
+[workspace]
+
+[dependencies]
+risc0-zkvm = { path = "../../../../risc0/zkvm", features = ["std"], default-features = false }
+hello-world-methods = { path = "../../../hello-world/methods" }
+bytemuck = "1.14"

@@ -240,7 +240,8 @@ impl SysVerify {
             ));
         };
 
-        self.assumptions.borrow_mut().accessed.push(assumption);
+        // Mark the assumption as accessed, pushing it to the head of the list, and return the success code.
+        self.assumptions.borrow_mut().accessed.insert(0, assumption);
         return Ok((0, 0));
     }
 
@@ -305,8 +306,8 @@ impl SysVerify {
             ));
         };
 
-        // Mark the assumption as accessed and return the success code.
-        self.assumptions.borrow_mut().accessed.push(assumption);
+        // Mark the assumption as accessed, pushing it to the head of the list, and return the success code.
+        self.assumptions.borrow_mut().accessed.insert(0, assumption);
         return Ok((0, 0));
     }
 
