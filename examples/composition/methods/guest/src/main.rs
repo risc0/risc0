@@ -21,11 +21,7 @@ fn main() {
     let (n, e, x): (u64, u64, u64) = env::read();
 
     // Verify that n has a known factorization.
-    env::verify(
-        MULTIPLY_ID,
-        bytemuck::cast_slice(&serde::to_vec(&n).unwrap()),
-    )
-    .unwrap();
+    env::verify(MULTIPLY_ID, &serde::to_vec(&n).unwrap()).unwrap();
 
     // Commit n, e, and x^e mod n.
     env::commit(&(n, e, pow_mod(x, e, n)));
