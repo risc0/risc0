@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 // This code is automatically generated
 
 #include "fp.h"
-#include "fp4.h"
+#include "fpext.h"
 
 #include <cstdint>
 
@@ -25,11 +25,11 @@ constexpr size_t kInvRate = 4;
 namespace risc0::circuit::rv32im {
 
 struct MixState {
-  Fp4 tot;
-  Fp4 mul;
+  FpExt tot;
+  FpExt mul;
 };
 
-Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
+FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   size_t mask = steps - 1;
   // loc("zirgen/circuit/rv32im/top.cpp":17:0)
   Fp x0(1);
@@ -194,7 +194,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   // loc("./zirgen/components/plonk.h":218:0)
   Fp x80(2013265910);
   // loc("zirgen/circuit/rv32im/rv32im.cpp":43:0)
-  MixState x81{Fp4(0), Fp4(1)};
+  MixState x81{FpExt(0), FpExt(1)};
   // loc("Top/Code/OneHot/hot[1](Reg)"("./zirgen/components/mux.h":49:0))
   auto x82 = args[0][2 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("Top/Code/OneHot/hot[1](Reg)"("zirgen/circuit/rv32im/top.cpp":17:0))
