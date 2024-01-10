@@ -72,7 +72,6 @@ Conditional receipts are a part of the [composition] feature.
 ### Continuations
 
 [continuations]: #continuations
-
 [Continuations study club]: https://www.youtube.com/watch?v=v4HIwaqmIxk&list=PLcPzhUaCxlCirUkJY0ltpjdtzWcz5U_6y&index=1
 [Continuations blog]: https://www.risczero.com/news/continuations
 
