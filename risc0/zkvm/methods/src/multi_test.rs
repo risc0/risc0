@@ -55,13 +55,13 @@ pub enum MultiTestSpec {
         // Position and length to do reads
         pos_and_len: Vec<(u32, u32)>,
     },
-    SysVerify {
-        image_id: Digest,
-        journal: Vec<u8>,
-    },
+    SysVerify(Vec<(Digest, Vec<u8>)>),
     SysVerifyIntegrity {
         // Define this field as a serialized vector to avoid circular dependency issues.
         claim_words: Vec<u32>,
+    },
+    Echo {
+        bytes: Vec<u8>,
     },
     EchoStdout {
         nbytes: u32,

@@ -63,6 +63,8 @@ where
 #[derive(Debug, Default)]
 pub(crate) struct Assumptions {
     pub(crate) cached: Vec<Assumption>,
+    // An ordered list of assumptions accessed during execution.
+    // Each time an assumption is used, it is cloned and pushed to the head of the list.
     #[cfg(feature = "prove")]
     pub(crate) accessed: Vec<Assumption>,
 }
