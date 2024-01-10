@@ -535,7 +535,7 @@ mod sys_verify {
         let env = ExecutorEnv::builder()
             .write(&spec)
             .unwrap()
-            .add_assumption(HELLO_COMMIT_RECEIPT.clone().into())
+            .add_assumption(HELLO_COMMIT_RECEIPT.clone())
             .build()
             .unwrap();
         get_prover_server(&prover_opts_fast())
@@ -562,7 +562,7 @@ mod sys_verify {
         let env = ExecutorEnv::builder()
             .write(&spec)
             .unwrap()
-            .add_assumption(HELLO_COMMIT_RECEIPT.get_claim().unwrap().into())
+            .add_assumption(HELLO_COMMIT_RECEIPT.get_claim().unwrap())
             .build()
             .unwrap();
         // TODO(#982) Conditional receipts currently return an error on verification.
@@ -589,7 +589,7 @@ mod sys_verify {
         let env = ExecutorEnv::builder()
             .write(&spec)
             .unwrap()
-            .add_assumption(HELLO_COMMIT_RECEIPT.clone().into())
+            .add_assumption(HELLO_COMMIT_RECEIPT.clone())
             .build()
             .unwrap();
         get_prover_server(&prover_opts_fast())
@@ -616,7 +616,7 @@ mod sys_verify {
         let env = ExecutorEnv::builder()
             .write(&spec)
             .unwrap()
-            .add_assumption(HELLO_COMMIT_RECEIPT.get_claim().unwrap().into())
+            .add_assumption(HELLO_COMMIT_RECEIPT.get_claim().unwrap())
             .build()
             .unwrap();
         // TODO(#982) Conditional receipts currently return an error on verification.
@@ -640,7 +640,7 @@ mod sys_verify {
         let env = ExecutorEnv::builder()
             .write(&spec)
             .unwrap()
-            .add_assumption(halt_receipt.into())
+            .add_assumption(halt_receipt)
             .build()
             .unwrap();
         get_prover_server(&prover_opts_fast())
@@ -666,7 +666,7 @@ mod sys_verify {
         let env = ExecutorEnv::builder()
             .write(&spec)
             .unwrap()
-            .add_assumption(fault_receipt.into())
+            .add_assumption(fault_receipt)
             .build()
             .unwrap();
         get_prover_server(&prover_opts_fast())
