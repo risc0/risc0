@@ -640,7 +640,9 @@ impl Merge for Option<Output> {
 
 impl Merge for ReceiptClaim {
     fn merge(&self, other: &Self) -> Result<Self, MergeInequalityError> {
-        if self.exit_code != other.exit_code || self.input != other.input {
+        // NOTE: ExitCodes are converted into their pairs first because this code is intended
+        // to accept SystemSplit, SessionLimit, and Fault as interchanable.
+        if self.exit_code.into_pair() != other.exit_code.into_pair() || self.input != other.input {
             return Err(MergeInequalityError(
                 self.digest::<sha::Impl>(),
                 other.digest::<sha::Impl>(),
