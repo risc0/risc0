@@ -47,11 +47,32 @@ pub struct BenchmarkCommand {
 impl BenchmarkCommand {
     /// Execute this command.
     pub fn run(&self) -> Result<()> {
-        // TODO: Handle the case where the user does not specify the number of iterations
-        let iterations = SpecWithIters(
-            BenchmarkSpec::SimpleLoop,
-            self.iterations.unwrap_or(4 * 1024),
-        );
+        if let Some(i) = self.iterations {
+            return self.run_with_iterations(i);
+        } else {
+            let iterations = [
+                0,          // warm-up
+                1,          // 16, 64K
+                4 * 1024,   // 17, 128K
+                16 * 1024,  // 18, 256K
+                32 * 1024,  // 19, 512K
+                64 * 1024,  // 20, 1M
+                200 * 1024, // 21, 2M
+                400 * 1024, // 22, 4M
+                            // 900 * 1024,  // 23, 8M
+                            // 1400 * 1024, // 24, 16M
+            ];
+
+            for i in iterations.into_iter() {
+                self.run_with_iterations(i)?;
+            }
+        }
+
+        Ok(())
+    }
+
+    fn run_with_iterations(&self, iterations: u64) -> Result<()> {
+        let iterations = SpecWithIters(BenchmarkSpec::SimpleLoop, iterations);
         let env = ExecutorEnv::builder()
             .write(&iterations)?
             .segment_limit_po2(self.po2)
