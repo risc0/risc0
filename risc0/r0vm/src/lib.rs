@@ -54,7 +54,7 @@ struct Cli {
     #[arg(short, long, action = clap::ArgAction::Count)]
     verbose: u8,
 
-    /// Add environment vairables in the form of NAME=value.
+    /// Add environment variables in the form of NAME=value.
     #[arg(long, action = clap::ArgAction::Append)]
     env: Vec<String>,
 

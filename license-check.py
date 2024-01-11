@@ -30,7 +30,7 @@ EXTENSIONS = [
 
 SKIP_DIRS = [
     str(Path.cwd()) + "/templates/rust-starter",
-    # Groth16 verifier implementaion uses circom generated code under GPL3.
+    # Groth16 verifier implementation uses circom generated code under GPL3.
     str(Path.cwd()) + "/bonsai/ethereum/contracts/groth16",
 ]
 
