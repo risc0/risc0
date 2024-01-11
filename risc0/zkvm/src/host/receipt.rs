@@ -99,7 +99,7 @@ use crate::{
 /// ```
 ///
 /// The public outputs of the [Receipt] are contained in the
-/// [Receipt::journal]. You can use [Journal::decode] to deserialize the journal are typed and
+/// [Receipt::journal]. You can use [Journal::decode] to deserialize the journal as typed and
 /// structured data, or access the [Journal::bytes] directly.
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[cfg_attr(test, derive(PartialEq))]
@@ -659,7 +659,7 @@ impl SegmentReceipt {
     }
 }
 
-/// An assumption attached with to a guest execution as a result of calling
+/// An assumption attached to a guest execution as a result of calling
 /// `env::verify` or `env::verify_integrity`.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum Assumption {
