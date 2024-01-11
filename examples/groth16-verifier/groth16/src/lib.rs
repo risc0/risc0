@@ -102,9 +102,10 @@ impl Groth16 {
     }
 
     pub fn verify(&self) -> Result<(), Error> {
-        let pvk = &PreparedVerifyingKey::deserialize_uncompressed(&*self.pvk)?;
-        let proof = &Proof::deserialize_uncompressed(&*self.proof)?;
-        let prepared_inputs = &G1Projective::deserialize_uncompressed(&*self.prepared_inputs)?;
+        let pvk = &PreparedVerifyingKey::deserialize_uncompressed_unchecked(&*self.pvk)?;
+        let proof = &Proof::deserialize_uncompressed_unchecked(&*self.proof)?;
+        let prepared_inputs =
+            &G1Projective::deserialize_uncompressed_unchecked(&*self.prepared_inputs)?;
         match ark_Groth16::<Bn254>::verify_proof_with_prepared_inputs(pvk, proof, prepared_inputs)?
         {
             true => Ok(()),

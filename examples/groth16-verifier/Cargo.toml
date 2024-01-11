@@ -6,7 +6,7 @@ edition = "2021"
 [dependencies]
 methods = { path = "methods" }
 risc0-groth16 = { path = "groth16" }
-risc0-zkvm = { path = "../../risc0/zkvm", features = ["prove"] }
+risc0-zkvm = { path = "../../risc0/zkvm" }
 serde_json = "1.0"
 
 # Always optimize; building and running the guest takes much longer without optimization.
@@ -22,3 +22,9 @@ lto = true
 
 [profile.release.build-override]
 opt-level = 3
+
+[features]
+cuda = ["risc0-zkvm/cuda"]
+default = []
+metal = ["risc0-zkvm/metal"]
+prove = ["risc0-zkvm/prove"]
