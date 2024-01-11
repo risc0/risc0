@@ -13,7 +13,7 @@
 // limitations under the License.
 
 #include "fp.h"
-#include "fp4.h"
+#include "fpext.h"
 #include "sha256.h"
 
 using namespace metal;
@@ -38,12 +38,12 @@ kernel void eltwise_copy_fp(device Fp* out,
   out[gid] = in[gid];
 }
 
-kernel void eltwise_sum_fp4(device Fp* out,
-                            const device Fp4* in,
-                            device uint32_t& count,
-                            device uint32_t& to_add,
-                            uint gid [[thread_position_in_grid]]) {
-  Fp4 tot;
+kernel void eltwise_sum_fpext(device Fp* out,
+                              const device FpExt* in,
+                              device uint32_t& count,
+                              device uint32_t& to_add,
+                              uint gid [[thread_position_in_grid]]) {
+  FpExt tot;
   for (size_t i = 0; i < to_add; i++) {
     tot += in[count * i + gid];
   }

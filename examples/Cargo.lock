@@ -928,6 +928,23 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "acbf1af155f9b9ef647e42cdc158db4b64a1b61f743629225fde6f3e0be2a7c7"
 
 [[package]]
+name = "composition-example"
+version = "0.1.0"
+dependencies = [
+ "composition-example-methods",
+ "hello-world",
+ "risc0-zkvm",
+ "serde",
+]
+
+[[package]]
+name = "composition-example-methods"
+version = "0.1.0"
+dependencies = [
+ "risc0-build",
+]
+
+[[package]]
 name = "console"
 version = "0.15.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2180,6 +2197,12 @@ name = "httpdate"
 version = "1.0.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "df3b46402a9d5adb4c86a0cf463f42e19994e3ee891101b1841f30a545cb49a9"
+
+[[package]]
+name = "human-repr"
+version = "1.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f58b778a5761513caf593693f8951c97a5b610841e754788400f32102eefdff1"
 
 [[package]]
 name = "hyper"
@@ -3919,6 +3942,7 @@ dependencies = [
  "elf",
  "getrandom",
  "hex",
+ "human-repr",
  "lazy-regex",
  "num-bigint 0.4.4",
  "num-derive",
