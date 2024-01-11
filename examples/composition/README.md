@@ -9,7 +9,7 @@ See the [`src/main.rs`] file for the [host] side implementation of composition, 
 
 ## Quick Start
 
-First, follow the [installation guide] if you don't already have the RISC Zero tools installed.
+First, follow the [examples guide] to install dependencies and check out the correct version of the example.
 
 Then, run the example with:
 
@@ -17,7 +17,7 @@ Then, run the example with:
 cargo run --release
 ```
 
-[installation guide]: https://dev.risczero.com/api/zkvm/quickstart
+[examples guide]: https://dev.risczero.com/api/zkvm/examples/#running-the-examples
 
 ## Use Cases
 
