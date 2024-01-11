@@ -416,7 +416,7 @@ impl MachineContext {
         // 10.5.1
 
         // Setup working buffers of u64 elements. We use u64 values here because this
-        // implementation does a lot of non-field opperations and so we need to take the
+        // implementation does a lot of non-field operations and so we need to take the
         // inputs out of Montgomery form.
         let mut a = [0u64; bigint::WIDTH_BYTES * 2 + 1];
         for (i, ai) in a_elems.iter().copied().enumerate() {

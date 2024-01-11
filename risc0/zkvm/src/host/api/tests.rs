@@ -295,7 +295,7 @@ fn lift_resolve() {
         .unwrap();
 
     // Use resolve to create an unconditional succinct receipt
-    let succint_receipt = client.resolve(
+    let succinct_receipt = client.resolve(
         opts.clone(),
         composition_succinct_receipt.try_into().unwrap(),
         assumption_succinct_receipt.try_into().unwrap(),
@@ -303,7 +303,7 @@ fn lift_resolve() {
 
     // Wrap into a Receipt and verify
     let receipt = Receipt::new(
-        InnerReceipt::Succinct(succint_receipt),
+        InnerReceipt::Succinct(succinct_receipt),
         composition_session.journal.bytes,
     );
     receipt.verify(MULTI_TEST_ID).unwrap();

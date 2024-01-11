@@ -34,7 +34,7 @@ pub struct CallbackRequest {
     pub input: Vec<u8>,
     /// The Ethereum address of the callback.
     pub callback_contract: ethers::types::Address,
-    /// The function selector of the callbcak.
+    /// The function selector of the callback.
     pub function_selector: ethers::types::Selector,
     /// The gas limit.
     pub gas_limit: u64,

@@ -516,7 +516,7 @@ impl<'a> ExecutorImpl<'a> {
         let exit_code = if total_pending_cycles > self.segment_limit {
             if self.insn_counter == 0 {
                 // splitting on the first instruction of the segment means that
-                // it's too large to fit into a signle cycle.
+                // it's too large to fit into a single cycle.
                 bail!("execution of instruction at pc [0x{:08x}] resulted in a cycle count too large to fit into a single segment.", self.pc);
             }
             self.split_insn = Some(self.insn_counter);

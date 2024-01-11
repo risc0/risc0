@@ -68,7 +68,7 @@ enum Command {
 
         /// Wallet Key Identifier.
         /// Can be a private key as a hex string, or an AWS KMS key identifier.
-        /// Defaults to the first private key of a deafult Anvil instance.
+        /// Defaults to the first private key of a default Anvil instance.
         #[arg(
             short,
             long,

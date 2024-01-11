@@ -307,7 +307,7 @@ impl Client {
     ///
     /// The identity_p254 program is used as the last step in the prover pipeline before running the
     /// Groth16 prover. In Groth16 over BN254, it is much more efficient to verify a STARK that was
-    /// produced with Poseidon over the BN254 base field compared to using Posidon over BabyBear.
+    /// produced with Poseidon over the BN254 base field compared to using Poseidon over BabyBear.
     pub fn identity_p254(
         &self,
         opts: ProverOpts,

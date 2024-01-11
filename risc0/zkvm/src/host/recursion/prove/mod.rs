@@ -59,7 +59,7 @@ use crate::{
 const RECURSION_PO2: usize = 18;
 /// Depth of the Merkle tree to use for encoding the set of allowed control IDs.
 /// NOTE: Changing this constant must be coordinated with the circuit. In order to avoid needing to
-/// change the circuit later, this is set to 8 which allows for enough control IDs to be ecoded
+/// change the circuit later, this is set to 8 which allows for enough control IDs to be encoded
 /// that we are unlikely to need more.
 const ALLOWED_CODE_MERKLE_DEPTH: usize = 8;
 /// Size of the code group in the taps of the recursion circuit.
@@ -176,7 +176,7 @@ pub fn resolve(
 ///
 /// The identity_p254 program is used as the last step in the prover pipeline before running the
 /// Groth16 prover. In Groth16 over BN254, it is much more efficient to verify a STARK that was
-/// produced with Poseidon over the BN254 base field compared to using Posidon over BabyBear.
+/// produced with Poseidon over the BN254 base field compared to using Poseidon over BabyBear.
 pub fn identity_p254(a: &SuccinctReceipt) -> Result<SuccinctReceipt> {
     let hal_pair = poseidon254_hal_pair();
     let (hal, circuit_hal) = (hal_pair.hal.as_ref(), hal_pair.circuit_hal.as_ref());

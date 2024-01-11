@@ -192,7 +192,7 @@ async fn e2e_test_counter() {
     let max_seconds_to_wait = 120;
     let expected_value = U256::from(100);
     let mut value = U256::from(0);
-    while now.elapsed().expect("error occured getting time").as_secs() < max_seconds_to_wait {
+    while now.elapsed().expect("error occurred getting time").as_secs() < max_seconds_to_wait {
         value = counter
             .method::<_, U256>("value", ())
             .expect("value should be a function")
@@ -336,7 +336,7 @@ async fn e2e_test_counter_publish_mode() {
     let max_seconds_to_wait = 120;
     let expected_value = U256::from(100);
     let mut value = U256::from(0);
-    while now.elapsed().expect("error occured getting time").as_secs() < max_seconds_to_wait {
+    while now.elapsed().expect("error occurred getting time").as_secs() < max_seconds_to_wait {
         value = counter
             .method::<_, U256>("value", ())
             .expect("value should be a function")
