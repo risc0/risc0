@@ -18,7 +18,7 @@
 //! extension field. This field choice allows for 32-bit addition without
 //! overflow.
 
-use alloc::{fmt, vec::Vec};
+use alloc::{fmt, vec, vec::Vec};
 use core::{
     cmp::{Ordering, PartialEq},
     ops,
@@ -26,10 +26,13 @@ use core::{
 
 use bytemuck::{Pod, Zeroable};
 
-use crate::field::{self, Elem as FieldElem};
+use crate::{
+    field::{self, Elem as FieldElem},
+    polynomial::{degree, ExtensionField},
+};
 
 /// Definition of this field for operations that operate on the baby
-/// bear field and its 4th degree extension.
+/// bear field and its 5th degree extension.
 pub struct BabyBear;
 
 impl field::Field for BabyBear {
@@ -362,7 +365,7 @@ const fn decode(a: u32) -> u32 {
 }
 
 /// The size of the extension field in elements, 4 in this case.
-const EXT_SIZE: usize = 4;
+const EXT_SIZE: usize = 5;
 
 /// Instances of `ExtElem` are elements of a finite field `F_p^4`. They are
 /// represented as elements of `F_p[X] / (X^4 + 11)`. This large
@@ -396,7 +399,13 @@ impl fmt::Debug for ExtElem {
 }
 
 impl field::Elem for ExtElem {
-    const INVALID: Self = ExtElem([Elem::INVALID, Elem::INVALID, Elem::INVALID, Elem::INVALID]);
+    const INVALID: Self = ExtElem([
+        Elem::INVALID,
+        Elem::INVALID,
+        Elem::INVALID,
+        Elem::INVALID,
+        Elem::INVALID,
+    ]);
     const ZERO: Self = ExtElem::zero();
     const ONE: Self = ExtElem::one();
     const WORDS: usize = WORDS * EXT_SIZE;
@@ -404,6 +413,7 @@ impl field::Elem for ExtElem {
     /// Generate a random field element uniformly.
     fn random(rng: &mut impl rand_core::RngCore) -> Self {
         Self([
+            Elem::random(rng),
             Elem::random(rng),
             Elem::random(rng),
             Elem::random(rng),
@@ -437,33 +447,61 @@ impl field::Elem for ExtElem {
         // denominator by `a'`, producing `out = a' / (a * a')`. By construction
         // `(a * a')` has `0`s in its first and third elements. We call this
         // number, `b` and compute it as follows.
-        let mut b0 = a[0] * a[0] + BETA * (a[1] * (a[3] + a[3]) - a[2] * a[2]);
-        let mut b2 = a[0] * (a[2] + a[2]) - a[1] * a[1] + BETA * (a[3] * a[3]);
+        // let mut b0 = a[0] * a[0] + BETA * (a[1] * (a[3] + a[3]) - a[2] * a[2]);
+        // let mut b2 = a[0] * (a[2] + a[2]) - a[1] * a[1] + BETA * (a[3] * a[3]);
         // Now, we make `b'` by inverting `b2`. When we muliply both sizes by `b'`, we
         // get `out = (a' * b') / (b * b')`.  But by construction `b * b'` is in
         // fact an element of `Elem`, call it `c`.
-        let c = b0 * b0 + BETA * b2 * b2;
+        // let c = b0 * b0 + BETA * b2 * b2;
         // But we can now invert `C` direcly, and multiply by `a' * b'`:
         // `out = a' * b' * inv(c)`
-        let ic = c.inv();
+        // let ic = c.inv();
         // Note: if c == 0 (really should only happen if in == 0), our
         // 'safe' version of inverse results in ic == 0, and thus out
         // = 0, so we have the same 'safe' behavior for ExtElem.  Oh,
         // and since we want to multiply everything by ic, it's
         // slightly faster to pre-multiply the two parts of b by ic (2
         // multiplies instead of 4).
-        b0 *= ic;
-        b2 *= ic;
-        ExtElem([
-            a[0] * b0 + BETA * a[2] * b2,
-            -a[1] * b0 + NBETA * a[3] * b2,
-            -a[0] * b2 + a[2] * b0,
-            a[1] * b2 - a[3] * b0,
-        ])
+        // b0 *= ic;
+        // b2 *= ic;
+        // ExtElem([
+        //     a[0] * b0 + BETA * a[2] * b2,
+        //     -a[1] * b0 + NBETA * a[3] * b2,
+        //     -a[0] * b2 + a[2] * b0,
+        //     a[1] * b2 - a[3] * b0,
+        //     Elem::ZERO, // TODO
+        // ])
+
+        let irreducible = vec![NBETA, Elem::ZERO, Elem::ZERO, Elem::ZERO, Elem::ZERO];
+        let f = ExtensionField::new(EXT_SIZE + 1, irreducible.clone());
+        let mut t0 = f.zero();
+        let mut t1 = f.one();
+        let mut r0 = irreducible;
+        r0.push(Elem::new(P - 1));
+        let mut r1 = vec![a[0], a[1], a[2], a[3], a[4], Elem::ZERO];
+
+        while degree(&r1) > 0 {
+            let quot = f.div(&r0, &r1);
+            let r2 = f.sub(&r0, &f.mul(&quot, &r1));
+            r0 = r1;
+            r1 = r2;
+            let t2 = f.sub(&t0, &f.mul(&quot, &t1));
+            t0 = t1;
+            t1 = t2;
+        }
+
+        let x = f.mul_elem(r1[0].inv(), &t1);
+        Self::new([x[0], x[1], x[2], x[3], x[4]])
     }
 
     fn from_u64(val: u64) -> Self {
-        Self([Elem::from_u64(val), Elem::ZERO, Elem::ZERO, Elem::ZERO])
+        Self([
+            Elem::from_u64(val),
+            Elem::ZERO,
+            Elem::ZERO,
+            Elem::ZERO,
+            Elem::ZERO,
+        ])
     }
 
     fn to_u32_words(&self) -> Vec<u32> {
@@ -492,12 +530,19 @@ impl field::ExtElem for ExtElem {
     type SubElem = Elem;
 
     fn from_subfield(elem: &Elem) -> Self {
-        Self::from([*elem.ensure_valid(), Elem::ZERO, Elem::ZERO, Elem::ZERO])
+        Self::from([
+            *elem.ensure_valid(),
+            Elem::ZERO,
+            Elem::ZERO,
+            Elem::ZERO,
+            Elem::ZERO,
+        ])
     }
 
     fn from_subelems(elems: impl IntoIterator<Item = Self::SubElem>) -> Self {
         let mut iter = elems.into_iter();
         let elem = Self::from([
+            *iter.next().unwrap().ensure_valid(),
             *iter.next().unwrap().ensure_valid(),
             *iter.next().unwrap().ensure_valid(),
             *iter.next().unwrap().ensure_valid(),
@@ -525,7 +570,7 @@ impl PartialEq<ExtElem> for ExtElem {
 impl From<[Elem; EXT_SIZE]> for ExtElem {
     fn from(val: [Elem; EXT_SIZE]) -> Self {
         if cfg!(debug_assertions) {
-            for elem in val.iter() {
+            for elem in val {
                 elem.ensure_valid();
             }
         }
@@ -533,34 +578,31 @@ impl From<[Elem; EXT_SIZE]> for ExtElem {
     }
 }
 
-const BETA: Elem = Elem::new(11);
-const NBETA: Elem = Elem::new(P - 11);
-
-// TODO: refactor if rust gets const trait methods.
-const fn const_ensure_valid(x: Elem) -> Elem {
-    debug_assert!(x.0 != Elem::INVALID.0);
-    x
-}
+const NBETA: Elem = Elem::new(P + 2);
 
 impl ExtElem {
     /// Explicitly construct an ExtElem from parts.
-    pub const fn new(x0: Elem, x1: Elem, x2: Elem, x3: Elem) -> Self {
-        Self([
-            const_ensure_valid(x0),
-            const_ensure_valid(x1),
-            const_ensure_valid(x2),
-            const_ensure_valid(x3),
-        ])
+    pub fn new(xs: [Elem; EXT_SIZE]) -> Self {
+        for x in xs {
+            debug_assert!(x.0 != Elem::INVALID.0);
+        }
+        Self(xs)
     }
 
     /// Create an [ExtElem] from an [Elem].
     pub fn from_fp(x: Elem) -> Self {
-        Self([x, Elem::new(0), Elem::new(0), Elem::new(0)])
+        Self([x, Elem::new(0), Elem::new(0), Elem::new(0), Elem::new(0)])
     }
 
     /// Create an [ExtElem] from a raw integer.
     pub const fn from_u32(x0: u32) -> Self {
-        Self([Elem::new(x0), Elem::new(0), Elem::new(0), Elem::new(0)])
+        Self([
+            Elem::new(x0),
+            Elem::new(0),
+            Elem::new(0),
+            Elem::new(0),
+            Elem::new(0),
+        ])
     }
 
     /// Return the value zero.
@@ -581,6 +623,16 @@ impl ExtElem {
     /// Return [Elem] as a vector of base field values.
     pub fn elems(&self) -> &[Elem] {
         &self.ensure_valid().0
+    }
+
+    fn naive_mul(a: &[Elem], b: &[Elem]) -> [Elem; 2 * EXT_SIZE - 1] {
+        let mut c = [Elem::ZERO; 2 * EXT_SIZE - 1];
+        for i in 0..a.len() {
+            for j in 0..b.len() {
+                c[i + j] += a[i] * b[j];
+            }
+        }
+        c
     }
 }
 
@@ -654,29 +706,32 @@ impl ops::Mul<ExtElem> for Elem {
     }
 }
 
-// Now we get to the interesting case of multiplication. Basically,
-// multiply out the polynomial representations, and then reduce module
-// `x^4 - B`, which means powers >= 4 get shifted back 4 and
-// multiplied by `-beta`. We could write this as a double loops with
-// some `if`s and hope it gets unrolled properly, but it's small
-// enough to just hand write.
 impl ops::MulAssign for ExtElem {
     #[inline(always)]
     fn mul_assign(&mut self, rhs: Self) {
         // Rename the element arrays to something small for readability.
         let a = &self.0;
         let b = &rhs.0;
-        self.0 = [
-            a[0] * b[0] + NBETA * (a[1] * b[3] + a[2] * b[2] + a[3] * b[1]),
-            a[0] * b[1] + a[1] * b[0] + NBETA * (a[2] * b[3] + a[3] * b[2]),
-            a[0] * b[2] + a[1] * b[1] + a[2] * b[0] + NBETA * (a[3] * b[3]),
-            a[0] * b[3] + a[1] * b[2] + a[2] * b[1] + a[3] * b[0],
-        ];
+
+        let mut c = Self::naive_mul(a, b);
+
+        // Reduce the degree using the irreducible polynomial
+        let irreducible = ExtElem::from_fp(NBETA).0;
+        let upper = 2 * EXT_SIZE - 2;
+        for i in (EXT_SIZE..=upper).rev() {
+            for j in 0..EXT_SIZE {
+                c[i - EXT_SIZE] += c[i] * irreducible[j];
+            }
+            c[i] = Elem::ZERO;
+        }
+
+        self.0.copy_from_slice(&c[0..EXT_SIZE]);
     }
 }
 
 impl ops::Mul for ExtElem {
     type Output = ExtElem;
+
     #[inline(always)]
     fn mul(self, rhs: ExtElem) -> ExtElem {
         let mut lhs = self;
@@ -687,6 +742,7 @@ impl ops::Mul for ExtElem {
 
 impl ops::Neg for ExtElem {
     type Output = Self;
+
     fn neg(self) -> Self {
         ExtElem::ZERO - self
     }
@@ -694,13 +750,19 @@ impl ops::Neg for ExtElem {
 
 impl From<u32> for ExtElem {
     fn from(x: u32) -> Self {
-        Self([Elem::from(x), Elem::ZERO, Elem::ZERO, Elem::ZERO])
+        Self([
+            Elem::from(x),
+            Elem::ZERO,
+            Elem::ZERO,
+            Elem::ZERO,
+            Elem::ZERO,
+        ])
     }
 }
 
 impl From<Elem> for ExtElem {
     fn from(x: Elem) -> Self {
-        Self([x, Elem::ZERO, Elem::ZERO, Elem::ZERO])
+        Self([x, Elem::ZERO, Elem::ZERO, Elem::ZERO, Elem::ZERO])
     }
 }
 
@@ -725,42 +787,47 @@ mod tests {
 
     #[test]
     pub fn linear() {
-        let x = ExtElem::new(
+        let x = ExtElem::new([
             Elem::new(1880084280),
             Elem::new(1788985953),
             Elem::new(1273325207),
             Elem::new(277471107),
-        );
-        let c0 = ExtElem::new(
+            Elem::ZERO,
+        ]);
+        let c0 = ExtElem::new([
             Elem::new(1582815482),
             Elem::new(2011839994),
             Elem::new(589901),
             Elem::new(698998108),
-        );
-        let c1 = ExtElem::new(
+            Elem::ZERO,
+        ]);
+        let c1 = ExtElem::new([
             Elem::new(1262573828),
             Elem::new(1903841444),
             Elem::new(1738307519),
             Elem::new(100967278),
-        );
+            Elem::ZERO,
+        ]);
 
         assert_eq!(
             x * c1,
-            ExtElem::new(
+            ExtElem::new([
                 Elem::new(876029217),
                 Elem::new(1948387849),
                 Elem::new(498773186),
-                Elem::new(1997003991)
-            )
+                Elem::new(1997003991),
+                Elem::ZERO,
+            ])
         );
         assert_eq!(
             c0 + x * c1,
-            ExtElem::new(
+            ExtElem::new([
                 Elem::new(445578778),
                 Elem::new(1946961922),
                 Elem::new(499363087),
-                Elem::new(682736178)
-            )
+                Elem::new(682736178),
+                Elem::ZERO,
+            ])
         );
     }
 
@@ -847,7 +914,7 @@ mod tests {
             let elem = ExtElem::random(&mut rng);
             assert_eq!(elem, ExtElem::from_u32_words(&elem.to_u32_words()));
 
-            let vec: Vec<u32> = vec![rng.gen(), rng.gen(), rng.gen(), rng.gen()];
+            let vec: Vec<u32> = vec![rng.gen(), rng.gen(), rng.gen(), rng.gen(), rng.gen()];
 
             assert_eq!(vec, ExtElem::from_u32_words(&vec).to_u32_words());
         }

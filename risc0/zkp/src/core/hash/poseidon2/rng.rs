@@ -84,6 +84,6 @@ impl Rng<BabyBear> for Poseidon2Rng {
     }
 
     fn random_ext_elem(&mut self) -> BabyBearExtElem {
-        ExtElem::from_subelems((0..4).map(|_| self.random_elem()))
+        ExtElem::from_subelems((0..BabyBearExtElem::EXT_SIZE).map(|_| self.random_elem()))
     }
 }

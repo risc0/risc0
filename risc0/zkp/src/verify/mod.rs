@@ -320,10 +320,10 @@ where
         // tracing::debug!("Result = {result:?}");
 
         // Now generate the check polynomial
-        // TODO: This currently treats the extension degree as hardcoded at 4, with
+        // TODO: This currently treats the expansion degree as hardcoded at 4, with
         // the structure of the code and the value of `remap` (and how it is
-        // accessed) only working in the extension degree = 4 case.
-        // However, for generic fields the extension degree may be different
+        // accessed) only working in the expansion degree = 4 case.
+        // However, for generic fields the expansion degree may be different
         // TODO: Therefore just using the to/from baby bear shims for now
         let mut check = F::ExtElem::default();
         let remap = [0, 2, 1, 3];
