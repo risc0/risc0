@@ -79,7 +79,7 @@ impl ProverServer for DevModeProver {
     fn resolve(
         &self,
         _conditional: &SuccinctReceipt,
-        _corroborating: &SuccinctReceipt,
+        _assumption: &SuccinctReceipt,
     ) -> Result<SuccinctReceipt> {
         unimplemented!("This is unsupported for dev mode.")
     }
