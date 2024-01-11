@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -37,10 +37,10 @@ pub enum TraceEvent {
 
     /// A memory location has been written
     MemorySet {
-        /// Address of word that's been written
+        /// Address of memory that's been written
         addr: u32,
-        /// Value of word that's been written
-        value: u32,
+        /// Data that's been written
+        region: Vec<u8>,
     },
 }
 
@@ -51,7 +51,9 @@ impl std::fmt::Debug for TraceEvent {
                 write!(f, "InstructionStart({cycle}, 0x{pc:08X}, 0x{insn:08X})")
             }
             Self::RegisterSet { idx, value } => write!(f, "RegisterSet({idx}, 0x{value:08X})"),
-            Self::MemorySet { addr, value } => write!(f, "MemorySet(0x{addr:08X}, 0x{value:08X})"),
+            Self::MemorySet { addr, region } => {
+                write!(f, "MemorySet(0x{addr:08X}, {region:#04X?})")
+            }
         }
     }
 }

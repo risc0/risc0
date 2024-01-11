@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -63,6 +63,8 @@ where
 #[derive(Debug, Default)]
 pub(crate) struct Assumptions {
     pub(crate) cached: Vec<Assumption>,
+    // An ordered list of assumptions accessed during execution.
+    // Each time an assumption is used, it is cloned and pushed to the head of the list.
     #[cfg(feature = "prove")]
     pub(crate) accessed: Vec<Assumption>,
 }

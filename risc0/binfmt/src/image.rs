@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -87,7 +87,7 @@ impl From<PageTableInfo> for PersistentPageTableInfo {
 }
 
 /// Compute and return the ImageID of the given `(merkle_root, pc)` pair.
-pub fn compute_image_id(merkle_root: &Digest, pc: u32) -> Digest {
+fn compute_image_id(merkle_root: &Digest, pc: u32) -> Digest {
     SystemState {
         merkle_root: *merkle_root,
         pc,
