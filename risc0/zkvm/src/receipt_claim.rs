@@ -186,7 +186,7 @@ pub enum ExitCode {
     /// This indicates that the guest exited upon reaching the session limit set by the host.
     ///
     /// NOTE: The current version of the RISC Zero zkVM will never exit with an exit code of SessionLimit.
-    /// This is because the system cannot currently prove that a fault has occured.
+    /// This is because the system cannot currently prove that the session limit as been reached.
     SessionLimit,
 }
 
