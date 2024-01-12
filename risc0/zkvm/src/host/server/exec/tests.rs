@@ -458,10 +458,10 @@ mod sys_verify {
     fn sys_verify() {
         let hello_commit_session = exec_hello_commit();
 
-        let spec = &MultiTestSpec::SysVerify {
-            image_id: HELLO_COMMIT_ID.into(),
-            journal: hello_commit_session.journal.clone().unwrap().bytes,
-        };
+        let spec = &MultiTestSpec::SysVerify(vec![(
+            HELLO_COMMIT_ID.into(),
+            hello_commit_session.journal.clone().unwrap().bytes,
+        )]);
 
         // Test that it works when the assumption is added.
         let env = ExecutorEnv::builder()
@@ -494,10 +494,7 @@ mod sys_verify {
             tracing::debug!("sys_verify_pause_codes: code = {code}");
             let halt_session = exec_halt(code);
 
-            let spec = &MultiTestSpec::SysVerify {
-                image_id: MULTI_TEST_ID.into(),
-                journal: Vec::new(),
-            };
+            let spec = &MultiTestSpec::SysVerify(vec![(MULTI_TEST_ID.into(), Vec::new())]);
 
             let env = ExecutorEnv::builder()
                 .write(&spec)
@@ -521,10 +518,7 @@ mod sys_verify {
             tracing::debug!("sys_verify_halt_codes: code = {code}");
             let pause_session = exec_pause(code);
 
-            let spec = &MultiTestSpec::SysVerify {
-                image_id: MULTI_TEST_ID.into(),
-                journal: Vec::new(),
-            };
+            let spec = &MultiTestSpec::SysVerify(vec![(MULTI_TEST_ID.into(), Vec::new())]);
 
             let env = ExecutorEnv::builder()
                 .write(&spec)
@@ -548,10 +542,7 @@ mod sys_verify {
         // since these cannot be distinguished from the circuit's point of view.
         let fault_session = exec_fault();
 
-        let spec = &MultiTestSpec::SysVerify {
-            image_id: MULTI_TEST_ID.into(),
-            journal: Vec::new(),
-        };
+        let spec = &MultiTestSpec::SysVerify(vec![(MULTI_TEST_ID.into(), Vec::new())]);
 
         let env = ExecutorEnv::builder()
             .write(&spec)

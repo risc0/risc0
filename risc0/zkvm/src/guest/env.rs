@@ -78,7 +78,7 @@ pub(crate) fn finalize(halt: bool, user_exit: u8) {
     }
 }
 
-/// Terminate execution of the zkvm.
+/// Terminate execution of the zkVM.
 ///
 /// Use an exit code of 0 to indicate success, and non-zero to indicate an error.
 pub fn exit(exit_code: u8) -> ! {
@@ -86,7 +86,7 @@ pub fn exit(exit_code: u8) -> ! {
     unreachable!();
 }
 
-/// Pause the execution of the zkvm.
+/// Pause the execution of the zkVM.
 ///
 /// Execution may be continued at a later time.
 /// Use an exit code of 0 to indicate success, and non-zero to indicate an error.
@@ -110,11 +110,26 @@ pub fn syscall(syscall: SyscallName, to_host: &[u8], from_host: &mut [u32]) -> s
 
 /// Verify there exists a receipt for an execution with `image_id` and `journal`.
 ///
+/// Calling this function in the guest is logically equivalent to verifying a receipt with the same
+/// image ID and journal. Any party verifying the receipt produced by this execution can then be
+/// sure that the receipt verified by this call is also valid. In this way, multiple receipts from
+/// potentially distinct guests can be combined into one. This feature is know as composition.
+///
 /// In order to be valid, the [crate::Receipt] must have `ExitCode::Halted(0)` or
 /// `ExitCode::Paused(0)`, an empty assumptions list, and an all-zeroes input hash. It may have any
 /// post [crate::SystemState].
-pub fn verify(image_id: Digest, journal: &[u8]) -> Result<(), VerifyError> {
-    let journal_digest: Digest = journal.digest();
+///
+/// # Example
+///
+/// ```rust,ignore
+/// use risc0_zkvm::guest::env;
+///
+/// # let HELLO_WORLD_ID = Digest::ZERO;
+/// env::verify(HELLO_WORLD_ID, b"hello world".as_slice()).unwrap();
+/// ```
+pub fn verify(image_id: impl Into<Digest>, journal: &[impl Pod]) -> Result<(), VerifyError> {
+    let image_id: Digest = image_id.into();
+    let journal_digest: Digest = bytemuck::cast_slice::<_, u8>(journal).digest();
     let mut from_host_buf = MaybeUninit::<[u32; DIGEST_WORDS + 1]>::uninit();
 
     unsafe {
@@ -172,7 +187,7 @@ pub fn verify(image_id: Digest, journal: &[u8]) -> Result<(), VerifyError> {
 #[derive(Debug)]
 #[non_exhaustive]
 pub enum VerifyError {
-    /// Error returned when the host responds to sys_verify with an invalid exit code.
+    /// Error returned when the host responds to `sys_verify` with an invalid exit code.
     BadExitCodeResponse(InvalidExitCodeError),
 }
 
@@ -197,6 +212,11 @@ impl std::error::Error for VerifyError {}
 
 /// Verify that there exists a valid receipt with the specified
 /// [ReceiptClaim].
+///
+/// Calling this function in the guest is logically equivalent to verifying a receipt with the same
+/// [ReceiptClaim]. Any party verifying the receipt produced by this execution can then be
+/// sure that the receipt verified by this call is also valid. In this way, multiple receipts from
+/// potentially distinct guests can be combined into one. This feature is know as composition.
 ///
 /// In order for a receipt to be valid, it must have a verifying cryptographic seal and
 /// additionally have no assumptions. Note that executions with no output (e.g. those ending in
@@ -360,7 +380,7 @@ pub fn journal() -> FdWriter<impl for<'a> Fn(&'a [u8])> {
     })
 }
 
-/// Reaturn a reader for the standard input
+/// Return a reader for the standard input
 pub fn stdin() -> FdReader {
     FdReader::new(fileno::STDIN)
 }
