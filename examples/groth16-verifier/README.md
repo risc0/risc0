@@ -9,7 +9,7 @@ Specifically, you will learn:
 - How to prove the verification of a `Groth16 proof` from the zkVM.
 
 ## Performance
-This example requires 64M cycles to run and therefore will take some time to prove locally. We recommend running it on [Bonsai] or just running in [DEV_MODE].
+This example requires ~500M cycles to run and therefore will take some time to prove locally. We recommend running it on [Bonsai] or just running in [DEV_MODE].
 
 ## Quick Start
 
