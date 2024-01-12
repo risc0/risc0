@@ -24,4 +24,4 @@
 extern crate alloc;
 
 pub mod field;
-mod polynomial;
+mod inverse;

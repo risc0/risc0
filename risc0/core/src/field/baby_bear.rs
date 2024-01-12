@@ -18,7 +18,7 @@
 //! extension field. This field choice allows for 32-bit addition without
 //! overflow.
 
-use alloc::{fmt, vec, vec::Vec};
+use alloc::{fmt, vec::Vec};
 use core::{
     cmp::{Ordering, PartialEq},
     ops,
@@ -28,7 +28,7 @@ use bytemuck::{Pod, Zeroable};
 
 use crate::{
     field::{self, Elem as FieldElem},
-    polynomial::{degree, ExtensionField},
+    inverse::inv,
 };
 
 /// Definition of this field for operations that operate on the baby
@@ -119,7 +119,7 @@ impl field::Elem for Elem {
         // Even if we imagined that this failure to reject totally destroys soundess,
         // the probablity of it occuring even once during proving is vanishingly low
         // (for the about 50 samples our current verifier pulls and at a probability of
-        // less than2^-161 per sample, this is less than 2^-155).  Even if we target
+        // less than 2^-161 per sample, this is less than 2^-155).  Even if we target
         // a soundness of 128 bits, we are millions of times more likely to let an
         // invalid proof by due to normal low probability events which are part of
         // soundess analysis than due to imperfect sampling.
@@ -392,8 +392,8 @@ impl fmt::Debug for ExtElem {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
         write!(
             f,
-            "[{:?}, {:?}, {:?}, {:?}]",
-            self.0[0], self.0[1], self.0[2], self.0[3]
+            "[{:?}, {:?}, {:?}, {:?}, {:?}]",
+            self.0[0], self.0[1], self.0[2], self.0[3], self.0[4]
         )
     }
 }
@@ -439,59 +439,8 @@ impl field::Elem for ExtElem {
     /// Compute the multiplicative inverse of an `ExtElem`.
     fn inv(self) -> Self {
         let a = &self.ensure_valid().0;
-        // Compute the multiplicative inverse by looking at `ExtElem` as a composite
-        // field and using the same basic methods used to invert complex
-        // numbers. We imagine that initially we have a numerator of `1`, and a
-        // denominator of `a`. `out = 1 / a`; We set `a'` to be a with the first
-        // and third components negated. We then multiply the numerator and the
-        // denominator by `a'`, producing `out = a' / (a * a')`. By construction
-        // `(a * a')` has `0`s in its first and third elements. We call this
-        // number, `b` and compute it as follows.
-        // let mut b0 = a[0] * a[0] + BETA * (a[1] * (a[3] + a[3]) - a[2] * a[2]);
-        // let mut b2 = a[0] * (a[2] + a[2]) - a[1] * a[1] + BETA * (a[3] * a[3]);
-        // Now, we make `b'` by inverting `b2`. When we muliply both sizes by `b'`, we
-        // get `out = (a' * b') / (b * b')`.  But by construction `b * b'` is in
-        // fact an element of `Elem`, call it `c`.
-        // let c = b0 * b0 + BETA * b2 * b2;
-        // But we can now invert `C` direcly, and multiply by `a' * b'`:
-        // `out = a' * b' * inv(c)`
-        // let ic = c.inv();
-        // Note: if c == 0 (really should only happen if in == 0), our
-        // 'safe' version of inverse results in ic == 0, and thus out
-        // = 0, so we have the same 'safe' behavior for ExtElem.  Oh,
-        // and since we want to multiply everything by ic, it's
-        // slightly faster to pre-multiply the two parts of b by ic (2
-        // multiplies instead of 4).
-        // b0 *= ic;
-        // b2 *= ic;
-        // ExtElem([
-        //     a[0] * b0 + BETA * a[2] * b2,
-        //     -a[1] * b0 + NBETA * a[3] * b2,
-        //     -a[0] * b2 + a[2] * b0,
-        //     a[1] * b2 - a[3] * b0,
-        //     Elem::ZERO, // TODO
-        // ])
-
-        let irreducible = vec![NBETA, Elem::ZERO, Elem::ZERO, Elem::ZERO, Elem::ZERO];
-        let f = ExtensionField::new(EXT_SIZE + 1, irreducible.clone());
-        let mut t0 = f.zero();
-        let mut t1 = f.one();
-        let mut r0 = irreducible;
-        r0.push(Elem::new(P - 1));
-        let mut r1 = vec![a[0], a[1], a[2], a[3], a[4], Elem::ZERO];
-
-        while degree(&r1) > 0 {
-            let quot = f.div(&r0, &r1);
-            let r2 = f.sub(&r0, &f.mul(&quot, &r1));
-            r0 = r1;
-            r1 = r2;
-            let t2 = f.sub(&t0, &f.mul(&quot, &t1));
-            t0 = t1;
-            t1 = t2;
-        }
-
-        let x = f.mul_elem(r1[0].inv(), &t1);
-        Self::new([x[0], x[1], x[2], x[3], x[4]])
+        let r = inv(a, NBETA.to_vec(), Elem::new(P - 1));
+        Self::new([r[0], r[1], r[2], r[3], r[4]])
     }
 
     fn from_u64(val: u64) -> Self {
@@ -578,7 +527,7 @@ impl From<[Elem; EXT_SIZE]> for ExtElem {
     }
 }
 
-const NBETA: Elem = Elem::new(P + 2);
+const NBETA: [Elem; EXT_SIZE] = [Elem::new(2), Elem::ZERO, Elem::ZERO, Elem::ZERO, Elem::ZERO];
 
 impl ExtElem {
     /// Explicitly construct an ExtElem from parts.
@@ -591,17 +540,17 @@ impl ExtElem {
 
     /// Create an [ExtElem] from an [Elem].
     pub fn from_fp(x: Elem) -> Self {
-        Self([x, Elem::new(0), Elem::new(0), Elem::new(0), Elem::new(0)])
+        Self([x, Elem::ZERO, Elem::ZERO, Elem::ZERO, Elem::ZERO])
     }
 
     /// Create an [ExtElem] from a raw integer.
     pub const fn from_u32(x0: u32) -> Self {
         Self([
             Elem::new(x0),
-            Elem::new(0),
-            Elem::new(0),
-            Elem::new(0),
-            Elem::new(0),
+            Elem::ZERO,
+            Elem::ZERO,
+            Elem::ZERO,
+            Elem::ZERO,
         ])
     }
 
@@ -716,11 +665,10 @@ impl ops::MulAssign for ExtElem {
         let mut c = Self::naive_mul(a, b);
 
         // Reduce the degree using the irreducible polynomial
-        let irreducible = ExtElem::from_fp(NBETA).0;
         let upper = 2 * EXT_SIZE - 2;
         for i in (EXT_SIZE..=upper).rev() {
             for j in 0..EXT_SIZE {
-                c[i - EXT_SIZE] += c[i] * irreducible[j];
+                c[i - EXT_SIZE] += c[i] * NBETA[j];
             }
             c[i] = Elem::ZERO;
         }
@@ -787,46 +735,44 @@ mod tests {
 
     #[test]
     pub fn linear() {
-        let x = ExtElem::new([
-            Elem::new(1880084280),
-            Elem::new(1788985953),
-            Elem::new(1273325207),
-            Elem::new(277471107),
-            Elem::ZERO,
+        // Generated from a simple python program:
+        //
+        // ```python
+        // import galois as gal
+        //
+        // babybear = pow(2, 31) - pow(2, 27) + 1
+        // babybear5 = pow(babybear, 5)
+        // fp = gal.GF(babybear)
+        // fp5 = gal.GF(babybear5, irreducible_poly=gal.Poly([1, 0, 0, 0, 0, 2], fp))
+        //
+        // a = fp5.Vector([1, 2, 3, 4, 5])
+        // b = fp5.Vector([6, 7, 8, 9, 10])
+        // print(fp5.vector(a * b))
+        // ```
+
+        let a = ExtElem::new([
+            Elem::new(1),
+            Elem::new(2),
+            Elem::new(3),
+            Elem::new(4),
+            Elem::new(5),
         ]);
-        let c0 = ExtElem::new([
-            Elem::new(1582815482),
-            Elem::new(2011839994),
-            Elem::new(589901),
-            Elem::new(698998108),
-            Elem::ZERO,
-        ]);
-        let c1 = ExtElem::new([
-            Elem::new(1262573828),
-            Elem::new(1903841444),
-            Elem::new(1738307519),
-            Elem::new(100967278),
-            Elem::ZERO,
+        let b = ExtElem::new([
+            Elem::new(6),
+            Elem::new(7),
+            Elem::new(8),
+            Elem::new(9),
+            Elem::new(10),
         ]);
 
         assert_eq!(
-            x * c1,
+            a * b,
             ExtElem::new([
-                Elem::new(876029217),
-                Elem::new(1948387849),
-                Elem::new(498773186),
-                Elem::new(1997003991),
-                Elem::ZERO,
-            ])
-        );
-        assert_eq!(
-            c0 + x * c1,
-            ExtElem::new([
-                Elem::new(445578778),
-                Elem::new(1946961922),
-                Elem::new(499363087),
-                Elem::new(682736178),
-                Elem::ZERO,
+                Elem::new(110),
+                Elem::new(102),
+                Elem::new(68),
+                Elem::new(2),
+                Elem::new(2013265831),
             ])
         );
     }

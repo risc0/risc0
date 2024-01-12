@@ -17,30 +17,30 @@ use core::cmp::min;
 
 use crate::field::Elem;
 
-pub(crate) struct ExtensionField<T> {
+struct ExtensionField<T> {
     degree: usize,
     irreducible: Vec<T>,
 }
 
 impl<T: Elem> ExtensionField<T> {
-    pub fn new(degree: usize, irreducible: Vec<T>) -> Self {
+    fn new(degree: usize, irreducible: Vec<T>) -> Self {
         Self {
             degree,
             irreducible,
         }
     }
 
-    pub fn zero(&self) -> Vec<T> {
+    fn zero(&self) -> Vec<T> {
         vec![T::ZERO; self.degree]
     }
 
-    pub fn one(&self) -> Vec<T> {
+    fn one(&self) -> Vec<T> {
         let mut coeffs = vec![T::ZERO; self.degree];
         coeffs[0] = T::ONE;
         coeffs
     }
 
-    pub fn sub(&self, a: &[T], b: &[T]) -> Vec<T> {
+    fn sub(&self, a: &[T], b: &[T]) -> Vec<T> {
         let mut c = a.to_vec();
         c.resize(self.degree, T::ZERO);
         for i in 0..min(self.degree, b.len()) {
@@ -49,7 +49,7 @@ impl<T: Elem> ExtensionField<T> {
         c
     }
 
-    pub fn mul(&self, a: &[T], b: &[T]) -> Vec<T> {
+    fn mul(&self, a: &[T], b: &[T]) -> Vec<T> {
         let mut c = self.naive_mul(a, b);
 
         // Reduce the degree using the irreducible polynomial
@@ -57,7 +57,8 @@ impl<T: Elem> ExtensionField<T> {
         for i in (self.degree..=upper).rev() {
             let x = c[i];
             for j in 0..self.degree {
-                c[i - self.degree] += x * self.irreducible[j];
+                let y = *self.irreducible.get(j).unwrap_or(&T::ZERO);
+                c[i - self.degree] += x * y;
             }
             c[i] = T::ZERO;
         }
@@ -65,7 +66,7 @@ impl<T: Elem> ExtensionField<T> {
         c
     }
 
-    pub fn mul_elem(&self, a: T, b: &[T]) -> Vec<T> {
+    fn mul_elem(&self, a: T, b: &[T]) -> Vec<T> {
         let mut c = self.zero();
         for i in 0..self.degree {
             c[i] = a * b[i];
@@ -73,30 +74,55 @@ impl<T: Elem> ExtensionField<T> {
         c
     }
 
-    pub fn div(&self, a: &[T], b: &[T]) -> Vec<T> {
-        let a_degree = degree(a);
-        let b_degree = degree(b);
+    fn inv(&self, a: &[T], p_minus_one: T) -> Vec<T> {
+        let f = ExtensionField::new(self.degree + 1, self.irreducible.clone());
+        let mut t0 = f.zero();
+        let mut t1 = f.one();
+        let mut r0 = self.irreducible.clone();
+        r0.push(p_minus_one);
+        let mut r1 = f.zero();
+        for i in 0..self.degree {
+            r1[i] = a[i];
+        }
+
+        while Self::degree(&r1) > 0 {
+            let quot = self.div(&r0, &r1);
+            let r2 = f.sub(&r0, &f.mul(&quot, &r1));
+            r0 = r1;
+            r1 = r2;
+            let t2 = f.sub(&t0, &f.mul(&quot, &t1));
+            t0 = t1;
+            t1 = t2;
+        }
+
+        self.mul_elem(r1[0].inv(), &t1)
+    }
+
+    fn div(&self, a: &[T], b: &[T]) -> Vec<T> {
+        let a_degree = Self::degree(a);
+        let b_degree = Self::degree(b);
 
         // Work in an extension field that can fit this extension field's irreducible
         // polynomial. This is necessary because `a` will be the irreducible polynomial
         // in the first step of Euclid's algorithm for finding multiplicative inverses.
         let f = ExtensionField::new(self.degree + 1, self.irreducible.clone());
-        let mut b2 = vec![T::ZERO; self.degree + 1];
-        let mut r = vec![T::ZERO; self.degree + 1];
-        let mut q = vec![T::ZERO; self.degree + 1];
-        for i in 0..a_degree {
+        let mut b2 = f.zero();
+        let mut r = f.zero();
+        let mut q = f.zero();
+        for i in 0..=a_degree {
             r[i] = a[i];
         }
-        for i in 0..b_degree {
+        for i in 0..=b_degree {
             b2[i] = b[i];
         }
 
         let mut r_degree = a_degree;
-        while r_degree >= a_degree {
+        while r_degree >= b_degree {
             debug_assert_eq!(q[r_degree - b_degree], T::ZERO);
             q[r_degree - b_degree] = r[r_degree] * b2[b_degree].inv();
+
             r = f.sub(a, &f.naive_mul(&q, &b2));
-            r_degree = degree(&r);
+            r_degree = Self::degree(&r);
         }
 
         q
@@ -111,13 +137,18 @@ impl<T: Elem> ExtensionField<T> {
         }
         c
     }
+
+    fn degree(x: &[T]) -> usize {
+        for i in (1..x.len()).rev() {
+            if x[i] != T::ZERO {
+                return i;
+            }
+        }
+        0
+    }
 }
 
-pub fn degree<T: Elem>(x: &[T]) -> usize {
-    for i in (1..x.len()).rev() {
-        if x[i] != T::ZERO {
-            return i;
-        }
-    }
-    0
+pub fn inv<T: Elem>(a: &[T], irreducible: Vec<T>, p_minus_one: T) -> Vec<T> {
+    let f = ExtensionField::new(a.len(), irreducible);
+    f.inv(a, p_minus_one)
 }
