@@ -79,11 +79,12 @@ pub trait ProverServer {
     /// Join two [SuccinctReceipt] into a [SuccinctReceipt]
     fn join(&self, a: &SuccinctReceipt, b: &SuccinctReceipt) -> Result<SuccinctReceipt>;
 
-    /// Resolve an assumption from a conditional [SuccinctReceipt] by providing a corroborating [SuccinctReceipt]
+    /// Resolve an assumption from a conditional [SuccinctReceipt] by providing a [SuccinctReceipt]
+    /// proving the validity of the assumption.
     fn resolve(
         &self,
         conditional: &SuccinctReceipt,
-        corroborating: &SuccinctReceipt,
+        assumption: &SuccinctReceipt,
     ) -> Result<SuccinctReceipt>;
 
     /// Convert a [SuccinctReceipt] with a poseidon hash function that uses a 254-bit field

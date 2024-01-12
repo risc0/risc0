@@ -469,7 +469,7 @@ impl CompositeReceipt {
             }
         }
 
-        // Verify all corroborating receipts attached to this composite receipt.
+        // Verify all assumption receipts attached to this composite receipt.
         for receipt in self.assumptions.iter() {
             tracing::debug!("verifying assumption: {:?}", receipt.get_claim()?.digest());
             receipt.verify_integrity_with_context(ctx)?;

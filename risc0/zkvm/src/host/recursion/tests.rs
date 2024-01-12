@@ -285,9 +285,9 @@ fn test_recursion_lift_resolve_e2e() {
     let resolved =
         lifted_assumptions
             .into_iter()
-            .fold(lifted_conditional, |conditional, corroborating| {
+            .fold(lifted_conditional, |conditional, assumption| {
                 tracing::info!("Resolve");
-                let resolved = resolve(&conditional, &corroborating).unwrap();
+                let resolved = resolve(&conditional, &assumption).unwrap();
                 resolved
                     .verify_integrity_with_context(&VerifierContext::default())
                     .unwrap();
