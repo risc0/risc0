@@ -94,7 +94,7 @@ message JoinResult {
 message ResolveRequest {
   ProverOpts opts = 1;
   Asset conditional_receipt = 2;
-  Asset corroborating_receipt = 3;
+  Asset assumption_receipt = 3;
   AssetRequest receipt_out = 4;
 }
 
