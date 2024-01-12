@@ -44,6 +44,15 @@ impl field::Field for BabyBear {
 const M: u32 = 0x88000001;
 const R2: u32 = 1172168163;
 
+const IRREDUCIBLE: [Elem; EXT_SIZE + 1] = [
+    Elem::new(2),
+    Elem::ZERO,
+    Elem::ZERO,
+    Elem::ZERO,
+    Elem::ZERO,
+    Elem::ONE,
+];
+
 /// The BabyBear class is an element of the finite field F_p, where P is the
 /// prime number 15*2^27 + 1. Put another way, Fp is basically integer
 /// arithmetic modulo P.
@@ -439,7 +448,7 @@ impl field::Elem for ExtElem {
     /// Compute the multiplicative inverse of an `ExtElem`.
     fn inv(self) -> Self {
         let a = &self.ensure_valid().0;
-        let r = inv(a, NBETA.to_vec(), Elem::new(P - 1));
+        let r = inv(a, IRREDUCIBLE.to_vec());
         Self::new([r[0], r[1], r[2], r[3], r[4]])
     }
 
@@ -466,7 +475,7 @@ impl field::Elem for ExtElem {
 
     // So we're not checking every subfield element every time we do
     // anything, assume that if our first subelement is valid, the
-    // whole thing is valid.  Any subfield elements will doublee check
+    // whole thing is valid. Any subfield elements will double check
     // when we do operations on them anyways.
     fn is_valid(&self) -> bool {
         self.0[0].is_valid()
@@ -526,8 +535,6 @@ impl From<[Elem; EXT_SIZE]> for ExtElem {
         ExtElem(val)
     }
 }
-
-const NBETA: [Elem; EXT_SIZE] = [Elem::new(2), Elem::ZERO, Elem::ZERO, Elem::ZERO, Elem::ZERO];
 
 impl ExtElem {
     /// Explicitly construct an ExtElem from parts.
@@ -667,8 +674,8 @@ impl ops::MulAssign for ExtElem {
         // Reduce the degree using the irreducible polynomial
         let upper = 2 * EXT_SIZE - 2;
         for i in (EXT_SIZE..=upper).rev() {
-            for j in 0..EXT_SIZE {
-                c[i - EXT_SIZE] += c[i] * NBETA[j];
+            for j in 0..IRREDUCIBLE.len() {
+                c[i - EXT_SIZE] += c[i] * IRREDUCIBLE[j];
             }
             c[i] = Elem::ZERO;
         }
@@ -796,7 +803,7 @@ mod tests {
             assert_eq!(a * (b + c), a * b + a * c);
             // Inverses
             if a != ExtElem::ZERO {
-                assert_eq!(a.inv() * a, ExtElem::from(1));
+                assert_eq!(a.inv() * a, ExtElem::ONE);
             }
             assert_eq!(ExtElem::ZERO - a, -a);
             assert_eq!(a + (-a), ExtElem::ZERO);

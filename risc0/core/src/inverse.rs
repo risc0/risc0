@@ -57,8 +57,7 @@ impl<T: Elem> ExtensionField<T> {
         for i in (self.degree..=upper).rev() {
             let x = c[i];
             for j in 0..self.degree {
-                let y = *self.irreducible.get(j).unwrap_or(&T::ZERO);
-                c[i - self.degree] += x * y;
+                c[i - self.degree] += x * self.irreducible[j];
             }
             c[i] = T::ZERO;
         }
@@ -74,16 +73,12 @@ impl<T: Elem> ExtensionField<T> {
         c
     }
 
-    fn inv(&self, a: &[T], p_minus_one: T) -> Vec<T> {
+    fn inv(&self, a: &[T]) -> Vec<T> {
         let f = ExtensionField::new(self.degree + 1, self.irreducible.clone());
         let mut t0 = f.zero();
         let mut t1 = f.one();
         let mut r0 = self.irreducible.clone();
-        r0.push(p_minus_one);
-        let mut r1 = f.zero();
-        for i in 0..self.degree {
-            r1[i] = a[i];
-        }
+        let mut r1 = a.to_vec();
 
         while Self::degree(&r1) > 0 {
             let quot = self.div(&r0, &r1);
@@ -139,16 +134,10 @@ impl<T: Elem> ExtensionField<T> {
     }
 
     fn degree(x: &[T]) -> usize {
-        for i in (1..x.len()).rev() {
-            if x[i] != T::ZERO {
-                return i;
-            }
-        }
-        0
+        x.iter().rev().position(|x| *x != T::ZERO).unwrap_or(0)
     }
 }
 
-pub fn inv<T: Elem>(a: &[T], irreducible: Vec<T>, p_minus_one: T) -> Vec<T> {
-    let f = ExtensionField::new(a.len(), irreducible);
-    f.inv(a, p_minus_one)
+pub fn inv<T: Elem>(a: &[T], irreducible: Vec<T>) -> Vec<T> {
+    ExtensionField::new(a.len(), irreducible).inv(a)
 }

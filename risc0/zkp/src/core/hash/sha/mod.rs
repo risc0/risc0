@@ -442,12 +442,13 @@ pub mod testutil {
     fn hash_extelems<S: Sha256>(len: usize) -> Digest {
         let items: Vec<BabyBearExtElem> = (0..len as u32)
             .map(|x| {
-                BabyBearExtElem::new(
-                    BabyBearElem::new(x * 4),
+                BabyBearExtElem::new([
+                    BabyBearElem::new(x * 4 + 0),
                     BabyBearElem::new(x * 4 + 1),
                     BabyBearElem::new(x * 4 + 2),
                     BabyBearElem::new(x * 4 + 3),
-                )
+                    BabyBearElem::new(x * 4 + 4),
+                ])
             })
             .collect();
         *S::hash_raw_pod_slice(items.as_slice())
