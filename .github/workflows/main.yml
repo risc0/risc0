@@ -334,7 +334,7 @@ jobs:
         with:
           key: macOS-default
       - run: pwd && ls -lh
-      - run: cargo clippy
+      - run: cargo clippy --all -- -W clippy::all -D warnings
       - uses: risc0/clippy-action@main
         with:
           reporter: 'github-pr-check'
