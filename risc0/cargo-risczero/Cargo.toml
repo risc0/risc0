@@ -33,8 +33,8 @@ reqwest-middleware = "0.2"
 reqwest-retry = "0.3"
 risc0-build = { workspace = true }
 risc0-r0vm = { workspace = true, optional = true }
-risc0-zkvm = { path = "../zkvm", default-features = false, features = ["std", "getrandom"] }
-risc0-zkvm-methods = { path = "../zkvm/methods", default-features = false }
+risc0-zkvm = { workspace = true, default-features = false, features = ["std", "getrandom"] }
+risc0-zkvm-methods = { workspace = true, default-features = false }
 serde = { version = "1", features = ["derive"] }
 syn = "2.0.38"
 tar = "0.4"
