@@ -334,6 +334,7 @@ jobs:
         with:
           key: macOS-default
       - run: pwd && ls -lh
+      - run: cargo --version
       - run: cargo clippy --all -- -W clippy::all
       - uses: risc0/clippy-action@main
         with:
