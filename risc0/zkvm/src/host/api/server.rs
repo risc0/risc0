@@ -513,18 +513,16 @@ impl Server {
                 .as_bytes()?;
             let conditional_succinct_receipt: SuccinctReceipt =
                 bincode::deserialize(&conditional_receipt_bytes)?;
-            let corroborating_receipt_bytes = request
-                .corroborating_receipt
+            let assumption_receipt_bytes = request
+                .assumption_receipt
                 .ok_or(malformed_err())?
                 .as_bytes()?;
-            let corroborating_succinct_receipt: SuccinctReceipt =
-                bincode::deserialize(&corroborating_receipt_bytes)?;
+            let assumption_succinct_receipt: SuccinctReceipt =
+                bincode::deserialize(&assumption_receipt_bytes)?;
 
             let prover = get_prover_server(&opts)?;
-            let receipt = prover.resolve(
-                &conditional_succinct_receipt,
-                &corroborating_succinct_receipt,
-            )?;
+            let receipt =
+                prover.resolve(&conditional_succinct_receipt, &assumption_succinct_receipt)?;
 
             let succinct_receipt_pb: pb::core::SuccinctReceipt = receipt.into();
             let succinct_receipt_bytes = succinct_receipt_pb.encode_to_vec();
