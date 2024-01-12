@@ -338,7 +338,7 @@ jobs:
       #- run: rustup component add clippy
       #- run: rustup component list | grep clippy
       #- run: ls $HOME/.rustup/toolchains/1.73*/bin
-      - run: rustc --version
+      - run: ls -lht $HOME/.rustup/toolchains
       - run: cargo clippy -- -W clippy::all
       - uses: risc0/clippy-action@main
         with:
