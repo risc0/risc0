@@ -333,12 +333,13 @@ jobs:
       - uses: ./.github/actions/sccache
         with:
           key: macOS-default
-      - run: pwd && ls -lh
-      - run: cargo --version
-      - run: rustup component add clippy
-      - run: rustup component list | grep clippy
-      - run: ls $HOME/.rustup/toolchains/1.73*/bin
-      - run: cargo clippy --all -- -W clippy::all -W clippy::pedantic -W clippy::restriction -W clippy::cargo -D warnings
+      #- run: pwd && ls -lh
+      #- run: cargo --version
+      #- run: rustup component add clippy
+      #- run: rustup component list | grep clippy
+      #- run: ls $HOME/.rustup/toolchains/1.73*/bin
+      - run: cargo clean
+      - run: cargo clippy
       - uses: risc0/clippy-action@main
         with:
           reporter: 'github-pr-check'
