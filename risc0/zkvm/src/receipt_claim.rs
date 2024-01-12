@@ -225,6 +225,15 @@ impl ExitCode {
             ExitCode::SystemSplit | ExitCode::SessionLimit | ExitCode::Fault => false,
         }
     }
+
+    /// True if the exit code is Halted(0) or Paused(0), indicating the program guest exited with
+    /// an ok status.
+    pub(crate) fn is_ok(&self) -> bool {
+        match self {
+            ExitCode::Halted(0) | ExitCode::Paused(0) => true,
+            _ => false,
+        }
+    }
 }
 
 impl Eq for ExitCode {}
