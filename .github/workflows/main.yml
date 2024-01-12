@@ -335,6 +335,7 @@ jobs:
           key: macOS-default
       - run: pwd && ls -lh
       - run: cargo --version
+      - run: rustup component add clippy
       - run: cargo clippy --all -- -W clippy::all
       - uses: risc0/clippy-action@main
         with:
