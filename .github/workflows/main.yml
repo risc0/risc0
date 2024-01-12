@@ -336,6 +336,8 @@ jobs:
       - run: pwd && ls -lh
       - run: cargo --version
       - run: rustup component add clippy
+      - run: rustup component list | grep clippy
+      - run: ls $HOME/.rustup/toolchains/1.73*/bin
       - run: cargo clippy --all -- -W clippy::all -W clippy::pedantic -W clippy::restriction -W clippy::cargo -D warnings
       - uses: risc0/clippy-action@main
         with:
