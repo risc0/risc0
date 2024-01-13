@@ -681,7 +681,7 @@ impl ops::MulAssign for ExtElem {
         //             = c_i * sum_j=0^(EXT_SIZE - 1) -IRREDUCIBLE_WITHOUT_LEADING_TERM * x^(i - EXT_SIZE + j)
         // So, we can zero out the x^i term by adding c[i] * -IRREDUCIBLE[j] to c[i - EXT_SIZE + j] for j < EXT_SIZE
         assert_eq!(IRREDUCIBLE.len(), EXT_SIZE + 1);
-        assert_eq!(IRREDUCIBLE[EXT_SIZE], Elem::from_u64(1));
+        assert_eq!(IRREDUCIBLE[EXT_SIZE], Elem::new(1));
         let upper = 2 * EXT_SIZE - 2;
         for i_rev in (0..EXT_SIZE - 1).rev() {
             // We need to iterate from high degree to low, otherwise we might add to coefficients we've already zeroed out
