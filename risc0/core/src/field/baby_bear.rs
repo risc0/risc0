@@ -771,28 +771,28 @@ mod tests {
         // ```
 
         let a = ExtElem::new([
-            Elem::new(1),
-            Elem::new(2),
-            Elem::new(3),
-            Elem::new(4),
             Elem::new(5),
+            Elem::new(4),
+            Elem::new(3),
+            Elem::new(2),
+            Elem::new(1),
         ]);
         let b = ExtElem::new([
-            Elem::new(6),
-            Elem::new(7),
-            Elem::new(8),
-            Elem::new(9),
             Elem::new(10),
+            Elem::new(9),
+            Elem::new(8),
+            Elem::new(7),
+            Elem::new(6),
         ]);
 
         assert_eq!(
             a * b,
             ExtElem::new([
-                Elem::new(110),
-                Elem::new(102),
-                Elem::new(68),
-                Elem::new(2),
                 Elem::new(2013265831),
+                Elem::new(2),
+                Elem::new(68),
+                Elem::new(102),
+                Elem::new(110),
             ])
         );
     }
