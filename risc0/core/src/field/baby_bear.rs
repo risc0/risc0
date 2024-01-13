@@ -14,7 +14,7 @@
 
 //! Baby bear field.
 //!
-//! Support for the finite field of order `15 * 2^27 + 1`, and its degree 4
+//! Support for the finite field of order `15 * 2^27 + 1`, and its degree 5
 //! extension field. This field choice allows for 32-bit addition without
 //! overflow.
 
@@ -382,17 +382,15 @@ const fn decode(a: u32) -> u32 {
     mul(1, a)
 }
 
-/// The size of the extension field in elements, 4 in this case.
+/// The size of the extension field in elements, 5 in this case.
 const EXT_SIZE: usize = 5;
 
-/// Instances of `ExtElem` are elements of a finite field `F_p^4`. They are
-/// represented as elements of `F_p[X] / (X^4 + 11)`. This large
-/// finite field (about `2^128` elements) is used when the security of
-/// operations depends on the size of the field. The field extension `ExtElem`
-/// has `Elem` as a subfield, so operations on elements of each are compatible.
-/// The irreducible polynomial `x^4 + 11` was chosen because `11` is
-/// the simplest choice of `BETA` for `x^4 + BETA` that makes this polynomial
-/// irreducible.
+/// Instances of `ExtElem` are elements of a finite field `F_p^5`. They are
+/// represented as elements of `F_p[X] / (X^5 + 2)`. This large finite field is
+/// used when the security of operations depends on the size of the field. The
+/// field extension `ExtElem` has `Elem` as a subfield, so operations on
+/// elements of each are compatible. The irreducible polynomial `x^5 + 2` was
+/// chosen because TODO.
 #[derive(Eq, Clone, Copy, Pod, Zeroable)]
 #[repr(transparent)]
 pub struct ExtElem([Elem; EXT_SIZE]);
@@ -552,7 +550,7 @@ const fn const_ensure_valid(x: Elem) -> Elem {
 }
 
 impl ExtElem {
-    /// Explicitly construct an ExtElem from parts.
+    /// Explicitly construct an [ExtElem] from parts.
     pub const fn new(x0: Elem, x1: Elem, x2: Elem, x3: Elem, x4: Elem) -> Self {
         Self([
             const_ensure_valid(x0),
@@ -633,7 +631,7 @@ impl ops::AddAssign for ExtElem {
 impl ops::Sub for ExtElem {
     type Output = Self;
 
-    /// Subtraction for Baby Bear [ExtElem]
+    /// Subtraction for Baby Bear [ExtElem].
     fn sub(self, rhs: Self) -> Self {
         let mut lhs = self;
         lhs -= rhs;
@@ -642,7 +640,7 @@ impl ops::Sub for ExtElem {
 }
 
 impl ops::SubAssign for ExtElem {
-    /// Simple subtraction case for Baby Bear [ExtElem]
+    /// Simple subtraction case for Baby Bear [ExtElem].
     fn sub_assign(&mut self, rhs: Self) {
         for i in 0..self.0.len() {
             self.0[i] -= rhs.0[i];
@@ -651,8 +649,7 @@ impl ops::SubAssign for ExtElem {
 }
 
 impl ops::MulAssign<Elem> for ExtElem {
-    /// Simple multiplication case by a
-    /// Baby Bear [Elem]
+    /// Simple multiplication case by a Baby Bear [Elem].
     fn mul_assign(&mut self, rhs: Elem) {
         for i in 0..self.0.len() {
             self.0[i] *= rhs;
@@ -663,7 +660,7 @@ impl ops::MulAssign<Elem> for ExtElem {
 impl ops::Mul<Elem> for ExtElem {
     type Output = Self;
 
-    /// Multiplication by a Baby Bear [Elem]
+    /// Multiplication by a Baby Bear [Elem].
     fn mul(self, rhs: Elem) -> Self {
         let mut lhs = self;
         lhs *= rhs;
@@ -674,7 +671,7 @@ impl ops::Mul<Elem> for ExtElem {
 impl ops::Mul<ExtElem> for Elem {
     type Output = ExtElem;
 
-    /// Multiplication for a subfield [Elem] by an [ExtElem]
+    /// Multiplication for a subfield [Elem] by an [ExtElem].
     fn mul(self, rhs: ExtElem) -> ExtElem {
         rhs * self
     }
