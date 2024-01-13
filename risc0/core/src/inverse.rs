@@ -49,22 +49,6 @@ impl<T: Elem> ExtensionField<T> {
         c
     }
 
-    // fn mul(&self, a: &[T], b: &[T]) -> Vec<T> {
-    //     let mut c = self.naive_mul(a, b);
-
-    //     // Reduce the degree using the irreducible polynomial
-    //     let upper = 2 * self.degree - 2;
-    //     for i in (self.degree..=upper).rev() {
-    //         let x = c[i];
-    //         for j in 0..self.degree {
-    //             c[i - self.degree] += x * self.irreducible[j];
-    //         }
-    //         c[i] = T::ZERO;
-    //     }
-    //     c.truncate(self.degree);
-    //     c
-    // }
-
     fn mul_elem(&self, a: T, b: &[T]) -> Vec<T> {
         let mut c = self.zero();
         for i in 0..self.degree {
