@@ -49,22 +49,6 @@ impl<T: Elem> ExtensionField<T> {
         c
     }
 
-    fn mul(&self, a: &[T], b: &[T]) -> Vec<T> {
-        let mut c = self.naive_mul(a, b);
-
-        // Reduce the degree using the irreducible polynomial
-        let upper = 2 * self.degree - 2;
-        for i in (self.degree..=upper).rev() {
-            let x = c[i];
-            for j in 0..self.degree {
-                c[i - self.degree] += x * self.irreducible[j];
-            }
-            c[i] = T::ZERO;
-        }
-        c.truncate(self.degree);
-        c
-    }
-
     fn mul_elem(&self, a: T, b: &[T]) -> Vec<T> {
         let mut c = self.zero();
         for i in 0..self.degree {
@@ -82,10 +66,10 @@ impl<T: Elem> ExtensionField<T> {
 
         while Self::degree(&r1) > 0 {
             let quot = self.div(&r0, &r1);
-            let r2 = f.sub(&r0, &f.mul(&quot, &r1));
+            let r2 = f.sub(&r0, &f.naive_mul(&quot, &r1));
             r0 = r1;
             r1 = r2;
-            let t2 = f.sub(&t0, &f.mul(&quot, &t1));
+            let t2 = f.sub(&t0, &f.naive_mul(&quot, &t1));
             t0 = t1;
             t1 = t2;
         }
@@ -134,7 +118,10 @@ impl<T: Elem> ExtensionField<T> {
     }
 
     fn degree(x: &[T]) -> usize {
-        x.iter().rev().position(|x| *x != T::ZERO).unwrap_or(0)
+        match x.iter().skip(1).rev().position(|x| *x != T::ZERO) {
+            Some(i) => x.len() - 1 - i,
+            None => 0,
+        }
     }
 }
 

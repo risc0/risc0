@@ -672,10 +672,23 @@ impl ops::MulAssign for ExtElem {
         let mut c = Self::naive_mul(a, b);
 
         // Reduce the degree using the irreducible polynomial
+        // Specifically, for irreducible polynomials whose leading coefficient is 1, we have
+        //   x^EXT_SIZE = -IRREDUCIBLE_WITHOUT_LEADING_TERM
+        // as the defining identity for the quotient group.
+        // Thus, for every term of degree i >= EXT_SIZE, we substitute
+        //   c_i * x^i = c_i * x^(i - EXT_SIZE) * x^EXT_SIZE
+        //             = c_i * x^(i - EXT_SIZE) * -IRREDUCIBLE_WITHOUT_LEADING_TERM
+        //             = c_i * sum_j=0^(EXT_SIZE - 1) -IRREDUCIBLE_WITHOUT_LEADING_TERM * x^(i - EXT_SIZE + j)
+        // So, we can zero out the x^i term by adding c[i] * -IRREDUCIBLE[j] to c[i - EXT_SIZE + j] for j < EXT_SIZE
+        assert_eq!(IRREDUCIBLE.len(), EXT_SIZE + 1);
+        assert_eq!(IRREDUCIBLE[EXT_SIZE], Elem::new(1));
         let upper = 2 * EXT_SIZE - 2;
-        for i in (EXT_SIZE..=upper).rev() {
-            for j in 0..IRREDUCIBLE.len() {
-                c[i - EXT_SIZE] += c[i] * IRREDUCIBLE[j];
+        for i_rev in (0..EXT_SIZE - 1).rev() {
+            // We need to iterate from high degree to low, otherwise we might add to coefficients we've already zeroed out
+            let i = upper - i_rev;
+            for j in 0..(IRREDUCIBLE.len() - 1) {
+                // Perhaps there's a minor perf gain to be had by storing NEG_IRREDUCIBLE instead of IRREDUCIBLE itself
+                c[i - EXT_SIZE + j] += c[i] * -IRREDUCIBLE[j];
             }
             c[i] = Elem::ZERO;
         }
@@ -758,28 +771,28 @@ mod tests {
         // ```
 
         let a = ExtElem::new([
-            Elem::new(1),
-            Elem::new(2),
-            Elem::new(3),
-            Elem::new(4),
             Elem::new(5),
+            Elem::new(4),
+            Elem::new(3),
+            Elem::new(2),
+            Elem::new(1),
         ]);
         let b = ExtElem::new([
-            Elem::new(6),
-            Elem::new(7),
-            Elem::new(8),
-            Elem::new(9),
             Elem::new(10),
+            Elem::new(9),
+            Elem::new(8),
+            Elem::new(7),
+            Elem::new(6),
         ]);
 
         assert_eq!(
             a * b,
             ExtElem::new([
-                Elem::new(110),
-                Elem::new(102),
-                Elem::new(68),
-                Elem::new(2),
                 Elem::new(2013265831),
+                Elem::new(5),
+                Elem::new(68),
+                Elem::new(102),
+                Elem::new(110),
             ])
         );
     }
