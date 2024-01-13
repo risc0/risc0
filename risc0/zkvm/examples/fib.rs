@@ -74,14 +74,15 @@ fn top(prover: Rc<dyn ProverServer>, iterations: u32, skip_prover: bool) -> Metr
         0
     } else {
         let ctx = VerifierContext::default();
-        let seal = prover
+        prover
             .prove_session(&ctx, &session)
             .unwrap()
             .inner
             .succinct()
             .unwrap()
-            .seal;
-        seal.len() * 4
+            .seal
+            .len()
+            * 4
     };
 
     Metrics {

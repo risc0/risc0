@@ -23,12 +23,12 @@ use serial_test::serial;
 use test_log::test;
 
 use super::{
-    identity_p254, join, lift, prove::poseidon254_hal_pair, prove::poseidon2_hal_pair, resolve,
-    Prover, ProverOpts,
+    identity_p254, join, lift, prove::poseidon254_hal_pair, prove::poseidon2_hal_pair, Prover,
+    ProverOpts,
 };
 use crate::{
     get_prover_server, ExecutorEnv, ExecutorImpl, InnerReceipt, Receipt, SegmentReceipt, Session,
-    SuccinctReceipt, VerifierContext,
+    VerifierContext,
 };
 
 // Failure on older mac minis in the lab with Intel UHD 630 graphics:
@@ -244,6 +244,9 @@ fn test_recursion_lift_resolve_e2e() {
     let composition_receipt = prover.prove(env, MULTI_TEST_ELF).unwrap();
     tracing::info!("Done proving: sys_verify");
 
+    // NOTE: Prove uses lift and resolve internally to result in a SuccinctReceipt. In generally,
+    // it is the only way to get a SuccinctReceipt of composition, so check that the receipt is
+    // succinct here serves to verify that lift and resolve work.
     let InnerReceipt::Succinct(_) = composition_receipt.inner else {
         panic!("receipt returned from prover is not succinct");
     };

@@ -77,7 +77,7 @@ fn main() {
         let duration = start.elapsed();
         let (cycles, _) = session.get_cycles().unwrap();
 
-        let seal = receipt.inner.succinct().unwrap();
+        let seal = receipt.inner.succinct().unwrap().seal.len() * 4;
 
         let usage = prover.get_peak_memory_usage();
         let throughput = (cycles as f64) / duration.as_secs_f64();
@@ -88,7 +88,7 @@ fn main() {
                     cycles,
                     duration: duration.as_nanos(),
                     ram: usage,
-                    seal: seal.len() * 4,
+                    seal,
                     speed: throughput,
                 };
                 match serde_json::to_string_pretty(&entry) {
