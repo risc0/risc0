@@ -134,7 +134,10 @@ impl<T: Elem> ExtensionField<T> {
     }
 
     fn degree(x: &[T]) -> usize {
-        x.iter().rev().position(|x| *x != T::ZERO).unwrap_or(0)
+        match x.iter().skip(1).rev().position(|x| *x != T::ZERO) {
+            Some(i) => x.len() - 1 - i,
+            None => 0,
+        }
     }
 }
 
