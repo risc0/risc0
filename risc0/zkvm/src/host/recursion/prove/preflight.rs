@@ -184,7 +184,7 @@ impl<'a, Ext: Externs> Preflight<'a, Ext> {
             let result = if u32arg[2] != 0 {
                 // AND and combine:
                 // [a, b, 0, 0] & [c, d, 0, 0] -> [(a&c) + ((b&d) << 16), 0, 0, 0]
-                let result = FpExt::new([
+                let result = FpExt::new(
                     Fp::from(
                         (u32::from(in_a.elems()[0]) & u32::from(in_b.elems()[0]))
                             + ((u32::from(in_a.elems()[1]) & u32::from(in_b.elems()[1])) << 16),
@@ -193,19 +193,19 @@ impl<'a, Ext: Externs> Preflight<'a, Ext> {
                     Fp::ZERO,
                     Fp::ZERO,
                     Fp::ZERO,
-                ]);
+                );
                 trace!("{in_a:?} & {in_b:?} (as shorts) -> {result:?}");
                 result
             } else {
                 // XORs and returns 2 shorts:
                 // [a, b, 0, 0] ^ [c, d, 0, 0] -> [a ^ c, b ^ d, 0, 0]
-                let result = FpExt::new([
+                let result = FpExt::new(
                     Fp::from(u32::from(in_a.elems()[0]) ^ u32::from(in_b.elems()[0])),
                     Fp::from(u32::from(in_a.elems()[1]) ^ u32::from(in_b.elems()[1])),
                     Fp::ZERO,
                     Fp::ZERO,
                     Fp::ZERO,
-                ]);
+                );
                 trace!("{in_a:?} ^ {in_b:?} -> {result:?}");
                 result
             };
@@ -277,13 +277,13 @@ impl<'a, Ext: Externs> Preflight<'a, Ext> {
                     trace!("sha_fini {out:?} -> wom[{out_addr} + {i}]");
                     self.externs.wom_write(
                         Fp::from(out_addr + i),
-                        FpExt::new([
+                        FpExt::new(
                             Fp::from(out & 0xFFFF),
                             Fp::from(out >> 16),
                             Fp::ZERO,
                             Fp::ZERO,
                             Fp::ZERO,
-                        ]),
+                        ),
                     );
                 }
             }
@@ -322,7 +322,7 @@ impl<'a, Ext: Externs> Preflight<'a, Ext> {
 
         match opcode {
             micro_op::CONST => {
-                let result = FpExt::new([arg[0], arg[1], Fp::ZERO, Fp::ZERO, Fp::ZERO]);
+                let result = FpExt::new(arg[0], arg[1], Fp::ZERO, Fp::ZERO, Fp::ZERO);
                 trace!("const {result:?}");
                 self.externs.wom_write(write_addr, result);
             }

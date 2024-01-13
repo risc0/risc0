@@ -53,6 +53,15 @@ const IRREDUCIBLE: [Elem; EXT_SIZE + 1] = [
     Elem::ONE,
 ];
 
+const NEG_IRREDUCIBLE: [Elem; EXT_SIZE + 1] = [
+    Elem::new(P - 2),
+    Elem::ZERO,
+    Elem::ZERO,
+    Elem::ZERO,
+    Elem::ZERO,
+    Elem::new(P - 1),
+];
+
 /// The BabyBear class is an element of the finite field F_p, where P is the
 /// prime number 15*2^27 + 1. Put another way, Fp is basically integer
 /// arithmetic modulo P.
@@ -449,7 +458,7 @@ impl field::Elem for ExtElem {
     fn inv(self) -> Self {
         let a = &self.ensure_valid().0;
         let r = inv(a, IRREDUCIBLE.to_vec());
-        Self::new([r[0], r[1], r[2], r[3], r[4]])
+        Self::new(r[0], r[1], r[2], r[3], r[4])
     }
 
     fn from_u64(val: u64) -> Self {
@@ -536,13 +545,22 @@ impl From<[Elem; EXT_SIZE]> for ExtElem {
     }
 }
 
+// TODO: refactor if rust gets const trait methods.
+const fn const_ensure_valid(x: Elem) -> Elem {
+    debug_assert!(x.0 != Elem::INVALID.0);
+    x
+}
+
 impl ExtElem {
     /// Explicitly construct an ExtElem from parts.
-    pub fn new(xs: [Elem; EXT_SIZE]) -> Self {
-        for x in xs {
-            debug_assert!(x.0 != Elem::INVALID.0);
-        }
-        Self(xs)
+    pub const fn new(x0: Elem, x1: Elem, x2: Elem, x3: Elem, x4: Elem) -> Self {
+        Self([
+            const_ensure_valid(x0),
+            const_ensure_valid(x1),
+            const_ensure_valid(x2),
+            const_ensure_valid(x3),
+            const_ensure_valid(x4),
+        ])
     }
 
     /// Create an [ExtElem] from an [Elem].
@@ -681,14 +699,13 @@ impl ops::MulAssign for ExtElem {
         //             = c_i * sum_j=0^(EXT_SIZE - 1) -IRREDUCIBLE_WITHOUT_LEADING_TERM * x^(i - EXT_SIZE + j)
         // So, we can zero out the x^i term by adding c[i] * -IRREDUCIBLE[j] to c[i - EXT_SIZE + j] for j < EXT_SIZE
         assert_eq!(IRREDUCIBLE.len(), EXT_SIZE + 1);
-        assert_eq!(IRREDUCIBLE[EXT_SIZE], Elem::new(1));
+        assert_eq!(IRREDUCIBLE[EXT_SIZE], Elem::ONE);
         let upper = 2 * EXT_SIZE - 2;
+        // We need to iterate from high degree to low, otherwise we might add to coefficients we've already zeroed out.
         for i_rev in (0..EXT_SIZE - 1).rev() {
-            // We need to iterate from high degree to low, otherwise we might add to coefficients we've already zeroed out
             let i = upper - i_rev;
-            for j in 0..(IRREDUCIBLE.len() - 1) {
-                // Perhaps there's a minor perf gain to be had by storing NEG_IRREDUCIBLE instead of IRREDUCIBLE itself
-                c[i - EXT_SIZE + j] += c[i] * -IRREDUCIBLE[j];
+            for j in 0..IRREDUCIBLE.len() - 1 {
+                c[i - EXT_SIZE + j] += c[i] * NEG_IRREDUCIBLE[j];
             }
             c[i] = Elem::ZERO;
         }
@@ -770,30 +787,30 @@ mod tests {
         // print(fp5.vector(a * b))
         // ```
 
-        let a = ExtElem::new([
+        let a = ExtElem::new(
             Elem::new(5),
             Elem::new(4),
             Elem::new(3),
             Elem::new(2),
             Elem::new(1),
-        ]);
-        let b = ExtElem::new([
+        );
+        let b = ExtElem::new(
             Elem::new(10),
             Elem::new(9),
             Elem::new(8),
             Elem::new(7),
             Elem::new(6),
-        ]);
+        );
 
         assert_eq!(
             a * b,
-            ExtElem::new([
+            ExtElem::new(
                 Elem::new(2013265831),
                 Elem::new(5),
                 Elem::new(68),
                 Elem::new(102),
                 Elem::new(110),
-            ])
+            )
         );
     }
 
@@ -826,22 +843,19 @@ mod tests {
     #[test]
     fn inv() {
         // Smoke test for inv
-        assert_eq!(Elem::new(5).inv() * Elem::new(5), Elem::new(1));
+        assert_eq!(Elem::new(5).inv() * Elem::new(5), Elem::ONE);
     }
 
     #[test]
     fn pow() {
         // Smoke tests for pow
-        assert_eq!(Elem::new(5).pow(0), Elem::new(1));
+        assert_eq!(Elem::new(5).pow(0), Elem::ONE);
         assert_eq!(Elem::new(5).pow(1), Elem::new(5));
         assert_eq!(Elem::new(5).pow(2), Elem::new(25));
         // Mathematica says PowerMod[5, 1000, 15*2^27 + 1] == 589699054
         assert_eq!(Elem::new(5).pow(1000), Elem::new(589699054));
-        assert_eq!(
-            Elem::new(5).pow((P - 2) as usize) * Elem::new(5),
-            Elem::new(1)
-        );
-        assert_eq!(Elem::new(5).pow((P - 1) as usize), Elem::new(1));
+        assert_eq!(Elem::new(5).pow((P - 2) as usize) * Elem::new(5), Elem::ONE);
+        assert_eq!(Elem::new(5).pow((P - 1) as usize), Elem::ONE);
     }
 
     #[test]
