@@ -38,7 +38,7 @@ use crate::{
         slice_io::SliceIo,
     },
     sha::{Digest, Digestible},
-    Assumption, ExitCode, MaybePruned, PrunedValueError, ReceiptClaim,
+    Assumption, MaybePruned, PrunedValueError, ReceiptClaim,
 };
 
 /// A host-side implementation of a system call.
