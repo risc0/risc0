@@ -789,7 +789,7 @@ mod tests {
             a * b,
             ExtElem::new([
                 Elem::new(2013265831),
-                Elem::new(2),
+                Elem::new(5),
                 Elem::new(68),
                 Elem::new(102),
                 Elem::new(110),
