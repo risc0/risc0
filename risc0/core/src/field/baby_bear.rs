@@ -674,8 +674,9 @@ impl ops::MulAssign for ExtElem {
         // Reduce the degree using the irreducible polynomial
         let upper = 2 * EXT_SIZE - 2;
         for i in (EXT_SIZE..=upper).rev() {
-            for j in 0..IRREDUCIBLE.len() {
-                c[i - EXT_SIZE] += c[i] * IRREDUCIBLE[j];
+            for j in 0..(IRREDUCIBLE.len() - 1) {
+                // Perhaps there's a minor perf gain to be had by storing NEG_IRREDUCIBLE instead of IRREDUCIBLE itself
+                c[i - EXT_SIZE] += c[i] * -IRREDUCIBLE[j];
             }
             c[i] = Elem::ZERO;
         }
