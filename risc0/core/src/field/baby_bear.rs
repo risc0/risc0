@@ -681,8 +681,7 @@ impl ops::MulAssign for ExtElem {
     #[inline(always)]
     fn mul_assign(&mut self, rhs: Self) {
         // Rename the element arrays to something small for readability.
-        let a = &self.0;
-        let b = &rhs.0;
+        let (a, b) = (&self.0, &rhs.0);
 
         let mut c = Self::naive_mul(a, b);
 
@@ -697,11 +696,9 @@ impl ops::MulAssign for ExtElem {
         // So, we can zero out the x^i term by adding c[i] * -IRREDUCIBLE[j] to c[i - EXT_SIZE + j] for j < EXT_SIZE
         assert_eq!(IRREDUCIBLE.len(), EXT_SIZE + 1);
         assert_eq!(IRREDUCIBLE[EXT_SIZE], Elem::ONE);
-        let upper = 2 * EXT_SIZE - 2;
         // We need to iterate from high degree to low, otherwise we might add to coefficients we've already zeroed out.
-        for i_rev in (0..EXT_SIZE - 1).rev() {
-            let i = upper - i_rev;
-            for j in 0..IRREDUCIBLE.len() - 1 {
+        for i in EXT_SIZE..2 * EXT_SIZE - 1 {
+            for j in 0..EXT_SIZE {
                 c[i - EXT_SIZE + j] += c[i] * NEG_IRREDUCIBLE[j];
             }
             c[i] = Elem::ZERO;
