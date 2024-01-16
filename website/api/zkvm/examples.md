@@ -28,7 +28,7 @@ cargo risczero --version
 Then check out the corresponding branch of the example:
 
 ```bash
-git checkout <version> # e.g. v0.19.1
+git checkout release-$VERSION # e.g. release-0.19
 ```
 
 ### Run the example
