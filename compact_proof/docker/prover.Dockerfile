@@ -36,7 +36,7 @@ FROM ubuntu:jammy-20231211.1@sha256:bbf3d1baa208b7649d1d0264ef7d522e1dc0deeeaaf6
 # install snarkjs for the `soliditycalldata` subcommand
 RUN apt update -qq && \
   apt install -y libsodium23 nodejs npm && \
-  npm install -g snarkjs@latest
+  npm install -g snarkjs0.7.3
 
 COPY --from=builder /usr/local/sbin/rapidsnark /usr/local/sbin/rapidsnark
 COPY groth16/stark_verify_final.zkey /app/stark_verify_final.zkey

@@ -5,7 +5,7 @@ WORKDIR /src/
 
 # APT deps
 RUN apt -qq update && \
-    apt install -y -q clang apt-transport-https curl gnupg nodejs npm build-essential nlohmann-json3-dev nasm cmake libgmp-dev libsodium-dev
+  apt install -y -q clang apt-transport-https curl gnupg nodejs npm build-essential nlohmann-json3-dev nasm cmake libgmp-dev libsodium-dev
 
 WORKDIR /src/
 
@@ -16,7 +16,7 @@ RUN git clone https://github.com/iden3/circom.git && \
   cargo install --path circom
 
 # install snarkjs globally
-RUN npm install -g snarkjs@latest
+RUN npm install -g snarkjs@0.7.3
 
 ENV CC=clang
 ENV CXX=clang++
