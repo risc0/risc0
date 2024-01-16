@@ -70,15 +70,3 @@ fn to_decimal(s: &str) -> Option<String> {
         .and_then(|stripped| BigUint::from_str_radix(stripped, 16).ok())
         .map(|n| n.to_str_radix(10))
 }
-
-// #[test]
-// fn test_digest_to_decimal() {
-//     use hex::FromHex;
-//     const HEX: &str = "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad";
-//     let digest = Digest::from_hex(HEX).unwrap();
-//     let decimal = digest_to_decimal(&digest).unwrap();
-//     assert_eq!(
-//         decimal,
-//         "84342368487090800366523834928142263660104883695016514377462985829716817089965"
-//     );
-// }
