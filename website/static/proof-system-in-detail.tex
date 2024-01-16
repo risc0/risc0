@@ -80,7 +80,7 @@ The receipt contains a cryptographic seal, which serves as a zero-knowledge argu
 By offering computational receipts for any code that will compile to RISC-V, our zkVM offers a platform to build truly trustable software, where skeptical third parties can verify authenticity in milliseconds. The idea of ``running a verifier'' to assure the integrity of massive computations is a novel addition to the world of digital security.
 
 \subsection{A Formally Verified Verifier}
-Formal verification is a process of translating code into a model that can be reasoned about with mathmatical tools to ensure properties relevant to security and correctness.
+Formal verification is a process of translating code into a model that can be reasoned about with mathematical tools to ensure properties relevant to security and correctness.
 Formal verification is used to ensure that a piece of code is actually doing what it's supposed to be doing. 
 To ensure that the RISC Zero verifier (which checks the receipts) is functioning without security bugs, we're working on a formal verification of the verifier implementation. 
 This formal verification work is available at \url{https://www.github.com/risc0/risc0-lean4}.\\
@@ -928,7 +928,7 @@ In the non-interactive version, we generate the Accumulation Parameters by runni
 \label{committing accum}
 As in \cite{cairo} and \cite{RAP}, we instantiate our system as a randomized AIR with preprocessing (RAP). 
 The random accumulation parameter defined in Appendix \ref{accum randomness} is used (along with $\mathbb{w}_\mathsf{data}$) to generate accumulator polynomials.
-The evaluations of these accumulator polynomials are called $\mathbb{w}_\mathsf{accum}$; the resulting Merkle cap, $M_\mathsf{accum}$, is commited to the seal. 
+The evaluations of these accumulator polynomials are called $\mathbb{w}_\mathsf{accum}$; the resulting Merkle cap, $M_\mathsf{accum}$, is committed to the seal. 
 The seal now reads
 \[
   M_\mathsf{control}||

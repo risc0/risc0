@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -55,13 +55,13 @@ pub enum MultiTestSpec {
         // Position and length to do reads
         pos_and_len: Vec<(u32, u32)>,
     },
-    SysVerify {
-        image_id: Digest,
-        journal: Vec<u8>,
-    },
+    SysVerify(Vec<(Digest, Vec<u8>)>),
     SysVerifyIntegrity {
         // Define this field as a serialized vector to avoid circular dependency issues.
-        metadata_words: Vec<u32>,
+        claim_words: Vec<u32>,
+    },
+    Echo {
+        bytes: Vec<u8>,
     },
     EchoStdout {
         nbytes: u32,
@@ -87,6 +87,7 @@ pub enum MultiTestSpec {
     RsaCompat,
     SysLogInvalidAddr,
     TooManySha,
+    AlignedAlloc,
 }
 
 declare_syscall!(pub SYS_MULTI_TEST);

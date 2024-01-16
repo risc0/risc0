@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -30,9 +30,9 @@ use std::{
 
 use cargo_metadata::{Message, MetadataCommand, Package};
 pub use docker::docker_build;
-use risc0_binfmt::{MemoryImage, Program};
+use risc0_binfmt::compute_image_id;
 use risc0_zkp::core::digest::{Digest, DIGEST_WORDS};
-use risc0_zkvm_platform::{memory, PAGE_SIZE};
+use risc0_zkvm_platform::memory;
 use serde::Deserialize;
 
 const RUSTUP_TOOLCHAIN_NAME: &str = "risc0";
@@ -80,9 +80,8 @@ impl Risc0Method {
         }
 
         let elf = fs::read(&self.elf_path).unwrap();
-        let program = Program::load_elf(&elf, memory::GUEST_MAX_MEM as u32).unwrap();
-        let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
-        image.compute_id()
+
+        compute_image_id(&elf).unwrap()
     }
 
     fn rust_def(&self) -> String {
@@ -486,6 +485,7 @@ fn detect_toolchain(name: &str) {
 }
 
 /// Options for configuring a docker build environment.
+#[derive(Clone)]
 pub struct DockerOptions {
     /// Specify the root directory for docker builds.
     ///

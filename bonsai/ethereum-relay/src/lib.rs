@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,14 +14,12 @@
 
 #![doc = include_str!("../README.md")]
 
-pub mod sdk;
-
-pub use sdk::{CallbackRequest, Client, ClientError};
-
 mod api;
 mod client_config;
 mod downloader;
+pub mod sdk;
 mod storage;
+#[cfg(test)]
 mod tests;
 mod uploader;
 
@@ -29,22 +27,25 @@ use std::sync::Arc;
 
 use anyhow::{Context, Result};
 use bonsai_sdk::alpha_async::get_client_from_parts;
-pub use client_config::EthersClientConfig;
 use downloader::{
     proxy_callback_proof_processor::ProxyCallbackProofRequestProcessor,
     proxy_callback_proof_request_stream::ProxyCallbackProofRequestStream,
 };
 use ethers::core::types::Address;
+use reqwest::Url;
 use storage::{in_memory::InMemoryStorage, Storage};
-use tokio::sync::Notify;
+use tokio::{net::TcpListener, sync::Notify};
 use tracing::info;
-pub use uploader::completed_proofs::snark::tokenize_snark_receipt;
 use uploader::{
     completed_proofs::manager::BonsaiCompleteProofManager,
     pending_proofs::manager::BonsaiPendingProofManager,
 };
 
 use crate::api::{server::serve, state::ApiState};
+
+pub use client_config::EthersClientConfig;
+pub use sdk::{CallbackRequest, Client, ClientError};
+pub use uploader::completed_proofs::snark::tokenize_snark_receipt;
 
 static DEFAULT_FILTER: &str = "info";
 
@@ -154,19 +155,19 @@ impl Relayer {
 
         tokio::select! {
             err = server_handle, if self.rest_api => {
-                panic!("{}", format!("server API exited: {:?}", err))
+                panic!("server API exited: {err:?}")
             }
             err = local_bonsai_handle, if self.dev_mode => {
-                panic!("{}", format!("local Bonsai service exited: {:?}", err))
+                panic!("local Bonsai service exited: {err:?}")
             }
             err = downloader_handle => {
-                panic!("{}", format!("downloader exited: {:?}", err))
+                panic!("downloader exited: {err:?}")
             }
             err = uploader_pending_proof_manager_handle => {
-                panic!("{}", format!("pending proof manager exited: {:?}", err))
+                panic!("pending proof manager exited: {err:?}")
             }
             err = uploader_complete_proof_manager_handle => {
-                panic!("{}", format!("complete proof manager exited: {:?}", err))
+                panic!("complete proof manager exited: {err:?}")
             }
         }
     }
@@ -186,8 +187,10 @@ async fn maybe_start_publish_mode<S: Storage + Sync + Send + Clone + 'static>(
 
 async fn maybe_start_local_bonsai(dev_mode: bool, bonsai_url: String) -> anyhow::Result<()> {
     if dev_mode {
-        let port = bonsai_url.split(':').last().context("port not defined")?;
-        return bonsai_rest_api_mock::serve(port.to_string()).await;
+        let bonsai_url = Url::parse(&bonsai_url)?;
+        let port = bonsai_url.port_or_known_default().unwrap();
+        let listener = TcpListener::bind(format!("0.0.0.0:{port}")).await?;
+        return bonsai_rest_api_mock::serve(listener).await;
     }
 
     Ok(())

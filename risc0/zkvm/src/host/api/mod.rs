@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -78,6 +78,8 @@ impl RootMessage for pb::api::LiftRequest {}
 impl RootMessage for pb::api::LiftReply {}
 impl RootMessage for pb::api::JoinRequest {}
 impl RootMessage for pb::api::JoinReply {}
+impl RootMessage for pb::api::ResolveRequest {}
+impl RootMessage for pb::api::ResolveReply {}
 impl RootMessage for pb::api::IdentityP254Request {}
 impl RootMessage for pb::api::IdentityP254Reply {}
 
@@ -267,17 +269,6 @@ impl pb::api::Asset {
     }
 }
 
-/// Represents a binary executable or image that a zkvm can execute.
-pub struct Binary {
-    kind: BinaryKind,
-    asset: Asset,
-}
-
-pub enum BinaryKind {
-    Elf,
-    Image,
-}
-
 /// Determines the format of an asset.
 #[derive(Clone)]
 pub enum Asset {
@@ -299,7 +290,7 @@ pub enum AssetRequest {
 }
 
 /// Provides information about the result of execution.
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SessionInfo {
     /// The number of user cycles for each segment.
     pub segments: Vec<SegmentInfo>,
@@ -312,7 +303,7 @@ pub struct SessionInfo {
 }
 
 /// Provides information about a segment of execution.
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SegmentInfo {
     /// The number of cycles used for proving in powers of 2.
     pub po2: u32,
@@ -320,41 +311,6 @@ pub struct SegmentInfo {
     /// The number of user cycles without any overhead for continuations or po2
     /// padding.
     pub cycles: u32,
-}
-
-impl Binary {
-    /// Construct a [Binary] from raw ELF bytes.
-    pub fn new_elf_inline(bytes: Bytes) -> Self {
-        Self {
-            kind: BinaryKind::Elf,
-            asset: Asset::Inline(bytes),
-        }
-    }
-
-    /// Construct a [Binary] from an ELF on disk specified by the `path`.
-    pub fn new_elf_path<P: AsRef<Path>>(path: P) -> Self {
-        Self {
-            kind: BinaryKind::Elf,
-            asset: Asset::Path(path.as_ref().to_path_buf()),
-        }
-    }
-
-    /// Construct a [Binary] from an encoding of a [crate::MemoryImage] bytes.
-    pub fn new_image_inline(bytes: Bytes) -> Self {
-        Self {
-            kind: BinaryKind::Image,
-            asset: Asset::Inline(bytes),
-        }
-    }
-
-    /// Construct a [Binary] from a [crate::MemoryImage] stored on disk
-    /// specified by the `path`.
-    pub fn new_image_path<P: AsRef<Path>>(path: P) -> Self {
-        Self {
-            kind: BinaryKind::Image,
-            asset: Asset::Path(path.as_ref().to_path_buf()),
-        }
-    }
 }
 
 impl Asset {

@@ -35,7 +35,7 @@ RISC0_PPROF_OUT=./profile.pb cargo run
 ```
 
 The above command will run the Fibonacci computation for 1000 iterations and write the profiling output to `profile.pb`.
-Use the environment variable `RISC0_PPROF_OUT` to set to the desired output path for the profiling data.
+Use the environment variable `RISC0_PPROF_OUT` to set the desired output path for the profiling data.
 
 ### Step 3: Visualization
 
@@ -67,7 +67,7 @@ When you visualize the profiling data, you can see the relative performance in t
 This can be helpful in understanding the efficiency of various algorithms and their performance implications.
 
 Use the pprof web interface to compare the performance of the 3 Fibonacci implementations.
-Refer to the [pprof docs] for more inforamtion about the web interface.
+Refer to the [pprof docs] for more information about the web interface.
 
 [install Go]: https://go.dev/doc/install
 [official pprof documentation]: https://github.com/google/pprof/blob/main/doc/README.md
@@ -78,7 +78,7 @@ Refer to the [pprof docs] for more inforamtion about the web interface.
 <!-- prettier-ignore-start -->
 [^1]:
     Here “sampling” is in quotes because the profiler actually captures the call stack at every cycle of program execution. Capturing a call stack on every cycle of execution is not done in most programs on physical CPUs for a few reasons:
-    <!-- HACK: This comment prevents the list below from being interpretted to be a code block -->
+    <!-- HACK: This comment prevents the list below from being interpreted to be a code block -->
     - It would be cost prohibitive to do so for all but quite short program executions.
     - Introducing such heavy profiling would actually alter the performance characteristics in significant ways.
     <!-- -->

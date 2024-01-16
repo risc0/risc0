@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -206,7 +206,7 @@ impl BuildCommand {
                     .build()?;
 
                 let exec = default_executor();
-                let session = exec.execute_elf(env, &fs::read(test)?)?;
+                let session = exec.execute(env, &fs::read(test)?)?;
                 ensure!(
                     session.exit_code == ExitCode::Halted(0),
                     "test exited with code {:?}",

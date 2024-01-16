@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
 extern crate alloc;
 
 use alloc::{collections::VecDeque, vec::Vec};
+use core::fmt;
 
 use risc0_zkp::core::{digest::Digest, hash::sha::Sha256};
 use serde::{Deserialize, Serialize};
@@ -36,11 +37,11 @@ pub struct SystemState {
 }
 
 impl SystemState {
-    pub fn decode(flat: &mut VecDeque<u32>) -> Self {
-        Self {
-            pc: read_u32_bytes(flat),
-            merkle_root: read_sha_halfs(flat),
-        }
+    pub fn decode(flat: &mut VecDeque<u32>) -> Result<Self, DecodeError> {
+        Ok(Self {
+            pc: read_u32_bytes(flat)?,
+            merkle_root: read_sha_halfs(flat)?,
+        })
     }
 
     pub fn encode(&self, flat: &mut Vec<u32>) {
@@ -48,6 +49,8 @@ impl SystemState {
         write_sha_halfs(flat, &self.merkle_root);
     }
 }
+
+impl Eq for SystemState {}
 
 impl Digestible for SystemState {
     /// Hash the [crate::SystemState] to get a digest of the struct.
@@ -61,28 +64,40 @@ impl From<&MemoryImage> for SystemState {
     fn from(image: &MemoryImage) -> Self {
         Self {
             pc: image.pc,
-            merkle_root: image.compute_root_hash(),
+            merkle_root: image
+                .compute_root_hash()
+                .expect("failed to compute root hash"),
         }
     }
 }
 
-pub fn read_sha_halfs(flat: &mut VecDeque<u32>) -> Digest {
+pub fn read_sha_halfs(flat: &mut VecDeque<u32>) -> Result<Digest, DecodeError> {
     let mut bytes = Vec::<u8>::new();
+    if flat.len() < 16 {
+        return Err(DecodeError::EndOfStream);
+    }
     for half in flat.drain(0..16) {
         bytes.push((half & 0xff).try_into().unwrap());
-        bytes.push((half >> 8).try_into().unwrap());
+        bytes.push(
+            (half >> 8)
+                .try_into()
+                .map_err(|_| DecodeError::OutOfRange)?,
+        );
     }
-    bytes.try_into().unwrap()
+    Ok(bytes.try_into().unwrap())
 }
 
-fn read_u32_bytes(flat: &mut VecDeque<u32>) -> u32 {
-    u32::from_le_bytes(
+fn read_u32_bytes(flat: &mut VecDeque<u32>) -> Result<u32, DecodeError> {
+    if flat.len() < 4 {
+        return Err(DecodeError::EndOfStream);
+    }
+    Ok(u32::from_le_bytes(
         flat.drain(0..4)
             .map(|x| x as u8)
             .collect::<Vec<u8>>()
             .try_into()
             .unwrap(),
-    )
+    ))
 }
 
 pub fn write_sha_halfs(flat: &mut Vec<u32>, digest: &Digest) {
@@ -97,3 +112,24 @@ fn write_u32_bytes(flat: &mut Vec<u32>, word: u32) {
         flat.push(x as u32);
     }
 }
+
+/// Error returned when a decoding failure occurs.
+#[derive(Debug, Copy, Clone)]
+pub enum DecodeError {
+    /// End of stream was reached when more data was expected.
+    EndOfStream,
+    /// Value in the stream is outside the expected range.
+    OutOfRange,
+}
+
+impl fmt::Display for DecodeError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Self::EndOfStream => write!(f, "end of stream reached when more data was expected"),
+            Self::OutOfRange => write!(f, "value outside of expected range"),
+        }
+    }
+}
+
+#[cfg(feature = "std")]
+impl std::error::Error for DecodeError {}

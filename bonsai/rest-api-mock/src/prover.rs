@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,8 +19,7 @@ use std::{
 
 use anyhow::Context;
 use risc0_zkvm::{
-    default_executor, receipt_metadata::MaybePruned, sha::Digest, ExecutorEnv, InnerReceipt,
-    MemoryImage, Program, Receipt, ReceiptMetadata, GUEST_MAX_MEM, PAGE_SIZE,
+    default_executor, sha::Digest, ExecutorEnv, InnerReceipt, MaybePruned, Receipt, ReceiptClaim,
 };
 use tokio::sync::mpsc;
 
@@ -31,6 +30,7 @@ pub(crate) struct Task {
     pub session_id: String,
     pub image_id: String,
     pub input_id: String,
+    pub assumptions: Vec<String>,
 }
 
 #[derive(Debug)]
@@ -64,8 +64,6 @@ impl ProverHandle {
     }
 }
 
-const ELF_MAGIC: [u8; 4] = [0x7f, 0x45, 0x4c, 0x46];
-
 pub(crate) struct Prover {
     pub(crate) receiver: mpsc::Receiver<ProverMessage>,
     pub(crate) storage: Arc<RwLock<BonsaiState>>,
@@ -85,16 +83,19 @@ impl Prover {
                 tracing::info!("Running task...");
                 let image = self.get_image(task).await?;
                 let input = self.get_input(task).await?;
-                let mem_img = image.as_slice();
-                let mem_img = if mem_img[0..ELF_MAGIC.len()] == ELF_MAGIC {
-                    tracing::info!("Loading guest image from ELF binary");
-                    let program = Program::load_elf(mem_img, GUEST_MAX_MEM as u32)?;
-                    MemoryImage::new(&program, PAGE_SIZE as u32)?
-                } else {
-                    bincode::deserialize(mem_img).context("failed to decode memory image")?
-                };
+                let receipts = self.get_receipts(task).await?;
+                let elf = image.as_slice();
 
-                let env = ExecutorEnv::builder()
+                let mut env = ExecutorEnv::builder();
+                for receipt in receipts {
+                    if receipt.len() < 1 {
+                        continue;
+                    }
+                    let deserialized_receipt: Receipt = bincode::deserialize(&receipt)?;
+                    env.add_assumption(deserialized_receipt.into());
+                }
+
+                let env = env
                     .write_slice(&input)
                     .session_limit(None)
                     .segment_limit_po2(20)
@@ -104,12 +105,12 @@ impl Prover {
                     })?;
                 let exec = default_executor();
                 let session = exec
-                    .execute(env, mem_img)
+                    .execute(env, elf)
                     .context("Executor failed to generate a successful session")?;
 
                 let receipt = Receipt {
                     inner: InnerReceipt::Fake {
-                        metadata: ReceiptMetadata {
+                        claim: ReceiptClaim {
                             pre: MaybePruned::Pruned(Digest::ZERO),
                             post: MaybePruned::Pruned(Digest::ZERO),
                             exit_code: session.exit_code,
@@ -165,5 +166,20 @@ impl Prover {
             .read()?
             .get_input(&task.input_id)
             .ok_or_else(|| anyhow::anyhow!("Failed to get input for ID: {:?}", task.input_id))?)
+    }
+
+    async fn get_receipts(&self, task: &Task) -> Result<Vec<Vec<u8>>, Error> {
+        let mut assumptions: Vec<Vec<u8>> = vec![];
+        for receipt_id in &task.assumptions {
+            let receipt = self
+                .storage
+                .read()?
+                .get_receipt(receipt_id)
+                .ok_or_else(|| {
+                    anyhow::anyhow!("Failed to get input for ID: {:?}", task.input_id)
+                })?;
+            assumptions.push(receipt);
+        }
+        Ok(assumptions)
     }
 }

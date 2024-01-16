@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,9 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use digital_signature_core::{Message, Passphrase, SigningRequest};
-use risc0_zkvm::ExecutorEnv;
-use sha2::{Digest, Sha256};
+use digital_signature_core::SigningRequest;
+use risc0_zkvm::{
+    sha::{Impl, Sha256},
+    ExecutorEnv,
+};
 
 use crate::{exec, CycleCounter, Metrics};
 
@@ -26,13 +28,10 @@ impl CycleCounter for Job {
 
     fn run() -> Metrics {
         let params = SigningRequest {
-            passphrase: Passphrase {
-                pass: Sha256::digest("passphrase").try_into().unwrap(),
-            },
-            msg: Message {
-                msg: Sha256::digest("message").try_into().unwrap(),
-            },
+            passphrase: *Impl::hash_bytes("passphrase".as_bytes()),
+            msg: *Impl::hash_bytes("message".as_bytes()),
         };
+
         let env = ExecutorEnv::builder()
             .write(&params)
             .unwrap()

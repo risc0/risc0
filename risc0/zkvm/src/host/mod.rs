@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,8 +17,7 @@ pub(crate) mod api;
 #[cfg(feature = "client")]
 pub(crate) mod client;
 pub(crate) mod control_id;
-#[cfg(feature = "profiler")]
-pub(crate) mod profiler;
+pub(crate) mod groth16;
 pub(crate) mod receipt;
 pub(crate) mod recursion;
 #[cfg(feature = "prove")]

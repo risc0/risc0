@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ impl<'a> Server<'a> {
         let prover = default_prover();
 
         // Produce a receipt by proving the specified ELF binary.
-        prover.prove_elf(env, WORDLE_GUEST_ELF).unwrap()
+        prover.prove(env, WORDLE_GUEST_ELF).unwrap()
     }
 }
 

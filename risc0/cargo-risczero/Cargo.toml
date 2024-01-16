@@ -15,15 +15,20 @@ doc = false
 
 [dependencies]
 anyhow = { version = "1.0", features = ["backtrace"] }
-cargo-generate = "0.18"
+cargo-generate = { version = "0.18", features = ["vendored-openssl"] }
 cargo_metadata = { version = "0.18", optional = true }
 clap = { version = "4", features = ["derive"] }
 const_format = "0.2"
 dirs = "5.0"
-downloader = "0.2"
+downloader = { version = "0.2", default-features = false, features = [
+  "rustls-tls",
+] }
 flate2 = "1"
 fs2 = "0.4"
-reqwest = { version = "0.11", default-features = false, features = ["json"] }
+reqwest = { version = "0.11", default-features = false, features = [
+  "json",
+  "rustls-tls",
+] }
 reqwest-middleware = "0.2"
 reqwest-retry = "0.3"
 risc0-build = { workspace = true }
@@ -40,7 +45,9 @@ zip = { version = "0.6", optional = true }
 
 [build-dependencies]
 risc0-build = { workspace = true, optional = true }
-tracing-subscriber = { version = "0.3", features = ["env-filter"], optional = true }
+tracing-subscriber = { version = "0.3", features = [
+  "env-filter",
+], optional = true }
 zip = { version = "0.6", optional = true }
 
 [features]
@@ -56,4 +63,3 @@ experimental = [
 ]
 metal = ["risc0-zkvm/metal"]
 r0vm = ["dep:risc0-r0vm"]
-profiler = ["risc0-zkvm/profiler", "risc0-r0vm?/profiler"]

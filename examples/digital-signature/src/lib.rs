@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,10 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-pub use digital_signature_core::{Message, Passphrase, SignMessageCommit, SigningRequest};
+pub use digital_signature_core::{SignMessageCommit, SigningRequest};
 use digital_signature_methods::{SIGN_ELF, SIGN_ID};
-use risc0_zkvm::{default_prover, ExecutorEnv, Receipt, Result};
-use sha2::{Digest, Sha256};
+use risc0_zkvm::{
+    default_prover,
+    sha::{Digest, Impl, Sha256},
+    ExecutorEnv, Receipt, Result,
+};
 
 pub struct SignatureWithReceipt {
     receipt: Receipt,
@@ -26,14 +29,12 @@ impl SignatureWithReceipt {
         Ok(self.receipt.journal.decode()?)
     }
 
-    pub fn get_identity(&self) -> Result<risc0_zkvm::sha::Digest> {
-        let commit = self.get_commit()?;
-        Ok(commit.identity)
+    pub fn get_identity(&self) -> Result<Digest> {
+        Ok(self.get_commit()?.identity)
     }
 
-    pub fn get_message(&self) -> Result<Message> {
-        let commit = self.get_commit()?;
-        Ok(commit.msg)
+    pub fn get_message(&self) -> Result<Digest> {
+        Ok(self.get_commit()?.msg)
     }
 
     pub fn verify(&self) -> Result<SignMessageCommit> {
@@ -44,12 +45,8 @@ impl SignatureWithReceipt {
 
 pub fn sign(pass_str: impl AsRef<[u8]>, msg_str: impl AsRef<[u8]>) -> Result<SignatureWithReceipt> {
     let params = SigningRequest {
-        passphrase: Passphrase {
-            pass: Sha256::digest(pass_str).try_into()?,
-        },
-        msg: Message {
-            msg: Sha256::digest(msg_str).try_into()?,
-        },
+        passphrase: *Impl::hash_bytes(pass_str.as_ref()),
+        msg: *Impl::hash_bytes(msg_str.as_ref()),
     };
     let env = ExecutorEnv::builder().write(&params)?.build()?;
 
@@ -57,13 +54,14 @@ pub fn sign(pass_str: impl AsRef<[u8]>, msg_str: impl AsRef<[u8]>) -> Result<Sig
     let prover = default_prover();
 
     // Produce a receipt by proving the specified ELF binary.
-    let receipt = prover.prove_elf(env, SIGN_ELF)?;
+    let receipt = prover.prove(env, SIGN_ELF)?;
 
     Ok(SignatureWithReceipt { receipt })
 }
 
 #[cfg(test)]
 mod tests {
+    use sha2::{Digest, Sha256};
     use test_log::test;
 
     use super::*;
@@ -77,13 +75,12 @@ mod tests {
 
         let mut msg_hasher = Sha256::new();
         msg_hasher.update(msg_str);
-        let mut msg_hash = [0u8; 32];
-        msg_hash.copy_from_slice(&msg_hasher.finalize());
+        let msg_hash = msg_hasher.finalize();
 
         let message = signing_receipt.get_message().unwrap();
-        assert_eq!(msg_hash, message.msg);
+        assert_eq!(msg_hash.as_slice(), message.as_bytes());
 
-        tracing::info!("msg: {:?}", &msg_str);
-        tracing::info!("commit: {:?}", &message);
+        tracing::info!("msg: {msg_str:?}");
+        tracing::info!("commit: {message:?}");
     }
 }

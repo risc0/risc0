@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,23 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// TODO(Cardosaum): Check how to export only the functions that are needed
+pub mod args;
+
 use std::{
     collections::{btree_map::Entry, BTreeMap, HashMap, HashSet},
     fs::File,
     io::Write,
     path::{Path, PathBuf},
 };
-
-use crate::{
-    parser::Parser,
-    types::{
-        traits::Reduce,
-        version::{Version, Versions},
-    },
-    ProfileConfig,
-};
-use crate::{Profile, Profiles};
 
 use anyhow::{Context, Result};
 use db_dump::{
@@ -41,7 +32,15 @@ use indicatif::{ProgressBar, ProgressStyle};
 use tokio_stream::StreamExt;
 use tracing::{debug, info, warn};
 
-pub mod args;
+use crate::{
+    parser::Parser,
+    types::{
+        traits::Reduce,
+        version::{Version, Versions},
+    },
+    Profile, ProfileConfig, Profiles,
+};
+
 pub use args::Args;
 
 // Define alias for ease of use.
@@ -143,10 +142,13 @@ impl StateMachine<ReadProfilesConfig> {
             .content_length()
             .context("Failed to get content length from '{url}'")?;
         let pb = ProgressBar::new(total_size);
-        pb.set_style(ProgressStyle::default_bar()
-    .template("{msg}\n{spinner:.green} [{elapsed_precise}] [{wide_bar:.white/blue}] {bytes}/{total_bytes} ({bytes_per_sec}, {eta})")
-    .progress_chars("█  "));
-        pb.set_message(&format!("Downloading {url}"));
+        pb.set_style(
+            ProgressStyle::default_bar()
+                .template("{msg}\n{spinner:.green} [{elapsed_precise}] [{wide_bar:.white/blue}] {bytes}/{total_bytes} ({bytes_per_sec}, {eta})")
+                .unwrap()
+                .progress_chars("█  ")
+        );
+        pb.set_message(format!("Downloading {url}"));
 
         let mut stream = resp.bytes_stream();
         let mut downloaded = 0;

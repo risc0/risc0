@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,10 +16,9 @@ use std::time::Duration;
 
 use anyhow::{anyhow, bail, ensure, Result};
 use bonsai_sdk::alpha::Client;
-use risc0_binfmt::MemoryImage;
 
 use super::Prover;
-use crate::{sha::Digestible, ExecutorEnv, ProverOpts, Receipt, VerifierContext};
+use crate::{compute_image_id, sha::Digestible, ExecutorEnv, ProverOpts, Receipt, VerifierContext};
 
 /// An implementation of a [Prover] that runs proof workloads via Bonsai.
 ///
@@ -43,30 +42,38 @@ impl Prover for BonsaiProver {
         self.name.clone()
     }
 
-    fn prove(
+    fn prove_with_ctx(
         &self,
         env: ExecutorEnv<'_>,
         ctx: &VerifierContext,
+        elf: &[u8],
         opts: &ProverOpts,
-        image: MemoryImage,
     ) -> Result<Receipt> {
         let client = Client::from_env(crate::VERSION)?;
 
-        // upload the image
-        let image_id = image.compute_id();
-        let image_id_hex = hex::encode(image.compute_id());
-        let image = bincode::serialize(&image)?;
-
-        // return value 'exists' is ignored here
-        client.upload_img(&image_id_hex, image)?;
+        // Compute the ImageID and upload the ELF binary
+        let image_id = compute_image_id(elf)?;
+        let image_id_hex = hex::encode(image_id.clone());
+        client.upload_img(&image_id_hex, elf.to_vec())?;
 
         // upload input data
         let input_id = client.upload_input(env.input)?;
 
+        // upload receipts
+        let mut receipts_ids: Vec<String> = vec![];
+        for assumption in &env.assumptions.borrow().cached {
+            let serialized_receipt = match assumption {
+                crate::Assumption::Proven(receipt) => bincode::serialize(receipt)?,
+                crate::Assumption::Unresolved(_) => bail!("Only proven receipts can be uploaded."), //TODO: improve the message
+            };
+            let receipt_id = client.upload_receipt(serialized_receipt)?;
+            receipts_ids.push(receipt_id);
+        }
+
         // While this is the executor, we want to start a session on the bonsai prover.
         // By doing so, we can return a session ID so that the prover can use it to
         // retrieve the receipt.
-        let session = client.create_session(image_id_hex, input_id)?;
+        let session = client.create_session(image_id_hex, input_id, receipts_ids)?;
         tracing::debug!("Bonsai proving SessionID: {}", session.uuid);
 
         loop {
@@ -89,10 +96,10 @@ impl Prover for BonsaiProver {
                 if opts.prove_guest_errors {
                     receipt.verify_integrity_with_context(ctx)?;
                     ensure!(
-                        receipt.get_metadata()?.pre.digest() == image_id,
+                        receipt.get_claim()?.pre.digest() == image_id,
                         "received unexpected image ID: expected {}, found {}",
                         hex::encode(&image_id),
-                        hex::encode(&receipt.get_metadata()?.pre.digest())
+                        hex::encode(&receipt.get_claim()?.pre.digest())
                     );
                 } else {
                     receipt.verify_with_context(ctx, image_id)?;

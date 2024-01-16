@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ mod gen_receipt;
 mod install;
 
 use clap::{Parser, Subcommand};
+use tracing_subscriber::{prelude::*, EnvFilter};
 
 use self::{
     bootstrap::Bootstrap, bootstrap_fault::BootstrapFault, bootstrap_poseidon::BootstrapPoseidon,
@@ -53,5 +54,9 @@ impl Commands {
 }
 
 fn main() {
+    tracing_subscriber::registry()
+        .with(EnvFilter::from_default_env())
+        .init();
+
     Cli::parse().cmd.run();
 }

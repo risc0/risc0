@@ -6,13 +6,13 @@ edition = "2021"
 [dependencies]
 chess-core = { path = "core" }
 chess-methods = { path = "methods" }
-clap = "4.0"
+clap = { version = "4.0", features = ["derive"] }
 risc0-zkvm = { path = "../../risc0/zkvm" }
 serde = "1.0"
 shakmaty = "0.22"
 
 [features]
-default = []
 cuda = ["risc0-zkvm/cuda"]
+default = []
+metal = ["risc0-zkvm/metal"]
 prove = ["risc0-zkvm/prove"]
-profiler = ["risc0-zkvm/profiler"]

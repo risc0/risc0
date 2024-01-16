@@ -32,13 +32,14 @@ message InnerReceipt {
     CompositeReceipt composite = 1;
     SuccinctReceipt succinct = 2;
     FakeReceipt fake = 3;
+    Groth16Receipt groth16 = 4;
   }
 }
 
 message CompositeReceipt {
   repeated SegmentReceipt segments = 1;
   repeated InnerReceipt assumptions = 2;
-  optional Digest journal_digest = 3;
+  Digest journal_digest = 3;
 }
 
 message SegmentReceipt {
@@ -46,21 +47,28 @@ message SegmentReceipt {
   bytes seal = 2;
   uint32 index = 3;
   string hashfn = 4;
+  ReceiptClaim claim = 5;
 }
 
 message SuccinctReceipt {
   protos.base.CompatVersion version = 1;
   bytes seal = 2;
   Digest control_id = 3;
-  ReceiptMetadata meta = 4;
+  ReceiptClaim claim = 4;
 }
 
-message ReceiptMetadata {
-  MaybePruned pre = 1; // MaybePruned<SystemState>
+message Groth16Receipt {
+  protos.base.CompatVersion version = 1;
+  bytes seal = 2;
+  ReceiptClaim claim = 3;
+}
+
+message ReceiptClaim {
+  MaybePruned pre = 1;  // MaybePruned<SystemState>
   MaybePruned post = 2; // MaybePruned<SystemState>
   protos.base.ExitCode exit_code = 3;
   Digest input = 4;
-  optional MaybePruned output = 5; // Option<MaybePruned<Output>>
+  MaybePruned output = 5; // Option<MaybePruned<Output>>
 }
 
 message MaybePruned {
@@ -77,16 +85,16 @@ message SystemState {
 }
 
 message Output {
-    MaybePruned journal = 1; // MaybePruned<bytes>
-    MaybePruned assumptions = 2; // MaybePruned<Assumptions>
+  MaybePruned journal = 1;     // MaybePruned<bytes>
+  MaybePruned assumptions = 2; // MaybePruned<Assumptions>
 }
 
 message Assumptions {
-  repeated MaybePruned inner = 1; // MaybePruned<ReceiptMetadata>
+  repeated MaybePruned inner = 1; // MaybePruned<ReceiptClaim>
 }
 
 message FakeReceipt {
-  ReceiptMetadata metadata = 1;
+  ReceiptClaim claim = 1;
 }
 
 message Digest {

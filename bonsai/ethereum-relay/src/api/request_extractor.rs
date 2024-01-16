@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,11 +16,10 @@ use anyhow::Context;
 use async_trait::async_trait;
 use axum::{
     body::Bytes,
-    extract::FromRequest,
-    http::{Request, StatusCode},
+    extract::{FromRequest, Request},
+    http::{header, HeaderMap, StatusCode},
     response::{IntoResponse, Response},
 };
-use hyper::{body::HttpBody, header, HeaderMap};
 use serde::de::DeserializeOwned;
 
 /// Extractor of the callback request body. Uses bincode or json, depending on
@@ -30,17 +29,14 @@ use serde::de::DeserializeOwned;
 pub(crate) struct RequestExtractor<T>(pub T);
 
 #[async_trait]
-impl<T, S, B> FromRequest<S, B> for RequestExtractor<T>
+impl<T, S> FromRequest<S> for RequestExtractor<T>
 where
     T: DeserializeOwned,
-    B: HttpBody + Send + 'static,
-    B::Data: Send,
-    B::Error: std::error::Error + Send + Sync,
     S: Send + Sync,
 {
     type Rejection = Response;
 
-    async fn from_request(req: Request<B>, state: &S) -> Result<Self, Self::Rejection> {
+    async fn from_request(req: Request, state: &S) -> Result<Self, Self::Rejection> {
         if octet_stream_content_type(req.headers()) {
             let bytes = Bytes::from_request(req, state)
                 .await
@@ -113,8 +109,7 @@ fn json_content_type(headers: &HeaderMap) -> bool {
 
 #[cfg(test)]
 mod tests {
-    use axum::http::{Method, Request};
-    use hyper::{header::HeaderValue, Body};
+    use axum::http::{HeaderValue, Method, Request};
     use serde::Serialize;
 
     use super::*;
@@ -125,14 +120,8 @@ mod tests {
         content_type: &str,
     ) -> RequestExtractor<T> {
         let body = match content_type {
-            "application/octet-stream" => {
-                let serialized = bincode::serialize(&value).unwrap();
-                Body::from(serialized)
-            }
-            "application/json" => {
-                let serialized = serde_json::to_string(&value).unwrap();
-                Body::from(serialized)
-            }
+            "application/octet-stream" => bincode::serialize(&value).unwrap().into(),
+            "application/json" => serde_json::to_string(&value).unwrap().into(),
             _ => panic!("Unsupported content type"),
         };
 

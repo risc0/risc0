@@ -7,9 +7,9 @@ use risc0_zkvm::{default_prover, ExecutorEnv};
 
 fn main() {
     // Initialize tracing. In order to view logs, run `RUST_LOG=info cargo run`
-        tracing_subscriber::fmt()
+    tracing_subscriber::fmt()
         .with_env_filter(tracing_subscriber::filter::EnvFilter::from_default_env())
-        .init();();
+        .init();
 
     // An executor environment describes the configurations for the zkVM
     // including program inputs.
@@ -25,13 +25,19 @@ fn main() {
 
     // For example:
     let input: u32 = 15 * u32::pow(2, 27) + 1;
-    let env = ExecutorEnv::builder().write(&input).unwrap().build().unwrap();
+    let env = ExecutorEnv::builder()
+        .write(&input)
+        .unwrap()
+        .build()
+        .unwrap();
 
     // Obtain the default prover.
     let prover = default_prover();
 
     // Produce a receipt by proving the specified ELF binary.
-    let receipt = prover.prove_elf(env, {{guest_elf}}).unwrap();
+    let receipt = prover
+        .prove(env, {{guest_elf}})
+        .unwrap();
 
     // TODO: Implement code for retrieving receipt journal here.
 
@@ -40,5 +46,7 @@ fn main() {
 
     // The receipt was verified at the end of proving, but the below code is an
     // example of how someone else could verify this receipt.
-    receipt.verify({{guest_id}}).unwrap();
+    receipt
+        .verify({{guest_id}})
+        .unwrap();
 }

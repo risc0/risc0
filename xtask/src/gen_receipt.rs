@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ impl GenReceipt {
         let opts = ProverOpts::default();
         let receipt = get_prover_server(&opts)
             .unwrap()
-            .prove_elf(env, FIB_ELF)
+            .prove(env, FIB_ELF)
             .unwrap();
         let receipt_bytes = bincode::serialize(&receipt).unwrap();
 

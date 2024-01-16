@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,8 +21,6 @@ use std::{
 use anyhow::{anyhow, bail, Result};
 use bytes::Bytes;
 use prost::Message;
-use risc0_binfmt::{MemoryImage, Program};
-use risc0_zkvm_platform::{memory::GUEST_MAX_MEM, PAGE_SIZE};
 use serde::{Deserialize, Serialize};
 
 use super::{malformed_err, path_to_string, pb, ConnectionWrapper, Connector, TcpConnector};
@@ -32,8 +30,9 @@ use crate::{
         client::{env::TraceCallback, slice_io::SliceIo},
         recursion::SuccinctReceipt,
     },
-    ExecutorEnv, ExecutorImpl, ProverOpts, Segment, SegmentReceipt, SegmentRef, TraceEvent,
-    VerifierContext,
+    receipt_claim::{MaybePruned, ReceiptClaim},
+    ExecutorEnv, ExecutorImpl, ProverOpts, Receipt, Segment, SegmentReceipt, SegmentRef,
+    TraceEvent, VerifierContext,
 };
 
 /// A server implementation for handling requests by clients of the zkVM.
@@ -48,21 +47,6 @@ struct EmptySegmentRef;
 impl SegmentRef for EmptySegmentRef {
     fn resolve(&self) -> Result<Segment> {
         Err(anyhow!("Segment resolution not supported"))
-    }
-}
-
-impl pb::api::Binary {
-    fn as_image(&self) -> Result<MemoryImage> {
-        let bytes = self.asset.as_ref().ok_or(malformed_err())?.as_bytes()?;
-        let image = match self.kind() {
-            pb::api::binary::Kind::Unspecified => bail!(malformed_err()),
-            pb::api::binary::Kind::Image => pb::core::MemoryImage::decode(bytes)?.try_into()?,
-            pb::api::binary::Kind::Elf => {
-                let program = Program::load_elf(&bytes, GUEST_MAX_MEM as u32)?;
-                MemoryImage::new(&program, PAGE_SIZE as u32)?
-            }
-        };
-        Ok(image)
     }
 }
 
@@ -248,7 +232,9 @@ impl Server {
             .try_into()
             .map_err(|err: semver::Error| anyhow!(err))?;
         if !check_client_version(&client_version, &server_version) {
-            let msg = format!("incompatible client version: {client_version}");
+            let msg = format!(
+                "incompatible client version: {client_version}, server version: {server_version}"
+            );
             tracing::debug!("{msg}");
             bail!(msg);
         }
@@ -271,6 +257,7 @@ impl Server {
             }
             pb::api::server_request::Kind::Lift(request) => self.on_lift(conn, request),
             pb::api::server_request::Kind::Join(request) => self.on_join(conn, request),
+            pb::api::server_request::Kind::Resolve(request) => self.on_resolve(conn, request),
             pb::api::server_request::Kind::IdentiyP254(request) => {
                 self.on_identity_p254(conn, request)
             }
@@ -290,10 +277,11 @@ impl Server {
             let env = build_env(&conn, &env_request)?;
 
             let binary = env_request.binary.ok_or(malformed_err())?;
-            let image = binary.as_image()?;
-            let segments_out = request.segments_out.ok_or(malformed_err())?;
 
-            let mut exec = ExecutorImpl::new(env, image)?;
+            let segments_out = request.segments_out.ok_or(malformed_err())?;
+            let bytes = binary.as_bytes()?;
+            let mut exec = ExecutorImpl::from_elf(env, &bytes)?;
+
             let session = exec.run_with_callback(|segment| {
                 let segment_bytes = bincode::serialize(&segment)?;
                 let asset = pb::api::Asset::from_bytes(
@@ -362,12 +350,12 @@ impl Server {
             let env = build_env(&conn, &env_request)?;
 
             let binary = env_request.binary.ok_or(malformed_err())?;
-            let image = binary.as_image()?;
+            let bytes = binary.as_bytes()?;
 
             let opts: ProverOpts = request.opts.ok_or(malformed_err())?.into();
             let prover = get_prover_server(&opts)?;
             let ctx = VerifierContext::default();
-            let receipt = prover.prove(env, &ctx, image)?;
+            let receipt = prover.prove_with_ctx(env, &ctx, &bytes)?;
 
             let receipt_pb: pb::core::Receipt = receipt.into();
             let receipt_bytes = receipt_pb.encode_to_vec();
@@ -512,6 +500,55 @@ impl Server {
         conn.send(msg)
     }
 
+    fn on_resolve(
+        &self,
+        mut conn: ConnectionWrapper,
+        request: pb::api::ResolveRequest,
+    ) -> Result<()> {
+        fn inner(request: pb::api::ResolveRequest) -> Result<pb::api::ResolveReply> {
+            let opts: ProverOpts = request.opts.ok_or(malformed_err())?.into();
+            let conditional_receipt_bytes = request
+                .conditional_receipt
+                .ok_or(malformed_err())?
+                .as_bytes()?;
+            let conditional_succinct_receipt: SuccinctReceipt =
+                bincode::deserialize(&conditional_receipt_bytes)?;
+            let assumption_receipt_bytes = request
+                .assumption_receipt
+                .ok_or(malformed_err())?
+                .as_bytes()?;
+            let assumption_succinct_receipt: SuccinctReceipt =
+                bincode::deserialize(&assumption_receipt_bytes)?;
+
+            let prover = get_prover_server(&opts)?;
+            let receipt =
+                prover.resolve(&conditional_succinct_receipt, &assumption_succinct_receipt)?;
+
+            let succinct_receipt_pb: pb::core::SuccinctReceipt = receipt.into();
+            let succinct_receipt_bytes = succinct_receipt_pb.encode_to_vec();
+            let asset = pb::api::Asset::from_bytes(
+                &request.receipt_out.ok_or(malformed_err())?,
+                succinct_receipt_bytes.into(),
+                "receipt.zkp",
+            )?;
+
+            Ok(pb::api::ResolveReply {
+                kind: Some(pb::api::resolve_reply::Kind::Ok(pb::api::ResolveResult {
+                    receipt: Some(asset),
+                })),
+            })
+        }
+
+        let msg = inner(request).unwrap_or_else(|err| pb::api::ResolveReply {
+            kind: Some(pb::api::resolve_reply::Kind::Error(pb::api::GenericError {
+                reason: err.to_string(),
+            })),
+        });
+
+        tracing::debug!("tx: {msg:?}");
+        conn.send(msg)
+    }
+
     fn on_identity_p254(
         &self,
         mut conn: ConnectionWrapper,
@@ -582,6 +619,22 @@ fn build_env<'a>(
     if let Some(_) = request.trace_events {
         let proxy = TraceProxy::new(conn.try_clone()?);
         env_builder.trace_callback(proxy);
+    }
+    if !request.pprof_out.is_empty() {
+        env_builder.enable_profiler(Path::new(&request.pprof_out));
+    }
+    for assumption in request.assumptions.iter() {
+        match assumption.kind.as_ref().ok_or(malformed_err())? {
+            pb::api::assumption::Kind::Proven(asset) => {
+                let receipt: Receipt = pb::core::Receipt::decode(asset.as_bytes()?)?.try_into()?;
+                env_builder.add_assumption(receipt.into())
+            }
+            pb::api::assumption::Kind::Unresolved(asset) => {
+                let claim: MaybePruned<ReceiptClaim> =
+                    pb::core::MaybePruned::decode(asset.as_bytes()?)?.try_into()?;
+                env_builder.add_assumption(claim.into())
+            }
+        };
     }
     env_builder.build()
 }

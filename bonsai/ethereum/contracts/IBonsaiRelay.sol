@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ struct CallbackAuthorization {
     bytes seal;
     /// @notice Digest of the zkVM SystemState after execution.
     /// @dev The relay does not additionally check any property of this digest, but needs the
-    /// digest in order to reconstruct the ReceiptMetadata hash to which the proof is linked.
+    /// digest in order to reconstruct the ReceiptClaim hash to which the proof is linked.
     bytes32 postStateDigest;
 }
 

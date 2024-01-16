@@ -72,7 +72,7 @@ This can be helpful in understanding the efficiency of various algorithms and th
 
 :::tip[Explore]
 Use the pprof web interface to compare the performance of the 3 Fibonacci implementations.
-Refer to the [pprof docs] for more inforamtion about the web interface.
+Refer to the [pprof docs] for more information about the web interface.
 :::
 
 [profiling example]: https://github.com/risc0/risc0/tree/main/examples/profiling
@@ -85,7 +85,7 @@ Refer to the [pprof docs] for more inforamtion about the web interface.
 <!-- prettier-ignore-start -->
 [^1]:
     Here “sampling” is in quotes because the profiler actually captures the call stack at every cycle of program execution. Capturing a call stack on every cycle of execution is not done in most programs on physical CPUs for a few reasons:
-    <!-- HACK: This comment prevents the list below from being interpretted to be a code block -->
+    <!-- HACK: This comment prevents the list below from being interpreted to be a code block -->
     - It would be cost prohibitive to do so for all but quite short program executions.
     - Introducing such heavy profiling would actually alter the performance characteristics in significant ways.
     <!-- -->

@@ -13,12 +13,9 @@
 // limitations under the License.
 
 #include "fp.h"
-#include "fp4.h"
+#include "fpext.h"
 
-extern "C" __global__
-void multi_bit_reverse(Fp* io,
-                       const uint32_t nBits,
-                       const uint32_t count) {
+extern "C" __global__ void multi_bit_reverse(Fp* io, const uint32_t nBits, const uint32_t count) {
   uint totIdx = blockIdx.x * blockDim.x + threadIdx.x;
   if (totIdx < count) {
     uint32_t rowSize = 1 << nBits;
@@ -35,30 +32,26 @@ void multi_bit_reverse(Fp* io,
   }
 }
 
-extern "C" __global__
-void multi_poly_eval(Fp4* out,
-                     const Fp* coeffs,
-                     const uint32_t* which,
-                     const Fp4* xs,
-                     const uint32_t deg) {
+extern "C" __global__ void multi_poly_eval(
+    FpExt* out, const Fp* coeffs, const uint32_t* which, const FpExt* xs, const uint32_t deg) {
   const Fp* cur_poly = coeffs + which[blockIdx.x] * deg;
-  Fp4 x = xs[blockIdx.x];
-  Fp4 stepx = pow(x, blockDim.x);
-  Fp4 powx = pow(x, threadIdx.x);
-  Fp4 tot;
+  FpExt x = xs[blockIdx.x];
+  FpExt stepx = pow(x, blockDim.x);
+  FpExt powx = pow(x, threadIdx.x);
+  FpExt tot;
   for (size_t i = threadIdx.x; i < deg; i += blockDim.x) {
     tot += powx * cur_poly[i];
     powx *= stepx;
   }
   extern __shared__ uint32_t totsBuf[];
-  Fp4* tots = reinterpret_cast<Fp4*>(totsBuf);
+  FpExt* tots = reinterpret_cast<FpExt*>(totsBuf);
   tots[threadIdx.x] = tot;
   __syncthreads();
   unsigned cur = blockDim.x;
   while (cur) {
     cur /= 2;
     if (threadIdx.x < cur) {
-      tots[threadIdx.x] = Fp4(tots[threadIdx.x]) + Fp4(tots[threadIdx.x + cur]);
+      tots[threadIdx.x] = FpExt(tots[threadIdx.x]) + FpExt(tots[threadIdx.x + cur]);
     }
     __syncthreads();
   }
@@ -67,13 +60,12 @@ void multi_poly_eval(Fp4* out,
   }
 }
 
-extern "C" __global__
-void batch_expand(Fp* out,
-                  const Fp* in,
-                  const uint32_t polyCount,
-                  const uint32_t outSize,
-                  const uint32_t inSize,
-                  const uint32_t expandBits) {
+extern "C" __global__ void batch_expand(Fp* out,
+                                        const Fp* in,
+                                        const uint32_t polyCount,
+                                        const uint32_t outSize,
+                                        const uint32_t inSize,
+                                        const uint32_t expandBits) {
   uint idx = blockIdx.x * blockDim.x + threadIdx.x;
   if (idx < outSize) {
     for (uint32_t i = 0; i < polyCount; i++) {
@@ -82,24 +74,16 @@ void batch_expand(Fp* out,
   }
 }
 
-extern "C" __global__
-void gather_sample(Fp* dst,
-                   const Fp* src,
-                   const uint32_t idx,
-                   const uint32_t size,
-                   const uint32_t stride) {
+extern "C" __global__ void gather_sample(
+    Fp* dst, const Fp* src, const uint32_t idx, const uint32_t size, const uint32_t stride) {
   uint gid = blockIdx.x * blockDim.x + threadIdx.x;
   if (gid < size) {
-      dst[gid] = src[gid * stride + idx];
+    dst[gid] = src[gid * stride + idx];
   }
 }
 
-extern "C" __global__
-void multi_ntt_fwd_step(Fp* io,
-                        const Fp* rou,
-                        const uint32_t nBits,
-                        const uint32_t sBits,
-                        const uint32_t cSize) {
+extern "C" __global__ void multi_ntt_fwd_step(
+    Fp* io, const Fp* rou, const uint32_t nBits, const uint32_t sBits, const uint32_t cSize) {
   uint32_t gSize = 1 << (nBits - sBits);
   uint32_t sSize = 1 << (sBits - 1);
   uint32_t nSize = 1 << nBits;
@@ -138,12 +122,8 @@ void multi_ntt_fwd_step(Fp* io,
   }
 }
 
-extern "C" __global__
-void multi_ntt_rev_step(Fp* io,
-                        const Fp* rou,
-                        const uint32_t nBits,
-                        const uint32_t sBits,
-                        const uint32_t cSize) {
+extern "C" __global__ void multi_ntt_rev_step(
+    Fp* io, const Fp* rou, const uint32_t nBits, const uint32_t sBits, const uint32_t cSize) {
   uint32_t gSize = 1 << (nBits - sBits);
   uint32_t sSize = 1 << (sBits - 1);
   uint32_t nSize = 1 << nBits;

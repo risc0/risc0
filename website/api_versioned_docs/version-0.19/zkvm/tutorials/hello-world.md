@@ -46,7 +46,7 @@ In the code snippet below, the guest reads the `input` value from the host and t
 ```rust ignore
 use risc0_zkvm::guest::env;
 
-pub fn main() {
+fn main() {
     // read the input
     let input: u32 = env::read();
 
@@ -98,7 +98,7 @@ If you're ready to start building more complex projects, we recommend taking a l
 
 [Installation]: ../install
 [cargo risczero]: https://docs.rs/cargo-risczero
-[examples directory]: https://github.com/risc0/risc0/tree/main/examples
+[examples directory]: https://github.com/risc0/risc0/tree/release-0.19/examples
 [host]: /terminology#host-program
 [guest]: terminology#guest-program
 [receipt]: /terminology#receipt

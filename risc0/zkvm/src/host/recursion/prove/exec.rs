@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -276,7 +276,7 @@ impl<'a> RecursionExecutor<'a> {
         let po2 = RECURSION_PO2;
         let executor = Executor::new(circuit, machine, po2, po2, &io);
         Self {
-            zkr: zkr,
+            zkr,
             executor,
             split_points,
         }

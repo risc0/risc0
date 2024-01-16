@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ use axum::{
     routing::{get, post, put},
     Extension, Router,
 };
-use tokio::sync::mpsc;
+use tokio::{net::TcpListener, sync::mpsc};
 use tower_http::trace::{DefaultOnRequest, TraceLayer};
 use tracing::{info, Level};
 
@@ -33,7 +33,8 @@ use crate::{
     prover::{Prover, ProverHandle},
     routes::{
         create_session, create_snark, get_image_upload, get_input_upload, get_receipt,
-        put_image_upload, put_input_upload, session_status, snark_status,
+        get_receipt_upload, put_image_upload, put_input_upload, put_receipt, session_status,
+        snark_status,
     },
     state::BonsaiState,
 };
@@ -49,6 +50,8 @@ fn app(state: Arc<RwLock<BonsaiState>>, prover_handle: ProverHandle) -> Router {
         .route("/snark/create", post(create_snark))
         .route("/snark/status/:snark_id", get(snark_status))
         .route("/receipts/:session_id", get(get_receipt))
+        .route("/receipts/:session_id", put(put_receipt))
+        .route("/receipts/upload", get(get_receipt_upload))
         .layer(Extension(prover_handle))
         .with_state(state)
         .layer(DefaultBodyLimit::max(256 * 1024 * 1024))
@@ -61,9 +64,10 @@ fn app(state: Arc<RwLock<BonsaiState>>, prover_handle: ProverHandle) -> Router {
 /// REST API of Bonsai alpha.
 ///
 /// Note that this mock only performs execution, no proving.
-pub async fn serve(port: String) -> anyhow::Result<()> {
-    let local_url = format!("http://localhost:{port}");
-    let bind_address = &format!("0.0.0.0:{port}");
+pub async fn serve(listener: TcpListener) -> anyhow::Result<()> {
+    let local_addr = listener.local_addr().unwrap();
+    let port = local_addr.port();
+    let local_url = format!("http://127.0.0.1:{port}");
     let state = Arc::new(RwLock::new(BonsaiState::new(local_url)));
 
     let (sender, receiver) = mpsc::channel(8);
@@ -73,18 +77,11 @@ pub async fn serve(port: String) -> anyhow::Result<()> {
 
     tokio::spawn(async move { prover.run().await });
 
-    let handle = axum::Server::bind(
-        &bind_address
-            .parse()
-            .context("failed to parse bind address")?,
-    )
-    .serve(app(state, prover_handle).into_make_service());
+    info!("Local Bonsai started on {local_addr}");
 
-    info!("Local Bonsai started on {bind_address}");
-
-    handle.await.context(format!(
-        "failed to serve Local Bonsai API on {bind_address}"
-    ))
+    axum::serve(listener, app(state, prover_handle))
+        .await
+        .context(format!("failed to serve Local Bonsai API on {local_addr}"))
 }
 
 #[cfg(test)]
@@ -93,35 +90,32 @@ mod test {
 
     use anyhow::{bail, Result};
     use bonsai_sdk::alpha_async as bonsai_sdk;
-    use risc0_zkvm::{MemoryImage, Program, GUEST_MAX_MEM, PAGE_SIZE};
+    use risc0_zkvm::compute_image_id;
     use risc0_zkvm_methods::HELLO_COMMIT_ELF;
+    use tokio::net::TcpListener;
 
     use crate::serve;
 
-    async fn run_bonsai(
-        bonsai_api_url: String,
-        bonsai_api_key: String,
-        method: &[u8],
-    ) -> Result<()> {
+    async fn run_bonsai(bonsai_api_url: String, bonsai_api_key: String, elf: &[u8]) -> Result<()> {
         let client =
             bonsai_sdk::get_client_from_parts(bonsai_api_url, bonsai_api_key, risc0_zkvm::VERSION)
                 .await?;
 
-        // create the memoryImg, upload it and return the imageId
-        let img_id = {
-            let program = Program::load_elf(method, GUEST_MAX_MEM as u32)?;
-            let image = MemoryImage::new(&program, PAGE_SIZE as u32)?;
-            let image_id = hex::encode(image.compute_id());
-            let image = bincode::serialize(&image).expect("Failed to serialize memory img");
-            bonsai_sdk::upload_img(client.clone(), image_id.clone(), image).await?;
-            image_id
-        };
+        // Compute the image_id, then upload the ELF with the image_id as its key.
+        // TODO: it would be nice if `bonsai_sdk::upload_img` only took the ELF
+        // so that the image_id can be computed server-side.
+        let image_id = hex::encode(compute_image_id(elf)?);
+        bonsai_sdk::upload_img(client.clone(), image_id.clone(), elf.to_vec()).await?;
 
         // Prepare input data and upload it.
         let input_id = bonsai_sdk::upload_input(client.clone(), vec![]).await?;
 
+        // Prepare symbolic list of receipt data and upload it.
+        let receipts_ids = vec![bonsai_sdk::upload_receipt(client.clone(), vec![]).await?];
+
         // Start a session running the prover
-        let session = bonsai_sdk::create_session(client.clone(), img_id, input_id).await?;
+        let session =
+            bonsai_sdk::create_session(client.clone(), image_id, input_id, receipts_ids).await?;
         loop {
             let res = bonsai_sdk::session_status(client.clone(), session.clone()).await?;
             if res.status == "RUNNING" {
@@ -150,12 +144,15 @@ mod test {
     async fn local_bonsai() {
         use std::{thread::sleep, time::Duration};
 
-        let local_bonsai_handle = tokio::spawn(async move { serve("8989".to_string()).await });
+        let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let local_addr = listener.local_addr().unwrap();
+        let local_bonsai_handle = tokio::spawn(async move { serve(listener).await });
+
         // wait for the service to be up
         sleep(Duration::from_secs(1));
 
         run_bonsai(
-            "http://localhost:8989".to_string(),
+            format!("http://{local_addr}"),
             "test_key".to_string(),
             HELLO_COMMIT_ELF,
         )
@@ -169,12 +166,15 @@ mod test {
     async fn local_bonsai_wrong_elf() {
         use std::{thread::sleep, time::Duration};
 
-        let local_bonsai_handle = tokio::spawn(async move { serve("8999".to_string()).await });
+        let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let local_addr = listener.local_addr().unwrap();
+        let local_bonsai_handle = tokio::spawn(async move { serve(listener).await });
+
         // wait for the service to be up
         sleep(Duration::from_secs(1));
 
         assert!(run_bonsai(
-            "http://localhost:8999".to_string(),
+            format!("http://{local_addr}"),
             "test_key".to_string(),
             b"wrong ELF"
         )

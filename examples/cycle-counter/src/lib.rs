@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ pub trait CycleCounter {
 
 pub fn exec<'a>(name: &str, elf: &[u8], env: ExecutorEnv<'a>) -> Metrics {
     let exec = default_executor();
-    let session_info = exec.execute_elf(env, elf).unwrap();
+    let session_info = exec.execute(env, elf).unwrap();
     let cycles = session_info
         .segments
         .iter()

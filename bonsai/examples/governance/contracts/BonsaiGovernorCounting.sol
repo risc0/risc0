@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,14 +17,11 @@
 pragma solidity ^0.8.9;
 
 import {Governor} from "openzeppelin/contracts/governance/Governor.sol";
-import {SafeMath} from "openzeppelin/contracts/utils/math/SafeMath.sol";
 
 /**
  * @dev Implementation of of vote counting for the BonsaiGovernor, based on GovernorCountingSimple.
  */
 abstract contract BonsaiGovernorCounting is Governor {
-    using SafeMath for uint256;
-
     /// @notice Emitted when a ballot is committed to the ballot box.
     /// @param encoded ballot encoded as bytes exactly as included in the hash.
     event CommittedBallot(uint256 indexed proposalId, bytes encoded);
@@ -164,7 +161,7 @@ abstract contract BonsaiGovernorCounting is Governor {
         bytes memory params = _defaultParams();
 
         // Iterate through the encoded ballots in chunks of 24 bytes.
-        for (uint256 offset = 0; offset < encodedBallots.length; offset = offset.add(24)) {
+        for (uint256 offset = 0; offset < encodedBallots.length; offset = offset + 24) {
             // Decode the packed ballot encoding.
             // { bytes3(0), uint8(support), address }
             bytes24 ballot = bytes24(encodedBallots[offset:offset + 24]);

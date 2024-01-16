@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -189,7 +189,7 @@ const MAIN_RS_TEMPLATE: &str = r#"
 
 risc0_zkvm::guest::entry!(main);
 
-pub fn main() {
+fn main() {
     {{ main_body }}
 }
 
@@ -256,6 +256,7 @@ impl Validator {
         cmd.arg("--no-git");
         cmd.arg("--dest");
         cmd.arg(&self.proj_out_dir);
+        cmd.arg("--guest-name=method_name");
         cmd.env_clear();
         cmd.envs(&filtered_env);
 

@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -89,7 +89,7 @@ fn run_guest(iters: i32) -> i32 {
     let prover = default_prover();
 
     // Produce a receipt by proving the specified ELF binary.
-    let receipt = prover.prove_elf(env, WASM_INTERP_ELF).unwrap();
+    let receipt = prover.prove(env, WASM_INTERP_ELF).unwrap();
 
     receipt.verify(WASM_INTERP_ID).expect(
         "Code you have proven should successfully verify; did you specify the correct image ID?",

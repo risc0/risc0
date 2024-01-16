@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,9 +11,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
-#[cfg(test)]
-pub(crate) mod tests {
 
 use crate::downloader::proxy_callback_proof_request_stream::ProxyCallbackProofRequestStream;
 use ethers::types::{Bytes, H160, H256};
@@ -80,5 +77,4 @@ async fn integration_test_proxy_stream_runner() {
         }
         _ => false,
     });
-}
 }

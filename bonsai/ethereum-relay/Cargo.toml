@@ -1,7 +1,7 @@
 [package]
 name = "bonsai-ethereum-relay"
 description = "A relayer to integrate Ethereum with Bonsai."
-version = "0.5.0"
+version = "0.6.0-rc.1"
 edition = { workspace = true }
 license = { workspace = true }
 homepage = { workspace = true }
@@ -10,7 +10,8 @@ repository = { workspace = true }
 [dependencies]
 anyhow = "1.0"
 async-trait = "0.1"
-axum = { version = "0.6", features = ["macros", "headers"] }
+axum = { version = "0.7", features = ["macros"] }
+backoff = { version = "0.4", features = ["tokio"] }
 bincode = "1.3"
 bonsai-ethereum-contracts = { workspace = true }
 bonsai-rest-api-mock = { workspace = true }
@@ -21,20 +22,24 @@ ethers = { version = "2.0", features = ["rustls", "ws", "ethers-solc"] }
 ethers-signers = { version = "2.0", features = ["aws"] }
 futures = "0.3"
 hex = "0.4"
-hyper = "0.14"
 pin-project = "1"
-reqwest = { version = "0.11", features = ["stream", "json", "gzip"] }
+reqwest = { version = "0.11", default-features = false, features = [
+  "gzip",
+  "json",
+  "rustls-tls",
+  "stream",
+] }
 risc0-zkvm = { workspace = true }
 serde = { version = "1.0", default-features = false, features = ["derive"] }
 serde_json = "1.0"
 thiserror = "1.0"
 tokio = { version = "1", features = ["full", "sync"] }
 tokio-stream = "0.1"
-tower-http = { version = "0.4", features = ["trace"] }
+tower-http = { version = "0.5", features = ["trace"] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
-utoipa = { version = "3.0", features = ["axum_extras", "time", "uuid"] }
-utoipa-swagger-ui = { version = "3.0", features = ["axum", "debug-embed"] }
+utoipa = { version = "4.1", features = ["axum_extras", "time", "uuid"] }
+utoipa-swagger-ui = { version = "5.0", features = ["axum", "debug-embed"] }
 validator = { version = "0.16", features = ["derive"] }
 
 [dev-dependencies]
@@ -42,6 +47,7 @@ bincode = "1"
 bytemuck = "1.13"
 risc0-zkvm-methods = { path = "../../risc0/zkvm/methods", default-features = false }
 rstest = "0.18"
+serial_test = "2.0"
 time = "0.3"
 uuid = { version = "1.3", features = ["v4", "serde"] }
 wiremock = "0.5"

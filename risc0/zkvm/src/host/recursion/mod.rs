@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -27,7 +27,9 @@ mod tests;
 pub use risc0_circuit_recursion::control_id::ALLOWED_IDS_ROOT;
 
 #[cfg(feature = "prove")]
-pub use self::prove::{identity_p254, join, lift, poseidon_hal_pair, Program, Prover, ProverOpts};
+pub use self::prove::{
+    identity_p254, join, lift, poseidon_hal_pair, resolve, Program, Prover, ProverOpts,
+};
 pub use self::receipt::{valid_control_ids, SuccinctReceipt};
 
 const CIRCUIT: risc0_circuit_recursion::CircuitImpl = risc0_circuit_recursion::CircuitImpl::new();

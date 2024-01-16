@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // The RiscZeroGroth16Verifier is a free software: you can redistribute it
 // and/or modify it under the terms of the GNU General Public License as
@@ -23,8 +23,8 @@ import {Groth16Verifier} from "./Groth16Verifier.sol";
 import {
     IRiscZeroVerifier,
     Receipt,
-    ReceiptMetadata,
-    ReceiptMetadataLib,
+    ReceiptClaim,
+    ReceiptClaimLib,
     ExitCode,
     SystemExitCode
 } from "../IRiscZeroVerifier.sol";
@@ -70,7 +70,7 @@ function reverseByteOrderUint32(uint32 input) pure returns (uint32 v) {
     v = (v >> 16) | (v << 16);
 }
 
-/// @notice A Groth16 seal over the claimed receipt metadata.
+/// @notice A Groth16 seal over the claimed receipt claim.
 struct Seal {
     uint256[2] a;
     uint256[2][2] b;
@@ -86,7 +86,7 @@ library ControlID {
 }
 
 contract RiscZeroGroth16Verifier is IRiscZeroVerifier, Groth16Verifier {
-    using ReceiptMetadataLib for ReceiptMetadata;
+    using ReceiptClaimLib for ReceiptClaim;
     using SafeCast for uint256;
 
     // Control ID hash for the identity_p254 predicate decomposed as implemented by splitDigest.
@@ -110,9 +110,9 @@ contract RiscZeroGroth16Verifier is IRiscZeroVerifier, Groth16Verifier {
     /// @notice verify that the given receipt is a valid Groth16 RISC Zero recursion receipt.
     /// @return true if the receipt passes the verification checks.
     function verify(Receipt memory receipt) public view returns (bool) {
-        (uint256 meta0, uint256 meta1) = splitDigest(receipt.meta.digest());
+        (uint256 claim0, uint256 claim1) = splitDigest(receipt.claim.digest());
         Seal memory seal = abi.decode(receipt.seal, (Seal));
-        return this.verifyProof(seal.a, seal.b, seal.c, [CONTROL_ID_0, CONTROL_ID_1, meta0, meta1]);
+        return this.verifyProof(seal.a, seal.b, seal.c, [CONTROL_ID_0, CONTROL_ID_1, claim0, claim1]);
     }
 
     /// @notice verifies that the given seal is a valid Groth16 RISC Zero proof of execution over the
@@ -125,7 +125,7 @@ contract RiscZeroGroth16Verifier is IRiscZeroVerifier, Groth16Verifier {
         returns (bool)
     {
         Receipt memory receipt = Receipt(
-            seal, ReceiptMetadata(imageId, postStateDigest, ExitCode(SystemExitCode.Halted, 0), bytes32(0), journalHash)
+            seal, ReceiptClaim(imageId, postStateDigest, ExitCode(SystemExitCode.Halted, 0), bytes32(0), journalHash)
         );
         return verify(receipt);
     }

@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,5 +19,5 @@ use risc0_zkvm::{default_executor, ExecutorEnv};
 fn main() {
     let env = ExecutorEnv::builder().build().unwrap();
     let exec = default_executor();
-    std::hint::black_box(exec.execute_elf(env, BENCHMARK_ELF)).unwrap();
+    std::hint::black_box(exec.execute(env, BENCHMARK_ELF)).unwrap();
 }

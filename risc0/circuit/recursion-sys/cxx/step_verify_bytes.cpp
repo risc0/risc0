@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
   size_t mask = steps - 1;
   std::array<Fp, 96> host_args;
   std::array<Fp, 32> host_outs;
-  // loc("zirgen/circuit/recursion/micro.cpp":151:46)
+  // loc("zirgen/circuit/recursion/micro.cpp":151:0)
   Fp x0(0);
   return x0;
 }

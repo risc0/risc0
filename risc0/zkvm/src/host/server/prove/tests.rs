@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -58,9 +58,7 @@ fn prove_nothing(hashfn: &str) -> Result<Receipt> {
         hashfn: hashfn.to_string(),
         prove_guest_errors: false,
     };
-    get_prover_server(&opts)
-        .unwrap()
-        .prove_elf(env, MULTI_TEST_ELF)
+    get_prover_server(&opts).unwrap().prove(env, MULTI_TEST_ELF)
 }
 
 #[test]
@@ -81,7 +79,7 @@ fn hashfn_blake2b() {
         .build()
         .unwrap();
     let prover = ProverImpl::new("cpu:blake2b", hal_pair);
-    prover.prove_elf(env, MULTI_TEST_ELF).unwrap();
+    prover.prove(env, MULTI_TEST_ELF).unwrap();
 }
 
 #[test]
@@ -208,7 +206,7 @@ fn memory_io() {
         let session = exec.run()?;
         let receipt = prove_session_fast(&session);
         receipt.verify_integrity_with_context(&VerifierContext::default())?;
-        Ok(receipt.get_metadata()?.exit_code)
+        Ok(receipt.get_claim()?.exit_code)
     }
 
     // Pick a memory position in the middle of the memory space, which is unlikely
@@ -234,16 +232,13 @@ fn memory_io() {
     assert_eq!(run_memio(&[(POS, 1)]).unwrap(), ExitCode::Halted(0));
 
     // Unaligned write is bad
-    assert_eq!(
-        run_memio(&[(POS + 1001, 1)]).unwrap(),
-        ExitCode::SystemSplit
-    );
+    assert_eq!(run_memio(&[(POS + 1001, 1)]).unwrap(), ExitCode::Fault);
 
     // Aligned read is fine
     assert_eq!(run_memio(&[(POS, 0)]).unwrap(), ExitCode::Halted(0));
 
     // Unaligned read is bad
-    assert_eq!(run_memio(&[(POS + 1, 0)]).unwrap(), ExitCode::SystemSplit);
+    assert_eq!(run_memio(&[(POS + 1, 0)]).unwrap(), ExitCode::Fault);
 }
 
 #[test]
@@ -290,13 +285,12 @@ fn session_events() {
 // https://github.com/risc0/toolchain/releases/tag/2022.03.25
 mod riscv {
     use super::prove_session_fast;
-    use crate::{ExecutorEnv, ExecutorImpl, MemoryImage, Program};
+    use crate::{ExecutorEnv, ExecutorImpl};
 
     fn run_test(test_name: &str) {
         use std::io::Read;
 
         use flate2::read::GzDecoder;
-        use risc0_zkvm_platform::{memory::GUEST_MAX_MEM, PAGE_SIZE};
         use tar::Archive;
 
         let bytes = include_bytes!("../testdata/riscv-tests.tgz");
@@ -315,11 +309,8 @@ mod riscv {
             let mut elf = Vec::new();
             entry.read_to_end(&mut elf).unwrap();
 
-            let program = Program::load_elf(elf.as_slice(), GUEST_MAX_MEM as u32).unwrap();
-            let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
-
             let env = ExecutorEnv::default();
-            let mut exec = ExecutorImpl::new(env, image).unwrap();
+            let mut exec = ExecutorImpl::from_elf(env, &elf).unwrap();
             let session = exec.run().unwrap();
 
             prove_session_fast(&session);
@@ -468,7 +459,7 @@ mod sys_verify {
     fn prove_hello_commit() -> Receipt {
         let hello_commit_receipt = get_prover_server(&prover_opts_fast())
             .unwrap()
-            .prove_elf(ExecutorEnv::default(), HELLO_COMMIT_ELF)
+            .prove(ExecutorEnv::default(), HELLO_COMMIT_ELF)
             .unwrap();
 
         // Double check that the receipt verifies.
@@ -489,16 +480,16 @@ mod sys_verify {
             .unwrap();
         let halt_receipt = get_prover_server(&opts)
             .unwrap()
-            .prove_elf(env, MULTI_TEST_ELF)
+            .prove(env, MULTI_TEST_ELF)
             .unwrap();
 
         // Double check that the receipt verifies with the expected image ID and exit code.
         halt_receipt
             .verify_integrity_with_context(&Default::default())
             .unwrap();
-        let halt_metadata = halt_receipt.get_metadata().unwrap();
-        assert_eq!(halt_metadata.pre.digest(), MULTI_TEST_ID.into());
-        assert_eq!(halt_metadata.exit_code, ExitCode::Halted(exit_code as u32));
+        let halt_claim = halt_receipt.get_claim().unwrap();
+        assert_eq!(halt_claim.pre.digest(), MULTI_TEST_ID.into());
+        assert_eq!(halt_claim.exit_code, ExitCode::Halted(exit_code as u32));
         halt_receipt
     }
 
@@ -515,16 +506,16 @@ mod sys_verify {
             .unwrap();
         let fault_receipt = get_prover_server(&opts)
             .unwrap()
-            .prove_elf(env, MULTI_TEST_ELF)
+            .prove(env, MULTI_TEST_ELF)
             .unwrap();
 
         // Double check that the receipt verifies with the expected image ID and exit code.
         fault_receipt
             .verify_integrity_with_context(&Default::default())
             .unwrap();
-        let fault_metadata = fault_receipt.get_metadata().unwrap();
-        assert_eq!(fault_metadata.pre.digest(), MULTI_TEST_ID.into());
-        assert_eq!(fault_metadata.exit_code, ExitCode::SystemSplit);
+        let fault_claim = fault_receipt.get_claim().unwrap();
+        assert_eq!(fault_claim.pre.digest(), MULTI_TEST_ID.into());
+        assert_eq!(fault_claim.exit_code, ExitCode::Fault);
         fault_receipt
     }
 
@@ -534,10 +525,10 @@ mod sys_verify {
 
     #[test]
     fn sys_verify() {
-        let spec = &MultiTestSpec::SysVerify {
-            image_id: HELLO_COMMIT_ID.into(),
-            journal: HELLO_COMMIT_RECEIPT.journal.bytes.clone(),
-        };
+        let spec = &MultiTestSpec::SysVerify(vec![(
+            HELLO_COMMIT_ID.into(),
+            HELLO_COMMIT_RECEIPT.journal.bytes.clone(),
+        )]);
 
         // Test that providing the proven assumption results in an unconditional
         // receipt.
@@ -549,7 +540,7 @@ mod sys_verify {
             .unwrap();
         get_prover_server(&prover_opts_fast())
             .unwrap()
-            .prove_elf(env, MULTI_TEST_ELF)
+            .prove(env, MULTI_TEST_ELF)
             .unwrap()
             .verify(MULTI_TEST_ID)
             .unwrap();
@@ -563,7 +554,7 @@ mod sys_verify {
             .unwrap();
         assert!(get_prover_server(&prover_opts_fast())
             .unwrap()
-            .prove_elf(env, MULTI_TEST_ELF)
+            .prove(env, MULTI_TEST_ELF)
             .is_err());
 
         // Test that providing an unresolved assumption results in a conditional
@@ -571,13 +562,13 @@ mod sys_verify {
         let env = ExecutorEnv::builder()
             .write(&spec)
             .unwrap()
-            .add_assumption(HELLO_COMMIT_RECEIPT.get_metadata().unwrap().into())
+            .add_assumption(HELLO_COMMIT_RECEIPT.get_claim().unwrap().into())
             .build()
             .unwrap();
         // TODO(#982) Conditional receipts currently return an error on verification.
         assert!(get_prover_server(&prover_opts_fast())
             .unwrap()
-            .prove_elf(env, MULTI_TEST_ELF)
+            .prove(env, MULTI_TEST_ELF)
             .is_err());
 
         // TODO(#982) With conditional receipts, implement the following cases.
@@ -590,7 +581,7 @@ mod sys_verify {
     #[test]
     fn sys_verify_integrity() {
         let spec = &MultiTestSpec::SysVerifyIntegrity {
-            metadata_words: to_vec(&HELLO_COMMIT_RECEIPT.get_metadata().unwrap()).unwrap(),
+            claim_words: to_vec(&HELLO_COMMIT_RECEIPT.get_claim().unwrap()).unwrap(),
         };
 
         // Test that providing the proven assumption results in an unconditional
@@ -603,7 +594,7 @@ mod sys_verify {
             .unwrap();
         get_prover_server(&prover_opts_fast())
             .unwrap()
-            .prove_elf(env, MULTI_TEST_ELF)
+            .prove(env, MULTI_TEST_ELF)
             .unwrap()
             .verify(MULTI_TEST_ID)
             .unwrap();
@@ -617,7 +608,7 @@ mod sys_verify {
             .unwrap();
         assert!(get_prover_server(&prover_opts_fast())
             .unwrap()
-            .prove_elf(env, MULTI_TEST_ELF)
+            .prove(env, MULTI_TEST_ELF)
             .is_err());
 
         // Test that providing an unresolved assumption results in a conditional
@@ -625,13 +616,13 @@ mod sys_verify {
         let env = ExecutorEnv::builder()
             .write(&spec)
             .unwrap()
-            .add_assumption(HELLO_COMMIT_RECEIPT.get_metadata().unwrap().into())
+            .add_assumption(HELLO_COMMIT_RECEIPT.get_claim().unwrap().into())
             .build()
             .unwrap();
         // TODO(#982) Conditional receipts currently return an error on verification.
         assert!(get_prover_server(&prover_opts_fast())
             .unwrap()
-            .prove_elf(env, MULTI_TEST_ELF)
+            .prove(env, MULTI_TEST_ELF)
             .is_err());
     }
 
@@ -642,7 +633,7 @@ mod sys_verify {
         let halt_receipt = prove_halt(1);
 
         let spec = &MultiTestSpec::SysVerifyIntegrity {
-            metadata_words: to_vec(&halt_receipt.get_metadata().unwrap()).unwrap(),
+            claim_words: to_vec(&halt_receipt.get_claim().unwrap()).unwrap(),
         };
 
         // Test that proving results in a success execution and unconditional receipt.
@@ -654,7 +645,7 @@ mod sys_verify {
             .unwrap();
         get_prover_server(&prover_opts_fast())
             .unwrap()
-            .prove_elf(env, MULTI_TEST_ELF)
+            .prove(env, MULTI_TEST_ELF)
             .unwrap()
             .verify(MULTI_TEST_ID)
             .unwrap();
@@ -668,7 +659,7 @@ mod sys_verify {
         let fault_receipt = prove_fault();
 
         let spec = &MultiTestSpec::SysVerifyIntegrity {
-            metadata_words: to_vec(&fault_receipt.get_metadata().unwrap()).unwrap(),
+            claim_words: to_vec(&fault_receipt.get_claim().unwrap()).unwrap(),
         };
 
         // Test that proving results in a success execution and unconditional receipt.
@@ -680,7 +671,7 @@ mod sys_verify {
             .unwrap();
         get_prover_server(&prover_opts_fast())
             .unwrap()
-            .prove_elf(env, MULTI_TEST_ELF)
+            .prove(env, MULTI_TEST_ELF)
             .unwrap()
             .verify(MULTI_TEST_ID)
             .unwrap();

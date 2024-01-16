@@ -36,7 +36,7 @@ use risc0_zkvm::{default_prover, ExecutorEnv};
 
 let env = ExecutorEnv::builder().build().unwrap();
 let prover = default_prover();
-let receipt = prover.prove_elf(env, METHOD_NAME_ELF).unwrap();
+let receipt = prover.prove(env, METHOD_NAME_ELF).unwrap();
 ```
 
 To see more complex examples, check out our [examples] folder on GitHub.
@@ -53,7 +53,7 @@ The standard workflow is for one party to generate a receipt and pass it to anot
 # use risc0_zkvm_methods::HELLO_COMMIT_ID as METHOD_NAME_ID;
 # let env = ExecutorEnv::builder().build().unwrap();
 # let prover = default_prover();
-# let receipt = prover.prove_elf(env, METHOD_NAME_ELF).unwrap();
+# let receipt = prover.prove(env, METHOD_NAME_ELF).unwrap();
 receipt.verify(METHOD_NAME_ID).unwrap();
 ```
 
@@ -69,15 +69,15 @@ You can file an issue on [these docs] or the [examples], and we're happy to answ
 
 [Bonsai]: ../../bonsai/bonsai-overview.md
 [Discord]: https://discord.gg/risczero
-[examples]: https://github.com/risc0/risc0/tree/v0.18.0/examples
+[examples]: https://github.com/risc0/risc0/tree/release-0.18/examples
 [execute]: /terminology#execute
 [execution environment]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.ExecutorEnv.html
 [executor]: /terminology#executor
 [guest]: /terminology#guest
 [`guest` module]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest
 [guest program]: /terminology#guest-program
-[Hello World demo]: https://github.com/risc0/risc0/tree/v0.18.0/examples/hello-world
-[Hello World Tutorial]: https://github.com/risc0/risc0/blob/v0.18.0/examples/hello-world/tutorial
+[Hello World demo]: https://github.com/risc0/risc0/tree/release-0.18/examples/hello-world
+[Hello World Tutorial]: https://github.com/risc0/risc0/blob/release-0.18/examples/hello-world/tutorial
 [host]: /terminology#host
 [journal]: /terminology#journal
 [JSON demo]: https://github.com/risc0/risc0/blob/main/examples/json/src/main.rs

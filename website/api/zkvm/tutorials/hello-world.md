@@ -46,7 +46,7 @@ In the code snippet below, the guest reads the `input` value from the host and t
 ```rust ignore
 use risc0_zkvm::guest::env;
 
-pub fn main() {
+fn main() {
     // read the input
     let input: u32 = env::read();
 
@@ -77,7 +77,7 @@ fn main() {
     // Obtain the default prover.
     let prover = default_prover();
     // Produce a receipt by proving the specified ELF binary.
-    let receipt = prover.prove_elf(env, HELLO_GUEST_ELF).unwrap();
+    let receipt = prover.prove(env, HELLO_GUEST_ELF).unwrap();
 
     // Extract journal of receipt
     let _output: u32 = receipt.journal.decode().unwrap();

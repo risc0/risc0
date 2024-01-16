@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
 // limitations under the License.
 
 use anyhow::Result;
-use risc0_binfmt::MemoryImage;
 
 use super::{Executor, Prover, ProverOpts};
 use crate::{
@@ -37,14 +36,14 @@ impl LocalProver {
 }
 
 impl Prover for LocalProver {
-    fn prove(
+    fn prove_with_ctx(
         &self,
         env: ExecutorEnv<'_>,
         ctx: &VerifierContext,
+        elf: &[u8],
         opts: &ProverOpts,
-        image: MemoryImage,
     ) -> Result<Receipt> {
-        get_prover_server(opts)?.prove(env, ctx, image)
+        get_prover_server(opts)?.prove_with_ctx(env, ctx, elf)
     }
 
     fn get_name(&self) -> String {
@@ -53,8 +52,8 @@ impl Prover for LocalProver {
 }
 
 impl Executor for LocalProver {
-    fn execute(&self, env: ExecutorEnv<'_>, image: MemoryImage) -> Result<SessionInfo> {
-        let mut exec = ExecutorImpl::new(env, image)?;
+    fn execute(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<SessionInfo> {
+        let mut exec = ExecutorImpl::from_elf(env, elf)?;
         let session = exec.run()?;
         let mut segments = Vec::new();
         for segment in session.segments {

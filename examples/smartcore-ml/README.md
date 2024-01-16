@@ -18,7 +18,7 @@ res/ml-model and res/input-data come preloaded with a trained decision tree clas
 
 ## Model Types
 
-It is important to specificy the generic types for each model so that they can be succesfully deserialized.  The input data for a trained model is typically formatted as a DenseMatrix, so be sure to add the following import:
+It is important to specify the generic types for each model so that they can be successfully deserialized.  The input data for a trained model is typically formatted as a DenseMatrix, so be sure to add the following import:
 `use smartcore::linalg::basic::matrix::DenseMatrix;`
 when using KNN, be sure to add the following import:
 `use smartcore::metrics::distance::euclidian::Euclidian;`
@@ -37,7 +37,7 @@ let model: GaussianNB<{float}, _, DenseMatrix<{float}>, _> = trained_model;
 ```
 
 ```
-let model: LogisticRegression<{flaot}, u32, DenseMatrix<{float}>, Vec<u32>> = trained_model;
+let model: LogisticRegression<{float}, u32, DenseMatrix<{float}>, Vec<u32>> = trained_model;
 ```
 
 ```
@@ -56,7 +56,7 @@ let model: KMeans<{float}, u8, DenseMatrix<{float}>, Vec<u8>> = trained_model;
 let model: PCA<{float}, DenseMatrix<{float}>> = trained_model;
 ```
 
-NOTE:  Deserialization of SVC and SVR does not includes that `SVCParametersmake` field.  It must be added back into the model struct manually after deserialization.  The RISC Zero SmartCore fork has amended the visbility of the model `struct`, making the parameters field public and thereby allowing the parameters field to be directly inserted into the model struct after deserialization.  You must insert the same parameters that were used when training the model.
+NOTE:  Deserialization of SVC and SVR does not includes that `SVCParametersmake` field.  It must be added back into the model struct manually after deserialization.  The RISC Zero SmartCore fork has amended the visibility of the model `struct`, making the parameters field public and thereby allowing the parameters field to be directly inserted into the model struct after deserialization.  You must insert the same parameters that were used when training the model.
 ```
 let mut model: SVC<{float}, i32, DenseMatrix<{float}>, Vec<i32>> = deserialized_svc_trained;
 let params = &SVCParameters::default().with_c(200.0).with_kernel(Kernels::linear());

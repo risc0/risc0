@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -29,13 +29,13 @@ use serde::{de::DeserializeOwned, Serialize};
 
 use crate::{
     align_up,
-    receipt_metadata::{Assumptions, InvalidExitCodeError, MaybePruned, Output, PrunedValueError},
     serde::{Deserializer, Serializer, WordRead, WordWrite},
     sha::{
         rust_crypto::{Digest as _, Sha256},
         Digest, Digestible, DIGEST_WORDS,
     },
-    ExitCode, ReceiptMetadata,
+    Assumptions, ExitCode, InvalidExitCodeError, MaybePruned, Output, PrunedValueError,
+    ReceiptClaim,
 };
 
 static mut HASHER: Option<Sha256> = None;
@@ -48,11 +48,16 @@ static mut ASSUMPTIONS_DIGEST: MaybePruned<Assumptions> = MaybePruned::Pruned(Di
 /// guest start and upon resuming from a pause. Setting this value ensures that
 /// the total memory image has at least 128 bits of entropy, preventing
 /// information leakage through the post-state digest.
-static mut MEMORY_IMAGE_ENTROPY: [u8; 16] = [0u8; 16];
+static mut MEMORY_IMAGE_ENTROPY: [u32; 4] = [0u32; 4];
 
 pub(crate) fn init() {
-    unsafe { HASHER = Some(Sha256::new()) };
-    unsafe { getrandom::getrandom(&mut MEMORY_IMAGE_ENTROPY).unwrap() };
+    unsafe {
+        HASHER = Some(Sha256::new());
+        syscall::sys_rand(
+            MEMORY_IMAGE_ENTROPY.as_mut_ptr(),
+            MEMORY_IMAGE_ENTROPY.len(),
+        )
+    }
 }
 
 pub(crate) fn finalize(halt: bool, user_exit: u8) {
@@ -73,7 +78,7 @@ pub(crate) fn finalize(halt: bool, user_exit: u8) {
     }
 }
 
-/// Terminate execution of the zkvm.
+/// Terminate execution of the zkVM.
 ///
 /// Use an exit code of 0 to indicate success, and non-zero to indicate an error.
 pub fn exit(exit_code: u8) -> ! {
@@ -81,7 +86,7 @@ pub fn exit(exit_code: u8) -> ! {
     unreachable!();
 }
 
-/// Pause the execution of the zkvm.
+/// Pause the execution of the zkVM.
 ///
 /// Execution may be continued at a later time.
 /// Use an exit code of 0 to indicate success, and non-zero to indicate an error.
@@ -105,11 +110,26 @@ pub fn syscall(syscall: SyscallName, to_host: &[u8], from_host: &mut [u32]) -> s
 
 /// Verify there exists a receipt for an execution with `image_id` and `journal`.
 ///
+/// Calling this function in the guest is logically equivalent to verifying a receipt with the same
+/// image ID and journal. Any party verifying the receipt produced by this execution can then be
+/// sure that the receipt verified by this call is also valid. In this way, multiple receipts from
+/// potentially distinct guests can be combined into one. This feature is know as composition.
+///
 /// In order to be valid, the [crate::Receipt] must have `ExitCode::Halted(0)` or
 /// `ExitCode::Paused(0)`, an empty assumptions list, and an all-zeroes input hash. It may have any
 /// post [crate::SystemState].
-pub fn verify(image_id: Digest, journal: &[u8]) -> Result<(), VerifyError> {
-    let journal_digest: Digest = journal.digest();
+///
+/// # Example
+///
+/// ```rust,ignore
+/// use risc0_zkvm::guest::env;
+///
+/// # let HELLO_WORLD_ID = Digest::ZERO;
+/// env::verify(HELLO_WORLD_ID, b"hello world".as_slice()).unwrap();
+/// ```
+pub fn verify(image_id: impl Into<Digest>, journal: &[impl Pod]) -> Result<(), VerifyError> {
+    let image_id: Digest = image_id.into();
+    let journal_digest: Digest = bytemuck::cast_slice::<_, u8>(journal).digest();
     let mut from_host_buf = MaybeUninit::<[u32; DIGEST_WORDS + 1]>::uninit();
 
     unsafe {
@@ -138,11 +158,11 @@ pub fn verify(image_id: Digest, journal: &[u8]) -> Result<(), VerifyError> {
         )));
     };
 
-    // Construct the ReceiptMetadata for this assumption. Use the host provided
+    // Construct the ReceiptClaim for this assumption. Use the host provided
     // post_state_digest and fix all fields that are required to have a certain
     // value. This assumption will only be resolvable if there exists a receipt
-    // matching this metadata.
-    let assumption_metadata = ReceiptMetadata {
+    // matching this claim.
+    let assumption_claim = ReceiptClaim {
         pre: MaybePruned::Pruned(image_id),
         post: MaybePruned::Pruned(post_state_digest),
         exit_code,
@@ -153,7 +173,7 @@ pub fn verify(image_id: Digest, journal: &[u8]) -> Result<(), VerifyError> {
         })
         .into(),
     };
-    unsafe { ASSUMPTIONS_DIGEST.add(assumption_metadata.into()) };
+    unsafe { ASSUMPTIONS_DIGEST.add(assumption_claim.into()) };
 
     Ok(())
 }
@@ -167,7 +187,7 @@ pub fn verify(image_id: Digest, journal: &[u8]) -> Result<(), VerifyError> {
 #[derive(Debug)]
 #[non_exhaustive]
 pub enum VerifyError {
-    /// Error returned when the host responds to sys_verify with an invalid exit code.
+    /// Error returned when the host responds to `sys_verify` with an invalid exit code.
     BadExitCodeResponse(InvalidExitCodeError),
 }
 
@@ -191,16 +211,21 @@ impl fmt::Display for VerifyError {
 impl std::error::Error for VerifyError {}
 
 /// Verify that there exists a valid receipt with the specified
-/// [ReceiptMetadata].
+/// [ReceiptClaim].
+///
+/// Calling this function in the guest is logically equivalent to verifying a receipt with the same
+/// [ReceiptClaim]. Any party verifying the receipt produced by this execution can then be
+/// sure that the receipt verified by this call is also valid. In this way, multiple receipts from
+/// potentially distinct guests can be combined into one. This feature is know as composition.
 ///
 /// In order for a receipt to be valid, it must have a verifying cryptographic seal and
 /// additionally have no assumptions. Note that executions with no output (e.g. those ending in
 /// [ExitCode::SystemSplit]) will not have any encoded assumptions even if [verify] or
 /// [verify_integrity] is called.
-pub fn verify_integrity(metadata: &ReceiptMetadata) -> Result<(), VerifyIntegrityError> {
+pub fn verify_integrity(claim: &ReceiptClaim) -> Result<(), VerifyIntegrityError> {
     // Check that the assumptions list is empty.
-    let assumptions_empty = metadata.output.is_none()
-        || metadata
+    let assumptions_empty = claim.output.is_none()
+        || claim
             .output
             .as_value()?
             .as_ref()
@@ -210,11 +235,11 @@ pub fn verify_integrity(metadata: &ReceiptMetadata) -> Result<(), VerifyIntegrit
         return Err(VerifyIntegrityError::NonEmptyAssumptionsList);
     }
 
-    let metadata_digest = metadata.digest();
+    let claim_digest = claim.digest();
 
     unsafe {
-        sys_verify_integrity(metadata_digest.as_ref());
-        ASSUMPTIONS_DIGEST.add(MaybePruned::Pruned(metadata_digest));
+        sys_verify_integrity(claim_digest.as_ref());
+        ASSUMPTIONS_DIGEST.add(MaybePruned::Pruned(claim_digest));
     }
 
     Ok(())
@@ -223,12 +248,12 @@ pub fn verify_integrity(metadata: &ReceiptMetadata) -> Result<(), VerifyIntegrit
 /// Error encountered during a call to [verify_integrity].
 ///
 /// Note that an error is only returned for "provable" errors. In particular, if the host fails to
-/// find a receipt matching the requested metadata digest, this is not a provable error. In this
+/// find a receipt matching the requested claim digest, this is not a provable error. In this
 /// case, [verify_integrity] will not return.
 #[derive(Debug)]
 #[non_exhaustive]
 pub enum VerifyIntegrityError {
-    /// Provided [ReceiptMetadata] struct contained a non-empty assumptions list.
+    /// Provided [ReceiptClaim] struct contained a non-empty assumptions list.
     ///
     /// This is a semantic error as only unconditional receipts can be verified
     /// inside the guest. If there is a conditional receipt to verify, it's
@@ -254,7 +279,7 @@ impl fmt::Display for VerifyIntegrityError {
                 write!(f, "assumptions list is not empty")
             }
             VerifyIntegrityError::PrunedValueError(err) => {
-                write!(f, "metadata output is pruned and non-zero: {}", err.0)
+                write!(f, "claim output is pruned and non-zero: {}", err.0)
             }
         }
     }
@@ -324,7 +349,9 @@ pub fn commit_slice<T: Pod>(slice: &[T]) {
 
 /// Return the number of processor cycles that have occurred since the guest
 /// began.
-pub fn get_cycle_count() -> usize {
+///
+/// WARNING: The cycle count is provided by the host and is not checked by the zkVM circuit.
+pub fn cycle_count() -> usize {
     sys_cycle_count()
 }
 
@@ -353,7 +380,7 @@ pub fn journal() -> FdWriter<impl for<'a> Fn(&'a [u8])> {
     })
 }
 
-/// Reaturn a reader for the standard input
+/// Return a reader for the standard input
 pub fn stdin() -> FdReader {
     FdReader::new(fileno::STDIN)
 }

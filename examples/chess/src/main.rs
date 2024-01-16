@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,24 +14,25 @@
 
 use chess_core::Inputs;
 use chess_methods::{CHECKMATE_ELF, CHECKMATE_ID};
-use clap::{Arg, Command};
+use clap::Parser;
 use risc0_zkvm::{default_prover, ExecutorEnv, Receipt};
 use shakmaty::{fen::Fen, CastlingMode, Chess, FromSetup, Position, Setup};
 
+#[derive(Parser)]
+struct Cli {
+    #[arg(id = "MOVE", default_value = "Qxf7")]
+    mv: String,
+
+    #[arg(default_value = "r1bqkb1r/pppp1ppp/2n2n2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR w KQkq - 4 4")]
+    board: String,
+}
+
 fn main() {
-    let matches =
-        Command::new("chess")
-            .arg(Arg::new("move").default_value("Qxf7"))
-            .arg(Arg::new("board").default_value(
-                "r1bqkb1r/pppp1ppp/2n2n2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR w KQkq - 4 4",
-            ))
-            .get_matches();
-    let mv = matches.get_one::<String>("move").unwrap();
-    let initial_state = matches.get_one::<String>("board").unwrap().to_string();
+    let args = Cli::parse();
 
     let inputs = Inputs {
-        board: initial_state,
-        mv: mv.to_string(),
+        board: args.board,
+        mv: args.mv,
     };
 
     let receipt = chess(&inputs);
@@ -62,7 +63,7 @@ fn chess(inputs: &Inputs) -> Receipt {
     let prover = default_prover();
 
     // Produce a receipt by proving the specified ELF binary.
-    prover.prove_elf(env, CHECKMATE_ELF).unwrap()
+    prover.prove(env, CHECKMATE_ELF).unwrap()
 }
 
 #[cfg(test)]

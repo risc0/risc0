@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -368,7 +368,7 @@ impl<F: Field> Hal for CpuHal<F> {
         let eval_count = which.size();
         assert_eq!(xs.size(), eval_count);
         assert_eq!(out.size(), eval_count);
-        let coeffs = coeffs.as_slice().to_vec(); // TODO: avoid copy
+        let coeffs = &*coeffs.as_slice();
         let which = which.as_slice();
         let xs = xs.as_slice();
         let mut out = out.as_slice_mut();
@@ -553,7 +553,7 @@ impl<F: Field> Hal for CpuHal<F> {
         let col_size = matrix.size() / output.size();
         assert_eq!(matrix.size(), col_size * row_size);
         let mut output = output.as_slice_mut();
-        let matrix = matrix.as_slice().to_vec(); // TODO: avoid copy
+        let matrix = &*matrix.as_slice();
         let hashfn = self.suite.hashfn.as_ref();
         output.par_iter_mut().enumerate().for_each(|(idx, output)| {
             let column: Vec<Self::Elem> =

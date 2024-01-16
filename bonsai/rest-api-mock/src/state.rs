@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -33,9 +33,9 @@ pub(crate) struct BonsaiState {
 }
 
 impl BonsaiState {
-    pub(crate) fn new(local_address: String) -> Self {
+    pub(crate) fn new(local_url: String) -> Self {
         Self {
-            local_url: local_address,
+            local_url,
             images: HashMap::new(),
             inputs: HashMap::new(),
             sessions: HashMap::new(),

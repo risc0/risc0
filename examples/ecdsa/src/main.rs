@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ fn prove_ecdsa_verification(
     let prover = default_prover();
 
     // Produce a receipt by proving the specified ELF binary.
-    prover.prove_elf(env, ECDSA_VERIFY_ELF).unwrap()
+    prover.prove(env, ECDSA_VERIFY_ELF).unwrap()
 }
 
 fn main() {

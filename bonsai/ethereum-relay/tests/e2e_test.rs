@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -31,8 +31,8 @@ use bonsai_sdk::{
 };
 use ethers::prelude::*;
 use ethers::types::{Bytes, H256 as ethers_H256, U256};
-use risc0_zkvm::{MemoryImage, Program, GUEST_MAX_MEM, PAGE_SIZE};
 use risc0_zkvm_methods::{SLICE_IO_ELF, SLICE_IO_ID};
+use serial_test::serial;
 use tokio::time::{sleep, Duration};
 
 const BONSAI_API_URI: &str = "http://localhost:8081";
@@ -83,6 +83,7 @@ async fn get_bonsai_client(api_key: String) -> BonsaiClient {
 
 #[tokio::test]
 #[ignore]
+#[serial] // TODO: allow tests to bind to port 0
 async fn e2e_test_counter() {
     // Get Anvil
     let anvil = utils::get_anvil();
@@ -154,19 +155,15 @@ async fn e2e_test_counter() {
     // register elf
     let bonsai_client = get_bonsai_client(get_api_key()).await;
     // create the memoryImg, upload it and return the imageId
-    let image_key = {
-        let program =
-            Program::load_elf(SLICE_IO_ELF, GUEST_MAX_MEM as u32).expect("unable to load elf");
-        let image =
-            MemoryImage::new(&program, PAGE_SIZE as u32).expect("unable to create memory image");
-        let image_id = hex::encode(image.compute_id());
-        let image = bincode::serialize(&image).expect("Failed to serialize memory img");
-        upload_img(bonsai_client.clone(), image_id.clone(), image)
-            .await
-            .expect("unable to upload result");
-        image_id
-    };
-    dbg!(&image_key);
+    let image_id_bytes: [u8; 32] = bytemuck::cast(SLICE_IO_ID);
+    let image_id = hex::encode(image_id_bytes);
+    upload_img(
+        bonsai_client.clone(),
+        image_id.clone(),
+        SLICE_IO_ELF.to_vec(),
+    )
+    .await
+    .expect("unable to upload result");
 
     // Since we are using the True Elf, the first 4 bytes need to be the length
     // of the slice (in little endian)
@@ -176,10 +173,6 @@ async fn e2e_test_counter() {
 
     // Invoke the Counter contract which should request a callback through bonsai
     let gas_limit: u64 = 3000000;
-    let image_id_bytes: [u8; 32] = hex::decode(image_key)
-        .expect("image key should be valid hex")
-        .try_into()
-        .expect("hex should be 32 bytes");
     counter
         .method::<_, ()>(
             "request_callback",
@@ -229,6 +222,7 @@ async fn e2e_test_counter() {
 
 #[tokio::test]
 #[ignore]
+#[serial] // TODO: allow tests to bind to port 0
 async fn e2e_test_counter_publish_mode() {
     // Get Anvil
     let anvil = utils::get_anvil();
@@ -299,15 +293,15 @@ async fn e2e_test_counter_publish_mode() {
     // register elf
     let bonsai_client = get_bonsai_client(get_api_key()).await;
     // create the memoryImg, upload it and return the imageId
-    let program =
-        Program::load_elf(SLICE_IO_ELF, GUEST_MAX_MEM as u32).expect("unable to load elf");
-    let image =
-        MemoryImage::new(&program, PAGE_SIZE as u32).expect("unable to create memory image");
-    let image_id = hex::encode(image.compute_id());
-    let image = bincode::serialize(&image).expect("Failed to serialize memory img");
-    upload_img(bonsai_client.clone(), image_id.clone(), image)
-        .await
-        .expect("unable to upload result");
+    let image_id_bytes: [u8; 32] = bytemuck::cast(SLICE_IO_ID);
+    let image_id = hex::encode(image_id_bytes);
+    upload_img(
+        bonsai_client.clone(),
+        image_id.clone(),
+        SLICE_IO_ELF.to_vec(),
+    )
+    .await
+    .expect("unable to upload result");
 
     // Since we are using the True Elf, the first 4 bytes need to be the length
     // of the slice (in little endian)
@@ -317,12 +311,11 @@ async fn e2e_test_counter_publish_mode() {
 
     // Invoke the Counter contract which should request a callback through bonsai
     let gas_limit: u64 = 3000000;
-    let image_id: [u8; 32] = bytemuck::cast(SLICE_IO_ID);
     let request = CallbackRequest {
         callback_contract: counter.address(),
         function_selector: [0xff, 0x58, 0x5c, 0xaf],
         gas_limit,
-        image_id,
+        image_id: image_id_bytes,
         input,
     };
 

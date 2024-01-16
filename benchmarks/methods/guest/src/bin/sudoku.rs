@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,19 +18,22 @@
 #![feature(slice_flatten)]
 
 use risc0_benchmark_lib::Sudoku;
-use risc0_zkvm::{guest::env, sha, sha::Sha256};
+use risc0_zkvm::{
+    guest::env,
+    sha::{Impl, Sha256},
+};
 
 risc0_zkvm::guest::entry!(main);
 
-pub fn main() {
+fn main() {
     let puzzle: Sudoku = env::read();
 
     if !valid_solution(&puzzle) {
         panic!("invalid solution");
-    } else {
-        let solution_hash = sha::Impl::hash_bytes(&puzzle.0.flatten()).as_bytes();
-        env::commit(&solution_hash);
     }
+
+    let digest = Impl::hash_bytes(&puzzle.0.flatten());
+    env::commit(&digest);
 }
 
 fn valid_solution(sudoku: &Sudoku) -> bool {

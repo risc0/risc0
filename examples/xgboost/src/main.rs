@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -55,7 +55,7 @@ fn predict() -> f64 {
     let prover = default_prover();
 
     // Produce a receipt by proving the specified ELF binary.
-    let receipt = prover.prove_elf(env, XGBOOST_ELF).unwrap();
+    let receipt = prover.prove(env, XGBOOST_ELF).unwrap();
 
     // We return the inference value committed to the journal.
     receipt.journal.decode().unwrap()

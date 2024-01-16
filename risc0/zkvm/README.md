@@ -34,10 +34,11 @@ The following [crate feature flags](https://doc.rust-lang.org/cargo/reference/fe
 
 Note that in order to use `risc0-zkvm` in the guest, you must disable the "prove" feature by setting `default-features = false`.
 
-| Feature  | Target(s)         | Implies    | Description                                                                           |
-| -------- | ----------------- | ---------- | ------------------------------------------------------------------------------------- |
-| cuda     |                   | prove, std | Turns on CUDA GPU acceleration for the prover. Requires CUDA toolkit to be installed. |
-| metal    | macos             | prove, std | Turns on Metal GPU acceleration for the prover.                                       |
-| profiler | all               |            | Tracks where cycles are spent during guest execution as an aid to code optimization.  |
-| prove    | all except rv32im | std        | Enables the prover, incompatible within the zkvm guest.                               |
-| std      | all               |            | Support for the Rust stdlib.                                                          |
+| Feature          | Target(s)         | Implies            | Description                                                                                                                                                  |
+| ---------------- | ----------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| client           | all except rv32im | std        | Enables the client API.                                                                                                                                      |
+| cuda             |                   | prove, std | Enables CUDA GPU acceleration for the prover. Requires CUDA toolkit to be installed.                                                                         |
+| disable-dev-mode | all except rv32im |                    | Disables dev mode so that proving and verifying may not be faked. Used to prevent a misplaced `RISC0_DEV_MODE` from breaking security in production systems. |
+| metal            | macos             | prove, std | Enables Metal GPU acceleration for the prover.                                                                                                               |
+| prove            | all except rv32im | std        | Enables the prover, incompatible within the zkvm guest.                                                                                                      |
+| std              | all               |                    | Support for the Rust stdlib.                                                                                                                                 |

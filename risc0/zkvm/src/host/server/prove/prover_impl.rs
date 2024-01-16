@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ use super::{exec::MachineContext, HalPair, ProverServer};
 use crate::{
     host::{
         receipt::{CompositeReceipt, InnerReceipt, SegmentReceipt, SuccinctReceipt},
-        recursion::{identity_p254, join, lift},
+        recursion::{identity_p254, join, lift, resolve},
         CIRCUIT,
     },
     sha::Digestible,
@@ -96,14 +96,14 @@ where
         let receipt = Receipt::new(inner, session.journal.clone().unwrap_or_default().bytes);
 
         receipt.verify_integrity_with_context(ctx)?;
-        if receipt.get_metadata()?.digest() != session.get_metadata()?.digest() {
-            tracing::debug!("receipt and session metadata do not match");
-            tracing::debug!("receipt metadata: {:#?}", receipt.get_metadata()?);
-            tracing::debug!("session metadata: {:#?}", session.get_metadata()?);
+        if receipt.get_claim()?.digest() != session.get_claim()?.digest() {
+            tracing::debug!("receipt and session claim do not match");
+            tracing::debug!("receipt claim: {:#?}", receipt.get_claim()?);
+            tracing::debug!("session claim: {:#?}", session.get_claim()?);
             bail!(
-                "session and receipt metadata do not match: session {}, receipt {}",
-                hex::encode(&session.get_metadata()?.digest()),
-                hex::encode(&receipt.get_metadata()?.digest())
+                "session and receipt claim do not match: session {}, receipt {}",
+                hex::encode(&session.get_claim()?.digest()),
+                hex::encode(&receipt.get_claim()?.digest())
             );
         }
         Ok(receipt)
@@ -121,7 +121,7 @@ where
         let (hal, circuit_hal) = (self.hal_pair.hal.as_ref(), &self.hal_pair.circuit_hal);
         let hashfn = &hal.get_hash_suite().name;
 
-        let io = segment.prepare_globals();
+        let io = segment.prepare_globals()?;
         let machine = MachineContext::new(segment);
         let po2 = segment.po2 as usize;
         let mut executor = Executor::new(&CIRCUIT, machine, po2, po2, &io);
@@ -163,6 +163,7 @@ where
             seal,
             index: segment.index,
             hashfn: hashfn.clone(),
+            claim: segment.get_claim()?,
         };
         receipt.verify_integrity_with_context(ctx)?;
 
@@ -179,6 +180,14 @@ where
 
     fn join(&self, a: &SuccinctReceipt, b: &SuccinctReceipt) -> Result<SuccinctReceipt> {
         join(a, b)
+    }
+
+    fn resolve(
+        &self,
+        conditional: &SuccinctReceipt,
+        assumption: &SuccinctReceipt,
+    ) -> Result<SuccinctReceipt> {
+        resolve(conditional, assumption)
     }
 
     fn identity_p254(&self, a: &SuccinctReceipt) -> Result<SuccinctReceipt> {

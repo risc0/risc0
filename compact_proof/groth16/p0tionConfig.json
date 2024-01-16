@@ -1,0 +1,32 @@
+{
+  "title": "RISC Zero Groth16 Verifier",
+  "description": "A Ceremony for the Groth 16 circuit used in RISC Zero's STARK-to-SNARK code",
+  "startDate": "2023-12-04T23:26:22",
+  "endDate": "2024-01-03T23:26:22",
+  "timeoutMechanismType": "FIXED",
+  "penalty": 10,
+  "circuits": [
+    {
+      "description": "This circuit verifies the validity of a RISC Zero recursion receipt",
+      "compiler": {
+        "version": "2.1.6",
+        "commitHash": "57b18f68794189753964bfb6e18e64385fed9c2c"
+      },
+      "template": {
+        "source": "https://github.com/risc0/risc0",
+        "commitHash": "41a0997a68ae288f5456238ca9ae9c2b68c37421",
+        "paramsConfiguration": []
+      },
+      "verification": {
+        "cfOrVm": "CF"
+      },
+      "artifacts": {
+        "r1csStoragePath": "http://risc0-p0tion-ceremony.s3.us-east-2.amazonaws.com/verify.r1cs",
+        "wasmStoragePath": "http://risc0-p0tion-ceremony.s3.us-east-2.amazonaws.com/verify.wasm"
+      },
+      "name": "verify",
+      "sequencePosition": 1,
+      "fixedTimeWindow": 10
+    }
+  ]
+}

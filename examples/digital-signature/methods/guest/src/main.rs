@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,16 +15,16 @@
 #![no_main]
 #![no_std]
 
+use digital_signature_core::{SignMessageCommit, SigningRequest};
 use risc0_zkvm::guest::env;
 use risc0_zkvm::sha::{Impl, Sha256};
-use digital_signature_core::{SignMessageCommit, SigningRequest};
 
 risc0_zkvm::guest::entry!(main);
 
-pub fn main() {
+fn main() {
     let request: SigningRequest = env::read();
     env::commit(&SignMessageCommit {
-        identity: *Impl::hash_bytes(&request.passphrase.pass),
+        identity: *Impl::hash_bytes(request.passphrase.as_bytes()),
         msg: request.msg,
     });
 }

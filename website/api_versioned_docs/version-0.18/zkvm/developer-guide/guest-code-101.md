@@ -11,7 +11,7 @@ This page serves as an introduction to writing RISC Zero [guest code], to help y
 
 The full functionality of the guest is documented in the [`guest` module] of the [`risc0-zkvm` Rust crate].
 
-## Basic Guest Funtionality: Reading, Writing, and Committing
+## Basic Guest Functionality: Reading, Writing, and Committing
 
 To build a zkVM application, we need our guest program to be able to:
 
@@ -86,13 +86,13 @@ You can file an issue on [these docs] or the [examples], and we're happy to answ
 [method]: /terminology#method
 [zkVM Quick Start]: ../quickstart.md
 [zkVM Overview]: ../zkvm_overview.md
-[Hello World demo]: https://github.com/risc0/risc0/tree/main/examples/hello-world
-[risc0/examples]: https://github.com/risc0/risc0/tree/v0.18.0/examples/
+[Hello World demo]: https://github.com/risc0/risc0/tree/release-0.18/examples/hello-world
+[risc0/examples]: https://github.com/risc0/risc0/tree/release-0.18/examples/
 [guest environment commands]: https://docs.rs/risc0-zkvm/0.18.0/risc0_zkvm/guest/index.html
 [zkVM Application]: ../
 [zkVM]: ../
 [Bonsai]: ../../bonsai/
-[template]: https://github.com/risc0/risc0/tree/v0.18.0/templates/rust-starter
-[examples]: https://github.com/risc0/risc0/tree/v0.18.0/examples/
+[template]: https://github.com/risc0/risc0/tree/release-0.18/templates/rust-starter
+[examples]: https://github.com/risc0/risc0/tree/release-0.18/examples/
 [these docs]: https://github.com/risc0/website
 [Discord]: https://discord.gg/risczero

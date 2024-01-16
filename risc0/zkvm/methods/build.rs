@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -38,12 +38,18 @@ fn main() {
     };
 
     let map = HashMap::from([
-        ("risc0-zkvm-methods-guest", GuestOptions::default()),
+        (
+            "risc0-zkvm-methods-guest",
+            GuestOptions {
+                features: vec![],
+                use_docker,
+            },
+        ),
         (
             "risc0-zkvm-methods-std",
             GuestOptions {
                 features: vec!["test_feature1".to_string(), "test_feature2".to_string()],
-                use_docker,
+                use_docker: None,
             },
         ),
     ]);
