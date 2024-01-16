@@ -6,9 +6,10 @@ The demo uses the [shakmaty] crate to prove that a chess position has a checkmat
 
 ## Quick Start
 
-First, follow the [installation guide] if you don't already have the RISC Zero tools installed.
+First, follow the [examples guide] to install dependencies and check out the correct version of the example.
 
 Then, run the example with:
+
 ```bash
 cargo run --release
 ```
@@ -46,7 +47,6 @@ The [host code] supplies a move that the [guest code] keeps private and an initi
 
 The [guest code] checks that applying the move to the initial board state is legal and results in a checkmate. If not, the [guest code] asserts and no [journal] is produced.
 
-
 ## More Resources
 
 - For a video walk-through of this example, check out this [excerpt from our workshop at ZK HACK III].
@@ -62,7 +62,7 @@ The [guest code] checks that applying the move to the initial board state is leg
 [receipt]: https://dev.risczero.com/terminology#receipt
 [verify]: https://dev.risczero.com/terminology#verify
 [journal]: https://dev.risczero.com/terminology#journal
-[installation guide]: https://dev.risczero.com/api/zkvm/quickstart
+[examples guide]: https://dev.risczero.com/api/zkvm/examples/#running-the-examples
 [here]: https://github.com/risc0/risc0/blob/main/examples/chess/src/main.rs#L29
 [zkVM]: https://dev.risczero.com/zkvm
 [shakmaty]: https://docs.rs/shakmaty/latest/shakmaty/

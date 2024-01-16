@@ -19,6 +19,10 @@ way, voters can confirm that their vote was counted.
 
 ## Running the tests
 
+Follow the [examples guide] to install dependencies and check out the correct version of the example.
+
+Then, run the example with:
+
 ```bash
 RUST_LOG=info cargo test --release -- --nocapture
 ```
@@ -41,3 +45,5 @@ RUST_LOG=info cargo test --release -- --nocapture
 [2022-03-29T18:13:44Z INFO  test::tests] Final vote count: 2
 ...
 ```
+
+[examples guide]: https://dev.risczero.com/api/zkvm/examples/#running-the-examples

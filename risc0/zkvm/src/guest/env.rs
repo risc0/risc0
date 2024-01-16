@@ -113,7 +113,7 @@ pub fn syscall(syscall: SyscallName, to_host: &[u8], from_host: &mut [u32]) -> s
 /// Calling this function in the guest is logically equivalent to verifying a receipt with the same
 /// image ID and journal. Any party verifying the receipt produced by this execution can then be
 /// sure that the receipt verified by this call is also valid. In this way, multiple receipts from
-/// potentially distinct guests can be combined into one. This feature is know as composition.
+/// potentially distinct guests can be combined into one. This feature is know as [composition].
 ///
 /// In order to be valid, the [crate::Receipt] must have `ExitCode::Halted(0)` or
 /// `ExitCode::Paused(0)`, an empty assumptions list, and an all-zeroes input hash. It may have any
@@ -127,6 +127,8 @@ pub fn syscall(syscall: SyscallName, to_host: &[u8], from_host: &mut [u32]) -> s
 /// # let HELLO_WORLD_ID = Digest::ZERO;
 /// env::verify(HELLO_WORLD_ID, b"hello world".as_slice()).unwrap();
 /// ```
+///
+/// [composition]: https://dev.risczero.com/terminology#composition
 pub fn verify(image_id: impl Into<Digest>, journal: &[impl Pod]) -> Result<(), VerifyError> {
     let image_id: Digest = image_id.into();
     let journal_digest: Digest = bytemuck::cast_slice::<_, u8>(journal).digest();
@@ -211,17 +213,19 @@ impl fmt::Display for VerifyError {
 impl std::error::Error for VerifyError {}
 
 /// Verify that there exists a valid receipt with the specified
-/// [ReceiptClaim].
+/// [crate::ReceiptClaim].
 ///
 /// Calling this function in the guest is logically equivalent to verifying a receipt with the same
-/// [ReceiptClaim]. Any party verifying the receipt produced by this execution can then be
+/// [crate::ReceiptClaim]. Any party verifying the receipt produced by this execution can then be
 /// sure that the receipt verified by this call is also valid. In this way, multiple receipts from
-/// potentially distinct guests can be combined into one. This feature is know as composition.
+/// potentially distinct guests can be combined into one. This feature is know as [composition].
 ///
 /// In order for a receipt to be valid, it must have a verifying cryptographic seal and
 /// additionally have no assumptions. Note that executions with no output (e.g. those ending in
 /// [ExitCode::SystemSplit]) will not have any encoded assumptions even if [verify] or
 /// [verify_integrity] is called.
+///
+/// [composition]: https://dev.risczero.com/terminology#composition
 pub fn verify_integrity(claim: &ReceiptClaim) -> Result<(), VerifyIntegrityError> {
     // Check that the assumptions list is empty.
     let assumptions_empty = claim.output.is_none()
@@ -253,7 +257,7 @@ pub fn verify_integrity(claim: &ReceiptClaim) -> Result<(), VerifyIntegrityError
 #[derive(Debug)]
 #[non_exhaustive]
 pub enum VerifyIntegrityError {
-    /// Provided [ReceiptClaim] struct contained a non-empty assumptions list.
+    /// Provided [crate::ReceiptClaim] struct contained a non-empty assumptions list.
     ///
     /// This is a semantic error as only unconditional receipts can be verified
     /// inside the guest. If there is a conditional receipt to verify, it's

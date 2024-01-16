@@ -4,11 +4,12 @@ The Cycle Counter is a utility to measure and report into a CSV the number of cy
 
 ## Quick Start
 
-First, follow the [installation guide] if you don't already have the RISC Zero tools installed.
+First, follow the [examples guide] to install dependencies and check out the correct version of the example.
 
 Then, run the example with:
+
 ```bash
 RUST_LOG=info cargo run --release -- --out count.csv all
 ```
 
-[installation guide]: https://dev.risczero.com/api/zkvm/quickstart
+[examples guide]: https://dev.risczero.com/api/zkvm/examples/#running-the-examples
