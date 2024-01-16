@@ -7,14 +7,15 @@ This code demonstrates a minimal example of how to use the [bevy] game engine in
 
 ## Quick Start
 
-First, follow the [installation guide] if you don't already have the RISC Zero tools installed.
+First, follow the [examples guide] to install dependencies and check out the correct version of the example.
 
 Then, run the example with:
+
 ```bash
 cargo run --release
 ```
 
-[installation guide]: https://dev.risczero.com/api/zkvm/quickstart
+[examples guide]: https://dev.risczero.com/api/zkvm/examples/#running-the-examples
 
 ## Use Cases
 By using this demo as part of a [Bonsai application], you could build an app where on-chain payment depends on off-chain gameplay.
@@ -50,4 +51,3 @@ The receipt can be passed to a third party, who can examine the [journal] to che
 For more information about building, running, and testing zkVM applications, see our [developer docs].
 
 [developer docs]: https://dev.risczero.com/zkvm
-

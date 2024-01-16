@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -54,8 +54,32 @@ pub fn zkvm_getrandom(dest: &mut [u8]) -> Result<(), Error> {
 #[cfg(not(feature = "getrandom"))]
 pub fn zkvm_getrandom(dest: &mut [u8]) -> Result<(), Error> {
     panic!(
-        "Guest code attempted to call getrandom but it was disabled. To enable getrandom, use the \
-        `getrandom` feature in the guest crate's `risc0-zkvm` dependency."
+        r#"
+
+WARNING: `getrandom()` called from guest.
+=========================================
+
+This panic was generated from the guest program calling `getrandom()`.
+Using randomness in the zkVM requires careful attention to your
+application’s security requirements. Therefore, the default behavior is
+for the zkVM to generate this panic message when the guest calls
+`getrandom()`. If you wrote this guest program, it is crucial that you
+understand the implications of using randomness in your guest code and
+make changes to fit your needs.
+
+
+The zkVM supports providing random data from the host in response to
+`getrandom()`. When the randomness is being used to protect private data, this
+is a good option. However, it is not appropriate for all use cases. Consider a
+situation when random data is needed to ensure the honesty of the prover (e.g.
+to flip a coin for a game between the prover and verifier). In this scenario,
+host provided randomness is not suitable because the prover may alter the source
+of randomness. For such use cases, great care must be taken to provide a source
+of randomness that the prover cannot manipulate or predict. Host provided
+randomness can be enabled with the `getrandom` feature flag on the `risc0-zkvm`
+crate used for the guest.
+
+"#
     );
 }
 

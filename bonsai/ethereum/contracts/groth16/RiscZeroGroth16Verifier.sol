@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // The RiscZeroGroth16Verifier is a free software: you can redistribute it
 // and/or modify it under the terms of the GNU General Public License as

@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#![no_main]
-
 use json::parse;
 use json_core::Outputs;
 use risc0_zkvm::{
@@ -21,9 +19,7 @@ use risc0_zkvm::{
     sha::{Impl, Sha256},
 };
 
-risc0_zkvm::guest::entry!(main);
-
-pub fn main() {
+fn main() {
     let data: String = env::read();
     let sha = *Impl::hash_bytes(&data.as_bytes());
     let data = parse(&data).unwrap();

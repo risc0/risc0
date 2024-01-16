@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -639,8 +639,8 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
         let kernel = self.module.get_function("multi_poly_eval").unwrap();
         let threads_per_block = self.max_threads / 4;
         const BYTES_PER_WORD: u32 = 4;
-        const WORDS_PER_FP4: u32 = 4;
-        let shared_size = threads_per_block * BYTES_PER_WORD * WORDS_PER_FP4;
+        const WORDS_PER_FPEXT: u32 = 4;
+        let shared_size = threads_per_block * BYTES_PER_WORD * WORDS_PER_FPEXT;
         let (grid, block) = self.compute_simple_params(out.size() * threads_per_block as usize);
         unsafe {
             launch!(kernel<<<grid, block, shared_size, stream>>>(
@@ -770,7 +770,7 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
         assert_eq!(input.size(), count * to_add);
 
         let stream = Stream::new(StreamFlags::DEFAULT, None).unwrap();
-        let kernel = self.module.get_function("eltwise_sum_fp4").unwrap();
+        let kernel = self.module.get_function("eltwise_sum_fpext").unwrap();
         let params = self.compute_simple_params(output.size());
         unsafe {
             launch!(kernel<<<params.0, params.1, 0, stream>>>(

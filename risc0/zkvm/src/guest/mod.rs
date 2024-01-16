@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,13 +14,10 @@
 
 //! The RISC Zero zkVM's guest-side RISC-V API.
 //!
-//! Code that is validated by the [RISC Zero zkVM](crate) is run inside the
-//! guest. In the minimal case, an entrypoint (the guest's "`main`" function)
-//! must be provided by using the [entry! macro](entry). In almost all
-//! practical cases, the guest will want to read private input data from the
-//! host and write public data to the journal. In the simplest case, this can be
-//! done with [env::read] and [env::commit], respectively; additional I/O
-//! functionality is also available in [mod@env].
+//! Code that is validated by the [RISC Zero zkVM](crate) is run inside the guest. In almost all
+//! practical cases, the guest will want to read private input data from the host and write public
+//! data to the journal. This can be done with [env::read] and [env::commit], respectively;
+//! additional I/O functionality is also available in [mod@env].
 //!
 //! ## Installation
 //!
@@ -39,12 +36,16 @@
 //! The following guest code[^starter-ex] proves a number is
 //! composite by multiplying two unsigned integers, and panicking if either is
 //! `1` or if the multiplication overflows:
+//!
 //! ```ignore
+//! #![no_main]
+//! #![no_std]
+//!
 //! use risc0_zkvm::guest::env;
 //!
-//! risc0_zkvm::entry!(main);
+//! risc0_zkvm::guest::entry!(main);
 //!
-//! pub fn main() {
+//! fn main() {
 //!     // Load the first number from the host
 //!     let a: u64 = env::read();
 //!     // Load the second number from the host
@@ -58,9 +59,16 @@
 //!     env::commit(&product);
 //! }
 //! ```
-//! Notice how the [entry! macro](entry) is used to indicate the
-//! entrypoint, [env::read] is used to load the two factors, and [env::commit]
-//! is used to make their composite product publically available.
+//!
+//! Notice how [env::read] is used to load the two factors, and [env::commit] is used to make their
+//! composite product publically available. All input an output of your guest is private except for
+//! what is written to the journal with [env::commit].
+//!
+//! By default, the guest only has the Rust `core` libraries and not `std`. A partial
+//! implementation of the Rust standard libraries can be enabled with the `std` feature on this [crate].
+//! When this feature is not enabled, the lines including `#![no_std]` and `#![no_main]` are
+//! required, as well as the use of the [crate::guest::entry] macro. When `std` is enabled, these
+//! three lines can be omitted and many features of `std` can be used.
 //!
 //! If you encounter problems building zkVM guest code, you can see if we have a
 //! known workaround for your issue by looking in our
@@ -103,11 +111,21 @@ pub fn abort(msg: &str) -> ! {
     }
 }
 
-/// Used for defining a main entrypoint.
+/// Used for defining the guest's entrypoint and main function.
+///
+/// When `#![no_main]` is used, the programs entrypoint and main function is left undefined. The
+/// `entry` macro is required to indicate the main function and link it to an entrypoint provided
+/// by the RISC Zero SDK.
+///
+/// When `std` is enabled, the entrypoint will be linked automatically and this macro is not
+/// required.
 ///
 /// # Example
 ///
 /// ```ignore
+/// #![no_main]
+/// #![no_std]
+///
 /// risc0_zkvm::entry!(main);
 ///
 /// fn main() { }
@@ -163,7 +181,7 @@ _start:
     .option pop;
     la sp, {0}
     lw sp, 0(sp)
-    jal ra, __start;
+    call __start;
 "#,
     sym STACK_TOP
 );

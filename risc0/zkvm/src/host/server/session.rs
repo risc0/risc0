@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ use std::{
 };
 
 use anyhow::{anyhow, ensure, Result};
+use human_repr::HumanCount;
 use risc0_binfmt::{MemoryImage, SystemState};
 use risc0_zkvm_platform::WORD_SIZE;
 use serde::{Deserialize, Serialize};
@@ -249,6 +250,35 @@ impl Session {
                     user_cycles + segment.cycles as u64,
                 )
             }))
+    }
+
+    /// Log cycle information for this [Session].
+    ///
+    /// This logs the total and user cycles for this [Session] at the INFO level.
+    pub fn log(&self) -> anyhow::Result<()> {
+        // TODO: Refactor this call to `get_cycles` to avoid the costly `resolve` call.
+        // reference: <https://github.com/risc0/risc0/pull/1276#issuecomment-1877792024>
+        let (total_prover_cycles, user_instruction_cycles) = self.get_cycles()?;
+        let cycles_used_ratio = user_instruction_cycles as f64 / total_prover_cycles as f64 * 100.0;
+
+        tracing::info!(
+            "number of segments: {}",
+            self.segments.len().human_count_bare()
+        );
+        tracing::info!(
+            "total prover cycles: {}",
+            total_prover_cycles.human_count_bare()
+        );
+        tracing::info!(
+            "user instruction cycles: {}",
+            user_instruction_cycles.human_count_bare()
+        );
+        tracing::info!(
+            "cycle efficiency: {}%",
+            cycles_used_ratio.human_count_bare()
+        );
+
+        Ok(())
     }
 }
 

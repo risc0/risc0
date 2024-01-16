@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -109,9 +109,13 @@ impl From<TraceEvent> for pb::api::TraceEvent {
                     },
                 )),
             },
-            TraceEvent::MemorySet { addr, value } => Self {
+            TraceEvent::MemorySet { addr, region } => Self {
                 kind: Some(pb::api::trace_event::Kind::MemorySet(
-                    pb::api::trace_event::MemorySet { addr, value },
+                    pb::api::trace_event::MemorySet {
+                        addr,
+                        value: 0,
+                        region,
+                    },
                 )),
             },
         }
@@ -134,7 +138,7 @@ impl TryFrom<pb::api::TraceEvent> for TraceEvent {
             },
             pb::api::trace_event::Kind::MemorySet(event) => TraceEvent::MemorySet {
                 addr: event.addr,
-                value: event.value,
+                region: event.region,
             },
         })
     }

@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -73,6 +73,14 @@ impl ProverServer for DevModeProver {
     }
 
     fn join(&self, _a: &SuccinctReceipt, _b: &SuccinctReceipt) -> Result<SuccinctReceipt> {
+        unimplemented!("This is unsupported for dev mode.")
+    }
+
+    fn resolve(
+        &self,
+        _conditional: &SuccinctReceipt,
+        _assumption: &SuccinctReceipt,
+    ) -> Result<SuccinctReceipt> {
         unimplemented!("This is unsupported for dev mode.")
     }
 

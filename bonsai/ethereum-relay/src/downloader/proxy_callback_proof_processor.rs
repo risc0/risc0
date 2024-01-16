@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -58,6 +58,7 @@ impl<S: Storage + Sync + Send> EventProcessor for ProxyCallbackProofRequestProce
             self.bonsai_client.clone(),
             hex::encode(event.image_id),
             input_id.clone(),
+            vec![], // TODO: add composition to ethereum crates
         )
         .await?;
 

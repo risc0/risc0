@@ -765,6 +765,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "human-repr"
+version = "1.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f58b778a5761513caf593693f8951c97a5b610841e754788400f32102eefdff1"
+
+[[package]]
 name = "impl-codec"
 version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1314,7 +1320,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-binfmt"
-version = "0.20.0-alpha.1"
+version = "0.21.0-alpha.1"
 dependencies = [
  "anyhow",
  "elf",
@@ -1326,7 +1332,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion"
-version = "0.20.0-alpha.1"
+version = "0.21.0-alpha.1"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -1337,7 +1343,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im"
-version = "0.20.0-alpha.1"
+version = "0.21.0-alpha.1"
 dependencies = [
  "anyhow",
  "risc0-core",
@@ -1348,7 +1354,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-core"
-version = "0.20.0-alpha.1"
+version = "0.21.0-alpha.1"
 dependencies = [
  "bytemuck",
  "rand_core",
@@ -1356,7 +1362,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkp"
-version = "0.20.0-alpha.1"
+version = "0.21.0-alpha.1"
 dependencies = [
  "anyhow",
  "blake2",
@@ -1374,7 +1380,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "0.20.0-alpha.1"
+version = "0.21.0-alpha.1"
 dependencies = [
  "anyhow",
  "ark-bn254",
@@ -1384,6 +1390,7 @@ dependencies = [
  "cfg-if",
  "getrandom",
  "hex",
+ "human-repr",
  "num-bigint",
  "num-derive",
  "num-traits",
@@ -1402,7 +1409,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "0.20.0-alpha.1"
+version = "0.21.0-alpha.1"
 dependencies = [
  "bytemuck",
  "getrandom",
