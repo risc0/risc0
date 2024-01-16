@@ -440,7 +440,7 @@ abstract contract BonsaiGovernorTest is GovernorTest, BonsaiTest {
                 vm.expectRevert(bytes(expectedRevert));
             }
 
-            // Bonsai Relay callbacks use a non-stardard call encoding of
+            // Bonsai Relay callbacks use a non-standard call encoding of
             // { bytes4(selector) || journal bytes || bytes32(imageId) }
             // Here we are calling through the Relay and so assemble to call to be same structure.
             CallbackAuthorization memory auth = CallbackAuthorization(new bytes(0), bytes32(0));

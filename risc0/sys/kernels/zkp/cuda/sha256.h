@@ -154,7 +154,7 @@ __device__ inline uint32_t convertU32(Fp in) {
 // Main entry point for uint32_t sized objects
 template <typename T>
 __device__ inline ShaDigest shaHashInner(const T* data, size_t size, size_t stride, bool pad) {
-  // Prepare the inital state
+  // Prepare the initial state
   uint32_t words[16];
   uint32_t curWord = 0;
   ShaDigest state = initState();

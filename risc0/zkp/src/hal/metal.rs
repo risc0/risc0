@@ -64,7 +64,7 @@ const KERNEL_NAMES: &[&str] = &[
 ];
 
 pub trait MetalHash {
-    /// Create a hash implemention
+    /// Create a hash implementation
     fn new(hal: &MetalHal<Self>) -> Self;
 
     /// Run the hash_fold function

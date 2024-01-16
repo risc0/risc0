@@ -42,13 +42,13 @@ async fn integration_test_pending_proof_manager() {
         .unwrap();
     let storage = InMemoryStorage::new();
     let notifier = Arc::new(Notify::new());
-    let done_notifer = Arc::new(Notify::new());
+    let done_notifier = Arc::new(Notify::new());
 
     let mut manager = BonsaiPendingProofManager::new(
         bonsai_client,
         storage.clone(),
         notifier.clone(),
-        done_notifer.clone(),
+        done_notifier.clone(),
     );
 
     // add a pending proof request to storage
@@ -79,7 +79,7 @@ async fn integration_test_pending_proof_manager() {
     // If we did another manager.step() here it would block since there is no
     // more input for the manager to work on
 
-    done_notifer.notified().await;
+    done_notifier.notified().await;
 }
 
 #[tokio::test]
@@ -118,7 +118,7 @@ async fn integration_test_completed_proof_manager() {
     let new_complete_proofs_notifier = Arc::new(Notify::new());
     let send_batch_notifier = Arc::new(Notify::new());
     let max_batch_size: usize = 3;
-    // Set some ridicoulous time for the send_batch_interval because we want to
+    // Set some ridiculous time for the send_batch_interval because we want to
     // control when batches get sent in the test using the send_batch_notifier
     let mut send_batch_interval =
         tokio::time::interval(tokio::time::Duration::from_millis(10000000000));

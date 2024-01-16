@@ -30,7 +30,7 @@ import {
 } from "../IRiscZeroVerifier.sol";
 
 /// @notice reverse the byte order of the uint256 value.
-/// @dev Soldity uses a big-endian ABI encoding. Reversing the byte order before encoding
+/// @dev Solidity uses a big-endian ABI encoding. Reversing the byte order before encoding
 /// ensure that the encoded value will be little-endian.
 /// Written by k06a. https://ethereum.stackexchange.com/a/83627
 function reverseByteOrderUint256(uint256 input) pure returns (uint256 v) {

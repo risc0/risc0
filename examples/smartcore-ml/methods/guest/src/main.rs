@@ -27,7 +27,7 @@ fn main() {
     let is_svm: bool = env::read();
 
     if !is_svm {
-        // Read the model from the host into a SmartCore Decesion Tree model object.
+        // Read the model from the host into a SmartCore Decision Tree model object.
         // We MUST explicitly declare the correct type in order for deserialization to be
         // successful.
         type Model = DecisionTreeClassifier<f64, u32, DenseMatrix<f64>, Vec<u32>>;

@@ -187,7 +187,7 @@ impl Receipt {
         Ok(())
     }
 
-    /// Verify the integrity of this receipt, ensuring the claim and jounral
+    /// Verify the integrity of this receipt, ensuring the claim and journal
     /// are attested to by the seal.
     ///
     /// This does not verify the success of the guest execution. In
@@ -389,7 +389,7 @@ impl Groth16Receipt {
 }
 
 /// A receipt composed of one or more [SegmentReceipt] structs proving a single
-/// execution with continuations, and zero or more [Receipt] stucts proving any
+/// execution with continuations, and zero or more [Receipt] structs proving any
 /// assumptions.
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[cfg_attr(test, derive(PartialEq))]

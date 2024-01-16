@@ -145,7 +145,7 @@ impl Bootstrap {
         writeln!(&mut cntlf, "{license}").unwrap();
         writeln!(&mut cntlf, "").unwrap();
 
-        // Add all of the known and allowed controled IDs to the control_id.rs file.
+        // Add all of the known and allowed control IDs to the control_id.rs file.
         writeln!(
             &mut cntlf,
             "pub const RECURSION_CONTROL_IDS: [(&str, &str); {}] = [",
@@ -158,7 +158,7 @@ impl Bootstrap {
         writeln!(&mut cntlf, "];").unwrap();
         writeln!(&mut cntlf, "").unwrap();
 
-        // Calculuate a Merkle root for the allowed control IDs and add it to the file.
+        // Calculate a Merkle root for the allowed control IDs and add it to the file.
         let hash_suite = PoseidonHashSuite::new_suite();
         let hashfn = hash_suite.hashfn.as_ref();
         let allowed_ids = risc0_zkvm::recursion::Prover::make_allowed_tree();

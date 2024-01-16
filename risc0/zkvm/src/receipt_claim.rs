@@ -533,7 +533,7 @@ impl fmt::Display for MergeInequalityError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(
             f,
-            "cannot merge values; left and right are not diegst equal: left {}, right {}",
+            "cannot merge values; left and right are not digest equal: left {}, right {}",
             hex::encode(&self.0),
             hex::encode(&self.1)
         )

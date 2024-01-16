@@ -47,6 +47,6 @@ fn main() {
     // write public output to the journal
     env::commit(&answer);
 
-    // If you want to obtain total cycle count to bechnmark performance, you can use the code below.
+    // If you want to obtain total cycle count to benchmark performance, you can use the code below.
     println!("cycles: {}", env::cycle_count());
 }

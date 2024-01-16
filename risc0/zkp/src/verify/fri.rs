@@ -109,7 +109,7 @@ where
         let hashfn = self.suite.hashfn.as_ref();
         let orig_domain = INV_RATE * degree;
         let mut domain = orig_domain;
-        // Prep the folding verfiers
+        // Prep the folding verifiers
         let rounds_capacity =
             (log2_ceil((degree + FRI_FOLD - 1) / FRI_FOLD) + FRI_FOLD_PO2 - 1) / FRI_FOLD_PO2;
         let mut rounds = Vec::with_capacity(rounds_capacity);

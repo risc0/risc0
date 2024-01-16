@@ -253,7 +253,7 @@ impl<'a> Debug for TapRef<'a> {
             .field("group", &self.group())
             .field("offset", &self.offset())
             .field("back", &self.back())
-            .field("conmbo_id", &self.combo_id())
+            .field("combo_id", &self.combo_id())
             .finish()
     }
 }

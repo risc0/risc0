@@ -48,7 +48,7 @@ abstract contract BonsaiTest is Test, BonsaiCheats {
     modifier withRelay() {
         if (devMode()) {
             // BonsaiTestRelay should only be deployed in test scenarios.
-            // Use a long and unweildy environment variable name for overriding
+            // Use a long and unwieldy environment variable name for overriding
             // the expected chain ID for the test relay so that it is hard to
             // trigger without thinking about it.
             bonsaiTestRelay = new BonsaiTestRelay(vm.envOr("TEST_BONSAI_TEST_RELAY_EXPECTED_CHAIN_ID", uint256(31337)));

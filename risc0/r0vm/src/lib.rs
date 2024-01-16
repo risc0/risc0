@@ -35,7 +35,7 @@ struct Cli {
     #[arg(long, value_enum, default_value_t = HashFn::Poseidon)]
     hashfn: HashFn,
 
-    /// Whether to prove exections ending in error status.
+    /// Whether to prove executions ending in error status.
     //
     // When false, only prove execution sessions that end in a successful
     // [ExitCode] (i.e. `Halted(0)` or `Paused(0)`. When set to true, any
@@ -54,7 +54,7 @@ struct Cli {
     #[arg(short, long, action = clap::ArgAction::Count)]
     verbose: u8,
 
-    /// Add environment vairables in the form of NAME=value.
+    /// Add environment variables in the form of NAME=value.
     #[arg(long, action = clap::ArgAction::Append)]
     env: Vec<String>,
 

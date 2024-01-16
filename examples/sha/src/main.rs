@@ -24,7 +24,7 @@ use sha_methods::{HASH_ELF, HASH_ID, HASH_RUST_CRYPTO_ELF};
 /// HASH_ELF uses the risc0_zkvm::sha interface for hashing.
 /// HASH_RUST_CRYPTO_ELF uses RustCrypto's [sha2] crate, patched to use the RISC
 /// Zero accelerator. See `src/methods/guest/Cargo.toml` for the patch
-/// definition, which can be used to enable SHA-256 accelerrator support
+/// definition, which can be used to enable SHA-256 accelerator support
 /// everywhere the [sha2] crate is used.
 fn provably_hash(input: &str, use_rust_crypto: bool) -> (Digest, Receipt) {
     let env = ExecutorEnv::builder()

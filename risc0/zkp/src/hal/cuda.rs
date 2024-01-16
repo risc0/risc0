@@ -55,7 +55,7 @@ lazy_static! {
 }
 
 pub trait CudaHash {
-    /// Create a hash implemention
+    /// Create a hash implementation
     fn new(hal: &CudaHal<Self>) -> Self;
 
     /// Run the hash_fold function

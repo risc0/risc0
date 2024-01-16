@@ -110,7 +110,7 @@ fn compute_image_id(used_elf_pages, page_size, page_table_addr, pc) -> ImageID
 
 Note: Only the loaded parts of the application binary, `used_elf_pages,` are utilized to calculate the ImageID. Consequently, the hashing does not include elements of a compiled binary that do not affect program meaning, e.g., debug information and timestamps.
 
-As a consequence, _functionally equivilant_ binaries, from the zkVM perspective, will result in identical ImageIDs. However, the compiled binaries (ELFs) may be bitwise different if hashed directly from disk. _This does not affect the zkVM security model._
+As a consequence, _functionally equivalent_ binaries, from the zkVM perspective, will result in identical ImageIDs. However, the compiled binaries (ELFs) may be bitwise different if hashed directly from disk. _This does not affect the zkVM security model._
 
 </details>
 <br/>

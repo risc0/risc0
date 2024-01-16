@@ -80,7 +80,7 @@ impl<S: Storage> BonsaiCompleteProofManager<S> {
         }
         let contract_call = {
             let ethers_client = self.ethers_client_config.get_client().await?;
-            let bonsay_relay =
+            let bonsai_relay =
                 IBonsaiRelay::<SignerMiddleware<Provider<Ws>, Wallet<SigningKey>>>::new(
                     self.proxy_contract_address,
                     Arc::new(ethers_client),
@@ -93,7 +93,7 @@ impl<S: Storage> BonsaiCompleteProofManager<S> {
                 .collect();
 
             info!("sending batch");
-            bonsay_relay
+            bonsai_relay
                 .invoke_callbacks(proof_batch)
                 .gas(BONSAI_RELAY_GAS_LIMIT)
         };
@@ -160,7 +160,7 @@ impl<S: Storage> BonsaiCompleteProofManager<S> {
                     id: Some(request.proof_request_id.clone()),
                 })?;
 
-            info!(?request.proof_request_id, "processing compeleted proof");
+            info!(?request.proof_request_id, "processing completed proof");
         }
 
         Ok(())
