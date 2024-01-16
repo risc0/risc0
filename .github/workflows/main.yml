@@ -339,7 +339,6 @@ jobs:
       #- run: rustup component list | grep clippy
       #- run: ls $HOME/.rustup/toolchains/1.73*/bin
       - run: ls -lht $HOME/.rustup/toolchains
-      - run: rust default stable
       - run: cargo clippy --all-targets --all-features
       - uses: risc0/clippy-action@main
         with:
