@@ -1,0 +1,84 @@
+// Copyright 2024 RISC Zero, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+mod seal_format;
+#[cfg(test)]
+mod tests;
+
+use std::io::{Read, Write};
+
+use anyhow::{Context, Result};
+use num_bigint::BigUint;
+use num_traits::Num;
+use risc0_core::field::baby_bear::BabyBearElem;
+use risc0_zkp::core::{
+    digest::{Digest, DIGEST_WORDS},
+    hash::poseidon_254::digest_to_fr,
+};
+
+use seal_format::{IopType, K_SEAL_ELEMS, K_SEAL_TYPES, K_SEAL_WORDS};
+
+/// Convert a seal into a JSON format compatible with the `stark_verify` witness generator.
+pub fn to_json<R: Read, W: Write>(mut reader: R, mut writer: W) -> Result<()> {
+    let mut iop = vec![0u32; K_SEAL_WORDS];
+    reader.read_exact(bytemuck::cast_slice_mut(&mut iop))?;
+
+    writeln!(writer, "{{\n  \"iop\" : [")?;
+
+    let mut pos = 0;
+    for seal_type in K_SEAL_TYPES.iter().take(K_SEAL_ELEMS) {
+        if pos != 0 {
+            writeln!(writer, ",")?;
+        }
+        match seal_type {
+            IopType::Fp => {
+                let value = BabyBearElem::new_raw(iop[pos]).as_u32();
+                pos += 1;
+                writeln!(writer, "    \"{value}\"")?;
+            }
+            _ => {
+                let digest = Digest::try_from(&iop[pos..pos + DIGEST_WORDS])?;
+                let value = digest_to_decimal(&digest).context("digest_to_decimal failed")?;
+                pos += 8;
+                writeln!(writer, "    \"{value}\"")?;
+            }
+        }
+    }
+    write!(writer, "  ]\n}}")?;
+
+    Ok(())
+}
+
+fn digest_to_decimal(digest: &Digest) -> Result<String> {
+    to_decimal(&format!("{:?}", digest_to_fr(digest)))
+}
+
+fn to_decimal(s: &str) -> Option<String> {
+    s.strip_prefix("Fr(0x")
+        .and_then(|s| s.strip_suffix(')'))
+        .and_then(|stripped| BigUint::from_str_radix(stripped, 16).ok())
+        .map(|n| n.to_str_radix(10))
+}
+
+// #[test]
+// fn test_digest_to_decimal() {
+//     use hex::FromHex;
+//     const HEX: &str = "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad";
+//     let digest = Digest::from_hex(HEX).unwrap();
+//     let decimal = digest_to_decimal(&digest).unwrap();
+//     assert_eq!(
+//         decimal,
+//         "84342368487090800366523834928142263660104883695016514377462985829716817089965"
+//     );
+// }
