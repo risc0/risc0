@@ -450,6 +450,16 @@ impl Prover {
         }
     }
 
+    /// Construct a Merkle tree encoding the set of accepted control IDs.
+    ///
+    /// Provide the set of allowed IDs during the bootstrapping process.
+    pub fn bootstrap_allowed_tree(leaves: Vec<Digest>) -> MerkleGroup {
+        MerkleGroup {
+            depth: ALLOWED_CODE_MERKLE_DEPTH,
+            leaves,
+        }
+    }
+
     /// Initialize a recursion prover with the test recursion program. This program is used in
     /// testing the basic correctness of the recursion circuit.
     pub fn new_test_recursion_circuit(digests: [&Digest; 2], opts: ProverOpts) -> Result<Self> {
