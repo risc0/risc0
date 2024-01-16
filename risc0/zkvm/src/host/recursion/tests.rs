@@ -225,8 +225,8 @@ fn generate_composition_receipt(hashfn: &str) -> Receipt {
     tracing::info!("Done proving rv32im: echo 'execution B'");
 
     let env = ExecutorEnv::builder()
-        .add_assumption(assumption_receipt_a.clone().into())
-        .add_assumption(assumption_receipt_b.clone().into())
+        .add_assumption(assumption_receipt_a.clone())
+        .add_assumption(assumption_receipt_b.clone())
         .write(&MultiTestSpec::SysVerify(vec![
             (MULTI_TEST_ID.into(), b"execution A".to_vec()),
             (MULTI_TEST_ID.into(), b"execution B".to_vec()),
