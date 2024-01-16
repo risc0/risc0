@@ -10,10 +10,10 @@ For a step-by-step guide to building your first zkVM application, we recommend
 
 ## Quick Start
 
-First, follow the [installation guide] if you don't already have the RISC Zero
-tools installed.
+First, follow the [examples guide] to install dependencies and check out the correct version of the example.
 
 Then, run the example with:
+
 ```bash
 cargo run --release
 ```
@@ -43,7 +43,6 @@ party, who can examine the [journal] to check the program's outputs and can
 [verify] the [receipt] to ensure the integrity of the [guest program]'s
 execution.
 
-
 ### What gets proven?
 
 The [receipt] proves that the [guest program] was executed correctly, and that
@@ -54,7 +53,6 @@ By running the demo, Alice demonstrates that she knows two integers that
 multiply to give the number written in `receipt.journal`. Thus, Alice proves
 that the number written in `receipt.journal` is composite — and that she knows
 the factors — without revealing any further information.
-
 
 ## Tutorial: Building your first zkVM Application
 
@@ -70,7 +68,7 @@ tutorial][tutorial]. For more materials, check out the [developer docs].
 [guest program]: https://dev.risczero.com/terminology#guest-program
 [host program]: https://dev.risczero.com/terminology#host-program
 [host]: https://dev.risczero.com/terminology#host
-[installation guide]: https://dev.risczero.com/api/zkvm/quickstart
+[examples guide]: https://dev.risczero.com/api/zkvm/examples/#running-the-examples
 [journal]: https://dev.risczero.com/terminology#journal
 [prove]: https://dev.risczero.com/terminology#prove
 [receipt]: https://dev.risczero.com/terminology#receipt
