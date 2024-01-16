@@ -49,7 +49,7 @@ pub fn to_json<R: Read, W: Write>(mut reader: R, mut writer: W) -> Result<()> {
             }
             _ => {
                 let digest = Digest::try_from(&iop[pos..pos + DIGEST_WORDS])?;
-                let value = digest_to_decimal(&digest).context("digest_to_decimal failed")?;
+                let value = digest_to_decimal(&digest)?;
                 pos += 8;
                 writeln!(writer, "    \"{value}\"")?;
             }
@@ -61,7 +61,7 @@ pub fn to_json<R: Read, W: Write>(mut reader: R, mut writer: W) -> Result<()> {
 }
 
 fn digest_to_decimal(digest: &Digest) -> Result<String> {
-    to_decimal(&format!("{:?}", digest_to_fr(digest)))
+    to_decimal(&format!("{:?}", digest_to_fr(digest))).context("digest_to_decimal failed")
 }
 
 fn to_decimal(s: &str) -> Option<String> {
