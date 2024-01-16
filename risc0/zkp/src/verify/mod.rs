@@ -36,7 +36,7 @@ use crate::{
 #[non_exhaustive]
 pub enum VerificationError {
     ReceiptFormatError,
-    ControlVerificationError,
+    ControlVerificationError { control_id: Digest },
     ImageVerificationError,
     MerkleQueryOutOfRange { idx: usize, rows: usize },
     InvalidProof,
@@ -57,7 +57,9 @@ impl fmt::Display for VerificationError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             VerificationError::ReceiptFormatError => write!(f, "invalid receipt format"),
-            VerificationError::ControlVerificationError => write!(f, "control_id mismatch"),
+            VerificationError::ControlVerificationError { control_id } => {
+                write!(f, "control_id mismatch: {control_id}")
+            }
             VerificationError::ImageVerificationError => write!(f, "image_id mismatch"),
             VerificationError::MerkleQueryOutOfRange { idx, rows } => write!(
                 f,
