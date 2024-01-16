@@ -60,7 +60,7 @@ You can file an issue on [these docs] or the [examples], and we're happy to answ
 
 [zkVM application]: ../zkvm_overview.md
 [receipt]: /terminology#receipt
-[validity proof]: /terminology#proof
+[validity proof]: /terminology#validity-proof
 [execution]: /terminology#execution-trace
 [verified]: /terminology#verify
 [journal]: /terminology#journal

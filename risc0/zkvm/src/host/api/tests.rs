@@ -116,16 +116,12 @@ impl TestClient {
         &self,
         opts: ProverOpts,
         conditional_receipt: Asset,
-        corroborating_receipt: Asset,
+        assumption_receipt: Asset,
     ) -> SuccinctReceipt {
         with_server(self.addr, || {
             let receipt_out = AssetRequest::Path(self.get_work_path());
-            self.client.resolve(
-                opts,
-                conditional_receipt,
-                corroborating_receipt,
-                receipt_out,
-            )
+            self.client
+                .resolve(opts, conditional_receipt, assumption_receipt, receipt_out)
         })
     }
 
@@ -267,7 +263,7 @@ fn lift_resolve() {
 
     // Execute the composition multitest
     let env = ExecutorEnv::builder()
-        .add_assumption(assumption_succinct_receipt.claim.clone().into())
+        .add_assumption(assumption_succinct_receipt.claim.clone())
         .write(&MultiTestSpec::SysVerify(vec![(
             HELLO_COMMIT_ID.into(),
             b"hello world".to_vec(),
