@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,19 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#![no_main]
-
 use std::{collections::BTreeMap, io::Read};
 
-use risc0_zkvm::{
-    guest::env,
-    sha::rust_crypto::{Digest as _, Sha256},
-};
-risc0_zkvm::guest::entry!(main);
 use k256::{
     ecdsa::{RecoveryId, Signature, VerifyingKey},
     elliptic_curve::sec1::ToEncodedPoint,
     PublicKey,
+};
+use risc0_zkvm::{
+    guest::env,
+    sha::rust_crypto::{Digest as _, Sha256},
 };
 use tiny_keccak::{Hasher, Keccak};
 

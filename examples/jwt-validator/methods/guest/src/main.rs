@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,12 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#![no_main]
-
 use jwt_core::Validator;
 use risc0_zkvm::guest::env;
-
-risc0_zkvm::guest::entry!(main);
 
 static PUBLIC_KEY: &str = r#"
     {
@@ -33,7 +29,7 @@ static PUBLIC_KEY: &str = r#"
     }
     "#;
 
-pub fn main() {
+fn main() {
     // read the token input
     let token: String = env::read();
 

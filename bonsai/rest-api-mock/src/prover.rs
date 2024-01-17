@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -92,7 +92,7 @@ impl Prover {
                         continue;
                     }
                     let deserialized_receipt: Receipt = bincode::deserialize(&receipt)?;
-                    env.add_assumption(deserialized_receipt.into());
+                    env.add_assumption(deserialized_receipt);
                 }
 
                 let env = env

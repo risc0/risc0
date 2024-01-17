@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -525,17 +525,17 @@ mod sys_verify {
 
     #[test]
     fn sys_verify() {
-        let spec = &MultiTestSpec::SysVerify {
-            image_id: HELLO_COMMIT_ID.into(),
-            journal: HELLO_COMMIT_RECEIPT.journal.bytes.clone(),
-        };
+        let spec = &MultiTestSpec::SysVerify(vec![(
+            HELLO_COMMIT_ID.into(),
+            HELLO_COMMIT_RECEIPT.journal.bytes.clone(),
+        )]);
 
         // Test that providing the proven assumption results in an unconditional
         // receipt.
         let env = ExecutorEnv::builder()
             .write(&spec)
             .unwrap()
-            .add_assumption(HELLO_COMMIT_RECEIPT.clone().into())
+            .add_assumption(HELLO_COMMIT_RECEIPT.clone())
             .build()
             .unwrap();
         get_prover_server(&prover_opts_fast())
@@ -562,7 +562,7 @@ mod sys_verify {
         let env = ExecutorEnv::builder()
             .write(&spec)
             .unwrap()
-            .add_assumption(HELLO_COMMIT_RECEIPT.get_claim().unwrap().into())
+            .add_assumption(HELLO_COMMIT_RECEIPT.get_claim().unwrap())
             .build()
             .unwrap();
         // TODO(#982) Conditional receipts currently return an error on verification.
@@ -589,7 +589,7 @@ mod sys_verify {
         let env = ExecutorEnv::builder()
             .write(&spec)
             .unwrap()
-            .add_assumption(HELLO_COMMIT_RECEIPT.clone().into())
+            .add_assumption(HELLO_COMMIT_RECEIPT.clone())
             .build()
             .unwrap();
         get_prover_server(&prover_opts_fast())
@@ -616,7 +616,7 @@ mod sys_verify {
         let env = ExecutorEnv::builder()
             .write(&spec)
             .unwrap()
-            .add_assumption(HELLO_COMMIT_RECEIPT.get_claim().unwrap().into())
+            .add_assumption(HELLO_COMMIT_RECEIPT.get_claim().unwrap())
             .build()
             .unwrap();
         // TODO(#982) Conditional receipts currently return an error on verification.
@@ -640,7 +640,7 @@ mod sys_verify {
         let env = ExecutorEnv::builder()
             .write(&spec)
             .unwrap()
-            .add_assumption(halt_receipt.into())
+            .add_assumption(halt_receipt)
             .build()
             .unwrap();
         get_prover_server(&prover_opts_fast())
@@ -666,7 +666,7 @@ mod sys_verify {
         let env = ExecutorEnv::builder()
             .write(&spec)
             .unwrap()
-            .add_assumption(fault_receipt.into())
+            .add_assumption(fault_receipt)
             .build()
             .unwrap();
         get_prover_server(&prover_opts_fast())

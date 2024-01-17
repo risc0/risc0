@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -78,6 +78,14 @@ pub trait ProverServer {
 
     /// Join two [SuccinctReceipt] into a [SuccinctReceipt]
     fn join(&self, a: &SuccinctReceipt, b: &SuccinctReceipt) -> Result<SuccinctReceipt>;
+
+    /// Resolve an assumption from a conditional [SuccinctReceipt] by providing a [SuccinctReceipt]
+    /// proving the validity of the assumption.
+    fn resolve(
+        &self,
+        conditional: &SuccinctReceipt,
+        assumption: &SuccinctReceipt,
+    ) -> Result<SuccinctReceipt>;
 
     /// Convert a [SuccinctReceipt] with a poseidon hash function that uses a 254-bit field
     fn identity_p254(&self, a: &SuccinctReceipt) -> Result<SuccinctReceipt>;
