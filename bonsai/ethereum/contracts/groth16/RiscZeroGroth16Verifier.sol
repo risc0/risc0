@@ -79,21 +79,29 @@ struct Seal {
     uint256[2] c;
 }
 
-/// Control ID hash for the identity_p254 predicate decomposed as implemented by splitDigest.
-/// New releases of RISC Zero's zkvm may require updating these values. These values can be
+// TODO(victor): Is this comment accurate? Or is it actually the root hash for the program set.
+// Control ID hash for the identity_p254 predicate decomposed as implemented by splitDigest.
+/// @notice Control ID hash for the identity_p254 predicate decomposed by `splitDigest`.
+/// @dev New releases of RISC Zero's zkVM require updating these values. These values can be
 /// obtained by running `cargo run --bin bonsai-ethereum-contracts -F control-id`
 library ControlID {
     uint256 public constant CONTROL_ID_0 = 0x68e42d8b3ddc499f4e1799a767052ab3;
     uint256 public constant CONTROL_ID_1 = 0x3802684f1645e0a028585b0445d39231;
 }
 
+/// @notice Groth16 verifier contract for RISC Zero receipts of execution.
 contract RiscZeroGroth16Verifier is IRiscZeroVerifier, Groth16Verifier {
     using ReceiptClaimLib for ReceiptClaim;
     using OutputLib for Output;
     using SafeCast for uint256;
 
-    // TODO(victor): Is this comment accurate? Or is it actually the root hash for the program set.
-    // Control ID hash for the identity_p254 predicate decomposed as implemented by splitDigest.
+    /// @notice Control ID hash for the identity_p254 predicate decomposed by `splitDigest`.
+    /// @dev This value controls what set of recursion programs, and therefore what version of the
+    /// zkVM circuit, will be accepted by this contract. Each instance of this verifier contract
+    /// will accept a single release of the RISC Zero circuits.
+    ///
+    /// New releases of RISC Zero's zkVM require updating these values. These values can be
+    /// obtained by running `cargo run --bin bonsai-ethereum-contracts -F control-id`
     uint256 public immutable CONTROL_ID_0;
     uint256 public immutable CONTROL_ID_1;
 
