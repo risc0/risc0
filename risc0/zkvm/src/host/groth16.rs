@@ -27,6 +27,8 @@ use serde::{Deserialize, Serialize};
 
 use crate::{sha::Digest, ALLOWED_IDS_ROOT};
 
+// Constants from: bonsai/ethereum/contracts/groth16/Groth16Verifier.sol
+// When running a new ceremony, update them by running cargo xtask bootstrap-groth16
 const ALPHA_X: &str =
     "20491192805390485299153009773594534940189261866228447918068658471970481763042";
 const ALPHA_Y: &str =
