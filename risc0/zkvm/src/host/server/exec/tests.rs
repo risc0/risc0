@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -458,16 +458,16 @@ mod sys_verify {
     fn sys_verify() {
         let hello_commit_session = exec_hello_commit();
 
-        let spec = &MultiTestSpec::SysVerify {
-            image_id: HELLO_COMMIT_ID.into(),
-            journal: hello_commit_session.journal.clone().unwrap().bytes,
-        };
+        let spec = &MultiTestSpec::SysVerify(vec![(
+            HELLO_COMMIT_ID.into(),
+            hello_commit_session.journal.clone().unwrap().bytes,
+        )]);
 
         // Test that it works when the assumption is added.
         let env = ExecutorEnv::builder()
             .write(&spec)
             .unwrap()
-            .add_assumption(hello_commit_session.get_claim().unwrap().into())
+            .add_assumption(hello_commit_session.get_claim().unwrap())
             .build()
             .unwrap();
         let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
@@ -494,15 +494,12 @@ mod sys_verify {
             tracing::debug!("sys_verify_pause_codes: code = {code}");
             let halt_session = exec_halt(code);
 
-            let spec = &MultiTestSpec::SysVerify {
-                image_id: MULTI_TEST_ID.into(),
-                journal: Vec::new(),
-            };
+            let spec = &MultiTestSpec::SysVerify(vec![(MULTI_TEST_ID.into(), Vec::new())]);
 
             let env = ExecutorEnv::builder()
                 .write(&spec)
                 .unwrap()
-                .add_assumption(halt_session.get_claim().unwrap().into())
+                .add_assumption(halt_session.get_claim().unwrap())
                 .build()
                 .unwrap();
             let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap().run();
@@ -521,15 +518,12 @@ mod sys_verify {
             tracing::debug!("sys_verify_halt_codes: code = {code}");
             let pause_session = exec_pause(code);
 
-            let spec = &MultiTestSpec::SysVerify {
-                image_id: MULTI_TEST_ID.into(),
-                journal: Vec::new(),
-            };
+            let spec = &MultiTestSpec::SysVerify(vec![(MULTI_TEST_ID.into(), Vec::new())]);
 
             let env = ExecutorEnv::builder()
                 .write(&spec)
                 .unwrap()
-                .add_assumption(pause_session.get_claim().unwrap().into())
+                .add_assumption(pause_session.get_claim().unwrap())
                 .build()
                 .unwrap();
             let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap().run();
@@ -548,15 +542,12 @@ mod sys_verify {
         // since these cannot be distinguished from the circuit's point of view.
         let fault_session = exec_fault();
 
-        let spec = &MultiTestSpec::SysVerify {
-            image_id: MULTI_TEST_ID.into(),
-            journal: Vec::new(),
-        };
+        let spec = &MultiTestSpec::SysVerify(vec![(MULTI_TEST_ID.into(), Vec::new())]);
 
         let env = ExecutorEnv::builder()
             .write(&spec)
             .unwrap()
-            .add_assumption(fault_session.get_claim().unwrap().into())
+            .add_assumption(fault_session.get_claim().unwrap())
             .build()
             .unwrap();
         assert!(ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
@@ -577,7 +568,7 @@ mod sys_verify {
         let env = ExecutorEnv::builder()
             .write(&spec)
             .unwrap()
-            .add_assumption(hello_commit_session.get_claim().unwrap().into())
+            .add_assumption(hello_commit_session.get_claim().unwrap())
             .build()
             .unwrap();
         let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
@@ -611,7 +602,7 @@ mod sys_verify {
             let env = ExecutorEnv::builder()
                 .write(&spec)
                 .unwrap()
-                .add_assumption(halt_session.get_claim().unwrap().into())
+                .add_assumption(halt_session.get_claim().unwrap())
                 .build()
                 .unwrap();
             let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
@@ -635,7 +626,7 @@ mod sys_verify {
             let env = ExecutorEnv::builder()
                 .write(&spec)
                 .unwrap()
-                .add_assumption(pause_session.get_claim().unwrap().into())
+                .add_assumption(pause_session.get_claim().unwrap())
                 .build()
                 .unwrap();
             let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
@@ -659,7 +650,7 @@ mod sys_verify {
         let env = ExecutorEnv::builder()
             .write(&spec)
             .unwrap()
-            .add_assumption(fault_session.get_claim().unwrap().into())
+            .add_assumption(fault_session.get_claim().unwrap())
             .build()
             .unwrap();
         let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
@@ -685,7 +676,7 @@ mod sys_verify {
         let env = ExecutorEnv::builder()
             .write(&spec)
             .unwrap()
-            .add_assumption(hello_commit_session.get_claim().unwrap().into())
+            .add_assumption(hello_commit_session.get_claim().unwrap())
             .build()
             .unwrap();
 
@@ -1135,7 +1126,7 @@ mod docker {
         assert_eq!(occurrences, 1, "trace events: {:#?}", &events);
         assert!(events.contains(&TraceEvent::MemorySet {
             addr: 0x08000224,
-            value: 1337
+            region: 1337_u32.to_le_bytes().to_vec()
         }));
     }
 

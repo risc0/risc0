@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 // This code is automatically generated
 
 #include "fp.h"
-#include "fp4.h"
+#include "fpext.h"
 
 #include <cstdint>
 
@@ -25,11 +25,11 @@ constexpr size_t kInvRate = 4;
 namespace risc0::circuit::recursion {
 
 struct MixState {
-  Fp4 tot;
-  Fp4 mul;
+  FpExt tot;
+  FpExt mul;
 };
 
-Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
+FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   size_t mask = steps - 1;
   // loc("zirgen/circuit/recursion/micro.cpp":151:0)
   Fp x0(0);
@@ -4684,7 +4684,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   // loc("zirgen/circuit/recursion/poseidon.cpp":140:0)
   Fp x2325(1834032191);
   // loc("zirgen/circuit/recursion/recursion.cpp":41:0)
-  MixState x2326{Fp4(0), Fp4(1)};
+  MixState x2326{FpExt(0), FpExt(1)};
   // loc("top(recursion::Top)/code(recursion::Code)/select(OneHot)/micro_ops(Reg)"("./zirgen/components/mux.h":49:0))
   auto x2327 = args[0][1 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("top(recursion::Top)/code(recursion::Code)/write_addr(Reg)"("zirgen/circuit/recursion/top.cpp":22:0))

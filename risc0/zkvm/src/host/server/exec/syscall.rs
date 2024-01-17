@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ use risc0_zkvm_platform::{
     syscall::{
         nr::{
             SYS_ARGC, SYS_ARGV, SYS_CYCLE_COUNT, SYS_GETENV, SYS_LOG, SYS_PANIC, SYS_RANDOM,
-            SYS_READ, SYS_READ_AVAIL, SYS_VERIFY, SYS_VERIFY_INTEGRITY, SYS_WRITE,
+            SYS_READ, SYS_VERIFY, SYS_VERIFY_INTEGRITY, SYS_WRITE,
         },
         reg_abi::{REG_A3, REG_A4, REG_A5},
         SyscallName, DIGEST_BYTES, DIGEST_WORDS,
@@ -110,7 +110,6 @@ impl<'a> SyscallTable<'a> {
             .with_syscall(SYS_RANDOM, SysRandom)
             .with_syscall(SYS_GETENV, SysGetenv(env.env_vars.clone()))
             .with_syscall(SYS_READ, posix_io.clone())
-            .with_syscall(SYS_READ_AVAIL, posix_io.clone())
             .with_syscall(SYS_WRITE, posix_io)
             .with_syscall(SYS_VERIFY, sys_verify.clone())
             .with_syscall(SYS_VERIFY_INTEGRITY, sys_verify)
@@ -241,7 +240,8 @@ impl SysVerify {
             ));
         };
 
-        self.assumptions.borrow_mut().accessed.push(assumption);
+        // Mark the assumption as accessed, pushing it to the head of the list, and return the success code.
+        self.assumptions.borrow_mut().accessed.insert(0, assumption);
         return Ok((0, 0));
     }
 
@@ -306,8 +306,8 @@ impl SysVerify {
             ));
         };
 
-        // Mark the assumption as accessed and return the success code.
-        self.assumptions.borrow_mut().accessed.push(assumption);
+        // Mark the assumption as accessed, pushing it to the head of the list, and return the success code.
+        self.assumptions.borrow_mut().accessed.insert(0, assumption);
         return Ok((0, 0));
     }
 
@@ -480,9 +480,7 @@ impl<'a> Syscall for PosixIo<'a> {
         to_guest: &mut [u32],
     ) -> Result<(u32, u32)> {
         // TODO: Is there a way to use "match" here instead of if statements?
-        if syscall == SYS_READ_AVAIL.as_str() {
-            self.sys_read_avail(ctx)
-        } else if syscall == SYS_READ.as_str() {
+        if syscall == SYS_READ.as_str() {
             self.sys_read(ctx, to_guest)
         } else if syscall == SYS_WRITE.as_str() {
             self.sys_write(ctx)
@@ -506,18 +504,6 @@ impl<'a> Syscall for Rc<RefCell<PosixIo<'a>>> {
 }
 
 impl<'a> PosixIo<'a> {
-    fn sys_read_avail(&mut self, ctx: &mut dyn SyscallContext) -> Result<(u32, u32)> {
-        tracing::debug!("sys_read_avail");
-        let fd = ctx.load_register(REG_A3);
-        let reader = self
-            .read_fds
-            .get_mut(&fd)
-            .ok_or(anyhow!("Bad read file descriptor {fd}"))?;
-        let navail = reader.borrow_mut().fill_buf()?.len() as u32;
-        tracing::debug!("navail: {navail}");
-        Ok((navail, 0))
-    }
-
     fn sys_read(
         &mut self,
         ctx: &mut dyn SyscallContext,
@@ -527,8 +513,8 @@ impl<'a> PosixIo<'a> {
         let nbytes = ctx.load_register(REG_A4) as usize;
 
         tracing::debug!(
-            "sys_read, attempting to read {nbytes} bytes from fd {fd}, to_guest: {}",
-            to_guest.len()
+            "sys_read, attempting to read {nbytes} bytes from fd {fd}, to_guest: {} bytes",
+            to_guest.len() * WORD_SIZE
         );
 
         assert!(
@@ -558,21 +544,19 @@ impl<'a> PosixIo<'a> {
 
         let to_guest_u8 = bytemuck::cast_slice_mut(to_guest);
         let nread_main = read_all(to_guest_u8)?;
-        assert_eq!(
-            nread_main,
-            to_guest_u8.len(),
-            "Guest requested more data than was available"
-        );
 
         tracing::debug!(
             "Main read got {nread_main} bytes out of requested {}",
             to_guest_u8.len()
         );
-        let unaligned_end = nbytes - nread_main;
-        assert!(
-            unaligned_end <= WORD_SIZE,
-            "{unaligned_end} must be <= {WORD_SIZE}"
-        );
+
+        // It's possible that there's an unaligned word at the end
+        let unaligned_end = if nbytes - nread_main <= WORD_SIZE {
+            nbytes - nread_main
+        } else {
+            // We encountered an EOF. There's nothing left to read
+            0
+        };
 
         // Fill unaligned word out.
         let mut to_guest_end: [u8; WORD_SIZE] = [0; WORD_SIZE];

@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -233,15 +233,15 @@ mod test {
         build("../../risc0/zkvm/methods/guest/Cargo.toml");
         compare_image_id(
             "risc0_zkvm_methods_guest/multi_test",
-            "a99254cb6991d6212fc3f7ea23093062b7bb6fbaaa545d33baf5a6dfa768fbc6",
+            "7cf76922134ecd86e4ad76508a7069afc3e9727e061c27ec2372bcbc2a5fcec8",
         );
         compare_image_id(
             "risc0_zkvm_methods_guest/hello_commit",
-            "f98a7b541e9488a5065a0b67f246e5fc4ad41182d2487c7a0c47607c96766471",
+            "6efc912a71f11d152714774094c94e2a395b70cdeeb87bcb0e740ce8a321e9a4",
         );
         compare_image_id(
             "risc0_zkvm_methods_guest/slice_io",
-            "160d9e2e1cefb1c0a62597548a0385c40ba64125a1ddcbda912f38c5821458e0",
+            "d22f1a689dfc6b4a0fcf93b18d710b420b5416849ec9f6c64f97a56838518aab",
         );
     }
 }

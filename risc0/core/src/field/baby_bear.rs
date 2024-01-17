@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -356,7 +356,7 @@ const fn encode(a: u32) -> u32 {
     mul(R2, a)
 }
 
-/// Decode from Montgomery form from direct form.
+/// Decode from Montgomery form to direct form.
 const fn decode(a: u32) -> u32 {
     mul(1, a)
 }

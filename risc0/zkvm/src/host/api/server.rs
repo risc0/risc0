@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -257,6 +257,7 @@ impl Server {
             }
             pb::api::server_request::Kind::Lift(request) => self.on_lift(conn, request),
             pb::api::server_request::Kind::Join(request) => self.on_join(conn, request),
+            pb::api::server_request::Kind::Resolve(request) => self.on_resolve(conn, request),
             pb::api::server_request::Kind::IdentiyP254(request) => {
                 self.on_identity_p254(conn, request)
             }
@@ -499,6 +500,55 @@ impl Server {
         conn.send(msg)
     }
 
+    fn on_resolve(
+        &self,
+        mut conn: ConnectionWrapper,
+        request: pb::api::ResolveRequest,
+    ) -> Result<()> {
+        fn inner(request: pb::api::ResolveRequest) -> Result<pb::api::ResolveReply> {
+            let opts: ProverOpts = request.opts.ok_or(malformed_err())?.into();
+            let conditional_receipt_bytes = request
+                .conditional_receipt
+                .ok_or(malformed_err())?
+                .as_bytes()?;
+            let conditional_succinct_receipt: SuccinctReceipt =
+                bincode::deserialize(&conditional_receipt_bytes)?;
+            let assumption_receipt_bytes = request
+                .assumption_receipt
+                .ok_or(malformed_err())?
+                .as_bytes()?;
+            let assumption_succinct_receipt: SuccinctReceipt =
+                bincode::deserialize(&assumption_receipt_bytes)?;
+
+            let prover = get_prover_server(&opts)?;
+            let receipt =
+                prover.resolve(&conditional_succinct_receipt, &assumption_succinct_receipt)?;
+
+            let succinct_receipt_pb: pb::core::SuccinctReceipt = receipt.into();
+            let succinct_receipt_bytes = succinct_receipt_pb.encode_to_vec();
+            let asset = pb::api::Asset::from_bytes(
+                &request.receipt_out.ok_or(malformed_err())?,
+                succinct_receipt_bytes.into(),
+                "receipt.zkp",
+            )?;
+
+            Ok(pb::api::ResolveReply {
+                kind: Some(pb::api::resolve_reply::Kind::Ok(pb::api::ResolveResult {
+                    receipt: Some(asset),
+                })),
+            })
+        }
+
+        let msg = inner(request).unwrap_or_else(|err| pb::api::ResolveReply {
+            kind: Some(pb::api::resolve_reply::Kind::Error(pb::api::GenericError {
+                reason: err.to_string(),
+            })),
+        });
+
+        tracing::debug!("tx: {msg:?}");
+        conn.send(msg)
+    }
+
     fn on_identity_p254(
         &self,
         mut conn: ConnectionWrapper,
@@ -577,12 +627,12 @@ fn build_env<'a>(
         match assumption.kind.as_ref().ok_or(malformed_err())? {
             pb::api::assumption::Kind::Proven(asset) => {
                 let receipt: Receipt = pb::core::Receipt::decode(asset.as_bytes()?)?.try_into()?;
-                env_builder.add_assumption(receipt.into())
+                env_builder.add_assumption(receipt)
             }
             pb::api::assumption::Kind::Unresolved(asset) => {
                 let claim: MaybePruned<ReceiptClaim> =
                     pb::core::MaybePruned::decode(asset.as_bytes()?)?.try_into()?;
-                env_builder.add_assumption(claim.into())
+                env_builder.add_assumption(claim)
             }
         };
     }

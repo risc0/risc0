@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -125,21 +125,21 @@ pub fn join(a: &SuccinctReceipt, b: &SuccinctReceipt) -> Result<SuccinctReceipt>
 }
 
 /// Run the resolve program to remove an assumption from a conditional receipt upon verifying a
-/// corroborating receipt for the assumption.
+/// receipt proving the validity of the assumption.
 ///
 /// By applying the resolve program, a conditional receipt (i.e. a receipt for an execution using
 /// the `env::verify` API to logically verify a receipt) can be made into an unconditional receipt.
 pub fn resolve(
     conditional: &SuccinctReceipt,
-    corroborating: &SuccinctReceipt,
+    assumption: &SuccinctReceipt,
 ) -> Result<SuccinctReceipt> {
     tracing::debug!(
         "Proving resolve: conditional.claim = {:#?}",
         conditional.claim,
     );
     tracing::debug!(
-        "Proving resolve: corroborating.claim = {:#?}",
-        corroborating.claim,
+        "Proving resolve: assumption.claim = {:#?}",
+        assumption.claim,
     );
 
     // Construct the resolved claim by copying the conditional receipt claim and resolving
@@ -156,9 +156,9 @@ pub fn resolve(
         .assumptions
         .as_value_mut()
         .context("conditional receipt assumptions are pruned")?
-        .resolve(&corroborating.claim.digest())?;
+        .resolve(&assumption.claim.digest())?;
 
-    let mut prover = Prover::new_resolve(conditional, corroborating, ProverOpts::default())?;
+    let mut prover = Prover::new_resolve(conditional, assumption, ProverOpts::default())?;
     let receipt = prover.run()?;
     let mut out_stream = VecDeque::<u32>::new();
     out_stream.extend(receipt.output.iter());
@@ -450,6 +450,16 @@ impl Prover {
         }
     }
 
+    /// Construct a Merkle tree encoding the set of accepted control IDs.
+    ///
+    /// Provide the set of allowed IDs during the bootstrapping process.
+    pub fn bootstrap_allowed_tree(leaves: Vec<Digest>) -> MerkleGroup {
+        MerkleGroup {
+            depth: ALLOWED_CODE_MERKLE_DEPTH,
+            leaves,
+        }
+    }
+
     /// Initialize a recursion prover with the test recursion program. This program is used in
     /// testing the basic correctness of the recursion circuit.
     pub fn new_test_recursion_circuit(digests: [&Digest; 2], opts: ProverOpts) -> Result<Self> {
@@ -550,14 +560,14 @@ impl Prover {
     }
 
     /// Initialize a recursion prover with the resolve program to remove an assumption from a
-    /// conditional receipt upon verifying a corroborating receipt for the assumption.
+    /// conditional receipt upon verifying a receipt proving the validity of the assumption.
     ///
     /// By applying the resolve program, a conditional receipt (i.e. a receipt for an execution
     /// using the `env::verify` API to logically verify a receipt) can be made into an
     /// unconditional receipt.
     pub fn new_resolve(
         cond: &SuccinctReceipt,
-        corr: &SuccinctReceipt,
+        assum: &SuccinctReceipt,
         opts: ProverOpts,
     ) -> Result<Self> {
         // Construct the Merkle tree of all acceptable recursion predicate control IDs.
@@ -574,7 +584,7 @@ impl Prover {
         // to compute the opening of the conditional receipt claim to the first assumption.
         prover.add_input_digest(&merkle_root, DigestKind::Poseidon);
         prover.add_segment_receipt(cond, &allowed_ids)?;
-        prover.add_segment_receipt(corr, &allowed_ids)?;
+        prover.add_segment_receipt(assum, &allowed_ids)?;
 
         let Output {
             assumptions,
@@ -593,7 +603,7 @@ impl Prover {
         let mut assumptions_tail = assumptions
             .value()
             .context("cannot resolve conditional receipt with pruned assumptions")?;
-        assumptions_tail.resolve(&corr.claim.digest())?;
+        assumptions_tail.resolve(&assum.claim.digest())?;
 
         prover.add_input_digest(&assumptions_tail.digest(), DigestKind::Sha256);
         prover.add_input_digest(&journal.digest(), DigestKind::Sha256);

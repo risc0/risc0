@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -78,6 +78,8 @@ impl RootMessage for pb::api::LiftRequest {}
 impl RootMessage for pb::api::LiftReply {}
 impl RootMessage for pb::api::JoinRequest {}
 impl RootMessage for pb::api::JoinReply {}
+impl RootMessage for pb::api::ResolveRequest {}
+impl RootMessage for pb::api::ResolveReply {}
 impl RootMessage for pb::api::IdentityP254Request {}
 impl RootMessage for pb::api::IdentityP254Reply {}
 
