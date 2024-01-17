@@ -44,7 +44,8 @@ pub struct CircomVKey {
 }
 
 impl CircomVKey {
-    pub fn pvk(&self) -> Result<PreparedVerifyingKey<Bn254>, Error> {
+    /// Prepare the verifier key for use by parsing the key and pre-computing values needed during verification.
+    pub fn prepare_verifying_key(&self) -> Result<PreparedVerifyingKey<Bn254>, Error> {
         let alpha_g1 = convert_g1(&vec![
             from_u256(&self.vk_alpha_1[0])?,
             from_u256(&self.vk_alpha_1[1])?,
