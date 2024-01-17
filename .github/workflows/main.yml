@@ -266,7 +266,7 @@ jobs:
       - uses: ./.github/actions/rustup
       - uses: risc0/foundry-toolchain@2fe7e70b520f62368a0e3c464f997df07ede420f
         with:
-          version: nightly-34f684ddfacc5b2ed371353ba6f730c485616ffe
+          version: nightly-09fe3e041369a816365a020f715ad6f94dbce9f2
       - uses: ./.github/actions/sccache
         with:
           key: macOS-default
