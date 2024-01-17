@@ -164,32 +164,34 @@ impl std::error::Error for DecodeError {}
 /// Indicates how a Segment or Session's execution has terminated
 #[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq)]
 pub enum ExitCode {
-    /// This indicates when a system-initiated split has occurred due to the
-    /// segment limit being exceeded.
-    SystemSplit,
-
-    /// This indicates that the session limit has been reached.
-    ///
-    /// NOTE: This state is reported by the host prover and results in the same proof as an
-    /// execution ending in `SystemSplit`.
-    // TODO(1.0): Refine how we handle the difference between proven and unproven exit codes.
-    SessionLimit,
+    /// This indicates normal termination of a program with an interior exit
+    /// code returned from the guest.
+    Halted(u32),
 
     /// A user may manually pause a session so that it can be resumed at a later
     /// time, along with the user returned code.
     Paused(u32),
 
-    /// This indicates normal termination of a program with an interior exit
-    /// code returned from the guest.
-    Halted(u32),
+    /// This indicates when a system-initiated split has occurred, stopping execution of a segment.
+    ///
+    /// Splits are initiated by the host. The most common reason a host will initiate a split is if
+    /// the number of cycles is approaching the limit for a single segment. The host may also
+    /// initiate a split if the next instruction will trigger a fault, or if the session limit is
+    /// reached.
+    SystemSplit,
 
     /// This indicates termination of a program where the next instruction will
     /// fail due to a machine fault (e.g. out of bounds memory read).
     ///
-    /// NOTE: This state is reported by the host prover and results in the same proof as an
-    /// execution ending in `SystemSplit`.
-    // TODO(1.0): Refine how we handle the difference between proven and unproven exit codes.
+    /// NOTE: The current version of the RISC Zero zkVM will never exit with an exit code of Fault.
+    /// This is because the system cannot currently prove that a fault has occured.
     Fault,
+
+    /// This indicates that the guest exited upon reaching the session limit set by the host.
+    ///
+    /// NOTE: The current version of the RISC Zero zkVM will never exit with an exit code of SessionLimit.
+    /// This is because the system cannot currently prove that the session limit as been reached.
+    SessionLimit,
 }
 
 impl ExitCode {
@@ -198,11 +200,8 @@ impl ExitCode {
             ExitCode::Halted(user_exit) => (0, user_exit),
             ExitCode::Paused(user_exit) => (1, user_exit),
             ExitCode::SystemSplit => (2, 0),
-            // NOTE: SessionLimit and Fault result in the same exit code set by the rv32im
-            // circuit. As a result, this conversion is lossy. This factoring results in Fault,
-            // SessionLimit, and SystemSplit all having the same digest.
-            ExitCode::SessionLimit => (2, 0),
-            ExitCode::Fault => (2, 0),
+            ExitCode::Fault => (2, 1),
+            ExitCode::SessionLimit => (2, 2),
         }
     }
 
