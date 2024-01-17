@@ -111,6 +111,7 @@ pub mod responses {
         /// * `Planner`
         /// * `Recursion`
         /// * `RecursionJoin`
+        /// * `Resolve`
         /// * `Finalize`
         /// * `InProgress`
         pub state: Option<String>,
