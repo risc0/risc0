@@ -64,7 +64,7 @@ impl TryFrom<CircomProof> for Groth16Seal {
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Groth16 {
-    pvk: Vec<u8>,
+    prepared_verifying_key: Vec<u8>,
     proof: Vec<u8>,
     prepared_inputs: Vec<u8>,
 }
@@ -75,9 +75,9 @@ impl Groth16 {
         circom_proof: CircomProof,
         circom_public: CircomPublic,
     ) -> Result<Self, anyhow::Error> {
-        let mut pvk_bytes = Vec::new();
-        let public_key_verification = circom_vk.pvk()?;
-        public_key_verification.serialize_uncompressed(&mut pvk_bytes)?;
+        let mut prepared_verifying_key_bytes = Vec::new();
+        let public_key_verification = circom_vk.prepare_verifying_key()?;
+        public_key_verification.serialize_uncompressed(&mut prepared_verifying_key_bytes)?;
 
         let groth16_seal: Groth16Seal = circom_proof.try_into()?;
         let proof = Proof::<Bn254> {
@@ -95,18 +95,22 @@ impl Groth16 {
         prepared_inputs.serialize_uncompressed(&mut prepared_inputs_bytes)?;
 
         Ok(Self {
-            pvk: pvk_bytes,
+            prepared_verifying_key: prepared_verifying_key_bytes,
             proof: proof_bytes,
             prepared_inputs: prepared_inputs_bytes,
         })
     }
 
     pub fn verify(&self) -> Result<(), Error> {
-        let pvk = &PreparedVerifyingKey::deserialize_uncompressed(&*self.pvk)?;
+        let prepared_verifying_key =
+            &PreparedVerifyingKey::deserialize_uncompressed(&*self.prepared_verifying_key)?;
         let proof = &Proof::deserialize_uncompressed(&*self.proof)?;
         let prepared_inputs = &G1Projective::deserialize_uncompressed(&*self.prepared_inputs)?;
-        match ark_Groth16::<Bn254>::verify_proof_with_prepared_inputs(pvk, proof, prepared_inputs)?
-        {
+        match ark_Groth16::<Bn254>::verify_proof_with_prepared_inputs(
+            prepared_verifying_key,
+            proof,
+            prepared_inputs,
+        )? {
             true => Ok(()),
             false => Err(anyhow!("Invalid proof")),
         }
@@ -114,7 +118,7 @@ impl Groth16 {
 
     pub fn digest(&self) -> [u8; 32] {
         let mut hasher = sha2::Sha256::new();
-        hasher.update(&self.pvk);
+        hasher.update(&self.prepared_verifying_key);
         hasher.update(&self.proof);
         hasher.update(&self.prepared_inputs);
         hasher.finalize().into()

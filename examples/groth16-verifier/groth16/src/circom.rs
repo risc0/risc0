@@ -265,6 +265,6 @@ mod tests {
         assert_eq!(vk.protocol, "groth16");
         assert_eq!(vk.curve, "bn128");
         assert_eq!(vk.n_public, 1);
-        vk.pvk().unwrap();
+        vk.prepare_verifying_key().unwrap();
     }
 }

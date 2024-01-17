@@ -2011,16 +2011,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "groth16-verifier"
-version = "0.1.0"
-dependencies = [
- "methods",
- "risc0-groth16",
- "risc0-zkvm",
- "serde_json",
-]
-
-[[package]]
 name = "group"
 version = "0.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3876,6 +3866,16 @@ dependencies = [
  "serde",
  "serde_json",
  "sha2",
+]
+
+[[package]]
+name = "risc0-groth16-verifier-example"
+version = "0.1.0"
+dependencies = [
+ "methods",
+ "risc0-groth16",
+ "risc0-zkvm",
+ "serde_json",
 ]
 
 [[package]]
