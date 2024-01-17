@@ -46,9 +46,7 @@ struct ReceiptClaim {
 }
 
 library ReceiptClaimLib {
-    // TODO: This tag name needs to be updated.
-    // This is blocked on tests that need to embed an updated receipt blob.
-    bytes32 constant TAG_DIGEST = sha256("risc0.ReceiptMeta");
+    bytes32 constant TAG_DIGEST = sha256("risc0.ReceiptClaim");
 
     function digest(ReceiptClaim memory claim) internal pure returns (bytes32) {
         return sha256(
