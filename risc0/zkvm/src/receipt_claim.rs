@@ -165,15 +165,14 @@ impl std::error::Error for DecodeError {}
 /// error).
 #[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq)]
 pub enum ExitCode {
-<<<<<<< HEAD
+    /// This indicates normal termination of a program with an interior exit code returned from the
+    /// guest program. A halted program cannot be resumed.
+    Halted(u32),
+
     /// This indicates the execution ended in a paused state with an interior exit code set by the
     /// guest program. A paused program can be resumed such that execution picks up where it left
     /// of, with the same memory state.
     Paused(u32),
-
-    /// This indicates normal termination of a program with an interior exit code returned from the
-    /// guest program. A halted program cannot be resumed.
-    Halted(u32),
 
     /// This indicates the execution ended on a host-initiated system split.
     ///
