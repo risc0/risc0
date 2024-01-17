@@ -35,6 +35,7 @@ jobs:
           filters: |
             bonsai:
               - .github/actions/**
+              - .github/workflows/bonsai.yml
               - bonsai/**
               - risc0/**
 

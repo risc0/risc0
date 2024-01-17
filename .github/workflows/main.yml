@@ -41,6 +41,7 @@ jobs:
           filters: |
             base: &base
               - .github/actions/**
+              - .github/workflows/main.yml
               - Cargo.toml
             check-benchmarks:
               - *base
