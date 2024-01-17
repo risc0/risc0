@@ -8,22 +8,17 @@ The layout of this example is intended as a template for developers to train XGB
 
 ## Quick Start
 
-First, [install Rust] if you don't already have it.
-
-Next, install the `cargo-risczero` tool and install the toolchain with:
-```bash
-cargo install cargo-binstall
-cargo binstall cargo-risczero
-cargo risczero install
-```
+First, follow the [examples guide] to install dependencies and check out the correct version of the example.
 
 Then, run the example with:
+
 ```bash
 cargo run --release
 ```
+
 ## Install Jupyter Notebook
 
-Instructions for installing Jupyter Notebooks can be found here:  https://jupyter.org/install
+Instructions for installing Jupyter Notebooks can be found on the [Jupyter Website].
 
 ## Running proofs remotely on Bonsai
 
@@ -64,3 +59,7 @@ project_name
     └── src
         └── lib.rs
 ```
+
+[examples guide]: https://dev.risczero.com/api/zkvm/examples/#running-the-examples
+[bonsai access]: https://bonsai.xyz/apply
+[Jupyter Website]: https://jupyter.org/install

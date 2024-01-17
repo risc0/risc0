@@ -263,7 +263,7 @@ fn lift_resolve() {
 
     // Execute the composition multitest
     let env = ExecutorEnv::builder()
-        .add_assumption(assumption_succinct_receipt.claim.clone().into())
+        .add_assumption(assumption_succinct_receipt.claim.clone())
         .write(&MultiTestSpec::SysVerify(vec![(
             HELLO_COMMIT_ID.into(),
             b"hello world".to_vec(),
@@ -306,7 +306,7 @@ fn lift_resolve() {
 }
 
 #[test]
-#[should_panic(expected = "Guest panicked: panicked at 'MultiTestSpec::Panic invoked'")]
+#[should_panic(expected = "MultiTestSpec::Panic invoked")]
 fn guest_error_forwarding() {
     let env = ExecutorEnv::builder()
         .write(&MultiTestSpec::Panic)

@@ -9,6 +9,7 @@
 .vim/
 bazel-*
 Cargo.lock
+ceremony/
 dist/
 rust-project.json
 target/
