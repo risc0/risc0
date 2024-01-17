@@ -453,7 +453,7 @@ mod sys_verify {
         let env = ExecutorEnv::builder()
             .write(&spec)
             .unwrap()
-            .add_assumption(hello_commit_session.get_claim().unwrap().into())
+            .add_assumption(hello_commit_session.get_claim().unwrap())
             .build()
             .unwrap();
         let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
@@ -485,7 +485,7 @@ mod sys_verify {
             let env = ExecutorEnv::builder()
                 .write(&spec)
                 .unwrap()
-                .add_assumption(halt_session.get_claim().unwrap().into())
+                .add_assumption(halt_session.get_claim().unwrap())
                 .build()
                 .unwrap();
             let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap().run();
@@ -509,7 +509,7 @@ mod sys_verify {
             let env = ExecutorEnv::builder()
                 .write(&spec)
                 .unwrap()
-                .add_assumption(pause_session.get_claim().unwrap().into())
+                .add_assumption(pause_session.get_claim().unwrap())
                 .build()
                 .unwrap();
             let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap().run();
@@ -534,7 +534,7 @@ mod sys_verify {
         let env = ExecutorEnv::builder()
             .write(&spec)
             .unwrap()
-            .add_assumption(hello_commit_session.get_claim().unwrap().into())
+            .add_assumption(hello_commit_session.get_claim().unwrap())
             .build()
             .unwrap();
         let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
@@ -568,7 +568,7 @@ mod sys_verify {
             let env = ExecutorEnv::builder()
                 .write(&spec)
                 .unwrap()
-                .add_assumption(halt_session.get_claim().unwrap().into())
+                .add_assumption(halt_session.get_claim().unwrap())
                 .build()
                 .unwrap();
             let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
@@ -592,7 +592,7 @@ mod sys_verify {
             let env = ExecutorEnv::builder()
                 .write(&spec)
                 .unwrap()
-                .add_assumption(pause_session.get_claim().unwrap().into())
+                .add_assumption(pause_session.get_claim().unwrap())
                 .build()
                 .unwrap();
             let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
@@ -619,7 +619,7 @@ mod sys_verify {
         let env = ExecutorEnv::builder()
             .write(&spec)
             .unwrap()
-            .add_assumption(hello_commit_session.get_claim().unwrap().into())
+            .add_assumption(hello_commit_session.get_claim().unwrap())
             .build()
             .unwrap();
 

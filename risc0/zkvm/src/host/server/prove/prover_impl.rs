@@ -185,9 +185,9 @@ where
     fn resolve(
         &self,
         conditional: &SuccinctReceipt,
-        corroborating: &SuccinctReceipt,
+        assumption: &SuccinctReceipt,
     ) -> Result<SuccinctReceipt> {
-        resolve(conditional, corroborating)
+        resolve(conditional, assumption)
     }
 
     fn identity_p254(&self, a: &SuccinctReceipt) -> Result<SuccinctReceipt> {

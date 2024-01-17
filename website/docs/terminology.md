@@ -5,6 +5,15 @@ slug: /terminology
 
 # Key Terminology
 
+### Assumption
+
+[assumption]: #assumption
+[assumptions]: #assumption
+
+An assumption is [receipt claim] upon which a [receipt] is [conditional].
+When the [guest] uses [composition] to verify a receipt in the [zkVM], an assumption is added to the [receipt].
+This assumption can be proven and resolved later, either through [recursion] or by providing proof of the assumption to the verifier.
+
 ### Circuit
 
 [circuit]: #circuit
@@ -34,8 +43,35 @@ See the [Optimization Guide](/api/zkvm/developer-guide/optimization) for more in
 Append data to the [journal]. <br/>
 See also: [env::commit()]
 
+### Composition
+
+[composition]: #composition
+
+As of our 0.20 release, the [zkVM] supports verification of RISC Zero receipts inside the RISC Zero [guest] through a feature known as composition.
+With this, multiple zkVM programs can be _composed_ and produce a single receipt that verifies all computation done to reach the final result.
+
+Some use cases for composition include:
+
+- Splitting a program into multiple parts, proven by different parties, to preserve privacy and data ownership of each party.
+  - E.g. Produce a proof that a ciphertext is a correct encryption of some value to a valid public key.
+  - E.g. Produce a proof for a database query by joining receipts from the query over each privately held shard.
+- Aggregating many proofs into one for efficient batch verification.
+  - E.g. Produce a proof for a block of transactions, where each transaction is itself verified by a receipt.
+- Creating a single receipt for a workflow that might be split into many different operations.
+  - E.g. Produce a single receipt for the result of an image processing pipeline, where different filters are in their own guests.
+
+### Conditional
+
+[conditional]: #conditional
+
+A [receipt] can be described as "conditional" if it is only true when one or more unproven [assumptions] are also true.
+When the [assumptions] are not proven to be true, a conditional receipt does not provide any guarantees, and so verifiers will reject conditional receipts.
+A conditional receipt can be made unconditional by providing receipts proving all [assumptions].
+Conditional receipts are a part of the [composition] feature.
+
 ### Continuations
 
+[continuations]: #continuations
 [Continuations study club]: https://www.youtube.com/watch?v=v4HIwaqmIxk&list=PLcPzhUaCxlCirUkJY0ltpjdtzWcz5U_6y&index=1
 [Continuations blog]: https://www.risczero.com/news/continuations
 
@@ -85,6 +121,7 @@ See also: [Rust crate for zkVM guest]
 
 ### Guest Program
 
+[guest]: #guest-program
 [guest program]: #guest-program
 
 The portion of a [zkVM] application that gets proven.
@@ -142,11 +179,32 @@ See also: [Prover documentation], [Executor]
 ### Receipt
 
 [receipt]: #receipt
+[receipts]: #receipt
 
-A receipt attests to valid [execution] of a [guest program]. [Verifying] the receipt provides cryptographic assurance that the [journal] was indeed constructed using the expected [circuit] and the expected [imageID].
-The receipt consists of a [journal] and a [seal].
-The journal attests to the public outputs of the program, and
-the seal is the opaque blob that cryptographically attests to the validity of the receipt.
+A receipt attests to valid [execution] of a [guest program].
+[Verifying] the receipt provides cryptographic assurance that the [journal] was indeed constructed using the expected [circuit] and the expected [imageID].
+The receipt consists of the [receipt claim] and the [seal].
+The [receipt claim] contains the [journal] along with other important details, and constitutes to the public outputs of the program.
+The [seal] is the opaque blob that cryptographically attests to the validity of the [receipt claim].
+
+### Receipt Claim
+
+[receipt claim]: #receipt-claim
+
+Every receipt has an associated "receipt claim" or "claim", also known as the "public output".
+The claim is the statement that the receipt provides proof of.
+It contains the [journal], and it additionally includes information about the [imageID], exit status (e.g. if the program exits successfully or encountered an error), and the memory state at the end of execution.
+A simple example of a claim is "I ran the Fibonacci sequence calculator with input "21" and got output "10946".
+RISC Zero provides a formal system for defining and proving claims.
+
+### Recursion
+
+[recursion]: #recursion
+
+When a zero-knowledge proof is verified within a zero-knowledge proof, this is referred to as "recursion".
+RISC Zero uses recursion to underpin features such as [continuations] and [composition].
+Through recursion, RISC Zero can take two or more [receipts] and compress them into one receipt.
+By repeating this compression, an arbitrary number of related [receipts] (e.g. all the [Segments] of a [Session]) can be compressed into a single receipt.
 
 ### RISC-V
 
@@ -159,8 +217,9 @@ RISC Zero uses RISC-V, specifically the [rv32im instruction set](https://riscv.o
 
 [seal]: #seal
 
-The portion of the [receipt] that cryptographically attests to the correct execution of the [guest program]. Concretely, the seal is a [zk-STARK] and is generated by the [prover]. <br/>
-See also: [Validity Proof]
+The portion of the [receipt] that cryptographically attests to the [receipt claim] and the correct execution of the [guest program].
+Concretely, the seal is a [zk-STARK] and is generated by the [prover]. <br/>
+See also: [validity proof]
 
 ### Segment
 
@@ -169,7 +228,7 @@ See also: [Validity Proof]
 
 The [execution trace] of a portion of a [guest program].
 The execution of a segment begins at some initial memory image (identified by the [ImageID]) and proceeds until terminated by the system or user.
-This represents a chunk of execution work that will be proven in a single call to the ZKP system. <br/>
+This represents a chunk of execution work that will be proven in a single call to the zero-knowledge proof system. <br/>
 See also: [Session]
 
 ### Session
@@ -196,6 +255,7 @@ See also: [About STARKs], [Sequence Diagram for RISC Zero's STARK], [RISC Zero's
 
 A validity proof is a cryptographic argument that attests to the validity of an [execution trace].
 The [seal] on the [receipt] serves as a validity proof for the RISC-V instruction set.
+A validity proof is often referred to as a "zero-knowledge proof", or simply a "proof".
 
 ### Verifier
 

@@ -26,7 +26,7 @@ fn main() {
     // chosen by Alice. This is like an RSA encryption from Bob to Alice, verified by the zkVM.
     let env = ExecutorEnv::builder()
         // add_assumption makes the receipt to be verified available to the prover.
-        .add_assumption(multiply_receipt.into())
+        .add_assumption(multiply_receipt)
         .write(&(n, 9u64, 100u64))
         .unwrap()
         .build()
