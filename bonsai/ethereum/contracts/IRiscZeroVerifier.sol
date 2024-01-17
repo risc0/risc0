@@ -67,6 +67,37 @@ library ReceiptClaimLib {
     }
 }
 
+/// @notice Output field in the `ReceiptClaim`, committing to a claimed journal and assumptions list.
+struct Output {
+    /// @notice Digest of the journal committed to by the guest execution.
+    bytes32 journalDigest;
+    /// @notice Digest of the ordered list of `ReceiptClaim` digests corresponding to the
+    /// calls to `env::verify` and `env::verify_integrity`.
+    /// @dev Verifying the integrity of a `Receipt` corresponding to a `ReceiptClaim` with a
+    /// non-empty assumptions list does not guarantee unconditionally any of the claims over the
+    /// guest execution (i.e. if the assumptions list is non-empty, then the journal digest cannot
+    /// be trusted to correspond to a genuine execution). The claims can be checked by additional
+    /// verifying a `Receipt` for every digest in the assumptions list.
+    bytes32 assumptionsDigest;
+}
+
+library OutputLib {
+    bytes32 constant TAG_DIGEST = sha256("risc0.Output");
+
+    function digest(Output memory output) internal pure returns (bytes32) {
+        return sha256(
+            abi.encodePacked(
+                TAG_DIGEST,
+                // down
+                output.journalDigest,
+                output.assumptionsDigest,
+                // down.length
+                uint16(2) << 8
+            )
+        );
+    }
+}
+
 struct Receipt {
     bytes seal;
     ReceiptClaim claim;

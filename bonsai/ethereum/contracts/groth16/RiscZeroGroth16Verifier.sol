@@ -22,6 +22,8 @@ import {SafeCast} from "openzeppelin/contracts/utils/math/SafeCast.sol";
 import {Groth16Verifier} from "./Groth16Verifier.sol";
 import {
     IRiscZeroVerifier,
+    Output,
+    OutputLib,
     Receipt,
     ReceiptClaim,
     ReceiptClaimLib,
@@ -87,6 +89,7 @@ library ControlID {
 
 contract RiscZeroGroth16Verifier is IRiscZeroVerifier, Groth16Verifier {
     using ReceiptClaimLib for ReceiptClaim;
+    using OutputLib for Output;
     using SafeCast for uint256;
 
     // Control ID hash for the identity_p254 predicate decomposed as implemented by splitDigest.
@@ -119,13 +122,20 @@ contract RiscZeroGroth16Verifier is IRiscZeroVerifier, Groth16Verifier {
     ///     given image ID, post-state digest, and journal hash. Asserts that the input hash
     //      is all-zeros (i.e. no committed input) and the exit code is (Halted, 0).
     /// @return true if the receipt passes the verification checks.
-    function verify(bytes memory seal, bytes32 imageId, bytes32 postStateDigest, bytes32 journalHash)
+    function verify(bytes memory seal, bytes32 imageId, bytes32 postStateDigest, bytes32 journalDigest)
         public
         view
         returns (bool)
     {
         Receipt memory receipt = Receipt(
-            seal, ReceiptClaim(imageId, postStateDigest, ExitCode(SystemExitCode.Halted, 0), bytes32(0), journalHash)
+            seal,
+            ReceiptClaim(
+                imageId,
+                postStateDigest,
+                ExitCode(SystemExitCode.Halted, 0),
+                bytes32(0),
+                Output(journalDigest, bytes32(0)).digest()
+            )
         );
         return verify(receipt);
     }
