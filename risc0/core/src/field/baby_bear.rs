@@ -356,7 +356,7 @@ const fn encode(a: u32) -> u32 {
     mul(R2, a)
 }
 
-/// Decode from Montgomery form from direct form.
+/// Decode from Montgomery form to direct form.
 const fn decode(a: u32) -> u32 {
     mul(1, a)
 }

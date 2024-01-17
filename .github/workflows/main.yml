@@ -30,6 +30,7 @@ jobs:
       crates-validator: ${{ steps.filter.outputs.crates-validator }}
       doc: ${{ steps.filter.outputs.doc }}
       examples: ${{ steps.filter.outputs.examples }}
+      stark2snark: ${{ steps.filter.outputs.stark2snark }}
       test: ${{ steps.filter.outputs.test }}
       web: ${{ steps.filter.outputs.web }}
     steps:
@@ -40,6 +41,7 @@ jobs:
           filters: |
             base: &base
               - .github/actions/**
+              - .github/workflows/main.yml
               - Cargo.toml
             check-benchmarks:
               - *base
@@ -59,6 +61,10 @@ jobs:
             examples:
               - *base
               - examples/**
+              - risc0/**
+            stark2snark:
+              - *base
+              - compact_proof/**
               - risc0/**
             test:
               - *base
@@ -82,6 +88,7 @@ jobs:
       - doc
       - examples
       - reproducible-build
+      - stark2snark
       - test
       - web
     runs-on: ubuntu-latest
@@ -260,7 +267,7 @@ jobs:
       - uses: ./.github/actions/rustup
       - uses: risc0/foundry-toolchain@2fe7e70b520f62368a0e3c464f997df07ede420f
         with:
-          version: nightly-34f684ddfacc5b2ed371353ba6f730c485616ffe
+          version: nightly-09fe3e041369a816365a020f715ad6f94dbce9f2
       - uses: ./.github/actions/sccache
         with:
           key: macOS-default
@@ -384,4 +391,25 @@ jobs:
       - run: cargo test -p risc0-zkvm -F docker -F prove -- "docker::"
         env:
           RISC0_USE_DOCKER: "1"
+      - run: sccache --show-stats
+
+  stark2snark:
+    if: needs.changes.outputs.stark2snark == 'true'
+    needs: changes
+    runs-on: [self-hosted, prod, Linux, cpu, docker]
+    steps:
+      # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
+      - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - uses: ./.github/actions/rustup
+      - uses: ./.github/actions/sccache
+        with:
+          key: Linux-default
+      - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
+      - run: scripts/install_prover.sh
+        working-directory: compact_proof
+      - run: cargo test --release
+        working-directory: compact_proof/seal_to_json
       - run: sccache --show-stats

@@ -631,7 +631,9 @@ impl SegmentReceipt {
                 .chain(BLAKE2B_CONTROL_ID)
                 .find(|x| Digest::from_hex(x).unwrap() == *control_id)
                 .map(|_| ())
-                .ok_or(VerificationError::ControlVerificationError)
+                .ok_or(VerificationError::ControlVerificationError {
+                    control_id: *control_id,
+                })
         };
         let suite = ctx
             .suites
