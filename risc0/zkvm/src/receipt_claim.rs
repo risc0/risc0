@@ -14,10 +14,10 @@
 
 //! [ReceiptClaim] and associated types and functions.
 //!
-//! A [ReceiptClaim] struct contains the public claims about a zkVM guest
-//! execution, such as the journal committed to by the guest. It also includes
-//! important information such as the exit code and the starting and ending
-//! system state (i.e. the state of memory).
+//! A [ReceiptClaim] struct contains the public claims (i.e. public outputs) of a zkVM guest
+//! execution, such as the journal committed to by the guest. It also includes important
+//! information such as the exit code and the starting and ending system state (i.e. the state of
+//! memory).
 
 use alloc::{collections::VecDeque, vec::Vec};
 use core::{fmt, ops::Deref};
@@ -59,14 +59,13 @@ pub struct ReceiptClaim {
 
     /// Input to the guest.
     ///
-    /// NOTE: This field can only be constructed as a Digest because it is not yet
-    /// cryptographically bound by the RISC Zero proof system; the guest has no way to set the
-    /// input. In the future, it will be implemented with a [MaybePruned] type.
+    /// NOTE: This field must be set to the zero Digest because it is not yet cryptographically
+    /// bound by the RISC Zero proof system; the guest has no way to set the input. It may be
+    /// possible to use set this field to non-zero values in the future.
     // TODO(1.0): Determine the 1.0 status of input.
     pub input: Digest,
 
-    /// [Output] of the guest, including the journal and assumptions set
-    /// during execution.
+    /// [Output] of the guest, including the journal and assumptions set during execution.
     pub output: MaybePruned<Option<Output>>,
 }
 
@@ -157,11 +156,24 @@ impl From<InvalidExitCodeError> for DecodeError {
 #[cfg(feature = "std")]
 impl std::error::Error for DecodeError {}
 
-/// Indicates how a Segment or Session's execution has terminated
+/// Exit condition indicated by the zkVM at the end of the guest execution.
+///
+/// Exit codes have a "system" part and a "user" part. Semantically, the system part is set to
+/// indicate the type of exit (e.g. halt, pause, or system split) and is directly controlled by the
+/// zkVM. The user part is an exit code, similar to exit codes used in Linux, chosen by the guest
+/// program to indicate additional information (e.g. 0 to indicate success or 1 to indicate an
+/// error).
 #[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq)]
 pub enum ExitCode {
-    /// This indicates when a system-initiated split has occurred due to the
-    /// segment limit being exceeded.
+    /// This indicates the execution ended on a host-initiated system split.
+    ///
+    /// System split is mechanism by which the host can temporarily stop execution of the guest.
+    /// Execution ended in a system split has no output and no conclusions can be drawn about
+    /// whether the program will eventually halt. System split is used in [continuations] to split
+    /// execution into individually provable [segments].
+    ///
+    /// [continuations]: https://dev.risczero.com/terminology#continuations
+    /// [segments]: https://dev.risczero.com/terminology#segment
     SystemSplit,
 
     /// This indicates that the session limit has been reached.
@@ -171,12 +183,13 @@ pub enum ExitCode {
     // TODO(1.0): Refine how we handle the difference between proven and unproven exit codes.
     SessionLimit,
 
-    /// A user may manually pause a session so that it can be resumed at a later
-    /// time, along with the user returned code.
+    /// This indicates the execution ended in a paused state with an interior exit code set by the
+    /// guest program. A paused program can be resumed such that execution picks up where it left
+    /// of, with the same memory state.
     Paused(u32),
 
-    /// This indicates normal termination of a program with an interior exit
-    /// code returned from the guest.
+    /// This indicates normal termination of a program with an interior exit code returned from the
+    /// guest program. A halted program cannot be resumed.
     Halted(u32),
 
     /// This indicates termination of a program where the next instruction will

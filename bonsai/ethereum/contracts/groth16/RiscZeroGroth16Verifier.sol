@@ -111,13 +111,7 @@ contract RiscZeroGroth16Verifier is IRiscZeroVerifier, Groth16Verifier {
         return (uint256(uint128(uint256(reversed))), uint256(reversed >> 128));
     }
 
-    /// @notice verifies that the given seal is a valid RISC Zero proof of execution over the
-    ///     given image ID, post-state digest, and journal digest.
-    /// @dev `journalDigest` must be the SHA-256 digest of the journal bytes. Asserts that the input
-    /// hash is all-zeros (i.e. no committed input), the exit code is (Halted, 0), and there are no
-    /// assumptions (i.e. the receipt is unconditional).
-    /// @return true if the receipt passes the verification checks, ensuring
-    /// the `seal` is a cryptographic proof of the execution with the given image ID and journal.
+    /// @inheritdoc IRiscZeroVerifier
     function verify(bytes calldata seal, bytes32 imageId, bytes32 postStateDigest, bytes32 journalDigest)
         public
         view
@@ -138,9 +132,7 @@ contract RiscZeroGroth16Verifier is IRiscZeroVerifier, Groth16Verifier {
         return verify_integrity(receipt);
     }
 
-    /// @notice verify that the given receipt is a valid RISC Zero receipt.
-    /// @return true if the receipt passes the verification checks, ensuring
-    /// the `seal` is a cryptographic proof of the claims in `claim`.
+    /// @inheritdoc IRiscZeroVerifier
     function verify_integrity(Receipt memory receipt) public view returns (bool) {
         (uint256 claim0, uint256 claim1) = splitDigest(receipt.claim.digest());
         Seal memory seal = abi.decode(receipt.seal, (Seal));

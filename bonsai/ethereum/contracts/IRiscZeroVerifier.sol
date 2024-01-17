@@ -16,33 +16,10 @@
 
 pragma solidity ^0.8.9;
 
-/// @notice Exit condition indicated by the zkVM at the end of the execution covered by this proof.
-/// @dev `Halted` indicates that the execution ended in a terminal state, with
-///   the `halt` ecall. A Halted program cannot be resumed. `Paused` indicates that
-///   the execution ended in a paused state with the `halt` ecall and can be
-///   resumed. `SystemSplit` indicates the prover stopped execution. In this state
-///   no conclusion can be made about what the programs output will be, or if it
-///   will halt.
-enum SystemExitCode {
-    Halted,
-    Paused,
-    SystemSplit
-}
-
-/// @notice Combination of system and user exit codes.
-/// @dev The user exit code is chosen by the guest program, with an exit code of
-///   zero conventionally indicating success. If system exit code is `SystemSplit`,
-///   the user exit code must be zero.
-struct ExitCode {
-    SystemExitCode system;
-    uint8 user;
-}
-
 /// @notice Public claims about a zkVM guest execution, such as the journal committed to by the guest.
 /// @dev Also includes important information such as the exit code and the starting and ending system
-/// state (i.e. the state of memory). [ReceiptClaim] is a "Merkle-ized struct" supporting
-/// partial openings of the underlying fields from a hash commitment to the full structure. Also
-/// see [MaybePruned].
+/// state (i.e. the state of memory). `ReceiptClaim` is a "Merkle-ized struct" supporting
+/// partial openings of the underlying fields from a hash commitment to the full structure.
 struct ReceiptClaim {
     /// @notice Digest of the SystemState just before execution has begun.
     bytes32 preStateDigest;
@@ -53,7 +30,7 @@ struct ReceiptClaim {
     /// @notice A digest of the input to the guest.
     /// @dev This field is currently unused and must be set to the zero digest.
     bytes32 input;
-    /// @notice Digest of the [Output] of the guest, including the journal
+    /// @notice Digest of the Output of the guest, including the journal
     /// and assumptions set during execution.
     bytes32 output;
 }
@@ -78,6 +55,36 @@ library ReceiptClaimLib {
             )
         );
     }
+}
+
+/// @notice Exit condition indicated by the zkVM at the end of the guest execution.
+/// @dev Exit codes have a "system" part and a "user" part. Semantically, the system part is set to
+/// indicate the type of exit (e.g. halt, pause, or system split) and is directly controlled by the
+/// zkVM. The user part is an exit code, similar to exit codes used in Linux, chosen by the guest
+/// program to indicate additional information (e.g. 0 to indicate success or 1 to indicate an
+/// error).
+struct ExitCode {
+    SystemExitCode system;
+    uint8 user;
+}
+
+/// @notice Exit condition indicated by the zkVM at the end of the execution covered by this proof.
+/// @dev
+/// `Halted` indicates normal termination of a program with an interior exit code returned from the
+/// guest program. A halted program cannot be resumed.
+///
+/// `Paused` indicates the execution ended in a paused state with an interior exit code set by the
+/// guest program. A paused program can be resumed such that execution picks up where it left
+/// of, with the same memory state.
+///
+/// `SystemSplit` indicates the execution ended on a host-initiated system split. System split is
+/// mechanism by which the host can temporarily stop execution of the execution ended in a system
+/// split has no output and no conclusions can be drawn about whether the program will eventually
+/// halt. System split is used in continuations to split execution into individually provable segments.
+enum SystemExitCode {
+    Halted,
+    Paused,
+    SystemSplit
 }
 
 /// @notice Output field in the `ReceiptClaim`, committing to a claimed journal and assumptions list.
@@ -112,26 +119,34 @@ library OutputLib {
     }
 }
 
+/// @notice A receipt attesting to the execution of a guest program.
+/// @dev A receipt contains two parts: a seal and a claim. The seal is a zero-knowledge proof
+/// attesting to knowledge of a zkVM execution resulting the claim. The claim is a set of public
+/// outputs for the execution. Crucially, the claim includes the journal and the image ID. The
+/// image ID identifies the program that was executed, and the journal is the public data written
+/// by the program.
 struct Receipt {
     bytes seal;
     ReceiptClaim claim;
 }
 
 interface IRiscZeroVerifier {
-    /// @notice verifies that the given seal is a valid RISC Zero proof of execution over the
+    /// @notice Verifies that the given seal is a valid RISC Zero proof of execution over the
     ///     given image ID, post-state digest, and journal digest.
     /// @dev `journalDigest` must be the SHA-256 digest of the journal bytes. Asserts that the input
     /// hash is all-zeros (i.e. no committed input), the exit code is (Halted, 0), and there are no
     /// assumptions (i.e. the receipt is unconditional).
-    /// @return true if the receipt passes the verification checks, ensuring
-    /// the `seal` is a cryptographic proof of the execution with the given image ID and journal.
+    /// @return true if the receipt passes the verification checks, ensuring the `seal` is a
+    /// cryptographic proof of the execution with the given image ID and journal. If the checks do
+    /// not pass, false will be returned. The return code must be checked.
     function verify(bytes calldata seal, bytes32 imageId, bytes32 postStateDigest, bytes32 journalDigest)
         external
         view
         returns (bool);
 
     /// @notice verify that the given receipt is a valid RISC Zero receipt.
-    /// @return true if the receipt passes the verification checks, ensuring
-    /// the `seal` is a cryptographic proof of the claims in `claim`.
+    /// @return true if the receipt passes the verification checks, ensuring the `seal` is a
+    /// cryptographic proof of the execution with the given `claim`. If the checks do
+    /// not pass, false will be returned. The return code must be checked.
     function verify_integrity(Receipt calldata receipt) external view returns (bool);
 }
