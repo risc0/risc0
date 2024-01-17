@@ -36,6 +36,7 @@ jobs:
           filters: |
             main:
               - .github/actions/**
+              - .github/workflows/website-test.yml
               - bonsai/**
               - risc0/**
               - website/api/**
@@ -43,10 +44,12 @@ jobs:
               - website/docs/**
             version-0_18:
               - .github/actions/**
+              - .github/workflows/website-test.yml
               - website/api_versioned_docs/version-0.18/**
               - website/doc-test/version-0.18/**
             version-0_19:
               - .github/actions/**
+              - .github/workflows/website-test.yml
               - website/api_versioned_docs/version-0.19/**
               - website/doc-test/version-0.19/**
 
@@ -80,7 +83,7 @@ jobs:
           key: Linux-default
       - uses: risc0/foundry-toolchain@2fe7e70b520f62368a0e3c464f997df07ede420f
         with:
-          version: nightly-34f684ddfacc5b2ed371353ba6f730c485616ffe
+          version: nightly-09fe3e041369a816365a020f715ad6f94dbce9f2
       - uses: risc0/cargo-install@2cfb0024938d23011106cbf127b393bc83fddba1
         with:
           crate: cargo-binstall
@@ -114,7 +117,7 @@ jobs:
           key: Linux-default
       - uses: risc0/foundry-toolchain@2fe7e70b520f62368a0e3c464f997df07ede420f
         with:
-          version: nightly-34f684ddfacc5b2ed371353ba6f730c485616ffe
+          version: nightly-09fe3e041369a816365a020f715ad6f94dbce9f2
       - uses: risc0/cargo-install@2cfb0024938d23011106cbf127b393bc83fddba1
         with:
           crate: cargo-binstall
@@ -148,7 +151,7 @@ jobs:
           key: Linux-default
       - uses: risc0/foundry-toolchain@2fe7e70b520f62368a0e3c464f997df07ede420f
         with:
-          version: nightly-34f684ddfacc5b2ed371353ba6f730c485616ffe
+          version: nightly-09fe3e041369a816365a020f715ad6f94dbce9f2
       - uses: risc0/cargo-install@2cfb0024938d23011106cbf127b393bc83fddba1
         with:
           crate: cargo-binstall

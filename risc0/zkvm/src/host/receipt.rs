@@ -45,10 +45,10 @@ use crate::{
     Assumptions, ExitCode, MaybePruned, Output, ReceiptClaim,
 };
 
-/// A receipt attesting to the execution of a Session.
+/// A receipt attesting to the execution of a guest program.
 ///
 /// A Receipt is a zero-knowledge proof of computation. It attests that the
-/// [Receipt::journal] was produced by executing a [crate::Session] based on a
+/// [Receipt::journal] was produced by executing a guest program based on a
 /// specified memory image. This image is _not_ included in the receipt; the
 /// verifier must provide an [ImageID](https://dev.risczero.com/terminology),
 /// a cryptographic hash corresponding to the expected image.
@@ -58,6 +58,7 @@ use crate::{
 /// from running specific code. Conversely, a verifier can inspect a receipt to
 /// confirm that its results must have been generated from the expected code,
 /// even when this code was run by an untrusted source.
+///
 /// # Example
 ///
 /// To create a [Receipt] attesting to the faithful execution of your code, run
@@ -81,6 +82,7 @@ use crate::{
 /// have been executed as a parameter. (See
 /// [risc0_build](https://docs.rs/risc0-build/latest/risc0_build/) for more
 /// information about how ImageIDs are generated.)
+///
 /// ```rust
 /// use risc0_zkvm::Receipt;
 /// # #[cfg(feature = "prove")]
@@ -97,10 +99,8 @@ use crate::{
 /// ```
 ///
 /// The public outputs of the [Receipt] are contained in the
-/// [Receipt::journal]. We provide serialization tools in the zkVM
-/// [serde](crate::serde) module, which can be used to read data from the
-/// journal as the same type it was written to the journal. If you prefer, you
-/// can also directly access the [Receipt::journal] as a `Vec<u8>`.
+/// [Receipt::journal]. You can use [Journal::decode] to deserialize the journal as typed and
+/// structured data, or access the [Journal::bytes] directly.
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[cfg_attr(test, derive(PartialEq))]
 pub struct Receipt {
@@ -252,7 +252,7 @@ impl Journal {
         Self { bytes }
     }
 
-    /// Decode the journal bytes by using the risc0 deserializer.
+    /// Decode the journal bytes by using the [risc0 deserializer](crate::serde).
     pub fn decode<T: DeserializeOwned>(&self) -> Result<T, Error> {
         from_slice(&self.bytes)
     }
@@ -469,7 +469,7 @@ impl CompositeReceipt {
             }
         }
 
-        // Verify all corroborating receipts attached to this composite receipt.
+        // Verify all assumption receipts attached to this composite receipt.
         for receipt in self.assumptions.iter() {
             tracing::debug!("verifying assumption: {:?}", receipt.get_claim()?.digest());
             receipt.verify_integrity_with_context(ctx)?;
@@ -592,7 +592,7 @@ impl CompositeReceipt {
 
 /// A receipt attesting to the execution of a Segment.
 ///
-/// A SegmentReceipt attests that a [crate::Segment] was executed in a manner
+/// A SegmentReceipt attests that a Segment was executed in a manner
 /// consistent with the [ReceiptClaim] included in the receipt.
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[cfg_attr(test, derive(PartialEq))]
@@ -631,7 +631,9 @@ impl SegmentReceipt {
                 .chain(BLAKE2B_CONTROL_ID)
                 .find(|x| Digest::from_hex(x).unwrap() == *control_id)
                 .map(|_| ())
-                .ok_or(VerificationError::ControlVerificationError)
+                .ok_or(VerificationError::ControlVerificationError {
+                    control_id: *control_id,
+                })
         };
         let suite = ctx
             .suites
@@ -659,11 +661,15 @@ impl SegmentReceipt {
     }
 }
 
-/// An assumption attached with a guest execution as a result of calling
+/// An assumption attached to a guest execution as a result of calling
 /// `env::verify` or `env::verify_integrity`.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum Assumption {
     /// A [Receipt] for a proven assumption.
+    ///
+    /// Upon proving, this receipt will be used as proof of the assumption that results from a call
+    /// to `env::verify`, and the resulting receipt will be unconditional. As a result,
+    /// [Receipt::verify] will return true and the verifier will accept the receipt.
     Proven(Receipt),
 
     /// [ReceiptClaim] digest for an assumption that is not directly proven

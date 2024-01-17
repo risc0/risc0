@@ -20,11 +20,11 @@ RISC Zero provides a "sampling" [^1] CPU profiler for guest execution.
 
 ### Step 1: Prerequisites
 
-First, follow the [installation guide] if you don't already have the RISC Zero tools installed.
+First, follow the [examples guide] to install dependencies and check out the correct version of the example.
 
 Additionally, you will need to [install Go], which bundles with it the [pprof] tool.
 
-[installation guide]: https://dev.risczero.com/api/zkvm/quickstart
+[examples guide]: https://dev.risczero.com/api/zkvm/examples/#running-the-examples
 
 ### Step 2: Running
 

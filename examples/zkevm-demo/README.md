@@ -13,9 +13,9 @@ Currently, this demo accepts an Ethereum transaction hash and replays the transa
 
 ## Dependencies
 
-Follow the [installation guide] if you don't already have the RISC Zero tools installed.
+Follow the [examples guide] to install dependencies and check out the correct version of the example.
 
-[installation guide]: https://dev.risczero.com/api/zkvm/quickstart
+[examples guide]: https://dev.risczero.com/api/zkvm/examples/#running-the-examples
 
 ## Building
 
