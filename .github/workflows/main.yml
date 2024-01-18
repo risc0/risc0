@@ -127,6 +127,12 @@ jobs:
       - run: cargo sort --workspace --check bonsai/examples/governance
       - run: cargo sort --workspace --check examples
       - run: cargo sort --workspace --check tools/crates-validator
+      - uses: risc0/clippy-action@main
+        with:
+          reporter: 'github-pr-check'
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          filter_mode: nofilter
+          fail_on_error: true
       - uses: actions/setup-python@v4
         with:
           python-version: "3.10"
@@ -336,12 +342,6 @@ jobs:
       - uses: ./.github/actions/sccache
         with:
           key: macOS-default
-      - uses: risc0/clippy-action@main
-        with:
-          reporter: 'github-pr-check'
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          filter_mode: nofilter
-          fail_on_error: true
       - run: cargo test
         working-directory: tools/crates-validator
       - run: sccache --show-stats
