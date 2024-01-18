@@ -5923,7 +5923,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "xgboost"
+name = "xgboost-example"
 version = "0.1.0"
 dependencies = [
  "forust-ml",
