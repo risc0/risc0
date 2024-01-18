@@ -127,7 +127,7 @@ message IdentityP254Result {
 }
 
 message ExecutorEnv {
-  reserved 3;
+  reserved 3; // was: repeated string slice_ios
   Asset binary = 1;
   map<string, string> env_vars = 2;
   repeated uint32 read_fds = 4;
