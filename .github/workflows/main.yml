@@ -107,6 +107,12 @@ jobs:
           # Full history is required by license-check.py
           fetch-depth: 0
       - uses: ./.github/actions/rustup
+      - uses: risc0/clippy-action@main
+        with:
+          reporter: 'github-pr-check'
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          filter_mode: nofilter
+          fail_on_error: true
       - name: Install cargo-sort
         uses: risc0/cargo-install@2cfb0024938d23011106cbf127b393bc83fddba1
         with:
@@ -127,12 +133,6 @@ jobs:
       - run: cargo sort --workspace --check bonsai/examples/governance
       - run: cargo sort --workspace --check examples
       - run: cargo sort --workspace --check tools/crates-validator
-      - uses: risc0/clippy-action@main
-        with:
-          reporter: 'github-pr-check'
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          filter_mode: nofilter
-          fail_on_error: true
       - uses: actions/setup-python@v4
         with:
           python-version: "3.10"
