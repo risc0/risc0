@@ -21,6 +21,8 @@ import {console2} from "forge-std/console2.sol";
 
 import {
     IRiscZeroVerifier,
+    Output,
+    OutputLib,
     Receipt as RiscZeroReceipt,
     ReceiptClaim,
     ReceiptClaimLib,
@@ -31,17 +33,24 @@ import {ControlID, RiscZeroGroth16Verifier} from "../contracts/groth16/RiscZeroG
 import {TestReceipt} from "./TestReceipt.sol";
 
 contract RiscZeroGroth16VerifierTest is Test {
+    using OutputLib for Output;
     using ReceiptClaimLib for ReceiptClaim;
 
-    RiscZeroReceipt internal TEST_RECEIPT;
+    RiscZeroReceipt internal TEST_RECEIPT = RiscZeroReceipt(
+        TestReceipt.SEAL,
+        ReceiptClaim(
+            TestReceipt.IMAGE_ID,
+            TestReceipt.POST_DIGEST,
+            ExitCode(SystemExitCode.Halted, 0),
+            bytes32(0x0000000000000000000000000000000000000000000000000000000000000000),
+            Output(sha256(TestReceipt.JOURNAL), bytes32(0)).digest()
+        )
+    );
+
     IRiscZeroVerifier internal verifier;
 
     function setUp() external {
-        TEST_RECEIPT = TestReceipt.getReceipt();
-        verifier = new RiscZeroGroth16Verifier(
-            ControlID.CONTROL_ID_0,
-            ControlID.CONTROL_ID_1
-        );
+        verifier = new RiscZeroGroth16Verifier(ControlID.CONTROL_ID_0, ControlID.CONTROL_ID_1);
     }
 
     function testVerifyKnownGoodReceipt() external view {
