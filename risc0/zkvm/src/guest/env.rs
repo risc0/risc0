@@ -152,7 +152,7 @@ pub fn verify(image_id: impl Into<Digest>, journal: &[impl Pod]) -> Result<(), V
 
     // Require that the exit code is either Halted(0) or Paused(0).
     let exit_code = ExitCode::from_pair(sys_exit_code, 0)?;
-    let (ExitCode::Halted(0) | ExitCode::Paused(0)) = exit_code else {
+    if !exit_code.is_ok() {
         return Err(VerifyError::BadExitCodeResponse(InvalidExitCodeError(
             sys_exit_code,
             0,

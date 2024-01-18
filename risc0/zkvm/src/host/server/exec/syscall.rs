@@ -36,7 +36,7 @@ use crate::{
         posix_io::PosixIo,
     },
     sha::{Digest, Digestible},
-    Assumption, ExitCode, MaybePruned, PrunedValueError, ReceiptClaim,
+    Assumption, MaybePruned, PrunedValueError, ReceiptClaim,
 };
 
 /// A host-side implementation of a system call.
@@ -325,7 +325,7 @@ impl SysVerify {
         }
 
         // Check that the exit code is either Halted(0) or Paused(0).
-        let (ExitCode::Halted(0) | ExitCode::Paused(0)) = claim.as_value()?.exit_code else {
+        if !claim.as_value()?.exit_code.is_ok() {
             tracing::debug!("sys_verify: ignoring matching claim with error exit code: {claim:?}");
             return Ok(None);
         };
