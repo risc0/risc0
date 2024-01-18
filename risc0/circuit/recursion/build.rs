@@ -58,9 +58,9 @@ fn download_zkr() {
         let data = std::fs::read(&out_path).unwrap();
         if sha2::Sha256::digest(data).to_vec() == decode_hex(SHA256_HASH).unwrap() {
             return;
+        } else {
+            std::fs::remove_file(&out_path).unwrap();
         }
-    } else {
-        std::fs::remove_file(out_path).unwrap();
     }
 
     if std::fs::metadata(&src_path).is_ok() {
