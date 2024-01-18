@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use sha2::Digest;
 use std::env;
 
 fn main() {
@@ -52,31 +53,34 @@ fn download_zkr() {
     let out_dir = env::var("OUT_DIR").unwrap();
     let out_dir = Path::new(&out_dir);
     if std::fs::metadata(&src_path).is_ok() {
-        let tgt_path = out_dir.join(FILENAME);
-        std::fs::copy(&src_path, &tgt_path).unwrap();
-    } else {
-        fn decode_hex(s: &str) -> Result<Vec<u8>, ParseIntError> {
-            (0..s.len())
-                .step_by(2)
-                .map(|i| u8::from_str_radix(&s[i..i + 2], 16))
-                .collect()
+        let data = std::fs::read(&src_path).unwrap();
+        if sha2::Sha256::digest(data).to_vec() == decode_hex(SHA256_HASH).unwrap() {
+            let tgt_path = out_dir.join(FILENAME);
+            std::fs::copy(&src_path, &tgt_path).unwrap();
+            return;
         }
-        let mut downloader = Downloader::builder()
-            .download_folder(out_dir)
-            .build()
-            .unwrap();
-        let url =
-            format!("https://risc0-artifacts.s3.us-west-2.amazonaws.com/zkr/{SHA256_HASH}.zip");
-        eprintln!("Downloading {url}");
-        let dl = Download::new(&url)
-            .file_name(&PathBuf::from_str(FILENAME).unwrap())
-            .verify(verify::with_digest::<sha2::Sha256>(
-                decode_hex(SHA256_HASH).unwrap(),
-            ));
-        let results = downloader.download(&[dl]).unwrap();
-        for result in results {
-            let summary: DownloadSummary = result.unwrap();
-            eprintln!("{summary}");
-        }
+    }
+
+    fn decode_hex(s: &str) -> Result<Vec<u8>, ParseIntError> {
+        (0..s.len())
+            .step_by(2)
+            .map(|i| u8::from_str_radix(&s[i..i + 2], 16))
+            .collect()
+    }
+    let mut downloader = Downloader::builder()
+        .download_folder(out_dir)
+        .build()
+        .unwrap();
+    let url = format!("https://risc0-artifacts.s3.us-west-2.amazonaws.com/zkr/{SHA256_HASH}.zip");
+    eprintln!("Downloading {url}");
+    let dl = Download::new(&url)
+        .file_name(&PathBuf::from_str(FILENAME).unwrap())
+        .verify(verify::with_digest::<sha2::Sha256>(
+            decode_hex(SHA256_HASH).unwrap(),
+        ));
+    let results = downloader.download(&[dl]).unwrap();
+    for result in results {
+        let summary: DownloadSummary = result.unwrap();
+        eprintln!("{summary}");
     }
 }
