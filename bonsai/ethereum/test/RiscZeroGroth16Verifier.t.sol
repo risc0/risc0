@@ -19,7 +19,14 @@ pragma solidity ^0.8.13;
 import {Test} from "forge-std/Test.sol";
 import {console2} from "forge-std/console2.sol";
 
-import {IRiscZeroVerifier, Receipt as RiscZeroReceipt, ReceiptClaim, ReceiptClaimLib, ExitCode, SystemExitCode} from "../contracts/IRiscZeroVerifier.sol";
+import {
+    IRiscZeroVerifier,
+    Receipt as RiscZeroReceipt,
+    ReceiptClaim,
+    ReceiptClaimLib,
+    ExitCode,
+    SystemExitCode
+} from "../contracts/IRiscZeroVerifier.sol";
 import {ControlID, RiscZeroGroth16Verifier} from "../contracts/groth16/RiscZeroGroth16Verifier.sol";
 import {TestReceipt} from "./TestReceipt.sol";
 
@@ -44,10 +51,7 @@ contract RiscZeroGroth16VerifierTest is Test {
     function testVerifyKnownGoodImageIdAndJournal() external view {
         require(
             verifier.verify(
-                TEST_RECEIPT.seal,
-                TestReceipt.IMAGE_ID,
-                TEST_RECEIPT.claim.postStateDigest,
-                sha256(TestReceipt.JOURNAL)
+                TEST_RECEIPT.seal, TestReceipt.IMAGE_ID, TEST_RECEIPT.claim.postStateDigest, sha256(TestReceipt.JOURNAL)
             ),
             "verification failed"
         );
@@ -58,45 +62,27 @@ contract RiscZeroGroth16VerifierTest is Test {
         RiscZeroReceipt memory mangled = TEST_RECEIPT;
 
         mangled.seal[0] ^= bytes1(uint8(1));
-        require(
-            !verifier.verify_integrity(mangled),
-            "verification passed on mangled seal value"
-        );
+        require(!verifier.verify_integrity(mangled), "verification passed on mangled seal value");
         mangled = TEST_RECEIPT;
 
         mangled.claim.preStateDigest ^= bytes32(uint256(1));
-        require(
-            !verifier.verify_integrity(mangled),
-            "verification passed on mangled preStateDigest value"
-        );
+        require(!verifier.verify_integrity(mangled), "verification passed on mangled preStateDigest value");
         mangled = TEST_RECEIPT;
 
         mangled.claim.postStateDigest ^= bytes32(uint256(1));
-        require(
-            !verifier.verify_integrity(mangled),
-            "verification passed on mangled postStateDigest value"
-        );
+        require(!verifier.verify_integrity(mangled), "verification passed on mangled postStateDigest value");
         mangled = TEST_RECEIPT;
 
         mangled.claim.exitCode = ExitCode(SystemExitCode.SystemSplit, 0);
-        require(
-            !verifier.verify_integrity(mangled),
-            "verification passed on mangled exitCode value"
-        );
+        require(!verifier.verify_integrity(mangled), "verification passed on mangled exitCode value");
         mangled = TEST_RECEIPT;
 
         mangled.claim.input ^= bytes32(uint256(1));
-        require(
-            !verifier.verify_integrity(mangled),
-            "verification passed on mangled input value"
-        );
+        require(!verifier.verify_integrity(mangled), "verification passed on mangled input value");
         mangled = TEST_RECEIPT;
 
         mangled.claim.output ^= bytes32(uint256(1));
-        require(
-            !verifier.verify_integrity(mangled),
-            "verification passed on mangled input value"
-        );
+        require(!verifier.verify_integrity(mangled), "verification passed on mangled input value");
         mangled = TEST_RECEIPT;
 
         // Just a quick sanity check
