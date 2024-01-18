@@ -167,7 +167,7 @@ fn bootstrap_test_receipt() {
     let image_id = format!("bytes32 public constant IMAGE_ID = bytes32({image_id});");
 
     let content =
-        &format!("{SOL_HEADER}{LIB_HEADER}\n{seal};\n{post_digest};\n{journal};\n{image_id};\n}}");
+        &format!("{SOL_HEADER}{LIB_HEADER}\n{seal}\n{post_digest}\n{journal}\n{image_id}\n}}");
     fs::write(SOLIDITY_TEST_RECEIPT_PATH, content).expect(&format!(
         "failed to save changes to {}",
         SOLIDITY_TEST_RECEIPT_PATH
@@ -181,11 +181,11 @@ fn bootstrap_test_receipt() {
         .expect("failed to format {SOLIDITY_TEST_RECEIPT_PATH}");
 }
 
-// Splits the digest in half returning the halves as big endiand
+// Splits the digest in half returning the two halves as big endian
 fn split_digest(d: Digest) -> (String, String) {
     let big_endian: Vec<u8> = d.as_bytes().to_vec().iter().rev().cloned().collect();
     let middle = big_endian.len() / 2;
-    let (control_id_0, control_id_1) = big_endian.split_at(middle);
+    let (control_id_1, control_id_0) = big_endian.split_at(middle);
     (
         format!("0x{}", hex::encode(control_id_0)),
         format!("0x{}", hex::encode(control_id_1)),

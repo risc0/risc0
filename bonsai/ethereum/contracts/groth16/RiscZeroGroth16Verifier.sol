@@ -19,6 +19,7 @@ pragma solidity ^0.8.9;
 
 import {SafeCast} from "openzeppelin/contracts/utils/math/SafeCast.sol";
 
+import {ControlID} from "./ControlID.sol";
 import {Groth16Verifier} from "./Groth16Verifier.sol";
 import {
     IRiscZeroVerifier,
@@ -77,14 +78,6 @@ struct Seal {
     uint256[2] a;
     uint256[2][2] b;
     uint256[2] c;
-}
-
-/// Control ID hash for the identity_p254 predicate decomposed as implemented by splitDigest.
-/// New releases of RISC Zero's zkvm may require updating these values. These values can be
-/// obtained by running `cargo run --bin bonsai-ethereum-contracts -F control-id`
-library ControlID {
-    uint256 public constant CONTROL_ID_0 = 0x447d7e12291364db4bc5421164880129;
-    uint256 public constant CONTROL_ID_1 = 0x12c49ad247d28a32147e13615c6c81f9;
 }
 
 contract RiscZeroGroth16Verifier is IRiscZeroVerifier, Groth16Verifier {

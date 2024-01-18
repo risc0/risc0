@@ -168,14 +168,16 @@ jobs:
             --exclude doc-test \
             --exclude bonsai-ethereum-contracts \
             --exclude bonsai-ethereum-relay \
-            --exclude bonsai-rest-api-mock
+            --exclude bonsai-rest-api-mock \
+            --exclude risc0-seal-to-json
       - name: test workspace
         run: |
           cargo test -F $FEATURE -F fault-proof -F prove --workspace --timings \
             --exclude doc-test \
             --exclude bonsai-ethereum-contracts \
             --exclude bonsai-ethereum-relay \
-            --exclude bonsai-rest-api-mock
+            --exclude bonsai-rest-api-mock \
+            --exclude risc0-seal-to-json
       - uses: actions/upload-artifact@v3
         with:
           name: cargo-timings-${{ matrix.os }}-${{ matrix.device }}
@@ -192,7 +194,8 @@ jobs:
             --exclude doc-test \
             --exclude bonsai-ethereum-contracts \
             --exclude bonsai-ethereum-relay \
-            --exclude bonsai-rest-api-mock
+            --exclude bonsai-rest-api-mock \
+            --exclude risc0-seal-to-json
       - run: cargo check -p risc0-build
         if: matrix.device == 'cpu'
       - run: cargo check -p risc0-circuit-rv32im -F $FEATURE
