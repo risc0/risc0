@@ -2,9 +2,7 @@
 name = "risc0-seal-to-json"
 description = "RISC Zero seal to json"
 version = "0.1.0"
-edition = "2021"
-
-[workspace]
+edition = { workspace = true }
 
 [dependencies]
 anyhow = "1.0"
@@ -26,3 +24,6 @@ tracing = "0.1"
 [features]
 cuda = ["risc0-zkvm/cuda", "risc0-zkp/cuda"]
 metal = ["risc0-zkvm/metal", "risc0-zkp/metal"]
+
+[package.metadata.release]
+release = false
