@@ -105,18 +105,12 @@ async fn e2e_test_counter() {
             .expect("deployment should succeed")
             .address(),
         false => {
-            let verifier = RiscZeroGroth16Verifier::deploy(
-                ethers_client.clone(),
-                (
-                    U256::from("0x447d7e12291364db4bc5421164880129"),
-                    U256::from("0x12c49ad247d28a32147e13615c6c81f9"),
-                ),
-            )
-            .expect("should be able to deploy the BonsaiRelay contract")
-            .send()
-            .await
-            .expect("deployment should succeed")
-            .address();
+            let verifier = RiscZeroGroth16Verifier::deploy(ethers_client.clone(), ())
+                .expect("should be able to deploy the BonsaiRelay contract")
+                .send()
+                .await
+                .expect("deployment should succeed")
+                .address();
 
             BonsaiRelay::deploy(ethers_client.clone(), verifier)
                 .expect("should be able to deploy the BonsaiRelay contract")
@@ -250,18 +244,12 @@ async fn e2e_test_counter_publish_mode() {
             .expect("deployment should succeed")
             .address(),
         false => {
-            let verifier = RiscZeroGroth16Verifier::deploy(
-                ethers_client.clone(),
-                (
-                    U256::from("0x447d7e12291364db4bc5421164880129"),
-                    U256::from("0x12c49ad247d28a32147e13615c6c81f9"),
-                ),
-            )
-            .expect("should be able to deploy the BonsaiRelay contract")
-            .send()
-            .await
-            .expect("deployment should succeed")
-            .address();
+            let verifier = RiscZeroGroth16Verifier::deploy(ethers_client.clone(), ())
+                .expect("should be able to deploy the BonsaiRelay contract")
+                .send()
+                .await
+                .expect("deployment should succeed")
+                .address();
 
             BonsaiRelay::deploy(ethers_client.clone(), verifier)
                 .expect("should be able to deploy the BonsaiRelay contract")
