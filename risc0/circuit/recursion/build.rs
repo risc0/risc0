@@ -52,11 +52,21 @@ fn download_zkr() {
     let src_path = PathBuf::from_str(src_path.as_str()).unwrap();
     let out_dir = env::var("OUT_DIR").unwrap();
     let out_dir = Path::new(&out_dir);
+    let out_path = out_dir.join(FILENAME);
+
+    if std::fs::metadata(&out_path).is_ok() {
+        let data = std::fs::read(&out_path).unwrap();
+        if sha2::Sha256::digest(data).to_vec() == decode_hex(SHA256_HASH).unwrap() {
+            return;
+        }
+    } else {
+        std::fs::remove_file(out_path).unwrap();
+    }
+
     if std::fs::metadata(&src_path).is_ok() {
         let data = std::fs::read(&src_path).unwrap();
         if sha2::Sha256::digest(data).to_vec() == decode_hex(SHA256_HASH).unwrap() {
-            let tgt_path = out_dir.join(FILENAME);
-            std::fs::copy(&src_path, &tgt_path).unwrap();
+            std::fs::copy(&src_path, &out_path).unwrap();
             return;
         }
     }
