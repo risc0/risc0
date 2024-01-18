@@ -24,6 +24,7 @@ use risc0_zkvm_methods::{
     bench::{BenchmarkSpec, SpecWithIters},
     BENCH_ELF,
 };
+use risc0_zkvm_platform::WORD_SIZE;
 use tracing_subscriber::{prelude::*, EnvFilter};
 
 #[derive(serde::Serialize, Debug)]
@@ -77,13 +78,7 @@ fn main() {
         let duration = start.elapsed();
         let (cycles, _) = session.get_cycles().unwrap();
 
-        let seal = receipt
-            .inner
-            .composite()
-            .unwrap()
-            .segments
-            .iter()
-            .fold(0, |acc, segment| acc + segment.get_seal_bytes().len());
+        let seal = receipt.inner.succinct().unwrap().seal.len() * WORD_SIZE;
 
         let usage = prover.get_peak_memory_usage();
         let throughput = (cycles as f64) / duration.as_secs_f64();
