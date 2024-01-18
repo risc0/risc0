@@ -204,12 +204,6 @@ jobs:
       - run: cargo check -p risc0-zkvm -F $FEATURE
       - run: cargo check
         working-directory: external/substrate
-      - uses: risc0/clippy-action@main
-        with:
-          reporter: "github-pr-check"
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          filter_mode: nofilter
-          fail_on_error: true
       - run: sccache --show-stats
 
   examples:
