@@ -126,15 +126,13 @@ contract RiscZeroGroth16Verifier is IRiscZeroVerifier, Groth16Verifier {
         returns (bool)
     {
         Receipt memory receipt = Receipt(
-            seal, ReceiptClaim(
+            seal,
+            ReceiptClaim(
                 imageId,
                 postStateDigest,
                 ExitCode(SystemExitCode.Halted, 0),
                 bytes32(0),
-                Output(
-                    journalDigest,
-                    bytes32(0)
-                ).digest()
+                Output(journalDigest, bytes32(0)).digest()
             )
         );
         return verify_integrity(receipt);

@@ -91,7 +91,6 @@ enum SystemExitCode {
 struct Output {
     /// @notice Digest of the journal committed to by the guest execution.
     bytes32 journalDigest;
-
     /// @notice Digest of the ordered list of `ReceiptClaim` digests corresponding to the
     /// calls to `env::verify` and `env::verify_integrity`.
     /// @dev Verifying the integrity of a `Receipt` corresponding to a `ReceiptClaim` with a
