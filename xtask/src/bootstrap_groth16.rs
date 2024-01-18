@@ -33,6 +33,7 @@ use risc0_zkvm::{
 };
 use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID};
 use tempfile::tempdir;
+use tracing_subscriber::fmt::format;
 
 #[derive(Parser)]
 pub struct BootstrapGroth16;
@@ -61,7 +62,7 @@ const SOL_HEADER: &str = r#"// Copyright 2024 RISC Zero, Inc.
 const SOLIDITY_GROTH16_VERIFIER_PATH: &str =
     "bonsai/ethereum/contracts/groth16/Groth16Verifier.sol";
 const SOLIDITY_CONTROL_ID_PATH: &str = "bonsai/ethereum/contracts/groth16/ControlID.sol";
-// const SOLIDITY_TEST_RECEIPT_PATH: &str = "bonsai/ethereum/contracts/test/TestReceipt.sol";
+const SOLIDITY_TEST_RECEIPT_PATH: &str = "bonsai/ethereum/contracts/test/TestReceipt.sol";
 const RUST_GROTH16_VERIFIER_PATH: &str = "risc0/zkvm/src/host/groth16.rs";
 
 impl BootstrapGroth16 {
@@ -131,9 +132,9 @@ fn bootstrap_control_id() {
  library ControlID {
 "#;
     let (control_id_0, control_id_1) = split_digest(Digest::from_hex(ALLOWED_IDS_ROOT).unwrap());
-    let content = &format!(
-        "{SOL_HEADER}{LIB_HEADER}uint256 public constant CONTROL_ID_0 = {control_id_0}\npublic constant CONTROL_ID_1 = {control_id_1}\n}}"
-    );
+    let control_id_0 = format!("uint256 public constant CONTROL_ID_0 = {control_id_0};");
+    let control_id_1 = format!("uint256 public constant CONTROL_ID_1 = {control_id_1};");
+    let content = &format!("{SOL_HEADER}{LIB_HEADER}\n{control_id_0}\n{control_id_1}\n}}");
     fs::write(SOLIDITY_CONTROL_ID_PATH, content).expect(&format!(
         "failed to save changes to {}",
         SOLIDITY_CONTROL_ID_PATH
@@ -148,6 +149,10 @@ fn bootstrap_control_id() {
 }
 
 fn bootstrap_test_receipt() {
+    const LIB_HEADER: &str = r#"pragma solidity ^0.8.13;
+
+ library TestReceipt {
+"#;
     let (receipt, image_id) = generate_receipt();
     let seal = hex::encode(receipt.inner.groth16().unwrap().seal.clone());
     let post_digest = format!(
@@ -156,7 +161,25 @@ fn bootstrap_test_receipt() {
     );
     let image_id = format!("0x{}", hex::encode(image_id.as_bytes()));
     let journal = hex::encode(receipt.journal.bytes);
-    println!("{seal} {post_digest} {image_id} {journal}");
+
+    let seal = format!("bytes public constant SEAL = hex\"{seal}\";");
+    let post_digest = format!("bytes32 public constant POST_DIGEST = bytes32({seal});");
+    let journal = format!("bytes public constant JOURNAL = hex\"{journal}\";");
+    let image_id = format!("bytes32 public constant IMAGE_ID = bytes32({image_id});");
+
+    let content =
+        &format!("{SOL_HEADER}{LIB_HEADER}\n{seal};\n{post_digest};\n{journal};\n{image_id};\n}}");
+    fs::write(SOLIDITY_TEST_RECEIPT_PATH, content).expect(&format!(
+        "failed to save changes to {}",
+        SOLIDITY_TEST_RECEIPT_PATH
+    ));
+
+    // Use forge fmt to format the file.
+    Command::new("forge")
+        .arg("fmt")
+        .arg(SOLIDITY_TEST_RECEIPT_PATH)
+        .status()
+        .expect("failed to format {SOLIDITY_TEST_RECEIPT_PATH}");
 }
 
 // Splits the digest in half returning the halves as big endiand
