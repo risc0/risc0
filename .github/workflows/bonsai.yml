@@ -51,6 +51,7 @@ jobs:
       - name: checkout code
         uses: actions/checkout@v4
         with:
+          lfs: true
           submodules: recursive
 
       # Install dependencies.
