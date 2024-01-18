@@ -16,7 +16,7 @@ risc0-zkvm-methods = { path = "../risc0/zkvm/methods" }
 tempfile = "3.3"
 tracing = { version = "0.1", default-features = false }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
-which = "5.0"
+which = "6.0"
 xshell = "0.2"
 
 [package.metadata.release]
