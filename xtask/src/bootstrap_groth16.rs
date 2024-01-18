@@ -61,7 +61,7 @@ const SOL_HEADER: &str = r#"// Copyright 2024 RISC Zero, Inc.
 const SOLIDITY_GROTH16_VERIFIER_PATH: &str =
     "bonsai/ethereum/contracts/groth16/Groth16Verifier.sol";
 const SOLIDITY_CONTROL_ID_PATH: &str = "bonsai/ethereum/contracts/groth16/ControlID.sol";
-const SOLIDITY_TEST_RECEIPT_PATH: &str = "bonsai/ethereum/contracts/test/TestReceipt.sol";
+const SOLIDITY_TEST_RECEIPT_PATH: &str = "bonsai/ethereum/test/TestReceipt.sol";
 const RUST_GROTH16_VERIFIER_PATH: &str = "risc0/zkvm/src/host/groth16.rs";
 
 impl BootstrapGroth16 {
