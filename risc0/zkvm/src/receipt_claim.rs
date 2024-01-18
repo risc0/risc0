@@ -176,13 +176,6 @@ pub enum ExitCode {
     /// reached.
     SystemSplit,
 
-    /// This indicates termination of a program where the next instruction will
-    /// fail due to a machine fault (e.g. out of bounds memory read).
-    ///
-    /// NOTE: The current version of the RISC Zero zkVM will never exit with an exit code of Fault.
-    /// This is because the system cannot currently prove that a fault has occured.
-    Fault,
-
     /// This indicates that the guest exited upon reaching the session limit set by the host.
     ///
     /// NOTE: The current version of the RISC Zero zkVM will never exit with an exit code of SessionLimit.
@@ -196,7 +189,6 @@ impl ExitCode {
             ExitCode::Halted(user_exit) => (0, user_exit),
             ExitCode::Paused(user_exit) => (1, user_exit),
             ExitCode::SystemSplit => (2, 0),
-            ExitCode::Fault => (2, 1),
             ExitCode::SessionLimit => (2, 2),
         }
     }
@@ -217,7 +209,7 @@ impl ExitCode {
     pub(crate) fn expects_output(&self) -> bool {
         match self {
             ExitCode::Halted(_) | ExitCode::Paused(_) => true,
-            ExitCode::SystemSplit | ExitCode::SessionLimit | ExitCode::Fault => false,
+            ExitCode::SystemSplit | ExitCode::SessionLimit => false,
         }
     }
 }
