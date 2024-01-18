@@ -26,10 +26,7 @@ use serde::{Deserialize, Serialize};
 use super::{malformed_err, path_to_string, pb, ConnectionWrapper, Connector, TcpConnector};
 use crate::{
     get_prover_server, get_version,
-    host::{
-        client::{env::TraceCallback, slice_io::SliceIo},
-        recursion::SuccinctReceipt,
-    },
+    host::{client::env::TraceCallback, recursion::SuccinctReceipt},
     receipt_claim::{MaybePruned, ReceiptClaim},
     ExecutorEnv, ExecutorImpl, ProverOpts, Receipt, Segment, SegmentReceipt, SegmentRef,
     TraceEvent, VerifierContext,
@@ -125,48 +122,6 @@ impl Write for PosixIoProxy {
 
     fn flush(&mut self) -> std::io::Result<()> {
         Ok(())
-    }
-}
-
-struct SliceIoProxy {
-    conn: ConnectionWrapper,
-}
-
-impl SliceIoProxy {
-    fn new(conn: ConnectionWrapper) -> Self {
-        Self { conn }
-    }
-
-    fn try_clone(&self) -> Result<Self> {
-        Ok(SliceIoProxy {
-            conn: self.conn.try_clone()?,
-        })
-    }
-}
-
-impl SliceIo for SliceIoProxy {
-    fn handle_io(&mut self, syscall: &str, from_guest: Bytes) -> Result<Bytes> {
-        let request = pb::api::ServerReply {
-            kind: Some(pb::api::server_reply::Kind::Ok(pb::api::ClientCallback {
-                kind: Some(pb::api::client_callback::Kind::Io(pb::api::OnIoRequest {
-                    kind: Some(pb::api::on_io_request::Kind::Slice(pb::api::SliceIo {
-                        name: syscall.to_string(),
-                        from_guest: from_guest.into(),
-                    })),
-                })),
-            })),
-        };
-        tracing::trace!("tx: {request:?}");
-        self.conn.send(request)?;
-
-        let reply: pb::api::OnIoReply = self.conn.recv().map_io_err()?;
-        tracing::trace!("rx: {reply:?}");
-
-        let kind = reply.kind.ok_or("Malformed message").map_io_err()?;
-        match kind {
-            pb::api::on_io_reply::Kind::Ok(buf) => Ok(buf.into()),
-            pb::api::on_io_reply::Kind::Error(err) => Err(err.into()),
-        }
     }
 }
 
@@ -607,10 +562,6 @@ fn build_env<'a>(
     for fd in request.write_fds.iter() {
         let proxy = PosixIoProxy::new(*fd, conn.try_clone()?);
         env_builder.write_fd(*fd, proxy);
-    }
-    let proxy = SliceIoProxy::new(conn.try_clone()?);
-    for name in request.slice_ios.iter() {
-        env_builder.slice_io(&name, proxy.try_clone()?);
     }
     if let Some(segment_limit_po2) = request.segment_limit_po2 {
         env_builder.segment_limit_po2(segment_limit_po2);

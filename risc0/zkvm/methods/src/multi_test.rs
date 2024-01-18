@@ -44,9 +44,6 @@ pub enum MultiTestSpec {
         /// output it; nonzero means write that value.
         values: Vec<(u32, u32)>,
     },
-    Syscall {
-        count: u32,
-    },
     DoRandom,
     SysRead {
         // Buffer to read to

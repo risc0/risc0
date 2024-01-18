@@ -16,15 +16,13 @@ use std::{
     collections::{BTreeMap, HashSet},
     io::Cursor,
     str::from_utf8,
-    sync::Mutex,
 };
 
 use anyhow::Result;
-use bytes::Bytes;
 use risc0_binfmt::{MemoryImage, Program};
 use risc0_zkvm_methods::{
-    multi_test::{MultiTestSpec, SYS_MULTI_TEST},
-    HELLO_COMMIT_ELF, MULTI_TEST_ELF, RAND_ELF, SLICE_IO_ELF, STANDARD_LIB_ELF,
+    multi_test::MultiTestSpec, HELLO_COMMIT_ELF, MULTI_TEST_ELF, RAND_ELF, SLICE_IO_ELF,
+    STANDARD_LIB_ELF,
 };
 use risc0_zkvm_platform::{fileno, syscall::nr::SYS_RANDOM, PAGE_SIZE, WORD_SIZE};
 use sha2::{Digest as _, Sha256};
@@ -144,57 +142,6 @@ fn system_split() {
 #[test]
 fn libm_build() {
     run_test(MultiTestSpec::LibM);
-}
-
-#[test]
-fn host_syscall() {
-    let expected: Vec<Bytes> = vec![
-        "".into(),
-        "H".into(),
-        "He".into(),
-        "Hel".into(),
-        "Hell".into(),
-        "Hello".into(),
-    ];
-    let input = MultiTestSpec::Syscall {
-        count: expected.len() as u32 - 1,
-    };
-    let actual: Mutex<Vec<Bytes>> = Vec::new().into();
-    let env = ExecutorEnv::builder()
-        .write(&input)
-        .unwrap()
-        .io_callback(SYS_MULTI_TEST, |buf| {
-            let mut actual = actual.lock().unwrap();
-            actual.push(buf);
-            Ok(expected[actual.len()].clone())
-        })
-        .build()
-        .unwrap();
-    let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
-        .unwrap()
-        .run()
-        .unwrap();
-    assert_eq!(session.exit_code, ExitCode::Halted(0));
-    assert_eq!(*actual.lock().unwrap(), expected[..expected.len() - 1]);
-}
-
-// Make sure panics in the callback get propagated correctly.
-#[test]
-#[should_panic(expected = "I am panicking from here!")]
-fn host_syscall_callback_panic() {
-    let env = ExecutorEnv::builder()
-        .write(&MultiTestSpec::Syscall { count: 5 })
-        .unwrap()
-        .io_callback(SYS_MULTI_TEST, |_| {
-            panic!("I am panicking from here!");
-        })
-        .build()
-        .unwrap();
-    let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
-        .unwrap()
-        .run()
-        .unwrap();
-    assert_eq!(session.exit_code, ExitCode::Halted(0));
 }
 
 #[test]

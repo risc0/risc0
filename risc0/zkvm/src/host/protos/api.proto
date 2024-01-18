@@ -127,9 +127,9 @@ message IdentityP254Result {
 }
 
 message ExecutorEnv {
+  reserved 3;
   Asset binary = 1;
   map<string, string> env_vars = 2;
-  repeated string slice_ios = 3;
   repeated uint32 read_fds = 4;
   repeated uint32 write_fds = 5;
   optional uint32 segment_limit_po2 = 6;
@@ -201,16 +201,11 @@ message ClientCallback {
 }
 
 message OnIoRequest {
+  reserved 2;
   oneof kind {
     PosixIo posix = 1;
-    SliceIo slice = 2;
     TraceEvent trace = 3;
   }
-}
-
-message SliceIo {
-  string name = 1;
-  bytes from_guest = 2;
 }
 
 message PosixIo {

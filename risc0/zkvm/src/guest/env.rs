@@ -20,15 +20,14 @@ use bytemuck::Pod;
 use risc0_zkvm_platform::{
     fileno,
     syscall::{
-        self, sys_alloc_words, sys_cycle_count, sys_halt, sys_log, sys_pause, sys_read,
-        sys_read_words, sys_verify, sys_verify_integrity, sys_write, syscall_2, SyscallName,
+        self, sys_cycle_count, sys_halt, sys_log, sys_pause, sys_read, sys_read_words, sys_verify,
+        sys_verify_integrity, sys_write, syscall_2, SyscallName,
     },
     WORD_SIZE,
 };
 use serde::{de::DeserializeOwned, Serialize};
 
 use crate::{
-    align_up,
     serde::{Deserializer, Serializer, WordRead, WordWrite},
     sha::{
         rust_crypto::{Digest as _, Sha256},
@@ -291,21 +290,6 @@ impl fmt::Display for VerifyIntegrityError {
 
 #[cfg(feature = "std")]
 impl std::error::Error for VerifyIntegrityError {}
-
-/// Exchanges slices of plain old data with the host.
-///
-/// This makes two calls to the given syscall; the first gets the length of the
-/// buffer to allocate for the return data, and the second actually
-/// receives the return data.
-///
-/// On the host side, implement SliceIo to provide a handler for this call.
-pub fn send_recv_slice<T: Pod, U: Pod>(syscall_name: SyscallName, to_host: &[T]) -> &'static [U] {
-    let syscall::Return(nelem, _) = syscall(syscall_name, bytemuck::cast_slice(to_host), &mut []);
-    let nwords = align_up(core::mem::size_of::<T>() * nelem as usize, WORD_SIZE) / WORD_SIZE;
-    let from_host_buf = unsafe { core::slice::from_raw_parts_mut(sys_alloc_words(nwords), nwords) };
-    syscall(syscall_name, &[], from_host_buf);
-    &bytemuck::cast_slice(from_host_buf)[..nelem as usize]
-}
 
 /// Read private data from the host and deserializes it.
 pub fn read<T: DeserializeOwned>() -> T {

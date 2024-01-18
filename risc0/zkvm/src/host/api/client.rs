@@ -391,7 +391,6 @@ impl Client {
             binary: Some(binary),
             env_vars: env.env_vars.clone(),
             args: env.args.clone(),
-            slice_ios: env.slice_io.borrow().inner.keys().cloned().collect(),
             read_fds: env.posix_io.borrow().read_fds.keys().cloned().collect(),
             write_fds: env.posix_io.borrow().write_fds.keys().cloned().collect(),
             segment_limit_po2: env.segment_limit_po2,
@@ -548,9 +547,6 @@ impl Client {
                     }
                 }
             }
-            pb::api::on_io_request::Kind::Slice(slice_io) => {
-                self.on_slice(env, &slice_io.name, slice_io.from_guest.into())
-            }
             pb::api::on_io_request::Kind::Trace(event) => {
                 self.on_trace(env, event)?;
                 Ok(Bytes::new())
@@ -580,16 +576,6 @@ impl Client {
             .ok_or(anyhow!("Bad write file descriptor: {fd}"))?;
         writer.borrow_mut().write_all(&from_guest)?;
         Ok(())
-    }
-
-    fn on_slice(&self, env: &ExecutorEnv<'_>, name: &str, from_guest: Bytes) -> Result<Bytes> {
-        let table = env.slice_io.borrow();
-        let slice_io = table
-            .inner
-            .get(name)
-            .ok_or(anyhow!("Unknown I/O channel name: {name}"))?;
-        let result = slice_io.borrow_mut().handle_io(name, from_guest)?;
-        Ok(result)
     }
 
     fn on_trace(&self, env: &ExecutorEnv<'_>, event: pb::api::TraceEvent) -> Result<()> {

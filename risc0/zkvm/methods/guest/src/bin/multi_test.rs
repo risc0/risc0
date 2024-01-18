@@ -29,7 +29,7 @@ use risc0_zkvm::{
     sha::{Digest, Sha256},
     ReceiptClaim,
 };
-use risc0_zkvm_methods::multi_test::{MultiTestSpec, SYS_MULTI_TEST};
+use risc0_zkvm_methods::multi_test::MultiTestSpec;
 use risc0_zkvm_platform::{
     fileno,
     memory::{self, SYSTEM},
@@ -131,17 +131,6 @@ fn main() {
                 hash = sha::Impl::hash_bytes(hash).as_bytes();
             }
             env::commit(&Digest::try_from(hash).unwrap())
-        }
-        MultiTestSpec::Syscall { count } => {
-            let mut input: &[u8] = &[];
-            let mut input_len: usize = 0;
-
-            for _ in 0..count {
-                let host_data = env::send_recv_slice::<u8, u8>(SYS_MULTI_TEST, &input[..input_len]);
-
-                input = bytemuck::cast_slice(host_data);
-                input_len = input.len();
-            }
         }
         MultiTestSpec::DoRandom => {
             // Test random number generation in the zkvm
