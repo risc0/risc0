@@ -22,13 +22,13 @@ import {SafeCast} from "openzeppelin/contracts/utils/math/SafeCast.sol";
 import {ControlID} from "./ControlID.sol";
 import {Groth16Verifier} from "./Groth16Verifier.sol";
 import {
+    ExitCode,
     IRiscZeroVerifier,
     Output,
     OutputLib,
     Receipt,
     ReceiptClaim,
     ReceiptClaimLib,
-    ExitCode,
     SystemExitCode
 } from "../IRiscZeroVerifier.sol";
 
@@ -80,12 +80,19 @@ struct Seal {
     uint256[2] c;
 }
 
+/// @notice Groth16 verifier contract for RISC Zero receipts of execution.
 contract RiscZeroGroth16Verifier is IRiscZeroVerifier, Groth16Verifier {
     using ReceiptClaimLib for ReceiptClaim;
     using OutputLib for Output;
     using SafeCast for uint256;
 
-    // Control ID hash for the identity_p254 predicate decomposed as implemented by splitDigest.
+    /// @notice Control ID hash for the identity_p254 predicate decomposed by `splitDigest`.
+    /// @dev This value controls what set of recursion programs, and therefore what version of the
+    /// zkVM circuit, will be accepted by this contract. Each instance of this verifier contract
+    /// will accept a single release of the RISC Zero circuits.
+    ///
+    /// New releases of RISC Zero's zkVM require updating these values. These values can be
+    /// obtained by running `cargo xtask bootstrap-groth16`
     uint256 public immutable CONTROL_ID_0;
     uint256 public immutable CONTROL_ID_1;
 
@@ -103,19 +110,8 @@ contract RiscZeroGroth16Verifier is IRiscZeroVerifier, Groth16Verifier {
         return (uint256(uint128(uint256(reversed))), uint256(reversed >> 128));
     }
 
-    /// @notice verify that the given receipt is a valid Groth16 RISC Zero recursion receipt.
-    /// @return true if the receipt passes the verification checks.
-    function verify(Receipt memory receipt) public view returns (bool) {
-        (uint256 claim0, uint256 claim1) = splitDigest(receipt.claim.digest());
-        Seal memory seal = abi.decode(receipt.seal, (Seal));
-        return this.verifyProof(seal.a, seal.b, seal.c, [CONTROL_ID_0, CONTROL_ID_1, claim0, claim1]);
-    }
-
-    /// @notice verifies that the given seal is a valid Groth16 RISC Zero proof of execution over the
-    ///     given image ID, post-state digest, and journal hash. Asserts that the input hash
-    //      is all-zeros (i.e. no committed input) and the exit code is (Halted, 0).
-    /// @return true if the receipt passes the verification checks.
-    function verify(bytes memory seal, bytes32 imageId, bytes32 postStateDigest, bytes32 journalDigest)
+    /// @inheritdoc IRiscZeroVerifier
+    function verify(bytes calldata seal, bytes32 imageId, bytes32 postStateDigest, bytes32 journalDigest)
         public
         view
         returns (bool)
@@ -130,18 +126,13 @@ contract RiscZeroGroth16Verifier is IRiscZeroVerifier, Groth16Verifier {
                 Output(journalDigest, bytes32(0)).digest()
             )
         );
-        return verify(receipt);
+        return verify_integrity(receipt);
     }
 
-    /// @notice verifies that the given seal is a valid Groth16 RISC Zero proof of execution over the
-    ///     given image ID, post-state digest, and full journal. Asserts that the input hash
-    //      is all-zeros (i.e. no committed input) and the exit code is (Halted, 0).
-    /// @return true if the receipt passes the verification checks.
-    function verify(bytes memory seal, bytes32 imageId, bytes32 postStateDigest, bytes calldata journal)
-        public
-        view
-        returns (bool)
-    {
-        return verify(seal, imageId, postStateDigest, sha256(journal));
+    /// @inheritdoc IRiscZeroVerifier
+    function verify_integrity(Receipt memory receipt) public view returns (bool) {
+        (uint256 claim0, uint256 claim1) = splitDigest(receipt.claim.digest());
+        Seal memory seal = abi.decode(receipt.seal, (Seal));
+        return this.verifyProof(seal.a, seal.b, seal.c, [CONTROL_ID_0, CONTROL_ID_1, claim0, claim1]);
     }
 }

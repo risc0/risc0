@@ -17,7 +17,7 @@
 pragma solidity ^0.8.17;
 
 import {IBonsaiRelay, Callback, CallbackAuthorization} from "./IBonsaiRelay.sol";
-import {IRiscZeroVerifier} from "./IRiscZeroVerifier.sol";
+import {IRiscZeroVerifier} from "../IRiscZeroVerifier.sol";
 
 /// @notice Bonsai Relay contract supporting authenticated communication from zkVM guest programs.
 contract BonsaiRelay is IBonsaiRelay {
