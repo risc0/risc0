@@ -92,7 +92,6 @@ pub fn main() {
     tracing_subscriber::fmt()
         .with_env_filter(tracing_subscriber::filter::EnvFilter::from_default_env())
         .init();
-    ();
 
     let args = Cli::parse();
     if let Some(port) = args.mode.port {

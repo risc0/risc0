@@ -84,7 +84,7 @@ where
             }
         }
         // TODO(#982): Support unresolved assumptions here.
-        let inner = InnerReceipt::Composite(CompositeReceipt {
+        let composite_receipt = CompositeReceipt {
             segments,
             assumptions: session
                 .assumptions
@@ -92,9 +92,37 @@ where
                 .map(|a| Ok(a.as_receipt()?.inner.clone()))
                 .collect::<Result<Vec<_>>>()?,
             journal_digest: session.journal.as_ref().map(|journal| journal.digest()),
-        });
-        let receipt = Receipt::new(inner, session.journal.clone().unwrap_or_default().bytes);
+        };
 
+        // Verify the receipt to catch if something is broken in the proving process.
+        composite_receipt.verify_integrity_with_context(ctx)?;
+        if composite_receipt.get_claim()?.digest() != session.get_claim()?.digest() {
+            tracing::debug!("composite receipt and session claim do not match");
+            tracing::debug!(
+                "composite receipt claim: {:#?}",
+                composite_receipt.get_claim()?
+            );
+            tracing::debug!("session claim: {:#?}", session.get_claim()?);
+            bail!(
+                "session and composite receipt claim do not match: session {}, receipt {}",
+                hex::encode(&session.get_claim()?.digest()),
+                hex::encode(&composite_receipt.get_claim()?.digest())
+            );
+        }
+
+        // Use recursion to compress the, linear-size, composite receipt into a single, fixed-size, succinct receipt.
+        // NOTE: Recursion is only supported on receipts generated with the poseidon hash function.
+        let inner_receipt = match self.hal_pair.hal.get_hash_suite().name.as_str() {
+            "poseidon" => InnerReceipt::Succinct(self.compress(&composite_receipt)?),
+            _ => InnerReceipt::Composite(composite_receipt),
+        };
+
+        let receipt = Receipt::new(
+            inner_receipt,
+            session.journal.clone().unwrap_or_default().bytes,
+        );
+
+        // Verify the receipt to catch if something is broken in the proving process.
         receipt.verify_integrity_with_context(ctx)?;
         if receipt.get_claim()?.digest() != session.get_claim()?.digest() {
             tracing::debug!("receipt and session claim do not match");
@@ -106,6 +134,7 @@ where
                 hex::encode(&receipt.get_claim()?.digest())
             );
         }
+
         Ok(receipt)
     }
 
@@ -185,9 +214,9 @@ where
     fn resolve(
         &self,
         conditional: &SuccinctReceipt,
-        corroborating: &SuccinctReceipt,
+        assumption: &SuccinctReceipt,
     ) -> Result<SuccinctReceipt> {
-        resolve(conditional, corroborating)
+        resolve(conditional, assumption)
     }
 
     fn identity_p254(&self, a: &SuccinctReceipt) -> Result<SuccinctReceipt> {
