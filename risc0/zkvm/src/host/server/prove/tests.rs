@@ -232,13 +232,21 @@ fn memory_io() {
     assert_eq!(run_memio(&[(POS, 1)]).unwrap(), ExitCode::Halted(0));
 
     // Unaligned write is bad
-    assert_eq!(run_memio(&[(POS + 1001, 1)]).unwrap(), ExitCode::Fault);
+    assert!(run_memio(&[(POS + 1001, 1)])
+        .err()
+        .unwrap()
+        .to_string()
+        .contains("fault"));
 
     // Aligned read is fine
     assert_eq!(run_memio(&[(POS, 0)]).unwrap(), ExitCode::Halted(0));
 
     // Unaligned read is bad
-    assert_eq!(run_memio(&[(POS + 1, 0)]).unwrap(), ExitCode::Fault);
+    assert!(run_memio(&[(POS + 1, 0)])
+        .err()
+        .unwrap()
+        .to_string()
+        .contains("fault"));
 }
 
 #[test]
@@ -493,32 +501,6 @@ mod sys_verify {
         halt_receipt
     }
 
-    fn prove_fault() -> Receipt {
-        let opts = ProverOpts {
-            hashfn: "sha-256".to_string(),
-            prove_guest_errors: true,
-        };
-
-        let env = ExecutorEnvBuilder::default()
-            .write(&MultiTestSpec::Fault)
-            .unwrap()
-            .build()
-            .unwrap();
-        let fault_receipt = get_prover_server(&opts)
-            .unwrap()
-            .prove(env, MULTI_TEST_ELF)
-            .unwrap();
-
-        // Double check that the receipt verifies with the expected image ID and exit code.
-        fault_receipt
-            .verify_integrity_with_context(&Default::default())
-            .unwrap();
-        let fault_claim = fault_receipt.get_claim().unwrap();
-        assert_eq!(fault_claim.pre.digest(), MULTI_TEST_ID.into());
-        assert_eq!(fault_claim.exit_code, ExitCode::Fault);
-        fault_receipt
-    }
-
     lazy_static::lazy_static! {
         static ref HELLO_COMMIT_RECEIPT: Receipt = prove_hello_commit();
     }
@@ -641,32 +623,6 @@ mod sys_verify {
             .write(&spec)
             .unwrap()
             .add_assumption(halt_receipt)
-            .build()
-            .unwrap();
-        get_prover_server(&prover_opts_fast())
-            .unwrap()
-            .prove(env, MULTI_TEST_ELF)
-            .unwrap()
-            .verify(MULTI_TEST_ID)
-            .unwrap();
-    }
-
-    #[test]
-    fn sys_verify_integrity_fault() {
-        // Generate a receipt for a execution ending in fault.
-        // NOTE: This is not really a "proof of fault". Instead it is simply verifying a receipt
-        // that ended in SystemSplit for which the host claims a fault is about to occur.
-        let fault_receipt = prove_fault();
-
-        let spec = &MultiTestSpec::SysVerifyIntegrity {
-            claim_words: to_vec(&fault_receipt.get_claim().unwrap()).unwrap(),
-        };
-
-        // Test that proving results in a success execution and unconditional receipt.
-        let env = ExecutorEnv::builder()
-            .write(&spec)
-            .unwrap()
-            .add_assumption(fault_receipt)
             .build()
             .unwrap();
         get_prover_server(&prover_opts_fast())

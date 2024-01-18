@@ -239,8 +239,8 @@ impl<'a> ExecutorImpl<'a> {
         self.run_with_callback(|segment| Ok(Box::new(FileSegmentRef::new(&segment, &path)?)))
     }
 
-    /// Run the executor until [ExitCode::Halted], [ExitCode::Paused], or
-    /// [ExitCode::Fault] is reached, producing a [Session] as a result.
+    /// Run the executor until [ExitCode::Halted] or [ExitCode::Paused] is reached, producing a
+    /// [Session] as a result.
     pub fn run_with_callback<F>(&mut self, mut callback: F) -> Result<Session>
     where
         F: FnMut(Segment) -> Result<Box<dyn SegmentRef>>,
@@ -285,7 +285,8 @@ impl<'a> ExecutorImpl<'a> {
                     let segment = Segment::new(
                         pre_image,
                         SystemState::from(&post_image),
-                        // NOTE: On the last segment, the output is added outside this loop.
+                        // NOTE: On the last segment, the output is added outside this loop, before
+                        // it is sent to the callback and pushed into the Session object.
                         None,
                         faults,
                         syscalls,
@@ -304,11 +305,6 @@ impl<'a> ExecutorImpl<'a> {
                             self.segments.push(segment_ref);
                             self.split(Some(post_image.into()))?
                         }
-                        ExitCode::SessionLimit => {
-                            let segment_ref = callback(segment)?;
-                            self.segments.push(segment_ref);
-                            bail!("Session limit exceeded")
-                        }
                         ExitCode::Paused(inner) => {
                             tracing::debug!("Paused({inner}): {}", self.segment_cycle);
                             // Set the pre_image so that the Executor can be run again to resume.
@@ -322,10 +318,7 @@ impl<'a> ExecutorImpl<'a> {
                             tracing::debug!("Halted({inner}): {}", self.segment_cycle);
                             return Ok((exit_code, segment, post_image));
                         }
-                        ExitCode::Fault => {
-                            tracing::debug!("Fault: {}", self.segment_cycle);
-                            return Ok((exit_code, segment, post_image));
-                        }
+                        _ => bail!("execution reached unexpected exit code {:?}", exit_code),
                     };
                 };
             }
@@ -418,7 +411,7 @@ impl<'a> ExecutorImpl<'a> {
     pub fn step(&mut self) -> Result<Option<ExitCode>> {
         if let Some(limit) = self.env.session_limit {
             if self.session_cycle() >= (limit as usize) {
-                return Ok(Some(ExitCode::SessionLimit));
+                bail!("Session limit exceeded")
             }
         }
 
@@ -485,11 +478,7 @@ impl<'a> ExecutorImpl<'a> {
                     err
                 );
                 self.monitor.undo()?;
-                if cfg!(feature = "fault-proof") {
-                    return Ok(Some(ExitCode::Fault));
-                } else {
-                    bail!("rrs instruction executor failed with {:?}", err);
-                }
+                bail!("execution encountered a fault: {:?}", err);
             }
 
             if let Some(idx) = hart.last_register_write {

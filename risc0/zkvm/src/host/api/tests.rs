@@ -306,7 +306,7 @@ fn lift_resolve() {
 }
 
 #[test]
-#[should_panic(expected = "Guest panicked: panicked at 'MultiTestSpec::Panic invoked'")]
+#[should_panic(expected = "MultiTestSpec::Panic invoked")]
 fn guest_error_forwarding() {
     let env = ExecutorEnv::builder()
         .write(&MultiTestSpec::Panic)
