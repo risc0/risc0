@@ -33,7 +33,6 @@ use risc0_zkvm::{
 };
 use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID};
 use tempfile::tempdir;
-use tracing_subscriber::fmt::format;
 
 #[derive(Parser)]
 pub struct BootstrapGroth16;
@@ -163,7 +162,7 @@ fn bootstrap_test_receipt() {
     let journal = hex::encode(receipt.journal.bytes);
 
     let seal = format!("bytes public constant SEAL = hex\"{seal}\";");
-    let post_digest = format!("bytes32 public constant POST_DIGEST = bytes32({seal});");
+    let post_digest = format!("bytes32 public constant POST_DIGEST = bytes32({post_digest});");
     let journal = format!("bytes public constant JOURNAL = hex\"{journal}\";");
     let image_id = format!("bytes32 public constant IMAGE_ID = bytes32({image_id});");
 
