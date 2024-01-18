@@ -19,17 +19,9 @@ pragma solidity ^0.8.9;
 
 import {SafeCast} from "openzeppelin/contracts/utils/math/SafeCast.sol";
 
+import {ControlID} from "./ControlID.sol";
 import {Groth16Verifier} from "./Groth16Verifier.sol";
-import {
-    ExitCode,
-    IRiscZeroVerifier,
-    Output,
-    OutputLib,
-    Receipt,
-    ReceiptClaim,
-    ReceiptClaimLib,
-    SystemExitCode
-} from "../IRiscZeroVerifier.sol";
+import {ExitCode, IRiscZeroVerifier, Output, OutputLib, Receipt, ReceiptClaim, ReceiptClaimLib, SystemExitCode} from "../IRiscZeroVerifier.sol";
 
 /// @notice reverse the byte order of the uint256 value.
 /// @dev Soldity uses a big-endian ABI encoding. Reversing the byte order before encoding
@@ -39,20 +31,40 @@ function reverseByteOrderUint256(uint256 input) pure returns (uint256 v) {
     v = input;
 
     // swap bytes
-    v = ((v & 0xFF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00) >> 8)
-        | ((v & 0x00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF) << 8);
+    v =
+        ((v &
+            0xFF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00) >>
+            8) |
+        ((v &
+            0x00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF) <<
+            8);
 
     // swap 2-byte long pairs
-    v = ((v & 0xFFFF0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF0000) >> 16)
-        | ((v & 0x0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF) << 16);
+    v =
+        ((v &
+            0xFFFF0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF0000) >>
+            16) |
+        ((v &
+            0x0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF) <<
+            16);
 
     // swap 4-byte long pairs
-    v = ((v & 0xFFFFFFFF00000000FFFFFFFF00000000FFFFFFFF00000000FFFFFFFF00000000) >> 32)
-        | ((v & 0x00000000FFFFFFFF00000000FFFFFFFF00000000FFFFFFFF00000000FFFFFFFF) << 32);
+    v =
+        ((v &
+            0xFFFFFFFF00000000FFFFFFFF00000000FFFFFFFF00000000FFFFFFFF00000000) >>
+            32) |
+        ((v &
+            0x00000000FFFFFFFF00000000FFFFFFFF00000000FFFFFFFF00000000FFFFFFFF) <<
+            32);
 
     // swap 8-byte long pairs
-    v = ((v & 0xFFFFFFFFFFFFFFFF0000000000000000FFFFFFFFFFFFFFFF0000000000000000) >> 64)
-        | ((v & 0x0000000000000000FFFFFFFFFFFFFFFF0000000000000000FFFFFFFFFFFFFFFF) << 64);
+    v =
+        ((v &
+            0xFFFFFFFFFFFFFFFF0000000000000000FFFFFFFFFFFFFFFF0000000000000000) >>
+            64) |
+        ((v &
+            0x0000000000000000FFFFFFFFFFFFFFFF0000000000000000FFFFFFFFFFFFFFFF) <<
+            64);
 
     // swap 16-byte long pairs
     v = (v >> 128) | (v << 128);
@@ -77,16 +89,6 @@ struct Seal {
     uint256[2] a;
     uint256[2][2] b;
     uint256[2] c;
-}
-
-// TODO(victor): Is this comment accurate? Or is it actually the root hash for the program set.
-// Control ID hash for the identity_p254 predicate decomposed as implemented by splitDigest.
-/// @notice Control ID hash for the identity_p254 predicate decomposed by `splitDigest`.
-/// @dev New releases of RISC Zero's zkVM require updating these values. These values can be
-/// obtained by running `cargo run --bin bonsai-ethereum-contracts -F control-id`
-library ControlID {
-    uint256 public constant CONTROL_ID_0 = 0x68e42d8b3ddc499f4e1799a767052ab3;
-    uint256 public constant CONTROL_ID_1 = 0x3802684f1645e0a028585b0445d39231;
 }
 
 /// @notice Groth16 verifier contract for RISC Zero receipts of execution.
@@ -114,17 +116,20 @@ contract RiscZeroGroth16Verifier is IRiscZeroVerifier, Groth16Verifier {
     /// @dev RISC Zero's Circom verifier circuit takes each of two hash digests in two 128-bit
     /// chunks. These values can be derived from the digest by splitting the digest in half and
     /// then reversing the bytes of each.
-    function splitDigest(bytes32 digest) internal pure returns (uint256, uint256) {
+    function splitDigest(
+        bytes32 digest
+    ) internal pure returns (uint256, uint256) {
         uint256 reversed = reverseByteOrderUint256(uint256(digest));
         return (uint256(uint128(uint256(reversed))), uint256(reversed >> 128));
     }
 
     /// @inheritdoc IRiscZeroVerifier
-    function verify(bytes calldata seal, bytes32 imageId, bytes32 postStateDigest, bytes32 journalDigest)
-        public
-        view
-        returns (bool)
-    {
+    function verify(
+        bytes calldata seal,
+        bytes32 imageId,
+        bytes32 postStateDigest,
+        bytes32 journalDigest
+    ) public view returns (bool) {
         Receipt memory receipt = Receipt(
             seal,
             ReceiptClaim(
@@ -139,9 +144,17 @@ contract RiscZeroGroth16Verifier is IRiscZeroVerifier, Groth16Verifier {
     }
 
     /// @inheritdoc IRiscZeroVerifier
-    function verify_integrity(Receipt memory receipt) public view returns (bool) {
+    function verify_integrity(
+        Receipt memory receipt
+    ) public view returns (bool) {
         (uint256 claim0, uint256 claim1) = splitDigest(receipt.claim.digest());
         Seal memory seal = abi.decode(receipt.seal, (Seal));
-        return this.verifyProof(seal.a, seal.b, seal.c, [CONTROL_ID_0, CONTROL_ID_1, claim0, claim1]);
+        return
+            this.verifyProof(
+                seal.a,
+                seal.b,
+                seal.c,
+                [CONTROL_ID_0, CONTROL_ID_1, claim0, claim1]
+            );
     }
 }
