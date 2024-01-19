@@ -212,7 +212,7 @@ fn generate_receipt() -> (Receipt, Digest) {
     let ident_receipt = identity_p254(&succinct_receipt).unwrap();
     let seal_bytes = ident_receipt.get_seal_bytes();
 
-    tracing::info!("seal-to-json");
+    tracing::info!("stark-to-snark");
     let seal = stark_to_snark(&seal_bytes).unwrap().to_vec();
 
     tracing::info!("Receipt");
