@@ -25,6 +25,9 @@ use risc0_zkp::core::digest::Digest;
 pub mod data_structures;
 pub mod verifier;
 
+pub use data_structures::{ProofJson, PublicInputsJson, Seal, VerifyingKeyJson};
+pub use verifier::Verifier;
+
 // Deserialize a scalar field from bytes in big-endian format
 pub(crate) fn fr_from_bytes(scalar: &Vec<u8>) -> Result<Fr, Error> {
     let scalar: Vec<u8> = scalar.iter().rev().cloned().collect();

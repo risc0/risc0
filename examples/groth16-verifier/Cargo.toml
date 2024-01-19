@@ -5,7 +5,7 @@ edition = "2021"
 
 [dependencies]
 methods = { path = "methods" }
-risc0-groth16 = { path = "groth16" }
+risc0-groth16 = { path = "../../risc0/groth16" }
 risc0-zkvm = { path = "../../risc0/zkvm" }
 serde_json = "1.0"
 

@@ -19,7 +19,9 @@ use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
 
 use serde::{Deserialize, Serialize};
 
-use crate::{data_structures::Seal, from_u256, g1_from_bytes, g2_from_bytes};
+use crate::{
+    from_u256, g1_from_bytes, g2_from_bytes, ProofJson, PublicInputsJson, Seal, VerifyingKeyJson,
+};
 
 const ALPHA_X: &str =
     "20491192805390485299153009773594534940189261866228447918068658471970481763042";
@@ -104,6 +106,18 @@ impl Verifier {
             encoded_proof,
             encoded_prepared_inputs,
         })
+    }
+
+    pub fn from_json(
+        proof: ProofJson,
+        public_inputs: PublicInputsJson,
+        verifying_key: VerifyingKeyJson,
+    ) -> Result<Self> {
+        Verifier::new(
+            &proof.try_into()?,
+            public_inputs.to_scalar()?,
+            verifying_key.prepared_verifying_key()?,
+        )
     }
 
     /// Verifies the Groth16 proof.
