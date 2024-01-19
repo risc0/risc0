@@ -1,0 +1,36 @@
+[package]
+name = "risc0-groth16"
+description = "RISC Zero Groth16"
+version = { workspace = true }
+edition = { workspace = true }
+license = { workspace = true }
+homepage = { workspace = true }
+repository = { workspace = true }
+
+[dependencies]
+anyhow = { version = "1.0", default-features = false }
+ark-bn254 = { version = "0.4" }
+ark-groth16 = { version = "0.4", default-features = false }
+ark-serialize = { version = "0.4", default-features = false }
+hex = { version = "0.4.3", default-features = false, features = ["alloc"] }
+num-bigint = { version = "0.4", default-features = false }
+num-derive = { version = "0.4" }
+risc0-zkp = { workspace = true }
+serde = { version = "1.0", default-features = false, features = [
+  "alloc",
+  "derive",
+] }
+
+[dev-dependencies]
+
+[features]
+std = [
+  "anyhow/std",
+  "ark-bn254/std",
+  "ark-groth16/std",
+  "ark-serialize/std",
+  "hex/std",
+  "num-bigint/std",
+  "risc0-zkp/std",
+  "serde/std",
+]
