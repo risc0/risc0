@@ -8,6 +8,7 @@ edition = "2021"
 [dependencies]
 risc0-groth16 = { path = "../../../../risc0/groth16", default-features = false }
 risc0-zkvm = { path = "../../../../risc0/zkvm", default-features = false, features = ["std"] }
+sha2 = "0.10.6"
 
 [patch.crates-io]
 sha2 = { git = "https://github.com/risc0/RustCrypto-hashes", tag = "sha2-v0.10.6-risczero.0" }

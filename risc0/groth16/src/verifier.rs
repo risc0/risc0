@@ -66,9 +66,12 @@ const IC4_Y: &str = "17036398532634379807038707418819848170237695473144751623976
 /// Groth16 `Verifier` instance over the BN_254 curve encoded in little endian.
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Verifier {
-    encoded_pvk: Vec<u8>,
-    encoded_proof: Vec<u8>,
-    encoded_prepared_inputs: Vec<u8>,
+    /// prepared verifying key little endian encoded.
+    pub encoded_pvk: Vec<u8>,
+    /// proof little endian encoded.
+    pub encoded_proof: Vec<u8>,
+    /// prepared public inputs little endian encoded.
+    pub encoded_prepared_inputs: Vec<u8>,
 }
 
 impl Verifier {

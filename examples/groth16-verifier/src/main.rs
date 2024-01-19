@@ -14,7 +14,8 @@
 
 use methods::{GROTH16_VERIFIER_ELF, GROTH16_VERIFIER_ID};
 use risc0_groth16::{ProofJson, PublicInputsJson, Verifier, VerifyingKeyJson};
-use risc0_zkvm::{default_prover, ExecutorEnv};
+use risc0_zkvm::{default_prover, sha::Digest, ExecutorEnv};
+use sha2::{Digest as _, Sha256};
 
 const PROOF: &str = include_str!("data/proof.json");
 const PUBLIC_INPUTS: &str = include_str!("data/public.json");
@@ -47,6 +48,18 @@ fn main() {
 
     // we verify the final receipt
     receipt.verify(GROTH16_VERIFIER_ID).unwrap();
+
+    // we check that what committed into the journal matches with the input
+    let committed_digest: Digest = receipt.journal.decode().unwrap();
+
+    let mut hasher = Sha256::new();
+    hasher.update(verifier.encoded_pvk);
+    hasher.update(verifier.encoded_proof);
+    hasher.update(verifier.encoded_prepared_inputs);
+    let expected_digest = hasher.finalize();
+    let expected_digest = Digest::try_from(expected_digest.as_slice()).unwrap();
+
+    assert_eq!(committed_digest, expected_digest);
 
     println!("Verification: OK!");
 }
