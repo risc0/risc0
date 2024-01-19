@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use anyhow::{anyhow, bail, Error, Result};
+use anyhow::{anyhow, Error, Result};
 use ark_bn254::{Bn254, Fr, G1Projective};
 use ark_groth16::{prepare_verifying_key, Groth16, PreparedVerifyingKey, Proof, VerifyingKey};
 use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
@@ -133,7 +133,7 @@ impl Verifier {
             .map_err(|err| anyhow!(err))?
         {
             true => Ok(()),
-            false => bail!("Invalid proof"),
+            false => Err(anyhow!("Invalid proof")),
         }
     }
 }

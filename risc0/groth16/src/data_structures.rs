@@ -16,7 +16,7 @@ extern crate alloc;
 
 use alloc::{vec, vec::Vec};
 
-use anyhow::{bail, Error, Result};
+use anyhow::{anyhow, Error, Result};
 use ark_bn254::{Bn254, Fr};
 use ark_groth16::{prepare_verifying_key, PreparedVerifyingKey, VerifyingKey};
 use serde::{Deserialize, Serialize};
@@ -67,7 +67,7 @@ impl Seal {
     /// Method to convert back from a `Vec<u8>`
     pub fn from_vec(data: &[u8]) -> Result<Seal, Error> {
         if data.len() != Self::SIZE {
-            bail!("Data length mismatch");
+            return Err(anyhow!("Data length mismatch"));
         }
 
         let mut offset = 0;
@@ -105,12 +105,12 @@ impl TryFrom<ProofJson> for Seal {
     type Error = Error;
     fn try_from(proof: ProofJson) -> Result<Self, Error> {
         if proof.pi_a.len() < 2 {
-            bail!("Malformed G1 element field");
+            return Err(anyhow!("Malformed G1 element field"));
         }
         let a = vec![from_u256(&proof.pi_a[0])?, from_u256(&proof.pi_a[1])?];
 
         if proof.pi_b.len() < 2 || proof.pi_b[0].len() < 2 || proof.pi_b[1].len() < 2 {
-            bail!("Malformed G2 element field");
+            return Err(anyhow!("Malformed G2 element field"));
         }
         let b = vec![
             vec![from_u256(&proof.pi_b[0][1])?, from_u256(&proof.pi_b[0][0])?],
@@ -118,7 +118,7 @@ impl TryFrom<ProofJson> for Seal {
         ];
 
         if proof.pi_c.len() < 2 {
-            bail!("Malformed G1 element field");
+            return Err(anyhow!("Malformed G1 element field"));
         }
         let c = vec![from_u256(&proof.pi_c[0])?, from_u256(&proof.pi_c[1])?];
 
@@ -156,7 +156,7 @@ impl VerifyingKeyJson {
     /// Computes the prepared verifying key
     pub fn prepared_verifying_key(&self) -> Result<PreparedVerifyingKey<Bn254>, Error> {
         if self.vk_alpha_1.len() < 2 {
-            bail!("Malformed G1 element field: vk_alpha_1");
+            return Err(anyhow!("Malformed G1 element field: vk_alpha_1"));
         }
         let alpha_g1 = g1_from_bytes(&vec![
             from_u256(&self.vk_alpha_1[0])?,
@@ -164,7 +164,7 @@ impl VerifyingKeyJson {
         ])?;
 
         if self.vk_beta_2.len() < 2 || self.vk_beta_2[0].len() < 2 || self.vk_beta_2[1].len() < 2 {
-            bail!("Malformed G2 element field: vk_beta_2");
+            return Err(anyhow!("Malformed G2 element field: vk_beta_2"));
         }
         let beta_g2 = g2_from_bytes(&vec![
             vec![
@@ -179,7 +179,7 @@ impl VerifyingKeyJson {
 
         if self.vk_gamma_2.len() < 2 || self.vk_gamma_2[0].len() < 2 || self.vk_gamma_2[1].len() < 2
         {
-            bail!("Malformed G2 element field: vk_gamma_2");
+            return Err(anyhow!("Malformed G2 element field: vk_gamma_2"));
         }
         let gamma_g2 = g2_from_bytes(&vec![
             vec![
@@ -194,7 +194,7 @@ impl VerifyingKeyJson {
 
         if self.vk_delta_2.len() < 2 || self.vk_delta_2[0].len() < 2 || self.vk_delta_2[1].len() < 2
         {
-            bail!("Malformed G2 element field: vk_delta_2");
+            return Err(anyhow!("Malformed G2 element field: vk_delta_2"));
         }
         let delta_g2 = g2_from_bytes(&vec![
             vec![
@@ -213,7 +213,7 @@ impl VerifyingKeyJson {
             .enumerate()
             .map(|(i, ic)| {
                 if ic.len() < 2 {
-                    bail!("Malformed G1 element field: IC_{i}");
+                    return Err(anyhow!("Malformed G1 element field: IC_{i}"));
                 }
                 g1_from_bytes(&[from_u256(&ic[0])?, from_u256(&ic[1])?])
             })
@@ -245,7 +245,7 @@ impl PublicInputsJson {
         for input in self.values.clone() {
             match input.parse::<u64>() {
                 Ok(n) => parsed_inputs.push(Fr::from(n)),
-                Err(_) => bail!("Failed to decode 'public inputs' values"),
+                Err(_) => return Err(anyhow!("Failed to decode 'public inputs' values")),
             }
         }
         Ok(parsed_inputs)
