@@ -26,7 +26,7 @@ import {console2} from "forge-std/console2.sol";
 import {BytesLib} from "solidity-bytes-utils//BytesLib.sol";
 
 import {BonsaiTest} from "bonsai/BonsaiTest.sol";
-import {IBonsaiRelay, Callback, CallbackAuthorization} from "bonsai/IBonsaiRelay.sol";
+import {IBonsaiRelay, Callback, CallbackAuthorization} from "bonsai/relay/IBonsaiRelay.sol";
 
 import {BonsaiGovernor} from "../contracts/BonsaiGovernor.sol";
 import {BaselineGovernor} from "../contracts/BaselineGovernor.sol";
