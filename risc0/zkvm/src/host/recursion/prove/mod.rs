@@ -422,7 +422,7 @@ cfg_if::cfg_if! {
 // NOTE: Default is additionally a recognized type in the recursion program language. It's not
 // yet supported here because some of the code in this module assumes Poseidon is Default.
 enum DigestKind {
-    Poseidon,
+    Poseidon2,
     Sha256,
 }
 
@@ -467,7 +467,7 @@ impl Prover {
         let mut prover = Prover::new(program, control_id, opts);
 
         for digest in digests {
-            prover.add_input_digest(digest, DigestKind::Poseidon);
+            prover.add_input_digest(digest, DigestKind::Poseidon2);
         }
 
         Ok(prover)
@@ -489,7 +489,7 @@ impl Prover {
         )]));
         for digest in proof.digests {
             tracing::debug!("path = {:?}", digest);
-            self.add_input_digest(&digest, DigestKind::Poseidon);
+            self.add_input_digest(&digest, DigestKind::Poseidon2);
         }
         tracing::debug!(
             "root = {:?}",
@@ -518,7 +518,7 @@ impl Prover {
         let (program, control_id) = zkr::lift(po2)?;
         let mut prover = Prover::new(program, control_id, opts);
 
-        prover.add_input_digest(&merkle_root, DigestKind::Poseidon);
+        prover.add_input_digest(&merkle_root, DigestKind::Poseidon2);
 
         let which = po2 - MIN_CYCLES_PO2;
         let inner_control_id = Digest::from_hex(POSEIDON_CONTROL_ID[which]).unwrap();
@@ -553,7 +553,7 @@ impl Prover {
         let (program, control_id) = zkr::join()?;
         let mut prover = Prover::new(program, control_id, opts);
 
-        prover.add_input_digest(&merkle_root, DigestKind::Poseidon);
+        prover.add_input_digest(&merkle_root, DigestKind::Poseidon2);
         prover.add_segment_receipt(a, &allowed_ids)?;
         prover.add_segment_receipt(b, &allowed_ids)?;
         Ok(prover)
@@ -582,7 +582,7 @@ impl Prover {
         // Load the input values needed by the predicate.
         // Resolve predicate needs both seals as input, and the journal and assumptions tail digest
         // to compute the opening of the conditional receipt claim to the first assumption.
-        prover.add_input_digest(&merkle_root, DigestKind::Poseidon);
+        prover.add_input_digest(&merkle_root, DigestKind::Poseidon2);
         prover.add_segment_receipt(cond, &allowed_ids)?;
         prover.add_segment_receipt(assum, &allowed_ids)?;
 
@@ -622,7 +622,7 @@ impl Prover {
         let (program, control_id) = zkr::identity()?;
         let mut prover = Prover::new(program, control_id, opts);
 
-        prover.add_input_digest(&merkle_root, DigestKind::Poseidon);
+        prover.add_input_digest(&merkle_root, DigestKind::Poseidon2);
         prover.add_segment_receipt(a, &allowed_ids)?;
         Ok(prover)
     }
@@ -635,7 +635,7 @@ impl Prover {
     fn add_input_digest(&mut self, digest: &Digest, kind: DigestKind) {
         match kind {
             // Poseidon digests consist of  BabyBear field elems and do not need to be split.
-            DigestKind::Poseidon => self.add_input(digest.as_words()),
+            DigestKind::Poseidon2 => self.add_input(digest.as_words()),
             // SHA-256 digests need to be split into 16-bit half words to avoid overflowing.
             DigestKind::Sha256 => self.add_input(bytemuck::cast_slice(
                 &digest
