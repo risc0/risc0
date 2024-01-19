@@ -77,7 +77,6 @@ pub use self::{
 pub use {
     self::host::{
         control_id::POSEIDON_CONTROL_ID,
-        groth16::{Groth16Proof, Groth16Seal},
         receipt::{
             Assumption, CompositeReceipt, Groth16Receipt, InnerReceipt, Journal, Receipt,
             SegmentReceipt, SuccinctReceipt, VerifierContext,

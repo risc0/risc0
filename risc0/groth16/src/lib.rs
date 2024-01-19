@@ -96,7 +96,7 @@ fn to_fixed_array(input: Vec<u8>) -> [u8; 32] {
 pub fn split_digest(d: Digest) -> Result<(Fr, Fr), Error> {
     let big_endian: Vec<u8> = d.as_bytes().to_vec().iter().rev().cloned().collect();
     let middle = big_endian.len() / 2;
-    let (a, b) = big_endian.split_at(middle);
+    let (b, a) = big_endian.split_at(middle);
     Ok((
         fr_from_bytes(&from_u256(&format!("0x{}", hex::encode(a)))?)?,
         fr_from_bytes(&from_u256(&format!("0x{}", hex::encode(b)))?)?,
