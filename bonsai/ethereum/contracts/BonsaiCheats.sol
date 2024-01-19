@@ -22,8 +22,8 @@ import {CommonBase} from "forge-std/Base.sol";
 import {console2} from "forge-std/console2.sol";
 import {Strings2} from "murky_differential_testing/test/utils/Strings2.sol";
 
-import {IBonsaiRelay} from "./IBonsaiRelay.sol";
-import {BonsaiTestRelay} from "./BonsaiTestRelay.sol";
+import {IBonsaiRelay} from "./relay/IBonsaiRelay.sol";
+import {BonsaiTestRelay} from "./relay/BonsaiTestRelay.sol";
 
 /// @notice A base contract for testing a Bonsai callback receiver contract
 abstract contract BonsaiCheats is StdCheatsSafe, CommonBase {

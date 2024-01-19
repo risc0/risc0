@@ -14,10 +14,10 @@
 
 //! [ReceiptClaim] and associated types and functions.
 //!
-//! A [ReceiptClaim] struct contains the public claims about a zkVM guest
-//! execution, such as the journal committed to by the guest. It also includes
-//! important information such as the exit code and the starting and ending
-//! system state (i.e. the state of memory).
+//! A [ReceiptClaim] struct contains the public claims (i.e. public outputs) of a zkVM guest
+//! execution, such as the journal committed to by the guest. It also includes important
+//! information such as the exit code and the starting and ending system state (i.e. the state of
+//! memory).
 
 use alloc::{collections::VecDeque, vec::Vec};
 use core::{fmt, ops::Deref};
@@ -46,10 +46,10 @@ use crate::{
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[cfg_attr(test, derive(PartialEq))]
 pub struct ReceiptClaim {
-    /// The [SystemState] of a segment just before execution has begun.
+    /// The [SystemState] just before execution has begun.
     pub pre: MaybePruned<SystemState>,
 
-    /// The [SystemState] of a segment just after execution has completed.
+    /// The [SystemState] just after execution has completed.
     ///
     /// NOTE: In order to avoid extra logic in the rv32im circuit to perform arithmetic on the PC
     /// with carry, the post state PC is recorded as the current PC + 4. Subtract 4 to get the
@@ -58,19 +58,18 @@ pub struct ReceiptClaim {
     /// `SystemSplit`, this will be the address of the next instruction to be executed.
     pub post: MaybePruned<SystemState>,
 
-    /// The exit code for a segment
+    /// The exit code for the execution.
     pub exit_code: ExitCode,
 
     /// Input to the guest.
     ///
-    /// NOTE: This field can only be constructed as a Digest because it is not yet
-    /// cryptographically bound by the RISC Zero proof system; the guest has no way to set the
-    /// input. In the future, it will be implemented with a [MaybePruned] type.
+    /// NOTE: This field must be set to the zero Digest because it is not yet cryptographically
+    /// bound by the RISC Zero proof system; the guest has no way to set the input. It may be
+    /// possible to use set this field to non-zero values in the future.
     // TODO(1.0): Determine the 1.0 status of input.
     pub input: Digest,
 
-    /// A [Output] of the guest, including the journal and assumptions set
-    /// during execution.
+    /// [Output] of the guest, including the journal and assumptions set during execution.
     pub output: MaybePruned<Option<Output>>,
 }
 
@@ -161,24 +160,40 @@ impl From<InvalidExitCodeError> for DecodeError {
 #[cfg(feature = "std")]
 impl std::error::Error for DecodeError {}
 
-/// Indicates how a Segment or Session's execution has terminated
+/// Exit condition indicated by the zkVM at the end of the guest execution.
+///
+/// Exit codes have a "system" part and a "user" part. Semantically, the system part is set to
+/// indicate the type of exit (e.g. halt, pause, or system split) and is directly controlled by the
+/// zkVM. The user part is an exit code, similar to exit codes used in Linux, chosen by the guest
+/// program to indicate additional information (e.g. 0 to indicate success or 1 to indicate an
+/// error).
 #[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq)]
 pub enum ExitCode {
-    /// This indicates normal termination of a program with an interior exit
-    /// code returned from the guest.
+    /// This indicates normal termination of a program with an interior exit code returned from the
+    /// guest program. A halted program cannot be resumed.
     Halted(u32),
 
-    /// A user may manually pause a session so that it can be resumed at a later
-    /// time, along with the user returned code.
+    /// This indicates the execution ended in a paused state with an interior exit code set by the
+    /// guest program. A paused program can be resumed such that execution picks up where it left
+    /// of, with the same memory state.
     Paused(u32),
 
-    /// This indicates when a system-initiated split has occurred, stopping execution of a segment.
+    /// This indicates the execution ended on a host-initiated system split.
     ///
-    /// Splits are initiated by the host. The most common reason a host will initiate a split is if
-    /// the number of cycles is approaching the limit for a single segment. The host may also
-    /// initiate a split if the next instruction will trigger a fault, or if the session limit is
-    /// reached.
+    /// System split is mechanism by which the host can temporarily stop execution of the guest.
+    /// Execution ended in a system split has no output and no conclusions can be drawn about
+    /// whether the program will eventually halt. System split is used in [continuations] to split
+    /// execution into individually provable [segments].
+    ///
+    /// [continuations]: https://dev.risczero.com/terminology#continuations
+    /// [segments]: https://dev.risczero.com/terminology#segment
     SystemSplit,
+
+    /// This indicates that the guest exited upon reaching the session limit set by the host.
+    ///
+    /// NOTE: The current version of the RISC Zero zkVM will never exit with an exit code of SessionLimit.
+    /// This is because the system cannot currently prove that the session limit has been reached.
+    SessionLimit,
 
     /// This indicates termination of a program where the next instruction will
     /// fail due to a machine fault (e.g. out of bounds memory read).
@@ -186,12 +201,6 @@ pub enum ExitCode {
     /// NOTE: The current version of the RISC Zero zkVM will never exit with an exit code of Fault.
     /// This is because the system cannot currently prove that a fault has occured.
     Fault,
-
-    /// This indicates that the guest exited upon reaching the session limit set by the host.
-    ///
-    /// NOTE: The current version of the RISC Zero zkVM will never exit with an exit code of SessionLimit.
-    /// This is because the system cannot currently prove that the session limit as been reached.
-    SessionLimit,
 }
 
 impl ExitCode {
