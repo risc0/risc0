@@ -15,22 +15,12 @@
 #[cfg(feature = "prove")]
 #[test]
 fn stark2snark() {
-    use std::{fs::File, io::Cursor, path::Path, process::Command};
-
-    use risc0_groth16::{to_json, Seal as Groth16Seal};
+    use risc0_groth16::docker::stark_to_snark;
     use risc0_zkvm::{
         get_prover_server, recursion::identity_p254, CompactReceipt, ExecutorEnv, ExecutorImpl,
         InnerReceipt, ProverOpts, Receipt, VerifierContext,
     };
     use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID};
-    use tempfile::tempdir;
-
-    let tmp_dir = tempdir().expect("Failed to create tmpdir");
-    let work_dir = std::env::var("RISC0_WORK_DIR");
-    let work_dir = work_dir
-        .as_ref()
-        .map(|x| Path::new(x))
-        .unwrap_or(tmp_dir.path());
 
     let env = ExecutorEnv::builder()
         .write(&MultiTestSpec::BusyLoop { cycles: 0 })
@@ -48,77 +38,20 @@ fn stark2snark() {
     let ctx = VerifierContext::default();
     let prover = get_prover_server(&opts).unwrap();
     let receipt = prover.prove_session(&ctx, &session).unwrap();
+    let claim = receipt.get_claim().unwrap();
     let succinct_receipt = receipt.inner.succinct().unwrap();
+    let journal = session.journal.unwrap().bytes;
 
     tracing::info!("identity_p254");
     let ident_receipt = identity_p254(&succinct_receipt).unwrap();
     let seal_bytes = ident_receipt.get_seal_bytes();
 
-    let journal = session.journal.unwrap().bytes;
-
     tracing::info!("seal-to-json");
-    std::fs::write(work_dir.join("seal.r0"), &seal_bytes).unwrap();
-    let seal_path = work_dir.join("input.json");
-    let snark_path = work_dir.join("output.json");
-    let seal_json = File::create(&seal_path).unwrap();
-    let mut seal_reader = Cursor::new(&seal_bytes);
-    to_json(&mut seal_reader, &seal_json).unwrap();
+    let seal = stark_to_snark(&seal_bytes).unwrap().to_vec();
 
-    tracing::info!("risc0-groth16-prover");
-    let status = Command::new("docker")
-        .arg("run")
-        .arg("--rm")
-        .arg("-v")
-        .arg(&format!("{}:/mnt", work_dir.to_string_lossy()))
-        .arg("risc0-groth16-prover")
-        .status()
-        .unwrap();
-    if !status.success() {
-        panic!("docker returned failure exit code: {:?}", status.code());
-    }
-
-    let snark_str = std::fs::read_to_string(snark_path).unwrap();
-    tracing::info!("{snark_str}");
-    let snark_str = format!("[{snark_str}]"); // make the output valid json
-    let raw_proof: (Vec<String>, Vec<Vec<String>>, Vec<String>, Vec<String>) =
-        serde_json::from_str(&snark_str).unwrap();
-
-    tracing::info!("decode a");
-    let a: Result<Vec<Vec<u8>>, hex::FromHexError> = raw_proof
-        .0
-        .into_iter()
-        .map(|x| hex::decode(&x[2..]))
-        .collect();
-    let a = a.expect("Failed to decode snark 'a' values");
-
-    tracing::info!("decode b");
-    let b: Result<Vec<Vec<Vec<u8>>>, hex::FromHexError> = raw_proof
-        .1
-        .into_iter()
-        .map(|inner| {
-            inner
-                .into_iter()
-                .map(|x| hex::decode(&x[2..]))
-                .collect::<Result<Vec<Vec<u8>>, hex::FromHexError>>()
-        })
-        .collect();
-    let b = b.expect("Failed to decode snark 'b' values");
-
-    tracing::info!("decode c");
-    let c: Result<Vec<Vec<u8>>, hex::FromHexError> = raw_proof
-        .2
-        .into_iter()
-        .map(|x| hex::decode(&x[2..]))
-        .collect();
-    let c = c.expect("Failed to decode snark 'c' values");
-
-    tracing::info!("Groth16Seal");
-    let groth16_seal = Groth16Seal { a, b, c };
+    tracing::info!("Receipt");
     let receipt = Receipt::new(
-        InnerReceipt::Compact(CompactReceipt {
-            seal: groth16_seal.to_vec(),
-            claim: receipt.get_claim().unwrap(),
-        }),
+        InnerReceipt::Compact(CompactReceipt { seal, claim }),
         journal,
     );
 

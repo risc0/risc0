@@ -24,6 +24,8 @@ use risc0_zkp::core::digest::Digest;
 
 pub mod data_structures;
 #[cfg(feature = "prove")]
+pub mod docker;
+#[cfg(feature = "prove")]
 mod seal_format;
 #[cfg(feature = "prove")]
 mod seal_to_json;
