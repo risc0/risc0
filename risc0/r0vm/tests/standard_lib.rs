@@ -53,8 +53,6 @@ fn stdio_outputs_in_receipt() {
         .success();
 
     let receipt = load_receipt(&receipt_file);
-    let segments = &receipt.inner.composite().unwrap().segments;
-    assert_eq!(segments.len(), 1);
-    assert!(segments[0].get_seal_bytes().len() > 0);
+    assert!(receipt.inner.succinct().unwrap().seal.len() > 0);
     receipt.verify(STANDARD_LIB_ID).unwrap();
 }

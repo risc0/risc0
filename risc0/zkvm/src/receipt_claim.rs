@@ -33,6 +33,10 @@ use crate::{
     SystemState,
 };
 
+// TODO(victor): Add functions to handle the `ReceiptClaim` transformations conducted as part of
+// join, resolve, and eventually resume calls. This will allow these to be used for recursion, as
+// well as deve mode recursion, and composite receipts.
+
 /// Public claims about a zkVM guest execution, such as the journal committed to by the guest.
 ///
 /// Also includes important information such as the exit code and the starting and ending system
@@ -227,6 +231,15 @@ impl ExitCode {
         match self {
             ExitCode::Halted(_) | ExitCode::Paused(_) => true,
             ExitCode::SystemSplit | ExitCode::SessionLimit | ExitCode::Fault => false,
+        }
+    }
+
+    /// True if the exit code is Halted(0) or Paused(0), indicating the program guest exited with
+    /// an ok status.
+    pub(crate) fn is_ok(&self) -> bool {
+        match self {
+            ExitCode::Halted(0) | ExitCode::Paused(0) => true,
+            _ => false,
         }
     }
 }

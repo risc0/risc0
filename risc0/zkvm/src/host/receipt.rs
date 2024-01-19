@@ -158,7 +158,7 @@ impl Receipt {
 
         // Check the exit code. This verification method requires execution to be
         // successful.
-        let (ExitCode::Halted(0) | ExitCode::Paused(0)) = claim.exit_code else {
+        if !claim.exit_code.is_ok() {
             return Err(VerificationError::UnexpectedExitCode);
         };
 
