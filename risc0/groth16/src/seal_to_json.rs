@@ -12,10 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-mod seal_format;
-#[cfg(test)]
-mod tests;
-
 use std::io::{Read, Write};
 
 use anyhow::{Context, Result};
@@ -27,7 +23,7 @@ use risc0_zkp::core::{
     hash::poseidon_254::digest_to_fr,
 };
 
-use seal_format::{IopType, K_SEAL_ELEMS, K_SEAL_TYPES, K_SEAL_WORDS};
+use crate::seal_format::{IopType, K_SEAL_ELEMS, K_SEAL_TYPES, K_SEAL_WORDS};
 
 /// Convert a seal into a JSON format compatible with the `stark_verify` witness generator.
 pub fn to_json<R: Read, W: Write>(mut reader: R, mut writer: W) -> Result<()> {

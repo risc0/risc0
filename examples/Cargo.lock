@@ -3855,6 +3855,7 @@ dependencies = [
  "hex",
  "num-bigint 0.4.4",
  "num-derive",
+ "num-traits",
  "risc0-zkp",
  "serde",
 ]
@@ -3932,6 +3933,7 @@ dependencies = [
  "hex",
  "human-repr",
  "lazy-regex",
+ "num-derive",
  "num-traits",
  "prost",
  "prost-build",

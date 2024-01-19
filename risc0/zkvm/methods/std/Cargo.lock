@@ -733,6 +733,7 @@ dependencies = [
  "hex",
  "num-bigint",
  "num-derive",
+ "num-traits",
  "risc0-zkp",
  "serde",
 ]
@@ -765,6 +766,7 @@ dependencies = [
  "getrandom",
  "hex",
  "human-repr",
+ "num-derive",
  "num-traits",
  "risc0-binfmt",
  "risc0-circuit-recursion",

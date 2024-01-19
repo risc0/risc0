@@ -849,6 +849,7 @@ dependencies = [
  "getrandom",
  "hex",
  "human-repr",
+ "num-derive",
  "risc0-binfmt",
  "risc0-circuit-recursion",
  "risc0-circuit-rv32im",

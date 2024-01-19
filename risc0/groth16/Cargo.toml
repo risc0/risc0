@@ -12,9 +12,12 @@ anyhow = { version = "1.0", default-features = false }
 ark-bn254 = { version = "0.4" }
 ark-groth16 = { version = "0.4", default-features = false }
 ark-serialize = { version = "0.4", default-features = false }
-hex = { version = "0.4.3", default-features = false, features = ["alloc"] }
+bytemuck = {version = "1.14", optional = true }
+hex = { version = "0.4", default-features = false, features = ["alloc"] }
 num-bigint = { version = "0.4", default-features = false }
 num-derive = { version = "0.4" }
+num-traits = { version = "0.2", default-features = false, optional = true }
+risc0-core = { path = "../../risc0/core", optional = true }
 risc0-zkp = { workspace = true }
 serde = { version = "1.0", default-features = false, features = [
   "alloc",
@@ -22,9 +25,22 @@ serde = { version = "1.0", default-features = false, features = [
 ] }
 
 [dev-dependencies]
+risc0-zkvm = { workspace = true, features = ["prove"] }
+risc0-zkvm-methods = { path = "../zkvm/methods" }
 serde_json = "1.0"
+tempfile = "3"
+test-log = { version = "0.2", default-features = false, features = ["trace"] }
+tracing = "0.1"
 
 [features]
+default = ["std"]
+prove = [
+  "dep:bytemuck",
+  "dep:num-traits",
+  "dep:risc0-core",
+  "risc0-zkp/prove",
+  "std"
+]
 std = [
   "anyhow/std",
   "ark-bn254/std",
@@ -32,6 +48,7 @@ std = [
   "ark-serialize/std",
   "hex/std",
   "num-bigint/std",
+  "num-traits?/std",
   "risc0-zkp/std",
   "serde/std",
 ]

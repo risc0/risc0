@@ -12,21 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{fs::File, io::Cursor, path::Path, process::Command};
-
-use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID};
-use tempfile::tempdir;
-use test_log::test;
-
-use risc0_zkvm::{
-    get_prover_server,
-    recursion::{identity_p254, lift},
-    ExecutorEnv, ExecutorImpl, Groth16Receipt, Groth16Seal, InnerReceipt, ProverOpts, Receipt,
-    VerifierContext,
-};
-
+#[cfg(feature = "prove")]
 #[test]
 fn stark2snark() {
+    use std::{fs::File, io::Cursor, path::Path, process::Command};
+
+    use risc0_groth16::{to_json, Seal as Groth16Seal};
+    use risc0_zkvm::{
+        get_prover_server, recursion::identity_p254, CompactReceipt, ExecutorEnv, ExecutorImpl,
+        InnerReceipt, ProverOpts, Receipt, VerifierContext,
+    };
+    use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID};
+    use tempfile::tempdir;
+
     let tmp_dir = tempdir().expect("Failed to create tmpdir");
     let work_dir = std::env::var("RISC0_WORK_DIR");
     let work_dir = work_dir
@@ -41,38 +39,30 @@ fn stark2snark() {
         .unwrap();
 
     tracing::info!("execute");
+
     let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
     let session = exec.run().unwrap();
-    let segments = session.resolve().unwrap();
-    assert_eq!(segments.len(), 1);
 
     tracing::info!("prove");
     let opts = ProverOpts::default();
     let ctx = VerifierContext::default();
     let prover = get_prover_server(&opts).unwrap();
-    let segment_receipt = prover.prove_segment(&ctx, &segments[0]).unwrap();
-
-    tracing::info!("lift");
-    let lift_receipt = lift(&segment_receipt).unwrap();
-    lift_receipt.verify_integrity().unwrap();
+    let receipt = prover.prove_session(&ctx, &session).unwrap();
+    let succinct_receipt = receipt.inner.succinct().unwrap();
 
     tracing::info!("identity_p254");
-    let ident_receipt = identity_p254(&lift_receipt).unwrap();
+    let ident_receipt = identity_p254(&succinct_receipt).unwrap();
     let seal_bytes = ident_receipt.get_seal_bytes();
 
-    std::fs::write(work_dir.join("seal.r0"), &seal_bytes).unwrap();
-
     let journal = session.journal.unwrap().bytes;
-    let succinct_receipt = Receipt::new(InnerReceipt::Succinct(ident_receipt), journal.clone());
-    // NOTE: verifying an identity_p254 receipt in rust is not supported at the moment.
-    // succinct_receipt.verify(MULTI_TEST_ID).unwrap();
 
     tracing::info!("seal-to-json");
+    std::fs::write(work_dir.join("seal.r0"), &seal_bytes).unwrap();
     let seal_path = work_dir.join("input.json");
     let snark_path = work_dir.join("output.json");
     let seal_json = File::create(&seal_path).unwrap();
     let mut seal_reader = Cursor::new(&seal_bytes);
-    super::to_json(&mut seal_reader, &seal_json).unwrap();
+    to_json(&mut seal_reader, &seal_json).unwrap();
 
     tracing::info!("risc0-groth16-prover");
     let status = Command::new("docker")
@@ -125,9 +115,9 @@ fn stark2snark() {
     tracing::info!("Groth16Seal");
     let groth16_seal = Groth16Seal { a, b, c };
     let receipt = Receipt::new(
-        InnerReceipt::Groth16(Groth16Receipt {
+        InnerReceipt::Compact(CompactReceipt {
             seal: groth16_seal.to_vec(),
-            claim: succinct_receipt.get_claim().unwrap(),
+            claim: receipt.get_claim().unwrap(),
         }),
         journal,
     );

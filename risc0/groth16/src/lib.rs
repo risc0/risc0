@@ -23,9 +23,15 @@ use num_bigint::BigInt;
 use risc0_zkp::core::digest::Digest;
 
 pub mod data_structures;
+#[cfg(feature = "prove")]
+mod seal_format;
+#[cfg(feature = "prove")]
+mod seal_to_json;
 pub mod verifier;
 
 pub use data_structures::{ProofJson, PublicInputsJson, Seal, VerifyingKeyJson};
+#[cfg(feature = "prove")]
+pub use seal_to_json::to_json;
 pub use verifier::Verifier;
 
 // Deserialize a scalar field from bytes in big-endian format

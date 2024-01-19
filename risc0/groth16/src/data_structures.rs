@@ -284,16 +284,11 @@ mod tests {
             "3539307538774736362004944548122522044958136460057956047632676706584864343097",
             "1"
             ],
-            "protocol": "groth16",
-            "curve": "bn128"
         }
     "#;
 
         let proof: ProofJson =
             serde_json::from_str(json_data).expect("JSON was not well-formatted");
-        assert_eq!(proof.protocol, "groth16");
-        assert_eq!(proof.curve, "bn128");
-        println!("{:?}", proof);
     }
 
     #[test]

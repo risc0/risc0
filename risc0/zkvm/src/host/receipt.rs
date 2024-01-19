@@ -282,8 +282,8 @@ pub enum InnerReceipt {
     /// The [SuccinctReceipt].
     Succinct(SuccinctReceipt),
 
-    /// The [Groth16Receipt].
-    Groth16(Groth16Receipt),
+    /// The [CompactReceipt].
+    Compact(CompactReceipt),
 
     /// A fake receipt for testing and development.
     ///
@@ -310,7 +310,7 @@ impl InnerReceipt {
     ) -> Result<(), VerificationError> {
         match self {
             InnerReceipt::Composite(x) => x.verify_integrity_with_context(ctx),
-            InnerReceipt::Groth16(x) => x.verify_integrity(),
+            InnerReceipt::Compact(x) => x.verify_integrity(),
             InnerReceipt::Succinct(x) => x.verify_integrity_with_context(ctx),
             InnerReceipt::Fake { .. } => {
                 #[cfg(feature = "std")]
@@ -331,9 +331,9 @@ impl InnerReceipt {
         }
     }
 
-    /// Returns the [InnerReceipt::Groth16] arm.
-    pub fn groth16(&self) -> Result<&Groth16Receipt, VerificationError> {
-        if let InnerReceipt::Groth16(x) = self {
+    /// Returns the [InnerReceipt::Compact] arm.
+    pub fn compact(&self) -> Result<&CompactReceipt, VerificationError> {
+        if let InnerReceipt::Compact(x) = self {
             Ok(&x)
         } else {
             Err(VerificationError::ReceiptFormatError)
@@ -353,7 +353,7 @@ impl InnerReceipt {
     pub fn get_claim(&self) -> Result<ReceiptClaim, VerificationError> {
         match self {
             InnerReceipt::Composite(ref receipt) => receipt.get_claim(),
-            InnerReceipt::Groth16(ref groth16_receipt) => Ok(groth16_receipt.claim.clone()),
+            InnerReceipt::Compact(ref compact_receipt) => Ok(compact_receipt.claim.clone()),
             InnerReceipt::Succinct(ref succinct_receipt) => Ok(succinct_receipt.claim.clone()),
             InnerReceipt::Fake { claim } => Ok(claim.clone()),
         }
@@ -363,7 +363,7 @@ impl InnerReceipt {
 /// A receipt composed of a Groth16 over the BN_254 curve
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[cfg_attr(test, derive(PartialEq))]
-pub struct Groth16Receipt {
+pub struct CompactReceipt {
     /// A Groth16 proof of a zkVM execution with the associated claim.
     pub seal: Vec<u8>,
 
@@ -372,7 +372,7 @@ pub struct Groth16Receipt {
     pub claim: ReceiptClaim,
 }
 
-impl Groth16Receipt {
+impl CompactReceipt {
     /// Verify the integrity of this receipt, ensuring the claim is attested
     /// to by the seal.
     pub fn verify_integrity(&self) -> Result<(), VerificationError> {
