@@ -132,8 +132,8 @@ pub struct ProofJson {
     pi_a: Vec<String>,
     pi_b: Vec<Vec<String>>,
     pi_c: Vec<String>,
-    protocol: String,
-    curve: String,
+    protocol: Option<String>,
+    curve: Option<String>,
 }
 
 /// Groth16 VErifying Key encoded as JSON.
@@ -283,9 +283,7 @@ mod tests {
             "3377589055768505200338103068502385766692581078477457038865468586522780813958",
             "3539307538774736362004944548122522044958136460057956047632676706584864343097",
             "1"
-            ],
-            "protocol": "groth16",
-            "curve": "bn128"
+            ]
         }
     "#;
 

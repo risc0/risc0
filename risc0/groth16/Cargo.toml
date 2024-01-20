@@ -30,6 +30,7 @@ tracing =  { version = "0.1", optional = true }
 [dev-dependencies]
 risc0-zkvm = { workspace = true, features = ["prove"] }
 risc0-zkvm-methods = { path = "../zkvm/methods" }
+serde_json = { version = "1.0" }
 test-log = { version = "0.2", default-features = false, features = ["trace"] }
 
 [features]
