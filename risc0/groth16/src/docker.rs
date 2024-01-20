@@ -13,6 +13,7 @@
 // limitations under the License.
 
 use std::{
+    env::consts::ARCH,
     fs::File,
     io::{Cursor, Read},
     path::Path,
@@ -32,7 +33,7 @@ pub fn stark_to_snark(identity_p254_seal_bytes: &[u8]) -> Result<Seal> {
         bail!("stark_to_snark is only supported on x86 architecture.")
     }
     if !is_docker_installed() {
-        bail("Please install docker first.")
+        bail!("Please install docker first.")
     }
 
     let tmp_dir = tempdir()?;
@@ -79,9 +80,5 @@ fn is_docker_installed() -> bool {
 }
 
 fn is_x86_architecture() -> bool {
-    if let Ok(arch) = sys_info::cpu_info() {
-        arch.contains("x86")
-    } else {
-        false
-    }
+    ARCH == "x86_64" || ARCH == "x86"
 }
