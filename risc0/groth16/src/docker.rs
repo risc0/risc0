@@ -19,7 +19,8 @@ use std::{
     process::Command,
 };
 
-use anyhow::Result;
+use anyhow::{bail, Result};
+use sys_info;
 use tempfile::tempdir;
 
 use crate::{to_json, ProofJson, Seal};
@@ -27,6 +28,13 @@ use crate::{to_json, ProofJson, Seal};
 /// Compact a given seal of an `identity_p254` receipt into a Groth16 `Seal`.
 /// Requires running Docker on an x86 architecture.
 pub fn stark_to_snark(identity_p254_seal_bytes: &[u8]) -> Result<Seal> {
+    if !is_x86_architecture() {
+        bail!("stark_to_snark is only supported on x86 architecture.")
+    }
+    if !is_docker_installed() {
+        bail("Please install docker first.")
+    }
+
     let tmp_dir = tempdir()?;
     let work_dir = std::env::var("RISC0_WORK_DIR");
     let work_dir = work_dir
@@ -60,4 +68,20 @@ pub fn stark_to_snark(identity_p254_seal_bytes: &[u8]) -> Result<Seal> {
     proof_file.read_to_string(&mut contents)?;
     let proof_json: ProofJson = serde_json::from_str(&contents)?;
     proof_json.try_into()
+}
+
+fn is_docker_installed() -> bool {
+    Command::new("docker")
+        .arg("--version")
+        .output()
+        .map(|output| output.status.success())
+        .unwrap_or(false)
+}
+
+fn is_x86_architecture() -> bool {
+    if let Ok(arch) = sys_info::cpu_info() {
+        arch.contains("x86")
+    } else {
+        false
+    }
 }
