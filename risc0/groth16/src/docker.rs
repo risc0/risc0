@@ -21,7 +21,6 @@ use std::{
 };
 
 use anyhow::{bail, Result};
-use sys_info;
 use tempfile::tempdir;
 
 use crate::{to_json, ProofJson, Seal};
