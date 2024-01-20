@@ -548,6 +548,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "risc0-groth16"
+version = "0.21.0-alpha.1"
+dependencies = [
+ "anyhow",
+ "ark-bn254",
+ "ark-groth16",
+ "ark-serialize",
+ "hex",
+ "num-bigint",
+ "num-derive",
+ "num-traits",
+ "risc0-zkp",
+ "serde",
+]
+
+[[package]]
 name = "risc0-zkp"
 version = "0.21.0-alpha.1"
 dependencies = [
@@ -570,21 +586,18 @@ name = "risc0-zkvm"
 version = "0.21.0-alpha.1"
 dependencies = [
  "anyhow",
- "ark-bn254",
- "ark-groth16",
- "ark-serialize",
  "bytemuck",
  "cfg-if",
  "getrandom",
  "hex",
  "human-repr",
- "num-bigint",
  "num-derive",
  "num-traits",
  "risc0-binfmt",
  "risc0-circuit-recursion",
  "risc0-circuit-rv32im",
  "risc0-core",
+ "risc0-groth16",
  "risc0-zkp",
  "risc0-zkvm-platform",
  "rrs-lib",
