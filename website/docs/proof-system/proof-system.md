@@ -5,6 +5,7 @@ slug: ./
 
 # Proof System Overview
 
+### Introduction
 When the RISC Zero [zkVM] executes, it produces a [Receipt] that serves as a proof of validity of a given [Session].
 
 To confirm that a [Receipt] was honestly generated, use [Receipt::verify] and supply the [ImageID] of the code that should have been executed as a parameter.
@@ -15,15 +16,14 @@ The contents of the [journal] are specified by calling [env::commit()] and [env:
 In addition to the journal, a receipt makes a number of claims about the program execution.
 These claims are summarized in the [ReceiptClaim].
 
-A [Receipt] can take two main forms:
+### Types of Receipts
+A [Receipt] can take three main forms, each of which constitutes a proof of validity of a [Session]:
 
-- It can be represented by a collection of [SegmentReceipts], each of which proves a single [Segment].
-  Collectively, the [SegmentReceipts] prove the validity of the full [Session].
-- It can also be represented by a single [SuccinctReceipt], proving the validity of the entire session.
-  Using recursive proving, any number of [SegmentReceipts] can be compressed into a single [SuccinctReceipt].
+1. A [FlatReceipt] is a vector of [ZK-STARK]s, one for each [segment]. Segments & segment proofs are constructed by the [RISC-V zkVM].
+2. A [SuccinctReceipt] is a single [ZK-STARK] proving an entire [Session]. The SuccinctReceipt is formed by aggregating the proofs from the [FlatReceipt]. This is accomplished using the [Recursion Circuit]. Users can also aggregate multiple [SuccinctReceipt]s into a single [SuccinctReceipt] using [proof composition].
+3. A [Groth16Receipt] is a single [Groth16] proof for an entire [Session]. The Groth16Receipt is formed by verifying a SuccinctReceipt using RISC Zero's [Groth16 circuit].
 
-Cryptographically each [SegmentReceipt] or [SuccinctReceipt] is a [ZK-STARK].
-The details of the RISC Zero ZK-STARK are described in our [ZKP Whitepaper] and in this [Sequence Diagram].
+The details of the RISC Zero ZK-STARK protocol are described in our [ZKP Whitepaper] and in this [Sequence Diagram].
 
 ## Learn More
 
@@ -56,8 +56,8 @@ The details of the RISC Zero ZK-STARK are described in our [ZKP Whitepaper] and 
 [ReceiptClaim]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.ReceiptClaim.html
 [SegmentReceipts]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.SegmentReceipts.html
 [SegmentReceipt]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.SegmentReceipt.html
-[SuccinctReceipt]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/recursion/struct.SuccinctReceipt.html
-[Session]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Session.html
+[SuccinctReceipt]: https://docs.rs/risc0-zkvm/0.19.1/risc0_zkvm/struct.SuccinctReceipt.html
+[session]: https://dev.risczero.com/terminology#session
 [Receipt::verify]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Receipt.html#method.verify
 [ImageID]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.SystemState.html
 [journal]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Receipt.html#structfield.journal
@@ -65,7 +65,7 @@ The details of the RISC Zero ZK-STARK are described in our [ZKP Whitepaper] and 
 [env::commit_slice()]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest/env/fn.commit_slice.html
 [guest]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest
 [ZK-STARK]: ../reference-docs/about-starks.md
-[Segment]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Segment.html
+[segment]: https://dev.risczero.com/terminology#segment
 [ZKP Whitepaper]: https://www.risczero.com/proof-system-in-detail.pdf
 [Sequence Diagram]: ./proof-system-sequence-diagram.md
 [RISC Zero Study Club]: https://dev.risczero.com/studyclub
