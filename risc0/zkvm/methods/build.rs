@@ -41,6 +41,7 @@ fn main() {
         (
             "risc0-zkvm-methods-guest",
             GuestOptions {
+                bin: vec![],
                 features: vec![],
                 use_docker,
             },
@@ -48,6 +49,7 @@ fn main() {
         (
             "risc0-zkvm-methods-std",
             GuestOptions {
+                bin: vec![],
                 features: vec!["test_feature1".to_string(), "test_feature2".to_string()],
                 use_docker: None,
             },

@@ -35,7 +35,12 @@ const DOCKER_IGNORE: &str = r#"
 const TARGET_DIR: &str = "target/riscv-guest/riscv32im-risc0-zkvm-elf/docker";
 
 /// Build the package in the manifest path using a docker environment.
-pub fn docker_build(manifest_path: &Path, src_dir: &Path, features: &[String]) -> Result<()> {
+pub fn docker_build(
+    manifest_path: &Path,
+    src_dir: &Path,
+    binaries: &[String],
+    features: &[String],
+) -> Result<()> {
     let manifest_path = manifest_path
         .canonicalize()
         .context(format!("manifest_path: {manifest_path:?}"))?;
@@ -69,7 +74,13 @@ pub fn docker_build(manifest_path: &Path, src_dir: &Path, features: &[String]) -
         let temp_dir = tempdir()?;
         let temp_path = temp_dir.path();
         let rel_manifest_path = manifest_path.strip_prefix(&src_dir)?;
-        create_dockerfile(&rel_manifest_path, temp_path, pkg_name.as_str(), features)?;
+        create_dockerfile(
+            &rel_manifest_path,
+            temp_path,
+            pkg_name.as_str(),
+            binaries,
+            features,
+        )?;
         build(&src_dir, temp_path)?;
     }
     println!("ELFs ready at:");
@@ -77,6 +88,10 @@ pub fn docker_build(manifest_path: &Path, src_dir: &Path, features: &[String]) -
     let target_dir = src_dir.join(TARGET_DIR);
     for target in root_pkg.targets.iter() {
         if target.is_bin() {
+            if !binaries.is_empty() && !binaries.contains(&target.name) {
+                println!("Skipping target: {}", target.name);
+                continue;
+            }
             let elf_path = target_dir.join(&pkg_name).join(&target.name);
             let image_id = compute_image_id(&elf_path)?;
             let rel_elf_path = Path::new(TARGET_DIR).join(&pkg_name).join(&target.name);
@@ -94,6 +109,7 @@ fn create_dockerfile(
     manifest_path: &Path,
     temp_dir: &Path,
     pkg_name: &str,
+    binaries: &[String],
     features: &[String],
 ) -> Result<()> {
     let manifest_env = &[("CARGO_MANIFEST_PATH", manifest_path.to_str().unwrap())];
@@ -111,6 +127,11 @@ fn create_dockerfile(
     ];
 
     let mut build_args = common_args.clone();
+    let binaries_str = binaries.join(",");
+    if !binaries.is_empty() {
+        build_args.push("--bin");
+        build_args.push(&binaries_str);
+    }
     let features_str = features.join(",");
     if !features.is_empty() {
         build_args.push("--features");
