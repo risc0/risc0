@@ -130,7 +130,6 @@ pub mod nr {
     declare_syscall!(pub SYS_LOG);
     declare_syscall!(pub SYS_PANIC);
     declare_syscall!(pub SYS_RANDOM);
-    declare_syscall!(pub SYS_READ_AVAIL);
     declare_syscall!(pub SYS_READ);
     declare_syscall!(pub SYS_WRITE);
     declare_syscall!(pub SYS_VERIFY);
@@ -424,7 +423,7 @@ pub extern "C" fn sys_cycle_count() -> usize {
 ///
 /// `recv_ptr` must be aligned and dereferenceable.
 #[cfg_attr(feature = "export-syscalls", no_mangle)]
-pub unsafe extern "C" fn sys_read(fd: u32, recv_ptr: *mut u8, nrequested: usize) -> usize {
+pub unsafe extern "C" fn sys_read(fd: u32, recv_ptr: *mut u8, nread: usize) -> usize {
     // The SYS_READ system call can do a given number of word-aligned reads
     // efficiently. The semantics of the system call are:
     //
@@ -436,9 +435,6 @@ pub unsafe extern "C" fn sys_read(fd: u32, recv_ptr: *mut u8, nrequested: usize)
     // the rest with NULs.  It returns the number of bytes read.
     //
     // sys_read exposes this as a byte-aligned read by:
-    //   * Uses sys_read_avail to determine how many bytes actually need to be read
-    //     to avoid having to null-pad the whole buffer if we're not reading very
-    //     much
     //   * Copies any unaligned bytes at the start or end of the region.
 
     // Fills 0-3 bytes from a u32 into memory, returning the pointer afterwards.
@@ -452,15 +448,11 @@ pub unsafe extern "C" fn sys_read(fd: u32, recv_ptr: *mut u8, nrequested: usize)
         ptr
     }
 
-    // Find out how many bytes to actually read, given how many we requested.
-    let Return(navail, _) = syscall_1(nr::SYS_READ_AVAIL, null_mut(), 0, fd);
-    let nread = min(nrequested, navail as usize);
-
     // Determine how many bytes at the beginning of the buffer we have
     // to read in order to become word-aligned.
     let ptr_offset = (recv_ptr as usize) & (WORD_SIZE - 1);
-    let (main_ptr, main_requested) = if ptr_offset == 0 {
-        (recv_ptr, nread)
+    let (main_ptr, main_requested, nread_first) = if ptr_offset == 0 {
+        (recv_ptr, nread, 0)
     } else {
         let unaligned_at_start = min(nread, WORD_SIZE - ptr_offset);
         // Read unaligned bytes into "firstword".
@@ -474,7 +466,7 @@ pub unsafe extern "C" fn sys_read(fd: u32, recv_ptr: *mut u8, nrequested: usize)
             // We only read part of a word, and don't have to read any full words.
             return nread;
         }
-        (main_ptr, nread - unaligned_at_start)
+        (main_ptr, nread - unaligned_at_start, nread_first as usize)
     };
 
     // Copy in all of the word-aligned data
@@ -482,16 +474,17 @@ pub unsafe extern "C" fn sys_read(fd: u32, recv_ptr: *mut u8, nrequested: usize)
     let (nread_main, lastword) =
         sys_read_internal(fd, main_ptr as *mut u32, main_words, main_requested);
     debug_assert_eq!(nread_main, main_requested);
+    let read_words = nread_main / WORD_SIZE;
 
     // Copy in individual bytes after the word-aligned section.
     let unaligned_at_end = main_requested % WORD_SIZE;
     fill_from_word(
-        main_ptr.add(main_words * WORD_SIZE),
+        main_ptr.add(read_words * WORD_SIZE),
         lastword,
         unaligned_at_end,
     );
 
-    nread
+    nread_first + nread_main
 }
 
 /// Reads up to the given number of words into the buffer [recv_buf,
@@ -502,13 +495,11 @@ pub unsafe extern "C" fn sys_read(fd: u32, recv_ptr: *mut u8, nrequested: usize)
 /// * The read length is specified in words, not bytes.  (The output
 /// length is still returned in bytes)
 ///
-/// * If not all data is available, sys_read_words will block on the
-/// input stream instead of returning a short read.
+/// * If not all data is available, `sys_read_words` will return a short read.
 ///
 /// * recv_buf must be word-aligned.
 ///
-/// * All of the buffer is overwritten, even in the case of EOF
-/// mid-way through.
+/// * Return a short read in the case of EOF mid-way through.
 ///
 /// # Safety
 ///
@@ -530,22 +521,27 @@ fn sys_read_internal(fd: u32, recv_ptr: *mut u32, nwords: usize, nbytes: usize) 
             final_word == 0,
             "host returned non-zero final word on a fully aligned read"
         );
+        let chunk_len = min(nbytes_remain, MAX_BUF_BYTES) as u32;
         let Return(nread_bytes, last_word) = unsafe {
             syscall_2(
                 nr::SYS_READ,
                 recv_ptr,
                 min(nwords_remain, MAX_BUF_WORDS),
                 fd,
-                min(nbytes_remain, MAX_BUF_BYTES) as u32,
+                chunk_len,
             )
         };
         let nread_bytes = nread_bytes as usize;
         let nread_words = nread_bytes / WORD_SIZE;
         recv_ptr = unsafe { recv_ptr.add(nread_words) };
-        nwords_remain -= nread_words;
-        nbytes_remain -= nread_bytes;
-        nread_total_bytes += nread_bytes;
         final_word = last_word;
+        nwords_remain -= nread_words;
+        nread_total_bytes += nread_bytes;
+        nbytes_remain -= nread_bytes;
+        if nread_bytes < chunk_len as usize {
+            // We've reached EOF, and the host has returned a partial word.
+            break;
+        }
     }
     (nread_total_bytes, final_word)
 }

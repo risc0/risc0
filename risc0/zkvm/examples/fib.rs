@@ -19,6 +19,7 @@ use risc0_zkvm::{
     get_prover_server, ExecutorEnv, ExecutorImpl, ProverOpts, ProverServer, VerifierContext,
 };
 use risc0_zkvm_methods::FIB_ELF;
+use risc0_zkvm_platform::WORD_SIZE;
 use tracing_subscriber::{prelude::*, EnvFilter};
 
 #[derive(Parser)]
@@ -78,11 +79,11 @@ fn top(prover: Rc<dyn ProverServer>, iterations: u32, skip_prover: bool) -> Metr
             .prove_session(&ctx, &session)
             .unwrap()
             .inner
-            .composite()
+            .succinct()
             .unwrap()
-            .segments
-            .iter()
-            .fold(0, |acc, segment| acc + segment.get_seal_bytes().len())
+            .seal
+            .len()
+            * WORD_SIZE
     };
 
     Metrics {

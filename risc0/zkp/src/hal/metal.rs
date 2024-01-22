@@ -46,7 +46,7 @@ const KERNEL_NAMES: &[&str] = &[
     "eltwise_add_fp",
     "eltwise_copy_fp",
     "eltwise_mul_factor_fp",
-    "eltwise_sum_fp4",
+    "eltwise_sum_fpext",
     "fri_fold",
     "gather_sample",
     "mix_poly_coeffs",
@@ -670,7 +670,7 @@ impl<MH: MetalHash> Hal for MetalHal<MH> {
             KernelArg::Integer(count as u32),
             KernelArg::Integer(to_add as u32),
         ];
-        self.dispatch_by_name("eltwise_sum_fp4", args, count as u64);
+        self.dispatch_by_name("eltwise_sum_fpext", args, count as u64);
     }
 
     #[tracing::instrument(skip_all)]

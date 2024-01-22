@@ -226,6 +226,7 @@ dependencies = [
  "blake2",
  "derivative",
  "digest",
+ "rayon",
  "sha2",
 ]
 
@@ -243,6 +244,7 @@ dependencies = [
  "hashbrown 0.13.2",
  "itertools 0.10.5",
  "num-traits",
+ "rayon",
  "zeroize",
 ]
 
@@ -262,6 +264,7 @@ dependencies = [
  "num-bigint 0.4.4",
  "num-traits",
  "paste",
+ "rayon",
  "rustc_version",
  "zeroize",
 ]
@@ -302,6 +305,7 @@ dependencies = [
  "ark-relations",
  "ark-serialize",
  "ark-std",
+ "rayon",
 ]
 
 [[package]]
@@ -315,6 +319,7 @@ dependencies = [
  "ark-std",
  "derivative",
  "hashbrown 0.13.2",
+ "rayon",
 ]
 
 [[package]]
@@ -372,6 +377,7 @@ checksum = "94893f1e0c6eeab764ade8dc4c0db24caf4fe7cbbaafc0eba0a9030f447b5185"
 dependencies = [
  "num-traits",
  "rand",
+ "rayon",
 ]
 
 [[package]]
@@ -920,6 +926,23 @@ name = "colorchoice"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "acbf1af155f9b9ef647e42cdc158db4b64a1b61f743629225fde6f3e0be2a7c7"
+
+[[package]]
+name = "composition-example"
+version = "0.1.0"
+dependencies = [
+ "composition-example-methods",
+ "hello-world",
+ "risc0-zkvm",
+ "serde",
+]
+
+[[package]]
+name = "composition-example-methods"
+version = "0.1.0"
+dependencies = [
+ "risc0-build",
+]
 
 [[package]]
 name = "console"
@@ -2681,6 +2704,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "methods"
+version = "0.1.0"
+dependencies = [
+ "risc0-build",
+]
+
+[[package]]
 name = "mime"
 version = "0.3.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3821,6 +3851,34 @@ dependencies = [
 ]
 
 [[package]]
+name = "risc0-groth16"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "ark-bn254",
+ "ark-groth16",
+ "ark-serialize",
+ "bincode",
+ "bytemuck",
+ "ethereum-types",
+ "hex",
+ "risc0-zkvm",
+ "serde",
+ "serde_json",
+ "sha2",
+]
+
+[[package]]
+name = "risc0-groth16-verifier-example"
+version = "0.1.0"
+dependencies = [
+ "methods",
+ "risc0-groth16",
+ "risc0-zkvm",
+ "serde_json",
+]
+
+[[package]]
 name = "risc0-sppark"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4382,9 +4440,9 @@ dependencies = [
 
 [[package]]
 name = "sha2"
-version = "0.10.8"
+version = "0.10.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "793db75ad2bcafc3ffa7c68b215fee268f537982cd901d132f89c6343f3a3dc8"
+checksum = "82e6b795fe2e3b1e845bafcb27aa35405c4d47cdfc92af5fc8d3002f76cebdc0"
 dependencies = [
  "cfg-if",
  "cpufeatures",

@@ -39,6 +39,7 @@
     "Cargo.toml",
     "benchmarks/Cargo.toml",
     "bonsai/examples/governance/Cargo.toml",
+    "compact_proof/seal_to_json/Cargo.toml",
     "examples/Cargo.toml",
     "risc0/fault/guest/Cargo.toml",
     "risc0/zkvm/methods/guest/Cargo.toml",

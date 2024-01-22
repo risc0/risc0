@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 #pragma once
 
 #include "fp.h"
-#include "fp4.h"
+#include "fpext.h"
 
 #include <cstdint>
 #include <exception>
@@ -56,6 +56,6 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args);
 Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args);
 Fp step_verify_mem(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args);
 
-Fp4 poly_fp(size_t cycle, size_t steps, Fp4* poly_mix, Fp** args);
+FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args);
 
 } // namespace risc0::circuit::rv32im

@@ -513,18 +513,16 @@ impl Server {
                 .as_bytes()?;
             let conditional_succinct_receipt: SuccinctReceipt =
                 bincode::deserialize(&conditional_receipt_bytes)?;
-            let corroborating_receipt_bytes = request
-                .corroborating_receipt
+            let assumption_receipt_bytes = request
+                .assumption_receipt
                 .ok_or(malformed_err())?
                 .as_bytes()?;
-            let corroborating_succinct_receipt: SuccinctReceipt =
-                bincode::deserialize(&corroborating_receipt_bytes)?;
+            let assumption_succinct_receipt: SuccinctReceipt =
+                bincode::deserialize(&assumption_receipt_bytes)?;
 
             let prover = get_prover_server(&opts)?;
-            let receipt = prover.resolve(
-                &conditional_succinct_receipt,
-                &corroborating_succinct_receipt,
-            )?;
+            let receipt =
+                prover.resolve(&conditional_succinct_receipt, &assumption_succinct_receipt)?;
 
             let succinct_receipt_pb: pb::core::SuccinctReceipt = receipt.into();
             let succinct_receipt_bytes = succinct_receipt_pb.encode_to_vec();
@@ -629,12 +627,12 @@ fn build_env<'a>(
         match assumption.kind.as_ref().ok_or(malformed_err())? {
             pb::api::assumption::Kind::Proven(asset) => {
                 let receipt: Receipt = pb::core::Receipt::decode(asset.as_bytes()?)?.try_into()?;
-                env_builder.add_assumption(receipt.into())
+                env_builder.add_assumption(receipt)
             }
             pb::api::assumption::Kind::Unresolved(asset) => {
                 let claim: MaybePruned<ReceiptClaim> =
                     pb::core::MaybePruned::decode(asset.as_bytes()?)?.try_into()?;
-                env_builder.add_assumption(claim.into())
+                env_builder.add_assumption(claim)
             }
         };
     }
