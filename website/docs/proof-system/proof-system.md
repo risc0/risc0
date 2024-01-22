@@ -59,6 +59,7 @@ In addition to the links in the sidebar, we recommend the following resources:
 [Groth16 Circuit]: https://dev.risczero.com/terminology#groth16-circuit
 [fake receipt]: https://dev.risczero.com/api/zkvm/dev-mode
 [session]: https://dev.risczero.com/terminology#session
+[proof composition]: https://dev.risczero.com/terminology#proof-composition
 [Receipt::verify()]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Receipt.html#method.verify
 [ImageID]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.SystemState.html
 [journal]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Receipt.html#structfield.journal
