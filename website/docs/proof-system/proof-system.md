@@ -72,4 +72,7 @@ In addition to the links in the sidebar, we recommend the following resources:
 [RISC-V Circuit]: https://dev.risczero.com/terminology#risc-v-circuit
 [Sequence Diagram]: ./proof-system-sequence-diagram.md
 [Study Club]: https://dev.risczero.com/studyclub
+[talk from zkSummit 10]: https://www.youtube.com/watch?v=wkIBN2CGJdc
+[GitHub]: https://github.com/risc0/risc0
+[Bonsai]: https://bonsai.xyz
 
