@@ -21,7 +21,7 @@ These claims are summarized in the [ReceiptClaim].
 A [Receipt] can take four main forms.
 
 1. A **[flat receipt]** is a vector of [ZK-STARK]s, one for each [segment]. Segments & segment proofs are constructed by the [RISC-V Circuit].
-2. A **[succinct receipt]** is a single [ZK-STARK] proving an entire [Session]. The SuccinctReceipt is formed by aggregating the proofs from the [FlatReceipt]. This is accomplished using the [Recursion Circuit]. Users can also aggregate multiple [SuccinctReceipt]s into a single [SuccinctReceipt] using [proof composition].
+2. A **[succinct receipt]** is a single [ZK-STARK] proving an entire [Session]. The SuccinctReceipt is formed by aggregating the proofs from the flat receipt. This is accomplished using the [Recursion Circuit]. Users can also aggregate multiple succinct receipts into a single succinct receipt using [proof composition].
 3. A **[Groth16 receipt]**  is a single [Groth16] proof for an entire [Session]. The Groth16Receipt is formed by verifying a SuccinctReceipt using RISC Zero's [Groth16 circuit].
 4. A **[fake receipt]** doesn't contain any proof at all. This feature is offered to enable rapid prototyping. See [Dev Mode] for more information.
 
@@ -46,6 +46,7 @@ In addition to the links in the sidebar, we recommend the following resources:
 - [Start Building](/api/zkvm/quickstart)
 - [Study Club]
 
+[Dev mode]: https://dev.risczero.com/zkvm/dev-mode
 [zkVM]: https://docs.rs/risc0-zkvm
 [Receipt]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Receipt.html
 [ReceiptClaim]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.ReceiptClaim.html
@@ -53,7 +54,8 @@ In addition to the links in the sidebar, we recommend the following resources:
 [SegmentReceipt]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.SegmentReceipt.html
 [flat receipt]: https://docs.rs/risc0-zkvm/0.19.1/risc0_zkvm/struct.FlatReceipt.html
 [succinct receipt]: https://docs.rs/risc0-zkvm/0.19.1/risc0_zkvm/struct.SuccinctReceipt.html
-[Groth16 receipt]: test
+[Groth16]: https://dev.risczero.com/terminology#groth16
+[Groth16 receipt]: https://dev.risczero.com/terminology#groth-16-receipt
 [fake receipt]: https://dev.risczero.com/api/zkvm/dev-mode
 [session]: https://dev.risczero.com/terminology#session
 [Receipt::verify()]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Receipt.html#method.verify
@@ -65,6 +67,8 @@ In addition to the links in the sidebar, we recommend the following resources:
 [ZK-STARK]: ../reference-docs/about-starks.md
 [segment]: https://dev.risczero.com/terminology#segment
 [ZKP Whitepaper]: https://www.risczero.com/proof-system-in-detail.pdf
+[Recursion Circuit]: https://dev.risczero.com/terminology#recursion-circuit
+[RISC-V Circuit]: https://dev.risczero.com/terminology#risc-v-circuit
 [Sequence Diagram]: ./proof-system-sequence-diagram.md
 [Study Club]: https://dev.risczero.com/studyclub
 

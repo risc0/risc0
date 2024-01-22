@@ -123,6 +123,9 @@ TODO
 ### Groth16 Circuit
 TODO
 
+### Groth16 Receipt
+TODO
+
 ### Guest
 
 The system running inside the [zkVM]. <br/>
