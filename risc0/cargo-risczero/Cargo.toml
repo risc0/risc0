@@ -41,6 +41,9 @@ tar = "0.4"
 tempfile = "3"
 text_io = "0.1.12"
 tokio = { version = "1", features = ["rt"] }
+tracing = { version = "0.1", features = ["log"] }
+sha2 = "0.10.8"
+serde_json = "1.0.96"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 zip = { version = "0.6", optional = true }
 
