@@ -182,10 +182,6 @@ See also: [commit]
 
 A single 'main' entry point for code that runs inside the [zkVM].
 
-### Proof Composition
-
-TODO
-
 ### Prove
 
 [prove]: #prove
