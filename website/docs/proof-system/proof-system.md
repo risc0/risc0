@@ -18,11 +18,12 @@ In addition to the journal, a receipt makes a number of claims about the program
 These claims are summarized in the [ReceiptClaim].
 
 ### Types of Receipts
+
 A [Receipt] can take four main forms.
 
 1. A **[flat receipt]** is a vector of [ZK-STARK]s, one for each [segment]. Segments & segment proofs are constructed by the [RISC-V Circuit].
 2. A **[succinct receipt]** is a single [ZK-STARK] proving an entire [Session]. A succinct receipt is formed by aggregating the proofs from a flat receipt. This is accomplished using the [Recursion Circuit]. Users can also aggregate multiple succinct receipts into a single succinct receipt using [proof composition].
-3. A **[Groth16 receipt]**  is a single [Groth16] proof for an entire [Session]. A Groth16Receipt is formed by verifying a succinct receipt using RISC Zero's [Groth16 circuit].
+3. A **[Groth16 receipt]** is a single [Groth16] proof for an entire [Session]. A Groth16Receipt is formed by verifying a succinct receipt using RISC Zero's [Groth16 circuit].
 4. A **[fake receipt]** doesn't contain any proof at all. This feature is offered to enable rapid prototyping. See [Dev Mode] for more information.
 
 <center> <img src="assets/proof-system-layers.png"/> </center>
@@ -34,13 +35,16 @@ The details of the RISC Zero ZK-STARK protocol are described in our [ZKP Whitepa
 Documentation for our Groth16 circuit is TODO.
 
 ### Open-Source Proving
+
 All three of these circuits are open-source and permissionless; anyone may generate proofs on their own hardware using the implementations available at our [GitHub].
 Users may also choose to delegate the work of proof generation to [Bonsai].
 
 Read more about our philosophy on open-source software [here](https://risczero.com/news/open-source).
 
 ## Learn More
+
 In addition to the links in the sidebar, we recommend the following resources:
+
 - [About the zkVM & Bonsai](/api/zkvm)
 - [RISC Zero News](https://risczero.com/news)
 - [Start Building](/api/zkvm/quickstart)
@@ -76,4 +80,3 @@ In addition to the links in the sidebar, we recommend the following resources:
 [talk from zkSummit 10]: https://www.youtube.com/watch?v=wkIBN2CGJdc
 [GitHub]: https://github.com/risc0/risc0
 [Bonsai]: https://bonsai.xyz
-
