@@ -4,12 +4,13 @@ RISC Zero's Study Club sessions aim to introduce the pre-requisite concepts nece
 
 ## Upcoming Sessions
 
-Stay tuned for 2024 sessions!
+**January 24: Hash Functions for ZK** <br/>
+**Wolfgang Welz** <br/>
 
-<!---
+This session provides an introduction to cryptographic hash functions. In this context, we'll take a look at the sponge construction, which is a popular framework for hash function design. While hashes such as SHA-3 are widely used in all areas of cryptography, they are usually not well suited for ZKPs. Therefore, we'll discuss the special requirements of ZK-friendly hash functions and their design, in particular the sponge-based MiMC and Poseidon.
+
 All sessions are hosted at **9am Pacific / 5PM UTC**. <br/>
 Join the session: [Zoom link] <br/>
---->
 
 Join the conversation on [Discord](https://discord.gg/risczero).
 
