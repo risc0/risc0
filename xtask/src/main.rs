@@ -13,6 +13,7 @@
 // limitations under the License.
 
 mod bootstrap;
+mod bootstrap_groth16;
 mod bootstrap_poseidon;
 mod gen_receipt;
 mod install;
@@ -21,8 +22,8 @@ use clap::{Parser, Subcommand};
 use tracing_subscriber::{prelude::*, EnvFilter};
 
 use self::{
-    bootstrap::Bootstrap, bootstrap_poseidon::BootstrapPoseidon, gen_receipt::GenReceipt,
-    install::Install,
+    bootstrap::Bootstrap, bootstrap_groth16::BootstrapGroth16,
+    bootstrap_poseidon::BootstrapPoseidon, gen_receipt::GenReceipt, install::Install,
 };
 
 #[derive(Parser)]
@@ -34,6 +35,7 @@ struct Cli {
 #[derive(Subcommand)]
 enum Commands {
     Bootstrap(Bootstrap),
+    BootstrapGroth16(BootstrapGroth16),
     BootstrapPoseidon(BootstrapPoseidon),
     GenReceipt(GenReceipt),
     Install(Install),
@@ -43,6 +45,7 @@ impl Commands {
     fn run(&self) {
         match self {
             Commands::Bootstrap(cmd) => cmd.run(),
+            Commands::BootstrapGroth16(cmd) => cmd.run(),
             Commands::BootstrapPoseidon(cmd) => cmd.run(),
             Commands::Install(cmd) => cmd.run(),
             Commands::GenReceipt(cmd) => cmd.run(),

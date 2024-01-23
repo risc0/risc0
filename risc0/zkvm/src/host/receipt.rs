@@ -19,8 +19,10 @@ use core::fmt::Debug;
 
 use anyhow::Result;
 use risc0_binfmt::SystemState;
+use risc0_circuit_recursion::control_id::ALLOWED_IDS_ROOT;
 use risc0_circuit_rv32im::layout;
 use risc0_core::field::baby_bear::BabyBear;
+use risc0_groth16::{split_digest, verifier::prepared_verifying_key, Seal, Verifier};
 use risc0_zkp::{
     core::{
         digest::Digest,
@@ -39,7 +41,6 @@ use super::control_id::{BLAKE2B_CONTROL_ID, POSEIDON_CONTROL_ID, SHA256_CONTROL_
 // Make succinct receipt available through this `receipt` module.
 pub use super::recursion::SuccinctReceipt;
 use crate::{
-    host::groth16::{Groth16Proof, Groth16Seal},
     serde::{from_slice, Error},
     sha::{Digestible, Sha256},
     Assumptions, ExitCode, MaybePruned, Output, ReceiptClaim,
@@ -281,8 +282,8 @@ pub enum InnerReceipt {
     /// The [SuccinctReceipt].
     Succinct(SuccinctReceipt),
 
-    /// The [Groth16Receipt].
-    Groth16(Groth16Receipt),
+    /// The [CompactReceipt].
+    Compact(CompactReceipt),
 
     /// A fake receipt for testing and development.
     ///
@@ -309,7 +310,7 @@ impl InnerReceipt {
     ) -> Result<(), VerificationError> {
         match self {
             InnerReceipt::Composite(x) => x.verify_integrity_with_context(ctx),
-            InnerReceipt::Groth16(x) => x.verify_integrity(),
+            InnerReceipt::Compact(x) => x.verify_integrity(),
             InnerReceipt::Succinct(x) => x.verify_integrity_with_context(ctx),
             InnerReceipt::Fake { .. } => {
                 #[cfg(feature = "std")]
@@ -330,9 +331,9 @@ impl InnerReceipt {
         }
     }
 
-    /// Returns the [InnerReceipt::Groth16] arm.
-    pub fn groth16(&self) -> Result<&Groth16Receipt, VerificationError> {
-        if let InnerReceipt::Groth16(x) = self {
+    /// Returns the [InnerReceipt::Compact] arm.
+    pub fn compact(&self) -> Result<&CompactReceipt, VerificationError> {
+        if let InnerReceipt::Compact(x) = self {
             Ok(x)
         } else {
             Err(VerificationError::ReceiptFormatError)
@@ -352,7 +353,7 @@ impl InnerReceipt {
     pub fn get_claim(&self) -> Result<ReceiptClaim, VerificationError> {
         match self {
             InnerReceipt::Composite(ref receipt) => receipt.get_claim(),
-            InnerReceipt::Groth16(ref groth16_receipt) => Ok(groth16_receipt.claim.clone()),
+            InnerReceipt::Compact(ref compact_receipt) => Ok(compact_receipt.claim.clone()),
             InnerReceipt::Succinct(ref succinct_receipt) => Ok(succinct_receipt.claim.clone()),
             InnerReceipt::Fake { claim } => Ok(claim.clone()),
         }
@@ -362,7 +363,7 @@ impl InnerReceipt {
 /// A receipt composed of a Groth16 over the BN_254 curve
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[cfg_attr(test, derive(PartialEq))]
-pub struct Groth16Receipt {
+pub struct CompactReceipt {
     /// A Groth16 proof of a zkVM execution with the associated claim.
     pub seal: Vec<u8>,
 
@@ -371,13 +372,21 @@ pub struct Groth16Receipt {
     pub claim: ReceiptClaim,
 }
 
-impl Groth16Receipt {
+impl CompactReceipt {
     /// Verify the integrity of this receipt, ensuring the claim is attested
     /// to by the seal.
     pub fn verify_integrity(&self) -> Result<(), VerificationError> {
-        Groth16Proof::from_seal(
-            &Groth16Seal::from_vec(&self.seal).map_err(|_| VerificationError::InvalidProof)?,
-            self.claim.digest(),
+        use hex::FromHex;
+        let (a0, a1) = split_digest(
+            Digest::from_hex(ALLOWED_IDS_ROOT).map_err(|_| VerificationError::InvalidProof)?,
+        )
+        .map_err(|_| VerificationError::InvalidProof)?;
+        let (c0, c1) =
+            split_digest(self.claim.digest()).map_err(|_| VerificationError::InvalidProof)?;
+        Verifier::new(
+            &Seal::from_vec(&self.seal).map_err(|_| VerificationError::InvalidProof)?,
+            vec![a0, a1, c0, c1],
+            prepared_verifying_key().map_err(|_| VerificationError::InvalidProof)?,
         )
         .map_err(|_| VerificationError::InvalidProof)?
         .verify()
@@ -789,65 +798,5 @@ impl Default for VerifierContext {
                 ("sha-256".into(), Sha256HashSuite::new_suite()),
             ]),
         }
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use hex::FromHex;
-
-    use super::*;
-    use crate::{receipt_claim::MaybePruned, ExitCode::Halted};
-
-    const IMAGE_ID: [u32; 8] = [
-        3877313773, 4166950669, 1851257837, 1474316178, 3714943358, 2342301681, 2883381307,
-        234838297,
-    ];
-
-    const RISC0_GROTH16_SEAL: &str = r#"
-    {
-        "a":[[26,63,155,211,133,192,185,234,51,172,152,49,113,248,13,45,155,140,75,98,171,225,72,44,133,246,88,199,37,103,28,56],
-            [22,46,102,79,175,35,89,153,55,78,200,143,26,196,209,62,247,200,136,247,101,65,101,157,59,33,20,91,191,43,246,84]],
-        "b":[[[20,0,192,47,211,1,254,55,118,229,52,232,89,161,51,100,224,242,246,5,106,190,188,113,187,230,100,7,255,70,192,153],
-            [9,206,194,232,36,249,103,125,57,1,189,209,245,133,230,79,219,98,176,253,221,160,20,78,189,142,46,52,171,1,162,203]],
-            [[32,70,252,38,183,118,240,156,230,16,28,10,122,111,184,65,239,158,193,102,94,156,5,56,24,236,174,103,160,172,89,109],
-            [4,151,70,37,225,160,65,7,230,206,172,247,41,192,58,149,244,201,31,171,7,137,232,107,29,143,227,49,96,29,198,35]]],
-        "c":[[20,112,216,216,113,186,224,139,117,16,31,102,238,29,76,150,58,216,254,75,147,172,89,147,216,138,41,130,172,106,148,8],
-            [23,250,144,90,188,98,158,62,214,76,108,236,158,31,125,183,20,200,101,254,212,15,32,174,120,230,219,15,71,206,189,55]]
-    }
-    "#;
-
-    #[ignore]
-    #[test]
-    fn test_groth16_receipt() {
-        let seal: Groth16Seal = serde_json::from_str(RISC0_GROTH16_SEAL).unwrap();
-        let journal: Vec<u8> = vec![135, 1, 0, 0, 0, 0, 0, 0];
-        let merkle_root =
-            Digest::from_hex("5bcc4b8e50095f5a5e28f324170ef29d25ee52d966ad996159644c63f3b11eba")
-                .unwrap();
-        let claim: ReceiptClaim = ReceiptClaim {
-            pre: MaybePruned::Value(SystemState {
-                pc: 2103560,
-                merkle_root,
-            }),
-            post: MaybePruned::Value(SystemState {
-                pc: 2111560,
-                merkle_root,
-            }),
-            exit_code: Halted(0),
-            input: Digest::default(),
-            output: MaybePruned::Value(Some(Output {
-                journal: MaybePruned::Value(journal.clone()),
-                assumptions: MaybePruned::Value(Assumptions(vec![])),
-            })),
-        };
-        let receipt = Receipt::new(
-            InnerReceipt::Groth16(Groth16Receipt {
-                seal: seal.to_vec(),
-                claim,
-            }),
-            journal,
-        );
-        receipt.verify(IMAGE_ID).unwrap();
     }
 }

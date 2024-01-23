@@ -416,7 +416,7 @@ impl From<InnerReceipt> for pb::core::InnerReceipt {
                         claim: Some(claim.into()),
                     })
                 }
-                InnerReceipt::Groth16(_) => unimplemented!(),
+                InnerReceipt::Compact(_) => unimplemented!(),
             }),
         }
     }

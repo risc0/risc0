@@ -5,9 +5,10 @@ edition = "2021"
 
 [dependencies]
 groth16-verifier-methods = { path = "methods" }
-risc0-groth16 = { path = "groth16" }
+risc0-groth16 = { path = "../../risc0/groth16" }
 risc0-zkvm = { path = "../../risc0/zkvm" }
 serde_json = "1.0"
+sha2 = "0.10"
 
 [features]
 cuda = ["risc0-zkvm/cuda"]
