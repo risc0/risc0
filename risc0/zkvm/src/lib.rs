@@ -19,9 +19,6 @@
 
 extern crate alloc;
 
-mod fault_ids;
-#[cfg(feature = "fault-proof")]
-mod fault_monitor;
 pub mod guest;
 #[cfg(not(target_os = "zkvm"))]
 mod host;
@@ -42,8 +39,6 @@ pub use bytes::Bytes;
 pub use risc0_binfmt::SystemState;
 pub use risc0_zkvm_platform::{declare_syscall, memory::GUEST_MAX_MEM, PAGE_SIZE};
 
-#[cfg(feature = "fault-proof")]
-pub use self::fault_monitor::FaultCheckMonitor;
 #[cfg(all(not(target_os = "zkvm"), feature = "prove"))]
 pub use self::host::{
     api::server::Server as ApiServer,
@@ -66,20 +61,16 @@ pub use self::host::{
         },
     },
 };
-pub use self::{
-    fault_ids::{FAULT_CHECKER_ELF, FAULT_CHECKER_ID},
-    receipt_claim::{
-        Assumptions, ExitCode, InvalidExitCodeError, MaybePruned, Output, PrunedValueError,
-        ReceiptClaim,
-    },
+pub use self::receipt_claim::{
+    Assumptions, ExitCode, InvalidExitCodeError, MaybePruned, Output, PrunedValueError,
+    ReceiptClaim,
 };
 #[cfg(not(target_os = "zkvm"))]
 pub use {
     self::host::{
         control_id::POSEIDON_CONTROL_ID,
-        groth16::{Groth16Proof, Groth16Seal},
         receipt::{
-            Assumption, CompositeReceipt, Groth16Receipt, InnerReceipt, Journal, Receipt,
+            Assumption, CompactReceipt, CompositeReceipt, InnerReceipt, Journal, Receipt,
             SegmentReceipt, SuccinctReceipt, VerifierContext,
         },
         recursion::ALLOWED_IDS_ROOT,

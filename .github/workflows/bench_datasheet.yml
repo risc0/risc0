@@ -92,6 +92,7 @@ jobs:
       - name: Checkout gh-pages repository
         uses: actions/checkout@v4
         with:
+          lfs: true
           repository: risc0/ghpages
           ref: dev
           token: ${{ secrets.BENCHMARK_TOKEN }}

@@ -31,7 +31,8 @@ use crate::{
 /// circuits
 pub fn valid_control_ids() -> Vec<Digest> {
     use hex::FromHex;
-    let mut all_ids = Vec::<Digest>::new();
+
+    let mut all_ids = Vec::new();
     for digest_str in POSEIDON_CONTROL_ID {
         all_ids.push(Digest::from_hex(digest_str).unwrap());
     }
@@ -64,6 +65,12 @@ pub struct SuccinctReceipt {
 impl SuccinctReceipt {
     /// Verify the integrity of this receipt, ensuring the claim is attested
     /// to by the seal.
+    pub fn verify_integrity(&self) -> Result<(), VerificationError> {
+        self.verify_integrity_with_context(&VerifierContext::default())
+    }
+
+    /// Verify the integrity of this receipt, ensuring the claim is attested
+    /// to by the seal.
     pub fn verify_integrity_with_context(
         &self,
         ctx: &VerifierContext,
@@ -76,7 +83,9 @@ impl SuccinctReceipt {
                 .iter()
                 .find(|x| *x == control_id)
                 .map(|_| ())
-                .ok_or(VerificationError::ControlVerificationError)
+                .ok_or(VerificationError::ControlVerificationError {
+                    control_id: *control_id,
+                })
         };
 
         // All receipts from the recursion circuit use Poseidon as the FRI hash

@@ -24,7 +24,7 @@ mod tests;
 
 use std::rc::Rc;
 
-use anyhow::Result;
+use anyhow::{anyhow, bail, Result};
 use cfg_if::cfg_if;
 use risc0_circuit_rv32im::CircuitImpl;
 use risc0_core::field::{
@@ -40,7 +40,7 @@ use risc0_zkvm_platform::WORD_SIZE;
 
 use self::{dev_mode::DevModeProver, prover_impl::ProverImpl};
 use crate::{
-    host::receipt::{SegmentReceipt, SuccinctReceipt},
+    host::receipt::{CompositeReceipt, InnerReceipt, SegmentReceipt, SuccinctReceipt},
     is_dev_mode, ExecutorEnv, ExecutorImpl, ProverOpts, Receipt, Segment, Session, VerifierContext,
 };
 
@@ -87,8 +87,52 @@ pub trait ProverServer {
         assumption: &SuccinctReceipt,
     ) -> Result<SuccinctReceipt>;
 
-    /// Convert a [SuccinctReceipt] with a poseidon hash function that uses a 254-bit field
+    /// Convert a [SuccinctReceipt] with a Poseidon hash function that uses a 254-bit field
     fn identity_p254(&self, a: &SuccinctReceipt) -> Result<SuccinctReceipt>;
+
+    /// Compress a [CompositeReceipt] into a single [SuccinctReceipt].
+    ///
+    /// A [CompositeReceipt] may contain an arbitrary number of receipts assembled into
+    /// continuations and compositions. Together, these receipts collectively prove a top-level
+    /// [ReceiptClaim](crate::ReceiptClaim). This function compresses all of the constituent receipts of a
+    /// [CompositeReceipt] into a single [SuccinctReceipt] that proves the same top-level claim. It
+    /// accomplishes this by iterative application of the recursion programs including lift, join,
+    /// and resolve.
+    fn compress(&self, receipt: &CompositeReceipt) -> Result<SuccinctReceipt> {
+        // Compress all receipts in the top-level session into one succinct receipt for the session.
+        let continuation_receipt = receipt
+            .segments
+            .iter()
+            .try_fold(
+                None,
+                |left: Option<SuccinctReceipt>, right: &SegmentReceipt| -> Result<_> {
+                    Ok(Some(match left {
+                        Some(left) => self.join(&left, &self.lift(right)?)?,
+                        None => self.lift(right)?,
+                    }))
+                },
+            )?
+            .ok_or(anyhow!(
+                "malformed composite receipt has no continuation segment receipts"
+            ))?;
+
+        // Compress assumptions and resolve them to get the final succinct receipt.
+        receipt.assumptions.iter().try_fold(
+            continuation_receipt,
+            |conditional: SuccinctReceipt, assumption: &InnerReceipt| match assumption {
+                InnerReceipt::Succinct(assumption) => self.resolve(&conditional, assumption),
+                InnerReceipt::Composite(assumption) => {
+                    self.resolve(&conditional, &self.compress(assumption)?)
+                }
+                InnerReceipt::Fake { .. } => bail!(
+                    "compressing composite receipts with fake receipt assumptions is not supported"
+                ),
+                InnerReceipt::Compact(_) => bail!(
+                    "compressing composite receipts with Compact receipt assumptions is not supported"
+                )
+            },
+        )
+    }
 }
 
 /// A pair of [Hal] and [CircuitHal].
