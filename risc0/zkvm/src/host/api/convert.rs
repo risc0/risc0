@@ -328,7 +328,7 @@ impl From<SegmentReceipt> for pb::core::SegmentReceipt {
     fn from(value: SegmentReceipt) -> Self {
         Self {
             version: Some(ver::SEGMENT_RECEIPT),
-            seal: value.get_seal_bytes().into(),
+            seal: value.get_seal_bytes(),
             index: value.index,
             hashfn: value.hashfn,
             claim: Some(value.claim.into()),

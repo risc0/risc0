@@ -194,7 +194,7 @@ impl Groth16Proof {
 
     /// Computes the prepared verifying key used by Bonsai
     fn pvk() -> Result<PreparedVerifyingKey<Bn254>, Error> {
-        let alpha_g1 = g1_from_bytes(&vec![from_u256(ALPHA_X)?, from_u256(ALPHA_Y)?])?;
+        let alpha_g1 = g1_from_bytes(&[from_u256(ALPHA_X)?, from_u256(ALPHA_Y)?])?;
         let beta_g2 = g2_from_bytes(&vec![
             vec![from_u256(BETA_X1)?, from_u256(BETA_X2)?],
             vec![from_u256(BETA_Y1)?, from_u256(BETA_Y2)?],
@@ -208,11 +208,11 @@ impl Groth16Proof {
             vec![from_u256(DELTA_Y1)?, from_u256(DELTA_Y2)?],
         ])?;
 
-        let ic0 = g1_from_bytes(&vec![from_u256(IC0_X)?, from_u256(IC0_Y)?])?;
-        let ic1 = g1_from_bytes(&vec![from_u256(IC1_X)?, from_u256(IC1_Y)?])?;
-        let ic2 = g1_from_bytes(&vec![from_u256(IC2_X)?, from_u256(IC2_Y)?])?;
-        let ic3 = g1_from_bytes(&vec![from_u256(IC3_X)?, from_u256(IC3_Y)?])?;
-        let ic4 = g1_from_bytes(&vec![from_u256(IC4_X)?, from_u256(IC4_Y)?])?;
+        let ic0 = g1_from_bytes(&[from_u256(IC0_X)?, from_u256(IC0_Y)?])?;
+        let ic1 = g1_from_bytes(&[from_u256(IC1_X)?, from_u256(IC1_Y)?])?;
+        let ic2 = g1_from_bytes(&[from_u256(IC2_X)?, from_u256(IC2_Y)?])?;
+        let ic3 = g1_from_bytes(&[from_u256(IC3_X)?, from_u256(IC3_Y)?])?;
+        let ic4 = g1_from_bytes(&[from_u256(IC4_X)?, from_u256(IC4_Y)?])?;
         let gamma_abc_g1 = vec![ic0, ic1, ic2, ic3, ic4];
 
         let vk = VerifyingKey::<Bn254> {
@@ -243,9 +243,9 @@ impl Groth16Proof {
 }
 
 // Deserialize a scalar field from bytes in big-endian format
-fn fr_from_bytes(scalar: &Vec<u8>) -> Result<Fr, Error> {
+fn fr_from_bytes(scalar: &[u8]) -> Result<Fr, Error> {
     let scalar: Vec<u8> = scalar.iter().rev().cloned().collect();
-    Ok(Fr::deserialize_uncompressed(&*scalar).map_err(|err| anyhow!(err))?)
+    Fr::deserialize_uncompressed(&*scalar).map_err(|err| anyhow!(err))
 }
 
 // Deserialize an element over the G1 group from bytes in big-endian format
@@ -260,7 +260,7 @@ fn g1_from_bytes(elem: &[Vec<u8>]) -> Result<G1Affine, Error> {
         .cloned()
         .collect();
 
-    Ok(G1Affine::deserialize_uncompressed(&*g1_affine).map_err(|err| anyhow!(err))?)
+    G1Affine::deserialize_uncompressed(&*g1_affine).map_err(|err| anyhow!(err))
 }
 
 // Deserialize an element over the G2 group from bytes in big-endian format
@@ -277,16 +277,14 @@ fn g2_from_bytes(elem: &Vec<Vec<Vec<u8>>>) -> Result<G2Affine, Error> {
         .cloned()
         .collect();
 
-    Ok(G2Affine::deserialize_uncompressed(&*g2_affine).map_err(|err| anyhow!(err))?)
+    G2Affine::deserialize_uncompressed(&*g2_affine).map_err(|err| anyhow!(err))
 }
 
 // Convert the U256 value to a byte array in big-endian format
 fn from_u256(value: &str) -> Result<Vec<u8>, Error> {
-    let value = if value.starts_with("0x") {
-        to_fixed_array(
-            hex::decode(&value[2..]).map_err(|_| anyhow!("conversion from u256 failed"))?,
-        )
-        .to_vec()
+    let value = if let Some(stripped) = value.strip_prefix("0x") {
+        to_fixed_array(hex::decode(stripped).map_err(|_| anyhow!("conversion from u256 failed"))?)
+            .to_vec()
     } else {
         to_fixed_array(
             BigInt::from_str(value)

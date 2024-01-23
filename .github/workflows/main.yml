@@ -107,12 +107,6 @@ jobs:
           # Full history is required by license-check.py
           fetch-depth: 0
       - uses: ./.github/actions/rustup
-      - uses: risc0/clippy-action@main
-        with:
-          filter_mode: nofilter
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          level: warning
-          reporter: 'github-pr-check'
       - name: Install cargo-sort
         uses: risc0/cargo-install@2cfb0024938d23011106cbf127b393bc83fddba1
         with:
@@ -127,6 +121,7 @@ jobs:
       - run: cargo fmt --all --check --manifest-path bonsai/examples/governance/Cargo.toml
       - run: cargo fmt --all --check --manifest-path examples/Cargo.toml
       - run: cargo fmt --all --check --manifest-path tools/crates-validator/Cargo.toml
+      - run: cargo clippy -p risc0-zkvm
       - run: cargo sort --workspace --check
       - run: cargo sort --workspace --check benchmarks
       - run: cargo sort --workspace --check bonsai

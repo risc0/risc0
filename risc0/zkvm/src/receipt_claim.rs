@@ -228,10 +228,7 @@ impl ExitCode {
     /// True if the exit code is Halted(0) or Paused(0), indicating the program guest exited with
     /// an ok status.
     pub(crate) fn is_ok(&self) -> bool {
-        match self {
-            ExitCode::Halted(0) | ExitCode::Paused(0) => true,
-            _ => false,
-        }
+        matches!(self, ExitCode::Halted(0) | ExitCode::Paused(0))
     }
 }
 
@@ -376,7 +373,7 @@ impl MaybePruned<Assumptions> {
                 );
 
                 // Set the pruned digest value to be equal to the rest parameter.
-                *list_digest = tail.clone();
+                *list_digest = *tail;
                 Ok(())
             }
         }
@@ -418,7 +415,7 @@ where
     pub fn as_value(&self) -> Result<&T, PrunedValueError> {
         match self {
             MaybePruned::Value(ref value) => Ok(value),
-            MaybePruned::Pruned(ref digest) => Err(PrunedValueError(digest.clone())),
+            MaybePruned::Pruned(ref digest) => Err(PrunedValueError(*digest)),
         }
     }
 
@@ -426,7 +423,7 @@ where
     pub fn as_value_mut(&mut self) -> Result<&mut T, PrunedValueError> {
         match self {
             MaybePruned::Value(ref mut value) => Ok(value),
-            MaybePruned::Pruned(ref digest) => Err(PrunedValueError(digest.clone())),
+            MaybePruned::Pruned(ref digest) => Err(PrunedValueError(*digest)),
         }
     }
 }
@@ -447,7 +444,7 @@ where
     fn digest<S: Sha256>(&self) -> Digest {
         match self {
             MaybePruned::Value(ref val) => val.digest::<S>(),
-            MaybePruned::Pruned(digest) => digest.clone(),
+            MaybePruned::Pruned(digest) => *digest,
         }
     }
 }
@@ -546,8 +543,8 @@ impl fmt::Display for MergeInequalityError {
         write!(
             f,
             "cannot merge values; left and right are not diegst equal: left {}, right {}",
-            hex::encode(&self.0),
-            hex::encode(&self.1)
+            hex::encode(self.0),
+            hex::encode(self.1)
         )
     }
 }
@@ -592,7 +589,7 @@ where
 
         Ok(match (self, other) {
             (MaybePruned::Value(left), MaybePruned::Value(right)) => {
-                MaybePruned::Value(left.merge(&right)?)
+                MaybePruned::Value(left.merge(right)?)
             }
             (MaybePruned::Value(_), MaybePruned::Pruned(_)) => {
                 check_eq()?;

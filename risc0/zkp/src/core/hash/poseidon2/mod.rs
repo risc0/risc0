@@ -20,8 +20,8 @@ mod rng;
 use alloc::{boxed::Box, rc::Rc, vec::Vec};
 
 use risc0_core::field::{
-    baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem, Elem},
-    ExtElem,
+    baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
+    Elem, ExtElem,
 };
 
 use self::consts::{M_INT_DIAG_ULVT, ROUNDS_HALF_FULL, ROUNDS_PARTIAL, ROUND_CONSTANTS};
@@ -91,68 +91,63 @@ fn to_digest(elems: [BabyBearElem; CELLS_OUT]) -> Box<Digest> {
     Box::new(Digest::from(state))
 }
 
-fn add_round_constants_full(cells: &mut [Elem; CELLS], round: usize) {
+fn add_round_constants_full(cells: &mut [BabyBearElem; CELLS], round: usize) {
     for i in 0..CELLS {
         cells[i] += ROUND_CONSTANTS[round * CELLS + i];
     }
 }
 
-fn add_round_constants_partial(cells: &mut [Elem; CELLS], round: usize) {
+fn add_round_constants_partial(cells: &mut [BabyBearElem; CELLS], round: usize) {
     cells[0] += ROUND_CONSTANTS[round * CELLS];
 }
 
-fn sbox(x: Elem) -> Elem {
+fn sbox(x: BabyBearElem) -> BabyBearElem {
     let x2 = x * x;
     let x4 = x2 * x2;
     let x6 = x4 * x2;
     x6 * x
 }
 
-fn do_full_sboxes(cells: &mut [Elem; CELLS]) {
+fn do_full_sboxes(cells: &mut [BabyBearElem; CELLS]) {
     for cell in cells.iter_mut() {
         *cell = sbox(*cell);
     }
 }
 
-fn do_partial_sboxes(cells: &mut [Elem; CELLS]) {
+fn do_partial_sboxes(cells: &mut [BabyBearElem; CELLS]) {
     cells[0] = sbox(cells[0]);
 }
 
-fn multiply_by_m_int(cells: &mut [Elem; CELLS]) {
+fn multiply_by_m_int(cells: &mut [BabyBearElem; CELLS]) {
     // Exploit the fact that off-diagonal entries of M_INT are all 1.
-    let mut sum = Elem::new(0);
-    for i in 0..CELLS {
-        sum += cells[i];
-    }
+    let sum: BabyBearElem = cells.iter().fold(BabyBearElem::ZERO, |acc, x| acc + *x);
     for i in 0..CELLS {
         cells[i] = sum + M_INT_DIAG_ULVT[i] * cells[i];
     }
 }
 
-fn multiply_by_4x4_circulant(x: &[Elem; 4]) -> [Elem; 4] {
+fn multiply_by_4x4_circulant(x: &[BabyBearElem; 4]) -> [BabyBearElem; 4] {
     // See appendix B of Poseidon2 paper.
     let t0 = x[0] + x[1];
     let t1 = x[2] + x[3];
-    let t2 = Elem::new(2) * x[1] + t1;
-    let t3 = Elem::new(2) * x[3] + t0;
-    let t4 = Elem::new(4) * t1 + t3;
-    let t5 = Elem::new(4) * t0 + t2;
+    let t2 = BabyBearElem::new(2) * x[1] + t1;
+    let t3 = BabyBearElem::new(2) * x[3] + t0;
+    let t4 = BabyBearElem::new(4) * t1 + t3;
+    let t5 = BabyBearElem::new(4) * t0 + t2;
     let t6 = t3 + t5;
     let t7 = t2 + t4;
     [t6, t5, t7, t4]
 }
 
-fn multiply_by_m_ext(cells: &mut [Elem; CELLS]) {
+fn multiply_by_m_ext(cells: &mut [BabyBearElem; CELLS]) {
     // Optimized method for multiplication by M_EXT.
     // See appendix B of Poseidon2 paper for additional details.
     let old_cells = *cells;
-    for i in 0..CELLS {
-        cells[i] = Elem::new(0);
-    }
-    let mut tmp_sums = [Elem::new(0); 4];
+    cells.fill(BabyBearElem::ZERO);
+    let mut tmp_sums = [BabyBearElem::ZERO; 4];
 
     for i in 0..CELLS / 4 {
-        let chunk_array: [Elem; 4] = [
+        let chunk_array: [BabyBearElem; 4] = [
             old_cells[i * 4],
             old_cells[i * 4 + 1],
             old_cells[i * 4 + 2],
@@ -160,7 +155,7 @@ fn multiply_by_m_ext(cells: &mut [Elem; CELLS]) {
         ];
         let out = multiply_by_4x4_circulant(&chunk_array);
         for j in 0..4 {
-            let to_add = Elem::new_raw(1) * out[j];
+            let to_add = BabyBearElem::new_raw(1) * out[j];
             tmp_sums[j] += to_add;
             cells[i * 4 + j] += to_add;
         }
@@ -170,20 +165,20 @@ fn multiply_by_m_ext(cells: &mut [Elem; CELLS]) {
     }
 }
 
-fn full_round(cells: &mut [Elem; CELLS], round: usize) {
+fn full_round(cells: &mut [BabyBearElem; CELLS], round: usize) {
     add_round_constants_full(cells, round);
     do_full_sboxes(cells);
     multiply_by_m_ext(cells);
 }
 
-fn partial_round(cells: &mut [Elem; CELLS], round: usize) {
+fn partial_round(cells: &mut [BabyBearElem; CELLS], round: usize) {
     add_round_constants_partial(cells, round);
     do_partial_sboxes(cells);
     multiply_by_m_int(cells);
 }
 
 /// The raw sponge mixing function
-pub fn poseidon2_mix(cells: &mut [Elem; CELLS]) {
+pub fn poseidon2_mix(cells: &mut [BabyBearElem; CELLS]) {
     let mut round = 0;
 
     // First linear layer.
@@ -209,11 +204,11 @@ pub fn poseidon2_mix(cells: &mut [Elem; CELLS]) {
 /// Perform a unpadded hash of a vector of elements.  Because this is unpadded
 /// collision resistance is only true for vectors of the same size.  If the size
 /// is variable, this is subject to length extension attacks.
-pub fn unpadded_hash<'a, I>(iter: I) -> [Elem; CELLS_OUT]
+pub fn unpadded_hash<'a, I>(iter: I) -> [BabyBearElem; CELLS_OUT]
 where
-    I: Iterator<Item = &'a Elem>,
+    I: Iterator<Item = &'a BabyBearElem>,
 {
-    let mut state = [Elem::new(0); CELLS];
+    let mut state = [BabyBearElem::ZERO; CELLS];
     let mut count = 0;
     let mut unmixed = 0;
     for val in iter {
@@ -238,20 +233,20 @@ mod tests {
     use super::*;
     use crate::core::hash::poseidon2::consts::{_M_EXT, _M_EXT_MONTGOMERY};
 
-    fn do_partial_sboxes(cells: &mut [Elem; CELLS]) {
+    fn do_partial_sboxes(cells: &mut [BabyBearElem; CELLS]) {
         cells[0] = sbox(cells[0]);
     }
 
-    fn partial_round_naive(cells: &mut [Elem; CELLS], round: usize) {
+    fn partial_round_naive(cells: &mut [BabyBearElem; CELLS], round: usize) {
         add_round_constants_partial(cells, round);
         do_partial_sboxes(cells);
         multiply_by_m_int_naive(cells);
     }
 
-    fn multiply_by_m_ext_naive(cells: &mut [Elem; CELLS]) {
+    fn multiply_by_m_ext_naive(cells: &mut [BabyBearElem; CELLS]) {
         let old_cells = *cells;
         for i in 0..CELLS {
-            let mut tot = Elem::new(0);
+            let mut tot = BabyBearElem::ZERO;
             for j in 0..CELLS {
                 tot += _M_EXT_MONTGOMERY[i * CELLS + j] * old_cells[j];
             }
@@ -259,10 +254,10 @@ mod tests {
         }
     }
 
-    fn multiply_by_m_int_naive(cells: &mut [Elem; CELLS]) {
+    fn multiply_by_m_int_naive(cells: &mut [BabyBearElem; CELLS]) {
         let old_cells = *cells;
         for i in 0..CELLS {
-            let mut tot = Elem::new(0);
+            let mut tot = BabyBearElem::ZERO;
             for j in 0..CELLS {
                 if i == j {
                     tot += (M_INT_DIAG_ULVT[i] + Elem::new(1)) * old_cells[j];
@@ -275,7 +270,7 @@ mod tests {
     }
 
     // Naive version of poseidon
-    fn poseidon2_mix_naive(cells: &mut [Elem; CELLS]) {
+    fn poseidon2_mix_naive(cells: &mut [BabyBearElem; CELLS]) {
         let mut round = 0;
         multiply_by_m_ext_naive(cells);
         for _i in 0..ROUNDS_HALF_FULL {
@@ -315,7 +310,7 @@ mod tests {
 
     #[test]
     fn poseidon2_test_vectors() {
-        let mut buf: &mut [Elem; CELLS] = &mut baby_bear_array![
+        let mut buf: &mut [BabyBearElem; CELLS] = &mut baby_bear_array![
             0x00000000, 0x00000001, 0x00000002, 0x00000003, 0x00000004, 0x00000005, 0x00000006,
             0x00000007, 0x00000008, 0x00000009, 0x0000000A, 0x0000000B, 0x0000000C, 0x0000000D,
             0x0000000E, 0x0000000F, 0x00000010, 0x00000011, 0x00000012, 0x00000013, 0x00000014,
