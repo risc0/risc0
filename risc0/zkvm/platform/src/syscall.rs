@@ -611,8 +611,8 @@ pub unsafe extern "C" fn sys_getenv(
 /// NOTE: Repeated calls to sys_argc are not guaranteed to result in the same
 /// data being returned. Returned data is entirely in the control of the host.
 #[cfg_attr(feature = "export-syscalls", no_mangle)]
-pub unsafe extern "C" fn sys_argc() -> usize {
-    let Return(a0, _) = syscall_0(nr::SYS_ARGC, null_mut(), 0);
+pub extern "C" fn sys_argc() -> usize {
+    let Return(a0, _) = unsafe { syscall_0(nr::SYS_ARGC, null_mut(), 0) };
     a0 as usize
 }
 
@@ -629,6 +629,10 @@ pub unsafe extern "C" fn sys_argc() -> usize {
 ///
 /// NOTE: Repeated calls to sys_argv are not guaranteed to result in the same
 /// data being returned. Returned data is entirely in the control of the host.
+///
+/// # Safety
+///
+/// `out_words` must be aligned and dereferenceable.
 #[cfg_attr(feature = "export-syscalls", no_mangle)]
 pub unsafe extern "C" fn sys_argv(
     out_words: *mut u32,
@@ -646,6 +650,9 @@ pub extern "C" fn sys_alloc_words(nwords: usize) -> *mut u32 {
 
 #[cfg(feature = "export-syscalls")]
 #[no_mangle]
+/// # Safety
+///
+/// This function should be safe to call, but clippy complains if it is not marked as `unsafe`.
 pub unsafe extern "C" fn sys_alloc_aligned(bytes: usize, align: usize) -> *mut u8 {
     extern "C" {
         // This symbol is defined by the loader and marks the end
@@ -700,6 +707,9 @@ pub unsafe extern "C" fn sys_alloc_aligned(bytes: usize, align: usize) -> *mut u
 /// output.
 #[cfg(feature = "export-syscalls")]
 #[no_mangle]
+/// # Safety
+///
+/// `image_id`, `journal_digest`, and `from_host_buf` must be aligned and dereferenceable.
 pub unsafe extern "C" fn sys_verify(
     image_id: *const [u32; DIGEST_WORDS],
     journal_digest: *const [u32; DIGEST_WORDS],
@@ -735,18 +745,22 @@ pub unsafe extern "C" fn sys_verify(
 ///
 /// A cooperative prover will only return if there is a verifying proof
 /// associated with that claim digest, and will always return a result code
-/// of 0 to register a0. The caller must encode the metadata_digest into a
+/// of 0 to register a0. The caller must encode the claim_digest into a
 /// public assumptions list for inclusion in the guest output.
+///
+/// # Safety
+///
+/// `claim_digest` must be aligned and dereferenceable.
 #[cfg(feature = "export-syscalls")]
 #[no_mangle]
-pub unsafe extern "C" fn sys_verify_integrity(metadata_digest: *const [u32; DIGEST_WORDS]) {
+pub unsafe extern "C" fn sys_verify_integrity(claim_digest: *const [u32; DIGEST_WORDS]) {
     let Return(a0, _) = unsafe {
-        // Send the metadata_digest to the host via software ecall.
+        // Send the claim_digest to the host via software ecall.
         syscall_2(
             nr::SYS_VERIFY_INTEGRITY,
             null_mut(),
             0,
-            metadata_digest as u32,
+            claim_digest as u32,
             DIGEST_BYTES as u32,
         )
     };

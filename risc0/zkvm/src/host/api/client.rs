@@ -482,7 +482,7 @@ impl Client {
                             return match session.session {
                                 Some(session) => Ok(SessionInfo {
                                     segments,
-                                    journal: Journal::new(session.journal.into()),
+                                    journal: Journal::new(session.journal),
                                     exit_code: session
                                         .exit_code
                                         .ok_or(malformed_err())?
@@ -525,7 +525,7 @@ impl Client {
                             return Err(anyhow!("Illegal client callback"))
                         }
                         pb::api::client_callback::Kind::ProveDone(done) => {
-                            return Ok(done.receipt.ok_or(malformed_err())?)
+                            return done.receipt.ok_or(malformed_err())
                         }
                     }
                 }

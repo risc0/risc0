@@ -53,7 +53,7 @@ fn download_zkr() {
     let out_dir = Path::new(&out_dir);
     if std::fs::metadata(&src_path).is_ok() {
         let tgt_path = out_dir.join(FILENAME);
-        std::fs::copy(&src_path, &tgt_path).unwrap();
+        std::fs::copy(&src_path, tgt_path).unwrap();
     } else {
         fn decode_hex(s: &str) -> Result<Vec<u8>, ParseIntError> {
             (0..s.len())
