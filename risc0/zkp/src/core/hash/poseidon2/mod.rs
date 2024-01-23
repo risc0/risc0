@@ -260,7 +260,7 @@ mod tests {
             let mut tot = BabyBearElem::ZERO;
             for j in 0..CELLS {
                 if i == j {
-                    tot += (M_INT_DIAG_ULVT[i] + Elem::new(1)) * old_cells[j];
+                    tot += (M_INT_DIAG_ULVT[i] + BabyBearElem::ONE) * old_cells[j];
                 } else {
                     tot += old_cells[j];
                 }
@@ -290,7 +290,7 @@ mod tests {
     #[test]
     fn compare_naive() {
         // Make a fixed input
-        let mut test_in_1 = [Elem::new(1); CELLS];
+        let mut test_in_1 = [BabyBearElem::ONE; CELLS];
         // Copy it
         let mut test_in_2 = test_in_1;
         // Try two versions
@@ -304,7 +304,7 @@ mod tests {
 
     macro_rules! baby_bear_array {
         [$($x:literal),* $(,)?] => {
-            [$(Elem::new($x)),* ]
+            [$(BabyBearElem::new($x)),* ]
         }
     }
 
