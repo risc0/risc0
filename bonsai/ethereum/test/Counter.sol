@@ -15,7 +15,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.17;
 
-import {IBonsaiRelay} from "./IBonsaiRelay.sol";
+import {IBonsaiRelay} from "../contracts/relay/IBonsaiRelay.sol";
 
 contract Counter {
     uint256 public value = 0;
