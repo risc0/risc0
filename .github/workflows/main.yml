@@ -121,6 +121,7 @@ jobs:
       - run: cargo fmt --all --check --manifest-path bonsai/examples/governance/Cargo.toml
       - run: cargo fmt --all --check --manifest-path examples/Cargo.toml
       - run: cargo fmt --all --check --manifest-path tools/crates-validator/Cargo.toml
+      - run: cargo clippy -p risc0-zkvm
       - run: cargo sort --workspace --check
       - run: cargo sort --workspace --check benchmarks
       - run: cargo sort --workspace --check bonsai
@@ -202,11 +203,6 @@ jobs:
       - run: cargo check -p risc0-zkvm -F $FEATURE
       - run: cargo check
         working-directory: external/substrate
-      - uses: risc0/clippy-action@main
-        with:
-          reporter: "github-pr-check"
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          clippy_flags: --features $FEATURE --all-targets
       - run: sccache --show-stats
 
   examples:
@@ -335,11 +331,6 @@ jobs:
       - uses: ./.github/actions/sccache
         with:
           key: macOS-default
-      - uses: risc0/clippy-action@main
-        with:
-          reporter: 'github-pr-check'
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          clippy_flags: --manifest-path tools/crates-validator/Cargo.toml
       - run: cargo test
         working-directory: tools/crates-validator
       - run: sccache --show-stats
