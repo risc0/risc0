@@ -37,9 +37,9 @@ pub use seal_to_json::to_json;
 pub use verifier::Verifier;
 
 // Deserialize a scalar field from bytes in big-endian format
-pub(crate) fn fr_from_bytes(scalar: &Vec<u8>) -> Result<Fr, Error> {
+pub(crate) fn fr_from_bytes(scalar: &[u8]) -> Result<Fr, Error> {
     let scalar: Vec<u8> = scalar.iter().rev().cloned().collect();
-    Ok(Fr::deserialize_uncompressed(&*scalar).map_err(|err| anyhow!(err))?)
+    Fr::deserialize_uncompressed(&*scalar).map_err(|err| anyhow!(err))
 }
 
 // Deserialize an element over the G1 group from bytes in big-endian format
@@ -54,7 +54,7 @@ pub(crate) fn g1_from_bytes(elem: &[Vec<u8>]) -> Result<G1Affine, Error> {
         .cloned()
         .collect();
 
-    Ok(G1Affine::deserialize_uncompressed(&*g1_affine).map_err(|err| anyhow!(err))?)
+    G1Affine::deserialize_uncompressed(&*g1_affine).map_err(|err| anyhow!(err))
 }
 
 // Deserialize an element over the G2 group from bytes in big-endian format
@@ -71,16 +71,14 @@ pub(crate) fn g2_from_bytes(elem: &Vec<Vec<Vec<u8>>>) -> Result<G2Affine, Error>
         .cloned()
         .collect();
 
-    Ok(G2Affine::deserialize_uncompressed(&*g2_affine).map_err(|err| anyhow!(err))?)
+    G2Affine::deserialize_uncompressed(&*g2_affine).map_err(|err| anyhow!(err))
 }
 
 // Convert the U256 value to a byte array in big-endian format
 pub(crate) fn from_u256(value: &str) -> Result<Vec<u8>, Error> {
-    let value = if value.starts_with("0x") {
-        to_fixed_array(
-            hex::decode(&value[2..]).map_err(|_| anyhow!("conversion from u256 failed"))?,
-        )
-        .to_vec()
+    let value = if let Some(stripped) = value.strip_prefix("0x") {
+        to_fixed_array(hex::decode(stripped).map_err(|_| anyhow!("conversion from u256 failed"))?)
+            .to_vec()
     } else {
         to_fixed_array(
             BigInt::from_str(value)

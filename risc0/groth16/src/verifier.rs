@@ -145,7 +145,7 @@ impl Verifier {
 
 /// Computes the default prepared verifying key, used by Bonsai.
 pub fn prepared_verifying_key() -> Result<PreparedVerifyingKey<Bn254>, Error> {
-    let alpha_g1 = g1_from_bytes(&vec![from_u256(ALPHA_X)?, from_u256(ALPHA_Y)?])?;
+    let alpha_g1 = g1_from_bytes(&[from_u256(ALPHA_X)?, from_u256(ALPHA_Y)?])?;
     let beta_g2 = g2_from_bytes(&vec![
         vec![from_u256(BETA_X1)?, from_u256(BETA_X2)?],
         vec![from_u256(BETA_Y1)?, from_u256(BETA_Y2)?],
@@ -159,11 +159,11 @@ pub fn prepared_verifying_key() -> Result<PreparedVerifyingKey<Bn254>, Error> {
         vec![from_u256(DELTA_Y1)?, from_u256(DELTA_Y2)?],
     ])?;
 
-    let ic0 = g1_from_bytes(&vec![from_u256(IC0_X)?, from_u256(IC0_Y)?])?;
-    let ic1 = g1_from_bytes(&vec![from_u256(IC1_X)?, from_u256(IC1_Y)?])?;
-    let ic2 = g1_from_bytes(&vec![from_u256(IC2_X)?, from_u256(IC2_Y)?])?;
-    let ic3 = g1_from_bytes(&vec![from_u256(IC3_X)?, from_u256(IC3_Y)?])?;
-    let ic4 = g1_from_bytes(&vec![from_u256(IC4_X)?, from_u256(IC4_Y)?])?;
+    let ic0 = g1_from_bytes(&[from_u256(IC0_X)?, from_u256(IC0_Y)?])?;
+    let ic1 = g1_from_bytes(&[from_u256(IC1_X)?, from_u256(IC1_Y)?])?;
+    let ic2 = g1_from_bytes(&[from_u256(IC2_X)?, from_u256(IC2_Y)?])?;
+    let ic3 = g1_from_bytes(&[from_u256(IC3_X)?, from_u256(IC3_Y)?])?;
+    let ic4 = g1_from_bytes(&[from_u256(IC4_X)?, from_u256(IC4_Y)?])?;
     let gamma_abc_g1 = vec![ic0, ic1, ic2, ic3, ic4];
 
     let vk = VerifyingKey::<Bn254> {

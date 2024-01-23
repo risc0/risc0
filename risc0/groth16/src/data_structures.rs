@@ -158,7 +158,7 @@ impl VerifyingKeyJson {
         if self.vk_alpha_1.len() < 2 {
             return Err(anyhow!("Malformed G1 element field: vk_alpha_1"));
         }
-        let alpha_g1 = g1_from_bytes(&vec![
+        let alpha_g1 = g1_from_bytes(&[
             from_u256(&self.vk_alpha_1[0])?,
             from_u256(&self.vk_alpha_1[1])?,
         ])?;
