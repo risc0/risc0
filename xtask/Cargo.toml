@@ -10,7 +10,6 @@ hex = "0.4"
 regex = "1"
 risc0-circuit-recursion = { workspace = true, features = ["prove"] }
 risc0-core = { workspace = true }
-risc0-fault = { path = "../risc0/fault" }
 risc0-groth16 = { workspace = true, features = ["prove"] }
 risc0-zkp = { workspace = true }
 risc0-zkvm = { workspace = true, features = ["prove"] }

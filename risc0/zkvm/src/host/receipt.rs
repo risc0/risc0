@@ -325,7 +325,7 @@ impl InnerReceipt {
     /// Returns the [InnerReceipt::Composite] arm.
     pub fn composite(&self) -> Result<&CompositeReceipt, VerificationError> {
         if let InnerReceipt::Composite(x) = self {
-            Ok(&x)
+            Ok(x)
         } else {
             Err(VerificationError::ReceiptFormatError)
         }
@@ -334,7 +334,7 @@ impl InnerReceipt {
     /// Returns the [InnerReceipt::Compact] arm.
     pub fn compact(&self) -> Result<&CompactReceipt, VerificationError> {
         if let InnerReceipt::Compact(x) = self {
-            Ok(&x)
+            Ok(x)
         } else {
             Err(VerificationError::ReceiptFormatError)
         }
@@ -529,7 +529,7 @@ impl CompositeReceipt {
             pre: first_claim.pre.clone(),
             post: last_claim.post.clone(),
             exit_code: last_claim.exit_code,
-            input: first_claim.input.clone(),
+            input: first_claim.input,
             output: output.into(),
         })
     }
