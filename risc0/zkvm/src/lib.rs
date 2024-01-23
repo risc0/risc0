@@ -69,9 +69,8 @@ pub use self::receipt_claim::{
 pub use {
     self::host::{
         control_id::POSEIDON_CONTROL_ID,
-        groth16::{Groth16Proof, Groth16Seal},
         receipt::{
-            Assumption, CompositeReceipt, Groth16Receipt, InnerReceipt, Journal, Receipt,
+            Assumption, CompactReceipt, CompositeReceipt, InnerReceipt, Journal, Receipt,
             SegmentReceipt, SuccinctReceipt, VerifierContext,
         },
         recursion::ALLOWED_IDS_ROOT,

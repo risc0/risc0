@@ -46,9 +46,9 @@ run the docker container:
 docker run --rm -v $WORK_DIR:/mnt risc0-groth16-prover
 ```
 
-The resulting `output.json` file will be in the chosen `$WORK_DIR`.
-This file can be parsed and decoded into a `Groth16Seal`.
-Finally, this seal can be embedded within a `InnerReceipt::Groth16`.
+The resulting `proof.json` file will be in the chosen `$WORK_DIR`.
+This file can be parsed and decoded into a `risc0_groth16::Seal`.
+Finally, this seal can be embedded within a `InnerReceipt::Compact`.
 
-See [`seal_to_json/src/tests.rs`](./seal_to_json/src/tests.rs) for an end-to-end
+See [`risc0-groth16/src/tests/stark_to_snark.rs`](../risc0/groth16/tests/stark_to_snark.rs) for an end-to-end
 example.
