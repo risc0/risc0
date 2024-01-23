@@ -10,3 +10,6 @@
 [submodule "bonsai/examples/governance/lib/solidity-bytes-utils"]
 	path = bonsai/ethereum/lib/solidity-bytes-utils
 	url = https://github.com/GNSPS/solidity-bytes-utils
+[submodule "bonsai/ethereum/lib/openzeppelin-contracts"]
+	branch = "v5.0.1"
+	url = https://github.com/OpenZeppelin/openzeppelin-contracts.git
