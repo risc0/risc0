@@ -276,7 +276,7 @@ impl Ord for Elem {
 
 impl PartialOrd for Elem {
     fn partial_cmp(&self, rhs: &Self) -> Option<Ordering> {
-        decode(self.ensure_valid().0).partial_cmp(&decode(rhs.ensure_valid().0))
+        Some(self.cmp(rhs))
     }
 }
 

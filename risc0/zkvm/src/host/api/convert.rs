@@ -152,7 +152,6 @@ impl From<ExitCode> for pb::base::ExitCode {
                 ExitCode::SessionLimit => pb::base::exit_code::Kind::SessionLimit(()),
                 ExitCode::Paused(code) => pb::base::exit_code::Kind::Paused(code),
                 ExitCode::Halted(code) => pb::base::exit_code::Kind::Halted(code),
-                ExitCode::Fault => pb::base::exit_code::Kind::Fault(()),
             }),
         }
     }
@@ -167,7 +166,6 @@ impl TryFrom<pb::base::ExitCode> for ExitCode {
             pb::base::exit_code::Kind::Paused(code) => Self::Paused(code),
             pb::base::exit_code::Kind::SystemSplit(_) => Self::SystemSplit,
             pb::base::exit_code::Kind::SessionLimit(_) => Self::SessionLimit,
-            pb::base::exit_code::Kind::Fault(_) => Self::Fault,
         })
     }
 }
@@ -328,7 +326,7 @@ impl From<SegmentReceipt> for pb::core::SegmentReceipt {
     fn from(value: SegmentReceipt) -> Self {
         Self {
             version: Some(ver::SEGMENT_RECEIPT),
-            seal: value.get_seal_bytes().into(),
+            seal: value.get_seal_bytes(),
             index: value.index,
             hashfn: value.hashfn,
             claim: Some(value.claim.into()),

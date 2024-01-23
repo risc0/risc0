@@ -324,7 +324,7 @@ impl InnerReceipt {
     /// Returns the [InnerReceipt::Composite] arm.
     pub fn composite(&self) -> Result<&CompositeReceipt, VerificationError> {
         if let InnerReceipt::Composite(x) = self {
-            Ok(&x)
+            Ok(x)
         } else {
             Err(VerificationError::ReceiptFormatError)
         }
@@ -333,7 +333,7 @@ impl InnerReceipt {
     /// Returns the [InnerReceipt::Groth16] arm.
     pub fn groth16(&self) -> Result<&Groth16Receipt, VerificationError> {
         if let InnerReceipt::Groth16(x) = self {
-            Ok(&x)
+            Ok(x)
         } else {
             Err(VerificationError::ReceiptFormatError)
         }
@@ -377,7 +377,7 @@ impl Groth16Receipt {
     pub fn verify_integrity(&self) -> Result<(), VerificationError> {
         Groth16Proof::from_seal(
             &Groth16Seal::from_vec(&self.seal).map_err(|_| VerificationError::InvalidProof)?,
-            self.claim.digest().into(),
+            self.claim.digest(),
         )
         .map_err(|_| VerificationError::InvalidProof)?
         .verify()
@@ -520,7 +520,7 @@ impl CompositeReceipt {
             pre: first_claim.pre.clone(),
             post: last_claim.post.clone(),
             exit_code: last_claim.exit_code,
-            input: first_claim.input.clone(),
+            input: first_claim.input,
             output: output.into(),
         })
     }
