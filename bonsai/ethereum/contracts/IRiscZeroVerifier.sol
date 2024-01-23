@@ -14,7 +14,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-pragma solidity ^0.8.9;
+pragma solidity ^0.8.20;
 
 /// @notice Public claims about a zkVM guest execution, such as the journal committed to by the guest.
 /// @dev Also includes important information such as the exit code and the starting and ending system

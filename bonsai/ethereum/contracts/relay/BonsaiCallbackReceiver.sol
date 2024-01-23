@@ -16,7 +16,7 @@
 
 import {IBonsaiRelay} from "./IBonsaiRelay.sol";
 
-pragma solidity ^0.8.17;
+pragma solidity ^0.8.20;
 
 /// @notice A base contract for writing a Bonsai app
 abstract contract BonsaiCallbackReceiver {
