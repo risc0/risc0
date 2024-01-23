@@ -48,21 +48,9 @@ fn download_zkr() {
     const SRC_PATH: &str = "src/recursion_zkr.zip";
     const SHA256_HASH: &str = "ae5736a42189aec2f04936c3aee4b5441e48b26b4fa1fae28657cf50cdf3cae4";
 
-    struct Checker {
-        hex_digest: String,
-    }
-
-    impl Checker {
-        fn new(path: &Path) -> Self {
-            let data = fs::read(path).unwrap();
-            Self {
-                hex_digest: hex::encode(Sha256::digest(data)),
-            }
-        }
-
-        fn is_ok(&self) -> bool {
-            self.hex_digest == SHA256_HASH
-        }
+    fn check_sha2(path: &Path) -> bool {
+        let data = fs::read(path).unwrap();
+        hex::encode(Sha256::digest(data)) == SHA256_HASH
     }
 
     if env::var("DOCS_RS").is_ok() {
@@ -78,22 +66,14 @@ fn download_zkr() {
     let out_path = out_dir.join(FILENAME);
 
     if out_path.exists() {
-        if Checker::new(&out_path).is_ok() {
+        if check_sha2(&out_path) {
             return;
         }
         fs::remove_file(&out_path).unwrap();
     }
 
-    if src_path.exists() {
-        let checker = Checker::new(&src_path);
-        if checker.is_ok() {
-            fs::copy(&src_path, &out_path).unwrap();
-        } else {
-            panic!(
-                "{SRC_PATH} hash mismatch. Expected: {SHA256_HASH}, Actual: {}",
-                checker.hex_digest
-            );
-        }
+    if src_path.exists() && check_sha2(&src_path) {
+        fs::copy(&src_path, &out_path).unwrap();
         return;
     }
 
