@@ -335,12 +335,6 @@ fn save_elf_to_file(content: impl AsRef<[u8]>, path: impl AsRef<Path>) -> Result
     Ok(())
 }
 
-fn read_json_file(path: impl AsRef<str>) -> Result<Value> {
-    let json = std::fs::read_to_string(path.as_ref())?;
-    let value = serde_json::from_str(&json)?;
-    Ok(value)
-}
-
 fn get_client() -> Result<Client> {
     let client = Client::builder()
         .default_headers(get_headers()?)
@@ -392,10 +386,4 @@ async fn get_bytes(client: &Client, url: &str) -> Result<Vec<u8>> {
         .bytes()
         .await?
         .into())
-}
-
-pub fn init_logging() {
-    tracing_subscriber::fmt()
-        .with_env_filter(tracing_subscriber::filter::EnvFilter::from_default_env())
-        .init();
 }
