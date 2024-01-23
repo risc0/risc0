@@ -584,6 +584,7 @@ version = "0.21.0-alpha.1"
 dependencies = [
  "anyhow",
  "bytemuck",
+ "hex",
  "risc0-core",
  "risc0-zkp",
  "tracing",

@@ -3758,6 +3758,7 @@ dependencies = [
  "bytemuck",
  "cust",
  "downloader",
+ "hex",
  "metal",
  "rand",
  "rayon",

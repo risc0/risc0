@@ -36,47 +36,61 @@ fn main() {
 #[cfg(feature = "prove")]
 fn download_zkr() {
     use std::{
-        num::ParseIntError,
+        fs,
         path::{Path, PathBuf},
         str::FromStr,
     };
 
     use downloader::{verify, Download, DownloadSummary, Downloader};
+    use sha2::{Digest, Sha256};
 
     const FILENAME: &str = "recursion_zkr.zip";
     const SRC_PATH: &str = "src/recursion_zkr.zip";
-    const SHA256_HASH: &str = "af7843e15818ef2ebd04fb455caeb42aaa3b70582f519a040adb870318797990";
+    const SHA256_HASH: &str = "ae5736a42189aec2f04936c3aee4b5441e48b26b4fa1fae28657cf50cdf3cae4";
+
+    fn check_sha2(path: &Path) -> bool {
+        let data = fs::read(path).unwrap();
+        hex::encode(Sha256::digest(data)) == SHA256_HASH
+    }
+
+    if env::var("DOCS_RS").is_ok() {
+        return;
+    }
+
+    println!("cargo:rerun-if-env-changed=RECURSION_SRC_PATH");
 
     let src_path = env::var("RECURSION_SRC_PATH").unwrap_or(SRC_PATH.to_string());
     let src_path = PathBuf::from_str(src_path.as_str()).unwrap();
     let out_dir = env::var("OUT_DIR").unwrap();
     let out_dir = Path::new(&out_dir);
-    if std::fs::metadata(&src_path).is_ok() {
-        let tgt_path = out_dir.join(FILENAME);
-        std::fs::copy(&src_path, tgt_path).unwrap();
-    } else {
-        fn decode_hex(s: &str) -> Result<Vec<u8>, ParseIntError> {
-            (0..s.len())
-                .step_by(2)
-                .map(|i| u8::from_str_radix(&s[i..i + 2], 16))
-                .collect()
+    let out_path = out_dir.join(FILENAME);
+
+    if out_path.exists() {
+        if check_sha2(&out_path) {
+            return;
         }
-        let mut downloader = Downloader::builder()
-            .download_folder(out_dir)
-            .build()
-            .unwrap();
-        let url =
-            format!("https://risc0-artifacts.s3.us-west-2.amazonaws.com/zkr/{SHA256_HASH}.zip");
-        eprintln!("Downloading {url}");
-        let dl = Download::new(&url)
-            .file_name(&PathBuf::from_str(FILENAME).unwrap())
-            .verify(verify::with_digest::<sha2::Sha256>(
-                decode_hex(SHA256_HASH).unwrap(),
-            ));
-        let results = downloader.download(&[dl]).unwrap();
-        for result in results {
-            let summary: DownloadSummary = result.unwrap();
-            eprintln!("{summary}");
-        }
+        fs::remove_file(&out_path).unwrap();
+    }
+
+    if src_path.exists() && check_sha2(&src_path) {
+        fs::copy(&src_path, &out_path).unwrap();
+        return;
+    }
+
+    let mut downloader = Downloader::builder()
+        .download_folder(out_dir)
+        .build()
+        .unwrap();
+    let url = format!("https://risc0-artifacts.s3.us-west-2.amazonaws.com/zkr/{SHA256_HASH}.zip");
+    eprintln!("Downloading {url}");
+    let dl = Download::new(&url)
+        .file_name(&PathBuf::from_str(FILENAME).unwrap())
+        .verify(verify::with_digest::<Sha256>(
+            hex::decode(SHA256_HASH).unwrap(),
+        ));
+    let results = downloader.download(&[dl]).unwrap();
+    for result in results {
+        let summary: DownloadSummary = result.unwrap();
+        eprintln!("{summary}");
     }
 }
