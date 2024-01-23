@@ -117,7 +117,7 @@ fn test_recursion_poseidon2() {
     test
 )]
 #[should_panic(expected = "assertion failed: elem.is_reduced()")]
-fn test_poseidon_reduced() {
+fn test_poseidon_sanitized_inputs() {
     use risc0_zkp::core::{digest::Digest, hash::poseidon::PoseidonHashSuite};
 
     let suite = PoseidonHashSuite::new_suite();
@@ -134,7 +134,7 @@ fn test_poseidon_reduced() {
     test
 )]
 #[should_panic(expected = "assertion failed: elem.is_reduced()")]
-fn test_poseidon2_reduced() {
+fn test_poseidon2_sanitized_inputs() {
     use risc0_zkp::core::{digest::Digest, hash::poseidon2::Poseidon2HashSuite};
 
     let suite = Poseidon2HashSuite::new_suite();
