@@ -24,7 +24,7 @@ use core::{
     ops,
 };
 
-use bytemuck::{NoUninit, Zeroable};
+use bytemuck::{CheckedBitPattern, NoUninit, Zeroable};
 
 use crate::field::{self, Elem as FieldElem};
 
@@ -160,6 +160,15 @@ impl field::Elem for Elem {
 
     fn is_reduced(&self) -> bool {
         self.0 < P
+    }
+}
+
+unsafe impl CheckedBitPattern for Elem {
+    type Bits = u32;
+
+    // Required method
+    fn is_valid_bit_pattern(bits: &u32) -> bool {
+        *bits < P
     }
 }
 
@@ -577,7 +586,6 @@ const fn const_ensure_valid(x: Elem) -> Elem {
     x
 }
 
-// TODO(victor): Continue review of methods from this point
 impl ExtElem {
     /// Explicitly construct an ExtElem from parts.
     pub const fn new(x0: Elem, x1: Elem, x2: Elem, x3: Elem) -> Self {
@@ -594,6 +602,7 @@ impl ExtElem {
         Self([x, Elem::new(0), Elem::new(0), Elem::new(0)])
     }
 
+    // TODO(victor): Review usage of this method
     /// Create an [ExtElem] from a raw integer.
     pub const fn from_u32(x0: u32) -> Self {
         Self([Elem::new(x0), Elem::new(0), Elem::new(0), Elem::new(0)])

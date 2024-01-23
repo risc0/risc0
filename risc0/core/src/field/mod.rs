@@ -47,6 +47,7 @@ pub trait Elem:
     + core::marker::Copy
     + Sized
     + bytemuck::NoUninit
+    + bytemuck::CheckedBitPattern
     + core::default::Default
     + Clone
     + Copy
@@ -153,20 +154,15 @@ pub trait Elem:
 
     /// Interprets a slice of u32s as a slice of these elements.
     /// These elements may not be INVALID.
+    // TODO(victor): Refactor with bytemucks checked functions.
     fn from_u32_slice(u32s: &[u32]) -> &[Self] {
-        let elems = Self::from_u32_slice_unchecked(u32s);
+        let elems: &[Self] = bytemuck::cast_slice(u32s);
         if cfg!(debug_assertions) {
             for elem in elems {
                 elem.ensure_valid();
             }
         }
         elems
-    }
-
-    /// Interprets a slice of u32s as a slice of these elements.
-    /// These elements may be INVALID.
-    fn from_u32_slice_unchecked(u32s: &[u32]) -> &[Self] {
-        bytemuck::cast_slice(u32s)
     }
 }
 
