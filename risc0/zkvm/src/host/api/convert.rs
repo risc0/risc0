@@ -152,7 +152,6 @@ impl From<ExitCode> for pb::base::ExitCode {
                 ExitCode::SessionLimit => pb::base::exit_code::Kind::SessionLimit(()),
                 ExitCode::Paused(code) => pb::base::exit_code::Kind::Paused(code),
                 ExitCode::Halted(code) => pb::base::exit_code::Kind::Halted(code),
-                ExitCode::Fault => pb::base::exit_code::Kind::Fault(()),
             }),
         }
     }
@@ -167,7 +166,6 @@ impl TryFrom<pb::base::ExitCode> for ExitCode {
             pb::base::exit_code::Kind::Paused(code) => Self::Paused(code),
             pb::base::exit_code::Kind::SystemSplit(_) => Self::SystemSplit,
             pb::base::exit_code::Kind::SessionLimit(_) => Self::SessionLimit,
-            pb::base::exit_code::Kind::Fault(_) => Self::Fault,
         })
     }
 }
@@ -663,8 +661,8 @@ where
     }
 }
 
-// Specialized implementaion for Vec<u8> for work around challenges getting the
-// generic implementaion above to work for Vec<u8>.
+// Specialized implementation for Vec<u8> for work around challenges getting the
+// generic implementation above to work for Vec<u8>.
 impl From<MaybePruned<Vec<u8>>> for pb::core::MaybePruned {
     fn from(value: MaybePruned<Vec<u8>>) -> Self {
         Self {
