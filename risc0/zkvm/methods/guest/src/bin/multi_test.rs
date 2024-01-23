@@ -29,7 +29,7 @@ use risc0_zkvm::{
     sha::{Digest, Sha256},
     ReceiptClaim,
 };
-use risc0_zkvm_methods::multi_test::{MultiTestSpec, SYS_MULTI_TEST};
+use risc0_zkvm_methods_core::multi_test::{MultiTestSpec, SYS_MULTI_TEST};
 use risc0_zkvm_platform::{
     fileno,
     memory::{self, SYSTEM},

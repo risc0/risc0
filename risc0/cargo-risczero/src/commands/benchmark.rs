@@ -28,7 +28,7 @@ use risc0_zkvm::{
     recursion::{join, lift},
     ExecutorEnv, ExecutorImpl, ProverOpts, VerifierContext,
 };
-use risc0_zkvm_methods::bench::{BenchmarkSpec, SpecWithIters};
+use risc0_zkvm_methods_core::bench::{BenchmarkSpec, SpecWithIters};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use sha2::{Digest, Sha256};

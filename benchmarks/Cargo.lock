@@ -2421,6 +2421,18 @@ version = "0.21.0-alpha.1"
 dependencies = [
  "risc0-build",
  "risc0-zkvm",
+ "risc0-zkvm-methods-core",
+ "risc0-zkvm-platform",
+ "serde",
+ "tracing-subscriber 0.3.18",
+]
+
+[[package]]
+name = "risc0-zkvm-methods-core"
+version = "0.21.0-alpha.1"
+dependencies = [
+ "risc0-build",
+ "risc0-zkvm",
  "risc0-zkvm-platform",
  "serde",
  "tracing-subscriber 0.3.18",

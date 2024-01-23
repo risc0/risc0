@@ -16,6 +16,7 @@ members = [
   "risc0/zkp",
   "risc0/zkvm",
   "risc0/zkvm/methods",
+  "risc0/zkvm/methods-core",
   "risc0/zkvm/platform",
   "risc0/zkvm/receipts",
   "website/doc-test/main",
@@ -48,7 +49,7 @@ risc0-sys = { version = "0.21.0-alpha.1", default-features = false, path = "risc
 risc0-zkp = { version = "0.21.0-alpha.1", default-features = false, path = "risc0/zkp" }
 risc0-zkvm = { version = "0.21.0-alpha.1", default-features = false, path = "risc0/zkvm" }
 risc0-zkvm-platform = { version = "0.21.0-alpha.1", default-features = false, path = "risc0/zkvm/platform" }
-risc0-zkvm-methods = { version = "0.21.0-alpha.1", default-features = false, path = "risc0/zkvm/methods" }
+risc0-zkvm-methods-core = { version = "0.21.0-alpha.1", default-features = false, path = "risc0/zkvm/methods-core" }
 
 [profile.bench]
 lto = true

@@ -1,5 +1,5 @@
 [package]
-name = "risc0-zkvm-methods"
+name = "risc0-zkvm-methods-core"
 version = { workspace = true }
 edition = { workspace = true }
 
@@ -7,14 +7,7 @@ edition = { workspace = true }
 risc0-build = { workspace = true }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
-[package.metadata.release]
-release = false
-
-[package.metadata.risc0]
-methods = ["guest", "rand", "std"]
-
 [dependencies]
-risc0-zkvm = { workspace = true }
-risc0-zkvm-methods-core = { workspace = true }
+risc0-zkvm = { workspace = true, default-features = false}
 risc0-zkvm-platform = { workspace = true }
 serde = { version = "1.0", default-features = false, features = ["derive"] }

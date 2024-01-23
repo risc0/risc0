@@ -853,7 +853,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "risc0-zkvm-methods"
+name = "risc0-zkvm-methods-core"
 version = "0.21.0-alpha.1"
 dependencies = [
  "risc0-build",
@@ -871,7 +871,7 @@ dependencies = [
  "getrandom",
  "risc0-zkp",
  "risc0-zkvm",
- "risc0-zkvm-methods",
+ "risc0-zkvm-methods-core",
  "risc0-zkvm-platform",
  "rsa",
 ]

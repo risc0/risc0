@@ -16,7 +16,7 @@ use risc0_zkvm::{
     guest::{env, memory_barrier, sha},
     sha::Sha256,
 };
-use risc0_zkvm_methods::bench::{BenchmarkSpec, SpecWithIters};
+use risc0_zkvm_methods_core::bench::{BenchmarkSpec, SpecWithIters};
 
 fn main() {
     let SpecWithIters(spec, iters) = env::read();
