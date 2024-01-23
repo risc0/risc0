@@ -22,7 +22,7 @@ use alloc::{boxed::Box, rc::Rc, vec::Vec};
 
 use risc0_core::field::{
     baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem, Elem},
-    ExtElem,
+    Elem as BaseElem, ExtElem,
 };
 
 use self::consts::{
@@ -51,6 +51,9 @@ impl HashFn<BabyBear> for PoseidonHashFn {
             .map(|w| BabyBearElem::new_raw(*w))
             .collect();
         assert!(both.len() == 16);
+        for elem in &both {
+            assert!(elem.is_reduced());
+        }
         to_digest(unpadded_hash(both.iter()))
     }
 
