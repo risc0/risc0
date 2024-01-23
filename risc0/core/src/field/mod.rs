@@ -46,7 +46,7 @@ pub trait Elem:
     + core::clone::Clone
     + core::marker::Copy
     + Sized
-    + bytemuck::Pod
+    + bytemuck::NoUninit
     + core::default::Default
     + Clone
     + Copy
