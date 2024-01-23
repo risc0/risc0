@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use methods::{GROTH16_VERIFIER_ELF, GROTH16_VERIFIER_ID};
+use groth16_verifier_methods::{GROTH16_VERIFIER_ELF, GROTH16_VERIFIER_ID};
 use risc0_groth16::{
     circom::{CircomProof, CircomPublic, CircomVKey},
     Groth16,
