@@ -238,26 +238,13 @@ pub const _M_EXT_MONTGOMERY: &[Elem] = &baby_bear_array![
     0x38400000, 0x38400000, 0x68ffffff, 0x617ffffe, 0x70800000, 0x70800000, 0x59fffffd, 0x4afffffb
 ];
 
-// Outputted by a modified version of https://github.com/HorizenLabs/poseidon2.git
-// Computed by Ben Diamond at Ulvetanna.
-//
-// These parameters were chosen because they have low hamming weight in
-// montgomery form which makes them more efficient to implement in hardware.
-//
-// The full matrix can be constructed by as follows:
-// - Initialize a matrix with all 1s.
-// - Add these values along the diagonal.
-
-// pub const M_INT_DIAG_ULVT: &[Elem] = &baby_bear_array![
-//     0x77f10001, 0x70800001, 0x59fffffd, 0x3bfffff9, 0x30c00000, 0x77100001, 0x77ffff11, 0x38040000,
-//     0x70800000, 0x77ff1001, 0x38388000, 0x77880001, 0x76200001, 0x383fe200, 0x77fffc41, 0x77fff101,
-//     0x383ffe20, 0x77e20001, 0x383c4000, 0x69000001, 0x68ffffff, 0x77fffe21, 0x77f88001, 0x77ffffe3
-// ];
-
 // Standardizing on the same coefficients as https://github.com/HorizenLabs/poseidon2.git
 // (as used in its plain implementation of Poseidon2 for BabyBear)
 //
-// These parameters are confirmed by [TODO talk about psi2 good weights reference]
+// These parameters are have been confirmed to pass the algorithms given in Grassi, Rechberger, and
+// Schofnegger's paper "Proving Resistance Against Infinitely Long Subspace Trails: How to Choose
+// the Linear Layer" by running a version of the code provided with the paper adapted to include
+// these parameters in what's tested.
 //
 // The full matrix can be constructed by as follows:
 // - Initialize a matrix with all 1s.
