@@ -90,10 +90,10 @@ __device__ void multiply_by_m_ext(Fp* old_cells) {
   for (uint i = 0; i < 4; i++) {
     tmp_sums[i] = 0;
   }
-  for (uint i = 0; i < CELLS/4; i++) {
-    multiply_by_4x4_circulant(old_cells + i*4);
+  for (uint i = 0; i < CELLS / 4; i++) {
+    multiply_by_4x4_circulant(old_cells + i * 4);
     for (uint j = 0; j < 4; j++) {
-      Fp to_add = old_cells[i*4 + j];
+      Fp to_add = old_cells[i * 4 + j];
       tmp_sums[j] += to_add;
       cells[i * 4 + j] += to_add;
     }
@@ -109,15 +109,14 @@ __device__ void full_round(const Fp* ROUND_CONSTANTS, Fp* cells, uint round) {
   multiply_by_m_ext(cells);
 }
 
-__device__ void partial_round(const Fp* ROUND_CONSTANTS, const Fp* M_INT_DIAG, Fp* cells, uint round) {
+__device__ void
+partial_round(const Fp* ROUND_CONSTANTS, const Fp* M_INT_DIAG, Fp* cells, uint round) {
   add_round_constants_partial(ROUND_CONSTANTS, cells, round);
   do_partial_sboxes(cells);
   multiply_by_m_int(M_INT_DIAG, cells);
 }
 
-__device__ void poseidon2_mix(const Fp* ROUND_CONSTANTS,
-                const Fp* M_INT_DIAG,
-                Fp* cells) {
+__device__ void poseidon2_mix(const Fp* ROUND_CONSTANTS, const Fp* M_INT_DIAG, Fp* cells) {
   uint round = 0;
 
   // First linear layer.
@@ -140,15 +139,17 @@ __device__ void poseidon2_mix(const Fp* ROUND_CONSTANTS,
   }
 }
 
-}
+} // namespace poseidon2
 
 extern "C" __global__ void poseidon2_fold(const Fp* ROUND_CONSTANTS,
-                     const Fp* M_INT_DIAG,
-                     Fp* output,
-                     const Fp* input,
-                     uint32_t output_size) {
+                                          const Fp* M_INT_DIAG,
+                                          Fp* output,
+                                          const Fp* input,
+                                          uint32_t output_size) {
   uint32_t gid = blockDim.x * blockIdx.x + threadIdx.x;
-  if (gid >= output_size) { return; }
+  if (gid >= output_size) {
+    return;
+  }
   Fp cells[CELLS];
   for (size_t i = 0; i < CELLS_OUT; i++) {
     cells[i] = input[2 * gid * CELLS_OUT + i];
@@ -161,13 +162,15 @@ extern "C" __global__ void poseidon2_fold(const Fp* ROUND_CONSTANTS,
 }
 
 extern "C" __global__ void poseidon2_rows(const Fp* ROUND_CONSTANTS,
-                     const Fp* M_INT_DIAG,
-                     Fp* out,
-                     const Fp* matrix,
-                     uint32_t count,
-                     uint32_t col_size) {
+                                          const Fp* M_INT_DIAG,
+                                          Fp* out,
+                                          const Fp* matrix,
+                                          uint32_t count,
+                                          uint32_t col_size) {
   uint32_t gid = blockDim.x * blockIdx.x + threadIdx.x;
-  if (gid >= count) { return; }
+  if (gid >= count) {
+    return;
+  }
   Fp cells[CELLS];
   uint used = 0;
   for (uint i = 0; i < col_size; i++) {
@@ -184,4 +187,3 @@ extern "C" __global__ void poseidon2_rows(const Fp* ROUND_CONSTANTS,
     out[CELLS_OUT * gid + i] = cells[i];
   }
 }
-
