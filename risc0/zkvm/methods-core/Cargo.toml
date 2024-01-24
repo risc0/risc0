@@ -8,6 +8,6 @@ risc0-build = { workspace = true }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [dependencies]
-risc0-zkvm = { workspace = true, default-features = false}
+risc0-zkvm = { workspace = true, default-features = false }
 risc0-zkvm-platform = { workspace = true }
 serde = { version = "1.0", default-features = false, features = ["derive"] }
