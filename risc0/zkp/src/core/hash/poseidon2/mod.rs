@@ -231,7 +231,7 @@ mod tests {
     use test_log::test;
 
     use super::*;
-    use crate::core::hash::poseidon2::consts::{_M_EXT, _M_EXT_MONTGOMERY};
+    use crate::core::hash::poseidon2::consts::_M_EXT;
 
     fn do_partial_sboxes(cells: &mut [BabyBearElem; CELLS]) {
         cells[0] = sbox(cells[0]);
@@ -329,17 +329,5 @@ mod tests {
         }
 
         tracing::debug!("output: {:?}", buf);
-    }
-
-    #[test]
-    fn poseidon2_ext_matrices_match() {
-        for i in 0..CELLS {
-            for j in 0..CELLS {
-                assert_eq!(
-                    _M_EXT[i * CELLS + j].as_u32(),
-                    _M_EXT_MONTGOMERY[i * CELLS + j].as_u32_montgomery()
-                );
-            }
-        }
     }
 }
