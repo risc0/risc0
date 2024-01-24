@@ -757,7 +757,7 @@ fn decode_system_state_from_io(
 pub(crate) fn decode_receipt_claim_from_seal(
     seal: &[u32],
 ) -> Result<ReceiptClaim, VerificationError> {
-    let elems = bytemuck::cast_slice(seal);
+    let elems = bytemuck::checked::cast_slice(seal);
     let io = layout::OutBuffer(elems);
     let body = layout::LAYOUT.mux.body;
     let pre = decode_system_state_from_io(io, body.global.pre)?;
