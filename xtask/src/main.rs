@@ -16,6 +16,7 @@ mod bootstrap;
 mod bootstrap_groth16;
 mod bootstrap_poseidon;
 mod gen_receipt;
+mod gen_benchmark;
 mod install;
 
 use clap::{Parser, Subcommand};
@@ -23,7 +24,7 @@ use tracing_subscriber::{prelude::*, EnvFilter};
 
 use self::{
     bootstrap::Bootstrap, bootstrap_groth16::BootstrapGroth16,
-    bootstrap_poseidon::BootstrapPoseidon, gen_receipt::GenReceipt, install::Install,
+    bootstrap_poseidon::BootstrapPoseidon, gen_receipt::GenReceipt, install::Install, gen_benchmark::GenBenchmark,
 };
 
 #[derive(Parser)]
@@ -38,6 +39,7 @@ enum Commands {
     BootstrapGroth16(BootstrapGroth16),
     BootstrapPoseidon(BootstrapPoseidon),
     GenReceipt(GenReceipt),
+    GenBenchmark(GenBenchmark),
     Install(Install),
 }
 
@@ -49,6 +51,7 @@ impl Commands {
             Commands::BootstrapPoseidon(cmd) => cmd.run(),
             Commands::Install(cmd) => cmd.run(),
             Commands::GenReceipt(cmd) => cmd.run(),
+            Commands::GenBenchmark(cmd) => cmd.run(),
         }
     }
 }

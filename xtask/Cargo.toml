@@ -13,6 +13,7 @@ risc0-core = { workspace = true }
 risc0-groth16 = { workspace = true, features = ["prove"] }
 risc0-zkp = { workspace = true }
 risc0-zkvm = { workspace = true, features = ["prove"] }
+risc0-zkvm-methods-core = { workspace = true }
 risc0-zkvm-methods = { path = "../risc0/zkvm/methods" }
 tempfile = "3.3"
 tracing = { version = "0.1", default-features = false }

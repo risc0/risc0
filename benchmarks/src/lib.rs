@@ -25,7 +25,6 @@ use std::{
 use risc0_zkvm::{sha::Digest, ExecutorEnv, ExecutorImpl, Receipt, Segment, Session};
 use serde::Serialize;
 use tracing::info;
-
 pub struct Metrics {
     pub job_name: String,
     pub job_size: u32,
