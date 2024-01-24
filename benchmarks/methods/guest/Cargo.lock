@@ -854,7 +854,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-binfmt"
-version = "0.20.0-rc.2"
+version = "0.20.0-rc.3"
 dependencies = [
  "anyhow",
  "elf",
@@ -866,7 +866,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion"
-version = "0.20.0-rc.2"
+version = "0.20.0-rc.3"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -878,7 +878,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im"
-version = "0.20.0-rc.2"
+version = "0.20.0-rc.3"
 dependencies = [
  "anyhow",
  "risc0-core",
@@ -889,7 +889,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-core"
-version = "0.20.0-rc.2"
+version = "0.20.0-rc.3"
 dependencies = [
  "bytemuck",
  "rand_core",
@@ -897,7 +897,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkp"
-version = "0.20.0-rc.2"
+version = "0.20.0-rc.3"
 dependencies = [
  "anyhow",
  "blake2",
@@ -915,7 +915,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "0.20.0-rc.2"
+version = "0.20.0-rc.3"
 dependencies = [
  "anyhow",
  "ark-bn254",
@@ -944,7 +944,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "0.20.0-rc.2"
+version = "0.20.0-rc.3"
 dependencies = [
  "bytemuck",
  "getrandom",
