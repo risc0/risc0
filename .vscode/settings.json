@@ -48,6 +48,7 @@
     "canonicalize",
     "risczero",
     "tempdir",
-    "tmpdir"
+    "tmpdir",
+    "xtask"
   ]
 }
