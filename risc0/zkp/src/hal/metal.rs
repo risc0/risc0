@@ -14,7 +14,6 @@
 
 use std::{collections::HashMap, ffi::c_void, fmt::Debug, marker::PhantomData, mem, slice};
 
-use bytemuck::Pod;
 use metal::{
     Buffer as MetalBuffer, CommandQueue, ComputePipelineDescriptor, Device, MTLResourceOptions,
     MTLSize, NSRange,
@@ -469,7 +468,7 @@ impl<MH: MetalHash> Hal for MetalHal<MH> {
     type Elem = BabyBearElem;
     type ExtElem = BabyBearExtElem;
     type Field = BabyBear;
-    type Buffer<T: Clone + Debug + PartialEq + Pod> = BufferImpl<T>;
+    type Buffer<T: Clone + Debug + PartialEq> = BufferImpl<T>;
 
     fn alloc_elem(&self, _name: &'static str, size: usize) -> Self::Buffer<Self::Elem> {
         BufferImpl::new(&self.device, self.cmd_queue.clone(), size)
