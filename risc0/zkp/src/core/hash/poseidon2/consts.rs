@@ -247,8 +247,23 @@ pub const _M_EXT_MONTGOMERY: &[Elem] = &baby_bear_array![
 // The full matrix can be constructed by as follows:
 // - Initialize a matrix with all 1s.
 // - Add these values along the diagonal.
-pub const M_INT_DIAG_ULVT: &[Elem] = &baby_bear_array![
-    0x77f10001, 0x70800001, 0x59fffffd, 0x3bfffff9, 0x30c00000, 0x77100001, 0x77ffff11, 0x38040000,
-    0x70800000, 0x77ff1001, 0x38388000, 0x77880001, 0x76200001, 0x383fe200, 0x77fffc41, 0x77fff101,
-    0x383ffe20, 0x77e20001, 0x383c4000, 0x69000001, 0x68ffffff, 0x77fffe21, 0x77f88001, 0x77ffffe3
+
+// pub const M_INT_DIAG_ULVT: &[Elem] = &baby_bear_array![
+//     0x77f10001, 0x70800001, 0x59fffffd, 0x3bfffff9, 0x30c00000, 0x77100001, 0x77ffff11, 0x38040000,
+//     0x70800000, 0x77ff1001, 0x38388000, 0x77880001, 0x76200001, 0x383fe200, 0x77fffc41, 0x77fff101,
+//     0x383ffe20, 0x77e20001, 0x383c4000, 0x69000001, 0x68ffffff, 0x77fffe21, 0x77f88001, 0x77ffffe3
+// ];
+
+// Standardizing on the same coefficients as https://github.com/HorizenLabs/poseidon2.git
+// (as used in its plain implementation of Poseidon2 for BabyBear)
+//
+// These parameters are confirmed by [TODO talk about psi2 good weights reference]
+//
+// The full matrix can be constructed by as follows:
+// - Initialize a matrix with all 1s.
+// - Add these values along the diagonal.
+pub const M_INT_DIAG_HZN: &[Elem] = &baby_bear_array![
+    0x409133f0, 0x1667a8a1, 0x06a6c7b6, 0x6f53160e, 0x273b11d1, 0x03176c5d, 0x72f9bbf9, 0x73ceba91,
+    0x5cdef81d, 0x01393285, 0x46daee06, 0x065d7ba6, 0x52d72d6f, 0x05dd05e0, 0x3bab4b63, 0x6ada3842,
+    0x2fc5fbec, 0x770d61b0, 0x5715aae9, 0x03ef0e90, 0x75b6c770, 0x242adf5f, 0x00d0ca4c, 0x36c0e388,
 ];
