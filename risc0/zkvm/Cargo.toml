@@ -90,6 +90,7 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 [target.'cfg(not(target_os = "zkvm"))'.dev-dependencies]
 flate2 = "1.0"
 risc0-zkvm-methods = { path = "methods" }
+risc0-zkvm-methods-core = { workspace = true }
 serde_json = "1.0"
 serial_test = "3.0"
 tar = "0.4"

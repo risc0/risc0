@@ -15,7 +15,8 @@
 use assert_cmd::Command;
 use assert_fs::{fixture::PathChild, TempDir};
 use risc0_zkvm::{serde::to_vec, Receipt};
-use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_PATH};
+use risc0_zkvm_methods::MULTI_TEST_PATH;
+use risc0_zkvm_methods_core::multi_test::MultiTestSpec;
 
 fn run_dev_mode() -> Receipt {
     let temp = TempDir::new().unwrap();

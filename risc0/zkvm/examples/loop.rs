@@ -20,10 +20,8 @@ use risc0_zkvm::{
     get_prover_server, ExecutorEnv, ExecutorImpl, ProverOpts, ProverServer, Receipt, Session,
     VerifierContext,
 };
-use risc0_zkvm_methods::{
-    bench::{BenchmarkSpec, SpecWithIters},
-    BENCH_ELF,
-};
+use risc0_zkvm_methods::BENCH_ELF;
+use risc0_zkvm_methods_core::bench::{BenchmarkSpec, SpecWithIters};
 use risc0_zkvm_platform::WORD_SIZE;
 use tracing_subscriber::{prelude::*, EnvFilter};
 

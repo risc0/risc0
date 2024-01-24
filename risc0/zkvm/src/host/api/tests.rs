@@ -20,9 +20,9 @@ use std::{
 
 use anyhow::Result;
 use risc0_zkvm_methods::{
-    multi_test::MultiTestSpec, HELLO_COMMIT_ELF, HELLO_COMMIT_ID, MULTI_TEST_ELF, MULTI_TEST_ID,
-    MULTI_TEST_PATH,
+    HELLO_COMMIT_ELF, HELLO_COMMIT_ID, MULTI_TEST_ELF, MULTI_TEST_ID, MULTI_TEST_PATH,
 };
+use risc0_zkvm_methods_core::multi_test::MultiTestSpec;
 use tempfile::{tempdir, TempDir};
 use test_log::test;
 

@@ -18,7 +18,8 @@ use risc0_zkp::{
     core::digest::{Digest, DIGEST_WORDS},
     field::baby_bear::BabyBearElem,
 };
-use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID};
+use risc0_zkvm_methods::{MULTI_TEST_ELF, MULTI_TEST_ID};
+use risc0_zkvm_methods_core::multi_test::MultiTestSpec;
 use serial_test::serial;
 use test_log::test;
 
