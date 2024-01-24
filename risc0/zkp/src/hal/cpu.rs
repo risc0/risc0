@@ -20,7 +20,6 @@ use core::{
 };
 use std::{cell::RefCell, fmt::Debug, rc::Rc};
 
-use bytemuck::Pod;
 use ndarray::{ArrayView, ArrayViewMut, Axis};
 use rayon::prelude::*;
 use risc0_core::field::{Elem, ExtElem, Field};
@@ -93,7 +92,7 @@ pub struct CpuBuffer<T> {
     region: Region,
 }
 
-enum SyncSliceRef<'a, T: Default + Clone + Pod> {
+enum SyncSliceRef<'a, T: Default + Clone> {
     FromBuf(RefMut<'a, [T]>),
     FromSlice(&'a SyncSlice<'a, T>),
 }
@@ -101,7 +100,7 @@ enum SyncSliceRef<'a, T: Default + Clone + Pod> {
 /// A buffer which can be used across multiple threads.  Users are
 /// responsible for ensuring that no two threads access the same
 /// element at the same time.
-pub struct SyncSlice<'a, T: Default + Clone + Pod> {
+pub struct SyncSlice<'a, T: Default + Clone> {
     _buf: SyncSliceRef<'a, T>,
     ptr: *mut T,
     size: usize,
@@ -112,9 +111,9 @@ pub struct SyncSlice<'a, T: Default + Clone + Pod> {
 //
 // The user of the SyncSlice is responsible for ensuring that no
 // two threads access the same elements at the same time.
-unsafe impl<'a, T: Default + Clone + Pod> Sync for SyncSlice<'a, T> {}
+unsafe impl<'a, T: Default + Clone> Sync for SyncSlice<'a, T> {}
 
-impl<'a, T: Default + Clone + Pod> SyncSlice<'a, T> {
+impl<'a, T: Default + Clone> SyncSlice<'a, T> {
     pub fn new(mut buf: RefMut<'a, [T]>) -> Self {
         let ptr = buf.as_mut_ptr();
         let size = buf.len();
@@ -158,7 +157,7 @@ impl<'a, T: Default + Clone + Pod> SyncSlice<'a, T> {
     }
 }
 
-impl<T: Default + Clone + Pod> CpuBuffer<T> {
+impl<T: Default + Clone> CpuBuffer<T> {
     fn new(size: usize) -> Self {
         let buf = vec![T::default(); size];
         CpuBuffer {
@@ -172,9 +171,8 @@ impl<T: Default + Clone + Pod> CpuBuffer<T> {
     }
 
     fn copy_from(slice: &[T]) -> Self {
-        let bytes = bytemuck::cast_slice(slice);
         CpuBuffer {
-            buf: Rc::new(RefCell::new(TrackedVec::new(Vec::from(bytes)))),
+            buf: Rc::new(RefCell::new(TrackedVec::new(Vec::from(slice)))),
             region: Region(0, slice.len()),
         }
     }
@@ -192,18 +190,12 @@ impl<T: Default + Clone + Pod> CpuBuffer<T> {
 
     pub fn as_slice(&self) -> Ref<'_, [T]> {
         let vec = self.buf.borrow();
-        Ref::map(vec, |vec| {
-            let slice = bytemuck::cast_slice(&vec.0);
-            &slice[self.region.range()]
-        })
+        Ref::map(vec, |vec| &vec.0[self.region.range()])
     }
 
     pub fn as_slice_mut(&self) -> RefMut<'_, [T]> {
         let vec = self.buf.borrow_mut();
-        RefMut::map(vec, |vec| {
-            let slice = bytemuck::cast_slice_mut(&mut vec.0);
-            &mut slice[self.region.range()]
-        })
+        RefMut::map(vec, |vec| &mut vec.0[self.region.range()])
     }
 
     pub fn as_slice_sync(&self) -> SyncSlice<'_, T> {
@@ -211,7 +203,7 @@ impl<T: Default + Clone + Pod> CpuBuffer<T> {
     }
 }
 
-impl<T: Default + Clone + Pod> From<Vec<T>> for CpuBuffer<T> {
+impl<T: Default + Clone> From<Vec<T>> for CpuBuffer<T> {
     fn from(vec: Vec<T>) -> CpuBuffer<T> {
         let size = vec.len();
         CpuBuffer {
@@ -221,7 +213,7 @@ impl<T: Default + Clone + Pod> From<Vec<T>> for CpuBuffer<T> {
     }
 }
 
-impl<T: Pod> Buffer<T> for CpuBuffer<T> {
+impl<T: Clone> Buffer<T> for CpuBuffer<T> {
     fn size(&self) -> usize {
         self.region.size()
     }
@@ -237,14 +229,12 @@ impl<T: Pod> Buffer<T> for CpuBuffer<T> {
 
     fn view<F: FnOnce(&[T])>(&self, f: F) {
         let buf = self.buf.borrow();
-        let slice = bytemuck::cast_slice(&buf.0);
-        f(&slice[self.region.range()]);
+        f(&buf.0[self.region.range()]);
     }
 
     fn view_mut<F: FnOnce(&mut [T])>(&self, f: F) {
         let mut buf = self.buf.borrow_mut();
-        let slice = bytemuck::cast_slice_mut(&mut buf.0);
-        f(&mut slice[self.region.range()]);
+        f(&mut buf.0[self.region.range()]);
     }
 }
 
@@ -252,7 +242,7 @@ impl<F: Field> Hal for CpuHal<F> {
     type Field = F;
     type Elem = F::Elem;
     type ExtElem = F::ExtElem;
-    type Buffer<T: Clone + Debug + PartialEq + Pod> = CpuBuffer<T>;
+    type Buffer<T: Clone + Debug + PartialEq> = CpuBuffer<T>;
 
     fn alloc_elem(&self, _name: &'static str, size: usize) -> Self::Buffer<Self::Elem> {
         CpuBuffer::new(size)

@@ -166,7 +166,7 @@ impl field::Elem for Elem {
 unsafe impl CheckedBitPattern for Elem {
     type Bits = u32;
 
-    // Required method
+    /// Checks that the u32 is less than the modulus.
     fn is_valid_bit_pattern(bits: &u32) -> bool {
         *bits < P
     }
@@ -402,10 +402,21 @@ pub struct ExtElem([Elem; EXT_SIZE]);
 // https://docs.rs/bytemuck/latest/bytemuck/trait.NoUninit.html#safety
 unsafe impl NoUninit for ExtElem {}
 
-/* This alias can be approximated by aliasing on import
+unsafe impl CheckedBitPattern for ExtElem {
+    type Bits = [u32; EXT_SIZE];
+
+    /// Checks that the u32 array elements are all less than the modulus.
+    fn is_valid_bit_pattern(bits: &[u32; EXT_SIZE]) -> bool {
+        let mut valid = true;
+        for x in bits {
+            valid &= *x < P;
+        }
+        valid
+    }
+}
+
 /// Alias for the Baby Bear [ExtElem]
 pub type BabyBearExtElem = ExtElem;
-*/
 
 impl Default for ExtElem {
     fn default() -> Self {
@@ -520,12 +531,11 @@ impl field::Elem for ExtElem {
     }
 
     fn is_reduced(&self) -> bool {
+        let mut valid = true;
         for comp in self.0 {
-            if !comp.is_reduced() {
-                return false;
-            }
+            valid &= comp.0 < P;
         }
-        true
+        valid
     }
 }
 

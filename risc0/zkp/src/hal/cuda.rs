@@ -14,7 +14,6 @@
 
 use std::{cell::RefCell, fmt::Debug, marker::PhantomData, rc::Rc};
 
-use bytemuck::Pod;
 use cust::{
     device::DeviceAttribute,
     function::{BlockSize, GridSize},
@@ -347,7 +346,7 @@ pub struct BufferImpl<T> {
     marker: PhantomData<T>,
 }
 
-impl<T: Pod> BufferImpl<T> {
+impl<T> BufferImpl<T> {
     fn new(name: &'static str, size: usize) -> Self {
         let bytes_len = std::mem::size_of::<T>() * size;
         assert!(bytes_len > 0);
@@ -386,7 +385,7 @@ impl<T: Pod> BufferImpl<T> {
     }
 }
 
-impl<T: Pod> Buffer<T> for BufferImpl<T> {
+impl<T> Buffer<T> for BufferImpl<T> {
     fn size(&self) -> usize {
         self.size
     }
@@ -487,7 +486,7 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
     type Field = BabyBear;
     type Elem = BabyBearElem;
     type ExtElem = BabyBearExtElem;
-    type Buffer<T: Clone + Debug + PartialEq + Pod> = BufferImpl<T>;
+    type Buffer<T: Clone + Debug + PartialEq> = BufferImpl<T>;
 
     fn alloc_elem(&self, name: &'static str, size: usize) -> Self::Buffer<Self::Elem> {
         BufferImpl::new(name, size)

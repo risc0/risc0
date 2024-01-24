@@ -154,15 +154,8 @@ pub trait Elem:
 
     /// Interprets a slice of u32s as a slice of these elements.
     /// These elements may not be INVALID.
-    // TODO(victor): Refactor with bytemucks checked functions.
     fn from_u32_slice(u32s: &[u32]) -> &[Self] {
-        let elems: &[Self] = bytemuck::cast_slice(u32s);
-        if cfg!(debug_assertions) {
-            for elem in elems {
-                elem.ensure_valid();
-            }
-        }
-        elems
+        bytemuck::checked::cast_slice(u32s)
     }
 }
 
