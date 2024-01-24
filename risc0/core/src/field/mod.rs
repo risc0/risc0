@@ -128,12 +128,6 @@ pub trait Elem:
         self
     }
 
-    /// Returns this element, but checks to make sure it's in reduced form.
-    fn ensure_reduced(&self) -> &Self {
-        assert!(self.is_reduced());
-        self
-    }
-
     /// Interprets a slice of these elements as u32s.  These elements
     /// may not be INVALID.
     fn as_u32_slice(elems: &[Self]) -> &[u32] {
