@@ -107,7 +107,7 @@ pub struct ProverOpts {
 }
 
 impl Default for ProverOpts {
-    /// Return [ProverOpts] with the SHA-256 hash function and
+    /// Return [ProverOpts] with the Poseidon hash function and
     /// `prove_guest_errors` set to false.
     fn default() -> Self {
         Self {
@@ -134,7 +134,7 @@ impl Default for ProverOpts {
 /// * [local::LocalProver] if the `prove` feature flag is enabled.
 /// * [ExternalProver] otherwise.
 pub fn default_prover() -> Rc<dyn Prover> {
-    let explicit = std::env::var("RISC0_PROVER").unwrap_or(String::new());
+    let explicit = std::env::var("RISC0_PROVER").unwrap_or_default();
     if !explicit.is_empty() {
         return match explicit.to_lowercase().as_str() {
             "bonsai" => Rc::new(BonsaiProver::new("bonsai")),
@@ -176,7 +176,7 @@ pub fn default_prover() -> Rc<dyn Prover> {
 /// * [local::LocalProver] if the `prove` feature flag is enabled.
 /// * [ExternalProver] otherwise.
 pub fn default_executor() -> Rc<dyn Executor> {
-    let explicit = std::env::var("RISC0_EXECUTOR").unwrap_or(String::new());
+    let explicit = std::env::var("RISC0_EXECUTOR").unwrap_or_default();
     if !explicit.is_empty() {
         return match explicit.to_lowercase().as_str() {
             "ipc" => Rc::new(ExternalProver::new("ipc", get_r0vm_path())),
