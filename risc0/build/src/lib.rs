@@ -401,11 +401,6 @@ fn build_guest_package<P>(
         cargo_command("build", &[])
     };
 
-    let binaries_str = guest_opts.bin.join(",");
-    if !guest_opts.bin.is_empty() {
-        cmd.args(&["--bin", &binaries_str]);
-    }
-
     let features_str = guest_opts.features.join(",");
     if !features_str.is_empty() {
         cmd.args(["--features", &features_str]);
@@ -501,9 +496,6 @@ pub struct GuestOptions {
     /// Features for cargo to build the guest with.
     pub features: Vec<String>,
 
-    /// Binary names to build.
-    pub bin: Vec<String>,
-
     /// Use a docker environment for building.
     pub use_docker: Option<DockerOptions>,
 }
@@ -560,7 +552,6 @@ pub fn embed_methods_with_options(mut guest_pkg_to_options: HashMap<&str, GuestO
             docker_build(
                 guest_pkg.manifest_path.as_std_path(),
                 &src_dir,
-                &guest_opts.bin,
                 &guest_opts.features,
             )
             .unwrap();

@@ -26,10 +26,6 @@ pub struct BuildGuest {
     #[arg(long)]
     pub manifest_path: PathBuf,
 
-    /// Specify binaries to build.
-    #[clap(long, value_delimiter = ',')]
-    pub bin: Vec<String>,
-
     /// Feature flags passed to cargo.
     #[arg(long, value_delimiter = ',')]
     pub features: Vec<String>,
@@ -38,6 +34,6 @@ pub struct BuildGuest {
 impl BuildGuest {
     pub fn run(&self) -> Result<()> {
         let src_dir = std::env::current_dir().unwrap();
-        risc0_build::docker_build(&self.manifest_path, &src_dir, &self.bin, &self.features)
+        risc0_build::docker_build(&self.manifest_path, &src_dir, &self.features)
     }
 }
