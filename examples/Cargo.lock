@@ -226,7 +226,6 @@ dependencies = [
  "blake2",
  "derivative",
  "digest",
- "rayon",
  "sha2",
 ]
 
@@ -244,7 +243,6 @@ dependencies = [
  "hashbrown 0.13.2",
  "itertools 0.10.5",
  "num-traits",
- "rayon",
  "zeroize",
 ]
 
@@ -264,7 +262,6 @@ dependencies = [
  "num-bigint 0.4.4",
  "num-traits",
  "paste",
- "rayon",
  "rustc_version",
  "zeroize",
 ]
@@ -305,7 +302,6 @@ dependencies = [
  "ark-relations",
  "ark-serialize",
  "ark-std",
- "rayon",
 ]
 
 [[package]]
@@ -319,7 +315,6 @@ dependencies = [
  "ark-std",
  "derivative",
  "hashbrown 0.13.2",
- "rayon",
 ]
 
 [[package]]
@@ -377,7 +372,6 @@ checksum = "94893f1e0c6eeab764ade8dc4c0db24caf4fe7cbbaafc0eba0a9030f447b5185"
 dependencies = [
  "num-traits",
  "rand",
- "rayon",
 ]
 
 [[package]]
@@ -2011,6 +2005,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "groth16-verifier-methods"
+version = "0.1.0"
+dependencies = [
+ "risc0-build",
+]
+
+[[package]]
 name = "group"
 version = "0.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2701,13 +2702,6 @@ dependencies = [
  "log",
  "objc",
  "paste",
-]
-
-[[package]]
-name = "methods"
-version = "0.1.0"
-dependencies = [
- "risc0-build",
 ]
 
 [[package]]
@@ -3768,6 +3762,7 @@ name = "risc0-build"
 version = "0.21.0-alpha.1"
 dependencies = [
  "anyhow",
+ "cargo-platform",
  "cargo_metadata",
  "docker-generate",
  "risc0-binfmt",
@@ -3797,6 +3792,7 @@ dependencies = [
  "bytemuck",
  "cust",
  "downloader",
+ "hex",
  "metal",
  "rand",
  "rayon",
@@ -3852,30 +3848,29 @@ dependencies = [
 
 [[package]]
 name = "risc0-groth16"
-version = "0.1.0"
+version = "0.21.0-alpha.1"
 dependencies = [
  "anyhow",
  "ark-bn254",
  "ark-groth16",
  "ark-serialize",
- "bincode",
- "bytemuck",
- "ethereum-types",
  "hex",
- "risc0-zkvm",
+ "num-bigint 0.4.4",
+ "num-derive",
+ "num-traits",
+ "risc0-zkp",
  "serde",
- "serde_json",
- "sha2",
 ]
 
 [[package]]
 name = "risc0-groth16-verifier-example"
 version = "0.1.0"
 dependencies = [
- "methods",
+ "groth16-verifier-methods",
  "risc0-groth16",
  "risc0-zkvm",
  "serde_json",
+ "sha2",
 ]
 
 [[package]]
@@ -3930,9 +3925,6 @@ version = "0.21.0-alpha.1"
 dependencies = [
  "addr2line",
  "anyhow",
- "ark-bn254",
- "ark-groth16",
- "ark-serialize",
  "bincode",
  "bonsai-sdk",
  "bytemuck",
@@ -3944,7 +3936,6 @@ dependencies = [
  "hex",
  "human-repr",
  "lazy-regex",
- "num-bigint 0.4.4",
  "num-derive",
  "num-traits",
  "prost",
@@ -3955,6 +3946,7 @@ dependencies = [
  "risc0-circuit-recursion",
  "risc0-circuit-rv32im",
  "risc0-core",
+ "risc0-groth16",
  "risc0-zkp",
  "risc0-zkvm-platform",
  "rrs-lib",
@@ -5923,7 +5915,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "xgboost"
+name = "xgboost-example"
 version = "0.1.0"
 dependencies = [
  "forust-ml",

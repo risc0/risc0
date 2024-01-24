@@ -127,8 +127,8 @@ pub trait ProverServer {
                 InnerReceipt::Fake { .. } => bail!(
                     "compressing composite receipts with fake receipt assumptions is not supported"
                 ),
-                InnerReceipt::Groth16(_) => bail!(
-                    "compressing composite receipts with Groth16 receipt assumptions is not supported"
+                InnerReceipt::Compact(_) => bail!(
+                    "compressing composite receipts with Compact receipt assumptions is not supported"
                 )
             },
         )

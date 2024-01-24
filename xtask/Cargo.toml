@@ -6,9 +6,11 @@ edition = { workspace = true }
 [dependencies]
 bincode = "1.3"
 clap = { version = "4", features = ["derive"] }
+hex = "0.4"
 regex = "1"
 risc0-circuit-recursion = { workspace = true, features = ["prove"] }
 risc0-core = { workspace = true }
+risc0-groth16 = { workspace = true, features = ["prove"] }
 risc0-zkp = { workspace = true }
 risc0-zkvm = { workspace = true, features = ["prove"] }
 risc0-zkvm-methods = { path = "../risc0/zkvm/methods" }
