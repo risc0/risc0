@@ -37,7 +37,29 @@ mod runtime {
     }
 }
 
+mod benchmark {
+    pub fn build_benchmark_elf(path: &str) {
+        let benchmark_elf = std::env::current_dir().unwrap().join(path);
+        if let Ok(content) = std::fs::read(&benchmark_elf) {
+            std::fs::write(&benchmark_elf, content).unwrap();
+        } else {
+            build_elf(benchmark_elf.to_str().unwrap());
+        }
+    }
+
+    fn build_elf(path: &str) {
+        let is_success = std::process::Command::new("cargo")
+            .args(["xtask", "gen-benchmark", "--path", path])
+            .status()
+            .unwrap()
+            .success();
+        assert!(is_success);
+    }
+}
+
 fn main() {
+    const ELF: &str = "src/benchmark_elf.rs";
+
     #[cfg(feature = "experimental")]
     {
         tracing_subscriber::fmt()
@@ -46,4 +68,7 @@ fn main() {
         ();
         runtime::build_and_zip_runtime();
     }
+
+    benchmark::build_benchmark_elf(ELF);
+    println!("cargo:rerun-if-changed={ELF}")
 }

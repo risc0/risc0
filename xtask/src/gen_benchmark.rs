@@ -16,10 +16,14 @@ use clap::Parser;
 use risc0_zkvm_methods::BENCH_ELF;
 
 #[derive(Parser)]
-pub struct GenBenchmark;
+pub struct GenBenchmark {
+    /// Path to the benchmark_elf.rs file.
+    #[arg(short, long, default_value_t = String::from("risc0/cargo-risczero/src/benchmark_elf.rs"))]
+    pub path: String,
+}
 
 impl GenBenchmark {
     pub fn run(&self) {
-        std::fs::write("risc0/cargo-risczero/src/benchmark_elf.rs", BENCH_ELF).unwrap();
+        std::fs::write(&self.path, BENCH_ELF).unwrap();
     }
 }
