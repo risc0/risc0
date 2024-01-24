@@ -25,7 +25,7 @@ A [Receipt] can take four main forms.
 3. A **[Groth16 receipt]** is a single [Groth16] proof for an entire [Session]. A Groth16Receipt is formed by verifying a succinct receipt using RISC Zero's [Groth16 circuit].
 4. A **[fake receipt]** doesn't contain any proof at all. This feature is offered to enable rapid prototyping. See [Dev Mode] for more information.
 
-<center> <img src="assets/proof-system-layers.png"/> </center>
+![The layers of the RISC Zero proving system](assets/proof-system-layers.png)
 
 The diagram above shows RISC Zero's full proving stack, including the [RISC-V Circuit], the [Recursion Circuit], and the [Groth16 Circuit]. In this diagram, the [flat receipt] is the collection of 6 stacked receipts, the [succinct receipt] is the single receipt after the last use of FRI, and the [Groth16 Receipt] is the tiny receipt that comes from the Groth16 Circuit.
 For a video explanation of this architecture and the associated terminology, check out our [talk from zkSummit 10].
