@@ -5,8 +5,7 @@ slug: ./
 
 # Proof System Overview
 
-<center> <img src="assets/receipt.png" width="600"/> </center>
-<br/>
+![A diagram of a receipt as the output of a zkVM program](assets/receipt.png)
 When the RISC Zero [zkVM] executes, it produces a [Receipt] that serves as a proof of validity of a given [Session].
 
 To confirm that a [Receipt] was honestly generated, use [Receipt::verify()].
