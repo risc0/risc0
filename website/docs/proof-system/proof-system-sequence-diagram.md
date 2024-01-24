@@ -2,16 +2,19 @@
 sidebar_position: 4
 ---
 
-# Proof System Sequence Diagram and Spec
+# The RISC Zero STARK Protocol
 
-_The implementation in code for the RISC Zero prover can be seen [here](https://github.com/risc0/risc0/blob/v0.18.0/risc0/zkp/src/prove/prover.rs).
-In this document, we present an overview to the protocol, as well as a sequence diagram and a detailed description below. The [STARK by Hand](stark-by-hand.md) explainer and the [RISC Zero ZKP Whitepaper](https://dev.risczero.com/proof-system-in-detail.pdf) are good companions to this document._
+_The implementation in code for the RISC Zero STARK prover can be seen [here](https://github.com/risc0/risc0/blob/v0.18.0/risc0/zkp/src/prove/prover.rs).
+In this document, we present an overview to the RISC Zero STARK protocol, as well as a sequence diagram and a detailed description below. The [STARK by Hand](stark-by-hand.md) explainer and the [RISC Zero ZKP Whitepaper](https://dev.risczero.com/proof-system-in-detail.pdf) are good companions to this document._
 
 ## Overview
 
 RISC Zero's [receipts] are built on the shoulders of several recent advances in the world of zero-knowledge cryptography.
 The core of the proof system is [STARK]-based, implementing [DEEP-ALI & FRI].
-At a high level, the design of the prover is very similar to the system described in [ethSTARK], and the system implemented in [Winterfell].
+This proof system is used to generate zero-knowledge validity proofs for RISC Zero's RISC-V circuit and RISC Zero's recursion circuit.
+Users may also be interested in reading about the [RISC Zero Groth16 Circuit], which enables on-chain verification.
+
+At a high level, the design of the RISC Zero STARK protocol is very similar to the system described in [ethSTARK], and the system implemented in [Winterfell].
 
 ### Setup Phase
 
