@@ -23,7 +23,7 @@ use risc0_core::field::baby_bear::{BabyBearElem as Fp, BabyBearExtElem as FpExt}
 use risc0_zkp::{
     adapter::CircuitStepContext,
     core::hash::{
-        poseidon::{poseidon_mix, CELLS},
+        poseidon2::{poseidon2_mix, CELLS},
         sha::SHA256_INIT,
     },
     field::Elem,
@@ -117,7 +117,7 @@ impl<'a, Ext: Externs> Preflight<'a, Ext> {
         }
         if self.get(code, LAYOUT.code.select.poseidon_partial) == Fp::ONE {
             trace!("Poseidon partial");
-            poseidon_mix(&mut self.poseidon_state);
+            poseidon2_mix(&mut self.poseidon_state);
             self.set_not_splittable(ctx);
         }
         if self.get(code, LAYOUT.code.select.poseidon_store) == Fp::ONE {

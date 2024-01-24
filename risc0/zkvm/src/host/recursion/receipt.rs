@@ -92,7 +92,7 @@ impl SuccinctReceipt {
         // function.
         let suite = ctx
             .suites
-            .get("poseidon")
+            .get("poseidon2")
             .ok_or(VerificationError::InvalidHashSuite)?;
 
         // Verify the receipt itself is correct, and therefore the encoded globals are

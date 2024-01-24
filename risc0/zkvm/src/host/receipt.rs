@@ -27,7 +27,7 @@ use risc0_zkp::{
     core::{
         digest::Digest,
         hash::{
-            blake2b::Blake2bCpuHashSuite, poseidon::PoseidonHashSuite, sha::Sha256HashSuite,
+            blake2b::Blake2bCpuHashSuite, poseidon2::Poseidon2HashSuite, sha::Sha256HashSuite,
             HashSuite,
         },
     },
@@ -794,7 +794,7 @@ impl Default for VerifierContext {
         Self {
             suites: BTreeMap::from([
                 ("blake2b".into(), Blake2bCpuHashSuite::new_suite()),
-                ("poseidon".into(), PoseidonHashSuite::new_suite()),
+                ("poseidon2".into(), Poseidon2HashSuite::new_suite()),
                 ("sha-256".into(), Sha256HashSuite::new_suite()),
             ]),
         }

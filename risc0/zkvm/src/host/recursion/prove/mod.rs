@@ -31,7 +31,7 @@ use risc0_zkp::{
     adapter::{CircuitInfo, CircuitStepContext, TapsProvider},
     core::{
         digest::Digest,
-        hash::{poseidon::PoseidonHashSuite, poseidon2::Poseidon2HashSuite, HashSuite},
+        hash::{poseidon2::Poseidon2HashSuite, HashSuite},
     },
     field::{
         baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
@@ -212,7 +212,7 @@ impl Default for ProverOpts {
     fn default() -> ProverOpts {
         ProverOpts {
             skip_seal: false,
-            suite: PoseidonHashSuite::new_suite(),
+            suite: Poseidon2HashSuite::new_suite(),
         }
     }
 }
@@ -309,19 +309,12 @@ mod cpu {
 
     use super::{
         BabyBear, CircuitImpl, CpuCircuitHal, CpuHal, HalPair, Poseidon2HashSuite,
-        PoseidonHashSuite, Rc, CIRCUIT,
+        Rc, CIRCUIT,
     };
 
     #[allow(dead_code)]
     pub fn sha256_hal_pair() -> HalPair<CpuHal<BabyBear>, CpuCircuitHal<'static, CircuitImpl>> {
         let hal = Rc::new(CpuHal::new(Sha256HashSuite::new_suite()));
-        let circuit_hal = Rc::new(CpuCircuitHal::new(&CIRCUIT));
-        HalPair { hal, circuit_hal }
-    }
-
-    #[allow(dead_code)]
-    pub fn poseidon_hal_pair() -> HalPair<CpuHal<BabyBear>, CpuCircuitHal<'static, CircuitImpl>> {
-        let hal = Rc::new(CpuHal::new(PoseidonHashSuite::new_suite()));
         let circuit_hal = Rc::new(CpuCircuitHal::new(&CIRCUIT));
         HalPair { hal, circuit_hal }
     }
@@ -396,12 +389,6 @@ cfg_if::cfg_if! {
         #[allow(dead_code)]
         pub fn sha256_hal_pair() -> HalPair<CpuHal<BabyBear>, CpuCircuitHal<'static, CircuitImpl>> {
             cpu::sha256_hal_pair()
-        }
-
-        /// TODO
-        #[allow(dead_code)]
-        pub fn poseidon_hal_pair() -> HalPair<CpuHal<BabyBear>, CpuCircuitHal<'static, CircuitImpl>> {
-            cpu::poseidon_hal_pair()
         }
 
         /// TODO
@@ -653,7 +640,7 @@ impl Prover {
     /// program and input.
     #[tracing::instrument(skip_all)]
     pub fn run(&mut self) -> Result<RecursionReceipt> {
-        let hal_pair = poseidon_hal_pair();
+        let hal_pair = poseidon2_hal_pair();
         let (hal, circuit_hal) = (hal_pair.hal.as_ref(), hal_pair.circuit_hal.as_ref());
         self.run_with_hal(hal, circuit_hal)
     }

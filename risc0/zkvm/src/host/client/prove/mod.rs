@@ -111,7 +111,7 @@ impl Default for ProverOpts {
     /// `prove_guest_errors` set to false.
     fn default() -> Self {
         Self {
-            hashfn: "poseidon".to_string(),
+            hashfn: "poseidon2".to_string(),
             prove_guest_errors: false,
         }
     }
