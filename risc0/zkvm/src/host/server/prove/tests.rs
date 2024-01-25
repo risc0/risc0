@@ -429,7 +429,11 @@ mod docker {
             .unwrap();
         let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
         let session = exec.run().unwrap();
-        let segments = session.resolve().unwrap();
+        let segments = session
+            .segments
+            .iter()
+            .map(|x| x.resolve().unwrap())
+            .collect();
         assert_eq!(segments.len(), COUNT);
 
         let (final_segment, segments) = segments.split_last().unwrap();

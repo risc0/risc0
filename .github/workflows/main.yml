@@ -168,16 +168,14 @@ jobs:
             --exclude doc-test \
             --exclude bonsai-ethereum-contracts \
             --exclude bonsai-ethereum-relay \
-            --exclude bonsai-rest-api-mock \
-            --exclude risc0-groth16
+            --exclude bonsai-rest-api-mock
       - name: test workspace
         run: |
           cargo test -F $FEATURE -F prove --workspace --timings \
             --exclude doc-test \
             --exclude bonsai-ethereum-contracts \
             --exclude bonsai-ethereum-relay \
-            --exclude bonsai-rest-api-mock \
-            --exclude risc0-groth16
+            --exclude bonsai-rest-api-mock
       - uses: actions/upload-artifact@v3
         with:
           name: cargo-timings-${{ matrix.os }}-${{ matrix.device }}
@@ -194,8 +192,7 @@ jobs:
             --exclude doc-test \
             --exclude bonsai-ethereum-contracts \
             --exclude bonsai-ethereum-relay \
-            --exclude bonsai-rest-api-mock \
-            --exclude risc0-groth16
+            --exclude bonsai-rest-api-mock
       - run: cargo check -p risc0-build
         if: matrix.device == 'cpu'
       - run: cargo check -p risc0-circuit-rv32im -F $FEATURE
@@ -403,5 +400,5 @@ jobs:
       - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
       - run: scripts/install_prover.sh
         working-directory: compact_proof
-      - run: cargo test -p risc0-groth16 -F prove --release
+      - run: cargo test -p risc0-groth16 -F docker --release
       - run: sccache --show-stats

@@ -91,13 +91,13 @@ fn basic() {
     let mut exec = ExecutorImpl::new(env, image).unwrap();
     let session = exec.run().unwrap();
     assert_eq!(session.exit_code, ExitCode::Halted(0));
-    let segments = session.resolve().unwrap();
+    let segment = session.segments.first().unwrap().resolve().unwrap();
 
-    assert_eq!(segments.len(), 1);
-    assert_eq!(segments[0].exit_code, ExitCode::Halted(0));
-    assert_eq!(segments[0].pre_image.compute_id().unwrap(), pre_image_id);
-    assert_ne!(segments[0].post_state.digest(), pre_image_id);
-    assert_eq!(segments[0].index, 0);
+    assert_eq!(session.segments.len(), 1);
+    assert_eq!(segment.exit_code, ExitCode::Halted(0));
+    assert_eq!(segment.pre_image.compute_id().unwrap(), pre_image_id);
+    assert_ne!(segment.post_state.digest(), pre_image_id);
+    assert_eq!(segment.index, 0);
 }
 
 #[test]
@@ -126,7 +126,11 @@ fn system_split() {
     let mut exec = ExecutorImpl::new(env, image).unwrap();
     let session = exec.run().unwrap();
     assert_eq!(session.exit_code, ExitCode::Halted(0));
-    let segments = session.resolve().unwrap();
+    let segments: Vec<_> = session
+        .segments
+        .iter()
+        .map(|x| x.resolve().unwrap())
+        .collect();
 
     assert_eq!(segments.len(), 2);
     assert_eq!(segments[0].exit_code, ExitCode::SystemSplit);
