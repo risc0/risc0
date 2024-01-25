@@ -429,7 +429,7 @@ mod docker {
             .unwrap();
         let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
         let session = exec.run().unwrap();
-        let segments = session
+        let segments: Vec<_> = session
             .segments
             .iter()
             .map(|x| x.resolve().unwrap())
