@@ -93,12 +93,12 @@ impl risc0_zkp::layout::Component for OneHot0 {
         Ok(())
     }
 }
-pub struct RecursionPoseidonFullInst {
+pub struct RecursionPoseidon2FullInst {
     pub cycle: &'static OneHot0,
 }
-impl risc0_zkp::layout::Component for RecursionPoseidonFullInst {
+impl risc0_zkp::layout::Component for RecursionPoseidon2FullInst {
     fn ty_name(&self) -> &'static str {
-        "RecursionPoseidonFullInst"
+        "RecursionPoseidon2FullInst"
     }
     #[allow(unused_variables)]
     fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
@@ -124,31 +124,31 @@ impl risc0_zkp::layout::Component for OneHot1 {
     }
 }
 pub type CodeReg8LayoutArray = [&'static CodeReg; 8];
-pub struct RecursionPoseidonMemInst {
-    pub add_consts: &'static CodeReg,
+pub struct RecursionPoseidon2MemInst {
     pub do_mont: &'static CodeReg,
     pub keep_state: &'static CodeReg,
+    pub prep_full: &'static CodeReg,
     pub group: &'static OneHot1,
     pub inputs: &'static CodeReg8LayoutArray,
 }
-impl risc0_zkp::layout::Component for RecursionPoseidonMemInst {
+impl risc0_zkp::layout::Component for RecursionPoseidon2MemInst {
     fn ty_name(&self) -> &'static str {
-        "RecursionPoseidonMemInst"
+        "RecursionPoseidon2MemInst"
     }
     #[allow(unused_variables)]
     fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
-        v.visit_component("add_consts", self.add_consts)?;
         v.visit_component("do_mont", self.do_mont)?;
         v.visit_component("keep_state", self.keep_state)?;
+        v.visit_component("prep_full", self.prep_full)?;
         v.visit_component("group", self.group)?;
         v.visit_component("inputs", self.inputs)?;
         Ok(())
     }
 }
-pub struct RecursionPoseidonInst {}
-impl risc0_zkp::layout::Component for RecursionPoseidonInst {
+pub struct RecursionPoseidon2Inst {}
+impl risc0_zkp::layout::Component for RecursionPoseidon2Inst {
     fn ty_name(&self) -> &'static str {
-        "RecursionPoseidonInst"
+        "RecursionPoseidon2Inst"
     }
     #[allow(unused_variables)]
     fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
@@ -158,10 +158,10 @@ impl risc0_zkp::layout::Component for RecursionPoseidonInst {
 pub struct Mux {
     pub macro_ops: &'static RecursionMacroInst,
     pub micro_ops: &'static RecursionMicroInsts,
-    pub poseidon_full: &'static RecursionPoseidonFullInst,
-    pub poseidon_load: &'static RecursionPoseidonMemInst,
-    pub poseidon_partial: &'static RecursionPoseidonInst,
-    pub poseidon_store: &'static RecursionPoseidonMemInst,
+    pub poseidon_full: &'static RecursionPoseidon2FullInst,
+    pub poseidon_load: &'static RecursionPoseidon2MemInst,
+    pub poseidon_partial: &'static RecursionPoseidon2Inst,
+    pub poseidon_store: &'static RecursionPoseidon2MemInst,
 }
 impl risc0_zkp::layout::Component for Mux {
     fn ty_name(&self) -> &'static str {
@@ -181,10 +181,10 @@ impl risc0_zkp::layout::Component for Mux {
 pub struct OneHot2 {
     pub macro_ops: &'static CodeReg,
     pub micro_ops: &'static CodeReg,
-    pub poseidon_full: &'static CodeReg,
-    pub poseidon_load: &'static CodeReg,
-    pub poseidon_partial: &'static CodeReg,
-    pub poseidon_store: &'static CodeReg,
+    pub poseidon2_full: &'static CodeReg,
+    pub poseidon2_load: &'static CodeReg,
+    pub poseidon2_partial: &'static CodeReg,
+    pub poseidon2_store: &'static CodeReg,
 }
 impl risc0_zkp::layout::Component for OneHot2 {
     fn ty_name(&self) -> &'static str {
@@ -194,10 +194,10 @@ impl risc0_zkp::layout::Component for OneHot2 {
     fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
         v.visit_component("macro_ops", self.macro_ops)?;
         v.visit_component("micro_ops", self.micro_ops)?;
-        v.visit_component("poseidon_full", self.poseidon_full)?;
-        v.visit_component("poseidon_load", self.poseidon_load)?;
-        v.visit_component("poseidon_partial", self.poseidon_partial)?;
-        v.visit_component("poseidon_store", self.poseidon_store)?;
+        v.visit_component("poseidon2_full", self.poseidon2_full)?;
+        v.visit_component("poseidon2_load", self.poseidon2_load)?;
+        v.visit_component("poseidon2_partial", self.poseidon2_partial)?;
+        v.visit_component("poseidon2_store", self.poseidon2_store)?;
         Ok(())
     }
 }
@@ -248,7 +248,7 @@ impl risc0_zkp::layout::Component for RecursionWomReg {
     }
 }
 pub struct RecursionWomBody {
-    pub plonk_body: &'static RecursionPoseidonInst,
+    pub plonk_body: &'static RecursionPoseidon2Inst,
 }
 impl risc0_zkp::layout::Component for RecursionWomBody {
     fn ty_name(&self) -> &'static str {
@@ -344,14 +344,14 @@ impl risc0_zkp::layout::Component for RecursionSetGlobal {
 }
 pub type DataReg2LayoutArray = [&'static DataReg; 2];
 pub struct RecursionShaCycle {
-    pub a_carry_hi: &'static RecursionPoseidonInst,
-    pub a_carry_low: &'static RecursionPoseidonInst,
-    pub e_carry_high: &'static RecursionPoseidonInst,
-    pub e_carry_low: &'static RecursionPoseidonInst,
+    pub a_carry_hi: &'static RecursionPoseidon2Inst,
+    pub a_carry_low: &'static RecursionPoseidon2Inst,
+    pub e_carry_high: &'static RecursionPoseidon2Inst,
+    pub e_carry_low: &'static RecursionPoseidon2Inst,
     pub io0: &'static RecursionWomReg,
     pub io1: &'static RecursionWomReg,
-    pub w_carry_high: &'static RecursionPoseidonInst,
-    pub w_carry_low: &'static RecursionPoseidonInst,
+    pub w_carry_high: &'static RecursionPoseidon2Inst,
+    pub w_carry_low: &'static RecursionPoseidon2Inst,
     pub a: &'static DataReg32LayoutArray,
     pub a_raw: &'static DataReg2LayoutArray,
     pub e: &'static DataReg32LayoutArray,
@@ -398,14 +398,14 @@ impl risc0_zkp::layout::Component for RecursionShaWrap {
 pub struct Mux4 {
     pub bit_and_elem: &'static RecursionBitAndElem,
     pub bit_op_shorts: &'static RecursionBitOpShorts,
-    pub nop: &'static RecursionPoseidonInst,
+    pub nop: &'static RecursionPoseidon2Inst,
     pub set_global: &'static RecursionSetGlobal,
     pub sha_fini: &'static RecursionShaWrap,
     pub sha_init: &'static RecursionShaWrap,
     pub sha_load: &'static RecursionShaWrap,
     pub sha_mix: &'static RecursionShaWrap,
-    pub wom_fini: &'static RecursionPoseidonInst,
-    pub wom_init: &'static RecursionPoseidonInst,
+    pub wom_fini: &'static RecursionPoseidon2Inst,
+    pub wom_init: &'static RecursionPoseidon2Inst,
 }
 impl risc0_zkp::layout::Component for Mux4 {
     fn ty_name(&self) -> &'static str {
@@ -511,12 +511,12 @@ impl risc0_zkp::layout::Component for RecursionMicroOps {
         Ok(())
     }
 }
-pub struct RecursionPoseidonLoad {
+pub struct RecursionPoseidon2Load {
     pub wom_body: &'static RecursionWomBody,
 }
-impl risc0_zkp::layout::Component for RecursionPoseidonLoad {
+impl risc0_zkp::layout::Component for RecursionPoseidon2Load {
     fn ty_name(&self) -> &'static str {
-        "RecursionPoseidonLoad"
+        "RecursionPoseidon2Load"
     }
     #[allow(unused_variables)]
     fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
@@ -527,10 +527,10 @@ impl risc0_zkp::layout::Component for RecursionPoseidonLoad {
 pub struct Mux6 {
     pub macro_ops: &'static RecursionMacroOp,
     pub micro_ops: &'static RecursionMicroOps,
-    pub poseidon_full: &'static RecursionPoseidonInst,
-    pub poseidon_load: &'static RecursionPoseidonLoad,
-    pub poseidon_partial: &'static RecursionPoseidonInst,
-    pub poseidon_store: &'static RecursionPoseidonLoad,
+    pub poseidon2_full: &'static RecursionPoseidon2Inst,
+    pub poseidon2_load: &'static RecursionPoseidon2Load,
+    pub poseidon2_partial: &'static RecursionPoseidon2Inst,
+    pub poseidon2_store: &'static RecursionPoseidon2Load,
 }
 impl risc0_zkp::layout::Component for Mux6 {
     fn ty_name(&self) -> &'static str {
@@ -540,10 +540,10 @@ impl risc0_zkp::layout::Component for Mux6 {
     fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
         v.visit_component("macro_ops", self.macro_ops)?;
         v.visit_component("micro_ops", self.micro_ops)?;
-        v.visit_component("poseidon_full", self.poseidon_full)?;
-        v.visit_component("poseidon_load", self.poseidon_load)?;
-        v.visit_component("poseidon_partial", self.poseidon_partial)?;
-        v.visit_component("poseidon_store", self.poseidon_store)?;
+        v.visit_component("poseidon2_full", self.poseidon2_full)?;
+        v.visit_component("poseidon2_load", self.poseidon2_load)?;
+        v.visit_component("poseidon2_partial", self.poseidon2_partial)?;
+        v.visit_component("poseidon2_store", self.poseidon2_store)?;
         Ok(())
     }
 }
@@ -613,7 +613,7 @@ pub static LAYOUT: RecursionTop = RecursionTop {
                     },
                 ],
             },
-            poseidon_full: &RecursionPoseidonFullInst {
+            poseidon_full: &RecursionPoseidon2FullInst {
                 cycle: &OneHot0 {
                     c0: &CodeReg { offset: 7 },
                     c1: &CodeReg { offset: 8 },
@@ -621,10 +621,10 @@ pub static LAYOUT: RecursionTop = RecursionTop {
                     c3: &CodeReg { offset: 10 },
                 },
             },
-            poseidon_load: &RecursionPoseidonMemInst {
-                add_consts: &CodeReg { offset: 9 },
+            poseidon_load: &RecursionPoseidon2MemInst {
                 do_mont: &CodeReg { offset: 7 },
                 keep_state: &CodeReg { offset: 8 },
+                prep_full: &CodeReg { offset: 9 },
                 group: &OneHot1 {
                     g0: &CodeReg { offset: 10 },
                     g1: &CodeReg { offset: 11 },
@@ -641,11 +641,11 @@ pub static LAYOUT: RecursionTop = RecursionTop {
                     &CodeReg { offset: 20 },
                 ],
             },
-            poseidon_partial: &RecursionPoseidonInst {},
-            poseidon_store: &RecursionPoseidonMemInst {
-                add_consts: &CodeReg { offset: 9 },
+            poseidon_partial: &RecursionPoseidon2Inst {},
+            poseidon_store: &RecursionPoseidon2MemInst {
                 do_mont: &CodeReg { offset: 7 },
                 keep_state: &CodeReg { offset: 8 },
+                prep_full: &CodeReg { offset: 9 },
                 group: &OneHot1 {
                     g0: &CodeReg { offset: 10 },
                     g1: &CodeReg { offset: 11 },
@@ -666,10 +666,10 @@ pub static LAYOUT: RecursionTop = RecursionTop {
         select: &OneHot2 {
             macro_ops: &CodeReg { offset: 2 },
             micro_ops: &CodeReg { offset: 1 },
-            poseidon_full: &CodeReg { offset: 4 },
-            poseidon_load: &CodeReg { offset: 3 },
-            poseidon_partial: &CodeReg { offset: 5 },
-            poseidon_store: &CodeReg { offset: 6 },
+            poseidon2_full: &CodeReg { offset: 4 },
+            poseidon2_load: &CodeReg { offset: 3 },
+            poseidon2_partial: &CodeReg { offset: 5 },
+            poseidon2_store: &CodeReg { offset: 6 },
         },
     },
     mux: &Mux6 {
@@ -710,7 +710,7 @@ pub static LAYOUT: RecursionTop = RecursionTop {
                         },
                     },
                     wom_body: &RecursionWomBody {
-                        plonk_body: &RecursionPoseidonInst {},
+                        plonk_body: &RecursionPoseidon2Inst {},
                     },
                     bits_a: &[
                         &DataReg { offset: 36 },
@@ -814,7 +814,7 @@ pub static LAYOUT: RecursionTop = RecursionTop {
                         },
                     },
                     wom_body: &RecursionWomBody {
-                        plonk_body: &RecursionPoseidonInst {},
+                        plonk_body: &RecursionPoseidon2Inst {},
                     },
                     bits_a: &[
                         &DataReg { offset: 36 },
@@ -885,7 +885,7 @@ pub static LAYOUT: RecursionTop = RecursionTop {
                         &DataReg { offset: 99 },
                     ],
                 },
-                nop: &RecursionPoseidonInst {},
+                nop: &RecursionPoseidon2Inst {},
                 set_global: &RecursionSetGlobal {
                     select: &OneHot3 {
                         hot: &[
@@ -896,7 +896,7 @@ pub static LAYOUT: RecursionTop = RecursionTop {
                         ],
                     },
                     wom_body: &RecursionWomBody {
-                        plonk_body: &RecursionPoseidonInst {},
+                        plonk_body: &RecursionPoseidon2Inst {},
                     },
                     out: &[
                         &OutReg { offset: 0 },
@@ -981,10 +981,10 @@ pub static LAYOUT: RecursionTop = RecursionTop {
                 },
                 sha_fini: &RecursionShaWrap {
                     sha_cycle: &RecursionShaCycle {
-                        a_carry_hi: &RecursionPoseidonInst {},
-                        a_carry_low: &RecursionPoseidonInst {},
-                        e_carry_high: &RecursionPoseidonInst {},
-                        e_carry_low: &RecursionPoseidonInst {},
+                        a_carry_hi: &RecursionPoseidon2Inst {},
+                        a_carry_low: &RecursionPoseidon2Inst {},
+                        e_carry_high: &RecursionPoseidon2Inst {},
+                        e_carry_low: &RecursionPoseidon2Inst {},
                         io0: &RecursionWomReg {
                             wom: &RecursionImplWomPlonkElement {
                                 addr: &DataReg { offset: 11 },
@@ -1007,8 +1007,8 @@ pub static LAYOUT: RecursionTop = RecursionTop {
                                 ],
                             },
                         },
-                        w_carry_high: &RecursionPoseidonInst {},
-                        w_carry_low: &RecursionPoseidonInst {},
+                        w_carry_high: &RecursionPoseidon2Inst {},
+                        w_carry_low: &RecursionPoseidon2Inst {},
                         a: &[
                             &DataReg { offset: 26 },
                             &DataReg { offset: 27 },
@@ -1118,10 +1118,10 @@ pub static LAYOUT: RecursionTop = RecursionTop {
                 },
                 sha_init: &RecursionShaWrap {
                     sha_cycle: &RecursionShaCycle {
-                        a_carry_hi: &RecursionPoseidonInst {},
-                        a_carry_low: &RecursionPoseidonInst {},
-                        e_carry_high: &RecursionPoseidonInst {},
-                        e_carry_low: &RecursionPoseidonInst {},
+                        a_carry_hi: &RecursionPoseidon2Inst {},
+                        a_carry_low: &RecursionPoseidon2Inst {},
+                        e_carry_high: &RecursionPoseidon2Inst {},
+                        e_carry_low: &RecursionPoseidon2Inst {},
                         io0: &RecursionWomReg {
                             wom: &RecursionImplWomPlonkElement {
                                 addr: &DataReg { offset: 11 },
@@ -1144,8 +1144,8 @@ pub static LAYOUT: RecursionTop = RecursionTop {
                                 ],
                             },
                         },
-                        w_carry_high: &RecursionPoseidonInst {},
-                        w_carry_low: &RecursionPoseidonInst {},
+                        w_carry_high: &RecursionPoseidon2Inst {},
+                        w_carry_low: &RecursionPoseidon2Inst {},
                         a: &[
                             &DataReg { offset: 26 },
                             &DataReg { offset: 27 },
@@ -1255,10 +1255,10 @@ pub static LAYOUT: RecursionTop = RecursionTop {
                 },
                 sha_load: &RecursionShaWrap {
                     sha_cycle: &RecursionShaCycle {
-                        a_carry_hi: &RecursionPoseidonInst {},
-                        a_carry_low: &RecursionPoseidonInst {},
-                        e_carry_high: &RecursionPoseidonInst {},
-                        e_carry_low: &RecursionPoseidonInst {},
+                        a_carry_hi: &RecursionPoseidon2Inst {},
+                        a_carry_low: &RecursionPoseidon2Inst {},
+                        e_carry_high: &RecursionPoseidon2Inst {},
+                        e_carry_low: &RecursionPoseidon2Inst {},
                         io0: &RecursionWomReg {
                             wom: &RecursionImplWomPlonkElement {
                                 addr: &DataReg { offset: 11 },
@@ -1281,8 +1281,8 @@ pub static LAYOUT: RecursionTop = RecursionTop {
                                 ],
                             },
                         },
-                        w_carry_high: &RecursionPoseidonInst {},
-                        w_carry_low: &RecursionPoseidonInst {},
+                        w_carry_high: &RecursionPoseidon2Inst {},
+                        w_carry_low: &RecursionPoseidon2Inst {},
                         a: &[
                             &DataReg { offset: 26 },
                             &DataReg { offset: 27 },
@@ -1392,10 +1392,10 @@ pub static LAYOUT: RecursionTop = RecursionTop {
                 },
                 sha_mix: &RecursionShaWrap {
                     sha_cycle: &RecursionShaCycle {
-                        a_carry_hi: &RecursionPoseidonInst {},
-                        a_carry_low: &RecursionPoseidonInst {},
-                        e_carry_high: &RecursionPoseidonInst {},
-                        e_carry_low: &RecursionPoseidonInst {},
+                        a_carry_hi: &RecursionPoseidon2Inst {},
+                        a_carry_low: &RecursionPoseidon2Inst {},
+                        e_carry_high: &RecursionPoseidon2Inst {},
+                        e_carry_low: &RecursionPoseidon2Inst {},
                         io0: &RecursionWomReg {
                             wom: &RecursionImplWomPlonkElement {
                                 addr: &DataReg { offset: 11 },
@@ -1418,8 +1418,8 @@ pub static LAYOUT: RecursionTop = RecursionTop {
                                 ],
                             },
                         },
-                        w_carry_high: &RecursionPoseidonInst {},
-                        w_carry_low: &RecursionPoseidonInst {},
+                        w_carry_high: &RecursionPoseidon2Inst {},
+                        w_carry_low: &RecursionPoseidon2Inst {},
                         a: &[
                             &DataReg { offset: 26 },
                             &DataReg { offset: 27 },
@@ -1527,13 +1527,13 @@ pub static LAYOUT: RecursionTop = RecursionTop {
                         w_raw: &[&DataReg { offset: 126 }, &DataReg { offset: 127 }],
                     },
                 },
-                wom_fini: &RecursionPoseidonInst {},
-                wom_init: &RecursionPoseidonInst {},
+                wom_fini: &RecursionPoseidon2Inst {},
+                wom_init: &RecursionPoseidon2Inst {},
             },
         },
         micro_ops: &RecursionMicroOps {
             wom_body: &RecursionWomBody {
-                plonk_body: &RecursionPoseidonInst {},
+                plonk_body: &RecursionPoseidon2Inst {},
             },
             op: &[
                 &RecursionMicroOp {
@@ -1709,16 +1709,16 @@ pub static LAYOUT: RecursionTop = RecursionTop {
                 },
             ],
         },
-        poseidon_full: &RecursionPoseidonInst {},
-        poseidon_load: &RecursionPoseidonLoad {
+        poseidon2_full: &RecursionPoseidon2Inst {},
+        poseidon2_load: &RecursionPoseidon2Load {
             wom_body: &RecursionWomBody {
-                plonk_body: &RecursionPoseidonInst {},
+                plonk_body: &RecursionPoseidon2Inst {},
             },
         },
-        poseidon_partial: &RecursionPoseidonInst {},
-        poseidon_store: &RecursionPoseidonLoad {
+        poseidon2_partial: &RecursionPoseidon2Inst {},
+        poseidon2_store: &RecursionPoseidon2Load {
             wom_body: &RecursionWomBody {
-                plonk_body: &RecursionPoseidonInst {},
+                plonk_body: &RecursionPoseidon2Inst {},
             },
         },
     },
