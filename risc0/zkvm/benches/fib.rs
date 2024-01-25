@@ -41,13 +41,9 @@ pub fn bench(c: &mut Criterion) {
     for iterations in [100, 1000, 10_000] {
         let mut exec = setup(iterations);
         let session = exec.run().unwrap();
-        let segments = session.resolve().unwrap();
-        let exec_cycles = segments
-            .iter()
-            .fold(0, |exec_cycles, segment| exec_cycles + segment.cycles);
         group.sample_size(10);
         let id = BenchmarkId::from_parameter(format!("{iterations}/execute"));
-        group.throughput(Throughput::Elements(exec_cycles as u64));
+        group.throughput(Throughput::Elements(session.user_cycles));
         group.bench_with_input(id, &iterations, |b, &iterations| {
             b.iter_batched(
                 || setup(iterations),
@@ -61,21 +57,11 @@ pub fn bench(c: &mut Criterion) {
         for iterations in [100, 1000, 10_000] {
             let mut exec = setup(iterations);
             let session = exec.run().unwrap();
-            let segments = session.resolve().unwrap();
-            let (exec_cycles, prove_cycles) =
-                segments
-                    .iter()
-                    .fold((0, 0), |(exec_cycles, prove_cycles), segment| {
-                        (
-                            exec_cycles + segment.cycles,
-                            prove_cycles + (1 << segment.po2),
-                        )
-                    });
             group.sample_size(10);
             match scope {
                 Scope::Prove => {
                     let id = BenchmarkId::from_parameter(format!("{iterations}/prove"));
-                    group.throughput(Throughput::Elements(prove_cycles as u64));
+                    group.throughput(Throughput::Elements(session.total_cycles));
                     group.bench_with_input(id, &iterations, |b, &iterations| {
                         b.iter_batched(
                             || {
@@ -89,7 +75,7 @@ pub fn bench(c: &mut Criterion) {
                 }
                 Scope::Total => {
                     let id = BenchmarkId::from_parameter(format!("{iterations}/total"));
-                    group.throughput(Throughput::Elements(exec_cycles as u64));
+                    group.throughput(Throughput::Elements(session.user_cycles));
                     group.bench_with_input(id, &iterations, |b, &iterations| {
                         b.iter_batched(
                             || setup(iterations),
