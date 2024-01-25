@@ -19,7 +19,7 @@ use risc0_circuit_recursion::zkr::get_all_zkrs;
 use risc0_zkp::{
     core::{
         digest::Digest,
-        hash::{blake2b::Blake2bCpuHashSuite, poseidon::PoseidonHashSuite, sha::Sha256HashSuite},
+        hash::{blake2b::Blake2bCpuHashSuite, poseidon2::Poseidon2HashSuite, sha::Sha256HashSuite},
     },
     field::baby_bear::BabyBear,
     hal::cpu::CpuHal,
@@ -48,7 +48,7 @@ impl Bootstrap {
             loader.compute_control_id(&CpuHal::new(Sha256HashSuite::<BabyBear>::new_suite()));
         tracing::info!("computing control IDs with Poseidon");
         let control_id_poseidon =
-            loader.compute_control_id(&CpuHal::new(PoseidonHashSuite::new_suite()));
+            loader.compute_control_id(&CpuHal::new(Poseidon2HashSuite::new_suite()));
         tracing::info!("computing control IDs with Blake2b");
         let control_id_blake2b =
             loader.compute_control_id(&CpuHal::new(Blake2bCpuHashSuite::new_suite()));
@@ -112,7 +112,7 @@ impl Bootstrap {
                 let program = Program::from_encoded(&encoded_program);
 
                 tracing::info!("computing control ID for {name} with Poseidon");
-                let control_id = program.compute_control_id(PoseidonHashSuite::new_suite());
+                let control_id = program.compute_control_id(Poseidon2HashSuite::new_suite());
                 valid_control_ids.push(control_id.clone());
 
                 tracing::debug!("{name} control id: {control_id:?}");
@@ -122,7 +122,7 @@ impl Bootstrap {
 
         // Calculuate a Merkle root for the allowed control IDs and add it to the file.
         let merkle_group = RecursionProver::bootstrap_allowed_tree(valid_control_ids);
-        let hash_suite = PoseidonHashSuite::new_suite();
+        let hash_suite = Poseidon2HashSuite::new_suite();
         let hashfn = hash_suite.hashfn.as_ref();
         let allowed_ids_root = merkle_group.calc_root(hashfn);
 

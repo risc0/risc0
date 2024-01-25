@@ -84,10 +84,10 @@ impl<'a, Ext: Externs> Preflight<'a, Ext> {
         if self.get(code, LAYOUT.code.select.micro_ops) == Fp::ONE {
             self.set_micros(ctx, code)?
         }
-        if self.get(code, LAYOUT.code.select.poseidon_load) == Fp::ONE {
+        if self.get(code, LAYOUT.code.select.poseidon2_load) == Fp::ONE {
             let inst = LAYOUT.code.inst.poseidon_load;
             let do_mont = self.get(code, inst.do_mont).as_u32();
-            let add_consts = self.get(code, inst.add_consts).as_u32();
+            let add_consts = self.get(code, inst.prep_full).as_u32();
             let keep_state = self.get(code, inst.keep_state).as_u32();
             let group = (self.get(code, inst.group.g1).as_u32()
                 + self.get(code, inst.group.g2).as_u32() * 2) as usize;
@@ -111,16 +111,16 @@ impl<'a, Ext: Externs> Preflight<'a, Ext> {
             }
             self.set_not_splittable(ctx);
         }
-        if self.get(code, LAYOUT.code.select.poseidon_full) == Fp::ONE {
+        if self.get(code, LAYOUT.code.select.poseidon2_full) == Fp::ONE {
             trace!("Poseidon full");
             self.set_not_splittable(ctx);
         }
-        if self.get(code, LAYOUT.code.select.poseidon_partial) == Fp::ONE {
+        if self.get(code, LAYOUT.code.select.poseidon2_partial) == Fp::ONE {
             trace!("Poseidon partial");
             poseidon2_mix(&mut self.poseidon_state);
             self.set_not_splittable(ctx);
         }
-        if self.get(code, LAYOUT.code.select.poseidon_store) == Fp::ONE {
+        if self.get(code, LAYOUT.code.select.poseidon2_store) == Fp::ONE {
             let inst = LAYOUT.code.inst.poseidon_load;
             let do_mont = self.get(code, inst.do_mont).as_u32();
             let group = (self.get(code, inst.group.g1).as_u32()
