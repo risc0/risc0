@@ -170,8 +170,6 @@ fn generate_busy_loop_segments(hashfn: &str) -> (Session, Vec<SegmentReceipt>) {
     tracing::info!("Executing rv32im");
     let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
     let session = exec.run().unwrap();
-    let segments = session.resolve().unwrap();
-    tracing::info!("Got {} segments", segments.len());
 
     let opts = crate::ProverOpts {
         hashfn: hashfn.to_string(),
@@ -181,9 +179,11 @@ fn generate_busy_loop_segments(hashfn: &str) -> (Session, Vec<SegmentReceipt>) {
 
     tracing::info!("Proving rv32im");
     let ctx = VerifierContext::default();
-    let segment_receipts = segments
+    let segment_receipts = session
+        .segments
         .iter()
-        .map(|x| prover.prove_segment(&ctx, x).unwrap())
+        .map(|x| x.resolve().unwrap())
+        .map(|x| prover.prove_segment(&ctx, &x).unwrap())
         .collect();
     tracing::info!("Done proving rv32im");
 

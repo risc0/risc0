@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#[cfg(feature = "prove")]
 #[test]
+#[cfg(feature = "docker")]
 fn stark2snark() {
     use risc0_groth16::docker::stark_to_snark;
     use risc0_zkvm::{

@@ -24,7 +24,7 @@ use risc0_core::field::{
     Elem, ExtElem,
 };
 
-use self::consts::{M_INT_DIAG_ULVT, ROUNDS_HALF_FULL, ROUNDS_PARTIAL, ROUND_CONSTANTS};
+use self::consts::{M_INT_DIAG_HZN, ROUNDS_HALF_FULL, ROUNDS_PARTIAL, ROUND_CONSTANTS};
 pub use self::{consts::CELLS, rng::Poseidon2Rng};
 use super::{HashFn, HashSuite, Rng, RngFactory};
 use crate::core::digest::{Digest, DIGEST_WORDS};
@@ -125,7 +125,7 @@ fn multiply_by_m_int(cells: &mut [BabyBearElem; CELLS]) {
     // Exploit the fact that off-diagonal entries of M_INT are all 1.
     let sum: BabyBearElem = cells.iter().fold(BabyBearElem::ZERO, |acc, x| acc + *x);
     for i in 0..CELLS {
-        cells[i] = sum + M_INT_DIAG_ULVT[i] * cells[i];
+        cells[i] = sum + M_INT_DIAG_HZN[i] * cells[i];
     }
 }
 
@@ -158,9 +158,9 @@ fn multiply_by_m_ext(cells: &mut [BabyBearElem; CELLS]) {
         ];
         let out = multiply_by_4x4_circulant(&chunk_array);
         for j in 0..4 {
-            let to_add = BabyBearElem::new_raw(1) * out[j];
-            tmp_sums[j] += to_add;
-            cells[i * 4 + j] += to_add;
+            // let to_add = BabyBearElem::new_raw(1) * out[j];
+            tmp_sums[j] += out[j];
+            cells[i * 4 + j] += out[j];
         }
     }
     for i in 0..CELLS {
@@ -234,7 +234,7 @@ mod tests {
     use test_log::test;
 
     use super::*;
-    use crate::core::hash::poseidon2::consts::{_M_EXT, _M_EXT_MONTGOMERY};
+    use crate::core::hash::poseidon2::consts::_M_EXT;
 
     fn do_partial_sboxes(cells: &mut [BabyBearElem; CELLS]) {
         cells[0] = sbox(cells[0]);
@@ -251,7 +251,7 @@ mod tests {
         for i in 0..CELLS {
             let mut tot = BabyBearElem::ZERO;
             for j in 0..CELLS {
-                tot += _M_EXT_MONTGOMERY[i * CELLS + j] * old_cells[j];
+                tot += _M_EXT[i * CELLS + j] * old_cells[j];
             }
             cells[i] = tot;
         }
@@ -263,7 +263,7 @@ mod tests {
             let mut tot = BabyBearElem::ZERO;
             for j in 0..CELLS {
                 if i == j {
-                    tot += (M_INT_DIAG_ULVT[i] + BabyBearElem::ONE) * old_cells[j];
+                    tot += (M_INT_DIAG_HZN[i] + BabyBearElem::ONE) * old_cells[j];
                 } else {
                     tot += old_cells[j];
                 }
@@ -322,27 +322,15 @@ mod tests {
         tracing::debug!("input: {:?}", buf);
         poseidon2_mix(&mut buf);
         let goal: [u32; CELLS] = [
-            0x08007b06, 0x7670b735, 0x70312c6b, 0x2ee92f8e, 0x7206cd75, 0x4f4d5907, 0x72e7763c,
-            0x3bdf2875, 0x1b7f7564, 0x519d73f0, 0x114ff3d0, 0x3cb62b62, 0x69871e79, 0x5826dc02,
-            0x1d2512c7, 0x6d6d1f1b, 0x140d841a, 0x6b8e6bdc, 0x2f1c5867, 0x29591570, 0x656a3362,
-            0x21f7c0c0, 0x4426143a, 0x5a78bbb4,
+            0x2ed3e23d, 0x12921fb0, 0x0e659e79, 0x61d81dc9, 0x32bae33b, 0x62486ae3, 0x1e681b60,
+            0x24b91325, 0x2a2ef5b9, 0x50e8593e, 0x5bc818ec, 0x10691997, 0x35a14520, 0x2ba6a3c5,
+            0x279d47ec, 0x55014e81, 0x5953a67f, 0x2f403111, 0x6b8828ff, 0x1801301f, 0x2749207a,
+            0x3dc9cf21, 0x3c985ba2, 0x57a99864,
         ];
         for i in 0..CELLS {
             assert_eq!(buf[i].as_u32(), goal[i]);
         }
 
         tracing::debug!("output: {:?}", buf);
-    }
-
-    #[test]
-    fn poseidon2_ext_matrices_match() {
-        for i in 0..CELLS {
-            for j in 0..CELLS {
-                assert_eq!(
-                    _M_EXT[i * CELLS + j].as_u32(),
-                    _M_EXT_MONTGOMERY[i * CELLS + j].as_u32_montgomery()
-                );
-            }
-        }
     }
 }
