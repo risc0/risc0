@@ -234,6 +234,7 @@ Through recursion, RISC Zero can take two or more [receipts] and compress them i
 By repeating this compression, an arbitrary number of related [receipts] (e.g. all the [Segments] of a [Session]) can be compressed into a single receipt.
 
 ### Recursion Circuit
+
 [Recursion Circuit]: #recursion-circuit
 
 The recursion circuit is used to aggregate [proofs].
