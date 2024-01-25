@@ -30,10 +30,8 @@ use rand::{
     Rng,
 };
 use risc0_zkvm::{ExecutorEnv, ExecutorImpl};
-use risc0_zkvm_methods::{
-    bench::{BenchmarkSpec, SpecWithIters},
-    BENCH_ELF,
-};
+use risc0_zkvm_methods::bench::{BenchmarkSpec, SpecWithIters};
+use risc0_zkvm_methods::BENCH_ELF;
 
 fn run_guest(spec: SpecWithIters) -> Duration {
     let env = ExecutorEnv::builder()

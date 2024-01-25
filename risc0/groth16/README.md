@@ -43,7 +43,8 @@ fn stark2snark() {
         get_prover_server, recursion::identity_p254, CompactReceipt, ExecutorEnv, ExecutorImpl,
         InnerReceipt, ProverOpts, Receipt, VerifierContext,
     };
-    use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID};
+    use risc0_zkvm_methods_core::multi_test::MultiTestSpec;
+    use risc0_zkvm_methods::{MULTI_TEST_ELF, MULTI_TEST_ID};
 
     let env = ExecutorEnv::builder()
         .write(&MultiTestSpec::BusyLoop { cycles: 0 })

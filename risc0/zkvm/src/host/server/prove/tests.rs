@@ -386,7 +386,8 @@ mod riscv {
 
 #[cfg(feature = "docker")]
 mod docker {
-    use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF};
+    use risc0_zkvm_methods::MULTI_TEST_ELF;
+    use risc0_zkvm_methods_core::multi_test::MultiTestSpec;
     use test_log::test;
 
     use super::prove_session_fast;

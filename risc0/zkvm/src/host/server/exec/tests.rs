@@ -25,8 +25,7 @@ use risc0_binfmt::{MemoryImage, Program};
 use risc0_zkvm_methods::{
     HELLO_COMMIT_ELF, MULTI_TEST_ELF, RAND_ELF, SLICE_IO_ELF, STANDARD_LIB_ELF,
 };
-use risc0_zkvm_methods_core::multi_test::MultiTestSpec;
-use risc0_zkvm_methods_core::multi_test::SYS_MULTI_TEST;
+use risc0_zkvm_methods_core::multi_test::{MultiTestSpec, SYS_MULTI_TEST};
 use risc0_zkvm_platform::{fileno, syscall::nr::SYS_RANDOM, PAGE_SIZE, WORD_SIZE};
 use sha2::{Digest as _, Sha256};
 use test_log::test;
