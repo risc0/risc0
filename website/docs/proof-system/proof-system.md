@@ -55,7 +55,7 @@ In addition to the links in the sidebar, we recommend the following resources:
 [ReceiptClaim]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.ReceiptClaim.html
 [SegmentReceipts]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.SegmentReceipts.html
 [SegmentReceipt]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.SegmentReceipt.html
-[flat receipt]: https://docs.rs/risc0-zkvm/0.19.1/risc0_zkvm/struct.FlatReceipt.html
+[flat receipt]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/enum.InnerReceipt.html#variant.Flat
 [succinct receipt]: https://docs.rs/risc0-zkvm/0.19.1/risc0_zkvm/struct.SuccinctReceipt.html
 [Groth16]: https://dev.risczero.com/terminology#groth16
 [Groth16 receipt]: https://dev.risczero.com/terminology#groth16-receipt
