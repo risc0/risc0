@@ -57,14 +57,23 @@ struct Args {
     /// Print results in json format.
     #[arg(long, short)]
     json: bool,
+
+    /// Enable tracing forest
+    #[arg(short, long, default_value_t = false)]
+    tree: bool,
 }
 
 fn main() {
     let args = Args::parse();
     if let Some(iterations) = args.iterations {
         tracing_subscriber::registry()
+            .with(tracing_subscriber::fmt::layer())
             .with(EnvFilter::from_default_env())
-            .with(tracing_forest::ForestLayer::default())
+            .with(if args.tree {
+                Some(tracing_forest::ForestLayer::default())
+            } else {
+                None
+            })
             .init();
 
         let mut opts = ProverOpts::default();
@@ -76,17 +85,16 @@ fn main() {
         let start = Instant::now();
         let (session, receipt) = top(prover.clone(), iterations, args.po2);
         let duration = start.elapsed();
-        let (cycles, _) = session.get_cycles().unwrap();
 
         let seal = receipt.inner.succinct().unwrap().seal.len() * WORD_SIZE;
 
         let usage = prover.get_peak_memory_usage();
-        let throughput = (cycles as f64) / duration.as_secs_f64();
+        let throughput = (session.user_cycles as f64) / duration.as_secs_f64();
 
         if !args.quiet {
             if args.json {
                 let entry = PerformanceData {
-                    cycles,
+                    cycles: session.user_cycles,
                     duration: duration.as_nanos(),
                     ram: usage,
                     seal,
@@ -99,7 +107,7 @@ fn main() {
             } else {
                 println!(
                     "| {:>9}k | {:>10} | {:>10} | {:>10} | {:>8}hz |",
-                    cycles / 1024,
+                    session.user_cycles / 1024,
                     duration.human_duration().to_string(),
                     usage.human_count_bytes().to_string(),
                     seal.human_count_bytes().to_string(),

@@ -322,7 +322,7 @@ struct RawBuffer {
 
 impl RawBuffer {
     pub fn new(name: &'static str, size: usize) -> Self {
-        tracing::debug!("alloc: {size} bytes, {name}");
+        tracing::trace!("alloc: {size} bytes, {name}");
         TRACKER.lock().unwrap().alloc(size);
         Self {
             name,
@@ -333,7 +333,7 @@ impl RawBuffer {
 
 impl Drop for RawBuffer {
     fn drop(&mut self) {
-        tracing::debug!("free: {} bytes, {}", self.buf.len(), self.name);
+        tracing::trace!("free: {} bytes, {}", self.buf.len(), self.name);
         TRACKER.lock().unwrap().free(self.buf.len());
     }
 }
