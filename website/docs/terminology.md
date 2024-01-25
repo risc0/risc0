@@ -134,11 +134,12 @@ A proof system that offers a very small proof size, suitable for on-chain verifi
 [Groth16 Circuit]: #groth16-circuit
 
 RISC Zero's Groth16 Circuit is used to generate [receipts] that are small enough to support on-chain verification.
+The Groth16 Circuit is a circom implementation of the verifier for the [Recursion Circuit].
 
 ### Groth16 Receipt
 
 A Groth16 Receipt is a very small [validity proof], used primarily for on-chain verification.
-The Groth16 Receipt is constructed using the [Groth16 Circuit], which verifies a [succinct receipt] using a [Groth16] proof.
+The Groth16 Receipt is constructed using the [Groth16 Circuit].
 
 ### Guest
 
@@ -233,6 +234,7 @@ Through recursion, RISC Zero can take two or more [receipts] and compress them i
 By repeating this compression, an arbitrary number of related [receipts] (e.g. all the [Segments] of a [Session]) can be compressed into a single receipt.
 
 ### Recursion Circuit
+[Recursion Circuit]: #recursion-circuit
 
 The recursion circuit is used to aggregate [proofs].
 

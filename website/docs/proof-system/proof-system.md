@@ -20,7 +20,7 @@ These claims are summarized in the [ReceiptClaim].
 
 A [Receipt] can take four main forms.
 
-1. A **[flat receipt]** is a vector of [ZK-STARK]s, one for each [segment]. Segments & segment proofs are constructed by the [RISC-V Circuit].
+1. A **[flat receipt]** is a vector of [ZK-STARK]s, one for each [segment]. Segments & segment proofs are constructed using the [RISC-V Circuit].
 2. A **[succinct receipt]** is a single [ZK-STARK] proving an entire [Session]. A succinct receipt is formed by aggregating the proofs from a flat receipt. This is accomplished using the [Recursion Circuit]. Users can also aggregate multiple succinct receipts into a single succinct receipt using [proof composition].
 3. A **[Groth16 receipt]** is a single [Groth16] proof for an entire [Session]. A Groth16Receipt is formed by verifying a succinct receipt using RISC Zero's [Groth16 circuit].
 4. A **[fake receipt]** doesn't contain any proof at all. This feature is offered to enable rapid prototyping. See [Dev Mode] for more information.
