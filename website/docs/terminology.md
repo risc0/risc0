@@ -125,16 +125,20 @@ A valid trace means that the [ELF binary] was faithfully executed according to t
 
 ### Groth16
 
-A proof system that is popular for its very small proof size.
+[Groth16]: #groth16
+
+A proof system that offers a very small proof size, suitable for on-chain verification.
 
 ### Groth16 Circuit
+
+[Groth16 Circuit]: #groth16-circuit
 
 RISC Zero's Groth16 Circuit is used to generate [receipts] that are small enough to support on-chain verification.
 
 ### Groth16 Receipt
 
-A Groth16 Receipt is a very small [SNARK], used primarily for on-chain verification.
-The Groth16 Receipt is constructed using the [Groth16 Circuit], which verifies a [succcinct receipt] using a [Groth16] proof.
+A Groth16 Receipt is a very small [validity proof], used primarily for on-chain verification.
+The Groth16 Receipt is constructed using the [Groth16 Circuit], which verifies a [succinct receipt] using a [Groth16] proof.
 
 ### Guest
 

@@ -31,7 +31,7 @@ The diagram above shows RISC Zero's full proving stack, including the [RISC-V Ci
 For a video explanation of this architecture and the associated terminology, check out our [talk from zkSummit 10].
 
 The details of the RISC Zero ZK-STARK protocol are described in our [ZKP Whitepaper] and in this [Sequence Diagram].
-Documentation for our Groth16 circuit is TODO.
+Documentation for our Groth16 circuit is available in the [zkVM] docs.
 
 ### Open-Source Proving
 
