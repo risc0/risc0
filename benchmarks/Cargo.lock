@@ -2202,6 +2202,7 @@ dependencies = [
  "risc0-zkp",
  "risc0-zkvm",
  "risc0-zkvm-methods",
+ "risc0-zkvm-platform",
  "serde",
  "sha2",
  "sha3",
