@@ -198,7 +198,7 @@ impl<'a> ExecutorImpl<'a> {
     /// ```
     /// use risc0_zkvm::{ExecutorImpl, ExecutorEnv, Session};
     /// use risc0_zkvm_methods::BENCH_ELF;
-    /// use risc0_zkvm_methods_core::bench::{BenchmarkSpec, SpecWithIters}};
+    /// use risc0_zkvm_methods_core::bench::{BenchmarkSpec, SpecWithIters};
     ///
     /// let env = ExecutorEnv::builder()
     ///     .write(&SpecWithIters(BenchmarkSpec::SimpleLoop, 1))
