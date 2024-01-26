@@ -42,7 +42,7 @@ jobs:
         run: yarn build
         working-directory: website
         env:
-          BASE_URL: build_${{github.run_id}}/index.html
+          BASE_URL: /
           #BASE_URL: risc0-website-previews.s3.us-west-2.amazonaws.com/build_${{github.run_id}}/index.html/
           #BASE_URL: ${{ steps.baseurl.outputs.relative }}
 
