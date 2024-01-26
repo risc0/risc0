@@ -48,12 +48,15 @@ jobs:
 
       - run: ls -lhta website
 
-      #- uses: EndBug/pages-preview@v1
-      #  with:
-      #    build_dir: website/build
-      #    preview_base_url: ${{ env.PAGES_BASE }}
-      #    preview_repo: ${{ env.PREVIEW_REPO }}
-      #    preview_token: ${{ secrets.PREVIEW_TOKEN }}
+      - if: >
+          runner.os == 'Linux' &&
+          github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name
+        uses: EndBug/pages-preview@v1
+        with:
+          build_dir: website/build
+          preview_base_url: ${{ env.PAGES_BASE }}
+          preview_repo: ${{ env.PREVIEW_REPO }}
+          preview_token: ${{ secrets.PREVIEW_TOKEN }}
 
       #- if: >
       #    runner.os == 'Linux' &&
@@ -65,9 +68,7 @@ jobs:
       #    role-to-assume: arn:aws:iam::083632199359:role/gha_oidc_risc0_cache_public_access
       #    output-credentials: true
 
-      #- if: >
-      #    runner.os == 'Linux' &&
-      #    github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name
+      #
       - run: |
           cd website
           aws s3 sync build/ s3://risc0-website-previews
