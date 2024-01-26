@@ -42,7 +42,7 @@ jobs:
         env:
           BASE_URL: ${{ steps.baseurl.outputs.relative }}
 
-      - run: ls -lhta
+      - run: ls -lhta website
 
       #- uses: EndBug/pages-preview@v1
       #  with:
