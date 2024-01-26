@@ -39,14 +39,12 @@ jobs:
         shell: bash
 
       - name: Build
-        run: |
-          yarn build
-          cd website
+        run: yarn build
         working-directory: website
         env:
           BASE_URL: ${{ steps.baseurl.outputs.relative }}
 
-      - run: ls -lhta website
+      - run: cd website
 
       - if: >
           runner.os == 'Linux' &&
@@ -69,6 +67,4 @@ jobs:
       #    output-credentials: true
 
       #
-      - run: |
-          cd website
-          aws s3 sync build/ s3://risc0-website-previews
+      - run: aws s3 sync build/ s3://risc0-website-previews/build
