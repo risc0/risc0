@@ -23,9 +23,9 @@ jobs:
         with:
           node-version: 18
 
-      - run: |
-          npm install --global yarn
-          yarn install
+      - run: npm install --global yarn
+
+      - run: yarn install
         working-directory: website
 
       - name: Determine base URL
@@ -39,7 +39,9 @@ jobs:
         shell: bash
 
       - name: Build
-        run: yarn build
+        run: |
+          yarn build
+          cd website
         working-directory: website
         env:
           BASE_URL: ${{ steps.baseurl.outputs.relative }}
