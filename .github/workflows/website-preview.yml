@@ -64,4 +64,6 @@ jobs:
       #- if: >
       #    runner.os == 'Linux' &&
       #    github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name
-      - run: aws s3 sync build/ s3://risc0-website-previews
+      - run: |
+          cd website
+          aws s3 sync build/ s3://risc0-website-previews
