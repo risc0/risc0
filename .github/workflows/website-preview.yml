@@ -12,7 +12,7 @@ concurrency:
 
 jobs:
   dev:
-    runs-on: ubuntu-20.04
+    runs-on: [self-hosted, prod, Linux, cpu]
     env:
       PREVIEW_REPO: risc0/website-preview
       PAGES_BASE: https://risc0.github.io/website-preview
