@@ -55,6 +55,7 @@ jobs:
           preview_token: ${{ secrets.PREVIEW_TOKEN }}
 
       - run: |
+          ls -lht
           cd website
           aws s3api put-object --bucket risc0-website-previews --key build/ --content-length 0
 
