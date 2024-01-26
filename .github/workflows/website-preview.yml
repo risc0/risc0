@@ -37,7 +37,9 @@ jobs:
         shell: bash
 
       - name: Build
-        run: yarn build
+        run: |
+          npm install --global yarn
+          yarn build
         working-directory: website
         env:
           BASE_URL: ${{ steps.baseurl.outputs.relative }}
