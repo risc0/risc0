@@ -43,14 +43,14 @@ fn stark2snark() {
     tracing::info!("execute");
     let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
     let session = exec.run().unwrap();
-    let segments = session.resolve().unwrap();
-    assert_eq!(segments.len(), 1);
+    assert_eq!(session.segments.len(), 1);
+    let segment = session.segments.first().unwrap().resolve().unwrap();
 
     tracing::info!("prove");
     let opts = ProverOpts::default();
     let ctx = VerifierContext::default();
     let prover = get_prover_server(&opts).unwrap();
-    let segment_receipt = prover.prove_segment(&ctx, &segments[0]).unwrap();
+    let segment_receipt = prover.prove_segment(&ctx, &segment).unwrap();
 
     tracing::info!("lift");
     let lift_receipt = lift(&segment_receipt).unwrap();
