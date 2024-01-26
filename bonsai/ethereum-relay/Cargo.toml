@@ -1,7 +1,7 @@
 [package]
 name = "bonsai-ethereum-relay"
 description = "A relayer to integrate Ethereum with Bonsai."
-version = "0.6.0-rc.3"
+version = "0.6.0-rc.4"
 edition = { workspace = true }
 license = { workspace = true }
 homepage = { workspace = true }
