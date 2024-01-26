@@ -58,4 +58,4 @@ jobs:
 
       - run: aws s3api put-object --bucket risc0-website-previews --key build/ --content-length 0
 
-      - run: aws s3 sync build/ s3://risc0-website-previews/build
+      - run: aws s3 sync build/ s3://risc0-website-previews/build/
