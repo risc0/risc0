@@ -15,6 +15,7 @@
 use std::{fs::File, path::Path};
 
 use reqwest::{blocking::Client as BlockingClient, header};
+use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
 use self::responses::{
@@ -199,7 +200,7 @@ pub mod responses {
 }
 
 /// Proof Session representation
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct SessionId {
     /// Session UUID
     pub uuid: String,
