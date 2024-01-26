@@ -35,7 +35,7 @@ pub const CELLS_RATE: usize = 16;
 /// The size of the hash output in cells (~ 248 bits)
 pub const CELLS_OUT: usize = 8;
 
-/// A hash implemention for Poseidon
+/// A hash implemention for Poseidon2
 struct Poseidon2HashFn;
 
 impl HashFn<BabyBear> for Poseidon2HashFn {
@@ -269,7 +269,7 @@ mod tests {
         }
     }
 
-    // Naive version of poseidon
+    // Naive version of poseidon2
     fn poseidon2_mix_naive(cells: &mut [BabyBearElem; CELLS]) {
         let mut round = 0;
         multiply_by_m_ext_naive(cells);

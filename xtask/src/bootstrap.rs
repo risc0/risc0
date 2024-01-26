@@ -37,8 +37,8 @@ const CONTROL_ID_PATH_RECURSION: &str = "risc0/circuit/recursion/src/control_id.
 
 impl Bootstrap {
     pub fn run(&self) {
-        let poseidon_control_ids = Self::generate_rv32im_control_ids();
-        Self::generate_recursion_control_ids(poseidon_control_ids);
+        let poseidon2_control_ids = Self::generate_rv32im_control_ids();
+        Self::generate_recursion_control_ids(poseidon2_control_ids);
     }
 
     fn generate_rv32im_control_ids() -> Vec<Digest> {
@@ -46,8 +46,8 @@ impl Bootstrap {
         tracing::info!("computing control IDs with SHA-256");
         let control_id_sha256 =
             loader.compute_control_id(&CpuHal::new(Sha256HashSuite::<BabyBear>::new_suite()));
-        tracing::info!("computing control IDs with Poseidon");
-        let control_id_poseidon =
+        tracing::info!("computing control IDs with Poseidon2");
+        let control_id_poseidon2 =
             loader.compute_control_id(&CpuHal::new(Poseidon2HashSuite::new_suite()));
         tracing::info!("computing control IDs with Blake2b");
         let control_id_blake2b =
@@ -66,17 +66,17 @@ impl Bootstrap {
             control_id_sha256[8],
             control_id_sha256[9],
             control_id_sha256[10],
-            control_id_poseidon[0],
-            control_id_poseidon[1],
-            control_id_poseidon[2],
-            control_id_poseidon[3],
-            control_id_poseidon[4],
-            control_id_poseidon[5],
-            control_id_poseidon[6],
-            control_id_poseidon[7],
-            control_id_poseidon[8],
-            control_id_poseidon[9],
-            control_id_poseidon[10],
+            control_id_poseidon2[0],
+            control_id_poseidon2[1],
+            control_id_poseidon2[2],
+            control_id_poseidon2[3],
+            control_id_poseidon2[4],
+            control_id_poseidon2[5],
+            control_id_poseidon2[6],
+            control_id_poseidon2[7],
+            control_id_poseidon2[8],
+            control_id_poseidon2[9],
+            control_id_poseidon2[10],
             control_id_blake2b[0],
             control_id_blake2b[1],
             control_id_blake2b[2],
@@ -100,7 +100,7 @@ impl Bootstrap {
             .status()
             .expect("failed to format {CONTROL_ID_PATH_RV32IM}");
 
-        control_id_poseidon
+        control_id_poseidon2
     }
 
     fn generate_recursion_control_ids(mut valid_control_ids: Vec<Digest>) {
@@ -111,7 +111,7 @@ impl Bootstrap {
             .map(|(name, encoded_program)| {
                 let program = Program::from_encoded(&encoded_program);
 
-                tracing::info!("computing control ID for {name} with Poseidon");
+                tracing::info!("computing control ID for {name} with Poseidon2");
                 let control_id = program.compute_control_id(Poseidon2HashSuite::new_suite());
                 valid_control_ids.push(control_id.clone());
 

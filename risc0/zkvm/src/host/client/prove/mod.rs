@@ -107,7 +107,7 @@ pub struct ProverOpts {
 }
 
 impl Default for ProverOpts {
-    /// Return [ProverOpts] with the Poseidon hash function and
+    /// Return [ProverOpts] with the Poseidon2 hash function and
     /// `prove_guest_errors` set to false.
     fn default() -> Self {
         Self {

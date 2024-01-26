@@ -68,7 +68,7 @@ pub use self::receipt_claim::{
 #[cfg(not(target_os = "zkvm"))]
 pub use {
     self::host::{
-        control_id::POSEIDON_CONTROL_ID,
+        control_id::POSEIDON2_CONTROL_ID,
         receipt::{
             Assumption, CompactReceipt, CompositeReceipt, InnerReceipt, Journal, Receipt,
             SegmentReceipt, SuccinctReceipt, VerifierContext,

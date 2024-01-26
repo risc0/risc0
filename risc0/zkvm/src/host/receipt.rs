@@ -37,7 +37,7 @@ use risc0_zkp::{
 use risc0_zkvm_platform::WORD_SIZE;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 
-use super::control_id::{BLAKE2B_CONTROL_ID, POSEIDON_CONTROL_ID, SHA256_CONTROL_ID};
+use super::control_id::{BLAKE2B_CONTROL_ID, POSEIDON2_CONTROL_ID, SHA256_CONTROL_ID};
 // Make succinct receipt available through this `receipt` module.
 pub use super::recursion::SuccinctReceipt;
 use crate::{
@@ -634,7 +634,7 @@ impl SegmentReceipt {
     ) -> Result<(), VerificationError> {
         use hex::FromHex;
         let check_code = |_, control_id: &Digest| -> Result<(), VerificationError> {
-            POSEIDON_CONTROL_ID
+            POSEIDON2_CONTROL_ID
                 .into_iter()
                 .chain(SHA256_CONTROL_ID)
                 .chain(BLAKE2B_CONTROL_ID)

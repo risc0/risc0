@@ -31,8 +31,8 @@ pub const SHA256_CONTROL_ID: RawControlId = [
     "e51149bf1d6a6c1707c19b81a2cca76b7b874384abba56092a8a813759eff362", //
 ];
 
-/// Control ID for Poseidon
-pub const POSEIDON_CONTROL_ID: RawControlId = [
+/// Control ID for Poseidon2
+pub const POSEIDON2_CONTROL_ID: RawControlId = [
     "8a86794f11dd22308f9f8f06e2e99c45e3f78724bba7996d6396aa3d650d9823", //
     "cbe4ed0c692ede3b079a32361242cb2ff547a64ec38f202a41522529b14cbc69", //
     "ebd09568e3445d2db59bca16a386372053a7d1451e4b03629022a11019ab2e41", //

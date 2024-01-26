@@ -201,8 +201,8 @@ mod cuda {
     use std::rc::Rc;
 
     use anyhow::{bail, Result};
-    use risc0_circuit_rv32im::cuda::{CudaCircuitHalPoseidon, CudaCircuitHalSha256};
-    use risc0_zkp::hal::cuda::{CudaHalPoseidon, CudaHalSha256};
+    use risc0_circuit_rv32im::cuda::{CudaCircuitHalPoseidon2, CudaCircuitHalSha256};
+    use risc0_zkp::hal::cuda::{CudaHalPoseidon2, CudaHalSha256};
 
     use super::{HalPair, ProverImpl, ProverServer};
     use crate::ProverOpts;
@@ -212,14 +212,6 @@ mod cuda {
             "sha-256" => {
                 let hal = Rc::new(CudaHalSha256::new());
                 let circuit_hal = Rc::new(CudaCircuitHalSha256::new(hal.clone()));
-                Ok(Rc::new(ProverImpl::new(
-                    "cuda",
-                    HalPair { hal, circuit_hal },
-                )))
-            }
-            "poseidon" => {
-                let hal = Rc::new(CudaHalPoseidon::new());
-                let circuit_hal = Rc::new(CudaCircuitHalPoseidon::new(hal.clone()));
                 Ok(Rc::new(ProverImpl::new(
                     "cuda",
                     HalPair { hal, circuit_hal },
@@ -245,7 +237,7 @@ mod metal {
     use anyhow::{bail, Result};
     use risc0_circuit_rv32im::metal::MetalCircuitHal;
     use risc0_zkp::hal::metal::{
-        MetalHalPoseidon, MetalHalSha256, MetalHashPoseidon, MetalHashSha256,
+        MetalHalPoseidon2, MetalHalSha256, MetalHashPoseidon2, MetalHashSha256,
     };
 
     use super::{HalPair, ProverImpl, ProverServer};
@@ -261,15 +253,7 @@ mod metal {
                     HalPair { hal, circuit_hal },
                 )))
             }
-            "poseidon" => {
-                let hal = Rc::new(MetalHalPoseidon::new());
-                let circuit_hal = Rc::new(MetalCircuitHal::<MetalHashPoseidon>::new(hal.clone()));
-                Ok(Rc::new(ProverImpl::new(
-                    "metal",
-                    HalPair { hal, circuit_hal },
-                )))
-            }
-            "poseidon" => {
+            "poseidon2" => {
                 let hal = Rc::new(MetalHalPoseidon2::new());
                 let circuit_hal = Rc::new(MetalCircuitHal::<MetalHashPoseidon2>::new(hal.clone()));
                 Ok(Rc::new(ProverImpl::new(

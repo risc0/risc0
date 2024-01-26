@@ -33,7 +33,6 @@ use crate::{
     core::{
         digest::Digest,
         hash::{
-            poseidon::{self, PoseidonHashSuite},
             poseidon2::{self, Poseidon2HashSuite},
             sha::Sha256HashSuite,
             HashSuite,
@@ -138,94 +137,6 @@ impl CudaHash for CudaHashSha256 {
     }
 }
 
-pub struct CudaHashPoseidon {
-    suite: HashSuite<BabyBear>,
-    round_constants: BufferImpl<BabyBearElem>,
-    mds: BufferImpl<BabyBearElem>,
-    partial_comp_matrix: BufferImpl<BabyBearElem>,
-    partial_comp_offset: BufferImpl<BabyBearElem>,
-}
-
-impl CudaHash for CudaHashPoseidon {
-    fn new(hal: &CudaHal<Self>) -> Self {
-        let round_constants =
-            hal.copy_from_elem("round_constants", poseidon::consts::ROUND_CONSTANTS);
-        let mds = hal.copy_from_elem("mds", poseidon::consts::MDS);
-        let partial_comp_matrix =
-            hal.copy_from_elem("partial_comp_matrix", poseidon::consts::PARTIAL_COMP_MATRIX);
-        let partial_comp_offset =
-            hal.copy_from_elem("partial_comp_offset", poseidon::consts::PARTIAL_COMP_OFFSET);
-        CudaHashPoseidon {
-            suite: PoseidonHashSuite::new_suite(),
-            round_constants,
-            mds,
-            partial_comp_matrix,
-            partial_comp_offset,
-        }
-    }
-
-    fn hash_fold(&self, hal: &CudaHal<Self>, io: &BufferImpl<Digest>, output_size: usize) {
-        let stream = Stream::new(StreamFlags::DEFAULT, None).unwrap();
-        let kernel = hal.module.get_function("poseidon_fold").unwrap();
-        let params = hal.compute_simple_params(output_size);
-        unsafe {
-            // DevicePointers require that the underlying type of the pointer implements the
-            // DeviceCopy trait. core::Digest does not implement this trait.
-            // TODO: refactor data types to allow safer copying.
-            // Here, we perform pointer arithmetic on the underlying device_pointer of type
-            // u8.
-            // TODO: modify type hierarchy to fit Rustacuda's memory model
-            // to allow for more type safe pointer arithmetic
-            let input = io.as_device_ptr_with_offset(2 * output_size);
-            let output = io.as_device_ptr_with_offset(output_size);
-            launch!(kernel<<<params.0, params.1, 0, stream>>>(
-                self.round_constants.as_device_ptr(),
-                self.mds.as_device_ptr(),
-                self.partial_comp_matrix.as_device_ptr(),
-                self.partial_comp_offset.as_device_ptr(),
-                output,
-                input,
-                output_size
-            ))
-            .unwrap();
-        }
-        stream.synchronize().unwrap();
-    }
-
-    fn hash_rows(
-        &self,
-        hal: &CudaHal<Self>,
-        output: &BufferImpl<Digest>,
-        matrix: &BufferImpl<BabyBearElem>,
-    ) {
-        let row_size = output.size();
-        let col_size = matrix.size() / output.size();
-        assert_eq!(matrix.size(), col_size * row_size);
-
-        let stream = Stream::new(StreamFlags::DEFAULT, None).unwrap();
-        let kernel = hal.module.get_function("poseidon_rows").unwrap();
-        let params = hal.compute_simple_params(row_size);
-        unsafe {
-            launch!(kernel<<<params.0, params.1, 0, stream>>>(
-                self.round_constants.as_device_ptr(),
-                self.mds.as_device_ptr(),
-                self.partial_comp_matrix.as_device_ptr(),
-                self.partial_comp_offset.as_device_ptr(),
-                output.as_device_ptr(),
-                matrix.as_device_ptr(),
-                row_size,
-                col_size
-            ))
-            .unwrap();
-        }
-        stream.synchronize().unwrap();
-    }
-
-    fn get_hash_suite(&self) -> &HashSuite<BabyBear> {
-        &self.suite
-    }
-}
-
 pub struct CudaHashPoseidon2 {
     suite: HashSuite<BabyBear>,
     round_constants: BufferImpl<BabyBearElem>,
@@ -312,7 +223,6 @@ pub struct CudaHal<Hash: CudaHash + ?Sized> {
 }
 
 pub type CudaHalSha256 = CudaHal<CudaHashSha256>;
-pub type CudaHalPoseidon = CudaHal<CudaHashPoseidon>;
 pub type CudaHalPoseidon2 = CudaHal<CudaHashPoseidon2>;
 
 struct RawBuffer {
@@ -857,7 +767,7 @@ mod tests {
     use serial_test::serial;
     use test_log::test;
 
-    use super::{CudaHalPoseidon, CudaHalPoseidon2, CudaHalSha256};
+    use super::{CudaHalPoseidon2, CudaHalSha256};
     use crate::hal::testutil;
 
     #[test]
@@ -894,18 +804,6 @@ mod tests {
     #[serial]
     fn hash_fold_sha256() {
         testutil::hash_fold(CudaHalSha256::new());
-    }
-
-    #[test]
-    #[serial]
-    fn hash_rows_poseidon() {
-        testutil::hash_rows(CudaHalPoseidon::new());
-    }
-
-    #[test]
-    #[serial]
-    fn hash_fold_poseidon() {
-        testutil::hash_fold(CudaHalPoseidon::new());
     }
 
     #[test]

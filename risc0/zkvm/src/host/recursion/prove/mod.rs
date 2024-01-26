@@ -50,7 +50,7 @@ use crate::{
     receipt_claim::{Merge, Output},
     recursion::{valid_control_ids, SuccinctReceipt},
     sha::Digestible,
-    HalPair, ReceiptClaim, SegmentReceipt, POSEIDON_CONTROL_ID,
+    HalPair, ReceiptClaim, SegmentReceipt, POSEIDON2_CONTROL_ID,
 };
 
 // TODO: Automatically generate these constants from the circuit somehow without
@@ -230,11 +230,11 @@ pub struct Prover {
 #[cfg(feature = "cuda")]
 mod cuda {
     pub use risc0_circuit_recursion::cuda::{
-        CudaCircuitHalPoseidon, CudaCircuitHalPoseidon2, CudaCircuitHalSha256,
+        CudaCircuitHalPoseidon2, CudaCircuitHalSha256,
     };
     pub use risc0_zkp::{
         core::hash::poseidon_254::Poseidon254HashSuite,
-        hal::cuda::{CudaHalPoseidon, CudaHalPoseidon2, CudaHalSha256},
+        hal::cuda::{CudaHalPoseidon2, CudaHalSha256},
     };
 
     use super::{BabyBear, CircuitImpl, CpuCircuitHal, CpuHal, HalPair, Rc, CIRCUIT};
@@ -242,12 +242,6 @@ mod cuda {
     pub fn sha256_hal_pair() -> HalPair<CudaHalSha256, CudaCircuitHalSha256> {
         let hal = Rc::new(CudaHalSha256::new());
         let circuit_hal = Rc::new(CudaCircuitHalSha256::new(hal.clone()));
-        HalPair { hal, circuit_hal }
-    }
-
-    pub fn poseidon_hal_pair() -> HalPair<CudaHalPoseidon, CudaCircuitHalPoseidon> {
-        let hal = Rc::new(CudaHalPoseidon::new());
-        let circuit_hal = Rc::new(CudaCircuitHalPoseidon::new(hal.clone()));
         HalPair { hal, circuit_hal }
     }
 
@@ -271,7 +265,7 @@ mod metal {
     pub use risc0_zkp::{
         core::hash::poseidon_254::Poseidon254HashSuite,
         hal::metal::{
-            MetalHalPoseidon, MetalHalPoseidon2, MetalHalSha256, MetalHashPoseidon,
+            MetalHalPoseidon2, MetalHalSha256,
             MetalHashPoseidon2, MetalHashSha256,
         },
     };
@@ -281,12 +275,6 @@ mod metal {
     pub fn sha256_hal_pair() -> HalPair<MetalHalSha256, MetalCircuitHal<MetalHashSha256>> {
         let hal = Rc::new(MetalHalSha256::new());
         let circuit_hal = Rc::new(MetalCircuitHal::<MetalHashSha256>::new(hal.clone()));
-        HalPair { hal, circuit_hal }
-    }
-
-    pub fn poseidon_hal_pair() -> HalPair<MetalHalPoseidon, MetalCircuitHal<MetalHashPoseidon>> {
-        let hal = Rc::new(MetalHalPoseidon::new());
-        let circuit_hal = Rc::new(MetalCircuitHal::<MetalHashPoseidon>::new(hal.clone()));
         HalPair { hal, circuit_hal }
     }
 
@@ -345,12 +333,6 @@ cfg_if::cfg_if! {
 
         /// TODO
         #[allow(dead_code)]
-        pub fn poseidon_hal_pair() -> HalPair<cuda::CudaHalPoseidon, cuda::CudaCircuitHalPoseidon> {
-            cuda::poseidon_hal_pair()
-        }
-
-        /// TODO
-        #[allow(dead_code)]
         pub fn poseidon2_hal_pair() -> HalPair<cuda::CudaHalPoseidon2, cuda::CudaCircuitHalPoseidon2> {
             cuda::poseidon2_hal_pair()
         }
@@ -365,12 +347,6 @@ cfg_if::cfg_if! {
         #[allow(dead_code)]
         pub fn sha256_hal_pair() -> HalPair<metal::MetalHalSha256, metal::MetalCircuitHal<metal::MetalHashSha256>> {
             metal::sha256_hal_pair()
-        }
-
-        /// TODO
-        #[allow(dead_code)]
-        pub fn poseidon_hal_pair() -> HalPair<metal::MetalHalPoseidon, metal::MetalCircuitHal<metal::MetalHashPoseidon>> {
-            metal::poseidon_hal_pair()
         }
 
         /// TODO
@@ -407,7 +383,7 @@ cfg_if::cfg_if! {
 
 /// Kinds of digests recognized by the recursion program language.
 // NOTE: Default is additionally a recognized type in the recursion program language. It's not
-// yet supported here because some of the code in this module assumes Poseidon is Default.
+// yet supported here because some of the code in this module assumes Poseidon2 is Default.
 enum DigestKind {
     Poseidon2,
     Sha256,
@@ -508,7 +484,7 @@ impl Prover {
         prover.add_input_digest(&merkle_root, DigestKind::Poseidon2);
 
         let which = po2 - MIN_CYCLES_PO2;
-        let inner_control_id = Digest::from_hex(POSEIDON_CONTROL_ID[which]).unwrap();
+        let inner_control_id = Digest::from_hex(POSEIDON2_CONTROL_ID[which]).unwrap();
         prover.add_seal(seal, &inner_control_id, &allowed_ids)?;
 
         Ok(prover)
@@ -621,7 +597,7 @@ impl Prover {
     /// Add a digest to the input for the recursion program.
     fn add_input_digest(&mut self, digest: &Digest, kind: DigestKind) {
         match kind {
-            // Poseidon digests consist of  BabyBear field elems and do not need to be split.
+            // Poseidon2 digests consist of  BabyBear field elems and do not need to be split.
             DigestKind::Poseidon2 => self.add_input(digest.as_words()),
             // SHA-256 digests need to be split into 16-bit half words to avoid overflowing.
             DigestKind::Sha256 => self.add_input(bytemuck::cast_slice(

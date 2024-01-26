@@ -14,16 +14,7 @@
 
 use criterion::{criterion_group, criterion_main, Criterion};
 use risc0_core::field::{baby_bear::BabyBearElem, Elem};
-use risc0_zkp::core::hash::{
-    poseidon::{poseidon_mix, CELLS as POSEIDON_CELLS},
-    poseidon2::{poseidon2_mix, CELLS as POSEIDON2_CELLS},
-};
-
-fn benchmark_poseidon_mix(c: &mut Criterion) {
-    let mut rng = rand::thread_rng();
-    let mut cells = [BabyBearElem::random(&mut rng); POSEIDON_CELLS];
-    c.bench_function("poseidon_mix", |b| b.iter(|| poseidon_mix(&mut cells)));
-}
+use risc0_zkp::core::hash::poseidon2::{poseidon2_mix, CELLS as POSEIDON2_CELLS};
 
 fn benchmark_poseidon2_mix(c: &mut Criterion) {
     let mut rng = rand::thread_rng();
@@ -31,5 +22,5 @@ fn benchmark_poseidon2_mix(c: &mut Criterion) {
     c.bench_function("poseidon2_mix", |b| b.iter(|| poseidon2_mix(&mut cells)));
 }
 
-criterion_group!(benches, benchmark_poseidon_mix, benchmark_poseidon2_mix);
+criterion_group!(benches, benchmark_poseidon2_mix);
 criterion_main!(benches);

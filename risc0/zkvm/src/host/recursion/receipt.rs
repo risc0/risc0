@@ -22,18 +22,18 @@ use serde::{Deserialize, Serialize};
 
 use super::CIRCUIT;
 use crate::{
-    host::{control_id::POSEIDON_CONTROL_ID, receipt::VerifierContext},
+    host::{control_id::POSEIDON2_CONTROL_ID, receipt::VerifierContext},
     sha::Digestible,
     ReceiptClaim,
 };
 
-/// This function gets valid control IDs from the Poseidon and recursion
+/// This function gets valid control IDs from the Poseidon2 and recursion
 /// circuits
 pub fn valid_control_ids() -> Vec<Digest> {
     use hex::FromHex;
 
     let mut all_ids = Vec::new();
-    for digest_str in POSEIDON_CONTROL_ID {
+    for digest_str in POSEIDON2_CONTROL_ID {
         all_ids.push(Digest::from_hex(digest_str).unwrap());
     }
     for (_, digest_str) in RECURSION_CONTROL_IDS {
@@ -88,7 +88,7 @@ impl SuccinctReceipt {
                 })
         };
 
-        // All receipts from the recursion circuit use Poseidon as the FRI hash
+        // All receipts from the recursion circuit use Poseidon2 as the FRI hash
         // function.
         let suite = ctx
             .suites
