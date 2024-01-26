@@ -25,7 +25,11 @@ jobs:
 
       - run: npm install --global yarn
 
-      - run: yarn install --ignore-engines
+      - run: |
+          node -v
+          npm -v
+
+      - run: yarn install
         working-directory: website
 
       - name: Determine base URL
