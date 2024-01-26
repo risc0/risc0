@@ -28797,7 +28797,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
   auto x8776 = args[0][3 * steps + ((cycle - 0) & mask)];
   assert(x8776 != Fp::invalid());
   if (x8776 != 0) {
-    // loc("top(recursion::Top)/code(recursion::Code)/inst(Mux)/poseidon_load(recursion::Poseidon2MemInst)/do_mont(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+    // loc("top(recursion::Top)/code(recursion::Code)/inst(Mux)/poseidon2_load(recursion::Poseidon2MemInst)/do_mont(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
     auto x8777 = args[0][7 * steps + ((cycle - 0) & mask)];
     assert(x8777 != Fp::invalid());
     // loc("zirgen/circuit/recursion/poseidon2.cpp":57:13)
@@ -28806,7 +28806,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
     auto x8779 = x307 - x8777;
     // loc("zirgen/circuit/recursion/poseidon2.cpp":57:13)
     auto x8780 = x8778 + x8779;
-    // loc("top(recursion::Top)/code(recursion::Code)/inst(Mux)/poseidon_load(recursion::Poseidon2MemInst)/inputs[0](Reg)"("./zirgen/compiler/edsl/component.h":154:27))
+    // loc("top(recursion::Top)/code(recursion::Code)/inst(Mux)/poseidon2_load(recursion::Poseidon2MemInst)/inputs[0](Reg)"("./zirgen/compiler/edsl/component.h":154:27))
     auto x8781 = args[0][13 * steps + ((cycle - 0) & mask)];
     assert(x8781 != Fp::invalid());
     {
@@ -28852,7 +28852,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
     assert(x8786 != Fp::invalid());
     // loc("zirgen/circuit/recursion/poseidon2.cpp":59:24)
     auto x8787 = x8786 * x8780;
-    // loc("top(recursion::Top)/code(recursion::Code)/inst(Mux)/poseidon_load(recursion::Poseidon2MemInst)/inputs[1](Reg)"("./zirgen/compiler/edsl/component.h":154:27))
+    // loc("top(recursion::Top)/code(recursion::Code)/inst(Mux)/poseidon2_load(recursion::Poseidon2MemInst)/inputs[1](Reg)"("./zirgen/compiler/edsl/component.h":154:27))
     auto x8788 = args[0][14 * steps + ((cycle - 0) & mask)];
     assert(x8788 != Fp::invalid());
     {
@@ -28898,7 +28898,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
     assert(x8793 != Fp::invalid());
     // loc("zirgen/circuit/recursion/poseidon2.cpp":59:24)
     auto x8794 = x8793 * x8780;
-    // loc("top(recursion::Top)/code(recursion::Code)/inst(Mux)/poseidon_load(recursion::Poseidon2MemInst)/inputs[2](Reg)"("./zirgen/compiler/edsl/component.h":154:27))
+    // loc("top(recursion::Top)/code(recursion::Code)/inst(Mux)/poseidon2_load(recursion::Poseidon2MemInst)/inputs[2](Reg)"("./zirgen/compiler/edsl/component.h":154:27))
     auto x8795 = args[0][15 * steps + ((cycle - 0) & mask)];
     assert(x8795 != Fp::invalid());
     {
@@ -28944,7 +28944,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
     assert(x8800 != Fp::invalid());
     // loc("zirgen/circuit/recursion/poseidon2.cpp":59:24)
     auto x8801 = x8800 * x8780;
-    // loc("top(recursion::Top)/code(recursion::Code)/inst(Mux)/poseidon_load(recursion::Poseidon2MemInst)/inputs[3](Reg)"("./zirgen/compiler/edsl/component.h":154:27))
+    // loc("top(recursion::Top)/code(recursion::Code)/inst(Mux)/poseidon2_load(recursion::Poseidon2MemInst)/inputs[3](Reg)"("./zirgen/compiler/edsl/component.h":154:27))
     auto x8802 = args[0][16 * steps + ((cycle - 0) & mask)];
     assert(x8802 != Fp::invalid());
     {
@@ -28990,7 +28990,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
     assert(x8807 != Fp::invalid());
     // loc("zirgen/circuit/recursion/poseidon2.cpp":59:24)
     auto x8808 = x8807 * x8780;
-    // loc("top(recursion::Top)/code(recursion::Code)/inst(Mux)/poseidon_load(recursion::Poseidon2MemInst)/inputs[4](Reg)"("./zirgen/compiler/edsl/component.h":154:27))
+    // loc("top(recursion::Top)/code(recursion::Code)/inst(Mux)/poseidon2_load(recursion::Poseidon2MemInst)/inputs[4](Reg)"("./zirgen/compiler/edsl/component.h":154:27))
     auto x8809 = args[0][17 * steps + ((cycle - 0) & mask)];
     assert(x8809 != Fp::invalid());
     {
@@ -29036,7 +29036,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
     assert(x8814 != Fp::invalid());
     // loc("zirgen/circuit/recursion/poseidon2.cpp":59:24)
     auto x8815 = x8814 * x8780;
-    // loc("top(recursion::Top)/code(recursion::Code)/inst(Mux)/poseidon_load(recursion::Poseidon2MemInst)/inputs[5](Reg)"("./zirgen/compiler/edsl/component.h":154:27))
+    // loc("top(recursion::Top)/code(recursion::Code)/inst(Mux)/poseidon2_load(recursion::Poseidon2MemInst)/inputs[5](Reg)"("./zirgen/compiler/edsl/component.h":154:27))
     auto x8816 = args[0][18 * steps + ((cycle - 0) & mask)];
     assert(x8816 != Fp::invalid());
     {
@@ -29082,7 +29082,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
     assert(x8821 != Fp::invalid());
     // loc("zirgen/circuit/recursion/poseidon2.cpp":59:24)
     auto x8822 = x8821 * x8780;
-    // loc("top(recursion::Top)/code(recursion::Code)/inst(Mux)/poseidon_load(recursion::Poseidon2MemInst)/inputs[6](Reg)"("./zirgen/compiler/edsl/component.h":154:27))
+    // loc("top(recursion::Top)/code(recursion::Code)/inst(Mux)/poseidon2_load(recursion::Poseidon2MemInst)/inputs[6](Reg)"("./zirgen/compiler/edsl/component.h":154:27))
     auto x8823 = args[0][19 * steps + ((cycle - 0) & mask)];
     assert(x8823 != Fp::invalid());
     {
@@ -29128,7 +29128,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
     assert(x8828 != Fp::invalid());
     // loc("zirgen/circuit/recursion/poseidon2.cpp":59:24)
     auto x8829 = x8828 * x8780;
-    // loc("top(recursion::Top)/code(recursion::Code)/inst(Mux)/poseidon_load(recursion::Poseidon2MemInst)/inputs[7](Reg)"("./zirgen/compiler/edsl/component.h":154:27))
+    // loc("top(recursion::Top)/code(recursion::Code)/inst(Mux)/poseidon2_load(recursion::Poseidon2MemInst)/inputs[7](Reg)"("./zirgen/compiler/edsl/component.h":154:27))
     auto x8830 = args[0][20 * steps + ((cycle - 0) & mask)];
     assert(x8830 != Fp::invalid());
     {
@@ -29174,7 +29174,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
     assert(x8835 != Fp::invalid());
     // loc("zirgen/circuit/recursion/poseidon2.cpp":59:24)
     auto x8836 = x8835 * x8780;
-    // loc("top(recursion::Top)/code(recursion::Code)/inst(Mux)/poseidon_load(recursion::Poseidon2MemInst)/keep_state(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+    // loc("top(recursion::Top)/code(recursion::Code)/inst(Mux)/poseidon2_load(recursion::Poseidon2MemInst)/keep_state(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
     auto x8837 = args[0][8 * steps + ((cycle - 0) & mask)];
     assert(x8837 != Fp::invalid());
     // loc("top(recursion::Top)/mux(Mux)/poseidon2_load(recursion::Poseidon2Load)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":64:65))
@@ -29182,7 +29182,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
     if (x8838 == Fp::invalid()) x8838 = 0;
     // loc("zirgen/circuit/recursion/poseidon2.cpp":64:13)
     auto x8839 = x8837 * x8838;
-    // loc("top(recursion::Top)/code(recursion::Code)/inst(Mux)/poseidon_load(recursion::Poseidon2MemInst)/group(OneHot)/g0(Reg)"("zirgen/circuit/recursion/poseidon2.cpp":65:13))
+    // loc("top(recursion::Top)/code(recursion::Code)/inst(Mux)/poseidon2_load(recursion::Poseidon2MemInst)/group(OneHot)/g0(Reg)"("zirgen/circuit/recursion/poseidon2.cpp":65:13))
     auto x8840 = args[0][10 * steps + ((cycle - 0) & mask)];
     assert(x8840 != Fp::invalid());
     // loc("zirgen/circuit/recursion/poseidon2.cpp":65:13)
@@ -29257,7 +29257,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
     if (x8871 == Fp::invalid()) x8871 = 0;
     // loc("zirgen/circuit/recursion/poseidon2.cpp":64:13)
     auto x8872 = x8837 * x8871;
-    // loc("top(recursion::Top)/code(recursion::Code)/inst(Mux)/poseidon_load(recursion::Poseidon2MemInst)/group(OneHot)/g1(Reg)"("zirgen/circuit/recursion/poseidon2.cpp":65:13))
+    // loc("top(recursion::Top)/code(recursion::Code)/inst(Mux)/poseidon2_load(recursion::Poseidon2MemInst)/group(OneHot)/g1(Reg)"("zirgen/circuit/recursion/poseidon2.cpp":65:13))
     auto x8873 = args[0][11 * steps + ((cycle - 0) & mask)];
     assert(x8873 != Fp::invalid());
     // loc("zirgen/circuit/recursion/poseidon2.cpp":65:13)
@@ -29332,7 +29332,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
     if (x8904 == Fp::invalid()) x8904 = 0;
     // loc("zirgen/circuit/recursion/poseidon2.cpp":64:13)
     auto x8905 = x8837 * x8904;
-    // loc("top(recursion::Top)/code(recursion::Code)/inst(Mux)/poseidon_load(recursion::Poseidon2MemInst)/group(OneHot)/g2(Reg)"("zirgen/circuit/recursion/poseidon2.cpp":65:13))
+    // loc("top(recursion::Top)/code(recursion::Code)/inst(Mux)/poseidon2_load(recursion::Poseidon2MemInst)/group(OneHot)/g2(Reg)"("zirgen/circuit/recursion/poseidon2.cpp":65:13))
     auto x8906 = args[0][12 * steps + ((cycle - 0) & mask)];
     assert(x8906 != Fp::invalid());
     // loc("zirgen/circuit/recursion/poseidon2.cpp":65:13)
@@ -29634,7 +29634,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
     auto x9051 = x9024 + x9027;
     // loc("zirgen/circuit/recursion/poseidon2.cpp":42:14)
     auto x9052 = x9020 + x9028;
-    // loc("top(recursion::Top)/code(recursion::Code)/inst(Mux)/poseidon_load(recursion::Poseidon2MemInst)/prep_full(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+    // loc("top(recursion::Top)/code(recursion::Code)/inst(Mux)/poseidon2_load(recursion::Poseidon2MemInst)/prep_full(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
     auto x9053 = args[0][9 * steps + ((cycle - 0) & mask)];
     assert(x9053 != Fp::invalid());
     // loc("zirgen/circuit/recursion/poseidon2.cpp":71:11)
@@ -30748,26 +30748,26 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
     auto x9436 = x9409 + x9412;
     // loc("zirgen/circuit/recursion/poseidon2.cpp":42:14)
     auto x9437 = x9405 + x9413;
-    // loc("top(recursion::Top)/code(recursion::Code)/inst(Mux)/poseidon_full(recursion::Poseidon2FullInst)/cycle(OneHot)/c0(Reg)"("zirgen/circuit/recursion/poseidon2.cpp":126:19))
+    // loc("top(recursion::Top)/code(recursion::Code)/inst(Mux)/poseidon2_full(recursion::Poseidon2FullInst)/cycle(OneHot)/c0(Reg)"("zirgen/circuit/recursion/poseidon2.cpp":126:19))
     auto x9438 = args[0][7 * steps + ((cycle - 0) & mask)];
     assert(x9438 != Fp::invalid());
     // loc("zirgen/circuit/recursion/poseidon2.cpp":126:19)
     auto x9439 = x9438 * x212;
-    // loc("top(recursion::Top)/code(recursion::Code)/inst(Mux)/poseidon_full(recursion::Poseidon2FullInst)/cycle(OneHot)/c1(Reg)"("zirgen/circuit/recursion/poseidon2.cpp":126:19))
+    // loc("top(recursion::Top)/code(recursion::Code)/inst(Mux)/poseidon2_full(recursion::Poseidon2FullInst)/cycle(OneHot)/c1(Reg)"("zirgen/circuit/recursion/poseidon2.cpp":126:19))
     auto x9440 = args[0][8 * steps + ((cycle - 0) & mask)];
     assert(x9440 != Fp::invalid());
     // loc("zirgen/circuit/recursion/poseidon2.cpp":126:19)
     auto x9441 = x9440 * x211;
     // loc("zirgen/circuit/recursion/poseidon2.cpp":126:13)
     auto x9442 = x9439 + x9441;
-    // loc("top(recursion::Top)/code(recursion::Code)/inst(Mux)/poseidon_full(recursion::Poseidon2FullInst)/cycle(OneHot)/c2(Reg)"("zirgen/circuit/recursion/poseidon2.cpp":126:19))
+    // loc("top(recursion::Top)/code(recursion::Code)/inst(Mux)/poseidon2_full(recursion::Poseidon2FullInst)/cycle(OneHot)/c2(Reg)"("zirgen/circuit/recursion/poseidon2.cpp":126:19))
     auto x9443 = args[0][9 * steps + ((cycle - 0) & mask)];
     assert(x9443 != Fp::invalid());
     // loc("zirgen/circuit/recursion/poseidon2.cpp":126:19)
     auto x9444 = x9443 * x210;
     // loc("zirgen/circuit/recursion/poseidon2.cpp":126:13)
     auto x9445 = x9442 + x9444;
-    // loc("top(recursion::Top)/code(recursion::Code)/inst(Mux)/poseidon_full(recursion::Poseidon2FullInst)/cycle(OneHot)/c3(Reg)"("zirgen/circuit/recursion/poseidon2.cpp":126:19))
+    // loc("top(recursion::Top)/code(recursion::Code)/inst(Mux)/poseidon2_full(recursion::Poseidon2FullInst)/cycle(OneHot)/c3(Reg)"("zirgen/circuit/recursion/poseidon2.cpp":126:19))
     auto x9446 = args[0][10 * steps + ((cycle - 0) & mask)];
     assert(x9446 != Fp::invalid());
     // loc("zirgen/circuit/recursion/poseidon2.cpp":126:19)
@@ -36200,7 +36200,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
     // loc("top(recursion::Top)/code(recursion::Code)/write_addr(Reg)"("zirgen/circuit/recursion/top.cpp":22:49))
     auto x11682 = args[0][0 * steps + ((cycle - 0) & mask)];
     assert(x11682 != Fp::invalid());
-    // loc("top(recursion::Top)/code(recursion::Code)/inst(Mux)/poseidon_store(recursion::Poseidon2MemInst)/group(OneHot)/g0(Reg)"("zirgen/circuit/recursion/poseidon2.cpp":206:39))
+    // loc("top(recursion::Top)/code(recursion::Code)/inst(Mux)/poseidon2_store(recursion::Poseidon2MemInst)/group(OneHot)/g0(Reg)"("zirgen/circuit/recursion/poseidon2.cpp":206:39))
     auto x11683 = args[0][10 * steps + ((cycle - 0) & mask)];
     assert(x11683 != Fp::invalid());
     // loc("top(recursion::Top)/mux(Mux)/poseidon2_store(recursion::Poseidon2Store)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":206:88))
@@ -36243,7 +36243,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
     assert(x11698 != Fp::invalid());
     // loc("zirgen/circuit/recursion/poseidon2.cpp":206:39)
     auto x11699 = x11683 * x11698;
-    // loc("top(recursion::Top)/code(recursion::Code)/inst(Mux)/poseidon_store(recursion::Poseidon2MemInst)/group(OneHot)/g1(Reg)"("zirgen/circuit/recursion/poseidon2.cpp":206:39))
+    // loc("top(recursion::Top)/code(recursion::Code)/inst(Mux)/poseidon2_store(recursion::Poseidon2MemInst)/group(OneHot)/g1(Reg)"("zirgen/circuit/recursion/poseidon2.cpp":206:39))
     auto x11700 = args[0][11 * steps + ((cycle - 0) & mask)];
     assert(x11700 != Fp::invalid());
     // loc("top(recursion::Top)/mux(Mux)/poseidon2_store(recursion::Poseidon2Store)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":206:88))
@@ -36302,7 +36302,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
     auto x11723 = x11700 * x11722;
     // loc("zirgen/circuit/recursion/poseidon2.cpp":206:22)
     auto x11724 = x11699 + x11723;
-    // loc("top(recursion::Top)/code(recursion::Code)/inst(Mux)/poseidon_store(recursion::Poseidon2MemInst)/group(OneHot)/g2(Reg)"("zirgen/circuit/recursion/poseidon2.cpp":206:39))
+    // loc("top(recursion::Top)/code(recursion::Code)/inst(Mux)/poseidon2_store(recursion::Poseidon2MemInst)/group(OneHot)/g2(Reg)"("zirgen/circuit/recursion/poseidon2.cpp":206:39))
     auto x11725 = args[0][12 * steps + ((cycle - 0) & mask)];
     assert(x11725 != Fp::invalid());
     // loc("top(recursion::Top)/mux(Mux)/poseidon2_store(recursion::Poseidon2Store)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":206:88))
@@ -36361,7 +36361,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
     auto x11748 = x11725 * x11747;
     // loc("zirgen/circuit/recursion/poseidon2.cpp":206:22)
     auto x11749 = x11724 + x11748;
-    // loc("top(recursion::Top)/code(recursion::Code)/inst(Mux)/poseidon_store(recursion::Poseidon2MemInst)/do_mont(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
+    // loc("top(recursion::Top)/code(recursion::Code)/inst(Mux)/poseidon2_store(recursion::Poseidon2MemInst)/do_mont(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
     auto x11750 = args[0][7 * steps + ((cycle - 0) & mask)];
     assert(x11750 != Fp::invalid());
     // loc("zirgen/circuit/recursion/poseidon2.cpp":208:13)

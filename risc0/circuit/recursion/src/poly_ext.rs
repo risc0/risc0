@@ -4858,7 +4858,7 @@ PolyExtStep::Mul(518, 4415), // zirgen/circuit/recursion/poseidon2.cpp:59
 PolyExtStep::Sub(695, 1108), // zirgen/circuit/recursion/wom.cpp:80
 PolyExtStep::AndEqz(402, 4428), // zirgen/circuit/recursion/wom.cpp:80
 PolyExtStep::Mul(696, 4415), // zirgen/circuit/recursion/poseidon2.cpp:59
-PolyExtStep::Get(36), // top(recursion::Top)/code(recursion::Code)/inst(Mux)/poseidon_load(recursion::Poseidon2MemInst)/inputs[7](Reg)(compiler/edsl/component.h:154)
+PolyExtStep::Get(36), // top(recursion::Top)/code(recursion::Code)/inst(Mux)/poseidon2_load(recursion::Poseidon2MemInst)/inputs[7](Reg)(compiler/edsl/component.h:154)
 PolyExtStep::Sub(700, 4430), // zirgen/circuit/recursion/wom.cpp:80
 PolyExtStep::AndEqz(403, 4431), // zirgen/circuit/recursion/wom.cpp:80
 PolyExtStep::Mul(701, 4415), // zirgen/circuit/recursion/poseidon2.cpp:59

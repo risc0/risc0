@@ -22,10 +22,7 @@ use risc0_zkp::{
         RootsOfUnity,
     },
     hal::{
-        cuda::{
-            BufferImpl as CudaBuffer, CudaHal, CudaHash, CudaHashPoseidon2,
-            CudaHashSha256,
-        },
+        cuda::{BufferImpl as CudaBuffer, CudaHal, CudaHash, CudaHashPoseidon2, CudaHashSha256},
         Buffer, CircuitHal,
     },
     INV_RATE,

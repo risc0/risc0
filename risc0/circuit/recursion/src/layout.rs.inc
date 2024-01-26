@@ -158,10 +158,10 @@ impl risc0_zkp::layout::Component for RecursionPoseidon2Inst {
 pub struct Mux {
     pub macro_ops: &'static RecursionMacroInst,
     pub micro_ops: &'static RecursionMicroInsts,
-    pub poseidon_full: &'static RecursionPoseidon2FullInst,
-    pub poseidon_load: &'static RecursionPoseidon2MemInst,
-    pub poseidon_partial: &'static RecursionPoseidon2Inst,
-    pub poseidon_store: &'static RecursionPoseidon2MemInst,
+    pub poseidon2_full: &'static RecursionPoseidon2FullInst,
+    pub poseidon2_load: &'static RecursionPoseidon2MemInst,
+    pub poseidon2_partial: &'static RecursionPoseidon2Inst,
+    pub poseidon2_store: &'static RecursionPoseidon2MemInst,
 }
 impl risc0_zkp::layout::Component for Mux {
     fn ty_name(&self) -> &'static str {
@@ -171,10 +171,10 @@ impl risc0_zkp::layout::Component for Mux {
     fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
         v.visit_component("macro_ops", self.macro_ops)?;
         v.visit_component("micro_ops", self.micro_ops)?;
-        v.visit_component("poseidon_full", self.poseidon_full)?;
-        v.visit_component("poseidon_load", self.poseidon_load)?;
-        v.visit_component("poseidon_partial", self.poseidon_partial)?;
-        v.visit_component("poseidon_store", self.poseidon_store)?;
+        v.visit_component("poseidon2_full", self.poseidon2_full)?;
+        v.visit_component("poseidon2_load", self.poseidon2_load)?;
+        v.visit_component("poseidon2_partial", self.poseidon2_partial)?;
+        v.visit_component("poseidon2_store", self.poseidon2_store)?;
         Ok(())
     }
 }
@@ -613,7 +613,7 @@ pub static LAYOUT: RecursionTop = RecursionTop {
                     },
                 ],
             },
-            poseidon_full: &RecursionPoseidon2FullInst {
+            poseidon2_full: &RecursionPoseidon2FullInst {
                 cycle: &OneHot0 {
                     c0: &CodeReg { offset: 7 },
                     c1: &CodeReg { offset: 8 },
@@ -621,7 +621,7 @@ pub static LAYOUT: RecursionTop = RecursionTop {
                     c3: &CodeReg { offset: 10 },
                 },
             },
-            poseidon_load: &RecursionPoseidon2MemInst {
+            poseidon2_load: &RecursionPoseidon2MemInst {
                 do_mont: &CodeReg { offset: 7 },
                 keep_state: &CodeReg { offset: 8 },
                 prep_full: &CodeReg { offset: 9 },
@@ -641,8 +641,8 @@ pub static LAYOUT: RecursionTop = RecursionTop {
                     &CodeReg { offset: 20 },
                 ],
             },
-            poseidon_partial: &RecursionPoseidon2Inst {},
-            poseidon_store: &RecursionPoseidon2MemInst {
+            poseidon2_partial: &RecursionPoseidon2Inst {},
+            poseidon2_store: &RecursionPoseidon2MemInst {
                 do_mont: &CodeReg { offset: 7 },
                 keep_state: &CodeReg { offset: 8 },
                 prep_full: &CodeReg { offset: 9 },

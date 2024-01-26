@@ -9699,7 +9699,7 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   MixState x4832{x4829.tot + x4829.mul * x4831, x4829.mul * (*mix)};
   // loc("zirgen/circuit/recursion/poseidon2.cpp":59:24)
   auto x4833 = x865 * x4812;
-  // loc("top(recursion::Top)/code(recursion::Code)/inst(Mux)/poseidon_load(recursion::Poseidon2MemInst)/inputs[7](Reg)"("./zirgen/compiler/edsl/component.h":154:27))
+  // loc("top(recursion::Top)/code(recursion::Code)/inst(Mux)/poseidon2_load(recursion::Poseidon2MemInst)/inputs[7](Reg)"("./zirgen/compiler/edsl/component.h":154:27))
   auto x4834 = args[0][20 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("zirgen/circuit/recursion/wom.cpp":80:3)
   auto x4835 = x873 - x4834;
