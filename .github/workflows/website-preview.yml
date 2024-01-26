@@ -42,7 +42,7 @@ jobs:
         run: yarn build
         working-directory: website
         env:
-          BASE_URL: /build_${{github.run_id}}/index.html/
+          BASE_URL: build_${{github.run_id}}/index.html/
           #BASE_URL: ${{ steps.baseurl.outputs.relative }}
 
       - name: (Internal PRs) Generate Website Preview
@@ -67,6 +67,5 @@ jobs:
           runner.os == 'Linux' &&
           github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
         run: |
-          ls -lht
           cd website
           aws s3 sync build/ s3://risc0-website-previews/build_${{github.run_id}}/
