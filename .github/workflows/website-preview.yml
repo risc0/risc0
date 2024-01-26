@@ -45,7 +45,8 @@ jobs:
           BASE_URL: /build/index.html/
           #BASE_URL: ${{ steps.baseurl.outputs.relative }}
 
-      - if: >
+      - name: (Internal PRs) Generate Website Preview
+        if: >
           runner.os == 'Linux' &&
           github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name
         uses: EndBug/pages-preview@v1
@@ -55,12 +56,14 @@ jobs:
           preview_repo: ${{ env.PREVIEW_REPO }}
           preview_token: ${{ secrets.PREVIEW_TOKEN }}
 
-      - if: >
+      - name: (External PRs) Create Bucket Folder for Build
+        if: >
           runner.os == 'Linux' &&
           github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
         run: aws s3api put-object --bucket risc0-website-previews --key build/ --content-length 0
 
-      - if: >
+      - name: (External PRs) Sync Build Folder to S3 Bucket
+        if: >
           runner.os == 'Linux' &&
           github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
         run: |
