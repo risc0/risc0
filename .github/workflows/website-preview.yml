@@ -50,7 +50,7 @@ jobs:
       #    preview_token: ${{ secrets.PREVIEW_TOKEN }}
 
       - if: >
-          #runner.os == 'Linux' &&
+          runner.os == 'Linux' &&
           github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name
         id: aws-creds
         uses: aws-actions/configure-aws-credentials@v4
@@ -60,7 +60,6 @@ jobs:
           output-credentials: true
 
       - if: >
-          #runner.os == 'Linux' &&
+          runner.os == 'Linux' &&
           github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name
         run: aws s3 sync build/ s3://risc0-website-previews
-        
