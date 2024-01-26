@@ -396,6 +396,7 @@ where
 {
     /// Unpruned value.
     Value(T),
+
     /// Pruned value, which is a hash [Digest] of the value.
     Pruned(Digest),
 }
