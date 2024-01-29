@@ -15,8 +15,8 @@ permissions:
 
 env:
   RISC0_TOOLCHAIN_VERSION: test-release-2
-  TAG: v0.20.0-rc.4
-  VERSION: "0.20.0-rc.4"
+  TAG: v0.20.0
+  VERSION: "0.20.0"
 
 jobs:
   release:
