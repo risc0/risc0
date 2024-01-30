@@ -108,14 +108,14 @@ Read the [article][zeth].
 [ethers]: https://github.com/ethers-io/ethers.js
 [examples]: ./examples.md
 [imageID]: /terminology#image-id
-[receipt]: ./developer-guide/receipts.md
+[receipt]: ./receipts.md
 [ELF binary]: /terminology#elf-binary
 [execution trace]: /terminology#execution-trace
 [executor]: /terminology#executor
 [feature flags]: https://github.com/risc0/risc0#feature-flags
-[guest program]: ./developer-guide/guest-code-101.md
+[guest program]: ./guest-code-101.md
 [host]: /terminology#host-program
-[host program]: ./developer-guide/host-code-101.md
+[host program]: ./host-code-101.md
 [journal]: /terminology#journal
 [json]: https://github.com/risc0/risc0/tree/main/examples/json
 [prove]: /terminology#validity-proof

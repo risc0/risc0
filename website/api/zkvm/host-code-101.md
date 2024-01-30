@@ -1,10 +1,11 @@
 # Host Code 101
 
-In a [zkVM application][zkVM], the [host] is the machine that is running the zkVM. The
-host is an untrusted agent that sets up the zkVM environment and handles
-inputs/outputs during execution.
+In a [zkVM application][zkVM], the [host] is the machine that is running the
+zkVM. The host is an untrusted agent that sets up the zkVM environment and
+handles inputs/outputs during execution.
 
-> **Note:** _If you're building for [Bonsai], you don't need to write host code._
+> **Note:** _If you're building for [Bonsai], you don't need to write host
+> code._
 
 This page serves as an introduction to writing RISC Zero host code, to help you
 get started building applications for the [zkVM].
@@ -19,7 +20,7 @@ get started building applications for the [zkVM].
 In a zkVM application, the host is responsible for constructing and running the
 [Executor] and the [Prover].
 
-![From Guest Code to Receipt](/diagrams/from-rust-to-receipt.png)
+![From Guest Code to Receipt][from-rust-to-receipt]
 
 In more detail, the host will:
 
@@ -72,18 +73,19 @@ For more information on passing and verifying receipts, check out our page on
 
 ## Happy Building!
 
-Hopefully, this guide and the [zkVM Quick Start][quickstart] page will be sufficient for you
-to build your first [zkVM application][zkVM]!
+Hopefully, this guide and the [zkVM Quick Start][quickstart] page will be
+sufficient for you to build your first [zkVM application][zkVM]!
 
 If you run into problems, don't be a stranger! You can file an issue on [these
 docs] or the [examples], and we're happy to answer questions on [Discord].
 
-[Bonsai]: ../../bonsai/bonsai-overview.md
+[Bonsai]: ../bonsai/bonsai-overview.md
 [Discord]: https://discord.gg/risczero
-[examples]: ../examples.md
+[examples]: ./examples.md
 [execute]: /terminology#execute
 [executor]: /terminology#executor
 [executor-env]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.ExecutorEnv.html
+[from-rust-to-receipt]: /diagrams/from-rust-to-receipt.png
 [guest]: /terminology#guest
 [guest program]: /terminology#guest-program
 [host]: /terminology#host
@@ -92,11 +94,11 @@ docs] or the [examples], and we're happy to answer questions on [Discord].
 [method]: /terminology#method
 [prove]: /terminology#prove
 [Prover]: /terminology#prover
-[quickstart]: ../quickstart.md
+[quickstart]: ./quickstart.md
 [receipt]: /terminology#receipt
 [Receipts]: ./receipts.md
 [receipt-verify]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Receipt.html#method.verify
 [risc0-zkvm]: https://docs.rs/risc0-zkvm
-[tutorial]: ../tutorials/hello-world.md
+[tutorial]: ./tutorials/hello-world.md
 [verifies]: /terminology#verify
-[zkVM]: ../zkvm_overview.md
+[zkVM]: ./zkvm_overview.md

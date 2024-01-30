@@ -3,16 +3,16 @@
 In a [zkVM application][zkVM], the [guest code] is the code that will be
 executed and proven by the zkVM.
 
-![From Guest Code to Receipt](/diagrams/from-rust-to-receipt.png)
+![From Guest Code to Receipt][from-rust-to-receipt]
 
 This page serves as an introduction to writing RISC Zero [guest code], to help
 you get started building applications for [Bonsai] and the [zkVM].
 
 - For a guide to writing and running your first guest code, check out our [zkVM
-  Quick Start].
-- For a simple example, check out the [Hello World demo][hello-world], where the
-  [guest] receives two inputs from the [host] and commits their product to the
-  [journal].
+  Quick Start][quickstart].
+- For a simple example, check out the [Hello World tutorial][hello-world], where
+  the [guest] receives two inputs from the [host] and commits their product to
+  the [journal].
 
 The full functionality of the guest is documented in the [`guest`
 module][risc0-zkvm-guest] of the [`risc0-zkvm` Rust crate][risc0-zkvm].
@@ -52,8 +52,7 @@ list, but include some highlights here:
   [`env::log`]
 
 For more information on optimization & performance, see our pages on
-[Cryptography Acceleration](acceleration.md) and
-[Benchmarking](../benchmarks.md).
+[Cryptography Acceleration][acceleration] and [Benchmarking][benchmarks].
 
 ## Boilerplate before `main()`
 
@@ -82,7 +81,9 @@ sufficient for you to build your first [zkVM application][zkVM]!
 If you run into problems, don't be a stranger! You can file an issue on [these
 docs] or the [examples], and we're happy to answer questions on [Discord].
 
-[Bonsai]: ../../bonsai/bonsai-overview.md
+[acceleration]: ./acceleration.md
+[benchmarks]: ./benchmarks.md
+[Bonsai]: ../bonsai/bonsai-overview.md
 [Discord]: https://discord.gg/risczero
 [`env::read`]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest/env/fn.read.html
 [`env::read_slice`]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest/env/fn.read_slice.html
@@ -95,14 +96,15 @@ docs] or the [examples], and we're happy to answer questions on [Discord].
 [`env::stderr`]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest/env/fn.stderr.html
 [`env::commit`]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest/env/fn.commit.html
 [`env::commit_slice`]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest/env/fn.commit_slice.html
-[examples]: https://github.com/risc0/risc0/tree/v0.18.0/examples
+[examples]: ./examples.md
+[from-rust-to-receipt]: /diagrams/from-rust-to-receipt.png
 [guest]: /terminology#guest
 [guest code]: /terminology#guest
-[hello-world]: https://github.com/risc0/risc0/tree/main/examples/hello-world
+[hello-world]: ./tutorials/hello-world.md
 [host]: /terminology#host
 [journal]: /terminology#journal
-[quickstart]: ../quickstart.md
+[quickstart]: ./quickstart.md
 [risc0-zkvm]: https://docs.rs/risc0-zkvm
 [risc0-zkvm-guest]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest
-[template]: https://github.com/risc0/risc0/tree/v0.18.0/templates/rust-starter
-[zkVM]: ../zkvm_overview.md
+[template]: https://github.com/risc0/risc0/tree/main/templates/rust-starter
+[zkVM]: ./zkvm_overview.md

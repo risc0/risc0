@@ -1,8 +1,3 @@
----
-sidebar_position: 5
-slug: /terminology
----
-
 # Key Terminology
 
 ### Assumption

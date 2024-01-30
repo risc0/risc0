@@ -106,11 +106,11 @@ proportional to the number of cycles and segments used.
 >
 > _That's all it takes to build and run a minimal RISC Zero application._
 
-[Bonsai]: ../bonsai/quickstart
+[Bonsai]: ../bonsai/quickstart.md
 [dev-mode]: ./dev-mode.md
 [feature flags]: https://github.com/risc0/risc0#feature-flags
 [guest]: /terminology#guest-program
-[hello-world]: tutorials/hello-world
+[hello-world]: ./tutorials/hello-world.md
 [host]: /terminology#host-program
 [install Rust]: https://doc.rust-lang.org/cargo/getting-started/installation.html
 [journal]: /terminology#journal
