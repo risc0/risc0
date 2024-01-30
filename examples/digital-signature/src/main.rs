@@ -42,6 +42,7 @@ fn main() {
     println!("\tmessage: {:?}", &signing_receipt.get_message().unwrap());
     println!("\tidentity: {:?}", &signing_receipt.get_identity().unwrap());
     println!("Integrity Checks:");
+
     let message_hash = &signing_receipt.get_message().unwrap();
     let expected_message_hash = Sha256::digest(args.message);
     if message_hash.as_bytes() != expected_message_hash.as_slice() {
@@ -49,6 +50,16 @@ fn main() {
         std::process::exit(1);
     }
     println!("\tmessage: valid");
+
+    let identity = &signing_receipt.get_identity().unwrap();
+    let expected_identity = Sha256::digest(Sha256::digest(args.passphrase));
+    if identity.as_bytes() != expected_identity.as_slice() {
+        tracing::error!("Identity commitment does not match given identity!");
+        std::process::exit(1);
+    }
+
+    println!("\tidentity: valid");
+
     if signing_receipt.verify().is_err() {
         tracing::error!("Receipt is invalid!");
         tracing::error!("{}", signing_receipt.verify().unwrap_err());
@@ -68,6 +79,15 @@ mod tests {
     #[test]
     fn main() {
         let signing_receipt = sign(&PASSPHRASE, &MESSAGE).unwrap();
+
+        let identity = signing_receipt.get_identity().unwrap();
+        let expected_identity = Sha256::digest(Sha256::digest(PASSPHRASE));
+        assert_eq!(
+            identity.as_bytes(),
+            expected_identity.as_slice(),
+            "Identity commitment does not match given identity!"
+        );
+
         let message_hash = signing_receipt.get_message().unwrap();
         let expected_message_hash = Sha256::digest(MESSAGE);
         assert_eq!(
@@ -75,6 +95,7 @@ mod tests {
             expected_message_hash.as_slice(),
             "Message commitment does not match given message!"
         );
+
         assert!(
             signing_receipt.verify().is_ok(),
             "Receipt is invalid! {}",
