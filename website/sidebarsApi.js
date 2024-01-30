@@ -71,11 +71,6 @@ export default {
           id: "zkvm/dev-mode",
         },
         {
-          type: "link",
-          label: "API Reference Docs",
-          href: "https://docs.rs/risc0-zkvm/",
-        },
-        {
           type: "doc",
           label: "Installation",
           id: "zkvm/install",
@@ -83,42 +78,42 @@ export default {
         {
           type: "doc",
           label: "Rust Resources",
-          id: "zkvm/developer-guide/rust-resources",
+          id: "zkvm/rust-resources",
         },
         {
           type: "doc",
           label: "Guest Code 101",
-          id: "zkvm/developer-guide/guest-code-101",
+          id: "zkvm/guest-code-101",
         },
         {
           type: "doc",
           label: "Host Code 101",
-          id: "zkvm/developer-guide/host-code-101",
+          id: "zkvm/host-code-101",
         },
         {
           type: "doc",
           label: "Receipts",
-          id: "zkvm/developer-guide/receipts",
+          id: "zkvm/receipts",
         },
         {
           type: "doc",
           label: "Guest Optimization",
-          id: "zkvm/developer-guide/optimization",
+          id: "zkvm/optimization",
         },
         {
           type: "doc",
           label: "Cryptography Acceleration",
-          id: "zkvm/developer-guide/acceleration",
+          id: "zkvm/acceleration",
         },
         {
           type: "doc",
           label: "Profiling",
-          id: "zkvm/developer-guide/profiling",
+          id: "zkvm/profiling",
         },
         {
           type: "doc",
           label: "zkVM technical specification",
-          id: "zkvm/developer-guide/zkvm-specification",
+          id: "zkvm/zkvm-specification",
         },
         {
           type: "doc",
@@ -145,6 +140,11 @@ export default {
           type: "doc",
           label: "Examples",
           id: "zkvm/examples",
+        },
+        {
+          type: "link",
+          label: "API Reference Docs",
+          href: "https://docs.rs/risc0-zkvm/",
         },
         {
           type: "link",
