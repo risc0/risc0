@@ -118,7 +118,7 @@ impl Prover {
                             output: None.into(),
                         },
                     },
-                    journal: session.journal,
+                    journal: session.public_journal,
                 };
                 let receipt_bytes = bincode::serialize(&receipt)?;
                 self.storage

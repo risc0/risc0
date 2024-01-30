@@ -19,7 +19,7 @@ use anyhow::{ensure, Result};
 use super::{Executor, Prover, ProverOpts};
 use crate::{
     compute_image_id, host::api::AssetRequest, sha::Digestible, ApiClient, Asset, ExecutorEnv,
-    Receipt, SessionInfo, VerifierContext,
+    ProveResult, SessionInfo, VerifierContext,
 };
 
 /// An implementation of a [Prover] that runs proof workloads via an external
@@ -46,7 +46,7 @@ impl Prover for ExternalProver {
         ctx: &VerifierContext,
         elf: &[u8],
         opts: &ProverOpts,
-    ) -> Result<Receipt> {
+    ) -> Result<ProveResult> {
         tracing::debug!("Launching {}", &self.r0vm_path.to_string_lossy());
 
         let image_id = compute_image_id(elf)?;
@@ -65,7 +65,7 @@ impl Prover for ExternalProver {
             receipt.verify_with_context(ctx, image_id)?;
         }
 
-        Ok(receipt)
+        todo!("return ProveResult")
     }
 
     fn get_name(&self) -> String {

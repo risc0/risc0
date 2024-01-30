@@ -16,7 +16,7 @@ use anyhow::Result;
 
 use super::{Executor, Prover, ProverOpts};
 use crate::{
-    get_prover_server, ExecutorEnv, ExecutorImpl, Receipt, SegmentInfo, SessionInfo,
+    get_prover_server, ExecutorEnv, ExecutorImpl, ProveResult,  SegmentInfo, SessionInfo,
     VerifierContext,
 };
 
@@ -42,8 +42,8 @@ impl Prover for LocalProver {
         ctx: &VerifierContext,
         elf: &[u8],
         opts: &ProverOpts,
-    ) -> Result<Receipt> {
-        get_prover_server(opts)?.prove_with_ctx(env, ctx, elf)
+    ) -> Result<ProveResult> {
+        Ok(get_prover_server(opts)?.prove_with_ctx(env, ctx, elf)?)
     }
 
     fn get_name(&self) -> String {
@@ -65,7 +65,8 @@ impl Executor for LocalProver {
         }
         Ok(SessionInfo {
             segments,
-            journal: session.journal.unwrap_or_default().into(),
+            public_journal: session.journal.unwrap_or_default().into(),
+            private_journal: session.private_journal.into(),
             exit_code: session.exit_code,
         })
     }

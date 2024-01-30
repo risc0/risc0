@@ -1001,6 +1001,21 @@ fn aligned_alloc() {
 }
 
 #[test]
+fn private_output() {
+    let env = ExecutorEnv::builder()
+        .write(&MultiTestSpec::PrivateOutput)
+        .unwrap()
+        .build()
+        .unwrap();
+    let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
+        .unwrap()
+        .run()
+        .unwrap();
+    assert_eq!(session.private_output, b"Hello, world!");
+    assert_eq!(session.exit_code, ExitCode::Halted(0));
+}
+
+#[test]
 #[should_panic(expected = "cycle count too large")]
 fn too_many_sha() {
     run_test(MultiTestSpec::TooManySha);

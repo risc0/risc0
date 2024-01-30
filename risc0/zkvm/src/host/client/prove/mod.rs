@@ -23,7 +23,7 @@ use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
 use self::{bonsai::BonsaiProver, external::ExternalProver};
-use crate::{is_dev_mode, ExecutorEnv, Receipt, SessionInfo, VerifierContext};
+use crate::{is_dev_mode, ExecutorEnv, Receipt, Session, SessionInfo, VerifierContext};
 
 /// A Prover can execute a given ELF binary and produce a
 /// [Receipt] that can be used to verify correct computation.
@@ -61,7 +61,7 @@ pub trait Prover {
     fn get_name(&self) -> String;
 
     /// Prove zkVM execution starting from the specified ELF binary.
-    fn prove(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<Receipt> {
+    fn prove(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<ProveResult> {
         self.prove_with_ctx(
             env,
             &VerifierContext::default(),
@@ -78,7 +78,7 @@ pub trait Prover {
         ctx: &VerifierContext,
         elf: &[u8],
         opts: &ProverOpts,
-    ) -> Result<Receipt>;
+    ) -> Result<ProveResult>;
 }
 
 /// An Executor can execute a given ELF binary.
@@ -198,4 +198,41 @@ pub(crate) fn get_r0vm_path() -> PathBuf {
     std::env::var("RISC0_SERVER_PATH")
         .unwrap_or("r0vm".to_string())
         .into()
+}
+
+/// TODO: Write documentation.
+#[derive(Clone, Debug, Deserialize, Serialize)]
+#[cfg_attr(test, derive(PartialEq))]
+pub struct ProveResult {
+    /// TODO: Write documentation.
+    pub receipt: Receipt,
+    /// TODO: Write documentation.
+    pub session_info: SessionInfo,
+}
+
+impl ProveResult {
+    fn new(receipt: Receipt, session_info: SessionInfo) -> Self {
+        Self {
+            receipt,
+            session_info,
+        }
+    }
+}
+
+impl From<(Receipt, SessionInfo)> for ProveResult {
+    fn from((receipt, session_info): (Receipt, SessionInfo)) -> Self {
+        Self::new(receipt, session_info)
+    }
+}
+
+impl From<(Receipt, &Session)> for ProveResult {
+    fn from((receipt, session): (Receipt, &Session)) -> Self {
+        (receipt, session.get_info()).into()
+    }
+}
+
+impl From<(Receipt, Session)> for ProveResult {
+    fn from((receipt, session): (Receipt, Session)) -> Self {
+        (receipt, &session).into()
+    }
 }

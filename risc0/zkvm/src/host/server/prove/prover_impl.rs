@@ -33,7 +33,7 @@ use crate::{
         CIRCUIT,
     },
     sha::Digestible,
-    Loader, Receipt, Segment, Session, VerifierContext,
+    Loader, ProveResult, Receipt, Segment, Session, VerifierContext,
 };
 
 /// An implementation of a Prover that runs locally.
@@ -65,7 +65,7 @@ where
     H: Hal<Field = BabyBear, Elem = Elem, ExtElem = ExtElem>,
     C: CircuitHal<H>,
 {
-    fn prove_session(&self, ctx: &VerifierContext, session: &Session) -> Result<Receipt> {
+    fn prove_session(&self, ctx: &VerifierContext, session: &Session) -> Result<ProveResult> {
         tracing::info!(
             "prove_session: {}, exit_code = {:?}, journal = {:?}",
             self.name,
@@ -135,7 +135,12 @@ where
             );
         }
 
-        Ok(receipt)
+        let prove_result = ProveResult {
+            receipt,
+            session_info: session.get_info(),
+        };
+
+        Ok(prove_result)
     }
 
     fn prove_segment(&self, ctx: &VerifierContext, segment: &Segment) -> Result<SegmentReceipt> {

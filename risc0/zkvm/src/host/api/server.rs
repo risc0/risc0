@@ -31,8 +31,8 @@ use crate::{
         recursion::SuccinctReceipt,
     },
     receipt_claim::{MaybePruned, ReceiptClaim},
-    ExecutorEnv, ExecutorImpl, ProverOpts, Receipt, Segment, SegmentReceipt, SegmentRef,
-    TraceEvent, VerifierContext,
+    ExecutorEnv, ExecutorImpl, ProveResult, ProverOpts, Receipt, Segment, SegmentReceipt,
+    SegmentRef, TraceEvent, VerifierContext,
 };
 
 /// A server implementation for handling requests by clients of the zkVM.
@@ -355,7 +355,7 @@ impl Server {
             let opts: ProverOpts = request.opts.ok_or(malformed_err())?.into();
             let prover = get_prover_server(&opts)?;
             let ctx = VerifierContext::default();
-            let receipt = prover.prove_with_ctx(env, &ctx, &bytes)?;
+            let ProveResult { receipt, .. } = prover.prove_with_ctx(env, &ctx, &bytes)?;
 
             let receipt_pb: pb::core::Receipt = receipt.into();
             let receipt_bytes = receipt_pb.encode_to_vec();

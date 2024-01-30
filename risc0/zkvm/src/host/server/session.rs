@@ -28,7 +28,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     host::server::exec::executor::SyscallRecord, sha::Digest, Assumption, Assumptions, ExitCode,
-    Journal, Output, ReceiptClaim,
+    Journal, Output, ReceiptClaim, SegmentInfo, SessionInfo,
 };
 
 #[derive(Clone, Default, Serialize, Deserialize, Debug)]
@@ -221,6 +221,23 @@ impl Session {
         })
     }
 
+    /// TODO: write doc
+    pub fn get_info(&self) -> SessionInfo {
+        SessionInfo {
+            segments: self
+                .segments
+                .iter()
+                .map(|segment_ref| {
+                    let segment = segment_ref.resolve().unwrap();
+                    segment.get_info()
+                })
+                .collect(),
+            public_journal: self.journal.clone().unwrap_or_default(),
+            private_journal: self.private_journal.clone(),
+            exit_code: self.exit_code,
+        }
+    }
+
     /// Log cycle information for this [Session].
     ///
     /// This logs the total and user cycles for this [Session] at the INFO level.
@@ -294,6 +311,14 @@ impl Segment {
             input: Digest::ZERO,
             output: self.output.clone().into(),
         })
+    }
+
+    /// TODO: write doc
+    pub fn get_info(&self) -> SegmentInfo {
+        SegmentInfo {
+            po2: self.po2,
+            cycles: self.cycles,
+        }
     }
 }
 

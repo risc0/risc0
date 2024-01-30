@@ -482,7 +482,9 @@ impl Client {
                             return match session.session {
                                 Some(session) => Ok(SessionInfo {
                                     segments,
-                                    journal: Journal::new(session.journal),
+                                    public_journal: Journal::new(session.journal),
+                                    // TODO: private_journal
+                                    private_journal: Default::default(),
                                     exit_code: session
                                         .exit_code
                                         .ok_or(malformed_err())?

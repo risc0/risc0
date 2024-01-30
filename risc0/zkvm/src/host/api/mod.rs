@@ -37,8 +37,9 @@ use std::{
 use anyhow::{anyhow, Context, Result};
 use bytes::{Buf, BufMut, Bytes};
 use prost::Message;
+use serde::{Deserialize, Serialize};
 
-use crate::{ExitCode, Journal};
+use crate::{ExitCode, Journal, Segment};
 
 mod pb {
     pub(crate) mod api {
@@ -290,20 +291,25 @@ pub enum AssetRequest {
 }
 
 /// Provides information about the result of execution.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
+#[cfg_attr(test, derive(PartialEq))]
 pub struct SessionInfo {
     /// The number of user cycles for each segment.
     pub segments: Vec<SegmentInfo>,
 
     /// The data publicly committed by the guest program.
-    pub journal: Journal,
+    pub public_journal: Journal,
+
+    /// The data privately send to the host.
+    pub private_journal: Journal,
 
     /// The [ExitCode] of the session.
     pub exit_code: ExitCode,
 }
 
 /// Provides information about a segment of execution.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
+#[cfg_attr(test, derive(PartialEq))]
 pub struct SegmentInfo {
     /// The number of cycles used for proving in powers of 2.
     pub po2: u32,
@@ -311,6 +317,12 @@ pub struct SegmentInfo {
     /// The number of user cycles without any overhead for continuations or po2
     /// padding.
     pub cycles: u32,
+}
+
+impl From<Segment> for SegmentInfo {
+    fn from(segment: Segment) -> Self {
+        segment.get_info()
+    }
 }
 
 impl Asset {

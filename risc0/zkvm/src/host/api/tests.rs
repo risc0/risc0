@@ -231,7 +231,10 @@ fn lift_join_identity() {
     }
     client.identity_p254(opts, rollup.clone().try_into().unwrap());
 
-    let rollup_receipt = Receipt::new(InnerReceipt::Succinct(rollup), session.journal.bytes.into());
+    let rollup_receipt = Receipt::new(
+        InnerReceipt::Succinct(rollup),
+        session.public_journal.bytes.into(),
+    );
     rollup_receipt.verify(MULTI_TEST_ID).unwrap();
 }
 
@@ -300,7 +303,7 @@ fn lift_resolve() {
     // Wrap into a Receipt and verify
     let receipt = Receipt::new(
         InnerReceipt::Succinct(succint_receipt),
-        composition_session.journal.bytes,
+        composition_session.public_journal.bytes,
     );
     receipt.verify(MULTI_TEST_ID).unwrap();
 }

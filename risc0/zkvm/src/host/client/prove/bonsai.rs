@@ -18,7 +18,10 @@ use anyhow::{anyhow, bail, ensure, Result};
 use bonsai_sdk::alpha::Client;
 
 use super::Prover;
-use crate::{compute_image_id, sha::Digestible, ExecutorEnv, ProverOpts, Receipt, VerifierContext};
+use crate::{
+    compute_image_id, sha::Digestible, ExecutorEnv, ProveResult, ProverOpts,
+    VerifierContext,
+};
 
 /// An implementation of a [Prover] that runs proof workloads via Bonsai.
 ///
@@ -48,7 +51,7 @@ impl Prover for BonsaiProver {
         ctx: &VerifierContext,
         elf: &[u8],
         opts: &ProverOpts,
-    ) -> Result<Receipt> {
+    ) -> Result<ProveResult> {
         let client = Client::from_env(crate::VERSION)?;
 
         // Compute the ImageID and upload the ELF binary
@@ -85,26 +88,26 @@ impl Prover for BonsaiProver {
                 continue;
             }
             if res.status == "SUCCEEDED" {
-                // Download the receipt, containing the output
-                let receipt_url = res
+                // Download the prove result, containing the output
+                let prove_result_url = res
                     .receipt_url
                     .ok_or(anyhow!("API error, missing receipt on completed session"))?;
 
-                let receipt_buf = client.download(&receipt_url)?;
-                let receipt: Receipt = bincode::deserialize(&receipt_buf)?;
+                let prove_result_buf = client.download(&prove_result_url)?;
+                let prove_result: ProveResult = bincode::deserialize(&prove_result_buf)?;
 
                 if opts.prove_guest_errors {
-                    receipt.verify_integrity_with_context(ctx)?;
+                    prove_result.receipt.verify_integrity_with_context(ctx)?;
                     ensure!(
-                        receipt.get_claim()?.pre.digest() == image_id,
+                        prove_result.receipt.get_claim()?.pre.digest() == image_id,
                         "received unexpected image ID: expected {}, found {}",
                         hex::encode(image_id),
-                        hex::encode(receipt.get_claim()?.pre.digest())
+                        hex::encode(prove_result.receipt.get_claim()?.pre.digest())
                     );
                 } else {
-                    receipt.verify_with_context(ctx, image_id)?;
+                    prove_result.receipt.verify_with_context(ctx, image_id)?;
                 }
-                return Ok(receipt);
+                return Ok(prove_result);
             } else {
                 bail!("Bonsai prover workflow exited: {}", res.status);
             }
