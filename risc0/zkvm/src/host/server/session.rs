@@ -54,6 +54,9 @@ pub struct Session {
     /// The data publicly committed by the guest program.
     pub journal: Option<Journal>,
 
+    /// The data privately sent to the host.
+    pub private_journal: Journal,
+
     /// The [ExitCode] of the session.
     pub exit_code: ExitCode,
 
@@ -140,6 +143,7 @@ impl Session {
     pub fn new(
         segments: Vec<Box<dyn SegmentRef>>,
         journal: Option<Vec<u8>>,
+        private_journal: Vec<u8>,
         exit_code: ExitCode,
         post_image: MemoryImage,
         assumptions: Vec<Assumption>,
@@ -151,6 +155,7 @@ impl Session {
         Self {
             segments,
             journal: journal.map(|x| Journal::new(x)),
+            private_journal: Journal::new(private_journal),
             exit_code,
             post_image,
             assumptions,

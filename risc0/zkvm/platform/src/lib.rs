@@ -39,4 +39,5 @@ pub mod fileno {
     pub const STDOUT: u32 = 1;
     pub const STDERR: u32 = 2;
     pub const JOURNAL: u32 = 3;
+    pub const PRIVATE_JOURNAL: u32 = 4;
 }

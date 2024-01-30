@@ -317,22 +317,22 @@ pub fn read_slice<T: Pod>(slice: &mut [T]) {
     stdin().read_slice(slice)
 }
 
-/// Serialize the given data and write it to the STDOUT of the zkVM.
+/// Serialize the given data and write it to the [PRIVATE_JOURNAL][fileno::PRIVATE_JOURNAL] of the zkVM.
 ///
 /// This is available to the host as the private output on the prover.
 /// Some implementations, such as [risc0-r0vm] will also write the data to
-/// the host's stdout file descriptor. It is not included in the receipt.
+/// the host's private_journal file descriptor. It is not included in the receipt.
 pub fn write<T: Serialize>(data: &T) {
-    stdout().write(data)
+    private_journal().write(data)
 }
 
-/// Write the given slice to the STDOUT of the zkVM.
+/// Write the given slice to the [PRIVATE_JOURNAL][fileno::PRIVATE_JOURNAL] of the zkVM.
 ///
 /// This is available to the host as the private output on the prover.
 /// Some implementations, such as [risc0-r0vm] will also write the data to
-/// the host's stdout file descriptor. It is not included in the receipt.
+/// the host's private_journal file descriptor. It is not included in the receipt.
 pub fn write_slice<T: Pod>(slice: &[T]) {
-    stdout().write_slice(slice);
+    private_journal().write_slice(slice);
 }
 
 /// Serialize the given data and commit it to the journal.
@@ -380,6 +380,13 @@ pub fn stderr() -> FdWriter<impl for<'a> Fn(&'a [u8])> {
 /// Return a writer for the JOURNAL.
 pub fn journal() -> FdWriter<impl for<'a> Fn(&'a [u8])> {
     FdWriter::new(fileno::JOURNAL, |bytes| {
+        unsafe { HASHER.as_mut().unwrap_unchecked().update(bytes) };
+    })
+}
+
+/// Return a writer for the PRIVATE_JOURNAL.
+pub fn private_journal() -> FdWriter<impl for<'a> Fn(&'a [u8])> {
+    FdWriter::new(fileno::PRIVATE_JOURNAL, |bytes| {
         unsafe { HASHER.as_mut().unwrap_unchecked().update(bytes) };
     })
 }

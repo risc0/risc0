@@ -272,6 +272,12 @@ impl<'a> ExecutorImpl<'a> {
             .borrow_mut()
             .with_write_fd(fileno::JOURNAL, journal.clone());
 
+        let private_journal = Journal::default();
+        self.env
+            .posix_io
+            .borrow_mut()
+            .with_write_fd(fileno::PRIVATE_JOURNAL, private_journal.clone());
+
         let mut run_loop = || -> Result<(ExitCode, Segment, MemoryImage, SessionCycles)> {
             let mut session_cycles = SessionCycles::default();
 
@@ -401,9 +407,12 @@ impl<'a> ExecutorImpl<'a> {
             std::fs::write(self.env.pprof_out.as_ref().unwrap(), report)?;
         }
 
+        let private_session_journal = private_journal.buf.take();
+
         let session = Session::new(
             mem::take(&mut self.segments),
             session_journal,
+            private_session_journal,
             exit_code,
             post_image,
             assumptions,
