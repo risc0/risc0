@@ -303,7 +303,7 @@ impl Client {
     ///
     /// # Example:
     ///
-    /// ```
+    /// ```no_run
     /// use bonsai_sdk::alpha as bonsai_sdk;
     /// bonsai_sdk::Client::from_env(risc0_zkvm::VERSION)
     ///     .expect("Failed to construct sdk client");
