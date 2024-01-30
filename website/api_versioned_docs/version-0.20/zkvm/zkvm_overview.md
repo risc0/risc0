@@ -102,7 +102,7 @@ Read the [article][zeth].
 [benchmarks]: ./benchmarks.md
 [Bonsai]: ../bonsai/bonsai-overview.md
 [cargo]: https://doc.rust-lang.org/cargo/index.html
-[chess]: https://github.com/risc0/risc0/tree/main/examples/chess#zk-checkmate
+[chess]: https://github.com/risc0/risc0/tree/release-0.20/examples/chess#zk-checkmate
 [continuations]: https://www.risczero.com/news/continuations
 [ethers]: https://github.com/ethers-io/ethers.js
 [examples]: ./examples.md
@@ -116,7 +116,7 @@ Read the [article][zeth].
 [host]: /terminology#host-program
 [host program]: ./host-code-101.md
 [journal]: /terminology#journal
-[json]: https://github.com/risc0/risc0/tree/main/examples/json
+[json]: https://github.com/risc0/risc0/tree/release-0.20/examples/json
 [prove]: /terminology#validity-proof
 [proofs]: /terminology#validity-proof
 [prover]: /terminology#prover
