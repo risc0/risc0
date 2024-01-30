@@ -39,7 +39,7 @@ use bytes::{Buf, BufMut, Bytes};
 use prost::Message;
 use serde::{Deserialize, Serialize};
 
-use crate::{ExitCode, Journal, Segment};
+use crate::{ExitCode, Journal};
 
 mod pb {
     pub(crate) mod api {
@@ -317,12 +317,6 @@ pub struct SegmentInfo {
     /// The number of user cycles without any overhead for continuations or po2
     /// padding.
     pub cycles: u32,
-}
-
-impl From<Segment> for SegmentInfo {
-    fn from(segment: Segment) -> Self {
-        segment.get_info()
-    }
 }
 
 impl Asset {

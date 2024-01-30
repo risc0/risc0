@@ -58,8 +58,9 @@ impl ProverServer for DevModeProver {
             InnerReceipt::Fake { claim },
             session.journal.clone().unwrap_or_default().bytes,
         );
+        let session_info = session.get_info();
 
-        Ok((receipt, session).into())
+        Ok(ProveResult::new(receipt, session_info))
     }
 
     fn prove_segment(&self, _ctx: &VerifierContext, _segment: &Segment) -> Result<SegmentReceipt> {

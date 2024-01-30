@@ -23,7 +23,7 @@ use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
 use self::{bonsai::BonsaiProver, external::ExternalProver};
-use crate::{is_dev_mode, ExecutorEnv, Receipt, Session, SessionInfo, VerifierContext};
+use crate::{is_dev_mode, ExecutorEnv, Receipt, SessionInfo, VerifierContext};
 
 /// A Prover can execute a given ELF binary and produce a
 /// [Receipt] that can be used to verify correct computation.
@@ -211,7 +211,8 @@ pub struct ProveResult {
 }
 
 impl ProveResult {
-    fn new(receipt: Receipt, session_info: SessionInfo) -> Self {
+    /// TODO: write docs
+    pub fn new(receipt: Receipt, session_info: SessionInfo) -> Self {
         Self {
             receipt,
             session_info,
@@ -222,17 +223,5 @@ impl ProveResult {
 impl From<(Receipt, SessionInfo)> for ProveResult {
     fn from((receipt, session_info): (Receipt, SessionInfo)) -> Self {
         Self::new(receipt, session_info)
-    }
-}
-
-impl From<(Receipt, &Session)> for ProveResult {
-    fn from((receipt, session): (Receipt, &Session)) -> Self {
-        (receipt, session.get_info()).into()
-    }
-}
-
-impl From<(Receipt, Session)> for ProveResult {
-    fn from((receipt, session): (Receipt, Session)) -> Self {
-        (receipt, &session).into()
     }
 }
