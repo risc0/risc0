@@ -1,7 +1,3 @@
----
-sidebar_position: 3
----
-
 # STARK by Hand
 
 > When the RISC Zero [zkVM](/api/zkvm) executes, it generates a [receipt](https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Receipt.html) that allows third-parties to authenticate the validity of the execution.

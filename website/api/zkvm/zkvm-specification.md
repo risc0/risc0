@@ -1,10 +1,10 @@
 # zkVM Technical Specification
 
-Like many other execution environments, the zkVM has unique characteristics
-that developers may find helpful when programming. The following description of
-zkVM characteristics assume familiarity with systems programming concepts. Those
-who are not familiar may want to consult additional resources such as
-[OsDevWiki] to understand the terminology.
+Like many other execution environments, the zkVM has unique characteristics that
+developers may find helpful when programming. The following description of zkVM
+characteristics assume familiarity with systems programming concepts. Those who
+are not familiar may want to consult additional resources such as [OsDevWiki] to
+understand the terminology.
 
 ## Introduction
 
@@ -48,9 +48,9 @@ The following table summarizes the layout of the zkVM memory
 
 ## zkVM Memory Model
 
-The zkVM executes instructions in order; in other
-words, instructions are never reordered and the zkVM's memory model is
-sequentially consistent. Unlike many processors, the zkVM has no notion of
-traditional memory caches and cache-coherency protocols implemented in the zkVM.
+The zkVM executes instructions in order; in other words, instructions are never
+reordered and the zkVM's memory model is sequentially consistent. Unlike many
+processors, the zkVM has no notion of traditional memory caches and
+cache-coherency protocols implemented in the zkVM.
 
 [OsDevWiki]: https://wiki.osdev.org/Main_Page
