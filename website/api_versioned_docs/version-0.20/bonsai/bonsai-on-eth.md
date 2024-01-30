@@ -92,7 +92,7 @@ While Bonsai is in alpha, you will deploy this contract as part of your applicat
 The [Bonsai SDK] provides support for sending requests to the Bonsai proving service.
 You may also want to check out our [Bonsai Quick Start](quickstart.md) page and/or the [Bonsai Overview](../bonsai).
 
-[Bonsai SDK]: https://docs.rs/bonsai-sdk/latest/bonsai_sdk/
+[Bonsai SDK]: https://docs.rs/bonsai-sdk/0.6/bonsai_sdk/
 [`IRiscZeroVerifier` interface]: https://github.com/risc0/risc0/blob/release-0.20/bonsai/ethereum/contracts/IRiscZeroVerifier.sol
 [`RiscZeroGroth16Verifier` contract]: https://github.com/risc0/risc0/blob/release-0.20/bonsai/ethereum/contracts/groth16/RiscZeroGroth16Verifier.sol
 [described above]: #bonsai-relay

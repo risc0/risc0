@@ -84,7 +84,7 @@ docs] or the [examples], and we're happy to answer questions on [Discord].
 [examples]: ./examples.md
 [execute]: /terminology#execute
 [executor]: /terminology#executor
-[executor-env]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.ExecutorEnv.html
+[executor-env]: https://docs.rs/risc0-zkvm/0.20/risc0_zkvm/struct.ExecutorEnv.html
 [from-rust-to-receipt]: /diagrams/from-rust-to-receipt.png
 [guest]: /terminology#guest
 [guest program]: /terminology#guest-program
@@ -97,7 +97,7 @@ docs] or the [examples], and we're happy to answer questions on [Discord].
 [quickstart]: ./quickstart.md
 [receipt]: /terminology#receipt
 [Receipts]: ./receipts.md
-[receipt-verify]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Receipt.html#method.verify
+[receipt-verify]: https://docs.rs/risc0-zkvm/0.20/risc0_zkvm/struct.Receipt.html#method.verify
 [risc0-zkvm]: https://docs.rs/risc0-zkvm
 [tutorial]: ./tutorials/hello-world.md
 [verifies]: /terminology#verify
