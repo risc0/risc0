@@ -52,7 +52,8 @@ RustCrypto's secp256k1 ECDSA library. This fork starts from the base
 implementation, and changes the core operations to use the accelerated 256-bit
 modular multiplication instruction. E.g. [`FieldElement8x32R0::mul`][field-mul].
 
-[^1]: This is similar to the cryptography support such as [AES-NI] or the [SHA
+[^1]:
+    This is similar to the cryptography support such as [AES-NI] or the [SHA
     extensions] for x86 processors. In both cases, the circuitry is extended to
     compute otherwise expensive operations in fewer instruction cycles.
 

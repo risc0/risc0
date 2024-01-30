@@ -485,10 +485,12 @@ below.
     measurement overhead.
 <!-- prettier-ignore-end -->
 
-[^2]: An implementation of cycle-accounting for paging operations is implemented
+[^2]:
+    An implementation of cycle-accounting for paging operations is implemented
     in the [Executor].
 
-[^3]: This is similar to the cryptography support such as [AES-NI] or the [SHA
+[^3]:
+    This is similar to the cryptography support such as [AES-NI] or the [SHA
     extensions] for x86 processors. In both cases, the circuitry is extended to
     compute otherwise expensive operations in fewer instruction cycles.
 

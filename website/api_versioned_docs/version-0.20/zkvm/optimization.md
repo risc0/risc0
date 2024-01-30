@@ -485,10 +485,12 @@ below.
     measurement overhead.
 <!-- prettier-ignore-end -->
 
-[^2]: An implementation of cycle-accounting for paging operations is implemented
+[^2]:
+    An implementation of cycle-accounting for paging operations is implemented
     in the [Executor].
 
-[^3]: This is similar to the cryptography support such as [AES-NI] or the [SHA
+[^3]:
+    This is similar to the cryptography support such as [AES-NI] or the [SHA
     extensions] for x86 processors. In both cases, the circuitry is extended to
     compute otherwise expensive operations in fewer instruction cycles.
 
@@ -509,9 +511,9 @@ below.
 [`env::cycle_count()`]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest/env/fn.cycle_count.html
 [`env::read`]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/guest/env/fn.read.html
 [`env::read_slice`]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest/env/fn.read_slice.html
-[example-ecdsa]: https://github.com/risc0/risc0/tree/main/examples/ecdsa
-[example-waldo]: https://github.com/risc0/risc0/tree/main/examples/waldo
-[Executor]: https://github.com/risc0/risc0/blob/main/risc0/zkvm/src/host/server/exec/monitor.rs#L30-L39
+[example-ecdsa]: https://github.com/risc0/risc0/tree/release-0.20/examples/ecdsa
+[example-waldo]: https://github.com/risc0/risc0/tree/release-0.20/examples/waldo
+[Executor]: https://github.com/risc0/risc0/blob/release-0.20/risc0/zkvm/src/host/server/exec/monitor.rs#L30-L39
 [flamegraph]: https://www.brendangregg.com/FlameGraphs/cpuflamegraphs.html
 [golang-install]: https://go.dev/doc/install
 [hibernates]: https://en.wikipedia.org/wiki/Hibernation_(computing)
@@ -532,9 +534,9 @@ below.
 [RISC-V architecture]: /reference-docs/about-risc-v
 [Sampling CPU profilers]: https://nikhilism.com/post/2018/sampling-profiler-internals-introduction/
 [SHA extensions]: https://en.wikipedia.org/wiki/Intel_SHA_extensions
-[snippet-bonsai-governance]: https://github.com/risc0/risc0/blob/main/bonsai/examples/governance/methods/guest/src/bin/finalize_votes.rs#L88-L90
-[snippet-password-checker]: https://github.com/risc0/risc0/blob/main/examples/password-checker/methods/guest/src/main.rs#L24
+[snippet-bonsai-governance]: https://github.com/risc0/risc0/blob/release-0.20/bonsai/examples/governance/methods/guest/src/bin/finalize_votes.rs#L88-L90
+[snippet-password-checker]: https://github.com/risc0/risc0/blob/release-0.20/examples/password-checker/methods/guest/src/main.rs#L24
 [superscalar]: https://en.wikipedia.org/wiki/Superscalar_processor
-[waldo-merkle]: https://github.com/risc0/risc0/blob/main/examples/waldo/core/src/merkle.rs
+[waldo-merkle]: https://github.com/risc0/risc0/blob/release-0.20/examples/waldo/core/src/merkle.rs
 [x86]: https://en.wikipedia.org/wiki/X86
 [zkVM guest programs]: ./guest-code-101.md

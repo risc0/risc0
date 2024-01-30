@@ -80,7 +80,7 @@ We're building technology that allows anyone to generate highly performant zero-
 [Bonsai REST API]: https://api.bonsai.xyz/swagger-ui/
 [Bonsai Quick Start]: quickstart.md
 [Bonsai as a zk coprocessor]: https://twitter.com/RiscZero/status/1677316664772132864
-[Governance Showcase]: https://github.com/risc0/risc0/tree/main/bonsai/examples/governance#readme
+[Governance Showcase]: https://github.com/risc0/risc0/tree/release-0.20/bonsai/examples/governance#readme
 [Zeth]: https://www.risczero.com/news/zeth-release
 [guest program]: /terminology#guest-program
 [receipt]: /terminology#receipt

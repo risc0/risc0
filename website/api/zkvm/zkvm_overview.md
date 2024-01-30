@@ -49,8 +49,7 @@ To prove correct execution of the [guest program]:
    [receipt].
 
 > **Note:** You only need to worry about the details of step 2 & step 3 if
-> you're running the zkVM on your own hardware. See [Host Code 101][host
-> program] for more details on these steps. If you're using [Bonsai] for remote
+> you're running the zkVM on your own hardware. See [Host Code 101][host program] for more details on these steps. If you're using [Bonsai] for remote
 > proving, you won't need to write host code.
 
 ![From Guest Code to Receipt](/diagrams/from-rust-to-receipt.png)

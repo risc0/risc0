@@ -53,7 +53,7 @@ go tool pprof -http=127.0.0.1:8000 profile.pb
 
 Then navigate to [http://localhost:8000](http://localhost:8000) in your browser.
 
-You can find much more information about how to use ``pprof`` in the [official
+You can find much more information about how to use `pprof` in the [official
 pprof documentation][pprof].
 
 ## Exploring the Example Profile
@@ -101,7 +101,7 @@ web interface.
 <!-- prettier-ignore-end -->
 
 [cycle count]: /terminology#clock-cycles
-[example-profiling]: https://github.com/risc0/risc0/tree/main/examples/profiling
+[example-profiling]: https://github.com/risc0/risc0/tree/release-0.20/examples/profiling
 [flamegraph]: https://www.brendangregg.com/FlameGraphs/cpuflamegraphs.html
 [golang-install]: https://go.dev/doc/install
 [install]: ./install.md

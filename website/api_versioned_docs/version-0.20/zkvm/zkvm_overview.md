@@ -49,8 +49,7 @@ To prove correct execution of the [guest program]:
    [receipt].
 
 > **Note:** You only need to worry about the details of step 2 & step 3 if
-> you're running the zkVM on your own hardware. See [Host Code 101][host
-> program] for more details on these steps. If you're using [Bonsai] for remote
+> you're running the zkVM on your own hardware. See [Host Code 101][host program] for more details on these steps. If you're using [Bonsai] for remote
 > proving, you won't need to write host code.
 
 ![From Guest Code to Receipt](/diagrams/from-rust-to-receipt.png)
@@ -103,7 +102,7 @@ Read the [article][zeth].
 [benchmarks]: ./benchmarks.md
 [Bonsai]: ../bonsai/bonsai-overview.md
 [cargo]: https://doc.rust-lang.org/cargo/index.html
-[chess]: https://github.com/risc0/risc0/tree/main/examples/chess#zk-checkmate
+[chess]: https://github.com/risc0/risc0/tree/release-0.20/examples/chess#zk-checkmate
 [continuations]: https://www.risczero.com/news/continuations
 [ethers]: https://github.com/ethers-io/ethers.js
 [examples]: ./examples.md
@@ -117,7 +116,7 @@ Read the [article][zeth].
 [host]: /terminology#host-program
 [host program]: ./host-code-101.md
 [journal]: /terminology#journal
-[json]: https://github.com/risc0/risc0/tree/main/examples/json
+[json]: https://github.com/risc0/risc0/tree/release-0.20/examples/json
 [prove]: /terminology#validity-proof
 [proofs]: /terminology#validity-proof
 [prover]: /terminology#prover
