@@ -23,8 +23,11 @@ fn run_bonsai(input_data: Vec<u8>) -> Result<()> {
     let input_data = bytemuck::cast_slice(&input_data).to_vec();
     let input_id = client.upload_input(input_data)?;
 
+    // Add a list of assumptions
+    let assumptions: Vec<String> = vec![];
+
     // Start a session running the prover
-    let session = client.create_session(image_id, input_id)?;
+    let session = client.create_session(image_id, input_id, assumptions)?;
     loop {
         let res = session.status(&client)?;
         if res.status == "RUNNING" {
