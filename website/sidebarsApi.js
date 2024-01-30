@@ -71,11 +71,6 @@ export default {
           id: "zkvm/dev-mode",
         },
         {
-          type: "link",
-          label: "API Reference Docs",
-          href: "https://docs.rs/risc0-zkvm/",
-        },
-        {
           type: "doc",
           label: "Installation",
           id: "zkvm/install",
@@ -145,6 +140,11 @@ export default {
           type: "doc",
           label: "Examples",
           id: "zkvm/examples",
+        },
+        {
+          type: "link",
+          label: "API Reference Docs",
+          href: "https://docs.rs/risc0-zkvm/",
         },
         {
           type: "link",
