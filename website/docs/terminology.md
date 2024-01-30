@@ -26,9 +26,7 @@ The complexity of a [guest program]'s [execution] is measured in clock cycles as
 
 Generally, a single cycle corresponds to a single [RISC-V] operation. However, some operations require two cycles.
 
-<!-- TODO: Once the optimization guide is in a release API doc, include this line.
-See the [Optimization Guide](/api/zkvm/developer-guide/optimization) for more information about the zkVM cycles and performance.
--->
+See the [Optimization Guide](/api/zkvm/optimization) for more information about the zkVM cycles and performance.
 
 ### Commit
 
