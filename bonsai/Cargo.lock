@@ -918,8 +918,14 @@ dependencies = [
 name = "bonsai-sdk"
 version = "0.6.0-rc.1"
 dependencies = [
+ "anyhow",
+ "bincode",
+ "bytemuck",
+ "hello-world-methods",
+ "hex",
  "httpmock",
  "reqwest",
+ "risc0-zkvm",
  "serde",
  "temp-env",
  "thiserror",
@@ -2556,6 +2562,13 @@ name = "heck"
 version = "0.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "95505c38b4572b2d910cecb0281560f54b440a19336cbbcb27bf6ce6adc6f5a8"
+
+[[package]]
+name = "hello-world-methods"
+version = "0.1.0"
+dependencies = [
+ "risc0-build",
+]
 
 [[package]]
 name = "hermit-abi"
