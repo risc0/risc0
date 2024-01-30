@@ -19,8 +19,7 @@ use bonsai_sdk::alpha::Client;
 
 use super::Prover;
 use crate::{
-    compute_image_id, sha::Digestible, ExecutorEnv, ProveResult, ProverOpts,
-    VerifierContext,
+    compute_image_id, sha::Digestible, ExecutorEnv, ProveResult, ProverOpts, VerifierContext,
 };
 
 /// An implementation of a [Prover] that runs proof workloads via Bonsai.

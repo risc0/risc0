@@ -16,7 +16,7 @@ use anyhow::Result;
 
 use super::{Executor, Prover, ProverOpts};
 use crate::{
-    get_prover_server, ExecutorEnv, ExecutorImpl, ProveResult,  SegmentInfo, SessionInfo,
+    get_prover_server, ExecutorEnv, ExecutorImpl, ProveResult, SegmentInfo, SessionInfo,
     VerifierContext,
 };
 

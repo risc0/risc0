@@ -40,7 +40,9 @@ use risc0_zkvm_platform::WORD_SIZE;
 
 use self::{dev_mode::DevModeProver, prover_impl::ProverImpl};
 use crate::{
-    host::receipt::{CompositeReceipt, InnerReceipt, SegmentReceipt, SuccinctReceipt}, is_dev_mode, ExecutorEnv, ExecutorImpl, ProveResult, ProverOpts, Segment, Session, VerifierContext
+    host::receipt::{CompositeReceipt, InnerReceipt, SegmentReceipt, SuccinctReceipt},
+    is_dev_mode, ExecutorEnv, ExecutorImpl, ProveResult, ProverOpts, Segment, Session,
+    VerifierContext,
 };
 
 /// A ProverServer can execute a given ELF binary and produce a [Receipt]

@@ -57,7 +57,7 @@ pub use self::host::{
         exec::TraceEvent,
         prove::{
             bonsai::BonsaiProver, default_executor, default_prover, external::ExternalProver,
-            Executor, Prover, ProverOpts, ProveResult,
+            Executor, ProveResult, Prover, ProverOpts,
         },
     },
 };
