@@ -81,7 +81,7 @@ jobs:
 
       # Test
       - name: run cargo tests in bonsai
-        run: cargo test --locked --tests -- --include-ignored --nocapture
+        run: cargo test --locked -- --include-ignored --nocapture
         working-directory: bonsai
 
       - name: run cargo tests in bonsai/examples/governance
