@@ -18,7 +18,7 @@ permissions:
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   RISC0_BUILD_LOCKED: 1
-  RISC0_TOOLCHAIN_VERSION: test-release-2
+  RISC0_TOOLCHAIN_VERSION: v2024-01-31.1
 
 jobs:
   changes:

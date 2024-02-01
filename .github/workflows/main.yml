@@ -17,7 +17,7 @@ permissions:
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  RISC0_TOOLCHAIN_VERSION: test-release-2
+  RISC0_TOOLCHAIN_VERSION: v2024-01-31.1
 
 jobs:
   changes:
@@ -112,6 +112,11 @@ jobs:
         with:
           crate: cargo-sort
           version: "1.0"
+      - name: Install cargo-rdme
+        uses: risc0/cargo-install@2cfb0024938d23011106cbf127b393bc83fddba1
+        with:
+          crate: cargo-rdme
+          version: "1.4.2"
       - uses: actions/setup-node@v3
         with:
           node-version: 18
@@ -128,6 +133,8 @@ jobs:
       - run: cargo sort --workspace --check bonsai/examples/governance
       - run: cargo sort --workspace --check examples
       - run: cargo sort --workspace --check tools/crates-validator
+      - run: cargo rdme -c
+        working-directory: risc0/zkvm
       - uses: actions/setup-python@v4
         with:
           python-version: "3.10"
