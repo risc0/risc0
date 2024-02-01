@@ -16,7 +16,6 @@ use anyhow::{anyhow, Error, Result};
 use ark_bn254::{Bn254, Fr, G1Projective};
 use ark_groth16::{prepare_verifying_key, Groth16, PreparedVerifyingKey, Proof, VerifyingKey};
 use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
-
 use serde::{Deserialize, Serialize};
 
 use crate::{

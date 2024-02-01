@@ -110,15 +110,8 @@ where
             );
         }
 
-        // Use recursion to compress the, linear-size, composite receipt into a single, fixed-size, succinct receipt.
-        // NOTE: Recursion is only supported on receipts generated with the poseidon hash function.
-        let inner_receipt = match self.hal_pair.hal.get_hash_suite().name.as_str() {
-            "poseidon" => InnerReceipt::Succinct(self.compress(&composite_receipt)?),
-            _ => InnerReceipt::Composite(composite_receipt),
-        };
-
         let receipt = Receipt::new(
-            inner_receipt,
+            InnerReceipt::Composite(composite_receipt),
             session.journal.clone().unwrap_or_default().bytes,
         );
 
