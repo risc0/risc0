@@ -198,58 +198,58 @@ fn prove_segment_elf() {
 fn lift_join_identity() {
     let segment_limit_po2 = 16; // 64k cycles
     let cycles = 1 << segment_limit_po2;
-    println!("Checkpoint A");
+    tracing::info!("Checkpoint A");
     let env = ExecutorEnv::builder()
         .write(&MultiTestSpec::BusyLoop { cycles })
         .unwrap()
         .segment_limit_po2(segment_limit_po2)
         .build()
         .unwrap();
-    println!("Checkpoint B");
+    tracing::info!("Checkpoint B");
     let binary = Asset::Inline(MULTI_TEST_ELF.into());
-    println!("Checkpoint C");
+    tracing::info!("Checkpoint C");
 
     let mut client = TestClient::new();
-    println!("Checkpoint D");
+    tracing::info!("Checkpoint D");
 
     let session = client.execute(env, binary);
-    println!("Checkpoint E");
+    tracing::info!("Checkpoint E");
     assert_eq!(session.segments.len(), client.segments.len());
-    println!("Checkpoint F");
+    tracing::info!("Checkpoint F");
 
     let opts = ProverOpts::default();
-    println!("Checkpoint G");
+    tracing::info!("Checkpoint G");
 
     let receipt = client.prove_segment(opts.clone(), client.segments[0].clone());
-    println!("Checkpoint H");
+    tracing::info!("Checkpoint H");
     let mut rollup = client.lift(opts.clone(), receipt.try_into().unwrap());
-    println!("Checkpoint I");
+    tracing::info!("Checkpoint I");
 
     for segment in &client.segments[1..] {
         let receipt = client.prove_segment(opts.clone(), segment.clone());
-        println!("Checkpoint I1");
+        tracing::info!("Checkpoint I1");
         let rec_receipt = client.lift(opts.clone(), receipt.try_into().unwrap());
-        println!("Checkpoint I2");
+        tracing::info!("Checkpoint I2");
 
         rollup = client.join(
             opts.clone(),
             rollup.try_into().unwrap(),
             rec_receipt.try_into().unwrap(),
         );
-        println!("Checkpoint I3");
+        tracing::info!("Checkpoint I3");
         rollup
             .verify_integrity_with_context(&VerifierContext::default())
             .unwrap();
-        println!("Checkpoint I4");
+        tracing::info!("Checkpoint I4");
     }
-    println!("Checkpoint J");
+    tracing::info!("Checkpoint J");
     client.identity_p254(opts, rollup.clone().try_into().unwrap());
 
-    println!("Checkpoint K");
+    tracing::info!("Checkpoint K");
     let rollup_receipt = Receipt::new(InnerReceipt::Succinct(rollup), session.journal.bytes.into());
-    println!("Checkpoint L");
+    tracing::info!("Checkpoint L");
     rollup_receipt.verify(MULTI_TEST_ID).unwrap();
-    println!("Checkpoint M");
+    tracing::info!("Checkpoint M");
 }
 
 #[test]
