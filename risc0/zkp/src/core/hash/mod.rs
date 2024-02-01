@@ -28,6 +28,7 @@ use risc0_core::field::Field;
 use super::digest::Digest;
 
 /// A trait that sets the hashes and encodings used by the ZKP.
+// TODO(victor): This generic does not actually need to be at the type level.
 pub trait HashFn<F: Field>: Send + Sync {
     /// Generate a hash from a pair of [Digest].
     fn hash_pair(&self, a: &Digest, b: &Digest) -> Box<Digest>;

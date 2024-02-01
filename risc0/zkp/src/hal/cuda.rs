@@ -14,6 +14,7 @@
 
 use std::{cell::RefCell, fmt::Debug, marker::PhantomData, rc::Rc};
 
+use bytemuck::NoUninit;
 use cust::{
     device::DeviceAttribute,
     function::{BlockSize, GridSize},
@@ -346,7 +347,7 @@ pub struct BufferImpl<T> {
     marker: PhantomData<T>,
 }
 
-impl<T> BufferImpl<T> {
+impl<T: NoUninit> BufferImpl<T> {
     fn new(name: &'static str, size: usize) -> Self {
         let bytes_len = std::mem::size_of::<T>() * size;
         assert!(bytes_len > 0);
@@ -362,7 +363,8 @@ impl<T> BufferImpl<T> {
         let bytes_len = std::mem::size_of::<T>() * slice.len();
         assert!(bytes_len > 0);
         let mut buffer = RawBuffer::new(name, bytes_len);
-        buffer.buf.copy_from(slice).unwrap();
+        let bytes = bytemuck::cast_slice(slice);
+        buffer.buf.copy_from(bytes).unwrap();
         BufferImpl {
             buffer: Rc::new(RefCell::new(buffer)),
             size: slice.len(),
@@ -402,13 +404,17 @@ impl<T> Buffer<T> for BufferImpl<T> {
     fn view<F: FnOnce(&[T])>(&self, f: F) {
         let buf = self.buffer.borrow_mut();
         let host_buf = buf.buf.as_host_vec().unwrap();
-        f(&host_buf[self.offset..]);
+        // TODO(victor): Find a new way to be an (unchecked) cast here.
+        let slice = bytemuck::cast_slice(&host_buf);
+        f(&slice[self.offset..]);
     }
 
     fn view_mut<F: FnOnce(&mut [T])>(&self, f: F) {
         let mut buf = self.buffer.borrow_mut();
         let mut host_buf = buf.buf.as_host_vec().unwrap();
-        f(&mut host_buf[self.offset..]);
+        // TODO(victor): Find a new way to be an (unchecked) cast here.
+        let slice = bytemuck::cast_slice(&host_buf);
+        f(&mut slice[self.offset..]);
         buf.buf.copy_from(&host_buf).unwrap();
     }
 }
@@ -483,7 +489,7 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
     type Field = BabyBear;
     type Elem = BabyBearElem;
     type ExtElem = BabyBearExtElem;
-    type Buffer<T: Clone + Debug + PartialEq> = BufferImpl<T>;
+    type Buffer<T: Clone + Debug + PartialEq + NoUninit> = BufferImpl<T>;
 
     fn alloc_elem(&self, name: &'static str, size: usize) -> Self::Buffer<Self::Elem> {
         BufferImpl::new(name, size)
