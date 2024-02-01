@@ -241,7 +241,7 @@ mod test {
         );
         compare_image_id(
             "risc0_zkvm_methods_guest/slice_io",
-            "812b5d6a27b565af20e8ce770534ef216e1c1fa6e5255be7c3d181eefd173250",
+            "4652f8a5c183eb75106070c3b6693dcf6ad0362d67f70258e8b5014b1e3ac52c",
         );
     }
 }
