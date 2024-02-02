@@ -31,8 +31,6 @@ reqwest = { version = "0.11", default-features = false, features = [
 ] }
 reqwest-middleware = "0.2"
 reqwest-retry = "0.3"
-# rhai depends on an incompatbile version of rhai_codgen, pin it here
-rhai_codegen = "=1.6.0"
 risc0-build = { workspace = true }
 risc0-r0vm = { workspace = true, optional = true }
 risc0-zkvm = { workspace = true, optional = true }
