@@ -170,8 +170,13 @@ fn multiply_by_m_ext(cells: &mut [BabyBearElem; CELLS]) {
 
 fn full_round(cells: &mut [BabyBearElem; CELLS], round: usize) {
     add_round_constants_full(cells, round);
+    if round == 0 {
+        tracing::debug!("After constants in full round 0: {cells:?}");
+    }
+
     do_full_sboxes(cells);
     multiply_by_m_ext(cells);
+    tracing::debug!("After mExt in full round {round}: {cells:?}");
 }
 
 fn partial_round(cells: &mut [BabyBearElem; CELLS], round: usize) {
@@ -186,6 +191,7 @@ pub fn poseidon2_mix(cells: &mut [BabyBearElem; CELLS]) {
 
     // First linear layer.
     multiply_by_m_ext(cells);
+    tracing::debug!("After mExt: {cells:?}");
 
     // Do initial full rounds
     for _i in 0..ROUNDS_HALF_FULL {
