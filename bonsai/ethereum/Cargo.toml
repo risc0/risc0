@@ -18,6 +18,9 @@ risc0-zkvm = { workspace = true, features = ["prove"], optional = true }
 [dev-dependencies]
 tokio = { version = "1", features = ["macros", "rt"] }
 
+[lib]
+doctest = false
+
 [features]
 default = []
 control-id = ["dep:risc0-zkvm", "dep:hex"]

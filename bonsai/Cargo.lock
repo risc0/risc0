@@ -918,8 +918,13 @@ dependencies = [
 name = "bonsai-sdk"
 version = "0.6.0-rc.1"
 dependencies = [
+ "anyhow",
+ "bincode",
+ "bytemuck",
+ "hex",
  "httpmock",
  "reqwest",
+ "risc0-zkvm",
  "serde",
  "temp-env",
  "thiserror",

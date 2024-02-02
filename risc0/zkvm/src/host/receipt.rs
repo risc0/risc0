@@ -51,8 +51,9 @@ use crate::{
 /// A Receipt is a zero-knowledge proof of computation. It attests that the
 /// [Receipt::journal] was produced by executing a guest program based on a
 /// specified memory image. This image is _not_ included in the receipt; the
-/// verifier must provide an [ImageID](https://dev.risczero.com/terminology),
-/// a cryptographic hash corresponding to the expected image.
+/// verifier must provide an
+/// [ImageID](https://dev.risczero.com/terminology#image-id), a cryptographic
+/// hash corresponding to the expected image.
 ///
 /// A prover can provide a Receipt to an untrusting party to convince them that
 /// the results contained within the Receipt (in the [Receipt::journal]) came
@@ -78,9 +79,9 @@ use crate::{
 /// # }
 /// ```
 ///
-/// To confirm that a [Receipt] was honestly generated, use
-/// [Receipt::verify] and supply the ImageID of the code that should
-/// have been executed as a parameter. (See
+/// To confirm that a [Receipt] was honestly generated, use [Receipt::verify]
+/// and supply the ImageID of the code that should have been executed as a
+/// parameter. (See
 /// [risc0_build](https://docs.rs/risc0-build/latest/risc0_build/) for more
 /// information about how ImageIDs are generated.)
 ///
@@ -99,8 +100,8 @@ use crate::{
 /// # }
 /// ```
 ///
-/// The public outputs of the [Receipt] are contained in the
-/// [Receipt::journal]. You can use [Journal::decode] to deserialize the journal as typed and
+/// The public outputs of the [Receipt] are contained in the [Receipt::journal].
+/// You can use [Journal::decode] to deserialize the journal as typed and
 /// structured data, or access the [Journal::bytes] directly.
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[cfg_attr(test, derive(PartialEq))]
