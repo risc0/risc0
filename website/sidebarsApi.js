@@ -49,6 +49,47 @@ export default {
             },
           ],
         },
+        {
+          type: "category",
+          label: "Verifier Contract",
+          link: {
+            type: `doc`,
+            id: "bonsai/verifier-contract/verifier-contract",
+          },
+          collapsed: false,
+          items: [
+            {
+              type: "doc",
+              label: "About",
+              id: "bonsai/verifier-contract/about",
+            },
+            {
+              type: "doc",
+              label: "Interface",
+              id: "bonsai/verifier-contract/interface",
+            },
+            {
+              type: "doc",
+              label: "Example Usage",
+              id: "bonsai/verifier-contract/example",
+            },
+            {
+              type: "doc",
+              label: "Versioning",
+              id: "bonsai/verifier-contract/versioning",
+            },
+            {
+              type: "doc",
+              label: "Contract Addresses",
+              id: "bonsai/verifier-contract/addresses",
+            },
+            {
+              type: "doc",
+              label: "Gas costs",
+              id: "bonsai/verifier-contract/gas-costs",
+            },
+          ],
+        },
       ],
     },
     {
