@@ -14,16 +14,16 @@
 
 /// Merkle root of the RECURSION_CONTROL_IDS
 pub const ALLOWED_IDS_ROOT: &str =
-    "b584335eed0877448ca6222b5d59ec4f46f7e03878b78a20a7788b311a9b5132";
+    "6df708447638d36828ebf4545980ff39315562181c926d3a9e2697405f3acf15";
 
 pub const RECURSION_CONTROL_IDS: [(&str, &str); 15] = [
     (
         "identity.zkr",
-        "b046ec62b0168930138735042d89f26a4f6cd94314292a1d45b8f5520dfcfc33",
+        "bb534807c5b84d4cfc3d2f2199823458c56ac004181d8046df71c00959ef7543",
     ),
     (
         "join.zkr",
-        "1ae5b8530e69e75a3a26ea753f8af26766e9251a9d38fa0a30c441664c24ba66",
+        "3025fe5a318893694081732f97ac8245eafc24691ecd3303c309e73f2ad44e62",
     ),
     (
         "lift_14.zkr",
@@ -71,7 +71,7 @@ pub const RECURSION_CONTROL_IDS: [(&str, &str); 15] = [
     ),
     (
         "resolve.zkr",
-        "92f4554f6e07002c0e77dc4b9313a5047b75ba11bb6fcf6365944606a06e2906",
+        "9b6186083e3181587855306ea3e44a619414cf537927f82293e918272374074b",
     ),
     (
         "test_recursion_circuit.zkr",
