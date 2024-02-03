@@ -16,6 +16,7 @@
 #include "fri.cu"
 #include "mix.cu"
 #include "ntt.cu"
+#include "poseidon.cu"
 #include "poseidon2.cu"
 #include "sha.cu"
 #include "zk.cu"
