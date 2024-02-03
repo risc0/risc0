@@ -198,58 +198,41 @@ fn prove_segment_elf() {
 fn lift_join_identity() {
     let segment_limit_po2 = 16; // 64k cycles
     let cycles = 1 << segment_limit_po2;
-    tracing::info!("Checkpoint A");
     let env = ExecutorEnv::builder()
         .write(&MultiTestSpec::BusyLoop { cycles })
         .unwrap()
         .segment_limit_po2(segment_limit_po2)
         .build()
         .unwrap();
-    tracing::info!("Checkpoint B");
     let binary = Asset::Inline(MULTI_TEST_ELF.into());
-    tracing::info!("Checkpoint C");
 
     let mut client = TestClient::new();
-    tracing::info!("Checkpoint D");
 
     let session = client.execute(env, binary);
-    tracing::info!("Checkpoint E");
     assert_eq!(session.segments.len(), client.segments.len());
-    tracing::info!("Checkpoint F");
 
     let opts = ProverOpts::default();
-    tracing::info!("Checkpoint G");
 
     let receipt = client.prove_segment(opts.clone(), client.segments[0].clone());
-    tracing::info!("Checkpoint H");
     let mut rollup = client.lift(opts.clone(), receipt.try_into().unwrap());
-    tracing::info!("Checkpoint I");
 
     for segment in &client.segments[1..] {
         let receipt = client.prove_segment(opts.clone(), segment.clone());
-        tracing::info!("Checkpoint I1");
         let rec_receipt = client.lift(opts.clone(), receipt.try_into().unwrap());
-        tracing::info!("Checkpoint I2");
 
         rollup = client.join(
             opts.clone(),
             rollup.try_into().unwrap(),
             rec_receipt.try_into().unwrap(),
         );
-        tracing::info!("Checkpoint I3");
         rollup
             .verify_integrity_with_context(&VerifierContext::default())
             .unwrap();
-        tracing::info!("Checkpoint I4");
     }
-    tracing::info!("Checkpoint J");
     client.identity_p254(opts, rollup.clone().try_into().unwrap());
 
-    tracing::info!("Checkpoint K");
     let rollup_receipt = Receipt::new(InnerReceipt::Succinct(rollup), session.journal.bytes.into());
-    tracing::info!("Checkpoint L");
     rollup_receipt.verify(MULTI_TEST_ID).unwrap();
-    tracing::info!("Checkpoint M");
 }
 
 #[test]
