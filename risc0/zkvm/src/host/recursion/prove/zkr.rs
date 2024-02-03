@@ -23,7 +23,6 @@ use risc0_zkp::{
 use super::{Program, CIRCUIT, RECURSION_CODE_SIZE};
 
 fn get_zkr(name: &str) -> Result<(Program, Digest)> {
-    // assert!(false, "Called get_zkr");  // TODO: This is exactly the tests that fail
     let u32s = risc0_circuit_recursion::zkr::get_zkr(name)?;
     let code_size = CIRCUIT.get_taps().group_size(REGISTER_GROUP_CODE);
     assert_eq!(code_size, RECURSION_CODE_SIZE);
