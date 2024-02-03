@@ -390,7 +390,6 @@ impl<'a> ParallelHandler<'a> {
                 size: 1 << RECURSION_PO2,
                 cycle: row,
             };
-            // tracing::debug!("Step is {}", row);
             CIRCUIT.step_exec(&ctx, &mut self, args).unwrap();
         }
         self
