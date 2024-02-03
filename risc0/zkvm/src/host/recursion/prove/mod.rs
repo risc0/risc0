@@ -81,13 +81,9 @@ pub struct RecursionReceipt {
 pub fn lift(segment_receipt: &SegmentReceipt) -> Result<SuccinctReceipt> {
     tracing::debug!("Proving lift: claim = {:#?}", segment_receipt.claim);
     let mut prover = Prover::new_lift(&segment_receipt.seal, ProverOpts::default())?;
-    tracing::info!("Lift outer chkpt 1");
     let receipt = prover.run()?;
-    tracing::info!("Lift outer chkpt 2");
     let mut out_stream = VecDeque::<u32>::new();
-    tracing::info!("Lift outer chkpt 3");
     out_stream.extend(receipt.output.iter());
-    tracing::info!("Lift outer chkpt 4");
     let claim_decoded = ReceiptClaim::decode(&mut out_stream)?;
     tracing::debug!("Proving lift finished: decoded claim = {claim_decoded:#?}");
     Ok(SuccinctReceipt {
@@ -474,35 +470,22 @@ impl Prover {
     /// then used as the input to all other recursion programs (e.g. join, resolve, and
     /// identity_p254).
     pub fn new_lift(seal: &[u32], opts: ProverOpts) -> Result<Self> {
-        tracing::debug!("new_lift chkpt 1");
         let hashfn = opts.suite.hashfn.as_ref();
-        tracing::debug!("new_lift chkpt 2");
         let allowed_ids = Self::make_allowed_tree();
-        tracing::debug!("new_lift chkpt 3");
         let merkle_root = allowed_ids.calc_root(hashfn);
-        tracing::debug!("new_lift chkpt 4");
 
         let mut iop = ReadIOP::new(seal, opts.suite.rng.as_ref());
-        tracing::debug!("new_lift chkpt 5");
         iop.read_field_elem_slice::<BabyBearElem>(risc0_circuit_rv32im::CircuitImpl::OUTPUT_SIZE);
-        tracing::debug!("new_lift chkpt 6");
         let po2 = *iop.read_u32s(1).first().unwrap() as usize;
-        tracing::debug!("new_lift chkpt 7");
 
         let (program, control_id) = zkr::lift(po2)?;
-        tracing::debug!("new_lift chkpt 8");
         let mut prover = Prover::new(program, control_id, opts);
-        tracing::debug!("new_lift chkpt 9");
 
         prover.add_input_digest(&merkle_root, DigestKind::Poseidon2);
-        tracing::debug!("new_lift chkpt 10");
 
         let which = po2 - MIN_CYCLES_PO2;
-        tracing::debug!("new_lift chkpt 11");
         let inner_control_id = Digest::from_hex(POSEIDON2_CONTROL_ID[which]).unwrap();
-        tracing::debug!("new_lift chkpt 12");
         prover.add_seal(seal, &inner_control_id, &allowed_ids)?;
-        tracing::debug!("new_lift chkpt 13");
 
         Ok(prover)
     }
