@@ -31,7 +31,7 @@ use risc0_zkp::{
     adapter::{CircuitInfo, CircuitStepContext, TapsProvider},
     core::{
         digest::Digest,
-        hash::{poseidon2::Poseidon2HashSuite, HashSuite},
+        hash::{poseidon::PoseidonHashSuite, poseidon2::Poseidon2HashSuite, HashSuite},
     },
     field::{
         baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
@@ -230,11 +230,11 @@ pub struct Prover {
 #[cfg(feature = "cuda")]
 mod cuda {
     pub use risc0_circuit_recursion::cuda::{
-        CudaCircuitHalPoseidon2, CudaCircuitHalSha256,
+        CudaCircuitHalPoseidon, CudaCircuitHalPoseidon2, CudaCircuitHalSha256,
     };
     pub use risc0_zkp::{
         core::hash::poseidon_254::Poseidon254HashSuite,
-        hal::cuda::{CudaHalPoseidon2, CudaHalSha256},
+        hal::cuda::{CudaHalPoseidon, CudaHalPoseidon2, CudaHalSha256},
     };
 
     use super::{BabyBear, CircuitImpl, CpuCircuitHal, CpuHal, HalPair, Rc, CIRCUIT};
@@ -242,6 +242,12 @@ mod cuda {
     pub fn sha256_hal_pair() -> HalPair<CudaHalSha256, CudaCircuitHalSha256> {
         let hal = Rc::new(CudaHalSha256::new());
         let circuit_hal = Rc::new(CudaCircuitHalSha256::new(hal.clone()));
+        HalPair { hal, circuit_hal }
+    }
+
+    pub fn poseidon_hal_pair() -> HalPair<CudaHalPoseidon, CudaCircuitHalPoseidon> {
+        let hal = Rc::new(CudaHalPoseidon::new());
+        let circuit_hal = Rc::new(CudaCircuitHalPoseidon::new(hal.clone()));
         HalPair { hal, circuit_hal }
     }
 
@@ -265,7 +271,7 @@ mod metal {
     pub use risc0_zkp::{
         core::hash::poseidon_254::Poseidon254HashSuite,
         hal::metal::{
-            MetalHalPoseidon2, MetalHalSha256,
+            MetalHalPoseidon, MetalHalPoseidon2, MetalHalSha256, MetalHashPoseidon,
             MetalHashPoseidon2, MetalHashSha256,
         },
     };
@@ -275,6 +281,12 @@ mod metal {
     pub fn sha256_hal_pair() -> HalPair<MetalHalSha256, MetalCircuitHal<MetalHashSha256>> {
         let hal = Rc::new(MetalHalSha256::new());
         let circuit_hal = Rc::new(MetalCircuitHal::<MetalHashSha256>::new(hal.clone()));
+        HalPair { hal, circuit_hal }
+    }
+
+    pub fn poseidon_hal_pair() -> HalPair<MetalHalPoseidon, MetalCircuitHal<MetalHashPoseidon>> {
+        let hal = Rc::new(MetalHalPoseidon::new());
+        let circuit_hal = Rc::new(MetalCircuitHal::<MetalHashPoseidon>::new(hal.clone()));
         HalPair { hal, circuit_hal }
     }
 
@@ -297,12 +309,19 @@ mod cpu {
 
     use super::{
         BabyBear, CircuitImpl, CpuCircuitHal, CpuHal, HalPair, Poseidon2HashSuite,
-        Rc, CIRCUIT,
+        PoseidonHashSuite, Rc, CIRCUIT,
     };
 
     #[allow(dead_code)]
     pub fn sha256_hal_pair() -> HalPair<CpuHal<BabyBear>, CpuCircuitHal<'static, CircuitImpl>> {
         let hal = Rc::new(CpuHal::new(Sha256HashSuite::new_suite()));
+        let circuit_hal = Rc::new(CpuCircuitHal::new(&CIRCUIT));
+        HalPair { hal, circuit_hal }
+    }
+
+    #[allow(dead_code)]
+    pub fn poseidon_hal_pair() -> HalPair<CpuHal<BabyBear>, CpuCircuitHal<'static, CircuitImpl>> {
+        let hal = Rc::new(CpuHal::new(PoseidonHashSuite::new_suite()));
         let circuit_hal = Rc::new(CpuCircuitHal::new(&CIRCUIT));
         HalPair { hal, circuit_hal }
     }
@@ -333,6 +352,12 @@ cfg_if::cfg_if! {
 
         /// TODO
         #[allow(dead_code)]
+        pub fn poseidon_hal_pair() -> HalPair<cuda::CudaHalPoseidon, cuda::CudaCircuitHalPoseidon> {
+            cuda::poseidon_hal_pair()
+        }
+
+        /// TODO
+        #[allow(dead_code)]
         pub fn poseidon2_hal_pair() -> HalPair<cuda::CudaHalPoseidon2, cuda::CudaCircuitHalPoseidon2> {
             cuda::poseidon2_hal_pair()
         }
@@ -347,6 +372,12 @@ cfg_if::cfg_if! {
         #[allow(dead_code)]
         pub fn sha256_hal_pair() -> HalPair<metal::MetalHalSha256, metal::MetalCircuitHal<metal::MetalHashSha256>> {
             metal::sha256_hal_pair()
+        }
+
+        /// TODO
+        #[allow(dead_code)]
+        pub fn poseidon_hal_pair() -> HalPair<metal::MetalHalPoseidon, metal::MetalCircuitHal<metal::MetalHashPoseidon>> {
+            metal::poseidon_hal_pair()
         }
 
         /// TODO
