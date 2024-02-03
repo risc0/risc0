@@ -191,7 +191,7 @@ pub fn poseidon2_mix(cells: &mut [BabyBearElem; CELLS]) {
 
     // First linear layer.
     multiply_by_m_ext(cells);
-    tracing::debug!("After mExt: {cells:?}");
+    tracing::debug!("After initial mExt: {cells:?}");
 
     // Do initial full rounds
     for _i in 0..ROUNDS_HALF_FULL {
@@ -203,6 +203,7 @@ pub fn poseidon2_mix(cells: &mut [BabyBearElem; CELLS]) {
         partial_round(cells, round);
         round += 1;
     }
+    tracing::debug!("After partial rounds: {cells:?}");
     // Do remaining full rounds
     for _i in 0..ROUNDS_HALF_FULL {
         full_round(cells, round);
