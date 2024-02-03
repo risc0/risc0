@@ -1,30 +1,34 @@
-# Bonsai REST SDK
+<!-- cargo-rdme start -->
 
 A library to handle HTTP REST requests to the Bonsai-alpha prover interface
 
 ## Example Usage
 
 ```rust
+use std::time::Duration;
+
 use anyhow::Result;
 use bonsai_sdk::alpha as bonsai_sdk;
-use methods::{METHOD_NAME_ELF, METHOD_NAME_ID};
-use risc0_zkvm::{serde::to_vec, Receipt};
-use std::time::Duration;
+use methods::{METHOD_ELF, METHOD_ID};
+use risc0_zkvm::{compute_image_id, serde::to_vec, Receipt};
 
 fn run_bonsai(input_data: Vec<u8>) -> Result<()> {
     let client = bonsai_sdk::Client::from_env(risc0_zkvm::VERSION)?;
 
     // Compute the image_id, then upload the ELF with the image_id as its key.
-    let image_id = hex::encode(compute_image_id(METHOD_NAME_ELF)?);
-    client.upload_img(&image_id, METHOD_NAME_ELF.to_vec())?;
+    let image_id = hex::encode(compute_image_id(METHOD_ELF)?);
+    client.upload_img(&image_id, METHOD_ELF.to_vec())?;
 
     // Prepare input data and upload it.
     let input_data = to_vec(&input_data).unwrap();
     let input_data = bytemuck::cast_slice(&input_data).to_vec();
     let input_id = client.upload_input(input_data)?;
 
+    // Add a list of assumptions
+    let assumptions: Vec<String> = vec![];
+
     // Start a session running the prover
-    let session = client.create_session(image_id, input_id)?;
+    let session = client.create_session(image_id, input_id, assumptions)?;
     loop {
         let res = session.status(&client)?;
         if res.status == "RUNNING" {
@@ -45,7 +49,7 @@ fn run_bonsai(input_data: Vec<u8>) -> Result<()> {
             let receipt_buf = client.download(&receipt_url)?;
             let receipt: Receipt = bincode::deserialize(&receipt_buf)?;
             receipt
-                .verify(METHOD_NAME_ID)
+                .verify(METHOD_ID)
                 .expect("Receipt verification failed");
         } else {
             panic!(
@@ -73,6 +77,11 @@ After a STARK proof is generated, it is possible to convert the proof to SNARK.
 ### Example
 
 ```rust
+use std::time::Duration;
+
+use anyhow::Result;
+use bonsai_sdk::alpha as bonsai_sdk;
+
 fn run_stark2snark(session_id: String) -> Result<()> {
     let client = bonsai_sdk::Client::from_env(risc0_zkvm::VERSION)?;
 
@@ -102,6 +111,6 @@ fn run_stark2snark(session_id: String) -> Result<()> {
     }
     Ok(())
 }
-
-run_stark2snark(session.uuid)?;
 ```
+
+<!-- cargo-rdme end -->

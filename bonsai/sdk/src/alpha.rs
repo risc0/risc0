@@ -15,6 +15,7 @@
 use std::{fs::File, path::Path};
 
 use reqwest::{blocking::Client as BlockingClient, header};
+use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
 use self::responses::{
@@ -199,7 +200,7 @@ pub mod responses {
 }
 
 /// Proof Session representation
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct SessionId {
     /// Session UUID
     pub uuid: String,
@@ -302,9 +303,9 @@ impl Client {
     ///
     /// # Example:
     ///
-    /// ```
+    /// ```no_run
     /// use bonsai_sdk::alpha as bonsai_sdk;
-    /// bonsai_sdk::from_env(risc0_zkvm::VERSION)
+    /// bonsai_sdk::Client::from_env(risc0_zkvm::VERSION)
     ///     .expect("Failed to construct sdk client");
     /// ```
     pub fn from_env(risc0_version: &str) -> Result<Self, SdkErr> {
@@ -328,7 +329,7 @@ impl Client {
     /// use bonsai_sdk::alpha as bonsai_sdk;
     /// let url = "http://api.bonsai.xyz".to_string();
     /// let api_key = "my_secret_key".to_string();
-    /// bonsai_sdk::from_parts(url, api_key, risc0_zkvm::VERSION)
+    /// bonsai_sdk::Client::from_parts(url, api_key, risc0_zkvm::VERSION)
     ///     .expect("Failed to construct sdk client");
     /// ```
     pub fn from_parts(url: String, key: String, risc0_version: &str) -> Result<Self, SdkErr> {
