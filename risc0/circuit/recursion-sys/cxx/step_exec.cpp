@@ -879,7 +879,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         assert(reg == Fp::invalid() || reg == x308);
         reg = x308;
       }
-      // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":87:3)
       {
         auto& reg = args[2][15 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x310);
@@ -966,7 +966,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x355;
         }
       }
-      // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":82:3)
       {
         auto& reg = args[2][5 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x343);
@@ -1016,7 +1016,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x363;
         }
       }
-      // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":82:3)
       {
         auto& reg = args[2][10 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x344);
@@ -1042,7 +1042,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       auto x370 = x358 + x366;
       // loc("zirgen/circuit/recursion/micro.cpp":28:30)
       auto x371 = x359 + x367;
-      // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":87:3)
       {
         auto& reg = args[2][15 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x310);
@@ -1154,7 +1154,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x384;
         }
       }
-      // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":82:3)
       {
         auto& reg = args[2][5 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x343);
@@ -1204,7 +1204,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x392;
         }
       }
-      // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":82:3)
       {
         auto& reg = args[2][10 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x344);
@@ -1230,7 +1230,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       auto x399 = x387 - x395;
       // loc("zirgen/circuit/recursion/micro.cpp":34:30)
       auto x400 = x388 - x396;
-      // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":87:3)
       {
         auto& reg = args[2][15 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x310);
@@ -1342,7 +1342,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x413;
         }
       }
-      // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":82:3)
       {
         auto& reg = args[2][5 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x343);
@@ -1392,7 +1392,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x421;
         }
       }
-      // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":82:3)
       {
         auto& reg = args[2][10 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x344);
@@ -1472,7 +1472,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       auto x455 = x417 * x422;
       // loc("zirgen/circuit/recursion/micro.cpp":40:30)
       auto x456 = x454 + x455;
-      // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":87:3)
       {
         auto& reg = args[2][15 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x310);
@@ -1586,7 +1586,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x470;
         }
       }
-      // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":82:3)
       {
         auto& reg = args[2][5 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x343);
@@ -1635,81 +1635,81 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         reg = x308;
       }
       {
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x475 = x471 * x471;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x476 = x474 + x474;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x477 = x472 * x476;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x478 = x473 * x473;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x479 = x477 - x478;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x480 = x479 * x297;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x481 = x475 + x480;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x482 = x473 + x473;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x483 = x471 * x482;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x484 = x472 * x472;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x485 = x483 - x484;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x486 = x474 * x474;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x487 = x486 * x297;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x488 = x485 + x487;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x489 = x481 * x481;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x490 = x488 * x297;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x491 = x490 * x488;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x492 = x489 + x491;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x493 = inv(x492);
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x494 = x481 * x493;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x495 = x488 * x493;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x496 = x471 * x494;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x497 = x473 * x297;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x498 = x497 * x495;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x499 = x496 + x498;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x500 = -x472;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x501 = x500 * x494;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x502 = x474 * x297;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x503 = x502 * x495;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x504 = x501 - x503;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x505 = -x471;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x506 = x505 * x495;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x507 = x473 * x494;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x508 = x506 + x507;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x509 = x472 * x495;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x510 = x474 * x494;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x511 = x509 - x510;
-        // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+        // loc("zirgen/circuit/recursion/wom.cpp":87:3)
         {
           auto& reg = args[2][15 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x310);
@@ -1785,9 +1785,9 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       host_args.at(7) = x520;
       host(ctx, "log", "INV: %e -> %e", host_args.data(), 8, host_outs.data(), 0);
     }
-    // loc("zirgen/circuit/recursion/micro.cpp":50:62)
+    // loc("zirgen/circuit/recursion/micro.cpp":52:62)
     auto x521 = x307 - x344;
-    // loc("zirgen/circuit/recursion/micro.cpp":50:62)
+    // loc("zirgen/circuit/recursion/micro.cpp":52:62)
     auto x522 = x336 * x521;
     if (x522 != 0) {
       {
@@ -1822,7 +1822,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x526;
         }
       }
-      // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":82:3)
       {
         auto& reg = args[2][5 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x343);
@@ -1862,9 +1862,9 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       auto x527 = args[2][6 * steps + ((cycle - 0) & mask)];
       assert(x527 != Fp::invalid());
       {
-        // loc("zirgen/circuit/recursion/micro.cpp":55:22)
+        // loc("zirgen/circuit/recursion/micro.cpp":57:22)
         auto x528 = inv(x527);
-        // loc("zirgen/circuit/recursion/micro.cpp":55:7)
+        // loc("zirgen/circuit/recursion/micro.cpp":57:7)
         {
           auto& reg = args[2][101 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x528);
@@ -1873,11 +1873,11 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[0](recursion::MicroOp)/extra(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
         auto x529 = args[2][101 * steps + ((cycle - 0) & mask)];
         assert(x529 != Fp::invalid());
-        // loc("zirgen/circuit/recursion/micro.cpp":56:36)
+        // loc("zirgen/circuit/recursion/micro.cpp":58:36)
         auto x530 = x529 * x527;
-        // loc("zirgen/circuit/recursion/micro.cpp":56:32)
+        // loc("zirgen/circuit/recursion/micro.cpp":58:32)
         auto x531 = x307 - x530;
-        // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+        // loc("zirgen/circuit/recursion/wom.cpp":87:3)
         {
           auto& reg = args[2][15 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x310);
@@ -1995,7 +1995,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x547;
         }
       }
-      // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":82:3)
       {
         auto& reg = args[2][5 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x343);
@@ -2045,7 +2045,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x555;
         }
       }
-      // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":82:3)
       {
         auto& reg = args[2][10 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x344);
@@ -2063,15 +2063,15 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[3](Reg)"("zirgen/circuit/recursion/wom.cpp":42:14))
       auto x559 = args[2][14 * steps + ((cycle - 0) & mask)];
       assert(x559 != Fp::invalid());
-      // loc("zirgen/circuit/recursion/micro.cpp":71:30)
+      // loc("zirgen/circuit/recursion/micro.cpp":73:30)
       auto x560 = x548 - x556;
-      // loc("zirgen/circuit/recursion/micro.cpp":71:30)
+      // loc("zirgen/circuit/recursion/micro.cpp":73:30)
       auto x561 = x549 - x557;
-      // loc("zirgen/circuit/recursion/micro.cpp":71:30)
+      // loc("zirgen/circuit/recursion/micro.cpp":73:30)
       auto x562 = x550 - x558;
-      // loc("zirgen/circuit/recursion/micro.cpp":71:30)
+      // loc("zirgen/circuit/recursion/micro.cpp":73:30)
       auto x563 = x551 - x559;
-      // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":87:3)
       {
         auto& reg = args[2][15 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x310);
@@ -2198,7 +2198,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         assert(reg == Fp::invalid() || reg == x308);
         reg = x308;
       }
-      // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":87:3)
       {
         auto& reg = args[2][15 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x310);
@@ -2327,7 +2327,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         auto x575 = host_outs.at(1);
         auto x576 = host_outs.at(2);
         auto x577 = host_outs.at(3);
-        // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+        // loc("zirgen/circuit/recursion/wom.cpp":87:3)
         {
           auto& reg = args[2][15 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x310);
@@ -2438,7 +2438,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x590;
         }
       }
-      // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":82:3)
       {
         auto& reg = args[2][5 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x343);
@@ -2476,7 +2476,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x594;
         }
       }
-      // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":82:3)
       {
         auto& reg = args[2][10 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x344);
@@ -2499,38 +2499,38 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       host_args.at(2) = x597;
       host_args.at(3) = x598;
       host(ctx, "log", "  in0=[%x %x], in1=[%x %x]", host_args.data(), 4, host_outs.data(), 0);
-      // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[2](recursion::MicroOp)/extra(Reg)"("zirgen/circuit/recursion/micro.cpp":107:71))
+      // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[2](recursion::MicroOp)/extra(Reg)"("zirgen/circuit/recursion/micro.cpp":111:71))
       auto x599 = args[2][125 * steps + ((cycle - 1) & mask)];
       if (x599 == Fp::invalid()) x599 = 0;
-      // loc("zirgen/circuit/recursion/micro.cpp":107:15)
+      // loc("zirgen/circuit/recursion/micro.cpp":111:15)
       auto x600 = x345 * x599;
       host_args.at(0) = x600;
       host(ctx, "log", "  prev_val = %u", host_args.data(), 1, host_outs.data(), 0);
-      // loc("zirgen/circuit/recursion/micro.cpp":109:11)
+      // loc("zirgen/circuit/recursion/micro.cpp":113:11)
       auto x601 = x600 * x295;
-      // loc("zirgen/circuit/recursion/micro.cpp":109:11)
+      // loc("zirgen/circuit/recursion/micro.cpp":113:11)
       auto x602 = x601 + x596;
-      // loc("zirgen/circuit/recursion/micro.cpp":110:11)
+      // loc("zirgen/circuit/recursion/micro.cpp":114:11)
       auto x603 = x602 * x295;
-      // loc("zirgen/circuit/recursion/micro.cpp":110:11)
+      // loc("zirgen/circuit/recursion/micro.cpp":114:11)
       auto x604 = x603 + x595;
-      // loc("zirgen/circuit/recursion/micro.cpp":111:11)
+      // loc("zirgen/circuit/recursion/micro.cpp":115:11)
       auto x605 = x604 * x295;
-      // loc("zirgen/circuit/recursion/micro.cpp":111:11)
+      // loc("zirgen/circuit/recursion/micro.cpp":115:11)
       auto x606 = x605 + x598;
-      // loc("zirgen/circuit/recursion/micro.cpp":112:11)
+      // loc("zirgen/circuit/recursion/micro.cpp":116:11)
       auto x607 = x606 * x295;
-      // loc("zirgen/circuit/recursion/micro.cpp":112:11)
+      // loc("zirgen/circuit/recursion/micro.cpp":116:11)
       auto x608 = x607 + x597;
       host_args.at(0) = x608;
       host(ctx, "log", "  val = %u", host_args.data(), 1, host_outs.data(), 0);
-      // loc("zirgen/circuit/recursion/micro.cpp":114:5)
+      // loc("zirgen/circuit/recursion/micro.cpp":118:5)
       {
         auto& reg = args[2][101 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x608);
         reg = x608;
       }
-      // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":87:3)
       {
         auto& reg = args[2][15 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x310);
@@ -2617,7 +2617,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x617;
         }
       }
-      // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":82:3)
       {
         auto& reg = args[2][5 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x343);
@@ -2626,9 +2626,9 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[0](Reg)"("zirgen/circuit/recursion/wom.cpp":42:14))
       auto x618 = args[2][6 * steps + ((cycle - 0) & mask)];
       assert(x618 != Fp::invalid());
-      // loc("zirgen/circuit/recursion/micro.cpp":119:31)
+      // loc("zirgen/circuit/recursion/micro.cpp":123:31)
       auto x619 = x345 * x618;
-      // loc("zirgen/circuit/recursion/micro.cpp":119:17)
+      // loc("zirgen/circuit/recursion/micro.cpp":123:17)
       auto x620 = x344 + x619;
       {
         host_args.at(0) = x620;
@@ -2662,7 +2662,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x624;
         }
       }
-      // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":82:3)
       {
         auto& reg = args[2][10 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x620);
@@ -2680,7 +2680,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[3](Reg)"("zirgen/circuit/recursion/wom.cpp":42:14))
       auto x628 = args[2][14 * steps + ((cycle - 0) & mask)];
       assert(x628 != Fp::invalid());
-      // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":87:3)
       {
         auto& reg = args[2][15 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x310);
@@ -2777,7 +2777,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x637;
         }
       }
-      // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":82:3)
       {
         auto& reg = args[2][5 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x343);
@@ -2813,43 +2813,43 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         assert(reg == Fp::invalid() || reg == x308);
         reg = x308;
       }
-      // loc("zirgen/circuit/recursion/micro.cpp":132:15)
+      // loc("zirgen/circuit/recursion/micro.cpp":136:15)
       auto x638 = x344 * x345;
       // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[3](Reg)"("zirgen/circuit/recursion/wom.cpp":42:14))
       auto x639 = args[2][9 * steps + ((cycle - 0) & mask)];
       assert(x639 != Fp::invalid());
-      // loc("zirgen/circuit/recursion/micro.cpp":132:15)
+      // loc("zirgen/circuit/recursion/micro.cpp":136:15)
       auto x640 = x638 * x639;
-      // loc("zirgen/circuit/recursion/micro.cpp":133:30)
+      // loc("zirgen/circuit/recursion/micro.cpp":137:30)
       auto x641 = x307 - x345;
-      // loc("zirgen/circuit/recursion/micro.cpp":133:15)
+      // loc("zirgen/circuit/recursion/micro.cpp":137:15)
       auto x642 = x344 * x641;
       // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[2](Reg)"("zirgen/circuit/recursion/wom.cpp":42:14))
       auto x643 = args[2][8 * steps + ((cycle - 0) & mask)];
       assert(x643 != Fp::invalid());
-      // loc("zirgen/circuit/recursion/micro.cpp":133:15)
+      // loc("zirgen/circuit/recursion/micro.cpp":137:15)
       auto x644 = x642 * x643;
-      // loc("zirgen/circuit/recursion/micro.cpp":132:15)
+      // loc("zirgen/circuit/recursion/micro.cpp":136:15)
       auto x645 = x640 + x644;
-      // loc("zirgen/circuit/recursion/micro.cpp":134:15)
+      // loc("zirgen/circuit/recursion/micro.cpp":138:15)
       auto x646 = x521 * x345;
       // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[1](Reg)"("zirgen/circuit/recursion/wom.cpp":42:14))
       auto x647 = args[2][7 * steps + ((cycle - 0) & mask)];
       assert(x647 != Fp::invalid());
-      // loc("zirgen/circuit/recursion/micro.cpp":134:15)
+      // loc("zirgen/circuit/recursion/micro.cpp":138:15)
       auto x648 = x646 * x647;
-      // loc("zirgen/circuit/recursion/micro.cpp":132:15)
+      // loc("zirgen/circuit/recursion/micro.cpp":136:15)
       auto x649 = x645 + x648;
-      // loc("zirgen/circuit/recursion/micro.cpp":135:15)
+      // loc("zirgen/circuit/recursion/micro.cpp":139:15)
       auto x650 = x521 * x641;
       // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[0](Reg)"("zirgen/circuit/recursion/wom.cpp":42:14))
       auto x651 = args[2][6 * steps + ((cycle - 0) & mask)];
       assert(x651 != Fp::invalid());
-      // loc("zirgen/circuit/recursion/micro.cpp":135:15)
+      // loc("zirgen/circuit/recursion/micro.cpp":139:15)
       auto x652 = x650 * x651;
-      // loc("zirgen/circuit/recursion/micro.cpp":132:15)
+      // loc("zirgen/circuit/recursion/micro.cpp":136:15)
       auto x653 = x649 + x652;
-      // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":87:3)
       {
         auto& reg = args[2][15 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x310);
@@ -2903,7 +2903,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         host(ctx, "womWrite", "", host_args.data(), 5, host_outs.data(), 0);
       }
     }
-    // loc("zirgen/circuit/recursion/micro.cpp":151:34)
+    // loc("zirgen/circuit/recursion/micro.cpp":155:34)
     auto x659 = x310 + x307;
     // loc("top(recursion::Top)/code(recursion::Code)/inst(Mux)/micro_ops(recursion::MicroInsts)/inst[1](recursion::MicroInst)/opcode(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
     auto x660 = args[0][11 * steps + ((cycle - 0) & mask)];
@@ -3126,7 +3126,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         assert(reg == Fp::invalid() || reg == x308);
         reg = x308;
       }
-      // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":87:3)
       {
         auto& reg = args[2][30 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x659);
@@ -3213,7 +3213,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x704;
         }
       }
-      // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":82:3)
       {
         auto& reg = args[2][20 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x692);
@@ -3263,7 +3263,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x712;
         }
       }
-      // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":82:3)
       {
         auto& reg = args[2][25 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x693);
@@ -3289,7 +3289,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       auto x719 = x707 + x715;
       // loc("zirgen/circuit/recursion/micro.cpp":28:30)
       auto x720 = x708 + x716;
-      // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":87:3)
       {
         auto& reg = args[2][30 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x659);
@@ -3401,7 +3401,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x733;
         }
       }
-      // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":82:3)
       {
         auto& reg = args[2][20 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x692);
@@ -3451,7 +3451,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x741;
         }
       }
-      // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":82:3)
       {
         auto& reg = args[2][25 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x693);
@@ -3477,7 +3477,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       auto x748 = x736 - x744;
       // loc("zirgen/circuit/recursion/micro.cpp":34:30)
       auto x749 = x737 - x745;
-      // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":87:3)
       {
         auto& reg = args[2][30 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x659);
@@ -3589,7 +3589,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x762;
         }
       }
-      // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":82:3)
       {
         auto& reg = args[2][20 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x692);
@@ -3639,7 +3639,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x770;
         }
       }
-      // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":82:3)
       {
         auto& reg = args[2][25 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x693);
@@ -3719,7 +3719,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       auto x804 = x766 * x771;
       // loc("zirgen/circuit/recursion/micro.cpp":40:30)
       auto x805 = x803 + x804;
-      // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":87:3)
       {
         auto& reg = args[2][30 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x659);
@@ -3833,7 +3833,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x819;
         }
       }
-      // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":82:3)
       {
         auto& reg = args[2][20 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x692);
@@ -3882,81 +3882,81 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         reg = x308;
       }
       {
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x824 = x820 * x820;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x825 = x823 + x823;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x826 = x821 * x825;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x827 = x822 * x822;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x828 = x826 - x827;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x829 = x828 * x297;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x830 = x824 + x829;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x831 = x822 + x822;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x832 = x820 * x831;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x833 = x821 * x821;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x834 = x832 - x833;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x835 = x823 * x823;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x836 = x835 * x297;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x837 = x834 + x836;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x838 = x830 * x830;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x839 = x837 * x297;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x840 = x839 * x837;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x841 = x838 + x840;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x842 = inv(x841);
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x843 = x830 * x842;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x844 = x837 * x842;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x845 = x820 * x843;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x846 = x822 * x297;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x847 = x846 * x844;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x848 = x845 + x847;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x849 = -x821;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x850 = x849 * x843;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x851 = x823 * x297;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x852 = x851 * x844;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x853 = x850 - x852;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x854 = -x820;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x855 = x854 * x844;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x856 = x822 * x843;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x857 = x855 + x856;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x858 = x821 * x844;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x859 = x823 * x843;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x860 = x858 - x859;
-        // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+        // loc("zirgen/circuit/recursion/wom.cpp":87:3)
         {
           auto& reg = args[2][30 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x659);
@@ -4032,9 +4032,9 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       host_args.at(7) = x869;
       host(ctx, "log", "INV: %e -> %e", host_args.data(), 8, host_outs.data(), 0);
     }
-    // loc("zirgen/circuit/recursion/micro.cpp":50:62)
+    // loc("zirgen/circuit/recursion/micro.cpp":52:62)
     auto x870 = x307 - x693;
-    // loc("zirgen/circuit/recursion/micro.cpp":50:62)
+    // loc("zirgen/circuit/recursion/micro.cpp":52:62)
     auto x871 = x685 * x870;
     if (x871 != 0) {
       {
@@ -4069,7 +4069,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x875;
         }
       }
-      // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":82:3)
       {
         auto& reg = args[2][20 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x692);
@@ -4109,9 +4109,9 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       auto x876 = args[2][21 * steps + ((cycle - 0) & mask)];
       assert(x876 != Fp::invalid());
       {
-        // loc("zirgen/circuit/recursion/micro.cpp":55:22)
+        // loc("zirgen/circuit/recursion/micro.cpp":57:22)
         auto x877 = inv(x876);
-        // loc("zirgen/circuit/recursion/micro.cpp":55:7)
+        // loc("zirgen/circuit/recursion/micro.cpp":57:7)
         {
           auto& reg = args[2][113 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x877);
@@ -4120,11 +4120,11 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[1](recursion::MicroOp)/extra(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
         auto x878 = args[2][113 * steps + ((cycle - 0) & mask)];
         assert(x878 != Fp::invalid());
-        // loc("zirgen/circuit/recursion/micro.cpp":56:36)
+        // loc("zirgen/circuit/recursion/micro.cpp":58:36)
         auto x879 = x878 * x876;
-        // loc("zirgen/circuit/recursion/micro.cpp":56:32)
+        // loc("zirgen/circuit/recursion/micro.cpp":58:32)
         auto x880 = x307 - x879;
-        // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+        // loc("zirgen/circuit/recursion/wom.cpp":87:3)
         {
           auto& reg = args[2][30 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x659);
@@ -4242,7 +4242,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x896;
         }
       }
-      // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":82:3)
       {
         auto& reg = args[2][20 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x692);
@@ -4292,7 +4292,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x904;
         }
       }
-      // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":82:3)
       {
         auto& reg = args[2][25 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x693);
@@ -4310,15 +4310,15 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[3](Reg)"("zirgen/circuit/recursion/wom.cpp":42:14))
       auto x908 = args[2][29 * steps + ((cycle - 0) & mask)];
       assert(x908 != Fp::invalid());
-      // loc("zirgen/circuit/recursion/micro.cpp":71:30)
+      // loc("zirgen/circuit/recursion/micro.cpp":73:30)
       auto x909 = x897 - x905;
-      // loc("zirgen/circuit/recursion/micro.cpp":71:30)
+      // loc("zirgen/circuit/recursion/micro.cpp":73:30)
       auto x910 = x898 - x906;
-      // loc("zirgen/circuit/recursion/micro.cpp":71:30)
+      // loc("zirgen/circuit/recursion/micro.cpp":73:30)
       auto x911 = x899 - x907;
-      // loc("zirgen/circuit/recursion/micro.cpp":71:30)
+      // loc("zirgen/circuit/recursion/micro.cpp":73:30)
       auto x912 = x900 - x908;
-      // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":87:3)
       {
         auto& reg = args[2][30 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x659);
@@ -4445,7 +4445,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         assert(reg == Fp::invalid() || reg == x308);
         reg = x308;
       }
-      // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":87:3)
       {
         auto& reg = args[2][30 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x659);
@@ -4574,7 +4574,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         auto x924 = host_outs.at(1);
         auto x925 = host_outs.at(2);
         auto x926 = host_outs.at(3);
-        // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+        // loc("zirgen/circuit/recursion/wom.cpp":87:3)
         {
           auto& reg = args[2][30 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x659);
@@ -4685,7 +4685,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x939;
         }
       }
-      // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":82:3)
       {
         auto& reg = args[2][20 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x692);
@@ -4723,7 +4723,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x943;
         }
       }
-      // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":82:3)
       {
         auto& reg = args[2][25 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x693);
@@ -4746,38 +4746,38 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       host_args.at(2) = x946;
       host_args.at(3) = x947;
       host(ctx, "log", "  in0=[%x %x], in1=[%x %x]", host_args.data(), 4, host_outs.data(), 0);
-      // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[0](recursion::MicroOp)/extra(Reg)"("zirgen/circuit/recursion/micro.cpp":107:71))
+      // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[0](recursion::MicroOp)/extra(Reg)"("zirgen/circuit/recursion/micro.cpp":111:71))
       auto x948 = args[2][101 * steps + ((cycle - 0) & mask)];
       if (x948 == Fp::invalid()) x948 = 0;
-      // loc("zirgen/circuit/recursion/micro.cpp":107:15)
+      // loc("zirgen/circuit/recursion/micro.cpp":111:15)
       auto x949 = x694 * x948;
       host_args.at(0) = x949;
       host(ctx, "log", "  prev_val = %u", host_args.data(), 1, host_outs.data(), 0);
-      // loc("zirgen/circuit/recursion/micro.cpp":109:11)
+      // loc("zirgen/circuit/recursion/micro.cpp":113:11)
       auto x950 = x949 * x295;
-      // loc("zirgen/circuit/recursion/micro.cpp":109:11)
+      // loc("zirgen/circuit/recursion/micro.cpp":113:11)
       auto x951 = x950 + x945;
-      // loc("zirgen/circuit/recursion/micro.cpp":110:11)
+      // loc("zirgen/circuit/recursion/micro.cpp":114:11)
       auto x952 = x951 * x295;
-      // loc("zirgen/circuit/recursion/micro.cpp":110:11)
+      // loc("zirgen/circuit/recursion/micro.cpp":114:11)
       auto x953 = x952 + x944;
-      // loc("zirgen/circuit/recursion/micro.cpp":111:11)
+      // loc("zirgen/circuit/recursion/micro.cpp":115:11)
       auto x954 = x953 * x295;
-      // loc("zirgen/circuit/recursion/micro.cpp":111:11)
+      // loc("zirgen/circuit/recursion/micro.cpp":115:11)
       auto x955 = x954 + x947;
-      // loc("zirgen/circuit/recursion/micro.cpp":112:11)
+      // loc("zirgen/circuit/recursion/micro.cpp":116:11)
       auto x956 = x955 * x295;
-      // loc("zirgen/circuit/recursion/micro.cpp":112:11)
+      // loc("zirgen/circuit/recursion/micro.cpp":116:11)
       auto x957 = x956 + x946;
       host_args.at(0) = x957;
       host(ctx, "log", "  val = %u", host_args.data(), 1, host_outs.data(), 0);
-      // loc("zirgen/circuit/recursion/micro.cpp":114:5)
+      // loc("zirgen/circuit/recursion/micro.cpp":118:5)
       {
         auto& reg = args[2][113 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x957);
         reg = x957;
       }
-      // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":87:3)
       {
         auto& reg = args[2][30 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x659);
@@ -4864,7 +4864,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x966;
         }
       }
-      // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":82:3)
       {
         auto& reg = args[2][20 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x692);
@@ -4873,9 +4873,9 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[0](Reg)"("zirgen/circuit/recursion/wom.cpp":42:14))
       auto x967 = args[2][21 * steps + ((cycle - 0) & mask)];
       assert(x967 != Fp::invalid());
-      // loc("zirgen/circuit/recursion/micro.cpp":119:31)
+      // loc("zirgen/circuit/recursion/micro.cpp":123:31)
       auto x968 = x694 * x967;
-      // loc("zirgen/circuit/recursion/micro.cpp":119:17)
+      // loc("zirgen/circuit/recursion/micro.cpp":123:17)
       auto x969 = x693 + x968;
       {
         host_args.at(0) = x969;
@@ -4909,7 +4909,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x973;
         }
       }
-      // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":82:3)
       {
         auto& reg = args[2][25 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x969);
@@ -4927,7 +4927,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[3](Reg)"("zirgen/circuit/recursion/wom.cpp":42:14))
       auto x977 = args[2][29 * steps + ((cycle - 0) & mask)];
       assert(x977 != Fp::invalid());
-      // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":87:3)
       {
         auto& reg = args[2][30 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x659);
@@ -5024,7 +5024,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x986;
         }
       }
-      // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":82:3)
       {
         auto& reg = args[2][20 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x692);
@@ -5060,43 +5060,43 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         assert(reg == Fp::invalid() || reg == x308);
         reg = x308;
       }
-      // loc("zirgen/circuit/recursion/micro.cpp":132:15)
+      // loc("zirgen/circuit/recursion/micro.cpp":136:15)
       auto x987 = x693 * x694;
       // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[3](Reg)"("zirgen/circuit/recursion/wom.cpp":42:14))
       auto x988 = args[2][24 * steps + ((cycle - 0) & mask)];
       assert(x988 != Fp::invalid());
-      // loc("zirgen/circuit/recursion/micro.cpp":132:15)
+      // loc("zirgen/circuit/recursion/micro.cpp":136:15)
       auto x989 = x987 * x988;
-      // loc("zirgen/circuit/recursion/micro.cpp":133:30)
+      // loc("zirgen/circuit/recursion/micro.cpp":137:30)
       auto x990 = x307 - x694;
-      // loc("zirgen/circuit/recursion/micro.cpp":133:15)
+      // loc("zirgen/circuit/recursion/micro.cpp":137:15)
       auto x991 = x693 * x990;
       // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[2](Reg)"("zirgen/circuit/recursion/wom.cpp":42:14))
       auto x992 = args[2][23 * steps + ((cycle - 0) & mask)];
       assert(x992 != Fp::invalid());
-      // loc("zirgen/circuit/recursion/micro.cpp":133:15)
+      // loc("zirgen/circuit/recursion/micro.cpp":137:15)
       auto x993 = x991 * x992;
-      // loc("zirgen/circuit/recursion/micro.cpp":132:15)
+      // loc("zirgen/circuit/recursion/micro.cpp":136:15)
       auto x994 = x989 + x993;
-      // loc("zirgen/circuit/recursion/micro.cpp":134:15)
+      // loc("zirgen/circuit/recursion/micro.cpp":138:15)
       auto x995 = x870 * x694;
       // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[1](Reg)"("zirgen/circuit/recursion/wom.cpp":42:14))
       auto x996 = args[2][22 * steps + ((cycle - 0) & mask)];
       assert(x996 != Fp::invalid());
-      // loc("zirgen/circuit/recursion/micro.cpp":134:15)
+      // loc("zirgen/circuit/recursion/micro.cpp":138:15)
       auto x997 = x995 * x996;
-      // loc("zirgen/circuit/recursion/micro.cpp":132:15)
+      // loc("zirgen/circuit/recursion/micro.cpp":136:15)
       auto x998 = x994 + x997;
-      // loc("zirgen/circuit/recursion/micro.cpp":135:15)
+      // loc("zirgen/circuit/recursion/micro.cpp":139:15)
       auto x999 = x870 * x990;
       // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[0](Reg)"("zirgen/circuit/recursion/wom.cpp":42:14))
       auto x1000 = args[2][21 * steps + ((cycle - 0) & mask)];
       assert(x1000 != Fp::invalid());
-      // loc("zirgen/circuit/recursion/micro.cpp":135:15)
+      // loc("zirgen/circuit/recursion/micro.cpp":139:15)
       auto x1001 = x999 * x1000;
-      // loc("zirgen/circuit/recursion/micro.cpp":132:15)
+      // loc("zirgen/circuit/recursion/micro.cpp":136:15)
       auto x1002 = x998 + x1001;
-      // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":87:3)
       {
         auto& reg = args[2][30 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x659);
@@ -5150,7 +5150,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         host(ctx, "womWrite", "", host_args.data(), 5, host_outs.data(), 0);
       }
     }
-    // loc("zirgen/circuit/recursion/micro.cpp":151:34)
+    // loc("zirgen/circuit/recursion/micro.cpp":155:34)
     auto x1008 = x310 + x306;
     // loc("top(recursion::Top)/code(recursion::Code)/inst(Mux)/micro_ops(recursion::MicroInsts)/inst[2](recursion::MicroInst)/opcode(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
     auto x1009 = args[0][15 * steps + ((cycle - 0) & mask)];
@@ -5373,7 +5373,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         assert(reg == Fp::invalid() || reg == x308);
         reg = x308;
       }
-      // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":87:3)
       {
         auto& reg = args[2][45 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x1008);
@@ -5460,7 +5460,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x1053;
         }
       }
-      // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":82:3)
       {
         auto& reg = args[2][35 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x1041);
@@ -5510,7 +5510,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x1061;
         }
       }
-      // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":82:3)
       {
         auto& reg = args[2][40 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x1042);
@@ -5536,7 +5536,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       auto x1068 = x1056 + x1064;
       // loc("zirgen/circuit/recursion/micro.cpp":28:30)
       auto x1069 = x1057 + x1065;
-      // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":87:3)
       {
         auto& reg = args[2][45 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x1008);
@@ -5648,7 +5648,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x1082;
         }
       }
-      // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":82:3)
       {
         auto& reg = args[2][35 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x1041);
@@ -5698,7 +5698,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x1090;
         }
       }
-      // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":82:3)
       {
         auto& reg = args[2][40 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x1042);
@@ -5724,7 +5724,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       auto x1097 = x1085 - x1093;
       // loc("zirgen/circuit/recursion/micro.cpp":34:30)
       auto x1098 = x1086 - x1094;
-      // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":87:3)
       {
         auto& reg = args[2][45 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x1008);
@@ -5836,7 +5836,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x1111;
         }
       }
-      // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":82:3)
       {
         auto& reg = args[2][35 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x1041);
@@ -5886,7 +5886,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x1119;
         }
       }
-      // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":82:3)
       {
         auto& reg = args[2][40 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x1042);
@@ -5966,7 +5966,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       auto x1153 = x1115 * x1120;
       // loc("zirgen/circuit/recursion/micro.cpp":40:30)
       auto x1154 = x1152 + x1153;
-      // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":87:3)
       {
         auto& reg = args[2][45 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x1008);
@@ -6080,7 +6080,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x1168;
         }
       }
-      // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":82:3)
       {
         auto& reg = args[2][35 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x1041);
@@ -6129,81 +6129,81 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         reg = x308;
       }
       {
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x1173 = x1169 * x1169;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x1174 = x1172 + x1172;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x1175 = x1170 * x1174;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x1176 = x1171 * x1171;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x1177 = x1175 - x1176;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x1178 = x1177 * x297;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x1179 = x1173 + x1178;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x1180 = x1171 + x1171;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x1181 = x1169 * x1180;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x1182 = x1170 * x1170;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x1183 = x1181 - x1182;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x1184 = x1172 * x1172;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x1185 = x1184 * x297;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x1186 = x1183 + x1185;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x1187 = x1179 * x1179;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x1188 = x1186 * x297;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x1189 = x1188 * x1186;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x1190 = x1187 + x1189;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x1191 = inv(x1190);
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x1192 = x1179 * x1191;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x1193 = x1186 * x1191;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x1194 = x1169 * x1192;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x1195 = x1171 * x297;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x1196 = x1195 * x1193;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x1197 = x1194 + x1196;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x1198 = -x1170;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x1199 = x1198 * x1192;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x1200 = x1172 * x297;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x1201 = x1200 * x1193;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x1202 = x1199 - x1201;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x1203 = -x1169;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x1204 = x1203 * x1193;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x1205 = x1171 * x1192;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x1206 = x1204 + x1205;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x1207 = x1170 * x1193;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x1208 = x1172 * x1192;
-        // loc("zirgen/circuit/recursion/micro.cpp":46:42)
+        // loc("zirgen/circuit/recursion/micro.cpp":47:35)
         auto x1209 = x1207 - x1208;
-        // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+        // loc("zirgen/circuit/recursion/wom.cpp":87:3)
         {
           auto& reg = args[2][45 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x1008);
@@ -6279,9 +6279,9 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       host_args.at(7) = x1218;
       host(ctx, "log", "INV: %e -> %e", host_args.data(), 8, host_outs.data(), 0);
     }
-    // loc("zirgen/circuit/recursion/micro.cpp":50:62)
+    // loc("zirgen/circuit/recursion/micro.cpp":52:62)
     auto x1219 = x307 - x1042;
-    // loc("zirgen/circuit/recursion/micro.cpp":50:62)
+    // loc("zirgen/circuit/recursion/micro.cpp":52:62)
     auto x1220 = x1034 * x1219;
     if (x1220 != 0) {
       {
@@ -6316,7 +6316,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x1224;
         }
       }
-      // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":82:3)
       {
         auto& reg = args[2][35 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x1041);
@@ -6356,9 +6356,9 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       auto x1225 = args[2][36 * steps + ((cycle - 0) & mask)];
       assert(x1225 != Fp::invalid());
       {
-        // loc("zirgen/circuit/recursion/micro.cpp":55:22)
+        // loc("zirgen/circuit/recursion/micro.cpp":57:22)
         auto x1226 = inv(x1225);
-        // loc("zirgen/circuit/recursion/micro.cpp":55:7)
+        // loc("zirgen/circuit/recursion/micro.cpp":57:7)
         {
           auto& reg = args[2][125 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x1226);
@@ -6367,11 +6367,11 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[2](recursion::MicroOp)/extra(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
         auto x1227 = args[2][125 * steps + ((cycle - 0) & mask)];
         assert(x1227 != Fp::invalid());
-        // loc("zirgen/circuit/recursion/micro.cpp":56:36)
+        // loc("zirgen/circuit/recursion/micro.cpp":58:36)
         auto x1228 = x1227 * x1225;
-        // loc("zirgen/circuit/recursion/micro.cpp":56:32)
+        // loc("zirgen/circuit/recursion/micro.cpp":58:32)
         auto x1229 = x307 - x1228;
-        // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+        // loc("zirgen/circuit/recursion/wom.cpp":87:3)
         {
           auto& reg = args[2][45 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x1008);
@@ -6489,7 +6489,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x1245;
         }
       }
-      // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":82:3)
       {
         auto& reg = args[2][35 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x1041);
@@ -6539,7 +6539,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x1253;
         }
       }
-      // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":82:3)
       {
         auto& reg = args[2][40 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x1042);
@@ -6557,15 +6557,15 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[3](Reg)"("zirgen/circuit/recursion/wom.cpp":42:14))
       auto x1257 = args[2][44 * steps + ((cycle - 0) & mask)];
       assert(x1257 != Fp::invalid());
-      // loc("zirgen/circuit/recursion/micro.cpp":71:30)
+      // loc("zirgen/circuit/recursion/micro.cpp":73:30)
       auto x1258 = x1246 - x1254;
-      // loc("zirgen/circuit/recursion/micro.cpp":71:30)
+      // loc("zirgen/circuit/recursion/micro.cpp":73:30)
       auto x1259 = x1247 - x1255;
-      // loc("zirgen/circuit/recursion/micro.cpp":71:30)
+      // loc("zirgen/circuit/recursion/micro.cpp":73:30)
       auto x1260 = x1248 - x1256;
-      // loc("zirgen/circuit/recursion/micro.cpp":71:30)
+      // loc("zirgen/circuit/recursion/micro.cpp":73:30)
       auto x1261 = x1249 - x1257;
-      // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":87:3)
       {
         auto& reg = args[2][45 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x1008);
@@ -6692,7 +6692,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         assert(reg == Fp::invalid() || reg == x308);
         reg = x308;
       }
-      // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":87:3)
       {
         auto& reg = args[2][45 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x1008);
@@ -6821,7 +6821,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         auto x1273 = host_outs.at(1);
         auto x1274 = host_outs.at(2);
         auto x1275 = host_outs.at(3);
-        // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+        // loc("zirgen/circuit/recursion/wom.cpp":87:3)
         {
           auto& reg = args[2][45 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x1008);
@@ -6932,7 +6932,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x1288;
         }
       }
-      // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":82:3)
       {
         auto& reg = args[2][35 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x1041);
@@ -6970,7 +6970,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x1292;
         }
       }
-      // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":82:3)
       {
         auto& reg = args[2][40 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x1042);
@@ -6993,38 +6993,38 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       host_args.at(2) = x1295;
       host_args.at(3) = x1296;
       host(ctx, "log", "  in0=[%x %x], in1=[%x %x]", host_args.data(), 4, host_outs.data(), 0);
-      // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[1](recursion::MicroOp)/extra(Reg)"("zirgen/circuit/recursion/micro.cpp":107:71))
+      // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[1](recursion::MicroOp)/extra(Reg)"("zirgen/circuit/recursion/micro.cpp":111:71))
       auto x1297 = args[2][113 * steps + ((cycle - 0) & mask)];
       if (x1297 == Fp::invalid()) x1297 = 0;
-      // loc("zirgen/circuit/recursion/micro.cpp":107:15)
+      // loc("zirgen/circuit/recursion/micro.cpp":111:15)
       auto x1298 = x1043 * x1297;
       host_args.at(0) = x1298;
       host(ctx, "log", "  prev_val = %u", host_args.data(), 1, host_outs.data(), 0);
-      // loc("zirgen/circuit/recursion/micro.cpp":109:11)
+      // loc("zirgen/circuit/recursion/micro.cpp":113:11)
       auto x1299 = x1298 * x295;
-      // loc("zirgen/circuit/recursion/micro.cpp":109:11)
+      // loc("zirgen/circuit/recursion/micro.cpp":113:11)
       auto x1300 = x1299 + x1294;
-      // loc("zirgen/circuit/recursion/micro.cpp":110:11)
+      // loc("zirgen/circuit/recursion/micro.cpp":114:11)
       auto x1301 = x1300 * x295;
-      // loc("zirgen/circuit/recursion/micro.cpp":110:11)
+      // loc("zirgen/circuit/recursion/micro.cpp":114:11)
       auto x1302 = x1301 + x1293;
-      // loc("zirgen/circuit/recursion/micro.cpp":111:11)
+      // loc("zirgen/circuit/recursion/micro.cpp":115:11)
       auto x1303 = x1302 * x295;
-      // loc("zirgen/circuit/recursion/micro.cpp":111:11)
+      // loc("zirgen/circuit/recursion/micro.cpp":115:11)
       auto x1304 = x1303 + x1296;
-      // loc("zirgen/circuit/recursion/micro.cpp":112:11)
+      // loc("zirgen/circuit/recursion/micro.cpp":116:11)
       auto x1305 = x1304 * x295;
-      // loc("zirgen/circuit/recursion/micro.cpp":112:11)
+      // loc("zirgen/circuit/recursion/micro.cpp":116:11)
       auto x1306 = x1305 + x1295;
       host_args.at(0) = x1306;
       host(ctx, "log", "  val = %u", host_args.data(), 1, host_outs.data(), 0);
-      // loc("zirgen/circuit/recursion/micro.cpp":114:5)
+      // loc("zirgen/circuit/recursion/micro.cpp":118:5)
       {
         auto& reg = args[2][125 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x1306);
         reg = x1306;
       }
-      // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":87:3)
       {
         auto& reg = args[2][45 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x1008);
@@ -7111,7 +7111,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x1315;
         }
       }
-      // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":82:3)
       {
         auto& reg = args[2][35 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x1041);
@@ -7120,9 +7120,9 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[0](Reg)"("zirgen/circuit/recursion/wom.cpp":42:14))
       auto x1316 = args[2][36 * steps + ((cycle - 0) & mask)];
       assert(x1316 != Fp::invalid());
-      // loc("zirgen/circuit/recursion/micro.cpp":119:31)
+      // loc("zirgen/circuit/recursion/micro.cpp":123:31)
       auto x1317 = x1043 * x1316;
-      // loc("zirgen/circuit/recursion/micro.cpp":119:17)
+      // loc("zirgen/circuit/recursion/micro.cpp":123:17)
       auto x1318 = x1042 + x1317;
       {
         host_args.at(0) = x1318;
@@ -7156,7 +7156,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x1322;
         }
       }
-      // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":82:3)
       {
         auto& reg = args[2][40 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x1318);
@@ -7174,7 +7174,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[3](Reg)"("zirgen/circuit/recursion/wom.cpp":42:14))
       auto x1326 = args[2][44 * steps + ((cycle - 0) & mask)];
       assert(x1326 != Fp::invalid());
-      // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":87:3)
       {
         auto& reg = args[2][45 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x1008);
@@ -7271,7 +7271,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x1335;
         }
       }
-      // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":82:3)
       {
         auto& reg = args[2][35 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x1041);
@@ -7307,43 +7307,43 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         assert(reg == Fp::invalid() || reg == x308);
         reg = x308;
       }
-      // loc("zirgen/circuit/recursion/micro.cpp":132:15)
+      // loc("zirgen/circuit/recursion/micro.cpp":136:15)
       auto x1336 = x1042 * x1043;
       // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[3](Reg)"("zirgen/circuit/recursion/wom.cpp":42:14))
       auto x1337 = args[2][39 * steps + ((cycle - 0) & mask)];
       assert(x1337 != Fp::invalid());
-      // loc("zirgen/circuit/recursion/micro.cpp":132:15)
+      // loc("zirgen/circuit/recursion/micro.cpp":136:15)
       auto x1338 = x1336 * x1337;
-      // loc("zirgen/circuit/recursion/micro.cpp":133:30)
+      // loc("zirgen/circuit/recursion/micro.cpp":137:30)
       auto x1339 = x307 - x1043;
-      // loc("zirgen/circuit/recursion/micro.cpp":133:15)
+      // loc("zirgen/circuit/recursion/micro.cpp":137:15)
       auto x1340 = x1042 * x1339;
       // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[2](Reg)"("zirgen/circuit/recursion/wom.cpp":42:14))
       auto x1341 = args[2][38 * steps + ((cycle - 0) & mask)];
       assert(x1341 != Fp::invalid());
-      // loc("zirgen/circuit/recursion/micro.cpp":133:15)
+      // loc("zirgen/circuit/recursion/micro.cpp":137:15)
       auto x1342 = x1340 * x1341;
-      // loc("zirgen/circuit/recursion/micro.cpp":132:15)
+      // loc("zirgen/circuit/recursion/micro.cpp":136:15)
       auto x1343 = x1338 + x1342;
-      // loc("zirgen/circuit/recursion/micro.cpp":134:15)
+      // loc("zirgen/circuit/recursion/micro.cpp":138:15)
       auto x1344 = x1219 * x1043;
       // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[1](Reg)"("zirgen/circuit/recursion/wom.cpp":42:14))
       auto x1345 = args[2][37 * steps + ((cycle - 0) & mask)];
       assert(x1345 != Fp::invalid());
-      // loc("zirgen/circuit/recursion/micro.cpp":134:15)
+      // loc("zirgen/circuit/recursion/micro.cpp":138:15)
       auto x1346 = x1344 * x1345;
-      // loc("zirgen/circuit/recursion/micro.cpp":132:15)
+      // loc("zirgen/circuit/recursion/micro.cpp":136:15)
       auto x1347 = x1343 + x1346;
-      // loc("zirgen/circuit/recursion/micro.cpp":135:15)
+      // loc("zirgen/circuit/recursion/micro.cpp":139:15)
       auto x1348 = x1219 * x1339;
       // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[0](Reg)"("zirgen/circuit/recursion/wom.cpp":42:14))
       auto x1349 = args[2][36 * steps + ((cycle - 0) & mask)];
       assert(x1349 != Fp::invalid());
-      // loc("zirgen/circuit/recursion/micro.cpp":135:15)
+      // loc("zirgen/circuit/recursion/micro.cpp":139:15)
       auto x1350 = x1348 * x1349;
-      // loc("zirgen/circuit/recursion/micro.cpp":132:15)
+      // loc("zirgen/circuit/recursion/micro.cpp":136:15)
       auto x1351 = x1347 + x1350;
-      // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":87:3)
       {
         auto& reg = args[2][45 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x1008);
@@ -7486,7 +7486,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x1366;
         }
       }
-      // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":82:3)
       {
         auto& reg = args[2][11 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x1362);
@@ -7527,7 +7527,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x1371;
         }
       }
-      // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":82:3)
       {
         auto& reg = args[2][16 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x1367);
@@ -8771,7 +8771,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/bit_and_elem(recursion::BitAndElem)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[0](Reg)"("zirgen/circuit/recursion/wom.cpp":42:14))
       auto x1710 = args[2][17 * steps + ((cycle - 0) & mask)];
       assert(x1710 != Fp::invalid());
-      // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":87:3)
       {
         auto& reg = args[2][21 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x1358);
@@ -8908,7 +8908,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x1730;
         }
       }
-      // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":82:3)
       {
         auto& reg = args[2][11 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x1724);
@@ -8946,7 +8946,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x1734;
         }
       }
-      // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":82:3)
       {
         auto& reg = args[2][16 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x1725);
@@ -10046,7 +10046,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         auto x2019 = x2018 * x295;
         // loc("zirgen/circuit/recursion/bits.cpp":44:30)
         auto x2020 = x2019 + x1878;
-        // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+        // loc("zirgen/circuit/recursion/wom.cpp":87:3)
         {
           auto& reg = args[2][21 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x1358);
@@ -10132,7 +10132,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         auto x2035 = x2018 * x306;
         // loc("zirgen/circuit/recursion/bits.cpp":51:19)
         auto x2036 = x2034 - x2035;
-        // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+        // loc("zirgen/circuit/recursion/wom.cpp":87:3)
         {
           auto& reg = args[2][21 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x1358);
@@ -10243,7 +10243,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x2051;
         }
       }
-      // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":82:3)
       {
         auto& reg = args[2][11 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x2047);
@@ -10284,7 +10284,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x2056;
         }
       }
-      // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":82:3)
       {
         auto& reg = args[2][16 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x2052);
@@ -10501,7 +10501,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("zirgen/circuit/recursion/sha.cpp":106:15)
       auto x2104 = x2103 * x267;
       {
-        // loc("zirgen/circuit/recursion/sha.cpp":124:26)
+        // loc("zirgen/circuit/recursion/sha.cpp":125:19)
         auto x2105 = Fp(x2104.asUInt32() & x305.asUInt32());
         // loc("./zirgen/components/bits.h":68:23)
         {
@@ -10783,7 +10783,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("zirgen/circuit/recursion/sha.cpp":106:15)
       auto x2184 = x2183 * x267;
       {
-        // loc("zirgen/circuit/recursion/sha.cpp":128:27)
+        // loc("zirgen/circuit/recursion/sha.cpp":131:20)
         auto x2185 = Fp(x2184.asUInt32() & x305.asUInt32());
         // loc("./zirgen/components/bits.h":68:23)
         {
@@ -11071,7 +11071,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("zirgen/circuit/recursion/sha.cpp":106:15)
       auto x2266 = x2265 * x267;
       {
-        // loc("zirgen/circuit/recursion/sha.cpp":124:26)
+        // loc("zirgen/circuit/recursion/sha.cpp":125:19)
         auto x2267 = Fp(x2266.asUInt32() & x305.asUInt32());
         // loc("./zirgen/components/bits.h":68:23)
         {
@@ -11080,7 +11080,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x2267;
         }
       }
-      // loc("zirgen/circuit/recursion/sha.cpp":127:32)
+      // loc("zirgen/circuit/recursion/sha.cpp":129:32)
       auto x2268 = x2187 + x2266;
       {
         // loc("zirgen/circuit/recursion/sha.cpp":99:29)
@@ -11355,7 +11355,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("zirgen/circuit/recursion/sha.cpp":106:15)
       auto x2347 = x2346 * x267;
       {
-        // loc("zirgen/circuit/recursion/sha.cpp":128:27)
+        // loc("zirgen/circuit/recursion/sha.cpp":131:20)
         auto x2348 = Fp(x2347.asUInt32() & x305.asUInt32());
         // loc("./zirgen/components/bits.h":68:23)
         {
@@ -11643,7 +11643,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("zirgen/circuit/recursion/sha.cpp":106:15)
       auto x2429 = x2428 * x267;
       {
-        // loc("zirgen/circuit/recursion/sha.cpp":124:26)
+        // loc("zirgen/circuit/recursion/sha.cpp":125:19)
         auto x2430 = Fp(x2429.asUInt32() & x305.asUInt32());
         // loc("./zirgen/components/bits.h":68:23)
         {
@@ -11652,7 +11652,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x2430;
         }
       }
-      // loc("zirgen/circuit/recursion/sha.cpp":127:32)
+      // loc("zirgen/circuit/recursion/sha.cpp":129:32)
       auto x2431 = x2350 + x2429;
       {
         // loc("zirgen/circuit/recursion/sha.cpp":99:29)
@@ -11927,7 +11927,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("zirgen/circuit/recursion/sha.cpp":106:15)
       auto x2510 = x2509 * x267;
       {
-        // loc("zirgen/circuit/recursion/sha.cpp":128:27)
+        // loc("zirgen/circuit/recursion/sha.cpp":131:20)
         auto x2511 = Fp(x2510.asUInt32() & x305.asUInt32());
         // loc("./zirgen/components/bits.h":68:23)
         {
@@ -12152,7 +12152,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("zirgen/circuit/recursion/sha.cpp":106:15)
       auto x2560 = x2559 * x267;
       {
-        // loc("zirgen/circuit/recursion/sha.cpp":124:26)
+        // loc("zirgen/circuit/recursion/sha.cpp":125:19)
         auto x2561 = Fp(x2560.asUInt32() & x305.asUInt32());
         // loc("./zirgen/components/bits.h":68:23)
         {
@@ -12434,7 +12434,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("zirgen/circuit/recursion/sha.cpp":106:15)
       auto x2640 = x2639 * x267;
       {
-        // loc("zirgen/circuit/recursion/sha.cpp":128:27)
+        // loc("zirgen/circuit/recursion/sha.cpp":131:20)
         auto x2641 = Fp(x2640.asUInt32() & x305.asUInt32());
         // loc("./zirgen/components/bits.h":68:23)
         {
@@ -13152,7 +13152,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("zirgen/circuit/recursion/sha.cpp":106:15)
       auto x2906 = x2905 * x267;
       {
-        // loc("zirgen/circuit/recursion/sha.cpp":124:26)
+        // loc("zirgen/circuit/recursion/sha.cpp":125:19)
         auto x2907 = Fp(x2906.asUInt32() & x305.asUInt32());
         // loc("./zirgen/components/bits.h":68:23)
         {
@@ -13161,7 +13161,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x2907;
         }
       }
-      // loc("zirgen/circuit/recursion/sha.cpp":127:32)
+      // loc("zirgen/circuit/recursion/sha.cpp":129:32)
       auto x2908 = x2827 + x2906;
       {
         // loc("zirgen/circuit/recursion/sha.cpp":99:29)
@@ -13436,7 +13436,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("zirgen/circuit/recursion/sha.cpp":106:15)
       auto x2987 = x2986 * x267;
       {
-        // loc("zirgen/circuit/recursion/sha.cpp":128:27)
+        // loc("zirgen/circuit/recursion/sha.cpp":131:20)
         auto x2988 = Fp(x2987.asUInt32() & x305.asUInt32());
         // loc("./zirgen/components/bits.h":68:23)
         {
@@ -14154,7 +14154,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("zirgen/circuit/recursion/sha.cpp":106:15)
       auto x3253 = x3252 * x267;
       {
-        // loc("zirgen/circuit/recursion/sha.cpp":124:26)
+        // loc("zirgen/circuit/recursion/sha.cpp":125:19)
         auto x3254 = Fp(x3253.asUInt32() & x305.asUInt32());
         // loc("./zirgen/components/bits.h":68:23)
         {
@@ -14163,7 +14163,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x3254;
         }
       }
-      // loc("zirgen/circuit/recursion/sha.cpp":127:32)
+      // loc("zirgen/circuit/recursion/sha.cpp":129:32)
       auto x3255 = x3174 + x3253;
       {
         // loc("zirgen/circuit/recursion/sha.cpp":99:29)
@@ -14438,7 +14438,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("zirgen/circuit/recursion/sha.cpp":106:15)
       auto x3334 = x3333 * x267;
       {
-        // loc("zirgen/circuit/recursion/sha.cpp":128:27)
+        // loc("zirgen/circuit/recursion/sha.cpp":131:20)
         auto x3335 = Fp(x3334.asUInt32() & x305.asUInt32());
         // loc("./zirgen/components/bits.h":68:23)
         {
@@ -14571,15 +14571,15 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("top(recursion::Top)/code(recursion::Code)/inst(Mux)/macro_ops(recursion::MacroInst)/operand[0](Reg)"("./zirgen/compiler/edsl/component.h":154:27))
       auto x3392 = args[0][17 * steps + ((cycle - 0) & mask)];
       assert(x3392 != Fp::invalid());
-      // loc("zirgen/circuit/recursion/sha.cpp":248:46)
+      // loc("zirgen/circuit/recursion/sha.cpp":256:46)
       auto x3393 = x2961 * x283;
-      // loc("zirgen/circuit/recursion/sha.cpp":248:36)
+      // loc("zirgen/circuit/recursion/sha.cpp":256:36)
       auto x3394 = x3363 + x3393;
-      // loc("zirgen/circuit/recursion/sha.cpp":248:71)
+      // loc("zirgen/circuit/recursion/sha.cpp":256:71)
       auto x3395 = x2880 * x283;
-      // loc("zirgen/circuit/recursion/sha.cpp":248:61)
+      // loc("zirgen/circuit/recursion/sha.cpp":256:61)
       auto x3396 = x3349 + x3395;
-      // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":87:3)
       {
         auto& reg = args[2][11 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x3392);
@@ -14635,15 +14635,15 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("top(recursion::Top)/code(recursion::Code)/inst(Mux)/macro_ops(recursion::MacroInst)/operand[1](Reg)"("./zirgen/compiler/edsl/component.h":154:27))
       auto x3402 = args[0][18 * steps + ((cycle - 0) & mask)];
       assert(x3402 != Fp::invalid());
-      // loc("zirgen/circuit/recursion/sha.cpp":249:46)
+      // loc("zirgen/circuit/recursion/sha.cpp":257:46)
       auto x3403 = x3308 * x283;
-      // loc("zirgen/circuit/recursion/sha.cpp":249:36)
+      // loc("zirgen/circuit/recursion/sha.cpp":257:36)
       auto x3404 = x3391 + x3403;
-      // loc("zirgen/circuit/recursion/sha.cpp":249:71)
+      // loc("zirgen/circuit/recursion/sha.cpp":257:71)
       auto x3405 = x3227 * x283;
-      // loc("zirgen/circuit/recursion/sha.cpp":249:61)
+      // loc("zirgen/circuit/recursion/sha.cpp":257:61)
       auto x3406 = x3377 + x3405;
-      // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":87:3)
       {
         auto& reg = args[2][16 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x3402);
@@ -14736,7 +14736,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x3417;
         }
       }
-      // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":82:3)
       {
         auto& reg = args[2][11 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x3413);
@@ -14777,7 +14777,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x3422;
         }
       }
-      // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":82:3)
       {
         auto& reg = args[2][16 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x3418);
@@ -14786,13 +14786,13 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("top(recursion::Top)/code(recursion::Code)/inst(Mux)/macro_ops(recursion::MacroInst)/operand[2](Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
       auto x3423 = args[0][19 * steps + ((cycle - 0) & mask)];
       assert(x3423 != Fp::invalid());
-      // loc("zirgen/circuit/recursion/sha.cpp":177:27)
+      // loc("zirgen/circuit/recursion/sha.cpp":181:27)
       auto x3424 = x307 - x3423;
       if (x3424 != 0) {
         // loc("top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/sha_load(recursion::ShaWrap)/sha_cycle(recursion::ShaCycle)/recursion::WomBody/plonk_body(PlonkBody)/recursion::impl::WomPlonkElement/data[0](Reg)"("zirgen/circuit/recursion/wom.cpp":42:14))
         auto x3425 = args[2][12 * steps + ((cycle - 0) & mask)];
         assert(x3425 != Fp::invalid());
-        // loc("zirgen/circuit/recursion/sha.cpp":179:15)
+        // loc("zirgen/circuit/recursion/sha.cpp":183:15)
         auto x3426 = x3425 * x238;
         {
           // loc("zirgen/circuit/recursion/sha.cpp":99:29)
@@ -15294,16 +15294,16 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/sha_load(recursion::ShaWrap)/sha_cycle(recursion::ShaCycle)/w[6](Bit)/bit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
         auto x3562 = args[2][100 * steps + ((cycle - 0) & mask)];
         assert(x3562 != Fp::invalid());
-        // loc("zirgen/circuit/recursion/sha.cpp":193:14)
+        // loc("zirgen/circuit/recursion/sha.cpp":197:14)
         auto x3563 = x3559 + x3560;
-        // loc("zirgen/circuit/recursion/sha.cpp":193:14)
+        // loc("zirgen/circuit/recursion/sha.cpp":197:14)
         auto x3564 = x3563 + x3561;
-        // loc("zirgen/circuit/recursion/sha.cpp":193:14)
+        // loc("zirgen/circuit/recursion/sha.cpp":197:14)
         auto x3565 = x3564 + x3562;
         {
-          // loc("zirgen/circuit/recursion/sha.cpp":202:25)
+          // loc("zirgen/circuit/recursion/sha.cpp":206:25)
           auto x3566 = x3565 - x304;
-          // loc("zirgen/circuit/recursion/sha.cpp":202:25)
+          // loc("zirgen/circuit/recursion/sha.cpp":206:25)
           auto x3567 = (x3566 == 0) ? Fp(1) : Fp(0);
           if (x3567 != 0) {
             // loc("./zirgen/components/bits.h":68:23)
@@ -15313,7 +15313,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
               reg = x308;
             }
           }
-          // loc("zirgen/circuit/recursion/sha.cpp":204:21)
+          // loc("zirgen/circuit/recursion/sha.cpp":210:21)
           auto x3568 = x307 - x3567;
           if (x3568 != 0) {
             // loc("./zirgen/components/bits.h":68:23)
@@ -19560,25 +19560,25 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       auto x5421 = x4819 + x5390;
       // loc("zirgen/circuit/recursion/sha.cpp":83:14)
       auto x5422 = x4820 + x5420;
-      // loc("zirgen/circuit/recursion/sha.cpp":290:5)
+      // loc("zirgen/circuit/recursion/sha.cpp":298:5)
       {
         auto& reg = args[2][58 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x5359);
         reg = x5359;
       }
-      // loc("zirgen/circuit/recursion/sha.cpp":291:5)
+      // loc("zirgen/circuit/recursion/sha.cpp":299:5)
       {
         auto& reg = args[2][92 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x5421);
         reg = x5421;
       }
-      // loc("zirgen/circuit/recursion/sha.cpp":290:5)
+      // loc("zirgen/circuit/recursion/sha.cpp":298:5)
       {
         auto& reg = args[2][59 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x5360);
         reg = x5360;
       }
-      // loc("zirgen/circuit/recursion/sha.cpp":291:5)
+      // loc("zirgen/circuit/recursion/sha.cpp":299:5)
       {
         auto& reg = args[2][93 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x5422);
@@ -19863,7 +19863,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("zirgen/circuit/recursion/sha.cpp":106:15)
       auto x5503 = x5502 * x267;
       {
-        // loc("zirgen/circuit/recursion/sha.cpp":124:26)
+        // loc("zirgen/circuit/recursion/sha.cpp":125:19)
         auto x5504 = Fp(x5503.asUInt32() & x305.asUInt32());
         // loc("./zirgen/components/bits.h":68:23)
         {
@@ -19872,7 +19872,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x5504;
         }
       }
-      // loc("zirgen/circuit/recursion/sha.cpp":127:32)
+      // loc("zirgen/circuit/recursion/sha.cpp":129:32)
       auto x5505 = x5424 + x5503;
       {
         // loc("zirgen/circuit/recursion/sha.cpp":99:29)
@@ -20147,7 +20147,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("zirgen/circuit/recursion/sha.cpp":106:15)
       auto x5584 = x5583 * x267;
       {
-        // loc("zirgen/circuit/recursion/sha.cpp":128:27)
+        // loc("zirgen/circuit/recursion/sha.cpp":131:20)
         auto x5585 = Fp(x5584.asUInt32() & x305.asUInt32());
         // loc("./zirgen/components/bits.h":68:23)
         {
@@ -20435,7 +20435,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("zirgen/circuit/recursion/sha.cpp":106:15)
       auto x5666 = x5665 * x267;
       {
-        // loc("zirgen/circuit/recursion/sha.cpp":124:26)
+        // loc("zirgen/circuit/recursion/sha.cpp":125:19)
         auto x5667 = Fp(x5666.asUInt32() & x305.asUInt32());
         // loc("./zirgen/components/bits.h":68:23)
         {
@@ -20444,7 +20444,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x5667;
         }
       }
-      // loc("zirgen/circuit/recursion/sha.cpp":127:32)
+      // loc("zirgen/circuit/recursion/sha.cpp":129:32)
       auto x5668 = x5587 + x5666;
       {
         // loc("zirgen/circuit/recursion/sha.cpp":99:29)
@@ -20719,7 +20719,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("zirgen/circuit/recursion/sha.cpp":106:15)
       auto x5747 = x5746 * x267;
       {
-        // loc("zirgen/circuit/recursion/sha.cpp":128:27)
+        // loc("zirgen/circuit/recursion/sha.cpp":131:20)
         auto x5748 = Fp(x5747.asUInt32() & x305.asUInt32());
         // loc("./zirgen/components/bits.h":68:23)
         {
@@ -20798,7 +20798,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x5754;
         }
       }
-      // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+      // loc("zirgen/circuit/recursion/wom.cpp":82:3)
       {
         auto& reg = args[2][16 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x5750);
@@ -22498,13 +22498,13 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       auto x6536 = x6321 + x6534;
       // loc("zirgen/circuit/recursion/sha.cpp":83:14)
       auto x6537 = x6351 + x6535;
-      // loc("zirgen/circuit/recursion/sha.cpp":261:5)
+      // loc("zirgen/circuit/recursion/sha.cpp":269:5)
       {
         auto& reg = args[2][126 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x6536);
         reg = x6536;
       }
-      // loc("zirgen/circuit/recursion/sha.cpp":261:5)
+      // loc("zirgen/circuit/recursion/sha.cpp":269:5)
       {
         auto& reg = args[2][127 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x6537);
@@ -22789,7 +22789,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("zirgen/circuit/recursion/sha.cpp":106:15)
       auto x6618 = x6617 * x267;
       {
-        // loc("zirgen/circuit/recursion/sha.cpp":124:26)
+        // loc("zirgen/circuit/recursion/sha.cpp":125:19)
         auto x6619 = Fp(x6618.asUInt32() & x305.asUInt32());
         // loc("./zirgen/components/bits.h":68:23)
         {
@@ -22798,7 +22798,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x6619;
         }
       }
-      // loc("zirgen/circuit/recursion/sha.cpp":127:32)
+      // loc("zirgen/circuit/recursion/sha.cpp":129:32)
       auto x6620 = x6539 + x6618;
       {
         // loc("zirgen/circuit/recursion/sha.cpp":99:29)
@@ -23073,7 +23073,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("zirgen/circuit/recursion/sha.cpp":106:15)
       auto x6699 = x6698 * x267;
       {
-        // loc("zirgen/circuit/recursion/sha.cpp":128:27)
+        // loc("zirgen/circuit/recursion/sha.cpp":131:20)
         auto x6700 = Fp(x6699.asUInt32() & x305.asUInt32());
         // loc("./zirgen/components/bits.h":68:23)
         {
@@ -26588,25 +26588,25 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       auto x8323 = x7721 + x8292;
       // loc("zirgen/circuit/recursion/sha.cpp":83:14)
       auto x8324 = x7722 + x8322;
-      // loc("zirgen/circuit/recursion/sha.cpp":290:5)
+      // loc("zirgen/circuit/recursion/sha.cpp":298:5)
       {
         auto& reg = args[2][58 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x8261);
         reg = x8261;
       }
-      // loc("zirgen/circuit/recursion/sha.cpp":291:5)
+      // loc("zirgen/circuit/recursion/sha.cpp":299:5)
       {
         auto& reg = args[2][92 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x8323);
         reg = x8323;
       }
-      // loc("zirgen/circuit/recursion/sha.cpp":290:5)
+      // loc("zirgen/circuit/recursion/sha.cpp":298:5)
       {
         auto& reg = args[2][59 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x8262);
         reg = x8262;
       }
-      // loc("zirgen/circuit/recursion/sha.cpp":291:5)
+      // loc("zirgen/circuit/recursion/sha.cpp":299:5)
       {
         auto& reg = args[2][93 * steps + cycle];
         assert(reg == Fp::invalid() || reg == x8324);
@@ -26891,7 +26891,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("zirgen/circuit/recursion/sha.cpp":106:15)
       auto x8405 = x8404 * x267;
       {
-        // loc("zirgen/circuit/recursion/sha.cpp":124:26)
+        // loc("zirgen/circuit/recursion/sha.cpp":125:19)
         auto x8406 = Fp(x8405.asUInt32() & x305.asUInt32());
         // loc("./zirgen/components/bits.h":68:23)
         {
@@ -26900,7 +26900,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x8406;
         }
       }
-      // loc("zirgen/circuit/recursion/sha.cpp":127:32)
+      // loc("zirgen/circuit/recursion/sha.cpp":129:32)
       auto x8407 = x8326 + x8405;
       {
         // loc("zirgen/circuit/recursion/sha.cpp":99:29)
@@ -27175,7 +27175,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("zirgen/circuit/recursion/sha.cpp":106:15)
       auto x8486 = x8485 * x267;
       {
-        // loc("zirgen/circuit/recursion/sha.cpp":128:27)
+        // loc("zirgen/circuit/recursion/sha.cpp":131:20)
         auto x8487 = Fp(x8486.asUInt32() & x305.asUInt32());
         // loc("./zirgen/components/bits.h":68:23)
         {
@@ -27463,7 +27463,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("zirgen/circuit/recursion/sha.cpp":106:15)
       auto x8568 = x8567 * x267;
       {
-        // loc("zirgen/circuit/recursion/sha.cpp":124:26)
+        // loc("zirgen/circuit/recursion/sha.cpp":125:19)
         auto x8569 = Fp(x8568.asUInt32() & x305.asUInt32());
         // loc("./zirgen/components/bits.h":68:23)
         {
@@ -27472,7 +27472,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x8569;
         }
       }
-      // loc("zirgen/circuit/recursion/sha.cpp":127:32)
+      // loc("zirgen/circuit/recursion/sha.cpp":129:32)
       auto x8570 = x8489 + x8568;
       {
         // loc("zirgen/circuit/recursion/sha.cpp":99:29)
@@ -27747,7 +27747,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("zirgen/circuit/recursion/sha.cpp":106:15)
       auto x8649 = x8648 * x267;
       {
-        // loc("zirgen/circuit/recursion/sha.cpp":128:27)
+        // loc("zirgen/circuit/recursion/sha.cpp":131:20)
         auto x8650 = Fp(x8649.asUInt32() & x305.asUInt32());
         // loc("./zirgen/components/bits.h":68:23)
         {
@@ -27855,7 +27855,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x8668;
           }
         }
-        // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+        // loc("zirgen/circuit/recursion/wom.cpp":82:3)
         {
           auto& reg = args[2][15 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x8664);
@@ -27915,7 +27915,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x8675;
           }
         }
-        // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+        // loc("zirgen/circuit/recursion/wom.cpp":82:3)
         {
           auto& reg = args[2][20 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x8671);
@@ -27975,7 +27975,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x8682;
           }
         }
-        // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+        // loc("zirgen/circuit/recursion/wom.cpp":82:3)
         {
           auto& reg = args[2][25 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x8678);
@@ -28035,7 +28035,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x8689;
           }
         }
-        // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+        // loc("zirgen/circuit/recursion/wom.cpp":82:3)
         {
           auto& reg = args[2][30 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x8685);
@@ -28098,7 +28098,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x8696;
           }
         }
-        // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+        // loc("zirgen/circuit/recursion/wom.cpp":82:3)
         {
           auto& reg = args[2][15 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x8692);
@@ -28158,7 +28158,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x8703;
           }
         }
-        // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+        // loc("zirgen/circuit/recursion/wom.cpp":82:3)
         {
           auto& reg = args[2][20 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x8699);
@@ -28218,7 +28218,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x8710;
           }
         }
-        // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+        // loc("zirgen/circuit/recursion/wom.cpp":82:3)
         {
           auto& reg = args[2][25 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x8706);
@@ -28278,7 +28278,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x8717;
           }
         }
-        // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+        // loc("zirgen/circuit/recursion/wom.cpp":82:3)
         {
           auto& reg = args[2][30 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x8713);
@@ -28341,7 +28341,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x8724;
           }
         }
-        // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+        // loc("zirgen/circuit/recursion/wom.cpp":82:3)
         {
           auto& reg = args[2][15 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x8720);
@@ -28401,7 +28401,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x8731;
           }
         }
-        // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+        // loc("zirgen/circuit/recursion/wom.cpp":82:3)
         {
           auto& reg = args[2][20 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x8727);
@@ -28461,7 +28461,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x8738;
           }
         }
-        // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+        // loc("zirgen/circuit/recursion/wom.cpp":82:3)
         {
           auto& reg = args[2][25 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x8734);
@@ -28521,7 +28521,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x8745;
           }
         }
-        // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+        // loc("zirgen/circuit/recursion/wom.cpp":82:3)
         {
           auto& reg = args[2][30 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x8741);
@@ -28584,7 +28584,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x8752;
           }
         }
-        // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+        // loc("zirgen/circuit/recursion/wom.cpp":82:3)
         {
           auto& reg = args[2][15 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x8748);
@@ -28644,7 +28644,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x8759;
           }
         }
-        // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+        // loc("zirgen/circuit/recursion/wom.cpp":82:3)
         {
           auto& reg = args[2][20 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x8755);
@@ -28704,7 +28704,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x8766;
           }
         }
-        // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+        // loc("zirgen/circuit/recursion/wom.cpp":82:3)
         {
           auto& reg = args[2][25 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x8762);
@@ -28764,7 +28764,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x8773;
           }
         }
-        // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+        // loc("zirgen/circuit/recursion/wom.cpp":82:3)
         {
           auto& reg = args[2][30 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x8769);
@@ -28841,7 +28841,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         reg = x8785;
       }
     }
-    // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+    // loc("zirgen/circuit/recursion/wom.cpp":82:3)
     {
       auto& reg = args[2][5 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x8781);
@@ -28887,7 +28887,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         reg = x8792;
       }
     }
-    // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+    // loc("zirgen/circuit/recursion/wom.cpp":82:3)
     {
       auto& reg = args[2][10 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x8788);
@@ -28933,7 +28933,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         reg = x8799;
       }
     }
-    // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+    // loc("zirgen/circuit/recursion/wom.cpp":82:3)
     {
       auto& reg = args[2][15 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x8795);
@@ -28979,7 +28979,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         reg = x8806;
       }
     }
-    // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+    // loc("zirgen/circuit/recursion/wom.cpp":82:3)
     {
       auto& reg = args[2][20 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x8802);
@@ -29025,7 +29025,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         reg = x8813;
       }
     }
-    // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+    // loc("zirgen/circuit/recursion/wom.cpp":82:3)
     {
       auto& reg = args[2][25 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x8809);
@@ -29071,7 +29071,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         reg = x8820;
       }
     }
-    // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+    // loc("zirgen/circuit/recursion/wom.cpp":82:3)
     {
       auto& reg = args[2][30 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x8816);
@@ -29117,7 +29117,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         reg = x8827;
       }
     }
-    // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+    // loc("zirgen/circuit/recursion/wom.cpp":82:3)
     {
       auto& reg = args[2][35 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x8823);
@@ -29163,7 +29163,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         reg = x8834;
       }
     }
-    // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+    // loc("zirgen/circuit/recursion/wom.cpp":82:3)
     {
       auto& reg = args[2][40 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x8830);
@@ -30191,485 +30191,485 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
     auto x9208 = x9205 + x9207;
     host_args.at(0) = x9208;
     host(ctx, "log", "POSEIDON2_FULL: %u", host_args.data(), 1, host_outs.data(), 0);
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":151:42))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":195:42))
     auto x9209 = args[2][90 * steps + ((cycle - 1) & mask)];
     assert(x9209 != Fp::invalid());
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":151:42))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":195:42))
     auto x9210 = args[2][91 * steps + ((cycle - 1) & mask)];
     assert(x9210 != Fp::invalid());
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":151:42))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":195:42))
     auto x9211 = args[2][92 * steps + ((cycle - 1) & mask)];
     assert(x9211 != Fp::invalid());
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":151:42))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":195:42))
     auto x9212 = args[2][93 * steps + ((cycle - 1) & mask)];
     assert(x9212 != Fp::invalid());
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":151:42))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":195:42))
     auto x9213 = args[2][94 * steps + ((cycle - 1) & mask)];
     assert(x9213 != Fp::invalid());
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":151:42))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":195:42))
     auto x9214 = args[2][95 * steps + ((cycle - 1) & mask)];
     assert(x9214 != Fp::invalid());
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":151:42))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":195:42))
     auto x9215 = args[2][96 * steps + ((cycle - 1) & mask)];
     assert(x9215 != Fp::invalid());
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":151:42))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":195:42))
     auto x9216 = args[2][97 * steps + ((cycle - 1) & mask)];
     assert(x9216 != Fp::invalid());
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":151:42))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":195:42))
     auto x9217 = args[2][98 * steps + ((cycle - 1) & mask)];
     assert(x9217 != Fp::invalid());
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":151:42))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":195:42))
     auto x9218 = args[2][99 * steps + ((cycle - 1) & mask)];
     assert(x9218 != Fp::invalid());
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":151:42))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":195:42))
     auto x9219 = args[2][100 * steps + ((cycle - 1) & mask)];
     assert(x9219 != Fp::invalid());
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":151:42))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":195:42))
     auto x9220 = args[2][101 * steps + ((cycle - 1) & mask)];
     assert(x9220 != Fp::invalid());
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":151:42))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":195:42))
     auto x9221 = args[2][102 * steps + ((cycle - 1) & mask)];
     assert(x9221 != Fp::invalid());
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":151:42))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":195:42))
     auto x9222 = args[2][103 * steps + ((cycle - 1) & mask)];
     assert(x9222 != Fp::invalid());
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":151:42))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":195:42))
     auto x9223 = args[2][104 * steps + ((cycle - 1) & mask)];
     assert(x9223 != Fp::invalid());
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":151:42))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":195:42))
     auto x9224 = args[2][105 * steps + ((cycle - 1) & mask)];
     assert(x9224 != Fp::invalid());
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":151:42))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":195:42))
     auto x9225 = args[2][106 * steps + ((cycle - 1) & mask)];
     assert(x9225 != Fp::invalid());
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":151:42))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":195:42))
     auto x9226 = args[2][107 * steps + ((cycle - 1) & mask)];
     assert(x9226 != Fp::invalid());
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":151:42))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":195:42))
     auto x9227 = args[2][108 * steps + ((cycle - 1) & mask)];
     assert(x9227 != Fp::invalid());
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":151:42))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":195:42))
     auto x9228 = args[2][109 * steps + ((cycle - 1) & mask)];
     assert(x9228 != Fp::invalid());
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":151:42))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":195:42))
     auto x9229 = args[2][110 * steps + ((cycle - 1) & mask)];
     assert(x9229 != Fp::invalid());
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":151:42))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":195:42))
     auto x9230 = args[2][111 * steps + ((cycle - 1) & mask)];
     assert(x9230 != Fp::invalid());
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":151:42))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":195:42))
     auto x9231 = args[2][112 * steps + ((cycle - 1) & mask)];
     assert(x9231 != Fp::invalid());
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":151:42))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":195:42))
     auto x9232 = args[2][113 * steps + ((cycle - 1) & mask)];
     assert(x9232 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
     auto x9233 = x9209 * x9209;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
     auto x9234 = x9233 * x9233;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
     {
       auto& reg = args[2][5 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x9234);
       reg = x9234;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":112:14))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":156:14))
     auto x9235 = args[2][5 * steps + ((cycle - 0) & mask)];
     assert(x9235 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9236 = x9235 * x9233;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9237 = x9236 * x9209;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
     auto x9238 = x9210 * x9210;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
     auto x9239 = x9238 * x9238;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
     {
       auto& reg = args[2][6 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x9239);
       reg = x9239;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":112:14))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":156:14))
     auto x9240 = args[2][6 * steps + ((cycle - 0) & mask)];
     assert(x9240 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9241 = x9240 * x9238;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9242 = x9241 * x9210;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
     auto x9243 = x9211 * x9211;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
     auto x9244 = x9243 * x9243;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
     {
       auto& reg = args[2][7 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x9244);
       reg = x9244;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":112:14))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":156:14))
     auto x9245 = args[2][7 * steps + ((cycle - 0) & mask)];
     assert(x9245 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9246 = x9245 * x9243;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9247 = x9246 * x9211;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
     auto x9248 = x9212 * x9212;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
     auto x9249 = x9248 * x9248;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
     {
       auto& reg = args[2][8 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x9249);
       reg = x9249;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":112:14))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":156:14))
     auto x9250 = args[2][8 * steps + ((cycle - 0) & mask)];
     assert(x9250 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9251 = x9250 * x9248;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9252 = x9251 * x9212;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
     auto x9253 = x9213 * x9213;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
     auto x9254 = x9253 * x9253;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
     {
       auto& reg = args[2][9 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x9254);
       reg = x9254;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":112:14))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":156:14))
     auto x9255 = args[2][9 * steps + ((cycle - 0) & mask)];
     assert(x9255 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9256 = x9255 * x9253;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9257 = x9256 * x9213;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
     auto x9258 = x9214 * x9214;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
     auto x9259 = x9258 * x9258;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
     {
       auto& reg = args[2][10 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x9259);
       reg = x9259;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":112:14))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":156:14))
     auto x9260 = args[2][10 * steps + ((cycle - 0) & mask)];
     assert(x9260 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9261 = x9260 * x9258;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9262 = x9261 * x9214;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
     auto x9263 = x9215 * x9215;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
     auto x9264 = x9263 * x9263;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
     {
       auto& reg = args[2][11 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x9264);
       reg = x9264;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":112:14))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":156:14))
     auto x9265 = args[2][11 * steps + ((cycle - 0) & mask)];
     assert(x9265 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9266 = x9265 * x9263;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9267 = x9266 * x9215;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
     auto x9268 = x9216 * x9216;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
     auto x9269 = x9268 * x9268;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
     {
       auto& reg = args[2][12 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x9269);
       reg = x9269;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":112:14))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":156:14))
     auto x9270 = args[2][12 * steps + ((cycle - 0) & mask)];
     assert(x9270 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9271 = x9270 * x9268;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9272 = x9271 * x9216;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
     auto x9273 = x9217 * x9217;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
     auto x9274 = x9273 * x9273;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
     {
       auto& reg = args[2][13 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x9274);
       reg = x9274;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":112:14))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":156:14))
     auto x9275 = args[2][13 * steps + ((cycle - 0) & mask)];
     assert(x9275 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9276 = x9275 * x9273;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9277 = x9276 * x9217;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
     auto x9278 = x9218 * x9218;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
     auto x9279 = x9278 * x9278;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
     {
       auto& reg = args[2][14 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x9279);
       reg = x9279;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":112:14))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":156:14))
     auto x9280 = args[2][14 * steps + ((cycle - 0) & mask)];
     assert(x9280 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9281 = x9280 * x9278;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9282 = x9281 * x9218;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
     auto x9283 = x9219 * x9219;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
     auto x9284 = x9283 * x9283;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
     {
       auto& reg = args[2][15 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x9284);
       reg = x9284;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":112:14))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":156:14))
     auto x9285 = args[2][15 * steps + ((cycle - 0) & mask)];
     assert(x9285 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9286 = x9285 * x9283;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9287 = x9286 * x9219;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
     auto x9288 = x9220 * x9220;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
     auto x9289 = x9288 * x9288;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
     {
       auto& reg = args[2][16 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x9289);
       reg = x9289;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":112:14))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":156:14))
     auto x9290 = args[2][16 * steps + ((cycle - 0) & mask)];
     assert(x9290 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9291 = x9290 * x9288;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9292 = x9291 * x9220;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
     auto x9293 = x9221 * x9221;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
     auto x9294 = x9293 * x9293;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
     {
       auto& reg = args[2][17 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x9294);
       reg = x9294;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":112:14))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":156:14))
     auto x9295 = args[2][17 * steps + ((cycle - 0) & mask)];
     assert(x9295 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9296 = x9295 * x9293;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9297 = x9296 * x9221;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
     auto x9298 = x9222 * x9222;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
     auto x9299 = x9298 * x9298;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
     {
       auto& reg = args[2][18 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x9299);
       reg = x9299;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":112:14))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":156:14))
     auto x9300 = args[2][18 * steps + ((cycle - 0) & mask)];
     assert(x9300 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9301 = x9300 * x9298;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9302 = x9301 * x9222;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
     auto x9303 = x9223 * x9223;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
     auto x9304 = x9303 * x9303;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
     {
       auto& reg = args[2][19 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x9304);
       reg = x9304;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":112:14))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":156:14))
     auto x9305 = args[2][19 * steps + ((cycle - 0) & mask)];
     assert(x9305 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9306 = x9305 * x9303;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9307 = x9306 * x9223;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
     auto x9308 = x9224 * x9224;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
     auto x9309 = x9308 * x9308;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
     {
       auto& reg = args[2][20 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x9309);
       reg = x9309;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":112:14))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":156:14))
     auto x9310 = args[2][20 * steps + ((cycle - 0) & mask)];
     assert(x9310 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9311 = x9310 * x9308;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9312 = x9311 * x9224;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
     auto x9313 = x9225 * x9225;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
     auto x9314 = x9313 * x9313;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
     {
       auto& reg = args[2][21 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x9314);
       reg = x9314;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":112:14))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":156:14))
     auto x9315 = args[2][21 * steps + ((cycle - 0) & mask)];
     assert(x9315 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9316 = x9315 * x9313;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9317 = x9316 * x9225;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
     auto x9318 = x9226 * x9226;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
     auto x9319 = x9318 * x9318;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
     {
       auto& reg = args[2][22 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x9319);
       reg = x9319;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":112:14))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":156:14))
     auto x9320 = args[2][22 * steps + ((cycle - 0) & mask)];
     assert(x9320 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9321 = x9320 * x9318;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9322 = x9321 * x9226;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
     auto x9323 = x9227 * x9227;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
     auto x9324 = x9323 * x9323;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
     {
       auto& reg = args[2][23 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x9324);
       reg = x9324;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":112:14))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":156:14))
     auto x9325 = args[2][23 * steps + ((cycle - 0) & mask)];
     assert(x9325 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9326 = x9325 * x9323;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9327 = x9326 * x9227;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
     auto x9328 = x9228 * x9228;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
     auto x9329 = x9328 * x9328;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
     {
       auto& reg = args[2][24 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x9329);
       reg = x9329;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":112:14))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":156:14))
     auto x9330 = args[2][24 * steps + ((cycle - 0) & mask)];
     assert(x9330 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9331 = x9330 * x9328;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9332 = x9331 * x9228;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
     auto x9333 = x9229 * x9229;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
     auto x9334 = x9333 * x9333;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
     {
       auto& reg = args[2][25 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x9334);
       reg = x9334;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":112:14))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":156:14))
     auto x9335 = args[2][25 * steps + ((cycle - 0) & mask)];
     assert(x9335 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9336 = x9335 * x9333;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9337 = x9336 * x9229;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
     auto x9338 = x9230 * x9230;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
     auto x9339 = x9338 * x9338;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
     {
       auto& reg = args[2][26 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x9339);
       reg = x9339;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":112:14))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":156:14))
     auto x9340 = args[2][26 * steps + ((cycle - 0) & mask)];
     assert(x9340 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9341 = x9340 * x9338;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9342 = x9341 * x9230;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
     auto x9343 = x9231 * x9231;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
     auto x9344 = x9343 * x9343;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
     {
       auto& reg = args[2][27 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x9344);
       reg = x9344;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":112:14))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":156:14))
     auto x9345 = args[2][27 * steps + ((cycle - 0) & mask)];
     assert(x9345 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9346 = x9345 * x9343;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9347 = x9346 * x9231;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
     auto x9348 = x9232 * x9232;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
     auto x9349 = x9348 * x9348;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
     {
       auto& reg = args[2][28 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x9349);
       reg = x9349;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":112:14))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":156:14))
     auto x9350 = args[2][28 * steps + ((cycle - 0) & mask)];
     assert(x9350 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9351 = x9350 * x9348;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9352 = x9351 * x9232;
     // loc("zirgen/circuit/recursion/poseidon2.cpp":16:12)
     auto x9353 = x9237 + x9242;
@@ -30931,1016 +30931,1016 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
     host_args.at(6) = x9347;
     host_args.at(7) = x9352;
     host(ctx, "log", "                     %u %u %u %u %u %u %u %u", host_args.data(), 8, host_outs.data(), 0);
-    // loc("top(recursion::Top)/code(recursion::Code)/inst(Mux)/poseidon2_full(recursion::Poseidon2FullInst)/cycle(OneHot)/c0(Reg)"("zirgen/circuit/recursion/poseidon2.cpp":138:19))
+    // loc("top(recursion::Top)/code(recursion::Code)/inst(Mux)/poseidon2_full(recursion::Poseidon2FullInst)/cycle(OneHot)/c0(Reg)"("zirgen/circuit/recursion/poseidon2.cpp":182:19))
     auto x9469 = args[0][7 * steps + ((cycle - 0) & mask)];
     assert(x9469 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9470 = x9469 * x212;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9471 = x9202 * x211;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9472 = x9470 + x9471;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9473 = x9203 * x210;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9474 = x9472 + x9473;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9475 = x9206 * x209;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9476 = x9474 + x9475;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9477 = x9469 * x208;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9478 = x9202 * x207;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9479 = x9477 + x9478;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9480 = x9203 * x206;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9481 = x9479 + x9480;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9482 = x9206 * x205;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9483 = x9481 + x9482;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9484 = x9469 * x204;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9485 = x9202 * x203;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9486 = x9484 + x9485;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9487 = x9203 * x202;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9488 = x9486 + x9487;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9489 = x9206 * x201;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9490 = x9488 + x9489;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9491 = x9469 * x200;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9492 = x9202 * x199;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9493 = x9491 + x9492;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9494 = x9203 * x198;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9495 = x9493 + x9494;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9496 = x9206 * x197;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9497 = x9495 + x9496;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9498 = x9469 * x196;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9499 = x9202 * x195;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9500 = x9498 + x9499;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9501 = x9203 * x194;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9502 = x9500 + x9501;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9503 = x9206 * x193;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9504 = x9502 + x9503;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9505 = x9469 * x192;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9506 = x9202 * x191;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9507 = x9505 + x9506;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9508 = x9203 * x190;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9509 = x9507 + x9508;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9510 = x9206 * x189;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9511 = x9509 + x9510;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9512 = x9469 * x188;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9513 = x9202 * x187;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9514 = x9512 + x9513;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9515 = x9203 * x186;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9516 = x9514 + x9515;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9517 = x9206 * x185;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9518 = x9516 + x9517;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9519 = x9469 * x184;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9520 = x9202 * x183;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9521 = x9519 + x9520;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9522 = x9203 * x182;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9523 = x9521 + x9522;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9524 = x9206 * x181;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9525 = x9523 + x9524;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9526 = x9469 * x180;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9527 = x9202 * x179;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9528 = x9526 + x9527;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9529 = x9203 * x178;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9530 = x9528 + x9529;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9531 = x9206 * x177;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9532 = x9530 + x9531;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9533 = x9469 * x176;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9534 = x9202 * x175;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9535 = x9533 + x9534;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9536 = x9203 * x174;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9537 = x9535 + x9536;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9538 = x9206 * x173;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9539 = x9537 + x9538;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9540 = x9469 * x172;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9541 = x9202 * x171;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9542 = x9540 + x9541;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9543 = x9203 * x170;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9544 = x9542 + x9543;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9545 = x9206 * x169;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9546 = x9544 + x9545;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9547 = x9469 * x168;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9548 = x9202 * x167;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9549 = x9547 + x9548;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9550 = x9203 * x166;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9551 = x9549 + x9550;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9552 = x9206 * x165;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9553 = x9551 + x9552;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9554 = x9469 * x164;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9555 = x9202 * x163;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9556 = x9554 + x9555;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9557 = x9203 * x162;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9558 = x9556 + x9557;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9559 = x9206 * x161;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9560 = x9558 + x9559;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9561 = x9469 * x160;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9562 = x9202 * x159;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9563 = x9561 + x9562;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9564 = x9203 * x158;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9565 = x9563 + x9564;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9566 = x9206 * x157;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9567 = x9565 + x9566;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9568 = x9469 * x156;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9569 = x9202 * x155;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9570 = x9568 + x9569;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9571 = x9203 * x154;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9572 = x9570 + x9571;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9573 = x9206 * x153;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9574 = x9572 + x9573;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9575 = x9469 * x152;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9576 = x9202 * x151;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9577 = x9575 + x9576;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9578 = x9203 * x150;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9579 = x9577 + x9578;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9580 = x9206 * x149;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9581 = x9579 + x9580;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9582 = x9469 * x148;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9583 = x9202 * x147;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9584 = x9582 + x9583;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9585 = x9203 * x146;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9586 = x9584 + x9585;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9587 = x9206 * x145;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9588 = x9586 + x9587;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9589 = x9469 * x144;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9590 = x9202 * x143;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9591 = x9589 + x9590;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9592 = x9203 * x142;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9593 = x9591 + x9592;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9594 = x9206 * x141;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9595 = x9593 + x9594;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9596 = x9469 * x140;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9597 = x9202 * x139;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9598 = x9596 + x9597;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9599 = x9203 * x138;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9600 = x9598 + x9599;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9601 = x9206 * x137;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9602 = x9600 + x9601;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9603 = x9469 * x136;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9604 = x9202 * x135;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9605 = x9603 + x9604;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9606 = x9203 * x134;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9607 = x9605 + x9606;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9608 = x9206 * x133;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9609 = x9607 + x9608;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9610 = x9469 * x132;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9611 = x9202 * x131;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9612 = x9610 + x9611;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9613 = x9203 * x130;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9614 = x9612 + x9613;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9615 = x9206 * x129;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9616 = x9614 + x9615;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9617 = x9469 * x128;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9618 = x9202 * x127;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9619 = x9617 + x9618;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9620 = x9203 * x126;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9621 = x9619 + x9620;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9622 = x9206 * x125;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9623 = x9621 + x9622;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9624 = x9469 * x124;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9625 = x9202 * x123;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9626 = x9624 + x9625;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9627 = x9203 * x122;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9628 = x9626 + x9627;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9629 = x9206 * x121;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9630 = x9628 + x9629;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9631 = x9469 * x120;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9632 = x9202 * x119;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9633 = x9631 + x9632;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9634 = x9203 * x118;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9635 = x9633 + x9634;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9636 = x9206 * x117;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9637 = x9635 + x9636;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":166:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":232:19)
     auto x9638 = x9445 + x9476;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":166:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":232:5)
     {
       auto& reg = args[2][29 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x9638);
       reg = x9638;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":167:58))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":233:58))
     auto x9639 = args[2][29 * steps + ((cycle - 0) & mask)];
     assert(x9639 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
     auto x9640 = x9639 * x9639;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
     auto x9641 = x9640 * x9640;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
     {
       auto& reg = args[2][53 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x9641);
       reg = x9641;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":112:14))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":156:14))
     auto x9642 = args[2][53 * steps + ((cycle - 0) & mask)];
     assert(x9642 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9643 = x9642 * x9640;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9644 = x9643 * x9639;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":166:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":232:19)
     auto x9645 = x9446 + x9483;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":166:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":232:5)
     {
       auto& reg = args[2][30 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x9645);
       reg = x9645;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":167:58))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":233:58))
     auto x9646 = args[2][30 * steps + ((cycle - 0) & mask)];
     assert(x9646 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
     auto x9647 = x9646 * x9646;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
     auto x9648 = x9647 * x9647;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
     {
       auto& reg = args[2][54 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x9648);
       reg = x9648;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":112:14))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":156:14))
     auto x9649 = args[2][54 * steps + ((cycle - 0) & mask)];
     assert(x9649 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9650 = x9649 * x9647;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9651 = x9650 * x9646;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":166:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":232:19)
     auto x9652 = x9447 + x9490;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":166:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":232:5)
     {
       auto& reg = args[2][31 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x9652);
       reg = x9652;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":167:58))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":233:58))
     auto x9653 = args[2][31 * steps + ((cycle - 0) & mask)];
     assert(x9653 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
     auto x9654 = x9653 * x9653;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
     auto x9655 = x9654 * x9654;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
     {
       auto& reg = args[2][55 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x9655);
       reg = x9655;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":112:14))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":156:14))
     auto x9656 = args[2][55 * steps + ((cycle - 0) & mask)];
     assert(x9656 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9657 = x9656 * x9654;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9658 = x9657 * x9653;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":166:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":232:19)
     auto x9659 = x9448 + x9497;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":166:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":232:5)
     {
       auto& reg = args[2][32 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x9659);
       reg = x9659;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":167:58))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":233:58))
     auto x9660 = args[2][32 * steps + ((cycle - 0) & mask)];
     assert(x9660 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
     auto x9661 = x9660 * x9660;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
     auto x9662 = x9661 * x9661;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
     {
       auto& reg = args[2][56 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x9662);
       reg = x9662;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":112:14))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":156:14))
     auto x9663 = args[2][56 * steps + ((cycle - 0) & mask)];
     assert(x9663 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9664 = x9663 * x9661;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9665 = x9664 * x9660;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":166:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":232:19)
     auto x9666 = x9449 + x9504;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":166:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":232:5)
     {
       auto& reg = args[2][33 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x9666);
       reg = x9666;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":167:58))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":233:58))
     auto x9667 = args[2][33 * steps + ((cycle - 0) & mask)];
     assert(x9667 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
     auto x9668 = x9667 * x9667;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
     auto x9669 = x9668 * x9668;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
     {
       auto& reg = args[2][57 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x9669);
       reg = x9669;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":112:14))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":156:14))
     auto x9670 = args[2][57 * steps + ((cycle - 0) & mask)];
     assert(x9670 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9671 = x9670 * x9668;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9672 = x9671 * x9667;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":166:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":232:19)
     auto x9673 = x9450 + x9511;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":166:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":232:5)
     {
       auto& reg = args[2][34 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x9673);
       reg = x9673;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":167:58))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":233:58))
     auto x9674 = args[2][34 * steps + ((cycle - 0) & mask)];
     assert(x9674 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
     auto x9675 = x9674 * x9674;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
     auto x9676 = x9675 * x9675;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
     {
       auto& reg = args[2][58 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x9676);
       reg = x9676;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":112:14))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":156:14))
     auto x9677 = args[2][58 * steps + ((cycle - 0) & mask)];
     assert(x9677 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9678 = x9677 * x9675;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9679 = x9678 * x9674;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":166:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":232:19)
     auto x9680 = x9451 + x9518;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":166:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":232:5)
     {
       auto& reg = args[2][35 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x9680);
       reg = x9680;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":167:58))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":233:58))
     auto x9681 = args[2][35 * steps + ((cycle - 0) & mask)];
     assert(x9681 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
     auto x9682 = x9681 * x9681;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
     auto x9683 = x9682 * x9682;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
     {
       auto& reg = args[2][59 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x9683);
       reg = x9683;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":112:14))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":156:14))
     auto x9684 = args[2][59 * steps + ((cycle - 0) & mask)];
     assert(x9684 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9685 = x9684 * x9682;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9686 = x9685 * x9681;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":166:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":232:19)
     auto x9687 = x9452 + x9525;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":166:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":232:5)
     {
       auto& reg = args[2][36 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x9687);
       reg = x9687;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":167:58))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":233:58))
     auto x9688 = args[2][36 * steps + ((cycle - 0) & mask)];
     assert(x9688 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
     auto x9689 = x9688 * x9688;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
     auto x9690 = x9689 * x9689;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
     {
       auto& reg = args[2][60 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x9690);
       reg = x9690;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":112:14))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":156:14))
     auto x9691 = args[2][60 * steps + ((cycle - 0) & mask)];
     assert(x9691 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9692 = x9691 * x9689;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9693 = x9692 * x9688;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":166:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":232:19)
     auto x9694 = x9453 + x9532;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":166:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":232:5)
     {
       auto& reg = args[2][37 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x9694);
       reg = x9694;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":167:58))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":233:58))
     auto x9695 = args[2][37 * steps + ((cycle - 0) & mask)];
     assert(x9695 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
     auto x9696 = x9695 * x9695;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
     auto x9697 = x9696 * x9696;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
     {
       auto& reg = args[2][61 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x9697);
       reg = x9697;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":112:14))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":156:14))
     auto x9698 = args[2][61 * steps + ((cycle - 0) & mask)];
     assert(x9698 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9699 = x9698 * x9696;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9700 = x9699 * x9695;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":166:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":232:19)
     auto x9701 = x9454 + x9539;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":166:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":232:5)
     {
       auto& reg = args[2][38 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x9701);
       reg = x9701;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":167:58))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":233:58))
     auto x9702 = args[2][38 * steps + ((cycle - 0) & mask)];
     assert(x9702 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
     auto x9703 = x9702 * x9702;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
     auto x9704 = x9703 * x9703;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
     {
       auto& reg = args[2][62 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x9704);
       reg = x9704;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":112:14))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":156:14))
     auto x9705 = args[2][62 * steps + ((cycle - 0) & mask)];
     assert(x9705 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9706 = x9705 * x9703;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9707 = x9706 * x9702;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":166:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":232:19)
     auto x9708 = x9455 + x9546;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":166:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":232:5)
     {
       auto& reg = args[2][39 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x9708);
       reg = x9708;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":167:58))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":233:58))
     auto x9709 = args[2][39 * steps + ((cycle - 0) & mask)];
     assert(x9709 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
     auto x9710 = x9709 * x9709;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
     auto x9711 = x9710 * x9710;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
     {
       auto& reg = args[2][63 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x9711);
       reg = x9711;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":112:14))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":156:14))
     auto x9712 = args[2][63 * steps + ((cycle - 0) & mask)];
     assert(x9712 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9713 = x9712 * x9710;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9714 = x9713 * x9709;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":166:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":232:19)
     auto x9715 = x9456 + x9553;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":166:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":232:5)
     {
       auto& reg = args[2][40 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x9715);
       reg = x9715;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":167:58))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":233:58))
     auto x9716 = args[2][40 * steps + ((cycle - 0) & mask)];
     assert(x9716 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
     auto x9717 = x9716 * x9716;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
     auto x9718 = x9717 * x9717;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
     {
       auto& reg = args[2][64 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x9718);
       reg = x9718;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":112:14))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":156:14))
     auto x9719 = args[2][64 * steps + ((cycle - 0) & mask)];
     assert(x9719 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9720 = x9719 * x9717;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9721 = x9720 * x9716;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":166:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":232:19)
     auto x9722 = x9457 + x9560;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":166:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":232:5)
     {
       auto& reg = args[2][41 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x9722);
       reg = x9722;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":167:58))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":233:58))
     auto x9723 = args[2][41 * steps + ((cycle - 0) & mask)];
     assert(x9723 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
     auto x9724 = x9723 * x9723;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
     auto x9725 = x9724 * x9724;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
     {
       auto& reg = args[2][65 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x9725);
       reg = x9725;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":112:14))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":156:14))
     auto x9726 = args[2][65 * steps + ((cycle - 0) & mask)];
     assert(x9726 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9727 = x9726 * x9724;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9728 = x9727 * x9723;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":166:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":232:19)
     auto x9729 = x9458 + x9567;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":166:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":232:5)
     {
       auto& reg = args[2][42 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x9729);
       reg = x9729;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":167:58))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":233:58))
     auto x9730 = args[2][42 * steps + ((cycle - 0) & mask)];
     assert(x9730 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
     auto x9731 = x9730 * x9730;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
     auto x9732 = x9731 * x9731;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
     {
       auto& reg = args[2][66 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x9732);
       reg = x9732;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":112:14))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":156:14))
     auto x9733 = args[2][66 * steps + ((cycle - 0) & mask)];
     assert(x9733 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9734 = x9733 * x9731;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9735 = x9734 * x9730;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":166:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":232:19)
     auto x9736 = x9459 + x9574;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":166:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":232:5)
     {
       auto& reg = args[2][43 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x9736);
       reg = x9736;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":167:58))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":233:58))
     auto x9737 = args[2][43 * steps + ((cycle - 0) & mask)];
     assert(x9737 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
     auto x9738 = x9737 * x9737;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
     auto x9739 = x9738 * x9738;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
     {
       auto& reg = args[2][67 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x9739);
       reg = x9739;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":112:14))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":156:14))
     auto x9740 = args[2][67 * steps + ((cycle - 0) & mask)];
     assert(x9740 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9741 = x9740 * x9738;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9742 = x9741 * x9737;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":166:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":232:19)
     auto x9743 = x9460 + x9581;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":166:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":232:5)
     {
       auto& reg = args[2][44 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x9743);
       reg = x9743;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":167:58))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":233:58))
     auto x9744 = args[2][44 * steps + ((cycle - 0) & mask)];
     assert(x9744 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
     auto x9745 = x9744 * x9744;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
     auto x9746 = x9745 * x9745;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
     {
       auto& reg = args[2][68 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x9746);
       reg = x9746;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":112:14))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":156:14))
     auto x9747 = args[2][68 * steps + ((cycle - 0) & mask)];
     assert(x9747 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9748 = x9747 * x9745;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9749 = x9748 * x9744;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":166:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":232:19)
     auto x9750 = x9461 + x9588;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":166:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":232:5)
     {
       auto& reg = args[2][45 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x9750);
       reg = x9750;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":167:58))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":233:58))
     auto x9751 = args[2][45 * steps + ((cycle - 0) & mask)];
     assert(x9751 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
     auto x9752 = x9751 * x9751;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
     auto x9753 = x9752 * x9752;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
     {
       auto& reg = args[2][69 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x9753);
       reg = x9753;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":112:14))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":156:14))
     auto x9754 = args[2][69 * steps + ((cycle - 0) & mask)];
     assert(x9754 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9755 = x9754 * x9752;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9756 = x9755 * x9751;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":166:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":232:19)
     auto x9757 = x9462 + x9595;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":166:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":232:5)
     {
       auto& reg = args[2][46 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x9757);
       reg = x9757;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":167:58))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":233:58))
     auto x9758 = args[2][46 * steps + ((cycle - 0) & mask)];
     assert(x9758 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
     auto x9759 = x9758 * x9758;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
     auto x9760 = x9759 * x9759;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
     {
       auto& reg = args[2][70 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x9760);
       reg = x9760;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":112:14))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":156:14))
     auto x9761 = args[2][70 * steps + ((cycle - 0) & mask)];
     assert(x9761 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9762 = x9761 * x9759;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9763 = x9762 * x9758;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":166:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":232:19)
     auto x9764 = x9463 + x9602;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":166:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":232:5)
     {
       auto& reg = args[2][47 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x9764);
       reg = x9764;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":167:58))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":233:58))
     auto x9765 = args[2][47 * steps + ((cycle - 0) & mask)];
     assert(x9765 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
     auto x9766 = x9765 * x9765;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
     auto x9767 = x9766 * x9766;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
     {
       auto& reg = args[2][71 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x9767);
       reg = x9767;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":112:14))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":156:14))
     auto x9768 = args[2][71 * steps + ((cycle - 0) & mask)];
     assert(x9768 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9769 = x9768 * x9766;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9770 = x9769 * x9765;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":166:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":232:19)
     auto x9771 = x9464 + x9609;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":166:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":232:5)
     {
       auto& reg = args[2][48 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x9771);
       reg = x9771;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":167:58))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":233:58))
     auto x9772 = args[2][48 * steps + ((cycle - 0) & mask)];
     assert(x9772 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
     auto x9773 = x9772 * x9772;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
     auto x9774 = x9773 * x9773;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
     {
       auto& reg = args[2][72 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x9774);
       reg = x9774;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":112:14))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":156:14))
     auto x9775 = args[2][72 * steps + ((cycle - 0) & mask)];
     assert(x9775 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9776 = x9775 * x9773;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9777 = x9776 * x9772;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":166:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":232:19)
     auto x9778 = x9465 + x9616;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":166:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":232:5)
     {
       auto& reg = args[2][49 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x9778);
       reg = x9778;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":167:58))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":233:58))
     auto x9779 = args[2][49 * steps + ((cycle - 0) & mask)];
     assert(x9779 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
     auto x9780 = x9779 * x9779;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
     auto x9781 = x9780 * x9780;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
     {
       auto& reg = args[2][73 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x9781);
       reg = x9781;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":112:14))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":156:14))
     auto x9782 = args[2][73 * steps + ((cycle - 0) & mask)];
     assert(x9782 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9783 = x9782 * x9780;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9784 = x9783 * x9779;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":166:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":232:19)
     auto x9785 = x9466 + x9623;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":166:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":232:5)
     {
       auto& reg = args[2][50 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x9785);
       reg = x9785;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":167:58))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":233:58))
     auto x9786 = args[2][50 * steps + ((cycle - 0) & mask)];
     assert(x9786 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
     auto x9787 = x9786 * x9786;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
     auto x9788 = x9787 * x9787;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
     {
       auto& reg = args[2][74 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x9788);
       reg = x9788;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":112:14))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":156:14))
     auto x9789 = args[2][74 * steps + ((cycle - 0) & mask)];
     assert(x9789 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9790 = x9789 * x9787;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9791 = x9790 * x9786;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":166:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":232:19)
     auto x9792 = x9467 + x9630;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":166:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":232:5)
     {
       auto& reg = args[2][51 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x9792);
       reg = x9792;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":167:58))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":233:58))
     auto x9793 = args[2][51 * steps + ((cycle - 0) & mask)];
     assert(x9793 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
     auto x9794 = x9793 * x9793;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
     auto x9795 = x9794 * x9794;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
     {
       auto& reg = args[2][75 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x9795);
       reg = x9795;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":112:14))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":156:14))
     auto x9796 = args[2][75 * steps + ((cycle - 0) & mask)];
     assert(x9796 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9797 = x9796 * x9794;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9798 = x9797 * x9793;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":166:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":232:19)
     auto x9799 = x9468 + x9637;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":166:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":232:5)
     {
       auto& reg = args[2][52 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x9799);
       reg = x9799;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":167:58))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":233:58))
     auto x9800 = args[2][52 * steps + ((cycle - 0) & mask)];
     assert(x9800 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
     auto x9801 = x9800 * x9800;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
     auto x9802 = x9801 * x9801;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
     {
       auto& reg = args[2][76 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x9802);
       reg = x9802;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":112:14))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":156:14))
     auto x9803 = args[2][76 * steps + ((cycle - 0) & mask)];
     assert(x9803 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9804 = x9803 * x9801;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x9805 = x9804 * x9800;
     // loc("zirgen/circuit/recursion/poseidon2.cpp":16:12)
     auto x9806 = x9644 + x9651;
@@ -32202,337 +32202,337 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
     host_args.at(6) = x9798;
     host_args.at(7) = x9805;
     host(ctx, "log", "                    %u %u %u %u %u %u %u %u", host_args.data(), 8, host_outs.data(), 0);
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9922 = x9469 * x116;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9923 = x9203 * x115;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9924 = x9922 + x9923;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9925 = x9469 * x114;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9926 = x9203 * x113;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9927 = x9925 + x9926;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9928 = x9469 * x112;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9929 = x9203 * x111;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9930 = x9928 + x9929;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9931 = x9469 * x110;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9932 = x9203 * x109;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9933 = x9931 + x9932;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9934 = x9469 * x108;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9935 = x9203 * x107;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9936 = x9934 + x9935;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9937 = x9469 * x106;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9938 = x9203 * x105;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9939 = x9937 + x9938;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9940 = x9469 * x104;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9941 = x9203 * x103;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9942 = x9940 + x9941;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9943 = x9469 * x102;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9944 = x9203 * x101;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9945 = x9943 + x9944;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9946 = x9469 * x100;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9947 = x9203 * x99;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9948 = x9946 + x9947;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9949 = x9469 * x98;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9950 = x9203 * x97;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9951 = x9949 + x9950;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9952 = x9469 * x96;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9953 = x9203 * x95;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9954 = x9952 + x9953;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9955 = x9469 * x94;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9956 = x9203 * x93;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9957 = x9955 + x9956;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9958 = x9469 * x92;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9959 = x9203 * x91;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9960 = x9958 + x9959;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9961 = x9469 * x90;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9962 = x9203 * x89;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9963 = x9961 + x9962;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9964 = x9469 * x88;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9965 = x9203 * x87;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9966 = x9964 + x9965;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9967 = x9469 * x86;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9968 = x9203 * x85;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9969 = x9967 + x9968;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9970 = x9469 * x84;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9971 = x9203 * x83;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9972 = x9970 + x9971;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9973 = x9469 * x82;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9974 = x9203 * x81;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9975 = x9973 + x9974;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9976 = x9469 * x80;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9977 = x9203 * x79;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9978 = x9976 + x9977;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9979 = x9469 * x78;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9980 = x9203 * x77;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9981 = x9979 + x9980;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9982 = x9469 * x76;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9983 = x9203 * x75;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9984 = x9982 + x9983;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9985 = x9469 * x74;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9986 = x9203 * x73;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9987 = x9985 + x9986;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9988 = x9469 * x72;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9989 = x9203 * x71;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9990 = x9988 + x9989;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9991 = x9469 * x70;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
     auto x9992 = x9203 * x69;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
     auto x9993 = x9991 + x9992;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":179:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":267:20)
     auto x9994 = x9898 + x9924;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":179:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":267:5)
     {
       auto& reg = args[2][90 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x9994);
       reg = x9994;
     }
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":179:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":267:20)
     auto x9995 = x9899 + x9927;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":179:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":267:5)
     {
       auto& reg = args[2][91 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x9995);
       reg = x9995;
     }
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":179:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":267:20)
     auto x9996 = x9900 + x9930;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":179:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":267:5)
     {
       auto& reg = args[2][92 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x9996);
       reg = x9996;
     }
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":179:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":267:20)
     auto x9997 = x9901 + x9933;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":179:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":267:5)
     {
       auto& reg = args[2][93 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x9997);
       reg = x9997;
     }
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":179:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":267:20)
     auto x9998 = x9902 + x9936;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":179:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":267:5)
     {
       auto& reg = args[2][94 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x9998);
       reg = x9998;
     }
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":179:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":267:20)
     auto x9999 = x9903 + x9939;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":179:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":267:5)
     {
       auto& reg = args[2][95 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x9999);
       reg = x9999;
     }
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":179:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":267:20)
     auto x10000 = x9904 + x9942;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":179:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":267:5)
     {
       auto& reg = args[2][96 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x10000);
       reg = x10000;
     }
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":179:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":267:20)
     auto x10001 = x9905 + x9945;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":179:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":267:5)
     {
       auto& reg = args[2][97 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x10001);
       reg = x10001;
     }
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":179:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":267:20)
     auto x10002 = x9906 + x9948;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":179:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":267:5)
     {
       auto& reg = args[2][98 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x10002);
       reg = x10002;
     }
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":179:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":267:20)
     auto x10003 = x9907 + x9951;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":179:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":267:5)
     {
       auto& reg = args[2][99 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x10003);
       reg = x10003;
     }
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":179:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":267:20)
     auto x10004 = x9908 + x9954;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":179:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":267:5)
     {
       auto& reg = args[2][100 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x10004);
       reg = x10004;
     }
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":179:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":267:20)
     auto x10005 = x9909 + x9957;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":179:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":267:5)
     {
       auto& reg = args[2][101 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x10005);
       reg = x10005;
     }
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":179:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":267:20)
     auto x10006 = x9910 + x9960;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":179:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":267:5)
     {
       auto& reg = args[2][102 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x10006);
       reg = x10006;
     }
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":179:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":267:20)
     auto x10007 = x9911 + x9963;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":179:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":267:5)
     {
       auto& reg = args[2][103 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x10007);
       reg = x10007;
     }
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":179:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":267:20)
     auto x10008 = x9912 + x9966;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":179:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":267:5)
     {
       auto& reg = args[2][104 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x10008);
       reg = x10008;
     }
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":179:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":267:20)
     auto x10009 = x9913 + x9969;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":179:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":267:5)
     {
       auto& reg = args[2][105 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x10009);
       reg = x10009;
     }
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":179:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":267:20)
     auto x10010 = x9914 + x9972;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":179:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":267:5)
     {
       auto& reg = args[2][106 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x10010);
       reg = x10010;
     }
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":179:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":267:20)
     auto x10011 = x9915 + x9975;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":179:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":267:5)
     {
       auto& reg = args[2][107 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x10011);
       reg = x10011;
     }
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":179:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":267:20)
     auto x10012 = x9916 + x9978;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":179:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":267:5)
     {
       auto& reg = args[2][108 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x10012);
       reg = x10012;
     }
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":179:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":267:20)
     auto x10013 = x9917 + x9981;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":179:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":267:5)
     {
       auto& reg = args[2][109 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x10013);
       reg = x10013;
     }
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":179:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":267:20)
     auto x10014 = x9918 + x9984;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":179:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":267:5)
     {
       auto& reg = args[2][110 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x10014);
       reg = x10014;
     }
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":179:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":267:20)
     auto x10015 = x9919 + x9987;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":179:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":267:5)
     {
       auto& reg = args[2][111 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x10015);
       reg = x10015;
     }
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":179:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":267:20)
     auto x10016 = x9920 + x9990;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":179:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":267:5)
     {
       auto& reg = args[2][112 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x10016);
       reg = x10016;
     }
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":179:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":267:20)
     auto x10017 = x9921 + x9993;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":179:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":267:5)
     {
       auto& reg = args[2][113 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x10017);
@@ -32544,3649 +32544,3649 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
   assert(x10018 != Fp::invalid());
   if (x10018 != 0) {
     host(ctx, "log", "POSEIDON2_PARTIAL", host_args.data(), 0, host_outs.data(), 0);
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":195:37))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":283:37))
     auto x10019 = args[2][90 * steps + ((cycle - 1) & mask)];
     assert(x10019 != Fp::invalid());
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":195:37))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":283:37))
     auto x10020 = args[2][91 * steps + ((cycle - 1) & mask)];
     assert(x10020 != Fp::invalid());
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":195:37))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":283:37))
     auto x10021 = args[2][92 * steps + ((cycle - 1) & mask)];
     assert(x10021 != Fp::invalid());
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":195:37))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":283:37))
     auto x10022 = args[2][93 * steps + ((cycle - 1) & mask)];
     assert(x10022 != Fp::invalid());
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":195:37))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":283:37))
     auto x10023 = args[2][94 * steps + ((cycle - 1) & mask)];
     assert(x10023 != Fp::invalid());
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":195:37))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":283:37))
     auto x10024 = args[2][95 * steps + ((cycle - 1) & mask)];
     assert(x10024 != Fp::invalid());
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":195:37))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":283:37))
     auto x10025 = args[2][96 * steps + ((cycle - 1) & mask)];
     assert(x10025 != Fp::invalid());
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":195:37))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":283:37))
     auto x10026 = args[2][97 * steps + ((cycle - 1) & mask)];
     assert(x10026 != Fp::invalid());
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":195:37))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":283:37))
     auto x10027 = args[2][98 * steps + ((cycle - 1) & mask)];
     assert(x10027 != Fp::invalid());
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":195:37))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":283:37))
     auto x10028 = args[2][99 * steps + ((cycle - 1) & mask)];
     assert(x10028 != Fp::invalid());
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":195:37))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":283:37))
     auto x10029 = args[2][100 * steps + ((cycle - 1) & mask)];
     assert(x10029 != Fp::invalid());
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":195:37))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":283:37))
     auto x10030 = args[2][101 * steps + ((cycle - 1) & mask)];
     assert(x10030 != Fp::invalid());
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":195:37))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":283:37))
     auto x10031 = args[2][102 * steps + ((cycle - 1) & mask)];
     assert(x10031 != Fp::invalid());
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":195:37))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":283:37))
     auto x10032 = args[2][103 * steps + ((cycle - 1) & mask)];
     assert(x10032 != Fp::invalid());
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":195:37))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":283:37))
     auto x10033 = args[2][104 * steps + ((cycle - 1) & mask)];
     assert(x10033 != Fp::invalid());
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":195:37))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":283:37))
     auto x10034 = args[2][105 * steps + ((cycle - 1) & mask)];
     assert(x10034 != Fp::invalid());
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":195:37))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":283:37))
     auto x10035 = args[2][106 * steps + ((cycle - 1) & mask)];
     assert(x10035 != Fp::invalid());
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":195:37))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":283:37))
     auto x10036 = args[2][107 * steps + ((cycle - 1) & mask)];
     assert(x10036 != Fp::invalid());
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":195:37))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":283:37))
     auto x10037 = args[2][108 * steps + ((cycle - 1) & mask)];
     assert(x10037 != Fp::invalid());
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":195:37))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":283:37))
     auto x10038 = args[2][109 * steps + ((cycle - 1) & mask)];
     assert(x10038 != Fp::invalid());
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":195:37))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":283:37))
     auto x10039 = args[2][110 * steps + ((cycle - 1) & mask)];
     assert(x10039 != Fp::invalid());
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":195:37))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":283:37))
     auto x10040 = args[2][111 * steps + ((cycle - 1) & mask)];
     assert(x10040 != Fp::invalid());
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":195:37))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":283:37))
     auto x10041 = args[2][112 * steps + ((cycle - 1) & mask)];
     assert(x10041 != Fp::invalid());
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":195:37))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":283:37))
     auto x10042 = args[2][113 * steps + ((cycle - 1) & mask)];
     assert(x10042 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":197:3)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":285:3)
     {
       auto& reg = args[2][5 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x10019);
       reg = x10019;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":199:41))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":287:41))
     auto x10043 = args[2][5 * steps + ((cycle - 0) & mask)];
     assert(x10043 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":202:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":290:13)
     auto x10044 = x10043 + x68;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
     auto x10045 = x10044 * x10044;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
     auto x10046 = x10045 * x10045;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
     {
       auto& reg = args[2][29 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x10046);
       reg = x10046;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":112:14))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":156:14))
     auto x10047 = args[2][29 * steps + ((cycle - 0) & mask)];
     assert(x10047 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x10048 = x10047 * x10045;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x10049 = x10048 * x10044;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10050 = x10049 + x10020;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10051 = x10050 + x10021;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10052 = x10051 + x10022;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10053 = x10052 + x10023;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10054 = x10053 + x10024;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10055 = x10054 + x10025;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10056 = x10055 + x10026;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10057 = x10056 + x10027;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10058 = x10057 + x10028;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10059 = x10058 + x10029;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10060 = x10059 + x10030;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10061 = x10060 + x10031;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10062 = x10061 + x10032;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10063 = x10062 + x10033;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10064 = x10063 + x10034;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10065 = x10064 + x10035;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10066 = x10065 + x10036;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10067 = x10066 + x10037;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10068 = x10067 + x10038;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10069 = x10068 + x10039;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10070 = x10069 + x10040;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10071 = x10070 + x10041;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10072 = x10071 + x10042;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10073 = x10049 * x67;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10074 = x10072 + x10073;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10075 = x10020 * x66;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10076 = x10072 + x10075;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10077 = x10021 * x65;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10078 = x10072 + x10077;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10079 = x10022 * x64;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10080 = x10072 + x10079;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10081 = x10023 * x63;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10082 = x10072 + x10081;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10083 = x10024 * x62;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10084 = x10072 + x10083;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10085 = x10025 * x61;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10086 = x10072 + x10085;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10087 = x10026 * x60;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10088 = x10072 + x10087;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10089 = x10027 * x59;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10090 = x10072 + x10089;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10091 = x10028 * x58;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10092 = x10072 + x10091;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10093 = x10029 * x57;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10094 = x10072 + x10093;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10095 = x10030 * x56;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10096 = x10072 + x10095;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10097 = x10031 * x55;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10098 = x10072 + x10097;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10099 = x10032 * x54;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10100 = x10072 + x10099;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10101 = x10033 * x53;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10102 = x10072 + x10101;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10103 = x10034 * x52;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10104 = x10072 + x10103;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10105 = x10035 * x51;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10106 = x10072 + x10105;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10107 = x10036 * x50;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10108 = x10072 + x10107;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10109 = x10037 * x49;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10110 = x10072 + x10109;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10111 = x10038 * x48;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10112 = x10072 + x10111;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10113 = x10039 * x47;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10114 = x10072 + x10113;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10115 = x10040 * x46;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10116 = x10072 + x10115;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10117 = x10041 * x45;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10118 = x10072 + x10117;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10119 = x10042 * x44;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10120 = x10072 + x10119;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":207:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":295:5)
     {
       auto& reg = args[2][6 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x10074);
       reg = x10074;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":199:41))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":287:41))
     auto x10121 = args[2][6 * steps + ((cycle - 0) & mask)];
     assert(x10121 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":202:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":290:13)
     auto x10122 = x10121 + x43;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
     auto x10123 = x10122 * x10122;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
     auto x10124 = x10123 * x10123;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
     {
       auto& reg = args[2][30 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x10124);
       reg = x10124;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":112:14))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":156:14))
     auto x10125 = args[2][30 * steps + ((cycle - 0) & mask)];
     assert(x10125 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x10126 = x10125 * x10123;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x10127 = x10126 * x10122;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10128 = x10127 + x10076;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10129 = x10128 + x10078;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10130 = x10129 + x10080;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10131 = x10130 + x10082;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10132 = x10131 + x10084;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10133 = x10132 + x10086;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10134 = x10133 + x10088;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10135 = x10134 + x10090;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10136 = x10135 + x10092;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10137 = x10136 + x10094;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10138 = x10137 + x10096;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10139 = x10138 + x10098;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10140 = x10139 + x10100;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10141 = x10140 + x10102;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10142 = x10141 + x10104;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10143 = x10142 + x10106;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10144 = x10143 + x10108;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10145 = x10144 + x10110;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10146 = x10145 + x10112;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10147 = x10146 + x10114;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10148 = x10147 + x10116;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10149 = x10148 + x10118;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10150 = x10149 + x10120;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10151 = x10127 * x67;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10152 = x10150 + x10151;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10153 = x10076 * x66;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10154 = x10150 + x10153;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10155 = x10078 * x65;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10156 = x10150 + x10155;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10157 = x10080 * x64;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10158 = x10150 + x10157;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10159 = x10082 * x63;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10160 = x10150 + x10159;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10161 = x10084 * x62;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10162 = x10150 + x10161;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10163 = x10086 * x61;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10164 = x10150 + x10163;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10165 = x10088 * x60;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10166 = x10150 + x10165;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10167 = x10090 * x59;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10168 = x10150 + x10167;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10169 = x10092 * x58;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10170 = x10150 + x10169;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10171 = x10094 * x57;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10172 = x10150 + x10171;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10173 = x10096 * x56;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10174 = x10150 + x10173;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10175 = x10098 * x55;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10176 = x10150 + x10175;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10177 = x10100 * x54;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10178 = x10150 + x10177;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10179 = x10102 * x53;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10180 = x10150 + x10179;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10181 = x10104 * x52;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10182 = x10150 + x10181;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10183 = x10106 * x51;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10184 = x10150 + x10183;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10185 = x10108 * x50;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10186 = x10150 + x10185;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10187 = x10110 * x49;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10188 = x10150 + x10187;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10189 = x10112 * x48;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10190 = x10150 + x10189;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10191 = x10114 * x47;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10192 = x10150 + x10191;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10193 = x10116 * x46;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10194 = x10150 + x10193;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10195 = x10118 * x45;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10196 = x10150 + x10195;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10197 = x10120 * x44;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10198 = x10150 + x10197;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":207:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":295:5)
     {
       auto& reg = args[2][7 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x10152);
       reg = x10152;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":199:41))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":287:41))
     auto x10199 = args[2][7 * steps + ((cycle - 0) & mask)];
     assert(x10199 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":202:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":290:13)
     auto x10200 = x10199 + x42;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
     auto x10201 = x10200 * x10200;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
     auto x10202 = x10201 * x10201;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
     {
       auto& reg = args[2][31 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x10202);
       reg = x10202;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":112:14))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":156:14))
     auto x10203 = args[2][31 * steps + ((cycle - 0) & mask)];
     assert(x10203 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x10204 = x10203 * x10201;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x10205 = x10204 * x10200;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10206 = x10205 + x10154;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10207 = x10206 + x10156;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10208 = x10207 + x10158;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10209 = x10208 + x10160;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10210 = x10209 + x10162;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10211 = x10210 + x10164;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10212 = x10211 + x10166;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10213 = x10212 + x10168;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10214 = x10213 + x10170;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10215 = x10214 + x10172;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10216 = x10215 + x10174;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10217 = x10216 + x10176;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10218 = x10217 + x10178;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10219 = x10218 + x10180;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10220 = x10219 + x10182;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10221 = x10220 + x10184;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10222 = x10221 + x10186;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10223 = x10222 + x10188;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10224 = x10223 + x10190;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10225 = x10224 + x10192;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10226 = x10225 + x10194;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10227 = x10226 + x10196;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10228 = x10227 + x10198;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10229 = x10205 * x67;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10230 = x10228 + x10229;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10231 = x10154 * x66;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10232 = x10228 + x10231;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10233 = x10156 * x65;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10234 = x10228 + x10233;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10235 = x10158 * x64;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10236 = x10228 + x10235;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10237 = x10160 * x63;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10238 = x10228 + x10237;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10239 = x10162 * x62;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10240 = x10228 + x10239;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10241 = x10164 * x61;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10242 = x10228 + x10241;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10243 = x10166 * x60;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10244 = x10228 + x10243;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10245 = x10168 * x59;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10246 = x10228 + x10245;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10247 = x10170 * x58;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10248 = x10228 + x10247;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10249 = x10172 * x57;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10250 = x10228 + x10249;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10251 = x10174 * x56;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10252 = x10228 + x10251;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10253 = x10176 * x55;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10254 = x10228 + x10253;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10255 = x10178 * x54;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10256 = x10228 + x10255;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10257 = x10180 * x53;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10258 = x10228 + x10257;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10259 = x10182 * x52;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10260 = x10228 + x10259;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10261 = x10184 * x51;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10262 = x10228 + x10261;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10263 = x10186 * x50;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10264 = x10228 + x10263;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10265 = x10188 * x49;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10266 = x10228 + x10265;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10267 = x10190 * x48;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10268 = x10228 + x10267;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10269 = x10192 * x47;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10270 = x10228 + x10269;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10271 = x10194 * x46;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10272 = x10228 + x10271;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10273 = x10196 * x45;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10274 = x10228 + x10273;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10275 = x10198 * x44;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10276 = x10228 + x10275;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":207:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":295:5)
     {
       auto& reg = args[2][8 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x10230);
       reg = x10230;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":199:41))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":287:41))
     auto x10277 = args[2][8 * steps + ((cycle - 0) & mask)];
     assert(x10277 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":202:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":290:13)
     auto x10278 = x10277 + x41;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
     auto x10279 = x10278 * x10278;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
     auto x10280 = x10279 * x10279;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
     {
       auto& reg = args[2][32 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x10280);
       reg = x10280;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":112:14))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":156:14))
     auto x10281 = args[2][32 * steps + ((cycle - 0) & mask)];
     assert(x10281 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x10282 = x10281 * x10279;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x10283 = x10282 * x10278;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10284 = x10283 + x10232;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10285 = x10284 + x10234;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10286 = x10285 + x10236;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10287 = x10286 + x10238;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10288 = x10287 + x10240;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10289 = x10288 + x10242;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10290 = x10289 + x10244;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10291 = x10290 + x10246;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10292 = x10291 + x10248;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10293 = x10292 + x10250;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10294 = x10293 + x10252;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10295 = x10294 + x10254;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10296 = x10295 + x10256;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10297 = x10296 + x10258;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10298 = x10297 + x10260;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10299 = x10298 + x10262;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10300 = x10299 + x10264;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10301 = x10300 + x10266;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10302 = x10301 + x10268;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10303 = x10302 + x10270;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10304 = x10303 + x10272;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10305 = x10304 + x10274;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10306 = x10305 + x10276;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10307 = x10283 * x67;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10308 = x10306 + x10307;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10309 = x10232 * x66;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10310 = x10306 + x10309;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10311 = x10234 * x65;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10312 = x10306 + x10311;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10313 = x10236 * x64;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10314 = x10306 + x10313;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10315 = x10238 * x63;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10316 = x10306 + x10315;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10317 = x10240 * x62;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10318 = x10306 + x10317;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10319 = x10242 * x61;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10320 = x10306 + x10319;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10321 = x10244 * x60;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10322 = x10306 + x10321;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10323 = x10246 * x59;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10324 = x10306 + x10323;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10325 = x10248 * x58;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10326 = x10306 + x10325;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10327 = x10250 * x57;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10328 = x10306 + x10327;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10329 = x10252 * x56;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10330 = x10306 + x10329;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10331 = x10254 * x55;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10332 = x10306 + x10331;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10333 = x10256 * x54;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10334 = x10306 + x10333;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10335 = x10258 * x53;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10336 = x10306 + x10335;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10337 = x10260 * x52;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10338 = x10306 + x10337;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10339 = x10262 * x51;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10340 = x10306 + x10339;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10341 = x10264 * x50;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10342 = x10306 + x10341;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10343 = x10266 * x49;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10344 = x10306 + x10343;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10345 = x10268 * x48;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10346 = x10306 + x10345;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10347 = x10270 * x47;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10348 = x10306 + x10347;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10349 = x10272 * x46;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10350 = x10306 + x10349;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10351 = x10274 * x45;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10352 = x10306 + x10351;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10353 = x10276 * x44;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10354 = x10306 + x10353;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":207:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":295:5)
     {
       auto& reg = args[2][9 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x10308);
       reg = x10308;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":199:41))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":287:41))
     auto x10355 = args[2][9 * steps + ((cycle - 0) & mask)];
     assert(x10355 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":202:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":290:13)
     auto x10356 = x10355 + x40;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
     auto x10357 = x10356 * x10356;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
     auto x10358 = x10357 * x10357;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
     {
       auto& reg = args[2][33 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x10358);
       reg = x10358;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":112:14))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":156:14))
     auto x10359 = args[2][33 * steps + ((cycle - 0) & mask)];
     assert(x10359 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x10360 = x10359 * x10357;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x10361 = x10360 * x10356;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10362 = x10361 + x10310;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10363 = x10362 + x10312;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10364 = x10363 + x10314;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10365 = x10364 + x10316;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10366 = x10365 + x10318;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10367 = x10366 + x10320;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10368 = x10367 + x10322;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10369 = x10368 + x10324;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10370 = x10369 + x10326;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10371 = x10370 + x10328;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10372 = x10371 + x10330;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10373 = x10372 + x10332;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10374 = x10373 + x10334;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10375 = x10374 + x10336;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10376 = x10375 + x10338;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10377 = x10376 + x10340;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10378 = x10377 + x10342;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10379 = x10378 + x10344;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10380 = x10379 + x10346;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10381 = x10380 + x10348;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10382 = x10381 + x10350;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10383 = x10382 + x10352;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10384 = x10383 + x10354;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10385 = x10361 * x67;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10386 = x10384 + x10385;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10387 = x10310 * x66;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10388 = x10384 + x10387;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10389 = x10312 * x65;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10390 = x10384 + x10389;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10391 = x10314 * x64;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10392 = x10384 + x10391;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10393 = x10316 * x63;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10394 = x10384 + x10393;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10395 = x10318 * x62;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10396 = x10384 + x10395;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10397 = x10320 * x61;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10398 = x10384 + x10397;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10399 = x10322 * x60;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10400 = x10384 + x10399;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10401 = x10324 * x59;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10402 = x10384 + x10401;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10403 = x10326 * x58;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10404 = x10384 + x10403;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10405 = x10328 * x57;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10406 = x10384 + x10405;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10407 = x10330 * x56;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10408 = x10384 + x10407;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10409 = x10332 * x55;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10410 = x10384 + x10409;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10411 = x10334 * x54;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10412 = x10384 + x10411;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10413 = x10336 * x53;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10414 = x10384 + x10413;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10415 = x10338 * x52;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10416 = x10384 + x10415;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10417 = x10340 * x51;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10418 = x10384 + x10417;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10419 = x10342 * x50;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10420 = x10384 + x10419;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10421 = x10344 * x49;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10422 = x10384 + x10421;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10423 = x10346 * x48;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10424 = x10384 + x10423;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10425 = x10348 * x47;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10426 = x10384 + x10425;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10427 = x10350 * x46;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10428 = x10384 + x10427;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10429 = x10352 * x45;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10430 = x10384 + x10429;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10431 = x10354 * x44;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10432 = x10384 + x10431;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":207:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":295:5)
     {
       auto& reg = args[2][10 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x10386);
       reg = x10386;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":199:41))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":287:41))
     auto x10433 = args[2][10 * steps + ((cycle - 0) & mask)];
     assert(x10433 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":202:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":290:13)
     auto x10434 = x10433 + x39;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
     auto x10435 = x10434 * x10434;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
     auto x10436 = x10435 * x10435;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
     {
       auto& reg = args[2][34 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x10436);
       reg = x10436;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":112:14))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":156:14))
     auto x10437 = args[2][34 * steps + ((cycle - 0) & mask)];
     assert(x10437 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x10438 = x10437 * x10435;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x10439 = x10438 * x10434;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10440 = x10439 + x10388;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10441 = x10440 + x10390;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10442 = x10441 + x10392;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10443 = x10442 + x10394;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10444 = x10443 + x10396;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10445 = x10444 + x10398;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10446 = x10445 + x10400;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10447 = x10446 + x10402;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10448 = x10447 + x10404;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10449 = x10448 + x10406;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10450 = x10449 + x10408;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10451 = x10450 + x10410;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10452 = x10451 + x10412;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10453 = x10452 + x10414;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10454 = x10453 + x10416;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10455 = x10454 + x10418;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10456 = x10455 + x10420;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10457 = x10456 + x10422;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10458 = x10457 + x10424;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10459 = x10458 + x10426;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10460 = x10459 + x10428;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10461 = x10460 + x10430;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10462 = x10461 + x10432;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10463 = x10439 * x67;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10464 = x10462 + x10463;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10465 = x10388 * x66;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10466 = x10462 + x10465;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10467 = x10390 * x65;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10468 = x10462 + x10467;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10469 = x10392 * x64;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10470 = x10462 + x10469;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10471 = x10394 * x63;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10472 = x10462 + x10471;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10473 = x10396 * x62;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10474 = x10462 + x10473;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10475 = x10398 * x61;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10476 = x10462 + x10475;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10477 = x10400 * x60;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10478 = x10462 + x10477;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10479 = x10402 * x59;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10480 = x10462 + x10479;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10481 = x10404 * x58;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10482 = x10462 + x10481;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10483 = x10406 * x57;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10484 = x10462 + x10483;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10485 = x10408 * x56;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10486 = x10462 + x10485;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10487 = x10410 * x55;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10488 = x10462 + x10487;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10489 = x10412 * x54;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10490 = x10462 + x10489;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10491 = x10414 * x53;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10492 = x10462 + x10491;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10493 = x10416 * x52;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10494 = x10462 + x10493;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10495 = x10418 * x51;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10496 = x10462 + x10495;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10497 = x10420 * x50;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10498 = x10462 + x10497;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10499 = x10422 * x49;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10500 = x10462 + x10499;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10501 = x10424 * x48;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10502 = x10462 + x10501;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10503 = x10426 * x47;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10504 = x10462 + x10503;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10505 = x10428 * x46;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10506 = x10462 + x10505;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10507 = x10430 * x45;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10508 = x10462 + x10507;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10509 = x10432 * x44;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10510 = x10462 + x10509;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":207:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":295:5)
     {
       auto& reg = args[2][11 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x10464);
       reg = x10464;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":199:41))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":287:41))
     auto x10511 = args[2][11 * steps + ((cycle - 0) & mask)];
     assert(x10511 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":202:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":290:13)
     auto x10512 = x10511 + x38;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
     auto x10513 = x10512 * x10512;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
     auto x10514 = x10513 * x10513;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
     {
       auto& reg = args[2][35 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x10514);
       reg = x10514;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":112:14))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":156:14))
     auto x10515 = args[2][35 * steps + ((cycle - 0) & mask)];
     assert(x10515 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x10516 = x10515 * x10513;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x10517 = x10516 * x10512;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10518 = x10517 + x10466;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10519 = x10518 + x10468;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10520 = x10519 + x10470;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10521 = x10520 + x10472;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10522 = x10521 + x10474;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10523 = x10522 + x10476;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10524 = x10523 + x10478;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10525 = x10524 + x10480;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10526 = x10525 + x10482;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10527 = x10526 + x10484;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10528 = x10527 + x10486;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10529 = x10528 + x10488;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10530 = x10529 + x10490;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10531 = x10530 + x10492;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10532 = x10531 + x10494;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10533 = x10532 + x10496;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10534 = x10533 + x10498;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10535 = x10534 + x10500;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10536 = x10535 + x10502;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10537 = x10536 + x10504;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10538 = x10537 + x10506;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10539 = x10538 + x10508;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10540 = x10539 + x10510;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10541 = x10517 * x67;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10542 = x10540 + x10541;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10543 = x10466 * x66;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10544 = x10540 + x10543;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10545 = x10468 * x65;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10546 = x10540 + x10545;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10547 = x10470 * x64;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10548 = x10540 + x10547;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10549 = x10472 * x63;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10550 = x10540 + x10549;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10551 = x10474 * x62;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10552 = x10540 + x10551;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10553 = x10476 * x61;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10554 = x10540 + x10553;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10555 = x10478 * x60;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10556 = x10540 + x10555;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10557 = x10480 * x59;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10558 = x10540 + x10557;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10559 = x10482 * x58;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10560 = x10540 + x10559;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10561 = x10484 * x57;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10562 = x10540 + x10561;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10563 = x10486 * x56;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10564 = x10540 + x10563;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10565 = x10488 * x55;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10566 = x10540 + x10565;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10567 = x10490 * x54;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10568 = x10540 + x10567;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10569 = x10492 * x53;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10570 = x10540 + x10569;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10571 = x10494 * x52;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10572 = x10540 + x10571;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10573 = x10496 * x51;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10574 = x10540 + x10573;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10575 = x10498 * x50;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10576 = x10540 + x10575;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10577 = x10500 * x49;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10578 = x10540 + x10577;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10579 = x10502 * x48;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10580 = x10540 + x10579;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10581 = x10504 * x47;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10582 = x10540 + x10581;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10583 = x10506 * x46;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10584 = x10540 + x10583;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10585 = x10508 * x45;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10586 = x10540 + x10585;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10587 = x10510 * x44;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10588 = x10540 + x10587;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":207:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":295:5)
     {
       auto& reg = args[2][12 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x10542);
       reg = x10542;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":199:41))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":287:41))
     auto x10589 = args[2][12 * steps + ((cycle - 0) & mask)];
     assert(x10589 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":202:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":290:13)
     auto x10590 = x10589 + x37;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
     auto x10591 = x10590 * x10590;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
     auto x10592 = x10591 * x10591;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
     {
       auto& reg = args[2][36 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x10592);
       reg = x10592;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":112:14))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":156:14))
     auto x10593 = args[2][36 * steps + ((cycle - 0) & mask)];
     assert(x10593 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x10594 = x10593 * x10591;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x10595 = x10594 * x10590;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10596 = x10595 + x10544;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10597 = x10596 + x10546;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10598 = x10597 + x10548;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10599 = x10598 + x10550;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10600 = x10599 + x10552;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10601 = x10600 + x10554;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10602 = x10601 + x10556;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10603 = x10602 + x10558;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10604 = x10603 + x10560;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10605 = x10604 + x10562;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10606 = x10605 + x10564;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10607 = x10606 + x10566;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10608 = x10607 + x10568;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10609 = x10608 + x10570;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10610 = x10609 + x10572;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10611 = x10610 + x10574;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10612 = x10611 + x10576;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10613 = x10612 + x10578;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10614 = x10613 + x10580;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10615 = x10614 + x10582;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10616 = x10615 + x10584;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10617 = x10616 + x10586;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10618 = x10617 + x10588;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10619 = x10595 * x67;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10620 = x10618 + x10619;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10621 = x10544 * x66;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10622 = x10618 + x10621;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10623 = x10546 * x65;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10624 = x10618 + x10623;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10625 = x10548 * x64;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10626 = x10618 + x10625;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10627 = x10550 * x63;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10628 = x10618 + x10627;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10629 = x10552 * x62;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10630 = x10618 + x10629;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10631 = x10554 * x61;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10632 = x10618 + x10631;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10633 = x10556 * x60;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10634 = x10618 + x10633;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10635 = x10558 * x59;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10636 = x10618 + x10635;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10637 = x10560 * x58;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10638 = x10618 + x10637;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10639 = x10562 * x57;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10640 = x10618 + x10639;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10641 = x10564 * x56;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10642 = x10618 + x10641;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10643 = x10566 * x55;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10644 = x10618 + x10643;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10645 = x10568 * x54;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10646 = x10618 + x10645;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10647 = x10570 * x53;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10648 = x10618 + x10647;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10649 = x10572 * x52;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10650 = x10618 + x10649;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10651 = x10574 * x51;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10652 = x10618 + x10651;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10653 = x10576 * x50;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10654 = x10618 + x10653;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10655 = x10578 * x49;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10656 = x10618 + x10655;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10657 = x10580 * x48;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10658 = x10618 + x10657;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10659 = x10582 * x47;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10660 = x10618 + x10659;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10661 = x10584 * x46;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10662 = x10618 + x10661;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10663 = x10586 * x45;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10664 = x10618 + x10663;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10665 = x10588 * x44;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10666 = x10618 + x10665;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":207:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":295:5)
     {
       auto& reg = args[2][13 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x10620);
       reg = x10620;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":199:41))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":287:41))
     auto x10667 = args[2][13 * steps + ((cycle - 0) & mask)];
     assert(x10667 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":202:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":290:13)
     auto x10668 = x10667 + x36;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
     auto x10669 = x10668 * x10668;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
     auto x10670 = x10669 * x10669;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
     {
       auto& reg = args[2][37 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x10670);
       reg = x10670;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":112:14))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":156:14))
     auto x10671 = args[2][37 * steps + ((cycle - 0) & mask)];
     assert(x10671 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x10672 = x10671 * x10669;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x10673 = x10672 * x10668;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10674 = x10673 + x10622;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10675 = x10674 + x10624;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10676 = x10675 + x10626;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10677 = x10676 + x10628;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10678 = x10677 + x10630;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10679 = x10678 + x10632;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10680 = x10679 + x10634;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10681 = x10680 + x10636;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10682 = x10681 + x10638;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10683 = x10682 + x10640;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10684 = x10683 + x10642;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10685 = x10684 + x10644;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10686 = x10685 + x10646;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10687 = x10686 + x10648;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10688 = x10687 + x10650;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10689 = x10688 + x10652;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10690 = x10689 + x10654;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10691 = x10690 + x10656;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10692 = x10691 + x10658;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10693 = x10692 + x10660;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10694 = x10693 + x10662;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10695 = x10694 + x10664;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10696 = x10695 + x10666;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10697 = x10673 * x67;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10698 = x10696 + x10697;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10699 = x10622 * x66;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10700 = x10696 + x10699;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10701 = x10624 * x65;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10702 = x10696 + x10701;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10703 = x10626 * x64;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10704 = x10696 + x10703;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10705 = x10628 * x63;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10706 = x10696 + x10705;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10707 = x10630 * x62;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10708 = x10696 + x10707;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10709 = x10632 * x61;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10710 = x10696 + x10709;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10711 = x10634 * x60;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10712 = x10696 + x10711;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10713 = x10636 * x59;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10714 = x10696 + x10713;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10715 = x10638 * x58;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10716 = x10696 + x10715;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10717 = x10640 * x57;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10718 = x10696 + x10717;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10719 = x10642 * x56;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10720 = x10696 + x10719;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10721 = x10644 * x55;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10722 = x10696 + x10721;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10723 = x10646 * x54;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10724 = x10696 + x10723;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10725 = x10648 * x53;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10726 = x10696 + x10725;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10727 = x10650 * x52;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10728 = x10696 + x10727;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10729 = x10652 * x51;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10730 = x10696 + x10729;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10731 = x10654 * x50;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10732 = x10696 + x10731;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10733 = x10656 * x49;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10734 = x10696 + x10733;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10735 = x10658 * x48;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10736 = x10696 + x10735;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10737 = x10660 * x47;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10738 = x10696 + x10737;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10739 = x10662 * x46;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10740 = x10696 + x10739;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10741 = x10664 * x45;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10742 = x10696 + x10741;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10743 = x10666 * x44;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10744 = x10696 + x10743;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":207:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":295:5)
     {
       auto& reg = args[2][14 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x10698);
       reg = x10698;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":199:41))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":287:41))
     auto x10745 = args[2][14 * steps + ((cycle - 0) & mask)];
     assert(x10745 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":202:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":290:13)
     auto x10746 = x10745 + x35;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
     auto x10747 = x10746 * x10746;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
     auto x10748 = x10747 * x10747;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
     {
       auto& reg = args[2][38 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x10748);
       reg = x10748;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":112:14))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":156:14))
     auto x10749 = args[2][38 * steps + ((cycle - 0) & mask)];
     assert(x10749 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x10750 = x10749 * x10747;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x10751 = x10750 * x10746;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10752 = x10751 + x10700;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10753 = x10752 + x10702;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10754 = x10753 + x10704;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10755 = x10754 + x10706;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10756 = x10755 + x10708;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10757 = x10756 + x10710;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10758 = x10757 + x10712;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10759 = x10758 + x10714;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10760 = x10759 + x10716;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10761 = x10760 + x10718;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10762 = x10761 + x10720;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10763 = x10762 + x10722;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10764 = x10763 + x10724;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10765 = x10764 + x10726;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10766 = x10765 + x10728;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10767 = x10766 + x10730;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10768 = x10767 + x10732;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10769 = x10768 + x10734;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10770 = x10769 + x10736;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10771 = x10770 + x10738;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10772 = x10771 + x10740;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10773 = x10772 + x10742;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10774 = x10773 + x10744;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10775 = x10751 * x67;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10776 = x10774 + x10775;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10777 = x10700 * x66;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10778 = x10774 + x10777;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10779 = x10702 * x65;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10780 = x10774 + x10779;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10781 = x10704 * x64;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10782 = x10774 + x10781;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10783 = x10706 * x63;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10784 = x10774 + x10783;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10785 = x10708 * x62;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10786 = x10774 + x10785;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10787 = x10710 * x61;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10788 = x10774 + x10787;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10789 = x10712 * x60;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10790 = x10774 + x10789;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10791 = x10714 * x59;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10792 = x10774 + x10791;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10793 = x10716 * x58;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10794 = x10774 + x10793;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10795 = x10718 * x57;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10796 = x10774 + x10795;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10797 = x10720 * x56;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10798 = x10774 + x10797;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10799 = x10722 * x55;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10800 = x10774 + x10799;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10801 = x10724 * x54;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10802 = x10774 + x10801;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10803 = x10726 * x53;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10804 = x10774 + x10803;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10805 = x10728 * x52;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10806 = x10774 + x10805;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10807 = x10730 * x51;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10808 = x10774 + x10807;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10809 = x10732 * x50;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10810 = x10774 + x10809;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10811 = x10734 * x49;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10812 = x10774 + x10811;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10813 = x10736 * x48;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10814 = x10774 + x10813;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10815 = x10738 * x47;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10816 = x10774 + x10815;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10817 = x10740 * x46;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10818 = x10774 + x10817;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10819 = x10742 * x45;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10820 = x10774 + x10819;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10821 = x10744 * x44;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10822 = x10774 + x10821;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":207:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":295:5)
     {
       auto& reg = args[2][15 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x10776);
       reg = x10776;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":199:41))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":287:41))
     auto x10823 = args[2][15 * steps + ((cycle - 0) & mask)];
     assert(x10823 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":202:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":290:13)
     auto x10824 = x10823 + x34;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
     auto x10825 = x10824 * x10824;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
     auto x10826 = x10825 * x10825;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
     {
       auto& reg = args[2][39 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x10826);
       reg = x10826;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":112:14))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":156:14))
     auto x10827 = args[2][39 * steps + ((cycle - 0) & mask)];
     assert(x10827 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x10828 = x10827 * x10825;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x10829 = x10828 * x10824;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10830 = x10829 + x10778;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10831 = x10830 + x10780;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10832 = x10831 + x10782;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10833 = x10832 + x10784;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10834 = x10833 + x10786;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10835 = x10834 + x10788;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10836 = x10835 + x10790;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10837 = x10836 + x10792;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10838 = x10837 + x10794;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10839 = x10838 + x10796;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10840 = x10839 + x10798;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10841 = x10840 + x10800;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10842 = x10841 + x10802;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10843 = x10842 + x10804;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10844 = x10843 + x10806;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10845 = x10844 + x10808;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10846 = x10845 + x10810;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10847 = x10846 + x10812;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10848 = x10847 + x10814;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10849 = x10848 + x10816;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10850 = x10849 + x10818;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10851 = x10850 + x10820;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10852 = x10851 + x10822;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10853 = x10829 * x67;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10854 = x10852 + x10853;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10855 = x10778 * x66;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10856 = x10852 + x10855;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10857 = x10780 * x65;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10858 = x10852 + x10857;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10859 = x10782 * x64;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10860 = x10852 + x10859;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10861 = x10784 * x63;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10862 = x10852 + x10861;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10863 = x10786 * x62;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10864 = x10852 + x10863;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10865 = x10788 * x61;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10866 = x10852 + x10865;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10867 = x10790 * x60;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10868 = x10852 + x10867;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10869 = x10792 * x59;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10870 = x10852 + x10869;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10871 = x10794 * x58;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10872 = x10852 + x10871;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10873 = x10796 * x57;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10874 = x10852 + x10873;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10875 = x10798 * x56;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10876 = x10852 + x10875;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10877 = x10800 * x55;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10878 = x10852 + x10877;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10879 = x10802 * x54;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10880 = x10852 + x10879;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10881 = x10804 * x53;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10882 = x10852 + x10881;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10883 = x10806 * x52;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10884 = x10852 + x10883;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10885 = x10808 * x51;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10886 = x10852 + x10885;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10887 = x10810 * x50;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10888 = x10852 + x10887;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10889 = x10812 * x49;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10890 = x10852 + x10889;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10891 = x10814 * x48;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10892 = x10852 + x10891;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10893 = x10816 * x47;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10894 = x10852 + x10893;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10895 = x10818 * x46;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10896 = x10852 + x10895;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10897 = x10820 * x45;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10898 = x10852 + x10897;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10899 = x10822 * x44;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10900 = x10852 + x10899;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":207:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":295:5)
     {
       auto& reg = args[2][16 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x10854);
       reg = x10854;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":199:41))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":287:41))
     auto x10901 = args[2][16 * steps + ((cycle - 0) & mask)];
     assert(x10901 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":202:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":290:13)
     auto x10902 = x10901 + x33;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
     auto x10903 = x10902 * x10902;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
     auto x10904 = x10903 * x10903;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
     {
       auto& reg = args[2][40 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x10904);
       reg = x10904;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":112:14))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":156:14))
     auto x10905 = args[2][40 * steps + ((cycle - 0) & mask)];
     assert(x10905 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x10906 = x10905 * x10903;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x10907 = x10906 * x10902;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10908 = x10907 + x10856;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10909 = x10908 + x10858;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10910 = x10909 + x10860;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10911 = x10910 + x10862;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10912 = x10911 + x10864;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10913 = x10912 + x10866;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10914 = x10913 + x10868;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10915 = x10914 + x10870;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10916 = x10915 + x10872;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10917 = x10916 + x10874;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10918 = x10917 + x10876;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10919 = x10918 + x10878;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10920 = x10919 + x10880;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10921 = x10920 + x10882;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10922 = x10921 + x10884;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10923 = x10922 + x10886;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10924 = x10923 + x10888;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10925 = x10924 + x10890;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10926 = x10925 + x10892;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10927 = x10926 + x10894;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10928 = x10927 + x10896;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10929 = x10928 + x10898;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10930 = x10929 + x10900;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10931 = x10907 * x67;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10932 = x10930 + x10931;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10933 = x10856 * x66;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10934 = x10930 + x10933;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10935 = x10858 * x65;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10936 = x10930 + x10935;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10937 = x10860 * x64;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10938 = x10930 + x10937;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10939 = x10862 * x63;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10940 = x10930 + x10939;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10941 = x10864 * x62;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10942 = x10930 + x10941;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10943 = x10866 * x61;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10944 = x10930 + x10943;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10945 = x10868 * x60;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10946 = x10930 + x10945;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10947 = x10870 * x59;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10948 = x10930 + x10947;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10949 = x10872 * x58;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10950 = x10930 + x10949;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10951 = x10874 * x57;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10952 = x10930 + x10951;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10953 = x10876 * x56;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10954 = x10930 + x10953;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10955 = x10878 * x55;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10956 = x10930 + x10955;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10957 = x10880 * x54;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10958 = x10930 + x10957;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10959 = x10882 * x53;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10960 = x10930 + x10959;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10961 = x10884 * x52;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10962 = x10930 + x10961;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10963 = x10886 * x51;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10964 = x10930 + x10963;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10965 = x10888 * x50;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10966 = x10930 + x10965;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10967 = x10890 * x49;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10968 = x10930 + x10967;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10969 = x10892 * x48;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10970 = x10930 + x10969;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10971 = x10894 * x47;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10972 = x10930 + x10971;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10973 = x10896 * x46;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10974 = x10930 + x10973;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10975 = x10898 * x45;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10976 = x10930 + x10975;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x10977 = x10900 * x44;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x10978 = x10930 + x10977;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":207:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":295:5)
     {
       auto& reg = args[2][17 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x10932);
       reg = x10932;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":199:41))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":287:41))
     auto x10979 = args[2][17 * steps + ((cycle - 0) & mask)];
     assert(x10979 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":202:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":290:13)
     auto x10980 = x10979 + x32;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
     auto x10981 = x10980 * x10980;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
     auto x10982 = x10981 * x10981;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
     {
       auto& reg = args[2][41 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x10982);
       reg = x10982;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":112:14))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":156:14))
     auto x10983 = args[2][41 * steps + ((cycle - 0) & mask)];
     assert(x10983 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x10984 = x10983 * x10981;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x10985 = x10984 * x10980;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10986 = x10985 + x10934;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10987 = x10986 + x10936;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10988 = x10987 + x10938;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10989 = x10988 + x10940;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10990 = x10989 + x10942;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10991 = x10990 + x10944;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10992 = x10991 + x10946;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10993 = x10992 + x10948;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10994 = x10993 + x10950;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10995 = x10994 + x10952;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10996 = x10995 + x10954;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10997 = x10996 + x10956;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10998 = x10997 + x10958;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x10999 = x10998 + x10960;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11000 = x10999 + x10962;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11001 = x11000 + x10964;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11002 = x11001 + x10966;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11003 = x11002 + x10968;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11004 = x11003 + x10970;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11005 = x11004 + x10972;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11006 = x11005 + x10974;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11007 = x11006 + x10976;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11008 = x11007 + x10978;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11009 = x10985 * x67;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11010 = x11008 + x11009;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11011 = x10934 * x66;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11012 = x11008 + x11011;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11013 = x10936 * x65;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11014 = x11008 + x11013;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11015 = x10938 * x64;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11016 = x11008 + x11015;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11017 = x10940 * x63;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11018 = x11008 + x11017;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11019 = x10942 * x62;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11020 = x11008 + x11019;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11021 = x10944 * x61;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11022 = x11008 + x11021;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11023 = x10946 * x60;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11024 = x11008 + x11023;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11025 = x10948 * x59;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11026 = x11008 + x11025;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11027 = x10950 * x58;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11028 = x11008 + x11027;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11029 = x10952 * x57;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11030 = x11008 + x11029;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11031 = x10954 * x56;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11032 = x11008 + x11031;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11033 = x10956 * x55;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11034 = x11008 + x11033;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11035 = x10958 * x54;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11036 = x11008 + x11035;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11037 = x10960 * x53;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11038 = x11008 + x11037;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11039 = x10962 * x52;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11040 = x11008 + x11039;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11041 = x10964 * x51;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11042 = x11008 + x11041;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11043 = x10966 * x50;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11044 = x11008 + x11043;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11045 = x10968 * x49;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11046 = x11008 + x11045;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11047 = x10970 * x48;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11048 = x11008 + x11047;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11049 = x10972 * x47;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11050 = x11008 + x11049;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11051 = x10974 * x46;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11052 = x11008 + x11051;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11053 = x10976 * x45;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11054 = x11008 + x11053;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11055 = x10978 * x44;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11056 = x11008 + x11055;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":207:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":295:5)
     {
       auto& reg = args[2][18 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x11010);
       reg = x11010;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":199:41))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":287:41))
     auto x11057 = args[2][18 * steps + ((cycle - 0) & mask)];
     assert(x11057 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":202:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":290:13)
     auto x11058 = x11057 + x31;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
     auto x11059 = x11058 * x11058;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
     auto x11060 = x11059 * x11059;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
     {
       auto& reg = args[2][42 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x11060);
       reg = x11060;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":112:14))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":156:14))
     auto x11061 = args[2][42 * steps + ((cycle - 0) & mask)];
     assert(x11061 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x11062 = x11061 * x11059;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x11063 = x11062 * x11058;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11064 = x11063 + x11012;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11065 = x11064 + x11014;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11066 = x11065 + x11016;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11067 = x11066 + x11018;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11068 = x11067 + x11020;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11069 = x11068 + x11022;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11070 = x11069 + x11024;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11071 = x11070 + x11026;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11072 = x11071 + x11028;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11073 = x11072 + x11030;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11074 = x11073 + x11032;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11075 = x11074 + x11034;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11076 = x11075 + x11036;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11077 = x11076 + x11038;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11078 = x11077 + x11040;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11079 = x11078 + x11042;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11080 = x11079 + x11044;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11081 = x11080 + x11046;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11082 = x11081 + x11048;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11083 = x11082 + x11050;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11084 = x11083 + x11052;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11085 = x11084 + x11054;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11086 = x11085 + x11056;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11087 = x11063 * x67;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11088 = x11086 + x11087;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11089 = x11012 * x66;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11090 = x11086 + x11089;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11091 = x11014 * x65;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11092 = x11086 + x11091;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11093 = x11016 * x64;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11094 = x11086 + x11093;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11095 = x11018 * x63;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11096 = x11086 + x11095;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11097 = x11020 * x62;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11098 = x11086 + x11097;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11099 = x11022 * x61;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11100 = x11086 + x11099;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11101 = x11024 * x60;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11102 = x11086 + x11101;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11103 = x11026 * x59;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11104 = x11086 + x11103;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11105 = x11028 * x58;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11106 = x11086 + x11105;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11107 = x11030 * x57;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11108 = x11086 + x11107;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11109 = x11032 * x56;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11110 = x11086 + x11109;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11111 = x11034 * x55;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11112 = x11086 + x11111;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11113 = x11036 * x54;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11114 = x11086 + x11113;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11115 = x11038 * x53;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11116 = x11086 + x11115;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11117 = x11040 * x52;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11118 = x11086 + x11117;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11119 = x11042 * x51;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11120 = x11086 + x11119;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11121 = x11044 * x50;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11122 = x11086 + x11121;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11123 = x11046 * x49;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11124 = x11086 + x11123;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11125 = x11048 * x48;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11126 = x11086 + x11125;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11127 = x11050 * x47;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11128 = x11086 + x11127;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11129 = x11052 * x46;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11130 = x11086 + x11129;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11131 = x11054 * x45;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11132 = x11086 + x11131;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11133 = x11056 * x44;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11134 = x11086 + x11133;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":207:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":295:5)
     {
       auto& reg = args[2][19 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x11088);
       reg = x11088;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":199:41))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":287:41))
     auto x11135 = args[2][19 * steps + ((cycle - 0) & mask)];
     assert(x11135 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":202:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":290:13)
     auto x11136 = x11135 + x30;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
     auto x11137 = x11136 * x11136;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
     auto x11138 = x11137 * x11137;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
     {
       auto& reg = args[2][43 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x11138);
       reg = x11138;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":112:14))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":156:14))
     auto x11139 = args[2][43 * steps + ((cycle - 0) & mask)];
     assert(x11139 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x11140 = x11139 * x11137;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x11141 = x11140 * x11136;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11142 = x11141 + x11090;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11143 = x11142 + x11092;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11144 = x11143 + x11094;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11145 = x11144 + x11096;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11146 = x11145 + x11098;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11147 = x11146 + x11100;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11148 = x11147 + x11102;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11149 = x11148 + x11104;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11150 = x11149 + x11106;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11151 = x11150 + x11108;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11152 = x11151 + x11110;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11153 = x11152 + x11112;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11154 = x11153 + x11114;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11155 = x11154 + x11116;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11156 = x11155 + x11118;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11157 = x11156 + x11120;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11158 = x11157 + x11122;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11159 = x11158 + x11124;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11160 = x11159 + x11126;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11161 = x11160 + x11128;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11162 = x11161 + x11130;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11163 = x11162 + x11132;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11164 = x11163 + x11134;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11165 = x11141 * x67;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11166 = x11164 + x11165;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11167 = x11090 * x66;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11168 = x11164 + x11167;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11169 = x11092 * x65;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11170 = x11164 + x11169;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11171 = x11094 * x64;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11172 = x11164 + x11171;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11173 = x11096 * x63;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11174 = x11164 + x11173;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11175 = x11098 * x62;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11176 = x11164 + x11175;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11177 = x11100 * x61;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11178 = x11164 + x11177;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11179 = x11102 * x60;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11180 = x11164 + x11179;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11181 = x11104 * x59;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11182 = x11164 + x11181;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11183 = x11106 * x58;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11184 = x11164 + x11183;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11185 = x11108 * x57;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11186 = x11164 + x11185;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11187 = x11110 * x56;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11188 = x11164 + x11187;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11189 = x11112 * x55;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11190 = x11164 + x11189;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11191 = x11114 * x54;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11192 = x11164 + x11191;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11193 = x11116 * x53;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11194 = x11164 + x11193;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11195 = x11118 * x52;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11196 = x11164 + x11195;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11197 = x11120 * x51;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11198 = x11164 + x11197;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11199 = x11122 * x50;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11200 = x11164 + x11199;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11201 = x11124 * x49;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11202 = x11164 + x11201;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11203 = x11126 * x48;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11204 = x11164 + x11203;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11205 = x11128 * x47;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11206 = x11164 + x11205;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11207 = x11130 * x46;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11208 = x11164 + x11207;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11209 = x11132 * x45;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11210 = x11164 + x11209;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11211 = x11134 * x44;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11212 = x11164 + x11211;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":207:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":295:5)
     {
       auto& reg = args[2][20 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x11166);
       reg = x11166;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":199:41))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":287:41))
     auto x11213 = args[2][20 * steps + ((cycle - 0) & mask)];
     assert(x11213 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":202:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":290:13)
     auto x11214 = x11213 + x29;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
     auto x11215 = x11214 * x11214;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
     auto x11216 = x11215 * x11215;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
     {
       auto& reg = args[2][44 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x11216);
       reg = x11216;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":112:14))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":156:14))
     auto x11217 = args[2][44 * steps + ((cycle - 0) & mask)];
     assert(x11217 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x11218 = x11217 * x11215;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x11219 = x11218 * x11214;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11220 = x11219 + x11168;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11221 = x11220 + x11170;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11222 = x11221 + x11172;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11223 = x11222 + x11174;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11224 = x11223 + x11176;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11225 = x11224 + x11178;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11226 = x11225 + x11180;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11227 = x11226 + x11182;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11228 = x11227 + x11184;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11229 = x11228 + x11186;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11230 = x11229 + x11188;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11231 = x11230 + x11190;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11232 = x11231 + x11192;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11233 = x11232 + x11194;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11234 = x11233 + x11196;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11235 = x11234 + x11198;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11236 = x11235 + x11200;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11237 = x11236 + x11202;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11238 = x11237 + x11204;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11239 = x11238 + x11206;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11240 = x11239 + x11208;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11241 = x11240 + x11210;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11242 = x11241 + x11212;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11243 = x11219 * x67;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11244 = x11242 + x11243;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11245 = x11168 * x66;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11246 = x11242 + x11245;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11247 = x11170 * x65;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11248 = x11242 + x11247;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11249 = x11172 * x64;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11250 = x11242 + x11249;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11251 = x11174 * x63;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11252 = x11242 + x11251;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11253 = x11176 * x62;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11254 = x11242 + x11253;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11255 = x11178 * x61;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11256 = x11242 + x11255;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11257 = x11180 * x60;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11258 = x11242 + x11257;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11259 = x11182 * x59;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11260 = x11242 + x11259;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11261 = x11184 * x58;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11262 = x11242 + x11261;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11263 = x11186 * x57;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11264 = x11242 + x11263;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11265 = x11188 * x56;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11266 = x11242 + x11265;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11267 = x11190 * x55;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11268 = x11242 + x11267;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11269 = x11192 * x54;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11270 = x11242 + x11269;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11271 = x11194 * x53;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11272 = x11242 + x11271;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11273 = x11196 * x52;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11274 = x11242 + x11273;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11275 = x11198 * x51;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11276 = x11242 + x11275;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11277 = x11200 * x50;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11278 = x11242 + x11277;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11279 = x11202 * x49;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11280 = x11242 + x11279;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11281 = x11204 * x48;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11282 = x11242 + x11281;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11283 = x11206 * x47;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11284 = x11242 + x11283;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11285 = x11208 * x46;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11286 = x11242 + x11285;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11287 = x11210 * x45;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11288 = x11242 + x11287;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11289 = x11212 * x44;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11290 = x11242 + x11289;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":207:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":295:5)
     {
       auto& reg = args[2][21 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x11244);
       reg = x11244;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":199:41))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":287:41))
     auto x11291 = args[2][21 * steps + ((cycle - 0) & mask)];
     assert(x11291 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":202:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":290:13)
     auto x11292 = x11291 + x28;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
     auto x11293 = x11292 * x11292;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
     auto x11294 = x11293 * x11293;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
     {
       auto& reg = args[2][45 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x11294);
       reg = x11294;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":112:14))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":156:14))
     auto x11295 = args[2][45 * steps + ((cycle - 0) & mask)];
     assert(x11295 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x11296 = x11295 * x11293;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x11297 = x11296 * x11292;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11298 = x11297 + x11246;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11299 = x11298 + x11248;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11300 = x11299 + x11250;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11301 = x11300 + x11252;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11302 = x11301 + x11254;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11303 = x11302 + x11256;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11304 = x11303 + x11258;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11305 = x11304 + x11260;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11306 = x11305 + x11262;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11307 = x11306 + x11264;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11308 = x11307 + x11266;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11309 = x11308 + x11268;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11310 = x11309 + x11270;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11311 = x11310 + x11272;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11312 = x11311 + x11274;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11313 = x11312 + x11276;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11314 = x11313 + x11278;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11315 = x11314 + x11280;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11316 = x11315 + x11282;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11317 = x11316 + x11284;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11318 = x11317 + x11286;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11319 = x11318 + x11288;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11320 = x11319 + x11290;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11321 = x11297 * x67;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11322 = x11320 + x11321;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11323 = x11246 * x66;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11324 = x11320 + x11323;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11325 = x11248 * x65;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11326 = x11320 + x11325;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11327 = x11250 * x64;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11328 = x11320 + x11327;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11329 = x11252 * x63;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11330 = x11320 + x11329;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11331 = x11254 * x62;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11332 = x11320 + x11331;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11333 = x11256 * x61;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11334 = x11320 + x11333;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11335 = x11258 * x60;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11336 = x11320 + x11335;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11337 = x11260 * x59;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11338 = x11320 + x11337;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11339 = x11262 * x58;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11340 = x11320 + x11339;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11341 = x11264 * x57;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11342 = x11320 + x11341;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11343 = x11266 * x56;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11344 = x11320 + x11343;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11345 = x11268 * x55;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11346 = x11320 + x11345;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11347 = x11270 * x54;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11348 = x11320 + x11347;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11349 = x11272 * x53;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11350 = x11320 + x11349;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11351 = x11274 * x52;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11352 = x11320 + x11351;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11353 = x11276 * x51;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11354 = x11320 + x11353;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11355 = x11278 * x50;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11356 = x11320 + x11355;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11357 = x11280 * x49;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11358 = x11320 + x11357;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11359 = x11282 * x48;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11360 = x11320 + x11359;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11361 = x11284 * x47;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11362 = x11320 + x11361;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11363 = x11286 * x46;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11364 = x11320 + x11363;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11365 = x11288 * x45;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11366 = x11320 + x11365;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11367 = x11290 * x44;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11368 = x11320 + x11367;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":207:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":295:5)
     {
       auto& reg = args[2][22 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x11322);
       reg = x11322;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":199:41))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":287:41))
     auto x11369 = args[2][22 * steps + ((cycle - 0) & mask)];
     assert(x11369 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":202:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":290:13)
     auto x11370 = x11369 + x27;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
     auto x11371 = x11370 * x11370;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
     auto x11372 = x11371 * x11371;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
     {
       auto& reg = args[2][46 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x11372);
       reg = x11372;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":112:14))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":156:14))
     auto x11373 = args[2][46 * steps + ((cycle - 0) & mask)];
     assert(x11373 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x11374 = x11373 * x11371;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x11375 = x11374 * x11370;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11376 = x11375 + x11324;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11377 = x11376 + x11326;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11378 = x11377 + x11328;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11379 = x11378 + x11330;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11380 = x11379 + x11332;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11381 = x11380 + x11334;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11382 = x11381 + x11336;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11383 = x11382 + x11338;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11384 = x11383 + x11340;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11385 = x11384 + x11342;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11386 = x11385 + x11344;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11387 = x11386 + x11346;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11388 = x11387 + x11348;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11389 = x11388 + x11350;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11390 = x11389 + x11352;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11391 = x11390 + x11354;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11392 = x11391 + x11356;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11393 = x11392 + x11358;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11394 = x11393 + x11360;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11395 = x11394 + x11362;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11396 = x11395 + x11364;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11397 = x11396 + x11366;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11398 = x11397 + x11368;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11399 = x11375 * x67;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11400 = x11398 + x11399;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11401 = x11324 * x66;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11402 = x11398 + x11401;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11403 = x11326 * x65;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11404 = x11398 + x11403;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11405 = x11328 * x64;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11406 = x11398 + x11405;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11407 = x11330 * x63;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11408 = x11398 + x11407;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11409 = x11332 * x62;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11410 = x11398 + x11409;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11411 = x11334 * x61;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11412 = x11398 + x11411;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11413 = x11336 * x60;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11414 = x11398 + x11413;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11415 = x11338 * x59;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11416 = x11398 + x11415;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11417 = x11340 * x58;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11418 = x11398 + x11417;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11419 = x11342 * x57;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11420 = x11398 + x11419;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11421 = x11344 * x56;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11422 = x11398 + x11421;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11423 = x11346 * x55;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11424 = x11398 + x11423;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11425 = x11348 * x54;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11426 = x11398 + x11425;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11427 = x11350 * x53;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11428 = x11398 + x11427;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11429 = x11352 * x52;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11430 = x11398 + x11429;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11431 = x11354 * x51;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11432 = x11398 + x11431;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11433 = x11356 * x50;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11434 = x11398 + x11433;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11435 = x11358 * x49;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11436 = x11398 + x11435;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11437 = x11360 * x48;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11438 = x11398 + x11437;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11439 = x11362 * x47;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11440 = x11398 + x11439;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11441 = x11364 * x46;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11442 = x11398 + x11441;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11443 = x11366 * x45;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11444 = x11398 + x11443;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11445 = x11368 * x44;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11446 = x11398 + x11445;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":207:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":295:5)
     {
       auto& reg = args[2][23 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x11400);
       reg = x11400;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":199:41))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":287:41))
     auto x11447 = args[2][23 * steps + ((cycle - 0) & mask)];
     assert(x11447 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":202:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":290:13)
     auto x11448 = x11447 + x26;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
     auto x11449 = x11448 * x11448;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
     auto x11450 = x11449 * x11449;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
     {
       auto& reg = args[2][47 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x11450);
       reg = x11450;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":112:14))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":156:14))
     auto x11451 = args[2][47 * steps + ((cycle - 0) & mask)];
     assert(x11451 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x11452 = x11451 * x11449;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x11453 = x11452 * x11448;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11454 = x11453 + x11402;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11455 = x11454 + x11404;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11456 = x11455 + x11406;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11457 = x11456 + x11408;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11458 = x11457 + x11410;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11459 = x11458 + x11412;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11460 = x11459 + x11414;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11461 = x11460 + x11416;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11462 = x11461 + x11418;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11463 = x11462 + x11420;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11464 = x11463 + x11422;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11465 = x11464 + x11424;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11466 = x11465 + x11426;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11467 = x11466 + x11428;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11468 = x11467 + x11430;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11469 = x11468 + x11432;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11470 = x11469 + x11434;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11471 = x11470 + x11436;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11472 = x11471 + x11438;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11473 = x11472 + x11440;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11474 = x11473 + x11442;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11475 = x11474 + x11444;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11476 = x11475 + x11446;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11477 = x11453 * x67;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11478 = x11476 + x11477;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11479 = x11402 * x66;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11480 = x11476 + x11479;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11481 = x11404 * x65;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11482 = x11476 + x11481;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11483 = x11406 * x64;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11484 = x11476 + x11483;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11485 = x11408 * x63;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11486 = x11476 + x11485;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11487 = x11410 * x62;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11488 = x11476 + x11487;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11489 = x11412 * x61;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11490 = x11476 + x11489;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11491 = x11414 * x60;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11492 = x11476 + x11491;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11493 = x11416 * x59;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11494 = x11476 + x11493;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11495 = x11418 * x58;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11496 = x11476 + x11495;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11497 = x11420 * x57;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11498 = x11476 + x11497;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11499 = x11422 * x56;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11500 = x11476 + x11499;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11501 = x11424 * x55;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11502 = x11476 + x11501;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11503 = x11426 * x54;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11504 = x11476 + x11503;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11505 = x11428 * x53;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11506 = x11476 + x11505;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11507 = x11430 * x52;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11508 = x11476 + x11507;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11509 = x11432 * x51;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11510 = x11476 + x11509;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11511 = x11434 * x50;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11512 = x11476 + x11511;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11513 = x11436 * x49;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11514 = x11476 + x11513;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11515 = x11438 * x48;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11516 = x11476 + x11515;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11517 = x11440 * x47;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11518 = x11476 + x11517;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11519 = x11442 * x46;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11520 = x11476 + x11519;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11521 = x11444 * x45;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11522 = x11476 + x11521;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11523 = x11446 * x44;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11524 = x11476 + x11523;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":207:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":295:5)
     {
       auto& reg = args[2][24 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x11478);
       reg = x11478;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":199:41))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":287:41))
     auto x11525 = args[2][24 * steps + ((cycle - 0) & mask)];
     assert(x11525 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":202:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":290:13)
     auto x11526 = x11525 + x25;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
     auto x11527 = x11526 * x11526;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
     auto x11528 = x11527 * x11527;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
     {
       auto& reg = args[2][48 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x11528);
       reg = x11528;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":112:14))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":156:14))
     auto x11529 = args[2][48 * steps + ((cycle - 0) & mask)];
     assert(x11529 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x11530 = x11529 * x11527;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x11531 = x11530 * x11526;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11532 = x11531 + x11480;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11533 = x11532 + x11482;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11534 = x11533 + x11484;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11535 = x11534 + x11486;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11536 = x11535 + x11488;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11537 = x11536 + x11490;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11538 = x11537 + x11492;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11539 = x11538 + x11494;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11540 = x11539 + x11496;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11541 = x11540 + x11498;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11542 = x11541 + x11500;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11543 = x11542 + x11502;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11544 = x11543 + x11504;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11545 = x11544 + x11506;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11546 = x11545 + x11508;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11547 = x11546 + x11510;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11548 = x11547 + x11512;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11549 = x11548 + x11514;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11550 = x11549 + x11516;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11551 = x11550 + x11518;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11552 = x11551 + x11520;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11553 = x11552 + x11522;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11554 = x11553 + x11524;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11555 = x11531 * x67;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11556 = x11554 + x11555;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11557 = x11480 * x66;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11558 = x11554 + x11557;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11559 = x11482 * x65;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11560 = x11554 + x11559;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11561 = x11484 * x64;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11562 = x11554 + x11561;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11563 = x11486 * x63;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11564 = x11554 + x11563;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11565 = x11488 * x62;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11566 = x11554 + x11565;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11567 = x11490 * x61;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11568 = x11554 + x11567;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11569 = x11492 * x60;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11570 = x11554 + x11569;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11571 = x11494 * x59;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11572 = x11554 + x11571;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11573 = x11496 * x58;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11574 = x11554 + x11573;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11575 = x11498 * x57;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11576 = x11554 + x11575;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11577 = x11500 * x56;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11578 = x11554 + x11577;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11579 = x11502 * x55;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11580 = x11554 + x11579;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11581 = x11504 * x54;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11582 = x11554 + x11581;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11583 = x11506 * x53;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11584 = x11554 + x11583;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11585 = x11508 * x52;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11586 = x11554 + x11585;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11587 = x11510 * x51;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11588 = x11554 + x11587;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11589 = x11512 * x50;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11590 = x11554 + x11589;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11591 = x11514 * x49;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11592 = x11554 + x11591;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11593 = x11516 * x48;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11594 = x11554 + x11593;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11595 = x11518 * x47;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11596 = x11554 + x11595;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11597 = x11520 * x46;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11598 = x11554 + x11597;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11599 = x11522 * x45;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11600 = x11554 + x11599;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11601 = x11524 * x44;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11602 = x11554 + x11601;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":207:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":295:5)
     {
       auto& reg = args[2][25 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x11556);
       reg = x11556;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":199:41))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":287:41))
     auto x11603 = args[2][25 * steps + ((cycle - 0) & mask)];
     assert(x11603 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":202:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":290:13)
     auto x11604 = x11603 + x24;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
     auto x11605 = x11604 * x11604;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
     auto x11606 = x11605 * x11605;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
     {
       auto& reg = args[2][49 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x11606);
       reg = x11606;
     }
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":112:14))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_partial(recursion::Poseidon2Partial)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":156:14))
     auto x11607 = args[2][49 * steps + ((cycle - 0) & mask)];
     assert(x11607 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x11608 = x11607 * x11605;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
     auto x11609 = x11608 * x11604;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11610 = x11609 + x11558;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11611 = x11610 + x11560;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11612 = x11611 + x11562;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11613 = x11612 + x11564;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11614 = x11613 + x11566;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11615 = x11614 + x11568;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11616 = x11615 + x11570;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11617 = x11616 + x11572;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11618 = x11617 + x11574;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11619 = x11618 + x11576;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11620 = x11619 + x11578;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11621 = x11620 + x11580;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11622 = x11621 + x11582;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11623 = x11622 + x11584;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11624 = x11623 + x11586;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11625 = x11624 + x11588;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11626 = x11625 + x11590;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11627 = x11626 + x11592;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11628 = x11627 + x11594;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11629 = x11628 + x11596;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11630 = x11629 + x11598;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11631 = x11630 + x11600;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
     auto x11632 = x11631 + x11602;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11633 = x11609 * x67;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11634 = x11632 + x11633;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11635 = x11558 * x66;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11636 = x11632 + x11635;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11637 = x11560 * x65;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11638 = x11632 + x11637;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11639 = x11562 * x64;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11640 = x11632 + x11639;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11641 = x11564 * x63;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11642 = x11632 + x11641;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11643 = x11566 * x62;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11644 = x11632 + x11643;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11645 = x11568 * x61;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11646 = x11632 + x11645;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11647 = x11570 * x60;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11648 = x11632 + x11647;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11649 = x11572 * x59;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11650 = x11632 + x11649;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11651 = x11574 * x58;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11652 = x11632 + x11651;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11653 = x11576 * x57;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11654 = x11632 + x11653;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11655 = x11578 * x56;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11656 = x11632 + x11655;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11657 = x11580 * x55;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11658 = x11632 + x11657;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11659 = x11582 * x54;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11660 = x11632 + x11659;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11661 = x11584 * x53;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11662 = x11632 + x11661;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11663 = x11586 * x52;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11664 = x11632 + x11663;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11665 = x11588 * x51;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11666 = x11632 + x11665;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11667 = x11590 * x50;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11668 = x11632 + x11667;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11669 = x11592 * x49;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11670 = x11632 + x11669;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11671 = x11594 * x48;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11672 = x11632 + x11671;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11673 = x11596 * x47;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11674 = x11632 + x11673;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11675 = x11598 * x46;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11676 = x11632 + x11675;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11677 = x11600 * x45;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11678 = x11632 + x11677;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
     auto x11679 = x11602 * x44;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
     auto x11680 = x11632 + x11679;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":207:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":295:5)
     {
       auto& reg = args[2][26 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x11634);
@@ -36219,193 +36219,193 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
     host_args.at(6) = x11678;
     host_args.at(7) = x11680;
     host(ctx, "log", "                         %u %u %u %u %u %u %u %u", host_args.data(), 8, host_outs.data(), 0);
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":218:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":327:13)
     auto x11681 = x11634 + x23;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":219:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":328:5)
     {
       auto& reg = args[2][90 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x11681);
       reg = x11681;
     }
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":218:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":327:13)
     auto x11682 = x11636 + x22;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":219:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":328:5)
     {
       auto& reg = args[2][91 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x11682);
       reg = x11682;
     }
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":218:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":327:13)
     auto x11683 = x11638 + x21;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":219:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":328:5)
     {
       auto& reg = args[2][92 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x11683);
       reg = x11683;
     }
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":218:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":327:13)
     auto x11684 = x11640 + x20;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":219:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":328:5)
     {
       auto& reg = args[2][93 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x11684);
       reg = x11684;
     }
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":218:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":327:13)
     auto x11685 = x11642 + x19;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":219:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":328:5)
     {
       auto& reg = args[2][94 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x11685);
       reg = x11685;
     }
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":218:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":327:13)
     auto x11686 = x11644 + x18;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":219:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":328:5)
     {
       auto& reg = args[2][95 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x11686);
       reg = x11686;
     }
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":218:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":327:13)
     auto x11687 = x11646 + x17;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":219:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":328:5)
     {
       auto& reg = args[2][96 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x11687);
       reg = x11687;
     }
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":218:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":327:13)
     auto x11688 = x11648 + x16;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":219:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":328:5)
     {
       auto& reg = args[2][97 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x11688);
       reg = x11688;
     }
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":218:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":327:13)
     auto x11689 = x11650 + x15;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":219:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":328:5)
     {
       auto& reg = args[2][98 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x11689);
       reg = x11689;
     }
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":218:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":327:13)
     auto x11690 = x11652 + x14;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":219:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":328:5)
     {
       auto& reg = args[2][99 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x11690);
       reg = x11690;
     }
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":218:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":327:13)
     auto x11691 = x11654 + x13;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":219:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":328:5)
     {
       auto& reg = args[2][100 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x11691);
       reg = x11691;
     }
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":218:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":327:13)
     auto x11692 = x11656 + x12;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":219:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":328:5)
     {
       auto& reg = args[2][101 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x11692);
       reg = x11692;
     }
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":218:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":327:13)
     auto x11693 = x11658 + x11;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":219:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":328:5)
     {
       auto& reg = args[2][102 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x11693);
       reg = x11693;
     }
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":218:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":327:13)
     auto x11694 = x11660 + x10;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":219:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":328:5)
     {
       auto& reg = args[2][103 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x11694);
       reg = x11694;
     }
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":218:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":327:13)
     auto x11695 = x11662 + x9;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":219:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":328:5)
     {
       auto& reg = args[2][104 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x11695);
       reg = x11695;
     }
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":218:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":327:13)
     auto x11696 = x11664 + x8;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":219:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":328:5)
     {
       auto& reg = args[2][105 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x11696);
       reg = x11696;
     }
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":218:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":327:13)
     auto x11697 = x11666 + x7;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":219:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":328:5)
     {
       auto& reg = args[2][106 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x11697);
       reg = x11697;
     }
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":218:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":327:13)
     auto x11698 = x11668 + x6;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":219:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":328:5)
     {
       auto& reg = args[2][107 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x11698);
       reg = x11698;
     }
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":218:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":327:13)
     auto x11699 = x11670 + x5;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":219:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":328:5)
     {
       auto& reg = args[2][108 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x11699);
       reg = x11699;
     }
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":218:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":327:13)
     auto x11700 = x11672 + x4;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":219:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":328:5)
     {
       auto& reg = args[2][109 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x11700);
       reg = x11700;
     }
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":218:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":327:13)
     auto x11701 = x11674 + x3;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":219:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":328:5)
     {
       auto& reg = args[2][110 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x11701);
       reg = x11701;
     }
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":218:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":327:13)
     auto x11702 = x11676 + x2;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":219:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":328:5)
     {
       auto& reg = args[2][111 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x11702);
       reg = x11702;
     }
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":218:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":327:13)
     auto x11703 = x11678 + x1;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":219:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":328:5)
     {
       auto& reg = args[2][112 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x11703);
       reg = x11703;
     }
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":218:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":327:13)
     auto x11704 = x11680 + x0;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":219:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":328:5)
     {
       auto& reg = args[2][113 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x11704);
@@ -36419,179 +36419,179 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
     // loc("top(recursion::Top)/code(recursion::Code)/write_addr(Reg)"("zirgen/circuit/recursion/top.cpp":22:49))
     auto x11706 = args[0][0 * steps + ((cycle - 0) & mask)];
     assert(x11706 != Fp::invalid());
-    // loc("top(recursion::Top)/code(recursion::Code)/inst(Mux)/poseidon2_store(recursion::Poseidon2MemInst)/group(OneHot)/g0(Reg)"("zirgen/circuit/recursion/poseidon2.cpp":239:39))
+    // loc("top(recursion::Top)/code(recursion::Code)/inst(Mux)/poseidon2_store(recursion::Poseidon2MemInst)/group(OneHot)/g0(Reg)"("zirgen/circuit/recursion/poseidon2.cpp":348:39))
     auto x11707 = args[0][10 * steps + ((cycle - 0) & mask)];
     assert(x11707 != Fp::invalid());
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_store(recursion::Poseidon2Store)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":239:88))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_store(recursion::Poseidon2Store)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":348:88))
     auto x11708 = args[2][90 * steps + ((cycle - 1) & mask)];
     assert(x11708 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":239:39)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":348:39)
     auto x11709 = x11707 * x11708;
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_store(recursion::Poseidon2Store)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":239:88))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_store(recursion::Poseidon2Store)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":348:88))
     auto x11710 = args[2][91 * steps + ((cycle - 1) & mask)];
     assert(x11710 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":239:39)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":348:39)
     auto x11711 = x11707 * x11710;
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_store(recursion::Poseidon2Store)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":239:88))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_store(recursion::Poseidon2Store)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":348:88))
     auto x11712 = args[2][92 * steps + ((cycle - 1) & mask)];
     assert(x11712 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":239:39)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":348:39)
     auto x11713 = x11707 * x11712;
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_store(recursion::Poseidon2Store)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":239:88))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_store(recursion::Poseidon2Store)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":348:88))
     auto x11714 = args[2][93 * steps + ((cycle - 1) & mask)];
     assert(x11714 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":239:39)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":348:39)
     auto x11715 = x11707 * x11714;
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_store(recursion::Poseidon2Store)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":239:88))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_store(recursion::Poseidon2Store)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":348:88))
     auto x11716 = args[2][94 * steps + ((cycle - 1) & mask)];
     assert(x11716 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":239:39)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":348:39)
     auto x11717 = x11707 * x11716;
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_store(recursion::Poseidon2Store)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":239:88))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_store(recursion::Poseidon2Store)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":348:88))
     auto x11718 = args[2][95 * steps + ((cycle - 1) & mask)];
     assert(x11718 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":239:39)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":348:39)
     auto x11719 = x11707 * x11718;
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_store(recursion::Poseidon2Store)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":239:88))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_store(recursion::Poseidon2Store)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":348:88))
     auto x11720 = args[2][96 * steps + ((cycle - 1) & mask)];
     assert(x11720 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":239:39)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":348:39)
     auto x11721 = x11707 * x11720;
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_store(recursion::Poseidon2Store)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":239:88))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_store(recursion::Poseidon2Store)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":348:88))
     auto x11722 = args[2][97 * steps + ((cycle - 1) & mask)];
     assert(x11722 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":239:39)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":348:39)
     auto x11723 = x11707 * x11722;
-    // loc("top(recursion::Top)/code(recursion::Code)/inst(Mux)/poseidon2_store(recursion::Poseidon2MemInst)/group(OneHot)/g1(Reg)"("zirgen/circuit/recursion/poseidon2.cpp":239:39))
+    // loc("top(recursion::Top)/code(recursion::Code)/inst(Mux)/poseidon2_store(recursion::Poseidon2MemInst)/group(OneHot)/g1(Reg)"("zirgen/circuit/recursion/poseidon2.cpp":348:39))
     auto x11724 = args[0][11 * steps + ((cycle - 0) & mask)];
     assert(x11724 != Fp::invalid());
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_store(recursion::Poseidon2Store)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":239:88))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_store(recursion::Poseidon2Store)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":348:88))
     auto x11725 = args[2][98 * steps + ((cycle - 1) & mask)];
     assert(x11725 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":239:39)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":348:39)
     auto x11726 = x11724 * x11725;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":239:22)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":348:22)
     auto x11727 = x11709 + x11726;
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_store(recursion::Poseidon2Store)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":239:88))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_store(recursion::Poseidon2Store)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":348:88))
     auto x11728 = args[2][99 * steps + ((cycle - 1) & mask)];
     assert(x11728 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":239:39)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":348:39)
     auto x11729 = x11724 * x11728;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":239:22)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":348:22)
     auto x11730 = x11711 + x11729;
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_store(recursion::Poseidon2Store)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":239:88))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_store(recursion::Poseidon2Store)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":348:88))
     auto x11731 = args[2][100 * steps + ((cycle - 1) & mask)];
     assert(x11731 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":239:39)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":348:39)
     auto x11732 = x11724 * x11731;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":239:22)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":348:22)
     auto x11733 = x11713 + x11732;
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_store(recursion::Poseidon2Store)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":239:88))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_store(recursion::Poseidon2Store)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":348:88))
     auto x11734 = args[2][101 * steps + ((cycle - 1) & mask)];
     assert(x11734 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":239:39)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":348:39)
     auto x11735 = x11724 * x11734;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":239:22)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":348:22)
     auto x11736 = x11715 + x11735;
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_store(recursion::Poseidon2Store)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":239:88))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_store(recursion::Poseidon2Store)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":348:88))
     auto x11737 = args[2][102 * steps + ((cycle - 1) & mask)];
     assert(x11737 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":239:39)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":348:39)
     auto x11738 = x11724 * x11737;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":239:22)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":348:22)
     auto x11739 = x11717 + x11738;
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_store(recursion::Poseidon2Store)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":239:88))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_store(recursion::Poseidon2Store)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":348:88))
     auto x11740 = args[2][103 * steps + ((cycle - 1) & mask)];
     assert(x11740 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":239:39)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":348:39)
     auto x11741 = x11724 * x11740;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":239:22)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":348:22)
     auto x11742 = x11719 + x11741;
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_store(recursion::Poseidon2Store)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":239:88))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_store(recursion::Poseidon2Store)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":348:88))
     auto x11743 = args[2][104 * steps + ((cycle - 1) & mask)];
     assert(x11743 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":239:39)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":348:39)
     auto x11744 = x11724 * x11743;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":239:22)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":348:22)
     auto x11745 = x11721 + x11744;
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_store(recursion::Poseidon2Store)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":239:88))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_store(recursion::Poseidon2Store)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":348:88))
     auto x11746 = args[2][105 * steps + ((cycle - 1) & mask)];
     assert(x11746 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":239:39)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":348:39)
     auto x11747 = x11724 * x11746;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":239:22)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":348:22)
     auto x11748 = x11723 + x11747;
-    // loc("top(recursion::Top)/code(recursion::Code)/inst(Mux)/poseidon2_store(recursion::Poseidon2MemInst)/group(OneHot)/g2(Reg)"("zirgen/circuit/recursion/poseidon2.cpp":239:39))
+    // loc("top(recursion::Top)/code(recursion::Code)/inst(Mux)/poseidon2_store(recursion::Poseidon2MemInst)/group(OneHot)/g2(Reg)"("zirgen/circuit/recursion/poseidon2.cpp":348:39))
     auto x11749 = args[0][12 * steps + ((cycle - 0) & mask)];
     assert(x11749 != Fp::invalid());
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_store(recursion::Poseidon2Store)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":239:88))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_store(recursion::Poseidon2Store)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":348:88))
     auto x11750 = args[2][106 * steps + ((cycle - 1) & mask)];
     assert(x11750 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":239:39)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":348:39)
     auto x11751 = x11749 * x11750;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":239:22)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":348:22)
     auto x11752 = x11727 + x11751;
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_store(recursion::Poseidon2Store)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":239:88))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_store(recursion::Poseidon2Store)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":348:88))
     auto x11753 = args[2][107 * steps + ((cycle - 1) & mask)];
     assert(x11753 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":239:39)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":348:39)
     auto x11754 = x11749 * x11753;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":239:22)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":348:22)
     auto x11755 = x11730 + x11754;
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_store(recursion::Poseidon2Store)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":239:88))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_store(recursion::Poseidon2Store)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":348:88))
     auto x11756 = args[2][108 * steps + ((cycle - 1) & mask)];
     assert(x11756 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":239:39)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":348:39)
     auto x11757 = x11749 * x11756;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":239:22)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":348:22)
     auto x11758 = x11733 + x11757;
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_store(recursion::Poseidon2Store)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":239:88))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_store(recursion::Poseidon2Store)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":348:88))
     auto x11759 = args[2][109 * steps + ((cycle - 1) & mask)];
     assert(x11759 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":239:39)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":348:39)
     auto x11760 = x11749 * x11759;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":239:22)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":348:22)
     auto x11761 = x11736 + x11760;
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_store(recursion::Poseidon2Store)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":239:88))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_store(recursion::Poseidon2Store)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":348:88))
     auto x11762 = args[2][110 * steps + ((cycle - 1) & mask)];
     assert(x11762 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":239:39)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":348:39)
     auto x11763 = x11749 * x11762;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":239:22)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":348:22)
     auto x11764 = x11739 + x11763;
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_store(recursion::Poseidon2Store)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":239:88))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_store(recursion::Poseidon2Store)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":348:88))
     auto x11765 = args[2][111 * steps + ((cycle - 1) & mask)];
     assert(x11765 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":239:39)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":348:39)
     auto x11766 = x11749 * x11765;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":239:22)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":348:22)
     auto x11767 = x11742 + x11766;
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_store(recursion::Poseidon2Store)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":239:88))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_store(recursion::Poseidon2Store)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":348:88))
     auto x11768 = args[2][112 * steps + ((cycle - 1) & mask)];
     assert(x11768 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":239:39)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":348:39)
     auto x11769 = x11749 * x11768;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":239:22)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":348:22)
     auto x11770 = x11745 + x11769;
-    // loc("top(recursion::Top)/mux(Mux)/poseidon2_store(recursion::Poseidon2Store)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":239:88))
+    // loc("top(recursion::Top)/mux(Mux)/poseidon2_store(recursion::Poseidon2Store)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":348:88))
     auto x11771 = args[2][113 * steps + ((cycle - 1) & mask)];
     assert(x11771 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":239:39)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":348:39)
     auto x11772 = x11749 * x11771;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":239:22)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":348:22)
     auto x11773 = x11748 + x11772;
     // loc("top(recursion::Top)/code(recursion::Code)/inst(Mux)/poseidon2_store(recursion::Poseidon2MemInst)/do_mont(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
     auto x11774 = args[0][7 * steps + ((cycle - 0) & mask)];
     assert(x11774 != Fp::invalid());
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":241:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":350:13)
     auto x11775 = x11774 * x238;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":241:61)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":350:61)
     auto x11776 = x307 - x11774;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":241:13)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":350:13)
     auto x11777 = x11775 + x11776;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":243:37)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":352:37)
     auto x11778 = x11752 * x11777;
-    // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+    // loc("zirgen/circuit/recursion/wom.cpp":87:3)
     {
       auto& reg = args[2][5 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x11706);
@@ -36644,11 +36644,11 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       host_args.at(4) = x11783;
       host(ctx, "womWrite", "", host_args.data(), 5, host_outs.data(), 0);
     }
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":243:21)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":352:21)
     auto x11784 = x11706 + x307;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":243:37)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":352:37)
     auto x11785 = x11755 * x11777;
-    // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+    // loc("zirgen/circuit/recursion/wom.cpp":87:3)
     {
       auto& reg = args[2][10 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x11784);
@@ -36701,11 +36701,11 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       host_args.at(4) = x11790;
       host(ctx, "womWrite", "", host_args.data(), 5, host_outs.data(), 0);
     }
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":243:21)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":352:21)
     auto x11791 = x11706 + x306;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":243:37)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":352:37)
     auto x11792 = x11758 * x11777;
-    // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+    // loc("zirgen/circuit/recursion/wom.cpp":87:3)
     {
       auto& reg = args[2][15 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x11791);
@@ -36758,11 +36758,11 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       host_args.at(4) = x11797;
       host(ctx, "womWrite", "", host_args.data(), 5, host_outs.data(), 0);
     }
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":243:21)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":352:21)
     auto x11798 = x11706 + x305;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":243:37)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":352:37)
     auto x11799 = x11761 * x11777;
-    // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+    // loc("zirgen/circuit/recursion/wom.cpp":87:3)
     {
       auto& reg = args[2][20 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x11798);
@@ -36815,11 +36815,11 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       host_args.at(4) = x11804;
       host(ctx, "womWrite", "", host_args.data(), 5, host_outs.data(), 0);
     }
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":243:21)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":352:21)
     auto x11805 = x11706 + x304;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":243:37)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":352:37)
     auto x11806 = x11764 * x11777;
-    // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+    // loc("zirgen/circuit/recursion/wom.cpp":87:3)
     {
       auto& reg = args[2][25 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x11805);
@@ -36872,11 +36872,11 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       host_args.at(4) = x11811;
       host(ctx, "womWrite", "", host_args.data(), 5, host_outs.data(), 0);
     }
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":243:21)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":352:21)
     auto x11812 = x11706 + x303;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":243:37)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":352:37)
     auto x11813 = x11767 * x11777;
-    // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+    // loc("zirgen/circuit/recursion/wom.cpp":87:3)
     {
       auto& reg = args[2][30 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x11812);
@@ -36929,11 +36929,11 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       host_args.at(4) = x11818;
       host(ctx, "womWrite", "", host_args.data(), 5, host_outs.data(), 0);
     }
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":243:21)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":352:21)
     auto x11819 = x11706 + x302;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":243:37)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":352:37)
     auto x11820 = x11770 * x11777;
-    // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+    // loc("zirgen/circuit/recursion/wom.cpp":87:3)
     {
       auto& reg = args[2][35 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x11819);
@@ -36986,11 +36986,11 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       host_args.at(4) = x11825;
       host(ctx, "womWrite", "", host_args.data(), 5, host_outs.data(), 0);
     }
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":243:21)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":352:21)
     auto x11826 = x11706 + x301;
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":243:37)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":352:37)
     auto x11827 = x11773 * x11777;
-    // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+    // loc("zirgen/circuit/recursion/wom.cpp":87:3)
     {
       auto& reg = args[2][40 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x11826);
@@ -37043,145 +37043,145 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       host_args.at(4) = x11832;
       host(ctx, "womWrite", "", host_args.data(), 5, host_outs.data(), 0);
     }
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":246:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":355:5)
     {
       auto& reg = args[2][90 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x11708);
       reg = x11708;
     }
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":246:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":355:5)
     {
       auto& reg = args[2][91 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x11710);
       reg = x11710;
     }
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":246:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":355:5)
     {
       auto& reg = args[2][92 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x11712);
       reg = x11712;
     }
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":246:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":355:5)
     {
       auto& reg = args[2][93 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x11714);
       reg = x11714;
     }
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":246:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":355:5)
     {
       auto& reg = args[2][94 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x11716);
       reg = x11716;
     }
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":246:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":355:5)
     {
       auto& reg = args[2][95 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x11718);
       reg = x11718;
     }
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":246:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":355:5)
     {
       auto& reg = args[2][96 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x11720);
       reg = x11720;
     }
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":246:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":355:5)
     {
       auto& reg = args[2][97 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x11722);
       reg = x11722;
     }
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":246:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":355:5)
     {
       auto& reg = args[2][98 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x11725);
       reg = x11725;
     }
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":246:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":355:5)
     {
       auto& reg = args[2][99 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x11728);
       reg = x11728;
     }
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":246:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":355:5)
     {
       auto& reg = args[2][100 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x11731);
       reg = x11731;
     }
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":246:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":355:5)
     {
       auto& reg = args[2][101 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x11734);
       reg = x11734;
     }
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":246:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":355:5)
     {
       auto& reg = args[2][102 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x11737);
       reg = x11737;
     }
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":246:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":355:5)
     {
       auto& reg = args[2][103 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x11740);
       reg = x11740;
     }
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":246:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":355:5)
     {
       auto& reg = args[2][104 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x11743);
       reg = x11743;
     }
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":246:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":355:5)
     {
       auto& reg = args[2][105 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x11746);
       reg = x11746;
     }
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":246:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":355:5)
     {
       auto& reg = args[2][106 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x11750);
       reg = x11750;
     }
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":246:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":355:5)
     {
       auto& reg = args[2][107 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x11753);
       reg = x11753;
     }
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":246:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":355:5)
     {
       auto& reg = args[2][108 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x11756);
       reg = x11756;
     }
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":246:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":355:5)
     {
       auto& reg = args[2][109 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x11759);
       reg = x11759;
     }
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":246:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":355:5)
     {
       auto& reg = args[2][110 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x11762);
       reg = x11762;
     }
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":246:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":355:5)
     {
       auto& reg = args[2][111 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x11765);
       reg = x11765;
     }
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":246:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":355:5)
     {
       auto& reg = args[2][112 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x11768);
       reg = x11768;
     }
-    // loc("zirgen/circuit/recursion/poseidon2.cpp":246:5)
+    // loc("zirgen/circuit/recursion/poseidon2.cpp":355:5)
     {
       auto& reg = args[2][113 * steps + cycle];
       assert(reg == Fp::invalid() || reg == x11771);

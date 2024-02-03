@@ -709,11 +709,11 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x337 = args[2][14 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("zirgen/circuit/recursion/wom.cpp":49:5)
   MixState x338{x336.tot + x336.mul * x337, x336.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":87:3)
   auto x339 = args[2][15 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":87:3)
   auto x340 = x339 - x283;
-  // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":87:3)
   MixState x341{x338.tot + x338.mul * x340, x338.mul * (*mix)};
   // loc("zirgen/circuit/recursion/wom.cpp":49:5)
   auto x342 = args[2][16 * steps + ((cycle - kInvRate * 0) & mask)];
@@ -739,13 +739,13 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   MixState x352{x350.tot + x350.mul * x351, x350.mul * (*mix)};
   // loc("zirgen/circuit/recursion/micro.cpp":19:44)
   MixState x353{x314.tot + x318 * x352.tot * x314.mul, x314.mul * x352.mul};
-  // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":82:3)
   auto x354 = x319 - x315;
-  // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":82:3)
   MixState x355{x281.tot + x281.mul * x354, x281.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":82:3)
   auto x356 = x329 - x316;
-  // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":82:3)
   MixState x357{x355.tot + x355.mul * x356, x355.mul * (*mix)};
   // loc("zirgen/circuit/recursion/micro.cpp":28:30)
   auto x358 = x321 + x331;
@@ -755,7 +755,7 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x360 = x325 + x335;
   // loc("zirgen/circuit/recursion/micro.cpp":28:30)
   auto x361 = x327 + x337;
-  // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":87:3)
   MixState x362{x357.tot + x357.mul * x340, x357.mul * (*mix)};
   // loc("zirgen/circuit/recursion/wom.cpp":49:5)
   auto x363 = x342 - x358;
@@ -893,125 +893,125 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   MixState x429{x428.tot + x428.mul * x335, x428.mul * (*mix)};
   // loc("zirgen/circuit/recursion/wom.cpp":49:5)
   MixState x430{x429.tot + x429.mul * x337, x429.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x431 = x321 * x342;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x432 = x323 * x351;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x433 = x325 * x348;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x434 = x432 + x433;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x435 = x327 * x345;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x436 = x434 + x435;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x437 = x436 * x11;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x438 = x431 + x437;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x439 = x321 * x345;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x440 = x323 * x342;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x441 = x439 + x440;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x442 = x325 * x351;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x443 = x327 * x348;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x444 = x442 + x443;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x445 = x444 * x11;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x446 = x441 + x445;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x447 = x321 * x348;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x448 = x323 * x345;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x449 = x447 + x448;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x450 = x325 * x342;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x451 = x449 + x450;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x452 = x327 * x351;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x453 = x452 * x11;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x454 = x451 + x453;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x455 = x321 * x351;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x456 = x323 * x348;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x457 = x455 + x456;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x458 = x325 * x345;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x459 = x457 + x458;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x460 = x327 * x342;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x461 = x459 + x460;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:8)
   auto x462 = x1 - x438;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:8)
   MixState x463{x430.tot + x430.mul * x462, x430.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":48:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:8)
   auto x464 = x0 - x446;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:8)
   MixState x465{x463.tot + x463.mul * x464, x463.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":48:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:8)
   auto x466 = x0 - x454;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:8)
   MixState x467{x465.tot + x465.mul * x466, x465.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":48:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:8)
   auto x468 = x0 - x461;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:8)
   MixState x469{x467.tot + x467.mul * x468, x467.mul * (*mix)};
   // loc("zirgen/circuit/recursion/micro.cpp":43:56)
   MixState x470{x424.tot + x425 * x469.tot * x424.mul, x424.mul * x469.mul};
-  // loc("zirgen/circuit/recursion/micro.cpp":50:62)
+  // loc("zirgen/circuit/recursion/micro.cpp":52:62)
   auto x471 = x1 - x316;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:62)
+  // loc("zirgen/circuit/recursion/micro.cpp":52:62)
   auto x472 = x292 * x471;
   // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[0](recursion::MicroOp)/extra(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
   auto x473 = args[2][101 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("zirgen/circuit/recursion/micro.cpp":61:19)
+  // loc("zirgen/circuit/recursion/micro.cpp":63:19)
   auto x474 = x1 - x342;
-  // loc("zirgen/circuit/recursion/micro.cpp":61:9)
+  // loc("zirgen/circuit/recursion/micro.cpp":63:9)
   auto x475 = x342 * x474;
-  // loc("zirgen/circuit/recursion/micro.cpp":61:9)
+  // loc("zirgen/circuit/recursion/micro.cpp":63:9)
   MixState x476{x430.tot + x430.mul * x475, x430.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":63:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":65:8)
   auto x477 = x473 * x321;
-  // loc("zirgen/circuit/recursion/micro.cpp":63:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":65:8)
   auto x478 = x477 - x474;
-  // loc("zirgen/circuit/recursion/micro.cpp":63:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":65:8)
   MixState x479{x476.tot + x476.mul * x478, x476.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":65:9)
+  // loc("zirgen/circuit/recursion/micro.cpp":67:9)
   MixState x480{x479.tot + x479.mul * x431, x479.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":50:62)
+  // loc("zirgen/circuit/recursion/micro.cpp":52:62)
   MixState x481{x470.tot + x472 * x480.tot * x470.mul, x470.mul * x480.mul};
-  // loc("zirgen/circuit/recursion/micro.cpp":73:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":75:8)
   auto x482 = x0 - x342;
-  // loc("zirgen/circuit/recursion/micro.cpp":73:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":75:8)
   MixState x483{x383.tot + x383.mul * x482, x383.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":73:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":75:8)
   auto x484 = x0 - x345;
-  // loc("zirgen/circuit/recursion/micro.cpp":73:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":75:8)
   MixState x485{x483.tot + x483.mul * x484, x483.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":73:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":75:8)
   auto x486 = x0 - x348;
-  // loc("zirgen/circuit/recursion/micro.cpp":73:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":75:8)
   MixState x487{x485.tot + x485.mul * x486, x485.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":73:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":75:8)
   auto x488 = x0 - x351;
-  // loc("zirgen/circuit/recursion/micro.cpp":73:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":75:8)
   MixState x489{x487.tot + x487.mul * x488, x487.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":68:41)
+  // loc("zirgen/circuit/recursion/micro.cpp":70:41)
   MixState x490{x481.tot + x295 * x489.tot * x481.mul, x481.mul * x489.mul};
   // loc("zirgen/circuit/recursion/wom.cpp":49:5)
   MixState x491{x341.tot + x341.mul * x342, x341.mul * (*mix)};
@@ -1021,47 +1021,47 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   MixState x493{x492.tot + x492.mul * x348, x492.mul * (*mix)};
   // loc("zirgen/circuit/recursion/wom.cpp":49:5)
   MixState x494{x493.tot + x493.mul * x351, x493.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":75:54)
+  // loc("zirgen/circuit/recursion/micro.cpp":77:54)
   MixState x495{x490.tot + x298 * x494.tot * x490.mul, x490.mul * x494.mul};
-  // loc("zirgen/circuit/recursion/micro.cpp":94:9)
+  // loc("zirgen/circuit/recursion/micro.cpp":98:9)
   auto x496 = x315 * x345;
-  // loc("zirgen/circuit/recursion/micro.cpp":94:9)
+  // loc("zirgen/circuit/recursion/micro.cpp":98:9)
   MixState x497{x338.tot + x338.mul * x496, x338.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":95:9)
+  // loc("zirgen/circuit/recursion/micro.cpp":99:9)
   auto x498 = x316 * x348;
-  // loc("zirgen/circuit/recursion/micro.cpp":95:9)
+  // loc("zirgen/circuit/recursion/micro.cpp":99:9)
   MixState x499{x497.tot + x497.mul * x498, x497.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":96:9)
+  // loc("zirgen/circuit/recursion/micro.cpp":100:9)
   auto x500 = x316 * x351;
-  // loc("zirgen/circuit/recursion/micro.cpp":96:9)
+  // loc("zirgen/circuit/recursion/micro.cpp":100:9)
   MixState x501{x499.tot + x499.mul * x500, x499.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":82:52)
+  // loc("zirgen/circuit/recursion/micro.cpp":86:52)
   MixState x502{x495.tot + x301 * x501.tot * x495.mul, x495.mul * x501.mul};
-  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[2](recursion::MicroOp)/extra(Reg)"("zirgen/circuit/recursion/micro.cpp":107:71))
+  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[2](recursion::MicroOp)/extra(Reg)"("zirgen/circuit/recursion/micro.cpp":111:71))
   auto x503 = args[2][125 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("zirgen/circuit/recursion/micro.cpp":107:15)
+  // loc("zirgen/circuit/recursion/micro.cpp":111:15)
   auto x504 = x317 * x503;
-  // loc("zirgen/circuit/recursion/micro.cpp":109:11)
+  // loc("zirgen/circuit/recursion/micro.cpp":113:11)
   auto x505 = x504 * x12;
-  // loc("zirgen/circuit/recursion/micro.cpp":109:11)
+  // loc("zirgen/circuit/recursion/micro.cpp":113:11)
   auto x506 = x505 + x323;
-  // loc("zirgen/circuit/recursion/micro.cpp":110:11)
+  // loc("zirgen/circuit/recursion/micro.cpp":114:11)
   auto x507 = x506 * x12;
-  // loc("zirgen/circuit/recursion/micro.cpp":110:11)
+  // loc("zirgen/circuit/recursion/micro.cpp":114:11)
   auto x508 = x507 + x321;
-  // loc("zirgen/circuit/recursion/micro.cpp":111:11)
+  // loc("zirgen/circuit/recursion/micro.cpp":115:11)
   auto x509 = x508 * x12;
-  // loc("zirgen/circuit/recursion/micro.cpp":111:11)
+  // loc("zirgen/circuit/recursion/micro.cpp":115:11)
   auto x510 = x509 + x333;
-  // loc("zirgen/circuit/recursion/micro.cpp":112:11)
+  // loc("zirgen/circuit/recursion/micro.cpp":116:11)
   auto x511 = x510 * x12;
-  // loc("zirgen/circuit/recursion/micro.cpp":112:11)
+  // loc("zirgen/circuit/recursion/micro.cpp":116:11)
   auto x512 = x511 + x331;
-  // loc("zirgen/circuit/recursion/micro.cpp":114:5)
+  // loc("zirgen/circuit/recursion/micro.cpp":118:5)
   auto x513 = x473 - x512;
-  // loc("zirgen/circuit/recursion/micro.cpp":114:5)
+  // loc("zirgen/circuit/recursion/micro.cpp":118:5)
   MixState x514{x357.tot + x357.mul * x513, x357.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":87:3)
   MixState x515{x514.tot + x514.mul * x340, x514.mul * (*mix)};
   // loc("zirgen/circuit/recursion/wom.cpp":49:5)
   auto x516 = x342 - x512;
@@ -1073,17 +1073,17 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   MixState x519{x518.tot + x518.mul * x348, x518.mul * (*mix)};
   // loc("zirgen/circuit/recursion/wom.cpp":49:5)
   MixState x520{x519.tot + x519.mul * x351, x519.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":98:46)
+  // loc("zirgen/circuit/recursion/micro.cpp":102:46)
   MixState x521{x502.tot + x304 * x520.tot * x502.mul, x502.mul * x520.mul};
-  // loc("zirgen/circuit/recursion/micro.cpp":119:31)
+  // loc("zirgen/circuit/recursion/micro.cpp":123:31)
   auto x522 = x317 * x321;
-  // loc("zirgen/circuit/recursion/micro.cpp":119:17)
+  // loc("zirgen/circuit/recursion/micro.cpp":123:17)
   auto x523 = x316 + x522;
-  // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":82:3)
   auto x524 = x329 - x523;
-  // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":82:3)
   MixState x525{x355.tot + x355.mul * x524, x355.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":87:3)
   MixState x526{x525.tot + x525.mul * x340, x525.mul * (*mix)};
   // loc("zirgen/circuit/recursion/wom.cpp":49:5)
   auto x527 = x342 - x331;
@@ -1101,33 +1101,33 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x533 = x351 - x337;
   // loc("zirgen/circuit/recursion/wom.cpp":49:5)
   MixState x534{x532.tot + x532.mul * x533, x532.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":117:45)
+  // loc("zirgen/circuit/recursion/micro.cpp":121:45)
   MixState x535{x521.tot + x307 * x534.tot * x521.mul, x521.mul * x534.mul};
-  // loc("zirgen/circuit/recursion/micro.cpp":132:15)
+  // loc("zirgen/circuit/recursion/micro.cpp":136:15)
   auto x536 = x316 * x317;
-  // loc("zirgen/circuit/recursion/micro.cpp":132:15)
+  // loc("zirgen/circuit/recursion/micro.cpp":136:15)
   auto x537 = x536 * x327;
-  // loc("zirgen/circuit/recursion/micro.cpp":133:30)
+  // loc("zirgen/circuit/recursion/micro.cpp":137:30)
   auto x538 = x1 - x317;
-  // loc("zirgen/circuit/recursion/micro.cpp":133:15)
+  // loc("zirgen/circuit/recursion/micro.cpp":137:15)
   auto x539 = x316 * x538;
-  // loc("zirgen/circuit/recursion/micro.cpp":133:15)
+  // loc("zirgen/circuit/recursion/micro.cpp":137:15)
   auto x540 = x539 * x325;
-  // loc("zirgen/circuit/recursion/micro.cpp":132:15)
+  // loc("zirgen/circuit/recursion/micro.cpp":136:15)
   auto x541 = x537 + x540;
-  // loc("zirgen/circuit/recursion/micro.cpp":134:15)
+  // loc("zirgen/circuit/recursion/micro.cpp":138:15)
   auto x542 = x471 * x317;
-  // loc("zirgen/circuit/recursion/micro.cpp":134:15)
+  // loc("zirgen/circuit/recursion/micro.cpp":138:15)
   auto x543 = x542 * x323;
-  // loc("zirgen/circuit/recursion/micro.cpp":132:15)
+  // loc("zirgen/circuit/recursion/micro.cpp":136:15)
   auto x544 = x541 + x543;
-  // loc("zirgen/circuit/recursion/micro.cpp":135:15)
+  // loc("zirgen/circuit/recursion/micro.cpp":139:15)
   auto x545 = x471 * x538;
-  // loc("zirgen/circuit/recursion/micro.cpp":135:15)
+  // loc("zirgen/circuit/recursion/micro.cpp":139:15)
   auto x546 = x545 * x321;
-  // loc("zirgen/circuit/recursion/micro.cpp":132:15)
+  // loc("zirgen/circuit/recursion/micro.cpp":136:15)
   auto x547 = x544 + x546;
-  // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":87:3)
   MixState x548{x430.tot + x430.mul * x340, x430.mul * (*mix)};
   // loc("zirgen/circuit/recursion/wom.cpp":49:5)
   auto x549 = x342 - x547;
@@ -1139,9 +1139,9 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   MixState x552{x551.tot + x551.mul * x348, x551.mul * (*mix)};
   // loc("zirgen/circuit/recursion/wom.cpp":49:5)
   MixState x553{x552.tot + x552.mul * x351, x552.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":129:46)
+  // loc("zirgen/circuit/recursion/micro.cpp":133:46)
   MixState x554{x535.tot + x310 * x553.tot * x535.mul, x535.mul * x553.mul};
-  // loc("zirgen/circuit/recursion/micro.cpp":151:34)
+  // loc("zirgen/circuit/recursion/micro.cpp":155:34)
   auto x555 = x283 + x1;
   // loc("top(recursion::Top)/code(recursion::Code)/inst(Mux)/micro_ops(recursion::MicroInsts)/inst[1](recursion::MicroInst)/opcode(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
   auto x556 = args[0][11 * steps + ((cycle - kInvRate * 0) & mask)];
@@ -1253,11 +1253,11 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x609 = args[2][29 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("zirgen/circuit/recursion/wom.cpp":49:5)
   MixState x610{x608.tot + x608.mul * x609, x608.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":87:3)
   auto x611 = args[2][30 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":87:3)
   auto x612 = x611 - x555;
-  // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":87:3)
   MixState x613{x610.tot + x610.mul * x612, x610.mul * (*mix)};
   // loc("zirgen/circuit/recursion/wom.cpp":49:5)
   auto x614 = args[2][31 * steps + ((cycle - kInvRate * 0) & mask)];
@@ -1283,13 +1283,13 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   MixState x624{x622.tot + x622.mul * x623, x622.mul * (*mix)};
   // loc("zirgen/circuit/recursion/micro.cpp":19:44)
   MixState x625{x586.tot + x590 * x624.tot * x586.mul, x586.mul * x624.mul};
-  // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":82:3)
   auto x626 = x591 - x587;
-  // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":82:3)
   MixState x627{x281.tot + x281.mul * x626, x281.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":82:3)
   auto x628 = x601 - x588;
-  // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":82:3)
   MixState x629{x627.tot + x627.mul * x628, x627.mul * (*mix)};
   // loc("zirgen/circuit/recursion/micro.cpp":28:30)
   auto x630 = x593 + x603;
@@ -1299,7 +1299,7 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x632 = x597 + x607;
   // loc("zirgen/circuit/recursion/micro.cpp":28:30)
   auto x633 = x599 + x609;
-  // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":87:3)
   MixState x634{x629.tot + x629.mul * x612, x629.mul * (*mix)};
   // loc("zirgen/circuit/recursion/wom.cpp":49:5)
   auto x635 = x614 - x630;
@@ -1437,125 +1437,125 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   MixState x701{x700.tot + x700.mul * x607, x700.mul * (*mix)};
   // loc("zirgen/circuit/recursion/wom.cpp":49:5)
   MixState x702{x701.tot + x701.mul * x609, x701.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x703 = x593 * x614;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x704 = x595 * x623;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x705 = x597 * x620;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x706 = x704 + x705;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x707 = x599 * x617;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x708 = x706 + x707;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x709 = x708 * x11;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x710 = x703 + x709;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x711 = x593 * x617;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x712 = x595 * x614;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x713 = x711 + x712;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x714 = x597 * x623;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x715 = x599 * x620;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x716 = x714 + x715;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x717 = x716 * x11;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x718 = x713 + x717;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x719 = x593 * x620;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x720 = x595 * x617;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x721 = x719 + x720;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x722 = x597 * x614;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x723 = x721 + x722;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x724 = x599 * x623;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x725 = x724 * x11;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x726 = x723 + x725;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x727 = x593 * x623;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x728 = x595 * x620;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x729 = x727 + x728;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x730 = x597 * x617;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x731 = x729 + x730;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x732 = x599 * x614;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x733 = x731 + x732;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:8)
   auto x734 = x1 - x710;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:8)
   MixState x735{x702.tot + x702.mul * x734, x702.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":48:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:8)
   auto x736 = x0 - x718;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:8)
   MixState x737{x735.tot + x735.mul * x736, x735.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":48:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:8)
   auto x738 = x0 - x726;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:8)
   MixState x739{x737.tot + x737.mul * x738, x737.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":48:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:8)
   auto x740 = x0 - x733;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:8)
   MixState x741{x739.tot + x739.mul * x740, x739.mul * (*mix)};
   // loc("zirgen/circuit/recursion/micro.cpp":43:56)
   MixState x742{x696.tot + x697 * x741.tot * x696.mul, x696.mul * x741.mul};
-  // loc("zirgen/circuit/recursion/micro.cpp":50:62)
+  // loc("zirgen/circuit/recursion/micro.cpp":52:62)
   auto x743 = x1 - x588;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:62)
+  // loc("zirgen/circuit/recursion/micro.cpp":52:62)
   auto x744 = x564 * x743;
   // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[1](recursion::MicroOp)/extra(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
   auto x745 = args[2][113 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("zirgen/circuit/recursion/micro.cpp":61:19)
+  // loc("zirgen/circuit/recursion/micro.cpp":63:19)
   auto x746 = x1 - x614;
-  // loc("zirgen/circuit/recursion/micro.cpp":61:9)
+  // loc("zirgen/circuit/recursion/micro.cpp":63:9)
   auto x747 = x614 * x746;
-  // loc("zirgen/circuit/recursion/micro.cpp":61:9)
+  // loc("zirgen/circuit/recursion/micro.cpp":63:9)
   MixState x748{x702.tot + x702.mul * x747, x702.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":63:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":65:8)
   auto x749 = x745 * x593;
-  // loc("zirgen/circuit/recursion/micro.cpp":63:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":65:8)
   auto x750 = x749 - x746;
-  // loc("zirgen/circuit/recursion/micro.cpp":63:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":65:8)
   MixState x751{x748.tot + x748.mul * x750, x748.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":65:9)
+  // loc("zirgen/circuit/recursion/micro.cpp":67:9)
   MixState x752{x751.tot + x751.mul * x703, x751.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":50:62)
+  // loc("zirgen/circuit/recursion/micro.cpp":52:62)
   MixState x753{x742.tot + x744 * x752.tot * x742.mul, x742.mul * x752.mul};
-  // loc("zirgen/circuit/recursion/micro.cpp":73:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":75:8)
   auto x754 = x0 - x614;
-  // loc("zirgen/circuit/recursion/micro.cpp":73:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":75:8)
   MixState x755{x655.tot + x655.mul * x754, x655.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":73:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":75:8)
   auto x756 = x0 - x617;
-  // loc("zirgen/circuit/recursion/micro.cpp":73:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":75:8)
   MixState x757{x755.tot + x755.mul * x756, x755.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":73:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":75:8)
   auto x758 = x0 - x620;
-  // loc("zirgen/circuit/recursion/micro.cpp":73:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":75:8)
   MixState x759{x757.tot + x757.mul * x758, x757.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":73:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":75:8)
   auto x760 = x0 - x623;
-  // loc("zirgen/circuit/recursion/micro.cpp":73:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":75:8)
   MixState x761{x759.tot + x759.mul * x760, x759.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":68:41)
+  // loc("zirgen/circuit/recursion/micro.cpp":70:41)
   MixState x762{x753.tot + x567 * x761.tot * x753.mul, x753.mul * x761.mul};
   // loc("zirgen/circuit/recursion/wom.cpp":49:5)
   MixState x763{x613.tot + x613.mul * x614, x613.mul * (*mix)};
@@ -1565,47 +1565,47 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   MixState x765{x764.tot + x764.mul * x620, x764.mul * (*mix)};
   // loc("zirgen/circuit/recursion/wom.cpp":49:5)
   MixState x766{x765.tot + x765.mul * x623, x765.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":75:54)
+  // loc("zirgen/circuit/recursion/micro.cpp":77:54)
   MixState x767{x762.tot + x570 * x766.tot * x762.mul, x762.mul * x766.mul};
-  // loc("zirgen/circuit/recursion/micro.cpp":94:9)
+  // loc("zirgen/circuit/recursion/micro.cpp":98:9)
   auto x768 = x587 * x617;
-  // loc("zirgen/circuit/recursion/micro.cpp":94:9)
+  // loc("zirgen/circuit/recursion/micro.cpp":98:9)
   MixState x769{x610.tot + x610.mul * x768, x610.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":95:9)
+  // loc("zirgen/circuit/recursion/micro.cpp":99:9)
   auto x770 = x588 * x620;
-  // loc("zirgen/circuit/recursion/micro.cpp":95:9)
+  // loc("zirgen/circuit/recursion/micro.cpp":99:9)
   MixState x771{x769.tot + x769.mul * x770, x769.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":96:9)
+  // loc("zirgen/circuit/recursion/micro.cpp":100:9)
   auto x772 = x588 * x623;
-  // loc("zirgen/circuit/recursion/micro.cpp":96:9)
+  // loc("zirgen/circuit/recursion/micro.cpp":100:9)
   MixState x773{x771.tot + x771.mul * x772, x771.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":82:52)
+  // loc("zirgen/circuit/recursion/micro.cpp":86:52)
   MixState x774{x767.tot + x573 * x773.tot * x767.mul, x767.mul * x773.mul};
-  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[0](recursion::MicroOp)/extra(Reg)"("zirgen/circuit/recursion/micro.cpp":107:71))
+  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[0](recursion::MicroOp)/extra(Reg)"("zirgen/circuit/recursion/micro.cpp":111:71))
   auto x775 = args[2][101 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("zirgen/circuit/recursion/micro.cpp":107:15)
+  // loc("zirgen/circuit/recursion/micro.cpp":111:15)
   auto x776 = x589 * x775;
-  // loc("zirgen/circuit/recursion/micro.cpp":109:11)
+  // loc("zirgen/circuit/recursion/micro.cpp":113:11)
   auto x777 = x776 * x12;
-  // loc("zirgen/circuit/recursion/micro.cpp":109:11)
+  // loc("zirgen/circuit/recursion/micro.cpp":113:11)
   auto x778 = x777 + x595;
-  // loc("zirgen/circuit/recursion/micro.cpp":110:11)
+  // loc("zirgen/circuit/recursion/micro.cpp":114:11)
   auto x779 = x778 * x12;
-  // loc("zirgen/circuit/recursion/micro.cpp":110:11)
+  // loc("zirgen/circuit/recursion/micro.cpp":114:11)
   auto x780 = x779 + x593;
-  // loc("zirgen/circuit/recursion/micro.cpp":111:11)
+  // loc("zirgen/circuit/recursion/micro.cpp":115:11)
   auto x781 = x780 * x12;
-  // loc("zirgen/circuit/recursion/micro.cpp":111:11)
+  // loc("zirgen/circuit/recursion/micro.cpp":115:11)
   auto x782 = x781 + x605;
-  // loc("zirgen/circuit/recursion/micro.cpp":112:11)
+  // loc("zirgen/circuit/recursion/micro.cpp":116:11)
   auto x783 = x782 * x12;
-  // loc("zirgen/circuit/recursion/micro.cpp":112:11)
+  // loc("zirgen/circuit/recursion/micro.cpp":116:11)
   auto x784 = x783 + x603;
-  // loc("zirgen/circuit/recursion/micro.cpp":114:5)
+  // loc("zirgen/circuit/recursion/micro.cpp":118:5)
   auto x785 = x745 - x784;
-  // loc("zirgen/circuit/recursion/micro.cpp":114:5)
+  // loc("zirgen/circuit/recursion/micro.cpp":118:5)
   MixState x786{x629.tot + x629.mul * x785, x629.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":87:3)
   MixState x787{x786.tot + x786.mul * x612, x786.mul * (*mix)};
   // loc("zirgen/circuit/recursion/wom.cpp":49:5)
   auto x788 = x614 - x784;
@@ -1617,17 +1617,17 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   MixState x791{x790.tot + x790.mul * x620, x790.mul * (*mix)};
   // loc("zirgen/circuit/recursion/wom.cpp":49:5)
   MixState x792{x791.tot + x791.mul * x623, x791.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":98:46)
+  // loc("zirgen/circuit/recursion/micro.cpp":102:46)
   MixState x793{x774.tot + x576 * x792.tot * x774.mul, x774.mul * x792.mul};
-  // loc("zirgen/circuit/recursion/micro.cpp":119:31)
+  // loc("zirgen/circuit/recursion/micro.cpp":123:31)
   auto x794 = x589 * x593;
-  // loc("zirgen/circuit/recursion/micro.cpp":119:17)
+  // loc("zirgen/circuit/recursion/micro.cpp":123:17)
   auto x795 = x588 + x794;
-  // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":82:3)
   auto x796 = x601 - x795;
-  // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":82:3)
   MixState x797{x627.tot + x627.mul * x796, x627.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":87:3)
   MixState x798{x797.tot + x797.mul * x612, x797.mul * (*mix)};
   // loc("zirgen/circuit/recursion/wom.cpp":49:5)
   auto x799 = x614 - x603;
@@ -1645,33 +1645,33 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x805 = x623 - x609;
   // loc("zirgen/circuit/recursion/wom.cpp":49:5)
   MixState x806{x804.tot + x804.mul * x805, x804.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":117:45)
+  // loc("zirgen/circuit/recursion/micro.cpp":121:45)
   MixState x807{x793.tot + x579 * x806.tot * x793.mul, x793.mul * x806.mul};
-  // loc("zirgen/circuit/recursion/micro.cpp":132:15)
+  // loc("zirgen/circuit/recursion/micro.cpp":136:15)
   auto x808 = x588 * x589;
-  // loc("zirgen/circuit/recursion/micro.cpp":132:15)
+  // loc("zirgen/circuit/recursion/micro.cpp":136:15)
   auto x809 = x808 * x599;
-  // loc("zirgen/circuit/recursion/micro.cpp":133:30)
+  // loc("zirgen/circuit/recursion/micro.cpp":137:30)
   auto x810 = x1 - x589;
-  // loc("zirgen/circuit/recursion/micro.cpp":133:15)
+  // loc("zirgen/circuit/recursion/micro.cpp":137:15)
   auto x811 = x588 * x810;
-  // loc("zirgen/circuit/recursion/micro.cpp":133:15)
+  // loc("zirgen/circuit/recursion/micro.cpp":137:15)
   auto x812 = x811 * x597;
-  // loc("zirgen/circuit/recursion/micro.cpp":132:15)
+  // loc("zirgen/circuit/recursion/micro.cpp":136:15)
   auto x813 = x809 + x812;
-  // loc("zirgen/circuit/recursion/micro.cpp":134:15)
+  // loc("zirgen/circuit/recursion/micro.cpp":138:15)
   auto x814 = x743 * x589;
-  // loc("zirgen/circuit/recursion/micro.cpp":134:15)
+  // loc("zirgen/circuit/recursion/micro.cpp":138:15)
   auto x815 = x814 * x595;
-  // loc("zirgen/circuit/recursion/micro.cpp":132:15)
+  // loc("zirgen/circuit/recursion/micro.cpp":136:15)
   auto x816 = x813 + x815;
-  // loc("zirgen/circuit/recursion/micro.cpp":135:15)
+  // loc("zirgen/circuit/recursion/micro.cpp":139:15)
   auto x817 = x743 * x810;
-  // loc("zirgen/circuit/recursion/micro.cpp":135:15)
+  // loc("zirgen/circuit/recursion/micro.cpp":139:15)
   auto x818 = x817 * x593;
-  // loc("zirgen/circuit/recursion/micro.cpp":132:15)
+  // loc("zirgen/circuit/recursion/micro.cpp":136:15)
   auto x819 = x816 + x818;
-  // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":87:3)
   MixState x820{x702.tot + x702.mul * x612, x702.mul * (*mix)};
   // loc("zirgen/circuit/recursion/wom.cpp":49:5)
   auto x821 = x614 - x819;
@@ -1683,9 +1683,9 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   MixState x824{x823.tot + x823.mul * x620, x823.mul * (*mix)};
   // loc("zirgen/circuit/recursion/wom.cpp":49:5)
   MixState x825{x824.tot + x824.mul * x623, x824.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":129:46)
+  // loc("zirgen/circuit/recursion/micro.cpp":133:46)
   MixState x826{x807.tot + x582 * x825.tot * x807.mul, x807.mul * x825.mul};
-  // loc("zirgen/circuit/recursion/micro.cpp":151:34)
+  // loc("zirgen/circuit/recursion/micro.cpp":155:34)
   auto x827 = x283 + x2;
   // loc("top(recursion::Top)/code(recursion::Code)/inst(Mux)/micro_ops(recursion::MicroInsts)/inst[2](recursion::MicroInst)/opcode(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
   auto x828 = args[0][15 * steps + ((cycle - kInvRate * 0) & mask)];
@@ -1797,11 +1797,11 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x881 = args[2][44 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("zirgen/circuit/recursion/wom.cpp":49:5)
   MixState x882{x880.tot + x880.mul * x881, x880.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":87:3)
   auto x883 = args[2][45 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":87:3)
   auto x884 = x883 - x827;
-  // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":87:3)
   MixState x885{x882.tot + x882.mul * x884, x882.mul * (*mix)};
   // loc("zirgen/circuit/recursion/wom.cpp":49:5)
   auto x886 = args[2][46 * steps + ((cycle - kInvRate * 0) & mask)];
@@ -1827,13 +1827,13 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   MixState x896{x894.tot + x894.mul * x895, x894.mul * (*mix)};
   // loc("zirgen/circuit/recursion/micro.cpp":19:44)
   MixState x897{x858.tot + x862 * x896.tot * x858.mul, x858.mul * x896.mul};
-  // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":82:3)
   auto x898 = x863 - x859;
-  // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":82:3)
   MixState x899{x281.tot + x281.mul * x898, x281.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":82:3)
   auto x900 = x873 - x860;
-  // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":82:3)
   MixState x901{x899.tot + x899.mul * x900, x899.mul * (*mix)};
   // loc("zirgen/circuit/recursion/micro.cpp":28:30)
   auto x902 = x865 + x875;
@@ -1843,7 +1843,7 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x904 = x869 + x879;
   // loc("zirgen/circuit/recursion/micro.cpp":28:30)
   auto x905 = x871 + x881;
-  // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":87:3)
   MixState x906{x901.tot + x901.mul * x884, x901.mul * (*mix)};
   // loc("zirgen/circuit/recursion/wom.cpp":49:5)
   auto x907 = x886 - x902;
@@ -1981,125 +1981,125 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   MixState x973{x972.tot + x972.mul * x879, x972.mul * (*mix)};
   // loc("zirgen/circuit/recursion/wom.cpp":49:5)
   MixState x974{x973.tot + x973.mul * x881, x973.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x975 = x865 * x886;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x976 = x867 * x895;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x977 = x869 * x892;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x978 = x976 + x977;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x979 = x871 * x889;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x980 = x978 + x979;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x981 = x980 * x11;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x982 = x975 + x981;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x983 = x865 * x889;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x984 = x867 * x886;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x985 = x983 + x984;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x986 = x869 * x895;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x987 = x871 * x892;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x988 = x986 + x987;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x989 = x988 * x11;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x990 = x985 + x989;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x991 = x865 * x892;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x992 = x867 * x889;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x993 = x991 + x992;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x994 = x869 * x886;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x995 = x993 + x994;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x996 = x871 * x895;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x997 = x996 * x11;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x998 = x995 + x997;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x999 = x865 * x895;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x1000 = x867 * x892;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x1001 = x999 + x1000;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x1002 = x869 * x889;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x1003 = x1001 + x1002;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x1004 = x871 * x886;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
   auto x1005 = x1003 + x1004;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:8)
   auto x1006 = x1 - x982;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:8)
   MixState x1007{x974.tot + x974.mul * x1006, x974.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":48:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:8)
   auto x1008 = x0 - x990;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:8)
   MixState x1009{x1007.tot + x1007.mul * x1008, x1007.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":48:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:8)
   auto x1010 = x0 - x998;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:8)
   MixState x1011{x1009.tot + x1009.mul * x1010, x1009.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":48:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:8)
   auto x1012 = x0 - x1005;
-  // loc("zirgen/circuit/recursion/micro.cpp":48:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:8)
   MixState x1013{x1011.tot + x1011.mul * x1012, x1011.mul * (*mix)};
   // loc("zirgen/circuit/recursion/micro.cpp":43:56)
   MixState x1014{x968.tot + x969 * x1013.tot * x968.mul, x968.mul * x1013.mul};
-  // loc("zirgen/circuit/recursion/micro.cpp":50:62)
+  // loc("zirgen/circuit/recursion/micro.cpp":52:62)
   auto x1015 = x1 - x860;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:62)
+  // loc("zirgen/circuit/recursion/micro.cpp":52:62)
   auto x1016 = x836 * x1015;
   // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[2](recursion::MicroOp)/extra(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
   auto x1017 = args[2][125 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("zirgen/circuit/recursion/micro.cpp":61:19)
+  // loc("zirgen/circuit/recursion/micro.cpp":63:19)
   auto x1018 = x1 - x886;
-  // loc("zirgen/circuit/recursion/micro.cpp":61:9)
+  // loc("zirgen/circuit/recursion/micro.cpp":63:9)
   auto x1019 = x886 * x1018;
-  // loc("zirgen/circuit/recursion/micro.cpp":61:9)
+  // loc("zirgen/circuit/recursion/micro.cpp":63:9)
   MixState x1020{x974.tot + x974.mul * x1019, x974.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":63:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":65:8)
   auto x1021 = x1017 * x865;
-  // loc("zirgen/circuit/recursion/micro.cpp":63:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":65:8)
   auto x1022 = x1021 - x1018;
-  // loc("zirgen/circuit/recursion/micro.cpp":63:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":65:8)
   MixState x1023{x1020.tot + x1020.mul * x1022, x1020.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":65:9)
+  // loc("zirgen/circuit/recursion/micro.cpp":67:9)
   MixState x1024{x1023.tot + x1023.mul * x975, x1023.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":50:62)
+  // loc("zirgen/circuit/recursion/micro.cpp":52:62)
   MixState x1025{x1014.tot + x1016 * x1024.tot * x1014.mul, x1014.mul * x1024.mul};
-  // loc("zirgen/circuit/recursion/micro.cpp":73:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":75:8)
   auto x1026 = x0 - x886;
-  // loc("zirgen/circuit/recursion/micro.cpp":73:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":75:8)
   MixState x1027{x927.tot + x927.mul * x1026, x927.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":73:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":75:8)
   auto x1028 = x0 - x889;
-  // loc("zirgen/circuit/recursion/micro.cpp":73:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":75:8)
   MixState x1029{x1027.tot + x1027.mul * x1028, x1027.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":73:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":75:8)
   auto x1030 = x0 - x892;
-  // loc("zirgen/circuit/recursion/micro.cpp":73:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":75:8)
   MixState x1031{x1029.tot + x1029.mul * x1030, x1029.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":73:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":75:8)
   auto x1032 = x0 - x895;
-  // loc("zirgen/circuit/recursion/micro.cpp":73:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":75:8)
   MixState x1033{x1031.tot + x1031.mul * x1032, x1031.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":68:41)
+  // loc("zirgen/circuit/recursion/micro.cpp":70:41)
   MixState x1034{x1025.tot + x839 * x1033.tot * x1025.mul, x1025.mul * x1033.mul};
   // loc("zirgen/circuit/recursion/wom.cpp":49:5)
   MixState x1035{x885.tot + x885.mul * x886, x885.mul * (*mix)};
@@ -2109,47 +2109,47 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   MixState x1037{x1036.tot + x1036.mul * x892, x1036.mul * (*mix)};
   // loc("zirgen/circuit/recursion/wom.cpp":49:5)
   MixState x1038{x1037.tot + x1037.mul * x895, x1037.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":75:54)
+  // loc("zirgen/circuit/recursion/micro.cpp":77:54)
   MixState x1039{x1034.tot + x842 * x1038.tot * x1034.mul, x1034.mul * x1038.mul};
-  // loc("zirgen/circuit/recursion/micro.cpp":94:9)
+  // loc("zirgen/circuit/recursion/micro.cpp":98:9)
   auto x1040 = x859 * x889;
-  // loc("zirgen/circuit/recursion/micro.cpp":94:9)
+  // loc("zirgen/circuit/recursion/micro.cpp":98:9)
   MixState x1041{x882.tot + x882.mul * x1040, x882.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":95:9)
+  // loc("zirgen/circuit/recursion/micro.cpp":99:9)
   auto x1042 = x860 * x892;
-  // loc("zirgen/circuit/recursion/micro.cpp":95:9)
+  // loc("zirgen/circuit/recursion/micro.cpp":99:9)
   MixState x1043{x1041.tot + x1041.mul * x1042, x1041.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":96:9)
+  // loc("zirgen/circuit/recursion/micro.cpp":100:9)
   auto x1044 = x860 * x895;
-  // loc("zirgen/circuit/recursion/micro.cpp":96:9)
+  // loc("zirgen/circuit/recursion/micro.cpp":100:9)
   MixState x1045{x1043.tot + x1043.mul * x1044, x1043.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":82:52)
+  // loc("zirgen/circuit/recursion/micro.cpp":86:52)
   MixState x1046{x1039.tot + x845 * x1045.tot * x1039.mul, x1039.mul * x1045.mul};
-  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[1](recursion::MicroOp)/extra(Reg)"("zirgen/circuit/recursion/micro.cpp":107:71))
+  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[1](recursion::MicroOp)/extra(Reg)"("zirgen/circuit/recursion/micro.cpp":111:71))
   auto x1047 = args[2][113 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("zirgen/circuit/recursion/micro.cpp":107:15)
+  // loc("zirgen/circuit/recursion/micro.cpp":111:15)
   auto x1048 = x861 * x1047;
-  // loc("zirgen/circuit/recursion/micro.cpp":109:11)
+  // loc("zirgen/circuit/recursion/micro.cpp":113:11)
   auto x1049 = x1048 * x12;
-  // loc("zirgen/circuit/recursion/micro.cpp":109:11)
+  // loc("zirgen/circuit/recursion/micro.cpp":113:11)
   auto x1050 = x1049 + x867;
-  // loc("zirgen/circuit/recursion/micro.cpp":110:11)
+  // loc("zirgen/circuit/recursion/micro.cpp":114:11)
   auto x1051 = x1050 * x12;
-  // loc("zirgen/circuit/recursion/micro.cpp":110:11)
+  // loc("zirgen/circuit/recursion/micro.cpp":114:11)
   auto x1052 = x1051 + x865;
-  // loc("zirgen/circuit/recursion/micro.cpp":111:11)
+  // loc("zirgen/circuit/recursion/micro.cpp":115:11)
   auto x1053 = x1052 * x12;
-  // loc("zirgen/circuit/recursion/micro.cpp":111:11)
+  // loc("zirgen/circuit/recursion/micro.cpp":115:11)
   auto x1054 = x1053 + x877;
-  // loc("zirgen/circuit/recursion/micro.cpp":112:11)
+  // loc("zirgen/circuit/recursion/micro.cpp":116:11)
   auto x1055 = x1054 * x12;
-  // loc("zirgen/circuit/recursion/micro.cpp":112:11)
+  // loc("zirgen/circuit/recursion/micro.cpp":116:11)
   auto x1056 = x1055 + x875;
-  // loc("zirgen/circuit/recursion/micro.cpp":114:5)
+  // loc("zirgen/circuit/recursion/micro.cpp":118:5)
   auto x1057 = x1017 - x1056;
-  // loc("zirgen/circuit/recursion/micro.cpp":114:5)
+  // loc("zirgen/circuit/recursion/micro.cpp":118:5)
   MixState x1058{x901.tot + x901.mul * x1057, x901.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":87:3)
   MixState x1059{x1058.tot + x1058.mul * x884, x1058.mul * (*mix)};
   // loc("zirgen/circuit/recursion/wom.cpp":49:5)
   auto x1060 = x886 - x1056;
@@ -2161,17 +2161,17 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   MixState x1063{x1062.tot + x1062.mul * x892, x1062.mul * (*mix)};
   // loc("zirgen/circuit/recursion/wom.cpp":49:5)
   MixState x1064{x1063.tot + x1063.mul * x895, x1063.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":98:46)
+  // loc("zirgen/circuit/recursion/micro.cpp":102:46)
   MixState x1065{x1046.tot + x848 * x1064.tot * x1046.mul, x1046.mul * x1064.mul};
-  // loc("zirgen/circuit/recursion/micro.cpp":119:31)
+  // loc("zirgen/circuit/recursion/micro.cpp":123:31)
   auto x1066 = x861 * x865;
-  // loc("zirgen/circuit/recursion/micro.cpp":119:17)
+  // loc("zirgen/circuit/recursion/micro.cpp":123:17)
   auto x1067 = x860 + x1066;
-  // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":82:3)
   auto x1068 = x873 - x1067;
-  // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":82:3)
   MixState x1069{x899.tot + x899.mul * x1068, x899.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":87:3)
   MixState x1070{x1069.tot + x1069.mul * x884, x1069.mul * (*mix)};
   // loc("zirgen/circuit/recursion/wom.cpp":49:5)
   auto x1071 = x886 - x875;
@@ -2189,33 +2189,33 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x1077 = x895 - x881;
   // loc("zirgen/circuit/recursion/wom.cpp":49:5)
   MixState x1078{x1076.tot + x1076.mul * x1077, x1076.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":117:45)
+  // loc("zirgen/circuit/recursion/micro.cpp":121:45)
   MixState x1079{x1065.tot + x851 * x1078.tot * x1065.mul, x1065.mul * x1078.mul};
-  // loc("zirgen/circuit/recursion/micro.cpp":132:15)
+  // loc("zirgen/circuit/recursion/micro.cpp":136:15)
   auto x1080 = x860 * x861;
-  // loc("zirgen/circuit/recursion/micro.cpp":132:15)
+  // loc("zirgen/circuit/recursion/micro.cpp":136:15)
   auto x1081 = x1080 * x871;
-  // loc("zirgen/circuit/recursion/micro.cpp":133:30)
+  // loc("zirgen/circuit/recursion/micro.cpp":137:30)
   auto x1082 = x1 - x861;
-  // loc("zirgen/circuit/recursion/micro.cpp":133:15)
+  // loc("zirgen/circuit/recursion/micro.cpp":137:15)
   auto x1083 = x860 * x1082;
-  // loc("zirgen/circuit/recursion/micro.cpp":133:15)
+  // loc("zirgen/circuit/recursion/micro.cpp":137:15)
   auto x1084 = x1083 * x869;
-  // loc("zirgen/circuit/recursion/micro.cpp":132:15)
+  // loc("zirgen/circuit/recursion/micro.cpp":136:15)
   auto x1085 = x1081 + x1084;
-  // loc("zirgen/circuit/recursion/micro.cpp":134:15)
+  // loc("zirgen/circuit/recursion/micro.cpp":138:15)
   auto x1086 = x1015 * x861;
-  // loc("zirgen/circuit/recursion/micro.cpp":134:15)
+  // loc("zirgen/circuit/recursion/micro.cpp":138:15)
   auto x1087 = x1086 * x867;
-  // loc("zirgen/circuit/recursion/micro.cpp":132:15)
+  // loc("zirgen/circuit/recursion/micro.cpp":136:15)
   auto x1088 = x1085 + x1087;
-  // loc("zirgen/circuit/recursion/micro.cpp":135:15)
+  // loc("zirgen/circuit/recursion/micro.cpp":139:15)
   auto x1089 = x1015 * x1082;
-  // loc("zirgen/circuit/recursion/micro.cpp":135:15)
+  // loc("zirgen/circuit/recursion/micro.cpp":139:15)
   auto x1090 = x1089 * x865;
-  // loc("zirgen/circuit/recursion/micro.cpp":132:15)
+  // loc("zirgen/circuit/recursion/micro.cpp":136:15)
   auto x1091 = x1088 + x1090;
-  // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":87:3)
   MixState x1092{x974.tot + x974.mul * x884, x974.mul * (*mix)};
   // loc("zirgen/circuit/recursion/wom.cpp":49:5)
   auto x1093 = x886 - x1091;
@@ -2227,7 +2227,7 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   MixState x1096{x1095.tot + x1095.mul * x892, x1095.mul * (*mix)};
   // loc("zirgen/circuit/recursion/wom.cpp":49:5)
   MixState x1097{x1096.tot + x1096.mul * x895, x1096.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":129:46)
+  // loc("zirgen/circuit/recursion/micro.cpp":133:46)
   MixState x1098{x1079.tot + x854 * x1097.tot * x1079.mul, x1079.mul * x1097.mul};
   // loc("./zirgen/components/mux.h":49:25)
   MixState x1099{x281.tot + x282 * x1098.tot * x281.mul, x281.mul * x1098.mul};
@@ -2249,13 +2249,13 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   MixState x1107{x1106.tot + x1106.mul * x339, x1106.mul * (*mix)};
   // loc("./zirgen/components/mux.h":49:25)
   MixState x1108{x1101.tot + x316 * x1107.tot * x1101.mul, x1101.mul * x1107.mul};
-  // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":82:3)
   auto x1109 = x331 - x860;
-  // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":82:3)
   MixState x1110{x281.tot + x281.mul * x1109, x281.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":82:3)
   auto x1111 = x342 - x861;
-  // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":82:3)
   MixState x1112{x1110.tot + x1110.mul * x1111, x1110.mul * (*mix)};
   // loc("zirgen/circuit/recursion/bits.cpp":80:19)
   auto x1113 = x865 * x867;
@@ -2767,9 +2767,9 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x1366 = x1360 - x345;
   // loc("zirgen/circuit/recursion/bits.cpp":83:6)
   MixState x1367{x1365.tot + x1365.mul * x1366, x1365.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":87:3)
   auto x1368 = x593 - x283;
-  // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":87:3)
   MixState x1369{x1367.tot + x1367.mul * x1368, x1367.mul * (*mix)};
   // loc("zirgen/circuit/recursion/wom.cpp":49:5)
   auto x1370 = x595 - x1363;
@@ -3227,7 +3227,7 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x1596 = x1591 * x12;
   // loc("zirgen/circuit/recursion/bits.cpp":44:30)
   auto x1597 = x1596 + x1482;
-  // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":87:3)
   MixState x1598{x281.tot + x281.mul * x1368, x281.mul * (*mix)};
   // loc("zirgen/circuit/recursion/wom.cpp":49:5)
   auto x1599 = x595 - x1597;
@@ -3335,15 +3335,15 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x1650 = x0 - x1649;
   // loc("zirgen/circuit/recursion/sha.cpp":106:15)
   auto x1651 = x1650 * x27;
-  // loc("zirgen/circuit/recursion/sha.cpp":125:20)
+  // loc("zirgen/circuit/recursion/sha.cpp":127:20)
   auto x1652 = x1651 - x327;
-  // loc("zirgen/circuit/recursion/sha.cpp":125:19)
+  // loc("zirgen/circuit/recursion/sha.cpp":127:19)
   auto x1653 = x1652 * x13;
-  // loc("zirgen/circuit/recursion/sha.cpp":126:20)
+  // loc("zirgen/circuit/recursion/sha.cpp":128:20)
   auto x1654 = x1 - x1653;
-  // loc("zirgen/circuit/recursion/sha.cpp":126:7)
+  // loc("zirgen/circuit/recursion/sha.cpp":128:7)
   auto x1655 = x1653 * x1654;
-  // loc("zirgen/circuit/recursion/sha.cpp":126:7)
+  // loc("zirgen/circuit/recursion/sha.cpp":128:7)
   MixState x1656{x1112.tot + x1112.mul * x1655, x1112.mul * (*mix)};
   // loc("zirgen/circuit/recursion/sha.cpp":104:17)
   auto x1657 = x579 * x2;
@@ -3409,15 +3409,15 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x1687 = x1651 - x1686;
   // loc("zirgen/circuit/recursion/sha.cpp":106:15)
   auto x1688 = x1687 * x27;
-  // loc("zirgen/circuit/recursion/sha.cpp":129:21)
+  // loc("zirgen/circuit/recursion/sha.cpp":133:21)
   auto x1689 = x1688 - x329;
-  // loc("zirgen/circuit/recursion/sha.cpp":129:20)
+  // loc("zirgen/circuit/recursion/sha.cpp":133:20)
   auto x1690 = x1689 * x13;
-  // loc("zirgen/circuit/recursion/sha.cpp":130:21)
+  // loc("zirgen/circuit/recursion/sha.cpp":134:21)
   auto x1691 = x1 - x1690;
-  // loc("zirgen/circuit/recursion/sha.cpp":130:7)
+  // loc("zirgen/circuit/recursion/sha.cpp":134:7)
   auto x1692 = x1690 * x1691;
-  // loc("zirgen/circuit/recursion/sha.cpp":130:7)
+  // loc("zirgen/circuit/recursion/sha.cpp":134:7)
   MixState x1693{x1656.tot + x1656.mul * x1692, x1656.mul * (*mix)};
   // loc("zirgen/circuit/recursion/sha.cpp":104:17)
   auto x1694 = x605 * x2;
@@ -3483,17 +3483,17 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x1724 = x333 - x1723;
   // loc("zirgen/circuit/recursion/sha.cpp":106:15)
   auto x1725 = x1724 * x27;
-  // loc("zirgen/circuit/recursion/sha.cpp":125:20)
+  // loc("zirgen/circuit/recursion/sha.cpp":127:20)
   auto x1726 = x1725 - x319;
-  // loc("zirgen/circuit/recursion/sha.cpp":125:19)
+  // loc("zirgen/circuit/recursion/sha.cpp":127:19)
   auto x1727 = x1726 * x13;
-  // loc("zirgen/circuit/recursion/sha.cpp":126:20)
+  // loc("zirgen/circuit/recursion/sha.cpp":128:20)
   auto x1728 = x1 - x1727;
-  // loc("zirgen/circuit/recursion/sha.cpp":126:7)
+  // loc("zirgen/circuit/recursion/sha.cpp":128:7)
   auto x1729 = x1727 * x1728;
-  // loc("zirgen/circuit/recursion/sha.cpp":126:7)
+  // loc("zirgen/circuit/recursion/sha.cpp":128:7)
   MixState x1730{x1693.tot + x1693.mul * x1729, x1693.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/sha.cpp":127:32)
+  // loc("zirgen/circuit/recursion/sha.cpp":129:32)
   auto x1731 = x335 + x1725;
   // loc("zirgen/circuit/recursion/sha.cpp":104:17)
   auto x1732 = x879 * x2;
@@ -3555,15 +3555,15 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x1760 = x1731 - x1759;
   // loc("zirgen/circuit/recursion/sha.cpp":106:15)
   auto x1761 = x1760 * x27;
-  // loc("zirgen/circuit/recursion/sha.cpp":129:21)
+  // loc("zirgen/circuit/recursion/sha.cpp":133:21)
   auto x1762 = x1761 - x321;
-  // loc("zirgen/circuit/recursion/sha.cpp":129:20)
+  // loc("zirgen/circuit/recursion/sha.cpp":133:20)
   auto x1763 = x1762 * x13;
-  // loc("zirgen/circuit/recursion/sha.cpp":130:21)
+  // loc("zirgen/circuit/recursion/sha.cpp":134:21)
   auto x1764 = x1 - x1763;
-  // loc("zirgen/circuit/recursion/sha.cpp":130:7)
+  // loc("zirgen/circuit/recursion/sha.cpp":134:7)
   auto x1765 = x1763 * x1764;
-  // loc("zirgen/circuit/recursion/sha.cpp":130:7)
+  // loc("zirgen/circuit/recursion/sha.cpp":134:7)
   MixState x1766{x1730.tot + x1730.mul * x1765, x1730.mul * (*mix)};
   // loc("zirgen/circuit/recursion/sha.cpp":104:17)
   auto x1767 = x1204 * x2;
@@ -3629,17 +3629,17 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x1797 = x345 - x1796;
   // loc("zirgen/circuit/recursion/sha.cpp":106:15)
   auto x1798 = x1797 * x27;
-  // loc("zirgen/circuit/recursion/sha.cpp":125:20)
+  // loc("zirgen/circuit/recursion/sha.cpp":127:20)
   auto x1799 = x1798 - x323;
-  // loc("zirgen/circuit/recursion/sha.cpp":125:19)
+  // loc("zirgen/circuit/recursion/sha.cpp":127:19)
   auto x1800 = x1799 * x13;
-  // loc("zirgen/circuit/recursion/sha.cpp":126:20)
+  // loc("zirgen/circuit/recursion/sha.cpp":128:20)
   auto x1801 = x1 - x1800;
-  // loc("zirgen/circuit/recursion/sha.cpp":126:7)
+  // loc("zirgen/circuit/recursion/sha.cpp":128:7)
   auto x1802 = x1800 * x1801;
-  // loc("zirgen/circuit/recursion/sha.cpp":126:7)
+  // loc("zirgen/circuit/recursion/sha.cpp":128:7)
   MixState x1803{x1766.tot + x1766.mul * x1802, x1766.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/sha.cpp":127:32)
+  // loc("zirgen/circuit/recursion/sha.cpp":129:32)
   auto x1804 = x348 + x1798;
   // loc("zirgen/circuit/recursion/sha.cpp":104:17)
   auto x1805 = x1276 * x2;
@@ -3705,21 +3705,21 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x1835 = x1804 - x1834;
   // loc("zirgen/circuit/recursion/sha.cpp":106:15)
   auto x1836 = x1835 * x27;
-  // loc("zirgen/circuit/recursion/sha.cpp":129:21)
+  // loc("zirgen/circuit/recursion/sha.cpp":133:21)
   auto x1837 = x1836 - x325;
-  // loc("zirgen/circuit/recursion/sha.cpp":129:20)
+  // loc("zirgen/circuit/recursion/sha.cpp":133:20)
   auto x1838 = x1837 * x13;
-  // loc("zirgen/circuit/recursion/sha.cpp":130:21)
+  // loc("zirgen/circuit/recursion/sha.cpp":134:21)
   auto x1839 = x1 - x1838;
-  // loc("zirgen/circuit/recursion/sha.cpp":130:7)
+  // loc("zirgen/circuit/recursion/sha.cpp":134:7)
   auto x1840 = x1838 * x1839;
-  // loc("zirgen/circuit/recursion/sha.cpp":130:7)
+  // loc("zirgen/circuit/recursion/sha.cpp":134:7)
   MixState x1841{x1803.tot + x1803.mul * x1840, x1803.mul * (*mix)};
   // loc("./zirgen/components/mux.h":49:25)
   MixState x1842{x1619.tot + x587 * x1841.tot * x1619.mul, x1619.mul * x1841.mul};
-  // loc("zirgen/circuit/recursion/sha.cpp":126:7)
+  // loc("zirgen/circuit/recursion/sha.cpp":128:7)
   MixState x1843{x281.tot + x281.mul * x1655, x281.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/sha.cpp":130:7)
+  // loc("zirgen/circuit/recursion/sha.cpp":134:7)
   MixState x1844{x1843.tot + x1843.mul * x1692, x1843.mul * (*mix)};
   // loc("top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/sha_fini(recursion::ShaWrap)/sha_cycle(recursion::ShaCycle)/a[0](Bit)/bit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
   auto x1845 = args[2][26 * steps + ((cycle - kInvRate * 4) & mask)];
@@ -4097,31 +4097,31 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x2031 = x2029 - x1723;
   // loc("zirgen/circuit/recursion/sha.cpp":106:15)
   auto x2032 = x2031 * x27;
-  // loc("zirgen/circuit/recursion/sha.cpp":125:20)
+  // loc("zirgen/circuit/recursion/sha.cpp":127:20)
   auto x2033 = x2032 - x319;
-  // loc("zirgen/circuit/recursion/sha.cpp":125:19)
+  // loc("zirgen/circuit/recursion/sha.cpp":127:19)
   auto x2034 = x2033 * x13;
-  // loc("zirgen/circuit/recursion/sha.cpp":126:20)
+  // loc("zirgen/circuit/recursion/sha.cpp":128:20)
   auto x2035 = x1 - x2034;
-  // loc("zirgen/circuit/recursion/sha.cpp":126:7)
+  // loc("zirgen/circuit/recursion/sha.cpp":128:7)
   auto x2036 = x2034 * x2035;
-  // loc("zirgen/circuit/recursion/sha.cpp":126:7)
+  // loc("zirgen/circuit/recursion/sha.cpp":128:7)
   MixState x2037{x1844.tot + x1844.mul * x2036, x1844.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/sha.cpp":127:32)
+  // loc("zirgen/circuit/recursion/sha.cpp":129:32)
   auto x2038 = x2030 + x2032;
   // loc("zirgen/circuit/recursion/sha.cpp":106:16)
   auto x2039 = x2038 - x1759;
   // loc("zirgen/circuit/recursion/sha.cpp":106:15)
   auto x2040 = x2039 * x27;
-  // loc("zirgen/circuit/recursion/sha.cpp":129:21)
+  // loc("zirgen/circuit/recursion/sha.cpp":133:21)
   auto x2041 = x2040 - x321;
-  // loc("zirgen/circuit/recursion/sha.cpp":129:20)
+  // loc("zirgen/circuit/recursion/sha.cpp":133:20)
   auto x2042 = x2041 * x13;
-  // loc("zirgen/circuit/recursion/sha.cpp":130:21)
+  // loc("zirgen/circuit/recursion/sha.cpp":134:21)
   auto x2043 = x1 - x2042;
-  // loc("zirgen/circuit/recursion/sha.cpp":130:7)
+  // loc("zirgen/circuit/recursion/sha.cpp":134:7)
   auto x2044 = x2042 * x2043;
-  // loc("zirgen/circuit/recursion/sha.cpp":130:7)
+  // loc("zirgen/circuit/recursion/sha.cpp":134:7)
   MixState x2045{x2037.tot + x2037.mul * x2044, x2037.mul * (*mix)};
   // loc("top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/sha_fini(recursion::ShaWrap)/sha_cycle(recursion::ShaCycle)/e[0](Bit)/bit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
   auto x2046 = args[2][60 * steps + ((cycle - kInvRate * 4) & mask)];
@@ -4499,31 +4499,31 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x2232 = x2230 - x1796;
   // loc("zirgen/circuit/recursion/sha.cpp":106:15)
   auto x2233 = x2232 * x27;
-  // loc("zirgen/circuit/recursion/sha.cpp":125:20)
+  // loc("zirgen/circuit/recursion/sha.cpp":127:20)
   auto x2234 = x2233 - x323;
-  // loc("zirgen/circuit/recursion/sha.cpp":125:19)
+  // loc("zirgen/circuit/recursion/sha.cpp":127:19)
   auto x2235 = x2234 * x13;
-  // loc("zirgen/circuit/recursion/sha.cpp":126:20)
+  // loc("zirgen/circuit/recursion/sha.cpp":128:20)
   auto x2236 = x1 - x2235;
-  // loc("zirgen/circuit/recursion/sha.cpp":126:7)
+  // loc("zirgen/circuit/recursion/sha.cpp":128:7)
   auto x2237 = x2235 * x2236;
-  // loc("zirgen/circuit/recursion/sha.cpp":126:7)
+  // loc("zirgen/circuit/recursion/sha.cpp":128:7)
   MixState x2238{x2045.tot + x2045.mul * x2237, x2045.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/sha.cpp":127:32)
+  // loc("zirgen/circuit/recursion/sha.cpp":129:32)
   auto x2239 = x2231 + x2233;
   // loc("zirgen/circuit/recursion/sha.cpp":106:16)
   auto x2240 = x2239 - x1834;
   // loc("zirgen/circuit/recursion/sha.cpp":106:15)
   auto x2241 = x2240 * x27;
-  // loc("zirgen/circuit/recursion/sha.cpp":129:21)
+  // loc("zirgen/circuit/recursion/sha.cpp":133:21)
   auto x2242 = x2241 - x325;
-  // loc("zirgen/circuit/recursion/sha.cpp":129:20)
+  // loc("zirgen/circuit/recursion/sha.cpp":133:20)
   auto x2243 = x2242 * x13;
-  // loc("zirgen/circuit/recursion/sha.cpp":130:21)
+  // loc("zirgen/circuit/recursion/sha.cpp":134:21)
   auto x2244 = x1 - x2243;
-  // loc("zirgen/circuit/recursion/sha.cpp":130:7)
+  // loc("zirgen/circuit/recursion/sha.cpp":134:7)
   auto x2245 = x2243 * x2244;
-  // loc("zirgen/circuit/recursion/sha.cpp":130:7)
+  // loc("zirgen/circuit/recursion/sha.cpp":134:7)
   MixState x2246{x2238.tot + x2238.mul * x2245, x2238.mul * (*mix)};
   // loc("zirgen/circuit/recursion/sha.cpp":115:21)
   auto x2247 = x863 * x2;
@@ -4581,15 +4581,15 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x2273 = x1186 * x17;
   // loc("zirgen/circuit/recursion/sha.cpp":115:14)
   auto x2274 = x2272 + x2273;
-  // loc("zirgen/circuit/recursion/sha.cpp":248:46)
+  // loc("zirgen/circuit/recursion/sha.cpp":256:46)
   auto x2275 = x1743 * x18;
-  // loc("zirgen/circuit/recursion/sha.cpp":248:36)
+  // loc("zirgen/circuit/recursion/sha.cpp":256:36)
   auto x2276 = x2274 + x2275;
-  // loc("zirgen/circuit/recursion/sha.cpp":248:71)
+  // loc("zirgen/circuit/recursion/sha.cpp":256:71)
   auto x2277 = x1707 * x18;
-  // loc("zirgen/circuit/recursion/sha.cpp":248:61)
+  // loc("zirgen/circuit/recursion/sha.cpp":256:61)
   auto x2278 = x2260 + x2277;
-  // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":87:3)
   MixState x2279{x2246.tot + x2246.mul * x1109, x2246.mul * (*mix)};
   // loc("zirgen/circuit/recursion/wom.cpp":49:5)
   auto x2280 = x333 - x2276;
@@ -4603,15 +4603,15 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   MixState x2284{x2283.tot + x2283.mul * x337, x2283.mul * (*mix)};
   // loc("zirgen/circuit/recursion/wom.cpp":49:5)
   MixState x2285{x2284.tot + x2284.mul * x339, x2284.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/sha.cpp":249:46)
+  // loc("zirgen/circuit/recursion/sha.cpp":257:46)
   auto x2286 = x1818 * x18;
-  // loc("zirgen/circuit/recursion/sha.cpp":249:36)
+  // loc("zirgen/circuit/recursion/sha.cpp":257:36)
   auto x2287 = x1533 + x2286;
-  // loc("zirgen/circuit/recursion/sha.cpp":249:71)
+  // loc("zirgen/circuit/recursion/sha.cpp":257:71)
   auto x2288 = x1780 * x18;
-  // loc("zirgen/circuit/recursion/sha.cpp":249:61)
+  // loc("zirgen/circuit/recursion/sha.cpp":257:61)
   auto x2289 = x1423 + x2288;
-  // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":87:3)
   MixState x2290{x2285.tot + x2285.mul * x1111, x2285.mul * (*mix)};
   // loc("zirgen/circuit/recursion/wom.cpp":49:5)
   auto x2291 = x345 - x2287;
@@ -4627,7 +4627,7 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   MixState x2296{x2295.tot + x2295.mul * x591, x2295.mul * (*mix)};
   // loc("./zirgen/components/mux.h":49:25)
   MixState x2297{x1842.tot + x588 * x2296.tot * x1842.mul, x1842.mul * x2296.mul};
-  // loc("zirgen/circuit/recursion/sha.cpp":179:15)
+  // loc("zirgen/circuit/recursion/sha.cpp":183:15)
   auto x2298 = x333 * x42;
   // loc("zirgen/circuit/recursion/sha.cpp":104:17)
   auto x2299 = x839 * x2;
@@ -4701,75 +4701,75 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x2333 = x2332 - x1633;
   // loc("zirgen/circuit/recursion/sha.cpp":106:15)
   auto x2334 = x2333 * x19;
-  // loc("zirgen/circuit/recursion/sha.cpp":184:8)
+  // loc("zirgen/circuit/recursion/sha.cpp":188:8)
   MixState x2335{x281.tot + x281.mul * x2334, x281.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/sha.cpp":193:14)
+  // loc("zirgen/circuit/recursion/sha.cpp":197:14)
   auto x2336 = x301 + x304;
-  // loc("zirgen/circuit/recursion/sha.cpp":193:14)
+  // loc("zirgen/circuit/recursion/sha.cpp":197:14)
   auto x2337 = x2336 + x307;
-  // loc("zirgen/circuit/recursion/sha.cpp":193:14)
+  // loc("zirgen/circuit/recursion/sha.cpp":197:14)
   auto x2338 = x2337 + x310;
-  // loc("zirgen/circuit/recursion/sha.cpp":197:15)
+  // loc("zirgen/circuit/recursion/sha.cpp":201:15)
   auto x2339 = x836 + x839;
-  // loc("zirgen/circuit/recursion/sha.cpp":197:15)
+  // loc("zirgen/circuit/recursion/sha.cpp":201:15)
   auto x2340 = x2339 + x842;
-  // loc("zirgen/circuit/recursion/sha.cpp":197:15)
+  // loc("zirgen/circuit/recursion/sha.cpp":201:15)
   auto x2341 = x2340 + x845;
-  // loc("zirgen/circuit/recursion/sha.cpp":197:15)
+  // loc("zirgen/circuit/recursion/sha.cpp":201:15)
   auto x2342 = x2341 + x848;
-  // loc("zirgen/circuit/recursion/sha.cpp":197:15)
+  // loc("zirgen/circuit/recursion/sha.cpp":201:15)
   auto x2343 = x2342 + x851;
-  // loc("zirgen/circuit/recursion/sha.cpp":197:15)
+  // loc("zirgen/circuit/recursion/sha.cpp":201:15)
   auto x2344 = x2343 + x854;
-  // loc("zirgen/circuit/recursion/sha.cpp":197:15)
+  // loc("zirgen/circuit/recursion/sha.cpp":201:15)
   auto x2345 = x2344 + x1017;
-  // loc("zirgen/circuit/recursion/sha.cpp":197:15)
+  // loc("zirgen/circuit/recursion/sha.cpp":201:15)
   auto x2346 = x2345 + x576;
-  // loc("zirgen/circuit/recursion/sha.cpp":197:15)
+  // loc("zirgen/circuit/recursion/sha.cpp":201:15)
   auto x2347 = x2346 + x579;
-  // loc("zirgen/circuit/recursion/sha.cpp":197:15)
+  // loc("zirgen/circuit/recursion/sha.cpp":201:15)
   auto x2348 = x2347 + x582;
-  // loc("zirgen/circuit/recursion/sha.cpp":197:15)
+  // loc("zirgen/circuit/recursion/sha.cpp":201:15)
   auto x2349 = x2348 + x745;
-  // loc("zirgen/circuit/recursion/sha.cpp":197:15)
+  // loc("zirgen/circuit/recursion/sha.cpp":201:15)
   auto x2350 = x2349 + x862;
-  // loc("zirgen/circuit/recursion/sha.cpp":197:15)
+  // loc("zirgen/circuit/recursion/sha.cpp":201:15)
   auto x2351 = x2350 + x829;
-  // loc("zirgen/circuit/recursion/sha.cpp":197:15)
+  // loc("zirgen/circuit/recursion/sha.cpp":201:15)
   auto x2352 = x2351 + x830;
-  // loc("zirgen/circuit/recursion/sha.cpp":197:15)
+  // loc("zirgen/circuit/recursion/sha.cpp":201:15)
   auto x2353 = x2352 + x833;
-  // loc("zirgen/circuit/recursion/sha.cpp":197:15)
+  // loc("zirgen/circuit/recursion/sha.cpp":201:15)
   auto x2354 = x2353 + x590;
-  // loc("zirgen/circuit/recursion/sha.cpp":197:15)
+  // loc("zirgen/circuit/recursion/sha.cpp":201:15)
   auto x2355 = x2354 + x557;
-  // loc("zirgen/circuit/recursion/sha.cpp":197:15)
+  // loc("zirgen/circuit/recursion/sha.cpp":201:15)
   auto x2356 = x2355 + x558;
-  // loc("zirgen/circuit/recursion/sha.cpp":197:15)
+  // loc("zirgen/circuit/recursion/sha.cpp":201:15)
   auto x2357 = x2356 + x561;
-  // loc("zirgen/circuit/recursion/sha.cpp":197:15)
+  // loc("zirgen/circuit/recursion/sha.cpp":201:15)
   auto x2358 = x2357 + x564;
-  // loc("zirgen/circuit/recursion/sha.cpp":197:15)
+  // loc("zirgen/circuit/recursion/sha.cpp":201:15)
   auto x2359 = x2358 + x567;
-  // loc("zirgen/circuit/recursion/sha.cpp":197:15)
+  // loc("zirgen/circuit/recursion/sha.cpp":201:15)
   auto x2360 = x2359 + x570;
-  // loc("zirgen/circuit/recursion/sha.cpp":197:15)
+  // loc("zirgen/circuit/recursion/sha.cpp":201:15)
   auto x2361 = x2360 + x573;
-  // loc("zirgen/circuit/recursion/sha.cpp":197:15)
+  // loc("zirgen/circuit/recursion/sha.cpp":201:15)
   auto x2362 = x2361 + x292;
-  // loc("zirgen/circuit/recursion/sha.cpp":197:15)
+  // loc("zirgen/circuit/recursion/sha.cpp":201:15)
   auto x2363 = x2362 + x295;
-  // loc("zirgen/circuit/recursion/sha.cpp":197:15)
+  // loc("zirgen/circuit/recursion/sha.cpp":201:15)
   auto x2364 = x2363 + x298;
-  // loc("zirgen/circuit/recursion/sha.cpp":214:10)
+  // loc("zirgen/circuit/recursion/sha.cpp":222:10)
   auto x2365 = x2338 - x327;
-  // loc("zirgen/circuit/recursion/sha.cpp":214:9)
+  // loc("zirgen/circuit/recursion/sha.cpp":222:9)
   auto x2366 = x2365 * x2364;
-  // loc("zirgen/circuit/recursion/sha.cpp":214:9)
+  // loc("zirgen/circuit/recursion/sha.cpp":222:9)
   MixState x2367{x2335.tot + x2335.mul * x2366, x2335.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/sha.cpp":216:9)
+  // loc("zirgen/circuit/recursion/sha.cpp":224:9)
   MixState x2368{x2367.tot + x2367.mul * x473, x2367.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/sha.cpp":177:27)
+  // loc("zirgen/circuit/recursion/sha.cpp":181:27)
   MixState x2369{x1112.tot + x1605 * x2368.tot * x1112.mul, x1112.mul * x2368.mul};
   // loc("zirgen/circuit/recursion/sha.cpp":106:16)
   auto x2370 = x333 - x2312;
@@ -4779,9 +4779,9 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x2372 = x2371 - x1670;
   // loc("zirgen/circuit/recursion/sha.cpp":106:15)
   auto x2373 = x2372 * x19;
-  // loc("zirgen/circuit/recursion/sha.cpp":134:6)
+  // loc("zirgen/circuit/recursion/sha.cpp":138:6)
   auto x2374 = x0 - x2373;
-  // loc("zirgen/circuit/recursion/sha.cpp":134:6)
+  // loc("zirgen/circuit/recursion/sha.cpp":138:6)
   MixState x2375{x281.tot + x281.mul * x2374, x281.mul * (*mix)};
   // loc("zirgen/circuit/recursion/sha.cpp":106:16)
   auto x2376 = x335 - x2330;
@@ -4791,13 +4791,13 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x2378 = x2377 - x1633;
   // loc("zirgen/circuit/recursion/sha.cpp":106:15)
   auto x2379 = x2378 * x19;
-  // loc("zirgen/circuit/recursion/sha.cpp":135:6)
+  // loc("zirgen/circuit/recursion/sha.cpp":139:6)
   auto x2380 = x0 - x2379;
-  // loc("zirgen/circuit/recursion/sha.cpp":135:6)
+  // loc("zirgen/circuit/recursion/sha.cpp":139:6)
   MixState x2381{x2375.tot + x2375.mul * x2380, x2375.mul * (*mix)};
   // loc("./zirgen/components/bits.h":68:23)
   MixState x2382{x2381.tot + x2381.mul * x327, x2381.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/sha.cpp":218:23)
+  // loc("zirgen/circuit/recursion/sha.cpp":226:23)
   MixState x2383{x2369.tot + x1376 * x2382.tot * x2369.mul, x2369.mul * x2382.mul};
   // loc("./zirgen/components/bits.h":68:23)
   MixState x2384{x2383.tot + x2383.mul * x329, x2383.mul * (*mix)};
@@ -7677,81 +7677,81 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x3821 = x3279 + x1906;
   // loc("zirgen/circuit/recursion/sha.cpp":83:14)
   auto x3822 = x3280 + x1936;
-  // loc("zirgen/circuit/recursion/sha.cpp":290:5)
+  // loc("zirgen/circuit/recursion/sha.cpp":298:5)
   auto x3823 = x1192 - x3819;
-  // loc("zirgen/circuit/recursion/sha.cpp":290:5)
+  // loc("zirgen/circuit/recursion/sha.cpp":298:5)
   MixState x3824{x2384.tot + x2384.mul * x3823, x2384.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/sha.cpp":291:5)
+  // loc("zirgen/circuit/recursion/sha.cpp":299:5)
   auto x3825 = x286 - x3821;
-  // loc("zirgen/circuit/recursion/sha.cpp":291:5)
+  // loc("zirgen/circuit/recursion/sha.cpp":299:5)
   MixState x3826{x3824.tot + x3824.mul * x3825, x3824.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/sha.cpp":290:5)
+  // loc("zirgen/circuit/recursion/sha.cpp":298:5)
   auto x3827 = x1195 - x3820;
-  // loc("zirgen/circuit/recursion/sha.cpp":290:5)
+  // loc("zirgen/circuit/recursion/sha.cpp":298:5)
   MixState x3828{x3826.tot + x3826.mul * x3827, x3826.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/sha.cpp":291:5)
+  // loc("zirgen/circuit/recursion/sha.cpp":299:5)
   auto x3829 = x289 - x3822;
-  // loc("zirgen/circuit/recursion/sha.cpp":291:5)
+  // loc("zirgen/circuit/recursion/sha.cpp":299:5)
   MixState x3830{x3828.tot + x3828.mul * x3829, x3828.mul * (*mix)};
   // loc("zirgen/circuit/recursion/sha.cpp":106:16)
   auto x3831 = x1192 - x1723;
   // loc("zirgen/circuit/recursion/sha.cpp":106:15)
   auto x3832 = x3831 * x27;
-  // loc("zirgen/circuit/recursion/sha.cpp":125:20)
+  // loc("zirgen/circuit/recursion/sha.cpp":127:20)
   auto x3833 = x3832 - x319;
-  // loc("zirgen/circuit/recursion/sha.cpp":125:19)
+  // loc("zirgen/circuit/recursion/sha.cpp":127:19)
   auto x3834 = x3833 * x13;
-  // loc("zirgen/circuit/recursion/sha.cpp":126:20)
+  // loc("zirgen/circuit/recursion/sha.cpp":128:20)
   auto x3835 = x1 - x3834;
-  // loc("zirgen/circuit/recursion/sha.cpp":126:7)
+  // loc("zirgen/circuit/recursion/sha.cpp":128:7)
   auto x3836 = x3834 * x3835;
-  // loc("zirgen/circuit/recursion/sha.cpp":126:7)
+  // loc("zirgen/circuit/recursion/sha.cpp":128:7)
   MixState x3837{x3830.tot + x3830.mul * x3836, x3830.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/sha.cpp":127:32)
+  // loc("zirgen/circuit/recursion/sha.cpp":129:32)
   auto x3838 = x1195 + x3832;
   // loc("zirgen/circuit/recursion/sha.cpp":106:16)
   auto x3839 = x3838 - x1759;
   // loc("zirgen/circuit/recursion/sha.cpp":106:15)
   auto x3840 = x3839 * x27;
-  // loc("zirgen/circuit/recursion/sha.cpp":129:21)
+  // loc("zirgen/circuit/recursion/sha.cpp":133:21)
   auto x3841 = x3840 - x321;
-  // loc("zirgen/circuit/recursion/sha.cpp":129:20)
+  // loc("zirgen/circuit/recursion/sha.cpp":133:20)
   auto x3842 = x3841 * x13;
-  // loc("zirgen/circuit/recursion/sha.cpp":130:21)
+  // loc("zirgen/circuit/recursion/sha.cpp":134:21)
   auto x3843 = x1 - x3842;
-  // loc("zirgen/circuit/recursion/sha.cpp":130:7)
+  // loc("zirgen/circuit/recursion/sha.cpp":134:7)
   auto x3844 = x3842 * x3843;
-  // loc("zirgen/circuit/recursion/sha.cpp":130:7)
+  // loc("zirgen/circuit/recursion/sha.cpp":134:7)
   MixState x3845{x3837.tot + x3837.mul * x3844, x3837.mul * (*mix)};
   // loc("zirgen/circuit/recursion/sha.cpp":106:16)
   auto x3846 = x286 - x1796;
   // loc("zirgen/circuit/recursion/sha.cpp":106:15)
   auto x3847 = x3846 * x27;
-  // loc("zirgen/circuit/recursion/sha.cpp":125:20)
+  // loc("zirgen/circuit/recursion/sha.cpp":127:20)
   auto x3848 = x3847 - x323;
-  // loc("zirgen/circuit/recursion/sha.cpp":125:19)
+  // loc("zirgen/circuit/recursion/sha.cpp":127:19)
   auto x3849 = x3848 * x13;
-  // loc("zirgen/circuit/recursion/sha.cpp":126:20)
+  // loc("zirgen/circuit/recursion/sha.cpp":128:20)
   auto x3850 = x1 - x3849;
-  // loc("zirgen/circuit/recursion/sha.cpp":126:7)
+  // loc("zirgen/circuit/recursion/sha.cpp":128:7)
   auto x3851 = x3849 * x3850;
-  // loc("zirgen/circuit/recursion/sha.cpp":126:7)
+  // loc("zirgen/circuit/recursion/sha.cpp":128:7)
   MixState x3852{x3845.tot + x3845.mul * x3851, x3845.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/sha.cpp":127:32)
+  // loc("zirgen/circuit/recursion/sha.cpp":129:32)
   auto x3853 = x289 + x3847;
   // loc("zirgen/circuit/recursion/sha.cpp":106:16)
   auto x3854 = x3853 - x1834;
   // loc("zirgen/circuit/recursion/sha.cpp":106:15)
   auto x3855 = x3854 * x27;
-  // loc("zirgen/circuit/recursion/sha.cpp":129:21)
+  // loc("zirgen/circuit/recursion/sha.cpp":133:21)
   auto x3856 = x3855 - x325;
-  // loc("zirgen/circuit/recursion/sha.cpp":129:20)
+  // loc("zirgen/circuit/recursion/sha.cpp":133:20)
   auto x3857 = x3856 * x13;
-  // loc("zirgen/circuit/recursion/sha.cpp":130:21)
+  // loc("zirgen/circuit/recursion/sha.cpp":134:21)
   auto x3858 = x1 - x3857;
-  // loc("zirgen/circuit/recursion/sha.cpp":130:7)
+  // loc("zirgen/circuit/recursion/sha.cpp":134:7)
   auto x3859 = x3857 * x3858;
-  // loc("zirgen/circuit/recursion/sha.cpp":130:7)
+  // loc("zirgen/circuit/recursion/sha.cpp":134:7)
   MixState x3860{x3852.tot + x3852.mul * x3859, x3852.mul * (*mix)};
   // loc("./zirgen/components/mux.h":49:25)
   MixState x3861{x2297.tot + x589 * x3860.tot * x2297.mul, x2297.mul * x3860.mul};
@@ -7765,7 +7765,7 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   MixState x3865{x3864.tot + x3864.mul * x337, x3864.mul * (*mix)};
   // loc("zirgen/circuit/recursion/wom.cpp":49:5)
   MixState x3866{x3865.tot + x3865.mul * x339, x3865.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":82:3)
   MixState x3867{x3866.tot + x3866.mul * x1111, x3866.mul * (*mix)};
   // loc("top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/sha_mix(recursion::ShaWrap)/sha_cycle(recursion::ShaCycle)/w[0](Bit)/bit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
   auto x3868 = args[2][94 * steps + ((cycle - kInvRate * 2) & mask)];
@@ -9333,63 +9333,63 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x4649 = x4434 + x4647;
   // loc("zirgen/circuit/recursion/sha.cpp":83:14)
   auto x4650 = x4464 + x4648;
-  // loc("zirgen/circuit/recursion/sha.cpp":261:5)
+  // loc("zirgen/circuit/recursion/sha.cpp":269:5)
   auto x4651 = args[2][126 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("zirgen/circuit/recursion/sha.cpp":261:5)
+  // loc("zirgen/circuit/recursion/sha.cpp":269:5)
   auto x4652 = x4651 - x4649;
-  // loc("zirgen/circuit/recursion/sha.cpp":261:5)
+  // loc("zirgen/circuit/recursion/sha.cpp":269:5)
   MixState x4653{x3867.tot + x3867.mul * x4652, x3867.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/sha.cpp":261:5)
+  // loc("zirgen/circuit/recursion/sha.cpp":269:5)
   auto x4654 = args[2][127 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("zirgen/circuit/recursion/sha.cpp":261:5)
+  // loc("zirgen/circuit/recursion/sha.cpp":269:5)
   auto x4655 = x4654 - x4650;
-  // loc("zirgen/circuit/recursion/sha.cpp":261:5)
+  // loc("zirgen/circuit/recursion/sha.cpp":269:5)
   MixState x4656{x4653.tot + x4653.mul * x4655, x4653.mul * (*mix)};
   // loc("zirgen/circuit/recursion/sha.cpp":106:16)
   auto x4657 = x4651 - x1649;
   // loc("zirgen/circuit/recursion/sha.cpp":106:15)
   auto x4658 = x4657 * x27;
-  // loc("zirgen/circuit/recursion/sha.cpp":125:20)
+  // loc("zirgen/circuit/recursion/sha.cpp":127:20)
   auto x4659 = x4658 - x327;
-  // loc("zirgen/circuit/recursion/sha.cpp":125:19)
+  // loc("zirgen/circuit/recursion/sha.cpp":127:19)
   auto x4660 = x4659 * x13;
-  // loc("zirgen/circuit/recursion/sha.cpp":126:20)
+  // loc("zirgen/circuit/recursion/sha.cpp":128:20)
   auto x4661 = x1 - x4660;
-  // loc("zirgen/circuit/recursion/sha.cpp":126:7)
+  // loc("zirgen/circuit/recursion/sha.cpp":128:7)
   auto x4662 = x4660 * x4661;
-  // loc("zirgen/circuit/recursion/sha.cpp":126:7)
+  // loc("zirgen/circuit/recursion/sha.cpp":128:7)
   MixState x4663{x4656.tot + x4656.mul * x4662, x4656.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/sha.cpp":127:32)
+  // loc("zirgen/circuit/recursion/sha.cpp":129:32)
   auto x4664 = x4654 + x4658;
   // loc("zirgen/circuit/recursion/sha.cpp":106:16)
   auto x4665 = x4664 - x1686;
   // loc("zirgen/circuit/recursion/sha.cpp":106:15)
   auto x4666 = x4665 * x27;
-  // loc("zirgen/circuit/recursion/sha.cpp":129:21)
+  // loc("zirgen/circuit/recursion/sha.cpp":133:21)
   auto x4667 = x4666 - x329;
-  // loc("zirgen/circuit/recursion/sha.cpp":129:20)
+  // loc("zirgen/circuit/recursion/sha.cpp":133:20)
   auto x4668 = x4667 * x13;
-  // loc("zirgen/circuit/recursion/sha.cpp":130:21)
+  // loc("zirgen/circuit/recursion/sha.cpp":134:21)
   auto x4669 = x1 - x4668;
-  // loc("zirgen/circuit/recursion/sha.cpp":130:7)
+  // loc("zirgen/circuit/recursion/sha.cpp":134:7)
   auto x4670 = x4668 * x4669;
-  // loc("zirgen/circuit/recursion/sha.cpp":130:7)
+  // loc("zirgen/circuit/recursion/sha.cpp":134:7)
   MixState x4671{x4663.tot + x4663.mul * x4670, x4663.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/sha.cpp":290:5)
+  // loc("zirgen/circuit/recursion/sha.cpp":298:5)
   MixState x4672{x4671.tot + x4671.mul * x3823, x4671.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/sha.cpp":291:5)
+  // loc("zirgen/circuit/recursion/sha.cpp":299:5)
   MixState x4673{x4672.tot + x4672.mul * x3825, x4672.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/sha.cpp":290:5)
+  // loc("zirgen/circuit/recursion/sha.cpp":298:5)
   MixState x4674{x4673.tot + x4673.mul * x3827, x4673.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/sha.cpp":291:5)
+  // loc("zirgen/circuit/recursion/sha.cpp":299:5)
   MixState x4675{x4674.tot + x4674.mul * x3829, x4674.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/sha.cpp":126:7)
+  // loc("zirgen/circuit/recursion/sha.cpp":128:7)
   MixState x4676{x4675.tot + x4675.mul * x3836, x4675.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/sha.cpp":130:7)
+  // loc("zirgen/circuit/recursion/sha.cpp":134:7)
   MixState x4677{x4676.tot + x4676.mul * x3844, x4676.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/sha.cpp":126:7)
+  // loc("zirgen/circuit/recursion/sha.cpp":128:7)
   MixState x4678{x4677.tot + x4677.mul * x3851, x4677.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/sha.cpp":130:7)
+  // loc("zirgen/circuit/recursion/sha.cpp":134:7)
   MixState x4679{x4678.tot + x4678.mul * x3859, x4678.mul * (*mix)};
   // loc("./zirgen/components/mux.h":49:25)
   MixState x4680{x3861.tot + x828 * x4679.tot * x3861.mul, x3861.mul * x4679.mul};
@@ -9405,9 +9405,9 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x4685 = x4684 - x861;
   // loc("./zirgen/components/onehot.h":40:8)
   MixState x4686{x281.tot + x281.mul * x4685, x281.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":82:3)
   auto x4687 = x339 - x860;
-  // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":82:3)
   MixState x4688{x281.tot + x281.mul * x4687, x281.mul * (*mix)};
   // loc("zirgen/circuit/recursion/macro.cpp":40:11)
   auto x4689 = args[1][0];
@@ -9423,9 +9423,9 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   MixState x4694{x4691.tot + x4691.mul * x4693, x4691.mul * (*mix)};
   // loc("zirgen/circuit/recursion/macro.cpp":37:37)
   auto x4695 = x860 + x1;
-  // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":82:3)
   auto x4696 = x591 - x4695;
-  // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":82:3)
   MixState x4697{x4694.tot + x4694.mul * x4696, x4694.mul * (*mix)};
   // loc("zirgen/circuit/recursion/macro.cpp":40:11)
   auto x4698 = args[1][2];
@@ -9441,9 +9441,9 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   MixState x4703{x4700.tot + x4700.mul * x4702, x4700.mul * (*mix)};
   // loc("zirgen/circuit/recursion/macro.cpp":37:37)
   auto x4704 = x860 + x2;
-  // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":82:3)
   auto x4705 = x601 - x4704;
-  // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":82:3)
   MixState x4706{x4703.tot + x4703.mul * x4705, x4703.mul * (*mix)};
   // loc("zirgen/circuit/recursion/macro.cpp":40:11)
   auto x4707 = args[1][4];
@@ -9459,9 +9459,9 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   MixState x4712{x4709.tot + x4709.mul * x4711, x4709.mul * (*mix)};
   // loc("zirgen/circuit/recursion/macro.cpp":37:37)
   auto x4713 = x860 + x3;
-  // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":82:3)
   auto x4714 = x611 - x4713;
-  // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":82:3)
   MixState x4715{x4712.tot + x4712.mul * x4714, x4712.mul * (*mix)};
   // loc("zirgen/circuit/recursion/macro.cpp":40:11)
   auto x4716 = args[1][6];
@@ -9489,7 +9489,7 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x4727 = x4726 - x345;
   // loc("zirgen/circuit/recursion/macro.cpp":40:11)
   MixState x4728{x4725.tot + x4725.mul * x4727, x4725.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":82:3)
   MixState x4729{x4728.tot + x4728.mul * x4696, x4728.mul * (*mix)};
   // loc("zirgen/circuit/recursion/macro.cpp":40:11)
   auto x4730 = args[1][10];
@@ -9503,7 +9503,7 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x4734 = x4733 - x595;
   // loc("zirgen/circuit/recursion/macro.cpp":40:11)
   MixState x4735{x4732.tot + x4732.mul * x4734, x4732.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":82:3)
   MixState x4736{x4735.tot + x4735.mul * x4705, x4735.mul * (*mix)};
   // loc("zirgen/circuit/recursion/macro.cpp":40:11)
   auto x4737 = args[1][12];
@@ -9517,7 +9517,7 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x4741 = x4740 - x605;
   // loc("zirgen/circuit/recursion/macro.cpp":40:11)
   MixState x4742{x4739.tot + x4739.mul * x4741, x4739.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":82:3)
   MixState x4743{x4742.tot + x4742.mul * x4714, x4742.mul * (*mix)};
   // loc("zirgen/circuit/recursion/macro.cpp":40:11)
   auto x4744 = args[1][14];
@@ -9545,7 +9545,7 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x4755 = x4754 - x345;
   // loc("zirgen/circuit/recursion/macro.cpp":40:11)
   MixState x4756{x4753.tot + x4753.mul * x4755, x4753.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":82:3)
   MixState x4757{x4756.tot + x4756.mul * x4696, x4756.mul * (*mix)};
   // loc("zirgen/circuit/recursion/macro.cpp":40:11)
   auto x4758 = args[1][18];
@@ -9559,7 +9559,7 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x4762 = x4761 - x595;
   // loc("zirgen/circuit/recursion/macro.cpp":40:11)
   MixState x4763{x4760.tot + x4760.mul * x4762, x4760.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":82:3)
   MixState x4764{x4763.tot + x4763.mul * x4705, x4763.mul * (*mix)};
   // loc("zirgen/circuit/recursion/macro.cpp":40:11)
   auto x4765 = args[1][20];
@@ -9573,7 +9573,7 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x4769 = x4768 - x605;
   // loc("zirgen/circuit/recursion/macro.cpp":40:11)
   MixState x4770{x4767.tot + x4767.mul * x4769, x4767.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":82:3)
   MixState x4771{x4770.tot + x4770.mul * x4714, x4770.mul * (*mix)};
   // loc("zirgen/circuit/recursion/macro.cpp":40:11)
   auto x4772 = args[1][22];
@@ -9601,7 +9601,7 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x4783 = x4782 - x345;
   // loc("zirgen/circuit/recursion/macro.cpp":40:11)
   MixState x4784{x4781.tot + x4781.mul * x4783, x4781.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":82:3)
   MixState x4785{x4784.tot + x4784.mul * x4696, x4784.mul * (*mix)};
   // loc("zirgen/circuit/recursion/macro.cpp":40:11)
   auto x4786 = args[1][26];
@@ -9615,7 +9615,7 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x4790 = x4789 - x595;
   // loc("zirgen/circuit/recursion/macro.cpp":40:11)
   MixState x4791{x4788.tot + x4788.mul * x4790, x4788.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":82:3)
   MixState x4792{x4791.tot + x4791.mul * x4705, x4791.mul * (*mix)};
   // loc("zirgen/circuit/recursion/macro.cpp":40:11)
   auto x4793 = args[1][28];
@@ -9629,7 +9629,7 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x4797 = x4796 - x605;
   // loc("zirgen/circuit/recursion/macro.cpp":40:11)
   MixState x4798{x4795.tot + x4795.mul * x4797, x4795.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":82:3)
   MixState x4799{x4798.tot + x4798.mul * x4714, x4798.mul * (*mix)};
   // loc("zirgen/circuit/recursion/macro.cpp":40:11)
   auto x4800 = args[1][30];
@@ -9657,53 +9657,53 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x4811 = x1 - x284;
   // loc("zirgen/circuit/recursion/poseidon2.cpp":57:13)
   auto x4812 = x4810 + x4811;
-  // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":82:3)
   auto x4813 = x319 - x588;
-  // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":82:3)
   MixState x4814{x281.tot + x281.mul * x4813, x281.mul * (*mix)};
   // loc("zirgen/circuit/recursion/poseidon2.cpp":59:24)
   auto x4815 = x321 * x4812;
-  // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":82:3)
   auto x4816 = x329 - x589;
-  // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":82:3)
   MixState x4817{x4814.tot + x4814.mul * x4816, x4814.mul * (*mix)};
   // loc("zirgen/circuit/recursion/poseidon2.cpp":59:24)
   auto x4818 = x331 * x4812;
-  // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":82:3)
   auto x4819 = x339 - x828;
-  // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":82:3)
   MixState x4820{x4817.tot + x4817.mul * x4819, x4817.mul * (*mix)};
   // loc("zirgen/circuit/recursion/poseidon2.cpp":59:24)
   auto x4821 = x342 * x4812;
-  // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":82:3)
   auto x4822 = x591 - x859;
-  // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":82:3)
   MixState x4823{x4820.tot + x4820.mul * x4822, x4820.mul * (*mix)};
   // loc("zirgen/circuit/recursion/poseidon2.cpp":59:24)
   auto x4824 = x593 * x4812;
-  // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":82:3)
   auto x4825 = x601 - x860;
-  // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":82:3)
   MixState x4826{x4823.tot + x4823.mul * x4825, x4823.mul * (*mix)};
   // loc("zirgen/circuit/recursion/poseidon2.cpp":59:24)
   auto x4827 = x603 * x4812;
-  // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":82:3)
   auto x4828 = x611 - x861;
-  // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":82:3)
   MixState x4829{x4826.tot + x4826.mul * x4828, x4826.mul * (*mix)};
   // loc("zirgen/circuit/recursion/poseidon2.cpp":59:24)
   auto x4830 = x614 * x4812;
-  // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":82:3)
   auto x4831 = x863 - x1376;
-  // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":82:3)
   MixState x4832{x4829.tot + x4829.mul * x4831, x4829.mul * (*mix)};
   // loc("zirgen/circuit/recursion/poseidon2.cpp":59:24)
   auto x4833 = x865 * x4812;
   // loc("top(recursion::Top)/code(recursion::Code)/inst(Mux)/poseidon2_load(recursion::Poseidon2MemInst)/inputs[7](Reg)"("./zirgen/compiler/edsl/component.h":154:27))
   auto x4834 = args[0][20 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":82:3)
   auto x4835 = x873 - x4834;
-  // loc("zirgen/circuit/recursion/wom.cpp":80:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":82:3)
   MixState x4836{x4832.tot + x4832.mul * x4835, x4832.mul * (*mix)};
   // loc("zirgen/circuit/recursion/poseidon2.cpp":59:24)
   auto x4837 = x875 * x4812;
@@ -10471,337 +10471,337 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   MixState x5218{x4808.tot + x4809 * x5217.tot * x4808.mul, x4808.mul * x5217.mul};
   // loc("top(recursion::Top)/code(recursion::Code)/select(OneHot)/poseidon2_full(Reg)"("./zirgen/components/mux.h":49:25))
   auto x5219 = args[0][4 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":151:42))
+  // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":195:42))
   auto x5220 = args[2][92 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":151:42))
+  // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":195:42))
   auto x5221 = args[2][93 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":151:42))
+  // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":195:42))
   auto x5222 = args[2][94 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":151:42))
+  // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":195:42))
   auto x5223 = args[2][95 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":151:42))
+  // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":195:42))
   auto x5224 = args[2][96 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":151:42))
+  // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":195:42))
   auto x5225 = args[2][97 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":151:42))
+  // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":195:42))
   auto x5226 = args[2][98 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":151:42))
+  // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":195:42))
   auto x5227 = args[2][99 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":151:42))
+  // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":195:42))
   auto x5228 = args[2][100 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":151:42))
+  // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":195:42))
   auto x5229 = args[2][101 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":151:42))
+  // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":195:42))
   auto x5230 = args[2][102 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":151:42))
+  // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":195:42))
   auto x5231 = args[2][103 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":151:42))
+  // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":195:42))
   auto x5232 = args[2][104 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":151:42))
+  // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":195:42))
   auto x5233 = args[2][105 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":151:42))
+  // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":195:42))
   auto x5234 = args[2][106 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":151:42))
+  // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":195:42))
   auto x5235 = args[2][107 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":151:42))
+  // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":195:42))
   auto x5236 = args[2][108 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":151:42))
+  // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":195:42))
   auto x5237 = args[2][109 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":151:42))
+  // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":195:42))
   auto x5238 = args[2][110 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":151:42))
+  // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":195:42))
   auto x5239 = args[2][111 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":151:42))
+  // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":195:42))
   auto x5240 = args[2][112 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":151:42))
+  // loc("top(recursion::Top)/mux(Mux)/poseidon2_full(recursion::Poseidon2Full)/Reg"("zirgen/circuit/recursion/poseidon2.cpp":195:42))
   auto x5241 = args[2][113 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
   auto x5242 = x2511 * x2511;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
   auto x5243 = x5242 * x5242;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   auto x5244 = x319 - x5243;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   MixState x5245{x281.tot + x281.mul * x5244, x281.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5246 = x319 * x5242;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5247 = x5246 * x2511;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
   auto x5248 = x2512 * x2512;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
   auto x5249 = x5248 * x5248;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   auto x5250 = x321 - x5249;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   MixState x5251{x5245.tot + x5245.mul * x5250, x5245.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5252 = x321 * x5248;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5253 = x5252 * x2512;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
   auto x5254 = x5220 * x5220;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
   auto x5255 = x5254 * x5254;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   auto x5256 = x323 - x5255;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   MixState x5257{x5251.tot + x5251.mul * x5256, x5251.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5258 = x323 * x5254;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5259 = x5258 * x5220;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
   auto x5260 = x5221 * x5221;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
   auto x5261 = x5260 * x5260;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   auto x5262 = x325 - x5261;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   MixState x5263{x5257.tot + x5257.mul * x5262, x5257.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5264 = x325 * x5260;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5265 = x5264 * x5221;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
   auto x5266 = x5222 * x5222;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
   auto x5267 = x5266 * x5266;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   auto x5268 = x327 - x5267;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   MixState x5269{x5263.tot + x5263.mul * x5268, x5263.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5270 = x327 * x5266;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5271 = x5270 * x5222;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
   auto x5272 = x5223 * x5223;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
   auto x5273 = x5272 * x5272;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   auto x5274 = x329 - x5273;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   MixState x5275{x5269.tot + x5269.mul * x5274, x5269.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5276 = x329 * x5272;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5277 = x5276 * x5223;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
   auto x5278 = x5224 * x5224;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
   auto x5279 = x5278 * x5278;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   auto x5280 = x331 - x5279;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   MixState x5281{x5275.tot + x5275.mul * x5280, x5275.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5282 = x331 * x5278;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5283 = x5282 * x5224;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
   auto x5284 = x5225 * x5225;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
   auto x5285 = x5284 * x5284;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   auto x5286 = x333 - x5285;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   MixState x5287{x5281.tot + x5281.mul * x5286, x5281.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5288 = x333 * x5284;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5289 = x5288 * x5225;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
   auto x5290 = x5226 * x5226;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
   auto x5291 = x5290 * x5290;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   auto x5292 = x335 - x5291;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   MixState x5293{x5287.tot + x5287.mul * x5292, x5287.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5294 = x335 * x5290;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5295 = x5294 * x5226;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
   auto x5296 = x5227 * x5227;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
   auto x5297 = x5296 * x5296;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   auto x5298 = x337 - x5297;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   MixState x5299{x5293.tot + x5293.mul * x5298, x5293.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5300 = x337 * x5296;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5301 = x5300 * x5227;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
   auto x5302 = x5228 * x5228;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
   auto x5303 = x5302 * x5302;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   auto x5304 = x339 - x5303;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   MixState x5305{x5299.tot + x5299.mul * x5304, x5299.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5306 = x339 * x5302;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5307 = x5306 * x5228;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
   auto x5308 = x5229 * x5229;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
   auto x5309 = x5308 * x5308;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   auto x5310 = x342 - x5309;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   MixState x5311{x5305.tot + x5305.mul * x5310, x5305.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5312 = x342 * x5308;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5313 = x5312 * x5229;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
   auto x5314 = x5230 * x5230;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
   auto x5315 = x5314 * x5314;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   auto x5316 = x345 - x5315;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   MixState x5317{x5311.tot + x5311.mul * x5316, x5311.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5318 = x345 * x5314;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5319 = x5318 * x5230;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
   auto x5320 = x5231 * x5231;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
   auto x5321 = x5320 * x5320;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   auto x5322 = x348 - x5321;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   MixState x5323{x5317.tot + x5317.mul * x5322, x5317.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5324 = x348 * x5320;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5325 = x5324 * x5231;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
   auto x5326 = x5232 * x5232;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
   auto x5327 = x5326 * x5326;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   auto x5328 = x351 - x5327;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   MixState x5329{x5323.tot + x5323.mul * x5328, x5323.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5330 = x351 * x5326;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5331 = x5330 * x5232;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
   auto x5332 = x5233 * x5233;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
   auto x5333 = x5332 * x5332;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   auto x5334 = x591 - x5333;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   MixState x5335{x5329.tot + x5329.mul * x5334, x5329.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5336 = x591 * x5332;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5337 = x5336 * x5233;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
   auto x5338 = x5234 * x5234;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
   auto x5339 = x5338 * x5338;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   auto x5340 = x593 - x5339;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   MixState x5341{x5335.tot + x5335.mul * x5340, x5335.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5342 = x593 * x5338;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5343 = x5342 * x5234;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
   auto x5344 = x5235 * x5235;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
   auto x5345 = x5344 * x5344;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   auto x5346 = x595 - x5345;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   MixState x5347{x5341.tot + x5341.mul * x5346, x5341.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5348 = x595 * x5344;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5349 = x5348 * x5235;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
   auto x5350 = x5236 * x5236;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
   auto x5351 = x5350 * x5350;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   auto x5352 = x597 - x5351;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   MixState x5353{x5347.tot + x5347.mul * x5352, x5347.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5354 = x597 * x5350;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5355 = x5354 * x5236;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
   auto x5356 = x5237 * x5237;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
   auto x5357 = x5356 * x5356;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   auto x5358 = x599 - x5357;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   MixState x5359{x5353.tot + x5353.mul * x5358, x5353.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5360 = x599 * x5356;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5361 = x5360 * x5237;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
   auto x5362 = x5238 * x5238;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
   auto x5363 = x5362 * x5362;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   auto x5364 = x601 - x5363;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   MixState x5365{x5359.tot + x5359.mul * x5364, x5359.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5366 = x601 * x5362;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5367 = x5366 * x5238;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
   auto x5368 = x5239 * x5239;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
   auto x5369 = x5368 * x5368;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   auto x5370 = x603 - x5369;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   MixState x5371{x5365.tot + x5365.mul * x5370, x5365.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5372 = x603 * x5368;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5373 = x5372 * x5239;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
   auto x5374 = x5240 * x5240;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
   auto x5375 = x5374 * x5374;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   auto x5376 = x605 - x5375;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   MixState x5377{x5371.tot + x5371.mul * x5376, x5371.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5378 = x605 * x5374;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5379 = x5378 * x5240;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
   auto x5380 = x5241 * x5241;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
   auto x5381 = x5380 * x5380;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   auto x5382 = x607 - x5381;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   MixState x5383{x5377.tot + x5377.mul * x5382, x5377.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5384 = x607 * x5380;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5385 = x5384 * x5241;
   // loc("zirgen/circuit/recursion/poseidon2.cpp":16:12)
   auto x5386 = x5247 + x5253;
@@ -11035,773 +11035,773 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x5500 = x5473 + x5476;
   // loc("zirgen/circuit/recursion/poseidon2.cpp":42:14)
   auto x5501 = x5469 + x5477;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5502 = x284 * x68;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5503 = x315 * x69;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x5504 = x5502 + x5503;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5505 = x316 * x70;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x5506 = x5504 + x5505;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5507 = x317 * x71;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x5508 = x5506 + x5507;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5509 = x284 * x72;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5510 = x315 * x73;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x5511 = x5509 + x5510;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5512 = x316 * x74;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x5513 = x5511 + x5512;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5514 = x317 * x75;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x5515 = x5513 + x5514;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5516 = x284 * x76;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5517 = x315 * x77;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x5518 = x5516 + x5517;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5519 = x316 * x78;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x5520 = x5518 + x5519;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5521 = x317 * x79;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x5522 = x5520 + x5521;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5523 = x284 * x80;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5524 = x315 * x81;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x5525 = x5523 + x5524;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5526 = x316 * x82;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x5527 = x5525 + x5526;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5528 = x317 * x83;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x5529 = x5527 + x5528;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5530 = x284 * x84;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5531 = x315 * x85;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x5532 = x5530 + x5531;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5533 = x316 * x86;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x5534 = x5532 + x5533;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5535 = x317 * x87;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x5536 = x5534 + x5535;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5537 = x284 * x88;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5538 = x315 * x89;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x5539 = x5537 + x5538;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5540 = x316 * x90;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x5541 = x5539 + x5540;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5542 = x317 * x91;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x5543 = x5541 + x5542;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5544 = x284 * x92;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5545 = x315 * x93;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x5546 = x5544 + x5545;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5547 = x316 * x94;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x5548 = x5546 + x5547;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5549 = x317 * x95;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x5550 = x5548 + x5549;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5551 = x284 * x96;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5552 = x315 * x97;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x5553 = x5551 + x5552;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5554 = x316 * x98;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x5555 = x5553 + x5554;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5556 = x317 * x99;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x5557 = x5555 + x5556;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5558 = x284 * x100;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5559 = x315 * x101;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x5560 = x5558 + x5559;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5561 = x316 * x102;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x5562 = x5560 + x5561;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5563 = x317 * x103;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x5564 = x5562 + x5563;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5565 = x284 * x104;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5566 = x315 * x105;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x5567 = x5565 + x5566;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5568 = x316 * x106;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x5569 = x5567 + x5568;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5570 = x317 * x107;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x5571 = x5569 + x5570;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5572 = x284 * x108;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5573 = x315 * x109;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x5574 = x5572 + x5573;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5575 = x316 * x110;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x5576 = x5574 + x5575;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5577 = x317 * x111;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x5578 = x5576 + x5577;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5579 = x284 * x112;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5580 = x315 * x113;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x5581 = x5579 + x5580;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5582 = x316 * x114;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x5583 = x5581 + x5582;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5584 = x317 * x115;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x5585 = x5583 + x5584;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5586 = x284 * x116;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5587 = x315 * x117;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x5588 = x5586 + x5587;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5589 = x316 * x118;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x5590 = x5588 + x5589;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5591 = x317 * x119;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x5592 = x5590 + x5591;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5593 = x284 * x120;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5594 = x315 * x121;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x5595 = x5593 + x5594;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5596 = x316 * x122;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x5597 = x5595 + x5596;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5598 = x317 * x123;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x5599 = x5597 + x5598;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5600 = x284 * x124;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5601 = x315 * x125;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x5602 = x5600 + x5601;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5603 = x316 * x126;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x5604 = x5602 + x5603;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5605 = x317 * x127;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x5606 = x5604 + x5605;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5607 = x284 * x128;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5608 = x315 * x129;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x5609 = x5607 + x5608;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5610 = x316 * x130;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x5611 = x5609 + x5610;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5612 = x317 * x131;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x5613 = x5611 + x5612;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5614 = x284 * x132;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5615 = x315 * x133;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x5616 = x5614 + x5615;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5617 = x316 * x134;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x5618 = x5616 + x5617;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5619 = x317 * x135;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x5620 = x5618 + x5619;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5621 = x284 * x136;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5622 = x315 * x137;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x5623 = x5621 + x5622;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5624 = x316 * x138;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x5625 = x5623 + x5624;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5626 = x317 * x139;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x5627 = x5625 + x5626;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5628 = x284 * x140;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5629 = x315 * x141;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x5630 = x5628 + x5629;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5631 = x316 * x142;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x5632 = x5630 + x5631;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5633 = x317 * x143;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x5634 = x5632 + x5633;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5635 = x284 * x144;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5636 = x315 * x145;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x5637 = x5635 + x5636;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5638 = x316 * x146;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x5639 = x5637 + x5638;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5640 = x317 * x147;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x5641 = x5639 + x5640;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5642 = x284 * x148;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5643 = x315 * x149;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x5644 = x5642 + x5643;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5645 = x316 * x150;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x5646 = x5644 + x5645;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5647 = x317 * x151;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x5648 = x5646 + x5647;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5649 = x284 * x152;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5650 = x315 * x153;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x5651 = x5649 + x5650;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5652 = x316 * x154;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x5653 = x5651 + x5652;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5654 = x317 * x155;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x5655 = x5653 + x5654;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5656 = x284 * x156;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5657 = x315 * x157;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x5658 = x5656 + x5657;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5659 = x316 * x158;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x5660 = x5658 + x5659;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5661 = x317 * x159;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x5662 = x5660 + x5661;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5663 = x284 * x160;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5664 = x315 * x161;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x5665 = x5663 + x5664;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5666 = x316 * x162;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x5667 = x5665 + x5666;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x5668 = x317 * x163;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x5669 = x5667 + x5668;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":166:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":232:19)
   auto x5670 = x5478 + x5508;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":166:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":232:5)
   auto x5671 = x609 - x5670;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":166:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":232:5)
   MixState x5672{x5383.tot + x5383.mul * x5671, x5383.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
   auto x5673 = x609 * x609;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
   auto x5674 = x5673 * x5673;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   auto x5675 = x1168 - x5674;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   MixState x5676{x5672.tot + x5672.mul * x5675, x5672.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5677 = x1168 * x5673;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5678 = x5677 * x609;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":166:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":232:19)
   auto x5679 = x5479 + x5515;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":166:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":232:5)
   auto x5680 = x611 - x5679;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":166:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":232:5)
   MixState x5681{x5676.tot + x5676.mul * x5680, x5676.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
   auto x5682 = x611 * x611;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
   auto x5683 = x5682 * x5682;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   auto x5684 = x1174 - x5683;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   MixState x5685{x5681.tot + x5681.mul * x5684, x5681.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5686 = x1174 * x5682;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5687 = x5686 * x611;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":166:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":232:19)
   auto x5688 = x5480 + x5522;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":166:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":232:5)
   auto x5689 = x614 - x5688;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":166:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":232:5)
   MixState x5690{x5685.tot + x5685.mul * x5689, x5685.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
   auto x5691 = x614 * x614;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
   auto x5692 = x5691 * x5691;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   auto x5693 = x1177 - x5692;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   MixState x5694{x5690.tot + x5690.mul * x5693, x5690.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5695 = x1177 * x5691;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5696 = x5695 * x614;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":166:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":232:19)
   auto x5697 = x5481 + x5529;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":166:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":232:5)
   auto x5698 = x617 - x5697;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":166:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":232:5)
   MixState x5699{x5694.tot + x5694.mul * x5698, x5694.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
   auto x5700 = x617 * x617;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
   auto x5701 = x5700 * x5700;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   auto x5702 = x1183 - x5701;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   MixState x5703{x5699.tot + x5699.mul * x5702, x5699.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5704 = x1183 * x5700;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5705 = x5704 * x617;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":166:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":232:19)
   auto x5706 = x5482 + x5536;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":166:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":232:5)
   auto x5707 = x620 - x5706;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":166:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":232:5)
   MixState x5708{x5703.tot + x5703.mul * x5707, x5703.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
   auto x5709 = x620 * x620;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
   auto x5710 = x5709 * x5709;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   auto x5711 = x1186 - x5710;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   MixState x5712{x5708.tot + x5708.mul * x5711, x5708.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5713 = x1186 * x5709;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5714 = x5713 * x620;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":166:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":232:19)
   auto x5715 = x5483 + x5543;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":166:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":232:5)
   auto x5716 = x623 - x5715;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":166:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":232:5)
   MixState x5717{x5712.tot + x5712.mul * x5716, x5712.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
   auto x5718 = x623 * x623;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
   auto x5719 = x5718 * x5718;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   auto x5720 = x1192 - x5719;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   MixState x5721{x5717.tot + x5717.mul * x5720, x5717.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5722 = x1192 * x5718;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5723 = x5722 * x623;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":166:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":232:19)
   auto x5724 = x5484 + x5550;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":166:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":232:5)
   auto x5725 = x863 - x5724;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":166:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":232:5)
   MixState x5726{x5721.tot + x5721.mul * x5725, x5721.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
   auto x5727 = x863 * x863;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
   auto x5728 = x5727 * x5727;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   auto x5729 = x1195 - x5728;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   MixState x5730{x5726.tot + x5726.mul * x5729, x5726.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5731 = x1195 * x5727;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5732 = x5731 * x863;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":166:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":232:19)
   auto x5733 = x5485 + x5557;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":166:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":232:5)
   auto x5734 = x865 - x5733;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":166:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":232:5)
   MixState x5735{x5730.tot + x5730.mul * x5734, x5730.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
   auto x5736 = x865 * x865;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
   auto x5737 = x5736 * x5736;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   auto x5738 = x1201 - x5737;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   MixState x5739{x5735.tot + x5735.mul * x5738, x5735.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5740 = x1201 * x5736;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5741 = x5740 * x865;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":166:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":232:19)
   auto x5742 = x5486 + x5564;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":166:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":232:5)
   auto x5743 = x867 - x5742;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":166:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":232:5)
   MixState x5744{x5739.tot + x5739.mul * x5743, x5739.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
   auto x5745 = x867 * x867;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
   auto x5746 = x5745 * x5745;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   auto x5747 = x1204 - x5746;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   MixState x5748{x5744.tot + x5744.mul * x5747, x5744.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5749 = x1204 * x5745;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5750 = x5749 * x867;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":166:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":232:19)
   auto x5751 = x5487 + x5571;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":166:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":232:5)
   auto x5752 = x869 - x5751;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":166:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":232:5)
   MixState x5753{x5748.tot + x5748.mul * x5752, x5748.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
   auto x5754 = x869 * x869;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
   auto x5755 = x5754 * x5754;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   auto x5756 = x1210 - x5755;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   MixState x5757{x5753.tot + x5753.mul * x5756, x5753.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5758 = x1210 * x5754;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5759 = x5758 * x869;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":166:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":232:19)
   auto x5760 = x5488 + x5578;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":166:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":232:5)
   auto x5761 = x871 - x5760;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":166:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":232:5)
   MixState x5762{x5757.tot + x5757.mul * x5761, x5757.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
   auto x5763 = x871 * x871;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
   auto x5764 = x5763 * x5763;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   auto x5765 = x1213 - x5764;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   MixState x5766{x5762.tot + x5762.mul * x5765, x5762.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5767 = x1213 * x5763;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5768 = x5767 * x871;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":166:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":232:19)
   auto x5769 = x5489 + x5585;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":166:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":232:5)
   auto x5770 = x873 - x5769;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":166:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":232:5)
   MixState x5771{x5766.tot + x5766.mul * x5770, x5766.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
   auto x5772 = x873 * x873;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
   auto x5773 = x5772 * x5772;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   auto x5774 = x1219 - x5773;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   MixState x5775{x5771.tot + x5771.mul * x5774, x5771.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5776 = x1219 * x5772;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5777 = x5776 * x873;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":166:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":232:19)
   auto x5778 = x5490 + x5592;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":166:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":232:5)
   auto x5779 = x875 - x5778;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":166:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":232:5)
   MixState x5780{x5775.tot + x5775.mul * x5779, x5775.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
   auto x5781 = x875 * x875;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
   auto x5782 = x5781 * x5781;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   auto x5783 = x1222 - x5782;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   MixState x5784{x5780.tot + x5780.mul * x5783, x5780.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5785 = x1222 * x5781;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5786 = x5785 * x875;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":166:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":232:19)
   auto x5787 = x5491 + x5599;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":166:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":232:5)
   auto x5788 = x877 - x5787;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":166:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":232:5)
   MixState x5789{x5784.tot + x5784.mul * x5788, x5784.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
   auto x5790 = x877 * x877;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
   auto x5791 = x5790 * x5790;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   auto x5792 = x1228 - x5791;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   MixState x5793{x5789.tot + x5789.mul * x5792, x5789.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5794 = x1228 * x5790;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5795 = x5794 * x877;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":166:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":232:19)
   auto x5796 = x5492 + x5606;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":166:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":232:5)
   auto x5797 = x879 - x5796;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":166:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":232:5)
   MixState x5798{x5793.tot + x5793.mul * x5797, x5793.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
   auto x5799 = x879 * x879;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
   auto x5800 = x5799 * x5799;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   auto x5801 = x1231 - x5800;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   MixState x5802{x5798.tot + x5798.mul * x5801, x5798.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5803 = x1231 * x5799;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5804 = x5803 * x879;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":166:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":232:19)
   auto x5805 = x5493 + x5613;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":166:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":232:5)
   auto x5806 = x881 - x5805;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":166:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":232:5)
   MixState x5807{x5802.tot + x5802.mul * x5806, x5802.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
   auto x5808 = x881 * x881;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
   auto x5809 = x5808 * x5808;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   auto x5810 = x1237 - x5809;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   MixState x5811{x5807.tot + x5807.mul * x5810, x5807.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5812 = x1237 * x5808;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5813 = x5812 * x881;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":166:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":232:19)
   auto x5814 = x5494 + x5620;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":166:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":232:5)
   auto x5815 = x883 - x5814;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":166:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":232:5)
   MixState x5816{x5811.tot + x5811.mul * x5815, x5811.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
   auto x5817 = x883 * x883;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
   auto x5818 = x5817 * x5817;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   auto x5819 = x1240 - x5818;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   MixState x5820{x5816.tot + x5816.mul * x5819, x5816.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5821 = x1240 * x5817;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5822 = x5821 * x883;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":166:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":232:19)
   auto x5823 = x5495 + x5627;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":166:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":232:5)
   auto x5824 = x886 - x5823;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":166:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":232:5)
   MixState x5825{x5820.tot + x5820.mul * x5824, x5820.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
   auto x5826 = x886 * x886;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
   auto x5827 = x5826 * x5826;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   auto x5828 = x1246 - x5827;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   MixState x5829{x5825.tot + x5825.mul * x5828, x5825.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5830 = x1246 * x5826;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5831 = x5830 * x886;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":166:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":232:19)
   auto x5832 = x5496 + x5634;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":166:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":232:5)
   auto x5833 = x889 - x5832;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":166:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":232:5)
   MixState x5834{x5829.tot + x5829.mul * x5833, x5829.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
   auto x5835 = x889 * x889;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
   auto x5836 = x5835 * x5835;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   auto x5837 = x1249 - x5836;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   MixState x5838{x5834.tot + x5834.mul * x5837, x5834.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5839 = x1249 * x5835;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5840 = x5839 * x889;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":166:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":232:19)
   auto x5841 = x5497 + x5641;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":166:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":232:5)
   auto x5842 = x892 - x5841;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":166:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":232:5)
   MixState x5843{x5838.tot + x5838.mul * x5842, x5838.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
   auto x5844 = x892 * x892;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
   auto x5845 = x5844 * x5844;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   auto x5846 = x1255 - x5845;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   MixState x5847{x5843.tot + x5843.mul * x5846, x5843.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5848 = x1255 * x5844;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5849 = x5848 * x892;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":166:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":232:19)
   auto x5850 = x5498 + x5648;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":166:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":232:5)
   auto x5851 = x895 - x5850;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":166:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":232:5)
   MixState x5852{x5847.tot + x5847.mul * x5851, x5847.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
   auto x5853 = x895 * x895;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
   auto x5854 = x5853 * x5853;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   auto x5855 = x1258 - x5854;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   MixState x5856{x5852.tot + x5852.mul * x5855, x5852.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5857 = x1258 * x5853;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5858 = x5857 * x895;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":166:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":232:19)
   auto x5859 = x5499 + x5655;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":166:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":232:5)
   auto x5860 = x1156 - x5859;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":166:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":232:5)
   MixState x5861{x5856.tot + x5856.mul * x5860, x5856.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
   auto x5862 = x1156 * x1156;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
   auto x5863 = x5862 * x5862;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   auto x5864 = x1264 - x5863;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   MixState x5865{x5861.tot + x5861.mul * x5864, x5861.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5866 = x1264 * x5862;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5867 = x5866 * x1156;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":166:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":232:19)
   auto x5868 = x5500 + x5662;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":166:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":232:5)
   auto x5869 = x1159 - x5868;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":166:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":232:5)
   MixState x5870{x5865.tot + x5865.mul * x5869, x5865.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
   auto x5871 = x1159 * x1159;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
   auto x5872 = x5871 * x5871;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   auto x5873 = x1267 - x5872;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   MixState x5874{x5870.tot + x5870.mul * x5873, x5870.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5875 = x1267 * x5871;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5876 = x5875 * x1159;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":166:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":232:19)
   auto x5877 = x5501 + x5669;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":166:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":232:5)
   auto x5878 = x1165 - x5877;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":166:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":232:5)
   MixState x5879{x5874.tot + x5874.mul * x5878, x5874.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
   auto x5880 = x1165 * x1165;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
   auto x5881 = x5880 * x5880;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   auto x5882 = x1273 - x5881;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   MixState x5883{x5879.tot + x5879.mul * x5882, x5879.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5884 = x1273 * x5880;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x5885 = x5884 * x1165;
   // loc("zirgen/circuit/recursion/poseidon2.cpp":16:12)
   auto x5886 = x5678 + x5687;
@@ -12035,3899 +12035,3899 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x6000 = x5973 + x5976;
   // loc("zirgen/circuit/recursion/poseidon2.cpp":42:14)
   auto x6001 = x5969 + x5977;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x6002 = x284 * x164;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x6003 = x316 * x165;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x6004 = x6002 + x6003;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x6005 = x284 * x166;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x6006 = x316 * x167;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x6007 = x6005 + x6006;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x6008 = x284 * x168;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x6009 = x316 * x169;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x6010 = x6008 + x6009;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x6011 = x284 * x170;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x6012 = x316 * x171;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x6013 = x6011 + x6012;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x6014 = x284 * x172;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x6015 = x316 * x173;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x6016 = x6014 + x6015;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x6017 = x284 * x174;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x6018 = x316 * x175;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x6019 = x6017 + x6018;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x6020 = x284 * x176;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x6021 = x316 * x177;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x6022 = x6020 + x6021;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x6023 = x284 * x178;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x6024 = x316 * x179;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x6025 = x6023 + x6024;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x6026 = x284 * x180;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x6027 = x316 * x181;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x6028 = x6026 + x6027;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x6029 = x284 * x182;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x6030 = x316 * x183;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x6031 = x6029 + x6030;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x6032 = x284 * x184;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x6033 = x316 * x185;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x6034 = x6032 + x6033;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x6035 = x284 * x186;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x6036 = x316 * x187;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x6037 = x6035 + x6036;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x6038 = x284 * x188;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x6039 = x316 * x189;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x6040 = x6038 + x6039;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x6041 = x284 * x190;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x6042 = x316 * x191;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x6043 = x6041 + x6042;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x6044 = x284 * x192;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x6045 = x316 * x193;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x6046 = x6044 + x6045;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x6047 = x284 * x194;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x6048 = x316 * x195;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x6049 = x6047 + x6048;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x6050 = x284 * x196;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x6051 = x316 * x197;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x6052 = x6050 + x6051;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x6053 = x284 * x198;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x6054 = x316 * x199;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x6055 = x6053 + x6054;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x6056 = x284 * x200;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x6057 = x316 * x201;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x6058 = x6056 + x6057;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x6059 = x284 * x202;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x6060 = x316 * x203;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x6061 = x6059 + x6060;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x6062 = x284 * x204;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x6063 = x316 * x205;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x6064 = x6062 + x6063;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x6065 = x284 * x206;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x6066 = x316 * x207;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x6067 = x6065 + x6066;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x6068 = x284 * x208;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x6069 = x316 * x209;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x6070 = x6068 + x6069;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x6071 = x284 * x210;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:19)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:19)
   auto x6072 = x316 * x211;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":138:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":182:13)
   auto x6073 = x6071 + x6072;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":179:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":267:20)
   auto x6074 = x5978 + x6004;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":179:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":267:5)
   auto x6075 = x318 - x6074;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":179:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":267:5)
   MixState x6076{x5883.tot + x5883.mul * x6075, x5883.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":179:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":267:20)
   auto x6077 = x5979 + x6007;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":179:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":267:5)
   auto x6078 = x285 - x6077;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":179:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":267:5)
   MixState x6079{x6076.tot + x6076.mul * x6078, x6076.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":179:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":267:20)
   auto x6080 = x5980 + x6010;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":179:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":267:5)
   auto x6081 = x286 - x6080;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":179:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":267:5)
   MixState x6082{x6079.tot + x6079.mul * x6081, x6079.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":179:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":267:20)
   auto x6083 = x5981 + x6013;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":179:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":267:5)
   auto x6084 = x289 - x6083;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":179:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":267:5)
   MixState x6085{x6082.tot + x6082.mul * x6084, x6082.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":179:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":267:20)
   auto x6086 = x5982 + x6016;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":179:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":267:5)
   auto x6087 = x292 - x6086;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":179:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":267:5)
   MixState x6088{x6085.tot + x6085.mul * x6087, x6085.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":179:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":267:20)
   auto x6089 = x5983 + x6019;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":179:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":267:5)
   auto x6090 = x295 - x6089;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":179:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":267:5)
   MixState x6091{x6088.tot + x6088.mul * x6090, x6088.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":179:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":267:20)
   auto x6092 = x5984 + x6022;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":179:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":267:5)
   auto x6093 = x298 - x6092;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":179:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":267:5)
   MixState x6094{x6091.tot + x6091.mul * x6093, x6091.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":179:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":267:20)
   auto x6095 = x5985 + x6025;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":179:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":267:5)
   auto x6096 = x301 - x6095;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":179:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":267:5)
   MixState x6097{x6094.tot + x6094.mul * x6096, x6094.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":179:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":267:20)
   auto x6098 = x5986 + x6028;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":179:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":267:5)
   auto x6099 = x304 - x6098;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":179:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":267:5)
   MixState x6100{x6097.tot + x6097.mul * x6099, x6097.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":179:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":267:20)
   auto x6101 = x5987 + x6031;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":179:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":267:5)
   auto x6102 = x307 - x6101;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":179:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":267:5)
   MixState x6103{x6100.tot + x6100.mul * x6102, x6100.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":179:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":267:20)
   auto x6104 = x5988 + x6034;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":179:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":267:5)
   auto x6105 = x310 - x6104;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":179:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":267:5)
   MixState x6106{x6103.tot + x6103.mul * x6105, x6103.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":179:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":267:20)
   auto x6107 = x5989 + x6037;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":179:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":267:5)
   auto x6108 = x473 - x6107;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":179:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":267:5)
   MixState x6109{x6106.tot + x6106.mul * x6108, x6106.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":179:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":267:20)
   auto x6110 = x5990 + x6040;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":179:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":267:5)
   auto x6111 = x590 - x6110;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":179:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":267:5)
   MixState x6112{x6109.tot + x6109.mul * x6111, x6109.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":179:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":267:20)
   auto x6113 = x5991 + x6043;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":179:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":267:5)
   auto x6114 = x557 - x6113;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":179:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":267:5)
   MixState x6115{x6112.tot + x6112.mul * x6114, x6112.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":179:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":267:20)
   auto x6116 = x5992 + x6046;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":179:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":267:5)
   auto x6117 = x558 - x6116;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":179:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":267:5)
   MixState x6118{x6115.tot + x6115.mul * x6117, x6115.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":179:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":267:20)
   auto x6119 = x5993 + x6049;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":179:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":267:5)
   auto x6120 = x561 - x6119;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":179:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":267:5)
   MixState x6121{x6118.tot + x6118.mul * x6120, x6118.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":179:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":267:20)
   auto x6122 = x5994 + x6052;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":179:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":267:5)
   auto x6123 = x564 - x6122;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":179:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":267:5)
   MixState x6124{x6121.tot + x6121.mul * x6123, x6121.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":179:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":267:20)
   auto x6125 = x5995 + x6055;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":179:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":267:5)
   auto x6126 = x567 - x6125;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":179:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":267:5)
   MixState x6127{x6124.tot + x6124.mul * x6126, x6124.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":179:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":267:20)
   auto x6128 = x5996 + x6058;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":179:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":267:5)
   auto x6129 = x570 - x6128;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":179:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":267:5)
   MixState x6130{x6127.tot + x6127.mul * x6129, x6127.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":179:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":267:20)
   auto x6131 = x5997 + x6061;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":179:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":267:5)
   auto x6132 = x573 - x6131;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":179:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":267:5)
   MixState x6133{x6130.tot + x6130.mul * x6132, x6130.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":179:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":267:20)
   auto x6134 = x5998 + x6064;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":179:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":267:5)
   auto x6135 = x576 - x6134;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":179:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":267:5)
   MixState x6136{x6133.tot + x6133.mul * x6135, x6133.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":179:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":267:20)
   auto x6137 = x5999 + x6067;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":179:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":267:5)
   auto x6138 = x579 - x6137;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":179:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":267:5)
   MixState x6139{x6136.tot + x6136.mul * x6138, x6136.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":179:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":267:20)
   auto x6140 = x6000 + x6070;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":179:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":267:5)
   auto x6141 = x582 - x6140;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":179:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":267:5)
   MixState x6142{x6139.tot + x6139.mul * x6141, x6139.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":179:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":267:20)
   auto x6143 = x6001 + x6073;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":179:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":267:5)
   auto x6144 = x745 - x6143;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":179:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":267:5)
   MixState x6145{x6142.tot + x6142.mul * x6144, x6142.mul * (*mix)};
   // loc("./zirgen/components/mux.h":49:25)
   MixState x6146{x5218.tot + x5219 * x6145.tot * x5218.mul, x5218.mul * x6145.mul};
   // loc("top(recursion::Top)/code(recursion::Code)/select(OneHot)/poseidon2_partial(Reg)"("./zirgen/components/mux.h":49:25))
   auto x6147 = args[0][5 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":197:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":285:3)
   auto x6148 = x319 - x2511;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":197:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":285:3)
   MixState x6149{x281.tot + x281.mul * x6148, x281.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":202:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":290:13)
   auto x6150 = x319 + x212;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
   auto x6151 = x6150 * x6150;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
   auto x6152 = x6151 * x6151;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   auto x6153 = x609 - x6152;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   MixState x6154{x6149.tot + x6149.mul * x6153, x6149.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x6155 = x609 * x6151;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x6156 = x6155 * x6150;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6157 = x6156 + x2512;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6158 = x6157 + x5220;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6159 = x6158 + x5221;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6160 = x6159 + x5222;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6161 = x6160 + x5223;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6162 = x6161 + x5224;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6163 = x6162 + x5225;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6164 = x6163 + x5226;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6165 = x6164 + x5227;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6166 = x6165 + x5228;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6167 = x6166 + x5229;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6168 = x6167 + x5230;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6169 = x6168 + x5231;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6170 = x6169 + x5232;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6171 = x6170 + x5233;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6172 = x6171 + x5234;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6173 = x6172 + x5235;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6174 = x6173 + x5236;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6175 = x6174 + x5237;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6176 = x6175 + x5238;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6177 = x6176 + x5239;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6178 = x6177 + x5240;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6179 = x6178 + x5241;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6180 = x6156 * x213;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6181 = x6179 + x6180;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6182 = x2512 * x214;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6183 = x6179 + x6182;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6184 = x5220 * x215;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6185 = x6179 + x6184;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6186 = x5221 * x216;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6187 = x6179 + x6186;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6188 = x5222 * x217;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6189 = x6179 + x6188;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6190 = x5223 * x218;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6191 = x6179 + x6190;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6192 = x5224 * x219;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6193 = x6179 + x6192;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6194 = x5225 * x220;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6195 = x6179 + x6194;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6196 = x5226 * x221;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6197 = x6179 + x6196;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6198 = x5227 * x222;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6199 = x6179 + x6198;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6200 = x5228 * x223;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6201 = x6179 + x6200;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6202 = x5229 * x224;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6203 = x6179 + x6202;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6204 = x5230 * x225;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6205 = x6179 + x6204;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6206 = x5231 * x226;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6207 = x6179 + x6206;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6208 = x5232 * x227;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6209 = x6179 + x6208;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6210 = x5233 * x228;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6211 = x6179 + x6210;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6212 = x5234 * x229;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6213 = x6179 + x6212;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6214 = x5235 * x230;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6215 = x6179 + x6214;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6216 = x5236 * x231;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6217 = x6179 + x6216;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6218 = x5237 * x232;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6219 = x6179 + x6218;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6220 = x5238 * x233;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6221 = x6179 + x6220;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6222 = x5239 * x234;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6223 = x6179 + x6222;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6224 = x5240 * x235;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6225 = x6179 + x6224;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6226 = x5241 * x236;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6227 = x6179 + x6226;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":207:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":295:5)
   auto x6228 = x321 - x6181;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":207:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":295:5)
   MixState x6229{x6154.tot + x6154.mul * x6228, x6154.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":202:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":290:13)
   auto x6230 = x321 + x237;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
   auto x6231 = x6230 * x6230;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
   auto x6232 = x6231 * x6231;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   auto x6233 = x611 - x6232;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   MixState x6234{x6229.tot + x6229.mul * x6233, x6229.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x6235 = x611 * x6231;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x6236 = x6235 * x6230;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6237 = x6236 + x6183;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6238 = x6237 + x6185;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6239 = x6238 + x6187;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6240 = x6239 + x6189;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6241 = x6240 + x6191;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6242 = x6241 + x6193;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6243 = x6242 + x6195;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6244 = x6243 + x6197;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6245 = x6244 + x6199;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6246 = x6245 + x6201;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6247 = x6246 + x6203;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6248 = x6247 + x6205;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6249 = x6248 + x6207;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6250 = x6249 + x6209;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6251 = x6250 + x6211;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6252 = x6251 + x6213;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6253 = x6252 + x6215;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6254 = x6253 + x6217;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6255 = x6254 + x6219;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6256 = x6255 + x6221;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6257 = x6256 + x6223;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6258 = x6257 + x6225;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6259 = x6258 + x6227;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6260 = x6236 * x213;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6261 = x6259 + x6260;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6262 = x6183 * x214;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6263 = x6259 + x6262;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6264 = x6185 * x215;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6265 = x6259 + x6264;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6266 = x6187 * x216;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6267 = x6259 + x6266;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6268 = x6189 * x217;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6269 = x6259 + x6268;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6270 = x6191 * x218;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6271 = x6259 + x6270;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6272 = x6193 * x219;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6273 = x6259 + x6272;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6274 = x6195 * x220;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6275 = x6259 + x6274;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6276 = x6197 * x221;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6277 = x6259 + x6276;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6278 = x6199 * x222;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6279 = x6259 + x6278;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6280 = x6201 * x223;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6281 = x6259 + x6280;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6282 = x6203 * x224;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6283 = x6259 + x6282;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6284 = x6205 * x225;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6285 = x6259 + x6284;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6286 = x6207 * x226;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6287 = x6259 + x6286;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6288 = x6209 * x227;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6289 = x6259 + x6288;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6290 = x6211 * x228;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6291 = x6259 + x6290;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6292 = x6213 * x229;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6293 = x6259 + x6292;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6294 = x6215 * x230;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6295 = x6259 + x6294;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6296 = x6217 * x231;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6297 = x6259 + x6296;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6298 = x6219 * x232;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6299 = x6259 + x6298;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6300 = x6221 * x233;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6301 = x6259 + x6300;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6302 = x6223 * x234;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6303 = x6259 + x6302;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6304 = x6225 * x235;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6305 = x6259 + x6304;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6306 = x6227 * x236;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6307 = x6259 + x6306;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":207:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":295:5)
   auto x6308 = x323 - x6261;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":207:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":295:5)
   MixState x6309{x6234.tot + x6234.mul * x6308, x6234.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":202:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":290:13)
   auto x6310 = x323 + x238;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
   auto x6311 = x6310 * x6310;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
   auto x6312 = x6311 * x6311;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   auto x6313 = x614 - x6312;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   MixState x6314{x6309.tot + x6309.mul * x6313, x6309.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x6315 = x614 * x6311;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x6316 = x6315 * x6310;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6317 = x6316 + x6263;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6318 = x6317 + x6265;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6319 = x6318 + x6267;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6320 = x6319 + x6269;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6321 = x6320 + x6271;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6322 = x6321 + x6273;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6323 = x6322 + x6275;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6324 = x6323 + x6277;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6325 = x6324 + x6279;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6326 = x6325 + x6281;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6327 = x6326 + x6283;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6328 = x6327 + x6285;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6329 = x6328 + x6287;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6330 = x6329 + x6289;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6331 = x6330 + x6291;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6332 = x6331 + x6293;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6333 = x6332 + x6295;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6334 = x6333 + x6297;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6335 = x6334 + x6299;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6336 = x6335 + x6301;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6337 = x6336 + x6303;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6338 = x6337 + x6305;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6339 = x6338 + x6307;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6340 = x6316 * x213;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6341 = x6339 + x6340;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6342 = x6263 * x214;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6343 = x6339 + x6342;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6344 = x6265 * x215;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6345 = x6339 + x6344;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6346 = x6267 * x216;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6347 = x6339 + x6346;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6348 = x6269 * x217;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6349 = x6339 + x6348;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6350 = x6271 * x218;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6351 = x6339 + x6350;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6352 = x6273 * x219;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6353 = x6339 + x6352;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6354 = x6275 * x220;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6355 = x6339 + x6354;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6356 = x6277 * x221;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6357 = x6339 + x6356;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6358 = x6279 * x222;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6359 = x6339 + x6358;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6360 = x6281 * x223;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6361 = x6339 + x6360;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6362 = x6283 * x224;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6363 = x6339 + x6362;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6364 = x6285 * x225;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6365 = x6339 + x6364;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6366 = x6287 * x226;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6367 = x6339 + x6366;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6368 = x6289 * x227;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6369 = x6339 + x6368;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6370 = x6291 * x228;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6371 = x6339 + x6370;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6372 = x6293 * x229;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6373 = x6339 + x6372;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6374 = x6295 * x230;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6375 = x6339 + x6374;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6376 = x6297 * x231;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6377 = x6339 + x6376;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6378 = x6299 * x232;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6379 = x6339 + x6378;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6380 = x6301 * x233;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6381 = x6339 + x6380;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6382 = x6303 * x234;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6383 = x6339 + x6382;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6384 = x6305 * x235;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6385 = x6339 + x6384;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6386 = x6307 * x236;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6387 = x6339 + x6386;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":207:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":295:5)
   auto x6388 = x325 - x6341;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":207:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":295:5)
   MixState x6389{x6314.tot + x6314.mul * x6388, x6314.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":202:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":290:13)
   auto x6390 = x325 + x239;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
   auto x6391 = x6390 * x6390;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
   auto x6392 = x6391 * x6391;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   auto x6393 = x617 - x6392;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   MixState x6394{x6389.tot + x6389.mul * x6393, x6389.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x6395 = x617 * x6391;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x6396 = x6395 * x6390;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6397 = x6396 + x6343;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6398 = x6397 + x6345;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6399 = x6398 + x6347;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6400 = x6399 + x6349;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6401 = x6400 + x6351;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6402 = x6401 + x6353;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6403 = x6402 + x6355;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6404 = x6403 + x6357;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6405 = x6404 + x6359;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6406 = x6405 + x6361;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6407 = x6406 + x6363;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6408 = x6407 + x6365;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6409 = x6408 + x6367;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6410 = x6409 + x6369;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6411 = x6410 + x6371;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6412 = x6411 + x6373;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6413 = x6412 + x6375;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6414 = x6413 + x6377;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6415 = x6414 + x6379;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6416 = x6415 + x6381;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6417 = x6416 + x6383;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6418 = x6417 + x6385;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6419 = x6418 + x6387;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6420 = x6396 * x213;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6421 = x6419 + x6420;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6422 = x6343 * x214;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6423 = x6419 + x6422;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6424 = x6345 * x215;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6425 = x6419 + x6424;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6426 = x6347 * x216;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6427 = x6419 + x6426;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6428 = x6349 * x217;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6429 = x6419 + x6428;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6430 = x6351 * x218;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6431 = x6419 + x6430;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6432 = x6353 * x219;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6433 = x6419 + x6432;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6434 = x6355 * x220;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6435 = x6419 + x6434;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6436 = x6357 * x221;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6437 = x6419 + x6436;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6438 = x6359 * x222;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6439 = x6419 + x6438;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6440 = x6361 * x223;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6441 = x6419 + x6440;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6442 = x6363 * x224;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6443 = x6419 + x6442;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6444 = x6365 * x225;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6445 = x6419 + x6444;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6446 = x6367 * x226;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6447 = x6419 + x6446;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6448 = x6369 * x227;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6449 = x6419 + x6448;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6450 = x6371 * x228;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6451 = x6419 + x6450;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6452 = x6373 * x229;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6453 = x6419 + x6452;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6454 = x6375 * x230;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6455 = x6419 + x6454;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6456 = x6377 * x231;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6457 = x6419 + x6456;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6458 = x6379 * x232;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6459 = x6419 + x6458;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6460 = x6381 * x233;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6461 = x6419 + x6460;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6462 = x6383 * x234;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6463 = x6419 + x6462;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6464 = x6385 * x235;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6465 = x6419 + x6464;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6466 = x6387 * x236;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6467 = x6419 + x6466;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":207:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":295:5)
   auto x6468 = x327 - x6421;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":207:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":295:5)
   MixState x6469{x6394.tot + x6394.mul * x6468, x6394.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":202:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":290:13)
   auto x6470 = x327 + x240;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
   auto x6471 = x6470 * x6470;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
   auto x6472 = x6471 * x6471;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   auto x6473 = x620 - x6472;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   MixState x6474{x6469.tot + x6469.mul * x6473, x6469.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x6475 = x620 * x6471;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x6476 = x6475 * x6470;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6477 = x6476 + x6423;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6478 = x6477 + x6425;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6479 = x6478 + x6427;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6480 = x6479 + x6429;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6481 = x6480 + x6431;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6482 = x6481 + x6433;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6483 = x6482 + x6435;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6484 = x6483 + x6437;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6485 = x6484 + x6439;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6486 = x6485 + x6441;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6487 = x6486 + x6443;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6488 = x6487 + x6445;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6489 = x6488 + x6447;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6490 = x6489 + x6449;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6491 = x6490 + x6451;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6492 = x6491 + x6453;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6493 = x6492 + x6455;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6494 = x6493 + x6457;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6495 = x6494 + x6459;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6496 = x6495 + x6461;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6497 = x6496 + x6463;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6498 = x6497 + x6465;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6499 = x6498 + x6467;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6500 = x6476 * x213;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6501 = x6499 + x6500;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6502 = x6423 * x214;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6503 = x6499 + x6502;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6504 = x6425 * x215;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6505 = x6499 + x6504;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6506 = x6427 * x216;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6507 = x6499 + x6506;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6508 = x6429 * x217;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6509 = x6499 + x6508;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6510 = x6431 * x218;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6511 = x6499 + x6510;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6512 = x6433 * x219;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6513 = x6499 + x6512;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6514 = x6435 * x220;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6515 = x6499 + x6514;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6516 = x6437 * x221;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6517 = x6499 + x6516;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6518 = x6439 * x222;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6519 = x6499 + x6518;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6520 = x6441 * x223;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6521 = x6499 + x6520;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6522 = x6443 * x224;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6523 = x6499 + x6522;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6524 = x6445 * x225;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6525 = x6499 + x6524;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6526 = x6447 * x226;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6527 = x6499 + x6526;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6528 = x6449 * x227;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6529 = x6499 + x6528;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6530 = x6451 * x228;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6531 = x6499 + x6530;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6532 = x6453 * x229;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6533 = x6499 + x6532;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6534 = x6455 * x230;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6535 = x6499 + x6534;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6536 = x6457 * x231;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6537 = x6499 + x6536;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6538 = x6459 * x232;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6539 = x6499 + x6538;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6540 = x6461 * x233;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6541 = x6499 + x6540;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6542 = x6463 * x234;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6543 = x6499 + x6542;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6544 = x6465 * x235;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6545 = x6499 + x6544;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6546 = x6467 * x236;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6547 = x6499 + x6546;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":207:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":295:5)
   auto x6548 = x329 - x6501;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":207:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":295:5)
   MixState x6549{x6474.tot + x6474.mul * x6548, x6474.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":202:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":290:13)
   auto x6550 = x329 + x241;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
   auto x6551 = x6550 * x6550;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
   auto x6552 = x6551 * x6551;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   auto x6553 = x623 - x6552;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   MixState x6554{x6549.tot + x6549.mul * x6553, x6549.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x6555 = x623 * x6551;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x6556 = x6555 * x6550;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6557 = x6556 + x6503;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6558 = x6557 + x6505;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6559 = x6558 + x6507;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6560 = x6559 + x6509;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6561 = x6560 + x6511;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6562 = x6561 + x6513;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6563 = x6562 + x6515;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6564 = x6563 + x6517;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6565 = x6564 + x6519;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6566 = x6565 + x6521;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6567 = x6566 + x6523;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6568 = x6567 + x6525;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6569 = x6568 + x6527;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6570 = x6569 + x6529;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6571 = x6570 + x6531;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6572 = x6571 + x6533;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6573 = x6572 + x6535;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6574 = x6573 + x6537;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6575 = x6574 + x6539;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6576 = x6575 + x6541;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6577 = x6576 + x6543;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6578 = x6577 + x6545;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6579 = x6578 + x6547;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6580 = x6556 * x213;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6581 = x6579 + x6580;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6582 = x6503 * x214;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6583 = x6579 + x6582;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6584 = x6505 * x215;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6585 = x6579 + x6584;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6586 = x6507 * x216;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6587 = x6579 + x6586;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6588 = x6509 * x217;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6589 = x6579 + x6588;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6590 = x6511 * x218;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6591 = x6579 + x6590;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6592 = x6513 * x219;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6593 = x6579 + x6592;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6594 = x6515 * x220;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6595 = x6579 + x6594;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6596 = x6517 * x221;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6597 = x6579 + x6596;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6598 = x6519 * x222;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6599 = x6579 + x6598;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6600 = x6521 * x223;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6601 = x6579 + x6600;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6602 = x6523 * x224;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6603 = x6579 + x6602;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6604 = x6525 * x225;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6605 = x6579 + x6604;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6606 = x6527 * x226;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6607 = x6579 + x6606;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6608 = x6529 * x227;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6609 = x6579 + x6608;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6610 = x6531 * x228;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6611 = x6579 + x6610;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6612 = x6533 * x229;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6613 = x6579 + x6612;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6614 = x6535 * x230;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6615 = x6579 + x6614;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6616 = x6537 * x231;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6617 = x6579 + x6616;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6618 = x6539 * x232;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6619 = x6579 + x6618;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6620 = x6541 * x233;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6621 = x6579 + x6620;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6622 = x6543 * x234;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6623 = x6579 + x6622;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6624 = x6545 * x235;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6625 = x6579 + x6624;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6626 = x6547 * x236;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6627 = x6579 + x6626;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":207:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":295:5)
   auto x6628 = x331 - x6581;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":207:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":295:5)
   MixState x6629{x6554.tot + x6554.mul * x6628, x6554.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":202:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":290:13)
   auto x6630 = x331 + x242;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
   auto x6631 = x6630 * x6630;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
   auto x6632 = x6631 * x6631;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   auto x6633 = x863 - x6632;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   MixState x6634{x6629.tot + x6629.mul * x6633, x6629.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x6635 = x863 * x6631;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x6636 = x6635 * x6630;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6637 = x6636 + x6583;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6638 = x6637 + x6585;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6639 = x6638 + x6587;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6640 = x6639 + x6589;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6641 = x6640 + x6591;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6642 = x6641 + x6593;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6643 = x6642 + x6595;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6644 = x6643 + x6597;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6645 = x6644 + x6599;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6646 = x6645 + x6601;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6647 = x6646 + x6603;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6648 = x6647 + x6605;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6649 = x6648 + x6607;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6650 = x6649 + x6609;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6651 = x6650 + x6611;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6652 = x6651 + x6613;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6653 = x6652 + x6615;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6654 = x6653 + x6617;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6655 = x6654 + x6619;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6656 = x6655 + x6621;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6657 = x6656 + x6623;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6658 = x6657 + x6625;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6659 = x6658 + x6627;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6660 = x6636 * x213;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6661 = x6659 + x6660;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6662 = x6583 * x214;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6663 = x6659 + x6662;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6664 = x6585 * x215;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6665 = x6659 + x6664;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6666 = x6587 * x216;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6667 = x6659 + x6666;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6668 = x6589 * x217;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6669 = x6659 + x6668;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6670 = x6591 * x218;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6671 = x6659 + x6670;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6672 = x6593 * x219;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6673 = x6659 + x6672;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6674 = x6595 * x220;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6675 = x6659 + x6674;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6676 = x6597 * x221;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6677 = x6659 + x6676;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6678 = x6599 * x222;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6679 = x6659 + x6678;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6680 = x6601 * x223;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6681 = x6659 + x6680;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6682 = x6603 * x224;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6683 = x6659 + x6682;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6684 = x6605 * x225;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6685 = x6659 + x6684;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6686 = x6607 * x226;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6687 = x6659 + x6686;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6688 = x6609 * x227;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6689 = x6659 + x6688;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6690 = x6611 * x228;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6691 = x6659 + x6690;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6692 = x6613 * x229;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6693 = x6659 + x6692;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6694 = x6615 * x230;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6695 = x6659 + x6694;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6696 = x6617 * x231;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6697 = x6659 + x6696;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6698 = x6619 * x232;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6699 = x6659 + x6698;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6700 = x6621 * x233;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6701 = x6659 + x6700;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6702 = x6623 * x234;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6703 = x6659 + x6702;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6704 = x6625 * x235;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6705 = x6659 + x6704;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6706 = x6627 * x236;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6707 = x6659 + x6706;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":207:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":295:5)
   auto x6708 = x333 - x6661;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":207:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":295:5)
   MixState x6709{x6634.tot + x6634.mul * x6708, x6634.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":202:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":290:13)
   auto x6710 = x333 + x243;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
   auto x6711 = x6710 * x6710;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
   auto x6712 = x6711 * x6711;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   auto x6713 = x865 - x6712;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   MixState x6714{x6709.tot + x6709.mul * x6713, x6709.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x6715 = x865 * x6711;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x6716 = x6715 * x6710;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6717 = x6716 + x6663;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6718 = x6717 + x6665;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6719 = x6718 + x6667;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6720 = x6719 + x6669;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6721 = x6720 + x6671;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6722 = x6721 + x6673;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6723 = x6722 + x6675;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6724 = x6723 + x6677;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6725 = x6724 + x6679;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6726 = x6725 + x6681;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6727 = x6726 + x6683;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6728 = x6727 + x6685;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6729 = x6728 + x6687;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6730 = x6729 + x6689;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6731 = x6730 + x6691;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6732 = x6731 + x6693;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6733 = x6732 + x6695;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6734 = x6733 + x6697;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6735 = x6734 + x6699;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6736 = x6735 + x6701;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6737 = x6736 + x6703;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6738 = x6737 + x6705;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6739 = x6738 + x6707;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6740 = x6716 * x213;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6741 = x6739 + x6740;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6742 = x6663 * x214;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6743 = x6739 + x6742;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6744 = x6665 * x215;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6745 = x6739 + x6744;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6746 = x6667 * x216;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6747 = x6739 + x6746;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6748 = x6669 * x217;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6749 = x6739 + x6748;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6750 = x6671 * x218;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6751 = x6739 + x6750;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6752 = x6673 * x219;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6753 = x6739 + x6752;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6754 = x6675 * x220;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6755 = x6739 + x6754;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6756 = x6677 * x221;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6757 = x6739 + x6756;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6758 = x6679 * x222;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6759 = x6739 + x6758;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6760 = x6681 * x223;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6761 = x6739 + x6760;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6762 = x6683 * x224;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6763 = x6739 + x6762;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6764 = x6685 * x225;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6765 = x6739 + x6764;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6766 = x6687 * x226;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6767 = x6739 + x6766;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6768 = x6689 * x227;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6769 = x6739 + x6768;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6770 = x6691 * x228;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6771 = x6739 + x6770;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6772 = x6693 * x229;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6773 = x6739 + x6772;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6774 = x6695 * x230;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6775 = x6739 + x6774;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6776 = x6697 * x231;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6777 = x6739 + x6776;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6778 = x6699 * x232;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6779 = x6739 + x6778;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6780 = x6701 * x233;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6781 = x6739 + x6780;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6782 = x6703 * x234;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6783 = x6739 + x6782;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6784 = x6705 * x235;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6785 = x6739 + x6784;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6786 = x6707 * x236;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6787 = x6739 + x6786;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":207:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":295:5)
   auto x6788 = x335 - x6741;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":207:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":295:5)
   MixState x6789{x6714.tot + x6714.mul * x6788, x6714.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":202:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":290:13)
   auto x6790 = x335 + x244;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
   auto x6791 = x6790 * x6790;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
   auto x6792 = x6791 * x6791;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   auto x6793 = x867 - x6792;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   MixState x6794{x6789.tot + x6789.mul * x6793, x6789.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x6795 = x867 * x6791;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x6796 = x6795 * x6790;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6797 = x6796 + x6743;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6798 = x6797 + x6745;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6799 = x6798 + x6747;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6800 = x6799 + x6749;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6801 = x6800 + x6751;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6802 = x6801 + x6753;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6803 = x6802 + x6755;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6804 = x6803 + x6757;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6805 = x6804 + x6759;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6806 = x6805 + x6761;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6807 = x6806 + x6763;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6808 = x6807 + x6765;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6809 = x6808 + x6767;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6810 = x6809 + x6769;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6811 = x6810 + x6771;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6812 = x6811 + x6773;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6813 = x6812 + x6775;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6814 = x6813 + x6777;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6815 = x6814 + x6779;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6816 = x6815 + x6781;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6817 = x6816 + x6783;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6818 = x6817 + x6785;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6819 = x6818 + x6787;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6820 = x6796 * x213;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6821 = x6819 + x6820;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6822 = x6743 * x214;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6823 = x6819 + x6822;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6824 = x6745 * x215;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6825 = x6819 + x6824;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6826 = x6747 * x216;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6827 = x6819 + x6826;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6828 = x6749 * x217;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6829 = x6819 + x6828;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6830 = x6751 * x218;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6831 = x6819 + x6830;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6832 = x6753 * x219;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6833 = x6819 + x6832;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6834 = x6755 * x220;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6835 = x6819 + x6834;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6836 = x6757 * x221;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6837 = x6819 + x6836;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6838 = x6759 * x222;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6839 = x6819 + x6838;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6840 = x6761 * x223;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6841 = x6819 + x6840;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6842 = x6763 * x224;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6843 = x6819 + x6842;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6844 = x6765 * x225;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6845 = x6819 + x6844;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6846 = x6767 * x226;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6847 = x6819 + x6846;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6848 = x6769 * x227;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6849 = x6819 + x6848;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6850 = x6771 * x228;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6851 = x6819 + x6850;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6852 = x6773 * x229;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6853 = x6819 + x6852;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6854 = x6775 * x230;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6855 = x6819 + x6854;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6856 = x6777 * x231;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6857 = x6819 + x6856;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6858 = x6779 * x232;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6859 = x6819 + x6858;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6860 = x6781 * x233;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6861 = x6819 + x6860;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6862 = x6783 * x234;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6863 = x6819 + x6862;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6864 = x6785 * x235;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6865 = x6819 + x6864;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6866 = x6787 * x236;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6867 = x6819 + x6866;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":207:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":295:5)
   auto x6868 = x337 - x6821;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":207:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":295:5)
   MixState x6869{x6794.tot + x6794.mul * x6868, x6794.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":202:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":290:13)
   auto x6870 = x337 + x245;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
   auto x6871 = x6870 * x6870;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
   auto x6872 = x6871 * x6871;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   auto x6873 = x869 - x6872;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   MixState x6874{x6869.tot + x6869.mul * x6873, x6869.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x6875 = x869 * x6871;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x6876 = x6875 * x6870;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6877 = x6876 + x6823;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6878 = x6877 + x6825;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6879 = x6878 + x6827;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6880 = x6879 + x6829;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6881 = x6880 + x6831;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6882 = x6881 + x6833;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6883 = x6882 + x6835;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6884 = x6883 + x6837;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6885 = x6884 + x6839;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6886 = x6885 + x6841;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6887 = x6886 + x6843;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6888 = x6887 + x6845;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6889 = x6888 + x6847;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6890 = x6889 + x6849;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6891 = x6890 + x6851;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6892 = x6891 + x6853;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6893 = x6892 + x6855;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6894 = x6893 + x6857;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6895 = x6894 + x6859;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6896 = x6895 + x6861;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6897 = x6896 + x6863;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6898 = x6897 + x6865;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6899 = x6898 + x6867;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6900 = x6876 * x213;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6901 = x6899 + x6900;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6902 = x6823 * x214;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6903 = x6899 + x6902;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6904 = x6825 * x215;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6905 = x6899 + x6904;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6906 = x6827 * x216;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6907 = x6899 + x6906;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6908 = x6829 * x217;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6909 = x6899 + x6908;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6910 = x6831 * x218;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6911 = x6899 + x6910;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6912 = x6833 * x219;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6913 = x6899 + x6912;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6914 = x6835 * x220;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6915 = x6899 + x6914;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6916 = x6837 * x221;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6917 = x6899 + x6916;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6918 = x6839 * x222;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6919 = x6899 + x6918;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6920 = x6841 * x223;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6921 = x6899 + x6920;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6922 = x6843 * x224;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6923 = x6899 + x6922;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6924 = x6845 * x225;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6925 = x6899 + x6924;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6926 = x6847 * x226;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6927 = x6899 + x6926;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6928 = x6849 * x227;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6929 = x6899 + x6928;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6930 = x6851 * x228;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6931 = x6899 + x6930;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6932 = x6853 * x229;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6933 = x6899 + x6932;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6934 = x6855 * x230;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6935 = x6899 + x6934;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6936 = x6857 * x231;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6937 = x6899 + x6936;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6938 = x6859 * x232;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6939 = x6899 + x6938;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6940 = x6861 * x233;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6941 = x6899 + x6940;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6942 = x6863 * x234;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6943 = x6899 + x6942;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6944 = x6865 * x235;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6945 = x6899 + x6944;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6946 = x6867 * x236;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6947 = x6899 + x6946;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":207:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":295:5)
   auto x6948 = x339 - x6901;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":207:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":295:5)
   MixState x6949{x6874.tot + x6874.mul * x6948, x6874.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":202:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":290:13)
   auto x6950 = x339 + x246;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
   auto x6951 = x6950 * x6950;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
   auto x6952 = x6951 * x6951;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   auto x6953 = x871 - x6952;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   MixState x6954{x6949.tot + x6949.mul * x6953, x6949.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x6955 = x871 * x6951;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x6956 = x6955 * x6950;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6957 = x6956 + x6903;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6958 = x6957 + x6905;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6959 = x6958 + x6907;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6960 = x6959 + x6909;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6961 = x6960 + x6911;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6962 = x6961 + x6913;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6963 = x6962 + x6915;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6964 = x6963 + x6917;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6965 = x6964 + x6919;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6966 = x6965 + x6921;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6967 = x6966 + x6923;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6968 = x6967 + x6925;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6969 = x6968 + x6927;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6970 = x6969 + x6929;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6971 = x6970 + x6931;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6972 = x6971 + x6933;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6973 = x6972 + x6935;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6974 = x6973 + x6937;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6975 = x6974 + x6939;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6976 = x6975 + x6941;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6977 = x6976 + x6943;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6978 = x6977 + x6945;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x6979 = x6978 + x6947;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6980 = x6956 * x213;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6981 = x6979 + x6980;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6982 = x6903 * x214;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6983 = x6979 + x6982;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6984 = x6905 * x215;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6985 = x6979 + x6984;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6986 = x6907 * x216;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6987 = x6979 + x6986;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6988 = x6909 * x217;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6989 = x6979 + x6988;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6990 = x6911 * x218;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6991 = x6979 + x6990;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6992 = x6913 * x219;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6993 = x6979 + x6992;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6994 = x6915 * x220;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6995 = x6979 + x6994;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6996 = x6917 * x221;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6997 = x6979 + x6996;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x6998 = x6919 * x222;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x6999 = x6979 + x6998;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7000 = x6921 * x223;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7001 = x6979 + x7000;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7002 = x6923 * x224;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7003 = x6979 + x7002;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7004 = x6925 * x225;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7005 = x6979 + x7004;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7006 = x6927 * x226;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7007 = x6979 + x7006;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7008 = x6929 * x227;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7009 = x6979 + x7008;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7010 = x6931 * x228;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7011 = x6979 + x7010;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7012 = x6933 * x229;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7013 = x6979 + x7012;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7014 = x6935 * x230;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7015 = x6979 + x7014;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7016 = x6937 * x231;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7017 = x6979 + x7016;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7018 = x6939 * x232;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7019 = x6979 + x7018;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7020 = x6941 * x233;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7021 = x6979 + x7020;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7022 = x6943 * x234;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7023 = x6979 + x7022;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7024 = x6945 * x235;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7025 = x6979 + x7024;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7026 = x6947 * x236;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7027 = x6979 + x7026;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":207:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":295:5)
   auto x7028 = x342 - x6981;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":207:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":295:5)
   MixState x7029{x6954.tot + x6954.mul * x7028, x6954.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":202:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":290:13)
   auto x7030 = x342 + x247;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
   auto x7031 = x7030 * x7030;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
   auto x7032 = x7031 * x7031;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   auto x7033 = x873 - x7032;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   MixState x7034{x7029.tot + x7029.mul * x7033, x7029.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x7035 = x873 * x7031;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x7036 = x7035 * x7030;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7037 = x7036 + x6983;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7038 = x7037 + x6985;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7039 = x7038 + x6987;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7040 = x7039 + x6989;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7041 = x7040 + x6991;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7042 = x7041 + x6993;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7043 = x7042 + x6995;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7044 = x7043 + x6997;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7045 = x7044 + x6999;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7046 = x7045 + x7001;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7047 = x7046 + x7003;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7048 = x7047 + x7005;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7049 = x7048 + x7007;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7050 = x7049 + x7009;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7051 = x7050 + x7011;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7052 = x7051 + x7013;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7053 = x7052 + x7015;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7054 = x7053 + x7017;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7055 = x7054 + x7019;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7056 = x7055 + x7021;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7057 = x7056 + x7023;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7058 = x7057 + x7025;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7059 = x7058 + x7027;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7060 = x7036 * x213;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7061 = x7059 + x7060;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7062 = x6983 * x214;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7063 = x7059 + x7062;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7064 = x6985 * x215;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7065 = x7059 + x7064;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7066 = x6987 * x216;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7067 = x7059 + x7066;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7068 = x6989 * x217;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7069 = x7059 + x7068;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7070 = x6991 * x218;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7071 = x7059 + x7070;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7072 = x6993 * x219;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7073 = x7059 + x7072;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7074 = x6995 * x220;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7075 = x7059 + x7074;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7076 = x6997 * x221;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7077 = x7059 + x7076;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7078 = x6999 * x222;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7079 = x7059 + x7078;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7080 = x7001 * x223;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7081 = x7059 + x7080;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7082 = x7003 * x224;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7083 = x7059 + x7082;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7084 = x7005 * x225;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7085 = x7059 + x7084;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7086 = x7007 * x226;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7087 = x7059 + x7086;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7088 = x7009 * x227;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7089 = x7059 + x7088;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7090 = x7011 * x228;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7091 = x7059 + x7090;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7092 = x7013 * x229;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7093 = x7059 + x7092;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7094 = x7015 * x230;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7095 = x7059 + x7094;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7096 = x7017 * x231;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7097 = x7059 + x7096;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7098 = x7019 * x232;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7099 = x7059 + x7098;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7100 = x7021 * x233;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7101 = x7059 + x7100;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7102 = x7023 * x234;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7103 = x7059 + x7102;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7104 = x7025 * x235;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7105 = x7059 + x7104;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7106 = x7027 * x236;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7107 = x7059 + x7106;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":207:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":295:5)
   auto x7108 = x345 - x7061;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":207:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":295:5)
   MixState x7109{x7034.tot + x7034.mul * x7108, x7034.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":202:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":290:13)
   auto x7110 = x345 + x248;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
   auto x7111 = x7110 * x7110;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
   auto x7112 = x7111 * x7111;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   auto x7113 = x875 - x7112;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   MixState x7114{x7109.tot + x7109.mul * x7113, x7109.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x7115 = x875 * x7111;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x7116 = x7115 * x7110;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7117 = x7116 + x7063;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7118 = x7117 + x7065;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7119 = x7118 + x7067;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7120 = x7119 + x7069;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7121 = x7120 + x7071;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7122 = x7121 + x7073;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7123 = x7122 + x7075;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7124 = x7123 + x7077;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7125 = x7124 + x7079;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7126 = x7125 + x7081;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7127 = x7126 + x7083;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7128 = x7127 + x7085;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7129 = x7128 + x7087;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7130 = x7129 + x7089;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7131 = x7130 + x7091;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7132 = x7131 + x7093;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7133 = x7132 + x7095;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7134 = x7133 + x7097;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7135 = x7134 + x7099;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7136 = x7135 + x7101;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7137 = x7136 + x7103;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7138 = x7137 + x7105;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7139 = x7138 + x7107;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7140 = x7116 * x213;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7141 = x7139 + x7140;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7142 = x7063 * x214;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7143 = x7139 + x7142;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7144 = x7065 * x215;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7145 = x7139 + x7144;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7146 = x7067 * x216;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7147 = x7139 + x7146;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7148 = x7069 * x217;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7149 = x7139 + x7148;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7150 = x7071 * x218;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7151 = x7139 + x7150;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7152 = x7073 * x219;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7153 = x7139 + x7152;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7154 = x7075 * x220;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7155 = x7139 + x7154;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7156 = x7077 * x221;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7157 = x7139 + x7156;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7158 = x7079 * x222;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7159 = x7139 + x7158;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7160 = x7081 * x223;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7161 = x7139 + x7160;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7162 = x7083 * x224;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7163 = x7139 + x7162;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7164 = x7085 * x225;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7165 = x7139 + x7164;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7166 = x7087 * x226;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7167 = x7139 + x7166;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7168 = x7089 * x227;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7169 = x7139 + x7168;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7170 = x7091 * x228;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7171 = x7139 + x7170;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7172 = x7093 * x229;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7173 = x7139 + x7172;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7174 = x7095 * x230;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7175 = x7139 + x7174;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7176 = x7097 * x231;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7177 = x7139 + x7176;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7178 = x7099 * x232;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7179 = x7139 + x7178;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7180 = x7101 * x233;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7181 = x7139 + x7180;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7182 = x7103 * x234;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7183 = x7139 + x7182;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7184 = x7105 * x235;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7185 = x7139 + x7184;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7186 = x7107 * x236;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7187 = x7139 + x7186;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":207:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":295:5)
   auto x7188 = x348 - x7141;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":207:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":295:5)
   MixState x7189{x7114.tot + x7114.mul * x7188, x7114.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":202:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":290:13)
   auto x7190 = x348 + x249;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
   auto x7191 = x7190 * x7190;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
   auto x7192 = x7191 * x7191;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   auto x7193 = x877 - x7192;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   MixState x7194{x7189.tot + x7189.mul * x7193, x7189.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x7195 = x877 * x7191;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x7196 = x7195 * x7190;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7197 = x7196 + x7143;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7198 = x7197 + x7145;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7199 = x7198 + x7147;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7200 = x7199 + x7149;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7201 = x7200 + x7151;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7202 = x7201 + x7153;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7203 = x7202 + x7155;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7204 = x7203 + x7157;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7205 = x7204 + x7159;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7206 = x7205 + x7161;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7207 = x7206 + x7163;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7208 = x7207 + x7165;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7209 = x7208 + x7167;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7210 = x7209 + x7169;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7211 = x7210 + x7171;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7212 = x7211 + x7173;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7213 = x7212 + x7175;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7214 = x7213 + x7177;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7215 = x7214 + x7179;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7216 = x7215 + x7181;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7217 = x7216 + x7183;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7218 = x7217 + x7185;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7219 = x7218 + x7187;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7220 = x7196 * x213;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7221 = x7219 + x7220;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7222 = x7143 * x214;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7223 = x7219 + x7222;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7224 = x7145 * x215;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7225 = x7219 + x7224;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7226 = x7147 * x216;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7227 = x7219 + x7226;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7228 = x7149 * x217;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7229 = x7219 + x7228;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7230 = x7151 * x218;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7231 = x7219 + x7230;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7232 = x7153 * x219;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7233 = x7219 + x7232;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7234 = x7155 * x220;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7235 = x7219 + x7234;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7236 = x7157 * x221;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7237 = x7219 + x7236;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7238 = x7159 * x222;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7239 = x7219 + x7238;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7240 = x7161 * x223;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7241 = x7219 + x7240;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7242 = x7163 * x224;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7243 = x7219 + x7242;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7244 = x7165 * x225;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7245 = x7219 + x7244;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7246 = x7167 * x226;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7247 = x7219 + x7246;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7248 = x7169 * x227;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7249 = x7219 + x7248;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7250 = x7171 * x228;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7251 = x7219 + x7250;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7252 = x7173 * x229;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7253 = x7219 + x7252;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7254 = x7175 * x230;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7255 = x7219 + x7254;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7256 = x7177 * x231;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7257 = x7219 + x7256;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7258 = x7179 * x232;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7259 = x7219 + x7258;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7260 = x7181 * x233;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7261 = x7219 + x7260;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7262 = x7183 * x234;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7263 = x7219 + x7262;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7264 = x7185 * x235;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7265 = x7219 + x7264;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7266 = x7187 * x236;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7267 = x7219 + x7266;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":207:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":295:5)
   auto x7268 = x351 - x7221;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":207:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":295:5)
   MixState x7269{x7194.tot + x7194.mul * x7268, x7194.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":202:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":290:13)
   auto x7270 = x351 + x250;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
   auto x7271 = x7270 * x7270;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
   auto x7272 = x7271 * x7271;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   auto x7273 = x879 - x7272;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   MixState x7274{x7269.tot + x7269.mul * x7273, x7269.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x7275 = x879 * x7271;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x7276 = x7275 * x7270;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7277 = x7276 + x7223;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7278 = x7277 + x7225;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7279 = x7278 + x7227;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7280 = x7279 + x7229;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7281 = x7280 + x7231;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7282 = x7281 + x7233;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7283 = x7282 + x7235;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7284 = x7283 + x7237;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7285 = x7284 + x7239;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7286 = x7285 + x7241;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7287 = x7286 + x7243;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7288 = x7287 + x7245;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7289 = x7288 + x7247;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7290 = x7289 + x7249;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7291 = x7290 + x7251;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7292 = x7291 + x7253;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7293 = x7292 + x7255;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7294 = x7293 + x7257;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7295 = x7294 + x7259;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7296 = x7295 + x7261;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7297 = x7296 + x7263;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7298 = x7297 + x7265;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7299 = x7298 + x7267;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7300 = x7276 * x213;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7301 = x7299 + x7300;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7302 = x7223 * x214;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7303 = x7299 + x7302;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7304 = x7225 * x215;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7305 = x7299 + x7304;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7306 = x7227 * x216;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7307 = x7299 + x7306;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7308 = x7229 * x217;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7309 = x7299 + x7308;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7310 = x7231 * x218;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7311 = x7299 + x7310;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7312 = x7233 * x219;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7313 = x7299 + x7312;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7314 = x7235 * x220;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7315 = x7299 + x7314;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7316 = x7237 * x221;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7317 = x7299 + x7316;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7318 = x7239 * x222;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7319 = x7299 + x7318;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7320 = x7241 * x223;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7321 = x7299 + x7320;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7322 = x7243 * x224;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7323 = x7299 + x7322;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7324 = x7245 * x225;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7325 = x7299 + x7324;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7326 = x7247 * x226;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7327 = x7299 + x7326;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7328 = x7249 * x227;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7329 = x7299 + x7328;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7330 = x7251 * x228;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7331 = x7299 + x7330;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7332 = x7253 * x229;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7333 = x7299 + x7332;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7334 = x7255 * x230;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7335 = x7299 + x7334;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7336 = x7257 * x231;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7337 = x7299 + x7336;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7338 = x7259 * x232;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7339 = x7299 + x7338;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7340 = x7261 * x233;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7341 = x7299 + x7340;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7342 = x7263 * x234;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7343 = x7299 + x7342;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7344 = x7265 * x235;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7345 = x7299 + x7344;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7346 = x7267 * x236;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7347 = x7299 + x7346;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":207:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":295:5)
   auto x7348 = x591 - x7301;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":207:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":295:5)
   MixState x7349{x7274.tot + x7274.mul * x7348, x7274.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":202:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":290:13)
   auto x7350 = x591 + x251;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
   auto x7351 = x7350 * x7350;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
   auto x7352 = x7351 * x7351;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   auto x7353 = x881 - x7352;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   MixState x7354{x7349.tot + x7349.mul * x7353, x7349.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x7355 = x881 * x7351;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x7356 = x7355 * x7350;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7357 = x7356 + x7303;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7358 = x7357 + x7305;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7359 = x7358 + x7307;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7360 = x7359 + x7309;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7361 = x7360 + x7311;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7362 = x7361 + x7313;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7363 = x7362 + x7315;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7364 = x7363 + x7317;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7365 = x7364 + x7319;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7366 = x7365 + x7321;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7367 = x7366 + x7323;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7368 = x7367 + x7325;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7369 = x7368 + x7327;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7370 = x7369 + x7329;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7371 = x7370 + x7331;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7372 = x7371 + x7333;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7373 = x7372 + x7335;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7374 = x7373 + x7337;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7375 = x7374 + x7339;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7376 = x7375 + x7341;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7377 = x7376 + x7343;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7378 = x7377 + x7345;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7379 = x7378 + x7347;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7380 = x7356 * x213;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7381 = x7379 + x7380;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7382 = x7303 * x214;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7383 = x7379 + x7382;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7384 = x7305 * x215;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7385 = x7379 + x7384;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7386 = x7307 * x216;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7387 = x7379 + x7386;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7388 = x7309 * x217;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7389 = x7379 + x7388;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7390 = x7311 * x218;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7391 = x7379 + x7390;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7392 = x7313 * x219;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7393 = x7379 + x7392;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7394 = x7315 * x220;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7395 = x7379 + x7394;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7396 = x7317 * x221;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7397 = x7379 + x7396;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7398 = x7319 * x222;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7399 = x7379 + x7398;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7400 = x7321 * x223;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7401 = x7379 + x7400;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7402 = x7323 * x224;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7403 = x7379 + x7402;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7404 = x7325 * x225;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7405 = x7379 + x7404;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7406 = x7327 * x226;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7407 = x7379 + x7406;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7408 = x7329 * x227;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7409 = x7379 + x7408;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7410 = x7331 * x228;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7411 = x7379 + x7410;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7412 = x7333 * x229;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7413 = x7379 + x7412;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7414 = x7335 * x230;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7415 = x7379 + x7414;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7416 = x7337 * x231;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7417 = x7379 + x7416;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7418 = x7339 * x232;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7419 = x7379 + x7418;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7420 = x7341 * x233;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7421 = x7379 + x7420;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7422 = x7343 * x234;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7423 = x7379 + x7422;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7424 = x7345 * x235;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7425 = x7379 + x7424;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7426 = x7347 * x236;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7427 = x7379 + x7426;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":207:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":295:5)
   auto x7428 = x593 - x7381;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":207:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":295:5)
   MixState x7429{x7354.tot + x7354.mul * x7428, x7354.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":202:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":290:13)
   auto x7430 = x593 + x252;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
   auto x7431 = x7430 * x7430;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
   auto x7432 = x7431 * x7431;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   auto x7433 = x883 - x7432;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   MixState x7434{x7429.tot + x7429.mul * x7433, x7429.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x7435 = x883 * x7431;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x7436 = x7435 * x7430;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7437 = x7436 + x7383;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7438 = x7437 + x7385;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7439 = x7438 + x7387;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7440 = x7439 + x7389;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7441 = x7440 + x7391;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7442 = x7441 + x7393;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7443 = x7442 + x7395;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7444 = x7443 + x7397;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7445 = x7444 + x7399;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7446 = x7445 + x7401;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7447 = x7446 + x7403;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7448 = x7447 + x7405;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7449 = x7448 + x7407;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7450 = x7449 + x7409;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7451 = x7450 + x7411;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7452 = x7451 + x7413;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7453 = x7452 + x7415;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7454 = x7453 + x7417;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7455 = x7454 + x7419;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7456 = x7455 + x7421;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7457 = x7456 + x7423;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7458 = x7457 + x7425;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7459 = x7458 + x7427;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7460 = x7436 * x213;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7461 = x7459 + x7460;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7462 = x7383 * x214;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7463 = x7459 + x7462;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7464 = x7385 * x215;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7465 = x7459 + x7464;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7466 = x7387 * x216;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7467 = x7459 + x7466;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7468 = x7389 * x217;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7469 = x7459 + x7468;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7470 = x7391 * x218;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7471 = x7459 + x7470;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7472 = x7393 * x219;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7473 = x7459 + x7472;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7474 = x7395 * x220;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7475 = x7459 + x7474;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7476 = x7397 * x221;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7477 = x7459 + x7476;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7478 = x7399 * x222;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7479 = x7459 + x7478;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7480 = x7401 * x223;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7481 = x7459 + x7480;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7482 = x7403 * x224;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7483 = x7459 + x7482;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7484 = x7405 * x225;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7485 = x7459 + x7484;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7486 = x7407 * x226;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7487 = x7459 + x7486;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7488 = x7409 * x227;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7489 = x7459 + x7488;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7490 = x7411 * x228;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7491 = x7459 + x7490;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7492 = x7413 * x229;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7493 = x7459 + x7492;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7494 = x7415 * x230;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7495 = x7459 + x7494;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7496 = x7417 * x231;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7497 = x7459 + x7496;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7498 = x7419 * x232;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7499 = x7459 + x7498;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7500 = x7421 * x233;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7501 = x7459 + x7500;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7502 = x7423 * x234;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7503 = x7459 + x7502;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7504 = x7425 * x235;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7505 = x7459 + x7504;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7506 = x7427 * x236;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7507 = x7459 + x7506;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":207:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":295:5)
   auto x7508 = x595 - x7461;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":207:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":295:5)
   MixState x7509{x7434.tot + x7434.mul * x7508, x7434.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":202:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":290:13)
   auto x7510 = x595 + x253;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
   auto x7511 = x7510 * x7510;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
   auto x7512 = x7511 * x7511;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   auto x7513 = x886 - x7512;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   MixState x7514{x7509.tot + x7509.mul * x7513, x7509.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x7515 = x886 * x7511;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x7516 = x7515 * x7510;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7517 = x7516 + x7463;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7518 = x7517 + x7465;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7519 = x7518 + x7467;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7520 = x7519 + x7469;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7521 = x7520 + x7471;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7522 = x7521 + x7473;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7523 = x7522 + x7475;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7524 = x7523 + x7477;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7525 = x7524 + x7479;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7526 = x7525 + x7481;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7527 = x7526 + x7483;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7528 = x7527 + x7485;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7529 = x7528 + x7487;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7530 = x7529 + x7489;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7531 = x7530 + x7491;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7532 = x7531 + x7493;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7533 = x7532 + x7495;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7534 = x7533 + x7497;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7535 = x7534 + x7499;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7536 = x7535 + x7501;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7537 = x7536 + x7503;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7538 = x7537 + x7505;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7539 = x7538 + x7507;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7540 = x7516 * x213;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7541 = x7539 + x7540;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7542 = x7463 * x214;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7543 = x7539 + x7542;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7544 = x7465 * x215;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7545 = x7539 + x7544;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7546 = x7467 * x216;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7547 = x7539 + x7546;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7548 = x7469 * x217;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7549 = x7539 + x7548;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7550 = x7471 * x218;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7551 = x7539 + x7550;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7552 = x7473 * x219;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7553 = x7539 + x7552;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7554 = x7475 * x220;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7555 = x7539 + x7554;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7556 = x7477 * x221;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7557 = x7539 + x7556;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7558 = x7479 * x222;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7559 = x7539 + x7558;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7560 = x7481 * x223;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7561 = x7539 + x7560;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7562 = x7483 * x224;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7563 = x7539 + x7562;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7564 = x7485 * x225;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7565 = x7539 + x7564;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7566 = x7487 * x226;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7567 = x7539 + x7566;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7568 = x7489 * x227;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7569 = x7539 + x7568;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7570 = x7491 * x228;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7571 = x7539 + x7570;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7572 = x7493 * x229;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7573 = x7539 + x7572;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7574 = x7495 * x230;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7575 = x7539 + x7574;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7576 = x7497 * x231;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7577 = x7539 + x7576;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7578 = x7499 * x232;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7579 = x7539 + x7578;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7580 = x7501 * x233;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7581 = x7539 + x7580;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7582 = x7503 * x234;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7583 = x7539 + x7582;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7584 = x7505 * x235;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7585 = x7539 + x7584;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7586 = x7507 * x236;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7587 = x7539 + x7586;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":207:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":295:5)
   auto x7588 = x597 - x7541;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":207:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":295:5)
   MixState x7589{x7514.tot + x7514.mul * x7588, x7514.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":202:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":290:13)
   auto x7590 = x597 + x254;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
   auto x7591 = x7590 * x7590;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
   auto x7592 = x7591 * x7591;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   auto x7593 = x889 - x7592;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   MixState x7594{x7589.tot + x7589.mul * x7593, x7589.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x7595 = x889 * x7591;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x7596 = x7595 * x7590;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7597 = x7596 + x7543;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7598 = x7597 + x7545;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7599 = x7598 + x7547;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7600 = x7599 + x7549;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7601 = x7600 + x7551;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7602 = x7601 + x7553;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7603 = x7602 + x7555;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7604 = x7603 + x7557;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7605 = x7604 + x7559;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7606 = x7605 + x7561;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7607 = x7606 + x7563;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7608 = x7607 + x7565;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7609 = x7608 + x7567;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7610 = x7609 + x7569;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7611 = x7610 + x7571;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7612 = x7611 + x7573;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7613 = x7612 + x7575;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7614 = x7613 + x7577;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7615 = x7614 + x7579;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7616 = x7615 + x7581;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7617 = x7616 + x7583;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7618 = x7617 + x7585;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7619 = x7618 + x7587;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7620 = x7596 * x213;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7621 = x7619 + x7620;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7622 = x7543 * x214;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7623 = x7619 + x7622;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7624 = x7545 * x215;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7625 = x7619 + x7624;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7626 = x7547 * x216;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7627 = x7619 + x7626;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7628 = x7549 * x217;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7629 = x7619 + x7628;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7630 = x7551 * x218;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7631 = x7619 + x7630;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7632 = x7553 * x219;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7633 = x7619 + x7632;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7634 = x7555 * x220;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7635 = x7619 + x7634;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7636 = x7557 * x221;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7637 = x7619 + x7636;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7638 = x7559 * x222;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7639 = x7619 + x7638;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7640 = x7561 * x223;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7641 = x7619 + x7640;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7642 = x7563 * x224;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7643 = x7619 + x7642;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7644 = x7565 * x225;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7645 = x7619 + x7644;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7646 = x7567 * x226;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7647 = x7619 + x7646;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7648 = x7569 * x227;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7649 = x7619 + x7648;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7650 = x7571 * x228;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7651 = x7619 + x7650;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7652 = x7573 * x229;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7653 = x7619 + x7652;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7654 = x7575 * x230;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7655 = x7619 + x7654;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7656 = x7577 * x231;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7657 = x7619 + x7656;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7658 = x7579 * x232;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7659 = x7619 + x7658;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7660 = x7581 * x233;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7661 = x7619 + x7660;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7662 = x7583 * x234;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7663 = x7619 + x7662;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7664 = x7585 * x235;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7665 = x7619 + x7664;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7666 = x7587 * x236;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7667 = x7619 + x7666;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":207:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":295:5)
   auto x7668 = x599 - x7621;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":207:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":295:5)
   MixState x7669{x7594.tot + x7594.mul * x7668, x7594.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":202:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":290:13)
   auto x7670 = x599 + x255;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
   auto x7671 = x7670 * x7670;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
   auto x7672 = x7671 * x7671;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   auto x7673 = x892 - x7672;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   MixState x7674{x7669.tot + x7669.mul * x7673, x7669.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x7675 = x892 * x7671;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x7676 = x7675 * x7670;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7677 = x7676 + x7623;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7678 = x7677 + x7625;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7679 = x7678 + x7627;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7680 = x7679 + x7629;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7681 = x7680 + x7631;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7682 = x7681 + x7633;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7683 = x7682 + x7635;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7684 = x7683 + x7637;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7685 = x7684 + x7639;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7686 = x7685 + x7641;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7687 = x7686 + x7643;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7688 = x7687 + x7645;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7689 = x7688 + x7647;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7690 = x7689 + x7649;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7691 = x7690 + x7651;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7692 = x7691 + x7653;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7693 = x7692 + x7655;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7694 = x7693 + x7657;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7695 = x7694 + x7659;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7696 = x7695 + x7661;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7697 = x7696 + x7663;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7698 = x7697 + x7665;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7699 = x7698 + x7667;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7700 = x7676 * x213;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7701 = x7699 + x7700;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7702 = x7623 * x214;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7703 = x7699 + x7702;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7704 = x7625 * x215;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7705 = x7699 + x7704;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7706 = x7627 * x216;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7707 = x7699 + x7706;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7708 = x7629 * x217;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7709 = x7699 + x7708;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7710 = x7631 * x218;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7711 = x7699 + x7710;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7712 = x7633 * x219;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7713 = x7699 + x7712;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7714 = x7635 * x220;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7715 = x7699 + x7714;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7716 = x7637 * x221;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7717 = x7699 + x7716;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7718 = x7639 * x222;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7719 = x7699 + x7718;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7720 = x7641 * x223;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7721 = x7699 + x7720;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7722 = x7643 * x224;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7723 = x7699 + x7722;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7724 = x7645 * x225;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7725 = x7699 + x7724;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7726 = x7647 * x226;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7727 = x7699 + x7726;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7728 = x7649 * x227;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7729 = x7699 + x7728;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7730 = x7651 * x228;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7731 = x7699 + x7730;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7732 = x7653 * x229;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7733 = x7699 + x7732;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7734 = x7655 * x230;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7735 = x7699 + x7734;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7736 = x7657 * x231;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7737 = x7699 + x7736;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7738 = x7659 * x232;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7739 = x7699 + x7738;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7740 = x7661 * x233;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7741 = x7699 + x7740;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7742 = x7663 * x234;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7743 = x7699 + x7742;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7744 = x7665 * x235;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7745 = x7699 + x7744;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7746 = x7667 * x236;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7747 = x7699 + x7746;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":207:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":295:5)
   auto x7748 = x601 - x7701;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":207:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":295:5)
   MixState x7749{x7674.tot + x7674.mul * x7748, x7674.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":202:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":290:13)
   auto x7750 = x601 + x256;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":109:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":153:13)
   auto x7751 = x7750 * x7750;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":110:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":154:13)
   auto x7752 = x7751 * x7751;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   auto x7753 = x895 - x7752;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":111:3)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":155:3)
   MixState x7754{x7749.tot + x7749.mul * x7753, x7749.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x7755 = x895 * x7751;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":113:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":157:13)
   auto x7756 = x7755 * x7750;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7757 = x7756 + x7703;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7758 = x7757 + x7705;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7759 = x7758 + x7707;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7760 = x7759 + x7709;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7761 = x7760 + x7711;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7762 = x7761 + x7713;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7763 = x7762 + x7715;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7764 = x7763 + x7717;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7765 = x7764 + x7719;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7766 = x7765 + x7721;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7767 = x7766 + x7723;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7768 = x7767 + x7725;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7769 = x7768 + x7727;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7770 = x7769 + x7729;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7771 = x7770 + x7731;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7772 = x7771 + x7733;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7773 = x7772 + x7735;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7774 = x7773 + x7737;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7775 = x7774 + x7739;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7776 = x7775 + x7741;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7777 = x7776 + x7743;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7778 = x7777 + x7745;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":100:11)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":144:11)
   auto x7779 = x7778 + x7747;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7780 = x7756 * x213;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7781 = x7779 + x7780;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7782 = x7703 * x214;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7783 = x7779 + x7782;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7784 = x7705 * x215;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7785 = x7779 + x7784;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7786 = x7707 * x216;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7787 = x7779 + x7786;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7788 = x7709 * x217;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7789 = x7779 + x7788;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7790 = x7711 * x218;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7791 = x7779 + x7790;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7792 = x7713 * x219;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7793 = x7779 + x7792;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7794 = x7715 * x220;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7795 = x7779 + x7794;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7796 = x7717 * x221;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7797 = x7779 + x7796;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7798 = x7719 * x222;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7799 = x7779 + x7798;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7800 = x7721 * x223;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7801 = x7779 + x7800;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7802 = x7723 * x224;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7803 = x7779 + x7802;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7804 = x7725 * x225;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7805 = x7779 + x7804;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7806 = x7727 * x226;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7807 = x7779 + x7806;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7808 = x7729 * x227;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7809 = x7779 + x7808;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7810 = x7731 * x228;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7811 = x7779 + x7810;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7812 = x7733 * x229;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7813 = x7779 + x7812;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7814 = x7735 * x230;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7815 = x7779 + x7814;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7816 = x7737 * x231;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7817 = x7779 + x7816;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7818 = x7739 * x232;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7819 = x7779 + x7818;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7820 = x7741 * x233;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7821 = x7779 + x7820;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7822 = x7743 * x234;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7823 = x7779 + x7822;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7824 = x7745 * x235;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7825 = x7779 + x7824;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:20)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:20)
   auto x7826 = x7747 * x236;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":103:14)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":147:14)
   auto x7827 = x7779 + x7826;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":207:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":295:5)
   auto x7828 = x603 - x7781;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":207:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":295:5)
   MixState x7829{x7754.tot + x7754.mul * x7828, x7754.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":218:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":327:13)
   auto x7830 = x7781 + x257;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":219:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":328:5)
   auto x7831 = x318 - x7830;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":219:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":328:5)
   MixState x7832{x7829.tot + x7829.mul * x7831, x7829.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":218:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":327:13)
   auto x7833 = x7783 + x258;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":219:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":328:5)
   auto x7834 = x285 - x7833;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":219:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":328:5)
   MixState x7835{x7832.tot + x7832.mul * x7834, x7832.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":218:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":327:13)
   auto x7836 = x7785 + x259;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":219:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":328:5)
   auto x7837 = x286 - x7836;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":219:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":328:5)
   MixState x7838{x7835.tot + x7835.mul * x7837, x7835.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":218:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":327:13)
   auto x7839 = x7787 + x260;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":219:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":328:5)
   auto x7840 = x289 - x7839;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":219:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":328:5)
   MixState x7841{x7838.tot + x7838.mul * x7840, x7838.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":218:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":327:13)
   auto x7842 = x7789 + x261;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":219:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":328:5)
   auto x7843 = x292 - x7842;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":219:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":328:5)
   MixState x7844{x7841.tot + x7841.mul * x7843, x7841.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":218:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":327:13)
   auto x7845 = x7791 + x262;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":219:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":328:5)
   auto x7846 = x295 - x7845;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":219:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":328:5)
   MixState x7847{x7844.tot + x7844.mul * x7846, x7844.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":218:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":327:13)
   auto x7848 = x7793 + x263;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":219:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":328:5)
   auto x7849 = x298 - x7848;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":219:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":328:5)
   MixState x7850{x7847.tot + x7847.mul * x7849, x7847.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":218:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":327:13)
   auto x7851 = x7795 + x264;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":219:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":328:5)
   auto x7852 = x301 - x7851;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":219:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":328:5)
   MixState x7853{x7850.tot + x7850.mul * x7852, x7850.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":218:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":327:13)
   auto x7854 = x7797 + x265;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":219:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":328:5)
   auto x7855 = x304 - x7854;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":219:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":328:5)
   MixState x7856{x7853.tot + x7853.mul * x7855, x7853.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":218:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":327:13)
   auto x7857 = x7799 + x266;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":219:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":328:5)
   auto x7858 = x307 - x7857;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":219:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":328:5)
   MixState x7859{x7856.tot + x7856.mul * x7858, x7856.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":218:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":327:13)
   auto x7860 = x7801 + x267;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":219:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":328:5)
   auto x7861 = x310 - x7860;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":219:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":328:5)
   MixState x7862{x7859.tot + x7859.mul * x7861, x7859.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":218:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":327:13)
   auto x7863 = x7803 + x268;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":219:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":328:5)
   auto x7864 = x473 - x7863;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":219:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":328:5)
   MixState x7865{x7862.tot + x7862.mul * x7864, x7862.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":218:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":327:13)
   auto x7866 = x7805 + x269;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":219:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":328:5)
   auto x7867 = x590 - x7866;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":219:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":328:5)
   MixState x7868{x7865.tot + x7865.mul * x7867, x7865.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":218:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":327:13)
   auto x7869 = x7807 + x270;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":219:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":328:5)
   auto x7870 = x557 - x7869;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":219:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":328:5)
   MixState x7871{x7868.tot + x7868.mul * x7870, x7868.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":218:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":327:13)
   auto x7872 = x7809 + x271;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":219:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":328:5)
   auto x7873 = x558 - x7872;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":219:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":328:5)
   MixState x7874{x7871.tot + x7871.mul * x7873, x7871.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":218:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":327:13)
   auto x7875 = x7811 + x272;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":219:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":328:5)
   auto x7876 = x561 - x7875;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":219:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":328:5)
   MixState x7877{x7874.tot + x7874.mul * x7876, x7874.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":218:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":327:13)
   auto x7878 = x7813 + x273;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":219:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":328:5)
   auto x7879 = x564 - x7878;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":219:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":328:5)
   MixState x7880{x7877.tot + x7877.mul * x7879, x7877.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":218:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":327:13)
   auto x7881 = x7815 + x274;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":219:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":328:5)
   auto x7882 = x567 - x7881;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":219:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":328:5)
   MixState x7883{x7880.tot + x7880.mul * x7882, x7880.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":218:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":327:13)
   auto x7884 = x7817 + x275;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":219:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":328:5)
   auto x7885 = x570 - x7884;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":219:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":328:5)
   MixState x7886{x7883.tot + x7883.mul * x7885, x7883.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":218:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":327:13)
   auto x7887 = x7819 + x276;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":219:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":328:5)
   auto x7888 = x573 - x7887;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":219:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":328:5)
   MixState x7889{x7886.tot + x7886.mul * x7888, x7886.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":218:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":327:13)
   auto x7890 = x7821 + x277;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":219:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":328:5)
   auto x7891 = x576 - x7890;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":219:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":328:5)
   MixState x7892{x7889.tot + x7889.mul * x7891, x7889.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":218:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":327:13)
   auto x7893 = x7823 + x278;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":219:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":328:5)
   auto x7894 = x579 - x7893;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":219:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":328:5)
   MixState x7895{x7892.tot + x7892.mul * x7894, x7892.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":218:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":327:13)
   auto x7896 = x7825 + x279;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":219:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":328:5)
   auto x7897 = x582 - x7896;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":219:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":328:5)
   MixState x7898{x7895.tot + x7895.mul * x7897, x7895.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":218:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":327:13)
   auto x7899 = x7827 + x280;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":219:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":328:5)
   auto x7900 = x745 - x7899;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":219:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":328:5)
   MixState x7901{x7898.tot + x7898.mul * x7900, x7898.mul * (*mix)};
   // loc("./zirgen/components/mux.h":49:25)
   MixState x7902{x6146.tot + x6147 * x7901.tot * x6146.mul, x6146.mul * x7901.mul};
   // loc("top(recursion::Top)/code(recursion::Code)/select(OneHot)/poseidon2_store(Reg)"("./zirgen/components/mux.h":49:25))
   auto x7903 = args[0][6 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":239:39)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":348:39)
   auto x7904 = x317 * x2511;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":239:39)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":348:39)
   auto x7905 = x317 * x2512;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":239:39)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":348:39)
   auto x7906 = x317 * x5220;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":239:39)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":348:39)
   auto x7907 = x317 * x5221;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":239:39)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":348:39)
   auto x7908 = x317 * x5222;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":239:39)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":348:39)
   auto x7909 = x317 * x5223;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":239:39)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":348:39)
   auto x7910 = x317 * x5224;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":239:39)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":348:39)
   auto x7911 = x317 * x5225;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":239:39)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":348:39)
   auto x7912 = x556 * x5226;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":239:22)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":348:22)
   auto x7913 = x7904 + x7912;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":239:39)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":348:39)
   auto x7914 = x556 * x5227;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":239:22)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":348:22)
   auto x7915 = x7905 + x7914;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":239:39)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":348:39)
   auto x7916 = x556 * x5228;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":239:22)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":348:22)
   auto x7917 = x7906 + x7916;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":239:39)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":348:39)
   auto x7918 = x556 * x5229;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":239:22)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":348:22)
   auto x7919 = x7907 + x7918;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":239:39)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":348:39)
   auto x7920 = x556 * x5230;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":239:22)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":348:22)
   auto x7921 = x7908 + x7920;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":239:39)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":348:39)
   auto x7922 = x556 * x5231;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":239:22)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":348:22)
   auto x7923 = x7909 + x7922;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":239:39)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":348:39)
   auto x7924 = x556 * x5232;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":239:22)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":348:22)
   auto x7925 = x7910 + x7924;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":239:39)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":348:39)
   auto x7926 = x556 * x5233;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":239:22)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":348:22)
   auto x7927 = x7911 + x7926;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":239:39)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":348:39)
   auto x7928 = x587 * x5234;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":239:22)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":348:22)
   auto x7929 = x7913 + x7928;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":239:39)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":348:39)
   auto x7930 = x587 * x5235;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":239:22)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":348:22)
   auto x7931 = x7915 + x7930;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":239:39)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":348:39)
   auto x7932 = x587 * x5236;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":239:22)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":348:22)
   auto x7933 = x7917 + x7932;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":239:39)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":348:39)
   auto x7934 = x587 * x5237;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":239:22)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":348:22)
   auto x7935 = x7919 + x7934;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":239:39)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":348:39)
   auto x7936 = x587 * x5238;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":239:22)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":348:22)
   auto x7937 = x7921 + x7936;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":239:39)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":348:39)
   auto x7938 = x587 * x5239;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":239:22)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":348:22)
   auto x7939 = x7923 + x7938;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":239:39)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":348:39)
   auto x7940 = x587 * x5240;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":239:22)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":348:22)
   auto x7941 = x7925 + x7940;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":239:39)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":348:39)
   auto x7942 = x587 * x5241;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":239:22)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":348:22)
   auto x7943 = x7927 + x7942;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":241:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":350:13)
   auto x7944 = x284 * x42;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":241:13)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":350:13)
   auto x7945 = x7944 + x4811;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":243:37)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":352:37)
   auto x7946 = x7929 * x7945;
-  // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":87:3)
   auto x7947 = x319 - x283;
-  // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":87:3)
   MixState x7948{x281.tot + x281.mul * x7947, x281.mul * (*mix)};
   // loc("zirgen/circuit/recursion/wom.cpp":49:5)
   auto x7949 = x321 - x7946;
@@ -15939,11 +15939,11 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   MixState x7952{x7951.tot + x7951.mul * x325, x7951.mul * (*mix)};
   // loc("zirgen/circuit/recursion/wom.cpp":49:5)
   MixState x7953{x7952.tot + x7952.mul * x327, x7952.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":243:37)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":352:37)
   auto x7954 = x7931 * x7945;
-  // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":87:3)
   auto x7955 = x329 - x555;
-  // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":87:3)
   MixState x7956{x7953.tot + x7953.mul * x7955, x7953.mul * (*mix)};
   // loc("zirgen/circuit/recursion/wom.cpp":49:5)
   auto x7957 = x331 - x7954;
@@ -15955,11 +15955,11 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   MixState x7960{x7959.tot + x7959.mul * x335, x7959.mul * (*mix)};
   // loc("zirgen/circuit/recursion/wom.cpp":49:5)
   MixState x7961{x7960.tot + x7960.mul * x337, x7960.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":243:37)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":352:37)
   auto x7962 = x7933 * x7945;
-  // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":87:3)
   auto x7963 = x339 - x827;
-  // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":87:3)
   MixState x7964{x7961.tot + x7961.mul * x7963, x7961.mul * (*mix)};
   // loc("zirgen/circuit/recursion/wom.cpp":49:5)
   auto x7965 = x342 - x7962;
@@ -15971,13 +15971,13 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   MixState x7968{x7967.tot + x7967.mul * x348, x7967.mul * (*mix)};
   // loc("zirgen/circuit/recursion/wom.cpp":49:5)
   MixState x7969{x7968.tot + x7968.mul * x351, x7968.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":243:21)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":352:21)
   auto x7970 = x283 + x3;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":243:37)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":352:37)
   auto x7971 = x7935 * x7945;
-  // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":87:3)
   auto x7972 = x591 - x7970;
-  // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":87:3)
   MixState x7973{x7969.tot + x7969.mul * x7972, x7969.mul * (*mix)};
   // loc("zirgen/circuit/recursion/wom.cpp":49:5)
   auto x7974 = x593 - x7971;
@@ -15989,13 +15989,13 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   MixState x7977{x7976.tot + x7976.mul * x597, x7976.mul * (*mix)};
   // loc("zirgen/circuit/recursion/wom.cpp":49:5)
   MixState x7978{x7977.tot + x7977.mul * x599, x7977.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":243:21)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":352:21)
   auto x7979 = x283 + x4;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":243:37)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":352:37)
   auto x7980 = x7937 * x7945;
-  // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":87:3)
   auto x7981 = x601 - x7979;
-  // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":87:3)
   MixState x7982{x7978.tot + x7978.mul * x7981, x7978.mul * (*mix)};
   // loc("zirgen/circuit/recursion/wom.cpp":49:5)
   auto x7983 = x603 - x7980;
@@ -16007,13 +16007,13 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   MixState x7986{x7985.tot + x7985.mul * x607, x7985.mul * (*mix)};
   // loc("zirgen/circuit/recursion/wom.cpp":49:5)
   MixState x7987{x7986.tot + x7986.mul * x609, x7986.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":243:21)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":352:21)
   auto x7988 = x283 + x5;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":243:37)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":352:37)
   auto x7989 = x7939 * x7945;
-  // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":87:3)
   auto x7990 = x611 - x7988;
-  // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":87:3)
   MixState x7991{x7987.tot + x7987.mul * x7990, x7987.mul * (*mix)};
   // loc("zirgen/circuit/recursion/wom.cpp":49:5)
   auto x7992 = x614 - x7989;
@@ -16025,13 +16025,13 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   MixState x7995{x7994.tot + x7994.mul * x620, x7994.mul * (*mix)};
   // loc("zirgen/circuit/recursion/wom.cpp":49:5)
   MixState x7996{x7995.tot + x7995.mul * x623, x7995.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":243:21)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":352:21)
   auto x7997 = x283 + x6;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":243:37)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":352:37)
   auto x7998 = x7941 * x7945;
-  // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":87:3)
   auto x7999 = x863 - x7997;
-  // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":87:3)
   MixState x8000{x7996.tot + x7996.mul * x7999, x7996.mul * (*mix)};
   // loc("zirgen/circuit/recursion/wom.cpp":49:5)
   auto x8001 = x865 - x7998;
@@ -16043,13 +16043,13 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   MixState x8004{x8003.tot + x8003.mul * x869, x8003.mul * (*mix)};
   // loc("zirgen/circuit/recursion/wom.cpp":49:5)
   MixState x8005{x8004.tot + x8004.mul * x871, x8004.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":243:21)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":352:21)
   auto x8006 = x283 + x7;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":243:37)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":352:37)
   auto x8007 = x7943 * x7945;
-  // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":87:3)
   auto x8008 = x873 - x8006;
-  // loc("zirgen/circuit/recursion/wom.cpp":85:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":87:3)
   MixState x8009{x8005.tot + x8005.mul * x8008, x8005.mul * (*mix)};
   // loc("zirgen/circuit/recursion/wom.cpp":49:5)
   auto x8010 = x875 - x8007;
@@ -16061,101 +16061,101 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   MixState x8013{x8012.tot + x8012.mul * x879, x8012.mul * (*mix)};
   // loc("zirgen/circuit/recursion/wom.cpp":49:5)
   MixState x8014{x8013.tot + x8013.mul * x881, x8013.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":246:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":355:5)
   auto x8015 = x318 - x2511;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":246:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":355:5)
   MixState x8016{x8014.tot + x8014.mul * x8015, x8014.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":246:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":355:5)
   auto x8017 = x285 - x2512;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":246:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":355:5)
   MixState x8018{x8016.tot + x8016.mul * x8017, x8016.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":246:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":355:5)
   auto x8019 = x286 - x5220;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":246:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":355:5)
   MixState x8020{x8018.tot + x8018.mul * x8019, x8018.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":246:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":355:5)
   auto x8021 = x289 - x5221;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":246:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":355:5)
   MixState x8022{x8020.tot + x8020.mul * x8021, x8020.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":246:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":355:5)
   auto x8023 = x292 - x5222;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":246:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":355:5)
   MixState x8024{x8022.tot + x8022.mul * x8023, x8022.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":246:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":355:5)
   auto x8025 = x295 - x5223;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":246:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":355:5)
   MixState x8026{x8024.tot + x8024.mul * x8025, x8024.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":246:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":355:5)
   auto x8027 = x298 - x5224;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":246:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":355:5)
   MixState x8028{x8026.tot + x8026.mul * x8027, x8026.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":246:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":355:5)
   auto x8029 = x301 - x5225;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":246:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":355:5)
   MixState x8030{x8028.tot + x8028.mul * x8029, x8028.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":246:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":355:5)
   auto x8031 = x304 - x5226;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":246:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":355:5)
   MixState x8032{x8030.tot + x8030.mul * x8031, x8030.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":246:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":355:5)
   auto x8033 = x307 - x5227;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":246:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":355:5)
   MixState x8034{x8032.tot + x8032.mul * x8033, x8032.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":246:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":355:5)
   auto x8035 = x310 - x5228;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":246:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":355:5)
   MixState x8036{x8034.tot + x8034.mul * x8035, x8034.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":246:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":355:5)
   auto x8037 = x473 - x5229;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":246:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":355:5)
   MixState x8038{x8036.tot + x8036.mul * x8037, x8036.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":246:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":355:5)
   auto x8039 = x590 - x5230;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":246:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":355:5)
   MixState x8040{x8038.tot + x8038.mul * x8039, x8038.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":246:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":355:5)
   auto x8041 = x557 - x5231;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":246:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":355:5)
   MixState x8042{x8040.tot + x8040.mul * x8041, x8040.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":246:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":355:5)
   auto x8043 = x558 - x5232;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":246:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":355:5)
   MixState x8044{x8042.tot + x8042.mul * x8043, x8042.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":246:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":355:5)
   auto x8045 = x561 - x5233;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":246:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":355:5)
   MixState x8046{x8044.tot + x8044.mul * x8045, x8044.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":246:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":355:5)
   auto x8047 = x564 - x5234;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":246:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":355:5)
   MixState x8048{x8046.tot + x8046.mul * x8047, x8046.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":246:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":355:5)
   auto x8049 = x567 - x5235;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":246:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":355:5)
   MixState x8050{x8048.tot + x8048.mul * x8049, x8048.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":246:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":355:5)
   auto x8051 = x570 - x5236;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":246:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":355:5)
   MixState x8052{x8050.tot + x8050.mul * x8051, x8050.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":246:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":355:5)
   auto x8053 = x573 - x5237;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":246:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":355:5)
   MixState x8054{x8052.tot + x8052.mul * x8053, x8052.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":246:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":355:5)
   auto x8055 = x576 - x5238;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":246:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":355:5)
   MixState x8056{x8054.tot + x8054.mul * x8055, x8054.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":246:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":355:5)
   auto x8057 = x579 - x5239;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":246:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":355:5)
   MixState x8058{x8056.tot + x8056.mul * x8057, x8056.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":246:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":355:5)
   auto x8059 = x582 - x5240;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":246:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":355:5)
   MixState x8060{x8058.tot + x8058.mul * x8059, x8058.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":246:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":355:5)
   auto x8061 = x745 - x5241;
-  // loc("zirgen/circuit/recursion/poseidon2.cpp":246:5)
+  // loc("zirgen/circuit/recursion/poseidon2.cpp":355:5)
   MixState x8062{x8060.tot + x8060.mul * x8061, x8060.mul * (*mix)};
   // loc("./zirgen/components/mux.h":49:25)
   MixState x8063{x7902.tot + x7903 * x8062.tot * x7902.mul, x7902.mul * x8062.mul};
