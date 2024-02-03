@@ -23,7 +23,7 @@ use serial_test::serial;
 use test_log::test;
 
 use super::{
-    identity_p254, join, lift, prove::poseidon2_hal_pair, Prover,
+    identity_p254, join, lift, prove::poseidon254_hal_pair, prove::poseidon2_hal_pair, Prover,
     ProverOpts as RecursionProverOpts,
 };
 use crate::{
@@ -38,11 +38,11 @@ use crate::{
     test
 )]
 #[serial]
-fn test_recursion() {
+fn test_recursion_poseidon254() {
     use risc0_zkp::core::{digest::Digest, hash::poseidon2::Poseidon2HashSuite};
 
     let suite = Poseidon2HashSuite::new_suite();
-    let hal_pair = poseidon2_hal_pair();
+    let hal_pair = poseidon254_hal_pair();
     let (hal, circuit_hal) = (hal_pair.hal.as_ref(), hal_pair.circuit_hal.as_ref());
 
     // First, run the simple test of the recursion circuit.  This
