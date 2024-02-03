@@ -135,7 +135,7 @@ impl<'a> MachineContext {
             "Args missing formatting: {:?} in {msg}",
             args_left
         );
-        tracing::debug!("{}", formatted);
+        tracing::trace!("{}", formatted);
     }
 }
 
