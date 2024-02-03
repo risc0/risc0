@@ -87,14 +87,14 @@ impl<'a, Ext: Externs> Preflight<'a, Ext> {
         if self.get(code, LAYOUT.code.select.poseidon2_load) == Fp::ONE {
             let inst = LAYOUT.code.inst.poseidon2_load;
             let do_mont = self.get(code, inst.do_mont).as_u32();
-            let add_consts = self.get(code, inst.prep_full).as_u32();
+            let prep_full = self.get(code, inst.prep_full).as_u32();
             let keep_state = self.get(code, inst.keep_state).as_u32();
             let group = (self.get(code, inst.group.g1).as_u32()
                 + self.get(code, inst.group.g2).as_u32() * 2) as usize;
             trace!(
-                "Poseidon2 Load: group = {}, add_consts = {}, keep_state = {}, do_mont = {}",
+                "Poseidon2 Load: group = {}, prep_full = {}, keep_state = {}, do_mont = {}",
                 group,
-                add_consts,
+                prep_full,
                 keep_state,
                 do_mont
             );
