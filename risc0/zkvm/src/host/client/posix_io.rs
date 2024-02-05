@@ -51,4 +51,14 @@ impl<'a> PosixIo<'a> {
         self.write_fds.insert(fd, Rc::new(RefCell::new(writer)));
         self
     }
+
+    pub fn with_read_fd2(&mut self, fd: u32, reader: Rc<RefCell<dyn BufRead + 'a>>) -> &mut Self {
+        self.read_fds.insert(fd, reader);
+        self
+    }
+
+    pub fn with_write_fd2(&mut self, fd: u32, writer: Rc<RefCell<dyn Write + 'a>>) -> &mut Self {
+        self.write_fds.insert(fd, writer);
+        self
+    }
 }

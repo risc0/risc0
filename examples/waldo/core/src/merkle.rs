@@ -94,6 +94,14 @@ where
             Ok(bincode::serialize(&(value, proof)).unwrap().into())
         }
     }
+
+    pub fn get(&self, index: usize) -> (&Element, Proof<Element>) {
+        let value = &self.elements()[index];
+        let proof = self.prove(index);
+
+        assert!(proof.verify(&self.root(), &value));
+        (value, proof)
+    }
 }
 
 // Implement Deref so that all the methods on the wrapped type are accessible.

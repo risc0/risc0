@@ -12,9 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#[cfg(not(target_os = "zkvm"))]
+use std::io::{BufRead, ErrorKind, Read, Write};
+
 use image::{DynamicImage, GrayImage, Rgb, RgbImage};
 use serde::{Deserialize, Serialize};
 
+#[cfg(not(target_os = "zkvm"))]
+use crate::merkle::Proof;
 use crate::merkle::{MerkleTree, Node};
 
 /// Recommended default chunk size to use in the ImageMerkleTree and
@@ -104,7 +109,7 @@ impl From<GrayImage> for ImageMask {
 /// Chunks on the right and bottom boundaries will be incomplete if the width or
 /// height cannot be divided by N. At the right edge, the width of the chunks
 /// will be truncated and on the bottom edge the height will be truncated.
-pub struct ImageMerkleTree<const N: u32>(MerkleTree<ImageChunk>);
+pub struct ImageMerkleTree<const N: u32>(MerkleTree<ImageChunk>, usize);
 
 impl<const N: u32> ImageMerkleTree<N> {
     pub fn new(image: &DynamicImage) -> Self {
@@ -120,7 +125,7 @@ impl<const N: u32> ImageMerkleTree<N> {
                 .collect()
         };
 
-        Self(MerkleTree::new(chunks))
+        Self(MerkleTree::new(chunks), 0)
     }
 
     pub fn root(&self) -> Node {
@@ -135,6 +140,51 @@ impl<const N: u32> ImageMerkleTree<N> {
     }
 }
 
+#[cfg(not(target_os = "zkvm"))]
+impl<const N: u32> Write for ImageMerkleTree<N> {
+    fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
+        self.1 = bincode::deserialize::<u32>(buf)
+            .unwrap()
+            .try_into()
+            .unwrap();
+        Ok(buf.len())
+    }
+
+    fn flush(&mut self) -> std::io::Result<()> {
+        Ok(())
+    }
+}
+
+#[cfg(not(target_os = "zkvm"))]
+impl<const N: u32> Read for ImageMerkleTree<N> {
+    fn read(&mut self, buf: &mut [u8]) -> std::io::Result<usize> {
+        let img_proof =
+            bincode::serialize::<(&ImageChunk, Proof<ImageChunk>)>(&self.0.get(self.1)).unwrap();
+        if img_proof.len() > buf.len() {
+            return Err(std::io::Error::new(
+                ErrorKind::OutOfMemory,
+                std::format!(
+                    "guest buffer ({} bytes) too small for in-coming data ({} bytes)",
+                    buf.len(),
+                    img_proof.len()
+                ),
+            ));
+        }
+        buf[..img_proof.len()].copy_from_slice(&img_proof);
+        Ok(img_proof.len())
+    }
+}
+
+#[cfg(not(target_os = "zkvm"))]
+impl<const N: u32> BufRead for ImageMerkleTree<N> {
+    fn fill_buf(&mut self) -> std::io::Result<&[u8]> {
+        todo!()
+    }
+
+    fn consume(&mut self, _amt: usize) {
+        todo!()
+    }
+}
 #[cfg(target_os = "zkvm")]
 mod zkvm {
     use divrem::{DivCeil, DivRem};

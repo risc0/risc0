@@ -12,14 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{error::Error, fs, path::PathBuf};
+use std::{cell::RefCell, error::Error, fs, path::PathBuf, rc::Rc};
 
 use clap::Parser;
 use image::{io::Reader as ImageReader, GenericImageView};
 use risc0_zkvm::{default_prover, ExecutorEnv};
 use waldo_core::{
     image::{ImageMask, ImageMerkleTree, IMAGE_CHUNK_SIZE},
-    merkle::SYS_VECTOR_ORACLE,
     PrivateInput,
 };
 use waldo_methods::IMAGE_CROP_ELF;
@@ -113,12 +112,14 @@ fn main() -> Result<(), Box<dyn Error>> {
         crop_location,
         crop_dimensions,
     };
+    let c = Rc::new(RefCell::new(img_merkle_tree));
 
     // Make the ExecutorEnv, registering an io_callback to communicate
     // vector oracle data from the Merkle tree.
     let env = ExecutorEnv::builder()
         .write(&input)?
-        .io_callback(SYS_VECTOR_ORACLE, img_merkle_tree.vector_oracle_callback())
+        .write_fd2(5, c.clone())
+        .read_fd2(5, c)
         .build()
         .unwrap();
 

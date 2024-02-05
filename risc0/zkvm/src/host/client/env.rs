@@ -302,6 +302,18 @@ impl<'a> ExecutorEnvBuilder<'a> {
         self
     }
 
+    /// Add a posix-style file descriptor for reading.
+    pub fn read_fd2(&mut self, fd: u32, reader: Rc<RefCell<dyn BufRead + 'a>>) -> &mut Self {
+        self.inner.posix_io.borrow_mut().with_read_fd2(fd, reader);
+        self
+    }
+
+    /// Add a posix-style file descriptor for writing.
+    pub fn write_fd2(&mut self, fd: u32, writer: Rc<RefCell<dyn Write + 'a>>) -> &mut Self {
+        self.inner.posix_io.borrow_mut().with_write_fd2(fd, writer);
+        self
+    }
+
     /// Add a handler for simple I/O handling.
     pub fn slice_io(&mut self, channel: &str, handler: impl SliceIo + 'a) -> &mut Self {
         self.inner
