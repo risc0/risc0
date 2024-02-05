@@ -25,6 +25,27 @@ COPY groth16/risc0.circom ./groth16/risc0.circom
 COPY groth16/stark_verify.circom ./groth16/stark_verify.circom
 COPY scripts/build.sh ./
 
+
+# Set up sccache
+ENV  SCCACHE_URL=https://github.com/mozilla/sccache/releases/download
+ENV  SCCACHE_VERSION=v0.7.1
+
+# Install sccache
+RUN SCCACHE_FILE=sccache-$SCCACHE_VERSION && \
+  curl -L "$SCCACHE_URL/$SCCACHE_VERSION/$SCCACHE_FILE.tar.gz" | tar xz && \
+  mv -f $SCCACHE_FILE/sccache /usr/local/bin/sccache && \
+  chmod +x /usr/local/bin/sccache
+
+
+ENV AWS_ACCESS_KEY_ID=changeme
+ENV AWS_SECRET_ACCESS_KEY=changeme
+ENV RUSTC_WRAPPER=/usr/local/bin/sccache
+ENV SCCACHE_REGION=us-west-2
+ENV SCCACHE_BUCKET=risc0-ci-cache
+ENV SCCACHE_S3_KEY_PREFIX=public/groth16/sccache
+#ENV SCCACHE_ENDPOINT=cdn.example.org
+#ENV SCCACHE_S3_USE_SSL=true
+
 # Cache ahead of the larger build process
 FROM dependencies AS build
 
