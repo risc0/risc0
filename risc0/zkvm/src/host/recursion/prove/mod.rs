@@ -400,6 +400,12 @@ cfg_if::cfg_if! {
 
         /// TODO
         #[allow(dead_code)]
+        pub fn poseidon_hal_pair() -> HalPair<CpuHal<BabyBear>, CpuCircuitHal<'static, CircuitImpl>> {
+            cpu::poseidon_hal_pair()
+        }
+
+        /// TODO
+        #[allow(dead_code)]
         pub fn poseidon2_hal_pair() -> HalPair<CpuHal<BabyBear>, CpuCircuitHal<'static, CircuitImpl>> {
             cpu::poseidon2_hal_pair()
         }
