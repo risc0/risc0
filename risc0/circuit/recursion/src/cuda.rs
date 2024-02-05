@@ -22,7 +22,10 @@ use risc0_zkp::{
         RootsOfUnity,
     },
     hal::{
-        cuda::{BufferImpl as CudaBuffer, CudaHal, CudaHash, CudaHashPoseidon2, CudaHashSha256},
+        cuda::{
+            BufferImpl as CudaBuffer, CudaHal, CudaHash, CudaHashPoseidon, CudaHashPoseidon2,
+            CudaHashSha256,
+        },
         Buffer, CircuitHal,
     },
     INV_RATE,
@@ -110,6 +113,7 @@ impl<'a, CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
 }
 
 pub type CudaCircuitHalSha256 = CudaCircuitHal<CudaHashSha256>;
+pub type CudaCircuitHalPoseidon = CudaCircuitHal<CudaHashPoseidon>;
 pub type CudaCircuitHalPoseidon2 = CudaCircuitHal<CudaHashPoseidon2>;
 
 #[cfg(test)]
