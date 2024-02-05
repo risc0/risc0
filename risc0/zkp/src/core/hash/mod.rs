@@ -15,6 +15,7 @@
 //! Traits to configure which cryptographic primitives the ZKP uses
 
 pub mod blake2b;
+pub mod poseidon;
 pub mod poseidon2;
 #[cfg(feature = "prove")]
 pub mod poseidon_254;
