@@ -7,7 +7,7 @@ WORKDIR /src/
 
 # APT deps
 RUN apt -qq update && \
-  apt install -y -q apt-transport-https build-essential clang cmake curl gnupg libgmp-dev libsodium-dev m4 nasm nlohmann-json3-dev
+  apt install -y -q apt-transport-https build-essential clang cmake curl gnupg libgmp-dev libsodium-dev m4 nasm nlohmann-json3-dev npm
 
 WORKDIR /src/
 
@@ -46,9 +46,12 @@ FROM dependencies AS builder
 WORKDIR /src/
 COPY groth16/risc0.circom ./groth16/risc0.circom
 COPY groth16/stark_verify.circom ./groth16/stark_verify.circom
-COPY scripts/build.sh ./
 
-RUN ./build.sh
+# Build the witness generation
+RUN (cd groth16; circom --c stark_verify.circom) && \
+  sed -i 's/g++/clang++/' groth16/stark_verify_cpp/Makefile && \
+  sed -i 's/O3/O0/' groth16/stark_verify_cpp/Makefile && \
+  (cd groth16/stark_verify_cpp; make)
 
 # Download the proving key
 RUN wget https://risc0-artifacts.s3.us-west-2.amazonaws.com/zkey/2024-01-15/stark_verify_final.zkey.gz -O groth16/stark_verify_final.zkey.gz && \
@@ -58,7 +61,8 @@ RUN wget https://risc0-artifacts.s3.us-west-2.amazonaws.com/zkey/2024-01-15/star
 FROM ubuntu:jammy-20231211.1@sha256:bbf3d1baa208b7649d1d0264ef7d522e1dc0deeeaaf6085bf8e4618867f03494 AS prover
 
 RUN apt update -qq && \
-  apt install -y libsodium23
+  apt install -y libsodium23 nodejs npm && \
+  npm install -g snarkjs@0.7.3
 
 COPY scripts/prover.sh /app/prover.sh
 COPY --from=builder /usr/local/sbin/rapidsnark /usr/local/sbin/rapidsnark
