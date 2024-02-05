@@ -44,12 +44,9 @@ impl HashFn<BabyBear> for Poseidon2HashFn {
             .as_words()
             .iter()
             .chain(b.as_words())
-            // TODO: Note that changing this to `new` breaks things slightly earlier
             .map(|w| BabyBearElem::new_raw(*w))
-            // .map(|w| BabyBearElem::new(*w))
             .collect();
         assert!(both.len() == 16);
-        // tracing::debug!("Calling hash_pair from Poseidon2");
         to_digest(unpadded_hash(both.iter()))
     }
 
