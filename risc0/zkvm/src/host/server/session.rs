@@ -80,6 +80,22 @@ pub struct Session {
 
     /// The system state of the final [MemoryImage] at the end of execution.
     pub post_state: SystemState,
+
+    /// Path of temporary segment storage used internally.
+    temp_segment_dir: Option<PathBuf>,
+}
+
+impl Drop for Session {
+    fn drop(&mut self) {
+        if let Some(path) = &self.temp_segment_dir {
+            if let Err(e) = std::fs::remove_dir_all(path.clone()) {
+                tracing::warn!(
+                    "Failed to delete directory {} used for temporary segment storage. {e}",
+                    path.display()
+                );
+            }
+        }
+    }
 }
 
 /// A reference to a [Segment].
@@ -147,6 +163,7 @@ impl Session {
         total_cycles: u64,
         pre_state: SystemState,
         post_state: SystemState,
+        temp_segment_dir: Option<PathBuf>,
     ) -> Self {
         Self {
             segments,
@@ -159,6 +176,7 @@ impl Session {
             total_cycles,
             pre_state,
             post_state,
+            temp_segment_dir,
         }
     }
 

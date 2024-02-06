@@ -322,7 +322,7 @@ impl Server {
                         pb::api::OnSessionDone {
                             session: Some(pb::api::SessionInfo {
                                 segments: session.segments.len().try_into()?,
-                                journal: session.journal.unwrap_or_default().bytes,
+                                journal: session.journal.clone().unwrap_or_default().bytes,
                                 exit_code: Some(session.exit_code.into()),
                             }),
                         },

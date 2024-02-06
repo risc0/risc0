@@ -105,6 +105,7 @@ client = [
   "dep:prost-build",
   "dep:protobuf-src",
   "std",
+  "dep:tempfile",
 ]
 cuda = [
   "prove",

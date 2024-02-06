@@ -28,6 +28,7 @@ use bytemuck::Pod;
 use bytes::Bytes;
 use risc0_zkvm_platform::{self, fileno};
 use serde::Serialize;
+use tempfile::TempDir;
 
 use crate::serde::to_vec;
 use crate::{
@@ -351,9 +352,9 @@ impl<'a> ExecutorEnvBuilder<'a> {
     }
 
     /// Set the path where segments will be stored.
-    pub fn segment_path<P: AsRef<Path>>(&mut self, path: P) -> &mut Self {
-        self.inner.segment_path = Some(path.as_ref().to_path_buf());
-        self
+    pub fn segment_path<P: AsRef<Path>>(&mut self, path: P) -> Result<&mut Self> {
+        self.inner.segment_path = Some(TempDir::new_in(path.as_ref())?.into_path());
+        Ok(self)
     }
 
     /// Enable the profiler and output results to the specified path.

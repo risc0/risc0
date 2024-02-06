@@ -411,6 +411,7 @@ impl<'a> ExecutorImpl<'a> {
             session_cycles.total,
             pre_state,
             post_state,
+            self.env.segment_path.clone(),
         );
 
         tracing::info_span!("executor").in_scope(|| {

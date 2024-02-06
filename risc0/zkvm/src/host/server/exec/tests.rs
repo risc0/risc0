@@ -236,7 +236,7 @@ fn bigint_accel() {
         let session = exec.run().unwrap();
         assert_eq!(session.exit_code, ExitCode::Halted(0));
         assert_eq!(
-            session.journal.unwrap().bytes.as_slice(),
+            session.journal.clone().unwrap().bytes.as_slice(),
             bytemuck::cast_slice::<u32, u8>(case.expected().as_slice())
         );
     }
@@ -307,7 +307,7 @@ fn posix_style_read() {
         let session = exec.run().unwrap();
         assert_eq!(session.exit_code, ExitCode::Halted(0));
 
-        let actual: Vec<u8> = session.journal.unwrap().decode().unwrap();
+        let actual: Vec<u8> = session.journal.clone().unwrap().decode().unwrap();
         assert_eq!(
             from_utf8(&actual).unwrap(),
             from_utf8(&expected).unwrap(),
@@ -368,7 +368,8 @@ fn large_io_words() {
     let session = exec.run().unwrap();
     assert_eq!(session.exit_code, ExitCode::Halted(0));
 
-    let actual: &[u32] = bytemuck::cast_slice(&session.journal.as_ref().unwrap().bytes);
+    let ref journal = session.journal;
+    let actual: &[u32] = bytemuck::cast_slice(&journal.as_ref().unwrap().bytes);
     assert_eq!(actual, expected);
 }
 
@@ -646,7 +647,7 @@ fn large_sha() {
         .unwrap();
     let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
     let session = exec.run().unwrap();
-    let actual = hex::encode(Digest::try_from(session.journal.unwrap().bytes).unwrap());
+    let actual = hex::encode(Digest::try_from(session.journal.clone().unwrap().bytes).unwrap());
     assert_eq!(expected, actual);
 }
 
@@ -697,7 +698,8 @@ ENV_VAR3",
         .unwrap();
     let mut exec = ExecutorImpl::from_elf(env, STANDARD_LIB_ELF).unwrap();
     let session = exec.run().unwrap();
-    let actual = &session.journal.as_ref().unwrap().bytes;
+    let ref journal = session.journal;
+    let actual = &journal.as_ref().unwrap().bytes;
     assert_eq!(
         from_utf8(actual).unwrap(),
         r"ENV_VAR1=val1
@@ -727,9 +729,13 @@ fn args() {
             .unwrap();
         let mut exec = ExecutorImpl::from_elf(env, STANDARD_LIB_ELF).unwrap();
         let session = exec.run().unwrap();
-        let output: Vec<String> = session.journal.unwrap().decode().unwrap();
         assert_eq!(
-            output,
+            session
+                .journal
+                .clone()
+                .unwrap()
+                .decode::<Vec<String>>()
+                .unwrap(),
             args_arr
                 .into_iter()
                 .map(|s| s.to_string())
@@ -771,7 +777,7 @@ fn slice_io() {
             .unwrap();
         let mut exec = ExecutorImpl::from_elf(env, SLICE_IO_ELF).unwrap();
         let session = exec.run().unwrap();
-        assert_eq!(session.journal.unwrap().bytes, slice);
+        assert_eq!(session.journal.clone().unwrap().bytes, slice);
     };
 
     run(b"");

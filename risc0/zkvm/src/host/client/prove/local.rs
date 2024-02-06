@@ -56,7 +56,8 @@ impl Executor for LocalProver {
         let mut exec = ExecutorImpl::from_elf(env, elf)?;
         let session = exec.run()?;
         let mut segments = Vec::new();
-        for segment in session.segments {
+        let ref session_segments = session.segments;
+        for segment in session_segments {
             let segment = segment.resolve()?;
             segments.push(SegmentInfo {
                 po2: segment.po2,
@@ -65,7 +66,7 @@ impl Executor for LocalProver {
         }
         Ok(SessionInfo {
             segments,
-            journal: session.journal.unwrap_or_default().into(),
+            journal: session.journal.clone().unwrap_or_default().into(),
             exit_code: session.exit_code,
         })
     }

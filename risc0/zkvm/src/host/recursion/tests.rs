@@ -192,7 +192,7 @@ fn test_recursion_lift_join_identity_e2e() {
     // Validate the Session rollup + journal data
     let rollup_receipt = Receipt::new(
         InnerReceipt::Succinct(rollup),
-        session.journal.unwrap().bytes,
+        session.journal.clone().unwrap().bytes,
     );
     rollup_receipt.verify(MULTI_TEST_ID).unwrap();
 }
