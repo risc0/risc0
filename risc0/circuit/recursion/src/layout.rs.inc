@@ -562,7 +562,7 @@ impl risc0_zkp::layout::Component for RecursionTop {
         Ok(())
     }
 }
-pub static LAYOUT: RecursionTop = RecursionTop {
+pub const LAYOUT: &RecursionTop = &RecursionTop {
     code: &RecursionCode {
         write_addr: &CodeReg { offset: 0 },
         inst: &Mux {

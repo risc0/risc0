@@ -673,41 +673,41 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x319 = args[2][5 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("zirgen/circuit/recursion/wom.cpp":12:3)
   MixState x320{x281.tot + x281.mul * x319, x281.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x321 = args[2][6 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x322{x320.tot + x320.mul * x321, x320.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x323 = args[2][7 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x324{x322.tot + x322.mul * x323, x322.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x325 = args[2][8 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x326{x324.tot + x324.mul * x325, x324.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x327 = args[2][9 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x328{x326.tot + x326.mul * x327, x326.mul * (*mix)};
   // loc("zirgen/circuit/recursion/wom.cpp":12:3)
   auto x329 = args[2][10 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("zirgen/circuit/recursion/wom.cpp":12:3)
   MixState x330{x328.tot + x328.mul * x329, x328.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x331 = args[2][11 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x332{x330.tot + x330.mul * x331, x330.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x333 = args[2][12 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x334{x332.tot + x332.mul * x333, x332.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x335 = args[2][13 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x336{x334.tot + x334.mul * x335, x334.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x337 = args[2][14 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x338{x336.tot + x336.mul * x337, x336.mul * (*mix)};
   // loc("zirgen/circuit/recursion/wom.cpp":87:3)
   auto x339 = args[2][15 * steps + ((cycle - kInvRate * 0) & mask)];
@@ -715,27 +715,27 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x340 = x339 - x283;
   // loc("zirgen/circuit/recursion/wom.cpp":87:3)
   MixState x341{x338.tot + x338.mul * x340, x338.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x342 = args[2][16 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x343 = x342 - x315;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x344{x341.tot + x341.mul * x343, x341.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x345 = args[2][17 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x346 = x345 - x316;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x347{x344.tot + x344.mul * x346, x344.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x348 = args[2][18 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x349 = x348 - x317;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x350{x347.tot + x347.mul * x349, x347.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x351 = args[2][19 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x352{x350.tot + x350.mul * x351, x350.mul * (*mix)};
   // loc("zirgen/circuit/recursion/micro.cpp":19:44)
   MixState x353{x314.tot + x318 * x352.tot * x314.mul, x314.mul * x352.mul};
@@ -757,21 +757,21 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x361 = x327 + x337;
   // loc("zirgen/circuit/recursion/wom.cpp":87:3)
   MixState x362{x357.tot + x357.mul * x340, x357.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x363 = x342 - x358;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x364{x362.tot + x362.mul * x363, x362.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x365 = x345 - x359;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x366{x364.tot + x364.mul * x365, x364.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x367 = x348 - x360;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x368{x366.tot + x366.mul * x367, x366.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x369 = x351 - x361;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x370{x368.tot + x368.mul * x369, x368.mul * (*mix)};
   // loc("zirgen/circuit/recursion/micro.cpp":25:42)
   MixState x371{x353.tot + x285 * x370.tot * x353.mul, x353.mul * x370.mul};
@@ -783,21 +783,21 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x374 = x325 - x335;
   // loc("zirgen/circuit/recursion/micro.cpp":34:30)
   auto x375 = x327 - x337;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x376 = x342 - x372;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x377{x362.tot + x362.mul * x376, x362.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x378 = x345 - x373;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x379{x377.tot + x377.mul * x378, x377.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x380 = x348 - x374;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x381{x379.tot + x379.mul * x380, x379.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x382 = x351 - x375;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x383{x381.tot + x381.mul * x382, x381.mul * (*mix)};
   // loc("zirgen/circuit/recursion/micro.cpp":31:42)
   MixState x384{x371.tot + x286 * x383.tot * x371.mul, x371.mul * x383.mul};
@@ -863,21 +863,21 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x414 = x327 * x331;
   // loc("zirgen/circuit/recursion/micro.cpp":40:30)
   auto x415 = x413 + x414;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x416 = x342 - x392;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x417{x362.tot + x362.mul * x416, x362.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x418 = x345 - x400;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x419{x417.tot + x417.mul * x418, x417.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x420 = x348 - x408;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x421{x419.tot + x419.mul * x420, x419.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x422 = x351 - x415;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x423{x421.tot + x421.mul * x422, x421.mul * (*mix)};
   // loc("zirgen/circuit/recursion/micro.cpp":37:42)
   MixState x424{x384.tot + x289 * x423.tot * x384.mul, x384.mul * x423.mul};
@@ -885,199 +885,199 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x425 = x292 * x316;
   // loc("zirgen/circuit/recursion/wom.cpp":12:3)
   MixState x426{x355.tot + x355.mul * x329, x355.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x427{x426.tot + x426.mul * x331, x426.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x428{x427.tot + x427.mul * x333, x427.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x429{x428.tot + x428.mul * x335, x428.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x430{x429.tot + x429.mul * x337, x429.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x431 = x321 * x342;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x432 = x323 * x351;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x433 = x325 * x348;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x434 = x432 + x433;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x435 = x327 * x345;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x436 = x434 + x435;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x437 = x436 * x11;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x438 = x431 + x437;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x439 = x321 * x345;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x440 = x323 * x342;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x441 = x439 + x440;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x442 = x325 * x351;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x443 = x327 * x348;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x444 = x442 + x443;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x445 = x444 * x11;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x446 = x441 + x445;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x447 = x321 * x348;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x448 = x323 * x345;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x449 = x447 + x448;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x450 = x325 * x342;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x451 = x449 + x450;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x452 = x327 * x351;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x453 = x452 * x11;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x454 = x451 + x453;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x455 = x321 * x351;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x456 = x323 * x348;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x457 = x455 + x456;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x458 = x325 * x345;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x459 = x457 + x458;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x460 = x327 * x342;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x461 = x459 + x460;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:8)
   auto x462 = x1 - x438;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:8)
   MixState x463{x430.tot + x430.mul * x462, x430.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":50:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:8)
   auto x464 = x0 - x446;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:8)
   MixState x465{x463.tot + x463.mul * x464, x463.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":50:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:8)
   auto x466 = x0 - x454;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:8)
   MixState x467{x465.tot + x465.mul * x466, x465.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":50:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:8)
   auto x468 = x0 - x461;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:8)
   MixState x469{x467.tot + x467.mul * x468, x467.mul * (*mix)};
   // loc("zirgen/circuit/recursion/micro.cpp":43:56)
   MixState x470{x424.tot + x425 * x469.tot * x424.mul, x424.mul * x469.mul};
-  // loc("zirgen/circuit/recursion/micro.cpp":52:62)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:62)
   auto x471 = x1 - x316;
-  // loc("zirgen/circuit/recursion/micro.cpp":52:62)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:62)
   auto x472 = x292 * x471;
   // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[0](recursion::MicroOp)/extra(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
   auto x473 = args[2][101 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("zirgen/circuit/recursion/micro.cpp":63:19)
+  // loc("zirgen/circuit/recursion/micro.cpp":61:19)
   auto x474 = x1 - x342;
-  // loc("zirgen/circuit/recursion/micro.cpp":63:9)
+  // loc("zirgen/circuit/recursion/micro.cpp":61:9)
   auto x475 = x342 * x474;
-  // loc("zirgen/circuit/recursion/micro.cpp":63:9)
+  // loc("zirgen/circuit/recursion/micro.cpp":61:9)
   MixState x476{x430.tot + x430.mul * x475, x430.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":65:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":63:8)
   auto x477 = x473 * x321;
-  // loc("zirgen/circuit/recursion/micro.cpp":65:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":63:8)
   auto x478 = x477 - x474;
-  // loc("zirgen/circuit/recursion/micro.cpp":65:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":63:8)
   MixState x479{x476.tot + x476.mul * x478, x476.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":67:9)
+  // loc("zirgen/circuit/recursion/micro.cpp":65:9)
   MixState x480{x479.tot + x479.mul * x431, x479.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":52:62)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:62)
   MixState x481{x470.tot + x472 * x480.tot * x470.mul, x470.mul * x480.mul};
-  // loc("zirgen/circuit/recursion/micro.cpp":75:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":73:8)
   auto x482 = x0 - x342;
-  // loc("zirgen/circuit/recursion/micro.cpp":75:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":73:8)
   MixState x483{x383.tot + x383.mul * x482, x383.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":75:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":73:8)
   auto x484 = x0 - x345;
-  // loc("zirgen/circuit/recursion/micro.cpp":75:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":73:8)
   MixState x485{x483.tot + x483.mul * x484, x483.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":75:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":73:8)
   auto x486 = x0 - x348;
-  // loc("zirgen/circuit/recursion/micro.cpp":75:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":73:8)
   MixState x487{x485.tot + x485.mul * x486, x485.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":75:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":73:8)
   auto x488 = x0 - x351;
-  // loc("zirgen/circuit/recursion/micro.cpp":75:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":73:8)
   MixState x489{x487.tot + x487.mul * x488, x487.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":70:41)
+  // loc("zirgen/circuit/recursion/micro.cpp":68:41)
   MixState x490{x481.tot + x295 * x489.tot * x481.mul, x481.mul * x489.mul};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x491{x341.tot + x341.mul * x342, x341.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x492{x491.tot + x491.mul * x345, x491.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x493{x492.tot + x492.mul * x348, x492.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x494{x493.tot + x493.mul * x351, x493.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":77:54)
+  // loc("zirgen/circuit/recursion/micro.cpp":75:54)
   MixState x495{x490.tot + x298 * x494.tot * x490.mul, x490.mul * x494.mul};
-  // loc("zirgen/circuit/recursion/micro.cpp":98:9)
+  // loc("zirgen/circuit/recursion/micro.cpp":94:9)
   auto x496 = x315 * x345;
-  // loc("zirgen/circuit/recursion/micro.cpp":98:9)
+  // loc("zirgen/circuit/recursion/micro.cpp":94:9)
   MixState x497{x338.tot + x338.mul * x496, x338.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":99:9)
+  // loc("zirgen/circuit/recursion/micro.cpp":95:9)
   auto x498 = x316 * x348;
-  // loc("zirgen/circuit/recursion/micro.cpp":99:9)
+  // loc("zirgen/circuit/recursion/micro.cpp":95:9)
   MixState x499{x497.tot + x497.mul * x498, x497.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":100:9)
+  // loc("zirgen/circuit/recursion/micro.cpp":96:9)
   auto x500 = x316 * x351;
-  // loc("zirgen/circuit/recursion/micro.cpp":100:9)
+  // loc("zirgen/circuit/recursion/micro.cpp":96:9)
   MixState x501{x499.tot + x499.mul * x500, x499.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":86:52)
+  // loc("zirgen/circuit/recursion/micro.cpp":82:52)
   MixState x502{x495.tot + x301 * x501.tot * x495.mul, x495.mul * x501.mul};
-  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[2](recursion::MicroOp)/extra(Reg)"("zirgen/circuit/recursion/micro.cpp":111:71))
+  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[2](recursion::MicroOp)/extra(Reg)"("zirgen/circuit/recursion/micro.cpp":107:71))
   auto x503 = args[2][125 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("zirgen/circuit/recursion/micro.cpp":111:15)
+  // loc("zirgen/circuit/recursion/micro.cpp":107:15)
   auto x504 = x317 * x503;
-  // loc("zirgen/circuit/recursion/micro.cpp":113:11)
+  // loc("zirgen/circuit/recursion/micro.cpp":109:11)
   auto x505 = x504 * x12;
-  // loc("zirgen/circuit/recursion/micro.cpp":113:11)
+  // loc("zirgen/circuit/recursion/micro.cpp":109:11)
   auto x506 = x505 + x323;
-  // loc("zirgen/circuit/recursion/micro.cpp":114:11)
+  // loc("zirgen/circuit/recursion/micro.cpp":110:11)
   auto x507 = x506 * x12;
-  // loc("zirgen/circuit/recursion/micro.cpp":114:11)
+  // loc("zirgen/circuit/recursion/micro.cpp":110:11)
   auto x508 = x507 + x321;
-  // loc("zirgen/circuit/recursion/micro.cpp":115:11)
+  // loc("zirgen/circuit/recursion/micro.cpp":111:11)
   auto x509 = x508 * x12;
-  // loc("zirgen/circuit/recursion/micro.cpp":115:11)
+  // loc("zirgen/circuit/recursion/micro.cpp":111:11)
   auto x510 = x509 + x333;
-  // loc("zirgen/circuit/recursion/micro.cpp":116:11)
+  // loc("zirgen/circuit/recursion/micro.cpp":112:11)
   auto x511 = x510 * x12;
-  // loc("zirgen/circuit/recursion/micro.cpp":116:11)
+  // loc("zirgen/circuit/recursion/micro.cpp":112:11)
   auto x512 = x511 + x331;
-  // loc("zirgen/circuit/recursion/micro.cpp":118:5)
+  // loc("zirgen/circuit/recursion/micro.cpp":114:5)
   auto x513 = x473 - x512;
-  // loc("zirgen/circuit/recursion/micro.cpp":118:5)
+  // loc("zirgen/circuit/recursion/micro.cpp":114:5)
   MixState x514{x357.tot + x357.mul * x513, x357.mul * (*mix)};
   // loc("zirgen/circuit/recursion/wom.cpp":87:3)
   MixState x515{x514.tot + x514.mul * x340, x514.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x516 = x342 - x512;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x517{x515.tot + x515.mul * x516, x515.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x518{x517.tot + x517.mul * x345, x517.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x519{x518.tot + x518.mul * x348, x518.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x520{x519.tot + x519.mul * x351, x519.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":102:46)
+  // loc("zirgen/circuit/recursion/micro.cpp":98:46)
   MixState x521{x502.tot + x304 * x520.tot * x502.mul, x502.mul * x520.mul};
-  // loc("zirgen/circuit/recursion/micro.cpp":123:31)
+  // loc("zirgen/circuit/recursion/micro.cpp":119:31)
   auto x522 = x317 * x321;
-  // loc("zirgen/circuit/recursion/micro.cpp":123:17)
+  // loc("zirgen/circuit/recursion/micro.cpp":119:17)
   auto x523 = x316 + x522;
   // loc("zirgen/circuit/recursion/wom.cpp":82:3)
   auto x524 = x329 - x523;
@@ -1085,63 +1085,63 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   MixState x525{x355.tot + x355.mul * x524, x355.mul * (*mix)};
   // loc("zirgen/circuit/recursion/wom.cpp":87:3)
   MixState x526{x525.tot + x525.mul * x340, x525.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x527 = x342 - x331;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x528{x526.tot + x526.mul * x527, x526.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x529 = x345 - x333;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x530{x528.tot + x528.mul * x529, x528.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x531 = x348 - x335;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x532{x530.tot + x530.mul * x531, x530.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x533 = x351 - x337;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x534{x532.tot + x532.mul * x533, x532.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":121:45)
+  // loc("zirgen/circuit/recursion/micro.cpp":117:45)
   MixState x535{x521.tot + x307 * x534.tot * x521.mul, x521.mul * x534.mul};
-  // loc("zirgen/circuit/recursion/micro.cpp":136:15)
+  // loc("zirgen/circuit/recursion/micro.cpp":134:15)
   auto x536 = x316 * x317;
-  // loc("zirgen/circuit/recursion/micro.cpp":136:15)
+  // loc("zirgen/circuit/recursion/micro.cpp":134:15)
   auto x537 = x536 * x327;
-  // loc("zirgen/circuit/recursion/micro.cpp":137:30)
+  // loc("zirgen/circuit/recursion/micro.cpp":135:30)
   auto x538 = x1 - x317;
-  // loc("zirgen/circuit/recursion/micro.cpp":137:15)
+  // loc("zirgen/circuit/recursion/micro.cpp":135:15)
   auto x539 = x316 * x538;
-  // loc("zirgen/circuit/recursion/micro.cpp":137:15)
+  // loc("zirgen/circuit/recursion/micro.cpp":135:15)
   auto x540 = x539 * x325;
-  // loc("zirgen/circuit/recursion/micro.cpp":136:15)
+  // loc("zirgen/circuit/recursion/micro.cpp":134:15)
   auto x541 = x537 + x540;
-  // loc("zirgen/circuit/recursion/micro.cpp":138:15)
+  // loc("zirgen/circuit/recursion/micro.cpp":136:15)
   auto x542 = x471 * x317;
-  // loc("zirgen/circuit/recursion/micro.cpp":138:15)
+  // loc("zirgen/circuit/recursion/micro.cpp":136:15)
   auto x543 = x542 * x323;
-  // loc("zirgen/circuit/recursion/micro.cpp":136:15)
+  // loc("zirgen/circuit/recursion/micro.cpp":134:15)
   auto x544 = x541 + x543;
-  // loc("zirgen/circuit/recursion/micro.cpp":139:15)
+  // loc("zirgen/circuit/recursion/micro.cpp":137:15)
   auto x545 = x471 * x538;
-  // loc("zirgen/circuit/recursion/micro.cpp":139:15)
+  // loc("zirgen/circuit/recursion/micro.cpp":137:15)
   auto x546 = x545 * x321;
-  // loc("zirgen/circuit/recursion/micro.cpp":136:15)
+  // loc("zirgen/circuit/recursion/micro.cpp":134:15)
   auto x547 = x544 + x546;
   // loc("zirgen/circuit/recursion/wom.cpp":87:3)
   MixState x548{x430.tot + x430.mul * x340, x430.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x549 = x342 - x547;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x550{x548.tot + x548.mul * x549, x548.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x551{x550.tot + x550.mul * x345, x550.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x552{x551.tot + x551.mul * x348, x551.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x553{x552.tot + x552.mul * x351, x552.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":133:46)
+  // loc("zirgen/circuit/recursion/micro.cpp":130:46)
   MixState x554{x535.tot + x310 * x553.tot * x535.mul, x535.mul * x553.mul};
-  // loc("zirgen/circuit/recursion/micro.cpp":155:34)
+  // loc("zirgen/circuit/recursion/micro.cpp":153:34)
   auto x555 = x283 + x1;
   // loc("top(recursion::Top)/code(recursion::Code)/inst(Mux)/micro_ops(recursion::MicroInsts)/inst[1](recursion::MicroInst)/opcode(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
   auto x556 = args[0][11 * steps + ((cycle - kInvRate * 0) & mask)];
@@ -1217,41 +1217,41 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x591 = args[2][20 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("zirgen/circuit/recursion/wom.cpp":12:3)
   MixState x592{x281.tot + x281.mul * x591, x281.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x593 = args[2][21 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x594{x592.tot + x592.mul * x593, x592.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x595 = args[2][22 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x596{x594.tot + x594.mul * x595, x594.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x597 = args[2][23 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x598{x596.tot + x596.mul * x597, x596.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x599 = args[2][24 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x600{x598.tot + x598.mul * x599, x598.mul * (*mix)};
   // loc("zirgen/circuit/recursion/wom.cpp":12:3)
   auto x601 = args[2][25 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("zirgen/circuit/recursion/wom.cpp":12:3)
   MixState x602{x600.tot + x600.mul * x601, x600.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x603 = args[2][26 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x604{x602.tot + x602.mul * x603, x602.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x605 = args[2][27 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x606{x604.tot + x604.mul * x605, x604.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x607 = args[2][28 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x608{x606.tot + x606.mul * x607, x606.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x609 = args[2][29 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x610{x608.tot + x608.mul * x609, x608.mul * (*mix)};
   // loc("zirgen/circuit/recursion/wom.cpp":87:3)
   auto x611 = args[2][30 * steps + ((cycle - kInvRate * 0) & mask)];
@@ -1259,27 +1259,27 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x612 = x611 - x555;
   // loc("zirgen/circuit/recursion/wom.cpp":87:3)
   MixState x613{x610.tot + x610.mul * x612, x610.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x614 = args[2][31 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x615 = x614 - x587;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x616{x613.tot + x613.mul * x615, x613.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x617 = args[2][32 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x618 = x617 - x588;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x619{x616.tot + x616.mul * x618, x616.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x620 = args[2][33 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x621 = x620 - x589;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x622{x619.tot + x619.mul * x621, x619.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x623 = args[2][34 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x624{x622.tot + x622.mul * x623, x622.mul * (*mix)};
   // loc("zirgen/circuit/recursion/micro.cpp":19:44)
   MixState x625{x586.tot + x590 * x624.tot * x586.mul, x586.mul * x624.mul};
@@ -1301,21 +1301,21 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x633 = x599 + x609;
   // loc("zirgen/circuit/recursion/wom.cpp":87:3)
   MixState x634{x629.tot + x629.mul * x612, x629.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x635 = x614 - x630;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x636{x634.tot + x634.mul * x635, x634.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x637 = x617 - x631;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x638{x636.tot + x636.mul * x637, x636.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x639 = x620 - x632;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x640{x638.tot + x638.mul * x639, x638.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x641 = x623 - x633;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x642{x640.tot + x640.mul * x641, x640.mul * (*mix)};
   // loc("zirgen/circuit/recursion/micro.cpp":25:42)
   MixState x643{x625.tot + x557 * x642.tot * x625.mul, x625.mul * x642.mul};
@@ -1327,21 +1327,21 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x646 = x597 - x607;
   // loc("zirgen/circuit/recursion/micro.cpp":34:30)
   auto x647 = x599 - x609;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x648 = x614 - x644;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x649{x634.tot + x634.mul * x648, x634.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x650 = x617 - x645;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x651{x649.tot + x649.mul * x650, x649.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x652 = x620 - x646;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x653{x651.tot + x651.mul * x652, x651.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x654 = x623 - x647;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x655{x653.tot + x653.mul * x654, x653.mul * (*mix)};
   // loc("zirgen/circuit/recursion/micro.cpp":31:42)
   MixState x656{x643.tot + x558 * x655.tot * x643.mul, x643.mul * x655.mul};
@@ -1407,21 +1407,21 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x686 = x599 * x603;
   // loc("zirgen/circuit/recursion/micro.cpp":40:30)
   auto x687 = x685 + x686;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x688 = x614 - x664;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x689{x634.tot + x634.mul * x688, x634.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x690 = x617 - x672;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x691{x689.tot + x689.mul * x690, x689.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x692 = x620 - x680;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x693{x691.tot + x691.mul * x692, x691.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x694 = x623 - x687;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x695{x693.tot + x693.mul * x694, x693.mul * (*mix)};
   // loc("zirgen/circuit/recursion/micro.cpp":37:42)
   MixState x696{x656.tot + x561 * x695.tot * x656.mul, x656.mul * x695.mul};
@@ -1429,199 +1429,199 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x697 = x564 * x588;
   // loc("zirgen/circuit/recursion/wom.cpp":12:3)
   MixState x698{x627.tot + x627.mul * x601, x627.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x699{x698.tot + x698.mul * x603, x698.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x700{x699.tot + x699.mul * x605, x699.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x701{x700.tot + x700.mul * x607, x700.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x702{x701.tot + x701.mul * x609, x701.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x703 = x593 * x614;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x704 = x595 * x623;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x705 = x597 * x620;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x706 = x704 + x705;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x707 = x599 * x617;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x708 = x706 + x707;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x709 = x708 * x11;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x710 = x703 + x709;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x711 = x593 * x617;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x712 = x595 * x614;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x713 = x711 + x712;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x714 = x597 * x623;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x715 = x599 * x620;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x716 = x714 + x715;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x717 = x716 * x11;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x718 = x713 + x717;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x719 = x593 * x620;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x720 = x595 * x617;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x721 = x719 + x720;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x722 = x597 * x614;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x723 = x721 + x722;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x724 = x599 * x623;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x725 = x724 * x11;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x726 = x723 + x725;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x727 = x593 * x623;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x728 = x595 * x620;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x729 = x727 + x728;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x730 = x597 * x617;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x731 = x729 + x730;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x732 = x599 * x614;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x733 = x731 + x732;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:8)
   auto x734 = x1 - x710;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:8)
   MixState x735{x702.tot + x702.mul * x734, x702.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":50:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:8)
   auto x736 = x0 - x718;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:8)
   MixState x737{x735.tot + x735.mul * x736, x735.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":50:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:8)
   auto x738 = x0 - x726;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:8)
   MixState x739{x737.tot + x737.mul * x738, x737.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":50:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:8)
   auto x740 = x0 - x733;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:8)
   MixState x741{x739.tot + x739.mul * x740, x739.mul * (*mix)};
   // loc("zirgen/circuit/recursion/micro.cpp":43:56)
   MixState x742{x696.tot + x697 * x741.tot * x696.mul, x696.mul * x741.mul};
-  // loc("zirgen/circuit/recursion/micro.cpp":52:62)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:62)
   auto x743 = x1 - x588;
-  // loc("zirgen/circuit/recursion/micro.cpp":52:62)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:62)
   auto x744 = x564 * x743;
   // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[1](recursion::MicroOp)/extra(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
   auto x745 = args[2][113 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("zirgen/circuit/recursion/micro.cpp":63:19)
+  // loc("zirgen/circuit/recursion/micro.cpp":61:19)
   auto x746 = x1 - x614;
-  // loc("zirgen/circuit/recursion/micro.cpp":63:9)
+  // loc("zirgen/circuit/recursion/micro.cpp":61:9)
   auto x747 = x614 * x746;
-  // loc("zirgen/circuit/recursion/micro.cpp":63:9)
+  // loc("zirgen/circuit/recursion/micro.cpp":61:9)
   MixState x748{x702.tot + x702.mul * x747, x702.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":65:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":63:8)
   auto x749 = x745 * x593;
-  // loc("zirgen/circuit/recursion/micro.cpp":65:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":63:8)
   auto x750 = x749 - x746;
-  // loc("zirgen/circuit/recursion/micro.cpp":65:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":63:8)
   MixState x751{x748.tot + x748.mul * x750, x748.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":67:9)
+  // loc("zirgen/circuit/recursion/micro.cpp":65:9)
   MixState x752{x751.tot + x751.mul * x703, x751.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":52:62)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:62)
   MixState x753{x742.tot + x744 * x752.tot * x742.mul, x742.mul * x752.mul};
-  // loc("zirgen/circuit/recursion/micro.cpp":75:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":73:8)
   auto x754 = x0 - x614;
-  // loc("zirgen/circuit/recursion/micro.cpp":75:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":73:8)
   MixState x755{x655.tot + x655.mul * x754, x655.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":75:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":73:8)
   auto x756 = x0 - x617;
-  // loc("zirgen/circuit/recursion/micro.cpp":75:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":73:8)
   MixState x757{x755.tot + x755.mul * x756, x755.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":75:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":73:8)
   auto x758 = x0 - x620;
-  // loc("zirgen/circuit/recursion/micro.cpp":75:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":73:8)
   MixState x759{x757.tot + x757.mul * x758, x757.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":75:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":73:8)
   auto x760 = x0 - x623;
-  // loc("zirgen/circuit/recursion/micro.cpp":75:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":73:8)
   MixState x761{x759.tot + x759.mul * x760, x759.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":70:41)
+  // loc("zirgen/circuit/recursion/micro.cpp":68:41)
   MixState x762{x753.tot + x567 * x761.tot * x753.mul, x753.mul * x761.mul};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x763{x613.tot + x613.mul * x614, x613.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x764{x763.tot + x763.mul * x617, x763.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x765{x764.tot + x764.mul * x620, x764.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x766{x765.tot + x765.mul * x623, x765.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":77:54)
+  // loc("zirgen/circuit/recursion/micro.cpp":75:54)
   MixState x767{x762.tot + x570 * x766.tot * x762.mul, x762.mul * x766.mul};
-  // loc("zirgen/circuit/recursion/micro.cpp":98:9)
+  // loc("zirgen/circuit/recursion/micro.cpp":94:9)
   auto x768 = x587 * x617;
-  // loc("zirgen/circuit/recursion/micro.cpp":98:9)
+  // loc("zirgen/circuit/recursion/micro.cpp":94:9)
   MixState x769{x610.tot + x610.mul * x768, x610.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":99:9)
+  // loc("zirgen/circuit/recursion/micro.cpp":95:9)
   auto x770 = x588 * x620;
-  // loc("zirgen/circuit/recursion/micro.cpp":99:9)
+  // loc("zirgen/circuit/recursion/micro.cpp":95:9)
   MixState x771{x769.tot + x769.mul * x770, x769.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":100:9)
+  // loc("zirgen/circuit/recursion/micro.cpp":96:9)
   auto x772 = x588 * x623;
-  // loc("zirgen/circuit/recursion/micro.cpp":100:9)
+  // loc("zirgen/circuit/recursion/micro.cpp":96:9)
   MixState x773{x771.tot + x771.mul * x772, x771.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":86:52)
+  // loc("zirgen/circuit/recursion/micro.cpp":82:52)
   MixState x774{x767.tot + x573 * x773.tot * x767.mul, x767.mul * x773.mul};
-  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[0](recursion::MicroOp)/extra(Reg)"("zirgen/circuit/recursion/micro.cpp":111:71))
+  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[0](recursion::MicroOp)/extra(Reg)"("zirgen/circuit/recursion/micro.cpp":107:71))
   auto x775 = args[2][101 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("zirgen/circuit/recursion/micro.cpp":111:15)
+  // loc("zirgen/circuit/recursion/micro.cpp":107:15)
   auto x776 = x589 * x775;
-  // loc("zirgen/circuit/recursion/micro.cpp":113:11)
+  // loc("zirgen/circuit/recursion/micro.cpp":109:11)
   auto x777 = x776 * x12;
-  // loc("zirgen/circuit/recursion/micro.cpp":113:11)
+  // loc("zirgen/circuit/recursion/micro.cpp":109:11)
   auto x778 = x777 + x595;
-  // loc("zirgen/circuit/recursion/micro.cpp":114:11)
+  // loc("zirgen/circuit/recursion/micro.cpp":110:11)
   auto x779 = x778 * x12;
-  // loc("zirgen/circuit/recursion/micro.cpp":114:11)
+  // loc("zirgen/circuit/recursion/micro.cpp":110:11)
   auto x780 = x779 + x593;
-  // loc("zirgen/circuit/recursion/micro.cpp":115:11)
+  // loc("zirgen/circuit/recursion/micro.cpp":111:11)
   auto x781 = x780 * x12;
-  // loc("zirgen/circuit/recursion/micro.cpp":115:11)
+  // loc("zirgen/circuit/recursion/micro.cpp":111:11)
   auto x782 = x781 + x605;
-  // loc("zirgen/circuit/recursion/micro.cpp":116:11)
+  // loc("zirgen/circuit/recursion/micro.cpp":112:11)
   auto x783 = x782 * x12;
-  // loc("zirgen/circuit/recursion/micro.cpp":116:11)
+  // loc("zirgen/circuit/recursion/micro.cpp":112:11)
   auto x784 = x783 + x603;
-  // loc("zirgen/circuit/recursion/micro.cpp":118:5)
+  // loc("zirgen/circuit/recursion/micro.cpp":114:5)
   auto x785 = x745 - x784;
-  // loc("zirgen/circuit/recursion/micro.cpp":118:5)
+  // loc("zirgen/circuit/recursion/micro.cpp":114:5)
   MixState x786{x629.tot + x629.mul * x785, x629.mul * (*mix)};
   // loc("zirgen/circuit/recursion/wom.cpp":87:3)
   MixState x787{x786.tot + x786.mul * x612, x786.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x788 = x614 - x784;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x789{x787.tot + x787.mul * x788, x787.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x790{x789.tot + x789.mul * x617, x789.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x791{x790.tot + x790.mul * x620, x790.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x792{x791.tot + x791.mul * x623, x791.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":102:46)
+  // loc("zirgen/circuit/recursion/micro.cpp":98:46)
   MixState x793{x774.tot + x576 * x792.tot * x774.mul, x774.mul * x792.mul};
-  // loc("zirgen/circuit/recursion/micro.cpp":123:31)
+  // loc("zirgen/circuit/recursion/micro.cpp":119:31)
   auto x794 = x589 * x593;
-  // loc("zirgen/circuit/recursion/micro.cpp":123:17)
+  // loc("zirgen/circuit/recursion/micro.cpp":119:17)
   auto x795 = x588 + x794;
   // loc("zirgen/circuit/recursion/wom.cpp":82:3)
   auto x796 = x601 - x795;
@@ -1629,63 +1629,63 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   MixState x797{x627.tot + x627.mul * x796, x627.mul * (*mix)};
   // loc("zirgen/circuit/recursion/wom.cpp":87:3)
   MixState x798{x797.tot + x797.mul * x612, x797.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x799 = x614 - x603;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x800{x798.tot + x798.mul * x799, x798.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x801 = x617 - x605;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x802{x800.tot + x800.mul * x801, x800.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x803 = x620 - x607;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x804{x802.tot + x802.mul * x803, x802.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x805 = x623 - x609;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x806{x804.tot + x804.mul * x805, x804.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":121:45)
+  // loc("zirgen/circuit/recursion/micro.cpp":117:45)
   MixState x807{x793.tot + x579 * x806.tot * x793.mul, x793.mul * x806.mul};
-  // loc("zirgen/circuit/recursion/micro.cpp":136:15)
+  // loc("zirgen/circuit/recursion/micro.cpp":134:15)
   auto x808 = x588 * x589;
-  // loc("zirgen/circuit/recursion/micro.cpp":136:15)
+  // loc("zirgen/circuit/recursion/micro.cpp":134:15)
   auto x809 = x808 * x599;
-  // loc("zirgen/circuit/recursion/micro.cpp":137:30)
+  // loc("zirgen/circuit/recursion/micro.cpp":135:30)
   auto x810 = x1 - x589;
-  // loc("zirgen/circuit/recursion/micro.cpp":137:15)
+  // loc("zirgen/circuit/recursion/micro.cpp":135:15)
   auto x811 = x588 * x810;
-  // loc("zirgen/circuit/recursion/micro.cpp":137:15)
+  // loc("zirgen/circuit/recursion/micro.cpp":135:15)
   auto x812 = x811 * x597;
-  // loc("zirgen/circuit/recursion/micro.cpp":136:15)
+  // loc("zirgen/circuit/recursion/micro.cpp":134:15)
   auto x813 = x809 + x812;
-  // loc("zirgen/circuit/recursion/micro.cpp":138:15)
+  // loc("zirgen/circuit/recursion/micro.cpp":136:15)
   auto x814 = x743 * x589;
-  // loc("zirgen/circuit/recursion/micro.cpp":138:15)
+  // loc("zirgen/circuit/recursion/micro.cpp":136:15)
   auto x815 = x814 * x595;
-  // loc("zirgen/circuit/recursion/micro.cpp":136:15)
+  // loc("zirgen/circuit/recursion/micro.cpp":134:15)
   auto x816 = x813 + x815;
-  // loc("zirgen/circuit/recursion/micro.cpp":139:15)
+  // loc("zirgen/circuit/recursion/micro.cpp":137:15)
   auto x817 = x743 * x810;
-  // loc("zirgen/circuit/recursion/micro.cpp":139:15)
+  // loc("zirgen/circuit/recursion/micro.cpp":137:15)
   auto x818 = x817 * x593;
-  // loc("zirgen/circuit/recursion/micro.cpp":136:15)
+  // loc("zirgen/circuit/recursion/micro.cpp":134:15)
   auto x819 = x816 + x818;
   // loc("zirgen/circuit/recursion/wom.cpp":87:3)
   MixState x820{x702.tot + x702.mul * x612, x702.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x821 = x614 - x819;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x822{x820.tot + x820.mul * x821, x820.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x823{x822.tot + x822.mul * x617, x822.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x824{x823.tot + x823.mul * x620, x823.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x825{x824.tot + x824.mul * x623, x824.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":133:46)
+  // loc("zirgen/circuit/recursion/micro.cpp":130:46)
   MixState x826{x807.tot + x582 * x825.tot * x807.mul, x807.mul * x825.mul};
-  // loc("zirgen/circuit/recursion/micro.cpp":155:34)
+  // loc("zirgen/circuit/recursion/micro.cpp":153:34)
   auto x827 = x283 + x2;
   // loc("top(recursion::Top)/code(recursion::Code)/inst(Mux)/micro_ops(recursion::MicroInsts)/inst[2](recursion::MicroInst)/opcode(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
   auto x828 = args[0][15 * steps + ((cycle - kInvRate * 0) & mask)];
@@ -1761,41 +1761,41 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x863 = args[2][35 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("zirgen/circuit/recursion/wom.cpp":12:3)
   MixState x864{x281.tot + x281.mul * x863, x281.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x865 = args[2][36 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x866{x864.tot + x864.mul * x865, x864.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x867 = args[2][37 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x868{x866.tot + x866.mul * x867, x866.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x869 = args[2][38 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x870{x868.tot + x868.mul * x869, x868.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x871 = args[2][39 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x872{x870.tot + x870.mul * x871, x870.mul * (*mix)};
   // loc("zirgen/circuit/recursion/wom.cpp":12:3)
   auto x873 = args[2][40 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("zirgen/circuit/recursion/wom.cpp":12:3)
   MixState x874{x872.tot + x872.mul * x873, x872.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x875 = args[2][41 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x876{x874.tot + x874.mul * x875, x874.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x877 = args[2][42 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x878{x876.tot + x876.mul * x877, x876.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x879 = args[2][43 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x880{x878.tot + x878.mul * x879, x878.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x881 = args[2][44 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x882{x880.tot + x880.mul * x881, x880.mul * (*mix)};
   // loc("zirgen/circuit/recursion/wom.cpp":87:3)
   auto x883 = args[2][45 * steps + ((cycle - kInvRate * 0) & mask)];
@@ -1803,27 +1803,27 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x884 = x883 - x827;
   // loc("zirgen/circuit/recursion/wom.cpp":87:3)
   MixState x885{x882.tot + x882.mul * x884, x882.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x886 = args[2][46 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x887 = x886 - x859;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x888{x885.tot + x885.mul * x887, x885.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x889 = args[2][47 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x890 = x889 - x860;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x891{x888.tot + x888.mul * x890, x888.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x892 = args[2][48 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x893 = x892 - x861;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x894{x891.tot + x891.mul * x893, x891.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x895 = args[2][49 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x896{x894.tot + x894.mul * x895, x894.mul * (*mix)};
   // loc("zirgen/circuit/recursion/micro.cpp":19:44)
   MixState x897{x858.tot + x862 * x896.tot * x858.mul, x858.mul * x896.mul};
@@ -1845,21 +1845,21 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x905 = x871 + x881;
   // loc("zirgen/circuit/recursion/wom.cpp":87:3)
   MixState x906{x901.tot + x901.mul * x884, x901.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x907 = x886 - x902;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x908{x906.tot + x906.mul * x907, x906.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x909 = x889 - x903;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x910{x908.tot + x908.mul * x909, x908.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x911 = x892 - x904;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x912{x910.tot + x910.mul * x911, x910.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x913 = x895 - x905;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x914{x912.tot + x912.mul * x913, x912.mul * (*mix)};
   // loc("zirgen/circuit/recursion/micro.cpp":25:42)
   MixState x915{x897.tot + x829 * x914.tot * x897.mul, x897.mul * x914.mul};
@@ -1871,21 +1871,21 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x918 = x869 - x879;
   // loc("zirgen/circuit/recursion/micro.cpp":34:30)
   auto x919 = x871 - x881;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x920 = x886 - x916;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x921{x906.tot + x906.mul * x920, x906.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x922 = x889 - x917;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x923{x921.tot + x921.mul * x922, x921.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x924 = x892 - x918;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x925{x923.tot + x923.mul * x924, x923.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x926 = x895 - x919;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x927{x925.tot + x925.mul * x926, x925.mul * (*mix)};
   // loc("zirgen/circuit/recursion/micro.cpp":31:42)
   MixState x928{x915.tot + x830 * x927.tot * x915.mul, x915.mul * x927.mul};
@@ -1951,21 +1951,21 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x958 = x871 * x875;
   // loc("zirgen/circuit/recursion/micro.cpp":40:30)
   auto x959 = x957 + x958;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x960 = x886 - x936;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x961{x906.tot + x906.mul * x960, x906.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x962 = x889 - x944;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x963{x961.tot + x961.mul * x962, x961.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x964 = x892 - x952;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x965{x963.tot + x963.mul * x964, x963.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x966 = x895 - x959;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x967{x965.tot + x965.mul * x966, x965.mul * (*mix)};
   // loc("zirgen/circuit/recursion/micro.cpp":37:42)
   MixState x968{x928.tot + x833 * x967.tot * x928.mul, x928.mul * x967.mul};
@@ -1973,199 +1973,199 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x969 = x836 * x860;
   // loc("zirgen/circuit/recursion/wom.cpp":12:3)
   MixState x970{x899.tot + x899.mul * x873, x899.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x971{x970.tot + x970.mul * x875, x970.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x972{x971.tot + x971.mul * x877, x971.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x973{x972.tot + x972.mul * x879, x972.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x974{x973.tot + x973.mul * x881, x973.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x975 = x865 * x886;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x976 = x867 * x895;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x977 = x869 * x892;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x978 = x976 + x977;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x979 = x871 * x889;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x980 = x978 + x979;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x981 = x980 * x11;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x982 = x975 + x981;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x983 = x865 * x889;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x984 = x867 * x886;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x985 = x983 + x984;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x986 = x869 * x895;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x987 = x871 * x892;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x988 = x986 + x987;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x989 = x988 * x11;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x990 = x985 + x989;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x991 = x865 * x892;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x992 = x867 * x889;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x993 = x991 + x992;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x994 = x869 * x886;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x995 = x993 + x994;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x996 = x871 * x895;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x997 = x996 * x11;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x998 = x995 + x997;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x999 = x865 * x895;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x1000 = x867 * x892;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x1001 = x999 + x1000;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x1002 = x869 * x889;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x1003 = x1001 + x1002;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x1004 = x871 * x886;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:23)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:23)
   auto x1005 = x1003 + x1004;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:8)
   auto x1006 = x1 - x982;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:8)
   MixState x1007{x974.tot + x974.mul * x1006, x974.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":50:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:8)
   auto x1008 = x0 - x990;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:8)
   MixState x1009{x1007.tot + x1007.mul * x1008, x1007.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":50:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:8)
   auto x1010 = x0 - x998;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:8)
   MixState x1011{x1009.tot + x1009.mul * x1010, x1009.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":50:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:8)
   auto x1012 = x0 - x1005;
-  // loc("zirgen/circuit/recursion/micro.cpp":50:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":48:8)
   MixState x1013{x1011.tot + x1011.mul * x1012, x1011.mul * (*mix)};
   // loc("zirgen/circuit/recursion/micro.cpp":43:56)
   MixState x1014{x968.tot + x969 * x1013.tot * x968.mul, x968.mul * x1013.mul};
-  // loc("zirgen/circuit/recursion/micro.cpp":52:62)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:62)
   auto x1015 = x1 - x860;
-  // loc("zirgen/circuit/recursion/micro.cpp":52:62)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:62)
   auto x1016 = x836 * x1015;
   // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[2](recursion::MicroOp)/extra(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
   auto x1017 = args[2][125 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("zirgen/circuit/recursion/micro.cpp":63:19)
+  // loc("zirgen/circuit/recursion/micro.cpp":61:19)
   auto x1018 = x1 - x886;
-  // loc("zirgen/circuit/recursion/micro.cpp":63:9)
+  // loc("zirgen/circuit/recursion/micro.cpp":61:9)
   auto x1019 = x886 * x1018;
-  // loc("zirgen/circuit/recursion/micro.cpp":63:9)
+  // loc("zirgen/circuit/recursion/micro.cpp":61:9)
   MixState x1020{x974.tot + x974.mul * x1019, x974.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":65:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":63:8)
   auto x1021 = x1017 * x865;
-  // loc("zirgen/circuit/recursion/micro.cpp":65:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":63:8)
   auto x1022 = x1021 - x1018;
-  // loc("zirgen/circuit/recursion/micro.cpp":65:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":63:8)
   MixState x1023{x1020.tot + x1020.mul * x1022, x1020.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":67:9)
+  // loc("zirgen/circuit/recursion/micro.cpp":65:9)
   MixState x1024{x1023.tot + x1023.mul * x975, x1023.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":52:62)
+  // loc("zirgen/circuit/recursion/micro.cpp":50:62)
   MixState x1025{x1014.tot + x1016 * x1024.tot * x1014.mul, x1014.mul * x1024.mul};
-  // loc("zirgen/circuit/recursion/micro.cpp":75:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":73:8)
   auto x1026 = x0 - x886;
-  // loc("zirgen/circuit/recursion/micro.cpp":75:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":73:8)
   MixState x1027{x927.tot + x927.mul * x1026, x927.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":75:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":73:8)
   auto x1028 = x0 - x889;
-  // loc("zirgen/circuit/recursion/micro.cpp":75:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":73:8)
   MixState x1029{x1027.tot + x1027.mul * x1028, x1027.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":75:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":73:8)
   auto x1030 = x0 - x892;
-  // loc("zirgen/circuit/recursion/micro.cpp":75:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":73:8)
   MixState x1031{x1029.tot + x1029.mul * x1030, x1029.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":75:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":73:8)
   auto x1032 = x0 - x895;
-  // loc("zirgen/circuit/recursion/micro.cpp":75:8)
+  // loc("zirgen/circuit/recursion/micro.cpp":73:8)
   MixState x1033{x1031.tot + x1031.mul * x1032, x1031.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":70:41)
+  // loc("zirgen/circuit/recursion/micro.cpp":68:41)
   MixState x1034{x1025.tot + x839 * x1033.tot * x1025.mul, x1025.mul * x1033.mul};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x1035{x885.tot + x885.mul * x886, x885.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x1036{x1035.tot + x1035.mul * x889, x1035.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x1037{x1036.tot + x1036.mul * x892, x1036.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x1038{x1037.tot + x1037.mul * x895, x1037.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":77:54)
+  // loc("zirgen/circuit/recursion/micro.cpp":75:54)
   MixState x1039{x1034.tot + x842 * x1038.tot * x1034.mul, x1034.mul * x1038.mul};
-  // loc("zirgen/circuit/recursion/micro.cpp":98:9)
+  // loc("zirgen/circuit/recursion/micro.cpp":94:9)
   auto x1040 = x859 * x889;
-  // loc("zirgen/circuit/recursion/micro.cpp":98:9)
+  // loc("zirgen/circuit/recursion/micro.cpp":94:9)
   MixState x1041{x882.tot + x882.mul * x1040, x882.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":99:9)
+  // loc("zirgen/circuit/recursion/micro.cpp":95:9)
   auto x1042 = x860 * x892;
-  // loc("zirgen/circuit/recursion/micro.cpp":99:9)
+  // loc("zirgen/circuit/recursion/micro.cpp":95:9)
   MixState x1043{x1041.tot + x1041.mul * x1042, x1041.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":100:9)
+  // loc("zirgen/circuit/recursion/micro.cpp":96:9)
   auto x1044 = x860 * x895;
-  // loc("zirgen/circuit/recursion/micro.cpp":100:9)
+  // loc("zirgen/circuit/recursion/micro.cpp":96:9)
   MixState x1045{x1043.tot + x1043.mul * x1044, x1043.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":86:52)
+  // loc("zirgen/circuit/recursion/micro.cpp":82:52)
   MixState x1046{x1039.tot + x845 * x1045.tot * x1039.mul, x1039.mul * x1045.mul};
-  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[1](recursion::MicroOp)/extra(Reg)"("zirgen/circuit/recursion/micro.cpp":111:71))
+  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/op[1](recursion::MicroOp)/extra(Reg)"("zirgen/circuit/recursion/micro.cpp":107:71))
   auto x1047 = args[2][113 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("zirgen/circuit/recursion/micro.cpp":111:15)
+  // loc("zirgen/circuit/recursion/micro.cpp":107:15)
   auto x1048 = x861 * x1047;
-  // loc("zirgen/circuit/recursion/micro.cpp":113:11)
+  // loc("zirgen/circuit/recursion/micro.cpp":109:11)
   auto x1049 = x1048 * x12;
-  // loc("zirgen/circuit/recursion/micro.cpp":113:11)
+  // loc("zirgen/circuit/recursion/micro.cpp":109:11)
   auto x1050 = x1049 + x867;
-  // loc("zirgen/circuit/recursion/micro.cpp":114:11)
+  // loc("zirgen/circuit/recursion/micro.cpp":110:11)
   auto x1051 = x1050 * x12;
-  // loc("zirgen/circuit/recursion/micro.cpp":114:11)
+  // loc("zirgen/circuit/recursion/micro.cpp":110:11)
   auto x1052 = x1051 + x865;
-  // loc("zirgen/circuit/recursion/micro.cpp":115:11)
+  // loc("zirgen/circuit/recursion/micro.cpp":111:11)
   auto x1053 = x1052 * x12;
-  // loc("zirgen/circuit/recursion/micro.cpp":115:11)
+  // loc("zirgen/circuit/recursion/micro.cpp":111:11)
   auto x1054 = x1053 + x877;
-  // loc("zirgen/circuit/recursion/micro.cpp":116:11)
+  // loc("zirgen/circuit/recursion/micro.cpp":112:11)
   auto x1055 = x1054 * x12;
-  // loc("zirgen/circuit/recursion/micro.cpp":116:11)
+  // loc("zirgen/circuit/recursion/micro.cpp":112:11)
   auto x1056 = x1055 + x875;
-  // loc("zirgen/circuit/recursion/micro.cpp":118:5)
+  // loc("zirgen/circuit/recursion/micro.cpp":114:5)
   auto x1057 = x1017 - x1056;
-  // loc("zirgen/circuit/recursion/micro.cpp":118:5)
+  // loc("zirgen/circuit/recursion/micro.cpp":114:5)
   MixState x1058{x901.tot + x901.mul * x1057, x901.mul * (*mix)};
   // loc("zirgen/circuit/recursion/wom.cpp":87:3)
   MixState x1059{x1058.tot + x1058.mul * x884, x1058.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x1060 = x886 - x1056;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x1061{x1059.tot + x1059.mul * x1060, x1059.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x1062{x1061.tot + x1061.mul * x889, x1061.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x1063{x1062.tot + x1062.mul * x892, x1062.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x1064{x1063.tot + x1063.mul * x895, x1063.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":102:46)
+  // loc("zirgen/circuit/recursion/micro.cpp":98:46)
   MixState x1065{x1046.tot + x848 * x1064.tot * x1046.mul, x1046.mul * x1064.mul};
-  // loc("zirgen/circuit/recursion/micro.cpp":123:31)
+  // loc("zirgen/circuit/recursion/micro.cpp":119:31)
   auto x1066 = x861 * x865;
-  // loc("zirgen/circuit/recursion/micro.cpp":123:17)
+  // loc("zirgen/circuit/recursion/micro.cpp":119:17)
   auto x1067 = x860 + x1066;
   // loc("zirgen/circuit/recursion/wom.cpp":82:3)
   auto x1068 = x873 - x1067;
@@ -2173,61 +2173,61 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   MixState x1069{x899.tot + x899.mul * x1068, x899.mul * (*mix)};
   // loc("zirgen/circuit/recursion/wom.cpp":87:3)
   MixState x1070{x1069.tot + x1069.mul * x884, x1069.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x1071 = x886 - x875;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x1072{x1070.tot + x1070.mul * x1071, x1070.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x1073 = x889 - x877;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x1074{x1072.tot + x1072.mul * x1073, x1072.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x1075 = x892 - x879;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x1076{x1074.tot + x1074.mul * x1075, x1074.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x1077 = x895 - x881;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x1078{x1076.tot + x1076.mul * x1077, x1076.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":121:45)
+  // loc("zirgen/circuit/recursion/micro.cpp":117:45)
   MixState x1079{x1065.tot + x851 * x1078.tot * x1065.mul, x1065.mul * x1078.mul};
-  // loc("zirgen/circuit/recursion/micro.cpp":136:15)
+  // loc("zirgen/circuit/recursion/micro.cpp":134:15)
   auto x1080 = x860 * x861;
-  // loc("zirgen/circuit/recursion/micro.cpp":136:15)
+  // loc("zirgen/circuit/recursion/micro.cpp":134:15)
   auto x1081 = x1080 * x871;
-  // loc("zirgen/circuit/recursion/micro.cpp":137:30)
+  // loc("zirgen/circuit/recursion/micro.cpp":135:30)
   auto x1082 = x1 - x861;
-  // loc("zirgen/circuit/recursion/micro.cpp":137:15)
+  // loc("zirgen/circuit/recursion/micro.cpp":135:15)
   auto x1083 = x860 * x1082;
-  // loc("zirgen/circuit/recursion/micro.cpp":137:15)
+  // loc("zirgen/circuit/recursion/micro.cpp":135:15)
   auto x1084 = x1083 * x869;
-  // loc("zirgen/circuit/recursion/micro.cpp":136:15)
+  // loc("zirgen/circuit/recursion/micro.cpp":134:15)
   auto x1085 = x1081 + x1084;
-  // loc("zirgen/circuit/recursion/micro.cpp":138:15)
+  // loc("zirgen/circuit/recursion/micro.cpp":136:15)
   auto x1086 = x1015 * x861;
-  // loc("zirgen/circuit/recursion/micro.cpp":138:15)
+  // loc("zirgen/circuit/recursion/micro.cpp":136:15)
   auto x1087 = x1086 * x867;
-  // loc("zirgen/circuit/recursion/micro.cpp":136:15)
+  // loc("zirgen/circuit/recursion/micro.cpp":134:15)
   auto x1088 = x1085 + x1087;
-  // loc("zirgen/circuit/recursion/micro.cpp":139:15)
+  // loc("zirgen/circuit/recursion/micro.cpp":137:15)
   auto x1089 = x1015 * x1082;
-  // loc("zirgen/circuit/recursion/micro.cpp":139:15)
+  // loc("zirgen/circuit/recursion/micro.cpp":137:15)
   auto x1090 = x1089 * x865;
-  // loc("zirgen/circuit/recursion/micro.cpp":136:15)
+  // loc("zirgen/circuit/recursion/micro.cpp":134:15)
   auto x1091 = x1088 + x1090;
   // loc("zirgen/circuit/recursion/wom.cpp":87:3)
   MixState x1092{x974.tot + x974.mul * x884, x974.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x1093 = x886 - x1091;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x1094{x1092.tot + x1092.mul * x1093, x1092.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x1095{x1094.tot + x1094.mul * x889, x1094.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x1096{x1095.tot + x1095.mul * x892, x1095.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x1097{x1096.tot + x1096.mul * x895, x1096.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/micro.cpp":133:46)
+  // loc("zirgen/circuit/recursion/micro.cpp":130:46)
   MixState x1098{x1079.tot + x854 * x1097.tot * x1079.mul, x1079.mul * x1097.mul};
   // loc("./zirgen/components/mux.h":49:25)
   MixState x1099{x281.tot + x282 * x1098.tot * x281.mul, x281.mul * x1098.mul};
@@ -2239,13 +2239,13 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x1102 = x331 - x283;
   // loc("zirgen/circuit/recursion/wom.cpp":17:3)
   MixState x1103{x281.tot + x281.mul * x1102, x281.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x1104{x1103.tot + x1103.mul * x333, x1103.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x1105{x1104.tot + x1104.mul * x335, x1104.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x1106{x1105.tot + x1105.mul * x337, x1105.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x1107{x1106.tot + x1106.mul * x339, x1106.mul * (*mix)};
   // loc("./zirgen/components/mux.h":49:25)
   MixState x1108{x1101.tot + x316 * x1107.tot * x1101.mul, x1101.mul * x1107.mul};
@@ -2771,15 +2771,15 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x1368 = x593 - x283;
   // loc("zirgen/circuit/recursion/wom.cpp":87:3)
   MixState x1369{x1367.tot + x1367.mul * x1368, x1367.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x1370 = x595 - x1363;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x1371{x1369.tot + x1369.mul * x1370, x1369.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x1372{x1371.tot + x1371.mul * x597, x1371.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x1373{x1372.tot + x1372.mul * x599, x1372.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x1374{x1373.tot + x1373.mul * x601, x1373.mul * (*mix)};
   // loc("./zirgen/components/mux.h":49:25)
   MixState x1375{x1108.tot + x317 * x1374.tot * x1108.mul, x1108.mul * x1374.mul};
@@ -3229,15 +3229,15 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x1597 = x1596 + x1482;
   // loc("zirgen/circuit/recursion/wom.cpp":87:3)
   MixState x1598{x281.tot + x281.mul * x1368, x281.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x1599 = x595 - x1597;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x1600{x1598.tot + x1598.mul * x1599, x1598.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x1601{x1600.tot + x1600.mul * x597, x1600.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x1602{x1601.tot + x1601.mul * x599, x1601.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x1603{x1602.tot + x1602.mul * x601, x1602.mul * (*mix)};
   // loc("zirgen/circuit/recursion/bits.cpp":42:23)
   MixState x1604{x1595.tot + x1376 * x1603.tot * x1595.mul, x1595.mul * x1603.mul};
@@ -3255,17 +3255,17 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x1610 = x1591 * x2;
   // loc("zirgen/circuit/recursion/bits.cpp":51:19)
   auto x1611 = x1609 - x1610;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x1612 = x595 - x1608;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x1613{x1598.tot + x1598.mul * x1612, x1598.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x1614 = x597 - x1611;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x1615{x1613.tot + x1613.mul * x1614, x1613.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x1616{x1615.tot + x1615.mul * x599, x1615.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x1617{x1616.tot + x1616.mul * x601, x1616.mul * (*mix)};
   // loc("zirgen/circuit/recursion/bits.cpp":47:27)
   MixState x1618{x1604.tot + x1605 * x1617.tot * x1604.mul, x1604.mul * x1617.mul};
@@ -3335,15 +3335,15 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x1650 = x0 - x1649;
   // loc("zirgen/circuit/recursion/sha.cpp":106:15)
   auto x1651 = x1650 * x27;
-  // loc("zirgen/circuit/recursion/sha.cpp":127:20)
+  // loc("zirgen/circuit/recursion/sha.cpp":125:20)
   auto x1652 = x1651 - x327;
-  // loc("zirgen/circuit/recursion/sha.cpp":127:19)
+  // loc("zirgen/circuit/recursion/sha.cpp":125:19)
   auto x1653 = x1652 * x13;
-  // loc("zirgen/circuit/recursion/sha.cpp":128:20)
+  // loc("zirgen/circuit/recursion/sha.cpp":126:20)
   auto x1654 = x1 - x1653;
-  // loc("zirgen/circuit/recursion/sha.cpp":128:7)
+  // loc("zirgen/circuit/recursion/sha.cpp":126:7)
   auto x1655 = x1653 * x1654;
-  // loc("zirgen/circuit/recursion/sha.cpp":128:7)
+  // loc("zirgen/circuit/recursion/sha.cpp":126:7)
   MixState x1656{x1112.tot + x1112.mul * x1655, x1112.mul * (*mix)};
   // loc("zirgen/circuit/recursion/sha.cpp":104:17)
   auto x1657 = x579 * x2;
@@ -3409,15 +3409,15 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x1687 = x1651 - x1686;
   // loc("zirgen/circuit/recursion/sha.cpp":106:15)
   auto x1688 = x1687 * x27;
-  // loc("zirgen/circuit/recursion/sha.cpp":133:21)
+  // loc("zirgen/circuit/recursion/sha.cpp":129:21)
   auto x1689 = x1688 - x329;
-  // loc("zirgen/circuit/recursion/sha.cpp":133:20)
+  // loc("zirgen/circuit/recursion/sha.cpp":129:20)
   auto x1690 = x1689 * x13;
-  // loc("zirgen/circuit/recursion/sha.cpp":134:21)
+  // loc("zirgen/circuit/recursion/sha.cpp":130:21)
   auto x1691 = x1 - x1690;
-  // loc("zirgen/circuit/recursion/sha.cpp":134:7)
+  // loc("zirgen/circuit/recursion/sha.cpp":130:7)
   auto x1692 = x1690 * x1691;
-  // loc("zirgen/circuit/recursion/sha.cpp":134:7)
+  // loc("zirgen/circuit/recursion/sha.cpp":130:7)
   MixState x1693{x1656.tot + x1656.mul * x1692, x1656.mul * (*mix)};
   // loc("zirgen/circuit/recursion/sha.cpp":104:17)
   auto x1694 = x605 * x2;
@@ -3483,17 +3483,17 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x1724 = x333 - x1723;
   // loc("zirgen/circuit/recursion/sha.cpp":106:15)
   auto x1725 = x1724 * x27;
-  // loc("zirgen/circuit/recursion/sha.cpp":127:20)
+  // loc("zirgen/circuit/recursion/sha.cpp":125:20)
   auto x1726 = x1725 - x319;
-  // loc("zirgen/circuit/recursion/sha.cpp":127:19)
+  // loc("zirgen/circuit/recursion/sha.cpp":125:19)
   auto x1727 = x1726 * x13;
-  // loc("zirgen/circuit/recursion/sha.cpp":128:20)
+  // loc("zirgen/circuit/recursion/sha.cpp":126:20)
   auto x1728 = x1 - x1727;
-  // loc("zirgen/circuit/recursion/sha.cpp":128:7)
+  // loc("zirgen/circuit/recursion/sha.cpp":126:7)
   auto x1729 = x1727 * x1728;
-  // loc("zirgen/circuit/recursion/sha.cpp":128:7)
+  // loc("zirgen/circuit/recursion/sha.cpp":126:7)
   MixState x1730{x1693.tot + x1693.mul * x1729, x1693.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/sha.cpp":129:32)
+  // loc("zirgen/circuit/recursion/sha.cpp":127:32)
   auto x1731 = x335 + x1725;
   // loc("zirgen/circuit/recursion/sha.cpp":104:17)
   auto x1732 = x879 * x2;
@@ -3555,15 +3555,15 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x1760 = x1731 - x1759;
   // loc("zirgen/circuit/recursion/sha.cpp":106:15)
   auto x1761 = x1760 * x27;
-  // loc("zirgen/circuit/recursion/sha.cpp":133:21)
+  // loc("zirgen/circuit/recursion/sha.cpp":129:21)
   auto x1762 = x1761 - x321;
-  // loc("zirgen/circuit/recursion/sha.cpp":133:20)
+  // loc("zirgen/circuit/recursion/sha.cpp":129:20)
   auto x1763 = x1762 * x13;
-  // loc("zirgen/circuit/recursion/sha.cpp":134:21)
+  // loc("zirgen/circuit/recursion/sha.cpp":130:21)
   auto x1764 = x1 - x1763;
-  // loc("zirgen/circuit/recursion/sha.cpp":134:7)
+  // loc("zirgen/circuit/recursion/sha.cpp":130:7)
   auto x1765 = x1763 * x1764;
-  // loc("zirgen/circuit/recursion/sha.cpp":134:7)
+  // loc("zirgen/circuit/recursion/sha.cpp":130:7)
   MixState x1766{x1730.tot + x1730.mul * x1765, x1730.mul * (*mix)};
   // loc("zirgen/circuit/recursion/sha.cpp":104:17)
   auto x1767 = x1204 * x2;
@@ -3629,17 +3629,17 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x1797 = x345 - x1796;
   // loc("zirgen/circuit/recursion/sha.cpp":106:15)
   auto x1798 = x1797 * x27;
-  // loc("zirgen/circuit/recursion/sha.cpp":127:20)
+  // loc("zirgen/circuit/recursion/sha.cpp":125:20)
   auto x1799 = x1798 - x323;
-  // loc("zirgen/circuit/recursion/sha.cpp":127:19)
+  // loc("zirgen/circuit/recursion/sha.cpp":125:19)
   auto x1800 = x1799 * x13;
-  // loc("zirgen/circuit/recursion/sha.cpp":128:20)
+  // loc("zirgen/circuit/recursion/sha.cpp":126:20)
   auto x1801 = x1 - x1800;
-  // loc("zirgen/circuit/recursion/sha.cpp":128:7)
+  // loc("zirgen/circuit/recursion/sha.cpp":126:7)
   auto x1802 = x1800 * x1801;
-  // loc("zirgen/circuit/recursion/sha.cpp":128:7)
+  // loc("zirgen/circuit/recursion/sha.cpp":126:7)
   MixState x1803{x1766.tot + x1766.mul * x1802, x1766.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/sha.cpp":129:32)
+  // loc("zirgen/circuit/recursion/sha.cpp":127:32)
   auto x1804 = x348 + x1798;
   // loc("zirgen/circuit/recursion/sha.cpp":104:17)
   auto x1805 = x1276 * x2;
@@ -3705,21 +3705,21 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x1835 = x1804 - x1834;
   // loc("zirgen/circuit/recursion/sha.cpp":106:15)
   auto x1836 = x1835 * x27;
-  // loc("zirgen/circuit/recursion/sha.cpp":133:21)
+  // loc("zirgen/circuit/recursion/sha.cpp":129:21)
   auto x1837 = x1836 - x325;
-  // loc("zirgen/circuit/recursion/sha.cpp":133:20)
+  // loc("zirgen/circuit/recursion/sha.cpp":129:20)
   auto x1838 = x1837 * x13;
-  // loc("zirgen/circuit/recursion/sha.cpp":134:21)
+  // loc("zirgen/circuit/recursion/sha.cpp":130:21)
   auto x1839 = x1 - x1838;
-  // loc("zirgen/circuit/recursion/sha.cpp":134:7)
+  // loc("zirgen/circuit/recursion/sha.cpp":130:7)
   auto x1840 = x1838 * x1839;
-  // loc("zirgen/circuit/recursion/sha.cpp":134:7)
+  // loc("zirgen/circuit/recursion/sha.cpp":130:7)
   MixState x1841{x1803.tot + x1803.mul * x1840, x1803.mul * (*mix)};
   // loc("./zirgen/components/mux.h":49:25)
   MixState x1842{x1619.tot + x587 * x1841.tot * x1619.mul, x1619.mul * x1841.mul};
-  // loc("zirgen/circuit/recursion/sha.cpp":128:7)
+  // loc("zirgen/circuit/recursion/sha.cpp":126:7)
   MixState x1843{x281.tot + x281.mul * x1655, x281.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/sha.cpp":134:7)
+  // loc("zirgen/circuit/recursion/sha.cpp":130:7)
   MixState x1844{x1843.tot + x1843.mul * x1692, x1843.mul * (*mix)};
   // loc("top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/sha_fini(recursion::ShaWrap)/sha_cycle(recursion::ShaCycle)/a[0](Bit)/bit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
   auto x1845 = args[2][26 * steps + ((cycle - kInvRate * 4) & mask)];
@@ -4097,31 +4097,31 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x2031 = x2029 - x1723;
   // loc("zirgen/circuit/recursion/sha.cpp":106:15)
   auto x2032 = x2031 * x27;
-  // loc("zirgen/circuit/recursion/sha.cpp":127:20)
+  // loc("zirgen/circuit/recursion/sha.cpp":125:20)
   auto x2033 = x2032 - x319;
-  // loc("zirgen/circuit/recursion/sha.cpp":127:19)
+  // loc("zirgen/circuit/recursion/sha.cpp":125:19)
   auto x2034 = x2033 * x13;
-  // loc("zirgen/circuit/recursion/sha.cpp":128:20)
+  // loc("zirgen/circuit/recursion/sha.cpp":126:20)
   auto x2035 = x1 - x2034;
-  // loc("zirgen/circuit/recursion/sha.cpp":128:7)
+  // loc("zirgen/circuit/recursion/sha.cpp":126:7)
   auto x2036 = x2034 * x2035;
-  // loc("zirgen/circuit/recursion/sha.cpp":128:7)
+  // loc("zirgen/circuit/recursion/sha.cpp":126:7)
   MixState x2037{x1844.tot + x1844.mul * x2036, x1844.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/sha.cpp":129:32)
+  // loc("zirgen/circuit/recursion/sha.cpp":127:32)
   auto x2038 = x2030 + x2032;
   // loc("zirgen/circuit/recursion/sha.cpp":106:16)
   auto x2039 = x2038 - x1759;
   // loc("zirgen/circuit/recursion/sha.cpp":106:15)
   auto x2040 = x2039 * x27;
-  // loc("zirgen/circuit/recursion/sha.cpp":133:21)
+  // loc("zirgen/circuit/recursion/sha.cpp":129:21)
   auto x2041 = x2040 - x321;
-  // loc("zirgen/circuit/recursion/sha.cpp":133:20)
+  // loc("zirgen/circuit/recursion/sha.cpp":129:20)
   auto x2042 = x2041 * x13;
-  // loc("zirgen/circuit/recursion/sha.cpp":134:21)
+  // loc("zirgen/circuit/recursion/sha.cpp":130:21)
   auto x2043 = x1 - x2042;
-  // loc("zirgen/circuit/recursion/sha.cpp":134:7)
+  // loc("zirgen/circuit/recursion/sha.cpp":130:7)
   auto x2044 = x2042 * x2043;
-  // loc("zirgen/circuit/recursion/sha.cpp":134:7)
+  // loc("zirgen/circuit/recursion/sha.cpp":130:7)
   MixState x2045{x2037.tot + x2037.mul * x2044, x2037.mul * (*mix)};
   // loc("top(recursion::Top)/mux(Mux)/macro_ops(recursion::MacroOp)/mux(Mux)/sha_fini(recursion::ShaWrap)/sha_cycle(recursion::ShaCycle)/e[0](Bit)/bit(Reg)"("./zirgen/compiler/edsl/component.h":154:27))
   auto x2046 = args[2][60 * steps + ((cycle - kInvRate * 4) & mask)];
@@ -4499,31 +4499,31 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x2232 = x2230 - x1796;
   // loc("zirgen/circuit/recursion/sha.cpp":106:15)
   auto x2233 = x2232 * x27;
-  // loc("zirgen/circuit/recursion/sha.cpp":127:20)
+  // loc("zirgen/circuit/recursion/sha.cpp":125:20)
   auto x2234 = x2233 - x323;
-  // loc("zirgen/circuit/recursion/sha.cpp":127:19)
+  // loc("zirgen/circuit/recursion/sha.cpp":125:19)
   auto x2235 = x2234 * x13;
-  // loc("zirgen/circuit/recursion/sha.cpp":128:20)
+  // loc("zirgen/circuit/recursion/sha.cpp":126:20)
   auto x2236 = x1 - x2235;
-  // loc("zirgen/circuit/recursion/sha.cpp":128:7)
+  // loc("zirgen/circuit/recursion/sha.cpp":126:7)
   auto x2237 = x2235 * x2236;
-  // loc("zirgen/circuit/recursion/sha.cpp":128:7)
+  // loc("zirgen/circuit/recursion/sha.cpp":126:7)
   MixState x2238{x2045.tot + x2045.mul * x2237, x2045.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/sha.cpp":129:32)
+  // loc("zirgen/circuit/recursion/sha.cpp":127:32)
   auto x2239 = x2231 + x2233;
   // loc("zirgen/circuit/recursion/sha.cpp":106:16)
   auto x2240 = x2239 - x1834;
   // loc("zirgen/circuit/recursion/sha.cpp":106:15)
   auto x2241 = x2240 * x27;
-  // loc("zirgen/circuit/recursion/sha.cpp":133:21)
+  // loc("zirgen/circuit/recursion/sha.cpp":129:21)
   auto x2242 = x2241 - x325;
-  // loc("zirgen/circuit/recursion/sha.cpp":133:20)
+  // loc("zirgen/circuit/recursion/sha.cpp":129:20)
   auto x2243 = x2242 * x13;
-  // loc("zirgen/circuit/recursion/sha.cpp":134:21)
+  // loc("zirgen/circuit/recursion/sha.cpp":130:21)
   auto x2244 = x1 - x2243;
-  // loc("zirgen/circuit/recursion/sha.cpp":134:7)
+  // loc("zirgen/circuit/recursion/sha.cpp":130:7)
   auto x2245 = x2243 * x2244;
-  // loc("zirgen/circuit/recursion/sha.cpp":134:7)
+  // loc("zirgen/circuit/recursion/sha.cpp":130:7)
   MixState x2246{x2238.tot + x2238.mul * x2245, x2238.mul * (*mix)};
   // loc("zirgen/circuit/recursion/sha.cpp":115:21)
   auto x2247 = x863 * x2;
@@ -4581,53 +4581,53 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x2273 = x1186 * x17;
   // loc("zirgen/circuit/recursion/sha.cpp":115:14)
   auto x2274 = x2272 + x2273;
-  // loc("zirgen/circuit/recursion/sha.cpp":256:46)
+  // loc("zirgen/circuit/recursion/sha.cpp":248:46)
   auto x2275 = x1743 * x18;
-  // loc("zirgen/circuit/recursion/sha.cpp":256:36)
+  // loc("zirgen/circuit/recursion/sha.cpp":248:36)
   auto x2276 = x2274 + x2275;
-  // loc("zirgen/circuit/recursion/sha.cpp":256:71)
+  // loc("zirgen/circuit/recursion/sha.cpp":248:71)
   auto x2277 = x1707 * x18;
-  // loc("zirgen/circuit/recursion/sha.cpp":256:61)
+  // loc("zirgen/circuit/recursion/sha.cpp":248:61)
   auto x2278 = x2260 + x2277;
   // loc("zirgen/circuit/recursion/wom.cpp":87:3)
   MixState x2279{x2246.tot + x2246.mul * x1109, x2246.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x2280 = x333 - x2276;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x2281{x2279.tot + x2279.mul * x2280, x2279.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x2282 = x335 - x2278;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x2283{x2281.tot + x2281.mul * x2282, x2281.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x2284{x2283.tot + x2283.mul * x337, x2283.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x2285{x2284.tot + x2284.mul * x339, x2284.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/sha.cpp":257:46)
+  // loc("zirgen/circuit/recursion/sha.cpp":249:46)
   auto x2286 = x1818 * x18;
-  // loc("zirgen/circuit/recursion/sha.cpp":257:36)
+  // loc("zirgen/circuit/recursion/sha.cpp":249:36)
   auto x2287 = x1533 + x2286;
-  // loc("zirgen/circuit/recursion/sha.cpp":257:71)
+  // loc("zirgen/circuit/recursion/sha.cpp":249:71)
   auto x2288 = x1780 * x18;
-  // loc("zirgen/circuit/recursion/sha.cpp":257:61)
+  // loc("zirgen/circuit/recursion/sha.cpp":249:61)
   auto x2289 = x1423 + x2288;
   // loc("zirgen/circuit/recursion/wom.cpp":87:3)
   MixState x2290{x2285.tot + x2285.mul * x1111, x2285.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x2291 = x345 - x2287;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x2292{x2290.tot + x2290.mul * x2291, x2290.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x2293 = x348 - x2289;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x2294{x2292.tot + x2292.mul * x2293, x2292.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x2295{x2294.tot + x2294.mul * x351, x2294.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x2296{x2295.tot + x2295.mul * x591, x2295.mul * (*mix)};
   // loc("./zirgen/components/mux.h":49:25)
   MixState x2297{x1842.tot + x588 * x2296.tot * x1842.mul, x1842.mul * x2296.mul};
-  // loc("zirgen/circuit/recursion/sha.cpp":183:15)
+  // loc("zirgen/circuit/recursion/sha.cpp":179:15)
   auto x2298 = x333 * x42;
   // loc("zirgen/circuit/recursion/sha.cpp":104:17)
   auto x2299 = x839 * x2;
@@ -4701,75 +4701,75 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x2333 = x2332 - x1633;
   // loc("zirgen/circuit/recursion/sha.cpp":106:15)
   auto x2334 = x2333 * x19;
-  // loc("zirgen/circuit/recursion/sha.cpp":188:8)
+  // loc("zirgen/circuit/recursion/sha.cpp":184:8)
   MixState x2335{x281.tot + x281.mul * x2334, x281.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/sha.cpp":197:14)
+  // loc("zirgen/circuit/recursion/sha.cpp":193:14)
   auto x2336 = x301 + x304;
-  // loc("zirgen/circuit/recursion/sha.cpp":197:14)
+  // loc("zirgen/circuit/recursion/sha.cpp":193:14)
   auto x2337 = x2336 + x307;
-  // loc("zirgen/circuit/recursion/sha.cpp":197:14)
+  // loc("zirgen/circuit/recursion/sha.cpp":193:14)
   auto x2338 = x2337 + x310;
-  // loc("zirgen/circuit/recursion/sha.cpp":201:15)
+  // loc("zirgen/circuit/recursion/sha.cpp":197:15)
   auto x2339 = x836 + x839;
-  // loc("zirgen/circuit/recursion/sha.cpp":201:15)
+  // loc("zirgen/circuit/recursion/sha.cpp":197:15)
   auto x2340 = x2339 + x842;
-  // loc("zirgen/circuit/recursion/sha.cpp":201:15)
+  // loc("zirgen/circuit/recursion/sha.cpp":197:15)
   auto x2341 = x2340 + x845;
-  // loc("zirgen/circuit/recursion/sha.cpp":201:15)
+  // loc("zirgen/circuit/recursion/sha.cpp":197:15)
   auto x2342 = x2341 + x848;
-  // loc("zirgen/circuit/recursion/sha.cpp":201:15)
+  // loc("zirgen/circuit/recursion/sha.cpp":197:15)
   auto x2343 = x2342 + x851;
-  // loc("zirgen/circuit/recursion/sha.cpp":201:15)
+  // loc("zirgen/circuit/recursion/sha.cpp":197:15)
   auto x2344 = x2343 + x854;
-  // loc("zirgen/circuit/recursion/sha.cpp":201:15)
+  // loc("zirgen/circuit/recursion/sha.cpp":197:15)
   auto x2345 = x2344 + x1017;
-  // loc("zirgen/circuit/recursion/sha.cpp":201:15)
+  // loc("zirgen/circuit/recursion/sha.cpp":197:15)
   auto x2346 = x2345 + x576;
-  // loc("zirgen/circuit/recursion/sha.cpp":201:15)
+  // loc("zirgen/circuit/recursion/sha.cpp":197:15)
   auto x2347 = x2346 + x579;
-  // loc("zirgen/circuit/recursion/sha.cpp":201:15)
+  // loc("zirgen/circuit/recursion/sha.cpp":197:15)
   auto x2348 = x2347 + x582;
-  // loc("zirgen/circuit/recursion/sha.cpp":201:15)
+  // loc("zirgen/circuit/recursion/sha.cpp":197:15)
   auto x2349 = x2348 + x745;
-  // loc("zirgen/circuit/recursion/sha.cpp":201:15)
+  // loc("zirgen/circuit/recursion/sha.cpp":197:15)
   auto x2350 = x2349 + x862;
-  // loc("zirgen/circuit/recursion/sha.cpp":201:15)
+  // loc("zirgen/circuit/recursion/sha.cpp":197:15)
   auto x2351 = x2350 + x829;
-  // loc("zirgen/circuit/recursion/sha.cpp":201:15)
+  // loc("zirgen/circuit/recursion/sha.cpp":197:15)
   auto x2352 = x2351 + x830;
-  // loc("zirgen/circuit/recursion/sha.cpp":201:15)
+  // loc("zirgen/circuit/recursion/sha.cpp":197:15)
   auto x2353 = x2352 + x833;
-  // loc("zirgen/circuit/recursion/sha.cpp":201:15)
+  // loc("zirgen/circuit/recursion/sha.cpp":197:15)
   auto x2354 = x2353 + x590;
-  // loc("zirgen/circuit/recursion/sha.cpp":201:15)
+  // loc("zirgen/circuit/recursion/sha.cpp":197:15)
   auto x2355 = x2354 + x557;
-  // loc("zirgen/circuit/recursion/sha.cpp":201:15)
+  // loc("zirgen/circuit/recursion/sha.cpp":197:15)
   auto x2356 = x2355 + x558;
-  // loc("zirgen/circuit/recursion/sha.cpp":201:15)
+  // loc("zirgen/circuit/recursion/sha.cpp":197:15)
   auto x2357 = x2356 + x561;
-  // loc("zirgen/circuit/recursion/sha.cpp":201:15)
+  // loc("zirgen/circuit/recursion/sha.cpp":197:15)
   auto x2358 = x2357 + x564;
-  // loc("zirgen/circuit/recursion/sha.cpp":201:15)
+  // loc("zirgen/circuit/recursion/sha.cpp":197:15)
   auto x2359 = x2358 + x567;
-  // loc("zirgen/circuit/recursion/sha.cpp":201:15)
+  // loc("zirgen/circuit/recursion/sha.cpp":197:15)
   auto x2360 = x2359 + x570;
-  // loc("zirgen/circuit/recursion/sha.cpp":201:15)
+  // loc("zirgen/circuit/recursion/sha.cpp":197:15)
   auto x2361 = x2360 + x573;
-  // loc("zirgen/circuit/recursion/sha.cpp":201:15)
+  // loc("zirgen/circuit/recursion/sha.cpp":197:15)
   auto x2362 = x2361 + x292;
-  // loc("zirgen/circuit/recursion/sha.cpp":201:15)
+  // loc("zirgen/circuit/recursion/sha.cpp":197:15)
   auto x2363 = x2362 + x295;
-  // loc("zirgen/circuit/recursion/sha.cpp":201:15)
+  // loc("zirgen/circuit/recursion/sha.cpp":197:15)
   auto x2364 = x2363 + x298;
-  // loc("zirgen/circuit/recursion/sha.cpp":222:10)
+  // loc("zirgen/circuit/recursion/sha.cpp":214:10)
   auto x2365 = x2338 - x327;
-  // loc("zirgen/circuit/recursion/sha.cpp":222:9)
+  // loc("zirgen/circuit/recursion/sha.cpp":214:9)
   auto x2366 = x2365 * x2364;
-  // loc("zirgen/circuit/recursion/sha.cpp":222:9)
+  // loc("zirgen/circuit/recursion/sha.cpp":214:9)
   MixState x2367{x2335.tot + x2335.mul * x2366, x2335.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/sha.cpp":224:9)
+  // loc("zirgen/circuit/recursion/sha.cpp":216:9)
   MixState x2368{x2367.tot + x2367.mul * x473, x2367.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/sha.cpp":181:27)
+  // loc("zirgen/circuit/recursion/sha.cpp":177:27)
   MixState x2369{x1112.tot + x1605 * x2368.tot * x1112.mul, x1112.mul * x2368.mul};
   // loc("zirgen/circuit/recursion/sha.cpp":106:16)
   auto x2370 = x333 - x2312;
@@ -4779,9 +4779,9 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x2372 = x2371 - x1670;
   // loc("zirgen/circuit/recursion/sha.cpp":106:15)
   auto x2373 = x2372 * x19;
-  // loc("zirgen/circuit/recursion/sha.cpp":138:6)
+  // loc("zirgen/circuit/recursion/sha.cpp":134:6)
   auto x2374 = x0 - x2373;
-  // loc("zirgen/circuit/recursion/sha.cpp":138:6)
+  // loc("zirgen/circuit/recursion/sha.cpp":134:6)
   MixState x2375{x281.tot + x281.mul * x2374, x281.mul * (*mix)};
   // loc("zirgen/circuit/recursion/sha.cpp":106:16)
   auto x2376 = x335 - x2330;
@@ -4791,13 +4791,13 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x2378 = x2377 - x1633;
   // loc("zirgen/circuit/recursion/sha.cpp":106:15)
   auto x2379 = x2378 * x19;
-  // loc("zirgen/circuit/recursion/sha.cpp":139:6)
+  // loc("zirgen/circuit/recursion/sha.cpp":135:6)
   auto x2380 = x0 - x2379;
-  // loc("zirgen/circuit/recursion/sha.cpp":139:6)
+  // loc("zirgen/circuit/recursion/sha.cpp":135:6)
   MixState x2381{x2375.tot + x2375.mul * x2380, x2375.mul * (*mix)};
   // loc("./zirgen/components/bits.h":68:23)
   MixState x2382{x2381.tot + x2381.mul * x327, x2381.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/sha.cpp":226:23)
+  // loc("zirgen/circuit/recursion/sha.cpp":218:23)
   MixState x2383{x2369.tot + x1376 * x2382.tot * x2369.mul, x2369.mul * x2382.mul};
   // loc("./zirgen/components/bits.h":68:23)
   MixState x2384{x2383.tot + x2383.mul * x329, x2383.mul * (*mix)};
@@ -7677,93 +7677,93 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x3821 = x3279 + x1906;
   // loc("zirgen/circuit/recursion/sha.cpp":83:14)
   auto x3822 = x3280 + x1936;
-  // loc("zirgen/circuit/recursion/sha.cpp":298:5)
+  // loc("zirgen/circuit/recursion/sha.cpp":290:5)
   auto x3823 = x1192 - x3819;
-  // loc("zirgen/circuit/recursion/sha.cpp":298:5)
+  // loc("zirgen/circuit/recursion/sha.cpp":290:5)
   MixState x3824{x2384.tot + x2384.mul * x3823, x2384.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/sha.cpp":299:5)
+  // loc("zirgen/circuit/recursion/sha.cpp":291:5)
   auto x3825 = x286 - x3821;
-  // loc("zirgen/circuit/recursion/sha.cpp":299:5)
+  // loc("zirgen/circuit/recursion/sha.cpp":291:5)
   MixState x3826{x3824.tot + x3824.mul * x3825, x3824.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/sha.cpp":298:5)
+  // loc("zirgen/circuit/recursion/sha.cpp":290:5)
   auto x3827 = x1195 - x3820;
-  // loc("zirgen/circuit/recursion/sha.cpp":298:5)
+  // loc("zirgen/circuit/recursion/sha.cpp":290:5)
   MixState x3828{x3826.tot + x3826.mul * x3827, x3826.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/sha.cpp":299:5)
+  // loc("zirgen/circuit/recursion/sha.cpp":291:5)
   auto x3829 = x289 - x3822;
-  // loc("zirgen/circuit/recursion/sha.cpp":299:5)
+  // loc("zirgen/circuit/recursion/sha.cpp":291:5)
   MixState x3830{x3828.tot + x3828.mul * x3829, x3828.mul * (*mix)};
   // loc("zirgen/circuit/recursion/sha.cpp":106:16)
   auto x3831 = x1192 - x1723;
   // loc("zirgen/circuit/recursion/sha.cpp":106:15)
   auto x3832 = x3831 * x27;
-  // loc("zirgen/circuit/recursion/sha.cpp":127:20)
+  // loc("zirgen/circuit/recursion/sha.cpp":125:20)
   auto x3833 = x3832 - x319;
-  // loc("zirgen/circuit/recursion/sha.cpp":127:19)
+  // loc("zirgen/circuit/recursion/sha.cpp":125:19)
   auto x3834 = x3833 * x13;
-  // loc("zirgen/circuit/recursion/sha.cpp":128:20)
+  // loc("zirgen/circuit/recursion/sha.cpp":126:20)
   auto x3835 = x1 - x3834;
-  // loc("zirgen/circuit/recursion/sha.cpp":128:7)
+  // loc("zirgen/circuit/recursion/sha.cpp":126:7)
   auto x3836 = x3834 * x3835;
-  // loc("zirgen/circuit/recursion/sha.cpp":128:7)
+  // loc("zirgen/circuit/recursion/sha.cpp":126:7)
   MixState x3837{x3830.tot + x3830.mul * x3836, x3830.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/sha.cpp":129:32)
+  // loc("zirgen/circuit/recursion/sha.cpp":127:32)
   auto x3838 = x1195 + x3832;
   // loc("zirgen/circuit/recursion/sha.cpp":106:16)
   auto x3839 = x3838 - x1759;
   // loc("zirgen/circuit/recursion/sha.cpp":106:15)
   auto x3840 = x3839 * x27;
-  // loc("zirgen/circuit/recursion/sha.cpp":133:21)
+  // loc("zirgen/circuit/recursion/sha.cpp":129:21)
   auto x3841 = x3840 - x321;
-  // loc("zirgen/circuit/recursion/sha.cpp":133:20)
+  // loc("zirgen/circuit/recursion/sha.cpp":129:20)
   auto x3842 = x3841 * x13;
-  // loc("zirgen/circuit/recursion/sha.cpp":134:21)
+  // loc("zirgen/circuit/recursion/sha.cpp":130:21)
   auto x3843 = x1 - x3842;
-  // loc("zirgen/circuit/recursion/sha.cpp":134:7)
+  // loc("zirgen/circuit/recursion/sha.cpp":130:7)
   auto x3844 = x3842 * x3843;
-  // loc("zirgen/circuit/recursion/sha.cpp":134:7)
+  // loc("zirgen/circuit/recursion/sha.cpp":130:7)
   MixState x3845{x3837.tot + x3837.mul * x3844, x3837.mul * (*mix)};
   // loc("zirgen/circuit/recursion/sha.cpp":106:16)
   auto x3846 = x286 - x1796;
   // loc("zirgen/circuit/recursion/sha.cpp":106:15)
   auto x3847 = x3846 * x27;
-  // loc("zirgen/circuit/recursion/sha.cpp":127:20)
+  // loc("zirgen/circuit/recursion/sha.cpp":125:20)
   auto x3848 = x3847 - x323;
-  // loc("zirgen/circuit/recursion/sha.cpp":127:19)
+  // loc("zirgen/circuit/recursion/sha.cpp":125:19)
   auto x3849 = x3848 * x13;
-  // loc("zirgen/circuit/recursion/sha.cpp":128:20)
+  // loc("zirgen/circuit/recursion/sha.cpp":126:20)
   auto x3850 = x1 - x3849;
-  // loc("zirgen/circuit/recursion/sha.cpp":128:7)
+  // loc("zirgen/circuit/recursion/sha.cpp":126:7)
   auto x3851 = x3849 * x3850;
-  // loc("zirgen/circuit/recursion/sha.cpp":128:7)
+  // loc("zirgen/circuit/recursion/sha.cpp":126:7)
   MixState x3852{x3845.tot + x3845.mul * x3851, x3845.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/sha.cpp":129:32)
+  // loc("zirgen/circuit/recursion/sha.cpp":127:32)
   auto x3853 = x289 + x3847;
   // loc("zirgen/circuit/recursion/sha.cpp":106:16)
   auto x3854 = x3853 - x1834;
   // loc("zirgen/circuit/recursion/sha.cpp":106:15)
   auto x3855 = x3854 * x27;
-  // loc("zirgen/circuit/recursion/sha.cpp":133:21)
+  // loc("zirgen/circuit/recursion/sha.cpp":129:21)
   auto x3856 = x3855 - x325;
-  // loc("zirgen/circuit/recursion/sha.cpp":133:20)
+  // loc("zirgen/circuit/recursion/sha.cpp":129:20)
   auto x3857 = x3856 * x13;
-  // loc("zirgen/circuit/recursion/sha.cpp":134:21)
+  // loc("zirgen/circuit/recursion/sha.cpp":130:21)
   auto x3858 = x1 - x3857;
-  // loc("zirgen/circuit/recursion/sha.cpp":134:7)
+  // loc("zirgen/circuit/recursion/sha.cpp":130:7)
   auto x3859 = x3857 * x3858;
-  // loc("zirgen/circuit/recursion/sha.cpp":134:7)
+  // loc("zirgen/circuit/recursion/sha.cpp":130:7)
   MixState x3860{x3852.tot + x3852.mul * x3859, x3852.mul * (*mix)};
   // loc("./zirgen/components/mux.h":49:25)
   MixState x3861{x2297.tot + x589 * x3860.tot * x2297.mul, x2297.mul * x3860.mul};
   // loc("zirgen/circuit/recursion/wom.cpp":12:3)
   MixState x3862{x281.tot + x281.mul * x331, x281.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x3863{x3862.tot + x3862.mul * x333, x3862.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x3864{x3863.tot + x3863.mul * x335, x3863.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x3865{x3864.tot + x3864.mul * x337, x3864.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x3866{x3865.tot + x3865.mul * x339, x3865.mul * (*mix)};
   // loc("zirgen/circuit/recursion/wom.cpp":82:3)
   MixState x3867{x3866.tot + x3866.mul * x1111, x3866.mul * (*mix)};
@@ -9333,63 +9333,63 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x4649 = x4434 + x4647;
   // loc("zirgen/circuit/recursion/sha.cpp":83:14)
   auto x4650 = x4464 + x4648;
-  // loc("zirgen/circuit/recursion/sha.cpp":269:5)
+  // loc("zirgen/circuit/recursion/sha.cpp":261:5)
   auto x4651 = args[2][126 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("zirgen/circuit/recursion/sha.cpp":269:5)
+  // loc("zirgen/circuit/recursion/sha.cpp":261:5)
   auto x4652 = x4651 - x4649;
-  // loc("zirgen/circuit/recursion/sha.cpp":269:5)
+  // loc("zirgen/circuit/recursion/sha.cpp":261:5)
   MixState x4653{x3867.tot + x3867.mul * x4652, x3867.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/sha.cpp":269:5)
+  // loc("zirgen/circuit/recursion/sha.cpp":261:5)
   auto x4654 = args[2][127 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("zirgen/circuit/recursion/sha.cpp":269:5)
+  // loc("zirgen/circuit/recursion/sha.cpp":261:5)
   auto x4655 = x4654 - x4650;
-  // loc("zirgen/circuit/recursion/sha.cpp":269:5)
+  // loc("zirgen/circuit/recursion/sha.cpp":261:5)
   MixState x4656{x4653.tot + x4653.mul * x4655, x4653.mul * (*mix)};
   // loc("zirgen/circuit/recursion/sha.cpp":106:16)
   auto x4657 = x4651 - x1649;
   // loc("zirgen/circuit/recursion/sha.cpp":106:15)
   auto x4658 = x4657 * x27;
-  // loc("zirgen/circuit/recursion/sha.cpp":127:20)
+  // loc("zirgen/circuit/recursion/sha.cpp":125:20)
   auto x4659 = x4658 - x327;
-  // loc("zirgen/circuit/recursion/sha.cpp":127:19)
+  // loc("zirgen/circuit/recursion/sha.cpp":125:19)
   auto x4660 = x4659 * x13;
-  // loc("zirgen/circuit/recursion/sha.cpp":128:20)
+  // loc("zirgen/circuit/recursion/sha.cpp":126:20)
   auto x4661 = x1 - x4660;
-  // loc("zirgen/circuit/recursion/sha.cpp":128:7)
+  // loc("zirgen/circuit/recursion/sha.cpp":126:7)
   auto x4662 = x4660 * x4661;
-  // loc("zirgen/circuit/recursion/sha.cpp":128:7)
+  // loc("zirgen/circuit/recursion/sha.cpp":126:7)
   MixState x4663{x4656.tot + x4656.mul * x4662, x4656.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/sha.cpp":129:32)
+  // loc("zirgen/circuit/recursion/sha.cpp":127:32)
   auto x4664 = x4654 + x4658;
   // loc("zirgen/circuit/recursion/sha.cpp":106:16)
   auto x4665 = x4664 - x1686;
   // loc("zirgen/circuit/recursion/sha.cpp":106:15)
   auto x4666 = x4665 * x27;
-  // loc("zirgen/circuit/recursion/sha.cpp":133:21)
+  // loc("zirgen/circuit/recursion/sha.cpp":129:21)
   auto x4667 = x4666 - x329;
-  // loc("zirgen/circuit/recursion/sha.cpp":133:20)
+  // loc("zirgen/circuit/recursion/sha.cpp":129:20)
   auto x4668 = x4667 * x13;
-  // loc("zirgen/circuit/recursion/sha.cpp":134:21)
+  // loc("zirgen/circuit/recursion/sha.cpp":130:21)
   auto x4669 = x1 - x4668;
-  // loc("zirgen/circuit/recursion/sha.cpp":134:7)
+  // loc("zirgen/circuit/recursion/sha.cpp":130:7)
   auto x4670 = x4668 * x4669;
-  // loc("zirgen/circuit/recursion/sha.cpp":134:7)
+  // loc("zirgen/circuit/recursion/sha.cpp":130:7)
   MixState x4671{x4663.tot + x4663.mul * x4670, x4663.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/sha.cpp":298:5)
+  // loc("zirgen/circuit/recursion/sha.cpp":290:5)
   MixState x4672{x4671.tot + x4671.mul * x3823, x4671.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/sha.cpp":299:5)
+  // loc("zirgen/circuit/recursion/sha.cpp":291:5)
   MixState x4673{x4672.tot + x4672.mul * x3825, x4672.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/sha.cpp":298:5)
+  // loc("zirgen/circuit/recursion/sha.cpp":290:5)
   MixState x4674{x4673.tot + x4673.mul * x3827, x4673.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/sha.cpp":299:5)
+  // loc("zirgen/circuit/recursion/sha.cpp":291:5)
   MixState x4675{x4674.tot + x4674.mul * x3829, x4674.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/sha.cpp":128:7)
+  // loc("zirgen/circuit/recursion/sha.cpp":126:7)
   MixState x4676{x4675.tot + x4675.mul * x3836, x4675.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/sha.cpp":134:7)
+  // loc("zirgen/circuit/recursion/sha.cpp":130:7)
   MixState x4677{x4676.tot + x4676.mul * x3844, x4676.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/sha.cpp":128:7)
+  // loc("zirgen/circuit/recursion/sha.cpp":126:7)
   MixState x4678{x4677.tot + x4677.mul * x3851, x4677.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/sha.cpp":134:7)
+  // loc("zirgen/circuit/recursion/sha.cpp":130:7)
   MixState x4679{x4678.tot + x4678.mul * x3859, x4678.mul * (*mix)};
   // loc("./zirgen/components/mux.h":49:25)
   MixState x4680{x3861.tot + x828 * x4679.tot * x3861.mul, x3861.mul * x4679.mul};
@@ -15929,15 +15929,15 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x7947 = x319 - x283;
   // loc("zirgen/circuit/recursion/wom.cpp":87:3)
   MixState x7948{x281.tot + x281.mul * x7947, x281.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x7949 = x321 - x7946;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x7950{x7948.tot + x7948.mul * x7949, x7948.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x7951{x7950.tot + x7950.mul * x323, x7950.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x7952{x7951.tot + x7951.mul * x325, x7951.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x7953{x7952.tot + x7952.mul * x327, x7952.mul * (*mix)};
   // loc("zirgen/circuit/recursion/poseidon2.cpp":352:37)
   auto x7954 = x7931 * x7945;
@@ -15945,15 +15945,15 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x7955 = x329 - x555;
   // loc("zirgen/circuit/recursion/wom.cpp":87:3)
   MixState x7956{x7953.tot + x7953.mul * x7955, x7953.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x7957 = x331 - x7954;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x7958{x7956.tot + x7956.mul * x7957, x7956.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x7959{x7958.tot + x7958.mul * x333, x7958.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x7960{x7959.tot + x7959.mul * x335, x7959.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x7961{x7960.tot + x7960.mul * x337, x7960.mul * (*mix)};
   // loc("zirgen/circuit/recursion/poseidon2.cpp":352:37)
   auto x7962 = x7933 * x7945;
@@ -15961,15 +15961,15 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x7963 = x339 - x827;
   // loc("zirgen/circuit/recursion/wom.cpp":87:3)
   MixState x7964{x7961.tot + x7961.mul * x7963, x7961.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x7965 = x342 - x7962;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x7966{x7964.tot + x7964.mul * x7965, x7964.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x7967{x7966.tot + x7966.mul * x345, x7966.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x7968{x7967.tot + x7967.mul * x348, x7967.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x7969{x7968.tot + x7968.mul * x351, x7968.mul * (*mix)};
   // loc("zirgen/circuit/recursion/poseidon2.cpp":352:21)
   auto x7970 = x283 + x3;
@@ -15979,15 +15979,15 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x7972 = x591 - x7970;
   // loc("zirgen/circuit/recursion/wom.cpp":87:3)
   MixState x7973{x7969.tot + x7969.mul * x7972, x7969.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x7974 = x593 - x7971;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x7975{x7973.tot + x7973.mul * x7974, x7973.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x7976{x7975.tot + x7975.mul * x595, x7975.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x7977{x7976.tot + x7976.mul * x597, x7976.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x7978{x7977.tot + x7977.mul * x599, x7977.mul * (*mix)};
   // loc("zirgen/circuit/recursion/poseidon2.cpp":352:21)
   auto x7979 = x283 + x4;
@@ -15997,15 +15997,15 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x7981 = x601 - x7979;
   // loc("zirgen/circuit/recursion/wom.cpp":87:3)
   MixState x7982{x7978.tot + x7978.mul * x7981, x7978.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x7983 = x603 - x7980;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x7984{x7982.tot + x7982.mul * x7983, x7982.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x7985{x7984.tot + x7984.mul * x605, x7984.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x7986{x7985.tot + x7985.mul * x607, x7985.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x7987{x7986.tot + x7986.mul * x609, x7986.mul * (*mix)};
   // loc("zirgen/circuit/recursion/poseidon2.cpp":352:21)
   auto x7988 = x283 + x5;
@@ -16015,15 +16015,15 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x7990 = x611 - x7988;
   // loc("zirgen/circuit/recursion/wom.cpp":87:3)
   MixState x7991{x7987.tot + x7987.mul * x7990, x7987.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x7992 = x614 - x7989;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x7993{x7991.tot + x7991.mul * x7992, x7991.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x7994{x7993.tot + x7993.mul * x617, x7993.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x7995{x7994.tot + x7994.mul * x620, x7994.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x7996{x7995.tot + x7995.mul * x623, x7995.mul * (*mix)};
   // loc("zirgen/circuit/recursion/poseidon2.cpp":352:21)
   auto x7997 = x283 + x6;
@@ -16033,15 +16033,15 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x7999 = x863 - x7997;
   // loc("zirgen/circuit/recursion/wom.cpp":87:3)
   MixState x8000{x7996.tot + x7996.mul * x7999, x7996.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x8001 = x865 - x7998;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x8002{x8000.tot + x8000.mul * x8001, x8000.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x8003{x8002.tot + x8002.mul * x867, x8002.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x8004{x8003.tot + x8003.mul * x869, x8003.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x8005{x8004.tot + x8004.mul * x871, x8004.mul * (*mix)};
   // loc("zirgen/circuit/recursion/poseidon2.cpp":352:21)
   auto x8006 = x283 + x7;
@@ -16051,15 +16051,15 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x8008 = x873 - x8006;
   // loc("zirgen/circuit/recursion/wom.cpp":87:3)
   MixState x8009{x8005.tot + x8005.mul * x8008, x8005.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   auto x8010 = x875 - x8007;
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x8011{x8009.tot + x8009.mul * x8010, x8009.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x8012{x8011.tot + x8011.mul * x877, x8011.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x8013{x8012.tot + x8012.mul * x879, x8012.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x8014{x8013.tot + x8013.mul * x881, x8013.mul * (*mix)};
   // loc("zirgen/circuit/recursion/poseidon2.cpp":355:5)
   auto x8015 = x318 - x2511;
@@ -16199,433 +16199,433 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   MixState x8082{x8081.tot + x4809 * x281.tot * x8081.mul, x8081.mul * x281.mul};
   // loc("zirgen/compiler/edsl/component.cpp":39:15)
   MixState x8083{x8082.tot + x7903 * x281.tot * x8082.mul, x8082.mul * x281.mul};
-  // loc("top(recursion::Top)/recursion::WomHeader/recursion::impl::WomPlonkElement/addr(Reg)"("zirgen/circuit/recursion/wom.cpp":59:40))
+  // loc("top(recursion::Top)/recursion::WomHeader/recursion::impl::WomPlonkElement/addr(Reg)"("zirgen/circuit/recursion/wom.cpp":61:40))
   auto x8084 = args[2][0 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("zirgen/circuit/recursion/wom.cpp":60:19)
+  // loc("zirgen/circuit/recursion/wom.cpp":62:19)
   auto x8085 = x1156 - x8084;
-  // loc("zirgen/circuit/recursion/wom.cpp":62:19)
+  // loc("zirgen/circuit/recursion/wom.cpp":64:19)
   auto x8086 = x1 - x8085;
-  // loc("zirgen/circuit/recursion/wom.cpp":62:7)
+  // loc("zirgen/circuit/recursion/wom.cpp":64:7)
   auto x8087 = x8085 * x8086;
-  // loc("zirgen/circuit/recursion/wom.cpp":62:7)
+  // loc("zirgen/circuit/recursion/wom.cpp":64:7)
   MixState x8088{x281.tot + x281.mul * x8087, x281.mul * (*mix)};
-  // loc("top(recursion::Top)/recursion::WomHeader/recursion::impl::WomPlonkElement/data[0](Reg)"("zirgen/circuit/recursion/wom.cpp":66:38))
+  // loc("top(recursion::Top)/recursion::WomHeader/recursion::impl::WomPlonkElement/data[0](Reg)"("zirgen/circuit/recursion/wom.cpp":68:38))
   auto x8089 = args[2][1 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x8090 = x8089 - x1159;
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   MixState x8091{x281.tot + x281.mul * x8090, x281.mul * (*mix)};
-  // loc("top(recursion::Top)/recursion::WomHeader/recursion::impl::WomPlonkElement/data[1](Reg)"("zirgen/circuit/recursion/wom.cpp":66:38))
+  // loc("top(recursion::Top)/recursion::WomHeader/recursion::impl::WomPlonkElement/data[1](Reg)"("zirgen/circuit/recursion/wom.cpp":68:38))
   auto x8092 = args[2][2 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x8093 = x8092 - x1165;
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   MixState x8094{x8091.tot + x8091.mul * x8093, x8091.mul * (*mix)};
-  // loc("top(recursion::Top)/recursion::WomHeader/recursion::impl::WomPlonkElement/data[2](Reg)"("zirgen/circuit/recursion/wom.cpp":66:38))
+  // loc("top(recursion::Top)/recursion::WomHeader/recursion::impl::WomPlonkElement/data[2](Reg)"("zirgen/circuit/recursion/wom.cpp":68:38))
   auto x8095 = args[2][3 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x8096 = x8095 - x1168;
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   MixState x8097{x8094.tot + x8094.mul * x8096, x8094.mul * (*mix)};
-  // loc("top(recursion::Top)/recursion::WomHeader/recursion::impl::WomPlonkElement/data[3](Reg)"("zirgen/circuit/recursion/wom.cpp":66:38))
+  // loc("top(recursion::Top)/recursion::WomHeader/recursion::impl::WomPlonkElement/data[3](Reg)"("zirgen/circuit/recursion/wom.cpp":68:38))
   auto x8098 = args[2][4 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x8099 = x8098 - x1174;
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   MixState x8100{x8097.tot + x8097.mul * x8099, x8097.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":64:18)
+  // loc("zirgen/circuit/recursion/wom.cpp":66:18)
   MixState x8101{x8088.tot + x8086 * x8100.tot * x8088.mul, x8088.mul * x8100.mul};
-  // loc("zirgen/circuit/recursion/wom.cpp":60:19)
+  // loc("zirgen/circuit/recursion/wom.cpp":62:19)
   auto x8102 = x1177 - x1156;
-  // loc("zirgen/circuit/recursion/wom.cpp":62:19)
+  // loc("zirgen/circuit/recursion/wom.cpp":64:19)
   auto x8103 = x1 - x8102;
-  // loc("zirgen/circuit/recursion/wom.cpp":62:7)
+  // loc("zirgen/circuit/recursion/wom.cpp":64:7)
   auto x8104 = x8102 * x8103;
-  // loc("zirgen/circuit/recursion/wom.cpp":62:7)
+  // loc("zirgen/circuit/recursion/wom.cpp":64:7)
   MixState x8105{x8101.tot + x8101.mul * x8104, x8101.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x8106 = x1159 - x1183;
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   MixState x8107{x281.tot + x281.mul * x8106, x281.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x8108 = x1165 - x1186;
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   MixState x8109{x8107.tot + x8107.mul * x8108, x8107.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x8110 = x1168 - x1192;
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   MixState x8111{x8109.tot + x8109.mul * x8110, x8109.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x8112 = x1174 - x1195;
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   MixState x8113{x8111.tot + x8111.mul * x8112, x8111.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":64:18)
+  // loc("zirgen/circuit/recursion/wom.cpp":66:18)
   MixState x8114{x8105.tot + x8103 * x8113.tot * x8105.mul, x8105.mul * x8113.mul};
-  // loc("zirgen/circuit/recursion/wom.cpp":60:19)
+  // loc("zirgen/circuit/recursion/wom.cpp":62:19)
   auto x8115 = x1201 - x1177;
-  // loc("zirgen/circuit/recursion/wom.cpp":62:19)
+  // loc("zirgen/circuit/recursion/wom.cpp":64:19)
   auto x8116 = x1 - x8115;
-  // loc("zirgen/circuit/recursion/wom.cpp":62:7)
+  // loc("zirgen/circuit/recursion/wom.cpp":64:7)
   auto x8117 = x8115 * x8116;
-  // loc("zirgen/circuit/recursion/wom.cpp":62:7)
+  // loc("zirgen/circuit/recursion/wom.cpp":64:7)
   MixState x8118{x8114.tot + x8114.mul * x8117, x8114.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x8119 = x1183 - x1204;
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   MixState x8120{x281.tot + x281.mul * x8119, x281.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x8121 = x1186 - x1210;
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   MixState x8122{x8120.tot + x8120.mul * x8121, x8120.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x8123 = x1192 - x1213;
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   MixState x8124{x8122.tot + x8122.mul * x8123, x8122.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x8125 = x1195 - x1219;
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   MixState x8126{x8124.tot + x8124.mul * x8125, x8124.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":64:18)
+  // loc("zirgen/circuit/recursion/wom.cpp":66:18)
   MixState x8127{x8118.tot + x8116 * x8126.tot * x8118.mul, x8118.mul * x8126.mul};
-  // loc("zirgen/circuit/recursion/wom.cpp":60:19)
+  // loc("zirgen/circuit/recursion/wom.cpp":62:19)
   auto x8128 = x1222 - x1201;
-  // loc("zirgen/circuit/recursion/wom.cpp":62:19)
+  // loc("zirgen/circuit/recursion/wom.cpp":64:19)
   auto x8129 = x1 - x8128;
-  // loc("zirgen/circuit/recursion/wom.cpp":62:7)
+  // loc("zirgen/circuit/recursion/wom.cpp":64:7)
   auto x8130 = x8128 * x8129;
-  // loc("zirgen/circuit/recursion/wom.cpp":62:7)
+  // loc("zirgen/circuit/recursion/wom.cpp":64:7)
   MixState x8131{x8127.tot + x8127.mul * x8130, x8127.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x8132 = x1204 - x1228;
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   MixState x8133{x281.tot + x281.mul * x8132, x281.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x8134 = x1210 - x1231;
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   MixState x8135{x8133.tot + x8133.mul * x8134, x8133.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x8136 = x1213 - x1237;
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   MixState x8137{x8135.tot + x8135.mul * x8136, x8135.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x8138 = x1219 - x1240;
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   MixState x8139{x8137.tot + x8137.mul * x8138, x8137.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":64:18)
+  // loc("zirgen/circuit/recursion/wom.cpp":66:18)
   MixState x8140{x8131.tot + x8129 * x8139.tot * x8131.mul, x8131.mul * x8139.mul};
-  // loc("zirgen/circuit/recursion/wom.cpp":60:19)
+  // loc("zirgen/circuit/recursion/wom.cpp":62:19)
   auto x8141 = x1246 - x1222;
-  // loc("zirgen/circuit/recursion/wom.cpp":62:19)
+  // loc("zirgen/circuit/recursion/wom.cpp":64:19)
   auto x8142 = x1 - x8141;
-  // loc("zirgen/circuit/recursion/wom.cpp":62:7)
+  // loc("zirgen/circuit/recursion/wom.cpp":64:7)
   auto x8143 = x8141 * x8142;
-  // loc("zirgen/circuit/recursion/wom.cpp":62:7)
+  // loc("zirgen/circuit/recursion/wom.cpp":64:7)
   MixState x8144{x8140.tot + x8140.mul * x8143, x8140.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x8145 = x1228 - x1249;
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   MixState x8146{x281.tot + x281.mul * x8145, x281.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x8147 = x1231 - x1255;
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   MixState x8148{x8146.tot + x8146.mul * x8147, x8146.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x8149 = x1237 - x1258;
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   MixState x8150{x8148.tot + x8148.mul * x8149, x8148.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x8151 = x1240 - x1264;
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   MixState x8152{x8150.tot + x8150.mul * x8151, x8150.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":64:18)
+  // loc("zirgen/circuit/recursion/wom.cpp":66:18)
   MixState x8153{x8144.tot + x8142 * x8152.tot * x8144.mul, x8144.mul * x8152.mul};
-  // loc("zirgen/circuit/recursion/wom.cpp":60:19)
+  // loc("zirgen/circuit/recursion/wom.cpp":62:19)
   auto x8154 = x1267 - x1246;
-  // loc("zirgen/circuit/recursion/wom.cpp":62:19)
+  // loc("zirgen/circuit/recursion/wom.cpp":64:19)
   auto x8155 = x1 - x8154;
-  // loc("zirgen/circuit/recursion/wom.cpp":62:7)
+  // loc("zirgen/circuit/recursion/wom.cpp":64:7)
   auto x8156 = x8154 * x8155;
-  // loc("zirgen/circuit/recursion/wom.cpp":62:7)
+  // loc("zirgen/circuit/recursion/wom.cpp":64:7)
   MixState x8157{x8153.tot + x8153.mul * x8156, x8153.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x8158 = x1249 - x1273;
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   MixState x8159{x281.tot + x281.mul * x8158, x281.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x8160 = x1255 - x1276;
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   MixState x8161{x8159.tot + x8159.mul * x8160, x8159.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x8162 = x1258 - x1282;
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   MixState x8163{x8161.tot + x8161.mul * x8162, x8161.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x8164 = x1264 - x1285;
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   MixState x8165{x8163.tot + x8163.mul * x8164, x8163.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":64:18)
+  // loc("zirgen/circuit/recursion/wom.cpp":66:18)
   MixState x8166{x8157.tot + x8155 * x8165.tot * x8157.mul, x8157.mul * x8165.mul};
-  // loc("zirgen/circuit/recursion/wom.cpp":60:19)
+  // loc("zirgen/circuit/recursion/wom.cpp":62:19)
   auto x8167 = x1291 - x1267;
-  // loc("zirgen/circuit/recursion/wom.cpp":62:19)
+  // loc("zirgen/circuit/recursion/wom.cpp":64:19)
   auto x8168 = x1 - x8167;
-  // loc("zirgen/circuit/recursion/wom.cpp":62:7)
+  // loc("zirgen/circuit/recursion/wom.cpp":64:7)
   auto x8169 = x8167 * x8168;
-  // loc("zirgen/circuit/recursion/wom.cpp":62:7)
+  // loc("zirgen/circuit/recursion/wom.cpp":64:7)
   MixState x8170{x8166.tot + x8166.mul * x8169, x8166.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x8171 = x1273 - x1294;
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   MixState x8172{x281.tot + x281.mul * x8171, x281.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x8173 = x1276 - x1300;
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   MixState x8174{x8172.tot + x8172.mul * x8173, x8172.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x8175 = x1282 - x1303;
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   MixState x8176{x8174.tot + x8174.mul * x8175, x8174.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x8177 = x1285 - x1309;
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   MixState x8178{x8176.tot + x8176.mul * x8177, x8176.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":64:18)
+  // loc("zirgen/circuit/recursion/wom.cpp":66:18)
   MixState x8179{x8170.tot + x8168 * x8178.tot * x8170.mul, x8170.mul * x8178.mul};
-  // loc("zirgen/circuit/recursion/wom.cpp":60:19)
-  auto x8180 = x1312 - x1291;
   // loc("zirgen/circuit/recursion/wom.cpp":62:19)
+  auto x8180 = x1312 - x1291;
+  // loc("zirgen/circuit/recursion/wom.cpp":64:19)
   auto x8181 = x1 - x8180;
-  // loc("zirgen/circuit/recursion/wom.cpp":62:7)
+  // loc("zirgen/circuit/recursion/wom.cpp":64:7)
   auto x8182 = x8180 * x8181;
-  // loc("zirgen/circuit/recursion/wom.cpp":62:7)
+  // loc("zirgen/circuit/recursion/wom.cpp":64:7)
   MixState x8183{x8179.tot + x8179.mul * x8182, x8179.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x8184 = x1294 - x1318;
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   MixState x8185{x281.tot + x281.mul * x8184, x281.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x8186 = x1300 - x1321;
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   MixState x8187{x8185.tot + x8185.mul * x8186, x8185.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x8188 = x1303 - x1327;
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   MixState x8189{x8187.tot + x8187.mul * x8188, x8187.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x8190 = x1309 - x1330;
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   MixState x8191{x8189.tot + x8189.mul * x8190, x8189.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":64:18)
+  // loc("zirgen/circuit/recursion/wom.cpp":66:18)
   MixState x8192{x8183.tot + x8181 * x8191.tot * x8183.mul, x8183.mul * x8191.mul};
   // loc("top(recursion::Top)/recursion::WomHeader/recursion::impl::WomPlonkElement/addr(Reg)"("./zirgen/compiler/edsl/edsl.h":117:61))
   auto x8193 = args[2][0 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("zirgen/circuit/recursion/wom.cpp":60:19)
-  auto x8194 = x8193 - x1312;
   // loc("zirgen/circuit/recursion/wom.cpp":62:19)
+  auto x8194 = x8193 - x1312;
+  // loc("zirgen/circuit/recursion/wom.cpp":64:19)
   auto x8195 = x1 - x8194;
-  // loc("zirgen/circuit/recursion/wom.cpp":62:7)
+  // loc("zirgen/circuit/recursion/wom.cpp":64:7)
   auto x8196 = x8194 * x8195;
-  // loc("zirgen/circuit/recursion/wom.cpp":62:7)
+  // loc("zirgen/circuit/recursion/wom.cpp":64:7)
   MixState x8197{x8192.tot + x8192.mul * x8196, x8192.mul * (*mix)};
-  // loc("top(recursion::Top)/recursion::WomHeader/recursion::impl::WomPlonkElement/data[0](Reg)"("zirgen/circuit/recursion/wom.cpp":66:41))
+  // loc("top(recursion::Top)/recursion::WomHeader/recursion::impl::WomPlonkElement/data[0](Reg)"("zirgen/circuit/recursion/wom.cpp":68:41))
   auto x8198 = args[2][1 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x8199 = x1318 - x8198;
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   MixState x8200{x281.tot + x281.mul * x8199, x281.mul * (*mix)};
-  // loc("top(recursion::Top)/recursion::WomHeader/recursion::impl::WomPlonkElement/data[1](Reg)"("zirgen/circuit/recursion/wom.cpp":66:41))
+  // loc("top(recursion::Top)/recursion::WomHeader/recursion::impl::WomPlonkElement/data[1](Reg)"("zirgen/circuit/recursion/wom.cpp":68:41))
   auto x8201 = args[2][2 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x8202 = x1321 - x8201;
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   MixState x8203{x8200.tot + x8200.mul * x8202, x8200.mul * (*mix)};
-  // loc("top(recursion::Top)/recursion::WomHeader/recursion::impl::WomPlonkElement/data[2](Reg)"("zirgen/circuit/recursion/wom.cpp":66:41))
+  // loc("top(recursion::Top)/recursion::WomHeader/recursion::impl::WomPlonkElement/data[2](Reg)"("zirgen/circuit/recursion/wom.cpp":68:41))
   auto x8204 = args[2][3 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x8205 = x1327 - x8204;
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   MixState x8206{x8203.tot + x8203.mul * x8205, x8203.mul * (*mix)};
-  // loc("top(recursion::Top)/recursion::WomHeader/recursion::impl::WomPlonkElement/data[3](Reg)"("zirgen/circuit/recursion/wom.cpp":66:41))
+  // loc("top(recursion::Top)/recursion::WomHeader/recursion::impl::WomPlonkElement/data[3](Reg)"("zirgen/circuit/recursion/wom.cpp":68:41))
   auto x8207 = args[2][4 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x8208 = x1330 - x8207;
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   MixState x8209{x8206.tot + x8206.mul * x8208, x8206.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":64:18)
+  // loc("zirgen/circuit/recursion/wom.cpp":66:18)
   MixState x8210{x8197.tot + x8195 * x8209.tot * x8197.mul, x8197.mul * x8209.mul};
   // loc("zirgen/compiler/edsl/component.cpp":39:15)
   MixState x8211{x8083.tot + x282 * x8210.tot * x8083.mul, x8083.mul * x8210.mul};
   // loc("zirgen/circuit/recursion/wom.cpp":12:3)
   MixState x8212{x281.tot + x281.mul * x8193, x281.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x8213{x8212.tot + x8212.mul * x8198, x8212.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x8214{x8213.tot + x8213.mul * x8201, x8213.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x8215{x8214.tot + x8214.mul * x8204, x8214.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":49:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":51:5)
   MixState x8216{x8215.tot + x8215.mul * x8207, x8215.mul * (*mix)};
   // loc("zirgen/compiler/edsl/component.cpp":39:15)
   MixState x8217{x281.tot + x315 * x8216.tot * x281.mul, x281.mul * x8216.mul};
-  // loc("zirgen/circuit/recursion/wom.cpp":60:19)
-  auto x8218 = x331 - x8084;
   // loc("zirgen/circuit/recursion/wom.cpp":62:19)
+  auto x8218 = x331 - x8084;
+  // loc("zirgen/circuit/recursion/wom.cpp":64:19)
   auto x8219 = x1 - x8218;
-  // loc("zirgen/circuit/recursion/wom.cpp":62:7)
+  // loc("zirgen/circuit/recursion/wom.cpp":64:7)
   auto x8220 = x8218 * x8219;
-  // loc("zirgen/circuit/recursion/wom.cpp":62:7)
+  // loc("zirgen/circuit/recursion/wom.cpp":64:7)
   MixState x8221{x281.tot + x281.mul * x8220, x281.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x8222 = x8089 - x333;
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   MixState x8223{x281.tot + x281.mul * x8222, x281.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x8224 = x8092 - x335;
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   MixState x8225{x8223.tot + x8223.mul * x8224, x8223.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x8226 = x8095 - x337;
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   MixState x8227{x8225.tot + x8225.mul * x8226, x8225.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x8228 = x8098 - x339;
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   MixState x8229{x8227.tot + x8227.mul * x8228, x8227.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":64:18)
+  // loc("zirgen/circuit/recursion/wom.cpp":66:18)
   MixState x8230{x8221.tot + x8219 * x8229.tot * x8221.mul, x8221.mul * x8229.mul};
   // loc("zirgen/compiler/edsl/component.cpp":39:15)
   MixState x8231{x8217.tot + x316 * x8230.tot * x8217.mul, x8217.mul * x8230.mul};
-  // loc("zirgen/circuit/recursion/wom.cpp":60:19)
+  // loc("zirgen/circuit/recursion/wom.cpp":62:19)
   auto x8232 = x603 - x8084;
-  // loc("zirgen/circuit/recursion/wom.cpp":62:19)
+  // loc("zirgen/circuit/recursion/wom.cpp":64:19)
   auto x8233 = x1 - x8232;
-  // loc("zirgen/circuit/recursion/wom.cpp":62:7)
+  // loc("zirgen/circuit/recursion/wom.cpp":64:7)
   auto x8234 = x8232 * x8233;
-  // loc("zirgen/circuit/recursion/wom.cpp":62:7)
+  // loc("zirgen/circuit/recursion/wom.cpp":64:7)
   MixState x8235{x281.tot + x281.mul * x8234, x281.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x8236 = x8089 - x605;
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   MixState x8237{x281.tot + x281.mul * x8236, x281.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x8238 = x8092 - x607;
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   MixState x8239{x8237.tot + x8237.mul * x8238, x8237.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x8240 = x8095 - x609;
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   MixState x8241{x8239.tot + x8239.mul * x8240, x8239.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x8242 = x8098 - x611;
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   MixState x8243{x8241.tot + x8241.mul * x8242, x8241.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":64:18)
+  // loc("zirgen/circuit/recursion/wom.cpp":66:18)
   MixState x8244{x8235.tot + x8233 * x8243.tot * x8235.mul, x8235.mul * x8243.mul};
-  // loc("zirgen/circuit/recursion/wom.cpp":62:19)
+  // loc("zirgen/circuit/recursion/wom.cpp":64:19)
   auto x8245 = x1 - x799;
-  // loc("zirgen/circuit/recursion/wom.cpp":62:7)
+  // loc("zirgen/circuit/recursion/wom.cpp":64:7)
   auto x8246 = x799 * x8245;
-  // loc("zirgen/circuit/recursion/wom.cpp":62:7)
+  // loc("zirgen/circuit/recursion/wom.cpp":64:7)
   MixState x8247{x8244.tot + x8244.mul * x8246, x8244.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x8248 = x605 - x617;
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   MixState x8249{x281.tot + x281.mul * x8248, x281.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x8250 = x607 - x620;
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   MixState x8251{x8249.tot + x8249.mul * x8250, x8249.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x8252 = x609 - x623;
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   MixState x8253{x8251.tot + x8251.mul * x8252, x8251.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x8254 = x611 - x863;
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   MixState x8255{x8253.tot + x8253.mul * x8254, x8253.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":64:18)
+  // loc("zirgen/circuit/recursion/wom.cpp":66:18)
   MixState x8256{x8247.tot + x8245 * x8255.tot * x8247.mul, x8247.mul * x8255.mul};
-  // loc("zirgen/circuit/recursion/wom.cpp":60:19)
-  auto x8257 = x8193 - x614;
   // loc("zirgen/circuit/recursion/wom.cpp":62:19)
+  auto x8257 = x8193 - x614;
+  // loc("zirgen/circuit/recursion/wom.cpp":64:19)
   auto x8258 = x1 - x8257;
-  // loc("zirgen/circuit/recursion/wom.cpp":62:7)
+  // loc("zirgen/circuit/recursion/wom.cpp":64:7)
   auto x8259 = x8257 * x8258;
-  // loc("zirgen/circuit/recursion/wom.cpp":62:7)
+  // loc("zirgen/circuit/recursion/wom.cpp":64:7)
   MixState x8260{x8256.tot + x8256.mul * x8259, x8256.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x8261 = x617 - x8198;
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   MixState x8262{x281.tot + x281.mul * x8261, x281.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x8263 = x620 - x8201;
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   MixState x8264{x8262.tot + x8262.mul * x8263, x8262.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x8265 = x623 - x8204;
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   MixState x8266{x8264.tot + x8264.mul * x8265, x8264.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x8267 = x863 - x8207;
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   MixState x8268{x8266.tot + x8266.mul * x8267, x8266.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":64:18)
+  // loc("zirgen/circuit/recursion/wom.cpp":66:18)
   MixState x8269{x8260.tot + x8258 * x8268.tot * x8260.mul, x8260.mul * x8268.mul};
   // loc("zirgen/compiler/edsl/component.cpp":39:15)
   MixState x8270{x8231.tot + x317 * x8269.tot * x8231.mul, x8231.mul * x8269.mul};
   // loc("zirgen/compiler/edsl/component.cpp":39:15)
   MixState x8271{x8270.tot + x556 * x8269.tot * x8270.mul, x8270.mul * x8269.mul};
-  // loc("zirgen/circuit/recursion/wom.cpp":60:19)
+  // loc("zirgen/circuit/recursion/wom.cpp":62:19)
   auto x8272 = x593 - x8084;
-  // loc("zirgen/circuit/recursion/wom.cpp":62:19)
+  // loc("zirgen/circuit/recursion/wom.cpp":64:19)
   auto x8273 = x1 - x8272;
-  // loc("zirgen/circuit/recursion/wom.cpp":62:7)
+  // loc("zirgen/circuit/recursion/wom.cpp":64:7)
   auto x8274 = x8272 * x8273;
-  // loc("zirgen/circuit/recursion/wom.cpp":62:7)
+  // loc("zirgen/circuit/recursion/wom.cpp":64:7)
   MixState x8275{x281.tot + x281.mul * x8274, x281.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x8276 = x8089 - x595;
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   MixState x8277{x281.tot + x281.mul * x8276, x281.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x8278 = x8092 - x597;
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   MixState x8279{x8277.tot + x8277.mul * x8278, x8277.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x8280 = x8095 - x599;
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   MixState x8281{x8279.tot + x8279.mul * x8280, x8279.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x8282 = x8098 - x601;
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   MixState x8283{x8281.tot + x8281.mul * x8282, x8281.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":64:18)
+  // loc("zirgen/circuit/recursion/wom.cpp":66:18)
   MixState x8284{x8275.tot + x8273 * x8283.tot * x8275.mul, x8275.mul * x8283.mul};
-  // loc("zirgen/circuit/recursion/wom.cpp":60:19)
-  auto x8285 = x8193 - x593;
   // loc("zirgen/circuit/recursion/wom.cpp":62:19)
+  auto x8285 = x8193 - x593;
+  // loc("zirgen/circuit/recursion/wom.cpp":64:19)
   auto x8286 = x1 - x8285;
-  // loc("zirgen/circuit/recursion/wom.cpp":62:7)
+  // loc("zirgen/circuit/recursion/wom.cpp":64:7)
   auto x8287 = x8285 * x8286;
-  // loc("zirgen/circuit/recursion/wom.cpp":62:7)
+  // loc("zirgen/circuit/recursion/wom.cpp":64:7)
   MixState x8288{x8284.tot + x8284.mul * x8287, x8284.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x8289 = x595 - x8198;
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   MixState x8290{x281.tot + x281.mul * x8289, x281.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x8291 = x597 - x8201;
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   MixState x8292{x8290.tot + x8290.mul * x8291, x8290.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x8293 = x599 - x8204;
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   MixState x8294{x8292.tot + x8292.mul * x8293, x8292.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x8295 = x601 - x8207;
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   MixState x8296{x8294.tot + x8294.mul * x8295, x8294.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":64:18)
+  // loc("zirgen/circuit/recursion/wom.cpp":66:18)
   MixState x8297{x8288.tot + x8286 * x8296.tot * x8288.mul, x8288.mul * x8296.mul};
   // loc("zirgen/compiler/edsl/component.cpp":39:15)
   MixState x8298{x8271.tot + x587 * x8297.tot * x8271.mul, x8271.mul * x8297.mul};
@@ -16635,101 +16635,101 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   MixState x8300{x8299.tot + x589 * x8297.tot * x8299.mul, x8299.mul * x8297.mul};
   // loc("zirgen/compiler/edsl/component.cpp":39:15)
   MixState x8301{x8300.tot + x828 * x8297.tot * x8300.mul, x8300.mul * x8297.mul};
-  // loc("zirgen/circuit/recursion/wom.cpp":60:19)
+  // loc("zirgen/circuit/recursion/wom.cpp":62:19)
   auto x8302 = x863 - x8084;
-  // loc("zirgen/circuit/recursion/wom.cpp":62:19)
+  // loc("zirgen/circuit/recursion/wom.cpp":64:19)
   auto x8303 = x1 - x8302;
-  // loc("zirgen/circuit/recursion/wom.cpp":62:7)
+  // loc("zirgen/circuit/recursion/wom.cpp":64:7)
   auto x8304 = x8302 * x8303;
-  // loc("zirgen/circuit/recursion/wom.cpp":62:7)
+  // loc("zirgen/circuit/recursion/wom.cpp":64:7)
   MixState x8305{x281.tot + x281.mul * x8304, x281.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x8306 = x8089 - x865;
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   MixState x8307{x281.tot + x281.mul * x8306, x281.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x8308 = x8092 - x867;
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   MixState x8309{x8307.tot + x8307.mul * x8308, x8307.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x8310 = x8095 - x869;
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   MixState x8311{x8309.tot + x8309.mul * x8310, x8309.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x8312 = x8098 - x871;
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   MixState x8313{x8311.tot + x8311.mul * x8312, x8311.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":64:18)
+  // loc("zirgen/circuit/recursion/wom.cpp":66:18)
   MixState x8314{x8305.tot + x8303 * x8313.tot * x8305.mul, x8305.mul * x8313.mul};
-  // loc("zirgen/circuit/recursion/wom.cpp":60:19)
+  // loc("zirgen/circuit/recursion/wom.cpp":62:19)
   auto x8315 = x873 - x863;
-  // loc("zirgen/circuit/recursion/wom.cpp":62:19)
+  // loc("zirgen/circuit/recursion/wom.cpp":64:19)
   auto x8316 = x1 - x8315;
-  // loc("zirgen/circuit/recursion/wom.cpp":62:7)
+  // loc("zirgen/circuit/recursion/wom.cpp":64:7)
   auto x8317 = x8315 * x8316;
-  // loc("zirgen/circuit/recursion/wom.cpp":62:7)
+  // loc("zirgen/circuit/recursion/wom.cpp":64:7)
   MixState x8318{x8314.tot + x8314.mul * x8317, x8314.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   MixState x8319{x281.tot + x281.mul * x916, x281.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   MixState x8320{x8319.tot + x8319.mul * x917, x8319.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   MixState x8321{x8320.tot + x8320.mul * x918, x8320.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   MixState x8322{x8321.tot + x8321.mul * x919, x8321.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":64:18)
+  // loc("zirgen/circuit/recursion/wom.cpp":66:18)
   MixState x8323{x8318.tot + x8316 * x8322.tot * x8318.mul, x8318.mul * x8322.mul};
-  // loc("zirgen/circuit/recursion/wom.cpp":60:19)
+  // loc("zirgen/circuit/recursion/wom.cpp":62:19)
   auto x8324 = x883 - x873;
-  // loc("zirgen/circuit/recursion/wom.cpp":62:19)
+  // loc("zirgen/circuit/recursion/wom.cpp":64:19)
   auto x8325 = x1 - x8324;
-  // loc("zirgen/circuit/recursion/wom.cpp":62:7)
+  // loc("zirgen/circuit/recursion/wom.cpp":64:7)
   auto x8326 = x8324 * x8325;
-  // loc("zirgen/circuit/recursion/wom.cpp":62:7)
+  // loc("zirgen/circuit/recursion/wom.cpp":64:7)
   MixState x8327{x8323.tot + x8323.mul * x8326, x8323.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x8328 = x875 - x886;
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   MixState x8329{x281.tot + x281.mul * x8328, x281.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x8330 = x877 - x889;
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   MixState x8331{x8329.tot + x8329.mul * x8330, x8329.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x8332 = x879 - x892;
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   MixState x8333{x8331.tot + x8331.mul * x8332, x8331.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x8334 = x881 - x895;
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   MixState x8335{x8333.tot + x8333.mul * x8334, x8333.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":64:18)
+  // loc("zirgen/circuit/recursion/wom.cpp":66:18)
   MixState x8336{x8327.tot + x8325 * x8335.tot * x8327.mul, x8327.mul * x8335.mul};
-  // loc("zirgen/circuit/recursion/wom.cpp":60:19)
-  auto x8337 = x8193 - x883;
   // loc("zirgen/circuit/recursion/wom.cpp":62:19)
+  auto x8337 = x8193 - x883;
+  // loc("zirgen/circuit/recursion/wom.cpp":64:19)
   auto x8338 = x1 - x8337;
-  // loc("zirgen/circuit/recursion/wom.cpp":62:7)
+  // loc("zirgen/circuit/recursion/wom.cpp":64:7)
   auto x8339 = x8337 * x8338;
-  // loc("zirgen/circuit/recursion/wom.cpp":62:7)
+  // loc("zirgen/circuit/recursion/wom.cpp":64:7)
   MixState x8340{x8336.tot + x8336.mul * x8339, x8336.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x8341 = x886 - x8198;
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   MixState x8342{x281.tot + x281.mul * x8341, x281.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x8343 = x889 - x8201;
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   MixState x8344{x8342.tot + x8342.mul * x8343, x8342.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x8345 = x892 - x8204;
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   MixState x8346{x8344.tot + x8344.mul * x8345, x8344.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   auto x8347 = x895 - x8207;
-  // loc("zirgen/circuit/recursion/wom.cpp":66:38)
+  // loc("zirgen/circuit/recursion/wom.cpp":68:38)
   MixState x8348{x8346.tot + x8346.mul * x8347, x8346.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":64:18)
+  // loc("zirgen/circuit/recursion/wom.cpp":66:18)
   MixState x8349{x8340.tot + x8338 * x8348.tot * x8340.mul, x8340.mul * x8348.mul};
   // loc("zirgen/compiler/edsl/component.cpp":39:15)
   MixState x8350{x8301.tot + x859 * x8349.tot * x8301.mul, x8301.mul * x8349.mul};
@@ -16737,25 +16737,25 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   MixState x8351{x8211.tot + x1100 * x8350.tot * x8211.mul, x8211.mul * x8350.mul};
   // loc("zirgen/compiler/edsl/component.cpp":39:15)
   MixState x8352{x8351.tot + x4809 * x8210.tot * x8351.mul, x8351.mul * x8210.mul};
-  // loc("zirgen/circuit/recursion/wom.cpp":29:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":31:3)
   auto x8353 = x8193 - x8084;
-  // loc("zirgen/circuit/recursion/wom.cpp":29:3)
+  // loc("zirgen/circuit/recursion/wom.cpp":31:3)
   MixState x8354{x281.tot + x281.mul * x8353, x281.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":31:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":33:5)
   auto x8355 = x8198 - x8089;
-  // loc("zirgen/circuit/recursion/wom.cpp":31:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":33:5)
   MixState x8356{x8354.tot + x8354.mul * x8355, x8354.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":31:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":33:5)
   auto x8357 = x8201 - x8092;
-  // loc("zirgen/circuit/recursion/wom.cpp":31:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":33:5)
   MixState x8358{x8356.tot + x8356.mul * x8357, x8356.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":31:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":33:5)
   auto x8359 = x8204 - x8095;
-  // loc("zirgen/circuit/recursion/wom.cpp":31:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":33:5)
   MixState x8360{x8358.tot + x8358.mul * x8359, x8358.mul * (*mix)};
-  // loc("zirgen/circuit/recursion/wom.cpp":31:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":33:5)
   auto x8361 = x8207 - x8098;
-  // loc("zirgen/circuit/recursion/wom.cpp":31:5)
+  // loc("zirgen/circuit/recursion/wom.cpp":33:5)
   MixState x8362{x8360.tot + x8360.mul * x8361, x8360.mul * (*mix)};
   // loc("zirgen/compiler/edsl/component.cpp":39:15)
   MixState x8363{x8352.tot + x5219 * x8362.tot * x8352.mul, x8352.mul * x8362.mul};
@@ -18891,457 +18891,457 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x9428 = x9361 * x9395;
   // loc("./zirgen/components/plonk.h":220:16)
   auto x9429 = x9427 + x9428;
-  // loc("top(recursion::Top)/recursion::WomHeader/FpExtReg/elem[0](Reg)"("./zirgen/components/plonk.h":283:45))
+  // loc("top(recursion::Top)/recursion::WomHeader/FpExtReg/elem[0](Reg)"("./zirgen/components/plonk.h":284:45))
   auto x9430 = args[4][0 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("top(recursion::Top)/recursion::WomHeader/FpExtReg/elem[1](Reg)"("./zirgen/components/plonk.h":283:45))
+  // loc("top(recursion::Top)/recursion::WomHeader/FpExtReg/elem[1](Reg)"("./zirgen/components/plonk.h":284:45))
   auto x9431 = args[4][1 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("top(recursion::Top)/recursion::WomHeader/FpExtReg/elem[2](Reg)"("./zirgen/components/plonk.h":283:45))
+  // loc("top(recursion::Top)/recursion::WomHeader/FpExtReg/elem[2](Reg)"("./zirgen/components/plonk.h":284:45))
   auto x9432 = args[4][2 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("top(recursion::Top)/recursion::WomHeader/FpExtReg/elem[3](Reg)"("./zirgen/components/plonk.h":283:45))
+  // loc("top(recursion::Top)/recursion::WomHeader/FpExtReg/elem[3](Reg)"("./zirgen/components/plonk.h":284:45))
   auto x9433 = args[4][3 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/FpExtReg/elem[0](Reg)"("./zirgen/components/plonk.h":285:20))
+  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/FpExtReg/elem[0](Reg)"("./zirgen/components/plonk.h":286:20))
   auto x9434 = args[4][4 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/FpExtReg/elem[1](Reg)"("./zirgen/components/plonk.h":285:20))
+  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/FpExtReg/elem[1](Reg)"("./zirgen/components/plonk.h":286:20))
   auto x9435 = args[4][5 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/FpExtReg/elem[2](Reg)"("./zirgen/components/plonk.h":285:20))
+  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/FpExtReg/elem[2](Reg)"("./zirgen/components/plonk.h":286:20))
   auto x9436 = args[4][6 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/FpExtReg/elem[3](Reg)"("./zirgen/components/plonk.h":285:20))
+  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/FpExtReg/elem[3](Reg)"("./zirgen/components/plonk.h":286:20))
   auto x9437 = args[4][7 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9438 = x9430 * x8541;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9439 = x9431 * x8564;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9440 = x9432 * x8557;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9441 = x9439 + x9440;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9442 = x9433 * x8549;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9443 = x9441 + x9442;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9444 = x9443 * x11;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9445 = x9438 + x9444;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9446 = x9430 * x8549;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9447 = x9431 * x8541;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9448 = x9446 + x9447;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9449 = x9432 * x8564;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9450 = x9433 * x8557;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9451 = x9449 + x9450;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9452 = x9451 * x11;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9453 = x9448 + x9452;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9454 = x9430 * x8557;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9455 = x9431 * x8549;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9456 = x9454 + x9455;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9457 = x9432 * x8541;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9458 = x9456 + x9457;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9459 = x9433 * x8564;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9460 = x9459 * x11;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9461 = x9458 + x9460;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9462 = x9430 * x8564;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9463 = x9431 * x8557;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9464 = x9462 + x9463;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9465 = x9432 * x8549;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9466 = x9464 + x9465;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9467 = x9433 * x8541;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9468 = x9466 + x9467;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9469 = x9434 * x9060;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9470 = x9435 * x9083;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9471 = x9436 * x9076;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9472 = x9470 + x9471;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9473 = x9437 * x9068;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9474 = x9472 + x9473;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9475 = x9474 * x11;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9476 = x9469 + x9475;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9477 = x9434 * x9068;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9478 = x9435 * x9060;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9479 = x9477 + x9478;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9480 = x9436 * x9083;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9481 = x9437 * x9076;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9482 = x9480 + x9481;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9483 = x9482 * x11;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9484 = x9479 + x9483;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9485 = x9434 * x9076;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9486 = x9435 * x9068;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9487 = x9485 + x9486;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9488 = x9436 * x9060;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9489 = x9487 + x9488;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9490 = x9437 * x9083;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9491 = x9490 * x11;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9492 = x9489 + x9491;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9493 = x9434 * x9083;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9494 = x9435 * x9076;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9495 = x9493 + x9494;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9496 = x9436 * x9068;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9497 = x9495 + x9496;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9498 = x9437 * x9060;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9499 = x9497 + x9498;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9500 = x9445 - x9476;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   MixState x9501{x281.tot + x281.mul * x9500, x281.mul * (*mix)};
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9502 = x9453 - x9484;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   MixState x9503{x9501.tot + x9501.mul * x9502, x9501.mul * (*mix)};
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9504 = x9461 - x9492;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   MixState x9505{x9503.tot + x9503.mul * x9504, x9503.mul * (*mix)};
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9506 = x9468 - x9499;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   MixState x9507{x9505.tot + x9505.mul * x9506, x9505.mul * (*mix)};
-  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/FpExtReg/elem[0](Reg)"("./zirgen/components/plonk.h":285:20))
+  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/FpExtReg/elem[0](Reg)"("./zirgen/components/plonk.h":286:20))
   auto x9508 = args[4][8 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/FpExtReg/elem[1](Reg)"("./zirgen/components/plonk.h":285:20))
+  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/FpExtReg/elem[1](Reg)"("./zirgen/components/plonk.h":286:20))
   auto x9509 = args[4][9 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/FpExtReg/elem[2](Reg)"("./zirgen/components/plonk.h":285:20))
+  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/FpExtReg/elem[2](Reg)"("./zirgen/components/plonk.h":286:20))
   auto x9510 = args[4][10 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/FpExtReg/elem[3](Reg)"("./zirgen/components/plonk.h":285:20))
+  // loc("top(recursion::Top)/mux(Mux)/micro_ops(recursion::MicroOps)/wom_body(recursion::WomBody)/plonk_body(PlonkBody)/FpExtReg/elem[3](Reg)"("./zirgen/components/plonk.h":286:20))
   auto x9511 = args[4][11 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9512 = x9434 * x8714;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9513 = x9435 * x8737;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9514 = x9436 * x8730;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9515 = x9513 + x9514;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9516 = x9437 * x8722;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9517 = x9515 + x9516;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9518 = x9517 * x11;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9519 = x9512 + x9518;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9520 = x9434 * x8722;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9521 = x9435 * x8714;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9522 = x9520 + x9521;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9523 = x9436 * x8737;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9524 = x9437 * x8730;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9525 = x9523 + x9524;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9526 = x9525 * x11;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9527 = x9522 + x9526;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9528 = x9434 * x8730;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9529 = x9435 * x8722;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9530 = x9528 + x9529;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9531 = x9436 * x8714;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9532 = x9530 + x9531;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9533 = x9437 * x8737;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9534 = x9533 * x11;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9535 = x9532 + x9534;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9536 = x9434 * x8737;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9537 = x9435 * x8730;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9538 = x9536 + x9537;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9539 = x9436 * x8722;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9540 = x9538 + x9539;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9541 = x9437 * x8714;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9542 = x9540 + x9541;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9543 = x9508 * x9233;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9544 = x9509 * x9256;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9545 = x9510 * x9249;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9546 = x9544 + x9545;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9547 = x9511 * x9241;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9548 = x9546 + x9547;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9549 = x9548 * x11;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9550 = x9543 + x9549;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9551 = x9508 * x9241;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9552 = x9509 * x9233;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9553 = x9551 + x9552;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9554 = x9510 * x9256;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9555 = x9511 * x9249;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9556 = x9554 + x9555;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9557 = x9556 * x11;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9558 = x9553 + x9557;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9559 = x9508 * x9249;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9560 = x9509 * x9241;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9561 = x9559 + x9560;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9562 = x9510 * x9233;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9563 = x9561 + x9562;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9564 = x9511 * x9256;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9565 = x9564 * x11;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9566 = x9563 + x9565;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9567 = x9508 * x9256;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9568 = x9509 * x9249;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9569 = x9567 + x9568;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9570 = x9510 * x9241;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9571 = x9569 + x9570;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9572 = x9511 * x9233;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9573 = x9571 + x9572;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9574 = x9519 - x9550;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   MixState x9575{x9507.tot + x9507.mul * x9574, x9507.mul * (*mix)};
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9576 = x9527 - x9558;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   MixState x9577{x9575.tot + x9575.mul * x9576, x9575.mul * (*mix)};
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9578 = x9535 - x9566;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   MixState x9579{x9577.tot + x9577.mul * x9578, x9577.mul * (*mix)};
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9580 = x9542 - x9573;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   MixState x9581{x9579.tot + x9579.mul * x9580, x9579.mul * (*mix)};
-  // loc("top(recursion::Top)/recursion::WomHeader/FpExtReg/elem[0](Reg)"("./zirgen/components/plonk.h":285:20))
+  // loc("top(recursion::Top)/recursion::WomHeader/FpExtReg/elem[0](Reg)"("./zirgen/components/plonk.h":286:20))
   auto x9582 = args[4][0 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("top(recursion::Top)/recursion::WomHeader/FpExtReg/elem[1](Reg)"("./zirgen/components/plonk.h":285:20))
+  // loc("top(recursion::Top)/recursion::WomHeader/FpExtReg/elem[1](Reg)"("./zirgen/components/plonk.h":286:20))
   auto x9583 = args[4][1 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("top(recursion::Top)/recursion::WomHeader/FpExtReg/elem[2](Reg)"("./zirgen/components/plonk.h":285:20))
+  // loc("top(recursion::Top)/recursion::WomHeader/FpExtReg/elem[2](Reg)"("./zirgen/components/plonk.h":286:20))
   auto x9584 = args[4][2 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("top(recursion::Top)/recursion::WomHeader/FpExtReg/elem[3](Reg)"("./zirgen/components/plonk.h":285:20))
+  // loc("top(recursion::Top)/recursion::WomHeader/FpExtReg/elem[3](Reg)"("./zirgen/components/plonk.h":286:20))
   auto x9585 = args[4][3 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9586 = x9508 * x8887;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9587 = x9509 * x8910;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9588 = x9510 * x8903;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9589 = x9587 + x9588;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9590 = x9511 * x8895;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9591 = x9589 + x9590;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9592 = x9591 * x11;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9593 = x9586 + x9592;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9594 = x9508 * x8895;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9595 = x9509 * x8887;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9596 = x9594 + x9595;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9597 = x9510 * x8910;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9598 = x9511 * x8903;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9599 = x9597 + x9598;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9600 = x9599 * x11;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9601 = x9596 + x9600;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9602 = x9508 * x8903;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9603 = x9509 * x8895;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9604 = x9602 + x9603;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9605 = x9510 * x8887;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9606 = x9604 + x9605;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9607 = x9511 * x8910;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9608 = x9607 * x11;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9609 = x9606 + x9608;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9610 = x9508 * x8910;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9611 = x9509 * x8903;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9612 = x9610 + x9611;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9613 = x9510 * x8895;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9614 = x9612 + x9613;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9615 = x9511 * x8887;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9616 = x9614 + x9615;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9617 = x9582 * x9406;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9618 = x9583 * x9429;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9619 = x9584 * x9422;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9620 = x9618 + x9619;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9621 = x9585 * x9414;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9622 = x9620 + x9621;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9623 = x9622 * x11;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9624 = x9617 + x9623;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9625 = x9582 * x9414;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9626 = x9583 * x9406;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9627 = x9625 + x9626;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9628 = x9584 * x9429;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9629 = x9585 * x9422;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9630 = x9628 + x9629;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9631 = x9630 * x11;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9632 = x9627 + x9631;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9633 = x9582 * x9422;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9634 = x9583 * x9414;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9635 = x9633 + x9634;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9636 = x9584 * x9406;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9637 = x9635 + x9636;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9638 = x9585 * x9429;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9639 = x9638 * x11;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9640 = x9637 + x9639;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9641 = x9582 * x9429;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9642 = x9583 * x9422;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9643 = x9641 + x9642;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9644 = x9584 * x9414;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9645 = x9643 + x9644;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9646 = x9585 * x9406;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9647 = x9645 + x9646;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9648 = x9593 - x9624;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   MixState x9649{x9581.tot + x9581.mul * x9648, x9581.mul * (*mix)};
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9650 = x9601 - x9632;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   MixState x9651{x9649.tot + x9649.mul * x9650, x9649.mul * (*mix)};
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9652 = x9609 - x9640;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   MixState x9653{x9651.tot + x9651.mul * x9652, x9651.mul * (*mix)};
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9654 = x9616 - x9647;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   MixState x9655{x9653.tot + x9653.mul * x9654, x9653.mul * (*mix)};
   // loc("zirgen/compiler/edsl/component.cpp":39:15)
   MixState x9656{x8371.tot + x282 * x9655.tot * x8371.mul, x8371.mul * x9655.mul};
@@ -19863,285 +19863,285 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x9914 = x9847 * x9881;
   // loc("./zirgen/components/plonk.h":220:16)
   auto x9915 = x9913 + x9914;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9916 = x9430 * x9750;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9917 = x9431 * x9773;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9918 = x9432 * x9766;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9919 = x9917 + x9918;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9920 = x9433 * x9758;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9921 = x9919 + x9920;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9922 = x9921 * x11;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9923 = x9916 + x9922;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9924 = x9430 * x9758;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9925 = x9431 * x9750;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9926 = x9924 + x9925;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9927 = x9432 * x9773;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9928 = x9433 * x9766;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9929 = x9927 + x9928;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9930 = x9929 * x11;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9931 = x9926 + x9930;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9932 = x9430 * x9766;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9933 = x9431 * x9758;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9934 = x9932 + x9933;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9935 = x9432 * x9750;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9936 = x9934 + x9935;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9937 = x9433 * x9773;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9938 = x9937 * x11;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9939 = x9936 + x9938;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9940 = x9430 * x9773;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9941 = x9431 * x9766;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9942 = x9940 + x9941;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9943 = x9432 * x9758;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9944 = x9942 + x9943;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9945 = x9433 * x9750;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9946 = x9944 + x9945;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9947 = x9434 * x9892;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9948 = x9435 * x9915;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9949 = x9436 * x9908;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9950 = x9948 + x9949;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9951 = x9437 * x9900;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9952 = x9950 + x9951;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9953 = x9952 * x11;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9954 = x9947 + x9953;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9955 = x9434 * x9900;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9956 = x9435 * x9892;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9957 = x9955 + x9956;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9958 = x9436 * x9915;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9959 = x9437 * x9908;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9960 = x9958 + x9959;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9961 = x9960 * x11;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9962 = x9957 + x9961;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9963 = x9434 * x9908;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9964 = x9435 * x9900;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9965 = x9963 + x9964;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9966 = x9436 * x9892;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9967 = x9965 + x9966;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9968 = x9437 * x9915;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9969 = x9968 * x11;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9970 = x9967 + x9969;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9971 = x9434 * x9915;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9972 = x9435 * x9908;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9973 = x9971 + x9972;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9974 = x9436 * x9900;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9975 = x9973 + x9974;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9976 = x9437 * x9892;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x9977 = x9975 + x9976;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9978 = x9923 - x9954;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   MixState x9979{x281.tot + x281.mul * x9978, x281.mul * (*mix)};
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9980 = x9931 - x9962;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   MixState x9981{x9979.tot + x9979.mul * x9980, x9979.mul * (*mix)};
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9982 = x9939 - x9970;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   MixState x9983{x9981.tot + x9981.mul * x9982, x9981.mul * (*mix)};
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9984 = x9946 - x9977;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   MixState x9985{x9983.tot + x9983.mul * x9984, x9983.mul * (*mix)};
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9986 = x9434 * x9807;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9987 = x9435 * x9810;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9988 = x9436 * x9809;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9989 = x9987 + x9988;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9990 = x9437 * x9808;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9991 = x9989 + x9990;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9992 = x9991 * x11;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9993 = x9986 + x9992;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9994 = x9434 * x9808;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9995 = x9435 * x9807;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9996 = x9994 + x9995;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9997 = x9436 * x9810;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9998 = x9437 * x9809;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x9999 = x9997 + x9998;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10000 = x9999 * x11;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10001 = x9996 + x10000;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10002 = x9434 * x9809;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10003 = x9435 * x9808;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10004 = x10002 + x10003;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10005 = x9436 * x9807;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10006 = x10004 + x10005;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10007 = x9437 * x9810;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10008 = x10007 * x11;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10009 = x10006 + x10008;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10010 = x9434 * x9810;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10011 = x9435 * x9809;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10012 = x10010 + x10011;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10013 = x9436 * x9808;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10014 = x10012 + x10013;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10015 = x9437 * x9807;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10016 = x10014 + x10015;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10017 = x9582 * x9395;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10018 = x9583 * x9398;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10019 = x9584 * x9397;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10020 = x10018 + x10019;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10021 = x9585 * x9396;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10022 = x10020 + x10021;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10023 = x10022 * x11;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10024 = x10017 + x10023;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10025 = x9582 * x9396;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10026 = x9583 * x9395;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10027 = x10025 + x10026;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10028 = x9584 * x9398;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10029 = x9585 * x9397;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10030 = x10028 + x10029;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10031 = x10030 * x11;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10032 = x10027 + x10031;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10033 = x9582 * x9397;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10034 = x9583 * x9396;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10035 = x10033 + x10034;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10036 = x9584 * x9395;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10037 = x10035 + x10036;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10038 = x9585 * x9398;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10039 = x10038 * x11;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10040 = x10037 + x10039;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10041 = x9582 * x9398;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10042 = x9583 * x9397;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10043 = x10041 + x10042;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10044 = x9584 * x9396;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10045 = x10043 + x10044;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10046 = x9585 * x9395;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10047 = x10045 + x10046;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10048 = x9993 - x10024;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   MixState x10049{x9985.tot + x9985.mul * x10048, x9985.mul * (*mix)};
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10050 = x10001 - x10032;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   MixState x10051{x10049.tot + x10049.mul * x10050, x10049.mul * (*mix)};
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10052 = x10009 - x10040;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   MixState x10053{x10051.tot + x10051.mul * x10052, x10051.mul * (*mix)};
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10054 = x10016 - x10047;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   MixState x10055{x10053.tot + x10053.mul * x10054, x10053.mul * (*mix)};
   // loc("zirgen/compiler/edsl/component.cpp":39:15)
   MixState x10056{x9668.tot + x317 * x10055.tot * x9668.mul, x9668.mul * x10055.mul};
@@ -20209,83 +20209,83 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x10087 = x9810 * x9395;
   // loc("./zirgen/components/plonk.h":220:16)
   auto x10088 = x10086 + x10087;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10089 = x9582 * x10065;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10090 = x9583 * x10088;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10091 = x9584 * x10081;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10092 = x10090 + x10091;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10093 = x9585 * x10073;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10094 = x10092 + x10093;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10095 = x10094 * x11;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10096 = x10089 + x10095;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10097 = x9582 * x10073;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10098 = x9583 * x10065;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10099 = x10097 + x10098;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10100 = x9584 * x10088;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10101 = x9585 * x10081;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10102 = x10100 + x10101;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10103 = x10102 * x11;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10104 = x10099 + x10103;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10105 = x9582 * x10081;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10106 = x9583 * x10073;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10107 = x10105 + x10106;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10108 = x9584 * x10065;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10109 = x10107 + x10108;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10110 = x9585 * x10088;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10111 = x10110 * x11;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10112 = x10109 + x10111;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10113 = x9582 * x10088;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10114 = x9583 * x10081;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10115 = x10113 + x10114;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10116 = x9584 * x10073;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10117 = x10115 + x10116;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10118 = x9585 * x10065;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10119 = x10117 + x10118;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10120 = x9923 - x10096;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   MixState x10121{x281.tot + x281.mul * x10120, x281.mul * (*mix)};
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10122 = x9931 - x10104;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   MixState x10123{x10121.tot + x10121.mul * x10122, x10121.mul * (*mix)};
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10124 = x9939 - x10112;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   MixState x10125{x10123.tot + x10123.mul * x10124, x10123.mul * (*mix)};
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10126 = x9946 - x10119;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   MixState x10127{x10125.tot + x10125.mul * x10126, x10125.mul * (*mix)};
   // loc("zirgen/compiler/edsl/component.cpp":39:15)
   MixState x10128{x10057.tot + x587 * x10127.tot * x10057.mul, x10057.mul * x10127.mul};
@@ -20481,285 +20481,285 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* mix, Fp** args) {
   auto x10223 = x8879 * x9395;
   // loc("./zirgen/components/plonk.h":220:16)
   auto x10224 = x10222 + x10223;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10225 = x9430 * x10139;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10226 = x9431 * x10162;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10227 = x9432 * x10155;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10228 = x10226 + x10227;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10229 = x9433 * x10147;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10230 = x10228 + x10229;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10231 = x10230 * x11;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10232 = x10225 + x10231;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10233 = x9430 * x10147;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10234 = x9431 * x10139;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10235 = x10233 + x10234;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10236 = x9432 * x10162;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10237 = x9433 * x10155;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10238 = x10236 + x10237;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10239 = x10238 * x11;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10240 = x10235 + x10239;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10241 = x9430 * x10155;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10242 = x9431 * x10147;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10243 = x10241 + x10242;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10244 = x9432 * x10139;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10245 = x10243 + x10244;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10246 = x9433 * x10162;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10247 = x10246 * x11;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10248 = x10245 + x10247;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10249 = x9430 * x10162;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10250 = x9431 * x10155;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10251 = x10249 + x10250;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10252 = x9432 * x10147;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10253 = x10251 + x10252;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10254 = x9433 * x10139;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10255 = x10253 + x10254;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10256 = x9434 * x8819;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10257 = x9435 * x8842;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10258 = x9436 * x8835;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10259 = x10257 + x10258;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10260 = x9437 * x8827;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10261 = x10259 + x10260;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10262 = x10261 * x11;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10263 = x10256 + x10262;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10264 = x9434 * x8827;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10265 = x9435 * x8819;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10266 = x10264 + x10265;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10267 = x9436 * x8842;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10268 = x9437 * x8835;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10269 = x10267 + x10268;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10270 = x10269 * x11;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10271 = x10266 + x10270;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10272 = x9434 * x8835;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10273 = x9435 * x8827;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10274 = x10272 + x10273;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10275 = x9436 * x8819;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10276 = x10274 + x10275;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10277 = x9437 * x8842;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10278 = x10277 * x11;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10279 = x10276 + x10278;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10280 = x9434 * x8842;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10281 = x9435 * x8835;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10282 = x10280 + x10281;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10283 = x9436 * x8827;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10284 = x10282 + x10283;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10285 = x9437 * x8819;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10286 = x10284 + x10285;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10287 = x10232 - x10263;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   MixState x10288{x281.tot + x281.mul * x10287, x281.mul * (*mix)};
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10289 = x10240 - x10271;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   MixState x10290{x10288.tot + x10288.mul * x10289, x10288.mul * (*mix)};
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10291 = x10248 - x10279;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   MixState x10292{x10290.tot + x10290.mul * x10291, x10290.mul * (*mix)};
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10293 = x10255 - x10286;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   MixState x10294{x10292.tot + x10292.mul * x10293, x10292.mul * (*mix)};
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10295 = x9434 * x10170;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10296 = x9435 * x10193;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10297 = x9436 * x10186;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10298 = x10296 + x10297;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10299 = x9437 * x10178;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10300 = x10298 + x10299;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10301 = x10300 * x11;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10302 = x10295 + x10301;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10303 = x9434 * x10178;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10304 = x9435 * x10170;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10305 = x10303 + x10304;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10306 = x9436 * x10193;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10307 = x9437 * x10186;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10308 = x10306 + x10307;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10309 = x10308 * x11;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10310 = x10305 + x10309;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10311 = x9434 * x10186;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10312 = x9435 * x10178;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10313 = x10311 + x10312;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10314 = x9436 * x10170;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10315 = x10313 + x10314;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10316 = x9437 * x10193;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10317 = x10316 * x11;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10318 = x10315 + x10317;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10319 = x9434 * x10193;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10320 = x9435 * x10186;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10321 = x10319 + x10320;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10322 = x9436 * x10178;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10323 = x10321 + x10322;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10324 = x9437 * x10170;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10325 = x10323 + x10324;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10326 = x9582 * x10201;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10327 = x9583 * x10224;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10328 = x9584 * x10217;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10329 = x10327 + x10328;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10330 = x9585 * x10209;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10331 = x10329 + x10330;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10332 = x10331 * x11;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10333 = x10326 + x10332;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10334 = x9582 * x10209;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10335 = x9583 * x10201;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10336 = x10334 + x10335;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10337 = x9584 * x10224;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10338 = x9585 * x10217;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10339 = x10337 + x10338;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10340 = x10339 * x11;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10341 = x10336 + x10340;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10342 = x9582 * x10217;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10343 = x9583 * x10209;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10344 = x10342 + x10343;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10345 = x9584 * x10201;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10346 = x10344 + x10345;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10347 = x9585 * x10224;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10348 = x10347 * x11;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10349 = x10346 + x10348;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10350 = x9582 * x10224;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10351 = x9583 * x10217;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10352 = x10350 + x10351;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10353 = x9584 * x10209;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10354 = x10352 + x10353;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10355 = x9585 * x10201;
-  // loc("./zirgen/components/plonk.h":286:30)
+  // loc("./zirgen/components/plonk.h":287:30)
   auto x10356 = x10354 + x10355;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10357 = x10302 - x10333;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   MixState x10358{x10294.tot + x10294.mul * x10357, x10294.mul * (*mix)};
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10359 = x10310 - x10341;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   MixState x10360{x10358.tot + x10358.mul * x10359, x10358.mul * (*mix)};
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10361 = x10318 - x10349;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   MixState x10362{x10360.tot + x10360.mul * x10361, x10360.mul * (*mix)};
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   auto x10363 = x10325 - x10356;
-  // loc("./zirgen/components/plonk.h":286:10)
+  // loc("./zirgen/components/plonk.h":287:10)
   MixState x10364{x10362.tot + x10362.mul * x10363, x10362.mul * (*mix)};
   // loc("zirgen/compiler/edsl/component.cpp":39:15)
   MixState x10365{x10131.tot + x859 * x10364.tot * x10131.mul, x10131.mul * x10364.mul};
