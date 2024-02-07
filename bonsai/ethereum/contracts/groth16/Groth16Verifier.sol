@@ -64,10 +64,10 @@ contract Groth16Verifier {
     uint16 constant pLastMem = 896;
 
     function verifyProof(
-        uint[2] calldata _pA,
-        uint[2][2] calldata _pB,
-        uint[2] calldata _pC,
-        uint[4] calldata _pubSignals
+        uint256[2] calldata _pA,
+        uint256[2][2] calldata _pB,
+        uint256[2] calldata _pC,
+        uint256[4] calldata _pubSignals
     ) public view returns (bool) {
         assembly {
             function checkField(v) {
@@ -119,7 +119,6 @@ contract Groth16Verifier {
                 g1_mulAccC(_pVk, IC3x, IC3y, calldataload(add(pubSignals, 64)))
 
                 g1_mulAccC(_pVk, IC4x, IC4y, calldataload(add(pubSignals, 96)))
-
 
                 // -A
                 mstore(_pPairing, calldataload(pA))
