@@ -41,7 +41,7 @@ fn stark2snark() {
     let claim = receipt.get_claim().unwrap();
     let composite_receipt = receipt.inner.composite().unwrap();
     let succinct_receipt = prover.compress(composite_receipt).unwrap();
-    let journal = session.journal.unwrap().bytes;
+    let journal = session.journal.clone().unwrap().bytes;
 
     tracing::info!("identity_p254");
     let ident_receipt = identity_p254(&succinct_receipt).unwrap();

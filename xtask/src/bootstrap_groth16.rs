@@ -206,7 +206,7 @@ fn generate_receipt() -> (Receipt, Digest) {
     let receipt = prover.prove_session(&ctx, &session).unwrap();
     let claim = receipt.get_claim().unwrap();
     let succinct_receipt = receipt.inner.succinct().unwrap();
-    let journal = session.journal.unwrap().bytes;
+    let journal = session.journal.clone().unwrap().bytes;
 
     tracing::info!("identity_p254");
     let ident_receipt = identity_p254(&succinct_receipt).unwrap();
