@@ -66,8 +66,10 @@ pub struct GuestListEntry<'a> {
 /// Represents a RISC Zero method
 #[derive(Debug)]
 pub struct Risc0Method {
-    name: String,
-    elf_path: PathBuf,
+    /// Name of the method
+    pub name: String,
+    /// Path of the method's binary
+    pub elf_path: PathBuf,
 }
 
 impl Risc0Method {
