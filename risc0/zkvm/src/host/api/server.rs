@@ -43,7 +43,6 @@ pub struct Server {
 #[derive(Clone, Serialize, Deserialize)]
 struct EmptySegmentRef;
 
-#[typetag::serde]
 impl SegmentRef for EmptySegmentRef {
     fn resolve(&self) -> Result<Segment> {
         Err(anyhow!("Segment resolution not supported"))
