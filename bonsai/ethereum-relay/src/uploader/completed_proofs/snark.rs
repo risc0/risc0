@@ -81,8 +81,7 @@ pub fn tokenize_snark_receipt(seal: &Seal) -> anyhow::Result<Token> {
     }
     Ok(Token::FixedArray(vec![
         Token::FixedArray(
-            seal
-                .a
+            seal.a
                 .iter()
                 .map(|elm| U256::from_big_endian(elm).into_token())
                 .collect(),
@@ -102,8 +101,7 @@ pub fn tokenize_snark_receipt(seal: &Seal) -> anyhow::Result<Token> {
             ),
         ]),
         Token::FixedArray(
-            seal
-                .c
+            seal.c
                 .iter()
                 .map(|elm| U256::from_big_endian(elm).into_token())
                 .collect(),
