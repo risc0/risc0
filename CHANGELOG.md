@@ -6,12 +6,16 @@
 
 * Fix temporary directory not being removed when session goes out of scope. This
   can help prevent out of disk space issues.
+* Verification of groth16 receipts in rust that are compatible with Bonsai
 
 ### ⚡️ Features
 
+* Improve performance by replacing Poseidon with Poseidon2 hashing function
 * Improved API for handling private outputs
 * Add support for configuration of intermediate segment storage (on-disk,
   in-memory, etc).
+* Add cargo-risczero deploy command
+* Increase bits of security
 
 ### 🚨 Breaking Changes
 

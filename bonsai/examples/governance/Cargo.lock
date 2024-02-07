@@ -639,6 +639,7 @@ dependencies = [
  "hex",
  "pin-project",
  "reqwest",
+ "risc0-groth16",
  "risc0-zkvm",
  "serde",
  "serde_json",
@@ -681,6 +682,7 @@ dependencies = [
  "bincode",
  "bonsai-sdk",
  "hex",
+ "risc0-groth16",
  "risc0-zkvm",
  "serde_json",
  "thiserror",
@@ -695,6 +697,7 @@ name = "bonsai-sdk"
 version = "0.6.0-rc.1"
 dependencies = [
  "reqwest",
+ "risc0-groth16",
  "serde",
  "thiserror",
  "tokio",
@@ -3713,7 +3716,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-binfmt"
-version = "0.21.0-alpha.1"
+version = "0.20.1"
 dependencies = [
  "anyhow",
  "elf",
@@ -3725,7 +3728,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build"
-version = "0.21.0-alpha.1"
+version = "0.20.1"
 dependencies = [
  "anyhow",
  "cargo-platform",
@@ -3741,7 +3744,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build-kernel"
-version = "0.21.0-alpha.1"
+version = "0.20.1"
 dependencies = [
  "cc",
  "directories",
@@ -3752,7 +3755,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion"
-version = "0.21.0-alpha.1"
+version = "0.20.1"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -3772,7 +3775,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion-sys"
-version = "0.21.0-alpha.1"
+version = "0.20.1"
 dependencies = [
  "glob",
  "risc0-build-kernel",
@@ -3781,7 +3784,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im"
-version = "0.21.0-alpha.1"
+version = "0.20.1"
 dependencies = [
  "anyhow",
  "cust",
@@ -3797,7 +3800,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im-sys"
-version = "0.21.0-alpha.1"
+version = "0.20.1"
 dependencies = [
  "glob",
  "risc0-build-kernel",
@@ -3806,7 +3809,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-core"
-version = "0.21.0-alpha.1"
+version = "0.20.1"
 dependencies = [
  "bytemuck",
  "rand_core",
@@ -3814,7 +3817,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-groth16"
-version = "0.21.0-alpha.1"
+version = "0.20.1"
 dependencies = [
  "anyhow",
  "ark-bn254",
@@ -3840,7 +3843,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-sys"
-version = "0.21.0-alpha.1"
+version = "0.20.1"
 dependencies = [
  "cc",
  "cust",
@@ -3850,7 +3853,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkp"
-version = "0.21.0-alpha.1"
+version = "0.20.1"
 dependencies = [
  "anyhow",
  "blake2",
@@ -3876,7 +3879,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "0.21.0-alpha.1"
+version = "0.20.1"
 dependencies = [
  "addr2line",
  "anyhow",
@@ -3916,7 +3919,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "0.21.0-alpha.1"
+version = "0.20.1"
 dependencies = [
  "bytemuck",
  "getrandom",
