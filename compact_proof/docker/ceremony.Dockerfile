@@ -42,6 +42,3 @@ RUN chmod +x run_ceremony.sh
 RUN ulimit -s unlimited
 
 ENTRYPOINT ["/ceremony/run_ceremony.sh", "/ceremony/groth16/pot23.ptau"]
-
-
-
