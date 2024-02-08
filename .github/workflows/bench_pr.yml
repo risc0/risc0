@@ -1,6 +1,9 @@
 name: Benchmark Check
 
 on:
+  pull_request:
+    branches:
+      - 'morgan/benchmarks-comments-fix'
   workflow_dispatch:
 
 concurrency:
