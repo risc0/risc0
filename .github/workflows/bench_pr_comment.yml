@@ -43,6 +43,16 @@ jobs:
         run: sed h ${{ runner.temp }}/pr-output/*-output.md > ${{ runner.temp }}/pr-output/merged.md
         id: download
 
+      - name: Append merged output file to collapse all details
+        shell: bash
+        run: |
+          echo "<details>
+          <summary>Click Here for Benchmark Results for Run ${{github.run_id}}</summary>
+          
+          $(cat ${{ runner.temp }}/pr-output/merged.md)" > ${{ runner.temp }}/pr-output/merged.md
+          echo "" >> ${{ runner.temp }}/pr-output/merged.md
+          echo "</details>" >> ${{ runner.temp }}/pr-output/merged.md
+
       - uses: actions/github-script@v3
         name: Create PR comment
         with:
