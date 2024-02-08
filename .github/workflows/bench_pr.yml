@@ -77,6 +77,9 @@ jobs:
       # the bench_pr_comment.yml picks up after this workflow to make the comment
       # needed because: https://securitylab.github.com/research/github-actions-preventing-pwn-requests/
 
+  comment:
+    runs-on: [self-hosted, prod, bench, "${{ matrix.os }}", "${{ matrix.device }}"]
+    steps:  
       - name: unzip benchmark markdown files
         run: |
           mkdir -p ${{ runner.temp }}/pr-output/
