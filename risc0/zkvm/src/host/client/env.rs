@@ -73,7 +73,7 @@ pub(crate) struct Assumptions {
 
 #[allow(dead_code)]
 #[derive(Clone)]
-pub enum DirectoryPath {
+pub enum SegmentPath {
     TempDir(Arc<TempDir>),
     Path(PathBuf),
 }
@@ -93,7 +93,7 @@ pub struct ExecutorEnv<'a> {
     pub(crate) input: Vec<u8>,
     pub(crate) trace: Vec<Rc<RefCell<dyn TraceCallback + 'a>>>,
     pub(crate) assumptions: Rc<RefCell<Assumptions>>,
-    pub(crate) segment_path: Option<DirectoryPath>,
+    pub(crate) segment_path: Option<SegmentPath>,
     pub(crate) pprof_out: Option<PathBuf>,
 }
 
@@ -361,7 +361,7 @@ impl<'a> ExecutorEnvBuilder<'a> {
 
     /// Set the path where segments will be stored.
     pub fn segment_path<P: AsRef<Path>>(&mut self, path: P) -> &mut Self {
-        self.inner.segment_path = Some(DirectoryPath::Path(path.as_ref().to_path_buf()));
+        self.inner.segment_path = Some(SegmentPath::Path(path.as_ref().to_path_buf()));
         self
     }
 

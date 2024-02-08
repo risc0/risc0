@@ -27,7 +27,7 @@ use risc0_zkvm_platform::WORD_SIZE;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    host::{client::env::DirectoryPath, server::exec::executor::SyscallRecord},
+    host::{client::env::SegmentPath, server::exec::executor::SyscallRecord},
     sha::Digest,
     Assumption, Assumptions, ExitCode, Journal, Output, ReceiptClaim,
 };
@@ -321,7 +321,7 @@ impl SimpleSegmentRef {
 /// [1]: https://github.com/risc0/risc0/blob/main/examples/zkevm-demo/src/main.rs
 pub struct FileSegmentRef {
     path: PathBuf,
-    _dir: DirectoryPath,
+    _dir: SegmentPath,
 }
 
 impl SegmentRef for FileSegmentRef {
@@ -345,7 +345,7 @@ impl FileSegmentRef {
     /// Construct a [FileSegmentRef]
     ///
     /// This builds a FileSegmentRef that stores `segment` in a file at `path`.
-    pub fn new(segment: &Segment, dir: &DirectoryPath) -> Result<Self> {
+    pub fn new(segment: &Segment, dir: &SegmentPath) -> Result<Self> {
         let path = dir.path().join(format!("{}.bincode", segment.index));
         fs::write(&path, bincode::serialize(&segment)?)?;
         Ok(Self {

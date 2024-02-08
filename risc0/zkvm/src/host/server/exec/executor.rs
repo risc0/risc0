@@ -52,7 +52,7 @@ use super::{monitor::MemoryMonitor, profiler::Profiler, syscall::SyscallTable};
 use crate::{
     align_up,
     host::{
-        client::{env::DirectoryPath, exec::TraceEvent},
+        client::{env::SegmentPath, exec::TraceEvent},
         receipt::Assumption,
         server::opcode::{MajorType, OpCode},
     },
@@ -238,7 +238,7 @@ impl<'a> ExecutorImpl<'a> {
     /// of the execution.
     pub fn run(&mut self) -> Result<Session> {
         if self.env.segment_path.is_none() {
-            self.env.segment_path = Some(DirectoryPath::TempDir(Arc::new(tempdir()?)));
+            self.env.segment_path = Some(SegmentPath::TempDir(Arc::new(tempdir()?)));
         }
 
         let path = self.env.segment_path.clone().unwrap();
