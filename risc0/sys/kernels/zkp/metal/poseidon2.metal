@@ -54,14 +54,14 @@ void do_partial_sboxes(thread Fp* cells) {
   cells[0] = sbox(cells[0]);
 }
 
-void multiply_by_m_int(const device Fp* M_INT_DIAG_ULVT, thread Fp* cells) {
+void multiply_by_m_int(const device Fp* M_INT_DIAG, thread Fp* cells) {
   // Exploit the fact that off-diagonal entries of M_INT are all 1.
   Fp sum = 0;
   for (uint i = 0; i < CELLS; i++) {
     sum += cells[i];
   }
   for (uint i = 0; i < CELLS; i++) {
-    cells[i] = sum + M_INT_DIAG_ULVT[i] * cells[i];
+    cells[i] = sum + M_INT_DIAG[i] * cells[i];
   }
 }
 
@@ -92,10 +92,10 @@ void multiply_by_m_ext(thread Fp* old_cells) {
   for (uint i = 0; i < 4; i++) {
     tmp_sums[i] = 0;
   }
-  for (uint i = 0; i < CELLS/4; i++) {
-    multiply_by_4x4_circulant(old_cells + i*4);
+  for (uint i = 0; i < CELLS / 4; i++) {
+    multiply_by_4x4_circulant(old_cells + i * 4);
     for (uint j = 0; j < 4; j++) {
-      Fp to_add = Fp::fromRaw(1) * old_cells[i*4 + j];
+      Fp to_add = old_cells[i * 4 + j];
       tmp_sums[j] += to_add;
       cells[i * 4 + j] += to_add;
     }
@@ -111,15 +111,18 @@ void full_round(const device Fp* ROUND_CONSTANTS, thread Fp* cells, uint round) 
   multiply_by_m_ext(cells);
 }
 
-void partial_round(const device Fp* ROUND_CONSTANTS, const device Fp* M_INT_DIAG_ULVT, thread Fp* cells, uint round) {
+void partial_round(const device Fp* ROUND_CONSTANTS,
+                   const device Fp* M_INT_DIAG,
+                   thread Fp* cells,
+                   uint round) {
   add_round_constants_partial(ROUND_CONSTANTS, cells, round);
   do_partial_sboxes(cells);
-  multiply_by_m_int(M_INT_DIAG_ULVT, cells);
+  multiply_by_m_int(M_INT_DIAG, cells);
 }
 
 void poseidon2_mix(const device Fp* ROUND_CONSTANTS,
-                const device Fp* M_INT_DIAG_ULVT,
-                thread Fp* cells) {
+                   const device Fp* M_INT_DIAG,
+                   thread Fp* cells) {
   uint round = 0;
 
   // First linear layer.
@@ -132,7 +135,7 @@ void poseidon2_mix(const device Fp* ROUND_CONSTANTS,
   }
   // Do partial rounds
   for (uint i = 0; i < ROUNDS_PARTIAL; i++) {
-    partial_round(ROUND_CONSTANTS, M_INT_DIAG_ULVT, cells, round);
+    partial_round(ROUND_CONSTANTS, M_INT_DIAG, cells, round);
     round++;
   }
   // Do remaining full rounds
@@ -142,46 +145,45 @@ void poseidon2_mix(const device Fp* ROUND_CONSTANTS,
   }
 }
 
-}
+} // namespace
 
 kernel void poseidon2_fold(const device Fp* ROUND_CONSTANTS,
-                     const device Fp* M_INT_DIAG_ULVT,
-                     device Fp* output,
-                     const device Fp* input,
-                     device uint32_t& output_size,
-                     uint gid [[thread_position_in_grid]]) {
+                           const device Fp* M_INT_DIAG,
+                           device Fp* output,
+                           const device Fp* input,
+                           device uint32_t& output_size,
+                           uint gid [[thread_position_in_grid]]) {
   Fp cells[CELLS];
   for (size_t i = 0; i < CELLS_OUT; i++) {
     cells[i] = input[2 * gid * CELLS_OUT + i];
     cells[CELLS_OUT + i] = input[(2 * gid + 1) * CELLS_OUT + i];
   }
-  poseidon2_mix(ROUND_CONSTANTS, M_INT_DIAG_ULVT, cells);
+  poseidon2_mix(ROUND_CONSTANTS, M_INT_DIAG, cells);
   for (uint i = 0; i < CELLS_OUT; i++) {
     output[gid * CELLS_OUT + i] = cells[i];
   }
 }
 
 kernel void poseidon2_rows(const device Fp* ROUND_CONSTANTS,
-                     const device Fp* M_INT_DIAG_ULVT,
-                     device Fp* out,
-                     const device Fp* matrix,
-                     device uint32_t& count,
-                     device uint32_t& col_size,
-                     uint gid [[thread_position_in_grid]]) {
+                           const device Fp* M_INT_DIAG,
+                           device Fp* out,
+                           const device Fp* matrix,
+                           device uint32_t& count,
+                           device uint32_t& col_size,
+                           uint gid [[thread_position_in_grid]]) {
   Fp cells[CELLS];
   uint used = 0;
   for (uint i = 0; i < col_size; i++) {
     cells[used++] += matrix[i * count + gid];
     if (used == CELLS_RATE) {
-      poseidon2_mix(ROUND_CONSTANTS, M_INT_DIAG_ULVT, cells);
+      poseidon2_mix(ROUND_CONSTANTS, M_INT_DIAG, cells);
       used = 0;
     }
   }
   if (used != 0 || count == 0) {
-    poseidon2_mix(ROUND_CONSTANTS, M_INT_DIAG_ULVT, cells);
+    poseidon2_mix(ROUND_CONSTANTS, M_INT_DIAG, cells);
   }
   for (uint i = 0; i < CELLS_OUT; i++) {
     out[CELLS_OUT * gid + i] = cells[i];
   }
 }
-

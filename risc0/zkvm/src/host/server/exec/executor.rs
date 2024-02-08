@@ -21,7 +21,7 @@ use addr2line::{
     gimli::{EndianRcSlice, RunTimeEndian},
     Frame, LookupResult, ObjectContext,
 };
-use anyhow::{anyhow, bail, Context, Result};
+use anyhow::{bail, Context, Result};
 use crypto_bigint::{CheckedMul, Encoding, NonZero, U256, U512};
 use human_repr::HumanDuration;
 use risc0_binfmt::{MemoryImage, Program, SystemState};
@@ -135,6 +135,12 @@ pub struct ExecutorImpl<'a> {
     profiler: Option<Rc<RefCell<Profiler>>>,
 }
 
+#[derive(Default)]
+struct SessionCycles {
+    user: u64,
+    total: u64,
+}
+
 impl<'a> ExecutorImpl<'a> {
     /// Construct a new [ExecutorImpl] from a [MemoryImage] and entry point.
     ///
@@ -239,27 +245,25 @@ impl<'a> ExecutorImpl<'a> {
         self.run_with_callback(|segment| Ok(Box::new(FileSegmentRef::new(&segment, &path)?)))
     }
 
-    /// Run the executor until [ExitCode::Halted], [ExitCode::Paused], or
-    /// [ExitCode::Fault] is reached, producing a [Session] as a result.
+    /// Run the executor until [ExitCode::Halted] or [ExitCode::Paused] is reached, producing a
+    /// [Session] as a result.
     pub fn run_with_callback<F>(&mut self, mut callback: F) -> Result<Session>
     where
         F: FnMut(Segment) -> Result<Box<dyn SegmentRef>>,
     {
         let (Some(ExitCode::SystemSplit | ExitCode::Paused(_)) | None) = self.exit_code else {
-            return Err(anyhow!(
+            bail!(
                 "cannot resume an execution which exited with {:?}",
                 self.exit_code
-            )
-            .into());
+            );
         };
 
         let start_time = std::time::Instant::now();
 
-        self.pc = self
-            .pre_image
-            .as_ref()
-            .ok_or_else(|| anyhow!("attempted to run the executor with no pre_image"))?
-            .pc;
+        let pre_image = self.pre_image.as_ref().context("missing pre_image")?;
+        let pre_state = pre_image.get_system_state()?;
+
+        self.pc = pre_image.pc;
         self.monitor.clear_session()?;
 
         let journal = Journal::default();
@@ -268,15 +272,18 @@ impl<'a> ExecutorImpl<'a> {
             .borrow_mut()
             .with_write_fd(fileno::JOURNAL, journal.clone());
 
-        let mut run_loop = || -> Result<(ExitCode, Segment, MemoryImage)> {
+        let mut run_loop = || -> Result<(ExitCode, Segment, MemoryImage, SessionCycles)> {
+            let mut session_cycles = SessionCycles::default();
+
             loop {
                 if let Some(exit_code) = self.step()? {
                     let total_cycles = self.total_cycles();
                     tracing::debug!("exit_code: {exit_code:?}, total_cycles: {total_cycles}");
                     assert!(total_cycles <= self.segment_limit);
-                    let pre_image = self.pre_image.take().ok_or_else(|| {
-                        anyhow!("attempted to run the executor with no pre_image")
-                    })?;
+                    let pre_image = self
+                        .pre_image
+                        .take()
+                        .context("attempted to run the executor with no pre_image")?;
                     let post_image = self.monitor.build_image(self.pc)?;
                     let syscalls = mem::take(&mut self.syscalls);
                     let faults = mem::take(&mut self.monitor.faults);
@@ -284,8 +291,9 @@ impl<'a> ExecutorImpl<'a> {
                     let cycles = self.body_cycles.try_into()?;
                     let segment = Segment::new(
                         pre_image,
-                        SystemState::from(&post_image),
-                        // NOTE: On the last segment, the output is added outside this loop.
+                        post_image.get_system_state()?,
+                        // NOTE: On the last segment, the output is added outside this loop, before
+                        // it is sent to the callback and pushed into the Session object.
                         None,
                         faults,
                         syscalls,
@@ -298,16 +306,13 @@ impl<'a> ExecutorImpl<'a> {
                             .context("Too many segments to fit in u32")?,
                         cycles,
                     );
+                    session_cycles.user += cycles as u64;
+                    session_cycles.total += 1 << po2;
                     match exit_code {
                         ExitCode::SystemSplit => {
                             let segment_ref = callback(segment)?;
                             self.segments.push(segment_ref);
                             self.split(Some(post_image.into()))?
-                        }
-                        ExitCode::SessionLimit => {
-                            let segment_ref = callback(segment)?;
-                            self.segments.push(segment_ref);
-                            bail!("Session limit exceeded")
                         }
                         ExitCode::Paused(inner) => {
                             tracing::debug!("Paused({inner}): {}", self.segment_cycle);
@@ -316,22 +321,19 @@ impl<'a> ExecutorImpl<'a> {
                             let mut resume_pre_image = post_image.clone();
                             resume_pre_image.pc += WORD_SIZE as u32;
                             self.split(Some(resume_pre_image.into()))?;
-                            return Ok((exit_code, segment, post_image));
+                            return Ok((exit_code, segment, post_image, session_cycles));
                         }
                         ExitCode::Halted(inner) => {
                             tracing::debug!("Halted({inner}): {}", self.segment_cycle);
-                            return Ok((exit_code, segment, post_image));
+                            return Ok((exit_code, segment, post_image, session_cycles));
                         }
-                        ExitCode::Fault => {
-                            tracing::debug!("Fault: {}", self.segment_cycle);
-                            return Ok((exit_code, segment, post_image));
-                        }
+                        _ => bail!("execution reached unexpected exit code {:?}", exit_code),
                     };
                 };
             }
         };
 
-        let (exit_code, mut final_segment, post_image) = run_loop()?;
+        let (exit_code, mut final_segment, post_image, session_cycles) = run_loop()?;
         let elapsed = start_time.elapsed();
 
         // Take (clear out) the list of accessed assumptions.
@@ -344,8 +346,7 @@ impl<'a> ExecutorImpl<'a> {
             .and_then(|output_digest| (output_digest != Digest::ZERO).then(|| journal.buf.take()));
         if !exit_code.expects_output() && session_journal.is_some() {
             tracing::debug!(
-                "dropping non-empty journal due to exit code {:?}: 0x{}",
-                exit_code,
+                "dropping non-empty journal due to exit code {exit_code:?}: 0x{}",
                 hex::encode(journal.buf.borrow().as_slice())
             );
         };
@@ -376,6 +377,21 @@ impl<'a> ExecutorImpl<'a> {
             .flatten()
             .transpose()?;
 
+        // NOTE: When a segment ends in a Halted(_) state, it may not update the post state
+        // digest. As a result, it will be the same are the pre_image. All other exit codes require
+        // the post state digest to reflect the final memory state.
+        // NOTE: The PC on the the post state is stored "+ 4". See ReceiptClaim for more detail.
+        let post_state = SystemState {
+            pc: post_image
+                .pc
+                .checked_add(WORD_SIZE as u32)
+                .context("invalid pc in session post image")?,
+            merkle_root: match exit_code {
+                ExitCode::Halted(_) => final_segment.pre_image.compute_root_hash()?,
+                _ => post_image.compute_root_hash()?,
+            },
+        };
+
         // Now that the Output has been populated, call the segment ref callback.
         let segment_ref = callback(final_segment)?;
         self.segments.push(segment_ref);
@@ -391,13 +407,15 @@ impl<'a> ExecutorImpl<'a> {
             exit_code,
             post_image,
             assumptions,
+            session_cycles.user,
+            session_cycles.total,
+            pre_state,
+            post_state,
         );
 
         tracing::info_span!("executor").in_scope(|| {
             tracing::info!("execution time: {}", elapsed.human_duration());
-            if let Err(error) = session.log() {
-                tracing::error!(?error, "failed to log session");
-            }
+            session.log();
         });
 
         Ok(session)
@@ -418,7 +436,7 @@ impl<'a> ExecutorImpl<'a> {
     pub fn step(&mut self) -> Result<Option<ExitCode>> {
         if let Some(limit) = self.env.session_limit {
             if self.session_cycle() >= (limit as usize) {
-                return Ok(Some(ExitCode::SessionLimit));
+                bail!("Session limit exceeded")
             }
         }
 
@@ -485,11 +503,7 @@ impl<'a> ExecutorImpl<'a> {
                     err
                 );
                 self.monitor.undo()?;
-                if cfg!(feature = "fault-proof") {
-                    return Ok(Some(ExitCode::Fault));
-                } else {
-                    bail!("rrs instruction executor failed with {:?}", err);
-                }
+                bail!("execution encountered a fault: {:?}", err);
             }
 
             if let Some(idx) = hart.last_register_write {
@@ -741,7 +755,7 @@ impl<'a> ExecutorImpl<'a> {
             let handler = self
                 .syscall_table
                 .get_syscall(&syscall_name)
-                .ok_or(anyhow!("Unknown syscall: {syscall_name:?}"))?;
+                .context(format!("Unknown syscall: {syscall_name:?}"))?;
             let (a0, a1) =
                 handler
                     .borrow_mut()

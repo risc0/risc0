@@ -922,6 +922,23 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "acbf1af155f9b9ef647e42cdc158db4b64a1b61f743629225fde6f3e0be2a7c7"
 
 [[package]]
+name = "composition-example"
+version = "0.1.0"
+dependencies = [
+ "composition-example-methods",
+ "hello-world",
+ "risc0-zkvm",
+ "serde",
+]
+
+[[package]]
+name = "composition-example-methods"
+version = "0.1.0"
+dependencies = [
+ "risc0-build",
+]
+
+[[package]]
 name = "console"
 version = "0.15.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1985,6 +2002,13 @@ dependencies = [
  "futures-core",
  "js-sys",
  "wasm-bindgen",
+]
+
+[[package]]
+name = "groth16-verifier-methods"
+version = "0.1.0"
+dependencies = [
+ "risc0-build",
 ]
 
 [[package]]
@@ -3738,6 +3762,7 @@ name = "risc0-build"
 version = "0.21.0-alpha.1"
 dependencies = [
  "anyhow",
+ "cargo-platform",
  "cargo_metadata",
  "docker-generate",
  "risc0-binfmt",
@@ -3767,6 +3792,7 @@ dependencies = [
  "bytemuck",
  "cust",
  "downloader",
+ "hex",
  "metal",
  "rand",
  "rayon",
@@ -3821,6 +3847,33 @@ dependencies = [
 ]
 
 [[package]]
+name = "risc0-groth16"
+version = "0.21.0-alpha.1"
+dependencies = [
+ "anyhow",
+ "ark-bn254",
+ "ark-groth16",
+ "ark-serialize",
+ "hex",
+ "num-bigint 0.4.4",
+ "num-derive",
+ "num-traits",
+ "risc0-zkp",
+ "serde",
+]
+
+[[package]]
+name = "risc0-groth16-verifier-example"
+version = "0.1.0"
+dependencies = [
+ "groth16-verifier-methods",
+ "risc0-groth16",
+ "risc0-zkvm",
+ "serde_json",
+ "sha2",
+]
+
+[[package]]
 name = "risc0-sppark"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3872,9 +3925,6 @@ version = "0.21.0-alpha.1"
 dependencies = [
  "addr2line",
  "anyhow",
- "ark-bn254",
- "ark-groth16",
- "ark-serialize",
  "bincode",
  "bonsai-sdk",
  "bytemuck",
@@ -3886,7 +3936,6 @@ dependencies = [
  "hex",
  "human-repr",
  "lazy-regex",
- "num-bigint 0.4.4",
  "num-derive",
  "num-traits",
  "prost",
@@ -3897,6 +3946,7 @@ dependencies = [
  "risc0-circuit-recursion",
  "risc0-circuit-rv32im",
  "risc0-core",
+ "risc0-groth16",
  "risc0-zkp",
  "risc0-zkvm-platform",
  "rrs-lib",
@@ -4382,9 +4432,9 @@ dependencies = [
 
 [[package]]
 name = "sha2"
-version = "0.10.8"
+version = "0.10.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "793db75ad2bcafc3ffa7c68b215fee268f537982cd901d132f89c6343f3a3dc8"
+checksum = "82e6b795fe2e3b1e845bafcb27aa35405c4d47cdfc92af5fc8d3002f76cebdc0"
 dependencies = [
  "cfg-if",
  "cpufeatures",
@@ -5865,7 +5915,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "xgboost"
+name = "xgboost-example"
 version = "0.1.0"
 dependencies = [
  "forust-ml",

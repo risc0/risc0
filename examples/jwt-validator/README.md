@@ -4,9 +4,10 @@ This code provides a minimal example for using RISC Zero's [zkVM] to create zero
 
 ## Quick Start
 
-First, follow the [installation guide] if you don't already have the RISC Zero tools installed.
+First, follow the [examples guide] to install dependencies and check out the correct version of the example.
 
 Then, run the example with:
+
 ```bash
 cargo run --release
 ```
@@ -53,7 +54,7 @@ The [guest code] confirms the JWT's integrity using the public key and records t
 [receipt]: https://dev.risczero.com/terminology#receipt
 [verify]: https://dev.risczero.com/terminology#verify
 [journal]: https://dev.risczero.com/terminology#journal
-[installation guide]: https://dev.risczero.com/api/zkvm/quickstart
+[examples guide]: https://dev.risczero.com/api/zkvm/examples/#running-the-examples
 [here]: https://github.com/risc0/risc0/blob/main/examples/chess/src/main.rs#L29
 [zkVM]: https://dev.risczero.com/zkvm
 [shakmaty]: https://docs.rs/shakmaty/latest/shakmaty/

@@ -20,10 +20,10 @@ import {Test} from "forge-std/Test.sol";
 import {console2} from "forge-std/console2.sol";
 import {Strings2} from "lib/murky/differential_testing/test/utils/Strings2.sol";
 
-import {IBonsaiRelay, Callback, CallbackAuthorization} from "./IBonsaiRelay.sol";
-import {BonsaiRelay} from "./BonsaiRelay.sol";
-import {BonsaiRelayQueueWrapper} from "./BonsaiRelayQueueWrapper.sol";
-import {BonsaiTestRelay} from "./BonsaiTestRelay.sol";
+import {IBonsaiRelay, Callback, CallbackAuthorization} from "./relay/IBonsaiRelay.sol";
+import {BonsaiRelay} from "./relay/BonsaiRelay.sol";
+import {BonsaiRelayQueueWrapper} from "./relay/BonsaiRelayQueueWrapper.sol";
+import {BonsaiTestRelay} from "./relay/BonsaiTestRelay.sol";
 import {BonsaiCheats} from "./BonsaiCheats.sol";
 import {IRiscZeroVerifier} from "./IRiscZeroVerifier.sol";
 import {ControlID, RiscZeroGroth16Verifier} from "./groth16/RiscZeroGroth16Verifier.sol";

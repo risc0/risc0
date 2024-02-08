@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,6 +11,10 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
+/// Merkle root of the RECURSION_CONTROL_IDS
+pub const ALLOWED_IDS_ROOT: &str =
+    "290188641142c54bdb641329127e7d44f9816c5c61137e14328ad247d29ac412";
 
 pub const RECURSION_CONTROL_IDS: [(&str, &str); 15] = [
     (
@@ -74,7 +78,3 @@ pub const RECURSION_CONTROL_IDS: [(&str, &str); 15] = [
         "93ddfd13ad326c73317033379bda035dd1e97a056aaed01c5beca909d764d213",
     ),
 ];
-
-/// Merkle root of the RECURSION_CONTROL_IDS
-pub const ALLOWED_IDS_ROOT: &str =
-    "290188641142c54bdb641329127e7d44f9816c5c61137e14328ad247d29ac412";

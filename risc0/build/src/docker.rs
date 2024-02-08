@@ -69,7 +69,7 @@ pub fn docker_build(manifest_path: &Path, src_dir: &Path, features: &[String]) -
         let temp_dir = tempdir()?;
         let temp_path = temp_dir.path();
         let rel_manifest_path = manifest_path.strip_prefix(&src_dir)?;
-        create_dockerfile(&rel_manifest_path, temp_path, pkg_name.as_str(), features)?;
+        create_dockerfile(rel_manifest_path, temp_path, pkg_name.as_str(), features)?;
         build(&src_dir, temp_path)?;
     }
     println!("ELFs ready at:");
@@ -128,7 +128,7 @@ fn create_dockerfile(
     .join(" ");
 
     let build = DockerFile::new()
-        .from_alias("build", "risczero/risc0-guest-builder:v0.17")
+        .from_alias("build", "risczero/risc0-guest-builder:v2024-01-31.1")
         .workdir("/src")
         .copy(".", ".")
         .env(manifest_env)
@@ -233,15 +233,15 @@ mod test {
         build("../../risc0/zkvm/methods/guest/Cargo.toml");
         compare_image_id(
             "risc0_zkvm_methods_guest/multi_test",
-            "0577d5559d28d3856d000fc5a7e77f5e376d9cd412729677ff0462919a1ebf8c",
+            "231730a4e1e2186d2dd84e87d9c37621629252f2767c6710d9fe50dafd35443f",
         );
         compare_image_id(
             "risc0_zkvm_methods_guest/hello_commit",
-            "f98a7b541e9488a5065a0b67f246e5fc4ad41182d2487c7a0c47607c96766471",
+            "814a0b41fcd444bd108888eebc8634b09b15627cec05dead7bcc8874bc8e5a3a",
         );
         compare_image_id(
             "risc0_zkvm_methods_guest/slice_io",
-            "160d9e2e1cefb1c0a62597548a0385c40ba64125a1ddcbda912f38c5821458e0",
+            "1d031a0f7b8fc6ee88a659d8cb5b2f81d4806d61a8340c43fa72cee0fc5527a6",
         );
     }
 }

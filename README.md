@@ -27,7 +27,7 @@
 [examples]: https://github.com/risc0/risc0/tree/main/examples
 [install-rust]: https://doc.rust-lang.org/cargo/getting-started/installation.html
 [risc-v]: https://en.wikipedia.org/wiki/RISC-V
-[website-getting-started]: https://dev.risczero.com/api/zkvm/quickstart
+[quickstart]: https://dev.risczero.com/api/zkvm/quickstart
 [zk-proof]: https://en.wikipedia.org/wiki/Non-interactive_zero-knowledge_proof
 
 > WARNING: This software is still experimental, we do not recommend it for
@@ -123,7 +123,7 @@ More details and options for `cargo risczero` are given in
 
 For more guidance on how to use RISC Zero, how RISC Zero projects are typically
 structured, and other resources useful to developers new to RISC Zero, see our
-[Getting Started page][website-getting-started].
+[Getting Started page][quickstart].
 
 ## Rust Binaries
 
