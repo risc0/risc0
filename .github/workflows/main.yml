@@ -134,6 +134,8 @@ jobs:
       - run: cargo sort --workspace --check examples
       - run: cargo sort --workspace --check tools/crates-validator
       - run: cargo rdme -c
+        working-directory: bonsai/sdk
+      - run: cargo rdme -c
         working-directory: risc0/zkvm
       - uses: actions/setup-python@v4
         with:
@@ -154,6 +156,9 @@ jobs:
           - os: Linux
             feature: cuda
             device: nvidia_rtx_a5000
+          - os: macOS
+            feature: metal
+            device: apple_m2_pro
     env:
       FEATURE: ${{ matrix.feature }}
       RISC0_BUILD_LOCKED: 1
@@ -226,6 +231,9 @@ jobs:
           - os: Linux
             feature: cuda
             device: nvidia_rtx_a5000
+          - os: macOS
+            feature: metal
+            device: apple_m2_pro
     env:
       FEATURE: ${{ matrix.feature }}
       RISC0_BUILD_LOCKED: 1
