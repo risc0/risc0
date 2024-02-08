@@ -1,0 +1,74 @@
+name: Benchmark Trends
+
+on:
+  push:
+    branches: [ main ]
+    # Only run benchmarks on changes to following paths:
+    paths:
+      - 'risc0/**'
+      - '.github/workflows/bench_*'
+
+  # uncomment for only for testing changes to this workflow while in a PR
+  # pull_request:
+  #   branches: [ main ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+# this is needed to gain access via OIDC to the S3 bucket for caching
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  RISC0_BUILD_LOCKED: 1
+  RISC0_TOOLCHAIN_VERSION: v2024-01-31.1
+
+jobs:
+  bench:
+    runs-on: [self-hosted, prod, bench, "${{ matrix.os }}", "${{ matrix.device }}"]
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [Linux, macOS]
+        feature: [default]
+        device: [cpu]
+        include:
+          - os: Linux
+            feature: cuda
+            device: nvidia_rtx_a5000
+          - os: macOS
+            feature: metal
+            device: apple_m2_pro
+
+    env:
+      FEATURE: ${{ matrix.feature }}
+
+    steps:
+      # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
+      - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
+      - uses: actions/checkout@v4
+      - if: matrix.feature == 'cuda'
+        uses: ./.github/actions/cuda
+      - uses: ./.github/actions/rustup
+      - uses: ./.github/actions/sccache
+        with:
+          key: ${{ matrix.os }}-${{ matrix.feature }}
+      - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
+      - run: cargo bench -F $FEATURE --bench fib -- --output-format=bencher | tee output.txt
+      - name: Store benchmark result
+        uses: risc0/github-action-benchmark@risc0
+        with:
+          name: "${{ matrix.os }}-${{ matrix.device }}"
+          tool: 'cargo'
+          github-token: ${{ secrets.BENCHMARK_TOKEN }}
+          gh-repository: 'github.com/risc0/ghpages'
+          gh-repository-dir: '${{ runner.temp }}/benchmark-data-repository'
+          gh-pages-branch: main
+          output-file-path: output.txt
+          comment-always: false
+          comment-on-alert: false
+          auto-push: true

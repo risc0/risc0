@@ -1,0 +1,49 @@
+name: rustup toolchain install
+description: Install the Rust toolchain
+
+inputs:
+  toolchain:
+    description: 'Identifier of the rust toolchain to install'
+    required: false
+    default: 'stable'
+    type: string
+  targets:
+    description: 'Rust compiler targets to install, as a space-delimited list'
+    required: false
+    default: ''
+    type: string
+  components:
+    description: 'List of components to install via rustup, as a space-delimited list'
+    required: false
+    default: ''
+    type: string
+
+runs:
+  using: composite
+  steps:
+    - run: |
+        if ! command -v rustup &>/dev/null; then
+          curl --proto '=https' --tlsv1.2 --retry 10 --retry-connrefused -fsSL "https://sh.rustup.rs" | sh -s -- -y
+          echo "${CARGO_HOME:-$HOME/.cargo}/bin" >> $GITHUB_PATH
+        fi
+      shell: bash
+
+    - run: rustup default ${{ inputs.toolchain }}
+      shell: bash
+
+    - if: ${{ inputs.targets != '' }}
+      run: rustup target add ${{ inputs.targets }}
+      shell: bash
+
+    - if: ${{ inputs.components != '' }}
+      run: rustup component add ${{ inputs.components }}
+      shell: bash
+
+    - run: |
+        echo "CARGO_NET_RETRY=10" >> $GITHUB_ENV
+        echo "CARGO_TERM_COLOR=always" >> $GITHUB_ENV
+        echo "RUSTUP_MAX_RETRIES=10" >> $GITHUB_ENV
+      shell: bash
+
+    - run: rustc --version --verbose
+      shell: bash
