@@ -332,7 +332,7 @@ impl SegmentRef for FileSegmentRef {
     }
 }
 
-impl DirectoryPath {
+impl SegmentPath {
     pub(crate) fn path(&self) -> &Path {
         match self {
             Self::TempDir(dir) => dir.path(),
