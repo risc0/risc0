@@ -76,3 +76,38 @@ jobs:
       # Note: we just push the comment data into artifacts, here
       # the bench_pr_comment.yml picks up after this workflow to make the comment
       # needed because: https://securitylab.github.com/research/github-actions-preventing-pwn-requests/
+
+      - name: unzip benchmark markdown files
+        run: |
+          mkdir -p ${{ runner.temp }}/pr-output/
+          unzip -o ${{ runner.temp }}/md-output.zip -d ${{ runner.temp }}/pr-output/
+
+      - name: Merge output files
+        shell: bash
+        run: sed h ${{ runner.temp }}/pr-output/*-output.md > ${{ runner.temp }}/pr-output/merged.md
+        id: download
+
+      - name: Append merged output file to collapse all details
+        shell: bash
+        run: |
+          echo "<details>
+          <summary>Click Here for Benchmark Results for Run ${{github.run_id}}</summary>
+          
+          $(cat ${{ runner.temp }}/pr-output/merged.md)" > ${{ runner.temp }}/pr-output/merged.md
+          echo "" >> ${{ runner.temp }}/pr-output/merged.md
+          echo "</details>" >> ${{ runner.temp }}/pr-output/merged.md
+
+      - uses: actions/github-script@v3
+        name: Create PR comment
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            var fs = require('fs');
+            var body = fs.readFileSync("${{ runner.temp }}/pr-output/merged.md", 'utf8');
+            var issue_number = Number(fs.readFileSync("${{ runner.temp }}/pr-output/NR"));
+            github.issues.createComment({
+              issue_number: issue_number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            })
