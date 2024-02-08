@@ -80,13 +80,13 @@ export default {
             },
             {
               type: "doc",
-              label: "Contract Addresses",
-              id: "bonsai/verifier-contract/addresses",
+              label: "Gas costs",
+              id: "bonsai/verifier-contract/gas-costs",
             },
             {
               type: "doc",
-              label: "Gas costs",
-              id: "bonsai/verifier-contract/gas-costs",
+              label: "Contract Addresses",
+              id: "bonsai/verifier-contract/addresses",
             },
           ],
         },
