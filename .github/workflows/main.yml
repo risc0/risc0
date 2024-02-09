@@ -43,6 +43,7 @@ jobs:
               - .github/actions/**
               - .github/workflows/main.yml
               - Cargo.toml
+              - rust-toolchain.toml
             check-benchmarks:
               - *base
               - benchmarks/**
