@@ -63,8 +63,8 @@ fn prove_nothing(hashfn: &str) -> Result<Receipt> {
 
 #[test]
 #[cfg_attr(feature = "cuda", serial)]
-fn hashfn_poseidon() {
-    prove_nothing("poseidon").unwrap();
+fn hashfn_poseidon2() {
+    prove_nothing("poseidon2").unwrap();
 }
 
 #[test]

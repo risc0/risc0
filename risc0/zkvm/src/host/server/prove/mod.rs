@@ -201,8 +201,8 @@ mod cuda {
     use std::rc::Rc;
 
     use anyhow::{bail, Result};
-    use risc0_circuit_rv32im::cuda::{CudaCircuitHalPoseidon, CudaCircuitHalSha256};
-    use risc0_zkp::hal::cuda::{CudaHalPoseidon, CudaHalSha256};
+    use risc0_circuit_rv32im::cuda::{CudaCircuitHalPoseidon2, CudaCircuitHalSha256};
+    use risc0_zkp::hal::cuda::{CudaHalPoseidon2, CudaHalSha256};
 
     use super::{HalPair, ProverImpl, ProverServer};
     use crate::ProverOpts;
@@ -217,9 +217,9 @@ mod cuda {
                     HalPair { hal, circuit_hal },
                 )))
             }
-            "poseidon" => {
-                let hal = Rc::new(CudaHalPoseidon::new());
-                let circuit_hal = Rc::new(CudaCircuitHalPoseidon::new(hal.clone()));
+            "poseidon2" => {
+                let hal = Rc::new(CudaHalPoseidon2::new());
+                let circuit_hal = Rc::new(CudaCircuitHalPoseidon2::new(hal.clone()));
                 Ok(Rc::new(ProverImpl::new(
                     "cuda",
                     HalPair { hal, circuit_hal },
@@ -237,7 +237,7 @@ mod metal {
     use anyhow::{bail, Result};
     use risc0_circuit_rv32im::metal::MetalCircuitHal;
     use risc0_zkp::hal::metal::{
-        MetalHalPoseidon, MetalHalSha256, MetalHashPoseidon, MetalHashSha256,
+        MetalHalPoseidon2, MetalHalSha256, MetalHashPoseidon2, MetalHashSha256,
     };
 
     use super::{HalPair, ProverImpl, ProverServer};
@@ -253,9 +253,9 @@ mod metal {
                     HalPair { hal, circuit_hal },
                 )))
             }
-            "poseidon" => {
-                let hal = Rc::new(MetalHalPoseidon::new());
-                let circuit_hal = Rc::new(MetalCircuitHal::<MetalHashPoseidon>::new(hal.clone()));
+            "poseidon2" => {
+                let hal = Rc::new(MetalHalPoseidon2::new());
+                let circuit_hal = Rc::new(MetalCircuitHal::<MetalHashPoseidon2>::new(hal.clone()));
                 Ok(Rc::new(ProverImpl::new(
                     "metal",
                     HalPair { hal, circuit_hal },
@@ -273,7 +273,7 @@ mod cpu {
     use anyhow::{bail, Result};
     use risc0_circuit_rv32im::cpu::CpuCircuitHal;
     use risc0_zkp::{
-        core::hash::{poseidon::PoseidonHashSuite, sha::Sha256HashSuite},
+        core::hash::{poseidon2::Poseidon2HashSuite, sha::Sha256HashSuite},
         hal::cpu::CpuHal,
     };
 
@@ -283,7 +283,7 @@ mod cpu {
     pub fn get_prover_server(opts: &ProverOpts) -> Result<Rc<dyn ProverServer>> {
         let suite = match opts.hashfn.as_str() {
             "sha-256" => Sha256HashSuite::new_suite(),
-            "poseidon" => PoseidonHashSuite::new_suite(),
+            "poseidon2" => Poseidon2HashSuite::new_suite(),
             _ => bail!("Unsupported hashfn: {}", opts.hashfn),
         };
         let hal = Rc::new(CpuHal::new(suite));

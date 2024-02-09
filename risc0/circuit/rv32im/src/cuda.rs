@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ use risc0_core::field::{
 use risc0_zkp::{
     core::log2_ceil,
     hal::{
-        cuda::{BufferImpl as CudaBuffer, CudaHal, CudaHash, CudaHashPoseidon, CudaHashSha256},
+        cuda::{BufferImpl as CudaBuffer, CudaHal, CudaHash, CudaHashPoseidon2, CudaHashSha256},
         Buffer, CircuitHal, Hal,
     },
     INV_RATE,
@@ -110,7 +110,7 @@ impl<'a, CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
 }
 
 pub type CudaCircuitHalSha256 = CudaCircuitHal<CudaHashSha256>;
-pub type CudaCircuitHalPoseidon = CudaCircuitHal<CudaHashPoseidon>;
+pub type CudaCircuitHalPoseidon2 = CudaCircuitHal<CudaHashPoseidon2>;
 
 #[cfg(test)]
 mod tests {
