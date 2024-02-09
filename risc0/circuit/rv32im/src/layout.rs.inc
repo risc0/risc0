@@ -129,7 +129,7 @@ impl risc0_zkp::layout::Component for Top {
         Ok(())
     }
 }
-pub static LAYOUT: Top = Top {
+pub const LAYOUT: &Top = &Top {
     halted: &DataReg { offset: 2 },
     mux: &Mux {
         body: &BodyStep {

@@ -27,7 +27,7 @@ use risc0_zkp::{
     core::{
         digest::Digest,
         hash::{
-            blake2b::Blake2bCpuHashSuite, poseidon::PoseidonHashSuite, sha::Sha256HashSuite,
+            blake2b::Blake2bCpuHashSuite, poseidon2::Poseidon2HashSuite, sha::Sha256HashSuite,
             HashSuite,
         },
     },
@@ -37,7 +37,7 @@ use risc0_zkp::{
 use risc0_zkvm_platform::WORD_SIZE;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 
-use super::control_id::{BLAKE2B_CONTROL_ID, POSEIDON_CONTROL_ID, SHA256_CONTROL_ID};
+use super::control_id::{BLAKE2B_CONTROL_ID, POSEIDON2_CONTROL_ID, SHA256_CONTROL_ID};
 // Make succinct receipt available through this `receipt` module.
 pub use super::recursion::SuccinctReceipt;
 use crate::{
@@ -635,7 +635,7 @@ impl SegmentReceipt {
     ) -> Result<(), VerificationError> {
         use hex::FromHex;
         let check_code = |_, control_id: &Digest| -> Result<(), VerificationError> {
-            POSEIDON_CONTROL_ID
+            POSEIDON2_CONTROL_ID
                 .into_iter()
                 .chain(SHA256_CONTROL_ID)
                 .chain(BLAKE2B_CONTROL_ID)
@@ -795,7 +795,7 @@ impl Default for VerifierContext {
         Self {
             suites: BTreeMap::from([
                 ("blake2b".into(), Blake2bCpuHashSuite::new_suite()),
-                ("poseidon".into(), PoseidonHashSuite::new_suite()),
+                ("poseidon2".into(), Poseidon2HashSuite::new_suite()),
                 ("sha-256".into(), Sha256HashSuite::new_suite()),
             ]),
         }

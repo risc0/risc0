@@ -38,10 +38,10 @@ use crate::{
     test
 )]
 #[serial]
-fn test_recursion() {
-    use risc0_zkp::core::{digest::Digest, hash::poseidon::PoseidonHashSuite};
+fn test_recursion_poseidon254() {
+    use risc0_zkp::core::{digest::Digest, hash::poseidon2::Poseidon2HashSuite};
 
-    let suite = PoseidonHashSuite::new_suite();
+    let suite = Poseidon2HashSuite::new_suite();
     let hal_pair = poseidon254_hal_pair();
     let (hal, circuit_hal) = (hal_pair.hal.as_ref(), hal_pair.circuit_hal.as_ref());
 
@@ -79,9 +79,9 @@ fn test_recursion() {
 )]
 #[serial]
 fn test_recursion_poseidon2() {
-    use risc0_zkp::core::{digest::Digest, hash::poseidon::PoseidonHashSuite};
+    use risc0_zkp::core::{digest::Digest, hash::poseidon2::Poseidon2HashSuite};
 
-    let suite = PoseidonHashSuite::new_suite();
+    let suite = Poseidon2HashSuite::new_suite();
     let hal_pair = poseidon2_hal_pair();
     let (hal, circuit_hal) = (hal_pair.hal.as_ref(), hal_pair.circuit_hal.as_ref());
 
@@ -165,7 +165,7 @@ fn generate_busy_loop_segments(hashfn: &str) -> (Session, Vec<SegmentReceipt>) {
 #[serial]
 fn test_recursion_lift_join_identity_e2e() {
     // Prove the base case
-    let (session, segments) = generate_busy_loop_segments("poseidon");
+    let (session, segments) = generate_busy_loop_segments("poseidon2");
 
     // Lift and join them  all (and verify)
     let mut rollup = lift(&segments[0]).unwrap();
