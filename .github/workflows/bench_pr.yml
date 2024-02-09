@@ -78,7 +78,8 @@ jobs:
       # needed because: https://securitylab.github.com/research/github-actions-preventing-pwn-requests/
 
   comment:
-    runs-on: [self-hosted, prod, bench, "${{ matrix.os }}", "${{ matrix.device }}"]
+    runs-on: [self-hosted, prod, bench]
+    needs: [bench]
     steps:  
       - name: unzip benchmark markdown files
         run: |
