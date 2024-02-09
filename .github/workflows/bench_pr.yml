@@ -81,10 +81,6 @@ jobs:
     runs-on: [self-hosted, prod, bench]
     needs: [bench]
     steps:  
-      - name: unzip benchmark markdown files
-        run: |
-          mkdir -p ${{ runner.temp }}/pr-output/
-          unzip -o ${{ runner.temp }}/md-output.zip -d ${{ runner.temp }}/pr-output/
 
       - name: Merge output files
         shell: bash
