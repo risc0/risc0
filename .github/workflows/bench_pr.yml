@@ -82,7 +82,6 @@ jobs:
     #runs-on: ubuntu-latest
     # Only run if the upstream workflow was successful.
     needs: [bench]
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
       - name: 'Download artifact'
         uses: actions/github-script@v3.1.0
