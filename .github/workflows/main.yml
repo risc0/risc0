@@ -17,7 +17,7 @@ permissions:
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  RISC0_TOOLCHAIN_VERSION: test-release-2
+  RISC0_TOOLCHAIN_VERSION: v2024-01-31.1
 
 jobs:
   changes:
@@ -30,6 +30,7 @@ jobs:
       crates-validator: ${{ steps.filter.outputs.crates-validator }}
       doc: ${{ steps.filter.outputs.doc }}
       examples: ${{ steps.filter.outputs.examples }}
+      stark2snark: ${{ steps.filter.outputs.stark2snark }}
       test: ${{ steps.filter.outputs.test }}
       web: ${{ steps.filter.outputs.web }}
     steps:
@@ -40,6 +41,7 @@ jobs:
           filters: |
             base: &base
               - .github/actions/**
+              - .github/workflows/main.yml
               - Cargo.toml
             check-benchmarks:
               - *base
@@ -59,6 +61,10 @@ jobs:
             examples:
               - *base
               - examples/**
+              - risc0/**
+            stark2snark:
+              - *base
+              - compact_proof/**
               - risc0/**
             test:
               - *base
@@ -82,6 +88,7 @@ jobs:
       - doc
       - examples
       - reproducible-build
+      - stark2snark
       - test
       - web
     runs-on: ubuntu-latest
@@ -105,6 +112,11 @@ jobs:
         with:
           crate: cargo-sort
           version: "1.0"
+      - name: Install cargo-rdme
+        uses: risc0/cargo-install@2cfb0024938d23011106cbf127b393bc83fddba1
+        with:
+          crate: cargo-rdme
+          version: "1.4.2"
       - uses: actions/setup-node@v3
         with:
           node-version: 18
@@ -114,12 +126,17 @@ jobs:
       - run: cargo fmt --all --check --manifest-path bonsai/examples/governance/Cargo.toml
       - run: cargo fmt --all --check --manifest-path examples/Cargo.toml
       - run: cargo fmt --all --check --manifest-path tools/crates-validator/Cargo.toml
+      - run: cargo clippy -p risc0-zkvm
       - run: cargo sort --workspace --check
       - run: cargo sort --workspace --check benchmarks
       - run: cargo sort --workspace --check bonsai
       - run: cargo sort --workspace --check bonsai/examples/governance
       - run: cargo sort --workspace --check examples
       - run: cargo sort --workspace --check tools/crates-validator
+      - run: cargo rdme -c
+        working-directory: bonsai/sdk
+      - run: cargo rdme -c
+        working-directory: risc0/zkvm
       - uses: actions/setup-python@v4
         with:
           python-version: "3.10"
@@ -139,6 +156,9 @@ jobs:
           - os: Linux
             feature: cuda
             device: nvidia_rtx_a5000
+          - os: macOS
+            feature: metal
+            device: apple_m2_pro
     env:
       FEATURE: ${{ matrix.feature }}
       RISC0_BUILD_LOCKED: 1
@@ -147,8 +167,6 @@ jobs:
       # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
       - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
       - uses: actions/checkout@v4
-        with:
-          lfs: true
       - if: matrix.feature == 'cuda'
         uses: ./.github/actions/cuda
       - uses: ./.github/actions/rustup
@@ -158,14 +176,14 @@ jobs:
       - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
       - name: build workspace
         run: |
-          cargo test -F $FEATURE -F fault-proof -F prove --workspace --timings --no-run \
+          cargo test -F $FEATURE -F prove --workspace --timings --no-run \
             --exclude doc-test \
             --exclude bonsai-ethereum-contracts \
             --exclude bonsai-ethereum-relay \
             --exclude bonsai-rest-api-mock
       - name: test workspace
         run: |
-          cargo test -F $FEATURE -F fault-proof -F prove --workspace --timings \
+          cargo test -F $FEATURE -F prove --workspace --timings \
             --exclude doc-test \
             --exclude bonsai-ethereum-contracts \
             --exclude bonsai-ethereum-relay \
@@ -197,11 +215,6 @@ jobs:
       - run: cargo check -p risc0-zkvm -F $FEATURE
       - run: cargo check
         working-directory: external/substrate
-      - uses: risc0/clippy-action@main
-        with:
-          reporter: "github-pr-check"
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          clippy_flags: --features $FEATURE --all-targets
       - run: sccache --show-stats
 
   examples:
@@ -218,6 +231,9 @@ jobs:
           - os: Linux
             feature: cuda
             device: nvidia_rtx_a5000
+          - os: macOS
+            feature: metal
+            device: apple_m2_pro
     env:
       FEATURE: ${{ matrix.feature }}
       RISC0_BUILD_LOCKED: 1
@@ -260,7 +276,7 @@ jobs:
       - uses: ./.github/actions/rustup
       - uses: risc0/foundry-toolchain@2fe7e70b520f62368a0e3c464f997df07ede420f
         with:
-          version: nightly-34f684ddfacc5b2ed371353ba6f730c485616ffe
+          version: nightly-09fe3e041369a816365a020f715ad6f94dbce9f2
       - uses: ./.github/actions/sccache
         with:
           key: macOS-default
@@ -330,11 +346,6 @@ jobs:
       - uses: ./.github/actions/sccache
         with:
           key: macOS-default
-      - uses: risc0/clippy-action@main
-        with:
-          reporter: 'github-pr-check'
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          clippy_flags: --manifest-path tools/crates-validator/Cargo.toml
       - run: cargo test
         working-directory: tools/crates-validator
       - run: sccache --show-stats
@@ -384,4 +395,25 @@ jobs:
       - run: cargo test -p risc0-zkvm -F docker -F prove -- "docker::"
         env:
           RISC0_USE_DOCKER: "1"
+      - run: sccache --show-stats
+
+  stark2snark:
+    if: needs.changes.outputs.stark2snark == 'true'
+    needs: changes
+    runs-on: [self-hosted, prod, Linux, cpu, docker]
+    steps:
+      # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
+      - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - run: git lfs pull
+      - uses: ./.github/actions/rustup
+      - uses: ./.github/actions/sccache
+        with:
+          key: Linux-default
+      - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
+      - run: scripts/install_prover.sh
+        working-directory: compact_proof
+      - run: cargo test -p risc0-groth16 -F docker --release
       - run: sccache --show-stats

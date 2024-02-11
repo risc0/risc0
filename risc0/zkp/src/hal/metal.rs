@@ -192,26 +192,25 @@ impl MetalHash for MetalHashPoseidon {
 pub struct MetalHashPoseidon2 {
     suite: HashSuite<BabyBear>,
     round_constants: BufferImpl<BabyBearElem>,
-    m_int_diag_ulvt: BufferImpl<BabyBearElem>,
+    m_int_diag: BufferImpl<BabyBearElem>,
 }
 
 impl MetalHash for MetalHashPoseidon2 {
     fn new(hal: &MetalHal<Self>) -> Self {
         let round_constants =
             hal.copy_from_elem("round_constants", poseidon2::consts::ROUND_CONSTANTS);
-        let m_int_diag_ulvt =
-            hal.copy_from_elem("m_int_diag_ulvt", poseidon2::consts::M_INT_DIAG_ULVT);
+        let m_int_diag = hal.copy_from_elem("m_int_diag", poseidon2::consts::M_INT_DIAG_HZN);
         MetalHashPoseidon2 {
             suite: Poseidon2HashSuite::new_suite(),
             round_constants,
-            m_int_diag_ulvt,
+            m_int_diag,
         }
     }
 
     fn hash_fold(&self, hal: &MetalHal<Self>, io: &BufferImpl<Digest>, output_size: usize) {
         let args = &[
             self.round_constants.as_arg(),
-            self.m_int_diag_ulvt.as_arg(),
+            self.m_int_diag.as_arg(),
             io.as_arg_with_offset(output_size),
             io.as_arg_with_offset(output_size * 2),
         ];
@@ -229,7 +228,7 @@ impl MetalHash for MetalHashPoseidon2 {
         assert_eq!(matrix.size(), col_size * row_size);
         let args = &[
             self.round_constants.as_arg(),
-            self.m_int_diag_ulvt.as_arg(),
+            self.m_int_diag.as_arg(),
             output.as_arg(),
             matrix.as_arg(),
             KernelArg::Integer(row_size as u32),

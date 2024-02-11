@@ -19,13 +19,15 @@ use core::fmt::Debug;
 
 use anyhow::Result;
 use risc0_binfmt::SystemState;
+use risc0_circuit_recursion::control_id::ALLOWED_IDS_ROOT;
 use risc0_circuit_rv32im::layout;
 use risc0_core::field::baby_bear::BabyBear;
+use risc0_groth16::{split_digest, verifier::prepared_verifying_key, Seal, Verifier};
 use risc0_zkp::{
     core::{
         digest::Digest,
         hash::{
-            blake2b::Blake2bCpuHashSuite, poseidon::PoseidonHashSuite, sha::Sha256HashSuite,
+            blake2b::Blake2bCpuHashSuite, poseidon2::Poseidon2HashSuite, sha::Sha256HashSuite,
             HashSuite,
         },
     },
@@ -35,29 +37,30 @@ use risc0_zkp::{
 use risc0_zkvm_platform::WORD_SIZE;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 
-use super::control_id::{BLAKE2B_CONTROL_ID, POSEIDON_CONTROL_ID, SHA256_CONTROL_ID};
+use super::control_id::{BLAKE2B_CONTROL_ID, POSEIDON2_CONTROL_ID, SHA256_CONTROL_ID};
 // Make succinct receipt available through this `receipt` module.
 pub use super::recursion::SuccinctReceipt;
 use crate::{
-    host::groth16::{Groth16Proof, Groth16Seal},
     serde::{from_slice, Error},
     sha::{Digestible, Sha256},
     Assumptions, ExitCode, MaybePruned, Output, ReceiptClaim,
 };
 
-/// A receipt attesting to the execution of a Session.
+/// A receipt attesting to the execution of a guest program.
 ///
 /// A Receipt is a zero-knowledge proof of computation. It attests that the
-/// [Receipt::journal] was produced by executing a [crate::Session] based on a
+/// [Receipt::journal] was produced by executing a guest program based on a
 /// specified memory image. This image is _not_ included in the receipt; the
-/// verifier must provide an [ImageID](https://dev.risczero.com/terminology),
-/// a cryptographic hash corresponding to the expected image.
+/// verifier must provide an
+/// [ImageID](https://dev.risczero.com/terminology#image-id), a cryptographic
+/// hash corresponding to the expected image.
 ///
 /// A prover can provide a Receipt to an untrusting party to convince them that
 /// the results contained within the Receipt (in the [Receipt::journal]) came
 /// from running specific code. Conversely, a verifier can inspect a receipt to
 /// confirm that its results must have been generated from the expected code,
 /// even when this code was run by an untrusted source.
+///
 /// # Example
 ///
 /// To create a [Receipt] attesting to the faithful execution of your code, run
@@ -76,11 +79,12 @@ use crate::{
 /// # }
 /// ```
 ///
-/// To confirm that a [Receipt] was honestly generated, use
-/// [Receipt::verify] and supply the ImageID of the code that should
-/// have been executed as a parameter. (See
+/// To confirm that a [Receipt] was honestly generated, use [Receipt::verify]
+/// and supply the ImageID of the code that should have been executed as a
+/// parameter. (See
 /// [risc0_build](https://docs.rs/risc0-build/latest/risc0_build/) for more
 /// information about how ImageIDs are generated.)
+///
 /// ```rust
 /// use risc0_zkvm::Receipt;
 /// # #[cfg(feature = "prove")]
@@ -96,11 +100,9 @@ use crate::{
 /// # }
 /// ```
 ///
-/// The public outputs of the [Receipt] are contained in the
-/// [Receipt::journal]. We provide serialization tools in the zkVM
-/// [serde](crate::serde) module, which can be used to read data from the
-/// journal as the same type it was written to the journal. If you prefer, you
-/// can also directly access the [Receipt::journal] as a `Vec<u8>`.
+/// The public outputs of the [Receipt] are contained in the [Receipt::journal].
+/// You can use [Journal::decode] to deserialize the journal as typed and
+/// structured data, or access the [Journal::bytes] directly.
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[cfg_attr(test, derive(PartialEq))]
 pub struct Receipt {
@@ -158,7 +160,7 @@ impl Receipt {
 
         // Check the exit code. This verification method requires execution to be
         // successful.
-        let (ExitCode::Halted(0) | ExitCode::Paused(0)) = claim.exit_code else {
+        if !claim.exit_code.is_ok() {
             return Err(VerificationError::UnexpectedExitCode);
         };
 
@@ -252,7 +254,7 @@ impl Journal {
         Self { bytes }
     }
 
-    /// Decode the journal bytes by using the risc0 deserializer.
+    /// Decode the journal bytes by using the [risc0 deserializer](crate::serde).
     pub fn decode<T: DeserializeOwned>(&self) -> Result<T, Error> {
         from_slice(&self.bytes)
     }
@@ -281,8 +283,8 @@ pub enum InnerReceipt {
     /// The [SuccinctReceipt].
     Succinct(SuccinctReceipt),
 
-    /// The [Groth16Receipt].
-    Groth16(Groth16Receipt),
+    /// The [CompactReceipt].
+    Compact(CompactReceipt),
 
     /// A fake receipt for testing and development.
     ///
@@ -309,7 +311,7 @@ impl InnerReceipt {
     ) -> Result<(), VerificationError> {
         match self {
             InnerReceipt::Composite(x) => x.verify_integrity_with_context(ctx),
-            InnerReceipt::Groth16(x) => x.verify_integrity(),
+            InnerReceipt::Compact(x) => x.verify_integrity(),
             InnerReceipt::Succinct(x) => x.verify_integrity_with_context(ctx),
             InnerReceipt::Fake { .. } => {
                 #[cfg(feature = "std")]
@@ -324,16 +326,16 @@ impl InnerReceipt {
     /// Returns the [InnerReceipt::Composite] arm.
     pub fn composite(&self) -> Result<&CompositeReceipt, VerificationError> {
         if let InnerReceipt::Composite(x) = self {
-            Ok(&x)
+            Ok(x)
         } else {
             Err(VerificationError::ReceiptFormatError)
         }
     }
 
-    /// Returns the [InnerReceipt::Groth16] arm.
-    pub fn groth16(&self) -> Result<&Groth16Receipt, VerificationError> {
-        if let InnerReceipt::Groth16(x) = self {
-            Ok(&x)
+    /// Returns the [InnerReceipt::Compact] arm.
+    pub fn compact(&self) -> Result<&CompactReceipt, VerificationError> {
+        if let InnerReceipt::Compact(x) = self {
+            Ok(x)
         } else {
             Err(VerificationError::ReceiptFormatError)
         }
@@ -352,7 +354,7 @@ impl InnerReceipt {
     pub fn get_claim(&self) -> Result<ReceiptClaim, VerificationError> {
         match self {
             InnerReceipt::Composite(ref receipt) => receipt.get_claim(),
-            InnerReceipt::Groth16(ref groth16_receipt) => Ok(groth16_receipt.claim.clone()),
+            InnerReceipt::Compact(ref compact_receipt) => Ok(compact_receipt.claim.clone()),
             InnerReceipt::Succinct(ref succinct_receipt) => Ok(succinct_receipt.claim.clone()),
             InnerReceipt::Fake { claim } => Ok(claim.clone()),
         }
@@ -362,7 +364,7 @@ impl InnerReceipt {
 /// A receipt composed of a Groth16 over the BN_254 curve
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[cfg_attr(test, derive(PartialEq))]
-pub struct Groth16Receipt {
+pub struct CompactReceipt {
     /// A Groth16 proof of a zkVM execution with the associated claim.
     pub seal: Vec<u8>,
 
@@ -371,13 +373,21 @@ pub struct Groth16Receipt {
     pub claim: ReceiptClaim,
 }
 
-impl Groth16Receipt {
+impl CompactReceipt {
     /// Verify the integrity of this receipt, ensuring the claim is attested
     /// to by the seal.
     pub fn verify_integrity(&self) -> Result<(), VerificationError> {
-        Groth16Proof::from_seal(
-            &Groth16Seal::from_vec(&self.seal).map_err(|_| VerificationError::InvalidProof)?,
-            self.claim.digest().into(),
+        use hex::FromHex;
+        let (a0, a1) = split_digest(
+            Digest::from_hex(ALLOWED_IDS_ROOT).map_err(|_| VerificationError::InvalidProof)?,
+        )
+        .map_err(|_| VerificationError::InvalidProof)?;
+        let (c0, c1) =
+            split_digest(self.claim.digest()).map_err(|_| VerificationError::InvalidProof)?;
+        Verifier::new(
+            &Seal::from_vec(&self.seal).map_err(|_| VerificationError::InvalidProof)?,
+            vec![a0, a1, c0, c1],
+            prepared_verifying_key().map_err(|_| VerificationError::InvalidProof)?,
         )
         .map_err(|_| VerificationError::InvalidProof)?
         .verify()
@@ -520,7 +530,7 @@ impl CompositeReceipt {
             pre: first_claim.pre.clone(),
             post: last_claim.post.clone(),
             exit_code: last_claim.exit_code,
-            input: first_claim.input.clone(),
+            input: first_claim.input,
             output: output.into(),
         })
     }
@@ -592,7 +602,7 @@ impl CompositeReceipt {
 
 /// A receipt attesting to the execution of a Segment.
 ///
-/// A SegmentReceipt attests that a [crate::Segment] was executed in a manner
+/// A SegmentReceipt attests that a Segment was executed in a manner
 /// consistent with the [ReceiptClaim] included in the receipt.
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[cfg_attr(test, derive(PartialEq))]
@@ -625,13 +635,15 @@ impl SegmentReceipt {
     ) -> Result<(), VerificationError> {
         use hex::FromHex;
         let check_code = |_, control_id: &Digest| -> Result<(), VerificationError> {
-            POSEIDON_CONTROL_ID
+            POSEIDON2_CONTROL_ID
                 .into_iter()
                 .chain(SHA256_CONTROL_ID)
                 .chain(BLAKE2B_CONTROL_ID)
                 .find(|x| Digest::from_hex(x).unwrap() == *control_id)
                 .map(|_| ())
-                .ok_or(VerificationError::ControlVerificationError)
+                .ok_or(VerificationError::ControlVerificationError {
+                    control_id: *control_id,
+                })
         };
         let suite = ctx
             .suites
@@ -659,11 +671,15 @@ impl SegmentReceipt {
     }
 }
 
-/// An assumption attached with a guest execution as a result of calling
+/// An assumption attached to a guest execution as a result of calling
 /// `env::verify` or `env::verify_integrity`.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum Assumption {
     /// A [Receipt] for a proven assumption.
+    ///
+    /// Upon proving, this receipt will be used as proof of the assumption that results from a call
+    /// to `env::verify`, and the resulting receipt will be unconditional. As a result,
+    /// [Receipt::verify] will return true and the verifier will accept the receipt.
     Proven(Receipt),
 
     /// [ReceiptClaim] digest for an assumption that is not directly proven
@@ -779,69 +795,9 @@ impl Default for VerifierContext {
         Self {
             suites: BTreeMap::from([
                 ("blake2b".into(), Blake2bCpuHashSuite::new_suite()),
-                ("poseidon".into(), PoseidonHashSuite::new_suite()),
+                ("poseidon2".into(), Poseidon2HashSuite::new_suite()),
                 ("sha-256".into(), Sha256HashSuite::new_suite()),
             ]),
         }
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use hex::FromHex;
-
-    use super::*;
-    use crate::{receipt_claim::MaybePruned, ExitCode::Halted};
-
-    const IMAGE_ID: [u32; 8] = [
-        3877313773, 4166950669, 1851257837, 1474316178, 3714943358, 2342301681, 2883381307,
-        234838297,
-    ];
-
-    const RISC0_GROTH16_SEAL: &str = r#"
-    {
-        "a":[[26,63,155,211,133,192,185,234,51,172,152,49,113,248,13,45,155,140,75,98,171,225,72,44,133,246,88,199,37,103,28,56],
-            [22,46,102,79,175,35,89,153,55,78,200,143,26,196,209,62,247,200,136,247,101,65,101,157,59,33,20,91,191,43,246,84]],
-        "b":[[[20,0,192,47,211,1,254,55,118,229,52,232,89,161,51,100,224,242,246,5,106,190,188,113,187,230,100,7,255,70,192,153],
-            [9,206,194,232,36,249,103,125,57,1,189,209,245,133,230,79,219,98,176,253,221,160,20,78,189,142,46,52,171,1,162,203]],
-            [[32,70,252,38,183,118,240,156,230,16,28,10,122,111,184,65,239,158,193,102,94,156,5,56,24,236,174,103,160,172,89,109],
-            [4,151,70,37,225,160,65,7,230,206,172,247,41,192,58,149,244,201,31,171,7,137,232,107,29,143,227,49,96,29,198,35]]],
-        "c":[[20,112,216,216,113,186,224,139,117,16,31,102,238,29,76,150,58,216,254,75,147,172,89,147,216,138,41,130,172,106,148,8],
-            [23,250,144,90,188,98,158,62,214,76,108,236,158,31,125,183,20,200,101,254,212,15,32,174,120,230,219,15,71,206,189,55]]
-    }
-    "#;
-
-    #[ignore]
-    #[test]
-    fn test_groth16_receipt() {
-        let seal: Groth16Seal = serde_json::from_str(RISC0_GROTH16_SEAL).unwrap();
-        let journal: Vec<u8> = vec![135, 1, 0, 0, 0, 0, 0, 0];
-        let merkle_root =
-            Digest::from_hex("5bcc4b8e50095f5a5e28f324170ef29d25ee52d966ad996159644c63f3b11eba")
-                .unwrap();
-        let claim: ReceiptClaim = ReceiptClaim {
-            pre: MaybePruned::Value(SystemState {
-                pc: 2103560,
-                merkle_root,
-            }),
-            post: MaybePruned::Value(SystemState {
-                pc: 2111560,
-                merkle_root,
-            }),
-            exit_code: Halted(0),
-            input: Digest::default(),
-            output: MaybePruned::Value(Some(Output {
-                journal: MaybePruned::Value(journal.clone()),
-                assumptions: MaybePruned::Value(Assumptions(vec![])),
-            })),
-        };
-        let receipt = Receipt::new(
-            InnerReceipt::Groth16(Groth16Receipt {
-                seal: seal.to_vec(),
-                claim,
-            }),
-            journal,
-        );
-        receipt.verify(IMAGE_ID).unwrap();
     }
 }

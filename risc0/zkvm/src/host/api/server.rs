@@ -43,7 +43,6 @@ pub struct Server {
 #[derive(Clone, Serialize, Deserialize)]
 struct EmptySegmentRef;
 
-#[typetag::serde]
 impl SegmentRef for EmptySegmentRef {
     fn resolve(&self) -> Result<Segment> {
         Err(anyhow!("Segment resolution not supported"))
@@ -627,12 +626,12 @@ fn build_env<'a>(
         match assumption.kind.as_ref().ok_or(malformed_err())? {
             pb::api::assumption::Kind::Proven(asset) => {
                 let receipt: Receipt = pb::core::Receipt::decode(asset.as_bytes()?)?.try_into()?;
-                env_builder.add_assumption(receipt.into())
+                env_builder.add_assumption(receipt)
             }
             pb::api::assumption::Kind::Unresolved(asset) => {
                 let claim: MaybePruned<ReceiptClaim> =
                     pb::core::MaybePruned::decode(asset.as_bytes()?)?.try_into()?;
-                env_builder.add_assumption(claim.into())
+                env_builder.add_assumption(claim)
             }
         };
     }

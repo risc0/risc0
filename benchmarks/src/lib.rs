@@ -22,7 +22,7 @@ use std::{
     time::{Duration, Instant},
 };
 
-use risc0_zkvm::{sha::Digest, ExecutorEnv, ExecutorImpl, Receipt, Segment, Session};
+use risc0_zkvm::{sha::Digest, ExecutorEnv, ExecutorImpl, Receipt, Session};
 use serde::Serialize;
 use tracing::info;
 
@@ -33,8 +33,8 @@ pub struct Metrics {
     pub proof_duration: Duration,
     pub total_duration: Duration,
     pub verify_duration: Duration,
-    pub cycles: u32,
-    pub insn_cycles: u32,
+    pub cycles: u64,
+    pub insn_cycles: u64,
     pub output_bytes: u32,
     pub proof_bytes: u32,
 }
@@ -118,7 +118,7 @@ impl Job {
         self.input.len() as u32
     }
 
-    fn exec_compute(&self) -> (Session, u32, u32, Duration) {
+    fn exec_compute(&self) -> (Session, Duration) {
         let env = ExecutorEnv::builder()
             .write_slice(&self.input)
             .build()
@@ -127,9 +127,7 @@ impl Job {
         let start = Instant::now();
         let session = exec.run().unwrap();
         let elapsed = start.elapsed();
-        let segments = session.resolve().unwrap();
-        let (exec_cycles, prove_cycles) = get_cycles(segments);
-        (session, prove_cycles as u32, exec_cycles as u32, elapsed)
+        (session, elapsed)
     }
 
     fn verify_proof(&self, receipt: &Receipt) -> bool {
@@ -145,10 +143,10 @@ impl Job {
     fn run(&self) -> Metrics {
         let mut metrics = Metrics::new(self.name.clone(), self.job_size());
 
-        let (session, cycles, insn_cycles, duration) = self.exec_compute();
+        let (session, duration) = self.exec_compute();
 
-        metrics.cycles = cycles;
-        metrics.insn_cycles = insn_cycles;
+        metrics.cycles = session.total_cycles;
+        metrics.insn_cycles = session.user_cycles;
         metrics.exec_duration = duration;
 
         let receipt = {
@@ -186,19 +184,6 @@ pub fn get_image(path: &str) -> Vec<u8> {
     std::fs::read(path).unwrap()
 }
 
-pub fn get_cycles(segments: Vec<Segment>) -> (u32, u32) {
-    let (exec_cycles, prove_cycles) =
-        segments
-            .iter()
-            .fold((0, 0), |(exec_cycles, prove_cycles), segment| {
-                (
-                    exec_cycles + segment.cycles,
-                    prove_cycles + (1 << segment.po2),
-                )
-            });
-    (prove_cycles as u32, exec_cycles as u32)
-}
-
 pub fn init_logging() {
     tracing_subscriber::fmt()
         .with_env_filter(tracing_subscriber::filter::EnvFilter::from_default_env())
@@ -214,8 +199,8 @@ struct CsvRow<'a> {
     proof_duration: u128,
     total_duration: u128,
     verify_duration: u128,
-    insn_cycles: u32,
-    prove_cycles: u32,
+    insn_cycles: u64,
+    prove_cycles: u64,
     proof_bytes: u32,
 }
 
