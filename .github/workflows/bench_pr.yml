@@ -91,18 +91,18 @@ jobs:
         with:
           script: |
             var artifacts = await github.actions.listWorkflowRunArtifacts({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                run_id: ${process.env.WORKFLOW_RUN_ID},
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              run_id: ${process.env.WORKFLOW_RUN_ID},
             });
             var matchArtifact = artifacts.data.artifacts.filter((artifact) => {
               return artifact.name == "md-output"
             })[0];
             var download = await github.actions.downloadArtifact({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                artifact_id: matchArtifact.id,
-                archive_format: 'zip',
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              artifact_id: matchArtifact.id,
+              archive_format: 'zip',
             });
             var fs = require('fs');
             fs.writeFileSync('${process.env.RUNNER_TEMP_DIR}/md-output.zip', Buffer.from(download.data));
