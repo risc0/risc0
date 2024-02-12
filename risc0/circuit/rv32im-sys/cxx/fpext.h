@@ -15,26 +15,22 @@
 #pragma once
 
 /// \file
-/// Defines FpExt, a finite field F_p^4, based on Fp via the irreducable polynomial x^4 - 11.
+/// Defines FpExt, a finite field F_p^5, based on Fp via the irreducable polynomial x^5 + 2.
 
 #include "fp.h"
 
 namespace risc0 {
 
-// Defines instead of constexpr to appease CUDAs limitations around constants.
-// undef'd at the end of this file.
-#define BETA Fp(11)
-#define NBETA Fp(Fp::P - 11)
+static constexpr size_t EXT_SIZE = 5;
 
-/// Intstances of FpExt are element of a finite field F_p^4.  They are represented as elements of
-/// F_p[X] / (X^4 - 11). Basically, this is a 'big' finite field (about 2^128 elements), which is
-/// used when the security of various operations depends on the size of the field.  It has the field
-/// Fp as a subfield, which means operations by the two are compatable, which is important.  The
-/// irreducible polynomial was choosen to be the simpilest possible one, x^4 - B, where 11 is the
-/// smallest B which makes the polynomial irreducable.
+/// Intstances of FpExt are elements of a finite field F_p^5.  They are
+/// represented as elements of F_p[X] / (X^5 + 2). This large finite field is
+/// used when the security of operations depends on the size of the field. The
+/// field extension `FpExt` has `Fp` as a subfield, so operations on elements of
+/// each are compatible.
 struct FpExt {
-  /// The elements of FpExt, elems[0] + elems[1]*X + elems[2]*X^2 + elems[3]*x^4
-  Fp elems[4];
+  /// The elements of FpExt, elems[0] + elems[1]*X + elems[2]*X^2 + elems[3]*x^4 + elems[4]*x^5
+  Fp elems[EXT_SIZE];
 
   /// Default constructor makes the zero elements
   constexpr FpExt() {}
@@ -45,6 +41,7 @@ struct FpExt {
     elems[1] = 0;
     elems[2] = 0;
     elems[3] = 0;
+    elems[4] = 0;
   }
 
   /// Convert from Fp to FpExt.
@@ -53,31 +50,33 @@ struct FpExt {
     elems[1] = 0;
     elems[2] = 0;
     elems[3] = 0;
+    elems[4] = 0;
   }
 
   /// Explicitly construct an FpExt from parts
-  constexpr FpExt(Fp a, Fp b, Fp c, Fp d) {
+  constexpr FpExt(Fp a, Fp b, Fp c, Fp d, Fp e) {
     elems[0] = a;
     elems[1] = b;
     elems[2] = c;
     elems[3] = d;
+    elems[4] = e;
   }
 
   /// Get an 'invalid' FpExt value
   static constexpr inline FpExt invalid() {
-    return FpExt(Fp::invalid(), Fp::invalid(), Fp::invalid(), Fp::invalid());
+    return FpExt(Fp::invalid(), Fp::invalid(), Fp::invalid(), Fp::invalid(), Fp::invalid());
   }
 
   // Implement the addition/subtraction overloads
   constexpr FpExt operator+=(FpExt rhs) {
-    for (uint32_t i = 0; i < 4; i++) {
+    for (uint32_t i = 0; i < EXT_SIZE; i++) {
       elems[i] += rhs.elems[i];
     }
     return *this;
   }
 
   constexpr FpExt operator-=(FpExt rhs) {
-    for (uint32_t i = 0; i < 4; i++) {
+    for (uint32_t i = 0; i < EXT_SIZE; i++) {
       elems[i] -= rhs.elems[i];
     }
     return *this;
@@ -100,7 +99,7 @@ struct FpExt {
   // Implement the simple multiplication case by the subfield Fp
   // Fp * FpExt is done as a free function due to C++'s operator overloading rules.
   constexpr FpExt operator*=(Fp rhs) {
-    for (uint32_t i = 0; i < 4; i++) {
+    for (uint32_t i = 0; i < EXT_SIZE; i++) {
       elems[i] *= rhs;
     }
     return *this;
@@ -112,21 +111,22 @@ struct FpExt {
     return result;
   }
 
-  // Now we get to the interesting case of multiplication.  Basically, multiply out the polynomial
-  // representations, and then reduce module x^4 - B, which means powers >= 4 get shifted back 4 and
-  // multiplied by -beta.  We could write this as a double loops with some if's and hope it gets
-  // unrolled properly, but it'a small enough to just hand write.
-  constexpr FpExt operator*(FpExt rhs) const {
-    // Rename the element arrays to something small for readability
-#define a elems
-#define b rhs.elems
-    return FpExt(a[0] * b[0] + NBETA * (a[1] * b[3] + a[2] * b[2] + a[3] * b[1]),
-                 a[0] * b[1] + a[1] * b[0] + NBETA * (a[2] * b[3] + a[3] * b[2]),
-                 a[0] * b[2] + a[1] * b[1] + a[2] * b[0] + NBETA * (a[3] * b[3]),
-                 a[0] * b[3] + a[1] * b[2] + a[2] * b[1] + a[3] * b[0]);
-#undef a
-#undef b
-  }
+  constexpr FpExt operator*(FpExt rhs) const;
+  //   {
+  // // Rename the element arrays to something small for readability
+  // #define a elems
+  // #define b rhs.elems
+  //     Fp c[2 * 4 + 1];
+  //     for (size_t i = 0; i < 4 + 1; i++) {
+  //       for (size_t j = 0; j < 4 + 1; j++) {
+  //         c[i + j] += a[i] * b[j];
+  //       }
+  //     }
+  //     return FpExt(c[0] - c[5] * 2, c[1] - c[6] * 2, c[2] - c[7] * 2, c[3] - c[8] * 2, c[4]);
+  // #undef a
+  // #undef b
+  //   }
+
   constexpr FpExt operator*=(FpExt rhs) {
     *this = *this * rhs;
     return *this;
@@ -134,7 +134,7 @@ struct FpExt {
 
   // Equality
   constexpr bool operator==(FpExt rhs) const {
-    for (uint32_t i = 0; i < 4; i++) {
+    for (uint32_t i = 0; i < EXT_SIZE; i++) {
       if (elems[i] != rhs.elems[i]) {
         return false;
       }
@@ -164,37 +164,5 @@ constexpr inline FpExt pow(FpExt x, size_t n) {
   }
   return tot;
 }
-
-/// Compute the multiplicative inverse of an FpExt.
-constexpr inline FpExt inv(FpExt in) {
-#define a in.elems
-  // Compute the multiplicative inverse by basicly looking at FpExt as a composite field and using
-  // the same basic methods used to invert complex numbers.  We imagine that initially we have a
-  // numerator of 1, and an denominator of a. i.e out = 1 / a; We set a' to be a with the first and
-  // third components negated.  We then multiply the numerator and the denominator by a', producing
-  // out = a' / (a * a'). By construction (a * a') has 0's in it's first and third elements.  We
-  // call this number, 'b' and compute it as follows.
-  Fp b0 = a[0] * a[0] + BETA * (a[1] * (a[3] + a[3]) - a[2] * a[2]);
-  Fp b2 = a[0] * (a[2] + a[2]) - a[1] * a[1] + BETA * (a[3] * a[3]);
-  // Now, we make b' by inverting b2.  When we muliply both sizes by b', we get out = (a' * b') /
-  // (b * b').  But by construcion b * b' is in fact an element of Fp, call it c.
-  Fp c = b0 * b0 + BETA * b2 * b2;
-  // But we can now invert C direcly, and multiply by a'*b', out = a'*b'*inv(c)
-  Fp ic = inv(c);
-  // Note: if c == 0 (really should only happen if in == 0), our 'safe' version of inverse results
-  // in ic == 0, and thus out = 0, so we have the same 'safe' behavior for FpExt.  Oh, and since we
-  // want to multiply everything by ic, it's slightly faster to premultiply the two parts of b by ic
-  // (2 multiplies instead of 4)
-  b0 *= ic;
-  b2 *= ic;
-  return FpExt(a[0] * b0 + BETA * a[2] * b2,
-               -a[1] * b0 + NBETA * a[3] * b2,
-               -a[0] * b2 + a[2] * b0,
-               a[1] * b2 - a[3] * b0);
-#undef a
-}
-
-#undef BETA
-#undef NBETA
 
 } // namespace risc0

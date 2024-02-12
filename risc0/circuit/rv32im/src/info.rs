@@ -23,5 +23,5 @@ impl CircuitInfo for CircuitImpl {
     const OUTPUT_SIZE: usize = 138;
 
     #[rustfmt::skip]
-    const MIX_SIZE: usize = 40;
+    const MIX_SIZE: usize = 50;
 }

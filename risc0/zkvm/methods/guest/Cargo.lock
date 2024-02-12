@@ -1397,3 +1397,11 @@ dependencies = [
  "quote",
  "syn 2.0.39",
 ]
+
+[[patch.unused]]
+name = "risc0-build-kernel"
+version = "0.21.0-alpha.1"
+
+[[patch.unused]]
+name = "risc0-sys"
+version = "0.21.0-alpha.1"

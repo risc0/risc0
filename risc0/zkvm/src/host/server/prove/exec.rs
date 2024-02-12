@@ -19,8 +19,8 @@ use anyhow::{anyhow, Result};
 use lazy_regex::{regex, Captures};
 use risc0_binfmt::MemoryImage;
 use risc0_core::field::{
-    baby_bear::{BabyBear, BabyBearElem as Elem},
-    Elem as _,
+    baby_bear::{BabyBear, BabyBearElem as Elem, BabyBearExtElem},
+    Elem as _, ExtElem,
 };
 use risc0_zkp::adapter::CircuitStepHandler;
 use risc0_zkvm_platform::{
@@ -188,6 +188,14 @@ impl CircuitStepHandler<Elem> for MachineContext {
                     (args[4], args[5], args[6], args[7]),
                     args[8],
                 );
+                Ok(())
+            }
+            "fpExtInv" => {
+                let x = BabyBearExtElem::new(args[0], args[1], args[2], args[3], args[4]);
+                let y = x.inv();
+                let ret = y.subelems();
+                (outs[0], outs[1], outs[2], outs[3], outs[4]) =
+                    (ret[0], ret[1], ret[2], ret[3], ret[4]);
                 Ok(())
             }
             "bigintQuotient" => {

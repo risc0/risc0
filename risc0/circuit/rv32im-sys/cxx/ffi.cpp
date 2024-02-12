@@ -124,3 +124,19 @@ extern "C" FpExt
 risc0_circuit_rv32im_poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   return circuit::rv32im::poly_fp(cycle, steps, poly_mix, args);
 }
+
+constexpr FpExt FpExt::operator*(FpExt rhs) const {
+  return FpExt();
+  // // Rename the element arrays to something small for readability
+  // #define a elems
+  // #define b rhs.elems
+  //   Fp c[2 * 4 + 1];
+  //   for (size_t i = 0; i < 4 + 1; i++) {
+  //     for (size_t j = 0; j < 4 + 1; j++) {
+  //       c[i + j] += a[i] * b[j];
+  //     }
+  //   }
+  //   return FpExt(c[0] - c[5] * 2, c[1] - c[6] * 2, c[2] - c[7] * 2, c[3] - c[8] * 2, c[4]);
+  // #undef a
+  // #undef b
+}

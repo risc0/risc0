@@ -117,6 +117,13 @@ impl<'a, F: Field> CircuitStepHandler<F::Elem> for Handler<'a, F> {
                 let elem = unsafe { ptr.add(cycle).read() };
                 outs.clone_from_slice(elem.subelems());
             }
+            "fpExtInv" => {
+                let x = F::ExtElem::from_subelems(args.iter().cloned());
+                let y = x.inv();
+                let ret = y.subelems();
+                (outs[0], outs[1], outs[2], outs[3], outs[4]) =
+                    (ret[0], ret[1], ret[2], ret[3], ret[4]);
+            }
             _ => panic!("Unknown accum operation {name}"),
         }
         Ok(())

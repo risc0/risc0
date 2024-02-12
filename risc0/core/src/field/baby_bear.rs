@@ -389,8 +389,7 @@ const EXT_SIZE: usize = 5;
 /// represented as elements of `F_p[X] / (X^5 + 2)`. This large finite field is
 /// used when the security of operations depends on the size of the field. The
 /// field extension `ExtElem` has `Elem` as a subfield, so operations on
-/// elements of each are compatible. The irreducible polynomial `x^5 + 2` was
-/// chosen because TODO.
+/// elements of each are compatible.
 #[derive(Eq, Clone, Copy, Pod, Zeroable)]
 #[repr(transparent)]
 pub struct ExtElem([Elem; EXT_SIZE]);

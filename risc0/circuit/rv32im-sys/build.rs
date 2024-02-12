@@ -17,6 +17,10 @@ use std::{env, path::PathBuf};
 use risc0_build_kernel::{KernelBuild, KernelType};
 
 fn main() {
+    if env::var("RISC0_SKIP_BUILD").is_ok() {
+        return;
+    }
+
     build_cpu_kernels();
 
     if env::var("CARGO_FEATURE_CUDA").is_ok() {
@@ -35,6 +39,7 @@ fn build_cpu_kernels() {
         .collect();
     KernelBuild::new(KernelType::Cpp)
         .files(&srcs)
+        .deps(&["fp.h", "fpext.h"])
         .compile("circuit");
 }
 
