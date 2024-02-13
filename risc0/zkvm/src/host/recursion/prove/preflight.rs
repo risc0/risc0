@@ -23,7 +23,7 @@ use risc0_core::field::baby_bear::{BabyBearElem as Fp, BabyBearExtElem as FpExt}
 use risc0_zkp::{
     adapter::CircuitStepContext,
     core::hash::{
-        poseidon::{poseidon_mix, CELLS},
+        poseidon2::{poseidon2_mix, CELLS},
         sha::SHA256_INIT,
     },
     field::Elem,
@@ -37,7 +37,7 @@ pub struct Preflight<'a, Ext: Externs> {
     sha_state: [u32; 8],
     sha_load: [u32; 16],
 
-    poseidon_state: [Fp; CELLS],
+    poseidon2_state: [Fp; CELLS],
 
     sha_init_pos: usize,
     sha_load_pos: usize,
@@ -57,7 +57,7 @@ impl<'a, Ext: Externs> Preflight<'a, Ext> {
     pub fn new(externs: &'a mut Ext) -> Self {
         Preflight {
             externs,
-            poseidon_state: [Fp::new(0); CELLS],
+            poseidon2_state: [Fp::new(0); CELLS],
             sha_state: [0; 8],
             sha_load: [0; 16],
             sha_init_pos: 0,
@@ -84,21 +84,22 @@ impl<'a, Ext: Externs> Preflight<'a, Ext> {
         if self.get(code, LAYOUT.code.select.micro_ops) == Fp::ONE {
             self.set_micros(ctx, code)?
         }
-        if self.get(code, LAYOUT.code.select.poseidon_load) == Fp::ONE {
-            let inst = LAYOUT.code.inst.poseidon_load;
+        if self.get(code, LAYOUT.code.select.poseidon2_load) == Fp::ONE {
+            let inst = LAYOUT.code.inst.poseidon2_load;
             let do_mont = self.get(code, inst.do_mont).as_u32();
-            let add_consts = self.get(code, inst.add_consts).as_u32();
+            let prep_full = self.get(code, inst.prep_full).as_u32();
             let keep_state = self.get(code, inst.keep_state).as_u32();
             let group = (self.get(code, inst.group.g1).as_u32()
                 + self.get(code, inst.group.g2).as_u32() * 2) as usize;
             trace!(
-                "Poseidon Load: group = {}, add_consts = {}, keep_state = {}",
+                "Poseidon2 Load: group = {}, prep_full = {}, keep_state = {}, do_mont = {}",
                 group,
-                add_consts,
-                keep_state
+                prep_full,
+                keep_state,
+                do_mont
             );
             if keep_state != 1 {
-                self.poseidon_state = [Fp::new(0); CELLS];
+                self.poseidon2_state = [Fp::new(0); CELLS];
             }
             for i in 0..8 {
                 let addr = self.get(code, inst.inputs[i]);
@@ -107,33 +108,35 @@ impl<'a, Ext: Externs> Preflight<'a, Ext> {
                     // Convert from montgomery form
                     load = load * Fp::from(943718400u32);
                 }
-                self.poseidon_state[group * 8 + i] += load;
+                trace!("  loading[{i}]: {load:?}");
+                self.poseidon2_state[group * 8 + i] += load;
             }
             self.set_not_splittable(ctx);
         }
-        if self.get(code, LAYOUT.code.select.poseidon_full) == Fp::ONE {
-            trace!("Poseidon full");
+        if self.get(code, LAYOUT.code.select.poseidon2_full) == Fp::ONE {
+            trace!("Poseidon2 full");
             self.set_not_splittable(ctx);
         }
-        if self.get(code, LAYOUT.code.select.poseidon_partial) == Fp::ONE {
-            trace!("Poseidon partial");
-            poseidon_mix(&mut self.poseidon_state);
+        if self.get(code, LAYOUT.code.select.poseidon2_partial) == Fp::ONE {
+            trace!("Poseidon2 partial");
+            poseidon2_mix(&mut self.poseidon2_state);
             self.set_not_splittable(ctx);
         }
-        if self.get(code, LAYOUT.code.select.poseidon_store) == Fp::ONE {
-            let inst = LAYOUT.code.inst.poseidon_load;
+        if self.get(code, LAYOUT.code.select.poseidon2_store) == Fp::ONE {
+            let inst = LAYOUT.code.inst.poseidon2_load;
             let do_mont = self.get(code, inst.do_mont).as_u32();
             let group = (self.get(code, inst.group.g1).as_u32()
                 + self.get(code, inst.group.g2).as_u32() * 2) as usize;
-            trace!("Poseidon store, group = {}", group);
+            trace!("Poseidon2 store, group = {}, doMont = {}", group, do_mont);
             let write_addr = self.get(code, LAYOUT.code.write_addr).as_u32() as usize;
             for i in 0..8 {
                 let addr = Fp::new((write_addr + i) as u32);
-                let mut store = self.poseidon_state[group * 8 + i];
+                let mut store = self.poseidon2_state[group * 8 + i];
                 if do_mont != 0 {
                     // Convert to montgomery form
                     store = store * Fp::from(268435454u32);
                 }
+                trace!("  storing[{i}]: {store:?}");
                 self.externs.wom_write(addr, FpExt::from(store));
             }
             self.set_not_splittable(ctx);
