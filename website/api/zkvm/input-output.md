@@ -6,7 +6,7 @@ outputs, the distinction between public and private data and additional
 considerations when working with I/O in the zkVM.
 
 As briefly mentioned in [Guest Code 101][guest-code-101-io], we can perform I/O
-between the guest and host by using some methods under the [`env`
+between the [guest] and [host] by using some methods under the [`env`
 module][env-module-functions]. These methods allow sending private data between
 them. In the zkVM, there is a distinction between public and private data.
 Public data is included in the journal and is part of the proof, while private
@@ -275,3 +275,5 @@ For further examples on how to handle I/O in the zkVM, you can check the [exampl
 [journal_terminology]: https://dev.risczero.com/terminology#journal
 [session]: https://dev.risczero.com/terminology#session
 [examples page]: examples.md
+[guest]: https://dev.risczero.com/terminology#guest
+[host]: https://dev.risczero.com/terminology#host
