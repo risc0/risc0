@@ -1,5 +1,5 @@
 [package]
-name = "doc-test-0_19"
+name = "doc-test-0_20"
 version = "0.1.0"
 edition = "2021"
 
@@ -9,14 +9,14 @@ edition = "2021"
 alloy-primitives = "0.4"
 alloy-sol-types = "0.4"
 anyhow = "1.0"
-bonsai-ethereum-relay = { git = "https://github.com/risc0/risc0.git", branch = "release-0.19" }
+bonsai-ethereum-relay = { git = "https://github.com/risc0/risc0.git", branch = "release-0.20" }
 clap = { version = "=4.4.18", features = ["derive", "env"] }
 ethers = { version = "2.0", features = ["rustls", "ws"] }
-fibonacci-methods = { git = "https://github.com/risc0/risc0.git", branch = "release-0.19" }
-risc0-zkvm = { git = "https://github.com/risc0/risc0.git", branch = "release-0.19", features = [
+fibonacci-methods = { git = "https://github.com/risc0/risc0.git", branch = "release-0.20" }
+risc0-zkvm = { git = "https://github.com/risc0/risc0.git", branch = "release-0.20", features = [
   "prove",
 ] }
-risc0-zkvm-methods = { git = "https://github.com/risc0/risc0.git", branch = "release-0.19" }
+risc0-zkvm-methods = { git = "https://github.com/risc0/risc0.git", branch = "release-0.20" }
 serde = { version = "1.0", features = ["derive"] }
 tokio = { version = "1", features = ["full", "sync"] }
 
