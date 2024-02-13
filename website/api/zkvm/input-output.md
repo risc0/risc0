@@ -1,14 +1,13 @@
 # Introduction to Input/Output in the zkVM
 
-This document provides an overview of how to perform I/O operations in the zkVM,
-going over the different file descriptors and methods used to handle inputs and
-outputs, the distinction between public and private data and additional
-considerations when working with I/O in the zkVM.
+This document provides an overview of how to perform I/O operations in the zkVM.
+It covers the methods used to handle inputs and outputs, the distinction between
+public and private data, and additional considerations.
 
 As briefly mentioned in [Guest Code 101][guest-code-101-io], we can perform I/O
 between the guest and host by using some methods under the [`env`
-module][env-module-functions]. These methods allow sending private data between
-them. In the zkVM, there is a distinction between public and private data.
+module][env-module-functions].
+In the zkVM, there is a distinction between public and private data.
 Public data is included in the journal and is part of the proof, while private
 data is sent between the guest and host and is not included in the journal nor
 consists in part of the proof.
@@ -21,7 +20,7 @@ data is only accessible by the host and guest. It's important to understand this
 distinction in order to handle data correctly and ensure that sensitive
 information is not publicly disclosed.
 
-Public data comprises everything that is included in the
+Public data comprises everything that is committed to the
 [journal][journal_terminology] as a result of a zkVM application's execution.
 Since this data is the _output_ of the application, public data is often also
 referred to as _public outputs_.
@@ -53,7 +52,7 @@ By default, the zkVM provides four file descriptors for I/O operations:
   data from the host to the guest.
 - [`stdout`][stdout]: The standard output file descriptor. It is used to write output
   data from the guest to the host.
-- [`stderr`][stderr]: The standard error file descriptor. It is used to write error from the guest to the host.
+- [`stderr`][stderr]: The standard error file descriptor. It is used to write errors from the guest to the host.
 - [`journal`][journal]: The journal file descriptor. It is used to write public
   data.
 
@@ -62,7 +61,7 @@ descriptors, there are some helper methods to read and write data, that we'll
 cover in the next sections.
 
 :::info
-It's important to highlight that from those file descriptors, only the [`journal`][journal] has a public nature. All the other file descriptors are private and will not be part of the proof.
+Only data written to the [`journal`][journal] is public. All the other file descriptors are private, and data written to them will not be part of the proof.
 :::
 
 ## Handling Inputs
@@ -71,7 +70,7 @@ The [`stdin`][stdin] file descriptor is used to send input data from the host to
 the guest. The zkVM provides some convenience methods to read data from this
 file descriptor.
 
-- [`env::read`][read_method]: Reads a value from the `stdin` file descriptor.
+- [`env::read`][read_method]: Reads and deserializes values from the `stdin` file descriptor.
 - [`env::read_slice`][read_slice_method]: Reads a slice from the `stdin` file
   descriptor.
 
@@ -215,8 +214,7 @@ For example, in the host program, we could instantiate the `ExecutorEnv` as usua
 use risc0_zkvm::{default_prover, ExecutorEnv};
 
 fn main() {
-  let env = ExecutorEnv::builder()
-              .build();
+  let env = ExecutorEnv::default()
   let prover = default_prover();
   let receipt = prover.prove(env, EXAMPLE_ELF).unwrap();
 
