@@ -84,7 +84,7 @@ jobs:
       - uses: risc0/foundry-toolchain@2fe7e70b520f62368a0e3c464f997df07ede420f
         with:
           version: nightly-09fe3e041369a816365a020f715ad6f94dbce9f2
-      - uses: risc0/cargo-install@2cfb0024938d23011106cbf127b393bc83fddba1
+      - uses: risc0/cargo-install@b9307573043522ab0d3e3be64a51763b765b52a4
         with:
           crate: cargo-binstall
           version: "1.4"
@@ -118,7 +118,7 @@ jobs:
       - uses: risc0/foundry-toolchain@2fe7e70b520f62368a0e3c464f997df07ede420f
         with:
           version: nightly-09fe3e041369a816365a020f715ad6f94dbce9f2
-      - uses: risc0/cargo-install@2cfb0024938d23011106cbf127b393bc83fddba1
+      - uses: risc0/cargo-install@b9307573043522ab0d3e3be64a51763b765b52a4
         with:
           crate: cargo-binstall
           version: "1.4"
@@ -152,7 +152,7 @@ jobs:
       - uses: risc0/foundry-toolchain@2fe7e70b520f62368a0e3c464f997df07ede420f
         with:
           version: nightly-09fe3e041369a816365a020f715ad6f94dbce9f2
-      - uses: risc0/cargo-install@2cfb0024938d23011106cbf127b393bc83fddba1
+      - uses: risc0/cargo-install@b9307573043522ab0d3e3be64a51763b765b52a4
         with:
           crate: cargo-binstall
           version: "1.4"
