@@ -79,17 +79,18 @@ For example, in the host program, we could:
 
 `/src/main.rs`
 
-```rust
+```rust,no_run
 use risc0_zkvm::ExecutorEnv;
 
 fn main() {
   let env = ExecutorEnv::builder()
               // Write a single value to [stdin]
-              .write(42u64)
+              .write(&42u64)
               .unwrap()
               // Write a slice to [stdin]
               .write_slice(&[1u8, 2u8, 3u8])
-              .build();
+              .build()
+              .unwrap();
 
   // Do something with the ExecutorEnv...
 }
@@ -99,18 +100,18 @@ And in the guest program, we could:
 
 `/methods/guest/src/main.rs`
 
-```rust
+```rust,no_run
 #![no_main]
 use risc0_zkvm::guest::env;
 risc0_zkvm::guest::entry!(main);
 
 fn main() {
   // Read a single value from the standard input
-  let input: u64 = env::read()?;
+  let input = env::read::<u64>();
 
   // Read a slice from the standard input
-  let mut buffer = [0u8; 32];
-  env::read_slice(&mut buffer)?;
+  let mut buffer = [0u8; 3];
+  env::read_slice(&mut buffer);
 
   // Ensure we read the expected input
   assert_eq!(input, 42);
@@ -142,15 +143,15 @@ For example, in the host program, we could:
 
 `/src/main.rs`
 
-```rust
+```rust,ignore
 use risc0_zkvm::{
   ExecutorEnv,
   Receipt,
   default_prover,   // convenience method to create a default prover
   serde::from_slice // necessary to deserialize the output
 };
-use app_methods::EXAMPLE_ELF;
-use app::ExampleStruct;
+
+use app::{ExampleStruct, EXAMPLE_ELF};
 
 fn main() {
   // Step 1: Create a buffer to store the output
@@ -158,7 +159,8 @@ fn main() {
   let env = ExecutorEnv::builder()
               // Step 2: Instruct the guest to write to the desired buffer
               .stdout(&mut output)
-              .build();
+              .build()
+              .unwrap();
   let prover = default_prover();
   let receipt = prover.prove(env, EXAMPLE_ELF).unwrap();
 
@@ -174,7 +176,7 @@ And in the guest program, we could:
 
 `/methods/guest/src/main.rs`
 
-```rust
+```rust,ignore
 #![no_main]
 use risc0_zkvm::guest::env;
 risc0_zkvm::guest::entry!(main);
@@ -211,12 +213,13 @@ For example, in the host program, we could instantiate the `ExecutorEnv` as usua
 
 `/src/main.rs`
 
-```rust
+```rust,ignore
 use risc0_zkvm::{default_prover, ExecutorEnv};
 
 fn main() {
   let env = ExecutorEnv::builder()
-              .build();
+              .build()
+              .unwrap();
   let prover = default_prover();
   let receipt = prover.prove(env, EXAMPLE_ELF).unwrap();
 
@@ -231,7 +234,7 @@ And in the guest program, we would write to the journal as follows:
 
 `/methods/guest/src/main.rs`
 
-```rust
+```rust,no_run
 #![no_main]
 
 use risc0_zkvm::guest::env;
@@ -239,7 +242,7 @@ risc0_zkvm::guest::entry!(main);
 
 fn main() {
   // Commit single value to the journal
-  env::commit(42u64);
+  env::commit(&42u64);
 
   // Commit a slice to the journal
   env::commit_slice(&[1u8, 2u8, 3u8]);
