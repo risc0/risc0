@@ -97,6 +97,11 @@ export default {
         },
         {
           type: "doc",
+          label: "I/O",
+          id: "zkvm/input-output",
+        },
+        {
+          type: "doc",
           label: "Guest Optimization",
           id: "zkvm/optimization",
         },
