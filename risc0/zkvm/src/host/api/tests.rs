@@ -116,16 +116,12 @@ impl TestClient {
         &self,
         opts: ProverOpts,
         conditional_receipt: Asset,
-        corroborating_receipt: Asset,
+        assumption_receipt: Asset,
     ) -> SuccinctReceipt {
         with_server(self.addr, || {
             let receipt_out = AssetRequest::Path(self.get_work_path());
-            self.client.resolve(
-                opts,
-                conditional_receipt,
-                corroborating_receipt,
-                receipt_out,
-            )
+            self.client
+                .resolve(opts, conditional_receipt, assumption_receipt, receipt_out)
         })
     }
 
@@ -267,11 +263,11 @@ fn lift_resolve() {
 
     // Execute the composition multitest
     let env = ExecutorEnv::builder()
-        .add_assumption(assumption_succinct_receipt.claim.clone().into())
-        .write(&MultiTestSpec::SysVerify {
-            image_id: HELLO_COMMIT_ID.into(),
-            journal: b"hello world".to_vec(),
-        })
+        .add_assumption(assumption_succinct_receipt.claim.clone())
+        .write(&MultiTestSpec::SysVerify(vec![(
+            HELLO_COMMIT_ID.into(),
+            b"hello world".to_vec(),
+        )]))
         .unwrap()
         .build()
         .unwrap();
@@ -310,7 +306,7 @@ fn lift_resolve() {
 }
 
 #[test]
-#[should_panic(expected = "Guest panicked: panicked at 'MultiTestSpec::Panic invoked'")]
+#[should_panic(expected = "MultiTestSpec::Panic invoked")]
 fn guest_error_forwarding() {
     let env = ExecutorEnv::builder()
         .write(&MultiTestSpec::Panic)

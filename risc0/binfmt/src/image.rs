@@ -310,6 +310,14 @@ impl MemoryImage {
     pub fn compute_id(&self) -> Result<Digest> {
         Ok(compute_image_id(&self.compute_root_hash()?, self.pc))
     }
+
+    /// Return the [SystemState] for this image.
+    pub fn get_system_state(&self) -> Result<SystemState> {
+        Ok(SystemState {
+            merkle_root: self.compute_root_hash()?,
+            pc: self.pc,
+        })
+    }
 }
 
 fn hash_page_bytes(page: &[u8]) -> Result<Digest> {

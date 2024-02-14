@@ -98,15 +98,20 @@ pub struct ProverOpts {
     /// [crate::ExitCode] (i.e. `Halted(0)` or `Paused(0)`).
     /// When set to true, any completed execution session will be proven, including indicated
     /// errors (e.g. `Halted(1)`) and sessions ending in `Fault`.
+    // TODO(1.0): This option exists to avoid wasting resourcing proving a guest that exited with
+    // Fault or another abnormal exit conditional. It is currently not consistently enforced, and
+    // it seems like this might not be the right place for this option and it's not clear at the
+    // moment if there is a better place. At some point before 1.0, this option should be moved or
+    // dropped.
     pub prove_guest_errors: bool,
 }
 
 impl Default for ProverOpts {
-    /// Return [ProverOpts] with the SHA-256 hash function and
+    /// Return [ProverOpts] with the Poseidon2 hash function and
     /// `prove_guest_errors` set to false.
     fn default() -> Self {
         Self {
-            hashfn: "poseidon".to_string(),
+            hashfn: "poseidon2".to_string(),
             prove_guest_errors: false,
         }
     }
@@ -129,7 +134,7 @@ impl Default for ProverOpts {
 /// * [local::LocalProver] if the `prove` feature flag is enabled.
 /// * [ExternalProver] otherwise.
 pub fn default_prover() -> Rc<dyn Prover> {
-    let explicit = std::env::var("RISC0_PROVER").unwrap_or(String::new());
+    let explicit = std::env::var("RISC0_PROVER").unwrap_or_default();
     if !explicit.is_empty() {
         return match explicit.to_lowercase().as_str() {
             "bonsai" => Rc::new(BonsaiProver::new("bonsai")),
@@ -171,7 +176,7 @@ pub fn default_prover() -> Rc<dyn Prover> {
 /// * [local::LocalProver] if the `prove` feature flag is enabled.
 /// * [ExternalProver] otherwise.
 pub fn default_executor() -> Rc<dyn Executor> {
-    let explicit = std::env::var("RISC0_EXECUTOR").unwrap_or(String::new());
+    let explicit = std::env::var("RISC0_EXECUTOR").unwrap_or_default();
     if !explicit.is_empty() {
         return match explicit.to_lowercase().as_str() {
             "ipc" => Rc::new(ExternalProver::new("ipc", get_r0vm_path())),

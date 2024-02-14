@@ -17,7 +17,7 @@ permissions:
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  RISC0_TOOLCHAIN_VERSION: test-release-2
+  RISC0_TOOLCHAIN_VERSION: v2024-01-31.1
 
 jobs:
   changes:
@@ -26,8 +26,7 @@ jobs:
       pull-requests: read
     outputs:
       main: ${{ steps.filter.outputs.main }}
-      version-0_18: ${{ steps.filter.outputs.version-0_18 }}
-      version-0_19: ${{ steps.filter.outputs.version-0_19 }}
+      version-0_20: ${{ steps.filter.outputs.version-0_20 }}
     steps:
       - uses: actions/checkout@v4
       - uses: risc0/paths-filter@4067d885736b84de7c414f582ac45897079b0a78
@@ -35,28 +34,26 @@ jobs:
         with:
           filters: |
             main:
+              - rust-toolchain.toml
               - .github/actions/**
+              - .github/workflows/website-test.yml
               - bonsai/**
               - risc0/**
               - website/api/**
               - website/doc-test/main/**
               - website/docs/**
-            version-0_18:
+            version-0_20:
               - .github/actions/**
-              - website/api_versioned_docs/version-0.18/**
-              - website/doc-test/version-0.18/**
-            version-0_19:
-              - .github/actions/**
-              - website/api_versioned_docs/version-0.19/**
-              - website/doc-test/version-0.19/**
+              - .github/workflows/website-test.yml
+              - website/api_versioned_docs/version-0.20/**
+              - website/doc-test/version-0.20/**
 
   # see: https://github.com/orgs/community/discussions/26822
   doc-test:
     if: always()
     needs:
       - main
-      - version-0_18
-      - version-0_19
+      - version-0_20
     runs-on: ubuntu-latest
     steps:
       - name: Check all job status
@@ -80,12 +77,12 @@ jobs:
           key: Linux-default
       - uses: risc0/foundry-toolchain@2fe7e70b520f62368a0e3c464f997df07ede420f
         with:
-          version: nightly-34f684ddfacc5b2ed371353ba6f730c485616ffe
-      - uses: risc0/cargo-install@2cfb0024938d23011106cbf127b393bc83fddba1
+          version: nightly-09fe3e041369a816365a020f715ad6f94dbce9f2
+      - uses: risc0/cargo-install@b9307573043522ab0d3e3be64a51763b765b52a4
         with:
           crate: cargo-binstall
           version: "1.4"
-      - run: cargo binstall -y --force cargo-risczero@0.19
+      - run: cargo binstall -y --force cargo-risczero@0.20
       - run: cargo risczero install --version $RISC0_TOOLCHAIN_VERSION
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -99,8 +96,8 @@ jobs:
 
       - run: sccache --show-stats
 
-  version-0_18:
-    if: needs.changes.outputs.version-0_18 == 'true'
+  version-0_20:
+    if: needs.changes.outputs.version-0_20 == 'true'
     needs: changes
     runs-on: ubuntu-latest
     steps:
@@ -114,55 +111,21 @@ jobs:
           key: Linux-default
       - uses: risc0/foundry-toolchain@2fe7e70b520f62368a0e3c464f997df07ede420f
         with:
-          version: nightly-34f684ddfacc5b2ed371353ba6f730c485616ffe
-      - uses: risc0/cargo-install@2cfb0024938d23011106cbf127b393bc83fddba1
+          version: nightly-09fe3e041369a816365a020f715ad6f94dbce9f2
+      - uses: risc0/cargo-install@b9307573043522ab0d3e3be64a51763b765b52a4
         with:
           crate: cargo-binstall
           version: "1.4"
-      - run: cargo binstall -y --force cargo-risczero@0.19
+      - run: cargo binstall -y --force cargo-risczero@0.20
       - run: cargo risczero install --version $RISC0_TOOLCHAIN_VERSION
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: build
         run: cargo test --release --no-run
-        working-directory: website/doc-test/version-0.18
+        working-directory: website/doc-test/version-0.20
       - name: test
         run: cargo test --release
-        working-directory: website/doc-test/version-0.18
-
-      - run: sccache --show-stats
-
-  version-0_19:
-    if: needs.changes.outputs.version-0_19 == 'true'
-    needs: changes
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          # Recursive checkout required to build Solidity contracts and bindings.
-          submodules: recursive
-      - uses: ./.github/actions/rustup
-      - uses: ./.github/actions/sccache
-        with:
-          key: Linux-default
-      - uses: risc0/foundry-toolchain@2fe7e70b520f62368a0e3c464f997df07ede420f
-        with:
-          version: nightly-34f684ddfacc5b2ed371353ba6f730c485616ffe
-      - uses: risc0/cargo-install@2cfb0024938d23011106cbf127b393bc83fddba1
-        with:
-          crate: cargo-binstall
-          version: "1.4"
-      - run: cargo binstall -y --force cargo-risczero@0.19
-      - run: cargo risczero install --version $RISC0_TOOLCHAIN_VERSION
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: build
-        run: cargo test --release --no-run
-        working-directory: website/doc-test/version-0.19
-      - name: test
-        run: cargo test --release
-        working-directory: website/doc-test/version-0.19
+        working-directory: website/doc-test/version-0.20
 
       - run: sccache --show-stats

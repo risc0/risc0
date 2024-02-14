@@ -257,7 +257,7 @@ impl Client {
     }
 
     /// Run the resolve program to remove an assumption from a conditional [SuccinctReceipt] upon
-    /// verifying a corroborating [SuccinctReceipt] for the assumption.
+    /// verifying a [SuccinctReceipt] proving the validity of the assumption.
     ///
     /// By applying the resolve program, a conditional receipt (i.e. a receipt for an execution
     /// using the `env::verify` API to logically verify a receipt) can be made into an
@@ -266,7 +266,7 @@ impl Client {
         &self,
         opts: ProverOpts,
         conditional_receipt: Asset,
-        corroborating_receipt: Asset,
+        assumption_receipt: Asset,
         receipt_out: AssetRequest,
     ) -> Result<SuccinctReceipt> {
         let mut conn = self.connect()?;
@@ -276,7 +276,7 @@ impl Client {
                 pb::api::ResolveRequest {
                     opts: Some(opts.into()),
                     conditional_receipt: Some(conditional_receipt.try_into()?),
-                    corroborating_receipt: Some(corroborating_receipt.try_into()?),
+                    assumption_receipt: Some(assumption_receipt.try_into()?),
                     receipt_out: Some(receipt_out.try_into()?),
                 },
             )),
@@ -482,7 +482,7 @@ impl Client {
                             return match session.session {
                                 Some(session) => Ok(SessionInfo {
                                     segments,
-                                    journal: Journal::new(session.journal.into()),
+                                    journal: Journal::new(session.journal),
                                     exit_code: session
                                         .exit_code
                                         .ok_or(malformed_err())?
@@ -525,7 +525,7 @@ impl Client {
                             return Err(anyhow!("Illegal client callback"))
                         }
                         pb::api::client_callback::Kind::ProveDone(done) => {
-                            return Ok(done.receipt.ok_or(malformed_err())?)
+                            return done.receipt.ok_or(malformed_err())
                         }
                     }
                 }

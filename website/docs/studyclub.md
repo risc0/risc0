@@ -4,12 +4,16 @@ RISC Zero's Study Club sessions aim to introduce the pre-requisite concepts nece
 
 ## Upcoming Sessions
 
-Stay tuned for 2024 sessions!
+**February 14: Proof Composition** <br/>
+**Victor Graf** <br/>
 
-<!---
+As of our v0.20 release, the zkVM supports verification of RISC Zero receipts inside the RISC Zero guest through a feature known as composition.
+With this feature, multiple zkVM programs can be composed and produce a single receipt that verifies all computation done to reach the final result.
+
+This session of study club will discuss how to use proof composition, how proof composition works behind the scenes, and what use cases this unlocks.
+
 All sessions are hosted at **9am Pacific / 5PM UTC**. <br/>
 Join the session: [Zoom link] <br/>
---->
 
 Join the conversation on [Discord](https://discord.gg/risczero).
 
@@ -34,6 +38,7 @@ Full recordings and slides from past sessions are available [here](https://www.y
 
 ### Mathematical Primitives
 
+- [Intro to Hash Functions](https://www.youtube.com/watch?v=_MIxjDs70W8&list=PLcPzhUaCxlCjdhONxEYZ1dgKjZh3ZvPtl&index=1)
 - [Intro Finite Fields](https://www.youtube.com/watch?v=g-GDvnJsZgg&list=PLcPzhUaCxlCiddOGuYdDbFlZhH8nwtR8D)
 - [Finite Field Implementations: Algorithms for Fast Multiplication](https://www.youtube.com/watch?v=hUl8ZB6hpUM&list=PLcPzhUaCxlCjdhONxEYZ1dgKjZh3ZvPtl&index=6)
 - [Intro to Number Theoretic Transforms (NTTs)](https://www.youtube.com/watch?v=IFsxQUbI6x0&list=PLcPzhUaCxlChIKDDR_WghPQ1HeK01YHpa)

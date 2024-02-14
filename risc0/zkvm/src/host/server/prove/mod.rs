@@ -24,7 +24,7 @@ mod tests;
 
 use std::rc::Rc;
 
-use anyhow::Result;
+use anyhow::{anyhow, bail, Result};
 use cfg_if::cfg_if;
 use risc0_circuit_rv32im::CircuitImpl;
 use risc0_core::field::{
@@ -40,7 +40,7 @@ use risc0_zkvm_platform::WORD_SIZE;
 
 use self::{dev_mode::DevModeProver, prover_impl::ProverImpl};
 use crate::{
-    host::receipt::{SegmentReceipt, SuccinctReceipt},
+    host::receipt::{CompositeReceipt, InnerReceipt, SegmentReceipt, SuccinctReceipt},
     is_dev_mode, ExecutorEnv, ExecutorImpl, ProverOpts, Receipt, Segment, Session, VerifierContext,
 };
 
@@ -79,15 +79,60 @@ pub trait ProverServer {
     /// Join two [SuccinctReceipt] into a [SuccinctReceipt]
     fn join(&self, a: &SuccinctReceipt, b: &SuccinctReceipt) -> Result<SuccinctReceipt>;
 
-    /// Resolve an assumption from a conditional [SuccinctReceipt] by providing a corroborating [SuccinctReceipt]
+    /// Resolve an assumption from a conditional [SuccinctReceipt] by providing a [SuccinctReceipt]
+    /// proving the validity of the assumption.
     fn resolve(
         &self,
         conditional: &SuccinctReceipt,
-        corroborating: &SuccinctReceipt,
+        assumption: &SuccinctReceipt,
     ) -> Result<SuccinctReceipt>;
 
-    /// Convert a [SuccinctReceipt] with a poseidon hash function that uses a 254-bit field
+    /// Convert a [SuccinctReceipt] with a Poseidon hash function that uses a 254-bit field
     fn identity_p254(&self, a: &SuccinctReceipt) -> Result<SuccinctReceipt>;
+
+    /// Compress a [CompositeReceipt] into a single [SuccinctReceipt].
+    ///
+    /// A [CompositeReceipt] may contain an arbitrary number of receipts assembled into
+    /// continuations and compositions. Together, these receipts collectively prove a top-level
+    /// [ReceiptClaim](crate::ReceiptClaim). This function compresses all of the constituent receipts of a
+    /// [CompositeReceipt] into a single [SuccinctReceipt] that proves the same top-level claim. It
+    /// accomplishes this by iterative application of the recursion programs including lift, join,
+    /// and resolve.
+    fn compress(&self, receipt: &CompositeReceipt) -> Result<SuccinctReceipt> {
+        // Compress all receipts in the top-level session into one succinct receipt for the session.
+        let continuation_receipt = receipt
+            .segments
+            .iter()
+            .try_fold(
+                None,
+                |left: Option<SuccinctReceipt>, right: &SegmentReceipt| -> Result<_> {
+                    Ok(Some(match left {
+                        Some(left) => self.join(&left, &self.lift(right)?)?,
+                        None => self.lift(right)?,
+                    }))
+                },
+            )?
+            .ok_or(anyhow!(
+                "malformed composite receipt has no continuation segment receipts"
+            ))?;
+
+        // Compress assumptions and resolve them to get the final succinct receipt.
+        receipt.assumptions.iter().try_fold(
+            continuation_receipt,
+            |conditional: SuccinctReceipt, assumption: &InnerReceipt| match assumption {
+                InnerReceipt::Succinct(assumption) => self.resolve(&conditional, assumption),
+                InnerReceipt::Composite(assumption) => {
+                    self.resolve(&conditional, &self.compress(assumption)?)
+                }
+                InnerReceipt::Fake { .. } => bail!(
+                    "compressing composite receipts with fake receipt assumptions is not supported"
+                ),
+                InnerReceipt::Compact(_) => bail!(
+                    "compressing composite receipts with Compact receipt assumptions is not supported"
+                )
+            },
+        )
+    }
 }
 
 /// A pair of [Hal] and [CircuitHal].
@@ -156,8 +201,8 @@ mod cuda {
     use std::rc::Rc;
 
     use anyhow::{bail, Result};
-    use risc0_circuit_rv32im::cuda::{CudaCircuitHalPoseidon, CudaCircuitHalSha256};
-    use risc0_zkp::hal::cuda::{CudaHalPoseidon, CudaHalSha256};
+    use risc0_circuit_rv32im::cuda::{CudaCircuitHalPoseidon2, CudaCircuitHalSha256};
+    use risc0_zkp::hal::cuda::{CudaHalPoseidon2, CudaHalSha256};
 
     use super::{HalPair, ProverImpl, ProverServer};
     use crate::ProverOpts;
@@ -172,9 +217,9 @@ mod cuda {
                     HalPair { hal, circuit_hal },
                 )))
             }
-            "poseidon" => {
-                let hal = Rc::new(CudaHalPoseidon::new());
-                let circuit_hal = Rc::new(CudaCircuitHalPoseidon::new(hal.clone()));
+            "poseidon2" => {
+                let hal = Rc::new(CudaHalPoseidon2::new());
+                let circuit_hal = Rc::new(CudaCircuitHalPoseidon2::new(hal.clone()));
                 Ok(Rc::new(ProverImpl::new(
                     "cuda",
                     HalPair { hal, circuit_hal },
@@ -192,7 +237,7 @@ mod metal {
     use anyhow::{bail, Result};
     use risc0_circuit_rv32im::metal::MetalCircuitHal;
     use risc0_zkp::hal::metal::{
-        MetalHalPoseidon, MetalHalSha256, MetalHashPoseidon, MetalHashSha256,
+        MetalHalPoseidon2, MetalHalSha256, MetalHashPoseidon2, MetalHashSha256,
     };
 
     use super::{HalPair, ProverImpl, ProverServer};
@@ -208,9 +253,9 @@ mod metal {
                     HalPair { hal, circuit_hal },
                 )))
             }
-            "poseidon" => {
-                let hal = Rc::new(MetalHalPoseidon::new());
-                let circuit_hal = Rc::new(MetalCircuitHal::<MetalHashPoseidon>::new(hal.clone()));
+            "poseidon2" => {
+                let hal = Rc::new(MetalHalPoseidon2::new());
+                let circuit_hal = Rc::new(MetalCircuitHal::<MetalHashPoseidon2>::new(hal.clone()));
                 Ok(Rc::new(ProverImpl::new(
                     "metal",
                     HalPair { hal, circuit_hal },
@@ -228,7 +273,7 @@ mod cpu {
     use anyhow::{bail, Result};
     use risc0_circuit_rv32im::cpu::CpuCircuitHal;
     use risc0_zkp::{
-        core::hash::{poseidon::PoseidonHashSuite, sha::Sha256HashSuite},
+        core::hash::{poseidon2::Poseidon2HashSuite, sha::Sha256HashSuite},
         hal::cpu::CpuHal,
     };
 
@@ -238,7 +283,7 @@ mod cpu {
     pub fn get_prover_server(opts: &ProverOpts) -> Result<Rc<dyn ProverServer>> {
         let suite = match opts.hashfn.as_str() {
             "sha-256" => Sha256HashSuite::new_suite(),
-            "poseidon" => PoseidonHashSuite::new_suite(),
+            "poseidon2" => Poseidon2HashSuite::new_suite(),
             _ => bail!("Unsupported hashfn: {}", opts.hashfn),
         };
         let hal = Rc::new(CpuHal::new(suite));

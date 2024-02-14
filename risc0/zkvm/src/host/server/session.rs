@@ -15,22 +15,21 @@
 //! This module defines [Session] and [Segment] which provides a way to share
 //! execution traces between the execution phase and the proving phase.
 
-use alloc::collections::BTreeSet;
 use std::{
-    borrow::Borrow,
-    fs::File,
-    io::{Read, Write},
+    collections::BTreeSet,
+    fs,
     path::{Path, PathBuf},
 };
 
-use anyhow::{anyhow, ensure, Result};
+use anyhow::{ensure, Context, Result};
 use risc0_binfmt::{MemoryImage, SystemState};
 use risc0_zkvm_platform::WORD_SIZE;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    host::server::exec::executor::SyscallRecord, sha::Digest, Assumption, Assumptions, ExitCode,
-    Journal, Output, ReceiptClaim,
+    host::{client::env::SegmentPath, server::exec::executor::SyscallRecord},
+    sha::Digest,
+    Assumption, Assumptions, ExitCode, Journal, Output, ReceiptClaim,
 };
 
 #[derive(Clone, Default, Serialize, Deserialize, Debug)]
@@ -45,7 +44,6 @@ pub struct PageFaults {
 /// initial memory image (which includes the starting PC) and proceeds until
 /// either a sys_halt or a sys_pause syscall is encountered. This record is
 /// stored as a vector of [Segment]s.
-#[derive(Serialize, Deserialize)]
 pub struct Session {
     /// The constituent [Segment]s of the Session. The final [Segment] will have
     /// an [ExitCode] of [Halted](ExitCode::Halted), [Paused](ExitCode::Paused),
@@ -66,8 +64,21 @@ pub struct Session {
     pub assumptions: Vec<Assumption>,
 
     /// The hooks to be called during the proving phase.
-    #[serde(skip)]
     pub hooks: Vec<Box<dyn SessionEvents>>,
+
+    /// The number of user cycles without any overhead for continuations or po2
+    /// padding.
+    pub user_cycles: u64,
+
+    /// Total number of cycles that a prover experiences. This includes overhead
+    /// associated with continuations and padding up to the nearest power of 2.
+    pub total_cycles: u64,
+
+    /// The system state of the initial [MemoryImage].
+    pub pre_state: SystemState,
+
+    /// The system state of the final [MemoryImage] at the end of execution.
+    pub post_state: SystemState,
 }
 
 /// A reference to a [Segment].
@@ -75,7 +86,6 @@ pub struct Session {
 /// This allows implementors to determine the best way to represent this in an
 /// pluggable manner. See the [SimpleSegmentRef] for a very basic
 /// implmentation.
-#[typetag::serde(tag = "type")]
 pub trait SegmentRef: Send {
     /// Resolve this reference into an actual [Segment].
     fn resolve(&self) -> Result<Segment>;
@@ -131,6 +141,10 @@ impl Session {
         exit_code: ExitCode,
         post_image: MemoryImage,
         assumptions: Vec<Assumption>,
+        user_cycles: u64,
+        total_cycles: u64,
+        pre_state: SystemState,
+        post_state: SystemState,
     ) -> Self {
         Self {
             segments,
@@ -139,16 +153,11 @@ impl Session {
             post_image,
             assumptions,
             hooks: Vec::new(),
+            user_cycles,
+            total_cycles,
+            pre_state,
+            post_state,
         }
-    }
-
-    /// A convenience method that resolves all [SegmentRef]s and returns the
-    /// associated [Segment]s.
-    pub fn resolve(&self) -> Result<Vec<Segment>> {
-        self.segments
-            .iter()
-            .map(|segment_ref| segment_ref.resolve())
-            .collect()
     }
 
     /// Add a hook to be called during the proving phase.
@@ -160,17 +169,6 @@ impl Session {
     /// [ReceiptClaim] is the claim that will be proven if this [Session]
     /// is passed to the [crate::Prover].
     pub fn get_claim(&self) -> Result<ReceiptClaim> {
-        let first_segment = &self
-            .segments
-            .first()
-            .ok_or_else(|| anyhow!("session has no segments"))?
-            .resolve()?;
-        let last_segment = &self
-            .segments
-            .last()
-            .ok_or_else(|| anyhow!("session has no segments"))?
-            .resolve()?;
-
         // Construct the Output struct for the session, checking internal consistency.
         // NOTE: The Session output if distinct from the final Segment output because in the
         // Session output any proven assumptions are not included.
@@ -207,48 +205,25 @@ impl Session {
             None
         };
 
-        // NOTE: When a segment ends in a Halted(_) state, it may not update the post state
-        // digest. As a result, it will be the same are the pre_image. All other exit codes require
-        // the post state digest to reflect the final memory state.
-        // NOTE: The PC on the the post state is stored "+ 4". See ReceiptClaim for more detail.
-        let post_state = SystemState {
-            pc: self
-                .post_image
-                .pc
-                .checked_add(WORD_SIZE as u32)
-                .ok_or(anyhow!("invalid pc in session post image"))?,
-            merkle_root: match self.exit_code {
-                ExitCode::Halted(_) => last_segment.pre_image.compute_root_hash()?,
-                _ => self.post_image.compute_root_hash()?,
-            },
-        };
-
         Ok(ReceiptClaim {
-            pre: SystemState::from(first_segment.pre_image.borrow()).into(),
-            post: post_state.into(),
+            pre: self.pre_state.clone().into(),
+            post: self.post_state.clone().into(),
             exit_code: self.exit_code,
             input: Digest::ZERO,
             output: output.into(),
         })
     }
 
-    /// Report cycle information for this [Session].
+    /// Log cycle information for this [Session].
     ///
-    /// Returns a tuple `(x, y)` where:
-    /// * `x`: Total number of cycles that a prover experiences. This includes
-    ///   overhead associated with continuations and padding up to the nearest
-    ///   power of 2.
-    /// * `y`: Total number of cycles used for executing user instructions.
-    pub fn get_cycles(&self) -> Result<(u64, u64)> {
-        let segments = self.resolve()?;
-        Ok(segments
-            .iter()
-            .fold((0, 0), |(total_cycles, user_cycles), segment| {
-                (
-                    total_cycles + (1 << segment.po2),
-                    user_cycles + segment.cycles as u64,
-                )
-            }))
+    /// This logs the total and user cycles for this [Session] at the INFO level.
+    pub fn log(&self) {
+        let cycle_efficiency = self.user_cycles as f64 / self.total_cycles as f64 * 100.0;
+
+        tracing::info!("number of segments: {}", self.segments.len());
+        tracing::info!("total cycles: {}", self.total_cycles);
+        tracing::info!("user cycles: {}", self.user_cycles);
+        tracing::info!("cycle efficiency: {}%", cycle_efficiency as u32);
     }
 }
 
@@ -290,7 +265,7 @@ impl Segment {
     /// is passed to the [crate::Prover].
     pub fn get_claim(&self) -> Result<ReceiptClaim> {
         // NOTE: When a segment ends in a Halted(_) state, it may not update the post state
-        // digest. As a result, it will be the same are the pre_image. All other exit codes require
+        // digest. As a result, it will be the same as the pre_image. All other exit codes require
         // the post state digest to reflect the final memory state.
         // NOTE: The PC on the the post state is stored "+ 4". See ReceiptClaim for more detail.
         let post_state = SystemState {
@@ -298,7 +273,7 @@ impl Segment {
                 .post_state
                 .pc
                 .checked_add(WORD_SIZE as u32)
-                .ok_or(anyhow!("invalid pc in segment post state"))?,
+                .context("invalid pc in segment post state")?,
             merkle_root: match self.exit_code {
                 ExitCode::Halted(_) => self.pre_image.compute_root_hash()?,
                 _ => self.post_state.merkle_root.clone(),
@@ -306,7 +281,7 @@ impl Segment {
         };
 
         Ok(ReceiptClaim {
-            pre: SystemState::from(&*self.pre_image).into(),
+            pre: self.pre_image.get_system_state()?.into(),
             post: post_state.into(),
             exit_code: self.exit_code,
             input: Digest::ZERO,
@@ -323,7 +298,6 @@ pub struct SimpleSegmentRef {
     segment: Segment,
 }
 
-#[typetag::serde]
 impl SegmentRef for SimpleSegmentRef {
     fn resolve(&self) -> Result<Segment> {
         Ok(self.segment.clone())
@@ -345,19 +319,25 @@ impl SimpleSegmentRef {
 /// There is an example of using [FileSegmentRef] in our [EVM example][1]
 ///
 /// [1]: https://github.com/risc0/risc0/blob/main/examples/zkevm-demo/src/main.rs
-#[derive(Clone, Serialize, Deserialize)]
 pub struct FileSegmentRef {
     path: PathBuf,
+    _dir: SegmentPath,
 }
 
-#[typetag::serde]
 impl SegmentRef for FileSegmentRef {
     fn resolve(&self) -> Result<Segment> {
-        let mut contents = Vec::new();
-        let mut file = File::open(&self.path)?;
-        file.read_to_end(&mut contents)?;
-        let segment: Segment = bincode::deserialize(&contents)?;
+        let contents = fs::read(&self.path)?;
+        let segment = bincode::deserialize(&contents)?;
         Ok(segment)
+    }
+}
+
+impl SegmentPath {
+    pub(crate) fn path(&self) -> &Path {
+        match self {
+            Self::TempDir(dir) => dir.path(),
+            Self::Path(path) => path.as_path(),
+        }
     }
 }
 
@@ -365,11 +345,12 @@ impl FileSegmentRef {
     /// Construct a [FileSegmentRef]
     ///
     /// This builds a FileSegmentRef that stores `segment` in a file at `path`.
-    pub fn new(segment: &Segment, path: &Path) -> Result<Self> {
-        let path = path.join(format!("{}.bincode", segment.index));
-        let mut file = File::create(&path)?;
-        let contents = bincode::serialize(&segment)?;
-        file.write_all(&contents)?;
-        Ok(Self { path })
+    pub fn new(segment: &Segment, dir: &SegmentPath) -> Result<Self> {
+        let path = dir.path().join(format!("{}.bincode", segment.index));
+        fs::write(&path, bincode::serialize(&segment)?)?;
+        Ok(Self {
+            path,
+            _dir: dir.clone(),
+        })
     }
 }

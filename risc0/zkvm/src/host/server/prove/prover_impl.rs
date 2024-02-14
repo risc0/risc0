@@ -84,7 +84,7 @@ where
             }
         }
         // TODO(#982): Support unresolved assumptions here.
-        let inner = InnerReceipt::Composite(CompositeReceipt {
+        let composite_receipt = CompositeReceipt {
             segments,
             assumptions: session
                 .assumptions
@@ -92,9 +92,30 @@ where
                 .map(|a| Ok(a.as_receipt()?.inner.clone()))
                 .collect::<Result<Vec<_>>>()?,
             journal_digest: session.journal.as_ref().map(|journal| journal.digest()),
-        });
-        let receipt = Receipt::new(inner, session.journal.clone().unwrap_or_default().bytes);
+        };
 
+        // Verify the receipt to catch if something is broken in the proving process.
+        composite_receipt.verify_integrity_with_context(ctx)?;
+        if composite_receipt.get_claim()?.digest() != session.get_claim()?.digest() {
+            tracing::debug!("composite receipt and session claim do not match");
+            tracing::debug!(
+                "composite receipt claim: {:#?}",
+                composite_receipt.get_claim()?
+            );
+            tracing::debug!("session claim: {:#?}", session.get_claim()?);
+            bail!(
+                "session and composite receipt claim do not match: session {}, receipt {}",
+                hex::encode(&session.get_claim()?.digest()),
+                hex::encode(&composite_receipt.get_claim()?.digest())
+            );
+        }
+
+        let receipt = Receipt::new(
+            InnerReceipt::Composite(composite_receipt),
+            session.journal.clone().unwrap_or_default().bytes,
+        );
+
+        // Verify the receipt to catch if something is broken in the proving process.
         receipt.verify_integrity_with_context(ctx)?;
         if receipt.get_claim()?.digest() != session.get_claim()?.digest() {
             tracing::debug!("receipt and session claim do not match");
@@ -106,6 +127,7 @@ where
                 hex::encode(&receipt.get_claim()?.digest())
             );
         }
+
         Ok(receipt)
     }
 
@@ -154,7 +176,7 @@ where
         let mix = hal.copy_from_elem("mix", &adapter.get_mix().as_slice());
         let out_slice = &adapter.get_io().as_slice();
 
-        tracing::debug!("Globals: {:?}", OutBuffer(out_slice).tree(&LAYOUT));
+        tracing::debug!("Globals: {:?}", OutBuffer(out_slice).tree(LAYOUT));
         let out = hal.copy_from_elem("out", &adapter.get_io().as_slice());
 
         let seal = prover.finalize(&[&mix, &out], circuit_hal.as_ref());
@@ -185,9 +207,9 @@ where
     fn resolve(
         &self,
         conditional: &SuccinctReceipt,
-        corroborating: &SuccinctReceipt,
+        assumption: &SuccinctReceipt,
     ) -> Result<SuccinctReceipt> {
-        resolve(conditional, corroborating)
+        resolve(conditional, assumption)
     }
 
     fn identity_p254(&self, a: &SuccinctReceipt) -> Result<SuccinctReceipt> {

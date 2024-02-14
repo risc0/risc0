@@ -1,7 +1,3 @@
----
-sidebar_position: 2
----
-
 # What is an Execution Trace?
 
 When a piece of code runs on a machine, the **execution trace** is a complete
