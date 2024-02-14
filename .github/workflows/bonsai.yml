@@ -38,6 +38,7 @@ jobs:
               - .github/workflows/bonsai.yml
               - bonsai/**
               - risc0/**
+              - rust-toolchain.toml
 
   bonsai:
     if: needs.changes.outputs.bonsai == 'true'

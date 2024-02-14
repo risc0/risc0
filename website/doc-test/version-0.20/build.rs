@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ fn main() {
 
     let mut level = Level::new();
 
-    for root_dir in ["api_versioned_docs/version-0.18"] {
+    for root_dir in ["api_versioned_docs/version-0.20"] {
         let pattern = format!("{home}/../../{root_dir}/**/*.md");
         let base = format!("{home}/../../{root_dir}",);
         let base = Path::new(&base).canonicalize().unwrap();
