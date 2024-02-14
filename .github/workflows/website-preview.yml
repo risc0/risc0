@@ -1,4 +1,4 @@
-name: Website preview
+name: (Internal PRs) GitHub Pages Website Preview
 on:
   pull_request:
     branches: [main]
@@ -13,6 +13,7 @@ concurrency:
 jobs:
   dev:
     runs-on: ubuntu-20.04
+    if: github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name
     env:
       PREVIEW_REPO: risc0/website-preview
       PAGES_BASE: https://risc0.github.io/website-preview
