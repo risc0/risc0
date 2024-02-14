@@ -38,6 +38,7 @@ downloader = { version = "0.2", default-features = false, features = [
   "rustls-tls",
   "verify",
 ], optional = true }
+hex = "0.4"
 sha2 = { version = "0.10", optional = true }
 
 [features]

@@ -35,11 +35,6 @@ export default {
         },
         {
           type: "link",
-          label: "Proof System Rust Crate",
-          href: "https://docs.rs/risc0-zkp/*/risc0_zkp/",
-        },
-        {
-          type: "link",
           label: "ZKP Whitepaper",
           href: "https://www.risczero.com/proof-system-in-detail.pdf",
         },
@@ -92,20 +87,9 @@ export default {
       ],
     },
     {
-      type: "category",
-      label: "Contribute to RISC Zero",
-      items: [
-        {
-          type: "doc",
-          label: "Contributor guide",
-          id: "contributors-guide",
-        },
-        {
-          type: "link",
-          label: "Risc Zero Github",
-          href: "https://github.com/risc0/risc0",
-        },
-      ],
+      type: "doc",
+      label: "Contributor guide",
+      id: "contributors-guide",
     },
   ],
 };

@@ -10,7 +10,7 @@ members = [
   "risc0/circuit/rv32im",
   "risc0/circuit/rv32im-sys",
   "risc0/core",
-  "risc0/fault",
+  "risc0/groth16",
   "risc0/r0vm",
   "risc0/sys",
   "risc0/tools",
@@ -44,6 +44,7 @@ risc0-circuit-recursion-sys = { version = "0.21.0-alpha.1", default-features = f
 risc0-circuit-rv32im = { version = "0.21.0-alpha.1", default-features = false, path = "risc0/circuit/rv32im" }
 risc0-circuit-rv32im-sys = { version = "0.21.0-alpha.1", default-features = false, path = "risc0/circuit/rv32im-sys" }
 risc0-core = { version = "0.21.0-alpha.1", default-features = false, path = "risc0/core" }
+risc0-groth16 = { version = "0.21.0-alpha.1", default-features = false, path = "risc0/groth16" }
 risc0-r0vm = { version = "0.21.0-alpha.1", default-features = false, path = "risc0/r0vm" }
 risc0-sys = { version = "0.21.0-alpha.1", default-features = false, path = "risc0/sys" }
 risc0-zkp = { version = "0.21.0-alpha.1", default-features = false, path = "risc0/zkp" }

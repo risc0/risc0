@@ -23,7 +23,7 @@ use std::{
     default::Default,
     env,
     fs::{self, File},
-    io::{stderr, BufRead, BufReader, Write},
+    io::{BufRead, BufReader, Write},
     path::{Path, PathBuf},
     process::{Command, Stdio},
 };
@@ -219,7 +219,7 @@ where
                 .as_ref()
                 .join("riscv32im-risc0-zkvm-elf")
                 .join("docker")
-                .join(pkg.name.replace("-", "_"))
+                .join(pkg.name.replace('-', "_"))
                 .join(&target.name),
         })
         .collect()
@@ -330,7 +330,7 @@ fn build_staticlib(guest_pkg: &str, features: &[&str]) -> String {
     }
 
     // Add args to specify the package to be built, and to build is as a staticlib.
-    cmd.args(&[
+    cmd.args([
         "--package",
         guest_pkg,
         "--target-dir",
@@ -341,7 +341,7 @@ fn build_staticlib(guest_pkg: &str, features: &[&str]) -> String {
     ]);
 
     for feature in features {
-        cmd.args(&["--features", &(guest_pkg.to_owned() + "/" + feature)]);
+        cmd.args(["--features", &(guest_pkg.to_owned() + "/" + feature)]);
     }
 
     eprintln!("Building staticlib: {:?}", cmd);
@@ -361,7 +361,7 @@ fn build_staticlib(guest_pkg: &str, features: &[&str]) -> String {
                 }
             }
             Message::CompilerMessage(msg) => {
-                write!(stderr(), "{}", msg).unwrap();
+                eprint!("{}", msg);
             }
             _ => (),
         }
@@ -389,10 +389,6 @@ fn build_guest_package<P>(
 ) where
     P: AsRef<Path>,
 {
-    if !get_env_var("RISC0_SKIP_BUILD").is_empty() {
-        return;
-    }
-
     fs::create_dir_all(target_dir.as_ref()).unwrap();
 
     let mut cmd = if let Some(lib) = runtime_lib {
@@ -403,10 +399,10 @@ fn build_guest_package<P>(
 
     let features_str = guest_opts.features.join(",");
     if !features_str.is_empty() {
-        cmd.args(&["--features", &features_str]);
+        cmd.args(["--features", &features_str]);
     }
 
-    cmd.args(&[
+    cmd.args([
         "--manifest-path",
         pkg.manifest_path.as_str(),
         "--target-dir",
@@ -414,7 +410,7 @@ fn build_guest_package<P>(
     ]);
 
     if !is_debug() {
-        cmd.args(&["--release"]);
+        cmd.args(["--release"]);
     }
 
     let mut child = cmd
@@ -470,11 +466,7 @@ fn detect_toolchain(name: &str) {
     }
 
     let stdout = String::from_utf8(result.stdout).unwrap();
-    if stdout
-        .lines()
-        .find(|line| line.trim().starts_with(name))
-        .is_none()
-    {
+    if !stdout.lines().any(|line| line.trim().starts_with(name)) {
         eprintln!("The 'risc0' toolchain could not be found.");
         eprintln!("To install the risc0 toolchain, use cargo-risczero.");
         eprintln!("For example:");
@@ -518,13 +510,16 @@ fn get_guest_dir() -> PathBuf {
         .parent() // $profile
         .unwrap()
         .join("riscv-guest")
-        .into()
 }
 
 /// Embeds methods built for RISC-V for use by host-side dependencies.
 /// Specify custom options for a guest package by defining its [GuestOptions].
 /// See [embed_methods].
 pub fn embed_methods_with_options(mut guest_pkg_to_options: HashMap<&str, GuestOptions>) {
+    if !get_env_var("RISC0_SKIP_BUILD").is_empty() {
+        return;
+    }
+
     let out_dir_env = env::var_os("OUT_DIR").unwrap();
     let out_dir = Path::new(&out_dir_env); // $ROOT/target/$profile/build/$crate/out
     let guest_dir = get_guest_dir();

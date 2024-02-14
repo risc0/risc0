@@ -1,0 +1,59 @@
+[package]
+name = "risc0-groth16"
+description = "RISC Zero Groth16"
+version = { workspace = true }
+edition = { workspace = true }
+license = { workspace = true }
+homepage = { workspace = true }
+repository = { workspace = true }
+
+[dependencies]
+anyhow = { version = "1.0", default-features = false }
+ark-bn254 = { version = "0.4" }
+ark-groth16 = { version = "0.4", default-features = false }
+ark-serialize = { version = "0.4", default-features = false }
+bytemuck = { version = "1.14", optional = true }
+hex = { version = "0.4", default-features = false, features = ["alloc"] }
+num-bigint = { version = "0.4", default-features = false }
+num-derive = { version = "0.4" }
+num-traits = { version = "0.2", default-features = false, optional = true }
+risc0-core = { path = "../../risc0/core", optional = true }
+risc0-zkp = { workspace = true }
+serde = { version = "1.0", default-features = false, features = [
+  "alloc",
+  "derive",
+] }
+serde_json = { version = "1.0", optional = true }
+tempfile = { version = "3", optional = true }
+tracing = { version = "0.1", optional = true }
+
+[dev-dependencies]
+risc0-zkvm = { workspace = true, features = ["prove"] }
+risc0-zkvm-methods = { path = "../zkvm/methods" }
+serde_json = { version = "1.0" }
+test-log = { version = "0.2", default-features = false, features = ["trace"] }
+
+[features]
+default = ["std"]
+docker = ["prove"]
+prove = [
+  "dep:bytemuck",
+  "dep:num-traits",
+  "dep:risc0-core",
+  "dep:serde_json",
+  "dep:tempfile",
+  "dep:tracing",
+  "risc0-zkp/prove",
+  "std",
+]
+std = [
+  "anyhow/std",
+  "ark-bn254/std",
+  "ark-groth16/std",
+  "ark-serialize/std",
+  "hex/std",
+  "num-bigint/std",
+  "num-traits?/std",
+  "risc0-zkp/std",
+  "serde/std",
+]

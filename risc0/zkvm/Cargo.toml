@@ -55,9 +55,6 @@ serde = { version = "1.0", default-features = false, features = [
 # Host dependencies
 [target.'cfg(not(target_os = "zkvm"))'.dependencies]
 addr2line = { version = "0.21", features = ["rustc-demangle"], optional = true }
-ark-bn254 = { version = "0.4" }
-ark-groth16 = { version = "0.4", default-features = false }
-ark-serialize = { version = "0.4", default-features = false }
 bincode = { version = "1.3", optional = true }
 bonsai-sdk = { workspace = true, optional = true }
 bytes = { version = "1.4", features = ["serde"], optional = true }
@@ -65,14 +62,15 @@ crypto-bigint = { version = "0.5", default-features = false, features = [
   "rand",
 ], optional = true }
 elf = { version = "0.7", default-features = false, optional = true }
+human-repr = { version = "1.0", optional = true }
 lazy-regex = { version = "3.1", optional = true }
-num-bigint = { version = "0.4", default-features = false }
-num-derive = { version = "0.4" }
+num-derive = "0.4"
 num-traits = { version = "0.2", default-features = false, optional = true }
 prost = { version = "0.12", optional = true }
 rayon = { version = "1.5", optional = true }
 risc0-circuit-recursion = { workspace = true }
 risc0-circuit-rv32im = { workspace = true }
+risc0-groth16 = { workspace = true }
 rustc-demangle = { version = "0.1", optional = true }
 sha2 = { version = "0.10", default-features = false }
 tempfile = { version = "3", optional = true }
@@ -80,10 +78,9 @@ tracing = { version = "0.1", default-features = false, features = [
   "attributes",
 ] }
 typetag = { version = "0.2", optional = true }
-human-repr = "1.0"
 
 [dev-dependencies]
-clap = { version = "4", features = ["derive"] }
+clap = { version = "4.4", features = ["derive"] }
 criterion = { version = "0.5", features = ["html_reports"] }
 lazy_static = "1.4.0"
 rand = "0.8"
@@ -94,7 +91,7 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 flate2 = "1.0"
 risc0-zkvm-methods = { path = "methods" }
 serde_json = "1.0"
-serial_test = "2.0"
+serial_test = "3.0"
 tar = "0.4"
 tempfile = "3"
 test-log = { version = "0.2", default-features = false, features = ["trace"] }
@@ -107,6 +104,7 @@ client = [
   "dep:prost",
   "dep:prost-build",
   "dep:protobuf-src",
+  "dep:tempfile",
   "std",
 ]
 cuda = [
@@ -134,17 +132,14 @@ docker = []
 # The zkVM exposes a getrandom implementation that panics by default. This will
 # expose a getrandom implementation that uses the `sys_random` ecall.
 getrandom = ["risc0-zkvm-platform/getrandom"]
-# note: cfg!(feature = "fault-proof") is used as a temporary measure in addition
-# to it being used to expose functionality to the fault checker.
-fault-proof = []
 prove = [
   "client",
-  "fault-proof",
   "dep:addr2line",
   "dep:bincode",
   "dep:bytes",
   "dep:crypto-bigint",
   "dep:elf",
+  "dep:human-repr",
   "dep:lazy-regex",
   "dep:num-traits",
   "dep:prost",
@@ -161,13 +156,10 @@ prove = [
 ]
 std = [
   "anyhow/std",
-  "ark-bn254/std",
-  "ark-groth16/std",
-  "ark-serialize/std",
   "hex/std",
-  "num-bigint/std",
   "num-traits?/std",
   "risc0-binfmt/std",
+  "risc0-groth16/std",
   "risc0-zkp/std",
   "serde/std",
   "sha2/std",

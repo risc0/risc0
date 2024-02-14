@@ -2244,6 +2244,7 @@ name = "risc0-build"
 version = "0.21.0-alpha.1"
 dependencies = [
  "anyhow",
+ "cargo-platform",
  "cargo_metadata",
  "docker-generate",
  "risc0-binfmt",
@@ -2273,6 +2274,7 @@ dependencies = [
  "bytemuck",
  "cust",
  "downloader",
+ "hex",
  "metal",
  "rand",
  "rayon",
@@ -2327,6 +2329,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "risc0-groth16"
+version = "0.21.0-alpha.1"
+dependencies = [
+ "anyhow",
+ "ark-bn254",
+ "ark-groth16",
+ "ark-serialize",
+ "hex",
+ "num-bigint 0.4.4",
+ "num-derive",
+ "num-traits",
+ "risc0-zkp",
+ "serde",
+]
+
+[[package]]
 name = "risc0-sppark"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2378,9 +2396,6 @@ version = "0.21.0-alpha.1"
 dependencies = [
  "addr2line",
  "anyhow",
- "ark-bn254",
- "ark-groth16",
- "ark-serialize",
  "bincode",
  "bonsai-sdk",
  "bytemuck",
@@ -2392,7 +2407,6 @@ dependencies = [
  "hex",
  "human-repr",
  "lazy-regex",
- "num-bigint 0.4.4",
  "num-derive",
  "num-traits",
  "prost",
@@ -2403,6 +2417,7 @@ dependencies = [
  "risc0-circuit-recursion",
  "risc0-circuit-rv32im",
  "risc0-core",
+ "risc0-groth16",
  "risc0-zkp",
  "risc0-zkvm-platform",
  "rrs-lib",

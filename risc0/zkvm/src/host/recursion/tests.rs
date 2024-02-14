@@ -23,12 +23,12 @@ use serial_test::serial;
 use test_log::test;
 
 use super::{
-    identity_p254, join, lift, prove::poseidon254_hal_pair, prove::poseidon2_hal_pair, resolve,
-    Prover, ProverOpts,
+    identity_p254, join, lift, prove::poseidon254_hal_pair, prove::poseidon2_hal_pair, Prover,
+    ProverOpts as RecursionProverOpts,
 };
 use crate::{
-    get_prover_server, ExecutorEnv, ExecutorImpl, InnerReceipt, Receipt, SegmentReceipt, Session,
-    VerifierContext,
+    get_prover_server, ExecutorEnv, ExecutorImpl, InnerReceipt, ProverOpts, Receipt,
+    SegmentReceipt, Session, VerifierContext,
 };
 
 // Failure on older mac minis in the lab with Intel UHD 630 graphics:
@@ -38,10 +38,10 @@ use crate::{
     test
 )]
 #[serial]
-fn test_recursion() {
-    use risc0_zkp::core::{digest::Digest, hash::poseidon::PoseidonHashSuite};
+fn test_recursion_poseidon254() {
+    use risc0_zkp::core::{digest::Digest, hash::poseidon2::Poseidon2HashSuite};
 
-    let suite = PoseidonHashSuite::new_suite();
+    let suite = Poseidon2HashSuite::new_suite();
     let hal_pair = poseidon254_hal_pair();
     let (hal, circuit_hal) = (hal_pair.hal.as_ref(), hal_pair.circuit_hal.as_ref());
 
@@ -51,7 +51,8 @@ fn test_recursion() {
     let digest2 = Digest::from([8, 9, 10, 11, 12, 13, 14, 15]);
     let expected = suite.hashfn.hash_pair(&digest1, &digest2);
     let mut prover =
-        Prover::new_test_recursion_circuit([&digest1, &digest2], ProverOpts::default()).unwrap();
+        Prover::new_test_recursion_circuit([&digest1, &digest2], RecursionProverOpts::default())
+            .unwrap();
     let receipt = prover
         .run_with_hal(hal, circuit_hal)
         .expect("Running prover failed");
@@ -78,9 +79,9 @@ fn test_recursion() {
 )]
 #[serial]
 fn test_recursion_poseidon2() {
-    use risc0_zkp::core::{digest::Digest, hash::poseidon::PoseidonHashSuite};
+    use risc0_zkp::core::{digest::Digest, hash::poseidon2::Poseidon2HashSuite};
 
-    let suite = PoseidonHashSuite::new_suite();
+    let suite = Poseidon2HashSuite::new_suite();
     let hal_pair = poseidon2_hal_pair();
     let (hal, circuit_hal) = (hal_pair.hal.as_ref(), hal_pair.circuit_hal.as_ref());
 
@@ -90,7 +91,8 @@ fn test_recursion_poseidon2() {
     let digest2 = Digest::from([8, 9, 10, 11, 12, 13, 14, 15]);
     let expected = suite.hashfn.hash_pair(&digest1, &digest2);
     let mut prover =
-        Prover::new_test_recursion_circuit([&digest1, &digest2], ProverOpts::default()).unwrap();
+        Prover::new_test_recursion_circuit([&digest1, &digest2], RecursionProverOpts::default())
+            .unwrap();
 
     tracing::info!("Begin");
     let receipt = prover
@@ -136,10 +138,8 @@ fn generate_busy_loop_segments(hashfn: &str) -> (Session, Vec<SegmentReceipt>) {
     tracing::info!("Executing rv32im");
     let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
     let session = exec.run().unwrap();
-    let segments = session.resolve().unwrap();
-    tracing::info!("Got {} segments", segments.len());
 
-    let opts = crate::ProverOpts {
+    let opts = ProverOpts {
         hashfn: hashfn.to_string(),
         prove_guest_errors: false,
     };
@@ -147,9 +147,11 @@ fn generate_busy_loop_segments(hashfn: &str) -> (Session, Vec<SegmentReceipt>) {
 
     tracing::info!("Proving rv32im");
     let ctx = VerifierContext::default();
-    let segment_receipts = segments
+    let segment_receipts = session
+        .segments
         .iter()
-        .map(|x| prover.prove_segment(&ctx, x).unwrap())
+        .map(|x| x.resolve().unwrap())
+        .map(|x| prover.prove_segment(&ctx, &x).unwrap())
         .collect();
     tracing::info!("Done proving rv32im");
 
@@ -163,7 +165,7 @@ fn generate_busy_loop_segments(hashfn: &str) -> (Session, Vec<SegmentReceipt>) {
 #[serial]
 fn test_recursion_lift_join_identity_e2e() {
     // Prove the base case
-    let (session, segments) = generate_busy_loop_segments("poseidon");
+    let (session, segments) = generate_busy_loop_segments("poseidon2");
 
     // Lift and join them  all (and verify)
     let mut rollup = lift(&segments[0]).unwrap();
@@ -195,14 +197,16 @@ fn test_recursion_lift_join_identity_e2e() {
     rollup_receipt.verify(MULTI_TEST_ID).unwrap();
 }
 
-fn generate_composition_receipt(hashfn: &str) -> Receipt {
-    let opts = crate::ProverOpts {
-        hashfn: hashfn.to_string(),
-        prove_guest_errors: false,
-    };
+#[cfg_attr(
+    not(all(feature = "metal", target_os = "macos", target_arch = "x86_64")),
+    test
+)]
+#[serial]
+fn test_recursion_lift_resolve_e2e() {
+    let opts = ProverOpts::default();
     let prover = get_prover_server(&opts).unwrap();
 
-    tracing::info!("Proving rv32im: echo 'execution A'");
+    tracing::info!("Proving: echo 'execution A'");
     let env = ExecutorEnv::builder()
         .write(&MultiTestSpec::Echo {
             bytes: b"execution A".to_vec(),
@@ -211,9 +215,9 @@ fn generate_composition_receipt(hashfn: &str) -> Receipt {
         .build()
         .unwrap();
     let assumption_receipt_a = prover.prove(env, MULTI_TEST_ELF).unwrap();
-    tracing::info!("Done proving rv32im: echo 'execution A'");
+    tracing::info!("Done proving: echo 'execution A'");
 
-    tracing::info!("Proving rv32im: echo 'execution B'");
+    tracing::info!("Proving: echo 'execution B'");
     let env = ExecutorEnv::builder()
         .write(&MultiTestSpec::Echo {
             bytes: b"execution B".to_vec(),
@@ -222,7 +226,7 @@ fn generate_composition_receipt(hashfn: &str) -> Receipt {
         .build()
         .unwrap();
     let assumption_receipt_b = prover.prove(env, MULTI_TEST_ELF).unwrap();
-    tracing::info!("Done proving rv32im: echo 'execution B'");
+    tracing::info!("Done proving: echo 'execution B'");
 
     let env = ExecutorEnv::builder()
         .add_assumption(assumption_receipt_a.clone())
@@ -235,68 +239,18 @@ fn generate_composition_receipt(hashfn: &str) -> Receipt {
         .build()
         .unwrap();
 
-    tracing::info!("Proving rv32im: sys_verify");
+    tracing::info!("Proving: sys_verify");
     let composition_receipt = prover.prove(env, MULTI_TEST_ELF).unwrap();
-    tracing::info!("Done proving rv32im: sys_verify");
+    tracing::info!("Done proving: sys_verify");
 
-    composition_receipt
-}
-
-#[cfg_attr(
-    not(all(feature = "metal", target_os = "macos", target_arch = "x86_64")),
-    test
-)]
-#[serial]
-fn test_recursion_lift_resolve_e2e() {
-    let receipt = generate_composition_receipt("poseidon");
-    let composition_receipt = receipt.inner.composite().unwrap().clone();
-    assert_eq!(composition_receipt.segments.len(), 1);
-    let conditional_segment_receipt = composition_receipt.segments[0].clone();
-
-    assert_eq!(composition_receipt.assumptions.len(), 2);
-    let lifted_assumptions = composition_receipt
-        .assumptions
-        .iter()
-        .map(|receipt| {
-            let assumption_receipt = receipt.composite().unwrap().clone();
-            assert_eq!(assumption_receipt.segments.len(), 1);
-            assert_eq!(assumption_receipt.assumptions.len(), 0);
-            let assumption_segment_receipt = assumption_receipt.segments[0].clone();
-
-            // Lift the assumption receipt.
-            tracing::info!("Lifting assumption");
-            let lifted_assumption = lift(&assumption_segment_receipt).unwrap();
-            lifted_assumption
-                .verify_integrity_with_context(&VerifierContext::default())
-                .unwrap();
-            tracing::info!("Lift assumption claim = {:?}", lifted_assumption.claim);
-
-            lifted_assumption
-        })
-        .collect::<Vec<_>>();
-
-    tracing::info!("Lifting conditional");
-    let lifted_conditional = lift(&conditional_segment_receipt).unwrap();
-    lifted_conditional
-        .verify_integrity_with_context(&VerifierContext::default())
+    let succinct_receipt = prover
+        .compress(&composition_receipt.inner.composite().unwrap())
         .unwrap();
-    tracing::info!("Lift conditional claim = {:?}", lifted_conditional.claim);
 
-    let resolved =
-        lifted_assumptions
-            .into_iter()
-            .fold(lifted_conditional, |conditional, assumption| {
-                tracing::info!("Resolve");
-                let resolved = resolve(&conditional, &assumption).unwrap();
-                resolved
-                    .verify_integrity_with_context(&VerifierContext::default())
-                    .unwrap();
-                tracing::info!("Resolve claim = {:?}", resolved.claim);
+    let receipt = Receipt::new(
+        InnerReceipt::Succinct(succinct_receipt),
+        composition_receipt.journal.bytes,
+    );
 
-                resolved
-            });
-
-    // Validate the Session rollup + journal data
-    let resolved_receipt = Receipt::new(InnerReceipt::Succinct(resolved), receipt.journal.bytes);
-    resolved_receipt.verify(MULTI_TEST_ID).unwrap();
+    receipt.verify(MULTI_TEST_ID).unwrap();
 }

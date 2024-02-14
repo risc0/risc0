@@ -53,7 +53,7 @@ impl Prover for BonsaiProver {
 
         // Compute the ImageID and upload the ELF binary
         let image_id = compute_image_id(elf)?;
-        let image_id_hex = hex::encode(image_id.clone());
+        let image_id_hex = hex::encode(image_id);
         client.upload_img(&image_id_hex, elf.to_vec())?;
 
         // upload input data
@@ -98,8 +98,8 @@ impl Prover for BonsaiProver {
                     ensure!(
                         receipt.get_claim()?.pre.digest() == image_id,
                         "received unexpected image ID: expected {}, found {}",
-                        hex::encode(&image_id),
-                        hex::encode(&receipt.get_claim()?.pre.digest())
+                        hex::encode(image_id),
+                        hex::encode(receipt.get_claim()?.pre.digest())
                     );
                 } else {
                     receipt.verify_with_context(ctx, image_id)?;
