@@ -394,6 +394,61 @@ impl<'a> ParallelHandler<'a> {
         }
         self
     }
+
+    fn log(&mut self, msg: &str, args: &[BabyBearElem]) {
+        // Don't bother to format it if we're not even logging.
+        if tracing::level_filters::LevelFilter::current()
+            .eq(&tracing::level_filters::LevelFilter::OFF)
+        {
+            return;
+        }
+
+        // "msg" is given to us in C++-style formatting, so interpret it.
+        let re = regex!("%([0-9]*)([xudwe%])");
+        let mut args_left = args;
+        let mut next_arg = || {
+            if args_left.is_empty() {
+                panic!("Log arg mismatch, msg {msg}");
+            }
+            let arg: u32 = args_left[0].into();
+            args_left = &args_left[1..];
+            arg
+        };
+        let formatted = re.replace_all(msg, |captures: &Captures| {
+            let width = captures
+                .get(1)
+                .map_or(0, |x| x.as_str().parse::<usize>().unwrap_or(0));
+            let format = captures.get(2).map_or("", |x| x.as_str());
+            match format {
+                "u" => format!("{:width$}", next_arg()),
+                "x" => format!("{:0width$x}", next_arg()),
+                "d" => format!("{:width$}", next_arg() as i32),
+                "%" => format!("%"),
+                "w" | "e" => {
+                    let nexts = [next_arg(), next_arg(), next_arg(), next_arg()];
+                    if nexts.iter().all(|v| *v <= 255) {
+                        format!(
+                            "0x{:08X}",
+                            nexts[0] | (nexts[1] << 8) | (nexts[2] << 16) | (nexts[3] << 24)
+                        )
+                    } else {
+                        format!(
+                            "0x{:X}, 0x{:X}, 0x{:X}, 0x{:X}",
+                            nexts[0], nexts[1], nexts[2], nexts[3]
+                        )
+                    }
+                }
+                _ => panic!("Unhandled printf format specification '{format}'"),
+            }
+        });
+        assert_eq!(
+            args_left.len(),
+            0,
+            "Args missing formatting: {:?} in {msg}",
+            args_left
+        );
+        tracing::debug!("{}", formatted);
+    }
 }
 
 impl<'a> CircuitStepHandler<BabyBearElem> for ParallelHandler<'a> {
@@ -405,13 +460,13 @@ impl<'a> CircuitStepHandler<BabyBearElem> for ParallelHandler<'a> {
         &mut self,
         cycle: usize,
         name: &str,
-        _extra: &str,
+        extra: &str,
         args: &[BabyBearElem],
         outs: &mut [BabyBearElem],
     ) -> Result<()> {
         match name {
             "log" => {
-                // TODO: Loggin is maybe still useful?
+                self.log(extra, args);
                 Ok(())
             }
             "womWrite" => {

@@ -18,7 +18,7 @@ permissions:
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   RISC0_BUILD_LOCKED: 1
-  RISC0_TOOLCHAIN_VERSION: test-release-2
+  RISC0_TOOLCHAIN_VERSION: v2024-01-31.1
 
 jobs:
   changes:
@@ -38,6 +38,7 @@ jobs:
               - .github/workflows/bonsai.yml
               - bonsai/**
               - risc0/**
+              - rust-toolchain.toml
 
   bonsai:
     if: needs.changes.outputs.bonsai == 'true'
@@ -81,7 +82,7 @@ jobs:
 
       # Test
       - name: run cargo tests in bonsai
-        run: cargo test --locked --tests -- --include-ignored --nocapture
+        run: cargo test --locked -- --include-ignored --nocapture
         working-directory: bonsai
 
       - name: run cargo tests in bonsai/examples/governance

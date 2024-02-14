@@ -4,10 +4,13 @@ RISC Zero's Study Club sessions aim to introduce the pre-requisite concepts nece
 
 ## Upcoming Sessions
 
-**January 24: Hash Functions for ZK** <br/>
-**Wolfgang Welz** <br/>
+**February 14: Proof Composition** <br/>
+**Victor Graf** <br/>
 
-This session provides an introduction to cryptographic hash functions. In this context, we'll take a look at the sponge construction, which is a popular framework for hash function design. While hashes such as SHA-3 are widely used in all areas of cryptography, they are usually not well suited for ZKPs. Therefore, we'll discuss the special requirements of ZK-friendly hash functions and their design, in particular the sponge-based MiMC and Poseidon.
+As of our v0.20 release, the zkVM supports verification of RISC Zero receipts inside the RISC Zero guest through a feature known as composition.
+With this feature, multiple zkVM programs can be composed and produce a single receipt that verifies all computation done to reach the final result.
+
+This session of study club will discuss how to use proof composition, how proof composition works behind the scenes, and what use cases this unlocks.
 
 All sessions are hosted at **9am Pacific / 5PM UTC**. <br/>
 Join the session: [Zoom link] <br/>
@@ -35,6 +38,7 @@ Full recordings and slides from past sessions are available [here](https://www.y
 
 ### Mathematical Primitives
 
+- [Intro to Hash Functions](https://www.youtube.com/watch?v=_MIxjDs70W8&list=PLcPzhUaCxlCjdhONxEYZ1dgKjZh3ZvPtl&index=1)
 - [Intro Finite Fields](https://www.youtube.com/watch?v=g-GDvnJsZgg&list=PLcPzhUaCxlCiddOGuYdDbFlZhH8nwtR8D)
 - [Finite Field Implementations: Algorithms for Fast Multiplication](https://www.youtube.com/watch?v=hUl8ZB6hpUM&list=PLcPzhUaCxlCjdhONxEYZ1dgKjZh3ZvPtl&index=6)
 - [Intro to Number Theoretic Transforms (NTTs)](https://www.youtube.com/watch?v=IFsxQUbI6x0&list=PLcPzhUaCxlChIKDDR_WghPQ1HeK01YHpa)

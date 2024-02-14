@@ -17,7 +17,7 @@ permissions:
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  RISC0_TOOLCHAIN_VERSION: test-release-2
+  RISC0_TOOLCHAIN_VERSION: v2024-01-31.1
 
 jobs:
   changes:
@@ -43,6 +43,7 @@ jobs:
               - .github/actions/**
               - .github/workflows/main.yml
               - Cargo.toml
+              - rust-toolchain.toml
             check-benchmarks:
               - *base
               - benchmarks/**
@@ -108,10 +109,15 @@ jobs:
           fetch-depth: 0
       - uses: ./.github/actions/rustup
       - name: Install cargo-sort
-        uses: risc0/cargo-install@2cfb0024938d23011106cbf127b393bc83fddba1
+        uses: risc0/cargo-install@b9307573043522ab0d3e3be64a51763b765b52a4
         with:
           crate: cargo-sort
           version: "1.0"
+      - name: Install cargo-rdme
+        uses: risc0/cargo-install@b9307573043522ab0d3e3be64a51763b765b52a4
+        with:
+          crate: cargo-rdme
+          version: "1.4.2"
       - uses: actions/setup-node@v3
         with:
           node-version: 18
@@ -128,6 +134,10 @@ jobs:
       - run: cargo sort --workspace --check bonsai/examples/governance
       - run: cargo sort --workspace --check examples
       - run: cargo sort --workspace --check tools/crates-validator
+      - run: cargo rdme -c
+        working-directory: bonsai/sdk
+      - run: cargo rdme -c
+        working-directory: risc0/zkvm
       - uses: actions/setup-python@v4
         with:
           python-version: "3.10"
@@ -147,6 +157,9 @@ jobs:
           - os: Linux
             feature: cuda
             device: nvidia_rtx_a5000
+          - os: macOS
+            feature: metal
+            device: apple_m2_pro
     env:
       FEATURE: ${{ matrix.feature }}
       RISC0_BUILD_LOCKED: 1
@@ -219,6 +232,9 @@ jobs:
           - os: Linux
             feature: cuda
             device: nvidia_rtx_a5000
+          - os: macOS
+            feature: metal
+            device: apple_m2_pro
     env:
       FEATURE: ${{ matrix.feature }}
       RISC0_BUILD_LOCKED: 1
