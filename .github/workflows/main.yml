@@ -260,7 +260,7 @@ jobs:
       - name: test
         run: cargo test --locked -F $FEATURE
         working-directory: examples
-      - run: cargo run --locked -F $FEATURE
+      - run: RISC0_DEV_MODE=1 cargo run --locked -F $FEATURE
         env:
           RISC0_PPROF_OUT: ${{ github.workspace }}/fibonacci.pb
         working-directory: examples/profiling
