@@ -50,7 +50,6 @@ impl Risc0Metadata {
 }
 
 /// Represents an item in the generated list of compiled guest binaries
-#[cfg(feature = "guest-list")]
 #[derive(Debug, Clone)]
 pub struct GuestListEntry<'a> {
     /// The name of the guest binary
@@ -110,7 +109,6 @@ pub const {upper}_PATH: &str = r#"{elf_path}"#;
         )
     }
 
-    #[cfg(feature = "guest-list")]
     fn guest_list_entry(&self) -> String {
         let upper = self.name.to_uppercase().replace('-', "_");
         format!(
@@ -534,9 +532,7 @@ pub fn embed_methods_with_options(
     let methods_path = out_dir.join("methods.rs");
     let mut methods_file = File::create(&methods_path).unwrap();
 
-    #[cfg(feature = "guest-list")]
     let mut guest_list_entries = Vec::new();
-    #[cfg(feature = "guest-list")]
     methods_file
         .write_all(b"use risc0_build::GuestListEntry;\n")
         .unwrap();
@@ -572,12 +568,10 @@ pub fn embed_methods_with_options(
                 .write_all(method.rust_def().as_bytes())
                 .unwrap();
 
-            #[cfg(feature = "guest-list")]
             guest_list_entries.push(method.guest_list_entry());
             out_methods.push(method);
         }
     }
-    #[cfg(feature = "guest-list")]
     methods_file
         .write_all(
             format!(
