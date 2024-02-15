@@ -43,6 +43,7 @@ jobs:
               - .github/actions/**
               - .github/workflows/main.yml
               - Cargo.toml
+              - rust-toolchain.toml
             check-benchmarks:
               - *base
               - benchmarks/**
@@ -116,7 +117,7 @@ jobs:
         uses: risc0/cargo-install@b9307573043522ab0d3e3be64a51763b765b52a4
         with:
           crate: cargo-rdme
-          version: "0.7.2"
+          version: "1.4.2"
       - uses: actions/setup-node@v3
         with:
           node-version: 18
