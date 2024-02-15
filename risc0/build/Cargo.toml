@@ -22,3 +22,4 @@ tempfile = "3"
 
 [features]
 docker = []
+guest-list = []
