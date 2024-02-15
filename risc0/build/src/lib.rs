@@ -50,7 +50,6 @@ impl Risc0Metadata {
 }
 
 /// Represents an item in the generated list of compiled guest binaries
-#[cfg(feature = "guest-list")]
 #[derive(Debug, Clone)]
 pub struct GuestListEntry<'a> {
     /// The name of the guest binary
@@ -534,6 +533,10 @@ pub fn embed_methods_with_options(
     let methods_path = out_dir.join("methods.rs");
     let mut methods_file = File::create(&methods_path).unwrap();
 
+    // NOTE: Codegen of the guest list is gated behind the "guest-list" feature flag,
+    // although the data structure are not, because when the `GuestListEntry` type
+    // is referenced in the generated code, this requires `risc0-build` be declared
+    // as a dependency of the methods crate.
     #[cfg(feature = "guest-list")]
     let mut guest_list_entries = Vec::new();
     #[cfg(feature = "guest-list")]
