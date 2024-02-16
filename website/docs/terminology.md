@@ -190,7 +190,7 @@ The recursion circuit is used to aggregate and compose [proofs].
 
 The [recursion circuit] is capable of efficiently evaluating polynomial constraints, and was specifically designed to verify STARK proofs. Programs written for this circuit are loaded into the [control columns]. Each recursion program is identified by a [Control ID].
 
-For a list of all supported recursion programs, see the documentation for the zkVM API Client.
+For a list of all supported recursion programs, see the documentation for the [zkVM API Client].
 
 ### RISC-V
 
@@ -312,3 +312,4 @@ RISC Zero's zkVM implements the RISC-V instruction set architecture and uses a [
 [verifying]: #verify
 [verifies]: #verify
 [zkVM]: #zero-knowledge-virtual-machine-zkvm
+[zkVM API Client]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.ApiClient.html#
