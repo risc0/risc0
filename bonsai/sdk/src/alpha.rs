@@ -85,6 +85,15 @@ pub mod responses {
         pub assumptions: Vec<String>,
     }
 
+    /// Session statistics metadata file
+    #[derive(Serialize, Deserialize)]
+    pub struct SessionStats {
+        /// Count of segments in this proof request
+        pub segments: usize,
+        /// User cycles run within guest, slightly below total overhead cycles
+        pub cycles: usize,
+    }
+
     /// Session Status response
     #[derive(Deserialize, Serialize)]
     pub struct SessionStatusRes {
@@ -116,6 +125,16 @@ pub mod responses {
         /// * `Finalize`
         /// * `InProgress`
         pub state: Option<String>,
+        /// Elapsed Time
+        ///
+        /// Elapsed time for a given session, in seconds
+        pub elapsed_time: Option<u64>,
+        /// Successful Session Stats
+        ///
+        /// Stats for a given successful session. Returns:
+        /// - Count of segments in this proof request
+        /// - User cycles run within guest, slightly below total overhead cycles
+        pub stats: Option<SessionStats>,
     }
 
     /// Snark proof request object
