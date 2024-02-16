@@ -814,6 +814,8 @@ mod tests {
             receipt_url: None,
             error_msg: None,
             state: None,
+            elapsed_time: None,
+            stats: None,
         };
 
         let create_mock = server.mock(|when, then| {
