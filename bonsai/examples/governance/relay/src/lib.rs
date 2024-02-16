@@ -123,10 +123,10 @@ pub fn prove_alpha(elf: &[u8], input: Vec<u8>) -> Result<Output> {
     Ok(Output::Bonsai { snark_receipt })
 }
 
-pub fn resolve_guest_entry<'a>(
-    guest_list: &[GuestListEntry<'a>],
+pub fn resolve_guest_entry(
+    guest_list: &[GuestListEntry],
     guest_binary: &String,
-) -> Result<GuestListEntry<'a>> {
+) -> Result<GuestListEntry> {
     // Search list for requested binary name
     let potential_guest_image_id: [u8; 32] =
         match hex::decode(guest_binary.to_lowercase().trim_start_matches("0x")) {
@@ -155,16 +155,17 @@ pub fn resolve_guest_entry<'a>(
 
 pub async fn resolve_image_output(
     input: &str,
-    guest_entry: &GuestListEntry<'static>,
+    guest_entry: &GuestListEntry,
     dev_mode: bool,
 ) -> Result<Output> {
     let input = hex::decode(input.trim_start_matches("0x")).context("Failed to decode input")?;
-    let elf = guest_entry.elf;
+    // NOTE: If elf is a static ref, this will not clone the underlying data.
+    let elf = guest_entry.elf.clone();
 
     if dev_mode {
-        execute_locally(elf, input)
+        execute_locally(&elf, input)
     } else {
-        tokio::task::spawn_blocking(move || prove_alpha(elf, input))
+        tokio::task::spawn_blocking(move || prove_alpha(&elf, input))
             .await
             .context("Failed to run alpha sub-task")?
     }
