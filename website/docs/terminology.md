@@ -260,6 +260,7 @@ RISC Zero's zkVM implements the RISC-V instruction set architecture and uses a [
 [continuations]: #continuations
 [Continuations study club]: https://www.youtube.com/watch?v=v4HIwaqmIxk&list=PLcPzhUaCxlCirUkJY0ltpjdtzWcz5U_6y&index=1
 [Continuations blog]: https://www.risczero.com/news/continuations
+[control columns]: #control-columns
 [control ID]: #control-id
 [control root]: #control-root
 [deterministic-builds]: #deterministic-builds
@@ -292,7 +293,9 @@ RISC Zero's zkVM implements the RISC-V instruction set architecture and uses a [
 [receipt claim]: #receipt-claim
 [recursion]: #recursion
 [Recursion Circuit]: #recursion-circuit
+[recursion program]: #recursion-program
 [RISC-V]: #risc-v
+[RISC-V Circuit]: #risc-v-circuit
 [RISC Zero's ZKP Whitepaper]: https://risczero.com/proof-system-in-detail.pdf
 [Rust crate for zkVM guest]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest
 [seal]: #seal
@@ -301,6 +304,7 @@ RISC Zero's zkVM implements the RISC-V instruction set architecture and uses a [
 [session]: #session
 [Sequence Diagram for RISC Zero's STARK]: ./proof-system/proof-system-sequence-diagram.md
 [STARK]: #stark
+[STARK by Hand]: ./proof-system/stark-by-hand.md
 [zk-stark]: #stark
 [proof]: #validity-proof
 [proofs]: #validity-proof
