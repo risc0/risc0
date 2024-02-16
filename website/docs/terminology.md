@@ -58,8 +58,8 @@ See also: [Continuations study club], [Continuations blog]
 The control ID is the Merkle hash of the contents of the [control columns], which are assumed to be known to the verifier as part of the circuit definition.
 
 The control ID is the first entry in the [seal] and plays a key role in defining the operations of the circuit. Verifying a [receipt] involves:
-Checking the control ID on the receipt against the control ID for the expected version of the zkVM.
-Verifying the validity of the Merkle branches for various entries of the Control columns.
+- Checking the control ID on the receipt against the control ID for the expected version of the zkVM.
+- Verifying the validity of the Merkle branches for various entries of the Control columns.
 
 For a closer look at how the control columns are used to manage constraint enforcement, check out our [STARK by Hand] explainer.
 
