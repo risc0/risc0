@@ -58,8 +58,9 @@ See also: [Continuations study club], [Continuations blog]
 The control ID is the Merkle hash of the contents of the [control columns], which are assumed to be known to the verifier as part of the circuit definition.
 
 The control ID is the first entry in the [seal] and plays a key role in defining the operations of the circuit. Verifying a [receipt] involves:
-Checking the control ID on the receipt against the control ID for the expected version of the zkVM.
-Verifying the validity of the Merkle branches for various entries of the Control columns.
+
+- Checking the control ID on the receipt against the control ID for the expected version of the zkVM.
+- Verifying the validity of the Merkle branches for various entries of the Control columns.
 
 For a closer look at how the control columns are used to manage constraint enforcement, check out our [STARK by Hand] explainer.
 
@@ -190,7 +191,7 @@ The recursion circuit is used to aggregate and compose [proofs].
 
 The [recursion circuit] is capable of efficiently evaluating polynomial constraints, and was specifically designed to verify STARK proofs. Programs written for this circuit are loaded into the [control columns]. Each recursion program is identified by a [Control ID].
 
-For a list of all supported recursion programs, see the documentation for the zkVM API Client.
+For a list of all supported recursion programs, see the documentation for the [zkVM API Client].
 
 ### RISC-V
 
@@ -260,6 +261,7 @@ RISC Zero's zkVM implements the RISC-V instruction set architecture and uses a [
 [continuations]: #continuations
 [Continuations study club]: https://www.youtube.com/watch?v=v4HIwaqmIxk&list=PLcPzhUaCxlCirUkJY0ltpjdtzWcz5U_6y&index=1
 [Continuations blog]: https://www.risczero.com/news/continuations
+[control columns]: #control-columns
 [control ID]: #control-id
 [control root]: #control-root
 [deterministic-builds]: #deterministic-builds
@@ -292,7 +294,9 @@ RISC Zero's zkVM implements the RISC-V instruction set architecture and uses a [
 [receipt claim]: #receipt-claim
 [recursion]: #recursion
 [Recursion Circuit]: #recursion-circuit
+[recursion program]: #recursion-program
 [RISC-V]: #risc-v
+[RISC-V Circuit]: #risc-v-circuit
 [RISC Zero's ZKP Whitepaper]: https://risczero.com/proof-system-in-detail.pdf
 [Rust crate for zkVM guest]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest
 [seal]: #seal
@@ -301,6 +305,7 @@ RISC Zero's zkVM implements the RISC-V instruction set architecture and uses a [
 [session]: #session
 [Sequence Diagram for RISC Zero's STARK]: ./proof-system/proof-system-sequence-diagram.md
 [STARK]: #stark
+[STARK by Hand]: ./proof-system/stark-by-hand.md
 [zk-stark]: #stark
 [proof]: #validity-proof
 [proofs]: #validity-proof
@@ -308,3 +313,4 @@ RISC Zero's zkVM implements the RISC-V instruction set architecture and uses a [
 [verifying]: #verify
 [verifies]: #verify
 [zkVM]: #zero-knowledge-virtual-machine-zkvm
+[zkVM API Client]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.ApiClient.html#
