@@ -97,6 +97,15 @@ install_cargo_risczero() {
     fi
 }
 
+install_risczero() {
+    if ! command -v risczero &> /dev/null; then
+        execute_with_feedback "cargo risczero install" "Installing the riscv32im-risc0-zkvm-elf toolchain"
+    else
+        [ "$VERBOSE_MODE" -eq 1 ] && echo "cargo-risczero is already installed."
+    fi
+
+}
+
 
 main() {
     print_banner
@@ -104,6 +113,8 @@ main() {
     install_rust
     install_cargo_binstall
     install_cargo_risczero
+    install_risczero
+    echo "Installation complete. Run cargo risczero --help to get started."
 }
 
 main "$@"
