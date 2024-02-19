@@ -46,5 +46,5 @@ if [[ ":$PATH:" != *":${RISC0_BIN_DIR}:"* ]]; then
     echo >> $PROFILE && echo "export PATH=\"\$PATH:$RISC0_BIN_DIR\"" >> $PROFILE
 fi
 
-echo && echo "Detected your preferred shell is ${PREF_SHELL} and added foundryup to PATH. Run 'source ${PROFILE}' or start a new terminal session to use risc0up."
+echo && echo "Detected your preferred shell is ${PREF_SHELL} and added risc0up to PATH. Run 'source ${PROFILE}' or start a new terminal session to use risc0up."
 echo "Then, simply run 'risc0up' to install the zkVM."
