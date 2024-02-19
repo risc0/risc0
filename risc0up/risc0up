@@ -6,13 +6,16 @@ VERBOSE_MODE=0
 
 print_banner() {
   printf '
-ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
-   __   ____ __  ___    ___
-  | _ \/_ _/ __|/ __|  /   \            A general purpose
-  |   / | |\__ \ (__  | (/) |             zero-knowledge
-  |_|\_\___|___/\___|  \___/            virtual - machine
+===============================================================
 
-ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+     ██████  █▀▀▀██
+     ██████  █ ▄▀ █             General purpose
+     ██████  ██▄▄▄█             Zero-Knowledge
+     ██████                     Virtual Machine.
+     ██████   RISC
+     ██████   ZERO
+
+===============================================================
 
 Contribute      : https://github.com/risc0/
 Documentation   : https://dev.risczero.com/
@@ -87,14 +90,8 @@ install_cargo_binstall() {
     execute_with_feedback "cargo install cargo-binstall --quiet" "Installing cargo-binstall"
 }
 
-install_cargo_risczero() {
-    if [[ -n $RISCZERO_SOURCE_PATH ]]; then
-        execute_with_feedback "cargo install --path \"$RISCZERO_SOURCE_PATH\"" "Installing cargo-risczero from local source"
-    elif [[ -n $RISCZERO_VERSION ]]; then
-        execute_with_feedback "cargo risczero install \"$RISCZERO_VERSION\"" "Installing specified version of cargo-risczero"
-    else
-        execute_with_feedback "cargo risczero install" "Installing the latest version of cargo-risczero"
-    fi
+binstall_cargo_risczero() {
+        execute_with_feedback "cargo binstall cargo-risczero" "Installing the latest version of cargo-risczero"
 }
 
 install_risczero() {
@@ -106,13 +103,12 @@ install_risczero() {
 
 }
 
-
 main() {
     print_banner
     parse_args "$@"
     install_rust
     install_cargo_binstall
-    install_cargo_risczero
+    binstall_cargo_risczero
     install_risczero
     echo "Installation complete. Run cargo risczero --help to get started."
 }
