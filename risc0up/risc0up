@@ -91,7 +91,7 @@ install_cargo_binstall() {
 }
 
 binstall_cargo_risczero() {
-        execute_with_feedback "cargo binstall cargo-risczero" "Installing the latest version of cargo-risczero"
+        execute_with_feedback "cargo binstall cargo-risczero --no-confirm" "Installing the latest version of cargo-risczero"
 }
 
 install_risczero() {
