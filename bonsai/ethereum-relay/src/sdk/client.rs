@@ -97,10 +97,10 @@ impl Client {
     }
 
     /// Construct a [Client] from url + api key strings
-    pub fn from_parts(api_url: String, api_key: String) -> Result<Self, ClientError> {
+    pub fn from_parts(api_url: String, api_key: &str) -> Result<Self, ClientError> {
         let mut headers = header::HeaderMap::new();
         let mut auth_value =
-            header::HeaderValue::from_str(&api_key).context("invalid API key value")?;
+            header::HeaderValue::from_str(api_key).context("invalid API key value")?;
         auth_value.set_sensitive(true);
         headers.insert(API_KEY_HEADER, auth_value);
 

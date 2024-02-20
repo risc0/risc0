@@ -29,8 +29,8 @@ async fn main() {
     let args = Args::parse();
     // initialize a relay client
     let relay_client = Client::from_parts(
-        "http://localhost:8080".to_string(), // here goes the actual url of the Bonsai Relay
-        "BONSAI_API_KEY".to_string(),        // here goes the actual Bonsai API-Key
+        "http://localhost:8080", // here goes the actual url of the Bonsai Relay
+        "BONSAI_API_KEY",        // here goes the actual Bonsai API-Key
     )
     .expect("Failed to initialize the relay client");
 

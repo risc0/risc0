@@ -320,7 +320,7 @@ async fn e2e_test_counter_publish_mode() {
     };
 
     let relay_client =
-        Client::from_parts("http://localhost:8080".to_string(), get_api_key()).unwrap();
+        Client::from_parts("http://localhost:8080".to_string(), &get_api_key()).unwrap();
 
     let session_id = relay_client
         .callback_request(request)

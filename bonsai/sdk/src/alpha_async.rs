@@ -33,7 +33,7 @@ pub async fn get_client_from_parts(
     api_key: String,
     risc0_version: &'static str,
 ) -> Result<Client, SdkErr> {
-    tokio::task::spawn_blocking(move || Client::from_parts(url, api_key, risc0_version))
+    tokio::task::spawn_blocking(move || Client::from_parts(&url, &api_key, risc0_version))
         .await
         .map_err(|err| SdkErr::InternalServerErr(format!("{err}")))?
 }

@@ -327,14 +327,14 @@ impl Client {
     ///
     /// ```
     /// use bonsai_sdk::alpha as bonsai_sdk;
-    /// let url = "http://api.bonsai.xyz".to_string();
-    /// let api_key = "my_secret_key".to_string();
+    /// let url = "http://api.bonsai.xyz";
+    /// let api_key = "my_secret_key";
     /// bonsai_sdk::Client::from_parts(url, api_key, risc0_zkvm::VERSION)
     ///     .expect("Failed to construct sdk client");
     /// ```
-    pub fn from_parts(url: String, key: String, risc0_version: &str) -> Result<Self, SdkErr> {
-        let client = construct_req_client(&key, risc0_version)?;
-        let url = url.strip_suffix('/').unwrap_or(&url).to_string();
+    pub fn from_parts(url: &str, key: &str, risc0_version: &str) -> Result<Self, SdkErr> {
+        let client = construct_req_client(key, risc0_version)?;
+        let url = url.strip_suffix('/').unwrap_or(url).to_string();
         Ok(Self { url, client })
     }
 
@@ -628,7 +628,7 @@ mod tests {
         });
 
         let server_url = format!("http://{}", server.address());
-        let client = super::Client::from_parts(server_url, TEST_KEY.to_string(), TEST_VERSION)
+        let client = super::Client::from_parts(&server_url, TEST_KEY, TEST_VERSION)
             .expect("Failed to construct client");
         let exists = client
             .upload_img(TEST_ID, data)
@@ -661,7 +661,7 @@ mod tests {
         });
 
         let server_url = format!("http://{}", server.address());
-        let client = super::Client::from_parts(server_url, TEST_KEY.to_string(), TEST_VERSION)
+        let client = super::Client::from_parts(&server_url, TEST_KEY, TEST_VERSION)
             .expect("Failed to construct client");
         let exists = client.upload_img(TEST_ID, data).unwrap();
         assert!(exists);
@@ -696,7 +696,7 @@ mod tests {
         });
 
         let server_url = format!("http://{}", server.address());
-        let client = super::Client::from_parts(server_url, TEST_KEY.to_string(), TEST_VERSION)
+        let client = super::Client::from_parts(&server_url, TEST_KEY, TEST_VERSION)
             .expect("Failed to construct client");
         let res = client.upload_input(data).expect("Failed to upload input");
 
@@ -735,7 +735,7 @@ mod tests {
         });
 
         let server_url = format!("http://{}", server.address());
-        let client = super::Client::from_parts(server_url, TEST_KEY.to_string(), TEST_VERSION)
+        let client = super::Client::from_parts(&server_url, TEST_KEY, TEST_VERSION)
             .expect("Failed to construct client");
         let res = client
             .upload_receipt(data)
@@ -773,8 +773,7 @@ mod tests {
         });
 
         let server_url = format!("http://{}", server.address());
-        let client =
-            super::Client::from_parts(server_url, TEST_KEY.to_string(), TEST_VERSION).unwrap();
+        let client = super::Client::from_parts(&server_url, TEST_KEY, TEST_VERSION).unwrap();
 
         let res = client
             .create_session(request.img, request.input, request.assumptions)
@@ -808,8 +807,7 @@ mod tests {
         });
 
         let server_url = format!("http://{}", server.address());
-        let client =
-            super::Client::from_parts(server_url, TEST_KEY.to_string(), TEST_VERSION).unwrap();
+        let client = super::Client::from_parts(&server_url, TEST_KEY, TEST_VERSION).unwrap();
 
         let status = session_id.status(&client).unwrap();
         assert_eq!(status.status, response.status);
@@ -837,8 +835,7 @@ mod tests {
         });
 
         let server_url = format!("http://{}", server.address());
-        let client =
-            super::Client::from_parts(server_url, TEST_KEY.to_string(), TEST_VERSION).unwrap();
+        let client = super::Client::from_parts(&server_url, TEST_KEY, TEST_VERSION).unwrap();
 
         let logs = session_id.logs(&client).unwrap();
 
@@ -871,8 +868,7 @@ mod tests {
         });
 
         let server_url = format!("http://{}", server.address());
-        let client =
-            super::Client::from_parts(server_url, TEST_KEY.to_string(), TEST_VERSION).unwrap();
+        let client = super::Client::from_parts(&server_url, TEST_KEY, TEST_VERSION).unwrap();
 
         let res = client.create_snark(request.session_id).unwrap();
         assert_eq!(res.uuid, response.uuid);
@@ -903,8 +899,7 @@ mod tests {
         });
 
         let server_url = format!("http://{}", server.address());
-        let client =
-            super::Client::from_parts(server_url, TEST_KEY.to_string(), TEST_VERSION).unwrap();
+        let client = super::Client::from_parts(&server_url, TEST_KEY, TEST_VERSION).unwrap();
 
         let status = snark_id.status(&client).unwrap();
         assert_eq!(status.status, response.status);
@@ -932,7 +927,7 @@ mod tests {
         });
 
         let server_url = format!("http://{}", server.address());
-        let client = super::Client::from_parts(server_url, TEST_KEY.to_string(), TEST_VERSION)
+        let client = super::Client::from_parts(&server_url, TEST_KEY, TEST_VERSION)
             .expect("Failed to construct client");
         let info = client.version().expect("Failed to fetch version route");
         assert_eq!(&info.risc0_zkvm[0], TEST_VERSION);
@@ -962,7 +957,7 @@ mod tests {
         });
 
         let server_url = format!("http://{}", server.address());
-        let client = super::Client::from_parts(server_url, TEST_KEY.to_string(), TEST_VERSION)
+        let client = super::Client::from_parts(&server_url, TEST_KEY, TEST_VERSION)
             .expect("Failed to construct client");
         let quota = client.quotas().expect("Failed to fetch version route");
         assert_eq!(quota.concurrent_proofs, response.concurrent_proofs);
