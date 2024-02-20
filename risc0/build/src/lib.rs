@@ -19,6 +19,7 @@
 mod docker;
 
 use std::{
+    borrow::Cow,
     collections::HashMap,
     default::Default,
     env,
@@ -28,12 +29,14 @@ use std::{
     process::{Command, Stdio},
 };
 
+use anyhow::{Context, Result};
 use cargo_metadata::{Message, MetadataCommand, Package};
-pub use docker::docker_build;
 use risc0_binfmt::compute_image_id;
-use risc0_zkp::core::digest::{Digest, DIGEST_WORDS};
+use risc0_zkp::core::digest::DIGEST_WORDS;
 use risc0_zkvm_platform::memory;
 use serde::Deserialize;
+
+pub use docker::docker_build;
 
 const RUSTUP_TOOLCHAIN_NAME: &str = "risc0";
 
@@ -50,53 +53,45 @@ impl Risc0Metadata {
 }
 
 /// Represents an item in the generated list of compiled guest binaries
-#[cfg(feature = "guest-list")]
 #[derive(Debug, Clone)]
-pub struct GuestListEntry<'a> {
+pub struct GuestListEntry {
     /// The name of the guest binary
-    pub name: &'a str,
+    pub name: Cow<'static, str>,
     /// The compiled ELF guest binary
-    pub elf: &'a [u8],
+    pub elf: Cow<'static, [u8]>,
     /// The image id of the guest
     pub image_id: [u32; DIGEST_WORDS],
     /// The path to the ELF binary
-    pub path: &'a str,
+    pub path: Cow<'static, str>,
 }
 
-#[derive(Debug)]
-struct Risc0Method {
-    name: String,
-    elf_path: PathBuf,
-}
+impl GuestListEntry {
+    /// Builds the [GuestListEntry] by reading the ELF from disk, and calculating the associated
+    /// image ID.
+    fn build(name: &str, elf_path: &str) -> Result<Self> {
+        let elf = std::fs::read(elf_path)?;
+        let image_id = compute_image_id(&elf)?;
 
-impl Risc0Method {
-    fn make_image_id(&self) -> Digest {
-        if !self.elf_path.exists() {
-            eprintln!(
-                "RISC-V method was not found at: {:?}",
-                self.elf_path.to_str().unwrap()
-            );
-            std::process::exit(-1);
-        }
-
-        let elf = fs::read(&self.elf_path).unwrap();
-
-        compute_image_id(&elf).unwrap()
+        Ok(Self {
+            name: Cow::Owned(name.to_owned()),
+            elf: Cow::Owned(elf),
+            image_id: image_id.into(),
+            path: Cow::Owned(elf_path.to_owned()),
+        })
     }
 
-    fn rust_def(&self) -> String {
-        let elf_path = self.elf_path.display();
-
+    fn codegen_consts(&self) -> String {
         // Quick check for '#' to avoid injection of arbitrary Rust code into the the
         // method.rs file. This would not be a serious issue since it would only
         // affect the user that set the path, but it's good to add a check.
-        if elf_path.to_string().contains('#') {
-            panic!("method path cannot include #: {}", elf_path);
+        if self.path.contains('#') {
+            panic!("method path cannot include #: {}", self.path);
         }
 
         let upper = self.name.to_uppercase().replace('-', "_");
-        let image_id: [u32; DIGEST_WORDS] = self.make_image_id().into();
-        let elf_contents = std::fs::read(&self.elf_path).unwrap();
+        let image_id: [u32; DIGEST_WORDS] = self.image_id;
+        let elf_path: &str = &self.path;
+        let elf_contents: &[u8] = &self.elf;
         format!(
             r##"
 pub const {upper}_ELF: &[u8] = &{elf_contents:?};
@@ -107,15 +102,15 @@ pub const {upper}_PATH: &str = r#"{elf_path}"#;
     }
 
     #[cfg(feature = "guest-list")]
-    fn guest_list_entry(&self) -> String {
+    fn codegen_list_entry(&self) -> String {
         let upper = self.name.to_uppercase().replace('-', "_");
         format!(
             r##"
     GuestListEntry {{
-        name: "{upper}",
-        elf: {upper}_ELF,
+        name: std::borrow::Cow::Borrowed("{upper}"),
+        elf: std::borrow::Cow::Borrowed({upper}_ELF),
         image_id: {upper}_ID,
-        path: {upper}_PATH,
+        path: std::borrow::Cow::Borrowed({upper}_PATH),
     }}"##
         )
     }
@@ -188,39 +183,51 @@ fn is_debug() -> bool {
     get_env_var("RISC0_BUILD_DEBUG") == "1"
 }
 
-/// Returns all methods associated with the given riscv guest package.
-fn guest_methods(pkg: &Package, target_dir: impl AsRef<Path>) -> Vec<Risc0Method> {
+/// Returns all methods associated with the given guest crate.
+fn guest_methods(pkg: &Package, target_dir: impl AsRef<Path>) -> Vec<GuestListEntry> {
     let profile = if is_debug() { "debug" } else { "release" };
     pkg.targets
         .iter()
         .filter(|target| target.kind.iter().any(|kind| kind == "bin"))
-        .map(|target| Risc0Method {
-            name: target.name.clone(),
-            elf_path: target_dir
-                .as_ref()
-                .join("riscv32im-risc0-zkvm-elf")
-                .join(profile)
-                .join(&target.name),
+        .map(|target| {
+            GuestListEntry::build(
+                &target.name,
+                target_dir
+                    .as_ref()
+                    .join("riscv32im-risc0-zkvm-elf")
+                    .join(profile)
+                    .join(&target.name)
+                    .to_str()
+                    .context("elf path contains invalid unicode")
+                    .unwrap(),
+            )
+            .unwrap()
         })
         .collect()
 }
 
-/// Returns all methods associated with the given riscv guest package.
-fn guest_methods_docker<P>(pkg: &Package, target_dir: P) -> Vec<Risc0Method>
+/// Returns all methods associated with the given guest crate.
+fn guest_methods_docker<P>(pkg: &Package, target_dir: P) -> Vec<GuestListEntry>
 where
     P: AsRef<Path>,
 {
     pkg.targets
         .iter()
         .filter(|target| target.kind.iter().any(|kind| kind == "bin"))
-        .map(|target| Risc0Method {
-            name: target.name.clone(),
-            elf_path: target_dir
-                .as_ref()
-                .join("riscv32im-risc0-zkvm-elf")
-                .join("docker")
-                .join(pkg.name.replace('-', "_"))
-                .join(&target.name),
+        .map(|target| {
+            GuestListEntry::build(
+                &target.name,
+                target_dir
+                    .as_ref()
+                    .join("riscv32im-risc0-zkvm-elf")
+                    .join("docker")
+                    .join(pkg.name.replace('-', "_"))
+                    .join(&target.name)
+                    .to_str()
+                    .context("elf path contains invalid unicode")
+                    .unwrap(),
+            )
+            .unwrap()
         })
         .collect()
 }
@@ -515,11 +522,12 @@ fn get_guest_dir() -> PathBuf {
 /// Embeds methods built for RISC-V for use by host-side dependencies.
 /// Specify custom options for a guest package by defining its [GuestOptions].
 /// See [embed_methods].
-pub fn embed_methods_with_options(mut guest_pkg_to_options: HashMap<&str, GuestOptions>) {
+pub fn embed_methods_with_options(
+    mut guest_pkg_to_options: HashMap<&str, GuestOptions>,
+) -> Vec<GuestListEntry> {
     if !get_env_var("RISC0_SKIP_BUILD").is_empty() {
-        return;
+        return Vec::new();
     }
-
     let out_dir_env = env::var_os("OUT_DIR").unwrap();
     let out_dir = Path::new(&out_dir_env); // $ROOT/target/$profile/build/$crate/out
     let guest_dir = get_guest_dir();
@@ -529,8 +537,12 @@ pub fn embed_methods_with_options(mut guest_pkg_to_options: HashMap<&str, GuestO
     let methods_path = out_dir.join("methods.rs");
     let mut methods_file = File::create(&methods_path).unwrap();
 
+    // NOTE: Codegen of the guest list is gated behind the "guest-list" feature flag,
+    // although the data structure are not, because when the `GuestListEntry` type
+    // is referenced in the generated code, this requires `risc0-build` be declared
+    // as a dependency of the methods crate.
     #[cfg(feature = "guest-list")]
-    let mut guest_list_entries = Vec::new();
+    let mut guest_list_codegen = Vec::new();
     #[cfg(feature = "guest-list")]
     methods_file
         .write_all(b"use risc0_build::GuestListEntry;\n")
@@ -538,6 +550,7 @@ pub fn embed_methods_with_options(mut guest_pkg_to_options: HashMap<&str, GuestO
 
     detect_toolchain(RUSTUP_TOOLCHAIN_NAME);
 
+    let mut guest_list = vec![];
     for guest_pkg in guest_packages {
         println!("Building guest package {}.{}", pkg.name, guest_pkg.name);
 
@@ -563,19 +576,21 @@ pub fn embed_methods_with_options(mut guest_pkg_to_options: HashMap<&str, GuestO
 
         for method in methods {
             methods_file
-                .write_all(method.rust_def().as_bytes())
+                .write_all(method.codegen_consts().as_bytes())
                 .unwrap();
 
             #[cfg(feature = "guest-list")]
-            guest_list_entries.push(method.guest_list_entry());
+            guest_list_codegen.push(method.codegen_list_entry());
+            guest_list.push(method);
         }
     }
+
     #[cfg(feature = "guest-list")]
     methods_file
         .write_all(
             format!(
                 "\npub const GUEST_LIST: &[GuestListEntry] = &[{}];\n",
-                guest_list_entries.join(",")
+                guest_list_codegen.join(",")
             )
             .as_bytes(),
         )
@@ -588,6 +603,7 @@ pub fn embed_methods_with_options(mut guest_pkg_to_options: HashMap<&str, GuestO
     // Since we generate methods.rs each time we run, it will always
     // be changed.
     println!("cargo:rerun-if-changed={}", methods_path.display());
+    guest_list
 }
 
 /// Embeds methods built for RISC-V for use by host-side dependencies.
@@ -608,6 +624,6 @@ pub fn embed_methods_with_options(mut guest_pkg_to_options: HashMap<&str, GuestO
 /// to uppercase.  For instance, if you have a method named
 /// "my_method", the image ID and elf contents will be defined as
 /// "MY_METHOD_ID" and "MY_METHOD_ELF" respectively.
-pub fn embed_methods() {
+pub fn embed_methods() -> Vec<GuestListEntry> {
     embed_methods_with_options(HashMap::new())
 }

@@ -258,7 +258,7 @@ jobs:
         run: cargo test --locked -F $FEATURE --no-run
         working-directory: examples
       - name: test
-        run: cargo test --locked -F $FEATURE
+        run: RISC0_DEV_MODE=1 cargo test --locked -F $FEATURE
         working-directory: examples
       - run: cargo run --locked -F $FEATURE
         env:
