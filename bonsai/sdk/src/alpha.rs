@@ -90,6 +90,8 @@ pub mod responses {
     pub struct SessionStats {
         /// Count of segments in this proof request
         pub segments: usize,
+        /// Total cycles run within guest
+        pub total_cycles: u64,
         /// User cycles run within guest, slightly below total overhead cycles
         pub cycles: usize,
     }
