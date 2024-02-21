@@ -93,7 +93,7 @@ pub mod responses {
         /// Total cycles run within guest
         pub total_cycles: u64,
         /// User cycles run within guest, slightly below total overhead cycles
-        pub cycles: usize,
+        pub cycles: u64,
     }
 
     /// Session Status response
