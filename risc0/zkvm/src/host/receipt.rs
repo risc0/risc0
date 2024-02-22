@@ -20,7 +20,10 @@ use core::fmt::Debug;
 use anyhow::Result;
 use risc0_binfmt::SystemState;
 use risc0_circuit_recursion::control_id::ALLOWED_IDS_ROOT;
-use risc0_circuit_rv32im::layout;
+use risc0_circuit_rv32im::{
+    control_id::{BLAKE2B_CONTROL_ID, POSEIDON2_CONTROL_ID, SHA256_CONTROL_ID},
+    layout, CIRCUIT,
+};
 use risc0_core::field::baby_bear::BabyBear;
 use risc0_groth16::{split_digest, verifier::prepared_verifying_key, Seal, Verifier};
 use risc0_zkp::{
@@ -37,7 +40,6 @@ use risc0_zkp::{
 use risc0_zkvm_platform::WORD_SIZE;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 
-use super::control_id::{BLAKE2B_CONTROL_ID, POSEIDON2_CONTROL_ID, SHA256_CONTROL_ID};
 // Make succinct receipt available through this `receipt` module.
 pub use super::recursion::SuccinctReceipt;
 use crate::{
@@ -649,7 +651,7 @@ impl SegmentReceipt {
             .suites
             .get(&self.hashfn)
             .ok_or(VerificationError::InvalidHashSuite)?;
-        risc0_zkp::verify::verify(&super::CIRCUIT, suite, &self.seal, check_code)?;
+        risc0_zkp::verify::verify(&CIRCUIT, suite, &self.seal, check_code)?;
 
         // Receipt is consistent with the claim encoded on the seal. Now check against the
         // claim on the struct.

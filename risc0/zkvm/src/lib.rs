@@ -120,7 +120,6 @@ pub use self::receipt_claim::{
 #[cfg(not(target_os = "zkvm"))]
 pub use {
     self::host::{
-        control_id::POSEIDON2_CONTROL_ID,
         receipt::{
             Assumption, CompactReceipt, CompositeReceipt, InnerReceipt, Journal, Receipt,
             SegmentReceipt, SuccinctReceipt, VerifierContext,
@@ -128,6 +127,7 @@ pub use {
         recursion::ALLOWED_IDS_ROOT,
     },
     risc0_binfmt::compute_image_id,
+    risc0_circuit_rv32im::control_id::POSEIDON2_CONTROL_ID,
 };
 
 use semver::Version;

@@ -4443,9 +4443,13 @@ version = "0.21.0-alpha.1"
 dependencies = [
  "anyhow",
  "cust",
+ "lazy-regex",
  "metal",
+ "num-derive",
+ "num-traits",
  "rand 0.8.5",
  "rayon",
+ "risc0-binfmt",
  "risc0-circuit-rv32im-sys",
  "risc0-core",
  "risc0-zkp",

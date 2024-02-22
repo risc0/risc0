@@ -15,7 +15,7 @@
 use std::rc::Rc;
 
 use anyhow::Result;
-use risc0_circuit_rv32im::cpu::CpuCircuitHal;
+use risc0_circuit_rv32im::prove::hal::cpu::CpuCircuitHal;
 use risc0_zkp::{
     core::{digest::Digest, hash::blake2b::Blake2bCpuHashSuite},
     hal::cpu::CpuHal,
@@ -28,7 +28,7 @@ use test_log::test;
 
 use super::{get_prover_server, HalPair, ProverImpl};
 use crate::{
-    host::{server::testutils, CIRCUIT},
+    host::server::testutils,
     serde::{from_slice, to_vec},
     ExecutorEnv, ExecutorImpl, ExitCode, ProverOpts, ProverServer, Receipt, Session,
     VerifierContext,
@@ -71,7 +71,7 @@ fn hashfn_poseidon2() {
 fn hashfn_blake2b() {
     let hal_pair = HalPair {
         hal: Rc::new(CpuHal::new(Blake2bCpuHashSuite::new_suite())),
-        circuit_hal: Rc::new(CpuCircuitHal::new(&CIRCUIT)),
+        circuit_hal: Rc::new(CpuCircuitHal::new()),
     };
     let env = ExecutorEnv::builder()
         .write(&MultiTestSpec::DoNothing)

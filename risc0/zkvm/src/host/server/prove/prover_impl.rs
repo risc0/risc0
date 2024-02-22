@@ -15,25 +15,24 @@
 use anyhow::{bail, Result};
 use risc0_circuit_rv32im::{
     layout::{OutBuffer, LAYOUT},
-    REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA,
+    CIRCUIT, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA,
 };
 use risc0_core::field::baby_bear::{BabyBear, Elem, ExtElem};
 use risc0_zkp::{
     adapter::TapsProvider,
     hal::{CircuitHal, Hal},
     layout::Buffer,
-    prove::adapter::ProveAdapter,
+    prove::{adapter::ProveAdapter, executor::Executor, Prover},
 };
 
-use super::{exec::MachineContext, HalPair, ProverServer};
+use super::{loader::Loader, machine::MachineContext, HalPair, ProverServer};
 use crate::{
     host::{
         receipt::{CompositeReceipt, InnerReceipt, SegmentReceipt, SuccinctReceipt},
         recursion::{identity_p254, join, lift, resolve},
-        CIRCUIT,
     },
     sha::Digestible,
-    Loader, Receipt, Segment, Session, VerifierContext,
+    Receipt, Segment, Session, VerifierContext,
 };
 
 /// An implementation of a Prover that runs locally.
@@ -132,8 +131,6 @@ where
     }
 
     fn prove_segment(&self, ctx: &VerifierContext, segment: &Segment) -> Result<SegmentReceipt> {
-        use risc0_zkp::prove::executor::Executor;
-
         tracing::debug!(
             "prove_segment[{}]: po2: {}, cycles: {}",
             segment.index,
@@ -143,7 +140,7 @@ where
         let (hal, circuit_hal) = (self.hal_pair.hal.as_ref(), &self.hal_pair.circuit_hal);
         let hashfn = &hal.get_hash_suite().name;
 
-        let io = segment.prepare_globals()?;
+        let io = segment.prepare_globals();
         let machine = MachineContext::new(segment);
         let po2 = segment.po2 as usize;
         let mut executor = Executor::new(&CIRCUIT, machine, po2, po2, &io);
@@ -153,7 +150,7 @@ where
         executor.finalize();
 
         let mut adapter = ProveAdapter::new(&mut executor);
-        let mut prover = risc0_zkp::prove::Prover::new(hal, CIRCUIT.get_taps());
+        let mut prover = Prover::new(hal, CIRCUIT.get_taps());
 
         adapter.execute(prover.iop());
 

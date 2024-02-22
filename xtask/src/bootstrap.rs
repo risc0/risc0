@@ -32,7 +32,7 @@ use risc0_zkvm::{
 #[derive(Parser)]
 pub struct Bootstrap;
 
-const CONTROL_ID_PATH_RV32IM: &str = "risc0/zkvm/src/host/control_id.rs";
+const CONTROL_ID_PATH_RV32IM: &str = "risc0/circuit/rv32im/src/control_id.rs";
 const CONTROL_ID_PATH_RECURSION: &str = "risc0/circuit/recursion/src/control_id.rs";
 
 impl Bootstrap {

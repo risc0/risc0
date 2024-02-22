@@ -14,10 +14,10 @@
 
 //! Run the zkVM guest and prove its results.
 
+mod argument;
 mod dev_mode;
-mod exec;
 pub(crate) mod loader;
-mod plonk;
+mod machine;
 mod prover_impl;
 #[cfg(test)]
 mod tests;
@@ -164,7 +164,7 @@ impl Segment {
         prover.prove_segment(ctx, self)
     }
 
-    fn prepare_globals(&self) -> Result<Vec<Elem>> {
+    fn prepare_globals(&self) -> Vec<Elem> {
         let mut io = vec![Elem::INVALID; CircuitImpl::OUTPUT_SIZE];
         tracing::debug!("run> pc: 0x{:08x}", self.pre_image.pc);
 
@@ -183,7 +183,7 @@ impl Segment {
         offset += WORD_SIZE;
 
         // initialize ImageID
-        let merkle_root = self.pre_image.compute_root_hash()?;
+        let merkle_root = self.pre_image.compute_root_hash();
         let merkle_root = merkle_root.as_words();
         for i in 0..DIGEST_WORDS {
             let bytes = merkle_root[i].to_le_bytes();
@@ -192,7 +192,7 @@ impl Segment {
             }
         }
 
-        Ok(io)
+        io
     }
 }
 
@@ -201,7 +201,7 @@ mod cuda {
     use std::rc::Rc;
 
     use anyhow::{bail, Result};
-    use risc0_circuit_rv32im::cuda::{CudaCircuitHalPoseidon2, CudaCircuitHalSha256};
+    use risc0_circuit_rv32im::prove::hal::cuda::{CudaCircuitHalPoseidon2, CudaCircuitHalSha256};
     use risc0_zkp::hal::cuda::{CudaHalPoseidon2, CudaHalSha256};
 
     use super::{HalPair, ProverImpl, ProverServer};
@@ -235,7 +235,7 @@ mod metal {
     use std::rc::Rc;
 
     use anyhow::{bail, Result};
-    use risc0_circuit_rv32im::metal::MetalCircuitHal;
+    use risc0_circuit_rv32im::prove::hal::metal::MetalCircuitHal;
     use risc0_zkp::hal::metal::{
         MetalHalPoseidon2, MetalHalSha256, MetalHashPoseidon2, MetalHashSha256,
     };
@@ -271,14 +271,14 @@ mod cpu {
     use std::rc::Rc;
 
     use anyhow::{bail, Result};
-    use risc0_circuit_rv32im::cpu::CpuCircuitHal;
+    use risc0_circuit_rv32im::prove::hal::cpu::CpuCircuitHal;
     use risc0_zkp::{
         core::hash::{poseidon2::Poseidon2HashSuite, sha::Sha256HashSuite},
         hal::cpu::CpuHal,
     };
 
     use super::{HalPair, ProverImpl, ProverServer};
-    use crate::{host::CIRCUIT, ProverOpts};
+    use crate::ProverOpts;
 
     pub fn get_prover_server(opts: &ProverOpts) -> Result<Rc<dyn ProverServer>> {
         let suite = match opts.hashfn.as_str() {
@@ -287,7 +287,7 @@ mod cpu {
             _ => bail!("Unsupported hashfn: {}", opts.hashfn),
         };
         let hal = Rc::new(CpuHal::new(suite));
-        let circuit_hal = Rc::new(CpuCircuitHal::new(&CIRCUIT));
+        let circuit_hal = Rc::new(CpuCircuitHal::new());
         let hal_pair = HalPair { hal, circuit_hal };
         Ok(Rc::new(ProverImpl::new("cpu", hal_pair)))
     }

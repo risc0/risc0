@@ -60,6 +60,9 @@ pub trait SyscallContext {
     /// Loads the value of the given register, e.g. REG_A0.
     fn load_register(&mut self, idx: usize) -> u32;
 
+    /// Loads an individual byte from memory.
+    fn load_u8(&mut self, addr: u32) -> Result<u8>;
+
     /// Loads bytes from the given region of memory.
     fn load_region(&mut self, addr: u32, size: u32) -> Result<Vec<u8>> {
         let mut region = Vec::new();
@@ -67,26 +70,6 @@ pub trait SyscallContext {
             region.push(self.load_u8(addr)?);
         }
         Ok(region)
-    }
-
-    /// Loads an individual word from memory.
-    fn load_u32(&mut self, addr: u32) -> Result<u32>;
-
-    /// Loads an individual byte from memory.
-    fn load_u8(&mut self, addr: u32) -> Result<u8>;
-
-    /// Loads a null-terminated string from memory.
-    fn load_string(&mut self, mut addr: u32) -> Result<String> {
-        let mut s: Vec<u8> = Vec::new();
-        loop {
-            let b = self.load_u8(addr)?;
-            if b == 0 {
-                break;
-            }
-            s.push(b);
-            addr += 1;
-        }
-        String::from_utf8(s).map_err(anyhow::Error::msg)
     }
 }
 

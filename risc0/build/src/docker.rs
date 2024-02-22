@@ -196,7 +196,7 @@ fn compute_image_id(elf_path: &Path) -> Result<String> {
     let program = Program::load_elf(&elf, GUEST_MAX_MEM as u32).context("unable to load elf")?;
     let image =
         MemoryImage::new(&program, PAGE_SIZE as u32).context("unable to create memory image")?;
-    Ok(image.compute_id()?.to_string())
+    Ok(image.compute_id().to_string())
 }
 
 // requires Docker to be installed

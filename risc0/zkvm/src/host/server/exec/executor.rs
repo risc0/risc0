@@ -261,7 +261,7 @@ impl<'a> ExecutorImpl<'a> {
         let start_time = std::time::Instant::now();
 
         let pre_image = self.pre_image.as_ref().context("missing pre_image")?;
-        let pre_state = pre_image.get_system_state()?;
+        let pre_state = pre_image.get_system_state();
 
         self.pc = pre_image.pc;
         self.monitor.clear_session()?;
@@ -291,7 +291,7 @@ impl<'a> ExecutorImpl<'a> {
                     let cycles = self.body_cycles.try_into()?;
                     let segment = Segment::new(
                         pre_image,
-                        post_image.get_system_state()?,
+                        post_image.get_system_state(),
                         // NOTE: On the last segment, the output is added outside this loop, before
                         // it is sent to the callback and pushed into the Session object.
                         None,
@@ -387,8 +387,8 @@ impl<'a> ExecutorImpl<'a> {
                 .checked_add(WORD_SIZE as u32)
                 .context("invalid pc in session post image")?,
             merkle_root: match exit_code {
-                ExitCode::Halted(_) => final_segment.pre_image.compute_root_hash()?,
-                _ => post_image.compute_root_hash()?,
+                ExitCode::Halted(_) => final_segment.pre_image.compute_root_hash(),
+                _ => post_image.compute_root_hash(),
             },
         };
 

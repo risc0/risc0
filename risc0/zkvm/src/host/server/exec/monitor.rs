@@ -485,7 +485,7 @@ impl MemoryMonitor {
 
         // Update the merkle tree and PC.
         self.image
-            .hash_pages_iter(self.faults.writes.iter().cloned())?;
+            .hash_pages_iter(self.faults.writes.iter().cloned());
         self.image.pc = pc;
         Ok(self.image.clone())
     }
@@ -527,23 +527,19 @@ impl SyscallContext for MemoryMonitor {
         self.registers[idx]
     }
 
-    fn load_u32(&mut self, addr: u32) -> Result<u32> {
-        MemoryMonitor::load_u32_from_guest_addr(self, addr)
-    }
-
     fn load_u8(&mut self, addr: u32) -> Result<u8> {
         MemoryMonitor::load_u8_from_guest_addr(self, addr)
     }
 }
 
 impl PageFaults {
-    fn clear(&mut self) {
+    pub fn clear(&mut self) {
         self.reads.clear();
         self.writes.clear();
     }
 
     #[allow(dead_code)]
-    fn dump(&self) {
+    pub fn dump(&self) {
         tracing::debug!("PageFaultInfo");
         tracing::debug!("  reads>");
         for idx in self.reads.iter().rev() {

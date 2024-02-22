@@ -102,7 +102,7 @@ mod tests {
     };
     use test_log::test;
 
-    use crate::cpu::CpuCircuitHal;
+    use crate::prove::hal::cpu::CpuCircuitHal;
 
     // TODO: figure out a better way to test this.
     #[test]
@@ -110,17 +110,22 @@ mod tests {
     fn eval_check() {
         // The number of cycles, choose a number that doesn't make tests take too long.
         const PO2: usize = 4;
-        let circuit = crate::CircuitImpl::new();
         let cpu_hal = CpuHal::new(Sha256HashSuite::<BabyBear>::new_suite());
-        let cpu_eval = CpuCircuitHal::new(&circuit);
+        let cpu_eval = CpuCircuitHal::new();
         let gpu_hal = Rc::new(MetalHalSha256::new());
         let gpu_eval = super::MetalCircuitHal::new(gpu_hal.clone());
-        crate::testutil::eval_check(&cpu_hal, cpu_eval, gpu_hal.as_ref(), gpu_eval, PO2);
+        crate::prove::hal::testutil::eval_check(
+            &cpu_hal,
+            cpu_eval,
+            gpu_hal.as_ref(),
+            gpu_eval,
+            PO2,
+        );
     }
 
     #[test]
     #[ignore]
     fn memory_usage() {
-        crate::testutil::EvalCheckParams::new(22);
+        crate::prove::hal::testutil::EvalCheckParams::new(22);
     }
 }

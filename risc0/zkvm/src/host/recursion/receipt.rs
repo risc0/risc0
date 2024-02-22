@@ -16,16 +16,13 @@ use alloc::{collections::VecDeque, vec::Vec};
 
 use risc0_binfmt::read_sha_halfs;
 use risc0_circuit_recursion::{control_id::RECURSION_CONTROL_IDS, CircuitImpl};
+use risc0_circuit_rv32im::control_id::POSEIDON2_CONTROL_ID;
 use risc0_core::field::baby_bear::BabyBearElem;
 use risc0_zkp::{adapter::CircuitInfo, core::digest::Digest, verify::VerificationError};
 use serde::{Deserialize, Serialize};
 
 use super::CIRCUIT;
-use crate::{
-    host::{control_id::POSEIDON2_CONTROL_ID, receipt::VerifierContext},
-    sha::Digestible,
-    ReceiptClaim,
-};
+use crate::{host::receipt::VerifierContext, sha::Digestible, ReceiptClaim};
 
 /// This function gets valid control IDs from the Poseidon2 and recursion
 /// circuits

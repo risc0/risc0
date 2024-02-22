@@ -27,6 +27,7 @@ use merkle::MerkleGroup;
 use risc0_circuit_recursion::{
     cpu::CpuCircuitHal, CircuitImpl, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA,
 };
+use risc0_circuit_rv32im::control_id::POSEIDON2_CONTROL_ID;
 use risc0_zkp::{
     adapter::{CircuitInfo, CircuitStepContext, TapsProvider},
     core::{
@@ -50,7 +51,7 @@ use crate::{
     receipt_claim::{Merge, Output},
     recursion::{valid_control_ids, SuccinctReceipt},
     sha::Digestible,
-    HalPair, ReceiptClaim, SegmentReceipt, POSEIDON2_CONTROL_ID,
+    HalPair, ReceiptClaim, SegmentReceipt,
 };
 
 // TODO: Automatically generate these constants from the circuit somehow without

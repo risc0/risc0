@@ -594,6 +594,7 @@ name = "risc0-circuit-rv32im"
 version = "0.21.0-alpha.1"
 dependencies = [
  "anyhow",
+ "risc0-binfmt",
  "risc0-core",
  "risc0-zkp",
  "risc0-zkvm-platform",

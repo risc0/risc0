@@ -20,7 +20,6 @@ use std::{
 };
 
 use anyhow::Result;
-use risc0_circuit_rv32im::CIRCUIT;
 use risc0_core::field::{baby_bear::BabyBearElem, Elem};
 use risc0_zkp::{
     adapter::TapsProvider,
@@ -34,6 +33,8 @@ use risc0_zkp::{
 };
 use risc0_zkvm_platform::{memory, WORD_SIZE};
 use tracing::{debug, trace};
+
+use crate::CIRCUIT;
 
 // TODO: get from circuit
 const SETUP_STEP_REGS: usize = 84;

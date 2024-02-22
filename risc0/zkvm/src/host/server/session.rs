@@ -275,13 +275,13 @@ impl Segment {
                 .checked_add(WORD_SIZE as u32)
                 .context("invalid pc in segment post state")?,
             merkle_root: match self.exit_code {
-                ExitCode::Halted(_) => self.pre_image.compute_root_hash()?,
+                ExitCode::Halted(_) => self.pre_image.compute_root_hash(),
                 _ => self.post_state.merkle_root.clone(),
             },
         };
 
         Ok(ReceiptClaim {
-            pre: self.pre_image.get_system_state()?.into(),
+            pre: self.pre_image.get_system_state().into(),
             post: post_state.into(),
             exit_code: self.exit_code,
             input: Digest::ZERO,

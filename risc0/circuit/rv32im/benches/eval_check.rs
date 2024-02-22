@@ -13,10 +13,9 @@
 // limitations under the License.
 
 use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion};
-use risc0_circuit_rv32im::{
+use risc0_circuit_rv32im::prove::hal::{
     cpu::CpuCircuitHal,
     testutil::{eval_check_impl, EvalCheckParams},
-    CircuitImpl,
 };
 use risc0_core::field::baby_bear::BabyBear;
 use risc0_zkp::{core::hash::sha::Sha256HashSuite, hal::cpu::CpuHal};
@@ -26,9 +25,8 @@ pub fn eval_check(c: &mut Criterion) {
     group.sample_size(10);
     for po2 in [2, 8, 16].iter() {
         let params = EvalCheckParams::new(*po2);
-        let circuit = CircuitImpl::new();
         let hal = CpuHal::new(Sha256HashSuite::<BabyBear>::new_suite());
-        let circuit_hal = CpuCircuitHal::new(&circuit);
+        let circuit_hal = CpuCircuitHal::new();
         group.bench_function(BenchmarkId::new("cpu", po2), |b| {
             b.iter(|| {
                 eval_check_impl(&params, &hal, &circuit_hal);
