@@ -1301,7 +1301,6 @@ dependencies = [
  "downloader",
  "flate2",
  "fs2",
- "openssl",
  "reqwest",
  "reqwest-middleware",
  "reqwest-retry",

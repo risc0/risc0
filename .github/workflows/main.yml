@@ -318,7 +318,7 @@ jobs:
       - uses: ./.github/actions/sccache
         with:
           key: ${{ matrix.os }}-default
-      - run: cargo install --force --path risc0/cargo-risczero
+      - run: cargo install --force --path risc0/cargo-risczero -j1
       - run: cargo risczero install --version $RISC0_TOOLCHAIN_VERSION
       - run: |
           cargo risczero new \
