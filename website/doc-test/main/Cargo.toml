@@ -11,7 +11,7 @@ release = false
 
 [dependencies]
 alloy-primitives = "0.6"
-alloy-sol-types = "0.5"
+alloy-sol-types = "0.6"
 anyhow = "1.0"
 bonsai-ethereum-relay = { workspace = true }
 clap = { version = "4.1", features = ["derive", "env"] }
