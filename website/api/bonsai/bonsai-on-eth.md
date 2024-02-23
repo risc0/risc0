@@ -1,7 +1,5 @@
 # Bonsai on Ethereum
 
-_Warning: Bonsai is still in early development. Do not use in production._
-
 Bonsai can produce [SNARK proofs]; allowing efficient verification of any computation, on Ethereum.
 
 There are two main ways to integrate your RISC Zero application with Ethereum:
