@@ -6,11 +6,11 @@ slug: /
 
 Welcome to the [RISC Zero] documentation! This site contains documentation for:
 
-- **[Bonsai]**: A software development stack that allows on-chain and off-chain
-  applications to request and receive proofs from our zkVM.
-
 - **[The RISC Zero zkVM][zkVM]**: A high-performance tool for proving correct
   execution of arbitrary code.
+
+- **[Bonsai]**: A software development stack that allows on-chain and off-chain
+  applications to request and receive proofs from our zkVM.
 
 - **[The RISC Zero Proof System][proof-system]**: The cryptographic techniques
   underlying the zkVM.
@@ -48,30 +48,6 @@ are:
 
 To enable ZK builders to thrive, we're working on two core products: the [zkVM]
 and [Bonsai].
-
-## Bonsai
-
-[Bonsai] is a proving service that allows on-chain and off-chain applications to
-request and receive [zkVM] proofs.
-
-Bonsai is a general purpose zero-knowledge proving service that allows for any
-chain, any protocol, and any application to take advantage of ZK proofs. It is
-massively parallel, programmable, and performant.
-
-Bonsai lets you integrate zero-knowledge proofs directly into any smart
-contracts without the need for custom circuits. This allows for ZK to be
-integrated directly into dApps on any EVM chain, with the potential to support
-any other ecosystem.
-
-Our zkVM is the foundation of Bonsai and enables widespread language
-compatibility with support for provable Rust code and the potential for
-zero-knowledge provable code in any language that compiles to RISC-V like C++,
-Rust, Go, and more. With a combination of recursive proofs, a bespoke circuit
-compiler, state continuations, and continuous improvements to the proving
-algorithm, Bonsai enables anyone to generate highly performant ZK proofs for a
-variety of applications.
-
-Read more on Bonsai [here][Bonsai].
 
 ## The RISC Zero zkVM
 
@@ -111,6 +87,30 @@ In addition to being far easier to build on, we're also delivering on
 
 Given the ease of development and the performance, the zkVM is the clear choice
 for your ZK needs.
+
+## Bonsai
+
+[Bonsai] is a proving service that allows on-chain and off-chain applications to
+request and receive [zkVM] proofs.
+
+Bonsai is a general purpose zero-knowledge proving service that allows for any
+chain, any protocol, and any application to take advantage of ZK proofs. It is
+massively parallel, programmable, and performant.
+
+Bonsai lets you integrate zero-knowledge proofs directly into any smart
+contracts without the need for custom circuits. This allows for ZK to be
+integrated directly into dApps on any EVM chain, with the potential to support
+any other ecosystem.
+
+Our zkVM is the foundation of Bonsai and enables widespread language
+compatibility with support for provable Rust code and the potential for
+zero-knowledge provable code in any language that compiles to RISC-V like C++,
+Rust, Go, and more. With a combination of recursive proofs, a bespoke circuit
+compiler, state continuations, and continuous improvements to the proving
+algorithm, Bonsai enables anyone to generate highly performant ZK proofs for a
+variety of applications.
+
+Read more on Bonsai [here][Bonsai].
 
 ## Connect with us
 
