@@ -90,7 +90,7 @@ The [`IRiscZeroVerifier` interface] is implemented by the [`RiscZeroGroth16Verif
 While Bonsai is in alpha, you will deploy this contract as part of your application.
 
 The [Bonsai SDK] provides support for sending requests to the Bonsai proving service.
-You may also want to check out our [Bonsai Quick Start](quickstart.md) page and/or the [Bonsai Overview](../bonsai).
+You may also want to check out our [Bonsai Quick Start](../bonsai/quickstart.md) page and/or the [Bonsai Overview](../bonsai).
 
 [Bonsai SDK]: https://docs.rs/bonsai-sdk/latest/bonsai_sdk/
 [`IRiscZeroVerifier` interface]: https://github.com/risc0/risc0/blob/main/bonsai/ethereum/contracts/IRiscZeroVerifier.sol
