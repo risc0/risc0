@@ -35,6 +35,7 @@ The [`IRiscZeroVerifier` interface][IRiscZeroVerifier.sol] is implemented by the
 The `RiscZeroGroth16Verifier` contract is a stateless and immutable verifier the RISC Zero Groth16 SNARK proofs.
 
 <!-- TODO(#1423) Replace this note with a dedicated page for verifier contract information -->
+
 > The `RiscZeroGroth16Verifier` contract is deployed to Sepolia at [`0x83C2e9CD64B2A16D3908E94C7654f3864212E2F8`][etherscan-0x83C2e9CD64B2A16D3908E94C7654f3864212E2F8].
 > You can choose to use this contract, or deploy your own.
 
