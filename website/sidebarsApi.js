@@ -20,7 +20,7 @@ export default {
         },
         {
           type: "doc",
-          label: "Bonsai on Ethereum",
+          label: "RISC Zero on Ethereum",
           id: "bonsai/bonsai-on-eth",
         },
         {
