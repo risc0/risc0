@@ -1,116 +1,138 @@
 #!/bin/bash
 
-RISCZERO_VERSION=""
-RISCZERO_SOURCE_PATH=""
+MIN_RUST_VERSION="1.74.1" # Minimum required Rust version
 VERBOSE_MODE=0
 
 print_banner() {
-  printf '
-===============================================================
+  cat <<"EOF"
 
-     ██████  █▀▀▀██
-     ██████  █ ▄▀ █             General purpose
-     ██████  ██▄▄▄█             Zero-Knowledge
-     ██████                     Virtual Machine.
-     ██████   RISC
-     ██████   ZERO
-
-===============================================================
+    ██████  █▀▀▀██
+    ██████  █ ▄▀ █       A zero-knowledge verifiable
+    ██████  ██▄▄▄█       general computing platform.
+    ██████
+    ██████   RISC
+    ██████   ZERO
 
 Contribute      : https://github.com/risc0/
 Documentation   : https://dev.risczero.com/
 Chat & Support  : https://discord.com/invite/risczero/
 
-'
+EOF
 }
 
-usage() {
-    echo "Usage: $0 [options]"
-    echo "Options:"
-    echo "    -v, --version VERSION       Specify the cargo-risczero version to install (e.g., risc0-v2023-08-10.1)"
-    echo "    -p, --path SOURCE_PATH      Install cargo-risczero from a local source directory"
-    echo "    --verbose                   Enable verbose output"
-    echo "    -h, --help                  Display this help message and exit"
+log_verbose() {
+  if [ "$VERBOSE_MODE" -eq 1 ]; then
+    echo "$@"
+  fi
 }
 
-spinner() {
-    local pid=$1
-    local delay=0.1
-    local spinstr='|/-\'
-    while kill -0 $pid 2>/dev/null; do
-        local temp=${spinstr#?}
-        printf " [%c]  " "$spinstr"
-        local spinstr=$temp${spinstr%"$temp"}
-        sleep $delay
-        printf "\b\b\b\b\b\b"
-    done
-    printf "    \b\b\b\b"
+version_gte() {
+  local -a version1=(${1//./ })
+  local -a version2=(${2//./ })
+  for ((i = 0; i < ${#version1[@]}; i++)); do
+    if [[ -z ${version2[i]} ]]; then version2[i]=0; fi
+    if ((10#${version1[i]} > 10#${version2[i]})); then return 0; fi
+    if ((10#${version1[i]} < 10#${version2[i]})); then return 1; fi
+  done
+  return 0
 }
 
 execute_with_feedback() {
-    if [ "$VERBOSE_MODE" -eq 1 ]; then
-        eval $1
-    else
-        eval "$1" > /dev/null 2>&1 &
-        pid=$!
-        spinner $pid
-        wait $pid
-        status=$?
-        if [ $status -ne 0 ]; then
-            echo "Error executing command: $1"
-            exit $status
-        fi
-        echo "$2 - Done"
-    fi
-}
+  local COMMAND="$1"
+  local MESSAGE="$2"
 
-parse_args() {
-    while [[ "$#" -gt 0 ]]; do
-        case $1 in
-            -v|--version) RISCZERO_VERSION="$2"; shift ;;
-            -p|--path) RISCZERO_SOURCE_PATH="$2"; shift ;;
-            --verbose) VERBOSE_MODE=1 ;;
-            -h|--help) usage; exit 0 ;;
-            *) echo "Unknown option: $1" >&2; usage; exit 1 ;;
-        esac
-        shift
+  echo "$MESSAGE..."
+
+  if [ "$VERBOSE_MODE" -eq 1 ]; then
+    echo "Executing: $COMMAND"
+    eval "$COMMAND"
+    local STATUS=$?
+    if [ $STATUS -ne 0 ]; then
+      echo "Error executing command: $COMMAND"
+      exit $STATUS
+    fi
+  else
+    eval "$COMMAND" >/dev/null 2>&1 &
+    pid=$!
+    local spinstr='|/-\'
+    while kill -0 $pid 2>/dev/null; do
+      local temp=${spinstr#?}
+      printf " [%c]  " "$spinstr"
+      local spinstr=$temp${spinstr%"$temp"}
+      sleep 0.1
+      printf "\b\b\b\b\b\b"
     done
+    wait $pid
+    local STATUS=$?
+    if [ $STATUS -ne 0 ]; then
+      echo "Error executing command: $COMMAND"
+      exit $STATUS
+    fi
+  fi
 }
 
-install_rust() {
-    if ! command -v cargo &> /dev/null; then
-        execute_with_feedback "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh" "Installing Rust"
-        source $HOME/.cargo/env
+check_rust_version() {
+  if ! command -v rustc &>/dev/null; then
+    echo "Rust is not installed. Please install Rust using https://rustup.rs/ and rerun this script."
+    exit 1
+  else
+    local current_version=$(rustc --version | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
+    if version_gte $current_version $MIN_RUST_VERSION; then
+      log_verbose "Rust version $current_version meets the minimum requirement."
     else
-        [ "$VERBOSE_MODE" -eq 1 ] && echo "Rust is already installed."
+      echo "Your Rust version ($current_version) is below the minimum requirement ($MIN_RUST_VERSION)."
+      echo "Please update Rust by running 'rustup update' and rerun this script."
+      exit 1
     fi
+  fi
 }
 
 install_cargo_binstall() {
-    execute_with_feedback "cargo install cargo-binstall --quiet" "Installing cargo-binstall"
+  execute_with_feedback "cargo install cargo-binstall --quiet" "Installing cargo-binstall"
 }
 
 binstall_cargo_risczero() {
-        execute_with_feedback "cargo binstall cargo-risczero --no-confirm" "Installing the latest version of cargo-risczero"
+  execute_with_feedback "cargo binstall cargo-risczero --no-confirm" "Installing the latest version of cargo-risczero"
 }
 
 install_risczero() {
-    if ! command -v risczero &> /dev/null; then
-        execute_with_feedback "cargo risczero install" "Installing the riscv32im-risc0-zkvm-elf toolchain"
-    else
-        [ "$VERBOSE_MODE" -eq 1 ] && echo "cargo-risczero is already installed."
-    fi
+  execute_with_feedback "cargo risczero install" "Installing the risc0 toolchain"
+}
 
+usage() {
+  echo "Usage: $0 [options]"
+  echo "Options:"
+  echo "    --verbose                   Enable verbose output"
+  echo "    -h, --help                  Display this help message and exit"
+}
+
+parse_args() {
+  while [[ "$#" -gt 0 ]]; do
+    case $1 in
+    --verbose) VERBOSE_MODE=1 ;;
+    -h | --help)
+      usage
+      exit 0
+      ;;
+    *)
+      echo "Unknown option: $1" >&2
+      usage
+      exit 1
+      ;;
+    esac
+    shift
+  done
 }
 
 main() {
-    print_banner
-    parse_args "$@"
-    install_rust
-    install_cargo_binstall
-    binstall_cargo_risczero
-    install_risczero
-    echo "Installation complete. Run cargo risczero --help to get started."
+  parse_args "$@"
+  print_banner
+  check_rust_version
+  install_cargo_binstall
+  binstall_cargo_risczero
+  install_risczero
+
+  echo "Installation complete. Run cargo risczero --help to get started."
 }
 
 main "$@"
