@@ -13,6 +13,9 @@
 // limitations under the License.
 
 use anyhow::Result;
+use risc0_zkvm_platform::WORD_SIZE;
+
+use super::addr::{ByteAddr, WordAddr};
 
 pub trait EmuConext {
     // Handle environment call
@@ -31,10 +34,10 @@ pub trait EmuConext {
     fn on_normal_end(&mut self, kind: InsnKind, decoded: &DecodedInstruction);
 
     // Get the program counter
-    fn get_pc(&self) -> u32;
+    fn get_pc(&self) -> ByteAddr;
 
     // Set the program counter
-    fn set_pc(&mut self, addr: u32);
+    fn set_pc(&mut self, addr: ByteAddr);
 
     // Load from a register
     fn load_register(&mut self, idx: usize) -> Result<u32>;
@@ -43,23 +46,23 @@ pub trait EmuConext {
     fn store_register(&mut self, idx: usize, data: u32) -> Result<()>;
 
     // Load from memory
-    fn load_memory(&mut self, addr: u32) -> Result<u32>;
+    fn load_memory(&mut self, addr: WordAddr) -> Result<u32>;
 
     // Store to memory
-    fn store_memory(&mut self, addr: u32, data: u32) -> Result<()>;
+    fn store_memory(&mut self, addr: WordAddr, data: u32) -> Result<()>;
 
     // Check access for instruction load
-    fn check_insn_load(&self, _addr: u32) -> bool {
+    fn check_insn_load(&self, _addr: ByteAddr) -> bool {
         true
     }
 
     // Check access for data load
-    fn check_data_load(&self, _addr: u32) -> bool {
+    fn check_data_load(&self, _addr: ByteAddr) -> bool {
         true
     }
 
     // Check access for data store
-    fn check_data_store(&self, _addr: u32) -> bool {
+    fn check_data_store(&self, _addr: ByteAddr) -> bool {
         true
     }
 }
@@ -353,7 +356,7 @@ impl Emulator {
             return Ok(());
         }
 
-        let word = ctx.load_memory(pc / 4)?;
+        let word = ctx.load_memory(pc.waddr())?;
         if word & 0x03 != 0x03 {
             ctx.trap(TrapCause::IllegalInstruction(word))?;
             return Ok(());
@@ -383,7 +386,7 @@ impl Emulator {
         decoded: &DecodedInstruction,
     ) -> Result<bool> {
         let pc = ctx.get_pc();
-        let mut new_pc = pc + 4;
+        let mut new_pc = pc + WORD_SIZE;
         let mut rd = decoded.rd;
         let rs1 = ctx.load_register(decoded.rs1 as usize)?;
         let rs2 = ctx.load_register(decoded.rs2 as usize)?;
@@ -446,15 +449,15 @@ impl Emulator {
             InsnKind::BLTU => br_cond(rs1 < rs2),
             InsnKind::BGEU => br_cond(rs1 >= rs2),
             InsnKind::JAL => {
-                new_pc = rs1.wrapping_add(decoded.imm_j());
-                pc + 4
+                new_pc = ByteAddr(rs1.wrapping_add(decoded.imm_j()));
+                (pc + WORD_SIZE).0
             }
             InsnKind::JALR => {
-                new_pc = rs1.wrapping_add(imm_i) & 0xfffffffe;
-                pc + 4
+                new_pc = ByteAddr(rs1.wrapping_add(imm_i) & 0xfffffffe);
+                (pc + WORD_SIZE).0
             }
             InsnKind::LUI => decoded.imm_u(),
-            InsnKind::AUIPC => pc + decoded.imm_u(),
+            InsnKind::AUIPC => (pc + decoded.imm_u()).0,
             InsnKind::MUL => rs1.wrapping_mul(rs2),
             InsnKind::MULH => {
                 (sign_extend_u32(rs1).wrapping_mul(sign_extend_u32(rs2)) >> 32) as u32
@@ -491,7 +494,7 @@ impl Emulator {
             }
             _ => unreachable!(),
         };
-        if new_pc % 4 != 0 {
+        if !new_pc.is_aligned() {
             return ctx.trap(TrapCause::InstructionAddressMisaligned);
         }
         ctx.store_register(rd as usize, out)?;
@@ -506,12 +509,12 @@ impl Emulator {
         decoded: &DecodedInstruction,
     ) -> Result<bool> {
         let rs1 = ctx.load_register(decoded.rs1 as usize)?;
-        let addr = rs1.wrapping_add(decoded.imm_i());
+        let addr = ByteAddr(rs1.wrapping_add(decoded.imm_i()));
         if !ctx.check_data_load(addr) {
             return ctx.trap(TrapCause::LoadAccessFault);
         }
-        let data = ctx.load_memory(addr / 4)?;
-        let shift = 8 * (addr & 3);
+        let data = ctx.load_memory(addr.waddr())?;
+        let shift = 8 * (addr.0 & 3);
         let out = match kind {
             InsnKind::LB => {
                 let mut out = (data >> shift) & 0xff;
@@ -521,7 +524,7 @@ impl Emulator {
                 out
             }
             InsnKind::LH => {
-                if addr & 0x01 != 0 {
+                if addr.0 & 0x01 != 0 {
                     return ctx.trap(TrapCause::LoadAddressMisaligned);
                 }
                 let mut out = (data >> shift) & 0xffff;
@@ -531,14 +534,14 @@ impl Emulator {
                 out
             }
             InsnKind::LW => {
-                if addr & 0x03 != 0 {
+                if addr.0 & 0x03 != 0 {
                     return ctx.trap(TrapCause::LoadAddressMisaligned);
                 }
                 data
             }
             InsnKind::LBU => (data >> shift) & 0xff,
             InsnKind::LHU => {
-                if addr & 0x01 != 0 {
+                if addr.0 & 0x01 != 0 {
                     return ctx.trap(TrapCause::LoadAddressMisaligned);
                 }
                 (data >> shift) & 0xffff
@@ -546,7 +549,7 @@ impl Emulator {
             _ => unreachable!(),
         };
         ctx.store_register(decoded.rd as usize, out)?;
-        ctx.set_pc(ctx.get_pc() + 4);
+        ctx.set_pc(ctx.get_pc() + WORD_SIZE);
         Ok(true)
     }
 
@@ -558,34 +561,34 @@ impl Emulator {
     ) -> Result<bool> {
         let rs1 = ctx.load_register(decoded.rs1 as usize)?;
         let rs2 = ctx.load_register(decoded.rs2 as usize)?;
-        let addr = rs1.wrapping_add(decoded.imm_s());
-        let shift = 8 * (addr & 3);
+        let addr = ByteAddr(rs1.wrapping_add(decoded.imm_s()));
+        let shift = 8 * (addr.0 & 3);
         if !ctx.check_data_store(addr) {
             return ctx.trap(TrapCause::StoreAccessFault);
         }
-        let mut data = ctx.load_memory(addr / 4)?;
+        let mut data = ctx.load_memory(addr.waddr())?;
         match kind {
             InsnKind::SB => {
                 data ^= data & (0xff << shift);
                 data |= (rs2 & 0xff) << shift;
             }
             InsnKind::SH => {
-                if addr & 0x01 != 0 {
+                if addr.0 & 0x01 != 0 {
                     return ctx.trap(TrapCause::StoreAddressMisaligned);
                 }
                 data ^= data & (0xffff << shift);
                 data |= (rs2 & 0xffff) << shift;
             }
             InsnKind::SW => {
-                if addr & 0x03 != 0 {
+                if addr.0 & 0x03 != 0 {
                     return ctx.trap(TrapCause::StoreAddressMisaligned);
                 }
                 data = rs2;
             }
             _ => unreachable!(),
         }
-        ctx.store_memory(addr / 4, data)?;
-        ctx.set_pc(ctx.get_pc() + 4);
+        ctx.store_memory(addr.waddr(), data)?;
+        ctx.set_pc(ctx.get_pc() + WORD_SIZE);
         Ok(true)
     }
 

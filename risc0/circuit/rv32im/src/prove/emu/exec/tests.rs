@@ -24,6 +24,7 @@ use risc0_zkvm_platform::{
 use test_log::test;
 
 use super::{Syscall, SyscallContext};
+use crate::prove::emu::addr::ByteAddr;
 
 #[derive(Default, Clone)]
 struct BasicSyscallState {
@@ -62,7 +63,7 @@ impl Syscall for BasicSyscall {
         guest_buf: &mut [u32],
     ) -> Result<(u32, u32)> {
         self.state.borrow_mut().syscall = syscall.to_string();
-        let buf_ptr = ctx.peek_register(REG_A4)?;
+        let buf_ptr = ByteAddr(ctx.peek_register(REG_A4)?);
         let buf_len = ctx.peek_register(REG_A5)?;
         self.state.borrow_mut().from_guest = ctx.peek_region(buf_ptr, buf_len)?;
         let guest_buf_bytes: &mut [u8] = bytemuck::cast_slice_mut(guest_buf);

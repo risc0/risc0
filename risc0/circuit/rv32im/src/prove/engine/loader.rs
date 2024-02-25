@@ -45,12 +45,12 @@ const SETUP_STEP_REGS: usize = 84;
 // 1: BytesFini
 const FINI_TAILROOM: usize = 6;
 
-const SHA_K_OFFSET: usize = memory::PRE_LOAD.start();
-const SHA_K_SIZE: usize = 64;
-const SHA_INIT_OFFSET: usize = SHA_K_OFFSET + SHA_K_SIZE * WORD_SIZE;
+pub const SHA_K_OFFSET: usize = memory::PRE_LOAD.start();
+pub const SHA_K_SIZE: usize = 64;
+pub const SHA_INIT_OFFSET: usize = SHA_K_OFFSET + SHA_K_SIZE * WORD_SIZE;
 const ZEROS_OFFSET: usize = SHA_INIT_OFFSET + DIGEST_WORDS * WORD_SIZE;
 
-static SHA_K: [u32; SHA_K_SIZE] = [
+pub static SHA_K: [u32; SHA_K_SIZE] = [
     0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
     0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
     0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,

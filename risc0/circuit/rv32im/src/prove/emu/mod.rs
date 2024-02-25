@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+pub mod addr;
 pub mod exec;
 mod pager;
 pub mod preflight;
@@ -23,9 +24,12 @@ use risc0_zkp::{
     core::digest::DIGEST_WORDS,
     field::{baby_bear::Elem, Elem as _},
 };
-use risc0_zkvm_platform::WORD_SIZE;
+use risc0_zkvm_platform::{memory::SYSTEM, WORD_SIZE};
 
+use self::addr::{ByteAddr, WordAddr};
 use crate::CircuitImpl;
+
+const SYSTEM_START: WordAddr = ByteAddr(SYSTEM.start() as u32).waddr();
 
 pub struct SyscallRecord {
     pub to_guest: Vec<u32>,

@@ -19,7 +19,12 @@ use risc0_binfmt::{MemoryImage, SystemState};
 use risc0_zkp::core::hash::sha::BLOCK_BYTES;
 use risc0_zkvm_platform::{PAGE_SIZE, WORD_SIZE};
 
-const PAGE_WORDS: usize = PAGE_SIZE / WORD_SIZE;
+use super::{
+    addr::{ByteAddr, WordAddr},
+    preflight::PageFaults,
+};
+
+pub const PAGE_WORDS: usize = PAGE_SIZE / WORD_SIZE;
 
 /// The number of blocks that fit within a single page.
 const BLOCKS_PER_PAGE: usize = PAGE_SIZE / BLOCK_BYTES;
@@ -47,6 +52,12 @@ pub struct PagedMemory {
     pub cycles: usize,
 }
 
+impl WordAddr {
+    fn page_idx(&self) -> u32 {
+        self.0 / PAGE_WORDS as u32
+    }
+}
+
 impl PagedMemory {
     pub fn new(image: MemoryImage) -> Self {
         Self {
@@ -57,19 +68,24 @@ impl PagedMemory {
         }
     }
 
-    pub fn peek(&self, addr: u32) -> Result<u32> {
-        let page_idx = addr / PAGE_WORDS as u32;
+    pub fn pre_peek(&self, addr: WordAddr) -> Result<u32> {
+        let mut bytes = [0u8; WORD_SIZE];
+        let addr: ByteAddr = addr.into();
+        self.image.load_region_in_page(addr.0, &mut bytes)?;
+        Ok(u32::from_le_bytes(bytes))
+    }
+
+    pub fn peek(&self, addr: WordAddr) -> Result<u32> {
+        let page_idx = addr.page_idx();
         if let Some(cache) = self.page_cache.get(&page_idx) {
             cache.load(addr)
         } else {
-            let mut bytes = [0u8; WORD_SIZE];
-            self.image.load_region_in_page(addr, &mut bytes)?;
-            Ok(u32::from_le_bytes(bytes))
+            self.pre_peek(addr)
         }
     }
 
-    pub fn load(&mut self, addr: u32) -> Result<u32> {
-        let page_idx = addr / PAGE_WORDS as u32;
+    pub fn load(&mut self, addr: WordAddr) -> Result<u32> {
+        let page_idx = addr.page_idx();
         // tracing::trace!("load: 0x{addr:08x}, page: 0x{page_idx:05x}");
         if self.page_states.get(&page_idx).is_none() {
             self.load_page(page_idx);
@@ -78,9 +94,9 @@ impl PagedMemory {
         self.page_cache.get(&page_idx).unwrap().load(addr)
     }
 
-    pub fn store(&mut self, addr: u32, data: u32) -> Result<()> {
-        let page_idx = addr / PAGE_WORDS as u32;
-        tracing::trace!("store: 0x{addr:08x}, page: 0x{page_idx:05x}, data: 0x{data:08x}");
+    pub fn store(&mut self, addr: WordAddr, data: u32) -> Result<()> {
+        let page_idx = addr.page_idx();
+        tracing::trace!("store: {addr:?}, page: 0x{page_idx:05x}, data: 0x{data:08x}");
         let state = if let Some(state) = self.page_states.get(&page_idx) {
             *state
         } else {
@@ -107,14 +123,14 @@ impl PagedMemory {
         self.cycles
     }
 
-    pub fn commit(&mut self, pc: u32) -> (SystemState, MemoryImage, SystemState) {
+    pub fn commit(&mut self, pc: ByteAddr) -> (SystemState, MemoryImage, SystemState) {
         let pre_state = self.image.get_system_state();
         let info = &self.image.info;
 
         let mut image = MemoryImage {
             pages: BTreeMap::new(),
             info: info.clone(),
-            pc,
+            pc: pc.0,
         };
 
         for (page_idx, page_state) in &self.page_states {
@@ -150,13 +166,16 @@ impl PagedMemory {
         self.cycles = 0;
     }
 
-    // fn read_info() {
-    //     todo!()
-    // }
-
-    // fn write_info() {
-    //     todo!()
-    // }
+    pub fn get_faults(&self) -> PageFaults {
+        let mut faults = PageFaults::default();
+        for (page_idx, page_state) in &self.page_states {
+            faults.reads.insert(*page_idx);
+            if *page_state == PageState::Dirty {
+                faults.writes.insert(*page_idx);
+            }
+        }
+        faults
+    }
 
     fn load_page(&mut self, page_idx: u32) {
         tracing::trace!("load_page: 0x{page_idx:05x}");
@@ -205,9 +224,9 @@ impl PagedMemory {
 }
 
 impl Page {
-    fn load(&self, addr: u32) -> Result<u32> {
-        let word_addr = (addr % PAGE_WORDS as u32) as usize;
-        let byte_addr = word_addr * 4;
+    fn load(&self, addr: WordAddr) -> Result<u32> {
+        let word_addr = (addr.0 % PAGE_WORDS as u32) as usize;
+        let byte_addr = word_addr * WORD_SIZE;
         // tracing::trace!("load: 0x{word_addr:04x}");
         let mut bytes = [0u8; WORD_SIZE];
         bytes.clone_from_slice(&self.0[byte_addr..byte_addr + WORD_SIZE]);
@@ -215,9 +234,9 @@ impl Page {
         // Ok(self.0[addr])
     }
 
-    fn store(&mut self, addr: u32, data: u32) {
-        let word_addr = (addr % PAGE_WORDS as u32) as usize;
-        let byte_addr = word_addr * 4;
+    fn store(&mut self, addr: WordAddr, data: u32) {
+        let word_addr = (addr.0 % PAGE_WORDS as u32) as usize;
+        let byte_addr = word_addr * WORD_SIZE;
         // tracing::trace!("store: 0x{word_addr:04x} <= 0x{data:08x}");
         self.0[byte_addr..byte_addr + WORD_SIZE].clone_from_slice(&data.to_le_bytes());
         // self.0[addr] = data;

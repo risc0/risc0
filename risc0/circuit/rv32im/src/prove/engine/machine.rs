@@ -29,14 +29,26 @@ use risc0_zkp::{
 use risc0_zkvm_platform::syscall::bigint;
 
 use super::argument::{ArgumentAccum, BytesArgument, RamArgument};
-use crate::prove::emu::preflight::{MemoryTransaction, PreflightCycle, PreflightTrace};
+use crate::prove::emu::{
+    addr::WordAddr,
+    preflight::{
+        Major, MemoryTransaction, PageFaults, PreflightCycle, PreflightStage, PreflightTrace,
+    },
+};
 
 type Quad = (Elem, Elem, Elem, Elem);
 
-pub struct MachineContext {
+struct SequentialStage {
     cycles: VecDeque<PreflightCycle>,
     txns: VecDeque<MemoryTransaction>,
+}
+
+pub struct MachineContext {
+    pre: SequentialStage,
+    body: SequentialStage,
+
     cur_cycle: Option<PreflightCycle>,
+    faults: PageFaults,
 
     // Tables for sorting arguments in proper order
     ram_arg: RamArgument,
@@ -46,14 +58,22 @@ pub struct MachineContext {
     arg_accum: BTreeMap<String, ArgumentAccum<BabyBear>>,
 }
 
+impl SequentialStage {
+    fn new(stage: PreflightStage) -> Self {
+        Self {
+            cycles: stage.cycles.into(),
+            txns: stage.txns.into(),
+        }
+    }
+}
+
 impl MachineContext {
     pub fn new(trace: PreflightTrace) -> Self {
-        let cycles = trace.cycles.into();
-        let txns = trace.txns.into();
         Self {
-            cycles,
-            txns,
+            pre: SequentialStage::new(trace.pre),
+            body: SequentialStage::new(trace.body),
             cur_cycle: None,
+            faults: trace.faults,
             ram_arg: RamArgument::new(),
             bytes_arg: BytesArgument::new(),
             arg_accum: BTreeMap::new(),
@@ -70,6 +90,7 @@ impl CircuitStepHandler<Elem> for MachineContext {
         args: &[Elem],
         outs: &mut [Elem],
     ) -> anyhow::Result<()> {
+        // tracing::trace!("[{cycle}] call({name})");
         match name {
             "halt" => Ok(()),
             "trace" => Ok(()),
@@ -159,8 +180,12 @@ impl CircuitStepHandler<Elem> for MachineContext {
 #[allow(unused)]
 impl MachineContext {
     fn get_major(&mut self, cycle: Elem, pc: Elem) -> Result<Elem> {
+        if !self.faults.reads.is_empty() {
+            return Ok(Major::PageFault.as_u32().into());
+        }
+
         let cycle: u32 = cycle.into();
-        let cur_cycle = self.cycles.pop_front().unwrap();
+        let cur_cycle = self.body.cycles.pop_front().unwrap();
         tracing::trace!("[{cycle}] get_major: {:?}", cur_cycle.major);
         let major = cur_cycle.major.as_u32().into();
         self.cur_cycle = Some(cur_cycle);
@@ -177,12 +202,22 @@ impl MachineContext {
         let addr: u32 = addr.into();
         let op: u32 = op.into();
 
-        let txn = self
+        let stage = if !self.pre.txns.is_empty() {
+            &mut self.pre
+        } else {
+            &mut self.body
+        };
+
+        let txn = stage
             .txns
             .pop_front()
             .ok_or(anyhow!("Invalid memory transaction log"))?;
-        if txn.addr != addr {
-            bail!("Mismatched memory transaction log addresses");
+        if txn.addr != WordAddr(addr) {
+            bail!(
+                "Mismatched memory txn addr. Expected: {:?}, Actual: {:?}",
+                txn.addr,
+                WordAddr(addr)
+            );
         }
         tracing::trace!("[{cycle}] ram_read(0x{addr:08x}, {op}): {txn:?}");
         Ok(split_word8(txn.data))
@@ -197,10 +232,10 @@ impl MachineContext {
     }
 
     fn page_info(&mut self, cycle: usize) -> (Elem, Elem, Elem) {
-        // if let Some(page_idx) = self.faults.reads.pop_last() {
-        //     tracing::debug!("[{cycle}] page_read: 0x{page_idx:08x}");
-        //     return (Elem::ONE, page_idx.into(), Elem::ZERO);
-        // }
+        if let Some(page_idx) = self.faults.reads.pop_last() {
+            tracing::debug!("[{cycle}] page_read: 0x{page_idx:05x}");
+            return (Elem::ONE, page_idx.into(), Elem::ZERO);
+        }
 
         // if self.is_flushing {
         //     if let Some(page_idx) = self.faults.writes.pop_first() {
@@ -209,8 +244,7 @@ impl MachineContext {
         //     }
         // }
 
-        // (Elem::ZERO, Elem::ZERO, Elem::ONE)
-        todo!()
+        (Elem::ZERO, Elem::ZERO, Elem::ONE)
     }
 
     fn divide(&self, numer: Quad, denom: Quad, sign: Elem) -> (Quad, Quad) {
