@@ -47,20 +47,17 @@ In addition to being far easier to build on, we're also delivering on
 [performance]. The zkVM has GPU acceleration for CUDA and Metal, and with
 [continuations] we've enabled parallel proving of large programs.
 
-Given the ease of development and the performance, the zkVM is the clear choice
-for your ZK needs.
-
 ## Getting Started
 
 To harness the power of ZK, you'll need to:
 
-1. [Write an application for the RISC Zero zkVM].
-2. [Generate proofs for your zkVM application].
-3. [Integrate your proofs into on-chain applications].
+1. [Write an application for the RISC Zero zkVM][zkvm-quickstart].
+2. [Generate proofs for your zkVM application][bonsai-quickstart].
+3. [Integrate your proofs into on-chain applications][foundry-template].
 
-[Write an application for the RISC Zero zkVM]: ./zkvm/quickstart
-[Generate proofs for your zkVM application]: ./bonsai/quickstart
-[Integrate your proofs into on-chain applications]: https://github.com/risc0/bonsai-foundry-template
+[zkvm-quickstart]: ./zkvm/quickstart.md
+[bonsai-quickstart]: ./bonsai/quickstart.md
+[foundry-template]: https://github.com/risc0/bonsai-foundry-template
 [Bonsai]: ./generating-proofs/remote-proving.md
 [chess]: https://github.com/risc0/risc0/tree/main/examples/chess
 [continuations]: https://risczero.com/news/continuations

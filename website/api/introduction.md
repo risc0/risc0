@@ -23,9 +23,9 @@ program!
 
 To harness the power of ZK, you'll need to:
 
-1. [Write an application for the RISC Zero zkVM].
-2. [Generate proofs for your zkVM application].
-3. [Integrate your proofs into on-chain applications].
+1. [Write an application for the RISC Zero zkVM][zkvm-quickstart].
+2. [Generate proofs for your zkVM application][bonsai-quickstart].
+3. [Integrate your proofs into on-chain applications][foundry-template].
 
 ```mermaid
 
@@ -73,9 +73,9 @@ flowchart TD
 
 ```
 
-[Write an application for the RISC Zero zkVM]: ./zkvm/quickstart
-[Generate proofs for your zkVM application]: ./bonsai/quickstart
-[Integrate your proofs into on-chain applications]: https://github.com/risc0/bonsai-foundry-template
+[zkvm-quickstart]: ./zkvm/quickstart.md
+[bonsai-quickstart]: ./bonsai/quickstart.md
+[foundry-template]: https://github.com/risc0/bonsai-foundry-template
 [Bonsai]: ./generating-proofs/remote-proving.md
 [chess]: https://github.com/risc0/risc0/tree/main/examples/chess
 [continuations]: https://risczero.com/news/continuations
