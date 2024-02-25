@@ -58,8 +58,8 @@ To harness the power of ZK, you'll need to:
 2. [Generate proofs for your zkVM application].
 3. [Integrate your proofs into on-chain applications].
 
-[Write an application for the RISC Zero zkVM]: /api/next/zkvm/quickstart
-[Generate proofs for your zkVM application]: /api/next/bonsai/quickstart
+[Write an application for the RISC Zero zkVM]: ./zkvm/quickstart
+[Generate proofs for your zkVM application]: ./bonsai/quickstart
 [Integrate your proofs into on-chain applications]: https://github.com/risc0/bonsai-foundry-template
 [Bonsai]: ./generating-proofs/remote-proving.md
 [chess]: https://github.com/risc0/risc0/tree/main/examples/chess
