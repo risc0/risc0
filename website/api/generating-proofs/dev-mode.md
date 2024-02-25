@@ -1,7 +1,3 @@
----
-slug: ./dev-mode
----
-
 # dev-mode
 
 We support a development-only mode for standalone risc0 projects in which code
