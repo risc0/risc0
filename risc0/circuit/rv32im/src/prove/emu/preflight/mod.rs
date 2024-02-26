@@ -32,14 +32,11 @@ use risc0_zkvm_platform::{
 };
 
 use super::{
-    pager::PagedMemory,
+    pager::{PagedMemory, PAGE_WORDS},
     rv32im::{DecodedInstruction, EmuConext, Emulator, InsnKind, TrapCause},
-    ByteAddr, Segment, WordAddr,
+    ByteAddr, Segment, WordAddr, SYSTEM_START,
 };
-use crate::prove::{
-    emu::{pager::PAGE_WORDS, SYSTEM_START},
-    engine::loader::{SHA_INIT_OFFSET, SHA_K, SHA_K_OFFSET, SHA_K_SIZE},
-};
+use crate::prove::engine::loader::{SHA_INIT_OFFSET, SHA_K, SHA_K_OFFSET, SHA_K_SIZE};
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub enum Major {
