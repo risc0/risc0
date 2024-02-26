@@ -45,6 +45,8 @@
     "tools/crates-validator/Cargo.toml",
   ],
   "cSpell.words": [
-    "Groth"
-  ]
+    "Groth",
+    "Holesky",
+    "Sepolia"
+  ],
 }

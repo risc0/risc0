@@ -7,5 +7,5 @@ zk-STARKs
 zk-STARK
 ZKVM
 zkVM
-composability
-composability
+Sepolia
+Holesky
