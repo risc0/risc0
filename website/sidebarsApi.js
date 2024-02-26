@@ -6,6 +6,53 @@ export default {
     "introduction",
     {
       type: "category",
+      label: "Bonsai",
+      link: {
+        type: `doc`,
+        id: "bonsai/bonsai-overview",
+      },
+      collapsed: false,
+      items: [
+        {
+          type: "doc",
+          label: "Quick Start",
+          id: "bonsai/quickstart",
+        },
+        {
+          type: "doc",
+          label: "RISC Zero on Ethereum",
+          id: "bonsai/bonsai-on-eth",
+        },
+        {
+          type: "doc",
+          label: "A Blockchain Dev's Guide to zkVM Development",
+          id: "bonsai/blockchain-zkvm-guide",
+        },
+        {
+          type: "doc",
+          label: "Ethereum Examples",
+          id: "bonsai/eth-examples",
+        },
+        {
+          type: "category",
+          label: "REST API",
+          link: {
+            type: `doc`,
+            id: "bonsai/rest-api",
+          },
+          collapsed: false,
+          items: [
+            {
+              type: "link",
+              label: "API Reference Docs",
+              href: "https://api.bonsai.xyz/swagger-ui/",
+            },
+          ],
+        },
+      ],
+    },
+    {
+      type: "category",
       label: "zkVM",
       link: {
         type: `doc`,
