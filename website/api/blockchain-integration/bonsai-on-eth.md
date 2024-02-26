@@ -34,8 +34,8 @@ This interface defines the relevant data structures for the receipt and provides
 The [`IRiscZeroVerifier` interface][IRiscZeroVerifier.sol] is implemented by the [`RiscZeroGroth16Verifier` contract][RiscZeroGroth16Verifier.sol].
 The `RiscZeroGroth16Verifier` contract is a stateless and immutable verifier the RISC Zero Groth16 SNARK proofs.
 
-
 <!-- TODO(#1423) Replace this note with a dedicated page for verifier contract information -->
+
 The [Bonsai SDK] provides support for sending requests to the Bonsai proving service.
 You may also want to check out our [Bonsai Quick Start](../bonsai/quickstart.md) page and/or the [Bonsai Overview](../bonsai).
 
