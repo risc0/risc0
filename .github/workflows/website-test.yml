@@ -65,7 +65,7 @@ jobs:
   main:
     if: needs.changes.outputs.main == 'true'
     needs: changes
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, prod, Linux, cpu]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -99,7 +99,7 @@ jobs:
   version-0_20:
     if: needs.changes.outputs.version-0_20 == 'true'
     needs: changes
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, prod, Linux, cpu]
     steps:
       - uses: actions/checkout@v4
         with:
