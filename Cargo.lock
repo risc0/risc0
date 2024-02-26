@@ -1296,7 +1296,6 @@ dependencies = [
  "anyhow",
  "cargo-generate",
  "cargo_metadata 0.18.1",
- "cc",
  "clap",
  "const_format",
  "dirs",
