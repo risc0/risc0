@@ -9,6 +9,7 @@ Given the nature of the zkVM, any computation performed off-chain can be proven 
 ## Interface
 
 <!-- TODO: Link to auto-generated Solidity annotation docs -->
+
 TODO
 
 ## Using the Verifier Contract
@@ -26,8 +27,8 @@ to keep track of the latest version and update your application accordingly.
 
 RISC Zero provides an already deployed verifier contract in the Sepolia network for your convenience. You can choose to use this contract or deploy your own.
 
-| Contract | Address |
-| --- | --- |
+| Contract                      | Address                                               |
+| ----------------------------- | ----------------------------------------------------- |
 | [RiscZeroGroth16Verifier.sol] | [0x83C2e9CD64B2A16D3908E94C7654f3864212E2F8][sepolia] |
 
 [Bonsai]: /api/bonsai/bonsai-overview.md
