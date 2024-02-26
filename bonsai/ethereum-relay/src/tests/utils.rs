@@ -41,6 +41,8 @@ pub(crate) async fn get_test_bonsai_server() -> (SessionId, MockServer) {
         receipt_url: Some(format!("{}/fake/receipt/path", server.uri())),
         error_msg: None,
         state: None,
+        elapsed_time: None,
+        stats: None,
     };
 
     let receipt_data_response = Receipt {
