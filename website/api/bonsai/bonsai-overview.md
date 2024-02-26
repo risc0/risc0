@@ -7,7 +7,7 @@ slug: ./
 Bonsai enables boundless computation on any blockchain.
 With Bonsai, instead of generating proofs on your own hardware, you can upload the program you need proven and request that Bonsai generates proofs for you as needed.
 
-Bonsai is highly parallelized, highly performant and can horizontally scale. To get a taste of what you can do with Bonsai, check out [Zeth], our [Governance Showcase], [Bonsai Pay], and our twitter thread about using [Bonsai as a zk coprocessor].
+Bonsai is highly parallelized, highly performant and can horizontally scale. To get a taste of what you can do with Bonsai, check out [Zeth], our [Governance Showcase], [Bonsai Pay], and our blog post about using [Bonsai as a zk coprocessor].
 
 Whether you're looking to take heavy computations off-chain or need to generate proofs for your trustless, verifiable software, Bonsai can help.
 Check out our [Bonsai Quick Start] page, and start building!
@@ -61,7 +61,7 @@ We're building technology that allows anyone to generate highly performant zero-
 [Bonsai SDK]: https://crates.io/crates/bonsai-sdk
 [Bonsai REST API]: https://api.bonsai.xyz/swagger-ui/
 [Bonsai Quick Start]: quickstart.md
-[Bonsai as a zk coprocessor]: https://twitter.com/RiscZero/status/1677316664772132864
+[Bonsai as a zk coprocessor]: https://www.risczero.com/news/a-guide-to-zk-coprocessors-for-scalability
 [Governance Showcase]: https://github.com/risc0/risc0/tree/main/bonsai/examples/governance#readme
 [Zeth]: https://www.risczero.com/news/zeth-release
 [guest program]: /terminology#guest-program
