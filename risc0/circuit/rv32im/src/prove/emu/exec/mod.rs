@@ -19,6 +19,7 @@ use std::mem;
 
 use anyhow::{bail, Result};
 use risc0_binfmt::MemoryImage;
+use risc0_zkp::core::log2_ceil;
 use risc0_zkvm_platform::{
     memory::is_guest_memory,
     syscall::{
@@ -126,12 +127,14 @@ impl<'a, S: Syscall> Executor<'a, S> {
             if self.cycles + paging_cycles >= segment_threshold {
                 tracing::debug!("split: {} + {}", self.cycles, paging_cycles);
                 let (pre_state, partial_image, post_state) = self.pager.commit(prev_pc);
+                let po2 = log2_ceil(self.cycles.next_power_of_two()).try_into()?; // TODO
                 segments.push(Segment {
                     partial_image,
                     pre_state,
                     post_state,
                     syscalls: mem::take(&mut self.syscalls),
                     insn_cycles: self.cycles,
+                    po2,
                 });
                 self.pager.clear();
                 prev_pc = self.pc;
@@ -142,12 +145,14 @@ impl<'a, S: Syscall> Executor<'a, S> {
         }
 
         let (pre_state, partial_image, post_state) = self.pager.commit(prev_pc);
+        let po2 = log2_ceil(self.cycles.next_power_of_two()).try_into()?; // TODO
         segments.push(Segment {
             partial_image,
             pre_state,
             post_state,
             syscalls: mem::take(&mut self.syscalls),
             insn_cycles: self.cycles,
+            po2,
         });
 
         Ok(segments)

@@ -12,14 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::collections::BTreeMap;
 use std::{
+    collections::BTreeMap,
     fmt::Debug,
     iter::Peekable,
     ops::{Index, IndexMut},
 };
 
-use anyhow::Result;
 use risc0_core::field::{baby_bear::BabyBearElem, Elem};
 use risc0_zkp::{
     adapter::TapsProvider,
@@ -27,12 +26,11 @@ use risc0_zkp::{
         digest::{Digest, DIGEST_WORDS},
         hash::sha::SHA256_INIT,
     },
-    hal::Hal,
+    hal::{cpu::CpuBuffer, Hal},
     prove::poly_group::PolyGroup,
     MAX_CYCLES_PO2, MIN_CYCLES_PO2, ZK_CYCLES,
 };
 use risc0_zkvm_platform::{memory, WORD_SIZE};
-use tracing::{debug, trace};
 
 use crate::CIRCUIT;
 
@@ -61,11 +59,19 @@ pub static SHA_K: [u32; SHA_K_SIZE] = [
     0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2,
 ];
 
-/// These are the columns of the control group.
-/// Entries of each column are elements of the Baby Bear Field.
+const fn div_ceil(a: usize, b: usize) -> usize {
+    (a + b - 1) / b
+}
+
+const fn setup_count(regs: usize) -> usize {
+    let pairs = regs / 4;
+    div_ceil(32 * 1024, pairs)
+}
+
+/// These are the registers of the control group.
 #[derive(Copy, Clone)]
-enum ControlIndex {
-    Cycle,
+enum CtrlReg {
+    _Cycle, // This register is handled by the loader
     BytesInit,
     BytesSetup,
     RamInit,
@@ -81,171 +87,11 @@ enum ControlIndex {
     Data2Hi,
     Data3Lo,
     Data3Hi,
+    NumRegs,
 }
 
-struct ControlGroup(Vec<BabyBearElem>);
-
-impl ControlGroup {
-    fn new() -> Self {
-        Self(vec![BabyBearElem::ZERO; CIRCUIT.code_size()])
-    }
-
-    fn reset(&mut self) {
-        self.0.fill(BabyBearElem::ZERO);
-    }
-}
-
-impl Index<ControlIndex> for ControlGroup {
-    type Output = BabyBearElem;
-
-    fn index(&self, index: ControlIndex) -> &Self::Output {
-        &self.0[index as usize]
-    }
-}
-
-impl IndexMut<ControlIndex> for ControlGroup {
-    fn index_mut(&mut self, index: ControlIndex) -> &mut Self::Output {
-        &mut self.0[index as usize]
-    }
-}
-
-struct LoaderImpl<F>
-where
-    F: FnMut(&[BabyBearElem], usize) -> Result<bool>,
-{
-    cycle: usize,
-    code: ControlGroup,
-    step: F,
-}
-
-impl<F> LoaderImpl<F>
-where
-    F: FnMut(&[BabyBearElem], usize) -> Result<bool>,
-{
-    pub fn new(step: F) -> Self {
-        Self {
-            cycle: 0,
-            code: ControlGroup::new(),
-            step,
-        }
-    }
-
-    /// Initialize bytes
-    pub fn bytes_init(&mut self) -> Result<bool> {
-        debug!("BYTES_INIT");
-        self.start();
-        self.code[ControlIndex::BytesInit] = BabyBearElem::ONE;
-        self.next()
-    }
-
-    /// Setup bytes lookup tables
-    pub fn bytes_setup(&mut self, count: usize) -> Result<bool> {
-        debug!("BYTES_SETUP");
-        for _ in 0..count - 1 {
-            self.start();
-            self.code[ControlIndex::BytesSetup] = BabyBearElem::ONE;
-            self.next()?;
-        }
-        self.start();
-        self.code[ControlIndex::BytesSetup] = BabyBearElem::ONE;
-        self.code[ControlIndex::Info] = BabyBearElem::ONE;
-        self.next()
-    }
-
-    /// Initialize ram
-    pub fn ram_init(&mut self) -> Result<bool> {
-        debug!("RAM_INIT");
-        self.start();
-        self.code[ControlIndex::RamInit] = BabyBearElem::ONE;
-        self.next()
-    }
-
-    /// Load Phase: Write binary instructions from ELF into control columns
-    /// Instructions are written three words at a time.
-    pub fn ram_load(&mut self, triple: &TripleWord) -> Result<bool> {
-        trace!("RAM_LOAD[{}]: {triple:?}", self.cycle);
-        self.start();
-        self.code[ControlIndex::RamLoad] = BabyBearElem::ONE;
-        self.code[ControlIndex::Info] = BabyBearElem::new(triple.addr);
-        (
-            self.code[ControlIndex::Data1Lo],
-            self.code[ControlIndex::Data1Hi],
-        ) = split_word16(triple.data[0]);
-        (
-            self.code[ControlIndex::Data2Lo],
-            self.code[ControlIndex::Data2Hi],
-        ) = split_word16(triple.data[1]);
-        (
-            self.code[ControlIndex::Data3Lo],
-            self.code[ControlIndex::Data3Hi],
-        ) = split_word16(triple.data[2]);
-        self.next()
-    }
-
-    /// Reset Phase
-    pub fn reset(&mut self, phase: u32) -> Result<bool> {
-        let phase_enum = match phase {
-            0 => ControlIndex::Data1Lo,
-            1 => ControlIndex::Data1Hi,
-            2 => ControlIndex::Data2Lo,
-            _ => unimplemented!("Invalid phase"),
-        };
-        debug!("RESET");
-        self.start();
-        self.code[ControlIndex::Reset] = BabyBearElem::ONE;
-        self.code[ControlIndex::Info] = BabyBearElem::ONE; // isFirst
-        self.code[phase_enum] = BabyBearElem::ONE;
-        self.next()?;
-
-        self.start();
-        self.code[ControlIndex::Reset] = BabyBearElem::ONE;
-        self.code[ControlIndex::Info] = BabyBearElem::ZERO; // isFirst
-        self.code[phase_enum] = BabyBearElem::ONE;
-        self.next()
-    }
-
-    /// Body Phase: In this phase, the zkVM executes the loaded instructions.
-    pub fn body(&mut self) -> Result<()> {
-        debug!("BODY");
-        loop {
-            self.start();
-            self.code[ControlIndex::Body] = BabyBearElem::ONE;
-            if !self.next_fini(FINI_TAILROOM)? {
-                break;
-            }
-        }
-        Ok(())
-    }
-
-    /// Fini Phase: Initialize RamFini and BytesFini
-    pub fn fini(&mut self) -> Result<bool> {
-        debug!("FINI");
-        self.start();
-        self.code[ControlIndex::RamFini] = BabyBearElem::ONE;
-        self.next()?;
-
-        self.start();
-        self.code[ControlIndex::BytesFini] = BabyBearElem::ONE;
-        self.next()
-    }
-
-    fn start(&mut self) {
-        self.code.reset();
-        self.code[ControlIndex::Cycle] = BabyBearElem::new(self.cycle as u32);
-    }
-
-    fn next(&mut self) -> Result<bool> {
-        self.cycle += 1;
-        let keep_going = (self.step)(&self.code.0, 0)?;
-        assert!(keep_going, "Premature halt, cycle: {}", self.cycle);
-        Ok(keep_going)
-    }
-
-    fn next_fini(&mut self, fini: usize) -> Result<bool> {
-        self.cycle += 1;
-        (self.step)(&self.code.0, fini)
-    }
-}
+#[derive(Clone)]
+struct CtrlCycle([BabyBearElem; CtrlReg::NumRegs as usize]);
 
 fn split_word16(value: u32) -> (BabyBearElem, BabyBearElem) {
     (
@@ -254,16 +100,78 @@ fn split_word16(value: u32) -> (BabyBearElem, BabyBearElem) {
     )
 }
 
-const fn div_ceil(a: usize, b: usize) -> usize {
-    (a + b - 1) / b
+impl CtrlCycle {
+    fn bytes_init() -> Self {
+        let mut row = Self([BabyBearElem::ZERO; CtrlReg::NumRegs as usize]);
+        row[CtrlReg::BytesInit] = BabyBearElem::ONE;
+        row
+    }
+
+    fn bytes_setup(info: BabyBearElem) -> Self {
+        let mut row = Self([BabyBearElem::ZERO; CtrlReg::NumRegs as usize]);
+        row[CtrlReg::BytesSetup] = BabyBearElem::ONE;
+        row[CtrlReg::Info] = info;
+        row
+    }
+
+    fn ram_init() -> Self {
+        let mut row = Self([BabyBearElem::ZERO; CtrlReg::NumRegs as usize]);
+        row[CtrlReg::RamInit] = BabyBearElem::ONE;
+        row
+    }
+
+    fn ram_load(triple: TripleWord) -> Self {
+        let mut row = Self([BabyBearElem::ZERO; CtrlReg::NumRegs as usize]);
+        row[CtrlReg::RamLoad] = BabyBearElem::ONE;
+        row[CtrlReg::Info] = BabyBearElem::new(triple.addr);
+        (row[CtrlReg::Data1Lo], row[CtrlReg::Data1Hi]) = split_word16(triple.data[0]);
+        (row[CtrlReg::Data2Lo], row[CtrlReg::Data2Hi]) = split_word16(triple.data[1]);
+        (row[CtrlReg::Data3Lo], row[CtrlReg::Data3Hi]) = split_word16(triple.data[2]);
+        row
+    }
+
+    fn reset(is_first: BabyBearElem, phase: CtrlReg) -> Self {
+        let mut row = Self([BabyBearElem::ZERO; CtrlReg::NumRegs as usize]);
+        row[CtrlReg::Reset] = BabyBearElem::ONE;
+        row[CtrlReg::Info] = is_first;
+        row[phase] = BabyBearElem::ONE;
+        row
+    }
+
+    fn ram_fini() -> Self {
+        let mut row = Self([BabyBearElem::ZERO; CtrlReg::NumRegs as usize]);
+        row[CtrlReg::RamFini] = BabyBearElem::ONE;
+        row
+    }
+
+    fn bytes_fini() -> Self {
+        let mut row = Self([BabyBearElem::ZERO; CtrlReg::NumRegs as usize]);
+        row[CtrlReg::BytesFini] = BabyBearElem::ONE;
+        row
+    }
+
+    fn body() -> Self {
+        let mut row = Self([BabyBearElem::ZERO; CtrlReg::NumRegs as usize]);
+        row[CtrlReg::Body] = BabyBearElem::ONE;
+        row
+    }
 }
 
-const fn setup_count(regs: usize) -> usize {
-    let pairs = regs / 4;
-    div_ceil(32 * 1024, pairs)
+impl Index<CtrlReg> for CtrlCycle {
+    type Output = BabyBearElem;
+
+    fn index(&self, index: CtrlReg) -> &Self::Output {
+        &self.0[index as usize]
+    }
 }
 
-#[derive(PartialEq)]
+impl IndexMut<CtrlReg> for CtrlCycle {
+    fn index_mut(&mut self, index: CtrlReg) -> &mut Self::Output {
+        &mut self.0[index as usize]
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 struct TripleWord {
     addr: u32,
     data: [u32; 3],
@@ -324,27 +232,19 @@ impl<'a> Iterator for TripleWordIter<'a> {
     }
 }
 
-/// Loads data into the zkVM image
-///
-/// Handles both loading the initial zkVM data and also loading updated data for
-/// each time step.
 pub struct Loader {
-    system: Vec<TripleWord>,
-}
-
-impl Default for Loader {
-    fn default() -> Self {
-        Self::new()
-    }
+    max_cycles: usize,
+    pub ctrl: CpuBuffer<BabyBearElem>,
+    pub cycle: usize,
+    ram_load_cycles: Vec<CtrlCycle>,
+    // init_cycles: usize,
+    // fini_cycles: usize,
 }
 
 impl Loader {
     const SETUP_CYCLES: usize = setup_count(SETUP_STEP_REGS);
 
-    /// Construct a Loader
-    ///
-    /// Loads the common setup data used by all zkVMs
-    pub fn new() -> Self {
+    pub fn new(max_cycles: usize) -> Self {
         let mut image: BTreeMap<u32, u32> = BTreeMap::new();
 
         // Setup 'k' for SHA
@@ -362,69 +262,101 @@ impl Loader {
             image.insert((ZEROS_OFFSET + i * WORD_SIZE) as u32, 0);
         }
 
+        let ram_load_cycles = TripleWordIter::new(&image)
+            .map(|x| CtrlCycle::ram_load(x))
+            .collect();
+
         Self {
-            system: TripleWordIter::new(&image).collect(),
+            max_cycles,
+            ctrl: CpuBuffer::from_fn(max_cycles * CIRCUIT.code_size(), |_| BabyBearElem::ZERO),
+            cycle: 0,
+            ram_load_cycles,
         }
     }
 
-    /// Load data specific to this zkVM instance
-    ///
-    /// Starting from the initialized image created by [Loader::new], use the
-    /// function `step` to repeatedly update the image, thereby creating an
-    /// execution trace.
     #[tracing::instrument(skip_all)]
-    pub fn load<F>(&self, step: F) -> Result<usize>
-    where
-        F: FnMut(&[BabyBearElem], usize) -> Result<bool>,
-    {
-        let mut loader = LoaderImpl::new(step);
-        self.pre_steps(&mut loader)?;
-        loader.body()?;
-        self.post_steps(&mut loader)?;
-        Ok(loader.cycle)
+    pub fn load(&mut self) {
+        self.pre_steps();
+        self.body();
+        self.post_steps();
     }
 
-    /// Compute the number of cycles needed for initialization.
-    pub fn init_cycles(&self) -> usize {
-        let mut loader = LoaderImpl::new(|_, _| Ok(true));
-        self.pre_steps(&mut loader).unwrap();
-        loader.cycle
+    fn pre_steps(&mut self) {
+        self.bytes_init();
+        self.bytes_setup();
+        self.ram_init();
+        self.ram_load();
+        self.reset(0);
     }
 
-    /// Compute the number of cycles needed for finalization.
-    pub fn fini_cycles(&self) -> usize {
-        let mut loader = LoaderImpl::new(|_, _| Ok(true));
-        self.post_steps(&mut loader).unwrap();
-        loader.cycle
-    }
-
-    fn pre_steps<F>(&self, loader: &mut LoaderImpl<F>) -> Result<()>
-    where
-        F: FnMut(&[BabyBearElem], usize) -> Result<bool>,
-    {
-        loader.bytes_init()?;
-        loader.bytes_setup(Self::SETUP_CYCLES)?;
-        loader.ram_init()?;
-        for triple in &self.system {
-            loader.ram_load(triple)?;
+    fn body(&mut self) {
+        let body_cycles = self.max_cycles - self.cycle - FINI_TAILROOM - ZK_CYCLES;
+        tracing::debug!("[{}] BODY: {body_cycles}", self.cycle);
+        for _ in 0..body_cycles {
+            self.add_cycle(CtrlCycle::body());
         }
-        loader.reset(0)?;
-        Ok(())
     }
 
-    fn post_steps<F>(&self, loader: &mut LoaderImpl<F>) -> Result<()>
-    where
-        F: FnMut(&[BabyBearElem], usize) -> Result<bool>,
-    {
-        loader.reset(1)?;
-        loader.reset(2)?;
-        loader.fini()?;
-        Ok(())
+    fn post_steps(&mut self) {
+        self.reset(1);
+        self.reset(2);
+        self.fini();
     }
 
-    /// Compute the `ControlId` associated with the given HAL
-    pub fn compute_control_id<H: Hal<Elem = BabyBearElem>>(&self, hal: &H) -> Vec<Digest> {
-        let code_size = CIRCUIT.code_size();
+    fn bytes_init(&mut self) {
+        tracing::debug!("[{}] BYTES_INIT", self.cycle);
+        self.add_cycle(CtrlCycle::bytes_init());
+    }
+
+    fn bytes_setup(&mut self) {
+        tracing::debug!("[{}] BYTES_SETUP", self.cycle);
+        for _ in 0..Self::SETUP_CYCLES - 1 {
+            self.add_cycle(CtrlCycle::bytes_setup(BabyBearElem::ZERO));
+        }
+        self.add_cycle(CtrlCycle::bytes_setup(BabyBearElem::ONE));
+    }
+
+    fn ram_init(&mut self) {
+        tracing::debug!("[{}] RAM_INIT", self.cycle);
+        self.add_cycle(CtrlCycle::ram_init());
+    }
+
+    fn ram_load(&mut self) {
+        for cycle in self.ram_load_cycles.clone() {
+            self.add_cycle(cycle);
+        }
+    }
+
+    fn reset(&mut self, phase: u32) {
+        tracing::debug!("[{}] RESET({phase})", self.cycle);
+        let phase = match phase {
+            0 => CtrlReg::Data1Lo,
+            1 => CtrlReg::Data1Hi,
+            2 => CtrlReg::Data2Lo,
+            _ => unimplemented!("Invalid phase"),
+        };
+        self.add_cycle(CtrlCycle::reset(BabyBearElem::ONE, phase));
+        self.add_cycle(CtrlCycle::reset(BabyBearElem::ZERO, phase));
+    }
+
+    fn fini(&mut self) {
+        tracing::debug!("[{}] FINI", self.cycle);
+        self.add_cycle(CtrlCycle::ram_fini());
+        self.add_cycle(CtrlCycle::bytes_fini());
+    }
+
+    fn add_cycle(&mut self, row: CtrlCycle) {
+        let mut ctrl = self.ctrl.as_slice_mut();
+        ctrl[self.cycle] = BabyBearElem::new(self.cycle as u32);
+        for i in 1..row.0.len() {
+            ctrl[self.max_cycles * i + self.cycle] = row.0[i];
+        }
+        self.cycle += 1;
+    }
+
+    // Compute the `ControlId` associated with the given HAL
+    pub fn compute_control_id<H: Hal<Elem = BabyBearElem>>(hal: &H) -> Vec<Digest> {
+        let ctrl_size = CIRCUIT.code_size();
 
         // Start with an empty table
         let mut table = Vec::new();
@@ -432,40 +364,21 @@ impl Loader {
         // Make the digest for each level
         for i in MIN_CYCLES_PO2..MAX_CYCLES_PO2 {
             let cycles = 1 << i;
+            let mut loader = Loader::new(cycles);
             tracing::info!("po2: {i}");
             // Make a vector & set it up with the elf data
-            let mut code = vec![BabyBearElem::default(); cycles * code_size];
-            self.load_code(&mut code, cycles);
+            loader.load();
             // Copy into accel buffer
-            let coeffs = hal.copy_from_elem("coeffs", &code);
+            let coeffs = hal.copy_from_elem("coeffs", &loader.ctrl.as_slice());
             // Do interpolate & shift
-            hal.batch_interpolate_ntt(&coeffs, code_size);
-            hal.zk_shift(&coeffs, code_size);
+            hal.batch_interpolate_ntt(&coeffs, ctrl_size);
+            hal.zk_shift(&coeffs, ctrl_size);
             // Make the poly-group & extract the root
-            let code_group = PolyGroup::new(hal, coeffs, code_size, cycles, "code");
-            table.push(*code_group.merkle.root());
+            let group = PolyGroup::new(hal, coeffs, ctrl_size, cycles, "ctrl");
+            table.push(*group.merkle.root());
         }
 
         table
-    }
-
-    fn load_code(&self, code: &mut [BabyBearElem], max_cycles: usize) {
-        let code_size = CIRCUIT.code_size();
-        let mut cycle = 0;
-        self.load(|chunk, fini| {
-            for i in 0..code_size {
-                code[max_cycles * i + cycle] = chunk[i];
-            }
-            let total = cycle + fini + ZK_CYCLES;
-            if total < max_cycles {
-                cycle += 1;
-                Ok(true)
-            } else {
-                tracing::info!("Halting. {cycle} + {fini} + ZK_CYCLES ({total}) < {max_cycles}");
-                Ok(false)
-            }
-        })
-        .unwrap();
     }
 }
 

@@ -110,8 +110,16 @@ pub trait PolyExt<F: Field> {
 pub trait TapsProvider {
     fn get_taps(&self) -> &'static TapSet<'static>;
 
+    fn accum_size(&self) -> usize {
+        self.get_taps().group_size(REGISTER_GROUP_ACCUM)
+    }
+
     fn code_size(&self) -> usize {
         self.get_taps().group_size(REGISTER_GROUP_CODE)
+    }
+
+    fn data_size(&self) -> usize {
+        self.get_taps().group_size(REGISTER_GROUP_DATA)
     }
 }
 

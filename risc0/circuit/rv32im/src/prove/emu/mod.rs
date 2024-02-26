@@ -42,6 +42,7 @@ pub struct Segment {
     pub post_state: SystemState,
     pub syscalls: Vec<SyscallRecord>,
     pub insn_cycles: usize,
+    pub po2: usize,
 }
 
 impl Segment {
