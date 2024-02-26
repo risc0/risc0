@@ -29,7 +29,7 @@ use risc0_zkp::{
 };
 
 use crate::{
-    GLOBAL_MIX, GLOBAL_OUT, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA,
+    GLOBAL_MIX, GLOBAL_OUT, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CTRL, REGISTER_GROUP_DATA,
 };
 
 const KERNELS_FATBIN: &[u8] = include_bytes!(env!("RV32IM_CUDA_PATH"));
@@ -58,15 +58,15 @@ impl<'a, CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
         po2: usize,
         steps: usize,
     ) {
-        let code = groups[REGISTER_GROUP_CODE];
+        let ctrl = groups[REGISTER_GROUP_CTRL];
         let data = groups[REGISTER_GROUP_DATA];
         let accum = groups[REGISTER_GROUP_ACCUM];
         let mix = globals[GLOBAL_MIX];
         let out = globals[GLOBAL_OUT];
         tracing::debug!(
-            "check: {}, code: {}, data: {}, accum: {}, mix: {} out: {}",
+            "check: {}, ctrl: {}, data: {}, accum: {}, mix: {} out: {}",
             check.size(),
-            code.size(),
+            ctrl.size(),
             data.size(),
             accum.size(),
             mix.size(),
@@ -74,7 +74,7 @@ impl<'a, CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
         );
         tracing::debug!(
             "total: {}",
-            (check.size() + code.size() + data.size() + accum.size() + mix.size() + out.size()) * 4
+            (check.size() + ctrl.size() + data.size() + accum.size() + mix.size() + out.size()) * 4
         );
 
         const EXP_PO2: usize = log2_ceil(INV_RATE);
@@ -93,7 +93,7 @@ impl<'a, CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
         unsafe {
             launch!(kernel<<<params.0, params.1, 0, stream>>>(
                 check.as_device_ptr(),
-                code.as_device_ptr(),
+                ctrl.as_device_ptr(),
                 data.as_device_ptr(),
                 accum.as_device_ptr(),
                 mix.as_device_ptr(),

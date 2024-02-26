@@ -41,7 +41,7 @@ use crate::{
 
 pub struct WitnessGenerator {
     steps: usize,
-    pub code: CpuBuffer<BabyBearElem>,
+    pub ctrl: CpuBuffer<BabyBearElem>,
     pub data: CpuBuffer<BabyBearElem>,
     pub io: CpuBuffer<BabyBearElem>,
 }
@@ -51,7 +51,7 @@ impl WitnessGenerator {
         let steps = 1 << po2;
         Self {
             steps,
-            code: CpuBuffer::from_fn(steps * CIRCUIT.code_size(), |_| BabyBearElem::ZERO),
+            ctrl: CpuBuffer::from_fn(steps * CIRCUIT.ctrl_size(), |_| BabyBearElem::ZERO),
             data: CpuBuffer::from_fn(steps * CIRCUIT.data_size(), |_| BabyBearElem::INVALID),
             io: CpuBuffer::from(Vec::from(io)),
         }
@@ -94,15 +94,15 @@ impl WitnessGenerator {
     fn compute_verify(&mut self, machine: &mut MachineContext) {
         tracing::debug!("compute_verify");
         let mut rng = thread_rng();
-        let code = self.code.as_slice_sync();
+        let ctrl = self.ctrl.as_slice_sync();
         let io = self.io.as_slice_sync();
         let data = self.data.as_slice_sync();
 
         for i in 0..ZK_CYCLES {
             let cycle = self.steps - ZK_CYCLES + i;
-            // Set code to all zeros for the ZK_CYCLES
-            for j in 0..CIRCUIT.code_size() {
-                code.set(j * self.steps + cycle, BabyBearElem::ZERO);
+            // Set ctrl to all zeros for the ZK_CYCLES
+            for j in 0..CIRCUIT.ctrl_size() {
+                ctrl.set(j * self.steps + cycle, BabyBearElem::ZERO);
             }
             // Set data to random for the ZK_CYCLES
             for j in 0..CIRCUIT.data_size() {
@@ -111,7 +111,7 @@ impl WitnessGenerator {
         }
 
         // Do the verify cycles
-        let args = &[code, io, data];
+        let args = &[ctrl, io, data];
 
         machine.sort("ram");
         let last_cycle = self.steps - ZK_CYCLES;
@@ -173,7 +173,7 @@ impl WitnessGenerator {
 
     fn compute_accum(&mut self, mix: &CpuBuffer<BabyBearElem>, accum: &CpuBuffer<BabyBearElem>) {
         let args = &[
-            self.code.as_slice_sync(),
+            self.ctrl.as_slice_sync(),
             self.io.as_slice_sync(),
             self.data.as_slice_sync(),
             mix.as_slice_sync(),

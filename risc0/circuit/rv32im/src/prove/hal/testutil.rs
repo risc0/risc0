@@ -23,13 +23,13 @@ use risc0_zkp::{
     INV_RATE,
 };
 
-use crate::{CircuitImpl, CIRCUIT, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA};
+use crate::{CircuitImpl, CIRCUIT, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CTRL, REGISTER_GROUP_DATA};
 
 pub struct EvalCheckParams {
     pub po2: usize,
     pub steps: usize,
     pub domain: usize,
-    pub code: Vec<BabyBearElem>,
+    pub ctrl: Vec<BabyBearElem>,
     pub data: Vec<BabyBearElem>,
     pub accum: Vec<BabyBearElem>,
     pub mix: Vec<BabyBearElem>,
@@ -43,16 +43,16 @@ impl EvalCheckParams {
         let steps = 1 << po2;
         let domain = steps * INV_RATE;
         let taps = CIRCUIT.get_taps();
-        let code_size = taps.group_size(REGISTER_GROUP_CODE);
+        let ctrl_size = taps.group_size(REGISTER_GROUP_CTRL);
         let data_size = taps.group_size(REGISTER_GROUP_DATA);
         let accum_size = taps.group_size(REGISTER_GROUP_ACCUM);
-        let code = random_fps(&mut rng, code_size * domain);
+        let ctrl = random_fps(&mut rng, ctrl_size * domain);
         let data = random_fps(&mut rng, data_size * domain);
         let accum = random_fps(&mut rng, accum_size * domain);
         let mix = random_fps(&mut rng, CircuitImpl::MIX_SIZE);
         let out = random_fps(&mut rng, CircuitImpl::OUTPUT_SIZE);
         let poly_mix = BabyBearExtElem::random(&mut rng);
-        tracing::debug!("code: {} bytes", code.len() * 4);
+        tracing::debug!("ctrl: {} bytes", ctrl.len() * 4);
         tracing::debug!("data: {} bytes", data.len() * 4);
         tracing::debug!("accum: {} bytes", accum.len() * 4);
         tracing::debug!("mix: {} bytes", mix.len() * 4);
@@ -61,7 +61,7 @@ impl EvalCheckParams {
             po2,
             steps,
             domain,
-            code,
+            ctrl,
             data,
             accum,
             mix,
@@ -99,14 +99,14 @@ where
     C: CircuitHal<H>,
 {
     let check = hal.alloc_elem("check", BabyBearExtElem::EXT_SIZE * params.domain);
-    let code = hal.copy_from_elem("code", &params.code);
+    let ctrl = hal.copy_from_elem("ctrl", &params.ctrl);
     let data = hal.copy_from_elem("data", &params.data);
     let accum = hal.copy_from_elem("accum", &params.accum);
     let mix = hal.copy_from_elem("mix", &params.mix);
     let out = hal.copy_from_elem("out", &params.out);
     circuit_hal.eval_check(
         &check,
-        &[&accum, &code, &data],
+        &[&accum, &ctrl, &data],
         &[&mix, &out],
         params.poly_mix,
         params.po2,

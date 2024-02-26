@@ -118,6 +118,10 @@ pub trait TapsProvider {
         self.get_taps().group_size(REGISTER_GROUP_CODE)
     }
 
+    fn ctrl_size(&self) -> usize {
+        self.get_taps().group_size(REGISTER_GROUP_CODE)
+    }
+
     fn data_size(&self) -> usize {
         self.get_taps().group_size(REGISTER_GROUP_DATA)
     }

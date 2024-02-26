@@ -25,7 +25,7 @@ use risc0_zkp::{
 };
 
 use crate::{
-    CIRCUIT, GLOBAL_MIX, GLOBAL_OUT, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA,
+    CIRCUIT, GLOBAL_MIX, GLOBAL_OUT, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CTRL, REGISTER_GROUP_DATA,
 };
 
 pub struct CpuCircuitHal;
@@ -62,8 +62,8 @@ where
         // usage is within this function and each thread access will not overlap with
         // each other.
 
-        let code = groups[REGISTER_GROUP_CODE].as_slice();
-        let code = unsafe { std::slice::from_raw_parts(code.as_ptr(), code.len()) };
+        let ctrl = groups[REGISTER_GROUP_CTRL].as_slice();
+        let ctrl = unsafe { std::slice::from_raw_parts(ctrl.as_ptr(), ctrl.len()) };
         let data = groups[REGISTER_GROUP_DATA].as_slice();
         let data = unsafe { std::slice::from_raw_parts(data.as_ptr(), data.len()) };
         let accum = groups[REGISTER_GROUP_ACCUM].as_slice();
@@ -75,7 +75,7 @@ where
         let check = check.as_slice();
         let check = unsafe { std::slice::from_raw_parts(check.as_ptr(), check.len()) };
 
-        let args: &[&[BabyBearElem]] = &[code, out, data, mix, accum];
+        let args: &[&[BabyBearElem]] = &[ctrl, out, data, mix, accum];
 
         (0..domain).into_par_iter().for_each(|cycle| {
             let tot = CIRCUIT.poly_fp(cycle, domain, &poly_mix, args);

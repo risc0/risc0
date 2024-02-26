@@ -268,7 +268,7 @@ impl Loader {
 
         Self {
             max_cycles,
-            ctrl: CpuBuffer::from_fn(max_cycles * CIRCUIT.code_size(), |_| BabyBearElem::ZERO),
+            ctrl: CpuBuffer::from_fn(max_cycles * CIRCUIT.ctrl_size(), |_| BabyBearElem::ZERO),
             cycle: 0,
             ram_load_cycles,
         }
@@ -356,7 +356,7 @@ impl Loader {
 
     // Compute the `ControlId` associated with the given HAL
     pub fn compute_control_id<H: Hal<Elem = BabyBearElem>>(hal: &H) -> Vec<Digest> {
-        let ctrl_size = CIRCUIT.code_size();
+        let ctrl_size = CIRCUIT.ctrl_size();
 
         // Start with an empty table
         let mut table = Vec::new();

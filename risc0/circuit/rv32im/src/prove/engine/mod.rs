@@ -30,7 +30,7 @@ use self::witgen::WitnessGenerator;
 use super::emu::{preflight::preflight_segment, Segment};
 use crate::{
     layout::{OutBuffer, LAYOUT},
-    CIRCUIT, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA,
+    CIRCUIT, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CTRL, REGISTER_GROUP_DATA,
 };
 
 pub fn prove_segment<H, C>(
@@ -54,8 +54,8 @@ where
     prover.iop().write_u32_slice(&[po2 as u32]);
     prover.set_po2(po2);
 
-    let code = hal.copy_from_elem("code", &witgen.code.as_slice());
-    prover.commit_group(REGISTER_GROUP_CODE, code);
+    let ctrl = hal.copy_from_elem("ctrl", &witgen.ctrl.as_slice());
+    prover.commit_group(REGISTER_GROUP_CTRL, ctrl);
 
     let data = hal.copy_from_elem("data", &witgen.data.as_slice());
     prover.commit_group(REGISTER_GROUP_DATA, data);
@@ -150,7 +150,7 @@ mod tests {
 
         let seal = super::prove_segment(&hal, &circuit_hal, segment, po2).unwrap();
 
-        let check_code = |_, _: &_| -> Result<(), VerificationError> { Ok(()) };
-        risc0_zkp::verify::verify(&CIRCUIT, &suite, &seal, check_code).unwrap();
+        let check_ctrl = |_, _: &_| -> Result<(), VerificationError> { Ok(()) };
+        risc0_zkp::verify::verify(&CIRCUIT, &suite, &seal, check_ctrl).unwrap();
     }
 }

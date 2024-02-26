@@ -33,6 +33,7 @@ pub struct CircuitImpl;
 
 pub const REGISTER_GROUP_ACCUM: usize = 0;
 pub const REGISTER_GROUP_CODE: usize = 1;
+pub const REGISTER_GROUP_CTRL: usize = 1;
 pub const REGISTER_GROUP_DATA: usize = 2;
 
 pub const GLOBAL_MIX: usize = 0;
