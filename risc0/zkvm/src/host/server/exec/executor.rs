@@ -75,6 +75,10 @@ const BIGINT_CYCLES: usize = 9;
 /// to try and fit with 8GB of RAM.
 const DEFAULT_SEGMENT_LIMIT_PO2: u32 = 20; // 1M cycles
 
+/// The default number of segments to store in memory during execution.
+/// Anything segments above this value gets stored in a file.
+pub const DEFAULT_SEGMENT_RAM_STORAGE_LIMIT: u32 = 64;
+
 // Capture the journal output in a buffer that we can access afterwards.
 #[derive(Clone, Default)]
 struct Journal {
@@ -241,11 +245,10 @@ impl<'a> ExecutorImpl<'a> {
     /// This will run the executor to get a [Session] which contain the results
     /// of the execution.
     pub fn run(&mut self) -> Result<Session> {
-        let ram_segment_limit: u32 = if std::env::var("RISC0_RAM_SEGMENT_LIMIT").is_ok() {
-            std::env::var("key").
-        } else {
-            64
-        };
+        let ram_segment_limit: u32 = self
+            .env
+            .segment_limit_ram_storage
+            .unwrap_or(DEFAULT_SEGMENT_RAM_STORAGE_LIMIT);
 
         if self.env.segment_path.is_none() {
             self.env.segment_path = Some(SegmentPath::TempDir(Arc::new(tempdir()?)));

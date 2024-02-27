@@ -139,6 +139,7 @@ message ExecutorEnv {
   google.protobuf.Empty trace_events = 9;
   string pprof_out = 10;
   repeated Assumption assumptions = 11;
+  optional uint32 segment_limit_ram_storage = 12;
 }
 
 message Assumption {

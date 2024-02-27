@@ -16,19 +16,25 @@ use std::{
     error::Error as StdError,
     io::{BufReader, Error as IoError, ErrorKind as IoErrorKind, Read, Write},
     path::{Path, PathBuf},
+    sync::Arc,
 };
 
 use anyhow::{anyhow, bail, Result};
 use bytes::Bytes;
 use prost::Message;
 use serde::{Deserialize, Serialize};
+use tempfile::tempdir;
 
 use super::{malformed_err, path_to_string, pb, ConnectionWrapper, Connector, TcpConnector};
 use crate::{
     get_prover_server, get_version,
     host::{
-        client::{env::TraceCallback, slice_io::SliceIo},
+        client::{
+            env::{SegmentPath, TraceCallback},
+            slice_io::SliceIo,
+        },
         recursion::SuccinctReceipt,
+        server::exec::executor::DEFAULT_SEGMENT_RAM_STORAGE_LIMIT,
     },
     receipt_claim::{MaybePruned, ReceiptClaim},
     ExecutorEnv, ExecutorImpl, ProverOpts, Receipt, Segment, SegmentReceipt, SegmentRef,
@@ -273,18 +279,39 @@ impl Server {
             request: pb::api::ExecuteRequest,
         ) -> Result<pb::api::ServerReply> {
             let env_request = request.env.ok_or(malformed_err())?;
-            let env = build_env(&conn, &env_request)?;
+            let mut env = build_env(&conn, &env_request)?;
+
+            if env.segment_path.is_none() {
+                env.segment_path = Some(SegmentPath::TempDir(Arc::new(tempdir()?)));
+            }
 
             let binary = env_request.binary.ok_or(malformed_err())?;
 
-            let segments_out = request.segments_out.ok_or(malformed_err())?;
+            let segment_path = env.segment_path.clone().unwrap();
+            let segment_path = segment_path.path().to_str().unwrap();
+
+            let segment_ram_storage_limit = env
+                .segment_limit_ram_storage
+                .unwrap_or(DEFAULT_SEGMENT_RAM_STORAGE_LIMIT);
             let bytes = binary.as_bytes()?;
             let mut exec = ExecutorImpl::from_elf(env, &bytes)?;
 
             let session = exec.run_with_callback(|segment| {
                 let segment_bytes = bincode::serialize(&segment)?;
+                let segment_storage: pb::api::AssetRequest = if segment.index
+                    < segment_ram_storage_limit
+                {
+                    pb::api::AssetRequest {
+                        kind: Some(pb::api::asset_request::Kind::Inline(())),
+                    }
+                } else {
+                    pb::api::AssetRequest {
+                        kind: Some(pb::api::asset_request::Kind::Path(segment_path.to_string())),
+                    }
+                };
+
                 let asset = pb::api::Asset::from_bytes(
-                    &segments_out,
+                    &segment_storage,
                     segment_bytes.into(),
                     format!("segment-{}", segment.index),
                 )?;
