@@ -18,7 +18,7 @@ If you don't have an API key, you can [request access].
 While you wait, you can make use of the local proving option on the Bonsai Foundry Template, or you can focus on developing for the [zkVM].
 
 [litepaper]: /litepaper
-[Request access here]: https://bonsai.xyz/apply
+[request access]: https://bonsai.xyz/apply
 [`cargo risczero`]: https://crates.io/crates/cargo-risczero
 [Bonsai SDK]: https://crates.io/crates/bonsai-sdk
 [Bonsai REST API]: https://api.bonsai.xyz/swagger-ui/
