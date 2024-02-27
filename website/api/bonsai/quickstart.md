@@ -1,6 +1,9 @@
 # Bonsai Quick Start
 
-To use Bonsai, you need an API key. If you don't have one, [request access]. Meanwhile, consider using the local proving option on the [Bonsai Foundry Template] or focusing on [zkVM] development.
+<!-- DO NOT MERGE: Doc is currently not linked to from anywhere. Do something with it or delete before merging to main -->
+
+> Note: The Bonsai proving service is still in development; an API key is required for access
+[Click here to request access].
 
 If you already have an API key, you can start building on Bonsai in any of the following ways:
 
@@ -9,6 +12,9 @@ If you already have an API key, you can start building on Bonsai in any of the f
 - via the **[Bonsai Foundry Template]** (for accessing Bonsai via Ethereum)
 - via the **[Bonsai SDK]** (for accessing Bonsai from Rust)
 - via the **[Bonsai REST API]** (for building your own client or accessing Bonsai directly)
+
+If you don't have an API key, you can [request access].
+While you wait, you can make use of the local proving option on the Bonsai Foundry Template, or you can focus on developing for the [zkVM].
 
 [Bonsai Foundry Template]: https://github.com/risc0/bonsai-foundry-template
 [cargo risczero]: https://crates.io/crates/cargo-risczero
