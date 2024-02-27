@@ -22,6 +22,8 @@ cryptography.
 
 These applications include:
 
+- **[Zeth]**: prove the correct construction of an entire Ethereum block or an entire Optimism block
+- **[Bonsai Pay]**: send Ethereum to someone's gmail address
 - **[JSON]**: prove the contents of some entry in a JSON file, while keeping the
   rest of the data private
 - **[Where's Waldo][waldo]**: prove that Waldo appears in a JPG file, while
@@ -55,6 +57,7 @@ To harness the power of ZK, you'll need to:
 [bonsai-quickstart]: ./generating-proofs/remote-proving.md
 [bonsai-on-eth]: ./blockchain-integration/bonsai-on-eth.md
 [Bonsai]: ./generating-proofs/remote-proving.md
+[Bonsai Pay]: https://risczero.com/news/bonsai-pay
 [chess]: https://github.com/risc0/risc0/tree/main/examples/chess
 [continuations]: https://risczero.com/news/continuations
 [crate-validation]: https://risc0.github.io/ghpages/dev/crate-validation/index.html
@@ -73,6 +76,7 @@ To harness the power of ZK, you'll need to:
 [twitter]: https://twitter.com/risczero
 [waldo]: https://risczero.com/news/waldo
 [YouTube]: https://www.youtube.com/@risczero
+[Zeth]: https://risczero.com/news/zeth-release
 [zk coprocessors]: https://twitter.com/RiscZero/status/1677316664772132864
 [zkpoex]: https://risczero.com/news/zkpoex
 [zkVM]: ./zkvm/zkvm_overview.md
