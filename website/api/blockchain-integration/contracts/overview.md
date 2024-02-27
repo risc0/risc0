@@ -31,7 +31,7 @@ RISC Zero provides an already deployed verifier contract in the Sepolia network 
 | ----------------------------- | ----------------------------------------------------- |
 | [RiscZeroGroth16Verifier.sol] | [0x83C2e9CD64B2A16D3908E94C7654f3864212E2F8][sepolia] |
 
-[Bonsai]: /api/bonsai/bonsai-overview.md
+[Bonsai]: /api/generating-proofs/remote-proving.md
 [RiscZeroGroth16Verifier.sol]: https://github.com/risc0/risc0-ethereum/blob/main/contracts/src/groth16/RiscZeroGroth16Verifier.sol
 [IRiscZeroVerifier.sol]: https://github.com/risc0/risc0-ethereum/blob/main/contracts/src/IRiscZeroVerifier.sol
 [EvenNumber.sol]: https://github.com/risc0/bonsai-foundry-template/blob/main/contracts/EvenNumber.sol
