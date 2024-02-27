@@ -1,7 +1,3 @@
----
-slug: ./remote-proving
----
-
 # Remote Proving using Bonsai
 
 Bonsai lets users generate proofs for their zkVM applications, without using their own hardware for proof generation.

@@ -1,7 +1,3 @@
----
-slug: ./proving-options
----
-
 # Options for Proof Generation
 
 To support a variety of use cases, RISC Zero allows users a variety of options for proof generation.
