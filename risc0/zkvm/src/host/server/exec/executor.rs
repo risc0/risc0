@@ -62,7 +62,7 @@ use crate::{
     is_dev_mode,
     sha::Digest,
     Assumptions, ExecutorEnv, ExitCode, FileSegmentRef, Loader, Output, Segment, SegmentRef,
-    Session,
+    Session, SimpleSegmentRef,
 };
 
 /// The number of cycles required to compress a SHA-256 block.
@@ -241,12 +241,25 @@ impl<'a> ExecutorImpl<'a> {
     /// This will run the executor to get a [Session] which contain the results
     /// of the execution.
     pub fn run(&mut self) -> Result<Session> {
+        let ram_segment_limit: u32 = if std::env::var("RISC0_RAM_SEGMENT_LIMIT").is_ok() {
+            std::env::var("key").
+        } else {
+            64
+        };
+
         if self.env.segment_path.is_none() {
             self.env.segment_path = Some(SegmentPath::TempDir(Arc::new(tempdir()?)));
         }
 
         let path = self.env.segment_path.clone().unwrap();
-        self.run_with_callback(|segment| Ok(Box::new(FileSegmentRef::new(&segment, &path)?)))
+        self.run_with_callback(|segment| {
+            if segment.index < ram_segment_limit {
+                Ok(Box::new(SimpleSegmentRef::new(segment)))
+            } else {
+                // After creating more than the limit, store it in files to save RAM.
+                Ok(Box::new(FileSegmentRef::new(&segment, &path)?))
+            }
+        })
     }
 
     /// Run the executor until [ExitCode::Halted] or [ExitCode::Paused] is reached, producing a
