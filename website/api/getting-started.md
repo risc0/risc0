@@ -20,10 +20,10 @@ flowchart TD
 
     zkvm_app["1. zkVM Application Development"]
         zkvm_quickstart["zkVM Quickstart"]
-    proof_generation["2. Generating proofs for your zkVM application."]
+    proof_generation["2. Generating proofs for your zkVM application"]
 
     chain_integration["3. Blockchain Integration"]
-        getting_proofs_on_chain["Post proofs on-chain."]
+        getting_proofs_on_chain["Post proofs on-chain"]
         onchain_verifier["Call our on-chain verifier"]
 
 
