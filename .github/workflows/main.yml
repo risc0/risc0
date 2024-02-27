@@ -144,7 +144,7 @@ jobs:
           python-version: "3.10"
       - run: python license-check.py
       - name: check for "D0 NOT MERGE" comments
-        run: grep -re 'DO[_ ]\?NOT[_ ]\?MERGE' $(git ls-tree --full-tree --name-only -r HEAD)
+        run: grep -re 'DO[_ ]\?NOT[_ ]\?MERGE' $(git ls-tree --full-tree --name-only -r HEAD); [ $? -eq 1 ]
 
   test:
     if: needs.changes.outputs.test == 'true'
