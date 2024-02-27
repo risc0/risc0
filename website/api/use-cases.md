@@ -1,7 +1,3 @@
----
-slug: /use-cases
----
-
 # Use Cases
 
 Verifiable computation is a game changer for the resilience and economics of

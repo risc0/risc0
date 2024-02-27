@@ -1,7 +1,3 @@
----
-slug: /getting-started
----
-
 # Getting Started
 
 To harness the power of ZK, you'll need to:

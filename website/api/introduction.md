@@ -1,7 +1,3 @@
----
-slug: /
----
-
 # Introduction
 
 Welcome to the [RISC Zero] documentation!
