@@ -52,7 +52,7 @@ export default {
     },
     {
       type: "category",
-      label: "Writing your first zkVM Application",
+      label: "Writing your zkVM Application",
       collapsed: true,
       items: [
         {
