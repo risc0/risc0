@@ -317,7 +317,6 @@ impl SysVerify {
         image_id: &Digest,
         journal_digest: &Digest,
     ) -> Result<Option<(Digest, u32)>, PrunedValueError> {
-        // DO NOT MERGE: Check here that the cached assumption has no assumptions
         let assumption_journal_digest = claim
             .as_value()?
             .output
