@@ -164,7 +164,7 @@ export default {
         {
           type: "doc",
           label: "Verifier Contract",
-          id: "blockchain-integration/contracts/overview",
+          id: "blockchain-integration/contracts/verifier",
         },
       ],
     },
