@@ -568,8 +568,7 @@ mod tests {
     #[test]
     fn client_from_parts() {
         let url = "http://127.0.0.1/stage".to_string();
-        let apikey = TEST_KEY.to_string();
-        let client = super::Client::from_parts(url.clone(), apikey, TEST_VERSION).unwrap();
+        let client = super::Client::from_parts(&url, TEST_KEY, TEST_VERSION).unwrap();
 
         assert_eq!(client.url, url);
     }
