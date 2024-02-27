@@ -70,7 +70,7 @@ flowchart TD
 ```
 
 [zkvm-quickstart]: ./zkvm/quickstart.md
-[bonsai-quickstart]: ./bonsai/quickstart.md
+[bonsai-quickstart]: ./generating-proofs/remote-proving.md
 [foundry-template]: https://github.com/risc0/bonsai-foundry-template
 [Bonsai]: ./generating-proofs/remote-proving.md
 [chess]: https://github.com/risc0/risc0/tree/main/examples/chess
