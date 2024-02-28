@@ -53,7 +53,7 @@ export default {
     {
       type: "category",
       label: "Writing your zkVM Application",
-      collapsed: true,
+      collapsed: false,
       items: [
         {
           type: "doc",
