@@ -45,13 +45,8 @@ In addition to being far easier to build on, we're also delivering on
 [performance]. The zkVM has GPU acceleration for CUDA and Metal, and with
 [continuations] we've enabled parallel proving of large programs.
 
-## Getting Started
-
-To harness the power of ZK, you'll need to:
-
-1. [Write an application for the RISC Zero zkVM][zkvm-quickstart].
-2. [Generate proofs for your zkVM application][bonsai-quickstart].
-3. [Integrate your proofs into on-chain applications][bonsai-on-eth].
+**Ready to start building?** <br/>
+Check out our [Getting Started] page.
 
 [zkvm-quickstart]: ./zkvm/quickstart.md
 [bonsai-quickstart]: ./generating-proofs/remote-proving.md
@@ -63,6 +58,7 @@ To harness the power of ZK, you'll need to:
 [crate-validation]: https://risc0.github.io/ghpages/dev/crate-validation/index.html
 [discord]: https://discord.gg/risczero
 [ecdsa]: https://github.com/risc0/risc0/tree/main/examples/ecdsa
+[Getting Started]: ./getting-started.md
 [JSON]: https://github.com/risc0/risc0/tree/main/examples/json
 [mailing-list]: https://fmree464va4.typeform.com/to/X3KJB85v
 [optimism]: https://www.theblock.co/post/240929/optimism-zk-proof-proposals?utm_source=twitter&utm_medium=social
