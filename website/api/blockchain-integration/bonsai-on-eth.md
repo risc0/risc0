@@ -2,7 +2,7 @@
 
 _Warning: The zkVM and Bonsai are still in development. Do not use in production._
 
-Prove computation with the [RISC Zero zkVM](../zkvm) and verify the results in your Ethereum contract.
+Prove computation with the [RISC Zero zkVM](../zkvm/zkvm_overview.md) and verify the results in your Ethereum contract.
 
 The zkVM and Bonsai together can act as a [coprocessor][coprocessor-article] to the smart contract application.
 This unlocks powerful new applications on Ethereum that offload computationally intensive (i.e. gas expensive) and difficult to implement (e.g. ed25519 signature verification, or HTML parsing) functions to the zkVM.

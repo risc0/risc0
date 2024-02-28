@@ -2,12 +2,11 @@
 
 Verifiable computation is a game changer for the resilience and economics of
 operating the computing infrastructure we all rely on. It creates a number of
-emergent use cases which we are excited to enable. Key among these use cases
-are:
+emergent use cases which we are excited to enable. Key among these are:
 
-- [zk coprocessors], which enable on-chain applications to reduce gas costs by
-  moving the complex part of their application logic off-chain
-- blockchain infrastructure, including [our work with Optimism][optimism]
+- [ZK Coprocessors][zk-coprocessors-tweet], which enable blockchain applications to reduce gas costs by
+  moving the expensive part of their application logic off-chain
+- Optimistic rollups with ZK fraud proofs, including [our work with Optimism][optimism]
 
 The RISC Zero [zkVM] can prove the correct execution of arbitrary code, allowing
 developers to build ZK applications in mature languages like Rust and C++. The release
@@ -20,7 +19,7 @@ ecosystem, the zkVM has made it possible for developers to quickly build
 meaningful ZK applications, with no background in advanced mathematics or
 cryptography.
 
-These applications include:
+We've built a number of applications and primitives showcasing these capabilies, including:
 
 - **[Zeth]**: prove the correct construction of an entire Ethereum block or an entire Optimism block
 - **[Bonsai Pay]**: send Ethereum to someone's gmail address
@@ -48,31 +47,17 @@ In addition to being far easier to build on, we're also delivering on
 **Ready to start building?** <br/>
 Check out our [Getting Started] page.
 
-[zkvm-quickstart]: ./zkvm/quickstart.md
-[bonsai-quickstart]: ./generating-proofs/remote-proving.md
-[bonsai-on-eth]: ./blockchain-integration/bonsai-on-eth.md
-[Bonsai]: ./generating-proofs/remote-proving.md
 [Bonsai Pay]: https://risczero.com/news/bonsai-pay
 [chess]: https://github.com/risc0/risc0/tree/main/examples/chess
 [continuations]: https://risczero.com/news/continuations
 [crate-validation]: https://risc0.github.io/ghpages/dev/crate-validation/index.html
-[discord]: https://discord.gg/risczero
 [ecdsa]: https://github.com/risc0/risc0/tree/main/examples/ecdsa
 [Getting Started]: ./getting-started.md
 [JSON]: https://github.com/risc0/risc0/tree/main/examples/json
-[mailing-list]: https://fmree464va4.typeform.com/to/X3KJB85v
 [optimism]: https://www.theblock.co/post/240929/optimism-zk-proof-proposals?utm_source=twitter&utm_medium=social
 [performance]: ./zkvm/benchmarks.md
-[proof-system]: /proof-system
-[RISC Zero]: https://risczero.com
-[risc0-repo]: https://github.com/risc0/risc0
-[risc0-zkvm]: https://docs.rs/risc0-zkvm
-[rust-libraries]: https://github.com/risc0/risc0#rust-libraries
-[startup]: https://risczero.com/news/series-a
-[twitter]: https://twitter.com/risczero
 [waldo]: https://risczero.com/news/waldo
-[YouTube]: https://www.youtube.com/@risczero
 [Zeth]: https://risczero.com/news/zeth-release
-[zk coprocessors]: https://twitter.com/RiscZero/status/1677316664772132864
+[zk-coprocessors-tweet]: https://twitter.com/RiscZero/status/1677316664772132864
 [zkpoex]: https://risczero.com/news/zkpoex
 [zkVM]: ./zkvm/zkvm_overview.md
