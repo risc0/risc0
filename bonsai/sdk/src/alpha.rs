@@ -43,7 +43,7 @@ pub enum SdkErr {
     #[error("missing BONSAI_API_URL env var")]
     MissingApiUrl,
     /// Missing file
-    #[error("failed to find file on disk")]
+    #[error("failed to find file on disk: {0:?}")]
     FileNotFound(#[from] std::io::Error),
 }
 
@@ -85,6 +85,17 @@ pub mod responses {
         pub assumptions: Vec<String>,
     }
 
+    /// Session statistics metadata file
+    #[derive(Serialize, Deserialize)]
+    pub struct SessionStats {
+        /// Count of segments in this proof request
+        pub segments: usize,
+        /// Total cycles run within guest
+        pub total_cycles: u64,
+        /// User cycles run within guest, slightly below total overhead cycles
+        pub cycles: u64,
+    }
+
     /// Session Status response
     #[derive(Deserialize, Serialize)]
     pub struct SessionStatusRes {
@@ -116,6 +127,16 @@ pub mod responses {
         /// * `Finalize`
         /// * `InProgress`
         pub state: Option<String>,
+        /// Elapsed Time
+        ///
+        /// Elapsed time for a given session, in seconds
+        pub elapsed_time: Option<u64>,
+        /// Successful Session Stats
+        ///
+        /// Stats for a given successful session. Returns:
+        /// - Count of segments in this proof request
+        /// - User cycles run within guest, slightly below total overhead cycles
+        pub stats: Option<SessionStats>,
     }
 
     /// Snark proof request object
@@ -795,6 +816,8 @@ mod tests {
             receipt_url: None,
             error_msg: None,
             state: None,
+            elapsed_time: None,
+            stats: None,
         };
 
         let create_mock = server.mock(|when, then| {
