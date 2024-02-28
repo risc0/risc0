@@ -138,72 +138,19 @@ impl ParallelCircuitStepHandler<Elem> for MachineContext {
         match name {
             "halt" => Ok(()),
             "trace" => Ok(()),
-            "getMajor" => {
-                outs[0] = self.get_major(cycle)?;
-                Ok(())
-            }
-            "getMinor" => {
-                outs[0] = self.get_minor(cycle)?;
-                Ok(())
-            }
-            "divide" => {
-                (
-                    Quad(outs[0], outs[1], outs[2], outs[3]),
-                    Quad(outs[4], outs[5], outs[6], outs[7]),
-                ) = self.divide(
-                    Quad(args[0], args[1], args[2], args[3]),
-                    Quad(args[4], args[5], args[6], args[7]),
-                    args[8],
-                );
-                Ok(())
-            }
-            "bigintQuotient" => {
-                let (a, b) = args.split_at(bigint::WIDTH_BYTES * 2);
-                let q = self.bigint_quotient(a.try_into()?, b.try_into()?)?;
-                outs.copy_from_slice(&q[..]);
-                Ok(())
-            }
-            "pageInfo" => {
-                (outs[0], outs[1], outs[2]) = self.page_info(cycle);
-                Ok(())
-            }
-            "ramWrite" => {
-                self.ram_write(
-                    cycle,
-                    args[0],
-                    Quad(args[1], args[2], args[3], args[4]),
-                    args[5],
-                )?;
-                Ok(())
-            }
-            "ramRead" => {
-                Quad(outs[0], outs[1], outs[2], outs[3]) =
-                    self.ram_read(cycle, args[0], args[1])?;
-                Ok(())
-            }
-            "plonkWrite" => {
-                self.arg_write(cycle, extra, args);
-                Ok(())
-            }
-            "plonkRead" => {
-                self.arg_read(cycle, extra, outs);
-                Ok(())
-            }
-            "log" => {
-                self.log(extra, args);
-                Ok(())
-            }
+            "getMajor" => self.get_major(cycle, outs),
+            "getMinor" => self.get_minor(cycle, outs),
+            "divide" => self.divide(args, outs),
+            "bigintQuotient" => self.bigint_quotient(args, outs),
+            "pageInfo" => self.page_info(cycle, outs),
+            "ramWrite" => self.ram_write(cycle, args),
+            "ramRead" => self.ram_read(cycle, args, outs),
+            "plonkWrite" => self.arg_write(cycle, extra, args),
+            "plonkRead" => self.arg_read(cycle, extra, outs),
+            "log" => self.log(extra, args),
             "syscallInit" => Ok(()),
-            "syscallBody" => {
-                Quad(outs[0], outs[1], outs[2], outs[3]) = self.syscall_body()?.into();
-                Ok(())
-            }
-            "syscallFini" => {
-                let (a0, a1) = self.syscall_fini()?;
-                Quad(outs[0], outs[1], outs[2], outs[3]) = a0.into();
-                Quad(outs[4], outs[5], outs[6], outs[7]) = a1.into();
-                Ok(())
-            }
+            "syscallBody" => self.syscall_body(outs),
+            "syscallFini" => self.syscall_fini(outs),
             _ => unimplemented!("Unsupported extern: {name}"),
         }
     }
@@ -223,23 +170,25 @@ impl MachineContext {
         &stage.cycles[cycle - offset]
     }
 
-    fn get_major(&self, cycle: usize) -> Result<Elem> {
+    fn get_major(&self, cycle: usize, outs: &mut [Elem]) -> Result<()> {
         let cur_cycle = self.get_cycle(cycle);
         let (major, _) = cur_cycle.mux.as_body()?;
         tracing::trace!("[{cycle}] get_major: {major:?}");
-        Ok(major.as_u32().into())
+        outs[0] = major.as_u32().into();
+        Ok(())
     }
 
-    fn get_minor(&self, cycle: usize) -> Result<Elem> {
+    fn get_minor(&self, cycle: usize, outs: &mut [Elem]) -> Result<()> {
         let cur_cycle = self.get_cycle(cycle);
         let (_, minor) = cur_cycle.mux.as_body()?;
         tracing::trace!("[{cycle}] get_minor: {minor:?}");
-        Ok(minor.into())
+        outs[0] = minor.into();
+        Ok(())
     }
 
-    fn ram_read(&self, cycle: usize, addr: Elem, op: Elem) -> Result<Quad> {
-        let addr: u32 = addr.into();
-        let op: u32 = op.into();
+    fn ram_read(&self, cycle: usize, args: &[Elem], outs: &mut [Elem]) -> Result<()> {
+        let addr: u32 = args[0].into();
+        let op: u32 = args[1].into();
 
         let (stage, offset) = self.get_stage_offset(cycle);
         let cycle_idx = cycle - offset;
@@ -271,30 +220,32 @@ impl MachineContext {
             "[{cycle}] {:?} ram_read(0x{addr:08x}, {op}): {txn:?}",
             cur_cycle.mux
         );
-        Ok(txn.data.into())
+        Quad(outs[0], outs[1], outs[2], outs[3]) = txn.data.into();
+        Ok(())
     }
 
-    fn ram_write(&self, cycle: usize, addr: Elem, data: Quad, op: Elem) -> Result<()> {
-        let addr: u32 = addr.into();
-        let data: u32 = data.into();
-        let op: u32 = op.into();
+    fn ram_write(&self, cycle: usize, args: &[Elem]) -> Result<()> {
+        let addr: u32 = args[0].into();
+        let data: u32 = Quad(args[1], args[2], args[3], args[4]).into();
+        let op: u32 = args[5].into();
         tracing::trace!("[{cycle}] ram_write(0x{addr:08x}, 0x{data:08x}, {op})");
         Ok(())
     }
 
-    fn page_info(&self, cycle: usize) -> (Elem, Elem, Elem) {
+    fn page_info(&self, cycle: usize, outs: &mut [Elem]) -> Result<()> {
         let (stage, offset) = self.get_stage_offset(cycle);
         let cur_cycle = &stage.cycles[cycle - offset];
         let is_read = stage.extras[cur_cycle.extra_idx + 0];
         let page_idx = stage.extras[cur_cycle.extra_idx + 1];
         let is_done = stage.extras[cur_cycle.extra_idx + 2];
-        (is_read.into(), page_idx.into(), is_done.into())
+        (outs[0], outs[1], outs[2]) = (is_read.into(), page_idx.into(), is_done.into());
+        Ok(())
     }
 
-    fn divide(&self, numer: Quad, denom: Quad, sign: Elem) -> (Quad, Quad) {
-        let mut numer: u32 = numer.into();
-        let mut denom: u32 = denom.into();
-        let sign: u32 = sign.into();
+    fn divide(&self, args: &[Elem], outs: &mut [Elem]) -> Result<()> {
+        let mut numer: u32 = Quad(args[0], args[1], args[2], args[3]).into();
+        let mut denom: u32 = Quad(args[4], args[5], args[6], args[7]).into();
+        let sign: u32 = args[8].into();
         // tracing::debug!("divide: [{sign}] {numer} / {denom}");
         let ones_comp = (sign == 2) as u32;
         let neg_numer = sign != 0 && (numer as i32) < 0;
@@ -319,7 +270,9 @@ impl MachineContext {
             rem = (!rem).overflowing_add(1 - ones_comp).0;
         }
         // tracing::debug!("  quot: {quot}, rem: {rem}");
-        (quot.into(), rem.into())
+        Quad(outs[0], outs[1], outs[2], outs[3]) = quot.into();
+        Quad(outs[4], outs[5], outs[6], outs[7]) = rem.into();
+        Ok(())
     }
 
     // Division of two positive byte-limbed bigints. a = q * b + r.
@@ -337,11 +290,9 @@ impl MachineContext {
     //   values `x` and `y` such that `floor(x * y / b) >=
     //   2^bigint::WIDTH_BITS`. If x and/or y is less than b (i.e. the modulus
     //   in bigint modular multiply) this constrain will be satisfied.
-    fn bigint_quotient(
-        &self,
-        a_elems: &[Elem; bigint::WIDTH_BYTES * 2],
-        b_elems: &[Elem; bigint::WIDTH_BYTES],
-    ) -> Result<[Elem; bigint::WIDTH_BYTES]> {
+    fn bigint_quotient(&self, args: &[Elem], outs: &mut [Elem]) -> Result<()> {
+        let (a_elems, b_elems) = args.split_at(bigint::WIDTH_BYTES * 2);
+
         // This is a variant of school-book multiplication.
         // Reference the Handbook of Elliptic and Hyper-elliptic Cryptography alg.
         // 10.5.1
@@ -381,7 +332,8 @@ impl MachineContext {
             // Divide by zero is strictly undefined, but the BigInt multiplier circuit uses
             // a modulus of zero as a special case to support "checked multiply"
             // of up to 256-bits. Return zero here to facilitate this.
-            return Ok([Elem::ZERO; bigint::WIDTH_BYTES]);
+            outs.copy_from_slice(&[Elem::ZERO; bigint::WIDTH_BYTES]);
+            return Ok(());
         }
         if n < 2 {
             // FIXME: This routine should be updated to lift this restriction.
@@ -459,15 +411,16 @@ impl MachineContext {
         for i in 0..bigint::WIDTH_BYTES {
             q_elems[i] = q[i].into();
         }
-        Ok(q_elems)
+        outs.copy_from_slice(&q_elems);
+        Ok(())
     }
 
-    fn log(&self, msg: &str, args: &[Elem]) {
+    fn log(&self, msg: &str, args: &[Elem]) -> Result<()> {
         // Don't bother to format it if we're not even logging.
         if tracing::level_filters::LevelFilter::current()
             .eq(&tracing::level_filters::LevelFilter::OFF)
         {
-            return;
+            return Ok(());
         }
 
         // "msg" is given to us in C++-style formatting, so interpret it.
@@ -518,9 +471,10 @@ impl MachineContext {
             args_left
         );
         tracing::trace!("{}", formatted); // here
+        Ok(())
     }
 
-    fn arg_read(&self, _cycle: usize, name: &str, outs: &mut [Elem]) {
+    fn arg_read(&self, _cycle: usize, name: &str, outs: &mut [Elem]) -> Result<()> {
         // tracing::debug!("[{cycle}] arg_read({name})");
         match name {
             "ram" => self.ram_arg.read(outs.try_into().unwrap()),
@@ -531,9 +485,10 @@ impl MachineContext {
                 .read(outs.try_into().unwrap()),
             _ => unimplemented!("Unknown argument type {name}"),
         }
+        Ok(())
     }
 
-    fn arg_write(&self, _cycle: usize, name: &str, args: &[Elem]) {
+    fn arg_write(&self, _cycle: usize, name: &str, args: &[Elem]) -> Result<()> {
         // tracing::debug!("[{cycle}] arg_write({name})");
         match name {
             "ram" => self.ram_arg.write(args.try_into().unwrap()),
@@ -544,20 +499,25 @@ impl MachineContext {
                 .write(args.try_into().unwrap()),
             _ => unimplemented!("Unknown argument type {name}"),
         }
+        Ok(())
     }
 
-    fn syscall_body(&self) -> Result<u32> {
-        // Ok(self.syscall_out_data.pop_front().unwrap_or_default())
+    fn syscall_body(&self, _outs: &mut [Elem]) -> Result<()> {
+        // Quad(outs[0], outs[1], outs[2], outs[3]) =
+        //     self.syscall_out_data.pop_front().unwrap_or_default();
+        // Ok(())
         todo!()
     }
 
-    fn syscall_fini(&self) -> Result<(u32, u32)> {
+    fn syscall_fini(&self, _outs: &mut [Elem]) -> Result<()> {
         // let syscall_out_regs = self
         //     .syscall_out_regs
         //     .pop_front()
         //     .ok_or(anyhow!("Invalid syscall records"))?;
         // tracing::trace!("syscall_fini: {:?}", syscall_out_regs);
-        // Ok(syscall_out_regs)
+        // Quad(outs[0], outs[1], outs[2], outs[3]) = syscall_out_regs.0.into();
+        // Quad(outs[4], outs[5], outs[6], outs[7]) = syscall_out_regs.1.into();
+        // Ok(())
         todo!()
     }
 }
