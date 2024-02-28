@@ -26,4 +26,4 @@ Below is a diagram and overview of a typical application with RISC Zero on Ether
 [coprocessor-article]: https://www.risczero.com/news/a-guide-to-zk-coprocessors-for-scalability
 [foundry-template]: https://github.com/risc0/bonsai-foundry-template
 [term-journal]: /terminology#journal
-[verifier-contract]: /api/blockchain-integration/contracts/verifier.md
+[verifier-contract]: ./contracts/verifier.md
