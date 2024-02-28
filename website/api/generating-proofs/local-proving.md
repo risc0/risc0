@@ -14,5 +14,5 @@ The primary reason to consider using local proof generation for your application
 _With local proof generation, you can generate proofs about your private data, while your private data never leaves your machine._
 
 [open-source]: https://risczero.com/news/open-source
-[zkVM]: ../zkvm
+[zkVM]: ../zkvm/zkvm_overview.md
 [feature flags]: https://github.com/risc0/risc0#feature-flags
