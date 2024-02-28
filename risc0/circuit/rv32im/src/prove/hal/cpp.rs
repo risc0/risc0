@@ -24,6 +24,7 @@ use risc0_circuit_rv32im_sys::ffi::{
 use risc0_core::field::baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem};
 use risc0_zkp::{
     adapter::{CircuitProveDef, CircuitStep, CircuitStepContext, CircuitStepHandler, PolyFp},
+    field::Elem,
     hal::cpu::SyncSlice,
 };
 
@@ -144,6 +145,124 @@ pub(crate) fn call_step<S, F>(
 ) -> Result<BabyBearElem>
 where
     S: CircuitStepHandler<BabyBearElem>,
+    F: FnOnce(
+        *mut RawError,
+        *mut c_void,
+        Callback,
+        usize,
+        usize,
+        *const *mut BabyBearElem,
+        usize,
+    ) -> BabyBearElem,
+{
+    let mut last_err = None;
+    let mut call =
+        |name: &str, extra: &str, args: &[BabyBearElem], outs: &mut [BabyBearElem]| match handler
+            .call(ctx.cycle, name, extra, args, outs)
+        {
+            Ok(()) => true,
+            Err(err) => {
+                last_err = Some(err);
+                false
+            }
+        };
+    let trampoline = get_trampoline(&call);
+    let mut err = RawError::default();
+    let args: Vec<*mut BabyBearElem> = args.iter().map(SyncSlice::get_ptr).collect();
+    let result = inner(
+        &mut err,
+        &mut call as *mut _ as *mut c_void,
+        trampoline,
+        ctx.size,
+        ctx.cycle,
+        args.as_ptr(),
+        args.len(),
+    );
+    if let Some(err) = last_err {
+        return Err(err);
+    }
+    if err.msg.is_null() {
+        Ok(result)
+    } else {
+        let what = unsafe {
+            let str = risc0_circuit_string_ptr(err.msg);
+            let msg = CStr::from_ptr(str).to_str().unwrap().to_string();
+            risc0_circuit_string_free(err.msg);
+            msg
+        };
+        Err(anyhow!(what))
+    }
+}
+
+pub trait ParallelCircuitStepHandler<E: Elem> {
+    fn call(&self, cycle: usize, name: &str, extra: &str, args: &[E], outs: &mut [E])
+        -> Result<()>;
+}
+
+impl CircuitImpl {
+    pub fn par_step_exec<S: ParallelCircuitStepHandler<BabyBearElem>>(
+        &self,
+        ctx: &CircuitStepContext,
+        handler: &S,
+        args: &[SyncSlice<BabyBearElem>],
+    ) -> Result<BabyBearElem> {
+        par_call_step(
+            ctx,
+            handler,
+            args,
+            |err, ctx, trampoline, size, cycle, args_ptr, args_len| unsafe {
+                risc0_circuit_rv32im_step_exec(
+                    err, ctx, trampoline, size, cycle, args_ptr, args_len,
+                )
+            },
+        )
+    }
+
+    pub fn par_step_verify_bytes<S: ParallelCircuitStepHandler<BabyBearElem>>(
+        &self,
+        ctx: &CircuitStepContext,
+        handler: &S,
+        args: &[SyncSlice<BabyBearElem>],
+    ) -> Result<BabyBearElem> {
+        par_call_step(
+            ctx,
+            handler,
+            args,
+            |err, ctx, trampoline, size, cycle, args_ptr, args_len| unsafe {
+                risc0_circuit_rv32im_step_verify_bytes(
+                    err, ctx, trampoline, size, cycle, args_ptr, args_len,
+                )
+            },
+        )
+    }
+
+    pub fn par_step_verify_mem<S: ParallelCircuitStepHandler<BabyBearElem>>(
+        &self,
+        ctx: &CircuitStepContext,
+        handler: &S,
+        args: &[SyncSlice<BabyBearElem>],
+    ) -> Result<BabyBearElem> {
+        par_call_step(
+            ctx,
+            handler,
+            args,
+            |err, ctx, trampoline, size, cycle, args_ptr, args_len| unsafe {
+                risc0_circuit_rv32im_step_verify_mem(
+                    err, ctx, trampoline, size, cycle, args_ptr, args_len,
+                )
+            },
+        )
+    }
+}
+
+pub(crate) fn par_call_step<S, F>(
+    ctx: &CircuitStepContext,
+    handler: &S,
+    args: &[SyncSlice<BabyBearElem>],
+    inner: F,
+) -> Result<BabyBearElem>
+where
+    S: ParallelCircuitStepHandler<BabyBearElem>,
     F: FnOnce(
         *mut RawError,
         *mut c_void,

@@ -27,6 +27,7 @@ tracing = { version = "0.1", default-features = false, features = [
 ] }
 
 [target.'cfg(not(target_os = "zkvm"))'.dependencies]
+crossbeam = { version = "0.8", optional = true }
 cust = { version = "0.3", optional = true }
 rand = { version = "0.8", optional = true }
 rayon = { version = "1.5", optional = true }
@@ -54,6 +55,7 @@ metal = [
   "risc0-zkp/metal",
 ]
 prove = [
+  "dep:crossbeam",
   "dep:lazy-regex",
   "dep:num-derive",
   "dep:num-traits",

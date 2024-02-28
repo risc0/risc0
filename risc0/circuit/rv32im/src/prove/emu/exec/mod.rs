@@ -32,9 +32,11 @@ use risc0_zkvm_platform::{
 use super::{
     addr::{ByteAddr, WordAddr},
     pager::PagedMemory,
-    rv32im::{DecodedInstruction, EmuConext, Emulator, InsnKind, TrapCause},
+    rv32im::{DecodedInstruction, EmuContext, Emulator, InsnKind, TrapCause},
     Segment, SyscallRecord, SYSTEM_START,
 };
+
+pub const DEFAULT_SEGMENT_PO2: usize = 20;
 
 /// A host-side implementation of a system call.
 pub trait Syscall {
@@ -112,10 +114,10 @@ impl<'a, S: Syscall> Executor<'a, S> {
         }
     }
 
-    fn run(&mut self, segment_threshold: usize, max_cycles: usize) -> Result<Vec<Segment>> {
+    fn run(&mut self, segment_po2: usize, max_cycles: usize) -> Result<Vec<Segment>> {
         // Leave enough space at the end of a segment so that we don't overflow
         // This needs to be the worst case number of cycles needed to run a single step.
-        let segment_threshold = segment_threshold - 10000;
+        let segment_threshold = (1 << segment_po2) - 10000;
 
         let mut segments = Vec::new();
         let mut emu = Emulator::new();
@@ -124,17 +126,17 @@ impl<'a, S: Syscall> Executor<'a, S> {
 
         while self.exit_code.is_none() && total_cycles < max_cycles {
             let paging_cycles = self.pager.get_paging_cycles();
-            if self.cycles + paging_cycles >= segment_threshold {
+            let segment_cycles = self.cycles + paging_cycles;
+            if segment_cycles >= segment_threshold {
                 tracing::debug!("split: {} + {}", self.cycles, paging_cycles);
                 let (pre_state, partial_image, post_state) = self.pager.commit(prev_pc);
-                let po2 = log2_ceil(self.cycles.next_power_of_two()).try_into()?; // TODO
                 segments.push(Segment {
                     partial_image,
                     pre_state,
                     post_state,
                     syscalls: mem::take(&mut self.syscalls),
                     insn_cycles: self.cycles,
-                    po2,
+                    po2: segment_po2,
                 });
                 self.pager.clear();
                 prev_pc = self.pc;
@@ -145,7 +147,8 @@ impl<'a, S: Syscall> Executor<'a, S> {
         }
 
         let (pre_state, partial_image, post_state) = self.pager.commit(prev_pc);
-        let po2 = log2_ceil(self.cycles.next_power_of_two()).try_into()?; // TODO
+        let segment_cycles = self.cycles + self.pager.get_paging_cycles();
+        let po2 = log2_ceil(segment_cycles.next_power_of_two()).try_into()?; // TODO
         segments.push(Segment {
             partial_image,
             pre_state,
@@ -253,7 +256,7 @@ impl<'a, S: Syscall> Executor<'a, S> {
     }
 }
 
-impl<'a, S: Syscall> EmuConext for Executor<'a, S> {
+impl<'a, S: Syscall> EmuContext for Executor<'a, S> {
     fn ecall(&mut self) -> Result<bool> {
         self.pc += WORD_SIZE;
         match self.load_register(REG_T0)? {
@@ -316,11 +319,11 @@ impl<'a, S: Syscall> EmuConext for Executor<'a, S> {
 
 pub fn execute<S: Syscall>(
     image: MemoryImage,
-    segment_threshold: usize,
+    segment_po2: usize,
     max_cycles: usize,
     syscall_handler: &S,
 ) -> Result<Vec<Segment>> {
-    Executor::new(image, syscall_handler).run(segment_threshold, max_cycles)
+    Executor::new(image, syscall_handler).run(segment_po2, max_cycles)
 }
 
 // const fn align_up(addr: usize, align: usize) -> usize {

@@ -14,13 +14,11 @@
 
 use std::sync::Mutex;
 
+use anyhow::Result;
 use rand::thread_rng;
 use rayon::prelude::*;
 use risc0_zkp::{
-    adapter::{
-        CircuitInfo as _, CircuitStep as _, CircuitStepContext, CircuitStepHandler as _,
-        TapsProvider,
-    },
+    adapter::{CircuitInfo as _, CircuitStep as _, CircuitStepContext, TapsProvider},
     field::{
         baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
         Elem as _,
@@ -57,9 +55,9 @@ impl WitnessGenerator {
         }
     }
 
-    pub fn execute(&mut self, trace: PreflightTrace) {
+    pub fn execute(&mut self, trace: PreflightTrace) -> Result<()> {
         let mut machine = MachineContext::new(trace);
-        self.compute_execute(&mut machine);
+        self.compute_execute(&mut machine)?;
         self.compute_verify(&mut machine);
 
         // Zero out 'invalid' entries in data and output.
@@ -68,27 +66,45 @@ impl WitnessGenerator {
             .par_iter_mut()
             .chain(self.io.as_slice_mut().par_iter_mut())
             .for_each(|value| *value = value.valid_or_zero());
+
+        Ok(())
     }
 
-    fn compute_execute(&mut self, machine: &mut MachineContext) {
+    fn compute_execute(&mut self, machine: &mut MachineContext) -> Result<()> {
         tracing::debug!("load");
-        let mut loader = Loader::new(self.steps);
-        loader.load();
+        let mut loader = Loader::new(self.steps, &mut self.ctrl);
+        let last_cycle = loader.load();
 
-        tracing::debug!("execute");
-        for cycle in 0..loader.cycle {
-            let args = &[
-                loader.ctrl.as_slice_sync(),
-                self.io.as_slice_sync(),
-                self.data.as_slice_sync(),
-            ];
+        tracing::debug!("inject_backs");
+        (0..last_cycle).into_par_iter().for_each(|cycle| {
+            machine.inject_backs(self.steps, cycle, self.data.as_slice_sync());
+        });
 
-            let ctx = CircuitStepContext {
-                size: self.steps,
-                cycle,
-            };
-            CIRCUIT.step_exec(&ctx, machine, args).unwrap();
-        }
+        let args = &[
+            self.ctrl.as_slice_sync(),
+            self.io.as_slice_sync(),
+            self.data.as_slice_sync(),
+        ];
+        tracing::debug!("step_exec");
+        tracing::info_span!("step_exec").in_scope(|| {
+            (0..last_cycle).into_par_iter().for_each(|cycle| {
+                if cycle == 0 || machine.is_parallel_safe(cycle) {
+                    // tracing::debug!("step_exec: {cycle}");
+                    machine.step_exec(self.steps, cycle, args).unwrap();
+
+                    let mut cycle = cycle + 1;
+                    while cycle < last_cycle && !machine.is_parallel_safe(cycle) {
+                        machine.step_exec(self.steps, cycle, args).unwrap();
+                        cycle += 1;
+                    }
+                }
+            });
+            // for cycle in 0..last_cycle {
+            //     machine.step_exec(self.steps, cycle, args).unwrap();
+            // }
+        });
+
+        Ok(())
     }
 
     fn compute_verify(&mut self, machine: &mut MachineContext) {
@@ -112,27 +128,21 @@ impl WitnessGenerator {
 
         // Do the verify cycles
         let args = &[ctrl, io, data];
+        let last_cycle = self.steps - ZK_CYCLES;
 
         machine.sort("ram");
-        let last_cycle = self.steps - ZK_CYCLES;
+        tracing::debug!("step_verify_mem");
         tracing::info_span!("step_verify_mem").in_scope(|| {
-            for i in 0..last_cycle {
-                let ctx = CircuitStepContext {
-                    cycle: i,
-                    size: self.steps,
-                };
-                CIRCUIT.step_verify_mem(&ctx, machine, args).unwrap();
+            for cycle in 0..last_cycle {
+                machine.step_verify_mem(self.steps, cycle, args).unwrap();
             }
         });
 
         machine.sort("bytes");
+        tracing::debug!("step_verify_bytes");
         tracing::info_span!("step_verify_bytes").in_scope(|| {
-            for i in 0..last_cycle {
-                let ctx = CircuitStepContext {
-                    cycle: i,
-                    size: self.steps,
-                };
-                CIRCUIT.step_verify_bytes(&ctx, machine, args).unwrap();
+            for cycle in 0..last_cycle {
+                machine.step_verify_bytes(self.steps, cycle, args).unwrap();
             }
         });
     }

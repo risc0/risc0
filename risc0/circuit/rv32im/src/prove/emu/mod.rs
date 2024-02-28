@@ -18,6 +18,7 @@ mod pager;
 pub mod preflight;
 pub mod rv32im;
 
+use derive_debug::Dbg;
 use risc0_binfmt::{MemoryImage, SystemState};
 use risc0_zkp::{
     adapter::CircuitInfo as _,
@@ -36,10 +37,13 @@ pub struct SyscallRecord {
     pub regs: (u32, u32),
 }
 
+#[derive(Dbg)]
 pub struct Segment {
+    #[dbg(placeholder = "...")]
     pub partial_image: MemoryImage,
     pub pre_state: SystemState,
     pub post_state: SystemState,
+    #[dbg(placeholder = "...")]
     pub syscalls: Vec<SyscallRecord>,
     pub insn_cycles: usize,
     pub po2: usize,

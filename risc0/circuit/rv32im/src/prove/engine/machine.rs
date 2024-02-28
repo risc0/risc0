@@ -12,78 +12,122 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{
-    cmp,
-    collections::{BTreeMap, VecDeque},
-};
+use std::sync::atomic::Ordering;
+use std::{cmp, sync::RwLock};
 
 use anyhow::{anyhow, bail, Result};
 use lazy_regex::{regex, Captures};
 use risc0_zkp::{
-    adapter::CircuitStepHandler,
+    adapter::CircuitStepContext,
     field::{
-        baby_bear::{BabyBear, Elem},
+        baby_bear::{BabyBearElem, Elem},
         Elem as _,
     },
+    hal::cpu::SyncSlice,
 };
 use risc0_zkvm_platform::syscall::bigint;
 
-use super::argument::{ArgumentAccum, BytesArgument, RamArgument};
-use crate::prove::emu::{
-    addr::WordAddr,
-    preflight::{
-        Major, MemoryTransaction, PageFaults, PreflightCycle, PreflightStage, PreflightTrace,
+use super::{
+    argument::{BytesArgument, RamArgument},
+    merge_word8, split_word8, Quad,
+};
+use crate::prove::hal::cpp::ParallelCircuitStepHandler;
+use crate::{
+    prove::emu::{
+        addr::WordAddr,
+        preflight::{Major, PreflightCycle, PreflightStage, PreflightTrace},
     },
+    CIRCUIT,
 };
 
-type Quad = (Elem, Elem, Elem, Elem);
-
-struct SequentialStage {
-    cycles: VecDeque<PreflightCycle>,
-    txns: VecDeque<MemoryTransaction>,
-}
-
 pub struct MachineContext {
-    pre: SequentialStage,
-    body: SequentialStage,
-
-    cur_cycle: Option<PreflightCycle>,
-    faults: PageFaults,
+    trace: PreflightTrace,
 
     // Tables for sorting arguments in proper order
     ram_arg: RamArgument,
-    bytes_arg: BytesArgument,
-
-    // Argument accumulations for compute_accum and verify_accum phases
-    arg_accum: BTreeMap<String, ArgumentAccum<BabyBear>>,
-}
-
-impl SequentialStage {
-    fn new(stage: PreflightStage) -> Self {
-        Self {
-            cycles: stage.cycles.into(),
-            txns: stage.txns.into(),
-        }
-    }
+    bytes_arg: RwLock<BytesArgument>,
 }
 
 impl MachineContext {
     pub fn new(trace: PreflightTrace) -> Self {
         Self {
-            pre: SequentialStage::new(trace.pre),
-            body: SequentialStage::new(trace.body),
-            cur_cycle: None,
-            faults: trace.faults,
-            ram_arg: RamArgument::new(),
-            bytes_arg: BytesArgument::new(),
-            arg_accum: BTreeMap::new(),
+            trace,
+            ram_arg: RamArgument::default(),
+            bytes_arg: RwLock::new(BytesArgument::new()),
         }
+    }
+
+    pub fn is_parallel_safe(&self, cycle: usize) -> bool {
+        let cur_cycle = self.get_cycle(cycle);
+        let is_safe = cur_cycle.pc.is_some();
+        // tracing::debug!("is_parallel_safe: {cycle} <= {is_safe}");
+        is_safe
+    }
+
+    pub fn inject_backs(&self, steps: usize, cycle: usize, data: SyncSlice<BabyBearElem>) {
+        let cur_cycle = self.get_cycle(cycle);
+        if let Some(pc) = &cur_cycle.pc {
+            let bytes = pc.0.to_le_bytes();
+            tracing::debug!("[{cycle}] inject_backs(pc: {pc:?})");
+            let bot2 = bytes[3] & 0b11;
+            let top2 = bytes[3] >> 2 & 0b11;
+            // 5204
+            data.set(6 * steps + cycle - 1, (bytes[0] as u32).into());
+            // 5207
+            data.set(7 * steps + cycle - 1, (bytes[1] as u32).into());
+            // 5214
+            data.set(8 * steps + cycle - 1, (bytes[2] as u32).into());
+            // 5221
+            data.set(70 * steps + cycle - 1, (bot2 as u32).into());
+            // 5228
+            data.set(71 * steps + cycle - 1, (top2 as u32).into());
+            // 5238
+            data.set(99 * steps + cycle - 1, Major::MuxSize.as_u32().into());
+        }
+    }
+
+    pub fn sort(&mut self, name: &str) {
+        match name {
+            "ram" => self.ram_arg.sort(),
+            "bytes" => self.bytes_arg.write().unwrap().sort(),
+            _ => unimplemented!("Unknown argument type {name}"),
+        };
+    }
+
+    pub fn step_exec(
+        &self,
+        steps: usize,
+        cycle: usize,
+        args: &[SyncSlice<BabyBearElem>],
+    ) -> Result<BabyBearElem> {
+        let ctx = CircuitStepContext { size: steps, cycle };
+        CIRCUIT.par_step_exec(&ctx, self, args)
+    }
+
+    pub fn step_verify_mem(
+        &mut self,
+        steps: usize,
+        cycle: usize,
+        args: &[SyncSlice<BabyBearElem>],
+    ) -> Result<BabyBearElem> {
+        let ctx = CircuitStepContext { size: steps, cycle };
+        CIRCUIT.par_step_verify_mem(&ctx, self, args)
+    }
+
+    pub fn step_verify_bytes(
+        &mut self,
+        steps: usize,
+        cycle: usize,
+        args: &[SyncSlice<BabyBearElem>],
+    ) -> Result<BabyBearElem> {
+        let ctx = CircuitStepContext { size: steps, cycle };
+        CIRCUIT.par_step_verify_bytes(&ctx, self, args)
     }
 }
 
-impl CircuitStepHandler<Elem> for MachineContext {
+impl ParallelCircuitStepHandler<Elem> for MachineContext {
     fn call(
-        &mut self,
+        &self,
         cycle: usize,
         name: &str,
         extra: &str,
@@ -95,7 +139,7 @@ impl CircuitStepHandler<Elem> for MachineContext {
             "halt" => Ok(()),
             "trace" => Ok(()),
             "getMajor" => {
-                outs[0] = self.get_major(args[0], args[1])?;
+                outs[0] = self.get_major(cycle)?;
                 Ok(())
             }
             "getMinor" => {
@@ -137,19 +181,11 @@ impl CircuitStepHandler<Elem> for MachineContext {
                 Ok(())
             }
             "plonkWrite" => {
-                self.arg_write(extra, args);
+                self.arg_write(cycle, extra, args);
                 Ok(())
             }
             "plonkRead" => {
-                self.arg_read(extra, outs);
-                Ok(())
-            }
-            "plonkWriteAccum" => {
-                self.arg_write_accum(extra, args);
-                Ok(())
-            }
-            "plonkReadAccum" => {
-                self.arg_read_accum(extra, outs);
+                self.arg_read(cycle, extra, outs);
                 Ok(())
             }
             "log" => {
@@ -170,60 +206,74 @@ impl CircuitStepHandler<Elem> for MachineContext {
             _ => unimplemented!("Unsupported extern: {name}"),
         }
     }
-
-    fn sort(&mut self, _name: &str) {
-        self.ram_arg.sort();
-        self.bytes_arg.sort();
-    }
 }
 
-#[allow(unused)]
 impl MachineContext {
-    fn get_major(&mut self, cycle: Elem, pc: Elem) -> Result<Elem> {
-        if !self.faults.reads.is_empty() {
-            return Ok(Major::PageFault.as_u32().into());
+    fn get_stage_offset(&self, cycle: usize) -> (&PreflightStage, usize) {
+        if cycle < self.trace.pre.cycles.len() {
+            (&self.trace.pre, 0)
+        } else {
+            (&self.trace.body, self.trace.pre.cycles.len())
         }
-
-        let cycle: u32 = cycle.into();
-        let cur_cycle = self.body.cycles.pop_front().unwrap();
-        tracing::trace!("[{cycle}] get_major: {:?}", cur_cycle.major);
-        let major = cur_cycle.major.as_u32().into();
-        self.cur_cycle = Some(cur_cycle);
-        Ok(major)
     }
 
-    fn get_minor(&mut self, cycle: usize) -> Result<Elem> {
-        let cur_cycle = self.cur_cycle.as_ref().unwrap();
-        tracing::trace!("[{cycle}] get_minor: {:?}", cur_cycle.minor);
-        Ok(cur_cycle.minor.into())
+    fn get_cycle(&self, cycle: usize) -> &PreflightCycle {
+        let (stage, offset) = self.get_stage_offset(cycle);
+        &stage.cycles[cycle - offset]
     }
 
-    fn ram_read(&mut self, cycle: usize, addr: Elem, op: Elem) -> Result<Quad> {
+    fn get_major(&self, cycle: usize) -> Result<Elem> {
+        let cur_cycle = self.get_cycle(cycle);
+        let (major, _) = cur_cycle.mux.as_body()?;
+        tracing::trace!("[{cycle}] get_major: {major:?}");
+        Ok(major.as_u32().into())
+    }
+
+    fn get_minor(&self, cycle: usize) -> Result<Elem> {
+        let cur_cycle = self.get_cycle(cycle);
+        let (_, minor) = cur_cycle.mux.as_body()?;
+        tracing::trace!("[{cycle}] get_minor: {minor:?}");
+        Ok(minor.into())
+    }
+
+    fn ram_read(&self, cycle: usize, addr: Elem, op: Elem) -> Result<Quad> {
         let addr: u32 = addr.into();
         let op: u32 = op.into();
 
-        let stage = if !self.pre.txns.is_empty() {
-            &mut self.pre
-        } else {
-            &mut self.body
-        };
+        let (stage, offset) = self.get_stage_offset(cycle);
+        let cycle_idx = cycle - offset;
+        let stage_cycles = stage.cycles.len();
+        let cur_cycle = stage
+            .cycles
+            .get(cycle_idx)
+            .ok_or_else(|| anyhow!("[{cycle}] Preflight trace truncated: {stage_cycles}"))?;
 
-        let txn = stage
-            .txns
-            .pop_front()
-            .ok_or(anyhow!("Invalid memory transaction log"))?;
+        let mem_idx = cur_cycle.mem_idx.load(Ordering::Relaxed);
+
+        let txn = &stage.txns[mem_idx];
+        let txn_cycle = txn.cycle + offset;
+        if txn_cycle != cycle {
+            bail!("[{cycle}] Mismatched memory txn cycle. {txn_cycle} != {cycle}, {cur_cycle:?}, {txn:?}",);
+        }
+
         if txn.addr != WordAddr(addr) {
             bail!(
-                "Mismatched memory txn addr. Expected: {:?}, Actual: {:?}",
+                "[{cycle}] Mismatched memory txn addr. {:?} != {:?}",
                 txn.addr,
                 WordAddr(addr)
             );
         }
-        tracing::trace!("[{cycle}] ram_read(0x{addr:08x}, {op}): {txn:?}");
+
+        cur_cycle.mem_idx.store(mem_idx + 1, Ordering::Relaxed);
+
+        tracing::trace!(
+            "[{cycle}] {:?} ram_read(0x{addr:08x}, {op}): {txn:?}",
+            cur_cycle.mux
+        );
         Ok(split_word8(txn.data))
     }
 
-    fn ram_write(&mut self, cycle: usize, addr: Elem, data: Quad, op: Elem) -> Result<()> {
+    fn ram_write(&self, cycle: usize, addr: Elem, data: Quad, op: Elem) -> Result<()> {
         let addr: u32 = addr.into();
         let data = merge_word8(data);
         let op: u32 = op.into();
@@ -231,20 +281,13 @@ impl MachineContext {
         Ok(())
     }
 
-    fn page_info(&mut self, cycle: usize) -> (Elem, Elem, Elem) {
-        if let Some(page_idx) = self.faults.reads.pop_last() {
-            tracing::debug!("[{cycle}] page_read: 0x{page_idx:05x}");
-            return (Elem::ONE, page_idx.into(), Elem::ZERO);
-        }
-
-        // if self.is_flushing {
-        //     if let Some(page_idx) = self.faults.writes.pop_first() {
-        //         tracing::debug!("[{cycle}] page_write: 0x{page_idx:08x}");
-        //         return (Elem::ZERO, page_idx.into(), Elem::ZERO);
-        //     }
-        // }
-
-        (Elem::ZERO, Elem::ZERO, Elem::ONE)
+    fn page_info(&self, cycle: usize) -> (Elem, Elem, Elem) {
+        let (stage, offset) = self.get_stage_offset(cycle);
+        let cur_cycle = &stage.cycles[cycle - offset];
+        let is_read = stage.extras[cur_cycle.extra_idx + 0];
+        let page_idx = stage.extras[cur_cycle.extra_idx + 1];
+        let is_done = stage.extras[cur_cycle.extra_idx + 2];
+        (is_read.into(), page_idx.into(), is_done.into())
     }
 
     fn divide(&self, numer: Quad, denom: Quad, sign: Elem) -> (Quad, Quad) {
@@ -418,7 +461,7 @@ impl MachineContext {
         Ok(q_elems)
     }
 
-    fn log(&mut self, msg: &str, args: &[Elem]) {
+    fn log(&self, msg: &str, args: &[Elem]) {
         // Don't bother to format it if we're not even logging.
         if tracing::level_filters::LevelFilter::current()
             .eq(&tracing::level_filters::LevelFilter::OFF)
@@ -473,49 +516,41 @@ impl MachineContext {
             "Args missing formatting: {:?} in {msg}",
             args_left
         );
-        tracing::trace!("{}", formatted);
+        tracing::trace!("{}", formatted); // here
     }
 
-    fn arg_read(&mut self, name: &str, outs: &mut [Elem]) {
+    fn arg_read(&self, _cycle: usize, name: &str, outs: &mut [Elem]) {
+        // tracing::debug!("[{cycle}] arg_read({name})");
         match name {
             "ram" => self.ram_arg.read(outs.try_into().unwrap()),
-            "bytes" => self.bytes_arg.read(outs.try_into().unwrap()),
-            _ => panic!("Unknown argument type {name}"),
+            "bytes" => self
+                .bytes_arg
+                .write()
+                .unwrap()
+                .read(outs.try_into().unwrap()),
+            _ => unimplemented!("Unknown argument type {name}"),
         }
     }
 
-    fn arg_write(&mut self, name: &str, args: &[Elem]) {
+    fn arg_write(&self, _cycle: usize, name: &str, args: &[Elem]) {
+        // tracing::debug!("[{cycle}] arg_write({name})");
         match name {
             "ram" => self.ram_arg.write(args.try_into().unwrap()),
-            "bytes" => self.bytes_arg.write(args.try_into().unwrap()),
-            _ => panic!("Unknown argument type {name}"),
+            "bytes" => self
+                .bytes_arg
+                .write()
+                .unwrap()
+                .write(args.try_into().unwrap()),
+            _ => unimplemented!("Unknown argument type {name}"),
         }
     }
 
-    fn arg_read_accum(&mut self, name: &str, outs: &mut [Elem]) {
-        if let Some(entry) = self.arg_accum.get_mut(name) {
-            entry.read(outs)
-        } else {
-            panic!("Unknown argument accum {}", name);
-        }
-    }
-
-    fn arg_write_accum(&mut self, name: &str, args: &[Elem]) {
-        if let Some(entry) = self.arg_accum.get_mut(name) {
-            entry.write(args);
-        } else {
-            let mut accum = ArgumentAccum::new();
-            accum.write(args);
-            self.arg_accum.insert(name.to_string(), accum);
-        }
-    }
-
-    fn syscall_body(&mut self) -> Result<u32> {
+    fn syscall_body(&self) -> Result<u32> {
         // Ok(self.syscall_out_data.pop_front().unwrap_or_default())
         todo!()
     }
 
-    fn syscall_fini(&mut self) -> Result<(u32, u32)> {
+    fn syscall_fini(&self) -> Result<(u32, u32)> {
         // let syscall_out_regs = self
         //     .syscall_out_regs
         //     .pop_front()
@@ -524,21 +559,4 @@ impl MachineContext {
         // Ok(syscall_out_regs)
         todo!()
     }
-}
-
-fn split_word8(value: u32) -> Quad {
-    (
-        Elem::new(value & 0xff),
-        Elem::new(value >> 8 & 0xff),
-        Elem::new(value >> 16 & 0xff),
-        Elem::new(value >> 24 & 0xff),
-    )
-}
-
-fn merge_word8((x0, x1, x2, x3): Quad) -> u32 {
-    let x0: u32 = x0.into();
-    let x1: u32 = x1.into();
-    let x2: u32 = x2.into();
-    let x3: u32 = x3.into();
-    x0 | x1 << 8 | x2 << 16 | x3 << 24
 }

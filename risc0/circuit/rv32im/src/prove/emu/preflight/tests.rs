@@ -19,9 +19,10 @@ use risc0_binfmt::{MemoryImage, Program};
 use risc0_zkvm_platform::PAGE_SIZE;
 use test_log::test;
 
+use super::{MemoryTransaction, PreflightCycle};
 use crate::prove::emu::{
-    exec::{execute, Syscall, SyscallContext},
-    preflight::{Major, MemoryTransaction, PreflightCycle},
+    exec::{execute, Syscall, SyscallContext, DEFAULT_SEGMENT_PO2},
+    rv32im::InsnKind,
     ByteAddr,
 };
 
@@ -48,6 +49,14 @@ fn assert_slice_eq<T: fmt::Debug + PartialEq>(lhs: &[T], rhs: &[T]) {
     }
 }
 
+fn add_cycle(insn: InsnKind, mem_idx: usize, pc: Option<u32>) -> PreflightCycle {
+    if let Some(pc) = pc {
+        PreflightCycle::new(insn.into(), Some(ByteAddr(pc)), mem_idx, 0)
+    } else {
+        PreflightCycle::new(insn.into(), None, mem_idx, 0)
+    }
+}
+
 #[test]
 fn basic() {
     let raw_image = BTreeMap::from([
@@ -63,21 +72,20 @@ fn basic() {
     };
     let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
 
-    let segments = execute(image, 1 << 20, 1 << 4, &NullSyscall::default()).unwrap();
+    let segments = execute(image, DEFAULT_SEGMENT_PO2, 1 << 20, &NullSyscall::default()).unwrap();
     let segment = segments.first().unwrap();
 
-    let trace = super::preflight_segment(segment).unwrap();
-    assert_slice_eq(
-        &trace.body.cycles,
-        &[
-            PreflightCycle::new(ByteAddr(0x4004), true, 0, 0, Major::Compute2, 5),
-            PreflightCycle::new(ByteAddr(0x4008), true, 3, 0, Major::Compute2, 5),
-            PreflightCycle::new(ByteAddr(0x400c), true, 6, 0, Major::Compute0, 0),
-            PreflightCycle::new(ByteAddr(0x4010), true, 9, 0, Major::Compute2, 5),
-            PreflightCycle::new(ByteAddr(0x4010), true, 12, 0, Major::ECall, 0),
-        ],
-    );
+    let mut trace = super::preflight_segment(segment).unwrap();
+    let expected_cycles = [
+        add_cycle(InsnKind::LUI, 0, Some(0x4004)),
+        add_cycle(InsnKind::LUI, 3, Some(0x4008)),
+        add_cycle(InsnKind::ADD, 6, Some(0x400c)),
+        add_cycle(InsnKind::LUI, 9, Some(0x4010)),
+        add_cycle(InsnKind::EANY, 12, None),
+    ];
+    trace.body.cycles.truncate(expected_cycles.len());
 
+    assert_slice_eq(&trace.body.cycles, &expected_cycles);
     assert_slice_eq(
         &trace.body.txns,
         &[
@@ -97,22 +105,24 @@ fn basic() {
             MemoryTransaction::new(4, ByteAddr(0x0c000014), 0),
             MemoryTransaction::new(4, ByteAddr(0x0c00002c), 0x00005000),
             MemoryTransaction::new(4, ByteAddr(0x0c000028), 0x00000000),
-            MemoryTransaction::new(5, ByteAddr(0x00005000), 0x00000000),
-            MemoryTransaction::new(5, ByteAddr(0x00005004), 0x00000000),
-            MemoryTransaction::new(5, ByteAddr(0x00005008), 0x00000000),
-            MemoryTransaction::new(5, ByteAddr(0x0000500c), 0x00000000),
-            MemoryTransaction::new(5, ByteAddr(0x00005010), 0x00000000),
-            MemoryTransaction::new(5, ByteAddr(0x00005014), 0x00000000),
-            MemoryTransaction::new(5, ByteAddr(0x00005018), 0x00000000),
-            MemoryTransaction::new(5, ByteAddr(0x0000501c), 0x00000000),
-            MemoryTransaction::new(5, ByteAddr(0x0d6b5ac0), 0x5540a93a),
-            MemoryTransaction::new(5, ByteAddr(0x0d6b5ac4), 0x5f49f0e7),
-            MemoryTransaction::new(5, ByteAddr(0x0d6b5ac8), 0xe8e63b65),
-            MemoryTransaction::new(5, ByteAddr(0x0d6b5acc), 0x67e2c509),
-            MemoryTransaction::new(5, ByteAddr(0x0d6b5ad0), 0x4bfcad79),
-            MemoryTransaction::new(5, ByteAddr(0x0d6b5ad4), 0x0943f0cb),
-            MemoryTransaction::new(5, ByteAddr(0x0d6b5ad8), 0xd99e50cf),
-            MemoryTransaction::new(5, ByteAddr(0x0d6b5adc), 0x2354b2e4),
+            // reset(1)
+            MemoryTransaction::new(6324, ByteAddr(0x00005000), 0x00000000),
+            MemoryTransaction::new(6324, ByteAddr(0x00005004), 0x00000000),
+            MemoryTransaction::new(6324, ByteAddr(0x00005008), 0x00000000),
+            MemoryTransaction::new(6324, ByteAddr(0x0000500c), 0x00000000),
+            MemoryTransaction::new(6325, ByteAddr(0x00005010), 0x00000000),
+            MemoryTransaction::new(6325, ByteAddr(0x00005014), 0x00000000),
+            MemoryTransaction::new(6325, ByteAddr(0x00005018), 0x00000000),
+            MemoryTransaction::new(6325, ByteAddr(0x0000501c), 0x00000000),
+            // reset(2)
+            MemoryTransaction::new(6326, ByteAddr(0x0d6b5ac0), 0x5540a93a),
+            MemoryTransaction::new(6326, ByteAddr(0x0d6b5ac4), 0x5f49f0e7),
+            MemoryTransaction::new(6326, ByteAddr(0x0d6b5ac8), 0xe8e63b65),
+            MemoryTransaction::new(6326, ByteAddr(0x0d6b5acc), 0x67e2c509),
+            MemoryTransaction::new(6327, ByteAddr(0x0d6b5ad0), 0x4bfcad79),
+            MemoryTransaction::new(6327, ByteAddr(0x0d6b5ad4), 0x0943f0cb),
+            MemoryTransaction::new(6327, ByteAddr(0x0d6b5ad8), 0xd99e50cf),
+            MemoryTransaction::new(6327, ByteAddr(0x0d6b5adc), 0x2354b2e4),
         ],
     );
 

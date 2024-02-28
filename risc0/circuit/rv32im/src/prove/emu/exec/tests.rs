@@ -24,7 +24,7 @@ use risc0_zkvm_platform::{
 use test_log::test;
 
 use super::{Syscall, SyscallContext};
-use crate::prove::emu::addr::ByteAddr;
+use crate::prove::emu::{addr::ByteAddr, exec::DEFAULT_SEGMENT_PO2};
 
 #[derive(Default, Clone)]
 struct BasicSyscallState {
@@ -89,7 +89,13 @@ fn basic() {
     let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
     let pre_image_id = image.compute_id();
 
-    let segments = super::execute(image, 1 << 20, 1 << 4, &BasicSyscall::default()).unwrap();
+    let segments = super::execute(
+        image,
+        DEFAULT_SEGMENT_PO2,
+        1 << 20,
+        &BasicSyscall::default(),
+    )
+    .unwrap();
 
     assert_eq!(segments.len(), 1);
     let segment = segments.first().unwrap();
@@ -118,7 +124,7 @@ fn system_split() {
     let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
     let pre_image_id = image.compute_id();
 
-    let segments = super::execute(image, 1 << 15, 1 << 20, &BasicSyscall::default()).unwrap();
+    let segments = super::execute(image, 15, 1 << 20, &BasicSyscall::default()).unwrap();
 
     assert_eq!(segments.len(), 2);
     // assert_eq!(segments[0].exit_code, ExitCode::SystemSplit);

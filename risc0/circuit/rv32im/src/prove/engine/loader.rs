@@ -34,19 +34,20 @@ use risc0_zkvm_platform::{memory, WORD_SIZE};
 
 use crate::CIRCUIT;
 
-// TODO: get from circuit
-const SETUP_STEP_REGS: usize = 84;
-
 // The number of cycles needed after the body phase.
 // 4: Reset(fini)
 // 1: RamFini
 // 1: BytesFini
-const FINI_TAILROOM: usize = 6;
+pub const FINI_TAILROOM: usize = 6;
 
 pub const SHA_K_OFFSET: usize = memory::PRE_LOAD.start();
 pub const SHA_K_SIZE: usize = 64;
 pub const SHA_INIT_OFFSET: usize = SHA_K_OFFSET + SHA_K_SIZE * WORD_SIZE;
 const ZEROS_OFFSET: usize = SHA_INIT_OFFSET + DIGEST_WORDS * WORD_SIZE;
+
+// TODO: generate from zirgen
+pub const SETUP_STEP_REGS: usize = 84;
+pub const SETUP_CYCLES: usize = setup_count(SETUP_STEP_REGS);
 
 pub static SHA_K: [u32; SHA_K_SIZE] = [
     0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
@@ -91,7 +92,7 @@ enum CtrlReg {
 }
 
 #[derive(Clone)]
-struct CtrlCycle([BabyBearElem; CtrlReg::NumRegs as usize]);
+pub struct CtrlCycle([BabyBearElem; CtrlReg::NumRegs as usize]);
 
 fn split_word16(value: u32) -> (BabyBearElem, BabyBearElem) {
     (
@@ -232,53 +233,54 @@ impl<'a> Iterator for TripleWordIter<'a> {
     }
 }
 
-pub struct Loader {
+pub struct Loader<'a> {
     max_cycles: usize,
-    pub ctrl: CpuBuffer<BabyBearElem>,
-    pub cycle: usize,
+    ctrl: &'a mut CpuBuffer<BabyBearElem>,
+    cycle: usize,
     ram_load_cycles: Vec<CtrlCycle>,
     // init_cycles: usize,
     // fini_cycles: usize,
 }
 
-impl Loader {
-    const SETUP_CYCLES: usize = setup_count(SETUP_STEP_REGS);
+pub fn ram_load_cycles() -> Vec<CtrlCycle> {
+    let mut image: BTreeMap<u32, u32> = BTreeMap::new();
 
-    pub fn new(max_cycles: usize) -> Self {
-        let mut image: BTreeMap<u32, u32> = BTreeMap::new();
+    // Setup 'k' for SHA
+    for (i, word) in SHA_K.iter().enumerate() {
+        image.insert((SHA_K_OFFSET + i * WORD_SIZE) as u32, *word);
+    }
 
-        // Setup 'k' for SHA
-        for (i, word) in SHA_K.iter().enumerate() {
-            image.insert((SHA_K_OFFSET + i * WORD_SIZE) as u32, *word);
-        }
+    // Setup SHA-256 Init
+    for (i, word) in SHA256_INIT.as_words().iter().enumerate() {
+        image.insert((SHA_INIT_OFFSET + i * WORD_SIZE) as u32, *word);
+    }
 
-        // Setup SHA-256 Init
-        for (i, word) in SHA256_INIT.as_words().iter().enumerate() {
-            image.insert((SHA_INIT_OFFSET + i * WORD_SIZE) as u32, *word);
-        }
+    // Setup ZEROS
+    for i in 0..DIGEST_WORDS {
+        image.insert((ZEROS_OFFSET + i * WORD_SIZE) as u32, 0);
+    }
 
-        // Setup ZEROS
-        for i in 0..DIGEST_WORDS {
-            image.insert((ZEROS_OFFSET + i * WORD_SIZE) as u32, 0);
-        }
+    TripleWordIter::new(&image)
+        .map(|x| CtrlCycle::ram_load(x))
+        .collect()
+}
 
-        let ram_load_cycles = TripleWordIter::new(&image)
-            .map(|x| CtrlCycle::ram_load(x))
-            .collect();
-
+impl<'a> Loader<'a> {
+    pub fn new(max_cycles: usize, ctrl: &'a mut CpuBuffer<BabyBearElem>) -> Self {
         Self {
             max_cycles,
-            ctrl: CpuBuffer::from_fn(max_cycles * CIRCUIT.ctrl_size(), |_| BabyBearElem::ZERO),
+            ctrl,
             cycle: 0,
-            ram_load_cycles,
+            ram_load_cycles: ram_load_cycles(),
         }
     }
 
     #[tracing::instrument(skip_all)]
-    pub fn load(&mut self) {
+    pub fn load(&mut self) -> usize {
         self.pre_steps();
         self.body();
         self.post_steps();
+        self.cycle
     }
 
     fn pre_steps(&mut self) {
@@ -310,7 +312,7 @@ impl Loader {
 
     fn bytes_setup(&mut self) {
         tracing::debug!("[{}] BYTES_SETUP", self.cycle);
-        for _ in 0..Self::SETUP_CYCLES - 1 {
+        for _ in 0..SETUP_CYCLES - 1 {
             self.add_cycle(CtrlCycle::bytes_setup(BabyBearElem::ZERO));
         }
         self.add_cycle(CtrlCycle::bytes_setup(BabyBearElem::ONE));
@@ -340,8 +342,9 @@ impl Loader {
     }
 
     fn fini(&mut self) {
-        tracing::debug!("[{}] FINI", self.cycle);
+        tracing::debug!("[{}] RAM_FINI", self.cycle);
         self.add_cycle(CtrlCycle::ram_fini());
+        tracing::debug!("[{}] BYTES_FINI", self.cycle);
         self.add_cycle(CtrlCycle::bytes_fini());
     }
 
@@ -355,30 +358,31 @@ impl Loader {
     }
 
     // Compute the `ControlId` associated with the given HAL
-    pub fn compute_control_id<H: Hal<Elem = BabyBearElem>>(hal: &H) -> Vec<Digest> {
-        let ctrl_size = CIRCUIT.ctrl_size();
-
-        // Start with an empty table
-        let mut table = Vec::new();
-
+    pub fn compute_control_id_table<H: Hal<Elem = BabyBearElem>>(hal: &H) -> Vec<Digest> {
         // Make the digest for each level
-        for i in MIN_CYCLES_PO2..MAX_CYCLES_PO2 {
-            let cycles = 1 << i;
-            let mut loader = Loader::new(cycles);
-            tracing::info!("po2: {i}");
-            // Make a vector & set it up with the elf data
-            loader.load();
-            // Copy into accel buffer
-            let coeffs = hal.copy_from_elem("coeffs", &loader.ctrl.as_slice());
-            // Do interpolate & shift
-            hal.batch_interpolate_ntt(&coeffs, ctrl_size);
-            hal.zk_shift(&coeffs, ctrl_size);
-            // Make the poly-group & extract the root
-            let group = PolyGroup::new(hal, coeffs, ctrl_size, cycles, "ctrl");
-            table.push(*group.merkle.root());
+        let mut table = Vec::new();
+        for po2 in MIN_CYCLES_PO2..MAX_CYCLES_PO2 {
+            table.push(Self::compute_control_id(hal, po2));
         }
-
         table
+    }
+
+    pub fn compute_control_id<H: Hal<Elem = BabyBearElem>>(hal: &H, po2: usize) -> Digest {
+        tracing::info!("po2: {po2}");
+        let cycles = 1 << po2;
+        let ctrl_size = CIRCUIT.ctrl_size();
+        let mut ctrl = CpuBuffer::from_fn(cycles * ctrl_size, |_| BabyBearElem::ZERO);
+        let mut loader = Loader::new(cycles, &mut ctrl);
+        // Make a vector & set it up with the elf data
+        loader.load();
+        // Copy into accel buffer
+        let coeffs = hal.copy_from_elem("coeffs", &ctrl.as_slice());
+        // Do interpolate & shift
+        hal.batch_interpolate_ntt(&coeffs, ctrl_size);
+        hal.zk_shift(&coeffs, ctrl_size);
+        // Make the poly-group & extract the root
+        let group = PolyGroup::new(hal, coeffs, ctrl_size, cycles, "ctrl");
+        *group.merkle.root()
     }
 }
 

@@ -17,7 +17,7 @@ use risc0_zkvm_platform::WORD_SIZE;
 
 use super::addr::{ByteAddr, WordAddr};
 
-pub trait EmuConext {
+pub trait EmuContext {
     // Handle environment call
     fn ecall(&mut self) -> Result<bool>;
 
@@ -104,7 +104,7 @@ enum InsnCategory {
     Invalid,
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum InsnKind {
     INVALID,
     ADD,
@@ -348,7 +348,7 @@ impl Emulator {
         }
     }
 
-    pub fn step<C: EmuConext>(&mut self, ctx: &mut C) -> Result<()> {
+    pub fn step<C: EmuContext>(&mut self, ctx: &mut C) -> Result<()> {
         let pc = ctx.get_pc();
 
         if !ctx.check_insn_load(pc) {
@@ -379,7 +379,7 @@ impl Emulator {
         Ok(())
     }
 
-    fn step_compute<M: EmuConext>(
+    fn step_compute<M: EmuContext>(
         &mut self,
         ctx: &mut M,
         kind: InsnKind,
@@ -502,7 +502,7 @@ impl Emulator {
         Ok(true)
     }
 
-    fn step_load<M: EmuConext>(
+    fn step_load<M: EmuContext>(
         &mut self,
         ctx: &mut M,
         kind: InsnKind,
@@ -553,7 +553,7 @@ impl Emulator {
         Ok(true)
     }
 
-    fn step_store<M: EmuConext>(
+    fn step_store<M: EmuContext>(
         &mut self,
         ctx: &mut M,
         kind: InsnKind,
@@ -592,7 +592,7 @@ impl Emulator {
         Ok(true)
     }
 
-    fn step_system<M: EmuConext>(
+    fn step_system<M: EmuContext>(
         &mut self,
         ctx: &mut M,
         kind: InsnKind,

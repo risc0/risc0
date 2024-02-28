@@ -14,14 +14,13 @@
 
 //! CPU implementation of the HAL.
 
-use core::{
-    cell::{Ref, RefMut},
-    ops::Range,
-};
-use std::{cell::RefCell, fmt::Debug, rc::Rc};
+use std::{fmt::Debug, ops::Range, sync::Arc};
 
 use bytemuck::Pod;
 use ndarray::{ArrayView, ArrayViewMut, Axis};
+use parking_lot::{
+    MappedRwLockReadGuard, MappedRwLockWriteGuard, RwLock, RwLockReadGuard, RwLockWriteGuard,
+};
 use rayon::prelude::*;
 use risc0_core::field::{Elem, ExtElem, Field};
 
@@ -89,12 +88,12 @@ impl<T> Drop for TrackedVec<T> {
 
 #[derive(Clone)]
 pub struct CpuBuffer<T> {
-    buf: Rc<RefCell<TrackedVec<T>>>,
+    buf: Arc<RwLock<TrackedVec<T>>>,
     region: Region,
 }
 
 enum SyncSliceRef<'a, T: Default + Clone + Pod> {
-    FromBuf(RefMut<'a, [T]>),
+    FromBuf(MappedRwLockWriteGuard<'a, [T]>),
     FromSlice(&'a SyncSlice<'a, T>),
 }
 
@@ -107,7 +106,7 @@ pub struct SyncSlice<'a, T: Default + Clone + Pod> {
     size: usize,
 }
 
-// SAFETY: SyncSlice keeps a RefMut to the original CpuBuffer, so
+// SAFETY: SyncSlice keeps a MappedRwLockWriteGuard to the original CpuBuffer, so
 // no other as_slice or as_slice_muts can be active at the same time.
 //
 // The user of the SyncSlice is responsible for ensuring that no
@@ -115,7 +114,7 @@ pub struct SyncSlice<'a, T: Default + Clone + Pod> {
 unsafe impl<'a, T: Default + Clone + Pod> Sync for SyncSlice<'a, T> {}
 
 impl<'a, T: Default + Clone + Pod> SyncSlice<'a, T> {
-    pub fn new(mut buf: RefMut<'a, [T]>) -> Self {
+    pub fn new(mut buf: MappedRwLockWriteGuard<'a, [T]>) -> Self {
         let ptr = buf.as_mut_ptr();
         let size = buf.len();
         SyncSlice {
@@ -162,7 +161,7 @@ impl<T: Default + Clone + Pod> CpuBuffer<T> {
     fn new(size: usize) -> Self {
         let buf = vec![T::default(); size];
         CpuBuffer {
-            buf: Rc::new(RefCell::new(TrackedVec::new(buf))),
+            buf: Arc::new(RwLock::new(TrackedVec::new(buf))),
             region: Region(0, size),
         }
     }
@@ -174,7 +173,7 @@ impl<T: Default + Clone + Pod> CpuBuffer<T> {
     fn copy_from(slice: &[T]) -> Self {
         let bytes = bytemuck::cast_slice(slice);
         CpuBuffer {
-            buf: Rc::new(RefCell::new(TrackedVec::new(Vec::from(bytes)))),
+            buf: Arc::new(RwLock::new(TrackedVec::new(Vec::from(bytes)))),
             region: Region(0, slice.len()),
         }
     }
@@ -185,22 +184,22 @@ impl<T: Default + Clone + Pod> CpuBuffer<T> {
     {
         let vec = (0..size).map(f).collect();
         CpuBuffer {
-            buf: Rc::new(RefCell::new(TrackedVec::new(vec))),
+            buf: Arc::new(RwLock::new(TrackedVec::new(vec))),
             region: Region(0, size),
         }
     }
 
-    pub fn as_slice(&self) -> Ref<'_, [T]> {
-        let vec = self.buf.borrow();
-        Ref::map(vec, |vec| {
+    pub fn as_slice(&self) -> MappedRwLockReadGuard<'_, [T]> {
+        let vec = self.buf.read();
+        RwLockReadGuard::map(vec, |vec| {
             let slice = bytemuck::cast_slice(&vec.0);
             &slice[self.region.range()]
         })
     }
 
-    pub fn as_slice_mut(&self) -> RefMut<'_, [T]> {
-        let vec = self.buf.borrow_mut();
-        RefMut::map(vec, |vec| {
+    pub fn as_slice_mut(&self) -> MappedRwLockWriteGuard<'_, [T]> {
+        let vec = self.buf.write();
+        RwLockWriteGuard::map(vec, |vec| {
             let slice = bytemuck::cast_slice_mut(&mut vec.0);
             &mut slice[self.region.range()]
         })
@@ -215,7 +214,7 @@ impl<T: Default + Clone + Pod> From<Vec<T>> for CpuBuffer<T> {
     fn from(vec: Vec<T>) -> CpuBuffer<T> {
         let size = vec.len();
         CpuBuffer {
-            buf: Rc::new(RefCell::new(TrackedVec::new(vec))),
+            buf: Arc::new(RwLock::new(TrackedVec::new(vec))),
             region: Region(0, size),
         }
     }
@@ -230,19 +229,19 @@ impl<T: Pod> Buffer<T> for CpuBuffer<T> {
         assert!(offset + size <= self.size());
         let region = Region(self.region.offset() + offset, size);
         CpuBuffer {
-            buf: Rc::clone(&self.buf),
+            buf: Arc::clone(&self.buf),
             region,
         }
     }
 
     fn view<F: FnOnce(&[T])>(&self, f: F) {
-        let buf = self.buf.borrow();
+        let buf = self.buf.read();
         let slice = bytemuck::cast_slice(&buf.0);
         f(&slice[self.region.range()]);
     }
 
     fn view_mut<F: FnOnce(&mut [T])>(&self, f: F) {
-        let mut buf = self.buf.borrow_mut();
+        let mut buf = self.buf.write();
         let slice = bytemuck::cast_slice_mut(&mut buf.0);
         f(&mut slice[self.region.range()]);
     }

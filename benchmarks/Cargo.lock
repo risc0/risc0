@@ -2395,6 +2395,7 @@ dependencies = [
  "lazy_static",
  "metal",
  "ndarray",
+ "parking_lot",
  "paste",
  "rand",
  "rand_core",

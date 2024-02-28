@@ -12,17 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::collections::{BTreeMap, HashMap};
+use std::collections::{BTreeMap, BTreeSet, HashMap};
 
 use anyhow::Result;
 use risc0_binfmt::{MemoryImage, SystemState};
 use risc0_zkp::core::hash::sha::BLOCK_BYTES;
 use risc0_zkvm_platform::{PAGE_SIZE, WORD_SIZE};
 
-use super::{
-    addr::{ByteAddr, WordAddr},
-    preflight::PageFaults,
-};
+use super::addr::{ByteAddr, WordAddr};
 
 pub const PAGE_WORDS: usize = PAGE_SIZE / WORD_SIZE;
 
@@ -43,6 +40,12 @@ struct Page(Vec<u8>);
 enum PageState {
     Loaded,
     Dirty,
+}
+
+#[derive(Clone, Default, Debug)]
+pub struct PageFaults {
+    pub reads: BTreeSet<u32>,
+    pub writes: BTreeSet<u32>,
 }
 
 pub struct PagedMemory {

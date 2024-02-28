@@ -12,88 +12,75 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::collections::VecDeque;
+use std::fmt;
+use std::sync::atomic::AtomicUsize;
+use std::sync::atomic::Ordering;
 
-use risc0_core::field::{Elem, ExtElem, Field};
-use risc0_zkp::MAX_CYCLES;
+use crossbeam::queue::SegQueue;
+use derive_debug::Dbg;
+use risc0_zkp::field::baby_bear::BabyBearElem;
+
+use super::{merge_twin, merge_word8, split_twin, split_word8};
+
+// (cycle << 2) | mem_op
+#[derive(Ord, PartialOrd, Eq, PartialEq)]
+struct Cyclop(u32);
 
 // Main RAM argument rows have the following 7 elements:
 // addr, cycle, isWrite, byte0, byte1, byte2, byte3
-#[derive(Ord, PartialOrd, Eq, PartialEq)]
-struct RamArgumentRow {
+#[derive(Dbg, Ord, PartialOrd, Eq, PartialEq)]
+pub struct RamArgumentRow {
+    #[dbg(fmt = "0x{:08x}")]
     addr: u32,
-    // (cycle << 2) | mem_op
-    cycle_and_write_flag: u32,
-    val: u32,
+    cyclop: Cyclop,
+    #[dbg(fmt = "0x{:08x}")]
+    word: u32,
 }
 
+#[derive(Default)]
 pub struct RamArgument {
-    main_ram: Vec<RamArgumentRow>,
+    queue: SegQueue<RamArgumentRow>,
+    sorted: Vec<RamArgumentRow>,
+    idx: AtomicUsize,
+}
+
+// Argument for bytes.
+//
+// Rows each have 2 byte elements, each of which is in [0, 256). We construct
+// these into a short, [0, 256*256), and count how many of each row occurs.
+pub struct BytesArgument {
+    counts: Box<[u32; 256 * 256]>,
+    read_pos: usize,
 }
 
 impl RamArgument {
-    pub fn new() -> Self {
-        // Make sure cycle_and_write_flag won't overflow
-        assert!(MAX_CYCLES < ((u32::MAX as usize) << 2));
-
-        RamArgument {
-            main_ram: Vec::new(),
-        }
-    }
-
-    pub fn write<E: Elem>(&mut self, elems: &[E; 7])
-    where
-        u32: From<E>,
-    {
-        let addr = u32::from(elems[0]);
-        let cycle = u32::from(elems[1]);
-        let mem_op = u32::from(elems[2]);
-        debug_assert!(mem_op < 4);
-        let cycle_and_write_flag = (cycle << 2) + mem_op;
-
-        for elem in &elems[3..] {
-            debug_assert!(u32::from(*elem) < 256);
-        }
-        self.main_ram.push(RamArgumentRow {
-            addr,
-            cycle_and_write_flag,
-            val: u32::from(elems[3])
-                + (u32::from(elems[4]) << 8)
-                + (u32::from(elems[5]) << 16)
-                + (u32::from(elems[6]) << 24),
-        });
+    pub fn write(&self, args: &[BabyBearElem]) {
+        let addr: u32 = args[0].into();
+        let cycle: u32 = args[1].into();
+        let mem_op: u32 = args[2].into();
+        let cyclop = Cyclop::new(cycle, mem_op);
+        let word = merge_word8((args[3], args[4], args[5], args[6]));
+        let row = RamArgumentRow { addr, cyclop, word };
+        // tracing::debug!("arg_write(ram): {row:?}");
+        self.queue.push(row);
     }
 
     pub fn sort(&mut self) {
-        // Reverse sort all rows so we can pop them off the back in order.
-        self.main_ram.sort_unstable_by(|a, b| b.cmp(a));
+        while !self.queue.is_empty() {
+            self.sorted.push(self.queue.pop().unwrap());
+        }
+        self.sorted.sort();
     }
 
-    pub fn read<E: Elem>(&mut self, elems: &mut [E; 7])
-    where
-        u32: From<E>,
-    {
-        let mut set_elem = |idx, val: u32| {
-            elems[idx] = E::from_u64(val as u64);
-        };
-        let row = self.main_ram.pop().unwrap();
-        set_elem(0, row.addr);
-        set_elem(1, row.cycle_and_write_flag >> 2);
-        set_elem(2, row.cycle_and_write_flag & 3);
-        set_elem(3, row.val & 0xFF);
-        set_elem(4, (row.val >> 8) & 0xFF);
-        set_elem(5, (row.val >> 16) & 0xFF);
-        set_elem(6, (row.val >> 24) & 0xFF);
+    pub fn read(&self, out: &mut [BabyBearElem]) {
+        let idx = self.idx.fetch_add(1, Ordering::Relaxed);
+        let row = self.sorted.get(idx).unwrap();
+        // tracing::debug!("arg_read(ram): {row:?}");
+        out[0] = row.addr.into();
+        out[1] = row.cyclop.cycle().into();
+        out[2] = row.cyclop.mem_op().into();
+        (out[3], out[4], out[5], out[6]) = split_word8(row.word);
     }
-}
-
-// Argument for bytes.  Rows each have 2 byte elements, each of which is
-// in [0, 256).  We construct these into a short, [0, 256*256), and
-// count how many of each row occurs.
-pub struct BytesArgument {
-    counts: Box<[u32; 256 * 256]>,
-
-    read_pos: usize,
 }
 
 impl BytesArgument {
@@ -104,68 +91,42 @@ impl BytesArgument {
         }
     }
 
-    pub fn write<E: Elem>(&mut self, elems: &[E; 2])
-    where
-        u32: From<E>,
-    {
-        for elem in elems {
-            debug_assert!(u32::from(*elem) < 256);
-        }
-        let index = ((u32::from(elems[0]) << 8) + u32::from(elems[1])) as usize;
-        self.counts[index] += 1;
+    pub fn write(&mut self, args: &[BabyBearElem]) {
+        let idx = merge_twin((args[0], args[1]));
+        // tracing::debug!("arg_write(bytes): {idx}");
+        self.counts[idx as usize] += 1;
     }
 
     pub fn sort(&mut self) {
         // BytesArgument is already sorted.
     }
 
-    pub fn read<E: Elem>(&mut self, outs: &mut [E; 2]) {
+    pub fn read(&mut self, outs: &mut [BabyBearElem]) {
         while self.counts[self.read_pos] == 0 {
             self.read_pos += 1;
         }
-
-        let b1 = (self.read_pos >> 8) & 0xFF;
-        let b2 = self.read_pos & 0xFF;
-
+        // tracing::debug!("arg_read(bytes): {}", self.read_pos);
+        (outs[0], outs[1]) = split_twin(self.read_pos as u32);
         self.counts[self.read_pos] -= 1;
-
-        *outs = [E::from_u64(b1 as u64), E::from_u64(b2 as u64)];
     }
 }
 
-/// Argument accumulations.
-///
-/// Saves factors to compute prefix products.
-pub struct ArgumentAccum<F: Field> {
-    elems: VecDeque<F::ExtElem>,
-}
-
-impl<F: Field> ArgumentAccum<F> {
-    pub fn new() -> Self {
-        ArgumentAccum {
-            elems: VecDeque::new(),
-        }
-    }
-
-    // TODO: When the circuit supports ExtElem natively we should operate on those
-    // directly instead of converting from E::Elem.
-    pub fn write(&mut self, elems: &[F::Elem]) {
-        self.elems.extend(
-            elems
-                .chunks_exact(F::ExtElem::EXT_SIZE)
-                .map(|v| F::ExtElem::from_subelems(v.iter().cloned())),
-        );
-    }
-
-    pub fn read(&mut self, outs: &mut [F::Elem]) {
-        for out in outs.chunks_exact_mut(F::ExtElem::EXT_SIZE) {
-            out.clone_from_slice(self.elems.pop_front().unwrap().subelems());
-        }
+impl fmt::Debug for Cyclop {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "({}, {})", self.cycle(), self.mem_op())
     }
 }
 
-impl<F: Field> Default for ArgumentAccum<F> {
-    fn default() -> Self {
-        Self::new()
+impl Cyclop {
+    fn new(cycle: u32, mem_op: u32) -> Self {
+        Self((cycle << 2) | mem_op)
+    }
+
+    fn cycle(&self) -> u32 {
+        self.0 >> 2
+    }
+
+    fn mem_op(&self) -> u32 {
+        self.0 & 0b11
     }
 }

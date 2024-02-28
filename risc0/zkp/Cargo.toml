@@ -32,6 +32,7 @@ tracing = { version = "0.1", default-features = false, features = [
 
 [target.'cfg(not(target_os = "zkvm"))'.dependencies]
 ndarray = { version = "0.15", features = ["rayon"], optional = true }
+parking_lot = { version = "0.12", optional = true }
 rand = { version = "0.8", optional = true }
 rayon = { version = "1.5", optional = true }
 risc0-sys = { workspace = true, optional = true }
@@ -52,6 +53,7 @@ prove = [
   "dep:ff",
   "dep:lazy_static",
   "dep:ndarray",
+  "dep:parking_lot",
   "dep:rand",
   "dep:rayon",
   "risc0-sys",
