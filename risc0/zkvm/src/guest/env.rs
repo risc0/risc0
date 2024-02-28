@@ -308,11 +308,39 @@ pub fn send_recv_slice<T: Pod, U: Pod>(syscall_name: SyscallName, to_host: &[T])
 }
 
 /// Read private data from the host and deserializes it.
+///
+/// This is a convenience function for [`stdin`] and [`read`].
+///
+/// By default, all data comes from the `stdin` file descriptor. In order to read from a different file descriptor, use [`FdReader`].
+///
+/// [`read`]: FdReader::read
 pub fn read<T: DeserializeOwned>() -> T {
     stdin().read()
 }
 
+#[allow(clippy::needless_doctest_main)]
 /// Read a slice from the host.
+///
+/// This is a convenience function for [`stdin`] and [`read_slice`].
+/// See [`read`] for more information.
+///
+/// [`read_slice`]: FdReader::read_slice
+///
+/// # Example
+///
+/// `Guest code`
+///
+/// ```no_run
+/// use risc0_zkvm::guest::env;
+///
+/// fn main() {
+///    let mut buf = [0u8; 1024];
+///
+/// }
+///
+///
+///
+/// ```
 pub fn read_slice<T: Pod>(slice: &mut [T]) {
     stdin().read_slice(slice)
 }
@@ -409,6 +437,7 @@ impl<R: Read + ?Sized> Read for &mut R {
 }
 
 /// Provides a FdReader which can read from any file descriptor
+/// TODO: Write instructions on how users can implement their own FdReader and read from custom file descriptors.
 pub struct FdReader {
     fd: u32,
 }
