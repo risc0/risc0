@@ -35,8 +35,9 @@ use crate::{
     CIRCUIT, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CTRL, REGISTER_GROUP_DATA,
 };
 
-type Twin = (Elem, Elem);
-type Quad = (Elem, Elem, Elem, Elem);
+struct Twin(Elem, Elem);
+
+struct Quad(Elem, Elem, Elem, Elem);
 
 pub fn prove_segment<H, C>(hal: &H, circuit_hal: &C, segment: &Segment) -> Result<Vec<u32>>
 where
@@ -74,29 +75,37 @@ where
     Ok(seal)
 }
 
-fn split_word8(value: u32) -> Quad {
-    (
-        Elem::new(value & 0xff),
-        Elem::new(value >> 8 & 0xff),
-        Elem::new(value >> 16 & 0xff),
-        Elem::new(value >> 24 & 0xff),
-    )
+impl From<Twin> for u32 {
+    fn from(value: Twin) -> Self {
+        let x0: u32 = value.0.into();
+        let x1: u32 = value.1.into();
+        x0 << 8 | x1
+    }
 }
 
-fn merge_word8((x0, x1, x2, x3): Quad) -> u32 {
-    let x0: u32 = x0.into();
-    let x1: u32 = x1.into();
-    let x2: u32 = x2.into();
-    let x3: u32 = x3.into();
-    x0 | x1 << 8 | x2 << 16 | x3 << 24
+impl From<u32> for Twin {
+    fn from(value: u32) -> Self {
+        Self(Elem::new(value >> 8 & 0xff), Elem::new(value & 0xff))
+    }
 }
 
-fn split_twin(value: u32) -> Twin {
-    (Elem::new(value >> 8 & 0xff), Elem::new(value & 0xff))
+impl From<Quad> for u32 {
+    fn from(value: Quad) -> Self {
+        let x0: u32 = value.0.into();
+        let x1: u32 = value.1.into();
+        let x2: u32 = value.2.into();
+        let x3: u32 = value.3.into();
+        x0 | x1 << 8 | x2 << 16 | x3 << 24
+    }
 }
 
-fn merge_twin((x0, x1): Twin) -> u32 {
-    let x0: u32 = x0.into();
-    let x1: u32 = x1.into();
-    x0 << 8 | x1
+impl From<u32> for Quad {
+    fn from(value: u32) -> Self {
+        Self(
+            Elem::new(value & 0xff),
+            Elem::new(value >> 8 & 0xff),
+            Elem::new(value >> 16 & 0xff),
+            Elem::new(value >> 24 & 0xff),
+        )
+    }
 }

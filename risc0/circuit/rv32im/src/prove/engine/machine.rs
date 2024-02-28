@@ -29,7 +29,7 @@ use risc0_zkvm_platform::syscall::bigint;
 
 use super::{
     argument::{BytesArgument, RamArgument},
-    merge_word8, split_word8, Quad,
+    Quad,
 };
 use crate::prove::hal::cpp::ParallelCircuitStepHandler;
 use crate::{
@@ -148,11 +148,11 @@ impl ParallelCircuitStepHandler<Elem> for MachineContext {
             }
             "divide" => {
                 (
-                    (outs[0], outs[1], outs[2], outs[3]),
-                    (outs[4], outs[5], outs[6], outs[7]),
+                    Quad(outs[0], outs[1], outs[2], outs[3]),
+                    Quad(outs[4], outs[5], outs[6], outs[7]),
                 ) = self.divide(
-                    (args[0], args[1], args[2], args[3]),
-                    (args[4], args[5], args[6], args[7]),
+                    Quad(args[0], args[1], args[2], args[3]),
+                    Quad(args[4], args[5], args[6], args[7]),
                     args[8],
                 );
                 Ok(())
@@ -171,13 +171,14 @@ impl ParallelCircuitStepHandler<Elem> for MachineContext {
                 self.ram_write(
                     cycle,
                     args[0],
-                    (args[1], args[2], args[3], args[4]),
+                    Quad(args[1], args[2], args[3], args[4]),
                     args[5],
                 )?;
                 Ok(())
             }
             "ramRead" => {
-                (outs[0], outs[1], outs[2], outs[3]) = self.ram_read(cycle, args[0], args[1])?;
+                Quad(outs[0], outs[1], outs[2], outs[3]) =
+                    self.ram_read(cycle, args[0], args[1])?;
                 Ok(())
             }
             "plonkWrite" => {
@@ -194,13 +195,13 @@ impl ParallelCircuitStepHandler<Elem> for MachineContext {
             }
             "syscallInit" => Ok(()),
             "syscallBody" => {
-                (outs[0], outs[1], outs[2], outs[3]) = split_word8(self.syscall_body()?);
+                Quad(outs[0], outs[1], outs[2], outs[3]) = self.syscall_body()?.into();
                 Ok(())
             }
             "syscallFini" => {
                 let (a0, a1) = self.syscall_fini()?;
-                (outs[0], outs[1], outs[2], outs[3]) = split_word8(a0);
-                (outs[4], outs[5], outs[6], outs[7]) = split_word8(a1);
+                Quad(outs[0], outs[1], outs[2], outs[3]) = a0.into();
+                Quad(outs[4], outs[5], outs[6], outs[7]) = a1.into();
                 Ok(())
             }
             _ => unimplemented!("Unsupported extern: {name}"),
@@ -270,12 +271,12 @@ impl MachineContext {
             "[{cycle}] {:?} ram_read(0x{addr:08x}, {op}): {txn:?}",
             cur_cycle.mux
         );
-        Ok(split_word8(txn.data))
+        Ok(txn.data.into())
     }
 
     fn ram_write(&self, cycle: usize, addr: Elem, data: Quad, op: Elem) -> Result<()> {
         let addr: u32 = addr.into();
-        let data = merge_word8(data);
+        let data: u32 = data.into();
         let op: u32 = op.into();
         tracing::trace!("[{cycle}] ram_write(0x{addr:08x}, 0x{data:08x}, {op})");
         Ok(())
@@ -291,8 +292,8 @@ impl MachineContext {
     }
 
     fn divide(&self, numer: Quad, denom: Quad, sign: Elem) -> (Quad, Quad) {
-        let mut numer = merge_word8(numer);
-        let mut denom = merge_word8(denom);
+        let mut numer: u32 = numer.into();
+        let mut denom: u32 = denom.into();
         let sign: u32 = sign.into();
         // tracing::debug!("divide: [{sign}] {numer} / {denom}");
         let ones_comp = (sign == 2) as u32;
@@ -318,7 +319,7 @@ impl MachineContext {
             rem = (!rem).overflowing_add(1 - ones_comp).0;
         }
         // tracing::debug!("  quot: {quot}, rem: {rem}");
-        (split_word8(quot), split_word8(rem))
+        (quot.into(), rem.into())
     }
 
     // Division of two positive byte-limbed bigints. a = q * b + r.

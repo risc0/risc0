@@ -20,7 +20,7 @@ use crossbeam::queue::SegQueue;
 use derive_debug::Dbg;
 use risc0_zkp::field::baby_bear::BabyBearElem;
 
-use super::{merge_twin, merge_word8, split_twin, split_word8};
+use super::{Quad, Twin};
 
 // (cycle << 2) | mem_op
 #[derive(Ord, PartialOrd, Eq, PartialEq)]
@@ -59,7 +59,7 @@ impl RamArgument {
         let cycle: u32 = args[1].into();
         let mem_op: u32 = args[2].into();
         let cyclop = Cyclop::new(cycle, mem_op);
-        let word = merge_word8((args[3], args[4], args[5], args[6]));
+        let word = Quad(args[3], args[4], args[5], args[6]).into();
         let row = RamArgumentRow { addr, cyclop, word };
         // tracing::debug!("arg_write(ram): {row:?}");
         self.queue.push(row);
@@ -79,7 +79,7 @@ impl RamArgument {
         out[0] = row.addr.into();
         out[1] = row.cyclop.cycle().into();
         out[2] = row.cyclop.mem_op().into();
-        (out[3], out[4], out[5], out[6]) = split_word8(row.word);
+        Quad(out[3], out[4], out[5], out[6]) = row.word.into();
     }
 }
 
@@ -92,7 +92,7 @@ impl BytesArgument {
     }
 
     pub fn write(&mut self, args: &[BabyBearElem]) {
-        let idx = merge_twin((args[0], args[1]));
+        let idx: u32 = Twin(args[0], args[1]).into();
         // tracing::debug!("arg_write(bytes): {idx}");
         self.counts[idx as usize] += 1;
     }
@@ -106,7 +106,7 @@ impl BytesArgument {
             self.read_pos += 1;
         }
         // tracing::debug!("arg_read(bytes): {}", self.read_pos);
-        (outs[0], outs[1]) = split_twin(self.read_pos as u32);
+        Twin(outs[0], outs[1]) = (self.read_pos as u32).into();
         self.counts[self.read_pos] -= 1;
     }
 }
