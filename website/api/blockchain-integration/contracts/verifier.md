@@ -14,29 +14,60 @@ Even in the case of a system that needs to use custom circuits, it's possible to
 
 ## Using the Verifier Contract
 
-In the [Foundry Template][foundry-template], you can find a complete example of how to use the verifier contract in your application.
-Specifically, the [EvenNumber.sol] contract demonstrates how to use the [IRiscZeroVerifier.sol] interface to verify a proof.
+Use verifier contract in your application by calling the `verify` method with the expected [journal][term-journal] and other fields of the [receipt][term-receipt].
+
+Below is an example from the [EvenNumber.sol] contract in the [Foundry Template][foundry-template]:
+
+```solidity
+contract EvenNumber {
+    // ...
+
+    /// @notice Set the even number stored on the contract. Requires a RISC Zero proof that the number is even.
+    function set(uint256 x, bytes32 postStateDigest, bytes calldata seal) public {
+        // Construct the expected journal data. Verify will fail if journal does not match.
+        bytes memory journal = abi.encode(x);
+        require(verifier.verify(seal, IS_EVEN_ID, postStateDigest, sha256(journal)));
+        number = x;
+    }
+
+    // ...
+}
+```
+
+In this example, the `IS_EVEN` zkVM program verifies that the number, `x`, is even.
+By verifying a receipt with the [image ID][term-image-id] of that program in a `require` statement, it is guaranteed that the stored number will always be even.
+RISC Zero's zkVM and the `IS_EVEN` program guarantee is it computationally impossible to produce a verifying receipt for with an odd number.
 
 ## Versioning
 
-Currently, the verifier contract is designed to support a static version, and we
-may change the contract's address when we release a new version. It's important
-to keep track of the latest version and update your application accordingly.
+The `RiscZeroGroth16Verifier` contract is stateless and immutable.
+When new versions of the RISC Zero proof system are released, a new verifier contract will be deployed.
+
+When using this contract directly you can be sure that the verifier will never change, as it cannot be upgraded or otherwise mutated.
+However, when new versions of the zkVM add features you'd like to use in your application, you will need to change the verifier contract address in your application as part of your upgrade process.
+This includes updates that include security fixes.
+
+We are working on process to provide opt-in upgradeability for the verifier contract, and we will have more information here in the future.
 
 ## Addresses
 
-RISC Zero provides an already deployed verifier contract in the Sepolia network for your convenience. You can choose to use this contract or deploy your own.
+RISC Zero provides an already deployed verifier contract in the Sepolia network for your convenience.
+You can choose to use this contract or deploy your own.
 
-| Contract                      | Address                                               |
-| ----------------------------- | ----------------------------------------------------- |
-| [RiscZeroGroth16Verifier.sol] | [0x83C2e9CD64B2A16D3908E94C7654f3864212E2F8][sepolia] |
+| Contract                      | Network   | Address                                                        |
+| ----------------------------- | --------- | -------------------------------------------------------------- |
+| [RiscZeroGroth16Verifier.sol] | [Sepolia] | [0x83C2e9CD64B2A16D3908E94C7654f3864212E2F8][sepolia-verifier] |
 
 [RiscZeroGroth16Verifier.sol]: https://github.com/risc0/risc0-ethereum/blob/main/contracts/src/groth16/RiscZeroGroth16Verifier.sol
 [IRiscZeroVerifier.sol]: https://github.com/risc0/risc0-ethereum/blob/main/contracts/src/IRiscZeroVerifier.sol
 [EvenNumber.sol]: https://github.com/risc0/bonsai-foundry-template/blob/main/contracts/EvenNumber.sol
 [article-groth16]: https://www.risczero.com/news/on-chain-verification
-[sepolia]: https://sepolia.etherscan.io/address/0x83c2e9cd64b2a16d3908e94c7654f3864212e2f8#code
+[Sepolia]: https://ethereum.org/nb/developers/docs/networks#sepolia
+[sepolia-verifier]: https://sepolia.etherscan.io/address/0x83c2e9cd64b2a16d3908e94c7654f3864212e2f8#code
+[term-journal]: /terminology#journal
 [term-receipt]: /terminology#receipt
 [term-verify]: /terminology#verify
+[term-image-id]: /terminology#image-id
 [term-zkvm-program]: /terminology#zkvm-program
 [foundry-template]: https://github.com/risc0/bonsai-foundry-template
+
