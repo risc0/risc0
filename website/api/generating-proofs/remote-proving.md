@@ -1,7 +1,3 @@
----
-slug: ./remote-proving
----
-
 # Remote Proving using Bonsai
 
 Bonsai lets users generate proofs for their zkVM applications, without using their own hardware for proof generation.
@@ -21,6 +17,7 @@ If you already have an API key, you can request proofs from Bonsai in any of the
 If you don't have an API key, you can [request access].
 While you wait, you can make use of the local proving option on the Bonsai Foundry Template, or you can focus on developing for the [zkVM].
 
+[request access]: https://bonsai.xyz/apply
 [Bonsai SDK]: https://crates.io/crates/bonsai-sdk
 [Bonsai REST API]: https://api.bonsai.xyz/swagger-ui/
 [Bonsai as a zk coprocessor]: https://www.risczero.com/news/a-guide-to-zk-coprocessors-for-scalability

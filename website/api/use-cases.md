@@ -1,7 +1,3 @@
----
-slug: /use-cases
----
-
 # Use Cases
 
 Verifiable computation is a game changer for the resilience and economics of
@@ -26,6 +22,8 @@ cryptography.
 
 These applications include:
 
+- **[Zeth]**: prove the correct construction of an entire Ethereum block or an entire Optimism block
+- **[Bonsai Pay]**: send Ethereum to someone's gmail address
 - **[JSON]**: prove the contents of some entry in a JSON file, while keeping the
   rest of the data private
 - **[Where's Waldo][waldo]**: prove that Waldo appears in a JPG file, while
@@ -47,23 +45,20 @@ In addition to being far easier to build on, we're also delivering on
 [performance]. The zkVM has GPU acceleration for CUDA and Metal, and with
 [continuations] we've enabled parallel proving of large programs.
 
-## Getting Started
-
-To harness the power of ZK, you'll need to:
-
-1. [Write an application for the RISC Zero zkVM][zkvm-quickstart].
-2. [Generate proofs for your zkVM application][bonsai-quickstart].
-3. [Integrate your proofs into on-chain applications][foundry-template].
+**Ready to start building?** <br/>
+Check out our [Getting Started] page.
 
 [zkvm-quickstart]: ./zkvm/quickstart.md
-[bonsai-quickstart]: ./bonsai/quickstart.md
-[foundry-template]: https://github.com/risc0/bonsai-foundry-template
+[bonsai-quickstart]: ./generating-proofs/remote-proving.md
+[bonsai-on-eth]: ./blockchain-integration/bonsai-on-eth.md
 [Bonsai]: ./generating-proofs/remote-proving.md
+[Bonsai Pay]: https://risczero.com/news/bonsai-pay
 [chess]: https://github.com/risc0/risc0/tree/main/examples/chess
 [continuations]: https://risczero.com/news/continuations
 [crate-validation]: https://risc0.github.io/ghpages/dev/crate-validation/index.html
 [discord]: https://discord.gg/risczero
 [ecdsa]: https://github.com/risc0/risc0/tree/main/examples/ecdsa
+[Getting Started]: ./getting-started.md
 [JSON]: https://github.com/risc0/risc0/tree/main/examples/json
 [mailing-list]: https://fmree464va4.typeform.com/to/X3KJB85v
 [optimism]: https://www.theblock.co/post/240929/optimism-zk-proof-proposals?utm_source=twitter&utm_medium=social
@@ -77,6 +72,7 @@ To harness the power of ZK, you'll need to:
 [twitter]: https://twitter.com/risczero
 [waldo]: https://risczero.com/news/waldo
 [YouTube]: https://www.youtube.com/@risczero
+[Zeth]: https://risczero.com/news/zeth-release
 [zk coprocessors]: https://twitter.com/RiscZero/status/1677316664772132864
 [zkpoex]: https://risczero.com/news/zkpoex
 [zkVM]: ./zkvm/zkvm_overview.md

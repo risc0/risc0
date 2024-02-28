@@ -1,7 +1,3 @@
----
-slug: ./local-proving
----
-
 # Local Proving
 
 RISC Zero offers a fully [open-source] prover.

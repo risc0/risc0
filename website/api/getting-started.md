@@ -1,14 +1,10 @@
----
-slug: /getting-started
----
-
 # Getting Started
 
 To harness the power of ZK, you'll need to:
 
 1. [Write an application for the RISC Zero zkVM][zkvm-quickstart].
 2. [Generate proofs for your zkVM application][bonsai-quickstart].
-3. [Integrate your proofs into on-chain applications][foundry-template].
+3. [Integrate your proofs into on-chain applications][bonsai-on-eth].
 
 ```mermaid
 
@@ -24,10 +20,10 @@ flowchart TD
 
     zkvm_app["1. zkVM Application Development"]
         zkvm_quickstart["zkVM Quickstart"]
-    proof_generation["2. Generating proofs for your zkVM application."]
+    proof_generation["2. Generating proofs for your zkVM application"]
 
     chain_integration["3. Blockchain Integration"]
-        getting_proofs_on_chain["Post proofs on-chain."]
+        getting_proofs_on_chain["Post proofs on-chain"]
         onchain_verifier["Call our on-chain verifier"]
 
 
@@ -57,5 +53,5 @@ flowchart TD
 ```
 
 [zkvm-quickstart]: ./zkvm/quickstart.md
-[bonsai-quickstart]: ./bonsai/quickstart.md
-[foundry-template]: https://github.com/risc0/bonsai-foundry-template
+[bonsai-quickstart]: ./generating-proofs/remote-proving.md
+[bonsai-on-eth]: ./blockchain-integration/bonsai-on-eth.md
