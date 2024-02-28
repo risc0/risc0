@@ -57,15 +57,16 @@ Check out the [zkVM example applications][examples].
 _Curious about performance?_ <br/>
 Check the [performance benchmarks][benchmarks] page.
 
-_Looking for information about blockchain integration?_ <br/>
+_Looking for information about remote proving?_ <br/>
 Check out [Bonsai].
 
-_Curious about Zeth?_<br/>
-Read the [article][zeth].
+_Looking for information about blockchain integration?_ <br/>
+Check out our [Bonsai on Eth] page.
 
 [alloy]: https://github.com/alloy-rs
 [benchmarks]: ./benchmarks.md
 [Bonsai]: ../generating-proofs/remote-proving.md
+[Bonsai on Eth]: ../blockchain-integration/bonsai-on-eth.md
 [cargo]: https://doc.rust-lang.org/cargo/index.html
 [chess]: https://github.com/risc0/risc0/tree/main/examples/chess#zk-checkmate
 [continuations]: https://www.risczero.com/news/continuations
