@@ -19,7 +19,6 @@ While you wait, you can make use of the local proving option on the Bonsai Found
 
 [litepaper]: /litepaper
 [request access]: https://bonsai.xyz/apply
-[`cargo risczero`]: https://crates.io/crates/cargo-risczero
 [Bonsai SDK]: https://crates.io/crates/bonsai-sdk
 [Bonsai REST API]: https://api.bonsai.xyz/swagger-ui/
 [Bonsai as a zk coprocessor]: https://twitter.com/RiscZero/status/1677316664772132864
