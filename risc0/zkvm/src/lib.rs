@@ -95,6 +95,9 @@ pub use risc0_zkvm_platform::{declare_syscall, memory::GUEST_MAX_MEM, PAGE_SIZE}
 pub use self::host::{
     api::server::Server as ApiServer,
     client::prove::local::LocalProver,
+    risc0_groth16::{
+        docker::stark_to_snark, to_json as seal_to_json, ProofJson as Groth16ProofJson,
+    },
     server::{
         exec::executor::ExecutorImpl,
         prove::{get_prover_server, loader::Loader, HalPair, ProverServer},
@@ -128,6 +131,7 @@ pub use {
         recursion::ALLOWED_IDS_ROOT,
     },
     risc0_binfmt::compute_image_id,
+    risc0_groth16::Seal as Groth16Seal,
 };
 
 use semver::Version;
