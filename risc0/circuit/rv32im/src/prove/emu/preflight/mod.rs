@@ -111,6 +111,8 @@ pub struct PreflightTrace {
 struct Preflight {
     po2: usize,
     pager: PagedMemory,
+    pre_pc: ByteAddr,
+    back_pc: ByteAddr,
     pc: ByteAddr,
     cycles: usize,
     pub trace: PreflightTrace,
@@ -269,6 +271,8 @@ impl Preflight {
         Self {
             po2: segment.po2,
             pager: PagedMemory::new(segment.partial_image.clone()),
+            pre_pc: pc,
+            back_pc: pc,
             pc,
             cycles: 0,
             trace: PreflightTrace::default(),
@@ -296,6 +300,15 @@ impl Preflight {
             &mut self.trace.body
         };
         stage.add_cycle(mux, None);
+    }
+
+    fn add_par_cycle(&mut self, pre: bool, mux: TopMux, pc: ByteAddr) {
+        let stage = if pre {
+            &mut self.trace.pre
+        } else {
+            &mut self.trace.body
+        };
+        stage.add_cycle(mux, Some(pc));
     }
 
     fn add_txn(&mut self, pre: bool, addr: WordAddr, data: u32) {
@@ -412,7 +425,7 @@ impl Preflight {
         self.add_extra(pre, is_read);
         self.add_extra(pre, page_idx);
         self.add_extra(pre, is_done);
-        self.add_cycle(pre, TopMux::Body(Major::PageFault, 0));
+        self.add_par_cycle(pre, TopMux::Body(Major::PageFault, 0), self.pre_pc);
         if is_done == 1 {
             return Ok(());
         }
@@ -544,8 +557,9 @@ impl EmuContext for Preflight {
         if kind == InsnKind::EANY {
             self.add_cycle(false, kind.into());
         } else {
-            self.trace.body.add_cycle(kind.into(), Some(self.pc));
+            self.add_par_cycle(false, kind.into(), self.back_pc);
         }
+        self.back_pc = self.pc;
         self.cycles += 1;
     }
 

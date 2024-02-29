@@ -77,10 +77,10 @@ fn basic() {
 
     let mut trace = super::preflight_segment(segment).unwrap();
     let expected_cycles = [
-        add_cycle(InsnKind::LUI, 0, Some(0x4004)),
-        add_cycle(InsnKind::LUI, 3, Some(0x4008)),
-        add_cycle(InsnKind::ADD, 6, Some(0x400c)),
-        add_cycle(InsnKind::LUI, 9, Some(0x4010)),
+        add_cycle(InsnKind::LUI, 0, Some(0x4000)),
+        add_cycle(InsnKind::LUI, 3, Some(0x4004)),
+        add_cycle(InsnKind::ADD, 6, Some(0x4008)),
+        add_cycle(InsnKind::LUI, 9, Some(0x400c)),
         add_cycle(InsnKind::EANY, 12, None),
     ];
     trace.body.cycles.truncate(expected_cycles.len());
