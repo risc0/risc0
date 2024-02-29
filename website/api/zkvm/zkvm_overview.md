@@ -1,3 +1,7 @@
+---
+slug: ./
+---
+
 # zkVM Overview
 
 > WARNING: This software is still experimental, we do not recommend it for
