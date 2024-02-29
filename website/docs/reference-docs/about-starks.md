@@ -29,7 +29,7 @@ We recommend the following external references on STARKs:
 - [Anatomy of a Stark](https://aszepieniec.github.io/stark-anatomy/) (developer focused)
 - [The Starkmath series](https://medium.com/tag/stark-math)
 - [STARK 101](https://starkware.co/stark-101/) (developer focused)
-- [Vitalik's STARK series](https://vitalik.eth.limo/2017/11/09/starks_part_1.html)
+- [Vitalik's STARK series](https://vitalik.eth.limo/general/2017/11/09/starks_part_1.html)
 
 ### Most Technical
 
