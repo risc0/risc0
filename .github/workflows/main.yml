@@ -43,6 +43,8 @@ jobs:
               - .github/actions/**
               - .github/workflows/main.yml
               - Cargo.toml
+              - rust-toolchain.toml
+              - Cargo.lock
             check-benchmarks:
               - *base
               - benchmarks/**
@@ -108,12 +110,12 @@ jobs:
           fetch-depth: 0
       - uses: ./.github/actions/rustup
       - name: Install cargo-sort
-        uses: risc0/cargo-install@2cfb0024938d23011106cbf127b393bc83fddba1
+        uses: risc0/cargo-install@b9307573043522ab0d3e3be64a51763b765b52a4
         with:
           crate: cargo-sort
           version: "1.0"
       - name: Install cargo-rdme
-        uses: risc0/cargo-install@2cfb0024938d23011106cbf127b393bc83fddba1
+        uses: risc0/cargo-install@b9307573043522ab0d3e3be64a51763b765b52a4
         with:
           crate: cargo-rdme
           version: "1.4.2"
@@ -257,7 +259,7 @@ jobs:
         run: cargo test --locked -F $FEATURE --no-run
         working-directory: examples
       - name: test
-        run: cargo test --locked -F $FEATURE
+        run: RISC0_DEV_MODE=1 cargo test --locked -F $FEATURE
         working-directory: examples
       - run: cargo run --locked -F $FEATURE
         env:

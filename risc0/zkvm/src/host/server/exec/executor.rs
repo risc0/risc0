@@ -14,7 +14,7 @@
 
 //! This module implements the Executor.
 
-use std::{cell::RefCell, fmt::Debug, io::Write, mem, rc::Rc};
+use std::{cell::RefCell, fmt::Debug, io::Write, mem, rc::Rc, sync::Arc};
 
 use addr2line::{
     fallible_iterator::FallibleIterator,
@@ -52,10 +52,14 @@ use super::{monitor::MemoryMonitor, profiler::Profiler, syscall::SyscallTable};
 use crate::{
     align_up,
     host::{
-        client::exec::TraceEvent,
+        client::{env::SegmentPath, exec::TraceEvent},
         receipt::Assumption,
-        server::opcode::{MajorType, OpCode},
+        server::{
+            opcode::{MajorType, OpCode},
+            session::null_callback,
+        },
     },
+    is_dev_mode,
     sha::Digest,
     Assumptions, ExecutorEnv, ExitCode, FileSegmentRef, Loader, Output, Segment, SegmentRef,
     Session,
@@ -238,7 +242,7 @@ impl<'a> ExecutorImpl<'a> {
     /// of the execution.
     pub fn run(&mut self) -> Result<Session> {
         if self.env.segment_path.is_none() {
-            self.env.segment_path = Some(tempdir()?.into_path());
+            self.env.segment_path = Some(SegmentPath::TempDir(Arc::new(tempdir()?)));
         }
 
         let path = self.env.segment_path.clone().unwrap();
@@ -256,6 +260,11 @@ impl<'a> ExecutorImpl<'a> {
                 "cannot resume an execution which exited with {:?}",
                 self.exit_code
             );
+        };
+
+        let mut callback = |segment| match is_dev_mode() {
+            true => null_callback(),
+            false => callback(segment),
         };
 
         let start_time = std::time::Instant::now();

@@ -22,7 +22,7 @@ use risc0_core::field::{
 use super::{consts::CELLS, poseidon2_mix, CELLS_OUT, CELLS_RATE};
 use crate::core::{digest::Digest, hash::Rng};
 
-/// A random number generator driven by Poseidon
+/// A random number generator driven by Poseidon2
 #[derive(Clone, Debug)]
 pub struct Poseidon2Rng {
     // The cells of the sponge

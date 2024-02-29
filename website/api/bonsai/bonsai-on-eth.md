@@ -1,98 +1,49 @@
-# Bonsai on Ethereum
+# RISC Zero on Ethereum
 
-_Warning: Bonsai is still in early development. Do not use in production._
+_Warning: The zkVM and Bonsai are still in development. Do not use in production._
 
-Bonsai can produce [SNARK proofs]; allowing efficient verification of any computation, on Ethereum.
+Prove computation with the [RISC Zero zkVM](../zkvm) and verify the results in your Ethereum contract.
 
-There are two main ways to integrate your RISC Zero application with Ethereum:
+The zkVM and Bonsai together can act as a [coprocessor][coprocessor-article] to the smart contract application.
+This unlocks powerful new applications on Ethereum that offload computationally intensive (i.e. gas expensive) and difficult to implement (e.g. ed25519 signature verification, or HTML parsing) functions to the zkVM.
 
-- Using the [Bonsai Relay](#bonsai-relay) to process proof requests and send verified results on-chain.
-- Using the Bonsai proving service and the [verifier contract](#verifier-contract) directly.
+## Getting Started
 
-[SNARK proofs]: https://www.risczero.com/news/on-chain-verification
+The [RISC Zero Foundry Template][foundry-template] provides a template and instructions for developing your application.
+You can get started right away by cloning the template and following the instructions there.
 
-## Bonsai Relay
+## Overview
 
-The Bonsai Relay is a service that simplifies the integration of RISC Zero into your applications, leveraging the [zk coprocessor] model.
+Below is a diagram and overview of a typical application with RISC Zero on Ethereum, utilizing Bonsai proving.
 
-At a high level, here's how it works:
+![RISC Zero on Ethereum interactions diagram](/img/risc0-ethereum-interaction.png)
 
-![Bonsai ETH Relay overview](/img/bonsai_ethereum.png)
-
-1. Your application sends a request to run your zkVM guest to the Bonsai Relay. You can either:
-   - Send your request [on-chain](#on-chain-requests), by calling `requestCallback` on the [`BonsaiRelay` contract].
-   - Send your request [off-chain](#off-chain-requests), by sending a request to the Bonsai Relay REST API.
-2. The Bonsai Relay sends the proof request to the Bonsai proving service.
-3. Bonsai generates a [Groth16 SNARK] proof of the guest execution, and submits the [receipt] to the [`BonsaiRelay` contract].
-4. The [`BonsaiRelay` contract]:
-   1. Verifies the [receipt] by using an [`IRiscZeroVerifier` contract]
-   2. Extracts the journal from the verified [receipt].
-   3. Sends the journal and image ID in a callback to your application contract.
-
-[Groth16 SNARK]: https://www.risczero.com/news/on-chain-verification
-[`BonsaiRelay` contract]: https://github.com/risc0/risc0/blob/main/bonsai/ethereum/contracts/BonsaiRelay.sol
-[`IRiscZeroVerifier` contract]: https://github.com/risc0/risc0/blob/main/bonsai/ethereum/contracts/IRiscZeroVerifier.sol
-[guest program]: /terminology#guest-program
-[receipt]: /terminology#receipt
-[zk coprocessor]: https://twitter.com/RiscZero/status/1677316664772132864
-
-### Getting Started
-
-The [Bonsai Foundry Template] provides a template and instructions for developing your application with the Bonsai Relay.
-More details are provided below on how to send requests to the Bonsai Relay.
-
-[Bonsai Foundry Template]: https://github.com/risc0/bonsai-foundry-template
-
-#### Running the Bonsai Relay
-
-With Bonsai in alpha, every application currently needs to run their own deployment of the Bonsai Relay.
-Instructions are included in the [Bonsai Foundry Template].
-This involves running a service binary provided by RISC Zero, and deploying the [`BonsaiRelay` contract]
-
-### Off-chain Requests
-
-The Bonsai Relay accepts requests off-chain using its [REST] API.
-
-Using the off-chain API allows for including data not available to smart contracts in the EVM, and avoids needing to pay transaction fees on Ethereum to initiate a request.
-When inputs to your [guest program] are large (e.g. more than a few kilobytes) sending requests on-chain can be cost-prohibitive, while sending large inputs (e.g. up to tens of megabytes) via the REST API has no additional cost.
-
-The [Bonsai Relay SDK] provides a Rust interface for interacting with the Bonsai Relay.
-An example for sending a callback request via the REST API can be found in the [relay directory of the Bonsai Foundry Template].
-
-[REST]: https://en.wikipedia.org/wiki/REST
-[Bonsai Relay SDK]: https://docs.rs/crate/bonsai-ethereum-relay/latest
-[relay directory of the Bonsai Foundry Template]: https://github.com/risc0/bonsai-foundry-template/blob/main/relay/examples/offchain_request.rs
-
-### On-chain Requests
-
-The Bonsai Relay also accepts requests on-chain using the [`BonsaiRelay` contract].
-
-On-chain requests can be useful for reducing the amount of code you need to maintain.
-When submitting requests off-chain, some client or indexer needs to be written to assemble the inputs and make the request to the Bonsai Relay.
-In contrast, with on-chain requests, the application's smart contract can directly issue these requests, eliminating the need to write or maintain any client or indexer.
-
-An example of sending a request on-chain can be found in the [starter contract of the Bonsai Foundry Template].
-
-[starter contract of the Bonsai Foundry Template]: https://github.com/risc0/bonsai-foundry-template/blob/main/contracts/BonsaiStarter.sol#L60-L68
+1. Run your application logic in the zkVM. The off-chain component of your app (e.g. server or dApp client) sends a proof request to the Bonsai proving service.
+2. Bonsai generates the program result, written to the [journal][term-journal], and a SNARK proof of its correctness.
+3. The app submits this proof and journal on-chain to your app contract for validation.
+4. Your app contract calls the RISC Zero verifier contract to validate the proof. If the verification is successful, the journal is deemed trustworthy and can be safely used.
 
 ## Verifier Contract
 
-RISC Zero supports an on-chain verifier for [Groth16 SNARK] proofs generated by the Bonsai proving service.
-You can use this contract in your applications.
+RISC Zero supports an on-chain verifier for [Groth16 SNARK][groth16-article] proofs generated by the Bonsai proving service.
+You can use this contract in your applications to verify zkVM [receipts][term-receipt].
 
-As [described above], the Bonsai Relay forwards requests to the Bonsai proving service, and sends proofs on-chain to be verified in the authentication for for the [`BonsaiRelay` contract].
-An alternative to using the Bonsai Relay is to send requests to the Bonsai proving service directly, and to use the verifier contract in your own application contract.
-
-The verifier contract has the [`IRiscZeroVerifier` interface].
+The verifier contract has the [`IRiscZeroVerifier` interface][IRiscZeroVerifier.sol].
 This interface defines the relevant data structures for the receipt and provides a `verify` method.
 
-The [`IRiscZeroVerifier` interface] is implemented by the [`RiscZeroGroth16Verifier` contract].
-While Bonsai is in alpha, you will deploy this contract as part of your application.
+The [`IRiscZeroVerifier` interface][IRiscZeroVerifier.sol] is implemented by the [`RiscZeroGroth16Verifier` contract][RiscZeroGroth16Verifier.sol].
+The `RiscZeroGroth16Verifier` contract is a stateless and immutable verifier the RISC Zero Groth16 SNARK proofs.
 
-The [Bonsai SDK] provides support for sending requests to the Bonsai proving service.
-You may also want to check out our [Bonsai Quick Start](quickstart.md) page and/or the [Bonsai Overview](../bonsai).
+<!-- TODO(#1423) Replace this note with a dedicated page for verifier contract information -->
 
-[Bonsai SDK]: https://docs.rs/bonsai-sdk/latest/bonsai_sdk/
-[`IRiscZeroVerifier` interface]: https://github.com/risc0/risc0/blob/main/bonsai/ethereum/contracts/IRiscZeroVerifier.sol
-[`RiscZeroGroth16Verifier` contract]: https://github.com/risc0/risc0/blob/main/bonsai/ethereum/contracts/groth16/RiscZeroGroth16Verifier.sol
-[described above]: #bonsai-relay
+> The `RiscZeroGroth16Verifier` contract is deployed to Sepolia at [`0x83C2e9CD64B2A16D3908E94C7654f3864212E2F8`][etherscan-0x83C2e9CD64B2A16D3908E94C7654f3864212E2F8].
+> You can choose to use this contract, or deploy your own.
+
+[IRiscZeroVerifier.sol]: https://github.com/risc0/risc0-ethereum/blob/main/contracts/src/IRiscZeroVerifier.sol
+[RiscZeroGroth16Verifier.sol]: https://github.com/risc0/risc0-ethereum/blob/main/contracts/src/groth16/RiscZeroGroth16Verifier.sol
+[coprocessor-article]: https://www.risczero.com/news/a-guide-to-zk-coprocessors-for-scalability
+[etherscan-0x83C2e9CD64B2A16D3908E94C7654f3864212E2F8]: https://sepolia.etherscan.io/address/0x83c2e9cd64b2a16d3908e94c7654f3864212e2f8#code
+[foundry-template]: https://github.com/risc0/bonsai-foundry-template
+[groth16-article]: https://www.risczero.com/news/on-chain-verification
+[term-journal]: /terminology#journal
+[term-receipt]: /terminology#receipt

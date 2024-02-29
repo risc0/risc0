@@ -12,7 +12,7 @@ Bonsai is highly parallelized, highly performant and can horizontally scale. To 
 Whether you're looking to take heavy computations off-chain or need to generate proofs for your trustless, verifiable software, Bonsai can help.
 Check out our [Bonsai Quick Start] page, and start building!
 
-**Please note that Bonsai is still in early development. <br/>
+**Please note that Bonsai is still in development. <br/>
 [Request access here], and do not use Bonsai in production.**
 
 ![Bonsai overview](/img/bonsai_architecture.png)
@@ -35,16 +35,6 @@ If you build a project with the [`cargo risczero`] tool, you can set environment
 
 Alternatively, you can use the [Bonsai SDK] or the [Bonsai REST API].
 
-## How do I interact with Bonsai from Ethereum?
-
-![Bonsai Ethereum](/img/bonsai_ethereum.png)
-
-The picture above shows a simplified overview of how users can integrate Bonsai into their Ethereum smart contracts:
-
-1. You can send proof requests to Bonsai via an _off-chain_ REST API interface or _on-chain_ via a smart contract.
-2. The `Bonsai Relayer` will forward your proof request to the Bonsai proving service.
-3. Bonsai will use the RISC Zero zkVM to generate a proof, and send the proof back to your contract via the `Bonsai Relay Contract`.
-
 ## How do I interact with Bonsai from other chains?
 
 Stay tuned!
@@ -53,21 +43,13 @@ Stay tuned!
 
 ### 1. The RISC Zero zkVM: the proof engine behind Bonsai
 
-_Status: [Available and open source](https://github.com/risc0/risc0)_
-
 Under the hood, Bonsai uses the RISC Zero zkVM to prove your programs. With the zkVM, you have access to recursive proofs, proofs composition, a general-purpose circuit (with a bespoke circuit compiler), state continuations, and continuous improvements to the proving algorithm.
+
+The zkVM is open source, and you can explore and contribute at [gtihub.com/risc0/risc0](https://github.com/risc0/risc0).
 
 ### 2. The Bonsai proving service, powered by the zkVM
 
-_Status: Pre-Alpha_
-
 The Bonsai proving service can be used standalone or directly integrated with smart contracts and blockchains. If you're interested in Bonsai, learn more in our [litepaper] and [talks](https://youtu.be/nVAs2i-_Iyo?t=3044).
-
-### 3. Bonsai Relayer and Relay Contract: Connecting off-chain proofs and on-chain applications
-
-_Status: Pre-Alpha, [documentation](./bonsai-on-eth.md) and [Bonsai Foundry template](https://github.com/risc0/bonsai-foundry-template) available_
-
-The `Bonsai Relayer` and the `Bonsay Relay Contract` let your Ethereum dApps connect to Bonsai. Smart contract developers can call our proving service off-chain via a REST API or through an on-chain relay contract connected to the Bonsai proving service.
 
 ## Where we're headed
 

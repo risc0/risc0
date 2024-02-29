@@ -110,12 +110,16 @@ pub(crate) async fn session_status(
             receipt_url: Some(format!("{}/receipts/{}", storage.local_url, session_id)),
             error_msg: None,
             state: None,
+            elapsed_time: None,
+            stats: None,
         })),
         None => Ok(Json(SessionStatusRes {
             status,
             receipt_url: None,
             error_msg: None,
             state: None,
+            elapsed_time: None,
+            stats: None,
         })),
     }
 }

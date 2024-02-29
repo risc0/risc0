@@ -27,8 +27,9 @@ use risc0_zkvm_platform::WORD_SIZE;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    host::server::exec::executor::SyscallRecord, sha::Digest, Assumption, Assumptions, ExitCode,
-    Journal, Output, ReceiptClaim,
+    host::{client::env::SegmentPath, server::exec::executor::SyscallRecord},
+    sha::Digest,
+    Assumption, Assumptions, ExitCode, Journal, Output, ReceiptClaim,
 };
 
 #[derive(Clone, Default, Serialize, Deserialize, Debug)]
@@ -43,7 +44,6 @@ pub struct PageFaults {
 /// initial memory image (which includes the starting PC) and proceeds until
 /// either a sys_halt or a sys_pause syscall is encountered. This record is
 /// stored as a vector of [Segment]s.
-#[derive(Serialize, Deserialize)]
 pub struct Session {
     /// The constituent [Segment]s of the Session. The final [Segment] will have
     /// an [ExitCode] of [Halted](ExitCode::Halted), [Paused](ExitCode::Paused),
@@ -64,7 +64,6 @@ pub struct Session {
     pub assumptions: Vec<Assumption>,
 
     /// The hooks to be called during the proving phase.
-    #[serde(skip)]
     pub hooks: Vec<Box<dyn SessionEvents>>,
 
     /// The number of user cycles without any overhead for continuations or po2
@@ -87,7 +86,6 @@ pub struct Session {
 /// This allows implementors to determine the best way to represent this in an
 /// pluggable manner. See the [SimpleSegmentRef] for a very basic
 /// implmentation.
-#[typetag::serde(tag = "type")]
 pub trait SegmentRef: Send {
     /// Resolve this reference into an actual [Segment].
     fn resolve(&self) -> Result<Segment>;
@@ -292,6 +290,24 @@ impl Segment {
     }
 }
 
+const NULL_SEGMENT_REF: NullSegmentRef = NullSegmentRef {};
+
+/// Implementation of a [SegmentRef] that does not save the segment.
+///
+/// This is useful for DevMode where the segments aren't needed.
+#[derive(Serialize, Deserialize)]
+pub struct NullSegmentRef {}
+
+impl SegmentRef for NullSegmentRef {
+    fn resolve(&self) -> anyhow::Result<Segment> {
+        unimplemented!()
+    }
+}
+
+pub fn null_callback() -> Result<Box<dyn SegmentRef>> {
+    Ok(Box::new(NULL_SEGMENT_REF))
+}
+
 /// A very basic implementation of a [SegmentRef].
 ///
 /// The [Segment] itself is stored in this implementation.
@@ -300,7 +316,6 @@ pub struct SimpleSegmentRef {
     segment: Segment,
 }
 
-#[typetag::serde]
 impl SegmentRef for SimpleSegmentRef {
     fn resolve(&self) -> Result<Segment> {
         Ok(self.segment.clone())
@@ -322,12 +337,11 @@ impl SimpleSegmentRef {
 /// There is an example of using [FileSegmentRef] in our [EVM example][1]
 ///
 /// [1]: https://github.com/risc0/risc0/blob/main/examples/zkevm-demo/src/main.rs
-#[derive(Clone, Serialize, Deserialize)]
 pub struct FileSegmentRef {
     path: PathBuf,
+    _dir: SegmentPath,
 }
 
-#[typetag::serde]
 impl SegmentRef for FileSegmentRef {
     fn resolve(&self) -> Result<Segment> {
         let contents = fs::read(&self.path)?;
@@ -336,13 +350,25 @@ impl SegmentRef for FileSegmentRef {
     }
 }
 
+impl SegmentPath {
+    pub(crate) fn path(&self) -> &Path {
+        match self {
+            Self::TempDir(dir) => dir.path(),
+            Self::Path(path) => path.as_path(),
+        }
+    }
+}
+
 impl FileSegmentRef {
     /// Construct a [FileSegmentRef]
     ///
     /// This builds a FileSegmentRef that stores `segment` in a file at `path`.
-    pub fn new(segment: &Segment, path: &Path) -> Result<Self> {
-        let path = path.join(format!("{}.bincode", segment.index));
+    pub fn new(segment: &Segment, dir: &SegmentPath) -> Result<Self> {
+        let path = dir.path().join(format!("{}.bincode", segment.index));
         fs::write(&path, bincode::serialize(&segment)?)?;
-        Ok(Self { path })
+        Ok(Self {
+            path,
+            _dir: dir.clone(),
+        })
     }
 }
