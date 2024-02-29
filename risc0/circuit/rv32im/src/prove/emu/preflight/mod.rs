@@ -112,7 +112,6 @@ struct Preflight {
     po2: usize,
     pager: PagedMemory,
     pre_pc: ByteAddr,
-    back_pc: ByteAddr,
     pc: ByteAddr,
     cycles: usize,
     pub trace: PreflightTrace,
@@ -272,7 +271,6 @@ impl Preflight {
             po2: segment.po2,
             pager: PagedMemory::new(segment.partial_image.clone()),
             pre_pc: pc,
-            back_pc: pc,
             pc,
             cycles: 0,
             trace: PreflightTrace::default(),
@@ -425,7 +423,7 @@ impl Preflight {
         self.add_extra(pre, is_read);
         self.add_extra(pre, page_idx);
         self.add_extra(pre, is_done);
-        self.add_par_cycle(pre, TopMux::Body(Major::PageFault, 0), self.pre_pc);
+        self.add_par_cycle(pre, TopMux::Body(Major::PageFault, 0), self.pre_pc + 4u32);
         if is_done == 1 {
             return Ok(());
         }
@@ -557,9 +555,8 @@ impl EmuContext for Preflight {
         if kind == InsnKind::EANY {
             self.add_cycle(false, kind.into());
         } else {
-            self.add_par_cycle(false, kind.into(), self.back_pc);
+            self.add_par_cycle(false, kind.into(), self.pc);
         }
-        self.back_pc = self.pc;
         self.cycles += 1;
     }
 

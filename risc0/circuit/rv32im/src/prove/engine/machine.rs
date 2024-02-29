@@ -72,7 +72,7 @@ impl MachineContext {
             let bot2 = bytes[3] & 0b11;
             let top2 = bytes[3] >> 2 & 0b11;
             // 5204
-            data.set(6 * steps + cycle - 1, (bytes[0] as u32 + 4).into());
+            data.set(6 * steps + cycle - 1, (bytes[0] as u32).into());
             // 5207
             data.set(7 * steps + cycle - 1, (bytes[1] as u32).into());
             // 5214
