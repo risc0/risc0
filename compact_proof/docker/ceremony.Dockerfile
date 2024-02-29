@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM rust:1.72.1 AS dependencies
+FROM rust:1.76.0 AS dependencies
 
 WORKDIR /src/
 
