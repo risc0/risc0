@@ -85,7 +85,6 @@ export default async function createConfigAsync() {
           },
           redirects: [
             { from: "/tech_faq", to: "/faq" },
-            { from: "/zkvm", to: "/api/zkvm/zkvm_overview" },
           ],
         },
       ],
