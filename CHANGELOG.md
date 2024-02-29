@@ -3,21 +3,20 @@
 ## Next (upcoming release)
 
 ### 🛠 Fixes
-
-* Fix temporary directory not being removed when session goes out of scope. This
-  can help prevent out of disk space issues.
-* Verification of groth16 receipts in rust that are compatible with Bonsai
+* Fix an issue where the temporary directory is not being removed when the
+`Session` goes out of scope. This helps prevent the depletion of disk space.
 
 ### ⚡️ Features
 
 * Improve performance by replacing Poseidon with Poseidon2 hashing function
-* Improved API for handling private outputs
-* Add support for configuration of intermediate segment storage (on-disk,
+* Add support for the configuration of intermediate segment storage (on-disk,
   in-memory, etc).
-* Add cargo-risczero deploy command
-* Increase bits of security
 
 ### 🚨 Breaking Changes
+* The Change in the hash function used for proof generation means that receipts
+generated from older versions of the `risc0-zkvm` crate will fail verification
+if this verifier is used. New proofs must be re-generated, but one does not need
+to upload new ELF binaries to services such as bonsai.
 
 # [v0.20.1 (2024-02-01)](https://github.com/risc0/risc0/releases/tag/v0.20.1)
 
