@@ -371,7 +371,7 @@ impl<'a> Loader<'a> {
         tracing::info!("po2: {po2}");
         let cycles = 1 << po2;
         let ctrl_size = CIRCUIT.ctrl_size();
-        let mut ctrl = CpuBuffer::from_fn(cycles * ctrl_size, |_| BabyBearElem::ZERO);
+        let mut ctrl = CpuBuffer::from_fn("ctrl", cycles * ctrl_size, |_| BabyBearElem::ZERO);
         let mut loader = Loader::new(cycles, &mut ctrl);
         // Make a vector & set it up with the elf data
         loader.load();

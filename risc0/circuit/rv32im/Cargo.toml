@@ -11,13 +11,16 @@ repository = { workspace = true }
 name = "eval_check"
 harness = false
 
+[[bin]]
+name = "bench"
+required-features = ["prove"]
+
 [dependencies]
 anyhow = { version = "1.0", default-features = false }
 bytemuck = "1.13"
+cfg-if = "1.0"
 derive-debug = "0.1.2"
 lazy-regex = { version = "3.1", optional = true }
-num-derive = { version = "0.4", optional = true }
-num-traits = { version = "0.2", default-features = false, optional = true }
 risc0-binfmt = { workspace = true }
 risc0-core = { workspace = true }
 risc0-zkp = { workspace = true }
@@ -25,19 +28,20 @@ risc0-zkvm-platform = { workspace = true }
 tracing = { version = "0.1", default-features = false, features = [
   "attributes",
 ] }
+tracing-forest = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [target.'cfg(not(target_os = "zkvm"))'.dependencies]
 crossbeam = { version = "0.8", optional = true }
 cust = { version = "0.3", optional = true }
 rand = { version = "0.8", optional = true }
 rayon = { version = "1.5", optional = true }
-metal = { version = "0.25", optional = true }
+metal = { version = "0.27", optional = true }
 risc0-circuit-rv32im-sys = { workspace = true, optional = true }
 
 [dev-dependencies]
 criterion = "0.5"
 test-log = { version = "0.2", default-features = false, features = ["trace"] }
-tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [features]
 cuda = [
@@ -57,8 +61,6 @@ metal = [
 prove = [
   "dep:crossbeam",
   "dep:lazy-regex",
-  "dep:num-derive",
-  "dep:num-traits",
   "dep:rand",
   "dep:rayon",
   "risc0-zkp/prove",

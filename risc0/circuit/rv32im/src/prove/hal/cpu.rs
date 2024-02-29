@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use std::rc::Rc;
+
 use rayon::prelude::*;
 use risc0_core::field::{
     baby_bear::{BabyBearElem, BabyBearExtElem},
@@ -19,13 +21,18 @@ use risc0_core::field::{
 };
 use risc0_zkp::{
     adapter::PolyFp,
-    core::log2_ceil,
-    hal::{cpu::CpuBuffer, CircuitHal, Hal},
+    core::{hash::sha::Sha256HashSuite, log2_ceil},
+    hal::{
+        cpu::{CpuBuffer, CpuHal},
+        CircuitHal, Hal,
+    },
     INV_RATE,
 };
 
 use crate::{
-    CIRCUIT, GLOBAL_MIX, GLOBAL_OUT, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CTRL, REGISTER_GROUP_DATA,
+    prove::{engine::SegmentProverImpl, SegmentProver},
+    CIRCUIT, GLOBAL_MIX, GLOBAL_OUT, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CTRL,
+    REGISTER_GROUP_DATA,
 };
 
 pub struct CpuCircuitHal;
@@ -94,4 +101,11 @@ where
             }
         });
     }
+}
+
+pub fn get_segment_prover() -> Box<dyn SegmentProver> {
+    let suite = Sha256HashSuite::new_suite();
+    let hal = Rc::new(CpuHal::new(suite.clone()));
+    let circuit_hal = Rc::new(CpuCircuitHal::new());
+    Box::new(SegmentProverImpl::new(hal, circuit_hal))
 }

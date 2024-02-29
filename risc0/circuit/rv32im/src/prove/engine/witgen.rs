@@ -49,12 +49,15 @@ impl WitnessGenerator {
         let steps = 1 << po2;
         Self {
             steps,
-            ctrl: CpuBuffer::from_fn(steps * CIRCUIT.ctrl_size(), |_| BabyBearElem::ZERO),
-            data: CpuBuffer::from_fn(steps * CIRCUIT.data_size(), |_| BabyBearElem::INVALID),
+            ctrl: CpuBuffer::from_fn("ctrl", steps * CIRCUIT.ctrl_size(), |_| BabyBearElem::ZERO),
+            data: CpuBuffer::from_fn("data", steps * CIRCUIT.data_size(), |_| {
+                BabyBearElem::INVALID
+            }),
             io: CpuBuffer::from(Vec::from(io)),
         }
     }
 
+    #[tracing::instrument(skip_all)]
     pub fn execute(&mut self, trace: PreflightTrace) -> Result<()> {
         let mut machine = MachineContext::new(trace);
         self.compute_execute(&mut machine)?;
@@ -130,6 +133,8 @@ impl WitnessGenerator {
         let args = &[ctrl, io, data];
         let last_cycle = self.steps - ZK_CYCLES;
 
+        tracing::info!("last_cycle: {last_cycle}");
+
         machine.sort("ram");
         tracing::debug!("step_verify_mem");
         tracing::info_span!("step_verify_mem").in_scope(|| {
@@ -147,6 +152,7 @@ impl WitnessGenerator {
         });
     }
 
+    #[tracing::instrument(skip_all)]
     pub fn accumulate(
         &mut self,
         iop: &mut WriteIOP<BabyBear>,
@@ -154,11 +160,11 @@ impl WitnessGenerator {
         tracing::debug!("accumulate");
 
         // Make the mixing values
-        let mix = CpuBuffer::from_fn(CircuitImpl::MIX_SIZE, |_| iop.random_elem());
+        let mix = CpuBuffer::from_fn("mix", CircuitImpl::MIX_SIZE, |_| iop.random_elem());
 
         // Make and compute accum data
         let accum_size = CIRCUIT.accum_size();
-        let accum = CpuBuffer::from_fn(self.steps * accum_size, |_| BabyBearElem::INVALID);
+        let accum = CpuBuffer::from_fn("accum", self.steps * accum_size, |_| BabyBearElem::INVALID);
         self.compute_accum(&mix, &accum);
 
         {
@@ -191,7 +197,7 @@ impl WitnessGenerator {
         ];
         let accum: Mutex<Accum<BabyBearExtElem>> = Mutex::new(Accum::new(self.steps));
         tracing::info_span!("step_compute_accum").in_scope(|| {
-            // TODO: Add an way to be able to run this on cuda, metal, etc.
+            // TODO: Add a way to be able to run this on cuda, metal, etc.
             (0..self.steps - ZK_CYCLES).into_par_iter().for_each_init(
                 || Handler::<BabyBear>::new(&accum),
                 |handler, cycle| {

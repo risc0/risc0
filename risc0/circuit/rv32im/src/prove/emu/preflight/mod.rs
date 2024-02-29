@@ -279,13 +279,13 @@ impl Preflight {
 
     fn load_u32(&mut self, addr: WordAddr) -> Result<u32> {
         let data = self.pager.load(addr)?;
-        tracing::debug!("load_u32: {:?} => 0x{data:08x}", addr.baddr(),);
+        // tracing::trace!("load_u32: {:?} => 0x{data:08x}", addr.baddr(),);
         self.add_txn(false, addr, data);
         Ok(data)
     }
 
     fn store_u32(&mut self, addr: WordAddr, data: u32) -> Result<()> {
-        tracing::debug!("store_u32: {:?} <= 0x{data:08x}", addr.baddr());
+        // tracing::trace!("store_u32: {:?} <= 0x{data:08x}", addr.baddr());
         self.pager.store(addr, data)
     }
 
@@ -537,7 +537,7 @@ impl EmuContext for Preflight {
     }
 
     fn on_insn_decoded(&self, kind: InsnKind, _decoded: &DecodedInstruction) {
-        tracing::debug!("{:?}> {kind:?}", self.pc);
+        tracing::trace!("{:?}> {kind:?}", self.pc);
     }
 
     fn on_normal_end(&mut self, kind: InsnKind, _decoded: &DecodedInstruction) {
@@ -563,7 +563,7 @@ impl EmuContext for Preflight {
 
     fn store_register(&mut self, idx: usize, data: u32) -> Result<()> {
         if idx != 0 {
-            tracing::trace!("store_reg: x{idx} <= 0x{data:08x}");
+            // tracing::trace!("store_reg: x{idx} <= 0x{data:08x}");
             self.store_u32(SYSTEM_START + idx, data)?;
         }
         Ok(())
@@ -578,6 +578,7 @@ impl EmuContext for Preflight {
     }
 }
 
+#[tracing::instrument(skip_all)]
 pub fn preflight_segment(segment: &Segment) -> Result<PreflightTrace> {
     tracing::debug!("preflight_segment: {segment:?}");
     let mut preflight = Preflight::new(segment);

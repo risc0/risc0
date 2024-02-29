@@ -88,6 +88,7 @@ impl<T> Drop for TrackedVec<T> {
 
 #[derive(Clone)]
 pub struct CpuBuffer<T> {
+    name: &'static str,
     buf: Arc<RwLock<TrackedVec<T>>>,
     region: Region,
 }
@@ -158,9 +159,10 @@ impl<'a, T: Default + Clone + Pod> SyncSlice<'a, T> {
 }
 
 impl<T: Default + Clone + Pod> CpuBuffer<T> {
-    fn new(size: usize) -> Self {
+    fn new(name: &'static str, size: usize) -> Self {
         let buf = vec![T::default(); size];
         CpuBuffer {
+            name,
             buf: Arc::new(RwLock::new(TrackedVec::new(buf))),
             region: Region(0, size),
         }
@@ -170,20 +172,22 @@ impl<T: Default + Clone + Pod> CpuBuffer<T> {
         self.as_slice_sync().get_ptr()
     }
 
-    fn copy_from(slice: &[T]) -> Self {
+    fn copy_from(name: &'static str, slice: &[T]) -> Self {
         let bytes = bytemuck::cast_slice(slice);
         CpuBuffer {
+            name,
             buf: Arc::new(RwLock::new(TrackedVec::new(Vec::from(bytes)))),
             region: Region(0, slice.len()),
         }
     }
 
-    pub fn from_fn<F>(size: usize, f: F) -> Self
+    pub fn from_fn<F>(name: &'static str, size: usize, f: F) -> Self
     where
         F: FnMut(usize) -> T,
     {
         let vec = (0..size).map(f).collect();
         CpuBuffer {
+            name,
             buf: Arc::new(RwLock::new(TrackedVec::new(vec))),
             region: Region(0, size),
         }
@@ -214,6 +218,7 @@ impl<T: Default + Clone + Pod> From<Vec<T>> for CpuBuffer<T> {
     fn from(vec: Vec<T>) -> CpuBuffer<T> {
         let size = vec.len();
         CpuBuffer {
+            name: "vec",
             buf: Arc::new(RwLock::new(TrackedVec::new(vec))),
             region: Region(0, size),
         }
@@ -221,6 +226,10 @@ impl<T: Default + Clone + Pod> From<Vec<T>> for CpuBuffer<T> {
 }
 
 impl<T: Pod> Buffer<T> for CpuBuffer<T> {
+    fn name(&self) -> &'static str {
+        self.name
+    }
+
     fn size(&self) -> usize {
         self.region.size()
     }
@@ -229,6 +238,7 @@ impl<T: Pod> Buffer<T> for CpuBuffer<T> {
         assert!(offset + size <= self.size());
         let region = Region(self.region.offset() + offset, size);
         CpuBuffer {
+            name: self.name,
             buf: Arc::clone(&self.buf),
             region,
         }
@@ -253,44 +263,40 @@ impl<F: Field> Hal for CpuHal<F> {
     type ExtElem = F::ExtElem;
     type Buffer<T: Clone + Debug + PartialEq + Pod> = CpuBuffer<T>;
 
-    fn alloc_elem(&self, _name: &'static str, size: usize) -> Self::Buffer<Self::Elem> {
-        CpuBuffer::new(size)
+    fn alloc_elem(&self, name: &'static str, size: usize) -> Self::Buffer<Self::Elem> {
+        CpuBuffer::new(name, size)
     }
 
-    fn copy_from_elem(
-        &self,
-        _name: &'static str,
-        slice: &[Self::Elem],
-    ) -> Self::Buffer<Self::Elem> {
-        CpuBuffer::copy_from(slice)
+    fn copy_from_elem(&self, name: &'static str, slice: &[Self::Elem]) -> Self::Buffer<Self::Elem> {
+        CpuBuffer::copy_from(name, slice)
     }
 
-    fn alloc_extelem(&self, _name: &'static str, size: usize) -> Self::Buffer<Self::ExtElem> {
-        CpuBuffer::new(size)
+    fn alloc_extelem(&self, name: &'static str, size: usize) -> Self::Buffer<Self::ExtElem> {
+        CpuBuffer::new(name, size)
     }
 
     fn copy_from_extelem(
         &self,
-        _name: &'static str,
+        name: &'static str,
         slice: &[Self::ExtElem],
     ) -> Self::Buffer<Self::ExtElem> {
-        CpuBuffer::copy_from(slice)
+        CpuBuffer::copy_from(name, slice)
     }
 
-    fn alloc_digest(&self, _name: &'static str, size: usize) -> Self::Buffer<Digest> {
-        CpuBuffer::new(size)
+    fn alloc_digest(&self, name: &'static str, size: usize) -> Self::Buffer<Digest> {
+        CpuBuffer::new(name, size)
     }
 
-    fn copy_from_digest(&self, _name: &'static str, slice: &[Digest]) -> Self::Buffer<Digest> {
-        CpuBuffer::copy_from(slice)
+    fn copy_from_digest(&self, name: &'static str, slice: &[Digest]) -> Self::Buffer<Digest> {
+        CpuBuffer::copy_from(name, slice)
     }
 
-    fn alloc_u32(&self, _name: &'static str, size: usize) -> Self::Buffer<u32> {
-        CpuBuffer::new(size)
+    fn alloc_u32(&self, name: &'static str, size: usize) -> Self::Buffer<u32> {
+        CpuBuffer::new(name, size)
     }
 
-    fn copy_from_u32(&self, _name: &'static str, slice: &[u32]) -> Self::Buffer<u32> {
-        CpuBuffer::copy_from(slice)
+    fn copy_from_u32(&self, name: &'static str, slice: &[u32]) -> Self::Buffer<u32> {
+        CpuBuffer::copy_from(name, slice)
     }
 
     #[tracing::instrument(skip_all)]

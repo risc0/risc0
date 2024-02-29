@@ -19,6 +19,8 @@ pub mod machine;
 mod tests;
 pub mod witgen;
 
+use std::rc::Rc;
+
 use anyhow::Result;
 use risc0_zkp::{
     adapter::TapsProvider,
@@ -29,7 +31,10 @@ use risc0_zkp::{
 };
 
 use self::witgen::WitnessGenerator;
-use super::emu::{preflight::preflight_segment, Segment};
+use super::{
+    emu::{preflight::preflight_segment, Segment},
+    Seal, SegmentProver,
+};
 use crate::{
     layout::{OutBuffer, LAYOUT},
     CIRCUIT, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CTRL, REGISTER_GROUP_DATA,
@@ -39,40 +44,65 @@ struct Twin(Elem, Elem);
 
 struct Quad(Elem, Elem, Elem, Elem);
 
-pub fn prove_segment<H, C>(hal: &H, circuit_hal: &C, segment: &Segment) -> Result<Vec<u32>>
+pub struct SegmentProverImpl<H, C>
 where
     H: Hal<Field = BabyBear, Elem = BabyBearElem, ExtElem = BabyBearExtElem>,
     C: CircuitHal<H>,
 {
-    let trace = preflight_segment(segment)?;
+    hal: Rc<H>,
+    circuit_hal: Rc<C>,
+}
 
-    let io = segment.prepare_globals();
-    let mut witgen = WitnessGenerator::new(segment.po2, &io);
-    witgen.execute(trace)?;
+impl<H, C> SegmentProverImpl<H, C>
+where
+    H: Hal<Field = BabyBear, Elem = BabyBearElem, ExtElem = BabyBearExtElem>,
+    C: CircuitHal<H>,
+{
+    pub fn new(hal: Rc<H>, circuit_hal: Rc<C>) -> Self {
+        Self { hal, circuit_hal }
+    }
+}
 
-    let mut prover = Prover::new(hal, CIRCUIT.get_taps());
-    prover.iop().write_field_elem_slice(&witgen.io.as_slice());
-    prover.iop().write_u32_slice(&[segment.po2 as u32]);
-    prover.set_po2(segment.po2);
+impl<H, C> SegmentProver for SegmentProverImpl<H, C>
+where
+    H: Hal<Field = BabyBear, Elem = BabyBearElem, ExtElem = BabyBearExtElem>,
+    C: CircuitHal<H>,
+{
+    #[tracing::instrument(skip_all)]
+    fn prove_segment(&self, segment: &Segment) -> Result<Seal> {
+        let trace = preflight_segment(segment)?;
 
-    let ctrl = hal.copy_from_elem("ctrl", &witgen.ctrl.as_slice());
-    prover.commit_group(REGISTER_GROUP_CTRL, ctrl);
+        let io = segment.prepare_globals();
+        let mut witgen = WitnessGenerator::new(segment.po2, &io);
+        witgen.execute(trace)?;
 
-    let data = hal.copy_from_elem("data", &witgen.data.as_slice());
-    prover.commit_group(REGISTER_GROUP_DATA, data);
+        let seal = tracing::info_span!("prove").in_scope(|| {
+            let mut prover = Prover::new(self.hal.as_ref(), CIRCUIT.get_taps());
+            prover.iop().write_field_elem_slice(&witgen.io.as_slice());
+            prover.iop().write_u32_slice(&[segment.po2 as u32]);
+            prover.set_po2(segment.po2);
 
-    let (mix, accum) = witgen.accumulate(prover.iop());
+            let ctrl = self.hal.copy_from_elem("ctrl", &witgen.ctrl.as_slice());
+            prover.commit_group(REGISTER_GROUP_CTRL, ctrl);
 
-    let accum = hal.copy_from_elem("accum", &accum.as_slice());
-    prover.commit_group(REGISTER_GROUP_ACCUM, accum);
+            let data = self.hal.copy_from_elem("data", &witgen.data.as_slice());
+            prover.commit_group(REGISTER_GROUP_DATA, data);
 
-    let io = &witgen.io.as_slice();
-    tracing::debug!("Globals: {:?}", OutBuffer(io).tree(LAYOUT));
-    let io = hal.copy_from_elem("io", io);
-    let mix = hal.copy_from_elem("mix", &mix.as_slice());
+            let (mix, accum) = witgen.accumulate(prover.iop());
 
-    let seal = prover.finalize(&[&mix, &io], circuit_hal);
-    Ok(seal)
+            let accum = self.hal.copy_from_elem("accum", &accum.as_slice());
+            prover.commit_group(REGISTER_GROUP_ACCUM, accum);
+
+            let io = &witgen.io.as_slice();
+            tracing::debug!("Globals: {:?}", OutBuffer(io).tree(LAYOUT));
+            let io = self.hal.copy_from_elem("io", io);
+            let mix = self.hal.copy_from_elem("mix", &mix.as_slice());
+
+            prover.finalize(&[&mix, &io], self.circuit_hal.as_ref())
+        });
+
+        Ok(seal)
+    }
 }
 
 impl From<Twin> for u32 {

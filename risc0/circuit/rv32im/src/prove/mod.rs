@@ -15,3 +15,25 @@
 pub mod emu;
 pub mod engine;
 pub mod hal;
+
+use self::emu::Segment;
+use anyhow::Result;
+use cfg_if::cfg_if;
+
+pub type Seal = Vec<u32>;
+
+pub trait SegmentProver {
+    fn prove_segment(&self, segment: &Segment) -> Result<Seal>;
+}
+
+pub fn get_segment_prover() -> Box<dyn SegmentProver> {
+    cfg_if! {
+        if #[cfg(feature = "cuda")] {
+            self::hal::cuda::get_segment_prover()
+        } else if #[cfg(feature = "metal")] {
+            self::hal::metal::get_segment_prover()
+        } else {
+            self::hal::cpu::get_segment_prover()
+        }
+    }
+}

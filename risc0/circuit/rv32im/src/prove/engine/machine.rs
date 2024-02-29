@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use std::cmp;
 use std::sync::atomic::Ordering;
-use std::{cmp, sync::RwLock};
 
 use anyhow::{anyhow, bail, Result};
 use lazy_regex::{regex, Captures};
@@ -31,7 +31,7 @@ use super::{
     argument::{BytesArgument, RamArgument},
     Quad,
 };
-use crate::prove::hal::cpp::ParallelCircuitStepHandler;
+use crate::prove::hal::cpp::{ParallelCircuitStepExecHandler, ParallelCircuitStepVerifyHandler};
 use crate::{
     prove::emu::{
         addr::WordAddr,
@@ -45,7 +45,7 @@ pub struct MachineContext {
 
     // Tables for sorting arguments in proper order
     ram_arg: RamArgument,
-    bytes_arg: RwLock<BytesArgument>,
+    bytes_arg: BytesArgument,
 }
 
 impl MachineContext {
@@ -53,7 +53,7 @@ impl MachineContext {
         Self {
             trace,
             ram_arg: RamArgument::default(),
-            bytes_arg: RwLock::new(BytesArgument::new()),
+            bytes_arg: BytesArgument::new(),
         }
     }
 
@@ -68,7 +68,7 @@ impl MachineContext {
         let cur_cycle = self.get_cycle(cycle);
         if let Some(pc) = &cur_cycle.pc {
             let bytes = pc.0.to_le_bytes();
-            tracing::debug!("[{cycle}] inject_backs(pc: {pc:?})");
+            tracing::trace!("[{cycle}] inject_backs(pc: {pc:?})");
             let bot2 = bytes[3] & 0b11;
             let top2 = bytes[3] >> 2 & 0b11;
             // 5204
@@ -89,7 +89,7 @@ impl MachineContext {
     pub fn sort(&mut self, name: &str) {
         match name {
             "ram" => self.ram_arg.sort(),
-            "bytes" => self.bytes_arg.write().unwrap().sort(),
+            "bytes" => self.bytes_arg.sort(),
             _ => unimplemented!("Unknown argument type {name}"),
         };
     }
@@ -125,7 +125,24 @@ impl MachineContext {
     }
 }
 
-impl ParallelCircuitStepHandler<Elem> for MachineContext {
+impl ParallelCircuitStepVerifyHandler<Elem> for MachineContext {
+    fn call(
+        &mut self,
+        cycle: usize,
+        name: &str,
+        extra: &str,
+        args: &[Elem],
+        outs: &mut [Elem],
+    ) -> Result<()> {
+        match name {
+            "plonkWrite" => self.arg_write_verify(cycle, extra, args),
+            "plonkRead" => self.arg_read_verify(cycle, extra, outs),
+            _ => unimplemented!("Unsupported extern: {name}"),
+        }
+    }
+}
+
+impl ParallelCircuitStepExecHandler<Elem> for MachineContext {
     fn call(
         &self,
         cycle: usize,
@@ -145,8 +162,7 @@ impl ParallelCircuitStepHandler<Elem> for MachineContext {
             "pageInfo" => self.page_info(cycle, outs),
             "ramWrite" => self.ram_write(cycle, args),
             "ramRead" => self.ram_read(cycle, args, outs),
-            "plonkWrite" => self.arg_write(cycle, extra, args),
-            "plonkRead" => self.arg_read(cycle, extra, outs),
+            "plonkWrite" => self.arg_write_exec(cycle, extra, args),
             "log" => self.log(extra, args),
             "syscallInit" => Ok(()),
             "syscallBody" => self.syscall_body(outs),
@@ -238,6 +254,7 @@ impl MachineContext {
         let is_read = stage.extras[cur_cycle.extra_idx + 0];
         let page_idx = stage.extras[cur_cycle.extra_idx + 1];
         let is_done = stage.extras[cur_cycle.extra_idx + 2];
+        // tracing::debug!("page_read: 0x{page_idx:05x}");
         (outs[0], outs[1], outs[2]) = (is_read.into(), page_idx.into(), is_done.into());
         Ok(())
     }
@@ -474,29 +491,29 @@ impl MachineContext {
         Ok(())
     }
 
-    fn arg_read(&self, _cycle: usize, name: &str, outs: &mut [Elem]) -> Result<()> {
-        // tracing::debug!("[{cycle}] arg_read({name})");
+    fn arg_write_exec(&self, _cycle: usize, name: &str, args: &[Elem]) -> Result<()> {
+        // tracing::debug!("[{cycle}] arg_write({name})");
         match name {
-            "ram" => self.ram_arg.read(outs.try_into().unwrap()),
-            "bytes" => self
-                .bytes_arg
-                .write()
-                .unwrap()
-                .read(outs.try_into().unwrap()),
+            "ram" => self.ram_arg.write(args.try_into().unwrap()),
             _ => unimplemented!("Unknown argument type {name}"),
         }
         Ok(())
     }
 
-    fn arg_write(&self, _cycle: usize, name: &str, args: &[Elem]) -> Result<()> {
+    fn arg_read_verify(&mut self, _cycle: usize, name: &str, outs: &mut [Elem]) -> Result<()> {
+        // tracing::debug!("[{cycle}] arg_read({name})");
+        match name {
+            "ram" => self.ram_arg.read(outs.try_into().unwrap()),
+            "bytes" => self.bytes_arg.read(outs.try_into().unwrap()),
+            _ => unimplemented!("Unknown argument type {name}"),
+        }
+        Ok(())
+    }
+
+    fn arg_write_verify(&mut self, _cycle: usize, name: &str, args: &[Elem]) -> Result<()> {
         // tracing::debug!("[{cycle}] arg_write({name})");
         match name {
-            "ram" => self.ram_arg.write(args.try_into().unwrap()),
-            "bytes" => self
-                .bytes_arg
-                .write()
-                .unwrap()
-                .write(args.try_into().unwrap()),
+            "bytes" => self.bytes_arg.write(args.try_into().unwrap()),
             _ => unimplemented!("Unknown argument type {name}"),
         }
         Ok(())

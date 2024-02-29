@@ -89,9 +89,9 @@ mod tests {
     fn step_exec() {
         let mut custom = CustomStepMock {};
         let ctx = CircuitStepContext { size: 0, cycle: 0 };
-        let args0 = CpuBuffer::from_fn(20, |_| BabyBearElem::default());
-        let args1 = CpuBuffer::from_fn(20, |_| BabyBearElem::default());
-        let args2 = CpuBuffer::from_fn(20, |_| BabyBearElem::default());
+        let args0 = CpuBuffer::from_fn("args0", 20, |_| BabyBearElem::default());
+        let args1 = CpuBuffer::from_fn("args1", 20, |_| BabyBearElem::default());
+        let args2 = CpuBuffer::from_fn("args2", 20, |_| BabyBearElem::default());
         let args = [&args0, &args1, &args2].map(CpuBuffer::as_slice_sync);
         CIRCUIT
             .step_exec(&ctx, &mut custom, args.as_slice())

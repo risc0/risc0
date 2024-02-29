@@ -145,38 +145,43 @@ where
         let po2 = segment.po2 as usize;
         let mut executor = Executor::new(&CIRCUIT, machine, po2, po2, &io);
 
-        let loader = Loader::new();
-        loader.load(|chunk, fini| executor.step(chunk, fini))?;
-        executor.finalize();
+        tracing::info_span!("execute").in_scope(|| -> Result<()> {
+            let loader = Loader::new();
+            loader.load(|chunk, fini| executor.step(chunk, fini))?;
+            executor.finalize();
+            Ok(())
+        })?;
 
-        let mut adapter = ProveAdapter::new(&mut executor);
-        let mut prover = Prover::new(hal, CIRCUIT.get_taps());
+        let seal = tracing::info_span!("prove").in_scope(|| {
+            let mut adapter = ProveAdapter::new(&mut executor);
+            let mut prover = Prover::new(hal, CIRCUIT.get_taps());
 
-        adapter.execute(prover.iop());
+            adapter.execute(prover.iop());
 
-        prover.set_po2(adapter.po2() as usize);
+            prover.set_po2(adapter.po2() as usize);
 
-        prover.commit_group(
-            REGISTER_GROUP_CODE,
-            hal.copy_from_elem("code", &adapter.get_code().as_slice()),
-        );
-        prover.commit_group(
-            REGISTER_GROUP_DATA,
-            hal.copy_from_elem("data", &adapter.get_data().as_slice()),
-        );
-        adapter.accumulate(prover.iop());
-        prover.commit_group(
-            REGISTER_GROUP_ACCUM,
-            hal.copy_from_elem("accum", &adapter.get_accum().as_slice()),
-        );
+            prover.commit_group(
+                REGISTER_GROUP_CODE,
+                hal.copy_from_elem("code", &adapter.get_code().as_slice()),
+            );
+            prover.commit_group(
+                REGISTER_GROUP_DATA,
+                hal.copy_from_elem("data", &adapter.get_data().as_slice()),
+            );
+            adapter.accumulate(prover.iop());
+            prover.commit_group(
+                REGISTER_GROUP_ACCUM,
+                hal.copy_from_elem("accum", &adapter.get_accum().as_slice()),
+            );
 
-        let mix = hal.copy_from_elem("mix", &adapter.get_mix().as_slice());
-        let out_slice = &adapter.get_io().as_slice();
+            let mix = hal.copy_from_elem("mix", &adapter.get_mix().as_slice());
+            let out_slice = &adapter.get_io().as_slice();
 
-        tracing::debug!("Globals: {:?}", OutBuffer(out_slice).tree(LAYOUT));
-        let out = hal.copy_from_elem("out", &adapter.get_io().as_slice());
+            tracing::debug!("Globals: {:?}", OutBuffer(out_slice).tree(LAYOUT));
+            let out = hal.copy_from_elem("out", &adapter.get_io().as_slice());
 
-        let seal = prover.finalize(&[&mix, &out], circuit_hal.as_ref());
+            prover.finalize(&[&mix, &out], circuit_hal.as_ref())
+        });
 
         let receipt = SegmentReceipt {
             seal,

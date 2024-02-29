@@ -277,7 +277,7 @@ impl<'a, S: Syscall> EmuContext for Executor<'a, S> {
     }
 
     fn on_insn_decoded(&self, kind: InsnKind, _decoded: &DecodedInstruction) {
-        tracing::debug!("{:?}> {kind:?}", self.pc);
+        tracing::trace!("{:?}> {kind:?}", self.pc);
     }
 
     fn on_normal_end(&mut self, _kind: InsnKind, _decoded: &DecodedInstruction) {
@@ -317,6 +317,7 @@ impl<'a, S: Syscall> EmuContext for Executor<'a, S> {
     }
 }
 
+#[tracing::instrument(skip_all)]
 pub fn execute<S: Syscall>(
     image: MemoryImage,
     segment_po2: usize,

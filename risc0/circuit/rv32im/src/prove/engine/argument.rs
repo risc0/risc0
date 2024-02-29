@@ -13,8 +13,6 @@
 // limitations under the License.
 
 use std::fmt;
-use std::sync::atomic::AtomicUsize;
-use std::sync::atomic::Ordering;
 
 use crossbeam::queue::SegQueue;
 use derive_debug::Dbg;
@@ -41,7 +39,7 @@ pub struct RamArgumentRow {
 pub struct RamArgument {
     queue: SegQueue<RamArgumentRow>,
     sorted: Vec<RamArgumentRow>,
-    idx: AtomicUsize,
+    idx: usize,
 }
 
 // Argument for bytes.
@@ -72,8 +70,10 @@ impl RamArgument {
         self.sorted.sort();
     }
 
-    pub fn read(&self, out: &mut [BabyBearElem]) {
-        let idx = self.idx.fetch_add(1, Ordering::Relaxed);
+    pub fn read(&mut self, out: &mut [BabyBearElem]) {
+        let idx = self.idx;
+        self.idx += 1;
+        // let idx = self.idx.fetch_add(1, Ordering::Relaxed);
         let row = self.sorted.get(idx).unwrap();
         // tracing::debug!("arg_read(ram): {row:?}");
         out[0] = row.addr.into();
@@ -106,8 +106,9 @@ impl BytesArgument {
             self.read_pos += 1;
         }
         // tracing::debug!("arg_read(bytes): {}", self.read_pos);
-        Twin(outs[0], outs[1]) = (self.read_pos as u32).into();
+        let read_pos = self.read_pos as u32;
         self.counts[self.read_pos] -= 1;
+        Twin(outs[0], outs[1]) = read_pos.into();
     }
 }
 

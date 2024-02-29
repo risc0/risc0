@@ -22,7 +22,7 @@ use risc0_core::field::{
 use risc0_zkp::{
     core::log2_ceil,
     hal::{
-        metal::{BufferImpl as MetalBuffer, MetalHal, MetalHash},
+        metal::{BufferImpl as MetalBuffer, MetalHal, MetalHalSha256, MetalHash, MetalHashSha256},
         CircuitHal,
     },
     INV_RATE,
@@ -31,6 +31,7 @@ use risc0_zkp::{
 const METAL_LIB: &[u8] = include_bytes!(env!("RV32IM_METAL_PATH"));
 
 use crate::{
+    prove::{engine::SegmentProverImpl, SegmentProver},
     GLOBAL_MIX, GLOBAL_OUT, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CTRL, REGISTER_GROUP_DATA,
 };
 
@@ -63,13 +64,23 @@ impl<MH: MetalHash> CircuitHal<MetalHal<MH>> for MetalCircuitHal<MH> {
     ) {
         const EXP_PO2: usize = log2_ceil(INV_RATE);
         let domain = steps * INV_RATE;
-        let poly_mix =
-            MetalBuffer::copy_from(&self.hal.device, self.hal.cmd_queue.clone(), &[poly_mix]);
+        let poly_mix = MetalBuffer::copy_from(
+            "poly_mix",
+            &self.hal.device,
+            self.hal.cmd_queue.clone(),
+            &[poly_mix],
+        );
         let rou = BabyBearElem::ROU_FWD[po2 + EXP_PO2];
-        let rou = MetalBuffer::copy_from(&self.hal.device, self.hal.cmd_queue.clone(), &[rou]);
-        let po2 =
-            MetalBuffer::copy_from(&self.hal.device, self.hal.cmd_queue.clone(), &[po2 as u32]);
+        let rou =
+            MetalBuffer::copy_from("rou", &self.hal.device, self.hal.cmd_queue.clone(), &[rou]);
+        let po2 = MetalBuffer::copy_from(
+            "po2",
+            &self.hal.device,
+            self.hal.cmd_queue.clone(),
+            &[po2 as u32],
+        );
         let size = MetalBuffer::copy_from(
+            "size",
             &self.hal.device,
             self.hal.cmd_queue.clone(),
             &[domain as u32],
@@ -89,6 +100,12 @@ impl<MH: MetalHash> CircuitHal<MetalHal<MH>> for MetalCircuitHal<MH> {
         self.hal
             .dispatch(&self.kernel, buffers, domain as u64, None);
     }
+}
+
+pub fn get_segment_prover() -> Box<dyn SegmentProver> {
+    let hal = Rc::new(MetalHalSha256::new());
+    let circuit_hal = Rc::new(MetalCircuitHal::<MetalHashSha256>::new(hal.clone()));
+    Box::new(SegmentProverImpl::new(hal, circuit_hal))
 }
 
 #[cfg(test)]

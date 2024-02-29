@@ -12,15 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#![allow(unused)]
-
 use std::collections::BTreeMap;
 
 use anyhow::Result;
 use rayon::prelude::*;
 use risc0_binfmt::{MemoryImage, Program};
 use risc0_zkp::{
-    adapter::{CircuitStep as _, CircuitStepContext, TapsProvider as _},
+    adapter::TapsProvider as _,
     core::{digest::Digest, hash::sha::Sha256HashSuite},
     field::{baby_bear::BabyBearElem, Elem as _},
     hal::{
@@ -39,7 +37,7 @@ use crate::{
             exec::{execute, Syscall, SyscallContext, DEFAULT_SEGMENT_PO2},
             preflight::preflight_segment,
         },
-        hal::cpu::CpuCircuitHal,
+        get_segment_prover,
     },
     CIRCUIT,
 };
@@ -69,7 +67,7 @@ impl ControlCheck {
         }
     }
 
-    fn check_ctrl(&self, po2: u32, control_id: &Digest) -> Result<(), VerificationError> {
+    fn check_ctrl(&self, _po2: u32, control_id: &Digest) -> Result<(), VerificationError> {
         if *control_id == self.computed {
             Ok(())
         } else {
@@ -98,12 +96,11 @@ fn basic() {
     let segments = execute(image, DEFAULT_SEGMENT_PO2, 1 << 20, &NullSyscall::default()).unwrap();
     let segment = segments.first().unwrap();
 
+    let prover = get_segment_prover();
+    let seal = prover.prove_segment(&segment).unwrap();
+
     let suite = Sha256HashSuite::new_suite();
     let hal = CpuHal::new(suite.clone());
-    let circuit_hal = CpuCircuitHal::new();
-
-    let seal = super::prove_segment(&hal, &circuit_hal, segment).unwrap();
-
     let checker = ControlCheck::new(&hal, segment.po2);
     risc0_zkp::verify::verify(&CIRCUIT, &suite, &seal, |x, y| checker.check_ctrl(x, y)).unwrap();
 }
@@ -129,15 +126,17 @@ fn fwd_rev_ab() {
 
     let io = segment.prepare_globals();
     let io = CpuBuffer::from(Vec::from(io));
-    let mut trace = preflight_segment(segment).unwrap();
+    let trace = preflight_segment(segment).unwrap();
 
-    let mut ctrl = CpuBuffer::from_fn(steps * CIRCUIT.ctrl_size(), |_| BabyBearElem::ZERO);
+    let mut ctrl = CpuBuffer::from_fn("ctrl", steps * CIRCUIT.ctrl_size(), |_| BabyBearElem::ZERO);
     let mut loader = Loader::new(steps, &mut ctrl);
     let ctrl_cycles = loader.load();
 
     // run trace in reverse
-    let mut rev_machine = MachineContext::new(trace.clone());
-    let rev_data = CpuBuffer::from_fn(steps * CIRCUIT.data_size(), |_| BabyBearElem::INVALID);
+    let rev_machine = MachineContext::new(trace.clone());
+    let rev_data = CpuBuffer::from_fn("rev_data", steps * CIRCUIT.data_size(), |_| {
+        BabyBearElem::INVALID
+    });
 
     for cycle in 0..ctrl_cycles {
         rev_machine.inject_backs(steps, cycle, rev_data.as_slice_sync());
@@ -154,12 +153,12 @@ fn fwd_rev_ab() {
             io.as_slice_sync(),
             rev_data.as_slice_sync(),
         ];
-        rev_machine.step_exec(steps, cycle, args);
+        rev_machine.step_exec(steps, cycle, args).unwrap();
 
         // execute forward until the next parallel safe cycle
         let mut cycle = cycle + 1;
         while cycle < ctrl_cycles && !rev_machine.is_parallel_safe(cycle) {
-            rev_machine.step_exec(steps, cycle, args);
+            rev_machine.step_exec(steps, cycle, args).unwrap();
             cycle += 1;
         }
     }
@@ -176,15 +175,17 @@ fn fwd_rev_ab() {
     });
 
     // run trace forward
-    let mut fwd_machine = MachineContext::new(trace);
-    let fwd_data = CpuBuffer::from_fn(steps * CIRCUIT.data_size(), |_| BabyBearElem::INVALID);
+    let fwd_machine = MachineContext::new(trace);
+    let fwd_data = CpuBuffer::from_fn("fwd_data", steps * CIRCUIT.data_size(), |_| {
+        BabyBearElem::INVALID
+    });
     for cycle in 0..ctrl_cycles {
         let args = &[
             ctrl.as_slice_sync(),
             io.as_slice_sync(),
             fwd_data.as_slice_sync(),
         ];
-        fwd_machine.step_exec(steps, cycle, args);
+        fwd_machine.step_exec(steps, cycle, args).unwrap();
     }
 
     // zero out invalids
