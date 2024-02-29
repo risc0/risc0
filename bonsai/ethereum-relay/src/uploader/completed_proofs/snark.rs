@@ -72,11 +72,11 @@ pub(crate) async fn get_snark_receipt(
 
 pub fn tokenize_snark_receipt(seal: &Groth16Seal) -> anyhow::Result<Token> {
     if seal.b.len() != 2 {
-        anyhow::bail!("hex-strings encoded proof is not well formed");
+        anyhow::bail!("hex-strings encoded Groth16 seal is not well formed");
     }
     for pair in [&seal.a, &seal.c].into_iter().chain(seal.b.iter()) {
         if pair.len() != 2 {
-            anyhow::bail!("hex-strings encoded proof is not well formed");
+            anyhow::bail!("hex-strings encoded Groth16 seal is not well formed");
         }
     }
     Ok(Token::FixedArray(vec![
