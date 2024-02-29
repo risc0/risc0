@@ -43,7 +43,7 @@ pub enum SdkErr {
     #[error("missing BONSAI_API_URL env var")]
     MissingApiUrl,
     /// Missing file
-    #[error("failed to find file on disk")]
+    #[error("failed to find file on disk: {0:?}")]
     FileNotFound(#[from] std::io::Error),
 }
 
