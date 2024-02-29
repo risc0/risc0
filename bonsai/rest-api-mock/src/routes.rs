@@ -23,8 +23,7 @@ use bonsai_sdk::alpha::responses::{
     CreateSessRes, ImgUploadRes, ProofReq, SessionStatusRes, SnarkReceipt, SnarkReq,
     SnarkStatusRes, UploadRes,
 };
-use risc0_groth16::Seal;
-use risc0_zkvm::Receipt;
+use risc0_zkvm::{Groth16Seal, Receipt};
 use tracing::info;
 
 use crate::{
@@ -147,7 +146,7 @@ pub(crate) async fn snark_status(
             Ok(Json(SnarkStatusRes {
                 status: "SUCCEEDED".to_string(),
                 output: Some(SnarkReceipt {
-                    snark: Seal {
+                    snark: Groth16Seal {
                         a: vec![],
                         b: vec![],
                         c: vec![],

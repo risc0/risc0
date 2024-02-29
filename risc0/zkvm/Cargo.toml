@@ -151,6 +151,7 @@ prove = [
   "dep:typetag",
   "risc0-circuit-recursion/prove",
   "risc0-circuit-rv32im/prove",
+  "risc0-groth16/prove",
   "risc0-zkp/prove",
   "std",
 ]

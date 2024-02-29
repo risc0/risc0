@@ -2337,12 +2337,17 @@ dependencies = [
  "ark-bn254",
  "ark-groth16",
  "ark-serialize",
+ "bytemuck",
  "hex",
  "num-bigint 0.4.4",
  "num-derive",
  "num-traits",
+ "risc0-core",
  "risc0-zkp",
  "serde",
+ "serde_json",
+ "tempfile",
+ "tracing",
 ]
 
 [[package]]

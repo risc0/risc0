@@ -22,7 +22,7 @@ use ethers::{
     abi::{Token, Tokenizable},
     types::U256,
 };
-use risc0_groth16::Seal;
+use risc0_zkvm::Groth16Seal;
 
 use super::error::CompleteProofError;
 use crate::api;
@@ -70,7 +70,7 @@ pub(crate) async fn get_snark_receipt(
     Ok(proof)
 }
 
-pub fn tokenize_snark_receipt(seal: &Seal) -> anyhow::Result<Token> {
+pub fn tokenize_snark_receipt(seal: &Groth16Seal) -> anyhow::Result<Token> {
     if seal.b.len() != 2 {
         anyhow::bail!("hex-strings encoded proof is not well formed");
     }

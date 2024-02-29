@@ -18,9 +18,8 @@ use bonsai_sdk::alpha::{
     SessionId,
 };
 use ethers::types::{Address, Bytes, H256};
-use risc0_groth16::Seal as Groth16Seal;
 use risc0_zkvm::{
-    sha::Digest, ExitCode, InnerReceipt, Journal, MaybePruned, Receipt, ReceiptClaim,
+    sha::Digest, ExitCode, Groth16Seal, InnerReceipt, Journal, MaybePruned, Receipt, ReceiptClaim,
 };
 use uuid::Uuid;
 use wiremock::{

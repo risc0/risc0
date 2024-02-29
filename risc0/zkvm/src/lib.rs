@@ -92,12 +92,14 @@ pub use risc0_binfmt::SystemState;
 pub use risc0_zkvm_platform::{declare_syscall, memory::GUEST_MAX_MEM, PAGE_SIZE};
 
 #[cfg(all(not(target_os = "zkvm"), feature = "prove"))]
+pub use risc0_groth16::{
+    docker::stark_to_snark, to_json as seal_to_json, ProofJson as Groth16ProofJson,
+};
+
+#[cfg(all(not(target_os = "zkvm"), feature = "prove"))]
 pub use self::host::{
     api::server::Server as ApiServer,
     client::prove::local::LocalProver,
-    risc0_groth16::{
-        docker::stark_to_snark, to_json as seal_to_json, ProofJson as Groth16ProofJson,
-    },
     server::{
         exec::executor::ExecutorImpl,
         prove::{get_prover_server, loader::Loader, HalPair, ProverServer},
