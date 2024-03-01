@@ -59,7 +59,7 @@ impl WitnessGenerator {
 
     #[tracing::instrument(skip_all)]
     pub fn execute(&mut self, trace: PreflightTrace) -> Result<()> {
-        let mut machine = MachineContext::new(trace);
+        let mut machine = MachineContext::new(self.steps, trace);
         self.compute_execute(&mut machine)?;
         self.compute_verify(&mut machine);
 
@@ -90,6 +90,7 @@ impl WitnessGenerator {
         ];
         tracing::debug!("step_exec");
         tracing::info_span!("step_exec").in_scope(|| {
+            #[cfg(not(feature = "seq"))]
             (0..last_cycle).into_par_iter().for_each(|cycle| {
                 if cycle == 0 || machine.is_parallel_safe(cycle) {
                     // tracing::debug!("step_exec: {cycle}");
@@ -102,9 +103,11 @@ impl WitnessGenerator {
                     }
                 }
             });
-            // for cycle in 0..last_cycle {
-            //     machine.step_exec(self.steps, cycle, args).unwrap();
-            // }
+
+            #[cfg(feature = "seq")]
+            for cycle in 0..last_cycle {
+                machine.step_exec(self.steps, cycle, args).unwrap();
+            }
         });
 
         Ok(())
@@ -138,6 +141,12 @@ impl WitnessGenerator {
         machine.sort("ram");
         tracing::debug!("step_verify_mem");
         tracing::info_span!("step_verify_mem").in_scope(|| {
+            // #[cfg(not(feature = "seq"))]
+            // (0..last_cycle).into_par_iter().for_each(|cycle| {
+            //     machine.step_verify_mem(self.steps, cycle, args).unwrap();
+            // });
+
+            // #[cfg(feature = "seq")]
             for cycle in 0..last_cycle {
                 machine.step_verify_mem(self.steps, cycle, args).unwrap();
             }
@@ -146,6 +155,12 @@ impl WitnessGenerator {
         machine.sort("bytes");
         tracing::debug!("step_verify_bytes");
         tracing::info_span!("step_verify_bytes").in_scope(|| {
+            // #[cfg(not(feature = "seq"))]
+            // (0..last_cycle).into_par_iter().for_each(|cycle| {
+            //     machine.step_verify_bytes(self.steps, cycle, args).unwrap();
+            // });
+
+            // #[cfg(feature = "seq")]
             for cycle in 0..last_cycle {
                 machine.step_verify_bytes(self.steps, cycle, args).unwrap();
             }

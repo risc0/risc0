@@ -20,7 +20,6 @@ anyhow = { version = "1.0", default-features = false }
 bytemuck = "1.13"
 cfg-if = "1.0"
 derive-debug = "0.1.2"
-lazy-regex = { version = "3.1", optional = true }
 risc0-binfmt = { workspace = true }
 risc0-core = { workspace = true }
 risc0-zkp = { workspace = true }
@@ -34,6 +33,7 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 [target.'cfg(not(target_os = "zkvm"))'.dependencies]
 crossbeam = { version = "0.8", optional = true }
 cust = { version = "0.3", optional = true }
+lazy-regex = { version = "3.1", optional = true }
 rand = { version = "0.8", optional = true }
 rayon = { version = "1.5", optional = true }
 metal = { version = "0.27", optional = true }
@@ -67,4 +67,5 @@ prove = [
   "risc0-circuit-rv32im-sys",
   "std",
 ]
+seq = ["prove"]
 std = ["risc0-zkp/std"]

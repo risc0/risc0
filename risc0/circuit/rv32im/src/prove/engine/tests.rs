@@ -133,7 +133,7 @@ fn fwd_rev_ab() {
     let ctrl_cycles = loader.load();
 
     // run trace in reverse
-    let rev_machine = MachineContext::new(trace.clone());
+    let rev_machine = MachineContext::new(steps, trace.clone());
     let rev_data = CpuBuffer::from_fn("rev_data", steps * CIRCUIT.data_size(), |_| {
         BabyBearElem::INVALID
     });
@@ -175,7 +175,7 @@ fn fwd_rev_ab() {
     });
 
     // run trace forward
-    let fwd_machine = MachineContext::new(trace);
+    let fwd_machine = MachineContext::new(steps, trace);
     let fwd_data = CpuBuffer::from_fn("fwd_data", steps * CIRCUIT.data_size(), |_| {
         BabyBearElem::INVALID
     });

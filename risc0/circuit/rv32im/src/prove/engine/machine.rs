@@ -49,11 +49,11 @@ pub struct MachineContext {
 }
 
 impl MachineContext {
-    pub fn new(trace: PreflightTrace) -> Self {
+    pub fn new(steps: usize, trace: PreflightTrace) -> Self {
         Self {
             trace,
-            ram_arg: RamArgument::default(),
-            bytes_arg: BytesArgument::new(),
+            ram_arg: RamArgument::new(steps),
+            bytes_arg: BytesArgument::new(steps),
         }
     }
 
@@ -125,23 +125,6 @@ impl MachineContext {
     }
 }
 
-impl ParallelCircuitStepVerifyHandler<Elem> for MachineContext {
-    fn call(
-        &mut self,
-        cycle: usize,
-        name: &str,
-        extra: &str,
-        args: &[Elem],
-        outs: &mut [Elem],
-    ) -> Result<()> {
-        match name {
-            "plonkWrite" => self.arg_write_verify(cycle, extra, args),
-            "plonkRead" => self.arg_read_verify(cycle, extra, outs),
-            _ => unimplemented!("Unsupported extern: {name}"),
-        }
-    }
-}
-
 impl ParallelCircuitStepExecHandler<Elem> for MachineContext {
     fn call(
         &self,
@@ -169,6 +152,53 @@ impl ParallelCircuitStepExecHandler<Elem> for MachineContext {
             "syscallFini" => self.syscall_fini(outs),
             _ => unimplemented!("Unsupported extern: {name}"),
         }
+    }
+}
+
+impl ParallelCircuitStepVerifyHandler<Elem> for MachineContext {
+    fn call(
+        &mut self,
+        cycle: usize,
+        name: &str,
+        extra: &str,
+        args: &[Elem],
+        outs: &mut [Elem],
+    ) -> Result<()> {
+        match name {
+            "plonkWrite" => self.arg_write_verify(cycle, extra, args),
+            "plonkRead" => self.arg_read_verify(cycle, extra, outs),
+            _ => unimplemented!("Unsupported extern: {name}"),
+        }
+    }
+}
+
+impl MachineContext {
+    fn arg_read_verify(&mut self, cycle: usize, name: &str, outs: &mut [Elem]) -> Result<()> {
+        // tracing::debug!("[{cycle}] arg_read({name})");
+        match name {
+            "ram" => self.ram_arg.read(cycle, outs.try_into().unwrap()),
+            "bytes" => self.bytes_arg.read(cycle, outs.try_into().unwrap()),
+            _ => unimplemented!("Unknown argument type {name}"),
+        }
+        Ok(())
+    }
+
+    fn arg_write_verify(&mut self, cycle: usize, name: &str, args: &[Elem]) -> Result<()> {
+        // tracing::debug!("[{cycle}] arg_write({name})");
+        match name {
+            "bytes" => self.bytes_arg.write(cycle, args.try_into().unwrap()),
+            _ => unimplemented!("Unknown argument type {name}"),
+        }
+        Ok(())
+    }
+
+    fn arg_write_exec(&self, cycle: usize, name: &str, args: &[Elem]) -> Result<()> {
+        // tracing::debug!("[{cycle}] arg_write({name})");
+        match name {
+            "ram" => self.ram_arg.write(cycle, args.try_into().unwrap()),
+            _ => unimplemented!("Unknown argument type {name}"),
+        }
+        Ok(())
     }
 }
 
@@ -488,34 +518,6 @@ impl MachineContext {
             args_left
         );
         tracing::trace!("{}", formatted); // here
-        Ok(())
-    }
-
-    fn arg_write_exec(&self, _cycle: usize, name: &str, args: &[Elem]) -> Result<()> {
-        // tracing::debug!("[{cycle}] arg_write({name})");
-        match name {
-            "ram" => self.ram_arg.write(args.try_into().unwrap()),
-            _ => unimplemented!("Unknown argument type {name}"),
-        }
-        Ok(())
-    }
-
-    fn arg_read_verify(&mut self, _cycle: usize, name: &str, outs: &mut [Elem]) -> Result<()> {
-        // tracing::debug!("[{cycle}] arg_read({name})");
-        match name {
-            "ram" => self.ram_arg.read(outs.try_into().unwrap()),
-            "bytes" => self.bytes_arg.read(outs.try_into().unwrap()),
-            _ => unimplemented!("Unknown argument type {name}"),
-        }
-        Ok(())
-    }
-
-    fn arg_write_verify(&mut self, _cycle: usize, name: &str, args: &[Elem]) -> Result<()> {
-        // tracing::debug!("[{cycle}] arg_write({name})");
-        match name {
-            "bytes" => self.bytes_arg.write(args.try_into().unwrap()),
-            _ => unimplemented!("Unknown argument type {name}"),
-        }
         Ok(())
     }
 
