@@ -22,13 +22,17 @@ use risc0_core::field::{
 use risc0_zkp::{
     core::log2_ceil,
     hal::{
-        cuda::{BufferImpl as CudaBuffer, CudaHal, CudaHash, CudaHashPoseidon2, CudaHashSha256},
+        cuda::{
+            BufferImpl as CudaBuffer, CudaHal, CudaHalSha256, CudaHash, CudaHashPoseidon2,
+            CudaHashSha256,
+        },
         Buffer, CircuitHal, Hal,
     },
     INV_RATE,
 };
 
 use crate::{
+    prove::{engine::SegmentProverImpl, SegmentProver},
     GLOBAL_MIX, GLOBAL_OUT, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CTRL, REGISTER_GROUP_DATA,
 };
 
@@ -112,6 +116,12 @@ impl<'a, CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
 pub type CudaCircuitHalSha256 = CudaCircuitHal<CudaHashSha256>;
 pub type CudaCircuitHalPoseidon2 = CudaCircuitHal<CudaHashPoseidon2>;
 
+pub fn get_segment_prover() -> Box<dyn SegmentProver> {
+    let hal = Rc::new(CudaHalSha256::new());
+    let circuit_hal = Rc::new(CudaCircuitHalSha256::new(hal.clone()));
+    Box::new(SegmentProverImpl::new(hal, circuit_hal))
+}
+
 #[cfg(test)]
 mod tests {
     use std::rc::Rc;
@@ -123,7 +133,7 @@ mod tests {
     };
     use test_log::test;
 
-    use crate::cpu::CpuCircuitHal;
+    use crate::prove::hal::cpu::CpuCircuitHal;
 
     #[test]
     fn eval_check() {
@@ -132,6 +142,12 @@ mod tests {
         let cpu_eval = CpuCircuitHal::new();
         let gpu_hal = Rc::new(CudaHalSha256::new());
         let gpu_eval = super::CudaCircuitHal::new(gpu_hal.clone());
-        crate::testutil::eval_check(&cpu_hal, cpu_eval, gpu_hal.as_ref(), gpu_eval, PO2);
+        crate::prove::hal::testutil::eval_check(
+            &cpu_hal,
+            cpu_eval,
+            gpu_hal.as_ref(),
+            gpu_eval,
+            PO2,
+        );
     }
 }

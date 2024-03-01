@@ -247,7 +247,7 @@ impl<'a, S: Syscall> Executor<'a, S> {
     }
 
     fn store_region(&mut self, addr: ByteAddr, slice: &[u8]) -> Result<()> {
-        // tracing::trace!("store_region: 0x{addr:08x}");
+        // tracing::trace!("store_region: {addr:?}");
         slice
             .iter()
             .enumerate()

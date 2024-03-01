@@ -386,6 +386,10 @@ impl<T: Pod> BufferImpl<T> {
 }
 
 impl<T: Pod> Buffer<T> for BufferImpl<T> {
+    fn name(&self) -> &'static str {
+        self.buffer.borrow().name
+    }
+
     fn size(&self) -> usize {
         self.size
     }
