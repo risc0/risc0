@@ -8,7 +8,7 @@ You can verify receipts with a call to a RISC Zero verifier contract.
 
 Using the zkVM, any computation performed off-chain can be proven on-chain using a single verifier contract.
 This simplifies system architecture and eliminates the need for multiple contracts for different circuits.
-Even in the case of a system that needs to use custom circuits, it's possible to prove the resulting custom [receipts][term-receipt] within a [zkVM program][term-zkvm-program] and submit the resulting proof to the verifier contract.
+Even in the case of a system that needs to use custom circuits, it's possible to prove the resulting custom [receipts][term-receipt] within a [zkVM program][term-zkvm-program] through [proof composition][article-proof-composition] and submit the resulting proof to the verifier contract.
 
 <!-- TODO: Link to auto-generated Solidity annotation docs -->
 
@@ -36,11 +36,11 @@ contract EvenNumber {
 
 In this example, the `IS_EVEN` zkVM program verifies that the number, `x`, is even.
 By verifying a receipt with the [image ID][term-image-id] of that program in a `require` statement, it is guaranteed that the stored number will always be even.
-RISC Zero's zkVM and the `IS_EVEN` program guarantee is it computationally impossible to produce a verifying receipt for with an odd number.
+RISC Zero's zkVM and the `IS_EVEN` program guarantee that it's computationally impossible to produce a verifying receipt for an odd number.
 
 ## Versioning
 
-The `RiscZeroGroth16Verifier` contract is stateless and immutable.
+The [`RiscZeroGroth16Verifier`][RiscZeroGroth16Verifier.sol] contract is stateless and immutable.
 When new versions of the RISC Zero proof system are released, a new verifier contract will be deployed.
 
 When using this contract directly you can be sure that the verifier will never change, as it cannot be upgraded or otherwise mutated.
@@ -62,6 +62,7 @@ You can choose to use this contract or deploy your own.
 [IRiscZeroVerifier.sol]: https://github.com/risc0/risc0-ethereum/blob/main/contracts/src/IRiscZeroVerifier.sol
 [EvenNumber.sol]: https://github.com/risc0/bonsai-foundry-template/blob/main/contracts/EvenNumber.sol
 [article-groth16]: https://www.risczero.com/news/on-chain-verification
+[article-proof-composition]: https://www.risczero.com/news/proof-composition
 [Sepolia]: https://ethereum.org/nb/developers/docs/networks#sepolia
 [sepolia-verifier]: https://sepolia.etherscan.io/address/0x83c2e9cd64b2a16d3908e94c7654f3864212e2f8#code
 [term-journal]: /terminology#journal
