@@ -35,7 +35,7 @@ use crate::prove::hal::cpp::{ParallelCircuitStepExecHandler, ParallelCircuitStep
 use crate::{
     prove::emu::{
         addr::WordAddr,
-        preflight::{Major, PreflightCycle, PreflightStage, PreflightTrace},
+        preflight::{PreflightCycle, PreflightStage, PreflightTrace},
     },
     CIRCUIT,
 };
@@ -59,30 +59,18 @@ impl MachineContext {
 
     pub fn is_parallel_safe(&self, cycle: usize) -> bool {
         let cur_cycle = self.get_cycle(cycle);
-        let is_safe = cur_cycle.pc.is_some();
+        let is_safe = cur_cycle.backs.is_some();
         // tracing::debug!("is_parallel_safe: {cycle} <= {is_safe}");
         is_safe
     }
 
     pub fn inject_backs(&self, steps: usize, cycle: usize, data: SyncSlice<BabyBearElem>) {
         let cur_cycle = self.get_cycle(cycle);
-        if let Some(pc) = &cur_cycle.pc {
-            let bytes = pc.0.to_le_bytes();
-            tracing::trace!("[{cycle}] inject_backs(pc: {pc:?})");
-            let bot2 = bytes[3] & 0b11;
-            let top2 = bytes[3] >> 2 & 0b11;
-            // 5204
-            data.set(6 * steps + cycle - 1, (bytes[0] as u32).into());
-            // 5207
-            data.set(7 * steps + cycle - 1, (bytes[1] as u32).into());
-            // 5214
-            data.set(8 * steps + cycle - 1, (bytes[2] as u32).into());
-            // 5221
-            data.set(70 * steps + cycle - 1, (bot2 as u32).into());
-            // 5228
-            data.set(71 * steps + cycle - 1, (top2 as u32).into());
-            // 5238
-            data.set(99 * steps + cycle - 1, Major::MuxSize.as_u32().into());
+        if let Some(backs) = &cur_cycle.backs {
+            // tracing::trace!("[{cycle}] inject_backs({backs:?})");
+            for back in &backs.0 {
+                data.set(back.idx * steps + cycle - back.back, back.value.into());
+            }
         }
     }
 
@@ -100,6 +88,18 @@ impl MachineContext {
         cycle: usize,
         args: &[SyncSlice<BabyBearElem>],
     ) -> Result<BabyBearElem> {
+        // let cur_cycle = self.get_cycle(cycle);
+        // tracing::debug!("[{cycle}]: {:?}", cur_cycle);
+        // if [10008, 10009, 10010].contains(&cycle) {
+        //     let data = &args[2];
+        //     let x108: u32 = data.get(108 * steps + cycle - 1).into();
+        //     let x112: u32 = data.get(112 * steps + cycle - 1).into();
+        //     let x115: u32 = data.get(115 * steps + cycle - 1).into();
+        //     let x118: u32 = data.get(118 * steps + cycle - 1).into();
+        //     let x192: u32 = data.get(192 * steps + cycle - 1).into();
+        //     tracing::debug!("x108: 0x{x108:08x}, x112: 0x{x112:08x}, x115: 0x{x115:08x}, x118: 0x{x118:08x}, x192: 0x{x192:08x}");
+        // }
+
         let ctx = CircuitStepContext { size: steps, cycle };
         CIRCUIT.par_step_exec(&ctx, self, args)
     }

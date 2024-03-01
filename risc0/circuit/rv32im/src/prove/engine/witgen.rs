@@ -88,6 +88,10 @@ impl WitnessGenerator {
             self.io.as_slice_sync(),
             self.data.as_slice_sync(),
         ];
+
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        let counts: Vec<_> = (0..last_cycle).map(|_| AtomicUsize::new(0)).collect();
+
         tracing::debug!("step_exec");
         tracing::info_span!("step_exec").in_scope(|| {
             #[cfg(not(feature = "seq"))]
@@ -96,11 +100,14 @@ impl WitnessGenerator {
                     // tracing::debug!("step_exec: {cycle}");
                     machine.step_exec(self.steps, cycle, args).unwrap();
 
-                    let mut cycle = cycle + 1;
-                    while cycle < last_cycle && !machine.is_parallel_safe(cycle) {
-                        machine.step_exec(self.steps, cycle, args).unwrap();
-                        cycle += 1;
+                    let mut seq_cycle = cycle + 1;
+                    while seq_cycle < last_cycle && !machine.is_parallel_safe(seq_cycle) {
+                        machine.step_exec(self.steps, seq_cycle, args).unwrap();
+                        seq_cycle += 1;
                     }
+
+                    let cycles = seq_cycle - cycle;
+                    counts.get(cycles).unwrap().fetch_add(1, Ordering::SeqCst);
                 }
             });
 
@@ -109,6 +116,13 @@ impl WitnessGenerator {
                 machine.step_exec(self.steps, cycle, args).unwrap();
             }
         });
+
+        for (cycles, count) in counts.iter().enumerate() {
+            let count = count.load(Ordering::Relaxed);
+            if count > 0 {
+                tracing::info!("cycles: {cycles} -> {count}");
+            }
+        }
 
         Ok(())
     }
@@ -135,8 +149,6 @@ impl WitnessGenerator {
         // Do the verify cycles
         let args = &[ctrl, io, data];
         let last_cycle = self.steps - ZK_CYCLES;
-
-        tracing::info!("last_cycle: {last_cycle}");
 
         machine.sort("ram");
         tracing::debug!("step_verify_mem");
