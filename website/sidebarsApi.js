@@ -163,7 +163,7 @@ export default {
           label: "zkVM technical specification",
           id: "zkvm/zkvm-specification",
         },
-      ]
-    }
+      ],
+    },
   ],
 };
