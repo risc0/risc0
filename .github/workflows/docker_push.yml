@@ -29,4 +29,3 @@ jobs:
         run: docker build . --file docker/prover.Dockerfile --tag risczero/risc0-groth16-prover:$RISC0_GROTH16_PROVER
       - name: Docker push
         run: docker push risczero/risc0-groth16-prover
-      
