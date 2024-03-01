@@ -67,28 +67,18 @@ export default {
         },
         {
           type: "doc",
-          label: "Rust Resources",
-          id: "zkvm/rust-resources",
-        },
-        {
-          type: "doc",
           label: "Hello World Tutorial",
           id: "zkvm/tutorials/hello-world",
         },
         {
           type: "doc",
-          label: "zkVM technical specification",
-          id: "zkvm/zkvm-specification",
+          label: "Rust Resources",
+          id: "zkvm/rust-resources",
         },
         {
           type: "link",
           label: "API Reference Docs",
           href: "https://docs.rs/risc0-zkvm/",
-        },
-        {
-          type: "link",
-          label: "Source code",
-          href: "https://github.com/risc0/risc0",
         },
       ],
     },
@@ -160,6 +150,18 @@ export default {
           type: "doc",
           label: "Ethereum Examples",
           id: "blockchain-integration/eth-examples",
+        },
+      ],
+    },
+    {
+      type: "category",
+      label: "Reference",
+      collapsed: true,
+      items: [
+        {
+          type: "doc",
+          label: "zkVM technical specification",
+          id: "zkvm/zkvm-specification",
         },
       ],
     },
