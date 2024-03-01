@@ -1,0 +1,32 @@
+name: Docker Image CI
+
+on:
+  workflow_dispatch:
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  RISC0_GROTH16_PROVER: v2024-02-07.1
+
+jobs:
+  groth16-prover-build:
+    runs-on: [self-hosted, prod, Linux, cpu, docker]
+
+    strategy:
+      fail-fast: false
+
+    steps:
+      # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
+      - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
+      - uses: actions/checkout@v4
+      - name: docker login
+        env:
+          DOCKER_USER: ${{secrets.DOCKER_USER}}
+          DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
+        run: |
+          docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
+      - name: Build the Docker image
+        working-directory: compact_proof
+        run: docker build . --file docker/prover.Dockerfile --tag risczero/risc0-groth16-prover:$RISC0_GROTH16_PROVER
+      - name: Docker push
+        run: docker push risczero/risc0-groth16-prover
+      
