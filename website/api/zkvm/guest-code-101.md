@@ -83,7 +83,7 @@ docs] or the [examples], and we're happy to answer questions on [Discord].
 
 [acceleration]: ./acceleration.md
 [benchmarks]: ./benchmarks.md
-[Bonsai]: ../bonsai/bonsai-overview.md
+[Bonsai]: ../generating-proofs/remote-proving.md
 [Discord]: https://discord.gg/risczero
 [`env::read`]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest/env/fn.read.html
 [`env::read_slice`]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest/env/fn.read_slice.html
