@@ -121,89 +121,6 @@ export default {
         },
         {
           type: "doc",
-          label: "Quick Start",
-          id: "zkvm/quickstart",
-        },
-        {
-          type: "doc",
-          label: "Rust Resources",
-          id: "zkvm/rust-resources",
-        },
-        {
-          type: "doc",
-          label: "Performance Benchmarks",
-          id: "zkvm/benchmarks",
-        },
-      ],
-    },
-    {
-      type: "category",
-      label: "Blockchain Integration",
-      collapsed: true,
-      items: [
-        {
-          type: "doc",
-          label: "Posting & Verifying Proofs on Ethereum",
-          id: "blockchain-integration/bonsai-on-eth",
-        },
-        {
-          type: "doc",
-          label: "Ethereum Examples",
-          id: "blockchain-integration/eth-examples",
-        },
-      ],
-    },
-    {
-      type: "category",
-      label: "Reference",
-      collapsed: true,
-      items: [
-        {
-          type: "doc",
-          label: "zkVM technical specification",
-          id: "zkvm/zkvm-specification",
-        },
-      ],
-    },
-    {
-      type: "category",
-      label: "Generating Proofs for your zkVM Application",
-      collapsed: true,
-      items: [
-        {
-          type: "doc",
-          label: "Proving Options",
-          id: "generating-proofs/proving-options",
-        },
-        {
-          type: "doc",
-          label: "Dev Mode",
-          id: "generating-proofs/dev-mode",
-        },
-        {
-          type: "doc",
-          label: "Local Proving",
-          id: "generating-proofs/local-proving",
-        },
-        {
-          type: "doc",
-          label: "Remote Proving",
-          id: "generating-proofs/remote-proving",
-        },
-      ],
-    },
-    {
-      type: "category",
-      label: "Optimizing your zkVM Application",
-      collapsed: true,
-      items: [
-        {
-          type: "doc",
-          label: "Profiling",
-          id: "zkvm/profiling",
-        },
-        {
-          type: "doc",
           label: "Guest Optimization",
           id: "zkvm/optimization",
         },
@@ -238,6 +155,18 @@ export default {
           type: "doc",
           label: "Verifier Contract",
           id: "blockchain-integration/contracts/verifier",
+        },
+      ],
+    },
+    {
+      type: "category",
+      label: "Reference",
+      collapsed: true,
+      items: [
+        {
+          type: "doc",
+          label: "zkVM technical specification",
+          id: "zkvm/zkvm-specification",
         },
       ],
     },
