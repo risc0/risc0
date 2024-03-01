@@ -5864,8 +5864,6 @@ dependencies = [
  "num-traits",
  "risc0-core",
  "risc0-zkp",
- "risc0-zkvm",
- "risc0-zkvm-methods",
  "serde",
  "serde_json",
  "tempfile",
