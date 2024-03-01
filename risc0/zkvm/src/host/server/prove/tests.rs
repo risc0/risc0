@@ -459,11 +459,11 @@ mod docker {
 #[cfg(feature = "docker")]
 #[test]
 fn stark2snark() {
-    use risc0_groth16::docker::stark_to_snark;
-    use risc0_zkvm::{
+    use crate::{
         get_prover_server, recursion::identity_p254, CompactReceipt, ExecutorEnv, ExecutorImpl,
         InnerReceipt, ProverOpts, Receipt, VerifierContext,
     };
+    use risc0_groth16::docker::stark_to_snark;
     use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID};
 
     let env = ExecutorEnv::builder()

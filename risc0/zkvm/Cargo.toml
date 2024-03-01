@@ -95,6 +95,7 @@ serial_test = "3.0"
 tar = "0.4"
 tempfile = "3"
 test-log = { version = "0.2", default-features = false, features = ["trace"] }
+risc0-groth16 = { workspace = true, features = ["docker"] }
 
 [features]
 client = [
