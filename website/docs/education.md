@@ -19,8 +19,7 @@ The materials here are intended to support learners of all backgrounds to make s
 If there's a piece of our tech stack that you're struggling to make sense of, please [open an issue] to help us improve.
 Or find us on [Discord] and ask us there!
 
-
-*Looking for documentation?*<br/>
+_Looking for documentation?_<br/>
 Check out the [dev docs].
 
 [blog]: https://risczero.com/blog
@@ -31,5 +30,3 @@ Check out the [dev docs].
 [More YouTube Content]: https://youtube.com/@risczero
 [open an issue]: https://github.com/risc0/risc0/issues/new/choose
 [Study Club]: ./studyclub
-
-
