@@ -17,7 +17,7 @@ hex = { version = "0.4", default-features = false, features = ["alloc"] }
 num-bigint = { version = "0.4", default-features = false }
 num-derive = { version = "0.4" }
 num-traits = { version = "0.2", default-features = false, optional = true }
-risc0-core = { path = "../../risc0/core", optional = true }
+risc0-core = { workspace = true, optional = true }
 risc0-zkp = { workspace = true }
 serde = { version = "1.0", default-features = false, features = [
   "alloc",
