@@ -15,7 +15,7 @@ If you already have an API key, you can request proofs from Bonsai in any of the
 - via the **[Bonsai REST API][external-bonsai-rest-api]** (for building your own client or accessing Bonsai directly)
 
 If you don't have an API key, you can [request access][external-bonsai-apply].
-While you wait, you can make use of the local proving option on the [Bonsai Foundry Template], or you can focus on developing for the [zkVM][docs-zkvm].
+While you wait, you can make use of the local proving option on the [Bonsai Foundry Template][external-foundry-template], or you can focus on developing for the [zkVM][docs-zkvm].
 
 ## API Limits
 

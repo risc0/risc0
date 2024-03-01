@@ -4,7 +4,7 @@ slug: ./
 
 # Introduction
 
-Welcome to the [RISC Zero] documentation!
+Welcome to the [RISC Zero][external-risc-zero] documentation!
 
 RISC Zero is creating the infrastructure & tooling necessary for
 developers around the globe to build software that leverages ZK technology.
@@ -20,7 +20,7 @@ doesn't need to repeat the original computation or even see the inputs to the
 program!
 
 **Ready to start building?** <br/>
-Check out our [Getting Started] page.
+Check out our [Getting Started][docs-getting-started] page.
 
-[Getting Started]: ./getting-started.md
-[RISC Zero]: https://risczero.com
+[docs-getting-started]: ./getting-started.md
+[external-risc-zero]: https://risczero.com
