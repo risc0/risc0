@@ -421,5 +421,5 @@ jobs:
       - run: scripts/install_prover.sh
         working-directory: compact_proof
       - run: cargo test -p risc0-groth16 -F docker --release
-      - run: cargo test -p risc0-zkvm -F docker -- host::server::prove::tests::stark2snark --exact
+      - run: cargo test -p risc0-zkvm -F prove -F docker -- tests::stark2snark
       - run: sccache --show-stats
