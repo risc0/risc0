@@ -134,8 +134,8 @@ export default async function createConfigAsync() {
             },
             {
               position: "left",
-              label: "Resources",
-              to: "/studyclub",
+              label: "Education Hub",
+              to: "/education",
             },
             {
               type: "docsVersionDropdown",
