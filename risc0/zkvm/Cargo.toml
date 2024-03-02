@@ -95,7 +95,6 @@ serial_test = "3.0"
 tar = "0.4"
 tempfile = "3"
 test-log = { version = "0.2", default-features = false, features = ["trace"] }
-risc0-groth16 = { workspace = true, features = ["docker"] }
 
 [features]
 client = [
@@ -129,7 +128,7 @@ disable-dev-mode = []
 # system will generate binaries that not identical across all architectures.
 # While this is acceptable for most tests, the tests counting cycles and
 # segments will fail intermittently.
-docker = []
+docker = ["risc0-groth16/docker"]
 # The zkVM exposes a getrandom implementation that panics by default. This will
 # expose a getrandom implementation that uses the `sys_random` ecall.
 getrandom = ["risc0-zkvm-platform/getrandom"]
