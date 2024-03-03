@@ -46,20 +46,16 @@ struct RamArgumentRow {
 pub struct RamArgument {
     queue: SegQueue<RamArgumentRow>,
     sorted: Vec<RamArgumentRow>,
-    // index: Vec<AtomicUsize>,
-    // idx: AtomicUsize,
-    idx: usize,
+    index: Vec<AtomicUsize>,
 }
 
 impl RamArgument {
     pub fn new(steps: usize) -> Self {
-        // let index = (0..steps).map(|_| AtomicUsize::new(0)).collect();
+        let index = (0..steps).map(|_| AtomicUsize::new(0)).collect();
         Self {
             queue: SegQueue::default(),
             sorted: Vec::default(),
-            // index,
-            // idx: AtomicUsize::new(0),
-            idx: 0,
+            index,
         }
     }
 
@@ -72,10 +68,10 @@ impl RamArgument {
         let row = RamArgumentRow { addr, cyclop, word };
         // tracing::debug!("[{cycle}] arg_write(ram): {row:?}");
         self.queue.push(row);
-        // self.index
-        //     .get(cycle)
-        //     .unwrap()
-        //     .fetch_add(1, Ordering::SeqCst);
+        self.index
+            .get(cycle)
+            .unwrap()
+            .fetch_add(1, Ordering::SeqCst);
     }
 
     pub fn sort(&mut self) {
@@ -84,30 +80,23 @@ impl RamArgument {
         }
         self.sorted.sort();
 
-        // let mut pos = 0;
-        // for item in self.index.iter_mut() {
-        //     let idx = pos;
-        //     let count = item.load(Ordering::Relaxed);
-        //     pos += count;
-        //     item.store(idx, Ordering::Relaxed);
-        // }
+        let mut pos = 0;
+        for item in self.index.iter_mut() {
+            let idx = pos;
+            let count = item.load(Ordering::Relaxed);
+            pos += count;
+            item.store(idx, Ordering::Relaxed);
+        }
     }
 
-    pub fn read(&mut self, cycle: usize, out: &mut [BabyBearElem]) {
-        // let par_idx = self
-        //     .index
-        //     .get(cycle)
-        //     .unwrap()
-        //     .fetch_add(1, Ordering::SeqCst);
+    pub fn read(&self, cycle: usize, out: &mut [BabyBearElem]) {
+        let par_idx = self
+            .index
+            .get(cycle)
+            .unwrap()
+            .fetch_add(1, Ordering::SeqCst);
 
-        // let idx = self.idx.fetch_add(1, Ordering::SeqCst);
-        let idx = self.idx;
-        self.idx += 1;
-
-        // assert_eq!(par_idx, idx, "cycle: {cycle}");
-
-        let row = self.sorted.get(idx).unwrap();
-        // let row = self.sorted.get(par_idx).unwrap();
+        let row = self.sorted.get(par_idx).unwrap();
         // tracing::debug!("[{cycle}] arg_read(ram): {row:?}");
         out[0] = row.addr.into();
         out[1] = row.cyclop.cycle().into();
@@ -124,7 +113,6 @@ pub struct BytesArgument {
     counts: Vec<AtomicU32>,
     index: Vec<AtomicUsize>,
     compact: Vec<u32>,
-    // state: Mutex<BytesState>,
 }
 
 struct BytesState {
@@ -137,10 +125,6 @@ impl BytesArgument {
         let counts = (0..256 * 256).map(|_| AtomicU32::new(0)).collect();
         let index = (0..steps).map(|_| AtomicUsize::new(0)).collect();
         BytesArgument {
-            // state: Mutex::new(BytesState {
-            //     counts: Box::new([0; 256 * 256]),
-            //     read_pos: 0,
-            // }),
             counts,
             index,
             compact: Vec::new(),
@@ -149,9 +133,6 @@ impl BytesArgument {
 
     pub fn write(&self, cycle: usize, args: &[BabyBearElem]) {
         let idx: u32 = Twin(args[0], args[1]).into();
-        // tracing::debug!("arg_write(bytes): {idx}");
-        // self.state.lock().unwrap().counts[idx as usize] += 1;
-
         self.counts
             .get(idx as usize)
             .unwrap()
@@ -191,18 +172,6 @@ impl BytesArgument {
 
         let pos = *self.compact.get(idx).unwrap();
         Twin(outs[0], outs[1]) = pos.into();
-
-        // let mut state = self.state.lock().unwrap();
-
-        // while state.counts[state.read_pos] == 0 {
-        //     state.read_pos += 1;
-        // }
-        // tracing::debug!("arg_read(bytes): {}", state.read_pos);
-        // let read_pos = state.read_pos as u32;
-        // state.counts[read_pos as usize] -= 1;
-        // Twin(outs[0], outs[1]) = read_pos.into();
-
-        // assert_eq!(pos, read_pos, "cycle: {cycle}");
     }
 }
 

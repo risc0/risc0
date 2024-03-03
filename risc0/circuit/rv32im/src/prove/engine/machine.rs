@@ -36,7 +36,7 @@ use crate::{
             addr::{ByteAddr, WordAddr},
             preflight::{Back, Major, PreflightCycle, PreflightStage, PreflightTrace},
         },
-        hal::cpp::{ParallelCircuitStepExecHandler, ParallelCircuitStepVerifyHandler},
+        hal::cpp::ParallelCircuitStepHandler,
     },
     CIRCUIT,
 };
@@ -144,24 +144,12 @@ impl MachineContext {
         cycle: usize,
         args: &[SyncSlice<BabyBearElem>],
     ) -> Result<BabyBearElem> {
-        // let cur_cycle = self.get_cycle(cycle);
-        // tracing::debug!("[{cycle}]: {:?}", cur_cycle);
-        // if [10008, 10009, 10010].contains(&cycle) {
-        //     let data = &args[2];
-        //     let x108: u32 = data.get(108 * steps + cycle - 1).into();
-        //     let x112: u32 = data.get(112 * steps + cycle - 1).into();
-        //     let x115: u32 = data.get(115 * steps + cycle - 1).into();
-        //     let x118: u32 = data.get(118 * steps + cycle - 1).into();
-        //     let x192: u32 = data.get(192 * steps + cycle - 1).into();
-        //     tracing::debug!("x108: 0x{x108:08x}, x112: 0x{x112:08x}, x115: 0x{x115:08x}, x118: 0x{x118:08x}, x192: 0x{x192:08x}");
-        // }
-
         let ctx = CircuitStepContext { size: steps, cycle };
         CIRCUIT.par_step_exec(&ctx, self, args)
     }
 
     pub fn step_verify_mem(
-        &mut self,
+        &self,
         steps: usize,
         cycle: usize,
         args: &[SyncSlice<BabyBearElem>],
@@ -171,7 +159,7 @@ impl MachineContext {
     }
 
     pub fn step_verify_bytes(
-        &mut self,
+        &self,
         steps: usize,
         cycle: usize,
         args: &[SyncSlice<BabyBearElem>],
@@ -181,7 +169,7 @@ impl MachineContext {
     }
 }
 
-impl ParallelCircuitStepExecHandler<Elem> for MachineContext {
+impl ParallelCircuitStepHandler<Elem> for MachineContext {
     fn call(
         &self,
         cycle: usize,
@@ -201,7 +189,8 @@ impl ParallelCircuitStepExecHandler<Elem> for MachineContext {
             "pageInfo" => self.page_info(cycle, outs),
             "ramWrite" => self.ram_write(cycle, args),
             "ramRead" => self.ram_read(cycle, args, outs),
-            "plonkWrite" => self.arg_write_exec(cycle, extra, args),
+            "plonkWrite" => self.arg_write(cycle, extra, args),
+            "plonkRead" => self.arg_read(cycle, extra, outs),
             "log" => self.log(extra, args),
             "syscallInit" => Ok(()),
             "syscallBody" => self.syscall_body(outs),
@@ -211,25 +200,8 @@ impl ParallelCircuitStepExecHandler<Elem> for MachineContext {
     }
 }
 
-impl ParallelCircuitStepVerifyHandler<Elem> for MachineContext {
-    fn call(
-        &mut self,
-        cycle: usize,
-        name: &str,
-        extra: &str,
-        args: &[Elem],
-        outs: &mut [Elem],
-    ) -> Result<()> {
-        match name {
-            "plonkWrite" => self.arg_write_verify(cycle, extra, args),
-            "plonkRead" => self.arg_read_verify(cycle, extra, outs),
-            _ => unimplemented!("Unsupported extern: {name}"),
-        }
-    }
-}
-
 impl MachineContext {
-    fn arg_read_verify(&mut self, cycle: usize, name: &str, outs: &mut [Elem]) -> Result<()> {
+    fn arg_read(&self, cycle: usize, name: &str, outs: &mut [Elem]) -> Result<()> {
         // tracing::debug!("[{cycle}] arg_read({name})");
         match name {
             "ram" => self.ram_arg.read(cycle, outs.try_into().unwrap()),
@@ -239,19 +211,11 @@ impl MachineContext {
         Ok(())
     }
 
-    fn arg_write_verify(&mut self, cycle: usize, name: &str, args: &[Elem]) -> Result<()> {
-        // tracing::debug!("[{cycle}] arg_write({name})");
-        match name {
-            "bytes" => self.bytes_arg.write(cycle, args.try_into().unwrap()),
-            _ => unimplemented!("Unknown argument type {name}"),
-        }
-        Ok(())
-    }
-
-    fn arg_write_exec(&self, cycle: usize, name: &str, args: &[Elem]) -> Result<()> {
+    fn arg_write(&self, cycle: usize, name: &str, args: &[Elem]) -> Result<()> {
         // tracing::debug!("[{cycle}] arg_write({name})");
         match name {
             "ram" => self.ram_arg.write(cycle, args.try_into().unwrap()),
+            "bytes" => self.bytes_arg.write(cycle, args.try_into().unwrap()),
             _ => unimplemented!("Unknown argument type {name}"),
         }
         Ok(())
