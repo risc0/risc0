@@ -658,7 +658,7 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
         stream.synchronize().unwrap();
     }
 
-    #[tracing::instrument(skip_all)]
+    // #[tracing::instrument(skip_all)]
     fn gather_sample(
         &self,
         dst: &Self::Buffer<Self::Elem>,

@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::cmp;
-use std::sync::atomic::Ordering;
+use std::{cmp, sync::atomic::Ordering};
 
 use anyhow::{anyhow, bail, Result};
 use lazy_regex::{regex, Captures};
@@ -31,14 +30,22 @@ use super::{
     argument::{BytesArgument, RamArgument},
     Quad,
 };
-use crate::prove::hal::cpp::{ParallelCircuitStepExecHandler, ParallelCircuitStepVerifyHandler};
 use crate::{
-    prove::emu::{
-        addr::WordAddr,
-        preflight::{PreflightCycle, PreflightStage, PreflightTrace},
+    prove::{
+        emu::{
+            addr::{ByteAddr, WordAddr},
+            preflight::{Back, Major, PreflightCycle, PreflightStage, PreflightTrace},
+        },
+        hal::cpp::{ParallelCircuitStepExecHandler, ParallelCircuitStepVerifyHandler},
     },
     CIRCUIT,
 };
+
+struct Injector<'a> {
+    steps: usize,
+    cycle: usize,
+    data: SyncSlice<'a, BabyBearElem>,
+}
 
 pub struct MachineContext {
     trace: PreflightTrace,
@@ -46,6 +53,41 @@ pub struct MachineContext {
     // Tables for sorting arguments in proper order
     ram_arg: RamArgument,
     bytes_arg: BytesArgument,
+}
+
+impl<'a> Injector<'a> {
+    fn new(steps: usize, cycle: usize, data: SyncSlice<'a, BabyBearElem>) -> Self {
+        Self { steps, cycle, data }
+    }
+
+    fn get_idx(&self, reg: usize) -> usize {
+        reg * self.steps + self.cycle - 1
+    }
+
+    fn set_pc(&self, pc: ByteAddr) {
+        let bytes = pc.0.to_le_bytes();
+        let bot2 = bytes[3] & 0b11;
+        let top2 = bytes[3] >> 2 & 0b11;
+        self.data.set(self.get_idx(6), (bytes[0] as u32).into()); // body->pc.bytes[0]
+        self.data.set(self.get_idx(7), (bytes[1] as u32).into()); // body->pc.bytes[1]
+        self.data.set(self.get_idx(8), (bytes[2] as u32).into()); // body->pc.bytes[2]
+        self.data.set(self.get_idx(70), (bot2 as u32).into()); // body->pc.twits[0]
+        self.data.set(self.get_idx(71), (top2 as u32).into()); // body->pc.twits[1]
+    }
+
+    fn set_next_major(&self, major: Major) {
+        self.data.set(self.get_idx(99), major.as_u32().into()); // body->nextMajor
+    }
+
+    fn set_halt(&self, exit_code: u32, write_addr: WordAddr) {
+        // TODO: fix exit_code
+        self.data.set(self.get_idx(108), 0u32.into()); // body->majorSelect->at(MajorType::kECall): 8
+        self.data.set(self.get_idx(112), 0u32.into()); // body->majorSelect->at(MajorType::kPageFault): 12
+        self.data.set(self.get_idx(115), 1u32.into()); // body->majorSelect->at(MajorType::kHalt): 15
+        self.data.set(self.get_idx(116), exit_code.into()); // HaltCycle::sysExitCode
+        self.data.set(self.get_idx(117), exit_code.into()); // HaltCycle::userExitCode
+        self.data.set(self.get_idx(118), write_addr.0.into()); // HaltCycle::writeAddr
+    }
 }
 
 impl MachineContext {
@@ -59,21 +101,35 @@ impl MachineContext {
 
     pub fn is_parallel_safe(&self, cycle: usize) -> bool {
         let cur_cycle = self.get_cycle(cycle);
-        let is_safe = cur_cycle.backs.is_some();
+        let is_safe = cur_cycle.back.is_some();
         // tracing::debug!("is_parallel_safe: {cycle} <= {is_safe}");
         is_safe
     }
 
     pub fn inject_backs(&self, steps: usize, cycle: usize, data: SyncSlice<BabyBearElem>) {
         let cur_cycle = self.get_cycle(cycle);
-        if let Some(backs) = &cur_cycle.backs {
-            // tracing::trace!("[{cycle}] inject_backs({backs:?})");
-            for back in &backs.0 {
-                data.set(back.idx * steps + cycle - back.back, back.value.into());
+        if let Some(back) = &cur_cycle.back {
+            let injector = Injector::new(steps, cycle, data);
+            match back {
+                Back::Null => (),
+                Back::Body { pc } => {
+                    injector.set_pc(*pc);
+                    injector.set_next_major(Major::MuxSize);
+                }
+                Back::Halt {
+                    pc,
+                    exit_code,
+                    write_addr,
+                } => {
+                    injector.set_pc(*pc);
+                    injector.set_halt(*exit_code, *write_addr);
+                    injector.set_next_major(Major::Halt);
+                }
             }
         }
     }
 
+    #[tracing::instrument(skip_all)]
     pub fn sort(&mut self, name: &str) {
         match name {
             "ram" => self.ram_arg.sort(),
@@ -244,7 +300,7 @@ impl MachineContext {
             .get(cycle_idx)
             .ok_or_else(|| anyhow!("[{cycle}] Preflight trace truncated: {stage_cycles}"))?;
 
-        let mem_idx = cur_cycle.mem_idx.load(Ordering::Relaxed);
+        let mem_idx = cur_cycle.mem_idx.fetch_add(1, Ordering::Relaxed);
 
         let txn = &stage.txns[mem_idx];
         let txn_cycle = txn.cycle + offset;
@@ -259,8 +315,6 @@ impl MachineContext {
                 WordAddr(addr)
             );
         }
-
-        cur_cycle.mem_idx.store(mem_idx + 1, Ordering::Relaxed);
 
         tracing::trace!(
             "[{cycle}] {:?} ram_read(0x{addr:08x}, {op}): {txn:?}",

@@ -76,20 +76,23 @@ pub enum TopMux {
     BytesFini,
 }
 
-#[derive(Debug, PartialEq)]
-pub struct Back {
-    pub idx: usize,
-    pub back: usize,
-    pub value: u32,
+#[derive(Clone, Debug, PartialEq)]
+pub enum Back {
+    Null,
+    Body {
+        pc: ByteAddr,
+    },
+    Halt {
+        pc: ByteAddr,
+        exit_code: u32,
+        write_addr: WordAddr,
+    },
 }
-
-#[derive(Debug, PartialEq)]
-pub struct Backs(pub Vec<Back>);
 
 #[derive(Debug)]
 pub struct PreflightCycle {
     pub mux: TopMux,
-    pub backs: Option<Backs>,
+    pub back: Option<Back>,
     pub mem_idx: AtomicUsize,
     pub extra_idx: usize,
 }
@@ -118,7 +121,7 @@ pub struct PreflightTrace {
 }
 
 struct Preflight {
-    po2: usize,
+    steps: usize,
     pager: PagedMemory,
     pre_pc: ByteAddr,
     pc: ByteAddr,
@@ -132,9 +135,9 @@ impl Clone for PreflightCycle {
     fn clone(&self) -> Self {
         Self {
             mux: self.mux.clone(),
-            backs: None,
+            back: self.back.clone(),
             mem_idx: AtomicUsize::new(self.mem_idx.load(Ordering::Relaxed)),
-            extra_idx: self.extra_idx.clone(),
+            extra_idx: self.extra_idx,
         }
     }
 }
@@ -142,7 +145,7 @@ impl Clone for PreflightCycle {
 impl PartialEq for PreflightCycle {
     fn eq(&self, other: &Self) -> bool {
         self.mux == other.mux
-            && self.backs == other.backs
+            && self.back == other.back
             && self.mem_idx.load(Ordering::Relaxed) == other.mem_idx.load(Ordering::Relaxed)
             && self.extra_idx == other.extra_idx
     }
@@ -160,65 +163,6 @@ impl TopMux {
             TopMux::Body(major, minor) => Ok((*major, *minor)),
             _ => Err(anyhow!("TopMux::as_body invalid mux")),
         }
-    }
-}
-
-impl Back {
-    fn new(idx: usize, back: usize, value: u32) -> Self {
-        Self { idx, back, value }
-    }
-}
-
-impl Backs {
-    fn new() -> Self {
-        Self(Vec::new())
-    }
-
-    fn new_body(pc: ByteAddr) -> Self {
-        Self::new().set_pc(pc).set_next_major(Major::MuxSize)
-    }
-
-    fn new_halt(
-        pc: ByteAddr,
-        sys_exit_code: u32,
-        user_exit_code: u32,
-        write_addr: WordAddr,
-    ) -> Self {
-        Self::new()
-            .set_pc(pc)
-            .set_halt(sys_exit_code, user_exit_code, write_addr)
-            .set_next_major(Major::Halt)
-    }
-
-    fn set_pc(mut self, pc: ByteAddr) -> Self {
-        let bytes = pc.0.to_le_bytes();
-        let bot2 = bytes[3] & 0b11;
-        let top2 = bytes[3] >> 2 & 0b11;
-        self.0.extend([
-            Back::new(6, 1, bytes[0] as u32), // body->pc.bytes[0]
-            Back::new(7, 1, bytes[1] as u32), // body->pc.bytes[1]
-            Back::new(8, 1, bytes[2] as u32), // body->pc.bytes[2]
-            Back::new(70, 1, bot2 as u32),    // body->pc.twits[0]
-            Back::new(71, 1, top2 as u32),    // body->pc.twits[1]
-        ]);
-        self
-    }
-
-    fn set_next_major(mut self, major: Major) -> Self {
-        self.0.push(Back::new(99, 1, major.as_u32())); // body->nextMajor
-        self
-    }
-
-    fn set_halt(mut self, sys_exit_code: u32, user_exit_code: u32, write_addr: WordAddr) -> Self {
-        self.0.extend([
-            Back::new(108, 1, 0),              // body->majorSelect->at(MajorType::kECall): 8
-            Back::new(112, 1, 0),              // body->majorSelect->at(MajorType::kPageFault): 12
-            Back::new(115, 1, 1),              // body->majorSelect->at(MajorType::kHalt): 15
-            Back::new(116, 1, sys_exit_code),  // HaltCycle::sysExitCode
-            Back::new(117, 1, user_exit_code), // HaltCycle::userExitCode
-            Back::new(118, 1, write_addr.0),   // HaltCycle::writeAddr
-        ]);
-        self
     }
 }
 
@@ -293,10 +237,10 @@ impl From<InsnKind> for TopMux {
 }
 
 impl PreflightCycle {
-    fn new(mux: TopMux, backs: Option<Backs>, mem_idx: usize, extra_idx: usize) -> Self {
+    fn new(mux: TopMux, back: Option<Back>, mem_idx: usize, extra_idx: usize) -> Self {
         Self {
             mux,
-            backs,
+            back,
             mem_idx: AtomicUsize::new(mem_idx),
             extra_idx,
         }
@@ -314,13 +258,9 @@ impl MemoryTransaction {
 }
 
 impl PreflightStage {
-    fn add_cycle(&mut self, mux: TopMux, backs: Option<Backs>) {
-        self.cycles.push(PreflightCycle::new(
-            mux,
-            backs,
-            self.mem_idx,
-            self.extra_idx,
-        ));
+    fn add_cycle(&mut self, mux: TopMux, back: Option<Back>) {
+        self.cycles
+            .push(PreflightCycle::new(mux, back, self.mem_idx, self.extra_idx));
         self.mem_idx = self.txns.len();
         self.extra_idx = self.extras.len();
     }
@@ -340,7 +280,7 @@ impl Preflight {
         tracing::debug!("po2: {}", segment.po2);
         let pc = ByteAddr(segment.partial_image.pc);
         Self {
-            po2: segment.po2,
+            steps: 1 << segment.po2,
             pager: PagedMemory::new(segment.partial_image.clone()),
             pre_pc: pc,
             pc,
@@ -372,13 +312,13 @@ impl Preflight {
         stage.add_cycle(mux, None);
     }
 
-    fn add_par_cycle(&mut self, pre: bool, mux: TopMux, backs: Backs) {
+    fn add_par_cycle(&mut self, pre: bool, mux: TopMux, back: Back) {
         let stage = if pre {
             &mut self.trace.pre
         } else {
             &mut self.trace.body
         };
-        stage.add_cycle(mux, Some(backs));
+        stage.add_cycle(mux, Some(back));
     }
 
     fn add_txn(&mut self, pre: bool, addr: WordAddr, data: u32) {
@@ -401,7 +341,7 @@ impl Preflight {
 
     fn pre_steps(&mut self) {
         // bytes_init
-        self.add_par_cycle(true, TopMux::BytesInit, Backs::new());
+        self.add_par_cycle(true, TopMux::BytesInit, Back::Null);
 
         // bytes_setup+
         for _ in 0..SETUP_CYCLES {
@@ -409,11 +349,11 @@ impl Preflight {
         }
 
         // ram_init
-        self.add_par_cycle(true, TopMux::RamInit, Backs::new());
+        self.add_par_cycle(true, TopMux::RamInit, Back::Null);
 
         // ram_load+
         for _ in 0..ram_load_cycles().len() {
-            self.add_par_cycle(true, TopMux::RamLoad, Backs::new());
+            self.add_par_cycle(true, TopMux::RamLoad, Back::Null);
         }
 
         // reset(0)
@@ -438,7 +378,7 @@ impl Preflight {
         //     self.page_fault(true, page_idx)?;
         // }
 
-        let max_cycles = 1 << self.po2;
+        let max_cycles = self.steps;
         let pre_cycles = self.trace.pre.cycles.len();
         let body_cycles = self.cycles;
         let body_padding = max_cycles - pre_cycles - body_cycles - FINI_TAILROOM - ZK_CYCLES;
@@ -450,7 +390,11 @@ impl Preflight {
             self.add_par_cycle(
                 false,
                 TopMux::Body(Major::Halt, 0),
-                Backs::new_halt(self.pc + 4u32, 0, 0, self.output_ptr.waddr()),
+                Back::Halt {
+                    pc: self.pc + 4u32,
+                    exit_code: 0,
+                    write_addr: self.output_ptr.waddr(),
+                },
             );
         }
 
@@ -461,10 +405,10 @@ impl Preflight {
         self.reset_cycle(ByteAddr(self.pager.image.info.root_addr).waddr())?;
 
         // ram_fini
-        self.add_par_cycle(false, TopMux::RamFini, Backs::new());
+        self.add_par_cycle(false, TopMux::RamFini, Back::Null);
 
         // bytes_fini
-        self.add_par_cycle(false, TopMux::BytesFini, Backs::new());
+        self.add_par_cycle(false, TopMux::BytesFini, Back::Null);
 
         Ok(())
     }
@@ -505,7 +449,9 @@ impl Preflight {
         self.add_par_cycle(
             pre,
             TopMux::Body(Major::PageFault, 0),
-            Backs::new_body(self.pre_pc + 4u32),
+            Back::Body {
+                pc: self.pre_pc + 4u32,
+            },
         );
         if is_done == 1 {
             return Ok(());
@@ -638,7 +584,7 @@ impl EmuContext for Preflight {
         if kind == InsnKind::EANY {
             self.add_cycle(false, kind.into());
         } else {
-            self.add_par_cycle(false, kind.into(), Backs::new_body(self.pc));
+            self.add_par_cycle(false, kind.into(), Back::Body { pc: self.pc });
         }
         self.cycles += 1;
     }

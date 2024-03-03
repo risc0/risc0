@@ -73,27 +73,30 @@ impl WitnessGenerator {
         Ok(())
     }
 
+    #[tracing::instrument(skip_all)]
     fn compute_execute(&mut self, machine: &mut MachineContext) -> Result<()> {
         tracing::debug!("load");
         let mut loader = Loader::new(self.steps, &mut self.ctrl);
         let last_cycle = loader.load();
 
         tracing::debug!("inject_backs");
-        (0..last_cycle).into_par_iter().for_each(|cycle| {
-            machine.inject_backs(self.steps, cycle, self.data.as_slice_sync());
+        tracing::info_span!("inject_backs").in_scope(|| {
+            for cycle in 0..last_cycle {
+                machine.inject_backs(self.steps, cycle, self.data.as_slice_sync());
+            }
         });
-
-        let args = &[
-            self.ctrl.as_slice_sync(),
-            self.io.as_slice_sync(),
-            self.data.as_slice_sync(),
-        ];
 
         use std::sync::atomic::{AtomicUsize, Ordering};
         let counts: Vec<_> = (0..last_cycle).map(|_| AtomicUsize::new(0)).collect();
 
         tracing::debug!("step_exec");
         tracing::info_span!("step_exec").in_scope(|| {
+            let args = &[
+                self.ctrl.as_slice_sync(),
+                self.io.as_slice_sync(),
+                self.data.as_slice_sync(),
+            ];
+
             #[cfg(not(feature = "seq"))]
             (0..last_cycle).into_par_iter().for_each(|cycle| {
                 if cycle == 0 || machine.is_parallel_safe(cycle) {
@@ -115,18 +118,19 @@ impl WitnessGenerator {
             for cycle in 0..last_cycle {
                 machine.step_exec(self.steps, cycle, args).unwrap();
             }
-        });
 
-        for (cycles, count) in counts.iter().enumerate() {
-            let count = count.load(Ordering::Relaxed);
-            if count > 0 {
-                tracing::info!("cycles: {cycles} -> {count}");
+            for (cycles, count) in counts.iter().enumerate() {
+                let count = count.load(Ordering::Relaxed);
+                if count > 0 {
+                    tracing::info!("cycles: {cycles} -> {count}");
+                }
             }
-        }
+        });
 
         Ok(())
     }
 
+    #[tracing::instrument(skip_all)]
     fn compute_verify(&mut self, machine: &mut MachineContext) {
         tracing::debug!("compute_verify");
         let mut rng = thread_rng();
@@ -214,6 +218,7 @@ impl WitnessGenerator {
         (mix, accum)
     }
 
+    #[tracing::instrument(skip_all)]
     fn compute_accum(&mut self, mix: &CpuBuffer<BabyBearElem>, accum: &CpuBuffer<BabyBearElem>) {
         let args = &[
             self.ctrl.as_slice_sync(),
