@@ -12,10 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{cmp, sync::atomic::Ordering};
+use std::{
+    cmp,
+    sync::atomic::{AtomicUsize, Ordering},
+};
 
 use anyhow::{anyhow, bail, Result};
 use lazy_regex::{regex, Captures};
+use rayon::prelude::*;
 use risc0_zkp::{
     adapter::CircuitStepContext,
     field::{
@@ -34,7 +38,7 @@ use crate::{
     prove::{
         emu::{
             addr::{ByteAddr, WordAddr},
-            preflight::{Back, Major, PreflightCycle, PreflightStage, PreflightTrace},
+            preflight::{Back, Major, PreflightCycle, PreflightStage, PreflightTrace, TopMux},
         },
         hal::cpp::ParallelCircuitStepHandler,
     },
@@ -99,10 +103,10 @@ impl MachineContext {
         }
     }
 
-    pub fn is_parallel_safe(&self, cycle: usize) -> bool {
+    pub fn is_exec_par_safe(&self, cycle: usize) -> bool {
         let cur_cycle = self.get_cycle(cycle);
         let is_safe = cur_cycle.back.is_some();
-        // tracing::debug!("is_parallel_safe: {cycle} <= {is_safe}");
+        // tracing::debug!("is_exec_par_safe: {cycle} <= {is_safe}");
         is_safe
     }
 
@@ -129,15 +133,6 @@ impl MachineContext {
         }
     }
 
-    pub fn inject_verify_mem_backs(
-        &self,
-        steps: usize,
-        cycle: usize,
-        data: SyncSlice<BabyBearElem>,
-    ) {
-        self.ram_arg.inject_backs(steps, cycle, data);
-    }
-
     #[tracing::instrument(skip_all)]
     pub fn sort(&mut self, name: &str) {
         match name {
@@ -157,15 +152,105 @@ impl MachineContext {
         CIRCUIT.par_step_exec(&ctx, self, args)
     }
 
+    pub fn par_step_exec(&self, steps: usize, last_cycle: usize, args: &[SyncSlice<BabyBearElem>]) {
+        let counts: Vec<_> = (0..last_cycle).map(|_| AtomicUsize::new(0)).collect();
+
+        (0..last_cycle).into_par_iter().for_each(|cycle| {
+            if cycle == 0 || self.is_exec_par_safe(cycle) {
+                // tracing::debug!("step_exec: {cycle}");
+                self.step_exec(steps, cycle, args).unwrap();
+
+                let mut seq_cycle = cycle + 1;
+                while seq_cycle < last_cycle && !self.is_exec_par_safe(seq_cycle) {
+                    self.step_exec(steps, seq_cycle, args).unwrap();
+                    seq_cycle += 1;
+                }
+
+                let cycles = seq_cycle - cycle;
+                counts.get(cycles).unwrap().fetch_add(1, Ordering::SeqCst);
+            }
+        });
+
+        for (cycles, count) in counts.iter().enumerate() {
+            let count = count.load(Ordering::Relaxed);
+            if count > 0 {
+                tracing::info!("cycles: {cycles} -> {count}");
+            }
+        }
+    }
+
     pub fn step_verify_mem(
         &self,
         steps: usize,
         cycle: usize,
         args: &[SyncSlice<BabyBearElem>],
     ) -> Result<BabyBearElem> {
-        tracing::debug!("step_verify_mem({cycle})");
         let ctx = CircuitStepContext { size: steps, cycle };
         CIRCUIT.par_step_verify_mem(&ctx, self, args)
+    }
+
+    fn is_verify_mem_par_safe(&self, cycle: usize) -> bool {
+        let cur_cycle = self.get_cycle(cycle);
+        let is_safe = match cur_cycle.mux {
+            TopMux::BytesInit => false,
+            TopMux::BytesSetup => false,
+            TopMux::RamInit => false,
+            TopMux::RamLoad => false,
+            TopMux::Reset => false,
+            TopMux::Body(Major::VerifyAnd, _) => false,
+            TopMux::Body(Major::VerifyDivide, _) => false,
+            TopMux::Body(Major::PageFault, _) => false,
+            TopMux::Body(Major::Halt, _) => false,
+            TopMux::Body(_, _) => true,
+            TopMux::RamFini => false,
+            TopMux::BytesFini => false,
+        };
+        // tracing::debug!("is_verify_mem_par_safe: {cycle} <= {is_safe}");
+        is_safe
+    }
+
+    pub fn inject_verify_mem_backs(
+        &self,
+        steps: usize,
+        cycle: usize,
+        data: SyncSlice<BabyBearElem>,
+    ) {
+        if self.is_verify_mem_par_safe(cycle) {
+            self.ram_arg.inject_backs(steps, cycle, data);
+        }
+    }
+
+    pub fn par_step_verify_mem(
+        &self,
+        steps: usize,
+        last_cycle: usize,
+        args: &[SyncSlice<BabyBearElem>],
+    ) {
+        let counts: Vec<_> = (0..last_cycle).map(|_| AtomicUsize::new(0)).collect();
+
+        (0..last_cycle).into_par_iter().for_each(|cycle| {
+            // (0..last_cycle).rev().for_each(|cycle| {
+            if cycle == 0 || self.is_verify_mem_par_safe(cycle) {
+                tracing::debug!("step_verify_mem({cycle})");
+                self.step_verify_mem(steps, cycle, args).unwrap();
+
+                let mut seq_cycle = cycle + 1;
+                while seq_cycle < last_cycle && !self.is_verify_mem_par_safe(seq_cycle) {
+                    self.step_verify_mem(steps, seq_cycle, args).unwrap();
+                    seq_cycle += 1;
+                }
+
+                let cycles = seq_cycle - cycle;
+                counts.get(cycles).unwrap().fetch_add(1, Ordering::SeqCst);
+            }
+        });
+
+        for (cycles, count) in counts.iter().enumerate() {
+            let count = count.load(Ordering::Relaxed);
+            if count > 0 {
+                tracing::info!("cycles: {cycles} -> {count}");
+            }
+        }
     }
 
     pub fn step_verify_bytes(

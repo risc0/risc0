@@ -144,7 +144,7 @@ fn fwd_rev_ab() {
 
     for cycle in (0..ctrl_cycles).rev() {
         // walk backwards until the first parallel safe cycle is found
-        if cycle > 0 && !rev_machine.is_parallel_safe(cycle) {
+        if cycle > 0 && !rev_machine.is_exec_par_safe(cycle) {
             continue;
         }
 
@@ -157,7 +157,7 @@ fn fwd_rev_ab() {
 
         // execute forward until the next parallel safe cycle
         let mut cycle = cycle + 1;
-        while cycle < ctrl_cycles && !rev_machine.is_parallel_safe(cycle) {
+        while cycle < ctrl_cycles && !rev_machine.is_exec_par_safe(cycle) {
             rev_machine.step_exec(steps, cycle, args).unwrap();
             cycle += 1;
         }

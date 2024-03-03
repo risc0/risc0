@@ -12,14 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#![allow(unused)]
-
 use std::{
     fmt,
-    sync::{
-        atomic::{AtomicU32, AtomicUsize, Ordering},
-        Mutex,
-    },
+    sync::atomic::{AtomicU32, AtomicUsize, Ordering},
 };
 
 use crossbeam::queue::SegQueue;
@@ -41,6 +36,7 @@ struct RamArgumentRow {
     cyclop: Cyclop,
     #[dbg(fmt = "0x{:08x}")]
     word: u32,
+    dirty: u32,
 }
 
 pub struct RamArgument {
@@ -65,7 +61,12 @@ impl RamArgument {
         let mem_op: u32 = args[2].into();
         let cyclop = Cyclop::new(mem_cycle, mem_op);
         let word = Quad(args[3], args[4], args[5], args[6]).into();
-        let row = RamArgumentRow { addr, cyclop, word };
+        let row = RamArgumentRow {
+            addr,
+            cyclop,
+            word,
+            dirty: 0,
+        };
         // tracing::debug!("[{cycle}] arg_write(ram): {row:?}");
         self.queue.push(row);
         self.index
@@ -80,6 +81,17 @@ impl RamArgument {
         }
         self.sorted.sort();
 
+        let mut prev_dirty = 0;
+        for row in self.sorted.iter_mut() {
+            row.dirty = match row.cyclop.mem_op() {
+                0 => 0,          // pageIo
+                1 => prev_dirty, // read
+                2 => 1,          // write
+                _ => unreachable!(),
+            };
+            prev_dirty = row.dirty;
+        }
+
         let mut pos = 0;
         for item in self.index.iter_mut() {
             let idx = pos;
@@ -90,39 +102,29 @@ impl RamArgument {
     }
 
     pub fn inject_backs(&self, steps: usize, cycle: usize, data: SyncSlice<BabyBearElem>) {
-        if cycle == 0 {
-            return;
-        }
-
-        // let prev_idx = self.index.get(cycle - 1).unwrap().load(Ordering::Relaxed);
-        // let cur_idx = self.index.get(cycle).unwrap().load(Ordering::Relaxed);
-        // if cur_idx == 0 {
-        //     tracing::debug!("inject_backs: cur_idx == 0");
-        //     return;
-        // }
-        // if prev_idx == 0 {
-        //     return;
-        // }
+        assert_ne!(cycle, 0);
 
         let cur_idx = self.index.get(cycle).unwrap().load(Ordering::Relaxed);
-        if cur_idx == 0 {
-            tracing::debug!("inject_backs({cycle}): cur_idx == 0");
-            return;
-        }
-        if let Some(row) = self.sorted.get(cur_idx - 1) {
-            let bytes = row.word.to_le_bytes();
-            if [16326, 16327, 16328].contains(&cycle) {
-                tracing::debug!("inject_backs({cycle}, {cur_idx}, {row:?})");
-            }
-            data.set(89 * steps + cycle - 1, row.addr.into()); // a->addr
-            data.set(90 * steps + cycle - 1, row.cyclop.cycle().into()); // a->cycle
-            data.set(91 * steps + cycle - 1, row.cyclop.mem_op().into()); // a->memOp
-            data.set(92 * steps + cycle - 1, (bytes[0] as u32).into()); // a->data[0]
-            data.set(93 * steps + cycle - 1, (bytes[1] as u32).into()); // a->data[1]
-            data.set(94 * steps + cycle - 1, (bytes[2] as u32).into()); // a->data[2]
-            data.set(95 * steps + cycle - 1, (bytes[3] as u32).into()); // a->data[3]
-            data.set(97 * steps + cycle - 1, 0u32.into()); // prevVerifier->dirty
-        }
+        assert_ne!(cur_idx, 0);
+
+        let row = self.sorted.get(cur_idx - 1).unwrap();
+        let bytes = row.word.to_le_bytes();
+        data.set(89 * steps + cycle - 1, row.addr.into()); // a->addr
+        data.set(90 * steps + cycle - 1, row.cyclop.cycle().into()); // a->cycle
+        data.set(91 * steps + cycle - 1, row.cyclop.mem_op().into()); // a->memOp
+        data.set(92 * steps + cycle - 1, (bytes[0] as u32).into()); // a->data[0]
+        data.set(93 * steps + cycle - 1, (bytes[1] as u32).into()); // a->data[1]
+        data.set(94 * steps + cycle - 1, (bytes[2] as u32).into()); // a->data[2]
+        data.set(95 * steps + cycle - 1, (bytes[3] as u32).into()); // a->data[3]
+        data.set(97 * steps + cycle - 1, row.dirty.into()); // prevVerifier->dirty
+
+        // RamPass
+        // data.set(96 * steps + cycle - 1, 0u32.into()); // isNewAddr
+        // data.set(97 * steps + cycle - 1, 0u32.into()); // dirty
+        // data.set(3 * steps + cycle - 1, 0u32.into()); // diff[0]
+        // data.set(4 * steps + cycle - 1, 0u32.into()); // diff[1]
+        // data.set(5 * steps + cycle - 1, 0u32.into()); // diff[2]
+        // data.set(69 * steps + cycle - 1, 0u32.into()); // extra
     }
 
     pub fn read(&self, cycle: usize, out: &mut [BabyBearElem]) {
@@ -149,11 +151,6 @@ pub struct BytesArgument {
     counts: Vec<AtomicU32>,
     index: Vec<AtomicUsize>,
     compact: Vec<u32>,
-}
-
-struct BytesState {
-    counts: Box<[u32; 256 * 256]>,
-    read_pos: usize,
 }
 
 impl BytesArgument {
@@ -183,7 +180,7 @@ impl BytesArgument {
         for (byte, count) in self.counts.iter().enumerate() {
             let count = count.load(Ordering::Relaxed);
             if count > 0 {
-                for i in (0..count).rev() {
+                for _ in (0..count).rev() {
                     self.compact.push(byte as u32);
                 }
             }
