@@ -24,7 +24,7 @@ use std::{
 
 use crossbeam::queue::SegQueue;
 use derive_debug::Dbg;
-use risc0_zkp::field::baby_bear::BabyBearElem;
+use risc0_zkp::{field::baby_bear::BabyBearElem, hal::cpu::SyncSlice};
 
 use super::{Quad, Twin};
 
@@ -86,6 +86,42 @@ impl RamArgument {
             let count = item.load(Ordering::Relaxed);
             pos += count;
             item.store(idx, Ordering::Relaxed);
+        }
+    }
+
+    pub fn inject_backs(&self, steps: usize, cycle: usize, data: SyncSlice<BabyBearElem>) {
+        if cycle == 0 {
+            return;
+        }
+
+        // let prev_idx = self.index.get(cycle - 1).unwrap().load(Ordering::Relaxed);
+        // let cur_idx = self.index.get(cycle).unwrap().load(Ordering::Relaxed);
+        // if cur_idx == 0 {
+        //     tracing::debug!("inject_backs: cur_idx == 0");
+        //     return;
+        // }
+        // if prev_idx == 0 {
+        //     return;
+        // }
+
+        let cur_idx = self.index.get(cycle).unwrap().load(Ordering::Relaxed);
+        if cur_idx == 0 {
+            tracing::debug!("inject_backs({cycle}): cur_idx == 0");
+            return;
+        }
+        if let Some(row) = self.sorted.get(cur_idx - 1) {
+            let bytes = row.word.to_le_bytes();
+            if [16326, 16327, 16328].contains(&cycle) {
+                tracing::debug!("inject_backs({cycle}, {cur_idx}, {row:?})");
+            }
+            data.set(89 * steps + cycle - 1, row.addr.into()); // a->addr
+            data.set(90 * steps + cycle - 1, row.cyclop.cycle().into()); // a->cycle
+            data.set(91 * steps + cycle - 1, row.cyclop.mem_op().into()); // a->memOp
+            data.set(92 * steps + cycle - 1, (bytes[0] as u32).into()); // a->data[0]
+            data.set(93 * steps + cycle - 1, (bytes[1] as u32).into()); // a->data[1]
+            data.set(94 * steps + cycle - 1, (bytes[2] as u32).into()); // a->data[2]
+            data.set(95 * steps + cycle - 1, (bytes[3] as u32).into()); // a->data[3]
+            data.set(97 * steps + cycle - 1, 0u32.into()); // prevVerifier->dirty
         }
     }
 

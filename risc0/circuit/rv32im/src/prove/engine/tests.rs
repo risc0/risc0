@@ -139,7 +139,7 @@ fn fwd_rev_ab() {
     });
 
     for cycle in 0..ctrl_cycles {
-        rev_machine.inject_backs(steps, cycle, rev_data.as_slice_sync());
+        rev_machine.inject_exec_backs(steps, cycle, rev_data.as_slice_sync());
     }
 
     for cycle in (0..ctrl_cycles).rev() {

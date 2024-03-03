@@ -106,7 +106,7 @@ impl MachineContext {
         is_safe
     }
 
-    pub fn inject_backs(&self, steps: usize, cycle: usize, data: SyncSlice<BabyBearElem>) {
+    pub fn inject_exec_backs(&self, steps: usize, cycle: usize, data: SyncSlice<BabyBearElem>) {
         let cur_cycle = self.get_cycle(cycle);
         if let Some(back) = &cur_cycle.back {
             let injector = Injector::new(steps, cycle, data);
@@ -127,6 +127,15 @@ impl MachineContext {
                 }
             }
         }
+    }
+
+    pub fn inject_verify_mem_backs(
+        &self,
+        steps: usize,
+        cycle: usize,
+        data: SyncSlice<BabyBearElem>,
+    ) {
+        self.ram_arg.inject_backs(steps, cycle, data);
     }
 
     #[tracing::instrument(skip_all)]
@@ -154,6 +163,7 @@ impl MachineContext {
         cycle: usize,
         args: &[SyncSlice<BabyBearElem>],
     ) -> Result<BabyBearElem> {
+        tracing::debug!("step_verify_mem({cycle})");
         let ctx = CircuitStepContext { size: steps, cycle };
         CIRCUIT.par_step_verify_mem(&ctx, self, args)
     }

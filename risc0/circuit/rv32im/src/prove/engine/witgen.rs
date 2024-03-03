@@ -79,10 +79,10 @@ impl WitnessGenerator {
         let mut loader = Loader::new(self.steps, &mut self.ctrl);
         let last_cycle = loader.load();
 
-        tracing::debug!("inject_backs");
-        tracing::info_span!("inject_backs").in_scope(|| {
+        tracing::debug!("inject_exec_backs");
+        tracing::info_span!("inject_exec_backs").in_scope(|| {
             for cycle in 0..last_cycle {
-                machine.inject_backs(self.steps, cycle, self.data.as_slice_sync());
+                machine.inject_exec_backs(self.steps, cycle, self.data.as_slice_sync());
             }
         });
 
@@ -134,43 +134,64 @@ impl WitnessGenerator {
     fn compute_verify(&mut self, machine: &mut MachineContext) {
         tracing::debug!("compute_verify");
         let mut rng = thread_rng();
-        let ctrl = self.ctrl.as_slice_sync();
-        let io = self.io.as_slice_sync();
-        let data = self.data.as_slice_sync();
+        {
+            let ctrl = self.ctrl.as_slice_sync();
+            let data = self.data.as_slice_sync();
 
-        for i in 0..ZK_CYCLES {
-            let cycle = self.steps - ZK_CYCLES + i;
-            // Set ctrl to all zeros for the ZK_CYCLES
-            for j in 0..CIRCUIT.ctrl_size() {
-                ctrl.set(j * self.steps + cycle, BabyBearElem::ZERO);
-            }
-            // Set data to random for the ZK_CYCLES
-            for j in 0..CIRCUIT.data_size() {
-                data.set(j * self.steps + cycle, BabyBearElem::random(&mut rng));
+            for i in 0..ZK_CYCLES {
+                let cycle = self.steps - ZK_CYCLES + i;
+                // Set ctrl to all zeros for the ZK_CYCLES
+                for j in 0..CIRCUIT.ctrl_size() {
+                    ctrl.set(j * self.steps + cycle, BabyBearElem::ZERO);
+                }
+                // Set data to random for the ZK_CYCLES
+                for j in 0..CIRCUIT.data_size() {
+                    data.set(j * self.steps + cycle, BabyBearElem::random(&mut rng));
+                }
             }
         }
 
         // Do the verify cycles
-        let args = &[ctrl, io, data];
         let last_cycle = self.steps - ZK_CYCLES;
 
         machine.sort("ram");
+
+        tracing::debug!("inject_verify_mem_backs");
+        tracing::info_span!("inject_verify_mem_backs").in_scope(|| {
+            for cycle in 0..last_cycle {
+                machine.inject_verify_mem_backs(self.steps, cycle, self.data.as_slice_sync());
+            }
+        });
+
         tracing::debug!("step_verify_mem");
         tracing::info_span!("step_verify_mem").in_scope(|| {
+            let args = &[
+                self.ctrl.as_slice_sync(),
+                self.io.as_slice_sync(),
+                self.data.as_slice_sync(),
+            ];
             // #[cfg(not(feature = "seq"))]
             // (0..last_cycle).into_par_iter().for_each(|cycle| {
             //     machine.step_verify_mem(self.steps, cycle, args).unwrap();
             // });
-
-            // #[cfg(feature = "seq")]
-            for cycle in 0..last_cycle {
+            for cycle in (0..last_cycle).rev() {
                 machine.step_verify_mem(self.steps, cycle, args).unwrap();
             }
+
+            // #[cfg(feature = "seq")]
+            // for cycle in 0..last_cycle {
+            //     machine.step_verify_mem(self.steps, cycle, args).unwrap();
+            // }
         });
 
         machine.sort("bytes");
         tracing::debug!("step_verify_bytes");
         tracing::info_span!("step_verify_bytes").in_scope(|| {
+            let args = &[
+                self.ctrl.as_slice_sync(),
+                self.io.as_slice_sync(),
+                self.data.as_slice_sync(),
+            ];
             // #[cfg(not(feature = "seq"))]
             // (0..last_cycle).into_par_iter().for_each(|cycle| {
             //     machine.step_verify_bytes(self.steps, cycle, args).unwrap();

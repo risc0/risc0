@@ -19,7 +19,7 @@ use risc0_binfmt::{MemoryImage, Program};
 use risc0_zkvm_platform::PAGE_SIZE;
 use test_log::test;
 
-use super::{Backs, MemoryTransaction, PreflightCycle};
+use super::{Back, MemoryTransaction, PreflightCycle};
 use crate::prove::emu::{
     exec::{execute, Syscall, SyscallContext, DEFAULT_SEGMENT_PO2},
     rv32im::InsnKind,
@@ -51,7 +51,12 @@ fn assert_slice_eq<T: fmt::Debug + PartialEq>(lhs: &[T], rhs: &[T]) {
 
 fn add_cycle(insn: InsnKind, mem_idx: usize, pc: Option<u32>) -> PreflightCycle {
     if let Some(pc) = pc {
-        PreflightCycle::new(insn.into(), Some(Backs::new_body(ByteAddr(pc))), mem_idx, 0)
+        PreflightCycle::new(
+            insn.into(),
+            Some(Back::Body { pc: ByteAddr(pc) }),
+            mem_idx,
+            0,
+        )
     } else {
         PreflightCycle::new(insn.into(), None, mem_idx, 0)
     }
