@@ -13,10 +13,7 @@
   in-memory, etc).
 
 ### 🚨 Breaking Changes
-* The Change in the hash function used for proof generation means that receipts
-generated from older versions of the `risc0-zkvm` crate will fail verification
-if this verifier is used. New proofs must be re-generated, but one does not need
-to upload new ELF binaries to services such as bonsai.
+* For recursive proofs the Poseidon hash function is replaced by the Poseidon2 hash function. Users can still create receipts using the older Poseidon hash function but these receipts will not be usable by Bonsai or any proof composition or rollup use cases.
 
 # [v0.20.1 (2024-02-01)](https://github.com/risc0/risc0/releases/tag/v0.20.1)
 
