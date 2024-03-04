@@ -7,7 +7,7 @@ on:
     inputs:
       crate_count:
         description: 'How many crates (sorted by downloads) to test'
-        default: 1
+        default: 100
 
 env:
   RISC0_BUILD_LOCKED: 1
@@ -72,7 +72,7 @@ jobs:
           retention-days: 2
 
       - name: Clone ghpages repo
-        run: git clone "https://x-access-token:${{ secrets.BENCHMARK_TOKEN2 }}@github.com/risc0/ghpages.git" ${{ runner.temp }}/benchmarks/
+        run: git clone "https://x-access-token:${{ secrets.BENCHMARK_TOKEN }}@github.com/risc0/ghpages.git" ${{ runner.temp }}/benchmarks/
 
       - name: Export environment variable
         run: |
