@@ -4481,6 +4481,7 @@ dependencies = [
  "risc0-core",
  "risc0-zkp",
  "risc0-zkvm-platform",
+ "sha2 0.10.8",
  "tracing",
  "tracing-forest",
  "tracing-subscriber 0.3.18",
