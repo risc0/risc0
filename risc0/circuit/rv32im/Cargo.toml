@@ -17,7 +17,6 @@ required-features = ["prove"]
 
 [dependencies]
 anyhow = { version = "1.0", default-features = false }
-bytemuck = "1.13"
 cfg-if = "1.0"
 derive-debug = "0.1.2"
 risc0-binfmt = { workspace = true }
@@ -27,10 +26,9 @@ risc0-zkvm-platform = { workspace = true }
 tracing = { version = "0.1", default-features = false, features = [
   "attributes",
 ] }
-tracing-forest = "0.1"
-tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [target.'cfg(not(target_os = "zkvm"))'.dependencies]
+bytemuck = { version = "1.13", optional = true }
 crossbeam = { version = "0.8", optional = true }
 cust = { version = "0.3", optional = true }
 lazy-regex = { version = "3.1", optional = true }
@@ -39,6 +37,10 @@ rayon = { version = "1.5", optional = true }
 metal = { version = "0.27", optional = true }
 risc0-circuit-rv32im-sys = { workspace = true, optional = true }
 sha2 = { version = "0.10", default-features = false, optional = true }
+tracing-forest = { version = "0.1", optional = true }
+tracing-subscriber = { version = "0.3", features = [
+  "env-filter",
+], optional = true }
 
 [dev-dependencies]
 criterion = "0.5"
@@ -60,11 +62,14 @@ metal = [
   "risc0-zkp/metal",
 ]
 prove = [
+  "dep:bytemuck",
   "dep:crossbeam",
   "dep:lazy-regex",
   "dep:rand",
   "dep:rayon",
   "dep:sha2",
+  "dep:tracing-forest",
+  "dep:tracing-subscriber",
   "risc0-zkp/prove",
   "risc0-circuit-rv32im-sys",
   "std",
