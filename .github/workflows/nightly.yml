@@ -72,7 +72,7 @@ jobs:
           retention-days: 2
 
       - name: Clone ghpages repo
-        run: git clone "https://x-access-token:${{ secrets.BENCHMARK_TOKEN }}@github.com/risc0/ghpages.git" ${{ runner.temp }}/benchmarks/
+        run: git clone "https://x-access-token:${{ secrets.BENCHMARK_TOKEN2 }}@github.com/risc0/ghpages.git" ${{ runner.temp }}/benchmarks/
 
       - name: Export environment variable
         run: |
@@ -87,11 +87,11 @@ jobs:
 
   alert_devops_if_failed:
     runs-on: ubuntu-latest
-    if: ${{ always() && contains(join(needs.*.result, ','), 'success') }}
+    if: ${{ always() && contains(join(needs.*.result, ','), 'failure') }}
     needs: [crates_validate]
     steps:
       - name: DevOps Alert
         env:
           NEEDS: ${{ toJSON(needs) }}     
         run: |
-          curl -X POST -H 'Content-type: application/json' --data '{"text":"Job Succeeded"}' ${{ secrets.DEVOPS_ALERT_WEBHOOK_URL }}
+          curl -X POST -H 'Content-type: application/json' --data '{"text":"Nightly Tasks Job Failed: https://github.com/risc0/risc0/actions/workflows/nightly.yml"}' ${{ secrets.DEVOPS_ALERT_WEBHOOK_URL }}
