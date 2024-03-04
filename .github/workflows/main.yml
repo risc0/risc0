@@ -43,6 +43,8 @@ jobs:
               - .github/actions/**
               - .github/workflows/main.yml
               - Cargo.toml
+              - rust-toolchain.toml
+              - Cargo.lock
             check-benchmarks:
               - *base
               - benchmarks/**
@@ -116,7 +118,7 @@ jobs:
         uses: risc0/cargo-install@b9307573043522ab0d3e3be64a51763b765b52a4
         with:
           crate: cargo-rdme
-          version: "0.7.2"
+          version: "1.4.2"
       - uses: actions/setup-node@v3
         with:
           node-version: 18
@@ -141,6 +143,9 @@ jobs:
         with:
           python-version: "3.10"
       - run: python license-check.py
+      - name: check for "D0 NOT MERGE" comments
+        run: |
+          [ "$(grep -re 'DO[_ ]\?NOT[_ ]\?MERGE' $(git ls-tree --full-tree --name-only -r HEAD) | tee /dev/fd/2 | wc -l)" -eq "0" ]
 
   test:
     if: needs.changes.outputs.test == 'true'
@@ -257,7 +262,7 @@ jobs:
         run: cargo test --locked -F $FEATURE --no-run
         working-directory: examples
       - name: test
-        run: cargo test --locked -F $FEATURE
+        run: RISC0_DEV_MODE=1 cargo test --locked -F $FEATURE
         working-directory: examples
       - run: cargo run --locked -F $FEATURE
         env:
@@ -416,4 +421,5 @@ jobs:
       - run: scripts/install_prover.sh
         working-directory: compact_proof
       - run: cargo test -p risc0-groth16 -F docker --release
+      - run: cargo test -p risc0-zkvm -F prove -F docker -- tests::stark2snark
       - run: sccache --show-stats

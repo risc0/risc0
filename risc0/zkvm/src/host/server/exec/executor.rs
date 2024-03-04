@@ -54,8 +54,12 @@ use crate::{
     host::{
         client::{env::SegmentPath, exec::TraceEvent},
         receipt::Assumption,
-        server::opcode::{MajorType, OpCode},
+        server::{
+            opcode::{MajorType, OpCode},
+            session::null_callback,
+        },
     },
+    is_dev_mode,
     sha::Digest,
     Assumptions, ExecutorEnv, ExitCode, FileSegmentRef, Loader, Output, Segment, SegmentRef,
     Session,
@@ -256,6 +260,11 @@ impl<'a> ExecutorImpl<'a> {
                 "cannot resume an execution which exited with {:?}",
                 self.exit_code
             );
+        };
+
+        let mut callback = |segment| match is_dev_mode() {
+            true => null_callback(),
+            false => callback(segment),
         };
 
         let start_time = std::time::Instant::now();

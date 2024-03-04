@@ -2,7 +2,7 @@
 
 _Warning: The zkVM and Bonsai are still in development. Do not use in production._
 
-Prove computation with the [RISC Zero zkVM](../zkvm) and verify the results in your Ethereum contract.
+Prove computation with the [RISC Zero zkVM](../zkvm/zkvm_overview.md) and verify the results in your Ethereum contract.
 
 The zkVM and Bonsai together can act as a [coprocessor][coprocessor-article] to the smart contract application.
 This unlocks powerful new applications on Ethereum that offload computationally intensive (i.e. gas expensive) and difficult to implement (e.g. ed25519 signature verification, or HTML parsing) functions to the zkVM.
@@ -39,8 +39,8 @@ The `RiscZeroGroth16Verifier` contract is a stateless and immutable verifier the
 > The `RiscZeroGroth16Verifier` contract is deployed to Sepolia at [`0x83C2e9CD64B2A16D3908E94C7654f3864212E2F8`][etherscan-0x83C2e9CD64B2A16D3908E94C7654f3864212E2F8].
 > You can choose to use this contract, or deploy your own.
 
-[IRiscZeroVerifier.sol]: https://github.com/risc0/risc0-ethereum/blob/release-0.7/contracts/src/IRiscZeroVerifier.sol
-[RiscZeroGroth16Verifier.sol]: https://github.com/risc0/risc0-ethereum/blob/release-0.7/contracts/src/groth16/RiscZeroGroth16Verifier.sol
+[IRiscZeroVerifier.sol]: https://github.com/risc0/risc0-ethereum/blob/main/contracts/src/IRiscZeroVerifier.sol
+[RiscZeroGroth16Verifier.sol]: https://github.com/risc0/risc0-ethereum/blob/main/contracts/src/groth16/RiscZeroGroth16Verifier.sol
 [coprocessor-article]: https://www.risczero.com/news/a-guide-to-zk-coprocessors-for-scalability
 [etherscan-0x83C2e9CD64B2A16D3908E94C7654f3864212E2F8]: https://sepolia.etherscan.io/address/0x83c2e9cd64b2a16d3908e94c7654f3864212e2f8#code
 [foundry-template]: https://github.com/risc0/bonsai-foundry-template
