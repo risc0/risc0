@@ -94,4 +94,4 @@ jobs:
         env:
           NEEDS: ${{ toJSON(needs) }}     
         run: |
-          curl -X POST -H 'Content-type: application/json' --data '{"text":"Nightly Tasks Job Failed: https://github.com/risc0/${{ github.repository }}/actions/runs/${{ github.run_id }}"}' ${{ secrets.DEVOPS_ALERT_WEBHOOK_URL }}
+          curl -X POST -H 'Content-type: application/json' --data '{"text":"Nightly Tasks Job Failed: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"}' ${{ secrets.DEVOPS_ALERT_WEBHOOK_URL }}
