@@ -412,9 +412,19 @@ pub fn journal() -> FdWriter<impl for<'a> Fn(&'a [u8])> {
     })
 }
 
+/// Return a writer for a custom file descriptor.
+pub fn writer(fd: u32) -> FdWriter<impl for<'a> Fn(&'a [u8])> {
+    FdWriter::new(fd, |_| {})
+}
+
 /// Return a reader for the standard input
 pub fn stdin() -> FdReader {
     FdReader::new(fileno::STDIN)
+}
+
+/// Return a reader for a custom file descriptor.
+pub fn reader(fd: u32) -> FdReader {
+    FdReader::new(fd)
 }
 
 /// Reads and deserializes objects
