@@ -133,7 +133,7 @@ impl PagedMemory {
         let mut image = MemoryImage {
             pages: BTreeMap::new(),
             info: info.clone(),
-            pc: pc.0,
+            pc: pre_state.pc,
         };
 
         for (page_idx, page_state) in &self.page_states {
@@ -158,6 +158,7 @@ impl PagedMemory {
                 self.image.update_page(*page_idx);
             }
         }
+        self.image.pc = pc.0;
         let post_state = self.image.get_system_state();
 
         (pre_state, image, post_state)

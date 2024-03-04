@@ -28,10 +28,10 @@ pub trait EmuContext {
     fn trap(&self, cause: TrapCause) -> Result<bool>;
 
     // Callback when instructions are decoded
-    fn on_insn_decoded(&self, kind: InsnKind, decoded: &DecodedInstruction);
+    fn on_insn_decoded(&self, kind: &Instruction, decoded: &DecodedInstruction);
 
     // Callback when instructions end normally
-    fn on_normal_end(&mut self, kind: InsnKind, decoded: &DecodedInstruction);
+    fn on_normal_end(&mut self, insn: &Instruction, decoded: &DecodedInstruction);
 
     // Get the program counter
     fn get_pc(&self) -> ByteAddr;
@@ -157,12 +157,13 @@ pub enum InsnKind {
 }
 
 #[derive(Clone, Copy)]
-struct Instruction {
-    kind: InsnKind,
+pub struct Instruction {
+    pub kind: InsnKind,
     category: InsnCategory,
-    opcode: u32,
-    func3: u32,
-    func7: u32,
+    pub opcode: u32,
+    pub func3: u32,
+    pub func7: u32,
+    pub cycles: usize,
 }
 
 impl DecodedInstruction {
@@ -214,6 +215,7 @@ const fn insn(
     opcode: u32,
     func3: i32,
     func7: i32,
+    cycles: usize,
 ) -> Instruction {
     Instruction {
         kind,
@@ -221,6 +223,7 @@ const fn insn(
         opcode,
         func3: func3 as u32,
         func7: func7 as u32,
+        cycles,
     }
 }
 
@@ -228,54 +231,54 @@ type InstructionTable = [Instruction; 48];
 type FastInstructionTable = [u8; 1 << 10];
 
 const RV32IM_ISA: InstructionTable = [
-    insn(InsnKind::INVALID, InsnCategory::Invalid, 0x00, 0x0, 0x00),
-    insn(InsnKind::ADD, InsnCategory::Compute, 0x33, 0x0, 0x00),
-    insn(InsnKind::SUB, InsnCategory::Compute, 0x33, 0x0, 0x20),
-    insn(InsnKind::XOR, InsnCategory::Compute, 0x33, 0x4, 0x00),
-    insn(InsnKind::OR, InsnCategory::Compute, 0x33, 0x6, 0x00),
-    insn(InsnKind::AND, InsnCategory::Compute, 0x33, 0x7, 0x00),
-    insn(InsnKind::SLL, InsnCategory::Compute, 0x33, 0x1, 0x00),
-    insn(InsnKind::SRL, InsnCategory::Compute, 0x33, 0x5, 0x00),
-    insn(InsnKind::SRA, InsnCategory::Compute, 0x33, 0x5, 0x20),
-    insn(InsnKind::SLT, InsnCategory::Compute, 0x33, 0x2, 0x00),
-    insn(InsnKind::SLTU, InsnCategory::Compute, 0x33, 0x3, 0x00),
-    insn(InsnKind::ADDI, InsnCategory::Compute, 0x13, 0x0, -1),
-    insn(InsnKind::XORI, InsnCategory::Compute, 0x13, 0x4, -1),
-    insn(InsnKind::ORI, InsnCategory::Compute, 0x13, 0x6, -1),
-    insn(InsnKind::ANDI, InsnCategory::Compute, 0x13, 0x7, -1),
-    insn(InsnKind::SLLI, InsnCategory::Compute, 0x13, 0x1, 0x00),
-    insn(InsnKind::SRLI, InsnCategory::Compute, 0x13, 0x5, 0x00),
-    insn(InsnKind::SRAI, InsnCategory::Compute, 0x13, 0x5, 0x20),
-    insn(InsnKind::SLTI, InsnCategory::Compute, 0x13, 0x2, -1),
-    insn(InsnKind::SLTIU, InsnCategory::Compute, 0x13, 0x3, -1),
-    insn(InsnKind::BEQ, InsnCategory::Compute, 0x63, 0x0, -1),
-    insn(InsnKind::BNE, InsnCategory::Compute, 0x63, 0x1, -1),
-    insn(InsnKind::BLT, InsnCategory::Compute, 0x63, 0x4, -1),
-    insn(InsnKind::BGE, InsnCategory::Compute, 0x63, 0x5, -1),
-    insn(InsnKind::BLTU, InsnCategory::Compute, 0x63, 0x6, -1),
-    insn(InsnKind::BGEU, InsnCategory::Compute, 0x63, 0x7, -1),
-    insn(InsnKind::JAL, InsnCategory::Compute, 0x6f, -1, -1),
-    insn(InsnKind::JALR, InsnCategory::Compute, 0x67, 0x0, -1),
-    insn(InsnKind::LUI, InsnCategory::Compute, 0x37, -1, -1),
-    insn(InsnKind::AUIPC, InsnCategory::Compute, 0x17, -1, -1),
-    insn(InsnKind::MUL, InsnCategory::Compute, 0x33, 0x0, 0x01),
-    insn(InsnKind::MULH, InsnCategory::Compute, 0x33, 0x1, 0x01),
-    insn(InsnKind::MULHSU, InsnCategory::Compute, 0x33, 0x2, 0x01),
-    insn(InsnKind::MULHU, InsnCategory::Compute, 0x33, 0x3, 0x01),
-    insn(InsnKind::DIV, InsnCategory::Compute, 0x33, 0x4, 0x01),
-    insn(InsnKind::DIVU, InsnCategory::Compute, 0x33, 0x5, 0x01),
-    insn(InsnKind::REM, InsnCategory::Compute, 0x33, 0x6, 0x01),
-    insn(InsnKind::REMU, InsnCategory::Compute, 0x33, 0x7, 0x01),
-    insn(InsnKind::LB, InsnCategory::Load, 0x03, 0x0, -1),
-    insn(InsnKind::LH, InsnCategory::Load, 0x03, 0x1, -1),
-    insn(InsnKind::LW, InsnCategory::Load, 0x03, 0x2, -1),
-    insn(InsnKind::LBU, InsnCategory::Load, 0x03, 0x4, -1),
-    insn(InsnKind::LHU, InsnCategory::Load, 0x03, 0x5, -1),
-    insn(InsnKind::SB, InsnCategory::Store, 0x23, 0x0, -1),
-    insn(InsnKind::SH, InsnCategory::Store, 0x23, 0x1, -1),
-    insn(InsnKind::SW, InsnCategory::Store, 0x23, 0x2, -1),
-    insn(InsnKind::EANY, InsnCategory::System, 0x73, 0x0, 0x00),
-    insn(InsnKind::MRET, InsnCategory::System, 0x73, 0x0, 0x18),
+    insn(InsnKind::INVALID, InsnCategory::Invalid, 0x00, 0x0, 0x00, 0),
+    insn(InsnKind::ADD, InsnCategory::Compute, 0x33, 0x0, 0x00, 1),
+    insn(InsnKind::SUB, InsnCategory::Compute, 0x33, 0x0, 0x20, 1),
+    insn(InsnKind::XOR, InsnCategory::Compute, 0x33, 0x4, 0x00, 2),
+    insn(InsnKind::OR, InsnCategory::Compute, 0x33, 0x6, 0x00, 2),
+    insn(InsnKind::AND, InsnCategory::Compute, 0x33, 0x7, 0x00, 2),
+    insn(InsnKind::SLL, InsnCategory::Compute, 0x33, 0x1, 0x00, 2),
+    insn(InsnKind::SRL, InsnCategory::Compute, 0x33, 0x5, 0x00, 2),
+    insn(InsnKind::SRA, InsnCategory::Compute, 0x33, 0x5, 0x20, 2),
+    insn(InsnKind::SLT, InsnCategory::Compute, 0x33, 0x2, 0x00, 1),
+    insn(InsnKind::SLTU, InsnCategory::Compute, 0x33, 0x3, 0x00, 1),
+    insn(InsnKind::ADDI, InsnCategory::Compute, 0x13, 0x0, -1, 1),
+    insn(InsnKind::XORI, InsnCategory::Compute, 0x13, 0x4, -1, 2),
+    insn(InsnKind::ORI, InsnCategory::Compute, 0x13, 0x6, -1, 2),
+    insn(InsnKind::ANDI, InsnCategory::Compute, 0x13, 0x7, -1, 2),
+    insn(InsnKind::SLLI, InsnCategory::Compute, 0x13, 0x1, 0x00, 2),
+    insn(InsnKind::SRLI, InsnCategory::Compute, 0x13, 0x5, 0x00, 2),
+    insn(InsnKind::SRAI, InsnCategory::Compute, 0x13, 0x5, 0x20, 2),
+    insn(InsnKind::SLTI, InsnCategory::Compute, 0x13, 0x2, -1, 1),
+    insn(InsnKind::SLTIU, InsnCategory::Compute, 0x13, 0x3, -1, 1),
+    insn(InsnKind::BEQ, InsnCategory::Compute, 0x63, 0x0, -1, 1),
+    insn(InsnKind::BNE, InsnCategory::Compute, 0x63, 0x1, -1, 1),
+    insn(InsnKind::BLT, InsnCategory::Compute, 0x63, 0x4, -1, 1),
+    insn(InsnKind::BGE, InsnCategory::Compute, 0x63, 0x5, -1, 1),
+    insn(InsnKind::BLTU, InsnCategory::Compute, 0x63, 0x6, -1, 1),
+    insn(InsnKind::BGEU, InsnCategory::Compute, 0x63, 0x7, -1, 1),
+    insn(InsnKind::JAL, InsnCategory::Compute, 0x6f, -1, -1, 1),
+    insn(InsnKind::JALR, InsnCategory::Compute, 0x67, 0x0, -1, 1),
+    insn(InsnKind::LUI, InsnCategory::Compute, 0x37, -1, -1, 1),
+    insn(InsnKind::AUIPC, InsnCategory::Compute, 0x17, -1, -1, 1),
+    insn(InsnKind::MUL, InsnCategory::Compute, 0x33, 0x0, 0x01, 2),
+    insn(InsnKind::MULH, InsnCategory::Compute, 0x33, 0x1, 0x01, 2),
+    insn(InsnKind::MULHSU, InsnCategory::Compute, 0x33, 0x2, 0x01, 2),
+    insn(InsnKind::MULHU, InsnCategory::Compute, 0x33, 0x3, 0x01, 2),
+    insn(InsnKind::DIV, InsnCategory::Compute, 0x33, 0x4, 0x01, 2),
+    insn(InsnKind::DIVU, InsnCategory::Compute, 0x33, 0x5, 0x01, 2),
+    insn(InsnKind::REM, InsnCategory::Compute, 0x33, 0x6, 0x01, 2),
+    insn(InsnKind::REMU, InsnCategory::Compute, 0x33, 0x7, 0x01, 2),
+    insn(InsnKind::LB, InsnCategory::Load, 0x03, 0x0, -1, 1),
+    insn(InsnKind::LH, InsnCategory::Load, 0x03, 0x1, -1, 1),
+    insn(InsnKind::LW, InsnCategory::Load, 0x03, 0x2, -1, 1),
+    insn(InsnKind::LBU, InsnCategory::Load, 0x03, 0x4, -1, 1),
+    insn(InsnKind::LHU, InsnCategory::Load, 0x03, 0x5, -1, 1),
+    insn(InsnKind::SB, InsnCategory::Store, 0x23, 0x0, -1, 1),
+    insn(InsnKind::SH, InsnCategory::Store, 0x23, 0x1, -1, 1),
+    insn(InsnKind::SW, InsnCategory::Store, 0x23, 0x2, -1, 1),
+    insn(InsnKind::EANY, InsnCategory::System, 0x73, 0x0, 0x00, 1),
+    insn(InsnKind::MRET, InsnCategory::System, 0x73, 0x0, 0x18, 1),
 ];
 
 // RISC-V instruction are determined by 3 parts:
@@ -364,7 +367,7 @@ impl Emulator {
 
         let decoded = DecodedInstruction::new(word);
         let insn = self.table.lookup(&decoded);
-        ctx.on_insn_decoded(insn.kind, &decoded);
+        ctx.on_insn_decoded(&insn, &decoded);
 
         if match insn.category {
             InsnCategory::Compute => self.step_compute(ctx, insn.kind, &decoded)?,
@@ -373,7 +376,7 @@ impl Emulator {
             InsnCategory::System => self.step_system(ctx, insn.kind, &decoded)?,
             InsnCategory::Invalid => ctx.trap(TrapCause::IllegalInstruction(word))?,
         } {
-            ctx.on_normal_end(insn.kind, &decoded);
+            ctx.on_normal_end(&insn, &decoded);
         };
 
         Ok(())
@@ -394,7 +397,7 @@ impl Emulator {
         let mut br_cond = |cond| -> u32 {
             rd = 0;
             if cond {
-                new_pc = pc + decoded.imm_b();
+                new_pc = pc.wrapping_add(decoded.imm_b());
             }
             0
         };
@@ -457,7 +460,7 @@ impl Emulator {
                 (pc + WORD_SIZE).0
             }
             InsnKind::LUI => decoded.imm_u(),
-            InsnKind::AUIPC => (pc + decoded.imm_u()).0,
+            InsnKind::AUIPC => (pc.wrapping_add(decoded.imm_u())).0,
             InsnKind::MUL => rs1.wrapping_mul(rs2),
             InsnKind::MULH => {
                 (sign_extend_u32(rs1).wrapping_mul(sign_extend_u32(rs2)) >> 32) as u32

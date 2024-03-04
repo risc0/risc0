@@ -31,10 +31,7 @@ use risc0_zkp::{
 };
 
 use self::witgen::WitnessGenerator;
-use super::{
-    emu::{preflight::preflight_segment, Segment},
-    Seal, SegmentProver,
-};
+use super::{emu::Segment, Seal, SegmentProver};
 use crate::{
     layout::{OutBuffer, LAYOUT},
     CIRCUIT, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CTRL, REGISTER_GROUP_DATA,
@@ -70,7 +67,7 @@ where
 {
     #[tracing::instrument(skip_all)]
     fn prove_segment(&self, segment: &Segment) -> Result<Seal> {
-        let trace = preflight_segment(segment)?;
+        let trace = segment.preflight()?;
 
         let io = segment.prepare_globals();
         let mut witgen = WitnessGenerator::new(segment.po2, &io);

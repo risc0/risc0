@@ -17,7 +17,7 @@ mod tests;
 
 use std::sync::atomic::{AtomicUsize, Ordering};
 
-use anyhow::{anyhow, bail, Result};
+use anyhow::{bail, Result};
 use derive_debug::Dbg;
 use risc0_zkp::{
     core::{
@@ -28,53 +28,23 @@ use risc0_zkp::{
 };
 use risc0_zkvm_platform::{
     syscall::{
-        ecall,
+        ecall, halt,
         reg_abi::{REG_A0, REG_A1, REG_T0},
     },
     WORD_SIZE,
 };
+use sha2::digest::generic_array::GenericArray;
 
 use super::{
+    mux::{Major, TopMux},
     pager::{PagedMemory, PAGE_WORDS},
-    rv32im::{DecodedInstruction, EmuContext, Emulator, InsnKind, TrapCause},
+    rv32im::{DecodedInstruction, EmuContext, Emulator, InsnKind, Instruction, TrapCause},
     ByteAddr, Segment, WordAddr, SYSTEM_START,
 };
 use crate::prove::engine::loader::{
     ram_load_cycles, FINI_TAILROOM, SETUP_CYCLES, SHA_INIT_OFFSET, SHA_K, SHA_K_OFFSET,
+    ZEROS_OFFSET,
 };
-
-#[derive(Copy, Clone, Debug, PartialEq)]
-pub enum Major {
-    Compute0,
-    Compute1,
-    Compute2,
-    MemIo,
-    Multiply,
-    Divide,
-    VerifyAnd,
-    VerifyDivide,
-    ECall,
-    ShaInit,
-    ShaLoad,
-    ShaMain,
-    PageFault,
-    ECallCopyIn,
-    BigInt,
-    Halt,
-    MuxSize,
-}
-
-#[derive(Clone, Debug, PartialEq)]
-pub enum TopMux {
-    BytesInit,
-    BytesSetup,
-    RamInit,
-    RamLoad,
-    Reset,
-    Body(Major, u32),
-    RamFini,
-    BytesFini,
-}
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum Back {
@@ -84,7 +54,8 @@ pub enum Back {
     },
     Halt {
         pc: ByteAddr,
-        exit_code: u32,
+        sys_exit_code: u8,
+        user_exit_code: u8,
         write_addr: WordAddr,
     },
 }
@@ -123,12 +94,13 @@ pub struct PreflightTrace {
 struct Preflight {
     steps: usize,
     pager: PagedMemory,
-    pre_pc: ByteAddr,
+    start_pc: ByteAddr,
+    prev_pc: ByteAddr,
     pc: ByteAddr,
-    cycles: usize,
     pub trace: PreflightTrace,
     output_ptr: ByteAddr,
     pre_merkle_root: Digest,
+    halted: Option<u32>,
 }
 
 impl Clone for PreflightCycle {
@@ -148,91 +120,6 @@ impl PartialEq for PreflightCycle {
             && self.back == other.back
             && self.mem_idx.load(Ordering::Relaxed) == other.mem_idx.load(Ordering::Relaxed)
             && self.extra_idx == other.extra_idx
-    }
-}
-
-impl Major {
-    pub fn as_u32(&self) -> u32 {
-        *self as u32
-    }
-}
-
-impl TopMux {
-    pub fn as_body(&self) -> Result<(Major, u32)> {
-        match self {
-            TopMux::Body(major, minor) => Ok((*major, *minor)),
-            _ => Err(anyhow!("TopMux::as_body invalid mux")),
-        }
-    }
-}
-
-impl InsnKind {
-    fn major_minor(&self) -> (Major, u32) {
-        match self {
-            InsnKind::ADD => (Major::Compute0, 0),
-            InsnKind::SUB => (Major::Compute0, 1),
-            InsnKind::XOR => (Major::Compute0, 2),
-            InsnKind::OR => (Major::Compute0, 3),
-            InsnKind::AND => (Major::Compute0, 4),
-            InsnKind::SLT => (Major::Compute0, 5),
-            InsnKind::SLTU => (Major::Compute0, 6),
-            InsnKind::ADDI => (Major::Compute0, 7),
-
-            InsnKind::XORI => (Major::Compute1, 0),
-            InsnKind::ORI => (Major::Compute1, 1),
-            InsnKind::ANDI => (Major::Compute1, 2),
-            InsnKind::SLTI => (Major::Compute1, 3),
-            InsnKind::SLTIU => (Major::Compute1, 4),
-            InsnKind::BEQ => (Major::Compute1, 5),
-            InsnKind::BNE => (Major::Compute1, 6),
-            InsnKind::BLT => (Major::Compute1, 7),
-
-            InsnKind::BGE => (Major::Compute2, 0),
-            InsnKind::BLTU => (Major::Compute2, 1),
-            InsnKind::BGEU => (Major::Compute2, 2),
-            InsnKind::JAL => (Major::Compute2, 3),
-            InsnKind::JALR => (Major::Compute2, 4),
-            InsnKind::LUI => (Major::Compute2, 5),
-            InsnKind::AUIPC => (Major::Compute2, 6),
-
-            InsnKind::LB => (Major::MemIo, 0),
-            InsnKind::LH => (Major::MemIo, 1),
-            InsnKind::LW => (Major::MemIo, 2),
-            InsnKind::LBU => (Major::MemIo, 3),
-            InsnKind::LHU => (Major::MemIo, 4),
-            InsnKind::SB => (Major::MemIo, 5),
-            InsnKind::SH => (Major::MemIo, 6),
-            InsnKind::SW => (Major::MemIo, 7),
-
-            InsnKind::MUL => (Major::Multiply, 0),
-            InsnKind::MULH => (Major::Multiply, 1),
-            InsnKind::MULHSU => (Major::Multiply, 2),
-            InsnKind::MULHU => (Major::Multiply, 3),
-            InsnKind::SLL => (Major::Multiply, 4),
-            InsnKind::SLLI => (Major::Multiply, 5),
-
-            InsnKind::DIV => (Major::Divide, 0),
-            InsnKind::DIVU => (Major::Divide, 1),
-            InsnKind::REM => (Major::Divide, 2),
-            InsnKind::REMU => (Major::Divide, 3),
-            InsnKind::SRL => (Major::Divide, 4),
-            InsnKind::SRA => (Major::Divide, 5),
-            InsnKind::SRLI => (Major::Divide, 6),
-            InsnKind::SRAI => (Major::Divide, 7),
-
-            // TODO: deal with ecall vs ebreak
-            InsnKind::EANY => (Major::ECall, 0),
-
-            InsnKind::MRET => unreachable!(),
-            InsnKind::INVALID => (Major::MuxSize, 0),
-        }
-    }
-}
-
-impl From<InsnKind> for TopMux {
-    fn from(kind: InsnKind) -> Self {
-        let (major, minor) = kind.major_minor();
-        TopMux::Body(major, minor)
     }
 }
 
@@ -282,24 +169,30 @@ impl Preflight {
         Self {
             steps: 1 << segment.po2,
             pager: PagedMemory::new(segment.partial_image.clone()),
-            pre_pc: pc,
+            start_pc: pc,
+            prev_pc: pc,
             pc,
-            cycles: 0,
             trace: PreflightTrace::default(),
-            output_ptr: ByteAddr(0),
+            output_ptr: ByteAddr(ZEROS_OFFSET as u32),
             pre_merkle_root: segment.pre_state.merkle_root,
+            halted: None,
         }
+    }
+
+    #[allow(unused)]
+    fn cur_cycle(&self) -> usize {
+        self.trace.pre.cycles.len() + self.trace.body.cycles.len()
     }
 
     fn load_u32(&mut self, addr: WordAddr) -> Result<u32> {
         let data = self.pager.load(addr)?;
-        // tracing::trace!("load_u32: {:?} => 0x{data:08x}", addr.baddr(),);
+        // tracing::trace!("[{}] load_u32: {addr:?} => 0x{data:08x}", self.cur_cycle());
         self.add_txn(false, addr, data);
         Ok(data)
     }
 
     fn store_u32(&mut self, addr: WordAddr, data: u32) -> Result<()> {
-        // tracing::trace!("store_u32: {:?} <= 0x{data:08x}", addr.baddr());
+        // tracing::trace!("[{}] store_u32: {addr:?} <= 0x{data:08x}", self.cur_cycle());
         self.pager.store(addr, data)
     }
 
@@ -356,6 +249,19 @@ impl Preflight {
             self.add_par_cycle(true, TopMux::RamLoad, Back::Null);
         }
 
+        for (i, word) in SHA_K.iter().enumerate() {
+            self.pager
+                .image
+                .store_region_in_page((SHA_K_OFFSET + i * WORD_SIZE) as u32, &word.to_le_bytes());
+        }
+
+        for (i, word) in SHA256_INIT.as_words().iter().enumerate() {
+            self.pager.image.store_region_in_page(
+                (SHA_INIT_OFFSET + i * WORD_SIZE) as u32,
+                &word.to_le_bytes(),
+            );
+        }
+
         // reset(0)
         self.add_cycle(true, TopMux::Reset);
         self.add_cycle(true, TopMux::Reset);
@@ -369,33 +275,69 @@ impl Preflight {
 
         // Emulate the page fault reads occuring before the body starts.
         for page_idx in faults.reads.iter().rev() {
-            self.page_fault(true, /*is_read=*/ 1, *page_idx, /*isdone=*/ 0)?;
+            self.page_fault(true, /*is_read=*/ 1, *page_idx, /*is_done=*/ 0)?;
         }
-
-        // Emulate the page fault writes occuring after a halt/pause.
-        // let faults: Vec<u32> = self.trace.faults.reads.iter().rev().cloned().collect();
-        // for page_idx in faults {
-        //     self.page_fault(true, page_idx)?;
-        // }
 
         let max_cycles = self.steps;
         let pre_cycles = self.trace.pre.cycles.len();
-        let body_cycles = self.cycles;
-        let body_padding = max_cycles - pre_cycles - body_cycles - FINI_TAILROOM - ZK_CYCLES;
-        tracing::debug!("body_padding: {body_padding}, pre: {pre_cycles}, body: {body_cycles}");
-        if body_padding > 1 {
-            self.add_cycle(false, TopMux::Body(Major::Halt, 0));
-        }
-        for _ in 1..body_padding {
-            self.add_par_cycle(
+
+        if let Some(exit_code) = self.halted {
+            let body_cycles = self.trace.body.cycles.len();
+            let body_padding = max_cycles - pre_cycles - body_cycles - FINI_TAILROOM - ZK_CYCLES;
+            tracing::debug!("halt padding: {body_padding}, pre: {pre_cycles}, body: {body_cycles}");
+
+            let exit_code_bytes = exit_code.to_le_bytes();
+            let (sys_exit_code, user_exit_code) = (exit_code_bytes[0], exit_code_bytes[1]);
+            if body_padding > 1 {
+                self.add_cycle(false, TopMux::Body(Major::Halt, 0));
+            }
+            for _ in 1..body_padding {
+                self.add_par_cycle(
+                    false,
+                    TopMux::Body(Major::Halt, 0),
+                    Back::Halt {
+                        pc: self.pc,
+                        sys_exit_code,
+                        user_exit_code,
+                        write_addr: self.output_ptr.waddr(),
+                    },
+                );
+            }
+        } else {
+            // Emulate the page fault writes before a system split.
+            for page_idx in faults.writes.iter() {
+                //.take(faults.writes.len() - 1) {
+                self.page_fault(false, /*is_read=*/ 0, *page_idx, /*is_done=*/ 0)?;
+            }
+            let last_page_idx = faults.writes.last().unwrap();
+            self.page_fault(
                 false,
-                TopMux::Body(Major::Halt, 0),
-                Back::Halt {
-                    pc: self.pc + 4u32,
-                    exit_code: 0,
-                    write_addr: self.output_ptr.waddr(),
-                },
+                /*is_read=*/ 0,
+                *last_page_idx,
+                /*is_done=*/ 1,
+            )?;
+
+            // let body_cycles = self.cycles;
+            let body_cycles = self.trace.body.cycles.len();
+            let body_padding = max_cycles - pre_cycles - body_cycles - FINI_TAILROOM - ZK_CYCLES;
+            tracing::debug!(
+                "fault padding: {body_padding}, pre: {pre_cycles}, body: {body_cycles}"
             );
+            if body_padding > 1 {
+                self.add_cycle(false, TopMux::Body(Major::Halt, 0));
+            }
+            for _ in 1..body_padding {
+                self.add_par_cycle(
+                    false,
+                    TopMux::Body(Major::Halt, 0),
+                    Back::Halt {
+                        pc: self.pc,
+                        sys_exit_code: halt::SPLIT as u8,
+                        user_exit_code: 0,
+                        write_addr: self.output_ptr.waddr(),
+                    },
+                );
+            }
         }
 
         // reset(1)
@@ -443,16 +385,11 @@ impl Preflight {
 // emulation of specific cycle types
 impl Preflight {
     fn page_fault(&mut self, pre: bool, is_read: u32, page_idx: u32, is_done: u32) -> Result<()> {
+        let pc = if pre { self.start_pc } else { self.prev_pc };
         self.add_extra(pre, is_read);
         self.add_extra(pre, page_idx);
         self.add_extra(pre, is_done);
-        self.add_par_cycle(
-            pre,
-            TopMux::Body(Major::PageFault, 0),
-            Back::Body {
-                pc: self.pre_pc + 4u32,
-            },
-        );
+        self.add_par_cycle(pre, TopMux::Body(Major::PageFault, 0), Back::Body { pc });
         if is_done == 1 {
             return Ok(());
         }
@@ -471,6 +408,7 @@ impl Preflight {
             entry_addr,
             page_words,
             pre,
+            is_read == 1,
         )
     }
 
@@ -481,6 +419,7 @@ impl Preflight {
         sout_addr: WordAddr,
         count: usize,
         pre: bool,
+        is_read: bool,
     ) -> Result<()> {
         const SHA_INIT: usize = 4;
         const SHA_LOAD: usize = 8;
@@ -489,6 +428,9 @@ impl Preflight {
         const SHA_K_ADDR: WordAddr = ByteAddr(SHA_K_OFFSET as u32).waddr();
 
         let repeat = count / BLOCK_WORDS;
+
+        let mut state: [u32; DIGEST_WORDS] =
+            std::array::from_fn(|i| self.pager.peek(sin_addr + i).unwrap().to_be());
 
         // SHA_INIT
         self.add_cycle(pre, TopMux::Body(Major::ShaInit, 0));
@@ -504,6 +446,17 @@ impl Preflight {
         }
 
         for i in 0..repeat {
+            if !is_read {
+                let block: [u32; BLOCK_WORDS] = std::array::from_fn(|j| {
+                    self.pager.peek(buf_addr + i * BLOCK_WORDS + j).unwrap()
+                });
+
+                sha2::compress256(
+                    &mut state,
+                    &[*GenericArray::from_slice(bytemuck::cast_slice(&block))],
+                );
+            }
+
             // SHA_LOAD
             for j in 0..2 {
                 let offset = SHA_LOAD * j;
@@ -523,12 +476,19 @@ impl Preflight {
             // SHA_MAIN(fini)
             for j in 0..SHA_MAIN_FINI {
                 if i == repeat - 1 {
-                    self.record_load(pre, sout_addr + (SHA_MAIN_FINI - j - 1))?;
-                    self.record_load(pre, sout_addr + (SHA_MAIN_FINI - j - 1) + SHA_MAIN_FINI)?;
-                    self.add_cycle(pre, TopMux::Body(Major::ShaMain, 1));
-                } else {
-                    self.add_cycle(pre, TopMux::Body(Major::ShaMain, 1));
+                    let offset = SHA_MAIN_FINI - j - 1;
+                    if is_read {
+                        self.record_load(pre, sout_addr + offset)?;
+                        self.record_load(pre, sout_addr + offset + SHA_MAIN_FINI)?;
+                    } else {
+                        self.store_u32(sout_addr + offset, state[offset].to_be())?;
+                        self.store_u32(
+                            sout_addr + offset + SHA_MAIN_FINI,
+                            state[offset + SHA_MAIN_FINI].to_be(),
+                        )?;
+                    }
                 }
+                self.add_cycle(pre, TopMux::Body(Major::ShaMain, 1));
             }
         }
 
@@ -537,7 +497,7 @@ impl Preflight {
 
     fn ecall_halt(&mut self) -> Result<bool> {
         self.output_ptr = ByteAddr(self.load_register(REG_A1)?);
-        self.load_register(REG_A0)?;
+        self.halted = Some(self.load_register(REG_A0)?);
         Ok(true)
     }
 
@@ -576,17 +536,17 @@ impl EmuContext for Preflight {
         bail!("Trap: {cause:08x?}");
     }
 
-    fn on_insn_decoded(&self, kind: InsnKind, _decoded: &DecodedInstruction) {
-        tracing::trace!("{:?}> {kind:?}", self.pc);
+    fn on_insn_decoded(&self, insn: &Instruction, _decoded: &DecodedInstruction) {
+        tracing::trace!("{:?}> {:?}", self.pc, insn.kind);
     }
 
-    fn on_normal_end(&mut self, kind: InsnKind, _decoded: &DecodedInstruction) {
-        if kind == InsnKind::EANY {
-            self.add_cycle(false, kind.into());
+    fn on_normal_end(&mut self, insn: &Instruction, _decoded: &DecodedInstruction) {
+        if insn.kind == InsnKind::EANY {
+            self.add_cycle(false, insn.kind.into());
         } else {
-            self.add_par_cycle(false, kind.into(), Back::Body { pc: self.pc });
+            self.add_par_cycle(false, insn.kind.into(), Back::Body { pc: self.prev_pc });
         }
-        self.cycles += 1;
+        self.prev_pc = self.pc
     }
 
     fn get_pc(&self) -> ByteAddr {
@@ -618,17 +578,19 @@ impl EmuContext for Preflight {
     }
 }
 
-#[tracing::instrument(skip_all)]
-pub fn preflight_segment(segment: &Segment) -> Result<PreflightTrace> {
-    tracing::debug!("preflight_segment: {segment:?}");
-    let mut preflight = Preflight::new(segment);
-    let mut emu = Emulator::new();
+impl Segment {
+    #[tracing::instrument(skip_all)]
+    pub fn preflight(&self) -> Result<PreflightTrace> {
+        tracing::debug!("preflight: {self:?}");
+        let mut preflight = Preflight::new(self);
+        let mut emu = Emulator::new();
 
-    preflight.pre_steps();
-    while preflight.cycles < segment.insn_cycles {
-        emu.step(&mut preflight)?;
+        preflight.pre_steps();
+        while preflight.trace.body.cycles.len() < self.insn_cycles {
+            emu.step(&mut preflight)?;
+        }
+        preflight.post_steps()?;
+
+        Ok(preflight.trace)
     }
-    preflight.post_steps()?;
-
-    Ok(preflight.trace)
 }

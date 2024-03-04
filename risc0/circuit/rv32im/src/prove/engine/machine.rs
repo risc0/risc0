@@ -38,7 +38,8 @@ use crate::{
     prove::{
         emu::{
             addr::{ByteAddr, WordAddr},
-            preflight::{Back, Major, PreflightCycle, PreflightStage, PreflightTrace, TopMux},
+            mux::{Major, TopMux},
+            preflight::{Back, PreflightCycle, PreflightStage, PreflightTrace},
         },
         hal::cpp::ParallelCircuitStepHandler,
     },
@@ -48,7 +49,7 @@ use crate::{
 struct Injector<'a> {
     steps: usize,
     cycle: usize,
-    data: SyncSlice<'a, BabyBearElem>,
+    data: &'a SyncSlice<'a, BabyBearElem>,
 }
 
 pub struct MachineContext {
@@ -60,7 +61,7 @@ pub struct MachineContext {
 }
 
 impl<'a> Injector<'a> {
-    fn new(steps: usize, cycle: usize, data: SyncSlice<'a, BabyBearElem>) -> Self {
+    fn new(steps: usize, cycle: usize, data: &'a SyncSlice<'a, BabyBearElem>) -> Self {
         Self { steps, cycle, data }
     }
 
@@ -69,6 +70,7 @@ impl<'a> Injector<'a> {
     }
 
     fn set_pc(&self, pc: ByteAddr) {
+        let pc = pc + 4u32;
         let bytes = pc.0.to_le_bytes();
         let bot2 = bytes[3] & 0b11;
         let top2 = bytes[3] >> 2 & 0b11;
@@ -83,13 +85,14 @@ impl<'a> Injector<'a> {
         self.data.set(self.get_idx(99), major.as_u32().into()); // body->nextMajor
     }
 
-    fn set_halt(&self, exit_code: u32, write_addr: WordAddr) {
-        // TODO: fix exit_code
+    fn set_halt(&self, sys_exit_code: u8, user_exit_code: u8, write_addr: WordAddr) {
         self.data.set(self.get_idx(108), 0u32.into()); // body->majorSelect->at(MajorType::kECall): 8
         self.data.set(self.get_idx(112), 0u32.into()); // body->majorSelect->at(MajorType::kPageFault): 12
         self.data.set(self.get_idx(115), 1u32.into()); // body->majorSelect->at(MajorType::kHalt): 15
-        self.data.set(self.get_idx(116), exit_code.into()); // HaltCycle::sysExitCode
-        self.data.set(self.get_idx(117), exit_code.into()); // HaltCycle::userExitCode
+        self.data
+            .set(self.get_idx(116), (sys_exit_code as u32).into()); // HaltCycle::sysExitCode
+        self.data
+            .set(self.get_idx(117), (user_exit_code as u32).into()); // HaltCycle::userExitCode
         self.data.set(self.get_idx(118), write_addr.0.into()); // HaltCycle::writeAddr
     }
 }
@@ -110,7 +113,7 @@ impl MachineContext {
         is_safe
     }
 
-    pub fn inject_exec_backs(&self, steps: usize, cycle: usize, data: SyncSlice<BabyBearElem>) {
+    pub fn inject_exec_backs(&self, steps: usize, cycle: usize, data: &SyncSlice<BabyBearElem>) {
         let cur_cycle = self.get_cycle(cycle);
         if let Some(back) = &cur_cycle.back {
             let injector = Injector::new(steps, cycle, data);
@@ -122,11 +125,12 @@ impl MachineContext {
                 }
                 Back::Halt {
                     pc,
-                    exit_code,
+                    sys_exit_code,
+                    user_exit_code,
                     write_addr,
                 } => {
                     injector.set_pc(*pc);
-                    injector.set_halt(*exit_code, *write_addr);
+                    injector.set_halt(*sys_exit_code, *user_exit_code, *write_addr);
                     injector.set_next_major(Major::Halt);
                 }
             }
@@ -148,33 +152,54 @@ impl MachineContext {
         cycle: usize,
         args: &[SyncSlice<BabyBearElem>],
     ) -> Result<BabyBearElem> {
+        // let cur_cycle = self.get_cycle(cycle);
+        // tracing::debug!("[{cycle}] {:?}", cur_cycle);
         let ctx = CircuitStepContext { size: steps, cycle };
         CIRCUIT.par_step_exec(&ctx, self, args)
+    }
+
+    fn next_step_exec(
+        &self,
+        steps: usize,
+        last_cycle: usize,
+        cycle: usize,
+        args: &[SyncSlice<BabyBearElem>],
+        counts: Option<&[AtomicUsize]>,
+    ) {
+        if cycle == 0 || self.is_exec_par_safe(cycle) {
+            // tracing::debug!("step_exec: {cycle}");
+            self.step_exec(steps, cycle, args).unwrap();
+
+            let mut seq_cycle = cycle + 1;
+            while seq_cycle < last_cycle && !self.is_exec_par_safe(seq_cycle) {
+                self.step_exec(steps, seq_cycle, args).unwrap();
+                seq_cycle += 1;
+            }
+
+            if let Some(counts) = counts {
+                let cycles = seq_cycle - cycle;
+                counts[cycles].fetch_add(1, Ordering::SeqCst);
+            }
+        }
+    }
+
+    pub fn rev_step_exec(&self, steps: usize, last_cycle: usize, args: &[SyncSlice<BabyBearElem>]) {
+        (0..last_cycle).rev().for_each(|cycle| {
+            self.next_step_exec(steps, last_cycle, cycle, args, None);
+        });
     }
 
     pub fn par_step_exec(&self, steps: usize, last_cycle: usize, args: &[SyncSlice<BabyBearElem>]) {
         let counts: Vec<_> = (0..last_cycle).map(|_| AtomicUsize::new(0)).collect();
 
         (0..last_cycle).into_par_iter().for_each(|cycle| {
-            if cycle == 0 || self.is_exec_par_safe(cycle) {
-                // tracing::debug!("step_exec: {cycle}");
-                self.step_exec(steps, cycle, args).unwrap();
-
-                let mut seq_cycle = cycle + 1;
-                while seq_cycle < last_cycle && !self.is_exec_par_safe(seq_cycle) {
-                    self.step_exec(steps, seq_cycle, args).unwrap();
-                    seq_cycle += 1;
-                }
-
-                let cycles = seq_cycle - cycle;
-                counts.get(cycles).unwrap().fetch_add(1, Ordering::SeqCst);
-            }
+            self.next_step_exec(steps, last_cycle, cycle, args, Some(&counts));
         });
 
         for (cycles, count) in counts.iter().enumerate() {
             let count = count.load(Ordering::Relaxed);
             if count > 0 {
-                tracing::info!("cycles: {cycles} -> {count}");
+                tracing::debug!("cycles: {cycles} -> {count}");
             }
         }
     }
@@ -185,6 +210,8 @@ impl MachineContext {
         cycle: usize,
         args: &[SyncSlice<BabyBearElem>],
     ) -> Result<BabyBearElem> {
+        // let cur_cycle = self.get_cycle(cycle);
+        // tracing::debug!("[{cycle}] {:?}", cur_cycle);
         let ctx = CircuitStepContext { size: steps, cycle };
         CIRCUIT.par_step_verify_mem(&ctx, self, args)
     }
@@ -229,9 +256,8 @@ impl MachineContext {
         let counts: Vec<_> = (0..last_cycle).map(|_| AtomicUsize::new(0)).collect();
 
         (0..last_cycle).into_par_iter().for_each(|cycle| {
-            // (0..last_cycle).rev().for_each(|cycle| {
             if cycle == 0 || self.is_verify_mem_par_safe(cycle) {
-                tracing::debug!("step_verify_mem({cycle})");
+                tracing::trace!("step_verify_mem({cycle})");
                 self.step_verify_mem(steps, cycle, args).unwrap();
 
                 let mut seq_cycle = cycle + 1;
@@ -248,7 +274,7 @@ impl MachineContext {
         for (cycles, count) in counts.iter().enumerate() {
             let count = count.load(Ordering::Relaxed);
             if count > 0 {
-                tracing::info!("cycles: {cycles} -> {count}");
+                tracing::debug!("cycles: {cycles} -> {count}");
             }
         }
     }
@@ -334,7 +360,7 @@ impl MachineContext {
     fn get_major(&self, cycle: usize, outs: &mut [Elem]) -> Result<()> {
         let cur_cycle = self.get_cycle(cycle);
         let (major, _) = cur_cycle.mux.as_body()?;
-        tracing::trace!("[{cycle}] get_major: {major:?}");
+        // tracing::trace!("[{cycle}] get_major: {major:?}");
         outs[0] = major.as_u32().into();
         Ok(())
     }
@@ -349,7 +375,7 @@ impl MachineContext {
 
     fn ram_read(&self, cycle: usize, args: &[Elem], outs: &mut [Elem]) -> Result<()> {
         let addr: u32 = args[0].into();
-        let op: u32 = args[1].into();
+        // let op: u32 = args[1].into();
 
         let (stage, offset) = self.get_stage_offset(cycle);
         let cycle_idx = cycle - offset;
@@ -364,30 +390,34 @@ impl MachineContext {
         let txn = &stage.txns[mem_idx];
         let txn_cycle = txn.cycle + offset;
         if txn_cycle != cycle {
-            bail!("[{cycle}] Mismatched memory txn cycle. {txn_cycle} != {cycle}, {cur_cycle:?}, {txn:?}",);
+            bail!("[{cycle}] Mismatched memory txn cycle. Recorded:{txn_cycle} != Circuit:{cycle}, {cur_cycle:?}, {txn:?}",);
         }
 
         if txn.addr != WordAddr(addr) {
             bail!(
-                "[{cycle}] Mismatched memory txn addr. {:?} != {:?}",
+                "[{cycle}] Mismatched memory txn addr. Recorded:{:?} != Circuit:{:?}",
                 txn.addr,
                 WordAddr(addr)
             );
         }
 
-        tracing::trace!(
-            "[{cycle}] {:?} ram_read(0x{addr:08x}, {op}): {txn:?}",
-            cur_cycle.mux
-        );
+        // tracing::trace!(
+        //     "[{cycle}] {:?} ram_read(0x{addr:08x}, {op}): {txn:?}",
+        //     cur_cycle.mux
+        // );
+
         Quad(outs[0], outs[1], outs[2], outs[3]) = txn.data.into();
         Ok(())
     }
 
-    fn ram_write(&self, cycle: usize, args: &[Elem]) -> Result<()> {
-        let addr: u32 = args[0].into();
-        let data: u32 = Quad(args[1], args[2], args[3], args[4]).into();
-        let op: u32 = args[5].into();
-        tracing::trace!("[{cycle}] ram_write(0x{addr:08x}, 0x{data:08x}, {op})");
+    fn ram_write(&self, _cycle: usize, _args: &[Elem]) -> Result<()> {
+        // let addr: u32 = args[0].into();
+        // let data: u32 = Quad(args[1], args[2], args[3], args[4]).into();
+        // let op: u32 = args[5].into();
+        // tracing::trace!(
+        //     "[{cycle}] {:?} ram_write(0x{addr:08x}, 0x{data:08x}, {op})",
+        //     self.get_cycle(cycle).mux
+        // );
         Ok(())
     }
 
@@ -397,7 +427,7 @@ impl MachineContext {
         let is_read = stage.extras[cur_cycle.extra_idx + 0];
         let page_idx = stage.extras[cur_cycle.extra_idx + 1];
         let is_done = stage.extras[cur_cycle.extra_idx + 2];
-        // tracing::debug!("page_read: 0x{page_idx:05x}");
+        // tracing::debug!("[{cycle}] page_info: ({is_read}, 0x{page_idx:05x}, {is_done})");
         (outs[0], outs[1], outs[2]) = (is_read.into(), page_idx.into(), is_done.into());
         Ok(())
     }

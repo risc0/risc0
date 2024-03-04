@@ -43,7 +43,7 @@ pub const FINI_TAILROOM: usize = 6;
 pub const SHA_K_OFFSET: usize = memory::PRE_LOAD.start();
 pub const SHA_K_SIZE: usize = 64;
 pub const SHA_INIT_OFFSET: usize = SHA_K_OFFSET + SHA_K_SIZE * WORD_SIZE;
-const ZEROS_OFFSET: usize = SHA_INIT_OFFSET + DIGEST_WORDS * WORD_SIZE;
+pub const ZEROS_OFFSET: usize = SHA_INIT_OFFSET + DIGEST_WORDS * WORD_SIZE;
 
 // TODO: generate from zirgen
 pub const SETUP_STEP_REGS: usize = 84;
@@ -238,8 +238,6 @@ pub struct Loader<'a> {
     ctrl: &'a mut CpuBuffer<BabyBearElem>,
     cycle: usize,
     ram_load_cycles: Vec<CtrlCycle>,
-    // init_cycles: usize,
-    // fini_cycles: usize,
 }
 
 pub fn ram_load_cycles() -> Vec<CtrlCycle> {
@@ -368,7 +366,7 @@ impl<'a> Loader<'a> {
     }
 
     pub fn compute_control_id<H: Hal<Elem = BabyBearElem>>(hal: &H, po2: usize) -> Digest {
-        tracing::info!("po2: {po2}");
+        tracing::debug!("po2: {po2}");
         let cycles = 1 << po2;
         let ctrl_size = CIRCUIT.ctrl_size();
         let mut ctrl = CpuBuffer::from_fn("ctrl", cycles * ctrl_size, |_| BabyBearElem::ZERO);

@@ -46,6 +46,10 @@ impl ByteAddr {
     pub const fn is_null(&self) -> bool {
         self.0 == 0
     }
+
+    pub fn wrapping_add(self, rhs: u32) -> Self {
+        Self(self.0.wrapping_add(rhs))
+    }
 }
 
 impl WordAddr {

@@ -12,49 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::collections::BTreeMap;
-
 use anyhow::Result;
-use rayon::prelude::*;
 use risc0_binfmt::{MemoryImage, Program};
 use risc0_zkp::{
-    adapter::TapsProvider as _,
     core::{digest::Digest, hash::sha::Sha256HashSuite},
-    field::{baby_bear::BabyBearElem, Elem as _},
-    hal::{
-        cpu::{CpuBuffer, CpuHal},
-        Buffer, Hal,
-    },
+    field::baby_bear::BabyBearElem,
+    hal::{cpu::CpuHal, Hal},
     verify::VerificationError,
 };
 use risc0_zkvm_platform::PAGE_SIZE;
 use test_log::test;
 
-use super::{loader::Loader, machine::MachineContext};
+use super::{loader::Loader, witgen::WitnessGenerator};
 use crate::{
     prove::{
         emu::{
-            exec::{execute, Syscall, SyscallContext, DEFAULT_SEGMENT_PO2},
-            preflight::preflight_segment,
+            exec::{execute, DEFAULT_SEGMENT_PO2},
+            testutil::{self, NullSyscall, DEFAULT_SESSION_LIMIT},
         },
         get_segment_prover,
     },
     CIRCUIT,
 };
-
-#[derive(Default)]
-struct NullSyscall;
-
-impl Syscall for NullSyscall {
-    fn syscall(
-        &self,
-        _syscall: &str,
-        _ctx: &mut dyn SyscallContext,
-        _guest_buf: &mut [u32],
-    ) -> Result<(u32, u32)> {
-        todo!()
-    }
-}
 
 struct ControlCheck {
     computed: Digest,
@@ -78,22 +57,42 @@ impl ControlCheck {
     }
 }
 
-#[test]
-fn basic() {
-    let raw_image = BTreeMap::from([
-        (0x4000, 0x1234b137), // lui x2, 0x1234b000
-        (0x4004, 0xf387e1b7), // lui x3, 0xf387e000
-        (0x4008, 0x003100b3), // add x1, x2, x3
-        (0x400c, 0x000055b7), // lui a1, 0x00005000
-        (0x4010, 0x00000073), // ecall(halt)
-    ]);
-    let program = Program {
-        entry: 0x4000,
-        image: raw_image.clone(),
-    };
+fn fwd_rev_ab_test(program: Program) {
     let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
 
-    let segments = execute(image, DEFAULT_SEGMENT_PO2, 1 << 20, &NullSyscall::default()).unwrap();
+    let segments = execute(
+        image,
+        DEFAULT_SEGMENT_PO2,
+        DEFAULT_SESSION_LIMIT,
+        &NullSyscall::default(),
+    )
+    .unwrap();
+    for segment in segments {
+        let trace = segment.preflight().unwrap();
+        let io = segment.prepare_globals();
+
+        let mut fwd_witgen = WitnessGenerator::new(segment.po2, &io);
+        let fwd_data = fwd_witgen.test_step_execute(trace.clone(), true);
+
+        let mut rev_witgen = WitnessGenerator::new(segment.po2, &io);
+        let rev_data = rev_witgen.test_step_execute(trace.clone(), false);
+
+        assert!(fwd_data == rev_data);
+    }
+}
+
+#[test]
+fn basic() {
+    let program = testutil::basic();
+    let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
+
+    let segments = execute(
+        image,
+        DEFAULT_SEGMENT_PO2,
+        DEFAULT_SESSION_LIMIT,
+        &NullSyscall::default(),
+    )
+    .unwrap();
     let segment = segments.first().unwrap();
 
     let prover = get_segment_prover();
@@ -106,98 +105,35 @@ fn basic() {
 }
 
 #[test]
-fn fwd_rev_ab() {
-    let raw_image = BTreeMap::from([
-        (0x4000, 0x1234b137), // lui x2, 0x1234b000
-        (0x4004, 0xf387e1b7), // lui x3, 0xf387e000
-        (0x4008, 0x003100b3), // add x1, x2, x3
-        (0x400c, 0x000055b7), // lui a1, 0x00005000
-        (0x4010, 0x00000073), // ecall(halt)
-    ]);
-    let program = Program {
-        entry: 0x4000,
-        image: raw_image.clone(),
-    };
+fn system_split() {
+    let program = testutil::simple_loop();
     let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
 
-    let segments = execute(image, DEFAULT_SEGMENT_PO2, 1 << 20, &NullSyscall::default()).unwrap();
-    let segment = segments.first().unwrap();
-    let steps = 1 << segment.po2;
+    let segments = execute(image, 15, DEFAULT_SESSION_LIMIT, &NullSyscall::default()).unwrap();
 
-    let io = segment.prepare_globals();
-    let io = CpuBuffer::from(Vec::from(io));
-    let trace = preflight_segment(segment).unwrap();
+    let prover = get_segment_prover();
+    let suite = Sha256HashSuite::new_suite();
+    let hal = CpuHal::new(suite.clone());
 
-    let mut ctrl = CpuBuffer::from_fn("ctrl", steps * CIRCUIT.ctrl_size(), |_| BabyBearElem::ZERO);
-    let mut loader = Loader::new(steps, &mut ctrl);
-    let ctrl_cycles = loader.load();
-
-    // run trace in reverse
-    let rev_machine = MachineContext::new(steps, trace.clone());
-    let rev_data = CpuBuffer::from_fn("rev_data", steps * CIRCUIT.data_size(), |_| {
-        BabyBearElem::INVALID
-    });
-
-    for cycle in 0..ctrl_cycles {
-        rev_machine.inject_exec_backs(steps, cycle, rev_data.as_slice_sync());
+    for segment in segments {
+        let seal = prover.prove_segment(&segment).unwrap();
+        let checker = ControlCheck::new(&hal, segment.po2);
+        risc0_zkp::verify::verify(&CIRCUIT, &suite, &seal, |x, y| checker.check_ctrl(x, y))
+            .unwrap();
     }
+}
 
-    for cycle in (0..ctrl_cycles).rev() {
-        // walk backwards until the first parallel safe cycle is found
-        if cycle > 0 && !rev_machine.is_exec_par_safe(cycle) {
-            continue;
-        }
+#[test]
+fn fwd_rev_ab() {
+    fwd_rev_ab_test(testutil::basic());
+}
 
-        let args = &[
-            ctrl.as_slice_sync(),
-            io.as_slice_sync(),
-            rev_data.as_slice_sync(),
-        ];
-        rev_machine.step_exec(steps, cycle, args).unwrap();
+#[test]
+fn fwd_rev_ab_split() {
+    fwd_rev_ab_test(testutil::simple_loop());
+}
 
-        // execute forward until the next parallel safe cycle
-        let mut cycle = cycle + 1;
-        while cycle < ctrl_cycles && !rev_machine.is_exec_par_safe(cycle) {
-            rev_machine.step_exec(steps, cycle, args).unwrap();
-            cycle += 1;
-        }
-    }
-
-    // zero out invalids
-    rev_data
-        .as_slice_mut()
-        .par_iter_mut()
-        .for_each(|value| *value = value.valid_or_zero());
-
-    let mut rev_vec = Vec::new();
-    rev_data.view(|view| {
-        rev_vec.extend_from_slice(view);
-    });
-
-    // run trace forward
-    let fwd_machine = MachineContext::new(steps, trace);
-    let fwd_data = CpuBuffer::from_fn("fwd_data", steps * CIRCUIT.data_size(), |_| {
-        BabyBearElem::INVALID
-    });
-    for cycle in 0..ctrl_cycles {
-        let args = &[
-            ctrl.as_slice_sync(),
-            io.as_slice_sync(),
-            fwd_data.as_slice_sync(),
-        ];
-        fwd_machine.step_exec(steps, cycle, args).unwrap();
-    }
-
-    // zero out invalids
-    fwd_data
-        .as_slice_mut()
-        .par_iter_mut()
-        .for_each(|value| *value = value.valid_or_zero());
-
-    let mut fwd_vec = Vec::new();
-    fwd_data.view(|view| {
-        fwd_vec.extend_from_slice(view);
-    });
-
-    assert!(fwd_vec == rev_vec);
+#[test]
+fn fwd_rev_ab_large_text() {
+    fwd_rev_ab_test(testutil::large_text());
 }

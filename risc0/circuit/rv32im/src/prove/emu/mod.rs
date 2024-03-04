@@ -14,12 +14,15 @@
 
 pub mod addr;
 pub mod exec;
+pub mod mux;
 mod pager;
 pub mod preflight;
 pub mod rv32im;
+#[cfg(test)]
+pub(crate) mod testutil;
 
 use derive_debug::Dbg;
-use risc0_binfmt::{MemoryImage, SystemState};
+use risc0_binfmt::{ExitCode, MemoryImage, SystemState};
 use risc0_zkp::{
     adapter::CircuitInfo as _,
     core::digest::DIGEST_WORDS,
@@ -47,6 +50,7 @@ pub struct Segment {
     pub syscalls: Vec<SyscallRecord>,
     pub insn_cycles: usize,
     pub po2: usize,
+    pub exit_code: ExitCode,
 }
 
 impl Segment {

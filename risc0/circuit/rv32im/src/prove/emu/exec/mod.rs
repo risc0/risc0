@@ -18,7 +18,7 @@ mod tests;
 use std::mem;
 
 use anyhow::{bail, Result};
-use risc0_binfmt::MemoryImage;
+use risc0_binfmt::{ExitCode, MemoryImage};
 use risc0_zkp::core::log2_ceil;
 use risc0_zkvm_platform::{
     memory::is_guest_memory,
@@ -32,7 +32,7 @@ use risc0_zkvm_platform::{
 use super::{
     addr::{ByteAddr, WordAddr},
     pager::PagedMemory,
-    rv32im::{DecodedInstruction, EmuContext, Emulator, InsnKind, TrapCause},
+    rv32im::{DecodedInstruction, EmuContext, Emulator, Instruction, TrapCause},
     Segment, SyscallRecord, SYSTEM_START,
 };
 
@@ -72,7 +72,7 @@ pub trait SyscallContext {
 
 pub struct Executor<'a, S: Syscall> {
     pager: PagedMemory,
-    exit_code: Option<u32>,
+    exit_code: Option<ExitCode>,
     pc: ByteAddr,
     cycles: usize,
     syscalls: Vec<SyscallRecord>,
@@ -119,9 +119,10 @@ impl<'a, S: Syscall> Executor<'a, S> {
         // This needs to be the worst case number of cycles needed to run a single step.
         let segment_threshold = (1 << segment_po2) - 10000;
 
+        self.reset();
+
         let mut segments = Vec::new();
         let mut emu = Emulator::new();
-        let mut prev_pc = self.pc;
         let mut total_cycles = 0;
 
         while self.exit_code.is_none() && total_cycles < max_cycles {
@@ -129,7 +130,7 @@ impl<'a, S: Syscall> Executor<'a, S> {
             let segment_cycles = self.cycles + paging_cycles;
             if segment_cycles >= segment_threshold {
                 tracing::debug!("split: {} + {}", self.cycles, paging_cycles);
-                let (pre_state, partial_image, post_state) = self.pager.commit(prev_pc);
+                let (pre_state, partial_image, post_state) = self.pager.commit(self.pc);
                 segments.push(Segment {
                     partial_image,
                     pre_state,
@@ -137,18 +138,23 @@ impl<'a, S: Syscall> Executor<'a, S> {
                     syscalls: mem::take(&mut self.syscalls),
                     insn_cycles: self.cycles,
                     po2: segment_po2,
+                    exit_code: ExitCode::SystemSplit,
                 });
                 self.pager.clear();
-                prev_pc = self.pc;
                 total_cycles += self.cycles;
                 self.cycles = 0;
             }
             emu.step(self)?;
         }
 
-        let (pre_state, partial_image, post_state) = self.pager.commit(prev_pc);
+        let (pre_state, partial_image, post_state) = self.pager.commit(self.pc);
         let segment_cycles = self.cycles + self.pager.get_paging_cycles();
-        let po2 = log2_ceil(segment_cycles.next_power_of_two()).try_into()?; // TODO
+        let po2 = log2_ceil(segment_cycles.next_power_of_two()).try_into()?;
+        let exit_code = if let Some(exit_code) = self.exit_code {
+            exit_code
+        } else {
+            ExitCode::SessionLimit
+        };
         segments.push(Segment {
             partial_image,
             pre_state,
@@ -156,9 +162,17 @@ impl<'a, S: Syscall> Executor<'a, S> {
             syscalls: mem::take(&mut self.syscalls),
             insn_cycles: self.cycles,
             po2,
+            exit_code,
         });
 
         Ok(segments)
+    }
+
+    fn reset(&mut self) {
+        self.pager.clear();
+        self.cycles = 0;
+        self.exit_code = None;
+        self.syscalls.clear();
     }
 
     fn ecall_halt(&mut self) -> Result<bool> {
@@ -170,8 +184,8 @@ impl<'a, S: Syscall> Executor<'a, S> {
         let user_exit = (a0 >> 8) & 0xff;
 
         self.exit_code = match halt_type {
-            halt::TERMINATE => Some(user_exit),
-            halt::PAUSE => todo!(),
+            halt::TERMINATE => Some(ExitCode::Halted(user_exit)),
+            halt::PAUSE => Some(ExitCode::Paused(user_exit)),
             _ => bail!("Illegal halt type: {halt_type}"),
         };
 
@@ -276,13 +290,12 @@ impl<'a, S: Syscall> EmuContext for Executor<'a, S> {
         bail!("Trap: {cause:08x?}");
     }
 
-    fn on_insn_decoded(&self, kind: InsnKind, _decoded: &DecodedInstruction) {
-        tracing::trace!("{:?}> {kind:?}", self.pc);
+    fn on_insn_decoded(&self, insn: &Instruction, _decoded: &DecodedInstruction) {
+        tracing::trace!("{:?}> {:?}", self.pc, insn.kind);
     }
 
-    fn on_normal_end(&mut self, _kind: InsnKind, _decoded: &DecodedInstruction) {
-        // TODO: not all instructions are 1 cycle
-        self.cycles += 1;
+    fn on_normal_end(&mut self, insn: &Instruction, _decoded: &DecodedInstruction) {
+        self.cycles += insn.cycles;
     }
 
     fn get_pc(&self) -> ByteAddr {
@@ -294,25 +307,25 @@ impl<'a, S: Syscall> EmuContext for Executor<'a, S> {
     }
 
     fn load_register(&mut self, idx: usize) -> Result<u32> {
-        tracing::trace!("load_reg: x{idx}");
+        // tracing::trace!("load_reg: x{idx}");
         self.pager.load(SYSTEM_START + idx)
     }
 
     fn store_register(&mut self, idx: usize, data: u32) -> Result<()> {
         if idx != 0 {
-            tracing::trace!("store_reg: x{idx} <= 0x{data:08x}");
+            // tracing::trace!("store_reg: x{idx} <= 0x{data:08x}");
             self.pager.store(SYSTEM_START + idx, data)?;
         }
         Ok(())
     }
 
     fn load_memory(&mut self, addr: WordAddr) -> Result<u32> {
-        tracing::trace!("load_mem: {:?}", addr.baddr());
+        // tracing::trace!("load_mem: {:?}", addr.baddr());
         self.pager.load(addr)
     }
 
     fn store_memory(&mut self, addr: WordAddr, data: u32) -> Result<()> {
-        tracing::trace!("store_mem: {:?} <= 0x{data:08x}", addr.baddr());
+        // tracing::trace!("store_mem: {:?} <= 0x{data:08x}", addr.baddr());
         self.pager.store(addr, data)
     }
 }

@@ -38,6 +38,7 @@ rand = { version = "0.8", optional = true }
 rayon = { version = "1.5", optional = true }
 metal = { version = "0.27", optional = true }
 risc0-circuit-rv32im-sys = { workspace = true, optional = true }
+sha2 = { version = "0.10", default-features = false, optional = true }
 
 [dev-dependencies]
 criterion = "0.5"
@@ -63,6 +64,7 @@ prove = [
   "dep:lazy-regex",
   "dep:rand",
   "dep:rayon",
+  "dep:sha2",
   "risc0-zkp/prove",
   "risc0-circuit-rv32im-sys",
   "std",

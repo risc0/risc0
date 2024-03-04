@@ -73,6 +73,43 @@ impl WitnessGenerator {
         Ok(())
     }
 
+    #[cfg(test)]
+    pub fn test_step_execute(&mut self, trace: PreflightTrace, is_fwd: bool) -> Vec<BabyBearElem> {
+        let machine = MachineContext::new(self.steps, trace);
+        let mut loader = Loader::new(self.steps, &mut self.ctrl);
+        let last_cycle = loader.load();
+
+        if !is_fwd {
+            for cycle in 0..last_cycle {
+                machine.inject_exec_backs(self.steps, cycle, &self.data.as_slice_sync());
+            }
+        }
+
+        {
+            let args = &[
+                self.ctrl.as_slice_sync(),
+                self.io.as_slice_sync(),
+                self.data.as_slice_sync(),
+            ];
+
+            if is_fwd {
+                for cycle in 0..last_cycle {
+                    machine.step_exec(self.steps, cycle, args).unwrap();
+                }
+            } else {
+                machine.rev_step_exec(self.steps, last_cycle, args);
+            }
+        }
+
+        self.data
+            .as_slice_mut()
+            .par_iter_mut()
+            .chain(self.io.as_slice_mut().par_iter_mut())
+            .for_each(|value| *value = value.valid_or_zero());
+
+        self.data.as_slice().to_vec()
+    }
+
     #[tracing::instrument(skip_all)]
     fn compute_execute(&mut self, machine: &mut MachineContext) -> Result<()> {
         tracing::debug!("load");
@@ -83,12 +120,12 @@ impl WitnessGenerator {
         tracing::info_span!("inject_exec_backs").in_scope(|| {
             tracing::debug!("inject_exec_backs");
             for cycle in 0..last_cycle {
-                machine.inject_exec_backs(self.steps, cycle, self.data.as_slice_sync());
+                machine.inject_exec_backs(self.steps, cycle, &self.data.as_slice_sync());
             }
         });
 
-        tracing::debug!("step_exec");
         tracing::info_span!("step_exec").in_scope(|| {
+            tracing::debug!("step_exec");
             let args = &[
                 self.ctrl.as_slice_sync(),
                 self.io.as_slice_sync(),
@@ -141,8 +178,8 @@ impl WitnessGenerator {
             }
         });
 
-        tracing::debug!("step_verify_mem");
         tracing::info_span!("step_verify_mem").in_scope(|| {
+            tracing::debug!("step_verify_mem");
             let args = &[
                 self.ctrl.as_slice_sync(),
                 self.io.as_slice_sync(),
@@ -159,8 +196,8 @@ impl WitnessGenerator {
         });
 
         machine.sort("bytes");
-        tracing::debug!("step_verify_bytes");
         tracing::info_span!("step_verify_bytes").in_scope(|| {
+            tracing::debug!("step_verify_bytes");
             let args = &[
                 self.ctrl.as_slice_sync(),
                 self.io.as_slice_sync(),

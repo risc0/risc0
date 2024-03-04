@@ -12,33 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{collections::BTreeMap, fmt};
+use std::fmt;
 
-use anyhow::Result;
-use risc0_binfmt::{MemoryImage, Program};
+use risc0_binfmt::MemoryImage;
 use risc0_zkvm_platform::PAGE_SIZE;
 use test_log::test;
 
 use super::{Back, MemoryTransaction, PreflightCycle};
 use crate::prove::emu::{
-    exec::{execute, Syscall, SyscallContext, DEFAULT_SEGMENT_PO2},
+    exec::{execute, DEFAULT_SEGMENT_PO2},
+    mux::{Major, TopMux},
     rv32im::InsnKind,
+    testutil::{self, NullSyscall, DEFAULT_SESSION_LIMIT},
     ByteAddr,
 };
-
-#[derive(Default)]
-struct NullSyscall;
-
-impl Syscall for NullSyscall {
-    fn syscall(
-        &self,
-        _syscall: &str,
-        _ctx: &mut dyn SyscallContext,
-        _guest_buf: &mut [u32],
-    ) -> Result<(u32, u32)> {
-        todo!()
-    }
-}
 
 fn assert_slice_eq<T: fmt::Debug + PartialEq>(lhs: &[T], rhs: &[T]) {
     if lhs.len() != rhs.len() {
@@ -64,28 +51,24 @@ fn add_cycle(insn: InsnKind, mem_idx: usize, pc: Option<u32>) -> PreflightCycle 
 
 #[test]
 fn basic() {
-    let raw_image = BTreeMap::from([
-        (0x4000, 0x1234b137), // lui x2, 0x1234b000
-        (0x4004, 0xf387e1b7), // lui x3, 0xf387e000
-        (0x4008, 0x003100b3), // add x1, x2, x3
-        (0x400c, 0x000055b7), // lui a1, 0x00005000
-        (0x4010, 0x00000073), // ecall(halt)
-    ]);
-    let program = Program {
-        entry: 0x4000,
-        image: raw_image.clone(),
-    };
+    let program = testutil::basic();
     let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
 
-    let segments = execute(image, DEFAULT_SEGMENT_PO2, 1 << 20, &NullSyscall::default()).unwrap();
+    let segments = execute(
+        image,
+        DEFAULT_SEGMENT_PO2,
+        DEFAULT_SESSION_LIMIT,
+        &NullSyscall::default(),
+    )
+    .unwrap();
     let segment = segments.first().unwrap();
 
-    let mut trace = super::preflight_segment(segment).unwrap();
+    let mut trace = segment.preflight().unwrap();
     let expected_cycles = [
-        add_cycle(InsnKind::LUI, 0, Some(0x4004)),
-        add_cycle(InsnKind::LUI, 3, Some(0x4008)),
-        add_cycle(InsnKind::ADD, 6, Some(0x400c)),
-        add_cycle(InsnKind::LUI, 9, Some(0x4010)),
+        add_cycle(InsnKind::LUI, 0, Some(0x4000)),
+        add_cycle(InsnKind::LUI, 3, Some(0x4004)),
+        add_cycle(InsnKind::ADD, 6, Some(0x4008)),
+        add_cycle(InsnKind::LUI, 9, Some(0x400c)),
         add_cycle(InsnKind::EANY, 12, None),
     ];
     trace.body.cycles.truncate(expected_cycles.len());
@@ -132,4 +115,75 @@ fn basic() {
     );
 
     assert_eq!(trace.body.extras.len(), 0);
+}
+
+#[test]
+fn system_split() {
+    let program = testutil::simple_loop();
+    let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
+
+    let segments = execute(image, 15, DEFAULT_SESSION_LIMIT, &NullSyscall::default()).unwrap();
+    assert_eq!(segments.len(), 2);
+    {
+        let trace = segments[0].preflight().unwrap();
+        assert_eq!(trace.pre.cycles.len(), 10004);
+        assert_eq!(trace.pre.txns.len(), 9968);
+        assert_eq!(trace.pre.extras.len(), 24);
+        assert_eq!(trace.body.cycles.len(), 22714);
+        assert_eq!(trace.body.txns.len(), 35728);
+        assert_eq!(trace.body.extras.len(), 15);
+        let page_reads: Vec<_> = trace
+            .pre
+            .cycles
+            .iter()
+            .filter(|x| x.mux == TopMux::Body(Major::PageFault, 0))
+            .map(|x| trace.pre.extras[x.extra_idx + 1])
+            .collect();
+        assert_slice_eq(
+            &page_reads,
+            &[
+                0x35ad6, 0x35ad0, 0x35ac0, 0x35a00, 0x35800, 0x34000, 0x30000, 0x00010,
+            ],
+        );
+        let page_writes: Vec<_> = trace
+            .body
+            .cycles
+            .iter()
+            .filter(|x| {
+                x.mux == TopMux::Body(Major::PageFault, 0)
+                    && trace.body.extras[x.extra_idx + 2] == 0 // !is_done
+            })
+            .map(|x| trace.body.extras[x.extra_idx + 1])
+            .collect();
+        assert_slice_eq(&page_writes, &[0x30000, 0x35800, 0x35ac0, 0x35ad6]);
+    }
+    {
+        let trace = segments[1].preflight().unwrap();
+        assert_eq!(trace.pre.cycles.len(), 10004);
+        assert_eq!(trace.pre.txns.len(), 9968);
+        assert_eq!(trace.pre.extras.len(), 24);
+        assert_eq!(trace.body.cycles.len(), 6330);
+        assert_eq!(trace.body.txns.len(), 32);
+        assert_eq!(trace.body.extras.len(), 0);
+        let page_reads: Vec<_> = trace
+            .pre
+            .cycles
+            .iter()
+            .filter(|x| x.mux == TopMux::Body(Major::PageFault, 0))
+            .map(|x| trace.pre.extras[x.extra_idx + 1])
+            .collect();
+        assert_slice_eq(
+            &page_reads,
+            &[
+                0x35ad6, 0x35ad0, 0x35ac0, 0x35a00, 0x35800, 0x34000, 0x30000, 0x00010,
+            ],
+        );
+        let page_writes: Vec<_> = trace
+            .body
+            .cycles
+            .iter()
+            .filter(|x| x.mux == TopMux::Body(Major::PageFault, 0))
+            .collect();
+        assert_eq!(page_writes.len(), 0);
+    }
 }

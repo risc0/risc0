@@ -12,19 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{cell::RefCell, collections::BTreeMap};
+use std::cell::RefCell;
 
 use anyhow::Result;
-use risc0_binfmt::{Digestible, MemoryImage, Program};
+use risc0_binfmt::{Digestible, ExitCode, MemoryImage};
 use risc0_zkp::core::hash::sha::cpu::Impl as ShaImpl;
 use risc0_zkvm_platform::{
     syscall::reg_abi::{REG_A4, REG_A5},
-    PAGE_SIZE, WORD_SIZE,
+    PAGE_SIZE,
 };
 use test_log::test;
 
 use super::{Syscall, SyscallContext};
-use crate::prove::emu::{addr::ByteAddr, exec::DEFAULT_SEGMENT_PO2};
+use crate::prove::emu::{
+    addr::ByteAddr,
+    exec::DEFAULT_SEGMENT_PO2,
+    testutil::{self, DEFAULT_SESSION_LIMIT},
+};
 
 #[derive(Default, Clone)]
 struct BasicSyscallState {
@@ -75,24 +79,14 @@ impl Syscall for BasicSyscall {
 
 #[test]
 fn basic() {
-    let raw_image = BTreeMap::from([
-        (0x4000, 0x1234b137), // lui x2, 0x1234b000
-        (0x4004, 0xf387e1b7), // lui x3, 0xf387e000
-        (0x4008, 0x003100b3), // add x1, x2, x3
-        (0x400c, 0x000055b7), // lui a1, 0x00005000
-        (0x4010, 0x00000073), // ecall(halt)
-    ]);
-    let program = Program {
-        entry: 0x4000,
-        image: raw_image.clone(),
-    };
+    let program = testutil::basic();
     let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
     let pre_image_id = image.compute_id();
 
     let segments = super::execute(
         image,
         DEFAULT_SEGMENT_PO2,
-        1 << 20,
+        DEFAULT_SESSION_LIMIT,
         &BasicSyscall::default(),
     )
     .unwrap();
@@ -102,36 +96,25 @@ fn basic() {
     assert_eq!(segment.pre_state.digest::<ShaImpl>(), pre_image_id);
     assert_ne!(segment.post_state.digest::<ShaImpl>(), pre_image_id);
     assert!(segment.syscalls.is_empty());
-    assert_eq!(segment.insn_cycles, raw_image.len());
+    assert_eq!(segment.insn_cycles, program.image.len());
+    assert_eq!(segment.exit_code, ExitCode::Halted(0));
 }
 
 #[test]
 fn system_split() {
-    let entry = 0x4000;
-    let mut image = BTreeMap::new();
-    let mut pc = entry;
-    for _ in 0..2500 {
-        image.insert(pc, 0x1234b137); // lui x2, 0x1234b000
-        pc += WORD_SIZE as u32;
-    }
-    image.insert(pc, 0x000055b7); // lui a1, 0x00005000
-    pc += WORD_SIZE as u32;
-    image.insert(pc, 0xc0058593); // addi a1, a1, -0x400
-    pc += WORD_SIZE as u32;
-    image.insert(pc, 0x00000073); // ecall(halt)
-
-    let program = Program { entry, image };
+    let program = testutil::large_text();
     let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
     let pre_image_id = image.compute_id();
 
-    let segments = super::execute(image, 15, 1 << 20, &BasicSyscall::default()).unwrap();
+    let segments =
+        super::execute(image, 15, DEFAULT_SESSION_LIMIT, &BasicSyscall::default()).unwrap();
 
     assert_eq!(segments.len(), 2);
-    // assert_eq!(segments[0].exit_code, ExitCode::SystemSplit);
+    assert_eq!(segments[0].exit_code, ExitCode::SystemSplit);
     assert_eq!(segments[0].pre_state.digest::<ShaImpl>(), pre_image_id);
     assert_ne!(segments[0].post_state.digest::<ShaImpl>(), pre_image_id);
     assert!(segments[0].syscalls.is_empty());
-    // assert_eq!(segments[1].exit_code, ExitCode::Halted(0));
+    assert_eq!(segments[1].exit_code, ExitCode::Halted(0));
     assert_eq!(
         segments[1].pre_state.digest::<ShaImpl>(),
         segments[0].post_state.digest::<ShaImpl>()
