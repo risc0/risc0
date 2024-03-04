@@ -85,13 +85,13 @@ jobs:
         run: bash ./parse_profile_compilation_results.sh
         working-directory: ./.github/scripts
 
-    alert_devops_if_failed:
-      runs-on: ubuntu-latest
-      if: ${{ always() && contains(join(needs.*.result, ','), 'success') }}
-      needs: [crates_validate]
-      steps:
-        - name: DevOps Alert
-          env:
-            NEEDS: ${{ toJSON(needs) }}     
-          run: |
-            curl -X POST -H 'Content-type: application/json' --data '{"text":"Job Succeeded"}' ${{ secrets.DEVOPS_ALERT_WEBHOOK_URL }}
+  alert_devops_if_failed:
+    runs-on: ubuntu-latest
+    if: ${{ always() && contains(join(needs.*.result, ','), 'success') }}
+    needs: [crates_validate]
+    steps:
+      - name: DevOps Alert
+        env:
+          NEEDS: ${{ toJSON(needs) }}     
+        run: |
+          curl -X POST -H 'Content-type: application/json' --data '{"text":"Job Succeeded"}' ${{ secrets.DEVOPS_ALERT_WEBHOOK_URL }}
