@@ -1,5 +1,5 @@
 ---
-displayed_sidebar: docs
+displayed_sidebar: education_hub
 ---
 
 # RISC Zero Education Hub

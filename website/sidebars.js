@@ -2,7 +2,7 @@
 
 /** @type {import('@docusaurus/plugin-content-docs').SidebarsConfig} */
 export default {
-  docs: [
+  education_hub: [
     {
       type: "link",
       label: "Talks and Podcasts",
