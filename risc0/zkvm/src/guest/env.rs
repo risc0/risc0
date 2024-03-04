@@ -548,7 +548,8 @@ pub struct FdWriter<F: Fn(&[u8])> {
 }
 
 impl<F: Fn(&[u8])> FdWriter<F> {
-    fn new(fd: u32, hook: F) -> Self {
+    /// Creates a new FdWriter writing to the given file descriptor.
+    pub fn new(fd: u32, hook: F) -> Self {
         FdWriter { fd, hook }
     }
 
