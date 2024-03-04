@@ -679,7 +679,7 @@ impl pb::api::Asset {
 fn check_client_version(client: &semver::Version, server: &semver::Version) -> bool {
     if server.pre.is_empty() {
         let comparator = semver::Comparator {
-            op: semver::Op::GreaterEq,
+            op: semver::Op::Caret,
             major: server.major,
             minor: Some(server.minor),
             patch: None,
