@@ -8,7 +8,7 @@
 
 ### ⚡️ Features
 
-* Improve performance by replacing Poseidon with Poseidon2 hashing function
+* Add an improved Poseidon2 hashing function that replaces Poseidon for recursive proofs.
 * Add support for the configuration of intermediate segment storage (on-disk,
   in-memory, etc).
 
