@@ -72,6 +72,11 @@ export default {
         },
         {
           type: "doc",
+          label: "Understanding I/O",
+          id: "zkvm/tutorials/input-output",
+        },
+        {
+          type: "doc",
           label: "Rust Resources",
           id: "zkvm/rust-resources",
         },
@@ -122,7 +127,7 @@ export default {
         {
           type: "doc",
           label: "I/O",
-          id: "zkvm/input-output",
+          id: "zkvm/tutorials/input-output",
         },
         {
           type: "doc",

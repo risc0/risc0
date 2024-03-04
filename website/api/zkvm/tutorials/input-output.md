@@ -76,9 +76,7 @@ file descriptor.
 
 For example, in the host program, we could:
 
-`/src/main.rs`
-
-```rust,no_run
+```rust no_run title="src/main.rs"
 use risc0_zkvm::ExecutorEnv;
 
 fn main() {
@@ -258,7 +256,7 @@ TODO: Give concrete examples of how to handle I/O in a zkVM application by point
 
 For further examples on how to handle I/O in the zkVM, you can check the [examples page].
 
-[guest-code-101-io]: guest-code-101.md#basic-guest-functionality-reading-writing-and-committing
+[guest-code-101-io]: ../guest-code-101.md#basic-guest-functionality-reading-writing-and-committing
 [env-module-functions]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest/env/index.html#functions
 [stdin]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest/env/fn.stdin.html
 [stdout]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest/env/fn.stdout.html
@@ -271,6 +269,6 @@ For further examples on how to handle I/O in the zkVM, you can check the [exampl
 [commit_method]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest/env/fn.commit.html
 [journal_terminology]: https://dev.risczero.com/terminology#journal
 [session]: https://dev.risczero.com/terminology#session
-[examples page]: examples.md
+[examples page]: ../examples.md
 [guest]: https://dev.risczero.com/terminology#guest
 [host]: https://dev.risczero.com/terminology#host
