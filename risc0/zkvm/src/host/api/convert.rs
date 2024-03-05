@@ -70,6 +70,7 @@ impl TryFrom<SuccinctReceipt> for Asset {
     type Error = anyhow::Error;
 
     fn try_from(succinct_receipt: SuccinctReceipt) -> Result<Self> {
+        // DO NOT MERGE: Is this an issue that needs to be fixed?
         Ok(Asset::Inline(bincode::serialize(&succinct_receipt)?.into()))
     }
 }

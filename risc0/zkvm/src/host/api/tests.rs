@@ -87,15 +87,15 @@ impl TestClient {
     }
 
     fn prove(&self, env: ExecutorEnv<'_>, opts: ProverOpts, binary: Asset) -> Receipt {
-        with_server(self.addr, || self.client.prove(&env, opts, binary))
+        with_server(self.addr, || self.client.prove(&env, &opts, binary))
     }
 
     fn prove_segment(&self, opts: ProverOpts, segment: Asset) -> SegmentReceipt {
-        with_server(self.addr, || self.client.prove_segment(opts, segment))
+        with_server(self.addr, || self.client.prove_segment(&opts, segment))
     }
 
     fn lift(&self, opts: ProverOpts, receipt: SegmentReceipt) -> SuccinctReceipt {
-        with_server(self.addr, || self.client.lift(opts, receipt))
+        with_server(self.addr, || self.client.lift(&opts, &receipt))
     }
 
     fn join(
@@ -105,7 +105,7 @@ impl TestClient {
         right_receipt: SuccinctReceipt,
     ) -> SuccinctReceipt {
         with_server(self.addr, || {
-            self.client.join(opts, left_receipt, right_receipt)
+            self.client.join(&opts, &left_receipt, &right_receipt)
         })
     }
 
@@ -117,13 +117,13 @@ impl TestClient {
     ) -> SuccinctReceipt {
         with_server(self.addr, || {
             self.client
-                .resolve(opts, conditional_receipt, assumption_receipt)
+                .resolve(&opts, &conditional_receipt, &assumption_receipt)
         })
     }
 
     // DO NOT MERGE: Does this need ownership?
     fn identity_p254(&self, opts: ProverOpts, receipt: SuccinctReceipt) -> SuccinctReceipt {
-        with_server(self.addr, || self.client.identity_p254(opts, receipt))
+        with_server(self.addr, || self.client.identity_p254(&opts, &receipt))
     }
 }
 

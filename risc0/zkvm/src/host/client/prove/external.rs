@@ -50,9 +50,12 @@ impl Prover for ExternalProver {
         tracing::debug!("Launching {}", &self.r0vm_path.to_string_lossy());
 
         let image_id = compute_image_id(elf)?;
-        let client = ApiClient::new_sub_process(&self.r0vm_path)?;
         let binary = Asset::Inline(elf.to_vec().into());
-        let receipt = client.prove(&env, opts.clone(), binary)?;
+
+        let client = ApiClient::new_sub_process(&self.r0vm_path)?;
+        let receipt = client.prove(&env, &opts, binary)?;
+
+        // Verify the receipt as a sanity check.
         if opts.prove_guest_errors {
             receipt.verify_integrity_with_context(ctx)?;
             ensure!(

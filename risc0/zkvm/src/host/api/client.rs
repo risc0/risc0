@@ -67,14 +67,19 @@ impl Client {
     }
 
     /// Prove the specified ELF binary.
-    pub fn prove(&self, env: &ExecutorEnv<'_>, opts: ProverOpts, binary: Asset) -> Result<Receipt> {
+    pub fn prove(
+        &self,
+        env: &ExecutorEnv<'_>,
+        opts: &ProverOpts,
+        binary: Asset,
+    ) -> Result<Receipt> {
         let mut conn = self.connect()?;
 
         let request = pb::api::ServerRequest {
             kind: Some(pb::api::server_request::Kind::Prove(
                 pb::api::ProveRequest {
                     env: Some(self.make_execute_env(env, binary.try_into()?)?),
-                    opts: Some(opts.into()),
+                    opts: Some(opts.clone().into()),
                 },
             )),
         };
@@ -125,13 +130,14 @@ impl Client {
     }
 
     /// Prove the specified segment.
-    pub fn prove_segment(&self, opts: ProverOpts, segment: Asset) -> Result<SegmentReceipt> {
+    pub fn prove_segment(&self, opts: &ProverOpts, segment: Asset) -> Result<SegmentReceipt> {
         let mut conn = self.connect()?;
 
         let request = pb::api::ServerRequest {
             kind: Some(pb::api::server_request::Kind::ProveSegment(
+                // NOTE: Clone operations on opts could be avoided if conversion did not use From.
                 pb::api::ProveSegmentRequest {
-                    opts: Some(opts.into()),
+                    opts: Some(opts.clone().into()),
                     segment: Some(segment.try_into()?),
                 },
             )),
@@ -162,13 +168,14 @@ impl Client {
     /// resulting in a recursion circuit STARK proof. This recursion proof has a single
     /// constant-time verification procedure, with respect to the original segment length, and is then
     /// used as the input to all other recursion programs (e.g. join, resolve, and identity_p254).
-    pub fn lift(&self, opts: ProverOpts, receipt: SegmentReceipt) -> Result<SuccinctReceipt> {
+    pub fn lift(&self, opts: &ProverOpts, receipt: &SegmentReceipt) -> Result<SuccinctReceipt> {
         let mut conn = self.connect()?;
 
         let request = pb::api::ServerRequest {
             kind: Some(pb::api::server_request::Kind::Lift(pb::api::LiftRequest {
-                opts: Some(opts.into()),
-                receipt: Some(receipt.into()),
+                // NOTE: Clone operations could be avoided if conversion did not use From.
+                opts: Some(opts.clone().into()),
+                receipt: Some(receipt.clone().into()),
             })),
         };
         tracing::trace!("tx: {request:?}");
@@ -197,17 +204,18 @@ impl Client {
     /// the same session can be compressed into a single receipt for the entire session.
     pub fn join(
         &self,
-        opts: ProverOpts,
-        left_receipt: SuccinctReceipt,
-        right_receipt: SuccinctReceipt,
+        opts: &ProverOpts,
+        left_receipt: &SuccinctReceipt,
+        right_receipt: &SuccinctReceipt,
     ) -> Result<SuccinctReceipt> {
         let mut conn = self.connect()?;
 
         let request = pb::api::ServerRequest {
             kind: Some(pb::api::server_request::Kind::Join(pb::api::JoinRequest {
-                opts: Some(opts.into()),
-                left_receipt: Some(left_receipt.into()),
-                right_receipt: Some(right_receipt.into()),
+                // NOTE: Clone operations could be avoided if conversion did not use From.
+                opts: Some(opts.clone().into()),
+                left_receipt: Some(left_receipt.clone().into()),
+                right_receipt: Some(right_receipt.clone().into()),
             })),
         };
         tracing::trace!("tx: {request:?}");
@@ -238,18 +246,18 @@ impl Client {
     /// unconditional receipt.
     pub fn resolve(
         &self,
-        opts: ProverOpts,
-        conditional_receipt: SuccinctReceipt,
-        assumption_receipt: SuccinctReceipt,
+        opts: &ProverOpts,
+        conditional_receipt: &SuccinctReceipt,
+        assumption_receipt: &SuccinctReceipt,
     ) -> Result<SuccinctReceipt> {
         let mut conn = self.connect()?;
 
         let request = pb::api::ServerRequest {
             kind: Some(pb::api::server_request::Kind::Resolve(
                 pb::api::ResolveRequest {
-                    opts: Some(opts.into()),
-                    conditional_receipt: Some(conditional_receipt.into()),
-                    assumption_receipt: Some(assumption_receipt.into()),
+                    opts: Some(opts.clone().into()),
+                    conditional_receipt: Some(conditional_receipt.clone().into()),
+                    assumption_receipt: Some(assumption_receipt.clone().into()),
                 },
             )),
         };
@@ -280,16 +288,16 @@ impl Client {
     /// produced with Poseidon over the BN254 base field compared to using Posidon over BabyBear.
     pub fn identity_p254(
         &self,
-        opts: ProverOpts,
-        receipt: SuccinctReceipt,
+        opts: &ProverOpts,
+        receipt: &SuccinctReceipt,
     ) -> Result<SuccinctReceipt> {
         let mut conn = self.connect()?;
 
         let request = pb::api::ServerRequest {
             kind: Some(pb::api::server_request::Kind::IdentiyP254(
                 pb::api::IdentityP254Request {
-                    opts: Some(opts.into()),
-                    receipt: Some(receipt.into()),
+                    opts: Some(opts.clone().into()),
+                    receipt: Some(receipt.clone().into()),
                 },
             )),
         };
