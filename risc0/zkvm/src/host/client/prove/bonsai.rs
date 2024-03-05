@@ -18,7 +18,10 @@ use anyhow::{anyhow, bail, ensure, Result};
 use bonsai_sdk::alpha::Client;
 
 use super::Prover;
-use crate::{compute_image_id, sha::Digestible, ExecutorEnv, ProverOpts, Receipt, VerifierContext};
+use crate::{
+    compute_image_id, sha::Digestible, ExecutorEnv, InnerReceipt, ProverOpts, Receipt,
+    VerifierContext,
+};
 
 /// An implementation of a [Prover] that runs proof workloads via Bonsai.
 ///
@@ -108,6 +111,19 @@ impl Prover for BonsaiProver {
             } else {
                 bail!("Bonsai prover workflow exited: {}", res.status);
             }
+        }
+    }
+
+    fn compress(&self, receipt: &Receipt) -> Result<Receipt> {
+        match receipt.inner {
+            InnerReceipt::Succinct(_) | InnerReceipt::Compact(_) => Ok(receipt.clone()),
+            // DO NOT MERGE: Investigate whether this would be reasonable to support.
+            InnerReceipt::Composite(_) => Err(anyhow!(
+                "BonsaiProver does not support compress on a composite receipt"
+            )),
+            InnerReceipt::Fake { .. } => Err(anyhow!(
+                "BonsaiProver does not support compress on a composite receipt"
+            )),
         }
     }
 }

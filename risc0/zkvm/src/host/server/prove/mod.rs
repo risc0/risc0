@@ -24,7 +24,7 @@ mod tests;
 
 use std::rc::Rc;
 
-use anyhow::{anyhow, bail, Result};
+use anyhow::{anyhow, Result};
 use cfg_if::cfg_if;
 use risc0_circuit_rv32im::CircuitImpl;
 use risc0_core::field::{
@@ -124,12 +124,12 @@ pub trait ProverServer {
                 InnerReceipt::Composite(assumption) => {
                     self.resolve(&conditional, &self.compress(assumption)?)
                 }
-                InnerReceipt::Fake { .. } => bail!(
+                InnerReceipt::Fake { .. } => Err(anyhow!(
                     "compressing composite receipts with fake receipt assumptions is not supported"
-                ),
-                InnerReceipt::Compact(_) => bail!(
+                )),
+                InnerReceipt::Compact(_) => Err(anyhow!(
                     "compressing composite receipts with Compact receipt assumptions is not supported"
-                )
+                ))
             },
         )
     }
