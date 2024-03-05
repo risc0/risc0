@@ -91,45 +91,39 @@ impl TestClient {
     }
 
     fn prove_segment(&self, opts: ProverOpts, segment: Asset) -> SegmentReceipt {
-        with_server(self.addr, || {
-            let receipt_out = AssetRequest::Path(self.get_work_path());
-            self.client.prove_segment(opts, segment, receipt_out)
-        })
+        with_server(self.addr, || self.client.prove_segment(opts, segment))
     }
 
-    fn lift(&self, opts: ProverOpts, receipt: Asset) -> SuccinctReceipt {
-        with_server(self.addr, || {
-            let receipt_out = AssetRequest::Path(self.get_work_path());
-            self.client.lift(opts, receipt, receipt_out)
-        })
+    fn lift(&self, opts: ProverOpts, receipt: SegmentReceipt) -> SuccinctReceipt {
+        with_server(self.addr, || self.client.lift(opts, receipt))
     }
 
-    fn join(&self, opts: ProverOpts, left_receipt: Asset, right_receipt: Asset) -> SuccinctReceipt {
+    fn join(
+        &self,
+        opts: ProverOpts,
+        left_receipt: SuccinctReceipt,
+        right_receipt: SuccinctReceipt,
+    ) -> SuccinctReceipt {
         with_server(self.addr, || {
-            let receipt_out = AssetRequest::Path(self.get_work_path());
-            self.client
-                .join(opts, left_receipt, right_receipt, receipt_out)
+            self.client.join(opts, left_receipt, right_receipt)
         })
     }
 
     fn resolve(
         &self,
         opts: ProverOpts,
-        conditional_receipt: Asset,
-        assumption_receipt: Asset,
+        conditional_receipt: SuccinctReceipt,
+        assumption_receipt: SuccinctReceipt,
     ) -> SuccinctReceipt {
         with_server(self.addr, || {
-            let receipt_out = AssetRequest::Path(self.get_work_path());
             self.client
-                .resolve(opts, conditional_receipt, assumption_receipt, receipt_out)
+                .resolve(opts, conditional_receipt, assumption_receipt)
         })
     }
 
-    fn identity_p254(&self, opts: ProverOpts, receipt: Asset) -> SuccinctReceipt {
-        with_server(self.addr, || {
-            let receipt_out = AssetRequest::Path(self.get_work_path());
-            self.client.identity_p254(opts, receipt, receipt_out)
-        })
+    // DO NOT MERGE: Does this need ownership?
+    fn identity_p254(&self, opts: ProverOpts, receipt: SuccinctReceipt) -> SuccinctReceipt {
+        with_server(self.addr, || self.client.identity_p254(opts, receipt))
     }
 }
 
@@ -214,24 +208,23 @@ fn lift_join_identity() {
     let opts = ProverOpts::default();
 
     let receipt = client.prove_segment(opts.clone(), client.segments[0].clone());
-    let mut rollup = client.lift(opts.clone(), receipt.try_into().unwrap());
+    let mut rollup = client.lift(opts.clone(), receipt);
 
     for segment in &client.segments[1..] {
         let receipt = client.prove_segment(opts.clone(), segment.clone());
-        let rec_receipt = client.lift(opts.clone(), receipt.try_into().unwrap());
+        let rec_receipt = client.lift(opts.clone(), receipt);
 
-        rollup = client.join(
-            opts.clone(),
-            rollup.try_into().unwrap(),
-            rec_receipt.try_into().unwrap(),
-        );
+        rollup = client.join(opts.clone(), rollup, rec_receipt);
         rollup
             .verify_integrity_with_context(&VerifierContext::default())
             .unwrap();
     }
-    client.identity_p254(opts, rollup.clone().try_into().unwrap());
+    let rollup_p254 = client.identity_p254(opts, rollup);
 
-    let rollup_receipt = Receipt::new(InnerReceipt::Succinct(rollup), session.journal.bytes.into());
+    let rollup_receipt = Receipt::new(
+        InnerReceipt::Succinct(rollup_p254),
+        session.journal.bytes.into(),
+    );
     rollup_receipt.verify(MULTI_TEST_ID).unwrap();
 }
 
@@ -252,8 +245,7 @@ fn lift_resolve() {
     assumption_segment_receipt
         .verify_integrity_with_context(&VerifierContext::default())
         .unwrap();
-    let assumption_succinct_receipt =
-        client.lift(opts.clone(), assumption_segment_receipt.try_into().unwrap());
+    let assumption_succinct_receipt = client.lift(opts.clone(), assumption_segment_receipt);
     assumption_succinct_receipt
         .verify_integrity_with_context(&VerifierContext::default())
         .unwrap();
@@ -282,10 +274,7 @@ fn lift_resolve() {
     composition_segment_receipt
         .verify_integrity_with_context(&VerifierContext::default())
         .unwrap();
-    let composition_succinct_receipt = client.lift(
-        opts.clone(),
-        composition_segment_receipt.try_into().unwrap(),
-    );
+    let composition_succinct_receipt = client.lift(opts.clone(), composition_segment_receipt);
     composition_succinct_receipt
         .verify_integrity_with_context(&VerifierContext::default())
         .unwrap();
@@ -293,8 +282,8 @@ fn lift_resolve() {
     // Use resolve to create an unconditional succinct receipt
     let succint_receipt = client.resolve(
         opts.clone(),
-        composition_succinct_receipt.try_into().unwrap(),
-        assumption_succinct_receipt.try_into().unwrap(),
+        composition_succinct_receipt,
+        assumption_succinct_receipt,
     );
 
     // Wrap into a Receipt and verify
