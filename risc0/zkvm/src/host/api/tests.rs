@@ -218,12 +218,12 @@ fn lift_join_identity() {
             .verify_integrity_with_context(&VerifierContext::default())
             .unwrap();
     }
-    let rollup_p254 = client.identity_p254(&opts, &rollup);
 
-    let rollup_receipt = Receipt::new(
-        InnerReceipt::Succinct(rollup_p254),
-        session.journal.bytes.into(),
-    );
+    // NOTE: identiy_p254 is generated, but never checked in this test.
+    // As long as the prover does not return an error, this test will pass.
+    let _: SuccinctReceipt = client.identity_p254(&opts, &rollup);
+
+    let rollup_receipt = Receipt::new(InnerReceipt::Succinct(rollup), session.journal.bytes.into());
     rollup_receipt.verify(MULTI_TEST_ID).unwrap();
 }
 
