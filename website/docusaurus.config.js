@@ -75,6 +75,9 @@ export default async function createConfigAsync() {
         "@docusaurus/plugin-client-redirects",
         {
           createRedirects(path) {
+            // TODO: when 0.21 is released, these new redirects are needed:
+            // /bonsai            -> /api/generating-proofs/remote-proving
+            // /bonsai/quickstart -> /api/generating-proofs/remote-proving
             if (path.includes("/api/bonsai")) {
               return [path.replace("/api/bonsai", "/bonsai")];
             }
@@ -118,7 +121,11 @@ export default async function createConfigAsync() {
             href: "https://risczero.com/",
           },
           items: [
-            { to: "/api/", label: "Introduction", position: "left" },
+            {
+              position: "left",
+              label: "Introduction",
+              to: "/api",
+            },
             {
               position: "left",
               label: "Terminology",

@@ -41,4 +41,4 @@ The polynomial associated with the array $(u_0,u_1,\ldots,u_{n-1})$ is the uniqu
   - [3blue1brown video](https://www.youtube.com/watch?v=spUNpyF58BY) and [lecture](https://www.youtube.com/watch?v=g8RkArhtCc4) on FFTs
   - [Veritasium](https://www.youtube.com/watch?v=nmgFG7PUHfo) on FFTs
 
-For a deeper look into the algorithm at both a software and hardware level, we recommend this [FFT video from Reducible](https://www.youtube.com/watch?v=h7apO7q16V0). And here's [Vitalik's take](https://vitalik.ca/general/2019/05/12/fft.html) on FFTs/NTTs.
+For a deeper look into the algorithm at both a software and hardware level, we recommend this [FFT video from Reducible](https://www.youtube.com/watch?v=h7apO7q16V0). And here's [Vitalik's take](https://vitalik.eth.limo/general/2019/05/12/fft.html) on FFTs/NTTs.
