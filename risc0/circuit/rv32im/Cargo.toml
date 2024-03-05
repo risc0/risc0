@@ -22,7 +22,7 @@ tracing = { version = "0.1", default-features = false, features = [
 [target.'cfg(not(target_os = "zkvm"))'.dependencies]
 cust = { version = "0.3", optional = true }
 rand = { version = "0.8", optional = true }
-rayon = { version = "1.5", optional = true }
+rayon = { version = "1.9", optional = true }
 metal = { version = "0.25", optional = true }
 risc0-circuit-rv32im-sys = { workspace = true, optional = true }
 

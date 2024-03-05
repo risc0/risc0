@@ -33,7 +33,7 @@ tracing = { version = "0.1", default-features = false, features = [
 [target.'cfg(not(target_os = "zkvm"))'.dependencies]
 ndarray = { version = "0.15", features = ["rayon"], optional = true }
 rand = { version = "0.8", optional = true }
-rayon = { version = "1.5", optional = true }
+rayon = { version = "1.9", optional = true }
 risc0-sys = { workspace = true, optional = true }
 sha2 = { version = "0.10", default-features = false, features = ["compress"] }
 
