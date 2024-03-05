@@ -16,7 +16,6 @@ use std::path::Path;
 
 use anyhow::{anyhow, bail, Result};
 use bytes::Bytes;
-use prost::Message;
 
 use super::{
     malformed_err, pb, Asset, AssetRequest, ConnectionWrapper, Connector, ParentProcessConnector,
@@ -76,24 +75,19 @@ impl Client {
                 pb::api::ProveRequest {
                     env: Some(self.make_execute_env(env, binary.try_into()?)?),
                     opts: Some(opts.into()),
-                    receipt_out: Some(pb::api::AssetRequest {
-                        kind: Some(pb::api::asset_request::Kind::Inline(())),
-                    }),
                 },
             )),
         };
         conn.send(request)?;
 
-        let asset = self.prove_handler(&mut conn, env)?;
+        let receipt = self.prove_handler(&mut conn, env)?;
 
         let code = conn.close()?;
         if code != 0 {
             bail!("Child finished with: {code}");
         }
 
-        let receipt_bytes = asset.as_bytes()?;
-        let receipt_pb = pb::core::Receipt::decode(receipt_bytes)?;
-        receipt_pb.try_into()
+        receipt.try_into()
     }
 
     /// Execute the specified ELF binary.
@@ -131,12 +125,7 @@ impl Client {
     }
 
     /// Prove the specified segment.
-    pub fn prove_segment(
-        &self,
-        opts: ProverOpts,
-        segment: Asset,
-        receipt_out: AssetRequest,
-    ) -> Result<SegmentReceipt> {
+    pub fn prove_segment(&self, opts: ProverOpts, segment: Asset) -> Result<SegmentReceipt> {
         let mut conn = self.connect()?;
 
         let request = pb::api::ServerRequest {
@@ -144,7 +133,6 @@ impl Client {
                 pb::api::ProveSegmentRequest {
                     opts: Some(opts.into()),
                     segment: Some(segment.try_into()?),
-                    receipt_out: Some(receipt_out.try_into()?),
                 },
             )),
         };
@@ -155,9 +143,7 @@ impl Client {
 
         let result = match reply.kind.ok_or(malformed_err())? {
             pb::api::prove_segment_reply::Kind::Ok(result) => {
-                let receipt_bytes = result.receipt.ok_or(malformed_err())?.as_bytes()?;
-                let receipt_pb = pb::core::SegmentReceipt::decode(receipt_bytes)?;
-                receipt_pb.try_into()
+                result.receipt.ok_or(malformed_err())?.try_into()
             }
             pb::api::prove_segment_reply::Kind::Error(err) => Err(err.into()),
         };
@@ -176,19 +162,13 @@ impl Client {
     /// resulting in a recursion circuit STARK proof. This recursion proof has a single
     /// constant-time verification procedure, with respect to the original segment length, and is then
     /// used as the input to all other recursion programs (e.g. join, resolve, and identity_p254).
-    pub fn lift(
-        &self,
-        opts: ProverOpts,
-        receipt: Asset,
-        receipt_out: AssetRequest,
-    ) -> Result<SuccinctReceipt> {
+    pub fn lift(&self, opts: ProverOpts, receipt: SegmentReceipt) -> Result<SuccinctReceipt> {
         let mut conn = self.connect()?;
 
         let request = pb::api::ServerRequest {
             kind: Some(pb::api::server_request::Kind::Lift(pb::api::LiftRequest {
                 opts: Some(opts.into()),
-                receipt: Some(receipt.try_into()?),
-                receipt_out: Some(receipt_out.try_into()?),
+                receipt: Some(receipt.into()),
             })),
         };
         tracing::trace!("tx: {request:?}");
@@ -198,9 +178,7 @@ impl Client {
 
         let result = match reply.kind.ok_or(malformed_err())? {
             pb::api::lift_reply::Kind::Ok(result) => {
-                let receipt_bytes = result.receipt.ok_or(malformed_err())?.as_bytes()?;
-                let receipt_pb = pb::core::SuccinctReceipt::decode(receipt_bytes)?;
-                receipt_pb.try_into()
+                result.receipt.ok_or(malformed_err())?.try_into()
             }
             pb::api::lift_reply::Kind::Error(err) => Err(err.into()),
         };
@@ -220,18 +198,16 @@ impl Client {
     pub fn join(
         &self,
         opts: ProverOpts,
-        left_receipt: Asset,
-        right_receipt: Asset,
-        receipt_out: AssetRequest,
+        left_receipt: SuccinctReceipt,
+        right_receipt: SuccinctReceipt,
     ) -> Result<SuccinctReceipt> {
         let mut conn = self.connect()?;
 
         let request = pb::api::ServerRequest {
             kind: Some(pb::api::server_request::Kind::Join(pb::api::JoinRequest {
                 opts: Some(opts.into()),
-                left_receipt: Some(left_receipt.try_into()?),
-                right_receipt: Some(right_receipt.try_into()?),
-                receipt_out: Some(receipt_out.try_into()?),
+                left_receipt: Some(left_receipt.into()),
+                right_receipt: Some(right_receipt.into()),
             })),
         };
         tracing::trace!("tx: {request:?}");
@@ -241,9 +217,7 @@ impl Client {
 
         let result = match reply.kind.ok_or(malformed_err())? {
             pb::api::join_reply::Kind::Ok(result) => {
-                let receipt_bytes = result.receipt.ok_or(malformed_err())?.as_bytes()?;
-                let receipt_pb = pb::core::SuccinctReceipt::decode(receipt_bytes)?;
-                receipt_pb.try_into()
+                result.receipt.ok_or(malformed_err())?.try_into()
             }
             pb::api::join_reply::Kind::Error(err) => Err(err.into()),
         };
@@ -265,9 +239,8 @@ impl Client {
     pub fn resolve(
         &self,
         opts: ProverOpts,
-        conditional_receipt: Asset,
-        assumption_receipt: Asset,
-        receipt_out: AssetRequest,
+        conditional_receipt: SuccinctReceipt,
+        assumption_receipt: SuccinctReceipt,
     ) -> Result<SuccinctReceipt> {
         let mut conn = self.connect()?;
 
@@ -275,9 +248,8 @@ impl Client {
             kind: Some(pb::api::server_request::Kind::Resolve(
                 pb::api::ResolveRequest {
                     opts: Some(opts.into()),
-                    conditional_receipt: Some(conditional_receipt.try_into()?),
-                    assumption_receipt: Some(assumption_receipt.try_into()?),
-                    receipt_out: Some(receipt_out.try_into()?),
+                    conditional_receipt: Some(conditional_receipt.into()),
+                    assumption_receipt: Some(assumption_receipt.into()),
                 },
             )),
         };
@@ -288,9 +260,7 @@ impl Client {
 
         let result = match reply.kind.ok_or(malformed_err())? {
             pb::api::resolve_reply::Kind::Ok(result) => {
-                let receipt_bytes = result.receipt.ok_or(malformed_err())?.as_bytes()?;
-                let receipt_pb = pb::core::SuccinctReceipt::decode(receipt_bytes)?;
-                receipt_pb.try_into()
+                result.receipt.ok_or(malformed_err())?.try_into()
             }
             pb::api::resolve_reply::Kind::Error(err) => Err(err.into()),
         };
@@ -311,8 +281,7 @@ impl Client {
     pub fn identity_p254(
         &self,
         opts: ProverOpts,
-        receipt: Asset,
-        receipt_out: AssetRequest,
+        receipt: SuccinctReceipt,
     ) -> Result<SuccinctReceipt> {
         let mut conn = self.connect()?;
 
@@ -320,8 +289,7 @@ impl Client {
             kind: Some(pb::api::server_request::Kind::IdentiyP254(
                 pb::api::IdentityP254Request {
                     opts: Some(opts.into()),
-                    receipt: Some(receipt.try_into()?),
-                    receipt_out: Some(receipt_out.try_into()?),
+                    receipt: Some(receipt.into()),
                 },
             )),
         };
@@ -332,9 +300,7 @@ impl Client {
 
         let result = match reply.kind.ok_or(malformed_err())? {
             pb::api::identity_p254_reply::Kind::Ok(result) => {
-                let receipt_bytes = result.receipt.ok_or(malformed_err())?.as_bytes()?;
-                let receipt_pb = pb::core::SuccinctReceipt::decode(receipt_bytes)?;
-                receipt_pb.try_into()
+                result.receipt.ok_or(malformed_err())?.try_into()
             }
             pb::api::identity_p254_reply::Kind::Error(err) => Err(err.into()),
         };
@@ -410,23 +376,13 @@ impl Client {
                 .map(|a| {
                     Ok(match a {
                         Assumption::Proven(receipt) => pb::api::Assumption {
-                            kind: Some(pb::api::assumption::Kind::Proven(
-                                Asset::Inline(
-                                    pb::core::Receipt::from(receipt.clone())
-                                        .encode_to_vec()
-                                        .into(),
-                                )
-                                .try_into()?,
-                            )),
+                            kind: Some(pb::api::assumption::Kind::Proven(pb::core::Receipt::from(
+                                receipt.clone(),
+                            ))),
                         },
                         Assumption::Unresolved(claim) => pb::api::Assumption {
                             kind: Some(pb::api::assumption::Kind::Unresolved(
-                                Asset::Inline(
-                                    pb::core::MaybePruned::from(claim.clone())
-                                        .encode_to_vec()
-                                        .into(),
-                                )
-                                .try_into()?,
+                                pb::core::MaybePruned::from(claim.clone()),
                             )),
                         },
                     })
@@ -505,7 +461,7 @@ impl Client {
         &self,
         conn: &mut ConnectionWrapper,
         env: &ExecutorEnv<'_>,
-    ) -> Result<pb::api::Asset> {
+    ) -> Result<pb::core::Receipt> {
         loop {
             let reply: pb::api::ServerReply = conn.recv()?;
             tracing::trace!("rx: {reply:?}");
