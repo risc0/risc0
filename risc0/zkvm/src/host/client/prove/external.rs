@@ -53,7 +53,7 @@ impl Prover for ExternalProver {
         let binary = Asset::Inline(elf.to_vec().into());
 
         let client = ApiClient::new_sub_process(&self.r0vm_path)?;
-        let receipt = client.prove(&env, &opts, binary)?;
+        let receipt = client.prove(&env, opts, binary)?;
 
         // Verify the receipt as a sanity check.
         if opts.prove_guest_errors {

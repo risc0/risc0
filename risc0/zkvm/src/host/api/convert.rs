@@ -66,23 +66,6 @@ impl TryFrom<Asset> for pb::api::Asset {
     }
 }
 
-impl TryFrom<SuccinctReceipt> for Asset {
-    type Error = anyhow::Error;
-
-    fn try_from(succinct_receipt: SuccinctReceipt) -> Result<Self> {
-        // DO NOT MERGE: Is this an issue that needs to be fixed?
-        Ok(Asset::Inline(bincode::serialize(&succinct_receipt)?.into()))
-    }
-}
-
-impl TryFrom<SegmentReceipt> for Asset {
-    type Error = anyhow::Error;
-
-    fn try_from(segment_receipt: SegmentReceipt) -> Result<Self> {
-        Ok(Asset::Inline(bincode::serialize(&segment_receipt)?.into()))
-    }
-}
-
 impl TryFrom<pb::api::Asset> for Asset {
     type Error = anyhow::Error;
 
