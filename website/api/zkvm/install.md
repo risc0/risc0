@@ -25,6 +25,9 @@ cargo binstall cargo-risczero
 cargo risczero install
 ```
 
+For x86-64 macOS, you must run `cargo risczero build-toolchain` instead of
+`cargo risczero install`.
+
 If this is successful, it will finish by printing the message
 
 ```text
@@ -44,7 +47,8 @@ which should list `risc0` along with its path.
 To update your installation:
 
 1. Run `cargo binstall cargo-risczero` to update the `cargo risczero` tool, and
-2. Run `cargo risczero install` to update the RISC Zero toolchain.
+2. Run `cargo risczero install` to update the RISC Zero toolchain. For x86-64
+macOS, run `cargo risczero build-toolchain`.
 
 [cargo-risczero]: https://crates.io/crates/cargo-risczero
 [install-rust]: https://doc.rust-lang.org/cargo/getting-started/installation.html
