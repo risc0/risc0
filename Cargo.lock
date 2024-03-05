@@ -132,7 +132,7 @@ dependencies = [
  "proc-macro-error",
  "proc-macro2",
  "quote",
- "syn 2.0.51",
+ "syn 2.0.52",
  "syn-solidity",
  "tiny-keccak",
 ]
@@ -750,7 +750,7 @@ checksum = "c980ee35e870bd1a4d2c8294d4c04d0499e67bca1e4b5cefcc693c2fa00caea9"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.51",
+ "syn 2.0.52",
 ]
 
 [[package]]
@@ -789,7 +789,7 @@ checksum = "823b8bb275161044e2ac7a25879cb3e2480cb403e3943022c7c769c599b756aa"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.51",
+ "syn 2.0.52",
 ]
 
 [[package]]
@@ -872,7 +872,7 @@ dependencies = [
  "heck",
  "proc-macro2",
  "quote",
- "syn 2.0.51",
+ "syn 2.0.52",
 ]
 
 [[package]]
@@ -1044,7 +1044,7 @@ dependencies = [
 
 [[package]]
 name = "bonsai-ethereum-contracts"
-version = "0.6.0-rc.1"
+version = "0.8.0-alpha.1"
 dependencies = [
  "anyhow",
  "ethers",
@@ -1055,7 +1055,7 @@ dependencies = [
 
 [[package]]
 name = "bonsai-ethereum-relay"
-version = "0.6.0-rc.1"
+version = "0.8.0-alpha.1"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -1096,7 +1096,7 @@ dependencies = [
 
 [[package]]
 name = "bonsai-rest-api-mock"
-version = "0.6.0-rc.1"
+version = "0.8.0-alpha.1"
 dependencies = [
  "anyhow",
  "axum",
@@ -1115,7 +1115,7 @@ dependencies = [
 
 [[package]]
 name = "bonsai-sdk"
-version = "0.6.0-rc.1"
+version = "0.8.0-rc.1"
 dependencies = [
  "anyhow",
  "bincode",
@@ -1191,7 +1191,7 @@ checksum = "965ab7eb5f8f97d2a083c799f3a1b994fc397b2fe2da5d1da1626ce15a39f2b1"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.51",
+ "syn 2.0.52",
 ]
 
 [[package]]
@@ -1291,7 +1291,7 @@ dependencies = [
 
 [[package]]
 name = "cargo-risczero"
-version = "0.21.0-alpha.1"
+version = "0.22.0-alpha.1"
 dependencies = [
  "anyhow",
  "cargo-generate",
@@ -1310,7 +1310,7 @@ dependencies = [
  "risc0-r0vm",
  "risc0-zkvm",
  "serde",
- "syn 2.0.51",
+ "syn 2.0.52",
  "tar",
  "tempfile",
  "text_io",
@@ -1456,7 +1456,7 @@ dependencies = [
  "heck",
  "proc-macro2",
  "quote",
- "syn 2.0.51",
+ "syn 2.0.52",
 ]
 
 [[package]]
@@ -2050,7 +2050,7 @@ checksum = "487585f4d0c6655fe74905e2504d8ad6908e4db67f744eb140876906c2f3175d"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.51",
+ "syn 2.0.52",
 ]
 
 [[package]]
@@ -2393,7 +2393,7 @@ dependencies = [
  "reqwest",
  "serde",
  "serde_json",
- "syn 2.0.51",
+ "syn 2.0.52",
  "toml",
  "walkdir",
 ]
@@ -2411,7 +2411,7 @@ dependencies = [
  "proc-macro2",
  "quote",
  "serde_json",
- "syn 2.0.51",
+ "syn 2.0.52",
 ]
 
 [[package]]
@@ -2437,7 +2437,7 @@ dependencies = [
  "serde",
  "serde_json",
  "strum",
- "syn 2.0.51",
+ "syn 2.0.52",
  "tempfile",
  "thiserror",
  "tiny-keccak",
@@ -2808,7 +2808,7 @@ checksum = "1a5c6c585bc94aaf2c7b51dd4c2ba22680844aba4c687be581871a6f518c5742"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.51",
+ "syn 2.0.52",
 ]
 
 [[package]]
@@ -2965,7 +2965,7 @@ checksum = "87750cf4b7a4c0625b1529e4c543c2182106e4dedc60a2a6455e00d212c489ac"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.51",
+ "syn 2.0.52",
 ]
 
 [[package]]
@@ -4082,7 +4082,7 @@ dependencies = [
  "proc-macro2",
  "quote",
  "regex",
- "syn 2.0.51",
+ "syn 2.0.52",
 ]
 
 [[package]]
@@ -4221,7 +4221,7 @@ checksum = "fc2fb41a9bb4257a3803154bdf7e2df7d45197d1941c9b1a90ad815231630721"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.51",
+ "syn 2.0.52",
 ]
 
 [[package]]
@@ -4504,7 +4504,7 @@ checksum = "ed3955f1a9c7c0c15e092f9c887db08b1fc683305fdf6eb6684f22555355e202"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.51",
+ "syn 2.0.52",
 ]
 
 [[package]]
@@ -4554,7 +4554,7 @@ dependencies = [
  "proc-macro-crate 3.1.0",
  "proc-macro2",
  "quote",
- "syn 2.0.51",
+ "syn 2.0.52",
 ]
 
 [[package]]
@@ -4668,7 +4668,7 @@ checksum = "a948666b637a0f465e8564c73e89d4dde00d72d4d473cc972f390fc3dcee7d9c"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.51",
+ "syn 2.0.52",
 ]
 
 [[package]]
@@ -4900,7 +4900,7 @@ dependencies = [
  "pest_meta",
  "proc-macro2",
  "quote",
- "syn 2.0.51",
+ "syn 2.0.52",
 ]
 
 [[package]]
@@ -4964,7 +4964,7 @@ dependencies = [
  "phf_shared 0.11.2",
  "proc-macro2",
  "quote",
- "syn 2.0.51",
+ "syn 2.0.52",
 ]
 
 [[package]]
@@ -5008,7 +5008,7 @@ checksum = "266c042b60c9c76b8d53061e52b2e0d1116abc57cefc8c5cd671619a56ac3690"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.51",
+ "syn 2.0.52",
 ]
 
 [[package]]
@@ -5166,7 +5166,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a41cf62165e97c7f814d2221421dbb9afcbcdb0a88068e5ea206e19951c2cbb5"
 dependencies = [
  "proc-macro2",
- "syn 2.0.51",
+ "syn 2.0.52",
 ]
 
 [[package]]
@@ -5297,7 +5297,7 @@ dependencies = [
  "prost",
  "prost-types",
  "regex",
- "syn 2.0.51",
+ "syn 2.0.52",
  "tempfile",
  "which 4.4.2",
 ]
@@ -5312,7 +5312,7 @@ dependencies = [
  "itertools 0.11.0",
  "proc-macro2",
  "quote",
- "syn 2.0.51",
+ "syn 2.0.52",
 ]
 
 [[package]]
@@ -5695,7 +5695,7 @@ checksum = "853977598f084a492323fe2f7896b4100a86284ee8473612de60021ea341310f"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.51",
+ "syn 2.0.52",
 ]
 
 [[package]]
@@ -5739,7 +5739,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-binfmt"
-version = "0.21.0-alpha.1"
+version = "0.22.0-alpha.1"
 dependencies = [
  "anyhow",
  "elf",
@@ -5754,7 +5754,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build"
-version = "0.21.0-alpha.1"
+version = "0.22.0-alpha.1"
 dependencies = [
  "anyhow",
  "cargo-platform",
@@ -5770,7 +5770,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build-kernel"
-version = "0.21.0-alpha.1"
+version = "0.22.0-alpha.1"
 dependencies = [
  "cc",
  "directories",
@@ -5781,7 +5781,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion"
-version = "0.21.0-alpha.1"
+version = "0.22.0-alpha.1"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -5805,7 +5805,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion-sys"
-version = "0.21.0-alpha.1"
+version = "0.22.0-alpha.1"
 dependencies = [
  "glob",
  "risc0-build-kernel",
@@ -5814,7 +5814,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im"
-version = "0.21.0-alpha.1"
+version = "0.22.0-alpha.1"
 dependencies = [
  "anyhow",
  "criterion",
@@ -5833,7 +5833,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im-sys"
-version = "0.21.0-alpha.1"
+version = "0.22.0-alpha.1"
 dependencies = [
  "glob",
  "risc0-build-kernel",
@@ -5842,7 +5842,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-core"
-version = "0.21.0-alpha.1"
+version = "0.22.0-alpha.1"
 dependencies = [
  "bytemuck",
  "rand 0.8.5",
@@ -5851,7 +5851,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-groth16"
-version = "0.21.0-alpha.1"
+version = "0.22.0-alpha.1"
 dependencies = [
  "anyhow",
  "ark-bn254",
@@ -5864,8 +5864,6 @@ dependencies = [
  "num-traits",
  "risc0-core",
  "risc0-zkp",
- "risc0-zkvm",
- "risc0-zkvm-methods",
  "serde",
  "serde_json",
  "tempfile",
@@ -5875,7 +5873,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-r0vm"
-version = "0.21.0-alpha.1"
+version = "0.22.0-alpha.1"
 dependencies = [
  "anyhow",
  "assert_cmd",
@@ -5904,7 +5902,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-sys"
-version = "0.21.0-alpha.1"
+version = "0.22.0-alpha.1"
 dependencies = [
  "cc",
  "cust",
@@ -5914,7 +5912,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-tools"
-version = "0.21.0-alpha.1"
+version = "0.22.0-alpha.1"
 dependencies = [
  "assert_cmd",
  "clap",
@@ -5924,7 +5922,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkp"
-version = "0.21.0-alpha.1"
+version = "0.22.0-alpha.1"
 dependencies = [
  "anyhow",
  "blake2",
@@ -5954,7 +5952,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "0.21.0-alpha.1"
+version = "0.22.0-alpha.1"
 dependencies = [
  "addr2line",
  "anyhow",
@@ -6006,7 +6004,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-methods"
-version = "0.21.0-alpha.1"
+version = "0.22.0-alpha.1"
 dependencies = [
  "risc0-build",
  "risc0-zkvm",
@@ -6017,7 +6015,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "0.21.0-alpha.1"
+version = "0.22.0-alpha.1"
 dependencies = [
  "bytemuck",
  "getrandom 0.2.12",
@@ -6026,7 +6024,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-receipts"
-version = "0.21.0-alpha.1"
+version = "0.22.0-alpha.1"
 
 [[package]]
 name = "rlp"
@@ -6085,7 +6083,7 @@ dependencies = [
  "regex",
  "relative-path",
  "rustc_version 0.4.0",
- "syn 2.0.51",
+ "syn 2.0.52",
  "unicode-ident",
 ]
 
@@ -6223,7 +6221,7 @@ dependencies = [
  "quote",
  "rust-embed-utils",
  "shellexpand",
- "syn 2.0.51",
+ "syn 2.0.52",
  "walkdir",
 ]
 
@@ -6566,7 +6564,7 @@ checksum = "7eb0b34b42edc17f6b7cac84a52a1c5f0e1bb2227e997ca9011ea3dd34e8610b"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.51",
+ "syn 2.0.52",
 ]
 
 [[package]]
@@ -6668,7 +6666,7 @@ checksum = "91d129178576168c589c9ec973feedf7d3126c01ac2bf08795109aa35b69fb8f"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.51",
+ "syn 2.0.52",
 ]
 
 [[package]]
@@ -6679,7 +6677,7 @@ checksum = "b93fb4adc70021ac1b47f7d45e8cc4169baaa7ea58483bc5b721d19a26202212"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.51",
+ "syn 2.0.52",
 ]
 
 [[package]]
@@ -6959,7 +6957,7 @@ dependencies = [
  "proc-macro2",
  "quote",
  "rustversion",
- "syn 2.0.51",
+ "syn 2.0.52",
 ]
 
 [[package]]
@@ -7001,9 +6999,9 @@ dependencies = [
 
 [[package]]
 name = "syn"
-version = "2.0.51"
+version = "2.0.52"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6ab617d94515e94ae53b8406c628598680aa0c9587474ecbe58188f7b345d66c"
+checksum = "b699d15b36d1f02c3e7c69f8ffef53de37aefae075d8488d4ba1a7788d574a07"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -7019,7 +7017,7 @@ dependencies = [
  "paste",
  "proc-macro2",
  "quote",
- "syn 2.0.51",
+ "syn 2.0.52",
 ]
 
 [[package]]
@@ -7151,7 +7149,7 @@ checksum = "c8f546451eaa38373f549093fe9fd05e7d2bade739e2ddf834b9968621d60107"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.51",
+ "syn 2.0.52",
 ]
 
 [[package]]
@@ -7177,7 +7175,7 @@ checksum = "a953cb265bef375dae3de6663da4d3804eee9682ea80d8e2542529b73c531c81"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.51",
+ "syn 2.0.52",
 ]
 
 [[package]]
@@ -7284,7 +7282,7 @@ checksum = "5b8a1e28f2deaa14e508979454cb3a223b10b938b45af148bc0986de36f1923b"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.51",
+ "syn 2.0.52",
 ]
 
 [[package]]
@@ -7481,7 +7479,7 @@ checksum = "34704c8d6ebcbc939824180af020566b01a7c01f80641264eba0999f6c2b6be7"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.51",
+ "syn 2.0.52",
 ]
 
 [[package]]
@@ -7630,7 +7628,7 @@ checksum = "ac73887f47b9312552aa90ef477927ff014d63d1920ca8037c6c1951eab64bb1"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.51",
+ "syn 2.0.52",
 ]
 
 [[package]]
@@ -7769,7 +7767,7 @@ dependencies = [
  "proc-macro2",
  "quote",
  "regex",
- "syn 2.0.51",
+ "syn 2.0.52",
  "uuid 1.7.0",
 ]
 
@@ -7954,7 +7952,7 @@ dependencies = [
  "once_cell",
  "proc-macro2",
  "quote",
- "syn 2.0.51",
+ "syn 2.0.52",
  "wasm-bindgen-shared",
 ]
 
@@ -7988,7 +7986,7 @@ checksum = "642f325be6301eb8107a83d12a8ac6c1e1c54345a7ef1a9261962dfefda09e66"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.51",
+ "syn 2.0.52",
  "wasm-bindgen-backend",
  "wasm-bindgen-shared",
 ]
@@ -8470,7 +8468,7 @@ checksum = "9ce1b18ccd8e73a9321186f97e46f9f04b778851177567b1975109d26a08d2a6"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.51",
+ "syn 2.0.52",
 ]
 
 [[package]]
@@ -8490,7 +8488,7 @@ checksum = "ce36e65b0d2999d2aafac989fb249189a141aee1f53c612c1f37d72631959f69"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.51",
+ "syn 2.0.52",
 ]
 
 [[package]]
