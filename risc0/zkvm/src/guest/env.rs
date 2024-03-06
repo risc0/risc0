@@ -594,7 +594,6 @@ impl<R: Read + ?Sized> Read for &mut R {
 }
 
 /// Provides a FdReader which can read from any file descriptor
-/// TODO: Write instructions on how users can implement their own FdReader and read from custom file descriptors.
 pub struct FdReader {
     fd: u32,
 }
