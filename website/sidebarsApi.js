@@ -151,6 +151,11 @@ export default {
           label: "Ethereum Examples",
           id: "blockchain-integration/eth-examples",
         },
+        {
+          type: "doc",
+          label: "Verifier Contract",
+          id: "blockchain-integration/contracts/verifier",
+        },
       ],
     },
     {
