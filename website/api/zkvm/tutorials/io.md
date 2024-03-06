@@ -49,9 +49,11 @@ Writing to the guest's stdin can be done as simply as the code below.
 For a real example, check the [Voting Machine's example][example-voting-machine-host-init-write].
 
 ```rust no_run title="src/main.rs"
-# use risc0_zkvm::ExecutorEnv;
+use risc0_zkvm::ExecutorEnv;
+
 let input = "Hello, guest!";
 let env = ExecutorEnv::builder().write(&input)?.build()?;
+# Ok::<(), anyhow::Error>(())
 ```
 
 Since we mentioned the `read`/`write` methods and their `_slice` variants, let's
