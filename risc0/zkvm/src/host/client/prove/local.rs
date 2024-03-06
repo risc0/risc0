@@ -50,14 +50,11 @@ impl Prover for LocalProver {
         self.name.clone()
     }
 
-    fn compress(&self, receipt: &Receipt) -> Result<Receipt> {
+    fn compress(&self, opts: &ProverOpts, receipt: &Receipt) -> Result<Receipt> {
         match receipt.inner {
             InnerReceipt::Succinct(_) | InnerReceipt::Compact(_) => Ok(receipt.clone()),
             InnerReceipt::Composite(ref inner) => Ok(Receipt {
-                // DO NOT MERGE: Decide how to handle prover options.
-                inner: InnerReceipt::Succinct(
-                    get_prover_server(&Default::default())?.compress(&inner)?,
-                ),
+                inner: InnerReceipt::Succinct(get_prover_server(opts)?.compress(&inner)?),
                 journal: receipt.journal.clone(),
             }),
             InnerReceipt::Fake { .. } => Err(anyhow!(

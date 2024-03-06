@@ -91,7 +91,7 @@ pub trait Prover {
     /// including lift, join, and resolve.
     ///
     /// If the receipt is succinct, this function will do nothing (i.e. it is idemopotent).
-    fn compress(&self, receipt: &Receipt) -> Result<Receipt>;
+    fn compress(&self, opts: &ProverOpts, receipt: &Receipt) -> Result<Receipt>;
 }
 
 /// An Executor can execute a given ELF binary.

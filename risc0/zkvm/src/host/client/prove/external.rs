@@ -42,6 +42,7 @@ impl ExternalProver {
     /// Internal implementation of the compress function.
     fn compress_internal(
         client: &ApiClient,
+        opts: &ProverOpts,
         receipt: &CompositeReceipt,
     ) -> Result<SuccinctReceipt> {
         // Compress all receipts in the top-level session into one succinct receipt for the session.
@@ -52,12 +53,8 @@ impl ExternalProver {
                 None,
                 |left: Option<SuccinctReceipt>, right: &SegmentReceipt| -> Result<_> {
                     Ok(Some(match left {
-                        Some(left) => client.join(
-                            &Default::default(), // DO NOT MERGE
-                            &left,
-                            &client.lift(&Default::default(), right)?,
-                        )?,
-                        None => client.lift(&Default::default(), right)?,
+                        Some(left) => client.join(opts, &left, &client.lift(opts, right)?)?,
+                        None => client.lift(opts, right)?,
                     }))
                 },
             )?
@@ -69,9 +66,9 @@ impl ExternalProver {
         receipt.assumptions.iter().try_fold(
             continuation_receipt,
             |conditional: SuccinctReceipt, assumption: &InnerReceipt| match assumption {
-                InnerReceipt::Succinct(assumption) => client.resolve(&Default::default(), &conditional, assumption),
+                InnerReceipt::Succinct(assumption) => client.resolve(opts, &conditional, assumption),
                 InnerReceipt::Composite(assumption) => {
-                    client.resolve(&Default::default(), &conditional, &Self::compress_internal(client, assumption)?)
+                    client.resolve(opts, &conditional, &Self::compress_internal(client, opts, assumption)?)
                 }
                 InnerReceipt::Fake { .. } => Err(anyhow!(
                     "compressing composite receipts with fake receipt assumptions is not supported"
@@ -120,13 +117,15 @@ impl Prover for ExternalProver {
         self.name.clone()
     }
 
-    fn compress(&self, receipt: &Receipt) -> Result<Receipt> {
+    fn compress(&self, opts: &ProverOpts, receipt: &Receipt) -> Result<Receipt> {
         match receipt.inner {
             InnerReceipt::Succinct(_) | InnerReceipt::Compact(_) => Ok(receipt.clone()),
             InnerReceipt::Composite(ref composite) => {
                 let client = ApiClient::new_sub_process(&self.r0vm_path)?;
                 Ok(Receipt {
-                    inner: InnerReceipt::Succinct(Self::compress_internal(&client, composite)?),
+                    inner: InnerReceipt::Succinct(Self::compress_internal(
+                        &client, opts, composite,
+                    )?),
                     journal: receipt.journal.clone(),
                 })
             }
