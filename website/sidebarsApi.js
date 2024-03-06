@@ -73,7 +73,7 @@ export default {
         {
           type: "doc",
           label: "Understanding I/O",
-          id: "zkvm/tutorials/input-output",
+          id: "zkvm/tutorials/io",
         },
         {
           type: "doc",
@@ -123,11 +123,6 @@ export default {
           type: "doc",
           label: "Profiling",
           id: "zkvm/profiling",
-        },
-        {
-          type: "doc",
-          label: "I/O",
-          id: "zkvm/tutorials/input-output",
         },
         {
           type: "doc",
