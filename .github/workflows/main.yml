@@ -168,6 +168,7 @@ jobs:
       FEATURE: ${{ matrix.feature }}
       RISC0_BUILD_LOCKED: 1
       RUST_BACKTRACE: full
+      SCCACHE_IDLE_TIMEOUT: 1200
     steps:
       # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
       - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
@@ -181,7 +182,7 @@ jobs:
       - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
       - name: build workspace
         run: |
-          SCCACHE_IDLE_TIMEOUT=1200 cargo test -F $FEATURE -F prove --workspace --timings --no-run \
+          cargo test -F $FEATURE -F prove --workspace --timings --no-run \
             --exclude doc-test \
             --exclude bonsai-ethereum-contracts \
             --exclude bonsai-ethereum-relay \
