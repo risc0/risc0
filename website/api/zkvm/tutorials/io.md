@@ -263,7 +263,7 @@ same patterns of sending and receiving data are repeated.
 
 ## Conclusions
 
-In this guide, we've covered the basics of I/O in the zkVM.  We've seen how to
+In this guide, we've covered the basics of I/O in the zkVM. We've seen how to
 send data from the host to the guest and vice-versa, how _private_ and _public_
 data are distinguished, and how to commit data to the journal.
 We also covered the trade-offs between using the standard functions and their
@@ -273,7 +273,6 @@ There are more examples available in the [examples page] that you can use as
 reference if you wish.
 
 Happy coding!
-
 
 [example-voting-machine]: https://github.com/risc0/risc0/tree/2deb83a15d8bd438bdc594a86438fc816d02b480/examples/voting-machine
 [example-voting-machine-core]: https://github.com/risc0/risc0/blob/2deb83a15d8bd438bdc594a86438fc816d02b480/examples/voting-machine/core/src/lib.rs
@@ -291,7 +290,6 @@ Happy coding!
 [example-voting-machine-guest-elf-submit-write]: https://github.com/risc0/risc0/blob/2deb83a15d8bd438bdc594a86438fc816d02b480/examples/voting-machine/methods/guest/src/bin/submit.rs#L30
 [example-voting-machine-guest-elf-submit-commit]: https://github.com/risc0/risc0/blob/2deb83a15d8bd438bdc594a86438fc816d02b480/examples/voting-machine/methods/guest/src/bin/submit.rs#L31-L39
 [term-elf-binary]: https://dev.risczero.com/terminology#elf-binary
-
 [Putting it all together]: #putting-it-all-together
 [guest-code-101-io]: ../guest-code-101.md#basic-guest-functionality-reading-writing-and-committing
 [env-module-functions]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest/env/index.html#functions
