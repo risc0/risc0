@@ -226,6 +226,11 @@ This record is stored as a vector of [Segments].
 A STARK (scalable, transparent argument of knowledge) serves as proof of validity for a [zkVM] program. <br/>
 See also: [About STARKs], [Sequence Diagram for RISC Zero's STARK], [RISC Zero's ZKP Whitepaper]
 
+### SNARK
+
+A SNARK (succinct non-interactive argument of knowledge) serves as proof of validity for Blockchain applications due to their small size compared to [STARK] proofs. <br/>
+See also: [About SNARKs]
+
 ### Validity Proof
 
 A validity proof is a cryptographic argument that attests to the validity of an [execution trace].
@@ -248,6 +253,7 @@ A virtual machine that runs trusted code and generates proofs.
 RISC Zero's zkVM implements the RISC-V instruction set architecture and uses a [STARK]-based proof system.
 
 [About STARKs]: ./reference-docs/about-starks.md
+[About SNARKs]: https://ethereum.org/en/developers/docs/scaling/zk-rollups/#validity-proofs
 [Arithmetic Circuits]: /reference-docs/about-arithmetic-circuits
 [assumption]: #assumption
 [assumptions]: #assumption

@@ -45,9 +45,12 @@
     "tools/crates-validator/Cargo.toml",
   ],
   "cSpell.words": [
+    "Groth",
+    "Holesky",
+    "Sepolia",
+    "Zeroable",
     "bytemuck",
     "posix",
     "repr",
-    "Zeroable"
-  ]
+  ],
 }
