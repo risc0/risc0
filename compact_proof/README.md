@@ -2,6 +2,8 @@
 
 > WARNING: This software is still experimental, we do not recommend it for
 > production use (see Security section).
+>
+> Currently, due to the Circom native C++ witness generator that depends on x86 assembly for field operations, only x86 architecture is supported.
 
 This directory contains utilities for performing a "stark2snark" workflow. This
 is useful for transforming a RISC Zero STARK proof into a Groth16 SNARK proof
@@ -50,5 +52,5 @@ The resulting `proof.json` file will be in the chosen `$WORK_DIR`.
 This file can be parsed and decoded into a `risc0_groth16::Seal`.
 Finally, this seal can be embedded within a `InnerReceipt::Compact`.
 
-See [`risc0-groth16/src/tests/stark_to_snark.rs`](../risc0/groth16/tests/stark_to_snark.rs) for an end-to-end
+See [`risc0-zkvm/src/host/server/prove/tests.rs`](../risc0/zkvm/src/host/server/prove/tests.rs) for an end-to-end
 example.
