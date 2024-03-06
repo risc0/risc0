@@ -46,19 +46,13 @@
 //! on guest optimization][guest-optimization]
 //!
 //! Convenience functions to read and write to default file descriptors are
-//! provided. See [read], [read_fd], [write][write()], [write_fd], [commit] (and
-//! their `_slice` variants) for more information.
+//! provided. See [read], [write][write()], [commit] (and their `_slice`
+//! variants) for more information.
 //!
 //! In order to access default file descriptors directly, see [stdin], [stdout],
-//! [stderr], [journal], [reader] and [writer]. These file descriptors are
-//! either [FdReader] or [FdWriter] instances, which can be used to read from or
-//! write to the host. To read from or write into them, use the [Read] and
-//! [Write] traits.
-//!
-//! Additionally, the zkVM allows custom file descriptors to be used. This can
-//! be achieved by instantiating an [FdReader] or [FdWriter] with a custom file
-//! descriptor directly, or using the convenience functions [reader] and
-//! [writer].
+//! [stderr] and [journal]. These file descriptors are either [FdReader] or
+//! [FdWriter] instances, which can be used to read from or write to the host.
+//! To read from or write into them, use the [Read] and [Write] traits.
 //!
 //! WARNING: Specifying a file descriptor with the same value of a default file
 //! descriptor is not recommended and may lead to unexpected behavior. A list of
@@ -368,23 +362,58 @@ pub fn send_recv_slice<T: Pod, U: Pod>(syscall_name: SyscallName, to_host: &[T])
 }
 
 /// Read private data from the STDIN of the zkVM and deserializes it.
+///
+/// This function operates on every [`DeserializeOwned`] type, so you can
+/// specify complex types as data to be read and it'll be deserialized
+/// automatically.
+///
+/// # Example
+///
+/// ```no_run
+/// use risc0_zkvm::guest::env;
+/// use std::collections::BTreeMap;
+///
+/// let input: Option<BTreeMap<u64, bool>> = env::read();
+/// ```
+///
+/// More examples can be found in RISC Zero's [example page].
+///
+/// Additional explanation on I/O in the zkVM can be found in RISC Zero's [I/O documentation].
+///
+/// [example page]: https://dev.risczero.com/api/zkvm/examples
+/// [I/O documentation]: https://dev.risczero.com/api/zkvm/tutorials/io
 pub fn read<T: DeserializeOwned>() -> T {
     stdin().read()
 }
 
 /// Read a slice from the STDIN of the zkVM.
+///
+/// This function reads a slice of [plain old data][bytemuck::Pod], not
+/// incurring in deserialization overhead. Recommended for performance
+/// optimizations. For more context on this, see RISC Zero's [instructions on
+/// guest optimization].
+///
+/// # Example
+///
+/// ```no_run
+/// use risc0_zkvm::guest::env;
+///
+/// let len: usize = env::read();
+/// let mut slice = vec![0u8; len];
+/// env::read_slice(&mut slice);
+///
+/// assert_eq!(slice.len(), len);
+/// ```
+///
+/// More examples can be found in RISC Zero's [example page].
+///
+/// Additional explanation on I/O in the zkVM can be found in RISC Zero's [I/O documentation].
+///
+/// [example page]: https://dev.risczero.com/api/zkvm/examples
+/// [I/O documentation]: https://dev.risczero.com/api/zkvm/tutorials/io
+/// [instructions on guest optimization]: https://dev.risczero.com/api/zkvm/optimization#when-reading-data-as-raw-bytes-use-envread_slice
 pub fn read_slice<T: Pod>(slice: &mut [T]) {
     stdin().read_slice(slice)
-}
-
-/// Read private data from a custom file descriptor of the zkVM and deserializes it.
-pub fn read_fd<T: DeserializeOwned>(fd: u32) -> T {
-    reader(fd).read()
-}
-
-/// Read a slice from a custom file descriptor of the zkVM.
-pub fn read_fd_slice<T: Pod>(fd: u32, slice: &mut [T]) {
-    reader(fd).read_slice(slice)
 }
 
 /// Serialize the given data and write it to the STDOUT of the zkVM.
@@ -392,6 +421,27 @@ pub fn read_fd_slice<T: Pod>(fd: u32, slice: &mut [T]) {
 /// This is available to the host as the private output on the prover.
 /// Some implementations, such as [risc0-r0vm] will also write the data to
 /// the host's stdout file descriptor. It is not included in the receipt.
+///
+/// # Example
+///
+/// ```no_run
+/// use risc0_zkvm::guest::env;
+/// use std::collections::BTreeMap;
+///
+/// let output: BTreeMap<u64, bool> = BTreeMap::from([
+///    (1, true),
+///    (2, false),
+/// ]);
+///
+/// env::write(&output);
+/// ```
+///
+/// More examples can be found in RISC Zero's [example page].
+///
+/// Additional explanation on I/O in the zkVM can be found in RISC Zero's [I/O documentation].
+///
+/// [example page]: https://dev.risczero.com/api/zkvm/examples
+/// [I/O documentation]: https://dev.risczero.com/api/zkvm/tutorials/io
 pub fn write<T: Serialize>(data: &T) {
     stdout().write(data)
 }
@@ -401,6 +451,28 @@ pub fn write<T: Serialize>(data: &T) {
 /// This is available to the host as the private output on the prover.
 /// Some implementations, such as [risc0-r0vm] will also write the data to
 /// the host's stdout file descriptor. It is not included in the receipt.
+///
+/// This function reads a slice of [plain old data][bytemuck::Pod], not
+/// incurring in deserialization overhead. Recommended for performance
+/// optimizations. For more context on this, see RISC Zero's [instructions on
+/// guest optimization].
+///
+/// # Example
+///
+/// ```no_run
+/// use risc0_zkvm::guest::env;
+///
+/// let slice = [1u8, 2, 3, 4];
+/// env::write_slice(&slice);
+/// ```
+///
+/// More examples can be found in RISC Zero's [example page].
+///
+/// Additional explanation on I/O in the zkVM can be found in RISC Zero's [I/O documentation].
+///
+/// [example page]: https://dev.risczero.com/api/zkvm/examples
+/// [I/O documentation]: https://dev.risczero.com/api/zkvm/tutorials/io
+/// [instructions on guest optimization]: https://dev.risczero.com/api/zkvm/optimization#when-reading-data-as-raw-bytes-use-envread_slice
 pub fn write_slice<T: Pod>(slice: &[T]) {
     stdout().write_slice(slice);
 }
@@ -409,6 +481,27 @@ pub fn write_slice<T: Pod>(slice: &[T]) {
 ///
 /// Data in the journal is included in the receipt and is available to the
 /// verifier. It is considered "public" data.
+///
+/// # Example
+///
+/// ```no_run
+/// use risc0_zkvm::guest::env;
+/// use std::collections::BTreeMap;
+///
+/// let data: BTreeMap<u64, bool> = BTreeMap::from([
+///   (1, true),
+///   (2, false),
+/// ]);
+///
+/// env::commit(&data);
+/// ```
+///
+/// More examples can be found in RISC Zero's [example page].
+///
+/// Additional explanation on I/O in the zkVM can be found in RISC Zero's [I/O documentation].
+///
+/// [example page]: https://dev.risczero.com/api/zkvm/examples
+/// [I/O documentation]: https://dev.risczero.com/api/zkvm/tutorials/io
 pub fn commit<T: Serialize>(data: &T) {
     journal().write(data)
 }
@@ -417,26 +510,30 @@ pub fn commit<T: Serialize>(data: &T) {
 ///
 /// Data in the journal is included in the receipt and is available to the
 /// verifier. It is considered "public" data.
+///
+/// This function reads a slice of [plain old data][bytemuck::Pod], not
+/// incurring in deserialization overhead. Recommended for performance
+/// optimizations. For more context on this, see RISC Zero's [instructions on
+/// guest optimization].
+///
+/// # Example
+///
+/// ```no_run
+/// use risc0_zkvm::guest::env;
+///
+/// let slice = [1u8, 2, 3, 4];
+/// env::commit_slice(&slice);
+/// ```
+///
+/// More examples can be found in RISC Zero's [example page].
+///
+/// Additional explanation on I/O in the zkVM can be found in RISC Zero's [I/O documentation].
+///
+/// [example page]: https://dev.risczero.com/api/zkvm/examples
+/// [I/O documentation]: https://dev.risczero.com/api/zkvm/tutorials/io
+/// [instructions on guest optimization]: https://dev.risczero.com/api/zkvm/optimization#when-reading-data-as-raw-bytes-use-envread_slice
 pub fn commit_slice<T: Pod>(slice: &[T]) {
     journal().write_slice(slice);
-}
-
-/// Serialize the given data and write it to the specified file descriptor of the zkVM.
-///
-/// This is available to the host as a private output on the prover.
-/// Some implementations, such as [risc0-r0vm] will also write the data to
-/// the host's file descriptor. It is not included in the receipt.
-pub fn write_fd<T: Serialize>(fd: u32, data: &T) {
-    writer(fd).write(data);
-}
-
-/// Write the given slice to the specified file descriptor of the zkVM.
-///
-/// This is available to the host as a private output on the prover.
-/// Some implementations, such as [risc0-r0vm] will also write the data to
-/// the host's file descriptor. It is not included in the receipt.
-pub fn write_fd_slice<T: Pod>(fd: u32, slice: &[T]) {
-    writer(fd).write_slice(slice);
 }
 
 /// Return the number of processor cycles that have occurred since the guest
@@ -472,19 +569,9 @@ pub fn journal() -> FdWriter<impl for<'a> Fn(&'a [u8])> {
     })
 }
 
-/// Return a writer for a custom file descriptor.
-pub fn writer(fd: u32) -> FdWriter<impl for<'a> Fn(&'a [u8])> {
-    FdWriter::new(fd, |_| {})
-}
-
 /// Return a reader for the standard input
 pub fn stdin() -> FdReader {
     FdReader::new(fileno::STDIN)
-}
-
-/// Return a reader for a custom file descriptor.
-pub fn reader(fd: u32) -> FdReader {
-    FdReader::new(fd)
 }
 
 /// Reads and deserializes objects
