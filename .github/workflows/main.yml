@@ -181,7 +181,7 @@ jobs:
       - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
       - name: build workspace
         run: |
-          SCCACHE_ERROR_LOG=/tmp/sccache_log.txt SCCACHE_LOG=debug cargo test -F $FEATURE -F prove --workspace --timings --no-run \
+          SCCACHE_IDLE_TIMEOUT=1200 cargo test -F $FEATURE -F prove --workspace --timings --no-run \
             --exclude doc-test \
             --exclude bonsai-ethereum-contracts \
             --exclude bonsai-ethereum-relay \
