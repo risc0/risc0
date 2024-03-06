@@ -6,9 +6,6 @@ inputs:
     required: true
     default: rust-cache-${{ runner.os }}-${{ runner.arch }}
 
-env:
-  SCCACHE_IDLE_TIMEOUT: 1200
-
 runs:
   using: composite
   steps:
