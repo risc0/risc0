@@ -1,91 +1,3 @@
- ```rust no_run
- use bytemuck::{Pod, Zeroable};
- use risc0_zkvm::guest::env;
-
- const CANVAS_SIZE: usize = 10_000;
-
- #[repr(C)]
- #[derive(Copy, Clone)]
- #[derive(Pod, Zeroable)]
- struct Rgba {
-   red: u8,
-   green: u8,
-   blue: u8,
-   alpha: u8,
- }
-
- #[repr(C)]
- #[derive(Copy, Clone)]
- #[derive(Pod, Zeroable)]
- struct Pixel {
-   x: u32,
-   y: u32,
-   color: Rgba,
- }
-
- #[repr(C)]
- #[derive(Copy, Clone)]
- #[derive(Pod, Zeroable)]
- struct Canvas<CanvasSize: usize> {
-   width: u32,
-   height: u32,
-   pixels: [Pixel; CanvasSize],
- }
-
- let rgba = Rgba { red: 0, green: 128, blue: 255, alpha: 42 };
- let pixel = Pixel { x: 0, y: 0, color: rgba };
- let canvas = Canvas { width: 100, height: 100, pixels: [pixel; CANVAS_SIZE] };
- env::commit_slice(&[canvas]);
- ```
-
-In the zkVM, a good pattern to follow on how to handle shared data
-structures between host and guest is to have a common `core` module that
-contains the shared data structures. The host and guest can then use the
-same data structures to communicate with each other.
-
-```rust no_run title="core/src/lib.rs"
-# pub mod app_core {
-use serde::{Deserialize, Serialize};
-
-#[derive(Serialize, Deserialize)]
-pub struct Input {
-    a: u32,
-    b: u32,
-}
-# }
-```
-
-In the host, add the input data to the environment.
-See also [write][source-env::write]
-
-```rust no_run title="src/main.rs"
-# use serde::{Serialize, Deserialize};
-# #[derive(Serialize, Deserialize)]
-# pub struct Input { a: u32, b: u32 }
-use risc0_zkvm::ExecutorEnv;
-// use app_core::Input;
-
-let input1 = Input{ a: 1, b: 2 };
-let input2 = Input{ a: 3, b: 4 };
-let env = ExecutorEnv::builder()
-    .write(&input1).unwrap()
-    .write(&input2).unwrap()
-    .build()
-    .unwrap();
-```
-
-```rust no_run title="methods/guest/src/main.rs"
-use std::collections::{BTreeMap, LinkedList};
-
-let input: Result<BTreeMap<u64, bool>> = read();
-```
-
-:::tip
-In this guide we'll first discuss the technical details about I/O and the
-reasoning behind it. If you're in a rush and just want to see some code, you can
-jump to the section [Putting it all together].
-:::
-
 # Understanding I/O in the zkVM
 
 In the [Hello World Tutorial][docs-hello-world], we had a brief introduction to
@@ -126,11 +38,24 @@ any sensitive data to be included in the proof.
 
 The [`stdin`][stdin] file descriptor is used to send input data from the host to
 the guest.
-In the host, it's possible to set the input data in the [Executor Environment][source-executor-env] through the methods [`write`][source-ExecutorEnvBuilder::write] and [`write_slice`][source-ExecutorEnvBuilder::write_slice].
-The guest has corresponding functions [`read`][source-env::read] and [`read_slice`][source-env::read_slice] to read the input data.
+In the host, it's possible to set the input data in the [Executor
+Environment][source-executor-env] through the methods
+[`write`][source-ExecutorEnvBuilder::write] and
+[`write_slice`][source-ExecutorEnvBuilder::write_slice].
+The guest has corresponding functions [`read`][source-env::read] and
+[`read_slice`][source-env::read_slice] to read the input data.
 
-Since we mentioned the `read`/`write` methods and their `_slice` variants, it's
-important to take some time to understand why the zkVM provides both options.
+Writing to the guest's stdin can be done as simply as the code below.
+For a real example, check the [Voting Machine's example][example-voting-machine-host-init-write].
+
+```rust no_run title="src/main.rs"
+# use risc0_zkvm::ExecutorEnv;
+let input = "Hello, guest!";
+let env = ExecutorEnv::builder().write(&input)?.build()?;
+```
+
+Since we mentioned the `read`/`write` methods and their `_slice` variants, let's
+take a moment to understand the difference between them.
 
 ## A note on performance
 
@@ -158,7 +83,18 @@ optimization if you want to learn more about this topic.
 Back where we were, after getting data from the host and performing some
 transformations on it, we might want to send _private_ data back.
 Both [`stdout`][stdout] and [`stderr`][stderr] file descriptor are used to send
-data from the guest to the host in a _private_ manner.
+data from the guest to the host in a _private_ manner, and a convenient way to
+send data to the host's [`stdout`][stdout] is by using the
+[`write`][source-env::write] method.
+
+Writing to the host's stdout can be done as simply as the code below.
+For a real example, check the [Voting Machine's example][example-voting-machine-guest-elf-submit-write].
+
+```rust no_run title="methods/guest/src/main.rs"
+# use risc0_zkvm::guest::env;
+let data = "Hello, host!";
+env::write(&data);
+```
 
 On the host side, it's possible to read data coming from the guest by reading
 the buffer that was originally passed to the [Executor
@@ -169,11 +105,10 @@ Environment][source-executor-env] through its methods
 :::info
 The _private_ data alluded to here is not included in the proof, but it _**is**_
 accessible to the host.
-This means that the party performing the proving can access the data, so if
-there is sensitive information during the proving process, it's important to be
-aware of this.
+This means that the party generating the proof can access the data, so you
+should take this into consideration.
 If you don't want to let private data leak to any other party, it's possible to
-achieve full secrecy by doing the proving locally.
+achieve full secrecy by proving locally.
 :::
 
 :::tip
@@ -196,25 +131,166 @@ the [`Receipt`][source-Receipt] after the proving process.
 Writing to the journal is done through the methods
 [`commit`][source-env::commit] and [`commit_slice`][source-env::commit_slice].
 
+Writing to the journal can be done as simply as the code below.
+For a real example, check the [Voting Machine's example][example-voting-machine-guest-elf-submit-commit].
+
+```rust ignore title="src/main.rs"
+let data = "Hello, journal!";
+env::commit(&data);
+```
+
 On the host side, (or any other regular program that has access to the
 [`Receipt`][source-Receipt]), reading from the journal can be achieved by simply
 calling the [`Journal`][source-Journal]'s method
 [`decode`][source-Journal::decode].
 
+## Reading _Private_ data in the host
+
+Once we sent data from the guest, we can read it back in the host by leveraging
+the [`from_slice`][source-from_slice] method. This method is used to deserialize
+the data from a buffer into the desired type.
+
+Reading from the host's stdout can be done as simply as the code below.
+For a real example, check the [Voting Machine's example][example-voting-machine-host-submit-output-from_slice].
+
+```rust ignore title="src/main.rs"
+let result: Type = from_slice(&output)?;
+```
+
+If data was sent in its raw form by using a `_slice` variant, you'll need to
+handle the bit fiddling manually.
+
+## Reading _Public_ data in the host
+
+Reading _public_ data is done by accessing the [`Journal`][source-Journal] that
+is contained in the resulting [`Receipt`][source-Receipt] after the proving
+process.
+This can be done by calling the [`decode`][source-Journal::decode] method on the
+journal instance.
+
+```rust ignore title="src/main.rs"
+// Produce a receipt by proving the specified ELF binary.
+let receipt = prover.prove(env, ELF).unwrap();
+// Decode the journal to access the public data.
+let public_data = receipt.journal.decode()?;
+```
+
+## Sharing data structures between host and guest
+
+A good pattern to follow when handling shared data structures between the host
+and guest is to have a common `core` module that contains the shared data
+structures.
+This way, both host and guest can import common data structures and consume them
+as needed.
+
+A good example of this pattern being used is the [JWT
+Validator][example-jwt-validator].
+In its [`core`][example-jwt-validator-core] module, it defines common structures that will
+be later used in the [`host`][example-jwt-validator-host] and
+[`guest`][example-jwt-validator-guest] modules.
+Similarly, the [Chess example][example-chess] does the same with its
+[`core`][example-chess-core] being used by the [`host`][example-chess-host] and
+[`guest`][example-chess-guest].
+
+Other examples leveraging this pattern can be found in the [examples page].
+
 ## Putting it all together
 
-Enough theory, let's see how to handle I/O in the zkVM by putting it all in an example.
-Let's say we have a simple program that
+Now that we've covered some details about I/O in the zkVM, let's see how a real
+program implements it in practice.
 
-## Best Practices
+We'll cover the [Voting Machine example][example-voting-machine].
+This example is a simple voting machine that allows users to vote for a
+candidate.
+We'll link to relevant parts of the code as we go along, and it's expected that
+you open the linked files in a separate tab to follow along.
 
-TODO: Mention the architecture of having a `core` crate that would share data structures and functions between the host and guest, and how to handle I/O in this context.
+The program is a state machine that supports three operations:
 
-TODO: Give concrete examples of how to handle I/O in a zkVM application by pointing to existing example applications in `risc0/examples`
+- `Init`: Configures initial state
+- `Submit`: Which allows a user to submit a vote
+- `Freeze`: Which reveals the result of the election and closes the voting
 
-## Further examples
+First, we can see that all common data structures are defined in the
+[`core`][example-voting-machine-core] module.
 
-For further examples on how to handle I/O in the zkVM, you can check the [examples page].
+The [`host`][example-voting-machine-host] has functions for each of the
+operations, and on each of them some input is sent to the guest.
+In the [`submit`][example-voting-machine-host-submit] and
+[`freeze`][example-voting-machine-host-freeze] functions the host also passes a
+buffer to the guest to be filled with the result of the operation, but we'll
+get there in time.
+
+Analyzing the [`init`][example-voting-machine-host-init] function first, we can
+see that the host simply sends the initial state to the guest using the
+[`write`][example-voting-machine-host-init-write] method.
+Such data is then [`read`][example-voting-machine-guest-elf-init-read] by the
+[`init` guest][example-voting-machine-guest-elf-init] program and immediately
+[`commit`][example-voting-machine-guest-elf-init-commit]ed to the journal.
+Note how easy it is to operate on data structures when using the standard
+[`read`][source-env::read] and [`commit`][source-env::commit] functions, no bit
+manipulation needed. It'd be a different story if we were using the `_slice`
+variants. Since we don't have to worry about performance critical code here, we
+can safely use the standard functions.
+
+Moving on to the [`submit`][example-voting-machine-host-submit] function, we can
+see that in the host an [`output`
+buffer][example-voting-machine-host-submit-output-buffer] is passed to the
+[`stdout`][example-voting-machine-host-submit-output-stdout] file descriptor of
+the guest.
+It'll be filled with values produced by the guest and then read by calling the
+[`from_slice`][source-from_slice] method on the buffer.
+This can be seen in [this
+line][example-voting-machine-host-submit-output-from_slice].
+The result that was filled in the buffer came from the
+[`write`][example-voting-machine-guest-elf-submit-write] method call in the
+guest.
+Remember, the [`write`][source-env::write] method is used to send data to the
+host's [`stdout`][stdout] file descriptor.
+
+Still in the [`submit`][example-voting-machine-host-submit] function, note how
+the _private_ output from the guest is used, and how it's relevant the
+distinction between _public_ and _private_ data in this case.
+In the example presented, the `VotingMachineState` struct is changed during the
+guest's execution. But we don't want to commit (make public) the state of the
+voting machine, so we use the `stdout` file descriptor to send the result back
+to the host.
+This way, we can update the voting machine state at each iteration while
+preserving its privacy.
+
+Finally, in the [`freeze`][example-voting-machine-host-freeze] function, the
+same patterns of sending and receiving data are repeated.
+
+## Conclusions
+
+In this guide, we've covered the basics of I/O in the zkVM.  We've seen how to
+send data from the host to the guest and vice-versa, how _private_ and _public_
+data are distinguished, and how to commit data to the journal.
+We also covered the trade-offs between using the standard functions and their
+`_slice` variants and showed through the [Voting Machine
+example][example-voting-machine] how to implement I/O in practice.
+There are more examples available in the [examples page] that you can use as
+reference if you wish.
+
+Happy coding!
+
+
+[example-voting-machine]: https://github.com/risc0/risc0/tree/2deb83a15d8bd438bdc594a86438fc816d02b480/examples/voting-machine
+[example-voting-machine-core]: https://github.com/risc0/risc0/blob/2deb83a15d8bd438bdc594a86438fc816d02b480/examples/voting-machine/core/src/lib.rs
+[example-voting-machine-host]: https://github.com/risc0/risc0/blob/2deb83a15d8bd438bdc594a86438fc816d02b480/examples/voting-machine/src/lib.rs
+[example-voting-machine-host-init]: https://github.com/risc0/risc0/blob/2deb83a15d8bd438bdc594a86438fc816d02b480/examples/voting-machine/src/lib.rs#L77-L83
+[example-voting-machine-host-submit]: https://github.com/risc0/risc0/blob/2deb83a15d8bd438bdc594a86438fc816d02b480/examples/voting-machine/src/lib.rs#L85-L97
+[example-voting-machine-host-submit-output-buffer]: https://github.com/risc0/risc0/blob/2deb83a15d8bd438bdc594a86438fc816d02b480/examples/voting-machine/src/lib.rs#L88
+[example-voting-machine-host-submit-output-stdout]: https://github.com/risc0/risc0/blob/2deb83a15d8bd438bdc594a86438fc816d02b480/examples/voting-machine/src/lib.rs#L91
+[example-voting-machine-host-submit-output-from_slice]: https://github.com/risc0/risc0/blob/2deb83a15d8bd438bdc594a86438fc816d02b480/examples/voting-machine/src/lib.rs#L95
+[example-voting-machine-host-freeze]: https://github.com/risc0/risc0/blob/2deb83a15d8bd438bdc594a86438fc816d02b480/examples/voting-machine/src/lib.rs#L99-L112
+[example-voting-machine-host-init-write]: https://github.com/risc0/risc0/blob/2deb83a15d8bd438bdc594a86438fc816d02b480/examples/voting-machine/src/lib.rs#L79
+[example-voting-machine-guest-elf-init]: https://github.com/risc0/risc0/blob/2deb83a15d8bd438bdc594a86438fc816d02b480/examples/voting-machine/methods/guest/src/bin/init.rs
+[example-voting-machine-guest-elf-init-read]: https://github.com/risc0/risc0/blob/2deb83a15d8bd438bdc594a86438fc816d02b480/examples/voting-machine/methods/guest/src/bin/init.rs#L28
+[example-voting-machine-guest-elf-init-commit]: https://github.com/risc0/risc0/blob/2deb83a15d8bd438bdc594a86438fc816d02b480/examples/voting-machine/methods/guest/src/bin/init.rs#L29-L33
+[example-voting-machine-guest-elf-submit-write]: https://github.com/risc0/risc0/blob/2deb83a15d8bd438bdc594a86438fc816d02b480/examples/voting-machine/methods/guest/src/bin/submit.rs#L30
+[example-voting-machine-guest-elf-submit-commit]: https://github.com/risc0/risc0/blob/2deb83a15d8bd438bdc594a86438fc816d02b480/examples/voting-machine/methods/guest/src/bin/submit.rs#L31-L39
+[term-elf-binary]: https://dev.risczero.com/terminology#elf-binary
 
 [Putting it all together]: #putting-it-all-together
 [guest-code-101-io]: ../guest-code-101.md#basic-guest-functionality-reading-writing-and-committing
@@ -230,6 +306,7 @@ For further examples on how to handle I/O in the zkVM, you can check the [exampl
 [source-ExecutorEnvBuilder::stdout]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.ExecutorEnvBuilder.html#method.stdout
 [source-ExecutorEnvBuilder::stderr]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.ExecutorEnvBuilder.html#method.stderr
 [source-ExecutorEnvBuilder::write_slice]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.ExecutorEnvBuilder.html#method.write_slice
+[source-from_slice]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/serde/fn.from_slice.html
 [write_slice_method]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest/env/fn.write_slice.html
 [source-env::commit]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest/env/fn.commit.html
 [source-env::commit_slice]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest/env/fn.commit_slice.html
@@ -246,5 +323,13 @@ For further examples on how to handle I/O in the zkVM, you can check the [exampl
 [source-fileno]: https://docs.rs/risc0-zkvm-platform/*/risc0_zkvm_platform/fileno/index.html
 [source-Journal]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Journal.html
 [source-Journal::decode]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Journal.html#method.decode
+[example-jwt-validator]: https://github.com/risc0/risc0/blob/main/examples/jwt-validator/README.md
+[example-jwt-validator-core]: https://github.com/risc0/risc0/blob/main/examples/jwt-validator/core/src/lib.rs
+[example-jwt-validator-host]: https://github.com/risc0/risc0/blob/main/examples/jwt-validator/src/lib.rs
+[example-jwt-validator-guest]: https://github.com/risc0/risc0/blob/main/examples/jwt-validator/methods/guest/src/main.rs
 [guest]: https://dev.risczero.com/terminology#guest
 [host]: https://dev.risczero.com/terminology#host
+[example-chess]: https://github.com/risc0/risc0/tree/main/examples/chess
+[example-chess-core]: https://github.com/risc0/risc0/blob/main/examples/chess/core/src/lib.rs
+[example-chess-host]: https://github.com/risc0/risc0/blob/main/examples/chess/src/main.rs
+[example-chess-guest]: https://github.com/risc0/risc0/blob/main/examples/chess/methods/guest/src/main.rs
