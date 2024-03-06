@@ -8,6 +8,8 @@ inputs:
 
 runs:
   using: composite
+  env:
+    SCCACHE_IDLE_TIMEOUT: 1200
   steps:
     - if: runner.os == 'Linux' && runner.arch == 'X64'
       run: |
