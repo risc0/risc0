@@ -87,14 +87,14 @@ jobs:
         with:
           version: nightly-09fe3e041369a816365a020f715ad6f94dbce9f2
       - name: Checkout risc0-ethereum
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           repository: 'risc0/risc0-ethereum'
           token: ${{ secrets.GITHUB_TOKEN }}
           submodules: recursive
           path: 'risc0-ethereum'
           ref: 'capossele/risc0-CI'
-      - name: override Cargo.toml
+      - name: override Cargo.toml on risc0-ethereum
         run: cp Cargo.toml.risc0 Cargo.toml
         working-directory: risc0-ethereum
       - name: build risc0-ethereum
@@ -103,7 +103,32 @@ jobs:
       - name: test risc0-ethereum
         run: cargo test --workspace
         working-directory: risc0-ethereum
-      - name: forge test
+      - name: forge test on risc0-ethereum
         run: forge test -vvv
         working-directory: risc0-ethereum/contracts
+      - name: Checkout foundry-template
+        uses: actions/checkout@v4
+        with:
+          repository: 'risc0/bonsai-foundry-template'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          submodules: recursive
+          path: 'bonsai-foundry-template'
+          ref: 'capossele/risc0-CI'
+      - name: override Cargo.toml on bonsai-foundry-template
+        run: cp Cargo.toml.risc0 Cargo.toml
+        working-directory: bonsai-foundry-template
+      - name: override Cargo.toml guest on bonsai-foundry-template
+        run: cp Cargo.toml.guest.risc0 methods/guest/Cargo.toml
+        working-directory: bonsai-foundry-template
+      - name: build bonsai-foundry-template
+        run: cargo build
+        working-directory: bonsai-foundry-template
+      - name: build bonsai-foundry-template contracts
+        run: forge build
+        working-directory: bonsai-foundry-template
+      - name: run foundry tests in dev mode
+        env:
+            RISC0_DEV_MODE: true
+        run: forge test -vvv
+        working-directory: bonsai-foundry-template
       - run: sccache --show-stats
