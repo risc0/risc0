@@ -34,7 +34,7 @@ jobs:
           filters: |
             base: &base
               - .github/actions/**
-              - .github/workflows/main.yml
+              - .github/workflows/risc0-ethereum.yml
               - Cargo.toml
               - rust-toolchain.toml
               - Cargo.lock
