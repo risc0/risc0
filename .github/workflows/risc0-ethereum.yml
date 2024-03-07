@@ -5,6 +5,15 @@ on:
   pull_request:
     branches: [main, "release-*"]
   workflow_dispatch:
+    inputs:
+      risc0-ethereum-branch:
+        description: "risc0-ethereum branch to checkout"
+        required: false
+        default: 'capossele/risc0-CI'
+      bonsai-foundry-template-branch:
+        description: "bonsai-foundry-template branch to checkout"
+        required: false
+        default: 'capossele/risc0-CI'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -58,7 +67,7 @@ jobs:
         run: exit 1
 
   test:
-    if: needs.changes.outputs.test == 'true'
+    if: ${{ needs.changes.outputs.test == 'true' || github.event_name == 'workflow_dispatch'}}
     needs: changes
     runs-on: [self-hosted, prod, "${{ matrix.os }}", "${{ matrix.device }}"]
     strategy:
@@ -93,7 +102,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           submodules: recursive
           path: 'risc0-ethereum'
-          ref: 'capossele/risc0-CI'
+          ref: ${{ github.event.inputs.risc0-ethereum-branch || 'capossele/risc0-CI' }}
       - name: override Cargo.toml on risc0-ethereum
         run: cp Cargo.toml.risc0 Cargo.toml
         working-directory: risc0-ethereum
@@ -113,7 +122,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           submodules: recursive
           path: 'bonsai-foundry-template'
-          ref: 'capossele/risc0-CI'
+          ref: ${{ github.event.inputs.bonsai-foundry-template-branch || 'capossele/risc0-CI' }}
       - name: override Cargo.toml on bonsai-foundry-template
         run: cp Cargo.toml.risc0 Cargo.toml
         working-directory: bonsai-foundry-template
