@@ -94,7 +94,7 @@ jobs:
           path: 'risc0-ethereum'
           ref: 'capossele/risc0-CI'
       - name: override Cargo.toml
-      - run: cp Cargo.toml.risc0 Cargo.toml
+        run: cp Cargo.toml.risc0 Cargo.toml
         working-directory: risc0-ethereum
       - name: build risc0-ethereum
         run: cargo test --workspace --no-run
@@ -102,6 +102,7 @@ jobs:
       - name: test risc0-ethereum
         run: cargo test --workspace
         working-directory: risc0-ethereum
-      - run: forge test -vvv
+      - name: forge test
+        run: forge test -vvv
         working-directory: risc0-ethereum/contracts
       - run: sccache --show-stats
