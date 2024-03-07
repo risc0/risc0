@@ -120,10 +120,10 @@ pub mod responses {
         /// Possible states in order, include:
         /// * `Setup`
         /// * `Executor`
-        /// * `ProveSegments`
+        /// * `ProveSegments: N/M`
         /// * `Planner`
         /// * `Recursion`
-        /// * `RecursionJoin`
+        /// * `RecursionJoin: N/M`
         /// * `Resolve`
         /// * `Finalize`
         /// * `InProgress`
@@ -131,7 +131,7 @@ pub mod responses {
         /// Elapsed Time
         ///
         /// Elapsed time for a given session, in seconds
-        pub elapsed_time: Option<u64>,
+        pub elapsed_time: Option<f64>,
         /// Successful Session Stats
         ///
         /// Stats for a given successful session. Returns:
