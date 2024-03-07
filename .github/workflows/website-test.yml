@@ -66,6 +66,8 @@ jobs:
     if: needs.changes.outputs.main == 'true'
     needs: changes
     runs-on: [self-hosted, prod, Linux, cpu]
+    env:
+      SCCACHE_IDLE_TIMEOUT: 1200
     steps:
       - uses: actions/checkout@v4
         with:
@@ -100,6 +102,8 @@ jobs:
     if: needs.changes.outputs.version-0_20 == 'true'
     needs: changes
     runs-on: [self-hosted, prod, Linux, cpu]
+    env:
+      SCCACHE_IDLE_TIMEOUT: 1200
     steps:
       - uses: actions/checkout@v4
         with:
