@@ -121,7 +121,11 @@ export default async function createConfigAsync() {
             href: "https://risczero.com/",
           },
           items: [
-            { to: "/api/", label: "Introduction", position: "left" },
+            {
+              position: "left",
+              label: "Introduction",
+              to: "/api",
+            },
             {
               position: "left",
               label: "Terminology",
