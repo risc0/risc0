@@ -2,13 +2,18 @@
 
 /** @type {import('@docusaurus/plugin-content-docs').SidebarsConfig} */
 export default {
-  docs: [
-    "studyclub",
+  education_hub: [
     {
       type: "link",
-      label: "YouTube",
-      href: "https://youtube.com/@risczero",
+      label: "Talks and Podcasts",
+      href: "https://www.youtube.com/playlist?list=PLcPzhUaCxlCgCvzkkaBWzVuHdBRsTNxj1",
     },
+    {
+      type: "link",
+      label: "Articles",
+      href: "https://risczero.com/blog",
+    },
+    "studyclub",
     {
       type: "link",
       label: "Education Database",
@@ -85,11 +90,6 @@ export default {
           id: "reference-docs/about-rs-codes",
         },
       ],
-    },
-    {
-      type: "doc",
-      label: "Contributor guide",
-      id: "contributors-guide",
     },
   ],
 };
