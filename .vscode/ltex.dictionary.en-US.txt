@@ -7,3 +7,5 @@ zk-STARKs
 zk-STARK
 ZKVM
 zkVM
+Sepolia
+Holesky

@@ -24,6 +24,8 @@ use risc0_zkvm_platform::{
 };
 use tempfile::tempdir;
 
+use crate::get_env_var;
+
 const DOCKER_IGNORE: &str = r#"
 **/Dockerfile
 **/.git
@@ -36,6 +38,10 @@ const TARGET_DIR: &str = "target/riscv-guest/riscv32im-risc0-zkvm-elf/docker";
 
 /// Build the package in the manifest path using a docker environment.
 pub fn docker_build(manifest_path: &Path, src_dir: &Path, features: &[String]) -> Result<()> {
+    if !get_env_var("RISC0_SKIP_BUILD").is_empty() {
+        return Ok(());
+    }
+
     let manifest_path = manifest_path
         .canonicalize()
         .context(format!("manifest_path: {manifest_path:?}"))?;
@@ -233,15 +239,15 @@ mod test {
         build("../../risc0/zkvm/methods/guest/Cargo.toml");
         compare_image_id(
             "risc0_zkvm_methods_guest/multi_test",
-            "804c487280b17cff1dc244a43e7e0b3af889460c069a35a49831a93070c2981c",
+            "57db93b2ac5ec574bb9d02bc08da086342a1439ef3fa776bc5065ff23b544bd8",
         );
         compare_image_id(
             "risc0_zkvm_methods_guest/hello_commit",
-            "814a0b41fcd444bd108888eebc8634b09b15627cec05dead7bcc8874bc8e5a3a",
+            "f42bfd47f68a4562e779ee74eb28ed806086992c5df926ddf3444feaf22233e9",
         );
         compare_image_id(
             "risc0_zkvm_methods_guest/slice_io",
-            "1d031a0f7b8fc6ee88a659d8cb5b2f81d4806d61a8340c43fa72cee0fc5527a6",
+            "8ccbb98aceca7f19ab0ef1f237853a574e79350a39f6bd73f838b3d0e2cd5cc4",
         );
     }
 }
