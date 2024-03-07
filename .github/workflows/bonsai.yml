@@ -44,8 +44,6 @@ jobs:
     if: needs.changes.outputs.bonsai == 'true'
     needs: changes
     runs-on: [self-hosted, prod, Linux, cpu]
-    env:
-      SCCACHE_IDLE_TIMEOUT: 0
     steps:
       # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
       - name: checkout dummy commit (submodule bug workaround)

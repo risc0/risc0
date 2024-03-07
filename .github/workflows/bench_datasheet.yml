@@ -55,7 +55,6 @@ jobs:
 
     env:
       FEATURE: ${{ matrix.feature }}
-      SCCACHE_IDLE_TIMEOUT: 0
 
     steps:
       # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842

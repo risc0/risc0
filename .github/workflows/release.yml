@@ -31,7 +31,6 @@ jobs:
             target: aarch64-apple-darwin
     env:
       TARGET: ${{ matrix.target }}
-      SCCACHE_IDLE_TIMEOUT: 0
     steps:
       - uses: actions/checkout@v4
         with:
