@@ -269,7 +269,7 @@ mod tests {
 
     #[tokio::test]
     async fn trace_tx() {
-        let rpc_url = "https://cloudflare-eth.com";
+        let rpc_url = "https://eth.llamarpc.com";
 
         let tx_hash =
             H256::from_str("0x671a3b40ecb7d51b209e68392df2d38c098aae03febd3a88be0f1fa77725bbd7")
