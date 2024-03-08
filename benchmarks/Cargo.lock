@@ -427,6 +427,7 @@ name = "bonsai-sdk"
 version = "0.8.0-rc.1"
 dependencies = [
  "reqwest",
+ "risc0-groth16",
  "serde",
  "thiserror",
 ]
@@ -2336,12 +2337,17 @@ dependencies = [
  "ark-bn254",
  "ark-groth16",
  "ark-serialize",
+ "bytemuck",
  "hex",
  "num-bigint 0.4.4",
  "num-derive",
  "num-traits",
+ "risc0-core",
  "risc0-zkp",
  "serde",
+ "serde_json",
+ "tempfile",
+ "tracing",
 ]
 
 [[package]]
