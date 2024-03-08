@@ -109,7 +109,7 @@ jobs:
           submodules: recursive
           path: 'risc0-ethereum'
           ref: ${{ github.event.inputs.risc0-ethereum-branch || 'capossele/risc0-CI' }}
-      - name: patching Cargo.toml on risc0-ethereum
+      - name: Local patch on risc0-ethereum
         run: python ../risc0/.github/cargo_local_patch.py Cargo.toml
         working-directory: risc0-ethereum
       - name: build risc0-ethereum
@@ -129,26 +129,20 @@ jobs:
           submodules: recursive
           path: 'bonsai-foundry-template'
           ref: ${{ github.event.inputs.bonsai-foundry-template-branch || 'capossele/risc0-CI' }}
-      - name: patching Cargo.toml on bonsai-foundry-template
+      - name: Local patch on bonsai-foundry-template
         run: |
           python ../risc0/.github/cargo_local_patch.py Cargo.toml
-        working-directory: bonsai-foundry-template
-      - name: patching Cargo.toml guest on bonsai-foundry-template
-        run: |
           python ../risc0/.github/cargo_local_patch.py methods/guest/Cargo.toml
         working-directory: bonsai-foundry-template
-      - name: run cargo update
-        run: cargo update
-        working-directory: bonsai-foundry-template
       - name: build bonsai-foundry-template
-        run: cargo build
+        run: cargo test --workspace --no-run
         working-directory: bonsai-foundry-template
       - name: build bonsai-foundry-template contracts
         run: forge build
         working-directory: bonsai-foundry-template
       - name: run foundry tests in dev mode
         env:
-            RISC0_DEV_MODE: true
+          RISC0_DEV_MODE: true
         run: forge test -vvv
         working-directory: bonsai-foundry-template
       - run: sccache --show-stats
