@@ -14,6 +14,7 @@ bonsai-ethereum-relay = { version = "0.7.0-rc.1", default-features = false, path
 bonsai-rest-api-mock = { version = "0.7.0-rc.1", default-features = false, path = "rest-api-mock" }
 bonsai-sdk = { version = "0.7.0-rc.1", default-features = false, path = "sdk" }
 risc0-build = { version = "0.21.0-rc.1", default-features = false, path = "../risc0/build" }
+risc0-groth16 = { version = "0.21.0-rc.1", default-features = false, path = "../risc0/groth16" }
 risc0-zkvm = { version = "0.21.0-rc.1", default-features = false, path = "../risc0/zkvm" }
 
 [profile.bench]

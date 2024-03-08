@@ -418,8 +418,6 @@ jobs:
         with:
           key: Linux-default
       - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
-      - run: scripts/install_prover.sh
-        working-directory: compact_proof
       - run: cargo test -p risc0-groth16 -F docker --release
       - run: cargo test -p risc0-zkvm -F prove -F docker -- tests::stark2snark
       - run: sccache --show-stats
