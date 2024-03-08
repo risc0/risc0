@@ -76,6 +76,7 @@ jobs:
           feature: [default]
           device: [cpu]
     env:
+      FEATURE: ${{ matrix.feature }}
       RISC0_BUILD_LOCKED: 1
       RUST_BACKTRACE: full
     steps:
