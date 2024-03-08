@@ -92,7 +92,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3'
+          python-version: '3.10'
       - name: Install python dependencies
         run: python -m pip install --upgrade toml
       - name: Install risczero toolchain
@@ -110,7 +110,7 @@ jobs:
           path: 'risc0-ethereum'
           ref: ${{ github.event.inputs.risc0-ethereum-branch || 'capossele/risc0-CI' }}
       - name: override Cargo.toml on risc0-ethereum
-        run: python ../risc0/.github/local_override.py Cargo.toml
+        run: python ../risc0/.github/cargo_local_patch.py Cargo.toml
         working-directory: risc0-ethereum
       - name: build risc0-ethereum
         run: cargo test --workspace --no-run
@@ -128,12 +128,12 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           submodules: recursive
           path: 'bonsai-foundry-template'
-          ref: ${{ github.event.inputs.bonsai-foundry-template-branch || 'main' }}
+          ref: ${{ github.event.inputs.bonsai-foundry-template-branch || 'capossele/risc0-CI' }}
       - name: override Cargo.toml on bonsai-foundry-template
-        run: python ../risc0/.github/local_override.py Cargo.toml
+        run: python ../risc0/.github/cargo_local_patch.py Cargo.toml
         working-directory: bonsai-foundry-template
       - name: override Cargo.toml guest on bonsai-foundry-template
-        run: python ../risc0/.github/local_override.py methods/guest/Cargo.toml
+        run: python ../risc0/.github/cargo_local_patch.py methods/guest/Cargo.toml
         working-directory: bonsai-foundry-template
       - name: build bonsai-foundry-template
         run: cargo build
