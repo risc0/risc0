@@ -132,6 +132,7 @@ jobs:
         run: |
           python ../risc0/.github/cargo_local_patch.py Cargo.toml
           python ../risc0/.github/cargo_local_patch.py methods/guest/Cargo.toml
+          cp -R ../risc0-ethereum lib/risc0-ethereum
         working-directory: bonsai-foundry-template
       - name: build bonsai-foundry-template
         run: cargo build
