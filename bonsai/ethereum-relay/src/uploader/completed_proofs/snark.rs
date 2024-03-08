@@ -15,13 +15,14 @@
 use std::time::Duration;
 
 use bonsai_sdk::{
-    alpha::{responses::Groth16Seal, Client, SessionId, SnarkId},
+    alpha::{Client, SessionId, SnarkId},
     alpha_async::{create_snark, snark_status},
 };
 use ethers::{
     abi::{Token, Tokenizable},
     types::U256,
 };
+use risc0_zkvm::Groth16Seal;
 
 use super::error::CompleteProofError;
 use crate::api;
@@ -69,40 +70,38 @@ pub(crate) async fn get_snark_receipt(
     Ok(proof)
 }
 
-pub fn tokenize_snark_receipt(proof: &Groth16Seal) -> anyhow::Result<Token> {
-    if proof.b.len() != 2 {
-        anyhow::bail!("hex-strings encoded proof is not well formed");
+pub fn tokenize_snark_receipt(seal: &Groth16Seal) -> anyhow::Result<Token> {
+    if seal.b.len() != 2 {
+        anyhow::bail!("hex-strings encoded Groth16 seal is not well formed");
     }
-    for pair in [&proof.a, &proof.c].into_iter().chain(proof.b.iter()) {
+    for pair in [&seal.a, &seal.c].into_iter().chain(seal.b.iter()) {
         if pair.len() != 2 {
-            anyhow::bail!("hex-strings encoded proof is not well formed");
+            anyhow::bail!("hex-strings encoded Groth16 seal is not well formed");
         }
     }
     Ok(Token::FixedArray(vec![
         Token::FixedArray(
-            proof
-                .a
+            seal.a
                 .iter()
                 .map(|elm| U256::from_big_endian(elm).into_token())
                 .collect(),
         ),
         Token::FixedArray(vec![
             Token::FixedArray(
-                proof.b[0]
+                seal.b[0]
                     .iter()
                     .map(|elm| U256::from_big_endian(elm).into_token())
                     .collect(),
             ),
             Token::FixedArray(
-                proof.b[1]
+                seal.b[1]
                     .iter()
                     .map(|elm| U256::from_big_endian(elm).into_token())
                     .collect(),
             ),
         ]),
         Token::FixedArray(
-            proof
-                .c
+            seal.c
                 .iter()
                 .map(|elm| U256::from_big_endian(elm).into_token())
                 .collect(),
