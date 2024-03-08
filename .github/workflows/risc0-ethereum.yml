@@ -68,7 +68,13 @@ jobs:
   test:
     if: ${{ needs.changes.outputs.test == 'true' || github.event_name == 'workflow_dispatch'}}
     needs: changes
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, prod, "${{ matrix.os }}", "${{ matrix.device }}"]
+      strategy:
+        fail-fast: false
+        matrix:
+          os: [Linux]
+          feature: [default]
+          device: [cpu]
     env:
       RISC0_BUILD_LOCKED: 1
       RUST_BACKTRACE: full
@@ -82,6 +88,10 @@ jobs:
       - uses: ./risc0/.github/actions/sccache
         with:
           key: ${{ matrix.os }}-${{ matrix.feature }}
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
       - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
         working-directory: risc0
       - uses: risc0/foundry-toolchain@2fe7e70b520f62368a0e3c464f997df07ede420f
