@@ -109,7 +109,7 @@ jobs:
           submodules: recursive
           path: 'risc0-ethereum'
           ref: ${{ github.event.inputs.risc0-ethereum-branch || 'capossele/risc0-CI' }}
-      - name: override Cargo.toml on risc0-ethereum
+      - name: patching Cargo.toml on risc0-ethereum
         run: python ../risc0/.github/cargo_local_patch.py Cargo.toml
         working-directory: risc0-ethereum
       - name: build risc0-ethereum
@@ -129,11 +129,15 @@ jobs:
           submodules: recursive
           path: 'bonsai-foundry-template'
           ref: ${{ github.event.inputs.bonsai-foundry-template-branch || 'capossele/risc0-CI' }}
-      - name: override Cargo.toml on bonsai-foundry-template
-        run: python ../risc0/.github/cargo_local_patch.py Cargo.toml
+      - name: patching Cargo.toml on bonsai-foundry-template
+        run: |
+          python ../risc0/.github/cargo_local_patch.py Cargo.toml
+          rm Cargo.lock
         working-directory: bonsai-foundry-template
-      - name: override Cargo.toml guest on bonsai-foundry-template
-        run: python ../risc0/.github/cargo_local_patch.py methods/guest/Cargo.toml
+      - name: patching Cargo.toml guest on bonsai-foundry-template
+        run: |
+          python ../risc0/.github/cargo_local_patch.py methods/guest/Cargo.toml
+          rm methods/guest/Cargo.lock
         working-directory: bonsai-foundry-template
       - name: build bonsai-foundry-template
         run: cargo build
