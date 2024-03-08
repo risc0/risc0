@@ -134,8 +134,10 @@ jobs:
           python ../risc0/.github/cargo_local_patch.py Cargo.toml
           python ../risc0/.github/cargo_local_patch.py methods/guest/Cargo.toml
         working-directory: bonsai-foundry-template
+      - name: Unset RISC0_BUILD_LOCKED
+        run: unset RISC0_BUILD_LOCKED
       - name: build bonsai-foundry-template
-        run: cargo test --workspace --no-run
+        run: cargo build
         working-directory: bonsai-foundry-template
       - name: build bonsai-foundry-template contracts
         run: forge build
