@@ -69,12 +69,12 @@ jobs:
     if: ${{ needs.changes.outputs.test == 'true' || github.event_name == 'workflow_dispatch'}}
     needs: changes
     runs-on: [self-hosted, prod, "${{ matrix.os }}", "${{ matrix.device }}"]
-      strategy:
-        fail-fast: false
-        matrix:
-          os: [Linux]
-          feature: [default]
-          device: [cpu]
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [Linux]
+        feature: [default]
+        device: [cpu]
     env:
       FEATURE: ${{ matrix.feature }}
       RISC0_BUILD_LOCKED: 1
