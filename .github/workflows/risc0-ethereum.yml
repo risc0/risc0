@@ -132,12 +132,13 @@ jobs:
       - name: patching Cargo.toml on bonsai-foundry-template
         run: |
           python ../risc0/.github/cargo_local_patch.py Cargo.toml
-          rm Cargo.lock
         working-directory: bonsai-foundry-template
       - name: patching Cargo.toml guest on bonsai-foundry-template
         run: |
           python ../risc0/.github/cargo_local_patch.py methods/guest/Cargo.toml
-          rm methods/guest/Cargo.lock
+        working-directory: bonsai-foundry-template
+      - name: run cargo update
+        run: cargo update
         working-directory: bonsai-foundry-template
       - name: build bonsai-foundry-template
         run: cargo build
