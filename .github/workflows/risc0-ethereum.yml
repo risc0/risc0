@@ -9,11 +9,11 @@ on:
       risc0-ethereum-branch:
         description: "risc0-ethereum branch to checkout"
         required: false
-        default: 'capossele/risc0-CI'
+        default: 'main'
       bonsai-foundry-template-branch:
         description: "bonsai-foundry-template branch to checkout"
         required: false
-        default: 'capossele/risc0-CI'
+        default: 'main'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -92,8 +92,11 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.9'
-      - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
+          python-version: '3'
+      - name: Install python dependencies
+        run: python -m pip install --upgrade toml
+      - name: Install risczero toolchain
+        run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
         working-directory: risc0
       - uses: risc0/foundry-toolchain@2fe7e70b520f62368a0e3c464f997df07ede420f
         with:
@@ -105,9 +108,9 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           submodules: recursive
           path: 'risc0-ethereum'
-          ref: ${{ github.event.inputs.risc0-ethereum-branch || 'capossele/risc0-CI' }}
+          ref: ${{ github.event.inputs.risc0-ethereum-branch || 'main' }}
       - name: override Cargo.toml on risc0-ethereum
-        run: python .github/local_override.py Cargo.toml
+        run: python ../risc0/.github/local_override.py Cargo.toml
         working-directory: risc0-ethereum
       - name: build risc0-ethereum
         run: cargo test --workspace --no-run
@@ -125,12 +128,12 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           submodules: recursive
           path: 'bonsai-foundry-template'
-          ref: ${{ github.event.inputs.bonsai-foundry-template-branch || 'capossele/risc0-CI' }}
+          ref: ${{ github.event.inputs.bonsai-foundry-template-branch || 'main' }}
       - name: override Cargo.toml on bonsai-foundry-template
-        run: cp Cargo.toml.risc0 Cargo.toml
+        run: python ../risc0/.github/local_override.py Cargo.toml
         working-directory: bonsai-foundry-template
       - name: override Cargo.toml guest on bonsai-foundry-template
-        run: cp Cargo.toml.guest.risc0 methods/guest/Cargo.toml
+        run: python ../risc0/.github/local_override.py methods/guest/Cargo.toml
         working-directory: bonsai-foundry-template
       - name: build bonsai-foundry-template
         run: cargo build
