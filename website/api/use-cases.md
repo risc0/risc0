@@ -1,5 +1,11 @@
 # Use Cases
 
+:::tip[**Ready to start building?**]
+
+Check out our [Getting Started][docs-getting-started] page.
+
+:::
+
 Verifiable computation is a game changer for the resilience and economics of
 operating the computing infrastructure we all rely on. It creates a number of
 emergent use cases which we are excited to enable. Key among these are:
@@ -44,13 +50,11 @@ In addition to being far easier to build on, we're also delivering on
 [performance]. The zkVM has GPU acceleration for CUDA and Metal, and with
 [continuations] we've enabled parallel proving of large programs.
 
-**Ready to start building?** <br/>
-Check out our [Getting Started] page.
-
 [Bonsai Pay]: https://risczero.com/news/bonsai-pay
 [chess]: https://github.com/risc0/risc0/tree/main/examples/chess
 [continuations]: https://risczero.com/news/continuations
 [crate-validation]: https://risc0.github.io/ghpages/dev/crate-validation/index.html
+[docs-getting-started]: ./getting-started.md
 [ecdsa]: https://github.com/risc0/risc0/tree/main/examples/ecdsa
 [Getting Started]: ./getting-started.md
 [JSON]: https://github.com/risc0/risc0/tree/main/examples/json

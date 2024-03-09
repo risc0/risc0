@@ -2,10 +2,13 @@
 slug: ./
 ---
 
+:::tip[**Ready to start building?**]
+
+Check out our [Getting Started][docs-getting-started] page.
+
+:::
+
 # Introduction
-
-Welcome to the [RISC Zero][external-risc-zero] documentation!
-
 RISC Zero is creating the infrastructure & tooling necessary for
 developers around the globe to build software that leverages ZK technology.
 
@@ -19,8 +22,4 @@ allowing a skeptical third party to verify correct execution — and the verifie
 doesn't need to repeat the original computation or even see the inputs to the
 program!
 
-**Ready to start building?** <br/>
-Check out our [Getting Started][docs-getting-started] page.
-
 [docs-getting-started]: ./getting-started.md
-[external-risc-zero]: https://risczero.com
