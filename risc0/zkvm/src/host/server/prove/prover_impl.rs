@@ -13,8 +13,12 @@
 // limitations under the License.
 
 use anyhow::{bail, Result};
+use risc0_binfmt::{ExitCode, SystemState};
 use risc0_core::field::baby_bear::{BabyBear, Elem, ExtElem};
-use risc0_zkp::hal::{CircuitHal, Hal};
+use risc0_zkp::{
+    core::digest::Digest,
+    hal::{CircuitHal, Hal},
+};
 
 use super::{HalPair, ProverServer};
 use crate::{
@@ -23,7 +27,7 @@ use crate::{
         recursion::{identity_p254, join, lift, resolve},
     },
     sha::Digestible,
-    Receipt, Segment, Session, VerifierContext,
+    Receipt, ReceiptClaim, Segment, Session, VerifierContext,
 };
 
 /// An implementation of a Prover that runs locally.
@@ -47,6 +51,33 @@ where
             name: name.to_string(),
             hal_pair,
         }
+    }
+
+    /// Calculate for the [ReceiptClaim] associated with this [Segment]. The
+    /// [ReceiptClaim] is the claim that will be proven if this [Segment]
+    /// is passed to the [crate::Prover].
+    fn get_segment_claim(&self, segment: &Segment) -> Result<ReceiptClaim> {
+        // NOTE: When a segment ends in a Halted(_) state, it may not update the post state
+        // digest. As a result, it will be the same as the pre_image. All other exit codes require
+        // the post state digest to reflect the final memory state.
+        // NOTE: The PC on the post state is stored "+ 4". See ReceiptClaim for more detail.
+        let post_state = SystemState {
+            pc: segment.post_state.pc,
+            // .checked_add(WORD_SIZE as u32)
+            // .context("invalid pc in segment post state")?,
+            merkle_root: match segment.exit_code {
+                ExitCode::Halted(_) => segment.pre_state.merkle_root.clone(),
+                _ => segment.post_state.merkle_root.clone(),
+            },
+        };
+
+        Ok(ReceiptClaim {
+            pre: segment.pre_state.clone().into(),
+            post: post_state.into(),
+            exit_code: segment.exit_code,
+            input: Digest::ZERO,
+            output: None.into(), // segment.output.clone().into(), TODO
+        })
     }
 }
 
@@ -74,13 +105,14 @@ where
             }
         }
         // TODO(#982): Support unresolved assumptions here.
+        let assumptions = session
+            .assumptions
+            .iter()
+            .map(|x| Ok(x.as_receipt()?.inner.clone()))
+            .collect::<Result<Vec<_>>>()?;
         let composite_receipt = CompositeReceipt {
             segments,
-            assumptions: session
-                .assumptions
-                .iter()
-                .map(|a| Ok(a.as_receipt()?.inner.clone()))
-                .collect::<Result<Vec<_>>>()?,
+            assumptions,
             journal_digest: session.journal.as_ref().map(|journal| journal.digest()),
         };
 
@@ -207,20 +239,20 @@ where
             "prove_segment[{}]: po2: {}, cycles: {}",
             segment.index,
             segment.po2,
-            segment.cycles,
+            segment.insn_cycles,
         );
 
         let hashfn = self.hal_pair.hal.get_hash_suite().name.clone();
 
         let prover =
             SegmentProverImpl::new(self.hal_pair.hal.clone(), self.hal_pair.circuit_hal.clone());
-        let seal = prover.prove_segment(&segment.clone().into())?;
+        let seal = prover.prove_segment(segment)?;
 
         let receipt = SegmentReceipt {
             seal,
-            index: segment.index,
+            index: segment.index as u32,
             hashfn,
-            claim: segment.get_claim()?,
+            claim: self.get_segment_claim(segment)?,
         };
         receipt.verify_integrity_with_context(ctx)?;
 

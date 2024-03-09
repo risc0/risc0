@@ -150,51 +150,6 @@ impl Session {
     }
 }
 
-impl Segment {
-    /// Call the ZKP system to produce a [SegmentReceipt].
-    pub fn prove(&self, ctx: &VerifierContext) -> Result<SegmentReceipt> {
-        let prover = get_prover_server(&ProverOpts::default())?;
-        prover.prove_segment(ctx, self)
-    }
-
-    #[cfg(not(feature = "parallel-witgen"))]
-    fn prepare_globals(&self) -> Vec<Elem> {
-        use risc0_circuit_rv32im::CircuitImpl;
-        use risc0_core::field::Elem as _;
-        use risc0_zkp::{adapter::CircuitInfo, core::digest::DIGEST_WORDS};
-        use risc0_zkvm_platform::WORD_SIZE;
-
-        let mut io = vec![Elem::INVALID; CircuitImpl::OUTPUT_SIZE];
-        tracing::debug!("run> pc: 0x{:08x}", self.pre_image.pc);
-
-        // initialize Input
-        let mut offset = 0;
-        for i in 0..DIGEST_WORDS * WORD_SIZE {
-            io[offset + i] = Elem::ZERO;
-        }
-        offset += DIGEST_WORDS * WORD_SIZE;
-
-        // initialize PC
-        let pc_bytes = self.pre_image.pc.to_le_bytes();
-        for i in 0..WORD_SIZE {
-            io[offset + i] = (pc_bytes[i] as u32).into();
-        }
-        offset += WORD_SIZE;
-
-        // initialize ImageID
-        let merkle_root = self.pre_image.compute_root_hash();
-        let merkle_root = merkle_root.as_words();
-        for i in 0..DIGEST_WORDS {
-            let bytes = merkle_root[i].to_le_bytes();
-            for j in 0..WORD_SIZE {
-                io[offset + i * WORD_SIZE + j] = (bytes[j] as u32).into();
-            }
-        }
-
-        io
-    }
-}
-
 #[cfg(feature = "cuda")]
 mod cuda {
     use std::rc::Rc;

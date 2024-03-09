@@ -16,24 +16,23 @@ use std::{cell::RefCell, io::Write, rc::Rc, sync::Arc};
 
 use anyhow::{Context as _, Result};
 use risc0_binfmt::{MemoryImage, Program};
-use risc0_circuit_rv32im::prove::emu::{
-    addr::ByteAddr,
-    exec::{
-        Executor as NewExecutor, Syscall as NewSyscall, SyscallContext as NewSyscallContext,
-        DEFAULT_SEGMENT_LIMIT_PO2,
+use risc0_circuit_rv32im::prove::{
+    emu::{
+        addr::ByteAddr,
+        exec::{
+            Executor as NewExecutor, Syscall as NewSyscall, SyscallContext as NewSyscallContext,
+            DEFAULT_SEGMENT_LIMIT_PO2,
+        },
     },
-    Segment as NewSegment,
+    segment::Segment,
 };
 use risc0_zkp::core::digest::Digest;
 use risc0_zkvm_platform::{fileno, memory::GUEST_MAX_MEM, PAGE_SIZE};
 use tempfile::tempdir;
 
 use crate::{
-    host::{
-        client::env::SegmentPath,
-        server::session::{null_callback, PageFaults},
-    },
-    is_dev_mode, ExecutorEnv, FileSegmentRef, Segment, SegmentRef, Session,
+    host::{client::env::SegmentPath, server::session::null_callback},
+    is_dev_mode, ExecutorEnv, FileSegmentRef, SegmentRef, Session,
 };
 
 use super::syscall::{SyscallContext, SyscallTable};
@@ -211,37 +210,6 @@ impl<'a> NewSyscall for ExecutorImpl<'a> {
             .context(format!("Unknown syscall: {syscall:?}"))?
             .borrow_mut()
             .syscall(&syscall, &mut ctx, into_guest)
-    }
-}
-
-impl From<NewSegment> for Segment {
-    fn from(value: NewSegment) -> Self {
-        Segment::new(
-            Box::new(value.partial_image),
-            value.post_state,
-            None, // output
-            PageFaults::default(),
-            value.syscalls,
-            value.exit_code,
-            Some(value.insn_cycles as u32),
-            value.po2 as u32,
-            0, // index
-            0, // cycles
-        )
-    }
-}
-
-impl From<Segment> for NewSegment {
-    fn from(value: Segment) -> Self {
-        Self {
-            partial_image: value.pre_image,
-            pre_state: (),
-            post_state: (),
-            syscalls: (),
-            insn_cycles: (),
-            po2: (),
-            exit_code: (),
-        }
     }
 }
 

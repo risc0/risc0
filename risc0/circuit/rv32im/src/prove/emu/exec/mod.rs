@@ -19,7 +19,7 @@ use std::{array, mem};
 
 use anyhow::{bail, Result};
 use crypto_bigint::{CheckedMul as _, Encoding as _, NonZero, U256, U512};
-use risc0_binfmt::{ExitCode, MemoryImage, Program, SystemState};
+use risc0_binfmt::{ExitCode, MemoryImage, Program, SyscallRecord, SystemState};
 use risc0_zkp::{
     core::{
         digest::{Digest, DIGEST_BYTES, DIGEST_WORDS},
@@ -42,8 +42,9 @@ use super::{
     addr::{ByteAddr, WordAddr},
     pager::PagedMemory,
     rv32im::{DecodedInstruction, EmuContext, Emulator, Instruction, TrapCause},
-    Segment, SyscallRecord, SYSTEM_START,
+    SYSTEM_START,
 };
+use crate::prove::segment::Segment;
 
 pub const DEFAULT_SEGMENT_LIMIT_PO2: usize = 20;
 
@@ -197,6 +198,7 @@ impl<'a, S: Syscall> Executor<'a, S> {
                     insn_cycles: self.cycles,
                     po2: segment_po2,
                     exit_code: ExitCode::SystemSplit,
+                    index: segments,
                 })?;
                 segments += 1;
                 session_cycles.user += self.cycles as u64;
@@ -212,6 +214,19 @@ impl<'a, S: Syscall> Executor<'a, S> {
         let segment_cycles = self.cycles + self.pager.get_paging_cycles();
         let po2 = log2_ceil(segment_cycles.next_power_of_two()).try_into()?;
         let exit_code = self.exit_code.unwrap();
+
+        // NOTE: When a segment ends in a Halted(_) state, it may not update the post state
+        // digest. As a result, it will be the same are the pre_image. All other exit codes require
+        // the post state digest to reflect the final memory state.
+        // NOTE: The PC on the the post state is stored "+ 4". See ReceiptClaim for more detail.
+        let post_state = SystemState {
+            pc: post_state.pc,
+            merkle_root: match exit_code {
+                ExitCode::Halted(_) => pre_state.merkle_root,
+                _ => post_state.merkle_root,
+            },
+        };
+
         callback(Segment {
             partial_image,
             pre_state,
@@ -220,7 +235,9 @@ impl<'a, S: Syscall> Executor<'a, S> {
             insn_cycles: self.cycles,
             po2,
             exit_code,
+            index: segments,
         })?;
+        segments += 1;
 
         session_cycles.user += self.cycles as u64;
         session_cycles.total += 1 << po2;

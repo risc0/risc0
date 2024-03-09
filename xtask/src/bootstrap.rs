@@ -42,16 +42,17 @@ impl Bootstrap {
     }
 
     fn generate_rv32im_control_ids() -> Vec<Digest> {
-        let loader = Loader::new();
         tracing::info!("computing control IDs with SHA-256");
-        let control_id_sha256 =
-            loader.compute_control_id(&CpuHal::new(Sha256HashSuite::<BabyBear>::new_suite()));
+        let control_id_sha256 = Loader::compute_control_id_table(&CpuHal::new(Sha256HashSuite::<
+            BabyBear,
+        >::new_suite(
+        )));
         tracing::info!("computing control IDs with Poseidon2");
         let control_id_poseidon2 =
-            loader.compute_control_id(&CpuHal::new(Poseidon2HashSuite::new_suite()));
+            Loader::compute_control_id_table(&CpuHal::new(Poseidon2HashSuite::new_suite()));
         tracing::info!("computing control IDs with Blake2b");
         let control_id_blake2b =
-            loader.compute_control_id(&CpuHal::new(Blake2bCpuHashSuite::new_suite()));
+            Loader::compute_control_id_table(&CpuHal::new(Blake2bCpuHashSuite::new_suite()));
 
         let contents = format!(
             include_str!("templates/control_id_rv32im.rs"),

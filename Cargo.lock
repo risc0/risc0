@@ -5876,6 +5876,7 @@ dependencies = [
  "risc0-core",
  "risc0-zkp",
  "risc0-zkvm-platform",
+ "serde",
  "serial_test 3.0.0",
  "sha2 0.10.8",
  "tar",

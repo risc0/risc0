@@ -232,7 +232,7 @@ impl Deref for Assumptions {
 }
 
 impl Digestible for Assumptions {
-    /// Hash the [Output] to get a digest of the struct.
+    /// Hash the [Assumptions] to get a digest of the struct.
     fn digest<S: Sha256>(&self) -> Digest {
         tagged_list::<S>(
             "risc0.Assumptions",
@@ -438,7 +438,7 @@ impl fmt::Display for PrunedValueError {
 #[cfg(feature = "std")]
 impl std::error::Error for PrunedValueError {}
 
-/// Merge two structured containing [MaybePruned] fields to produce a resulting structure with
+/// Merge two structures containing [MaybePruned] fields to produce a resulting structure with
 /// populated fields equal to the union of the two.
 ///
 /// Viewing the two structs as Merkle trees, in which subtrees may be pruned, the result of this

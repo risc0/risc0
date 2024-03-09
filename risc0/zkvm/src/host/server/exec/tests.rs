@@ -95,7 +95,7 @@ fn basic() {
 
     assert_eq!(session.segments.len(), 1);
     assert_eq!(segment.exit_code, ExitCode::Halted(0));
-    assert_eq!(segment.pre_image.compute_id(), pre_image_id);
+    assert_eq!(segment.pre_state.digest(), pre_image_id);
     assert_ne!(segment.post_state.digest(), pre_image_id);
     assert_eq!(segment.index, 0);
 }
@@ -134,11 +134,11 @@ fn system_split() {
 
     assert_eq!(segments.len(), 2);
     assert_eq!(segments[0].exit_code, ExitCode::SystemSplit);
-    assert_eq!(segments[0].pre_image.compute_id(), pre_image_id);
+    assert_eq!(segments[0].pre_state.digest(), pre_image_id);
     assert_ne!(segments[0].post_state.digest(), pre_image_id);
     assert_eq!(segments[1].exit_code, ExitCode::Halted(0));
     assert_eq!(
-        segments[1].pre_image.compute_id(),
+        segments[1].pre_state.digest(),
         segments[0].post_state.digest()
     );
     assert_eq!(segments[0].index, 0);

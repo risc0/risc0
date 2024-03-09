@@ -155,6 +155,7 @@ prove = [
   "risc0-zkp/prove",
   "std",
 ]
+seq = ["risc0-circuit-rv32im/seq"]
 std = [
   "anyhow/std",
   "hex/std",

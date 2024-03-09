@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#![allow(unused)]
+
 use std::collections::BTreeMap;
 use std::{
     fmt::Debug,
@@ -189,7 +191,7 @@ where
             2 => ControlIndex::Data2Lo,
             _ => unimplemented!("Invalid phase"),
         };
-        debug!("RESET");
+        debug!("[{}] RESET({phase})", self.cycle);
         self.start();
         self.code[ControlIndex::Reset] = BabyBearElem::ONE;
         self.code[ControlIndex::Info] = BabyBearElem::ONE; // isFirst
@@ -212,13 +214,14 @@ where
             if !self.next_fini(FINI_TAILROOM)? {
                 break;
             }
+            self.cycle += 1;
         }
         Ok(())
     }
 
     /// Fini Phase: Initialize RamFini and BytesFini
     pub fn fini(&mut self) -> Result<bool> {
-        debug!("FINI");
+        debug!("[{}] FINI", self.cycle);
         self.start();
         self.code[ControlIndex::RamFini] = BabyBearElem::ONE;
         self.next()?;
@@ -241,7 +244,6 @@ where
     }
 
     fn next_fini(&mut self, fini: usize) -> Result<bool> {
-        self.cycle += 1;
         (self.step)(&self.code.0, fini)
     }
 }
@@ -472,6 +474,8 @@ impl Loader {
 mod tests {
     use std::collections::BTreeMap;
 
+    use risc0_circuit_rv32im::CIRCUIT;
+    use risc0_zkp::hal::cpu::CpuBuffer;
     use test_log::test;
 
     use super::{TripleWord, TripleWordIter};
@@ -529,5 +533,45 @@ mod tests {
                 },
             ],
         );
+    }
+
+    #[test]
+    fn cmp_loaders() {
+        use risc0_zkp::adapter::TapsProvider;
+        use risc0_zkp::core::hash::sha::Sha256HashSuite;
+        use risc0_zkp::field::baby_bear::BabyBear;
+        use risc0_zkp::field::baby_bear::BabyBearElem;
+        use risc0_zkp::field::Elem as _;
+        use risc0_zkp::hal::cpu::CpuBuffer;
+        use risc0_zkp::hal::cpu::CpuHal;
+
+        let max_cycles = 1 << 14;
+        let ctrl_size = CIRCUIT.ctrl_size();
+
+        let loader = super::Loader::new();
+        let mut old_ctrl = vec![BabyBearElem::default(); max_cycles * ctrl_size];
+        loader.load_code(&mut old_ctrl, max_cycles);
+
+        let mut new_buf =
+            CpuBuffer::from_fn("ctrl", max_cycles * ctrl_size, |_| BabyBearElem::ZERO);
+        let mut loader =
+            risc0_circuit_rv32im::prove::engine::loader::Loader::new(max_cycles, &mut new_buf);
+        loader.load();
+
+        let mut diffs = Vec::new();
+
+        let new_ctrl = new_buf.as_slice();
+        for cycle in 0..max_cycles {
+            for reg in 0..ctrl_size {
+                let idx = max_cycles * reg + cycle;
+                let old_cell = old_ctrl[idx];
+                let new_cell = new_ctrl[idx];
+                if old_cell != new_cell {
+                    diffs.push((cycle, reg, old_cell, new_cell));
+                }
+            }
+        }
+
+        assert_eq!(diffs, vec![]);
     }
 }

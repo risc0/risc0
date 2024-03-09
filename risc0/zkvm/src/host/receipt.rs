@@ -507,7 +507,7 @@ impl CompositeReceipt {
             .ok_or(VerificationError::ReceiptFormatError)?
             .claim;
 
-        // After verifying the internally consistency of this receipt, we can use
+        // After verifying the internal consistency of this receipt, we can use
         // self.assumptions and self.journal_digest in place of
         // last_claim.output, which is equal.
         self.verify_output_consistency(last_claim)?;

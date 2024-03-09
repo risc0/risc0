@@ -31,7 +31,7 @@ use risc0_zkp::{
 };
 
 use self::witgen::WitnessGenerator;
-use super::{emu::Segment, Seal, SegmentProver};
+use super::{segment::Segment, Seal, SegmentProver};
 use crate::{
     layout::{OutBuffer, LAYOUT},
     CIRCUIT, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CTRL, REGISTER_GROUP_DATA,

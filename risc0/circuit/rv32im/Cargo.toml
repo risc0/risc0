@@ -18,11 +18,15 @@ required-features = ["prove"]
 [dependencies]
 anyhow = { version = "1.0", default-features = false }
 cfg-if = "1.0"
-derive-debug = "0.1.2"
+derive-debug = "0.1"
 risc0-binfmt = { workspace = true }
 risc0-core = { workspace = true }
 risc0-zkp = { workspace = true }
 risc0-zkvm-platform = { workspace = true }
+serde = { version = "1.0", default-features = false, features = [
+  "derive",
+  "alloc",
+] }
 tracing = { version = "0.1", default-features = false, features = [
   "attributes",
 ] }
@@ -84,4 +88,4 @@ prove = [
   "std",
 ]
 seq = ["prove"]
-std = ["risc0-zkp/std"]
+std = ["risc0-zkp/std", "serde/std"]

@@ -15,10 +15,12 @@
 pub mod emu;
 pub mod engine;
 pub mod hal;
+pub mod segment;
 
-use self::emu::Segment;
 use anyhow::Result;
 use cfg_if::cfg_if;
+
+use self::segment::Segment;
 
 pub type Seal = Vec<u32>;
 

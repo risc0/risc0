@@ -39,11 +39,14 @@ use super::{
     mux::{Major, TopMux},
     pager::{PagedMemory, PAGE_WORDS},
     rv32im::{DecodedInstruction, EmuContext, Emulator, InsnKind, Instruction, TrapCause},
-    ByteAddr, Segment, WordAddr, SYSTEM_START,
+    ByteAddr, WordAddr, SYSTEM_START,
 };
-use crate::prove::engine::loader::{
-    ram_load_cycles, FINI_TAILROOM, SETUP_CYCLES, SHA_INIT_OFFSET, SHA_K, SHA_K_OFFSET,
-    ZEROS_OFFSET,
+use crate::prove::{
+    engine::loader::{
+        ram_load_cycles, FINI_TAILROOM, SETUP_CYCLES, SHA_INIT_OFFSET, SHA_K, SHA_K_OFFSET,
+        ZEROS_OFFSET,
+    },
+    segment::Segment,
 };
 
 #[derive(Clone, Debug, PartialEq)]
