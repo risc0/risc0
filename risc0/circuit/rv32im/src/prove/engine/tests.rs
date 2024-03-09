@@ -27,7 +27,7 @@ use super::{loader::Loader, witgen::WitnessGenerator};
 use crate::{
     prove::{
         emu::{
-            exec::{execute, DEFAULT_SEGMENT_PO2},
+            exec::{execute, execute_elf, DEFAULT_SEGMENT_LIMIT_PO2},
             testutil::{self, NullSyscall, DEFAULT_SESSION_LIMIT},
         },
         get_segment_prover,
@@ -60,13 +60,14 @@ impl ControlCheck {
 fn fwd_rev_ab_test(program: Program) {
     let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
 
-    let segments = execute(
+    let result = execute(
         image,
-        DEFAULT_SEGMENT_PO2,
+        DEFAULT_SEGMENT_LIMIT_PO2,
         DEFAULT_SESSION_LIMIT,
         &NullSyscall::default(),
     )
     .unwrap();
+    let segments = result.segments;
     for segment in segments {
         let trace = segment.preflight().unwrap();
         let io = segment.prepare_globals();
@@ -86,13 +87,14 @@ fn basic() {
     let program = testutil::basic();
     let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
 
-    let segments = execute(
+    let result = execute(
         image,
-        DEFAULT_SEGMENT_PO2,
+        DEFAULT_SEGMENT_LIMIT_PO2,
         DEFAULT_SESSION_LIMIT,
         &NullSyscall::default(),
     )
     .unwrap();
+    let segments = result.segments;
     let segment = segments.first().unwrap();
 
     let prover = get_segment_prover();
@@ -109,12 +111,13 @@ fn system_split() {
     let program = testutil::simple_loop();
     let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
 
-    let segments = execute(image, 15, DEFAULT_SESSION_LIMIT, &NullSyscall::default()).unwrap();
+    let result = execute(image, 15, DEFAULT_SESSION_LIMIT, &NullSyscall::default()).unwrap();
 
     let prover = get_segment_prover();
     let suite = Sha256HashSuite::new_suite();
     let hal = CpuHal::new(suite.clone());
 
+    let segments = result.segments;
     for segment in segments {
         let seal = prover.prove_segment(&segment).unwrap();
         let checker = ControlCheck::new(&hal, segment.po2);
@@ -136,4 +139,101 @@ fn fwd_rev_ab_split() {
 #[test]
 fn fwd_rev_ab_large_text() {
     fwd_rev_ab_test(testutil::large_text());
+}
+
+// These tests come from:
+// https://github.com/riscv-software-src/riscv-tests
+// They were built using the toolchain from:
+// https://github.com/risc0/toolchain/releases/tag/2022.03.25
+mod riscv {
+    use super::{NullSyscall, DEFAULT_SEGMENT_LIMIT_PO2, DEFAULT_SESSION_LIMIT};
+
+    fn run_test(test_name: &str) {
+        use std::io::Read;
+
+        use flate2::read::GzDecoder;
+        use tar::Archive;
+
+        let bytes = include_bytes!("../testdata/riscv-tests.tgz");
+        let gz = GzDecoder::new(&bytes[..]);
+        let mut tar = Archive::new(gz);
+        for entry in tar.entries().unwrap() {
+            let mut entry = entry.unwrap();
+            if !entry.header().entry_type().is_file() {
+                continue;
+            }
+            let path = entry.path().unwrap();
+            let filename = path.file_name().unwrap().to_str().unwrap();
+            if filename != test_name {
+                continue;
+            }
+            let mut elf = Vec::new();
+            entry.read_to_end(&mut elf).unwrap();
+
+            super::execute_elf(
+                &elf,
+                DEFAULT_SEGMENT_LIMIT_PO2,
+                DEFAULT_SESSION_LIMIT,
+                &NullSyscall::default(),
+            )
+            .unwrap();
+        }
+    }
+
+    macro_rules! test_case {
+        ($func_name:ident) => {
+            #[test_log::test]
+            #[cfg_attr(feature = "cuda", serial_test::serial)]
+            fn $func_name() {
+                run_test(stringify!($func_name));
+            }
+        };
+    }
+
+    test_case!(add);
+    test_case!(addi);
+    test_case!(and);
+    test_case!(andi);
+    test_case!(auipc);
+    test_case!(beq);
+    test_case!(bge);
+    test_case!(bgeu);
+    test_case!(blt);
+    test_case!(bltu);
+    test_case!(bne);
+    test_case!(div);
+    test_case!(divu);
+    test_case!(jal);
+    test_case!(jalr);
+    test_case!(lb);
+    test_case!(lbu);
+    test_case!(lh);
+    test_case!(lhu);
+    test_case!(lui);
+    test_case!(lw);
+    test_case!(mul);
+    test_case!(mulh);
+    test_case!(mulhsu);
+    test_case!(mulhu);
+    test_case!(or);
+    test_case!(ori);
+    test_case!(rem);
+    test_case!(remu);
+    test_case!(sb);
+    test_case!(sh);
+    test_case!(simple);
+    test_case!(sll);
+    test_case!(slli);
+    test_case!(slt);
+    test_case!(slti);
+    test_case!(sltiu);
+    test_case!(sltu);
+    test_case!(sra);
+    test_case!(srai);
+    test_case!(srl);
+    test_case!(srli);
+    test_case!(sub);
+    test_case!(sw);
+    test_case!(xor);
+    test_case!(xori);
 }

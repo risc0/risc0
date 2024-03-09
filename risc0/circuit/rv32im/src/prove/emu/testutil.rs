@@ -20,7 +20,7 @@ use risc0_zkvm_platform::WORD_SIZE;
 
 use super::exec::{Syscall, SyscallContext};
 
-pub const DEFAULT_SESSION_LIMIT: usize = 1 << 24;
+pub const DEFAULT_SESSION_LIMIT: Option<u64> = Some(1 << 24);
 
 #[derive(Default)]
 pub struct NullSyscall;
@@ -32,7 +32,7 @@ impl Syscall for NullSyscall {
         _ctx: &mut dyn SyscallContext,
         _guest_buf: &mut [u32],
     ) -> Result<(u32, u32)> {
-        todo!()
+        unimplemented!()
     }
 }
 
@@ -94,6 +94,3 @@ pub fn large_text() -> Program {
     image.insert(pc, 0x00000073); // ecall(halt)
     Program { entry, image }
 }
-
-// 20322: blt
-// 20323: addi

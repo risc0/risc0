@@ -22,14 +22,13 @@ use std::{
 };
 
 use anyhow::{ensure, Context, Result};
-use risc0_binfmt::{MemoryImage, SystemState};
+use risc0_binfmt::{MemoryImage, SyscallRecord, SystemState};
 use risc0_zkvm_platform::WORD_SIZE;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    host::{client::env::SegmentPath, server::exec::executor::SyscallRecord},
-    sha::Digest,
-    Assumption, Assumptions, ExitCode, Journal, Output, ReceiptClaim,
+    host::client::env::SegmentPath, sha::Digest, Assumption, Assumptions, ExitCode, Journal,
+    Output, ReceiptClaim,
 };
 
 #[derive(Clone, Default, Serialize, Deserialize, Debug)]

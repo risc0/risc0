@@ -18,7 +18,7 @@ use alloc::{collections::BTreeMap, string::String, vec, vec::Vec};
 use core::fmt::Debug;
 
 use anyhow::Result;
-use risc0_binfmt::SystemState;
+use risc0_binfmt::{ExitCode, SystemState};
 use risc0_circuit_recursion::control_id::ALLOWED_IDS_ROOT;
 use risc0_circuit_rv32im::{
     control_id::{BLAKE2B_CONTROL_ID, POSEIDON2_CONTROL_ID, SHA256_CONTROL_ID},
@@ -45,7 +45,7 @@ pub use super::recursion::SuccinctReceipt;
 use crate::{
     serde::{from_slice, Error},
     sha::{Digestible, Sha256},
-    Assumptions, ExitCode, MaybePruned, Output, ReceiptClaim,
+    Assumptions, MaybePruned, Output, ReceiptClaim,
 };
 
 /// A receipt attesting to the execution of a guest program.

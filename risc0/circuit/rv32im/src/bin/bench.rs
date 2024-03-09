@@ -18,7 +18,7 @@ use anyhow::Result;
 use risc0_binfmt::{MemoryImage, Program};
 use risc0_circuit_rv32im::{
     prove::{
-        emu::exec::{execute, Syscall, SyscallContext, DEFAULT_SEGMENT_PO2},
+        emu::exec::{execute, Syscall, SyscallContext, DEFAULT_SEGMENT_LIMIT_PO2},
         engine::loader::Loader,
         get_segment_prover, Seal, SegmentProver,
     },
@@ -103,7 +103,14 @@ fn main() {
 
 #[tracing::instrument(skip_all)]
 fn top(prover: &dyn SegmentProver, image: MemoryImage) -> Seal {
-    let segments = execute(image, DEFAULT_SEGMENT_PO2, 1 << 21, &NullSyscall::default()).unwrap();
+    let result = execute(
+        image,
+        DEFAULT_SEGMENT_LIMIT_PO2,
+        None,
+        &NullSyscall::default(),
+    )
+    .unwrap();
+    let segments = result.segments;
     let segment = segments.first().unwrap();
     tracing::info!(
         "segments: {}, cycles: {}",

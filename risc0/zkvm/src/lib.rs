@@ -88,10 +88,28 @@ pub use anyhow::Result;
 #[cfg(not(target_os = "zkvm"))]
 #[cfg(any(feature = "client", feature = "prove"))]
 pub use bytes::Bytes;
-pub use risc0_binfmt::SystemState;
+pub use risc0_binfmt::{ExitCode, InvalidExitCodeError, SystemState};
 pub use risc0_zkvm_platform::{declare_syscall, memory::GUEST_MAX_MEM, PAGE_SIZE};
 
-#[cfg(all(not(target_os = "zkvm"), feature = "prove"))]
+#[cfg(all(
+    not(target_os = "zkvm"),
+    feature = "prove",
+    feature = "parallel-witgen"
+))]
+pub use self::host::{
+    api::server::Server as ApiServer,
+    client::prove::local::LocalProver,
+    server::{
+        exec::adapter::ExecutorImpl,
+        prove::{get_prover_server, loader::Loader, HalPair, ProverServer},
+        session::{FileSegmentRef, Segment, SegmentRef, Session, SessionEvents, SimpleSegmentRef},
+    },
+};
+#[cfg(all(
+    not(target_os = "zkvm"),
+    feature = "prove",
+    not(feature = "parallel-witgen")
+))]
 pub use self::host::{
     api::server::Server as ApiServer,
     client::prove::local::LocalProver,
@@ -113,10 +131,7 @@ pub use self::host::{
         },
     },
 };
-pub use self::receipt_claim::{
-    Assumptions, ExitCode, InvalidExitCodeError, MaybePruned, Output, PrunedValueError,
-    ReceiptClaim,
-};
+pub use self::receipt_claim::{Assumptions, MaybePruned, Output, PrunedValueError, ReceiptClaim};
 #[cfg(not(target_os = "zkvm"))]
 pub use {
     self::host::{

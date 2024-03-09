@@ -16,6 +16,8 @@
 
 #![cfg_attr(all(not(feature = "std"), not(test)), no_std)]
 
+extern crate alloc;
+
 mod elf;
 mod exit_code;
 mod hash;
@@ -23,11 +25,15 @@ mod hash;
 mod image;
 mod sys_state;
 
+use alloc::vec::Vec;
+
+use serde::{Deserialize, Serialize};
+
 #[cfg(not(target_os = "zkvm"))]
 pub use self::image::{MemoryImage, PageTableInfo};
 pub use crate::{
     elf::Program,
-    exit_code::ExitCode,
+    exit_code::{ExitCode, InvalidExitCodeError},
     hash::{tagged_list, tagged_list_cons, tagged_struct, Digestible},
     sys_state::{read_sha_halfs, write_sha_halfs, DecodeError, SystemState},
 };
@@ -40,4 +46,10 @@ pub fn compute_image_id(elf: &[u8]) -> anyhow::Result<risc0_zkp::core::digest::D
     let program = Program::load_elf(elf, GUEST_MAX_MEM as u32)?;
     let image = MemoryImage::new(&program, PAGE_SIZE as u32)?;
     Ok(image.compute_id())
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct SyscallRecord {
+    pub to_guest: Vec<u32>,
+    pub regs: (u32, u32),
 }

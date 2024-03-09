@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use core::fmt;
+
 use serde::{Deserialize, Serialize};
 
 /// Exit condition indicated by the zkVM at the end of the guest execution.
@@ -46,7 +48,59 @@ pub enum ExitCode {
     /// [segments]: https://dev.risczero.com/terminology#segment
     SystemSplit,
 
-    /// This indicates that the guest exited upon reaching the session limit set
-    /// by the host.
+    /// This indicates that the guest exited upon reaching the session limit set by the host.
+    ///
+    /// NOTE: The current version of the RISC Zero zkVM will never exit with an exit code of SessionLimit.
+    /// This is because the system cannot currently prove that the session limit as been reached.
     SessionLimit,
 }
+
+impl ExitCode {
+    pub fn into_pair(self) -> (u32, u32) {
+        match self {
+            ExitCode::Halted(user_exit) => (0, user_exit),
+            ExitCode::Paused(user_exit) => (1, user_exit),
+            ExitCode::SystemSplit => (2, 0),
+            ExitCode::SessionLimit => (2, 2),
+        }
+    }
+
+    pub fn from_pair(sys_exit: u32, user_exit: u32) -> Result<ExitCode, InvalidExitCodeError> {
+        match sys_exit {
+            0 => Ok(ExitCode::Halted(user_exit)),
+            1 => Ok(ExitCode::Paused(user_exit)),
+            2 => Ok(ExitCode::SystemSplit),
+            _ => Err(InvalidExitCodeError(sys_exit, user_exit)),
+        }
+    }
+
+    #[cfg(not(target_os = "zkvm"))]
+    pub fn expects_output(&self) -> bool {
+        match self {
+            ExitCode::Halted(_) | ExitCode::Paused(_) => true,
+            ExitCode::SystemSplit | ExitCode::SessionLimit => false,
+        }
+    }
+
+    /// True if the exit code is Halted(0) or Paused(0), indicating the program guest exited with
+    /// an ok status.
+    pub fn is_ok(&self) -> bool {
+        matches!(self, ExitCode::Halted(0) | ExitCode::Paused(0))
+    }
+}
+
+impl Eq for ExitCode {}
+
+/// Error returned when a (system, user) exit code pair is an invalid
+/// representation.
+#[derive(Debug, Copy, Clone)]
+pub struct InvalidExitCodeError(pub u32, pub u32);
+
+impl fmt::Display for InvalidExitCodeError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "invalid exit code pair ({}, {})", self.0, self.1)
+    }
+}
+
+#[cfg(feature = "std")]
+impl std::error::Error for InvalidExitCodeError {}

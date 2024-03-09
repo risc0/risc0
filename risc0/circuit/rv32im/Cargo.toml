@@ -30,6 +30,9 @@ tracing = { version = "0.1", default-features = false, features = [
 [target.'cfg(not(target_os = "zkvm"))'.dependencies]
 bytemuck = { version = "1.13", optional = true }
 crossbeam = { version = "0.8", optional = true }
+crypto-bigint = { version = "0.5", default-features = false, features = [
+  "rand",
+], optional = true }
 cust = { version = "0.3", optional = true }
 lazy-regex = { version = "3.1", optional = true }
 rand = { version = "0.8", optional = true }
@@ -45,6 +48,11 @@ tracing-subscriber = { version = "0.3", features = [
 [dev-dependencies]
 criterion = "0.5"
 test-log = { version = "0.2", default-features = false, features = ["trace"] }
+
+[target.'cfg(not(target_os = "zkvm"))'.dev-dependencies]
+flate2 = "1.0"
+serial_test = "3.0"
+tar = "0.4"
 
 [features]
 cuda = [
@@ -64,6 +72,7 @@ metal = [
 prove = [
   "dep:bytemuck",
   "dep:crossbeam",
+  "dep:crypto-bigint",
   "dep:lazy-regex",
   "dep:rand",
   "dep:rayon",

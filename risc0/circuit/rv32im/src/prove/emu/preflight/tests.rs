@@ -20,7 +20,7 @@ use test_log::test;
 
 use super::{Back, MemoryTransaction, PreflightCycle};
 use crate::prove::emu::{
-    exec::{execute, DEFAULT_SEGMENT_PO2},
+    exec::{execute, DEFAULT_SEGMENT_LIMIT_PO2},
     mux::{Major, TopMux},
     rv32im::InsnKind,
     testutil::{self, NullSyscall, DEFAULT_SESSION_LIMIT},
@@ -54,13 +54,14 @@ fn basic() {
     let program = testutil::basic();
     let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
 
-    let segments = execute(
+    let result = execute(
         image,
-        DEFAULT_SEGMENT_PO2,
+        DEFAULT_SEGMENT_LIMIT_PO2,
         DEFAULT_SESSION_LIMIT,
         &NullSyscall::default(),
     )
     .unwrap();
+    let segments = result.segments;
     let segment = segments.first().unwrap();
 
     let mut trace = segment.preflight().unwrap();
@@ -122,7 +123,9 @@ fn system_split() {
     let program = testutil::simple_loop();
     let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
 
-    let segments = execute(image, 15, DEFAULT_SESSION_LIMIT, &NullSyscall::default()).unwrap();
+    let result = execute(image, 15, DEFAULT_SESSION_LIMIT, &NullSyscall::default()).unwrap();
+    let segments = result.segments;
+
     assert_eq!(segments.len(), 2);
     {
         let trace = segments[0].preflight().unwrap();

@@ -14,9 +14,11 @@
 
 //! Run the zkVM guest and prove its results.
 
+#[cfg(not(feature = "parallel-witgen"))]
 mod argument;
 mod dev_mode;
 pub(crate) mod loader;
+#[cfg(not(feature = "parallel-witgen"))]
 mod machine;
 mod prover_impl;
 #[cfg(test)]
@@ -26,17 +28,8 @@ use std::rc::Rc;
 
 use anyhow::{anyhow, bail, Result};
 use cfg_if::cfg_if;
-use risc0_circuit_rv32im::CircuitImpl;
-use risc0_core::field::{
-    baby_bear::{BabyBear, Elem, ExtElem},
-    Elem as _,
-};
-use risc0_zkp::{
-    adapter::CircuitInfo,
-    core::digest::DIGEST_WORDS,
-    hal::{CircuitHal, Hal},
-};
-use risc0_zkvm_platform::WORD_SIZE;
+use risc0_core::field::baby_bear::{BabyBear, Elem, ExtElem};
+use risc0_zkp::hal::{CircuitHal, Hal};
 
 use self::{dev_mode::DevModeProver, prover_impl::ProverImpl};
 use crate::{
@@ -164,7 +157,13 @@ impl Segment {
         prover.prove_segment(ctx, self)
     }
 
+    #[cfg(not(feature = "parallel-witgen"))]
     fn prepare_globals(&self) -> Vec<Elem> {
+        use risc0_circuit_rv32im::CircuitImpl;
+        use risc0_core::field::Elem as _;
+        use risc0_zkp::{adapter::CircuitInfo, core::digest::DIGEST_WORDS};
+        use risc0_zkvm_platform::WORD_SIZE;
+
         let mut io = vec![Elem::INVALID; CircuitImpl::OUTPUT_SIZE];
         tracing::debug!("run> pc: 0x{:08x}", self.pre_image.pc);
 

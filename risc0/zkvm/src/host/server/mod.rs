@@ -13,6 +13,7 @@
 // limitations under the License.
 
 pub(crate) mod exec;
+#[cfg(not(feature = "parallel-witgen"))]
 pub(crate) mod opcode;
 #[cfg(feature = "prove")]
 pub(crate) mod prove;

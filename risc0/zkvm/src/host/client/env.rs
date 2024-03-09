@@ -31,13 +31,13 @@ use risc0_zkvm_platform::{self, fileno};
 use serde::Serialize;
 use tempfile::TempDir;
 
-use crate::serde::to_vec;
 use crate::{
     host::client::{
         exec::TraceEvent,
         posix_io::PosixIo,
         slice_io::{slice_io_from_fn, SliceIo, SliceIoTable},
     },
+    serde::to_vec,
     Assumption,
 };
 

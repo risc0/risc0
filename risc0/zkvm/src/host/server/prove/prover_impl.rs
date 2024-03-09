@@ -13,19 +13,10 @@
 // limitations under the License.
 
 use anyhow::{bail, Result};
-use risc0_circuit_rv32im::{
-    layout::{OutBuffer, LAYOUT},
-    CIRCUIT, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA,
-};
 use risc0_core::field::baby_bear::{BabyBear, Elem, ExtElem};
-use risc0_zkp::{
-    adapter::TapsProvider,
-    hal::{CircuitHal, Hal},
-    layout::Buffer,
-    prove::{adapter::ProveAdapter, executor::Executor, Prover},
-};
+use risc0_zkp::hal::{CircuitHal, Hal};
 
-use super::{loader::Loader, machine::MachineContext, HalPair, ProverServer};
+use super::{HalPair, ProverServer};
 use crate::{
     host::{
         receipt::{CompositeReceipt, InnerReceipt, SegmentReceipt, SuccinctReceipt},
@@ -130,7 +121,21 @@ where
         Ok(receipt)
     }
 
+    #[cfg(not(feature = "parallel-witgen"))]
     fn prove_segment(&self, ctx: &VerifierContext, segment: &Segment) -> Result<SegmentReceipt> {
+        use risc0_circuit_rv32im::{
+            layout::{OutBuffer, LAYOUT},
+            CIRCUIT, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA,
+        };
+
+        use risc0_zkp::{
+            adapter::TapsProvider,
+            layout::Buffer,
+            prove::{adapter::ProveAdapter, executor::Executor, Prover},
+        };
+
+        use super::{loader::Loader, machine::MachineContext};
+
         tracing::debug!(
             "prove_segment[{}]: po2: {}, cycles: {}",
             segment.index,
@@ -187,6 +192,34 @@ where
             seal,
             index: segment.index,
             hashfn: hashfn.clone(),
+            claim: segment.get_claim()?,
+        };
+        receipt.verify_integrity_with_context(ctx)?;
+
+        Ok(receipt)
+    }
+
+    #[cfg(feature = "parallel-witgen")]
+    fn prove_segment(&self, ctx: &VerifierContext, segment: &Segment) -> Result<SegmentReceipt> {
+        use risc0_circuit_rv32im::prove::{engine::SegmentProverImpl, SegmentProver as _};
+
+        tracing::debug!(
+            "prove_segment[{}]: po2: {}, cycles: {}",
+            segment.index,
+            segment.po2,
+            segment.cycles,
+        );
+
+        let hashfn = self.hal_pair.hal.get_hash_suite().name.clone();
+
+        let prover =
+            SegmentProverImpl::new(self.hal_pair.hal.clone(), self.hal_pair.circuit_hal.clone());
+        let seal = prover.prove_segment(&segment.clone().into())?;
+
+        let receipt = SegmentReceipt {
+            seal,
+            index: segment.index,
+            hashfn,
             claim: segment.get_claim()?,
         };
         receipt.verify_integrity_with_context(ctx)?;

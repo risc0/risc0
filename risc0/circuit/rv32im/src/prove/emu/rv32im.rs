@@ -79,7 +79,7 @@ pub enum TrapCause {
     Breakpoint,
     LoadAddressMisaligned,
     LoadAccessFault,
-    StoreAddressMisaligned,
+    StoreAddressMisaligned(ByteAddr),
     StoreAccessFault,
     EnvironmentCallFromUserMode,
 }
@@ -425,7 +425,7 @@ impl Emulator {
                 }
             }
             InsnKind::ADDI => rs1.wrapping_add(imm_i),
-            InsnKind::XORI => rs1 & imm_i,
+            InsnKind::XORI => rs1 ^ imm_i,
             InsnKind::ORI => rs1 | imm_i,
             InsnKind::ANDI => rs1 & imm_i,
             InsnKind::SLLI => rs1 << (imm_i & 0x1f),
@@ -452,7 +452,7 @@ impl Emulator {
             InsnKind::BLTU => br_cond(rs1 < rs2),
             InsnKind::BGEU => br_cond(rs1 >= rs2),
             InsnKind::JAL => {
-                new_pc = ByteAddr(rs1.wrapping_add(decoded.imm_j()));
+                new_pc = pc.wrapping_add(decoded.imm_j());
                 (pc + WORD_SIZE).0
             }
             InsnKind::JALR => {
@@ -577,14 +577,16 @@ impl Emulator {
             }
             InsnKind::SH => {
                 if addr.0 & 0x01 != 0 {
-                    return ctx.trap(TrapCause::StoreAddressMisaligned);
+                    tracing::debug!("Misaligned SH");
+                    return ctx.trap(TrapCause::StoreAddressMisaligned(addr));
                 }
                 data ^= data & (0xffff << shift);
                 data |= (rs2 & 0xffff) << shift;
             }
             InsnKind::SW => {
                 if addr.0 & 0x03 != 0 {
-                    return ctx.trap(TrapCause::StoreAddressMisaligned);
+                    tracing::debug!("Misaligned SW");
+                    return ctx.trap(TrapCause::StoreAddressMisaligned(addr));
                 }
                 data = rs2;
             }

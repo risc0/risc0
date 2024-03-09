@@ -18,7 +18,11 @@
 //! [crate::Session] contains one or more [crate::Segment]s, each of which
 //! contains an execution trace of the specified program.
 
+#[cfg(feature = "parallel-witgen")]
+pub(crate) mod adapter;
+#[cfg(not(feature = "parallel-witgen"))]
 pub(crate) mod executor;
+#[cfg(not(feature = "parallel-witgen"))]
 mod monitor;
 pub(crate) mod profiler;
 pub(crate) mod syscall;

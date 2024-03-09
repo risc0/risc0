@@ -26,7 +26,7 @@ use test_log::test;
 use super::{Syscall, SyscallContext};
 use crate::prove::emu::{
     addr::ByteAddr,
-    exec::DEFAULT_SEGMENT_PO2,
+    exec::DEFAULT_SEGMENT_LIMIT_PO2,
     testutil::{self, DEFAULT_SESSION_LIMIT},
 };
 
@@ -83,14 +83,15 @@ fn basic() {
     let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
     let pre_image_id = image.compute_id();
 
-    let segments = super::execute(
+    let result = super::execute(
         image,
-        DEFAULT_SEGMENT_PO2,
+        DEFAULT_SEGMENT_LIMIT_PO2,
         DEFAULT_SESSION_LIMIT,
         &BasicSyscall::default(),
     )
     .unwrap();
 
+    let segments = result.segments;
     assert_eq!(segments.len(), 1);
     let segment = segments.first().unwrap();
     assert_eq!(segment.pre_state.digest::<ShaImpl>(), pre_image_id);
@@ -106,9 +107,10 @@ fn system_split() {
     let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
     let pre_image_id = image.compute_id();
 
-    let segments =
+    let result =
         super::execute(image, 15, DEFAULT_SESSION_LIMIT, &BasicSyscall::default()).unwrap();
 
+    let segments = result.segments;
     assert_eq!(segments.len(), 2);
     assert_eq!(segments[0].exit_code, ExitCode::SystemSplit);
     assert_eq!(segments[0].pre_state.digest::<ShaImpl>(), pre_image_id);

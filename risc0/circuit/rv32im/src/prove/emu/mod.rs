@@ -22,7 +22,7 @@ pub mod rv32im;
 pub(crate) mod testutil;
 
 use derive_debug::Dbg;
-use risc0_binfmt::{ExitCode, MemoryImage, SystemState};
+use risc0_binfmt::{ExitCode, MemoryImage, SyscallRecord, SystemState};
 use risc0_zkp::{
     adapter::CircuitInfo as _,
     core::digest::DIGEST_WORDS,
@@ -34,11 +34,6 @@ use self::addr::{ByteAddr, WordAddr};
 use crate::CircuitImpl;
 
 const SYSTEM_START: WordAddr = ByteAddr(SYSTEM.start() as u32).waddr();
-
-pub struct SyscallRecord {
-    pub to_guest: Vec<u32>,
-    pub regs: (u32, u32),
-}
 
 #[derive(Dbg)]
 pub struct Segment {
