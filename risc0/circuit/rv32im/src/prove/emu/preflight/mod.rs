@@ -506,7 +506,7 @@ impl Preflight {
 
     fn ecall_software(&mut self) -> Result<bool> {
         self.pc += WORD_SIZE;
-        Ok(true)
+        todo!()
     }
 
     fn ecall_sha(&mut self) -> Result<bool> {

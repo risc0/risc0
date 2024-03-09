@@ -558,7 +558,7 @@ impl<'a, S: Syscall> EmuContext for Executor<'a, S> {
     }
 
     fn store_memory(&mut self, addr: WordAddr, data: u32) -> Result<()> {
-        tracing::debug!("store_mem: {:?} <= 0x{data:08x}", addr.baddr());
+        // tracing::trace!("store_mem: {:?} <= 0x{data:08x}", addr.baddr());
         self.pager.store(addr, data)
     }
 }
