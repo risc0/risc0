@@ -544,7 +544,10 @@ impl EmuContext for Preflight {
     }
 
     fn on_normal_end(&mut self, insn: &Instruction, _decoded: &DecodedInstruction) {
-        if insn.kind == InsnKind::EANY {
+        if insn.cycles == 2 {
+            self.add_par_cycle(false, insn.kind.into(), Back::Body { pc: self.prev_pc });
+            self.add_cycle(false, insn.kind.into());
+        } else if insn.kind == InsnKind::EANY {
             self.add_cycle(false, insn.kind.into());
         } else {
             self.add_par_cycle(false, insn.kind.into(), Back::Body { pc: self.prev_pc });

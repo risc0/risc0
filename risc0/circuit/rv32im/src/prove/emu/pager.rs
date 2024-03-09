@@ -99,7 +99,7 @@ impl PagedMemory {
 
     pub fn store(&mut self, addr: WordAddr, data: u32) -> Result<()> {
         let page_idx = addr.page_idx();
-        tracing::trace!("store: {addr:?}, page: 0x{page_idx:05x}, data: 0x{data:08x}");
+        // tracing::trace!("store: {addr:?}, page: 0x{page_idx:05x}, data: 0x{data:08x}");
         let state = if let Some(state) = self.page_states.get(&page_idx) {
             *state
         } else {

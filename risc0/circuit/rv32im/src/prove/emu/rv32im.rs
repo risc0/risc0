@@ -237,7 +237,7 @@ const RV32IM_ISA: InstructionTable = [
     insn(InsnKind::XOR, InsnCategory::Compute, 0x33, 0x4, 0x00, 2),
     insn(InsnKind::OR, InsnCategory::Compute, 0x33, 0x6, 0x00, 2),
     insn(InsnKind::AND, InsnCategory::Compute, 0x33, 0x7, 0x00, 2),
-    insn(InsnKind::SLL, InsnCategory::Compute, 0x33, 0x1, 0x00, 2),
+    insn(InsnKind::SLL, InsnCategory::Compute, 0x33, 0x1, 0x00, 1),
     insn(InsnKind::SRL, InsnCategory::Compute, 0x33, 0x5, 0x00, 2),
     insn(InsnKind::SRA, InsnCategory::Compute, 0x33, 0x5, 0x20, 2),
     insn(InsnKind::SLT, InsnCategory::Compute, 0x33, 0x2, 0x00, 1),
@@ -246,7 +246,7 @@ const RV32IM_ISA: InstructionTable = [
     insn(InsnKind::XORI, InsnCategory::Compute, 0x13, 0x4, -1, 2),
     insn(InsnKind::ORI, InsnCategory::Compute, 0x13, 0x6, -1, 2),
     insn(InsnKind::ANDI, InsnCategory::Compute, 0x13, 0x7, -1, 2),
-    insn(InsnKind::SLLI, InsnCategory::Compute, 0x13, 0x1, 0x00, 2),
+    insn(InsnKind::SLLI, InsnCategory::Compute, 0x13, 0x1, 0x00, 1),
     insn(InsnKind::SRLI, InsnCategory::Compute, 0x13, 0x5, 0x00, 2),
     insn(InsnKind::SRAI, InsnCategory::Compute, 0x13, 0x5, 0x20, 2),
     insn(InsnKind::SLTI, InsnCategory::Compute, 0x13, 0x2, -1, 1),
@@ -261,10 +261,10 @@ const RV32IM_ISA: InstructionTable = [
     insn(InsnKind::JALR, InsnCategory::Compute, 0x67, 0x0, -1, 1),
     insn(InsnKind::LUI, InsnCategory::Compute, 0x37, -1, -1, 1),
     insn(InsnKind::AUIPC, InsnCategory::Compute, 0x17, -1, -1, 1),
-    insn(InsnKind::MUL, InsnCategory::Compute, 0x33, 0x0, 0x01, 2),
-    insn(InsnKind::MULH, InsnCategory::Compute, 0x33, 0x1, 0x01, 2),
-    insn(InsnKind::MULHSU, InsnCategory::Compute, 0x33, 0x2, 0x01, 2),
-    insn(InsnKind::MULHU, InsnCategory::Compute, 0x33, 0x3, 0x01, 2),
+    insn(InsnKind::MUL, InsnCategory::Compute, 0x33, 0x0, 0x01, 1),
+    insn(InsnKind::MULH, InsnCategory::Compute, 0x33, 0x1, 0x01, 1),
+    insn(InsnKind::MULHSU, InsnCategory::Compute, 0x33, 0x2, 0x01, 1),
+    insn(InsnKind::MULHU, InsnCategory::Compute, 0x33, 0x3, 0x01, 1),
     insn(InsnKind::DIV, InsnCategory::Compute, 0x33, 0x4, 0x01, 2),
     insn(InsnKind::DIVU, InsnCategory::Compute, 0x33, 0x5, 0x01, 2),
     insn(InsnKind::REM, InsnCategory::Compute, 0x33, 0x6, 0x01, 2),
@@ -512,6 +512,7 @@ impl Emulator {
         decoded: &DecodedInstruction,
     ) -> Result<bool> {
         let rs1 = ctx.load_register(decoded.rs1 as usize)?;
+        let _rs2 = ctx.load_register(decoded.rs2 as usize)?;
         let addr = ByteAddr(rs1.wrapping_add(decoded.imm_i()));
         if !ctx.check_data_load(addr) {
             return ctx.trap(TrapCause::LoadAccessFault);
