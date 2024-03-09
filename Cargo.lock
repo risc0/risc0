@@ -1044,7 +1044,7 @@ dependencies = [
 
 [[package]]
 name = "bonsai-ethereum-contracts"
-version = "0.7.0-rc.1"
+version = "0.7.0-rc.2"
 dependencies = [
  "anyhow",
  "ethers",
@@ -1055,7 +1055,7 @@ dependencies = [
 
 [[package]]
 name = "bonsai-ethereum-relay"
-version = "0.7.0-rc.1"
+version = "0.7.0-rc.2"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -1096,7 +1096,7 @@ dependencies = [
 
 [[package]]
 name = "bonsai-rest-api-mock"
-version = "0.7.0-rc.1"
+version = "0.7.0-rc.2"
 dependencies = [
  "anyhow",
  "axum",
@@ -1115,7 +1115,7 @@ dependencies = [
 
 [[package]]
 name = "bonsai-sdk"
-version = "0.7.0-rc.1"
+version = "0.7.0-rc.2"
 dependencies = [
  "anyhow",
  "bincode",
@@ -1292,7 +1292,7 @@ dependencies = [
 
 [[package]]
 name = "cargo-risczero"
-version = "0.21.0-rc.1"
+version = "0.21.0-rc.2"
 dependencies = [
  "anyhow",
  "cargo-generate",
@@ -5726,7 +5726,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-binfmt"
-version = "0.21.0-rc.1"
+version = "0.21.0-rc.2"
 dependencies = [
  "anyhow",
  "elf",
@@ -5741,7 +5741,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build"
-version = "0.21.0-rc.1"
+version = "0.21.0-rc.2"
 dependencies = [
  "anyhow",
  "cargo-platform",
@@ -5757,7 +5757,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build-kernel"
-version = "0.21.0-rc.1"
+version = "0.21.0-rc.2"
 dependencies = [
  "cc",
  "directories",
@@ -5768,7 +5768,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion"
-version = "0.21.0-rc.1"
+version = "0.21.0-rc.2"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -5792,7 +5792,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion-sys"
-version = "0.21.0-rc.1"
+version = "0.21.0-rc.2"
 dependencies = [
  "glob",
  "risc0-build-kernel",
@@ -5801,7 +5801,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im"
-version = "0.21.0-rc.1"
+version = "0.21.0-rc.2"
 dependencies = [
  "anyhow",
  "criterion",
@@ -5820,7 +5820,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im-sys"
-version = "0.21.0-rc.1"
+version = "0.21.0-rc.2"
 dependencies = [
  "glob",
  "risc0-build-kernel",
@@ -5829,7 +5829,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-core"
-version = "0.21.0-rc.1"
+version = "0.21.0-rc.2"
 dependencies = [
  "bytemuck",
  "rand 0.8.5",
@@ -5838,7 +5838,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-groth16"
-version = "0.21.0-rc.1"
+version = "0.21.0-rc.2"
 dependencies = [
  "anyhow",
  "ark-bn254",
@@ -5860,7 +5860,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-r0vm"
-version = "0.21.0-rc.1"
+version = "0.21.0-rc.2"
 dependencies = [
  "anyhow",
  "assert_cmd",
@@ -5889,7 +5889,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-sys"
-version = "0.21.0-rc.1"
+version = "0.21.0-rc.2"
 dependencies = [
  "cc",
  "cust",
@@ -5899,7 +5899,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-tools"
-version = "0.21.0-rc.1"
+version = "0.21.0-rc.2"
 dependencies = [
  "assert_cmd",
  "clap",
@@ -5909,7 +5909,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkp"
-version = "0.21.0-rc.1"
+version = "0.21.0-rc.2"
 dependencies = [
  "anyhow",
  "blake2",
@@ -5939,7 +5939,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "0.21.0-rc.1"
+version = "0.21.0-rc.2"
 dependencies = [
  "addr2line",
  "anyhow",
@@ -5991,7 +5991,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-methods"
-version = "0.21.0-rc.1"
+version = "0.21.0-rc.2"
 dependencies = [
  "risc0-build",
  "risc0-zkvm",
@@ -6002,7 +6002,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "0.21.0-rc.1"
+version = "0.21.0-rc.2"
 dependencies = [
  "bytemuck",
  "getrandom 0.2.12",
@@ -6011,7 +6011,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-receipts"
-version = "0.21.0-rc.1"
+version = "0.21.0-rc.2"
 
 [[package]]
 name = "rlp"
