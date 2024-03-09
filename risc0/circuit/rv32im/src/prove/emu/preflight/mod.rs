@@ -544,13 +544,37 @@ impl EmuContext for Preflight {
     }
 
     fn on_normal_end(&mut self, insn: &Instruction, _decoded: &DecodedInstruction) {
-        if insn.cycles == 2 {
-            self.add_par_cycle(false, insn.kind.into(), Back::Body { pc: self.prev_pc });
-            self.add_cycle(false, insn.kind.into());
-        } else if insn.kind == InsnKind::EANY {
-            self.add_cycle(false, insn.kind.into());
-        } else {
-            self.add_par_cycle(false, insn.kind.into(), Back::Body { pc: self.prev_pc });
+        match insn.kind {
+            InsnKind::AND
+            | InsnKind::ANDI
+            | InsnKind::XOR
+            | InsnKind::XORI
+            | InsnKind::OR
+            | InsnKind::ORI => {
+                let mux: TopMux = insn.kind.into();
+                let (_, minor) = mux.as_body().unwrap();
+                self.add_par_cycle(false, mux, Back::Body { pc: self.prev_pc });
+                self.add_cycle(false, TopMux::Body(Major::VerifyAnd, minor));
+            }
+            InsnKind::DIV
+            | InsnKind::DIVU
+            | InsnKind::REM
+            | InsnKind::REMU
+            | InsnKind::SRL
+            | InsnKind::SRA
+            | InsnKind::SRLI
+            | InsnKind::SRAI => {
+                let mux: TopMux = insn.kind.into();
+                let (_, minor) = mux.as_body().unwrap();
+                self.add_par_cycle(false, mux, Back::Body { pc: self.prev_pc });
+                self.add_cycle(false, TopMux::Body(Major::VerifyDivide, minor));
+            }
+            InsnKind::EANY => {
+                self.add_cycle(false, insn.kind.into());
+            }
+            _ => {
+                self.add_par_cycle(false, insn.kind.into(), Back::Body { pc: self.prev_pc });
+            }
         }
         self.prev_pc = self.pc
     }
