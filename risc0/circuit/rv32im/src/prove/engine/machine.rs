@@ -314,8 +314,8 @@ impl ParallelCircuitStepHandler<Elem> for MachineContext {
             "plonkRead" => self.arg_read(cycle, extra, outs),
             "log" => self.log(extra, args),
             "syscallInit" => Ok(()),
-            "syscallBody" => self.syscall_body(outs),
-            "syscallFini" => self.syscall_fini(outs),
+            "syscallBody" => self.syscall_body(cycle, outs),
+            "syscallFini" => self.syscall_fini(cycle, outs),
             _ => unimplemented!("Unsupported extern: {name}"),
         }
     }
@@ -424,9 +424,10 @@ impl MachineContext {
     fn page_info(&self, cycle: usize, outs: &mut [Elem]) -> Result<()> {
         let (stage, offset) = self.get_stage_offset(cycle);
         let cur_cycle = &stage.cycles[cycle - offset];
-        let is_read = stage.extras[cur_cycle.extra_idx + 0];
-        let page_idx = stage.extras[cur_cycle.extra_idx + 1];
-        let is_done = stage.extras[cur_cycle.extra_idx + 2];
+        let extra_idx = cur_cycle.extra_idx.load(Ordering::Relaxed);
+        let is_read = stage.extras[extra_idx + 0];
+        let page_idx = stage.extras[extra_idx + 1];
+        let is_done = stage.extras[extra_idx + 2];
         // tracing::debug!("[{cycle}] page_info: ({is_read}, 0x{page_idx:05x}, {is_done})");
         (outs[0], outs[1], outs[2]) = (is_read.into(), page_idx.into(), is_done.into());
         Ok(())
@@ -664,22 +665,25 @@ impl MachineContext {
         Ok(())
     }
 
-    fn syscall_body(&self, _outs: &mut [Elem]) -> Result<()> {
-        // Quad(outs[0], outs[1], outs[2], outs[3]) =
-        //     self.syscall_out_data.pop_front().unwrap_or_default();
-        // Ok(())
-        todo!()
+    fn syscall_body(&self, cycle: usize, outs: &mut [Elem]) -> Result<()> {
+        let (stage, offset) = self.get_stage_offset(cycle);
+        let cur_cycle = &stage.cycles[cycle - offset];
+        let extra_idx = cur_cycle.extra_idx.fetch_add(1, Ordering::Relaxed);
+        let word = stage.extras[extra_idx];
+        tracing::trace!("syscall_body(0x{word:08x})");
+        Quad(outs[0], outs[1], outs[2], outs[3]) = word.into();
+        Ok(())
     }
 
-    fn syscall_fini(&self, _outs: &mut [Elem]) -> Result<()> {
-        // let syscall_out_regs = self
-        //     .syscall_out_regs
-        //     .pop_front()
-        //     .ok_or(anyhow!("Invalid syscall records"))?;
-        // tracing::trace!("syscall_fini: {:?}", syscall_out_regs);
-        // Quad(outs[0], outs[1], outs[2], outs[3]) = syscall_out_regs.0.into();
-        // Quad(outs[4], outs[5], outs[6], outs[7]) = syscall_out_regs.1.into();
-        // Ok(())
-        todo!()
+    fn syscall_fini(&self, cycle: usize, outs: &mut [Elem]) -> Result<()> {
+        let (stage, offset) = self.get_stage_offset(cycle);
+        let cur_cycle = &stage.cycles[cycle - offset];
+        let extra_idx = cur_cycle.extra_idx.load(Ordering::Relaxed);
+        let a0 = stage.extras[extra_idx + 0];
+        let a1 = stage.extras[extra_idx + 1];
+        tracing::trace!("syscall_fini(0x{a0:08x}, 0x{a1:08x})");
+        Quad(outs[0], outs[1], outs[2], outs[3]) = a0.into();
+        Quad(outs[4], outs[5], outs[6], outs[7]) = a1.into();
+        Ok(())
     }
 }

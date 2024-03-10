@@ -495,7 +495,7 @@ impl<'a> PosixIo<'a> {
         let nbytes = ctx.load_register(REG_A4) as usize;
 
         tracing::debug!(
-            "sys_read, attempting to read {nbytes} bytes from fd {fd}, to_guest: {} bytes",
+            "sys_read(fd: {fd}, nbytes: {nbytes}, into: {} bytes)",
             to_guest.len() * WORD_SIZE
         );
 
@@ -527,10 +527,7 @@ impl<'a> PosixIo<'a> {
         let to_guest_u8 = bytemuck::cast_slice_mut(to_guest);
         let nread_main = read_all(to_guest_u8)?;
 
-        tracing::debug!(
-            "Main read got {nread_main} bytes out of requested {}",
-            to_guest_u8.len()
-        );
+        tracing::debug!("read: {nread_main}, requested: {}", to_guest_u8.len());
 
         // It's possible that there's an unaligned word at the end
         let unaligned_end = if nbytes - nread_main <= WORD_SIZE {
@@ -560,7 +557,7 @@ impl<'a> PosixIo<'a> {
             .get_mut(&fd)
             .ok_or(anyhow!("Bad write file descriptor {fd}"))?;
 
-        tracing::debug!("Writing {buf_len} bytes to file descriptor {fd}");
+        tracing::debug!("sys_write(fd: {fd}, bytes: {buf_len})");
 
         writer.borrow_mut().write_all(from_guest_bytes.as_slice())?;
         Ok((0, 0))

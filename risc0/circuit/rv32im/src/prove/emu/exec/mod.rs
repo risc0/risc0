@@ -262,6 +262,7 @@ impl<'a, S: Syscall> Executor<'a, S> {
     }
 
     fn ecall_halt(&mut self) -> Result<bool> {
+        tracing::trace!("ecall_halt");
         let a0 = self.load_register(REG_A0)?;
         let output_ptr = self.load_guest_addr_from_register(REG_A1)?;
         let output: [u8; DIGEST_BYTES] = self.load_array_from_guest(output_ptr)?;
@@ -291,22 +292,27 @@ impl<'a, S: Syscall> Executor<'a, S> {
         Self::check_guest_addr(name_end)?;
         tracing::trace!("ecall_software({syscall_name})");
 
-        // let chunks = align_up(guest_len as usize, WORD_SIZE);
-        let mut guest_buf = vec![0u32; into_guest_len as usize];
+        // let chunks = align_up(guest_len as usize, IO_CHUNK_WORDS);
+        let mut to_guest = vec![0u32; into_guest_len as usize];
 
         let (a0, a1) = self
             .syscall_handler
-            .syscall(&syscall_name, self, &mut guest_buf)?;
+            .syscall(&syscall_name, self, &mut to_guest)?;
 
         // The guest uses a null pointer to indicate that a transfer from host
         // to guest is not needed.
         if !into_guest_ptr.is_null() {
             Self::check_guest_addr(into_guest_ptr + into_guest_len)?;
-            self.store_region(into_guest_ptr, bytemuck::cast_slice(&guest_buf))?
+            self.store_region(into_guest_ptr, bytemuck::cast_slice(&to_guest))?
         }
 
         self.store_register(REG_A0, a0)?;
         self.store_register(REG_A1, a1)?;
+
+        self.syscalls.push(SyscallRecord {
+            to_guest,
+            regs: (a0, a1),
+        });
 
         Ok(true)
     }
@@ -594,10 +600,6 @@ pub fn execute_elf<S: Syscall>(
     let image = MemoryImage::new(&program, PAGE_SIZE as u32)?;
     execute(image, segment_po2, max_cycles, syscall_handler)
 }
-
-// const fn align_up(addr: usize, align: usize) -> usize {
-//     (addr + align - 1) & !(align - 1)
-// }
 
 // SysCycleCount:
 //     ctx.get_cycle()

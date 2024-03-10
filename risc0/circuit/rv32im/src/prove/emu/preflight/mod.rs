@@ -15,10 +15,12 @@
 #[cfg(test)]
 mod tests;
 
+use std::collections::VecDeque;
 use std::sync::atomic::{AtomicUsize, Ordering};
 
-use anyhow::{bail, Result};
+use anyhow::{anyhow, bail, ensure, Result};
 use derive_debug::Dbg;
+use risc0_binfmt::SyscallRecord;
 use risc0_zkp::{
     core::{
         digest::{Digest, DIGEST_WORDS},
@@ -26,7 +28,9 @@ use risc0_zkp::{
     },
     ZK_CYCLES,
 };
+use risc0_zkvm_platform::syscall::IO_CHUNK_WORDS;
 use risc0_zkvm_platform::{
+    align_up,
     syscall::{
         ecall, halt,
         reg_abi::{REG_A0, REG_A1, REG_T0},
@@ -68,7 +72,7 @@ pub struct PreflightCycle {
     pub mux: TopMux,
     pub back: Option<Back>,
     pub mem_idx: AtomicUsize,
-    pub extra_idx: usize,
+    pub extra_idx: AtomicUsize,
 }
 
 #[derive(Clone, Dbg, PartialEq)]
@@ -104,6 +108,7 @@ struct Preflight {
     output_ptr: ByteAddr,
     pre_merkle_root: Digest,
     halted: Option<u32>,
+    syscalls: VecDeque<SyscallRecord>,
 }
 
 impl Clone for PreflightCycle {
@@ -112,7 +117,7 @@ impl Clone for PreflightCycle {
             mux: self.mux.clone(),
             back: self.back.clone(),
             mem_idx: AtomicUsize::new(self.mem_idx.load(Ordering::Relaxed)),
-            extra_idx: self.extra_idx,
+            extra_idx: AtomicUsize::new(self.extra_idx.load(Ordering::Relaxed)),
         }
     }
 }
@@ -122,7 +127,7 @@ impl PartialEq for PreflightCycle {
         self.mux == other.mux
             && self.back == other.back
             && self.mem_idx.load(Ordering::Relaxed) == other.mem_idx.load(Ordering::Relaxed)
-            && self.extra_idx == other.extra_idx
+            && self.extra_idx.load(Ordering::Relaxed) == other.extra_idx.load(Ordering::Relaxed)
     }
 }
 
@@ -132,7 +137,7 @@ impl PreflightCycle {
             mux,
             back,
             mem_idx: AtomicUsize::new(mem_idx),
-            extra_idx,
+            extra_idx: AtomicUsize::new(extra_idx),
         }
     }
 }
@@ -179,6 +184,7 @@ impl Preflight {
             output_ptr: ByteAddr(ZEROS_OFFSET as u32),
             pre_merkle_root: segment.pre_state.merkle_root,
             halted: None,
+            syscalls: segment.syscalls.clone().into(),
         }
     }
 
@@ -499,22 +505,62 @@ impl Preflight {
     }
 
     fn ecall_halt(&mut self) -> Result<bool> {
+        tracing::trace!("ecall_halt");
         self.output_ptr = ByteAddr(self.load_register(REG_A1)?);
         self.halted = Some(self.load_register(REG_A0)?);
         Ok(true)
     }
 
     fn ecall_software(&mut self) -> Result<bool> {
+        tracing::trace!("ecall_software");
+        let mut into_guest_ptr = ByteAddr(self.load_register(REG_A0)?).waddr();
+        let into_guest_len = self.load_register(REG_A1)? as usize;
+        let into_guest_chunks = align_up(into_guest_len, IO_CHUNK_WORDS) / IO_CHUNK_WORDS;
+
+        let syscall = self
+            .syscalls
+            .pop_front()
+            .ok_or(anyhow!("Missing syscall record"))?;
+
+        let chunks = syscall.to_guest.chunks(IO_CHUNK_WORDS);
+        ensure!(
+            chunks.len() == into_guest_chunks,
+            "syscall chunks mismatch. Recorded: {}, Requested: {into_guest_chunks}",
+            chunks.len()
+        );
+
+        // sycallInit
+        self.add_cycle(false, TopMux::Body(Major::ECall, 0));
+
+        for chunk in chunks {
+            // syscallBody
+            for word in chunk {
+                self.add_extra(false, *word);
+                self.store_u32(into_guest_ptr, *word)?;
+                into_guest_ptr += 1u32;
+            }
+            self.add_cycle(false, TopMux::Body(Major::ECallCopyIn, 0));
+        }
+
+        // syscallFini
+        self.add_extra(false, syscall.regs.0);
+        self.add_extra(false, syscall.regs.1);
+        self.store_register(REG_A0, syscall.regs.0)?;
+        self.store_register(REG_A1, syscall.regs.1)?;
+        self.add_cycle(false, TopMux::Body(Major::ECallCopyIn, 0));
+
         self.pc += WORD_SIZE;
-        todo!()
+        Ok(true)
     }
 
     fn ecall_sha(&mut self) -> Result<bool> {
+        tracing::trace!("ecall_sha");
         self.pc += WORD_SIZE;
         todo!()
     }
 
     fn ecall_bigint(&mut self) -> Result<bool> {
+        tracing::trace!("ecall_bigint");
         self.pc += WORD_SIZE;
         todo!()
     }

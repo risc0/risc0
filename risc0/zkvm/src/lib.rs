@@ -89,7 +89,7 @@ pub use anyhow::Result;
 #[cfg(any(feature = "client", feature = "prove"))]
 pub use bytes::Bytes;
 pub use risc0_binfmt::{ExitCode, InvalidExitCodeError, SystemState};
-pub use risc0_zkvm_platform::{declare_syscall, memory::GUEST_MAX_MEM, PAGE_SIZE};
+pub use risc0_zkvm_platform::{align_up, declare_syscall, memory::GUEST_MAX_MEM, PAGE_SIZE};
 
 #[cfg(all(
     not(target_os = "zkvm"),
@@ -157,13 +157,6 @@ pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 /// [semver::Version].
 pub fn get_version() -> Result<Version, semver::Error> {
     Version::parse(VERSION)
-}
-
-/// Align the given address `addr` upwards to alignment `align`.
-///
-/// Requires that `align` is a power of two.
-pub const fn align_up(addr: usize, align: usize) -> usize {
-    (addr + align - 1) & !(align - 1)
 }
 
 /// Returns `true` if dev mode is enabled.

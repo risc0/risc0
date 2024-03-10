@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::fmt;
+use std::{fmt, sync::atomic::Ordering};
 
 use risc0_binfmt::MemoryImage;
 use risc0_zkvm_platform::PAGE_SIZE;
@@ -140,7 +140,7 @@ fn system_split() {
             .cycles
             .iter()
             .filter(|x| x.mux == TopMux::Body(Major::PageFault, 0))
-            .map(|x| trace.pre.extras[x.extra_idx + 1])
+            .map(|x| trace.pre.extras[x.extra_idx.load(Ordering::Relaxed) + 1])
             .collect();
         assert_slice_eq(
             &page_reads,
@@ -154,9 +154,10 @@ fn system_split() {
             .iter()
             .filter(|x| {
                 x.mux == TopMux::Body(Major::PageFault, 0)
-                    && trace.body.extras[x.extra_idx + 2] == 0 // !is_done
+                    && trace.body.extras[x.extra_idx.load(Ordering::Relaxed) + 2] == 0
+                // !is_done
             })
-            .map(|x| trace.body.extras[x.extra_idx + 1])
+            .map(|x| trace.body.extras[x.extra_idx.load(Ordering::Relaxed) + 1])
             .collect();
         assert_slice_eq(&page_writes, &[0x30000, 0x35800, 0x35ac0, 0x35ad6]);
     }
@@ -173,7 +174,7 @@ fn system_split() {
             .cycles
             .iter()
             .filter(|x| x.mux == TopMux::Body(Major::PageFault, 0))
-            .map(|x| trace.pre.extras[x.extra_idx + 1])
+            .map(|x| trace.pre.extras[x.extra_idx.load(Ordering::Relaxed) + 1])
             .collect();
         assert_slice_eq(
             &page_reads,

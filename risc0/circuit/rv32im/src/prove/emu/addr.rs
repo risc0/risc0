@@ -94,6 +94,18 @@ impl ops::Add<u32> for WordAddr {
     }
 }
 
+impl ops::AddAssign<usize> for WordAddr {
+    fn add_assign(&mut self, rhs: usize) {
+        self.0 += rhs as u32;
+    }
+}
+
+impl ops::AddAssign<u32> for WordAddr {
+    fn add_assign(&mut self, rhs: u32) {
+        self.0 += rhs;
+    }
+}
+
 impl ops::Add for ByteAddr {
     type Output = ByteAddr;
 
@@ -132,6 +144,6 @@ impl ops::AddAssign<usize> for ByteAddr {
 
 impl ops::AddAssign<u32> for ByteAddr {
     fn add_assign(&mut self, rhs: u32) {
-        self.0 += rhs as u32;
+        self.0 += rhs;
     }
 }
