@@ -68,15 +68,8 @@ jobs:
   test:
     if: ${{ needs.changes.outputs.test == 'true' || github.event_name == 'workflow_dispatch'}}
     needs: changes
-    runs-on: [self-hosted, prod, "${{ matrix.os }}", "${{ matrix.device }}"]
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [Linux]
-        feature: [default]
-        device: [cpu]
+    runs-on: [self-hosted, prod, Linux, cpu, docker]
     env:
-      FEATURE: ${{ matrix.feature }}
       RUST_BACKTRACE: full
     steps:
       # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
@@ -87,7 +80,7 @@ jobs:
       - uses: ./risc0/.github/actions/rustup
       - uses: ./risc0/.github/actions/sccache
         with:
-          key: ${{ matrix.os }}-${{ matrix.feature }}
+          key: Linux-default
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -113,6 +106,9 @@ jobs:
       - name: Local patch on risc0-ethereum
         run: python ../risc0/.github/cargo_local_patch.py Cargo.toml
         working-directory: risc0-ethereum
+      - name: Bootstrap-groth16 test receipt
+        run: cargo xtask bootstrap-groth16 --test-receipt-only
+        working-directory: risc0
       - name: build risc0-ethereum
         run: cargo test --workspace --no-run
         working-directory: risc0-ethereum
