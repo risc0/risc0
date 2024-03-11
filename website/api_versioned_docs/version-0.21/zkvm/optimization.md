@@ -508,9 +508,9 @@ below.
 [CUDA]: https://developer.nvidia.com/cuda-toolkit
 [`counts`]: https://github.com/nnethercote/counts/
 [ecdsa-flamegraph]: /img/ecdsa-verification-flamegraph.png
-[`env::cycle_count()`]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest/env/fn.cycle_count.html
+[`env::cycle_count()`]: https://docs.rs/risc0-zkvm/0.21/risc0_zkvm/guest/env/fn.cycle_count.html
 [`env::read`]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/guest/env/fn.read.html
-[`env::read_slice`]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest/env/fn.read_slice.html
+[`env::read_slice`]: https://docs.rs/risc0-zkvm/0.21/risc0_zkvm/guest/env/fn.read_slice.html
 [example-ecdsa]: https://github.com/risc0/risc0/tree/main/examples/ecdsa
 [example-waldo]: https://github.com/risc0/risc0/tree/main/examples/waldo
 [Executor]: https://github.com/risc0/risc0/blob/main/risc0/zkvm/src/host/server/exec/monitor.rs#L30-L39
