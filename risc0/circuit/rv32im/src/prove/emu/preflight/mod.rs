@@ -566,7 +566,7 @@ impl Preflight {
     }
 
     fn ecall_sha(&mut self) -> Result<bool> {
-        let cycle = self.trace.body.cycles.len() + 55952;
+        let cycle = self.trace.body.cycles.len();
         tracing::debug!("[{cycle}] ecall_sha");
         let state_out_ptr = ByteAddr(self.load_register(REG_A0)?).waddr();
         let state_in_ptr = ByteAddr(self.load_register(REG_A1)?).waddr();
@@ -600,14 +600,12 @@ impl Preflight {
     fn ecall_bigint(&mut self) -> Result<bool> {
         const BIGINT_IO_SIZE: usize = 4;
 
-        let cycle = self.trace.body.cycles.len() + 55952;
+        let cycle = self.trace.body.cycles.len();
         tracing::debug!("[{cycle}] ecall_bigint");
 
-        // 58236
         self.load_register(REG_A1)?;
         self.add_cycle(false, TopMux::Body(Major::ECall, 0));
 
-        // 58237
         let z_ptr = ByteAddr(self.load_register(REG_A0)?).waddr();
         let x_ptr = ByteAddr(self.load_register(REG_A2)?).waddr();
         let y_ptr = ByteAddr(self.load_register(REG_A3)?).waddr();
