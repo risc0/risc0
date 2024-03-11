@@ -21,6 +21,7 @@ use std::{
 };
 
 use anyhow::{anyhow, bail, ensure, Result};
+use crypto_bigint::{CheckedMul as _, Encoding as _, NonZero, U256, U512};
 use derive_debug::Dbg;
 use risc0_zkp::{
     core::{
@@ -32,7 +33,7 @@ use risc0_zkp::{
 use risc0_zkvm_platform::{
     align_up,
     syscall::{
-        ecall, halt,
+        bigint, ecall, halt,
         reg_abi::{REG_A0, REG_A1, REG_A2, REG_A3, REG_A4, REG_T0},
         IO_CHUNK_WORDS,
     },
@@ -565,7 +566,7 @@ impl Preflight {
     }
 
     fn ecall_sha(&mut self) -> Result<bool> {
-        let cycle = self.trace.body.cycles.len() + 54858;
+        let cycle = self.trace.body.cycles.len() + 55952;
         tracing::debug!("[{cycle}] ecall_sha");
         let state_out_ptr = ByteAddr(self.load_register(REG_A0)?).waddr();
         let state_in_ptr = ByteAddr(self.load_register(REG_A1)?).waddr();
@@ -588,10 +589,90 @@ impl Preflight {
         Ok(true)
     }
 
+    fn peek_bigint(&mut self, idx: usize) -> Result<()> {
+        let ptr = ByteAddr(self.load_register(idx)?).waddr();
+        for i in 0..bigint::WIDTH_WORDS {
+            self.load_u32(ptr + i)?;
+        }
+        Ok(())
+    }
+
     fn ecall_bigint(&mut self) -> Result<bool> {
-        tracing::trace!("ecall_bigint");
+        const BIGINT_IO_SIZE: usize = 4;
+
+        let cycle = self.trace.body.cycles.len() + 55952;
+        tracing::debug!("[{cycle}] ecall_bigint");
+
+        // 58236
+        self.load_register(REG_A1)?;
+        self.add_cycle(false, TopMux::Body(Major::ECall, 0));
+
+        // 58237
+        let z_ptr = ByteAddr(self.load_register(REG_A0)?).waddr();
+        let x_ptr = ByteAddr(self.load_register(REG_A2)?).waddr();
+        let y_ptr = ByteAddr(self.load_register(REG_A3)?).waddr();
+        let n_ptr = ByteAddr(self.load_register(REG_A4)?).waddr();
+        tracing::debug!("bigint(z: {z_ptr:?}, x: {x_ptr:?}, y: {y_ptr:?}, n {n_ptr:?}");
+        self.peek_bigint(REG_A2)?;
+        self.peek_bigint(REG_A3)?;
+        self.peek_bigint(REG_A4)?;
+        self.add_cycle(false, TopMux::Body(Major::BigInt, 0));
+
+        let mut n = [0u32; bigint::WIDTH_WORDS];
+        let mut x = [0u32; bigint::WIDTH_WORDS];
+        let mut y = [0u32; bigint::WIDTH_WORDS];
+
+        let ptrs = [(n_ptr, &mut n), (x_ptr, &mut x), (y_ptr, &mut y)];
+
+        // Load inputs.
+        for (ptr, arr) in ptrs {
+            for i in 0..2 {
+                let offset = i * BIGINT_IO_SIZE;
+                for j in 0..BIGINT_IO_SIZE {
+                    let word = self.load_u32(ptr + offset + j)?;
+                    arr[offset + j] = word.to_le();
+                }
+                self.peek_bigint(REG_A2)?;
+                self.peek_bigint(REG_A3)?;
+                self.peek_bigint(REG_A4)?;
+                self.add_cycle(false, TopMux::Body(Major::BigInt, 0));
+            }
+        }
+
+        let n = U256::from_le_bytes(bytemuck::cast(n));
+        let x = U256::from_le_bytes(bytemuck::cast(x));
+        let y = U256::from_le_bytes(bytemuck::cast(y));
+
+        // Compute modular multiplication, or simply multiplication if n == 0.
+        let z: U256 = if n == U256::ZERO {
+            x.checked_mul(&y).unwrap()
+        } else {
+            let (w_lo, w_hi) = x.mul_wide(&y);
+            let w = w_hi.concat(&w_lo);
+            let z = w.rem(&NonZero::<U512>::from_uint(n.resize()));
+            z.resize()
+        };
+
+        tracing::debug!("n: {n:?}, x: {x:?}, y: {y:?}, z: {z:?}");
+
+        // Store result.
+        let z: [u32; bigint::WIDTH_WORDS] = bytemuck::cast(z.to_le_bytes());
+        for i in 0..2 {
+            self.peek_bigint(REG_A2)?;
+            self.peek_bigint(REG_A3)?;
+            self.peek_bigint(REG_A4)?;
+
+            let offset = i * BIGINT_IO_SIZE;
+            for j in 0..BIGINT_IO_SIZE {
+                let word = z[offset + j].to_le();
+                self.store_u32(z_ptr + offset + j, word)?;
+            }
+
+            self.add_cycle(false, TopMux::Body(Major::BigInt, 0));
+        }
+
         self.pc += WORD_SIZE;
-        todo!()
+        Ok(true)
     }
 }
 

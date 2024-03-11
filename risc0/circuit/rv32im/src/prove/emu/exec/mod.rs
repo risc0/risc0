@@ -419,8 +419,8 @@ impl<'a, S: Syscall> Executor<'a, S> {
     }
 
     fn ecall_bigint(&mut self) -> Result<bool> {
-        let z_ptr = self.load_guest_addr_from_register(REG_A0)?;
         let op = self.load_register(REG_A1)?;
+        let z_ptr = self.load_guest_addr_from_register(REG_A0)?;
         let x_ptr = self.load_guest_addr_from_register(REG_A2)?;
         let y_ptr = self.load_guest_addr_from_register(REG_A3)?;
         let n_ptr = self.load_guest_addr_from_register(REG_A4)?;
@@ -428,7 +428,9 @@ impl<'a, S: Syscall> Executor<'a, S> {
         let mut load_bigint_le_bytes = |ptr: ByteAddr| -> Result<[u8; bigint::WIDTH_BYTES]> {
             let mut arr = [0u32; bigint::WIDTH_WORDS];
             for (i, word) in arr.iter_mut().enumerate() {
-                *word = self.peek_u32(ptr + (i * WORD_SIZE) as u32)?.to_le();
+                *word = self
+                    .load_u32_from_guest(ptr + (i * WORD_SIZE) as u32)?
+                    .to_le();
             }
             Ok(bytemuck::cast(arr))
         };
@@ -728,8 +730,5 @@ pub fn execute_elf<S: Syscall>(
 //     let from_guest = ctx.load_region(buf_ptr, buf_len)?;
 
 // Failing tests:
-// host::server::exec::tests::insufficient_segment_limit
 // host::server::exec::tests::profiler
-// host::server::exec::tests::sha_cycle_count
-// host::server::exec::tests::system_split
-// host::server::exec::tests::too_many_sha
+// host::server::exec::tests::post_state_digest_randomization
