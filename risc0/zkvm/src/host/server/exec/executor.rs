@@ -62,7 +62,7 @@ use crate::{
     is_dev_mode,
     sha::Digest,
     Assumptions, ExecutorEnv, ExitCode, FileSegmentRef, Loader, Output, Segment, SegmentRef,
-    Session,
+    Session, SimpleSegmentRef,
 };
 
 /// The number of cycles required to compress a SHA-256 block.
@@ -74,6 +74,10 @@ const BIGINT_CYCLES: usize = 9;
 /// The default segment limit specified in powers of 2 cycles. Choose this value
 /// to try and fit with 8GB of RAM.
 const DEFAULT_SEGMENT_LIMIT_PO2: u32 = 20; // 1M cycles
+
+/// The default number of segments to store in memory during execution.
+/// Anything segments above this value gets stored in a file.
+pub const DEFAULT_SEGMENT_RAM_STORAGE_LIMIT: u32 = 64;
 
 // Capture the journal output in a buffer that we can access afterwards.
 #[derive(Clone, Default)]
@@ -241,12 +245,24 @@ impl<'a> ExecutorImpl<'a> {
     /// This will run the executor to get a [Session] which contain the results
     /// of the execution.
     pub fn run(&mut self) -> Result<Session> {
+        let ram_segment_limit: u32 = self
+            .env
+            .segment_limit_ram_storage
+            .unwrap_or(DEFAULT_SEGMENT_RAM_STORAGE_LIMIT);
+
         if self.env.segment_path.is_none() {
             self.env.segment_path = Some(SegmentPath::TempDir(Arc::new(tempdir()?)));
         }
 
         let path = self.env.segment_path.clone().unwrap();
-        self.run_with_callback(|segment| Ok(Box::new(FileSegmentRef::new(&segment, &path)?)))
+        self.run_with_callback(|segment| {
+            if segment.index < ram_segment_limit {
+                Ok(Box::new(SimpleSegmentRef::new(segment)))
+            } else {
+                // After creating more than the limit, store it in files to save RAM.
+                Ok(Box::new(FileSegmentRef::new(&segment, &path)?))
+            }
+        })
     }
 
     /// Run the executor until [ExitCode::Halted] or [ExitCode::Paused] is reached, producing a

@@ -95,6 +95,7 @@ pub struct ExecutorEnv<'a> {
     pub(crate) assumptions: Rc<RefCell<Assumptions>>,
     pub(crate) segment_path: Option<SegmentPath>,
     pub(crate) pprof_out: Option<PathBuf>,
+    pub(crate) segment_limit_ram_storage: Option<u32>,
 }
 
 impl<'a> ExecutorEnv<'a> {
@@ -362,6 +363,12 @@ impl<'a> ExecutorEnvBuilder<'a> {
     /// Set the path where segments will be stored.
     pub fn segment_path<P: AsRef<Path>>(&mut self, path: P) -> &mut Self {
         self.inner.segment_path = Some(SegmentPath::Path(path.as_ref().to_path_buf()));
+        self
+    }
+
+    /// Set the path where segments will be stored.
+    pub fn segment_limit_ram_storage(&mut self, limit: u32) -> &mut Self {
+        self.inner.segment_limit_ram_storage = Some(limit);
         self
     }
 
