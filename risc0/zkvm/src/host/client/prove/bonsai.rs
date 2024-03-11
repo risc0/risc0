@@ -14,7 +14,7 @@
 
 use std::time::Duration;
 
-use anyhow::{anyhow, bail, ensure, Result};
+use anyhow::{anyhow, bail, ensure, Context, Result};
 use bonsai_sdk::alpha::Client;
 
 use super::Prover;
@@ -90,6 +90,15 @@ impl Prover for BonsaiProver {
                     .receipt_url
                     .ok_or(anyhow!("API error, missing receipt on completed session"))?;
 
+                let stats = res
+                    .stats
+                    .context("Missing stats object on Bonsai status res")?;
+                tracing::debug!(
+                    "Bonsai usage: cycles: {} total_cycles: {}",
+                    stats.cycles,
+                    stats.total_cycles
+                );
+
                 let receipt_buf = client.download(&receipt_url)?;
                 let receipt: Receipt = bincode::deserialize(&receipt_buf)?;
 
@@ -106,7 +115,13 @@ impl Prover for BonsaiProver {
                 }
                 return Ok(receipt);
             } else {
-                bail!("Bonsai prover workflow exited: {}", res.status);
+                bail!(
+                    "Bonsai prover workflow [{}] exited: {} err: {}",
+                    session.uuid,
+                    res.status,
+                    res.error_msg
+                        .unwrap_or("Bonsai workflow missing error_msg".into()),
+                );
             }
         }
     }
