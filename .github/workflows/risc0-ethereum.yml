@@ -95,7 +95,7 @@ jobs:
       - name: Install python dependencies
         run: python -m pip install --upgrade toml
       - name: Install risczero toolchain
-      - run: |
+        run: |
           cargo install --force --path risc0/cargo-risczero
           cargo risczero install --version $RISC0_TOOLCHAIN_VERSION
         working-directory: risc0
