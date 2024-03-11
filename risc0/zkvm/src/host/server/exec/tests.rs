@@ -57,7 +57,7 @@ fn run_test(spec: MultiTestSpec) {
 }
 
 #[test]
-#[should_panic(expected = "cycle count too large")]
+#[should_panic(expected = "too small")]
 fn insufficient_segment_limit() {
     let env = ExecutorEnv::builder()
         .segment_limit_po2(14)
@@ -1003,7 +1003,7 @@ fn aligned_alloc() {
 }
 
 #[test]
-#[should_panic(expected = "cycle count too large")]
+#[should_panic(expected = "too small")]
 fn too_many_sha() {
     run_test(MultiTestSpec::TooManySha);
 }

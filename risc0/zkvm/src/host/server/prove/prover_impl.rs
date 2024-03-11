@@ -88,10 +88,11 @@ where
 {
     fn prove_session(&self, ctx: &VerifierContext, session: &Session) -> Result<Receipt> {
         tracing::info!(
-            "prove_session: {}, exit_code = {:?}, journal = {:?}",
+            "prove_session: {}, exit_code = {:?}, journal = {:?}, segments: {}",
             self.name,
             session.exit_code,
-            session.journal.as_ref().map(|x| hex::encode(x))
+            session.journal.as_ref().map(|x| hex::encode(x)),
+            session.segments.len()
         );
         let mut segments = Vec::new();
         for segment_ref in session.segments.iter() {
@@ -234,13 +235,6 @@ where
     #[cfg(feature = "parallel-witgen")]
     fn prove_segment(&self, ctx: &VerifierContext, segment: &Segment) -> Result<SegmentReceipt> {
         use risc0_circuit_rv32im::prove::{engine::SegmentProverImpl, SegmentProver as _};
-
-        tracing::debug!(
-            "prove_segment[{}]: po2: {}, cycles: {}",
-            segment.index,
-            segment.po2,
-            segment.insn_cycles,
-        );
 
         let hashfn = self.hal_pair.hal.get_hash_suite().name.clone();
 

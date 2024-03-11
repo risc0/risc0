@@ -211,7 +211,7 @@ impl MachineContext {
         args: &[SyncSlice<BabyBearElem>],
     ) -> Result<BabyBearElem> {
         // let cur_cycle = self.get_cycle(cycle);
-        // tracing::debug!("[{cycle}] {:?}", cur_cycle);
+        // tracing::debug!("[{cycle}] {cur_cycle:?}");
         let ctx = CircuitStepContext { size: steps, cycle };
         CIRCUIT.par_step_verify_mem(&ctx, self, args)
     }
@@ -257,7 +257,7 @@ impl MachineContext {
 
         (0..last_cycle).into_par_iter().for_each(|cycle| {
             if cycle == 0 || self.is_verify_mem_par_safe(cycle) {
-                tracing::trace!("step_verify_mem({cycle})");
+                // tracing::trace!("step_verify_mem({cycle})");
                 self.step_verify_mem(steps, cycle, args).unwrap();
 
                 let mut seq_cycle = cycle + 1;

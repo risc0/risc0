@@ -15,12 +15,13 @@
 #[cfg(test)]
 mod tests;
 
-use std::collections::VecDeque;
-use std::sync::atomic::{AtomicUsize, Ordering};
+use std::{
+    collections::VecDeque,
+    sync::atomic::{AtomicUsize, Ordering},
+};
 
 use anyhow::{anyhow, bail, ensure, Result};
 use derive_debug::Dbg;
-use risc0_binfmt::SyscallRecord;
 use risc0_zkp::{
     core::{
         digest::{Digest, DIGEST_WORDS},
@@ -28,12 +29,12 @@ use risc0_zkp::{
     },
     ZK_CYCLES,
 };
-use risc0_zkvm_platform::syscall::IO_CHUNK_WORDS;
 use risc0_zkvm_platform::{
     align_up,
     syscall::{
         ecall, halt,
-        reg_abi::{REG_A0, REG_A1, REG_T0},
+        reg_abi::{REG_A0, REG_A1, REG_A2, REG_A3, REG_A4, REG_T0},
+        IO_CHUNK_WORDS,
     },
     WORD_SIZE,
 };
@@ -43,15 +44,17 @@ use super::{
     mux::{Major, TopMux},
     pager::{PagedMemory, PAGE_WORDS},
     rv32im::{DecodedInstruction, EmuContext, Emulator, InsnKind, Instruction, TrapCause},
-    ByteAddr, WordAddr, SYSTEM_START,
+    ByteAddr, WordAddr, SHA_INIT, SHA_MAIN_FINI, SHA_MAIN_MIX, SYSTEM_START,
 };
 use crate::prove::{
     engine::loader::{
-        ram_load_cycles, FINI_TAILROOM, SETUP_CYCLES, SHA_INIT_OFFSET, SHA_K, SHA_K_OFFSET,
+        FINI_CYCLES, RAM_LOAD_CYCLES, SETUP_CYCLES, SHA_INIT_OFFSET, SHA_K, SHA_K_OFFSET,
         ZEROS_OFFSET,
     },
-    segment::Segment,
+    segment::{Segment, SyscallRecord},
 };
+
+const SHA_K_ADDR: WordAddr = ByteAddr(SHA_K_OFFSET as u32).waddr();
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum Back {
@@ -188,20 +191,15 @@ impl Preflight {
         }
     }
 
-    #[allow(unused)]
-    fn cur_cycle(&self) -> usize {
-        self.trace.pre.cycles.len() + self.trace.body.cycles.len()
-    }
-
     fn load_u32(&mut self, addr: WordAddr) -> Result<u32> {
-        let data = self.pager.load(addr)?;
-        // tracing::trace!("[{}] load_u32: {addr:?} => 0x{data:08x}", self.cur_cycle());
+        let data = self.pager.load(addr);
+        // tracing::trace!("load_u32({addr:?}) -> 0x{data:08x}");
         self.add_txn(false, addr, data);
         Ok(data)
     }
 
     fn store_u32(&mut self, addr: WordAddr, data: u32) -> Result<()> {
-        // tracing::trace!("[{}] store_u32: {addr:?} <= 0x{data:08x}", self.cur_cycle());
+        // tracing::trace!("store_u32({addr:?}, 0x{data:08x})");
         self.pager.store(addr, data)
     }
 
@@ -254,7 +252,7 @@ impl Preflight {
         self.add_par_cycle(true, TopMux::RamInit, Back::Null);
 
         // ram_load+
-        for _ in 0..ram_load_cycles().len() {
+        for _ in 0..RAM_LOAD_CYCLES {
             self.add_par_cycle(true, TopMux::RamLoad, Back::Null);
         }
 
@@ -292,7 +290,7 @@ impl Preflight {
 
         if let Some(exit_code) = self.halted {
             let body_cycles = self.trace.body.cycles.len();
-            let body_padding = max_cycles - pre_cycles - body_cycles - FINI_TAILROOM - ZK_CYCLES;
+            let body_padding = max_cycles - pre_cycles - body_cycles - FINI_CYCLES - ZK_CYCLES;
             tracing::debug!("halt padding: {body_padding}, pre: {pre_cycles}, body: {body_cycles}");
 
             let exit_code_bytes = exit_code.to_le_bytes();
@@ -328,7 +326,7 @@ impl Preflight {
 
             // let body_cycles = self.cycles;
             let body_cycles = self.trace.body.cycles.len();
-            let body_padding = max_cycles - pre_cycles - body_cycles - FINI_TAILROOM - ZK_CYCLES;
+            let body_padding = max_cycles - pre_cycles - body_cycles - FINI_CYCLES - ZK_CYCLES;
             tracing::debug!(
                 "fault padding: {body_padding}, pre: {pre_cycles}, body: {body_cycles}"
             );
@@ -366,8 +364,15 @@ impl Preflight {
 
     fn pre_peek(&mut self, addr: WordAddr) -> Result<()> {
         let data = self.pager.pre_peek(addr)?;
+        // tracing::trace!("pre_peek({addr:?}) -> 0x{data:08x}");
         self.trace.pre.add_txn(addr, data);
         Ok(())
+    }
+
+    fn peek(&self, addr: WordAddr) -> Result<u32> {
+        let data = self.pager.peek(addr)?;
+        // tracing::trace!("peek({addr:?}) -> 0x{data:08x}");
+        Ok(data)
     }
 
     fn record_load(&mut self, pre: bool, addr: WordAddr) -> Result<()> {
@@ -411,54 +416,51 @@ impl Preflight {
             PAGE_WORDS
         };
         let entry_addr = ByteAddr(info.get_page_entry_addr(page_idx)).waddr();
-        self.sha_buffer(
+        self.sha_cycles(
             addr,
+            addr + DIGEST_WORDS,
             ByteAddr(SHA_INIT_OFFSET as u32).waddr(),
             entry_addr,
-            page_words,
+            page_words / BLOCK_WORDS,
             pre,
             is_read == 1,
         )
     }
 
-    fn sha_buffer(
+    fn sha_cycles(
         &mut self,
-        buf_addr: WordAddr,
+        block1_addr: WordAddr,
+        block2_addr: WordAddr,
         sin_addr: WordAddr,
         sout_addr: WordAddr,
-        count: usize,
+        repeat: usize,
         pre: bool,
         is_read: bool,
     ) -> Result<()> {
-        const SHA_INIT: usize = 4;
-        const SHA_LOAD: usize = 8;
-        const SHA_MAIN_MIX: usize = 48;
-        const SHA_MAIN_FINI: usize = 4;
-        const SHA_K_ADDR: WordAddr = ByteAddr(SHA_K_OFFSET as u32).waddr();
-
-        let repeat = count / BLOCK_WORDS;
-
         let mut state: [u32; DIGEST_WORDS] =
-            std::array::from_fn(|i| self.pager.peek(sin_addr + i).unwrap().to_be());
+            std::array::from_fn(|i| self.peek(sin_addr + i).unwrap().to_be());
 
         // SHA_INIT
         self.add_cycle(pre, TopMux::Body(Major::ShaInit, 0));
-        for i in 0..SHA_INIT {
+        for i in 1..SHA_INIT {
             let idx = SHA_INIT - i - 1;
-            let data = SHA256_INIT.as_words()[idx];
-            self.add_txn(pre, sin_addr + idx, data);
-
-            let idx = DIGEST_WORDS - i - 1;
-            let data = SHA256_INIT.as_words()[idx];
-            self.add_txn(pre, sin_addr + idx, data);
+            // idx: [3, 2, 1, 0]
+            self.record_load(pre, sin_addr + idx)?;
+            // idx: [7, 6, 5, 4]
+            self.record_load(pre, sin_addr + idx + 4u32)?;
             self.add_cycle(pre, TopMux::Body(Major::ShaInit, 0));
         }
 
         for i in 0..repeat {
             if !is_read {
-                let block: [u32; BLOCK_WORDS] = std::array::from_fn(|j| {
-                    self.pager.peek(buf_addr + i * BLOCK_WORDS + j).unwrap()
-                });
+                let mut block = [0u32; BLOCK_WORDS];
+                let (digest1, digest2) = block.split_at_mut(DIGEST_WORDS);
+                for (j, word) in digest1.iter_mut().enumerate() {
+                    *word = self.peek(block1_addr + i * BLOCK_WORDS + j)?;
+                }
+                for (j, word) in digest2.iter_mut().enumerate() {
+                    *word = self.peek(block2_addr + i * BLOCK_WORDS + j)?;
+                }
 
                 sha2::compress256(
                     &mut state,
@@ -467,18 +469,16 @@ impl Preflight {
             }
 
             // SHA_LOAD
-            for j in 0..2 {
-                let offset = SHA_LOAD * j;
-                for k in 0..SHA_LOAD {
-                    self.record_load(pre, buf_addr + i * SHA_LOAD * 2 + offset + k)?;
-                    self.add_txn(pre, SHA_K_ADDR + offset + k, SHA_K[offset + k]);
-                    self.add_cycle(pre, TopMux::Body(Major::ShaLoad, j as u32));
-                }
+            for j in 0..DIGEST_WORDS {
+                self.sha_load(pre, block1_addr + i * BLOCK_WORDS, 0, j)?;
+            }
+            for j in 0..DIGEST_WORDS {
+                self.sha_load(pre, block2_addr + i * BLOCK_WORDS, 1, j)?;
             }
 
             // SHA_MAIN(mix)
             for j in 0..SHA_MAIN_MIX {
-                self.add_txn(pre, SHA_K_ADDR + SHA_LOAD * 2 + j, SHA_K[SHA_LOAD * 2 + j]);
+                self.add_txn(pre, SHA_K_ADDR + BLOCK_WORDS + j, SHA_K[BLOCK_WORDS + j]);
                 self.add_cycle(pre, TopMux::Body(Major::ShaMain, 0));
             }
 
@@ -504,10 +504,20 @@ impl Preflight {
         Ok(())
     }
 
+    fn sha_load(&mut self, pre: bool, block_addr: WordAddr, minor: u32, i: usize) -> Result<()> {
+        // tracing::trace!("sha_load({:?}, {minor}, {i})", block_addr + i);
+        let k_idx = minor as usize * DIGEST_WORDS + i;
+        self.record_load(pre, block_addr + i)?;
+        self.add_txn(pre, SHA_K_ADDR + k_idx, SHA_K[k_idx]);
+        self.add_cycle(pre, TopMux::Body(Major::ShaLoad, minor));
+        Ok(())
+    }
+
     fn ecall_halt(&mut self) -> Result<bool> {
         tracing::trace!("ecall_halt");
         self.output_ptr = ByteAddr(self.load_register(REG_A1)?);
         self.halted = Some(self.load_register(REG_A0)?);
+        self.add_cycle(false, TopMux::Body(Major::ECall, 0));
         Ok(true)
     }
 
@@ -521,6 +531,7 @@ impl Preflight {
             .syscalls
             .pop_front()
             .ok_or(anyhow!("Missing syscall record"))?;
+        let (a0, a1) = syscall.regs;
 
         let chunks = syscall.to_guest.chunks(IO_CHUNK_WORDS);
         ensure!(
@@ -543,10 +554,10 @@ impl Preflight {
         }
 
         // syscallFini
-        self.add_extra(false, syscall.regs.0);
-        self.add_extra(false, syscall.regs.1);
-        self.store_register(REG_A0, syscall.regs.0)?;
-        self.store_register(REG_A1, syscall.regs.1)?;
+        self.add_extra(false, a0);
+        self.add_extra(false, a1);
+        self.store_register(REG_A0, a0)?;
+        self.store_register(REG_A1, a1)?;
         self.add_cycle(false, TopMux::Body(Major::ECallCopyIn, 0));
 
         self.pc += WORD_SIZE;
@@ -554,9 +565,27 @@ impl Preflight {
     }
 
     fn ecall_sha(&mut self) -> Result<bool> {
-        tracing::trace!("ecall_sha");
+        let cycle = self.trace.body.cycles.len() + 54858;
+        tracing::debug!("[{cycle}] ecall_sha");
+        let state_out_ptr = ByteAddr(self.load_register(REG_A0)?).waddr();
+        let state_in_ptr = ByteAddr(self.load_register(REG_A1)?).waddr();
+        let count = self.load_register(REG_A4)? as usize;
+        self.add_cycle(false, TopMux::Body(Major::ECall, 0));
+
+        let block1_ptr = ByteAddr(self.load_register(REG_A2)?).waddr();
+        let block2_ptr = ByteAddr(self.load_register(REG_A3)?).waddr();
+        self.sha_cycles(
+            block1_ptr,
+            block2_ptr,
+            state_in_ptr,
+            state_out_ptr,
+            count,
+            false,
+            false,
+        )?;
+
         self.pc += WORD_SIZE;
-        todo!()
+        Ok(true)
     }
 
     fn ecall_bigint(&mut self) -> Result<bool> {
@@ -616,13 +645,13 @@ impl EmuContext for Preflight {
                 self.add_cycle(false, TopMux::Body(Major::VerifyDivide, minor));
             }
             InsnKind::EANY => {
-                self.add_cycle(false, insn.kind.into());
+                // cycles are added during ecall handlers
             }
             _ => {
                 self.add_par_cycle(false, insn.kind.into(), Back::Body { pc: self.prev_pc });
             }
         }
-        self.prev_pc = self.pc
+        self.prev_pc = self.pc;
     }
 
     fn get_pc(&self) -> ByteAddr {
@@ -657,13 +686,14 @@ impl EmuContext for Preflight {
 impl Segment {
     #[tracing::instrument(skip_all)]
     pub fn preflight(&self) -> Result<PreflightTrace> {
-        tracing::debug!("preflight: {self:?}");
+        tracing::debug!("preflight: {self:#?}");
         let mut preflight = Preflight::new(self);
         let mut emu = Emulator::new();
 
         preflight.pre_steps();
         while preflight.trace.body.cycles.len() < self.insn_cycles {
             emu.step(&mut preflight)?;
+            preflight.pager.commit_step();
         }
         preflight.post_steps()?;
 

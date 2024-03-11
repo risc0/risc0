@@ -19,20 +19,22 @@ use std::{array, mem};
 
 use anyhow::{bail, Result};
 use crypto_bigint::{CheckedMul as _, Encoding as _, NonZero, U256, U512};
-use risc0_binfmt::{ExitCode, MemoryImage, Program, SyscallRecord, SystemState};
+use risc0_binfmt::{ExitCode, MemoryImage, Program, SystemState};
 use risc0_zkp::{
     core::{
         digest::{Digest, DIGEST_BYTES, DIGEST_WORDS},
         hash::sha::{BLOCK_BYTES, BLOCK_WORDS},
         log2_ceil,
     },
-    MAX_CYCLES_PO2, MIN_CYCLES_PO2,
+    MAX_CYCLES_PO2, MIN_CYCLES_PO2, ZK_CYCLES,
 };
 use risc0_zkvm_platform::{
+    align_up,
     memory::{is_guest_memory, GUEST_MAX_MEM},
     syscall::{
         bigint, ecall, halt,
         reg_abi::{REG_A0, REG_A1, REG_A2, REG_A3, REG_A4, REG_MAX, REG_T0},
+        IO_CHUNK_WORDS,
     },
     PAGE_SIZE, WORD_SIZE,
 };
@@ -42,9 +44,12 @@ use super::{
     addr::{ByteAddr, WordAddr},
     pager::PagedMemory,
     rv32im::{DecodedInstruction, EmuContext, Emulator, Instruction, TrapCause},
-    SYSTEM_START,
+    BIGINT_CYCLES, SHA_CYCLES, SYSTEM_START,
 };
-use crate::prove::segment::Segment;
+use crate::prove::{
+    engine::loader::{FINI_CYCLES, INIT_CYCLES},
+    segment::{Segment, SyscallRecord},
+};
 
 pub const DEFAULT_SEGMENT_LIMIT_PO2: usize = 20;
 
@@ -106,39 +111,33 @@ pub struct SimpleSession {
     pub result: ExecutorResult,
 }
 
-pub struct Executor<'a, S: Syscall> {
-    pager: PagedMemory,
-    exit_code: Option<ExitCode>,
+#[derive(Debug)]
+struct PendingState {
     pc: ByteAddr,
     cycles: usize,
+    syscall: Option<SyscallRecord>,
+    output_digest: Option<Digest>,
+    exit_code: Option<ExitCode>,
+}
+
+pub struct Executor<'a, S: Syscall> {
+    pc: ByteAddr,
+    insn_cycles: usize,
+    pager: PagedMemory,
+    exit_code: Option<ExitCode>,
     syscalls: Vec<SyscallRecord>,
     syscall_handler: &'a S,
     output_digest: Option<Digest>,
+    pending: PendingState,
 }
 
-impl<'a, S: Syscall> SyscallContext for Executor<'a, S> {
-    fn get_cycle(&self) -> usize {
-        self.cycles
-    }
-
-    fn peek_register(&mut self, idx: usize) -> Result<u32> {
-        if idx >= REG_MAX {
-            bail!("invalid register: x{idx}");
-        }
-        self.pager.peek(SYSTEM_START + idx)
-    }
-
-    fn peek_u32(&mut self, addr: ByteAddr) -> Result<u32> {
-        let addr = Self::check_guest_addr(addr)?;
-        self.pager.peek(addr.waddr())
-    }
-
-    fn peek_u8(&mut self, addr: ByteAddr) -> Result<u8> {
-        let addr = Self::check_guest_addr(addr)?;
-        let word = self.pager.peek(addr.waddr())?;
-        let bytes = word.to_le_bytes();
-        let byte_offset = addr.0 as usize % WORD_SIZE;
-        Ok(bytes[byte_offset])
+impl PendingState {
+    fn reset(&mut self, pc: ByteAddr) {
+        self.pc = pc;
+        self.cycles = 0;
+        self.syscall = None;
+        self.output_digest = None;
+        self.exit_code = None;
     }
 }
 
@@ -146,13 +145,20 @@ impl<'a, S: Syscall> Executor<'a, S> {
     pub fn new(image: MemoryImage, syscall_handler: &'a S) -> Self {
         let pc = ByteAddr(image.pc);
         Self {
+            pc,
+            insn_cycles: 0,
             pager: PagedMemory::new(image),
             exit_code: None,
-            pc,
-            cycles: 0,
             syscalls: Vec::new(),
             syscall_handler,
             output_digest: None,
+            pending: PendingState {
+                pc,
+                cycles: 0,
+                syscall: None,
+                output_digest: None,
+                exit_code: None,
+            },
         }
     }
 
@@ -162,14 +168,12 @@ impl<'a, S: Syscall> Executor<'a, S> {
         max_cycles: Option<u64>,
         mut callback: F,
     ) -> Result<ExecutorResult> {
-        // Leave enough space at the end of a segment so that we don't overflow
-        // This needs to be the worst case number of cycles needed to run a single step.
-        let segment_threshold = (1 << segment_po2) - 10000;
+        const RESERVED_CYCLES: usize = INIT_CYCLES + FINI_CYCLES + ZK_CYCLES;
+        let segment_limit = (1 << segment_po2) - RESERVED_CYCLES;
 
         self.reset();
 
         let mut emu = Emulator::new();
-        let mut total_cycles = 0;
         let mut segments = 0;
         let mut session_cycles = SessionCycles::default();
         let initial_state = self.pager.image.get_system_state();
@@ -180,38 +184,58 @@ impl<'a, S: Syscall> Executor<'a, S> {
             }
 
             if let Some(max_cycles) = max_cycles {
-                if total_cycles >= max_cycles {
+                if session_cycles.user + self.insn_cycles as u64 >= max_cycles {
                     bail!("Session limit exceeded");
                 }
             }
 
-            let paging_cycles = self.pager.get_paging_cycles();
-            let segment_cycles = self.cycles + paging_cycles;
-            if segment_cycles >= segment_threshold {
-                tracing::debug!("split: {} + {}", self.cycles, paging_cycles);
+            emu.step(self)?;
+
+            let segment_cycles = self.insn_cycles + self.pager.cycles + self.pending.cycles;
+            if segment_cycles < segment_limit {
+                self.advance();
+            } else if self.insn_cycles == 0 {
+                bail!(
+                    "segment limit ({segment_limit}) too small for instruction at pc: {:?}",
+                    self.pc
+                );
+            } else {
+                self.pager.undo();
+                let used_cycles = self.insn_cycles + self.pager.cycles + RESERVED_CYCLES;
+                let waste = (1 << segment_po2) - used_cycles;
+                tracing::debug!(
+                    "split: {} + {} + {RESERVED_CYCLES} = {used_cycles}, waste: {waste}, pending: {:?}",
+                    self.insn_cycles,
+                    self.pager.cycles,
+                    self.pending
+                );
+
+                // split
                 let (pre_state, partial_image, post_state) = self.pager.commit(self.pc);
                 callback(Segment {
                     partial_image,
                     pre_state,
                     post_state,
                     syscalls: mem::take(&mut self.syscalls),
-                    insn_cycles: self.cycles,
+                    insn_cycles: self.insn_cycles,
                     po2: segment_po2,
                     exit_code: ExitCode::SystemSplit,
                     index: segments,
                 })?;
                 segments += 1;
-                session_cycles.user += self.cycles as u64;
+                session_cycles.user += self.insn_cycles as u64;
                 session_cycles.total += 1 << segment_po2;
                 self.pager.clear();
-                total_cycles += self.cycles as u64;
-                self.cycles = 0;
+                self.insn_cycles = 0;
+
+                // replay the current instruction in a new segment
+                self.pending.pc = self.pc;
+                self.pending.cycles = 0;
             }
-            emu.step(self)?;
         }
 
         let (pre_state, partial_image, post_state) = self.pager.commit(self.pc);
-        let segment_cycles = self.cycles + self.pager.get_paging_cycles();
+        let segment_cycles = self.insn_cycles + self.pager.cycles;
         let po2 = log2_ceil(segment_cycles.next_power_of_two()).try_into()?;
         let exit_code = self.exit_code.unwrap();
 
@@ -232,14 +256,13 @@ impl<'a, S: Syscall> Executor<'a, S> {
             pre_state,
             post_state: post_state.clone(),
             syscalls: mem::take(&mut self.syscalls),
-            insn_cycles: self.cycles,
+            insn_cycles: self.insn_cycles,
             po2,
             exit_code,
             index: segments,
         })?;
         segments += 1;
-
-        session_cycles.user += self.cycles as u64;
+        session_cycles.user += self.insn_cycles as u64;
         session_cycles.total += 1 << po2;
 
         Ok(ExecutorResult {
@@ -254,28 +277,44 @@ impl<'a, S: Syscall> Executor<'a, S> {
         })
     }
 
-    fn reset(&mut self) {
-        self.pager.clear();
-        self.cycles = 0;
-        self.exit_code = None;
-        self.syscalls.clear();
+    fn advance(&mut self) {
+        self.pc = self.pending.pc;
+        self.insn_cycles += self.pending.cycles;
+        self.pending.cycles = 0;
+        if let Some(syscall) = self.pending.syscall.take() {
+            self.syscalls.push(syscall);
+        }
+        self.output_digest = self.pending.output_digest.take();
+        self.exit_code = self.pending.exit_code.take();
+        self.pager.commit_step();
     }
 
+    fn reset(&mut self) {
+        self.pager.clear();
+        self.exit_code = None;
+        self.syscalls.clear();
+        self.output_digest = None;
+        self.pending.reset(self.pc);
+    }
+}
+
+impl<'a, S: Syscall> Executor<'a, S> {
     fn ecall_halt(&mut self) -> Result<bool> {
         tracing::trace!("ecall_halt");
         let a0 = self.load_register(REG_A0)?;
         let output_ptr = self.load_guest_addr_from_register(REG_A1)?;
         let output: [u8; DIGEST_BYTES] = self.load_array_from_guest(output_ptr)?;
-        self.output_digest = Some(output.into());
 
         let halt_type = a0 & 0xff;
         let user_exit = (a0 >> 8) & 0xff;
 
-        self.exit_code = match halt_type {
+        self.pending.exit_code = match halt_type {
             halt::TERMINATE => Some(ExitCode::Halted(user_exit)),
             halt::PAUSE => Some(ExitCode::Paused(user_exit)),
             _ => bail!("Illegal halt type: {halt_type}"),
         };
+        self.pending.output_digest = Some(output.into());
+        self.pending.pc = self.pc + WORD_SIZE;
 
         Ok(true)
     }
@@ -290,35 +329,49 @@ impl<'a, S: Syscall> Executor<'a, S> {
         let syscall_name = self.peek_string(name_ptr)?;
         let name_end = name_ptr + syscall_name.len();
         Self::check_guest_addr(name_end)?;
-        tracing::trace!("ecall_software({syscall_name})");
+        tracing::trace!("ecall_software({syscall_name}, into_guest: {into_guest_len})");
 
-        // let chunks = align_up(guest_len as usize, IO_CHUNK_WORDS);
-        let mut to_guest = vec![0u32; into_guest_len as usize];
+        let chunks = align_up(into_guest_len as usize, IO_CHUNK_WORDS) / IO_CHUNK_WORDS;
 
-        let (a0, a1) = self
-            .syscall_handler
-            .syscall(&syscall_name, self, &mut to_guest)?;
+        let syscall = if let Some(syscall) = &self.pending.syscall {
+            tracing::debug!("Replay syscall: {syscall:?}");
+            syscall.clone()
+        } else {
+            let mut to_guest = vec![0u32; into_guest_len as usize];
+
+            let (a0, a1) = self
+                .syscall_handler
+                .syscall(&syscall_name, self, &mut to_guest)?;
+
+            let syscall = SyscallRecord {
+                to_guest,
+                regs: (a0, a1),
+            };
+            self.pending.syscall = Some(syscall.clone());
+            syscall
+        };
 
         // The guest uses a null pointer to indicate that a transfer from host
         // to guest is not needed.
         if !into_guest_ptr.is_null() {
             Self::check_guest_addr(into_guest_ptr + into_guest_len)?;
-            self.store_region(into_guest_ptr, bytemuck::cast_slice(&to_guest))?
+            self.store_region(into_guest_ptr, bytemuck::cast_slice(&syscall.to_guest))?
         }
 
+        let (a0, a1) = syscall.regs;
         self.store_register(REG_A0, a0)?;
         self.store_register(REG_A1, a1)?;
 
-        self.syscalls.push(SyscallRecord {
-            to_guest,
-            regs: (a0, a1),
-        });
+        tracing::trace!("{syscall:08x?}");
+
+        self.pending.cycles += 1 + chunks + 1; // syscallInit + syscallBody + syscallFini
+        self.pending.pc = self.pc + WORD_SIZE;
 
         Ok(true)
     }
 
     fn ecall_sha(&mut self) -> Result<bool> {
-        tracing::trace!("ecall_sha");
+        // tracing::trace!("ecall_sha");
         let state_out_ptr = self.load_guest_addr_from_register(REG_A0)?;
         let state_in_ptr = self.load_guest_addr_from_register(REG_A1)?;
         let mut block1_ptr = self.load_guest_addr_from_register(REG_A2)?;
@@ -331,7 +384,7 @@ impl<'a, S: Syscall> Executor<'a, S> {
             *word = word.to_be();
         }
 
-        // tracing::debug!("ecall_sha: start state:{state:08x?}");
+        // tracing::debug!("ecall_sha: start state: {state:08x?}");
         let mut block = [0u32; BLOCK_WORDS];
 
         for _ in 0..count {
@@ -359,7 +412,8 @@ impl<'a, S: Syscall> Executor<'a, S> {
 
         self.store_region_into_guest(state_out_ptr, bytemuck::cast_slice(&state))?;
 
-        // SHA_CYCLES * count
+        self.pending.cycles += SHA_CYCLES * count as usize;
+        self.pending.pc = self.pc + WORD_SIZE;
 
         Ok(true)
     }
@@ -406,7 +460,8 @@ impl<'a, S: Syscall> Executor<'a, S> {
             self.store_u32_into_guest(z_ptr + (i * WORD_SIZE) as u32, word.to_le())?;
         }
 
-        // BIGINT_CYCLES
+        self.pending.cycles += BIGINT_CYCLES;
+        self.pending.pc = self.pc + WORD_SIZE;
 
         Ok(true)
     }
@@ -436,16 +491,17 @@ impl<'a, S: Syscall> Executor<'a, S> {
     }
 
     fn load_array<const N: usize>(&mut self, addr: ByteAddr) -> Result<[u8; N]> {
-        // tracing::trace!("load_array: 0x{addr:08x}");
         let mut bytes = Vec::new();
         for i in 0..N {
             bytes.push(self.load_u8(addr + i)?);
         }
-        Ok(array::from_fn(|i| bytes[i]))
+        let ret = array::from_fn(|i| bytes[i]);
+        // tracing::trace!("load_array({addr:?}) -> {ret:02x?}");
+        Ok(ret)
     }
 
     fn load_u8(&mut self, addr: ByteAddr) -> Result<u8> {
-        let word = self.pager.load(addr.waddr())?;
+        let word = self.pager.load(addr.waddr());
         let bytes = word.to_le_bytes();
         let byte_offset = addr.0 as usize % WORD_SIZE;
         Ok(bytes[byte_offset])
@@ -486,7 +542,7 @@ impl<'a, S: Syscall> Executor<'a, S> {
     }
 
     fn store_region(&mut self, addr: ByteAddr, slice: &[u8]) -> Result<()> {
-        // tracing::trace!("store_region: {addr:?}");
+        // tracing::trace!("store_region({addr:?}, {slice:02x?})");
         slice
             .iter()
             .enumerate()
@@ -497,7 +553,6 @@ impl<'a, S: Syscall> Executor<'a, S> {
 
 impl<'a, S: Syscall> EmuContext for Executor<'a, S> {
     fn ecall(&mut self) -> Result<bool> {
-        self.pc += WORD_SIZE;
         match self.load_register(REG_T0)? {
             ecall::HALT => self.ecall_halt(),
             ecall::SOFTWARE => self.ecall_software(),
@@ -534,20 +589,20 @@ impl<'a, S: Syscall> EmuContext for Executor<'a, S> {
     }
 
     fn on_normal_end(&mut self, insn: &Instruction, _decoded: &DecodedInstruction) {
-        self.cycles += insn.cycles;
+        self.pending.cycles += insn.cycles;
     }
 
     fn get_pc(&self) -> ByteAddr {
-        self.pc
+        self.pending.pc
     }
 
-    fn set_pc(&mut self, addr: ByteAddr) {
-        self.pc = addr;
+    fn set_pc(&mut self, pc: ByteAddr) {
+        self.pending.pc = pc;
     }
 
     fn load_register(&mut self, idx: usize) -> Result<u32> {
         // tracing::trace!("load_reg: x{idx}");
-        self.pager.load(SYSTEM_START + idx)
+        Ok(self.pager.load(SYSTEM_START + idx))
     }
 
     fn store_register(&mut self, idx: usize, data: u32) -> Result<()> {
@@ -559,13 +614,40 @@ impl<'a, S: Syscall> EmuContext for Executor<'a, S> {
     }
 
     fn load_memory(&mut self, addr: WordAddr) -> Result<u32> {
-        // tracing::trace!("load_mem: {:?}", addr.baddr());
-        self.pager.load(addr)
+        let data = self.pager.load(addr);
+        // tracing::trace!("load_mem({:?}) -> 0x{data:08x}", addr.baddr());
+        Ok(data)
     }
 
     fn store_memory(&mut self, addr: WordAddr, data: u32) -> Result<()> {
-        // tracing::trace!("store_mem: {:?} <= 0x{data:08x}", addr.baddr());
+        // tracing::trace!("store_mem({:?}, 0x{data:08x})", addr.baddr());
         self.pager.store(addr, data)
+    }
+}
+
+impl<'a, S: Syscall> SyscallContext for Executor<'a, S> {
+    fn get_cycle(&self) -> usize {
+        self.insn_cycles
+    }
+
+    fn peek_register(&mut self, idx: usize) -> Result<u32> {
+        if idx >= REG_MAX {
+            bail!("invalid register: x{idx}");
+        }
+        self.pager.peek(SYSTEM_START + idx)
+    }
+
+    fn peek_u32(&mut self, addr: ByteAddr) -> Result<u32> {
+        let addr = Self::check_guest_addr(addr)?;
+        self.pager.peek(addr.waddr())
+    }
+
+    fn peek_u8(&mut self, addr: ByteAddr) -> Result<u8> {
+        let addr = Self::check_guest_addr(addr)?;
+        let word = self.pager.peek(addr.waddr())?;
+        let bytes = word.to_le_bytes();
+        let byte_offset = addr.0 as usize % WORD_SIZE;
+        Ok(bytes[byte_offset])
     }
 }
 

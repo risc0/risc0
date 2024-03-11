@@ -21,8 +21,19 @@ pub mod rv32im;
 #[cfg(test)]
 pub(crate) mod testutil;
 
-use risc0_zkvm_platform::memory::SYSTEM;
+use risc0_zkvm_platform::{memory::SYSTEM, syscall::DIGEST_WORDS};
 
 use self::addr::{ByteAddr, WordAddr};
 
 const SYSTEM_START: WordAddr = ByteAddr(SYSTEM.start() as u32).waddr();
+
+const SHA_INIT: usize = 5;
+const SHA_LOAD: usize = DIGEST_WORDS * 2;
+const SHA_MAIN_MIX: usize = 48;
+const SHA_MAIN_FINI: usize = 4;
+
+/// The number of cycles required to compress a SHA-256 block.
+const SHA_CYCLES: usize = SHA_INIT + SHA_LOAD + SHA_MAIN_MIX + SHA_MAIN_FINI;
+
+/// Number of cycles required to complete a BigInt operation.
+const BIGINT_CYCLES: usize = 9;

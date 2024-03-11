@@ -25,10 +25,6 @@ mod hash;
 mod image;
 mod sys_state;
 
-use alloc::vec::Vec;
-
-use serde::{Deserialize, Serialize};
-
 #[cfg(not(target_os = "zkvm"))]
 pub use self::image::{MemoryImage, PageTableInfo};
 pub use crate::{
@@ -46,10 +42,4 @@ pub fn compute_image_id(elf: &[u8]) -> anyhow::Result<risc0_zkp::core::digest::D
     let program = Program::load_elf(elf, GUEST_MAX_MEM as u32)?;
     let image = MemoryImage::new(&program, PAGE_SIZE as u32)?;
     Ok(image.compute_id())
-}
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct SyscallRecord {
-    pub to_guest: Vec<u32>,
-    pub regs: (u32, u32),
 }

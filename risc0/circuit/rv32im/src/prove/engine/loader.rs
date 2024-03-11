@@ -34,12 +34,6 @@ use risc0_zkvm_platform::{memory, WORD_SIZE};
 
 use crate::CIRCUIT;
 
-// The number of cycles needed after the body phase.
-// 4: Reset(fini)
-// 1: RamFini
-// 1: BytesFini
-pub const FINI_TAILROOM: usize = 6;
-
 pub const SHA_K_OFFSET: usize = memory::PRE_LOAD.start();
 pub const SHA_K_SIZE: usize = 64;
 pub const SHA_INIT_OFFSET: usize = SHA_K_OFFSET + SHA_K_SIZE * WORD_SIZE;
@@ -48,6 +42,22 @@ pub const ZEROS_OFFSET: usize = SHA_INIT_OFFSET + DIGEST_WORDS * WORD_SIZE;
 // TODO: generate from zirgen
 pub const SETUP_STEP_REGS: usize = 84;
 pub const SETUP_CYCLES: usize = setup_count(SETUP_STEP_REGS);
+pub const RAM_LOAD_CYCLES: usize = 27;
+
+// The number of cycles needed before the body phase.
+// BytesInit: 1
+// BytesSetup: 1561
+// RamInit: 1
+// RamLoad: 27
+// Reset(0): 2
+pub const INIT_CYCLES: usize = 1 + SETUP_CYCLES + 1 + RAM_LOAD_CYCLES + 2;
+
+// The number of cycles needed after the body phase.
+// Reset(1): 2
+// Reset(2): 2
+// RamFini: 1
+// BytesFini: 1
+pub const FINI_CYCLES: usize = 2 + 2 + 1 + 1;
 
 pub static SHA_K: [u32; SHA_K_SIZE] = [
     0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
@@ -265,11 +275,13 @@ pub fn ram_load_cycles() -> Vec<CtrlCycle> {
 
 impl<'a> Loader<'a> {
     pub fn new(max_cycles: usize, ctrl: &'a mut CpuBuffer<BabyBearElem>) -> Self {
+        let ram_load_cycles = ram_load_cycles();
+        assert_eq!(ram_load_cycles.len(), RAM_LOAD_CYCLES);
         Self {
             max_cycles,
             ctrl,
             cycle: 0,
-            ram_load_cycles: ram_load_cycles(),
+            ram_load_cycles,
         }
     }
 
@@ -290,7 +302,7 @@ impl<'a> Loader<'a> {
     }
 
     fn body(&mut self) {
-        let body_cycles = self.max_cycles - self.cycle - FINI_TAILROOM - ZK_CYCLES;
+        let body_cycles = self.max_cycles - self.cycle - FINI_CYCLES - ZK_CYCLES;
         tracing::debug!("[{}] BODY: {body_cycles}", self.cycle);
         for _ in 0..body_cycles {
             self.add_cycle(CtrlCycle::body());

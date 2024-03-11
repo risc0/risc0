@@ -12,7 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::collections::{BTreeMap, BTreeSet, HashMap};
+use std::{
+    collections::{BTreeMap, BTreeSet, HashMap},
+    mem::take,
+};
 
 use anyhow::Result;
 use risc0_binfmt::{MemoryImage, SystemState};
@@ -48,11 +51,19 @@ pub struct PageFaults {
     pub writes: BTreeSet<u32>,
 }
 
+#[derive(Clone, Debug)]
+enum Action {
+    PageRead(u32, usize),
+    PageWrite(u32, usize, bool),
+    Store(WordAddr, u32),
+}
+
 pub struct PagedMemory {
     pub image: MemoryImage,
     page_cache: HashMap<u32, Page>,
     page_states: BTreeMap<u32, PageState>,
     pub cycles: usize,
+    pending_actions: Vec<Action>,
 }
 
 impl WordAddr {
@@ -68,6 +79,7 @@ impl PagedMemory {
             page_cache: HashMap::new(),
             page_states: BTreeMap::new(),
             cycles: 0,
+            pending_actions: Vec::new(),
         }
     }
 
@@ -81,18 +93,17 @@ impl PagedMemory {
     pub fn peek(&self, addr: WordAddr) -> Result<u32> {
         let page_idx = addr.page_idx();
         if let Some(cache) = self.page_cache.get(&page_idx) {
-            cache.load(addr)
+            Ok(cache.load(addr))
         } else {
             self.pre_peek(addr)
         }
     }
 
-    pub fn load(&mut self, addr: WordAddr) -> Result<u32> {
+    pub fn load(&mut self, addr: WordAddr) -> u32 {
         let page_idx = addr.page_idx();
-        // tracing::trace!("load: 0x{addr:08x}, page: 0x{page_idx:05x}");
+        // tracing::trace!("load: {addr:?}, page: 0x{page_idx:05x}");
         if self.page_states.get(&page_idx).is_none() {
             self.load_page(page_idx);
-            self.page_states.insert(page_idx, PageState::Loaded);
         }
         self.page_cache.get(&page_idx).unwrap().load(addr)
     }
@@ -104,26 +115,20 @@ impl PagedMemory {
             *state
         } else {
             self.load_page(page_idx);
-            self.page_states.insert(page_idx, PageState::Loaded);
             PageState::Loaded
         };
 
         if state == PageState::Loaded {
-            self.add_cost(page_idx);
             self.update(page_idx, PageState::Dirty);
-            self.page_states.insert(page_idx, PageState::Dirty);
+            self.page_changed(page_idx, PageState::Dirty);
         }
 
-        self.page_cache
-            .get_mut(&page_idx)
-            .unwrap()
-            .store(addr, data);
+        let page = self.page_cache.get_mut(&page_idx).unwrap();
+        let old = page.load(addr);
+        self.pending_actions.push(Action::Store(addr, old));
+        page.store(addr, data);
 
         Ok(())
-    }
-
-    pub fn get_paging_cycles(&self) -> usize {
-        self.cycles
     }
 
     pub fn commit(&mut self, pc: ByteAddr) -> (SystemState, MemoryImage, SystemState) {
@@ -164,7 +169,39 @@ impl PagedMemory {
         (pre_state, image, post_state)
     }
 
+    pub fn undo(&mut self) {
+        let pending_actions = take(&mut self.pending_actions);
+        for action in pending_actions.iter().rev() {
+            tracing::debug!("undo: {action:08x?})");
+            match action {
+                Action::PageRead(page_idx, cycles) => {
+                    self.page_states.remove(page_idx);
+                    self.cycles -= cycles;
+                }
+                Action::PageWrite(page_idx, cycles, was_loaded) => {
+                    if *was_loaded {
+                        self.page_states.insert(*page_idx, PageState::Loaded);
+                    } else {
+                        self.page_states.remove(page_idx);
+                    }
+                    self.cycles -= cycles;
+                }
+                Action::Store(addr, data) => {
+                    self.page_cache
+                        .get_mut(&addr.page_idx())
+                        .unwrap()
+                        .store(*addr, *data);
+                }
+            }
+        }
+    }
+
+    pub fn commit_step(&mut self) {
+        self.pending_actions.clear();
+    }
+
     pub fn clear(&mut self) {
+        self.pending_actions.clear();
         self.page_cache.clear();
         self.page_states.clear();
         self.cycles = 0;
@@ -185,8 +222,8 @@ impl PagedMemory {
         tracing::trace!("load_page: 0x{page_idx:05x}");
         let page = self.image.load_page(page_idx);
         self.page_cache.insert(page_idx, Page(page));
-        self.add_cost(page_idx);
         self.update(page_idx, PageState::Loaded);
+        self.page_changed(page_idx, PageState::Loaded);
     }
 
     fn update(&mut self, mut page_idx: u32, goal: PageState) {
@@ -196,23 +233,21 @@ impl PagedMemory {
             let entry_addr = info.get_page_entry_addr(page_idx);
             let parent_idx = info.get_page_index(entry_addr);
 
-            if let Some(state) = self.page_states.get_mut(&parent_idx) {
+            if let Some(state) = self.page_states.get(&parent_idx) {
                 if goal > *state {
-                    *state = goal;
-                    self.add_cost(parent_idx);
+                    self.page_changed(parent_idx, goal);
                 }
             } else {
                 let page = self.image.load_page(parent_idx);
                 self.page_cache.insert(parent_idx, Page(page));
-                self.page_states.insert(parent_idx, goal);
-                self.add_cost(parent_idx);
+                self.page_changed(parent_idx, goal);
             }
 
             page_idx = parent_idx;
         }
     }
 
-    fn add_cost(&mut self, page_idx: u32) {
+    fn page_changed(&mut self, page_idx: u32, state: PageState) {
         let info = &self.image.info;
 
         let page_cycles = if page_idx == info.root_idx {
@@ -222,27 +257,33 @@ impl PagedMemory {
             cycles_per_page(BLOCKS_PER_PAGE)
         };
 
-        // tracing::trace!("add_cost(0x{page_idx:05x}) <= {page_cycles}");
+        tracing::trace!("page_changed(0x{page_idx:05x}, {state:?}) <= {page_cycles}");
         self.cycles += page_cycles;
+
+        let old = self.page_states.insert(page_idx, state);
+        let action = match state {
+            PageState::Loaded => Action::PageRead(page_idx, page_cycles),
+            PageState::Dirty => Action::PageWrite(page_idx, page_cycles, old.is_some()),
+        };
+        self.pending_actions.push(action);
     }
 }
 
 impl Page {
-    fn load(&self, addr: WordAddr) -> Result<u32> {
+    fn load(&self, addr: WordAddr) -> u32 {
         let word_addr = (addr.0 % PAGE_WORDS as u32) as usize;
         let byte_addr = word_addr * WORD_SIZE;
-        // tracing::trace!("load: 0x{word_addr:04x}");
         let mut bytes = [0u8; WORD_SIZE];
         bytes.clone_from_slice(&self.0[byte_addr..byte_addr + WORD_SIZE]);
-        Ok(u32::from_le_bytes(bytes))
-        // Ok(self.0[addr])
+        let data = u32::from_le_bytes(bytes);
+        // tracing::trace!("load({addr:?}) -> 0x{data:08x}");
+        data
     }
 
     fn store(&mut self, addr: WordAddr, data: u32) {
         let word_addr = (addr.0 % PAGE_WORDS as u32) as usize;
         let byte_addr = word_addr * WORD_SIZE;
-        // tracing::trace!("store: 0x{word_addr:04x} <= 0x{data:08x}");
+        // tracing::trace!("store({addr:?}, 0x{data:08x})");
         self.0[byte_addr..byte_addr + WORD_SIZE].clone_from_slice(&data.to_le_bytes());
-        // self.0[addr] = data;
     }
 }

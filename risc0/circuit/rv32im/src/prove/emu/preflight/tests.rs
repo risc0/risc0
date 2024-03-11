@@ -87,31 +87,31 @@ fn basic() {
             MemoryTransaction::new(2, ByteAddr(0x00004008), 0x003100b3),
             MemoryTransaction::new(2, ByteAddr(0x0c000008), 0x1234b000),
             MemoryTransaction::new(2, ByteAddr(0x0c00000c), 0xf387e000),
-            MemoryTransaction::new(3, ByteAddr(0x0000400c), 0x000055b7),
+            MemoryTransaction::new(3, ByteAddr(0x0000400c), 0x000045b7),
             MemoryTransaction::new(3, ByteAddr(0x0c000000), 0),
             MemoryTransaction::new(3, ByteAddr(0x0c000000), 0),
             MemoryTransaction::new(4, ByteAddr(0x00004010), 0x00000073),
             MemoryTransaction::new(4, ByteAddr(0x0c000014), 0),
-            MemoryTransaction::new(4, ByteAddr(0x0c00002c), 0x00005000),
+            MemoryTransaction::new(4, ByteAddr(0x0c00002c), 0x00004000),
             MemoryTransaction::new(4, ByteAddr(0x0c000028), 0x00000000),
             // reset(1)
-            MemoryTransaction::new(6324, ByteAddr(0x00005000), 0x00000000),
-            MemoryTransaction::new(6324, ByteAddr(0x00005004), 0x00000000),
-            MemoryTransaction::new(6324, ByteAddr(0x00005008), 0x00000000),
-            MemoryTransaction::new(6324, ByteAddr(0x0000500c), 0x00000000),
-            MemoryTransaction::new(6325, ByteAddr(0x00005010), 0x00000000),
-            MemoryTransaction::new(6325, ByteAddr(0x00005014), 0x00000000),
-            MemoryTransaction::new(6325, ByteAddr(0x00005018), 0x00000000),
-            MemoryTransaction::new(6325, ByteAddr(0x0000501c), 0x00000000),
+            MemoryTransaction::new(6324, ByteAddr(0x00004000), 0x1234b137),
+            MemoryTransaction::new(6324, ByteAddr(0x00004004), 0xf387e1b7),
+            MemoryTransaction::new(6324, ByteAddr(0x00004008), 0x003100b3),
+            MemoryTransaction::new(6324, ByteAddr(0x0000400c), 0x000045b7),
+            MemoryTransaction::new(6325, ByteAddr(0x00004010), 0x00000073),
+            MemoryTransaction::new(6325, ByteAddr(0x00004014), 0x00000000),
+            MemoryTransaction::new(6325, ByteAddr(0x00004018), 0x00000000),
+            MemoryTransaction::new(6325, ByteAddr(0x0000401c), 0x00000000),
             // reset(2)
-            MemoryTransaction::new(6326, ByteAddr(0x0d6b5ac0), 0x5540a93a),
-            MemoryTransaction::new(6326, ByteAddr(0x0d6b5ac4), 0x5f49f0e7),
-            MemoryTransaction::new(6326, ByteAddr(0x0d6b5ac8), 0xe8e63b65),
-            MemoryTransaction::new(6326, ByteAddr(0x0d6b5acc), 0x67e2c509),
-            MemoryTransaction::new(6327, ByteAddr(0x0d6b5ad0), 0x4bfcad79),
-            MemoryTransaction::new(6327, ByteAddr(0x0d6b5ad4), 0x0943f0cb),
-            MemoryTransaction::new(6327, ByteAddr(0x0d6b5ad8), 0xd99e50cf),
-            MemoryTransaction::new(6327, ByteAddr(0x0d6b5adc), 0x2354b2e4),
+            MemoryTransaction::new(6326, ByteAddr(0x0d6b5ac0), 0x2ea10cf3),
+            MemoryTransaction::new(6326, ByteAddr(0x0d6b5ac4), 0x41559d09),
+            MemoryTransaction::new(6326, ByteAddr(0x0d6b5ac8), 0x032b0b9e),
+            MemoryTransaction::new(6326, ByteAddr(0x0d6b5acc), 0xda56a7af),
+            MemoryTransaction::new(6327, ByteAddr(0x0d6b5ad0), 0x7c9d8024),
+            MemoryTransaction::new(6327, ByteAddr(0x0d6b5ad4), 0x9bfea1c1),
+            MemoryTransaction::new(6327, ByteAddr(0x0d6b5ad8), 0xc37b44c3),
+            MemoryTransaction::new(6327, ByteAddr(0x0d6b5adc), 0x554f49f5),
         ],
     );
 
@@ -123,7 +123,7 @@ fn system_split() {
     let program = testutil::simple_loop();
     let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
 
-    let result = execute(image, 15, DEFAULT_SESSION_LIMIT, &NullSyscall::default()).unwrap();
+    let result = execute(image, 14, DEFAULT_SESSION_LIMIT, &NullSyscall::default()).unwrap();
     let segments = result.segments;
 
     assert_eq!(segments.len(), 2);
@@ -132,8 +132,8 @@ fn system_split() {
         assert_eq!(trace.pre.cycles.len(), 10004);
         assert_eq!(trace.pre.txns.len(), 9968);
         assert_eq!(trace.pre.extras.len(), 24);
-        assert_eq!(trace.body.cycles.len(), 22714);
-        assert_eq!(trace.body.txns.len(), 35728);
+        assert_eq!(trace.body.cycles.len(), 6330);
+        assert_eq!(trace.body.txns.len(), 10777);
         assert_eq!(trace.body.extras.len(), 15);
         let page_reads: Vec<_> = trace
             .pre
@@ -167,7 +167,7 @@ fn system_split() {
         assert_eq!(trace.pre.txns.len(), 9968);
         assert_eq!(trace.pre.extras.len(), 24);
         assert_eq!(trace.body.cycles.len(), 6330);
-        assert_eq!(trace.body.txns.len(), 32);
+        assert_eq!(trace.body.txns.len(), 20);
         assert_eq!(trace.body.extras.len(), 0);
         let page_reads: Vec<_> = trace
             .pre

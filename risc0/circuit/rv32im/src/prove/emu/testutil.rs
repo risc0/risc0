@@ -43,7 +43,7 @@ pub fn basic() -> Program {
             (0x4000, 0x1234b137), // lui x2, 0x1234b000
             (0x4004, 0xf387e1b7), // lui x3, 0xf387e000
             (0x4008, 0x003100b3), // add x1, x2, x3
-            (0x400c, 0x000055b7), // lui a1, 0x00005000
+            (0x400c, 0x000045b7), // lui a1, 0x4
             (0x4010, 0x00000073), // ecall(halt)
         ]),
     }
@@ -57,11 +57,11 @@ pub fn simple_loop() -> Program {
     //
     // _boot:
     //     li      a4,0
-    //     li      a5,5160
+    //     li      a5,1000
     // loop:
     //     addi    a4,a4,1
     //     blt     a4,a5,loop
-    //     lui     a1,0x5000
+    //     lui     a1,0x1000
     //     ecall
     //
     // riscv32-unknown-elf-as loop.asm -o loop; riscv32-unknown-elf-objdump -d loop
@@ -69,12 +69,11 @@ pub fn simple_loop() -> Program {
         entry: 0x4000,
         image: BTreeMap::from([
             (0x4000, 0x00000713), // li      a4,0
-            (0x4004, 0x000017b7), // lui     a5,0x1
-            (0x4008, 0x42878793), // add     a5,a5,1064
-            (0x400c, 0x00170713), // addi    a4,a4,1
-            (0x4010, 0xfef74ee3), // blt     a4,a5,c <loop>
-            (0x4014, 0x050005b7), // lui     a1,0x5000
-            (0x4018, 0x00000073), // ecall
+            (0x4004, 0x3e800793), // li      a5,1000
+            (0x4008, 0x00170713), // add     a4,a4,1
+            (0x400c, 0xfef74ee3), // blt     a4,a5,8 <loop>
+            (0x4010, 0x010005b7), // lui     a1,0x1000
+            (0x4014, 0x00000073), // ecall
         ]),
     }
 }

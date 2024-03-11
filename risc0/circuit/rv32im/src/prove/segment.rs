@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use derive_debug::Dbg;
-use risc0_binfmt::{ExitCode, MemoryImage, SyscallRecord, SystemState};
+use risc0_binfmt::{ExitCode, MemoryImage, SystemState};
 use risc0_zkp::{
     adapter::CircuitInfo as _,
     core::digest::DIGEST_WORDS,
@@ -23,6 +23,12 @@ use risc0_zkvm_platform::WORD_SIZE;
 use serde::{Deserialize, Serialize};
 
 use crate::CircuitImpl;
+
+#[derive(Clone, Dbg, Serialize, Deserialize)]
+pub struct SyscallRecord {
+    pub to_guest: Vec<u32>,
+    pub regs: (u32, u32),
+}
 
 #[derive(Clone, Dbg, Serialize, Deserialize)]
 pub struct Segment {

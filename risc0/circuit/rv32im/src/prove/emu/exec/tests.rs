@@ -103,12 +103,12 @@ fn basic() {
 
 #[test]
 fn system_split() {
-    let program = testutil::large_text();
+    let program = testutil::simple_loop();
     let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
     let pre_image_id = image.compute_id();
 
     let result =
-        super::execute(image, 15, DEFAULT_SESSION_LIMIT, &BasicSyscall::default()).unwrap();
+        super::execute(image, 14, DEFAULT_SESSION_LIMIT, &BasicSyscall::default()).unwrap();
 
     let segments = result.segments;
     assert_eq!(segments.len(), 2);
