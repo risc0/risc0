@@ -260,6 +260,7 @@ fn malformed_err() -> anyhow::Error {
 }
 
 impl pb::api::Asset {
+    #[cfg(feature = "prove")]
     fn as_bytes(&self) -> Result<Bytes> {
         let bytes = match self.kind.as_ref().ok_or(malformed_err())? {
             pb::api::asset::Kind::Inline(bytes) => bytes.clone(),

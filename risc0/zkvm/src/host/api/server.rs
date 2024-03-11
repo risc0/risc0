@@ -20,7 +20,6 @@ use std::{
 
 use anyhow::{anyhow, bail, Result};
 use bytes::Bytes;
-use prost::Message;
 use serde::{Deserialize, Serialize};
 
 use super::{malformed_err, path_to_string, pb, ConnectionWrapper, Connector, TcpConnector};
@@ -30,8 +29,7 @@ use crate::{
         client::{env::TraceCallback, slice_io::SliceIo},
         recursion::SuccinctReceipt,
     },
-    receipt_claim::{MaybePruned, ReceiptClaim},
-    ExecutorEnv, ExecutorImpl, ProverOpts, Receipt, Segment, SegmentReceipt, SegmentRef,
+    Assumption, ExecutorEnv, ExecutorImpl, ProverOpts, Segment, SegmentReceipt, SegmentRef,
     TraceEvent, VerifierContext,
 };
 
@@ -356,19 +354,11 @@ impl Server {
             let ctx = VerifierContext::default();
             let receipt = prover.prove_with_ctx(env, &ctx, &bytes)?;
 
-            let receipt_pb: pb::core::Receipt = receipt.into();
-            let receipt_bytes = receipt_pb.encode_to_vec();
-            let asset = pb::api::Asset::from_bytes(
-                &request.receipt_out.ok_or(malformed_err())?,
-                receipt_bytes.into(),
-                "receipt.zkp",
-            )?;
-
             Ok(pb::api::ServerReply {
                 kind: Some(pb::api::server_reply::Kind::Ok(pb::api::ClientCallback {
                     kind: Some(pb::api::client_callback::Kind::ProveDone(
                         pb::api::OnProveDone {
-                            receipt: Some(asset),
+                            receipt: Some(receipt.into()),
                         },
                     )),
                 })),
@@ -399,18 +389,10 @@ impl Server {
             let ctx = VerifierContext::default();
             let receipt = prover.prove_segment(&ctx, &segment)?;
 
-            let receipt_pb: pb::core::SegmentReceipt = receipt.into();
-            let receipt_bytes = receipt_pb.encode_to_vec();
-            let asset = pb::api::Asset::from_bytes(
-                &request.receipt_out.ok_or(malformed_err())?,
-                receipt_bytes.into(),
-                "receipt.zkp",
-            )?;
-
             Ok(pb::api::ProveSegmentReply {
                 kind: Some(pb::api::prove_segment_reply::Kind::Ok(
                     pb::api::ProveSegmentResult {
-                        receipt: Some(asset),
+                        receipt: Some(receipt.into()),
                     },
                 )),
             })
@@ -431,23 +413,15 @@ impl Server {
     fn on_lift(&self, mut conn: ConnectionWrapper, request: pb::api::LiftRequest) -> Result<()> {
         fn inner(request: pb::api::LiftRequest) -> Result<pb::api::LiftReply> {
             let opts: ProverOpts = request.opts.ok_or(malformed_err())?.into();
-            let receipt_bytes = request.receipt.ok_or(malformed_err())?.as_bytes()?;
-            let segment_receipt: SegmentReceipt = bincode::deserialize(&receipt_bytes)?;
+            let segment_receipt: SegmentReceipt =
+                request.receipt.ok_or(malformed_err())?.try_into()?;
 
             let prover = get_prover_server(&opts)?;
             let receipt = prover.lift(&segment_receipt)?;
 
-            let succinct_receipt_pb: pb::core::SuccinctReceipt = receipt.into();
-            let succinct_receipt_bytes = succinct_receipt_pb.encode_to_vec();
-            let asset = pb::api::Asset::from_bytes(
-                &request.receipt_out.ok_or(malformed_err())?,
-                succinct_receipt_bytes.into(),
-                "receipt.zkp",
-            )?;
-
             Ok(pb::api::LiftReply {
                 kind: Some(pb::api::lift_reply::Kind::Ok(pb::api::LiftResult {
-                    receipt: Some(asset),
+                    receipt: Some(receipt.into()),
                 })),
             })
         }
@@ -465,26 +439,17 @@ impl Server {
     fn on_join(&self, mut conn: ConnectionWrapper, request: pb::api::JoinRequest) -> Result<()> {
         fn inner(request: pb::api::JoinRequest) -> Result<pb::api::JoinReply> {
             let opts: ProverOpts = request.opts.ok_or(malformed_err())?.into();
-            let left_receipt_bytes = request.left_receipt.ok_or(malformed_err())?.as_bytes()?;
-            let left_succinct_receipt: SuccinctReceipt = bincode::deserialize(&left_receipt_bytes)?;
-            let right_receipt_bytes = request.right_receipt.ok_or(malformed_err())?.as_bytes()?;
-            let right_succinct_receipt: SuccinctReceipt =
-                bincode::deserialize(&right_receipt_bytes)?;
+            let left_receipt: SuccinctReceipt =
+                request.left_receipt.ok_or(malformed_err())?.try_into()?;
+            let right_receipt: SuccinctReceipt =
+                request.right_receipt.ok_or(malformed_err())?.try_into()?;
 
             let prover = get_prover_server(&opts)?;
-            let receipt = prover.join(&left_succinct_receipt, &right_succinct_receipt)?;
-
-            let succinct_receipt_pb: pb::core::SuccinctReceipt = receipt.into();
-            let succinct_receipt_bytes = succinct_receipt_pb.encode_to_vec();
-            let asset = pb::api::Asset::from_bytes(
-                &request.receipt_out.ok_or(malformed_err())?,
-                succinct_receipt_bytes.into(),
-                "receipt.zkp",
-            )?;
+            let receipt = prover.join(&left_receipt, &right_receipt)?;
 
             Ok(pb::api::JoinReply {
                 kind: Some(pb::api::join_reply::Kind::Ok(pb::api::JoinResult {
-                    receipt: Some(asset),
+                    receipt: Some(receipt.into()),
                 })),
             })
         }
@@ -506,34 +471,21 @@ impl Server {
     ) -> Result<()> {
         fn inner(request: pb::api::ResolveRequest) -> Result<pb::api::ResolveReply> {
             let opts: ProverOpts = request.opts.ok_or(malformed_err())?.into();
-            let conditional_receipt_bytes = request
+            let conditional_receipt: SuccinctReceipt = request
                 .conditional_receipt
                 .ok_or(malformed_err())?
-                .as_bytes()?;
-            let conditional_succinct_receipt: SuccinctReceipt =
-                bincode::deserialize(&conditional_receipt_bytes)?;
-            let assumption_receipt_bytes = request
+                .try_into()?;
+            let assumption_receipt: SuccinctReceipt = request
                 .assumption_receipt
                 .ok_or(malformed_err())?
-                .as_bytes()?;
-            let assumption_succinct_receipt: SuccinctReceipt =
-                bincode::deserialize(&assumption_receipt_bytes)?;
+                .try_into()?;
 
             let prover = get_prover_server(&opts)?;
-            let receipt =
-                prover.resolve(&conditional_succinct_receipt, &assumption_succinct_receipt)?;
-
-            let succinct_receipt_pb: pb::core::SuccinctReceipt = receipt.into();
-            let succinct_receipt_bytes = succinct_receipt_pb.encode_to_vec();
-            let asset = pb::api::Asset::from_bytes(
-                &request.receipt_out.ok_or(malformed_err())?,
-                succinct_receipt_bytes.into(),
-                "receipt.zkp",
-            )?;
+            let receipt = prover.resolve(&conditional_receipt, &assumption_receipt)?;
 
             Ok(pb::api::ResolveReply {
                 kind: Some(pb::api::resolve_reply::Kind::Ok(pb::api::ResolveResult {
-                    receipt: Some(asset),
+                    receipt: Some(receipt.into()),
                 })),
             })
         }
@@ -555,24 +507,16 @@ impl Server {
     ) -> Result<()> {
         fn inner(request: pb::api::IdentityP254Request) -> Result<pb::api::IdentityP254Reply> {
             let opts: ProverOpts = request.opts.ok_or(malformed_err())?.into();
-            let receipt_bytes = request.receipt.ok_or(malformed_err())?.as_bytes()?;
-            let succinct_receipt: SuccinctReceipt = bincode::deserialize(&receipt_bytes)?;
+            let succinct_receipt: SuccinctReceipt =
+                request.receipt.ok_or(malformed_err())?.try_into()?;
 
             let prover = get_prover_server(&opts)?;
             let receipt = prover.identity_p254(&succinct_receipt)?;
 
-            let succinct_receipt_pb: pb::core::SuccinctReceipt = receipt.into();
-            let succinct_receipt_bytes = succinct_receipt_pb.encode_to_vec();
-            let asset = pb::api::Asset::from_bytes(
-                &request.receipt_out.ok_or(malformed_err())?,
-                succinct_receipt_bytes.into(),
-                "receipt.zkp",
-            )?;
-
             Ok(pb::api::IdentityP254Reply {
                 kind: Some(pb::api::identity_p254_reply::Kind::Ok(
                     pb::api::IdentityP254Result {
-                        receipt: Some(asset),
+                        receipt: Some(receipt.into()),
                     },
                 )),
             })
@@ -624,14 +568,11 @@ fn build_env<'a>(
     }
     for assumption in request.assumptions.iter() {
         match assumption.kind.as_ref().ok_or(malformed_err())? {
-            pb::api::assumption::Kind::Proven(asset) => {
-                let receipt: Receipt = pb::core::Receipt::decode(asset.as_bytes()?)?.try_into()?;
-                env_builder.add_assumption(receipt)
+            pb::api::assumption::Kind::Proven(receipt) => {
+                env_builder.add_assumption(Assumption::Proven(receipt.clone().try_into()?))
             }
-            pb::api::assumption::Kind::Unresolved(asset) => {
-                let claim: MaybePruned<ReceiptClaim> =
-                    pb::core::MaybePruned::decode(asset.as_bytes()?)?.try_into()?;
-                env_builder.add_assumption(claim)
+            pb::api::assumption::Kind::Unresolved(claim) => {
+                env_builder.add_assumption(Assumption::Unresolved(claim.clone().try_into()?))
             }
         };
     }

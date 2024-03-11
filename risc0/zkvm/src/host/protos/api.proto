@@ -2,6 +2,7 @@ syntax = "proto3";
 
 import "google/protobuf/empty.proto";
 import "base.proto";
+import "core.proto";
 
 package protos.api;
 
@@ -40,13 +41,13 @@ message ExecuteRequest {
 message ProveRequest {
   ExecutorEnv env = 1;
   ProverOpts opts = 2;
-  AssetRequest receipt_out = 3;
+  reserved 3;
 }
 
 message ProveSegmentRequest {
   ProverOpts opts = 1;
   Asset segment = 2;
-  AssetRequest receipt_out = 3;
+  reserved 3;
 }
 
 message ProveSegmentReply {
@@ -58,8 +59,8 @@ message ProveSegmentReply {
 
 message LiftRequest {
   ProverOpts opts = 1;
-  Asset receipt = 2;
-  AssetRequest receipt_out = 3;
+  protos.core.SegmentReceipt receipt = 2;
+  reserved 3;
 }
 
 message LiftReply {
@@ -70,14 +71,14 @@ message LiftReply {
 }
 
 message LiftResult {
-  Asset receipt = 1;
+  protos.core.SuccinctReceipt receipt = 1;
 }
 
 message JoinRequest {
   ProverOpts opts = 1;
-  Asset left_receipt = 2;
-  Asset right_receipt = 3;
-  AssetRequest receipt_out = 4;
+  protos.core.SuccinctReceipt left_receipt = 2;
+  protos.core.SuccinctReceipt right_receipt = 3;
+  reserved 4;
 }
 
 message JoinReply {
@@ -88,14 +89,14 @@ message JoinReply {
 }
 
 message JoinResult {
-  Asset receipt = 1;
+  protos.core.SuccinctReceipt receipt = 1;
 }
 
 message ResolveRequest {
   ProverOpts opts = 1;
-  Asset conditional_receipt = 2;
-  Asset assumption_receipt = 3;
-  AssetRequest receipt_out = 4;
+  protos.core.SuccinctReceipt conditional_receipt = 2;
+  protos.core.SuccinctReceipt assumption_receipt = 3;
+  reserved 4;
 }
 
 message ResolveReply {
@@ -106,13 +107,13 @@ message ResolveReply {
 }
 
 message ResolveResult {
-  Asset receipt = 1;
+  protos.core.SuccinctReceipt receipt = 1;
 }
 
 message IdentityP254Request {
   ProverOpts opts = 1;
-  Asset receipt = 2;
-  AssetRequest receipt_out = 3;
+  protos.core.SuccinctReceipt receipt = 2;
+  reserved 3;
 }
 
 message IdentityP254Reply {
@@ -123,7 +124,7 @@ message IdentityP254Reply {
 }
 
 message IdentityP254Result {
-  Asset receipt = 1;
+  protos.core.SuccinctReceipt receipt = 1;
 }
 
 message ExecutorEnv {
@@ -143,8 +144,8 @@ message ExecutorEnv {
 
 message Assumption {
   oneof kind {
-    Asset proven = 1; // Receipt
-    Asset unresolved = 2; // MaybePruned<ReceiptClaim>
+    protos.core.Receipt proven = 1; // Receipt
+    protos.core.MaybePruned unresolved = 2; // MaybePruned<ReceiptClaim>
   }
 }
 
@@ -167,7 +168,7 @@ message SegmentInfo {
 }
 
 message ProveSegmentResult {
-  Asset receipt = 1;
+  protos.core.SegmentReceipt receipt = 1;
 }
 
 message Asset {
@@ -266,7 +267,7 @@ message OnSessionDone {
 }
 
 message OnProveDone {
-  Asset receipt = 1;
+  protos.core.Receipt receipt = 1;
 }
 
 message GenericReply {
