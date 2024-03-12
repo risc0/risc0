@@ -285,43 +285,9 @@ impl Preflight {
             self.page_fault(true, /*is_read=*/ 1, *page_idx, /*is_done=*/ 0)?;
         }
 
-        let max_cycles = self.steps;
-        let pre_cycles = self.trace.pre.cycles.len();
-
-        if let Some(exit_code) = self.halted {
-            let body_cycles = self.trace.body.cycles.len();
-
-            let err = || anyhow::anyhow!("Invalid execution trace: cycles");
-            let body_padding = max_cycles
-                .checked_sub(pre_cycles)
-                .ok_or_else(err)?
-                .checked_sub(body_cycles)
-                .ok_or_else(err)?
-                .checked_sub(FINI_CYCLES + ZK_CYCLES)
-                .ok_or_else(err)?;
-            tracing::debug!("halt padding: {body_padding}, pre: {pre_cycles}, body: {body_cycles}");
-
-            let exit_code_bytes = exit_code.to_le_bytes();
-            let (sys_exit_code, user_exit_code) = (exit_code_bytes[0], exit_code_bytes[1]);
-            if body_padding > 1 {
-                self.add_cycle(false, TopMux::Body(Major::Halt, 0));
-            }
-            for _ in 1..body_padding {
-                self.add_par_cycle(
-                    false,
-                    TopMux::Body(Major::Halt, 0),
-                    Back::Halt {
-                        pc: self.pc,
-                        sys_exit_code,
-                        user_exit_code,
-                        write_addr: self.output_ptr.waddr(),
-                    },
-                );
-            }
-        } else {
+        if self.halted.is_none() {
             // Emulate the page fault writes before a system split.
             for page_idx in faults.writes.iter() {
-                //.take(faults.writes.len() - 1) {
                 self.page_fault(false, /*is_read=*/ 0, *page_idx, /*is_done=*/ 0)?;
             }
             let last_page_idx = faults.writes.last().unwrap();
@@ -331,35 +297,42 @@ impl Preflight {
                 *last_page_idx,
                 /*is_done=*/ 1,
             )?;
+        }
 
-            let body_cycles = self.trace.body.cycles.len();
+        let max_cycles = self.steps;
+        let pre_cycles = self.trace.pre.cycles.len();
+        let body_cycles = self.trace.body.cycles.len();
+        let err = || anyhow::anyhow!("Invalid execution trace: cycles");
+        let body_padding = max_cycles
+            .checked_sub(pre_cycles)
+            .ok_or_else(err)?
+            .checked_sub(body_cycles)
+            .ok_or_else(err)?
+            .checked_sub(FINI_CYCLES + ZK_CYCLES)
+            .ok_or_else(err)?;
+        tracing::debug!("padding: {body_padding}, pre: {pre_cycles}, body: {body_cycles}");
 
-            let err = || anyhow::anyhow!("Invalid execution trace: cycles");
-            let body_padding = max_cycles
-                .checked_sub(pre_cycles)
-                .ok_or_else(err)?
-                .checked_sub(body_cycles)
-                .ok_or_else(err)?
-                .checked_sub(FINI_CYCLES + ZK_CYCLES)
-                .ok_or_else(err)?;
-            tracing::debug!(
-                "fault padding: {body_padding}, pre: {pre_cycles}, body: {body_cycles}"
+        let (sys_exit_code, user_exit_code) = if let Some(exit_code) = self.halted {
+            let exit_code_bytes = exit_code.to_le_bytes();
+            (exit_code_bytes[0], exit_code_bytes[1])
+        } else {
+            (halt::SPLIT as u8, 0)
+        };
+
+        if body_padding > 0 {
+            self.add_cycle(false, TopMux::Body(Major::Halt, 0));
+        }
+        for _ in 1..body_padding {
+            self.add_par_cycle(
+                false,
+                TopMux::Body(Major::Halt, 0),
+                Back::Halt {
+                    pc: self.pc,
+                    sys_exit_code,
+                    user_exit_code,
+                    write_addr: self.output_ptr.waddr(),
+                },
             );
-            if body_padding > 1 {
-                self.add_cycle(false, TopMux::Body(Major::Halt, 0));
-            }
-            for _ in 1..body_padding {
-                self.add_par_cycle(
-                    false,
-                    TopMux::Body(Major::Halt, 0),
-                    Back::Halt {
-                        pc: self.pc,
-                        sys_exit_code: halt::SPLIT as u8,
-                        user_exit_code: 0,
-                        write_addr: self.output_ptr.waddr(),
-                    },
-                );
-            }
         }
 
         // reset(1)

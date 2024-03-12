@@ -169,7 +169,8 @@ impl<'a, S: Syscall> Executor<'a, S> {
         max_cycles: Option<u64>,
         mut callback: F,
     ) -> Result<ExecutorResult> {
-        const RESERVED_CYCLES: usize = INIT_CYCLES + FINI_CYCLES + ZK_CYCLES;
+        const MIN_HALT_CYCLES: usize = 1;
+        const RESERVED_CYCLES: usize = INIT_CYCLES + MIN_HALT_CYCLES + FINI_CYCLES + ZK_CYCLES;
         let segment_limit = (1 << segment_po2) - RESERVED_CYCLES;
 
         self.reset();

@@ -238,7 +238,7 @@ mod cuda {
         hal::cuda::{CudaHalPoseidon, CudaHalPoseidon2, CudaHalSha256},
     };
 
-    use super::{BabyBear, CircuitImpl, CpuCircuitHal, CpuHal, HalPair, Rc, CIRCUIT};
+    use super::{HalPair, Rc};
 
     pub fn sha256_hal_pair() -> HalPair<CudaHalSha256, CudaCircuitHalSha256> {
         let hal = Rc::new(CudaHalSha256::new());
@@ -257,13 +257,6 @@ mod cuda {
         let circuit_hal = Rc::new(CudaCircuitHalPoseidon2::new(hal.clone()));
         HalPair { hal, circuit_hal }
     }
-
-    pub fn poseidon254_hal_pair() -> HalPair<CpuHal<BabyBear>, CpuCircuitHal<'static, CircuitImpl>>
-    {
-        let hal = Rc::new(CpuHal::new(Poseidon254HashSuite::new_suite()));
-        let circuit_hal = Rc::new(CpuCircuitHal::new(&CIRCUIT));
-        HalPair { hal, circuit_hal }
-    }
 }
 
 #[cfg(feature = "metal")]
@@ -277,7 +270,7 @@ mod metal {
         },
     };
 
-    use super::{BabyBear, CircuitImpl, CpuCircuitHal, CpuHal, HalPair, Rc, CIRCUIT};
+    use super::{HalPair, Rc};
 
     pub fn sha256_hal_pair() -> HalPair<MetalHalSha256, MetalCircuitHal<MetalHashSha256>> {
         let hal = Rc::new(MetalHalSha256::new());
@@ -294,13 +287,6 @@ mod metal {
     pub fn poseidon2_hal_pair() -> HalPair<MetalHalPoseidon2, MetalCircuitHal<MetalHashPoseidon2>> {
         let hal = Rc::new(MetalHalPoseidon2::new());
         let circuit_hal = Rc::new(MetalCircuitHal::<MetalHashPoseidon2>::new(hal.clone()));
-        HalPair { hal, circuit_hal }
-    }
-
-    pub fn poseidon254_hal_pair() -> HalPair<CpuHal<BabyBear>, CpuCircuitHal<'static, CircuitImpl>>
-    {
-        let hal = Rc::new(CpuHal::new(Poseidon254HashSuite::new_suite()));
-        let circuit_hal = Rc::new(CpuCircuitHal::new(&CIRCUIT));
         HalPair { hal, circuit_hal }
     }
 }
@@ -366,7 +352,7 @@ cfg_if::cfg_if! {
         /// TODO
         #[allow(dead_code)]
         pub fn poseidon254_hal_pair() -> HalPair<CpuHal<BabyBear>, CpuCircuitHal<'static, CircuitImpl>> {
-            cuda::poseidon254_hal_pair()
+            cpu::poseidon254_hal_pair()
         }
     } else if #[cfg(feature = "metal")] {
         /// TODO
@@ -390,7 +376,7 @@ cfg_if::cfg_if! {
         /// TODO
         #[allow(dead_code)]
         pub fn poseidon254_hal_pair() -> HalPair<CpuHal<BabyBear>, CpuCircuitHal<'static, CircuitImpl>> {
-            metal::poseidon254_hal_pair()
+            cpu::poseidon254_hal_pair()
         }
     } else {
         /// TODO
