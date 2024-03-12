@@ -1,19 +1,22 @@
 # CHANGELOG
 
 ## Next (upcoming release)
+TBD
+
+# [v0.21.0 (2024-03-11)](https://github.com/risc0/risc0/releases/tag/v0.21.0)
 
 ### 🛠 Fixes
 * Fix an issue where the temporary directory is not being removed when the
 `Session` goes out of scope. This helps prevent the depletion of disk space.
 
+* Verification of groth16 receipts in rust that are compatible with Bonsai
+
 ### ⚡️ Features
 
 * Add an improved Poseidon2 hashing function that replaces Poseidon for recursive proofs.
-* Add support for the configuration of intermediate segment storage (on-disk,
-  in-memory, etc).
 
 ### 🚨 Breaking Changes
-* For recursive proofs the Poseidon hash function is replaced by the Poseidon2 hash function. Users can still create receipts using the older Poseidon hash function but these receipts will not be usable by Bonsai or any proof composition or rollup use cases.
+* For recursive proofs, the Poseidon hash function is replaced by the Poseidon2 hash function. Users can still create receipts using the older Poseidon hash function but these receipts will not be usable by Bonsai or any proof composition or rollup use cases.
 
 # [v0.20.1 (2024-02-01)](https://github.com/risc0/risc0/releases/tag/v0.20.1)
 
