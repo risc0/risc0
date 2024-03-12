@@ -77,8 +77,14 @@ export default async function createConfigAsync() {
           createRedirects(path) {
             if (path.includes("/api/generating-proofs/remote-proving")) {
               return [
-                path.replace("/api/generating-proofs/remote-proving", "/bonsai"),
-                path.replace("/api/generating-proofs/remote-proving", "/bonsai/quickstart")
+                path.replace(
+                  "/api/generating-proofs/remote-proving",
+                  "/bonsai",
+                ),
+                path.replace(
+                  "/api/generating-proofs/remote-proving",
+                  "/bonsai/quickstart",
+                ),
               ];
             }
             if (path.includes("/api/zkvm")) {
