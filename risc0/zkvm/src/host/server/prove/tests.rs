@@ -551,8 +551,8 @@ mod sys_verify {
     }
 
     #[test]
-    fn sys_verify() {
-        let spec = &MultiTestSpec::SysVerify(vec![(
+    fn sys_verify_1() {
+        let spec = MultiTestSpec::SysVerify(vec![(
             HELLO_COMMIT_ID.into(),
             HELLO_COMMIT_RECEIPT.journal.bytes.clone(),
         )]);
@@ -571,6 +571,14 @@ mod sys_verify {
             .unwrap()
             .verify(MULTI_TEST_ID)
             .unwrap();
+    }
+
+    #[test]
+    fn sys_verify_2() {
+        let spec = MultiTestSpec::SysVerify(vec![(
+            HELLO_COMMIT_ID.into(),
+            HELLO_COMMIT_RECEIPT.journal.bytes.clone(),
+        )]);
 
         // Test that proving without a provided assumption results in an execution
         // failure.
@@ -583,6 +591,14 @@ mod sys_verify {
             .unwrap()
             .prove(env, MULTI_TEST_ELF)
             .is_err());
+    }
+
+    #[test]
+    fn sys_verify_3() {
+        let spec = MultiTestSpec::SysVerify(vec![(
+            HELLO_COMMIT_ID.into(),
+            HELLO_COMMIT_RECEIPT.journal.bytes.clone(),
+        )]);
 
         // Test that providing an unresolved assumption results in a conditional
         // receipt.
@@ -592,6 +608,7 @@ mod sys_verify {
             .add_assumption(HELLO_COMMIT_RECEIPT.get_claim().unwrap())
             .build()
             .unwrap();
+
         // TODO(#982) Conditional receipts currently return an error on verification.
         assert!(get_prover_server(&prover_opts_fast())
             .unwrap()

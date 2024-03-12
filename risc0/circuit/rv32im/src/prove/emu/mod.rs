@@ -32,8 +32,10 @@ const SHA_LOAD: usize = DIGEST_WORDS * 2;
 const SHA_MAIN_MIX: usize = 48;
 const SHA_MAIN_FINI: usize = 4;
 
-/// The number of cycles required to compress a SHA-256 block.
-const SHA_CYCLES: usize = SHA_INIT + SHA_LOAD + SHA_MAIN_MIX + SHA_MAIN_FINI;
-
 /// Number of cycles required to complete a BigInt operation.
 const BIGINT_CYCLES: usize = 9;
+
+/// The number of cycles required to compress a SHA-256 block.
+const fn sha_cycles(count: usize) -> usize {
+    SHA_INIT + (SHA_LOAD + SHA_MAIN_MIX + SHA_MAIN_FINI) * count
+}

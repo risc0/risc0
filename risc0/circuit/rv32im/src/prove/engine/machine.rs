@@ -17,7 +17,7 @@ use std::{
     sync::atomic::{AtomicUsize, Ordering},
 };
 
-use anyhow::{anyhow, bail, Result};
+use anyhow::{anyhow, bail, ensure, Result};
 use lazy_regex::{regex, Captures};
 use rayon::prelude::*;
 use risc0_zkp::{
@@ -668,9 +668,10 @@ impl MachineContext {
     fn syscall_body(&self, cycle: usize, outs: &mut [Elem]) -> Result<()> {
         let (stage, offset) = self.get_stage_offset(cycle);
         let cur_cycle = &stage.cycles[cycle - offset];
+        ensure!(cur_cycle.mux == TopMux::Body(Major::ECallCopyIn, 0));
         let extra_idx = cur_cycle.extra_idx.fetch_add(1, Ordering::Relaxed);
         let word = stage.extras[extra_idx];
-        tracing::trace!("syscall_body(0x{word:08x})");
+        // tracing::debug!("[{cycle}] syscall_body(0x{word:08x}), {cur_cycle:?}");
         Quad(outs[0], outs[1], outs[2], outs[3]) = word.into();
         Ok(())
     }
@@ -678,10 +679,11 @@ impl MachineContext {
     fn syscall_fini(&self, cycle: usize, outs: &mut [Elem]) -> Result<()> {
         let (stage, offset) = self.get_stage_offset(cycle);
         let cur_cycle = &stage.cycles[cycle - offset];
+        ensure!(cur_cycle.mux == TopMux::Body(Major::ECallCopyIn, 1));
         let extra_idx = cur_cycle.extra_idx.load(Ordering::Relaxed);
         let a0 = stage.extras[extra_idx + 0];
         let a1 = stage.extras[extra_idx + 1];
-        tracing::trace!("syscall_fini(0x{a0:08x}, 0x{a1:08x})");
+        // tracing::debug!("[{cycle}] syscall_fini(0x{a0:08x}, 0x{a1:08x}), {cur_cycle:?}");
         Quad(outs[0], outs[1], outs[2], outs[3]) = a0.into();
         Quad(outs[4], outs[5], outs[6], outs[7]) = a1.into();
         Ok(())

@@ -44,9 +44,10 @@ use super::{
     addr::{ByteAddr, WordAddr},
     pager::PagedMemory,
     rv32im::{DecodedInstruction, EmuContext, Emulator, Instruction, TrapCause},
-    BIGINT_CYCLES, SHA_CYCLES, SYSTEM_START,
+    BIGINT_CYCLES, SYSTEM_START,
 };
 use crate::prove::{
+    emu::sha_cycles,
     engine::loader::{FINI_CYCLES, INIT_CYCLES},
     segment::{Segment, SyscallRecord},
 };
@@ -320,24 +321,25 @@ impl<'a, S: Syscall> Executor<'a, S> {
     }
 
     fn ecall_software(&mut self) -> Result<bool> {
+        tracing::debug!("[{}] ecall_software", self.insn_cycles);
         let into_guest_ptr = ByteAddr(self.load_register(REG_A0)?);
         if !is_guest_memory(into_guest_ptr.0) && !into_guest_ptr.is_null() {
             bail!("{into_guest_ptr:?} is an invalid guest address");
         }
-        let into_guest_len = self.load_register(REG_A1)?;
+        let into_guest_len = self.load_register(REG_A1)? as usize;
         let name_ptr = self.load_guest_addr_from_register(REG_A2)?;
         let syscall_name = self.peek_string(name_ptr)?;
         let name_end = name_ptr + syscall_name.len();
         Self::check_guest_addr(name_end)?;
         tracing::trace!("ecall_software({syscall_name}, into_guest: {into_guest_len})");
 
-        let chunks = align_up(into_guest_len as usize, IO_CHUNK_WORDS) / IO_CHUNK_WORDS;
+        let chunks = align_up(into_guest_len, IO_CHUNK_WORDS) / IO_CHUNK_WORDS;
 
         let syscall = if let Some(syscall) = &self.pending.syscall {
             tracing::debug!("Replay syscall: {syscall:?}");
             syscall.clone()
         } else {
-            let mut to_guest = vec![0u32; into_guest_len as usize];
+            let mut to_guest = vec![0u32; into_guest_len];
 
             let (a0, a1) = self
                 .syscall_handler
@@ -366,12 +368,6 @@ impl<'a, S: Syscall> Executor<'a, S> {
 
         self.pending.cycles += chunks + 1; // syscallBody + syscallFini
         self.pending.pc = self.pc + WORD_SIZE;
-
-        tracing::debug!(
-            "[{}] ecall_software: {}",
-            self.insn_cycles,
-            self.pending.cycles
-        );
 
         Ok(true)
     }
@@ -418,7 +414,7 @@ impl<'a, S: Syscall> Executor<'a, S> {
 
         self.store_region_into_guest(state_out_ptr, bytemuck::cast_slice(&state))?;
 
-        self.pending.cycles += SHA_CYCLES * count as usize;
+        self.pending.cycles += sha_cycles(count as usize);
         self.pending.pc = self.pc + WORD_SIZE;
 
         Ok(true)

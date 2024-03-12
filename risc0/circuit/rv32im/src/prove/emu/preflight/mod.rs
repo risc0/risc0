@@ -20,7 +20,7 @@ use std::{
     sync::atomic::{AtomicUsize, Ordering},
 };
 
-use anyhow::{anyhow, bail, ensure, Result};
+use anyhow::{anyhow, bail, Result};
 use crypto_bigint::{CheckedMul as _, Encoding as _, NonZero, U256, U512};
 use derive_debug::Dbg;
 use risc0_zkp::{
@@ -31,7 +31,6 @@ use risc0_zkp::{
     ZK_CYCLES,
 };
 use risc0_zkvm_platform::{
-    align_up,
     syscall::{
         bigint, ecall, halt,
         reg_abi::{REG_A0, REG_A1, REG_A2, REG_A3, REG_A4, REG_T0},
@@ -529,6 +528,25 @@ impl Preflight {
         Ok(())
     }
 
+    fn syscall_body(&mut self, chunk: &[u32], ptr: &mut WordAddr) -> Result<()> {
+        for word in chunk {
+            self.add_extra(false, *word);
+            self.store_u32(*ptr, *word)?;
+            *ptr += 1u32;
+        }
+        self.add_cycle(false, TopMux::Body(Major::ECallCopyIn, 0));
+        Ok(())
+    }
+
+    fn syscall_fini(&mut self, a0: u32, a1: u32) -> Result<()> {
+        self.add_extra(false, a0);
+        self.add_extra(false, a1);
+        self.store_register(REG_A0, a0)?;
+        self.store_register(REG_A1, a1)?;
+        self.add_cycle(false, TopMux::Body(Major::ECallCopyIn, 1));
+        Ok(())
+    }
+
     fn ecall_halt(&mut self) -> Result<bool> {
         tracing::trace!("ecall_halt");
         self.output_ptr = ByteAddr(self.load_register(REG_A1)?);
@@ -541,7 +559,6 @@ impl Preflight {
         let cycle = self.trace.body.cycles.len();
         let mut into_guest_ptr = ByteAddr(self.load_register(REG_A0)?).waddr();
         let into_guest_len = self.load_register(REG_A1)? as usize;
-        let into_guest_chunks = align_up(into_guest_len, IO_CHUNK_WORDS) / IO_CHUNK_WORDS;
 
         let syscall = self
             .syscalls
@@ -549,32 +566,21 @@ impl Preflight {
             .ok_or(anyhow!("Missing syscall record"))?;
         let (a0, a1) = syscall.regs;
 
-        let chunks = syscall.to_guest.chunks(IO_CHUNK_WORDS);
-        ensure!(
-            chunks.len() == into_guest_chunks,
-            "syscall chunks mismatch. Recorded: {}, Requested: {into_guest_chunks}",
-            chunks.len()
-        );
+        let stray_words = into_guest_len % IO_CHUNK_WORDS;
+        let (head, body) = syscall.to_guest.split_at(stray_words);
 
         // syscallInit
         self.add_cycle(false, TopMux::Body(Major::ECall, 0));
 
-        for chunk in chunks {
-            // syscallBody
-            for word in chunk {
-                self.add_extra(false, *word);
-                self.store_u32(into_guest_ptr, *word)?;
-                into_guest_ptr += 1u32;
-            }
-            self.add_cycle(false, TopMux::Body(Major::ECallCopyIn, 0));
+        if !head.is_empty() {
+            self.syscall_body(head, &mut into_guest_ptr)?;
         }
 
-        // syscallFini
-        self.add_extra(false, a0);
-        self.add_extra(false, a1);
-        self.store_register(REG_A0, a0)?;
-        self.store_register(REG_A1, a1)?;
-        self.add_cycle(false, TopMux::Body(Major::ECallCopyIn, 0));
+        for chunk in body.chunks_exact(IO_CHUNK_WORDS) {
+            self.syscall_body(chunk, &mut into_guest_ptr)?;
+        }
+
+        self.syscall_fini(a0, a1)?;
 
         tracing::debug!(
             "[{cycle}] ecall_software: {}",
