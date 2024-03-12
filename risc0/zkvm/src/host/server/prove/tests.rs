@@ -232,21 +232,15 @@ fn memory_io() {
     assert_eq!(run_memio(&[(POS, 1)]).unwrap(), ExitCode::Halted(0));
 
     // Unaligned write is bad
-    assert!(run_memio(&[(POS + 1001, 1)])
-        .err()
-        .unwrap()
-        .to_string()
-        .contains("fault"));
+    let err = run_memio(&[(POS + 1001, 1)]).err().unwrap().to_string();
+    assert!(err.contains("StoreAddressMisaligned"), "{err}");
 
     // Aligned read is fine
     assert_eq!(run_memio(&[(POS, 0)]).unwrap(), ExitCode::Halted(0));
 
     // Unaligned read is bad
-    assert!(run_memio(&[(POS + 1, 0)])
-        .err()
-        .unwrap()
-        .to_string()
-        .contains("fault"));
+    let err = run_memio(&[(POS + 1, 0)]).err().unwrap().to_string();
+    assert!(err.contains("LoadAddressMisaligned"), "{err}");
 }
 
 #[test]
