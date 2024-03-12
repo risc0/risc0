@@ -1,90 +1,169 @@
 {
-  "education_hub": [
+  "api": [
     {
-      "type": "link",
-      "label": "Talks and Podcasts",
-      "href": "https://www.youtube.com/playlist?list=PLcPzhUaCxlCgCvzkkaBWzVuHdBRsTNxj1"
+      "type": "doc",
+      "label": "Introduction",
+      "id": "introduction"
     },
     {
-      "type": "link",
-      "label": "Articles",
-      "href": "https://risczero.com/blog"
+      "type": "doc",
+      "label": "What does RISC Zero enable?",
+      "id": "use-cases"
     },
-    "studyclub",
     {
-      "type": "link",
-      "label": "Education Database",
-      "href": "https://risczero.notion.site/5a335a1d29b44cb48c44b36ae66f366f?v=95cda72e39d3403fbfb59884afb0045d&pvs=4"
+      "type": "doc",
+      "label": "Getting Started",
+      "id": "getting-started"
     },
     {
       "type": "category",
-      "label": "Proof System",
-      "link": {
-        "type": "doc",
-        "id": "proof-system/proof-system"
-      },
-      "collapsed": false,
+      "label": "What is a zkVM Application?",
+      "collapsed": true,
       "items": [
         {
           "type": "doc",
-          "label": "STARK by hand",
-          "id": "proof-system/stark-by-hand"
+          "label": "Overview",
+          "id": "zkvm/zkvm_overview"
         },
         {
           "type": "doc",
-          "label": "Sequence Diagram",
-          "id": "proof-system/proof-system-sequence-diagram"
+          "label": "Receipts 101",
+          "id": "zkvm/receipts"
         },
         {
-          "type": "link",
-          "label": "ZKP Whitepaper",
-          "href": "https://www.risczero.com/proof-system-in-detail.pdf"
+          "type": "doc",
+          "label": "Guest Code 101",
+          "id": "zkvm/guest-code-101"
+        },
+        {
+          "type": "doc",
+          "label": "Host Code 101",
+          "id": "zkvm/host-code-101"
+        },
+        {
+          "type": "doc",
+          "label": "Example Applications",
+          "id": "zkvm/examples"
         }
       ]
     },
     {
       "type": "category",
-      "label": "Background Reading",
+      "label": "Writing your zkVM Application",
+      "collapsed": false,
       "items": [
         {
           "type": "doc",
-          "label": "Arithmetic Circuits",
-          "id": "reference-docs/about-arithmetic-circuits"
+          "label": "Installation",
+          "id": "zkvm/install"
         },
         {
           "type": "doc",
-          "label": "Finite Fields",
-          "id": "reference-docs/about-finite-fields"
+          "label": "Quick Start",
+          "id": "zkvm/quickstart"
         },
         {
           "type": "doc",
-          "label": "FRI Protocol",
-          "id": "reference-docs/about-fri"
+          "label": "Hello World Tutorial",
+          "id": "zkvm/tutorials/hello-world"
         },
         {
           "type": "doc",
-          "label": "PLONK",
-          "id": "reference-docs/about-plonk"
+          "label": "Rust Resources",
+          "id": "zkvm/rust-resources"
+        },
+        {
+          "type": "link",
+          "label": "API Reference Docs",
+          "href": "https://docs.rs/risc0-zkvm/"
+        }
+      ]
+    },
+    {
+      "type": "category",
+      "label": "Generating Proofs for your zkVM Application",
+      "collapsed": true,
+      "items": [
+        {
+          "type": "doc",
+          "label": "Proving Options",
+          "id": "generating-proofs/proving-options"
         },
         {
           "type": "doc",
-          "label": "STARKs",
-          "id": "reference-docs/about-starks"
+          "label": "Dev Mode",
+          "id": "generating-proofs/dev-mode"
         },
         {
           "type": "doc",
-          "label": "Number Theoretic Transforms",
-          "id": "reference-docs/about-ntts-and-fourier"
+          "label": "Local Proving",
+          "id": "generating-proofs/local-proving"
         },
         {
           "type": "doc",
-          "label": "RISC-V",
-          "id": "reference-docs/about-risc-v"
+          "label": "Remote Proving",
+          "id": "generating-proofs/remote-proving"
+        }
+      ]
+    },
+    {
+      "type": "category",
+      "label": "Optimizing your zkVM Application",
+      "collapsed": true,
+      "items": [
+        {
+          "type": "doc",
+          "label": "Profiling",
+          "id": "zkvm/profiling"
         },
         {
           "type": "doc",
-          "label": "Reed Solomon Codes",
-          "id": "reference-docs/about-rs-codes"
+          "label": "Guest Optimization",
+          "id": "zkvm/optimization"
+        },
+        {
+          "type": "doc",
+          "label": "Cryptography Acceleration",
+          "id": "zkvm/acceleration"
+        },
+        {
+          "type": "doc",
+          "label": "Performance Benchmarks",
+          "id": "zkvm/benchmarks"
+        }
+      ]
+    },
+    {
+      "type": "category",
+      "label": "Blockchain Integration",
+      "collapsed": true,
+      "items": [
+        {
+          "type": "doc",
+          "label": "Posting & Verifying Proofs on Ethereum",
+          "id": "blockchain-integration/bonsai-on-eth"
+        },
+        {
+          "type": "doc",
+          "label": "Ethereum Examples",
+          "id": "blockchain-integration/eth-examples"
+        },
+        {
+          "type": "doc",
+          "label": "Verifier Contract",
+          "id": "blockchain-integration/contracts/verifier"
+        }
+      ]
+    },
+    {
+      "type": "category",
+      "label": "Reference",
+      "collapsed": true,
+      "items": [
+        {
+          "type": "doc",
+          "label": "zkVM technical specification",
+          "id": "zkvm/zkvm-specification"
         }
       ]
     }
