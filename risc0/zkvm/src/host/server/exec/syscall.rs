@@ -494,7 +494,7 @@ impl<'a> PosixIo<'a> {
         let fd = ctx.load_register(REG_A3);
         let nbytes = ctx.load_register(REG_A4) as usize;
 
-        tracing::debug!(
+        tracing::trace!(
             "sys_read(fd: {fd}, nbytes: {nbytes}, into: {} bytes)",
             to_guest.len() * WORD_SIZE
         );
@@ -527,7 +527,7 @@ impl<'a> PosixIo<'a> {
         let to_guest_u8 = bytemuck::cast_slice_mut(to_guest);
         let nread_main = read_all(to_guest_u8)?;
 
-        tracing::debug!("read: {nread_main}, requested: {}", to_guest_u8.len());
+        tracing::trace!("read: {nread_main}, requested: {}", to_guest_u8.len());
 
         // It's possible that there's an unaligned word at the end
         let unaligned_end = if nbytes - nread_main <= WORD_SIZE {
@@ -557,7 +557,7 @@ impl<'a> PosixIo<'a> {
             .get_mut(&fd)
             .ok_or(anyhow!("Bad write file descriptor {fd}"))?;
 
-        tracing::debug!("sys_write(fd: {fd}, bytes: {buf_len})");
+        tracing::trace!("sys_write(fd: {fd}, bytes: {buf_len})");
 
         writer.borrow_mut().write_all(from_guest_bytes.as_slice())?;
         Ok((0, 0))
@@ -573,10 +573,7 @@ impl<'a> PosixIo<'a> {
             .get_mut(&fileno::STDOUT)
             .ok_or(anyhow!("Bad write file descriptor {}", &fileno::STDOUT))?;
 
-        tracing::debug!(
-            "Writing {buf_len} bytes to STDOUT file descriptor {}",
-            &fileno::STDOUT
-        );
+        tracing::debug!("sys_log({buf_len} bytes)");
 
         let msg = format!("R0VM[{}] ", ctx.get_cycle().to_string());
         writer

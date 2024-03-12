@@ -291,7 +291,15 @@ impl Preflight {
 
         if let Some(exit_code) = self.halted {
             let body_cycles = self.trace.body.cycles.len();
-            let body_padding = max_cycles - pre_cycles - body_cycles - FINI_CYCLES - ZK_CYCLES;
+
+            let err = || anyhow::anyhow!("Invalid execution trace: cycles");
+            let body_padding = max_cycles
+                .checked_sub(pre_cycles)
+                .ok_or_else(err)?
+                .checked_sub(body_cycles)
+                .ok_or_else(err)?
+                .checked_sub(FINI_CYCLES + ZK_CYCLES)
+                .ok_or_else(err)?;
             tracing::debug!("halt padding: {body_padding}, pre: {pre_cycles}, body: {body_cycles}");
 
             let exit_code_bytes = exit_code.to_le_bytes();
@@ -325,9 +333,16 @@ impl Preflight {
                 /*is_done=*/ 1,
             )?;
 
-            // let body_cycles = self.cycles;
             let body_cycles = self.trace.body.cycles.len();
-            let body_padding = max_cycles - pre_cycles - body_cycles - FINI_CYCLES - ZK_CYCLES;
+
+            let err = || anyhow::anyhow!("Invalid execution trace: cycles");
+            let body_padding = max_cycles
+                .checked_sub(pre_cycles)
+                .ok_or_else(err)?
+                .checked_sub(body_cycles)
+                .ok_or_else(err)?
+                .checked_sub(FINI_CYCLES + ZK_CYCLES)
+                .ok_or_else(err)?;
             tracing::debug!(
                 "fault padding: {body_padding}, pre: {pre_cycles}, body: {body_cycles}"
             );
@@ -523,7 +538,7 @@ impl Preflight {
     }
 
     fn ecall_software(&mut self) -> Result<bool> {
-        tracing::trace!("ecall_software");
+        let cycle = self.trace.body.cycles.len();
         let mut into_guest_ptr = ByteAddr(self.load_register(REG_A0)?).waddr();
         let into_guest_len = self.load_register(REG_A1)? as usize;
         let into_guest_chunks = align_up(into_guest_len, IO_CHUNK_WORDS) / IO_CHUNK_WORDS;
@@ -541,7 +556,7 @@ impl Preflight {
             chunks.len()
         );
 
-        // sycallInit
+        // syscallInit
         self.add_cycle(false, TopMux::Body(Major::ECall, 0));
 
         for chunk in chunks {
@@ -561,13 +576,17 @@ impl Preflight {
         self.store_register(REG_A1, a1)?;
         self.add_cycle(false, TopMux::Body(Major::ECallCopyIn, 0));
 
+        tracing::debug!(
+            "[{cycle}] ecall_software: {}",
+            self.trace.body.cycles.len() - cycle
+        );
+
         self.pc += WORD_SIZE;
         Ok(true)
     }
 
     fn ecall_sha(&mut self) -> Result<bool> {
         let cycle = self.trace.body.cycles.len();
-        tracing::debug!("[{cycle}] ecall_sha");
         let state_out_ptr = ByteAddr(self.load_register(REG_A0)?).waddr();
         let state_in_ptr = ByteAddr(self.load_register(REG_A1)?).waddr();
         let count = self.load_register(REG_A4)? as usize;
@@ -584,6 +603,11 @@ impl Preflight {
             false,
             false,
         )?;
+
+        tracing::debug!(
+            "[{cycle}] ecall_sha: {}",
+            self.trace.body.cycles.len() - cycle
+        );
 
         self.pc += WORD_SIZE;
         Ok(true)

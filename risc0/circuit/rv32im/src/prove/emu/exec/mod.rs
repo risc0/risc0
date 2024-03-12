@@ -364,14 +364,20 @@ impl<'a, S: Syscall> Executor<'a, S> {
 
         tracing::trace!("{syscall:08x?}");
 
-        self.pending.cycles += 1 + chunks + 1; // syscallInit + syscallBody + syscallFini
+        self.pending.cycles += chunks + 1; // syscallBody + syscallFini
         self.pending.pc = self.pc + WORD_SIZE;
+
+        tracing::debug!(
+            "[{}] ecall_software: {}",
+            self.insn_cycles,
+            self.pending.cycles
+        );
 
         Ok(true)
     }
 
     fn ecall_sha(&mut self) -> Result<bool> {
-        // tracing::trace!("ecall_sha");
+        tracing::debug!("[{}] ecall_sha", self.insn_cycles);
         let state_out_ptr = self.load_guest_addr_from_register(REG_A0)?;
         let state_in_ptr = self.load_guest_addr_from_register(REG_A1)?;
         let mut block1_ptr = self.load_guest_addr_from_register(REG_A2)?;
