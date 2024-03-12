@@ -78,13 +78,8 @@ export default async function createConfigAsync() {
             // TODO: when 0.21 is released, these new redirects are needed:
             // /bonsai            -> /api/generating-proofs/remote-proving
             // /bonsai/quickstart -> /api/generating-proofs/remote-proving
-            if (path.includes("/bonsai")) {
-              return [
-                path.replace(
-                  "/bonsai",
-                  "/api/generating-proofs/remote-proving",
-                ),
-              ];
+            if (path.includes("/api/bonsai")) {
+              return [path.replace("/api/bonsai", "/bonsai")];
             }
             if (path.includes("/bonsai/quickstart")) {
               return [
@@ -94,8 +89,13 @@ export default async function createConfigAsync() {
                 ),
               ];
             }
-            if (path.includes("/api/bonsai")) {
-              return [path.replace("/api/bonsai", "/bonsai")];
+            if (path.includes("/bonsai")) {
+              return [
+                path.replace(
+                  "/bonsai",
+                  "/api/generating-proofs/remote-proving",
+                ),
+              ];
             }
             if (path.includes("/api/zkvm")) {
               return [path.replace("/api/zkvm", "/zkvm")];
