@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{cell::RefCell, io::Write, rc::Rc, sync::Arc};
+use std::{cell::RefCell, io::Write, mem, rc::Rc, sync::Arc};
 
 use anyhow::{Context as _, Result};
 use risc0_binfmt::{MemoryImage, Program};
@@ -163,7 +163,9 @@ impl<'a> ExecutorImpl<'a> {
             );
         };
 
-        let assumptions = Vec::new();
+        // Take (clear out) the list of accessed assumptions.
+        // Leave the assumptions cache so it can be used if execution is resumed from pause.
+        let assumptions = mem::take(&mut self.env.assumptions.borrow_mut().accessed);
 
         Ok(Session::new(
             refs,
