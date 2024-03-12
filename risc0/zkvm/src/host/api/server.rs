@@ -293,9 +293,9 @@ impl Server {
                         kind: Some(pb::api::client_callback::Kind::SegmentDone(
                             pb::api::OnSegmentDone {
                                 segment: Some(pb::api::SegmentInfo {
-                                    index: segment.index as u32,
-                                    po2: segment.po2 as u32,
-                                    cycles: segment.insn_cycles as u32,
+                                    index: segment.index,
+                                    po2: segment.inner.po2 as u32,
+                                    cycles: segment.inner.insn_cycles as u32,
                                     segment: Some(asset),
                                 }),
                             },

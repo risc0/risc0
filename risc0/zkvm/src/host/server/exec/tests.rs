@@ -94,9 +94,9 @@ fn basic() {
     let segment = session.segments.first().unwrap().resolve().unwrap();
 
     assert_eq!(session.segments.len(), 1);
-    assert_eq!(segment.exit_code, ExitCode::Halted(0));
-    assert_eq!(segment.pre_state.digest(), pre_image_id);
-    assert_ne!(segment.post_state.digest(), pre_image_id);
+    assert_eq!(segment.inner.exit_code, ExitCode::Halted(0));
+    assert_eq!(segment.inner.pre_state.digest(), pre_image_id);
+    assert_ne!(segment.inner.post_state.digest(), pre_image_id);
     assert_eq!(segment.index, 0);
 }
 
@@ -133,13 +133,13 @@ fn system_split() {
         .collect();
 
     assert_eq!(segments.len(), 2);
-    assert_eq!(segments[0].exit_code, ExitCode::SystemSplit);
-    assert_eq!(segments[0].pre_state.digest(), pre_image_id);
-    assert_ne!(segments[0].post_state.digest(), pre_image_id);
-    assert_eq!(segments[1].exit_code, ExitCode::Halted(0));
+    assert_eq!(segments[0].inner.exit_code, ExitCode::SystemSplit);
+    assert_eq!(segments[0].inner.pre_state.digest(), pre_image_id);
+    assert_ne!(segments[0].inner.post_state.digest(), pre_image_id);
+    assert_eq!(segments[1].inner.exit_code, ExitCode::Halted(0));
     assert_eq!(
-        segments[1].pre_state.digest(),
-        segments[0].post_state.digest()
+        segments[1].inner.pre_state.digest(),
+        segments[0].inner.post_state.digest()
     );
     assert_eq!(segments[0].index, 0);
     assert_eq!(segments[1].index, 1);
@@ -950,6 +950,7 @@ fn post_state_digest_randomization() {
                 .unwrap()
                 .resolve()
                 .unwrap()
+                .inner
                 .post_state
                 .digest()
         })
@@ -988,6 +989,7 @@ fn post_state_digest_randomization() {
                 .unwrap()
                 .resolve()
                 .unwrap()
+                .inner
                 .post_state
                 .digest()
         })

@@ -16,15 +16,12 @@ use std::{cell::RefCell, io::Write, mem, rc::Rc, sync::Arc};
 
 use anyhow::{Context as _, Result};
 use risc0_binfmt::{MemoryImage, Program};
-use risc0_circuit_rv32im::prove::{
-    emu::{
-        addr::ByteAddr,
-        exec::{
-            Executor as NewExecutor, Syscall as NewSyscall, SyscallContext as NewSyscallContext,
-            DEFAULT_SEGMENT_LIMIT_PO2,
-        },
+use risc0_circuit_rv32im::prove::emu::{
+    addr::ByteAddr,
+    exec::{
+        Executor as NewExecutor, Syscall as NewSyscall, SyscallContext as NewSyscallContext,
+        DEFAULT_SEGMENT_LIMIT_PO2,
     },
-    segment::Segment,
 };
 use risc0_zkp::core::digest::Digest;
 use risc0_zkvm_platform::{fileno, memory::GUEST_MAX_MEM, PAGE_SIZE};
@@ -32,7 +29,8 @@ use tempfile::tempdir;
 
 use crate::{
     host::{client::env::SegmentPath, server::session::null_callback},
-    is_dev_mode, ExecutorEnv, FileSegmentRef, SegmentRef, Session,
+    is_dev_mode, Assumption, Assumptions, ExecutorEnv, FileSegmentRef, Output, Segment, SegmentRef,
+    Session,
 };
 
 use super::syscall::{SyscallContext, SyscallTable};
@@ -141,7 +139,45 @@ impl<'a> ExecutorImpl<'a> {
         let mut refs = Vec::new();
         let mut exec = NewExecutor::new(self.image.clone(), self);
         let is_dev_mode = is_dev_mode();
-        let result = exec.run(segment_limit_po2, self.env.session_limit, |segment| {
+        let result = exec.run(segment_limit_po2, self.env.session_limit, |inner| {
+            let output = inner
+                .exit_code
+                .expects_output()
+                .then(|| -> Option<Result<_>> {
+                    inner
+                        .output_digest
+                        .and_then(|digest| {
+                            (digest != Digest::ZERO).then(|| journal.buf.borrow().clone())
+                        })
+                        .map(|journal| {
+                            Ok(Output {
+                                journal: journal.into(),
+                                assumptions: Assumptions(
+                                    self.env
+                                        .assumptions
+                                        .borrow()
+                                        .accessed
+                                        .iter()
+                                        .map(|a| {
+                                            Ok(match a {
+                                                Assumption::Proven(r) => r.get_claim()?.into(),
+                                                Assumption::Unresolved(r) => r.clone(),
+                                            })
+                                        })
+                                        .collect::<Result<Vec<_>>>()?,
+                                )
+                                .into(),
+                            })
+                        })
+                })
+                .flatten()
+                .transpose()?;
+
+            let segment = Segment {
+                index: inner.index as u32,
+                inner,
+                output,
+            };
             let segment_ref = if is_dev_mode {
                 null_callback()?
             } else {

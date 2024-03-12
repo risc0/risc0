@@ -130,10 +130,12 @@ pub use {
         server::{
             exec::adapter::ExecutorImpl,
             prove::{get_prover_server, HalPair, ProverServer},
-            session::{FileSegmentRef, SegmentRef, Session, SessionEvents, SimpleSegmentRef},
+            session::{
+                FileSegmentRef, Segment, SegmentRef, Session, SessionEvents, SimpleSegmentRef,
+            },
         },
     },
-    risc0_circuit_rv32im::prove::{engine::loader::Loader, segment::Segment},
+    risc0_circuit_rv32im::prove::engine::loader::Loader,
 };
 #[cfg(not(target_os = "zkvm"))]
 pub use {

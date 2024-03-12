@@ -23,7 +23,7 @@ use std::{
 
 use anyhow::{ensure, Result};
 use risc0_binfmt::{MemoryImage, SystemState};
-use risc0_circuit_rv32im::prove::segment::Segment;
+use risc0_circuit_rv32im::prove::segment::Segment as CircuitSegment;
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -78,6 +78,23 @@ pub struct Session {
 
     /// The system state of the final [MemoryImage] at the end of execution.
     pub post_state: SystemState,
+}
+
+/// The execution trace of a portion of a program.
+///
+/// The record of memory transactions of an execution that starts from an
+/// initial memory image, and proceeds until terminated by the system or user.
+/// This represents a chunk of execution work that will be proven in a single
+/// call to the ZKP system. It does not necessarily represent an entire program;
+/// see [Session] for tracking memory transactions until a user-requested
+/// termination.
+#[derive(Clone, Serialize, Deserialize)]
+pub struct Segment {
+    /// The index of this [Segment] within the [Session]
+    pub index: u32,
+
+    pub(crate) inner: CircuitSegment,
+    pub(crate) output: Option<Output>,
 }
 
 /// A reference to a [Segment].

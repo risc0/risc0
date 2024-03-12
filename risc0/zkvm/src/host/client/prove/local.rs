@@ -59,8 +59,8 @@ impl Executor for LocalProver {
         for segment in session.segments {
             let segment = segment.resolve()?;
             segments.push(SegmentInfo {
-                po2: segment.po2 as u32,
-                cycles: segment.insn_cycles as u32,
+                po2: segment.inner.po2 as u32,
+                cycles: segment.inner.insn_cycles as u32,
             })
         }
         Ok(SessionInfo {

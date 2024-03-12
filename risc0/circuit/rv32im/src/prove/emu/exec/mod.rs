@@ -223,6 +223,7 @@ impl<'a, S: Syscall> Executor<'a, S> {
                     po2: segment_po2,
                     exit_code: ExitCode::SystemSplit,
                     index: segments,
+                    output_digest: self.output_digest,
                 })?;
                 segments += 1;
                 session_cycles.user += self.insn_cycles as u64;
@@ -250,6 +251,7 @@ impl<'a, S: Syscall> Executor<'a, S> {
             po2,
             exit_code,
             index: segments,
+            output_digest: self.output_digest,
         })?;
         segments += 1;
         session_cycles.user += self.insn_cycles as u64;

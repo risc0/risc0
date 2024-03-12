@@ -211,9 +211,11 @@ where
 
         let prover =
             SegmentProverImpl::new(self.hal_pair.hal.clone(), self.hal_pair.circuit_hal.clone());
-        let seal = prover.prove_segment(segment)?;
+        let seal = prover.prove_segment(&segment.inner)?;
 
-        let claim = decode_receipt_claim_from_seal(&seal)?;
+        let mut claim = decode_receipt_claim_from_seal(&seal)?;
+        claim.output = segment.output.clone().into();
+
         let receipt = SegmentReceipt {
             seal,
             index: segment.index as u32,

@@ -16,7 +16,7 @@ use derive_debug::Dbg;
 use risc0_binfmt::{ExitCode, MemoryImage, SystemState};
 use risc0_zkp::{
     adapter::CircuitInfo as _,
-    core::digest::DIGEST_WORDS,
+    core::digest::{Digest, DIGEST_WORDS},
     field::{baby_bear::Elem, Elem as _},
 };
 use risc0_zkvm_platform::WORD_SIZE;
@@ -42,6 +42,7 @@ pub struct Segment {
     pub po2: usize,
     pub exit_code: ExitCode,
     pub index: usize,
+    pub output_digest: Option<Digest>,
 }
 
 impl Segment {
