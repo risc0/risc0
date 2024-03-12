@@ -90,7 +90,7 @@ docs] or the [examples], and we're happy to answer questions on [Discord].
 [guest program]: /terminology#guest-program
 [host]: /terminology#host
 [journal]: /terminology#journal
-[JSON]: https://github.com/risc0/risc0/blob/main/examples/json/src/main.rs
+[JSON]: https://github.com/risc0/risc0/blob/release-0.21/examples/json/src/main.rs
 [method]: /terminology#method
 [prove]: /terminology#prove
 [Prover]: /terminology#prover
