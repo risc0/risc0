@@ -801,7 +801,7 @@ fn fault() {
         .unwrap();
     let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
     let err = exec.run().err().unwrap();
-    assert!(err.to_string().to_ascii_lowercase().contains("fault"));
+    assert!(err.to_string().contains("StoreAccessFault"));
 }
 
 #[test]
@@ -921,14 +921,12 @@ fn memory_access() {
         .err()
         .unwrap()
         .to_string()
-        .to_ascii_lowercase()
-        .contains("fault"));
+        .contains("StoreAccessFault"));
     assert!(access_memory(0x0C00_0000)
         .err()
         .unwrap()
         .to_string()
-        .to_ascii_lowercase()
-        .contains("fault"));
+        .contains("StoreAccessFault"));
     assert_eq!(access_memory(0x0B00_0000).unwrap(), ExitCode::Halted(0));
 }
 

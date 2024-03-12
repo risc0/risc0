@@ -240,6 +240,20 @@ impl<'a, S: Syscall> Executor<'a, S> {
         let po2 = log2_ceil(segment_cycles.next_power_of_two()).try_into()?;
         let exit_code = self.exit_code.unwrap();
 
+        callback(Segment {
+            partial_image,
+            pre_state: pre_state.clone(),
+            post_state: post_state.clone(),
+            syscalls: mem::take(&mut self.syscalls),
+            insn_cycles: self.insn_cycles,
+            po2,
+            exit_code,
+            index: segments,
+        })?;
+        segments += 1;
+        session_cycles.user += self.insn_cycles as u64;
+        session_cycles.total += 1 << po2;
+
         // NOTE: When a segment ends in a Halted(_) state, it may not update the post state
         // digest. As a result, it will be the same are the pre_image. All other exit codes require
         // the post state digest to reflect the final memory state.
@@ -251,20 +265,6 @@ impl<'a, S: Syscall> Executor<'a, S> {
                 _ => post_state.merkle_root,
             },
         };
-
-        callback(Segment {
-            partial_image,
-            pre_state,
-            post_state: post_state.clone(),
-            syscalls: mem::take(&mut self.syscalls),
-            insn_cycles: self.insn_cycles,
-            po2,
-            exit_code,
-            index: segments,
-        })?;
-        segments += 1;
-        session_cycles.user += self.insn_cycles as u64;
-        session_cycles.total += 1 << po2;
 
         Ok(ExecutorResult {
             segments,

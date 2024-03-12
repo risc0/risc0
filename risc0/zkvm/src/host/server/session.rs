@@ -195,69 +195,6 @@ impl Session {
     }
 }
 
-// impl Segment {
-//     /// Create a new [Segment] from its constituent components.
-//     #[allow(clippy::too_many_arguments)]
-//     pub(crate) fn new(
-//         pre_image: Box<MemoryImage>,
-//         post_state: SystemState,
-//         output: Option<Output>,
-//         faults: PageFaults,
-//         syscalls: Vec<SyscallRecord>,
-//         exit_code: ExitCode,
-//         split_insn: Option<u32>,
-//         po2: u32,
-//         index: u32,
-//         cycles: u32,
-//     ) -> Self {
-//         tracing::debug!("segment[{index}]> reads: {}, writes: {}, exit_code: {exit_code:?}, split_insn: {split_insn:?}, po2: {po2}, cycles: {cycles}",
-//             faults.reads.len(),
-//             faults.writes.len(),
-//         );
-//         Self {
-//             pre_image,
-//             post_state,
-//             output,
-//             faults,
-//             syscalls,
-//             exit_code,
-//             split_insn,
-//             po2,
-//             index,
-//             cycles,
-//         }
-//     }
-
-//     /// Calculate for the [ReceiptClaim] associated with this [Segment]. The
-//     /// [ReceiptClaim] is the claim that will be proven if this [Segment]
-//     /// is passed to the [crate::Prover].
-//     pub fn get_claim(&self) -> Result<ReceiptClaim> {
-//         // NOTE: When a segment ends in a Halted(_) state, it may not update the post state
-//         // digest. As a result, it will be the same as the pre_image. All other exit codes require
-//         // the post state digest to reflect the final memory state.
-//         // NOTE: The PC on the the post state is stored "+ 4". See ReceiptClaim for more detail.
-//         let post_state = SystemState {
-//             pc: self
-//                 .post_state
-//                 .pc
-//                 .checked_add(WORD_SIZE as u32)
-//                 .context("invalid pc in segment post state")?,
-//             merkle_root: match self.exit_code {
-//                 ExitCode::Halted(_) => self.pre_image.compute_root_hash(),
-//                 _ => self.post_state.merkle_root.clone(),
-//             },
-//         };
-
-//         Ok(ReceiptClaim {
-//             pre: self.pre_image.get_system_state().into(),
-//             post: post_state.into(),
-//             exit_code: self.exit_code,
-//             input: Digest::ZERO,
-//             output: self.output.clone().into(),
-//         })
-//     }
-// }
-
 const NULL_SEGMENT_REF: NullSegmentRef = NullSegmentRef {};
 
 /// Implementation of a [SegmentRef] that does not save the segment.

@@ -48,33 +48,6 @@ where
             hal_pair,
         }
     }
-
-    // /// Calculate for the [ReceiptClaim] associated with this [Segment]. The
-    // /// [ReceiptClaim] is the claim that will be proven if this [Segment]
-    // /// is passed to the [crate::Prover].
-    // fn get_segment_claim(&self, segment: &Segment) -> Result<ReceiptClaim> {
-    //     // NOTE: When a segment ends in a Halted(_) state, it may not update the post state
-    //     // digest. As a result, it will be the same as the pre_image. All other exit codes require
-    //     // the post state digest to reflect the final memory state.
-    //     // NOTE: The PC on the post state is stored "+ 4". See ReceiptClaim for more detail.
-    //     let post_state = SystemState {
-    //         pc: segment.post_state.pc,
-    //         // .checked_add(WORD_SIZE as u32)
-    //         // .context("invalid pc in segment post state")?,
-    //         merkle_root: match segment.exit_code {
-    //             ExitCode::Halted(_) => segment.pre_state.merkle_root.clone(),
-    //             _ => segment.post_state.merkle_root.clone(),
-    //         },
-    //     };
-
-    //     Ok(ReceiptClaim {
-    //         pre: segment.pre_state.clone().into(),
-    //         post: post_state.into(),
-    //         exit_code: segment.exit_code,
-    //         input: Digest::ZERO,
-    //         output: None.into(), // segment.output.clone().into(), TODO
-    //     })
-    // }
 }
 
 impl<H, C> ProverServer for ProverImpl<H, C>
