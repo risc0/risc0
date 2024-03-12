@@ -79,7 +79,12 @@ export default async function createConfigAsync() {
             // /bonsai            -> /api/generating-proofs/remote-proving
             // /bonsai/quickstart -> /api/generating-proofs/remote-proving
             if (path.includes("/api/generating-proofs/remote-proving")) {
-              return [path.replace("/api/generating-proofs/remote-proving", "/bonsai")];
+              return [
+                path.replace(
+                  "/api/generating-proofs/remote-proving",
+                  "/bonsai",
+                ),
+              ];
             }
             if (path.includes("/api/zkvm")) {
               return [path.replace("/api/zkvm", "/zkvm")];
