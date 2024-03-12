@@ -86,6 +86,14 @@ export default async function createConfigAsync() {
                 ),
               ];
             }
+            if (path.includes("/api/generating-proofs/remote-proving")) {
+              return [
+                path.replace(
+                  "/api/generating-proofs/remote-proving",
+                  "/bonsai/quickstart",
+                ),
+              ];
+            }
             if (path.includes("/api/zkvm")) {
               return [path.replace("/api/zkvm", "/zkvm")];
             }
