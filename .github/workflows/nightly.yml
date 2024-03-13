@@ -11,7 +11,7 @@ on:
 
 env:
   RISC0_BUILD_LOCKED: 1
-  RISC0_TOOLCHAIN_VERSION: v2024-01-31.1
+  RISC0_TOOLCHAIN_VERSION: v2024-02-08.1
 
 jobs:
   crates_validate:
@@ -92,6 +92,6 @@ jobs:
     steps:
       - name: DevOps Alert
         env:
-          NEEDS: ${{ toJSON(needs) }}     
+          NEEDS: ${{ toJSON(needs) }}
         run: |
           curl -X POST -H 'Content-type: application/json' --data '{"text":"Nightly Tasks Job Failed: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"}' ${{ secrets.DEVOPS_ALERT_WEBHOOK_URL }}
