@@ -606,7 +606,6 @@ name = "risc0-circuit-rv32im"
 version = "0.22.0-alpha.1"
 dependencies = [
  "anyhow",
- "cfg-if",
  "risc0-binfmt",
  "risc0-core",
  "risc0-zkp",
@@ -666,8 +665,6 @@ dependencies = [
  "cfg-if",
  "getrandom",
  "hex",
- "num-derive",
- "num-traits",
  "risc0-binfmt",
  "risc0-circuit-recursion",
  "risc0-circuit-rv32im",

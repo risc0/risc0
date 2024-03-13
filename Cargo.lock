@@ -5853,7 +5853,6 @@ dependencies = [
  "crypto-bigint",
  "cust",
  "derive-debug",
- "flate2",
  "lazy-regex",
  "metal",
  "rand 0.8.5",
@@ -5864,13 +5863,9 @@ dependencies = [
  "risc0-zkp",
  "risc0-zkvm-platform",
  "serde",
- "serial_test 3.0.0",
  "sha2 0.10.8",
- "tar",
  "test-log",
  "tracing",
- "tracing-forest",
- "tracing-subscriber 0.3.18",
 ]
 
 [[package]]
@@ -6014,8 +6009,6 @@ dependencies = [
  "human-repr",
  "lazy-regex",
  "lazy_static",
- "num-derive",
- "num-traits",
  "prost",
  "prost-build",
  "protobuf-src",

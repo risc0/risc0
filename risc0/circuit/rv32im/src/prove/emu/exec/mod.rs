@@ -44,14 +44,13 @@ use super::{
     addr::{ByteAddr, WordAddr},
     pager::PagedMemory,
     rv32im::{DecodedInstruction, EmuContext, Emulator, Instruction, TrapCause},
-    trace::{TraceCallback, TraceEvent},
     BIGINT_CYCLES, SYSTEM_START,
 };
-use crate::prove::{
+use crate::{prove::{
     emu::sha_cycles,
     engine::loader::{FINI_CYCLES, INIT_CYCLES},
     segment::{Segment, SyscallRecord},
-};
+}, trace::{TraceCallback, TraceEvent}};
 
 pub const DEFAULT_SEGMENT_LIMIT_PO2: usize = 20;
 

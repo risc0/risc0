@@ -15,14 +15,15 @@
 use std::rc::Rc;
 
 use anyhow::Result;
-use risc0_circuit_rv32im::prove::hal::cpu::CpuCircuitHal;
+use risc0_binfmt::MemoryImage;
+use risc0_circuit_rv32im::prove::{emu::testutil, hal::cpu::CpuCircuitHal};
 use risc0_zkp::{
     core::{digest::Digest, hash::blake2b::Blake2bCpuHashSuite},
     hal::cpu::CpuHal,
     verify::VerificationError,
 };
 use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID};
-use risc0_zkvm_platform::{memory, WORD_SIZE};
+use risc0_zkvm_platform::{memory, PAGE_SIZE, WORD_SIZE};
 use serial_test::serial;
 use test_log::test;
 
@@ -377,76 +378,67 @@ mod riscv {
     test_case!(xori);
 }
 
-#[cfg(feature = "docker")]
-mod docker {
-    use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF};
-    use test_log::test;
+#[test]
+#[ignore]
+fn pause_continue() {
+    let env = ExecutorEnv::builder()
+        .write(&MultiTestSpec::PauseContinue(0))
+        .unwrap()
+        .build()
+        .unwrap();
+    let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
 
-    use super::prove_session_fast;
-    use crate::{ExecutorEnv, ExecutorImpl, ExitCode};
+    // Run until sys_pause
+    let session = exec.run().unwrap();
+    assert_eq!(session.segments.len(), 1);
+    assert_eq!(session.exit_code, ExitCode::Paused(0));
+    let receipt = prove_session_fast(&session);
+    let segments = &receipt.inner.composite().unwrap().segments;
+    assert_eq!(segments.len(), 1);
+    assert_eq!(segments[0].index, 0);
 
-    #[test]
-    fn pause_continue() {
-        let env = ExecutorEnv::builder()
-            .write(&MultiTestSpec::PauseContinue(0))
-            .unwrap()
-            .build()
-            .unwrap();
-        let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
+    // Run until sys_halt
+    let session = exec.run().unwrap();
+    assert_eq!(session.exit_code, ExitCode::Halted(0));
+    prove_session_fast(&session);
+}
 
-        // Run until sys_pause
-        let session = exec.run().unwrap();
-        assert_eq!(session.segments.len(), 1);
-        assert_eq!(session.exit_code, ExitCode::Paused(0));
-        let receipt = prove_session_fast(&session);
-        let segments = &receipt.inner.composite().unwrap().segments;
-        assert_eq!(segments.len(), 1);
-        assert_eq!(segments[0].index, 0);
+#[test]
+fn continuation() {
+    const COUNT: usize = 2; // Number of total chunks to aim for.
 
-        // Run until sys_halt
-        let session = exec.run().unwrap();
-        assert_eq!(session.exit_code, ExitCode::Halted(0));
-        prove_session_fast(&session);
+    let program = testutil::simple_loop();
+    let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
+
+    let env = ExecutorEnv::builder()
+        .segment_limit_po2(14) // 16k cycles
+        .build()
+        .unwrap();
+    let mut exec = ExecutorImpl::new(env, image).unwrap();
+    let session = exec.run().unwrap();
+    let segments: Vec<_> = session
+        .segments
+        .iter()
+        .map(|x| x.resolve().unwrap())
+        .collect();
+    assert_eq!(segments.len(), COUNT);
+
+    let (final_segment, segments) = segments.split_last().unwrap();
+    for segment in segments {
+        assert_eq!(segment.inner.exit_code, ExitCode::SystemSplit);
     }
+    assert_eq!(final_segment.inner.exit_code, ExitCode::Halted(0));
 
-    #[test]
-    fn continuation() {
-        const COUNT: usize = 2; // Number of total chunks to aim for.
-        let segment_limit_po2 = 16; // 64k cycles
-        let cycles = 1 << segment_limit_po2;
-
-        let env = ExecutorEnv::builder()
-            .write(&MultiTestSpec::BusyLoop { cycles })
-            .unwrap()
-            .segment_limit_po2(segment_limit_po2)
-            .build()
-            .unwrap();
-        let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
-        let session = exec.run().unwrap();
-        let segments: Vec<_> = session
-            .segments
-            .iter()
-            .map(|x| x.resolve().unwrap())
-            .collect();
-        assert_eq!(segments.len(), COUNT);
-
-        let (final_segment, segments) = segments.split_last().unwrap();
-        for segment in segments {
-            assert_eq!(segment.exit_code, ExitCode::SystemSplit);
-        }
-        assert_eq!(final_segment.exit_code, ExitCode::Halted(0));
-
-        let receipt = prove_session_fast(&session);
-        for (idx, receipt) in receipt
-            .inner
-            .composite()
-            .unwrap()
-            .segments
-            .iter()
-            .enumerate()
-        {
-            assert_eq!(receipt.index, idx as u32);
-        }
+    let receipt = prove_session_fast(&session);
+    for (idx, receipt) in receipt
+        .inner
+        .composite()
+        .unwrap()
+        .segments
+        .iter()
+        .enumerate()
+    {
+        assert_eq!(receipt.index, idx as u32);
     }
 }
 

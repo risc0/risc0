@@ -18,9 +18,7 @@ pub mod mux;
 mod pager;
 pub mod preflight;
 pub mod rv32im;
-#[cfg(test)]
-pub(crate) mod testutil;
-pub mod trace;
+pub mod testutil;
 
 use risc0_zkvm_platform::{memory::SYSTEM, syscall::DIGEST_WORDS};
 

@@ -111,7 +111,7 @@ fn system_split() {
     let program = testutil::simple_loop();
     let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
 
-    let result = execute(image, 15, DEFAULT_SESSION_LIMIT, &NullSyscall::default()).unwrap();
+    let result = execute(image, 14, DEFAULT_SESSION_LIMIT, &NullSyscall::default()).unwrap();
 
     let prover = get_segment_prover();
     let suite = Sha256HashSuite::new_suite();

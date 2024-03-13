@@ -22,6 +22,7 @@ pub mod poly_ext;
 #[cfg(feature = "prove")]
 pub mod prove;
 mod taps;
+pub mod trace;
 
 use risc0_zkp::{
     adapter::{CircuitCoreDef, TapsProvider},

@@ -138,7 +138,8 @@ where
 }
 
 impl Session {
-    /// For each segment, call [Segment::prove] and collect the receipts.
+    /// For each segment, call [ProverServer::prove_session] and collect the
+    /// receipts.
     pub fn prove(&self) -> Result<Receipt> {
         let prover = get_prover_server(&ProverOpts::default())?;
         prover.prove_session(&VerifierContext::default(), self)

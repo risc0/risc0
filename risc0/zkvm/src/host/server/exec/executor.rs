@@ -117,8 +117,8 @@ impl<'a> ExecutorImpl<'a> {
         self.run_with_callback(|segment| Ok(Box::new(FileSegmentRef::new(&segment, &path)?)))
     }
 
-    /// Run the executor until [ExitCode::Halted] or [ExitCode::Paused] is reached, producing a
-    /// [Session] as a result.
+    /// Run the executor until [crate::ExitCode::Halted] or
+    /// [crate::ExitCode::Paused] is reached, producing a [Session] as a result.
     pub fn run_with_callback<F>(&mut self, mut callback: F) -> Result<Session>
     where
         F: FnMut(Segment) -> Result<Box<dyn SegmentRef>>,

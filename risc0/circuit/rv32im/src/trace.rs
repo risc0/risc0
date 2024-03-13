@@ -12,6 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+extern crate alloc;
+
+use alloc::vec::Vec;
+
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
@@ -56,7 +60,7 @@ impl<F: FnMut(TraceEvent) -> Result<()>> TraceCallback for F {
     }
 }
 
-impl std::fmt::Debug for TraceEvent {
+impl core::fmt::Debug for TraceEvent {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match self {
             Self::InstructionStart { cycle, pc, insn } => {

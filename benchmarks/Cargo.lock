@@ -2364,8 +2364,6 @@ dependencies = [
  "serde",
  "sha2",
  "tracing",
- "tracing-forest",
- "tracing-subscriber 0.3.18",
 ]
 
 [[package]]
@@ -2464,14 +2462,11 @@ dependencies = [
  "bytemuck",
  "bytes",
  "cfg-if",
- "crypto-bigint",
  "elf",
  "getrandom",
  "hex",
  "human-repr",
  "lazy-regex",
- "num-derive",
- "num-traits",
  "prost",
  "prost-build",
  "protobuf-src",
@@ -3086,18 +3081,6 @@ checksum = "c06d3da6113f116aaee68e4d601191614c9053067f9ab7f6edbcb161237daa54"
 dependencies = [
  "once_cell",
  "valuable",
-]
-
-[[package]]
-name = "tracing-forest"
-version = "0.1.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ee40835db14ddd1e3ba414292272eddde9dad04d3d4b65509656414d1c42592f"
-dependencies = [
- "smallvec",
- "thiserror",
- "tracing",
- "tracing-subscriber 0.3.18",
 ]
 
 [[package]]
