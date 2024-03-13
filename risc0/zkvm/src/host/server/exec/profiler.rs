@@ -41,7 +41,7 @@ use rrs_lib::instruction_formats::{IType, JType, OPCODE_JAL, OPCODE_JALR};
 use rustc_demangle::demangle;
 
 use self::proto::Line;
-use crate::{host::client::env::TraceCallback, TraceEvent};
+use crate::{TraceCallback, TraceEvent};
 
 mod proto {
     // Generated proto interface.
@@ -140,7 +140,7 @@ pub struct Profiler {
     insn: u32,
 
     // Cycle count when the last instruction started
-    cycle: u32,
+    cycle: u64,
 
     // Pop stack
     pop_stack: Vec<u32>,

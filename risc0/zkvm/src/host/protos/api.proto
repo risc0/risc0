@@ -143,7 +143,7 @@ message ExecutorEnv {
 
 message Assumption {
   oneof kind {
-    Asset proven = 1; // Receipt
+    Asset proven = 1;     // Receipt
     Asset unresolved = 2; // MaybePruned<ReceiptClaim>
   }
 }
@@ -227,7 +227,7 @@ message PosixCmd {
 
 message TraceEvent {
   message InstructionStart {
-    uint32 cycle = 1;
+    uint64 cycle = 1;
     uint32 pc = 2;
     uint32 insn = 3;
   }

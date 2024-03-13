@@ -20,6 +20,7 @@ pub mod preflight;
 pub mod rv32im;
 #[cfg(test)]
 pub(crate) mod testutil;
+pub mod trace;
 
 use risc0_zkvm_platform::{memory::SYSTEM, syscall::DIGEST_WORDS};
 

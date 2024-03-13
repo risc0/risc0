@@ -26,13 +26,10 @@ use serde::{Deserialize, Serialize};
 use super::{malformed_err, path_to_string, pb, ConnectionWrapper, Connector, TcpConnector};
 use crate::{
     get_prover_server, get_version,
-    host::{
-        client::{env::TraceCallback, slice_io::SliceIo},
-        recursion::SuccinctReceipt,
-    },
+    host::{client::slice_io::SliceIo, recursion::SuccinctReceipt},
     receipt_claim::{MaybePruned, ReceiptClaim},
     ExecutorEnv, ExecutorImpl, ProverOpts, Receipt, Segment, SegmentReceipt, SegmentRef,
-    TraceEvent, VerifierContext,
+    TraceCallback, TraceEvent, VerifierContext,
 };
 
 /// A server implementation for handling requests by clients of the zkVM.

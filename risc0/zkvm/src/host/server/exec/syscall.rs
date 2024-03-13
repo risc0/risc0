@@ -582,3 +582,47 @@ impl<'a> PosixIo<'a> {
         Ok((0, 0))
     }
 }
+
+// SysCycleCount:
+//     ctx.get_cycle()
+
+// SysGetenv:
+//     let buf_ptr = ctx.load_register(REG_A3);
+//     let buf_len = ctx.load_register(REG_A4);
+//     let from_guest = ctx.load_region(buf_ptr, buf_len)?;
+
+// SysPanic:
+//     let buf_ptr = ctx.load_register(REG_A3);
+//     let buf_len = ctx.load_register(REG_A4);
+//     let from_guest = ctx.load_region(buf_ptr, buf_len)?;
+
+// SysRandom:
+//     write to_guest
+
+// SysVerify:
+//     let from_guest_ptr = ctx.load_register(REG_A3);
+//     let from_guest_len = ctx.load_register(REG_A4);
+//     let from_guest: Vec<u8> = ctx.load_region(from_guest_ptr, from_guest_len)?;
+
+// SysArgs:
+//     let arg_index = ctx.load_register(REG_A3);
+
+// SysSliceIo:
+//     let buf_ptr = ctx.load_register(REG_A3);
+//     let buf_len = ctx.load_register(REG_A4);
+//     let from_guest = ctx.load_region(buf_ptr, buf_len)?;
+
+// PosixIo/sys_read:
+//     let fd = ctx.load_register(REG_A3);
+//     let nbytes = ctx.load_register(REG_A4) as usize;
+
+// PosixIo/sys_write:
+//     let fd = ctx.load_register(REG_A3);
+//     let buf_ptr = ctx.load_register(REG_A4);
+//     let buf_len = ctx.load_register(REG_A5);
+//     let from_guest_bytes = ctx.load_region(buf_ptr, buf_len)?;
+
+// PosixIo/sys_log:
+//     let buf_ptr = ctx.load_register(REG_A3);
+//     let buf_len = ctx.load_register(REG_A4);
+//     let from_guest = ctx.load_region(buf_ptr, buf_len)?;

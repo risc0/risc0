@@ -15,7 +15,7 @@
 #[cfg(test)]
 mod tests;
 
-use std::{array, mem};
+use std::{array, cell::RefCell, collections::BTreeSet, mem, rc::Rc};
 
 use anyhow::{bail, Result};
 use crypto_bigint::{CheckedMul as _, Encoding as _, NonZero, U256, U512};
@@ -44,6 +44,7 @@ use super::{
     addr::{ByteAddr, WordAddr},
     pager::PagedMemory,
     rv32im::{DecodedInstruction, EmuContext, Emulator, Instruction, TrapCause},
+    trace::{TraceCallback, TraceEvent},
     BIGINT_CYCLES, SYSTEM_START,
 };
 use crate::prove::{
@@ -103,8 +104,8 @@ pub struct ExecutorResult {
 
 #[derive(Default)]
 struct SessionCycles {
-    user: u64,
-    total: u64,
+    user: usize,
+    total: usize,
 }
 
 pub struct SimpleSession {
@@ -115,13 +116,15 @@ pub struct SimpleSession {
 #[derive(Debug)]
 struct PendingState {
     pc: ByteAddr,
+    insn: u32,
     cycles: usize,
     syscall: Option<SyscallRecord>,
     output_digest: Option<Digest>,
     exit_code: Option<ExitCode>,
+    events: BTreeSet<TraceEvent>,
 }
 
-pub struct Executor<'a, S: Syscall> {
+pub struct Executor<'a, 'b, S: Syscall> {
     pc: ByteAddr,
     insn_cycles: usize,
     pager: PagedMemory,
@@ -130,6 +133,8 @@ pub struct Executor<'a, S: Syscall> {
     syscall_handler: &'a S,
     output_digest: Option<Digest>,
     pending: PendingState,
+    trace: Vec<Rc<RefCell<dyn TraceCallback + 'b>>>,
+    cycles: SessionCycles,
 }
 
 impl PendingState {
@@ -142,8 +147,12 @@ impl PendingState {
     }
 }
 
-impl<'a, S: Syscall> Executor<'a, S> {
-    pub fn new(image: MemoryImage, syscall_handler: &'a S) -> Self {
+impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
+    pub fn new(
+        image: MemoryImage,
+        syscall_handler: &'a S,
+        trace: Vec<Rc<RefCell<dyn TraceCallback + 'b>>>,
+    ) -> Self {
         let pc = ByteAddr(image.pc);
         Self {
             pc,
@@ -155,11 +164,15 @@ impl<'a, S: Syscall> Executor<'a, S> {
             output_digest: None,
             pending: PendingState {
                 pc,
+                insn: 0,
                 cycles: 0,
                 syscall: None,
                 output_digest: None,
                 exit_code: None,
+                events: BTreeSet::new(),
             },
+            trace,
+            cycles: SessionCycles::default(),
         }
     }
 
@@ -177,7 +190,6 @@ impl<'a, S: Syscall> Executor<'a, S> {
 
         let mut emu = Emulator::new();
         let mut segments = 0;
-        let mut session_cycles = SessionCycles::default();
         let initial_state = self.pager.image.get_system_state();
 
         loop {
@@ -186,7 +198,7 @@ impl<'a, S: Syscall> Executor<'a, S> {
             }
 
             if let Some(max_cycles) = max_cycles {
-                if session_cycles.user + self.insn_cycles as u64 >= max_cycles {
+                if self.cycles.user + self.insn_cycles >= max_cycles as usize {
                     bail!("Session limit exceeded");
                 }
             }
@@ -195,7 +207,7 @@ impl<'a, S: Syscall> Executor<'a, S> {
 
             let segment_cycles = self.insn_cycles + self.pager.cycles + self.pending.cycles;
             if segment_cycles < segment_limit {
-                self.advance();
+                self.advance()?;
             } else if self.insn_cycles == 0 {
                 bail!(
                     "segment limit ({segment_limit}) too small for instruction at pc: {:?}",
@@ -226,8 +238,7 @@ impl<'a, S: Syscall> Executor<'a, S> {
                     output_digest: self.output_digest,
                 })?;
                 segments += 1;
-                session_cycles.user += self.insn_cycles as u64;
-                session_cycles.total += 1 << segment_po2;
+                self.cycles.total += 1 << segment_po2;
                 self.pager.clear();
                 self.insn_cycles = 0;
 
@@ -254,8 +265,7 @@ impl<'a, S: Syscall> Executor<'a, S> {
             output_digest: self.output_digest,
         })?;
         segments += 1;
-        session_cycles.user += self.insn_cycles as u64;
-        session_cycles.total += 1 << po2;
+        self.cycles.total += 1 << po2;
 
         // NOTE: When a segment ends in a Halted(_) state, it may not update the post state
         // digest. As a result, it will be the same are the pre_image. All other exit codes require
@@ -273,24 +283,42 @@ impl<'a, S: Syscall> Executor<'a, S> {
             segments,
             exit_code,
             post_image: self.pager.image.clone(),
-            user_cycles: session_cycles.user,
-            total_cycles: session_cycles.total,
+            user_cycles: self.cycles.user as u64,
+            total_cycles: self.cycles.total as u64,
             pre_state: initial_state,
             post_state,
             output_digest: self.output_digest,
         })
     }
 
-    fn advance(&mut self) {
+    fn advance(&mut self) -> Result<()> {
+        for trace in &self.trace {
+            trace
+                .borrow_mut()
+                .trace_callback(TraceEvent::InstructionStart {
+                    cycle: self.cycles.user as u64,
+                    pc: self.pc.0,
+                    insn: self.pending.insn,
+                })?;
+
+            for event in &self.pending.events {
+                trace.borrow_mut().trace_callback(event.clone()).unwrap();
+            }
+        }
+
         self.pc = self.pending.pc;
         self.insn_cycles += self.pending.cycles;
+        self.cycles.user += self.pending.cycles;
         self.pending.cycles = 0;
+        self.pending.events.clear();
         if let Some(syscall) = self.pending.syscall.take() {
             self.syscalls.push(syscall);
         }
         self.output_digest = self.pending.output_digest.take();
         self.exit_code = self.pending.exit_code.take();
         self.pager.commit_step();
+
+        Ok(())
     }
 
     fn reset(&mut self) {
@@ -299,10 +327,12 @@ impl<'a, S: Syscall> Executor<'a, S> {
         self.syscalls.clear();
         self.output_digest = None;
         self.pending.reset(self.pc);
+        self.cycles.user = 0;
+        self.cycles.total = 0;
     }
 }
 
-impl<'a, S: Syscall> Executor<'a, S> {
+impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
     fn ecall_halt(&mut self) -> Result<bool> {
         tracing::trace!("ecall_halt");
         let a0 = self.load_register(REG_A0)?;
@@ -539,26 +569,39 @@ impl<'a, S: Syscall> Executor<'a, S> {
         self.store_region(addr, slice)
     }
 
-    fn store_u8(&mut self, addr: ByteAddr, byte: u8) -> Result<()> {
+    fn raw_store_u8(&mut self, addr: ByteAddr, byte: u8) -> Result<()> {
         let byte_offset = addr.0 as usize % WORD_SIZE;
         let word = self.peek_u32(addr)?;
         let mut bytes = word.to_le_bytes();
         bytes[byte_offset] = byte;
         let word = u32::from_le_bytes(bytes);
-        self.store_memory(addr.waddr(), word)
+        self.raw_store_memory(addr.waddr(), word)
     }
 
     fn store_region(&mut self, addr: ByteAddr, slice: &[u8]) -> Result<()> {
         // tracing::trace!("store_region({addr:?}, {slice:02x?})");
+        if !self.trace.is_empty() {
+            self.pending.events.insert(TraceEvent::MemorySet {
+                addr: addr.0,
+                region: slice.into(),
+            });
+        }
+
         slice
             .iter()
             .enumerate()
-            .try_for_each(|(i, x)| self.store_u8(addr + i, *x))?;
+            .try_for_each(|(i, x)| self.raw_store_u8(addr + i, *x))?;
+
         Ok(())
+    }
+
+    fn raw_store_memory(&mut self, addr: WordAddr, data: u32) -> Result<()> {
+        // tracing::trace!("store_mem({:?}, 0x{data:08x})", addr.baddr());
+        self.pager.store(addr, data)
     }
 }
 
-impl<'a, S: Syscall> EmuContext for Executor<'a, S> {
+impl<'a, 'b, S: Syscall> EmuContext for Executor<'a, 'b, S> {
     fn ecall(&mut self) -> Result<bool> {
         match self.load_register(REG_T0)? {
             ecall::HALT => self.ecall_halt(),
@@ -595,7 +638,8 @@ impl<'a, S: Syscall> EmuContext for Executor<'a, S> {
         tracing::trace!("{:?}> {:?}", self.pc, insn.kind);
     }
 
-    fn on_normal_end(&mut self, insn: &Instruction, _decoded: &DecodedInstruction) {
+    fn on_normal_end(&mut self, insn: &Instruction, decoded: &DecodedInstruction) {
+        self.pending.insn = decoded.insn;
         self.pending.cycles += insn.cycles;
     }
 
@@ -616,6 +660,11 @@ impl<'a, S: Syscall> EmuContext for Executor<'a, S> {
         if idx != 0 {
             // tracing::trace!("store_reg: x{idx} <= 0x{data:08x}");
             self.pager.store(SYSTEM_START + idx, data)?;
+            if !self.trace.is_empty() {
+                self.pending
+                    .events
+                    .insert(TraceEvent::RegisterSet { idx, value: data });
+            }
         }
         Ok(())
     }
@@ -628,13 +677,19 @@ impl<'a, S: Syscall> EmuContext for Executor<'a, S> {
 
     fn store_memory(&mut self, addr: WordAddr, data: u32) -> Result<()> {
         // tracing::trace!("store_mem({:?}, 0x{data:08x})", addr.baddr());
-        self.pager.store(addr, data)
+        if !self.trace.is_empty() {
+            self.pending.events.insert(TraceEvent::MemorySet {
+                addr: addr.baddr().0,
+                region: data.to_le_bytes().to_vec(),
+            });
+        }
+        self.raw_store_memory(addr, data)
     }
 }
 
-impl<'a, S: Syscall> SyscallContext for Executor<'a, S> {
+impl<'a, 'b, S: Syscall> SyscallContext for Executor<'a, 'b, S> {
     fn get_cycle(&self) -> usize {
-        self.insn_cycles
+        self.cycles.user
     }
 
     fn peek_register(&mut self, idx: usize) -> Result<u32> {
@@ -670,11 +725,15 @@ pub fn execute<S: Syscall>(
     }
 
     let mut segments = Vec::new();
-    let result =
-        Executor::new(image, syscall_handler).run(segment_limit_po2, max_cycles, |segment| {
+    let trace = Vec::new();
+    let result = Executor::new(image, syscall_handler, trace).run(
+        segment_limit_po2,
+        max_cycles,
+        |segment| {
             segments.push(segment);
             Ok(())
-        })?;
+        },
+    )?;
 
     Ok(SimpleSession { segments, result })
 }
@@ -689,51 +748,3 @@ pub fn execute_elf<S: Syscall>(
     let image = MemoryImage::new(&program, PAGE_SIZE as u32)?;
     execute(image, segment_po2, max_cycles, syscall_handler)
 }
-
-// SysCycleCount:
-//     ctx.get_cycle()
-
-// SysGetenv:
-//     let buf_ptr = ctx.load_register(REG_A3);
-//     let buf_len = ctx.load_register(REG_A4);
-//     let from_guest = ctx.load_region(buf_ptr, buf_len)?;
-
-// SysPanic:
-//     let buf_ptr = ctx.load_register(REG_A3);
-//     let buf_len = ctx.load_register(REG_A4);
-//     let from_guest = ctx.load_region(buf_ptr, buf_len)?;
-
-// SysRandom:
-//     write to_guest
-
-// SysVerify:
-//     let from_guest_ptr = ctx.load_register(REG_A3);
-//     let from_guest_len = ctx.load_register(REG_A4);
-//     let from_guest: Vec<u8> = ctx.load_region(from_guest_ptr, from_guest_len)?;
-
-// SysArgs:
-//     let arg_index = ctx.load_register(REG_A3);
-
-// SysSliceIo:
-//     let buf_ptr = ctx.load_register(REG_A3);
-//     let buf_len = ctx.load_register(REG_A4);
-//     let from_guest = ctx.load_region(buf_ptr, buf_len)?;
-
-// PosixIo/sys_read:
-//     let fd = ctx.load_register(REG_A3);
-//     let nbytes = ctx.load_register(REG_A4) as usize;
-
-// PosixIo/sys_write:
-//     let fd = ctx.load_register(REG_A3);
-//     let buf_ptr = ctx.load_register(REG_A4);
-//     let buf_len = ctx.load_register(REG_A5);
-//     let from_guest_bytes = ctx.load_region(buf_ptr, buf_len)?;
-
-// PosixIo/sys_log:
-//     let buf_ptr = ctx.load_register(REG_A3);
-//     let buf_len = ctx.load_register(REG_A4);
-//     let from_guest = ctx.load_region(buf_ptr, buf_len)?;
-
-// Failing tests:
-// host::server::exec::tests::profiler
-// host::server::exec::tests::post_state_digest_randomization

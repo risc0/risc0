@@ -19,7 +19,7 @@ use risc0_binfmt::{MemoryImage, Program};
 use risc0_circuit_rv32im::prove::emu::{
     addr::ByteAddr,
     exec::{
-        Executor as NewExecutor, Syscall as NewSyscall, SyscallContext as NewSyscallContext,
+        Executor, Syscall as NewSyscall, SyscallContext as NewSyscallContext,
         DEFAULT_SEGMENT_LIMIT_PO2,
     },
 };
@@ -33,7 +33,10 @@ use crate::{
     Session,
 };
 
-use super::syscall::{SyscallContext, SyscallTable};
+use super::{
+    profiler::Profiler,
+    syscall::{SyscallContext, SyscallTable},
+};
 
 // The Executor provides an implementation for the execution phase.
 ///
@@ -42,6 +45,7 @@ pub struct ExecutorImpl<'a> {
     env: ExecutorEnv<'a>,
     image: MemoryImage,
     pub(crate) syscall_table: SyscallTable<'a>,
+    profiler: Option<Rc<RefCell<Profiler>>>,
 }
 
 impl<'a> ExecutorImpl<'a> {
@@ -53,7 +57,7 @@ impl<'a> ExecutorImpl<'a> {
     /// the guest program is executed to determine how its proof should be
     /// divided into subparts.
     pub fn new(env: ExecutorEnv<'a>, image: MemoryImage) -> Result<Self> {
-        Self::with_details(env, image)
+        Self::with_details(env, image, None)
     }
 
     /// Construct a new [ExecutorImpl] from the ELF binary of the guest program
@@ -72,34 +76,32 @@ impl<'a> ExecutorImpl<'a> {
     ///     .unwrap();
     /// let mut exec = ExecutorImpl::from_elf(env, BENCH_ELF).unwrap();
     /// ```
-    pub fn from_elf(env: ExecutorEnv<'a>, elf: &[u8]) -> Result<Self> {
+    pub fn from_elf(mut env: ExecutorEnv<'a>, elf: &[u8]) -> Result<Self> {
         let program = Program::load_elf(elf, GUEST_MAX_MEM as u32)?;
         let image = MemoryImage::new(&program, PAGE_SIZE as u32)?;
 
-        // let obj_ctx = if LevelFilter::current().eq(&Level::TRACE) {
-        //     let file = addr2line::object::read::File::parse(elf)?;
-        //     Some(ObjectContext::new(&file)?)
-        // } else {
-        //     None
-        // };
+        let profiler = if env.pprof_out.is_some() {
+            let profiler = Rc::new(RefCell::new(Profiler::new(elf, None)?));
+            env.trace.push(profiler.clone());
+            Some(profiler)
+        } else {
+            None
+        };
 
-        // let profiler = if env.pprof_out.is_some() {
-        //     let profiler = Rc::new(RefCell::new(Profiler::new(elf, None)?));
-        //     env.trace.push(profiler.clone());
-        //     Some(profiler)
-        // } else {
-        //     None
-        // };
-
-        Self::with_details(env, image)
+        Self::with_details(env, image, profiler)
     }
 
-    fn with_details(env: ExecutorEnv<'a>, image: MemoryImage) -> Result<Self> {
+    fn with_details(
+        env: ExecutorEnv<'a>,
+        image: MemoryImage,
+        profiler: Option<Rc<RefCell<Profiler>>>,
+    ) -> Result<Self> {
         let syscall_table = SyscallTable::new(&env);
         Ok(Self {
             env,
             image,
             syscall_table,
+            profiler,
         })
     }
 
@@ -137,7 +139,7 @@ impl<'a> ExecutorImpl<'a> {
             .unwrap_or(DEFAULT_SEGMENT_LIMIT_PO2 as u32) as usize;
 
         let mut refs = Vec::new();
-        let mut exec = NewExecutor::new(self.image.clone(), self);
+        let mut exec = Executor::new(self.image.clone(), self, self.env.trace.clone());
         let is_dev_mode = is_dev_mode();
         let result = exec.run(segment_limit_po2, self.env.session_limit, |inner| {
             let output = inner
@@ -202,6 +204,11 @@ impl<'a> ExecutorImpl<'a> {
         // Take (clear out) the list of accessed assumptions.
         // Leave the assumptions cache so it can be used if execution is resumed from pause.
         let assumptions = mem::take(&mut self.env.assumptions.borrow_mut().accessed);
+
+        if let Some(profiler) = self.profiler.take() {
+            let report = profiler.borrow_mut().finalize_to_vec();
+            std::fs::write(self.env.pprof_out.as_ref().unwrap(), report)?;
+        }
 
         Ok(Session::new(
             refs,

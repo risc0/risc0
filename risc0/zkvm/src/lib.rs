@@ -105,18 +105,6 @@ pub use self::host::{
         session::{FileSegmentRef, SegmentRef, Session, SessionEvents, SimpleSegmentRef},
     },
 };
-#[cfg(all(not(target_os = "zkvm"), feature = "client"))]
-pub use self::host::{
-    api::{client::Client as ApiClient, Asset, AssetRequest, Connector, SegmentInfo, SessionInfo},
-    client::{
-        env::{ExecutorEnv, ExecutorEnvBuilder},
-        exec::TraceEvent,
-        prove::{
-            bonsai::BonsaiProver, default_executor, default_prover, external::ExternalProver,
-            Executor, Prover, ProverOpts,
-        },
-    },
-};
 pub use self::receipt_claim::{Assumptions, MaybePruned, Output, PrunedValueError, ReceiptClaim};
 #[cfg(all(
     not(target_os = "zkvm"),
@@ -136,6 +124,22 @@ pub use {
         },
     },
     risc0_circuit_rv32im::prove::engine::loader::Loader,
+};
+#[cfg(all(not(target_os = "zkvm"), feature = "client"))]
+pub use {
+    self::host::{
+        api::{
+            client::Client as ApiClient, Asset, AssetRequest, Connector, SegmentInfo, SessionInfo,
+        },
+        client::{
+            env::{ExecutorEnv, ExecutorEnvBuilder},
+            prove::{
+                bonsai::BonsaiProver, default_executor, default_prover, external::ExternalProver,
+                Executor, Prover, ProverOpts,
+            },
+        },
+    },
+    risc0_circuit_rv32im::prove::emu::trace::{TraceCallback, TraceEvent},
 };
 #[cfg(not(target_os = "zkvm"))]
 pub use {

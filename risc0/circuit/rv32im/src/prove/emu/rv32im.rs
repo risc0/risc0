@@ -84,8 +84,9 @@ pub enum TrapCause {
     EnvironmentCallFromUserMode,
 }
 
+#[derive(Clone, Debug, Default)]
 pub struct DecodedInstruction {
-    insn: u32,
+    pub insn: u32,
     top_bit: u32,
     func7: u32,
     rs2: u32,
@@ -95,7 +96,7 @@ pub struct DecodedInstruction {
     opcode: u32,
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 enum InsnCategory {
     Compute,
     Load,
@@ -156,7 +157,7 @@ pub enum InsnKind {
     MRET,
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub struct Instruction {
     pub kind: InsnKind,
     category: InsnCategory,

@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
 /// An event traced from the running VM.
@@ -20,7 +21,7 @@ pub enum TraceEvent {
     /// An instruction has started at the given program counter
     InstructionStart {
         /// Cycle number since startup
-        cycle: u32,
+        cycle: u64,
         /// Program counter of the instruction being executed
         pc: u32,
         /// Encoded instruction being executed.
@@ -42,6 +43,17 @@ pub enum TraceEvent {
         /// Data that's been written
         region: Vec<u8>,
     },
+}
+
+/// A callback used to collect [TraceEvent]s.
+pub trait TraceCallback {
+    fn trace_callback(&mut self, event: TraceEvent) -> Result<()>;
+}
+
+impl<F: FnMut(TraceEvent) -> Result<()>> TraceCallback for F {
+    fn trace_callback(&mut self, event: TraceEvent) -> Result<()> {
+        self(event)
+    }
 }
 
 impl std::fmt::Debug for TraceEvent {

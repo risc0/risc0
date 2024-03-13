@@ -33,32 +33,17 @@ use tempfile::TempDir;
 
 use crate::{
     host::client::{
-        exec::TraceEvent,
         posix_io::PosixIo,
         slice_io::{slice_io_from_fn, SliceIo, SliceIoTable},
     },
     serde::to_vec,
-    Assumption,
+    Assumption, TraceCallback,
 };
 
 /// A builder pattern used to construct an [ExecutorEnv].
 #[derive(Default)]
 pub struct ExecutorEnvBuilder<'a> {
     inner: ExecutorEnv<'a>,
-}
-
-/// A callback used to collect [TraceEvent]s.
-pub trait TraceCallback {
-    fn trace_callback(&mut self, event: TraceEvent) -> Result<()>;
-}
-
-impl<F> TraceCallback for F
-where
-    F: FnMut(TraceEvent) -> Result<()>,
-{
-    fn trace_callback(&mut self, event: TraceEvent) -> Result<()> {
-        self(event)
-    }
 }
 
 /// Container for assumptions in the executor environment.
