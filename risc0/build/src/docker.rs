@@ -134,7 +134,7 @@ fn create_dockerfile(
     .join(" ");
 
     let build = DockerFile::new()
-        .from_alias("build", "risczero/risc0-guest-builder:v2024-01-31.1")
+        .from_alias("build", "risczero/risc0-guest-builder:v2024-02-08.1")
         .workdir("/src")
         .copy(".", ".")
         .env(manifest_env)

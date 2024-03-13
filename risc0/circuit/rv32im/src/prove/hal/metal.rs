@@ -17,7 +17,7 @@ use std::rc::Rc;
 use metal::ComputePipelineDescriptor;
 use risc0_core::field::{
     baby_bear::{BabyBearElem, BabyBearExtElem},
-    RootsOfUnity,
+    map_pow, RootsOfUnity,
 };
 use risc0_zkp::{
     core::log2_ceil,
@@ -64,11 +64,12 @@ impl<MH: MetalHash> CircuitHal<MetalHal<MH>> for MetalCircuitHal<MH> {
     ) {
         const EXP_PO2: usize = log2_ceil(INV_RATE);
         let domain = steps * INV_RATE;
-        let poly_mix = MetalBuffer::copy_from(
+        let poly_mix_pows = map_pow(poly_mix, crate::info::POLY_MIX_POWERS);
+        let poly_mix_pows = MetalBuffer::copy_from(
             "poly_mix",
             &self.hal.device,
             self.hal.cmd_queue.clone(),
-            &[poly_mix],
+            poly_mix_pows.as_slice(),
         );
         let rou = BabyBearElem::ROU_FWD[po2 + EXP_PO2];
         let rou =
@@ -92,7 +93,7 @@ impl<MH: MetalHash> CircuitHal<MetalHal<MH>> for MetalCircuitHal<MH> {
             groups[REGISTER_GROUP_ACCUM].as_arg(),
             globals[GLOBAL_MIX].as_arg(),
             globals[GLOBAL_OUT].as_arg(),
-            poly_mix.as_arg(),
+            poly_mix_pows.as_arg(),
             rou.as_arg(),
             po2.as_arg(),
             size.as_arg(),

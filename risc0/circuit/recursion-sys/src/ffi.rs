@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -103,7 +103,7 @@ extern "C" {
     pub fn risc0_circuit_recursion_poly_fp(
         cycle: usize,
         steps: usize,
-        poly_mix: *const BabyBearExtElem,
+        poly_mixs: *const BabyBearExtElem,
         args_ptr: *const *const BabyBearElem,
         args_len: usize,
     ) -> BabyBearExtElem;
