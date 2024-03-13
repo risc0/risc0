@@ -1,3 +1,5 @@
 {"rule":"A_INSTALL","sentence":"^\\QRust development on MacOS seems to require a full install of xcode.\\E$"}
 {"rule":"REPEATED_VERBS","sentence":"^\\Qcrate crates.io docs.rs\\E$"}
 {"rule":"REPEATED_VERBS","sentence":"^\\Qcrate crates.io\\E$"}
+{"rule":"POSSESSIVE_APOSTROPHE","sentence":"^\\QThe Addresses page describes the addresses of the verifier contract.\\E$"}
+{"rule":"MORFOLOGIK_RULE_EN_US","sentence":"^\\QThis design ensures efficiency, flexibility, and composability, making it the preferred choice for verifying a wide range of applications and circuits.\\E$"}

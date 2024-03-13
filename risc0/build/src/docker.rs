@@ -24,6 +24,8 @@ use risc0_zkvm_platform::{
 };
 use tempfile::tempdir;
 
+use crate::get_env_var;
+
 const DOCKER_IGNORE: &str = r#"
 **/Dockerfile
 **/.git
@@ -36,6 +38,10 @@ const TARGET_DIR: &str = "target/riscv-guest/riscv32im-risc0-zkvm-elf/docker";
 
 /// Build the package in the manifest path using a docker environment.
 pub fn docker_build(manifest_path: &Path, src_dir: &Path, features: &[String]) -> Result<()> {
+    if !get_env_var("RISC0_SKIP_BUILD").is_empty() {
+        return Ok(());
+    }
+
     let manifest_path = manifest_path
         .canonicalize()
         .context(format!("manifest_path: {manifest_path:?}"))?;
@@ -233,7 +239,7 @@ mod test {
         build("../../risc0/zkvm/methods/guest/Cargo.toml");
         compare_image_id(
             "risc0_zkvm_methods_guest/multi_test",
-            "57db93b2ac5ec574bb9d02bc08da086342a1439ef3fa776bc5065ff23b544bd8",
+            "65b178c28b97a497a47d36104590006b1eb4e068ff67eca6c3ae2a0b380c9c68",
         );
         compare_image_id(
             "risc0_zkvm_methods_guest/hello_commit",

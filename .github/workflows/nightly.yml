@@ -84,3 +84,14 @@ jobs:
           GITHUB_SHA: ${{ github.sha }}
         run: bash ./parse_profile_compilation_results.sh
         working-directory: ./.github/scripts
+
+  alert_devops_if_failed:
+    runs-on: ubuntu-latest
+    if: ${{ always() && contains(join(needs.*.result, ','), 'failure') }}
+    needs: [crates_validate]
+    steps:
+      - name: DevOps Alert
+        env:
+          NEEDS: ${{ toJSON(needs) }}     
+        run: |
+          curl -X POST -H 'Content-type: application/json' --data '{"text":"Nightly Tasks Job Failed: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"}' ${{ secrets.DEVOPS_ALERT_WEBHOOK_URL }}

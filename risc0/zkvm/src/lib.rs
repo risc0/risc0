@@ -106,6 +106,9 @@ pub use {
         },
     },
     risc0_circuit_rv32im::prove::engine::loader::Loader,
+    risc0_groth16::{
+        docker::stark_to_snark, to_json as seal_to_json, ProofJson as Groth16ProofJson,
+    },
 };
 #[cfg(all(not(target_os = "zkvm"), feature = "client"))]
 pub use {
@@ -134,6 +137,7 @@ pub use {
     },
     risc0_binfmt::compute_image_id,
     risc0_circuit_rv32im::control_id::POSEIDON2_CONTROL_ID,
+    risc0_groth16::Seal as Groth16Seal,
 };
 
 use semver::Version;
