@@ -64,12 +64,12 @@
 }
 
 @media (max-width: 996px) {
-  .navbarSearchContainer_node_modules-\@docusaurus-theme-classic-lib-theme-Navbar-Search-styles-module  {
-    position: relative !important;
-    right: 0 !important;
+  .navbar__items--right > div:has(.DocSearch-Button)  {
+    position: relative;
+    right: 0;
   }
 
-  .navbar__items--right > .navbar__item:first-child {
+  .navbar__item:has(.docsVersionDropdown) {
     display: block; /* so the version picker always shows up, even on small screens */
   }
 }
