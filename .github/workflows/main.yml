@@ -308,8 +308,6 @@ jobs:
       - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
       - run: cargo check
         working-directory: benchmarks
-      - run: cargo check
-        working-directory: external/substrate
       - run: sccache --show-stats
 
   check-external:
