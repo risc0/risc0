@@ -205,7 +205,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             }
 
             if let Some(max_cycles) = max_cycles {
-                if self.cycles.user + self.insn_cycles >= max_cycles as usize {
+                if self.cycles.user >= max_cycles as usize {
                     bail!("Session limit exceeded");
                 }
             }
@@ -256,7 +256,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         }
 
         let (pre_state, partial_image, post_state) = self.pager.commit(self.pc);
-        let segment_cycles = self.insn_cycles + self.pager.cycles;
+        let segment_cycles = self.insn_cycles + self.pager.cycles + RESERVED_CYCLES;
         let po2 = log2_ceil(segment_cycles.next_power_of_two()).try_into()?;
         let exit_code = self.exit_code.unwrap();
 
@@ -274,10 +274,13 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         segments += 1;
         self.cycles.total += 1 << po2;
 
-        // NOTE: When a segment ends in a Halted(_) state, it may not update the post state
-        // digest. As a result, it will be the same are the pre_image. All other exit codes require
-        // the post state digest to reflect the final memory state.
-        // NOTE: The PC on the the post state is stored "+ 4". See ReceiptClaim for more detail.
+        // NOTE: When a segment ends in a Halted(_) state, it may not update the
+        // post state digest. As a result, it will be the same as the pre_image.
+        // All other exit codes require the post state digest to reflect the
+        // final memory state.
+        //
+        // NOTE: The PC on the the post state is stored "+ 4". See ReceiptClaim
+        // for more detail.
         let post_state = SystemState {
             pc: post_state.pc,
             merkle_root: match exit_code {
