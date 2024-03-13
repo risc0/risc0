@@ -56,7 +56,7 @@ where
     C: CircuitHal<H>,
 {
     fn prove_session(&self, ctx: &VerifierContext, session: &Session) -> Result<Receipt> {
-        tracing::info!(
+        tracing::debug!(
             "prove_session: {}, exit_code = {:?}, journal = {:?}, segments: {}",
             self.name,
             session.exit_code,
@@ -123,85 +123,6 @@ where
         Ok(receipt)
     }
 
-    #[cfg(not(feature = "parallel-witgen"))]
-    fn prove_segment(&self, ctx: &VerifierContext, segment: &Segment) -> Result<SegmentReceipt> {
-        use risc0_circuit_rv32im::{
-            layout::{OutBuffer, LAYOUT},
-            CIRCUIT, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA,
-        };
-
-        use risc0_zkp::{
-            adapter::TapsProvider,
-            layout::Buffer,
-            prove::{adapter::ProveAdapter, executor::Executor, Prover},
-        };
-
-        use super::{loader::Loader, machine::MachineContext};
-
-        tracing::debug!(
-            "prove_segment[{}]: po2: {}, cycles: {}",
-            segment.index,
-            segment.po2,
-            segment.cycles,
-        );
-        let (hal, circuit_hal) = (self.hal_pair.hal.as_ref(), &self.hal_pair.circuit_hal);
-        let hashfn = &hal.get_hash_suite().name;
-
-        let io = segment.prepare_globals();
-        let machine = MachineContext::new(segment);
-        let po2 = segment.po2 as usize;
-        let mut executor = Executor::new(&CIRCUIT, machine, po2, po2, &io);
-
-        tracing::info_span!("execute").in_scope(|| -> Result<()> {
-            let loader = Loader::new();
-            loader.load(|chunk, fini| executor.step(chunk, fini))?;
-            executor.finalize();
-            Ok(())
-        })?;
-
-        let seal = tracing::info_span!("prove").in_scope(|| {
-            let mut adapter = ProveAdapter::new(&mut executor);
-            let mut prover = Prover::new(hal, CIRCUIT.get_taps());
-
-            adapter.execute(prover.iop());
-
-            prover.set_po2(adapter.po2() as usize);
-
-            prover.commit_group(
-                REGISTER_GROUP_CODE,
-                hal.copy_from_elem("code", &adapter.get_code().as_slice()),
-            );
-            prover.commit_group(
-                REGISTER_GROUP_DATA,
-                hal.copy_from_elem("data", &adapter.get_data().as_slice()),
-            );
-            adapter.accumulate(prover.iop());
-            prover.commit_group(
-                REGISTER_GROUP_ACCUM,
-                hal.copy_from_elem("accum", &adapter.get_accum().as_slice()),
-            );
-
-            let mix = hal.copy_from_elem("mix", &adapter.get_mix().as_slice());
-            let out_slice = &adapter.get_io().as_slice();
-
-            tracing::debug!("Globals: {:?}", OutBuffer(out_slice).tree(LAYOUT));
-            let out = hal.copy_from_elem("out", &adapter.get_io().as_slice());
-
-            prover.finalize(&[&mix, &out], circuit_hal.as_ref())
-        });
-
-        let receipt = SegmentReceipt {
-            seal,
-            index: segment.index,
-            hashfn: hashfn.clone(),
-            claim: segment.get_claim()?,
-        };
-        receipt.verify_integrity_with_context(ctx)?;
-
-        Ok(receipt)
-    }
-
-    #[cfg(feature = "parallel-witgen")]
     fn prove_segment(&self, ctx: &VerifierContext, segment: &Segment) -> Result<SegmentReceipt> {
         use risc0_circuit_rv32im::prove::{engine::SegmentProverImpl, SegmentProver as _};
 

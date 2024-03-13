@@ -91,32 +91,14 @@ pub use bytes::Bytes;
 pub use risc0_binfmt::{ExitCode, InvalidExitCodeError, SystemState};
 pub use risc0_zkvm_platform::{align_up, declare_syscall, memory::GUEST_MAX_MEM, PAGE_SIZE};
 
-#[cfg(all(
-    not(target_os = "zkvm"),
-    feature = "prove",
-    not(feature = "parallel-witgen")
-))]
-pub use self::host::{
-    api::server::Server as ApiServer,
-    client::prove::local::LocalProver,
-    server::{
-        exec::executor::ExecutorImpl,
-        prove::{get_prover_server, loader::Loader, HalPair, ProverServer},
-        session::{FileSegmentRef, SegmentRef, Session, SessionEvents, SimpleSegmentRef},
-    },
-};
 pub use self::receipt_claim::{Assumptions, MaybePruned, Output, PrunedValueError, ReceiptClaim};
-#[cfg(all(
-    not(target_os = "zkvm"),
-    feature = "prove",
-    feature = "parallel-witgen"
-))]
+#[cfg(all(not(target_os = "zkvm"), feature = "prove",))]
 pub use {
     self::host::{
         api::server::Server as ApiServer,
         client::prove::local::LocalProver,
         server::{
-            exec::adapter::ExecutorImpl,
+            exec::executor::ExecutorImpl,
             prove::{get_prover_server, HalPair, ProverServer},
             session::{
                 FileSegmentRef, Segment, SegmentRef, Session, SessionEvents, SimpleSegmentRef,

@@ -14,12 +14,7 @@
 
 //! Run the zkVM guest and prove its results.
 
-#[cfg(not(feature = "parallel-witgen"))]
-mod argument;
 mod dev_mode;
-pub(crate) mod loader;
-#[cfg(not(feature = "parallel-witgen"))]
-mod machine;
 mod prover_impl;
 #[cfg(test)]
 mod tests;
