@@ -395,7 +395,7 @@ impl MachineContext {
 
         if txn.addr != WordAddr(addr) {
             bail!(
-                "[{cycle}] Mismatched memory txn addr. Recorded:{:?} != Circuit:{:?}",
+                "[{cycle}] Mismatched memory txn addr. Recorded:{:?} != Circuit:{:?}, {cur_cycle:?}, {txn:?}",
                 txn.addr,
                 WordAddr(addr)
             );

@@ -379,8 +379,7 @@ mod riscv {
 }
 
 #[test]
-#[ignore]
-fn pause_continue() {
+fn pause_resume() {
     let env = ExecutorEnv::builder()
         .write(&MultiTestSpec::PauseContinue(0))
         .unwrap()

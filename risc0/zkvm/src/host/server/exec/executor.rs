@@ -214,6 +214,8 @@ impl<'a> ExecutorImpl<'a> {
             std::fs::write(self.env.pprof_out.as_ref().unwrap(), report)?;
         }
 
+        self.image = result.post_image.clone();
+
         let session = Session::new(
             refs,
             session_journal,

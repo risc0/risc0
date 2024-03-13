@@ -46,11 +46,14 @@ use super::{
     rv32im::{DecodedInstruction, EmuContext, Emulator, Instruction, TrapCause},
     BIGINT_CYCLES, SYSTEM_START,
 };
-use crate::{prove::{
-    emu::sha_cycles,
-    engine::loader::{FINI_CYCLES, INIT_CYCLES},
-    segment::{Segment, SyscallRecord},
-}, trace::{TraceCallback, TraceEvent}};
+use crate::{
+    prove::{
+        emu::sha_cycles,
+        engine::loader::{FINI_CYCLES, INIT_CYCLES},
+        segment::{Segment, SyscallRecord},
+    },
+    trace::{TraceCallback, TraceEvent},
+};
 
 pub const DEFAULT_SEGMENT_LIMIT_PO2: usize = 20;
 
@@ -181,8 +184,13 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         max_cycles: Option<u64>,
         mut callback: F,
     ) -> Result<ExecutorResult> {
+        // at least one HaltCycle needs to appear in the body
         const MIN_HALT_CYCLES: usize = 1;
-        const RESERVED_CYCLES: usize = INIT_CYCLES + MIN_HALT_CYCLES + FINI_CYCLES + ZK_CYCLES;
+        // a final "is_done" PageFault cycle is required when a split occurs
+        const PAGE_FINI_CYCLES: usize = 1;
+        // leave room for reserved cycles
+        const RESERVED_CYCLES: usize =
+            INIT_CYCLES + MIN_HALT_CYCLES + PAGE_FINI_CYCLES + FINI_CYCLES + ZK_CYCLES;
         let segment_limit = (1 << segment_po2) - RESERVED_CYCLES;
 
         self.reset();
@@ -333,13 +341,14 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
 
 impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
     fn ecall_halt(&mut self) -> Result<bool> {
-        tracing::trace!("ecall_halt");
         let a0 = self.load_register(REG_A0)?;
         let output_ptr = self.load_guest_addr_from_register(REG_A1)?;
         let output: [u8; DIGEST_BYTES] = self.load_array_from_guest(output_ptr)?;
 
         let halt_type = a0 & 0xff;
         let user_exit = (a0 >> 8) & 0xff;
+
+        tracing::debug!("ecall_halt({halt_type}, {user_exit})");
 
         self.pending.exit_code = match halt_type {
             halt::TERMINATE => Some(ExitCode::Halted(user_exit)),

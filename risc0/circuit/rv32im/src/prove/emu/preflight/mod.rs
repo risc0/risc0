@@ -285,18 +285,34 @@ impl Preflight {
             self.page_fault(true, /*is_read=*/ 1, *page_idx, /*is_done=*/ 0)?;
         }
 
-        if self.halted.is_none() {
-            // Emulate the page fault writes before a system split.
+        let (sys_exit_code, user_exit_code) = self
+            .halted
+            .map(|exit_code| {
+                let exit_code_bytes = exit_code.to_le_bytes();
+                (exit_code_bytes[0], exit_code_bytes[1])
+            })
+            .unwrap_or((halt::SPLIT as u8, 0));
+
+        if sys_exit_code != halt::TERMINATE as u8 {
+            // Emulate the page fault writes before a system split or a pause.
             for page_idx in faults.writes.iter() {
                 self.page_fault(false, /*is_read=*/ 0, *page_idx, /*is_done=*/ 0)?;
             }
-            let last_page_idx = faults.writes.last().unwrap();
-            self.page_fault(
-                false,
-                /*is_read=*/ 0,
-                *last_page_idx,
-                /*is_done=*/ 1,
-            )?;
+            if sys_exit_code == halt::SPLIT as u8 {
+                self.page_fault(
+                    false, /*is_read=*/ 0, /*page_idx=*/ 0, /*is_done=*/ 1,
+                )?;
+            }
+        }
+
+        if sys_exit_code != halt::SPLIT as u8 {
+            if sys_exit_code == halt::PAUSE as u8 {
+                self.load_u32(self.pc.waddr())?;
+            }
+            self.add_txn(false, SYSTEM_START + REG_T0, ecall::HALT);
+            self.add_txn(false, SYSTEM_START + REG_A1, self.output_ptr.0);
+            self.add_txn(false, SYSTEM_START + REG_A0, self.halted.unwrap());
+            self.add_cycle(false, TopMux::Body(Major::ECall, 0));
         }
 
         let max_cycles = self.steps;
@@ -311,13 +327,6 @@ impl Preflight {
             .checked_sub(FINI_CYCLES + ZK_CYCLES)
             .ok_or_else(err)?;
         tracing::debug!("padding: {body_padding}, pre: {pre_cycles}, body: {body_cycles}");
-
-        let (sys_exit_code, user_exit_code) = if let Some(exit_code) = self.halted {
-            let exit_code_bytes = exit_code.to_le_bytes();
-            (exit_code_bytes[0], exit_code_bytes[1])
-        } else {
-            (halt::SPLIT as u8, 0)
-        };
 
         if body_padding > 0 {
             self.add_cycle(false, TopMux::Body(Major::Halt, 0));
@@ -398,6 +407,10 @@ impl Preflight {
 
         let info = &self.pager.image.info;
         let addr = ByteAddr(info.get_page_addr(page_idx)).waddr();
+        tracing::debug!(
+            "page_fault(0x{page_idx:05x}, {is_read}, {is_done}, {:?})",
+            addr.baddr()
+        );
         let page_words = if page_idx == info.root_idx {
             info.num_root_entries as usize * DIGEST_WORDS
         } else {
@@ -522,14 +535,19 @@ impl Preflight {
 
     fn ecall_halt(&mut self) -> Result<bool> {
         tracing::trace!("ecall_halt");
-        self.output_ptr = ByteAddr(self.load_register(REG_A1)?);
-        self.halted = Some(self.load_register(REG_A0)?);
-        self.add_cycle(false, TopMux::Body(Major::ECall, 0));
+        self.output_ptr = ByteAddr(self.peek_register(REG_A1)?);
+        let exit_code = self.peek_register(REG_A0)?;
+        self.halted = Some(exit_code);
         Ok(true)
+    }
+
+    fn peek_register(&mut self, idx: usize) -> Result<u32> {
+        self.peek(SYSTEM_START + idx)
     }
 
     fn ecall_software(&mut self) -> Result<bool> {
         let cycle = self.trace.body.cycles.len();
+        self.load_register(REG_T0)?;
         let mut into_guest_ptr = ByteAddr(self.load_register(REG_A0)?).waddr();
         let into_guest_len = self.load_register(REG_A1)? as usize;
 
@@ -566,6 +584,7 @@ impl Preflight {
 
     fn ecall_sha(&mut self) -> Result<bool> {
         let cycle = self.trace.body.cycles.len();
+        self.load_register(REG_T0)?;
         let state_out_ptr = ByteAddr(self.load_register(REG_A0)?).waddr();
         let state_in_ptr = ByteAddr(self.load_register(REG_A1)?).waddr();
         let count = self.load_register(REG_A4)? as usize;
@@ -606,6 +625,7 @@ impl Preflight {
         let cycle = self.trace.body.cycles.len();
         tracing::debug!("[{cycle}] ecall_bigint");
 
+        self.load_register(REG_T0)?;
         self.load_register(REG_A1)?;
         self.add_cycle(false, TopMux::Body(Major::ECall, 0));
 
@@ -679,7 +699,9 @@ impl Preflight {
 
 impl EmuContext for Preflight {
     fn ecall(&mut self) -> Result<bool> {
-        match self.load_register(REG_T0)? {
+        // we use the pager load directly here so that we don't induce a memory
+        // transaction but still cause the page to marked as loaded.
+        match self.pager.load(SYSTEM_START + REG_T0) {
             ecall::HALT => self.ecall_halt(),
             ecall::SOFTWARE => self.ecall_software(),
             ecall::SHA => self.ecall_sha(),
@@ -773,7 +795,7 @@ impl Segment {
         let mut emu = Emulator::new();
 
         preflight.pre_steps();
-        while preflight.trace.body.cycles.len() < self.insn_cycles {
+        while preflight.trace.body.cycles.len() < self.insn_cycles && preflight.halted.is_none() {
             emu.step(&mut preflight)?;
             preflight.pager.commit_step();
         }
