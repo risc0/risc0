@@ -312,7 +312,7 @@ jobs:
         working-directory: external/substrate
       - run: sccache --show-stats
 
-  check-extras:
+  check-external:
     if: needs.changes.outputs.check-external == 'true'
     needs: changes
     runs-on: [self-hosted, prod, macOS, cpu]
