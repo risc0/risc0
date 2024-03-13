@@ -128,16 +128,6 @@ export default async function createConfigAsync() {
           },
           items: [
             {
-              position: "left",
-              label: "Learn",
-              to: "/api/next",
-            },
-            {
-              position: "left",
-              label: "Build",
-              to: "/api/next/getting-started",
-            },
-            {
               type: "docsVersionDropdown",
               position: "right",
               docsPluginId: "api",
