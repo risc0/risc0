@@ -318,7 +318,9 @@ impl Preflight {
         let max_cycles = self.steps;
         let pre_cycles = self.trace.pre.cycles.len();
         let body_cycles = self.trace.body.cycles.len();
-        let err = || anyhow::anyhow!("Invalid execution trace: cycles");
+        let err = || {
+            anyhow::anyhow!("Invalid execution trace. max: {max_cycles}, pre: {pre_cycles}, body: {body_cycles}")
+        };
         let body_padding = max_cycles
             .checked_sub(pre_cycles)
             .ok_or_else(err)?

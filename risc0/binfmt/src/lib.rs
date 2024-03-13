@@ -16,8 +16,6 @@
 
 #![cfg_attr(all(not(feature = "std"), not(test)), no_std)]
 
-extern crate alloc;
-
 mod elf;
 mod exit_code;
 mod hash;
