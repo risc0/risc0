@@ -26,6 +26,7 @@ jobs:
       pull-requests: read
     outputs:
       check-benchmarks: ${{ steps.filter.outputs.check-benchmarks }}
+      check-external: ${{ steps.filter.outputs.check-external }}
       check-template: ${{ steps.filter.outputs.check-template }}
       crates-validator: ${{ steps.filter.outputs.crates-validator }}
       doc: ${{ steps.filter.outputs.doc }}
@@ -48,6 +49,10 @@ jobs:
             check-benchmarks:
               - *base
               - benchmarks/**
+              - risc0/**
+            check-external:
+              - *base
+              - external/**
               - risc0/**
             check-template:
               - *base
@@ -85,6 +90,7 @@ jobs:
     needs:
       - check
       - check-benchmarks
+      - check-external
       - check-template
       - crates-validator
       - doc
@@ -218,8 +224,6 @@ jobs:
       - run: cargo check -p risc0-sys -F $FEATURE
       - run: cargo check -p risc0-zkp -F $FEATURE
       - run: cargo check -p risc0-zkvm -F $FEATURE
-      - run: cargo check
-        working-directory: external/substrate
       - run: sccache --show-stats
 
   examples:
@@ -304,6 +308,24 @@ jobs:
       - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
       - run: cargo check
         working-directory: benchmarks
+      - run: cargo check
+        working-directory: external/substrate
+      - run: sccache --show-stats
+
+  check-extras:
+    if: needs.changes.outputs.check-external == 'true'
+    needs: changes
+    runs-on: [self-hosted, prod, macOS, cpu]
+    steps:
+      # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
+      - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/rustup
+      - uses: ./.github/actions/sccache
+        with:
+          key: macOS-default
+      - run: cargo check
+        working-directory: external/substrate
       - run: sccache --show-stats
 
   check-template:
