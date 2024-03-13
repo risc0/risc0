@@ -64,7 +64,7 @@
 }
 
 @media (max-width: 996px) {
-  .navbar__items--right > div:has(.DocSearch-Button)  {
+  .navbar__items--right > div:has(.DocSearch-Button) {
     position: relative;
     right: 0;
   }
