@@ -56,7 +56,7 @@ Fp step_compute_accum(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp
   // loc("Top/Code/OneHot/hot[6](Reg)"("./zirgen/components/mux.h":49:25))
   auto x8 = args[0][7 * steps + ((cycle - 0) & mask)];
   assert(x8 != Fp::invalid());
-  // loc("Top/Code/OneHot/hot[2](Reg)"("zirgen/circuit/rv32im/top.cpp":78:27))
+  // loc("Top/Code/OneHot/hot[2](Reg)"("zirgen/circuit/rv32im/v1/edsl/top.cpp":78:27))
   auto x9 = args[0][3 * steps + ((cycle - 0) & mask)];
   assert(x9 != Fp::invalid());
   if (x4 != 0) {
