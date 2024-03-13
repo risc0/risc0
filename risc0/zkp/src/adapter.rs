@@ -93,7 +93,7 @@ pub trait PolyFp<F: Field> {
         &self,
         cycle: usize,
         steps: usize,
-        mix: &F::ExtElem,
+        mix: &[F::ExtElem],
         args: &[&[F::Elem]],
     ) -> F::ExtElem;
 }
