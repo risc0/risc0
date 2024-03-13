@@ -1,13 +1,23 @@
+/// A soundness calculator for the RISC Zero STARK protocol that secures the
+/// RISC Zero zkVM. Soundness for STARK protocols can be analyzed under a
+/// number of different cryptographic assumptions. RISC Zero targets 100 bits
+/// of conjectured soundness, using the Toy Problem Conjecture. For
+/// completeness, we also include analysis in three other regimes:
+/// - Conjectured soundness using Conjecture 8.4 from [Proximity Gaps] and
+///   Conjecture 2.3 from [DEEP-FRI]
+/// - Proven soundness in the list-decoding regime
+/// - Proven soundness in the unique-decoding regime
+
 use crate::{hal::Hal, taps::TapSet, FRI_FOLD, FRI_MIN_DEGREE, INV_RATE};
 use risc0_core::field::{baby_bear, ExtElem};
 
-/// Johnson's bound
+/// Johnson parameter. See https://eprint.iacr.org/2022/1216
 const M: f32 = 16.0;
 
 /// Rate
 const RHO: f32 = 1.0 / crate::INV_RATE as f32;
 
-/// η in Conjecture 8.4 [BCIKS21]
+/// η in Conjecture 8.4 of the Proximity Gaps paper [BCIKS21](https://eprint.iacr.org/2020/654.pdf)
 const ETA: f32 = 0.05;
 
 pub fn proven<H: Hal>(taps: &TapSet, coeffs_size: usize) -> f32 {
@@ -117,7 +127,6 @@ fn parameters<H: Hal>(taps: &TapSet, coeffs_size: usize) -> Params {
 
     let biggest_combo = taps.combos().map(|combo| combo.size()).max().unwrap() as f32;
 
-    // e, field extension degree
     let ext_size = H::ExtElem::EXT_SIZE;
     let field_size = baby_bear::P as f32;
     let ext_field_size = libm::powf(field_size, ext_size as f32);
