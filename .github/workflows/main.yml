@@ -27,6 +27,7 @@ jobs:
     outputs:
       check-benchmarks: ${{ steps.filter.outputs.check-benchmarks }}
       check-external: ${{ steps.filter.outputs.check-external }}
+      check-semver: ${{ steps.filter.outputs.check-semver }}
       check-template: ${{ steps.filter.outputs.check-template }}
       crates-validator: ${{ steps.filter.outputs.crates-validator }}
       doc: ${{ steps.filter.outputs.doc }}
@@ -53,6 +54,9 @@ jobs:
             check-external:
               - *base
               - external/**
+              - risc0/**
+            check-semver:
+              - *base
               - risc0/**
             check-template:
               - *base
@@ -91,6 +95,7 @@ jobs:
       - check
       - check-benchmarks
       - check-external
+      - check-semver
       - check-template
       - crates-validator
       - doc
@@ -324,6 +329,42 @@ jobs:
           key: macOS-default
       - run: cargo check
         working-directory: external/substrate
+      - run: sccache --show-stats
+
+  check-semver:
+    if: needs.changes.outputs.check-semver == 'true'
+    needs: changes
+    runs-on: [self-hosted, prod, cpu, "${{ matrix.os }}"]
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [Linux, macOS]
+    steps:
+      # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
+      - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: ./.github/actions/rustup
+      - uses: ./.github/actions/sccache
+        with:
+          key: ${{ matrix.os }}-default
+      - run: sudo apt install -y cmake
+      - name: Install cargo-semver-checks
+        uses: risc0/cargo-install@b9307573043522ab0d3e3be64a51763b765b52a4
+        with:
+          crate: cargo-semver-checks
+          version: "0.29.1"
+      - name: run cargo semverchecks on ${{ github.event.pull_request.base.sha }}
+        run: |
+          cargo semver-checks --default-features --baseline-rev ${{ github.event.pull_request.base.sha }} \
+           # There seems to be a bug in cargo-semver-checks that can't locate the platform crate...
+           --exclude risc0-zkvm-platform \
+           # these aren't published. Ignore them
+           --exclude doc-test --exclude fibonacci-methods --exclude risc0-zkvm-receipts --exclude risc0-zkvm-methods \
+           # the packages below will be moved out of risc0 \
+           --exclude bonsai-ethereum-contracts --exclude bonsai-ethereum-relay --exclude bonsai-rest-api-mock
+
       - run: sccache --show-stats
 
   check-template:
