@@ -293,8 +293,8 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             segments,
             exit_code,
             post_image: self.pager.image.clone(),
-            user_cycles: self.cycles.user as u64,
-            total_cycles: self.cycles.total as u64,
+            user_cycles: self.cycles.user.try_into()?,
+            total_cycles: self.cycles.total.try_into()?,
             pre_state: initial_state,
             post_state,
             output_digest: self.output_digest,
@@ -306,7 +306,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             trace
                 .borrow_mut()
                 .trace_callback(TraceEvent::InstructionStart {
-                    cycle: self.cycles.user as u64,
+                    cycle: self.cycles.user.try_into()?,
                     pc: self.pc.0,
                     insn: self.pending.insn,
                 })?;

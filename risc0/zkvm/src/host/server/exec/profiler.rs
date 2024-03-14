@@ -140,7 +140,8 @@ pub struct Profiler {
     insn: u32,
 
     // Cycle count when the last instruction started
-    cycle: u64,
+    // TODO(breaking change): update to `u64`
+    cycle: u32,
 
     // Pop stack
     pop_stack: Vec<u32>,

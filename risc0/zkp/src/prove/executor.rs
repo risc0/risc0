@@ -183,8 +183,6 @@ where
         // Do the verify cycles
         let args: &[SyncSlice<F::Elem>] = &[code_buf, io_buf, data_buf];
 
-        tracing::info!("last_cycle: {}", self.cycle);
-
         self.handler.sort("ram");
         tracing::info_span!("step_verify_mem").in_scope(|| {
             for i in 0..self.cycle {
