@@ -57,7 +57,7 @@ use crate::{
 // TODO: Automatically generate these constants from the circuit somehow without
 // messing up bootstrap dependencies.
 /// Number of rows to use for the recursion circuit witness as a power of 2.
-const RECURSION_PO2: usize = 18;
+pub const RECURSION_PO2: usize = 18;
 /// Depth of the Merkle tree to use for encoding the set of allowed control IDs.
 /// NOTE: Changing this constant must be coordinated with the circuit. In order to avoid needing to
 /// change the circuit later, this is set to 8 which allows for enough control IDs to be ecoded

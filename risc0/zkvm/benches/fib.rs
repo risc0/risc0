@@ -15,7 +15,9 @@
 use criterion::{
     black_box, criterion_group, criterion_main, BatchSize, BenchmarkId, Criterion, Throughput,
 };
-use risc0_zkvm::{get_prover_server, ExecutorEnv, ExecutorImpl, ProverOpts, VerifierContext};
+use risc0_zkvm::{
+    get_prover_server, ExecutorEnv, ExecutorImpl, ProverOpts, VerifierContext, RECURSION_PO2,
+};
 use risc0_zkvm_methods::FIB_ELF;
 
 fn setup_exec(iterations: u32) -> ExecutorImpl<'static> {
@@ -144,22 +146,20 @@ fn lift(c: &mut Criterion) {
     let prover = get_prover_server(&opts).unwrap();
     let ctx = VerifierContext::default();
 
-    for (po2, iterations) in [(18, 10_000), (19, 25_000), (20, 100_000)] {
-        let id = BenchmarkId::from_parameter(format!("{po2}/lift"));
-        group.throughput(Throughput::Elements(1 << po2));
-        group.bench_function(id, |b| {
-            b.iter_batched_ref(
-                || {
-                    let mut exec = setup_exec(iterations);
-                    let session = exec.run().unwrap();
-                    let segment = session.segments[0].resolve().unwrap();
-                    prover.prove_segment(&ctx, &segment).unwrap()
-                },
-                |receipt| black_box(prover.lift(&receipt).unwrap()),
-                BatchSize::SmallInput,
-            );
-        });
-    }
+    let id = BenchmarkId::from_parameter(format!("lift"));
+    group.throughput(Throughput::Elements(1 << RECURSION_PO2));
+    group.bench_function(id, |b| {
+        b.iter_batched_ref(
+            || {
+                let mut exec = setup_exec(100);
+                let session = exec.run().unwrap();
+                let segment = session.segments[0].resolve().unwrap();
+                prover.prove_segment(&ctx, &segment).unwrap()
+            },
+            |receipt| black_box(prover.lift(&receipt).unwrap()),
+            BatchSize::SmallInput,
+        );
+    });
 }
 
 fn join(c: &mut Criterion) {
@@ -187,7 +187,7 @@ fn join(c: &mut Criterion) {
     let ctx = VerifierContext::default();
 
     let id = BenchmarkId::from_parameter("join");
-    group.throughput(Throughput::Elements(1 << 18));
+    group.throughput(Throughput::Elements(1 << RECURSION_PO2));
     group.bench_function(id, |b| {
         b.iter_batched_ref(
             || {
