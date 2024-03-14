@@ -61,6 +61,10 @@ where
     L: Buffer<T>,
     R: Buffer<T>,
 {
+    fn name(&self) -> &'static str {
+        "dual"
+    }
+
     fn size(&self) -> usize {
         let lhs = self.lhs.size();
         let rhs = self.rhs.size();

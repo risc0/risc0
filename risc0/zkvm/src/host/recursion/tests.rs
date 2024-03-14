@@ -167,7 +167,7 @@ fn test_recursion_lift_join_identity_e2e() {
     // Prove the base case
     let (session, segments) = generate_busy_loop_segments("poseidon2");
 
-    // Lift and join them  all (and verify)
+    // Lift and join them all (and verify)
     let mut rollup = lift(&segments[0]).unwrap();
     tracing::info!("Lift claim = {:?}", rollup.claim);
     let ctx = VerifierContext::default();

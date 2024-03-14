@@ -64,16 +64,23 @@ impl<MH: MetalHash> CircuitHal<MetalHal<MH>> for MetalCircuitHal<MH> {
         const EXP_PO2: usize = log2_ceil(INV_RATE);
         let domain = steps * INV_RATE;
         let rou = BabyBearElem::ROU_FWD[po2 + EXP_PO2];
-        let rou = MetalBuffer::copy_from(&self.hal.device, self.hal.cmd_queue.clone(), &[rou]);
         let poly_mix_pows = map_pow(poly_mix, crate::info::POLY_MIX_POWERS);
         let poly_mix_pows = MetalBuffer::copy_from(
+            "poly_mix",
             &self.hal.device,
             self.hal.cmd_queue.clone(),
             poly_mix_pows.as_slice(),
         );
-        let po2 =
-            MetalBuffer::copy_from(&self.hal.device, self.hal.cmd_queue.clone(), &[po2 as u32]);
+        let rou =
+            MetalBuffer::copy_from("rou", &self.hal.device, self.hal.cmd_queue.clone(), &[rou]);
+        let po2 = MetalBuffer::copy_from(
+            "po2",
+            &self.hal.device,
+            self.hal.cmd_queue.clone(),
+            &[po2 as u32],
+        );
         let size = MetalBuffer::copy_from(
+            "size",
             &self.hal.device,
             self.hal.cmd_queue.clone(),
             &[domain as u32],

@@ -12,6 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+extern crate alloc;
+
+use alloc::vec::Vec;
+
+use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
 /// An event traced from the running VM.
@@ -20,6 +25,7 @@ pub enum TraceEvent {
     /// An instruction has started at the given program counter
     InstructionStart {
         /// Cycle number since startup
+        // TODO(breaking change): use `u64`
         cycle: u32,
         /// Program counter of the instruction being executed
         pc: u32,
@@ -44,7 +50,18 @@ pub enum TraceEvent {
     },
 }
 
-impl std::fmt::Debug for TraceEvent {
+/// A callback used to collect [TraceEvent]s.
+pub trait TraceCallback {
+    fn trace_callback(&mut self, event: TraceEvent) -> Result<()>;
+}
+
+impl<F: FnMut(TraceEvent) -> Result<()>> TraceCallback for F {
+    fn trace_callback(&mut self, event: TraceEvent) -> Result<()> {
+        self(event)
+    }
+}
+
+impl core::fmt::Debug for TraceEvent {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match self {
             Self::InstructionStart { cycle, pc, insn } => {

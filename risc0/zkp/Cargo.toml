@@ -20,7 +20,7 @@ digest = { version = "0.10", features = ["oid"] }
 ff = { version = "0.13", features = ["derive", "bits"], optional = true }
 hex = { version = "0.4.3", default-features = false, features = ["alloc"] }
 lazy_static = { version = "1.4", optional = true }
-metal = { version = "0.25", optional = true }
+metal = { version = "0.27", optional = true }
 paste = "1.0"
 rand_core = "0.6"
 risc0-core = { workspace = true }
@@ -32,6 +32,7 @@ tracing = { version = "0.1", default-features = false, features = [
 
 [target.'cfg(not(target_os = "zkvm"))'.dependencies]
 ndarray = { version = "0.15", features = ["rayon"], optional = true }
+parking_lot = { version = "0.12", optional = true }
 rand = { version = "0.8", optional = true }
 rayon = { version = "1.5", optional = true }
 risc0-sys = { workspace = true, optional = true }
@@ -52,6 +53,7 @@ prove = [
   "dep:ff",
   "dep:lazy_static",
   "dep:ndarray",
+  "dep:parking_lot",
   "dep:rand",
   "dep:rayon",
   "risc0-sys",
