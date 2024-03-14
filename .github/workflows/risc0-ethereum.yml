@@ -53,7 +53,7 @@ jobs:
               - risc0/**
 
   # see: https://github.com/orgs/community/discussions/26822
-  main-status-check:
+  risc0-ethereum-status-check:
     if: always()
     needs:
       - test
