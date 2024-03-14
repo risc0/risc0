@@ -97,6 +97,7 @@ pub use {
     self::host::{
         api::server::Server as ApiServer,
         client::prove::local::LocalProver,
+        recursion::RECURSION_PO2,
         server::{
             exec::executor::ExecutorImpl,
             prove::{get_prover_server, HalPair, ProverServer},
