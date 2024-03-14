@@ -64,7 +64,7 @@ Fp step_verify_mem(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** 
   // loc("Top/Code/OneHot/hot[6](Reg)"("./zirgen/components/mux.h":49:25))
   auto x12 = args[0][7 * steps + ((cycle - 0) & mask)];
   assert(x12 != Fp::invalid());
-  // loc("Top/Code/OneHot/hot[2](Reg)"("zirgen/circuit/rv32im/top.cpp":78:27))
+  // loc("Top/Code/OneHot/hot[2](Reg)"("zirgen/circuit/rv32im/v1/edsl/top.cpp":78:27))
   auto x13 = args[0][3 * steps + ((cycle - 0) & mask)];
   assert(x13 != Fp::invalid());
   if (x13 != 0) {
