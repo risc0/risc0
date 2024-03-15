@@ -107,11 +107,21 @@ pub struct ProverOpts {
 }
 
 impl Default for ProverOpts {
-    /// Return [ProverOpts] with the Poseidon hash function and
+    /// Return [ProverOpts] with the Poseidon2 hash function and
     /// `prove_guest_errors` set to false.
     fn default() -> Self {
         Self {
-            hashfn: "poseidon".to_string(),
+            hashfn: "poseidon2".to_string(),
+            prove_guest_errors: false,
+        }
+    }
+}
+
+impl ProverOpts {
+    /// Choose the fastest prover options. May not be compatible with recursion.
+    pub fn fast() -> Self {
+        Self {
+            hashfn: "sha-256".to_string(),
             prove_guest_errors: false,
         }
     }

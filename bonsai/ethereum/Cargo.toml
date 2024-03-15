@@ -1,11 +1,14 @@
 [package]
 name = "bonsai-ethereum-contracts"
 description = "Bonsai Ethereum contracts"
-version = "0.6.0-rc.1"
+version = "0.8.0-alpha.1"
 edition = { workspace = true }
 license = { workspace = true }
 homepage = { workspace = true }
 repository = { workspace = true }
+
+[package.metadata.release]
+release = false
 
 [build-dependencies]
 anyhow = "1.0"
@@ -17,6 +20,9 @@ risc0-zkvm = { workspace = true, features = ["prove"], optional = true }
 
 [dev-dependencies]
 tokio = { version = "1", features = ["macros", "rt"] }
+
+[lib]
+doctest = false
 
 [features]
 default = []

@@ -122,14 +122,14 @@ where
     #[tracing::instrument(skip_all)]
     pub fn accumulate(&mut self, iop: &mut WriteIOP<F>) {
         // Make the mixing values
-        self.mix = CpuBuffer::from_fn(C::MIX_SIZE, |_| iop.random_elem());
+        self.mix = CpuBuffer::from_fn("mix", C::MIX_SIZE, |_| iop.random_elem());
         // Make and compute accum data
         let accum_size = self
             .exec
             .circuit
             .get_taps()
             .group_size(REGISTER_GROUP_ACCUM);
-        self.accum = CpuBuffer::from_fn(self.steps * accum_size, |_| F::Elem::INVALID);
+        self.accum = CpuBuffer::from_fn("accum", self.steps * accum_size, |_| F::Elem::INVALID);
 
         self.compute_accum();
 

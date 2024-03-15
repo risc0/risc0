@@ -14,13 +14,12 @@
 
 //! CPU implementation of the HAL.
 
-use core::{
-    cell::{Ref, RefMut},
-    ops::Range,
-};
-use std::{cell::RefCell, fmt::Debug, rc::Rc};
+use std::{fmt::Debug, ops::Range, sync::Arc};
 
 use ndarray::{ArrayView, ArrayViewMut, Axis};
+use parking_lot::{
+    MappedRwLockReadGuard, MappedRwLockWriteGuard, RwLock, RwLockReadGuard, RwLockWriteGuard,
+};
 use rayon::prelude::*;
 use risc0_core::field::{Elem, ExtElem, Field};
 
@@ -88,12 +87,13 @@ impl<T> Drop for TrackedVec<T> {
 
 #[derive(Clone)]
 pub struct CpuBuffer<T> {
-    buf: Rc<RefCell<TrackedVec<T>>>,
+    name: &'static str,
+    buf: Arc<RwLock<TrackedVec<T>>>,
     region: Region,
 }
 
 enum SyncSliceRef<'a, T: Default + Clone> {
-    FromBuf(RefMut<'a, [T]>),
+    FromBuf(MappedRwLockWriteGuard<'a, [T]>),
     FromSlice(&'a SyncSlice<'a, T>),
 }
 
@@ -106,7 +106,7 @@ pub struct SyncSlice<'a, T: Default + Clone> {
     size: usize,
 }
 
-// SAFETY: SyncSlice keeps a RefMut to the original CpuBuffer, so
+// SAFETY: SyncSlice keeps a MappedRwLockWriteGuard to the original CpuBuffer, so
 // no other as_slice or as_slice_muts can be active at the same time.
 //
 // The user of the SyncSlice is responsible for ensuring that no
@@ -114,7 +114,7 @@ pub struct SyncSlice<'a, T: Default + Clone> {
 unsafe impl<'a, T: Default + Clone> Sync for SyncSlice<'a, T> {}
 
 impl<'a, T: Default + Clone> SyncSlice<'a, T> {
-    pub fn new(mut buf: RefMut<'a, [T]>) -> Self {
+    pub fn new(mut buf: MappedRwLockWriteGuard<'a, [T]>) -> Self {
         let ptr = buf.as_mut_ptr();
         let size = buf.len();
         SyncSlice {
@@ -158,10 +158,11 @@ impl<'a, T: Default + Clone> SyncSlice<'a, T> {
 }
 
 impl<T: Default + Clone> CpuBuffer<T> {
-    fn new(size: usize) -> Self {
+    fn new(name: &'static str, size: usize) -> Self {
         let buf = vec![T::default(); size];
         CpuBuffer {
-            buf: Rc::new(RefCell::new(TrackedVec::new(buf))),
+            name,
+            buf: Arc::new(RwLock::new(TrackedVec::new(buf))),
             region: Region(0, size),
         }
     }
@@ -170,32 +171,41 @@ impl<T: Default + Clone> CpuBuffer<T> {
         self.as_slice_sync().get_ptr()
     }
 
-    fn copy_from(slice: &[T]) -> Self {
+    fn copy_from(name: &'static str, slice: &[T]) -> Self {
+        let bytes = bytemuck::cast_slice(slice);
         CpuBuffer {
-            buf: Rc::new(RefCell::new(TrackedVec::new(Vec::from(slice)))),
+            name,
+            buf: Arc::new(RwLock::new(TrackedVec::new(Vec::from(bytes)))),
             region: Region(0, slice.len()),
         }
     }
 
-    pub fn from_fn<F>(size: usize, f: F) -> Self
+    pub fn from_fn<F>(name: &'static str, size: usize, f: F) -> Self
     where
         F: FnMut(usize) -> T,
     {
         let vec = (0..size).map(f).collect();
         CpuBuffer {
-            buf: Rc::new(RefCell::new(TrackedVec::new(vec))),
+            name,
+            buf: Arc::new(RwLock::new(TrackedVec::new(vec))),
             region: Region(0, size),
         }
     }
 
-    pub fn as_slice(&self) -> Ref<'_, [T]> {
-        let vec = self.buf.borrow();
-        Ref::map(vec, |vec| &vec.0[self.region.range()])
+    pub fn as_slice(&self) -> MappedRwLockReadGuard<'_, [T]> {
+        let vec = self.buf.read();
+        RwLockReadGuard::map(vec, |vec| {
+            let slice = bytemuck::cast_slice(&vec.0);
+            &slice[self.region.range()]
+        })
     }
 
-    pub fn as_slice_mut(&self) -> RefMut<'_, [T]> {
-        let vec = self.buf.borrow_mut();
-        RefMut::map(vec, |vec| &mut vec.0[self.region.range()])
+    pub fn as_slice_mut(&self) -> MappedRwLockWriteGuard<'_, [T]> {
+        let vec = self.buf.write();
+        RwLockWriteGuard::map(vec, |vec| {
+            let slice = bytemuck::cast_slice_mut(&mut vec.0);
+            &mut slice[self.region.range()]
+        })
     }
 
     pub fn as_slice_sync(&self) -> SyncSlice<'_, T> {
@@ -207,13 +217,18 @@ impl<T: Default + Clone> From<Vec<T>> for CpuBuffer<T> {
     fn from(vec: Vec<T>) -> CpuBuffer<T> {
         let size = vec.len();
         CpuBuffer {
-            buf: Rc::new(RefCell::new(TrackedVec::new(vec))),
+            name: "vec",
+            buf: Arc::new(RwLock::new(TrackedVec::new(vec))),
             region: Region(0, size),
         }
     }
 }
 
 impl<T: Clone> Buffer<T> for CpuBuffer<T> {
+    fn name(&self) -> &'static str {
+        self.name
+    }
+
     fn size(&self) -> usize {
         self.region.size()
     }
@@ -222,19 +237,22 @@ impl<T: Clone> Buffer<T> for CpuBuffer<T> {
         assert!(offset + size <= self.size());
         let region = Region(self.region.offset() + offset, size);
         CpuBuffer {
-            buf: Rc::clone(&self.buf),
+            name: self.name,
+            buf: Arc::clone(&self.buf),
             region,
         }
     }
 
     fn view<F: FnOnce(&[T])>(&self, f: F) {
-        let buf = self.buf.borrow();
-        f(&buf.0[self.region.range()]);
+        let buf = self.buf.read();
+        let slice = bytemuck::cast_slice(&buf.0);
+        f(&slice[self.region.range()]);
     }
 
     fn view_mut<F: FnOnce(&mut [T])>(&self, f: F) {
-        let mut buf = self.buf.borrow_mut();
-        f(&mut buf.0[self.region.range()]);
+        let mut buf = self.buf.write();
+        let slice = bytemuck::cast_slice_mut(&mut buf.0);
+        f(&mut slice[self.region.range()]);
     }
 }
 
@@ -244,44 +262,40 @@ impl<F: Field> Hal for CpuHal<F> {
     type ExtElem = F::ExtElem;
     type Buffer<T: Clone + Debug + PartialEq> = CpuBuffer<T>;
 
-    fn alloc_elem(&self, _name: &'static str, size: usize) -> Self::Buffer<Self::Elem> {
-        CpuBuffer::new(size)
+    fn alloc_elem(&self, name: &'static str, size: usize) -> Self::Buffer<Self::Elem> {
+        CpuBuffer::new(name, size)
     }
 
-    fn copy_from_elem(
-        &self,
-        _name: &'static str,
-        slice: &[Self::Elem],
-    ) -> Self::Buffer<Self::Elem> {
-        CpuBuffer::copy_from(slice)
+    fn copy_from_elem(&self, name: &'static str, slice: &[Self::Elem]) -> Self::Buffer<Self::Elem> {
+        CpuBuffer::copy_from(name, slice)
     }
 
-    fn alloc_extelem(&self, _name: &'static str, size: usize) -> Self::Buffer<Self::ExtElem> {
-        CpuBuffer::new(size)
+    fn alloc_extelem(&self, name: &'static str, size: usize) -> Self::Buffer<Self::ExtElem> {
+        CpuBuffer::new(name, size)
     }
 
     fn copy_from_extelem(
         &self,
-        _name: &'static str,
+        name: &'static str,
         slice: &[Self::ExtElem],
     ) -> Self::Buffer<Self::ExtElem> {
-        CpuBuffer::copy_from(slice)
+        CpuBuffer::copy_from(name, slice)
     }
 
-    fn alloc_digest(&self, _name: &'static str, size: usize) -> Self::Buffer<Digest> {
-        CpuBuffer::new(size)
+    fn alloc_digest(&self, name: &'static str, size: usize) -> Self::Buffer<Digest> {
+        CpuBuffer::new(name, size)
     }
 
-    fn copy_from_digest(&self, _name: &'static str, slice: &[Digest]) -> Self::Buffer<Digest> {
-        CpuBuffer::copy_from(slice)
+    fn copy_from_digest(&self, name: &'static str, slice: &[Digest]) -> Self::Buffer<Digest> {
+        CpuBuffer::copy_from(name, slice)
     }
 
-    fn alloc_u32(&self, _name: &'static str, size: usize) -> Self::Buffer<u32> {
-        CpuBuffer::new(size)
+    fn alloc_u32(&self, name: &'static str, size: usize) -> Self::Buffer<u32> {
+        CpuBuffer::new(name, size)
     }
 
-    fn copy_from_u32(&self, _name: &'static str, slice: &[u32]) -> Self::Buffer<u32> {
-        CpuBuffer::copy_from(slice)
+    fn copy_from_u32(&self, name: &'static str, slice: &[u32]) -> Self::Buffer<u32> {
+        CpuBuffer::copy_from(name, slice)
     }
 
     #[tracing::instrument(skip_all)]

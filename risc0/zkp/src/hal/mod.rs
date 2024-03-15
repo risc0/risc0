@@ -36,6 +36,8 @@ lazy_static! {
 }
 
 pub trait Buffer<T>: Clone {
+    fn name(&self) -> &'static str;
+
     fn size(&self) -> usize;
 
     fn slice(&self, offset: usize, size: usize) -> Self;

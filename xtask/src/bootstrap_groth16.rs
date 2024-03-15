@@ -17,13 +17,12 @@ use std::{fs, fs::read_to_string, process::Command};
 use clap::Parser;
 use hex::FromHex;
 use regex::Regex;
-use risc0_groth16::docker::stark_to_snark;
 use risc0_zkvm::{
     get_prover_server,
     recursion::identity_p254,
     sha::{Digest, Digestible},
-    CompactReceipt, ExecutorEnv, ExecutorImpl, InnerReceipt, ProverOpts, Receipt, VerifierContext,
-    ALLOWED_IDS_ROOT,
+    stark_to_snark, CompactReceipt, ExecutorEnv, ExecutorImpl, InnerReceipt, ProverOpts, Receipt,
+    VerifierContext, ALLOWED_IDS_ROOT,
 };
 use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID};
 
@@ -205,7 +204,8 @@ fn generate_receipt() -> (Receipt, Digest) {
     let prover = get_prover_server(&opts).unwrap();
     let receipt = prover.prove_session(&ctx, &session).unwrap();
     let claim = receipt.get_claim().unwrap();
-    let succinct_receipt = receipt.inner.succinct().unwrap();
+    let composite_receipt = receipt.inner.composite().unwrap();
+    let succinct_receipt = prover.compress(composite_receipt).unwrap();
     let journal = session.journal.unwrap().bytes;
 
     tracing::info!("identity_p254");

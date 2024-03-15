@@ -14,12 +14,12 @@
 
 use bonsai_ethereum_contracts::i_bonsai_relay::CallbackRequestFilter;
 use bonsai_sdk::alpha::{
-    responses::{CreateSessRes, Groth16Seal, SessionStatusRes, SnarkReceipt, SnarkStatusRes},
+    responses::{CreateSessRes, SessionStatusRes, SnarkReceipt, SnarkStatusRes},
     SessionId,
 };
 use ethers::types::{Address, Bytes, H256};
 use risc0_zkvm::{
-    sha::Digest, ExitCode, InnerReceipt, Journal, MaybePruned, Receipt, ReceiptClaim,
+    sha::Digest, ExitCode, Groth16Seal, InnerReceipt, Journal, MaybePruned, Receipt, ReceiptClaim,
 };
 use uuid::Uuid;
 use wiremock::{
@@ -41,6 +41,8 @@ pub(crate) async fn get_test_bonsai_server() -> (SessionId, MockServer) {
         receipt_url: Some(format!("{}/fake/receipt/path", server.uri())),
         error_msg: None,
         state: None,
+        elapsed_time: None,
+        stats: None,
     };
 
     let receipt_data_response = Receipt {
@@ -66,14 +68,8 @@ pub(crate) async fn get_test_bonsai_server() -> (SessionId, MockServer) {
         vec![zeroes.clone(), zeroes.clone()],
     ];
     let c = vec![zeroes.clone(), zeroes.clone()];
-    let public = vec![
-        zeroes.clone(),
-        zeroes.clone(),
-        zeroes.clone(),
-        zeroes.clone(),
-    ];
     let dummy_snark = Some(SnarkReceipt {
-        snark: Groth16Seal { a, b, c, public },
+        snark: Groth16Seal { a, b, c },
         post_state_digest: vec![],
         journal: vec![],
     });

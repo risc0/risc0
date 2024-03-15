@@ -1,72 +1,98 @@
----
-sidebar_position: 1
-slug: ./
----
-
 # Proof System Overview
 
-When the RISC Zero [zkVM] executes, it produces a [Receipt] that serves as a proof of validity of a given [Session].
+![A diagram of a receipt as the output of a zkVM program](assets/receipt.png)
+When the RISC Zero [zkVM] executes, it produces a [Receipt] that serves as a
+proof of validity of a given [Session].
 
-To confirm that a [Receipt] was honestly generated, use [Receipt::verify] and supply the [ImageID] of the code that should have been executed as a parameter.
+To confirm that a [Receipt] was honestly generated, use [Receipt::verify()].
 
-The [Receipt] includes a [journal], which contains the public outputs of the [Session].
-The contents of the [journal] are specified by calling [env::commit()] and [env::commit_slice()] in the [guest] code.
+The [Receipt] includes a [journal], which contains the public outputs of the
+[Session]. The contents of the [journal] are specified by calling
+[env::commit()] and [env::commit_slice()] in the [guest] code.
 
-In addition to the journal, a receipt makes a number of claims about the program execution.
-These claims are summarized in the [ReceiptClaim].
+In addition to the journal, a receipt makes a number of claims about the program
+execution. These claims are summarized in the [ReceiptClaim].
 
-A [Receipt] can take two main forms:
+### Types of Receipts
 
-- It can be represented by a collection of [SegmentReceipts], each of which proves a single [Segment].
-  Collectively, the [SegmentReceipts] prove the validity of the full [Session].
-- It can also be represented by a single [SuccinctReceipt], proving the validity of the entire session.
-  Using recursive proving, any number of [SegmentReceipts] can be compressed into a single [SuccinctReceipt].
+A [Receipt] can take four main forms.
 
-Cryptographically each [SegmentReceipt] or [SuccinctReceipt] is a [ZK-STARK].
-The details of the RISC Zero ZK-STARK are described in our [ZKP Whitepaper] and in this [Sequence Diagram].
+1. A **[composite receipt]** is a vector of [ZK-STARK]s, one for each [segment].
+   Segments & segment proofs are constructed using the [RISC-V Circuit].
+2. A **[succinct receipt]** is a single [ZK-STARK] proving an entire [Session].
+   A succinct receipt is formed by aggregating the proofs from a composite
+   receipt. This is accomplished using the [Recursion Circuit]. Users can also
+   aggregate multiple succinct receipts into a single succinct receipt using
+   [proof composition].
+3. A **[Groth16 receipt]** is a single [Groth16] proof for an entire [Session].
+   A Groth16Receipt is formed by verifying a succinct receipt using RISC Zero's
+   [Groth16 circuit].
+4. A **[fake receipt]** doesn't contain any proof at all. This feature is
+   offered to enable rapid prototyping. See [dev-mode] for more information.
+
+![The layers of the RISC Zero proving system](assets/proof-system-layers.png)
+
+The diagram above shows RISC Zero's full proving stack, including the [RISC-V
+Circuit], the [Recursion Circuit], and the [Groth16 Circuit]. In this diagram,
+the [composite receipt] is the collection of 6 stacked receipts, the [succinct
+receipt] is the single receipt after the last use of FRI, and the [Groth16
+Receipt] is the tiny receipt that comes from the Groth16 Circuit. For a video
+explanation of this architecture and the associated terminology, check out our
+[talk from zkSummit 10][zksummit-10].
+
+The details of the RISC Zero ZK-STARK protocol are described in our [ZKP
+Whitepaper] and in this [Sequence Diagram]. Documentation for our Groth16
+circuit is available in the [zkVM] docs.
+
+### Open-Source Proving
+
+All three of these circuits are open-source and permissionless; anyone may
+generate proofs on their own hardware using the implementations available at our
+[GitHub]. Users may also choose to delegate the work of proof generation to
+[Bonsai].
+
+Read more about our philosophy on open-source software [here][open-source].
 
 ## Learn More
 
-### About the zkVM
+In addition to the links in the sidebar, we recommend the following resources:
 
-- [Video Explainer from zkHack](https://www.youtube.com/watch?v=8hwY88xJoyM&list=PLcPzhUaCxlCgig7ofeARMPwQ8vbuD6hC5&index=8)
-- [Written Explainer](/api/zkvm)
+- [About the zkVM][about-zkvm]
+- [RISC Zero News][news]
+- [Start Building][quickstart]
+- [Study Club]
 
-### About STARKs
-
-- [STARKs reference doc](../reference-docs/about-starks.md)
-- STARK by Hand Tutorial
-  - [Website version](./stark-by-hand.md)
-  - [Google Sheet version](https://docs.google.com/spreadsheets/d/1Onr41OozD62y-B0jIL7bHAH5kf771-o4xvmnHUFpOyo/edit?usp=sharing)
-  - [Printable Version](assets/fibonacci-stark.pdf)
-
-### About RISC Zero
-
-- All our public talks and podcasts are available on our [YouTube channel].
-- [RISC Zero Study Club] is intended to help make the technology underpinning RISC Zero more accessible. Past sessions include:
-  - [What is RISC-V and how does it relate to RISC Zero?](https://www.youtube.com/watch?v=11DIflEwx50&list=PLcPzhUaCxlCjdhONxEYZ1dgKjZh3ZvPtl&index=5)
-  - [Intro to Finite Fields](https://www.youtube.com/watch?v=11DIflEwx50&list=PLcPzhUaCxlCjdhONxEYZ1dgKjZh3ZvPtl&index=2)
-  - [Intro to Reed-Solomon Codes](https://www.youtube.com/watch?v=11DIflEwx50&list=PLcPzhUaCxlCjdhONxEYZ1dgKjZh3ZvPtl&index=3)
-  - [Intro to Number Theoretic Transforms](https://www.youtube.com/watch?v=11DIflEwx50&list=PLcPzhUaCxlCjdhONxEYZ1dgKjZh3ZvPtl&index=4)
-  - [Intro to the FRI Protocol](https://www.youtube.com/watch?v=11DIflEwx50&list=PLcPzhUaCxlCjdhONxEYZ1dgKjZh3ZvPtl&index=1)
-  - [Finite Field Implementation Options: Barrett & Montgomery Multiplication](https://www.youtube.com/watch?v=hUl8ZB6hpUM&list=PLcPzhUaCxlCjdhONxEYZ1dgKjZh3ZvPtl&index=6)
-
-[zkVM]: https://docs.rs/risc0-zkvm
-[Receipt]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Receipt.html
-[ReceiptClaim]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.ReceiptClaim.html
-[SegmentReceipts]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.SegmentReceipts.html
-[SegmentReceipt]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.SegmentReceipt.html
-[SuccinctReceipt]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/recursion/struct.SuccinctReceipt.html
-[Session]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Session.html
-[Receipt::verify]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Receipt.html#method.verify
-[ImageID]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.SystemState.html
-[journal]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Receipt.html#structfield.journal
+[about-zkvm]: /api/zkvm
+[Bonsai]: https://bonsai.xyz
+[composite receipt]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.CompositeReceipt.html
+[dev-mode]: /api/generating-proofs/dev-mode
 [env::commit()]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest/env/fn.commit.html
 [env::commit_slice()]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest/env/fn.commit_slice.html
+[fake receipt]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/enum.InnerReceipt.html#variant.Fake
+[GitHub]: https://github.com/risc0/risc0
+[Groth16]: ../terminology#groth16
+[Groth16 receipt]: ../terminology#groth16-receipt
+[Groth16 Circuit]: ../terminology#groth16-circuit
 [guest]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest
-[ZK-STARK]: ../reference-docs/about-starks.md
-[Segment]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Segment.html
-[ZKP Whitepaper]: https://www.risczero.com/proof-system-in-detail.pdf
+[ImageID]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.SystemState.html
+[journal]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Receipt.html#structfield.journal
+[news]: https://risczero.com/news
+[open-source]: https://risczero.com/news/open-source
+[proof composition]: ../terminology#composition
+[quickstart]: /api/zkvm/quickstart
+[Receipt]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Receipt.html
+[ReceiptClaim]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.ReceiptClaim.html
+[Receipt::verify()]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Receipt.html#method.verify
+[Recursion Circuit]: ../terminology#recursion-circuit
+[RISC-V Circuit]: ../terminology#risc-v-circuit
+[segment]: ../terminology#segment
+[SegmentReceipts]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.SegmentReceipts.html
+[SegmentReceipt]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.SegmentReceipt.html
 [Sequence Diagram]: ./proof-system-sequence-diagram.md
-[RISC Zero Study Club]: https://dev.risczero.com/studyclub
-[YouTube channel]: https://www.youtube.com/@risczero
+[session]: ../terminology#session
+[Study Club]: ../studyclub.md
+[succinct receipt]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.SuccinctReceipt.html
+[ZKP Whitepaper]: https://www.risczero.com/proof-system-in-detail.pdf
+[zksummit-10]: https://www.youtube.com/watch?v=wkIBN2CGJdc
+[zkVM]: https://docs.rs/risc0-zkvm
+[ZK-STARK]: ../reference-docs/about-starks.md
