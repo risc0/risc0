@@ -317,12 +317,7 @@ pub fn cargo_command(subcmd: &str, rust_flags: &[&str]) -> Command {
 pub fn build_rust_runtime() -> String {
     build_staticlib(
         "risc0-zkvm-platform",
-        &[
-            "rust-runtime",
-            "panic-handler",
-            "entrypoint",
-            "export-getrandom",
-        ],
+        &["rust-runtime", "panic-handler", "entrypoint", "getrandom"],
     )
 }
 
