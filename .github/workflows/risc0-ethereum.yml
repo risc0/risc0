@@ -117,10 +117,10 @@ jobs:
           version: nightly-09fe3e041369a816365a020f715ad6f94dbce9f2
       # Apply local patch
       - name: Local patch on risc0-ethereum
-        run: python ../risc0/.github/cargo_local_patch.py
+        run: python ../risc0/.github/cargo_local_patch.py .
         working-directory: risc0-ethereum
       - name: Local patch on bonsai-foundry-template
-        run: python ../risc0/.github/cargo_local_patch.py
+        run: python ../risc0/.github/cargo_local_patch.py .
         working-directory: bonsai-foundry-template
       # Run Bootstrap-groth16 to update test receipt for checking
       # the latest groth16 prover against the solidity verifier on risc0-ethereum
