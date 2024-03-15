@@ -62,3 +62,14 @@
 .anchor {
   scroll-margin-top: 50pt;
 }
+
+@media (max-width: 996px) {
+  .navbar__items--right > div:has(.DocSearch-Button) {
+    position: relative;
+    right: 0;
+  }
+
+  .navbar__item:has(.docsVersionDropdown) {
+    display: block; /* so the version picker always shows up, even on small screens */
+  }
+}
