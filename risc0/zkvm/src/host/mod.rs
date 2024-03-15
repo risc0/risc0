@@ -16,7 +16,6 @@
 pub(crate) mod api;
 #[cfg(feature = "client")]
 pub(crate) mod client;
-pub(crate) mod control_id;
 pub(crate) mod receipt;
 pub(crate) mod recursion;
 #[cfg(feature = "prove")]
@@ -39,5 +38,3 @@ mod protos {
         include!(concat!(env!("OUT_DIR"), "/protos.core.rs"));
     }
 }
-
-const CIRCUIT: risc0_circuit_rv32im::CircuitImpl = risc0_circuit_rv32im::CircuitImpl::new();

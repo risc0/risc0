@@ -27,6 +27,7 @@ use merkle::MerkleGroup;
 use risc0_circuit_recursion::{
     cpu::CpuCircuitHal, CircuitImpl, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA,
 };
+use risc0_circuit_rv32im::control_id::POSEIDON2_CONTROL_ID;
 use risc0_zkp::{
     adapter::{CircuitInfo, CircuitStepContext, TapsProvider},
     core::{
@@ -50,13 +51,13 @@ use crate::{
     receipt_claim::{Merge, Output},
     recursion::{valid_control_ids, SuccinctReceipt},
     sha::Digestible,
-    HalPair, ReceiptClaim, SegmentReceipt, POSEIDON2_CONTROL_ID,
+    HalPair, ReceiptClaim, SegmentReceipt,
 };
 
 // TODO: Automatically generate these constants from the circuit somehow without
 // messing up bootstrap dependencies.
 /// Number of rows to use for the recursion circuit witness as a power of 2.
-const RECURSION_PO2: usize = 18;
+pub const RECURSION_PO2: usize = 18;
 /// Depth of the Merkle tree to use for encoding the set of allowed control IDs.
 /// NOTE: Changing this constant must be coordinated with the circuit. In order to avoid needing to
 /// change the circuit later, this is set to 8 which allows for enough control IDs to be ecoded
@@ -237,7 +238,7 @@ mod cuda {
         hal::cuda::{CudaHalPoseidon, CudaHalPoseidon2, CudaHalSha256},
     };
 
-    use super::{BabyBear, CircuitImpl, CpuCircuitHal, CpuHal, HalPair, Rc, CIRCUIT};
+    use super::{HalPair, Rc};
 
     pub fn sha256_hal_pair() -> HalPair<CudaHalSha256, CudaCircuitHalSha256> {
         let hal = Rc::new(CudaHalSha256::new());
@@ -256,13 +257,6 @@ mod cuda {
         let circuit_hal = Rc::new(CudaCircuitHalPoseidon2::new(hal.clone()));
         HalPair { hal, circuit_hal }
     }
-
-    pub fn poseidon254_hal_pair() -> HalPair<CpuHal<BabyBear>, CpuCircuitHal<'static, CircuitImpl>>
-    {
-        let hal = Rc::new(CpuHal::new(Poseidon254HashSuite::new_suite()));
-        let circuit_hal = Rc::new(CpuCircuitHal::new(&CIRCUIT));
-        HalPair { hal, circuit_hal }
-    }
 }
 
 #[cfg(feature = "metal")]
@@ -276,7 +270,7 @@ mod metal {
         },
     };
 
-    use super::{BabyBear, CircuitImpl, CpuCircuitHal, CpuHal, HalPair, Rc, CIRCUIT};
+    use super::{HalPair, Rc};
 
     pub fn sha256_hal_pair() -> HalPair<MetalHalSha256, MetalCircuitHal<MetalHashSha256>> {
         let hal = Rc::new(MetalHalSha256::new());
@@ -293,13 +287,6 @@ mod metal {
     pub fn poseidon2_hal_pair() -> HalPair<MetalHalPoseidon2, MetalCircuitHal<MetalHashPoseidon2>> {
         let hal = Rc::new(MetalHalPoseidon2::new());
         let circuit_hal = Rc::new(MetalCircuitHal::<MetalHashPoseidon2>::new(hal.clone()));
-        HalPair { hal, circuit_hal }
-    }
-
-    pub fn poseidon254_hal_pair() -> HalPair<CpuHal<BabyBear>, CpuCircuitHal<'static, CircuitImpl>>
-    {
-        let hal = Rc::new(CpuHal::new(Poseidon254HashSuite::new_suite()));
-        let circuit_hal = Rc::new(CpuCircuitHal::new(&CIRCUIT));
         HalPair { hal, circuit_hal }
     }
 }
@@ -365,7 +352,7 @@ cfg_if::cfg_if! {
         /// TODO
         #[allow(dead_code)]
         pub fn poseidon254_hal_pair() -> HalPair<CpuHal<BabyBear>, CpuCircuitHal<'static, CircuitImpl>> {
-            cuda::poseidon254_hal_pair()
+            cpu::poseidon254_hal_pair()
         }
     } else if #[cfg(feature = "metal")] {
         /// TODO
@@ -389,7 +376,7 @@ cfg_if::cfg_if! {
         /// TODO
         #[allow(dead_code)]
         pub fn poseidon254_hal_pair() -> HalPair<CpuHal<BabyBear>, CpuCircuitHal<'static, CircuitImpl>> {
-            metal::poseidon254_hal_pair()
+            cpu::poseidon254_hal_pair()
         }
     } else {
         /// TODO

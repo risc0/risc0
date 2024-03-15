@@ -40,3 +40,13 @@ pub mod fileno {
     pub const STDERR: u32 = 2;
     pub const JOURNAL: u32 = 3;
 }
+
+/// Align address upwards.
+///
+/// Returns the smallest `x` with alignment `align` so that `x >= addr`.
+///
+/// `align` must be a power of 2.
+pub const fn align_up(addr: usize, align: usize) -> usize {
+    let mask = align - 1;
+    (addr + mask) & !mask
+}

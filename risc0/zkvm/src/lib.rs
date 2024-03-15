@@ -88,44 +88,48 @@ pub use anyhow::Result;
 #[cfg(not(target_os = "zkvm"))]
 #[cfg(any(feature = "client", feature = "prove"))]
 pub use bytes::Bytes;
-pub use risc0_binfmt::SystemState;
-pub use risc0_zkvm_platform::{declare_syscall, memory::GUEST_MAX_MEM, PAGE_SIZE};
+pub use risc0_binfmt::{ExitCode, InvalidExitCodeError, SystemState};
+pub use risc0_zkvm_platform::{align_up, declare_syscall, memory::GUEST_MAX_MEM, PAGE_SIZE};
 
-#[cfg(all(not(target_os = "zkvm"), feature = "prove"))]
-pub use risc0_groth16::{
-    docker::stark_to_snark, to_json as seal_to_json, ProofJson as Groth16ProofJson,
-};
-
-#[cfg(all(not(target_os = "zkvm"), feature = "prove"))]
-pub use self::host::{
-    api::server::Server as ApiServer,
-    client::prove::local::LocalProver,
-    server::{
-        exec::executor::ExecutorImpl,
-        prove::{get_prover_server, loader::Loader, HalPair, ProverServer},
-        session::{FileSegmentRef, Segment, SegmentRef, Session, SessionEvents, SimpleSegmentRef},
+pub use self::receipt_claim::{Assumptions, MaybePruned, Output, PrunedValueError, ReceiptClaim};
+#[cfg(all(not(target_os = "zkvm"), feature = "prove",))]
+pub use {
+    self::host::{
+        api::server::Server as ApiServer,
+        client::prove::local::LocalProver,
+        recursion::RECURSION_PO2,
+        server::{
+            exec::executor::ExecutorImpl,
+            prove::{get_prover_server, HalPair, ProverServer},
+            session::{
+                FileSegmentRef, Segment, SegmentRef, Session, SessionEvents, SimpleSegmentRef,
+            },
+        },
+    },
+    risc0_circuit_rv32im::prove::engine::loader::Loader,
+    risc0_groth16::{
+        docker::stark_to_snark, to_json as seal_to_json, ProofJson as Groth16ProofJson,
     },
 };
 #[cfg(all(not(target_os = "zkvm"), feature = "client"))]
-pub use self::host::{
-    api::{client::Client as ApiClient, Asset, AssetRequest, Connector, SegmentInfo, SessionInfo},
-    client::{
-        env::{ExecutorEnv, ExecutorEnvBuilder},
-        exec::TraceEvent,
-        prove::{
-            bonsai::BonsaiProver, default_executor, default_prover, external::ExternalProver,
-            Executor, Prover, ProverOpts,
+pub use {
+    self::host::{
+        api::{
+            client::Client as ApiClient, Asset, AssetRequest, Connector, SegmentInfo, SessionInfo,
+        },
+        client::{
+            env::{ExecutorEnv, ExecutorEnvBuilder},
+            prove::{
+                bonsai::BonsaiProver, default_executor, default_prover, external::ExternalProver,
+                Executor, Prover, ProverOpts,
+            },
         },
     },
-};
-pub use self::receipt_claim::{
-    Assumptions, ExitCode, InvalidExitCodeError, MaybePruned, Output, PrunedValueError,
-    ReceiptClaim,
+    risc0_circuit_rv32im::trace::{TraceCallback, TraceEvent},
 };
 #[cfg(not(target_os = "zkvm"))]
 pub use {
     self::host::{
-        control_id::POSEIDON2_CONTROL_ID,
         receipt::{
             Assumption, CompactReceipt, CompositeReceipt, InnerReceipt, Journal, Receipt,
             SegmentReceipt, SuccinctReceipt, VerifierContext,
@@ -133,6 +137,7 @@ pub use {
         recursion::ALLOWED_IDS_ROOT,
     },
     risc0_binfmt::compute_image_id,
+    risc0_circuit_rv32im::control_id::POSEIDON2_CONTROL_ID,
     risc0_groth16::Seal as Groth16Seal,
 };
 
@@ -145,13 +150,6 @@ pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 /// [semver::Version].
 pub fn get_version() -> Result<Version, semver::Error> {
     Version::parse(VERSION)
-}
-
-/// Align the given address `addr` upwards to alignment `align`.
-///
-/// Requires that `align` is a power of two.
-pub const fn align_up(addr: usize, align: usize) -> usize {
-    (addr + align - 1) & !(align - 1)
 }
 
 /// Returns `true` if dev mode is enabled.
