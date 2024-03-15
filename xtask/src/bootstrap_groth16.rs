@@ -33,7 +33,7 @@ use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_I
 #[derive(Debug, Parser)]
 pub struct BootstrapGroth16 {
     /// ris0-ethereum repository path
-    #[arg(long, env, default_value = "../risc0-ethereum")]
+    #[arg(long, env)]
     risc0_ethereum_path: String,
     /// bootstrap test receipt only (exclude rust verifier and control id)
     #[arg(long, action = clap::ArgAction::SetTrue, default_value_t = false)]
