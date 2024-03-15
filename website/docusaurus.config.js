@@ -151,6 +151,7 @@ export default async function createConfigAsync() {
               type: "docsVersionDropdown",
               position: "right",
               docsPluginId: "api",
+              class: "docsVersionDropdown",
             },
             {
               href: "https://github.com/risc0",
