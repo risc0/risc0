@@ -349,7 +349,10 @@ jobs:
       - uses: ./.github/actions/sccache
         with:
           key: ${{ matrix.os }}-default
-      - run: sudo apt install -y cmake
+      - if: ${{ matrix.os }} == 'Linux'
+        run: sudo apt install -y cmake
+      - if: ${{ matrix.os }} == 'macOS'
+        run: brew install -f cmake
       - name: Install cargo-semver-checks
         uses: risc0/cargo-install@b9307573043522ab0d3e3be64a51763b765b52a4
         with:
@@ -364,7 +367,6 @@ jobs:
            --exclude doc-test --exclude fibonacci-methods --exclude risc0-zkvm-receipts --exclude risc0-zkvm-methods \
            # the packages below will be moved out of risc0 \
            --exclude bonsai-ethereum-contracts --exclude bonsai-ethereum-relay --exclude bonsai-rest-api-mock
-
       - run: sccache --show-stats
 
   check-template:
