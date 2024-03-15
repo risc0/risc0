@@ -481,15 +481,13 @@ pub unsafe extern "C" fn sys_read(fd: u32, recv_ptr: *mut u8, nread: usize) -> u
 
     // Copy in individual bytes after the word-aligned section.
     let unaligned_at_end = main_requested % WORD_SIZE;
-    if nread_main > main_requested - unaligned_at_end {
-        // If read more than the expected max aligned, write the extra bytes to the end
-        // of the buffer.
-        fill_from_word(
-            main_ptr.add(read_words * WORD_SIZE),
-            lastword,
-            unaligned_at_end,
-        );
-    }
+
+    // The last 0-3 bytes are returned in lastword. Write those to complete the _requested_ read amount.
+    fill_from_word(
+        main_ptr.add(main_words * WORD_SIZE),
+        lastword,
+        unaligned_at_end,
+    );
 
     nread_first + nread_main
 }
