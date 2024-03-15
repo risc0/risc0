@@ -29,8 +29,8 @@ use crate::{
         client::slice_io::SliceIo, recursion::SuccinctReceipt, server::session::NullSegmentRef,
     },
     receipt_claim::{MaybePruned, ReceiptClaim},
-    ExecutorEnv, ExecutorImpl, ProverOpts, Receipt, Segment, SegmentReceipt, SegmentRef,
-    TraceCallback, TraceEvent, VerifierContext,
+    ExecutorEnv, ExecutorImpl, ProverOpts, Receipt, Segment, SegmentReceipt, TraceCallback,
+    TraceEvent, VerifierContext,
 };
 
 /// A server implementation for handling requests by clients of the zkVM.

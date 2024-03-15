@@ -224,6 +224,10 @@ impl SegmentRef for NullSegmentRef {
     }
 }
 
+pub fn null_callback(_: Segment) -> Result<Box<dyn SegmentRef>> {
+    Ok(Box::new(NullSegmentRef))
+}
+
 /// A very basic implementation of a [SegmentRef].
 ///
 /// The [Segment] itself is stored in this implementation.
