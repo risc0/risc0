@@ -74,13 +74,33 @@ jobs:
     steps:
       # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
       - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
-      - uses: actions/checkout@v4
-        with:
-          path: 'risc0'
       - uses: ./risc0/.github/actions/rustup
       - uses: ./risc0/.github/actions/sccache
         with:
           key: Linux-default
+      # Checkout risc0
+      - uses: actions/checkout@v4
+        with:
+          path: 'risc0'
+      # Checkout risc0-ethereum
+      - name: Checkout risc0-ethereum
+        uses: actions/checkout@v4
+        with:
+          repository: 'risc0/risc0-ethereum'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          submodules: recursive
+          path: 'risc0-ethereum'
+          ref: ${{ github.event.inputs.risc0-ethereum-branch || 'main' }}
+      # Checkout bonsai-foundry-template
+      - name: Checkout foundry-template
+        uses: actions/checkout@v4
+        with:
+          repository: 'risc0/bonsai-foundry-template'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          submodules: recursive
+          path: 'bonsai-foundry-template'
+          ref: ${{ github.event.inputs.bonsai-foundry-template-branch || 'main' }}
+      # Installing dev tooling
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -95,20 +115,21 @@ jobs:
       - uses: risc0/foundry-toolchain@2fe7e70b520f62368a0e3c464f997df07ede420f
         with:
           version: nightly-09fe3e041369a816365a020f715ad6f94dbce9f2
-      - name: Checkout risc0-ethereum
-        uses: actions/checkout@v4
-        with:
-          repository: 'risc0/risc0-ethereum'
-          token: ${{ secrets.GITHUB_TOKEN }}
-          submodules: recursive
-          path: 'risc0-ethereum'
-          ref: ${{ github.event.inputs.risc0-ethereum-branch || 'main' }}
+      # Apply local patch
       - name: Local patch on risc0-ethereum
-        run: python ../risc0/.github/cargo_local_patch.py Cargo.toml
+        run: python ../risc0/.github/cargo_local_patch.py
         working-directory: risc0-ethereum
+      - name: Local patch on bonsai-foundry-template
+        run: python ../risc0/.github/cargo_local_patch.py
+        working-directory: bonsai-foundry-template
+      # Run Bootstrap-groth16 to update test receipt for checking
+      # the latest groth16 prover against the solidity verifier on risc0-ethereum
       - name: Bootstrap-groth16 test receipt
         run: cargo xtask bootstrap-groth16 --test-receipt-only
+        env:
+          RISC0_ETHEREUM_PATH: "../risc0-ethereum"
         working-directory: risc0
+      # Build and test risc0-ethereum
       - name: build risc0-ethereum
         run: cargo test --workspace --no-run
         working-directory: risc0-ethereum
@@ -118,20 +139,7 @@ jobs:
       - name: forge test on risc0-ethereum
         run: forge test -vvv
         working-directory: risc0-ethereum/contracts
-      - name: Checkout foundry-template
-        uses: actions/checkout@v4
-        with:
-          repository: 'risc0/bonsai-foundry-template'
-          token: ${{ secrets.GITHUB_TOKEN }}
-          submodules: recursive
-          path: 'bonsai-foundry-template'
-          ref: ${{ github.event.inputs.bonsai-foundry-template-branch || 'main' }}
-      - name: Local patch on bonsai-foundry-template
-        run: |
-          python ../risc0/.github/cargo_local_patch.py Cargo.toml
-          python ../risc0/.github/cargo_local_patch.py methods/guest/Cargo.toml
-          python ../risc0/.github/cargo_local_patch.py lib/risc0-ethereum/Cargo.toml
-        working-directory: bonsai-foundry-template
+      # Build and test bonsai-foundry-template
       - name: build bonsai-foundry-template
         run: cargo build
         working-directory: bonsai-foundry-template
