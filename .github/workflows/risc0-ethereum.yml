@@ -95,7 +95,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           submodules: recursive
           path: 'bonsai-foundry-template'
-          ref: ${{ github.event.inputs.bonsai-foundry-template-branch || 'main' }}
+          ref: ${{ github.event.inputs.bonsai-foundry-template-branch || 'capossele/risc0-CI' }}
       - uses: ./risc0/.github/actions/rustup
       - uses: ./risc0/.github/actions/sccache
         with:
