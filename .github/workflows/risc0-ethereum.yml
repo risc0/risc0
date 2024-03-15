@@ -86,7 +86,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           submodules: recursive
           path: 'risc0-ethereum'
-          ref: ${{ github.event.inputs.risc0-ethereum-branch || 'main' }}
+          ref: ${{ github.event.inputs.risc0-ethereum-branch || 'capossele/test-0.22' }}
       # Checkout bonsai-foundry-template
       - name: Checkout foundry-template
         uses: actions/checkout@v4
