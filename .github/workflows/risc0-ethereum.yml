@@ -74,10 +74,6 @@ jobs:
     steps:
       # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
       - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
-      - uses: ./risc0/.github/actions/rustup
-      - uses: ./risc0/.github/actions/sccache
-        with:
-          key: Linux-default
       # Checkout risc0
       - uses: actions/checkout@v4
         with:
@@ -100,6 +96,10 @@ jobs:
           submodules: recursive
           path: 'bonsai-foundry-template'
           ref: ${{ github.event.inputs.bonsai-foundry-template-branch || 'main' }}
+      - uses: ./risc0/.github/actions/rustup
+      - uses: ./risc0/.github/actions/sccache
+        with:
+          key: Linux-default
       # Installing dev tooling
       - name: Set up Python
         uses: actions/setup-python@v4
