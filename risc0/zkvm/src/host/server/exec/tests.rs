@@ -307,7 +307,13 @@ fn posix_style_read() {
         let session = exec.run().unwrap();
         assert_eq!(session.exit_code, ExitCode::Halted(0));
 
-        let actual: Vec<u8> = session.journal.unwrap().decode().unwrap();
+        let (actual, num_read): (Vec<u8>, Vec<usize>) = session.journal.unwrap().decode().unwrap();
+        for ((_, len), n_read) in pos_and_len.iter().zip(num_read) {
+            assert_eq!(
+                *len as usize, n_read,
+                "length mismatch, pos and lens: {pos_and_len:?}"
+            )
+        }
         assert_eq!(
             from_utf8(&actual).unwrap(),
             from_utf8(&expected).unwrap(),
@@ -349,7 +355,7 @@ fn posix_style_read() {
 }
 
 #[test]
-fn unaligned_short_read_bug() {
+fn unaligned_short_read() {
     const FD: u32 = 123;
     // Initial buffer to read bytes on top of.
     let buf: Vec<u8> = vec![0; 9];
@@ -768,10 +774,12 @@ fn args() {
 
 #[test]
 fn buf_read() {
+    // Host-provided input is 7 bytes, while the guest requests to read 9.
     let input = b"1234567";
     let env = ExecutorEnv::builder()
         .env_var("TEST_MODE", "BUF_READ")
         // Previously failed on anything > buf and not % 4 == 0
+        // https://github.com/risc0/risc0/pull/1557
         .write(&9usize)
         .unwrap()
         .write_slice(input.as_slice())
