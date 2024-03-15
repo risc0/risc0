@@ -169,7 +169,7 @@ fn main() {
             for (pos, len) in pos_and_len {
                 let num_read =
                     unsafe { sys_read(fd, buf.as_mut_ptr().add(pos as usize), len as usize) };
-                assert_eq!(num_read, len as usize);
+                assert!(num_read <= len as usize);
             }
             env::commit(&buf);
         }

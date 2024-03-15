@@ -349,6 +349,34 @@ fn posix_style_read() {
 }
 
 #[test]
+fn unaligned_short_read_bug() {
+    const FD: u32 = 123;
+    // Initial buffer to read bytes on top of.
+    let buf: Vec<u8> = vec![0; 9];
+    let readbuf: &[u8] = b"1234567";
+
+    let spec = MultiTestSpec::SysRead {
+        fd: FD,
+        buf: buf.clone(),
+        pos_and_len: vec![(0, 9)],
+    };
+    let env = ExecutorEnv::builder()
+        .read_fd(FD, readbuf)
+        .write(&spec)
+        .unwrap()
+        .build()
+        .unwrap();
+    let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
+    let session = exec.run().unwrap();
+    assert_eq!(session.exit_code, ExitCode::Halted(0));
+
+    let actual: Vec<u8> = session.journal.unwrap().decode().unwrap();
+    let mut expected = readbuf.to_vec();
+    expected.resize(buf.len(), 0);
+    assert_eq!(actual, expected, "pos and lens: {spec:?}");
+}
+
+#[test]
 fn large_io_words() {
     const FD: u32 = 123;
     let buf: Vec<u32> = (0..400_000).collect();
@@ -736,6 +764,23 @@ fn args() {
                 .collect::<Vec<String>>(),
         );
     }
+}
+
+#[test]
+fn buf_read() {
+    let input = b"1234567";
+    let env = ExecutorEnv::builder()
+        .env_var("TEST_MODE", "BUF_READ")
+        // Previously failed on anything > buf and not % 4 == 0
+        .write(&9usize)
+        .unwrap()
+        .write_slice(input.as_slice())
+        .build()
+        .unwrap();
+    let mut exec = ExecutorImpl::from_elf(env, STANDARD_LIB_ELF).unwrap();
+    let session = exec.run().unwrap();
+    let output = session.journal.unwrap().bytes;
+    assert_eq!(output, input);
 }
 
 #[test]
