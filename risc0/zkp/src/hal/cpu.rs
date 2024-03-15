@@ -172,10 +172,9 @@ impl<T: Default + Clone> CpuBuffer<T> {
     }
 
     fn copy_from(name: &'static str, slice: &[T]) -> Self {
-        let bytes = bytemuck::cast_slice(slice);
         CpuBuffer {
             name,
-            buf: Arc::new(RwLock::new(TrackedVec::new(Vec::from(bytes)))),
+            buf: Arc::new(RwLock::new(TrackedVec::new(slice.to_vec()))),
             region: Region(0, slice.len()),
         }
     }
@@ -194,18 +193,12 @@ impl<T: Default + Clone> CpuBuffer<T> {
 
     pub fn as_slice(&self) -> MappedRwLockReadGuard<'_, [T]> {
         let vec = self.buf.read();
-        RwLockReadGuard::map(vec, |vec| {
-            let slice = bytemuck::cast_slice(&vec.0);
-            &slice[self.region.range()]
-        })
+        RwLockReadGuard::map(vec, |vec| &vec.0[self.region.range()])
     }
 
     pub fn as_slice_mut(&self) -> MappedRwLockWriteGuard<'_, [T]> {
         let vec = self.buf.write();
-        RwLockWriteGuard::map(vec, |vec| {
-            let slice = bytemuck::cast_slice_mut(&mut vec.0);
-            &mut slice[self.region.range()]
-        })
+        RwLockWriteGuard::map(vec, |vec| &mut vec.0[self.region.range()])
     }
 
     pub fn as_slice_sync(&self) -> SyncSlice<'_, T> {
@@ -245,14 +238,12 @@ impl<T: Clone> Buffer<T> for CpuBuffer<T> {
 
     fn view<F: FnOnce(&[T])>(&self, f: F) {
         let buf = self.buf.read();
-        let slice = bytemuck::cast_slice(&buf.0);
-        f(&slice[self.region.range()]);
+        f(&buf.0[self.region.range()]);
     }
 
     fn view_mut<F: FnOnce(&mut [T])>(&self, f: F) {
         let mut buf = self.buf.write();
-        let slice = bytemuck::cast_slice_mut(&mut buf.0);
-        f(&mut slice[self.region.range()]);
+        f(&mut buf.0[self.region.range()]);
     }
 }
 
