@@ -355,6 +355,56 @@ fn posix_style_read() {
 }
 
 #[test]
+fn short_read_combinations() {
+    const FD: u32 = 123;
+    // Initial buffer to read bytes on top of.
+    let buf: Vec<u8> = (b'a'..=b'l').collect();
+    // Input to read bytes from.
+    let readbuf: Vec<u8> = (b'A'..b'L').collect();
+
+    for read_len in 0..WORD_SIZE {
+        for excess_buffer in 0..WORD_SIZE * 2 {
+            let buffer = read_len + excess_buffer;
+            let mut expected = buf.to_vec();
+
+            expected[..read_len].copy_from_slice(&readbuf[..read_len]);
+
+            // The current behaviour of the read call for more bytes than available is to write
+            // zeroes for the remaining bytes.
+            expected[read_len..buffer].fill(0);
+
+            let spec = MultiTestSpec::SysRead {
+                fd: FD,
+                buf: buf.to_vec(),
+                pos_and_len: vec![(0, buffer as u32)],
+            };
+            let env = ExecutorEnv::builder()
+                .read_fd(FD, &readbuf[..read_len])
+                .write(&spec)
+                .unwrap()
+                .build()
+                .unwrap();
+            let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
+            let session = exec.run().unwrap();
+            assert_eq!(session.exit_code, ExitCode::Halted(0));
+
+            let (actual, num_read): (Vec<u8>, Vec<usize>) =
+                session.journal.unwrap().decode().unwrap();
+            assert_eq!(
+                [read_len].as_slice(),
+                &num_read,
+                "length mismatch, length {read_len} buffer: {buffer}"
+            );
+            assert_eq!(
+                from_utf8(&actual).unwrap(),
+                from_utf8(&expected).unwrap(),
+                "length {read_len}, buffer {buffer}"
+            );
+        }
+    }
+}
+
+#[test]
 fn unaligned_short_read() {
     const FD: u32 = 123;
     // Initial buffer to read bytes on top of.
