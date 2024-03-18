@@ -29,7 +29,7 @@ env:
   RISC0_TOOLCHAIN_VERSION: v2024-02-08.1
   RISC0_PATH: ${{ github.workspace }}/risc0
   RISC0_ETHERIUM_PATH: ${{ github.workspace }}/risc0-ethereum
-  BONSAI_FOUNDARY_TEMPLATE_PATH: ${{ github.workspace }}/bonsai-foundry-template
+  BONSAI_FOUNDRY_TEMPLATE_PATH: ${{ github.workspace }}/bonsai-foundry-template
 
 jobs:
   changes:
@@ -123,7 +123,7 @@ jobs:
         run: python .github/cargo_local_patch.py  ${{ env.RISC0_ETHEREUM_PATH }}
         working-directory:  ${{ env.RISC0_PATH }}
       - name: Local patch on bonsai-foundry-template
-        run: python .github/cargo_local_patch.py  ${{ env.BONSAI_FOUNDARY_TEMPLATE_PATH }}
+        run: python .github/cargo_local_patch.py  ${{ env.BONSAI_FOUNDRY_TEMPLATE_PATH }}
         working-directory:  ${{ env.RISC0_PATH }}
       # Run Bootstrap-groth16 to update test receipt for checking
       # the latest groth16 prover against the solidity verifier on risc0-ethereum
@@ -145,13 +145,13 @@ jobs:
       # Build and test bonsai-foundry-template
       - name: build bonsai-foundry-template
         run: cargo build
-        working-directory: ${{ env.BONSAI_FOUNDARY_TEMPLATE_PATH }}
+        working-directory: ${{ env.BONSAI_FOUNDRY_TEMPLATE_PATH }}
       - name: build bonsai-foundry-template contracts
         run: forge build
-        working-directory: ${{ env.BONSAI_FOUNDARY_TEMPLATE_PATH }}
+        working-directory: ${{ env.BONSAI_FOUNDRY_TEMPLATE_PATH }}
       - name: run foundry tests in dev mode
         env:
           RISC0_DEV_MODE: true
         run: forge test -vvv
-        working-directory: ${{ env.BONSAI_FOUNDARY_TEMPLATE_PATH }}
+        working-directory: ${{ env.BONSAI_FOUNDRY_TEMPLATE_PATH }}
       - run: sccache --show-stats
