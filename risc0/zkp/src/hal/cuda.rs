@@ -386,6 +386,10 @@ impl<T: Pod> BufferImpl<T> {
 }
 
 impl<T: Pod> Buffer<T> for BufferImpl<T> {
+    fn name(&self) -> &'static str {
+        self.buffer.borrow().name
+    }
+
     fn size(&self) -> usize {
         self.size
     }
@@ -654,7 +658,7 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
         stream.synchronize().unwrap();
     }
 
-    #[tracing::instrument(skip_all)]
+    // #[tracing::instrument(skip_all)]
     fn gather_sample(
         &self,
         dst: &Self::Buffer<Self::Elem>,

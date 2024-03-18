@@ -72,7 +72,7 @@ use core::{fmt, mem::MaybeUninit};
 
 use bytemuck::Pod;
 use risc0_zkvm_platform::{
-    fileno,
+    align_up, fileno,
     syscall::{
         self, sys_alloc_words, sys_cycle_count, sys_halt, sys_log, sys_pause, sys_read,
         sys_read_words, sys_verify, sys_verify_integrity, sys_write, syscall_2, SyscallName,
@@ -82,7 +82,6 @@ use risc0_zkvm_platform::{
 use serde::{de::DeserializeOwned, Serialize};
 
 use crate::{
-    align_up,
     serde::{Deserializer, Serializer, WordRead, WordWrite},
     sha::{
         rust_crypto::{Digest as _, Sha256},

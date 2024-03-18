@@ -396,6 +396,10 @@ fn build_guest_package<P>(
 ) where
     P: AsRef<Path>,
 {
+    if !get_env_var("RISC0_SKIP_BUILD").is_empty() {
+        return;
+    }
+
     fs::create_dir_all(target_dir.as_ref()).unwrap();
 
     let mut cmd = if let Some(lib) = runtime_lib {
@@ -525,9 +529,6 @@ fn get_guest_dir() -> PathBuf {
 pub fn embed_methods_with_options(
     mut guest_pkg_to_options: HashMap<&str, GuestOptions>,
 ) -> Vec<GuestListEntry> {
-    if !get_env_var("RISC0_SKIP_BUILD").is_empty() {
-        return Vec::new();
-    }
     let out_dir_env = env::var_os("OUT_DIR").unwrap();
     let out_dir = Path::new(&out_dir_env); // $ROOT/target/$profile/build/$crate/out
     let guest_dir = get_guest_dir();

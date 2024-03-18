@@ -117,6 +117,16 @@ impl Default for ProverOpts {
     }
 }
 
+impl ProverOpts {
+    /// Choose the fastest prover options. May not be compatible with recursion.
+    pub fn fast() -> Self {
+        Self {
+            hashfn: "sha-256".to_string(),
+            prove_guest_errors: false,
+        }
+    }
+}
+
 /// Return a default [Prover] based on environment variables and feature flags.
 ///
 /// The `RISC0_PROVER` environment variable, if specified, will select the

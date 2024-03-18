@@ -24,7 +24,7 @@ use crate::{tagged_struct, Digestible};
 
 /// Represents the public state of a segment, needed for continuations and
 /// receipt verification.
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Serialize, Deserialize, PartialEq)]
 pub struct SystemState {
     /// The program counter.
     pub pc: u32,
@@ -45,6 +45,15 @@ impl SystemState {
     pub fn encode(&self, flat: &mut Vec<u32>) {
         write_u32_bytes(flat, self.pc);
         write_sha_halfs(flat, &self.merkle_root);
+    }
+}
+
+impl fmt::Debug for SystemState {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("SystemState")
+            .field("pc", &format_args!("0x{:08x}", self.pc))
+            .field("merkle_root", &self.merkle_root)
+            .finish()
     }
 }
 

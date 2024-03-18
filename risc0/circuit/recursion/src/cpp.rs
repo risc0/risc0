@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -126,18 +126,12 @@ impl PolyFp<BabyBear> for CircuitImpl {
         &self,
         cycle: usize,
         steps: usize,
-        mix: &BabyBearExtElem,
+        mix: &[BabyBearExtElem],
         args: &[&[BabyBearElem]],
     ) -> BabyBearExtElem {
         let args: Vec<*const BabyBearElem> = args.iter().map(|x| (*x).as_ptr()).collect();
         unsafe {
-            risc0_circuit_recursion_poly_fp(
-                cycle,
-                steps,
-                mix as *const BabyBearExtElem,
-                args.as_ptr(),
-                args.len(),
-            )
+            risc0_circuit_recursion_poly_fp(cycle, steps, mix.as_ptr(), args.as_ptr(), args.len())
         }
     }
 }
