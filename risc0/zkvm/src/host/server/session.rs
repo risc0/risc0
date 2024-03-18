@@ -212,13 +212,11 @@ impl Session {
     }
 }
 
-const NULL_SEGMENT_REF: NullSegmentRef = NullSegmentRef {};
-
 /// Implementation of a [SegmentRef] that does not save the segment.
 ///
 /// This is useful for DevMode where the segments aren't needed.
 #[derive(Serialize, Deserialize)]
-pub struct NullSegmentRef {}
+pub struct NullSegmentRef;
 
 impl SegmentRef for NullSegmentRef {
     fn resolve(&self) -> anyhow::Result<Segment> {
@@ -226,8 +224,8 @@ impl SegmentRef for NullSegmentRef {
     }
 }
 
-pub fn null_callback() -> Result<Box<dyn SegmentRef>> {
-    Ok(Box::new(NULL_SEGMENT_REF))
+pub fn null_callback(_: Segment) -> Result<Box<dyn SegmentRef>> {
+    Ok(Box::new(NullSegmentRef))
 }
 
 /// A very basic implementation of a [SegmentRef].
