@@ -283,7 +283,7 @@ Happy coding!
 [example-chess-core]: https://github.com/risc0/risc0/blob/release-0.21/examples/chess/core/src/lib.rs
 [example-chess-guest]: https://github.com/risc0/risc0/blob/release-0.21/examples/chess/methods/guest/src/main.rs
 [example-chess-host]: https://github.com/risc0/risc0/blob/release-0.21/examples/chess/src/main.rs
-[example-chess]: https://github.com/risc0/risc0/tree/main/examples/chess
+[example-chess]: https://github.com/risc0/risc0/tree/release-0.21/examples/chess
 [example-jwt-validator-core]: https://github.com/risc0/risc0/blob/release-0.21/examples/jwt-validator/core/src/lib.rs
 [example-jwt-validator-guest]: https://github.com/risc0/risc0/blob/release-0.21/examples/jwt-validator/methods/guest/src/main.rs
 [example-jwt-validator-host]: https://github.com/risc0/risc0/blob/release-0.21/examples/jwt-validator/src/lib.rs
