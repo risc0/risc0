@@ -167,7 +167,7 @@ fn join(c: &mut Criterion) {
     group.sample_size(10);
 
     let env = ExecutorEnv::builder()
-        .write_slice(&[2000])
+        .write_slice(&[10_000])
         .segment_limit_po2(16)
         .build()
         .unwrap();
