@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,12 +17,12 @@ use std::rc::Rc;
 use metal::ComputePipelineDescriptor;
 use risc0_core::field::{
     baby_bear::{BabyBearElem, BabyBearExtElem},
-    RootsOfUnity,
+    map_pow, RootsOfUnity,
 };
 use risc0_zkp::{
     core::log2_ceil,
     hal::{
-        metal::{BufferImpl as MetalBuffer, MetalHal, MetalHash},
+        metal::{BufferImpl as MetalBuffer, MetalHal, MetalHalSha256, MetalHash, MetalHashSha256},
         CircuitHal,
     },
     INV_RATE,
@@ -31,7 +31,8 @@ use risc0_zkp::{
 const METAL_LIB: &[u8] = include_bytes!(env!("RV32IM_METAL_PATH"));
 
 use crate::{
-    GLOBAL_MIX, GLOBAL_OUT, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA,
+    prove::{engine::SegmentProverImpl, SegmentProver},
+    GLOBAL_MIX, GLOBAL_OUT, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CTRL, REGISTER_GROUP_DATA,
 };
 
 #[derive(Debug)]
@@ -63,25 +64,36 @@ impl<MH: MetalHash> CircuitHal<MetalHal<MH>> for MetalCircuitHal<MH> {
     ) {
         const EXP_PO2: usize = log2_ceil(INV_RATE);
         let domain = steps * INV_RATE;
-        let poly_mix =
-            MetalBuffer::copy_from(&self.hal.device, self.hal.cmd_queue.clone(), &[poly_mix]);
         let rou = BabyBearElem::ROU_FWD[po2 + EXP_PO2];
-        let rou = MetalBuffer::copy_from(&self.hal.device, self.hal.cmd_queue.clone(), &[rou]);
-        let po2 =
-            MetalBuffer::copy_from(&self.hal.device, self.hal.cmd_queue.clone(), &[po2 as u32]);
+        let rou =
+            MetalBuffer::copy_from("rou", &self.hal.device, self.hal.cmd_queue.clone(), &[rou]);
+        let poly_mix_pows = map_pow(poly_mix, crate::info::POLY_MIX_POWERS);
+        let poly_mix_pows = MetalBuffer::copy_from(
+            "poly_mix",
+            &self.hal.device,
+            self.hal.cmd_queue.clone(),
+            poly_mix_pows.as_slice(),
+        );
+        let po2 = MetalBuffer::copy_from(
+            "po2",
+            &self.hal.device,
+            self.hal.cmd_queue.clone(),
+            &[po2 as u32],
+        );
         let size = MetalBuffer::copy_from(
+            "size",
             &self.hal.device,
             self.hal.cmd_queue.clone(),
             &[domain as u32],
         );
         let buffers = &[
             check.as_arg(),
-            groups[REGISTER_GROUP_CODE].as_arg(),
+            groups[REGISTER_GROUP_CTRL].as_arg(),
             groups[REGISTER_GROUP_DATA].as_arg(),
             groups[REGISTER_GROUP_ACCUM].as_arg(),
             globals[GLOBAL_MIX].as_arg(),
             globals[GLOBAL_OUT].as_arg(),
-            poly_mix.as_arg(),
+            poly_mix_pows.as_arg(),
             rou.as_arg(),
             po2.as_arg(),
             size.as_arg(),
@@ -89,6 +101,12 @@ impl<MH: MetalHash> CircuitHal<MetalHal<MH>> for MetalCircuitHal<MH> {
         self.hal
             .dispatch(&self.kernel, buffers, domain as u64, None);
     }
+}
+
+pub fn get_segment_prover() -> Box<dyn SegmentProver> {
+    let hal = Rc::new(MetalHalSha256::new());
+    let circuit_hal = Rc::new(MetalCircuitHal::<MetalHashSha256>::new(hal.clone()));
+    Box::new(SegmentProverImpl::new(hal, circuit_hal))
 }
 
 #[cfg(test)]
@@ -102,7 +120,7 @@ mod tests {
     };
     use test_log::test;
 
-    use crate::cpu::CpuCircuitHal;
+    use crate::prove::hal::cpu::CpuCircuitHal;
 
     // TODO: figure out a better way to test this.
     #[test]
@@ -110,17 +128,22 @@ mod tests {
     fn eval_check() {
         // The number of cycles, choose a number that doesn't make tests take too long.
         const PO2: usize = 4;
-        let circuit = crate::CircuitImpl::new();
         let cpu_hal = CpuHal::new(Sha256HashSuite::<BabyBear>::new_suite());
-        let cpu_eval = CpuCircuitHal::new(&circuit);
+        let cpu_eval = CpuCircuitHal::new();
         let gpu_hal = Rc::new(MetalHalSha256::new());
         let gpu_eval = super::MetalCircuitHal::new(gpu_hal.clone());
-        crate::testutil::eval_check(&cpu_hal, cpu_eval, gpu_hal.as_ref(), gpu_eval, PO2);
+        crate::prove::hal::testutil::eval_check(
+            &cpu_hal,
+            cpu_eval,
+            gpu_hal.as_ref(),
+            gpu_eval,
+            PO2,
+        );
     }
 
     #[test]
     #[ignore]
     fn memory_usage() {
-        crate::testutil::EvalCheckParams::new(22);
+        crate::prove::hal::testutil::EvalCheckParams::new(22);
     }
 }

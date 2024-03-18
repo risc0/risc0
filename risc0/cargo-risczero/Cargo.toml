@@ -17,7 +17,6 @@ doc = false
 anyhow = { version = "1.0", features = ["backtrace"] }
 cargo-generate = { version = "0.18", features = ["vendored-openssl"] }
 cargo_metadata = { version = "0.18", optional = true }
-cc = "=1.0.83"
 clap = { version = "4.4", features = ["derive"] }
 const_format = "0.2"
 dirs = "5.0"
@@ -31,7 +30,7 @@ reqwest = { version = "0.11", default-features = false, features = [
   "rustls-tls",
 ] }
 reqwest-middleware = "0.2"
-reqwest-retry = "0.3"
+reqwest-retry = "0.4"
 risc0-build = { workspace = true }
 risc0-r0vm = { workspace = true, optional = true }
 risc0-zkvm = { workspace = true, optional = true }

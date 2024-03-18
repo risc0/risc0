@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,35 +12,39 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use std::rc::Rc;
+
 use rayon::prelude::*;
 use risc0_core::field::{
-    baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
-    Elem, ExtElem, RootsOfUnity,
+    baby_bear::{BabyBearElem, BabyBearExtElem},
+    map_pow, Elem, ExtElem, RootsOfUnity,
 };
 use risc0_zkp::{
     adapter::PolyFp,
-    core::log2_ceil,
-    hal::{cpu::CpuBuffer, CircuitHal, Hal},
+    core::{hash::sha::Sha256HashSuite, log2_ceil},
+    hal::{
+        cpu::{CpuBuffer, CpuHal},
+        CircuitHal, Hal,
+    },
     INV_RATE,
 };
 
 use crate::{
-    GLOBAL_MIX, GLOBAL_OUT, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA,
+    prove::{engine::SegmentProverImpl, SegmentProver},
+    CIRCUIT, GLOBAL_MIX, GLOBAL_OUT, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CTRL,
+    REGISTER_GROUP_DATA,
 };
 
-pub struct CpuCircuitHal<'a, C: PolyFp<BabyBear>> {
-    circuit: &'a C,
-}
+pub struct CpuCircuitHal;
 
-impl<'a, C: PolyFp<BabyBear>> CpuCircuitHal<'a, C> {
-    pub fn new(circuit: &'a C) -> Self {
-        Self { circuit }
+impl CpuCircuitHal {
+    pub fn new() -> Self {
+        Self
     }
 }
 
-impl<'a, C, H> CircuitHal<H> for CpuCircuitHal<'a, C>
+impl<H> CircuitHal<H> for CpuCircuitHal
 where
-    C: PolyFp<BabyBear> + Sync,
     H: Hal<
         Elem = BabyBearElem,
         ExtElem = BabyBearExtElem,
@@ -60,13 +64,15 @@ where
         const EXP_PO2: usize = log2_ceil(INV_RATE);
         let domain = steps * INV_RATE;
 
+        let poly_mix_pows = map_pow(poly_mix, crate::info::POLY_MIX_POWERS);
+
         // SAFETY: Convert a borrow of a cell into a raw const slice so that we can pass
         // it over the thread boundary. This should be safe because the scope of the
         // usage is within this function and each thread access will not overlap with
         // each other.
 
-        let code = groups[REGISTER_GROUP_CODE].as_slice();
-        let code = unsafe { std::slice::from_raw_parts(code.as_ptr(), code.len()) };
+        let ctrl = groups[REGISTER_GROUP_CTRL].as_slice();
+        let ctrl = unsafe { std::slice::from_raw_parts(ctrl.as_ptr(), ctrl.len()) };
         let data = groups[REGISTER_GROUP_DATA].as_slice();
         let data = unsafe { std::slice::from_raw_parts(data.as_ptr(), data.len()) };
         let accum = groups[REGISTER_GROUP_ACCUM].as_slice();
@@ -77,11 +83,12 @@ where
         let out = unsafe { std::slice::from_raw_parts(out.as_ptr(), out.len()) };
         let check = check.as_slice();
         let check = unsafe { std::slice::from_raw_parts(check.as_ptr(), check.len()) };
+        let poly_mix_pows = poly_mix_pows.as_slice();
 
-        let args: &[&[BabyBearElem]] = &[code, out, data, mix, accum];
+        let args: &[&[BabyBearElem]] = &[ctrl, out, data, mix, accum];
 
         (0..domain).into_par_iter().for_each(|cycle| {
-            let tot = self.circuit.poly_fp(cycle, domain, &poly_mix, args);
+            let tot = CIRCUIT.poly_fp(cycle, domain, poly_mix_pows, args);
             let x = BabyBearElem::ROU_FWD[po2 + EXP_PO2].pow(cycle);
             // TODO: what is this magic number 3?
             let y = (BabyBearElem::new(3) * x).pow(1 << po2);
@@ -97,4 +104,11 @@ where
             }
         });
     }
+}
+
+pub fn get_segment_prover() -> Box<dyn SegmentProver> {
+    let suite = Sha256HashSuite::new_suite();
+    let hal = Rc::new(CpuHal::new(suite.clone()));
+    let circuit_hal = Rc::new(CpuCircuitHal::new());
+    Box::new(SegmentProverImpl::new(hal, circuit_hal))
 }

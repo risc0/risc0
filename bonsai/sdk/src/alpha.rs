@@ -49,6 +49,7 @@ pub enum SdkErr {
 
 /// Collection of serialization object for the REST api
 pub mod responses {
+    use risc0_groth16::Seal;
     use serde::{Deserialize, Serialize};
 
     /// Response of a upload request
@@ -119,10 +120,10 @@ pub mod responses {
         /// Possible states in order, include:
         /// * `Setup`
         /// * `Executor`
-        /// * `ProveSegments`
+        /// * `ProveSegments: N/M`
         /// * `Planner`
         /// * `Recursion`
-        /// * `RecursionJoin`
+        /// * `RecursionJoin: N/M`
         /// * `Resolve`
         /// * `Finalize`
         /// * `InProgress`
@@ -130,7 +131,7 @@ pub mod responses {
         /// Elapsed Time
         ///
         /// Elapsed time for a given session, in seconds
-        pub elapsed_time: Option<u64>,
+        pub elapsed_time: Option<f64>,
         /// Successful Session Stats
         ///
         /// Stats for a given successful session. Returns:
@@ -146,30 +147,14 @@ pub mod responses {
         pub session_id: String,
     }
 
-    /// Snark Proof object
-    ///
-    /// following the snarkjs calldata format:
-    /// <https://github.com/iden3/snarkjs#26-simulate-a-verification-call>
-    #[derive(Debug, Deserialize, Serialize, PartialEq)]
-    pub struct Groth16Seal {
-        /// Proof 'a' value
-        pub a: Vec<Vec<u8>>,
-        /// Proof 'b' value
-        pub b: Vec<Vec<Vec<u8>>>,
-        /// Proof 'c' value
-        pub c: Vec<Vec<u8>>,
-        /// Proof public outputs
-        pub public: Vec<Vec<u8>>,
-    }
-
     /// Snark Receipt object
     ///
     /// All relevant data to verify both the snark proof an corresponding
     /// imageId on chain.
     #[derive(Debug, Deserialize, Serialize, PartialEq)]
     pub struct SnarkReceipt {
-        /// Snark seal from snarkjs
-        pub snark: Groth16Seal,
+        /// SNARK Groth16 seal object encoded in big endian
+        pub snark: Seal,
         /// Post State Digest
         ///
         /// Collected from the STARK proof via
