@@ -75,11 +75,17 @@ export default async function createConfigAsync() {
         "@docusaurus/plugin-client-redirects",
         {
           createRedirects(path) {
-            // TODO: when 0.21 is released, these new redirects are needed:
-            // /bonsai            -> /api/generating-proofs/remote-proving
-            // /bonsai/quickstart -> /api/generating-proofs/remote-proving
-            if (path.includes("/api/bonsai")) {
-              return [path.replace("/api/bonsai", "/bonsai")];
+            if (path.includes("/api/generating-proofs/remote-proving")) {
+              return [
+                path.replace(
+                  "/api/generating-proofs/remote-proving",
+                  "/bonsai",
+                ),
+                path.replace(
+                  "/api/generating-proofs/remote-proving",
+                  "/bonsai/quickstart",
+                ),
+              ];
             }
             if (path.includes("/api/zkvm")) {
               return [path.replace("/api/zkvm", "/zkvm")];
@@ -121,7 +127,11 @@ export default async function createConfigAsync() {
             href: "https://risczero.com/",
           },
           items: [
-            { to: "/api/", label: "Introduction", position: "left" },
+            {
+              position: "left",
+              label: "Introduction",
+              to: "/api",
+            },
             {
               position: "left",
               label: "Terminology",
@@ -134,13 +144,14 @@ export default async function createConfigAsync() {
             },
             {
               position: "left",
-              label: "Resources",
-              to: "/studyclub",
+              label: "Education Hub",
+              to: "/education",
             },
             {
               type: "docsVersionDropdown",
               position: "right",
               docsPluginId: "api",
+              class: "docsVersionDropdown",
             },
             {
               href: "https://github.com/risc0",

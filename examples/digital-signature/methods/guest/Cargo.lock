@@ -512,9 +512,11 @@ name = "risc0-circuit-rv32im"
 version = "0.22.0-alpha.1"
 dependencies = [
  "anyhow",
+ "risc0-binfmt",
  "risc0-core",
  "risc0-zkp",
  "risc0-zkvm-platform",
+ "serde",
  "tracing",
 ]
 
@@ -568,7 +570,6 @@ dependencies = [
  "cfg-if",
  "getrandom",
  "hex",
- "num-derive",
  "risc0-binfmt",
  "risc0-circuit-recursion",
  "risc0-circuit-rv32im",

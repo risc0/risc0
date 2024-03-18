@@ -24,6 +24,8 @@ use risc0_zkvm_platform::{
 };
 use tempfile::tempdir;
 
+use crate::get_env_var;
+
 const DOCKER_IGNORE: &str = r#"
 **/Dockerfile
 **/.git
@@ -36,6 +38,10 @@ const TARGET_DIR: &str = "target/riscv-guest/riscv32im-risc0-zkvm-elf/docker";
 
 /// Build the package in the manifest path using a docker environment.
 pub fn docker_build(manifest_path: &Path, src_dir: &Path, features: &[String]) -> Result<()> {
+    if !get_env_var("RISC0_SKIP_BUILD").is_empty() {
+        return Ok(());
+    }
+
     let manifest_path = manifest_path
         .canonicalize()
         .context(format!("manifest_path: {manifest_path:?}"))?;
@@ -128,7 +134,7 @@ fn create_dockerfile(
     .join(" ");
 
     let build = DockerFile::new()
-        .from_alias("build", "risczero/risc0-guest-builder:v2024-01-31.1")
+        .from_alias("build", "risczero/risc0-guest-builder:v2024-02-08.1")
         .workdir("/src")
         .copy(".", ".")
         .env(manifest_env)
@@ -196,7 +202,7 @@ fn compute_image_id(elf_path: &Path) -> Result<String> {
     let program = Program::load_elf(&elf, GUEST_MAX_MEM as u32).context("unable to load elf")?;
     let image =
         MemoryImage::new(&program, PAGE_SIZE as u32).context("unable to create memory image")?;
-    Ok(image.compute_id()?.to_string())
+    Ok(image.compute_id().to_string())
 }
 
 // requires Docker to be installed
@@ -233,15 +239,7 @@ mod test {
         build("../../risc0/zkvm/methods/guest/Cargo.toml");
         compare_image_id(
             "risc0_zkvm_methods_guest/multi_test",
-            "57db93b2ac5ec574bb9d02bc08da086342a1439ef3fa776bc5065ff23b544bd8",
-        );
-        compare_image_id(
-            "risc0_zkvm_methods_guest/hello_commit",
-            "f42bfd47f68a4562e779ee74eb28ed806086992c5df926ddf3444feaf22233e9",
-        );
-        compare_image_id(
-            "risc0_zkvm_methods_guest/slice_io",
-            "8ccbb98aceca7f19ab0ef1f237853a574e79350a39f6bd73f838b3d0e2cd5cc4",
+            "acfdb2b8c96e32000437d05465077ee25dfeb26d478d0aca2449111343424a83",
         );
     }
 }

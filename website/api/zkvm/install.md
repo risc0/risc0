@@ -50,6 +50,12 @@ To update your installation:
 2. Run `cargo risczero install` to update the RISC Zero toolchain. For x86-64
    macOS, run `cargo risczero build-toolchain`.
 
+After you update your installation, be sure to update your project's risc0
+crates. To do this, you must update all risc0 dependencies in your project's
+host and guest `Cargo.toml` files. In most projects, this is done by updating
+the host and guest `risc0-zkvm` crate and the `risc0-build` build dependency.
+They should be updated to use the version number displayed by `cargo risczero --version`.
+
 [cargo-risczero]: https://crates.io/crates/cargo-risczero
 [install-rust]: https://doc.rust-lang.org/cargo/getting-started/installation.html
 [rustup]: https://rustup.rs/

@@ -29,6 +29,7 @@ pub use risc0_circuit_recursion::control_id::ALLOWED_IDS_ROOT;
 #[cfg(feature = "prove")]
 pub use self::prove::{
     identity_p254, join, lift, poseidon2_hal_pair, resolve, Program, Prover, ProverOpts,
+    RECURSION_PO2,
 };
 pub use self::receipt::{valid_control_ids, SuccinctReceipt};
 

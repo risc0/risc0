@@ -21,15 +21,14 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use anyhow::{ensure, Context, Result};
+use anyhow::{ensure, Result};
 use risc0_binfmt::{MemoryImage, SystemState};
-use risc0_zkvm_platform::WORD_SIZE;
+use risc0_circuit_rv32im::prove::segment::Segment as CircuitSegment;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    host::{client::env::SegmentPath, server::exec::executor::SyscallRecord},
-    sha::Digest,
-    Assumption, Assumptions, ExitCode, Journal, Output, ReceiptClaim,
+    host::client::env::SegmentPath, sha::Digest, Assumption, Assumptions, ExitCode, Journal,
+    Output, ReceiptClaim,
 };
 
 #[derive(Clone, Default, Serialize, Deserialize, Debug)]
@@ -81,16 +80,6 @@ pub struct Session {
     pub post_state: SystemState,
 }
 
-/// A reference to a [Segment].
-///
-/// This allows implementors to determine the best way to represent this in an
-/// pluggable manner. See the [SimpleSegmentRef] for a very basic
-/// implmentation.
-pub trait SegmentRef: Send {
-    /// Resolve this reference into an actual [Segment].
-    fn resolve(&self) -> Result<Segment>;
-}
-
 /// The execution trace of a portion of a program.
 ///
 /// The record of memory transactions of an execution that starts from an
@@ -101,25 +90,21 @@ pub trait SegmentRef: Send {
 /// termination.
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Segment {
-    pub(crate) pre_image: Box<MemoryImage>,
-    // NOTE: segment.post_state is NOT EQUAL to segment.get_claim()?.post. This is because the
-    // post SystemState on the ReceiptClaim struct has a PC that is shifted forward by 4.
-    pub(crate) post_state: SystemState,
-    pub(crate) output: Option<Output>,
-    pub(crate) faults: PageFaults,
-    pub(crate) syscalls: Vec<SyscallRecord>,
-    pub(crate) split_insn: Option<u32>,
-    pub(crate) exit_code: ExitCode,
-
-    /// The number of cycles in powers of 2.
-    pub po2: u32,
-
     /// The index of this [Segment] within the [Session]
     pub index: u32,
 
-    /// The number of user cycles without any overhead for continuations or po2
-    /// padding.
-    pub cycles: u32,
+    pub(crate) inner: CircuitSegment,
+    pub(crate) output: Option<Output>,
+}
+
+/// A reference to a [Segment].
+///
+/// This allows implementors to determine the best way to represent this in an
+/// pluggable manner. See the [SimpleSegmentRef] for a very basic
+/// implmentation.
+pub trait SegmentRef: Send {
+    /// Resolve this reference into an actual [Segment].
+    fn resolve(&self) -> Result<Segment>;
 }
 
 /// The Events of [Session]
@@ -170,7 +155,7 @@ impl Session {
     /// is passed to the [crate::Prover].
     pub fn get_claim(&self) -> Result<ReceiptClaim> {
         // Construct the Output struct for the session, checking internal consistency.
-        // NOTE: The Session output if distinct from the final Segment output because in the
+        // NOTE: The Session output is distinct from the final Segment output because in the
         // Session output any proven assumptions are not included.
         let output = if self.exit_code.expects_output() {
             self.journal
@@ -227,76 +212,11 @@ impl Session {
     }
 }
 
-impl Segment {
-    /// Create a new [Segment] from its constituent components.
-    #[allow(clippy::too_many_arguments)]
-    pub(crate) fn new(
-        pre_image: Box<MemoryImage>,
-        post_state: SystemState,
-        output: Option<Output>,
-        faults: PageFaults,
-        syscalls: Vec<SyscallRecord>,
-        exit_code: ExitCode,
-        split_insn: Option<u32>,
-        po2: u32,
-        index: u32,
-        cycles: u32,
-    ) -> Self {
-        tracing::debug!("segment[{index}]> reads: {}, writes: {}, exit_code: {exit_code:?}, split_insn: {split_insn:?}, po2: {po2}, cycles: {cycles}",
-            faults.reads.len(),
-            faults.writes.len(),
-        );
-        Self {
-            pre_image,
-            post_state,
-            output,
-            faults,
-            syscalls,
-            exit_code,
-            split_insn,
-            po2,
-            index,
-            cycles,
-        }
-    }
-
-    /// Calculate for the [ReceiptClaim] associated with this [Segment]. The
-    /// [ReceiptClaim] is the claim that will be proven if this [Segment]
-    /// is passed to the [crate::Prover].
-    pub fn get_claim(&self) -> Result<ReceiptClaim> {
-        // NOTE: When a segment ends in a Halted(_) state, it may not update the post state
-        // digest. As a result, it will be the same as the pre_image. All other exit codes require
-        // the post state digest to reflect the final memory state.
-        // NOTE: The PC on the the post state is stored "+ 4". See ReceiptClaim for more detail.
-        let post_state = SystemState {
-            pc: self
-                .post_state
-                .pc
-                .checked_add(WORD_SIZE as u32)
-                .context("invalid pc in segment post state")?,
-            merkle_root: match self.exit_code {
-                ExitCode::Halted(_) => self.pre_image.compute_root_hash()?,
-                _ => self.post_state.merkle_root.clone(),
-            },
-        };
-
-        Ok(ReceiptClaim {
-            pre: self.pre_image.get_system_state()?.into(),
-            post: post_state.into(),
-            exit_code: self.exit_code,
-            input: Digest::ZERO,
-            output: self.output.clone().into(),
-        })
-    }
-}
-
-const NULL_SEGMENT_REF: NullSegmentRef = NullSegmentRef {};
-
 /// Implementation of a [SegmentRef] that does not save the segment.
 ///
 /// This is useful for DevMode where the segments aren't needed.
 #[derive(Serialize, Deserialize)]
-pub struct NullSegmentRef {}
+pub struct NullSegmentRef;
 
 impl SegmentRef for NullSegmentRef {
     fn resolve(&self) -> anyhow::Result<Segment> {
@@ -304,8 +224,8 @@ impl SegmentRef for NullSegmentRef {
     }
 }
 
-pub fn null_callback() -> Result<Box<dyn SegmentRef>> {
-    Ok(Box::new(NULL_SEGMENT_REF))
+pub fn null_callback(_: Segment) -> Result<Box<dyn SegmentRef>> {
+    Ok(Box::new(NullSegmentRef))
 }
 
 /// A very basic implementation of a [SegmentRef].
