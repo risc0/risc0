@@ -28,7 +28,7 @@ env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   RISC0_TOOLCHAIN_VERSION: v2024-02-08.1
   RISC0_PATH: ${{ github.workspace }}/risc0
-  RISC0_ETHERIUM_PATH: ${{ github.workspace }}/risc0-ethereum
+  RISC0_ETHEREUM_PATH: ${{ github.workspace }}/risc0-ethereum
   BONSAI_FOUNDRY_TEMPLATE_PATH: ${{ github.workspace }}/bonsai-foundry-template
 
 jobs:
