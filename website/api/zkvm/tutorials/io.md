@@ -80,7 +80,7 @@ shouldn't be a problem.
 We have a [more detailed explanation][docs-guest-code-optmization] on guest code
 optimization if you want to learn more about this topic.
 
-## Sending _Private_ data from the guest to the host
+## Sending _Private_ data from the guest
 
 Back where we were, after getting data from the host and performing some
 transformations on it, we might want to send _private_ data back.
