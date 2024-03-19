@@ -337,4 +337,29 @@ mod tests {
 
         tracing::debug!("output: {:?}", buf);
     }
+
+    #[test]
+    fn hash_elem_slice_compare_golden() {
+        let buf: [BabyBearElem; 32] = baby_bear_array![
+            943718400, 1887436800, 2013125296, 1761607679, 692060158, 1761607634, 566231037, 1509949437,
+            440401916, 1384120316, 314572795, 1258291195, 188743674, 1132462074, 62914553, 1006632953,
+            1950351353, 880803832, 1824522232, 754974711, 1698693111, 629145590, 1572863990, 503316469,
+            1447034869, 377487348, 1321205748, 251658227, 1195376627, 125829106, 1069547506, 2013265906,
+        ];
+        let suite = Poseidon2HashSuite::new_suite();
+        let result = suite.hashfn.hash_elem_slice(&buf);
+        let goal: [u32; DIGEST_WORDS] = [
+            (BabyBearElem::from(0x29b25ad7 as u32)).as_u32_montgomery(),
+            (BabyBearElem::from(0x1c72c1d9 as u32)).as_u32_montgomery(),
+            (BabyBearElem::from(0x42e40bbb as u32)).as_u32_montgomery(),
+            (BabyBearElem::from(0x53d3a9c3 as u32)).as_u32_montgomery(),
+            (BabyBearElem::from(0x41ef11f7 as u32)).as_u32_montgomery(),
+            (BabyBearElem::from(0x21872e9a as u32)).as_u32_montgomery(),
+            (BabyBearElem::from(0x2262b9f3 as u32)).as_u32_montgomery(),
+            (BabyBearElem::from(0x54491332 as u32)).as_u32_montgomery(),
+        ];
+        for i in 0..DIGEST_WORDS {
+            assert_eq!(result.as_words()[i], goal[i]);
+        }
+    }
 }
