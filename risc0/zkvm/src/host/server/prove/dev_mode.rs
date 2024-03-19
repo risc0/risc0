@@ -15,8 +15,11 @@
 use anyhow::{bail, Result};
 
 use crate::{
-    host::receipt::{InnerReceipt, SegmentReceipt, SuccinctReceipt},
-    ProverServer, Receipt, Segment, Session, VerifierContext,
+    host::{
+        receipt::{InnerReceipt, SegmentReceipt, SuccinctReceipt},
+        server::session::null_callback,
+    },
+    ExecutorEnv, ExecutorImpl, ProverServer, Receipt, Segment, Session, VerifierContext,
 };
 
 /// An implementation of a [ProverServer] for development and testing purposes.
@@ -58,6 +61,18 @@ impl ProverServer for DevModeProver {
             InnerReceipt::Fake { claim },
             session.journal.clone().unwrap_or_default().bytes,
         ))
+    }
+
+    /// Prove the specified ELF binary using the specified [VerifierContext].
+    fn prove_with_ctx(
+        &self,
+        env: ExecutorEnv<'_>,
+        ctx: &VerifierContext,
+        elf: &[u8],
+    ) -> Result<Receipt> {
+        let mut exec = ExecutorImpl::from_elf(env, elf)?;
+        let session = exec.run_with_callback(null_callback)?;
+        self.prove_session(ctx, &session)
     }
 
     fn prove_segment(&self, _ctx: &VerifierContext, _segment: &Segment) -> Result<SegmentReceipt> {
