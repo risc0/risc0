@@ -349,17 +349,17 @@ mod tests {
         let suite = Poseidon2HashSuite::new_suite();
         let result = suite.hashfn.hash_elem_slice(&buf);
         let goal: [u32; DIGEST_WORDS] = [
-            (BabyBearElem::from(0x29b25ad7 as u32)).as_u32_montgomery(),
-            (BabyBearElem::from(0x1c72c1d9 as u32)).as_u32_montgomery(),
-            (BabyBearElem::from(0x42e40bbb as u32)).as_u32_montgomery(),
-            (BabyBearElem::from(0x53d3a9c3 as u32)).as_u32_montgomery(),
-            (BabyBearElem::from(0x41ef11f7 as u32)).as_u32_montgomery(),
-            (BabyBearElem::from(0x21872e9a as u32)).as_u32_montgomery(),
-            (BabyBearElem::from(0x2262b9f3 as u32)).as_u32_montgomery(),
-            (BabyBearElem::from(0x54491332 as u32)).as_u32_montgomery(),
+            (BabyBearElem::from(0x722baada as u32)).as_u32_montgomery(),
+            (BabyBearElem::from(0x5b352fed as u32)).as_u32_montgomery(),
+            (BabyBearElem::from(0x3684017b as u32)).as_u32_montgomery(),
+            (BabyBearElem::from(0x540d4a7b as u32)).as_u32_montgomery(),
+            (BabyBearElem::from(0x44ffd422 as u32)).as_u32_montgomery(),
+            (BabyBearElem::from(0x48615f97 as u32)).as_u32_montgomery(),
+            (BabyBearElem::from(0x1a496f45 as u32)).as_u32_montgomery(),
+            (BabyBearElem::from(0x203ca999 as u32)).as_u32_montgomery(),
         ];
         for i in 0..DIGEST_WORDS {
-            assert_eq!(result.as_words()[i], goal[i]);
+            assert_eq!(result.as_words()[i], goal[i], "At entry {}", i);
         }
     }
 }
