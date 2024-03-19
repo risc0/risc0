@@ -180,7 +180,7 @@ fn join(c: &mut Criterion) {
         session.user_cycles,
         session.total_cycles
     );
-    
+
     // Want more than two segments to ensure that the first two are a consistent power of `2` cycles
     assert!(session.segments.len() > 2);
 
