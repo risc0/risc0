@@ -2,7 +2,7 @@
 
 In the [Hello World Tutorial][docs-hello-world], we had a brief introduction to
 how to perform I/O operations in the zkVM. Now we'll dive deeper into the subject.
-By following the steps in this guide, you will learn:
+Keep reading to learn more about:
 
 - What are the different types of data in the zkVM
 - How to handle inputs and outputs
