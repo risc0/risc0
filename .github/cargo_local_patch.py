@@ -36,7 +36,7 @@ def modify_dependency(details, new_path, start_directory):
 
 # Modify the list of dependencies in-place, setting a path reference for those in the mapping.
 def process_dependencies(dependencies, base_path, dep_path_mapping, start_directory):
-    for dep, details in list(dependencies.items()):
+    for dep, details in dependencies.items():
         # Check if a dep starts with "risc0-" or "bonsai-" and is not in the mapping.
         # This should make sure to patch all the dependencies or fail if new are found.
         if (dep.startswith("risc0-") or dep.startswith("bonsai-")) and dep not in dep_path_mapping:
