@@ -348,14 +348,13 @@ jobs:
           crate: cargo-semver-checks
           version: "0.29.1"
       - name: run cargo semverchecks on ${{ github.event.pull_request.base.sha }}
+        # There seems to be a bug in cargo-semver-checks that can't locate the platform crate...
+        # All other excluded crates aren't published and therefore do not need this check
         run: |
           cargo semver-checks --default-features --baseline-rev ${{ github.event.pull_request.base.sha }} \
-           # There seems to be a bug in cargo-semver-checks that can't locate the platform crate...
-           --exclude risc0-zkvm-platform \
-           # these aren't published. Ignore them
-           --exclude doc-test --exclude fibonacci-methods --exclude risc0-zkvm-receipts --exclude risc0-zkvm-methods \
-           # the packages below will be moved out of risc0 \
-           --exclude bonsai-ethereum-contracts --exclude bonsai-ethereum-relay --exclude bonsai-rest-api-mock
+            --exclude risc0-zkvm-platform \
+            --exclude doc-test --exclude fibonacci-methods --exclude risc0-zkvm-receipts --exclude risc0-zkvm-methods \
+            --exclude bonsai-rest-api-mock
       - run: sccache --show-stats
 
   check-template:
