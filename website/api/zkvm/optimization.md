@@ -534,7 +534,7 @@ below.
 [RISC-V architecture]: /reference-docs/about-risc-v
 [Sampling CPU profilers]: https://nikhilism.com/post/2018/sampling-profiler-internals-introduction/
 [SHA extensions]: https://en.wikipedia.org/wiki/Intel_SHA_extensions
-[snippet-bonsai-governance]: https://github.com/risc0/risc0/blob/main/bonsai/examples/governance/methods/guest/src/bin/finalize_votes.rs#L88-L90
+[snippet-bonsai-governance]: https://github.com/risc0/risc0/blob/release-0.20/bonsai/examples/governance/methods/guest/src/bin/finalize_votes.rs#L88-L90
 [snippet-password-checker]: https://github.com/risc0/risc0/blob/main/examples/password-checker/methods/guest/src/main.rs#L24
 [superscalar]: https://en.wikipedia.org/wiki/Superscalar_processor
 [waldo-merkle]: https://github.com/risc0/risc0/blob/main/examples/waldo/core/src/merkle.rs

@@ -114,7 +114,7 @@ impl Bootstrap {
 
                 tracing::info!("computing control ID for {name} with Poseidon2");
                 let control_id = program.compute_control_id(Poseidon2HashSuite::new_suite());
-                valid_control_ids.push(control_id.clone());
+                valid_control_ids.push(control_id);
 
                 tracing::debug!("{name} control id: {control_id:?}");
                 (name, control_id)

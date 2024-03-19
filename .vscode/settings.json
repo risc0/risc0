@@ -38,7 +38,6 @@
   "rust-analyzer.linkedProjects": [
     "Cargo.toml",
     "benchmarks/Cargo.toml",
-    "bonsai/examples/governance/Cargo.toml",
     "examples/Cargo.toml",
     "risc0/zkvm/methods/guest/Cargo.toml",
     "risc0/zkvm/methods/std/Cargo.toml",
