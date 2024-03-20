@@ -93,7 +93,7 @@ impl<'a, Ext: Externs> Preflight<'a, Ext> {
             let group = (self.get(code, inst.group.g1).as_u32()
                 + self.get(code, inst.group.g2).as_u32() * 2) as usize;
             trace!(
-                "Poseidon2 Load: group = {}, prep_full = {}, keep_state = {}, do_mont = {}",
+                "Poseidon2 Load: group = {}, prep_full = {}, keep_state = {}, keep_upper_state = {}, do_mont = {}",
                 group,
                 prep_full,
                 keep_state,
