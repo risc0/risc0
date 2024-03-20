@@ -223,19 +223,16 @@ where
         count += 1;
         unmixed += 1;
         if unmixed == CELLS_RATE {
-            tracing::debug!("Mixing {:?}", state);  // TODO
             poseidon2_mix(&mut state);
-            tracing::debug!("Mix result {:?}", state);  // TODO
             unmixed = 0;
         }
     }
     if unmixed != 0 || count == 0 {
+        // Zero pad to get a CELLS_RATE-aligned number of inputs
         for i in unmixed..CELLS_RATE {
             state[i] = BabyBearElem::ZERO;
         }
-        tracing::debug!("Mixing (padded) {:?}", state);  // TODO
         poseidon2_mix(&mut state);
-        tracing::debug!("Mix result (padded) {:?}", state);  // TODO
     }
     state.as_slice()[0..CELLS_OUT].try_into().unwrap()
 }
@@ -345,6 +342,7 @@ mod tests {
         tracing::debug!("output: {:?}", buf);
     }
 
+    // Test against golden values from an independent interpreter version of Poseidon2
     #[test]
     fn hash_elem_slice_compare_golden() {
         let buf: [BabyBearElem; 32] = baby_bear_array![
