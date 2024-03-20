@@ -89,6 +89,7 @@ impl<'a, Ext: Externs> Preflight<'a, Ext> {
             let do_mont = self.get(code, inst.do_mont).as_u32();
             let prep_full = self.get(code, inst.prep_full).as_u32();
             let keep_state = self.get(code, inst.keep_state).as_u32();
+            let keep_upper_state = self.get(code, inst.keep_upper_state).as_u32();
             let group = (self.get(code, inst.group.g1).as_u32()
                 + self.get(code, inst.group.g2).as_u32() * 2) as usize;
             trace!(
@@ -96,10 +97,17 @@ impl<'a, Ext: Externs> Preflight<'a, Ext> {
                 group,
                 prep_full,
                 keep_state,
+                keep_upper_state,
                 do_mont
             );
             if keep_state != 1 {
-                self.poseidon2_state = [Fp::new(0); CELLS];
+                if keep_upper_state != 1 {
+                    self.poseidon2_state = [Fp::new(0); CELLS];
+                } else {
+                    for i in 0..16 {
+                        self.poseidon2_state[i] = Fp::new(0);
+                    }
+                }
             }
             for i in 0..8 {
                 let addr = self.get(code, inst.inputs[i]);
