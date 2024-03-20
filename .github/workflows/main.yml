@@ -131,14 +131,12 @@ jobs:
       - run: cargo fmt --all --check
       - run: cargo fmt --all --check --manifest-path benchmarks/Cargo.toml
       - run: cargo fmt --all --check --manifest-path bonsai/Cargo.toml
-      - run: cargo fmt --all --check --manifest-path bonsai/examples/governance/Cargo.toml
       - run: cargo fmt --all --check --manifest-path examples/Cargo.toml
       - run: cargo fmt --all --check --manifest-path tools/crates-validator/Cargo.toml
       - run: cargo clippy -p risc0-zkvm
       - run: cargo sort --workspace --check
       - run: cargo sort --workspace --check benchmarks
       - run: cargo sort --workspace --check bonsai
-      - run: cargo sort --workspace --check bonsai/examples/governance
       - run: cargo sort --workspace --check examples
       - run: cargo sort --workspace --check tools/crates-validator
       - run: cargo rdme -c
@@ -189,15 +187,11 @@ jobs:
         run: |
           cargo test -F $FEATURE -F prove --workspace --timings --no-run \
             --exclude doc-test \
-            --exclude bonsai-ethereum-contracts \
-            --exclude bonsai-ethereum-relay \
             --exclude bonsai-rest-api-mock
       - name: test workspace
         run: |
           cargo test -F $FEATURE -F prove --workspace --timings \
             --exclude doc-test \
-            --exclude bonsai-ethereum-contracts \
-            --exclude bonsai-ethereum-relay \
             --exclude bonsai-rest-api-mock
       - uses: actions/upload-artifact@v3
         with:
@@ -213,8 +207,6 @@ jobs:
       - run: |
           cargo check -F $FEATURE --benches --workspace \
             --exclude doc-test \
-            --exclude bonsai-ethereum-contracts \
-            --exclude bonsai-ethereum-relay \
             --exclude bonsai-rest-api-mock
       - run: cargo check -p risc0-build
         if: matrix.device == 'cpu'
@@ -283,9 +275,6 @@ jobs:
       - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/rustup
-      - uses: risc0/foundry-toolchain@2fe7e70b520f62368a0e3c464f997df07ede420f
-        with:
-          version: nightly-09fe3e041369a816365a020f715ad6f94dbce9f2
       - uses: ./.github/actions/sccache
         with:
           key: macOS-default
