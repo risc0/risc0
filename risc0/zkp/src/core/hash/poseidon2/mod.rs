@@ -228,7 +228,7 @@ where
         }
     }
     if unmixed != 0 || count == 0 {
-        for i in unmixed..16 {
+        for i in unmixed..CELLS_RATE {
             state[i] = BabyBearElem::ZERO;
         }
         poseidon2_mix(&mut state);
