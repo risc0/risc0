@@ -223,7 +223,9 @@ where
         count += 1;
         unmixed += 1;
         if unmixed == CELLS_RATE {
+            tracing::debug!("Mixing {:?}", state);  // TODO
             poseidon2_mix(&mut state);
+            tracing::debug!("Mix result {:?}", state);  // TODO
             unmixed = 0;
         }
     }
@@ -231,7 +233,9 @@ where
         for i in unmixed..CELLS_RATE {
             state[i] = BabyBearElem::ZERO;
         }
+        tracing::debug!("Mixing (padded) {:?}", state);  // TODO
         poseidon2_mix(&mut state);
+        tracing::debug!("Mix result (padded) {:?}", state);  // TODO
     }
     state.as_slice()[0..CELLS_OUT].try_into().unwrap()
 }
