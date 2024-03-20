@@ -228,6 +228,9 @@ where
         }
     }
     if unmixed != 0 || count == 0 {
+        for i in unmixed..16 {
+            state[i] = BabyBearElem::ZERO;
+        }
         poseidon2_mix(&mut state);
     }
     state.as_slice()[0..CELLS_OUT].try_into().unwrap()
