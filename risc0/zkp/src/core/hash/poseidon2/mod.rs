@@ -219,7 +219,7 @@ where
     let mut count = 0;
     let mut unmixed = 0;
     for val in iter {
-        state[unmixed] += *val;
+        state[unmixed] = *val;
         count += 1;
         unmixed += 1;
         if unmixed == CELLS_RATE {
