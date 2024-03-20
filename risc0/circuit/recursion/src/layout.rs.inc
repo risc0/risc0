@@ -1,3 +1,22 @@
+pub struct RecursionCheckedBytesInst {
+    pub eval_point: &'static CodeReg,
+    pub keep_coeffs: &'static CodeReg,
+    pub keep_upper_state: &'static CodeReg,
+    pub prep_full: &'static CodeReg,
+}
+impl risc0_zkp::layout::Component for RecursionCheckedBytesInst {
+    fn ty_name(&self) -> &'static str {
+        "RecursionCheckedBytesInst"
+    }
+    #[allow(unused_variables)]
+    fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
+        v.visit_component("eval_point", self.eval_point)?;
+        v.visit_component("keep_coeffs", self.keep_coeffs)?;
+        v.visit_component("keep_upper_state", self.keep_upper_state)?;
+        v.visit_component("prep_full", self.prep_full)?;
+        Ok(())
+    }
+}
 pub struct OneHot {
     pub bit_and_elem: &'static CodeReg,
     pub bit_op_shorts: &'static CodeReg,
@@ -127,6 +146,7 @@ pub type CodeReg8LayoutArray = [&'static CodeReg; 8];
 pub struct RecursionPoseidon2MemInst {
     pub do_mont: &'static CodeReg,
     pub keep_state: &'static CodeReg,
+    pub keep_upper_state: &'static CodeReg,
     pub prep_full: &'static CodeReg,
     pub group: &'static OneHot1,
     pub inputs: &'static CodeReg8LayoutArray,
@@ -139,6 +159,7 @@ impl risc0_zkp::layout::Component for RecursionPoseidon2MemInst {
     fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
         v.visit_component("do_mont", self.do_mont)?;
         v.visit_component("keep_state", self.keep_state)?;
+        v.visit_component("keep_upper_state", self.keep_upper_state)?;
         v.visit_component("prep_full", self.prep_full)?;
         v.visit_component("group", self.group)?;
         v.visit_component("inputs", self.inputs)?;
@@ -156,6 +177,7 @@ impl risc0_zkp::layout::Component for RecursionPoseidon2Inst {
     }
 }
 pub struct Mux {
+    pub checked_bytes: &'static RecursionCheckedBytesInst,
     pub macro_ops: &'static RecursionMacroInst,
     pub micro_ops: &'static RecursionMicroInsts,
     pub poseidon2_full: &'static RecursionPoseidon2FullInst,
@@ -169,6 +191,7 @@ impl risc0_zkp::layout::Component for Mux {
     }
     #[allow(unused_variables)]
     fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
+        v.visit_component("checked_bytes", self.checked_bytes)?;
         v.visit_component("macro_ops", self.macro_ops)?;
         v.visit_component("micro_ops", self.micro_ops)?;
         v.visit_component("poseidon2_full", self.poseidon2_full)?;
@@ -179,6 +202,7 @@ impl risc0_zkp::layout::Component for Mux {
     }
 }
 pub struct OneHot2 {
+    pub checked_bytes: &'static CodeReg,
     pub macro_ops: &'static CodeReg,
     pub micro_ops: &'static CodeReg,
     pub poseidon2_full: &'static CodeReg,
@@ -192,6 +216,7 @@ impl risc0_zkp::layout::Component for OneHot2 {
     }
     #[allow(unused_variables)]
     fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
+        v.visit_component("checked_bytes", self.checked_bytes)?;
         v.visit_component("macro_ops", self.macro_ops)?;
         v.visit_component("micro_ops", self.micro_ops)?;
         v.visit_component("poseidon2_full", self.poseidon2_full)?;
@@ -257,6 +282,21 @@ impl risc0_zkp::layout::Component for RecursionWomBody {
     #[allow(unused_variables)]
     fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
         v.visit_component("plonk_body", self.plonk_body)?;
+        Ok(())
+    }
+}
+pub struct RecursionCheckedBytes {
+    pub eval_point: &'static RecursionWomReg,
+    pub wom_body: &'static RecursionWomBody,
+}
+impl risc0_zkp::layout::Component for RecursionCheckedBytes {
+    fn ty_name(&self) -> &'static str {
+        "RecursionCheckedBytes"
+    }
+    #[allow(unused_variables)]
+    fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
+        v.visit_component("eval_point", self.eval_point)?;
+        v.visit_component("wom_body", self.wom_body)?;
         Ok(())
     }
 }
@@ -525,6 +565,7 @@ impl risc0_zkp::layout::Component for RecursionPoseidon2Load {
     }
 }
 pub struct Mux6 {
+    pub checked_bytes: &'static RecursionCheckedBytes,
     pub macro_ops: &'static RecursionMacroOp,
     pub micro_ops: &'static RecursionMicroOps,
     pub poseidon2_full: &'static RecursionPoseidon2Inst,
@@ -538,6 +579,7 @@ impl risc0_zkp::layout::Component for Mux6 {
     }
     #[allow(unused_variables)]
     fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
+        v.visit_component("checked_bytes", self.checked_bytes)?;
         v.visit_component("macro_ops", self.macro_ops)?;
         v.visit_component("micro_ops", self.micro_ops)?;
         v.visit_component("poseidon2_full", self.poseidon2_full)?;
@@ -566,104 +608,113 @@ pub const LAYOUT: &RecursionTop = &RecursionTop {
     code: &RecursionCode {
         write_addr: &CodeReg { offset: 0 },
         inst: &Mux {
+            checked_bytes: &RecursionCheckedBytesInst {
+                eval_point: &CodeReg { offset: 8 },
+                keep_coeffs: &CodeReg { offset: 9 },
+                keep_upper_state: &CodeReg { offset: 10 },
+                prep_full: &CodeReg { offset: 11 },
+            },
             macro_ops: &RecursionMacroInst {
                 opcode: &OneHot {
-                    bit_and_elem: &CodeReg { offset: 10 },
-                    bit_op_shorts: &CodeReg { offset: 11 },
-                    nop: &CodeReg { offset: 7 },
-                    set_global: &CodeReg { offset: 16 },
-                    sha_fini: &CodeReg { offset: 13 },
-                    sha_init: &CodeReg { offset: 12 },
-                    sha_load: &CodeReg { offset: 14 },
-                    sha_mix: &CodeReg { offset: 15 },
-                    wom_fini: &CodeReg { offset: 9 },
-                    wom_init: &CodeReg { offset: 8 },
+                    bit_and_elem: &CodeReg { offset: 11 },
+                    bit_op_shorts: &CodeReg { offset: 12 },
+                    nop: &CodeReg { offset: 8 },
+                    set_global: &CodeReg { offset: 17 },
+                    sha_fini: &CodeReg { offset: 14 },
+                    sha_init: &CodeReg { offset: 13 },
+                    sha_load: &CodeReg { offset: 15 },
+                    sha_mix: &CodeReg { offset: 16 },
+                    wom_fini: &CodeReg { offset: 10 },
+                    wom_init: &CodeReg { offset: 9 },
                 },
                 operand: &[
-                    &CodeReg { offset: 17 },
                     &CodeReg { offset: 18 },
                     &CodeReg { offset: 19 },
+                    &CodeReg { offset: 20 },
                 ],
             },
             micro_ops: &RecursionMicroInsts {
                 inst: &[
                     &RecursionMicroInst {
-                        opcode: &CodeReg { offset: 7 },
+                        opcode: &CodeReg { offset: 8 },
                         operand: &[
-                            &CodeReg { offset: 8 },
                             &CodeReg { offset: 9 },
                             &CodeReg { offset: 10 },
+                            &CodeReg { offset: 11 },
                         ],
                     },
                     &RecursionMicroInst {
-                        opcode: &CodeReg { offset: 11 },
+                        opcode: &CodeReg { offset: 12 },
                         operand: &[
-                            &CodeReg { offset: 12 },
                             &CodeReg { offset: 13 },
                             &CodeReg { offset: 14 },
+                            &CodeReg { offset: 15 },
                         ],
                     },
                     &RecursionMicroInst {
-                        opcode: &CodeReg { offset: 15 },
+                        opcode: &CodeReg { offset: 16 },
                         operand: &[
-                            &CodeReg { offset: 16 },
                             &CodeReg { offset: 17 },
                             &CodeReg { offset: 18 },
+                            &CodeReg { offset: 19 },
                         ],
                     },
                 ],
             },
             poseidon2_full: &RecursionPoseidon2FullInst {
                 cycle: &OneHot0 {
-                    c0: &CodeReg { offset: 7 },
-                    c1: &CodeReg { offset: 8 },
-                    c2: &CodeReg { offset: 9 },
-                    c3: &CodeReg { offset: 10 },
+                    c0: &CodeReg { offset: 8 },
+                    c1: &CodeReg { offset: 9 },
+                    c2: &CodeReg { offset: 10 },
+                    c3: &CodeReg { offset: 11 },
                 },
             },
             poseidon2_load: &RecursionPoseidon2MemInst {
-                do_mont: &CodeReg { offset: 7 },
-                keep_state: &CodeReg { offset: 8 },
-                prep_full: &CodeReg { offset: 9 },
+                do_mont: &CodeReg { offset: 8 },
+                keep_state: &CodeReg { offset: 9 },
+                keep_upper_state: &CodeReg { offset: 10 },
+                prep_full: &CodeReg { offset: 11 },
                 group: &OneHot1 {
-                    g0: &CodeReg { offset: 10 },
-                    g1: &CodeReg { offset: 11 },
-                    g2: &CodeReg { offset: 12 },
+                    g0: &CodeReg { offset: 12 },
+                    g1: &CodeReg { offset: 13 },
+                    g2: &CodeReg { offset: 14 },
                 },
                 inputs: &[
-                    &CodeReg { offset: 13 },
-                    &CodeReg { offset: 14 },
                     &CodeReg { offset: 15 },
                     &CodeReg { offset: 16 },
                     &CodeReg { offset: 17 },
                     &CodeReg { offset: 18 },
                     &CodeReg { offset: 19 },
                     &CodeReg { offset: 20 },
+                    &CodeReg { offset: 21 },
+                    &CodeReg { offset: 22 },
                 ],
             },
             poseidon2_partial: &RecursionPoseidon2Inst {},
             poseidon2_store: &RecursionPoseidon2MemInst {
-                do_mont: &CodeReg { offset: 7 },
-                keep_state: &CodeReg { offset: 8 },
-                prep_full: &CodeReg { offset: 9 },
+                do_mont: &CodeReg { offset: 8 },
+                keep_state: &CodeReg { offset: 9 },
+                keep_upper_state: &CodeReg { offset: 10 },
+                prep_full: &CodeReg { offset: 11 },
                 group: &OneHot1 {
-                    g0: &CodeReg { offset: 10 },
-                    g1: &CodeReg { offset: 11 },
-                    g2: &CodeReg { offset: 12 },
+                    g0: &CodeReg { offset: 12 },
+                    g1: &CodeReg { offset: 13 },
+                    g2: &CodeReg { offset: 14 },
                 },
                 inputs: &[
-                    &CodeReg { offset: 13 },
-                    &CodeReg { offset: 14 },
                     &CodeReg { offset: 15 },
                     &CodeReg { offset: 16 },
                     &CodeReg { offset: 17 },
                     &CodeReg { offset: 18 },
                     &CodeReg { offset: 19 },
                     &CodeReg { offset: 20 },
+                    &CodeReg { offset: 21 },
+                    &CodeReg { offset: 22 },
                 ],
             },
         },
         select: &OneHot2 {
+            checked_bytes: &CodeReg { offset: 7 },
             macro_ops: &CodeReg { offset: 2 },
             micro_ops: &CodeReg { offset: 1 },
             poseidon2_full: &CodeReg { offset: 4 },
@@ -673,6 +724,22 @@ pub const LAYOUT: &RecursionTop = &RecursionTop {
         },
     },
     mux: &Mux6 {
+        checked_bytes: &RecursionCheckedBytes {
+            eval_point: &RecursionWomReg {
+                wom: &RecursionImplWomPlonkElement {
+                    addr: &DataReg { offset: 5 },
+                    data: &[
+                        &DataReg { offset: 6 },
+                        &DataReg { offset: 7 },
+                        &DataReg { offset: 8 },
+                        &DataReg { offset: 9 },
+                    ],
+                },
+            },
+            wom_body: &RecursionWomBody {
+                plonk_body: &RecursionPoseidon2Inst {},
+            },
+        },
         macro_ops: &RecursionMacroOp {
             mux: &Mux4 {
                 bit_and_elem: &RecursionBitAndElem {
@@ -1574,11 +1641,11 @@ pub const LAYOUT: &RecursionTop = &RecursionTop {
                         },
                     },
                     inst: &RecursionMicroInst {
-                        opcode: &CodeReg { offset: 7 },
+                        opcode: &CodeReg { offset: 8 },
                         operand: &[
-                            &CodeReg { offset: 8 },
                             &CodeReg { offset: 9 },
                             &CodeReg { offset: 10 },
+                            &CodeReg { offset: 11 },
                         ],
                     },
                     out: &RecursionWomReg {
@@ -1631,11 +1698,11 @@ pub const LAYOUT: &RecursionTop = &RecursionTop {
                         },
                     },
                     inst: &RecursionMicroInst {
-                        opcode: &CodeReg { offset: 11 },
+                        opcode: &CodeReg { offset: 12 },
                         operand: &[
-                            &CodeReg { offset: 12 },
                             &CodeReg { offset: 13 },
                             &CodeReg { offset: 14 },
+                            &CodeReg { offset: 15 },
                         ],
                     },
                     out: &RecursionWomReg {
@@ -1688,11 +1755,11 @@ pub const LAYOUT: &RecursionTop = &RecursionTop {
                         },
                     },
                     inst: &RecursionMicroInst {
-                        opcode: &CodeReg { offset: 15 },
+                        opcode: &CodeReg { offset: 16 },
                         operand: &[
-                            &CodeReg { offset: 16 },
                             &CodeReg { offset: 17 },
                             &CodeReg { offset: 18 },
+                            &CodeReg { offset: 19 },
                         ],
                     },
                     out: &RecursionWomReg {
