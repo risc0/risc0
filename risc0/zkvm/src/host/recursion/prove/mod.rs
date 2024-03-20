@@ -64,7 +64,7 @@ pub const RECURSION_PO2: usize = 18;
 /// that we are unlikely to need more.
 const ALLOWED_CODE_MERKLE_DEPTH: usize = 8;
 /// Size of the code group in the taps of the recursion circuit.
-const RECURSION_CODE_SIZE: usize = 21;
+const RECURSION_CODE_SIZE: usize = 22;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct RecursionReceipt {
