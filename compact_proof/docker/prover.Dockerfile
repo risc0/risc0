@@ -52,7 +52,7 @@ RUN (cd groth16; circom --c stark_verify.circom) && \
   (cd groth16/stark_verify_cpp; make)
 
 # Download the proving key
-RUN wget https://risc0-artifacts.s3.us-west-2.amazonaws.com/zkey/2024-02-07/stark_verify_final.zkey.gz -O groth16/stark_verify_final.zkey.gz && \
+RUN wget https://risc0-artifacts.s3.us-west-2.amazonaws.com/zkey/2024-03-20/stark_verify_final.zkey.gz -O groth16/stark_verify_final.zkey.gz && \
   (cd groth16; gzip -df stark_verify_final.zkey.gz)
 
 # Create a final clean image with all the dependencies to perform stark->snark
