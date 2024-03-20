@@ -362,4 +362,28 @@ mod tests {
             assert_eq!(result.as_words()[i], goal[i], "At entry {}", i);
         }
     }
+
+    #[test]
+    fn hash_elem_slice_compare_golden_unaligned() {
+        let buf: [BabyBearElem; 17] = baby_bear_array![
+            943718400, 1887436800, 2013125296, 1761607679, 692060158, 1761607634, 566231037, 1509949437,
+            440401916, 1384120316, 314572795, 1258291195, 188743674, 1132462074, 62914553, 1006632953,
+            1950351353,
+        ];
+        let suite = Poseidon2HashSuite::new_suite();
+        let result = suite.hashfn.hash_elem_slice(&buf);
+        let goal: [u32; DIGEST_WORDS] = [
+            (BabyBearElem::from(0x622615d7 as u32)).as_u32_montgomery(),
+            (BabyBearElem::from(0x1cfe9764 as u32)).as_u32_montgomery(),
+            (BabyBearElem::from(0x166cb1c9 as u32)).as_u32_montgomery(),
+            (BabyBearElem::from(0x76febcde as u32)).as_u32_montgomery(),
+            (BabyBearElem::from(0x6056219f as u32)).as_u32_montgomery(),
+            (BabyBearElem::from(0x326359cf as u32)).as_u32_montgomery(),
+            (BabyBearElem::from(0x5c2cca75 as u32)).as_u32_montgomery(),
+            (BabyBearElem::from(0x233dc3ff as u32)).as_u32_montgomery(),
+        ];
+        for i in 0..DIGEST_WORDS {
+            assert_eq!(result.as_words()[i], goal[i], "At entry {}", i);
+        }
+    }
 }
