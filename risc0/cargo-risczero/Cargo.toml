@@ -34,6 +34,7 @@ reqwest-retry = "0.4"
 risc0-build = { workspace = true }
 risc0-r0vm = { workspace = true, optional = true }
 risc0-zkvm = { workspace = true, optional = true }
+rust-lzma = "0.6.0"
 serde = { version = "1", features = ["derive"] }
 syn = "2.0.53"
 tar = "0.4"

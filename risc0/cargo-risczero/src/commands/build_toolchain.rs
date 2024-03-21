@@ -23,7 +23,7 @@ use anyhow::{bail, Context, Result};
 use clap::Parser;
 
 use crate::{
-    toolchain::{RustupToolchain, RUSTUP_TOOLCHAIN_NAME, RUST_BRANCH, RUST_REPO},
+    toolchain::{RustupToolchain, ToolchainRepo, RUSTUP_TOOLCHAIN_NAME, RUST_BRANCH},
     utils::{ensure_binary, CommandExt},
 };
 
@@ -54,7 +54,7 @@ impl BuildToolchain {
 
         let is_ci = std::env::var("CI").is_ok();
         if !is_ci {
-            self.prepare_git_repo(RUST_REPO, RUST_BRANCH, &rust_dir)?;
+            self.prepare_git_repo(ToolchainRepo::RUST.url(), RUST_BRANCH, &rust_dir)?;
         }
 
         let out = self.build_toolchain(&rust_dir)?;

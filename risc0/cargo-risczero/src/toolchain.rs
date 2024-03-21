@@ -23,8 +23,37 @@ use anyhow::{bail, Context, Result};
 
 use crate::utils::CommandExt;
 
-/// Custom rust repository.
-pub const RUST_REPO: &str = "https://github.com/risc0/rust.git";
+pub enum ToolchainRepo {
+    RUST,
+    C,
+}
+
+impl ToolchainRepo {
+    pub const fn url(&self) -> &str {
+        match self {
+            Self::RUST => "https://github.com/risc0/rust.git",
+            Self::C => "https://github.com/risc0/toolchain.git",
+        }
+    }
+
+    pub const fn language(&self) -> &str {
+        match self {
+            Self::RUST => "rust",
+            Self::C => "c",
+        }
+    }
+
+    pub fn asset_name(&self, target: &str) -> String {
+        match self {
+            Self::RUST => format!("rust-toolchain-{target}.tar.gz"),
+            Self::C => match target {
+                "aarch64-apple-darwin" => "riscv32im-osx-arm64.tar.xz".to_string(),
+                "x86_64-apple-darwin" => "riscv32im-osx-x86_64.tar.xz".to_string(),
+                _ => "riscv32im-linux-x86_64.tar.xz".to_string(),
+            },
+        }
+    }
+}
 
 /// Branch to use in the custom Rust repo.
 pub const RUST_BRANCH: &str = "risc0";

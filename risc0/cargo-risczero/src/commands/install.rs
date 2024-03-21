@@ -32,7 +32,7 @@ use tar::Archive;
 use tempfile::tempdir;
 
 use crate::{
-    toolchain::{RustupToolchain, RUSTUP_TOOLCHAIN_NAME, RUST_REPO},
+    toolchain::{RustupToolchain, ToolchainRepo, RUSTUP_TOOLCHAIN_NAME},
     utils::{flock, risc0_data},
 };
 
@@ -84,8 +84,8 @@ impl Install {
     /// Returns the path to the toolchain.
     fn install_prebuilt_toolchain(&self, toolchain_dir: &Path) -> Result<RustupToolchain> {
         if let Some(target) = guess_host_target() {
-            match self.download_toolchain(target, toolchain_dir) {
-                Ok(path) => RustupToolchain::link(RUSTUP_TOOLCHAIN_NAME, &path.join("rust")),
+            match self.download_toolchains(target, toolchain_dir) {
+                Ok(path) => RustupToolchain::link(RUSTUP_TOOLCHAIN_NAME, &path),
                 Err(err) => {
                     eprintln!("Could not download pre-built toolchain: {err:?}");
                     Err(err.context("Download of pre-built toolchain failed"))
@@ -97,7 +97,50 @@ impl Install {
     }
 
     /// Download a pre-built toolchain from Github releases.
-    fn download_toolchain(&self, target: &str, toolchains_root_dir: &Path) -> Result<PathBuf> {
+    fn download_toolchains(&self, target: &str, toolchains_root_dir: &Path) -> Result<PathBuf> {
+        let c_toolchain_dir =
+            self.download_toolchain(target, toolchains_root_dir, &ToolchainRepo::C)?;
+        eprintln!("Downloaded c toolchain to {}", c_toolchain_dir.display());
+
+        let rust_toolchain_dir =
+            self.download_toolchain(target, toolchains_root_dir, &ToolchainRepo::RUST)?;
+
+        let rust_dir = rust_toolchain_dir.clone(); //.join("rust");
+
+        // Ensure permissions for rust toolchain.
+        #[cfg(target_family = "unix")]
+        {
+            use std::os::unix::fs::PermissionsExt;
+
+            let iter1 = std::fs::read_dir(rust_dir.join("bin"))?;
+            let iter2 = std::fs::read_dir(rust_dir.join(format!("lib/rustlib/{target}/bin")))?;
+
+            // Make sure the binaries can be executed.
+            for res in iter1.chain(iter2) {
+                let entry = res?;
+                if entry.file_type()?.is_file() {
+                    let mut perms = entry.metadata()?.permissions();
+                    perms.set_mode(0o755);
+                    std::fs::set_permissions(entry.path(), perms)?;
+                }
+            }
+        }
+
+        eprintln!(
+            "Downloaded rust toolchain {} to {}",
+            target,
+            rust_dir.display()
+        );
+
+        Ok(rust_toolchain_dir)
+    }
+
+    fn download_toolchain(
+        &self,
+        target: &str,
+        toolchains_root_dir: &Path,
+        repo: &ToolchainRepo,
+    ) -> Result<PathBuf> {
         let mut headers = HeaderMap::new();
 
         // Use api token if specified via env var.
@@ -126,9 +169,9 @@ impl Install {
             .build();
         let rt = tokio::runtime::Runtime::new()?;
 
-        let (tag_name, download_url) = rt.block_on(self.get_download_url(&client, target))?;
-
-        let toolchain_dir = toolchains_root_dir.join(format!("{target}_{}", tag_name));
+        let (tag_name, download_url) = rt.block_on(self.get_download_url(&client, target, repo))?;
+        let toolchain_dir =
+            toolchains_root_dir.join(format!("{}_{target}_{}", repo.language(), tag_name));
         if toolchain_dir.is_dir() {
             eprintln!(
                 "Toolchain path {} already exists - deleting existing files!",
@@ -138,8 +181,11 @@ impl Install {
         }
 
         // Download.
-        eprintln!("Downloading Rust toolchain from url '{}'...", &download_url);
-        let rust_dir = toolchain_dir.join("rust");
+        eprintln!(
+            "Downloading {} toolchain from url '{}'...",
+            repo.language(),
+            &download_url
+        );
 
         let dl = Download::new(&download_url);
         let results = downloader.download(&[dl])?;
@@ -147,32 +193,19 @@ impl Install {
             let summary = result.context(format!("Download failed. {TOKEN_MSG}"))?;
             let tarball = File::open(summary.file_name)?;
             eprintln!("Extracting...");
-            let decoder = GzDecoder::new(BufReader::new(tarball));
-            let mut archive = Archive::new(decoder);
-            archive.unpack(&rust_dir)?;
-        }
-
-        // Ensure permissions.
-        #[cfg(target_family = "unix")]
-        {
-            use std::os::unix::fs::PermissionsExt;
-
-            let iter1 = std::fs::read_dir(rust_dir.join("bin"))?;
-            let iter2 = std::fs::read_dir(rust_dir.join(format!("lib/rustlib/{target}/bin")))?;
-
-            // Make sure the binaries can be executed.
-            for res in iter1.chain(iter2) {
-                let entry = res?;
-                if entry.file_type()?.is_file() {
-                    let mut perms = entry.metadata()?.permissions();
-                    perms.set_mode(0o755);
-                    std::fs::set_permissions(entry.path(), perms)?;
+            match repo {
+                ToolchainRepo::RUST => {
+                    let decoder = GzDecoder::new(BufReader::new(tarball));
+                    let mut archive = Archive::new(decoder);
+                    archive.unpack(toolchain_dir.clone())?;
+                }
+                ToolchainRepo::C => {
+                    let decoder = lzma::LzmaReader::new_decompressor(BufReader::new(tarball))?;
+                    let mut archive = Archive::new(decoder);
+                    archive.unpack(toolchain_dir.clone())?;
                 }
             }
         }
-
-        eprintln!("Downloaded toolchain {} to {}", target, rust_dir.display());
-
         Ok(toolchain_dir)
     }
 
@@ -180,16 +213,18 @@ impl Install {
         &self,
         client: &ClientWithMiddleware,
         target: &str,
+        repo: &ToolchainRepo,
     ) -> Result<(String, String)> {
         let tag = self
             .version
             .clone()
             .map_or("latest".to_string(), |tag| format!("tags/{tag}"));
 
-        let repo = RUST_REPO
+        let repo_name = repo
+            .url()
             .trim_start_matches("https://github.com/")
             .trim_end_matches(".git");
-        let release_url = format!("https://api.github.com/repos/{repo}/releases/{tag}");
+        let release_url = format!("https://api.github.com/repos/{repo_name}/releases/{tag}");
 
         eprintln!("Getting release info: {release_url}...");
 
@@ -204,11 +239,11 @@ impl Install {
             .context("Could not deserialize release info")?;
 
         // Try to find the asset for the wanted target triple.
-        let rust_asset_name = format!("rust-toolchain-{target}.tar.gz");
-        let rust_asset = release
+        let asset_name = repo.asset_name(target);
+        let asset = release
             .assets
             .iter()
-            .find(|asset| asset.name == rust_asset_name)
+            .find(|asset| asset.name == asset_name)
             .with_context(|| {
                 format!(
                     "Release {} does not have a prebuilt toolchain for host {}",
@@ -216,7 +251,7 @@ impl Install {
                 )
             })?;
 
-        Ok((release.tag_name, rust_asset.browser_download_url.clone()))
+        Ok((release.tag_name, asset.browser_download_url.clone()))
     }
 }
 
