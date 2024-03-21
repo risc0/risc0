@@ -229,8 +229,8 @@ where
     }
     if unmixed != 0 || count == 0 {
         // Zero pad to get a CELLS_RATE-aligned number of inputs
-        for i in unmixed..CELLS_RATE {
-            state[i] = BabyBearElem::ZERO;
+        for elem in state.iter_mut().take(CELLS_RATE).skip(unmixed) {
+            *elem = BabyBearElem::ZERO;
         }
         poseidon2_mix(&mut state);
     }
