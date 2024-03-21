@@ -72,6 +72,11 @@ export default {
         },
         {
           type: "doc",
+          label: "Understanding I/O",
+          id: "zkvm/tutorials/io",
+        },
+        {
+          type: "doc",
           label: "Rust Resources",
           id: "zkvm/rust-resources",
         },
