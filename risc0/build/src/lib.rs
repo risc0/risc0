@@ -40,6 +40,21 @@ pub use docker::docker_build;
 
 const RUSTUP_TOOLCHAIN_NAME: &str = "risc0";
 
+/// todo
+pub fn risc0_data() -> Result<PathBuf> {
+    let dir = if let Ok(dir) = std::env::var("RISC0_DATA_DIR") {
+        dir.into()
+    } else if let Some(root) = dirs::data_dir() {
+        root.join("cargo-risczero")
+    } else if let Some(home) = dirs::home_dir() {
+        home.join(".cargo-risczero")
+    } else {
+        anyhow::bail!("Could not determine cargo-risczero data dir. Set RISC0_DATA_DIR env var.");
+    };
+
+    Ok(dir)
+}
+
 #[derive(Debug, Deserialize)]
 struct Risc0Metadata {
     methods: Vec<String>,
@@ -303,8 +318,17 @@ pub fn cargo_command(subcmd: &str, rust_flags: &[&str]) -> Command {
     .concat()
     .join("\x1f");
 
+    let c_include = risc0_data().unwrap().join("c/riscv32-unknown-elf/include");
     cmd.env("RUSTC", rustc)
         .env("CARGO_ENCODED_RUSTFLAGS", rustflags_envvar)
+        .env("CC", "clang")
+        .env(
+            "CFLAGS_riscv32im_risc0_zkvm_elf",
+            format!(
+                "-target riscv32-unknown-elf -march=rv32im -I{}",
+                c_include.display()
+            ),
+        )
         .args(args);
 
     cmd

@@ -15,37 +15,42 @@
 // This is based on cargo-wasix: https://github.com/wasix-org/cargo-wasix
 
 use std::{
+    fs,
     path::{Path, PathBuf},
     process::Command,
 };
 
 use anyhow::{bail, Context, Result};
+use fs_extra::dir::CopyOptions;
+use risc0_build::risc0_data;
+//use fs_extra::dir::{CopyOptions, DirOptions};
 
 use crate::utils::CommandExt;
+//use risc0_build::risc0_data;
 
 pub enum ToolchainRepo {
-    RUST,
+    Rust,
     C,
 }
 
 impl ToolchainRepo {
     pub const fn url(&self) -> &str {
         match self {
-            Self::RUST => "https://github.com/risc0/rust.git",
+            Self::Rust => "https://github.com/risc0/rust.git",
             Self::C => "https://github.com/risc0/toolchain.git",
         }
     }
 
     pub const fn language(&self) -> &str {
         match self {
-            Self::RUST => "rust",
+            Self::Rust => "rust",
             Self::C => "c",
         }
     }
 
     pub fn asset_name(&self, target: &str) -> String {
         match self {
-            Self::RUST => format!("rust-toolchain-{target}.tar.gz"),
+            Self::Rust => format!("rust-toolchain-{target}.tar.gz"),
             Self::C => match target {
                 "aarch64-apple-darwin" => "riscv32im-osx-arm64.tar.xz".to_string(),
                 "x86_64-apple-darwin" => "riscv32im-osx-x86_64.tar.xz".to_string(),
@@ -139,4 +144,57 @@ impl RustupToolchain {
             path: dir.into(),
         })
     }
+}
+
+/// A rustup toolchain manager
+#[derive(Clone, Debug)]
+pub struct CToolchain {
+    /// The path of the rustup toolchain
+    pub path: PathBuf,
+}
+
+impl CToolchain {
+    fn get_subdir(path: &Path) -> Result<PathBuf> {
+        let sub_dir: Vec<std::result::Result<std::fs::DirEntry, std::io::Error>> =
+            std::fs::read_dir(path)?.into_iter().collect();
+        if sub_dir.len() != 1 {
+            bail!(
+                "Expected {} to only have 1 subdirectory, found {}",
+                path.display(),
+                sub_dir.len()
+            );
+        }
+        let entry = sub_dir[0].as_ref().unwrap();
+        Ok(entry.path())
+    }
+
+    pub fn link(path: &Path) -> Result<Self> {
+        let c_download_dir = Self::get_subdir(path)?;
+        let r0_data = risc0_data()?;
+        fs_extra::dir::copy(
+            c_download_dir.clone(),
+            &r0_data,
+            &CopyOptions::new().overwrite(true),
+        )?;
+
+        // for c, we will keep the toolchains in the r0_data directory for now
+        let c_install_dir = &r0_data.join("c");
+        if c_install_dir.exists() {
+            fs::remove_dir_all(c_install_dir)?;
+        }
+        fs::rename(
+            r0_data.join(c_download_dir.file_name().unwrap()),
+            c_install_dir,
+        )?;
+
+        Ok(Self {
+            path: c_install_dir.into(),
+        })
+    }
+}
+
+#[test]
+fn c_link() {
+    let _ = CToolchain::link(
+    &PathBuf::from("/Users/erik/Library/Application Support/cargo-risczero/toolchains/c_aarch64-apple-darwin_2022.03.25")).unwrap();
 }

@@ -32,9 +32,10 @@ use tar::Archive;
 use tempfile::tempdir;
 
 use crate::{
-    toolchain::{RustupToolchain, ToolchainRepo, RUSTUP_TOOLCHAIN_NAME},
-    utils::{flock, risc0_data},
+    toolchain::{CToolchain, RustupToolchain, ToolchainRepo, RUSTUP_TOOLCHAIN_NAME},
+    utils::flock,
 };
+use risc0_build::risc0_data;
 
 /// `cargo risczero install`
 #[derive(Parser)]
@@ -67,12 +68,16 @@ impl Install {
         let _lock = flock(&lockfile_path);
 
         let toolchain_dir = root_dir.join("toolchains");
-        let chain = self.install_prebuilt_toolchain(&toolchain_dir)?;
+        let (rust_chain, c_chain) = self.install_prebuilt_toolchain(&toolchain_dir)?;
 
         eprintln!(
-            "Toolchain {} downloaded and installed to path {}.",
-            chain.name,
-            chain.path.display()
+            "Rust Toolchain {} downloaded and installed to path {}.",
+            rust_chain.name,
+            rust_chain.path.display()
+        );
+        eprintln!(
+            "C Toolchain downloaded and installed to path {}.",
+            c_chain.path.display()
         );
         eprintln!("The risc0 toolchain is now ready to use.");
 
@@ -82,10 +87,17 @@ impl Install {
     /// Tries to download a pre-built toolchain if possible.
     ///
     /// Returns the path to the toolchain.
-    fn install_prebuilt_toolchain(&self, toolchain_dir: &Path) -> Result<RustupToolchain> {
+    fn install_prebuilt_toolchain(
+        &self,
+        toolchain_dir: &Path,
+    ) -> Result<(RustupToolchain, CToolchain)> {
         if let Some(target) = guess_host_target() {
             match self.download_toolchains(target, toolchain_dir) {
-                Ok(path) => RustupToolchain::link(RUSTUP_TOOLCHAIN_NAME, &path),
+                Ok((rust_path, c_path)) => {
+                    let r = RustupToolchain::link(RUSTUP_TOOLCHAIN_NAME, &rust_path)?;
+                    let c = CToolchain::link(&c_path)?;
+                    Ok((r, c))
+                }
                 Err(err) => {
                     eprintln!("Could not download pre-built toolchain: {err:?}");
                     Err(err.context("Download of pre-built toolchain failed"))
@@ -97,15 +109,19 @@ impl Install {
     }
 
     /// Download a pre-built toolchain from Github releases.
-    fn download_toolchains(&self, target: &str, toolchains_root_dir: &Path) -> Result<PathBuf> {
+    fn download_toolchains(
+        &self,
+        target: &str,
+        toolchains_root_dir: &Path,
+    ) -> Result<(PathBuf, PathBuf)> {
         let c_toolchain_dir =
             self.download_toolchain(target, toolchains_root_dir, &ToolchainRepo::C)?;
         eprintln!("Downloaded c toolchain to {}", c_toolchain_dir.display());
 
         let rust_toolchain_dir =
-            self.download_toolchain(target, toolchains_root_dir, &ToolchainRepo::RUST)?;
+            self.download_toolchain(target, toolchains_root_dir, &ToolchainRepo::Rust)?;
 
-        let rust_dir = rust_toolchain_dir.clone(); //.join("rust");
+        let rust_dir = rust_toolchain_dir.clone();
 
         // Ensure permissions for rust toolchain.
         #[cfg(target_family = "unix")]
@@ -132,7 +148,7 @@ impl Install {
             rust_dir.display()
         );
 
-        Ok(rust_toolchain_dir)
+        Ok((rust_toolchain_dir, c_toolchain_dir))
     }
 
     fn download_toolchain(
@@ -194,7 +210,7 @@ impl Install {
             let tarball = File::open(summary.file_name)?;
             eprintln!("Extracting...");
             match repo {
-                ToolchainRepo::RUST => {
+                ToolchainRepo::Rust => {
                     let decoder = GzDecoder::new(BufReader::new(tarball));
                     let mut archive = Archive::new(decoder);
                     archive.unpack(toolchain_dir.clone())?;

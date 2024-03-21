@@ -54,7 +54,7 @@ impl BuildToolchain {
 
         let is_ci = std::env::var("CI").is_ok();
         if !is_ci {
-            self.prepare_git_repo(ToolchainRepo::RUST.url(), RUST_BRANCH, &rust_dir)?;
+            self.prepare_git_repo(ToolchainRepo::Rust.url(), RUST_BRANCH, &rust_dir)?;
         }
 
         let out = self.build_toolchain(&rust_dir)?;
