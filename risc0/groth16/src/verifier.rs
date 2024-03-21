@@ -64,6 +64,8 @@ const IC3_X: &str = "20457045958098673349648536986654637998627860761194610688186
 const IC3_Y: &str = "20016645794309877455213278100232898860301762821112066365123784115381277628768";
 const IC4_X: &str = "21239879785520219456396454940027328701856640130991351667643741030239553576430";
 const IC4_Y: &str = "20792082454563427423578028870779800202936035067991988946784302720095342614530";
+const IC5_X: &str = "17622463197037705164686879153818888337611670039316323149958751021262085916949";
+const IC5_Y: &str = "10546326028888365743245970980969672597991412490319907398941581639510925080455";
 
 /// Groth16 `Verifier` instance over the BN_254 curve encoded in little endian.
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -164,7 +166,8 @@ pub fn prepared_verifying_key() -> Result<PreparedVerifyingKey<Bn254>, Error> {
     let ic2 = g1_from_bytes(&[from_u256(IC2_X)?, from_u256(IC2_Y)?])?;
     let ic3 = g1_from_bytes(&[from_u256(IC3_X)?, from_u256(IC3_Y)?])?;
     let ic4 = g1_from_bytes(&[from_u256(IC4_X)?, from_u256(IC4_Y)?])?;
-    let gamma_abc_g1 = vec![ic0, ic1, ic2, ic3, ic4];
+    let ic5 = g1_from_bytes(&[from_u256(IC5_X)?, from_u256(IC5_Y)?])?;
+    let gamma_abc_g1 = vec![ic0, ic1, ic2, ic3, ic4, ic5];
 
     let vk = VerifyingKey::<Bn254> {
         alpha_g1,

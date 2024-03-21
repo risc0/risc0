@@ -96,13 +96,13 @@ fn bootstrap_verifying_key(risc0_ethereum_path: &Path) {
     let solidity_constants = [
         "alphax", "alphay", "betax1", "betax2", "betay1", "betay2", "gammax1", "gammax2",
         "gammay1", "gammay2", "deltax1", "deltax2", "deltay1", "deltay2", "IC0x", "IC0y", "IC1x",
-        "IC1y", "IC2x", "IC2y", "IC3x", "IC3y", "IC4x", "IC4y",
+        "IC1y", "IC2x", "IC2y", "IC3x", "IC3y", "IC4x", "IC4y", "IC5x", "IC5y",
     ];
 
     let rust_constants = [
         "ALPHA_X", "ALPHA_Y", "BETA_X1", "BETA_X2", "BETA_Y1", "BETA_Y2", "GAMMA_X1", "GAMMA_X2",
         "GAMMA_Y1", "GAMMA_Y2", "DELTA_X1", "DELTA_X2", "DELTA_Y1", "DELTA_Y2", "IC0_X", "IC0_Y",
-        "IC1_X", "IC1_Y", "IC2_X", "IC2_Y", "IC3_X", "IC3_Y", "IC4_X", "IC4_Y",
+        "IC1_X", "IC1_Y", "IC2_X", "IC2_Y", "IC3_X", "IC3_Y", "IC4_X", "IC4_Y", "IC5_X", "IC5_Y",
     ];
 
     for (i, constant) in solidity_constants.into_iter().enumerate() {
