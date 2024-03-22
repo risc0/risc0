@@ -213,12 +213,12 @@ fn join(c: &mut Criterion) {
 
 criterion_group!(
     benches,
-    \\execute,
-    \\prove_sha256,
-    \\prove_poseidon2,
-    \\total_composite,
+    //execute,
+    //prove_sha256,
+    //prove_poseidon2,
+    //total_composite,
     lift,
     join,
-    \\total_succinct,
+    //total_succinct,
 );
 criterion_main!(benches);
