@@ -28,6 +28,7 @@ fn setup_exec(iterations: u32) -> ExecutorImpl<'static> {
     ExecutorImpl::from_elf(env, FIB_ELF).unwrap()
 }
 
+#[allow(dead_code)]
 fn execute(c: &mut Criterion) {
     let mut group = c.benchmark_group("fib");
 
@@ -45,6 +46,7 @@ fn execute(c: &mut Criterion) {
     }
 }
 
+#[allow(dead_code)]
 fn prove_segment(c: &mut Criterion, hashfn: &str) {
     let mut group = c.benchmark_group("fib");
     group.sample_size(10);
@@ -74,14 +76,17 @@ fn prove_segment(c: &mut Criterion, hashfn: &str) {
     }
 }
 
+#[allow(dead_code)]
 fn prove_sha256(c: &mut Criterion) {
     prove_segment(c, "sha-256");
 }
 
+#[allow(dead_code)]
 fn prove_poseidon2(c: &mut Criterion) {
     prove_segment(c, "poseidon2");
 }
 
+#[allow(dead_code)]
 fn total_composite(c: &mut Criterion) {
     let mut group = c.benchmark_group("fib");
     group.sample_size(10);
@@ -109,6 +114,7 @@ fn total_composite(c: &mut Criterion) {
     }
 }
 
+#[allow(dead_code)]
 fn total_succinct(c: &mut Criterion) {
     let mut group = c.benchmark_group("fib");
     group.sample_size(10);
@@ -207,12 +213,12 @@ fn join(c: &mut Criterion) {
 
 criterion_group!(
     benches,
-    execute,
-    prove_sha256,
-    prove_poseidon2,
-    total_composite,
+    \\execute,
+    \\prove_sha256,
+    \\prove_poseidon2,
+    \\total_composite,
     lift,
     join,
-    total_succinct,
+    \\total_succinct,
 );
 criterion_main!(benches);
