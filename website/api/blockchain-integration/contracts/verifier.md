@@ -56,9 +56,9 @@ You can choose to use this contract or deploy your own.
 
 | Contract                      | Network   | Address                                                        |
 | ----------------------------- | --------- | -------------------------------------------------------------- |
-| [RiscZeroGroth16Verifier.sol] | [Sepolia] | [0x83C2e9CD64B2A16D3908E94C7654f3864212E2F8][sepolia-verifier] |
+| [RiscZeroGroth16Verifier.sol] | [Sepolia] | [0xe57255C10291771A2E14f7eb257555AE82D78302][sepolia-verifier] |
 
-[RiscZeroGroth16Verifier.sol]: https://github.com/risc0/risc0-ethereum/blob/ffaee10167143d21273db5c309f8dcddcbd7a3df/contracts/src/groth16/RiscZeroGroth16Verifier.sol
+[RiscZeroGroth16Verifier.sol]: https://github.com/risc0/risc0-ethereum/blob/release-0.8/contracts/src/groth16/RiscZeroGroth16Verifier.sol
 [IRiscZeroVerifier.sol]: https://github.com/risc0/risc0-ethereum/blob/main/contracts/src/IRiscZeroVerifier.sol
 [EvenNumber.sol]: https://github.com/risc0/bonsai-foundry-template/blob/main/contracts/EvenNumber.sol
 [article-groth16]: https://www.risczero.com/news/on-chain-verification
