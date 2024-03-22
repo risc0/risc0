@@ -27,7 +27,7 @@ use clap::{Parser, Subcommand};
 #[cfg(feature = "experimental")]
 use self::commands::build::BuildCommand;
 use self::commands::{
-    build_guest::BuildGuest, build_toolchain::BuildToolchain, install::Install, new::NewCommand,
+    build_guest::BuildGuest, build_toolchain::BuildToolchain, install::Install, new::NewCommand, deploy::Deploy,
 };
 
 #[derive(Parser)]
@@ -58,6 +58,8 @@ pub enum RisczeroCmd {
     Install(Install),
     /// Creates a new risczero starter project.
     New(NewCommand),
+    /// Sends the guest code to Bonsai.
+    Deploy(Deploy),
     /// Build a crate for RISC Zero.
     #[cfg(feature = "experimental")]
     BuildCrate(BuildCommand),

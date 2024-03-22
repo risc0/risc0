@@ -12,10 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#[cfg(feature = "experimental")]
-pub mod build;
-pub mod build_guest;
-pub mod build_toolchain;
-pub mod install;
-pub mod new;
-pub mod deploy;
+use anyhow::Result;
+use clap::Parser;
+
+/// `cargo risczero new`
+#[derive(Parser)]
+pub struct Deploy {
+}
+
+impl Deploy {
+    pub fn run(&self) -> Result<()> {
+        todo!("Implement the `cargo risczero deploy` command")
+    }
+}

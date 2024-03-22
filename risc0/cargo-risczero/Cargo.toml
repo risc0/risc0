@@ -31,7 +31,9 @@ reqwest = { version = "0.11", default-features = false, features = [
 ] }
 reqwest-middleware = "0.2"
 reqwest-retry = "0.4"
+bonsai-sdk = { workspace = true }
 risc0-build = { workspace = true }
+risc0-binfmt = { workspace = true }
 risc0-r0vm = { workspace = true, optional = true }
 risc0-zkvm = { workspace = true, optional = true }
 serde = { version = "1", features = ["derive"] }
@@ -40,6 +42,7 @@ tar = "0.4"
 tempfile = "3"
 text_io = "0.1.12"
 tokio = { version = "1", features = ["rt"] }
+hex = { version = "0.4.3", default-features = false, features = ["alloc"] }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 zip = { version = "0.6", optional = true }
 

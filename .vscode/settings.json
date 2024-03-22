@@ -44,12 +44,13 @@
     "tools/crates-validator/Cargo.toml",
   ],
   "cSpell.words": [
+    "bytemuck",
+    "canonicalize",
     "Groth",
     "Holesky",
-    "Sepolia",
-    "Zeroable",
-    "bytemuck",
     "posix",
     "repr",
+    "Sepolia",
+    "Zeroable"
   ],
 }

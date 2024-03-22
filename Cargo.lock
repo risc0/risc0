@@ -1120,6 +1120,7 @@ name = "cargo-risczero"
 version = "0.22.0-alpha.1"
 dependencies = [
  "anyhow",
+ "bonsai-sdk",
  "cargo-generate",
  "cargo_metadata 0.18.1",
  "clap",
@@ -1128,9 +1129,11 @@ dependencies = [
  "downloader",
  "flate2",
  "fs2",
+ "hex",
  "reqwest",
  "reqwest-middleware",
  "reqwest-retry",
+ "risc0-binfmt",
  "risc0-build",
  "risc0-r0vm",
  "risc0-zkvm",
