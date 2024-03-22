@@ -64,7 +64,7 @@ You can choose to use this contract or deploy your own.
 [article-groth16]: https://www.risczero.com/news/on-chain-verification
 [article-proof-composition]: https://www.risczero.com/news/proof-composition
 [Sepolia]: https://ethereum.org/nb/developers/docs/networks#sepolia
-[sepolia-verifier]: https://sepolia.etherscan.io/address/0x83c2e9cd64b2a16d3908e94c7654f3864212e2f8#code
+[sepolia-verifier]: https://sepolia.etherscan.io/address/0xe57255C10291771A2E14f7eb257555AE82D78302:#code
 [term-journal]: /terminology#journal
 [term-receipt]: /terminology#receipt
 [term-verify]: /terminology#verify
