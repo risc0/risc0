@@ -40,7 +40,7 @@ RISC Zero's zkVM and the `IS_EVEN` program guarantee that it's computationally i
 
 ## Versioning
 
-The [`RiscZeroGroth16Verifier`][RiscZeroGroth16Verifier.sol] contract is stateless and immutable.
+The [`RiscZeroGroth16Verifier`][sepolia-verifier] contract is stateless and immutable.
 When new versions of the RISC Zero proof system are released, a new verifier contract will be deployed.
 
 When using this contract directly you can be sure that the verifier will never change, as it cannot be upgraded or otherwise mutated.
@@ -58,7 +58,7 @@ You can choose to use this contract or deploy your own.
 | ----------------------------- | --------- | -------------------------------------------------------------- |
 | [RiscZeroGroth16Verifier.sol] | [Sepolia] | [0x83C2e9CD64B2A16D3908E94C7654f3864212E2F8][sepolia-verifier] |
 
-[RiscZeroGroth16Verifier.sol]: https://github.com/risc0/risc0-ethereum/blob/main/contracts/src/groth16/RiscZeroGroth16Verifier.sol
+[RiscZeroGroth16Verifier.sol]: https://github.com/risc0/risc0-ethereum/blob/ffaee10167143d21273db5c309f8dcddcbd7a3df/contracts/src/groth16/RiscZeroGroth16Verifier.sol
 [IRiscZeroVerifier.sol]: https://github.com/risc0/risc0-ethereum/blob/main/contracts/src/IRiscZeroVerifier.sol
 [EvenNumber.sol]: https://github.com/risc0/bonsai-foundry-template/blob/main/contracts/EvenNumber.sol
 [article-groth16]: https://www.risczero.com/news/on-chain-verification
