@@ -20,6 +20,7 @@ const RHO: f32 = 1.0 / crate::INV_RATE as f32;
 /// η in Conjecture 8.4 of the Proximity Gaps paper [BCIKS21](https://eprint.iacr.org/2020/654.pdf)
 const ETA: f32 = 0.05;
 
+/// Compute the security level of the system based on the proven FRI list-decoding regime (up to 1-sqrt(rate)).
 pub fn proven<H: Hal>(taps: &TapSet, coeffs_size: usize) -> f32 {
     let params = parameters::<H>(taps, coeffs_size);
     let e_proximity_gap = params.e_proximity_gap_proven();
@@ -35,9 +36,10 @@ pub fn proven<H: Hal>(taps: &TapSet, coeffs_size: usize) -> f32 {
 
         (m_plus + 0.5) / rho_plus.sqrt()
     };
-    soundness_error::<H>(taps, coeffs_size, theta, e_proximity_gap, l_plus)
+    soundness_error::<H>(&params, theta, e_proximity_gap, l_plus)
 }
 
+/// Compute the security level of the system based on the FRI list-decoding conjecture (up to 1-rate).
 pub fn conjectured<H: Hal>(taps: &TapSet, coeffs_size: usize) -> f32 {
     let params = parameters::<H>(taps, coeffs_size);
     let theta = 1.0 - RHO - ETA;
@@ -48,17 +50,27 @@ pub fn conjectured<H: Hal>(taps: &TapSet, coeffs_size: usize) -> f32 {
         let c_rho = 1; // unspecified exponent parameter in DEEP-FRI, Conjecture 2.3
         (params.lde_domain_size / epsilon_plus).powi(c_rho)
     };
-    soundness_error::<H>(taps, coeffs_size, theta, e_proximity_gap, l_plus)
+    soundness_error::<H>(&params, theta, e_proximity_gap, l_plus)
 }
 
-fn soundness_error<H: Hal>(
-    taps: &TapSet,
-    coeffs_size: usize,
-    theta: f32,
-    e_proximity_gap: f32,
-    l_plus: f32,
-) -> f32 {
-    let params = parameters::<H>(taps, coeffs_size);
+/// Compute the system security following the Toy Model conjecture of ethSTARK.
+/// This conjecture states that:
+/// 1. any AIR is as secure as the "simplest AIR" (1 column and degree 1 constraint).
+/// 2. The security of FRI matches its known upper bound (rather than the proven lower bound).
+#[allow(unused)]
+pub fn toy_model_security<H: Hal>() -> f32 {
+    let ext_size = H::ExtElem::EXT_SIZE as f32;
+    let field_size = baby_bear::P as f32;
+    let ext_field_size = libm::powf(field_size, ext_size);
+
+    let constraints_error = 1f32 / ext_field_size;
+    let fri_error = RHO.powi(crate::QUERIES as i32);
+
+    libm::log2f(constraints_error + fri_error)
+}
+
+/// Helper function. Combines the soundness error terms from different system components.
+fn soundness_error<H: Hal>(params: &Params, theta: f32, e_proximity_gap: f32, l_plus: f32) -> f32 {
     let plonk_plookup_error = params.plonk_plookup_error();
     let fri_error = params.e_fri(theta, e_proximity_gap);
     let deep_ali_error = params.e_deep_ali(l_plus);
@@ -106,6 +118,7 @@ struct Params {
     num_folding_rounds: usize,
 }
 
+/// Compute circuit parameters given a tapset, number of trace rows and all the global constants.
 fn parameters<H: Hal>(taps: &TapSet, coeffs_size: usize) -> Params {
     // Circuit-specific info
     // FIXME get from circuit instead of hard-coding
@@ -220,82 +233,11 @@ impl Params {
     }
 }
 
-#[cfg(test)]
-mod toy_model {
-    use super::*;
-    fn toy_model(coeffs_size: usize) {
-        // e, field extension degree
-        let ext_size = baby_bear::ExtElem::EXT_SIZE;
-        let field_size = baby_bear::P as f32;
-        let ext_field_size = libm::powf(field_size, ext_size as f32);
-        let trace_domain_size = (coeffs_size / ext_size) as f32;
-        let lde_domain_size = trace_domain_size * INV_RATE as f32;
+#[test]
+fn toy_model() {
+    use risc0_core::field::baby_bear::BabyBear;
+    use crate::hal::cpu::CpuHal;
 
-        let num_folding_rounds = num_folding_rounds(coeffs_size, ext_size);
-
-        let params = Params {
-            n_sigma_mem: 0,
-            n_sigma_bytes: 0,
-            n_trace_polys: 1.0,
-            d: 1.0,
-            biggest_combo: 1.0,
-            ext_size: 4,
-            ext_field_size,
-            trace_domain_size,
-            lde_domain_size,
-            num_folding_rounds,
-        };
-
-        pub fn toy_proven(params: Params) -> f32 {
-            let e_proximity_gap = params.e_proximity_gap_proven();
-
-            // α = (1 + 1/2m) * sqrt(ρ)
-            let alpha = (1.0 + 1.0 / (2.0 * M)) * RHO.sqrt();
-
-            let theta = 1.0 - alpha;
-            let l_plus = {
-                let rho_plus =
-                    (params.trace_domain_size + params.biggest_combo) / params.lde_domain_size;
-                let m_plus = 1.0 / (params.biggest_combo * (alpha / rho_plus.sqrt() - 1.0));
-                let m_plus = m_plus.ceil();
-
-                (m_plus + 0.5) / rho_plus.sqrt()
-            };
-            toy_soundness_error(params, theta, e_proximity_gap, l_plus)
-        }
-
-        pub fn toy_conjectured(params: Params) -> f32 {
-            let theta = 1.0 - RHO - ETA;
-            let e_proximity_gap = params.e_proximity_gap_conjectured();
-            let l_plus = {
-                let rho_plus =
-                    (params.trace_domain_size + params.biggest_combo) / params.lde_domain_size;
-                let epsilon_plus = 1.0 - rho_plus - theta;
-                let c_rho = 1; // unspecified exponent parameter in DEEP-FRI, Conjecture 2.3
-                (params.lde_domain_size / epsilon_plus).powi(c_rho)
-            };
-            toy_soundness_error(params, theta, e_proximity_gap, l_plus)
-        }
-
-        fn toy_soundness_error(
-            params: Params,
-            theta: f32,
-            e_proximity_gap: f32,
-            l_plus: f32,
-        ) -> f32 {
-            let plonk_plookup_error = params.plonk_plookup_error();
-            let fri_error = params.e_fri(theta, e_proximity_gap);
-            let deep_ali_error = params.e_deep_ali(l_plus);
-            libm::log2f(plonk_plookup_error + fri_error + deep_ali_error)
-        }
-
-        println!("proven soundness error: {}", toy_proven(params));
-        println!("conjectured soundness error: {}", toy_conjectured(params));
-    }
-
-    #[test]
-    fn test_toy_model() {
-        let coeffs_size = 1u32 << 20 - 1;
-        toy_model(coeffs_size as usize)
-    }
+    let security = toy_model_security::<CpuHal<BabyBear>>();
+    println!("Toy model security: {}", security);
 }
