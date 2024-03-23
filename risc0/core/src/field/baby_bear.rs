@@ -24,7 +24,7 @@ use core::{
     ops,
 };
 
-use bytemuck::{Pod, Zeroable};
+use bytemuck::{CheckedBitPattern, NoUninit, Zeroable};
 
 use crate::field::{self, Elem as FieldElem};
 
@@ -56,11 +56,12 @@ const R2: u32 = 1172168163;
 /// - Otherwise have as large a power of 2 in the factors of P-1 as possible.
 ///
 /// This last property is useful for number theoretical transforms (the fast
-/// fourier transform equivelant on finite fields). See NTT.h for details.
+/// fourier transform equivelant on finite fields). See [risc0_zkp::core::ntt]
+/// for details.
 ///
 /// The Fp class wraps all the standard arithmetic operations to make the finite
 /// field elements look basically like ordinary numbers (which they mostly are).
-#[derive(Eq, Clone, Copy, Pod, Zeroable)]
+#[derive(Eq, Clone, Copy, NoUninit, Zeroable)]
 #[repr(transparent)]
 pub struct Elem(u32);
 
@@ -142,16 +143,32 @@ impl field::Elem for Elem {
         Elem::from(val)
     }
 
+    // TODO(victor): Does this function need to exist?
     fn to_u32_words(&self) -> Vec<u32> {
         Vec::<u32>::from([self.0])
     }
 
+    // TODO(victor): This is a potentially unsafe wrapping.
     fn from_u32_words(val: &[u32]) -> Self {
         Self(val[0])
     }
 
+    // TODO(victor): How is invalid defined here?
     fn is_valid(&self) -> bool {
         self.0 != Self::INVALID.0
+    }
+
+    fn is_reduced(&self) -> bool {
+        self.0 < P
+    }
+}
+
+unsafe impl CheckedBitPattern for Elem {
+    type Bits = u32;
+
+    /// Checks that the u32 is less than the modulus.
+    fn is_valid_bit_pattern(bits: &u32) -> bool {
+        *bits < P
     }
 }
 
@@ -192,6 +209,7 @@ impl Elem {
     /// Create a new [BabyBear] from a Montgomery form representation
     ///
     /// Requires that `x` comes pre-encoded in Montegomery form.
+    // TODO(victor): Look for usages of this function.
     pub const fn new_raw(x: u32) -> Self {
         Self(x)
     }
@@ -203,6 +221,7 @@ impl Elem {
 
     /// Return the Montgomery form representation used for byte-based
     /// hashes of slices of [BabyBear]s.
+    // TODO(victor): Why does this function exist given other ways of doing this?
     pub const fn as_u32_montgomery(&self) -> u32 {
         self.0
     }
@@ -286,11 +305,13 @@ impl From<Elem> for u32 {
     }
 }
 
+/* TODO(victor): Does this break anything?
 impl From<&Elem> for u32 {
     fn from(x: &Elem) -> Self {
         decode(x.0)
     }
 }
+*/
 
 impl From<Elem> for u64 {
     fn from(x: Elem) -> Self {
@@ -372,9 +393,27 @@ const EXT_SIZE: usize = 4;
 /// The irreducible polynomial `x^4 + 11` was chosen because `11` is
 /// the simplest choice of `BETA` for `x^4 + BETA` that makes this polynomial
 /// irreducible.
-#[derive(Eq, Clone, Copy, Pod, Zeroable)]
+#[derive(Eq, Clone, Copy, Zeroable)]
 #[repr(transparent)]
 pub struct ExtElem([Elem; EXT_SIZE]);
+
+// ExtElem has no padding bytes as Elem has none and is 32 bits in width.
+// See bytemuck docs for a full list of requirements.
+// https://docs.rs/bytemuck/latest/bytemuck/trait.NoUninit.html#safety
+unsafe impl NoUninit for ExtElem {}
+
+unsafe impl CheckedBitPattern for ExtElem {
+    type Bits = [u32; EXT_SIZE];
+
+    /// Checks that the u32 array elements are all less than the modulus.
+    fn is_valid_bit_pattern(bits: &[u32; EXT_SIZE]) -> bool {
+        let mut valid = true;
+        for x in bits {
+            valid &= *x < P;
+        }
+        valid
+    }
+}
 
 /// Alias for the Baby Bear [ExtElem]
 pub type BabyBearExtElem = ExtElem;
@@ -396,6 +435,7 @@ impl fmt::Debug for ExtElem {
 }
 
 impl field::Elem for ExtElem {
+    // TODO(victor): Understand why invalid exists.
     const INVALID: Self = ExtElem([Elem::INVALID, Elem::INVALID, Elem::INVALID, Elem::INVALID]);
     const ZERO: Self = ExtElem::zero();
     const ONE: Self = ExtElem::one();
@@ -403,6 +443,8 @@ impl field::Elem for ExtElem {
 
     /// Generate a random field element uniformly.
     fn random(rng: &mut impl rand_core::RngCore) -> Self {
+        // NOTE: It's possible this could be made more efficient since each field element uses 192
+        // random bits while the total entropy needed for a negligibly biased ExtElem is 288.
         Self([
             Elem::random(rng),
             Elem::random(rng),
@@ -462,10 +504,12 @@ impl field::Elem for ExtElem {
         ])
     }
 
+    /// Convert from a u64 to a base field elem, then cast to the extension field.
     fn from_u64(val: u64) -> Self {
         Self([Elem::from_u64(val), Elem::ZERO, Elem::ZERO, Elem::ZERO])
     }
 
+    // TODO(victor): Look into usages of this method.
     fn to_u32_words(&self) -> Vec<u32> {
         self.elems()
             .iter()
@@ -473,16 +517,25 @@ impl field::Elem for ExtElem {
             .collect()
     }
 
+    // TODO(victor): Look into usages of this method.
     fn from_u32_words(val: &[u32]) -> Self {
         field::ExtElem::from_subelems(val.iter().map(|word| Elem(*word)))
     }
 
     // So we're not checking every subfield element every time we do
     // anything, assume that if our first subelement is valid, the
-    // whole thing is valid.  Any subfield elements will doublee check
+    // whole thing is valid.  Any subfield elements will be double checked
     // when we do operations on them anyways.
     fn is_valid(&self) -> bool {
         self.0[0].is_valid()
+    }
+
+    fn is_reduced(&self) -> bool {
+        let mut valid = true;
+        for comp in self.0 {
+            valid &= comp.0 < P;
+        }
+        valid
     }
 }
 
@@ -495,6 +548,7 @@ impl field::ExtElem for ExtElem {
         Self::from([*elem.ensure_valid(), Elem::ZERO, Elem::ZERO, Elem::ZERO])
     }
 
+    // TODO(victor): Look for usages of this. It panics when less than 4 elements are provided.
     fn from_subelems(elems: impl IntoIterator<Item = Self::SubElem>) -> Self {
         let mut iter = elems.into_iter();
         let elem = Self::from([
@@ -558,6 +612,7 @@ impl ExtElem {
         Self([x, Elem::new(0), Elem::new(0), Elem::new(0)])
     }
 
+    // TODO(victor): Review usage of this method
     /// Create an [ExtElem] from a raw integer.
     pub const fn from_u32(x0: u32) -> Self {
         Self([Elem::new(x0), Elem::new(0), Elem::new(0), Elem::new(0)])

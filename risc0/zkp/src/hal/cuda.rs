@@ -14,7 +14,7 @@
 
 use std::{cell::RefCell, fmt::Debug, marker::PhantomData, rc::Rc};
 
-use bytemuck::Pod;
+use bytemuck::NoUninit;
 use cust::{
     device::DeviceAttribute,
     function::{BlockSize, GridSize},
@@ -346,7 +346,7 @@ pub struct BufferImpl<T> {
     marker: PhantomData<T>,
 }
 
-impl<T: Pod> BufferImpl<T> {
+impl<T: NoUninit> BufferImpl<T> {
     fn new(name: &'static str, size: usize) -> Self {
         let bytes_len = std::mem::size_of::<T>() * size;
         assert!(bytes_len > 0);
@@ -385,7 +385,7 @@ impl<T: Pod> BufferImpl<T> {
     }
 }
 
-impl<T: Pod> Buffer<T> for BufferImpl<T> {
+impl<T> Buffer<T> for BufferImpl<T> {
     fn name(&self) -> &'static str {
         self.buffer.borrow().name
     }
@@ -407,6 +407,7 @@ impl<T: Pod> Buffer<T> for BufferImpl<T> {
     fn view<F: FnOnce(&[T])>(&self, f: F) {
         let buf = self.buffer.borrow_mut();
         let host_buf = buf.buf.as_host_vec().unwrap();
+        // TODO(victor): Find a new way to be an (unchecked) cast here.
         let slice = bytemuck::cast_slice(&host_buf);
         f(&slice[self.offset..]);
     }
@@ -414,7 +415,8 @@ impl<T: Pod> Buffer<T> for BufferImpl<T> {
     fn view_mut<F: FnOnce(&mut [T])>(&self, f: F) {
         let mut buf = self.buffer.borrow_mut();
         let mut host_buf = buf.buf.as_host_vec().unwrap();
-        let slice = bytemuck::cast_slice_mut(&mut host_buf);
+        // TODO(victor): Find a new way to be an (unchecked) cast here.
+        let slice = bytemuck::cast_slice(&host_buf);
         f(&mut slice[self.offset..]);
         buf.buf.copy_from(&host_buf).unwrap();
     }
@@ -490,7 +492,7 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
     type Field = BabyBear;
     type Elem = BabyBearElem;
     type ExtElem = BabyBearExtElem;
-    type Buffer<T: Clone + Debug + PartialEq + Pod> = BufferImpl<T>;
+    type Buffer<T: Clone + Debug + PartialEq + NoUninit> = BufferImpl<T>;
 
     fn alloc_elem(&self, name: &'static str, size: usize) -> Self::Buffer<Self::Elem> {
         BufferImpl::new(name, size)

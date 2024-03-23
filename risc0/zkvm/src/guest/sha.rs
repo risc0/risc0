@@ -257,9 +257,9 @@ impl risc0_zkp::core::hash::sha::Sha256 for Impl {
         unsafe { &mut *digest }
     }
 
-    fn hash_raw_pod_slice<T: bytemuck::Pod>(pod: &[T]) -> Self::DigestPtr {
+    fn hash_raw_data_slice<T: bytemuck::NoUninit>(data: &[T]) -> Self::DigestPtr {
         let digest = alloc_uninit_digest();
-        let words: &[u32] = bytemuck::cast_slice(pod);
+        let words: &[u32] = bytemuck::cast_slice(data);
         update_u32(digest, &SHA256_INIT, words, WithoutTrailer);
         // Now that digest is initialized, we can convert it to a reference.
         unsafe { &mut *digest }

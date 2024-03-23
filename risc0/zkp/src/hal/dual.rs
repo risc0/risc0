@@ -14,7 +14,6 @@
 
 use std::{fmt::Debug, marker::PhantomData, rc::Rc};
 
-use bytemuck::Pod;
 use risc0_core::field::Field;
 
 use super::{Buffer, CircuitHal, Hal};
@@ -57,7 +56,7 @@ where
 
 impl<T, L, R> Buffer<T> for BufferImpl<T, L, R>
 where
-    T: Clone + Debug + PartialEq + Pod,
+    T: Clone + Debug + PartialEq,
     L: Buffer<T>,
     R: Buffer<T>,
 {
@@ -118,7 +117,7 @@ where
     type Field = F;
     type Elem = F::Elem;
     type ExtElem = F::ExtElem;
-    type Buffer<T: Clone + Debug + PartialEq + Pod> = BufferImpl<T, L::Buffer<T>, R::Buffer<T>>;
+    type Buffer<T: Clone + Debug + PartialEq> = BufferImpl<T, L::Buffer<T>, R::Buffer<T>>;
 
     fn get_hash_suite(&self) -> &HashSuite<Self::Field> {
         self.lhs.get_hash_suite()
