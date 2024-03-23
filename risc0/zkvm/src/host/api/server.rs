@@ -610,6 +610,10 @@ fn build_env<'a>(
     if !request.pprof_out.is_empty() {
         env_builder.enable_profiler(Path::new(&request.pprof_out));
     }
+    if !request.segment_path.is_empty() {
+        env_builder.segment_path(Path::new(&request.segment_path));
+    }
+
     for assumption in request.assumptions.iter() {
         match assumption.kind.as_ref().ok_or(malformed_err())? {
             pb::api::assumption::Kind::Proven(asset) => {

@@ -63,6 +63,15 @@ pub enum SegmentPath {
     Path(PathBuf),
 }
 
+impl SegmentPath {
+    pub(crate) fn path(&self) -> &Path {
+        match self {
+            Self::TempDir(dir) => dir.path(),
+            Self::Path(path) => path.as_path(),
+        }
+    }
+}
+
 /// The [crate::Executor] is configured from this object.
 ///
 /// The executor environment holds configuration details that inform how the
