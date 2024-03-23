@@ -32,6 +32,7 @@ risc0-zkvm = { path = "../risc0/zkvm", default-features = false, features = [
   "prove",
 ] }
 risc0-zkvm-methods = { path = "../risc0/zkvm/methods" }
+risc0-zkvm-platform = { path = "../risc0/zkvm/platform" }
 serde = { version = "1.0", features = ["derive"] }
 sha2 = "0.10"
 sha3 = "0.10"
