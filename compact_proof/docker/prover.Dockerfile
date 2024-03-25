@@ -1,4 +1,4 @@
-# syntax=docker/dockerfile:1.4
+# syntax=docker/dockerfile:1.7
 FROM rust:1.74.0 AS dependencies
 
 WORKDIR /src/
