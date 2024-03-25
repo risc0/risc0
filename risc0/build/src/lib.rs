@@ -36,7 +36,7 @@ use risc0_zkp::core::digest::DIGEST_WORDS;
 use risc0_zkvm_platform::memory;
 use serde::Deserialize;
 
-pub use docker::{docker_build, get_elf_path, get_root_pkg, get_targets};
+pub use docker::{docker_build, get_elf_path, get_root_pkg, get_targets, BuildStatus};
 
 const RUSTUP_TOOLCHAIN_NAME: &str = "risc0";
 

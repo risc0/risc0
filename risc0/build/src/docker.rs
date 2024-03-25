@@ -40,8 +40,25 @@ const DOCKER_IGNORE: &str = r#"
 
 const TARGET_DIR: &str = "target/riscv-guest/riscv32im-risc0-zkvm-elf/docker";
 
+/// Indicates weather the build was successful or skipped.
+pub enum BuildStatus {
+    /// The build was successful.
+    Success,
+    /// The build was skipped.
+    Skipped,
+}
+
 /// Build the package in the manifest path using a docker environment.
-pub fn docker_build(manifest_path: &Path, src_dir: &Path, features: &[String]) -> Result<()> {
+pub fn docker_build(
+    manifest_path: &Path,
+    src_dir: &Path,
+    features: &[String],
+) -> Result<BuildStatus> {
+    if !get_env_var("RISC0_SKIP_BUILD").is_empty() {
+        eprintln!("Skipping build because RISC0_SKIP_BUILD is set");
+        return Ok(BuildStatus::Skipped);
+    }
+
     let manifest_path = canonicalize_path(manifest_path)?;
     let src_dir = canonicalize_path(src_dir)?;
     let root_pkg = get_root_pkg(&manifest_path, &src_dir)?;
@@ -81,7 +98,7 @@ pub fn docker_build(manifest_path: &Path, src_dir: &Path, features: &[String]) -
         }
     }
 
-    Ok(())
+    Ok(BuildStatus::Success)
 }
 
 fn canonicalize_path(path: &Path) -> Result<PathBuf> {
@@ -104,11 +121,6 @@ pub fn get_elf_path(
 
 /// TODO: write doc
 pub fn get_root_pkg(manifest_path: &PathBuf, src_dir: &PathBuf) -> Result<cargo_metadata::Package> {
-    if !get_env_var("RISC0_SKIP_BUILD").is_empty() {
-        // TODO: Change to Ok
-        bail!("RISC0_SKIP_BUILD is set")
-    }
-
     eprintln!("Docker context: {src_dir:?}");
     let meta = MetadataCommand::new()
         .manifest_path(manifest_path)
