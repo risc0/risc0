@@ -21,9 +21,8 @@ use risc0_build::BuildStatus;
 
 use crate::commands::build_guest;
 
-// TODO: How to use the version from risc0_zkvm?
-// use risc0_zkvm::VERSION;
-const VERSION: &str = "0.21.0";
+/// Reports the current version of this crate.
+pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 /// `cargo risczero deploy`
 ///
