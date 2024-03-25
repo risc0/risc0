@@ -50,6 +50,7 @@
     "Holesky",
     "posix",
     "repr",
+    "risczero",
     "Sepolia",
     "Zeroable"
   ],
