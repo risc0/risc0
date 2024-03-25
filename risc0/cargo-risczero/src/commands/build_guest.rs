@@ -36,12 +36,8 @@ pub struct BuildGuest {
 
 impl BuildGuest {
     pub fn run(&self) -> Result<()> {
-        self.build()?;
+        build(&self.manifest_path, &self.features)?;
         Ok(())
-    }
-
-    fn build(&self) -> Result<BuildStatus> {
-        build(&self.manifest_path, &self.features)
     }
 }
 
