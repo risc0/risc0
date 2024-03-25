@@ -15,10 +15,13 @@
 use std::path::PathBuf;
 
 use anyhow::{Context, Result};
-use bonsai_sdk::alpha::Client;
+use bonsai_sdk::{alpha::Client, API_KEY_ENVVAR, API_URL_ENVVAR};
 use clap::Parser;
-use risc0_build::get_elf_path;
-use risc0_zkvm::VERSION;
+use risc0_build::BuildStatus;
+
+// TODO: How to use the version from risc0_zkvm?
+// use risc0_zkvm::VERSION;
+const VERSION: &str = "0.21.0";
 
 /// `cargo risczero build`
 ///
@@ -38,6 +41,14 @@ pub struct BuildGuest {
     /// Sends the guest code to Bonsai.
     #[arg(short, long)]
     pub deploy: bool,
+
+    /// API URL for Bonsai.
+    #[arg(long)]
+    pub api_url: Option<String>,
+
+    /// API key for Bonsai.
+    #[arg(long)]
+    pub api_key: Option<String>,
 }
 
 impl BuildGuest {
@@ -53,20 +64,23 @@ impl BuildGuest {
         Ok(())
     }
 
-    fn build(&self) -> Result<()> {
+    fn build(&self) -> Result<BuildStatus> {
         let src_dir = std::env::current_dir().unwrap();
         risc0_build::docker_build(&self.manifest_path, &src_dir, &self.features)
     }
 
     fn deploy(&self, client: Client) -> Result<()> {
         // Ensure we have an up to date artifact before deploying
-        self.build()?;
+        if let BuildStatus::Skipped = self.build()? {
+            eprintln!("Build skipped, nothing to deploy.");
+            return Ok(());
+        }
 
         let src_dir = std::env::current_dir().unwrap();
         let root_pkg = risc0_build::get_root_pkg(&self.manifest_path, &src_dir)?;
         for target in risc0_build::get_targets(&root_pkg) {
             if target.is_bin() {
-                let elf_path = get_elf_path(&src_dir, &root_pkg.name, &target.name);
+                let elf_path = risc0_build::get_elf_path(&src_dir, &root_pkg.name, &target.name);
                 let elf = std::fs::read(&elf_path).with_context(|| {
                     format!("Failed to read ELF file at path: {}", elf_path.display())
                 })?;
@@ -84,6 +98,30 @@ impl BuildGuest {
     }
 
     fn get_client(&self) -> Result<Client> {
-        Client::from_env(VERSION).with_context(|| "Failed to create Bonsai client")
+        let (api_url, api_key) = self.get_client_envs()?;
+
+        Client::from_parts(api_url, api_key, VERSION).context("Failed to create Bonsai client")
+    }
+
+    fn get_client_envs(&self) -> Result<(String, String)> {
+        let api_url = if let Some(api_url) = self.api_url.clone() {
+            api_url
+        } else {
+            std::env::var(API_URL_ENVVAR).context(format!(
+                "Either `--api-url` or `{}` env var must be set",
+                API_URL_ENVVAR
+            ))?
+        };
+
+        let api_key = if let Some(api_key) = self.api_key.clone() {
+            api_key
+        } else {
+            std::env::var(API_KEY_ENVVAR).context(format!(
+                "Either `--api-key` or `{}` env var must be set",
+                API_KEY_ENVVAR
+            ))?
+        };
+
+        Ok((api_url, api_key))
     }
 }
