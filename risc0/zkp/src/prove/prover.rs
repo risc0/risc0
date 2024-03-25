@@ -358,11 +358,11 @@ impl<'a, H: Hal> Prover<'a, H> {
 
         let proven_soundness_error =
             super::soundness::proven::<H>(self.taps, final_poly_coeffs.size());
-        println!("proven_soundness_error: {proven_soundness_error:?}");
+        tracing::info!("proven_soundness_error: {proven_soundness_error:?}");
 
         let conjectured_soundness_error =
             super::soundness::conjectured_strict::<H>(self.taps, final_poly_coeffs.size());
-        println!("conjectured_soundness_error: {conjectured_soundness_error:?}");
+        tracing::info!("conjectured_soundness_error: {conjectured_soundness_error:?}");
 
         // Return final proof
         let proof = self.iop.proof;
