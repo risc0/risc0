@@ -5502,6 +5502,7 @@ dependencies = [
  "ff",
  "hex",
  "lazy_static",
+ "libm",
  "metal",
  "ndarray",
  "parking_lot 0.12.1",
