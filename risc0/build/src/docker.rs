@@ -106,7 +106,7 @@ fn canonicalize_path(path: &Path) -> Result<PathBuf> {
         .context(format!("Failed to canonicalize path: {path:?}"))
 }
 
-/// TODO: write doc
+/// Get the path to the ELF binary.
 pub fn get_elf_path(
     src_dir: impl AsRef<Path>,
     pkg_name: impl AsRef<Path> + ToString,
@@ -119,7 +119,7 @@ pub fn get_elf_path(
         .join(target_name)
 }
 
-/// TODO: write doc
+/// Get the root package from the manifest path.
 pub fn get_root_pkg(manifest_path: &PathBuf, src_dir: &PathBuf) -> Result<cargo_metadata::Package> {
     eprintln!("Docker context: {src_dir:?}");
     let meta = MetadataCommand::new()
@@ -133,7 +133,7 @@ pub fn get_root_pkg(manifest_path: &PathBuf, src_dir: &PathBuf) -> Result<cargo_
         .clone())
 }
 
-/// TODO: write doc
+/// Get the targets from the root package.
 pub fn get_targets(root_pkg: &cargo_metadata::Package) -> Vec<cargo_metadata::Target> {
     root_pkg
         .targets
