@@ -1,26 +1,49 @@
-/// A soundness calculator for the RISC Zero STARK protocol that secures the
-/// RISC Zero zkVM. Soundness for STARK protocols can be analyzed under a
-/// number of different cryptographic assumptions. RISC Zero targets 100 bits
-/// of conjectured soundness, using the Toy Problem Conjecture. For
-/// completeness, we also include analysis in three other regimes:
-/// - Conjectured soundness using Conjecture 8.4 from [Proximity Gaps] and
-///   Conjecture 2.3 from [DEEP-FRI]
-/// - Proven soundness in the list-decoding regime
-/// - Proven soundness in the unique-decoding regime
+// Copyright 2024 RISC Zero, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
-use crate::{hal::Hal, taps::TapSet, FRI_FOLD, FRI_MIN_DEGREE, INV_RATE};
+//! A soundness calculator for the RISC Zero STARK protocol that secures the
+//! RISC Zero zkVM. Soundness for STARK protocols can be analyzed under a
+//! number of different cryptographic assumptions. RISC Zero targets 100 bits
+//! of conjectured soundness, using the Toy Problem Conjecture. For
+//! completeness, we also include analysis in three other regimes:
+//!
+//! - Conjectured soundness using Conjecture 8.4 from [Proximity Gaps] and
+//!   Conjecture 2.3 from [DEEP-FRI]
+//! - Proven soundness in the list-decoding regime
+//! - Proven soundness in the unique-decoding regime
+
 use risc0_core::field::{baby_bear, ExtElem};
+
+use crate::{
+    adapter::{REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA},
+    hal::Hal,
+    taps::TapSet,
+    FRI_FOLD, FRI_MIN_DEGREE, INV_RATE,
+};
 
 /// Johnson parameter. See https://eprint.iacr.org/2022/1216
 const M: f32 = 16.0;
 
 /// Rate
-const RHO: f32 = 1.0 / crate::INV_RATE as f32;
+const RHO: f32 = 1.0 / INV_RATE as f32;
 
-/// η in Conjecture 8.4 of the Proximity Gaps paper [BCIKS21](https://eprint.iacr.org/2020/654.pdf)
+/// η in Conjecture 8.4 of the Proximity Gaps paper
+/// [BCIKS21](https://eprint.iacr.org/2020/654.pdf)
 const ETA: f32 = 0.05;
 
-/// Compute the security level of the system based on the proven FRI list-decoding regime (up to 1-sqrt(rate)).
+/// Compute the security level of the system based on the proven FRI
+/// list-decoding regime (up to 1-sqrt(rate)).
 pub fn proven<H: Hal>(taps: &TapSet, coeffs_size: usize) -> f32 {
     let params = parameters::<H>(taps, coeffs_size);
     let e_proximity_gap = params.e_proximity_gap_proven();
@@ -36,10 +59,11 @@ pub fn proven<H: Hal>(taps: &TapSet, coeffs_size: usize) -> f32 {
 
         (m_plus + 0.5) / rho_plus.sqrt()
     };
-    soundness_error::<H>(&params, theta, e_proximity_gap, l_plus)
+    soundness_error(&params, theta, e_proximity_gap, l_plus)
 }
 
-/// Compute the security level of the system based on the FRI list-decoding conjecture (up to 1-rate).
+/// Compute the security level of the system based on the FRI list-decoding
+/// conjecture (up to 1-rate).
 pub fn conjectured<H: Hal>(taps: &TapSet, coeffs_size: usize) -> f32 {
     let params = parameters::<H>(taps, coeffs_size);
     let theta = 1.0 - RHO - ETA;
@@ -50,31 +74,34 @@ pub fn conjectured<H: Hal>(taps: &TapSet, coeffs_size: usize) -> f32 {
         let c_rho = 1; // unspecified exponent parameter in DEEP-FRI, Conjecture 2.3
         (params.lde_domain_size / epsilon_plus).powi(c_rho)
     };
-    soundness_error::<H>(&params, theta, e_proximity_gap, l_plus)
+    soundness_error(&params, theta, e_proximity_gap, l_plus)
 }
 
 /// Compute the system security following the Toy Model conjecture of ethSTARK.
 /// This conjecture states that:
-/// 1. any AIR is as secure as the "simplest AIR" (1 column and degree 1 constraint).
-/// 2. The security of FRI matches its known upper bound (rather than the proven lower bound).
-#[allow(unused)]
+/// 1. any AIR is as secure as the "simplest AIR" (1 column and degree 1
+///    constraint).
+/// 2. The security of FRI matches its known upper bound (rather than the proven
+///    lower bound).
 pub fn toy_model_security<H: Hal>() -> f32 {
     let ext_size = H::ExtElem::EXT_SIZE as f32;
     let field_size = baby_bear::P as f32;
-    let ext_field_size = libm::powf(field_size, ext_size);
+    let ext_field_size = field_size.powf(ext_size);
 
     let constraints_error = 1f32 / ext_field_size;
     let fri_error = RHO.powi(crate::QUERIES as i32);
 
-    libm::log2f(constraints_error + fri_error)
+    let sum = constraints_error + fri_error;
+    sum.log2().abs()
 }
 
 /// Helper function. Combines the soundness error terms from different system components.
-fn soundness_error<H: Hal>(params: &Params, theta: f32, e_proximity_gap: f32, l_plus: f32) -> f32 {
+fn soundness_error(params: &Params, theta: f32, e_proximity_gap: f32, l_plus: f32) -> f32 {
     let plonk_plookup_error = params.plonk_plookup_error();
     let fri_error = params.e_fri(theta, e_proximity_gap);
     let deep_ali_error = params.e_deep_ali(l_plus);
-    libm::log2f(plonk_plookup_error + fri_error + deep_ali_error)
+    let sum = plonk_plookup_error + fri_error + deep_ali_error;
+    sum.log2().abs()
 }
 
 /// (1 - θ)^QUERIES
@@ -118,16 +145,15 @@ struct Params {
     num_folding_rounds: usize,
 }
 
-/// Compute circuit parameters given a tapset, number of trace rows and all the global constants.
+/// Compute circuit parameters given a tapset, number of trace rows and all the
+/// global constants.
 fn parameters<H: Hal>(taps: &TapSet, coeffs_size: usize) -> Params {
     // Circuit-specific info
-    // FIXME get from circuit instead of hard-coding
+    // FIXME: get from circuit instead of hard-coding
     let n_sigma_mem = 5;
-    // FIXME get from circuit instead of hard-coding
+    // FIXME: get from circuit instead of hard-coding
     let n_sigma_bytes = 15;
     let n_trace_polys = {
-        use crate::adapter::{REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA};
-
         let w_accum = taps.group_size(REGISTER_GROUP_ACCUM) as f32;
         let w_code = taps.group_size(REGISTER_GROUP_CODE) as f32;
         let w_data = taps.group_size(REGISTER_GROUP_DATA) as f32;
@@ -135,14 +161,14 @@ fn parameters<H: Hal>(taps: &TapSet, coeffs_size: usize) -> Params {
         w_accum + w_code + w_data
     };
     // Max degree of the constraint system, i.e. no. of segment polys
-    // FIXME get from circuit instead of hard-coding
+    // FIXME: get from circuit instead of hard-coding
     let d = 4.0;
 
     let biggest_combo = taps.combos().map(|combo| combo.size()).max().unwrap() as f32;
 
     let ext_size = H::ExtElem::EXT_SIZE;
     let field_size = baby_bear::P as f32;
-    let ext_field_size = libm::powf(field_size, ext_size as f32);
+    let ext_field_size = field_size.powf(ext_size as f32);
     let trace_domain_size = (coeffs_size / ext_size) as f32;
     let lde_domain_size = trace_domain_size * INV_RATE as f32;
 
@@ -233,11 +259,15 @@ impl Params {
     }
 }
 
-#[test]
-fn toy_model() {
+#[cfg(test)]
+mod tests {
     use risc0_core::field::baby_bear::BabyBear;
+
     use crate::hal::cpu::CpuHal;
 
-    let security = toy_model_security::<CpuHal<BabyBear>>();
-    println!("Toy model security: {}", security);
+    #[test]
+    fn toy_model() {
+        let security = super::toy_model_security::<CpuHal<BabyBear>>();
+        assert_eq!(security, 100.0);
+    }
 }

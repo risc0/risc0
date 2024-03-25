@@ -745,7 +745,6 @@ dependencies = [
  "bytemuck",
  "digest",
  "hex",
- "libm",
  "paste",
  "rand_core",
  "risc0-core",
