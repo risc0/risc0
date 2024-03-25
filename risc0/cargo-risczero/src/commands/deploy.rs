@@ -25,7 +25,7 @@ use crate::commands::build_guest;
 // use risc0_zkvm::VERSION;
 const VERSION: &str = "0.21.0";
 
-/// `cargo risczero build`
+/// `cargo risczero deploy`
 ///
 /// NOTE: Requires Docker to be installed and running.
 #[derive(Parser)]
