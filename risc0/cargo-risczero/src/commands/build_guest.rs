@@ -18,11 +18,7 @@ use anyhow::{Context, Result};
 use bonsai_sdk::alpha::Client;
 use clap::Parser;
 use risc0_build::get_elf_path;
-
-// TODO: move this to a shared location
-// TODO: How can we use the version from the risc0 crate instead of hardcoding
-// it here?
-pub const VERSION: &str = "0.21.0";
+use risc0_zkvm::VERSION;
 
 /// `cargo risczero build`
 ///
@@ -62,7 +58,7 @@ impl BuildGuest {
         risc0_build::docker_build(&self.manifest_path, &src_dir, &self.features)
     }
 
-    pub fn deploy(&self, client: Client) -> Result<()> {
+    fn deploy(&self, client: Client) -> Result<()> {
         // Ensure we have an up to date artifact before deploying
         self.build()?;
 
