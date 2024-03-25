@@ -30,7 +30,6 @@ fn main() -> Result<()> {
         RisczeroCmd::BuildToolchain(cmd) => cmd.run(),
         RisczeroCmd::Install(cmd) => cmd.run(),
         RisczeroCmd::New(cmd) => cmd.run(),
-        RisczeroCmd::Deploy(cmd) => cmd.run(),
         #[cfg(feature = "experimental")]
         RisczeroCmd::BuildCrate(build) => build.run(BuildSubcommand::Build),
         #[cfg(feature = "experimental")]
