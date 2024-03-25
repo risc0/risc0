@@ -17,7 +17,7 @@ permissions:
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  RISC0_TOOLCHAIN_VERSION: v2024-01-31.1
+  RISC0_TOOLCHAIN_VERSION: v2024-02-08.1
 
 jobs:
   changes:
@@ -65,19 +65,13 @@ jobs:
   main:
     if: needs.changes.outputs.main == 'true'
     needs: changes
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, prod, Linux, cpu]
     steps:
       - uses: actions/checkout@v4
-        with:
-          # Recursive checkout required to build Solidity contracts and bindings.
-          submodules: recursive
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
         with:
           key: Linux-default
-      - uses: risc0/foundry-toolchain@2fe7e70b520f62368a0e3c464f997df07ede420f
-        with:
-          version: nightly-09fe3e041369a816365a020f715ad6f94dbce9f2
       - uses: risc0/cargo-install@b9307573043522ab0d3e3be64a51763b765b52a4
         with:
           crate: cargo-binstall
@@ -99,12 +93,9 @@ jobs:
   version-0_20:
     if: needs.changes.outputs.version-0_20 == 'true'
     needs: changes
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, prod, Linux, cpu]
     steps:
       - uses: actions/checkout@v4
-        with:
-          # Recursive checkout required to build Solidity contracts and bindings.
-          submodules: recursive
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
         with:

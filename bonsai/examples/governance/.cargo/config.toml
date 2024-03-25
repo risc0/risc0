@@ -1,8 +1,0 @@
-[build]
-rustflags = [
-  "-Dclippy::all",
-  "-Dwarnings"
-]
-
-[net]
-git-fetch-with-cli = true

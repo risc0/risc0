@@ -32,7 +32,7 @@ use risc0_zkvm::{
 #[derive(Parser)]
 pub struct Bootstrap;
 
-const CONTROL_ID_PATH_RV32IM: &str = "risc0/zkvm/src/host/control_id.rs";
+const CONTROL_ID_PATH_RV32IM: &str = "risc0/circuit/rv32im/src/control_id.rs";
 const CONTROL_ID_PATH_RECURSION: &str = "risc0/circuit/recursion/src/control_id.rs";
 
 impl Bootstrap {
@@ -42,16 +42,17 @@ impl Bootstrap {
     }
 
     fn generate_rv32im_control_ids() -> Vec<Digest> {
-        let loader = Loader::new();
         tracing::info!("computing control IDs with SHA-256");
-        let control_id_sha256 =
-            loader.compute_control_id(&CpuHal::new(Sha256HashSuite::<BabyBear>::new_suite()));
+        let control_id_sha256 = Loader::compute_control_id_table(&CpuHal::new(Sha256HashSuite::<
+            BabyBear,
+        >::new_suite(
+        )));
         tracing::info!("computing control IDs with Poseidon2");
         let control_id_poseidon2 =
-            loader.compute_control_id(&CpuHal::new(Poseidon2HashSuite::new_suite()));
+            Loader::compute_control_id_table(&CpuHal::new(Poseidon2HashSuite::new_suite()));
         tracing::info!("computing control IDs with Blake2b");
         let control_id_blake2b =
-            loader.compute_control_id(&CpuHal::new(Blake2bCpuHashSuite::new_suite()));
+            Loader::compute_control_id_table(&CpuHal::new(Blake2bCpuHashSuite::new_suite()));
 
         let contents = format!(
             include_str!("templates/control_id_rv32im.rs"),
@@ -113,7 +114,7 @@ impl Bootstrap {
 
                 tracing::info!("computing control ID for {name} with Poseidon2");
                 let control_id = program.compute_control_id(Poseidon2HashSuite::new_suite());
-                valid_control_ids.push(control_id.clone());
+                valid_control_ids.push(control_id);
 
                 tracing::debug!("{name} control id: {control_id:?}");
                 (name, control_id)

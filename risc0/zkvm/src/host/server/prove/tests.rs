@@ -15,20 +15,21 @@
 use std::rc::Rc;
 
 use anyhow::Result;
-use risc0_circuit_rv32im::cpu::CpuCircuitHal;
+use risc0_binfmt::MemoryImage;
+use risc0_circuit_rv32im::prove::{emu::testutil, hal::cpu::CpuCircuitHal};
 use risc0_zkp::{
     core::{digest::Digest, hash::blake2b::Blake2bCpuHashSuite},
     hal::cpu::CpuHal,
     verify::VerificationError,
 };
 use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID};
-use risc0_zkvm_platform::{memory, WORD_SIZE};
+use risc0_zkvm_platform::{memory, PAGE_SIZE, WORD_SIZE};
 use serial_test::serial;
 use test_log::test;
 
 use super::{get_prover_server, HalPair, ProverImpl};
 use crate::{
-    host::{server::testutils, CIRCUIT},
+    host::server::testutils,
     serde::{from_slice, to_vec},
     ExecutorEnv, ExecutorImpl, ExitCode, ProverOpts, ProverServer, Receipt, Session,
     VerifierContext,
@@ -71,7 +72,7 @@ fn hashfn_poseidon2() {
 fn hashfn_blake2b() {
     let hal_pair = HalPair {
         hal: Rc::new(CpuHal::new(Blake2bCpuHashSuite::new_suite())),
-        circuit_hal: Rc::new(CpuCircuitHal::new(&CIRCUIT)),
+        circuit_hal: Rc::new(CpuCircuitHal::new()),
     };
     let env = ExecutorEnv::builder()
         .write(&MultiTestSpec::DoNothing)
@@ -232,21 +233,15 @@ fn memory_io() {
     assert_eq!(run_memio(&[(POS, 1)]).unwrap(), ExitCode::Halted(0));
 
     // Unaligned write is bad
-    assert!(run_memio(&[(POS + 1001, 1)])
-        .err()
-        .unwrap()
-        .to_string()
-        .contains("fault"));
+    let err = run_memio(&[(POS + 1001, 1)]).err().unwrap().to_string();
+    assert!(err.contains("StoreAddressMisaligned"), "{err}");
 
     // Aligned read is fine
     assert_eq!(run_memio(&[(POS, 0)]).unwrap(), ExitCode::Halted(0));
 
     // Unaligned read is bad
-    assert!(run_memio(&[(POS + 1, 0)])
-        .err()
-        .unwrap()
-        .to_string()
-        .contains("fault"));
+    let err = run_memio(&[(POS + 1, 0)]).err().unwrap().to_string();
+    assert!(err.contains("LoadAddressMisaligned"), "{err}");
 }
 
 #[test]
@@ -383,77 +378,114 @@ mod riscv {
     test_case!(xori);
 }
 
+#[test]
+fn pause_resume() {
+    let env = ExecutorEnv::builder()
+        .write(&MultiTestSpec::PauseContinue(0))
+        .unwrap()
+        .build()
+        .unwrap();
+    let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
+
+    // Run until sys_pause
+    let session = exec.run().unwrap();
+    assert_eq!(session.segments.len(), 1);
+    assert_eq!(session.exit_code, ExitCode::Paused(0));
+    let receipt = prove_session_fast(&session);
+    let segments = &receipt.inner.composite().unwrap().segments;
+    assert_eq!(segments.len(), 1);
+    assert_eq!(segments[0].index, 0);
+
+    // Run until sys_halt
+    let session = exec.run().unwrap();
+    assert_eq!(session.exit_code, ExitCode::Halted(0));
+    prove_session_fast(&session);
+}
+
+#[test]
+fn continuation() {
+    const COUNT: usize = 2; // Number of total chunks to aim for.
+
+    let program = testutil::simple_loop();
+    let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
+
+    let env = ExecutorEnv::builder()
+        .segment_limit_po2(14) // 16k cycles
+        .build()
+        .unwrap();
+    let mut exec = ExecutorImpl::new(env, image).unwrap();
+    let session = exec.run().unwrap();
+    let segments: Vec<_> = session
+        .segments
+        .iter()
+        .map(|x| x.resolve().unwrap())
+        .collect();
+    assert_eq!(segments.len(), COUNT);
+
+    let (final_segment, segments) = segments.split_last().unwrap();
+    for segment in segments {
+        assert_eq!(segment.inner.exit_code, ExitCode::SystemSplit);
+    }
+    assert_eq!(final_segment.inner.exit_code, ExitCode::Halted(0));
+
+    let receipt = prove_session_fast(&session);
+    for (idx, receipt) in receipt
+        .inner
+        .composite()
+        .unwrap()
+        .segments
+        .iter()
+        .enumerate()
+    {
+        assert_eq!(receipt.index, idx as u32);
+    }
+}
+
 #[cfg(feature = "docker")]
-mod docker {
-    use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF};
-    use test_log::test;
+#[test]
+fn stark2snark() {
+    use crate::{
+        get_prover_server, recursion::identity_p254, CompactReceipt, ExecutorEnv, ExecutorImpl,
+        InnerReceipt, ProverOpts, Receipt, VerifierContext,
+    };
+    use risc0_groth16::docker::stark_to_snark;
+    use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID};
 
-    use super::prove_session_fast;
-    use crate::{ExecutorEnv, ExecutorImpl, ExitCode};
+    let env = ExecutorEnv::builder()
+        .write(&MultiTestSpec::BusyLoop { cycles: 0 })
+        .unwrap()
+        .build()
+        .unwrap();
 
-    #[test]
-    fn pause_continue() {
-        let env = ExecutorEnv::builder()
-            .write(&MultiTestSpec::PauseContinue(0))
-            .unwrap()
-            .build()
-            .unwrap();
-        let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
+    tracing::info!("execute");
 
-        // Run until sys_pause
-        let session = exec.run().unwrap();
-        assert_eq!(session.segments.len(), 1);
-        assert_eq!(session.exit_code, ExitCode::Paused(0));
-        let receipt = prove_session_fast(&session);
-        let segments = &receipt.inner.composite().unwrap().segments;
-        assert_eq!(segments.len(), 1);
-        assert_eq!(segments[0].index, 0);
+    let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
+    let session = exec.run().unwrap();
 
-        // Run until sys_halt
-        let session = exec.run().unwrap();
-        assert_eq!(session.exit_code, ExitCode::Halted(0));
-        prove_session_fast(&session);
-    }
+    tracing::info!("prove");
+    let opts = ProverOpts::default();
+    let ctx = VerifierContext::default();
+    let prover = get_prover_server(&opts).unwrap();
+    let receipt = prover.prove_session(&ctx, &session).unwrap();
+    let claim = receipt.get_claim().unwrap();
+    let composite_receipt = receipt.inner.composite().unwrap();
+    let succinct_receipt = prover.compress(composite_receipt).unwrap();
+    let journal = session.journal.unwrap().bytes;
 
-    #[test]
-    fn continuation() {
-        const COUNT: usize = 2; // Number of total chunks to aim for.
-        let segment_limit_po2 = 16; // 64k cycles
-        let cycles = 1 << segment_limit_po2;
+    tracing::info!("identity_p254");
+    let ident_receipt = identity_p254(&succinct_receipt).unwrap();
+    let seal_bytes = ident_receipt.get_seal_bytes();
 
-        let env = ExecutorEnv::builder()
-            .write(&MultiTestSpec::BusyLoop { cycles })
-            .unwrap()
-            .segment_limit_po2(segment_limit_po2)
-            .build()
-            .unwrap();
-        let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
-        let session = exec.run().unwrap();
-        let segments: Vec<_> = session
-            .segments
-            .iter()
-            .map(|x| x.resolve().unwrap())
-            .collect();
-        assert_eq!(segments.len(), COUNT);
+    tracing::info!("stark-to-snark");
+    let seal = stark_to_snark(&seal_bytes).unwrap().to_vec();
 
-        let (final_segment, segments) = segments.split_last().unwrap();
-        for segment in segments {
-            assert_eq!(segment.exit_code, ExitCode::SystemSplit);
-        }
-        assert_eq!(final_segment.exit_code, ExitCode::Halted(0));
+    tracing::info!("Receipt");
+    let receipt = Receipt::new(
+        InnerReceipt::Compact(CompactReceipt { seal, claim }),
+        journal,
+    );
 
-        let receipt = prove_session_fast(&session);
-        for (idx, receipt) in receipt
-            .inner
-            .composite()
-            .unwrap()
-            .segments
-            .iter()
-            .enumerate()
-        {
-            assert_eq!(receipt.index, idx as u32);
-        }
-    }
+    receipt.verify(MULTI_TEST_ID).unwrap();
 }
 
 mod sys_verify {
@@ -510,8 +542,8 @@ mod sys_verify {
     }
 
     #[test]
-    fn sys_verify() {
-        let spec = &MultiTestSpec::SysVerify(vec![(
+    fn sys_verify_1() {
+        let spec = MultiTestSpec::SysVerify(vec![(
             HELLO_COMMIT_ID.into(),
             HELLO_COMMIT_RECEIPT.journal.bytes.clone(),
         )]);
@@ -530,6 +562,14 @@ mod sys_verify {
             .unwrap()
             .verify(MULTI_TEST_ID)
             .unwrap();
+    }
+
+    #[test]
+    fn sys_verify_2() {
+        let spec = MultiTestSpec::SysVerify(vec![(
+            HELLO_COMMIT_ID.into(),
+            HELLO_COMMIT_RECEIPT.journal.bytes.clone(),
+        )]);
 
         // Test that proving without a provided assumption results in an execution
         // failure.
@@ -542,6 +582,14 @@ mod sys_verify {
             .unwrap()
             .prove(env, MULTI_TEST_ELF)
             .is_err());
+    }
+
+    #[test]
+    fn sys_verify_3() {
+        let spec = MultiTestSpec::SysVerify(vec![(
+            HELLO_COMMIT_ID.into(),
+            HELLO_COMMIT_RECEIPT.journal.bytes.clone(),
+        )]);
 
         // Test that providing an unresolved assumption results in a conditional
         // receipt.
@@ -551,6 +599,7 @@ mod sys_verify {
             .add_assumption(HELLO_COMMIT_RECEIPT.get_claim().unwrap())
             .build()
             .unwrap();
+
         // TODO(#982) Conditional receipts currently return an error on verification.
         assert!(get_prover_server(&prover_opts_fast())
             .unwrap()

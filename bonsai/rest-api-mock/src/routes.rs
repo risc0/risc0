@@ -20,10 +20,10 @@ use axum::{
     Extension, Json,
 };
 use bonsai_sdk::alpha::responses::{
-    CreateSessRes, Groth16Seal, ImgUploadRes, ProofReq, SessionStatusRes, SnarkReceipt, SnarkReq,
+    CreateSessRes, ImgUploadRes, ProofReq, SessionStatusRes, SnarkReceipt, SnarkReq,
     SnarkStatusRes, UploadRes,
 };
-use risc0_zkvm::Receipt;
+use risc0_zkvm::{Groth16Seal, Receipt};
 use tracing::info;
 
 use crate::{
@@ -109,12 +109,16 @@ pub(crate) async fn session_status(
             receipt_url: Some(format!("{}/receipts/{}", storage.local_url, session_id)),
             error_msg: None,
             state: None,
+            elapsed_time: None,
+            stats: None,
         })),
         None => Ok(Json(SessionStatusRes {
             status,
             receipt_url: None,
             error_msg: None,
             state: None,
+            elapsed_time: None,
+            stats: None,
         })),
     }
 }
@@ -146,7 +150,6 @@ pub(crate) async fn snark_status(
                         a: vec![],
                         b: vec![],
                         c: vec![],
-                        public: vec![],
                     },
                     post_state_digest: vec![],
                     journal: receipt.journal.bytes,

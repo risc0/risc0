@@ -447,7 +447,7 @@ impl<'a> ParallelHandler<'a> {
             "Args missing formatting: {:?} in {msg}",
             args_left
         );
-        tracing::debug!("{}", formatted);
+        tracing::trace!("{}", formatted);
     }
 }
 

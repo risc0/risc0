@@ -84,13 +84,14 @@ impl<'a, H: Hal> Prover<'a, H> {
             self.taps.group_name(tap_group_index)
         );
 
+        let name = buf.name();
         let coeffs = make_coeffs(self.hal, buf, group_size);
         let group_ref = self.groups[tap_group_index].insert(PolyGroup::new(
             self.hal,
             coeffs,
             group_size,
             self.cycles,
-            "data",
+            name,
         ));
 
         group_ref.merkle.commit(&mut self.iop);

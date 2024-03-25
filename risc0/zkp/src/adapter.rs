@@ -93,7 +93,7 @@ pub trait PolyFp<F: Field> {
         &self,
         cycle: usize,
         steps: usize,
-        mix: &F::ExtElem,
+        mix: &[F::ExtElem],
         args: &[&[F::Elem]],
     ) -> F::ExtElem;
 }
@@ -110,8 +110,20 @@ pub trait PolyExt<F: Field> {
 pub trait TapsProvider {
     fn get_taps(&self) -> &'static TapSet<'static>;
 
+    fn accum_size(&self) -> usize {
+        self.get_taps().group_size(REGISTER_GROUP_ACCUM)
+    }
+
     fn code_size(&self) -> usize {
         self.get_taps().group_size(REGISTER_GROUP_CODE)
+    }
+
+    fn ctrl_size(&self) -> usize {
+        self.get_taps().group_size(REGISTER_GROUP_CODE)
+    }
+
+    fn data_size(&self) -> usize {
+        self.get_taps().group_size(REGISTER_GROUP_DATA)
     }
 }
 

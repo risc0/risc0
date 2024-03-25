@@ -57,7 +57,7 @@ fn run_test(spec: MultiTestSpec) {
 }
 
 #[test]
-#[should_panic(expected = "cycle count too large")]
+#[should_panic(expected = "too small")]
 fn insufficient_segment_limit() {
     let env = ExecutorEnv::builder()
         .segment_limit_po2(14)
@@ -86,7 +86,7 @@ fn basic() {
         image,
     };
     let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
-    let pre_image_id = image.compute_id().unwrap();
+    let pre_image_id = image.compute_id();
 
     let mut exec = ExecutorImpl::new(env, image).unwrap();
     let session = exec.run().unwrap();
@@ -94,9 +94,9 @@ fn basic() {
     let segment = session.segments.first().unwrap().resolve().unwrap();
 
     assert_eq!(session.segments.len(), 1);
-    assert_eq!(segment.exit_code, ExitCode::Halted(0));
-    assert_eq!(segment.pre_image.compute_id().unwrap(), pre_image_id);
-    assert_ne!(segment.post_state.digest(), pre_image_id);
+    assert_eq!(segment.inner.exit_code, ExitCode::Halted(0));
+    assert_eq!(segment.inner.pre_state.digest(), pre_image_id);
+    assert_ne!(segment.inner.post_state.digest(), pre_image_id);
     assert_eq!(segment.index, 0);
 }
 
@@ -121,7 +121,7 @@ fn system_split() {
 
     let program = Program { entry, image };
     let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
-    let pre_image_id = image.compute_id().unwrap();
+    let pre_image_id = image.compute_id();
 
     let mut exec = ExecutorImpl::new(env, image).unwrap();
     let session = exec.run().unwrap();
@@ -133,13 +133,13 @@ fn system_split() {
         .collect();
 
     assert_eq!(segments.len(), 2);
-    assert_eq!(segments[0].exit_code, ExitCode::SystemSplit);
-    assert_eq!(segments[0].pre_image.compute_id().unwrap(), pre_image_id);
-    assert_ne!(segments[0].post_state.digest(), pre_image_id);
-    assert_eq!(segments[1].exit_code, ExitCode::Halted(0));
+    assert_eq!(segments[0].inner.exit_code, ExitCode::SystemSplit);
+    assert_eq!(segments[0].inner.pre_state.digest(), pre_image_id);
+    assert_ne!(segments[0].inner.post_state.digest(), pre_image_id);
+    assert_eq!(segments[1].inner.exit_code, ExitCode::Halted(0));
     assert_eq!(
-        segments[1].pre_image.compute_id().unwrap(),
-        segments[0].post_state.digest()
+        segments[1].inner.pre_state.digest(),
+        segments[0].inner.post_state.digest()
     );
     assert_eq!(segments[0].index, 0);
     assert_eq!(segments[1].index, 1);
@@ -801,7 +801,7 @@ fn fault() {
         .unwrap();
     let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
     let err = exec.run().err().unwrap();
-    assert!(err.to_string().contains("fault"));
+    assert!(err.to_string().contains("StoreAccessFault"));
 }
 
 #[test]
@@ -921,12 +921,12 @@ fn memory_access() {
         .err()
         .unwrap()
         .to_string()
-        .contains("fault"));
+        .contains("StoreAccessFault"));
     assert!(access_memory(0x0C00_0000)
         .err()
         .unwrap()
         .to_string()
-        .contains("fault"));
+        .contains("StoreAccessFault"));
     assert_eq!(access_memory(0x0B00_0000).unwrap(), ExitCode::Halted(0));
 }
 
@@ -950,6 +950,7 @@ fn post_state_digest_randomization() {
                 .unwrap()
                 .resolve()
                 .unwrap()
+                .inner
                 .post_state
                 .digest()
         })
@@ -988,6 +989,7 @@ fn post_state_digest_randomization() {
                 .unwrap()
                 .resolve()
                 .unwrap()
+                .inner
                 .post_state
                 .digest()
         })
@@ -1001,7 +1003,7 @@ fn aligned_alloc() {
 }
 
 #[test]
-#[should_panic(expected = "cycle count too large")]
+#[should_panic(expected = "too small")]
 fn too_many_sha() {
     run_test(MultiTestSpec::TooManySha);
 }
@@ -1118,12 +1120,12 @@ mod docker {
         // this should contain exactly 2 segments
         assert!(run_session(1 << 16, 16, 2).is_ok());
 
-        // make sure that it's ok to run with a limit that's higher the actual count
+        // it's ok to run with a limit that's higher than the actual count
         assert!(run_session(1 << 16, 16, 10).is_ok());
 
-        let err = run_session(1 << 16, 15, 3).err().unwrap();
+        let err = run_session(1 << 16, 15, 2).err().unwrap();
         assert!(err.to_string().contains("Session limit exceeded"));
 
-        assert!(run_session(1 << 16, 15, 16).is_ok());
+        assert!(run_session(1 << 16, 15, 17).is_ok());
     }
 }
