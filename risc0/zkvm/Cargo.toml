@@ -62,7 +62,7 @@ elf = { version = "0.7", default-features = false, optional = true }
 human-repr = { version = "1.0", optional = true }
 lazy-regex = { version = "3.1", optional = true }
 prost = { version = "0.12", optional = true }
-rayon = { version = "1.5", optional = true }
+rayon = { version = "1.10", optional = true }
 risc0-circuit-recursion = { workspace = true }
 risc0-circuit-rv32im = { workspace = true }
 risc0-groth16 = { workspace = true }
