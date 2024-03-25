@@ -14,12 +14,19 @@
 
 use std::path::PathBuf;
 
-use anyhow::Result;
+use anyhow::{Context, Result};
 use bonsai_sdk::alpha::Client;
 use clap::Parser;
 use risc0_build::get_elf_path;
 
+// TODO: move this to a shared location
+// TODO: How can we use the version from the risc0 crate instead of hardcoding
+// it here?
+pub const VERSION: &str = "0.21.0";
+
 /// `cargo risczero build`
+///
+/// NOTE: Requires Docker to be installed and running.
 #[derive(Parser)]
 pub struct BuildGuest {
     /// Location of the Cargo.toml for the guest code.
@@ -39,41 +46,48 @@ pub struct BuildGuest {
 
 impl BuildGuest {
     pub fn run(&self) -> Result<()> {
-        let src_dir = std::env::current_dir().unwrap();
-        risc0_build::docker_build(&self.manifest_path, &src_dir, &self.features)?;
-
         if self.deploy {
-            self.deploy()?;
+            // Instantiate client first to check for errors
+            let client = self.get_client()?;
+            self.deploy(client)?;
+        } else {
+            self.build()?;
         }
 
         Ok(())
     }
 
-    pub fn deploy(&self) -> Result<()> {
+    fn build(&self) -> Result<()> {
         let src_dir = std::env::current_dir().unwrap();
-        let root_pkg = risc0_build::export_root_pkg(&self.manifest_path, &src_dir)?;
-        let client = Client::from_env(VERSION)?;
+        risc0_build::docker_build(&self.manifest_path, &src_dir, &self.features)
+    }
+
+    pub fn deploy(&self, client: Client) -> Result<()> {
+        // Ensure we have an up to date artifact before deploying
+        self.build()?;
+
+        let src_dir = std::env::current_dir().unwrap();
+        let root_pkg = risc0_build::get_root_pkg(&self.manifest_path, &src_dir)?;
         for target in risc0_build::get_targets(&root_pkg) {
             if target.is_bin() {
-                eprintln!("Deploying {} to Bonsai...", target.name);
-                // TODO: proper handle pkg_name
-                let pkg_name = &root_pkg.name;
-                let elf_path = get_elf_path(&src_dir, pkg_name, &target.name);
-                let elf = std::fs::read(&elf_path)?;
+                let elf_path = get_elf_path(&src_dir, &root_pkg.name, &target.name);
+                let elf = std::fs::read(&elf_path).with_context(|| {
+                    format!("Failed to read ELF file at path: {}", elf_path.display())
+                })?;
                 let image_id = risc0_binfmt::compute_image_id(&elf)?;
                 let image_id_hex = hex::encode(image_id);
-                eprintln!("Uploading ELF with size {} bytes", elf.len());
-                // TODO: Do we need to check for already uploaded image?
                 client.upload_img(&image_id_hex, elf)?;
-                eprintln!("Elf uploaded with image_id: {}", image_id_hex);
+                eprintln!(
+                    "Uploaded ELF `{}` with image ID `{}`.",
+                    target.name, image_id_hex
+                );
             }
         }
 
         Ok(())
     }
-}
 
-// TODO: move this to a shared location
-// TODO: How can we use the version from the risc0 crate instead of hardcoding
-// it here?
-pub const VERSION: &str = "0.21.0";
+    fn get_client(&self) -> Result<Client> {
+        Client::from_env(VERSION).with_context(|| "Failed to create Bonsai client")
+    }
+}

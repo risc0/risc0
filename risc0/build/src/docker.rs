@@ -44,7 +44,7 @@ const TARGET_DIR: &str = "target/riscv-guest/riscv32im-risc0-zkvm-elf/docker";
 pub fn docker_build(manifest_path: &Path, src_dir: &Path, features: &[String]) -> Result<()> {
     let manifest_path = canonicalize_path(manifest_path)?;
     let src_dir = canonicalize_path(src_dir)?;
-    let root_pkg = export_root_pkg(&manifest_path, &src_dir)?;
+    let root_pkg = get_root_pkg(&manifest_path, &src_dir)?;
     let pkg_name = &root_pkg.name;
 
     eprintln!("Building ELF binaries in {pkg_name} for riscv32im-risc0-zkvm-elf target...");
@@ -92,21 +92,18 @@ fn canonicalize_path(path: &Path) -> Result<PathBuf> {
 /// TODO: write doc
 pub fn get_elf_path(
     src_dir: impl AsRef<Path>,
-    pkg_name: impl AsRef<Path>,
+    pkg_name: impl AsRef<Path> + ToString,
     target_name: impl AsRef<Path>,
 ) -> PathBuf {
     src_dir
         .as_ref()
         .join(TARGET_DIR)
-        .join(pkg_name)
+        .join(pkg_name.to_string().replace('-', "_"))
         .join(target_name)
 }
 
 /// TODO: write doc
-pub fn export_root_pkg(
-    manifest_path: &PathBuf,
-    src_dir: &PathBuf,
-) -> Result<cargo_metadata::Package> {
+pub fn get_root_pkg(manifest_path: &PathBuf, src_dir: &PathBuf) -> Result<cargo_metadata::Package> {
     if !get_env_var("RISC0_SKIP_BUILD").is_empty() {
         // TODO: Change to Ok
         bail!("RISC0_SKIP_BUILD is set")
