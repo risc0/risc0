@@ -64,7 +64,7 @@ pub fn proven<H: Hal>(taps: &TapSet, coeffs_size: usize) -> f32 {
 
 /// Compute the security level of the system based on the FRI list-decoding
 /// conjecture (up to 1-rate).
-pub fn conjectured<H: Hal>(taps: &TapSet, coeffs_size: usize) -> f32 {
+pub fn conjectured_strict<H: Hal>(taps: &TapSet, coeffs_size: usize) -> f32 {
     let params = parameters::<H>(taps, coeffs_size);
     let theta = 1.0 - RHO - ETA;
     let e_proximity_gap = params.e_proximity_gap_conjectured();

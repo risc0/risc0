@@ -361,7 +361,7 @@ impl<'a, H: Hal> Prover<'a, H> {
         println!("proven_soundness_error: {proven_soundness_error:?}");
 
         let conjectured_soundness_error =
-            super::soundness::conjectured::<H>(self.taps, final_poly_coeffs.size());
+            super::soundness::conjectured_strict::<H>(self.taps, final_poly_coeffs.size());
         println!("conjectured_soundness_error: {conjectured_soundness_error:?}");
 
         // Return final proof
