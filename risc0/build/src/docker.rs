@@ -268,14 +268,14 @@ mod test {
     fn build(manifest_path: &str) {
         let src_dir = Path::new(SRC_DIR);
         let manifest_path = Path::new(manifest_path);
-        self::docker_build(manifest_path, &src_dir, &[]).unwrap()
+        self::docker_build(manifest_path, &src_dir, &[]).unwrap();
     }
 
     fn compare_image_id(bin_path: &str, expected: &str) {
         let src_dir = Path::new(SRC_DIR);
         let target_dir = src_dir.join(TARGET_DIR);
         let elf_path = target_dir.join(bin_path);
-        let actual = super::compute_image_id(&get_elf_path).unwrap();
+        let actual = super::compute_image_id(&elf_path).unwrap();
         assert_eq!(expected, actual);
     }
 
