@@ -65,7 +65,8 @@ runs:
       shell: bash
 
     - if: >
-        runner.os == 'Linux' && inputs.disable_s3 == 'false' &&
+        runner.os == 'Linux' && 
+        ${{ inputs.disable_s3 }} == 'false' &&
         github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name
       id: aws-creds
       uses: aws-actions/configure-aws-credentials@v4
@@ -75,7 +76,8 @@ runs:
         output-credentials: true
 
     - if: >
-        runner.os == 'Linux' && !inputs.disable_s3 == 'false' &&
+        runner.os == 'Linux' && 
+        ${{ inputs.disable_s3 }} == 'false' &&
         github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name
       uses: risc0/actions-cache@v1
       with:
