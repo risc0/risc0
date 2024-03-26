@@ -387,10 +387,8 @@ impl CompactReceipt {
             Digest::from_hex(ALLOWED_IDS_ROOT).map_err(|_| VerificationError::InvalidProof)?,
         )
         .map_err(|_| VerificationError::InvalidProof)?;
-        // assert!(false, "CHKPT A: got here");
         let (c0, c1) =
             split_digest(self.claim.digest()).map_err(|_| VerificationError::InvalidProof)?;
-            // assert!(false, "CHKPT B: got here");
         // TODO: WAY too ugly, do a cleaner thing
         let todo_temp_hash = fr_from_bytes(&from_u256("0x2793e3a11528690d665e95dc211752ea64a77b509aa87339e2ba5cec97bc09af").unwrap()).unwrap();
         Verifier::new(
@@ -401,7 +399,6 @@ impl CompactReceipt {
         .map_err(|_| VerificationError::InvalidProof)?
         .verify()
         .map_err(|_| VerificationError::InvalidProof)?;
-        // assert!(false, "CHKPT C: Fail with invalid proof before here");
 
         // Everything passed
         Ok(())
