@@ -176,9 +176,10 @@ impl std::error::Error for ProcessError {}
 
 #[derive(Debug, Default, Args)]
 pub struct ClientEnvs {
-    #[arg(long)]
     /// API URL for Bonsai.
+    #[arg(long)]
     pub api_url: Option<String>,
+
     /// API key for Bonsai.
     #[arg(long)]
     pub api_key: Option<String>,
