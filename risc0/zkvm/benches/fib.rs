@@ -167,7 +167,7 @@ fn join(c: &mut Criterion) {
     group.sample_size(10);
 
     let env = ExecutorEnv::builder()
-        .write_slice(&[2000])
+        .write_slice(&[10_000])
         .segment_limit_po2(16)
         .build()
         .unwrap();
@@ -180,7 +180,9 @@ fn join(c: &mut Criterion) {
         session.user_cycles,
         session.total_cycles
     );
-    assert_eq!(session.segments.len(), 2);
+
+    // Want more than two segments to ensure that the first two are a consistent power of `2` cycles
+    assert!(session.segments.len() > 2);
 
     let opts = ProverOpts::default();
     let prover = get_prover_server(&opts).unwrap();
