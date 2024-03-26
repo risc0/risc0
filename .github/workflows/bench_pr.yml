@@ -18,9 +18,6 @@ jobs:
     runs-on:
       labels: [self-hosted, test, bench, "${{ matrix.os }}", "${{ matrix.device }}"]
 
-    outputs:
-      critcmp-output: ${{ steps.baseline-compare.outputs.* }}
-
     strategy:
       fail-fast: false
       matrix:
