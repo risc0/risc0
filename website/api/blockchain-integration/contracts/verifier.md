@@ -40,7 +40,7 @@ RISC Zero's zkVM and the `IS_EVEN` program guarantee that it's computationally i
 
 ## Versioning
 
-The [`RiscZeroGroth16Verifier`][RiscZeroGroth16Verifier.sol] contract is stateless and immutable.
+The [`RiscZeroGroth16Verifier`][sepolia-verifier] contract is stateless and immutable.
 When new versions of the RISC Zero proof system are released, a new verifier contract will be deployed.
 
 When using this contract directly you can be sure that the verifier will never change, as it cannot be upgraded or otherwise mutated.
@@ -56,15 +56,15 @@ You can choose to use this contract or deploy your own.
 
 | Contract                      | Network   | Address                                                        |
 | ----------------------------- | --------- | -------------------------------------------------------------- |
-| [RiscZeroGroth16Verifier.sol] | [Sepolia] | [0x83C2e9CD64B2A16D3908E94C7654f3864212E2F8][sepolia-verifier] |
+| [RiscZeroGroth16Verifier.sol] | [Sepolia] | [0xe57255C10291771A2E14f7eb257555AE82D78302][sepolia-verifier] |
 
-[RiscZeroGroth16Verifier.sol]: https://github.com/risc0/risc0-ethereum/blob/main/contracts/src/groth16/RiscZeroGroth16Verifier.sol
+[RiscZeroGroth16Verifier.sol]: https://github.com/risc0/risc0-ethereum/blob/release-0.8/contracts/src/groth16/RiscZeroGroth16Verifier.sol
 [IRiscZeroVerifier.sol]: https://github.com/risc0/risc0-ethereum/blob/main/contracts/src/IRiscZeroVerifier.sol
 [EvenNumber.sol]: https://github.com/risc0/bonsai-foundry-template/blob/main/contracts/EvenNumber.sol
 [article-groth16]: https://www.risczero.com/news/on-chain-verification
 [article-proof-composition]: https://www.risczero.com/news/proof-composition
 [Sepolia]: https://ethereum.org/nb/developers/docs/networks#sepolia
-[sepolia-verifier]: https://sepolia.etherscan.io/address/0x83c2e9cd64b2a16d3908e94c7654f3864212e2f8#code
+[sepolia-verifier]: https://sepolia.etherscan.io/address/0xe57255C10291771A2E14f7eb257555AE82D78302#code
 [term-journal]: /terminology#journal
 [term-receipt]: /terminology#receipt
 [term-verify]: /terminology#verify
