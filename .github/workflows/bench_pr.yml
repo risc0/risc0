@@ -46,9 +46,9 @@ jobs:
         uses: ./.github/actions/cuda
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
-       with:
-         key: ${{ matrix.os }}-${{ matrix.feature }}
-         disable_s3: true
+        with:
+          key: ${{ matrix.os }}-${{ matrix.feature }}
+          disable_s3: true
 
       - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
 
