@@ -37,7 +37,8 @@ pub use seal_to_json::to_json;
 pub use verifier::Verifier;
 
 // Deserialize a scalar field from bytes in big-endian format
-pub(crate) fn fr_from_bytes(scalar: &[u8]) -> Result<Fr, Error> {
+// TODO: Making public for zkvm/src/host/receipt.rs, probably a cleaner option
+pub fn fr_from_bytes(scalar: &[u8]) -> Result<Fr, Error> {
     let scalar: Vec<u8> = scalar.iter().rev().cloned().collect();
     Fr::deserialize_uncompressed(&*scalar).map_err(|err| anyhow!(err))
 }
@@ -75,7 +76,8 @@ pub(crate) fn g2_from_bytes(elem: &Vec<Vec<Vec<u8>>>) -> Result<G2Affine, Error>
 }
 
 // Convert the U256 value to a byte array in big-endian format
-pub(crate) fn from_u256(value: &str) -> Result<Vec<u8>, Error> {
+// TODO: Making public for zkvm/src/host/receipt.rs, probably a cleaner option
+pub fn from_u256(value: &str) -> Result<Vec<u8>, Error> {
     let value = if let Some(stripped) = value.strip_prefix("0x") {
         to_fixed_array(hex::decode(stripped).map_err(|_| anyhow!("conversion from u256 failed"))?)
             .to_vec()
