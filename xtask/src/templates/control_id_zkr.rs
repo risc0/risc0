@@ -16,3 +16,5 @@
 pub const ALLOWED_IDS_ROOT: &str = "{}";
 
 pub const RECURSION_CONTROL_IDS: [(&str, &str); {}] = [{}];
+
+pub const RECURSION_PROGRAM_ID: &str = "{}";

@@ -132,11 +132,13 @@ impl Bootstrap {
             writeln!(&mut inner, r#"("{name}", "{digest}"),"#).unwrap();
         }
 
+        let recursion_program_id = "2793e3a11528690d665e95dc211752ea64a77b509aa87339e2ba5cec97bc09af"
         let contents = format!(
             include_str!("templates/control_id_zkr.rs"),
             allowed_ids_root,
             zkr_control_ids.len(),
-            inner
+            inner,
+            recursion_program_id
         );
 
         tracing::info!("writing control ids to {CONTROL_ID_PATH_RECURSION}");
