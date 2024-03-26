@@ -15,14 +15,12 @@
 use std::path::PathBuf;
 
 use anyhow::{Context, Result};
-use bonsai_sdk::{alpha::Client, API_KEY_ENVVAR, API_URL_ENVVAR};
+use bonsai_sdk::alpha::Client;
 use clap::Parser;
 use risc0_build::BuildStatus;
 
 use crate::commands::build_guest;
-
-/// Reports the current version of this crate.
-pub const VERSION: &str = env!("CARGO_PKG_VERSION");
+use crate::utils;
 
 /// `cargo risczero deploy`
 ///
@@ -39,19 +37,14 @@ pub struct DeployCommand {
     #[arg(long, value_delimiter = ',')]
     pub features: Vec<String>,
 
-    /// API URL for Bonsai.
-    #[arg(long)]
-    pub api_url: Option<String>,
-
-    /// API key for Bonsai.
-    #[arg(long)]
-    pub api_key: Option<String>,
+    #[command(flatten)]
+    client_envs: utils::ClientEnvs,
 }
 
 impl DeployCommand {
     pub fn run(&self) -> Result<()> {
         // Instantiate client first to check for errors
-        let client = self.get_client()?;
+        let client = utils::get_client(&self.client_envs)?;
         self.deploy(client)?;
 
         Ok(())
@@ -83,33 +76,5 @@ impl DeployCommand {
         }
 
         Ok(())
-    }
-
-    fn get_client(&self) -> Result<Client> {
-        let (api_url, api_key) = self.get_client_envs()?;
-
-        Client::from_parts(api_url, api_key, VERSION).context("Failed to create Bonsai client")
-    }
-
-    fn get_client_envs(&self) -> Result<(String, String)> {
-        let api_url = if let Some(api_url) = self.api_url.clone() {
-            api_url
-        } else {
-            std::env::var(API_URL_ENVVAR).context(format!(
-                "Either `--api-url` or `{}` env var must be set",
-                API_URL_ENVVAR
-            ))?
-        };
-
-        let api_key = if let Some(api_key) = self.api_key.clone() {
-            api_key
-        } else {
-            std::env::var(API_KEY_ENVVAR).context(format!(
-                "Either `--api-key` or `{}` env var must be set",
-                API_KEY_ENVVAR
-            ))?
-        };
-
-        Ok((api_url, api_key))
     }
 }
