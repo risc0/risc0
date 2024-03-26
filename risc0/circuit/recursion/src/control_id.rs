@@ -78,3 +78,6 @@ pub const RECURSION_CONTROL_IDS: [(&str, &str); 15] = [
         "ca7ade1f42976e5e103ad45c97e42963515f5b4b33076418e0a9390a576edd4e",
     ),
 ];
+
+pub const RECURSION_PROGRAM_ID: &str =
+    "2793e3a11528690d665e95dc211752ea64a77b509aa87339e2ba5cec97bc09af";

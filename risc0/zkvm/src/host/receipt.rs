@@ -391,7 +391,7 @@ impl CompactReceipt {
             split_digest(self.claim.digest()).map_err(|_| VerificationError::InvalidProof)?;
         // TODO: WAY too ugly, do a cleaner thing
         // let TODO = Digest::from_hex(RECURSION_PROGRAM_ID).map_err(|_| VerificationError::InvalidProof)?;
-        let todo_temp_hash = fr_from_bytes(&from_u256("0x{}".format(RECURSION_PROGRAM_ID)).unwrap()).unwrap();
+        let todo_temp_hash = fr_from_bytes(&from_u256(&format!("0x{}", RECURSION_PROGRAM_ID)).unwrap()).unwrap();
         Verifier::new(
             &Seal::from_vec(&self.seal).map_err(|_| VerificationError::InvalidProof)?,
             vec![a0, a1, c0, c1, todo_temp_hash],
