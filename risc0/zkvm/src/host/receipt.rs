@@ -25,7 +25,7 @@ use risc0_circuit_rv32im::{
     layout, CIRCUIT,
 };
 use risc0_core::field::baby_bear::BabyBear;
-use risc0_groth16::{fr_from_bytes, from_u256, split_digest, verifier::prepared_verifying_key, Seal, Verifier};
+use risc0_groth16::{fr_from_hex_string, split_digest, verifier::prepared_verifying_key, Seal, Verifier};
 use risc0_zkp::{
     core::{
         digest::Digest,
@@ -389,12 +389,11 @@ impl CompactReceipt {
         .map_err(|_| VerificationError::InvalidProof)?;
         let (c0, c1) =
             split_digest(self.claim.digest()).map_err(|_| VerificationError::InvalidProof)?;
-        // TODO: WAY too ugly, do a cleaner thing
-        // let TODO = Digest::from_hex(RECURSION_PROGRAM_ID).map_err(|_| VerificationError::InvalidProof)?;
-        let todo_temp_hash = fr_from_bytes(&from_u256(&format!("0x{}", RECURSION_PROGRAM_ID)).unwrap()).unwrap();
+        let id_p254_hash = fr_from_hex_string(RECURSION_PROGRAM_ID)
+        .map_err(|_| VerificationError::InvalidProof)?;
         Verifier::new(
             &Seal::from_vec(&self.seal).map_err(|_| VerificationError::InvalidProof)?,
-            vec![a0, a1, c0, c1, todo_temp_hash],
+            vec![a0, a1, c0, c1, id_p254_hash],
             prepared_verifying_key().map_err(|_| VerificationError::InvalidProof)?,
         )
         .map_err(|_| VerificationError::InvalidProof)?
