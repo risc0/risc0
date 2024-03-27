@@ -318,17 +318,12 @@ pub fn cargo_command(subcmd: &str, rust_flags: &[&str]) -> Command {
     .concat()
     .join("\x1f");
 
-    let c_include = risc0_data().unwrap().join("c/riscv32-unknown-elf/include");
+    let cc_path = risc0_data().unwrap().join("c/bin/riscv32-unknown-elf-gcc");
+    let c_flags = "-march=rv32im  -Wl,-nostdlib";
     cmd.env("RUSTC", rustc)
         .env("CARGO_ENCODED_RUSTFLAGS", rustflags_envvar)
-        .env("CC", "clang")
-        .env(
-            "CFLAGS_riscv32im_risc0_zkvm_elf",
-            format!(
-                "-target riscv32-unknown-elf -march=rv32im -I{}",
-                c_include.display()
-            ),
-        )
+        .env("CC", cc_path)
+        .env("CFLAGS_riscv32im_risc0_zkvm_elf", c_flags)
         .args(args);
 
     cmd
