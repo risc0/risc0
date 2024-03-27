@@ -28,6 +28,13 @@ fn setup_exec(iterations: u32) -> ExecutorImpl<'static> {
     ExecutorImpl::from_elf(env, FIB_ELF).unwrap()
 }
 
+fn is_pull_request() -> bool {
+    std::env::var("CI_BENCH_PR")
+        .ok()
+        .filter(|x| x == "true")
+        .is_some()
+}
+
 fn execute(c: &mut Criterion) {
     let mut group = c.benchmark_group("fib");
 
@@ -49,13 +56,6 @@ fn execute(c: &mut Criterion) {
             )
         });
     }
-}
-
-fn is_pull_request() -> bool {
-    std::env::var("CI_BENCH_PR")
-        .ok()
-        .filter(|x| x == "true")
-        .is_some()
 }
 
 fn prove_segment(c: &mut Criterion, hashfn: &str) {

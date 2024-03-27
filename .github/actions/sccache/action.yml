@@ -5,6 +5,8 @@ inputs:
   key:
     required: true
     default: rust-cache-${{ runner.os }}-${{ runner.arch }}
+  disable_s3:
+    default: false
 
 runs:
   using: composite
@@ -13,7 +15,7 @@ runs:
       run: |
         echo "SCCACHE_IDLE_TIMEOUT=0" >> $GITHUB_ENV
       shell: bash
-    
+
     - if: runner.os == 'Linux' && runner.arch == 'X64'
       run: |
         echo "SCCACHE_ARCH=x86_64-unknown-linux-musl" >> $GITHUB_ENV
@@ -29,7 +31,7 @@ runs:
         echo "SCCACHE_ARCH=aarch64-apple-darwin" >> $GITHUB_ENV
       shell: bash
 
-    - if: runner.os == 'Linux' &&  runner.arch == 'ARM64'
+    - if: runner.os == 'Linux' && runner.arch == 'ARM64'
       run: |
         echo "SCCACHE_ARCH=aarch64-unknown-linux-musl" >> $GITHUB_ENV
       shell: bash
@@ -45,7 +47,7 @@ runs:
         echo "$HOME/.local/bin" >> $GITHUB_PATH
       shell: bash
 
-    - if: runner.os == 'Linux'
+    - if: runner.os == 'Linux' && inputs.disable_s3 == 'false'
       run: |
         echo "SCCACHE_REGION=us-west-2" >> $GITHUB_ENV
         echo "SCCACHE_BUCKET=risc0-ci-cache" >> $GITHUB_ENV
@@ -63,7 +65,7 @@ runs:
       shell: bash
 
     - if: >
-        runner.os == 'Linux' &&
+        runner.os == 'Linux' && inputs.disable_s3 == 'false' &&
         github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name
       id: aws-creds
       uses: aws-actions/configure-aws-credentials@v4
@@ -73,7 +75,7 @@ runs:
         output-credentials: true
 
     - if: >
-        runner.os == 'Linux' &&
+        runner.os == 'Linux' && inputs.disable_s3 == 'false' &&
         github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name
       uses: risc0/actions-cache@v1
       with:
