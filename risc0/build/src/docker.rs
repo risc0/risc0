@@ -12,9 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{fs, path::Path, process::Command};
+use std::{
+    fs,
+    path::{Path, PathBuf},
+    process::Command,
+    time::Duration,
+};
 
-use anyhow::{bail, Context, Result};
+use anyhow::{anyhow, bail, Context, Result};
 use cargo_metadata::MetadataCommand;
 use docker_generate::DockerFile;
 use risc0_binfmt::{MemoryImage, Program};
@@ -23,8 +28,13 @@ use risc0_zkvm_platform::{
     PAGE_SIZE,
 };
 use tempfile::tempdir;
+use which::which;
 
 use crate::get_env_var;
+
+const DOCKER_MSG: &str = r#"We depend on Docker for reproducible builds.
+Please install Docker and ensure it is running before running this command.
+"#;
 
 const DOCKER_IGNORE: &str = r#"
 **/Dockerfile
@@ -36,23 +46,30 @@ const DOCKER_IGNORE: &str = r#"
 
 const TARGET_DIR: &str = "target/riscv-guest/riscv32im-risc0-zkvm-elf/docker";
 
+/// Indicates weather the build was successful or skipped.
+pub enum BuildStatus {
+    /// The build was successful.
+    Success,
+    /// The build was skipped.
+    Skipped,
+}
+
 /// Build the package in the manifest path using a docker environment.
-pub fn docker_build(manifest_path: &Path, src_dir: &Path, features: &[String]) -> Result<()> {
+pub fn docker_build(
+    manifest_path: &Path,
+    src_dir: &Path,
+    features: &[String],
+) -> Result<BuildStatus> {
+    ensure_docker_is_running()?;
+
     if !get_env_var("RISC0_SKIP_BUILD").is_empty() {
-        return Ok(());
+        eprintln!("Skipping build because RISC0_SKIP_BUILD is set");
+        return Ok(BuildStatus::Skipped);
     }
 
-    let manifest_path = manifest_path
-        .canonicalize()
-        .context(format!("manifest_path: {manifest_path:?}"))?;
-    let src_dir = src_dir.canonicalize().context("src_dir")?;
-    eprintln!("Docker context: {src_dir:?}");
-
-    let meta = MetadataCommand::new()
-        .manifest_path(&manifest_path)
-        .exec()
-        .context("Manifest not found")?;
-    let root_pkg = meta.root_package().context("failed to parse Cargo.toml")?;
+    let manifest_path = canonicalize_path(manifest_path)?;
+    let src_dir = canonicalize_path(src_dir)?;
+    let root_pkg = get_root_pkg(&manifest_path, &src_dir)?;
     let pkg_name = &root_pkg.name;
 
     eprintln!("Building ELF binaries in {pkg_name} for riscv32im-risc0-zkvm-elf target...");
@@ -66,7 +83,7 @@ pub fn docker_build(manifest_path: &Path, src_dir: &Path, features: &[String]) -
         bail!("`docker --version` failed");
     }
 
-    if let Err(err) = check_cargo_lock(&manifest_path) {
+    if let Err(err) = check_cargo_lock(manifest_path.as_path()) {
         eprintln!("{err}");
     }
 
@@ -76,21 +93,62 @@ pub fn docker_build(manifest_path: &Path, src_dir: &Path, features: &[String]) -
         let temp_path = temp_dir.path();
         let rel_manifest_path = manifest_path.strip_prefix(&src_dir)?;
         create_dockerfile(rel_manifest_path, temp_path, pkg_name.as_str(), features)?;
-        build(&src_dir, temp_path)?;
+        build(src_dir.as_path(), temp_path)?;
     }
     println!("ELFs ready at:");
 
-    let target_dir = src_dir.join(TARGET_DIR);
-    for target in root_pkg.targets.iter() {
+    for target in get_targets(&root_pkg) {
         if target.is_bin() {
-            let elf_path = target_dir.join(&pkg_name).join(&target.name);
+            let elf_path = get_elf_path(&src_dir, &pkg_name, &target.name);
             let image_id = compute_image_id(&elf_path)?;
             let rel_elf_path = Path::new(TARGET_DIR).join(&pkg_name).join(&target.name);
             println!("ImageID: {} - {:?}", image_id, rel_elf_path);
         }
     }
 
-    Ok(())
+    Ok(BuildStatus::Success)
+}
+
+fn canonicalize_path(path: &Path) -> Result<PathBuf> {
+    path.canonicalize()
+        .context(format!("Failed to canonicalize path: {path:?}"))
+}
+
+/// Get the path to the ELF binary.
+pub fn get_elf_path(
+    src_dir: impl AsRef<Path>,
+    pkg_name: impl AsRef<Path> + ToString,
+    target_name: impl AsRef<Path>,
+) -> PathBuf {
+    src_dir
+        .as_ref()
+        .join(TARGET_DIR)
+        .join(pkg_name.to_string().replace('-', "_"))
+        .join(target_name)
+}
+
+/// Get the root package from the manifest path.
+pub fn get_root_pkg(manifest_path: &PathBuf, src_dir: &PathBuf) -> Result<cargo_metadata::Package> {
+    eprintln!("Docker context: {src_dir:?}");
+    let meta = MetadataCommand::new()
+        .manifest_path(manifest_path)
+        .exec()
+        .context("Manifest not found")?;
+
+    Ok(meta
+        .root_package()
+        .context("failed to parse Cargo.toml")?
+        .clone())
+}
+
+/// Get the targets from the root package.
+pub fn get_targets(root_pkg: &cargo_metadata::Package) -> Vec<cargo_metadata::Target> {
+    root_pkg
+        .targets
+        .iter()
+        .filter(|target| target.is_bin())
+        .cloned()
+        .collect()
 }
 
 /// Create the dockerfile.
@@ -205,6 +263,59 @@ fn compute_image_id(elf_path: &Path) -> Result<String> {
     Ok(image.compute_id().to_string())
 }
 
+/// Check if docker is running.
+fn check_docker(docker: impl AsRef<std::ffi::OsStr>, max_elapsed_time: Duration) -> Result<()> {
+    let backoff = backoff::ExponentialBackoffBuilder::new()
+        .with_max_elapsed_time(Some(max_elapsed_time))
+        .build();
+    let f = || -> Result<bool, backoff::Error<anyhow::Error>> {
+        Command::new(&docker)
+            .arg("version")
+            .stdout(std::process::Stdio::null())
+            .stderr(std::process::Stdio::null())
+            .status()
+            .context("Failed to run `docker version`")?
+            .success()
+            .then_some(true)
+            .ok_or(anyhow!("Docker engine is not running").into())
+    };
+
+    let result = backoff::retry(backoff, f);
+
+    match result {
+        Ok(true) => Ok(()),
+        _ => Err(anyhow!("Docker engine is not running")),
+    }
+}
+
+/// Tries to start the docker daemon.
+fn start_docker(docker: impl AsRef<std::ffi::OsStr>) -> Result<()> {
+    eprintln!("Starting docker...");
+    let dockerd = which("dockerd").context(DOCKER_MSG)?;
+
+    // Start docker daemon as a background process
+    Command::new(dockerd)
+        .stdout(std::process::Stdio::null())
+        .stderr(std::process::Stdio::null())
+        .spawn()
+        .context(DOCKER_MSG)?;
+
+    check_docker(docker.as_ref(), Duration::from_secs(10))
+        .map_err(|err| anyhow!("Failed to interact with Docker: {err}.\n{DOCKER_MSG}"))?;
+
+    Ok(())
+}
+
+/// Ensures that docker is running.
+fn ensure_docker_is_running() -> Result<()> {
+    let docker = which("docker").context(DOCKER_MSG)?;
+    let initial_check = check_docker(&docker, Duration::from_secs(1));
+    match initial_check {
+        Ok(_) => Ok(()),
+        _ => start_docker(docker),
+    }
+}
+
 // requires Docker to be installed
 #[cfg(feature = "docker")]
 #[cfg(test)]
@@ -218,7 +329,7 @@ mod test {
     fn build(manifest_path: &str) {
         let src_dir = Path::new(SRC_DIR);
         let manifest_path = Path::new(manifest_path);
-        self::docker_build(manifest_path, &src_dir, &[]).unwrap()
+        self::docker_build(manifest_path, &src_dir, &[]).unwrap();
     }
 
     fn compare_image_id(bin_path: &str, expected: &str) {
