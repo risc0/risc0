@@ -32,7 +32,7 @@ jobs:
     env:
       CI_BENCH_PR: true
       FEATURE: ${{ matrix.feature }}
-      DISABLE_S3: ${{ matrix.device == nvidia_rtx_3090_ti }}
+      DISABLE_S3: ${{ matrix.device == 'nvidia_rtx_3090_ti' }}
 
     steps:
       # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
