@@ -70,7 +70,8 @@ The control root is the Merkle hash of a set of [control ID]s.
 
 The control root plays a key role in enforcing zkVM version control. Each [control ID] identifies one [recursion program]; the control root identifies the list of allowed recursion programs. When the RISC-V circuit or recursion programs change, the control root is updated to reflect the new set of allowed functions.
 
-This design allows for updates to the [RISC-V circuit] without necessitating a new trusted setup for the [Groth16 circuit].
+This design allows for updates to the [RISC-V circuit] without necessitating a new trusted setup for the [Groth16 circuit]. <br/>
+See also: [Code reference for control root]
 
 ### Deterministic Builds
 
@@ -260,6 +261,7 @@ RISC Zero's zkVM implements the RISC-V instruction set architecture and uses a [
 [cargo risczero]: https://docs.rs/crate/cargo-risczero/latest
 [circuit]: #circuit
 [clock cycles]: #clock-cycles
+[Code reference for control root]: https://github.com/risc0/risc0/blob/v0.21.0/risc0/circuit/recursion/src/control_id.rs#L16
 [commit]: #commit
 [compose]: #composition
 [composition]: #composition
