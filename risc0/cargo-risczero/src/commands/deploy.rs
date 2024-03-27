@@ -68,7 +68,7 @@ impl DeployCommand {
                 let image_id = risc0_binfmt::compute_image_id(&elf)?;
                 let image_id_hex = hex::encode(image_id);
                 client.upload_img(&image_id_hex, elf)?;
-                eprintln!(
+                println!(
                     "Uploaded ELF `{}` with image ID `{}`.",
                     target.name, image_id_hex
                 );
