@@ -47,13 +47,13 @@ jobs:
           key: ${{ matrix.os }}-${{ matrix.feature }}
           disable_s3: true
 
-      - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
-
       - name: Install critcmp
         uses: risc0/cargo-install@b9307573043522ab0d3e3be64a51763b765b52a4
         with:
           crate: critcmp
           version: "0.1.8"
+
+      - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
 
       - name: Run Benchmarks for changes
         run: cargo bench --bench fib -- --save-baseline changes
@@ -62,6 +62,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: main
+          clean: false
 
       - name: Run benchmarks for base
         run: cargo bench --bench fib -- --save-baseline base

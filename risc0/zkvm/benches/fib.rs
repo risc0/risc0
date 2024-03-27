@@ -55,23 +55,22 @@ fn prove_segment(c: &mut Criterion, hashfn: &str) {
     };
     let prover = get_prover_server(&opts).unwrap();
     let ctx = VerifierContext::default();
+    let iterations = 10_000;
 
-    for iterations in [100, 10_000, 100_000] {
-        let session = setup_exec(iterations).run().unwrap();
-        println!("{iterations}: {}", session.total_cycles);
-        let id = BenchmarkId::from_parameter(format!("{iterations}/prove/{hashfn}"));
-        group.throughput(Throughput::Elements(session.total_cycles));
-        group.bench_function(id, |b| {
-            b.iter_batched_ref(
-                || {
-                    let session = setup_exec(iterations).run().unwrap();
-                    session.segments[0].resolve().unwrap()
-                },
-                |segment| black_box(prover.prove_segment(&ctx, &segment).unwrap()),
-                BatchSize::SmallInput,
-            )
-        });
-    }
+    let session = setup_exec(iterations).run().unwrap();
+    println!("{iterations}: {}", session.total_cycles);
+    let id = BenchmarkId::from_parameter(format!("{iterations}/prove/{hashfn}"));
+    group.throughput(Throughput::Elements(session.total_cycles));
+    group.bench_function(id, |b| {
+        b.iter_batched_ref(
+            || {
+                let session = setup_exec(iterations).run().unwrap();
+                session.segments[0].resolve().unwrap()
+            },
+            |segment| black_box(prover.prove_segment(&ctx, &segment).unwrap()),
+            BatchSize::SmallInput,
+        )
+    });
 }
 
 fn prove_sha256(c: &mut Criterion) {
@@ -89,24 +88,23 @@ fn total_composite(c: &mut Criterion) {
     let opts = ProverOpts::fast();
     let prover = get_prover_server(&opts).unwrap();
     let ctx = VerifierContext::default();
+    let iterations = 10_000;
 
-    for iterations in [100, 10_000, 100_000] {
-        let session = setup_exec(iterations).run().unwrap();
-        let id = BenchmarkId::from_parameter(format!("{iterations}/composite"));
-        group.throughput(Throughput::Elements(session.total_cycles));
-        group.bench_function(id, |b| {
-            b.iter_batched_ref(
-                || setup_exec(iterations),
-                |exec| {
-                    black_box({
-                        let session = exec.run().unwrap();
-                        prover.prove_session(&ctx, &session).unwrap()
-                    })
-                },
-                BatchSize::SmallInput,
-            )
-        });
-    }
+    let session = setup_exec(iterations).run().unwrap();
+    let id = BenchmarkId::from_parameter(format!("{iterations}/composite"));
+    group.throughput(Throughput::Elements(session.total_cycles));
+    group.bench_function(id, |b| {
+        b.iter_batched_ref(
+            || setup_exec(iterations),
+            |exec| {
+                black_box({
+                    let session = exec.run().unwrap();
+                    prover.prove_session(&ctx, &session).unwrap()
+                })
+            },
+            BatchSize::SmallInput,
+        )
+    });
 }
 
 fn total_succinct(c: &mut Criterion) {
@@ -116,26 +114,25 @@ fn total_succinct(c: &mut Criterion) {
     let opts = ProverOpts::default();
     let prover = get_prover_server(&opts).unwrap();
     let ctx = VerifierContext::default();
+    let iterations = 10_000;
 
-    for iterations in [100, 10_000, 100_000] {
-        let session = setup_exec(iterations).run().unwrap();
-        let id = BenchmarkId::from_parameter(format!("{iterations}/succinct"));
-        group.throughput(Throughput::Elements(session.total_cycles));
-        group.bench_function(id, |b| {
-            b.iter_batched_ref(
-                || setup_exec(iterations),
-                |exec| {
-                    black_box({
-                        let session = exec.run().unwrap();
-                        let receipt = prover.prove_session(&ctx, &session).unwrap();
-                        let composite_receipt = receipt.inner.composite().unwrap();
-                        prover.compress(composite_receipt).unwrap();
-                    })
-                },
-                BatchSize::SmallInput,
-            )
-        });
-    }
+    let session = setup_exec(iterations).run().unwrap();
+    let id = BenchmarkId::from_parameter(format!("{iterations}/succinct"));
+    group.throughput(Throughput::Elements(session.total_cycles));
+    group.bench_function(id, |b| {
+        b.iter_batched_ref(
+            || setup_exec(iterations),
+            |exec| {
+                black_box({
+                    let session = exec.run().unwrap();
+                    let receipt = prover.prove_session(&ctx, &session).unwrap();
+                    let composite_receipt = receipt.inner.composite().unwrap();
+                    prover.compress(composite_receipt).unwrap();
+                })
+            },
+            BatchSize::SmallInput,
+        )
+    });
 }
 
 fn lift(c: &mut Criterion) {
@@ -182,7 +179,7 @@ fn join(c: &mut Criterion) {
     );
 
     // Want more than two segments to ensure that the first two are a consistent power of `2` cycles
-    assert!(session.segments.len() > 2);
+    assert!(session.segments.len() => 2);
 
     let opts = ProverOpts::default();
     let prover = get_prover_server(&opts).unwrap();
