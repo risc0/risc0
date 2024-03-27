@@ -209,18 +209,9 @@ impl Install {
             let summary = result.context(format!("Download failed. {TOKEN_MSG}"))?;
             let tarball = File::open(summary.file_name)?;
             eprintln!("Extracting...");
-            match repo {
-                ToolchainRepo::Rust => {
-                    let decoder = GzDecoder::new(BufReader::new(tarball));
-                    let mut archive = Archive::new(decoder);
-                    archive.unpack(toolchain_dir.clone())?;
-                }
-                ToolchainRepo::C => {
-                    let decoder = lzma::LzmaReader::new_decompressor(BufReader::new(tarball))?;
-                    let mut archive = Archive::new(decoder);
-                    archive.unpack(toolchain_dir.clone())?;
-                }
-            }
+            let decoder = GzDecoder::new(BufReader::new(tarball));
+            let mut archive = Archive::new(decoder);
+            archive.unpack(toolchain_dir.clone())?;
         }
         Ok(toolchain_dir)
     }
