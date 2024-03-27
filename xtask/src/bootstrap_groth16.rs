@@ -21,6 +21,7 @@ use std::{
 use clap::Parser;
 use hex::FromHex;
 use regex::Regex;
+use risc0_circuit_recursion::control_id::RECURSION_PROGRAM_ID;
 use risc0_zkvm::{
     get_prover_server,
     recursion::identity_p254,
@@ -140,12 +141,12 @@ fn bootstrap_control_id(risc0_ethereum_path: &Path) {
  library ControlID {
 "#;
     let (control_id_0, control_id_1) = split_digest(Digest::from_hex(ALLOWED_IDS_ROOT).unwrap());
-    let todo_code_id = "0x2793e3a11528690d665e95dc211752ea64a77b509aa87339e2ba5cec97bc09af"; // TODO
+    let recursion_program_id = format!("0x{}", RECURSION_PROGRAM_ID);
     let control_id_0 = format!("uint256 public constant CONTROL_ID_0 = {control_id_0};");
     let control_id_1 = format!("uint256 public constant CONTROL_ID_1 = {control_id_1};");
-    let todo_code_id = format!("uint256 public constant TODO_CODE_ID = {todo_code_id};");
+    let recursion_program_id = format!("uint256 public constant RECURSION_PROGRAM_ID = {recursion_program_id};");
     let content =
-        &format!("{SOL_HEADER}{LIB_HEADER}\n{control_id_0}\n{control_id_1}\n{todo_code_id}\n}}");
+        &format!("{SOL_HEADER}{LIB_HEADER}\n{control_id_0}\n{control_id_1}\n{recursion_program_id}\n}}");
     let solidity_control_id_path = risc0_ethereum_path.join(SOLIDITY_CONTROL_ID_PATH);
     fs::write(&solidity_control_id_path, content).unwrap_or_else(|_| {
         panic!(
