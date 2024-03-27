@@ -133,7 +133,8 @@ impl Bootstrap {
         }
 
         // TODO: Generate `recursion_program_id` programmatically
-        let recursion_program_id = "2793e3a11528690d665e95dc211752ea64a77b509aa87339e2ba5cec97bc09af";
+        let recursion_program_id =
+            "2793e3a11528690d665e95dc211752ea64a77b509aa87339e2ba5cec97bc09af";
         let contents = format!(
             include_str!("templates/control_id_zkr.rs"),
             allowed_ids_root,

@@ -140,11 +140,12 @@ fn bootstrap_control_id(risc0_ethereum_path: &Path) {
  library ControlID {
 "#;
     let (control_id_0, control_id_1) = split_digest(Digest::from_hex(ALLOWED_IDS_ROOT).unwrap());
-    let todo_code_id = "0x2793e3a11528690d665e95dc211752ea64a77b509aa87339e2ba5cec97bc09af";  // TODO
+    let todo_code_id = "0x2793e3a11528690d665e95dc211752ea64a77b509aa87339e2ba5cec97bc09af"; // TODO
     let control_id_0 = format!("uint256 public constant CONTROL_ID_0 = {control_id_0};");
     let control_id_1 = format!("uint256 public constant CONTROL_ID_1 = {control_id_1};");
     let todo_code_id = format!("uint256 public constant TODO_CODE_ID = {todo_code_id};");
-    let content = &format!("{SOL_HEADER}{LIB_HEADER}\n{control_id_0}\n{control_id_1}\n{todo_code_id}\n}}");
+    let content =
+        &format!("{SOL_HEADER}{LIB_HEADER}\n{control_id_0}\n{control_id_1}\n{todo_code_id}\n}}");
     let solidity_control_id_path = risc0_ethereum_path.join(SOLIDITY_CONTROL_ID_PATH);
     fs::write(&solidity_control_id_path, content).unwrap_or_else(|_| {
         panic!(
