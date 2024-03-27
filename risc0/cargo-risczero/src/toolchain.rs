@@ -15,7 +15,8 @@
 // This is based on cargo-wasix: https://github.com/wasix-org/cargo-wasix
 
 use std::{
-    fs,
+    fs::{self, File},
+    io::Write,
     path::{Path, PathBuf},
     process::Command,
 };
@@ -172,7 +173,7 @@ impl CToolchain {
         fs_extra::dir::copy(
             c_download_dir.clone(),
             &r0_data,
-            &CopyOptions::new().overwrite(true),
+            &CopyOptions::new().overwrite(true).copy_inside(true),
         )?;
 
         // for c, we will keep the toolchains in the r0_data directory for now
@@ -184,6 +185,24 @@ impl CToolchain {
             r0_data.join(c_download_dir.file_name().unwrap()),
             c_install_dir,
         )?;
+
+        let gcc_script_path = c_install_dir.join("r0-gcc");
+        let mut gcc_script = File::create(gcc_script_path.clone())?;
+        write!(
+            gcc_script,
+            "#!/bin/bash\n\"{}\" -I \"{}\" \"$@\"\n",
+            c_install_dir.join("bin/riscv32-unknown-elf-gcc").display(),
+            c_install_dir.join("picolibc/include").display()
+        )
+        .unwrap();
+
+        #[cfg(target_family = "unix")]
+        {
+            use std::os::unix::fs::PermissionsExt;
+            let mut perms = gcc_script.metadata()?.permissions();
+            perms.set_mode(0o755);
+            std::fs::set_permissions(gcc_script_path, perms)?;
+        }
 
         Ok(Self {
             path: c_install_dir.into(),
