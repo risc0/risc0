@@ -19,7 +19,7 @@ use core::fmt::Debug;
 
 use anyhow::Result;
 use risc0_binfmt::{ExitCode, SystemState};
-use risc0_circuit_recursion::control_id::{ALLOWED_IDS_ROOT, RECURSION_PROGRAM_ID};
+use risc0_circuit_recursion::control_id::{ALLOWED_IDS_ROOT, BN254_CONTROL_ID};
 use risc0_circuit_rv32im::{
     control_id::{BLAKE2B_CONTROL_ID, POSEIDON2_CONTROL_ID, SHA256_CONTROL_ID},
     layout, CIRCUIT,
@@ -391,7 +391,7 @@ impl CompactReceipt {
         .map_err(|_| VerificationError::InvalidProof)?;
         let (c0, c1) =
             split_digest(self.claim.digest()).map_err(|_| VerificationError::InvalidProof)?;
-        let id_p254_hash = fr_from_hex_string(RECURSION_PROGRAM_ID)
+        let id_p254_hash = fr_from_hex_string(BN254_CONTROL_ID)
             .map_err(|_| VerificationError::InvalidProof)?;
         Verifier::new(
             &Seal::from_vec(&self.seal).map_err(|_| VerificationError::InvalidProof)?,

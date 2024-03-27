@@ -79,5 +79,5 @@ pub const RECURSION_CONTROL_IDS: [(&str, &str); 15] = [
     ),
 ];
 
-pub const RECURSION_PROGRAM_ID: &str =
+pub const BN254_CONTROL_ID: &str =
     "2793e3a11528690d665e95dc211752ea64a77b509aa87339e2ba5cec97bc09af";
