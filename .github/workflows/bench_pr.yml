@@ -30,7 +30,9 @@ jobs:
             device: nvidia_rtx_3090_ti
 
     env:
+      CI_BENCH_PR: true
       FEATURE: ${{ matrix.feature }}
+      DISABLE_S3: ${{ matrix.device == nvidia_rtx_3090_ti }}
 
     steps:
       # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
@@ -45,7 +47,7 @@ jobs:
       - uses: ./.github/actions/sccache
         with:
           key: ${{ matrix.os }}-${{ matrix.feature }}
-          disable_s3: ${{ matrix.device == nvidia_rtx_3090_ti }}
+          disable_s3: ${{ env.DISABLE_S3 }}
 
       - name: Install critcmp
         uses: risc0/cargo-install@b9307573043522ab0d3e3be64a51763b765b52a4
