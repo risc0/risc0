@@ -113,11 +113,3 @@ pub fn split_digest(d: Digest) -> Result<(Fr, Fr), Error> {
 pub fn fr_from_hex_string(val: &str) -> Result<Fr, Error> {
     Ok(fr_from_bytes(&from_u256(&format!("0x{}", val))?)?)
 }
-
-// Encodes a BN254 digest as an `ark_bn254::Fr`
-//
-// Note that this must be used on BN254 digests, as larger hashes will
-// overflow the `ark_bn254::Fr`.
-// pub fn encode_digest_as_fr(d: Digest) -> Result<(Fr), Error> {
-
-// }
