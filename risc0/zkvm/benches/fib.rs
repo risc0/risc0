@@ -179,7 +179,7 @@ fn join(c: &mut Criterion) {
     );
 
     // Want more than two segments to ensure that the first two are a consistent power of `2` cycles
-    assert!(session.segments.len() => 2);
+    assert!(session.segments.len() >= 2);
 
     let opts = ProverOpts::default();
     let prover = get_prover_server(&opts).unwrap();
