@@ -16,14 +16,14 @@ env:
 jobs:
   bench:
     runs-on:
-      labels: [self-hosted, test, bench, "${{ matrix.os }}", "${{ matrix.device }}"]
+      labels: [self-hosted, prod, bench, "${{ matrix.os }}", "${{ matrix.device }}"]
 
     strategy:
       fail-fast: false
       matrix:
-        # os: [Linux, macOS]
-        # feature: [default]
-        # device: [cpu]
+        os: [Linux, macOS]
+        feature: [default]
+        device: [cpu]
         include:
           - os: Linux
             feature: cuda
@@ -45,7 +45,7 @@ jobs:
       - uses: ./.github/actions/sccache
         with:
           key: ${{ matrix.os }}-${{ matrix.feature }}
-          disable_s3: true
+          disable_s3: ${{ matrix.device == nvidia_rtx_3090_ti }}
 
       - name: Install critcmp
         uses: risc0/cargo-install@b9307573043522ab0d3e3be64a51763b765b52a4

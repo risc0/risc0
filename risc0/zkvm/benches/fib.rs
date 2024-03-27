@@ -68,7 +68,6 @@ fn prove_segment(c: &mut Criterion, hashfn: &str) {
     };
     let prover = get_prover_server(&opts).unwrap();
     let ctx = VerifierContext::default();
-    let iterations = 10_000;
 
     let cases = if is_pull_request() {
         vec![10_000]
@@ -109,7 +108,6 @@ fn total_composite(c: &mut Criterion) {
     let opts = ProverOpts::fast();
     let prover = get_prover_server(&opts).unwrap();
     let ctx = VerifierContext::default();
-    let iterations = 10_000;
 
     let cases = if is_pull_request() {
         vec![10_000]
@@ -143,7 +141,6 @@ fn total_succinct(c: &mut Criterion) {
     let opts = ProverOpts::default();
     let prover = get_prover_server(&opts).unwrap();
     let ctx = VerifierContext::default();
-    let iterations = 10_000;
 
     let cases = if is_pull_request() {
         vec![10_000]
