@@ -17,15 +17,17 @@
 #![cfg_attr(all(not(feature = "std"), not(test)), no_std)]
 
 mod elf;
+mod exit_code;
 mod hash;
 #[cfg(not(target_os = "zkvm"))]
 mod image;
 mod sys_state;
 
 #[cfg(not(target_os = "zkvm"))]
-pub use crate::image::{MemoryImage, PageTableInfo};
+pub use self::image::{MemoryImage, PageTableInfo};
 pub use crate::{
     elf::Program,
+    exit_code::{ExitCode, InvalidExitCodeError},
     hash::{tagged_list, tagged_list_cons, tagged_struct, Digestible},
     sys_state::{read_sha_halfs, write_sha_halfs, DecodeError, SystemState},
 };
@@ -37,5 +39,5 @@ pub fn compute_image_id(elf: &[u8]) -> anyhow::Result<risc0_zkp::core::digest::D
 
     let program = Program::load_elf(elf, GUEST_MAX_MEM as u32)?;
     let image = MemoryImage::new(&program, PAGE_SIZE as u32)?;
-    image.compute_id()
+    Ok(image.compute_id())
 }

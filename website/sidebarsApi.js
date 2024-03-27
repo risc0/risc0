@@ -3,78 +3,58 @@
 /** @type {import('@docusaurus/plugin-content-docs').SidebarsConfig} */
 export default {
   api: [
-    "introduction",
+    {
+      type: "doc",
+      label: "Introduction",
+      id: "introduction",
+    },
+    {
+      type: "doc",
+      label: "What does RISC Zero enable?",
+      id: "use-cases",
+    },
+    {
+      type: "doc",
+      label: "Getting Started",
+      id: "getting-started",
+    },
     {
       type: "category",
-      label: "Bonsai",
-      link: {
-        type: `doc`,
-        id: "bonsai/bonsai-overview",
-      },
-      collapsed: false,
+      label: "What is a zkVM Application?",
+      collapsed: true,
       items: [
         {
           type: "doc",
-          label: "Quick Start",
-          id: "bonsai/quickstart",
+          label: "Overview",
+          id: "zkvm/zkvm_overview",
         },
         {
           type: "doc",
-          label: "Bonsai on Ethereum",
-          id: "bonsai/bonsai-on-eth",
+          label: "Receipts 101",
+          id: "zkvm/receipts",
         },
         {
           type: "doc",
-          label: "A Blockchain Dev's Guide to zkVM Development",
-          id: "bonsai/blockchain-zkvm-guide",
+          label: "Guest Code 101",
+          id: "zkvm/guest-code-101",
         },
         {
           type: "doc",
-          label: "Ethereum Examples",
-          id: "bonsai/eth-examples",
+          label: "Host Code 101",
+          id: "zkvm/host-code-101",
         },
         {
-          type: "category",
-          label: "REST API",
-          link: {
-            type: `doc`,
-            id: "bonsai/rest-api",
-          },
-          collapsed: false,
-          items: [
-            {
-              type: "link",
-              label: "API Reference Docs",
-              href: "https://api.bonsai.xyz/swagger-ui/",
-            },
-          ],
+          type: "doc",
+          label: "Example Applications",
+          id: "zkvm/examples",
         },
       ],
     },
     {
       type: "category",
-      label: "zkVM",
-      link: {
-        type: `doc`,
-        id: "zkvm/zkvm_overview",
-      },
+      label: "Writing your zkVM Application",
       collapsed: false,
       items: [
-        {
-          type: "doc",
-          label: "Quick Start",
-          id: "zkvm/quickstart",
-        },
-        {
-          type: "doc",
-          label: "Dev Mode",
-          id: "zkvm/dev-mode",
-        },
-        {
-          type: "link",
-          label: "API Reference Docs",
-          href: "https://docs.rs/risc0-zkvm/",
-        },
         {
           type: "doc",
           label: "Installation",
@@ -82,74 +62,116 @@ export default {
         },
         {
           type: "doc",
+          label: "Quick Start",
+          id: "zkvm/quickstart",
+        },
+        {
+          type: "doc",
+          label: "Hello World Tutorial",
+          id: "zkvm/tutorials/hello-world",
+        },
+        {
+          type: "doc",
+          label: "Understanding I/O",
+          id: "zkvm/tutorials/io",
+        },
+        {
+          type: "doc",
           label: "Rust Resources",
-          id: "zkvm/developer-guide/rust-resources",
+          id: "zkvm/rust-resources",
+        },
+        {
+          type: "link",
+          label: "API Reference Docs",
+          href: "https://docs.rs/risc0-zkvm/",
+        },
+      ],
+    },
+    {
+      type: "category",
+      label: "Generating Proofs for your zkVM Application",
+      collapsed: true,
+      items: [
+        {
+          type: "doc",
+          label: "Proving Options",
+          id: "generating-proofs/proving-options",
         },
         {
           type: "doc",
-          label: "Guest Code 101",
-          id: "zkvm/developer-guide/guest-code-101",
+          label: "Dev Mode",
+          id: "generating-proofs/dev-mode",
         },
         {
           type: "doc",
-          label: "Host Code 101",
-          id: "zkvm/developer-guide/host-code-101",
+          label: "Local Proving",
+          id: "generating-proofs/local-proving",
         },
         {
           type: "doc",
-          label: "Receipts",
-          id: "zkvm/developer-guide/receipts",
+          label: "Remote Proving",
+          id: "generating-proofs/remote-proving",
+        },
+      ],
+    },
+    {
+      type: "category",
+      label: "Optimizing your zkVM Application",
+      collapsed: true,
+      items: [
+        {
+          type: "doc",
+          label: "Profiling",
+          id: "zkvm/profiling",
         },
         {
           type: "doc",
           label: "Guest Optimization",
-          id: "zkvm/developer-guide/optimization",
+          id: "zkvm/optimization",
         },
         {
           type: "doc",
           label: "Cryptography Acceleration",
-          id: "zkvm/developer-guide/acceleration",
-        },
-        {
-          type: "doc",
-          label: "Profiling",
-          id: "zkvm/developer-guide/profiling",
-        },
-        {
-          type: "doc",
-          label: "zkVM technical specification",
-          id: "zkvm/developer-guide/zkvm-specification",
+          id: "zkvm/acceleration",
         },
         {
           type: "doc",
           label: "Performance Benchmarks",
           id: "zkvm/benchmarks",
         },
+      ],
+    },
+    {
+      type: "category",
+      label: "Blockchain Integration",
+      collapsed: true,
+      items: [
         {
-          type: "category",
-          label: "Tutorials",
-          link: {
-            type: `doc`,
-            id: "zkvm/tutorials/overview",
-          },
-          collapsed: false,
-          items: [
-            {
-              type: "doc",
-              label: "Hello World Tutorial",
-              id: "zkvm/tutorials/hello-world",
-            },
-          ],
+          type: "doc",
+          label: "Posting & Verifying Proofs on Ethereum",
+          id: "blockchain-integration/bonsai-on-eth",
         },
         {
           type: "doc",
-          label: "Examples",
-          id: "zkvm/examples",
+          label: "Ethereum Examples",
+          id: "blockchain-integration/eth-examples",
         },
         {
-          type: "link",
-          label: "Source code",
-          href: "https://github.com/risc0/risc0",
+          type: "doc",
+          label: "Verifier Contract",
+          id: "blockchain-integration/contracts/verifier",
+        },
+      ],
+    },
+    {
+      type: "category",
+      label: "Reference",
+      collapsed: true,
+      items: [
+        {
+          type: "doc",
+          label: "zkVM technical specification",
+          id: "zkvm/zkvm-specification",
         },
       ],
     },

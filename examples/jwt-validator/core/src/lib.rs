@@ -101,7 +101,9 @@ impl FromStr for Validator {
 
 #[cfg(test)]
 mod tests {
+
     use super::*;
+
     const SECRET_KEY: &str = r#"
     {
       "alg": "RS256",

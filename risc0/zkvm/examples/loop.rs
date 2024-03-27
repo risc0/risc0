@@ -24,7 +24,6 @@ use risc0_zkvm_methods::{
     bench::{BenchmarkSpec, SpecWithIters},
     BENCH_ELF,
 };
-use risc0_zkvm_platform::WORD_SIZE;
 use tracing_subscriber::{prelude::*, EnvFilter};
 
 #[derive(serde::Serialize, Debug)]
@@ -57,14 +56,23 @@ struct Args {
     /// Print results in json format.
     #[arg(long, short)]
     json: bool,
+
+    /// Enable tracing forest
+    #[arg(short, long, default_value_t = false)]
+    tree: bool,
 }
 
 fn main() {
     let args = Args::parse();
     if let Some(iterations) = args.iterations {
         tracing_subscriber::registry()
+            .with(tracing_subscriber::fmt::layer())
             .with(EnvFilter::from_default_env())
-            .with(tracing_forest::ForestLayer::default())
+            .with(if args.tree {
+                Some(tracing_forest::ForestLayer::default())
+            } else {
+                None
+            })
             .init();
 
         let mut opts = ProverOpts::default();
@@ -76,17 +84,22 @@ fn main() {
         let start = Instant::now();
         let (session, receipt) = top(prover.clone(), iterations, args.po2);
         let duration = start.elapsed();
-        let (cycles, _) = session.get_cycles().unwrap();
 
-        let seal = receipt.inner.succinct().unwrap().seal.len() * WORD_SIZE;
+        let seal = receipt
+            .inner
+            .composite()
+            .unwrap()
+            .segments
+            .iter()
+            .fold(0, |acc, segment| acc + segment.get_seal_bytes().len());
 
         let usage = prover.get_peak_memory_usage();
-        let throughput = (cycles as f64) / duration.as_secs_f64();
+        let throughput = (session.total_cycles as f64) / duration.as_secs_f64();
 
         if !args.quiet {
             if args.json {
                 let entry = PerformanceData {
-                    cycles,
+                    cycles: session.user_cycles,
                     duration: duration.as_nanos(),
                     ram: usage,
                     seal,
@@ -98,8 +111,9 @@ fn main() {
                 }
             } else {
                 println!(
-                    "| {:>9}k | {:>10} | {:>10} | {:>10} | {:>8}hz |",
-                    cycles / 1024,
+                    "| {:>10}k | {:>12}k | {:>10} | {:>10} | {:>10} | {:>8}hz |",
+                    session.user_cycles / 1024,
+                    session.total_cycles / 1024,
                     duration.human_duration().to_string(),
                     usage.human_count_bytes().to_string(),
                     seal.human_count_bytes().to_string(),
@@ -112,8 +126,8 @@ fn main() {
             println!("[");
         } else {
             println!(
-                "| {:>10} | {:>10} | {:>10} | {:>10} | {:>10} |",
-                "Cycles", "Duration", "RAM", "Seal", "Speed"
+                "| {:>11} | {:>13} | {:>10} | {:>10} | {:>10} | {:>10} |",
+                "User Cycles", "Prover Cycles", "Duration", "RAM", "Seal", "Speed"
             );
         }
 
@@ -132,7 +146,7 @@ fn main() {
         let len = input.len();
 
         for (index, &iteration) in input.iter().enumerate() {
-            run_with_iterations(iteration, args.po2, args.json);
+            run_with_iterations(iteration, &args);
 
             if args.json {
                 if index == len - 1 {
@@ -145,19 +159,22 @@ fn main() {
     }
 }
 
-fn run_with_iterations(iterations: usize, po2: u32, json: bool) {
+fn run_with_iterations(iterations: usize, args: &Args) {
     let mut cmd = Command::new(std::env::current_exe().unwrap());
     if iterations == 0 {
         cmd.arg("--quiet");
     }
-    if json {
+    if args.json {
         cmd.arg("--json");
+    }
+    if let Some(hashfn) = &args.hashfn {
+        cmd.arg("--hashfn").arg(hashfn);
     }
     let ok = cmd
         .arg("--iterations")
         .arg(iterations.to_string())
         .arg("--po2")
-        .arg(po2.to_string())
+        .arg(args.po2.to_string())
         .status()
         .unwrap()
         .success();

@@ -19,7 +19,6 @@ use risc0_zkvm::{
     get_prover_server, ExecutorEnv, ExecutorImpl, ProverOpts, ProverServer, VerifierContext,
 };
 use risc0_zkvm_methods::FIB_ELF;
-use risc0_zkvm_platform::WORD_SIZE;
 use tracing_subscriber::{prelude::*, EnvFilter};
 
 #[derive(Parser)]
@@ -31,6 +30,10 @@ struct Args {
     /// Specify the hash function to use.
     #[arg(short = 'f', long)]
     hashfn: Option<String>,
+
+    /// Enable tracing forest
+    #[arg(short, long, default_value_t = false)]
+    tree: bool,
 
     #[arg(short, long, default_value_t = false)]
     skip_prover: bool,
@@ -46,12 +49,18 @@ struct Metrics {
 }
 
 fn main() {
+    let args = Args::parse();
+
     tracing_subscriber::registry()
+        .with(tracing_subscriber::fmt::layer())
         .with(EnvFilter::from_default_env())
-        .with(tracing_forest::ForestLayer::default())
+        .with(if args.tree {
+            Some(tracing_forest::ForestLayer::default())
+        } else {
+            None
+        })
         .init();
 
-    let args = Args::parse();
     let mut opts = ProverOpts::default();
     if let Some(hashfn) = args.hashfn {
         opts.hashfn = hashfn;
@@ -69,8 +78,6 @@ fn top(prover: Rc<dyn ProverServer>, iterations: u32, skip_prover: bool) -> Metr
         .unwrap();
     let mut exec = ExecutorImpl::from_elf(env, FIB_ELF).unwrap();
     let session = exec.run().unwrap();
-    let segments = session.resolve().unwrap();
-    let (total_cycles, user_cycles) = session.get_cycles().unwrap();
     let seal = if skip_prover {
         0
     } else {
@@ -79,17 +86,17 @@ fn top(prover: Rc<dyn ProverServer>, iterations: u32, skip_prover: bool) -> Metr
             .prove_session(&ctx, &session)
             .unwrap()
             .inner
-            .succinct()
+            .composite()
             .unwrap()
-            .seal
-            .len()
-            * WORD_SIZE
+            .segments
+            .iter()
+            .fold(0, |acc, segment| acc + segment.get_seal_bytes().len())
     };
 
     Metrics {
-        segments: segments.len(),
-        user_cycles,
-        total_cycles,
+        segments: session.segments.len(),
+        user_cycles: session.user_cycles,
+        total_cycles: session.total_cycles,
         seal,
     }
 }

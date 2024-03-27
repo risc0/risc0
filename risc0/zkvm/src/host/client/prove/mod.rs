@@ -107,11 +107,21 @@ pub struct ProverOpts {
 }
 
 impl Default for ProverOpts {
-    /// Return [ProverOpts] with the Poseidon hash function and
+    /// Return [ProverOpts] with the Poseidon2 hash function and
     /// `prove_guest_errors` set to false.
     fn default() -> Self {
         Self {
-            hashfn: "poseidon".to_string(),
+            hashfn: "poseidon2".to_string(),
+            prove_guest_errors: false,
+        }
+    }
+}
+
+impl ProverOpts {
+    /// Choose the fastest prover options. May not be compatible with recursion.
+    pub fn fast() -> Self {
+        Self {
+            hashfn: "sha-256".to_string(),
             prove_guest_errors: false,
         }
     }
@@ -122,7 +132,7 @@ impl Default for ProverOpts {
 /// The `RISC0_PROVER` environment variable, if specified, will select the
 /// following [Prover] implementation:
 /// * `bonsai`: [BonsaiProver] to prove on Bonsai.
-/// * `local`: [local::LocalProver] to prove locally in-process. Note: this
+/// * `local`: LocalProver to prove locally in-process. Note: this
 ///   requires the `prove` feature flag.
 /// * `ipc`: [ExternalProver] to prove using an `r0vm` sub-process. Note: `r0vm`
 ///   must be installed. To specify the path to `r0vm`, use `RISC0_SERVER_PATH`.
@@ -131,7 +141,7 @@ impl Default for ProverOpts {
 /// [Prover]:
 /// * [BonsaiProver] if the `BONSAI_API_URL` and `BONSAI_API_KEY` environment
 ///   variables are set unless `RISC0_DEV_MODE` is enabled.
-/// * [local::LocalProver] if the `prove` feature flag is enabled.
+/// * LocalProver if the `prove` feature flag is enabled.
 /// * [ExternalProver] otherwise.
 pub fn default_prover() -> Rc<dyn Prover> {
     let explicit = std::env::var("RISC0_PROVER").unwrap_or_default();
@@ -165,7 +175,7 @@ pub fn default_prover() -> Rc<dyn Prover> {
 ///
 /// The `RISC0_EXECUTOR` environment variable, if specified, will select the
 /// following [Executor] implementation:
-/// * `local`: [local::LocalProver] to execute locally in-process. Note: this is
+/// * `local`: LocalProver to execute locally in-process. Note: this is
 ///   only available when the `prove` feature is enabled.
 /// * `ipc`: [ExternalProver] to execute using an `r0vm` sub-process. Note:
 ///   `r0vm` must be installed. To specify the path to `r0vm`, use
@@ -173,7 +183,7 @@ pub fn default_prover() -> Rc<dyn Prover> {
 ///
 /// If `RISC0_EXECUTOR` is not specified, the following rules are used to select
 /// an [Executor]:
-/// * [local::LocalProver] if the `prove` feature flag is enabled.
+/// * LocalProver if the `prove` feature flag is enabled.
 /// * [ExternalProver] otherwise.
 pub fn default_executor() -> Rc<dyn Executor> {
     let explicit = std::env::var("RISC0_EXECUTOR").unwrap_or_default();

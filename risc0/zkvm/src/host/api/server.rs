@@ -21,17 +21,15 @@ use std::{
 use anyhow::{anyhow, bail, Result};
 use bytes::Bytes;
 use prost::Message;
-use serde::{Deserialize, Serialize};
 
 use super::{malformed_err, path_to_string, pb, ConnectionWrapper, Connector, TcpConnector};
 use crate::{
     get_prover_server, get_version,
     host::{
-        client::{env::TraceCallback, slice_io::SliceIo},
-        recursion::SuccinctReceipt,
+        client::slice_io::SliceIo, recursion::SuccinctReceipt, server::session::NullSegmentRef,
     },
     receipt_claim::{MaybePruned, ReceiptClaim},
-    ExecutorEnv, ExecutorImpl, ProverOpts, Receipt, Segment, SegmentReceipt, SegmentRef,
+    ExecutorEnv, ExecutorImpl, ProverOpts, Receipt, Segment, SegmentReceipt, TraceCallback,
     TraceEvent, VerifierContext,
 };
 
@@ -39,17 +37,6 @@ use crate::{
 pub struct Server {
     connector: Box<dyn Connector>,
 }
-
-#[derive(Clone, Serialize, Deserialize)]
-struct EmptySegmentRef;
-
-#[typetag::serde]
-impl SegmentRef for EmptySegmentRef {
-    fn resolve(&self) -> Result<Segment> {
-        Err(anyhow!("Segment resolution not supported"))
-    }
-}
-
 struct PosixIoProxy {
     fd: u32,
     conn: ConnectionWrapper,
@@ -295,8 +282,8 @@ impl Server {
                             pb::api::OnSegmentDone {
                                 segment: Some(pb::api::SegmentInfo {
                                     index: segment.index,
-                                    po2: segment.po2,
-                                    cycles: segment.cycles,
+                                    po2: segment.inner.po2 as u32,
+                                    cycles: segment.inner.insn_cycles as u32,
                                     segment: Some(asset),
                                 }),
                             },
@@ -313,7 +300,7 @@ impl Server {
                     bail!(err)
                 }
 
-                Ok(Box::new(EmptySegmentRef))
+                Ok(Box::new(NullSegmentRef))
             })?;
 
             Ok(pb::api::ServerReply {
