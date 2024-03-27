@@ -28,6 +28,9 @@ jobs:
           - os: Linux
             feature: cuda
             device: nvidia_rtx_3090_ti
+          - os: macOS
+            feature: metal
+            device: apple_m2_pro
 
     env:
       CI_BENCH_PR: true
