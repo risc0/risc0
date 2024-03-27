@@ -27,14 +27,12 @@
 
     .container {
       display: grid;
-      /* Two columns */
       grid-template-columns: repeat(2, 1fr);
       gap: 30px;
     }
 
     .footer {
       display: grid;
-      /* Three columns */
       grid-template-columns: repeat(3, 1fr);
       gap: 10px;
     }
@@ -43,11 +41,10 @@
       grid-column: span 2;
     }
 
-    .box {
-      border: 1px solid black;
+    .box, .qrcode-box {
       padding: 10px;
       box-sizing: border-box;
-      border: none;
+      border: none; /* No border */
     }
 
     .text-box {
@@ -63,34 +60,20 @@
       gap: 10px;
     }
 
-    .qrcode-box {
-      border: 1px solid black;
-      padding: 10px;
-      box-sizing: border-box;
-      border: none;
-    }
-
     .responsive {
-      /* Reducing the width to half */
       width: 50%;
-      /* Keeping the aspect ratio intact */
       height: auto;
-      /* To use margin auto for centering */
       display: block;
-      /* Center the image horizontally */
       margin: 0 auto;
     }
 
-
-    /* Table base styles */
     table {
       border-collapse: collapse;
       width: 100%;
       margin: 10px 0;
     }
 
-    th,
-    td {
+    th, td {
       padding: 10px 10px;
       border-bottom: 1px solid #ddd;
     }
@@ -100,23 +83,19 @@
       font-weight: 600;
     }
 
-    /* Zebra stripe alternate rows */
     tr:nth-child(even) {
       background-color: #f9f9f9;
     }
 
-    /* Highlight row on hover */
     tr:hover {
       background-color: #e6e6e6;
     }
 
-    /* Header styles */
     th {
       text-align: left;
       font-size: 1em;
     }
 
-    /* Content styles */
     td {
       font-size: 1em;
     }
@@ -125,7 +104,6 @@
       margin-top: -10px;
     }
 
-    /* Print-specific styles */
     @media print {
       body {
         font-size: 10px;
@@ -138,18 +116,15 @@
 
       table {
         width: 100%;
-        /* Reduce font size for print */
         font-size: 10px;
       }
 
-      th,
-      td {
+      th, td {
         padding: 5px;
         font-size: 10px;
       }
 
-      table td,
-      table th {
+      table td, table th {
         padding: 3px 10px;
       }
 
@@ -184,18 +159,13 @@
         text-align: center;
       }
 
-      figcaption>div,
-      figcaption>img {
+      figcaption>div, figcaption>img {
         display: inline-block;
       }
     }
 
-    /* Different styles for US Letter */
-    /* Using a min-width slightly below 216mm to target US Letter */
     @media print and (min-width: 215mm) {
-
-      table td,
-      table th {
+      table td, table th {
         padding: 1px 10px;
       }
     }
@@ -210,14 +180,13 @@
       <h1>RISC Zero Datasheet</h1>
       <p>
         Commit hash: <span id="hash-content">Loading...</span>
-        <br></br>
+        <br>
         Use cargo run —release —example loop in head of main to collect data for your machine
       </p>
     </div>
   </div>
 
   <div class="container">
-    <!-- The table containers for JavaScript to append benchmarks -->
     <div class="box" id="table1"></div>
     <div class="box" id="table2"></div>
     <div class="box" id="table3"></div>
@@ -225,43 +194,31 @@
   </div>
 
   <div class="footnote">
-    <p>*This uses continuations, reducing the memory usage but producing more receipts (if not rolled up with Bonsai).
-    </p>
+    <p>*This uses continuations, reducing the memory usage but producing more receipts (if not rolled up with Bonsai).</p>
   </div>
 
   <div class="footer">
     <div class="text-box">
-      The performance of the prover depends on the number of execution cycles in the zkVM guest. We
-      therefore give
-      performance data for different guest execution lengths, as indicated in the "Cycles" column. For cryptographic
-      reasons, the
-      cycle count for each segment is always rounded up in length to the next highest power of two; thus, a program that
-      requires 33000
-      cycles
-      will have the same performance as a program that requires 63000 cycles, as both will round up to 65536 (64 k)
-      cycles.
-      <br></br>
-      Initializing a zkVM guest requires over 16 k cycles. Combined with this power of two rounding, this means that no
-      program can be executed in fewer than 64 k cycles.
-      <br></br>
-      To give context for these numbers we have included a table indicating the size of some of our example programs in
-      cycles. Note that some programs vary in cycle count depending on input data. The cycle counts given here use the
-      default input data, or, for examples with no defaults, the input data suggested in the associated README file.
-      <br></br>
+      The performance of the prover depends on the number of execution cycles in the zkVM guest. We therefore give performance data for different guest execution lengths, as indicated in the "Cycles" column. For cryptographic reasons, the cycle count for each segment is always rounded up in length to the next highest power of two; thus, a program that requires 33000 cycles will have the same performance as a program that requires 63000 cycles, as both will round up to 65536 (64 k) cycles.
+      <br>
+      Initializing a zkVM guest requires over 16 k cycles. Combined with this power of two rounding, this means that no program can be executed in fewer than 64 k cycles.
+      <br>
+      To give context for these numbers we have included a table indicating the size of some of our example programs in cycles. Note that some programs vary in cycle count depending on input data. The cycle counts given here use the default input data, or, for examples with no defaults, the input data suggested in the associated README file.
+      <br>
     </div>
     <div class="box" id="table_cycle_count"></div>
   </div>
   <div class="qrcode-container">
     <div class="qrcode-box">
       <figure>
-        <img src="static/risczero_qrcode.png" alt="Image 2">
-        <figcaption text-align: center;>www.RISCZero.com</figcaption>
+        <img src="static/risczero_qrcode.png" alt="RISC Zero QR Code" class="responsive">
+        <figcaption style="text-align: center;">www.RISCZero.com</figcaption>
       </figure>
     </div>
     <div class="qrcode-box">
       <figure>
-        <img src="static/zkvm_examples_qrcode.png" alt="Image 3">
-        <figcaption text-align: center;>zkVM Examples</figcaption>
+        <img src="static/zkvm_examples_qrcode.png" alt="zkVM Examples QR Code" class="responsive">
+        <figcaption style="text-align: center;">zkVM Examples</figcaption>
       </figure>
     </div>
   </div>
@@ -453,10 +410,6 @@
           table.appendChild(tableBody);
           tableContainer.appendChild(table);
         });
-
-        const logoDiv = document.createElement('div');
-        logoDiv.innerHTML = '<img src="static/RISC_Zero_Logo.jpeg" alt="RISC Zero Logo" class="responsive">';
-        document.getElementById('logo-container').appendChild(logoDiv);
 
       } catch (error) {
         console.error('Error processing data:', error);
