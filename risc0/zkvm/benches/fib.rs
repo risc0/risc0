@@ -28,10 +28,23 @@ fn setup_exec(iterations: u32) -> ExecutorImpl<'static> {
     ExecutorImpl::from_elf(env, FIB_ELF).unwrap()
 }
 
+fn is_pull_request() -> bool {
+    std::env::var("CI_BENCH_PR")
+        .ok()
+        .filter(|x| x == "true")
+        .is_some()
+}
+
 fn execute(c: &mut Criterion) {
     let mut group = c.benchmark_group("fib");
 
-    for iterations in [100, 1000, 10_000, 100_000] {
+    let cases = if is_pull_request() {
+        vec![100_000]
+    } else {
+        vec![100, 10_000, 100_000]
+    };
+
+    for iterations in cases {
         let session = setup_exec(iterations).run().unwrap();
         let id = BenchmarkId::from_parameter(format!("{iterations}/execute"));
         group.throughput(Throughput::Elements(session.user_cycles));
@@ -56,7 +69,13 @@ fn prove_segment(c: &mut Criterion, hashfn: &str) {
     let prover = get_prover_server(&opts).unwrap();
     let ctx = VerifierContext::default();
 
-    for iterations in [100, 10_000, 100_000] {
+    let cases = if is_pull_request() {
+        vec![10_000]
+    } else {
+        vec![100, 10_000, 100_000]
+    };
+
+    for iterations in cases {
         let session = setup_exec(iterations).run().unwrap();
         println!("{iterations}: {}", session.total_cycles);
         let id = BenchmarkId::from_parameter(format!("{iterations}/prove/{hashfn}"));
@@ -90,7 +109,13 @@ fn total_composite(c: &mut Criterion) {
     let prover = get_prover_server(&opts).unwrap();
     let ctx = VerifierContext::default();
 
-    for iterations in [100, 10_000, 100_000] {
+    let cases = if is_pull_request() {
+        vec![10_000]
+    } else {
+        vec![100, 10_000, 100_000]
+    };
+
+    for iterations in cases {
         let session = setup_exec(iterations).run().unwrap();
         let id = BenchmarkId::from_parameter(format!("{iterations}/composite"));
         group.throughput(Throughput::Elements(session.total_cycles));
@@ -117,7 +142,13 @@ fn total_succinct(c: &mut Criterion) {
     let prover = get_prover_server(&opts).unwrap();
     let ctx = VerifierContext::default();
 
-    for iterations in [100, 10_000, 100_000] {
+    let cases = if is_pull_request() {
+        vec![10_000]
+    } else {
+        vec![100, 10_000, 100_000]
+    };
+
+    for iterations in cases {
         let session = setup_exec(iterations).run().unwrap();
         let id = BenchmarkId::from_parameter(format!("{iterations}/succinct"));
         group.throughput(Throughput::Elements(session.total_cycles));
@@ -167,7 +198,7 @@ fn join(c: &mut Criterion) {
     group.sample_size(10);
 
     let env = ExecutorEnv::builder()
-        .write_slice(&[2000])
+        .write_slice(&[3000])
         .segment_limit_po2(16)
         .build()
         .unwrap();
@@ -180,7 +211,7 @@ fn join(c: &mut Criterion) {
         session.user_cycles,
         session.total_cycles
     );
-    assert_eq!(session.segments.len(), 2);
+    assert!(session.segments.len() >= 2);
 
     let opts = ProverOpts::default();
     let prover = get_prover_server(&opts).unwrap();

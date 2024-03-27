@@ -1,6 +1,8 @@
 name: Benchmark Check
 
 on:
+  pull_request:
+    branches: [main, "release-*"]
   workflow_dispatch:
 
 concurrency:
@@ -13,13 +15,13 @@ permissions:
   contents: read
 
 env:
-  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   RISC0_BUILD_LOCKED: 1
   RISC0_TOOLCHAIN_VERSION: v2024-02-08.1
 
 jobs:
   bench:
-    runs-on: [self-hosted, prod, bench, "${{ matrix.os }}", "${{ matrix.device }}"]
+    runs-on:
+      labels: [self-hosted, prod, bench, "${{ matrix.os }}", "${{ matrix.device }}"]
 
     strategy:
       fail-fast: false
@@ -30,46 +32,32 @@ jobs:
         include:
           - os: Linux
             feature: cuda
-            device: nvidia_rtx_a5000
+            device: nvidia_rtx_3090_ti
+          - os: macOS
+            feature: metal
+            device: apple_m2_pro
 
     env:
+      CI_BENCH_PR: true
       FEATURE: ${{ matrix.feature }}
+      DISABLE_S3: ${{ matrix.device == 'nvidia_rtx_3090_ti' }}
 
     steps:
       # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
       - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
-      - uses: actions/checkout@v4
+
+      - name: Check out the current PR
+        uses: actions/checkout@v4
+
       - if: matrix.feature == 'cuda'
         uses: ./.github/actions/cuda
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
         with:
           key: ${{ matrix.os }}-${{ matrix.feature }}
+          disable_s3: ${{ env.DISABLE_S3 }}
+
       - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
-      - uses: risc0/criterion-compare-action@risc0
-        id: criterion-cmp
-        with:
-          benchName: fib
-          branchName: main
-          features: ${{ matrix.feature }}
-          prettyName: "${{ matrix.os }}-${{ matrix.feature }}"
-          outputMarkdown: true
 
-      - name: Create output dir
-        run: |
-          mkdir -p ${{ runner.temp }}/pr-output/
-          echo ${{ github.event.number }} > ${{ runner.temp }}/pr-output/NR
-
-      - name: Write compare markdown to file
-        run: |
-          echo "${{ steps.criterion-cmp.outputs.markdown }}" > ${{ runner.temp }}/pr-output/${{ matrix.os }}-${{ matrix.feature }}-output.md
-
-      - uses: actions/upload-artifact@v3
-        with:
-          name: 'md-output'
-          path: ${{ runner.temp }}/pr-output/
-          if-no-files-found: error
-
-      # Note: we just push the comment data into artifacts, here
-      # the bench_pr_comment.yml picks up after this workflow to make the comment
-      # needed because: https://securitylab.github.com/research/github-actions-preventing-pwn-requests/
+      - name: Run Benchmarks
+        run: cargo bench --bench divan -F $FEATURE
