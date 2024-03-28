@@ -45,7 +45,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [Linux, macOS]
-        feature: [default]
+        feature: [prove]
         device: [cpu]
         include:
           - os: Linux
@@ -94,7 +94,6 @@ jobs:
       - name: Checkout gh-pages repository
         uses: actions/checkout@v4
         with:
-          lfs: true
           repository: risc0/ghpages
           ref: dev
           token: ${{ secrets.BENCHMARK_TOKEN }}
@@ -107,12 +106,7 @@ jobs:
         run: |
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
-          git add dev/datasheet/macOS-cpu.json
-          git add dev/datasheet/macOS-apple_m2_pro.json
-          git add dev/datasheet/Linux-nvidia_rtx_3090_ti.json
-          git add dev/datasheet/Linux-cpu.json
-          git add dev/datasheet/COMMIT_HASH.txt
-          git add dev/datasheet/cycle_count.csv
+          git add --all
           if git diff --cached --exit-code; then
             echo "No changes to commit"
           else
