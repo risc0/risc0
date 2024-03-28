@@ -51,6 +51,13 @@ fn main() {
                 use_docker: None,
             },
         ),
+        (
+            "risc0-zkvm-methods-c-crates",
+            GuestOptions {
+                features: vec![],
+                use_docker: None,
+            },
+        ),
     ]);
 
     embed_methods_with_options(map);

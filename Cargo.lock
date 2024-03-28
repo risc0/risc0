@@ -1128,6 +1128,7 @@ dependencies = [
  "downloader",
  "flate2",
  "fs2",
+ "fs_extra",
  "reqwest",
  "reqwest-middleware",
  "reqwest-retry",
@@ -2679,6 +2680,12 @@ dependencies = [
  "nix",
  "windows-sys 0.48.0",
 ]
+
+[[package]]
+name = "fs_extra"
+version = "1.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "42703706b716c37f96a77aea830392ad231f44c9e9a67872fa5548707e11b11c"
 
 [[package]]
 name = "funty"
@@ -5320,6 +5327,7 @@ dependencies = [
  "anyhow",
  "cargo-platform",
  "cargo_metadata 0.17.0",
+ "dirs",
  "docker-generate",
  "risc0-binfmt",
  "risc0-zkp",
