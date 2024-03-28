@@ -11,7 +11,7 @@ you get started building applications for [Bonsai] and the [zkVM].
 - For a guide to writing and running your first guest code, check out our [zkVM
   Quick Start][quickstart].
 - For a simple example, check out the [Hello World tutorial][hello-world], where
-  the [guest] receives two inputs from the [host] and commits their product to
+  the [guest] receives one input from the [host] and commits the result of its operation to
   the [journal].
 
 The full functionality of the guest is documented in the [`guest`
