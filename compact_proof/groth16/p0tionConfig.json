@@ -21,8 +21,8 @@
         "cfOrVm": "CF"
       },
       "artifacts": {
-        "r1csStoragePath": "http://risc0-artifacts.s3.us-west-2.amazonaws.com/tsc/stark_verify.r1cs",
-        "wasmStoragePath": "http://risc0-artifacts.s3.us-west-2.amazonaws.com/tsc/stark_verify.wasm"
+        "r1csStoragePath": "http://risc0-artifacts.s3.us-west-2.amazonaws.com/tsc/2024-03-28/stark_verify.r1cs",
+        "wasmStoragePath": "http://risc0-artifacts.s3.us-west-2.amazonaws.com/tsc/2024-03-28/stark_verify.wasm"
       },
       "name": "stark_verify",
       "sequencePosition": 1,
