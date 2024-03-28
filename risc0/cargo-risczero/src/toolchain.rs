@@ -209,9 +209,3 @@ impl CToolchain {
         })
     }
 }
-
-#[test]
-fn c_link() {
-    let _ = CToolchain::link(
-    &PathBuf::from("/Users/erik/Library/Application Support/cargo-risczero/toolchains/c_aarch64-apple-darwin_2022.03.25")).unwrap();
-}
