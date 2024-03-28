@@ -166,12 +166,13 @@ fn main() {
             fd,
             pos_and_len,
         } => {
+            let mut num_read = alloc::vec::Vec::with_capacity(pos_and_len.len());
             for (pos, len) in pos_and_len {
-                let num_read =
-                    unsafe { sys_read(fd, buf.as_mut_ptr().add(pos as usize), len as usize) };
-                assert_eq!(num_read, len as usize);
+                let n = unsafe { sys_read(fd, buf.as_mut_ptr().add(pos as usize), len as usize) };
+                num_read.push(n);
+                assert!(n <= len as usize);
             }
-            env::commit(&buf);
+            env::commit(&(buf, num_read));
         }
         MultiTestSpec::SysVerify(pairs) => {
             for (image_id, journal) in pairs.into_iter() {
