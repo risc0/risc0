@@ -32,7 +32,9 @@ use which::which;
 
 use crate::get_env_var;
 
-const DOCKER_MSG: &str = r#"We depend on Docker for reproducible builds.
+const DOCKER_MSG: &str = r#"Docker is not running.
+
+Reproducible builds rely on Docker to build the ELF binaries.
 Please install Docker and ensure it is running before running this command.
 "#;
 
@@ -292,7 +294,7 @@ fn check_docker(docker: impl AsRef<std::ffi::OsStr>, max_elapsed_time: Duration)
 /// Ensures that docker is running.
 fn ensure_docker_is_running() -> Result<()> {
     let docker = which("docker").context(DOCKER_MSG)?;
-    check_docker(docker, Duration::from_secs(5))?;
+    check_docker(docker, Duration::from_secs(5)).context(DOCKER_MSG)?;
     Ok(())
 }
 
