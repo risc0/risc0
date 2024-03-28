@@ -32,6 +32,11 @@ env:
   RISC0_BUILD_LOCKED: 1
   RISC0_TOOLCHAIN_VERSION: v2024-02-08.1
 
+defaults:
+  run:
+    # This ensures `-eo pipefail`, which is important for catching errors
+    shell: bash
+
 jobs:
   bench:
     runs-on: [self-hosted, prod, bench, "${{ matrix.os }}", "${{ matrix.device }}"]
@@ -39,19 +44,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        os: [Linux, macOS]
+        feature: [default]
+        device: [cpu]
         include:
           - os: Linux
             feature: cuda
-            device: nvidia_rtx_a5000
+            device: nvidia_rtx_3090_ti
           - os: macOS
             feature: metal
             device: apple_m2_pro
-          - os: macOS
-            feature: default
-            device: cpu
-          - os: Linux
-            feature: default
-            device: cpu
 
     env:
       FEATURE: ${{ matrix.feature }}
@@ -107,7 +109,7 @@ jobs:
           git config user.email "actions@github.com"
           git add dev/datasheet/macOS-cpu.json
           git add dev/datasheet/macOS-apple_m2_pro.json
-          git add dev/datasheet/Linux-nvidia_rtx_a5000.json
+          git add dev/datasheet/Linux-nvidia_rtx_3090_ti.json
           git add dev/datasheet/Linux-cpu.json
           git add dev/datasheet/COMMIT_HASH.txt
           git add dev/datasheet/cycle_count.csv
