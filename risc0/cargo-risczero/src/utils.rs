@@ -17,7 +17,7 @@
 use std::{
     fmt,
     fs::{File, OpenOptions},
-    path::{Path},
+    path::Path,
     process::{Command, ExitStatus, Output, Stdio},
 };
 
