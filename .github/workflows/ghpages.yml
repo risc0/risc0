@@ -22,7 +22,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  upload_artifacts:
+  publish:
     runs-on: ubuntu-latest
 
     steps:
@@ -38,6 +38,7 @@ jobs:
           path: ghpages
           ref: dev
           token: ${{ secrets.BENCHMARK_TOKEN }}
+      - run: find risc0/ghpages/
       - name: Push gh-pages
         run: |
           cp -r risc0/ghpages/* ghpages/
