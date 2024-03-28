@@ -280,6 +280,20 @@ pub const TAPSET: &TapSet = &TapSet::<'static> {
             skip: 1,
         },
         TapData {
+            offset: 21,
+            back: 0,
+            group: 1,
+            combo: 0,
+            skip: 1,
+        },
+        TapData {
+            offset: 22,
+            back: 0,
+            group: 1,
+            combo: 0,
+            skip: 1,
+        },
+        TapData {
             offset: 0,
             back: 0,
             group: 2,
@@ -4512,9 +4526,9 @@ pub const TAPSET: &TapSet = &TapSet::<'static> {
         0, 0, 1, 0, 1, 2, 3, 4, 68, 0, 1, 2, 7, 15, 16, 0, 2, 7, 15, 16,
     ],
     combo_begin: &[0, 1, 3, 9, 15, 20],
-    group_begin: &[0, 16, 37, 641],
+    group_begin: &[0, 16, 39, 643],
     combos_count: 5,
-    reg_count: 161,
+    reg_count: 163,
     tot_combo_backs: 20,
     // TODO: Generate these instead of hardcoding:
     group_names: &["accum", "code", "data"],

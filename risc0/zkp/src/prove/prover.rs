@@ -356,6 +356,14 @@ impl<'a, H: Hal> Prover<'a, H> {
             check_group.merkle.prove(self.hal, iop, idx);
         });
 
+        let proven_soundness_error =
+            super::soundness::proven::<H>(self.taps, final_poly_coeffs.size());
+        tracing::info!("proven_soundness_error: {proven_soundness_error:?}");
+
+        let conjectured_soundness_error =
+            super::soundness::conjectured_strict::<H>(self.taps, final_poly_coeffs.size());
+        tracing::info!("conjectured_soundness_error: {conjectured_soundness_error:?}");
+
         // Return final proof
         let proof = self.iop.proof;
         tracing::debug!("Proof size = {}", proof.len());
