@@ -56,8 +56,10 @@ pub fn docker_build(
         return Ok(BuildStatus::Skipped);
     }
 
-    let manifest_path = manifest_path.canonicalize()?;
-    let src_dir = src_dir.canonicalize()?;
+    let manifest_path = manifest_path
+        .canonicalize()
+        .context(format!("manifest_path: {manifest_path:?}"))?;
+    let src_dir = src_dir.canonicalize().context("src_dir")?;
     let meta = MetadataCommand::new()
         .manifest_path(&manifest_path)
         .exec()
