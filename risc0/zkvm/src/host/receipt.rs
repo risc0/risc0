@@ -19,13 +19,15 @@ use core::fmt::Debug;
 
 use anyhow::Result;
 use risc0_binfmt::{ExitCode, SystemState};
-use risc0_circuit_recursion::control_id::ALLOWED_IDS_ROOT;
+use risc0_circuit_recursion::control_id::{ALLOWED_IDS_ROOT, BN254_CONTROL_ID};
 use risc0_circuit_rv32im::{
     control_id::{BLAKE2B_CONTROL_ID, POSEIDON2_CONTROL_ID, SHA256_CONTROL_ID},
     layout, CIRCUIT,
 };
 use risc0_core::field::baby_bear::BabyBear;
-use risc0_groth16::{split_digest, verifier::prepared_verifying_key, Seal, Verifier};
+use risc0_groth16::{
+    fr_from_hex_string, split_digest, verifier::prepared_verifying_key, Seal, Verifier,
+};
 use risc0_zkp::{
     core::{
         digest::Digest,
@@ -389,9 +391,11 @@ impl CompactReceipt {
         .map_err(|_| VerificationError::InvalidProof)?;
         let (c0, c1) =
             split_digest(self.claim.digest()).map_err(|_| VerificationError::InvalidProof)?;
+        let id_p254_hash =
+            fr_from_hex_string(BN254_CONTROL_ID).map_err(|_| VerificationError::InvalidProof)?;
         Verifier::new(
             &Seal::from_vec(&self.seal).map_err(|_| VerificationError::InvalidProof)?,
-            vec![a0, a1, c0, c1],
+            vec![a0, a1, c0, c1, id_p254_hash],
             prepared_verifying_key().map_err(|_| VerificationError::InvalidProof)?,
         )
         .map_err(|_| VerificationError::InvalidProof)?
