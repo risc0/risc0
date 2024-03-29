@@ -105,10 +105,23 @@ impl Bootstrap {
     }
 
     fn generate_recursion_control_ids(mut valid_control_ids: Vec<Digest>) {
-        tracing::info!("unzipping recursion programs (zkrs)");
-        let zkrs = get_all_zkrs().unwrap();
-        let zkr_control_ids: Vec<(String, Digest)> = zkrs
+        // Recursion programs (ZKRs) that are too be included in the allowed set.
+        // NOTE: We use an allow list here, rather than including all ZKRs in the zip archive,
+        // because there may be ZKRs included only for tests, or ones that are not part of the main
+        // set of allowed programs (e.g. accelerators).
+        let allowed_zkrs: Vec<String> = ["join.zkr", "resolve.zkr", "identity.zkr"]
+            .map(str::to_string)
             .into_iter()
+            .chain((14..=24).map(|i| format!("lift_{i}.zkr")))
+            .collect();
+
+        tracing::info!("unzipping recursion programs (zkrs)");
+        let zkrs = get_all_zkrs()
+            .unwrap()
+            .into_iter()
+            .filter(|(name, _)| allowed_zkrs.contains(name));
+
+        let zkr_control_ids: Vec<(String, Digest)> = zkrs
             .map(|(name, encoded_program)| {
                 let program = Program::from_encoded(&encoded_program);
 
