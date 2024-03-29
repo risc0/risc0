@@ -26,7 +26,7 @@ downloader = { version = "0.2", default-features = false, features = [
 ] }
 flate2 = "1"
 fs2 = "0.4"
-hex = { version = "0.4.3", default-features = false }
+hex = { version = "0.4", default-features = false }
 reqwest = { version = "0.11", default-features = false, features = [
   "json",
   "rustls-tls",
