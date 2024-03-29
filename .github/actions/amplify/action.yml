@@ -1,0 +1,26 @@
+name: 'amplify-preview-actions'
+description: 'This action builds and deploys your AWS Amplify pull request preview'
+inputs:
+  branch_name:
+    description: 'GitHub branch name to deploy'
+    required: true
+  amplify_command:
+    description: 'amplify command: SUPPORTED: [deploy, delete]'
+    required: true
+  comments_url:
+    description: 'Github comments url'
+    default: "${{ github.event.pull_request.comments_url }}"
+    required: false
+
+runs:
+  using: composite
+  steps: 
+    - name: run entrypoint
+      shell: bash
+      run: |
+        chmod +x ./amplify.sh
+        ./amplify.sh ${{ inputs.branch_name }} ${{ inputs.amplify_command }} ${{ inputs.comments_url }}
+
+branding:
+  icon: 'git-pull-request'
+  color: 'blue'

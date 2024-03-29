@@ -1,0 +1,113 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 99%;
+    --foreground: 224 71.4% 4.1%;
+    --card: 0 0% 100%;
+    --card-foreground: 224 71.4% 4.1%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 224 71.4% 4.1%;
+    --primary: 243.4 75.4% 58.6%;
+    --primary-foreground: 210 20% 98%;
+    --secondary: 220 14.3% 95.9%;
+    --secondary-foreground: 220.9 39.3% 11%;
+    --muted: 220 14.3% 95.9%;
+    --muted-foreground: 220 8.9% 46.1%;
+    --accent: 220 14.3% 95.9%;
+    --accent-foreground: 220.9 39.3% 11%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 20% 98%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 262.1 83.3% 57.8%;
+    --radius: 0.75rem;
+  }
+
+  .dark {
+    --background: 243.4 48% 10%;
+    --foreground: 243.4 5% 90%;
+    --card: 243.4 47% 12%;
+    --card-foreground: 243.4 5% 90%;
+    --popover: 243.4 48% 5%;
+    --popover-foreground: 243.4 5% 90%;
+    --primary: 243.4 75.4% 58.6%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 243.4 30% 20%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 205.4 30% 25%;
+    --muted-foreground: 243.4 5% 60%;
+    --accent: 243.4 25% 25%;
+    --accent-foreground: 243.4 5% 90%;
+    --destructive: 0 50% 60%;
+    --destructive-foreground: 243.4 5% 90%;
+    --border: 243.4 30% 26%;
+    --input: 243.4 30% 26%;
+    --ring: 243.4 75.4% 58.6%;
+    --radius: 0.75rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground min-h-dvh antialiased font-sans;
+  }
+}
+
+@layer components {
+
+  /* usually h1 */
+  .title {
+    @apply text-3xl font-bold tracking-tight;
+  }
+
+  /* usually h2 */
+  .title-sm {
+    @apply text-2xl font-semibold tracking-tight;
+  }
+
+  /* usually h3 */
+  .subtitle {
+    @apply text-xl font-semibold tracking-tight;
+  }
+
+  /* usually h4 */
+  .subtitle-sm {
+    @apply text-lg font-medium tracking-tight;
+  }
+
+  /* Don't use h5/h6 */
+
+  /* regular link style */
+  .link {
+    @apply text-primary hover:underline underline-offset-4
+  }
+}
+
+/* Custom rules */
+iframe {
+  /* for google login button having a white background otherwise */
+  color-scheme: auto;
+}
+
+[data-sonner-toaster][data-theme=light] {
+  --success-bg: hsl(var(--background))!important;
+  --success-border: var(--gray4)!important;
+  --info-bg: hsl(var(--background))!important;
+  --info-border: var(--gray4)!important;
+  --warning-bg: hsl(var(--background))!important;
+  --warning-border: var(--gray4)!important;
+  --error-bg: hsl(var(--background))!important;
+  --error-border: var(--gray4)!important;
+}
+
+.lucide {
+  /* bigger stroke for ALL icons */
+  stroke-width: 2.25px;
+}

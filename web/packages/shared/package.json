@@ -1,0 +1,8 @@
+{
+  "name": "@web/shared",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc"
+  }
+}
