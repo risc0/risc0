@@ -32,12 +32,6 @@ use which::which;
 
 use crate::get_env_var;
 
-const DOCKER_MSG: &str = r#"Docker is not running.
-
-Reproducible builds rely on Docker to build the ELF binaries.
-Please install Docker and ensure it is running before running this command.
-"#;
-
 const DOCKER_IGNORE: &str = r#"
 **/Dockerfile
 **/.git
@@ -62,8 +56,6 @@ pub fn docker_build(
     src_dir: &Path,
     features: &[String],
 ) -> Result<BuildStatus> {
-    ensure_docker_is_running()?;
-
     if !get_env_var("RISC0_SKIP_BUILD").is_empty() {
         eprintln!("Skipping build because RISC0_SKIP_BUILD is set");
         return Ok(BuildStatus::Skipped);
@@ -258,39 +250,6 @@ fn compute_image_id(elf_path: &Path) -> Result<String> {
     let image =
         MemoryImage::new(&program, PAGE_SIZE as u32).context("unable to create memory image")?;
     Ok(image.compute_id().to_string())
-}
-
-/// Check if docker is running.
-fn check_docker(docker: impl AsRef<std::ffi::OsStr>, max_elapsed_time: Duration) -> Result<()> {
-    eprintln!("Checking if Docker is running...");
-    let backoff = backoff::ExponentialBackoffBuilder::new()
-        .with_max_elapsed_time(Some(max_elapsed_time))
-        .build();
-    let f = || -> Result<bool, backoff::Error<anyhow::Error>> {
-        Command::new(&docker)
-            .arg("version")
-            .stdout(std::process::Stdio::null())
-            .stderr(std::process::Stdio::null())
-            .status()
-            .context("Failed to run `docker version`")?
-            .success()
-            .then_some(true)
-            .ok_or(anyhow!("Docker engine is not running").into())
-    };
-
-    let result = backoff::retry(backoff, f);
-
-    match result {
-        Ok(true) => Ok(()),
-        _ => Err(anyhow!("Docker engine is not running")),
-    }
-}
-
-/// Ensures that docker is running.
-fn ensure_docker_is_running() -> Result<()> {
-    let docker = which("docker").context(DOCKER_MSG)?;
-    check_docker(docker, Duration::from_secs(5)).context(DOCKER_MSG)?;
-    Ok(())
 }
 
 // requires Docker to be installed
