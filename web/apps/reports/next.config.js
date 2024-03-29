@@ -11,6 +11,17 @@ const config = {
   experimental: {
     ppr: true,
   },
+
+  // biome-ignore lint/suspicious/useAwait: not needed
+  async redirects() {
+    return [
+      {
+        source: "/",
+        destination: "/reports",
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default withBundleAnalyzer({

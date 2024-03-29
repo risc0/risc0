@@ -16,7 +16,7 @@ export const metadata = {
   icons: [
     {
       rel: "icon",
-      url: process.env.NODE_ENV === "production" ? "/favicon.svg" : "/favicon-dev.svg",
+      url: "/favicon.png",
     },
   ],
 };

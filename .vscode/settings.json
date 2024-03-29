@@ -18,7 +18,6 @@
 	},
 	"biome.rename": true,
 	"biome.enabled": true,
-	"editor.tabSize": 2,
 	"rust-analyzer.cargo.extraEnv": {
 		"RISC0_SKIP_BUILD": "1"
 	},

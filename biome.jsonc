@@ -2,6 +2,7 @@
   "$schema": "https://biomejs.dev/schemas/1.6.3/schema.json",
   "files": {
     "include": ["web"],
+    "ignore": [".next", ".vercel", "*.spec.*", "*.test.*", "build", "dist", "node_modules"],
     "ignoreUnknown": true
   },
   "linter": {

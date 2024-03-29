@@ -2,14 +2,13 @@
 
 ## Getting Started 🚀
 
-> [!IMPORTANT]  
+> [!IMPORTANT]
 > Create an `.env` file at the root of the project and fill its contents (see `.env.example`)
 
 Then run:
 
 ```sh
 bun install      # installs all dependencies
-bun run codegen  # generates types
 ```
 
 ## Running Tests 🧪
