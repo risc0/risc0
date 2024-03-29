@@ -69,11 +69,12 @@ pub fn docker_build(
         return Ok(BuildStatus::Skipped);
     }
 
-    let manifest_path = canonicalize_path(manifest_path)?;
-    let src_dir = canonicalize_path(src_dir)?;
-    let root_pkg = get_root_pkg(&manifest_path, &src_dir)?;
+    let manifest_path = manifest_path.canonicalize()?;
+    let src_dir = src_dir.canonicalize()?;
+    let root_pkg = get_root_pkg(&manifest_path)?;
     let pkg_name = &root_pkg.name;
 
+    eprintln!("Docker context: {src_dir:?}");
     eprintln!("Building ELF binaries in {pkg_name} for riscv32im-risc0-zkvm-elf target...");
 
     if !Command::new("docker")
@@ -111,11 +112,6 @@ pub fn docker_build(
     Ok(BuildStatus::Success)
 }
 
-fn canonicalize_path(path: &Path) -> Result<PathBuf> {
-    path.canonicalize()
-        .context(format!("Failed to canonicalize path: {path:?}"))
-}
-
 /// Get the path to the ELF binary.
 pub fn get_elf_path(
     src_dir: impl AsRef<Path>,
@@ -130,8 +126,7 @@ pub fn get_elf_path(
 }
 
 /// Get the root package from the manifest path.
-pub fn get_root_pkg(manifest_path: &PathBuf, src_dir: &PathBuf) -> Result<cargo_metadata::Package> {
-    eprintln!("Docker context: {src_dir:?}");
+pub fn get_root_pkg(manifest_path: &PathBuf) -> Result<cargo_metadata::Package> {
     let meta = MetadataCommand::new()
         .manifest_path(manifest_path)
         .exec()
