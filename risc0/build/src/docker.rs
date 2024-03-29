@@ -12,12 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{
-    fs,
-    path::{Path, PathBuf},
-    process::Command,
-    time::Duration,
-};
+use std::{fs, path::Path, process::Command, time::Duration};
 
 use anyhow::{anyhow, bail, Context, Result};
 use cargo_metadata::MetadataCommand;
@@ -40,7 +35,8 @@ const DOCKER_IGNORE: &str = r#"
 **/tmp
 "#;
 
-const TARGET_DIR: &str = "target/riscv-guest/riscv32im-risc0-zkvm-elf/docker";
+/// The target directory for the ELF binaries.
+pub const TARGET_DIR: &str = "target/riscv-guest/riscv32im-risc0-zkvm-elf/docker";
 
 /// Indicates weather the build was successful or skipped.
 pub enum BuildStatus {
@@ -63,7 +59,11 @@ pub fn docker_build(
 
     let manifest_path = manifest_path.canonicalize()?;
     let src_dir = src_dir.canonicalize()?;
-    let root_pkg = get_root_pkg(&manifest_path)?;
+    let meta = MetadataCommand::new()
+        .manifest_path(&manifest_path)
+        .exec()
+        .context("Manifest not found")?;
+    let root_pkg = meta.root_package().context("Failed to parse Cargo.toml")?;
     let pkg_name = &root_pkg.name;
 
     eprintln!("Docker context: {src_dir:?}");
@@ -92,52 +92,15 @@ pub fn docker_build(
     }
     println!("ELFs ready at:");
 
-    for target in get_targets(&root_pkg) {
-        if target.is_bin() {
-            let elf_path = get_elf_path(&src_dir, &pkg_name, &target.name);
-            let image_id = compute_image_id(&elf_path)?;
-            let rel_elf_path = Path::new(TARGET_DIR).join(&pkg_name).join(&target.name);
-            println!("ImageID: {} - {:?}", image_id, rel_elf_path);
-        }
+    let target_dir = src_dir.join(TARGET_DIR);
+    for target in root_pkg.targets.iter().filter(|t| t.is_bin()) {
+        let elf_path = target_dir.join(&pkg_name).join(&target.name);
+        let image_id = compute_image_id(&elf_path)?;
+        let rel_elf_path = Path::new(TARGET_DIR).join(&pkg_name).join(&target.name);
+        println!("ImageID: {} - {:?}", image_id, rel_elf_path);
     }
 
     Ok(BuildStatus::Success)
-}
-
-/// Get the path to the ELF binary.
-pub fn get_elf_path(
-    src_dir: impl AsRef<Path>,
-    pkg_name: impl ToString,
-    target_name: impl AsRef<Path>,
-) -> PathBuf {
-    src_dir
-        .as_ref()
-        .join(TARGET_DIR)
-        .join(pkg_name.to_string().replace('-', "_"))
-        .join(target_name)
-}
-
-/// Get the root package from the manifest path.
-pub fn get_root_pkg(manifest_path: &PathBuf) -> Result<cargo_metadata::Package> {
-    let meta = MetadataCommand::new()
-        .manifest_path(manifest_path)
-        .exec()
-        .context("Manifest not found")?;
-
-    Ok(meta
-        .root_package()
-        .context("failed to parse Cargo.toml")?
-        .clone())
-}
-
-/// Get the targets from the root package.
-pub fn get_targets(root_pkg: &cargo_metadata::Package) -> Vec<cargo_metadata::Target> {
-    root_pkg
-        .targets
-        .iter()
-        .filter(|target| target.is_bin())
-        .cloned()
-        .collect()
 }
 
 /// Create the dockerfile.
