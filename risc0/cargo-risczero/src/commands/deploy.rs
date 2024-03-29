@@ -16,6 +16,7 @@ use std::path::PathBuf;
 
 use anyhow::{Context, Result};
 use bonsai_sdk::alpha::Client;
+use cargo_metadata::MetadataCommand;
 use clap::Parser;
 use risc0_build::BuildStatus;
 
@@ -58,21 +59,25 @@ impl DeployCommand {
         }
 
         let src_dir = std::env::current_dir().unwrap();
-        let root_pkg = risc0_build::get_root_pkg(&self.manifest_path, &src_dir)?;
-        for target in risc0_build::get_targets(&root_pkg) {
-            if target.is_bin() {
-                let elf_path = risc0_build::get_elf_path(&src_dir, &root_pkg.name, &target.name);
-                let elf = std::fs::read(&elf_path).with_context(|| {
-                    format!("Failed to read ELF file at path: {}", elf_path.display())
-                })?;
-                let image_id = risc0_binfmt::compute_image_id(&elf)?;
-                let image_id_hex = hex::encode(image_id);
-                client.upload_img(&image_id_hex, elf)?;
-                println!(
-                    "Uploaded ELF `{}` with image ID `{}`.",
-                    target.name, image_id_hex
-                );
-            }
+        let meta = MetadataCommand::new()
+            .manifest_path(&self.manifest_path)
+            .exec()
+            .context("Manifest not found")?;
+        let root_pkg = meta.root_package().context("Failed to parse Cargo.toml")?;
+        let target_dir = src_dir.join(risc0_build::TARGET_DIR);
+        let pkg_name = root_pkg.name.replace('-', "_");
+        for target in root_pkg.targets.iter().filter(|t| t.is_bin()) {
+            let elf_path = target_dir.join(&pkg_name).join(&target.name);
+            let elf = std::fs::read(&elf_path).with_context(|| {
+                format!("Failed to read ELF file at path: {}", elf_path.display())
+            })?;
+            let image_id = risc0_binfmt::compute_image_id(&elf)?;
+            let image_id_hex = hex::encode(image_id);
+            client.upload_img(&image_id_hex, elf)?;
+            println!(
+                "Uploaded ELF `{}` with image ID `{}`.",
+                target.name, image_id_hex
+            );
         }
 
         Ok(())

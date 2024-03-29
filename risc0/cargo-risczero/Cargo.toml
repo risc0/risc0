@@ -17,7 +17,7 @@ doc = false
 anyhow = { version = "1.0", features = ["backtrace"] }
 bonsai-sdk = { workspace = true }
 cargo-generate = { version = "0.18", features = ["vendored-openssl"] }
-cargo_metadata = { version = "0.18", optional = true }
+cargo_metadata = { version = "0.18" }
 clap = { version = "4.4", features = ["derive"] }
 const_format = "0.2"
 dirs = "5.0"
@@ -58,7 +58,6 @@ cuda = ["risc0-zkvm/cuda"]
 default = ["r0vm"]
 docker = []
 experimental = [
-  "dep:cargo_metadata",
   "dep:tracing-subscriber",
   "dep:risc0-build",
   "dep:zip",
