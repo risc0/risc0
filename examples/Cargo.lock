@@ -430,17 +430,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "backoff"
-version = "0.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b62ddb9cb1ec0a098ad4bbf9344d0713fa193ae1a80af55febcff2627b6a00c1"
-dependencies = [
- "getrandom",
- "instant",
- "rand",
-]
-
-[[package]]
 name = "backtrace"
 version = "0.3.69"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -532,7 +521,7 @@ dependencies = [
  "rustc-hash",
  "shlex",
  "syn 2.0.39",
- "which 4.4.2",
+ "which",
 ]
 
 [[package]]
@@ -3405,7 +3394,7 @@ dependencies = [
  "regex",
  "syn 2.0.39",
  "tempfile",
- "which 4.4.2",
+ "which",
 ]
 
 [[package]]
@@ -3799,7 +3788,6 @@ name = "risc0-build"
 version = "0.22.0-alpha.1"
 dependencies = [
  "anyhow",
- "backoff",
  "cargo-platform",
  "cargo_metadata",
  "docker-generate",
@@ -3809,7 +3797,6 @@ dependencies = [
  "serde",
  "serde_json",
  "tempfile",
- "which 6.0.1",
 ]
 
 [[package]]
@@ -3933,7 +3920,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5be1d1ff7fe501c9f420654bc1ff7461909b85e7f8fb3698a8812c0a8a787306"
 dependencies = [
  "cc",
- "which 4.4.2",
+ "which",
 ]
 
 [[package]]
@@ -5654,18 +5641,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "which"
-version = "6.0.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8211e4f58a2b2805adfbefbc07bab82958fc91e3836339b1ab7ae32465dce0d7"
-dependencies = [
- "either",
- "home",
- "rustix",
- "winsafe",
-]
-
-[[package]]
 name = "winapi"
 version = "0.3.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5921,12 +5896,6 @@ dependencies = [
  "cfg-if",
  "windows-sys 0.48.0",
 ]
-
-[[package]]
-name = "winsafe"
-version = "0.0.19"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d135d17ab770252ad95e9a872d365cf3090e3be864a34ab46f48555993efc904"
 
 [[package]]
 name = "wordle"

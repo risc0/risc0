@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{fs, path::Path, process::Command, time::Duration};
+use std::{fs, path::Path, process::Command};
 
-use anyhow::{anyhow, bail, Context, Result};
+use anyhow::{bail, Context, Result};
 use cargo_metadata::MetadataCommand;
 use docker_generate::DockerFile;
 use risc0_binfmt::{MemoryImage, Program};
@@ -23,7 +23,6 @@ use risc0_zkvm_platform::{
     PAGE_SIZE,
 };
 use tempfile::tempdir;
-use which::which;
 
 use crate::get_env_var;
 
