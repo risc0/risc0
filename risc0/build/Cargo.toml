@@ -9,6 +9,7 @@ repository = { workspace = true }
 
 [dependencies]
 anyhow = "1.0"
+backoff = "0.4"
 # This is a workaround to prevent the guest from pulling in a dependency that requires a newer rustc
 cargo-platform = "=0.1.5"
 cargo_metadata = "0.17"
@@ -20,7 +21,6 @@ serde = { version = "1.0", default-features = false, features = ["derive"] }
 serde_json = "1.0"
 tempfile = "3"
 which = "6.0"
-backoff = "0.4"
 
 [features]
 docker = []
