@@ -1,6 +1,5 @@
 import "@web/shared/styles/globals.css";
 
-import Toaster from "@web/ui/sonner";
 import { TooltipProvider } from "@web/ui/tooltip";
 import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
@@ -35,7 +34,6 @@ export default function RootLayout({ children }: PropsWithChildren) {
       <body>
         <Providers>
           <TooltipProvider>{children}</TooltipProvider>
-          <Toaster visibleToasts={3} richColors duration={8000} />
         </Providers>
         <Script strategy="beforeInteractive" src="/google.js" />
       </body>

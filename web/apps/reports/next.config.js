@@ -8,6 +8,9 @@ const config = {
   },
   reactStrictMode: true,
   swcMinify: true,
+  experimental: {
+    ppr: true,
+  },
 };
 
 export default withBundleAnalyzer({

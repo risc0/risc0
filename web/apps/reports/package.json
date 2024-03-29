@@ -6,7 +6,6 @@
   "scripts": {
     "build": "next build",
     "build:analyze": "ANALYZE=true bun run build",
-    "bump:version": "changelogen --bump --prerelease --no-output",
     "dev": "next dev --turbo",
     "start": "next start",
     "test": "bun test spec",

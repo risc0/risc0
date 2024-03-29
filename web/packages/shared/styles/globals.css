@@ -96,17 +96,6 @@ iframe {
   color-scheme: auto;
 }
 
-[data-sonner-toaster][data-theme=light] {
-  --success-bg: hsl(var(--background))!important;
-  --success-border: var(--gray4)!important;
-  --info-bg: hsl(var(--background))!important;
-  --info-border: var(--gray4)!important;
-  --warning-bg: hsl(var(--background))!important;
-  --warning-border: var(--gray4)!important;
-  --error-bg: hsl(var(--background))!important;
-  --error-border: var(--gray4)!important;
-}
-
 .lucide {
   /* bigger stroke for ALL icons */
   stroke-width: 2.25px;
