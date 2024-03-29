@@ -119,7 +119,7 @@ fn canonicalize_path(path: &Path) -> Result<PathBuf> {
 /// Get the path to the ELF binary.
 pub fn get_elf_path(
     src_dir: impl AsRef<Path>,
-    pkg_name: impl AsRef<Path> + ToString,
+    pkg_name: impl ToString,
     target_name: impl AsRef<Path>,
 ) -> PathBuf {
     src_dir
