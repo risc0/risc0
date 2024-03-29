@@ -26,8 +26,7 @@ use bonsai_sdk::{alpha::Client, API_KEY_ENVVAR, API_URL_ENVVAR};
 use clap::Args;
 use fs2::FileExt;
 
-/// Reports the current version of this crate.
-pub const VERSION: &str = env!("CARGO_PKG_VERSION");
+use risc0_zkvm::VERSION;
 
 pub fn risc0_data() -> Result<PathBuf> {
     let dir = if let Ok(dir) = std::env::var("RISC0_DATA_DIR") {

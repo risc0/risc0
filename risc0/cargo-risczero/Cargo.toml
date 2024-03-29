@@ -36,7 +36,7 @@ reqwest-retry = "0.4"
 risc0-binfmt = { workspace = true, default-features = false }
 risc0-build = { workspace = true }
 risc0-r0vm = { workspace = true, optional = true }
-risc0-zkvm = { workspace = true, optional = true }
+risc0-zkvm = { workspace = true }
 serde = { version = "1", features = ["derive"] }
 syn = "2.0.55"
 tar = "0.4"
