@@ -11,18 +11,18 @@ import {
 import { ArrowDownIcon, ArrowUpIcon, ChevronsUpDownIcon, EyeOffIcon } from "lucide-react";
 import type { HTMLAttributes } from "react";
 
-interface DatasheetTableColumnHeaderProps<TData, TValue> extends HTMLAttributes<HTMLDivElement> {
+interface ApplicationsBenchmarksTableColumnHeaderProps<TData, TValue> extends HTMLAttributes<HTMLDivElement> {
   column: Column<TData, TValue>;
   title: string;
   align?: "left" | "right";
 }
 
-export default function DatasheetTableColumnHeader<TData, TValue>({
+export default function ApplicationsBenchmarksTableColumnHeader<TData, TValue>({
   column,
   title,
   className,
   align = "left",
-}: DatasheetTableColumnHeaderProps<TData, TValue>) {
+}: ApplicationsBenchmarksTableColumnHeaderProps<TData, TValue>) {
   if (!column.getCanSort()) {
     return <div className={cn(className)}>{title}</div>;
   }

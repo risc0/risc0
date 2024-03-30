@@ -17,11 +17,9 @@ import {
 } from "@tanstack/react-table";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@web/ui/table";
 import { useState } from "react";
-import DatasheetTableToolbar from "./applications-benchmarks-table-toolbar";
+import ApplicationsBenchmarksTableToolbar from "./applications-benchmarks-table-toolbar";
 
-const MAX_AMOUNT_OF_ROWS = 5;
-
-type DatasheetTableProps<TData, TValue> = {
+type ApplicationsBenchmarksTableProps<TData, TValue> = {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   title: string;
@@ -40,7 +38,11 @@ const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
   return itemRank.passed;
 };
 
-export default function DatasheetTable<TData, TValue>({ title, columns, data }: DatasheetTableProps<TData, TValue>) {
+export default function ApplicationsBenchmarksTable<TData, TValue>({
+  title,
+  columns,
+  data,
+}: ApplicationsBenchmarksTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = useState({});
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -77,7 +79,11 @@ export default function DatasheetTable<TData, TValue>({ title, columns, data }: 
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="subtitle">{title}</h2>
-        <DatasheetTableToolbar globalFilter={globalFilter} setGlobalFilter={setGlobalFilter} table={table} />
+        <ApplicationsBenchmarksTableToolbar
+          globalFilter={globalFilter}
+          setGlobalFilter={setGlobalFilter}
+          table={table}
+        />
       </div>
 
       <div className="overflow-auto rounded-md border">
@@ -85,28 +91,23 @@ export default function DatasheetTable<TData, TValue>({ title, columns, data }: 
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead key={header.id} colSpan={header.colSpan}>
-                      {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
-                    </TableHead>
-                  );
-                })}
+                {headerGroup.headers.map((header) => (
+                  <TableHead key={header.id} colSpan={header.colSpan}>
+                    {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                  </TableHead>
+                ))}
               </TableRow>
             ))}
           </TableHeader>
           <TableBody className="border-transparent">
             {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map(
-                (row, index) =>
-                  index < MAX_AMOUNT_OF_ROWS && (
-                    <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
-                      {row.getVisibleCells().map((cell) => (
-                        <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
-                      ))}
-                    </TableRow>
-                  ),
-              )
+              table.getRowModel().rows.map((row) => (
+                <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+                  ))}
+                </TableRow>
+              ))
             ) : (
               <TableRow>
                 <TableCell colSpan={columns.length} className="h-24 text-center text-muted-foreground">

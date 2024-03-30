@@ -1,27 +1,10 @@
 import Separator from "@web/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@web/ui/tabs";
 import type { Metadata } from "next";
-import DatasheetTable from "./_components/applications-benchmarks-table";
-import datasheetTableColumns from "./_components/applications-benchmarks-table-columns";
-
-const convertCSVToJson = (csvData) => {
-  const lines = csvData.split("\n");
-  const headers = lines[0].split(",");
-  const result: any[] = [];
-
-  for (let i = 1; i < lines.length; i++) {
-    const obj = {};
-    const currentLine = lines[i].split(",");
-
-    for (let j = 0; j < headers.length; j++) {
-      obj[headers[j]?.trim()] = currentLine[j]?.trim();
-    }
-
-    result.push(obj);
-  }
-
-  return result;
-};
+import convertCsvToJson from "../_utils/convertCsvToJson";
+import fetchCommitHash from "./_actions/fetchCommitHash";
+import ApplicationsBenchmarksTable from "./_components/applications-benchmarks-table";
+import applicationsBenchmarksTableColumns from "./_components/applications-benchmarks-table-columns";
 
 const FILENAMES_TO_TITLES = {
   "macOS-apple_m2_pro.csv": "Metal on Apple M2 Pro",
@@ -34,8 +17,9 @@ export const metadata: Metadata = {
   title: "Applications Benchmark",
 };
 
-export default async function DatasheetPage() {
+export default async function ApplicationsBenchmarksPage() {
   const urls = Object.keys(FILENAMES_TO_TITLES);
+  const commitHash = await fetchCommitHash();
   const dataPromises = urls.map((url) =>
     fetch(`https://risc0.github.io/ghpages/dev/benchmarks/${url}`)
       .then((response) => {
@@ -45,21 +29,22 @@ export default async function DatasheetPage() {
         return response.text();
       })
       .catch((error) => {
-        console.warn(`Failed fetching ${url}:`, error.message);
+        console.error(`Failed fetching ${url}:`, error.message);
         return null; // Handle individual failures gracefully
       }),
   );
-
   const dataArrays = await Promise.all(dataPromises);
-
-  console.log("dataArrays", dataArrays);
 
   return (
     <div className="container max-w-screen-3xl">
-      <h1 className="title">Applications Benchmarks</h1>
+      <div className="flex items-center justify-between text-muted-foreground">
+        <h1 className="title-sm">Applications Benchmarks</h1>
+        <p className="text-sm">Commit Hash: {commitHash}</p>
+      </div>
+
       <Separator />
 
-      <div className="mt-6 grid grid-cols-2 gap-8">
+      <div className="mt-6">
         <Tabs defaultValue={Object.keys(FILENAMES_TO_TITLES)[0]}>
           <div className="flex items-center">
             <TabsList>
@@ -72,10 +57,12 @@ export default async function DatasheetPage() {
           </div>
 
           {Object.keys(FILENAMES_TO_TITLES).map((filename, index) => (
-            <TabsContent value={filename} className="mt-4">
-              <h2 className="title">{Object.values(FILENAMES_TO_TITLES)[index]}</h2>
-              <p className="whitespace-warp">{JSON.stringify(convertCSVToJson(dataArrays[index]))}</p>
-              <DatasheetTable columns={datasheetTableColumns} data={convertCSVToJson(dataArrays[index])} />
+            <TabsContent key={filename} value={filename} className="mt-4">
+              <ApplicationsBenchmarksTable
+                title={Object.values(FILENAMES_TO_TITLES)[index] ?? ""}
+                columns={applicationsBenchmarksTableColumns}
+                data={convertCsvToJson(dataArrays[index]).filter((element) => element.job_name)}
+              />
             </TabsContent>
           ))}
         </Tabs>

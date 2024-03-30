@@ -1,13 +1,15 @@
 import { z } from "zod";
 
-const datasheetTableSchema = z.object({
-  cycles: z.number(),
-  user_cycles: z.number(),
-  total_cycles: z.number(),
-  duration: z.number(),
-  ram: z.number(),
-  seal: z.number(),
-  throughput: z.number(),
+const applicationsBenchmarksTableSchema = z.object({
+  job_name: z.string(),
+  job_size: z.string(),
+  exec_duration: z.string(),
+  proof_duration: z.string(),
+  total_duration: z.string(),
+  verify_duration: z.string(),
+  insn_cycles: z.string(),
+  prove_cycles: z.string(),
+  proof_bytes: z.string(),
 });
 
-export type DatasheetTable = z.infer<typeof datasheetTableSchema>;
+export type ApplicationsBenchmarksTable = z.infer<typeof applicationsBenchmarksTableSchema>;

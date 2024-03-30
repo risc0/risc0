@@ -6,11 +6,13 @@ import Button from "@web/ui/button";
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent } from "@web/ui/dropdown-menu";
 import { Settings2Icon } from "lucide-react";
 
-type DatasheetTableViewOptionsProps<TData> = {
+type ApplicationsBenchmarksTableViewOptionsProps<TData> = {
   table: Table<TData>;
 };
 
-export default function DatasheetTableViewOptions<TData>({ table }: DatasheetTableViewOptionsProps<TData>) {
+export default function ApplicationsBenchmarksTableViewOptions<TData>({
+  table,
+}: ApplicationsBenchmarksTableViewOptionsProps<TData>) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -22,18 +24,16 @@ export default function DatasheetTableViewOptions<TData>({ table }: DatasheetTab
         {table
           .getAllColumns()
           .filter((column) => typeof column.accessorFn !== "undefined" && column.getCanHide())
-          .map((column) => {
-            return (
-              <DropdownMenuCheckboxItem
-                key={column.id}
-                className="cursor-pointer"
-                checked={column.getIsVisible()}
-                onCheckedChange={(value) => column.toggleVisibility(!!value)}
-              >
-                {column.id}
-              </DropdownMenuCheckboxItem>
-            );
-          })}
+          .map((column) => (
+            <DropdownMenuCheckboxItem
+              key={column.id}
+              className="cursor-pointer"
+              checked={column.getIsVisible()}
+              onCheckedChange={(value) => column.toggleVisibility(!!value)}
+            >
+              {column.id}
+            </DropdownMenuCheckboxItem>
+          ))}
       </DropdownMenuContent>
     </DropdownMenu>
   );

@@ -13,7 +13,7 @@ export default function ReportsLayout({ children }: PropsWithChildren) {
 
   return (
     <div className="min-h-screen space-y-4 py-6">
-      <div className="container flex max-w-screen-md flex-row items-center justify-between">
+      <div className="container flex max-w-screen-3xl flex-row items-center justify-between">
         <h1 className="title">RISC Zero Reports</h1>
 
         <div className="flex flex-row justify-end gap-2">
