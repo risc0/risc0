@@ -3,7 +3,7 @@ import "@web/shared/styles/globals.css";
 import { TooltipProvider } from "@web/ui/tooltip";
 import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
-import Script from "next/script";
+import { Next13NProgress } from "nextjs13-progress";
 import type { PropsWithChildren } from "react";
 import Providers from "~/client/providers";
 
@@ -35,7 +35,7 @@ export default function RootLayout({ children }: PropsWithChildren) {
         <Providers>
           <TooltipProvider>{children}</TooltipProvider>
         </Providers>
-        <Script strategy="beforeInteractive" src="/google.js" />
+        <Next13NProgress color="#4E46E5" height={1} showOnShallow={false} />
       </body>
     </html>
   );

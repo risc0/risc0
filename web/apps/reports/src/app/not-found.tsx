@@ -1,9 +1,9 @@
 import Badge from "@web/ui/badge";
 import { buttonVariants } from "@web/ui/button";
 import { CardDescription, CardFooter, CardHeader, CardTitle } from "@web/ui/card";
+import Link from "@web/ui/link";
 import type { Metadata } from "next";
 import Image from "next/image";
-import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Page Not Found",

@@ -2,7 +2,7 @@ import Separator from "@web/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@web/ui/tabs";
 import type { Metadata } from "next";
 import convertCsvToJson from "../_utils/convertCsvToJson";
-import fetchCommitHash from "./_actions/fetchCommitHash";
+import fetchApplicationsBenchmarksCommitHash from "./_actions/fetchApplicationsBenchmarksCommitHash";
 import ApplicationsBenchmarksTable from "./_components/applications-benchmarks-table";
 import applicationsBenchmarksTableColumns from "./_components/applications-benchmarks-table-columns";
 
@@ -19,7 +19,7 @@ export const metadata: Metadata = {
 
 export default async function ApplicationsBenchmarksPage() {
   const urls = Object.keys(FILENAMES_TO_TITLES);
-  const commitHash = await fetchCommitHash();
+  const commitHash = await fetchApplicationsBenchmarksCommitHash();
   const dataPromises = urls.map((url) =>
     fetch(`https://risc0.github.io/ghpages/dev/benchmarks/${url}`)
       .then((response) => {

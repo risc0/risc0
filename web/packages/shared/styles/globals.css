@@ -100,3 +100,12 @@ iframe {
   /* bigger stroke for ALL icons */
   stroke-width: 2.25px;
 }
+
+/* NProgress (top progress bar on page load) */
+#nprogress .spinner {
+  display: none !important;
+}
+
+#nprogress .peg {
+  opacity: 0.5 !important;
+}

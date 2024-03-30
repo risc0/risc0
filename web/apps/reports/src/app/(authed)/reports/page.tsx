@@ -1,8 +1,7 @@
 import Button from "@web/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@web/ui/card";
-import type { Metadata } from "next";
+import Link from "@web/ui/link";
 import Image from "next/image";
-import Link from "next/link";
 
 const REPORTS = [
   {

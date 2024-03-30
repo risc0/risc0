@@ -1,5 +1,6 @@
 import Separator from "@web/ui/separator";
 import type { Metadata } from "next";
+import fetchDatasheetCommitHash from "./_actions/fetchDatasheetCommitHash";
 import DataSheetTable from "./_components/datasheet-table";
 import datasheetTableColumns from "./_components/datasheet-table-columns";
 
@@ -16,6 +17,7 @@ export const metadata: Metadata = {
 
 export default async function DatasheetPage() {
   const urls = Object.keys(FILENAMES_TO_TITLES);
+  const commitHash = await fetchDatasheetCommitHash();
   const dataPromises = urls.map((url) =>
     fetch(`https://risc0.github.io/ghpages/dev/datasheet/${url}`)
       .then((response) => {
@@ -29,15 +31,18 @@ export default async function DatasheetPage() {
         return null; // Handle individual failures gracefully
       }),
   );
-
   const dataArrays = await Promise.all(dataPromises);
 
   return (
     <div className="container max-w-screen-3xl">
-      <h1 className="title">Datasheet</h1>
+      <div className="flex items-center justify-between text-muted-foreground">
+        <h1 className="title-sm">Applications Benchmarks</h1>
+        <p className="text-sm">Commit Hash: {commitHash}</p>
+      </div>
+
       <Separator />
 
-      <div className="mt-8 grid grid-cols-2 gap-8">
+      <div className="mt-8 grid xl:grid-cols-2 gap-8">
         {dataArrays.map((dataArray, index) => (
           <DataSheetTable
             key={Object.values(FILENAMES_TO_TITLES)[index]}
