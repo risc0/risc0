@@ -29,9 +29,9 @@ export default function RootLayout({ children }: PropsWithChildren) {
       className={`${
         GeistMono.variable
         // biome-ignore lint/nursery/useSortedClasses: ignore
-      } ${GeistSans.variable}`}
+      } ${GeistSans.variable} h-full`}
     >
-      <body>
+      <body className="flex min-h-full flex-col">
         <Providers>
           <TooltipProvider>{children}</TooltipProvider>
         </Providers>

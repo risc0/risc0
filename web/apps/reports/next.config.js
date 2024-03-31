@@ -6,8 +6,6 @@ const config = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-  reactStrictMode: true,
-  swcMinify: true,
   experimental: {
     ppr: true,
   },

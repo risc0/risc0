@@ -36,7 +36,7 @@ export default function ReportsPage() {
       {REPORTS.map(({ label, href, description, cta }, index) => (
         <Link key={href} href={href} className="group transition-opacity hover:opacity-70">
           <Card className="group-hover:-translate-y-1 flex h-full flex-col shadow-sm transition-transform">
-            <CardHeader>
+            <CardHeader className="pb-4">
               <CardTitle className="text-2xl">{label}</CardTitle>
               <CardDescription>{description}</CardDescription>
             </CardHeader>

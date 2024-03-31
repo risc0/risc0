@@ -34,10 +34,10 @@ export default async function DatasheetPage() {
   const dataArrays = await Promise.all(dataPromises);
 
   return (
-    <div className="container max-w-screen-3xl">
+    <div className="container max-w-screen-3xl  pt-4">
       <div className="flex items-center justify-between text-muted-foreground">
         <h1 className="title-sm">Applications Benchmarks</h1>
-        <p className="text-sm">Commit Hash: {commitHash}</p>
+        <p className="text-xs">Commit Hash: {commitHash}</p>
       </div>
 
       <Separator />
