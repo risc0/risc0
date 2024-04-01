@@ -10,7 +10,7 @@ repository = { workspace = true }
 release = false
 
 [dependencies]
-alloy-primitives = "0.6"
+alloy-primitives = "0.7"
 alloy-sol-types = "0.6"
 anyhow = "1.0"
 clap = { version = "4.1", features = ["derive", "env"] }
