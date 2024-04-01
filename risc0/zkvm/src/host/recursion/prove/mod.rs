@@ -449,7 +449,11 @@ impl Prover {
 
     /// Initialize a recursion prover with the test recursion program. This program is used in
     /// testing the basic correctness of the recursion circuit.
-    pub fn new_test_recursion_circuit(digests: [&Digest; 2], opts: ProverOpts) -> Result<Self> {
+    #[cfg(test)]
+    pub(crate) fn new_test_recursion_circuit(
+        digests: [&Digest; 2],
+        opts: ProverOpts,
+    ) -> Result<Self> {
         let (program, control_id) = zkr::test_recursion_circuit()?;
         let mut prover = Prover::new(program, control_id, opts);
 

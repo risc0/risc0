@@ -44,6 +44,7 @@ fn get_zkr(name: &str) -> Result<(Program, Digest)> {
     ))
 }
 
+#[cfg(test)]
 pub fn test_recursion_circuit() -> Result<(Program, Digest)> {
     get_zkr("test_recursion_circuit.zkr")
 }

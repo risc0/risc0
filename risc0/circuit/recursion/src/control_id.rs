@@ -16,7 +16,7 @@
 pub const ALLOWED_IDS_ROOT: &str =
     "89dfc82261b33a2174de881e8fc54017e2a21647850a8b73fa28c56b31bad34b";
 
-pub const RECURSION_CONTROL_IDS: [(&str, &str); 14] = [
+pub const RECURSION_CONTROL_IDS: [(&str, &str); 15] = [
     (
         "identity.zkr",
         "a09149331924d71cf14f5b613484540d681f1d63753e9919c87d72414c100e6c",
@@ -72,6 +72,10 @@ pub const RECURSION_CONTROL_IDS: [(&str, &str); 14] = [
     (
         "resolve.zkr",
         "61a2fa5df9c9686208e9a926098cf8270bbfe76b843a2f3708a251549f21a530",
+    ),
+    (
+        "test_recursion_circuit.zkr",
+        "ca7ade1f42976e5e103ad45c97e42963515f5b4b33076418e0a9390a576edd4e",
     ),
 ];
 
