@@ -1,8 +1,8 @@
 import Separator from "@web/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@web/ui/tabs";
 import type { Metadata } from "next";
-import convertCsvToJson from "../_utils/convertCsvToJson";
-import fetchApplicationsBenchmarksCommitHash from "./_actions/fetchApplicationsBenchmarksCommitHash";
+import convertCsvToJson from "~/utils/convert-csv-to-json";
+import fetchApplicationsBenchmarksCommitHash from "./_actions/fetch-applications-benchmarks-commit-hash";
 import ApplicationsBenchmarksTable from "./_components/applications-benchmarks-table";
 import applicationsBenchmarksTableColumns from "./_components/applications-benchmarks-table-columns";
 

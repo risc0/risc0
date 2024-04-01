@@ -6,13 +6,11 @@ import Button from "@web/ui/button";
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent } from "@web/ui/dropdown-menu";
 import { Settings2Icon } from "lucide-react";
 
-type ApplicationsBenchmarksTableViewOptionsProps<TData> = {
+type TableViewOptionsProps<TData> = {
   table: Table<TData>;
 };
 
-export default function ApplicationsBenchmarksTableViewOptions<TData>({
-  table,
-}: ApplicationsBenchmarksTableViewOptionsProps<TData>) {
+export default function TableViewOptions<TData>({ table }: TableViewOptionsProps<TData>) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>

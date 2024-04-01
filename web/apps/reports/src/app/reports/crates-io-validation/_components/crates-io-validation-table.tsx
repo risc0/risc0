@@ -1,10 +1,8 @@
 "use client";
 
-import { rankItem } from "@tanstack/match-sorter-utils";
 import {
   type ColumnDef,
   type ColumnFiltersState,
-  type FilterFn,
   type SortingState,
   type VisibilityState,
   flexRender,
@@ -17,30 +15,19 @@ import {
 } from "@tanstack/react-table";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@web/ui/table";
 import { useState } from "react";
-import DatasheetTableToolbar from "./datasheet-table-toolbar";
+import TableToolbar from "~/client/table/table-toolbar";
+import formatNumber from "~/utils/format-number";
+import { tableFuzzyFilter } from "~/utils/table-fuzzy-filter";
 
-const MAX_AMOUNT_OF_ROWS = 5;
-
-type DatasheetTableProps<TData, TValue> = {
+type CratesIoValidationTableProps<TData, TValue> = {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
-  title: string;
 };
 
-const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
-  // Rank the item
-  const itemRank = rankItem(row.getValue(columnId), value);
-
-  // Store the itemRank info
-  addMeta({
-    itemRank,
-  });
-
-  // Return if the item should be filtered in/out
-  return itemRank.passed;
-};
-
-export default function DatasheetTable<TData, TValue>({ title, columns, data }: DatasheetTableProps<TData, TValue>) {
+export default function CratesIoValidationTable<TData, TValue>({
+  columns,
+  data,
+}: CratesIoValidationTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = useState({});
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -58,11 +45,11 @@ export default function DatasheetTable<TData, TValue>({ title, columns, data }: 
       globalFilter,
     },
     filterFns: {
-      fuzzy: fuzzyFilter,
+      fuzzy: tableFuzzyFilter,
     },
     onRowSelectionChange: setRowSelection,
     onGlobalFilterChange: setGlobalFilter,
-    globalFilterFn: fuzzyFilter,
+    globalFilterFn: tableFuzzyFilter,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
@@ -76,12 +63,12 @@ export default function DatasheetTable<TData, TValue>({ title, columns, data }: 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="subtitle">{title}</h2>
-        <DatasheetTableToolbar globalFilter={globalFilter} setGlobalFilter={setGlobalFilter} table={table} />
+        <h2 className="subtitle">Crates ({formatNumber(data.length)})</h2>
+        <TableToolbar globalFilter={globalFilter} setGlobalFilter={setGlobalFilter} table={table} />
       </div>
 
       <div className="overflow-auto rounded-md border">
-        <Table className="table-fixed">
+        <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
@@ -95,16 +82,13 @@ export default function DatasheetTable<TData, TValue>({ title, columns, data }: 
           </TableHeader>
           <TableBody className="border-transparent">
             {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map(
-                (row, index) =>
-                  index < MAX_AMOUNT_OF_ROWS && (
-                    <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
-                      {row.getVisibleCells().map((cell) => (
-                        <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
-                      ))}
-                    </TableRow>
-                  ),
-              )
+              table.getRowModel().rows.map((row) => (
+                <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+                  ))}
+                </TableRow>
+              ))
             ) : (
               <TableRow>
                 <TableCell colSpan={columns.length} className="h-24 text-center text-muted-foreground">

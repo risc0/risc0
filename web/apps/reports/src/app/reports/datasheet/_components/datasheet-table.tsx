@@ -1,10 +1,8 @@
 "use client";
 
-import { rankItem } from "@tanstack/match-sorter-utils";
 import {
   type ColumnDef,
   type ColumnFiltersState,
-  type FilterFn,
   type SortingState,
   type VisibilityState,
   flexRender,
@@ -17,7 +15,8 @@ import {
 } from "@tanstack/react-table";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@web/ui/table";
 import { useState } from "react";
-import DatasheetTableToolbar from "./datasheet-table-toolbar";
+import TableToolbar from "~/client/table/table-toolbar";
+import { tableFuzzyFilter } from "~/utils/table-fuzzy-filter";
 
 const MAX_AMOUNT_OF_ROWS = 5;
 
@@ -25,19 +24,6 @@ type DatasheetTableProps<TData, TValue> = {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   title: string;
-};
-
-const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
-  // Rank the item
-  const itemRank = rankItem(row.getValue(columnId), value);
-
-  // Store the itemRank info
-  addMeta({
-    itemRank,
-  });
-
-  // Return if the item should be filtered in/out
-  return itemRank.passed;
 };
 
 export default function DatasheetTable<TData, TValue>({ title, columns, data }: DatasheetTableProps<TData, TValue>) {
@@ -58,11 +44,11 @@ export default function DatasheetTable<TData, TValue>({ title, columns, data }: 
       globalFilter,
     },
     filterFns: {
-      fuzzy: fuzzyFilter,
+      fuzzy: tableFuzzyFilter,
     },
     onRowSelectionChange: setRowSelection,
     onGlobalFilterChange: setGlobalFilter,
-    globalFilterFn: fuzzyFilter,
+    globalFilterFn: tableFuzzyFilter,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
@@ -77,7 +63,7 @@ export default function DatasheetTable<TData, TValue>({ title, columns, data }: 
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="subtitle">{title}</h2>
-        <DatasheetTableToolbar globalFilter={globalFilter} setGlobalFilter={setGlobalFilter} table={table} />
+        <TableToolbar globalFilter={globalFilter} setGlobalFilter={setGlobalFilter} table={table} />
       </div>
 
       <div className="overflow-auto rounded-md border">

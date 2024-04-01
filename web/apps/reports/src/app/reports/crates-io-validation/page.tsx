@@ -1,17 +1,17 @@
 import Separator from "@web/ui/separator";
 import type { Metadata } from "next";
-import findMostRecentHash from "./_actions/findMostRecentHash";
-import DataSheetTable from "./_components/datasheet-table";
-import datasheetTableColumns from "./_components/datasheet-table-columns";
+import fetchCratesValidationResults from "./_actions/fetch-crates-validation-results";
+import findMostRecentHash from "./_actions/find-most-recent-hash";
+import DatasheetTable from "./_components/crates-io-validation-table";
+import datasheetTableColumns from "./_components/crates-io-validation-table-columns";
 
 export const metadata: Metadata = {
-  title: "Datasheet",
+  title: "Crates.io Validation",
 };
 
-export default async function DatasheetPage() {
+export default async function CratesIoValidationPage() {
   const mostRecentHash = await findMostRecentHash();
-
-  console.log("mostRecentHash", mostRecentHash);
+  const cratesValidationResults = await fetchCratesValidationResults(mostRecentHash);
 
   return (
     <div className="container max-w-screen-3xl  pt-4">
@@ -26,15 +26,8 @@ export default async function DatasheetPage() {
 
       <Separator className="mt-2" />
 
-      <div className="mt-8 grid xl:grid-cols-2 gap-8">
-        {/*dataArrays.map((dataArray, index) => (
-          <DataSheetTable
-            key={Object.values(FILENAMES_TO_TITLES)[index]}
-            data={dataArray}
-            title={Object.values(FILENAMES_TO_TITLES)[index] ?? ""}
-            columns={datasheetTableColumns}
-          />
-        ))*/}
+      <div className="mt-8">
+        <DatasheetTable data={cratesValidationResults} columns={datasheetTableColumns} />
       </div>
     </div>
   );

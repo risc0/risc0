@@ -3,19 +3,15 @@
 import type { Table } from "@tanstack/react-table";
 import Input from "@web/ui/input";
 import type { Dispatch, SetStateAction } from "react";
-import DatasheetViewOptions from "./datasheet-table-view-options";
+import TableViewOptions from "~/client/table/table-view-options";
 
-type DatasheetToolbarProps<TData> = {
+type TableToolbarProps<TData> = {
   table: Table<TData>;
   globalFilter: string;
   setGlobalFilter: Dispatch<SetStateAction<string>>;
 };
 
-export default function DatasheetTableToolbar<TData>({
-  table,
-  setGlobalFilter,
-  globalFilter,
-}: DatasheetToolbarProps<TData>) {
+export default function TableToolbar<TData>({ table, setGlobalFilter, globalFilter }: TableToolbarProps<TData>) {
   return (
     <div className="flex items-center justify-end gap-2">
       <Input
@@ -25,7 +21,7 @@ export default function DatasheetTableToolbar<TData>({
         className="h-8 w-[180px]"
       />
 
-      <DatasheetViewOptions table={table} />
+      <TableViewOptions table={table} />
     </div>
   );
 }

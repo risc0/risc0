@@ -1,6 +1,6 @@
 import Separator from "@web/ui/separator";
 import type { Metadata } from "next";
-import fetchDatasheetCommitHash from "./_actions/fetchDatasheetCommitHash";
+import fetchDatasheetCommitHash from "./_actions/fetch-datasheet-commit-hash";
 import DataSheetTable from "./_components/datasheet-table";
 import datasheetTableColumns from "./_components/datasheet-table-columns";
 
