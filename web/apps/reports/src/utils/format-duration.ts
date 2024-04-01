@@ -1,5 +1,7 @@
+import { isNil } from "lodash-es";
+
 export default function formatDuration(duration: number) {
-  if (!duration) {
+  if (isNil(duration)) {
     return;
   }
 

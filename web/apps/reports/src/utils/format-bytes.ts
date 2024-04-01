@@ -1,6 +1,8 @@
+import { isNil } from "lodash-es";
+
 // Function to format bytes
 export default function formatBytes(bytes: number) {
-  if (!bytes) {
+  if (isNil(bytes)) {
     return;
   }
 
