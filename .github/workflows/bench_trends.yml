@@ -26,6 +26,11 @@ env:
   RISC0_BUILD_LOCKED: 1
   RISC0_TOOLCHAIN_VERSION: v2024-02-08.1
 
+defaults:
+  run:
+    # This ensures `-eo pipefail`, which is important for catching errors
+    shell: bash
+
 jobs:
   bench:
     runs-on: [self-hosted, prod, bench, "${{ matrix.os }}", "${{ matrix.device }}"]
