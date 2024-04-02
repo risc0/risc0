@@ -100,6 +100,7 @@ export default function Charts() {
                     label: name,
                     data: dataset.map((d) => d.bench.value),
                     borderColor: color,
+                    fill: true,
                     backgroundColor: `${color}60`, // Add alpha for #rrggbbaa
                   },
                 ],
@@ -131,15 +132,7 @@ export default function Charts() {
                     afterTitle: (items) => {
                       const { index } = items[0];
                       const data = dataset[index];
-                      return (
-                        "\n" +
-                        data.commit.message +
-                        "\n\n" +
-                        data.commit.timestamp +
-                        " committed by @" +
-                        data.commit.committer.username +
-                        "\n"
-                      );
+                      return `\n${data.commit.message}\n\n${data.commit.timestamp} committed by @${data.commit.committer.username}\n`;
                     },
                     label: (item) => {
                       let label = item.value;
