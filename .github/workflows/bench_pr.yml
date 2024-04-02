@@ -27,7 +27,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [Linux, macOS]
-        feature: [default]
+        feature: [prove]
         device: [cpu]
         include:
           - os: Linux
@@ -38,16 +38,11 @@ jobs:
             device: apple_m2_pro
 
     env:
-      CI_BENCH_PR: true
       FEATURE: ${{ matrix.feature }}
       DISABLE_S3: ${{ matrix.device == 'nvidia_rtx_3090_ti' }}
 
     steps:
-      # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
-      - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
-
-      - name: Check out the current PR
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - if: matrix.feature == 'cuda'
         uses: ./.github/actions/cuda
@@ -59,5 +54,24 @@ jobs:
 
       - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
 
-      - name: Run Benchmarks
-        run: cargo bench --bench divan -F $FEATURE
+      - name: Run benchmarks
+        run: cargo bench --bench fib -F $FEATURE
+
+      - name: Download previous benchmark data
+        uses: actions/cache@v4
+        with:
+          path: ./cache
+          key: fib-${{ runner.os }}--${{ matrix.device }}
+
+      - name: Analyze benchmark results
+        uses: risc0/github-action-benchmark@v1.19.3
+        with:
+          name: "${{ matrix.os }}-${{ matrix.device }}"
+          tool: 'customBiggerIsBetter'
+          output-file-path: target/hotbench/fib/benchmark.json
+          external-data-json-path: ./cache/benchmark.json
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          alert-threshold: '120%'
+          comment-on-alert: true
+          fail-on-alert: true
+          summary-always: true

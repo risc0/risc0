@@ -1121,7 +1121,7 @@ version = "0.22.0-alpha.1"
 dependencies = [
  "anyhow",
  "cargo-generate",
- "cargo_metadata 0.18.1",
+ "cargo_metadata",
  "clap",
  "const_format",
  "dirs",
@@ -1142,20 +1142,6 @@ dependencies = [
  "tokio",
  "tracing-subscriber 0.3.18",
  "zip",
-]
-
-[[package]]
-name = "cargo_metadata"
-version = "0.17.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e7daec1a2a2129eeba1644b220b4647ec537b0b5d4bfd6876fcc5a540056b592"
-dependencies = [
- "camino",
- "cargo-platform",
- "semver 1.0.22",
- "serde",
- "serde_json",
- "thiserror",
 ]
 
 [[package]]
@@ -2273,7 +2259,7 @@ checksum = "82d80cc6ad30b14a48ab786523af33b37f28a8623fc06afd55324816ef18fb1f"
 dependencies = [
  "arrayvec",
  "bytes",
- "cargo_metadata 0.18.1",
+ "cargo_metadata",
  "chrono",
  "const-hex",
  "elliptic-curve",
@@ -3288,6 +3274,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e3d1354bf6b7235cb4a0576c2619fd4ed18183f689b12b006a0ee7329eeff9a5"
 dependencies = [
  "windows-sys 0.52.0",
+]
+
+[[package]]
+name = "hotbench"
+version = "0.1.0"
+dependencies = [
+ "cargo_metadata",
+ "human-repr",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]
@@ -5357,7 +5353,7 @@ version = "0.22.0-alpha.1"
 dependencies = [
  "anyhow",
  "cargo-platform",
- "cargo_metadata 0.17.0",
+ "cargo_metadata",
  "docker-generate",
  "risc0-binfmt",
  "risc0-zkp",
@@ -5577,6 +5573,7 @@ dependencies = [
  "flate2",
  "getrandom",
  "hex",
+ "hotbench",
  "human-repr",
  "lazy-regex",
  "lazy_static",
