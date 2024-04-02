@@ -1,8 +1,0 @@
-{
-  "name": "@web/ui",
-  "private": true,
-  "type": "module",
-  "devDependencies": {
-    "@web/shared": "*"
-  }
-}
