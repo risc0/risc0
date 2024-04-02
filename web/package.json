@@ -5,13 +5,9 @@
   "workspaces": ["apps/*"],
   "scripts": {
     "build": "turbo build",
-    "ci": "turbo ci",
     "dev": "turbo dev",
-    "prepare": "cd .. && bunx husky",
-    "sort-package": "bunx sort-package-json 'package.json' 'apps/*/package.json'",
     "test": "turbo test",
-    "typecheck": "turbo typecheck",
-    "update-deps": "bunx npm-check-updates --root --format group -i"
+    "typecheck": "turbo typecheck"
   },
   "dependencies": {
     "@hookform/resolvers": "3.3.4",
