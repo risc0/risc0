@@ -41,7 +41,7 @@ use risc0_zkp::{
     hal::{cpu::CpuHal, CircuitHal, Hal},
     prove::adapter::ProveAdapter,
     verify::ReadIOP,
-    MIN_CYCLES_PO2, ZK_CYCLES,
+    MIN_CYCLES_PO2, PROOF_SYSTEM_INFO, ZK_CYCLES,
 };
 use serde::{Deserialize, Serialize};
 
@@ -665,6 +665,16 @@ impl Prover {
 
         let mut adapter = ProveAdapter::new(&mut executor.executor);
         let mut prover = risc0_zkp::prove::Prover::new(hal, CIRCUIT.get_taps());
+        let hashfn = Rc::clone(&hal.get_hash_suite().hashfn);
+
+        // At the start of the protocol, seed the Fiat-Shamir transcript with context information
+        // about the proof system and circuit.
+        prover
+            .iop()
+            .commit(&hashfn.hash_elem_slice(&PROOF_SYSTEM_INFO.encode()));
+        prover
+            .iop()
+            .commit(&hashfn.hash_elem_slice(&CircuitImpl::CIRCUIT_INFO.encode()));
 
         adapter.execute(prover.iop(), hal);
 

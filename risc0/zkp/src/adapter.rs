@@ -19,7 +19,7 @@ use alloc::vec::Vec;
 use anyhow::Result;
 use risc0_core::field::{Elem, ExtElem, Field};
 
-use crate::{hal::cpu::SyncSlice, taps::TapSet};
+use crate::{hal::cpu::SyncSlice, taps::TapSet, ProtocolInfo};
 
 // TODO: Remove references to these constants so we don't depend on a
 // fixed set of register groups.
@@ -128,7 +128,7 @@ pub trait TapsProvider {
 }
 
 pub trait CircuitInfo {
-    const CIRCUIT_VERSION_ID: &'static [u8; 16];
+    const CIRCUIT_INFO: ProtocolInfo;
     const OUTPUT_SIZE: usize;
     const MIX_SIZE: usize;
 }

@@ -23,7 +23,7 @@ use std::rc::Rc;
 
 use anyhow::Result;
 use risc0_zkp::{
-    adapter::TapsProvider,
+    adapter::{CircuitInfo, TapsProvider},
     field::{
         baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem, Elem},
         Elem as _,
@@ -31,13 +31,14 @@ use risc0_zkp::{
     hal::{CircuitHal, Hal},
     layout::Buffer as _,
     prove::Prover,
+    PROOF_SYSTEM_INFO,
 };
 
 use self::witgen::WitnessGenerator;
 use super::{segment::Segment, Seal, SegmentProver};
 use crate::{
     layout::{OutBuffer, LAYOUT},
-    CIRCUIT, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CTRL, REGISTER_GROUP_DATA,
+    CircuitImpl, CIRCUIT, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CTRL, REGISTER_GROUP_DATA,
 };
 
 struct Twin(Elem, Elem);
@@ -78,6 +79,16 @@ where
 
         let seal = tracing::info_span!("prove").in_scope(|| {
             let mut prover = Prover::new(self.hal.as_ref(), CIRCUIT.get_taps());
+            let hashfn = Rc::clone(&self.hal.get_hash_suite().hashfn);
+
+            // At the start of the protocol, seed the Fiat-Shamir transcript with context information
+            // about the proof system and circuit.
+            prover
+                .iop()
+                .commit(&hashfn.hash_elem_slice(&PROOF_SYSTEM_INFO.encode()));
+            prover
+                .iop()
+                .commit(&hashfn.hash_elem_slice(&CircuitImpl::CIRCUIT_INFO.encode()));
 
             // Concat io (i.e. globals) and po2 into a vector.
             let vec: Vec<BabyBearElem> = witgen
@@ -88,7 +99,7 @@ where
                 .copied()
                 .collect();
 
-            let digest = self.hal.get_hash_suite().hashfn.hash_elem_slice(&vec);
+            let digest = hashfn.hash_elem_slice(&vec);
             prover.iop().commit(&digest);
             prover.iop().write_field_elem_slice(vec.as_slice());
             prover.set_po2(segment.po2);

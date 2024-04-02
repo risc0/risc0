@@ -44,6 +44,30 @@ pub mod hal {
 
 pub use risc0_core::field;
 
+/// A version identifier string for the proof system. Used to seed the Fiat-Shamir transcript and
+/// provide domain seperation between different protocol and circuit versions.
+#[derive(Debug)]
+pub struct ProtocolInfo(pub &'static [u8; 16]);
+
+impl ProtocolInfo {
+    /// Encode a fixed context byte-string to elements, with one element per byte.
+    // NOTE: This function is intended to be compatible with const, but is not const currently because
+    // E::from_u64 is not const, as const functions on traits is not stable.
+    pub fn encode<E: field::Elem>(&self) -> [E; 16] {
+        let mut elems = [E::ZERO; 16];
+        for i in 0..self.0.len() {
+            elems[i] = E::from_u64(self.0[i] as u64);
+        }
+        elems
+    }
+}
+
+/// Versioned info string for the proof system.
+///
+/// NOTE: This string should be bumped with every change to the proof system, as defined by a
+/// change to checks applied by the verifier.
+pub const PROOF_SYSTEM_INFO: ProtocolInfo = ProtocolInfo(b"RISC0_STARK:v1__");
+
 pub const MIN_CYCLES_PO2: usize = 13;
 pub const MIN_CYCLES: usize = 1 << MIN_CYCLES_PO2; // 8K
 pub const MAX_CYCLES_PO2: usize = 24;
