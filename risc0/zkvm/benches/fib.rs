@@ -33,7 +33,10 @@ fn execute(group: &mut BenchGroup) {
         b.iter(
             session.user_cycles as usize,
             || setup_exec(iterations),
-            |exec| exec.run(),
+            |exec| {
+                std::thread::sleep(Duration::from_secs(1));
+                exec.run()
+            },
         )
     });
 }
