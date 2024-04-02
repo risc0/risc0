@@ -24,7 +24,10 @@ use std::rc::Rc;
 use anyhow::Result;
 use risc0_zkp::{
     adapter::TapsProvider,
-    field::baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem, Elem},
+    field::{
+        baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem, Elem},
+        Elem as _,
+    },
     hal::{CircuitHal, Hal},
     layout::Buffer as _,
     prove::Prover,
@@ -75,8 +78,19 @@ where
 
         let seal = tracing::info_span!("prove").in_scope(|| {
             let mut prover = Prover::new(self.hal.as_ref(), CIRCUIT.get_taps());
-            prover.iop().write_field_elem_slice(&witgen.io.as_slice());
-            prover.iop().write_u32_slice(&[segment.po2 as u32]);
+
+            // Concat io (i.e. globals) and po2 into a vector.
+            let vec: Vec<BabyBearElem> = witgen
+                .io
+                .as_slice()
+                .iter()
+                .chain(BabyBearElem::from_u32_slice(&[segment.po2 as u32]))
+                .copied()
+                .collect();
+
+            let digest = self.hal.get_hash_suite().hashfn.hash_elem_slice(&vec);
+            prover.iop().commit(&digest);
+            prover.iop().write_field_elem_slice(vec.as_slice());
             prover.set_po2(segment.po2);
 
             let ctrl = self.hal.copy_from_elem("ctrl", &witgen.ctrl.as_slice());

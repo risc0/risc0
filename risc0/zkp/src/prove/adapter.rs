@@ -20,7 +20,7 @@ use risc0_core::field::{Elem, Field};
 
 use crate::{
     adapter::{CircuitProveDef, CircuitStepContext, CircuitStepHandler, REGISTER_GROUP_ACCUM},
-    hal::cpu::CpuBuffer,
+    hal::{cpu::CpuBuffer, Hal},
     prove::{
         accum::{Accum, Handler},
         executor::Executor,
@@ -30,31 +30,35 @@ use crate::{
     ZK_CYCLES,
 };
 
-pub struct ProveAdapter<'a, F, C, S>
+pub struct ProveAdapter<'a, F, C, S, H>
 where
     F: Field,
     C: 'static + CircuitProveDef<F>,
     S: CircuitStepHandler<F::Elem>,
+    H: Hal<Field = F, Elem = F::Elem, ExtElem = F::ExtElem>,
 {
     exec: &'a mut Executor<F, C, S>,
     mix: CpuBuffer<F::Elem>,
     accum: CpuBuffer<F::Elem>,
     steps: usize,
+    hal: &'a H,
 }
 
-impl<'a, F, C, CS> ProveAdapter<'a, F, C, CS>
+impl<'a, F, C, CS, H> ProveAdapter<'a, F, C, CS, H>
 where
     F: Field,
     C: 'static + CircuitProveDef<F>,
     CS: CircuitStepHandler<F::Elem>,
+    H: Hal<Field = F, Elem = F::Elem, ExtElem = F::ExtElem>,
 {
-    pub fn new(exec: &'a mut Executor<F, C, CS>) -> Self {
+    pub fn new(exec: &'a mut Executor<F, C, CS>, hal: &'a H) -> Self {
         let steps = exec.steps;
         ProveAdapter {
             exec,
             mix: CpuBuffer::from(Vec::new()),
             accum: CpuBuffer::from(Vec::new()),
             steps,
+            hal,
         }
     }
 
@@ -62,11 +66,20 @@ where
         self.exec.circuit.get_taps()
     }
 
-    /// Perform initial 'execution' setting code + data.
-    /// Additionally, write any 'results' as needed.
+    /// Write the globals and po2 to the IOP, and mix them into the Fiat-Shamir state.
     pub fn execute(&mut self, iop: &mut WriteIOP<F>) {
-        iop.write_field_elem_slice(&self.exec.io.as_slice());
-        iop.write_u32_slice(&[self.exec.po2 as u32]);
+        // Concat io (i.e. globals) and po2 into a vector.
+        let vec: Vec<F::Elem> = self
+            .exec
+            .io
+            .as_slice()
+            .iter()
+            .chain(F::Elem::from_u32_slice(&[self.exec.po2 as u32]))
+            .copied()
+            .collect();
+
+        iop.commit(&self.hal.get_hash_suite().hashfn.hash_elem_slice(&vec));
+        iop.write_field_elem_slice(vec.as_slice());
     }
 
     fn compute_accum(&mut self) {
