@@ -30,35 +30,31 @@ use crate::{
     ZK_CYCLES,
 };
 
-pub struct ProveAdapter<'a, F, C, S, H>
+pub struct ProveAdapter<'a, F, C, S>
 where
     F: Field,
     C: 'static + CircuitProveDef<F>,
     S: CircuitStepHandler<F::Elem>,
-    H: Hal<Field = F, Elem = F::Elem, ExtElem = F::ExtElem>,
 {
     exec: &'a mut Executor<F, C, S>,
     mix: CpuBuffer<F::Elem>,
     accum: CpuBuffer<F::Elem>,
     steps: usize,
-    hal: &'a H,
 }
 
-impl<'a, F, C, CS, H> ProveAdapter<'a, F, C, CS, H>
+impl<'a, F, C, CS> ProveAdapter<'a, F, C, CS>
 where
     F: Field,
     C: 'static + CircuitProveDef<F>,
     CS: CircuitStepHandler<F::Elem>,
-    H: Hal<Field = F, Elem = F::Elem, ExtElem = F::ExtElem>,
 {
-    pub fn new(exec: &'a mut Executor<F, C, CS>, hal: &'a H) -> Self {
+    pub fn new(exec: &'a mut Executor<F, C, CS>) -> Self {
         let steps = exec.steps;
         ProveAdapter {
             exec,
             mix: CpuBuffer::from(Vec::new()),
             accum: CpuBuffer::from(Vec::new()),
             steps,
-            hal,
         }
     }
 
@@ -67,7 +63,10 @@ where
     }
 
     /// Write the globals and po2 to the IOP, and mix them into the Fiat-Shamir state.
-    pub fn execute(&mut self, iop: &mut WriteIOP<F>) {
+    pub fn execute<H>(&mut self, iop: &mut WriteIOP<F>, hal: &H)
+    where
+        H: Hal<Field = F, Elem = F::Elem, ExtElem = F::ExtElem>,
+    {
         // Concat io (i.e. globals) and po2 into a vector.
         let vec: Vec<F::Elem> = self
             .exec
@@ -78,7 +77,7 @@ where
             .copied()
             .collect();
 
-        iop.commit(&self.hal.get_hash_suite().hashfn.hash_elem_slice(&vec));
+        iop.commit(&hal.get_hash_suite().hashfn.hash_elem_slice(&vec));
         iop.write_field_elem_slice(vec.as_slice());
     }
 

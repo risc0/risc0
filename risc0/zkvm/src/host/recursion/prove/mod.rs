@@ -663,10 +663,10 @@ impl Prover {
             exec::RecursionExecutor::new(&CIRCUIT, &self.program, machine_ctx, split_points);
         executor.run()?;
 
-        let mut adapter = ProveAdapter::new(&mut executor.executor, hal);
+        let mut adapter = ProveAdapter::new(&mut executor.executor);
         let mut prover = risc0_zkp::prove::Prover::new(hal, CIRCUIT.get_taps());
 
-        adapter.execute(prover.iop());
+        adapter.execute(prover.iop(), hal);
 
         let seal = if skip_seal {
             Vec::new()
