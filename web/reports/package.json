@@ -5,19 +5,14 @@
   "type": "module",
   "scripts": {
     "build": "next build",
-    "build:analyze": "ANALYZE=true bun run build",
     "dev": "next dev --turbo",
     "start": "next start",
-    "sort-package": "bunx sort-package-json 'package.json'",
-    "test": "bun test spec",
-    "typecheck": "tsc",
-    "update-deps": "bunx npm-check-updates --root --format group -i"
+    "test": "bun test spec"
   },
   "dependencies": {
     "@hookform/resolvers": "3.3.4",
-    "@next/bundle-analyzer": "14.1.4",
     "@poppinss/intl-formatter": "3.0.2",
-    "@risc0/ui": "0.0.27",
+    "@risc0/ui": "0.0.29",
     "@t3-oss/env-nextjs": "0.9.2",
     "@tanstack/match-sorter-utils": "8.15.1",
     "@tanstack/react-table": "8.15.3",
