@@ -353,11 +353,11 @@ impl std::error::Error for VerifyIntegrityError {}
 ///
 /// On the host side, implement SliceIo to provide a handler for this call.
 pub fn send_recv_slice<T: Pod, U: Pod>(syscall_name: SyscallName, to_host: &[T]) -> &'static [U] {
-    let syscall::Return(nelem, _) = syscall(syscall_name, bytemuck::cast_slice(to_host), &mut []);
-    let nwords = align_up(core::mem::size_of::<T>() * nelem as usize, WORD_SIZE) / WORD_SIZE;
+    let syscall::Return(nbytes, _) = syscall(syscall_name, bytemuck::cast_slice(to_host), &mut []);
+    let nwords = align_up(nbytes as usize, WORD_SIZE) / WORD_SIZE;
     let from_host_buf = unsafe { core::slice::from_raw_parts_mut(sys_alloc_words(nwords), nwords) };
     syscall(syscall_name, &[], from_host_buf);
-    &bytemuck::cast_slice(from_host_buf)[..nelem as usize]
+    bytemuck::cast_slice(&from_host_buf[..nbytes as usize])
 }
 
 /// Read private data from the STDIN of the zkVM and deserializes it.
