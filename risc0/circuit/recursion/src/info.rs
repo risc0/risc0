@@ -21,7 +21,7 @@ use super::CircuitImpl;
 impl CircuitInfo for CircuitImpl {
     // DO NOT MERGE: re-gen this file from bootsrap.
     #[rustfmt::skip]
-    const CIRCUIT_INFO: ProtocolInfo = ProtocolInfo(b"RECURSION_VM:v1_");
+    const CIRCUIT_INFO: ProtocolInfo = ProtocolInfo(b"RECURSION:rev1v1");
 
     #[rustfmt::skip]
     const OUTPUT_SIZE: usize = 32;
