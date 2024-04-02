@@ -138,7 +138,7 @@ jobs:
       - run: cargo fmt --all --check --manifest-path bonsai/Cargo.toml
       - run: cargo fmt --all --check --manifest-path examples/Cargo.toml
       - run: cargo fmt --all --check --manifest-path tools/crates-validator/Cargo.toml
-      - run: cargo clippy -p risc0-zkvm
+      - run: cargo clippy --workspace --exclude doc-test --exclude fibonacci-methods --exclude risc0-zkvm-methods --exclude xtask
       - run: cargo sort --workspace --check
       - run: cargo sort --workspace --check benchmarks
       - run: cargo sort --workspace --check bonsai
