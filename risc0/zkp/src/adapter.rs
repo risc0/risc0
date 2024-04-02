@@ -128,6 +128,7 @@ pub trait TapsProvider {
 }
 
 pub trait CircuitInfo {
+    const CIRCUIT_VERSION_ID: &'static [u8; 16];
     const OUTPUT_SIZE: usize;
     const MIX_SIZE: usize;
 }

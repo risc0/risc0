@@ -19,6 +19,10 @@ use risc0_zkp::adapter::CircuitInfo;
 use super::CircuitImpl;
 
 impl CircuitInfo for CircuitImpl {
+    // DO NOT MERGE: re-gen this file from bootsrap.
+    #[rustfmt::skip]
+    const CIRCUIT_VERSION_ID: &'static [u8; 16] = b"RECURSION_VM:v1_";
+
     #[rustfmt::skip]
     const OUTPUT_SIZE: usize = 32;
 

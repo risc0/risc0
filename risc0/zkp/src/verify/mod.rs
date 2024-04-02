@@ -32,6 +32,24 @@ use crate::{
     INV_RATE, MAX_CYCLES_PO2, QUERIES,
 };
 
+/// A version identifier string for our proof system. Used to seed the Fiat-Shamir transcript and
+/// provide domain seperation between versions of the proof protocol.
+///
+/// NOTE: This string should be bumped with every change to the proof system, as defined by the
+/// checked applied by the verifier.
+const PROOF_SYSTEM_VERSION_ID: &[u8; 16] = b"RISC0_STARK:v1__";
+
+/// Encode a fixed context byte-string to elements, with one element per byte.
+// NOTE: This function is intended to be compatible with const, but is not const currently because
+// E::from_u64 is not const, as const functions on traits is not stable.
+fn encode_context_bytes<const N: usize, E: Elem>(bytes: &[u8; N]) -> [E; N] {
+    let mut elems = [E::ZERO; N];
+    for i in 0..bytes.len() {
+        elems[i] = E::from_u64(bytes[i] as u64);
+    }
+    elems
+}
+
 #[derive(PartialEq)]
 #[non_exhaustive]
 pub enum VerificationError {
@@ -220,6 +238,11 @@ where
 
         // Make IOP
         let mut iop = ReadIOP::new(seal, self.suite.rng.as_ref());
+
+        // At the start of the protocol, seed the Fiat-Shamir transcript with context information
+        // about the proof system and circuit.
+        iop.commit(&hashfn.hash_elem_slice(&encode_context_bytes(PROOF_SYSTEM_VERSION_ID)));
+        iop.commit(&hashfn.hash_elem_slice(&encode_context_bytes(C::CIRCUIT_VERSION_ID)));
 
         // Read any execution state
         self.execute(&mut iop);
