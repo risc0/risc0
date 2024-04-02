@@ -9,6 +9,7 @@ const config = {
   experimental: {
     ppr: true,
   },
+  transpilePackages: ["@risc0/ui"],
 
   // biome-ignore lint/suspicious/useAwait: not needed
   async redirects() {
