@@ -167,6 +167,8 @@ export default function Charts() {
                 },
               };
 
+              // @ts-expect-error -- it exists
+              // biome-ignore lint/correctness/noUndeclaredVariables: ignore
               new Chart(canvas, {
                 type: "line",
                 data,
