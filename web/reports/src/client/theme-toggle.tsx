@@ -15,7 +15,7 @@ export default function ThemeToggle({ className }: { className?: string }) {
   }, []);
 
   if (!isMounted) {
-    return <div className="h-8">&bnsp;</div>;
+    return <div className="h-8">&nbsp;</div>;
   }
 
   return (

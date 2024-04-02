@@ -3,6 +3,7 @@ import "@risc0/ui/styles/globals.css";
 import { TooltipProvider } from "@risc0/ui/tooltip";
 import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
+import Script from "next/script";
 import { Next13NProgress } from "nextjs13-progress";
 import type { PropsWithChildren } from "react";
 import Providers from "~/client/providers";
@@ -36,6 +37,7 @@ export default function RootLayout({ children }: PropsWithChildren) {
           <TooltipProvider>{children}</TooltipProvider>
         </Providers>
         <Next13NProgress color="#4E46E5" height={1} showOnShallow={false} />
+        <Script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.2/dist/Chart.min.js" strategy="beforeInteractive" />
       </body>
     </html>
   );
