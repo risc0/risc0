@@ -34,7 +34,7 @@ fn execute(group: &mut BenchGroup) {
             session.user_cycles as usize,
             || setup_exec(iterations),
             |exec| {
-                std::thread::sleep(Duration::from_secs(1));
+                std::thread::sleep(std::time::Duration::from_secs(1));
                 exec.run()
             },
         )
