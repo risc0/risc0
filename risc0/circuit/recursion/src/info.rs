@@ -19,7 +19,6 @@ use risc0_zkp::adapter::{CircuitInfo, ProtocolInfo};
 use super::CircuitImpl;
 
 impl CircuitInfo for CircuitImpl {
-    // DO NOT MERGE: re-gen this file from bootsrap.
     #[rustfmt::skip]
     const CIRCUIT_INFO: ProtocolInfo = ProtocolInfo(b"RECURSION:rev1v1");
 
