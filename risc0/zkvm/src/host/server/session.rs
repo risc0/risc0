@@ -93,7 +93,7 @@ pub struct Segment {
     /// The index of this [Segment] within the [Session]
     pub index: u32,
 
-    pub(crate) inner: CircuitSegment,
+    pub inner: CircuitSegment,
     pub(crate) output: Option<Output>,
 }
 
