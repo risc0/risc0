@@ -14,64 +14,64 @@
 
 /// Merkle root of the RECURSION_CONTROL_IDS
 pub const ALLOWED_IDS_ROOT: &str =
-    "4c0dca38ca3de35d11b1fc46095bda17d5b86a2ffeac0636e9403356b0b5a84f";
+    "ec8bb4496d18984ef78ac827b3ccd36d121dca1621fc12143a4eef60bc5e1339";
 
 pub const RECURSION_CONTROL_IDS: [(&str, &str); 15] = [
     (
         "identity.zkr",
-        "a09149331924d71cf14f5b613484540d681f1d63753e9919c87d72414c100e6c",
+        "63d1f31503bc4b3d4a0a3d5bb358f63d3e7bc760f17002747a1ed0585c450a45",
     ),
     (
         "join.zkr",
-        "457ae5443b8c522e474bd369e122896146263b5e619c641abf3fb633dc42dd0b",
+        "27eada2cd321780dc6de631e4632b31751f94a4cc42f2862f8ac5a4e2968d226",
     ),
     (
         "lift_14.zkr",
-        "ddeedc095ce4c0060c29eb2d4b80fd3ebc89661c7c9dee1b13ed6e344b826053",
+        "6ee4b60ba803976cb9524940f335d83886893a45e24be6764824414ee3d2f914",
     ),
     (
         "lift_15.zkr",
-        "78c3a62952dbf93b85d0484b6fe61505c5eaca61f251ce47c4a38f6d9b160b5d",
+        "9d0560739edbba39df66987543158a5288e626417341244d9f37cb3ea0e7e10a",
     ),
     (
         "lift_16.zkr",
-        "f738ef56a740de749bd90c01dfd21a3c76e16f4e884bf02fd5c55f71f822873e",
+        "0a77f64453a7e51a2bfcd5264c490b4c3926e3418d8f011d6dbb7d5d1c355062",
     ),
     (
         "lift_17.zkr",
-        "9dd53c2ad993c9189cc4811b20c9c9182b18df2e0a1ea66c661dc872ac9a7216",
+        "b6644c086e898d6398be980460ab032af151e70ea6eb875d2d476d1882c17a0a",
     ),
     (
         "lift_18.zkr",
-        "00123470ff364b39904fc75613f1135224e4c506b60d391dcd65d2061c875614",
+        "78669c3e7ad433464fe27821d0ad7857311e470edfb9905aa8dbe01e0332df00",
     ),
     (
         "lift_19.zkr",
-        "43731b0bfbf7fe46aaa4a51ec97ae73c1c588b289e5e2b5536dd976d3577b075",
+        "24184c30c991dd445bf98506ba065d1b9f502f18465f883939ed200822032025",
     ),
     (
         "lift_20.zkr",
-        "dbcd525a242b2c6a5d12472ec5418f4bc444b940b1c9944b08b1f84fdaf8eb3b",
+        "9ecd861337b4ea5da09b97015d94212f5de708251271d4014cba6968262b6129",
     ),
     (
         "lift_21.zkr",
-        "1138f71c52032c32ede9ea1b59daf11114bbec6e22e1fd19cd7b974ca6cf2059",
+        "43b91276d76977598136142c6303ee4dee53df66f9419f233eeecc6e5672ba00",
     ),
     (
         "lift_22.zkr",
-        "1c12fe18d839ec4d60fea23b2d063a12acf1642fc488d04fef67c65126363550",
+        "8ee73e54db42260b7f61605adddd9b128ea6a508fb7d4a0031c4823dad94c157",
     ),
     (
         "lift_23.zkr",
-        "42cce4089799b41ef12de32bb6422e38f222b871473fd927c89cfe21b924d54d",
+        "923081004bf1c1745467c5577392672741e705533af55616fc59a3582ea98b38",
     ),
     (
         "lift_24.zkr",
-        "3159823a26f2f33abf4f015628dd120970845453bdee2e3636be2a15140e4475",
+        "77450228a462712e2eac6d4a37125e765655a62cb483a80efa61576563b43e14",
     ),
     (
         "resolve.zkr",
-        "61a2fa5df9c9686208e9a926098cf8270bbfe76b843a2f3708a251549f21a530",
+        "c3c7b6162d1ab926e8a5c3442af08654c752404c061c133bec86b910e862545f",
     ),
     (
         "test_recursion_circuit.zkr",
@@ -80,4 +80,4 @@ pub const RECURSION_CONTROL_IDS: [(&str, &str); 15] = [
 ];
 
 pub const BN254_CONTROL_ID: &str =
-    "2793e3a11528690d665e95dc211752ea64a77b509aa87339e2ba5cec97bc09af";
+    "30428f0c61dc6b56cf3909d956697e1d397de975c39168193da9e49a8a430611";
