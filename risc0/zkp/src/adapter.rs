@@ -137,8 +137,8 @@ impl ProtocolInfo {
     // E::from_u64 is not const, as const functions on traits is not stable.
     pub fn encode<E: Elem>(&self) -> [E; 16] {
         let mut elems = [E::ZERO; 16];
-        for i in 0..self.0.len() {
-            elems[i] = E::from_u64(self.0[i] as u64);
+        for (i, elem) in elems.iter_mut().enumerate().take(self.0.len()) {
+            *elem = E::from_u64(self.0[i] as u64);
         }
         elems
     }
