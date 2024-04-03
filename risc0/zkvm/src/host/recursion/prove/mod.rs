@@ -29,7 +29,7 @@ use risc0_circuit_recursion::{
 };
 use risc0_circuit_rv32im::control_id::POSEIDON2_CONTROL_ID;
 use risc0_zkp::{
-    adapter::{CircuitInfo, CircuitStepContext, TapsProvider},
+    adapter::{CircuitInfo, CircuitStepContext, TapsProvider, PROOF_SYSTEM_INFO},
     core::{
         digest::Digest,
         hash::{poseidon::PoseidonHashSuite, poseidon2::Poseidon2HashSuite, HashSuite},
@@ -41,7 +41,7 @@ use risc0_zkp::{
     hal::{cpu::CpuHal, CircuitHal, Hal},
     prove::adapter::ProveAdapter,
     verify::ReadIOP,
-    MIN_CYCLES_PO2, PROOF_SYSTEM_INFO, ZK_CYCLES,
+    MIN_CYCLES_PO2, ZK_CYCLES,
 };
 use serde::{Deserialize, Serialize};
 

@@ -26,10 +26,10 @@ pub use read_iop::ReadIOP;
 use risc0_core::field::{Elem, ExtElem, Field, RootsOfUnity};
 
 use crate::{
-    adapter::{CircuitCoreDef, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA},
+    adapter::{CircuitCoreDef, PROOF_SYSTEM_INFO, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA},
     core::{digest::Digest, hash::HashSuite, log2_ceil},
     taps::TapSet,
-    INV_RATE, MAX_CYCLES_PO2, PROOF_SYSTEM_INFO, QUERIES,
+    INV_RATE, MAX_CYCLES_PO2, QUERIES,
 };
 
 #[derive(PartialEq)]

@@ -14,7 +14,7 @@
 
 // This code is automatically generated
 
-use risc0_zkp::{adapter::CircuitInfo, ProtocolInfo};
+use risc0_zkp::adapter::{CircuitInfo, ProtocolInfo};
 
 use super::CircuitImpl;
 

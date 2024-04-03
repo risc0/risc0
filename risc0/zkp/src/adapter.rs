@@ -19,7 +19,7 @@ use alloc::vec::Vec;
 use anyhow::Result;
 use risc0_core::field::{Elem, ExtElem, Field};
 
-use crate::{hal::cpu::SyncSlice, taps::TapSet, ProtocolInfo};
+use crate::{hal::cpu::SyncSlice, taps::TapSet};
 
 // TODO: Remove references to these constants so we don't depend on a
 // fixed set of register groups.
@@ -126,6 +126,29 @@ pub trait TapsProvider {
         self.get_taps().group_size(REGISTER_GROUP_DATA)
     }
 }
+
+/// A protocol info string for the proof system and circuits. Used to seed the Fiat-Shamir transcript and provide domain seperation between different protocol and circuit versions.
+#[derive(Debug)]
+pub struct ProtocolInfo(pub &'static [u8; 16]);
+
+impl ProtocolInfo {
+    /// Encode a fixed context byte-string to elements, with one element per byte.
+    // NOTE: This function is intended to be compatible with const, but is not const currently because
+    // E::from_u64 is not const, as const functions on traits is not stable.
+    pub fn encode<E: Elem>(&self) -> [E; 16] {
+        let mut elems = [E::ZERO; 16];
+        for i in 0..self.0.len() {
+            elems[i] = E::from_u64(self.0[i] as u64);
+        }
+        elems
+    }
+}
+
+/// Versioned info string for the proof system.
+///
+/// NOTE: This string should be bumped with every change to the proof system, as defined by a
+/// change to checks applied by the verifier.
+pub const PROOF_SYSTEM_INFO: ProtocolInfo = ProtocolInfo(b"RISC0_STARK:v1__");
 
 pub trait CircuitInfo {
     const CIRCUIT_INFO: ProtocolInfo;

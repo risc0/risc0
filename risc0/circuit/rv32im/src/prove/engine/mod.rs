@@ -23,7 +23,7 @@ use std::rc::Rc;
 
 use anyhow::Result;
 use risc0_zkp::{
-    adapter::{CircuitInfo, TapsProvider},
+    adapter::{CircuitInfo, TapsProvider, PROOF_SYSTEM_INFO},
     field::{
         baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem, Elem},
         Elem as _,
@@ -31,7 +31,6 @@ use risc0_zkp::{
     hal::{CircuitHal, Hal},
     layout::Buffer as _,
     prove::Prover,
-    PROOF_SYSTEM_INFO,
 };
 
 use self::witgen::WitnessGenerator;
