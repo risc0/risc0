@@ -1,5 +1,7 @@
 pragma circom 2.0.4;
 
+// Decompose the signal in into an array of bits of length N.
+// out[0] will be the least-significant bit, out[N-1] the most.
 template to_bits_exact(N) {
   signal input in;
   signal output out[N];
@@ -13,6 +15,7 @@ template to_bits_exact(N) {
 }
 
 // Verify a bit-decomposed baby bear is valid
+// PRECONDITION: in must be constrained as bits.
 template valid_baby_bear() {
   signal input in[31];
   // If high_bits == 15, low_bits must == 0
@@ -26,24 +29,44 @@ template valid_baby_bear() {
   for (var i = 27; i < 31; i++) {
     high_bits = high_bits + in[i];
   }
-  // Convert 0-3 -> 0-3, 4 -> 0
-  component count_high = to_bits_exact(2);
-  count_high.in <-- high_bits % 4;
-  // Now, either count_high.in == high_bits *OR* low_bits == 0
-  (count_high.in - high_bits) * low_bits === 0;
+
+  // high_bits_sub4 will be 0 iff high_bits == 4.
+  // If high_bits_sub4 is zero, then high_bits_eq4 must be 1.
+  // If high_bits_sub4 is non-zero, then high_bits_eq4 may be 0.
+  // (If the prover is not faulty, high_bits_eq4 will be 0)
+  var high_bits_sub4 = high_bits - 4;
+  signal sub4_inv <-- high_bits_sub4 == 0 ? 0 : -1/high_bits_sub4;
+  signal high_bits_eq4 <== high_bits_sub4 * sub4_inv + 1;
+
+  // valid baby bear elem if high_bits != 4 OR low_bits == 0.
+  high_bits_eq4 * low_bits === 0;
 }
 
+// Normalize a Baby Bear field element to be less than P.
+// signal in is an element with value at most N bits in size.
+// signal out is the normalized representative field element.
+// PRECONDITION: N <= 252; such that 2^(N-30) * baby_bear + baby_bear-1 < bn254_r
 template normalize_impl(N) {
   signal input in;
   signal output out;
+  // P is the Baby Bear prime.
   var P = 15 * (1 << 27) + 1;
   var K = N - 30;
+
+  // Constrain the quotient to K bits and remainder to 31 bits.
   component k_bits = to_bits_exact(K);
   component out_bits = to_bits_exact(31);
   k_bits.in <-- in \ P;
   out_bits.in <-- in % P;
+
+  // Constrain the bit decomposed remainder to be less than P.
   component vbb = valid_baby_bear();
   vbb.in <== out_bits.out;
+
+  // Constrain the quotient and remainder to have been computed correctly.
+  // Solution is unique because (quotient * P) <= 2^(N + 1) < GLOBAL_FIELD_P - P and remainder < P.
+  k_bits.in * P + out_bits.in === in;
+
   // Final output
   out <== out_bits.in;
 }
@@ -240,7 +263,7 @@ template full_round(round_num) {
     sboxes[i] = sbox();
     sboxes[i].in <== in[i] + rc[round_num * 3 + i];
   }
-  
+
   for (var i = 0; i < 3; i++) {
     var tot = 0;
     for (var j = 0; j < 3; j++) {
@@ -311,7 +334,7 @@ template hash_impl(nInputs) {
     } else {
       permute[b].in[0] <== permute[b-1].out[0];
     }
-    for (var n = 0; n < 2; n++) { 
+    for (var n = 0; n < 2; n++) {
       var tot = 0;
       var mul = 1;
       for (var i = 0; i < 8; i++) {
@@ -367,7 +390,7 @@ function inverse(a, n) {
     if (x % 2 == 1) {
       x = x - 1;
       prod *= mul;
-      prod %= n; 
+      prod %= n;
     }
     mul *= mul;
     mul %= n;
@@ -435,14 +458,14 @@ template valid_254() {
   signal input in[254];
   signal cur[255];
   var bits_P[254] = [
-     1, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 
-     1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 
-     0, 1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 1, 0, 1, 1, 
-     0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 1, 0, 0, 0, 0, 1, 
-     0, 1, 1, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 
-     0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 0, 1, 1, 1, 0, 0, 1, 0, 1, 1, 1, 0, 0, 
-     0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 
-     0, 1, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+     1, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 1, 0,
+     1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0,
+     0, 1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 1, 0, 1, 1,
+     0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 1, 0, 0, 0, 0, 1,
+     0, 1, 1, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0,
+     0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 0, 1, 1, 1, 0, 0, 1, 0, 1, 1, 1, 0, 0,
+     0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1,
+     0, 1, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
   ];
   cur[0] <== 1;

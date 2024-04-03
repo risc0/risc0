@@ -108,3 +108,8 @@ pub fn split_digest(d: Digest) -> Result<(Fr, Fr), Error> {
         fr_from_bytes(&from_u256(&format!("0x{}", hex::encode(b)))?)?,
     ))
 }
+
+/// Creates an `ark_bn254::Fr` from a hex string
+pub fn fr_from_hex_string(val: &str) -> Result<Fr, Error> {
+    fr_from_bytes(&from_u256(&format!("0x{}", val))?)
+}

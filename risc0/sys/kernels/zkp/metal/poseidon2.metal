@@ -174,13 +174,17 @@ kernel void poseidon2_rows(const device Fp* ROUND_CONSTANTS,
   Fp cells[CELLS];
   uint used = 0;
   for (uint i = 0; i < col_size; i++) {
-    cells[used++] += matrix[i * count + gid];
+    cells[used++] = matrix[i * count + gid];
     if (used == CELLS_RATE) {
       poseidon2_mix(ROUND_CONSTANTS, M_INT_DIAG, cells);
       used = 0;
     }
   }
   if (used != 0 || count == 0) {
+    // Zero pad to get a CELLS_RATE-aligned number of inputs
+    for (uint i = used; i < CELLS_RATE; i++)  {
+        cells[i] = 0;
+    }
     poseidon2_mix(ROUND_CONSTANTS, M_INT_DIAG, cells);
   }
   for (uint i = 0; i < CELLS_OUT; i++) {
