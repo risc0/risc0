@@ -1121,7 +1121,7 @@ version = "0.22.0-alpha.1"
 dependencies = [
  "anyhow",
  "cargo-generate",
- "cargo_metadata 0.18.1",
+ "cargo_metadata",
  "clap",
  "const_format",
  "dirs",
@@ -1142,20 +1142,6 @@ dependencies = [
  "tokio",
  "tracing-subscriber 0.3.18",
  "zip",
-]
-
-[[package]]
-name = "cargo_metadata"
-version = "0.17.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e7daec1a2a2129eeba1644b220b4647ec537b0b5d4bfd6876fcc5a540056b592"
-dependencies = [
- "camino",
- "cargo-platform",
- "semver 1.0.22",
- "serde",
- "serde_json",
- "thiserror",
 ]
 
 [[package]]
@@ -2273,7 +2259,7 @@ checksum = "82d80cc6ad30b14a48ab786523af33b37f28a8623fc06afd55324816ef18fb1f"
 dependencies = [
  "arrayvec",
  "bytes",
- "cargo_metadata 0.18.1",
+ "cargo_metadata",
  "chrono",
  "const-hex",
  "elliptic-curve",
@@ -3288,6 +3274,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e3d1354bf6b7235cb4a0576c2619fd4ed18183f689b12b006a0ee7329eeff9a5"
 dependencies = [
  "windows-sys 0.52.0",
+]
+
+[[package]]
+name = "hotbench"
+version = "0.1.0"
+dependencies = [
+ "cargo_metadata",
+ "human-repr",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]
@@ -5357,7 +5353,7 @@ version = "0.22.0-alpha.1"
 dependencies = [
  "anyhow",
  "cargo-platform",
- "cargo_metadata 0.17.0",
+ "cargo_metadata",
  "docker-generate",
  "risc0-binfmt",
  "risc0-zkp",
@@ -5577,6 +5573,7 @@ dependencies = [
  "flate2",
  "getrandom",
  "hex",
+ "hotbench",
  "human-repr",
  "lazy-regex",
  "lazy_static",
@@ -7548,18 +7545,18 @@ dependencies = [
 
 [[package]]
 name = "xshell"
-version = "0.2.5"
+version = "0.2.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ce2107fe03e558353b4c71ad7626d58ed82efaf56c54134228608893c77023ad"
+checksum = "6db0ab86eae739efd1b054a8d3d16041914030ac4e01cd1dca0cf252fd8b6437"
 dependencies = [
  "xshell-macros",
 ]
 
 [[package]]
 name = "xshell-macros"
-version = "0.2.5"
+version = "0.2.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7e2c411759b501fb9501aac2b1b2d287a6e93e5bdcf13c25306b23e1b716dd0e"
+checksum = "9d422e8e38ec76e2f06ee439ccc765e9c6a9638b9e7c9f2e8255e4d41e8bd852"
 
 [[package]]
 name = "xtask"
