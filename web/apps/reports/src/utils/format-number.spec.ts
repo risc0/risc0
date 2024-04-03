@@ -1,4 +1,3 @@
-// FILEPATH: /Users/cohan/code/risc0/web/apps/reports/src/utils/format-number.spec.ts
 import formatNumber from './format-number';
 
 describe('formatNumber', () => {

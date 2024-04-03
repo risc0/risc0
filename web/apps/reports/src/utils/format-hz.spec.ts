@@ -1,4 +1,3 @@
-// FILEPATH: /Users/cohan/code/risc0/web/apps/reports/src/utils/format-hz.spec.ts
 import formatHz from './format-hz';
 
 describe('formatHz', () => {

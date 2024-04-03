@@ -1,5 +1,6 @@
 import Separator from "@risc0/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@risc0/ui/tabs";
+import truncate from "@risc0/ui/utils/truncate";
 import type { Metadata } from "next";
 import convertCsvToJson from "~/utils/convert-csv-to-json";
 import fetchApplicationsBenchmarksCommitHash from "./_actions/fetch-applications-benchmarks-commit-hash";
@@ -37,15 +38,19 @@ export default async function ApplicationsBenchmarksPage() {
 
   return (
     <div className="container max-w-screen-3xl pt-4">
-      <div className="flex items-center justify-between text-muted-foreground">
+      <div className="flex items-center justify-between">
         <h1 className="title-sm">Applications Benchmarks</h1>
-        <p className="text-xs">Commit Hash: {commitHash}</p>
+        {commitHash && (
+          <p className="text-xs" title={commitHash}>
+            Commit Hash: {truncate(commitHash, 15)}
+          </p>
+        )}
       </div>
 
       <Separator />
 
       <Tabs className="mt-6" defaultValue={Object.keys(FILENAMES_TO_TITLES)[0]}>
-        <div className="flex items-center">
+        <div className="flex items-center overflow-auto">
           <TabsList>
             {Object.keys(FILENAMES_TO_TITLES).map((filename, index) => (
               <TabsTrigger key={filename} value={filename}>

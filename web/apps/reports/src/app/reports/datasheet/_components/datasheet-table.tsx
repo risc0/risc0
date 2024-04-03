@@ -1,5 +1,6 @@
 "use client";
 
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@risc0/ui/table";
 import {
   type ColumnDef,
   type ColumnFiltersState,
@@ -13,7 +14,6 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@risc0/ui/table";
 import { useState } from "react";
 import TableToolbar from "~/client/table/table-toolbar";
 import { tableFuzzyFilter } from "~/utils/table-fuzzy-filter";
@@ -61,13 +61,13 @@ export default function DatasheetTable<TData, TValue>({ title, columns, data }: 
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="subtitle">{title}</h2>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h2 className="subtitle truncate">{title}</h2>
         <TableToolbar globalFilter={globalFilter} setGlobalFilter={setGlobalFilter} table={table} />
       </div>
 
       <div className="overflow-auto rounded-md border">
-        <Table className="table-fixed">
+        <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>

@@ -44,7 +44,7 @@ export default function ReportsPage() {
               <Image
                 width={294}
                 height={147}
-                className="h-[147px] w-full rounded-sm object-cover shadow-xl user-select-none pointer-events-none"
+                className="user-select-none pointer-events-none h-[147px] w-full rounded-sm object-cover shadow-xl"
                 src={`/benchmarks-${index}.jpg`}
                 alt={description}
               />

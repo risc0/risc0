@@ -5,8 +5,8 @@ export default function formatHz(hertz: number) {
     return;
   }
 
-  const units = ["Hz", "KHz", "MHz", "GHz"] as const;
   let unitIndex = 0;
+  const units = ["Hz", "KHz", "MHz", "GHz"] as const;
 
   while (hertz >= 1000 && unitIndex < units.length - 1) {
     // biome-ignore lint/style/noParameterAssign: not my code

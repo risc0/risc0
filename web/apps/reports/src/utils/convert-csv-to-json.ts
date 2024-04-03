@@ -1,4 +1,8 @@
 export default function convertCsvToJson(csvData) {
+  if (!csvData) {
+    return [];
+  }
+
   const lines = csvData.split("\n");
   const headers = lines[0].split(",");
   const result: any[] = [];

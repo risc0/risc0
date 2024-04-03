@@ -1,5 +1,6 @@
 "use client";
 
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@risc0/ui/table";
 import {
   type ColumnDef,
   type ColumnFiltersState,
@@ -13,7 +14,6 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@risc0/ui/table";
 import { useState } from "react";
 import TableToolbar from "~/client/table/table-toolbar";
 import formatNumber from "~/utils/format-number";
@@ -62,7 +62,7 @@ export default function CratesIoValidationTable<TData, TValue>({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="subtitle">Crates ({formatNumber(data.length)})</h2>
         <TableToolbar
           statuses={[

@@ -1,4 +1,5 @@
 import Separator from "@risc0/ui/separator";
+import truncate from "@risc0/ui/utils/truncate";
 import type { Metadata } from "next";
 import fetchDatasheetCommitHash from "./_actions/fetch-datasheet-commit-hash";
 import DataSheetTable from "./_components/datasheet-table";
@@ -35,9 +36,13 @@ export default async function DatasheetPage() {
 
   return (
     <div className="container max-w-screen-3xl pt-4">
-      <div className="flex items-center justify-between text-muted-foreground">
-        <h1 className="title-sm">Applications Benchmarks</h1>
-        <p className="text-xs">Commit Hash: {commitHash}</p>
+      <div className="flex items-center justify-between">
+        <h1 className="title-sm">Datasheet</h1>
+        {commitHash && (
+          <p className="text-xs" title={commitHash}>
+            Commit Hash: {truncate(commitHash, 15)}
+          </p>
+        )}
       </div>
 
       <Separator />

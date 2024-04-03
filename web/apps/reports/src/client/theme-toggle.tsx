@@ -1,13 +1,14 @@
 "use client";
 
 import Button from "@risc0/ui/button";
+import cn from "@risc0/ui/cn";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@risc0/ui/dropdown-menu";
-import { SunMoonIcon } from "lucide-react";
+import { CheckIcon, SunMoonIcon } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 
 export default function ThemeToggle({ className }: { className?: string }) {
-  const { setTheme } = useTheme();
+  const { theme, setTheme } = useTheme();
   const [isMounted, setIsMounted] = useState<boolean>(false);
 
   useEffect(() => {
@@ -15,7 +16,7 @@ export default function ThemeToggle({ className }: { className?: string }) {
   }, []);
 
   if (!isMounted) {
-    return <div className="h-8">&nbsp;</div>;
+    return <div className="h-8" />;
   }
 
   return (
@@ -27,9 +28,22 @@ export default function ThemeToggle({ className }: { className?: string }) {
       </DropdownMenuTrigger>
 
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => setTheme("light")}>Light</DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("dark")}>Dark</DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("system")}>System</DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setTheme("light")}>
+          <CheckIcon
+            className={cn("mr-2 size-3 text-muted-foreground opacity-0", theme === "light" && "opacity-100")}
+          />
+          Light
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setTheme("dark")}>
+          <CheckIcon className={cn("mr-2 size-3 text-muted-foreground opacity-0", theme === "dark" && "opacity-100")} />
+          Dark
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setTheme("system")}>
+          <CheckIcon
+            className={cn("mr-2 size-3 text-muted-foreground opacity-0", theme === "system" && "opacity-100")}
+          />
+          System
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );

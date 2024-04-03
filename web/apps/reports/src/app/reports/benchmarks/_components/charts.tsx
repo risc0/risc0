@@ -166,6 +166,7 @@ export default function Charts() {
       }
 
       //// Render download button
+      // biome-ignore lint/style/noNonNullAssertion: ignore -- not my code
       document.getElementById("dl-button")!.onclick = () => {
         const dataStr = `data:text/json;charset=utf-8,${encodeURIComponent(JSON.stringify(data))}`;
         const a = document.createElement("a");
@@ -188,7 +189,7 @@ export default function Charts() {
 
   return (
     <div>
-      <div className="flex items-center justify-between text-muted-foreground">
+      <div className="flex items-center justify-between">
         <h1 className="title-sm">Benchmarks</h1>
         <div className="flex items-center gap-3">
           {lastUpdate && <p className="text-xs">Last Update: {lastUpdate}</p>}
@@ -202,7 +203,7 @@ export default function Charts() {
 
       {names && (
         <Tabs defaultValue={names[0]} className="mt-6">
-          <div className="flex items-center">
+          <div className="flex items-center overflow-auto">
             <TabsList>
               {names.map((name) => (
                 <TabsTrigger key={name} value={name}>

@@ -5,9 +5,9 @@ export default function formatDuration(duration: number) {
     return;
   }
 
+  let unitIndex = 0;
   const thresholds = [1000, 1000, 1000, 60, 60] as const;
   const units = ["ns", "µs", "ms", "s", "min", "h"] as const;
-  let unitIndex = 0;
 
   // @ts-expect-error -- not my code
   while (duration >= thresholds[unitIndex] && unitIndex < thresholds.length) {
