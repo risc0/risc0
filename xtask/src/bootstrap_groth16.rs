@@ -21,7 +21,6 @@ use std::{
 use clap::Parser;
 use hex::FromHex;
 use regex::Regex;
-use risc0_circuit_recursion::control_id::BN254_CONTROL_ID;
 use risc0_zkvm::{
     get_prover_server,
     recursion::identity_p254,
@@ -31,11 +30,14 @@ use risc0_zkvm::{
 };
 use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID};
 
+use crate::bootstrap::Bootstrap;
+
 #[derive(Debug, Parser)]
 pub struct BootstrapGroth16 {
     /// ris0-ethereum repository path
     #[arg(long, env)]
     risc0_ethereum_path: String,
+
     /// bootstrap test receipt only (exclude rust verifier and control id)
     #[arg(long, action = clap::ArgAction::SetTrue, default_value_t = false)]
     test_receipt_only: bool,
@@ -141,7 +143,7 @@ fn bootstrap_control_id(risc0_ethereum_path: &Path) {
  library ControlID {
 "#;
     let (control_id_0, control_id_1) = split_digest(Digest::from_hex(ALLOWED_IDS_ROOT).unwrap());
-    let bn254_control_id = format!("0x{}", BN254_CONTROL_ID);
+    let bn254_control_id = format!("0x{}", Bootstrap::generate_identity_bn254_control_id());
     let control_id_0 = format!("uint256 public constant CONTROL_ID_0 = {control_id_0};");
     let control_id_1 = format!("uint256 public constant CONTROL_ID_1 = {control_id_1};");
     let bn254_control_id =
