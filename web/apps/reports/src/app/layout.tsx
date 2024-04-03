@@ -1,6 +1,7 @@
 import "@risc0/ui/styles/globals.css";
 
 import { TooltipProvider } from "@risc0/ui/tooltip";
+import { Analytics } from "@vercel/analytics/react";
 import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
 import { Next13NProgress } from "nextjs13-progress";
@@ -36,6 +37,7 @@ export default function RootLayout({ children }: PropsWithChildren) {
           <TooltipProvider>{children}</TooltipProvider>
         </Providers>
         <Next13NProgress color="#4E46E5" height={1} showOnShallow={false} />
+        <Analytics />
       </body>
     </html>
   );
