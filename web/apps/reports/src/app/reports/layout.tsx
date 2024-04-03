@@ -11,7 +11,12 @@ export default function ReportsLayout({ children }: PropsWithChildren) {
       <main className="grow">{children}</main>
 
       <SignInFooter />
-      <Script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js" strategy="beforeInteractive" />
+
+      <Script
+        // TODO: replace with newer version
+        src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"
+        strategy="beforeInteractive"
+      />
     </>
   );
 }

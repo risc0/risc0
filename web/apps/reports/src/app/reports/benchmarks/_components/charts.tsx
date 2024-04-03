@@ -1,13 +1,133 @@
 "use client";
 
+// TODO: this whole component was copy pasted from old code
+// could probably improve a lot
+
 import Button from "@risc0/ui/button";
 import Separator from "@risc0/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@risc0/ui/tabs";
+import truncate from "lodash-es/truncate";
 import { DownloadIcon } from "lucide-react";
 import Script from "next/script";
 import { useState } from "react";
 
+const toolColors = {
+  cargo: "#dea584",
+  go: "#00add8",
+  benchmarkjs: "#f1e05a",
+  benchmarkluau: "#000080",
+  pytest: "#3572a5",
+  googlecpp: "#f34b7d",
+  catch2: "#f34b7d",
+  julia: "#a270ba",
+  jmh: "#b07219",
+  benchmarkdotnet: "#178600",
+  customBiggerIsBetter: "#38ff38",
+  customSmallerIsBetter: "#ff3838",
+  _: "#333333",
+};
+
+function renderGraph(parent, name, dataset) {
+  const canvas = document.createElement("canvas");
+  canvas.className = "benchmark-chart max-w-screen-sm";
+  parent.appendChild(canvas);
+
+  const color = toolColors[dataset.length > 0 ? dataset[0].tool : "_"];
+
+  const data = {
+    labels: dataset.map((d) => d.commit.id.slice(0, 7)),
+    datasets: [
+      {
+        label: name,
+        data: dataset.map((d) => d.bench.value),
+        borderColor: color,
+        fill: true,
+        backgroundColor: `${color}60`, // Add alpha for #rrggbbaa
+      },
+    ],
+  };
+
+  const options = {
+    scales: {
+      xAxes: [
+        {
+          scaleLabel: {
+            display: true,
+            labelString: "commit",
+          },
+        },
+      ],
+      yAxes: [
+        {
+          scaleLabel: {
+            display: true,
+            labelString: dataset.length > 0 ? dataset[0].bench.unit : "",
+          },
+          ticks: {
+            beginAtZero: true,
+          },
+        },
+      ],
+    },
+    tooltips: {
+      intersect: false,
+      callbacks: {
+        afterTitle: (items) => {
+          const { index } = items[0];
+          const data = dataset[index];
+          return `\n${truncate(data.commit.message, {
+            length: 180,
+            omission: "...",
+          })}\n\n${data.commit.timestamp} committed by @${data.commit.committer.username}\n`;
+        },
+        label: (item) => {
+          let label = item.value;
+          const { range, unit } = dataset[item.index].bench;
+          label += ` ${unit}`;
+          if (range) {
+            label += ` (${range})`;
+          }
+          return label;
+        },
+        afterLabel: (item) => {
+          const { extra } = dataset[item.index].bench;
+          return extra ? `\n${extra}` : "";
+        },
+      },
+    },
+    onClick: (_mouseEvent, activeElems) => {
+      if (activeElems.length === 0) {
+        return;
+      }
+      // XXX: Undocumented. How can we know the index?
+      const index = activeElems[0]._index;
+      const url = dataset[index].commit.url;
+      window.open(url, "_blank");
+    },
+  };
+
+  // @ts-expect-error -- it exists
+  // biome-ignore lint/correctness/noUndeclaredVariables: ignore
+  new Chart(canvas, {
+    type: "line",
+    data,
+    options,
+  });
+}
+
+function renderBenchSet(benchSet, main) {
+  const graphsElem = document.createElement("div");
+  graphsElem.className = "flex flex-row flex-wrap gap-16";
+  main.appendChild(graphsElem);
+
+  for (const [benchName, benches] of benchSet.entries()) {
+    renderGraph(graphsElem, benchName, benches);
+  }
+}
+
 export default function Charts() {
   const [lastUpdate, setLastUpdate] = useState<string>();
+  const [names, setNames] = useState<string[]>();
 
   return (
     <div>
@@ -23,29 +143,27 @@ export default function Charts() {
 
       <Separator />
 
-      <div className="mt-8 max-w-screen-md mx-auto">
-        <div id="charts" />
-      </div>
+      {names && (
+        <Tabs defaultValue={names[0]} className="mt-6">
+          <div className="flex items-center">
+            <TabsList>
+              {names.map((name) => (
+                <TabsTrigger key={name} value={name}>
+                  {name}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </div>
+
+          {names.map((name) => (
+            <TabsContent className="mt-4" id={`chart-${name}`} key={name} value={name} />
+          ))}
+        </Tabs>
+      )}
 
       <Script
         src="https://risc0.github.io/ghpages/dev/bench/data.js"
         onReady={() => {
-          const toolColors = {
-            cargo: "#dea584",
-            go: "#00add8",
-            benchmarkjs: "#f1e05a",
-            benchmarkluau: "#000080",
-            pytest: "#3572a5",
-            googlecpp: "#f34b7d",
-            catch2: "#f34b7d",
-            julia: "#a270ba",
-            jmh: "#b07219",
-            benchmarkdotnet: "#178600",
-            customBiggerIsBetter: "#38ff38",
-            customSmallerIsBetter: "#ff3838",
-            _: "#333333",
-          };
-
           function init() {
             function collectBenchesPerTestCase(entries) {
               const map = new Map();
@@ -79,6 +197,8 @@ export default function Charts() {
               a.click();
             };
 
+            setNames(Object.keys(data.entries));
+
             // Prepare data points for charts
             return Object.keys(data.entries).map((name) => ({
               name,
@@ -86,120 +206,14 @@ export default function Charts() {
             }));
           }
 
-          function renderAllChars(dataSets) {
-            function renderGraph(parent, name, dataset) {
-              const canvas = document.createElement("canvas");
-              canvas.className = "benchmark-chart";
-              parent.appendChild(canvas);
+          const data = init();
 
-              const color = toolColors[dataset.length > 0 ? dataset[0].tool : "_"];
-              const data = {
-                labels: dataset.map((d) => d.commit.id.slice(0, 7)),
-                datasets: [
-                  {
-                    label: name,
-                    data: dataset.map((d) => d.bench.value),
-                    borderColor: color,
-                    fill: true,
-                    backgroundColor: `${color}60`, // Add alpha for #rrggbbaa
-                  },
-                ],
-              };
-              const options = {
-                responsive: true,
-                interaction: {
-                  mode: "index",
-                  intersect: false,
-                },
-                scales: {
-                  xAxes: [
-                    {
-                      scaleLabel: {
-                        display: true,
-                        labelString: "commit",
-                      },
-                    },
-                  ],
-                  yAxes: [
-                    {
-                      scaleLabel: {
-                        display: true,
-                        labelString: dataset.length > 0 ? dataset[0].bench.unit : "",
-                      },
-                      ticks: {
-                        beginAtZero: true,
-                      },
-                    },
-                  ],
-                },
-                tooltips: {
-                  callbacks: {
-                    afterTitle: (items) => {
-                      const { index } = items[0];
-                      const data = dataset[index];
-                      return `\n${data.commit.message}\n\n${data.commit.timestamp} committed by @${data.commit.committer.username}\n`;
-                    },
-                    label: (item) => {
-                      let label = item.value;
-                      const { range, unit } = dataset[item.index].bench;
-                      label += ` ${unit}`;
-                      if (range) {
-                        label += ` (${range})`;
-                      }
-                      return label;
-                    },
-                    afterLabel: (item) => {
-                      const { extra } = dataset[item.index].bench;
-                      return extra ? `\n${extra}` : "";
-                    },
-                  },
-                },
-                onClick: (_mouseEvent, activeElems) => {
-                  if (activeElems.length === 0) {
-                    return;
-                  }
-                  // XXX: Undocumented. How can we know the index?
-                  const index = activeElems[0]._index;
-                  const url = dataset[index].commit.url;
-                  window.open(url, "_blank");
-                },
-              };
-
-              // @ts-expect-error -- it exists
-              // biome-ignore lint/correctness/noUndeclaredVariables: ignore
-              new Chart(canvas, {
-                type: "line",
-                data,
-                options,
-              });
+          // setTimeout to push at bottom of JS queue
+          setTimeout(() => {
+            for (const { name, dataSet } of data) {
+              renderBenchSet(dataSet, document.getElementById(`chart-${name}`));
             }
-
-            function renderBenchSet(name, benchSet, main) {
-              const setElem = document.createElement("div");
-              setElem.className = "benchmark-set";
-              main.appendChild(setElem);
-
-              const nameElem = document.createElement("h1");
-              nameElem.className = "benchmark-title";
-              nameElem.textContent = name;
-              setElem.appendChild(nameElem);
-
-              const graphsElem = document.createElement("div");
-              graphsElem.className = "benchmark-graphs";
-              setElem.appendChild(graphsElem);
-
-              for (const [benchName, benches] of benchSet.entries()) {
-                renderGraph(graphsElem, benchName, benches);
-              }
-            }
-
-            const main = document.getElementById("charts");
-            for (const { name, dataSet } of dataSets) {
-              renderBenchSet(name, dataSet, main);
-            }
-          }
-
-          renderAllChars(init()); // Start
+          }, 0);
         }}
       />
     </div>

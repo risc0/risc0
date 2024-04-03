@@ -44,29 +44,27 @@ export default async function ApplicationsBenchmarksPage() {
 
       <Separator />
 
-      <div className="mt-6">
-        <Tabs defaultValue={Object.keys(FILENAMES_TO_TITLES)[0]}>
-          <div className="flex items-center">
-            <TabsList>
-              {Object.keys(FILENAMES_TO_TITLES).map((filename, index) => (
-                <TabsTrigger key={filename} value={filename}>
-                  {Object.values(FILENAMES_TO_TITLES)[index]}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </div>
+      <Tabs className="mt-6" defaultValue={Object.keys(FILENAMES_TO_TITLES)[0]}>
+        <div className="flex items-center">
+          <TabsList>
+            {Object.keys(FILENAMES_TO_TITLES).map((filename, index) => (
+              <TabsTrigger key={filename} value={filename}>
+                {Object.values(FILENAMES_TO_TITLES)[index]}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </div>
 
-          {Object.keys(FILENAMES_TO_TITLES).map((filename, index) => (
-            <TabsContent key={filename} value={filename} className="mt-4">
-              <ApplicationsBenchmarksTable
-                title={Object.values(FILENAMES_TO_TITLES)[index] ?? ""}
-                columns={applicationsBenchmarksTableColumns}
-                data={convertCsvToJson(dataArrays[index]).filter((element) => element.job_name)}
-              />
-            </TabsContent>
-          ))}
-        </Tabs>
-      </div>
+        {Object.keys(FILENAMES_TO_TITLES).map((filename, index) => (
+          <TabsContent key={filename} value={filename} className="mt-4">
+            <ApplicationsBenchmarksTable
+              title={Object.values(FILENAMES_TO_TITLES)[index] ?? ""}
+              columns={applicationsBenchmarksTableColumns}
+              data={convertCsvToJson(dataArrays[index]).filter((element) => element.job_name)}
+            />
+          </TabsContent>
+        ))}
+      </Tabs>
     </div>
   );
 }
