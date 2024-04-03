@@ -186,8 +186,6 @@ export default function Charts() {
     }
   }, [names]);
 
-  console.log("names", names);
-
   return (
     <div>
       <div className="flex items-center justify-between text-muted-foreground">
