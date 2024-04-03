@@ -44,7 +44,7 @@ pub mod hal {
 
 pub use risc0_core::field;
 
-/// A version identifier string for the proof system. Used to seed the Fiat-Shamir transcript and
+/// A protocol info string for the proof system. Used to seed the Fiat-Shamir transcript and
 /// provide domain seperation between different protocol and circuit versions.
 #[derive(Debug)]
 pub struct ProtocolInfo(pub &'static [u8; 16]);
