@@ -157,6 +157,12 @@ impl Bootstrap {
     pub fn generate_identity_bn254_control_id() -> Digest {
         let encoded_program = get_zkr("identity.zkr").unwrap();
         let program = Program::from_encoded(&encoded_program);
-        program.compute_control_id(Poseidon254HashSuite::new_suite())
+        let digest = program.compute_control_id(Poseidon254HashSuite::new_suite());
+
+        // NOTE: we need to byte-reverse the BN254_CONTROL_ID because
+        // (apparently) groth16 digests are represented as a single
+        // little-endian field element
+        let bytes: Vec<u8> = digest.as_bytes().iter().rev().cloned().collect();
+        Digest::try_from(bytes.as_slice()).unwrap()
     }
 }

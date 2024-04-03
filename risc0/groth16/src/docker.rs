@@ -50,10 +50,10 @@ pub fn stark_to_snark(identity_p254_seal_bytes: &[u8]) -> Result<Seal> {
         .arg("--rm")
         .arg("-v")
         .arg(&format!("{}:/mnt", work_dir.to_string_lossy()))
-        .arg("risc0-groth16-prover:latest")
+        .arg("risczero/risc0-groth16-prover:v2024-04-03.1")
         .status()?;
     if !status.success() {
-        panic!("docker returned failure exit code: {:?}", status.code());
+        bail!("docker returned failure exit code: {:?}", status.code());
     }
 
     tracing::debug!("Parsing proof");

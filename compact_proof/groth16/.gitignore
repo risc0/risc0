@@ -2,4 +2,3 @@ pot23.ptau
 stark_verification_key.json
 stark_verify_*.zkey
 stark_verify_final.zkey.gz
-verifier.sol

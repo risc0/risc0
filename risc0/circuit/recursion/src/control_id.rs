@@ -80,4 +80,4 @@ pub const RECURSION_CONTROL_IDS: [(&str, &str); 15] = [
 ];
 
 pub const BN254_CONTROL_ID: &str =
-    "af09bc97ec5cbae23973a89a507ba764ea521721dc955e660d692815a1e39327";
+    "2793e3a11528690d665e95dc211752ea64a77b509aa87339e2ba5cec97bc09af";
