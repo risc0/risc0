@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@risc0/ui/tabs";
 import truncate from "lodash-es/truncate";
 import { DownloadIcon } from "lucide-react";
 import Script from "next/script";
-import { useState } from "react";
+import { use, useEffect, useState } from "react";
 
 const toolColors = {
   cargo: "#dea584",
@@ -126,8 +126,67 @@ function renderBenchSet(benchSet, main) {
 }
 
 export default function Charts() {
-  const [lastUpdate, setLastUpdate] = useState<string>();
+  const [lastUpdate, setLastUpdate] = useState<string>("");
   const [names, setNames] = useState<string[]>();
+  const [ready, setReady] = useState<boolean>(false);
+
+  useEffect(() => {
+    // @ts-expect-error -- it exists
+    const data = window.BENCHMARK_DATA;
+
+    if (ready && data) {
+      // @ts-expect-error -- it exists
+      const data = window.BENCHMARK_DATA;
+
+      setLastUpdate(new Date(data.lastUpdate).toLocaleString());
+      setNames(Object.keys(data.entries));
+    }
+  }, [ready]);
+
+  useEffect(() => {
+    // @ts-expect-error -- it exists
+    const data = window.BENCHMARK_DATA;
+
+    if (names && data) {
+      function collectBenchesPerTestCase(entries) {
+        const map = new Map();
+        for (const entry of entries) {
+          const { commit, date, tool, benches } = entry;
+          for (const bench of benches) {
+            const result = { commit, date, tool, bench };
+            const arr = map.get(bench.name);
+            if (arr === undefined) {
+              map.set(bench.name, [result]);
+            } else {
+              arr.push(result);
+            }
+          }
+        }
+        return map;
+      }
+
+      //// Render download button
+      document.getElementById("dl-button")!.onclick = () => {
+        const dataStr = `data:text/json;charset=utf-8,${encodeURIComponent(JSON.stringify(data))}`;
+        const a = document.createElement("a");
+        a.href = dataStr;
+        a.download = "benchmark_data.json";
+        a.click();
+      };
+
+      // Prepare data points for charts
+      const dataset = Object.keys(data.entries).map((name) => ({
+        name,
+        dataSet: collectBenchesPerTestCase(data.entries[name]),
+      }));
+
+      for (const { name, dataSet } of dataset) {
+        renderBenchSet(dataSet, document.getElementById(`chart-${name}`));
+      }
+    }
+  }, [names]);
+
+  console.log("names", names);
 
   return (
     <div>
@@ -164,56 +223,7 @@ export default function Charts() {
       <Script
         src="https://risc0.github.io/ghpages/dev/bench/data.js"
         onReady={() => {
-          function init() {
-            function collectBenchesPerTestCase(entries) {
-              const map = new Map();
-              for (const entry of entries) {
-                const { commit, date, tool, benches } = entry;
-                for (const bench of benches) {
-                  const result = { commit, date, tool, bench };
-                  const arr = map.get(bench.name);
-                  if (arr === undefined) {
-                    map.set(bench.name, [result]);
-                  } else {
-                    arr.push(result);
-                  }
-                }
-              }
-              return map;
-            }
-
-            // @ts-expect-error -- it exists
-            const data = window.BENCHMARK_DATA;
-
-            // Render last update date
-            setLastUpdate(new Date(data.lastUpdate).toLocaleString());
-
-            //// Render download button
-            document.getElementById("dl-button")!.onclick = () => {
-              const dataStr = `data:text/json;charset=utf-8,${encodeURIComponent(JSON.stringify(data))}`;
-              const a = document.createElement("a");
-              a.href = dataStr;
-              a.download = "benchmark_data.json";
-              a.click();
-            };
-
-            setNames(Object.keys(data.entries));
-
-            // Prepare data points for charts
-            return Object.keys(data.entries).map((name) => ({
-              name,
-              dataSet: collectBenchesPerTestCase(data.entries[name]),
-            }));
-          }
-
-          const data = init();
-
-          // setTimeout to push at bottom of JS queue
-          setTimeout(() => {
-            for (const { name, dataSet } of data) {
-              renderBenchSet(dataSet, document.getElementById(`chart-${name}`));
-            }
-          }, 0);
+          setReady(true);
         }}
       />
     </div>
