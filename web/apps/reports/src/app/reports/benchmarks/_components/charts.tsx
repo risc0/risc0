@@ -106,6 +106,11 @@ export default function Charts() {
                 ],
               };
               const options = {
+                responsive: true,
+                interaction: {
+                  mode: "index",
+                  intersect: false,
+                },
                 scales: {
                   xAxes: [
                     {
