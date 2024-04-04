@@ -11,10 +11,12 @@ import {
   getFacetedRowModel,
   getFacetedUniqueValues,
   getFilteredRowModel,
+  getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
 import { useState } from "react";
+import { TablePagination } from "~/client/table/table-pagination";
 import { TableToolbar } from "~/client/table/table-toolbar";
 import { formatNumber } from "~/utils/format-number";
 import { tableFuzzyFilter } from "~/utils/table-fuzzy-filter";
@@ -39,6 +41,11 @@ export function CratesIoValidationTable<TData, TValue>({ columns, data }: Crates
       columnFilters,
       globalFilter,
     },
+    initialState: {
+      pagination: {
+        pageSize: 100,
+      },
+    },
     filterFns: {
       fuzzy: tableFuzzyFilter,
     },
@@ -50,6 +57,7 @@ export function CratesIoValidationTable<TData, TValue>({ columns, data }: Crates
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
   });
@@ -115,6 +123,7 @@ export function CratesIoValidationTable<TData, TValue>({ columns, data }: Crates
           </TableBody>
         </Table>
       </div>
+      <TablePagination table={table} />
     </div>
   );
 }
