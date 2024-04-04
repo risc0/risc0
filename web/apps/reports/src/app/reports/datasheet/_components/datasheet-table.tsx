@@ -66,7 +66,7 @@ export function DatasheetTable<TData, TValue>({ title, columns, data }: Datashee
         <TableToolbar globalFilter={globalFilter} setGlobalFilter={setGlobalFilter} table={table} />
       </div>
 
-      <div className="overflow-auto rounded-md border">
+      <div className="overflow-auto rounded border">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (

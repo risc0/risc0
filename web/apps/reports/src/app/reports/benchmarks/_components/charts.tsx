@@ -11,7 +11,7 @@ import Script from "next/script";
 import { useEffect, useState } from "react";
 
 const toolColors = {
-  cargo: "#4E46E5",
+  cargo: "#020077",
   go: "#00add8",
   benchmarkjs: "#f1e05a",
   benchmarkluau: "#000080",
@@ -116,7 +116,7 @@ function renderGraph(parent, name, dataset) {
 
 function renderBenchSet(benchSet, main) {
   const graphsElem = document.createElement("div");
-  graphsElem.className = "flex flex-row flex-wrap gap-16";
+  graphsElem.className = "flex flex-row flex-wrap gap-16 dark:invert";
   main.appendChild(graphsElem);
 
   for (const [benchName, benches] of benchSet.entries()) {

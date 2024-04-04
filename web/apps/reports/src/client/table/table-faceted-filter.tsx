@@ -48,7 +48,7 @@ export function TableFacetedFilter<TData, TValue>({ column, title, options }: Ta
               </Badge>
               <div className="hidden space-x-1 lg:flex">
                 {selectedValues.size > 4 ? (
-                  <Badge variant="secondary" className="rounded-sm px-1 font-normal">
+                  <Badge variant="secondary" className="px-1 font-normal">
                     {selectedValues.size} selected
                   </Badge>
                 ) : (
@@ -100,7 +100,7 @@ export function TableFacetedFilter<TData, TValue>({ column, title, options }: Ta
                   >
                     <div
                       className={cn(
-                        "mr-2 flex size-4 items-center justify-center rounded-[4px] border border-primary",
+                        "mr-2 flex size-4 items-center justify-center border border-primary",
                         isSelected ? "bg-primary text-primary-foreground" : "opacity-50 [&_svg]:invisible",
                       )}
                     >

@@ -45,7 +45,7 @@ export default function ReportsPage() {
                 width={294}
                 height={147}
                 priority
-                className="user-select-none pointer-events-none h-[147px] w-full rounded-sm object-cover shadow-xl"
+                className="user-select-none pointer-events-none h-[147px] w-full rounded object-cover shadow-xl"
                 src={`/benchmarks-${index}.jpg`}
                 alt={description}
                 quality={90}
