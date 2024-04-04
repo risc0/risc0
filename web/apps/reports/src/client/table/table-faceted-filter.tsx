@@ -58,11 +58,11 @@ export function TableFacetedFilter<TData, TValue>({ column, title, options }: Ta
                       <Badge
                         key={option.value}
                         className={cn(
-                          "p-2 py-0 text-[10px]",
+                          "p-2 py-0 text-[10px] rounded-full",
                           option.label === "Success"
-                            ? "border-green-200 bg-green-50 dark:bg-inherit"
+                            ? "border-green-200 bg-green-50 dark:bg-green-950"
                             : option.label === "BuildFail"
-                              ? "border-orange-200 bg-orange-50 dark:bg-inherit"
+                              ? "border-red-200 bg-red-50 dark:bg-red-950"
                               : "text-foreground",
                         )}
                         variant="outline"
@@ -100,7 +100,7 @@ export function TableFacetedFilter<TData, TValue>({ column, title, options }: Ta
                   >
                     <div
                       className={cn(
-                        "mr-2 flex size-4 items-center justify-center border border-primary",
+                        "mr-2 flex size-4 items-center justify-center rounded-[3px] border border-primary",
                         isSelected ? "bg-primary text-primary-foreground" : "opacity-50 [&_svg]:invisible",
                       )}
                     >

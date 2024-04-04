@@ -32,7 +32,7 @@ export default async function CratesIoValidationPage() {
 
       <Separator className="mt-2" />
 
-      <div className="mt-8">
+      <div className="mt-6">
         <CratesIoValidationTable data={cratesValidationResults} columns={cratesIoValidationTableColumns} />
       </div>
     </div>

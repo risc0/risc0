@@ -27,9 +27,14 @@
 }
 
 * {
-  @apply tracking-wide;
+  @apply tracking-wider;
 }
 
 .font-mono {
   letter-spacing: initial;
+}
+
+.lucide {
+  /* bigger stroke for ALL icons */
+  stroke-width: 1.75px !important;
 }
