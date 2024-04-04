@@ -26,7 +26,10 @@ pub use read_iop::ReadIOP;
 use risc0_core::field::{Elem, ExtElem, Field, RootsOfUnity};
 
 use crate::{
-    adapter::{CircuitCoreDef, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA},
+    adapter::{
+        CircuitCoreDef, PROOF_SYSTEM_INFO, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE,
+        REGISTER_GROUP_DATA,
+    },
     core::{digest::Digest, hash::HashSuite, log2_ceil},
     taps::TapSet,
     INV_RATE, MAX_CYCLES_PO2, QUERIES,
@@ -221,6 +224,11 @@ where
         // Make IOP
         let mut iop = ReadIOP::new(seal, self.suite.rng.as_ref());
 
+        // At the start of the protocol, seed the Fiat-Shamir transcript with context information
+        // about the proof system and circuit.
+        iop.commit(&hashfn.hash_elem_slice(&PROOF_SYSTEM_INFO.encode()));
+        iop.commit(&hashfn.hash_elem_slice(&C::CIRCUIT_INFO.encode()));
+
         // Read any execution state
         self.execute(&mut iop);
 
@@ -413,11 +421,25 @@ where
         Ok(())
     }
 
+    /// Read the globals (i.e. outputs) from the IOP, and mix them into the Fiat-Shamir state.
+    ///
+    /// NOTE: The globals are the only values known to the verifier, and constitute the public
+    /// statement of of the prover. In many scenarios, they are the first values sent to the
+    /// verifier by the prover, and therefore should be committed at the start of verification.
     fn execute(&mut self, iop: &mut ReadIOP<'a, F>) {
-        // Read the outputs + size
-        self.out = Some(iop.read_field_elem_slice(C::OUTPUT_SIZE));
-        self.po2 = *iop.read_u32s(1).first().unwrap();
-        self.steps = 1 << self.po2;
+        let slice = iop.read_field_elem_slice(C::OUTPUT_SIZE + 1);
+        iop.commit(&self.suite.hashfn.hash_elem_slice(slice));
+
+        // Extract the out buffer and po2 from slice while checking sizes.
+        let (out, &[po2_elem]) = slice.split_at(C::OUTPUT_SIZE) else {
+            unreachable!()
+        };
+        self.out = Some(out);
+        let (&[po2], &[]) = po2_elem.to_u32_words().split_at(1) else {
+            panic!("po2 elem is larger than u32");
+        };
+        self.po2 = po2;
+        self.steps = 1usize.checked_shl(po2).unwrap();
     }
 
     /// Evaluate a polynomial whose coefficients are in the extension field at a
