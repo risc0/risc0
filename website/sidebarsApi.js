@@ -173,6 +173,11 @@ export default {
           label: "zkVM technical specification",
           id: "zkvm/zkvm-specification",
         },
+        {
+          type: "link",
+          label: "Awesome risc0",
+          href: "https://github.com/inversebrah/awesome-risc0",
+        },
       ],
     },
   ],
