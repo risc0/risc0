@@ -58,7 +58,7 @@ export function TableFacetedFilter<TData, TValue>({ column, title, options }: Ta
                       <Badge
                         key={option.value}
                         className={cn(
-                          "p-2 py-0 text-[10px] rounded-full",
+                          "rounded-full p-2 py-0 text-[10px]",
                           option.label === "Success"
                             ? "border-green-200 bg-green-50 dark:bg-green-950"
                             : option.label === "BuildFail"
@@ -123,7 +123,7 @@ export function TableFacetedFilter<TData, TValue>({ column, title, options }: Ta
                 <CommandGroup>
                   <CommandItem
                     onSelect={() => column?.setFilterValue(undefined)}
-                    className="justify-center text-center cursor-pointer"
+                    className="cursor-pointer justify-center text-center"
                   >
                     Clear Filters
                   </CommandItem>

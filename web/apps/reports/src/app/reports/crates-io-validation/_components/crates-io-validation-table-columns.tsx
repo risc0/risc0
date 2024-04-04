@@ -6,6 +6,7 @@ import { cn } from "@risc0/ui/cn";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@risc0/ui/dialog";
 import { createColumnHelper } from "@tanstack/react-table";
 import { EyeIcon } from "lucide-react";
+import { Highlight, themes } from "prism-react-renderer";
 import { TableColumnHeader } from "~/client/table/table-column-header";
 import type { CratesIoValidationTable } from "./crates-io-validation-table-schema";
 
@@ -26,7 +27,7 @@ export const cratesIoValidationTableColumns = [
     cell: (info) => (
       <Badge
         className={cn(
-          "p-2 py-0 text-[10px] rounded-full",
+          "rounded-full p-2 py-0 text-[10px]",
           info.getValue() === "Success"
             ? "border-green-200 bg-green-50 dark:bg-green-950"
             : info.getValue() === "BuildFail"
@@ -48,7 +49,7 @@ export const cratesIoValidationTableColumns = [
     cell: (info) => {
       return (
         info.getValue() && (
-          <Badge title={info.getValue()} variant="secondary" className="max-w-xl line-clamp-6 font-mono text-[10px]">
+          <Badge title={info.getValue()} variant="secondary" className="line-clamp-5 max-w-xl font-mono text-[10px]">
             <pre>{info.getValue()}</pre>
           </Badge>
         )
@@ -70,8 +71,20 @@ export const cratesIoValidationTableColumns = [
 
             <DialogContent className="max-h-full max-w-screen-3xl">
               <DialogTitle>Build Errors for {row.original.name}</DialogTitle>
-              <div className="overflow-auto max-h-[calc(100dvh-8rem)]">
-                <pre className="text-[10px] ">{row.original.build_errors}</pre>
+              <div className="max-h-[calc(100dvh-8rem)] overflow-auto bg-slate-950 dark:bg-inherit">
+                <Highlight theme={themes.shadesOfPurple} code={row.original.build_errors} language="rust">
+                  {({ className, tokens, getLineProps, getTokenProps }) => (
+                    <pre className={cn(className, "text-xs")}>
+                      {tokens.map((line, index) => (
+                        <div key={`row-${index}`} {...getLineProps({ line })}>
+                          {line.map((token, index) => (
+                            <span key={`token-${index}`} {...getTokenProps({ token })} />
+                          ))}
+                        </div>
+                      ))}
+                    </pre>
+                  )}
+                </Highlight>
               </div>
             </DialogContent>
           </Dialog>
