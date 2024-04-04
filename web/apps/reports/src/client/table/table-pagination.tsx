@@ -11,7 +11,7 @@ export function TablePagination<TData>({ table }: TablePaginationProps<TData>) {
   return (
     <div className="flex items-center justify-between space-x-6 lg:space-x-8">
       <div className="flex items-center space-x-2">
-        <p className="text-sm font-medium">Rows per page</p>
+        <p className="font-medium text-sm">Rows per page</p>
         <Select
           value={`${table.getState().pagination.pageSize}`}
           onValueChange={(value) => {
@@ -22,7 +22,7 @@ export function TablePagination<TData>({ table }: TablePaginationProps<TData>) {
             <SelectValue placeholder={table.getState().pagination.pageSize} />
           </SelectTrigger>
           <SelectContent side="top">
-            {[100, 250, 500].map((pageSize) => (
+            {[100, 250, 500, 1000].map((pageSize) => (
               <SelectItem key={pageSize} value={`${pageSize}`}>
                 {pageSize}
               </SelectItem>
@@ -32,7 +32,7 @@ export function TablePagination<TData>({ table }: TablePaginationProps<TData>) {
       </div>
 
       <div className="flex flex-row justify-end">
-        <div className="flex w-[100px] items-center text-sm font-medium">
+        <div className="flex w-[100px] items-center font-medium text-sm">
           Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
         </div>
         <div className="flex items-center space-x-2">

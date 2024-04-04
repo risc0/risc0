@@ -10,7 +10,7 @@ export function Header() {
       <Link href="/reports" className="flex flex-col gap-2 transition-opacity hover:opacity-70">
         <Image width={59} height={43} src="/risczero.webp" alt="RISC Zero" className="invert dark:invert-0" />
 
-        <h1 className="text-pretty text-[10px] text-muted-foreground">Reports</h1>
+        <h1 className="text-pretty text-[10px] text-primary">Reports</h1>
       </Link>
 
       <div className="flex flex-row justify-end gap-2">
