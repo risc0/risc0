@@ -358,7 +358,7 @@ fn build_staticlib(guest_pkg: &str, features: &[&str]) -> String {
     let mut child = cmd.stdout(Stdio::piped()).spawn().unwrap();
     let reader = std::io::BufReader::new(child.stdout.take().unwrap());
     let mut libs = Vec::new();
-    for message in cargo_metadata::Message::parse_stream(reader) {
+    for message in Message::parse_stream(reader) {
         match message.unwrap() {
             Message::CompilerArtifact(artifact) => {
                 for filename in artifact.filenames {

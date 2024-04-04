@@ -1,0 +1,12 @@
+{
+  "name": "@risc0/reports",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "next build",
+    "dev": "next dev --turbo",
+    "start": "next start",
+    "test": "bun test spec"
+  }
+}
