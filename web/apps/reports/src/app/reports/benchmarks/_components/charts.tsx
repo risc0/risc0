@@ -2,8 +2,8 @@
 
 // TODO: this whole component was copy pasted from old code
 // could probably improve a lot
-import Button from "@risc0/ui/button";
-import Separator from "@risc0/ui/separator";
+import { Button } from "@risc0/ui/button";
+import { Separator } from "@risc0/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@risc0/ui/tabs";
 import truncate from "lodash-es/truncate";
 import { DownloadIcon } from "lucide-react";
@@ -124,7 +124,7 @@ function renderBenchSet(benchSet, main) {
   }
 }
 
-export default function Charts() {
+export function Charts() {
   const [lastUpdate, setLastUpdate] = useState<string>("");
   const [names, setNames] = useState<string[]>();
   const [ready, setReady] = useState<boolean>(false);

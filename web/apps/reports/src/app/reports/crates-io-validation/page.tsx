@@ -1,10 +1,11 @@
-import Separator from "@risc0/ui/separator";
-import truncate from "@risc0/ui/utils/truncate";
+import { Separator } from "@risc0/ui/separator";
+import { truncate } from "@risc0/ui/utils/truncate";
 import type { Metadata } from "next";
-import fetchCratesValidationResults from "./_actions/fetch-crates-validation-results";
-import findMostRecentHash from "./_actions/find-most-recent-hash";
-import CratesIoValidationTable from "./_components/crates-io-validation-table";
-import cratesIoValidationTableColumns from "./_components/crates-io-validation-table-columns";
+import { CopyButton } from "~/client/copy-button";
+import { fetchCratesValidationResults } from "./_actions/fetch-crates-validation-results";
+import { findMostRecentHash } from "./_actions/find-most-recent-hash";
+import { CratesIoValidationTable } from "./_components/crates-io-validation-table";
+import { cratesIoValidationTableColumns } from "./_components/crates-io-validation-table-columns";
 
 export const metadata: Metadata = {
   title: "Crates.io Validation",
@@ -19,9 +20,9 @@ export default async function CratesIoValidationPage() {
       <div className="flex items-center justify-between">
         <h1 className="title-sm">Crates.io Validation</h1>
         {mostRecentHash && (
-          <p className="text-xs" title={mostRecentHash}>
+          <CopyButton size="sm" variant="ghost" value={mostRecentHash}>
             Commit Hash: {truncate(mostRecentHash, 15)}
-          </p>
+          </CopyButton>
         )}
       </div>
       <p className="text-muted-foreground text-sm">

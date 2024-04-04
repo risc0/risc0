@@ -15,7 +15,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { useState } from "react";
-import TableToolbar from "~/client/table/table-toolbar";
+import { TableToolbar } from "~/client/table/table-toolbar";
 import { tableFuzzyFilter } from "~/utils/table-fuzzy-filter";
 
 type ApplicationsBenchmarksTableProps<TData, TValue> = {
@@ -24,7 +24,7 @@ type ApplicationsBenchmarksTableProps<TData, TValue> = {
   title: string;
 };
 
-export default function ApplicationsBenchmarksTable<TData, TValue>({
+export function ApplicationsBenchmarksTable<TData, TValue>({
   title,
   columns,
   data,

@@ -1,6 +1,6 @@
 "use server";
 
-export default async function fetchApplicationsBenchmarksCommitHash() {
+export async function fetchApplicationsBenchmarksCommitHash() {
   try {
     const response = await fetch("https://risc0.github.io/ghpages/dev/benchmarks/COMMIT_HASH.txt");
     return await response.text();

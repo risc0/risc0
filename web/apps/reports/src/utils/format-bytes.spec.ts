@@ -1,4 +1,4 @@
-import formatBytes from './format-bytes';
+import { formatBytes } from './format-bytes';
 
 describe('formatBytes', () => {
   it('should return undefined for null or undefined', () => {

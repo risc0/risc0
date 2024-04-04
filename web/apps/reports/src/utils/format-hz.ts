@@ -1,6 +1,6 @@
 import { isNil } from "lodash-es";
 
-export default function formatHz(hertz: number) {
+export function formatHz(hertz: number) {
   if (isNil(hertz)) {
     return;
   }

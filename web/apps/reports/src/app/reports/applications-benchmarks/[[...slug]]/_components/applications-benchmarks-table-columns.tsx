@@ -1,15 +1,15 @@
 "use client";
 
 import { createColumnHelper } from "@tanstack/react-table";
-import TableColumnHeader from "~/client/table/table-column-header";
-import formatBytes from "~/utils/format-bytes";
-import formatDuration from "~/utils/format-duration";
-import formatNumber from "~/utils/format-number";
+import { TableColumnHeader } from "~/client/table/table-column-header";
+import { formatBytes } from "~/utils/format-bytes";
+import { formatDuration } from "~/utils/format-duration";
+import { formatNumber } from "~/utils/format-number";
 import type { ApplicationsBenchmarksTable } from "./applications-benchmarks-table-schema";
 
 const columnHelper = createColumnHelper<ApplicationsBenchmarksTable>();
 
-const applicationsBenchmarksTableColumns = [
+export const applicationsBenchmarksTableColumns = [
   columnHelper.accessor("job_name", {
     header: ({ column }) => <TableColumnHeader column={column} title="Job Name" />,
     cell: (info) => <div className="font-mono">{info.getValue()}</div>,
@@ -47,5 +47,3 @@ const applicationsBenchmarksTableColumns = [
     cell: (info) => <div className="text-right font-mono">{formatBytes(Number(info.getValue()))}</div>,
   }),
 ];
-
-export default applicationsBenchmarksTableColumns;

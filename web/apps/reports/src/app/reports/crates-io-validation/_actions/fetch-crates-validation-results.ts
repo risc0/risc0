@@ -1,4 +1,6 @@
-export default async function fetchCratesValidationResults(hash) {
+"use server";
+
+export async function fetchCratesValidationResults(hash) {
   const filename = `https://risc0.github.io/ghpages/dev/crate-validation/results/${hash}.json`;
   return await fetch(filename)
     .then((res) => res.json())

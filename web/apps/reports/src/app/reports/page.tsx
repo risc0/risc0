@@ -1,6 +1,6 @@
-import Button from "@risc0/ui/button";
+import { Button } from "@risc0/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@risc0/ui/card";
-import Link from "@risc0/ui/link";
+import { Link } from "@risc0/ui/link";
 import Image from "next/image";
 
 const REPORTS = [
@@ -44,9 +44,11 @@ export default function ReportsPage() {
               <Image
                 width={294}
                 height={147}
+                priority
                 className="user-select-none pointer-events-none h-[147px] w-full rounded-sm object-cover shadow-xl"
                 src={`/benchmarks-${index}.jpg`}
                 alt={description}
+                quality={90}
               />
             </CardContent>
             <CardFooter>

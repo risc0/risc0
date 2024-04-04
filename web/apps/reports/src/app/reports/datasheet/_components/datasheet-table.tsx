@@ -15,7 +15,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { useState } from "react";
-import TableToolbar from "~/client/table/table-toolbar";
+import { TableToolbar } from "~/client/table/table-toolbar";
 import { tableFuzzyFilter } from "~/utils/table-fuzzy-filter";
 
 const MAX_AMOUNT_OF_ROWS = 5;
@@ -26,7 +26,7 @@ type DatasheetTableProps<TData, TValue> = {
   title: string;
 };
 
-export default function DatasheetTable<TData, TValue>({ title, columns, data }: DatasheetTableProps<TData, TValue>) {
+export function DatasheetTable<TData, TValue>({ title, columns, data }: DatasheetTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = useState({});
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);

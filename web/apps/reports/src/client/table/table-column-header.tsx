@@ -1,5 +1,5 @@
-import Button from "@risc0/ui/button";
-import cn from "@risc0/ui/cn";
+import { Button } from "@risc0/ui/button";
+import { cn } from "@risc0/ui/cn";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,7 +17,7 @@ interface TableColumnHeaderProps<TData, TValue> extends HTMLAttributes<HTMLDivEl
   align?: "left" | "right";
 }
 
-export default function TableColumnHeader<TData, TValue>({
+export function TableColumnHeader<TData, TValue>({
   column,
   title,
   className,

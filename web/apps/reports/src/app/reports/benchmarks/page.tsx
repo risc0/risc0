@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Charts from "./_components/charts";
+import { Charts } from "./_components/charts";
 
 export const metadata: Metadata = {
   title: "Benchmarks",

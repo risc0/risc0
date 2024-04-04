@@ -1,4 +1,4 @@
-import formatNumber from './format-number';
+import { formatNumber } from './format-number';
 
 describe('formatNumber', () => {
   it('should correctly format numbers without options', () => {

@@ -1,11 +1,11 @@
 "use client";
 
-import Button from "@risc0/ui/button";
-import Input from "@risc0/ui/input";
+import { Button } from "@risc0/ui/button";
+import { Input } from "@risc0/ui/input";
 import type { Table } from "@tanstack/react-table";
 import { XIcon } from "lucide-react";
-import type { ComponentType, Dispatch, ReactNode, SetStateAction } from "react";
-import TableViewOptions from "~/client/table/table-view-options";
+import type { ComponentType, Dispatch, SetStateAction } from "react";
+import { TableViewOptions } from "~/client/table/table-view-options";
 import { TableFacetedFilter } from "./table-faceted-filter";
 
 type TableToolbarProps<TData> = {
@@ -19,12 +19,7 @@ type TableToolbarProps<TData> = {
   setGlobalFilter: Dispatch<SetStateAction<string>>;
 };
 
-export default function TableToolbar<TData>({
-  table,
-  statuses,
-  setGlobalFilter,
-  globalFilter,
-}: TableToolbarProps<TData>) {
+export function TableToolbar<TData>({ table, statuses, setGlobalFilter, globalFilter }: TableToolbarProps<TData>) {
   const isFiltered = table.getState().columnFilters.length > 0;
 
   return (

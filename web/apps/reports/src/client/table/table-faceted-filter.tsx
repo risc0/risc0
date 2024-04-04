@@ -1,6 +1,6 @@
-import Badge from "@risc0/ui/badge";
-import Button from "@risc0/ui/button";
-import cn from "@risc0/ui/cn";
+import { Badge } from "@risc0/ui/badge";
+import { Button } from "@risc0/ui/button";
+import { cn } from "@risc0/ui/cn";
 import {
   Command,
   CommandEmpty,
@@ -11,7 +11,7 @@ import {
   CommandSeparator,
 } from "@risc0/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@risc0/ui/popover";
-import Separator from "@risc0/ui/separator";
+import { Separator } from "@risc0/ui/separator";
 import type { Column } from "@tanstack/react-table";
 import { CheckIcon, PlusCircleIcon } from "lucide-react";
 import type * as React from "react";

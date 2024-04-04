@@ -8,6 +8,8 @@ const config = {
   experimental: {
     ppr: true,
   },
+  reactStrictMode: true,
+  swcMinify: true,
   transpilePackages: ["@risc0/ui"],
 
   // biome-ignore lint/suspicious/useAwait: not needed

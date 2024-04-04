@@ -1,4 +1,4 @@
-import formatHz from './format-hz';
+import { formatHz } from './format-hz';
 
 describe('formatHz', () => {
   it('should return undefined for null or undefined', () => {

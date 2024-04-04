@@ -1,26 +1,22 @@
-import Separator from "@risc0/ui/separator";
+import { Link } from "@risc0/ui/link";
+import { Separator } from "@risc0/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@risc0/ui/tabs";
-import truncate from "@risc0/ui/utils/truncate";
+import { truncate } from "@risc0/ui/utils/truncate";
 import type { Metadata } from "next";
-import convertCsvToJson from "~/utils/convert-csv-to-json";
-import fetchApplicationsBenchmarksCommitHash from "./_actions/fetch-applications-benchmarks-commit-hash";
-import ApplicationsBenchmarksTable from "./_components/applications-benchmarks-table";
-import applicationsBenchmarksTableColumns from "./_components/applications-benchmarks-table-columns";
-
-const FILENAMES_TO_TITLES = {
-  "macOS-apple_m2_pro.csv": "Metal on Apple M2 Pro",
-  "Linux-nvidia_rtx_a5000.csv": "CUDA on NVIDIA RTX A5000",
-  "macOS-cpu.csv": "CPU only on Apple M2 Pro",
-  "Linux-cpu.csv": "CPU only on TBD [Linux]",
-} as const;
+import { CopyButton } from "~/client/copy-button";
+import { convertCsvToJson } from "~/utils/convert-csv-to-json";
+import { fetchApplicationsBenchmarksCommitHash } from "./_actions/fetch-applications-benchmarks-commit-hash";
+import { ApplicationsBenchmarksTable } from "./_components/applications-benchmarks-table";
+import { applicationsBenchmarksTableColumns } from "./_components/applications-benchmarks-table-columns";
+import { FILENAMES_TO_TITLES } from "./_utils/constants";
 
 export const metadata: Metadata = {
   title: "Applications Benchmark",
 };
 
-export default async function ApplicationsBenchmarksPage() {
-  const urls = Object.keys(FILENAMES_TO_TITLES);
+export default async function ApplicationsBenchmarksPage({ params }) {
   const commitHash = await fetchApplicationsBenchmarksCommitHash();
+  const urls = Object.keys(FILENAMES_TO_TITLES);
   const dataPromises = urls.map((url) =>
     fetch(`https://risc0.github.io/ghpages/dev/benchmarks/${url}`)
       .then((response) => {
@@ -41,21 +37,21 @@ export default async function ApplicationsBenchmarksPage() {
       <div className="flex items-center justify-between">
         <h1 className="title-sm">Applications Benchmarks</h1>
         {commitHash && (
-          <p className="text-xs" title={commitHash}>
+          <CopyButton size="sm" variant="ghost" value={commitHash}>
             Commit Hash: {truncate(commitHash, 15)}
-          </p>
+          </CopyButton>
         )}
       </div>
 
       <Separator className="mt-2" />
 
-      <Tabs className="mt-6" defaultValue={Object.keys(FILENAMES_TO_TITLES)[0]}>
+      <Tabs className="mt-6" defaultValue={params.slug?.[0] ?? Object.keys(FILENAMES_TO_TITLES)[0]}>
         <div className="flex items-center overflow-auto">
           <TabsList>
             {Object.keys(FILENAMES_TO_TITLES).map((filename, index) => (
-              <TabsTrigger key={filename} value={filename}>
-                {Object.values(FILENAMES_TO_TITLES)[index]}
-              </TabsTrigger>
+              <Link key={filename} href={`/reports/applications-benchmarks/${filename}`}>
+                <TabsTrigger value={filename}>{Object.values(FILENAMES_TO_TITLES)[index]}</TabsTrigger>
+              </Link>
             ))}
           </TabsList>
         </div>

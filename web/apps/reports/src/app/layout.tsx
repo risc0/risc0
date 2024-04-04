@@ -5,7 +5,7 @@ import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
 import { Next13NProgress } from "nextjs13-progress";
 import type { PropsWithChildren } from "react";
-import Providers from "~/client/providers";
+import { Providers } from "~/client/providers";
 
 export const metadata = {
   title: {

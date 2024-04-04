@@ -1,8 +1,10 @@
-import Link from "@risc0/ui/link";
+import { Button } from "@risc0/ui/button";
+import { Link } from "@risc0/ui/link";
+import { GithubIcon } from "lucide-react";
 import Image from "next/image";
-import ThemeToggle from "~/client/theme-toggle";
+import { ThemeToggle } from "~/client/theme-toggle";
 
-export default function Header() {
+export function Header() {
   return (
     <div className="container flex max-w-screen-3xl flex-row justify-between pt-6">
       <Link href="/reports" className="flex flex-col gap-2 transition-opacity hover:opacity-70">
@@ -13,6 +15,12 @@ export default function Header() {
 
       <div className="flex flex-row justify-end gap-2">
         <ThemeToggle />
+
+        <Link target="_blank" href="https://github.com/risc0/risc0/">
+          <Button variant="ghost" size="sm" startIcon={<GithubIcon />}>
+            GitHub
+          </Button>
+        </Link>
       </div>
     </div>
   );

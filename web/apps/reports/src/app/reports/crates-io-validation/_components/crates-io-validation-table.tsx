@@ -15,8 +15,8 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { useState } from "react";
-import TableToolbar from "~/client/table/table-toolbar";
-import formatNumber from "~/utils/format-number";
+import { TableToolbar } from "~/client/table/table-toolbar";
+import { formatNumber } from "~/utils/format-number";
 import { tableFuzzyFilter } from "~/utils/table-fuzzy-filter";
 
 type CratesIoValidationTableProps<TData, TValue> = {
@@ -24,10 +24,7 @@ type CratesIoValidationTableProps<TData, TValue> = {
   data: TData[];
 };
 
-export default function CratesIoValidationTable<TData, TValue>({
-  columns,
-  data,
-}: CratesIoValidationTableProps<TData, TValue>) {
+export function CratesIoValidationTable<TData, TValue>({ columns, data }: CratesIoValidationTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = useState({});
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);

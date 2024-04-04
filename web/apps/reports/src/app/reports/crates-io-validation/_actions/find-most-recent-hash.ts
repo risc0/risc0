@@ -1,6 +1,6 @@
 "use server";
 
-export default async function findMostRecentHash() {
+export async function findMostRecentHash() {
   try {
     const response = await fetch("https://risc0.github.io/ghpages/dev/crate-validation/results/index.json");
     const responseText = await response.text();

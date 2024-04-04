@@ -1,7 +1,7 @@
 import Script from "next/script";
 import type { PropsWithChildren } from "react";
-import SignInFooter from "./_components/footer";
-import Header from "./_components/header";
+import { Footer } from "./_components/footer";
+import { Header } from "./_components/header";
 
 export default function ReportsLayout({ children }: PropsWithChildren) {
   return (
@@ -10,7 +10,7 @@ export default function ReportsLayout({ children }: PropsWithChildren) {
 
       <main className="grow">{children}</main>
 
-      <SignInFooter />
+      <Footer />
 
       <Script
         // TODO: replace with newer version

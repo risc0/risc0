@@ -1,13 +1,13 @@
 "use client";
 
-import Button from "@risc0/ui/button";
-import cn from "@risc0/ui/cn";
+import { Button } from "@risc0/ui/button";
+import { cn } from "@risc0/ui/cn";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@risc0/ui/dropdown-menu";
 import { CheckIcon, SunMoonIcon } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 
-export default function ThemeToggle({ className }: { className?: string }) {
+export function ThemeToggle({ className }: { className?: string }) {
   const { theme, setTheme } = useTheme();
   const [isMounted, setIsMounted] = useState<boolean>(false);
 

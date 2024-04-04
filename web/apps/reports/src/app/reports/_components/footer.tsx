@@ -1,6 +1,6 @@
-import Link from "@risc0/ui/link";
+import { Link } from "@risc0/ui/link";
 
-export default function Footer() {
+export function Footer() {
   return (
     <div className="space-x-2 py-6 pt-6 text-center text-muted-foreground text-xs">
       <span>

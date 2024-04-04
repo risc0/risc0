@@ -1,14 +1,14 @@
 "use client";
 
-import Badge from "@risc0/ui/badge";
-import cn from "@risc0/ui/cn";
+import { Badge } from "@risc0/ui/badge";
+import { cn } from "@risc0/ui/cn";
 import { createColumnHelper } from "@tanstack/react-table";
-import TableColumnHeader from "~/client/table/table-column-header";
+import { TableColumnHeader } from "~/client/table/table-column-header";
 import type { CratesIoValidationTable } from "./crates-io-validation-table-schema";
 
 const columnHelper = createColumnHelper<CratesIoValidationTable>();
 
-const cratesIoValidationTableColumns = [
+export const cratesIoValidationTableColumns = [
   columnHelper.accessor("name", {
     header: ({ column }) => <TableColumnHeader column={column} title="Name" />,
     cell: (info) => <div className="font-mono">{info.getValue()}</div>,
@@ -48,5 +48,3 @@ const cratesIoValidationTableColumns = [
     ),
   }),
 ];
-
-export default cratesIoValidationTableColumns;

@@ -1,4 +1,4 @@
-import formatDuration from './format-duration';
+import { formatDuration } from './format-duration';
 
 describe('formatDuration', () => {
   it('should return undefined for null or undefined', () => {

@@ -1,9 +1,10 @@
-import Separator from "@risc0/ui/separator";
-import truncate from "@risc0/ui/utils/truncate";
+import { Separator } from "@risc0/ui/separator";
+import { truncate } from "@risc0/ui/utils/truncate";
 import type { Metadata } from "next";
-import fetchDatasheetCommitHash from "./_actions/fetch-datasheet-commit-hash";
-import DataSheetTable from "./_components/datasheet-table";
-import datasheetTableColumns from "./_components/datasheet-table-columns";
+import { CopyButton } from "~/client/copy-button";
+import { fetchDatasheetCommitHash } from "./_actions/fetch-datasheet-commit-hash";
+import { DatasheetTable } from "./_components/datasheet-table";
+import { datasheetTableColumns } from "./_components/datasheet-table-columns";
 
 const FILENAMES_TO_TITLES = {
   "macOS-apple_m2_pro.json": "Metal on Apple M2 Pro",
@@ -39,9 +40,9 @@ export default async function DatasheetPage() {
       <div className="flex items-center justify-between">
         <h1 className="title-sm">Datasheet</h1>
         {commitHash && (
-          <p className="text-xs" title={commitHash}>
+          <CopyButton size="sm" variant="ghost" value={commitHash}>
             Commit Hash: {truncate(commitHash, 15)}
-          </p>
+          </CopyButton>
         )}
       </div>
 
@@ -49,7 +50,7 @@ export default async function DatasheetPage() {
 
       <div className="mt-8 grid gap-8 xl:grid-cols-2">
         {dataArrays.map((dataArray, index) => (
-          <DataSheetTable
+          <DatasheetTable
             key={Object.values(FILENAMES_TO_TITLES)[index]}
             data={dataArray}
             title={Object.values(FILENAMES_TO_TITLES)[index] ?? ""}

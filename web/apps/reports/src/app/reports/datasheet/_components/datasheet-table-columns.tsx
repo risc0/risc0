@@ -1,15 +1,15 @@
 "use client";
 
 import { createColumnHelper } from "@tanstack/react-table";
-import TableColumnHeader from "~/client/table/table-column-header";
-import formatBytes from "~/utils/format-bytes";
-import formatDuration from "~/utils/format-duration";
-import formatHz from "~/utils/format-hz";
+import { TableColumnHeader } from "~/client/table/table-column-header";
+import { formatBytes } from "~/utils/format-bytes";
+import { formatDuration } from "~/utils/format-duration";
+import { formatHz } from "~/utils/format-hz";
 import type { DatasheetTable } from "./datasheet-table-schema";
 
 const columnHelper = createColumnHelper<DatasheetTable>();
 
-const datasheetTableColumns = [
+export const datasheetTableColumns = [
   {
     accessorKey: "total_cycles",
     header: ({ column }) => <TableColumnHeader column={column} title="Cycles" />,
@@ -45,5 +45,3 @@ const datasheetTableColumns = [
     },
   },
 ];
-
-export default datasheetTableColumns;

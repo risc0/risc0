@@ -1,4 +1,4 @@
-export default function convertCsvToJson(csvData) {
+export function convertCsvToJson(csvData) {
   if (!csvData) {
     return [];
   }

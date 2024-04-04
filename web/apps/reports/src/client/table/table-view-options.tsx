@@ -1,7 +1,7 @@
 "use client";
 
 import { DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
-import Button from "@risc0/ui/button";
+import { Button } from "@risc0/ui/button";
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent } from "@risc0/ui/dropdown-menu";
 import type { Table } from "@tanstack/react-table";
 import { Settings2Icon } from "lucide-react";
@@ -10,7 +10,7 @@ type TableViewOptionsProps<TData> = {
   table: Table<TData>;
 };
 
-export default function TableViewOptions<TData>({ table }: TableViewOptionsProps<TData>) {
+export function TableViewOptions<TData>({ table }: TableViewOptionsProps<TData>) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
