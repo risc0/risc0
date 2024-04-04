@@ -100,18 +100,15 @@ For a detailed discussion of the security of BN254, we refer readers to the disc
 [lift]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.ApiClient.html#method.lift
 [join]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.ApiClient.html#method.join
 [resolve]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.ApiClient.html#method.resolve
-[control ID]: ../terminology#control-id
-[control root]: https://dev.risczero.com/terminology#control-root
-[execution trace]: https://dev.risczero.com/terminology#execution-trace
+[control ID]: ../../terminology#control-id
+[control root]: ../../terminology#control-root
+[execution trace]: ../../terminology#execution-trace
 [ethSTARK documentation]: https://eprint.iacr.org/2021/582
-[deterministically]: https://dev.risczero.com/terminology#deterministic-builds
+[deterministically]: ../../terminology#deterministic-builds
 [GitHub issue from Zcash]: https://github.com/zcash/zcash/issues/714
-[Published Audits]: #published-audits
-[receipt claim]: https://dev.risczero.com/terminology#deterministic-builds
-[Security Description of Proof Construction]: https://www.notion.so/risczero/Security-Description-of-Construction-of-On-Chain-Proofs-of-RISC-Zero-zkVM-execution-7215c65af952465ab79ab0e3e3b58a21
+[receipt claim]: ../../terminology#deterministic-builds
 [RISC Zero zkVM: Scalable, Transparent Arguments of RISC-V Integrity]: ./proof-system-in-detail.pdf
-[RISC Zero zkVM]: https://dev.risczero.com/zkvm
+[RISC Zero zkVM]: ../zkvm
 [this article by Justin Thaler]: https://a16zcrypto.com/posts/article/snark-security-and-performance/
 [bits]: https://a16zcrypto.com/posts/article/snark-security-and-performance/
-[article announcing move to proven soundness]: https://www.notion.so/Soundness-Upgrade-to-RISC-Zero-s-STARK-Removing-the-Conjectures-ece8eeb1e5d94b7686b94b84a0187b37
 [Verifier Contract]: https://dev.risczero.com/api/next/blockchain-integration/contracts/verifier
