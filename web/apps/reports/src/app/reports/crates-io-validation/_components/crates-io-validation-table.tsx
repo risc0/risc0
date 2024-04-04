@@ -25,7 +25,6 @@ type CratesIoValidationTableProps<TData, TValue> = {
 };
 
 export function CratesIoValidationTable<TData, TValue>({ columns, data }: CratesIoValidationTableProps<TData, TValue>) {
-  const [rowSelection, setRowSelection] = useState({});
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -37,14 +36,12 @@ export function CratesIoValidationTable<TData, TValue>({ columns, data }: Crates
     state: {
       sorting,
       columnVisibility,
-      rowSelection,
       columnFilters,
       globalFilter,
     },
     filterFns: {
       fuzzy: tableFuzzyFilter,
     },
-    onRowSelectionChange: setRowSelection,
     onGlobalFilterChange: setGlobalFilter,
     globalFilterFn: tableFuzzyFilter,
     onSortingChange: setSorting,
@@ -60,7 +57,7 @@ export function CratesIoValidationTable<TData, TValue>({ columns, data }: Crates
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="subtitle">Crates ({formatNumber(data.length)})</h2>
+        <h2 className="subtitle">Crates ({formatNumber(table.getRowCount())})</h2>
         <TableToolbar
           statuses={[
             {

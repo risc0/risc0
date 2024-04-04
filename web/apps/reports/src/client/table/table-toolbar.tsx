@@ -1,9 +1,7 @@
 "use client";
 
-import { Button } from "@risc0/ui/button";
 import { Input } from "@risc0/ui/input";
 import type { Table } from "@tanstack/react-table";
-import { XIcon } from "lucide-react";
 import type { ComponentType, Dispatch, SetStateAction } from "react";
 import { TableViewOptions } from "~/client/table/table-view-options";
 import { TableFacetedFilter } from "./table-faceted-filter";
@@ -20,8 +18,6 @@ type TableToolbarProps<TData> = {
 };
 
 export function TableToolbar<TData>({ table, statuses, setGlobalFilter, globalFilter }: TableToolbarProps<TData>) {
-  const isFiltered = table.getState().columnFilters.length > 0;
-
   return (
     <div className="flex items-center justify-end gap-2">
       <Input
@@ -30,18 +26,9 @@ export function TableToolbar<TData>({ table, statuses, setGlobalFilter, globalFi
         onChange={(event) => setGlobalFilter(String(event.target.value))}
         className="h-8 w-[180px]"
       />
+
       {statuses && table.getColumn("status") && (
         <TableFacetedFilter column={table.getColumn("status")} title="Status" options={statuses} />
-      )}
-      {isFiltered && (
-        <Button
-          startIcon={<XIcon />}
-          variant="ghost"
-          onClick={() => table.resetColumnFilters()}
-          className="h-8 px-2 lg:px-3"
-        >
-          Reset
-        </Button>
       )}
 
       <TableViewOptions table={table} />

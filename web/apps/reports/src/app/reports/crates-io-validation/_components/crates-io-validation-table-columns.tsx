@@ -18,6 +18,7 @@ export const cratesIoValidationTableColumns = [
     cell: (info) => <div className="font-mono">{info.getValue()}</div>,
   }),
   columnHelper.accessor("status", {
+    filterFn: (row, id, value) => value.includes(row.getValue(id)),
     header: ({ column }) => <TableColumnHeader column={column} title="Status" />,
     cell: (info) => (
       <Badge
@@ -41,10 +42,11 @@ export const cratesIoValidationTableColumns = [
   }),
   columnHelper.accessor("build_errors", {
     header: ({ column }) => <TableColumnHeader column={column} title="Build Errors" />,
-    cell: (info) => (
-      <div title={info.getValue()} className="line-clamp-5 font-mono text-xs">
-        {info.getValue() ?? "-"}
-      </div>
-    ),
+    cell: (info) =>
+      info.getValue() && (
+        <Badge title={info.getValue()} variant="secondary" className="max-w-xl line-clamp-6 font-mono text-xs">
+          <pre>{info.getValue()}</pre>
+        </Badge>
+      ),
   }),
 ];

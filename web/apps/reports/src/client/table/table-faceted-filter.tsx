@@ -14,7 +14,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@risc0/ui/popover";
 import { Separator } from "@risc0/ui/separator";
 import type { Column } from "@tanstack/react-table";
 import { CheckIcon, PlusCircleIcon } from "lucide-react";
-import type * as React from "react";
+import type { ComponentType } from "react";
 
 interface TableFacetedFilterProps<TData, TValue> {
   column?: Column<TData, TValue>;
@@ -22,7 +22,7 @@ interface TableFacetedFilterProps<TData, TValue> {
   options: {
     label: string;
     value: string;
-    icon?: React.ComponentType<{ className?: string }>;
+    icon?: ComponentType<{ className?: string }>;
   }[];
 }
 
@@ -33,16 +33,21 @@ export function TableFacetedFilter<TData, TValue>({ column, title, options }: Ta
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button startIcon={<PlusCircleIcon />} variant="outline" size="sm" className="h-8 border-dashed">
+        <Button
+          startIcon={selectedValues?.size === 0 ? <PlusCircleIcon /> : undefined}
+          variant="outline"
+          size="sm"
+          className={cn(selectedValues?.size === 0 && "border-dashed")}
+        >
           {title}
           {selectedValues?.size > 0 && (
             <>
               <Separator orientation="vertical" className="mx-2 h-4" />
-              <Badge variant="secondary" className="rounded-sm px-1 font-normal lg:hidden">
+              <Badge variant="secondary" className="px-1 font-normal lg:hidden">
                 {selectedValues.size}
               </Badge>
               <div className="hidden space-x-1 lg:flex">
-                {selectedValues.size > 2 ? (
+                {selectedValues.size > 4 ? (
                   <Badge variant="secondary" className="rounded-sm px-1 font-normal">
                     {selectedValues.size} selected
                   </Badge>
@@ -50,7 +55,18 @@ export function TableFacetedFilter<TData, TValue>({ column, title, options }: Ta
                   options
                     .filter((option) => selectedValues.has(option.value))
                     .map((option) => (
-                      <Badge variant="secondary" key={option.value} className="rounded-sm px-1 font-normal">
+                      <Badge
+                        key={option.value}
+                        className={cn(
+                          "p-2 py-0 text-[10px]",
+                          option.label === "Success"
+                            ? "border-green-200 bg-green-50 dark:bg-inherit"
+                            : option.label === "BuildFail"
+                              ? "border-orange-200 bg-orange-50 dark:bg-inherit"
+                              : "text-foreground",
+                        )}
+                        variant="outline"
+                      >
                         {option.label}
                       </Badge>
                     ))
@@ -68,7 +84,6 @@ export function TableFacetedFilter<TData, TValue>({ column, title, options }: Ta
             <CommandGroup>
               {options.map((option) => {
                 const isSelected = selectedValues.has(option.value);
-
                 return (
                   <CommandItem
                     key={option.value}
@@ -81,19 +96,20 @@ export function TableFacetedFilter<TData, TValue>({ column, title, options }: Ta
                       const filterValues = Array.from(selectedValues);
                       column?.setFilterValue(filterValues.length ? filterValues : undefined);
                     }}
+                    className="cursor-pointer"
                   >
                     <div
                       className={cn(
-                        "mr-2 flex size-4 items-center justify-center rounded-sm border border-primary",
+                        "mr-2 flex size-4 items-center justify-center rounded-[4px] border border-primary",
                         isSelected ? "bg-primary text-primary-foreground" : "opacity-50 [&_svg]:invisible",
                       )}
                     >
-                      <CheckIcon className="size-4" />
+                      <CheckIcon className={cn("size-4")} />
                     </div>
                     {option.icon && <option.icon className="mr-2 size-4 text-muted-foreground" />}
                     <span>{option.label}</span>
                     {facets?.get(option.value) && (
-                      <span className="ml-auto flex h-4 w-4 items-center justify-center font-mono text-xs">
+                      <span className="ml-auto flex size-4 items-center justify-center font-mono text-xs">
                         {facets.get(option.value)}
                       </span>
                     )}
@@ -107,9 +123,9 @@ export function TableFacetedFilter<TData, TValue>({ column, title, options }: Ta
                 <CommandGroup>
                   <CommandItem
                     onSelect={() => column?.setFilterValue(undefined)}
-                    className="justify-center text-center"
+                    className="justify-center text-center cursor-pointer"
                   >
-                    Clear filters
+                    Clear Filters
                   </CommandItem>
                 </CommandGroup>
               </>
