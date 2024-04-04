@@ -24,11 +24,11 @@ use test_log::test;
 
 use super::{
     identity_p254, join, lift, prove::poseidon254_hal_pair, prove::poseidon2_hal_pair, Prover,
-    ProverOpts,
+    ProverOpts as RecursionProverOpts,
 };
 use crate::{
-    get_prover_server, ExecutorEnv, ExecutorImpl, InnerReceipt, Receipt, SegmentReceipt, Session,
-    VerifierContext,
+    get_prover_server, ExecutorEnv, ExecutorImpl, InnerReceipt, ProverOpts, Receipt,
+    SegmentReceipt, Session, VerifierContext,
 };
 
 // Failure on older mac minis in the lab with Intel UHD 630 graphics:
@@ -38,10 +38,10 @@ use crate::{
     test
 )]
 #[serial]
-fn test_recursion() {
-    use risc0_zkp::core::{digest::Digest, hash::poseidon::PoseidonHashSuite};
+fn test_recursion_poseidon254() {
+    use risc0_zkp::core::{digest::Digest, hash::poseidon2::Poseidon2HashSuite};
 
-    let suite = PoseidonHashSuite::new_suite();
+    let suite = Poseidon2HashSuite::new_suite();
     let hal_pair = poseidon254_hal_pair();
     let (hal, circuit_hal) = (hal_pair.hal.as_ref(), hal_pair.circuit_hal.as_ref());
 
@@ -51,7 +51,8 @@ fn test_recursion() {
     let digest2 = Digest::from([8, 9, 10, 11, 12, 13, 14, 15]);
     let expected = suite.hashfn.hash_pair(&digest1, &digest2);
     let mut prover =
-        Prover::new_test_recursion_circuit([&digest1, &digest2], ProverOpts::default()).unwrap();
+        Prover::new_test_recursion_circuit([&digest1, &digest2], RecursionProverOpts::default())
+            .unwrap();
     let receipt = prover
         .run_with_hal(hal, circuit_hal)
         .expect("Running prover failed");
@@ -78,9 +79,9 @@ fn test_recursion() {
 )]
 #[serial]
 fn test_recursion_poseidon2() {
-    use risc0_zkp::core::{digest::Digest, hash::poseidon::PoseidonHashSuite};
+    use risc0_zkp::core::{digest::Digest, hash::poseidon2::Poseidon2HashSuite};
 
-    let suite = PoseidonHashSuite::new_suite();
+    let suite = Poseidon2HashSuite::new_suite();
     let hal_pair = poseidon2_hal_pair();
     let (hal, circuit_hal) = (hal_pair.hal.as_ref(), hal_pair.circuit_hal.as_ref());
 
@@ -90,7 +91,8 @@ fn test_recursion_poseidon2() {
     let digest2 = Digest::from([8, 9, 10, 11, 12, 13, 14, 15]);
     let expected = suite.hashfn.hash_pair(&digest1, &digest2);
     let mut prover =
-        Prover::new_test_recursion_circuit([&digest1, &digest2], ProverOpts::default()).unwrap();
+        Prover::new_test_recursion_circuit([&digest1, &digest2], RecursionProverOpts::default())
+            .unwrap();
 
     tracing::info!("Begin");
     let receipt = prover
@@ -171,7 +173,7 @@ fn generate_busy_loop_segments(hashfn: &str) -> (Session, Vec<SegmentReceipt>) {
     let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
     let session = exec.run().unwrap();
 
-    let opts = crate::ProverOpts {
+    let opts = ProverOpts {
         hashfn: hashfn.to_string(),
         prove_guest_errors: false,
     };
@@ -197,9 +199,9 @@ fn generate_busy_loop_segments(hashfn: &str) -> (Session, Vec<SegmentReceipt>) {
 #[serial]
 fn test_recursion_lift_join_identity_e2e() {
     // Prove the base case
-    let (session, segments) = generate_busy_loop_segments("poseidon");
+    let (session, segments) = generate_busy_loop_segments("poseidon2");
 
-    // Lift and join them  all (and verify)
+    // Lift and join them all (and verify)
     let mut rollup = lift(&segments[0]).unwrap();
     tracing::info!("Lift claim = {:?}", rollup.claim);
     let ctx = VerifierContext::default();
@@ -235,10 +237,7 @@ fn test_recursion_lift_join_identity_e2e() {
 )]
 #[serial]
 fn test_recursion_lift_resolve_e2e() {
-    let opts = crate::ProverOpts {
-        hashfn: "poseidon".to_string(),
-        prove_guest_errors: false,
-    };
+    let opts = ProverOpts::default();
     let prover = get_prover_server(&opts).unwrap();
 
     tracing::info!("Proving: echo 'execution A'");
@@ -278,12 +277,14 @@ fn test_recursion_lift_resolve_e2e() {
     let composition_receipt = prover.prove(env, MULTI_TEST_ELF).unwrap();
     tracing::info!("Done proving: sys_verify");
 
-    // NOTE: Prove uses lift and resolve internally to result in a SuccinctReceipt. In generally,
-    // it is the only way to get a SuccinctReceipt of composition, so check that the receipt is
-    // succinct here serves to verify that lift and resolve work.
-    let InnerReceipt::Succinct(_) = composition_receipt.inner else {
-        panic!("receipt returned from prover is not succinct");
-    };
+    let succinct_receipt = prover
+        .compress(&composition_receipt.inner.composite().unwrap())
+        .unwrap();
 
-    composition_receipt.verify(MULTI_TEST_ID).unwrap();
+    let receipt = Receipt::new(
+        InnerReceipt::Succinct(succinct_receipt),
+        composition_receipt.journal.bytes,
+    );
+
+    receipt.verify(MULTI_TEST_ID).unwrap();
 }

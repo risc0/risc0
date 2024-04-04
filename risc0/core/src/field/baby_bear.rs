@@ -80,7 +80,7 @@ impl fmt::Debug for Elem {
 }
 
 /// The modulus of the field.
-const P: u32 = 15 * (1 << 27) + 1;
+pub const P: u32 = 15 * (1 << 27) + 1;
 
 /// The modulus of the field as a u64.
 const P_U64: u64 = P as u64;

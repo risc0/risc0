@@ -35,7 +35,7 @@ pub const CELLS_RATE: usize = 16;
 /// The size of the hash output in cells (~ 248 bits)
 pub const CELLS_OUT: usize = 8;
 
-/// A hash implemention for Poseidon
+/// A hash implemention for Poseidon2
 struct Poseidon2HashFn;
 
 impl HashFn<BabyBear> for Poseidon2HashFn {
@@ -170,8 +170,13 @@ fn multiply_by_m_ext(cells: &mut [BabyBearElem; CELLS]) {
 
 fn full_round(cells: &mut [BabyBearElem; CELLS], round: usize) {
     add_round_constants_full(cells, round);
+    if round == 0 {
+        tracing::trace!("After constants in full round 0: {cells:?}");
+    }
+
     do_full_sboxes(cells);
     multiply_by_m_ext(cells);
+    tracing::trace!("After mExt in full round {round}: {cells:?}");
 }
 
 fn partial_round(cells: &mut [BabyBearElem; CELLS], round: usize) {
@@ -186,6 +191,7 @@ pub fn poseidon2_mix(cells: &mut [BabyBearElem; CELLS]) {
 
     // First linear layer.
     multiply_by_m_ext(cells);
+    tracing::trace!("After initial mExt: {cells:?}");
 
     // Do initial full rounds
     for _i in 0..ROUNDS_HALF_FULL {
@@ -197,6 +203,7 @@ pub fn poseidon2_mix(cells: &mut [BabyBearElem; CELLS]) {
         partial_round(cells, round);
         round += 1;
     }
+    tracing::trace!("After partial rounds: {cells:?}");
     // Do remaining full rounds
     for _i in 0..ROUNDS_HALF_FULL {
         full_round(cells, round);
@@ -215,7 +222,7 @@ where
     let mut count = 0;
     let mut unmixed = 0;
     for val in iter {
-        state[unmixed] += *val;
+        state[unmixed] = *val;
         count += 1;
         unmixed += 1;
         if unmixed == CELLS_RATE {
@@ -224,6 +231,10 @@ where
         }
     }
     if unmixed != 0 || count == 0 {
+        // Zero pad to get a CELLS_RATE-aligned number of inputs
+        for elem in state.iter_mut().take(CELLS_RATE).skip(unmixed) {
+            *elem = BabyBearElem::ZERO;
+        }
         poseidon2_mix(&mut state);
     }
     state.as_slice()[0..CELLS_OUT].try_into().unwrap()
@@ -272,7 +283,7 @@ mod tests {
         }
     }
 
-    // Naive version of poseidon
+    // Naive version of poseidon2
     fn poseidon2_mix_naive(cells: &mut [BabyBearElem; CELLS]) {
         let mut round = 0;
         multiply_by_m_ext_naive(cells);
@@ -332,5 +343,56 @@ mod tests {
         }
 
         tracing::debug!("output: {:?}", buf);
+    }
+
+    // Test against golden values from an independent interpreter version of Poseidon2
+    #[test]
+    fn hash_elem_slice_compare_golden() {
+        let buf: [BabyBearElem; 32] = baby_bear_array![
+            943718400, 1887436800, 2013125296, 1761607679, 692060158, 1761607634, 566231037,
+            1509949437, 440401916, 1384120316, 314572795, 1258291195, 188743674, 1132462074,
+            62914553, 1006632953, 1950351353, 880803832, 1824522232, 754974711, 1698693111,
+            629145590, 1572863990, 503316469, 1447034869, 377487348, 1321205748, 251658227,
+            1195376627, 125829106, 1069547506, 2013265906,
+        ];
+        let suite = Poseidon2HashSuite::new_suite();
+        let result = suite.hashfn.hash_elem_slice(&buf);
+        let goal: [u32; DIGEST_WORDS] = [
+            (BabyBearElem::from(0x722baada as u32)).as_u32_montgomery(),
+            (BabyBearElem::from(0x5b352fed as u32)).as_u32_montgomery(),
+            (BabyBearElem::from(0x3684017b as u32)).as_u32_montgomery(),
+            (BabyBearElem::from(0x540d4a7b as u32)).as_u32_montgomery(),
+            (BabyBearElem::from(0x44ffd422 as u32)).as_u32_montgomery(),
+            (BabyBearElem::from(0x48615f97 as u32)).as_u32_montgomery(),
+            (BabyBearElem::from(0x1a496f45 as u32)).as_u32_montgomery(),
+            (BabyBearElem::from(0x203ca999 as u32)).as_u32_montgomery(),
+        ];
+        for i in 0..DIGEST_WORDS {
+            assert_eq!(result.as_words()[i], goal[i], "At entry {}", i);
+        }
+    }
+
+    #[test]
+    fn hash_elem_slice_compare_golden_unaligned() {
+        let buf: [BabyBearElem; 17] = baby_bear_array![
+            943718400, 1887436800, 2013125296, 1761607679, 692060158, 1635778558, 566231037,
+            1509949437, 440401916, 1384120316, 314572795, 1258291195, 188743674, 1132462074,
+            62914553, 1006632953, 1950351353,
+        ];
+        let suite = Poseidon2HashSuite::new_suite();
+        let result = suite.hashfn.hash_elem_slice(&buf);
+        let goal: [u32; DIGEST_WORDS] = [
+            (BabyBearElem::from(0x622615d7 as u32)).as_u32_montgomery(),
+            (BabyBearElem::from(0x1cfe9764 as u32)).as_u32_montgomery(),
+            (BabyBearElem::from(0x166cb1c9 as u32)).as_u32_montgomery(),
+            (BabyBearElem::from(0x76febcde as u32)).as_u32_montgomery(),
+            (BabyBearElem::from(0x6056219f as u32)).as_u32_montgomery(),
+            (BabyBearElem::from(0x326359cf as u32)).as_u32_montgomery(),
+            (BabyBearElem::from(0x5c2cca75 as u32)).as_u32_montgomery(),
+            (BabyBearElem::from(0x233dc3ff as u32)).as_u32_montgomery(),
+        ];
+        for i in 0..DIGEST_WORDS {
+            assert_eq!(result.as_words()[i], goal[i], "At entry {}", i);
+        }
     }
 }

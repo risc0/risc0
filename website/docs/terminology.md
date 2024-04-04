@@ -1,14 +1,6 @@
----
-sidebar_position: 5
-slug: /terminology
----
-
 # Key Terminology
 
 ### Assumption
-
-[assumption]: #assumption
-[assumptions]: #assumption
 
 An assumption is [receipt claim] upon which a [receipt] is [conditional].
 When the [guest] uses [composition] to verify a receipt in the [zkVM], an assumption is added to the [receipt].
@@ -16,36 +8,24 @@ This assumption can be proven and resolved later, either through [recursion] or 
 
 ### Circuit
 
-[circuit]: #circuit
-[Arithmetic Circuits]: /reference-docs/about-arithmetic-circuits
-
 A mathematical construct that acts as the "CPU" of the [zkVM] in a manner that enables creating [proofs]. <br/>
 See also: [Arithmetic Circuits]
 
 ### Clock cycles
-
-[clock cycles]: #clock-cycles
 
 The smallest unit of compute in the zkVM [circuit], analogous to a clock cycle on a physical CPU.
 The complexity of a [guest program]'s [execution] is measured in clock cycles as they directly affect the memory, proof size, and time performance of the [zkVM].
 
 Generally, a single cycle corresponds to a single [RISC-V] operation. However, some operations require two cycles.
 
-<!-- TODO: Once the optimization guide is in a release API doc, include this line.
-See the [Optimization Guide](/api/zkvm/developer-guide/optimization) for more information about the zkVM cycles and performance.
--->
+See the [Optimization Guide](/api/zkvm/optimization) for more information about the zkVM cycles and performance.
 
 ### Commit
-
-[commit]: #commit
-[env::commit()]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest/env/fn.commit.html
 
 Append data to the [journal]. <br/>
 See also: [env::commit()]
 
 ### Composition
-
-[composition]: #composition
 
 As of our 0.20 release, the [zkVM] supports verification of RISC Zero receipts inside the RISC Zero [guest] through a feature known as composition.
 With this, multiple zkVM programs can be _composed_ and produce a single receipt that verifies all computation done to reach the final result.
@@ -62,8 +42,6 @@ Some use cases for composition include:
 
 ### Conditional
 
-[conditional]: #conditional
-
 A [receipt] can be described as "conditional" if it is only true when one or more unproven [assumptions] are also true.
 When the [assumptions] are not proven to be true, a conditional receipt does not provide any guarantees, and so verifiers will reject conditional receipts.
 A conditional receipt can be made unconditional by providing receipts proving all [assumptions].
@@ -71,17 +49,31 @@ Conditional receipts are a part of the [composition] feature.
 
 ### Continuations
 
-[continuations]: #continuations
-[Continuations study club]: https://www.youtube.com/watch?v=v4HIwaqmIxk&list=PLcPzhUaCxlCirUkJY0ltpjdtzWcz5U_6y&index=1
-[Continuations blog]: https://www.risczero.com/news/continuations
-
 As of our 0.15 release, the [zkVM] uses continuations to enable proof generation for very large programs without blowing up memory requirements.
 Large proof generation is made possible by splitting the execution trace for a single [session] into a number of [segments], and proving those segments independently. <br/>
 See also: [Continuations study club], [Continuations blog]
 
-### Deterministic Builds
+### Control ID
 
-[deterministic-builds]: #deterministic-builds
+The control ID is the Merkle hash of the contents of the [control columns], which are assumed to be known to the verifier as part of the circuit definition.
+
+The control ID is the first entry in the [seal] and plays a key role in defining the operations of the circuit. Verifying a [receipt] involves:
+
+- Checking the control ID on the receipt against the control ID for the expected version of the zkVM.
+- Verifying the validity of the Merkle branches for various entries of the Control columns.
+
+For a closer look at how the control columns are used to manage constraint enforcement, check out our [STARK by Hand] explainer.
+
+### Control Root
+
+The control root is the Merkle hash of a set of [control ID]s.
+
+The control root plays a key role in enforcing zkVM version control. Each [control ID] identifies one [recursion program]; the control root identifies the list of allowed recursion programs. When the RISC-V circuit or recursion programs change, the control root is updated to reflect the new set of allowed functions.
+
+This design allows for updates to the [RISC-V circuit] without necessitating a new trusted setup for the [Groth16 circuit]. <br/>
+See also: [Code reference for control root]
+
+### Deterministic Builds
 
 Our [cargo risczero] tool offers a deterministic compilation from user-written Rust code to RISC-V binary.
 Compiled binary files are identified by their [imageID].
@@ -90,31 +82,19 @@ Deterministic builds are made possible by running the `cargo` compiler inside a 
 
 ### ELF Binary
 
-[ELF binary]: #elf-binary
-
 The executable format for the [RISC-V] instruction set.
 Each [method] in a [guest program] is written in Rust and compiled into an ELF binary before execution begins. Then, the ELF binary is [executed] and [proven].
 
 ### Execute
 
-[execute]: #execute
-[executes]: #execute
-[execution]: #execute
-
 Run a [method] inside the [zkVM] and produce an [execution trace] which can be used by the [prover] to create a [proof] of correct execution.
 
 ### Executor
-
-[executed]: #executor
-[executor]: #executor
-[Executor documentation]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Executor.html
 
 The portion of the [zkVM] responsible for generating the [execution trace]. <br/>
 See also: [Executor documentation], [Prover]
 
 ### Execution Trace
-
-[execution trace]: #execution-trace
 
 A complete record of a computation.
 The execution trace is organized as a rectangular array, where each row describes a complete snapshot of the state of the [zkVM] at a given moment in time.
@@ -125,13 +105,9 @@ A valid trace means that the [ELF binary] was faithfully executed according to t
 
 ### Groth16
 
-[Groth16]: #groth16
-
 A proof system that offers a very small proof size, suitable for on-chain verification.
 
 ### Groth16 Circuit
-
-[Groth16 Circuit]: #groth16-circuit
 
 RISC Zero's Groth16 Circuit is used to generate [receipts] that are small enough to support on-chain verification.
 The Groth16 Circuit is a circom implementation of the verifier for the [Recursion Circuit].
@@ -148,17 +124,12 @@ See also: [Rust crate for zkVM guest]
 
 ### Guest Program
 
-[guest]: #guest-program
-[guest program]: #guest-program
-
 The portion of a [zkVM] application that gets proven.
 The guest program receives inputs from an (untrusted) [host].
 Depending on the application, the guest program can [commit] results to the [journal] and/or send them to the host. <br/>
 See also: [Rust crate for zkVM guest]
 
 ### Host
-
-[host]: #host
 
 The system the [zkVM] runs on.
 
@@ -169,44 +140,28 @@ The host program loads the [guest program] and provides inputs to the guest prog
 
 ### Image ID
 
-[imageID]: #image-id
-
 A small cryptographic identifier that indicates the [method] or boot image for zkVM [execution]. <br/>
 See also: [ImageID documentation], [ImageID excerpt from Study Club], [segment]
 
 ### Journal
-
-[journal]: #journal
 
 The portion of the [receipt] that contains the public outputs of a [zkVM] application. <br/>
 See also: [commit]
 
 ### Method
 
-[method]: #method
-
 A single 'main' entry point for code that runs inside the [zkVM].
 
 ### Prove
-
-[prove]: #prove
-[proves]: #prove
 
 Generate a [receipt] that serves as [proof] of correct execution of a [guest program].
 
 ### Prover
 
-[proven]: #prover
-[prover]: #prover
-[Prover documentation]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/trait.Prover.html
-
 The portion of the [zkVM] that [executes] and [proves] a [guest program], thereby constructing a [receipt]. <br/>
 See also: [Prover documentation], [Executor]
 
 ### Receipt
-
-[receipt]: #receipt
-[receipts]: #receipt
 
 A receipt attests to valid [execution] of a [guest program].
 [Verifying] the receipt provides cryptographic assurance that the [journal] was indeed constructed using the expected [circuit] and the expected [imageID].
@@ -216,8 +171,6 @@ The [seal] is the opaque blob that cryptographically attests to the validity of 
 
 ### Receipt Claim
 
-[receipt claim]: #receipt-claim
-
 Every receipt has an associated "receipt claim" or "claim", also known as the "public output".
 The claim is the statement that the receipt provides proof of.
 It contains the [journal], and it additionally includes information about the [imageID], exit status (e.g. if the program exits successfully or encountered an error), and the memory state at the end of execution.
@@ -226,8 +179,6 @@ RISC Zero provides a formal system for defining and proving claims.
 
 ### Recursion
 
-[recursion]: #recursion
-
 When a zero-knowledge proof is verified within a zero-knowledge proof, this is referred to as "recursion".
 RISC Zero uses recursion to underpin features such as [continuations] and [composition].
 Through recursion, RISC Zero can take two or more [receipts] and compress them into one receipt.
@@ -235,13 +186,15 @@ By repeating this compression, an arbitrary number of related [receipts] (e.g. a
 
 ### Recursion Circuit
 
-[Recursion Circuit]: #recursion-circuit
+The recursion circuit is used to aggregate and compose [proofs].
 
-The recursion circuit is used to aggregate [proofs].
+### Recursion Program
+
+The [recursion circuit] is capable of efficiently evaluating polynomial constraints, and was specifically designed to verify STARK proofs. Programs written for this circuit are loaded into the [control columns]. Each recursion program is identified by a [Control ID].
+
+For a list of all supported recursion programs, see the documentation for the [zkVM API Client].
 
 ### RISC-V
-
-[RISC-V]: #risc-v
 
 The 5th edition of UC Berkeley's reduced instruction set computer architecture.
 RISC Zero uses RISC-V, specifically the [rv32im instruction set](https://riscv.org/wp-content/uploads/2019/12/riscv-spec-20191213.pdf), as the basis for the RISC Zero zkVM.
@@ -252,16 +205,11 @@ The RISC-V circuit is the core of the [zkVM].
 
 ### Seal
 
-[seal]: #seal
-
 The portion of the [receipt] that cryptographically attests to the [receipt claim] and the correct execution of the [guest program].
 Concretely, the seal is a [zk-STARK] and is generated by the [prover]. <br/>
 See also: [validity proof]
 
 ### Segment
-
-[Segment]: #segment
-[Segments]: #segment
 
 The [execution trace] of a portion of a [guest program].
 The execution of a segment begins at some initial memory image (identified by the [ImageID]) and proceeds until terminated by the system or user.
@@ -270,25 +218,21 @@ See also: [Session]
 
 ### Session
 
-[session]: #session
-
 The [execution trace] of a [guest program].
 The session's execution starts from an initial memory image (which includes the starting program counter) and proceeds until either a sys_halt or a sys_pause syscall is encountered.
 This record is stored as a vector of [Segments].
 
 ### STARK
 
-[STARK]: #stark
-[zk-stark]: #stark
-
 A STARK (scalable, transparent argument of knowledge) serves as proof of validity for a [zkVM] program. <br/>
 See also: [About STARKs], [Sequence Diagram for RISC Zero's STARK], [RISC Zero's ZKP Whitepaper]
 
-### Validity Proof
+### SNARK
 
-[proof]: #validity-proof
-[proofs]: #validity-proof
-[validity proof]: #validity-proof
+A SNARK (succinct non-interactive argument of knowledge) serves as proof of validity for Blockchain applications due to their small size compared to [STARK] proofs. <br/>
+See also: [About SNARKs]
+
+### Validity Proof
 
 A validity proof is a cryptographic argument that attests to the validity of an [execution trace].
 The [seal] on the [receipt] serves as a validity proof for the RISC-V instruction set.
@@ -300,24 +244,81 @@ A program on the [host] that [verifies] a [receipt].
 
 ### Verify
 
-[verifying]: #verify
-[verifies]: #verify
-
 Check that the [receipt] is valid.
 Verifying [segment] receipts requires checking that the [seal] is valid and was generated by the expected [ImageID].
 Verifying [session] receipts requires checking the validity of each [segment] and checking that the initial/final memory snapshots for each segment align appropriately.
 
 ### Zero-Knowledge Virtual Machine (zkVM)
 
-[zkVM]: #zero-knowledge-virtual-machine-zkvm
-
 A virtual machine that runs trusted code and generates proofs.
 RISC Zero's zkVM implements the RISC-V instruction set architecture and uses a [STARK]-based proof system.
 
 [About STARKs]: ./reference-docs/about-starks.md
+[About SNARKs]: https://ethereum.org/en/developers/docs/scaling/zk-rollups/#validity-proofs
+[Arithmetic Circuits]: /reference-docs/about-arithmetic-circuits
+[assumption]: #assumption
+[assumptions]: #assumption
 [cargo risczero]: https://docs.rs/crate/cargo-risczero/latest
+[circuit]: #circuit
+[clock cycles]: #clock-cycles
+[Code reference for control root]: https://github.com/risc0/risc0/blob/v0.21.0/risc0/circuit/recursion/src/control_id.rs#L16
+[commit]: #commit
+[compose]: #composition
+[composition]: #composition
+[conditional]: #conditional
+[continuations]: #continuations
+[Continuations study club]: https://www.youtube.com/watch?v=v4HIwaqmIxk&list=PLcPzhUaCxlCirUkJY0ltpjdtzWcz5U_6y&index=1
+[Continuations blog]: https://www.risczero.com/news/continuations
+[control columns]: #control-columns
+[control ID]: #control-id
+[control root]: #control-root
+[deterministic-builds]: #deterministic-builds
+[ELF binary]: #elf-binary
+[env::commit()]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest/env/fn.commit.html
+[execute]: #execute
+[executes]: #execute
+[execution]: #execute
+[executed]: #executor
+[executor]: #executor
+[Executor documentation]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Executor.html
+[execution trace]: #execution-trace
+[Groth16]: #groth16
+[Groth16 Circuit]: #groth16-circuit
+[guest]: #guest-program
+[guest program]: #guest-program
+[host]: #host
+[imageID]: #image-id
 [ImageID documentation]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.SystemState.html
 [ImageID excerpt from Study Club]: https://www.youtube.com/watch?v=QwzrBHHkzFE&list=PLcPzhUaCxlCirUkJY0ltpjdtzWcz5U_6y&index=4
+[journal]: #journal
+[method]: #method
+[prove]: #prove
+[proves]: #prove
+[proven]: #prover
+[prover]: #prover
+[Prover documentation]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/trait.Prover.html
+[receipt]: #receipt
+[receipts]: #receipt
+[receipt claim]: #receipt-claim
+[recursion]: #recursion
+[Recursion Circuit]: #recursion-circuit
+[recursion program]: #recursion-program
+[RISC-V]: #risc-v
+[RISC-V Circuit]: #risc-v-circuit
 [RISC Zero's ZKP Whitepaper]: https://risczero.com/proof-system-in-detail.pdf
 [Rust crate for zkVM guest]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest
+[seal]: #seal
+[Segment]: #segment
+[Segments]: #segment
+[session]: #session
 [Sequence Diagram for RISC Zero's STARK]: ./proof-system/proof-system-sequence-diagram.md
+[STARK]: #stark
+[STARK by Hand]: ./proof-system/stark-by-hand.md
+[zk-stark]: #stark
+[proof]: #validity-proof
+[proofs]: #validity-proof
+[validity proof]: #validity-proof
+[verifying]: #verify
+[verifies]: #verify
+[zkVM]: #zero-knowledge-virtual-machine-zkvm
+[zkVM API Client]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.ApiClient.html#

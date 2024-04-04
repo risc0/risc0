@@ -290,9 +290,9 @@ dependencies = [
 
 [[package]]
 name = "cargo_metadata"
-version = "0.17.0"
+version = "0.18.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e7daec1a2a2129eeba1644b220b4647ec537b0b5d4bfd6876fcc5a540056b592"
+checksum = "2d886547e41f740c616ae73108f6eb70afe6d940c7bc697cb30f13daec073037"
 dependencies = [
  "camino",
  "cargo-platform",
@@ -745,7 +745,7 @@ checksum = "c08c74e62047bb2de4ff487b251e4a92e24f48745648451635cec7d591162d9f"
 
 [[package]]
 name = "risc0-binfmt"
-version = "0.21.0-alpha.1"
+version = "0.22.0-alpha.1"
 dependencies = [
  "anyhow",
  "elf",
@@ -757,7 +757,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build"
-version = "0.21.0-alpha.1"
+version = "0.22.0-alpha.1"
 dependencies = [
  "anyhow",
  "cargo-platform",
@@ -773,7 +773,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-recursion"
-version = "0.21.0-alpha.1"
+version = "0.22.0-alpha.1"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -785,18 +785,20 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im"
-version = "0.21.0-alpha.1"
+version = "0.22.0-alpha.1"
 dependencies = [
  "anyhow",
+ "risc0-binfmt",
  "risc0-core",
  "risc0-zkp",
  "risc0-zkvm-platform",
+ "serde",
  "tracing",
 ]
 
 [[package]]
 name = "risc0-core"
-version = "0.21.0-alpha.1"
+version = "0.22.0-alpha.1"
 dependencies = [
  "bytemuck",
  "rand_core",
@@ -804,7 +806,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-groth16"
-version = "0.21.0-alpha.1"
+version = "0.22.0-alpha.1"
 dependencies = [
  "anyhow",
  "ark-bn254",
@@ -819,7 +821,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkp"
-version = "0.21.0-alpha.1"
+version = "0.22.0-alpha.1"
 dependencies = [
  "anyhow",
  "blake2",
@@ -837,14 +839,13 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "0.21.0-alpha.1"
+version = "0.22.0-alpha.1"
 dependencies = [
  "anyhow",
  "bytemuck",
  "cfg-if",
  "getrandom",
  "hex",
- "num-derive",
  "risc0-binfmt",
  "risc0-circuit-recursion",
  "risc0-circuit-rv32im",
@@ -861,7 +862,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-methods"
-version = "0.21.0-alpha.1"
+version = "0.22.0-alpha.1"
 dependencies = [
  "risc0-build",
  "risc0-zkvm",
@@ -885,7 +886,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "0.21.0-alpha.1"
+version = "0.22.0-alpha.1"
 dependencies = [
  "bytemuck",
  "getrandom",

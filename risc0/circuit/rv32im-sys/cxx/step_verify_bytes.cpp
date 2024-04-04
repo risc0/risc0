@@ -33,15 +33,15 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
   size_t mask = steps - 1;
   std::array<Fp, 96> host_args;
   std::array<Fp, 32> host_outs;
-  // loc("zirgen/components/bytes.cpp":96:0)
+  // loc(unknown)
   Fp x0(255);
-  // loc("zirgen/components/bytes.cpp":37:0)
+  // loc(unknown)
   Fp x1(2);
-  // loc("zirgen/components/bytes.cpp":34:0)
+  // loc(unknown)
   Fp x2(254);
-  // loc("zirgen/components/bytes.cpp":21:0)
+  // loc(unknown)
   Fp x3(0);
-  // loc("zirgen/circuit/rv32im/top.cpp":17:0)
+  // loc(unknown)
   Fp x4(1);
   // loc("Top/Code/OneHot/hot[1](Reg)"("./zirgen/components/mux.h":49:0))
   auto x5 = args[0][2 * steps + ((cycle - 0) & mask)];
@@ -61,10 +61,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
   // loc("Top/Code/OneHot/hot[7](Reg)"("./zirgen/components/mux.h":49:0))
   auto x10 = args[0][8 * steps + ((cycle - 0) & mask)];
   assert(x10 != Fp::invalid());
-  // loc("Top/Code/OneHot/hot[0](Reg)"("zirgen/circuit/rv32im/top.cpp":78:0))
+  // loc("Top/Code/OneHot/hot[0](Reg)"("zirgen/circuit/rv32im/v1/edsl/top.cpp":78:0))
   auto x11 = args[0][1 * steps + ((cycle - 0) & mask)];
   assert(x11 != Fp::invalid());
-  // loc("Top/Code/OneHot/hot[2](Reg)"("zirgen/circuit/rv32im/top.cpp":78:0))
+  // loc("Top/Code/OneHot/hot[2](Reg)"("zirgen/circuit/rv32im/v1/edsl/top.cpp":78:0))
   auto x12 = args[0][3 * steps + ((cycle - 0) & mask)];
   assert(x12 != Fp::invalid());
   if (x11 != 0) {

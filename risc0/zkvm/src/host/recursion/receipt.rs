@@ -16,24 +16,21 @@ use alloc::{collections::VecDeque, vec::Vec};
 
 use risc0_binfmt::read_sha_halfs;
 use risc0_circuit_recursion::{control_id::RECURSION_CONTROL_IDS, CircuitImpl};
+use risc0_circuit_rv32im::control_id::POSEIDON2_CONTROL_ID;
 use risc0_core::field::baby_bear::BabyBearElem;
 use risc0_zkp::{adapter::CircuitInfo, core::digest::Digest, verify::VerificationError};
 use serde::{Deserialize, Serialize};
 
 use super::CIRCUIT;
-use crate::{
-    host::{control_id::POSEIDON_CONTROL_ID, receipt::VerifierContext},
-    sha::Digestible,
-    ReceiptClaim,
-};
+use crate::{host::receipt::VerifierContext, sha::Digestible, ReceiptClaim};
 
-/// This function gets valid control IDs from the Poseidon and recursion
+/// This function gets valid control IDs from the Poseidon2 and recursion
 /// circuits
 pub fn valid_control_ids() -> Vec<Digest> {
     use hex::FromHex;
 
     let mut all_ids = Vec::new();
-    for digest_str in POSEIDON_CONTROL_ID {
+    for digest_str in POSEIDON2_CONTROL_ID {
         all_ids.push(Digest::from_hex(digest_str).unwrap());
     }
     for (_, digest_str) in RECURSION_CONTROL_IDS {
@@ -88,11 +85,11 @@ impl SuccinctReceipt {
                 })
         };
 
-        // All receipts from the recursion circuit use Poseidon as the FRI hash
+        // All receipts from the recursion circuit use Poseidon2 as the FRI hash
         // function.
         let suite = ctx
             .suites
-            .get("poseidon")
+            .get("poseidon2")
             .ok_or(VerificationError::InvalidHashSuite)?;
 
         // Verify the receipt itself is correct, and therefore the encoded globals are

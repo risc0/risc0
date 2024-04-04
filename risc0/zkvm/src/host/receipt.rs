@@ -18,16 +18,21 @@ use alloc::{collections::BTreeMap, string::String, vec, vec::Vec};
 use core::fmt::Debug;
 
 use anyhow::Result;
-use risc0_binfmt::SystemState;
-use risc0_circuit_recursion::control_id::ALLOWED_IDS_ROOT;
-use risc0_circuit_rv32im::layout;
+use risc0_binfmt::{ExitCode, SystemState};
+use risc0_circuit_recursion::control_id::{ALLOWED_IDS_ROOT, BN254_CONTROL_ID};
+use risc0_circuit_rv32im::{
+    control_id::{BLAKE2B_CONTROL_ID, POSEIDON2_CONTROL_ID, SHA256_CONTROL_ID},
+    layout, CIRCUIT,
+};
 use risc0_core::field::baby_bear::BabyBear;
-use risc0_groth16::{split_digest, verifier::prepared_verifying_key, Seal, Verifier};
+use risc0_groth16::{
+    fr_from_hex_string, split_digest, verifier::prepared_verifying_key, Seal, Verifier,
+};
 use risc0_zkp::{
     core::{
         digest::Digest,
         hash::{
-            blake2b::Blake2bCpuHashSuite, poseidon::PoseidonHashSuite, sha::Sha256HashSuite,
+            blake2b::Blake2bCpuHashSuite, poseidon2::Poseidon2HashSuite, sha::Sha256HashSuite,
             HashSuite,
         },
     },
@@ -37,13 +42,12 @@ use risc0_zkp::{
 use risc0_zkvm_platform::WORD_SIZE;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 
-use super::control_id::{BLAKE2B_CONTROL_ID, POSEIDON_CONTROL_ID, SHA256_CONTROL_ID};
 // Make succinct receipt available through this `receipt` module.
 pub use super::recursion::SuccinctReceipt;
 use crate::{
     serde::{from_slice, Error},
     sha::{Digestible, Sha256},
-    Assumptions, ExitCode, MaybePruned, Output, ReceiptClaim,
+    Assumptions, MaybePruned, Output, ReceiptClaim,
 };
 
 /// A receipt attesting to the execution of a guest program.
@@ -51,8 +55,9 @@ use crate::{
 /// A Receipt is a zero-knowledge proof of computation. It attests that the
 /// [Receipt::journal] was produced by executing a guest program based on a
 /// specified memory image. This image is _not_ included in the receipt; the
-/// verifier must provide an [ImageID](https://dev.risczero.com/terminology),
-/// a cryptographic hash corresponding to the expected image.
+/// verifier must provide an
+/// [ImageID](https://dev.risczero.com/terminology#image-id), a cryptographic
+/// hash corresponding to the expected image.
 ///
 /// A prover can provide a Receipt to an untrusting party to convince them that
 /// the results contained within the Receipt (in the [Receipt::journal]) came
@@ -78,9 +83,9 @@ use crate::{
 /// # }
 /// ```
 ///
-/// To confirm that a [Receipt] was honestly generated, use
-/// [Receipt::verify] and supply the ImageID of the code that should
-/// have been executed as a parameter. (See
+/// To confirm that a [Receipt] was honestly generated, use [Receipt::verify]
+/// and supply the ImageID of the code that should have been executed as a
+/// parameter. (See
 /// [risc0_build](https://docs.rs/risc0-build/latest/risc0_build/) for more
 /// information about how ImageIDs are generated.)
 ///
@@ -99,8 +104,8 @@ use crate::{
 /// # }
 /// ```
 ///
-/// The public outputs of the [Receipt] are contained in the
-/// [Receipt::journal]. You can use [Journal::decode] to deserialize the journal as typed and
+/// The public outputs of the [Receipt] are contained in the [Receipt::journal].
+/// You can use [Journal::decode] to deserialize the journal as typed and
 /// structured data, or access the [Journal::bytes] directly.
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[cfg_attr(test, derive(PartialEq))]
@@ -149,6 +154,7 @@ impl Receipt {
         ctx: &VerifierContext,
         image_id: impl Into<Digest>,
     ) -> Result<(), VerificationError> {
+        tracing::debug!("Receipt::verify_with_context");
         self.inner.verify_integrity_with_context(ctx)?;
 
         // NOTE: Post-state digest and input digest are unconstrained by this method.
@@ -188,7 +194,7 @@ impl Receipt {
         Ok(())
     }
 
-    /// Verify the integrity of this receipt, ensuring the claim and jounral
+    /// Verify the integrity of this receipt, ensuring the claim and journal
     /// are attested to by the seal.
     ///
     /// This does not verify the success of the guest execution. In
@@ -203,6 +209,7 @@ impl Receipt {
         &self,
         ctx: &VerifierContext,
     ) -> Result<(), VerificationError> {
+        tracing::debug!("Receipt::verify_integrity_with_context");
         self.inner.verify_integrity_with_context(ctx)?;
 
         // Check that self.journal is attested to by the inner receipt.
@@ -308,6 +315,7 @@ impl InnerReceipt {
         &self,
         ctx: &VerifierContext,
     ) -> Result<(), VerificationError> {
+        tracing::debug!("InnerReceipt::verify_integrity_with_context");
         match self {
             InnerReceipt::Composite(x) => x.verify_integrity_with_context(ctx),
             InnerReceipt::Compact(x) => x.verify_integrity(),
@@ -378,17 +386,20 @@ impl CompactReceipt {
     pub fn verify_integrity(&self) -> Result<(), VerificationError> {
         use hex::FromHex;
         let (a0, a1) = split_digest(
-            Digest::from_hex(ALLOWED_IDS_ROOT).map_err(|_| VerificationError::InvalidProof)?,
+            Digest::from_hex(ALLOWED_IDS_ROOT)
+                .map_err(|_| VerificationError::ReceiptFormatError)?,
         )
-        .map_err(|_| VerificationError::InvalidProof)?;
+        .map_err(|_| VerificationError::ReceiptFormatError)?;
         let (c0, c1) =
-            split_digest(self.claim.digest()).map_err(|_| VerificationError::InvalidProof)?;
+            split_digest(self.claim.digest()).map_err(|_| VerificationError::ReceiptFormatError)?;
+        let id_p254_hash = fr_from_hex_string(BN254_CONTROL_ID)
+            .map_err(|_| VerificationError::ReceiptFormatError)?;
         Verifier::new(
-            &Seal::from_vec(&self.seal).map_err(|_| VerificationError::InvalidProof)?,
-            vec![a0, a1, c0, c1],
-            prepared_verifying_key().map_err(|_| VerificationError::InvalidProof)?,
+            &Seal::from_vec(&self.seal).map_err(|_| VerificationError::ReceiptFormatError)?,
+            vec![a0, a1, c0, c1, id_p254_hash],
+            prepared_verifying_key().map_err(|_| VerificationError::ReceiptFormatError)?,
         )
-        .map_err(|_| VerificationError::InvalidProof)?
+        .map_err(|_| VerificationError::ReceiptFormatError)?
         .verify()
         .map_err(|_| VerificationError::InvalidProof)?;
 
@@ -398,12 +409,12 @@ impl CompactReceipt {
 }
 
 /// A receipt composed of one or more [SegmentReceipt] structs proving a single
-/// execution with continuations, and zero or more [Receipt] stucts proving any
+/// execution with continuations, and zero or more [Receipt] structs proving any
 /// assumptions.
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[cfg_attr(test, derive(PartialEq))]
 pub struct CompositeReceipt {
-    /// Segment receipts forming the proof of a execution with continuations.
+    /// Segment receipts forming the proof of an execution with continuations.
     pub segments: Vec<SegmentReceipt>,
 
     /// An ordered list of assumptions, either proven or unresolved, made within
@@ -414,11 +425,11 @@ pub struct CompositeReceipt {
     pub assumptions: Vec<InnerReceipt>,
 
     /// Digest of journal included in the final output of the continuation. Will
-    /// be `None` if the continuation has no output (e.g. it ended in
-    /// `Fault`).
-    // NOTE: This field is needed in order to open the assumptions digest from the output digest.
-    // TODO(1.0): This field can potentially be removed since it can be included in the claim on
-    // the last segment receipt instead.
+    /// be `None` if the continuation has no output (e.g. it ended in `Fault`).
+    // NOTE: This field is needed in order to open the assumptions digest from
+    // the output digest.
+    // TODO(1.0): This field can potentially be removed since
+    // it can be included in the claim on the last segment receipt instead.
     pub journal_digest: Option<Digest>,
 }
 
@@ -429,6 +440,7 @@ impl CompositeReceipt {
         &self,
         ctx: &VerifierContext,
     ) -> Result<(), VerificationError> {
+        tracing::debug!("CompositeReceipt::verify_integrity_with_context");
         // Verify the continuation, by verifying every segment receipt in order.
         let (final_receipt, receipts) = self
             .segments
@@ -453,8 +465,9 @@ impl CompositeReceipt {
                 return Err(VerificationError::ReceiptFormatError);
             }
             expected_pre_state_digest = Some({
-                // Post state PC is stored as the "actual" value plus 4. This matches the join
-                // predicate implementation. See [ReceiptClaim] for more detail.
+                // Post state PC is stored as the "actual" value plus 4. This
+                // matches the join predicate implementation. See [ReceiptClaim]
+                // for more detail.
                 let mut post = receipt
                     .claim
                     .post
@@ -484,8 +497,8 @@ impl CompositeReceipt {
             receipt.verify_integrity_with_context(ctx)?;
         }
 
-        // Verify decoded output digest is consistent with the journal_digest and
-        // assumptions.
+        // Verify decoded output digest is consistent with the journal_digest
+        // and assumptions.
         self.verify_output_consistency(&final_receipt.claim)?;
 
         Ok(())
@@ -504,7 +517,7 @@ impl CompositeReceipt {
             .ok_or(VerificationError::ReceiptFormatError)?
             .claim;
 
-        // After verifying the internally consistency of this receipt, we can use
+        // After verifying the internal consistency of this receipt, we can use
         // self.assumptions and self.journal_digest in place of
         // last_claim.output, which is equal.
         self.verify_output_consistency(last_claim)?;
@@ -538,7 +551,10 @@ impl CompositeReceipt {
     /// consistent with the exit code, and with the journal_digest and
     /// assumptions encoded on self.
     fn verify_output_consistency(&self, claim: &ReceiptClaim) -> Result<(), VerificationError> {
-        tracing::debug!("checking output: exit_code = {:?}", claim.exit_code);
+        tracing::debug!(
+            "verify_output_consistency: exit_code = {:?}",
+            claim.exit_code
+        );
         if claim.exit_code.expects_output() && claim.output.is_some() {
             let self_output = Output {
                 journal: MaybePruned::Pruned(
@@ -632,9 +648,10 @@ impl SegmentReceipt {
         &self,
         ctx: &VerifierContext,
     ) -> Result<(), VerificationError> {
+        tracing::debug!("SegmentReceipt::verify_integrity_with_context");
         use hex::FromHex;
         let check_code = |_, control_id: &Digest| -> Result<(), VerificationError> {
-            POSEIDON_CONTROL_ID
+            POSEIDON2_CONTROL_ID
                 .into_iter()
                 .chain(SHA256_CONTROL_ID)
                 .chain(BLAKE2B_CONTROL_ID)
@@ -648,7 +665,7 @@ impl SegmentReceipt {
             .suites
             .get(&self.hashfn)
             .ok_or(VerificationError::InvalidHashSuite)?;
-        risc0_zkp::verify::verify(&super::CIRCUIT, suite, &self.seal, check_code)?;
+        risc0_zkp::verify::verify(&CIRCUIT, suite, &self.seal, check_code)?;
 
         // Receipt is consistent with the claim encoded on the seal. Now check against the
         // claim on the struct.
@@ -794,7 +811,7 @@ impl Default for VerifierContext {
         Self {
             suites: BTreeMap::from([
                 ("blake2b".into(), Blake2bCpuHashSuite::new_suite()),
-                ("poseidon".into(), PoseidonHashSuite::new_suite()),
+                ("poseidon2".into(), Poseidon2HashSuite::new_suite()),
                 ("sha-256".into(), Sha256HashSuite::new_suite()),
             ]),
         }

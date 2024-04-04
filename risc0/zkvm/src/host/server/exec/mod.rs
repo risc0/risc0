@@ -19,7 +19,6 @@
 //! contains an execution trace of the specified program.
 
 pub(crate) mod executor;
-mod monitor;
 pub(crate) mod profiler;
 pub(crate) mod syscall;
 #[cfg(test)]
