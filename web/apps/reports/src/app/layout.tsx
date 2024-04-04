@@ -1,8 +1,7 @@
 import "@risc0/ui/styles/globals.css";
+import "~/styles/styles.css";
 
 import { Analytics } from "@vercel/analytics/react";
-import { GeistMono } from "geist/font/mono";
-import { GeistSans } from "geist/font/sans";
 import { Next13NProgress } from "nextjs13-progress";
 import type { PropsWithChildren } from "react";
 import { Providers } from "~/client/providers";
@@ -23,17 +22,10 @@ export const metadata = {
 
 export default function RootLayout({ children }: PropsWithChildren) {
   return (
-    <html
-      lang="en"
-      suppressHydrationWarning
-      className={`${
-        GeistMono.variable
-        // biome-ignore lint/nursery/useSortedClasses: ignore
-      } ${GeistSans.variable} h-full`}
-    >
-      <body className="flex min-h-full flex-col">
+    <html lang="en" suppressHydrationWarning>
+      <body className="flex min-h-full flex-col font-sans">
         <Providers>{children}</Providers>
-        <Next13NProgress color="#4E46E5" height={1} showOnShallow={false} />
+        <Next13NProgress color="#fdff9d" height={1} showOnShallow={false} />
         <Analytics />
       </body>
     </html>

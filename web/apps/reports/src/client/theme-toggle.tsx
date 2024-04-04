@@ -28,17 +28,17 @@ export function ThemeToggle({ className }: { className?: string }) {
       </DropdownMenuTrigger>
 
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => setTheme("light")}>
+        <DropdownMenuItem className="cursor-pointer" onClick={() => setTheme("light")}>
           <CheckIcon
             className={cn("mr-2 size-3 text-muted-foreground opacity-0", theme === "light" && "opacity-100")}
           />
           Light
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("dark")}>
+        <DropdownMenuItem className="cursor-pointer" onClick={() => setTheme("dark")}>
           <CheckIcon className={cn("mr-2 size-3 text-muted-foreground opacity-0", theme === "dark" && "opacity-100")} />
           Dark
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("system")}>
+        <DropdownMenuItem className="cursor-pointer" onClick={() => setTheme("system")}>
           <CheckIcon
             className={cn("mr-2 size-3 text-muted-foreground opacity-0", theme === "system" && "opacity-100")}
           />

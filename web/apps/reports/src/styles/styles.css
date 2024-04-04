@@ -1,0 +1,31 @@
+/* includes font-weights from 600-900 */
+@font-face {
+  font-family: "Europa";
+  src: url("/fonts/EuropaGroteskSH-Med.otf");
+  font-weight: 600 900;
+  font-style: normal;
+}
+
+/* includes font-weights from 400-500 */
+@font-face {
+  font-family: "Europa";
+  src: url("/fonts/EuropaGroteskSH-Reg.otf");
+  font-weight: 400 500;
+  font-style: normal;
+}
+
+/* includes font-weights from 100-300 */
+@font-face {
+  font-family: "Europa";
+  src: url("/fonts/EuropaGroteskSH-Lig.otf");
+  font-weight: 100 300;
+  font-style: normal;
+}
+
+:root {
+  --font-europa-sans: "Europa", sans-serif;
+}
+
+* {
+  @apply tracking-wide;
+}
