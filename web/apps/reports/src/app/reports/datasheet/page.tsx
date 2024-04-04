@@ -45,7 +45,7 @@ export default async function DatasheetPage() {
         )}
       </div>
 
-      <Separator />
+      <Separator className="mt-2" />
 
       <div className="mt-8 grid gap-8 xl:grid-cols-2">
         {dataArrays.map((dataArray, index) => (

@@ -32,7 +32,7 @@ const REPORTS = [
 
 export default function ReportsPage() {
   return (
-    <div className="container grid max-w-screen-md gap-4 sm:grid-cols-2">
+    <div className="container grid max-w-screen-md gap-4 pt-4 sm:grid-cols-2">
       {REPORTS.map(({ label, href, description, cta }, index) => (
         <Link key={href} href={href} className="group transition-opacity hover:opacity-70">
           <Card className="group-hover:-translate-y-1 flex h-full flex-col shadow-sm transition-transform">

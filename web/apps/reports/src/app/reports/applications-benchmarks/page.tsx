@@ -47,7 +47,7 @@ export default async function ApplicationsBenchmarksPage() {
         )}
       </div>
 
-      <Separator />
+      <Separator className="mt-2" />
 
       <Tabs className="mt-6" defaultValue={Object.keys(FILENAMES_TO_TITLES)[0]}>
         <div className="flex items-center overflow-auto">

@@ -2,17 +2,16 @@
 
 // TODO: this whole component was copy pasted from old code
 // could probably improve a lot
-
 import Button from "@risc0/ui/button";
 import Separator from "@risc0/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@risc0/ui/tabs";
 import truncate from "lodash-es/truncate";
 import { DownloadIcon } from "lucide-react";
 import Script from "next/script";
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 const toolColors = {
-  cargo: "#dea584",
+  cargo: "#4E46E5",
   go: "#00add8",
   benchmarkjs: "#f1e05a",
   benchmarkluau: "#000080",
@@ -190,16 +189,18 @@ export default function Charts() {
   return (
     <div>
       <div className="flex items-center justify-between">
-        <h1 className="title-sm">Benchmarks</h1>
+        <div>
+          <h1 className="title-sm">Benchmarks</h1>
+          {lastUpdate && <p className="text-muted-foreground text-xs">Last Update: {lastUpdate}</p>}
+        </div>
         <div className="flex items-center gap-3">
-          {lastUpdate && <p className="text-xs">Last Update: {lastUpdate}</p>}
           <Button id="dl-button" size="sm" variant="ghost" startIcon={<DownloadIcon />}>
             Download Data
           </Button>
         </div>
       </div>
 
-      <Separator />
+      <Separator className="mt-2" />
 
       {names && (
         <Tabs defaultValue={names[0]} className="mt-6">

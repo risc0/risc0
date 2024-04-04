@@ -1,6 +1,5 @@
 import "@risc0/ui/styles/globals.css";
 
-import { TooltipProvider } from "@risc0/ui/tooltip";
 import { Analytics } from "@vercel/analytics/react";
 import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
@@ -33,9 +32,7 @@ export default function RootLayout({ children }: PropsWithChildren) {
       } ${GeistSans.variable} h-full`}
     >
       <body className="flex min-h-full flex-col">
-        <Providers>
-          <TooltipProvider>{children}</TooltipProvider>
-        </Providers>
+        <Providers>{children}</Providers>
         <Next13NProgress color="#4E46E5" height={1} showOnShallow={false} />
         <Analytics />
       </body>
