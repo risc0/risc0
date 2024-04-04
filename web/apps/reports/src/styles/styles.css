@@ -29,3 +29,7 @@
 * {
   @apply tracking-wide;
 }
+
+.font-mono {
+  letter-spacing: initial;
+}
