@@ -95,20 +95,19 @@ This primitive has been heavily battle-tested: it's part of the core cryptograph
 
 For a detailed discussion of the security of BN254, we refer readers to the discussion on this [GitHub issue from Zcash].
 
-<!-- TODO - use relative links when we move this to dev docs -->
-
 [lift]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.ApiClient.html#method.lift
 [join]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.ApiClient.html#method.join
 [resolve]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.ApiClient.html#method.resolve
-[control ID]: ../../terminology#control-id
-[control root]: ../../terminology#control-root
-[execution trace]: ../../terminology#execution-trace
+[control ID]: ../terminology#control-id
+[control root]: ../terminology#control-root
+[execution trace]: ../terminology#execution-trace
 [ethSTARK documentation]: https://eprint.iacr.org/2021/582
-[deterministically]: ../../terminology#deterministic-builds
+[deterministically]: ../terminology#deterministic-builds
 [GitHub issue from Zcash]: https://github.com/zcash/zcash/issues/714
-[receipt claim]: ../../terminology#deterministic-builds
+[receipt claim]: ../terminology#receipt-claim
 [RISC Zero zkVM: Scalable, Transparent Arguments of RISC-V Integrity]: ./proof-system-in-detail.pdf
-[RISC Zero zkVM]: ../zkvm
+[RISC Zero zkVM]: ./zkvm
 [this article by Justin Thaler]: https://a16zcrypto.com/posts/article/snark-security-and-performance/
 [bits]: https://a16zcrypto.com/posts/article/snark-security-and-performance/
-[Verifier Contract]: https://dev.risczero.com/api/next/blockchain-integration/contracts/verifier
+[Verifier Contract]: ./blockchain-integration/contracts/verifier
+
