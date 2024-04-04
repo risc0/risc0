@@ -1,4 +1,5 @@
 # Security Model
+
 RISC Zero is proud to offer an end-to-end solution for verifiable computation.
 Users can generate proofs for correct execution of Rust code using the [RISC Zero zkVM],
 and they can verify those proofs on-chain using our permissionless [verifier contract] on Ethereum networks such as Sepolia.
@@ -105,4 +106,3 @@ For a detailed discussion of the security of BN254, we refer readers to the disc
 [this article by Justin Thaler]: https://a16zcrypto.com/posts/article/snark-security-and-performance/
 [bits]: https://a16zcrypto.com/posts/article/snark-security-and-performance/
 [Verifier Contract]: ./blockchain-integration/contracts/verifier
-
