@@ -1,7 +1,4 @@
 # Security Model
-
-<!-- This draft assumes we target 98 bits of conjectured soundness for our STARK prover. -->
-
 RISC Zero is proud to offer an end-to-end solution for verifiable computation.
 Users can generate proofs for correct execution of Rust code using the [RISC Zero zkVM],
 and they can verify those proofs on-chain using our permissionless [verifier contract] on Ethereum networks such as Sepolia.
