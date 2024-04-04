@@ -23,8 +23,11 @@ use std::rc::Rc;
 
 use anyhow::Result;
 use risc0_zkp::{
-    adapter::TapsProvider,
-    field::baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem, Elem},
+    adapter::{CircuitInfo, TapsProvider, PROOF_SYSTEM_INFO},
+    field::{
+        baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem, Elem},
+        Elem as _,
+    },
     hal::{CircuitHal, Hal},
     layout::Buffer as _,
     prove::Prover,
@@ -34,7 +37,7 @@ use self::witgen::WitnessGenerator;
 use super::{segment::Segment, Seal, SegmentProver};
 use crate::{
     layout::{OutBuffer, LAYOUT},
-    CIRCUIT, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CTRL, REGISTER_GROUP_DATA,
+    CircuitImpl, CIRCUIT, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CTRL, REGISTER_GROUP_DATA,
 };
 
 struct Twin(Elem, Elem);
@@ -75,8 +78,29 @@ where
 
         let seal = tracing::info_span!("prove").in_scope(|| {
             let mut prover = Prover::new(self.hal.as_ref(), CIRCUIT.get_taps());
-            prover.iop().write_field_elem_slice(&witgen.io.as_slice());
-            prover.iop().write_u32_slice(&[segment.po2 as u32]);
+            let hashfn = Rc::clone(&self.hal.get_hash_suite().hashfn);
+
+            // At the start of the protocol, seed the Fiat-Shamir transcript with context information
+            // about the proof system and circuit.
+            prover
+                .iop()
+                .commit(&hashfn.hash_elem_slice(&PROOF_SYSTEM_INFO.encode()));
+            prover
+                .iop()
+                .commit(&hashfn.hash_elem_slice(&CircuitImpl::CIRCUIT_INFO.encode()));
+
+            // Concat io (i.e. globals) and po2 into a vector.
+            let vec: Vec<BabyBearElem> = witgen
+                .io
+                .as_slice()
+                .iter()
+                .chain(BabyBearElem::from_u32_slice(&[segment.po2 as u32]))
+                .copied()
+                .collect();
+
+            let digest = hashfn.hash_elem_slice(&vec);
+            prover.iop().commit(&digest);
+            prover.iop().write_field_elem_slice(vec.as_slice());
             prover.set_po2(segment.po2);
 
             let ctrl = self.hal.copy_from_elem("ctrl", &witgen.ctrl.as_slice());

@@ -188,7 +188,7 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   Fp x79(33554431);
   // loc(unknown)
   Fp x80(2013265910);
-  // loc("zirgen/circuit/rv32im/v1/edsl/rv32im.cpp":43:0)
+  // loc("zirgen/circuit/rv32im/v1/edsl/rv32im.cpp":44:0)
   FpExt x81 = FpExt(0);
   // loc("Top/Code/OneHot/hot[1](Reg)"("./zirgen/components/mux.h":49:0))
   auto x82 = args[0][2 * steps + ((cycle - kInvRate * 0) & mask)];
