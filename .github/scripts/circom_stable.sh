@@ -1,5 +1,5 @@
 STARK_VERIFY_HASH=$(shasum -a 256 compact_proof/groth16/stark_verify.circom | awk '{ print $1 }')
-STARK_VERIFY_EXPECTED_HASH="4649d6a6504d6448b8eb0bbf57b5adcb56affee6f28626e6c7432be4a0ad7932"
+STARK_VERIFY_EXPECTED_HASH="a3789471909ba1a13cca783dc5269b25b6d41295abe60234a8075f750017518c"
 if [ $STARK_VERIFY_HASH != $STARK_VERIFY_EXPECTED_HASH ]; \
 then echo "Unexpected SHA-256 of stark_verify.circom: $STARK_VERIFY_HASH"; \
 exit 1; \
