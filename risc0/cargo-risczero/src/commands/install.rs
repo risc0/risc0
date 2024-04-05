@@ -33,7 +33,7 @@ use tempfile::tempdir;
 use xz::read::XzDecoder;
 
 use crate::{
-    toolchain::{CToolchain, RustupToolchain, ToolchainRepo, RUSTUP_TOOLCHAIN_NAME},
+    toolchain::{CppToolchain, RustupToolchain, ToolchainRepo, RUSTUP_TOOLCHAIN_NAME},
     utils::flock,
 };
 use risc0_build::risc0_data;
@@ -91,12 +91,12 @@ impl Install {
     fn install_prebuilt_toolchain(
         &self,
         toolchain_dir: &Path,
-    ) -> Result<(RustupToolchain, CToolchain)> {
+    ) -> Result<(RustupToolchain, CppToolchain)> {
         if let Some(target) = guess_host_target() {
             match self.download_toolchains(target, toolchain_dir) {
                 Ok((rust_path, cpp_path)) => {
                     let rust = RustupToolchain::link(RUSTUP_TOOLCHAIN_NAME, &rust_path)?;
-                    let cpp = CToolchain::link(&cpp_path)?;
+                    let cpp = CppToolchain::link(&cpp_path)?;
                     Ok((rust, cpp))
                 }
                 Err(err) => {
@@ -116,7 +116,7 @@ impl Install {
         toolchains_root_dir: &Path,
     ) -> Result<(PathBuf, PathBuf)> {
         let cpp_toolchain_dir =
-            self.download_toolchain(target, toolchains_root_dir, &ToolchainRepo::C)?;
+            self.download_toolchain(target, toolchains_root_dir, &ToolchainRepo::Cpp)?;
         eprintln!("Downloaded c toolchain to {}", cpp_toolchain_dir.display());
 
         let rust_toolchain_dir =
@@ -216,7 +216,7 @@ impl Install {
                     let mut archive = Archive::new(decoder);
                     archive.unpack(toolchain_dir.clone())?;
                 }
-                ToolchainRepo::C => {
+                ToolchainRepo::Cpp => {
                     let decoder = XzDecoder::new(BufReader::new(tarball));
                     let mut archive = Archive::new(decoder);
                     archive.unpack(toolchain_dir.clone())?;
@@ -237,7 +237,7 @@ impl Install {
                 .version
                 .clone()
                 .map_or("latest".to_string(), |tag| format!("tags/{tag}")),
-            ToolchainRepo::C => "tags/2024.01.05".to_string(),
+            ToolchainRepo::Cpp => "tags/2024.01.05".to_string(),
         };
 
         let repo_name = repo

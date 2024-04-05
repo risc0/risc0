@@ -40,7 +40,7 @@ pub use docker::docker_build;
 
 const RUSTUP_TOOLCHAIN_NAME: &str = "risc0";
 
-/// todo
+/// Get the path used by cargo-risczero that stores downloaded toolchains
 pub fn risc0_data() -> Result<PathBuf> {
     let dir = if let Ok(dir) = std::env::var("RISC0_DATA_DIR") {
         dir.into()
@@ -318,7 +318,9 @@ pub fn cargo_command(subcmd: &str, rust_flags: &[&str]) -> Command {
     .concat()
     .join("\x1f");
 
-    let cc_path = risc0_data().unwrap().join("c/bin/riscv32-unknown-elf-gcc");
+    let cc_path = risc0_data()
+        .unwrap()
+        .join("cpp/bin/riscv32-unknown-elf-gcc");
     let c_flags = "-march=rv32im -nostdlib";
     cmd.env("RUSTC", rustc)
         .env("CARGO_ENCODED_RUSTFLAGS", rustflags_envvar)

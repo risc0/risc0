@@ -35,21 +35,21 @@ impl ToolchainRepo {
     pub const fn url(&self) -> &str {
         match self {
             Self::Rust => "https://github.com/risc0/rust.git",
-            Self::C => "https://github.com/risc0/toolchain.git",
+            Self::Cpp => "https://github.com/risc0/toolchain.git",
         }
     }
 
     pub const fn language(&self) -> &str {
         match self {
             Self::Rust => "rust",
-            Self::C => "c",
+            Self::Cpp => "c",
         }
     }
 
     pub fn asset_name(&self, target: &str) -> String {
         match self {
             Self::Rust => format!("rust-toolchain-{target}.tar.gz"),
-            Self::C => match target {
+            Self::Cpp => match target {
                 "aarch64-apple-darwin" => "riscv32im-osx-arm64.tar.xz".to_string(),
                 "x86_64-unknown-linux-gnu" => "riscv32im-linux-x86_64.tar.xz".to_string(),
                 _ => panic!("binaries for {target} are not available"),
