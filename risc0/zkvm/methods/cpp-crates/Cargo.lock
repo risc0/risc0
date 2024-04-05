@@ -882,7 +882,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "risc0-zkvm-methods-c-crates"
+name = "risc0-zkvm-methods-cpp-crates"
 version = "0.1.0"
 dependencies = [
  "blst",

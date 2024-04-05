@@ -52,7 +52,7 @@ fn main() {
             },
         ),
         (
-            "risc0-zkvm-methods-c-crates",
+            "risc0-zkvm-methods-cpp-crates",
             GuestOptions {
                 features: vec![],
                 use_docker: None,

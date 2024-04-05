@@ -7,7 +7,7 @@
 resolver = "2"
 
 [package]
-name = "risc0-zkvm-methods-c-crates"
+name = "risc0-zkvm-methods-cpp-crates"
 version = "0.1.0"
 edition = "2021"
 
@@ -21,7 +21,7 @@ risc0-zkvm-methods = { path = "..", default-features = false }
 lto = true
 opt-level = 3
 
-[profile.release.package.risc0-zkvm-methods-c-crates]
+[profile.release.package.risc0-zkvm-methods-cpp-crates]
 # Include debug symbols so we can test the profiler.
 debug = 1
 
