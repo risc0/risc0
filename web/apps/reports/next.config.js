@@ -6,9 +6,6 @@ const config = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-  experimental: {
-    ppr: true,
-  },
   reactStrictMode: true,
   swcMinify: true,
   transpilePackages: ["@risc0/ui"],

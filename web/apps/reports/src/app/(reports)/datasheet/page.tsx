@@ -2,7 +2,6 @@ import { Link } from "@risc0/ui/link";
 import { Separator } from "@risc0/ui/separator";
 import { truncate } from "@risc0/ui/utils/truncate";
 import type { Metadata } from "next";
-import { unstable_noStore as noStore } from "next/cache";
 import { CopyButton } from "shared/client/components/copy-button";
 import { fetchDatasheet } from "./_actions/fetch-datasheet";
 import { fetchDatasheetCommitHash } from "./_actions/fetch-datasheet-commit-hash";
@@ -16,14 +15,9 @@ const FILENAMES_TO_TITLES = {
   "Linux-cpu.json": (
     <>
       CPU only on{" "}
-      <a
-        className="link underline"
-        target="_blank"
-        href="https://instances.vantage.sh/aws/ec2/c6i.8xlarge"
-        rel="noreferrer"
-      >
+      <Link target="_blank" href="https://instances.vantage.sh/aws/ec2/c6i.8xlarge" className="link">
         c6i.8xlarge
-      </a>
+      </Link>
     </>
   ),
 } as const;
@@ -33,7 +27,6 @@ export const metadata: Metadata = {
 };
 
 export default async function DatasheetPage() {
-  noStore();
   const urls = Object.keys(FILENAMES_TO_TITLES);
   const commitHash = await fetchDatasheetCommitHash();
   const dataPromises = urls.map((url) => fetchDatasheet(url));
