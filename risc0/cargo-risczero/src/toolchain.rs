@@ -186,24 +186,6 @@ impl CToolchain {
             c_install_dir,
         )?;
 
-        let gcc_script_path = c_install_dir.join("r0-gcc");
-        let mut gcc_script = File::create(gcc_script_path.clone())?;
-        write!(
-            gcc_script,
-            "#!/bin/bash\n\"{}\" -I \"{}\" \"$@\"\n",
-            c_install_dir.join("bin/riscv32-unknown-elf-gcc").display(),
-            c_install_dir.join("picolibc/include").display()
-        )
-        .unwrap();
-
-        #[cfg(target_family = "unix")]
-        {
-            use std::os::unix::fs::PermissionsExt;
-            let mut perms = gcc_script.metadata()?.permissions();
-            perms.set_mode(0o755);
-            std::fs::set_permissions(gcc_script_path, perms)?;
-        }
-
         Ok(Self {
             path: c_install_dir.into(),
         })
