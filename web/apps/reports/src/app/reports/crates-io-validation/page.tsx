@@ -26,8 +26,7 @@ export default async function CratesIoValidationPage() {
         )}
       </div>
       <p className="text-muted-foreground text-sm">
-        Each night, we test compatibility between each of the top 1000 Rust crates and the RISC Zero zkVM. This page
-        shows the results of those tests.
+        Each night, we test compatibility between each of the top 1000 Rust crates and the RISC Zero zkVM
       </p>
 
       <Separator className="mt-2" />

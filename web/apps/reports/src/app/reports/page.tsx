@@ -25,14 +25,14 @@ const REPORTS = [
   {
     label: "Crates.io Validation",
     href: "/reports/crates-io-validation",
-    description: "View the latest crates.io validation results",
-    cta: "View Validation",
+    description: "View the latest Crates.io validation results",
+    cta: "View Crates.io Validation",
   },
 ] as const;
 
 export default function ReportsPage() {
   return (
-    <div className="container grid max-w-screen-md gap-4 pt-4 sm:grid-cols-2">
+    <div className="container grid max-w-screen-lg gap-4 pt-4 grid-cols-1 sm:grid-cols-2">
       {REPORTS.map(({ label, href, description, cta }, index) => (
         <Link href={href} className="group transition-opacity hover:opacity-70">
           <Card className="group-hover:-translate-y-1 flex h-full flex-col shadow-sm transition-transform">
@@ -45,14 +45,14 @@ export default function ReportsPage() {
                 width={294}
                 height={147}
                 priority
-                className="user-select-none pointer-events-none h-[147px] w-full rounded object-cover shadow-xl"
-                src={`/benchmarks-${index}.jpg`}
+                className="bg-primary user-select-none pointer-events-none h-[147px] w-full rounded object-contain object-right shadow-xl"
+                src="/graph.svg"
                 alt={description}
                 quality={90}
               />
             </CardContent>
             <CardFooter>
-              <Button tabIndex={-1} className="pointer-events-none w-full">
+              <Button variant="ghost" tabIndex={-1} className="pointer-events-none w-full">
                 {cta}
               </Button>
             </CardFooter>
