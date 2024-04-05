@@ -51,9 +51,9 @@ impl ToolchainRepo {
         match self {
             Self::Rust => format!("rust-toolchain-{target}.tar.gz"),
             Self::C => match target {
-                "aarch64-apple-darwin" => "riscv32im-osx-arm64.tar.gz".to_string(),
-                "x86_64-apple-darwin" => "riscv32im-osx-x86_64.tar.gz".to_string(),
-                _ => "riscv32im-linux-x86_64.tar.gz".to_string(),
+                "aarch64-apple-darwin" => "riscv32im-osx-arm64.tar.xz".to_string(),
+                "x86_64-unknown-linux-gnu" => "riscv32im-linux-x86_64.tar.xz".to_string(),
+                _ => panic!("binaries for {target} are not available"),
             },
         }
     }

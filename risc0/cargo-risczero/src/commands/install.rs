@@ -30,6 +30,7 @@ use reqwest_retry::{policies::ExponentialBackoff, RetryTransientMiddleware};
 use serde::Deserialize;
 use tar::Archive;
 use tempfile::tempdir;
+use xz::read::XzDecoder;
 
 use crate::{
     toolchain::{CToolchain, RustupToolchain, ToolchainRepo, RUSTUP_TOOLCHAIN_NAME},
@@ -209,9 +210,18 @@ impl Install {
             let summary = result.context(format!("Download failed. {TOKEN_MSG}"))?;
             let tarball = File::open(summary.file_name)?;
             eprintln!("Extracting...");
-            let decoder = GzDecoder::new(BufReader::new(tarball));
-            let mut archive = Archive::new(decoder);
-            archive.unpack(toolchain_dir.clone())?;
+            match repo {
+                ToolchainRepo::Rust => {
+                    let decoder = GzDecoder::new(BufReader::new(tarball));
+                    let mut archive = Archive::new(decoder);
+                    archive.unpack(toolchain_dir.clone())?;
+                }
+                ToolchainRepo::C => {
+                    let decoder = XzDecoder::new(BufReader::new(tarball));
+                    let mut archive = Archive::new(decoder);
+                    archive.unpack(toolchain_dir.clone())?;
+                }
+            }
         }
         Ok(toolchain_dir)
     }

@@ -318,8 +318,8 @@ pub fn cargo_command(subcmd: &str, rust_flags: &[&str]) -> Command {
     .concat()
     .join("\x1f");
 
-    let cc_path = risc0_data().unwrap().join("c/r0-gcc");
-    let c_flags = "-march=rv32im -Wl,-nostdlib";
+    let cc_path = risc0_data().unwrap().join("c/bin/riscv32-unknown-elf-gcc");
+    let c_flags = "-march=rv32im -nostdlib";
     cmd.env("RUSTC", rustc)
         .env("CARGO_ENCODED_RUSTFLAGS", rustflags_envvar)
         .env("CC", cc_path)
