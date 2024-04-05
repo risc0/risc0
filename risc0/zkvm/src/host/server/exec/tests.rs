@@ -317,7 +317,13 @@ fn posix_style_read() {
         let session = exec.run().unwrap();
         assert_eq!(session.exit_code, ExitCode::Halted(0));
 
-        let actual: Vec<u8> = session.journal.unwrap().decode().unwrap();
+        let (actual, num_read): (Vec<u8>, Vec<usize>) = session.journal.unwrap().decode().unwrap();
+        for ((_, len), n_read) in pos_and_len.iter().zip(num_read) {
+            assert_eq!(
+                *len as usize, n_read,
+                "length mismatch, pos and lens: {pos_and_len:?}"
+            )
+        }
         assert_eq!(
             from_utf8(&actual).unwrap(),
             from_utf8(&expected).unwrap(),
@@ -356,6 +362,84 @@ fn posix_style_read() {
             run(pos_and_len);
         }
     }
+}
+
+#[test]
+fn short_read_combinations() {
+    const FD: u32 = 123;
+    // Initial buffer to read bytes on top of.
+    let buf: Vec<u8> = (b'a'..=b'l').collect();
+    // Input to read bytes from.
+    let readbuf: Vec<u8> = (b'A'..b'L').collect();
+
+    for read_len in 0..WORD_SIZE {
+        for excess_buffer in 0..WORD_SIZE * 2 {
+            let buffer = read_len + excess_buffer;
+            let mut expected = buf.to_vec();
+
+            expected[..read_len].copy_from_slice(&readbuf[..read_len]);
+
+            // The current behaviour of the read call for more bytes than available is to write
+            // zeroes for the remaining bytes.
+            expected[read_len..buffer].fill(0);
+
+            let spec = MultiTestSpec::SysRead {
+                fd: FD,
+                buf: buf.to_vec(),
+                pos_and_len: vec![(0, buffer as u32)],
+            };
+            let env = ExecutorEnv::builder()
+                .read_fd(FD, &readbuf[..read_len])
+                .write(&spec)
+                .unwrap()
+                .build()
+                .unwrap();
+            let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
+            let session = exec.run().unwrap();
+            assert_eq!(session.exit_code, ExitCode::Halted(0));
+
+            let (actual, num_read): (Vec<u8>, Vec<usize>) =
+                session.journal.unwrap().decode().unwrap();
+            assert_eq!(
+                [read_len].as_slice(),
+                &num_read,
+                "length mismatch, length {read_len} buffer: {buffer}"
+            );
+            assert_eq!(
+                from_utf8(&actual).unwrap(),
+                from_utf8(&expected).unwrap(),
+                "length {read_len}, buffer {buffer}"
+            );
+        }
+    }
+}
+
+#[test]
+fn unaligned_short_read() {
+    const FD: u32 = 123;
+    // Initial buffer to read bytes on top of.
+    let buf: Vec<u8> = vec![0; 9];
+    let readbuf: &[u8] = b"1234567";
+
+    let spec = MultiTestSpec::SysRead {
+        fd: FD,
+        buf: buf.clone(),
+        pos_and_len: vec![(0, 9)],
+    };
+    let env = ExecutorEnv::builder()
+        .read_fd(FD, readbuf)
+        .write(&spec)
+        .unwrap()
+        .build()
+        .unwrap();
+    let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
+    let session = exec.run().unwrap();
+    assert_eq!(session.exit_code, ExitCode::Halted(0));
+
+    let actual: Vec<u8> = session.journal.unwrap().decode().unwrap();
+    let mut expected = readbuf.to_vec();
+    expected.resize(buf.len(), 0);
+    assert_eq!(actual, expected, "pos and lens: {spec:?}");
 }
 
 #[test]
@@ -746,6 +830,25 @@ fn args() {
                 .collect::<Vec<String>>(),
         );
     }
+}
+
+#[test]
+fn buf_read() {
+    // Host-provided input is 7 bytes, while the guest requests to read 9.
+    let input = b"1234567";
+    let env = ExecutorEnv::builder()
+        .env_var("TEST_MODE", "BUF_READ")
+        // Previously failed on anything > buf and not % 4 == 0
+        // https://github.com/risc0/risc0/pull/1557
+        .write(&9usize)
+        .unwrap()
+        .write_slice(input.as_slice())
+        .build()
+        .unwrap();
+    let mut exec = ExecutorImpl::from_elf(env, STANDARD_LIB_ELF).unwrap();
+    let session = exec.run().unwrap();
+    let output = session.journal.unwrap().bytes;
+    assert_eq!(output, input);
 }
 
 #[test]

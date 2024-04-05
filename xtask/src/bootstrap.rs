@@ -15,11 +15,14 @@
 use std::{fmt::Write, process::Command};
 
 use clap::Parser;
-use risc0_circuit_recursion::zkr::get_all_zkrs;
+use risc0_circuit_recursion::zkr::{get_all_zkrs, get_zkr};
 use risc0_zkp::{
     core::{
         digest::Digest,
-        hash::{blake2b::Blake2bCpuHashSuite, poseidon2::Poseidon2HashSuite, sha::Sha256HashSuite},
+        hash::{
+            blake2b::Blake2bCpuHashSuite, poseidon2::Poseidon2HashSuite,
+            poseidon_254::Poseidon254HashSuite, sha::Sha256HashSuite,
+        },
     },
     field::baby_bear::BabyBear,
     hal::cpu::CpuHal,
@@ -132,11 +135,13 @@ impl Bootstrap {
             writeln!(&mut inner, r#"("{name}", "{digest}"),"#).unwrap();
         }
 
+        let bn254_control_id = Self::generate_identity_bn254_control_id();
         let contents = format!(
             include_str!("templates/control_id_zkr.rs"),
             allowed_ids_root,
             zkr_control_ids.len(),
-            inner
+            inner,
+            bn254_control_id
         );
 
         tracing::info!("writing control ids to {CONTROL_ID_PATH_RECURSION}");
@@ -147,5 +152,17 @@ impl Bootstrap {
             .arg(CONTROL_ID_PATH_RECURSION)
             .status()
             .expect("failed to format {CONTROL_ID_PATH_RECURSION}");
+    }
+
+    pub fn generate_identity_bn254_control_id() -> Digest {
+        let encoded_program = get_zkr("identity.zkr").unwrap();
+        let program = Program::from_encoded(&encoded_program);
+        let digest = program.compute_control_id(Poseidon254HashSuite::new_suite());
+
+        // NOTE: we need to byte-reverse the BN254_CONTROL_ID because
+        // (apparently) groth16 digests are represented as a single
+        // little-endian field element
+        let bytes: Vec<u8> = digest.as_bytes().iter().rev().cloned().collect();
+        Digest::try_from(bytes.as_slice()).unwrap()
     }
 }

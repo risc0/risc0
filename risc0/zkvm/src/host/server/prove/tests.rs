@@ -686,3 +686,38 @@ mod sys_verify {
             .unwrap();
     }
 }
+
+mod soundness {
+    use risc0_circuit_rv32im::CIRCUIT;
+    use risc0_zkp::{
+        adapter::TapsProvider,
+        field::{
+            baby_bear::{BabyBear, BabyBearExtElem},
+            ExtElem,
+        },
+        hal::cpu::CpuHal,
+        prove::soundness,
+    };
+
+    #[test]
+    fn proven() {
+        let cycles = 1 << 20; // 1M
+        let ext_size = BabyBearExtElem::EXT_SIZE;
+        let coeffs_size = cycles * ext_size;
+        let taps = CIRCUIT.get_taps();
+
+        let security = soundness::proven::<CpuHal<BabyBear>>(taps, coeffs_size);
+        assert_eq!(security, 41.757866);
+    }
+
+    #[test]
+    fn conjectured_strict() {
+        let cycles = 1 << 20; // 1M
+        let ext_size = BabyBearExtElem::EXT_SIZE;
+        let coeffs_size = cycles * ext_size;
+        let taps = CIRCUIT.get_taps();
+
+        let security = soundness::conjectured_strict::<CpuHal<BabyBear>>(taps, coeffs_size);
+        assert_eq!(security, 74.90123);
+    }
+}
