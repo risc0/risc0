@@ -76,7 +76,7 @@ export const cratesIoValidationTableColumns = [
             <Badge
               title={info.getValue()}
               variant="secondary"
-              className="relative max-w-lg md:max-w-max line-clamp-5 cursor-pointer font-mono text-[10px]"
+              className="relative line-clamp-5 max-w-lg cursor-pointer font-mono text-[10px] md:max-w-max"
             >
               <pre>{resultString}</pre>
 

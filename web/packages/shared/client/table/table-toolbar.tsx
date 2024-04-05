@@ -30,7 +30,7 @@ export function TableToolbar<TData>({
   globalFilter,
 }: TableToolbarProps<TData>) {
   return (
-    <div className="flex items-center flex-wrap justify-start md:justify-end gap-2">
+    <div className="flex flex-wrap items-center justify-start gap-2 md:justify-end">
       <Input
         placeholder="Search…"
         value={globalFilter ?? ""}
