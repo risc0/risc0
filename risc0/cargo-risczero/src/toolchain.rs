@@ -176,7 +176,7 @@ impl CToolchain {
         )?;
 
         // for c, we will keep the toolchains in the r0_data directory for now
-        let c_install_dir = &r0_data.join("c");
+        let c_install_dir = &r0_data.join("cpp");
         if c_install_dir.exists() {
             fs::remove_dir_all(c_install_dir)?;
         }
