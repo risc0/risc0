@@ -39,7 +39,7 @@ export default function ReportsPage() {
           <Card className="group-hover:-translate-y-1 flex h-full flex-col shadow-sm transition-transform">
             <CardHeader className="pb-4">
               <CardTitle className="text-2xl">{label}</CardTitle>
-              <CardDescription>{description}</CardDescription>
+              <CardDescription className="text-xs">{description}</CardDescription>
             </CardHeader>
             <CardContent className="flex flex-1 items-end">
               <Image
@@ -47,14 +47,12 @@ export default function ReportsPage() {
                 height={147}
                 priority
                 className={cn(
-                  "dark:bg-[#FDFF9D] user-select-none pointer-events-none h-[147px] w-full rounded object-contain object-center",
-                  index === 0 && "p-4",
-                  index === 1 && "p-4",
-                  index === 2 && "object-right",
+                  "dark:invert user-select-none pointer-events-none h-[147px] w-full rounded object-contain object-center",
+                  index === 0 && "object-right",
                 )}
                 src={`/graph-${index}.svg`}
                 alt={description}
-                quality={90}
+                quality={100}
               />
             </CardContent>
             <CardFooter>
