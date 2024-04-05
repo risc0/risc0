@@ -40,8 +40,9 @@ function renderGraph(parent, name, dataset) {
         label: name,
         data: dataset.map((d) => d.bench.value),
         borderColor: color,
+        borderWidth: 1,
         fill: true,
-        backgroundColor: `${color}60`, // Add alpha for #rrggbbaa
+        backgroundColor: `${color}50`, // Add alpha for #rrggbbaa
       },
     ],
   };
@@ -76,7 +77,7 @@ function renderGraph(parent, name, dataset) {
           const data = dataset[index];
           return `\n${truncate(data.commit.message, {
             length: 180,
-            omission: "...",
+            omission: "…",
           })}\n\n${data.commit.timestamp} committed by @${data.commit.committer.username}\n`;
         },
         label: (item) => {
@@ -116,7 +117,7 @@ function renderGraph(parent, name, dataset) {
 
 function renderBenchSet(benchSet, main) {
   const graphsElem = document.createElement("div");
-  graphsElem.className = "flex flex-row flex-wrap gap-16 dark:invert";
+  graphsElem.className = "flex flex-row flex-wrap gap-16 dark:invert [&>*]:tracking-normal";
   main.appendChild(graphsElem);
 
   for (const [benchName, benches] of benchSet.entries()) {
