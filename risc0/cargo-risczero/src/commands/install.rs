@@ -232,10 +232,13 @@ impl Install {
         target: &str,
         repo: &ToolchainRepo,
     ) -> Result<(String, String)> {
-        let tag = self
-            .version
-            .clone()
-            .map_or("latest".to_string(), |tag| format!("tags/{tag}"));
+        let tag = match repo {
+            ToolchainRepo::Rust => self
+                .version
+                .clone()
+                .map_or("latest".to_string(), |tag| format!("tags/{tag}")),
+            ToolchainRepo::C => "tags/2024.01.05".to_string(),
+        };
 
         let repo_name = repo
             .url()
