@@ -131,11 +131,9 @@ export function Charts() {
   const [ready, setReady] = useState<boolean>(false);
 
   useEffect(() => {
-    // @ts-expect-error -- it exists
     const data = window.BENCHMARK_DATA;
 
     if (ready && data) {
-      // @ts-expect-error -- it exists
       const data = window.BENCHMARK_DATA;
 
       setLastUpdate(new Date(data.lastUpdate).toLocaleString());
@@ -144,12 +142,12 @@ export function Charts() {
   }, [ready]);
 
   useEffect(() => {
-    // @ts-expect-error -- it exists
     const data = window.BENCHMARK_DATA;
 
     if (names && data) {
       function collectBenchesPerTestCase(entries) {
         const map = new Map();
+
         for (const entry of entries) {
           const { commit, date, tool, benches } = entry;
           for (const bench of benches) {
