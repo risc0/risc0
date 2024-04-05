@@ -57,7 +57,7 @@ fn run_test(spec: MultiTestSpec) {
 }
 
 #[test]
-fn c_test() {
+fn cpp_test() {
     let session = ExecutorImpl::from_elf(ExecutorEnv::default(), BLST_ELF)
         .unwrap()
         .run()

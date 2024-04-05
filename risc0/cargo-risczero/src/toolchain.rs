@@ -167,26 +167,26 @@ impl CToolchain {
     }
 
     pub fn link(path: &Path) -> Result<Self> {
-        let c_download_dir = Self::get_subdir(path)?;
+        let cpp_download_dir = Self::get_subdir(path)?;
         let r0_data = risc0_data()?;
         fs_extra::dir::copy(
-            c_download_dir.clone(),
+            cpp_download_dir.clone(),
             &r0_data,
             &CopyOptions::new().overwrite(true).copy_inside(true),
         )?;
 
         // for c, we will keep the toolchains in the r0_data directory for now
-        let c_install_dir = &r0_data.join("cpp");
-        if c_install_dir.exists() {
-            fs::remove_dir_all(c_install_dir)?;
+        let cpp_install_dir = &r0_data.join("cpp");
+        if cpp_install_dir.exists() {
+            fs::remove_dir_all(cpp_install_dir)?;
         }
         fs::rename(
-            r0_data.join(c_download_dir.file_name().unwrap()),
-            c_install_dir,
+            r0_data.join(cpp_download_dir.file_name().unwrap()),
+            cpp_install_dir,
         )?;
 
         Ok(Self {
-            path: c_install_dir.into(),
+            path: cpp_install_dir.into(),
         })
     }
 }

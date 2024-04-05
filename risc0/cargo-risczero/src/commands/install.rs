@@ -69,7 +69,7 @@ impl Install {
         let _lock = flock(&lockfile_path);
 
         let toolchain_dir = root_dir.join("toolchains");
-        let (rust_chain, c_chain) = self.install_prebuilt_toolchain(&toolchain_dir)?;
+        let (rust_chain, cpp_chain) = self.install_prebuilt_toolchain(&toolchain_dir)?;
 
         eprintln!(
             "Rust Toolchain {} downloaded and installed to path {}.",
@@ -78,7 +78,7 @@ impl Install {
         );
         eprintln!(
             "C Toolchain downloaded and installed to path {}.",
-            c_chain.path.display()
+            cpp_chain.path.display()
         );
         eprintln!("The risc0 toolchain is now ready to use.");
 
@@ -94,10 +94,10 @@ impl Install {
     ) -> Result<(RustupToolchain, CToolchain)> {
         if let Some(target) = guess_host_target() {
             match self.download_toolchains(target, toolchain_dir) {
-                Ok((rust_path, c_path)) => {
-                    let r = RustupToolchain::link(RUSTUP_TOOLCHAIN_NAME, &rust_path)?;
-                    let c = CToolchain::link(&c_path)?;
-                    Ok((r, c))
+                Ok((rust_path, cpp_path)) => {
+                    let rust = RustupToolchain::link(RUSTUP_TOOLCHAIN_NAME, &rust_path)?;
+                    let cpp = CToolchain::link(&cpp_path)?;
+                    Ok((rust, cpp))
                 }
                 Err(err) => {
                     eprintln!("Could not download pre-built toolchain: {err:?}");
@@ -115,9 +115,9 @@ impl Install {
         target: &str,
         toolchains_root_dir: &Path,
     ) -> Result<(PathBuf, PathBuf)> {
-        let c_toolchain_dir =
+        let cpp_toolchain_dir =
             self.download_toolchain(target, toolchains_root_dir, &ToolchainRepo::C)?;
-        eprintln!("Downloaded c toolchain to {}", c_toolchain_dir.display());
+        eprintln!("Downloaded c toolchain to {}", cpp_toolchain_dir.display());
 
         let rust_toolchain_dir =
             self.download_toolchain(target, toolchains_root_dir, &ToolchainRepo::Rust)?;
@@ -149,7 +149,7 @@ impl Install {
             rust_dir.display()
         );
 
-        Ok((rust_toolchain_dir, c_toolchain_dir))
+        Ok((rust_toolchain_dir, cpp_toolchain_dir))
     }
 
     fn download_toolchain(
