@@ -30,17 +30,17 @@ export default function ReportsPage() {
     <div className="container grid max-w-screen-xl grid-cols-1 gap-4 pt-4 lg:grid-cols-2">
       {REPORTS.map(({ label, href, description }, index) => (
         <Link href={href} className="group transition-opacity hover:opacity-70">
-          <Card className="py-4 px-8 group-hover:-translate-y-1 flex h-full gap-12 w-full min-h-44 flex-row justify-between items-center shadow-sm transition-transform">
+          <Card className="group-hover:-translate-y-1 flex h-full min-h-44 w-full flex-row items-center justify-between gap-12 px-8 py-4 shadow-sm transition-transform">
             <div>
               <CardTitle className="text-xl">{label}</CardTitle>
               <CardDescription className="text-xs">{description}</CardDescription>
             </div>
-            <div className="flex justify-center min-h-[160px] min-w-[220px]">
+            <div className="flex min-h-[160px] min-w-[220px] justify-center">
               <Image
                 width={220}
                 height={160}
                 priority
-                className={"hidden user-select-none pointer-events-none rounded object-contain dark:block"}
+                className="user-select-none pointer-events-none hidden rounded object-contain dark:block"
                 src={`/graph-${index}-dark.svg`}
                 alt={description}
                 quality={100}

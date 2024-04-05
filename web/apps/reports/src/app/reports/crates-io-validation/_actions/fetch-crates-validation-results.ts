@@ -1,11 +1,8 @@
 "use server";
 
-export async function fetchCratesValidationResults(hash) {
-  const filename = `https://risc0.github.io/ghpages/dev/crate-validation/results/${hash}.json`;
-  return await fetch(filename)
-    .then((res) => res.json())
-    .then((data) => data)
-    .catch((err) => {
-      console.error(err);
-    });
+export async function fetchCratesValidationResults(hash: string) {
+  const response = await fetch(`https://risc0.github.io/ghpages/dev/crate-validation/results/${hash}.json`);
+  const responseJson = await response.json();
+
+  return responseJson;
 }

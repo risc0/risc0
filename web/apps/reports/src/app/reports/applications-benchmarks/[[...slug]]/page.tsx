@@ -5,6 +5,7 @@ import { truncate } from "@risc0/ui/utils/truncate";
 import type { Metadata } from "next";
 import { CopyButton } from "shared/client/components/copy-button";
 import { convertCsvToJson } from "shared/utils/convert-csv-to-json";
+import { fetchApplicationsBenchmarks } from "./_actions/fetch-applications-benchmarks";
 import { fetchApplicationsBenchmarksCommitHash } from "./_actions/fetch-applications-benchmarks-commit-hash";
 import { ApplicationsBenchmarksTable } from "./_components/applications-benchmarks-table";
 import { applicationsBenchmarksTableColumns } from "./_components/applications-benchmarks-table-columns";
@@ -17,20 +18,8 @@ export const metadata: Metadata = {
 export default async function ApplicationsBenchmarksPage({ params }) {
   const commitHash = await fetchApplicationsBenchmarksCommitHash();
   const urls = Object.keys(FILENAMES_TO_TITLES);
-  const dataPromises = urls.map((url) =>
-    fetch(`https://risc0.github.io/ghpages/dev/benchmarks/${url}`)
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`Error fetching ${url}: ${response.statusText}`);
-        }
-        return response.text();
-      })
-      .catch((error) => {
-        console.error(`Failed fetching ${url}:`, error.message);
-        return null; // Handle individual failures gracefully
-      }),
-  );
-  const dataArrays = await Promise.all(dataPromises);
+  const dataPromises = urls.map((url) => fetchApplicationsBenchmarks(url));
+  const data = await Promise.all(dataPromises);
 
   return (
     <div className="container max-w-screen-3xl pt-4">
@@ -61,7 +50,7 @@ export default async function ApplicationsBenchmarksPage({ params }) {
             <ApplicationsBenchmarksTable
               title={Object.values(FILENAMES_TO_TITLES)[index] ?? ""}
               columns={applicationsBenchmarksTableColumns}
-              data={convertCsvToJson(dataArrays[index]).filter((element) => element.job_name)}
+              data={convertCsvToJson(data[index]).filter((element) => element.job_name)}
             />
           </TabsContent>
         ))}

@@ -2,6 +2,7 @@ import { Separator } from "@risc0/ui/separator";
 import { truncate } from "@risc0/ui/utils/truncate";
 import type { Metadata } from "next";
 import { CopyButton } from "shared/client/components/copy-button";
+import { fetchDatasheet } from "./_actions/fetch-datasheet";
 import { fetchDatasheetCommitHash } from "./_actions/fetch-datasheet-commit-hash";
 import { DatasheetTable } from "./_components/datasheet-table";
 import { datasheetTableColumns } from "./_components/datasheet-table-columns";
@@ -20,20 +21,8 @@ export const metadata: Metadata = {
 export default async function DatasheetPage() {
   const urls = Object.keys(FILENAMES_TO_TITLES);
   const commitHash = await fetchDatasheetCommitHash();
-  const dataPromises = urls.map((url) =>
-    fetch(`https://risc0.github.io/ghpages/dev/datasheet/${url}`)
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`Error fetching ${url}: ${response.statusText}`);
-        }
-        return response.json();
-      })
-      .catch((error) => {
-        console.warn(`Failed fetching ${url}:`, error.message);
-        return null; // Handle individual failures gracefully
-      }),
-  );
-  const dataArrays = await Promise.all(dataPromises);
+  const dataPromises = urls.map((url) => fetchDatasheet(url));
+  const data = await Promise.all(dataPromises);
 
   return (
     <div className="container max-w-screen-3xl pt-4">
@@ -49,7 +38,7 @@ export default async function DatasheetPage() {
       <Separator className="mt-2" />
 
       <div className="mt-6 grid grid-cols-1 gap-8 xl:grid-cols-2">
-        {dataArrays.map((dataArray, index) => (
+        {data.map((dataArray, index) => (
           <DatasheetTable
             key={Object.values(FILENAMES_TO_TITLES)[index]}
             data={dataArray}
