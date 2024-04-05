@@ -1,4 +1,5 @@
 {
+  "name": "web",
   "workspaces": ["apps/*"],
   "scripts": {
     "build": "turbo build",
