@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@risc0/ui/dia
 import { createColumnHelper } from "@tanstack/react-table";
 import { EyeIcon } from "lucide-react";
 import { Highlight, themes } from "prism-react-renderer";
-import { TableColumnHeader } from "~/client/table/table-column-header";
+import { TableColumnHeader } from "shared/client/table/table-column-header";
 import type { CratesIoValidationTable } from "./crates-io-validation-table-schema";
 
 const columnHelper = createColumnHelper<CratesIoValidationTable>();

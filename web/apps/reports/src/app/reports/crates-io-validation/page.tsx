@@ -1,7 +1,7 @@
 import { Separator } from "@risc0/ui/separator";
 import { truncate } from "@risc0/ui/utils/truncate";
 import type { Metadata } from "next";
-import { CopyButton } from "~/client/copy-button";
+import { CopyButton } from "shared/client/components/copy-button";
 import { fetchCratesValidationResults } from "./_actions/fetch-crates-validation-results";
 import { findMostRecentHash } from "./_actions/find-most-recent-hash";
 import { CratesIoValidationTable } from "./_components/crates-io-validation-table";

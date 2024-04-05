@@ -32,7 +32,7 @@
 
 * {
   /* apply letter-spacing to all html elements */
-  @apply tracking-widest;
+  @apply tracking-wider;
 }
 
 html {
@@ -41,7 +41,7 @@ html {
 }
 
 .font-mono {
-  /* reset the `tracking-widest` on the monospace font */
+  /* reset the `tracking-wider` on the monospace font */
   letter-spacing: initial;
 }
 

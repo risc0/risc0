@@ -2,7 +2,7 @@ import { Button } from "@risc0/ui/button";
 import { Link } from "@risc0/ui/link";
 import { GithubIcon } from "lucide-react";
 import Image from "next/image";
-import { ThemeToggle } from "~/client/theme-toggle";
+import { ThemeToggle } from "shared/client/theme/theme-toggle";
 
 export function Header() {
   return (

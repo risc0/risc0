@@ -1,10 +1,10 @@
 "use client";
 
 import { createColumnHelper } from "@tanstack/react-table";
-import { TableColumnHeader } from "~/client/table/table-column-header";
-import { formatBytes } from "~/utils/format-bytes";
-import { formatDuration } from "~/utils/format-duration";
-import { formatHz } from "~/utils/format-hz";
+import { TableColumnHeader } from "shared/client/table/table-column-header";
+import { formatBytes } from "shared/utils/format-bytes";
+import { formatDuration } from "shared/utils/format-duration";
+import { formatHz } from "shared/utils/format-hz";
 import type { DatasheetTable } from "./datasheet-table-schema";
 
 const columnHelper = createColumnHelper<DatasheetTable>();

@@ -15,8 +15,8 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { useState } from "react";
-import { TableToolbar } from "~/client/table/table-toolbar";
-import { tableFuzzyFilter } from "~/utils/table-fuzzy-filter";
+import { TableToolbar } from "shared/client/table/table-toolbar";
+import { tableFuzzyFilter } from "shared/utils/table-fuzzy-filter";
 
 const MAX_AMOUNT_OF_ROWS = 5;
 

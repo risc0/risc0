@@ -2,7 +2,7 @@
 
 import { Button, type ButtonProps } from "@risc0/ui/button";
 import { CopyIcon } from "lucide-react";
-import { setClipboard } from "~/utils/setClipboard";
+import { setClipboard } from "../../utils/setClipboard";
 
 type CopyButtonProps = ButtonProps & {
   value: string;

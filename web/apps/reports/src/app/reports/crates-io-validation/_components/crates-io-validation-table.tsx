@@ -16,10 +16,10 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { useState } from "react";
-import { TablePagination } from "~/client/table/table-pagination";
-import { TableToolbar } from "~/client/table/table-toolbar";
-import { formatNumber } from "~/utils/format-number";
-import { tableFuzzyFilter } from "~/utils/table-fuzzy-filter";
+import { TablePagination } from "shared/client/table/table-pagination";
+import { TableToolbar } from "shared/client/table/table-toolbar";
+import { formatNumber } from "shared/utils/format-number";
+import { tableFuzzyFilter } from "shared/utils/table-fuzzy-filter";
 
 type CratesIoValidationTableProps<TData, TValue> = {
   columns: ColumnDef<TData, TValue>[];

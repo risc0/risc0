@@ -3,8 +3,8 @@
 import { Input } from "@risc0/ui/input";
 import type { Table } from "@tanstack/react-table";
 import type { ComponentType, Dispatch, SetStateAction } from "react";
-import { TableViewOptions } from "~/client/table/table-view-options";
 import { TableFacetedFilter } from "./table-faceted-filter";
+import { TableViewOptions } from "./table-view-options";
 
 type TableToolbarProps<TData> = {
   table: Table<TData>;

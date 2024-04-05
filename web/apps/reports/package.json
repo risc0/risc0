@@ -1,5 +1,5 @@
 {
-  "name": "@risc0/reports",
+  "name": "reports",
   "version": "0.0.1",
   "private": true,
   "type": "module",
@@ -8,5 +8,8 @@
     "dev": "next dev --turbo",
     "start": "next start",
     "test": "bun test spec"
+  },
+  "dependencies": {
+    "shared": "*"
   }
 }

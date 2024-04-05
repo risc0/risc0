@@ -1,10 +1,10 @@
 "use client";
 
 import { createColumnHelper } from "@tanstack/react-table";
-import { TableColumnHeader } from "~/client/table/table-column-header";
-import { formatBytes } from "~/utils/format-bytes";
-import { formatDuration } from "~/utils/format-duration";
-import { formatNumber } from "~/utils/format-number";
+import { TableColumnHeader } from "shared/client/table/table-column-header";
+import { formatBytes } from "shared/utils/format-bytes";
+import { formatDuration } from "shared/utils/format-duration";
+import { formatNumber } from "shared/utils/format-number";
 import type { ApplicationsBenchmarksTable } from "./applications-benchmarks-table-schema";
 
 const columnHelper = createColumnHelper<ApplicationsBenchmarksTable>();

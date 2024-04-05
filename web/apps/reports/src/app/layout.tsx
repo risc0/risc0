@@ -1,11 +1,10 @@
 import "@risc0/ui/styles/globals.css";
-import "~/styles/styles.css";
+import "shared/styles/styles.css";
 
 import { cn } from "@risc0/ui/cn";
-import { Analytics } from "@vercel/analytics/react";
 import { JetBrains_Mono as FontMono } from "next/font/google";
 import type { PropsWithChildren } from "react";
-import { Providers } from "~/client/providers";
+import { Providers } from "shared/client/providers/providers";
 
 export const metadata = {
   title: {
@@ -31,7 +30,6 @@ export default function RootLayout({ children }: PropsWithChildren) {
     <html lang="en" suppressHydrationWarning className="h-full">
       <body className={cn("flex min-h-full flex-col font-sans", fontMono.variable)}>
         <Providers>{children}</Providers>
-        <Analytics />
       </body>
     </html>
   );

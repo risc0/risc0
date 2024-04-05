@@ -1,7 +1,7 @@
 import { Separator } from "@risc0/ui/separator";
 import { truncate } from "@risc0/ui/utils/truncate";
 import type { Metadata } from "next";
-import { CopyButton } from "~/client/copy-button";
+import { CopyButton } from "shared/client/components/copy-button";
 import { fetchDatasheetCommitHash } from "./_actions/fetch-datasheet-commit-hash";
 import { DatasheetTable } from "./_components/datasheet-table";
 import { datasheetTableColumns } from "./_components/datasheet-table-columns";
