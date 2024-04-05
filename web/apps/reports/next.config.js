@@ -11,6 +11,7 @@ const config = {
   reactStrictMode: true,
   swcMinify: true,
   transpilePackages: ["@risc0/ui"],
+  distDir: "dist",
 
   // biome-ignore lint/suspicious/useAwait: not needed
   async redirects() {
