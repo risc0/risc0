@@ -21,10 +21,11 @@ export default async function CratesIoValidationPage() {
         <h1 className="title-sm">Crates.io Validation</h1>
         {mostRecentHash && (
           <CopyButton size="sm" variant="ghost" value={mostRecentHash}>
-            Commit Hash: {truncate(mostRecentHash, 15)}
+            Commit Hash<span className="hidden sm:inline">: {truncate(mostRecentHash, 15)}</span>
           </CopyButton>
         )}
       </div>
+
       <p className="text-muted-foreground text-sm">
         Each night, we test compatibility between each of the top 1000 Rust crates and the RISC Zero zkVM
       </p>

@@ -30,7 +30,7 @@ export default async function DatasheetPage() {
         <h1 className="title-sm">Datasheet</h1>
         {commitHash && (
           <CopyButton size="sm" variant="ghost" value={commitHash}>
-            Commit Hash: {truncate(commitHash, 15)}
+            Commit Hash<span className="hidden sm:inline">: {truncate(commitHash, 15)}</span>
           </CopyButton>
         )}
       </div>

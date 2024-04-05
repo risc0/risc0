@@ -27,7 +27,7 @@ export default async function ApplicationsBenchmarksPage({ params }) {
         <h1 className="title-sm">Applications Benchmarks</h1>
         {commitHash && (
           <CopyButton size="sm" variant="ghost" value={commitHash}>
-            Commit Hash: {truncate(commitHash, 15)}
+            Commit Hash<span className="hidden sm:inline">: {truncate(commitHash, 15)}</span>
           </CopyButton>
         )}
       </div>

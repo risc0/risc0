@@ -107,7 +107,7 @@ export function CratesIoValidationTable<TData, TValue>({ columns, data }: Crates
       </div>
 
       <div className="overflow-auto rounded border">
-        <Table className="table-fixed">
+        <Table className="table-auto md:table-fixed">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
