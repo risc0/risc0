@@ -3,6 +3,7 @@ import { Separator } from "@risc0/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@risc0/ui/tabs";
 import { truncate } from "@risc0/ui/utils/truncate";
 import type { Metadata } from "next";
+import { unstable_noStore as noStore } from "next/cache";
 import { CopyButton } from "shared/client/components/copy-button";
 import { convertCsvToJson } from "shared/utils/convert-csv-to-json";
 import { fetchApplicationsBenchmarks } from "./_actions/fetch-applications-benchmarks";
@@ -16,6 +17,7 @@ export const metadata: Metadata = {
 };
 
 export default async function ApplicationsBenchmarksPage({ params }) {
+  noStore();
   const commitHash = await fetchApplicationsBenchmarksCommitHash();
   const urls = Object.keys(FILENAMES_TO_TITLES);
   const dataPromises = urls.map((url) => fetchApplicationsBenchmarks(url));

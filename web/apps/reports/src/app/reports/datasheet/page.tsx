@@ -1,6 +1,7 @@
 import { Separator } from "@risc0/ui/separator";
 import { truncate } from "@risc0/ui/utils/truncate";
 import type { Metadata } from "next";
+import { unstable_noStore as noStore } from "next/cache";
 import { CopyButton } from "shared/client/components/copy-button";
 import { fetchDatasheet } from "./_actions/fetch-datasheet";
 import { fetchDatasheetCommitHash } from "./_actions/fetch-datasheet-commit-hash";
@@ -9,9 +10,9 @@ import { datasheetTableColumns } from "./_components/datasheet-table-columns";
 
 const FILENAMES_TO_TITLES = {
   "macOS-apple_m2_pro.json": "Metal on Apple M2 Pro",
-  "Linux-nvidia_rtx_a5000.json": "CUDA on NVIDIA RTX A5000",
+  "Linux-nvidia_rtx_3090_ti.json": "CUDA on NVIDIA RTX 3090 Ti",
   "macOS-cpu.json": "CPU only on Apple M2 Pro",
-  "Linux-cpu.json": "CPU only on TBD [Linux]",
+  "Linux-cpu.json": "CPU only on c6i.8xlarge",
 } as const;
 
 export const metadata: Metadata = {
@@ -19,6 +20,7 @@ export const metadata: Metadata = {
 };
 
 export default async function DatasheetPage() {
+  noStore();
   const urls = Object.keys(FILENAMES_TO_TITLES);
   const commitHash = await fetchDatasheetCommitHash();
   const dataPromises = urls.map((url) => fetchDatasheet(url));

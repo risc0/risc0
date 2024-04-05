@@ -1,6 +1,7 @@
 import { Separator } from "@risc0/ui/separator";
 import { truncate } from "@risc0/ui/utils/truncate";
 import type { Metadata } from "next";
+import { unstable_noStore as noStore } from "next/cache";
 import { CopyButton } from "shared/client/components/copy-button";
 import { fetchCratesValidationResults } from "./_actions/fetch-crates-validation-results";
 import { findMostRecentHash } from "./_actions/find-most-recent-hash";
@@ -12,6 +13,7 @@ export const metadata: Metadata = {
 };
 
 export default async function CratesIoValidationPage() {
+  noStore();
   const mostRecentHash = await findMostRecentHash();
   const cratesValidationResults = await fetchCratesValidationResults(mostRecentHash);
 
