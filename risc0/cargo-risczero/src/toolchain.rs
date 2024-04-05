@@ -28,7 +28,7 @@ use crate::utils::CommandExt;
 
 pub enum ToolchainRepo {
     Rust,
-    C,
+    Cpp,
 }
 
 impl ToolchainRepo {
