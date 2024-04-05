@@ -1,5 +1,6 @@
 import { Button } from "@risc0/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@risc0/ui/card";
+import { cn } from "@risc0/ui/cn";
 import { Link } from "@risc0/ui/link";
 import Image from "next/image";
 
@@ -42,11 +43,16 @@ export default function ReportsPage() {
             </CardHeader>
             <CardContent className="flex flex-1 items-end">
               <Image
-                width={294}
+                width={422}
                 height={147}
                 priority
-                className="bg-primary user-select-none pointer-events-none h-[147px] w-full rounded object-contain object-right shadow-xl"
-                src="/graph.svg"
+                className={cn(
+                  "dark:bg-[#FDFF9D] user-select-none pointer-events-none h-[147px] w-full rounded object-contain object-center",
+                  index === 0 && "p-4",
+                  index === 1 && "p-4",
+                  index === 2 && "object-right",
+                )}
+                src={`/graph-${index}.svg`}
                 alt={description}
                 quality={90}
               />
