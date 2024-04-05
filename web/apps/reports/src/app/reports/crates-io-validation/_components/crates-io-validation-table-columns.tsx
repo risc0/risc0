@@ -41,6 +41,7 @@ export const cratesIoValidationTableColumns = [
     ),
   }),
   columnHelper.accessor("custom_profile", {
+    filterFn: (row, id, value) => value.includes(row.getValue(id)), // converting this to string for comparison, since raw value is a boolean
     header: ({ column }) => (
       <TableColumnHeader
         description="The zkVM can be configured with a custom profile to fix the build errors of a crate"
@@ -59,49 +60,57 @@ export const cratesIoValidationTableColumns = [
       />
     ),
     cell: (info) => {
+      const originalString = info.getValue();
+
+      if (!info.row.original.build_errors || !originalString) {
+        return;
+      }
+
+      const errorIndex: number = originalString.indexOf("error");
+      const methodNameIndex: number = originalString.lastIndexOf("\n", errorIndex);
+      const resultString: string = originalString.substring(methodNameIndex + 1);
+
       return (
-        info.getValue() && (
-          <Badge title={info.getValue()} variant="secondary" className="line-clamp-5 max-w-xl font-mono text-[10px]">
-            <pre>{info.getValue()}</pre>
-          </Badge>
-        )
+        <Dialog>
+          <DialogTrigger asChild>
+            <Badge
+              title={info.getValue()}
+              variant="secondary"
+              className="relative cursor-pointer line-clamp-5 font-mono text-[10px]"
+            >
+              <pre>{resultString}</pre>
+
+              <Button
+                size="sm"
+                variant="outline"
+                className="text-destructive absolute bottom-1 left-1"
+                startIcon={<EyeIcon />}
+              >
+                View Build Errors
+              </Button>
+            </Badge>
+          </DialogTrigger>
+
+          <DialogContent className="max-h-full max-w-screen-3xl">
+            <DialogTitle>Build Errors for {info.row.original.name}</DialogTitle>
+            <div className="max-h-[calc(100dvh-8rem)] overflow-auto bg-slate-950 dark:bg-inherit">
+              <Highlight theme={themes.shadesOfPurple} code={info.row.original.build_errors} language="rust">
+                {({ className, tokens, getLineProps, getTokenProps }) => (
+                  <pre className={cn(className, "text-xs")}>
+                    {tokens.map((line, index) => (
+                      <div key={`row-${index}`} {...getLineProps({ line })}>
+                        {line.map((token, index) => (
+                          <span key={`token-${index}`} {...getTokenProps({ token })} />
+                        ))}
+                      </div>
+                    ))}
+                  </pre>
+                )}
+              </Highlight>
+            </div>
+          </DialogContent>
+        </Dialog>
       );
     },
   }),
-  {
-    accessorKey: "actions",
-    header: undefined,
-    cell: ({ row }) => {
-      return (
-        row.original.build_errors && (
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button size="sm" variant="outline" startIcon={<EyeIcon />}>
-                View Build Errors
-              </Button>
-            </DialogTrigger>
-
-            <DialogContent className="max-h-full max-w-screen-3xl">
-              <DialogTitle>Build Errors for {row.original.name}</DialogTitle>
-              <div className="max-h-[calc(100dvh-8rem)] overflow-auto bg-slate-950 dark:bg-inherit">
-                <Highlight theme={themes.shadesOfPurple} code={row.original.build_errors} language="rust">
-                  {({ className, tokens, getLineProps, getTokenProps }) => (
-                    <pre className={cn(className, "text-xs")}>
-                      {tokens.map((line, index) => (
-                        <div key={`row-${index}`} {...getLineProps({ line })}>
-                          {line.map((token, index) => (
-                            <span key={`token-${index}`} {...getTokenProps({ token })} />
-                          ))}
-                        </div>
-                      ))}
-                    </pre>
-                  )}
-                </Highlight>
-              </div>
-            </DialogContent>
-          </Dialog>
-        )
-      );
-    },
-  },
 ];

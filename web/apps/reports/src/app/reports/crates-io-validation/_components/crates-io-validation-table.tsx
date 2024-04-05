@@ -65,7 +65,12 @@ export function CratesIoValidationTable<TData, TValue>({ columns, data }: Crates
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="subtitle">Crates ({formatNumber(table.getRowCount())})</h2>
+        <h2 className="subtitle">
+          Crates{" "}
+          <span className="ml-2 text-sm text-muted-foreground font-normal">
+            {formatNumber(table.getRowCount())} results
+          </span>
+        </h2>
         <TableToolbar
           statuses={[
             {
@@ -85,6 +90,16 @@ export function CratesIoValidationTable<TData, TValue>({ columns, data }: Crates
               label: "RunFail",
             },
           ]}
+          customProfiles={[
+            {
+              value: true,
+              label: "True",
+            },
+            {
+              value: false,
+              label: "False",
+            },
+          ]}
           globalFilter={globalFilter}
           setGlobalFilter={setGlobalFilter}
           table={table}
@@ -92,7 +107,7 @@ export function CratesIoValidationTable<TData, TValue>({ columns, data }: Crates
       </div>
 
       <div className="overflow-auto rounded border">
-        <Table>
+        <Table className="table-fixed">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
@@ -108,8 +123,10 @@ export function CratesIoValidationTable<TData, TValue>({ columns, data }: Crates
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+                  {row.getVisibleCells().map((cell, index, { length }) => (
+                    <TableCell colSpan={index === length - 1 ? 4 : 1} key={cell.id}>
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </TableCell>
                   ))}
                 </TableRow>
               ))

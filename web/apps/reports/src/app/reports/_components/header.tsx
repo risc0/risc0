@@ -16,7 +16,7 @@ export function Header() {
       <div className="flex flex-row justify-end gap-2">
         <ThemeToggle />
 
-        <Link target="_blank" href="https://github.com/risc0/risc0/">
+        <Link tabIndex={-1} target="_blank" href="https://github.com/risc0/risc0/">
           <Button variant="ghost" size="sm" startIcon={<GithubIcon />}>
             GitHub
           </Button>

@@ -14,10 +14,21 @@ type TableToolbarProps<TData> = {
     value: string;
     icon?: ComponentType<{ className?: string }>;
   }[];
+  customProfiles?: {
+    label: string;
+    value: boolean;
+    icon?: ComponentType<{ className?: string }>;
+  }[];
   setGlobalFilter: Dispatch<SetStateAction<string>>;
 };
 
-export function TableToolbar<TData>({ table, statuses, setGlobalFilter, globalFilter }: TableToolbarProps<TData>) {
+export function TableToolbar<TData>({
+  table,
+  statuses,
+  customProfiles,
+  setGlobalFilter,
+  globalFilter,
+}: TableToolbarProps<TData>) {
   return (
     <div className="flex items-center justify-end gap-2">
       <Input
@@ -28,7 +39,15 @@ export function TableToolbar<TData>({ table, statuses, setGlobalFilter, globalFi
       />
 
       {statuses && table.getColumn("status") && (
-        <TableFacetedFilter column={table.getColumn("status")} title="Status" options={statuses} />
+        <TableFacetedFilter column={table.getColumn("status")} title="Build Status" options={statuses} />
+      )}
+
+      {customProfiles && table.getColumn("custom_profile") && (
+        <TableFacetedFilter
+          column={table.getColumn("custom_profile")}
+          title="Custom Profile"
+          options={customProfiles}
+        />
       )}
 
       <TableViewOptions table={table} />

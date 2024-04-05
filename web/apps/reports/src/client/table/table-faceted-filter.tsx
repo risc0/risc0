@@ -21,14 +21,14 @@ interface TableFacetedFilterProps<TData, TValue> {
   title?: string;
   options: {
     label: string;
-    value: string;
+    value: string | boolean;
     icon?: ComponentType<{ className?: string }>;
   }[];
 }
 
 export function TableFacetedFilter<TData, TValue>({ column, title, options }: TableFacetedFilterProps<TData, TValue>) {
   const facets = column?.getFacetedUniqueValues();
-  const selectedValues = new Set(column?.getFilterValue() as string[]);
+  const selectedValues = new Set(column?.getFilterValue() as (string | boolean)[]);
 
   return (
     <Popover>
@@ -40,6 +40,7 @@ export function TableFacetedFilter<TData, TValue>({ column, title, options }: Ta
           className={cn(selectedValues?.size === 0 && "border-dashed")}
         >
           {title}
+
           {selectedValues?.size > 0 && (
             <>
               <Separator orientation="vertical" className="mx-2 h-4" />
@@ -56,7 +57,7 @@ export function TableFacetedFilter<TData, TValue>({ column, title, options }: Ta
                     .filter((option) => selectedValues.has(option.value))
                     .map((option) => (
                       <Badge
-                        key={option.value}
+                        key={`options-${option.value}`}
                         className={cn(
                           "rounded-full p-2 py-0 text-[10px]",
                           option.label === "Success"
@@ -84,9 +85,10 @@ export function TableFacetedFilter<TData, TValue>({ column, title, options }: Ta
             <CommandGroup>
               {options.map((option) => {
                 const isSelected = selectedValues.has(option.value);
+
                 return (
                   <CommandItem
-                    key={option.value}
+                    key={`options-${option.value}`}
                     onSelect={() => {
                       if (isSelected) {
                         selectedValues.delete(option.value);
@@ -117,6 +119,7 @@ export function TableFacetedFilter<TData, TValue>({ column, title, options }: Ta
                 );
               })}
             </CommandGroup>
+
             {selectedValues.size > 0 && (
               <>
                 <CommandSeparator />
