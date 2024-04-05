@@ -4,6 +4,7 @@
 // could probably improve a lot
 import { Button } from "@risc0/ui/button";
 import { Separator } from "@risc0/ui/separator";
+import { Skeleton } from "@risc0/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@risc0/ui/tabs";
 import truncate from "lodash-es/truncate";
 import { DownloadIcon } from "lucide-react";
@@ -190,7 +191,9 @@ export function Charts() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="title-sm">Benchmarks</h1>
-          {lastUpdate && <p className="text-muted-foreground text-xs">Last Update: {lastUpdate}</p>}
+          <p className="text-muted-foreground text-xs">
+            Last Update: {lastUpdate || <Skeleton className="inline-block h-2 w-28" />}
+          </p>
         </div>
         <div className="flex items-center gap-3">
           <Button id="dl-button" size="sm" variant="ghost" startIcon={<DownloadIcon />}>

@@ -67,7 +67,7 @@ export function CratesIoValidationTable<TData, TValue>({ columns, data }: Crates
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="subtitle">
           Crates{" "}
-          <span className="ml-2 text-sm text-muted-foreground font-normal">
+          <span className="ml-2 font-normal text-muted-foreground text-sm">
             {formatNumber(table.getRowCount())} results
           </span>
         </h2>

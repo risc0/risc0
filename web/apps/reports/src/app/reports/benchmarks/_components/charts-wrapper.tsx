@@ -9,7 +9,7 @@ export function ChartsWrapper() {
 
   if (typeof window !== "undefined") {
     return (
-      <div className="container max-w-screen-3xl pt-4">
+      <>
         {(renderCharts || window.BENCHMARK_DATA) && <Charts />}
 
         <Script
@@ -19,7 +19,7 @@ export function ChartsWrapper() {
             setRenderCharts(true);
           }}
         />
-      </div>
+      </>
     );
   }
 

@@ -33,7 +33,7 @@ const REPORTS = [
 
 export default function ReportsPage() {
   return (
-    <div className="container grid max-w-screen-lg gap-4 pt-4 grid-cols-1 sm:grid-cols-2">
+    <div className="container grid max-w-screen-lg grid-cols-1 gap-4 pt-4 sm:grid-cols-2">
       {REPORTS.map(({ label, href, description, cta }, index) => (
         <Link href={href} className="group transition-opacity hover:opacity-70">
           <Card className="group-hover:-translate-y-1 flex h-full flex-col shadow-sm transition-transform">
@@ -47,7 +47,7 @@ export default function ReportsPage() {
                 height={147}
                 priority
                 className={cn(
-                  "dark:invert user-select-none pointer-events-none h-[147px] w-full rounded object-contain object-center",
+                  "user-select-none pointer-events-none h-[147px] w-full rounded object-contain object-center dark:invert",
                   index === 0 && "object-right",
                 )}
                 src={`/graph-${index}.svg`}
