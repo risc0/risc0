@@ -14,16 +14,16 @@ const columnHelper = createColumnHelper<CratesIoValidationTable>();
 
 export const cratesIoValidationTableColumns = [
   columnHelper.accessor("name", {
-    header: ({ column }) => <TableColumnHeader column={column} title="Name" />,
+    header: ({ column }) => <TableColumnHeader column={column} title="Crate" />,
     cell: (info) => <div className="font-mono text-xs">{info.getValue()}</div>,
   }),
   columnHelper.accessor("version", {
-    header: ({ column }) => <TableColumnHeader column={column} title="Version" />,
+    header: ({ column }) => <TableColumnHeader column={column} title="Crate Version" />,
     cell: (info) => <div className="font-mono text-xs">{info.getValue()}</div>,
   }),
   columnHelper.accessor("status", {
     filterFn: (row, id, value) => value.includes(row.getValue(id)),
-    header: ({ column }) => <TableColumnHeader column={column} title="Status" />,
+    header: ({ column }) => <TableColumnHeader column={column} title="Build Status" />,
     cell: (info) => (
       <Badge
         className={cn(
@@ -41,11 +41,23 @@ export const cratesIoValidationTableColumns = [
     ),
   }),
   columnHelper.accessor("custom_profile", {
-    header: ({ column }) => <TableColumnHeader column={column} title="Custom Profile" />,
+    header: ({ column }) => (
+      <TableColumnHeader
+        description="The zkVM can be configured with a custom profile to fix the build errors of a crate"
+        column={column}
+        title="Custom Profile"
+      />
+    ),
     cell: (info) => <div className="font-mono text-xs capitalize">{String(info.getValue())}</div>,
   }),
   columnHelper.accessor("build_errors", {
-    header: ({ column }) => <TableColumnHeader column={column} title="Build Errors" />,
+    header: ({ column }) => (
+      <TableColumnHeader
+        column={column}
+        title="Build Errors"
+        description="Error logs produced while building the crate in the zkVM"
+      />
+    ),
     cell: (info) => {
       return (
         info.getValue() && (
