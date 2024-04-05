@@ -146,7 +146,7 @@ impl RustupToolchain {
 
 /// A rustup toolchain manager
 #[derive(Clone, Debug)]
-pub struct CToolchain {
+pub struct CppToolchain {
     /// The path of the rustup toolchain
     pub path: PathBuf,
 }
