@@ -15,8 +15,7 @@
 // This is based on cargo-wasix: https://github.com/wasix-org/cargo-wasix
 
 use std::{
-    fs::{self, File},
-    io::Write,
+    fs,
     path::{Path, PathBuf},
     process::Command,
 };
