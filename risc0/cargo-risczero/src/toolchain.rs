@@ -151,7 +151,7 @@ pub struct CppToolchain {
     pub path: PathBuf,
 }
 
-impl CToolchain {
+impl CppToolchain {
     fn get_subdir(path: &Path) -> Result<PathBuf> {
         let sub_dir: Vec<std::result::Result<std::fs::DirEntry, std::io::Error>> =
             std::fs::read_dir(path)?.into_iter().collect();
