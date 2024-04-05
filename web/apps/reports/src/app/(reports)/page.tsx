@@ -5,22 +5,22 @@ import Image from "next/image";
 const REPORTS = [
   {
     label: "Crates.io Validation",
-    href: "/reports/crates-io-validation",
+    href: "/crates-io-validation",
     description: "View the latest Crates.io validation results",
   },
   {
     label: "Benchmarks",
-    href: "/reports/benchmarks",
+    href: "/benchmarks",
     description: "View the latest benchmarks for the RISC Zero platform",
   },
   {
     label: "Applications Benchmarks",
-    href: "/reports/applications-benchmarks",
+    href: "/applications-benchmarks",
     description: "View the latest applications benchmarks for the RISC Zero platform",
   },
   {
     label: "Datasheet",
-    href: "/reports/datasheet",
+    href: "/datasheet",
     description: "View the latest datasheet for the RISC Zero platform",
   },
 ] as const;

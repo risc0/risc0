@@ -1,3 +1,4 @@
+import { Link } from "@risc0/ui/link";
 import { Separator } from "@risc0/ui/separator";
 import { truncate } from "@risc0/ui/utils/truncate";
 import type { Metadata } from "next";
@@ -12,7 +13,19 @@ const FILENAMES_TO_TITLES = {
   "macOS-apple_m2_pro.json": "Metal on Apple M2 Pro",
   "Linux-nvidia_rtx_3090_ti.json": "CUDA on NVIDIA RTX 3090 Ti",
   "macOS-cpu.json": "CPU only on Apple M2 Pro",
-  "Linux-cpu.json": "CPU only on c6i.8xlarge",
+  "Linux-cpu.json": (
+    <>
+      CPU only on{" "}
+      <a
+        className="link underline"
+        target="_blank"
+        href="https://instances.vantage.sh/aws/ec2/c6i.8xlarge"
+        rel="noreferrer"
+      >
+        c6i.8xlarge
+      </a>
+    </>
+  ),
 } as const;
 
 export const metadata: Metadata = {
@@ -42,7 +55,7 @@ export default async function DatasheetPage() {
       <div className="mt-6 grid grid-cols-1 gap-8 xl:grid-cols-2">
         {data.map((dataArray, index) => (
           <DatasheetTable
-            key={Object.values(FILENAMES_TO_TITLES)[index]}
+            key={Object.keys(FILENAMES_TO_TITLES)[index]}
             data={dataArray}
             title={Object.values(FILENAMES_TO_TITLES)[index] ?? ""}
             columns={datasheetTableColumns}

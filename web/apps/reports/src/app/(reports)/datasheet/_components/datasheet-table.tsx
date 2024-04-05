@@ -14,7 +14,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { useState } from "react";
+import { type ReactNode, useState } from "react";
 import { TableToolbar } from "shared/client/table/table-toolbar";
 import { tableFuzzyFilter } from "shared/utils/table-fuzzy-filter";
 
@@ -23,7 +23,7 @@ const MAX_AMOUNT_OF_ROWS = 5;
 type DatasheetTableProps<TData, TValue> = {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
-  title: string;
+  title: ReactNode;
 };
 
 export function DatasheetTable<TData, TValue>({ title, columns, data }: DatasheetTableProps<TData, TValue>) {

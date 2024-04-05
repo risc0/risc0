@@ -40,7 +40,7 @@ export default async function ApplicationsBenchmarksPage({ params }) {
         <div className="flex items-center overflow-auto">
           <TabsList>
             {Object.keys(FILENAMES_TO_TITLES).map((filename, index) => (
-              <Link key={filename} href={`/reports/applications-benchmarks/${filename}`}>
+              <Link key={filename} href={`/applications-benchmarks/${filename}`}>
                 <TabsTrigger value={filename}>{Object.values(FILENAMES_TO_TITLES)[index]}</TabsTrigger>
               </Link>
             ))}

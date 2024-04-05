@@ -12,17 +12,6 @@ const config = {
   reactStrictMode: true,
   swcMinify: true,
   transpilePackages: ["@risc0/ui"],
-
-  // biome-ignore lint/suspicious/useAwait: not needed
-  async redirects() {
-    return [
-      {
-        source: "/",
-        destination: "/reports",
-        permanent: true,
-      },
-    ];
-  },
 };
 
 export default withBundleAnalyzer({
