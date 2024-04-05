@@ -15,12 +15,12 @@
     "@tanstack/match-sorter-utils": "8.15.1",
     "@tanstack/react-table": "8.15.3",
     "@types/jest": "29.5.12",
-    "@types/node": "20.12.2",
+    "@types/node": "20.12.4",
     "@types/react": "18.2.74",
-    "@types/react-dom": "18.2.23",
+    "@types/react-dom": "18.2.24",
     "@vercel/analytics": "1.2.2",
     "deepmerge": "4.3.1",
-    "lucide-react": "0.364.0",
+    "lucide-react": "0.365.0",
     "next": "canary",
     "next-themes": "0.3.0",
     "nextjs13-progress": "1.2.5",
@@ -29,7 +29,7 @@
     "react-dom": "18.2.0",
     "sharp": "0.33.3",
     "turbo": "1.13.2",
-    "typescript": "5.4.3",
+    "typescript": "5.4.4",
     "zod": "3.22.4"
   }
 }
