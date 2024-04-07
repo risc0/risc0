@@ -1,5 +1,7 @@
 import { isNil } from "lodash-es";
 
+const UNITS = ["B", "KB", "MB", "GB", "TB"] as const;
+
 // Function to format bytes
 export function formatBytes(bytes: number) {
   if (isNil(bytes)) {
@@ -7,13 +9,12 @@ export function formatBytes(bytes: number) {
   }
 
   let unitIndex = 0;
-  const units = ["B", "KB", "MB", "GB", "TB"] as const;
 
-  while (bytes >= 1024 && unitIndex < units.length - 1) {
+  while (bytes >= 1024 && unitIndex < UNITS.length - 1) {
     // biome-ignore lint/style/noParameterAssign: not my code
     bytes /= 1024;
     unitIndex++;
   }
 
-  return `${bytes.toFixed(2)}${units[unitIndex]}`;
+  return `${bytes.toFixed(2)}${UNITS[unitIndex]}`;
 }
