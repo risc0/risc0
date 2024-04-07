@@ -12,4 +12,4 @@ const applicationsBenchmarksTableSchema = z.object({
   proof_bytes: z.string(),
 });
 
-export type ApplicationsBenchmarksTable = z.infer<typeof applicationsBenchmarksTableSchema>;
+export type ApplicationsBenchmarksTableSchema = z.infer<typeof applicationsBenchmarksTableSchema>;

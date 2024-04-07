@@ -10,4 +10,4 @@ const datasheetTableSchema = z.object({
   throughput: z.number(),
 });
 
-export type DatasheetTable = z.infer<typeof datasheetTableSchema>;
+export type DatasheetTableSchema = z.infer<typeof datasheetTableSchema>;

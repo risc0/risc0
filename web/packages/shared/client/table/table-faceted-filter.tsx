@@ -28,7 +28,7 @@ interface TableFacetedFilterProps<TData, TValue> {
 
 export function TableFacetedFilter<TData, TValue>({ column, title, options }: TableFacetedFilterProps<TData, TValue>) {
   const facets = column?.getFacetedUniqueValues();
-  const selectedValues = new Set(column?.getFilterValue() as (string | boolean)[]);
+  const selectedValues = new Set<string | boolean>(column?.getFilterValue() as (string | boolean)[]);
 
   return (
     <Popover>

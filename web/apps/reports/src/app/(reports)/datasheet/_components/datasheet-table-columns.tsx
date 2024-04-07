@@ -5,9 +5,9 @@ import { TableColumnHeader } from "shared/client/table/table-column-header";
 import { formatBytes } from "shared/utils/format-bytes";
 import { formatDuration } from "shared/utils/format-duration";
 import { formatHz } from "shared/utils/format-hz";
-import type { DatasheetTable } from "./datasheet-table-schema";
+import type { DatasheetTableSchema } from "./datasheet-table-schema";
 
-const columnHelper = createColumnHelper<DatasheetTable>();
+const columnHelper = createColumnHelper<DatasheetTableSchema>();
 
 export const datasheetTableColumns = [
   {

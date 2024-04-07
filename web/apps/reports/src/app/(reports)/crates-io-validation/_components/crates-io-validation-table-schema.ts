@@ -8,4 +8,4 @@ const cratesIoValidationTableSchema = z.object({
   build_errors: z.string().optional(),
 });
 
-export type CratesIoValidationTable = z.infer<typeof cratesIoValidationTableSchema>;
+export type CratesIoValidationTableSchema = z.infer<typeof cratesIoValidationTableSchema>;

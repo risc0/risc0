@@ -7,6 +7,7 @@ import { fetchDatasheet } from "./_actions/fetch-datasheet";
 import { fetchDatasheetCommitHash } from "./_actions/fetch-datasheet-commit-hash";
 import { DatasheetTable } from "./_components/datasheet-table";
 import { datasheetTableColumns } from "./_components/datasheet-table-columns";
+import type { DatasheetTableSchema } from "./_components/datasheet-table-schema";
 
 const FILENAMES_TO_TITLES = {
   "macOS-apple_m2_pro.json": "Metal on Apple M2 Pro",
@@ -30,7 +31,7 @@ export default async function DatasheetPage() {
   const urls = Object.keys(FILENAMES_TO_TITLES);
   const commitHash = await fetchDatasheetCommitHash();
   const dataPromises = urls.map((url) => fetchDatasheet(url));
-  const data = await Promise.all(dataPromises);
+  const data: DatasheetTableSchema[][] = await Promise.all(dataPromises);
 
   return (
     <div className="container max-w-screen-3xl pt-4">

@@ -1,7 +1,7 @@
 @font-face {
   /* includes font-weights from 600-900 */
   font-family: "Europa";
-  src: url("/fonts/EuropaGroteskSH-Med.otf");
+  src: url("/fonts/EuropaGroteskSH-Med.otf") format("opentype");
   font-weight: 600 900;
   font-style: normal;
   font-display: swap;
@@ -10,7 +10,7 @@
 @font-face {
   /* includes font-weights from 400-500 */
   font-family: "Europa";
-  src: url("/fonts/EuropaGroteskSH-Reg.otf");
+  src: url("/fonts/EuropaGroteskSH-Reg.otf") format("opentype");
   font-weight: 400 500;
   font-style: normal;
   font-display: swap;
@@ -19,7 +19,7 @@
 @font-face {
   /* includes font-weights from 100-300 */
   font-family: "Europa";
-  src: url("/fonts/EuropaGroteskSH-Lig.otf");
+  src: url("/fonts/EuropaGroteskSH-Lig.otf") format("opentype");
   font-weight: 100 300;
   font-style: normal;
   font-display: swap;

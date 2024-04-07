@@ -8,7 +8,8 @@
     "build:analyze": "ANALYZE=true next build",
     "dev": "next dev --turbo",
     "start": "next start",
-    "test": "bun test spec"
+    "test": "bun test spec",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "shared": "*"

@@ -2,7 +2,7 @@ import "@risc0/ui/styles/globals.css";
 import "shared/styles/styles.css";
 
 import { cn } from "@risc0/ui/cn";
-import { JetBrains_Mono as FontMono } from "next/font/google";
+import { JetBrains_Mono } from "next/font/google";
 import type { PropsWithChildren } from "react";
 import { Providers } from "shared/client/providers/providers";
 
@@ -20,7 +20,7 @@ export const metadata = {
   ],
 };
 
-const fontMono = FontMono({
+const fontMono = JetBrains_Mono({
   subsets: ["latin"],
   variable: "--font-jetbrains-mono",
 });

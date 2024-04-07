@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "bun test spec"
+    "test": "bun test spec",
+    "typecheck": "tsc --noEmit"
   }
 }
