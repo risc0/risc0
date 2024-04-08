@@ -1,7 +1,7 @@
 # Security Model
 
 RISC Zero is proud to offer an end-to-end solution for verifiable computation.
-Users can generate proofs for correct execution of Rust code using the [RISC Zero zkVM],
+Users can generate proofs for correct execution of software code using the [RISC Zero zkVM],
 and they can verify those proofs on-chain using our permissionless [verifier contract] on Ethereum networks such as Sepolia.
 
 The rest of this document offers an overview of the security model for applications that rely on RISC Zero's tooling.
@@ -30,7 +30,7 @@ In order to use these components, developers provide:
 - the Rust code for their zkVM guest program.
 - a smart contract on-chain whose behavior will depend on the output of the Verifier Contract
 
-**We strongly recommend third-party audits of each of these two components before deploying your application to production.**
+**RISC Zero technology cannot prevent many types of security issues in user guest programs (e.g. applications) or contracts. It is necessary for zkVM adopters to validate the security of guest programs and contracts. This includes secure development life-cycles and external security auditing by qualified providers.**
 
 ![Security Model Diagram](../static/diagrams/security-model-diagram.svg)
 
