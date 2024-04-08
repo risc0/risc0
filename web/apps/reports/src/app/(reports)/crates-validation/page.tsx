@@ -1,3 +1,4 @@
+import { Link } from "@risc0/ui/link";
 import { Separator } from "@risc0/ui/separator";
 import { truncate } from "@risc0/ui/utils/truncate";
 import type { Metadata } from "next";
@@ -24,7 +25,11 @@ export default async function CratesIoValidationPage() {
         <div>
           <h1 className="title-sm">Crates.io Validation</h1>
           <p className="text-muted-foreground text-sm">
-            Each night, we test compatibility between each of the top 1000 Rust crates and the RISC Zero zkVM
+            Each night, we test compatibility between each of the{" "}
+            <Link href="https://crates.io/crates?sort=downloads" href="_blank" className="link">
+              top 1000 Rust crates
+            </Link>{" "}
+            and the RISC Zero zkVM
           </p>
         </div>
         {mostRecentHash && (
