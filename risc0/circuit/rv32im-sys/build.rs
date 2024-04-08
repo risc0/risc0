@@ -41,6 +41,8 @@ fn build_cpu_kernels() {
 fn build_metal_kernels() {
     KernelBuild::new(KernelType::Metal)
         .file("kernels/metal/eval_check.metal")
+        .file("kernels/metal/step_compute_accum.metal")
+        .file("kernels/metal/step_verify_accum.metal")
         .compile("metal_kernel");
 }
 

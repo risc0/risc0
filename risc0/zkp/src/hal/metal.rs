@@ -47,6 +47,7 @@ const KERNEL_NAMES: &[&str] = &[
     "eltwise_copy_fp",
     "eltwise_mul_factor_fp",
     "eltwise_sum_fpext",
+    "eltwise_zeroize",
     "fri_fold",
     "gather_sample",
     "mix_poly_coeffs",
@@ -54,12 +55,13 @@ const KERNEL_NAMES: &[&str] = &[
     "multi_ntt_fwd_step",
     "multi_ntt_rev_step",
     "multi_poly_eval",
-    "sha_fold",
-    "sha_rows",
     "poseidon_fold",
     "poseidon_rows",
     "poseidon2_fold",
     "poseidon2_rows",
+    "prefix_product",
+    "sha_fold",
+    "sha_rows",
     "zk_shift",
 ];
 
@@ -289,7 +291,7 @@ pub enum KernelArg<'a> {
 }
 
 impl<T> BufferImpl<T> {
-    fn new(name: &'static str, device: &Device, cmd_queue: CommandQueue, size: usize) -> Self {
+    pub fn new(name: &'static str, device: &Device, cmd_queue: CommandQueue, size: usize) -> Self {
         let bytes_len = size * mem::size_of::<T>();
         let options = MTLResourceOptions::StorageModeManaged;
         let buffer = device.new_buffer(bytes_len as u64, options);

@@ -166,6 +166,18 @@ pub trait CircuitHal<H: Hal> {
         po2: usize,
         steps: usize,
     );
+
+    fn accumulate(
+        &self,
+        ctrl: &H::Buffer<H::Elem>,
+        io: &H::Buffer<H::Elem>,
+        data: &H::Buffer<H::Elem>,
+        mix: &H::Buffer<H::Elem>,
+        accum: &H::Buffer<H::Elem>,
+        steps: usize,
+    );
+
+    // fn step_verify_accum(&self);
 }
 
 struct MemoryTracker {

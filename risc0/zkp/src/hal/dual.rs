@@ -400,4 +400,16 @@ where
         );
         check.assert_eq();
     }
+
+    fn accumulate(
+        &self,
+        _ctrl: &<DualHal<F, LH, RH> as Hal>::Buffer<F::Elem>,
+        _io: &<DualHal<F, LH, RH> as Hal>::Buffer<F::Elem>,
+        _data: &<DualHal<F, LH, RH> as Hal>::Buffer<F::Elem>,
+        _mix: &<DualHal<F, LH, RH> as Hal>::Buffer<F::Elem>,
+        _accum: &<DualHal<F, LH, RH> as Hal>::Buffer<F::Elem>,
+        _steps: usize,
+    ) {
+        todo!()
+    }
 }

@@ -49,9 +49,9 @@ where
 {
     fn eval_check(
         &self,
-        check: &H::Buffer<BabyBearElem>,
-        groups: &[&H::Buffer<BabyBearElem>],
-        globals: &[&H::Buffer<BabyBearElem>],
+        check: &CpuBuffer<BabyBearElem>,
+        groups: &[&CpuBuffer<BabyBearElem>],
+        globals: &[&CpuBuffer<BabyBearElem>],
         poly_mix: BabyBearExtElem,
         po2: usize,
         steps: usize,
@@ -98,5 +98,17 @@ where
                 check[i * domain + cycle] = ret.elems()[i];
             }
         });
+    }
+
+    fn accumulate(
+        &self,
+        _ctrl: &CpuBuffer<BabyBearElem>,
+        _io: &CpuBuffer<BabyBearElem>,
+        _data: &CpuBuffer<BabyBearElem>,
+        _mix: &CpuBuffer<BabyBearElem>,
+        _accum: &CpuBuffer<BabyBearElem>,
+        _steps: usize,
+    ) {
+        todo!()
     }
 }

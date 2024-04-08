@@ -76,6 +76,7 @@ fn build_metal_kernels() {
             "ntt.metal",
             "poseidon.metal",
             "poseidon2.metal",
+            "product.metal",
             "sha.metal",
             "zk.metal",
         ],
