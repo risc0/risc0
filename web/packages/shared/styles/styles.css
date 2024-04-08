@@ -36,21 +36,6 @@
   @apply tracking-wider;
 }
 
-html {
-  /* prevent layout shifts when the scrollbar appears */
-  scrollbar-gutter: stable;
-}
-
-body[style] {
-  margin: 0 auto !important;
-}
-
-body[data-scroll-locked] {
-  overflow: hidden;
-  position: fixed;
-  width: 100%;
-}
-
 .font-mono {
   /* reset the `tracking-wider` on the monospace font */
   letter-spacing: initial;
