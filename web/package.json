@@ -10,7 +10,7 @@
   "dependencies": {
     "@next/bundle-analyzer": "14.1.4",
     "@poppinss/intl-formatter": "3.0.2",
-    "@risc0/ui": "0.0.43",
+    "@risc0/ui": "0.0.45",
     "@t3-oss/env-nextjs": "0.9.2",
     "@tanstack/match-sorter-utils": "8.15.1",
     "@tanstack/react-table": "8.15.3",

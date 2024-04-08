@@ -5,6 +5,7 @@ import { CopyButton } from "shared/client/components/copy-button";
 import { fetchCratesValidationResults } from "./_actions/fetch-crates-validation-results";
 import { findMostRecentHash } from "./_actions/find-most-recent-hash";
 import { CratesIoValidationSummary } from "./_components/crates-io-validation-summary";
+import { CratesIoValidationSummaryHeader } from "./_components/crates-io-validation-summary-header";
 import { CratesIoValidationTable } from "./_components/crates-io-validation-table";
 import { cratesIoValidationTableColumns } from "./_components/crates-io-validation-table-columns";
 import type { CratesIoValidationTableSchema } from "./_components/crates-io-validation-table-schema";
@@ -36,6 +37,7 @@ export default async function CratesIoValidationPage() {
       <Separator className="mt-2" />
 
       <div className="mt-6">
+        <CratesIoValidationSummaryHeader data={cratesValidationResults} />
         <CratesIoValidationSummary data={cratesValidationResults} />
         <CratesIoValidationTable data={cratesValidationResults} columns={cratesIoValidationTableColumns} />
       </div>
