@@ -33,7 +33,7 @@ export default function ReportsPage() {
           <Card className="group-hover:-translate-y-1 flex h-full min-h-44 w-full flex-col items-center justify-between gap-1 px-8 py-4 shadow-sm transition-transform md:flex-row md:gap-12">
             <div>
               <CardTitle className="text-xl">{label}</CardTitle>
-              <CardDescription className="text-xs">{description}</CardDescription>
+              <CardDescription className="text-sm">{description}</CardDescription>
             </div>
             <div className="flex min-h-[160px] min-w-[220px] justify-center">
               <Image

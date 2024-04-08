@@ -11,10 +11,10 @@ export function Header() {
       <Link href="/" className="flex flex-col gap-2 transition-opacity hover:opacity-70">
         <Image width={59} height={43} src="/risczero.webp" alt="RISC Zero" className="invert dark:invert-0" />
 
-        <h1 className="text-pretty text-[10px] text-primary">Reports</h1>
+        <h1 className="truncate text-[10px] text-primary">Benchmarks & Reports</h1>
       </Link>
 
-      <div className="ml-12 flex w-full flex-row items-center justify-between gap-12">
+      <div className="ml-8 flex w-full flex-row items-center justify-between gap-12">
         <Breadcrumbs />
 
         <div className="flex flex-row justify-end gap-2">
