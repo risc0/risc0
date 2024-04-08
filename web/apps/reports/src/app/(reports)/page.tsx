@@ -29,7 +29,7 @@ export default function ReportsPage() {
   return (
     <div className="container grid max-w-screen-xl grid-cols-1 gap-4 pt-4 lg:grid-cols-2">
       {REPORTS.map(({ label, href, description }, index) => (
-        <Link href={href} className="group transition-opacity hover:opacity-70">
+        <Link key={href} href={href} className="group transition-opacity hover:opacity-70">
           <Card className="group-hover:-translate-y-1 flex h-full min-h-44 w-full flex-col items-center justify-between gap-1 px-8 py-4 shadow-sm transition-transform md:flex-row md:gap-12">
             <div>
               <CardTitle className="text-xl">{label}</CardTitle>
