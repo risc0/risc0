@@ -22,9 +22,14 @@ export function ThemeToggle({ className }: { className?: string }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild className={className}>
-        <Button size="sm" variant="ghost" startIcon={<SunMoonIcon />}>
-          Toggle Theme
-        </Button>
+        <div>
+          <Button size="sm" className="hidden sm:flex" variant="ghost" startIcon={<SunMoonIcon />}>
+            Toggle Theme
+          </Button>
+          <Button size="icon-sm" className="flex sm:hidden" variant="ghost" startIcon={<SunMoonIcon />}>
+            <span className="sr-only">Toggle Theme</span>
+          </Button>
+        </div>
       </DropdownMenuTrigger>
 
       <DropdownMenuContent align="end">

@@ -17,19 +17,20 @@ export default async function CratesIoValidationPage() {
   const cratesValidationResults: CratesIoValidationTableSchema[] = await fetchCratesValidationResults(mostRecentHash);
 
   return (
-    <div className="container max-w-screen-3xl pt-4">
-      <div className="flex items-center justify-between">
-        <h1 className="title-sm">Crates.io Validation</h1>
+    <div className="container max-w-screen-3xl">
+      <div className="flex items-center justify-between gap-8">
+        <div>
+          <h1 className="title-sm">Crates.io Validation</h1>
+          <p className="text-muted-foreground text-sm">
+            Each night, we test compatibility between each of the top 1000 Rust crates and the RISC Zero zkVM
+          </p>
+        </div>
         {mostRecentHash && (
           <CopyButton size="sm" variant="ghost" value={mostRecentHash}>
             Commit Hash<span className="hidden sm:inline">: {truncate(mostRecentHash, 15)}</span>
           </CopyButton>
         )}
       </div>
-
-      <p className="text-muted-foreground text-sm">
-        Each night, we test compatibility between each of the top 1000 Rust crates and the RISC Zero zkVM
-      </p>
 
       <Separator className="mt-2" />
 

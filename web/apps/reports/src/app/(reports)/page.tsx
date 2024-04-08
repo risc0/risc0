@@ -5,7 +5,7 @@ import Image from "next/image";
 const REPORTS = [
   {
     label: "Crates.io Validation",
-    href: "/crates-io-validation",
+    href: "/crates-validation",
     description: "View the latest Crates.io validation results",
   },
   {

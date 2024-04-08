@@ -34,8 +34,8 @@ export default async function DatasheetPage() {
   const data: DatasheetTableSchema[][] = await Promise.all(dataPromises);
 
   return (
-    <div className="container max-w-screen-3xl pt-4">
-      <div className="flex items-center justify-between">
+    <div className="container max-w-screen-3xl">
+      <div className="flex items-center justify-between gap-8">
         <h1 className="title-sm">Datasheet</h1>
         {commitHash && (
           <CopyButton size="sm" variant="ghost" value={commitHash}>

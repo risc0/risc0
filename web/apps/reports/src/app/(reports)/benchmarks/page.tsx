@@ -7,7 +7,7 @@ export const metadata: Metadata = {
 
 export default function BenchmarksPage() {
   return (
-    <div className="container max-w-screen-3xl pt-4">
+    <div className="container max-w-screen-3xl">
       <ChartsWrapper />
     </div>
   );
