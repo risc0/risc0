@@ -1,12 +1,17 @@
 {
-  "name": "@risc0/reports",
+  "name": "reports",
   "version": "0.0.1",
   "private": true,
   "type": "module",
   "scripts": {
     "build": "next build",
+    "build:analyze": "ANALYZE=true next build",
     "dev": "next dev --turbo",
     "start": "next start",
-    "test": "bun test spec"
+    "test": "bun test spec",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "shared": "*"
   }
 }

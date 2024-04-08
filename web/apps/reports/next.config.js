@@ -1,25 +1,18 @@
 await import("./src/env.js");
+import withBundleAnalyzer from "@next/bundle-analyzer";
 
 /** @type {import("next").NextConfig} */
 const config = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-  experimental: {
-    ppr: true,
-  },
+  reactStrictMode: true,
   transpilePackages: ["@risc0/ui"],
-
-  // biome-ignore lint/suspicious/useAwait: not needed
-  async redirects() {
-    return [
-      {
-        source: "/",
-        destination: "/reports",
-        permanent: true,
-      },
-    ];
+  experimental: {
+    caseSensitiveRoutes: true,
   },
 };
 
-export default config;
+export default withBundleAnalyzer({
+  enabled: process.env.ANALYZE === "true",
+})(config);

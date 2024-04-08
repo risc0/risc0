@@ -1,7 +1,7 @@
 "use client"; // Error components must be Client components
 
 import { Alert, AlertDescription, AlertTitle } from "@risc0/ui/alert";
-import Button from "@risc0/ui/button";
+import { Button } from "@risc0/ui/button";
 import { AlertTriangleIcon } from "lucide-react";
 import { useEffect } from "react";
 
