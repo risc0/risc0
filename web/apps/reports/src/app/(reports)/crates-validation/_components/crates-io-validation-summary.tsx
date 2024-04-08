@@ -1,9 +1,10 @@
 import { Badge } from "@risc0/ui/badge";
 import { cn } from "@risc0/ui/cn";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@risc0/ui/tooltip";
+import type { CratesIoValidationTableSchema } from "./crates-io-validation-table-schema";
 
 type CratesIoValidationSummaryProps = {
-  data: { status: "Success" | "BuildFail" | "RunFail" | "Skipped"; name: string; version: string }[];
+  data: CratesIoValidationTableSchema[];
 };
 
 export function CratesIoValidationSummary({ data }: CratesIoValidationSummaryProps) {
