@@ -1,11 +1,10 @@
 import "@risc0/ui/styles/globals.css";
+import "shared/styles/styles.css";
 
-import { Analytics } from "@vercel/analytics/react";
-import { GeistMono } from "geist/font/mono";
-import { GeistSans } from "geist/font/sans";
-import { Next13NProgress } from "nextjs13-progress";
+import { cn } from "@risc0/ui/cn";
+import { JetBrains_Mono } from "next/font/google";
 import type { PropsWithChildren } from "react";
-import Providers from "~/client/providers";
+import { Providers } from "shared/client/providers/providers";
 
 export const metadata = {
   title: {
@@ -21,20 +20,16 @@ export const metadata = {
   ],
 };
 
+const fontMono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-jetbrains-mono",
+});
+
 export default function RootLayout({ children }: PropsWithChildren) {
   return (
-    <html
-      lang="en"
-      suppressHydrationWarning
-      className={`${
-        GeistMono.variable
-        // biome-ignore lint/nursery/useSortedClasses: ignore
-      } ${GeistSans.variable} h-full`}
-    >
-      <body className="flex min-h-full flex-col">
+    <html lang="en" suppressHydrationWarning className="h-full">
+      <body className={cn("flex min-h-full flex-col font-sans", fontMono.variable)}>
         <Providers>{children}</Providers>
-        <Next13NProgress color="#4E46E5" height={1} showOnShallow={false} />
-        <Analytics />
       </body>
     </html>
   );
