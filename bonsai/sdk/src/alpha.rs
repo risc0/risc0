@@ -490,6 +490,40 @@ impl Client {
         self.download(&res.url)
     }
 
+    /// Delete an existing image
+    ///
+    /// Allows deletion of a specified image_id.
+    pub fn image_delete(&self, image_id: &str) -> Result<(), SdkErr> {
+        let res = self
+            .client
+            .delete(format!("{}/images/{}", self.url, image_id))
+            .send()?;
+
+        if !res.status().is_success() {
+            let body = res.text()?;
+            return Err(SdkErr::InternalServerErr(body));
+        }
+
+        Ok(())
+    }
+
+    /// Delete an existing input
+    ///
+    /// Allows deletion of a specified input Uuid.
+    pub fn input_delete(&self, input_uuid: &str) -> Result<(), SdkErr> {
+        let res = self
+            .client
+            .delete(format!("{}/inputs/{}", self.url, input_uuid))
+            .send()?;
+
+        if !res.status().is_success() {
+            let body = res.text()?;
+            return Err(SdkErr::InternalServerErr(body));
+        }
+
+        Ok(())
+    }
+
     // - /sessions
 
     /// Create a new proof request Session
@@ -699,6 +733,25 @@ mod tests {
     }
 
     #[test]
+    fn image_delete() {
+        let server = MockServer::start();
+
+        let del_mock = server.mock(|when, then| {
+            when.method(DELETE)
+                .path(format!("/images/{TEST_ID}"))
+                .header(API_KEY_HEADER, TEST_KEY)
+                .header(VERSION_HEADER, TEST_VERSION);
+            then.status(200);
+        });
+
+        let server_url = format!("http://{}", server.address());
+        let client = super::Client::from_parts(server_url, TEST_KEY.to_string(), TEST_VERSION)
+            .expect("Failed to construct client");
+        client.image_delete(TEST_ID).unwrap();
+        del_mock.assert();
+    }
+
+    #[test]
     fn input_upload() {
         let data = vec![];
 
@@ -735,6 +788,25 @@ mod tests {
 
         get_mock.assert();
         put_mock.assert();
+    }
+
+    #[test]
+    fn input_delete() {
+        let server = MockServer::start();
+
+        let del_mock = server.mock(|when, then| {
+            when.method(DELETE)
+                .path(format!("/inputs/{TEST_ID}"))
+                .header(API_KEY_HEADER, TEST_KEY)
+                .header(VERSION_HEADER, TEST_VERSION);
+            then.status(200);
+        });
+
+        let server_url = format!("http://{}", server.address());
+        let client = super::Client::from_parts(server_url, TEST_KEY.to_string(), TEST_VERSION)
+            .expect("Failed to construct client");
+        client.input_delete(TEST_ID).unwrap();
+        del_mock.assert();
     }
 
     #[test]
