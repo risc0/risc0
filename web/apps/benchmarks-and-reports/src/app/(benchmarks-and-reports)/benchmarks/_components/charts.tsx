@@ -82,10 +82,6 @@ function renderGraph(parent, name, dataset) {
         },
       },
     },
-    interaction: {
-      intersect: true,
-      mode: "index",
-    },
     onClick: (_mouseEvent, activeElems) => {
       if (activeElems.length === 0) {
         return;
@@ -104,7 +100,7 @@ function renderGraph(parent, name, dataset) {
         display: false,
       },
       tooltip: {
-        animation: false,
+        animation: false as const,
         backgroundColor: "black",
         callbacks: {
           afterTitle: (items) => {
