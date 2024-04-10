@@ -8,8 +8,8 @@ import { Providers } from "shared/client/providers/providers";
 
 export const metadata = {
   title: {
-    template: "%s | RISC Zero Reports",
-    default: "RISC Zero Reports",
+    template: "%s | RISC Zero Benchmarks & Reports",
+    default: "RISC Zero Benchmarks & Reports",
   },
   description: "Get to market fast with dramatically lower development costs on the first general purpose zkVM.",
   icons: [
