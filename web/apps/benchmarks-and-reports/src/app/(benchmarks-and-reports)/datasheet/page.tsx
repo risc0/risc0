@@ -3,6 +3,7 @@ import { Separator } from "@risc0/ui/separator";
 import { truncate } from "@risc0/ui/utils/truncate";
 import type { Metadata } from "next";
 import { CopyButton } from "shared/client/components/copy-button";
+import { DATASHEET_DESCRIPTION } from "../_utils/constants";
 import { fetchDatasheet } from "./_actions/fetch-datasheet";
 import { fetchDatasheetCommitHash } from "./_actions/fetch-datasheet-commit-hash";
 import { DatasheetTable } from "./_components/datasheet-table";
@@ -25,6 +26,7 @@ const FILENAMES_TO_TITLES = {
 
 export const metadata: Metadata = {
   title: "Datasheet",
+  description: DATASHEET_DESCRIPTION,
 };
 
 export default async function DatasheetPage() {

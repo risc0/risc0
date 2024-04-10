@@ -1,27 +1,33 @@
 import { Card, CardDescription, CardTitle } from "@risc0/ui/card";
 import { Link } from "@risc0/ui/link";
 import Image from "next/image";
+import {
+  APPLICATIONS_BENCHMARKS_DESCRIPTION,
+  BENCHMARKS_DESCRIPTION,
+  CRATES_VALIDATION_DESCRIPTION,
+  DATASHEET_DESCRIPTION,
+} from "./_utils/constants";
 
-const REPORTS = [
+export const REPORTS = [
   {
     label: "Crates.io Validation",
     href: "/crates-validation",
-    description: "View the latest Crates.io validation results",
+    description: CRATES_VALIDATION_DESCRIPTION,
   },
   {
     label: "Benchmarks",
     href: "/benchmarks",
-    description: "View the latest benchmarks for the RISC Zero platform",
+    description: BENCHMARKS_DESCRIPTION,
   },
   {
     label: "Applications Benchmarks",
     href: "/applications-benchmarks",
-    description: "View the latest applications benchmarks for the RISC Zero platform",
+    description: APPLICATIONS_BENCHMARKS_DESCRIPTION,
   },
   {
     label: "Datasheet",
     href: "/datasheet",
-    description: "View the latest datasheet for the RISC Zero platform",
+    description: DATASHEET_DESCRIPTION,
   },
 ] as const;
 

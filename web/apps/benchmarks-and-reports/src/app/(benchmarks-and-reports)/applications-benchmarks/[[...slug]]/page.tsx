@@ -7,6 +7,7 @@ import { redirect } from "next/navigation";
 import { CopyButton } from "shared/client/components/copy-button";
 import { convertCsvToJson } from "shared/utils/convert-csv-to-json";
 import { replace } from "string-ts";
+import { APPLICATIONS_BENCHMARKS_DESCRIPTION } from "../../_utils/constants";
 import { fetchApplicationsBenchmarks } from "./_actions/fetch-applications-benchmarks";
 import { fetchApplicationsBenchmarksCommitHash } from "./_actions/fetch-applications-benchmarks-commit-hash";
 import { ApplicationsBenchmarksTable } from "./_components/applications-benchmarks-table";
@@ -15,6 +16,7 @@ import { FILENAMES_TO_TITLES } from "./_utils/constants";
 
 export const metadata: Metadata = {
   title: "Applications Benchmark",
+  description: APPLICATIONS_BENCHMARKS_DESCRIPTION,
 };
 
 export default async function ApplicationsBenchmarksPage({ params }) {

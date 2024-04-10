@@ -3,6 +3,7 @@ import { Separator } from "@risc0/ui/separator";
 import { truncate } from "@risc0/ui/utils/truncate";
 import type { Metadata } from "next";
 import { CopyButton } from "shared/client/components/copy-button";
+import { CRATES_VALIDATION_DESCRIPTION } from "../_utils/constants";
 import { fetchCratesValidationResults } from "./_actions/fetch-crates-validation-results";
 import { findMostRecentHash } from "./_actions/find-most-recent-hash";
 import { CratesIoValidationSummary } from "./_components/crates-io-validation-summary";
@@ -13,6 +14,7 @@ import type { CratesIoValidationTableSchema } from "./_components/crates-io-vali
 
 export const metadata: Metadata = {
   title: "Crates.io Validation",
+  description: CRATES_VALIDATION_DESCRIPTION,
 };
 
 export default async function CratesIoValidationPage() {
