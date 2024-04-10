@@ -1,35 +1,7 @@
 import { Card, CardDescription, CardTitle } from "@risc0/ui/card";
 import { Link } from "@risc0/ui/link";
 import Image from "next/image";
-import {
-  APPLICATIONS_BENCHMARKS_DESCRIPTION,
-  BENCHMARKS_DESCRIPTION,
-  CRATES_VALIDATION_DESCRIPTION,
-  DATASHEET_DESCRIPTION,
-} from "./_utils/constants";
-
-export const REPORTS = [
-  {
-    label: "Crates.io Validation",
-    href: "/crates-validation",
-    description: CRATES_VALIDATION_DESCRIPTION,
-  },
-  {
-    label: "Benchmarks",
-    href: "/benchmarks",
-    description: BENCHMARKS_DESCRIPTION,
-  },
-  {
-    label: "Applications Benchmarks",
-    href: "/applications-benchmarks",
-    description: APPLICATIONS_BENCHMARKS_DESCRIPTION,
-  },
-  {
-    label: "Datasheet",
-    href: "/datasheet",
-    description: DATASHEET_DESCRIPTION,
-  },
-] as const;
+import { REPORTS } from "./_utils/constants";
 
 export default function ReportsPage() {
   return (
