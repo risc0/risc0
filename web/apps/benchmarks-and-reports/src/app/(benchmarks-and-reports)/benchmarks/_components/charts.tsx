@@ -4,25 +4,13 @@ import { Button } from "@risc0/ui/button";
 import { Separator } from "@risc0/ui/separator";
 import { Skeleton } from "@risc0/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@risc0/ui/tabs";
-import {
-  CategoryScale,
-  Chart,
-  Colors,
-  Filler,
-  LineController,
-  LineElement,
-  LinearScale,
-  PointElement,
-  Tooltip,
-} from "chart.js";
+import { Chart } from "chart.js"; // stay on 2.9.4, much faster
 
 import truncate from "lodash-es/truncate";
 import { DownloadIcon } from "lucide-react";
 import Script from "next/script";
 import { useEffect, useState } from "react";
 import { joinWords } from "shared/utils/join-words";
-
-Chart.register(Colors, Tooltip, Filler, LineController, PointElement, LineElement, CategoryScale, LinearScale);
 
 const toolColors = {
   cargo: "#020077",
@@ -42,7 +30,7 @@ const toolColors = {
 
 function renderGraph(parent, name, dataset) {
   const canvas = document.createElement("canvas");
-  canvas.className = "benchmark-chart max-h-96";
+  canvas.className = "benchmark-chart w-full";
   parent.appendChild(canvas);
 
   const color = toolColors[dataset.length > 0 ? dataset[0].tool : "_"];
@@ -63,71 +51,73 @@ function renderGraph(parent, name, dataset) {
 
   const options = {
     animation: {
-      duration: 0, // disable animations
+      duration: 0, // general animation time
     },
+    hover: {
+      animationDuration: 0, // duration of animations when hovering an item
+    },
+    responsiveAnimationDuration: 0, // animation duration after a resize
+    legend: {
+      display: false,
+    },
+    aspectRatio: 4,
     scales: {
-      x: {
-        display: true,
-        title: {
-          display: true,
-          text: "commit",
+      xAxes: [
+        {
+          scaleLabel: {
+            display: true,
+            labelString: "commit",
+          },
         },
-      },
-      y: {
-        display: true,
-        beginAtZero: true,
-        title: {
-          display: true,
-          text: dataset.length > 0 ? dataset[0].bench.unit : "",
+      ],
+      yAxes: [
+        {
+          scaleLabel: {
+            display: true,
+            labelString: dataset.length > 0 ? dataset[0].bench.unit : "",
+          },
+          ticks: {
+            beginAtZero: true,
+          },
         },
-      },
+      ],
     },
     onClick: (_mouseEvent, activeElems) => {
       if (activeElems.length === 0) {
         return;
       }
 
-      const index = activeElems[0].index;
+      const index = activeElems[0]._index;
       const url = dataset[index].commit.url;
 
       window.open(url, "_blank");
     },
     onHover: (event, chartElement) => {
-      event.native.target.style.cursor = chartElement[0] ? "pointer" : "default";
+      event.target.style.cursor = chartElement[0] ? "pointer" : "default";
     },
-    plugins: {
-      legend: {
-        display: false,
-      },
-      tooltip: {
-        animation: false as const,
-        backgroundColor: "black",
-        callbacks: {
-          afterTitle: (items) => {
-            const { dataIndex } = items[0];
-            const data = dataset[dataIndex];
-
-            return `\n${truncate(data.commit.message, {
-              length: 180,
-              omission: "…",
-            })}\n\n${data.commit.timestamp} committed by @${data.commit.committer.username}\n`;
-          },
-          label: (item) => {
-            let label = item.label;
-            const { range, unit } = dataset[item.dataIndex].bench;
-
-            label += ` ${unit}`;
-
-            if (range) {
-              label += ` (${range})`;
-            }
-
-            return label;
-          },
-          afterLabel: (item) => {
-            const { extra } = dataset[item.dataIndex].bench;
-            return extra ? `\n${extra}` : "";
-          },
+    tooltips: {
+      backgroundColor: "rgba(0, 0, 0, 1)",
+      callbacks: {
+        afterTitle: (items) => {
+          const { index } = items[0];
+          const data = dataset[index];
+          return `\n${truncate(data.commit.message, {
+            length: 140,
+            omission: "…",
+          })}\n\n${data.commit.timestamp} committed by @${data.commit.committer.username}\n`;
+        },
+        label: (item) => {
+          let label = item.value;
+          const { range, unit } = dataset[item.index].bench;
+          label += ` ${unit}`;
+          if (range) {
+            label += ` (${range})`;
+          }
+          return label;
+        },
+        afterLabel: (item) => {
+          const { extra } = dataset[item.index].bench;
+          return extra ? `\n${extra}` : "";
         },
       },
     },
