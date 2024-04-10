@@ -1,16 +1,28 @@
 "use client";
 
-// TODO: this whole component was copy pasted from old code
-// could probably improve a lot
 import { Button } from "@risc0/ui/button";
 import { Separator } from "@risc0/ui/separator";
 import { Skeleton } from "@risc0/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@risc0/ui/tabs";
+import {
+  CategoryScale,
+  Chart,
+  Colors,
+  Filler,
+  LineController,
+  LineElement,
+  LinearScale,
+  PointElement,
+  Tooltip,
+} from "chart.js";
+
 import truncate from "lodash-es/truncate";
 import { DownloadIcon } from "lucide-react";
 import Script from "next/script";
 import { useEffect, useState } from "react";
 import { joinWords } from "shared/utils/join-words";
+
+Chart.register(Colors, Tooltip, Filler, LineController, PointElement, LineElement, CategoryScale, LinearScale);
 
 const toolColors = {
   cargo: "#020077",
@@ -88,6 +100,9 @@ function renderGraph(parent, name, dataset) {
       event.native.target.style.cursor = chartElement[0] ? "pointer" : "default";
     },
     plugins: {
+      legend: {
+        display: false,
+      },
       tooltip: {
         animation: false,
         backgroundColor: "black",
@@ -122,8 +137,6 @@ function renderGraph(parent, name, dataset) {
     },
   };
 
-  // @ts-expect-error -- it exists
-  // biome-ignore lint/correctness/noUndeclaredVariables: ignore
   new Chart(canvas, {
     type: "line",
     data,
@@ -133,7 +146,7 @@ function renderGraph(parent, name, dataset) {
 
 function renderBenchSet(benchSet, main) {
   const graphsElem = document.createElement("div");
-  graphsElem.className = "flex flex-row flex-wrap gap-16 dark:invert [&>*]:tracking-normal";
+  graphsElem.className = "mt-6 flex flex-row flex-wrap gap-10 dark:invert [&>*]:tracking-normal";
   main.appendChild(graphsElem);
 
   for (const [benchName, benches] of benchSet.entries()) {
@@ -145,6 +158,7 @@ export function Charts() {
   const [lastUpdate, setLastUpdate] = useState<string>("");
   const [names, setNames] = useState<string[]>();
   const [ready, setReady] = useState<boolean>(false);
+  const [isMounted, setIsMounted] = useState<boolean>(false);
 
   useEffect(() => {
     const data = window.BENCHMARK_DATA;
@@ -198,6 +212,14 @@ export function Charts() {
       }
     }
   }, [names]);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) {
+    return null;
+  }
 
   return (
     <div>

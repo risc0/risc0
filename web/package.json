@@ -20,6 +20,7 @@
     "@types/react-dom": "18.2.24",
     "@vercel/analytics": "1.2.2",
     "@vercel/edge-config": "1.1.0",
+    "chart.js": "4.4.2",
     "deepmerge": "4.3.1",
     "lucide-react": "0.367.0",
     "next": "canary",
