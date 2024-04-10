@@ -93,7 +93,7 @@ export function ApplicationsBenchmarksTable<TData, TValue>({
             ) : (
               <TableRow>
                 <TableCell colSpan={columns.length} className="h-24 text-center text-muted-foreground">
-                  No results
+                  No Results
                 </TableCell>
               </TableRow>
             )}

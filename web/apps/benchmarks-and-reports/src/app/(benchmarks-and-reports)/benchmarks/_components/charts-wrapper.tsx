@@ -14,7 +14,7 @@ export function ChartsWrapper() {
 
         <Script
           // TODO: replace with newer version
-          src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"
+          src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.js"
           onLoad={() => {
             setRenderCharts(true);
           }}

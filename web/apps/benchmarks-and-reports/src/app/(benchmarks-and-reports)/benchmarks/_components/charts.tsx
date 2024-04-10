@@ -10,6 +10,7 @@ import truncate from "lodash-es/truncate";
 import { DownloadIcon } from "lucide-react";
 import Script from "next/script";
 import { useEffect, useState } from "react";
+import { joinWords } from "shared/utils/join-words";
 
 const toolColors = {
   cargo: "#020077",
@@ -29,7 +30,7 @@ const toolColors = {
 
 function renderGraph(parent, name, dataset) {
   const canvas = document.createElement("canvas");
-  canvas.className = "benchmark-chart max-w-screen-sm";
+  canvas.className = "benchmark-chart max-h-96";
   parent.appendChild(canvas);
 
   const color = toolColors[dataset.length > 0 ? dataset[0].tool : "_"];
@@ -49,61 +50,75 @@ function renderGraph(parent, name, dataset) {
   };
 
   const options = {
-    scales: {
-      xAxes: [
-        {
-          scaleLabel: {
-            display: true,
-            labelString: "commit",
-          },
-        },
-      ],
-      yAxes: [
-        {
-          scaleLabel: {
-            display: true,
-            labelString: dataset.length > 0 ? dataset[0].bench.unit : "",
-          },
-          ticks: {
-            beginAtZero: true,
-          },
-        },
-      ],
+    animation: {
+      duration: 0, // disable animations
     },
-    tooltips: {
-      intersect: false,
-      callbacks: {
-        afterTitle: (items) => {
-          const { index } = items[0];
-          const data = dataset[index];
-          return `\n${truncate(data.commit.message, {
-            length: 180,
-            omission: "…",
-          })}\n\n${data.commit.timestamp} committed by @${data.commit.committer.username}\n`;
-        },
-        label: (item) => {
-          let label = item.value;
-          const { range, unit } = dataset[item.index].bench;
-          label += ` ${unit}`;
-          if (range) {
-            label += ` (${range})`;
-          }
-          return label;
-        },
-        afterLabel: (item) => {
-          const { extra } = dataset[item.index].bench;
-          return extra ? `\n${extra}` : "";
+    scales: {
+      x: {
+        display: true,
+        title: {
+          display: true,
+          text: "commit",
         },
       },
+      y: {
+        display: true,
+        beginAtZero: true,
+        title: {
+          display: true,
+          text: dataset.length > 0 ? dataset[0].bench.unit : "",
+        },
+      },
+    },
+    interaction: {
+      intersect: true,
+      mode: "index",
     },
     onClick: (_mouseEvent, activeElems) => {
       if (activeElems.length === 0) {
         return;
       }
-      // XXX: Undocumented. How can we know the index?
-      const index = activeElems[0]._index;
+
+      const index = activeElems[0].index;
       const url = dataset[index].commit.url;
+
       window.open(url, "_blank");
+    },
+    onHover: (event, chartElement) => {
+      event.native.target.style.cursor = chartElement[0] ? "pointer" : "default";
+    },
+    plugins: {
+      tooltip: {
+        animation: false,
+        backgroundColor: "black",
+        callbacks: {
+          afterTitle: (items) => {
+            const { dataIndex } = items[0];
+            const data = dataset[dataIndex];
+
+            return `\n${truncate(data.commit.message, {
+              length: 180,
+              omission: "…",
+            })}\n\n${data.commit.timestamp} committed by @${data.commit.committer.username}\n`;
+          },
+          label: (item) => {
+            let label = item.label;
+            const { range, unit } = dataset[item.dataIndex].bench;
+
+            label += ` ${unit}`;
+
+            if (range) {
+              label += ` (${range})`;
+            }
+
+            return label;
+          },
+          afterLabel: (item) => {
+            const { extra } = dataset[item.dataIndex].bench;
+            return extra ? `\n${extra}` : "";
+          },
+        },
+      },
     },
   };
 
@@ -135,8 +150,6 @@ export function Charts() {
     const data = window.BENCHMARK_DATA;
 
     if (ready && data) {
-      const data = window.BENCHMARK_DATA;
-
       setLastUpdate(new Date(data.lastUpdate).toLocaleString());
       setNames(Object.keys(data.entries));
     }
@@ -210,7 +223,7 @@ export function Charts() {
             <TabsList>
               {names.map((name) => (
                 <TabsTrigger key={name} value={name}>
-                  {name}
+                  {joinWords(name)}
                 </TabsTrigger>
               ))}
             </TabsList>
