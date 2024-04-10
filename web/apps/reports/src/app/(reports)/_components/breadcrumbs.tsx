@@ -12,7 +12,7 @@ import compact from "lodash-es/compact";
 import { ChevronRightIcon } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { Fragment } from "react";
-import { replaceAll } from "string-ts";
+import { join, words } from "string-ts";
 
 export function Breadcrumbs() {
   const pathname = usePathname();
@@ -37,7 +37,7 @@ export function Breadcrumbs() {
           </BreadcrumbSeparator>
           {paths.map((path, index, { length }) => {
             const isLast = length - 1 === index;
-            const sanitizedChunk = replaceAll(path, "-", " ");
+            const sanitizedChunk = join(words(path), " ");
 
             return (
               <Fragment key={path}>
