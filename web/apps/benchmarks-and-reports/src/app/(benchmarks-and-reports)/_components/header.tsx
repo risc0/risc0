@@ -21,10 +21,10 @@ export function Header() {
           <ThemeToggle />
 
           <Link tabIndex={-1} target="_blank" href="https://github.com/risc0/risc0/">
-            <Button variant="ghost" size="sm" className="hidden sm:flex" startIcon={<GithubIcon />}>
+            <Button variant="outline" size="sm" className="hidden sm:flex" startIcon={<GithubIcon />}>
               GitHub
             </Button>
-            <Button variant="ghost" className="flex sm:hidden" size="icon-sm" startIcon={<GithubIcon />}>
+            <Button variant="outline" className="flex sm:hidden" size="icon-sm" startIcon={<GithubIcon />}>
               <span className="sr-only">GitHub</span>
             </Button>
           </Link>
