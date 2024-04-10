@@ -105,11 +105,11 @@ public:
   /// Get an 'invalid' Fp value
   static constexpr Fp invalid() { return Fp(INVALID, true); }
 
-  constexpr inline Fp zeroize() const {
+  constexpr inline Fp zeroize() {
     if (val == INVALID) {
-      return 0;
+      val = 0;
     }
-    return val;
+    return *this;
   }
 
   // Implement all the various overloads

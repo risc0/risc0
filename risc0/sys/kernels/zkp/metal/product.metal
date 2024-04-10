@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "fp.h"
+#include "fpext.h"
 
 kernel void prefix_product(device uint32_t& count,
-                           device Fp* elems) {
-  Fp total(1);
+                           device FpExt* elems) {
+  FpExt total(1);
   for (size_t i = 0; i < count; i++) {
     total *= elems[i];
     elems[i] = total;

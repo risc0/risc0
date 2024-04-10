@@ -21,20 +21,18 @@ pub mod dual;
 #[cfg(feature = "metal")]
 pub mod metal;
 
-use std::{fmt::Debug, sync::Mutex};
+use std::{
+    fmt::Debug,
+    sync::{Mutex, OnceLock},
+};
 
 use bytemuck::Pod;
-use lazy_static::lazy_static;
 use risc0_core::field::{Elem, ExtElem, Field, RootsOfUnity};
 
 use crate::{
     core::{digest::Digest, hash::HashSuite},
     INV_RATE,
 };
-
-lazy_static! {
-    static ref TRACKER: Mutex<MemoryTracker> = Mutex::new(MemoryTracker::new());
-}
 
 pub trait Buffer<T>: Clone {
     fn name(&self) -> &'static str;
@@ -59,7 +57,7 @@ pub trait Hal {
     fn has_unified_memory(&self) -> bool;
 
     fn get_memory_usage(&self) -> usize {
-        TRACKER.lock().unwrap().peak
+        tracker().lock().unwrap().peak
     }
 
     fn get_hash_suite(&self) -> &HashSuite<Self::Field>;
@@ -178,6 +176,11 @@ pub trait CircuitHal<H: Hal> {
     );
 
     // fn step_verify_accum(&self);
+}
+
+fn tracker() -> &'static Mutex<MemoryTracker> {
+    static ONCE: OnceLock<Mutex<MemoryTracker>> = OnceLock::new();
+    ONCE.get_or_init(|| Mutex::new(MemoryTracker::new()))
 }
 
 struct MemoryTracker {

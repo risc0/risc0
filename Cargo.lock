@@ -5575,7 +5575,6 @@ dependencies = [
  "hotbench",
  "human-repr",
  "lazy-regex",
- "lazy_static",
  "prost",
  "prost-build",
  "protobuf-src",

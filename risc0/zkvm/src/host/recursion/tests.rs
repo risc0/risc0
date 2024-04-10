@@ -19,7 +19,6 @@ use risc0_zkp::{
     field::baby_bear::BabyBearElem,
 };
 use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID};
-use serial_test::serial;
 use test_log::test;
 
 use super::{
@@ -37,7 +36,6 @@ use crate::{
     not(all(feature = "metal", target_os = "macos", target_arch = "x86_64")),
     test
 )]
-#[serial]
 fn test_recursion_poseidon254() {
     use risc0_zkp::core::{digest::Digest, hash::poseidon2::Poseidon2HashSuite};
 
@@ -77,7 +75,6 @@ fn test_recursion_poseidon254() {
     not(all(feature = "metal", target_os = "macos", target_arch = "x86_64")),
     test
 )]
-#[serial]
 fn test_recursion_poseidon2() {
     use risc0_zkp::core::{digest::Digest, hash::poseidon2::Poseidon2HashSuite};
 
@@ -162,7 +159,6 @@ fn generate_busy_loop_segments(hashfn: &str) -> (Session, Vec<SegmentReceipt>) {
     not(all(feature = "metal", target_os = "macos", target_arch = "x86_64")),
     test
 )]
-#[serial]
 fn test_recursion_lift_join_identity_e2e() {
     // Prove the base case
     let (session, segments) = generate_busy_loop_segments("poseidon2");
@@ -201,7 +197,6 @@ fn test_recursion_lift_join_identity_e2e() {
     not(all(feature = "metal", target_os = "macos", target_arch = "x86_64")),
     test
 )]
-#[serial]
 fn test_recursion_lift_resolve_e2e() {
     let opts = ProverOpts::default();
     let prover = get_prover_server(&opts).unwrap();

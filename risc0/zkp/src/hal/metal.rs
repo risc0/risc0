@@ -12,19 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{collections::HashMap, ffi::c_void, fmt::Debug, marker::PhantomData, mem, slice};
+use std::{
+    collections::HashMap, ffi::c_void, fmt::Debug, marker::PhantomData, mem, slice, sync::OnceLock,
+};
 
 use bytemuck::Pod;
 use metal::{
     Buffer as MetalBuffer, CommandQueue, ComputePipelineDescriptor, Device, MTLResourceOptions,
     MTLSize, NSRange,
 };
+use parking_lot::{ReentrantMutex, ReentrantMutexGuard};
 use risc0_core::field::{
     baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
     Elem, ExtElem, RootsOfUnity,
 };
 
-use super::{Buffer, Hal, TRACKER};
+use super::{tracker, Buffer, Hal};
 use crate::{
     core::{
         digest::Digest,
@@ -47,7 +50,8 @@ const KERNEL_NAMES: &[&str] = &[
     "eltwise_copy_fp",
     "eltwise_mul_factor_fp",
     "eltwise_sum_fpext",
-    "eltwise_zeroize",
+    "eltwise_zeroize_fp",
+    "eltwise_zeroize_fpext",
     "fri_fold",
     "gather_sample",
     "mix_poly_coeffs",
@@ -64,6 +68,12 @@ const KERNEL_NAMES: &[&str] = &[
     "sha_rows",
     "zk_shift",
 ];
+
+// The GPU becomes unstable as the number of concurrent provers grow.
+fn singleton() -> &'static ReentrantMutex<()> {
+    static ONCE: OnceLock<ReentrantMutex<()>> = OnceLock::new();
+    ONCE.get_or_init(|| ReentrantMutex::new(()))
+}
 
 pub trait MetalHash {
     /// Create a hash implemention
@@ -250,6 +260,7 @@ pub struct MetalHal<Hash: MetalHash + ?Sized> {
     pub cmd_queue: CommandQueue,
     kernels: HashMap<String, ComputePipelineDescriptor>,
     hash: Option<Box<Hash>>,
+    _lock: ReentrantMutexGuard<'static, ()>,
 }
 
 pub type MetalHalSha256 = MetalHal<MetalHashSha256>;
@@ -261,14 +272,14 @@ struct TrackedBuffer(MetalBuffer);
 
 impl TrackedBuffer {
     pub fn new(buffer: MetalBuffer) -> Self {
-        TRACKER.lock().unwrap().alloc(buffer.length() as usize);
+        tracker().lock().unwrap().alloc(buffer.length() as usize);
         Self(buffer)
     }
 }
 
 impl Drop for TrackedBuffer {
     fn drop(&mut self) {
-        TRACKER.lock().unwrap().free(self.0.length() as usize);
+        tracker().lock().unwrap().free(self.0.length() as usize);
     }
 }
 
@@ -402,6 +413,7 @@ impl<MH: MetalHash> Default for MetalHal<MH> {
 
 impl<MH: MetalHash> MetalHal<MH> {
     pub fn new() -> Self {
+        let lock = singleton().lock();
         let device = Device::system_default().expect("no device found");
         let library = device.new_library_with_data(METAL_LIB).unwrap();
         let cmd_queue = device.new_command_queue();
@@ -417,6 +429,7 @@ impl<MH: MetalHash> MetalHal<MH> {
             cmd_queue,
             kernels,
             hash: None,
+            _lock: lock,
         };
         hal.hash = Some(Box::new(MH::new(&hal)));
         hal

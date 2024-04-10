@@ -14,14 +14,13 @@
 
 use std::{rc::Rc, sync::Mutex};
 
-use rand::thread_rng;
 use rayon::prelude::*;
 use risc0_core::field::{
     baby_bear::{BabyBearElem, BabyBearExtElem},
     map_pow, Elem, ExtElem, RootsOfUnity,
 };
 use risc0_zkp::{
-    adapter::{CircuitStep as _, CircuitStepContext, PolyFp, TapsProvider},
+    adapter::{CircuitStep as _, CircuitStepContext, PolyFp},
     core::{hash::sha::Sha256HashSuite, log2_ceil},
     field::baby_bear::BabyBear,
     hal::{
@@ -129,7 +128,6 @@ where
 
             let accumulator: Mutex<Accum<BabyBearExtElem>> = Mutex::new(Accum::new(steps));
             tracing::info_span!("step_compute_accum").in_scope(|| {
-                // TODO: Add a way to be able to run this on cuda, metal, etc.
                 (0..steps - ZK_CYCLES).into_par_iter().for_each_init(
                     || Handler::<BabyBear>::new(&accumulator),
                     |handler, cycle| {
@@ -168,14 +166,6 @@ where
             let mut io = io.as_slice_mut();
             for value in accum_slice.iter_mut().chain(io.iter_mut()) {
                 *value = value.valid_or_zero();
-            }
-
-            // Add random noise to end of accum and change invalid element to zero
-            let mut rng = thread_rng();
-            for i in steps - ZK_CYCLES..steps {
-                for j in 0..CIRCUIT.accum_size() {
-                    accum_slice[j * steps + i] = BabyBearElem::random(&mut rng);
-                }
             }
         }
     }

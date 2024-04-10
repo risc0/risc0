@@ -24,7 +24,7 @@ use parking_lot::{
 use rayon::prelude::*;
 use risc0_core::field::{Elem, ExtElem, Field};
 
-use super::{Buffer, Hal, TRACKER};
+use super::{tracker, Buffer, Hal};
 use crate::{
     core::{
         digest::Digest,
@@ -69,7 +69,7 @@ struct TrackedVec<T>(Vec<T>);
 
 impl<T> TrackedVec<T> {
     pub fn new(vec: Vec<T>) -> Self {
-        TRACKER
+        tracker()
             .lock()
             .unwrap()
             .alloc(vec.capacity() * std::mem::size_of::<T>());
@@ -79,7 +79,7 @@ impl<T> TrackedVec<T> {
 
 impl<T> Drop for TrackedVec<T> {
     fn drop(&mut self) {
-        TRACKER
+        tracker()
             .lock()
             .unwrap()
             .free(self.0.capacity() * std::mem::size_of::<T>());

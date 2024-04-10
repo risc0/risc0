@@ -28,7 +28,7 @@ use risc0_core::field::{
 };
 use risc0_sys::cuda::*;
 
-use super::{Buffer, Hal, TRACKER};
+use super::{tracker, Buffer, Hal};
 use crate::{
     core::{
         digest::Digest,
@@ -323,7 +323,7 @@ struct RawBuffer {
 impl RawBuffer {
     pub fn new(name: &'static str, size: usize) -> Self {
         tracing::trace!("alloc: {size} bytes, {name}");
-        TRACKER.lock().unwrap().alloc(size);
+        tracker().lock().unwrap().alloc(size);
         Self {
             name,
             buf: unsafe { DeviceBuffer::uninitialized(size).unwrap() },
@@ -334,7 +334,7 @@ impl RawBuffer {
 impl Drop for RawBuffer {
     fn drop(&mut self) {
         tracing::trace!("free: {} bytes, {}", self.buf.len(), self.name);
-        TRACKER.lock().unwrap().free(self.buf.len());
+        tracker().lock().unwrap().free(self.buf.len());
     }
 }
 

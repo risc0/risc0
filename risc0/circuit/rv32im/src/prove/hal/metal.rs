@@ -27,7 +27,7 @@ use risc0_zkp::{
             BufferImpl as MetalBuffer, KernelArg, MetalHal, MetalHalSha256, MetalHash,
             MetalHashSha256,
         },
-        Buffer, CircuitHal,
+        Buffer as _, CircuitHal,
     },
     INV_RATE, ZK_CYCLES,
 };
@@ -123,15 +123,10 @@ impl<MH: MetalHash> CircuitHal<MetalHal<MH>> for MetalCircuitHal<MH> {
     ) {
         let count = steps - ZK_CYCLES;
 
-        // let ram: MetalBuffer<BabyBearElem> =
-        //     MetalBuffer::new("ram", &self.hal.device, self.hal.cmd_queue.clone(), count);
-        // let bytes: MetalBuffer<BabyBearElem> =
-        //     MetalBuffer::new("bytes", &self.hal.device, self.hal.cmd_queue.clone(), count);
-
-        let ram = vec![BabyBearElem::ONE; count];
+        let ram = vec![BabyBearExtElem::ONE; steps];
         let ram = MetalBuffer::copy_from("ram", &self.hal.device, self.hal.cmd_queue.clone(), &ram);
 
-        let bytes = vec![BabyBearElem::ONE; count];
+        let bytes = vec![BabyBearExtElem::ONE; steps];
         let bytes = MetalBuffer::copy_from(
             "bytes",
             &self.hal.device,
@@ -168,11 +163,14 @@ impl<MH: MetalHash> CircuitHal<MetalHal<MH>> for MetalCircuitHal<MH> {
         let kernel = self.kernels.get("step_verify_accum").unwrap();
         self.hal.dispatch(&kernel, &args, count as u64, None);
 
-        self.hal
-            .dispatch_by_name("eltwise_zeroize", &[accum.as_arg()], accum.size() as u64);
+        self.hal.dispatch_by_name(
+            "eltwise_zeroize_fpext",
+            &[accum.as_arg()],
+            accum.size() as u64,
+        );
 
         self.hal
-            .dispatch_by_name("eltwise_zeroize", &[io.as_arg()], io.size() as u64);
+            .dispatch_by_name("eltwise_zeroize_fp", &[io.as_arg()], io.size() as u64);
     }
 }
 
