@@ -75,13 +75,15 @@ use risc0_zkvm_platform::{
     align_up, fileno,
     syscall::{
         self, sys_alloc_words, sys_cycle_count, sys_halt, sys_log, sys_pause, sys_read,
-        sys_read_words, sys_verify, sys_verify_integrity, sys_write, syscall_2, SyscallName,
+        sys_read_words, sys_verify, sys_verify_integrity, sys_verify_receipt, sys_write, syscall_2,
+        SyscallName,
     },
     WORD_SIZE,
 };
 use serde::{de::DeserializeOwned, Serialize};
 
 use crate::{
+    host::receipt::ReceiptWithImageId,
     serde::{Deserializer, Serializer, WordRead, WordWrite},
     sha::{
         rust_crypto::{Digest as _, Sha256},
@@ -233,6 +235,92 @@ pub fn verify(image_id: impl Into<Digest>, journal: &[impl Pod]) -> Result<(), V
     Ok(())
 }
 
+/// Verify that a specific receipt is valid for an execution with `image_id`
+///
+/// Calling this function in the guest is logically equivalent to running `receipt.verify(image_id)`.
+/// Unlike the [`verify`] function, this function can be invoked on an invalid receipt without causing
+/// proof generation to fail. This is useful when verifying a receipt that has been constructed by an
+/// untrusted party.
+///
+/// In order to be valid, the [crate::Receipt] must have `ExitCode::Halted(0)` or
+/// `ExitCode::Paused(0)`, an empty assumptions list, and an all-zeroes input hash. It may have any
+/// post [crate::SystemState].
+///
+/// # Example
+///
+/// ```rust,ignore
+/// use risc0_zkvm::guest::env;
+/// use risc0_zkvm::Receipt;
+///
+/// fn check_receipt(receipt: Receipt) {
+///     let HELLO_WORLD_ID = Digest::ZERO;
+///     match env::verify_receipt(receipt, HELLO_WORLD_ID) {
+///         Ok(()) => println!("Receipt is valid"),
+///         Err(e) => println!(&format!("Receipt is invalid: {}", e)),
+///     }
+/// }
+///
+/// ```
+///
+/// [composition]: https://dev.risczero.com/terminology#composition
+pub fn verify_receipt(
+    receipt: crate::Receipt,
+    image_id: impl Into<Digest>,
+) -> Result<(), VerifyError> {
+    let image_id: Digest = image_id.into();
+    let journal_digest = receipt.journal.digest();
+    let payload = ReceiptWithImageId { receipt, image_id };
+    let payload = crate::serde::to_vec(&payload).expect("serialization to vec must succeed");
+    let mut from_host_buf = MaybeUninit::<[u32; DIGEST_WORDS + 1]>::uninit();
+
+    let syscall_return_code =
+        unsafe { sys_verify_receipt(payload.as_ptr(), payload.len(), from_host_buf.as_mut_ptr()) };
+    if syscall_return_code != 0 {
+        // TODO: Invoke the Rust verifier to check this receipt and return the error
+        // If the verifier does not return an error, the host is malicious. Panic!
+        return Err(VerifyError::InvalidReceipt(
+            risc0_zkp::verify::VerificationError::InvalidProof,
+        ));
+    }
+
+    // Split the host buffer into the Digest and system exit code portions. This is statically
+    // known to succeed, but the array APIs that would allow compile-time checked splitting are
+    // unstable.
+    let (post_state_digest, sys_exit_code): (Digest, u32) = {
+        let buf = unsafe { from_host_buf.assume_init() };
+        let (digest_buf, code_buf) = buf.split_at(DIGEST_WORDS);
+        (digest_buf.try_into().unwrap(), code_buf[0])
+    };
+
+    // Require that the exit code is either Halted(0) or Paused(0).
+    let exit_code = ExitCode::from_pair(sys_exit_code, 0)?;
+    if !exit_code.is_ok() {
+        return Err(VerifyError::BadExitCodeResponse(InvalidExitCodeError(
+            sys_exit_code,
+            0,
+        )));
+    };
+
+    // Construct the ReceiptClaim for this assumption. Use the host provided
+    // post_state_digest and fix all fields that are required to have a certain
+    // value. This assumption will only be resolvable if there exists a receipt
+    // matching this claim.
+    let assumption_claim = ReceiptClaim {
+        pre: MaybePruned::Pruned(image_id),
+        post: MaybePruned::Pruned(post_state_digest),
+        exit_code,
+        input: Digest::ZERO,
+        output: Some(Output {
+            journal: MaybePruned::Pruned(journal_digest),
+            assumptions: MaybePruned::Pruned(Digest::ZERO),
+        })
+        .into(),
+    };
+    unsafe { ASSUMPTIONS_DIGEST.add(assumption_claim.into()) };
+
+    Ok(())
+}
+
 /// Error encountered during a call to [verify].
 ///
 /// Note that an error is only returned for "provable" errors. In particular, if
@@ -244,6 +332,8 @@ pub fn verify(image_id: impl Into<Digest>, journal: &[impl Pod]) -> Result<(), V
 pub enum VerifyError {
     /// Error returned when the host responds to `sys_verify` with an invalid exit code.
     BadExitCodeResponse(InvalidExitCodeError),
+    /// The provided receipt was invalid.
+    InvalidReceipt(risc0_zkp::verify::VerificationError),
 }
 
 impl From<InvalidExitCodeError> for VerifyError {
@@ -258,6 +348,7 @@ impl fmt::Display for VerifyError {
             Self::BadExitCodeResponse(err) => {
                 write!(f, "bad response from host to sys_verify: {}", err)
             }
+            Self::InvalidReceipt(inner) => write!(f, "The provided receipt was invalid: {}", inner),
         }
     }
 }

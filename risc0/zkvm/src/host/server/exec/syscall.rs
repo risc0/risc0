@@ -23,7 +23,7 @@ use risc0_zkvm_platform::{
     syscall::{
         nr::{
             SYS_ARGC, SYS_ARGV, SYS_CYCLE_COUNT, SYS_GETENV, SYS_LOG, SYS_PANIC, SYS_RANDOM,
-            SYS_READ, SYS_VERIFY, SYS_VERIFY_INTEGRITY, SYS_WRITE,
+            SYS_READ, SYS_VERIFY, SYS_VERIFY_INTEGRITY, SYS_VERIFY_RECEIPT, SYS_WRITE,
         },
         reg_abi::{REG_A3, REG_A4, REG_A5},
         SyscallName, DIGEST_BYTES, DIGEST_WORDS,
@@ -32,10 +32,13 @@ use risc0_zkvm_platform::{
 };
 
 use crate::{
-    host::client::{
-        env::{Assumptions, ExecutorEnv},
-        posix_io::PosixIo,
-        slice_io::SliceIo,
+    host::{
+        client::{
+            env::{Assumptions, ExecutorEnv},
+            posix_io::PosixIo,
+            slice_io::SliceIo,
+        },
+        receipt::ReceiptWithImageId,
     },
     sha::{Digest, Digestible},
     Assumption, MaybePruned, PrunedValueError, ReceiptClaim,
@@ -95,7 +98,8 @@ impl<'a> SyscallTable<'a> {
             .with_syscall(SYS_READ, posix_io.clone())
             .with_syscall(SYS_WRITE, posix_io)
             .with_syscall(SYS_VERIFY, sys_verify.clone())
-            .with_syscall(SYS_VERIFY_INTEGRITY, sys_verify)
+            .with_syscall(SYS_VERIFY_INTEGRITY, sys_verify.clone())
+            .with_syscall(SYS_VERIFY_RECEIPT, sys_verify)
             .with_syscall(SYS_ARGC, Args(env.args.clone()))
             .with_syscall(SYS_ARGV, Args(env.args.clone()));
         for (syscall, handler) in env.slice_io.borrow().inner.iter() {
@@ -294,6 +298,41 @@ impl SysVerify {
         return Ok((0, 0));
     }
 
+    fn sys_verify_receipt(
+        &mut self,
+        from_guest: Vec<u8>,
+        to_guest: &mut [u32],
+    ) -> Result<(u32, u32)> {
+        let ReceiptWithImageId { receipt, image_id } = crate::serde::from_slice(&from_guest)?;
+        match receipt.verify(image_id) {
+            Ok(()) => {
+                let claim = receipt.inner.get_claim()?;
+                to_guest[..DIGEST_WORDS].copy_from_slice(claim.post.digest().as_words());
+                to_guest[DIGEST_WORDS] = claim.exit_code.into_pair().0;
+
+                let mut assumption: Option<Assumption> = None;
+                let claim_digest = claim.digest();
+                // If we already have an assumption for this receipt, find it. Otherwise, create one.
+                for cached_assumption in self.assumptions.borrow().cached.iter() {
+                    if cached_assumption.get_claim()?.digest() == claim_digest {
+                        assumption = Some(cached_assumption.clone());
+                        break;
+                    }
+                }
+                let assumption = if let Some(assumption) = assumption {
+                    assumption
+                } else {
+                    Assumption::Proven(receipt)
+                };
+
+                // In either case, push the assumption to the head of the list, and return the success code.
+                self.assumptions.borrow_mut().accessed.insert(0, assumption);
+                Ok((0, 0))
+            }
+            Err(_) => Ok((u32::MAX, 0)),
+        }
+    }
+
     /// Check whether the claim satisfies the requirements to return for sys_verify.
     fn sys_verify_cmp(
         claim: &MaybePruned<ReceiptClaim>,
@@ -358,6 +397,8 @@ impl Syscall for SysVerify {
             self.sys_verify(from_guest, to_guest)
         } else if syscall == SYS_VERIFY_INTEGRITY.as_str() {
             self.sys_verify_integrity(from_guest)
+        } else if syscall == SYS_VERIFY_RECEIPT.as_str() {
+            self.sys_verify_receipt(from_guest, to_guest)
         } else {
             bail!("SysVerify received unrecognized syscall: {syscall}")
         }

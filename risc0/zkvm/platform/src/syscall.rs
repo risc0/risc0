@@ -137,6 +137,7 @@ pub mod nr {
     declare_syscall!(pub SYS_WRITE);
     declare_syscall!(pub SYS_VERIFY);
     declare_syscall!(pub SYS_VERIFY_INTEGRITY);
+    declare_syscall!(pub SYS_VERIFY_RECEIPT);
 }
 
 impl SyscallName {
@@ -744,6 +745,39 @@ pub unsafe extern "C" fn sys_verify(
         const MSG: &[u8] = "sys_verify returned error result".as_bytes();
         unsafe { sys_panic(MSG.as_ptr(), MSG.len()) };
     }
+}
+
+/// Send a receipt to the host to request verification. If the receipt is valid, the
+/// host generates a matching ReceiptClaim, adds it as an assumption, and
+/// returns the the post state digest and system exit. Otherwise, the host returns a non-zero exit code.
+///
+/// If this syscall returns a non-zero status code, the guest attempts to verify the proof directly
+/// using the rust verifier and asserts that an error is thrown. This allows efficient verification
+/// of *valid* receipts when the host is cooperative while ensuring that invalid receipts can be detected.
+#[cfg(feature = "export-syscalls")]
+#[no_mangle]
+/// # Safety
+///
+/// `image_id`, `journal_digest`, and `from_host_buf` must be aligned and dereferenceable.
+pub unsafe extern "C" fn sys_verify_receipt(
+    serialized_receipt_with_image_id_ptr: *const u32, // This is actually a *const [u32]
+    payload_len: usize,
+    from_host_buf: *mut [u32; DIGEST_WORDS + 1],
+) -> u32 {
+    let Return(a0, _) = unsafe {
+        // Send the image_id and journal_digest to the host in a syscall.
+        // Expect in return that from_host_buf is populated with the post state
+        // digest and system exit code for from a matching ReceiptClaim.
+        syscall_2(
+            nr::SYS_VERIFY_RECEIPT,
+            from_host_buf as *mut u32,
+            DIGEST_WORDS + 1,
+            serialized_receipt_with_image_id_ptr as u32,
+            payload_len as u32,
+        )
+    };
+
+    a0
 }
 
 /// Send a ReceiptClaim digest to the host to request verification.

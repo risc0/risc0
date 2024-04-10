@@ -120,6 +120,15 @@ pub struct Receipt {
     pub journal: Journal,
 }
 
+/// A receipt and its associated image ID.
+#[derive(Serialize, serde::Deserialize)]
+pub struct ReceiptWithImageId {
+    /// The [Receipt].
+    pub receipt: crate::Receipt,
+    /// The image ID.
+    pub image_id: Digest,
+}
+
 impl Receipt {
     /// Construct a new Receipt
     pub fn new(inner: InnerReceipt, journal: Vec<u8>) -> Self {
