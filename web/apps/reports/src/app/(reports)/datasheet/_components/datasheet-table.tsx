@@ -31,7 +31,6 @@ export function DatasheetTable<TData, TValue>({ title, columns, data }: Datashee
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [sorting, setSorting] = useState<SortingState>([]);
-  const [globalFilter, setGlobalFilter] = useState<string>("");
 
   const table = useReactTable({
     data,
@@ -41,14 +40,11 @@ export function DatasheetTable<TData, TValue>({ title, columns, data }: Datashee
       columnVisibility,
       rowSelection,
       columnFilters,
-      globalFilter,
     },
     filterFns: {
       fuzzy: tableFuzzyFilter,
     },
     onRowSelectionChange: setRowSelection,
-    onGlobalFilterChange: setGlobalFilter,
-    globalFilterFn: tableFuzzyFilter,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
@@ -63,7 +59,7 @@ export function DatasheetTable<TData, TValue>({ title, columns, data }: Datashee
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="subtitle truncate">{title}</h2>
-        <TableToolbar globalFilter={globalFilter} setGlobalFilter={setGlobalFilter} table={table} />
+        <TableToolbar table={table} />
       </div>
 
       <div className="overflow-auto rounded border">

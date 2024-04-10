@@ -8,7 +8,7 @@ import { TableViewOptions } from "./table-view-options";
 
 type TableToolbarProps<TData> = {
   table: Table<TData>;
-  globalFilter: string;
+  globalFilter?: string;
   statuses?: {
     label: string;
     value: string;
@@ -19,7 +19,7 @@ type TableToolbarProps<TData> = {
     value: boolean;
     icon?: ComponentType<{ className?: string }>;
   }[];
-  setGlobalFilter: Dispatch<SetStateAction<string>>;
+  setGlobalFilter?: Dispatch<SetStateAction<string>>;
 };
 
 export function TableToolbar<TData>({
@@ -31,12 +31,14 @@ export function TableToolbar<TData>({
 }: TableToolbarProps<TData>) {
   return (
     <div className="flex flex-wrap items-center justify-start gap-2 md:justify-end">
-      <Input
-        placeholder="Search…"
-        value={globalFilter ?? ""}
-        onChange={(event) => setGlobalFilter(String(event.target.value))}
-        className="h-8 w-[180px]"
-      />
+      {setGlobalFilter && (
+        <Input
+          placeholder="Search…"
+          value={globalFilter ?? ""}
+          onChange={(event) => setGlobalFilter(String(event.target.value))}
+          className="h-8 w-[180px]"
+        />
+      )}
 
       {statuses && table.getColumn("status") && (
         <TableFacetedFilter column={table.getColumn("status")} title="Build Status" options={statuses} />

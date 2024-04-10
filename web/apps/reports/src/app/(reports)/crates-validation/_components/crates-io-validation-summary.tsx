@@ -16,11 +16,11 @@ export function CratesIoValidationSummary({ data }: CratesIoValidationSummaryPro
             <div
               className={cn(
                 item.status === "Success"
-                  ? "border-green-400 bg-green-200 dark:border-green-400 dark:border-green-500 dark:bg-green-300"
+                  ? "border-green-400 bg-green-200 dark:border-green-500 dark:bg-green-300"
                   : item.status === "BuildFail"
-                    ? "border-red-300 bg-red-200 dark:border-red-400 dark:border-red-500 dark:bg-red-300"
+                    ? "border-red-300 bg-red-200 dark:border-red-500 dark:bg-red-300"
                     : "border-neutral-400 bg-neutral-300 dark:border-neutral-500",
-                "hover:!border-neutral-500 dark:hover:!border-white size-3 rounded-[3px] border hover:border-2 hover:border-2",
+                "hover:!border-neutral-500 dark:hover:!border-white size-3 rounded-[3px] border hover:border-2",
               )}
             />
           </TooltipTrigger>
