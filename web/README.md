@@ -11,7 +11,7 @@
 
 ## Apps 👾
 
-- [`reports`](./apps/management) → all of our reports and benchmarks
+- [`benchmarks-and-reports`](./apps/benchmarks-and-reports)
 
 ## Packages 📦
 
