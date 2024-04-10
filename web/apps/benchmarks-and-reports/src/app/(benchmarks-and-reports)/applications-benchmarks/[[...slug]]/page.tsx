@@ -3,6 +3,7 @@ import { Separator } from "@risc0/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@risc0/ui/tabs";
 import { truncate } from "@risc0/ui/utils/truncate";
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 import { CopyButton } from "shared/client/components/copy-button";
 import { convertCsvToJson } from "shared/utils/convert-csv-to-json";
 import { replace } from "string-ts";
@@ -22,6 +23,10 @@ export default async function ApplicationsBenchmarksPage({ params }) {
   const dataPromises = urls.map((url) => fetchApplicationsBenchmarks(url));
   const data = await Promise.all(dataPromises);
 
+  if (!params.slug) {
+    redirect(`/applications-benchmarks/${replace(Object.keys(FILENAMES_TO_TITLES)[0]!, ".csv", "")}`);
+  }
+
   return (
     <div className="container max-w-screen-3xl">
       <div className="flex items-center justify-between gap-8">
@@ -35,10 +40,7 @@ export default async function ApplicationsBenchmarksPage({ params }) {
 
       <Separator className="mt-2" />
 
-      <Tabs
-        className="mt-6"
-        defaultValue={params.slug?.[0] ?? replace(Object.keys(FILENAMES_TO_TITLES)[0]!, ".csv", "")}
-      >
+      <Tabs className="mt-6" defaultValue={params.slug?.[0]}>
         <div className="flex items-center overflow-auto">
           <TabsList>
             {Object.keys(FILENAMES_TO_TITLES).map((filename, index) => (

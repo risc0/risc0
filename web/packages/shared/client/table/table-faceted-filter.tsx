@@ -15,6 +15,7 @@ import { Separator } from "@risc0/ui/separator";
 import type { Column } from "@tanstack/react-table";
 import { CheckIcon, PlusCircleIcon } from "lucide-react";
 import type { ComponentType } from "react";
+import { joinWords } from "../../utils/join-words";
 
 interface TableFacetedFilterProps<TData, TValue> {
   column?: Column<TData, TValue>;
@@ -68,7 +69,7 @@ export function TableFacetedFilter<TData, TValue>({ column, title, options }: Ta
                         )}
                         variant="outline"
                       >
-                        {option.label}
+                        {joinWords(option.label)}
                       </Badge>
                     ))
                 )}
@@ -109,7 +110,7 @@ export function TableFacetedFilter<TData, TValue>({ column, title, options }: Ta
                       <CheckIcon className={cn("size-4")} />
                     </div>
                     {option.icon && <option.icon className="mr-2 size-4 text-muted-foreground" />}
-                    <span>{option.label}</span>
+                    <span>{joinWords(option.label)}</span>
                     {facets?.get(option.value) && (
                       <span className="ml-auto flex size-4 items-center justify-center font-mono text-xs">
                         {facets.get(option.value)}
