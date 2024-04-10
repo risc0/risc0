@@ -11,7 +11,7 @@
 
 ## Apps 👾
 
-- [`benchmarks-and-reports`](./apps/benchmarks-and-reports)
+- [`benchmarks-and-reports`](./apps/benchmarks-and-reports) → [LIVE PROD URL](https://benchmarks.risczero.com)
 
 ## Packages 📦
 
