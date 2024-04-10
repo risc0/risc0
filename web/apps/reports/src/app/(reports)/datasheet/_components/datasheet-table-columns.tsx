@@ -13,13 +13,9 @@ export const datasheetTableColumns = [
   {
     accessorKey: "total_cycles",
     header: ({ column }) => <TableColumnHeader column={column} title="Cycles" />,
-    cell: ({ row }) => {
-      return row.getValue("total_cycles") ? (
-        <div className="font-mono">{`${row.original.total_cycles / 1024}k`}</div>
-      ) : (
-        <div className="font-mono">{`${row.original.cycles / 1024}k`}</div>
-      );
-    },
+    cell: ({ row }) => (
+      <div className="font-mono">{`${(row.getValue("total_cycles") ?? row.getValue("cycles")) / 1024}k`}</div>
+    ),
   },
   columnHelper.accessor("duration", {
     header: ({ column }) => <TableColumnHeader column={column} title="Duration" />,
@@ -36,12 +32,8 @@ export const datasheetTableColumns = [
   {
     accessorKey: "throughput",
     header: ({ column }) => <TableColumnHeader column={column} title="Speed" />,
-    cell: ({ row }) => {
-      return row.getValue("throughput") ? (
-        <div className="font-mono">{formatHz(row.original.throughput)}</div>
-      ) : (
-        <div className="font-mono">{formatHz(row.original.speed)}</div>
-      );
-    },
+    cell: ({ row }) => (
+      <div className="font-mono">{formatHz(row.getValue("throughput") ?? row.getValue("speed")) ?? "-"}</div>
+    ),
   },
 ];
