@@ -20,7 +20,9 @@ export const config = {
 export default async (request: NextRequest) => {
   // for demo purposes, warn when there is no EDGE_CONFIG
   if (!process.env.EDGE_CONFIG || !parseConnectionString(process.env.EDGE_CONFIG)) {
-    throw new Error("Please set the EDGE_CONFIG environment variable in the Vercel project settings");
+    console.error("Error: Please set the EDGE_CONFIG environment variable in the Vercel project settings");
+
+    return;
   }
 
   const maintenanceFeatureFlag = await getFeatureFlag("maintenance");
