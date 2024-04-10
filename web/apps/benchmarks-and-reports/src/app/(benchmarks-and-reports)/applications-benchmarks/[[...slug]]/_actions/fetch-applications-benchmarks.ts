@@ -12,6 +12,6 @@ export async function fetchApplicationsBenchmarks(url: string) {
     .catch((error) => {
       console.error(`Failed fetching ${url}:`, error.message);
 
-      return null; // Handle individual failures gracefully
+      return undefined; // Handle individual failures gracefully
     });
 }

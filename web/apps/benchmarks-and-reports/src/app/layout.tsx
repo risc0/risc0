@@ -11,6 +11,7 @@ export const metadata = {
     template: "%s | RISC Zero Benchmarks & Reports",
     default: "RISC Zero Benchmarks & Reports",
   },
+  metadataBase: new URL("https://benchmarks.risczero.com"),
   description: "Get to market fast with dramatically lower development costs on the first general purpose zkVM.",
   icons: [
     {

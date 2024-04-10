@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { ChartsWrapper } from "./_components/charts-wrapper";
+import { Charts } from "./_components/charts";
 
 export const metadata: Metadata = {
   title: "Benchmarks",
@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 export default function BenchmarksPage() {
   return (
     <div className="container max-w-screen-3xl">
-      <ChartsWrapper />
+      <Charts />
     </div>
   );
 }

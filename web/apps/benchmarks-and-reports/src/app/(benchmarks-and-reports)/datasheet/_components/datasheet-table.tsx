@@ -90,7 +90,7 @@ export function DatasheetTable<TData, TValue>({ title, columns, data }: Datashee
             ) : (
               <TableRow>
                 <TableCell colSpan={columns.length} className="h-24 text-center text-muted-foreground">
-                  No results
+                  No Results
                 </TableCell>
               </TableRow>
             )}

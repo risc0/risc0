@@ -133,7 +133,7 @@ export function CratesIoValidationTable<TData, TValue>({ columns, data }: Crates
             ) : (
               <TableRow>
                 <TableCell colSpan={columns.length} className="h-24 text-center text-muted-foreground">
-                  No results
+                  No Results
                 </TableCell>
               </TableRow>
             )}

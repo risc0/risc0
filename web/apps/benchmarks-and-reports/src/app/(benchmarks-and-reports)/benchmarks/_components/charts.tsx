@@ -1,15 +1,16 @@
 "use client";
 
-// TODO: this whole component was copy pasted from old code
-// could probably improve a lot
 import { Button } from "@risc0/ui/button";
 import { Separator } from "@risc0/ui/separator";
 import { Skeleton } from "@risc0/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@risc0/ui/tabs";
+import { Chart } from "chart.js"; // stay on 2.9.4, much faster
+
 import truncate from "lodash-es/truncate";
 import { DownloadIcon } from "lucide-react";
 import Script from "next/script";
 import { useEffect, useState } from "react";
+import { joinWords } from "shared/utils/join-words";
 
 const toolColors = {
   cargo: "#020077",
@@ -29,7 +30,7 @@ const toolColors = {
 
 function renderGraph(parent, name, dataset) {
   const canvas = document.createElement("canvas");
-  canvas.className = "benchmark-chart max-w-screen-sm";
+  canvas.className = "benchmark-chart w-full";
   parent.appendChild(canvas);
 
   const color = toolColors[dataset.length > 0 ? dataset[0].tool : "_"];
@@ -49,6 +50,17 @@ function renderGraph(parent, name, dataset) {
   };
 
   const options = {
+    animation: {
+      duration: 0, // general animation time
+    },
+    hover: {
+      animationDuration: 0, // duration of animations when hovering an item
+    },
+    responsiveAnimationDuration: 0, // animation duration after a resize
+    legend: {
+      display: false,
+    },
+    aspectRatio: 4,
     scales: {
       xAxes: [
         {
@@ -70,14 +82,27 @@ function renderGraph(parent, name, dataset) {
         },
       ],
     },
+    onClick: (_mouseEvent, activeElems) => {
+      if (activeElems.length === 0) {
+        return;
+      }
+
+      const index = activeElems[0]._index;
+      const url = dataset[index].commit.url;
+
+      window.open(url, "_blank");
+    },
+    onHover: (event, chartElement) => {
+      event.target.style.cursor = chartElement[0] ? "pointer" : "default";
+    },
     tooltips: {
-      intersect: false,
+      backgroundColor: "rgba(0, 0, 0, 1)",
       callbacks: {
         afterTitle: (items) => {
           const { index } = items[0];
           const data = dataset[index];
           return `\n${truncate(data.commit.message, {
-            length: 180,
+            length: 140,
             omission: "…",
           })}\n\n${data.commit.timestamp} committed by @${data.commit.committer.username}\n`;
         },
@@ -96,19 +121,8 @@ function renderGraph(parent, name, dataset) {
         },
       },
     },
-    onClick: (_mouseEvent, activeElems) => {
-      if (activeElems.length === 0) {
-        return;
-      }
-      // XXX: Undocumented. How can we know the index?
-      const index = activeElems[0]._index;
-      const url = dataset[index].commit.url;
-      window.open(url, "_blank");
-    },
   };
 
-  // @ts-expect-error -- it exists
-  // biome-ignore lint/correctness/noUndeclaredVariables: ignore
   new Chart(canvas, {
     type: "line",
     data,
@@ -118,7 +132,7 @@ function renderGraph(parent, name, dataset) {
 
 function renderBenchSet(benchSet, main) {
   const graphsElem = document.createElement("div");
-  graphsElem.className = "flex flex-row flex-wrap gap-16 dark:invert [&>*]:tracking-normal";
+  graphsElem.className = "mt-6 flex flex-row flex-wrap gap-10 dark:invert [&>*]:tracking-normal";
   main.appendChild(graphsElem);
 
   for (const [benchName, benches] of benchSet.entries()) {
@@ -130,13 +144,12 @@ export function Charts() {
   const [lastUpdate, setLastUpdate] = useState<string>("");
   const [names, setNames] = useState<string[]>();
   const [ready, setReady] = useState<boolean>(false);
+  const [isMounted, setIsMounted] = useState<boolean>(false);
 
   useEffect(() => {
     const data = window.BENCHMARK_DATA;
 
     if (ready && data) {
-      const data = window.BENCHMARK_DATA;
-
       setLastUpdate(new Date(data.lastUpdate).toLocaleString());
       setNames(Object.keys(data.entries));
     }
@@ -186,6 +199,14 @@ export function Charts() {
     }
   }, [names]);
 
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) {
+    return null;
+  }
+
   return (
     <div>
       <div className="flex items-center justify-between">
@@ -210,7 +231,7 @@ export function Charts() {
             <TabsList>
               {names.map((name) => (
                 <TabsTrigger key={name} value={name}>
-                  {name}
+                  {joinWords(name)}
                 </TabsTrigger>
               ))}
             </TabsList>

@@ -82,7 +82,7 @@ export function TableFacetedFilter<TData, TValue>({ column, title, options }: Ta
         <Command>
           <CommandInput placeholder={title} />
           <CommandList>
-            <CommandEmpty>No results found</CommandEmpty>
+            <CommandEmpty>No Results Found</CommandEmpty>
             <CommandGroup>
               {options.map((option) => {
                 const isSelected = selectedValues.has(option.value);
