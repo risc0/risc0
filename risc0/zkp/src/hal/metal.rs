@@ -63,7 +63,7 @@ const KERNEL_NAMES: &[&str] = &[
     "poseidon_rows",
     "poseidon2_fold",
     "poseidon2_rows",
-    "prefix_product",
+    "prefix_products",
     "sha_fold",
     "sha_rows",
     "zk_shift",

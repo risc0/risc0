@@ -112,6 +112,7 @@ impl<MH: MetalHash> CircuitHal<MetalHal<MH>> for MetalCircuitHal<MH> {
         self.hal.dispatch(&kernel, &args, domain as u64, None);
     }
 
+    #[tracing::instrument(skip_all)]
     fn accumulate(
         &self,
         ctrl: &MetalBuffer<BabyBearElem>,
@@ -134,43 +135,51 @@ impl<MH: MetalHash> CircuitHal<MetalHal<MH>> for MetalCircuitHal<MH> {
             &bytes,
         );
 
-        let args = [
-            KernelArg::Integer(steps as u32),
-            ctrl.as_arg(),
-            data.as_arg(),
-            mix.as_arg(),
-            ram.as_arg(),
-            bytes.as_arg(),
-        ];
-        let kernel = self.kernels.get("step_compute_accum").unwrap();
-        self.hal.dispatch(&kernel, &args, count as u64, None);
+        tracing::info_span!("step_compute_accum").in_scope(|| {
+            let args = [
+                KernelArg::Integer(steps as u32),
+                ctrl.as_arg(),
+                data.as_arg(),
+                mix.as_arg(),
+                ram.as_arg(),
+                bytes.as_arg(),
+            ];
+            let kernel = self.kernels.get("step_compute_accum").unwrap();
+            self.hal.dispatch(&kernel, &args, count as u64, None);
+        });
 
-        let args = [KernelArg::Integer(count as u32), ram.as_arg()];
-        self.hal.dispatch_by_name("prefix_product", &args, 1);
+        tracing::info_span!("prefix_products").in_scope(|| {
+            let args = [KernelArg::Integer(count as u32), ram.as_arg()];
+            self.hal.dispatch_by_name("prefix_products", &args, 1);
 
-        let args = [KernelArg::Integer(count as u32), bytes.as_arg()];
-        self.hal.dispatch_by_name("prefix_product", &args, 1);
+            let args = [KernelArg::Integer(count as u32), bytes.as_arg()];
+            self.hal.dispatch_by_name("prefix_products", &args, 1);
+        });
 
-        let args = [
-            KernelArg::Integer(steps as u32),
-            ctrl.as_arg(),
-            data.as_arg(),
-            mix.as_arg(),
-            ram.as_arg(),
-            bytes.as_arg(),
-            accum.as_arg(),
-        ];
-        let kernel = self.kernels.get("step_verify_accum").unwrap();
-        self.hal.dispatch(&kernel, &args, count as u64, None);
+        tracing::info_span!("step_verify_accum").in_scope(|| {
+            let args = [
+                KernelArg::Integer(steps as u32),
+                ctrl.as_arg(),
+                data.as_arg(),
+                mix.as_arg(),
+                ram.as_arg(),
+                bytes.as_arg(),
+                accum.as_arg(),
+            ];
+            let kernel = self.kernels.get("step_verify_accum").unwrap();
+            self.hal.dispatch(&kernel, &args, count as u64, None);
+        });
 
-        self.hal.dispatch_by_name(
-            "eltwise_zeroize_fpext",
-            &[accum.as_arg()],
-            accum.size() as u64,
-        );
+        tracing::info_span!("zeroize").in_scope(|| {
+            self.hal.dispatch_by_name(
+                "eltwise_zeroize_fpext",
+                &[accum.as_arg()],
+                accum.size() as u64,
+            );
 
-        self.hal
-            .dispatch_by_name("eltwise_zeroize_fp", &[io.as_arg()], io.size() as u64);
+            self.hal
+                .dispatch_by_name("eltwise_zeroize_fp", &[io.as_arg()], io.size() as u64);
+        });
     }
 }
 

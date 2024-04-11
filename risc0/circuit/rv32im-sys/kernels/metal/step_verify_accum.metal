@@ -12,8 +12,7 @@ kernel void step_verify_accum(uint cycle [[thread_position_in_grid]],
                               const device Fp* ctrl,
                               const device Fp* data,
                               const device Fp* mix,
-                              const device FpExt* ram,
-                              const device FpExt* bytes,
+                              device FpExt* ram, device FpExt* bytes,
                               device Fp* accum) {
     uint mask = steps - 1;
     Fp x0(2013265910);

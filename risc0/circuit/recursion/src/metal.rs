@@ -132,7 +132,7 @@ impl<MH: MetalHash> CircuitHal<MetalHal<MH>> for MetalCircuitHal<MH> {
         self.hal.dispatch(&kernel, &args, count as u64, None);
 
         let args = [KernelArg::Integer(count as u32), wom.as_arg()];
-        self.hal.dispatch_by_name("prefix_product", &args, 1);
+        self.hal.dispatch_by_name("prefix_products", &args, 1);
 
         let args = [
             KernelArg::Integer(steps as u32),

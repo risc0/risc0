@@ -14,7 +14,7 @@
 
 #include "fpext.h"
 
-kernel void prefix_product(device uint32_t& count,
+kernel void prefix_products(device uint32_t& count,
                            device FpExt* elems) {
   FpExt total(1);
   for (size_t i = 0; i < count; i++) {

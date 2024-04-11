@@ -12,8 +12,7 @@ kernel void step_compute_accum(uint cycle [[thread_position_in_grid]],
                                const device Fp* ctrl,
                                const device Fp* data,
                                const device Fp* mix,
-                               device FpExt* ram,
-                               device FpExt* bytes) {
+                               device FpExt* ram, device FpExt* bytes) {
     uint mask = steps - 1;
     Fp x0(2013265910);
     Fp x1(11);
