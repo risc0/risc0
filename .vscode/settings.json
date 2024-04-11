@@ -42,8 +42,18 @@
 		"vector": "cpp",
 		"charconv": "cpp",
 		"stdexcept": "cpp",
-		"array": "cpp"
+		"array": "cpp",
+    "*.css": "tailwindcss"
 	},
+  "tailwindCSS.experimental.classRegex": [
+    ["cva\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"],
+    ["cn\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"],
+    ["cx\\(([^)]*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)"],
+    "twc\\.[^`]+`([^`]*)`",
+    "twc\\(.*?\\).*?`([^`]*)",
+    ["twc\\.[^`]+\\(([^)]*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)"],
+    ["twc\\(.*?\\).*?\\(([^)]*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)"]
+  ],
 	"rust-analyzer.showUnlinkedFileNotification": false,
 	"rust-analyzer.linkedProjects": [
 		"Cargo.toml",
