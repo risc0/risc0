@@ -41,7 +41,6 @@ sha2 = { version = "0.10", default-features = false, features = ["compress"] }
 [dev-dependencies]
 criterion = "0.5"
 rand = { version = "0.8", features = ["small_rng"] }
-risc0-circuit-rv32im = { workspace = true, features = ["prove"] }
 serial_test = "3.0"
 test-log = { version = "0.2", default-features = false, features = ["trace"] }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
