@@ -211,7 +211,9 @@ impl Params {
         let trace_domain_size: f32 = self.trace_domain_size as f32;
         tracing::info!("w_accum: {w_accum:?}");
         tracing::info!("trace_domain_size: {trace_domain_size:?}");
-        self.w_accum as f32 / self.ext_size as f32 * (self.max_degree - 2.0) * self.trace_domain_size
+        self.w_accum as f32 / self.ext_size as f32
+            * (self.max_degree - 2.0)
+            * self.trace_domain_size
             / self.ext_field_size
     }
 
@@ -239,7 +241,8 @@ impl Params {
 
     fn e_fri_constant(&self, e_proximity_gap: f32) -> f32 {
         // (w_rap + d - 1/2) * e_proximity_gap
-        let first_term = (self.n_trace_polys + self.num_segment_polynomials - 0.5) * e_proximity_gap;
+        let first_term =
+            (self.n_trace_polys + self.num_segment_polynomials - 0.5) * e_proximity_gap;
 
         // (2m + 1) * (|D| + 1) * FRI_FOLD * num_folding_rounds
         // ----------------------------------------------------
@@ -270,7 +273,8 @@ impl Params {
     fn e_deep(&self, l_plus: f32) -> f32 {
         let h_plus = self.trace_domain_size + self.biggest_combo;
 
-        let numerator = self.num_segment_polynomials * (h_plus - 1.0) + (self.trace_domain_size - 1.0);
+        let numerator =
+            self.num_segment_polynomials * (h_plus - 1.0) + (self.trace_domain_size - 1.0);
         let denominator = self.ext_field_size - self.trace_domain_size - self.lde_domain_size;
         l_plus * numerator / denominator
     }
