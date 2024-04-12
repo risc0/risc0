@@ -325,8 +325,8 @@ fn main() {
 
                 &*(ptr as *const [u32; 512])
             };
-            for byte in array {
-                assert_eq!(*byte, 0);
+            for value in array {
+                assert_eq!(*value, 0);
             }
         }
     }
