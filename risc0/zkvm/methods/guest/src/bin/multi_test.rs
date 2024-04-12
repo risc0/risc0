@@ -19,7 +19,10 @@
 
 extern crate alloc;
 
-use alloc::{format, vec};
+use alloc::{
+    alloc::{alloc_zeroed, Layout},
+    format, vec,
+};
 use core::arch::asm;
 
 use getrandom::getrandom;
@@ -311,6 +314,20 @@ fn main() {
             let a = &AlignTest1::new(54) as *const _;
             let b = &AlignTest1::new(60) as *const _;
             assert_eq!(PAGE_SIZE, b as usize - a as usize);
+        }
+        MultiTestSpec::AllocZeroed => {
+            // Bump allocator was modified to not manually zero memory in the zkVM. Simple test to
+            // ensure that zkVM memory is zeroed in initialization.
+            let array: &[u32; 512] = unsafe {
+                // Allocate some arbitrary amount of bytes
+                let layout = Layout::new::<[u32; 512]>();
+                let ptr = alloc_zeroed(layout);
+
+                &*(ptr as *const [u32; 512])
+            };
+            for byte in array {
+                assert_eq!(*byte, 0);
+            }
         }
     }
 }
