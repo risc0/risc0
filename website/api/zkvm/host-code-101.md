@@ -47,6 +47,7 @@ let env = ExecutorEnv::builder().build().unwrap();
 let prover = default_prover();
 let receipt = prover.prove(env, METHOD_NAME_ELF).unwrap();
 ```
+
 Here, the zkVM uses `METHOD_NAME_ELF` constant to execute guest code. The `cargo-risczero` toolchain computes this constant during compilation. The user needs to import it (`use methods::{METHOD_NAME_ELF};`) then pass it as an input parameter to the `prover.prove` function.
 
 To see more complex examples, check out the [examples].
