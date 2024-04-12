@@ -688,7 +688,10 @@ mod sys_verify {
 }
 
 mod soundness {
-    use risc0_circuit_rv32im::CIRCUIT;
+    use risc0_circuit_rv32im::{
+        CIRCUIT,
+        prove::emu::exec::DEFAULT_SEGMENT_LIMIT_PO2,
+    };
     use risc0_zkp::{
         adapter::TapsProvider,
         field::{
@@ -719,5 +722,16 @@ mod soundness {
 
         let security = soundness::conjectured_strict::<CpuHal<BabyBear>>(taps, coeffs_size);
         assert_eq!(security, 74.90123);
+    }
+
+    #[test]
+    fn toy_model() {
+        let cycles = DEFAULT_SEGMENT_LIMIT_PO2;
+        let ext_size = BabyBearExtElem::EXT_SIZE;
+        let coeffs_size = cycles * ext_size;
+        let taps = CIRCUIT.get_taps();
+
+        let security = soundness::toy_model_security::<CpuHal<BabyBear>>(taps, coeffs_size);
+        assert_eq!(security, 100.0);
     }
 }

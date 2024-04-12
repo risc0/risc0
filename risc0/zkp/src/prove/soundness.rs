@@ -283,16 +283,3 @@ impl Params {
         self.e_deep(l_plus) + self.e_ali(l_plus)
     }
 }
-
-#[cfg(test)]
-mod tests {
-    use risc0_core::field::baby_bear::BabyBear;
-
-    use crate::hal::cpu::CpuHal;
-
-    #[test]
-    fn toy_model() {
-        let security = super::toy_model_security::<CpuHal<BabyBear>>();
-        assert_eq!(security, 100.0);
-    }
-}
