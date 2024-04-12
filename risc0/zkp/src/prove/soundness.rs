@@ -286,13 +286,17 @@ impl Params {
 
 #[cfg(test)]
 mod tests {
-    use risc0_core::field::baby_bear::BabyBear;
 
+    use risc0_core::field::baby_bear::BabyBear;
+    use risc0_circuit_rv32im::CIRCUIT;
+    use risc0_circuit_rv32im::prove::emu::exec::DEFAULT_SEGMENT_LIMIT_PO2;
+
+    use crate::adapter::TapsProvider;
     use crate::hal::cpu::CpuHal;
 
     #[test]
     fn toy_model() {
-        let security = super::toy_model_security::<CpuHal<BabyBear>>();
+        let security = super::toy_model_security::<CpuHal<BabyBear>>(CIRCUIT.get_taps(), DEFAULT_SEGMENT_LIMIT_PO2);
         assert_eq!(security, 100.0);
     }
 }
