@@ -84,14 +84,13 @@ impl<'a, H: Hal> Prover<'a, H> {
             self.taps.group_name(tap_group_index)
         );
 
-        let name = buf.name();
         let coeffs = make_coeffs(self.hal, buf, group_size);
         let group_ref = self.groups[tap_group_index].insert(PolyGroup::new(
             self.hal,
             coeffs,
             group_size,
             self.cycles,
-            name,
+            "data",
         ));
 
         group_ref.merkle.commit(&mut self.iop);
@@ -360,9 +359,9 @@ impl<'a, H: Hal> Prover<'a, H> {
             super::soundness::proven::<H>(self.taps, final_poly_coeffs.size());
         tracing::info!("proven_soundness_error: {proven_soundness_error:?}");
 
-        let conjectured_soundness_error =
-            super::soundness::conjectured_strict::<H>(self.taps, final_poly_coeffs.size());
-        tracing::info!("conjectured_soundness_error: {conjectured_soundness_error:?}");
+        let conjectured_security =
+            super::soundness::toy_model_security::<H>(self.taps, final_poly_coeffs.size());
+        tracing::info!("conjectured_security: {conjectured_security:?}");
 
         // Return final proof
         let proof = self.iop.proof;
