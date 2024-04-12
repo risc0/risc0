@@ -75,12 +75,13 @@
         .then(res => res.text())
         .then(data => {
           // Find the most recent timestamp
-          const mostRecent = JSON.parse(responseText.replace("[,", "[")).reduce((prev, current) =>
+          const mostRecent = JSON.parse(data.replace("[,", "[")).reduce((prev, current) =>
             prev.timestamp > current.timestamp ? prev : current,
           );
 
           // Retrieve the hash related to the most recent timestamp
           let mostRecentHash = mostRecent.hash;
+
           return mostRecentHash;
         })
         .catch(err => { console.error(err) });
