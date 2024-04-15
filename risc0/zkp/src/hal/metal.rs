@@ -272,6 +272,7 @@ impl Drop for TrackedBuffer {
 
 #[derive(Clone, Debug)]
 pub struct BufferImpl<T> {
+    name: &'static str,
     cmd_queue: CommandQueue,
     buffer: TrackedBuffer,
     offset: usize,
@@ -288,11 +289,12 @@ pub enum KernelArg<'a> {
 }
 
 impl<T> BufferImpl<T> {
-    fn new(device: &Device, cmd_queue: CommandQueue, size: usize) -> Self {
+    fn new(name: &'static str, device: &Device, cmd_queue: CommandQueue, size: usize) -> Self {
         let bytes_len = size * mem::size_of::<T>();
         let options = MTLResourceOptions::StorageModeManaged;
         let buffer = device.new_buffer(bytes_len as u64, options);
         Self {
+            name,
             cmd_queue,
             buffer: TrackedBuffer::new(buffer),
             offset: 0,
@@ -301,12 +303,18 @@ impl<T> BufferImpl<T> {
         }
     }
 
-    pub fn copy_from(device: &Device, cmd_queue: CommandQueue, slice: &[T]) -> Self {
+    pub fn copy_from(
+        name: &'static str,
+        device: &Device,
+        cmd_queue: CommandQueue,
+        slice: &[T],
+    ) -> Self {
         let bytes_len = slice.len() * mem::size_of::<T>();
         let options = MTLResourceOptions::StorageModeManaged;
         let buffer =
             device.new_buffer_with_data(slice.as_ptr() as *const c_void, bytes_len as u64, options);
         Self {
+            name,
             cmd_queue,
             buffer: TrackedBuffer::new(buffer),
             offset: 0,
@@ -342,6 +350,10 @@ impl<T> BufferImpl<T> {
 }
 
 impl<T: Clone> Buffer<T> for BufferImpl<T> {
+    fn name(&self) -> &'static str {
+        self.name
+    }
+
     fn size(&self) -> usize {
         self.size
     }
@@ -349,6 +361,7 @@ impl<T: Clone> Buffer<T> for BufferImpl<T> {
     fn slice(&self, offset: usize, size: usize) -> BufferImpl<T> {
         assert!(offset + size <= self.size());
         BufferImpl {
+            name: self.name,
             cmd_queue: self.cmd_queue.clone(),
             buffer: self.buffer.clone(),
             offset: self.offset + offset,
@@ -470,44 +483,40 @@ impl<MH: MetalHash> Hal for MetalHal<MH> {
     type Field = BabyBear;
     type Buffer<T: Clone + Debug + PartialEq + Pod> = BufferImpl<T>;
 
-    fn alloc_elem(&self, _name: &'static str, size: usize) -> Self::Buffer<Self::Elem> {
-        BufferImpl::new(&self.device, self.cmd_queue.clone(), size)
+    fn alloc_elem(&self, name: &'static str, size: usize) -> Self::Buffer<Self::Elem> {
+        BufferImpl::new(name, &self.device, self.cmd_queue.clone(), size)
     }
 
-    fn copy_from_elem(
-        &self,
-        _name: &'static str,
-        slice: &[Self::Elem],
-    ) -> Self::Buffer<Self::Elem> {
-        BufferImpl::copy_from(&self.device, self.cmd_queue.clone(), slice)
+    fn copy_from_elem(&self, name: &'static str, slice: &[Self::Elem]) -> Self::Buffer<Self::Elem> {
+        BufferImpl::copy_from(name, &self.device, self.cmd_queue.clone(), slice)
     }
 
-    fn alloc_extelem(&self, _name: &'static str, size: usize) -> Self::Buffer<Self::ExtElem> {
-        BufferImpl::new(&self.device, self.cmd_queue.clone(), size)
+    fn alloc_extelem(&self, name: &'static str, size: usize) -> Self::Buffer<Self::ExtElem> {
+        BufferImpl::new(name, &self.device, self.cmd_queue.clone(), size)
     }
 
     fn copy_from_extelem(
         &self,
-        _name: &'static str,
+        name: &'static str,
         slice: &[Self::ExtElem],
     ) -> Self::Buffer<Self::ExtElem> {
-        BufferImpl::copy_from(&self.device, self.cmd_queue.clone(), slice)
+        BufferImpl::copy_from(name, &self.device, self.cmd_queue.clone(), slice)
     }
 
-    fn alloc_digest(&self, _name: &'static str, size: usize) -> Self::Buffer<Digest> {
-        BufferImpl::new(&self.device, self.cmd_queue.clone(), size)
+    fn alloc_digest(&self, name: &'static str, size: usize) -> Self::Buffer<Digest> {
+        BufferImpl::new(name, &self.device, self.cmd_queue.clone(), size)
     }
 
-    fn copy_from_digest(&self, _name: &'static str, slice: &[Digest]) -> Self::Buffer<Digest> {
-        BufferImpl::copy_from(&self.device, self.cmd_queue.clone(), slice)
+    fn copy_from_digest(&self, name: &'static str, slice: &[Digest]) -> Self::Buffer<Digest> {
+        BufferImpl::copy_from(name, &self.device, self.cmd_queue.clone(), slice)
     }
 
-    fn alloc_u32(&self, _name: &'static str, size: usize) -> Self::Buffer<u32> {
-        BufferImpl::new(&self.device, self.cmd_queue.clone(), size)
+    fn alloc_u32(&self, name: &'static str, size: usize) -> Self::Buffer<u32> {
+        BufferImpl::new(name, &self.device, self.cmd_queue.clone(), size)
     }
 
-    fn copy_from_u32(&self, _name: &'static str, slice: &[u32]) -> Self::Buffer<u32> {
-        BufferImpl::copy_from(&self.device, self.cmd_queue.clone(), slice)
+    fn copy_from_u32(&self, name: &'static str, slice: &[u32]) -> Self::Buffer<u32> {
+        BufferImpl::copy_from(name, &self.device, self.cmd_queue.clone(), slice)
     }
 
     #[tracing::instrument(skip_all)]

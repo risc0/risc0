@@ -13,7 +13,6 @@
 // limitations under the License.
 
 pub(crate) mod exec;
-pub(crate) mod opcode;
 #[cfg(feature = "prove")]
 pub(crate) mod prove;
 pub(crate) mod session;

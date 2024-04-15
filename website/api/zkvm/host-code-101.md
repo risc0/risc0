@@ -79,7 +79,7 @@ sufficient for you to build your first [zkVM application][zkVM]!
 If you run into problems, don't be a stranger! You can file an issue on [these
 docs] or the [examples], and we're happy to answer questions on [Discord].
 
-[Bonsai]: ../bonsai/bonsai-overview.md
+[Bonsai]: ../generating-proofs/remote-proving.md
 [Discord]: https://discord.gg/risczero
 [examples]: ./examples.md
 [execute]: /terminology#execute

@@ -11,7 +11,7 @@ you get started building applications for [Bonsai] and the [zkVM].
 - For a guide to writing and running your first guest code, check out our [zkVM
   Quick Start][quickstart].
 - For a simple example, check out the [Hello World tutorial][hello-world], where
-  the [guest] receives two inputs from the [host] and commits their product to
+  the [guest] receives an input from the [host], and then commits a value to
   the [journal].
 
 The full functionality of the guest is documented in the [`guest`
@@ -83,7 +83,7 @@ docs] or the [examples], and we're happy to answer questions on [Discord].
 
 [acceleration]: ./acceleration.md
 [benchmarks]: ./benchmarks.md
-[Bonsai]: ../bonsai/bonsai-overview.md
+[Bonsai]: ../generating-proofs/remote-proving.md
 [Discord]: https://discord.gg/risczero
 [`env::read`]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest/env/fn.read.html
 [`env::read_slice`]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest/env/fn.read_slice.html
