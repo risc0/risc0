@@ -422,6 +422,7 @@ jobs:
       - run: sccache --show-stats
 
   stable-ceremony:
+    # Tests that the circom files are unchanged from the versions we ran a trusted setup ceremony on
     if: needs.changes.outputs.stable-ceremony == 'true'
     needs: changes
     runs-on: [self-hosted, prod, Linux, cpu]
