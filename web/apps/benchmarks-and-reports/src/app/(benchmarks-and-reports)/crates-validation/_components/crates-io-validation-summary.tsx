@@ -15,11 +15,14 @@ export function CratesIoValidationSummary({ data }: CratesIoValidationSummaryPro
         <Tooltip key={item.name} disableHoverableContent delayDuration={0}>
           <TooltipTrigger asChild>
             <a
-              className="p-[0.5px] group"
+              className="group p-[0.5px]"
               href={`https://crates.io/crates/${item.name}${item.version ? `/${item.version}` : ""}`}
               target="_blank"
               rel="noopener noreferrer"
             >
+              <span className="sr-only">{`https://crates.io/crates/${item.name}${
+                item.version ? `/${item.version}` : ""
+              }`}</span>
               <div
                 className={cn(
                   item.status === "Success"
