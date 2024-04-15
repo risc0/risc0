@@ -10,6 +10,11 @@ import DatasheetContent from "./_components/datasheet-content";
 export const metadata: Metadata = {
   title: "Datasheet",
   description: DATASHEET_DESCRIPTION,
+  openGraph: {
+    images: {
+      url: "http://localhost:3000/og?title=Datasheet",
+    },
+  },
 };
 
 export default async function DatasheetPage() {

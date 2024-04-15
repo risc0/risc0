@@ -6,6 +6,11 @@ import { Charts } from "./_components/charts";
 export const metadata: Metadata = {
   title: "Benchmarks",
   description: BENCHMARKS_DESCRIPTION,
+  openGraph: {
+    images: {
+      url: "http://localhost:3000/og?title=Benchmarks",
+    },
+  },
 };
 
 export default function BenchmarksPage() {

@@ -11,6 +11,11 @@ import CratesIoValidationContent from "./_components/crates-io-validation-conten
 export const metadata: Metadata = {
   title: "Crates.io Validation",
   description: CRATES_VALIDATION_DESCRIPTION,
+  openGraph: {
+    images: {
+      url: "http://localhost:3000/og?title=Crates.io%20Validation",
+    },
+  },
 };
 
 export default async function CratesIoValidationPage() {

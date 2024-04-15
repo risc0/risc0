@@ -14,6 +14,11 @@ import { FILENAMES_TO_TITLES } from "./_utils/constants";
 export const metadata: Metadata = {
   title: "Applications Benchmark",
   description: APPLICATIONS_BENCHMARKS_DESCRIPTION,
+  openGraph: {
+    images: {
+      url: "http://localhost:3000/og?title=Applications%20Benchmark",
+    },
+  },
 };
 
 export default async function ApplicationsBenchmarksPage({ params }) {
