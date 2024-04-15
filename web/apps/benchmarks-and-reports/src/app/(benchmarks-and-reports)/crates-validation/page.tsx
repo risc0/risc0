@@ -14,10 +14,9 @@ export const metadata: Metadata = {
   openGraph: {
     images: [
       {
-        url: `https://reports-git-nahoc-view-risczero.vercel.app/api/og?title=Crates.io%20Validation&description=${encodeURIComponent(
+        url: `https://benchmarks.risczero.com/api/og?title=Crates.io%20Validation&description=${encodeURIComponent(
           CRATES_VALIDATION_DESCRIPTION,
         )}`,
-        type: "image/png",
       },
     ],
   },
