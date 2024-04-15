@@ -1,4 +1,7 @@
 import { Link } from "@risc0/ui/link";
+import getConfig from "next/config";
+
+const { publicRuntimeConfig } = getConfig();
 
 export function Footer() {
   return (
@@ -17,6 +20,8 @@ export function Footer() {
       <Link target="_blank" className="link text-muted-foreground" href="https://github.com/risc0/risc0/">
         GitHub
       </Link>
+      <span>•</span>
+      <span>v{publicRuntimeConfig?.version}</span>
     </div>
   );
 }

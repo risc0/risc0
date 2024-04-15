@@ -18,19 +18,25 @@ export default function ReportsPage() {
                 width={220}
                 height={160}
                 priority
-                className="user-select-none pointer-events-none hidden rounded object-contain object-right dark:block"
+                className="user-select-none pointer-events-none hidden rounded dark:block"
                 src={`/graph-${index}-dark.svg`}
+                style={{
+                  objectFit: "contain",
+                  objectPosition: "right",
+                }}
                 alt={description}
-                quality={100}
               />
               <Image
                 width={220}
                 height={160}
                 priority
-                className={"user-select-none pointer-events-none rounded object-contain object-right dark:hidden"}
+                className={"user-select-none pointer-events-none rounded dark:hidden"}
                 src={`/graph-${index}.svg`}
+                style={{
+                  objectFit: "contain",
+                  objectPosition: "right",
+                }}
                 alt={description}
-                quality={100}
               />
             </div>
           </Card>

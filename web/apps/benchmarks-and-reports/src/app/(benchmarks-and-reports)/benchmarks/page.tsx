@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { BENCHMARKS_DESCRIPTION } from "../_utils/constants";
 import { Charts } from "./_components/charts";
 
@@ -10,7 +11,9 @@ export const metadata: Metadata = {
 export default function BenchmarksPage() {
   return (
     <div className="container max-w-screen-3xl">
-      <Charts />
+      <Suspense>
+        <Charts />
+      </Suspense>
     </div>
   );
 }
