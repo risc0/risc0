@@ -427,7 +427,9 @@ jobs:
     needs: changes
     runs-on: [self-hosted, prod, Linux, cpu]
     steps:
-      - run: ./.github/scripts/circom_stable.sh
+      - name: Compare circom hashes to golden values
+        run: bash ./circom_stable.sh
+        working-directory: ./.github/scripts
 
 
   stark2snark:
