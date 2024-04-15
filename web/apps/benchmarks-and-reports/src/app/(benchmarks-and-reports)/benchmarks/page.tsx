@@ -7,11 +7,14 @@ export const metadata: Metadata = {
   title: "Benchmarks",
   description: BENCHMARKS_DESCRIPTION,
   openGraph: {
-    images: {
-      url: `https://reports-git-nahoc-view-risczero.vercel.app/og?title=Benchmarks&description=${encodeURIComponent(
-        BENCHMARKS_DESCRIPTION,
-      )}`,
-    },
+    images: [
+      {
+        url: `https://reports-git-nahoc-view-risczero.vercel.app/api/og?title=Benchmarks&description=${encodeURIComponent(
+          BENCHMARKS_DESCRIPTION,
+        )}`,
+        type: "image/png",
+      },
+    ],
   },
 };
 

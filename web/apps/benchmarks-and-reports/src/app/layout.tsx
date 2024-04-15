@@ -14,9 +14,12 @@ export const metadata = {
   metadataBase: new URL("https://reports-git-nahoc-view-risczero.vercel.app"),
   description: "Get to market fast with dramatically lower development costs on the first general purpose zkVM",
   openGraph: {
-    images: {
-      url: "https://reports-git-nahoc-view-risczero.vercel.app/og?title=RISC%20Zero%20Benchmarks%20%26%20Reports", // @TODO: change with official URL
-    },
+    images: [
+      {
+        url: "https://reports-git-nahoc-view-risczero.vercel.app/api/og?title=RISC%20Zero%20Benchmarks%20%26%20Reports", // @TODO: change with official URL
+        type: "image/png",
+      },
+    ],
   },
   icons: [
     {

@@ -11,11 +11,14 @@ export const metadata: Metadata = {
   title: "Datasheet",
   description: DATASHEET_DESCRIPTION,
   openGraph: {
-    images: {
-      url: `https://reports-git-nahoc-view-risczero.vercel.app/og?title=Datasheet&description=${encodeURIComponent(
-        DATASHEET_DESCRIPTION,
-      )}`,
-    },
+    images: [
+      {
+        url: `https://reports-git-nahoc-view-risczero.vercel.app/api/og?title=Datasheet&description=${encodeURIComponent(
+          DATASHEET_DESCRIPTION,
+        )}`,
+        type: "image/png",
+      },
+    ],
   },
 };
 

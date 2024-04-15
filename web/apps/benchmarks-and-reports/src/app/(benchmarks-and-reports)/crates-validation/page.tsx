@@ -12,11 +12,14 @@ export const metadata: Metadata = {
   title: "Crates.io Validation",
   description: CRATES_VALIDATION_DESCRIPTION,
   openGraph: {
-    images: {
-      url: `https://reports-git-nahoc-view-risczero.vercel.app/og?title=Crates.io%20Validation&description=${encodeURIComponent(
-        CRATES_VALIDATION_DESCRIPTION,
-      )}`,
-    },
+    images: [
+      {
+        url: `https://reports-git-nahoc-view-risczero.vercel.app/api/og?title=Crates.io%20Validation&description=${encodeURIComponent(
+          CRATES_VALIDATION_DESCRIPTION,
+        )}`,
+        type: "image/png",
+      },
+    ],
   },
 };
 

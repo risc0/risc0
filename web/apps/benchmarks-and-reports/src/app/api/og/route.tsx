@@ -3,10 +3,10 @@ import { ImageResponse } from "next/og";
 export const runtime = "edge";
 
 export async function GET(request: Request) {
-  const fontDataBold = await fetch(new URL("../../../public/fonts/EuropaGroteskSH-Med.otf", import.meta.url)).then(
+  const fontDataBold = await fetch(new URL("../../../../public/fonts/EuropaGroteskSH-Med.otf", import.meta.url)).then(
     (res) => res.arrayBuffer(),
   );
-  const fontDataNormal = await fetch(new URL("../../../public/fonts/EuropaGroteskSH-Reg.otf", import.meta.url)).then(
+  const fontDataNormal = await fetch(new URL("../../../../public/fonts/EuropaGroteskSH-Reg.otf", import.meta.url)).then(
     (res) => res.arrayBuffer(),
   );
   const imageData = await fetch(new URL("./og-1.png", import.meta.url)).then((res) => res.arrayBuffer());
