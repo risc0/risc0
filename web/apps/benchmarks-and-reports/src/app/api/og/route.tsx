@@ -3,18 +3,18 @@ import { ImageResponse } from "next/og";
 export const runtime = "edge";
 
 export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
   const fontDataBold = await fetch(new URL("../../../../public/fonts/EuropaGroteskSH-Med.otf", import.meta.url)).then(
     (res) => res.arrayBuffer(),
   );
   const fontDataNormal = await fetch(new URL("../../../../public/fonts/EuropaGroteskSH-Reg.otf", import.meta.url)).then(
     (res) => res.arrayBuffer(),
   );
-  const imageData = await fetch(new URL(`./og-${Math.floor(Math.random() * 3 + 1)}.png`, import.meta.url)).then((res) =>
-    res.arrayBuffer(),
+  const imageData = await fetch(new URL(`./og-${searchParams.get("imageVersion") ?? "2"}.png`, import.meta.url)).then(
+    (res) => res.arrayBuffer(),
   );
 
   try {
-    const { searchParams } = new URL(request.url);
     const hasTitle = searchParams.has("title");
     const hasDescription = searchParams.has("description");
     const title = hasTitle ? searchParams.get("title")?.slice(0, 100) : "Universal Zero Knowledge";
