@@ -149,6 +149,8 @@ pub trait Hal {
         size: usize,
         stride: usize,
     );
+
+    fn prefix_products(&self, io: &Self::Buffer<Self::ExtElem>);
 }
 
 pub trait CircuitHal<H: Hal> {
@@ -209,7 +211,10 @@ mod testutil {
     use std::rc::Rc;
 
     use rand::{thread_rng, RngCore};
-    use risc0_core::field::{baby_bear::BabyBearElem, Elem, ExtElem};
+    use risc0_core::field::{
+        baby_bear::{BabyBearElem, BabyBearExtElem},
+        Elem, ExtElem,
+    };
 
     use super::{dual::DualHal, Hal};
     use crate::{

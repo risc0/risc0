@@ -596,6 +596,13 @@ impl<F: Field> Hal for CpuHal<F> {
         }
     }
 
+    fn prefix_products(&self, io: &Self::Buffer<Self::ExtElem>) {
+        let mut io = io.as_slice_mut();
+        for i in 1..io.len() {
+            io[i] = io[i] * io[i - 1];
+        }
+    }
+
     fn has_unified_memory(&self) -> bool {
         true
     }
@@ -609,7 +616,7 @@ impl<F: Field> Hal for CpuHal<F> {
 mod tests {
     use hex::FromHex;
     use rand::thread_rng;
-    use risc0_core::field::baby_bear::BabyBear;
+    use risc0_core::field::baby_bear::{BabyBear, BabyBearExtElem};
 
     use super::*;
     use crate::core::hash::sha::Sha256HashSuite;
@@ -685,6 +692,26 @@ mod tests {
             1,
             16,
             &["da5698be17b9b46962335799779fbeca8ce5d491c0d26243bafef9ea1837a9d8"],
+        );
+    }
+
+    #[test]
+    fn prefix_products() {
+        let hal: CpuHal<BabyBear> = CpuHal::new(Sha256HashSuite::new_suite());
+        let io = vec![BabyBearExtElem::from_u32(2); 4];
+        let io = hal.copy_from_extelem("io", &io);
+        hal.prefix_products(&io);
+
+        let io: Vec<_> = io.as_slice().iter().cloned().collect();
+
+        assert_eq!(
+            &io,
+            &[
+                BabyBearExtElem::from_u32(2),
+                BabyBearExtElem::from_u32(4),
+                BabyBearExtElem::from_u32(8),
+                BabyBearExtElem::from_u32(16),
+            ]
         );
     }
 }

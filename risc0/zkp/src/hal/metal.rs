@@ -63,7 +63,6 @@ const KERNEL_NAMES: &[&str] = &[
     "poseidon_rows",
     "poseidon2_fold",
     "poseidon2_rows",
-    "prefix_products",
     "sha_fold",
     "sha_rows",
     "zk_shift",
@@ -802,6 +801,57 @@ impl<MH: MetalHash> Hal for MetalHal<MH> {
     fn get_hash_suite(&self) -> &HashSuite<Self::Field> {
         self.hash.as_ref().unwrap().get_hash_suite()
     }
+
+    #[cfg(feature = "metal_prefix_products")]
+    fn prefix_products(&self, io: &Self::Buffer<Self::ExtElem>) {
+        let block_size = 256;
+        let grain_size = 16;
+        let threadgroup_size = block_size * grain_size;
+        let io_size = io.size() as u64;
+        let threadgroups = (io_size + threadgroup_size - 1) / threadgroup_size;
+        let threadgroups_per_grid = MTLSize::new(threadgroups, 1, 1);
+        let threads_per_threadgroup = MTLSize::new(block_size, 1, 1);
+        let params = Params::ThreadGroups(threadgroups_per_grid, threads_per_threadgroup);
+
+        let partial_products = self.alloc_extelem("partial_products", block_size as usize);
+
+        let kernel = self.kernels.get("reduce").unwrap();
+        let args = &[partial_products.as_arg(), io.as_arg()];
+        self.dispatch(kernel, args, 0, Some(params.clone()));
+
+        // partial_products.view(|view| {
+        //     println!("partial_products");
+        //     let items: Vec<_> = view.iter().enumerate().collect();
+        //     for (i, x) in items {
+        //         println!("{i}: {x:?}");
+        //     }
+        // });
+
+        let kernel = self.kernels.get("prefix_products_single").unwrap();
+        let args = &[partial_products.as_arg(), partial_products.as_arg()];
+        self.dispatch(kernel, args, 0, Some(params.clone()));
+
+        // partial_products.view(|view| {
+        //     println!("partial_products");
+        //     let items: Vec<_> = view.iter().enumerate().collect();
+        //     for (i, x) in items {
+        //         println!("{i}: {x:?}");
+        //     }
+        // });
+
+        let kernel = self.kernels.get("prefix_products").unwrap();
+        let args = &[io.as_arg(), partial_products.as_arg()];
+        self.dispatch(kernel, args, 0, Some(params));
+    }
+
+    #[cfg(not(feature = "metal_prefix_products"))]
+    fn prefix_products(&self, io: &Self::Buffer<Self::ExtElem>) {
+        io.view_mut(|io| {
+            for i in 1..io.len() {
+                io[i] = io[i] * io[i - 1];
+            }
+        });
+    }
 }
 
 fn simple_launch_params(count: u32, threads_per_group: u32) -> (MTLSize, MTLSize) {
@@ -939,5 +989,50 @@ mod tests {
     #[test]
     fn gather_sample() {
         testutil::gather_sample(MetalHalSha256::new());
+    }
+
+    #[test]
+    fn prefix_products() {
+        use crate::hal::{cpu::CpuHal, dual::DualHal, Hal as _};
+        use risc0_core::field::baby_bear::BabyBearExtElem;
+        use std::rc::Rc;
+
+        fn test(size: usize) {
+            let hal_gpu = MetalHalSha256::new();
+            let hal_cpu = CpuHal::new(hal_gpu.get_hash_suite().clone());
+            let hal = DualHal::new(Rc::new(hal_cpu), Rc::new(hal_gpu));
+
+            use rand::thread_rng;
+            use risc0_core::field::Elem as _;
+            let mut rng = thread_rng();
+            let io: Vec<_> = (0..size)
+                .map(|_| BabyBearExtElem::random(&mut rng))
+                .collect();
+            // let io = vec![BabyBearExtElem::from_u32(2); size];
+            let io = hal.copy_from_extelem("io", io.as_slice());
+
+            hal.prefix_products(&io);
+        }
+
+        // test(256);
+        // test(512);
+        // test(1 * 1024);
+        // test(2 * 1024);
+        // test(4 * 1024);
+        // test(8 * 1024);
+        // test(16 * 1024);
+        // for i in 15..=20 {
+        //     println!("po2: {i}");
+        //     test(1 << i);
+        // }
+        // println!("po2: 15");
+        // test(1 << 15);
+        // println!("po2: 16");
+        // test(1 << 16);
+        // println!("po2: 17");
+        // test(1 << 17);
+        // test(1 << 18);
+        // test(1 << 19);
+        test(1 << 20);
     }
 }

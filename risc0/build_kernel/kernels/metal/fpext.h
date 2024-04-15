@@ -129,6 +129,7 @@ struct FpExt {
 #undef a
 #undef b
   }
+
   constexpr FpExt operator*=(FpExt rhs) {
     *this = *this * rhs;
     return *this;

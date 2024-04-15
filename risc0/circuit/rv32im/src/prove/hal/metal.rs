@@ -149,11 +149,9 @@ impl<MH: MetalHash> CircuitHal<MetalHal<MH>> for MetalCircuitHal<MH> {
         });
 
         tracing::info_span!("prefix_products").in_scope(|| {
-            let args = [KernelArg::Integer(count as u32), ram.as_arg()];
-            self.hal.dispatch_by_name("prefix_products", &args, 1);
-
-            let args = [KernelArg::Integer(count as u32), bytes.as_arg()];
-            self.hal.dispatch_by_name("prefix_products", &args, 1);
+            use risc0_zkp::hal::Hal as _;
+            self.hal.prefix_products(&ram);
+            self.hal.prefix_products(&bytes);
         });
 
         tracing::info_span!("step_verify_accum").in_scope(|| {

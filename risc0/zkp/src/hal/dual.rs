@@ -329,6 +329,21 @@ where
             .gather_sample(&dst.rhs, &src.rhs, idx, size, stride);
         dst.assert_eq();
     }
+
+    fn prefix_products(&self, io: &Self::Buffer<Self::ExtElem>) {
+        self.lhs.prefix_products(&io.lhs);
+        self.rhs.prefix_products(&io.rhs);
+        // io.assert_eq();
+
+        io.lhs.view(|lhs| {
+            io.rhs.view(|rhs| {
+                assert_eq!(lhs.len(), rhs.len());
+                for i in 0..lhs.len() {
+                    assert_eq!(lhs[i], rhs[i], "{i}");
+                }
+            });
+        })
+    }
 }
 
 pub struct DualCircuitHal<F, LH, RH, LC, RC>

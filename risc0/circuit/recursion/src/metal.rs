@@ -131,8 +131,8 @@ impl<MH: MetalHash> CircuitHal<MetalHal<MH>> for MetalCircuitHal<MH> {
         let kernel = self.kernels.get("step_compute_accum").unwrap();
         self.hal.dispatch(&kernel, &args, count as u64, None);
 
-        let args = [KernelArg::Integer(count as u32), wom.as_arg()];
-        self.hal.dispatch_by_name("prefix_products", &args, 1);
+        use risc0_zkp::hal::Hal as _;
+        self.hal.prefix_products(&wom);
 
         let args = [
             KernelArg::Integer(steps as u32),
