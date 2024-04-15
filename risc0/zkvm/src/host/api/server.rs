@@ -29,15 +29,11 @@ use super::{malformed_err, path_to_string, pb, ConnectionWrapper, Connector, Tcp
 use crate::{
     get_prover_server, get_version,
     host::{
-        client::{
-            env::{SegmentPath, TraceCallback},
-            slice_io::SliceIo,
-        },
-        recursion::SuccinctReceipt,
-        server::exec::executor::DEFAULT_SEGMENT_RAM_STORAGE_LIMIT,
+        client::env::SegmentPath, client::slice_io::SliceIo, recursion::SuccinctReceipt,
+        server::exec::executor::DEFAULT_SEGMENT_RAM_STORAGE_LIMIT, server::session::NullSegmentRef,
     },
     receipt_claim::{MaybePruned, ReceiptClaim},
-    ExecutorEnv, ExecutorImpl, ProverOpts, Receipt, Segment, SegmentReceipt, SegmentRef,
+    ExecutorEnv, ExecutorImpl, ProverOpts, Receipt, Segment, SegmentReceipt, TraceCallback,
     TraceEvent, VerifierContext,
 };
 
@@ -45,16 +41,6 @@ use crate::{
 pub struct Server {
     connector: Box<dyn Connector>,
 }
-
-#[derive(Clone, Serialize, Deserialize)]
-struct EmptySegmentRef;
-
-impl SegmentRef for EmptySegmentRef {
-    fn resolve(&self) -> Result<Segment> {
-        Err(anyhow!("Segment resolution not supported"))
-    }
-}
-
 struct PosixIoProxy {
     fd: u32,
     conn: ConnectionWrapper,
@@ -321,8 +307,8 @@ impl Server {
                             pb::api::OnSegmentDone {
                                 segment: Some(pb::api::SegmentInfo {
                                     index: segment.index,
-                                    po2: segment.po2,
-                                    cycles: segment.cycles,
+                                    po2: segment.inner.po2 as u32,
+                                    cycles: segment.inner.insn_cycles as u32,
                                     segment: Some(asset),
                                 }),
                             },
@@ -339,7 +325,7 @@ impl Server {
                     bail!(err)
                 }
 
-                Ok(Box::new(EmptySegmentRef))
+                Ok(Box::new(NullSegmentRef))
             })?;
 
             Ok(pb::api::ServerReply {

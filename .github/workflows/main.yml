@@ -17,7 +17,12 @@ permissions:
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  RISC0_TOOLCHAIN_VERSION: v2024-01-31.1
+  RISC0_TOOLCHAIN_VERSION: v2024-02-08.1
+
+defaults:
+  run:
+    # This ensures `-eo pipefail`, which is important for catching errors
+    shell: bash
 
 jobs:
   changes:
@@ -26,6 +31,7 @@ jobs:
       pull-requests: read
     outputs:
       check-benchmarks: ${{ steps.filter.outputs.check-benchmarks }}
+      check-external: ${{ steps.filter.outputs.check-external }}
       check-template: ${{ steps.filter.outputs.check-template }}
       crates-validator: ${{ steps.filter.outputs.crates-validator }}
       doc: ${{ steps.filter.outputs.doc }}
@@ -48,6 +54,10 @@ jobs:
             check-benchmarks:
               - *base
               - benchmarks/**
+              - risc0/**
+            check-external:
+              - *base
+              - external/**
               - risc0/**
             check-template:
               - *base
@@ -85,6 +95,7 @@ jobs:
     needs:
       - check
       - check-benchmarks
+      - check-external
       - check-template
       - crates-validator
       - doc
@@ -125,14 +136,12 @@ jobs:
       - run: cargo fmt --all --check
       - run: cargo fmt --all --check --manifest-path benchmarks/Cargo.toml
       - run: cargo fmt --all --check --manifest-path bonsai/Cargo.toml
-      - run: cargo fmt --all --check --manifest-path bonsai/examples/governance/Cargo.toml
       - run: cargo fmt --all --check --manifest-path examples/Cargo.toml
       - run: cargo fmt --all --check --manifest-path tools/crates-validator/Cargo.toml
       - run: cargo clippy -p risc0-zkvm
       - run: cargo sort --workspace --check
       - run: cargo sort --workspace --check benchmarks
       - run: cargo sort --workspace --check bonsai
-      - run: cargo sort --workspace --check bonsai/examples/governance
       - run: cargo sort --workspace --check examples
       - run: cargo sort --workspace --check tools/crates-validator
       - run: cargo rdme -c
@@ -143,6 +152,9 @@ jobs:
         with:
           python-version: "3.10"
       - run: python license-check.py
+      - name: check for "D0 NOT MERGE" comments
+        run: |
+          [ "$(grep -re 'DO[_ ]\?NOT[_ ]\?MERGE' $(git ls-tree --full-tree --name-only -r HEAD) | tee /dev/fd/2 | wc -l)" -eq "0" ]
 
   test:
     if: needs.changes.outputs.test == 'true'
@@ -180,15 +192,11 @@ jobs:
         run: |
           cargo test -F $FEATURE -F prove --workspace --timings --no-run \
             --exclude doc-test \
-            --exclude bonsai-ethereum-contracts \
-            --exclude bonsai-ethereum-relay \
             --exclude bonsai-rest-api-mock
       - name: test workspace
         run: |
           cargo test -F $FEATURE -F prove --workspace --timings \
             --exclude doc-test \
-            --exclude bonsai-ethereum-contracts \
-            --exclude bonsai-ethereum-relay \
             --exclude bonsai-rest-api-mock
       - uses: actions/upload-artifact@v3
         with:
@@ -204,8 +212,6 @@ jobs:
       - run: |
           cargo check -F $FEATURE --benches --workspace \
             --exclude doc-test \
-            --exclude bonsai-ethereum-contracts \
-            --exclude bonsai-ethereum-relay \
             --exclude bonsai-rest-api-mock
       - run: cargo check -p risc0-build
         if: matrix.device == 'cpu'
@@ -215,8 +221,6 @@ jobs:
       - run: cargo check -p risc0-sys -F $FEATURE
       - run: cargo check -p risc0-zkp -F $FEATURE
       - run: cargo check -p risc0-zkvm -F $FEATURE
-      - run: cargo check
-        working-directory: external/substrate
       - run: sccache --show-stats
 
   examples:
@@ -276,9 +280,6 @@ jobs:
       - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/rustup
-      - uses: risc0/foundry-toolchain@2fe7e70b520f62368a0e3c464f997df07ede420f
-        with:
-          version: nightly-09fe3e041369a816365a020f715ad6f94dbce9f2
       - uses: ./.github/actions/sccache
         with:
           key: macOS-default
@@ -301,6 +302,22 @@ jobs:
       - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
       - run: cargo check
         working-directory: benchmarks
+      - run: sccache --show-stats
+
+  check-external:
+    if: needs.changes.outputs.check-external == 'true'
+    needs: changes
+    runs-on: [self-hosted, prod, macOS, cpu]
+    steps:
+      # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
+      - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/rustup
+      - uses: ./.github/actions/sccache
+        with:
+          key: macOS-default
+      - run: cargo check
+        working-directory: external/substrate
       - run: sccache --show-stats
 
   check-template:
@@ -415,7 +432,6 @@ jobs:
         with:
           key: Linux-default
       - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
-      - run: scripts/install_prover.sh
-        working-directory: compact_proof
       - run: cargo test -p risc0-groth16 -F docker --release
+      - run: cargo test -p risc0-zkvm -F prove -F docker -- tests::stark2snark
       - run: sccache --show-stats

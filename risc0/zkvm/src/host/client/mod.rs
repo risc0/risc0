@@ -13,7 +13,6 @@
 // limitations under the License.
 
 pub(crate) mod env;
-pub(crate) mod exec;
 pub(crate) mod posix_io;
 pub(crate) mod prove;
 pub(crate) mod slice_io;

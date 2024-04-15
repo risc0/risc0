@@ -65,10 +65,10 @@ In addition to the links in the sidebar, we recommend the following resources:
 [about-zkvm]: /api/zkvm
 [Bonsai]: https://bonsai.xyz
 [composite receipt]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.CompositeReceipt.html
-[dev-mode]: /zkvm/dev-mode
+[dev-mode]: /api/generating-proofs/dev-mode
 [env::commit()]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest/env/fn.commit.html
 [env::commit_slice()]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/guest/env/fn.commit_slice.html
-[fake receipt]: /api/zkvm/dev-mode
+[fake receipt]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/enum.InnerReceipt.html#variant.Fake
 [GitHub]: https://github.com/risc0/risc0
 [Groth16]: ../terminology#groth16
 [Groth16 receipt]: ../terminology#groth16-receipt

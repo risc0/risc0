@@ -27,8 +27,9 @@ use merkle::MerkleGroup;
 use risc0_circuit_recursion::{
     cpu::CpuCircuitHal, CircuitImpl, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA,
 };
+use risc0_circuit_rv32im::control_id::POSEIDON2_CONTROL_ID;
 use risc0_zkp::{
-    adapter::{CircuitInfo, CircuitStepContext, TapsProvider},
+    adapter::{CircuitInfo, CircuitStepContext, TapsProvider, PROOF_SYSTEM_INFO},
     core::{
         digest::Digest,
         hash::{poseidon::PoseidonHashSuite, poseidon2::Poseidon2HashSuite, HashSuite},
@@ -50,20 +51,20 @@ use crate::{
     receipt_claim::{Merge, Output},
     recursion::{valid_control_ids, SuccinctReceipt},
     sha::Digestible,
-    HalPair, ReceiptClaim, SegmentReceipt, POSEIDON2_CONTROL_ID,
+    HalPair, ReceiptClaim, SegmentReceipt,
 };
 
 // TODO: Automatically generate these constants from the circuit somehow without
 // messing up bootstrap dependencies.
 /// Number of rows to use for the recursion circuit witness as a power of 2.
-const RECURSION_PO2: usize = 18;
+pub const RECURSION_PO2: usize = 18;
 /// Depth of the Merkle tree to use for encoding the set of allowed control IDs.
 /// NOTE: Changing this constant must be coordinated with the circuit. In order to avoid needing to
 /// change the circuit later, this is set to 8 which allows for enough control IDs to be ecoded
 /// that we are unlikely to need more.
 const ALLOWED_CODE_MERKLE_DEPTH: usize = 8;
 /// Size of the code group in the taps of the recursion circuit.
-const RECURSION_CODE_SIZE: usize = 21;
+const RECURSION_CODE_SIZE: usize = 23;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct RecursionReceipt {
@@ -237,7 +238,7 @@ mod cuda {
         hal::cuda::{CudaHalPoseidon, CudaHalPoseidon2, CudaHalSha256},
     };
 
-    use super::{BabyBear, CircuitImpl, CpuCircuitHal, CpuHal, HalPair, Rc, CIRCUIT};
+    use super::{HalPair, Rc};
 
     pub fn sha256_hal_pair() -> HalPair<CudaHalSha256, CudaCircuitHalSha256> {
         let hal = Rc::new(CudaHalSha256::new());
@@ -256,13 +257,6 @@ mod cuda {
         let circuit_hal = Rc::new(CudaCircuitHalPoseidon2::new(hal.clone()));
         HalPair { hal, circuit_hal }
     }
-
-    pub fn poseidon254_hal_pair() -> HalPair<CpuHal<BabyBear>, CpuCircuitHal<'static, CircuitImpl>>
-    {
-        let hal = Rc::new(CpuHal::new(Poseidon254HashSuite::new_suite()));
-        let circuit_hal = Rc::new(CpuCircuitHal::new(&CIRCUIT));
-        HalPair { hal, circuit_hal }
-    }
 }
 
 #[cfg(feature = "metal")]
@@ -276,7 +270,7 @@ mod metal {
         },
     };
 
-    use super::{BabyBear, CircuitImpl, CpuCircuitHal, CpuHal, HalPair, Rc, CIRCUIT};
+    use super::{HalPair, Rc};
 
     pub fn sha256_hal_pair() -> HalPair<MetalHalSha256, MetalCircuitHal<MetalHashSha256>> {
         let hal = Rc::new(MetalHalSha256::new());
@@ -293,13 +287,6 @@ mod metal {
     pub fn poseidon2_hal_pair() -> HalPair<MetalHalPoseidon2, MetalCircuitHal<MetalHashPoseidon2>> {
         let hal = Rc::new(MetalHalPoseidon2::new());
         let circuit_hal = Rc::new(MetalCircuitHal::<MetalHashPoseidon2>::new(hal.clone()));
-        HalPair { hal, circuit_hal }
-    }
-
-    pub fn poseidon254_hal_pair() -> HalPair<CpuHal<BabyBear>, CpuCircuitHal<'static, CircuitImpl>>
-    {
-        let hal = Rc::new(CpuHal::new(Poseidon254HashSuite::new_suite()));
-        let circuit_hal = Rc::new(CpuCircuitHal::new(&CIRCUIT));
         HalPair { hal, circuit_hal }
     }
 }
@@ -365,7 +352,7 @@ cfg_if::cfg_if! {
         /// TODO
         #[allow(dead_code)]
         pub fn poseidon254_hal_pair() -> HalPair<CpuHal<BabyBear>, CpuCircuitHal<'static, CircuitImpl>> {
-            cuda::poseidon254_hal_pair()
+            cpu::poseidon254_hal_pair()
         }
     } else if #[cfg(feature = "metal")] {
         /// TODO
@@ -389,7 +376,7 @@ cfg_if::cfg_if! {
         /// TODO
         #[allow(dead_code)]
         pub fn poseidon254_hal_pair() -> HalPair<CpuHal<BabyBear>, CpuCircuitHal<'static, CircuitImpl>> {
-            metal::poseidon254_hal_pair()
+            cpu::poseidon254_hal_pair()
         }
     } else {
         /// TODO
@@ -678,8 +665,18 @@ impl Prover {
 
         let mut adapter = ProveAdapter::new(&mut executor.executor);
         let mut prover = risc0_zkp::prove::Prover::new(hal, CIRCUIT.get_taps());
+        let hashfn = Rc::clone(&hal.get_hash_suite().hashfn);
 
-        adapter.execute(prover.iop());
+        // At the start of the protocol, seed the Fiat-Shamir transcript with context information
+        // about the proof system and circuit.
+        prover
+            .iop()
+            .commit(&hashfn.hash_elem_slice(&PROOF_SYSTEM_INFO.encode()));
+        prover
+            .iop()
+            .commit(&hashfn.hash_elem_slice(&CircuitImpl::CIRCUIT_INFO.encode()));
+
+        adapter.execute(prover.iop(), hal);
 
         let seal = if skip_seal {
             Vec::new()

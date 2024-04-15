@@ -60,6 +60,9 @@ pub trait SyscallContext {
     /// Loads the value of the given register, e.g. REG_A0.
     fn load_register(&mut self, idx: usize) -> u32;
 
+    /// Loads an individual byte from memory.
+    fn load_u8(&mut self, addr: u32) -> Result<u8>;
+
     /// Loads bytes from the given region of memory.
     fn load_region(&mut self, addr: u32, size: u32) -> Result<Vec<u8>> {
         let mut region = Vec::new();
@@ -67,26 +70,6 @@ pub trait SyscallContext {
             region.push(self.load_u8(addr)?);
         }
         Ok(region)
-    }
-
-    /// Loads an individual word from memory.
-    fn load_u32(&mut self, addr: u32) -> Result<u32>;
-
-    /// Loads an individual byte from memory.
-    fn load_u8(&mut self, addr: u32) -> Result<u8>;
-
-    /// Loads a null-terminated string from memory.
-    fn load_string(&mut self, mut addr: u32) -> Result<String> {
-        let mut s: Vec<u8> = Vec::new();
-        loop {
-            let b = self.load_u8(addr)?;
-            if b == 0 {
-                break;
-            }
-            s.push(b);
-            addr += 1;
-        }
-        String::from_utf8(s).map_err(anyhow::Error::msg)
     }
 }
 
@@ -317,7 +300,6 @@ impl SysVerify {
         image_id: &Digest,
         journal_digest: &Digest,
     ) -> Result<Option<(Digest, u32)>, PrunedValueError> {
-        // DO NOT MERGE: Check here that the cached assumption has no assumptions
         let assumption_journal_digest = claim
             .as_value()?
             .output
@@ -512,8 +494,8 @@ impl<'a> PosixIo<'a> {
         let fd = ctx.load_register(REG_A3);
         let nbytes = ctx.load_register(REG_A4) as usize;
 
-        tracing::debug!(
-            "sys_read, attempting to read {nbytes} bytes from fd {fd}, to_guest: {} bytes",
+        tracing::trace!(
+            "sys_read(fd: {fd}, nbytes: {nbytes}, into: {} bytes)",
             to_guest.len() * WORD_SIZE
         );
 
@@ -545,10 +527,7 @@ impl<'a> PosixIo<'a> {
         let to_guest_u8 = bytemuck::cast_slice_mut(to_guest);
         let nread_main = read_all(to_guest_u8)?;
 
-        tracing::debug!(
-            "Main read got {nread_main} bytes out of requested {}",
-            to_guest_u8.len()
-        );
+        tracing::trace!("read: {nread_main}, requested: {}", to_guest_u8.len());
 
         // It's possible that there's an unaligned word at the end
         let unaligned_end = if nbytes - nread_main <= WORD_SIZE {
@@ -578,7 +557,7 @@ impl<'a> PosixIo<'a> {
             .get_mut(&fd)
             .ok_or(anyhow!("Bad write file descriptor {fd}"))?;
 
-        tracing::debug!("Writing {buf_len} bytes to file descriptor {fd}");
+        tracing::trace!("sys_write(fd: {fd}, bytes: {buf_len})");
 
         writer.borrow_mut().write_all(from_guest_bytes.as_slice())?;
         Ok((0, 0))
@@ -594,10 +573,7 @@ impl<'a> PosixIo<'a> {
             .get_mut(&fileno::STDOUT)
             .ok_or(anyhow!("Bad write file descriptor {}", &fileno::STDOUT))?;
 
-        tracing::debug!(
-            "Writing {buf_len} bytes to STDOUT file descriptor {}",
-            &fileno::STDOUT
-        );
+        tracing::debug!("sys_log({buf_len} bytes)");
 
         let msg = format!("R0VM[{}] ", ctx.get_cycle().to_string());
         writer
@@ -606,3 +582,47 @@ impl<'a> PosixIo<'a> {
         Ok((0, 0))
     }
 }
+
+// SysCycleCount:
+//     ctx.get_cycle()
+
+// SysGetenv:
+//     let buf_ptr = ctx.load_register(REG_A3);
+//     let buf_len = ctx.load_register(REG_A4);
+//     let from_guest = ctx.load_region(buf_ptr, buf_len)?;
+
+// SysPanic:
+//     let buf_ptr = ctx.load_register(REG_A3);
+//     let buf_len = ctx.load_register(REG_A4);
+//     let from_guest = ctx.load_region(buf_ptr, buf_len)?;
+
+// SysRandom:
+//     write to_guest
+
+// SysVerify:
+//     let from_guest_ptr = ctx.load_register(REG_A3);
+//     let from_guest_len = ctx.load_register(REG_A4);
+//     let from_guest: Vec<u8> = ctx.load_region(from_guest_ptr, from_guest_len)?;
+
+// SysArgs:
+//     let arg_index = ctx.load_register(REG_A3);
+
+// SysSliceIo:
+//     let buf_ptr = ctx.load_register(REG_A3);
+//     let buf_len = ctx.load_register(REG_A4);
+//     let from_guest = ctx.load_region(buf_ptr, buf_len)?;
+
+// PosixIo/sys_read:
+//     let fd = ctx.load_register(REG_A3);
+//     let nbytes = ctx.load_register(REG_A4) as usize;
+
+// PosixIo/sys_write:
+//     let fd = ctx.load_register(REG_A3);
+//     let buf_ptr = ctx.load_register(REG_A4);
+//     let buf_len = ctx.load_register(REG_A5);
+//     let from_guest_bytes = ctx.load_region(buf_ptr, buf_len)?;
+
+// PosixIo/sys_log:
+//     let buf_ptr = ctx.load_register(REG_A3);
+//     let buf_len = ctx.load_register(REG_A4);
+//     let from_guest = ctx.load_region(buf_ptr, buf_len)?;
