@@ -29,7 +29,7 @@ use crate::{
         client::prove::get_r0vm_path,
         receipt::{Assumption, SegmentReceipt, SuccinctReceipt},
     },
-    ExecutorEnv, Journal, ProverOpts, Receipt,
+    ExecutorEnv, Journal, ProveInfo, ProverOpts,
 };
 
 /// A client implementation for interacting with a zkVM server.
@@ -68,7 +68,12 @@ impl Client {
     }
 
     /// Prove the specified ELF binary.
-    pub fn prove(&self, env: &ExecutorEnv<'_>, opts: ProverOpts, binary: Asset) -> Result<Receipt> {
+    pub fn prove(
+        &self,
+        env: &ExecutorEnv<'_>,
+        opts: ProverOpts,
+        binary: Asset,
+    ) -> Result<ProveInfo> {
         let mut conn = self.connect()?;
 
         let request = pb::api::ServerRequest {

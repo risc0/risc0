@@ -23,7 +23,7 @@ use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
 use self::{bonsai::BonsaiProver, external::ExternalProver};
-use crate::{is_dev_mode, ExecutorEnv, Receipt, SessionInfo, VerifierContext};
+use crate::{host::prove_info::ProveInfo, is_dev_mode, ExecutorEnv, SessionInfo, VerifierContext};
 
 /// A Prover can execute a given ELF binary and produce a
 /// [Receipt] that can be used to verify correct computation.
@@ -61,7 +61,7 @@ pub trait Prover {
     fn get_name(&self) -> String;
 
     /// Prove zkVM execution starting from the specified ELF binary.
-    fn prove(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<Receipt> {
+    fn prove(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<ProveInfo> {
         self.prove_with_ctx(
             env,
             &VerifierContext::default(),
@@ -78,7 +78,7 @@ pub trait Prover {
         ctx: &VerifierContext,
         elf: &[u8],
         opts: &ProverOpts,
-    ) -> Result<Receipt>;
+    ) -> Result<ProveInfo>;
 }
 
 /// An Executor can execute a given ELF binary.

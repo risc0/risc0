@@ -16,7 +16,7 @@ use anyhow::Result;
 
 use super::{Executor, Prover, ProverOpts};
 use crate::{
-    get_prover_server, host::server::session::NullSegmentRef, ExecutorEnv, ExecutorImpl, Receipt,
+    get_prover_server, host::server::session::NullSegmentRef, ExecutorEnv, ExecutorImpl, ProveInfo,
     SegmentInfo, SessionInfo, VerifierContext,
 };
 
@@ -42,7 +42,7 @@ impl Prover for LocalProver {
         ctx: &VerifierContext,
         elf: &[u8],
         opts: &ProverOpts,
-    ) -> Result<Receipt> {
+    ) -> Result<ProveInfo> {
         get_prover_server(opts)?.prove_with_ctx(env, ctx, elf)
     }
 

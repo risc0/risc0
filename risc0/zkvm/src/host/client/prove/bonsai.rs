@@ -18,7 +18,9 @@ use anyhow::{anyhow, bail, ensure, Context, Result};
 use bonsai_sdk::alpha::Client;
 
 use super::Prover;
-use crate::{compute_image_id, sha::Digestible, ExecutorEnv, ProverOpts, Receipt, VerifierContext};
+use crate::{
+    compute_image_id, sha::Digestible, ExecutorEnv, ProveInfo, ProverOpts, Receipt, VerifierContext,
+};
 
 /// An implementation of a [Prover] that runs proof workloads via Bonsai.
 ///
@@ -48,7 +50,7 @@ impl Prover for BonsaiProver {
         ctx: &VerifierContext,
         elf: &[u8],
         opts: &ProverOpts,
-    ) -> Result<Receipt> {
+    ) -> Result<ProveInfo> {
         let client = Client::from_env(crate::VERSION)?;
 
         // Compute the ImageID and upload the ELF binary
@@ -113,7 +115,14 @@ impl Prover for BonsaiProver {
                 } else {
                     receipt.verify_with_context(ctx, image_id)?;
                 }
-                return Ok(receipt);
+                return Ok(ProveInfo {
+                    receipt,
+                    stats: crate::SessionStats {
+                        segments: stats.segments,
+                        total_cycles: stats.total_cycles,
+                        user_cycles: stats.cycles,
+                    },
+                });
             } else {
                 bail!(
                     "Bonsai prover workflow [{}] exited: {} err: {}",

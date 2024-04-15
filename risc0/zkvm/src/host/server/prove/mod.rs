@@ -28,15 +28,18 @@ use risc0_zkp::hal::{CircuitHal, Hal};
 
 use self::{dev_mode::DevModeProver, prover_impl::ProverImpl};
 use crate::{
-    host::receipt::{CompositeReceipt, InnerReceipt, SegmentReceipt, SuccinctReceipt},
-    is_dev_mode, ExecutorEnv, ExecutorImpl, ProverOpts, Receipt, Segment, Session, VerifierContext,
+    host::{
+        prove_info::ProveInfo,
+        receipt::{CompositeReceipt, InnerReceipt, SegmentReceipt, SuccinctReceipt},
+    },
+    is_dev_mode, ExecutorEnv, ExecutorImpl, ProverOpts, Segment, Session, VerifierContext,
 };
 
 /// A ProverServer can execute a given ELF binary and produce a [Receipt]
 /// that can be used to verify correct computation.
 pub trait ProverServer {
     /// Prove the specified ELF binary.
-    fn prove(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<Receipt> {
+    fn prove(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<ProveInfo> {
         self.prove_with_ctx(env, &VerifierContext::default(), elf)
     }
 
@@ -46,14 +49,14 @@ pub trait ProverServer {
         env: ExecutorEnv<'_>,
         ctx: &VerifierContext,
         elf: &[u8],
-    ) -> Result<Receipt> {
+    ) -> Result<ProveInfo> {
         let mut exec = ExecutorImpl::from_elf(env, elf)?;
         let session = exec.run()?;
         self.prove_session(ctx, &session)
     }
 
     /// Prove the specified [Session].
-    fn prove_session(&self, ctx: &VerifierContext, session: &Session) -> Result<Receipt>;
+    fn prove_session(&self, ctx: &VerifierContext, session: &Session) -> Result<ProveInfo>;
 
     /// Prove the specified [Segment].
     fn prove_segment(&self, ctx: &VerifierContext, segment: &Segment) -> Result<SegmentReceipt>;
@@ -140,7 +143,7 @@ where
 impl Session {
     /// For each segment, call [ProverServer::prove_session] and collect the
     /// receipts.
-    pub fn prove(&self) -> Result<Receipt> {
+    pub fn prove(&self) -> Result<ProveInfo> {
         let prover = get_prover_server(&ProverOpts::default())?;
         prover.prove_session(&VerifierContext::default(), self)
     }
