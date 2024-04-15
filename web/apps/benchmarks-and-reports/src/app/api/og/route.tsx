@@ -11,9 +11,9 @@ export async function GET(request: Request) {
     (res) => res.arrayBuffer(),
   );
   // can't use variables in filenames, need to be static
-  const image1Data = await fetch(new URL("./og-1.png", import.meta.url)).then((res) => res.arrayBuffer());
-  const image2Data = await fetch(new URL("./og-2.png", import.meta.url)).then((res) => res.arrayBuffer());
-  const image3Data = await fetch(new URL("./og-3.png", import.meta.url)).then((res) => res.arrayBuffer());
+  const image1Data = await fetch(new URL("./og-1.jpg", import.meta.url)).then((res) => res.arrayBuffer());
+  const image2Data = await fetch(new URL("./og-2.jpg", import.meta.url)).then((res) => res.arrayBuffer());
+  const image3Data = await fetch(new URL("./og-3.jpg", import.meta.url)).then((res) => res.arrayBuffer());
 
   try {
     const hasTitle = searchParams.has("title");
