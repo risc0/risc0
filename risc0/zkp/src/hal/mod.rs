@@ -176,8 +176,6 @@ pub trait CircuitHal<H: Hal> {
         accum: &H::Buffer<H::Elem>,
         steps: usize,
     );
-
-    // fn step_verify_accum(&self);
 }
 
 fn tracker() -> &'static Mutex<MemoryTracker> {

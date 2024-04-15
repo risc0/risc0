@@ -2961,6 +2961,7 @@ dependencies = [
  "prost",
  "prost-build",
  "protobuf-src",
+ "rand",
  "rayon",
  "risc0-binfmt",
  "risc0-circuit-recursion",

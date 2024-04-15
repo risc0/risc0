@@ -1008,31 +1008,14 @@ mod tests {
             let io: Vec<_> = (0..size)
                 .map(|_| BabyBearExtElem::random(&mut rng))
                 .collect();
-            // let io = vec![BabyBearExtElem::from_u32(2); size];
             let io = hal.copy_from_extelem("io", io.as_slice());
 
             hal.prefix_products(&io);
         }
 
-        // test(256);
-        // test(512);
-        // test(1 * 1024);
-        // test(2 * 1024);
-        // test(4 * 1024);
-        // test(8 * 1024);
-        // test(16 * 1024);
-        // for i in 15..=20 {
-        //     println!("po2: {i}");
-        //     test(1 << i);
-        // }
-        // println!("po2: 15");
-        // test(1 << 15);
-        // println!("po2: 16");
-        // test(1 << 16);
-        // println!("po2: 17");
-        // test(1 << 17);
-        // test(1 << 18);
-        // test(1 << 19);
-        test(1 << 20);
+        for i in 15..=20 {
+            println!("po2: {i}");
+            test(1 << i);
+        }
     }
 }
