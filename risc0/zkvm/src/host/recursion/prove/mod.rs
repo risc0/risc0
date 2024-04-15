@@ -29,7 +29,7 @@ use risc0_circuit_recursion::{
 };
 use risc0_circuit_rv32im::control_id::POSEIDON2_CONTROL_ID;
 use risc0_zkp::{
-    adapter::{CircuitInfo, CircuitStepContext, TapsProvider},
+    adapter::{CircuitInfo, CircuitStepContext, TapsProvider, PROOF_SYSTEM_INFO},
     core::{
         digest::Digest,
         hash::{poseidon::PoseidonHashSuite, poseidon2::Poseidon2HashSuite, HashSuite},
@@ -665,8 +665,18 @@ impl Prover {
 
         let mut adapter = ProveAdapter::new(&mut executor.executor);
         let mut prover = risc0_zkp::prove::Prover::new(hal, CIRCUIT.get_taps());
+        let hashfn = Rc::clone(&hal.get_hash_suite().hashfn);
 
-        adapter.execute(prover.iop());
+        // At the start of the protocol, seed the Fiat-Shamir transcript with context information
+        // about the proof system and circuit.
+        prover
+            .iop()
+            .commit(&hashfn.hash_elem_slice(&PROOF_SYSTEM_INFO.encode()));
+        prover
+            .iop()
+            .commit(&hashfn.hash_elem_slice(&CircuitImpl::CIRCUIT_INFO.encode()));
+
+        adapter.execute(prover.iop(), hal);
 
         let seal = if skip_seal {
             Vec::new()
