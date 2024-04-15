@@ -12,10 +12,10 @@ export const metadata = {
     default: "RISC Zero Benchmarks & Reports",
   },
   metadataBase: new URL("https://benchmarks.risczero.com"),
-  description: "Get to market fast with dramatically lower development costs on the first general purpose zkVM.",
+  description: "Get to market fast with dramatically lower development costs on the first general purpose zkVM",
   openGraph: {
     images: {
-      url: "http://localhost:3000/og?title=RISC%20Zero%20Benchmarks%20%26%20Reports",
+      url: "https://benchmarks.risczero.com/og?title=RISC%20Zero%20Benchmarks%20%26%20Reports",
     },
   },
   icons: [

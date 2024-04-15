@@ -13,7 +13,9 @@ export const metadata: Metadata = {
   description: CRATES_VALIDATION_DESCRIPTION,
   openGraph: {
     images: {
-      url: "http://localhost:3000/og?title=Crates.io%20Validation",
+      url: `https://benchmarks.risczero.com/og?title=Crates.io%20Validation&description=${encodeURIComponent(
+        CRATES_VALIDATION_DESCRIPTION,
+      )}`,
     },
   },
 };

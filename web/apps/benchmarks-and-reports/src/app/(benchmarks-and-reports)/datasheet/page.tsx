@@ -12,7 +12,9 @@ export const metadata: Metadata = {
   description: DATASHEET_DESCRIPTION,
   openGraph: {
     images: {
-      url: "http://localhost:3000/og?title=Datasheet",
+      url: `https://benchmarks.risczero.com/og?title=Datasheet&description=${encodeURIComponent(
+        DATASHEET_DESCRIPTION,
+      )}`,
     },
   },
 };
