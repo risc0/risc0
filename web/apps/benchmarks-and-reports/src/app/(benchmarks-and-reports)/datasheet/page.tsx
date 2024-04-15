@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   description: DATASHEET_DESCRIPTION,
   openGraph: {
     images: {
-      url: `https://benchmarks.risczero.com/og?title=Datasheet&description=${encodeURIComponent(
+      url: `https://reports-git-nahoc-view-risczero.vercel.app/og?title=Datasheet&description=${encodeURIComponent(
         DATASHEET_DESCRIPTION,
       )}`,
     },

@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   description: CRATES_VALIDATION_DESCRIPTION,
   openGraph: {
     images: {
-      url: `https://benchmarks.risczero.com/og?title=Crates.io%20Validation&description=${encodeURIComponent(
+      url: `https://reports-git-nahoc-view-risczero.vercel.app/og?title=Crates.io%20Validation&description=${encodeURIComponent(
         CRATES_VALIDATION_DESCRIPTION,
       )}`,
     },
