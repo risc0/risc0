@@ -10,14 +10,16 @@ export async function GET(request: Request) {
   const fontDataNormal = await fetch(new URL("../../../../public/fonts/EuropaGroteskSH-Reg.otf", import.meta.url)).then(
     (res) => res.arrayBuffer(),
   );
-  const imageData = await fetch(new URL(`./og-${searchParams.get("imageVersion") ?? "2"}.png`, import.meta.url)).then(
-    (res) => res.arrayBuffer(),
-  );
+  // can't use variables in filenames, need to be static
+  const image1Data = await fetch(new URL("./og-1.png", import.meta.url)).then((res) => res.arrayBuffer());
+  const image2Data = await fetch(new URL("./og-2.png", import.meta.url)).then((res) => res.arrayBuffer());
+  const image3Data = await fetch(new URL("./og-3.png", import.meta.url)).then((res) => res.arrayBuffer());
 
   try {
     const hasTitle = searchParams.has("title");
     const hasDescription = searchParams.has("description");
     const title = hasTitle ? searchParams.get("title")?.slice(0, 100) : "Universal Zero Knowledge";
+    const imageVersion = Math.floor(Math.random() * 3 + 1).toString(); // number between 1 and 3
     const description = hasDescription
       ? searchParams.get("description")?.slice(0, 100)
       : "Get to market fast with dramatically lower development costs on the first general purpose zkVM";
@@ -60,7 +62,7 @@ export async function GET(request: Request) {
           height="701"
           alt=""
           // @ts-expect-error
-          src={imageData}
+          src={imageVersion === 1 ? image1Data : imageVersion === 2 ? image2Data : image3Data}
         />
       </div>,
       {
