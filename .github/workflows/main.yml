@@ -427,6 +427,9 @@ jobs:
     needs: changes
     runs-on: [self-hosted, prod, Linux, cpu]
     steps:
+      # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
+      - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
+      - uses: actions/checkout@v4
       - name: Compare circom hashes to golden values
         run: bash ./circom_stable.sh
         working-directory: ./.github/scripts
