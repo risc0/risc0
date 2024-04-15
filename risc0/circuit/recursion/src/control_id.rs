@@ -81,3 +81,14 @@ pub const RECURSION_CONTROL_IDS: [(&str, &str); 15] = [
 
 pub const BN254_CONTROL_ID: &str =
     "10ff834dbef62ccbba201ecd26a772e3036a075aacbaf47200679a11dcdcf10d";
+
+#[test]
+fn stable_root() {
+    // This tests that none of the control IDs have changed unexpectedly
+    // If you have _intentionally_ changed control IDs, update this hash.
+
+    assert_eq!(
+        ALLOWED_IDS_ROOT,
+        "4c0dca38ca3de35d11b1fc46095bda17d5b86a2ffeac0636e9403356b0b5a84f"
+    );
+}
