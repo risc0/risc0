@@ -170,6 +170,11 @@ export default {
       items: [
         {
           type: "doc",
+          label: "Security Model",
+          id: "security-model",
+        },
+        {
+          type: "doc",
           label: "zkVM technical specification",
           id: "zkvm/zkvm-specification",
         },
