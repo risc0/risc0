@@ -97,6 +97,15 @@ pub struct Segment {
     pub(crate) output: Option<Output>,
 }
 
+impl Segment {
+    /// Give the power of two length of this [Segment]
+    ///
+    /// If the [Segment]'s execution trace had 2^20 rows, this would return 20.
+    pub fn po2(&self) -> usize {
+        self.inner.po2
+    }
+}
+
 /// A reference to a [Segment].
 ///
 /// This allows implementors to determine the best way to represent this in an

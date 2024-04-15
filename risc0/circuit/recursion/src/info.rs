@@ -14,11 +14,14 @@
 
 // This code is automatically generated
 
-use risc0_zkp::adapter::CircuitInfo;
+use risc0_zkp::adapter::{CircuitInfo, ProtocolInfo};
 
 use super::CircuitImpl;
 
 impl CircuitInfo for CircuitImpl {
+    #[rustfmt::skip]
+    const CIRCUIT_INFO: ProtocolInfo = ProtocolInfo(b"RECURSION:rev1v1");
+
     #[rustfmt::skip]
     const OUTPUT_SIZE: usize = 32;
 

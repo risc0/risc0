@@ -8,6 +8,16 @@
   "emmet.includeLanguages": {
     "rust": "html"
   },
+  "[javascript][javascriptreact][typescript][typescriptreact][github-actions-workflow]": {
+    "editor.defaultFormatter": "biomejs.biome",
+    "editor.codeActionsOnSave": {
+      "quickfix.biome": "explicit",
+      "source.organizeImports.biome": "explicit"
+    },
+    "editor.formatOnSave": true
+  },
+  "biome.rename": true,
+  "biome.enabled": true,
   "rust-analyzer.cargo.extraEnv": {
     "RISC0_SKIP_BUILD": "1"
   },
@@ -32,8 +42,33 @@
     "vector": "cpp",
     "charconv": "cpp",
     "stdexcept": "cpp",
-    "array": "cpp"
+    "array": "cpp",
+    "*.css": "tailwindcss"
   },
+  "tailwindCSS.experimental.classRegex": [
+    [
+      "cva\\(([^)]*)\\)",
+      "[\"'`]([^\"'`]*).*?[\"'`]"
+    ],
+    [
+      "cn\\(([^)]*)\\)",
+      "[\"'`]([^\"'`]*).*?[\"'`]"
+    ],
+    [
+      "cx\\(([^)]*)\\)",
+      "(?:'|\"|`)([^']*)(?:'|\"|`)"
+    ],
+    "twc\\.[^`]+`([^`]*)`",
+    "twc\\(.*?\\).*?`([^`]*)",
+    [
+      "twc\\.[^`]+\\(([^)]*)\\)",
+      "(?:'|\"|`)([^']*)(?:'|\"|`)"
+    ],
+    [
+      "twc\\(.*?\\).*?\\(([^)]*)\\)",
+      "(?:'|\"|`)([^']*)(?:'|\"|`)"
+    ]
+  ],
   "rust-analyzer.showUnlinkedFileNotification": false,
   "rust-analyzer.linkedProjects": [
     "Cargo.toml",
@@ -41,17 +76,17 @@
     "examples/Cargo.toml",
     "risc0/zkvm/methods/guest/Cargo.toml",
     "risc0/zkvm/methods/std/Cargo.toml",
-    "tools/crates-validator/Cargo.toml",
+    "tools/crates-validator/Cargo.toml"
   ],
   "cSpell.words": [
-    "bytemuck",
-    "canonicalize",
     "Groth",
     "Holesky",
+    "Sepolia",
+    "Zeroable",
+    "bytemuck",
+    "canonicalize",
     "posix",
     "repr",
     "risczero",
-    "Sepolia",
-    "Zeroable"
-  ],
+  ]
 }

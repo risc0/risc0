@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::io::{stdin, stdout, Read, Write};
+use std::io::{stdin, stdout, BufRead, BufReader, Read, Write};
 
 use risc0_zkvm as _;
 
@@ -43,6 +43,12 @@ fn main() {
             // Collect args into a vector and commit them to the journal.
             let args: Vec<String> = std::env::args().collect();
             risc0_zkvm::guest::env::commit(&args);
+        }
+        "BUF_READ" => {
+            let capacity: usize = risc0_zkvm::guest::env::read();
+            let mut reader = BufReader::with_capacity(capacity, risc0_zkvm::guest::env::stdin());
+            let buf = reader.fill_buf().unwrap();
+            risc0_zkvm::guest::env::commit_slice(&buf)
         }
         _ => {
             panic!("Unknown test mode {test_mode}");

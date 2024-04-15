@@ -17,7 +17,7 @@
 use std::{
     fmt,
     fs::{File, OpenOptions},
-    path::{Path, PathBuf},
+    path::Path,
     process::{Command, ExitStatus, Output, Stdio},
 };
 
@@ -25,22 +25,7 @@ use anyhow::{anyhow, Context, Result};
 use bonsai_sdk::{alpha::Client, API_KEY_ENVVAR, API_URL_ENVVAR};
 use clap::Args;
 use fs2::FileExt;
-
 use risc0_zkvm::VERSION;
-
-pub fn risc0_data() -> Result<PathBuf> {
-    let dir = if let Ok(dir) = std::env::var("RISC0_DATA_DIR") {
-        dir.into()
-    } else if let Some(root) = dirs::data_dir() {
-        root.join("cargo-risczero")
-    } else if let Some(home) = dirs::home_dir() {
-        home.join(".cargo-risczero")
-    } else {
-        anyhow::bail!("Could not determine cargo-risczero data dir. Set RISC0_DATA_DIR env var.");
-    };
-
-    Ok(dir)
-}
 
 /// Make sure a binary exists and runs with the given arguments.
 pub fn ensure_binary(command: &str, args: &[&str]) -> Result<()> {
