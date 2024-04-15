@@ -12,9 +12,6 @@ const config = {
   experimental: {
     caseSensitiveRoutes: true,
   },
-  publicRuntimeConfig: {
-    version: packageJson.version,
-  },
 };
 
 export default withBundleAnalyzer({
