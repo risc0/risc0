@@ -24,5 +24,5 @@ fn stable_root() {{
     // This tests that none of the control IDs have changed unexpectedly
     // If you have _intentionally_ changed control IDs, update this hash.
 
-    assert_eq!(ALLOWED_IDS_ROOT, "4c0dca38ca3de35d11b1fc46095bda17d5b86a2ffeac0636e9403356b0b5a84f");
+    assert_eq!(ALLOWED_IDS_ROOT, "88c1f749250aba181168c33839d7a351671e7a5b7f3e746dde91ef6c6e9ef344");
 }}
