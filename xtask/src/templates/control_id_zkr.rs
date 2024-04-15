@@ -22,7 +22,7 @@ pub const BN254_CONTROL_ID: &str = "{}";
 #[test]
 fn stable_root() {{
     // This tests that none of the control IDs have changed unexpectedly
-    // If you have _intentionally_ changed control IDs, update this hash.
+    // If you have _intentionally_ changed control IDs, update this hash and bootstrap.
 
     assert_eq!(ALLOWED_IDS_ROOT, "88c1f749250aba181168c33839d7a351671e7a5b7f3e746dde91ef6c6e9ef344");
 }}
