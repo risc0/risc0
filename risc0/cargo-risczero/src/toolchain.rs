@@ -15,16 +15,48 @@
 // This is based on cargo-wasix: https://github.com/wasix-org/cargo-wasix
 
 use std::{
+    fs,
     path::{Path, PathBuf},
     process::Command,
 };
 
 use anyhow::{bail, Context, Result};
+use fs_extra::dir::CopyOptions;
+use risc0_build::risc0_data;
 
 use crate::utils::CommandExt;
 
-/// Custom rust repository.
-pub const RUST_REPO: &str = "https://github.com/risc0/rust.git";
+pub enum ToolchainRepo {
+    Rust,
+    Cpp,
+}
+
+impl ToolchainRepo {
+    pub const fn url(&self) -> &str {
+        match self {
+            Self::Rust => "https://github.com/risc0/rust.git",
+            Self::Cpp => "https://github.com/risc0/toolchain.git",
+        }
+    }
+
+    pub const fn language(&self) -> &str {
+        match self {
+            Self::Rust => "rust",
+            Self::Cpp => "c",
+        }
+    }
+
+    pub fn asset_name(&self, target: &str) -> String {
+        match self {
+            Self::Rust => format!("rust-toolchain-{target}.tar.gz"),
+            Self::Cpp => match target {
+                "aarch64-apple-darwin" => "riscv32im-osx-arm64.tar.xz".to_string(),
+                "x86_64-unknown-linux-gnu" => "riscv32im-linux-x86_64.tar.xz".to_string(),
+                _ => panic!("binaries for {target} are not available"),
+            },
+        }
+    }
+}
 
 /// Branch to use in the custom Rust repo.
 pub const RUST_BRANCH: &str = "risc0";
@@ -108,6 +140,53 @@ impl RustupToolchain {
         Ok(Self {
             name: name.to_string(),
             path: dir.into(),
+        })
+    }
+}
+
+/// A rustup toolchain manager
+#[derive(Clone, Debug)]
+pub struct CppToolchain {
+    /// The path of the rustup toolchain
+    pub path: PathBuf,
+}
+
+impl CppToolchain {
+    fn get_subdir(path: &Path) -> Result<PathBuf> {
+        let sub_dir: Vec<std::result::Result<std::fs::DirEntry, std::io::Error>> =
+            std::fs::read_dir(path)?.into_iter().collect();
+        if sub_dir.len() != 1 {
+            bail!(
+                "Expected {} to only have 1 subdirectory, found {}",
+                path.display(),
+                sub_dir.len()
+            );
+        }
+        let entry = sub_dir[0].as_ref().unwrap();
+        Ok(entry.path())
+    }
+
+    pub fn link(path: &Path) -> Result<Self> {
+        let cpp_download_dir = Self::get_subdir(path)?;
+        let r0_data = risc0_data()?;
+        fs_extra::dir::copy(
+            cpp_download_dir.clone(),
+            &r0_data,
+            &CopyOptions::new().overwrite(true).copy_inside(true),
+        )?;
+
+        // for c, we will keep the toolchains in the r0_data directory for now
+        let cpp_install_dir = &r0_data.join("cpp");
+        if cpp_install_dir.exists() {
+            fs::remove_dir_all(cpp_install_dir)?;
+        }
+        fs::rename(
+            r0_data.join(cpp_download_dir.file_name().unwrap()),
+            cpp_install_dir,
+        )?;
+
+        Ok(Self {
+            path: cpp_install_dir.into(),
         })
     }
 }
