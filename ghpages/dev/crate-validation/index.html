@@ -72,12 +72,16 @@
 
     async function findMostRecentHash() {
       return await fetch("results/index.json")
-        .then(res => res.json())
+        .then(res => res.text())
         .then(data => {
           // Find the most recent timestamp
-          let mostRecent = data.reduce((prev, current) => (prev.timestamp > current.timestamp) ? prev : current);
+          const mostRecent = JSON.parse(data.replace("[,", "[")).reduce((prev, current) =>
+            prev.timestamp > current.timestamp ? prev : current,
+          );
+
           // Retrieve the hash related to the most recent timestamp
           let mostRecentHash = mostRecent.hash;
+
           return mostRecentHash;
         })
         .catch(err => { console.error(err) });
