@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -86,9 +86,9 @@ where
             circuit,
             handler,
             // Initialize trace to min_po2 size
-            code: CpuBuffer::from_fn(steps * code_size, |_| F::Elem::ZERO),
+            code: CpuBuffer::from_fn("code", steps * code_size, |_| F::Elem::ZERO),
             code_size,
-            data: CpuBuffer::from_fn(steps * data_size, |_| F::Elem::INVALID),
+            data: CpuBuffer::from_fn("data", steps * data_size, |_| F::Elem::INVALID),
             data_size,
             io: CpuBuffer::from(Vec::from(io)),
             po2,
@@ -155,7 +155,7 @@ where
     ) -> CpuBuffer<F::Elem> {
         assert_eq!(self.steps * row_size, buf.size());
 
-        let new_buf = CpuBuffer::from_fn(buf.size() * 2, |_| fill_val);
+        let new_buf = CpuBuffer::from_fn("unused", buf.size() * 2, |_| fill_val);
         for i in 0..row_size {
             let idx = i * self.steps;
             let src = buf.slice(idx, self.cycle);

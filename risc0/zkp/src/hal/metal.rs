@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ const KERNEL_NAMES: &[&str] = &[
     "eltwise_add_fp",
     "eltwise_copy_fp",
     "eltwise_mul_factor_fp",
-    "eltwise_sum_fp4",
+    "eltwise_sum_fpext",
     "fri_fold",
     "gather_sample",
     "mix_poly_coeffs",
@@ -192,26 +192,25 @@ impl MetalHash for MetalHashPoseidon {
 pub struct MetalHashPoseidon2 {
     suite: HashSuite<BabyBear>,
     round_constants: BufferImpl<BabyBearElem>,
-    m_int_diag_ulvt: BufferImpl<BabyBearElem>,
+    m_int_diag: BufferImpl<BabyBearElem>,
 }
 
 impl MetalHash for MetalHashPoseidon2 {
     fn new(hal: &MetalHal<Self>) -> Self {
         let round_constants =
             hal.copy_from_elem("round_constants", poseidon2::consts::ROUND_CONSTANTS);
-        let m_int_diag_ulvt =
-            hal.copy_from_elem("m_int_diag_ulvt", poseidon2::consts::M_INT_DIAG_ULVT);
+        let m_int_diag = hal.copy_from_elem("m_int_diag", poseidon2::consts::M_INT_DIAG_HZN);
         MetalHashPoseidon2 {
             suite: Poseidon2HashSuite::new_suite(),
             round_constants,
-            m_int_diag_ulvt,
+            m_int_diag,
         }
     }
 
     fn hash_fold(&self, hal: &MetalHal<Self>, io: &BufferImpl<Digest>, output_size: usize) {
         let args = &[
             self.round_constants.as_arg(),
-            self.m_int_diag_ulvt.as_arg(),
+            self.m_int_diag.as_arg(),
             io.as_arg_with_offset(output_size),
             io.as_arg_with_offset(output_size * 2),
         ];
@@ -229,7 +228,7 @@ impl MetalHash for MetalHashPoseidon2 {
         assert_eq!(matrix.size(), col_size * row_size);
         let args = &[
             self.round_constants.as_arg(),
-            self.m_int_diag_ulvt.as_arg(),
+            self.m_int_diag.as_arg(),
             output.as_arg(),
             matrix.as_arg(),
             KernelArg::Integer(row_size as u32),
@@ -273,6 +272,7 @@ impl Drop for TrackedBuffer {
 
 #[derive(Clone, Debug)]
 pub struct BufferImpl<T> {
+    name: &'static str,
     cmd_queue: CommandQueue,
     buffer: TrackedBuffer,
     offset: usize,
@@ -289,11 +289,12 @@ pub enum KernelArg<'a> {
 }
 
 impl<T> BufferImpl<T> {
-    fn new(device: &Device, cmd_queue: CommandQueue, size: usize) -> Self {
+    fn new(name: &'static str, device: &Device, cmd_queue: CommandQueue, size: usize) -> Self {
         let bytes_len = size * mem::size_of::<T>();
         let options = MTLResourceOptions::StorageModeManaged;
         let buffer = device.new_buffer(bytes_len as u64, options);
         Self {
+            name,
             cmd_queue,
             buffer: TrackedBuffer::new(buffer),
             offset: 0,
@@ -302,12 +303,18 @@ impl<T> BufferImpl<T> {
         }
     }
 
-    pub fn copy_from(device: &Device, cmd_queue: CommandQueue, slice: &[T]) -> Self {
+    pub fn copy_from(
+        name: &'static str,
+        device: &Device,
+        cmd_queue: CommandQueue,
+        slice: &[T],
+    ) -> Self {
         let bytes_len = slice.len() * mem::size_of::<T>();
         let options = MTLResourceOptions::StorageModeManaged;
         let buffer =
             device.new_buffer_with_data(slice.as_ptr() as *const c_void, bytes_len as u64, options);
         Self {
+            name,
             cmd_queue,
             buffer: TrackedBuffer::new(buffer),
             offset: 0,
@@ -343,6 +350,10 @@ impl<T> BufferImpl<T> {
 }
 
 impl<T: Clone> Buffer<T> for BufferImpl<T> {
+    fn name(&self) -> &'static str {
+        self.name
+    }
+
     fn size(&self) -> usize {
         self.size
     }
@@ -350,6 +361,7 @@ impl<T: Clone> Buffer<T> for BufferImpl<T> {
     fn slice(&self, offset: usize, size: usize) -> BufferImpl<T> {
         assert!(offset + size <= self.size());
         BufferImpl {
+            name: self.name,
             cmd_queue: self.cmd_queue.clone(),
             buffer: self.buffer.clone(),
             offset: self.offset + offset,
@@ -471,44 +483,40 @@ impl<MH: MetalHash> Hal for MetalHal<MH> {
     type Field = BabyBear;
     type Buffer<T: Clone + Debug + PartialEq + Pod> = BufferImpl<T>;
 
-    fn alloc_elem(&self, _name: &'static str, size: usize) -> Self::Buffer<Self::Elem> {
-        BufferImpl::new(&self.device, self.cmd_queue.clone(), size)
+    fn alloc_elem(&self, name: &'static str, size: usize) -> Self::Buffer<Self::Elem> {
+        BufferImpl::new(name, &self.device, self.cmd_queue.clone(), size)
     }
 
-    fn copy_from_elem(
-        &self,
-        _name: &'static str,
-        slice: &[Self::Elem],
-    ) -> Self::Buffer<Self::Elem> {
-        BufferImpl::copy_from(&self.device, self.cmd_queue.clone(), slice)
+    fn copy_from_elem(&self, name: &'static str, slice: &[Self::Elem]) -> Self::Buffer<Self::Elem> {
+        BufferImpl::copy_from(name, &self.device, self.cmd_queue.clone(), slice)
     }
 
-    fn alloc_extelem(&self, _name: &'static str, size: usize) -> Self::Buffer<Self::ExtElem> {
-        BufferImpl::new(&self.device, self.cmd_queue.clone(), size)
+    fn alloc_extelem(&self, name: &'static str, size: usize) -> Self::Buffer<Self::ExtElem> {
+        BufferImpl::new(name, &self.device, self.cmd_queue.clone(), size)
     }
 
     fn copy_from_extelem(
         &self,
-        _name: &'static str,
+        name: &'static str,
         slice: &[Self::ExtElem],
     ) -> Self::Buffer<Self::ExtElem> {
-        BufferImpl::copy_from(&self.device, self.cmd_queue.clone(), slice)
+        BufferImpl::copy_from(name, &self.device, self.cmd_queue.clone(), slice)
     }
 
-    fn alloc_digest(&self, _name: &'static str, size: usize) -> Self::Buffer<Digest> {
-        BufferImpl::new(&self.device, self.cmd_queue.clone(), size)
+    fn alloc_digest(&self, name: &'static str, size: usize) -> Self::Buffer<Digest> {
+        BufferImpl::new(name, &self.device, self.cmd_queue.clone(), size)
     }
 
-    fn copy_from_digest(&self, _name: &'static str, slice: &[Digest]) -> Self::Buffer<Digest> {
-        BufferImpl::copy_from(&self.device, self.cmd_queue.clone(), slice)
+    fn copy_from_digest(&self, name: &'static str, slice: &[Digest]) -> Self::Buffer<Digest> {
+        BufferImpl::copy_from(name, &self.device, self.cmd_queue.clone(), slice)
     }
 
-    fn alloc_u32(&self, _name: &'static str, size: usize) -> Self::Buffer<u32> {
-        BufferImpl::new(&self.device, self.cmd_queue.clone(), size)
+    fn alloc_u32(&self, name: &'static str, size: usize) -> Self::Buffer<u32> {
+        BufferImpl::new(name, &self.device, self.cmd_queue.clone(), size)
     }
 
-    fn copy_from_u32(&self, _name: &'static str, slice: &[u32]) -> Self::Buffer<u32> {
-        BufferImpl::copy_from(&self.device, self.cmd_queue.clone(), slice)
+    fn copy_from_u32(&self, name: &'static str, slice: &[u32]) -> Self::Buffer<u32> {
+        BufferImpl::copy_from(name, &self.device, self.cmd_queue.clone(), slice)
     }
 
     #[tracing::instrument(skip_all)]
@@ -670,7 +678,7 @@ impl<MH: MetalHash> Hal for MetalHal<MH> {
             KernelArg::Integer(count as u32),
             KernelArg::Integer(to_add as u32),
         ];
-        self.dispatch_by_name("eltwise_sum_fp4", args, count as u64);
+        self.dispatch_by_name("eltwise_sum_fpext", args, count as u64);
     }
 
     #[tracing::instrument(skip_all)]

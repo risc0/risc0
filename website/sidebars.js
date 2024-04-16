@@ -2,13 +2,18 @@
 
 /** @type {import('@docusaurus/plugin-content-docs').SidebarsConfig} */
 export default {
-  docs: [
-    "studyclub",
+  education_hub: [
     {
       type: "link",
-      label: "YouTube",
-      href: "https://youtube.com/@risczero",
+      label: "Talks and Podcasts",
+      href: "https://www.youtube.com/playlist?list=PLcPzhUaCxlCgCvzkkaBWzVuHdBRsTNxj1",
     },
+    {
+      type: "link",
+      label: "Articles",
+      href: "https://risczero.com/blog",
+    },
+    "studyclub",
     {
       type: "link",
       label: "Education Database",
@@ -32,11 +37,6 @@ export default {
           type: "doc",
           label: "Sequence Diagram",
           id: "proof-system/proof-system-sequence-diagram",
-        },
-        {
-          type: "link",
-          label: "Proof System Rust Crate",
-          href: "https://docs.rs/risc0-zkp/*/risc0_zkp/",
         },
         {
           type: "link",
@@ -88,22 +88,6 @@ export default {
           type: "doc",
           label: "Reed Solomon Codes",
           id: "reference-docs/about-rs-codes",
-        },
-      ],
-    },
-    {
-      type: "category",
-      label: "Contribute to RISC Zero",
-      items: [
-        {
-          type: "doc",
-          label: "Contributor guide",
-          id: "contributors-guide",
-        },
-        {
-          type: "link",
-          label: "Risc Zero Github",
-          href: "https://github.com/risc0/risc0",
         },
       ],
     },

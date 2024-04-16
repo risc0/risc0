@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ use rrs_lib::instruction_formats::{IType, JType, OPCODE_JAL, OPCODE_JALR};
 use rustc_demangle::demangle;
 
 use self::proto::Line;
-use crate::{host::client::env::TraceCallback, TraceEvent};
+use crate::{TraceCallback, TraceEvent};
 
 mod proto {
     // Generated proto interface.
@@ -140,6 +140,7 @@ pub struct Profiler {
     insn: u32,
 
     // Cycle count when the last instruction started
+    // TODO(breaking change): update to `u64`
     cycle: u32,
 
     // Pop stack

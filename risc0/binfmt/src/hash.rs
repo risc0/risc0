@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -27,13 +27,13 @@ pub trait Digestible {
 
 impl Digestible for [u8] {
     fn digest<S: Sha256>(&self) -> Digest {
-        *S::hash_bytes(&self)
+        *S::hash_bytes(self)
     }
 }
 
 impl Digestible for Vec<u8> {
     fn digest<S: Sha256>(&self) -> Digest {
-        *S::hash_bytes(&self)
+        *S::hash_bytes(self)
     }
 }
 
@@ -72,11 +72,9 @@ pub fn tagged_struct<S: Sha256>(tag: &str, down: &[impl Borrow<Digest>], data: &
 /// Used for hashing of the receipt claim assumptions list, and in the recursion
 /// predicates.
 pub fn tagged_list<S: Sha256>(tag: &str, list: &[impl Borrow<Digest>]) -> Digest {
-    list.into_iter()
-        .rev()
-        .fold(Digest::ZERO, |list_digest, elem| {
-            tagged_list_cons::<S>(tag, elem.borrow(), &list_digest)
-        })
+    list.iter().rev().fold(Digest::ZERO, |list_digest, elem| {
+        tagged_list_cons::<S>(tag, elem.borrow(), &list_digest)
+    })
 }
 
 /// Calculate the hash resulting from adding one element to a [tagged_list]

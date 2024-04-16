@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,14 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#![no_main]
-
 use risc0_zkp::core::hash::blake2b::{Blake2b, Blake2bCpuImpl};
 use risc0_zkvm::{guest::env, sha::Digest};
 
-risc0_zkvm::entry!(main);
-
-pub fn main() {
+fn main() {
     let (num_iter, data): (u32, Vec<u8>) = env::read();
 
     let mut hash = Blake2bCpuImpl::blake2b(&data);

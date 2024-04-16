@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ use core::{
     panic::PanicInfo,
 };
 
-use crate::syscall;
+use crate::syscall::{sys_alloc_aligned, sys_panic};
 
 extern crate alloc;
 
@@ -34,25 +34,39 @@ extern crate alloc;
 pub fn panic_fault(panic_info: &PanicInfo) -> ! {
     let msg = alloc::format!("{}", panic_info);
     let msg_bytes = msg.as_bytes();
-    unsafe { syscall::sys_panic(msg.as_ptr(), msg.len()) }
+    unsafe { sys_panic(msg.as_ptr(), msg.len()) }
 }
 
 #[cfg(feature = "entrypoint")]
 mod entrypoint {
-    // Entry point; sets up global pointer and stack pointer and passes
-    // to __start.  TODO: when asm_const is stablized, use that here
-    // instead of defining a symbol and dereferencing it.
-    //
-    // This version of _start is marked as "weak" so it only gets used if
-    // start isn't already defined by e.g. risc0_zkvm::guest which needs
-    // to initialize things like the journal.
+    use crate::syscall::sys_halt;
+
+    #[no_mangle]
+    unsafe extern "C" fn __start() -> ! {
+        // This definition of __start differs from risc0_zkvm::guest in that it does not initialize the
+        // journal and will halt with empty output. It also assumes main follows the standard C
+        // convention, and uses the returned i32 value as the user exit code for halt.
+        let exit_code = {
+            extern "C" {
+                fn main(argc: i32, argv: *const *const u8) -> i32;
+            }
+
+            main(0, core::ptr::null())
+        };
+
+        const EMPTY_OUTPUT: [u32; 8] = [0; 8];
+        sys_halt(exit_code as u8, &EMPTY_OUTPUT);
+    }
 
     static STACK_TOP: u32 = crate::memory::STACK_TOP;
 
+    // Entry point; sets up global pointer and stack pointer and passes
+    // to __start.  TODO: when asm_const is stablized, use that here
+    // instead of defining a symbol and dereferencing it.
     core::arch::global_asm!(
         r#"
     .section .text._start
-    .weak _start
+    .globl _start
     _start:
         .option push;
         .option norelax
@@ -60,9 +74,7 @@ mod entrypoint {
         .option pop
         la sp, {0}
         lw sp, 0(sp)
-        call main
-        li a1, 0
-        call sys_halt
+        call __start;
     "#,
         sym STACK_TOP
     );
@@ -72,7 +84,7 @@ struct BumpPointerAlloc;
 
 unsafe impl GlobalAlloc for BumpPointerAlloc {
     unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
-        syscall::sys_alloc_aligned(layout.size(), layout.align())
+        sys_alloc_aligned(layout.size(), layout.align())
     }
 
     unsafe fn dealloc(&self, _: *mut u8, _: Layout) {

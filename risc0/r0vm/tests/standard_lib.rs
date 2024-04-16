@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -53,8 +53,10 @@ fn stdio_outputs_in_receipt() {
         .success();
 
     let receipt = load_receipt(&receipt_file);
+
     let segments = &receipt.inner.composite().unwrap().segments;
     assert_eq!(segments.len(), 1);
     assert!(segments[0].get_seal_bytes().len() > 0);
+
     receipt.verify(STANDARD_LIB_ID).unwrap();
 }

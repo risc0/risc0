@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#![no_main]
-
 use risc0_zkvm::guest::env;
 use smartcore::{
     linalg::basic::matrix::DenseMatrix,
@@ -24,9 +22,7 @@ use smartcore::{
     tree::decision_tree_classifier::DecisionTreeClassifier,
 };
 
-risc0_zkvm::guest::entry!(main);
-
-pub fn main() {
+fn main() {
     // Read in is_svm boolean to ensure the correct code block is executed
     let is_svm: bool = env::read();
 
@@ -62,7 +58,7 @@ pub fn main() {
             .with_c(200.0)
             .with_kernel(Kernels::linear());
 
-        // Now we can update the model with params_same.  The RISC Zero fork changes the visbility of the parameters field of the SVC and SVR model structs to public to allow for this reinsertion
+        // Now we can update the model with params_same.  The RISC Zero fork changes the visibility of the parameters field of the SVC and SVR model structs to public to allow for this reinsertion
         model.parameters = Some(params_same);
 
         // Now that the parameters have been loaded back into the SVC model struct, we can call predict on the model.
@@ -76,7 +72,7 @@ pub fn main() {
         env::commit(&y_hat);
     }
     // Logging the total cycle count is optional, though it's quite useful for benchmarking
-    // the various operations in the guest code. env::get_cycle_count() can be
+    // the various operations in the guest code. env::cycle_count() can be
     // called anywhere in the guest, multiple times. So if we are interested in
     // knowing how many cycles the inference computation takes, we can calculate
     // total cycles before and after model.predict() and the difference between
@@ -84,6 +80,6 @@ pub fn main() {
     // code.
     println!(
         "Total cycles for guest code execution: {}",
-        env::get_cycle_count()
+        env::cycle_count()
     );
 }

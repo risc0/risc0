@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -61,6 +61,10 @@ where
     L: Buffer<T>,
     R: Buffer<T>,
 {
+    fn name(&self) -> &'static str {
+        "dual"
+    }
+
     fn size(&self) -> usize {
         let lhs = self.lhs.size();
         let rhs = self.rhs.size();

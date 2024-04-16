@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -58,8 +58,8 @@ impl Prover for ExternalProver {
             ensure!(
                 receipt.get_claim()?.pre.digest() == image_id,
                 "received unexpected image ID: expected {}, found {}",
-                hex::encode(&image_id),
-                hex::encode(&receipt.get_claim()?.pre.digest())
+                hex::encode(image_id),
+                hex::encode(receipt.get_claim()?.pre.digest())
             );
         } else {
             receipt.verify_with_context(ctx, image_id)?;

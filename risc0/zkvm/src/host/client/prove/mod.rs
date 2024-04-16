@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -98,15 +98,30 @@ pub struct ProverOpts {
     /// [crate::ExitCode] (i.e. `Halted(0)` or `Paused(0)`).
     /// When set to true, any completed execution session will be proven, including indicated
     /// errors (e.g. `Halted(1)`) and sessions ending in `Fault`.
+    // TODO(1.0): This option exists to avoid wasting resourcing proving a guest that exited with
+    // Fault or another abnormal exit conditional. It is currently not consistently enforced, and
+    // it seems like this might not be the right place for this option and it's not clear at the
+    // moment if there is a better place. At some point before 1.0, this option should be moved or
+    // dropped.
     pub prove_guest_errors: bool,
 }
 
 impl Default for ProverOpts {
-    /// Return [ProverOpts] with the SHA-256 hash function and
+    /// Return [ProverOpts] with the Poseidon2 hash function and
     /// `prove_guest_errors` set to false.
     fn default() -> Self {
         Self {
-            hashfn: "poseidon".to_string(),
+            hashfn: "poseidon2".to_string(),
+            prove_guest_errors: false,
+        }
+    }
+}
+
+impl ProverOpts {
+    /// Choose the fastest prover options. May not be compatible with recursion.
+    pub fn fast() -> Self {
+        Self {
+            hashfn: "sha-256".to_string(),
             prove_guest_errors: false,
         }
     }
@@ -117,7 +132,7 @@ impl Default for ProverOpts {
 /// The `RISC0_PROVER` environment variable, if specified, will select the
 /// following [Prover] implementation:
 /// * `bonsai`: [BonsaiProver] to prove on Bonsai.
-/// * `local`: [local::LocalProver] to prove locally in-process. Note: this
+/// * `local`: LocalProver to prove locally in-process. Note: this
 ///   requires the `prove` feature flag.
 /// * `ipc`: [ExternalProver] to prove using an `r0vm` sub-process. Note: `r0vm`
 ///   must be installed. To specify the path to `r0vm`, use `RISC0_SERVER_PATH`.
@@ -126,10 +141,10 @@ impl Default for ProverOpts {
 /// [Prover]:
 /// * [BonsaiProver] if the `BONSAI_API_URL` and `BONSAI_API_KEY` environment
 ///   variables are set unless `RISC0_DEV_MODE` is enabled.
-/// * [local::LocalProver] if the `prove` feature flag is enabled.
+/// * LocalProver if the `prove` feature flag is enabled.
 /// * [ExternalProver] otherwise.
 pub fn default_prover() -> Rc<dyn Prover> {
-    let explicit = std::env::var("RISC0_PROVER").unwrap_or(String::new());
+    let explicit = std::env::var("RISC0_PROVER").unwrap_or_default();
     if !explicit.is_empty() {
         return match explicit.to_lowercase().as_str() {
             "bonsai" => Rc::new(BonsaiProver::new("bonsai")),
@@ -160,7 +175,7 @@ pub fn default_prover() -> Rc<dyn Prover> {
 ///
 /// The `RISC0_EXECUTOR` environment variable, if specified, will select the
 /// following [Executor] implementation:
-/// * `local`: [local::LocalProver] to execute locally in-process. Note: this is
+/// * `local`: LocalProver to execute locally in-process. Note: this is
 ///   only available when the `prove` feature is enabled.
 /// * `ipc`: [ExternalProver] to execute using an `r0vm` sub-process. Note:
 ///   `r0vm` must be installed. To specify the path to `r0vm`, use
@@ -168,10 +183,10 @@ pub fn default_prover() -> Rc<dyn Prover> {
 ///
 /// If `RISC0_EXECUTOR` is not specified, the following rules are used to select
 /// an [Executor]:
-/// * [local::LocalProver] if the `prove` feature flag is enabled.
+/// * LocalProver if the `prove` feature flag is enabled.
 /// * [ExternalProver] otherwise.
 pub fn default_executor() -> Rc<dyn Executor> {
-    let explicit = std::env::var("RISC0_EXECUTOR").unwrap_or(String::new());
+    let explicit = std::env::var("RISC0_EXECUTOR").unwrap_or_default();
     if !explicit.is_empty() {
         return match explicit.to_lowercase().as_str() {
             "ipc" => Rc::new(ExternalProver::new("ipc", get_r0vm_path())),

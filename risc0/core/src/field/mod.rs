@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -229,6 +229,37 @@ pub trait RootsOfUnity: Sized + 'static {
     const ROU_REV: &'static [Self];
 }
 
+/// Equivalent to exponents.map(|exponent|
+/// base.pow(exponent)).collect(), but optimized to execute fewer
+/// multiplies.  Exponents must be sorted and strictly increasing.
+pub fn map_pow<E: super::field::Elem>(base: E, exponents: &[usize]) -> Vec<E> {
+    let mut result = Vec::with_capacity(exponents.len());
+
+    let mut prev_exp: usize;
+    match exponents.first() {
+        None => return result,
+        Some(&exp) => {
+            result.push(base.pow(exp));
+            prev_exp = exp;
+        }
+    }
+
+    for exp in exponents.iter().skip(1).copied() {
+        assert!(
+            prev_exp < exp,
+            "Expecting exponents to be strictly increasing but {prev_exp} is not less than {exp}"
+        );
+        if exp == prev_exp + 1 {
+            result.push(*result.last().unwrap() * base);
+        } else {
+            result.push(*result.last().unwrap() * base.pow(exp - prev_exp));
+        }
+        prev_exp = exp;
+    }
+
+    result
+}
+
 #[cfg(test)]
 mod tests {
     use core::fmt::Debug;
@@ -299,6 +330,15 @@ mod tests {
                 assert!(xinv != x);
             }
             assert_eq!(xinv * x, F::ONE);
+        }
+
+        // Make sure map_pow produces the same results as calling F::pow.
+        let base: F = non_zero_rand(&mut rng);
+        let map_pow_cases: &[&[usize]] = &[&[], &[0], &[0, 1, 2, 3], &[1, 18, 19, 1234, 5678]];
+        for exps in map_pow_cases.iter() {
+            let expected: alloc::vec::Vec<_> = exps.iter().map(|&exp| base.pow(exp)).collect();
+            let actual = super::map_pow(base, exps);
+            assert_eq!(expected, actual);
         }
     }
 }

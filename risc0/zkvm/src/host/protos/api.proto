@@ -13,6 +13,7 @@ message ServerRequest {
     LiftRequest lift = 4;
     JoinRequest join = 5;
     IdentityP254Request identiy_p254 = 6;
+    ResolveRequest resolve = 7;
   }
 }
 
@@ -90,6 +91,24 @@ message JoinResult {
   Asset receipt = 1;
 }
 
+message ResolveRequest {
+  ProverOpts opts = 1;
+  Asset conditional_receipt = 2;
+  Asset assumption_receipt = 3;
+  AssetRequest receipt_out = 4;
+}
+
+message ResolveReply {
+  oneof kind {
+    ResolveResult ok = 1;
+    GenericError error = 2;
+  }
+}
+
+message ResolveResult {
+  Asset receipt = 1;
+}
+
 message IdentityP254Request {
   ProverOpts opts = 1;
   Asset receipt = 2;
@@ -119,6 +138,14 @@ message ExecutorEnv {
   // When present, trace events will be sent back to the client.
   google.protobuf.Empty trace_events = 9;
   string pprof_out = 10;
+  repeated Assumption assumptions = 11;
+}
+
+message Assumption {
+  oneof kind {
+    Asset proven = 1;     // Receipt
+    Asset unresolved = 2; // MaybePruned<ReceiptClaim>
+  }
 }
 
 message ProverOpts {
@@ -213,6 +240,7 @@ message TraceEvent {
   message MemorySet {
     uint32 addr = 1;
     uint32 value = 2;
+    bytes region = 3;
   }
 
   oneof kind {
@@ -259,6 +287,7 @@ service Server {
   rpc prove_segment(ProveSegmentRequest) returns (ProveSegmentReply);
   rpc lift(LiftRequest) returns (LiftReply);
   rpc join(JoinRequest) returns (JoinReply);
+  rpc resolve(ResolveRequest) returns (ResolveReply);
 }
 
 service ExecuteCallback {

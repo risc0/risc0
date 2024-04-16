@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ use risc0_zkvm_platform::{
     fileno,
     memory::{self, SYSTEM},
     syscall::{bigint, sys_bigint, sys_log, sys_read, sys_read_words, sys_write},
+    PAGE_SIZE,
 };
 
 risc0_zkvm::entry!(main);
@@ -50,7 +51,7 @@ fn profile_test_func2() {
     unsafe { asm!("nop") }
 }
 
-pub fn main() {
+fn main() {
     let impl_select: MultiTestSpec = env::read();
     match impl_select {
         MultiTestSpec::DoNothing => {}
@@ -60,13 +61,13 @@ pub fn main() {
             // see when it's a custom circuit.
             let a: &Digest = &Digest::from([1, 2, 3, 4, 5, 6, 7, 8]);
 
-            let count1 = env::get_cycle_count();
+            let count1 = env::cycle_count();
             memory_barrier(&count1);
-            let count2 = env::get_cycle_count();
+            let count2 = env::cycle_count();
             memory_barrier(&count2);
             let result = sha::Impl::hash_pair(a, a);
             memory_barrier(&result);
-            let count3 = env::get_cycle_count();
+            let count3 = env::cycle_count();
             memory_barrier(&count3);
 
             let overhead = count2 - count1;
@@ -80,15 +81,15 @@ pub fn main() {
             // Execute some instructions with distinctive arguments
             // that are easy to find in the event trace.
             asm!(r"
-      // Dry run first to make sure all regions are paged in
-      li x5, 1336
-      li x6, 0x08000000
-      sw x5, 548(x6)
-      // Now, run what we're actually looking for.
-      li x5, 1337
-      li x6, 0x08000000
-      sw x5, 548(x6)
-", out("x5") _, out("x6") _);
+                // Dry run first to make sure all regions are paged in
+                li x5, 1336
+                li x6, 0x08000000
+                sw x5, 548(x6)
+                // Now, run what we're actually looking for.
+                li x5, 1337
+                li x6, 0x08000000
+                sw x5, 548(x6)
+            ", out("x5") _, out("x6") _);
         },
         MultiTestSpec::Profiler => {
             // Call an external function to make sure it's detected during profiling.
@@ -165,19 +166,25 @@ pub fn main() {
             fd,
             pos_and_len,
         } => {
+            let mut num_read = alloc::vec::Vec::with_capacity(pos_and_len.len());
             for (pos, len) in pos_and_len {
-                let num_read =
-                    unsafe { sys_read(fd, buf.as_mut_ptr().add(pos as usize), len as usize) };
-                assert_eq!(num_read, len as usize);
+                let n = unsafe { sys_read(fd, buf.as_mut_ptr().add(pos as usize), len as usize) };
+                num_read.push(n);
+                assert!(n <= len as usize);
             }
-            env::commit(&buf);
+            env::commit(&(buf, num_read));
         }
-        MultiTestSpec::SysVerify { image_id, journal } => {
-            env::verify(image_id, &journal).unwrap();
+        MultiTestSpec::SysVerify(pairs) => {
+            for (image_id, journal) in pairs.into_iter() {
+                env::verify(image_id, &journal).unwrap();
+            }
         }
         MultiTestSpec::SysVerifyIntegrity { claim_words } => {
             let claim: ReceiptClaim = risc0_zkvm::serde::from_slice(&claim_words).unwrap();
             env::verify_integrity(&claim).unwrap();
+        }
+        MultiTestSpec::Echo { bytes } => {
+            env::commit_slice(&bytes);
         }
         MultiTestSpec::EchoStdout { nbytes, fd } => {
             // Unaligned buffer size to exercise things a little bit.
@@ -197,14 +204,14 @@ pub fn main() {
             env::commit_slice(&buf);
         }
         MultiTestSpec::BusyLoop { cycles } => {
-            let mut last_cycles = env::get_cycle_count();
+            let mut last_cycles = env::cycle_count();
 
             // Count all the cycles that have happened so far before we got to this point.
             env::log("Busy loop starting!");
             let mut tot_cycles = last_cycles;
 
             while tot_cycles < cycles as usize {
-                let now_cycles = env::get_cycle_count();
+                let now_cycles = env::cycle_count();
                 if now_cycles <= last_cycles {
                     // Cycle count may have reset or wrapped around.
                     // Since we don't know which, just start counting
@@ -255,17 +262,55 @@ pub fn main() {
             let addr: u32 = env::read();
             // Access memory outside of allowed boundaries. This is intended to cause a
             // fault
-            asm!( "mv x6, {}", "sw x5, (x6)" , in(reg) addr, out("x5") _, out("x6") _);
+            asm!(
+                "mv x6, {}",
+                "sw x5, (x6)",
+                in(reg) addr,
+                out("x5") _,
+                out("x6") _
+            );
         },
         MultiTestSpec::OutOfBoundsEcall => unsafe {
-            asm!("ecall", in("x5") 3, in("x10") 0x0, in("x11") 0x0, in("x12") 0x0, in("x13") 0x0, in("x14") 10000,);
+            asm!(
+                "ecall",
+                in("x5") 3,
+                in("x10") 0x0,
+                in("x11") 0x0,
+                in("x12") 0x0,
+                in("x13") 0x0,
+                in("x14") 10000,
+            );
         },
         MultiTestSpec::TooManySha => unsafe {
-            asm!("ecall", in("x5") 3, in("x10") 0x400, in("x11") 0x400, in("x12") 0x400, in("x13") 0x400, in("x14") 10000,);
+            asm!(
+                "ecall",
+                in("x5") 3,
+                in("x10") 0x400,
+                in("x11") 0x400,
+                in("x12") 0x400,
+                in("x13") 0x400,
+                in("x14") 10000,
+            );
         },
         MultiTestSpec::SysLogInvalidAddr => unsafe {
             let addr: *const u8 = SYSTEM.start() as _;
             sys_log(addr, 100);
         },
+        MultiTestSpec::AlignedAlloc => {
+            #[repr(align(1024))]
+            struct AlignTest1 {
+                pub _test: u32,
+            }
+
+            impl AlignTest1 {
+                pub fn new(_test: u32) -> Self {
+                    AlignTest1 { _test }
+                }
+            }
+
+            let a = &AlignTest1::new(54) as *const _;
+            let b = &AlignTest1::new(60) as *const _;
+            assert_eq!(PAGE_SIZE, b as usize - a as usize);
+        }
     }
 }

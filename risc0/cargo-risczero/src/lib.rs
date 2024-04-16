@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -27,7 +27,8 @@ use clap::{Parser, Subcommand};
 #[cfg(feature = "experimental")]
 use self::commands::build::BuildCommand;
 use self::commands::{
-    build_guest::BuildGuest, build_toolchain::BuildToolchain, install::Install, new::NewCommand,
+    build_guest::BuildGuest, build_toolchain::BuildToolchain, deploy::DeployCommand,
+    install::Install, new::NewCommand,
 };
 
 #[derive(Parser)]
@@ -58,6 +59,8 @@ pub enum RisczeroCmd {
     Install(Install),
     /// Creates a new risczero starter project.
     New(NewCommand),
+    /// Uploads the guest code to Bonsai.
+    Deploy(DeployCommand),
     /// Build a crate for RISC Zero.
     #[cfg(feature = "experimental")]
     BuildCrate(BuildCommand),

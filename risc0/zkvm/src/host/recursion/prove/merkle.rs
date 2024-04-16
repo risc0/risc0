@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -96,7 +96,7 @@ impl MerkleGroup {
 
 #[cfg(test)]
 mod tests {
-    use risc0_zkp::core::hash::poseidon::PoseidonHashSuite;
+    use risc0_zkp::core::hash::poseidon2::Poseidon2HashSuite;
 
     use super::*;
 
@@ -114,7 +114,7 @@ mod tests {
         let digest2 = Digest::new([9, 10, 11, 12, 13, 14, 15, 16]);
         let digest3 = Digest::new([17, 18, 19, 20, 21, 22, 23, 24]);
 
-        let suite = PoseidonHashSuite::new_suite();
+        let suite = Poseidon2HashSuite::new_suite();
         let hashfn = suite.hashfn.as_ref();
 
         let grp = MerkleGroup {

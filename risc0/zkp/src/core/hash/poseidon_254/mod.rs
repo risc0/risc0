@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -94,7 +94,8 @@ fn poseidon_mix(cells: &mut [Fr; CELLS]) {
 /// A hash implemention for Poseidon in a Snark friendly field
 struct Poseidon254HashFn;
 
-fn digest_to_fr(digest: &Digest) -> Fr {
+/// Returns the field representation of a given digest.
+pub fn digest_to_fr(digest: &Digest) -> Fr {
     let mut repr: FrRepr = FrRepr::default();
     repr.as_mut().clone_from_slice(digest.as_bytes());
     Fr::from_repr(repr).unwrap()

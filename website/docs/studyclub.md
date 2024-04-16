@@ -4,12 +4,18 @@ RISC Zero's Study Club sessions aim to introduce the pre-requisite concepts nece
 
 ## Upcoming Sessions
 
-- **December 13**: zkML on RISC Zero
-- **December 20**: Bonsai under the hood
+**February 14: Proof Composition** <br/>
+**Victor Graf** <br/>
+
+As of our v0.20 release, the zkVM supports verification of RISC Zero receipts inside the RISC Zero guest through a feature known as composition.
+With this feature, multiple zkVM programs can be composed and produce a single receipt that verifies all computation done to reach the final result.
+
+This session of study club will discuss how to use proof composition, how proof composition works behind the scenes, and what use cases this unlocks.
 
 All sessions are hosted at **9am Pacific / 5PM UTC**. <br/>
 Join the session: [Zoom link] <br/>
-Join the conversation: [Discord](https://discord.gg/risczero)
+
+Join the conversation on [Discord](https://discord.gg/risczero).
 
 ## Past Sessions
 
@@ -20,14 +26,19 @@ Full recordings and slides from past sessions are available [here](https://www.y
 - [Unlocking the ZK Future: Uses Cases for ZK](https://www.youtube.com/watch?v=J4YHSdG0KnA&list=PLcPzhUaCxlCjdhONxEYZ1dgKjZh3ZvPtl&index=1)
 - [Intro to Zeth: a block prover for Ethereum (built on Bonsai)](https://www.youtube.com/watch?v=4pBmf839eOA&list=PLcPzhUaCxlCjdhONxEYZ1dgKjZh3ZvPtl&index=2)
 
-### zkVMs & Developer Tooling
+### Developer Tooling
+
+- [zkVM Performance Tips & Tricks](https://www.youtube.com/watch?v=MckieUBpakw&list=PLcPzhUaCxlCjdhONxEYZ1dgKjZh3ZvPtl&index=1)
+- [zkML on RISC Zero](https://www.youtube.com/watch?v=yslyWRiCFCE&list=PLcPzhUaCxlCjdhONxEYZ1dgKjZh3ZvPtl&index=1)
+
+### zkVM Architecture
 
 - [What RISC-V has to do with RISC Zero's zkVM](https://www.youtube.com/watch?v=11DIflEwx50&list=PLcPzhUaCxlCjdhONxEYZ1dgKjZh3ZvPtl&index=5)
 - [Continuations: Scaling in zkVM](https://www.youtube.com/watch?v=h1qWnf-M5lo&list=PLcPzhUaCxlCjdhONxEYZ1dgKjZh3ZvPtl&index=9)
-- [zkVM Performance Tips & Tricks](https://www.youtube.com/watch?v=MckieUBpakw&list=PLcPzhUaCxlCjdhONxEYZ1dgKjZh3ZvPtl&index=1)
 
 ### Mathematical Primitives
 
+- [Intro to Hash Functions](https://www.youtube.com/watch?v=_MIxjDs70W8&list=PLcPzhUaCxlCjdhONxEYZ1dgKjZh3ZvPtl&index=1)
 - [Intro Finite Fields](https://www.youtube.com/watch?v=g-GDvnJsZgg&list=PLcPzhUaCxlCiddOGuYdDbFlZhH8nwtR8D)
 - [Finite Field Implementations: Algorithms for Fast Multiplication](https://www.youtube.com/watch?v=hUl8ZB6hpUM&list=PLcPzhUaCxlCjdhONxEYZ1dgKjZh3ZvPtl&index=6)
 - [Intro to Number Theoretic Transforms (NTTs)](https://www.youtube.com/watch?v=IFsxQUbI6x0&list=PLcPzhUaCxlChIKDDR_WghPQ1HeK01YHpa)
@@ -36,7 +47,7 @@ Full recordings and slides from past sessions are available [here](https://www.y
 
 ### ZK Protocol Design
 
-- [Using Quotients in ZK Protocols: A Peek Inside STARKs and DEEP-ALI](https://www.youtube.com/watch?v=LgQQHd9SzMs&list=PLcPzhUaCxlCjdhONxEYZ1dgKjZh3ZvPtl&index=8&t=4s)
+- [Using Quotients in ZK Protocols](https://www.youtube.com/watch?v=LgQQHd9SzMs&list=PLcPzhUaCxlCjdhONxEYZ1dgKjZh3ZvPtl&index=8&t=4s)
 - [Intro to FRI](https://www.youtube.com/watch?v=YiYN6UgE8sQ&list=PLcPzhUaCxlCi6rRRiIlkzJ_YELUlKO4Mz)
 - [FRI Mechanics: Folding, Committing, and Batching](https://www.youtube.com/watch?v=wqRuoyH3Mqk&list=PLcPzhUaCxlCjdhONxEYZ1dgKjZh3ZvPtl&index=8)
 

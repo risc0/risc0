@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ use risc0_zkvm_platform::{
     syscall::{
         nr::{
             SYS_ARGC, SYS_ARGV, SYS_CYCLE_COUNT, SYS_GETENV, SYS_LOG, SYS_PANIC, SYS_RANDOM,
-            SYS_READ, SYS_READ_AVAIL, SYS_VERIFY, SYS_VERIFY_INTEGRITY, SYS_WRITE,
+            SYS_READ, SYS_VERIFY, SYS_VERIFY_INTEGRITY, SYS_WRITE,
         },
         reg_abi::{REG_A3, REG_A4, REG_A5},
         SyscallName, DIGEST_BYTES, DIGEST_WORDS,
@@ -38,7 +38,7 @@ use crate::{
         slice_io::SliceIo,
     },
     sha::{Digest, Digestible},
-    Assumption, ExitCode, MaybePruned, PrunedValueError, ReceiptClaim,
+    Assumption, MaybePruned, PrunedValueError, ReceiptClaim,
 };
 
 /// A host-side implementation of a system call.
@@ -60,6 +60,9 @@ pub trait SyscallContext {
     /// Loads the value of the given register, e.g. REG_A0.
     fn load_register(&mut self, idx: usize) -> u32;
 
+    /// Loads an individual byte from memory.
+    fn load_u8(&mut self, addr: u32) -> Result<u8>;
+
     /// Loads bytes from the given region of memory.
     fn load_region(&mut self, addr: u32, size: u32) -> Result<Vec<u8>> {
         let mut region = Vec::new();
@@ -67,26 +70,6 @@ pub trait SyscallContext {
             region.push(self.load_u8(addr)?);
         }
         Ok(region)
-    }
-
-    /// Loads an individual word from memory.
-    fn load_u32(&mut self, addr: u32) -> Result<u32>;
-
-    /// Loads an individual byte from memory.
-    fn load_u8(&mut self, addr: u32) -> Result<u8>;
-
-    /// Loads a null-terminated string from memory.
-    fn load_string(&mut self, mut addr: u32) -> Result<String> {
-        let mut s: Vec<u8> = Vec::new();
-        loop {
-            let b = self.load_u8(addr)?;
-            if b == 0 {
-                break;
-            }
-            s.push(b);
-            addr += 1;
-        }
-        String::from_utf8(s).map_err(anyhow::Error::msg)
     }
 }
 
@@ -110,7 +93,6 @@ impl<'a> SyscallTable<'a> {
             .with_syscall(SYS_RANDOM, SysRandom)
             .with_syscall(SYS_GETENV, SysGetenv(env.env_vars.clone()))
             .with_syscall(SYS_READ, posix_io.clone())
-            .with_syscall(SYS_READ_AVAIL, posix_io.clone())
             .with_syscall(SYS_WRITE, posix_io)
             .with_syscall(SYS_VERIFY, sys_verify.clone())
             .with_syscall(SYS_VERIFY_INTEGRITY, sys_verify)
@@ -241,7 +223,8 @@ impl SysVerify {
             ));
         };
 
-        self.assumptions.borrow_mut().accessed.push(assumption);
+        // Mark the assumption as accessed, pushing it to the head of the list, and return the success code.
+        self.assumptions.borrow_mut().accessed.insert(0, assumption);
         return Ok((0, 0));
     }
 
@@ -306,8 +289,8 @@ impl SysVerify {
             ));
         };
 
-        // Mark the assumption as accessed and return the success code.
-        self.assumptions.borrow_mut().accessed.push(assumption);
+        // Mark the assumption as accessed, pushing it to the head of the list, and return the success code.
+        self.assumptions.borrow_mut().accessed.insert(0, assumption);
         return Ok((0, 0));
     }
 
@@ -317,7 +300,6 @@ impl SysVerify {
         image_id: &Digest,
         journal_digest: &Digest,
     ) -> Result<Option<(Digest, u32)>, PrunedValueError> {
-        // DO NOT MERGE: Check here that the cached assumption has no assumptions
         let assumption_journal_digest = claim
             .as_value()?
             .output
@@ -332,7 +314,7 @@ impl SysVerify {
         }
 
         // Check that the exit code is either Halted(0) or Paused(0).
-        let (ExitCode::Halted(0) | ExitCode::Paused(0)) = claim.as_value()?.exit_code else {
+        if !claim.as_value()?.exit_code.is_ok() {
             tracing::debug!("sys_verify: ignoring matching claim with error exit code: {claim:?}");
             return Ok(None);
         };
@@ -480,9 +462,7 @@ impl<'a> Syscall for PosixIo<'a> {
         to_guest: &mut [u32],
     ) -> Result<(u32, u32)> {
         // TODO: Is there a way to use "match" here instead of if statements?
-        if syscall == SYS_READ_AVAIL.as_str() {
-            self.sys_read_avail(ctx)
-        } else if syscall == SYS_READ.as_str() {
+        if syscall == SYS_READ.as_str() {
             self.sys_read(ctx, to_guest)
         } else if syscall == SYS_WRITE.as_str() {
             self.sys_write(ctx)
@@ -506,18 +486,6 @@ impl<'a> Syscall for Rc<RefCell<PosixIo<'a>>> {
 }
 
 impl<'a> PosixIo<'a> {
-    fn sys_read_avail(&mut self, ctx: &mut dyn SyscallContext) -> Result<(u32, u32)> {
-        tracing::debug!("sys_read_avail");
-        let fd = ctx.load_register(REG_A3);
-        let reader = self
-            .read_fds
-            .get_mut(&fd)
-            .ok_or(anyhow!("Bad read file descriptor {fd}"))?;
-        let navail = reader.borrow_mut().fill_buf()?.len() as u32;
-        tracing::debug!("navail: {navail}");
-        Ok((navail, 0))
-    }
-
     fn sys_read(
         &mut self,
         ctx: &mut dyn SyscallContext,
@@ -526,9 +494,9 @@ impl<'a> PosixIo<'a> {
         let fd = ctx.load_register(REG_A3);
         let nbytes = ctx.load_register(REG_A4) as usize;
 
-        tracing::debug!(
-            "sys_read, attempting to read {nbytes} bytes from fd {fd}, to_guest: {}",
-            to_guest.len()
+        tracing::trace!(
+            "sys_read(fd: {fd}, nbytes: {nbytes}, into: {} bytes)",
+            to_guest.len() * WORD_SIZE
         );
 
         assert!(
@@ -558,21 +526,16 @@ impl<'a> PosixIo<'a> {
 
         let to_guest_u8 = bytemuck::cast_slice_mut(to_guest);
         let nread_main = read_all(to_guest_u8)?;
-        assert_eq!(
-            nread_main,
-            to_guest_u8.len(),
-            "Guest requested more data than was available"
-        );
 
-        tracing::debug!(
-            "Main read got {nread_main} bytes out of requested {}",
-            to_guest_u8.len()
-        );
-        let unaligned_end = nbytes - nread_main;
-        assert!(
-            unaligned_end <= WORD_SIZE,
-            "{unaligned_end} must be <= {WORD_SIZE}"
-        );
+        tracing::trace!("read: {nread_main}, requested: {}", to_guest_u8.len());
+
+        // It's possible that there's an unaligned word at the end
+        let unaligned_end = if nbytes - nread_main <= WORD_SIZE {
+            nbytes - nread_main
+        } else {
+            // We encountered an EOF. There's nothing left to read
+            0
+        };
 
         // Fill unaligned word out.
         let mut to_guest_end: [u8; WORD_SIZE] = [0; WORD_SIZE];
@@ -594,7 +557,7 @@ impl<'a> PosixIo<'a> {
             .get_mut(&fd)
             .ok_or(anyhow!("Bad write file descriptor {fd}"))?;
 
-        tracing::debug!("Writing {buf_len} bytes to file descriptor {fd}");
+        tracing::trace!("sys_write(fd: {fd}, bytes: {buf_len})");
 
         writer.borrow_mut().write_all(from_guest_bytes.as_slice())?;
         Ok((0, 0))
@@ -610,15 +573,56 @@ impl<'a> PosixIo<'a> {
             .get_mut(&fileno::STDOUT)
             .ok_or(anyhow!("Bad write file descriptor {}", &fileno::STDOUT))?;
 
-        tracing::debug!(
-            "Writing {buf_len} bytes to STDOUT file descriptor {}",
-            &fileno::STDOUT
-        );
+        tracing::debug!("sys_log({buf_len} bytes)");
 
         let msg = format!("R0VM[{}] ", ctx.get_cycle().to_string());
         writer
             .borrow_mut()
-            .write_all(&[msg.as_bytes(), &from_guest].concat())?;
+            .write_all(&[msg.as_bytes(), &from_guest, b"\n"].concat())?;
         Ok((0, 0))
     }
 }
+
+// SysCycleCount:
+//     ctx.get_cycle()
+
+// SysGetenv:
+//     let buf_ptr = ctx.load_register(REG_A3);
+//     let buf_len = ctx.load_register(REG_A4);
+//     let from_guest = ctx.load_region(buf_ptr, buf_len)?;
+
+// SysPanic:
+//     let buf_ptr = ctx.load_register(REG_A3);
+//     let buf_len = ctx.load_register(REG_A4);
+//     let from_guest = ctx.load_region(buf_ptr, buf_len)?;
+
+// SysRandom:
+//     write to_guest
+
+// SysVerify:
+//     let from_guest_ptr = ctx.load_register(REG_A3);
+//     let from_guest_len = ctx.load_register(REG_A4);
+//     let from_guest: Vec<u8> = ctx.load_region(from_guest_ptr, from_guest_len)?;
+
+// SysArgs:
+//     let arg_index = ctx.load_register(REG_A3);
+
+// SysSliceIo:
+//     let buf_ptr = ctx.load_register(REG_A3);
+//     let buf_len = ctx.load_register(REG_A4);
+//     let from_guest = ctx.load_region(buf_ptr, buf_len)?;
+
+// PosixIo/sys_read:
+//     let fd = ctx.load_register(REG_A3);
+//     let nbytes = ctx.load_register(REG_A4) as usize;
+
+// PosixIo/sys_write:
+//     let fd = ctx.load_register(REG_A3);
+//     let buf_ptr = ctx.load_register(REG_A4);
+//     let buf_len = ctx.load_register(REG_A5);
+//     let from_guest_bytes = ctx.load_region(buf_ptr, buf_len)?;
+
+// PosixIo/sys_log:
+//     let buf_ptr = ctx.load_register(REG_A3);
+//     let buf_len = ctx.load_register(REG_A4);
+//     let from_guest = ctx.load_region(buf_ptr, buf_len)?;

@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -55,7 +55,16 @@ fn main() {
 
     let out = format!("{}/doctests.rs", env::var("OUT_DIR").unwrap());
 
-    fs::write(&out, level.to_string()).unwrap();
+    fs::write(out, level.to_string()).unwrap();
+}
+
+impl fmt::Display for Level {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let mut dst = String::new();
+        self.write_inner(&mut dst, 0)?;
+        f.write_str(&dst)?;
+        Ok(())
+    }
 }
 
 impl Level {
@@ -78,19 +87,13 @@ impl Level {
         }
     }
 
-    fn to_string(&self) -> String {
-        let mut dst = String::new();
-        self.write_inner(&mut dst, 0).unwrap();
-        dst
-    }
-
     fn write_into(&self, dst: &mut String, name: &str, level: usize) -> fmt::Result {
         self.write_space(dst, level);
-        let name = name.replace("-", "_").replace(".", "_");
-        write!(dst, "pub mod {name} {{\n",)?;
+        let name = name.replace(['-', '.'], "_");
+        writeln!(dst, "pub mod {name} {{",)?;
         self.write_inner(dst, level + 1)?;
         self.write_space(dst, level);
-        write!(dst, "}}\n")?;
+        writeln!(dst, "}}")?;
 
         Ok(())
     }
@@ -108,13 +111,13 @@ impl Level {
                 .unwrap()
                 .to_str()
                 .unwrap()
-                .replace("-", "_");
+                .replace('-', "_");
 
             self.write_space(dst, level);
-            write!(dst, "#[doc = include_str!(\"{}\")]\n", file.display())?;
+            writeln!(dst, "#[doc = include_str!(\"{}\")]", file.display())?;
             self.write_space(dst, level);
-            write!(dst, "pub fn {}_md() {{}}\n", stem)?;
-            // write!(dst, "doc_comment!(include_str!(\"{}\"));\n",
+            writeln!(dst, "pub fn {}_md() {{}}", stem)?;
+            // writeln!(dst, "doc_comment!(include_str!(\"{}\"));",
             // file.display())?;
         }
 

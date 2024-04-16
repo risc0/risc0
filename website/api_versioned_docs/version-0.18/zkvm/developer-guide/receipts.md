@@ -60,7 +60,7 @@ You can file an issue on [these docs] or the [examples], and we're happy to answ
 
 [zkVM application]: ../
 [receipt]: /terminology#receipt
-[validity proof]: /terminology#proof
+[validity proof]: /terminology#validity-proof
 [execution]: /terminology#execution-trace
 [verified]: /terminology#verify
 [journal]: /terminology#journal
@@ -73,7 +73,7 @@ You can file an issue on [these docs] or the [examples], and we're happy to answ
 [receipt.journal]: https://docs.rs/risc0-zkvm/0.18/risc0_zkvm/struct.Receipt.html#structfield.journal
 [verify]: /terminology#verify
 [Verifying]: /terminology#verify
-[examples]: https://github.com/risc0/risc0/tree/v0.18.0/examples/
+[examples]: https://github.com/risc0/risc0/tree/release-0.18/examples/
 [these docs]: https://github.com/risc0/website
 [Discord]: https://discord.gg/risczero
 [zkVM Quick Start]: ../quickstart

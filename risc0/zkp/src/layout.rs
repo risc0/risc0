@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -254,7 +254,7 @@ impl<'a, B: Buffer> Visitor for TreePrinter<'a, B> {
                         let mut lines = subtree.lines;
                         lines[0] = format!("{name}: {{{}", lines[0]);
                         lines.last_mut().as_mut().unwrap().push_str(" }");
-                        self.lines.extend(lines.into_iter());
+                        self.lines.extend(lines);
                     }
                     _ => {
                         // Multi-line structure; if we've seen this before, just emit a reference.

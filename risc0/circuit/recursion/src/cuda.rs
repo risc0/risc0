@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ use risc0_zkp::{
     core::log2_ceil,
     field::{
         baby_bear::{BabyBearElem, BabyBearExtElem},
-        RootsOfUnity,
+        map_pow, Elem, ExtElem, RootsOfUnity,
     },
     hal::{
         cuda::{
@@ -84,10 +84,22 @@ impl<'a, CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
         let domain = steps * INV_RATE;
         let rou = BabyBearElem::ROU_FWD[po2 + EXP_PO2];
 
-        let poly_mix = CudaBuffer::copy_from("poly_mix", &[poly_mix]);
         let rou = CudaBuffer::copy_from("rou", &[rou]);
         let po2 = CudaBuffer::copy_from("po2", &[po2 as u32]);
         let size = CudaBuffer::copy_from("size", &[domain as u32]);
+
+        let poly_mix_pows = map_pow(poly_mix, crate::info::POLY_MIX_POWERS);
+        let poly_mix_pows: &[u32; BabyBearExtElem::EXT_SIZE * crate::info::NUM_POLY_MIX_POWERS] =
+            BabyBearExtElem::as_u32_slice(poly_mix_pows.as_slice())
+                .try_into()
+                .unwrap();
+
+        let mix_pows_name = std::ffi::CString::new("poly_mix").unwrap();
+        self.module
+            .get_global(&mix_pows_name)
+            .unwrap()
+            .copy_from(poly_mix_pows)
+            .unwrap();
 
         let stream = Stream::new(StreamFlags::DEFAULT, None).unwrap();
 
@@ -101,7 +113,6 @@ impl<'a, CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
                 accum.as_device_ptr(),
                 mix.as_device_ptr(),
                 out.as_device_ptr(),
-                poly_mix.as_device_ptr(),
                 rou.as_device_ptr(),
                 po2.as_device_ptr(),
                 size.as_device_ptr()

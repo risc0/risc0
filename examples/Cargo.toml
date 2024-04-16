@@ -5,13 +5,17 @@ members = [
   "browser-verify",
   "chess",
   "chess/core",
+  "composition",
   "cycle-counter",
   "digital-signature",
   "digital-signature/core",
   "ecdsa",
+  "groth16-verifier",
   "hello-world",
   "json",
   "json/core",
+  "jwt-validator",
+  "jwt-validator/core",
   "password-checker",
   "password-checker/core",
   "profiling",
@@ -35,12 +39,6 @@ members = [
 [profile.dev]
 opt-level = 3
 
-[profile.dev.build-override]
-opt-level = 3
-
 [profile.release]
 debug = 1
 lto = true
-
-[profile.release.build-override]
-opt-level = 3

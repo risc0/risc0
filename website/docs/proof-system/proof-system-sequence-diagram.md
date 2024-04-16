@@ -1,17 +1,16 @@
----
-sidebar_position: 4
----
+# The RISC Zero STARK Protocol
 
-# Proof System Sequence Diagram and Spec
-
-_The implementation in code for the RISC Zero prover can be seen [here](https://github.com/risc0/risc0/blob/v0.18.0/risc0/zkp/src/prove/prover.rs).
-In this document, we present an overview to the protocol, as well as a sequence diagram and a detailed description below. The [STARK by Hand](stark-by-hand.md) explainer and the [RISC Zero ZKP Whitepaper](https://dev.risczero.com/proof-system-in-detail.pdf) are good companions to this document._
+_The implementation in code for the RISC Zero STARK prover can be seen [here](https://github.com/risc0/risc0/blob/v0.18.0/risc0/zkp/src/prove/prover.rs).
+In this document, we present an overview to the RISC Zero STARK protocol, as well as a sequence diagram and a detailed description below. The [STARK by Hand](stark-by-hand.md) explainer and the [RISC Zero ZKP Whitepaper][ZKP Whitepaper] are good companions to this document._
 
 ## Overview
 
-RISC Zero's [receipts] are built on the shoulders of several recent advances in the world of zero-knowledge cryptography.
+RISC Zero's [receipts][Receipt] are built on the shoulders of several recent advances in the world of zero-knowledge cryptography.
 The core of the proof system is [STARK]-based, implementing [DEEP-ALI & FRI].
-At a high level, the design of the prover is very similar to the system described in [ethSTARK], and the system implemented in [Winterfell].
+This proof system is used to generate zero-knowledge validity proofs for RISC Zero's RISC-V circuit and RISC Zero's recursion circuit.
+Users may also be interested in reading about the [RISC Zero Groth16 Circuit], which enables on-chain verification.
+
+At a high level, the design of the RISC Zero STARK protocol is very similar to the system described in [ethSTARK], and the system implemented in [Winterfell].
 
 ### Setup Phase
 
@@ -35,7 +34,7 @@ Then, the prover computes and commits the _Extended Auxiliary Execution Trace_ w
 
 Compared to [ethSTARK], our protocol adds an additional round of interaction to support constraints beyond basic AIR constraints.
 Using constraints that may span both the main trace and the auxiliary trace, we proceed with [DEEP-ALI & FRI] as described in [ethSTARK].
-Ading an Auxiliary Execution Trace enables various enhancements, relative to a Vanilla STARK protocol.
+Adding an Auxiliary Execution Trace enables various enhancements, relative to a Vanilla STARK protocol.
 These enhancements are described well in [From AIRs to RAPs].
 
 We use this Auxiliary Execution Trace to support:
@@ -43,14 +42,14 @@ We use this Auxiliary Execution Trace to support:
 1. A permutation argument for [memory verification](https://www.youtube.com/watch?v=dYuEPvRLwLo&list=PLcPzhUaCxlCiLk_VjLUNbmfb2mB1Y_N9N&index=5)<br/>
    The permutation argument is currently implemented as a grand product accumulator argument, as in [PLONK](https://eprint.iacr.org/2019/953.pdf).
    We plan to change this to a [log derivative] accumulator argument in the next version of the circuit.<br/>
-   Here, operations corresonding to memory are committed to the main trace both in the original ordering and the permuted ordering, and grand product accumulators are committed in the auxiliary trace.
+   Here, operations corresponding to memory are committed to the main trace both in the original ordering and the permuted ordering, and grand product accumulators are committed in the auxiliary trace.
 
 1. A lookup argument for range checks<br/>
    The lookup argument is currently implemented using the approach described in [PLOOKUP].
    We plan to change this to a [log derivative] accumulator argument in the next version of the circuit. <br/>
    Here, the tables and the witness are committed in the main trace, and grand product accumulators are committed in the auxiliary trace.
 
-1. A big integer accelerator to enable [fast cryptographic operations]<br/>
+1. A big integer accelerator to enable [fast cryptographic operations][acceleration]<br/>
    The bigint accelerator implements multiplication of `a` and `b` by asking the host to provide the product `c` as non-deterministic advice. Then, the verifier provides randomness `r`, and the constraints enforce that when `a`, `b`, and `c` are interpreted as polynomials, `a(r) * b(r) == c(r)`. <br/>
    Here, `a`, `b`, and `c` are committed in the main trace, and the evaluations at `r` are committed in the auxiliary trace.
 
@@ -108,8 +107,8 @@ For a more formal articulation of the protocol, refer to the [ZKP Whitepaper].
   - After computing the `data columns` and `auxiliary/accum columns,` the Prover adds some random `noise` to the end of those columns in order to ensure that the protocol is zero-knowledge.
 - The Prover encodes the `trace` as follows:
   - The Prover converts each `column` into a polynomial using an `iNTT`. We'll refer to these as `Trace Polynomials`, denoted $P_i(x)$.
-  - The Prover evaluates the `data polynomials` and the `control polynomials` over an expanded domain. The evaluations of the `data polynomials` and the `control polynomials` over this larger domain is called the `Extended Main Exeution Trace`.
-  - The Prover commits the `Extended Main Exeuction Trace` into two separate Merkle Trees, sending the roots to the Verifier.
+  - The Prover evaluates the `data polynomials` and the `control polynomials` over an expanded domain. The evaluations of the `data polynomials` and the `control polynomials` over this larger domain is called the `Extended Main Execution Trace`.
+  - The Prover commits the `Extended Main Execution Trace` into two separate Merkle Trees, sending the roots to the Verifier.
 
 ### Extended Auxiliary Execution Trace
 
@@ -156,16 +155,15 @@ For a more formal articulation of the protocol, refer to the [ZKP Whitepaper].
 
 Thanks for reading! If you have questions or feedback, we'd love to hear from you on Discord or Twitter.
 
-[zkVM]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/
-[Receipt]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Receipt.html
-[Image ID]: /terminology#image-id
-[STARK]: ../reference-docs/about-starks.md
-[Winterfell]: https://github.com/facebook/winterfell
+[acceleration]: /api/zkvm/acceleration
 [DEEP-ALI & FRI]: ../reference-docs/about-fri.md
 [ethSTARK]: https://eprint.iacr.org/2021/582.pdf
 [From AIRs to RAPs]: https://hackmd.io/FLbS_DLxRpmcWHCBQx76Cw
+[Image ID]: /terminology#image-id
 [log derivative]: https://eprint.iacr.org/2022/1530.pdf
 [PLOOKUP]: https://eprint.iacr.org/2020/315.pdf
-[receipts]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Receipt.html
+[Receipt]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/struct.Receipt.html
+[STARK]: ../reference-docs/about-starks.md
+[Winterfell]: https://github.com/facebook/winterfell
 [ZKP Whitepaper]: https://dev.risczero.com/proof-system-in-detail.pdf
-[fast cryptographic operations]: /api/zkvm/developer-guide/acceleration
+[zkVM]: https://docs.rs/risc0-zkvm/*/risc0_zkvm/

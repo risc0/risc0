@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ use risc0_zkvm::{
 };
 use risc0_zkvm_methods::bench::{BenchmarkSpec, SpecWithIters};
 
-pub fn main() {
+fn main() {
     let SpecWithIters(spec, iters) = env::read();
     match spec {
         BenchmarkSpec::SimpleLoop => {

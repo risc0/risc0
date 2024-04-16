@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,7 +14,6 @@
 
 pub mod args;
 
-// TODO(Cardosaum): Check how to export only the functions that are needed
 use std::{
     collections::{btree_map::Entry, BTreeMap, HashMap, HashSet},
     fs::File,
@@ -25,6 +24,7 @@ use std::{
 use anyhow::{Context, Result};
 use db_dump::{
     categories::{CategoryId, Row as CategoryRow},
+    crate_downloads::Row as CrateDownloadsRow,
     crates::{CrateId, Row as CrateRow},
     crates_categories::Row as CratesCategoriesRow,
     versions::Row as VersionRow,
@@ -67,6 +67,7 @@ pub struct ProcessDatabase {
     versions: BTreeMap<CrateId, VersionRow>,
     categories: HashMap<CategoryId, String>,
     crates_categories: HashMap<CrateId, CategoryId>,
+    crate_downloads: HashMap<CrateId, u64>,
 }
 pub struct FilterSelectedCrates {
     profile_config: ProfileConfig,
@@ -178,6 +179,7 @@ impl StateMachine<DownloadDatabase> {
         let mut crates = Vec::new();
         let mut categories = HashMap::new();
         let mut crates_categories = HashMap::new();
+        let mut crate_downloads = HashMap::new();
 
         debug!("Loading...");
         let crate_name = &self.args.name;
@@ -214,16 +216,25 @@ impl StateMachine<DownloadDatabase> {
             crates_categories.insert(row.crate_id, row.category_id);
         };
 
+        let handle_crate_downloads = |row: CrateDownloadsRow| {
+            crate_downloads.insert(row.crate_id, row.downloads);
+        };
+
         db_dump::Loader::new()
             .crates_categories(handle_crates_categories)
             .categories(handle_categories)
             .crates(handle_crates)
             .versions(handle_versions)
+            .crate_downloads(handle_crate_downloads)
             .load(self.state.database_path)
             .context("Failed to load database")?;
 
         debug!("Sorting...");
-        crates.sort_by(|r1, r2| r2.downloads.cmp(&r1.downloads));
+        crates.sort_by(|r1, r2| {
+            let r1_downloads = crate_downloads.get(&r1.id).unwrap_or(&0);
+            let r2_downloads = crate_downloads.get(&r2.id).unwrap_or(&0);
+            r2_downloads.cmp(r1_downloads)
+        });
 
         Ok(StateMachine {
             args: self.args,
@@ -233,6 +244,7 @@ impl StateMachine<DownloadDatabase> {
                 versions,
                 categories,
                 crates_categories,
+                crate_downloads,
             },
         })
     }
@@ -260,7 +272,11 @@ impl StateMachine<ProcessDatabase> {
                     &self.args.categories,
                     &self.state.crates_categories,
                 );
-                categories.sort_by(|r1, r2| r2.downloads.cmp(&r1.downloads));
+                categories.sort_by(|r1, r2| {
+                    let r1_downloads = self.state.crate_downloads.get(&r1.id).unwrap_or(&0);
+                    let r2_downloads = self.state.crate_downloads.get(&r2.id).unwrap_or(&0);
+                    r2_downloads.cmp(r1_downloads)
+                });
                 match self.args.category_count_limit {
                     Some(limit) => categories.into_iter().take(limit).collect(),
                     None => categories,

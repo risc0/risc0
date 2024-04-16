@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,69 +12,72 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/// Merkle root of the RECURSION_CONTROL_IDS
+pub const ALLOWED_IDS_ROOT: &str =
+    "88c1f749250aba181168c33839d7a351671e7a5b7f3e746dde91ef6c6e9ef344";
+
 pub const RECURSION_CONTROL_IDS: [(&str, &str); 15] = [
     (
         "identity.zkr",
-        "d75bc4134cbc30422041e12c8f3ea9768efdd41f7006bc1929a61843fbb9513b",
+        "4882cd253cc9c775ca50d63162756140aa910608886b9c3f97d0d55653a86671",
     ),
     (
         "join.zkr",
-        "f5c57b24147ee94b9e6aa447f3b312640b052257d5553c5929e3c1211c414c02",
+        "d6d4e4502b24a53e2097c86b820695196b50214171d1af085cf0d329eda2354c",
     ),
     (
         "lift_14.zkr",
-        "ba8ecf588e144202e0ed1176c9fbd2211235d136c2e7413086bab6162271ce70",
+        "e54c9017d3cd7b10f8590a097cc4ee3d309c380bcc9b310ead94587341b4d550",
     ),
     (
         "lift_15.zkr",
-        "d688a01a07741f66ffc78d2392d71d43de374822d980c83a5b0d551e779fbc21",
+        "9119b275ec70de27192e4d324bdb3c4d8a1b9e7137b9170ca0baed0d8bf77d0c",
     ),
     (
         "lift_16.zkr",
-        "d0a2312a236fc8555cb48d4f67f0ab6c08b33d4b60901e193f33a354b42ec95a",
+        "c5be2418325c0314e4bfe822d4c5bc5763abde06b59b7a4c35013e271470280a",
     ),
     (
         "lift_17.zkr",
-        "fdb3db4689e0da497e14fe360b6b5003c16d4c1801d26b0066081840a22e6c66",
+        "aa78453ab464ed650ac5b70debc4453a2a703e6f83c10755f518bc081926481d",
     ),
     (
         "lift_18.zkr",
-        "1f336126cd60bd021569216874162c4f39750976b8c2443e7eb6755add7a2b4a",
+        "d5cdf820ae55b209a2bc1b2b58803c0b85408934fc575c38da42931673e38144",
     ),
     (
         "lift_19.zkr",
-        "5e2c1331fb45a7771906871b80f397180a00f141256d8f4c3d5ede5a13196f6f",
+        "8fd2f733163e846b17a6503ad7070718f49b425c5d6b6a77751e9a221a407d4b",
     ),
     (
         "lift_20.zkr",
-        "800da7765edc9651018a4c0ca1c93775d2045249e13f7e0ea83fda7209f34050",
+        "5ae5fb57f4d8ca65e83af3650ce36f00c309267032699b6e9865b21e847f2070",
     ),
     (
         "lift_21.zkr",
-        "4f585b72d02be059d8557110ea0e2a1603a9a108aa116645e5f9ed2fa903003c",
+        "9407fc33d5126735f24ec662f156e50e377b45534ab789739145021f752c152a",
     ),
     (
         "lift_22.zkr",
-        "04b8d8497fde79654fbb8920118f3974b6d2442ce140c16e02bd6f63afcd0955",
+        "90027841077ad96250be266855d8506d0164b775bea8c35594ab5a40f9530955",
     ),
     (
         "lift_23.zkr",
-        "c2884640a0521366e4896167bbec273207e24064cfc4ab2ae916825e77fb9a10",
+        "47d3095f79618d57f3ee9c1bb2046c680a18ab05d062af2e33e6a53d1202063a",
     ),
     (
         "lift_24.zkr",
-        "c6968d61a11e0d2538f7b46cac4e8d69fe9be862f590531545c4cd308b64e91c",
+        "1112c0660d6a8c3dc7b2961cfe996815a19fbf2583f2d0639d530826aa67764f",
     ),
     (
         "resolve.zkr",
-        "2369ec64d831d361d77c7924a78be8250995e414f314d13c022d453a6180f45b",
+        "ea9f2c0e3d0fd2047a6f1b2c96f1dc15c3a9b6712b253f587a804511b9430248",
     ),
     (
         "test_recursion_circuit.zkr",
-        "93ddfd13ad326c73317033379bda035dd1e97a056aaed01c5beca909d764d213",
+        "ca7ade1f42976e5e103ad45c97e42963515f5b4b33076418e0a9390a576edd4e",
     ),
 ];
 
-/// Merkle root of the RECURSION_CONTROL_IDS
-pub const ALLOWED_IDS_ROOT: &str =
-    "48062923d32b9b6f53983e29fb83b63d07da85088fe62d4c06b13336e6dfa63e";
+pub const BN254_CONTROL_ID: &str =
+    "10ff834dbef62ccbba201ecd26a772e3036a075aacbaf47200679a11dcdcf10d";

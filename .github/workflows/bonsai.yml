@@ -18,7 +18,7 @@ permissions:
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   RISC0_BUILD_LOCKED: 1
-  RISC0_TOOLCHAIN_VERSION: test-release-2
+  RISC0_TOOLCHAIN_VERSION: v2024-02-08.1
 
 jobs:
   changes:
@@ -35,8 +35,10 @@ jobs:
           filters: |
             bonsai:
               - .github/actions/**
+              - .github/workflows/bonsai.yml
               - bonsai/**
               - risc0/**
+              - rust-toolchain.toml
 
   bonsai:
     if: needs.changes.outputs.bonsai == 'true'
@@ -50,7 +52,7 @@ jobs:
       - name: checkout code
         uses: actions/checkout@v4
         with:
-          submodules: recursive
+          lfs: true
 
       # Install dependencies.
       - uses: ./.github/actions/rustup
@@ -58,48 +60,14 @@ jobs:
         with:
           key: Linux-default
 
-      - name: Install Foundry
-        uses: risc0/foundry-toolchain@2fe7e70b520f62368a0e3c464f997df07ede420f
-        with:
-          version: nightly-34f684ddfacc5b2ed371353ba6f730c485616ffe
-
       - name: Cargo install cargo-risczero
         run: cargo install --force --path risc0/cargo-risczero
 
       - run: cargo risczero install --version $RISC0_TOOLCHAIN_VERSION
 
-      # Lint
-      - name: check solidity code formatting in bonsai/ethereum
-        run: forge fmt --check
-        working-directory: bonsai/ethereum
-
-      - name: check solidity code formatting in bonsai/examples/governance
-        run: forge fmt --check
-        working-directory: bonsai/examples/governance
-
       # Test
       - name: run cargo tests in bonsai
-        run: cargo test --locked --tests -- --include-ignored --nocapture
+        run: cargo test --locked -- --include-ignored --nocapture
         working-directory: bonsai
-
-      - name: run cargo tests in bonsai/examples/governance
-        run: cargo test --locked
-        working-directory: bonsai/examples/governance
-
-      - name: run forge tests in bonsai/ethereum
-        run: forge test -vvv
-        working-directory: bonsai/ethereum
-
-      - name: run forge tests without the zkVM in bonsai/examples/governance
-        env:
-          TEST_USE_ZKVM: false
-        run: forge test -vvv
-        working-directory: bonsai/examples/governance
-
-      - name: run forge tests with the zkvm in bonsai/examples/governance
-        env:
-          TEST_USE_ZKVM: true
-        run: forge test -vvv
-        working-directory: bonsai/examples/governance
 
       - run: sccache --show-stats

@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,8 +15,11 @@
 use anyhow::{bail, Result};
 
 use crate::{
-    host::receipt::{InnerReceipt, SegmentReceipt, SuccinctReceipt},
-    ProverServer, Receipt, Segment, Session, VerifierContext,
+    host::{
+        receipt::{InnerReceipt, SegmentReceipt, SuccinctReceipt},
+        server::session::null_callback,
+    },
+    ExecutorEnv, ExecutorImpl, ProverServer, Receipt, Segment, Session, VerifierContext,
 };
 
 /// An implementation of a [ProverServer] for development and testing purposes.
@@ -60,6 +63,18 @@ impl ProverServer for DevModeProver {
         ))
     }
 
+    /// Prove the specified ELF binary using the specified [VerifierContext].
+    fn prove_with_ctx(
+        &self,
+        env: ExecutorEnv<'_>,
+        ctx: &VerifierContext,
+        elf: &[u8],
+    ) -> Result<Receipt> {
+        let mut exec = ExecutorImpl::from_elf(env, elf)?;
+        let session = exec.run_with_callback(null_callback)?;
+        self.prove_session(ctx, &session)
+    }
+
     fn prove_segment(&self, _ctx: &VerifierContext, _segment: &Segment) -> Result<SegmentReceipt> {
         unimplemented!("This is unsupported for dev mode.")
     }
@@ -73,6 +88,14 @@ impl ProverServer for DevModeProver {
     }
 
     fn join(&self, _a: &SuccinctReceipt, _b: &SuccinctReceipt) -> Result<SuccinctReceipt> {
+        unimplemented!("This is unsupported for dev mode.")
+    }
+
+    fn resolve(
+        &self,
+        _conditional: &SuccinctReceipt,
+        _assumption: &SuccinctReceipt,
+    ) -> Result<SuccinctReceipt> {
         unimplemented!("This is unsupported for dev mode.")
     }
 

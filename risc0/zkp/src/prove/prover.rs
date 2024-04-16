@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -84,13 +84,14 @@ impl<'a, H: Hal> Prover<'a, H> {
             self.taps.group_name(tap_group_index)
         );
 
+        let name = buf.name();
         let coeffs = make_coeffs(self.hal, buf, group_size);
         let group_ref = self.groups[tap_group_index].insert(PolyGroup::new(
             self.hal,
             coeffs,
             group_size,
             self.cycles,
-            "data",
+            name,
         ));
 
         group_ref.merkle.commit(&mut self.iop);
@@ -144,9 +145,9 @@ impl<'a, H: Hal> Prover<'a, H> {
         });
 
         // Convert to coefficients.  Some tricky bizness here with the fact that
-        // checkPoly is really an Fp4 polynomial.  Nicely for us, since all the
+        // checkPoly is really an FpExt polynomial.  Nicely for us, since all the
         // roots of unity (which are the only thing that and values get multiplied
-        // by) are in Fp, Fp4 values act like simple vectors of Fp for the
+        // by) are in Fp, FpExt values act like simple vectors of Fp for the
         // purposes of interpolate/evaluate.
         self.hal.batch_interpolate_ntt(&check_poly, ext_size);
 
@@ -169,7 +170,7 @@ impl<'a, H: Hal> Prover<'a, H> {
         // Now pick a value for Z, which is used as the DEEP-ALI query point.
         let z = self.iop.random_ext_elem();
         // #ifdef CIRCUIT_DEBUG
-        //   if (badZ != Fp4(0)) {
+        //   if (badZ != FpExt(0)) {
         //     Z = badZ;
         //   }
         //   iop.write(&Z, 1);
@@ -354,6 +355,14 @@ impl<'a, H: Hal> Prover<'a, H> {
             }
             check_group.merkle.prove(self.hal, iop, idx);
         });
+
+        let proven_soundness_error =
+            super::soundness::proven::<H>(self.taps, final_poly_coeffs.size());
+        tracing::info!("proven_soundness_error: {proven_soundness_error:?}");
+
+        let conjectured_soundness_error =
+            super::soundness::conjectured_strict::<H>(self.taps, final_poly_coeffs.size());
+        tracing::info!("conjectured_soundness_error: {conjectured_soundness_error:?}");
 
         // Return final proof
         let proof = self.iop.proof;

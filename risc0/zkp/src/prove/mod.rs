@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,13 +19,14 @@
 //!
 //! [`risc0_zkvm::prove`]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/prove/index.html
 
-mod accum;
+pub mod accum;
 pub mod adapter;
 pub mod executor;
 mod fri;
 mod merkle;
 pub mod poly_group;
 pub mod prover;
+pub mod soundness;
 pub mod write_iop;
 
 pub use prover::Prover;

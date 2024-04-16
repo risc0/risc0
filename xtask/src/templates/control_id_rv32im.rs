@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -31,8 +31,8 @@ pub const SHA256_CONTROL_ID: RawControlId = [
     "{}", //
 ];
 
-/// Control ID for Poseidon
-pub const POSEIDON_CONTROL_ID: RawControlId = [
+/// Control ID for Poseidon2
+pub const POSEIDON2_CONTROL_ID: RawControlId = [
     "{}", //
     "{}", //
     "{}", //

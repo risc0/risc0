@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,18 +16,10 @@
 pub(crate) mod api;
 #[cfg(feature = "client")]
 pub(crate) mod client;
-pub(crate) mod control_id;
-pub(crate) mod groth16;
 pub(crate) mod receipt;
 pub(crate) mod recursion;
 #[cfg(feature = "prove")]
 pub(crate) mod server;
-
-use anyhow::Result;
-use risc0_binfmt::{MemoryImage, Program};
-use risc0_zkvm_platform::{memory::GUEST_MAX_MEM, PAGE_SIZE};
-
-use crate::sha::Digest;
 
 #[cfg(any(feature = "client", feature = "prove"))]
 mod protos {
@@ -45,13 +37,4 @@ mod protos {
         #![allow(non_snake_case)]
         include!(concat!(env!("OUT_DIR"), "/protos.core.rs"));
     }
-}
-
-const CIRCUIT: risc0_circuit_rv32im::CircuitImpl = risc0_circuit_rv32im::CircuitImpl::new();
-
-/// Compute and return the ImageID of the specified ELF binary.
-pub fn compute_image_id(elf: &[u8]) -> Result<Digest> {
-    let program = Program::load_elf(elf, GUEST_MAX_MEM as u32)?;
-    let image = MemoryImage::new(&program, PAGE_SIZE as u32)?;
-    image.compute_id()
 }

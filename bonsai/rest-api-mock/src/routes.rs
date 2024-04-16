@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,10 +20,10 @@ use axum::{
     Extension, Json,
 };
 use bonsai_sdk::alpha::responses::{
-    CreateSessRes, Groth16Seal, ImgUploadRes, ProofReq, SessionStatusRes, SnarkReceipt, SnarkReq,
+    CreateSessRes, ImgUploadRes, ProofReq, SessionStatusRes, SnarkReceipt, SnarkReq,
     SnarkStatusRes, UploadRes,
 };
-use risc0_zkvm::Receipt;
+use risc0_zkvm::{Groth16Seal, Receipt};
 use tracing::info;
 
 use crate::{
@@ -85,6 +85,7 @@ pub(crate) async fn create_session(
         image_id: request.img,
         input_id: request.input,
         session_id: session_id.to_string(),
+        assumptions: request.assumptions,
     };
     prover_handle.execute(task).await;
 
@@ -108,12 +109,16 @@ pub(crate) async fn session_status(
             receipt_url: Some(format!("{}/receipts/{}", storage.local_url, session_id)),
             error_msg: None,
             state: None,
+            elapsed_time: None,
+            stats: None,
         })),
         None => Ok(Json(SessionStatusRes {
             status,
             receipt_url: None,
             error_msg: None,
             state: None,
+            elapsed_time: None,
+            stats: None,
         })),
     }
 }
@@ -145,7 +150,6 @@ pub(crate) async fn snark_status(
                         a: vec![],
                         b: vec![],
                         c: vec![],
-                        public: vec![],
                     },
                     post_state_digest: vec![],
                     journal: receipt.journal.bytes,
@@ -170,4 +174,24 @@ pub(crate) async fn get_receipt(
         .get_receipt(&session_id)
         .ok_or_else(|| anyhow::anyhow!("Receipt not found for session id: {:?}", &session_id))?;
     Ok(receipt)
+}
+
+pub(crate) async fn get_receipt_upload(
+    State(s): State<AppState>,
+) -> Result<Json<UploadRes>, Error> {
+    let state = &s.read()?;
+    let receipt_id = uuid::Uuid::new_v4();
+    Ok(Json(UploadRes {
+        url: format!("{}/receipts/{}", state.local_url, receipt_id),
+        uuid: receipt_id.to_string(),
+    }))
+}
+
+pub(crate) async fn put_receipt(
+    State(s): State<AppState>,
+    Path(receipt_id): Path<String>,
+    body: Bytes,
+) -> Result<(), Error> {
+    s.write()?.put_receipt(receipt_id.clone(), body.to_vec());
+    Ok(())
 }

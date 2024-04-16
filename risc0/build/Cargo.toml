@@ -9,7 +9,10 @@ repository = { workspace = true }
 
 [dependencies]
 anyhow = "1.0"
-cargo_metadata = "0.17"
+# This is a workaround to prevent the guest from pulling in a dependency that requires a newer rustc
+cargo-platform = "=0.1.5"
+cargo_metadata = "0.18"
+dirs = "5.0"
 docker-generate = "0.1"
 risc0-binfmt = { workspace = true }
 risc0-zkp = { workspace = true, features = ["std"] }

@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -269,7 +269,7 @@ mod tests {
 
     #[tokio::test]
     async fn trace_tx() {
-        let rpc_url = "https://cloudflare-eth.com";
+        let rpc_url = "https://eth-mainnet.public.blastapi.io";
 
         let tx_hash =
             H256::from_str("0x671a3b40ecb7d51b209e68392df2d38c098aae03febd3a88be0f1fa77725bbd7")

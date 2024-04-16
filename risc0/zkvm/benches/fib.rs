@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use criterion::{
-    black_box, criterion_group, criterion_main, BatchSize, BenchmarkId, Criterion, Throughput,
+use hotbench::{benchmark_group, benchmark_main, BenchGroup};
+use risc0_zkvm::{
+    get_prover_server, ExecutorEnv, ExecutorImpl, ProverOpts, VerifierContext, RECURSION_PO2,
 };
-use risc0_zkvm::{get_prover_server, ExecutorEnv, ExecutorImpl, ProverOpts, VerifierContext};
 use risc0_zkvm_methods::FIB_ELF;
 
-fn setup(iterations: u32) -> ExecutorImpl<'static> {
+fn setup_exec(iterations: u32) -> ExecutorImpl<'static> {
     let env = ExecutorEnv::builder()
         .write_slice(&[iterations])
         .build()
@@ -26,91 +26,143 @@ fn setup(iterations: u32) -> ExecutorImpl<'static> {
     ExecutorImpl::from_elf(env, FIB_ELF).unwrap()
 }
 
-enum Scope {
-    Prove,
-    Total,
+fn execute(group: &mut BenchGroup) {
+    group.bench("execute", |b| {
+        let iterations = 100_000;
+        let session = setup_exec(iterations).run().unwrap();
+        b.iter(
+            session.user_cycles as usize,
+            || setup_exec(iterations),
+            |exec| exec.run(),
+        )
+    });
 }
 
-pub fn bench(c: &mut Criterion) {
-    let mut group = c.benchmark_group("fib");
+fn prove_segment(group: &mut BenchGroup, hashfn: &str) {
+    let name = format!("prove/{hashfn}");
+    group.bench(name, |b| {
+        let iterations = 100_000;
 
-    let opts = ProverOpts::default();
-    let prover = get_prover_server(&opts).unwrap();
-    let ctx = VerifierContext::default();
+        let opts = ProverOpts {
+            hashfn: hashfn.to_string(),
+            prove_guest_errors: false,
+        };
+        let prover = get_prover_server(&opts).unwrap();
+        let ctx = VerifierContext::default();
 
-    for iterations in [100, 1000, 10_000] {
-        let mut exec = setup(iterations);
+        let session = setup_exec(iterations).run().unwrap();
+        let segment = session.segments[0].resolve().unwrap();
+
+        b.iter(
+            session.total_cycles as usize,
+            || {},
+            |()| prover.prove_segment(&ctx, &segment),
+        );
+    })
+}
+
+fn prove(group: &mut BenchGroup) {
+    prove_segment(group, "sha-256");
+    prove_segment(group, "poseidon2");
+}
+
+fn lift(group: &mut BenchGroup) {
+    group.bench("lift", |b| {
+        let opts = ProverOpts::default();
+        let prover = get_prover_server(&opts).unwrap();
+        let ctx = VerifierContext::default();
+
+        b.iter(
+            1 << RECURSION_PO2,
+            || {
+                let mut exec = setup_exec(100);
+                let session = exec.run().unwrap();
+                let segment = session.segments[0].resolve().unwrap();
+                prover.prove_segment(&ctx, &segment).unwrap()
+            },
+            |receipt| prover.lift(&receipt),
+        );
+    })
+}
+
+fn join(group: &mut BenchGroup) {
+    group.bench("join", |b| {
+        let env = ExecutorEnv::builder()
+            .write_slice(&[3000])
+            .segment_limit_po2(16)
+            .build()
+            .unwrap();
+        let mut exec = ExecutorImpl::from_elf(env, FIB_ELF).unwrap();
         let session = exec.run().unwrap();
-        let segments = session.resolve().unwrap();
-        let exec_cycles = segments
-            .iter()
-            .fold(0, |exec_cycles, segment| exec_cycles + segment.cycles);
-        group.sample_size(10);
-        let id = BenchmarkId::from_parameter(format!("{iterations}/execute"));
-        group.throughput(Throughput::Elements(exec_cycles as u64));
-        group.bench_with_input(id, &iterations, |b, &iterations| {
-            b.iter_batched(
-                || setup(iterations),
-                |mut exec| black_box(exec.run().unwrap()),
-                BatchSize::SmallInput,
-            )
-        });
-    }
+        assert!(session.segments.len() >= 2);
 
-    for scope in [Scope::Prove, Scope::Total] {
-        for iterations in [100, 1000, 10_000] {
-            let mut exec = setup(iterations);
-            let session = exec.run().unwrap();
-            let segments = session.resolve().unwrap();
-            let (exec_cycles, prove_cycles) =
-                segments
-                    .iter()
-                    .fold((0, 0), |(exec_cycles, prove_cycles), segment| {
-                        (
-                            exec_cycles + segment.cycles,
-                            prove_cycles + (1 << segment.po2),
-                        )
-                    });
-            group.sample_size(10);
-            match scope {
-                Scope::Prove => {
-                    let id = BenchmarkId::from_parameter(format!("{iterations}/prove"));
-                    group.throughput(Throughput::Elements(prove_cycles as u64));
-                    group.bench_with_input(id, &iterations, |b, &iterations| {
-                        b.iter_batched(
-                            || {
-                                let mut exec = setup(iterations);
-                                exec.run().unwrap()
-                            },
-                            |session| black_box(prover.prove_session(&ctx, &session).unwrap()),
-                            BatchSize::SmallInput,
-                        )
-                    });
-                }
-                Scope::Total => {
-                    let id = BenchmarkId::from_parameter(format!("{iterations}/total"));
-                    group.throughput(Throughput::Elements(exec_cycles as u64));
-                    group.bench_with_input(id, &iterations, |b, &iterations| {
-                        b.iter_batched(
-                            || setup(iterations),
-                            |mut exec| {
-                                black_box({
-                                    let session = exec.run().unwrap();
-                                    prover.prove_session(&ctx, &session).unwrap()
-                                })
-                            },
-                            BatchSize::SmallInput,
-                        )
-                    });
-                }
-            };
-        }
-    }
+        let opts = ProverOpts::default();
+        let prover = get_prover_server(&opts).unwrap();
+        let ctx = VerifierContext::default();
 
-    group.finish();
+        b.iter(
+            1 << RECURSION_PO2,
+            || {
+                let receipt = prover.prove_session(&ctx, &session).unwrap();
+                let composite = receipt.inner.composite().unwrap();
+                let left = prover.lift(&composite.segments[0]).unwrap();
+                let right = prover.lift(&composite.segments[1]).unwrap();
+                (left, right)
+            },
+            |(left, right)| prover.join(&left, &right),
+        );
+    });
 }
 
-criterion_group!(name = benches;
-    config = Criterion::default();
-    targets = bench);
-criterion_main!(benches);
+fn total_composite(group: &mut BenchGroup) {
+    group.bench("composite", |b| {
+        let iterations = 100_000;
+
+        let opts = ProverOpts::fast();
+        let prover = get_prover_server(&opts).unwrap();
+        let ctx = VerifierContext::default();
+
+        let session = setup_exec(iterations).run().unwrap();
+        b.iter(
+            session.total_cycles as usize,
+            || setup_exec(iterations),
+            |exec| {
+                let session = exec.run().unwrap();
+                prover.prove_session(&ctx, &session)
+            },
+        );
+    });
+}
+
+fn total_succinct(group: &mut BenchGroup) {
+    group.bench("succinct", |b| {
+        let iterations = 100_000;
+
+        let opts = ProverOpts::default();
+        let prover = get_prover_server(&opts).unwrap();
+        let ctx = VerifierContext::default();
+
+        let session = setup_exec(iterations).run().unwrap();
+        b.iter(
+            session.total_cycles as usize,
+            || setup_exec(iterations),
+            |exec| {
+                let session = exec.run().unwrap();
+                let receipt = prover.prove_session(&ctx, &session).unwrap();
+                let composite_receipt = receipt.inner.composite().unwrap();
+                prover.compress(composite_receipt)
+            },
+        );
+    });
+}
+
+benchmark_group!(
+    fib,
+    execute,
+    prove,
+    lift,
+    join,
+    total_composite,
+    total_succinct
+);
+benchmark_main!(fib);

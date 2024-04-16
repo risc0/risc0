@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use risc0_zkvm::{
-    recursion::{poseidon_hal_pair, Prover, ProverOpts},
+    recursion::{poseidon2_hal_pair, Prover, ProverOpts},
     sha::Digest,
 };
 use tracing_subscriber::{prelude::*, EnvFilter};
@@ -24,7 +24,7 @@ fn main() {
         .with(tracing_forest::ForestLayer::default())
         .init();
 
-    let hal_pair = poseidon_hal_pair();
+    let hal_pair = poseidon2_hal_pair();
     let (hal, circuit_hal) = (hal_pair.hal.as_ref(), hal_pair.circuit_hal.as_ref());
 
     // This control tree just combines two hashes.
