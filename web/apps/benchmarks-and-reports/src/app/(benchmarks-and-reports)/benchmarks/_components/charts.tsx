@@ -57,9 +57,6 @@ function renderGraph(parent, name, dataset) {
       animationDuration: 0, // duration of animations when hovering an item
     },
     responsiveAnimationDuration: 0, // animation duration after a resize
-    legend: {
-      display: false,
-    },
     aspectRatio: 4,
     scales: {
       xAxes: [
@@ -192,6 +189,8 @@ export function Charts() {
         name,
         dataSet: collectBenchesPerTestCase(data.entries[name]),
       }));
+
+      console.log("dataset", dataset);
 
       for (const { name, dataSet } of dataset) {
         renderBenchSet(dataSet, document.getElementById(`chart-${name}`));
