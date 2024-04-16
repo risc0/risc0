@@ -15,6 +15,9 @@ import { usePathname } from "next/navigation";
 import { Fragment } from "react";
 import { joinWords } from "shared/utils/join-words";
 
+// Routes you don't want to show up in the breadcrumb
+const HIDDEN_BREADCRUMB_ROUTES = ["applications-benchmarks"];
+
 export function Breadcrumbs() {
   const pathname = usePathname();
   const paths = compact(pathname.split("/"));
@@ -39,31 +42,33 @@ export function Breadcrumbs() {
           <BreadcrumbSeparator>
             <ChevronRightIcon />
           </BreadcrumbSeparator>
-          {paths.map((path, index, { length }) => {
-            const isLast = length - 1 === index;
-            const sanitizedChunk = joinWords(path);
+          {paths
+            .filter((path) => !HIDDEN_BREADCRUMB_ROUTES.includes(path))
+            .map((path, index, { length }) => {
+              const isLast = length - 1 === index;
+              const sanitizedChunk = joinWords(path);
 
-            return (
-              <Fragment key={path}>
-                {isLast ? (
-                  <BreadcrumbPage className="capitalize">{sanitizedChunk}</BreadcrumbPage>
-                ) : (
-                  <BreadcrumbItem>
-                    <BreadcrumbLink asChild>
-                      <Link className="capitalize" href={`/${path}`}>
-                        {sanitizedChunk}
-                      </Link>
-                    </BreadcrumbLink>
-                  </BreadcrumbItem>
-                )}
-                {length - 1 !== index && (
-                  <BreadcrumbSeparator>
-                    <ChevronRightIcon />
-                  </BreadcrumbSeparator>
-                )}
-              </Fragment>
-            );
-          })}
+              return (
+                <Fragment key={path}>
+                  {isLast ? (
+                    <BreadcrumbPage className="capitalize">{sanitizedChunk}</BreadcrumbPage>
+                  ) : (
+                    <BreadcrumbItem>
+                      <BreadcrumbLink asChild>
+                        <Link className="capitalize" href={`/${path}`}>
+                          {sanitizedChunk}
+                        </Link>
+                      </BreadcrumbLink>
+                    </BreadcrumbItem>
+                  )}
+                  {length - 1 !== index && (
+                    <BreadcrumbSeparator>
+                      <ChevronRightIcon />
+                    </BreadcrumbSeparator>
+                  )}
+                </Fragment>
+              );
+            })}
         </BreadcrumbList>
       </Breadcrumb>
     </>

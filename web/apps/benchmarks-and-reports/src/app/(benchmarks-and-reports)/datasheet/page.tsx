@@ -1,10 +1,8 @@
 import { Separator } from "@risc0/ui/separator";
-import { truncate } from "@risc0/ui/utils/truncate";
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { CopyButton } from "shared/client/components/copy-button";
 import { DATASHEET_DESCRIPTION } from "../_utils/constants";
-import { fetchDatasheetCommitHash } from "./_actions/fetch-datasheet-commit-hash";
+import DatasheetCommitHashButton from "./_components/datasheet-commit-hash-button";
 import DatasheetContent from "./_components/datasheet-content";
 
 export const metadata: Metadata = {
@@ -21,18 +19,15 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function DatasheetPage() {
-  const commitHash = await fetchDatasheetCommitHash();
-
+export default function DatasheetPage() {
   return (
     <div className="container max-w-screen-3xl">
       <div className="flex items-center justify-between gap-8">
         <h1 className="title-sm">Datasheet</h1>
-        {commitHash && (
-          <CopyButton size="sm" variant="ghost" value={commitHash}>
-            Commit Hash<span className="hidden sm:inline">: {truncate(commitHash, 15)}</span>
-          </CopyButton>
-        )}
+
+        <Suspense>
+          <DatasheetCommitHashButton />
+        </Suspense>
       </div>
 
       <Separator className="mt-2" />
