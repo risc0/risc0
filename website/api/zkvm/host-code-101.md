@@ -48,7 +48,7 @@ let prover = default_prover();
 let receipt = prover.prove(env, METHOD_NAME_ELF).unwrap();
 ```
 
-Here, the zkVM uses `METHOD_NAME_ELF` constant to execute guest code. The `cargo-risczero` toolchain computes this constant during compilation. The user needs to import it (`use methods::{METHOD_NAME_ELF};`) then pass it as an input parameter to the `prover.prove` function.
+Here, the zkVM uses `METHOD_NAME_ELF` binary to execute guest code. The `METHOD_NAME_ELF` is computed during compilation. The user needs to import it (`use methods::{METHOD_NAME_ELF};`) and then pass it as an input parameter to the `prover.prove` function.
 
 To see more complex examples, check out the [examples].
 
@@ -70,7 +70,7 @@ another party for verification, along these lines:
 receipt.verify(METHOD_NAME_ID).unwrap();
 ```
 
-The `cargo-risczero` toolchain computes `METHOD_NAME_ID` constant during compilation and user needs to import it (`use methods::{METHOD_NAME_ID};`) before passing it to `receipt.verify` function for verification.
+During compilation, we compute the `METHOD_NAME_ID`, and the user needs to import it (`use methods::{METHOD_NAME_ID};`) before passing it to `receipt.verify` function for verification.
 
 For more information on passing and verifying receipts, check out our page on
 [Receipts]. For practical demos, check out the [examples].
