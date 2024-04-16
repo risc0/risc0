@@ -688,10 +688,7 @@ mod sys_verify {
 }
 
 mod soundness {
-    use risc0_circuit_rv32im::{
-        CIRCUIT,
-        prove::emu::exec::DEFAULT_SEGMENT_LIMIT_PO2,
-    };
+    use risc0_circuit_rv32im::{prove::emu::exec::DEFAULT_SEGMENT_LIMIT_PO2, CIRCUIT};
     use risc0_zkp::{
         adapter::TapsProvider,
         field::{
