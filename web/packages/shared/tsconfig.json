@@ -1,0 +1,9 @@
+{
+  "extends": "@risc0/ui/tsconfig.base.json",
+  "compilerOptions": {
+    /* Path Aliases */
+    "baseUrl": "."
+  },
+  "include": ["**/*.ts", "**/*.tsx"],
+  "exclude": ["node_modules"]
+}

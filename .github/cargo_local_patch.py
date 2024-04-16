@@ -104,6 +104,7 @@ if __name__ == "__main__":
         "risc0-forge-ffi": "risc0-ethereum/ffi",
         "risc0-ethereum-relay": "risc0-ethereum/relay",
         "risc0-ethereum-relay-test-methods": "risc0-ethereum/relay/tests/methods",
+        "risc0-ethereum-view-call": "risc0-ethereum/view-call",
     }
 
     main(os.path.normpath(args.directory), dep_path_mapping)

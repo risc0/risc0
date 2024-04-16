@@ -594,7 +594,7 @@ FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   Fp x282(48);
   // loc(unknown)
   Fp x283(192);
-  // loc("zirgen/circuit/recursion/recursion.cpp":37:0)
+  // loc("zirgen/circuit/recursion/recursion.cpp":38:0)
   FpExt x284 = FpExt(0);
   // loc("top(recursion::Top)/code(recursion::Code)/select(OneHot)/micro_ops(Reg)"("./zirgen/components/mux.h":49:0))
   auto x285 = args[0][1 * steps + ((cycle - kInvRate * 0) & mask)];
