@@ -1,5 +1,5 @@
-import { Link } from "@risc0/ui/link";
 import { TabsContent, TabsList, TabsTrigger } from "@risc0/ui/tabs";
+import Link from "next/link";
 import { convertCsvToJson } from "shared/utils/convert-csv-to-json";
 import { replace } from "string-ts";
 import { fetchApplicationsBenchmarks } from "../_actions/fetch-applications-benchmarks";

@@ -8,9 +8,9 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@risc0/ui/breadcrumb";
-import { Link } from "@risc0/ui/link";
 import compact from "lodash-es/compact";
 import { ChevronRightIcon } from "lucide-react";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Fragment } from "react";
 import { joinWords } from "shared/utils/join-words";

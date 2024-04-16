@@ -3,7 +3,6 @@ import { Tabs } from "@risc0/ui/tabs";
 import { truncate } from "@risc0/ui/utils/truncate";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { Suspense } from "react";
 import { CopyButton } from "shared/client/components/copy-button";
 import { replace } from "string-ts";
 import { APPLICATIONS_BENCHMARKS_DESCRIPTION } from "../../_utils/constants";
@@ -46,9 +45,7 @@ export default async function ApplicationsBenchmarksPage({ params }) {
       <Separator className="mt-2" />
 
       <Tabs className="mt-6" defaultValue={params.slug?.[0]}>
-        <Suspense>
-          <ApplicationsBenchmarksContent />
-        </Suspense>
+        <ApplicationsBenchmarksContent />
       </Tabs>
     </div>
   );

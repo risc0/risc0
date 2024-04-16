@@ -1,7 +1,7 @@
-import { Link } from "@risc0/ui/link";
 import { Separator } from "@risc0/ui/separator";
 import { truncate } from "@risc0/ui/utils/truncate";
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Suspense } from "react";
 import { CopyButton } from "shared/client/components/copy-button";
 import { CRATES_VALIDATION_DESCRIPTION } from "../_utils/constants";
