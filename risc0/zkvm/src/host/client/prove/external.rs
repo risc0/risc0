@@ -14,12 +14,13 @@
 
 use std::path::{Path, PathBuf};
 
-use anyhow::{ensure, Result};
+use anyhow::{anyhow, bail, ensure, Result};
 
 use super::{Executor, Prover, ProverOpts};
 use crate::{
-    compute_image_id, host::api::AssetRequest, sha::Digestible, ApiClient, Asset, ExecutorEnv,
-    Receipt, SessionInfo, VerifierContext,
+    compute_image_id, host::api::AssetRequest, sha::Digestible, ApiClient, Asset, CompositeReceipt,
+    ExecutorEnv, InnerReceipt, Receipt, SegmentReceipt, SessionInfo, SuccinctReceipt,
+    VerifierContext,
 };
 
 /// An implementation of a [Prover] that runs proof workloads via an external
@@ -36,6 +37,47 @@ impl ExternalProver {
             name: name.to_string(),
             r0vm_path: r0vm_path.as_ref().to_path_buf(),
         }
+    }
+
+    /// Internal implementation of the compress function.
+    fn compress_internal(
+        client: &ApiClient,
+        opts: &ProverOpts,
+        receipt: &CompositeReceipt,
+    ) -> Result<SuccinctReceipt> {
+        // Compress all receipts in the top-level session into one succinct receipt for the session.
+        let continuation_receipt = receipt
+            .segments
+            .iter()
+            .try_fold(
+                None,
+                |left: Option<SuccinctReceipt>, right: &SegmentReceipt| -> Result<_> {
+                    Ok(Some(match left {
+                        Some(left) => client.join(opts, &left, &client.lift(opts, right)?)?,
+                        None => client.lift(opts, right)?,
+                    }))
+                },
+            )?
+            .ok_or(anyhow!(
+                "malformed composite receipt has no continuation segment receipts"
+            ))?;
+
+        // Compress assumptions and resolve them to get the final succinct receipt.
+        receipt.assumptions.iter().try_fold(
+            continuation_receipt,
+            |conditional: SuccinctReceipt, assumption: &InnerReceipt| match assumption {
+                InnerReceipt::Succinct(assumption) => client.resolve(opts, &conditional, assumption),
+                InnerReceipt::Composite(assumption) => {
+                    client.resolve(opts, &conditional, &Self::compress_internal(client, opts, assumption)?)
+                }
+                InnerReceipt::Fake { .. } => bail!(
+                    "compressing composite receipts with fake receipt assumptions is not supported"
+                ),
+                InnerReceipt::Compact(_) => bail!(
+                    "compressing composite receipts with Compact receipt assumptions is not supported"
+                ),
+            },
+        )
     }
 }
 
@@ -70,6 +112,24 @@ impl Prover for ExternalProver {
 
     fn get_name(&self) -> String {
         self.name.clone()
+    }
+
+    fn compress(&self, opts: &ProverOpts, receipt: &Receipt) -> Result<Receipt> {
+        match receipt.inner {
+            InnerReceipt::Succinct(_) | InnerReceipt::Compact(_) => Ok(receipt.clone()),
+            InnerReceipt::Composite(ref composite) => {
+                let client = ApiClient::new_sub_process(&self.r0vm_path)?;
+                Ok(Receipt {
+                    inner: InnerReceipt::Succinct(Self::compress_internal(
+                        &client, opts, composite,
+                    )?),
+                    journal: receipt.journal.clone(),
+                })
+            }
+            InnerReceipt::Fake { .. } => {
+                bail!("ExternalProver cannot compress a fake receipt")
+            }
+        }
     }
 }
 
