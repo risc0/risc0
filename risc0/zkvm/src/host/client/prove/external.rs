@@ -53,17 +53,17 @@ impl Prover for ExternalProver {
         let client = ApiClient::new_sub_process(&self.r0vm_path)?;
         let binary = Asset::Inline(elf.to_vec().into());
         let prove_info = client.prove(&env, opts.clone(), binary)?;
-        let receipt = prove_info.receipt;
+        //let receipt = prove_info.receipt;
         if opts.prove_guest_errors {
-            receipt.verify_integrity_with_context(ctx)?;
+            prove_info.receipt.verify_integrity_with_context(ctx)?;
             ensure!(
-                receipt.get_claim()?.pre.digest() == image_id,
+                prove_info.receipt.get_claim()?.pre.digest() == image_id,
                 "received unexpected image ID: expected {}, found {}",
                 hex::encode(image_id),
-                hex::encode(receipt.get_claim()?.pre.digest())
+                hex::encode(prove_info.receipt.get_claim()?.pre.digest())
             );
         } else {
-            receipt.verify_with_context(ctx, image_id)?;
+            prove_info.receipt.verify_with_context(ctx, image_id)?;
         }
 
         Ok(prove_info)

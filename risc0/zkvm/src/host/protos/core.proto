@@ -23,7 +23,7 @@ message PageTableInfo {
 
 message ProveInfo {
   Receipt receipt = 1;
-  SessionStats session_stats = 2;
+  SessionStats stats = 2;
 }
 
 message SessionStats {

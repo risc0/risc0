@@ -221,6 +221,9 @@ impl Session {
         tracing::info!("cycle efficiency: {}%", cycle_efficiency as u32);
     }
 
+    /// Returns stats for the session
+    ///
+    /// This contains cycle and segment information about the session useful for debugging and measuring performance.
     pub fn stats(&self) -> SessionStats {
         SessionStats {
             segments: self.segments.len(),
