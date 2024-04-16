@@ -96,9 +96,9 @@ impl Client {
             bail!("Child finished with: {code}");
         }
 
-        let receipt_bytes = asset.as_bytes()?;
-        let receipt_pb = pb::core::Receipt::decode(receipt_bytes)?;
-        receipt_pb.try_into()
+        let prove_info_bytes = asset.as_bytes()?;
+        let prove_info_pb = pb::core::ProveInfo::decode(prove_info_bytes)?;
+        prove_info_pb.try_into()
     }
 
     /// Execute the specified ELF binary.
@@ -530,7 +530,7 @@ impl Client {
                             return Err(anyhow!("Illegal client callback"))
                         }
                         pb::api::client_callback::Kind::ProveDone(done) => {
-                            return done.receipt.ok_or(malformed_err())
+                            return done.prove_info.ok_or(malformed_err())
                         }
                     }
                 }
