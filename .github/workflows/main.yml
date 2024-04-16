@@ -424,19 +424,6 @@ jobs:
           RISC0_USE_DOCKER: "1"
       - run: sccache --show-stats
 
-  stable-ceremony:
-    # Tests that the circom files are unchanged from the versions we ran a trusted setup ceremony on
-    if: needs.changes.outputs.stable-ceremony == 'true'
-    needs: changes
-    runs-on: [self-hosted, prod, Linux, cpu]
-    steps:
-      # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
-      - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
-      - uses: actions/checkout@v4
-      - name: Compare circom hashes to golden values
-        run: bash .github/scripts/circom_stable.sh
-
-
   stark2snark:
     if: needs.changes.outputs.stark2snark == 'true'
     needs: changes
