@@ -71,5 +71,5 @@ Before submitting a PR, ensure the following:
 1. Fork the `risc0` repository and create a new branch there to do your work.
 2. Format with `cargo fmt --all`.
 3. Lint with `cargo clippy --all-targets`.
-4. Tests pass with `cargo test -F default -F fault-proof -F prove --workspace`
+4. Tests pass with `cargo test -F default -F prove --workspace`
 5. Open a PR against the `main` branch.
