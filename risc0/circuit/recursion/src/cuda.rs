@@ -28,25 +28,32 @@ use risc0_zkp::{
         },
         Buffer, CircuitHal,
     },
-    INV_RATE,
+    INV_RATE, ZK_CYCLES,
 };
 
 use crate::{
     GLOBAL_MIX, GLOBAL_OUT, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA,
 };
 
-const KERNELS_FATBIN: &[u8] = include_bytes!(env!("RECURSION_CUDA_PATH"));
+const EVAL_FATBIN: &[u8] = include_bytes!(env!("RECURSION_CUDA_EVAL_PATH"));
+const STEPS_FATBIN: &[u8] = include_bytes!(env!("RECURSION_CUDA_STEPS_PATH"));
 
 pub struct CudaCircuitHal<CH: CudaHash> {
     hal: Rc<CudaHal<CH>>, // retain a reference to ensure the context remains valid
-    module: Module,
+    eval_module: Module,
+    steps_module: Module,
 }
 
 impl<CH: CudaHash> CudaCircuitHal<CH> {
     #[tracing::instrument(name = "CudaCircuitHal::new", skip_all)]
     pub fn new(hal: Rc<CudaHal<CH>>) -> Self {
-        let module = Module::from_fatbin(KERNELS_FATBIN, &[]).unwrap();
-        Self { hal, module }
+        let eval_module = Module::from_fatbin(EVAL_FATBIN, &[]).unwrap();
+        let steps_module = Module::from_fatbin(STEPS_FATBIN, &[]).unwrap();
+        Self {
+            hal,
+            eval_module,
+            steps_module,
+        }
     }
 }
 
@@ -95,7 +102,7 @@ impl<'a, CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
                 .unwrap();
 
         let mix_pows_name = std::ffi::CString::new("poly_mix").unwrap();
-        self.module
+        self.eval_module
             .get_global(&mix_pows_name)
             .unwrap()
             .copy_from(poly_mix_pows)
@@ -103,7 +110,7 @@ impl<'a, CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
 
         let stream = Stream::new(StreamFlags::DEFAULT, None).unwrap();
 
-        let kernel = self.module.get_function("eval_check").unwrap();
+        let kernel = self.eval_module.get_function("eval_check").unwrap();
         let params = self.hal.compute_simple_params(domain);
         unsafe {
             launch!(kernel<<<params.0, params.1, 0, stream>>>(
@@ -120,6 +127,83 @@ impl<'a, CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
             .unwrap();
         }
         stream.synchronize().unwrap();
+    }
+
+    fn accumulate(
+        &self,
+        ctrl: &CudaBuffer<BabyBearElem>,
+        io: &CudaBuffer<BabyBearElem>,
+        data: &CudaBuffer<BabyBearElem>,
+        mix: &CudaBuffer<BabyBearElem>,
+        accum: &CudaBuffer<BabyBearElem>,
+        steps: usize,
+    ) {
+        let count = steps - ZK_CYCLES;
+        let params = self.hal.compute_simple_params(count);
+
+        let ram = vec![BabyBearExtElem::ONE; steps];
+        let ram = CudaBuffer::copy_from("ram", &ram);
+
+        let bytes = vec![BabyBearExtElem::ONE; steps];
+        let bytes = CudaBuffer::copy_from("bytes", &bytes);
+
+        let steps = CudaBuffer::copy_from("steps", &[steps as u32]);
+
+        let stream = Stream::new(StreamFlags::DEFAULT, None).unwrap();
+
+        tracing::info_span!("step_compute_accum").in_scope(|| {
+            let kernel = self
+                .steps_module
+                .get_function("step_compute_accum")
+                .unwrap();
+            unsafe {
+                launch!(kernel<<<params.0, params.1, 0, stream>>>(
+                    steps.as_device_ptr(),
+                    ctrl.as_device_ptr(),
+                    data.as_device_ptr(),
+                    mix.as_device_ptr(),
+                    ram.as_device_ptr(),
+                    bytes.as_device_ptr(),
+                ))
+                .unwrap();
+            }
+        });
+
+        tracing::info_span!("prefix_products").in_scope(|| {
+            use risc0_zkp::hal::Hal as _;
+            self.hal.prefix_products(&ram);
+            self.hal.prefix_products(&bytes);
+        });
+
+        tracing::info_span!("step_verify_accum").in_scope(|| {
+            let kernel = self.steps_module.get_function("step_verify_accum").unwrap();
+            unsafe {
+                launch!(kernel<<<params.0, params.1, 0, stream>>>(
+                    steps.as_device_ptr(),
+                    ctrl.as_device_ptr(),
+                    data.as_device_ptr(),
+                    mix.as_device_ptr(),
+                    ram.as_device_ptr(),
+                    bytes.as_device_ptr(),
+                    accum.as_device_ptr()
+                ))
+                .unwrap();
+            }
+        });
+
+        tracing::info_span!("zeroize").in_scope(|| {
+            let kernel = self.hal.module.get_function("eltwise_zeroize_fp").unwrap();
+
+            let params = self.hal.compute_simple_params(accum.size());
+            unsafe {
+                launch!(kernel<<<params.0, params.1, 0, stream>>>(accum.as_device_ptr())).unwrap();
+            }
+
+            let params = self.hal.compute_simple_params(io.size());
+            unsafe {
+                launch!(kernel<<<params.0, params.1, 0, stream>>>(io.as_device_ptr())).unwrap();
+            }
+        });
     }
 }
 

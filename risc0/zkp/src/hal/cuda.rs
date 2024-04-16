@@ -850,6 +850,14 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
     fn get_hash_suite(&self) -> &HashSuite<Self::Field> {
         self.hash.as_ref().unwrap().get_hash_suite()
     }
+
+    fn prefix_products(&self, io: &Self::Buffer<Self::ExtElem>) {
+        io.view_mut(|io| {
+            for i in 1..io.len() {
+                io[i] = io[i] * io[i - 1];
+            }
+        });
+    }
 }
 
 fn div_ceil(a: u32, b: u32) -> u32 {

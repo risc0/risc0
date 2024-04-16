@@ -16,16 +16,20 @@ use std::env;
 
 fn main() {
     if env::var("CARGO_FEATURE_CUDA").is_ok() {
-        let cuda_bin = env::var("DEP_RISC0_CIRCUIT_RV32IM_SYS_CUDA_KERNEL").expect(
-            "CARGO_FEATURE_CUDA is defined, but DEP_RISC0_CIRCUIT_RV32IM_SYS_CUDA_KERNEL is not",
+        println!(
+            "cargo:rustc-env=RV32IM_CUDA_EVAL_PATH={}",
+            env::var("DEP_RISC0_CIRCUIT_RV32IM_SYS_CUDA_EVAL_FATBIN").unwrap()
         );
-        println!("cargo:rustc-env=RV32IM_CUDA_PATH={cuda_bin}");
+        println!(
+            "cargo:rustc-env=RV32IM_CUDA_STEPS_PATH={}",
+            env::var("DEP_RISC0_CIRCUIT_RV32IM_SYS_CUDA_STEPS_FATBIN").unwrap()
+        );
     }
 
     if env::var("CARGO_FEATURE_METAL").is_ok() {
-        let metal_bin = env::var("DEP_RISC0_CIRCUIT_RV32IM_SYS_METAL_KERNEL").expect(
-            "CARGO_FEATURE_METAL is defined, but DEP_RISC0_CIRCUIT_RV32IM_SYS_METAL_KERNEL is not",
+        println!(
+            "cargo:rustc-env=RV32IM_METAL_PATH={}",
+            env::var("DEP_RISC0_CIRCUIT_RV32IM_SYS_METAL_KERNEL").unwrap()
         );
-        println!("cargo:rustc-env=RV32IM_METAL_PATH={metal_bin}");
     }
 }

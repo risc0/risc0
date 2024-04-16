@@ -42,6 +42,7 @@ public:
   static constexpr uint32_t P = 15 * (uint32_t(1) << 27) + 1;
   static constexpr uint32_t M = 0x88000001;
   static constexpr uint32_t R2 = 1172168163;
+  static constexpr uint32_t INVALID = 0xffffffff;
 
 private:
   // The actual value, always < P.
@@ -101,7 +102,14 @@ public:
   __device__ static constexpr Fp maxVal() { return P - 1; }
 
   /// Get an 'invalid' Fp value
-  __device__ static constexpr Fp invalid() { return Fp(0xfffffffful, true); }
+  __device__ static constexpr Fp invalid() { return Fp(INVALID, true); }
+
+  __device__ constexpr inline Fp zeroize() {
+    if (val == INVALID) {
+      val = 0;
+    }
+    return *this;
+  }
 
   // Implement all the various overloads
   __device__ constexpr void operator=(uint32_t rhs) { val = encode(rhs); }

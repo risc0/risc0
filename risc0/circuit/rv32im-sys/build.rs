@@ -12,7 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{env, path::PathBuf};
+use std::{
+    env,
+    path::{Path, PathBuf},
+};
 
 use risc0_build_kernel::{KernelBuild, KernelType};
 
@@ -38,16 +41,27 @@ fn build_cpu_kernels() {
         .compile("circuit");
 }
 
-fn build_metal_kernels() {
-    KernelBuild::new(KernelType::Metal)
-        .file("kernels/metal/eval_check.metal")
-        .file("kernels/metal/step_compute_accum.metal")
-        .file("kernels/metal/step_verify_accum.metal")
-        .compile("metal_kernel");
-}
-
 fn build_cuda_kernels() {
     KernelBuild::new(KernelType::Cuda)
+        .file("kernels/cuda/steps.cu")
+        .compile("cuda_steps_fatbin");
+
+    KernelBuild::new(KernelType::Cuda)
         .file("kernels/cuda/eval_check.cu")
-        .compile("cuda_kernel");
+        .compile("cuda_eval_fatbin");
+}
+
+fn build_metal_kernels() {
+    const SRCS: &[&str] = &[
+        "eval_check.metal",
+        "step_compute_accum.metal",
+        "step_verify_accum.metal",
+    ];
+
+    let dir = Path::new("kernels").join("metal");
+    let src_paths = SRCS.iter().map(|x| dir.join(x));
+
+    KernelBuild::new(KernelType::Metal)
+        .files(src_paths)
+        .compile("metal_kernel");
 }

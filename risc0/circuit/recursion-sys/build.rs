@@ -48,6 +48,10 @@ fn build_metal_kernels() {
 
 fn build_cuda_kernels() {
     KernelBuild::new(KernelType::Cuda)
+        .file("kernels/cuda/steps.cu")
+        .compile("cuda_steps_fatbin");
+
+    KernelBuild::new(KernelType::Cuda)
         .file("kernels/cuda/eval_check.cu")
-        .compile("cuda_kernel");
+        .compile("cuda_eval_fatbin");
 }

@@ -1,20 +1,17 @@
 // This code is automatically generated
 
-#include <metal_stdlib>
-
 #include "fp.h"
 #include "fpext.h"
 
-using namespace metal;
-
-kernel void step_verify_accum(uint cycle [[thread_position_in_grid]],
-                              const device uint& steps,
-                              const device Fp* ctrl,
-                              const device Fp* data,
-                              const device Fp* mix,
-                              device FpExt* ram, device FpExt* bytes,
-                              device Fp* accum) {
-    uint mask = steps - 1;
+extern "C" __global__
+void step_verify_accum(const uint& steps,
+                       const Fp* ctrl,
+                       const Fp* data,
+                       const Fp* mix,
+                       FpExt* ram, FpExt* bytes,
+                       Fp* accum) {
+    uint32_t mask = steps - 1;
+    uint32_t cycle = blockDim.x * blockIdx.x + threadIdx.x;
     Fp x0(2013265910);
     Fp x1(11);
     Fp x2(0);
