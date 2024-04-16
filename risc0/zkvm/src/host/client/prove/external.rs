@@ -53,8 +53,23 @@ impl ExternalProver {
                 None,
                 |left: Option<SuccinctReceipt>, right: &SegmentReceipt| -> Result<_> {
                     Ok(Some(match left {
-                        Some(left) => client.join(opts, &left, &client.lift(opts, right)?)?,
-                        None => client.lift(opts, right)?,
+                        Some(left) => client.join(
+                            opts.clone(),
+                            left.try_into()?,
+                            client
+                                .lift(
+                                    opts.clone(),
+                                    right.clone().try_into()?,
+                                    AssetRequest::Inline,
+                                )?
+                                .try_into()?,
+                            AssetRequest::Inline,
+                        )?,
+                        None => client.lift(
+                            opts.clone(),
+                            right.clone().try_into()?,
+                            AssetRequest::Inline,
+                        )?,
                     }))
                 },
             )?
@@ -66,9 +81,9 @@ impl ExternalProver {
         receipt.assumptions.iter().try_fold(
             continuation_receipt,
             |conditional: SuccinctReceipt, assumption: &InnerReceipt| match assumption {
-                InnerReceipt::Succinct(assumption) => client.resolve(opts, &conditional, assumption),
+                InnerReceipt::Succinct(assumption) => client.resolve(opts.clone(), conditional.try_into()?, assumption.clone().try_into()?, AssetRequest::Inline),
                 InnerReceipt::Composite(assumption) => {
-                    client.resolve(opts, &conditional, &Self::compress_internal(client, opts, assumption)?)
+                    client.resolve(opts.clone(), conditional.try_into()?, Self::compress_internal(client, opts, assumption)?.try_into()?, AssetRequest::Inline)
                 }
                 InnerReceipt::Fake { .. } => bail!(
                     "compressing composite receipts with fake receipt assumptions is not supported"
