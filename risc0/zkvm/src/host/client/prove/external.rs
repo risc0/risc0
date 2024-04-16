@@ -54,22 +54,16 @@ impl ExternalProver {
                 |left: Option<SuccinctReceipt>, right: &SegmentReceipt| -> Result<_> {
                     Ok(Some(match left {
                         Some(left) => client.join(
-                            opts.clone(),
+                            opts,
                             left.try_into()?,
                             client
-                                .lift(
-                                    opts.clone(),
-                                    right.clone().try_into()?,
-                                    AssetRequest::Inline,
-                                )?
+                                .lift(opts, right.clone().try_into()?, AssetRequest::Inline)?
                                 .try_into()?,
                             AssetRequest::Inline,
                         )?,
-                        None => client.lift(
-                            opts.clone(),
-                            right.clone().try_into()?,
-                            AssetRequest::Inline,
-                        )?,
+                        None => {
+                            client.lift(opts, right.clone().try_into()?, AssetRequest::Inline)?
+                        }
                     }))
                 },
             )?
@@ -81,9 +75,9 @@ impl ExternalProver {
         receipt.assumptions.iter().try_fold(
             continuation_receipt,
             |conditional: SuccinctReceipt, assumption: &InnerReceipt| match assumption {
-                InnerReceipt::Succinct(assumption) => client.resolve(opts.clone(), conditional.try_into()?, assumption.clone().try_into()?, AssetRequest::Inline),
+                InnerReceipt::Succinct(assumption) => client.resolve(opts, conditional.try_into()?, assumption.clone().try_into()?, AssetRequest::Inline),
                 InnerReceipt::Composite(assumption) => {
-                    client.resolve(opts.clone(), conditional.try_into()?, Self::compress_internal(client, opts, assumption)?.try_into()?, AssetRequest::Inline)
+                    client.resolve(opts, conditional.try_into()?, Self::compress_internal(client, opts, assumption)?.try_into()?, AssetRequest::Inline)
                 }
                 InnerReceipt::Fake { .. } => bail!(
                     "compressing composite receipts with fake receipt assumptions is not supported"
@@ -109,7 +103,7 @@ impl Prover for ExternalProver {
         let image_id = compute_image_id(elf)?;
         let client = ApiClient::new_sub_process(&self.r0vm_path)?;
         let binary = Asset::Inline(elf.to_vec().into());
-        let receipt = client.prove(&env, opts.clone(), binary)?;
+        let receipt = client.prove(&env, opts, binary)?;
         if opts.prove_guest_errors {
             receipt.verify_integrity_with_context(ctx)?;
             ensure!(
