@@ -1,11 +1,9 @@
-import { sleep } from "@risc0/ui/utils/sleep";
 import { truncate } from "@risc0/ui/utils/truncate";
 import { CopyButton } from "shared/client/components/copy-button";
 import { fetchApplicationsBenchmarksCommitHash } from "../_actions/fetch-applications-benchmarks-commit-hash";
 
 export default async function ApplicationsBenchmarksCommitHashButton() {
   const commitHash = await fetchApplicationsBenchmarksCommitHash();
-  await sleep(3000);
 
   if (!commitHash) {
     return null;
