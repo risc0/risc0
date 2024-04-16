@@ -1,37 +1,28 @@
-import { Link } from "@risc0/ui/link";
 import { Separator } from "@risc0/ui/separator";
 import { truncate } from "@risc0/ui/utils/truncate";
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { CopyButton } from "shared/client/components/copy-button";
-import { fetchDatasheet } from "./_actions/fetch-datasheet";
+import { DATASHEET_DESCRIPTION } from "../_utils/constants";
 import { fetchDatasheetCommitHash } from "./_actions/fetch-datasheet-commit-hash";
-import { DatasheetTable } from "./_components/datasheet-table";
-import { datasheetTableColumns } from "./_components/datasheet-table-columns";
-import type { DatasheetTableSchema } from "./_components/datasheet-table-schema";
-
-const FILENAMES_TO_TITLES = {
-  "macOS-apple_m2_pro.json": "Metal on Apple M2 Pro",
-  "Linux-nvidia_rtx_3090_ti.json": "CUDA on NVIDIA RTX 3090 Ti",
-  "macOS-cpu.json": "CPU only on Apple M2 Pro",
-  "Linux-cpu.json": (
-    <>
-      CPU only on{" "}
-      <Link target="_blank" href="https://instances.vantage.sh/aws/ec2/c6i.8xlarge" className="link">
-        c6i.8xlarge
-      </Link>
-    </>
-  ),
-} as const;
+import DatasheetContent from "./_components/datasheet-content";
 
 export const metadata: Metadata = {
   title: "Datasheet",
+  description: DATASHEET_DESCRIPTION,
+  openGraph: {
+    images: [
+      {
+        url: `https://benchmarks.risczero.com/api/og?title=Datasheet&description=${encodeURIComponent(
+          DATASHEET_DESCRIPTION,
+        )}`,
+      },
+    ],
+  },
 };
 
 export default async function DatasheetPage() {
-  const urls = Object.keys(FILENAMES_TO_TITLES);
   const commitHash = await fetchDatasheetCommitHash();
-  const dataPromises = urls.map((url) => fetchDatasheet(url));
-  const data: DatasheetTableSchema[][] = await Promise.all(dataPromises);
 
   return (
     <div className="container max-w-screen-3xl">
@@ -47,14 +38,9 @@ export default async function DatasheetPage() {
       <Separator className="mt-2" />
 
       <div className="mt-6 grid grid-cols-1 gap-8 xl:grid-cols-2">
-        {data.map((dataArray, index) => (
-          <DatasheetTable
-            key={Object.keys(FILENAMES_TO_TITLES)[index]}
-            data={dataArray}
-            title={Object.values(FILENAMES_TO_TITLES)[index] ?? ""}
-            columns={datasheetTableColumns}
-          />
-        ))}
+        <Suspense>
+          <DatasheetContent />
+        </Suspense>
       </div>
     </div>
   );

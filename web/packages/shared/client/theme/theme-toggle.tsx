@@ -7,6 +7,19 @@ import { CheckIcon, SunMoonIcon } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 
+function ButtonBase() {
+  return (
+    <>
+      <Button size="sm" className="hidden sm:flex" variant="outline" startIcon={<SunMoonIcon />}>
+        Toggle Theme
+      </Button>
+      <Button size="icon-sm" className="flex sm:hidden" variant="outline" startIcon={<SunMoonIcon />}>
+        <span className="sr-only">Toggle Theme</span>
+      </Button>
+    </>
+  );
+}
+
 export function ThemeToggle({ className }: { className?: string }) {
   const { theme, setTheme } = useTheme();
   const [isMounted, setIsMounted] = useState<boolean>(false);
@@ -16,19 +29,14 @@ export function ThemeToggle({ className }: { className?: string }) {
   }, []);
 
   if (!isMounted) {
-    return <div className="h-8" />;
+    return <ButtonBase />;
   }
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild className={className}>
         <div>
-          <Button size="sm" className="hidden sm:flex" variant="outline" startIcon={<SunMoonIcon />}>
-            Toggle Theme
-          </Button>
-          <Button size="icon-sm" className="flex sm:hidden" variant="outline" startIcon={<SunMoonIcon />}>
-            <span className="sr-only">Toggle Theme</span>
-          </Button>
+          <ButtonBase />
         </div>
       </DropdownMenuTrigger>
 
