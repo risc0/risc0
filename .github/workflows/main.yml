@@ -36,7 +36,6 @@ jobs:
       crates-validator: ${{ steps.filter.outputs.crates-validator }}
       doc: ${{ steps.filter.outputs.doc }}
       examples: ${{ steps.filter.outputs.examples }}
-      stable-ceremony: ${{ steps.filter.outputs.stable-ceremony }}
       stark2snark: ${{ steps.filter.outputs.stark2snark }}
       test: ${{ steps.filter.outputs.test }}
       web: ${{ steps.filter.outputs.web }}
@@ -75,9 +74,6 @@ jobs:
               - *base
               - examples/**
               - risc0/**
-            stable-ceremony:
-              - *base
-              - risc0/**
             stark2snark:
               - *base
               - compact_proof/**
@@ -105,7 +101,6 @@ jobs:
       - doc
       - examples
       - reproducible-build
-      - stable-ceremony
       - stark2snark
       - test
       - web
