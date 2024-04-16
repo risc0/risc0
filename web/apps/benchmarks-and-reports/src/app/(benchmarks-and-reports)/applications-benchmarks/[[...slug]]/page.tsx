@@ -25,8 +25,6 @@ export const metadata: Metadata = {
 };
 
 export default function ApplicationsBenchmarksPage({ params }) {
-  console.log("params", params);
-
   if (!params.slug) {
     redirect(`/applications-benchmarks/${replace(Object.keys(FILENAMES_TO_TITLES)[0]!, ".csv", "")}`);
   }
