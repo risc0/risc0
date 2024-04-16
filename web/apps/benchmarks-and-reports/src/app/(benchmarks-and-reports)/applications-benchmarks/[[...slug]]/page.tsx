@@ -45,7 +45,7 @@ export default function ApplicationsBenchmarksPage({ params }) {
         <div className="flex items-center overflow-auto">
           <TabsList>
             {Object.keys(FILENAMES_TO_TITLES).map((filename, index) => (
-              <Link key={filename} href={`/applications-benchmarks/${replace(filename, ".csv", "")}`}>
+              <Link tabIndex={-1} key={filename} href={`/applications-benchmarks/${replace(filename, ".csv", "")}`}>
                 <TabsTrigger value={replace(filename, ".csv", "")}>
                   {Object.values(FILENAMES_TO_TITLES)[index]}
                 </TabsTrigger>
