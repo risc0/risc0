@@ -160,9 +160,6 @@ jobs:
       - name: check for "D0 NOT MERGE" comments
         run: |
           [ "$(grep -re 'DO[_ ]\?NOT[_ ]\?MERGE' $(git ls-tree --full-tree --name-only -r HEAD) | tee /dev/fd/2 | wc -l)" -eq "0" ]
-      - name: Load circom check script
-      # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
-        run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
       - name: Compare circom hashes to golden values
         run: bash ./circom_stable.sh
         working-directory: ./.github/scripts
