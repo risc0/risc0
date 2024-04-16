@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
+import { SuspenseLoader } from "shared/client/components/suspense-loader";
 import { replace } from "string-ts";
 import { APPLICATIONS_BENCHMARKS_DESCRIPTION } from "../../_utils/constants";
 import ApplicationsBenchmarksCommitHashButton from "./_components/applications-benchmarks-commit-hash-button";
@@ -34,7 +35,7 @@ export default function ApplicationsBenchmarksPage({ params }) {
       <div className="flex items-center justify-between gap-8">
         <h1 className="title-sm">Applications Benchmarks</h1>
 
-        <Suspense>
+        <Suspense fallback={<SuspenseLoader />}>
           <ApplicationsBenchmarksCommitHashButton />
         </Suspense>
       </div>
@@ -55,7 +56,7 @@ export default function ApplicationsBenchmarksPage({ params }) {
         </div>
 
         <div className="mt-4">
-          <Suspense>
+          <Suspense fallback={<SuspenseLoader />}>
             <ApplicationsBenchmarksContent currentTab={params.slug?.[0]} />
           </Suspense>
         </div>
