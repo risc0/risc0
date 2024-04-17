@@ -5,12 +5,11 @@ import { Separator } from "@risc0/ui/separator";
 import { Skeleton } from "@risc0/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@risc0/ui/tabs";
 import { Chart } from "chart.js"; // stay on 2.9.4, much faster
-
 import truncate from "lodash-es/truncate";
 import { DownloadIcon } from "lucide-react";
 import Script from "next/script";
 import { useEffect, useState } from "react";
-import { joinWords } from "shared/utils/join-words";
+import { ChartsList } from "./charts-list";
 
 const toolColors = {
   cargo: "#020077",
@@ -28,9 +27,10 @@ const toolColors = {
   _: "#333333",
 };
 
-function renderGraph(parent, name, dataset) {
+function renderGraph({ parent, benchName, platformName, dataset }) {
   const canvas = document.createElement("canvas");
-  canvas.className = "benchmark-chart w-full";
+  canvas.className = "benchmark-chart";
+  canvas.id = `${platformName}-${benchName}`;
   parent.appendChild(canvas);
 
   const color = toolColors[dataset.length > 0 ? dataset[0].tool : "_"];
@@ -39,7 +39,7 @@ function renderGraph(parent, name, dataset) {
     labels: dataset.map((d) => d.commit.id.slice(0, 7)),
     datasets: [
       {
-        label: name,
+        label: benchName,
         data: dataset.map((d) => d.bench.value),
         borderColor: color,
         borderWidth: 1,
@@ -127,18 +127,38 @@ function renderGraph(parent, name, dataset) {
   });
 }
 
-function renderBenchSet(benchSet, main) {
+function renderBenchSet({ platformName, benchSet, main }) {
   const graphsElem = document.createElement("div");
   graphsElem.className = "mt-6 flex flex-row flex-wrap gap-10 dark:invert [&>*]:tracking-normal";
   main.appendChild(graphsElem);
 
   for (const [benchName, benches] of benchSet.entries()) {
-    renderGraph(graphsElem, benchName, benches);
+    renderGraph({ parent: graphsElem, benchName, dataset: benches, platformName });
   }
+}
+
+function collectBenchesPerTestCase(entries) {
+  const map = new Map();
+
+  for (const entry of entries) {
+    const { commit, date, tool, benches } = entry;
+    for (const bench of benches) {
+      const result = { commit, date, tool, bench };
+      const arr = map.get(bench.name);
+      if (arr === undefined) {
+        map.set(bench.name, [result]);
+      } else {
+        arr.push(result);
+      }
+    }
+  }
+  return map;
 }
 
 export function Charts() {
   const [lastUpdate, setLastUpdate] = useState<string>("");
+  const [benchSet, setBenchSet] = useState<any>();
+  const [selectedPlatform, setSelectedPlatform] = useState<string>();
   const [names, setNames] = useState<string[]>();
   const [ready, setReady] = useState<boolean>(false);
   const [isMounted, setIsMounted] = useState<boolean>(false);
@@ -146,55 +166,42 @@ export function Charts() {
   useEffect(() => {
     const data = window.BENCHMARK_DATA;
 
-    if (ready && data) {
-      setLastUpdate(new Date(data.lastUpdate).toLocaleString());
-      setNames(Object.keys(data.entries));
+    if (!ready || !data) {
+      return;
     }
+
+    setLastUpdate(new Date(data.lastUpdate).toLocaleString());
+    setNames(Object.keys(data.entries));
+    setSelectedPlatform(Object.keys(data.entries)[0]);
   }, [ready]);
 
   useEffect(() => {
     const data = window.BENCHMARK_DATA;
 
-    if (names && data) {
-      function collectBenchesPerTestCase(entries) {
-        const map = new Map();
+    if (!names || !data) {
+      return;
+    }
 
-        for (const entry of entries) {
-          const { commit, date, tool, benches } = entry;
-          for (const bench of benches) {
-            const result = { commit, date, tool, bench };
-            const arr = map.get(bench.name);
-            if (arr === undefined) {
-              map.set(bench.name, [result]);
-            } else {
-              arr.push(result);
-            }
-          }
-        }
-        return map;
-      }
+    //// Render download button
+    // biome-ignore lint/style/noNonNullAssertion: ignore -- not my code
+    document.getElementById("dl-button")!.onclick = () => {
+      const dataStr = `data:text/json;charset=utf-8,${encodeURIComponent(JSON.stringify(data))}`;
+      const a = document.createElement("a");
+      a.href = dataStr;
+      a.download = "benchmark_data.json";
+      a.click();
+    };
 
-      //// Render download button
-      // biome-ignore lint/style/noNonNullAssertion: ignore -- not my code
-      document.getElementById("dl-button")!.onclick = () => {
-        const dataStr = `data:text/json;charset=utf-8,${encodeURIComponent(JSON.stringify(data))}`;
-        const a = document.createElement("a");
-        a.href = dataStr;
-        a.download = "benchmark_data.json";
-        a.click();
-      };
+    // Prepare data points for charts
+    const dataset = Object.keys(data.entries).map((name) => ({
+      name,
+      dataSet: collectBenchesPerTestCase(data.entries[name]),
+    }));
 
-      // Prepare data points for charts
-      const dataset = Object.keys(data.entries).map((name) => ({
-        name,
-        dataSet: collectBenchesPerTestCase(data.entries[name]),
-      }));
+    setBenchSet(dataset);
 
-      console.log("dataset", dataset);
-
-      for (const { name, dataSet } of dataset) {
-        renderBenchSet(dataSet, document.getElementById(`chart-${name}`));
-      }
+    for (const { name, dataSet } of dataset) {
+      renderBenchSet({ platformName: name, benchSet: dataSet, main: document.getElementById(`chart-${name}`) });
     }
   }, [names]);
 
@@ -217,7 +224,7 @@ export function Charts() {
         </div>
         <div className="flex items-center gap-3">
           <Button id="dl-button" size="sm" variant="ghost" startIcon={<DownloadIcon />}>
-            Download Data
+            Download All Benchmarks Data
           </Button>
         </div>
       </div>
@@ -225,20 +232,34 @@ export function Charts() {
       <Separator className="mt-2" />
 
       {names && (
-        <Tabs defaultValue={names[0]} className="mt-6">
+        <Tabs
+          onValueChange={(value) => {
+            setSelectedPlatform(value);
+          }}
+          defaultValue={names[0]}
+          className="mt-6"
+        >
           <div className="flex items-center overflow-auto">
             <TabsList>
               {names.map((name) => (
                 <TabsTrigger key={name} value={name}>
-                  {joinWords(name)}
+                  {name}
                 </TabsTrigger>
               ))}
             </TabsList>
           </div>
 
-          {names.map((name) => (
-            <TabsContent className="mt-4" id={`chart-${name}`} key={name} value={name} />
-          ))}
+          <div className="mt-4 flex flex-row gap-8">
+            <div className="sticky top-6 hidden min-w-[280px] self-start lg:block">
+              <ChartsList charts={benchSet} selectedPlatform={selectedPlatform} />
+            </div>
+
+            <div className="w-full">
+              {names.map((name) => (
+                <TabsContent id={`chart-${name}`} key={name} value={name} />
+              ))}
+            </div>
+          </div>
         </Tabs>
       )}
 
