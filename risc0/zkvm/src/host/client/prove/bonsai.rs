@@ -18,7 +18,10 @@ use anyhow::{anyhow, bail, ensure, Context, Result};
 use bonsai_sdk::alpha::Client;
 
 use super::Prover;
-use crate::{compute_image_id, sha::Digestible, ExecutorEnv, ProverOpts, Receipt, VerifierContext};
+use crate::{
+    compute_image_id, sha::Digestible, ExecutorEnv, InnerReceipt, ProverOpts, Receipt,
+    VerifierContext,
+};
 
 /// An implementation of a [Prover] that runs proof workloads via Bonsai.
 ///
@@ -123,6 +126,21 @@ impl Prover for BonsaiProver {
                         .unwrap_or("Bonsai workflow missing error_msg".into()),
                 );
             }
+        }
+    }
+
+    fn compress(&self, _: &ProverOpts, receipt: &Receipt) -> Result<Receipt> {
+        match receipt.inner {
+            InnerReceipt::Succinct(_) | InnerReceipt::Compact(_) => Ok(receipt.clone()),
+            // NOTE: Bonsai always returns a SuccinctReceipt, and does not support compression of
+            // SegmentReceipts uploaded by clients. It would be possible to support this, but there
+            // is not an apperent reason to do so.
+            InnerReceipt::Composite(_) => Err(anyhow!(
+                "BonsaiProver does not support compress on a composite receipt"
+            )),
+            InnerReceipt::Fake { .. } => Err(anyhow!(
+                "BonsaiProver does not support compress on a composite receipt"
+            )),
         }
     }
 }
