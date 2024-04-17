@@ -160,6 +160,8 @@ jobs:
       - name: check for "D0 NOT MERGE" comments
         run: |
           [ "$(grep -re 'DO[_ ]\?NOT[_ ]\?MERGE' $(git ls-tree --full-tree --name-only -r HEAD) | tee /dev/fd/2 | wc -l)" -eq "0" ]
+      - name: Compare circom hashes to golden values
+        run: bash ./.github/scripts/circom_stable.sh
 
   test:
     if: needs.changes.outputs.test == 'true'
