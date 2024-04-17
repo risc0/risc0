@@ -90,7 +90,6 @@ pub fn toy_model_security<H: Hal>(taps: &TapSet, coeffs_size: usize) -> f32 {
     let ext_field_size = field_size.powf(ext_size);
 
     let plonk_plookup_error = params.plonk_plookup_error();
-    let plonk_plookup_bits = plonk_plookup_error.log2();
     let constraints_error = 1f32 / ext_field_size;
     let fri_error = RHO.powi(crate::QUERIES as i32);
 
@@ -206,8 +205,6 @@ impl Params {
     //     - From one row to the next, (max_degree - 2) bounds the number of accumulated values (prod` = prod * x1 * x2 * x3)
     //     - We compute [num Fp4s per row] * [num accumulated Fp4s per trace Fp4] * [trace_domain_size] / [ext_field_size]
     fn plonk_plookup_error(&self) -> f32 {
-        let w_accum: f32 = self.w_accum;
-        let trace_domain_size: f32 = self.trace_domain_size as f32;
         self.w_accum as f32 / self.ext_size as f32
             * (self.max_degree - 2.0)
             * self.trace_domain_size
