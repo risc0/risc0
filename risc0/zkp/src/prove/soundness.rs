@@ -91,7 +91,6 @@ pub fn toy_model_security<H: Hal>(taps: &TapSet, coeffs_size: usize) -> f32 {
 
     let plonk_plookup_error = params.plonk_plookup_error();
     let plonk_plookup_bits = plonk_plookup_error.log2();
-    tracing::info!("plonk_plookup_error: {plonk_plookup_bits:?}");
     let constraints_error = 1f32 / ext_field_size;
     let fri_error = RHO.powi(crate::QUERIES as i32);
 
@@ -209,8 +208,6 @@ impl Params {
     fn plonk_plookup_error(&self) -> f32 {
         let w_accum: f32 = self.w_accum;
         let trace_domain_size: f32 = self.trace_domain_size as f32;
-        tracing::info!("w_accum: {w_accum:?}");
-        tracing::info!("trace_domain_size: {trace_domain_size:?}");
         self.w_accum as f32 / self.ext_size as f32
             * (self.max_degree - 2.0)
             * self.trace_domain_size
