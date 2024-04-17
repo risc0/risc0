@@ -14,7 +14,7 @@
 
 use anyhow::Result;
 use assert_cmd::cargo::cargo_bin;
-use risc0_zkvm::{ExecutorEnv, ExternalProver, Prover};
+use risc0_zkvm::{ExecutorEnv, ExternalProver, ProveInfo, Prover};
 use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID};
 
 fn prove_nothing() -> Result<ProveInfo> {
