@@ -87,7 +87,7 @@ impl TestClient {
     }
 
     fn prove(&self, env: &ExecutorEnv<'_>, opts: &ProverOpts, binary: Asset) -> Receipt {
-        with_server(self.addr, || self.client.prove(env, opts, binary))
+        with_server(self.addr, || self.client.prove(&env, opts, binary)).receipt
     }
 
     fn prove_segment(&self, opts: &ProverOpts, segment: Asset) -> SegmentReceipt {

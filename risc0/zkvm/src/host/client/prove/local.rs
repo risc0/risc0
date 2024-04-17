@@ -17,7 +17,7 @@ use anyhow::{bail, Result};
 use super::{Executor, Prover, ProverOpts};
 use crate::{
     get_prover_server, host::server::session::NullSegmentRef, ExecutorEnv, ExecutorImpl,
-    InnerReceipt, Receipt, SegmentInfo, SessionInfo, VerifierContext,
+    InnerReceipt, ProveInfo, Receipt, SegmentInfo, SessionInfo, VerifierContext,
 };
 
 /// A [Prover] implementation that selects a [crate::ProverServer] by calling
@@ -42,7 +42,7 @@ impl Prover for LocalProver {
         ctx: &VerifierContext,
         elf: &[u8],
         opts: &ProverOpts,
-    ) -> Result<Receipt> {
+    ) -> Result<ProveInfo> {
         get_prover_server(opts)?.prove_with_ctx(env, ctx, elf)
     }
 
