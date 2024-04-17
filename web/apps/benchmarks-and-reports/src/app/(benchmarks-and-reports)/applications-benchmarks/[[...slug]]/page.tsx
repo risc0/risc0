@@ -27,7 +27,12 @@ export const metadata: Metadata = {
 
 export default function ApplicationsBenchmarksPage({ params }) {
   if (!params.slug) {
-    redirect(`/applications-benchmarks/${replace(Object.keys(FILENAMES_TO_TITLES)[0]!, ".csv", "")}`);
+    redirect(
+      `/applications-benchmarks/${
+        // biome-ignore lint/style/noNonNullAssertion: ignore
+        replace(Object.keys(FILENAMES_TO_TITLES)[0]!, ".csv", "")
+      }`,
+    );
   }
 
   return (

@@ -2,10 +2,6 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import Link from "next/link";
 
 export function ChartsList({ charts, selectedPlatform }) {
-  if (!charts) {
-    return null;
-  }
-
   return (
     <Command className="border">
       <CommandInput placeholder={`${selectedPlatform} Benchmarks`} />
