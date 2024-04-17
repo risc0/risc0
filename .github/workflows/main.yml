@@ -119,7 +119,6 @@ jobs:
         with:
           # Full history is required by license-check.py
           fetch-depth: 0
-          lfs: true
       - uses: ./.github/actions/rustup
       - name: Install cargo-sort
         uses: risc0/cargo-install@b9307573043522ab0d3e3be64a51763b765b52a4
