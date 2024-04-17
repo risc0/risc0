@@ -48,6 +48,8 @@ let prover = default_prover();
 let receipt = prover.prove(env, METHOD_NAME_ELF).unwrap().receipt;
 ```
 
+Here, the zkVM uses `METHOD_NAME_ELF` binary to execute guest code. The `METHOD_NAME_ELF` is computed during compilation. The user needs to import it (`use methods::{METHOD_NAME_ELF};`) and then pass it as an input parameter to the `prover.prove` function.
+
 To see more complex examples, check out the [examples].
 
 ## Verifying Receipts
@@ -67,6 +69,8 @@ another party for verification, along these lines:
 # let receipt = prover.prove(env, METHOD_NAME_ELF).unwrap().receipt;
 receipt.verify(METHOD_NAME_ID).unwrap();
 ```
+
+During compilation, we compute the `METHOD_NAME_ID`, and the user needs to import it (`use methods::{METHOD_NAME_ID};`) before passing it to `receipt.verify` function for verification.
 
 For more information on passing and verifying receipts, check out our page on
 [Receipts]. For practical demos, check out the [examples].
