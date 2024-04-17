@@ -44,7 +44,10 @@ fn main() {
         .unwrap();
 
     // we run the prover to generate a receipt of correct verification
-    let receipt = default_prover().prove(env, GROTH16_VERIFIER_ELF).unwrap();
+    let receipt = default_prover()
+        .prove(env, GROTH16_VERIFIER_ELF)
+        .unwrap()
+        .receipt;
 
     // we verify the final receipt
     receipt.verify(GROTH16_VERIFIER_ID).unwrap();

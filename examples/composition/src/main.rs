@@ -32,7 +32,10 @@ fn main() {
         .build()
         .unwrap();
 
-    let receipt = default_prover().prove(env, EXPONENTIATE_ELF).unwrap();
+    let receipt = default_prover()
+        .prove(env, EXPONENTIATE_ELF)
+        .unwrap()
+        .receipt;
 
     // Anybody who receives the receipt for the exponentiation is assured both that:
     // A) The modulus n included in the journal has a known factorization.

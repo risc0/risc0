@@ -214,7 +214,7 @@ fn test_recursion_lift_resolve_e2e() {
         .unwrap()
         .build()
         .unwrap();
-    let assumption_receipt_a = prover.prove(env, MULTI_TEST_ELF).unwrap();
+    let assumption_receipt_a = prover.prove(env, MULTI_TEST_ELF).unwrap().receipt;
     tracing::info!("Done proving: echo 'execution A'");
 
     tracing::info!("Proving: echo 'execution B'");
@@ -225,7 +225,7 @@ fn test_recursion_lift_resolve_e2e() {
         .unwrap()
         .build()
         .unwrap();
-    let assumption_receipt_b = prover.prove(env, MULTI_TEST_ELF).unwrap();
+    let assumption_receipt_b = prover.prove(env, MULTI_TEST_ELF).unwrap().receipt;
     tracing::info!("Done proving: echo 'execution B'");
 
     let env = ExecutorEnv::builder()
@@ -240,7 +240,7 @@ fn test_recursion_lift_resolve_e2e() {
         .unwrap();
 
     tracing::info!("Proving: sys_verify");
-    let composition_receipt = prover.prove(env, MULTI_TEST_ELF).unwrap();
+    let composition_receipt = prover.prove(env, MULTI_TEST_ELF).unwrap().receipt;
     tracing::info!("Done proving: sys_verify");
 
     let succinct_receipt = prover

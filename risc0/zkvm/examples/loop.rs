@@ -190,6 +190,6 @@ fn top(prover: Rc<dyn ProverServer>, iterations: u64, po2: u32) -> (Session, Rec
     let mut exec = ExecutorImpl::from_elf(env, BENCH_ELF).unwrap();
     let session = exec.run().unwrap();
     let ctx = VerifierContext::default();
-    let receipt = prover.prove_session(&ctx, &session).unwrap();
+    let receipt = prover.prove_session(&ctx, &session).unwrap().receipt;
     (session, receipt)
 }
