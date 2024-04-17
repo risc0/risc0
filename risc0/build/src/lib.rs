@@ -36,9 +36,24 @@ use risc0_zkp::core::digest::DIGEST_WORDS;
 use risc0_zkvm_platform::memory;
 use serde::Deserialize;
 
-pub use docker::docker_build;
+pub use docker::{docker_build, BuildStatus, TARGET_DIR};
 
 const RUSTUP_TOOLCHAIN_NAME: &str = "risc0";
+
+/// Get the path used by cargo-risczero that stores downloaded toolchains
+pub fn risc0_data() -> Result<PathBuf> {
+    let dir = if let Ok(dir) = std::env::var("RISC0_DATA_DIR") {
+        dir.into()
+    } else if let Some(root) = dirs::data_dir() {
+        root.join("cargo-risczero")
+    } else if let Some(home) = dirs::home_dir() {
+        home.join(".cargo-risczero")
+    } else {
+        anyhow::bail!("Could not determine cargo-risczero data dir. Set RISC0_DATA_DIR env var.");
+    };
+
+    Ok(dir)
+}
 
 #[derive(Debug, Deserialize)]
 struct Risc0Metadata {
@@ -303,8 +318,14 @@ pub fn cargo_command(subcmd: &str, rust_flags: &[&str]) -> Command {
     .concat()
     .join("\x1f");
 
+    let cc_path = risc0_data()
+        .unwrap()
+        .join("cpp/bin/riscv32-unknown-elf-gcc");
+    let c_flags = "-march=rv32im -nostdlib";
     cmd.env("RUSTC", rustc)
         .env("CARGO_ENCODED_RUSTFLAGS", rustflags_envvar)
+        .env("CC", cc_path)
+        .env("CFLAGS_riscv32im_risc0_zkvm_elf", c_flags)
         .args(args);
 
     cmd
@@ -358,7 +379,7 @@ fn build_staticlib(guest_pkg: &str, features: &[&str]) -> String {
     let mut child = cmd.stdout(Stdio::piped()).spawn().unwrap();
     let reader = std::io::BufReader::new(child.stdout.take().unwrap());
     let mut libs = Vec::new();
-    for message in cargo_metadata::Message::parse_stream(reader) {
+    for message in Message::parse_stream(reader) {
         match message.unwrap() {
             Message::CompilerArtifact(artifact) => {
                 for filename in artifact.filenames {

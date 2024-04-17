@@ -20,7 +20,7 @@ use risc0_core::field::{Elem, Field};
 
 use crate::{
     adapter::{CircuitProveDef, CircuitStepContext, CircuitStepHandler, REGISTER_GROUP_ACCUM},
-    hal::cpu::CpuBuffer,
+    hal::{cpu::CpuBuffer, Hal},
     prove::{
         accum::{Accum, Handler},
         executor::Executor,
@@ -62,11 +62,23 @@ where
         self.exec.circuit.get_taps()
     }
 
-    /// Perform initial 'execution' setting code + data.
-    /// Additionally, write any 'results' as needed.
-    pub fn execute(&mut self, iop: &mut WriteIOP<F>) {
-        iop.write_field_elem_slice(&self.exec.io.as_slice());
-        iop.write_u32_slice(&[self.exec.po2 as u32]);
+    /// Write the globals and po2 to the IOP, and mix them into the Fiat-Shamir state.
+    pub fn execute<H>(&mut self, iop: &mut WriteIOP<F>, hal: &H)
+    where
+        H: Hal<Field = F, Elem = F::Elem, ExtElem = F::ExtElem>,
+    {
+        // Concat io (i.e. globals) and po2 into a vector.
+        let vec: Vec<F::Elem> = self
+            .exec
+            .io
+            .as_slice()
+            .iter()
+            .chain(F::Elem::from_u32_slice(&[self.exec.po2 as u32]))
+            .copied()
+            .collect();
+
+        iop.commit(&hal.get_hash_suite().hashfn.hash_elem_slice(&vec));
+        iop.write_field_elem_slice(vec.as_slice());
     }
 
     fn compute_accum(&mut self) {
