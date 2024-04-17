@@ -6,6 +6,7 @@ import { cn } from "@risc0/ui/cn";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@risc0/ui/dialog";
 import { createColumnHelper } from "@tanstack/react-table";
 import { EyeIcon } from "lucide-react";
+import Link from "next/link";
 import { Highlight, themes } from "prism-react-renderer";
 import { TableColumnHeader } from "shared/client/table/table-column-header";
 import { joinWords } from "shared/utils/join-words";
@@ -16,7 +17,20 @@ const columnHelper = createColumnHelper<CratesIoValidationTableSchema>();
 export const cratesIoValidationTableColumns = [
   columnHelper.accessor("name", {
     header: ({ column }) => <TableColumnHeader column={column} title="Crate" />,
-    cell: (info) => <div className="font-mono text-xs">{info.getValue()}</div>,
+    cell: (info) => (
+      <div className="font-mono text-xs">
+        <Link
+          className="link"
+          href={`https://crates.io/crates/${info.row.original.name}${
+            info.row.original.version ? `/${info.row.original.version}` : ""
+          }`}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {info.getValue()}
+        </Link>
+      </div>
+    ),
   }),
   columnHelper.accessor("version", {
     header: ({ column }) => <TableColumnHeader column={column} title="Crate Version" />,

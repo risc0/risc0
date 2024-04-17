@@ -71,7 +71,7 @@ impl Client {
     pub fn prove(
         &self,
         env: &ExecutorEnv<'_>,
-        opts: ProverOpts,
+        opts: &ProverOpts,
         binary: Asset,
     ) -> Result<ProveInfo> {
         let mut conn = self.connect()?;
@@ -80,7 +80,7 @@ impl Client {
             kind: Some(pb::api::server_request::Kind::Prove(
                 pb::api::ProveRequest {
                     env: Some(self.make_execute_env(env, binary.try_into()?)?),
-                    opts: Some(opts.into()),
+                    opts: Some(opts.clone().into()),
                     receipt_out: Some(pb::api::AssetRequest {
                         kind: Some(pb::api::asset_request::Kind::Inline(())),
                     }),
@@ -138,7 +138,7 @@ impl Client {
     /// Prove the specified segment.
     pub fn prove_segment(
         &self,
-        opts: ProverOpts,
+        opts: &ProverOpts,
         segment: Asset,
         receipt_out: AssetRequest,
     ) -> Result<SegmentReceipt> {
@@ -147,7 +147,7 @@ impl Client {
         let request = pb::api::ServerRequest {
             kind: Some(pb::api::server_request::Kind::ProveSegment(
                 pb::api::ProveSegmentRequest {
-                    opts: Some(opts.into()),
+                    opts: Some(opts.clone().into()),
                     segment: Some(segment.try_into()?),
                     receipt_out: Some(receipt_out.try_into()?),
                 },
@@ -183,7 +183,7 @@ impl Client {
     /// used as the input to all other recursion programs (e.g. join, resolve, and identity_p254).
     pub fn lift(
         &self,
-        opts: ProverOpts,
+        opts: &ProverOpts,
         receipt: Asset,
         receipt_out: AssetRequest,
     ) -> Result<SuccinctReceipt> {
@@ -191,7 +191,7 @@ impl Client {
 
         let request = pb::api::ServerRequest {
             kind: Some(pb::api::server_request::Kind::Lift(pb::api::LiftRequest {
-                opts: Some(opts.into()),
+                opts: Some(opts.clone().into()),
                 receipt: Some(receipt.try_into()?),
                 receipt_out: Some(receipt_out.try_into()?),
             })),
@@ -224,7 +224,7 @@ impl Client {
     /// the same session can be compressed into a single receipt for the entire session.
     pub fn join(
         &self,
-        opts: ProverOpts,
+        opts: &ProverOpts,
         left_receipt: Asset,
         right_receipt: Asset,
         receipt_out: AssetRequest,
@@ -233,7 +233,7 @@ impl Client {
 
         let request = pb::api::ServerRequest {
             kind: Some(pb::api::server_request::Kind::Join(pb::api::JoinRequest {
-                opts: Some(opts.into()),
+                opts: Some(opts.clone().into()),
                 left_receipt: Some(left_receipt.try_into()?),
                 right_receipt: Some(right_receipt.try_into()?),
                 receipt_out: Some(receipt_out.try_into()?),
@@ -269,7 +269,7 @@ impl Client {
     /// unconditional receipt.
     pub fn resolve(
         &self,
-        opts: ProverOpts,
+        opts: &ProverOpts,
         conditional_receipt: Asset,
         assumption_receipt: Asset,
         receipt_out: AssetRequest,
@@ -279,7 +279,7 @@ impl Client {
         let request = pb::api::ServerRequest {
             kind: Some(pb::api::server_request::Kind::Resolve(
                 pb::api::ResolveRequest {
-                    opts: Some(opts.into()),
+                    opts: Some(opts.clone().into()),
                     conditional_receipt: Some(conditional_receipt.try_into()?),
                     assumption_receipt: Some(assumption_receipt.try_into()?),
                     receipt_out: Some(receipt_out.try_into()?),
@@ -315,7 +315,7 @@ impl Client {
     /// produced with Poseidon over the BN254 base field compared to using Posidon over BabyBear.
     pub fn identity_p254(
         &self,
-        opts: ProverOpts,
+        opts: &ProverOpts,
         receipt: Asset,
         receipt_out: AssetRequest,
     ) -> Result<SuccinctReceipt> {
@@ -324,7 +324,7 @@ impl Client {
         let request = pb::api::ServerRequest {
             kind: Some(pb::api::server_request::Kind::IdentiyP254(
                 pb::api::IdentityP254Request {
-                    opts: Some(opts.into()),
+                    opts: Some(opts.clone().into()),
                     receipt: Some(receipt.try_into()?),
                     receipt_out: Some(receipt_out.try_into()?),
                 },

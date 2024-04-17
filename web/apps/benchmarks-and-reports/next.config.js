@@ -10,6 +10,7 @@ const config = {
   transpilePackages: ["@risc0/ui"],
   experimental: {
     caseSensitiveRoutes: true,
+    ppr: true,
   },
 };
 
