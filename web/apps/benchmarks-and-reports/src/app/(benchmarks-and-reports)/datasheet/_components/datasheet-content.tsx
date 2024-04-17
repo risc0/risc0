@@ -1,4 +1,4 @@
-import { Link } from "@risc0/ui/link";
+import Link from "next/link";
 import { fetchDatasheet } from "../_actions/fetch-datasheet";
 import { DatasheetTable } from "./datasheet-table";
 import { datasheetTableColumns } from "./datasheet-table-columns";
