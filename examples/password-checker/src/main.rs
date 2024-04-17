@@ -42,7 +42,7 @@ fn password_checker(request: PasswordRequest) -> Digest {
     let prover = default_prover();
 
     // Produce a receipt by proving the specified ELF binary.
-    let receipt = prover.prove(env, PW_CHECKER_ELF).unwrap();
+    let receipt = prover.prove(env, PW_CHECKER_ELF).unwrap().receipt;
 
     receipt.journal.decode().unwrap()
 }

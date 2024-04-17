@@ -96,7 +96,7 @@ fn join(bencher: Bencher) {
     bencher
         .counter(ItemsCount::new(1usize << RECURSION_PO2))
         .with_inputs(|| {
-            let receipt = prover.prove_session(&ctx, &session).unwrap();
+            let receipt = prover.prove_session(&ctx, &session).unwrap().receipt;
             let composite = receipt.inner.composite().unwrap();
             let left = prover.lift(&composite.segments[0]).unwrap();
             let right = prover.lift(&composite.segments[1]).unwrap();

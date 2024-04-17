@@ -30,7 +30,7 @@ fn main() {
     let prover = default_prover();
 
     // Produce a receipt by proving the specified ELF binary.
-    let receipt = prover.prove(env, BEVY_GUEST_ELF).unwrap();
+    let receipt = prover.prove(env, BEVY_GUEST_ELF).unwrap().receipt;
 
     // The prover already runs a verify internally and so it's redundant to verify
     // again here. However, this is how other users would verify the receipt:
