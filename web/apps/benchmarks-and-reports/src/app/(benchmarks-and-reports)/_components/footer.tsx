@@ -1,4 +1,4 @@
-import { Link } from "@risc0/ui/link";
+import Link from "next/link";
 
 export function Footer() {
   return (

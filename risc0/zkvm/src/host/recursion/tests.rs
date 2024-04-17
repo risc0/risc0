@@ -27,8 +27,8 @@ use super::{
     ProverOpts as RecursionProverOpts,
 };
 use crate::{
-    get_prover_server, ExecutorEnv, ExecutorImpl, InnerReceipt, ProverOpts, Receipt,
-    SegmentReceipt, Session, VerifierContext, ALLOWED_IDS_ROOT,
+    default_prover, get_prover_server, ExecutorEnv, ExecutorImpl, InnerReceipt, ProverOpts,
+    Receipt, SegmentReceipt, Session, VerifierContext, ALLOWED_IDS_ROOT,
 };
 
 // Failure on older mac minis in the lab with Intel UHD 630 graphics:
@@ -249,10 +249,18 @@ fn test_recursion_lift_resolve_e2e() {
 
     let receipt = Receipt::new(
         InnerReceipt::Succinct(succinct_receipt),
-        composition_receipt.journal.bytes,
+        composition_receipt.clone().journal.bytes,
     );
 
     receipt.verify(MULTI_TEST_ID).unwrap();
+
+    // These tests take a long time. Since we have the composition receipt, test the prover trait's compress function
+    let prover = default_prover();
+
+    let succinct_receipt = prover
+        .compress(&ProverOpts::default(), &composition_receipt)
+        .unwrap();
+    succinct_receipt.verify(MULTI_TEST_ID).unwrap();
 }
 
 #[test]
