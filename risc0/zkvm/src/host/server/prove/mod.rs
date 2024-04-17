@@ -35,7 +35,7 @@ use crate::{
     is_dev_mode, ExecutorEnv, ExecutorImpl, ProverOpts, Segment, Session, VerifierContext,
 };
 
-/// A ProverServer can execute a given ELF binary and produce a [Receipt]
+/// A ProverServer can execute a given ELF binary and produce a [ProveInfo] which contains a [crate::Receipt]
 /// that can be used to verify correct computation.
 pub trait ProverServer {
     /// Prove the specified ELF binary.
