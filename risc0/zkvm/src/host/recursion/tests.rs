@@ -28,7 +28,7 @@ use super::{
 };
 use crate::{
     get_prover_server, ExecutorEnv, ExecutorImpl, InnerReceipt, ProverOpts, Receipt,
-    SegmentReceipt, Session, VerifierContext,
+    SegmentReceipt, Session, VerifierContext, ALLOWED_IDS_ROOT,
 };
 
 // Failure on older mac minis in the lab with Intel UHD 630 graphics:
@@ -253,4 +253,15 @@ fn test_recursion_lift_resolve_e2e() {
     );
 
     receipt.verify(MULTI_TEST_ID).unwrap();
+}
+
+#[test]
+fn stable_root() {
+    // This tests that none of the control IDs have changed unexpectedly
+    // If you have _intentionally_ changed control IDs, update this hash.
+
+    assert_eq!(
+        ALLOWED_IDS_ROOT,
+        "88c1f749250aba181168c33839d7a351671e7a5b7f3e746dde91ef6c6e9ef344"
+    );
 }
