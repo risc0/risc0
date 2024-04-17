@@ -138,7 +138,7 @@ pub fn main() {
 
     let prover = args.get_prover();
     let ctx = VerifierContext::default();
-    let receipt = prover.prove_session(&ctx, &session).unwrap();
+    let receipt = prover.prove_session(&ctx, &session).unwrap().receipt;
 
     let receipt_data = bincode::serialize(&receipt).unwrap();
     let receipt_bytes = bytemuck::cast_slice(&receipt_data);

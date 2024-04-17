@@ -27,8 +27,9 @@ use risc0_circuit_rv32im::prove::segment::Segment as CircuitSegment;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    host::client::env::SegmentPath, sha::Digest, Assumption, Assumptions, ExitCode, Journal,
-    Output, ReceiptClaim,
+    host::{client::env::SegmentPath, prove_info::SessionStats},
+    sha::Digest,
+    Assumption, Assumptions, ExitCode, Journal, Output, ReceiptClaim,
 };
 
 #[derive(Clone, Default, Serialize, Deserialize, Debug)]
@@ -218,6 +219,17 @@ impl Session {
         tracing::info!("total cycles: {}", self.total_cycles);
         tracing::info!("user cycles: {}", self.user_cycles);
         tracing::info!("cycle efficiency: {}%", cycle_efficiency as u32);
+    }
+
+    /// Returns stats for the session
+    ///
+    /// This contains cycle and segment information about the session useful for debugging and measuring performance.
+    pub fn stats(&self) -> SessionStats {
+        SessionStats {
+            segments: self.segments.len(),
+            total_cycles: self.total_cycles,
+            user_cycles: self.user_cycles,
+        }
     }
 }
 
