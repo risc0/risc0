@@ -260,8 +260,8 @@ mod cuda {
 mod metal {
     pub use risc0_circuit_recursion::metal::MetalCircuitHal;
     pub use risc0_zkp::hal::metal::{
-        MetalHalPoseidon, MetalHalPoseidon2, MetalHalSha256, MetalHashPoseidon,
-        MetalHashPoseidon2, MetalHashSha256,
+        MetalHalPoseidon, MetalHalPoseidon2, MetalHalSha256, MetalHashPoseidon, MetalHashPoseidon2,
+        MetalHashSha256,
     };
 
     use super::{HalPair, Rc};
