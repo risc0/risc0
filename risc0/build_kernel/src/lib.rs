@@ -168,9 +168,6 @@ impl KernelBuild {
             flags.push(append_flags);
         }
 
-        flags.push("--relocatable-device-code=true".into());
-        flags.push("--device-link".into());
-
         self.cached_compile(
             output,
             "fatbin",
