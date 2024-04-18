@@ -319,7 +319,9 @@ pub fn cargo_command(subcmd: &str, rust_flags: &[&str]) -> Command {
     .join("\x1f");
 
     if !cpp_toolchain_override() {
-       let cc_path = risc0_data().unwrap().join("cpp/bin/riscv32-unknown-elf-gcc");
+        let cc_path = risc0_data()
+            .unwrap()
+            .join("cpp/bin/riscv32-unknown-elf-gcc");
         cmd.env("CC", cc_path)
             .env("CFLAGS_riscv32im_risc0_zkvm_elf", "-march=rv32im -nostdlib");
     }
@@ -333,8 +335,8 @@ pub fn cargo_command(subcmd: &str, rust_flags: &[&str]) -> Command {
 fn cpp_toolchain_override() -> bool {
     // detect if there's an attempt to override the Cpp toolchain.
     // Overriding the toolchain useful for troubleshooting crates.
-    std::env::var("CC_riscv32im_risc0_zkvm_elf").is_ok() ||
-    std::env::var("CFLAGS_riscv32im_risc0_zkvm_elf").is_ok()
+    std::env::var("CC_riscv32im_risc0_zkvm_elf").is_ok()
+        || std::env::var("CFLAGS_riscv32im_risc0_zkvm_elf").is_ok()
 }
 
 /// Builds a static library providing a rust runtime.
