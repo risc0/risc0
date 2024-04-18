@@ -322,7 +322,7 @@ impl Client {
         let mut conn = self.connect()?;
 
         let request = pb::api::ServerRequest {
-            kind: Some(pb::api::server_request::Kind::IdentiyP254(
+            kind: Some(pb::api::server_request::Kind::IdentityP254(
                 pb::api::IdentityP254Request {
                     opts: Some(opts.clone().into()),
                     receipt: Some(receipt.try_into()?),
