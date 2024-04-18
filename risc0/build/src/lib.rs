@@ -333,9 +333,7 @@ pub fn cargo_command(subcmd: &str, rust_flags: &[&str]) -> Command {
 fn cpp_toolchain_override() -> bool {
     // detect if there's an attempt to override the Cpp toolchain.
     // Overriding the toolchain useful for troubleshooting crates.
-    std::env::var("CC").is_ok() ||
     std::env::var("CC_riscv32im_risc0_zkvm_elf").is_ok() ||
-    std::env::var("CFLAGS").is_ok() ||
     std::env::var("CFLAGS_riscv32im_risc0_zkvm_elf").is_ok()
 }
 
