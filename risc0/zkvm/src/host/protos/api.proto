@@ -143,7 +143,7 @@ message ExecutorEnv {
 
 message Assumption {
   oneof kind {
-    Asset proven = 1; // Receipt
+    Asset proven = 1;     // Receipt
     Asset unresolved = 2; // MaybePruned<ReceiptClaim>
   }
 }
@@ -266,7 +266,7 @@ message OnSessionDone {
 }
 
 message OnProveDone {
-  Asset receipt = 1;
+  Asset prove_info = 1;
 }
 
 message GenericReply {

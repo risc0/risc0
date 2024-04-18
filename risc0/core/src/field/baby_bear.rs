@@ -80,7 +80,7 @@ impl fmt::Debug for Elem {
 }
 
 /// The modulus of the field.
-const P: u32 = 15 * (1 << 27) + 1;
+pub const P: u32 = 15 * (1 << 27) + 1;
 
 /// The modulus of the field as a u64.
 const P_U64: u64 = P as u64;
@@ -276,7 +276,7 @@ impl Ord for Elem {
 
 impl PartialOrd for Elem {
     fn partial_cmp(&self, rhs: &Self) -> Option<Ordering> {
-        decode(self.ensure_valid().0).partial_cmp(&decode(rhs.ensure_valid().0))
+        Some(self.cmp(rhs))
     }
 }
 
@@ -356,7 +356,7 @@ const fn encode(a: u32) -> u32 {
     mul(R2, a)
 }
 
-/// Decode from Montgomery form from direct form.
+/// Decode from Montgomery form to direct form.
 const fn decode(a: u32) -> u32 {
     mul(1, a)
 }

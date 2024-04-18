@@ -92,7 +92,7 @@ impl Prover {
                         continue;
                     }
                     let deserialized_receipt: Receipt = bincode::deserialize(&receipt)?;
-                    env.add_assumption(deserialized_receipt.into());
+                    env.add_assumption(deserialized_receipt);
                 }
 
                 let env = env

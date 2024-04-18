@@ -31,6 +31,10 @@ struct Args {
     #[arg(short = 'f', long)]
     hashfn: Option<String>,
 
+    /// Enable tracing forest
+    #[arg(short, long, default_value_t = false)]
+    tree: bool,
+
     #[arg(short, long, default_value_t = false)]
     skip_prover: bool,
 }
@@ -45,12 +49,18 @@ struct Metrics {
 }
 
 fn main() {
+    let args = Args::parse();
+
     tracing_subscriber::registry()
+        .with(tracing_subscriber::fmt::layer())
         .with(EnvFilter::from_default_env())
-        .with(tracing_forest::ForestLayer::default())
+        .with(if args.tree {
+            Some(tracing_forest::ForestLayer::default())
+        } else {
+            None
+        })
         .init();
 
-    let args = Args::parse();
     let mut opts = ProverOpts::default();
     if let Some(hashfn) = args.hashfn {
         opts.hashfn = hashfn;
@@ -68,8 +78,6 @@ fn top(prover: Rc<dyn ProverServer>, iterations: u32, skip_prover: bool) -> Metr
         .unwrap();
     let mut exec = ExecutorImpl::from_elf(env, FIB_ELF).unwrap();
     let session = exec.run().unwrap();
-    let segments = session.resolve().unwrap();
-    let (total_cycles, user_cycles) = session.get_cycles().unwrap();
     let seal = if skip_prover {
         0
     } else {
@@ -77,6 +85,7 @@ fn top(prover: Rc<dyn ProverServer>, iterations: u32, skip_prover: bool) -> Metr
         prover
             .prove_session(&ctx, &session)
             .unwrap()
+            .receipt
             .inner
             .composite()
             .unwrap()
@@ -86,9 +95,9 @@ fn top(prover: Rc<dyn ProverServer>, iterations: u32, skip_prover: bool) -> Metr
     };
 
     Metrics {
-        segments: segments.len(),
-        user_cycles,
-        total_cycles,
+        segments: session.segments.len(),
+        user_cycles: session.user_cycles,
+        total_cycles: session.total_cycles,
         seal,
     }
 }

@@ -27,8 +27,9 @@ use merkle::MerkleGroup;
 use risc0_circuit_recursion::{
     cpu::CpuCircuitHal, CircuitImpl, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA,
 };
+use risc0_circuit_rv32im::control_id::POSEIDON2_CONTROL_ID;
 use risc0_zkp::{
-    adapter::{CircuitInfo, CircuitStepContext, TapsProvider},
+    adapter::{CircuitInfo, CircuitStepContext, TapsProvider, PROOF_SYSTEM_INFO},
     core::{
         digest::Digest,
         hash::{poseidon::PoseidonHashSuite, poseidon2::Poseidon2HashSuite, HashSuite},
@@ -50,20 +51,20 @@ use crate::{
     receipt_claim::{Merge, Output},
     recursion::{valid_control_ids, SuccinctReceipt},
     sha::Digestible,
-    HalPair, ReceiptClaim, SegmentReceipt, POSEIDON_CONTROL_ID,
+    HalPair, ReceiptClaim, SegmentReceipt,
 };
 
 // TODO: Automatically generate these constants from the circuit somehow without
 // messing up bootstrap dependencies.
 /// Number of rows to use for the recursion circuit witness as a power of 2.
-const RECURSION_PO2: usize = 18;
+pub const RECURSION_PO2: usize = 18;
 /// Depth of the Merkle tree to use for encoding the set of allowed control IDs.
 /// NOTE: Changing this constant must be coordinated with the circuit. In order to avoid needing to
 /// change the circuit later, this is set to 8 which allows for enough control IDs to be encoded
 /// that we are unlikely to need more.
 const ALLOWED_CODE_MERKLE_DEPTH: usize = 8;
 /// Size of the code group in the taps of the recursion circuit.
-const RECURSION_CODE_SIZE: usize = 21;
+const RECURSION_CODE_SIZE: usize = 23;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct RecursionReceipt {
@@ -212,7 +213,7 @@ impl Default for ProverOpts {
     fn default() -> ProverOpts {
         ProverOpts {
             skip_seal: false,
-            suite: PoseidonHashSuite::new_suite(),
+            suite: Poseidon2HashSuite::new_suite(),
         }
     }
 }
@@ -232,12 +233,9 @@ mod cuda {
     pub use risc0_circuit_recursion::cuda::{
         CudaCircuitHalPoseidon, CudaCircuitHalPoseidon2, CudaCircuitHalSha256,
     };
-    pub use risc0_zkp::{
-        core::hash::poseidon_254::Poseidon254HashSuite,
-        hal::cuda::{CudaHalPoseidon, CudaHalPoseidon2, CudaHalSha256},
-    };
+    pub use risc0_zkp::hal::cuda::{CudaHalPoseidon, CudaHalPoseidon2, CudaHalSha256};
 
-    use super::{BabyBear, CircuitImpl, CpuCircuitHal, CpuHal, HalPair, Rc, CIRCUIT};
+    use super::{HalPair, Rc};
 
     pub fn sha256_hal_pair() -> HalPair<CudaHalSha256, CudaCircuitHalSha256> {
         let hal = Rc::new(CudaHalSha256::new());
@@ -256,27 +254,17 @@ mod cuda {
         let circuit_hal = Rc::new(CudaCircuitHalPoseidon2::new(hal.clone()));
         HalPair { hal, circuit_hal }
     }
-
-    pub fn poseidon254_hal_pair() -> HalPair<CpuHal<BabyBear>, CpuCircuitHal<'static, CircuitImpl>>
-    {
-        let hal = Rc::new(CpuHal::new(Poseidon254HashSuite::new_suite()));
-        let circuit_hal = Rc::new(CpuCircuitHal::new(&CIRCUIT));
-        HalPair { hal, circuit_hal }
-    }
 }
 
 #[cfg(feature = "metal")]
 mod metal {
     pub use risc0_circuit_recursion::metal::MetalCircuitHal;
-    pub use risc0_zkp::{
-        core::hash::poseidon_254::Poseidon254HashSuite,
-        hal::metal::{
-            MetalHalPoseidon, MetalHalPoseidon2, MetalHalSha256, MetalHashPoseidon,
-            MetalHashPoseidon2, MetalHashSha256,
-        },
+    pub use risc0_zkp::hal::metal::{
+        MetalHalPoseidon, MetalHalPoseidon2, MetalHalSha256, MetalHashPoseidon, MetalHashPoseidon2,
+        MetalHashSha256,
     };
 
-    use super::{BabyBear, CircuitImpl, CpuCircuitHal, CpuHal, HalPair, Rc, CIRCUIT};
+    use super::{HalPair, Rc};
 
     pub fn sha256_hal_pair() -> HalPair<MetalHalSha256, MetalCircuitHal<MetalHashSha256>> {
         let hal = Rc::new(MetalHalSha256::new());
@@ -293,13 +281,6 @@ mod metal {
     pub fn poseidon2_hal_pair() -> HalPair<MetalHalPoseidon2, MetalCircuitHal<MetalHashPoseidon2>> {
         let hal = Rc::new(MetalHalPoseidon2::new());
         let circuit_hal = Rc::new(MetalCircuitHal::<MetalHashPoseidon2>::new(hal.clone()));
-        HalPair { hal, circuit_hal }
-    }
-
-    pub fn poseidon254_hal_pair() -> HalPair<CpuHal<BabyBear>, CpuCircuitHal<'static, CircuitImpl>>
-    {
-        let hal = Rc::new(CpuHal::new(Poseidon254HashSuite::new_suite()));
-        let circuit_hal = Rc::new(CpuCircuitHal::new(&CIRCUIT));
         HalPair { hal, circuit_hal }
     }
 }
@@ -365,7 +346,7 @@ cfg_if::cfg_if! {
         /// TODO
         #[allow(dead_code)]
         pub fn poseidon254_hal_pair() -> HalPair<CpuHal<BabyBear>, CpuCircuitHal<'static, CircuitImpl>> {
-            cuda::poseidon254_hal_pair()
+            cpu::poseidon254_hal_pair()
         }
     } else if #[cfg(feature = "metal")] {
         /// TODO
@@ -389,7 +370,7 @@ cfg_if::cfg_if! {
         /// TODO
         #[allow(dead_code)]
         pub fn poseidon254_hal_pair() -> HalPair<CpuHal<BabyBear>, CpuCircuitHal<'static, CircuitImpl>> {
-            metal::poseidon254_hal_pair()
+            cpu::poseidon254_hal_pair()
         }
     } else {
         /// TODO
@@ -420,9 +401,9 @@ cfg_if::cfg_if! {
 
 /// Kinds of digests recognized by the recursion program language.
 // NOTE: Default is additionally a recognized type in the recursion program language. It's not
-// yet supported here because some of the code in this module assumes Poseidon is Default.
+// yet supported here because some of the code in this module assumes Poseidon2 is Default.
 enum DigestKind {
-    Poseidon,
+    Poseidon2,
     Sha256,
 }
 
@@ -450,6 +431,16 @@ impl Prover {
         }
     }
 
+    /// Construct a Merkle tree encoding the set of accepted control IDs.
+    ///
+    /// Provide the set of allowed IDs during the bootstrapping process.
+    pub fn bootstrap_allowed_tree(leaves: Vec<Digest>) -> MerkleGroup {
+        MerkleGroup {
+            depth: ALLOWED_CODE_MERKLE_DEPTH,
+            leaves,
+        }
+    }
+
     /// Initialize a recursion prover with the test recursion program. This program is used in
     /// testing the basic correctness of the recursion circuit.
     pub fn new_test_recursion_circuit(digests: [&Digest; 2], opts: ProverOpts) -> Result<Self> {
@@ -457,7 +448,7 @@ impl Prover {
         let mut prover = Prover::new(program, control_id, opts);
 
         for digest in digests {
-            prover.add_input_digest(digest, DigestKind::Poseidon);
+            prover.add_input_digest(digest, DigestKind::Poseidon2);
         }
 
         Ok(prover)
@@ -479,7 +470,7 @@ impl Prover {
         )]));
         for digest in proof.digests {
             tracing::debug!("path = {:?}", digest);
-            self.add_input_digest(&digest, DigestKind::Poseidon);
+            self.add_input_digest(&digest, DigestKind::Poseidon2);
         }
         tracing::debug!(
             "root = {:?}",
@@ -508,10 +499,10 @@ impl Prover {
         let (program, control_id) = zkr::lift(po2)?;
         let mut prover = Prover::new(program, control_id, opts);
 
-        prover.add_input_digest(&merkle_root, DigestKind::Poseidon);
+        prover.add_input_digest(&merkle_root, DigestKind::Poseidon2);
 
         let which = po2 - MIN_CYCLES_PO2;
-        let inner_control_id = Digest::from_hex(POSEIDON_CONTROL_ID[which]).unwrap();
+        let inner_control_id = Digest::from_hex(POSEIDON2_CONTROL_ID[which]).unwrap();
         prover.add_seal(seal, &inner_control_id, &allowed_ids)?;
 
         Ok(prover)
@@ -543,7 +534,7 @@ impl Prover {
         let (program, control_id) = zkr::join()?;
         let mut prover = Prover::new(program, control_id, opts);
 
-        prover.add_input_digest(&merkle_root, DigestKind::Poseidon);
+        prover.add_input_digest(&merkle_root, DigestKind::Poseidon2);
         prover.add_segment_receipt(a, &allowed_ids)?;
         prover.add_segment_receipt(b, &allowed_ids)?;
         Ok(prover)
@@ -572,7 +563,7 @@ impl Prover {
         // Load the input values needed by the predicate.
         // Resolve predicate needs both seals as input, and the journal and assumptions tail digest
         // to compute the opening of the conditional receipt claim to the first assumption.
-        prover.add_input_digest(&merkle_root, DigestKind::Poseidon);
+        prover.add_input_digest(&merkle_root, DigestKind::Poseidon2);
         prover.add_segment_receipt(cond, &allowed_ids)?;
         prover.add_segment_receipt(assum, &allowed_ids)?;
 
@@ -612,7 +603,7 @@ impl Prover {
         let (program, control_id) = zkr::identity()?;
         let mut prover = Prover::new(program, control_id, opts);
 
-        prover.add_input_digest(&merkle_root, DigestKind::Poseidon);
+        prover.add_input_digest(&merkle_root, DigestKind::Poseidon2);
         prover.add_segment_receipt(a, &allowed_ids)?;
         Ok(prover)
     }
@@ -624,8 +615,8 @@ impl Prover {
     /// Add a digest to the input for the recursion program.
     fn add_input_digest(&mut self, digest: &Digest, kind: DigestKind) {
         match kind {
-            // Poseidon digests consist of  BabyBear field elems and do not need to be split.
-            DigestKind::Poseidon => self.add_input(digest.as_words()),
+            // Poseidon2 digests consist of  BabyBear field elems and do not need to be split.
+            DigestKind::Poseidon2 => self.add_input(digest.as_words()),
             // SHA-256 digests need to be split into 16-bit half words to avoid overflowing.
             DigestKind::Sha256 => self.add_input(bytemuck::cast_slice(
                 &digest
@@ -643,7 +634,7 @@ impl Prover {
     /// program and input.
     #[tracing::instrument(skip_all)]
     pub fn run(&mut self) -> Result<RecursionReceipt> {
-        let hal_pair = poseidon_hal_pair();
+        let hal_pair = poseidon2_hal_pair();
         let (hal, circuit_hal) = (hal_pair.hal.as_ref(), hal_pair.circuit_hal.as_ref());
         self.run_with_hal(hal, circuit_hal)
     }
@@ -668,8 +659,18 @@ impl Prover {
 
         let mut adapter = ProveAdapter::new(&mut executor.executor);
         let mut prover = risc0_zkp::prove::Prover::new(hal, CIRCUIT.get_taps());
+        let hashfn = Rc::clone(&hal.get_hash_suite().hashfn);
 
-        adapter.execute(prover.iop());
+        // At the start of the protocol, seed the Fiat-Shamir transcript with context information
+        // about the proof system and circuit.
+        prover
+            .iop()
+            .commit(&hashfn.hash_elem_slice(&PROOF_SYSTEM_INFO.encode()));
+        prover
+            .iop()
+            .commit(&hashfn.hash_elem_slice(&CircuitImpl::CIRCUIT_INFO.encode()));
+
+        adapter.execute(prover.iop(), hal);
 
         let seal = if skip_seal {
             Vec::new()

@@ -21,17 +21,15 @@ use std::{
 use anyhow::{anyhow, bail, Result};
 use bytes::Bytes;
 use prost::Message;
-use serde::{Deserialize, Serialize};
 
 use super::{malformed_err, path_to_string, pb, ConnectionWrapper, Connector, TcpConnector};
 use crate::{
     get_prover_server, get_version,
     host::{
-        client::{env::TraceCallback, slice_io::SliceIo},
-        recursion::SuccinctReceipt,
+        client::slice_io::SliceIo, recursion::SuccinctReceipt, server::session::NullSegmentRef,
     },
     receipt_claim::{MaybePruned, ReceiptClaim},
-    ExecutorEnv, ExecutorImpl, ProverOpts, Receipt, Segment, SegmentReceipt, SegmentRef,
+    ExecutorEnv, ExecutorImpl, ProverOpts, Receipt, Segment, SegmentReceipt, TraceCallback,
     TraceEvent, VerifierContext,
 };
 
@@ -39,17 +37,6 @@ use crate::{
 pub struct Server {
     connector: Box<dyn Connector>,
 }
-
-#[derive(Clone, Serialize, Deserialize)]
-struct EmptySegmentRef;
-
-#[typetag::serde]
-impl SegmentRef for EmptySegmentRef {
-    fn resolve(&self) -> Result<Segment> {
-        Err(anyhow!("Segment resolution not supported"))
-    }
-}
-
 struct PosixIoProxy {
     fd: u32,
     conn: ConnectionWrapper,
@@ -295,8 +282,8 @@ impl Server {
                             pb::api::OnSegmentDone {
                                 segment: Some(pb::api::SegmentInfo {
                                     index: segment.index,
-                                    po2: segment.po2,
-                                    cycles: segment.cycles,
+                                    po2: segment.inner.po2 as u32,
+                                    cycles: segment.inner.insn_cycles as u32,
                                     segment: Some(asset),
                                 }),
                             },
@@ -313,7 +300,7 @@ impl Server {
                     bail!(err)
                 }
 
-                Ok(Box::new(EmptySegmentRef))
+                Ok(Box::new(NullSegmentRef))
             })?;
 
             Ok(pb::api::ServerReply {
@@ -355,21 +342,21 @@ impl Server {
             let opts: ProverOpts = request.opts.ok_or(malformed_err())?.into();
             let prover = get_prover_server(&opts)?;
             let ctx = VerifierContext::default();
-            let receipt = prover.prove_with_ctx(env, &ctx, &bytes)?;
+            let prove_info = prover.prove_with_ctx(env, &ctx, &bytes)?;
 
-            let receipt_pb: pb::core::Receipt = receipt.into();
-            let receipt_bytes = receipt_pb.encode_to_vec();
+            let prove_info: pb::core::ProveInfo = prove_info.into();
+            let prove_info_bytes = prove_info.encode_to_vec();
             let asset = pb::api::Asset::from_bytes(
                 &request.receipt_out.ok_or(malformed_err())?,
-                receipt_bytes.into(),
-                "receipt.zkp",
+                prove_info_bytes.into(),
+                "prove_info.zkp",
             )?;
 
             Ok(pb::api::ServerReply {
                 kind: Some(pb::api::server_reply::Kind::Ok(pb::api::ClientCallback {
                     kind: Some(pb::api::client_callback::Kind::ProveDone(
                         pb::api::OnProveDone {
-                            receipt: Some(asset),
+                            prove_info: Some(asset),
                         },
                     )),
                 })),
@@ -627,12 +614,12 @@ fn build_env<'a>(
         match assumption.kind.as_ref().ok_or(malformed_err())? {
             pb::api::assumption::Kind::Proven(asset) => {
                 let receipt: Receipt = pb::core::Receipt::decode(asset.as_bytes()?)?.try_into()?;
-                env_builder.add_assumption(receipt.into())
+                env_builder.add_assumption(receipt)
             }
             pb::api::assumption::Kind::Unresolved(asset) => {
                 let claim: MaybePruned<ReceiptClaim> =
                     pb::core::MaybePruned::decode(asset.as_bytes()?)?.try_into()?;
-                env_builder.add_assumption(claim.into())
+                env_builder.add_assumption(claim)
             }
         };
     }

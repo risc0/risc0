@@ -27,7 +27,7 @@ static PUBLIC_KEY: &str = r#"
       "use": "sig",
       "kid": "6ab0e8e4bc121fc287e35d3e5e0efb8a"
     }
-"#;
+    "#;
 
 fn main() {
     // read the token input

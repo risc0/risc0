@@ -66,7 +66,7 @@ fn predict() -> Vec<u32> {
 
     // This initiates a session, runs the STARK prover on the resulting execution
     // trace, and produces a receipt.
-    let receipt = prover.prove(env, ML_TEMPLATE_ELF).unwrap();
+    let receipt = prover.prove(env, ML_TEMPLATE_ELF).unwrap().receipt;
 
     // We read the result that the guest code committed to the journal. The
     // receipt can also be serialized and sent to a verifier.

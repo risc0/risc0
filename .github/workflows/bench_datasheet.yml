@@ -6,15 +6,7 @@ on:
     # Only run benchmarks on changes to following paths:
     paths:
       - 'risc0/**'
-      - '.github/workflows/bench_*'
-
-  # uncomment for only for testing changes to this workflow while in a PR
-  # pull_request:
-  #   branches: [ main ]
-  #   # Only run benchmarks on changes to following paths:
-  #   paths:
-  #     - 'risc0/**'
-  #     - '.github/workflows/bench_*'
+      - '.github/workflows/bench_datasheet.yml'
 
   workflow_dispatch:
 
@@ -30,7 +22,12 @@ permissions:
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   RISC0_BUILD_LOCKED: 1
-  RISC0_TOOLCHAIN_VERSION: test-release-2
+  RISC0_TOOLCHAIN_VERSION: v2024-02-08.1
+
+defaults:
+  run:
+    # This ensures `-eo pipefail`, which is important for catching errors
+    shell: bash
 
 jobs:
   bench:
@@ -39,19 +36,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        os: [Linux, macOS]
+        feature: [prove]
+        device: [cpu]
         include:
           - os: Linux
             feature: cuda
-            device: nvidia_rtx_a5000
+            device: nvidia_rtx_3090_ti
           - os: macOS
             feature: metal
             device: apple_m2_pro
-          - os: macOS
-            feature: default
-            device: cpu
-          - os: Linux
-            feature: default
-            device: cpu
 
     env:
       FEATURE: ${{ matrix.feature }}
@@ -69,9 +63,6 @@ jobs:
       - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
       - run: cargo run --release -F $FEATURE --example loop -- --json | tee ${{ matrix.os }}-${{ matrix.device }}.json
         working-directory: risc0/zkvm
-      - run: cargo run --release -- --out ../../risc0/zkvm/cycle_count.csv all
-        working-directory: examples/cycle-counter
-        if: matrix.feature == 'metal'
       - name: Save commit hash to a file
         run: echo "${{ github.sha }}" > COMMIT_HASH.txt
         working-directory: risc0/zkvm
@@ -82,9 +73,8 @@ jobs:
           path: |
             risc0/zkvm/${{ matrix.os }}-${{ matrix.device }}.json
             risc0/zkvm/COMMIT_HASH.txt
-            risc0/zkvm/cycle_count.csv
 
-  push_to_ghpages:
+  publish:
     needs: bench
     runs-on: ubuntu-latest
 
@@ -93,7 +83,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: risc0/ghpages
-          ref: dev
           token: ${{ secrets.BENCHMARK_TOKEN }}
       - name: Download benchmark
         uses: actions/download-artifact@v2
@@ -102,18 +91,12 @@ jobs:
           path: dev/datasheet
       - name: Push benchmark result
         run: |
-          git config user.name "GitHub Actions"
-          git config user.email "actions@github.com"
-          git add dev/datasheet/macOS-cpu.json
-          git add dev/datasheet/macOS-apple_m2_pro.json
-          git add dev/datasheet/Linux-nvidia_rtx_a5000.json
-          git add dev/datasheet/Linux-cpu.json
-          git add dev/datasheet/COMMIT_HASH.txt
-          git add dev/datasheet/cycle_count.csv
+          git config user.name "r0-ghbot"
+          git config user.email "r0-ghbot@users.noreply.github.com"
+          git add --all
           if git diff --cached --exit-code; then
             echo "No changes to commit"
           else
             git commit -m "Add build artifacts"
-            git remote set-url origin https://${{ secrets.BENCHMARK_TOKEN }}@github.com/risc0/ghpages.git
-            git push -f origin dev
+            git push
           fi

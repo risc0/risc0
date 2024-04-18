@@ -15,11 +15,12 @@
 use std::{fs::File, path::Path};
 
 use reqwest::{blocking::Client as BlockingClient, header};
+use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
 use self::responses::{
-    CreateSessRes, ImgUploadRes, ProofReq, Quotas, SessionStatusRes, SnarkReq, SnarkStatusRes,
-    UploadRes, VersionInfo,
+    CreateSessRes, ImgUploadRes, ProofReq, Quotas, ReceiptDownload, SessionStatusRes, SnarkReq,
+    SnarkStatusRes, UploadRes, VersionInfo,
 };
 use crate::{API_KEY_ENVVAR, API_KEY_HEADER, API_URL_ENVVAR, VERSION_HEADER};
 
@@ -42,12 +43,13 @@ pub enum SdkErr {
     #[error("missing BONSAI_API_URL env var")]
     MissingApiUrl,
     /// Missing file
-    #[error("failed to find file on disk")]
+    #[error("failed to find file on disk: {0:?}")]
     FileNotFound(#[from] std::io::Error),
 }
 
 /// Collection of serialization object for the REST api
 pub mod responses {
+    use risc0_groth16::Seal;
     use serde::{Deserialize, Serialize};
 
     /// Response of a upload request
@@ -84,6 +86,17 @@ pub mod responses {
         pub assumptions: Vec<String>,
     }
 
+    /// Session statistics metadata file
+    #[derive(Serialize, Deserialize)]
+    pub struct SessionStats {
+        /// Count of segments in this proof request
+        pub segments: usize,
+        /// Total cycles run within guest
+        pub total_cycles: u64,
+        /// User cycles run within guest, slightly below total overhead cycles
+        pub cycles: u64,
+    }
+
     /// Session Status response
     #[derive(Deserialize, Serialize)]
     pub struct SessionStatusRes {
@@ -107,13 +120,31 @@ pub mod responses {
         /// Possible states in order, include:
         /// * `Setup`
         /// * `Executor`
-        /// * `ProveSegments`
+        /// * `ProveSegments: N/M`
         /// * `Planner`
         /// * `Recursion`
-        /// * `RecursionJoin`
+        /// * `RecursionJoin: N/M`
+        /// * `Resolve`
         /// * `Finalize`
         /// * `InProgress`
         pub state: Option<String>,
+        /// Elapsed Time
+        ///
+        /// Elapsed time for a given session, in seconds
+        pub elapsed_time: Option<f64>,
+        /// Successful Session Stats
+        ///
+        /// Stats for a given successful session. Returns:
+        /// - Count of segments in this proof request
+        /// - User cycles run within guest, slightly below total overhead cycles
+        pub stats: Option<SessionStats>,
+    }
+
+    /// Response of the receipt/download method
+    #[derive(Deserialize, Serialize)]
+    pub struct ReceiptDownload {
+        /// Pre-Signed URL that the receipt can be downloaded (GET) from
+        pub url: String,
     }
 
     /// Snark proof request object
@@ -123,30 +154,14 @@ pub mod responses {
         pub session_id: String,
     }
 
-    /// Snark Proof object
-    ///
-    /// following the snarkjs calldata format:
-    /// <https://github.com/iden3/snarkjs#26-simulate-a-verification-call>
-    #[derive(Debug, Deserialize, Serialize, PartialEq)]
-    pub struct Groth16Seal {
-        /// Proof 'a' value
-        pub a: Vec<Vec<u8>>,
-        /// Proof 'b' value
-        pub b: Vec<Vec<Vec<u8>>>,
-        /// Proof 'c' value
-        pub c: Vec<Vec<u8>>,
-        /// Proof public outputs
-        pub public: Vec<Vec<u8>>,
-    }
-
     /// Snark Receipt object
     ///
     /// All relevant data to verify both the snark proof an corresponding
     /// imageId on chain.
     #[derive(Debug, Deserialize, Serialize, PartialEq)]
     pub struct SnarkReceipt {
-        /// Snark seal from snarkjs
-        pub snark: Groth16Seal,
+        /// SNARK Groth16 seal object encoded in big endian
+        pub snark: Seal,
         /// Post State Digest
         ///
         /// Collected from the STARK proof via
@@ -198,7 +213,7 @@ pub mod responses {
 }
 
 /// Proof Session representation
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct SessionId {
     /// Session UUID
     pub uuid: String,
@@ -301,9 +316,9 @@ impl Client {
     ///
     /// # Example:
     ///
-    /// ```
+    /// ```no_run
     /// use bonsai_sdk::alpha as bonsai_sdk;
-    /// bonsai_sdk::from_env(risc0_zkvm::VERSION)
+    /// bonsai_sdk::Client::from_env(risc0_zkvm::VERSION)
     ///     .expect("Failed to construct sdk client");
     /// ```
     pub fn from_env(risc0_version: &str) -> Result<Self, SdkErr> {
@@ -327,7 +342,7 @@ impl Client {
     /// use bonsai_sdk::alpha as bonsai_sdk;
     /// let url = "http://api.bonsai.xyz".to_string();
     /// let api_key = "my_secret_key".to_string();
-    /// bonsai_sdk::from_parts(url, api_key, risc0_zkvm::VERSION)
+    /// bonsai_sdk::Client::from_parts(url, api_key, risc0_zkvm::VERSION)
     ///     .expect("Failed to construct sdk client");
     /// ```
     pub fn from_parts(url: String, key: String, risc0_version: &str) -> Result<Self, SdkErr> {
@@ -455,6 +470,58 @@ impl Client {
         self.put_data(&upload_data.url, fd)?;
 
         Ok(upload_data.uuid)
+    }
+
+    /// Download a existing receipt
+    ///
+    /// Allows download of older receipts without checking the current session status.
+    pub fn receipt_download(&self, session_id: &SessionId) -> Result<Vec<u8>, SdkErr> {
+        let res = self
+            .client
+            .get(format!("{}/receipts/{}", self.url, session_id.uuid))
+            .send()?;
+
+        if !res.status().is_success() {
+            let body = res.text()?;
+            return Err(SdkErr::InternalServerErr(body));
+        }
+        let res: ReceiptDownload = res.json()?;
+
+        self.download(&res.url)
+    }
+
+    /// Delete an existing image
+    ///
+    /// Allows deletion of a specified image_id.
+    pub fn image_delete(&self, image_id: &str) -> Result<(), SdkErr> {
+        let res = self
+            .client
+            .delete(format!("{}/images/{}", self.url, image_id))
+            .send()?;
+
+        if !res.status().is_success() {
+            let body = res.text()?;
+            return Err(SdkErr::InternalServerErr(body));
+        }
+
+        Ok(())
+    }
+
+    /// Delete an existing input
+    ///
+    /// Allows deletion of a specified input Uuid.
+    pub fn input_delete(&self, input_uuid: &str) -> Result<(), SdkErr> {
+        let res = self
+            .client
+            .delete(format!("{}/inputs/{}", self.url, input_uuid))
+            .send()?;
+
+        if !res.status().is_success() {
+            let body = res.text()?;
+            return Err(SdkErr::InternalServerErr(body));
+        }
+
+        Ok(())
     }
 
     // - /sessions
@@ -666,6 +733,25 @@ mod tests {
     }
 
     #[test]
+    fn image_delete() {
+        let server = MockServer::start();
+
+        let del_mock = server.mock(|when, then| {
+            when.method(DELETE)
+                .path(format!("/images/{TEST_ID}"))
+                .header(API_KEY_HEADER, TEST_KEY)
+                .header(VERSION_HEADER, TEST_VERSION);
+            then.status(200);
+        });
+
+        let server_url = format!("http://{}", server.address());
+        let client = super::Client::from_parts(server_url, TEST_KEY.to_string(), TEST_VERSION)
+            .expect("Failed to construct client");
+        client.image_delete(TEST_ID).unwrap();
+        del_mock.assert();
+    }
+
+    #[test]
     fn input_upload() {
         let data = vec![];
 
@@ -702,6 +788,25 @@ mod tests {
 
         get_mock.assert();
         put_mock.assert();
+    }
+
+    #[test]
+    fn input_delete() {
+        let server = MockServer::start();
+
+        let del_mock = server.mock(|when, then| {
+            when.method(DELETE)
+                .path(format!("/inputs/{TEST_ID}"))
+                .header(API_KEY_HEADER, TEST_KEY)
+                .header(VERSION_HEADER, TEST_VERSION);
+            then.status(200);
+        });
+
+        let server_url = format!("http://{}", server.address());
+        let client = super::Client::from_parts(server_url, TEST_KEY.to_string(), TEST_VERSION)
+            .expect("Failed to construct client");
+        client.input_delete(TEST_ID).unwrap();
+        del_mock.assert();
     }
 
     #[test]
@@ -743,6 +848,51 @@ mod tests {
 
         get_mock.assert();
         put_mock.assert();
+    }
+
+    #[test]
+    fn receipt_download() {
+        let server = MockServer::start();
+        let receipt_uuid = Uuid::new_v4();
+
+        let download_method = "download_path";
+        let download_url = format!("http://{}/{download_method}", server.address());
+        let response = ReceiptDownload { url: download_url };
+
+        let get_mock = server.mock(|when, then| {
+            when.method(GET)
+                .path(format!("/receipts/{}", receipt_uuid))
+                .header(API_KEY_HEADER, TEST_KEY)
+                .header(VERSION_HEADER, TEST_VERSION);
+            then.status(200)
+                .header("content-type", "application/json")
+                .json_body_obj(&response);
+        });
+
+        let receipt_data: Vec<u8> = vec![0x41, 0x41, 0x42, 0x42];
+        let download_mock = server.mock(|when, then| {
+            when.method(GET)
+                .path(format!("/{download_method}"))
+                .header(API_KEY_HEADER, TEST_KEY)
+                .header(VERSION_HEADER, TEST_VERSION);
+
+            then.body(&receipt_data).status(200);
+        });
+
+        let server_url = format!("http://{}", server.address());
+        let client = super::Client::from_parts(server_url, TEST_KEY.to_string(), TEST_VERSION)
+            .expect("Failed to construct client");
+        let res = client
+            .receipt_download(&SessionId {
+                uuid: receipt_uuid.to_string(),
+            })
+            .expect("Failed to upload receipt");
+
+        println!("{}", std::str::from_utf8(&res).unwrap());
+        assert_eq!(res, receipt_data);
+
+        get_mock.assert();
+        download_mock.assert();
     }
 
     #[test]
@@ -793,6 +943,8 @@ mod tests {
             receipt_url: None,
             error_msg: None,
             state: None,
+            elapsed_time: None,
+            stats: None,
         };
 
         let create_mock = server.mock(|when, then| {

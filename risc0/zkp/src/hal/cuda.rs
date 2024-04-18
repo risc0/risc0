@@ -229,7 +229,7 @@ impl CudaHash for CudaHashPoseidon {
 pub struct CudaHashPoseidon2 {
     suite: HashSuite<BabyBear>,
     round_constants: BufferImpl<BabyBearElem>,
-    m_int_diag_ulvt: BufferImpl<BabyBearElem>,
+    m_int_diag: BufferImpl<BabyBearElem>,
 }
 
 impl CudaHash for CudaHashPoseidon2 {
@@ -237,13 +237,12 @@ impl CudaHash for CudaHashPoseidon2 {
         let stream = Stream::new(StreamFlags::DEFAULT, None).unwrap();
         let round_constants =
             hal.copy_from_elem("round_constants", poseidon2::consts::ROUND_CONSTANTS);
-        let m_int_diag_ulvt =
-            hal.copy_from_elem("m_int_diag_ulvt", poseidon2::consts::M_INT_DIAG_ULVT);
+        let m_int_diag = hal.copy_from_elem("m_int_diag", poseidon2::consts::M_INT_DIAG_HZN);
         stream.synchronize().unwrap();
         CudaHashPoseidon2 {
             suite: Poseidon2HashSuite::new_suite(),
             round_constants,
-            m_int_diag_ulvt,
+            m_int_diag,
         }
     }
 
@@ -263,7 +262,7 @@ impl CudaHash for CudaHashPoseidon2 {
             let output = io.as_device_ptr_with_offset(output_size);
             launch!(kernel<<<params.0, params.1, 0, stream>>>(
                 self.round_constants.as_device_ptr(),
-                self.m_int_diag_ulvt.as_device_ptr(),
+                self.m_int_diag.as_device_ptr(),
                 output,
                 input,
                 output_size
@@ -289,7 +288,7 @@ impl CudaHash for CudaHashPoseidon2 {
         unsafe {
             launch!(kernel<<<params.0, params.1, 0, stream>>>(
                 self.round_constants.as_device_ptr(),
-                self.m_int_diag_ulvt.as_device_ptr(),
+                self.m_int_diag.as_device_ptr(),
                 output.as_device_ptr(),
                 matrix.as_device_ptr(),
                 row_size,
@@ -323,7 +322,7 @@ struct RawBuffer {
 
 impl RawBuffer {
     pub fn new(name: &'static str, size: usize) -> Self {
-        tracing::debug!("alloc: {size} bytes, {name}");
+        tracing::trace!("alloc: {size} bytes, {name}");
         TRACKER.lock().unwrap().alloc(size);
         Self {
             name,
@@ -334,7 +333,7 @@ impl RawBuffer {
 
 impl Drop for RawBuffer {
     fn drop(&mut self) {
-        tracing::debug!("free: {} bytes, {}", self.buf.len(), self.name);
+        tracing::trace!("free: {} bytes, {}", self.buf.len(), self.name);
         TRACKER.lock().unwrap().free(self.buf.len());
     }
 }
@@ -387,6 +386,10 @@ impl<T: Pod> BufferImpl<T> {
 }
 
 impl<T: Pod> Buffer<T> for BufferImpl<T> {
+    fn name(&self) -> &'static str {
+        self.buffer.borrow().name
+    }
+
     fn size(&self) -> usize {
         self.size
     }
@@ -655,7 +658,7 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
         stream.synchronize().unwrap();
     }
 
-    #[tracing::instrument(skip_all)]
+    // #[tracing::instrument(skip_all)]
     fn gather_sample(
         &self,
         dst: &Self::Buffer<Self::Elem>,

@@ -19,7 +19,10 @@
 
 extern crate alloc;
 
-use alloc::{format, vec};
+use alloc::{
+    alloc::{alloc_zeroed, Layout},
+    format, vec,
+};
 use core::arch::asm;
 
 use getrandom::getrandom;
@@ -81,15 +84,15 @@ fn main() {
             // Execute some instructions with distinctive arguments
             // that are easy to find in the event trace.
             asm!(r"
-      // Dry run first to make sure all regions are paged in
-      li x5, 1336
-      li x6, 0x08000000
-      sw x5, 548(x6)
-      // Now, run what we're actually looking for.
-      li x5, 1337
-      li x6, 0x08000000
-      sw x5, 548(x6)
-", out("x5") _, out("x6") _);
+                // Dry run first to make sure all regions are paged in
+                li x5, 1336
+                li x6, 0x08000000
+                sw x5, 548(x6)
+                // Now, run what we're actually looking for.
+                li x5, 1337
+                li x6, 0x08000000
+                sw x5, 548(x6)
+            ", out("x5") _, out("x6") _);
         },
         MultiTestSpec::Profiler => {
             // Call an external function to make sure it's detected during profiling.
@@ -166,12 +169,13 @@ fn main() {
             fd,
             pos_and_len,
         } => {
+            let mut num_read = alloc::vec::Vec::with_capacity(pos_and_len.len());
             for (pos, len) in pos_and_len {
-                let num_read =
-                    unsafe { sys_read(fd, buf.as_mut_ptr().add(pos as usize), len as usize) };
-                assert_eq!(num_read, len as usize);
+                let n = unsafe { sys_read(fd, buf.as_mut_ptr().add(pos as usize), len as usize) };
+                num_read.push(n);
+                assert!(n <= len as usize);
             }
-            env::commit(&buf);
+            env::commit(&(buf, num_read));
         }
         MultiTestSpec::SysVerify(pairs) => {
             for (image_id, journal) in pairs.into_iter() {
@@ -261,13 +265,35 @@ fn main() {
             let addr: u32 = env::read();
             // Access memory outside of allowed boundaries. This is intended to cause a
             // fault
-            asm!( "mv x6, {}", "sw x5, (x6)" , in(reg) addr, out("x5") _, out("x6") _);
+            asm!(
+                "mv x6, {}",
+                "sw x5, (x6)",
+                in(reg) addr,
+                out("x5") _,
+                out("x6") _
+            );
         },
         MultiTestSpec::OutOfBoundsEcall => unsafe {
-            asm!("ecall", in("x5") 3, in("x10") 0x0, in("x11") 0x0, in("x12") 0x0, in("x13") 0x0, in("x14") 10000,);
+            asm!(
+                "ecall",
+                in("x5") 3,
+                in("x10") 0x0,
+                in("x11") 0x0,
+                in("x12") 0x0,
+                in("x13") 0x0,
+                in("x14") 10000,
+            );
         },
         MultiTestSpec::TooManySha => unsafe {
-            asm!("ecall", in("x5") 3, in("x10") 0x400, in("x11") 0x400, in("x12") 0x400, in("x13") 0x400, in("x14") 10000,);
+            asm!(
+                "ecall",
+                in("x5") 3,
+                in("x10") 0x400,
+                in("x11") 0x400,
+                in("x12") 0x400,
+                in("x13") 0x400,
+                in("x14") 10000,
+            );
         },
         MultiTestSpec::SysLogInvalidAddr => unsafe {
             let addr: *const u8 = SYSTEM.start() as _;
@@ -288,6 +314,20 @@ fn main() {
             let a = &AlignTest1::new(54) as *const _;
             let b = &AlignTest1::new(60) as *const _;
             assert_eq!(PAGE_SIZE, b as usize - a as usize);
+        }
+        MultiTestSpec::AllocZeroed => {
+            // Bump allocator was modified to not manually zero memory in the zkVM. Simple test to
+            // ensure that zkVM memory is zeroed in initialization.
+            let array: &[u32; 512] = unsafe {
+                // Allocate some arbitrary amount of bytes
+                let layout = Layout::new::<[u32; 512]>();
+                let ptr = alloc_zeroed(layout);
+
+                &*(ptr as *const [u32; 512])
+            };
+            for value in array {
+                assert_eq!(*value, 0);
+            }
         }
     }
 }

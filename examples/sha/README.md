@@ -4,16 +4,18 @@ This code demonstrates how to provably compute the SHA-256 hash of a string usin
 
 ## Quick Start
 
-First, follow the [installation guide] if you don't already have the RISC Zero tools installed.
+First, follow the [examples guide] to install dependencies and check out the correct version of the example.
 
 Then, run the example with:
+
 ```bash
 cargo run --release
 ```
 
-[installation guide]: https://dev.risczero.com/api/zkvm/quickstart
+[examples guide]: https://dev.risczero.com/api/zkvm/examples/#running-the-examples
 
 Notable details:
+
 * We show two ways of calling the hash function:
   * Using `risc0_zkvm::sha`, which is the SHA-256 interface included in the `risc0_zkvm` crate.
   * Using a patched version of the [RustCrypto] `sha2` crate. Including this patch will accelerate _all_ usages of SHA-256 that use the `sha2` crate in any transitive dependency.

@@ -14,9 +14,9 @@ permissions:
   contents: write
 
 env:
-  RISC0_TOOLCHAIN_VERSION: test-release-2
-  TAG: v0.21.0-alpha.1
-  VERSION: "0.21.0-alpha.1"
+  RISC0_TOOLCHAIN_VERSION: v2024-02-08.1
+  TAG: v0.22.0-alpha.1
+  VERSION: "0.22.0-alpha.1"
 
 jobs:
   release:
@@ -35,7 +35,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           lfs: true
-      - run: git lfs checkout
+      - run: git lfs pull
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
         with:
@@ -61,7 +61,7 @@ jobs:
       # otherwise cargo-binstall sometimes errors with 404.
       - run: sleep 90
 
-      - uses: risc0/cargo-install@2cfb0024938d23011106cbf127b393bc83fddba1
+      - uses: risc0/cargo-install@b9307573043522ab0d3e3be64a51763b765b52a4
         with:
           crate: cargo-binstall
           version: "1.4"

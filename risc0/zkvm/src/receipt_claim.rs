@@ -14,10 +14,10 @@
 
 //! [ReceiptClaim] and associated types and functions.
 //!
-//! A [ReceiptClaim] struct contains the public claims about a zkVM guest
-//! execution, such as the journal committed to by the guest. It also includes
-//! important information such as the exit code and the starting and ending
-//! system state (i.e. the state of memory).
+//! A [ReceiptClaim] struct contains the public claims (i.e. public outputs) of a zkVM guest
+//! execution, such as the journal committed to by the guest. It also includes important
+//! information such as the exit code and the starting and ending system state (i.e. the state of
+//! memory).
 
 use alloc::{collections::VecDeque, vec::Vec};
 use core::{fmt, ops::Deref};
@@ -25,6 +25,7 @@ use core::{fmt, ops::Deref};
 use anyhow::{anyhow, ensure};
 use risc0_binfmt::{
     read_sha_halfs, tagged_list, tagged_list_cons, tagged_struct, write_sha_halfs, Digestible,
+    ExitCode, InvalidExitCodeError,
 };
 use serde::{Deserialize, Serialize};
 
@@ -32,6 +33,10 @@ use crate::{
     sha::{self, Digest, Sha256},
     SystemState,
 };
+
+// TODO(victor): Add functions to handle the `ReceiptClaim` transformations conducted as part of
+// join, resolve, and eventually resume calls. This will allow these to be used for recursion, as
+// well as deve mode recursion, and composite receipts.
 
 /// Public claims about a zkVM guest execution, such as the journal committed to by the guest.
 ///
@@ -42,10 +47,10 @@ use crate::{
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[cfg_attr(test, derive(PartialEq))]
 pub struct ReceiptClaim {
-    /// The [SystemState] of a segment just before execution has begun.
+    /// The [SystemState] just before execution has begun.
     pub pre: MaybePruned<SystemState>,
 
-    /// The [SystemState] of a segment just after execution has completed.
+    /// The [SystemState] just after execution has completed.
     ///
     /// NOTE: In order to avoid extra logic in the rv32im circuit to perform arithmetic on the PC
     /// with carry, the post state PC is recorded as the current PC + 4. Subtract 4 to get the
@@ -54,19 +59,18 @@ pub struct ReceiptClaim {
     /// `SystemSplit`, this will be the address of the next instruction to be executed.
     pub post: MaybePruned<SystemState>,
 
-    /// The exit code for a segment
+    /// The exit code for the execution.
     pub exit_code: ExitCode,
 
     /// Input to the guest.
     ///
-    /// NOTE: This field can only be constructed as a Digest because it is not yet
-    /// cryptographically bound by the RISC Zero proof system; the guest has no way to set the
-    /// input. In the future, it will be implemented with a [MaybePruned] type.
+    /// NOTE: This field must be set to the zero Digest because it is not yet cryptographically
+    /// bound by the RISC Zero proof system; the guest has no way to set the input. It may be
+    /// possible to use set this field to non-zero values in the future.
     // TODO(1.0): Determine the 1.0 status of input.
     pub input: Digest,
 
-    /// A [Output] of the guest, including the journal and assumptions set
-    /// during execution.
+    /// [Output] of the guest, including the journal and assumptions set during execution.
     pub output: MaybePruned<Option<Output>>,
 }
 
@@ -157,88 +161,6 @@ impl From<InvalidExitCodeError> for DecodeError {
 #[cfg(feature = "std")]
 impl std::error::Error for DecodeError {}
 
-/// Indicates how a Segment or Session's execution has terminated
-#[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq)]
-pub enum ExitCode {
-    /// This indicates when a system-initiated split has occurred due to the
-    /// segment limit being exceeded.
-    SystemSplit,
-
-    /// This indicates that the session limit has been reached.
-    ///
-    /// NOTE: This state is reported by the host prover and results in the same proof as an
-    /// execution ending in `SystemSplit`.
-    // TODO(1.0): Refine how we handle the difference between proven and unproven exit codes.
-    SessionLimit,
-
-    /// A user may manually pause a session so that it can be resumed at a later
-    /// time, along with the user returned code.
-    Paused(u32),
-
-    /// This indicates normal termination of a program with an interior exit
-    /// code returned from the guest.
-    Halted(u32),
-
-    /// This indicates termination of a program where the next instruction will
-    /// fail due to a machine fault (e.g. out of bounds memory read).
-    ///
-    /// NOTE: This state is reported by the host prover and results in the same proof as an
-    /// execution ending in `SystemSplit`.
-    // TODO(1.0): Refine how we handle the difference between proven and unproven exit codes.
-    Fault,
-}
-
-impl ExitCode {
-    pub(crate) fn into_pair(self) -> (u32, u32) {
-        match self {
-            ExitCode::Halted(user_exit) => (0, user_exit),
-            ExitCode::Paused(user_exit) => (1, user_exit),
-            ExitCode::SystemSplit => (2, 0),
-            // NOTE: SessionLimit and Fault result in the same exit code set by the rv32im
-            // circuit. As a result, this conversion is lossy. This factoring results in Fault,
-            // SessionLimit, and SystemSplit all having the same digest.
-            ExitCode::SessionLimit => (2, 0),
-            ExitCode::Fault => (2, 0),
-        }
-    }
-
-    pub(crate) fn from_pair(
-        sys_exit: u32,
-        user_exit: u32,
-    ) -> Result<ExitCode, InvalidExitCodeError> {
-        match sys_exit {
-            0 => Ok(ExitCode::Halted(user_exit)),
-            1 => Ok(ExitCode::Paused(user_exit)),
-            2 => Ok(ExitCode::SystemSplit),
-            _ => Err(InvalidExitCodeError(sys_exit, user_exit)),
-        }
-    }
-
-    #[cfg(not(target_os = "zkvm"))]
-    pub(crate) fn expects_output(&self) -> bool {
-        match self {
-            ExitCode::Halted(_) | ExitCode::Paused(_) => true,
-            ExitCode::SystemSplit | ExitCode::SessionLimit | ExitCode::Fault => false,
-        }
-    }
-}
-
-impl Eq for ExitCode {}
-
-/// Error returned when a (system, user) exit code pair is an invalid
-/// representation.
-#[derive(Debug, Copy, Clone)]
-pub struct InvalidExitCodeError(pub u32, pub u32);
-
-impl fmt::Display for InvalidExitCodeError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "invalid exit code pair ({}, {})", self.0, self.1)
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for InvalidExitCodeError {}
-
 /// Output field in the [ReceiptClaim], committing to a claimed journal and assumptions list.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[cfg_attr(test, derive(PartialEq))]
@@ -310,7 +232,7 @@ impl Deref for Assumptions {
 }
 
 impl Digestible for Assumptions {
-    /// Hash the [Output] to get a digest of the struct.
+    /// Hash the [Assumptions] to get a digest of the struct.
     fn digest<S: Sha256>(&self) -> Digest {
         tagged_list::<S>(
             "risc0.Assumptions",
@@ -364,7 +286,7 @@ impl MaybePruned<Assumptions> {
                 );
 
                 // Set the pruned digest value to be equal to the rest parameter.
-                *list_digest = tail.clone();
+                *list_digest = *tail;
                 Ok(())
             }
         }
@@ -386,6 +308,7 @@ where
 {
     /// Unpruned value.
     Value(T),
+
     /// Pruned value, which is a hash [Digest] of the value.
     Pruned(Digest),
 }
@@ -406,7 +329,7 @@ where
     pub fn as_value(&self) -> Result<&T, PrunedValueError> {
         match self {
             MaybePruned::Value(ref value) => Ok(value),
-            MaybePruned::Pruned(ref digest) => Err(PrunedValueError(digest.clone())),
+            MaybePruned::Pruned(ref digest) => Err(PrunedValueError(*digest)),
         }
     }
 
@@ -414,7 +337,7 @@ where
     pub fn as_value_mut(&mut self) -> Result<&mut T, PrunedValueError> {
         match self {
             MaybePruned::Value(ref mut value) => Ok(value),
-            MaybePruned::Pruned(ref digest) => Err(PrunedValueError(digest.clone())),
+            MaybePruned::Pruned(ref digest) => Err(PrunedValueError(*digest)),
         }
     }
 }
@@ -435,7 +358,7 @@ where
     fn digest<S: Sha256>(&self) -> Digest {
         match self {
             MaybePruned::Value(ref val) => val.digest::<S>(),
-            MaybePruned::Pruned(digest) => digest.clone(),
+            MaybePruned::Pruned(digest) => *digest,
         }
     }
 }
@@ -515,7 +438,7 @@ impl fmt::Display for PrunedValueError {
 #[cfg(feature = "std")]
 impl std::error::Error for PrunedValueError {}
 
-/// Merge two structured containing [MaybePruned] fields to produce a resulting structure with
+/// Merge two structures containing [MaybePruned] fields to produce a resulting structure with
 /// populated fields equal to the union of the two.
 ///
 /// Viewing the two structs as Merkle trees, in which subtrees may be pruned, the result of this
@@ -534,8 +457,8 @@ impl fmt::Display for MergeInequalityError {
         write!(
             f,
             "cannot merge values; left and right are not digest equal: left {}, right {}",
-            hex::encode(&self.0),
-            hex::encode(&self.1)
+            hex::encode(self.0),
+            hex::encode(self.1)
         )
     }
 }
@@ -580,7 +503,7 @@ where
 
         Ok(match (self, other) {
             (MaybePruned::Value(left), MaybePruned::Value(right)) => {
-                MaybePruned::Value(left.merge(&right)?)
+                MaybePruned::Value(left.merge(right)?)
             }
             (MaybePruned::Value(_), MaybePruned::Pruned(_)) => {
                 check_eq()?;

@@ -32,7 +32,7 @@ struct Cli {
     receipt: Option<PathBuf>,
 
     /// The hash function to use to produce a proof.
-    #[arg(long, value_enum, default_value_t = HashFn::Poseidon)]
+    #[arg(long, value_enum, default_value_t = HashFn::Poseidon2)]
     hashfn: HashFn,
 
     /// Whether to prove executions ending in error status.
@@ -84,15 +84,14 @@ struct Mode {
 enum HashFn {
     #[value(name = "sha-256")]
     Sha256,
-    #[value(name = "poseidon")]
-    Poseidon,
+    #[value(name = "poseidon2")]
+    Poseidon2,
 }
 
 pub fn main() {
     tracing_subscriber::fmt()
         .with_env_filter(tracing_subscriber::filter::EnvFilter::from_default_env())
         .init();
-    ();
 
     let args = Cli::parse();
     if let Some(port) = args.mode.port {
@@ -139,7 +138,7 @@ pub fn main() {
 
     let prover = args.get_prover();
     let ctx = VerifierContext::default();
-    let receipt = prover.prove_session(&ctx, &session).unwrap();
+    let receipt = prover.prove_session(&ctx, &session).unwrap().receipt;
 
     let receipt_data = bincode::serialize(&receipt).unwrap();
     let receipt_bytes = bytemuck::cast_slice(&receipt_data);
@@ -159,7 +158,7 @@ impl Cli {
     fn get_prover(&self) -> Rc<dyn ProverServer> {
         let hashfn = match self.hashfn {
             HashFn::Sha256 => "sha-256",
-            HashFn::Poseidon => "poseidon",
+            HashFn::Poseidon2 => "poseidon2",
         };
         let opts = ProverOpts {
             hashfn: hashfn.to_string(),
