@@ -701,7 +701,7 @@ mod soundness {
 
     #[test]
     fn proven() {
-        let cycles = DEFAULT_SEGMENT_LIMIT_PO2;
+        let cycles = 1 << DEFAULT_SEGMENT_LIMIT_PO2;
         let ext_size = BabyBearExtElem::EXT_SIZE;
         let coeffs_size = cycles * ext_size;
         let taps = CIRCUIT.get_taps();
@@ -712,7 +712,7 @@ mod soundness {
 
     #[test]
     fn conjectured_strict() {
-        let cycles = DEFAULT_SEGMENT_LIMIT_PO2;
+        let cycles = 1 << DEFAULT_SEGMENT_LIMIT_PO2;
         let ext_size = BabyBearExtElem::EXT_SIZE;
         let coeffs_size = cycles * ext_size;
         let taps = CIRCUIT.get_taps();
@@ -723,7 +723,7 @@ mod soundness {
 
     #[test]
     fn toy_model() {
-        let cycles = DEFAULT_SEGMENT_LIMIT_PO2;
+        let cycles: usize = 1 << DEFAULT_SEGMENT_LIMIT_PO2;
         let ext_size = BabyBearExtElem::EXT_SIZE;
         let coeffs_size = cycles * ext_size;
         let taps = CIRCUIT.get_taps();
