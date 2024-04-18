@@ -234,10 +234,7 @@ mod cuda {
     pub use risc0_circuit_recursion::cuda::{
         CudaCircuitHalPoseidon, CudaCircuitHalPoseidon2, CudaCircuitHalSha256,
     };
-    pub use risc0_zkp::{
-        core::hash::poseidon_254::Poseidon254HashSuite,
-        hal::cuda::{CudaHalPoseidon, CudaHalPoseidon2, CudaHalSha256},
-    };
+    pub use risc0_zkp::hal::cuda::{CudaHalPoseidon, CudaHalPoseidon2, CudaHalSha256};
 
     use super::{HalPair, Rc};
 
@@ -263,12 +260,9 @@ mod cuda {
 #[cfg(feature = "metal")]
 mod metal {
     pub use risc0_circuit_recursion::metal::MetalCircuitHal;
-    pub use risc0_zkp::{
-        core::hash::poseidon_254::Poseidon254HashSuite,
-        hal::metal::{
-            MetalHalPoseidon, MetalHalPoseidon2, MetalHalSha256, MetalHashPoseidon,
-            MetalHashPoseidon2, MetalHashSha256,
-        },
+    pub use risc0_zkp::hal::metal::{
+        MetalHalPoseidon, MetalHalPoseidon2, MetalHalSha256, MetalHashPoseidon, MetalHashPoseidon2,
+        MetalHashSha256,
     };
 
     use super::{HalPair, Rc};
