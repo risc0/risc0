@@ -38,7 +38,7 @@ fn make_coeffs<H: Hal>(hal: &H, witness: &H::Buffer<H::Elem>, count: usize) -> H
     hal.eltwise_copy_elem(&coeffs, witness);
     // Do interpolate
     hal.batch_interpolate_ntt(&coeffs, count);
-    // Convert f(x) -> f(3x), which effective multiplies cofficent c_i by 3^i.
+    // Convert f(x) -> f(3x), which effective multiplies coefficients c_i by 3^i.
     #[cfg(not(feature = "circuit_debug"))]
     hal.zk_shift(&coeffs, count);
     coeffs
@@ -145,22 +145,22 @@ impl<'a, H: Hal> Prover<'a, H> {
             }
         });
 
-        // Convert to coefficients.  Some tricky bizness here with the fact that
+        // Convert to coefficients.  Some tricky business here with the fact that
         // checkPoly is really an FpExt polynomial.  Nicely for us, since all the
         // roots of unity (which are the only thing that and values get multiplied
         // by) are in Fp, FpExt values act like simple vectors of Fp for the
         // purposes of interpolate/evaluate.
         self.hal.batch_interpolate_ntt(&check_poly, ext_size);
 
-        // The next step is to convert the degree 4*n check polynomial into 4 degreen n
+        // The next step is to convert the degree 4*n check polynomial into 4 degree n
         // polynomials so that f(x) = g0(x^4) + g1(x^4) x + g2(x^4) x^2 + g3(x^4)
-        // x^3.  To do this, we normally would grab all the coeffients of f(x) =
+        // x^3.  To do this, we normally would grab all the coefficients of f(x) =
         // sum_i c_i x^i where i % 4 == 0 and put them into a new polynomial g0(x) =
         // sum_i d0_i*x^i, where d0_i = c_(i*4).
         //
-        // Amazingingly, since the coefficients are bit reversed, the coefficients of g0
-        // are all aleady next to each other and in bit-reversed for for g0, as are
-        // the coeffients of g1, etc. So really, we can just reinterpret 4 polys of
+        // Amazingly, since the coefficients are bit reversed, the coefficients of g0
+        // are all already next to each other and in bit-reversed for for g0, as are
+        // the coefficients of g1, etc. So really, we can just reinterpret 4 polys of
         // invRate*size to 16 polys of size, without actually doing anything.
 
         // Make the PolyGroup + add it to the IOP;
@@ -182,7 +182,7 @@ impl<'a, H: Hal> Prover<'a, H> {
         let back_one = H::ExtElem::from_subfield(&H::Elem::ROU_REV[self.po2]);
         let mut all_xs = Vec::new();
 
-        // Now, we evaluate each group at the approriate points (relative to Z).
+        // Now, we evaluate each group at the appropriate points (relative to Z).
         // From here on out, we always process groups in accum, code, data order,
         // since this is the order used by the codegen system (alphabetical).
         // Sometimes it's a requirement for matching generated code, but even when
@@ -253,7 +253,7 @@ impl<'a, H: Hal> Prover<'a, H> {
         let mix = self.iop.random_ext_elem();
         tracing::debug!("Mix = {mix:?}");
 
-        // Do the coefficent mixing
+        // Do the coefficient mixing
         // Begin by making a zeroed output buffer
         let combo_count = self.taps.combos_size();
         let combos = vec![H::ExtElem::ZERO; self.cycles * (combo_count + 1)];
@@ -309,7 +309,7 @@ impl<'a, H: Hal> Prover<'a, H> {
                         cur *= mix;
                         cur_pos += reg.size();
                     }
-                    // Subtract the final 'check' coefficents
+                    // Subtract the final 'check' coefficients
                     for _ in 0..H::CHECK_SIZE {
                         combos[self.cycles * combo_count] -= cur * coeff_u[cur_pos];
                         cur_pos += 1;

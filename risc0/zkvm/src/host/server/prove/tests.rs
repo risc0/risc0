@@ -602,8 +602,8 @@ mod sys_verify {
             .is_err());
 
         // TODO(#982) With conditional receipts, implement the following cases.
-        // verify with proven corraboration in verifier success.
-        // verify with unresolved corraboration in verifier success.
+        // verify with proven corroboration in verifier success.
+        // verify with unresolved corroboration in verifier success.
         // verify with no resolution results in verifier error.
         // verify with wrong resolution results in verifier error.
     }

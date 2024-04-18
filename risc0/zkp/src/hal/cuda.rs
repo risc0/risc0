@@ -67,7 +67,7 @@ pub struct DeviceExtElem(pub BabyBearExtElem);
 unsafe impl DeviceCopy for DeviceExtElem {}
 
 pub trait CudaHash {
-    /// Create a hash implemention
+    /// Create a hash implementation
     fn new(hal: &CudaHal<Self>) -> Self;
 
     /// Run the hash_fold function
