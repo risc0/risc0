@@ -14,25 +14,25 @@
 
 //! An implementation of Poseidon targeting the Snark friendly field with a
 //! security of 128 bits.
-pub(crate) mod consts;
 
-use alloc::rc::Rc;
+mod consts;
 
+use std::rc::Rc;
+
+use ff::{Field, PrimeField};
 use risc0_core::field::{
     baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
     Elem, ExtElem,
 };
 
-use self::consts::*;
+use self::consts::{Fr, FrRepr, CELLS, ROUNDS_HALF_FULL, ROUNDS_PARTIAL};
+
 use super::{HashFn, HashSuite, Rng, RngFactory};
-use crate::{
-    core::digest::Digest,
-    ff::{Field, PrimeField},
-};
+use crate::core::digest::Digest;
 
 fn add_round_constants(cells: &mut [Fr; CELLS], round: usize) {
     for i in 0..CELLS {
-        cells[i] += ROUND_CONSTANTS[round * CELLS + i];
+        cells[i] += consts::round_constants()[round * CELLS + i];
     }
 }
 
@@ -57,7 +57,7 @@ fn multiply_by_mds(cells: &mut [Fr; CELLS]) {
     for i in 0..CELLS {
         let mut tot = Fr::ZERO;
         for j in 0..CELLS {
-            tot += MDS[i * CELLS + j] * old_cells[j];
+            tot += consts::mds()[i * CELLS + j] * old_cells[j];
         }
         cells[i] = tot;
     }

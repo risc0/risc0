@@ -4,14 +4,18 @@
 #include "fpext.h"
 
 extern "C" __global__
-void step_verify_accum(const uint& steps,
-                       const Fp* ctrl,
+void step_verify_accum(const Fp* ctrl,
                        const Fp* data,
                        const Fp* mix,
                        FpExt* wom,
-                       Fp* accum) {
+                       Fp* accum,
+                       uint32_t steps,
+                       uint32_t count) {
     uint32_t mask = steps - 1;
     uint32_t cycle = blockDim.x * blockIdx.x + threadIdx.x;
+    if (cycle >= count) {
+      return;
+    }
     Fp x0(2013265910);
     Fp x1(11);
     Fp x2(1);

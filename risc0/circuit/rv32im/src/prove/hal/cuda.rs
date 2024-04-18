@@ -14,7 +14,7 @@
 
 use std::rc::Rc;
 
-use cust::prelude::*;
+use cust::{memory::GpuBuffer as _, prelude::*};
 use risc0_core::field::{
     baby_bear::{BabyBearElem, BabyBearExtElem},
     map_pow, Elem, ExtElem, RootsOfUnity,
@@ -23,8 +23,8 @@ use risc0_zkp::{
     core::log2_ceil,
     hal::{
         cuda::{
-            BufferImpl as CudaBuffer, CudaHal, CudaHalSha256, CudaHash, CudaHashPoseidon2,
-            CudaHashSha256,
+            prefix_products, BufferImpl as CudaBuffer, CudaHal, CudaHalSha256, CudaHash,
+            CudaHashPoseidon2, CudaHashSha256, DeviceExtElem,
         },
         Buffer, CircuitHal, Hal,
     },
@@ -109,11 +109,10 @@ impl<'a, CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
             .copy_from(poly_mix_pows)
             .unwrap();
 
-        let stream = Stream::new(StreamFlags::DEFAULT, None).unwrap();
-
         let kernel = self.eval_module.get_function("eval_check").unwrap();
         let params = self.hal.compute_simple_params(domain);
         unsafe {
+            let stream = &self.hal.stream;
             launch!(kernel<<<params.0, params.1, 0, stream>>>(
                 check.as_device_ptr(),
                 ctrl.as_device_ptr(),
@@ -127,7 +126,7 @@ impl<'a, CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
             ))
             .unwrap();
         }
-        stream.synchronize().unwrap();
+        self.hal.stream.synchronize().unwrap();
     }
 
     #[tracing::instrument(skip_all)]
@@ -143,15 +142,11 @@ impl<'a, CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
         let count = steps - ZK_CYCLES;
         let params = self.hal.compute_simple_params(count);
 
-        let ram = vec![BabyBearExtElem::ONE; steps];
-        let ram = CudaBuffer::copy_from("ram", &ram);
+        let ram = vec![DeviceExtElem(BabyBearExtElem::ONE); steps];
+        let mut ram = UnifiedBuffer::from_slice(&ram).unwrap();
 
-        let bytes = vec![BabyBearExtElem::ONE; steps];
-        let bytes = CudaBuffer::copy_from("bytes", &bytes);
-
-        let steps = CudaBuffer::copy_from("steps", &[steps as u32]);
-
-        let stream = Stream::new(StreamFlags::DEFAULT, None).unwrap();
+        let bytes = vec![DeviceExtElem(BabyBearExtElem::ONE); steps];
+        let mut bytes = UnifiedBuffer::from_slice(&bytes).unwrap();
 
         tracing::info_span!("step_compute_accum").in_scope(|| {
             let kernel = self
@@ -159,38 +154,43 @@ impl<'a, CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
                 .get_function("step_compute_accum")
                 .unwrap();
             unsafe {
+                let stream = &self.hal.stream;
                 launch!(kernel<<<params.0, params.1, 0, stream>>>(
-                    steps.as_device_ptr(),
                     ctrl.as_device_ptr(),
                     data.as_device_ptr(),
                     mix.as_device_ptr(),
                     ram.as_device_ptr(),
                     bytes.as_device_ptr(),
+                    steps as u32,
+                    count as u32,
                 ))
                 .unwrap();
             }
+            self.hal.stream.synchronize().unwrap();
         });
 
         tracing::info_span!("prefix_products").in_scope(|| {
-            use risc0_zkp::hal::Hal as _;
-            self.hal.prefix_products(&ram);
-            self.hal.prefix_products(&bytes);
+            prefix_products(&mut ram);
+            prefix_products(&mut bytes);
         });
 
         tracing::info_span!("step_verify_accum").in_scope(|| {
             let kernel = self.steps_module.get_function("step_verify_accum").unwrap();
             unsafe {
+                let stream = &self.hal.stream;
                 launch!(kernel<<<params.0, params.1, 0, stream>>>(
-                    steps.as_device_ptr(),
                     ctrl.as_device_ptr(),
                     data.as_device_ptr(),
                     mix.as_device_ptr(),
                     ram.as_device_ptr(),
                     bytes.as_device_ptr(),
-                    accum.as_device_ptr()
+                    accum.as_device_ptr(),
+                    steps as u32,
+                    count as u32,
                 ))
                 .unwrap();
             }
+            self.hal.stream.synchronize().unwrap();
         });
 
         tracing::info_span!("zeroize").in_scope(|| {
@@ -198,13 +198,16 @@ impl<'a, CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
 
             let params = self.hal.compute_simple_params(accum.size());
             unsafe {
+                let stream = &self.hal.stream;
                 launch!(kernel<<<params.0, params.1, 0, stream>>>(accum.as_device_ptr())).unwrap();
             }
 
             let params = self.hal.compute_simple_params(io.size());
             unsafe {
+                let stream = &self.hal.stream;
                 launch!(kernel<<<params.0, params.1, 0, stream>>>(io.as_device_ptr())).unwrap();
             }
+            self.hal.stream.synchronize().unwrap();
         });
     }
 }

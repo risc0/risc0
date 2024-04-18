@@ -135,24 +135,41 @@ impl KernelBuild {
     }
 
     fn compile_cuda(&mut self, output: &str) {
+        println!("cargo:rerun-if-env-changed=RISC0_CUDA_DEBUG");
         println!("cargo:rerun-if-env-changed=RISC0_CUDA_OPT");
         println!("cargo:rerun-if-env-changed=NVCC_PREPEND_FLAGS");
         println!("cargo:rerun-if-env-changed=NVCC_APPEND_FLAGS");
-
-        // Note: we default to -O1 because O3 can upwards of 5 hours (or more)
-        // to compile on the current CUDA toolchain. Using O1 only shows a ~10%
-        // decrease in performance but a compile time in the minutes. Use
-        // RISC0_CUDA_OPT=3 for any performance critical releases / builds / testing
-        let ptx_opt_level = env::var("RISC0_CUDA_OPT").unwrap_or("1".to_string());
 
         let mut flags = vec![];
         if let Some(prepend_flags) = env::var("NVCC_PREPEND_FLAGS").ok() {
             flags.push(prepend_flags);
         }
-        flags.push(format!("--ptxas-options=-O{ptx_opt_level}"));
+
+        // Note: we default to -O1 because O3 can upwards of 5 hours (or more)
+        // to compile on the current CUDA toolchain. Using O1 only shows a ~10%
+        // decrease in performance but a compile time in the minutes. Use
+        // RISC0_CUDA_OPT=3 for any performance critical releases / builds / testing
+        let ptx_opt_level = env::var("RISC0_CUDA_OPT").unwrap_or("1".into());
+
+        fn enable_debug(output: &str) -> bool {
+            if let Ok(debug) = env::var("RISC0_CUDA_DEBUG") {
+                return debug.contains(output);
+            }
+            false
+        }
+
+        if enable_debug(output) {
+            flags.push("-G".into());
+        } else {
+            flags.push(format!("--ptxas-options=-O{ptx_opt_level}"));
+        }
+
         if let Some(append_flags) = env::var("NVCC_APPEND_FLAGS").ok() {
             flags.push(append_flags);
         }
+
+        flags.push("--relocatable-device-code=true".into());
+        flags.push("--device-link".into());
 
         self.cached_compile(
             output,

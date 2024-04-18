@@ -145,11 +145,8 @@ impl<MH: MetalHash> CircuitHal<MetalHal<MH>> for MetalCircuitHal<MH> {
         let kernel = self.kernels.get("step_verify_accum").unwrap();
         self.hal.dispatch(&kernel, &args, count as u64, None);
 
-        self.hal.dispatch_by_name(
-            "eltwise_zeroize_fpext",
-            &[accum.as_arg()],
-            accum.size() as u64,
-        );
+        self.hal
+            .dispatch_by_name("eltwise_zeroize_fp", &[accum.as_arg()], accum.size() as u64);
 
         self.hal
             .dispatch_by_name("eltwise_zeroize_fp", &[io.as_arg()], io.size() as u64);

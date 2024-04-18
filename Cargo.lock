@@ -1708,19 +1708,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "dashmap"
-version = "5.5.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "978747c1d849a7d2ee5e8adc0159961c48fb7e5db2f06af6723b80123bb53856"
-dependencies = [
- "cfg-if",
- "hashbrown 0.14.3",
- "lock_api",
- "once_cell",
- "parking_lot_core 0.9.9",
-]
-
-[[package]]
 name = "data-encoding"
 version = "2.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3295,6 +3282,7 @@ dependencies = [
  "human-repr",
  "serde",
  "serde_json",
+ "tracing-subscriber 0.3.18",
 ]
 
 [[package]]
@@ -5516,23 +5504,13 @@ dependencies = [
 ]
 
 [[package]]
-name = "risc0-sppark"
-version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5be1d1ff7fe501c9f420654bc1ff7461909b85e7f8fb3698a8812c0a8a787306"
-dependencies = [
- "cc",
- "which 4.4.2",
-]
-
-[[package]]
 name = "risc0-sys"
 version = "0.22.0-alpha.1"
 dependencies = [
  "cc",
  "cust",
  "risc0-build-kernel",
- "risc0-sppark",
+ "sppark",
 ]
 
 [[package]]
@@ -5557,7 +5535,6 @@ dependencies = [
  "digest 0.10.7",
  "ff",
  "hex",
- "lazy_static",
  "metal",
  "ndarray",
  "parking_lot 0.12.1",
@@ -5569,7 +5546,6 @@ dependencies = [
  "risc0-sys",
  "risc0-zkvm-platform",
  "serde",
- "serial_test",
  "sha2",
  "test-log",
  "tracing",
@@ -5616,7 +5592,6 @@ dependencies = [
  "semver 1.0.22",
  "serde",
  "serde_json",
- "serial_test",
  "sha2",
  "tar",
  "tempfile",
@@ -6041,31 +6016,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "serial_test"
-version = "3.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "953ad9342b3aaca7cb43c45c097dd008d4907070394bd0751a0aa8817e5a018d"
-dependencies = [
- "dashmap",
- "futures",
- "lazy_static",
- "log",
- "parking_lot 0.12.1",
- "serial_test_derive",
-]
-
-[[package]]
-name = "serial_test_derive"
-version = "3.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b93fb4adc70021ac1b47f7d45e8cc4169baaa7ea58483bc5b721d19a26202212"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 2.0.59",
-]
-
-[[package]]
 name = "sha1"
 version = "0.10.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -6262,6 +6212,16 @@ checksum = "d91ed6c858b01f942cd56b37a94b3e0a1798290327d1236e4d9cf4eaca44d29d"
 dependencies = [
  "base64ct",
  "der",
+]
+
+[[package]]
+name = "sppark"
+version = "0.1.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fb266b15daead53670d477d7e136b8fc92d46e31bb9007ac46d304df23689a4b"
+dependencies = [
+ "cc",
+ "which 4.4.2",
 ]
 
 [[package]]

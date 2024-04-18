@@ -42,12 +42,16 @@ fn build_cpu_kernels() {
 }
 
 fn build_cuda_kernels() {
+    let dir = Path::new("kernels").join("cuda");
+
     KernelBuild::new(KernelType::Cuda)
-        .file("kernels/cuda/steps.cu")
+        .file(dir.join("steps.cu"))
+        .dep(dir.join("step_compute_accum.cu"))
+        .dep(dir.join("step_verify_accum.cu"))
         .compile("cuda_steps_fatbin");
 
     KernelBuild::new(KernelType::Cuda)
-        .file("kernels/cuda/eval_check.cu")
+        .file(dir.join("eval_check.cu"))
         .compile("cuda_eval_fatbin");
 }
 

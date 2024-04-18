@@ -191,6 +191,12 @@ impl<'a> Bencher<'a> {
     }
 }
 
+pub fn hotbench_main() {
+    tracing_subscriber::fmt()
+        .with_env_filter(tracing_subscriber::filter::EnvFilter::from_default_env())
+        .init();
+}
+
 #[macro_export]
 macro_rules! benchmark_group {
     ($name:ident, $($function:path),+ $(,)*) => {
@@ -208,6 +214,7 @@ macro_rules! benchmark_group {
 macro_rules! benchmark_main {
     ($($group:path),+) => {
         fn main() {
+            $crate::hotbench_main();
             $(
                 $group();
             )+
