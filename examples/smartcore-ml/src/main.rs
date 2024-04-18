@@ -64,7 +64,7 @@ fn predict() -> Vec<u32> {
     // ```
     let prover = default_prover();
 
-    // This initiates a session, runs the STARK prover on the resulting exection
+    // This initiates a session, runs the STARK prover on the resulting execution
     // trace, and produces a receipt.
     let receipt = prover.prove(env, ML_TEMPLATE_ELF).unwrap().receipt;
 
@@ -131,7 +131,7 @@ mod test {
         ];
 
         // We create the SVC params and train the SVC model.
-        // The paramaters will NOT get serialized due to a serde_skip command in the
+        // The parameters will NOT get serialized due to a serde_skip command in the
         // source code for the SVC struct.
         let knl = Kernels::linear();
         let params = &SVCParameters::default().with_c(200.0).with_kernel(knl);
@@ -156,7 +156,7 @@ mod test {
         let exec = default_executor();
         let session = exec.execute(env, ML_TEMPLATE_ELF).unwrap();
 
-        // We read the result commited to the journal by the guest code.
+        // We read the result committed to the journal by the guest code.
         let result: Vec<f64> = session.journal.decode().unwrap();
 
         let y_expected: Vec<f64> = vec![

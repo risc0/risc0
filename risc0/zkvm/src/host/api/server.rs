@@ -245,7 +245,7 @@ impl Server {
             pb::api::server_request::Kind::Lift(request) => self.on_lift(conn, request),
             pb::api::server_request::Kind::Join(request) => self.on_join(conn, request),
             pb::api::server_request::Kind::Resolve(request) => self.on_resolve(conn, request),
-            pb::api::server_request::Kind::IdentiyP254(request) => {
+            pb::api::server_request::Kind::IdentityP254(request) => {
                 self.on_identity_p254(conn, request)
             }
         }

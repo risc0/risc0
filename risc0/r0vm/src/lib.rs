@@ -35,7 +35,7 @@ struct Cli {
     #[arg(long, value_enum, default_value_t = HashFn::Poseidon2)]
     hashfn: HashFn,
 
-    /// Whether to prove exections ending in error status.
+    /// Whether to prove executions ending in error status.
     //
     // When false, only prove execution sessions that end in a successful
     // [ExitCode] (i.e. `Halted(0)` or `Paused(0)`. When set to true, any

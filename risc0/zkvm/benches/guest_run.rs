@@ -16,7 +16,7 @@
 //! of these benchmarks is to gather performance data on code compiled
 //! for the guest, as opposed to performance data on the prover. As
 //! such, they do not generate seals, and these performance numbers
-//! are not indicitive of performance with cryptographically secure
+//! are not indicative of performance with cryptographically secure
 //! proofs.
 
 use std::time::{Duration, Instant};
