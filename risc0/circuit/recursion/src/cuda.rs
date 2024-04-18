@@ -128,6 +128,7 @@ impl<'a, CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
         self.hal.stream.synchronize().unwrap();
     }
 
+    #[tracing::instrument(skip_all)]
     fn accumulate(
         &self,
         ctrl: &CudaBuffer<BabyBearElem>,
