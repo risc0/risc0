@@ -172,7 +172,7 @@ journal instance.
 
 ```rust ignore title="src/main.rs"
 // Produce a receipt by proving the specified ELF binary.
-let receipt = prover.prove(env, ELF).unwrap();
+let receipt = prover.prove(env, ELF).unwrap().receipt;
 // Decode the journal to access the public data.
 let public_data = receipt.journal.decode()?;
 ```

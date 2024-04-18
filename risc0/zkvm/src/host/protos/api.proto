@@ -266,7 +266,7 @@ message OnSessionDone {
 }
 
 message OnProveDone {
-  Asset receipt = 1;
+  Asset prove_info = 1;
 }
 
 message GenericReply {

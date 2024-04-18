@@ -3,6 +3,35 @@
 ## Next (upcoming release)
 TBD
 
+### 🚨 Breaking Changes
+* The `Prover` trait's `prove()` function now returns a `ProveInfo`. This struct
+  contains the receipt as well as cycle and segment information gathered during
+  the proof generation. The following is the definition of `ProveInfo` and
+  `SessionStats` structs:
+```Rust
+/// Information returned by the prover including receipt as well as other information useful for debugging
+pub struct ProveInfo {
+    /// receipt from the computation
+    pub receipt: Receipt,
+    /// stats about cycle counts of the execution
+    pub stats: SessionStats,
+}
+
+/// Struct containing information about a prover's cycle count after running the guest program
+pub struct SessionStats {
+    /// Count of segments in this proof request
+    pub segments: usize,
+    /// Total cycles run within guest
+    pub total_cycles: u64,
+    /// User cycles run within guest
+    pub user_cycles: u64,
+}
+```
+For those upgrading from v0.21.0, the following code change is necessary on the host side to retrieve the receipt.
+```diff
+-   let receipt = prover.prove(env, BEVY_GUEST_ELF).unwrap();
++   let receipt = session.prove().unwrap().receipt;
+ ```
 # [v0.21.0 (2024-03-11)](https://github.com/risc0/risc0/releases/tag/v0.21.0)
 
 ### 🛠 Fixes

@@ -31,7 +31,7 @@ use super::{get_prover_server, HalPair, ProverImpl};
 use crate::{
     host::server::testutils,
     serde::{from_slice, to_vec},
-    ExecutorEnv, ExecutorImpl, ExitCode, ProverOpts, ProverServer, Receipt, Session,
+    ExecutorEnv, ExecutorImpl, ExitCode, ProveInfo, ProverOpts, ProverServer, Receipt, Session,
     VerifierContext,
 };
 
@@ -47,9 +47,10 @@ fn prove_session_fast(session: &Session) -> Receipt {
     prover
         .prove_session(&VerifierContext::default(), session)
         .unwrap()
+        .receipt
 }
 
-fn prove_nothing(hashfn: &str) -> Result<Receipt> {
+fn prove_nothing(hashfn: &str) -> Result<ProveInfo> {
     let env = ExecutorEnv::builder()
         .write(&MultiTestSpec::DoNothing)
         .unwrap()
@@ -86,7 +87,7 @@ fn hashfn_blake2b() {
 #[test]
 #[cfg_attr(feature = "cuda", serial)]
 fn receipt_serde() {
-    let receipt = prove_nothing("sha-256").unwrap();
+    let receipt = prove_nothing("sha-256").unwrap().receipt;
     let encoded: Vec<u32> = to_vec(&receipt).unwrap();
     let decoded: Receipt = from_slice(&encoded).unwrap();
     assert_eq!(decoded, receipt);
@@ -96,7 +97,7 @@ fn receipt_serde() {
 #[test]
 #[cfg_attr(feature = "cuda", serial)]
 fn check_image_id() {
-    let receipt = prove_nothing("sha-256").unwrap();
+    let receipt = prove_nothing("sha-256").unwrap().receipt;
     let mut image_id: Digest = MULTI_TEST_ID.into();
     for word in image_id.as_mut_words() {
         *word = word.wrapping_add(1);
@@ -466,7 +467,7 @@ fn stark2snark() {
     let opts = ProverOpts::default();
     let ctx = VerifierContext::default();
     let prover = get_prover_server(&opts).unwrap();
-    let receipt = prover.prove_session(&ctx, &session).unwrap();
+    let receipt = prover.prove_session(&ctx, &session).unwrap().receipt;
     let claim = receipt.get_claim().unwrap();
     let composite_receipt = receipt.inner.composite().unwrap();
     let succinct_receipt = prover.compress(composite_receipt).unwrap();
@@ -504,7 +505,8 @@ mod sys_verify {
         let hello_commit_receipt = get_prover_server(&prover_opts_fast())
             .unwrap()
             .prove(ExecutorEnv::default(), HELLO_COMMIT_ELF)
-            .unwrap();
+            .unwrap()
+            .receipt;
 
         // Double check that the receipt verifies.
         hello_commit_receipt.verify(HELLO_COMMIT_ID).unwrap();
@@ -525,7 +527,8 @@ mod sys_verify {
         let halt_receipt = get_prover_server(&opts)
             .unwrap()
             .prove(env, MULTI_TEST_ELF)
-            .unwrap();
+            .unwrap()
+            .receipt;
 
         // Double check that the receipt verifies with the expected image ID and exit code.
         halt_receipt
@@ -560,6 +563,7 @@ mod sys_verify {
             .unwrap()
             .prove(env, MULTI_TEST_ELF)
             .unwrap()
+            .receipt
             .verify(MULTI_TEST_ID)
             .unwrap();
     }
@@ -631,6 +635,7 @@ mod sys_verify {
             .unwrap()
             .prove(env, MULTI_TEST_ELF)
             .unwrap()
+            .receipt
             .verify(MULTI_TEST_ID)
             .unwrap();
 
@@ -682,6 +687,7 @@ mod sys_verify {
             .unwrap()
             .prove(env, MULTI_TEST_ELF)
             .unwrap()
+            .receipt
             .verify(MULTI_TEST_ID)
             .unwrap();
     }

@@ -99,7 +99,7 @@ use crate::{
 /// # #[cfg(feature = "prove")]
 /// # {
 /// # let env = ExecutorEnv::builder().write_slice(&[20]).build().unwrap();
-/// # let receipt = default_prover().prove(env, FIB_ELF).unwrap();
+/// # let receipt = default_prover().prove(env, FIB_ELF).unwrap().receipt;
 /// receipt.verify(FIB_ID).unwrap();
 /// # }
 /// ```

@@ -94,7 +94,7 @@ fn main() {
     let prover = default_prover();
 
     // Produce a receipt by proving the specified ELF binary.
-    let receipt = prover.prove(env, HELLO_GUEST_ELF).unwrap();
+    let receipt = prover.prove(env, HELLO_GUEST_ELF).unwrap().receipt;
 
     // Extract journal of receipt
     let output: u32 = receipt.journal.decode().unwrap();
