@@ -124,7 +124,8 @@ pub struct ProverOpts {
     pub receipt_format: ReceiptFormat,
 }
 
-#[derive(Clone, Serialize, Deserialize)]
+/// This enum represents the various receipt formats that can be generated.
+#[derive(Clone, Serialize, Deserialize, Eq, PartialEq)]
 pub enum ReceiptFormat {
     Composite = 0,
     Succinct = 1,

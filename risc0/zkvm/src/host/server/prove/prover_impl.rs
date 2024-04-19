@@ -19,6 +19,7 @@ use risc0_zkp::hal::{CircuitHal, Hal};
 use super::{HalPair, ProverServer};
 use crate::{
     host::{
+        client::prove::ReceiptFormat,
         prove_info::ProveInfo,
         receipt::{CompositeReceipt, InnerReceipt, SegmentReceipt, SuccinctReceipt},
         recursion::{identity_p254, join, lift, resolve},
@@ -35,6 +36,7 @@ where
 {
     name: String,
     hal_pair: HalPair<H, C>,
+    receipt_format: ReceiptFormat,
 }
 
 impl<H, C> ProverImpl<H, C>
@@ -43,10 +45,11 @@ where
     C: CircuitHal<H>,
 {
     /// Construct a [ProverImpl] with the given name and [HalPair].
-    pub fn new(name: &str, hal_pair: HalPair<H, C>) -> Self {
+    pub fn new(name: &str, hal_pair: HalPair<H, C>, receipt_format: ReceiptFormat) -> Self {
         Self {
             name: name.to_string(),
             hal_pair,
+            receipt_format,
         }
     }
 }
@@ -150,6 +153,10 @@ where
         receipt.verify_integrity_with_context(ctx)?;
 
         Ok(receipt)
+    }
+
+    fn get_receipt_format(&self) -> ReceiptFormat {
+        self.receipt_format.clone()
     }
 
     fn get_peak_memory_usage(&self) -> usize {

@@ -29,10 +29,11 @@ use risc0_zkp::hal::{CircuitHal, Hal};
 use self::{dev_mode::DevModeProver, prover_impl::ProverImpl};
 use crate::{
     host::{
+        client::prove::ReceiptFormat,
         prove_info::ProveInfo,
         receipt::{CompositeReceipt, InnerReceipt, SegmentReceipt, SuccinctReceipt},
     },
-    is_dev_mode, ExecutorEnv, ExecutorImpl, ProverOpts, Segment, Session, VerifierContext,
+    is_dev_mode, ExecutorEnv, ExecutorImpl, ProverOpts, Receipt, Segment, Session, VerifierContext,
 };
 
 /// A ProverServer can execute a given ELF binary and produce a [ProveInfo] which contains a [crate::Receipt]
@@ -52,7 +53,40 @@ pub trait ProverServer {
     ) -> Result<ProveInfo> {
         let mut exec = ExecutorImpl::from_elf(env, elf)?;
         let session = exec.run()?;
-        self.prove_session(ctx, &session)
+        let prove_info = self.prove_session(ctx, &session)?;
+        let stats = prove_info.stats;
+        let receipt = prove_info.receipt;
+
+        let composite_receipt = match receipt.inner {
+            InnerReceipt::Composite(composite) => composite,
+            other => bail!(
+                "Prove session returned a receipt format other than Composite {:?}",
+                other
+            ),
+        };
+
+        match self.get_receipt_format() {
+            ReceiptFormat::Composite => Ok(ProveInfo {
+                receipt: Receipt::new(
+                    InnerReceipt::Composite(composite_receipt),
+                    receipt.journal.bytes,
+                ),
+                stats,
+            }),
+            ReceiptFormat::Succinct => {
+                let succinct_receipt = self.compress(&composite_receipt)?;
+                Ok(ProveInfo {
+                    receipt: Receipt::new(
+                        InnerReceipt::Succinct(succinct_receipt),
+                        receipt.journal.bytes,
+                    ),
+                    stats,
+                })
+            }
+            ReceiptFormat::Compact => {
+                todo!("this will be implemented in the near future")
+            }
+        }
     }
 
     /// Prove the specified [Session].
@@ -60,6 +94,9 @@ pub trait ProverServer {
 
     /// Prove the specified [Segment].
     fn prove_segment(&self, ctx: &VerifierContext, segment: &Segment) -> Result<SegmentReceipt>;
+
+    /// Preturn the receipt format to be gerneated by proving.
+    fn get_receipt_format(&self) -> ReceiptFormat;
 
     /// Return the peak memory usage that this [ProverServer] has experienced.
     fn get_peak_memory_usage(&self) -> usize;
@@ -242,7 +279,11 @@ mod cpu {
         let hal = Rc::new(CpuHal::new(suite));
         let circuit_hal = Rc::new(CpuCircuitHal::new());
         let hal_pair = HalPair { hal, circuit_hal };
-        Ok(Rc::new(ProverImpl::new("cpu", hal_pair)))
+        Ok(Rc::new(ProverImpl::new(
+            "cpu",
+            hal_pair,
+            opts.receipt_format.clone(),
+        )))
     }
 }
 
