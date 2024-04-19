@@ -29,6 +29,7 @@ use test_log::test;
 
 use super::{get_prover_server, HalPair, ProverImpl};
 use crate::{
+    host::server::prove::ReceiptFormat,
     host::server::testutils,
     serde::{from_slice, to_vec},
     ExecutorEnv, ExecutorImpl, ExitCode, ProveInfo, ProverOpts, ProverServer, Receipt, Session,
@@ -39,6 +40,7 @@ fn prover_opts_fast() -> ProverOpts {
     ProverOpts {
         hashfn: "sha-256".to_string(),
         prove_guest_errors: false,
+        receipt_format: ReceiptFormat::Composite,
     }
 }
 
@@ -59,6 +61,7 @@ fn prove_nothing(hashfn: &str) -> Result<ProveInfo> {
     let opts = ProverOpts {
         hashfn: hashfn.to_string(),
         prove_guest_errors: false,
+        receipt_format: ReceiptFormat::Composite,
     };
     get_prover_server(&opts).unwrap().prove(env, MULTI_TEST_ELF)
 }
@@ -80,7 +83,7 @@ fn hashfn_blake2b() {
         .unwrap()
         .build()
         .unwrap();
-    let prover = ProverImpl::new("cpu:blake2b", hal_pair);
+    let prover = ProverImpl::new("cpu:blake2b", hal_pair, ReceiptFormat::Composite);
     prover.prove(env, MULTI_TEST_ELF).unwrap();
 }
 
@@ -490,6 +493,7 @@ fn stark2snark() {
 }
 
 mod sys_verify {
+    use crate::host::server::prove::ReceiptFormat;
     use risc0_zkvm_methods::{
         multi_test::MultiTestSpec, HELLO_COMMIT_ELF, HELLO_COMMIT_ID, MULTI_TEST_ELF, MULTI_TEST_ID,
     };
@@ -517,6 +521,7 @@ mod sys_verify {
         let opts = ProverOpts {
             hashfn: "sha-256".to_string(),
             prove_guest_errors: true,
+            receipt_format: ReceiptFormat::Composite,
         };
 
         let env = ExecutorEnvBuilder::default()
