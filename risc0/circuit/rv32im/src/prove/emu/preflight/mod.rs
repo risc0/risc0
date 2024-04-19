@@ -430,6 +430,7 @@ impl Preflight {
         )
     }
 
+    #[allow(clippy::too_many_arguments)]
     fn sha_cycles(
         &mut self,
         block1_addr: WordAddr,

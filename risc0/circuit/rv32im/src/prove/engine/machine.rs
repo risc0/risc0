@@ -108,9 +108,9 @@ impl MachineContext {
 
     pub fn is_exec_par_safe(&self, cycle: usize) -> bool {
         let cur_cycle = self.get_cycle(cycle);
-        let is_safe = cur_cycle.back.is_some();
+        // let is_safe = cur_cycle.back.is_some();
         // tracing::debug!("is_exec_par_safe: {cycle} <= {is_safe}");
-        is_safe
+        cur_cycle.back.is_some()
     }
 
     pub fn inject_exec_backs(&self, steps: usize, cycle: usize, data: &SyncSlice<BabyBearElem>) {
@@ -218,22 +218,8 @@ impl MachineContext {
 
     fn is_verify_mem_par_safe(&self, cycle: usize) -> bool {
         let cur_cycle = self.get_cycle(cycle);
-        let is_safe = match cur_cycle.mux {
-            TopMux::BytesInit => false,
-            TopMux::BytesSetup => false,
-            TopMux::RamInit => false,
-            TopMux::RamLoad => false,
-            TopMux::Reset => false,
-            TopMux::Body(Major::VerifyAnd, _) => false,
-            TopMux::Body(Major::VerifyDivide, _) => false,
-            TopMux::Body(Major::PageFault, _) => false,
-            TopMux::Body(Major::Halt, _) => false,
-            TopMux::Body(_, _) => true,
-            TopMux::RamFini => false,
-            TopMux::BytesFini => false,
-        };
-        // tracing::debug!("is_verify_mem_par_safe: {cycle} <= {is_safe}");
-        is_safe
+        // tracing::debug!("is_verify_mem_par_safe: {cycle} <= {}", cur_cycle.mux.is_safe());
+        cur_cycle.mux.is_safe()
     }
 
     pub fn inject_verify_mem_backs(
