@@ -200,6 +200,7 @@ impl From<pb::api::ProverOpts> for ProverOpts {
         Self {
             hashfn: opts.hashfn,
             prove_guest_errors: opts.prove_guest_errors,
+            receipt_format: opts.receipt_format.try_into().unwrap(),
         }
     }
 }
@@ -209,6 +210,7 @@ impl From<ProverOpts> for pb::api::ProverOpts {
         Self {
             hashfn: opts.hashfn,
             prove_guest_errors: opts.prove_guest_errors,
+            receipt_format: opts.receipt_format as i32,
         }
     }
 }

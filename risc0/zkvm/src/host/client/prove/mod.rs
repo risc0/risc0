@@ -19,7 +19,7 @@ pub(crate) mod local;
 
 use std::{path::PathBuf, rc::Rc};
 
-use anyhow::Result;
+use anyhow::{bail, Result};
 use serde::{Deserialize, Serialize};
 
 use self::{bonsai::BonsaiProver, external::ExternalProver};
@@ -120,6 +120,28 @@ pub struct ProverOpts {
     // moment if there is a better place. At some point before 1.0, this option should be moved or
     // dropped.
     pub prove_guest_errors: bool,
+    /// The kind of receipt to be generated.
+    pub receipt_format: ReceiptFormat,
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+pub enum ReceiptFormat {
+    Composite = 0,
+    Succinct = 1,
+    Compact = 2,
+}
+
+impl TryFrom<i32> for ReceiptFormat {
+    type Error = anyhow::Error;
+
+    fn try_from(value: i32) -> Result<Self> {
+        match value {
+            0 => Ok(ReceiptFormat::Composite),
+            1 => Ok(ReceiptFormat::Succinct),
+            2 => Ok(ReceiptFormat::Compact),
+            _ => bail!("Unknown receipt format number: {value}"),
+        }
+    }
 }
 
 impl Default for ProverOpts {
@@ -129,6 +151,7 @@ impl Default for ProverOpts {
         Self {
             hashfn: "poseidon2".to_string(),
             prove_guest_errors: false,
+            receipt_format: ReceiptFormat::Composite,
         }
     }
 }
@@ -139,6 +162,7 @@ impl ProverOpts {
         Self {
             hashfn: "sha-256".to_string(),
             prove_guest_errors: false,
+            receipt_format: ReceiptFormat::Composite,
         }
     }
 }
