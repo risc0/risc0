@@ -165,6 +165,31 @@ impl ProverOpts {
             receipt_format: ReceiptFormat::Composite,
         }
     }
+
+    /// Choose the prover that enables succinct receipts.
+    pub fn succinct() -> Self {
+        Self {
+            hashfn: "poseidon2".to_string(),
+            prove_guest_errors: false,
+            receipt_format: ReceiptFormat::Succinct,
+        }
+    }
+
+    /// Choose the prover that enables compact, snark receipts, only supported for x86_64 linux
+    #[cfg(all(target_arch = "x86_64", target_os = "linux"))]
+    pub fn compact() -> Self {
+        Self {
+            hashfn: "poseidon2".to_string(),
+            prove_guest_errors: false,
+            receipt_format: ReceiptFormat::Compact,
+        }
+    }
+
+    /// Choose the prover that enables compact, snark receipts, only supported for x86_64 linux
+    #[cfg(not(all(target_arch = "x86_64", target_os = "linux")))]
+    pub fn compact() -> Self {
+        unimplemented!("compact receipts are only supported on x86_64 linux")
+    }
 }
 
 /// Return a default [Prover] based on environment variables and feature flags.
