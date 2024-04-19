@@ -67,6 +67,24 @@ fn prove_nothing(hashfn: &str) -> Result<ProveInfo> {
 }
 
 #[test]
+fn prove_nothing_succinct() {
+    let env = ExecutorEnv::builder()
+        .write(&MultiTestSpec::DoNothing)
+        .unwrap()
+        .build()
+        .unwrap();
+    let opts = ProverOpts::succinct();
+    let inner_receipt = get_prover_server(&opts)
+        .unwrap()
+        .prove(env, MULTI_TEST_ELF)
+        .unwrap()
+        .receipt
+        .inner
+        .succinct()
+        .unwrap(); // ensure that we got a succinct receipt.
+}
+
+#[test]
 #[cfg_attr(feature = "cuda", serial)]
 fn hashfn_poseidon2() {
     prove_nothing("poseidon2").unwrap();
