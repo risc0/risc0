@@ -146,11 +146,11 @@ impl KernelBuild {
         let ptx_opt_level = env::var("RISC0_CUDA_OPT").unwrap_or("1".to_string());
 
         let mut flags = vec![];
-        if let Some(prepend_flags) = env::var("NVCC_PREPEND_FLAGS").ok() {
+        if let Ok(prepend_flags) = env::var("NVCC_PREPEND_FLAGS") {
             flags.push(prepend_flags);
         }
         flags.push(format!("--ptxas-options=-O{ptx_opt_level}"));
-        if let Some(append_flags) = env::var("NVCC_APPEND_FLAGS").ok() {
+        if let Ok(append_flags) = env::var("NVCC_APPEND_FLAGS") {
             flags.push(append_flags);
         }
 
@@ -245,7 +245,7 @@ impl KernelBuild {
         let temp_dir = tempdir_in(&cache_dir).unwrap();
         let mut hasher = Hasher::new();
         for flag in flags {
-            hasher.add_flag(&flag);
+            hasher.add_flag(flag);
         }
         for src in self.files.iter() {
             hasher.add_file(src);
