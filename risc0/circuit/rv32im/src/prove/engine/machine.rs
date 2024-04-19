@@ -325,8 +325,8 @@ impl MachineContext {
     fn arg_read(&self, cycle: usize, name: &str, outs: &mut [Elem]) -> Result<()> {
         // tracing::debug!("[{cycle}] arg_read({name})");
         match name {
-            "ram" => self.ram_arg.read(cycle, outs.try_into().unwrap()),
-            "bytes" => self.bytes_arg.read(cycle, outs.try_into().unwrap()),
+            "ram" => self.ram_arg.read(cycle, outs),
+            "bytes" => self.bytes_arg.read(cycle, outs),
             _ => unimplemented!("Unknown argument type {name}"),
         }
         Ok(())
@@ -335,8 +335,8 @@ impl MachineContext {
     fn arg_write(&self, cycle: usize, name: &str, args: &[Elem]) -> Result<()> {
         // tracing::debug!("[{cycle}] arg_write({name})");
         match name {
-            "ram" => self.ram_arg.write(cycle, args.try_into().unwrap()),
-            "bytes" => self.bytes_arg.write(cycle, args.try_into().unwrap()),
+            "ram" => self.ram_arg.write(cycle, args),
+            "bytes" => self.bytes_arg.write(cycle, args),
             _ => unimplemented!("Unknown argument type {name}"),
         }
         Ok(())
@@ -425,7 +425,7 @@ impl MachineContext {
         let (stage, offset) = self.get_stage_offset(cycle);
         let cur_cycle = &stage.cycles[cycle - offset];
         let extra_idx = cur_cycle.extra_idx.load(Ordering::Relaxed);
-        let is_read = stage.extras[extra_idx + 0];
+        let is_read = stage.extras[extra_idx];
         let page_idx = stage.extras[extra_idx + 1];
         let is_done = stage.extras[extra_idx + 2];
         // tracing::debug!("[{cycle}] page_info: ({is_read}, 0x{page_idx:05x}, {is_done})");
@@ -681,7 +681,7 @@ impl MachineContext {
         let cur_cycle = &stage.cycles[cycle - offset];
         ensure!(cur_cycle.mux == TopMux::Body(Major::ECallCopyIn, 1));
         let extra_idx = cur_cycle.extra_idx.load(Ordering::Relaxed);
-        let a0 = stage.extras[extra_idx + 0];
+        let a0 = stage.extras[extra_idx];
         let a1 = stage.extras[extra_idx + 1];
         // tracing::debug!("[{cycle}] syscall_fini(0x{a0:08x}, 0x{a1:08x}), {cur_cycle:?}");
         Quad(outs[0], outs[1], outs[2], outs[3]) = a0.into();

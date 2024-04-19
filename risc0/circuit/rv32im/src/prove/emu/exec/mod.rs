@@ -257,7 +257,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
 
         let (pre_state, partial_image, post_state) = self.pager.commit(self.pc);
         let segment_cycles = self.insn_cycles + self.pager.cycles + RESERVED_CYCLES;
-        let po2 = log2_ceil(segment_cycles.next_power_of_two()).try_into()?;
+        let po2 = log2_ceil(segment_cycles.next_power_of_two());
         let exit_code = self.exit_code.unwrap();
 
         callback(Segment {
@@ -731,7 +731,7 @@ pub fn execute<S: Syscall>(
     max_cycles: Option<u64>,
     syscall_handler: &S,
 ) -> Result<SimpleSession> {
-    if segment_limit_po2 < MIN_CYCLES_PO2 || segment_limit_po2 > MAX_CYCLES_PO2 {
+    if !(MIN_CYCLES_PO2..=MAX_CYCLES_PO2).contains(&segment_limit_po2) {
         bail!("Invalid segment_limit_po2: {segment_limit_po2}");
     }
 
