@@ -16,6 +16,7 @@
 pub(crate) mod api;
 #[cfg(feature = "client")]
 pub(crate) mod client;
+pub(crate) mod prove_info;
 pub(crate) mod receipt;
 pub(crate) mod recursion;
 #[cfg(feature = "prove")]

@@ -1,7 +1,7 @@
 import { Button } from "@risc0/ui/button";
-import { Link } from "@risc0/ui/link";
 import { GithubIcon } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { ThemeToggle } from "shared/client/theme/theme-toggle";
 import { Breadcrumbs } from "./breadcrumbs";
 

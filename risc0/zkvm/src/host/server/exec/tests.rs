@@ -1116,6 +1116,11 @@ fn aligned_alloc() {
 }
 
 #[test]
+fn alloc_zeroed() {
+    run_test(MultiTestSpec::AllocZeroed);
+}
+
+#[test]
 #[should_panic(expected = "too small")]
 fn too_many_sha() {
     run_test(MultiTestSpec::TooManySha);

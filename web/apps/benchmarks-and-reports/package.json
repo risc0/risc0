@@ -9,7 +9,7 @@
     "dev": "next dev --turbo",
     "start": "next start",
     "test": "bun test spec",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc"
   },
   "dependencies": {
     "shared": "*"

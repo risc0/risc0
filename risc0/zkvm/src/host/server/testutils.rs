@@ -19,7 +19,7 @@ use crypto_bigint::{
 };
 use risc0_zkvm_platform::syscall::bigint;
 
-// Convert to little-endian u32 array. Only reinterprettation on LE machines.
+// Convert to little-endian u32 array. Only reinterpretation on LE machines.
 fn bigint_to_arr(num: &U256) -> [u32; bigint::WIDTH_WORDS] {
     let mut arr: [u32; bigint::WIDTH_WORDS] = bytemuck::cast(num.to_le_bytes());
     for x in arr.iter_mut() {
@@ -28,7 +28,7 @@ fn bigint_to_arr(num: &U256) -> [u32; bigint::WIDTH_WORDS] {
     arr
 }
 
-// Convert from little-endian u32 array. Only reinterprettation on LE machines.
+// Convert from little-endian u32 array. Only reinterpretation on LE machines.
 fn arr_to_bigint(mut arr: [u32; bigint::WIDTH_WORDS]) -> U256 {
     for x in arr.iter_mut() {
         *x = x.to_le();

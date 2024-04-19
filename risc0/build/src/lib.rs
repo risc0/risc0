@@ -619,7 +619,7 @@ pub fn embed_methods_with_options(
         .unwrap();
 
     // HACK: It's not particularly practical to figure out all the
-    // files that all the guest crates transtively depend on.  So, we
+    // files that all the guest crates transitively depend on.  So, we
     // want to run the guest "cargo build" command each time we build.
     //
     // Since we generate methods.rs each time we run, it will always
