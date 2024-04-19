@@ -67,6 +67,7 @@ pub trait EmuContext {
     }
 }
 
+#[derive(Default)]
 pub struct Emulator {
     table: FastDecodeTable,
 }
@@ -293,6 +294,12 @@ const RV32IM_ISA: InstructionTable = [
 // to 2 bits, which gets us to 10 bits, which is only 1k.
 struct FastDecodeTable {
     table: FastInstructionTable,
+}
+
+impl Default for FastDecodeTable {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl FastDecodeTable {
