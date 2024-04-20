@@ -74,7 +74,7 @@ fn prove_nothing_succinct() {
         .build()
         .unwrap();
     let opts = ProverOpts::succinct();
-    let inner_receipt = get_prover_server(&opts)
+    get_prover_server(&opts)
         .unwrap()
         .prove(env, MULTI_TEST_ELF)
         .unwrap()

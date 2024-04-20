@@ -19,7 +19,7 @@ pub(crate) mod local;
 
 use std::{path::PathBuf, rc::Rc};
 
-use anyhow::{bail, Result};
+use anyhow::Result;
 use clap::ValueEnum;
 use serde::{Deserialize, Serialize};
 
@@ -136,19 +136,6 @@ pub enum ReceiptFormat {
     Compact,
 }
 
-impl TryFrom<i32> for ReceiptFormat {
-    type Error = anyhow::Error;
-
-    fn try_from(value: i32) -> Result<Self> {
-        match value {
-            0 => Ok(ReceiptFormat::Composite),
-            1 => Ok(ReceiptFormat::Succinct),
-            2 => Ok(ReceiptFormat::Compact),
-            _ => bail!("Unknown receipt format number: {value}"),
-        }
-    }
-}
-
 impl Default for ProverOpts {
     /// Return [ProverOpts] with the Poseidon2 hash function and
     /// `prove_guest_errors` set to false.
@@ -181,19 +168,12 @@ impl ProverOpts {
     }
 
     /// Choose the prover that enables compact, snark receipts, only supported for x86_64 linux
-    #[cfg(all(target_arch = "x86_64", target_os = "linux"))]
     pub fn compact() -> Self {
         Self {
             hashfn: "poseidon2".to_string(),
             prove_guest_errors: false,
             receipt_format: ReceiptFormat::Compact,
         }
-    }
-
-    /// Choose the prover that enables compact, snark receipts, only supported for x86_64 linux
-    #[cfg(not(all(target_arch = "x86_64", target_os = "linux")))]
-    pub fn compact() -> Self {
-        unimplemented!("compact receipts are only supported on x86_64 linux")
     }
 }
 
