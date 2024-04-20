@@ -205,6 +205,7 @@ mod cuda {
                 Ok(Rc::new(ProverImpl::new(
                     "cuda",
                     HalPair { hal, circuit_hal },
+                    opts.receipt_format.clone(),
                 )))
             }
             "poseidon2" => {
@@ -213,6 +214,7 @@ mod cuda {
                 Ok(Rc::new(ProverImpl::new(
                     "cuda",
                     HalPair { hal, circuit_hal },
+                    opts.receipt_format.clone(),
                 )))
             }
             _ => bail!("Unsupported hashfn: {}", opts.hashfn),
@@ -241,6 +243,7 @@ mod metal {
                 Ok(Rc::new(ProverImpl::new(
                     "metal",
                     HalPair { hal, circuit_hal },
+                    opts.receipt_format.clone(),
                 )))
             }
             "poseidon2" => {
@@ -249,6 +252,7 @@ mod metal {
                 Ok(Rc::new(ProverImpl::new(
                     "metal",
                     HalPair { hal, circuit_hal },
+                    opts.receipt_format.clone(),
                 )))
             }
             _ => bail!("Unsupported hashfn: {}", opts.hashfn),

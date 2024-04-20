@@ -20,6 +20,7 @@ pub(crate) mod local;
 use std::{path::PathBuf, rc::Rc};
 
 use anyhow::{bail, Result};
+use clap::ValueEnum;
 use serde::{Deserialize, Serialize};
 
 use self::{bonsai::BonsaiProver, external::ExternalProver};
@@ -125,10 +126,13 @@ pub struct ProverOpts {
 }
 
 /// This enum represents the various receipt formats that can be generated.
-#[derive(Clone, Serialize, Deserialize, Eq, PartialEq)]
+#[derive(Clone, Serialize, Deserialize, PartialEq, ValueEnum)]
 pub enum ReceiptFormat {
+    /// Composite Receipts resulting from proving a session
     Composite = 0,
+    /// Succinct Receipts resulting from applying the lift and join programgs so Composite receipts
     Succinct = 1,
+    /// Compact Receipts resulting from stark2snark on the Succinct receipts
     Compact = 2,
 }
 

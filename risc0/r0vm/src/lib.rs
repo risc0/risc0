@@ -17,7 +17,7 @@ use std::{fs, io, path::PathBuf, rc::Rc};
 use clap::{Args, Parser, ValueEnum};
 use risc0_zkvm::{
     get_prover_server, ApiServer, ExecutorEnv, ExecutorImpl, ProverOpts, ProverServer,
-    VerifierContext,
+    ReceiptFormat, VerifierContext,
 };
 
 /// Runs a RISC-V ELF binary within the RISC Zero ZKVM.
@@ -63,6 +63,10 @@ struct Cli {
     /// to read it.
     #[arg(long, env = "RISC0_PPROF_OUT")]
     pprof_out: Option<PathBuf>,
+
+    /// The receipt format produced by the r0vm prover
+    #[arg(long, value_enum, default_value_t = ReceiptFormat::Composite)]
+    receipt_format: ReceiptFormat,
 }
 
 #[derive(Args)]
@@ -163,6 +167,7 @@ impl Cli {
         let opts = ProverOpts {
             hashfn: hashfn.to_string(),
             prove_guest_errors: self.prove_guest_errors,
+            receipt_format: self.receipt_format.clone(),
         };
 
         get_prover_server(&opts).unwrap()

@@ -42,6 +42,7 @@ mod prove {
         let opts = super::ProverOpts {
             hashfn: hashfn.to_string(),
             prove_guest_errors: false,
+            receipt_format: risc0_zkvm::ReceiptFormat::Composite,
         };
         let prover = super::get_prover_server(&opts).unwrap();
         let ctx = super::VerifierContext::default();
