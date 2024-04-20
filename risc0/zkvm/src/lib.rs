@@ -121,7 +121,7 @@ pub use {
             env::{ExecutorEnv, ExecutorEnvBuilder},
             prove::{
                 bonsai::BonsaiProver, default_executor, default_prover, external::ExternalProver,
-                Executor, Prover, ProverOpts, ReceiptFormat,
+                Executor, Prover, ProverOpts, ReceiptKind,
             },
         },
     },

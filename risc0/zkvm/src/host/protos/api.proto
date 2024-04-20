@@ -151,10 +151,10 @@ message Assumption {
 message ProverOpts {
   string hashfn = 1;
   bool prove_guest_errors = 2;
-  ReceiptFormat receipt_format = 3;
+  ReceiptKind receipt_format = 3;
 }
 
-enum ReceiptFormat {
+enum ReceiptKind {
   COMPOSITE = 0;
   SUCCINCT = 1;
   COMPACT = 2;

@@ -16,7 +16,7 @@ use anyhow::{bail, Result};
 
 use crate::{
     host::{
-        client::prove::ReceiptFormat,
+        client::prove::ReceiptKind,
         prove_info::ProveInfo,
         receipt::{InnerReceipt, SegmentReceipt, SuccinctReceipt},
         server::session::null_callback,
@@ -86,7 +86,7 @@ impl ProverServer for DevModeProver {
         unimplemented!("This is unsupported for dev mode.")
     }
 
-    fn get_receipt_format(&self) -> ReceiptFormat {
+    fn get_receipt_format(&self) -> ReceiptKind {
         unimplemented!("This is unsupported for dev mode.")
     }
 

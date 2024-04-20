@@ -122,12 +122,12 @@ pub struct ProverOpts {
     // dropped.
     pub prove_guest_errors: bool,
     /// The kind of receipt to be generated.
-    pub receipt_format: ReceiptFormat,
+    pub receipt_format: ReceiptKind,
 }
 
 /// This enum represents the various receipt formats that can be generated.
 #[derive(Clone, Serialize, Deserialize, PartialEq, ValueEnum)]
-pub enum ReceiptFormat {
+pub enum ReceiptKind {
     /// Composite Receipts resulting from proving a session
     Composite,
     /// Succinct Receipts resulting from applying the lift and join programgs so Composite receipts
@@ -143,7 +143,7 @@ impl Default for ProverOpts {
         Self {
             hashfn: "poseidon2".to_string(),
             prove_guest_errors: false,
-            receipt_format: ReceiptFormat::Composite,
+            receipt_format: ReceiptKind::Composite,
         }
     }
 }
@@ -154,7 +154,7 @@ impl ProverOpts {
         Self {
             hashfn: "sha-256".to_string(),
             prove_guest_errors: false,
-            receipt_format: ReceiptFormat::Composite,
+            receipt_format: ReceiptKind::Composite,
         }
     }
 
@@ -163,7 +163,7 @@ impl ProverOpts {
         Self {
             hashfn: "poseidon2".to_string(),
             prove_guest_errors: false,
-            receipt_format: ReceiptFormat::Succinct,
+            receipt_format: ReceiptKind::Succinct,
         }
     }
 
@@ -172,7 +172,7 @@ impl ProverOpts {
         Self {
             hashfn: "poseidon2".to_string(),
             prove_guest_errors: false,
-            receipt_format: ReceiptFormat::Compact,
+            receipt_format: ReceiptKind::Compact,
         }
     }
 }

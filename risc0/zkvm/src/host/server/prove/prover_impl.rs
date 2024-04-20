@@ -19,7 +19,7 @@ use risc0_zkp::hal::{CircuitHal, Hal};
 use super::{HalPair, ProverServer};
 use crate::{
     host::{
-        client::prove::ReceiptFormat,
+        client::prove::ReceiptKind,
         prove_info::ProveInfo,
         receipt::{CompositeReceipt, InnerReceipt, SegmentReceipt, SuccinctReceipt},
         recursion::{identity_p254, join, lift, resolve},
@@ -36,7 +36,7 @@ where
 {
     name: String,
     hal_pair: HalPair<H, C>,
-    receipt_format: ReceiptFormat,
+    receipt_format: ReceiptKind,
 }
 
 impl<H, C> ProverImpl<H, C>
@@ -45,7 +45,7 @@ where
     C: CircuitHal<H>,
 {
     /// Construct a [ProverImpl] with the given name and [HalPair].
-    pub fn new(name: &str, hal_pair: HalPair<H, C>, receipt_format: ReceiptFormat) -> Self {
+    pub fn new(name: &str, hal_pair: HalPair<H, C>, receipt_format: ReceiptKind) -> Self {
         Self {
             name: name.to_string(),
             hal_pair,
@@ -155,7 +155,7 @@ where
         Ok(receipt)
     }
 
-    fn get_receipt_format(&self) -> ReceiptFormat {
+    fn get_receipt_format(&self) -> ReceiptKind {
         self.receipt_format.clone()
     }
 

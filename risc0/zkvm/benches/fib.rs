@@ -14,7 +14,7 @@
 
 use hotbench::{benchmark_group, benchmark_main, BenchGroup};
 use risc0_zkvm::{
-    get_prover_server, ExecutorEnv, ExecutorImpl, ProverOpts, ReceiptFormat, VerifierContext,
+    get_prover_server, ExecutorEnv, ExecutorImpl, ProverOpts, ReceiptKind, VerifierContext,
     RECURSION_PO2,
 };
 use risc0_zkvm_methods::FIB_ELF;
@@ -47,7 +47,7 @@ fn prove_segment(group: &mut BenchGroup, hashfn: &str) {
         let opts = ProverOpts {
             hashfn: hashfn.to_string(),
             prove_guest_errors: false,
-            receipt_format: ReceiptFormat::Composite,
+            receipt_format: ReceiptKind::Composite,
         };
         let prover = get_prover_server(&opts).unwrap();
         let ctx = VerifierContext::default();
