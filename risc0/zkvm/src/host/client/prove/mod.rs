@@ -129,11 +129,11 @@ pub struct ProverOpts {
 #[derive(Clone, Serialize, Deserialize, PartialEq, ValueEnum)]
 pub enum ReceiptFormat {
     /// Composite Receipts resulting from proving a session
-    Composite = 0,
+    Composite,
     /// Succinct Receipts resulting from applying the lift and join programgs so Composite receipts
-    Succinct = 1,
+    Succinct,
     /// Compact Receipts resulting from stark2snark on the Succinct receipts
-    Compact = 2,
+    Compact,
 }
 
 impl TryFrom<i32> for ReceiptFormat {
