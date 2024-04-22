@@ -1,41 +1,48 @@
-import { Link } from "@risc0/ui/link";
 import { Separator } from "@risc0/ui/separator";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@risc0/ui/tabs";
-import { truncate } from "@risc0/ui/utils/truncate";
+import { Tabs, TabsList, TabsTrigger } from "@risc0/ui/tabs";
 import type { Metadata } from "next";
+import Link from "next/link";
 import { redirect } from "next/navigation";
-import { CopyButton } from "shared/client/components/copy-button";
-import { convertCsvToJson } from "shared/utils/convert-csv-to-json";
+import { Suspense } from "react";
+import { SuspenseLoader } from "shared/client/components/suspense-loader";
 import { replace } from "string-ts";
-import { fetchApplicationsBenchmarks } from "./_actions/fetch-applications-benchmarks";
-import { fetchApplicationsBenchmarksCommitHash } from "./_actions/fetch-applications-benchmarks-commit-hash";
-import { ApplicationsBenchmarksTable } from "./_components/applications-benchmarks-table";
-import { applicationsBenchmarksTableColumns } from "./_components/applications-benchmarks-table-columns";
+import { APPLICATIONS_BENCHMARKS_DESCRIPTION } from "../../_utils/constants";
+import ApplicationsBenchmarksCommitHashButton from "./_components/applications-benchmarks-commit-hash-button";
+import ApplicationsBenchmarksContent from "./_components/applications-benchmarks-content";
 import { FILENAMES_TO_TITLES } from "./_utils/constants";
 
 export const metadata: Metadata = {
   title: "Applications Benchmark",
+  description: APPLICATIONS_BENCHMARKS_DESCRIPTION,
+  openGraph: {
+    images: [
+      {
+        url: `https://benchmarks.risczero.com/api/og?title=Applications%20Benchmark&description=${encodeURIComponent(
+          APPLICATIONS_BENCHMARKS_DESCRIPTION,
+        )}`,
+      },
+    ],
+  },
 };
 
-export default async function ApplicationsBenchmarksPage({ params }) {
-  const commitHash = await fetchApplicationsBenchmarksCommitHash();
-  const urls = Object.keys(FILENAMES_TO_TITLES);
-  const dataPromises = urls.map((url) => fetchApplicationsBenchmarks(url));
-  const data = await Promise.all(dataPromises);
-
+export default function ApplicationsBenchmarksPage({ params }) {
   if (!params.slug) {
-    redirect(`/applications-benchmarks/${replace(Object.keys(FILENAMES_TO_TITLES)[0]!, ".csv", "")}`);
+    redirect(
+      `/applications-benchmarks/${
+        // biome-ignore lint/style/noNonNullAssertion: ignore
+        replace(Object.keys(FILENAMES_TO_TITLES)[0]!, ".csv", "")
+      }`,
+    );
   }
 
   return (
     <div className="container max-w-screen-3xl">
       <div className="flex items-center justify-between gap-8">
         <h1 className="title-sm">Applications Benchmarks</h1>
-        {commitHash && (
-          <CopyButton size="sm" variant="ghost" value={commitHash}>
-            Commit Hash<span className="hidden sm:inline">: {truncate(commitHash, 15)}</span>
-          </CopyButton>
-        )}
+
+        <Suspense fallback={<SuspenseLoader />}>
+          <ApplicationsBenchmarksCommitHashButton />
+        </Suspense>
       </div>
 
       <Separator className="mt-2" />
@@ -44,7 +51,7 @@ export default async function ApplicationsBenchmarksPage({ params }) {
         <div className="flex items-center overflow-auto">
           <TabsList>
             {Object.keys(FILENAMES_TO_TITLES).map((filename, index) => (
-              <Link key={filename} href={`/applications-benchmarks/${replace(filename, ".csv", "")}`}>
+              <Link tabIndex={-1} key={filename} href={`/applications-benchmarks/${replace(filename, ".csv", "")}`}>
                 <TabsTrigger value={replace(filename, ".csv", "")}>
                   {Object.values(FILENAMES_TO_TITLES)[index]}
                 </TabsTrigger>
@@ -53,15 +60,11 @@ export default async function ApplicationsBenchmarksPage({ params }) {
           </TabsList>
         </div>
 
-        {Object.keys(FILENAMES_TO_TITLES).map((filename, index) => (
-          <TabsContent key={filename} value={replace(filename, ".csv", "")} className="mt-4">
-            <ApplicationsBenchmarksTable
-              title={Object.values(FILENAMES_TO_TITLES)[index] ?? ""}
-              columns={applicationsBenchmarksTableColumns}
-              data={convertCsvToJson(data[index]).filter((element) => element.job_name)}
-            />
-          </TabsContent>
-        ))}
+        <div className="mt-4">
+          <Suspense fallback={<SuspenseLoader />}>
+            <ApplicationsBenchmarksContent currentTab={params.slug?.[0]} />
+          </Suspense>
+        </div>
       </Tabs>
     </div>
   );

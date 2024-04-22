@@ -175,7 +175,7 @@ mod zkvm {
         /// chunk coordinates.
         fn get_chunk(&self, x: u32, y: u32) -> &RgbImage {
             // Check that the given x  if within the bounds of the width. No need to check y
-            // since if y is out of bounds the VectorOrcacle query will be out
+            // since if y is out of bounds the VectorOracle query will be out
             // of bounds.
             match self.cache.get(&(x, y)) {
                 Some(chunk) => chunk,

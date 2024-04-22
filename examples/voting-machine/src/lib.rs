@@ -78,7 +78,7 @@ impl PollingStation {
         tracing::info!("init");
         let env = ExecutorEnv::builder().write(&self.state)?.build()?;
         let prover = default_prover();
-        let receipt = prover.prove(env, INIT_ELF)?;
+        let receipt = prover.prove(env, INIT_ELF)?.receipt;
         Ok(InitMessage { receipt })
     }
 
@@ -91,7 +91,7 @@ impl PollingStation {
             .stdout(&mut output)
             .build()?;
         let prover = default_prover();
-        let receipt = prover.prove(env, SUBMIT_ELF)?;
+        let receipt = prover.prove(env, SUBMIT_ELF)?.receipt;
         self.state = from_slice(&output)?;
         Ok(SubmitBallotMessage { receipt })
     }
@@ -105,7 +105,7 @@ impl PollingStation {
             .stdout(&mut output)
             .build()?;
         let prover = default_prover();
-        let receipt = prover.prove(env, FREEZE_ELF)?;
+        let receipt = prover.prove(env, FREEZE_ELF)?.receipt;
         let result: FreezeVotingMachineResult = from_slice(&output)?;
         self.state = result.state;
         Ok(FreezeStationMessage { receipt })

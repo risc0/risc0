@@ -1,29 +1,7 @@
 import { Card, CardDescription, CardTitle } from "@risc0/ui/card";
-import { Link } from "@risc0/ui/link";
 import Image from "next/image";
-
-const REPORTS = [
-  {
-    label: "Crates.io Validation",
-    href: "/crates-validation",
-    description: "View the latest Crates.io validation results",
-  },
-  {
-    label: "Benchmarks",
-    href: "/benchmarks",
-    description: "View the latest benchmarks for the RISC Zero platform",
-  },
-  {
-    label: "Applications Benchmarks",
-    href: "/applications-benchmarks",
-    description: "View the latest applications benchmarks for the RISC Zero platform",
-  },
-  {
-    label: "Datasheet",
-    href: "/datasheet",
-    description: "View the latest datasheet for the RISC Zero platform",
-  },
-] as const;
+import Link from "next/link";
+import { REPORTS } from "./_utils/constants";
 
 export default function ReportsPage() {
   return (
@@ -35,24 +13,15 @@ export default function ReportsPage() {
               <CardTitle className="text-xl">{label}</CardTitle>
               <CardDescription className="text-sm">{description}</CardDescription>
             </div>
+
             <div className="flex min-h-[160px] min-w-[220px] justify-center">
               <Image
                 width={220}
                 height={160}
                 priority
-                className="user-select-none pointer-events-none hidden rounded object-contain object-right dark:block"
-                src={`/graph-${index}-dark.svg`}
-                alt={description}
-                quality={100}
-              />
-              <Image
-                width={220}
-                height={160}
-                priority
-                className={"user-select-none pointer-events-none rounded object-contain object-right dark:hidden"}
+                className="dark:filter-order-colored-svg-filter-order user-select-none pointer-events-none rounded object-contain object-right invert dark:brightness-100 dark:hue-rotate-[3deg] dark:invert-0 dark:saturate-[6] dark:sepia"
                 src={`/graph-${index}.svg`}
                 alt={description}
-                quality={100}
               />
             </div>
           </Card>
