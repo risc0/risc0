@@ -7,7 +7,7 @@ _A brief introduction to the RISC Zero [receipt]._
 A receipt gives the results of your program along with proof that they were
 produced honestly.
 
-![From Guest Code to Receipt](/diagrams/from-rust-to-receipt.png)
+![From Guest Code to Receipt](../../static/diagrams/from-rust-to-receipt.png)
 
 When you execute your [zkVM application][zkvm], the output of your application
 is included in a [receipt]. The [receipt] serves as a succinct [validity proof]
