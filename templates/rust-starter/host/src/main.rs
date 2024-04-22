@@ -34,10 +34,14 @@ fn main() {
     // Obtain the default prover.
     let prover = default_prover();
 
-    // Produce a receipt by proving the specified ELF binary.
-    let receipt = prover
+    // Proof information by proving the specified ELF binary.
+    // This struct contains the receipt along with statistics about execution of the guest
+    let prove_info = prover
         .prove(env, {{guest_elf}})
         .unwrap();
+
+    // extract the receipt.
+    let receipt = prove_info.receipt;
 
     // TODO: Implement code for retrieving receipt journal here.
 

@@ -106,7 +106,7 @@ fn join(group: &mut BenchGroup) {
         b.iter(
             1 << RECURSION_PO2,
             || {
-                let receipt = prover.prove_session(&ctx, &session).unwrap();
+                let receipt = prover.prove_session(&ctx, &session).unwrap().receipt;
                 let composite = receipt.inner.composite().unwrap();
                 let left = prover.lift(&composite.segments[0]).unwrap();
                 let right = prover.lift(&composite.segments[1]).unwrap();
@@ -151,7 +151,7 @@ fn total_succinct(group: &mut BenchGroup) {
             || setup_exec(iterations),
             |exec| {
                 let session = exec.run().unwrap();
-                let receipt = prover.prove_session(&ctx, &session).unwrap();
+                let receipt = prover.prove_session(&ctx, &session).unwrap().receipt;
                 let composite_receipt = receipt.inner.composite().unwrap();
                 prover.compress(composite_receipt)
             },

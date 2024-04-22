@@ -35,7 +35,7 @@ struct Cli {
     #[arg(long, value_enum, default_value_t = HashFn::Poseidon2)]
     hashfn: HashFn,
 
-    /// Whether to prove exections ending in error status.
+    /// Whether to prove executions ending in error status.
     //
     // When false, only prove execution sessions that end in a successful
     // [ExitCode] (i.e. `Halted(0)` or `Paused(0)`. When set to true, any
@@ -138,7 +138,7 @@ pub fn main() {
 
     let prover = args.get_prover();
     let ctx = VerifierContext::default();
-    let receipt = prover.prove_session(&ctx, &session).unwrap();
+    let receipt = prover.prove_session(&ctx, &session).unwrap().receipt;
 
     let receipt_data = bincode::serialize(&receipt).unwrap();
     let receipt_bytes = bytemuck::cast_slice(&receipt_data);

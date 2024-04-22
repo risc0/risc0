@@ -463,7 +463,7 @@ pub unsafe extern "C" fn sys_read(fd: u32, recv_ptr: *mut u8, nread: usize) -> u
             syscall_2(nr::SYS_READ, null_mut(), 0, fd, unaligned_at_start as u32);
         debug_assert_eq!(nread_first as usize, unaligned_at_start);
 
-        // Align up to a word boundry to do the main copy.
+        // Align up to a word boundary to do the main copy.
         let main_ptr = fill_from_word(recv_ptr, firstword, unaligned_at_start);
         if nread == unaligned_at_start {
             // We only read part of a word, and don't have to read any full words.
@@ -739,7 +739,7 @@ pub unsafe extern "C" fn sys_verify(
 
     // Check to ensure the host indicated success by returning 0.
     // This should always be the case. This check is included for
-    // forwards-compatiblity.
+    // forwards-compatibility.
     if a0 != 0 {
         const MSG: &[u8] = "sys_verify returned error result".as_bytes();
         unsafe { sys_panic(MSG.as_ptr(), MSG.len()) };
@@ -772,7 +772,7 @@ pub unsafe extern "C" fn sys_verify_integrity(claim_digest: *const [u32; DIGEST_
 
     // Check to ensure the host indicated success by returning 0.
     // This should always be the case. This check is included for
-    // forwards-compatiblity.
+    // forwards-compatibility.
     if a0 != 0 {
         const MSG: &[u8] = "sys_verify_integrity returned error result".as_bytes();
         unsafe { sys_panic(MSG.as_ptr(), MSG.len()) };

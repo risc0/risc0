@@ -19,6 +19,7 @@ use risc0_zkp::hal::{CircuitHal, Hal};
 use super::{HalPair, ProverServer};
 use crate::{
     host::{
+        prove_info::ProveInfo,
         receipt::{CompositeReceipt, InnerReceipt, SegmentReceipt, SuccinctReceipt},
         recursion::{identity_p254, join, lift, resolve},
     },
@@ -55,7 +56,7 @@ where
     H: Hal<Field = BabyBear, Elem = Elem, ExtElem = ExtElem>,
     C: CircuitHal<H>,
 {
-    fn prove_session(&self, ctx: &VerifierContext, session: &Session) -> Result<Receipt> {
+    fn prove_session(&self, ctx: &VerifierContext, session: &Session) -> Result<ProveInfo> {
         tracing::debug!(
             "prove_session: {}, exit_code = {:?}, journal = {:?}, segments: {}",
             self.name,
@@ -120,7 +121,10 @@ where
             );
         }
 
-        Ok(receipt)
+        Ok(ProveInfo {
+            receipt,
+            stats: session.stats(),
+        })
     }
 
     fn prove_segment(&self, ctx: &VerifierContext, segment: &Segment) -> Result<SegmentReceipt> {
