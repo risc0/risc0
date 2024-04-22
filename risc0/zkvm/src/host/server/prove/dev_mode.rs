@@ -86,7 +86,7 @@ impl ProverServer for DevModeProver {
         unimplemented!("This is unsupported for dev mode.")
     }
 
-    fn get_receipt_format(&self) -> ReceiptKind {
+    fn get_receipt_kind(&self) -> ReceiptKind {
         unimplemented!("This is unsupported for dev mode.")
     }
 

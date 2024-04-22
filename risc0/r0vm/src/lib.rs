@@ -66,7 +66,7 @@ struct Cli {
 
     /// The receipt format produced by the r0vm prover
     #[arg(long, value_enum, default_value_t = ReceiptKind::Composite)]
-    receipt_format: ReceiptKind,
+    receipt_kind: ReceiptKind,
 }
 
 #[derive(Args)]
@@ -167,7 +167,7 @@ impl Cli {
         let opts = ProverOpts {
             hashfn: hashfn.to_string(),
             prove_guest_errors: self.prove_guest_errors,
-            receipt_format: self.receipt_format.clone(),
+            receipt_kind: self.receipt_kind.clone(),
         };
 
         get_prover_server(&opts).unwrap()

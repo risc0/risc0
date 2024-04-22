@@ -40,7 +40,7 @@ fn prover_opts_fast() -> ProverOpts {
     ProverOpts {
         hashfn: "sha-256".to_string(),
         prove_guest_errors: false,
-        receipt_format: ReceiptKind::Composite,
+        receipt_kind: ReceiptKind::Composite,
     }
 }
 
@@ -61,7 +61,7 @@ fn prove_nothing(hashfn: &str) -> Result<ProveInfo> {
     let opts = ProverOpts {
         hashfn: hashfn.to_string(),
         prove_guest_errors: false,
-        receipt_format: ReceiptKind::Composite,
+        receipt_kind: ReceiptKind::Composite,
     };
     get_prover_server(&opts).unwrap().prove(env, MULTI_TEST_ELF)
 }
@@ -539,7 +539,7 @@ mod sys_verify {
         let opts = ProverOpts {
             hashfn: "sha-256".to_string(),
             prove_guest_errors: true,
-            receipt_format: ReceiptKind::Composite,
+            receipt_kind: ReceiptKind::Composite,
         };
 
         let env = ExecutorEnvBuilder::default()

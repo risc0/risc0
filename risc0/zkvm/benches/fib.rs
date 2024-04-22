@@ -47,7 +47,7 @@ fn prove_segment(group: &mut BenchGroup, hashfn: &str) {
         let opts = ProverOpts {
             hashfn: hashfn.to_string(),
             prove_guest_errors: false,
-            receipt_format: ReceiptKind::Composite,
+            receipt_kind: ReceiptKind::Composite,
         };
         let prover = get_prover_server(&opts).unwrap();
         let ctx = VerifierContext::default();

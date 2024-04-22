@@ -200,7 +200,7 @@ impl From<pb::api::ProverOpts> for ProverOpts {
         Self {
             hashfn: opts.hashfn,
             prove_guest_errors: opts.prove_guest_errors,
-            receipt_format: match opts.receipt_format {
+            receipt_kind: match opts.receipt_kind {
                 0 => ReceiptKind::Composite,
                 1 => ReceiptKind::Succinct,
                 2 => ReceiptKind::Compact,
@@ -215,7 +215,7 @@ impl From<ProverOpts> for pb::api::ProverOpts {
         Self {
             hashfn: opts.hashfn,
             prove_guest_errors: opts.prove_guest_errors,
-            receipt_format: opts.receipt_format as i32,
+            receipt_kind: opts.receipt_kind as i32,
         }
     }
 }

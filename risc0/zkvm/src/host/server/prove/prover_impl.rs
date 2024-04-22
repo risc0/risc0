@@ -36,7 +36,7 @@ where
 {
     name: String,
     hal_pair: HalPair<H, C>,
-    receipt_format: ReceiptKind,
+    receipt_kind: ReceiptKind,
 }
 
 impl<H, C> ProverImpl<H, C>
@@ -45,11 +45,11 @@ where
     C: CircuitHal<H>,
 {
     /// Construct a [ProverImpl] with the given name and [HalPair].
-    pub fn new(name: &str, hal_pair: HalPair<H, C>, receipt_format: ReceiptKind) -> Self {
+    pub fn new(name: &str, hal_pair: HalPair<H, C>, receipt_kind: ReceiptKind) -> Self {
         Self {
             name: name.to_string(),
             hal_pair,
-            receipt_format,
+            receipt_kind,
         }
     }
 }
@@ -106,7 +106,7 @@ where
             );
         }
 
-        let receipt = match self.get_receipt_format() {
+        let receipt = match self.get_receipt_kind() {
             ReceiptKind::Composite => Receipt::new(
                 InnerReceipt::Composite(composite_receipt),
                 session.journal.clone().unwrap_or_default().bytes,
@@ -167,8 +167,8 @@ where
         Ok(receipt)
     }
 
-    fn get_receipt_format(&self) -> ReceiptKind {
-        self.receipt_format.clone()
+    fn get_receipt_kind(&self) -> ReceiptKind {
+        self.receipt_kind.clone()
     }
 
     fn get_peak_memory_usage(&self) -> usize {
