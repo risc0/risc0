@@ -33,7 +33,7 @@ use crate::{
         prove_info::ProveInfo,
         receipt::{CompositeReceipt, InnerReceipt, SegmentReceipt, SuccinctReceipt},
     },
-    is_dev_mode, ExecutorEnv, ExecutorImpl, ProverOpts, Receipt, Segment, Session, VerifierContext,
+    is_dev_mode, ExecutorEnv, ExecutorImpl, ProverOpts, Segment, Session, VerifierContext,
 };
 
 /// A ProverServer can execute a given ELF binary and produce a [ProveInfo] which contains a [crate::Receipt]
@@ -53,40 +53,7 @@ pub trait ProverServer {
     ) -> Result<ProveInfo> {
         let mut exec = ExecutorImpl::from_elf(env, elf)?;
         let session = exec.run()?;
-        let prove_info = self.prove_session(ctx, &session)?;
-        let stats = prove_info.stats;
-        let receipt = prove_info.receipt;
-
-        let composite_receipt = match receipt.inner {
-            InnerReceipt::Composite(composite) => composite,
-            other => bail!(
-                "Prove session returned a receipt format other than Composite {:?}",
-                other
-            ),
-        };
-
-        match self.get_receipt_format() {
-            ReceiptKind::Composite => Ok(ProveInfo {
-                receipt: Receipt::new(
-                    InnerReceipt::Composite(composite_receipt),
-                    receipt.journal.bytes,
-                ),
-                stats,
-            }),
-            ReceiptKind::Succinct => {
-                let succinct_receipt = self.compress(&composite_receipt)?;
-                Ok(ProveInfo {
-                    receipt: Receipt::new(
-                        InnerReceipt::Succinct(succinct_receipt),
-                        receipt.journal.bytes,
-                    ),
-                    stats,
-                })
-            }
-            ReceiptKind::Compact => {
-                todo!("this will be implemented in the near future")
-            }
-        }
+        self.prove_session(ctx, &session)
     }
 
     /// Prove the specified [Session].

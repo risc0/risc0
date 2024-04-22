@@ -106,10 +106,22 @@ where
             );
         }
 
-        let receipt = Receipt::new(
-            InnerReceipt::Composite(composite_receipt),
-            session.journal.clone().unwrap_or_default().bytes,
-        );
+        let receipt = match self.get_receipt_format() {
+            ReceiptKind::Composite => Receipt::new(
+                InnerReceipt::Composite(composite_receipt),
+                session.journal.clone().unwrap_or_default().bytes,
+            ),
+            ReceiptKind::Succinct => {
+                let succinct_receipt = self.compress(&composite_receipt)?;
+                Receipt::new(
+                    InnerReceipt::Succinct(succinct_receipt),
+                    session.journal.clone().unwrap_or_default().bytes,
+                )
+            }
+            ReceiptKind::Compact => {
+                todo!("this will be implemented in the near future")
+            }
+        };
 
         // Verify the receipt to catch if something is broken in the proving process.
         receipt.verify_integrity_with_context(ctx)?;
