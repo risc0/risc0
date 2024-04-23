@@ -280,7 +280,7 @@ impl Preflight {
     fn post_steps(&mut self) -> Result<()> {
         let faults = self.pager.get_faults();
 
-        // Emulate the page fault reads occuring before the body starts.
+        // Emulate the page fault reads occurring before the body starts.
         for page_idx in faults.reads.iter().rev() {
             self.page_fault(true, /*is_read=*/ 1, *page_idx, /*is_done=*/ 0)?;
         }
