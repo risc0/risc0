@@ -20,7 +20,7 @@ use std::{
     sync::atomic::{AtomicUsize, Ordering},
 };
 
-use anyhow::{anyhow, bail, Result};
+use anyhow::{anyhow, bail, ensure, Result};
 use crypto_bigint::{CheckedMul as _, Encoding as _, NonZero, U256, U512};
 use derive_debug::Dbg;
 use risc0_zkp::{
@@ -548,8 +548,9 @@ impl Preflight {
 
     fn ecall_input(&mut self) -> Result<bool> {
         self.load_register(REG_T0)?;
-        let a0 = self.load_register(REG_A0)?;
-        let word = self.input_digest.as_words()[a0 as usize & 0x7];
+        let a0 = self.load_register(REG_A0)? as usize;
+        ensure!(a0 < DIGEST_WORDS, "sys_input index out of range");
+        let word = self.input_digest.as_words()[a0];
         self.store_register(REG_A0, word)?;
 
         self.add_cycle(false, TopMux::Body(Major::ECall, 0));
