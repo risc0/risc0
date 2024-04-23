@@ -136,8 +136,7 @@ impl KernelBuild {
 
     fn compile_cuda(&mut self, output: &str) {
         println!("cargo:rerun-if-env-changed=RISC0_CUDA_OPT");
-        println!("cargo:rerun-if-env-changed=NVCC_PREPEND_FLAGS");
-        println!("cargo:rerun-if-env-changed=NVCC_APPEND_FLAGS");
+        println!("cargo:rerun-if-env-changed=RISC0_NVCC_FLAGS");
 
         // Note: we default to -O1 because O3 can upwards of 5 hours (or more)
         // to compile on the current CUDA toolchain. Using O1 only shows a ~10%
@@ -146,12 +145,11 @@ impl KernelBuild {
         let ptx_opt_level = env::var("RISC0_CUDA_OPT").unwrap_or("1".to_string());
 
         let mut flags = vec![];
-        if let Ok(prepend_flags) = env::var("NVCC_PREPEND_FLAGS") {
-            flags.push(prepend_flags);
-        }
         flags.push(format!("--ptxas-options=-O{ptx_opt_level}"));
-        if let Ok(append_flags) = env::var("NVCC_APPEND_FLAGS") {
-            flags.push(append_flags);
+        if let Ok(nvcc_flags) = env::var("RISC0_NVCC_FLAGS") {
+            flags.push(nvcc_flags);
+        } else {
+            flags.push("-arch=native".into());
         }
 
         self.cached_compile(

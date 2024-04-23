@@ -107,7 +107,7 @@ fn main() {
         MultiTestSpec::Halt(exit_code) => {
             env::exit(exit_code);
         }
-        MultiTestSpec::PauseContinue(exit_code) => {
+        MultiTestSpec::PauseResume(exit_code) => {
             env::log("before");
             env::pause(exit_code);
             env::log("after");
@@ -163,6 +163,9 @@ fn main() {
                     }
                 }
             }
+        }
+        MultiTestSpec::SysInput(digest) => {
+            assert_eq!(env::input_digest(), digest);
         }
         MultiTestSpec::SysRead {
             mut buf,
