@@ -1,7 +1,9 @@
 "use server";
 
 export async function findMostRecentHash() {
-  const response = await fetch("https://risc0.github.io/ghpages/dev/crate-validation/results/index.json");
+  const response = await fetch("https://risc0.github.io/ghpages/dev/crate-validation/results/index.json", {
+    next: { revalidate: 3600 },
+  });
   const responseText = await response.text();
 
   // Find the most recent timestamp
