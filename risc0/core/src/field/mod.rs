@@ -298,7 +298,7 @@ mod tests {
     where
         F: Into<u64> + From<u64> + Debug,
     {
-        // For testng, we do 128-bit arithmetic so we don't have to worry about
+        // For testing, we do 128-bit arithmetic so we don't have to worry about
         // overflows.
         let p: u128 = p_u64 as _;
 
