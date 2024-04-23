@@ -17,7 +17,7 @@ mod tests;
 
 use std::{array, cell::RefCell, collections::BTreeSet, mem, rc::Rc};
 
-use anyhow::{bail, Result};
+use anyhow::{bail, ensure, Result};
 use crypto_bigint::{CheckedMul as _, Encoding as _, NonZero, U256, U512};
 use risc0_binfmt::{ExitCode, MemoryImage, Program, SystemState};
 use risc0_zkp::{
@@ -365,8 +365,9 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
 
     fn ecall_input(&mut self) -> Result<bool> {
         tracing::debug!("[{}] ecall_input", self.insn_cycles);
-        let a0 = self.load_register(REG_A0)?;
-        let word = self.input_digest.as_words()[a0 as usize & 0x7];
+        let a0 = self.load_register(REG_A0)? as usize;
+        ensure!(a0 < DIGEST_WORDS, "sys_input index out of range");
+        let word = self.input_digest.as_words()[a0];
         self.store_register(REG_A0, word)?;
 
         self.pending.cycles += 1;

@@ -307,6 +307,7 @@ pub unsafe extern "C" fn sys_pause(user_exit: u8, out_state: *const [u32; DIGEST
 #[cfg_attr(feature = "export-syscalls", no_mangle)]
 pub extern "C" fn sys_input(index: u32) -> u32 {
     let t0 = ecall::INPUT;
+    let index = index & 0x07;
     #[cfg(target_os = "zkvm")]
     unsafe {
         let a0: u32;
