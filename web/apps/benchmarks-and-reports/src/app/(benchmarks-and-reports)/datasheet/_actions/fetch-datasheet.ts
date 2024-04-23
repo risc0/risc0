@@ -1,7 +1,9 @@
 "use server";
 
 export async function fetchDatasheet(url: string) {
-  return fetch(`https://risc0.github.io/ghpages/dev/datasheet/${url}`)
+  return fetch(`https://risc0.github.io/ghpages/dev/datasheet/${url}`, {
+    next: { revalidate: 3600 },
+  })
     .then((response) => {
       if (!response.ok) {
         throw new Error(`Error fetching ${url}: ${response.statusText}`);
