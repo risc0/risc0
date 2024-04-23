@@ -48,6 +48,7 @@ pub enum MultiTestSpec {
         count: u32,
     },
     DoRandom,
+    SysInput(Digest),
     SysRead {
         // Buffer to read to
         buf: Vec<u8>,

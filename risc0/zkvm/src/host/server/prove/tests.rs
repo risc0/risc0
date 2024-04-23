@@ -464,6 +464,25 @@ fn continuation() {
     }
 }
 
+#[test]
+fn sys_input() {
+    use hex::FromHex;
+    let digest =
+        Digest::from_hex("ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad")
+            .unwrap();
+    let spec = MultiTestSpec::SysInput(digest);
+    let env = ExecutorEnv::builder()
+        .input_digest(digest)
+        .write(&spec)
+        .unwrap()
+        .build()
+        .unwrap();
+    let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
+    let session = exec.run().unwrap();
+    assert_eq!(session.exit_code, ExitCode::Halted(0));
+    prove_session_fast(&session);
+}
+
 #[cfg(feature = "docker")]
 mod docker {
     #[test]

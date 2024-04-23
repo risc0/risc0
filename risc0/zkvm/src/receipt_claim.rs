@@ -57,11 +57,6 @@ pub struct ReceiptClaim {
     pub exit_code: ExitCode,
 
     /// Input to the guest.
-    ///
-    /// NOTE: This field must be set to the zero Digest because it is not yet cryptographically
-    /// bound by the RISC Zero proof system; the guest has no way to set the input. It may be
-    /// possible to use set this field to non-zero values in the future.
-    // TODO(1.0): Determine the 1.0 status of input.
     pub input: Digest,
 
     /// [Output] of the guest, including the journal and assumptions set during execution.

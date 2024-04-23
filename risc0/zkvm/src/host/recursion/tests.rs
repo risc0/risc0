@@ -270,6 +270,6 @@ fn stable_root() {
 
     assert_eq!(
         ALLOWED_IDS_ROOT,
-        "54058968ca621b3dfdf22c5d7dc65533ffbc1552e36d8b4437424d037328645e"
+        "0fc5ed20489da66ad74ed75a58111203e1eccb18b34c472ba14c4d5b8f68da57"
     );
 }

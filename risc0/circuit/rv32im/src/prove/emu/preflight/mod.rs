@@ -112,6 +112,7 @@ struct Preflight {
     pre_merkle_root: Digest,
     halted: Option<u32>,
     syscalls: VecDeque<SyscallRecord>,
+    input_digest: Digest,
 }
 
 impl Clone for PreflightCycle {
@@ -188,6 +189,7 @@ impl Preflight {
             pre_merkle_root: segment.pre_state.merkle_root,
             halted: None,
             syscalls: segment.syscalls.clone().into(),
+            input_digest: segment.input_digest,
         }
     }
 
@@ -544,6 +546,18 @@ impl Preflight {
         Ok(true)
     }
 
+    fn ecall_input(&mut self) -> Result<bool> {
+        self.load_register(REG_T0)?;
+        let a0 = self.load_register(REG_A0)?;
+        let word = self.input_digest.as_words()[a0 as usize & 0x7];
+        self.store_register(REG_A0, word)?;
+
+        self.add_cycle(false, TopMux::Body(Major::ECall, 0));
+
+        self.pc += WORD_SIZE;
+        Ok(true)
+    }
+
     fn peek_register(&mut self, idx: usize) -> Result<u32> {
         self.peek(SYSTEM_START + idx)
     }
@@ -706,6 +720,7 @@ impl EmuContext for Preflight {
         // transaction but still cause the page to marked as loaded.
         match self.pager.load(SYSTEM_START + REG_T0) {
             ecall::HALT => self.ecall_halt(),
+            ecall::INPUT => self.ecall_input(),
             ecall::SOFTWARE => self.ecall_software(),
             ecall::SHA => self.ecall_sha(),
             ecall::BIGINT => self.ecall_bigint(),

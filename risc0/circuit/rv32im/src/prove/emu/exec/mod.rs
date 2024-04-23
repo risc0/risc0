@@ -133,6 +133,7 @@ pub struct Executor<'a, 'b, S: Syscall> {
     exit_code: Option<ExitCode>,
     syscalls: Vec<SyscallRecord>,
     syscall_handler: &'a S,
+    input_digest: Digest,
     output_digest: Option<Digest>,
     pending: PendingState,
     trace: Vec<Rc<RefCell<dyn TraceCallback + 'b>>>,
@@ -153,6 +154,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
     pub fn new(
         image: MemoryImage,
         syscall_handler: &'a S,
+        input_digest: Option<Digest>,
         trace: Vec<Rc<RefCell<dyn TraceCallback + 'b>>>,
     ) -> Self {
         let pc = ByteAddr(image.pc);
@@ -163,6 +165,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             exit_code: None,
             syscalls: Vec::new(),
             syscall_handler,
+            input_digest: input_digest.unwrap_or_default(),
             output_digest: None,
             pending: PendingState {
                 pc,
@@ -242,6 +245,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                     po2: segment_po2,
                     exit_code: ExitCode::SystemSplit,
                     index: segments,
+                    input_digest: self.input_digest,
                     output_digest: self.output_digest,
                 })?;
                 segments += 1;
@@ -269,6 +273,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             po2,
             exit_code,
             index: segments,
+            input_digest: self.input_digest,
             output_digest: self.output_digest,
         })?;
         segments += 1;
@@ -353,6 +358,18 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             _ => bail!("Illegal halt type: {halt_type}"),
         };
         self.pending.output_digest = Some(output.into());
+        self.pending.pc = self.pc + WORD_SIZE;
+
+        Ok(true)
+    }
+
+    fn ecall_input(&mut self) -> Result<bool> {
+        tracing::debug!("[{}] ecall_input", self.insn_cycles);
+        let a0 = self.load_register(REG_A0)?;
+        let word = self.input_digest.as_words()[a0 as usize & 0x7];
+        self.store_register(REG_A0, word)?;
+
+        self.pending.cycles += 1;
         self.pending.pc = self.pc + WORD_SIZE;
 
         Ok(true)
@@ -610,6 +627,7 @@ impl<'a, 'b, S: Syscall> EmuContext for Executor<'a, 'b, S> {
     fn ecall(&mut self) -> Result<bool> {
         match self.load_register(REG_T0)? {
             ecall::HALT => self.ecall_halt(),
+            ecall::INPUT => self.ecall_input(),
             ecall::SOFTWARE => self.ecall_software(),
             ecall::SHA => self.ecall_sha(),
             ecall::BIGINT => self.ecall_bigint(),
@@ -724,6 +742,7 @@ pub fn execute<S: Syscall>(
     segment_limit_po2: usize,
     max_cycles: Option<u64>,
     syscall_handler: &S,
+    input_digest: Option<Digest>,
 ) -> Result<SimpleSession> {
     if segment_limit_po2 < MIN_CYCLES_PO2 || segment_limit_po2 > MAX_CYCLES_PO2 {
         bail!("Invalid segment_limit_po2: {segment_limit_po2}");
@@ -731,7 +750,7 @@ pub fn execute<S: Syscall>(
 
     let mut segments = Vec::new();
     let trace = Vec::new();
-    let result = Executor::new(image, syscall_handler, trace).run(
+    let result = Executor::new(image, syscall_handler, input_digest, trace).run(
         segment_limit_po2,
         max_cycles,
         |segment| {
@@ -748,8 +767,15 @@ pub fn execute_elf<S: Syscall>(
     segment_po2: usize,
     max_cycles: Option<u64>,
     syscall_handler: &S,
+    input_digest: Option<Digest>,
 ) -> Result<SimpleSession> {
     let program = Program::load_elf(elf, GUEST_MAX_MEM as u32)?;
     let image = MemoryImage::new(&program, PAGE_SIZE as u32)?;
-    execute(image, segment_po2, max_cycles, syscall_handler)
+    execute(
+        image,
+        segment_po2,
+        max_cycles,
+        syscall_handler,
+        input_digest,
+    )
 }
