@@ -67,7 +67,7 @@ Soundness is often quantified in terms of “[bits]” — our system currently 
 | --------------------- | ----------------------------------------------------------------------------------------- | ---------------- | ------------- |
 | RISC-V Prover         | - Random Oracle Model <br/> - Toy Problem Conjecture                                      | 98               | Yes           |
 | Recursion Prover      | - Random Oracle Model <br/> - Toy Problem Conjecture                                      | 99               | Yes           |
-| STARK-to-SNARK Prover | - Security of elliptic curve pairing over BN254. <br/> - Knowledge of Exponent assumption | 100+             | No            |
+| STARK-to-SNARK Prover | - Security of elliptic curve pairing over BN254. <br/> - Knowledge of Exponent assumption | 99+             | No            |
 
 The Toy Problem conjecture, specified in detail in the [ethSTARK documentation], says that the best known attack on STARK proof systems is the best possible attack.
 
