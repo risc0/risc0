@@ -38,6 +38,20 @@ fn execute(group: &mut BenchGroup) {
     });
 }
 
+fn warmup(_group: &mut BenchGroup) {
+    #[cfg(any(feature = "cuda", feature = "metal"))]
+    {
+        println!("warmup");
+        let opts = ProverOpts::default();
+        let ctx = VerifierContext::default();
+        let prover = get_prover_server(&opts).unwrap();
+        let session = setup_exec(1).run().unwrap();
+        let segment = session.segments[0].resolve().unwrap();
+        let receipt = prover.prove_segment(&ctx, &segment).unwrap();
+        prover.lift(&receipt).unwrap();
+    }
+}
+
 fn prove_segment(group: &mut BenchGroup, hashfn: &str) {
     let name = format!("prove/{hashfn}");
     group.bench(name, |b| {
@@ -158,6 +172,7 @@ fn total_succinct(group: &mut BenchGroup) {
 
 benchmark_group!(
     fib,
+    warmup,
     execute,
     prove,
     lift,

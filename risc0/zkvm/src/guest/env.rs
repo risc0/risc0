@@ -74,7 +74,7 @@ use bytemuck::Pod;
 use risc0_zkvm_platform::{
     align_up, fileno,
     syscall::{
-        self, sys_alloc_words, sys_cycle_count, sys_halt, sys_log, sys_pause, sys_read,
+        self, sys_alloc_words, sys_cycle_count, sys_halt, sys_input, sys_log, sys_pause, sys_read,
         sys_read_words, sys_verify, sys_verify_integrity, sys_write, syscall_2, SyscallName,
     },
     WORD_SIZE,
@@ -751,4 +751,18 @@ impl<F: Fn(&[u8])> std::io::Write for FdWriter<F> {
     fn flush(&mut self) -> std::io::Result<()> {
         Ok(())
     }
+}
+
+/// Read the input digest from the input commitment.
+pub fn input_digest() -> Digest {
+    Digest::new([
+        sys_input(0),
+        sys_input(1),
+        sys_input(2),
+        sys_input(3),
+        sys_input(4),
+        sys_input(5),
+        sys_input(6),
+        sys_input(7),
+    ])
 }

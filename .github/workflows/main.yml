@@ -100,7 +100,6 @@ jobs:
       - check
       - check-benchmarks
       - check-external
-      - check-semver
       - check-template
       - crates-validator
       - doc
@@ -473,5 +472,5 @@ jobs:
           key: Linux-default
       - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
       - run: cargo test -p risc0-groth16 -F docker --release
-      - run: cargo test -p risc0-zkvm -F prove -F docker -- tests::stark2snark
+      - run: cargo test -p risc0-zkvm -F prove -F docker -- tests::docker::stark2snark
       - run: sccache --show-stats

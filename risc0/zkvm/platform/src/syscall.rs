@@ -126,17 +126,17 @@ macro_rules! declare_syscall {
 }
 
 pub mod nr {
-    declare_syscall!(pub SYS_CYCLE_COUNT);
-    declare_syscall!(pub SYS_GETENV);
     declare_syscall!(pub SYS_ARGC);
     declare_syscall!(pub SYS_ARGV);
+    declare_syscall!(pub SYS_CYCLE_COUNT);
+    declare_syscall!(pub SYS_GETENV);
     declare_syscall!(pub SYS_LOG);
     declare_syscall!(pub SYS_PANIC);
     declare_syscall!(pub SYS_RANDOM);
     declare_syscall!(pub SYS_READ);
-    declare_syscall!(pub SYS_WRITE);
     declare_syscall!(pub SYS_VERIFY);
     declare_syscall!(pub SYS_VERIFY_INTEGRITY);
+    declare_syscall!(pub SYS_WRITE);
 }
 
 impl SyscallName {
@@ -302,6 +302,27 @@ pub unsafe extern "C" fn sys_pause(user_exit: u8, out_state: *const [u32; DIGEST
         halt::PAUSE | ((user_exit as u32) << 8),
         out_state as u32,
     );
+}
+
+#[cfg_attr(feature = "export-syscalls", no_mangle)]
+pub extern "C" fn sys_input(index: u32) -> u32 {
+    let t0 = ecall::INPUT;
+    let index = index & 0x07;
+    #[cfg(target_os = "zkvm")]
+    unsafe {
+        let a0: u32;
+        asm!(
+            "ecall",
+            in("t0") t0,
+            inout("a0") index => a0,
+        );
+        a0
+    }
+    #[cfg(not(target_os = "zkvm"))]
+    {
+        core::hint::black_box((t0, index));
+        unimplemented!()
+    }
 }
 
 /// # Safety
@@ -653,11 +674,11 @@ pub extern "C" fn sys_alloc_words(nwords: usize) -> *mut u32 {
     unsafe { sys_alloc_aligned(WORD_SIZE * nwords, WORD_SIZE) as *mut u32 }
 }
 
-#[cfg(feature = "export-syscalls")]
-#[no_mangle]
 /// # Safety
 ///
 /// This function should be safe to call, but clippy complains if it is not marked as `unsafe`.
+#[cfg(feature = "export-syscalls")]
+#[no_mangle]
 pub unsafe extern "C" fn sys_alloc_aligned(bytes: usize, align: usize) -> *mut u8 {
     extern "C" {
         // This symbol is defined by the loader and marks the end
@@ -710,11 +731,12 @@ pub unsafe extern "C" fn sys_alloc_aligned(bytes: usize, align: usize) -> *mut u
 /// 0 to register a0. The caller must calculate the ReceiptClaim digest, using the provided post
 /// state digest and encode the digest into a public assumptions list for inclusion in the guest
 /// output.
-#[cfg(feature = "export-syscalls")]
-#[no_mangle]
+///
 /// # Safety
 ///
 /// `image_id`, `journal_digest`, and `from_host_buf` must be aligned and dereferenceable.
+#[cfg(feature = "export-syscalls")]
+#[no_mangle]
 pub unsafe extern "C" fn sys_verify(
     image_id: *const [u32; DIGEST_WORDS],
     journal_digest: *const [u32; DIGEST_WORDS],
