@@ -403,7 +403,7 @@ mod riscv {
 #[test]
 fn pause_resume() {
     let env = ExecutorEnv::builder()
-        .write(&MultiTestSpec::PauseContinue(0))
+        .write(&MultiTestSpec::PauseResume(0))
         .unwrap()
         .build()
         .unwrap();
@@ -417,6 +417,28 @@ fn pause_resume() {
     let segments = &receipt.inner.composite().unwrap().segments;
     assert_eq!(segments.len(), 1);
     assert_eq!(segments[0].index, 0);
+
+    // Run until sys_halt
+    let session = exec.run().unwrap();
+    assert_eq!(session.exit_code, ExitCode::Halted(0));
+    prove_session_fast(&session);
+}
+
+#[test]
+fn pause_exit_nonzero() {
+    let user_exit_code = 1;
+    let env = ExecutorEnv::builder()
+        .write(&MultiTestSpec::PauseResume(user_exit_code))
+        .unwrap()
+        .build()
+        .unwrap();
+    let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
+
+    // Run until sys_pause
+    let session = exec.run().unwrap();
+    assert_eq!(session.segments.len(), 1);
+    assert_eq!(session.exit_code, ExitCode::Paused(user_exit_code as u32));
+    prove_session_fast(&session);
 
     // Run until sys_halt
     let session = exec.run().unwrap();
@@ -463,51 +485,72 @@ fn continuation() {
     }
 }
 
-#[cfg(feature = "docker")]
 #[test]
-fn stark2snark() {
-    use crate::{
-        get_prover_server, recursion::identity_p254, CompactReceipt, ExecutorEnv, ExecutorImpl,
-        InnerReceipt, ProverOpts, Receipt, VerifierContext,
-    };
-    use risc0_groth16::docker::stark_to_snark;
-    use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID};
-
+fn sys_input() {
+    use hex::FromHex;
+    let digest =
+        Digest::from_hex("ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad")
+            .unwrap();
+    let spec = MultiTestSpec::SysInput(digest);
     let env = ExecutorEnv::builder()
-        .write(&MultiTestSpec::BusyLoop { cycles: 0 })
+        .input_digest(digest)
+        .write(&spec)
         .unwrap()
         .build()
         .unwrap();
-
-    tracing::info!("execute");
-
     let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
     let session = exec.run().unwrap();
+    assert_eq!(session.exit_code, ExitCode::Halted(0));
+    prove_session_fast(&session);
+}
 
-    tracing::info!("prove");
-    let opts = ProverOpts::default();
-    let ctx = VerifierContext::default();
-    let prover = get_prover_server(&opts).unwrap();
-    let receipt = prover.prove_session(&ctx, &session).unwrap().receipt;
-    let claim = receipt.get_claim().unwrap();
-    let composite_receipt = receipt.inner.composite().unwrap();
-    let succinct_receipt = prover.compress(composite_receipt).unwrap();
-    let journal = session.journal.unwrap().bytes;
+#[cfg(feature = "docker")]
+mod docker {
+    #[test]
+    fn stark2snark() {
+        use crate::{
+            get_prover_server, recursion::identity_p254, CompactReceipt, ExecutorEnv, ExecutorImpl,
+            InnerReceipt, ProverOpts, Receipt, VerifierContext,
+        };
+        use risc0_groth16::docker::stark_to_snark;
+        use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID};
 
-    tracing::info!("identity_p254");
-    let ident_receipt = identity_p254(&succinct_receipt).unwrap();
-    let seal_bytes = ident_receipt.get_seal_bytes();
+        let env = ExecutorEnv::builder()
+            .write(&MultiTestSpec::BusyLoop { cycles: 0 })
+            .unwrap()
+            .build()
+            .unwrap();
 
-    tracing::info!("stark-to-snark");
-    let seal = stark_to_snark(&seal_bytes).unwrap().to_vec();
+        tracing::info!("execute");
 
-    tracing::info!("Receipt");
-    let receipt = Receipt::new(
-        InnerReceipt::Compact(CompactReceipt { seal, claim }),
-        journal,
-    );
+        let mut exec = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap();
+        let session = exec.run().unwrap();
 
-    receipt.verify(MULTI_TEST_ID).unwrap();
+        tracing::info!("prove");
+        let opts = ProverOpts::default();
+        let ctx = VerifierContext::default();
+        let prover = get_prover_server(&opts).unwrap();
+        let receipt = prover.prove_session(&ctx, &session).unwrap().receipt;
+        let claim = receipt.get_claim().unwrap();
+        let composite_receipt = receipt.inner.composite().unwrap();
+        let succinct_receipt = prover.compress(composite_receipt).unwrap();
+        let journal = session.journal.unwrap().bytes;
+
+        tracing::info!("identity_p254");
+        let ident_receipt = identity_p254(&succinct_receipt).unwrap();
+        let seal_bytes = ident_receipt.get_seal_bytes();
+
+        tracing::info!("stark-to-snark");
+        let seal = stark_to_snark(&seal_bytes).unwrap().to_vec();
+
+        tracing::info!("Receipt");
+        let receipt = Receipt::new(
+            InnerReceipt::Compact(CompactReceipt { seal, claim }),
+            journal,
+        );
+
+        receipt.verify(MULTI_TEST_ID).unwrap();
+    }
 }
 
 mod sys_verify {

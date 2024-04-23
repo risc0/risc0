@@ -14,7 +14,7 @@
 
 /// Merkle root of the RECURSION_CONTROL_IDS
 pub const ALLOWED_IDS_ROOT: &str =
-    "88c1f749250aba181168c33839d7a351671e7a5b7f3e746dde91ef6c6e9ef344";
+    "54058968ca621b3dfdf22c5d7dc65533ffbc1552e36d8b4437424d037328645e";
 
 pub const RECURSION_CONTROL_IDS: [(&str, &str); 15] = [
     (
@@ -23,51 +23,51 @@ pub const RECURSION_CONTROL_IDS: [(&str, &str); 15] = [
     ),
     (
         "join.zkr",
-        "d6d4e4502b24a53e2097c86b820695196b50214171d1af085cf0d329eda2354c",
+        "bea76f74072983519b9ca337aae9e653b5468d721b1f9664c7bc2c50fa1fc236",
     ),
     (
         "lift_14.zkr",
-        "e54c9017d3cd7b10f8590a097cc4ee3d309c380bcc9b310ead94587341b4d550",
+        "1ca9f73882f7b11685e6c6702d41f038ed7cd341b71d97115adaf81e8404873c",
     ),
     (
         "lift_15.zkr",
-        "9119b275ec70de27192e4d324bdb3c4d8a1b9e7137b9170ca0baed0d8bf77d0c",
+        "55a319417092cc0ee5685455de8551421ef36b3de7cff0391478bf0335c4045e",
     ),
     (
         "lift_16.zkr",
-        "c5be2418325c0314e4bfe822d4c5bc5763abde06b59b7a4c35013e271470280a",
+        "0e9269332ef0c02843ee796bade0cc1bfa03071a74ec15623f0c766158771166",
     ),
     (
         "lift_17.zkr",
-        "aa78453ab464ed650ac5b70debc4453a2a703e6f83c10755f518bc081926481d",
+        "b20f380484297d66efbfd930108ea541d734dd1e6189dc1f0f647d10487ca43a",
     ),
     (
         "lift_18.zkr",
-        "d5cdf820ae55b209a2bc1b2b58803c0b85408934fc575c38da42931673e38144",
+        "202feb2b77a5c4675f02e50843635766dd9a9963d67af608525eab708ed1b023",
     ),
     (
         "lift_19.zkr",
-        "8fd2f733163e846b17a6503ad7070718f49b425c5d6b6a77751e9a221a407d4b",
+        "c884c54fd8e34558654fcb058e369955d3d75b516469ef5066208b3e4974b609",
     ),
     (
         "lift_20.zkr",
-        "5ae5fb57f4d8ca65e83af3650ce36f00c309267032699b6e9865b21e847f2070",
+        "f9b12b4707d9a9274665064ca487604e700c561e753b284c151ccc42b5bc5b11",
     ),
     (
         "lift_21.zkr",
-        "9407fc33d5126735f24ec662f156e50e377b45534ab789739145021f752c152a",
+        "02591155c3ef402f8ca4b45c21491973fe305769e9f12f21c86d15307731643b",
     ),
     (
         "lift_22.zkr",
-        "90027841077ad96250be266855d8506d0164b775bea8c35594ab5a40f9530955",
+        "f9cb321681130d5d77bf4e013d7ea0220571b75f39499b5a256a64275aa10e6d",
     ),
     (
         "lift_23.zkr",
-        "47d3095f79618d57f3ee9c1bb2046c680a18ab05d062af2e33e6a53d1202063a",
+        "3b5368352b643730fe48d459ca66fc272de8e46e1dc0d349b98f886cefdd9219",
     ),
     (
         "lift_24.zkr",
-        "1112c0660d6a8c3dc7b2961cfe996815a19fbf2583f2d0639d530826aa67764f",
+        "758ac221b3f3843dfe5fee23bf3097567f97103c5211e5075f8e151950a0b038",
     ),
     (
         "resolve.zkr",
