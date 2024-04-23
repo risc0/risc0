@@ -205,9 +205,7 @@ impl Params {
     //     - From one row to the next, (max_degree - 2) bounds the number of accumulated values (prod` = prod * x1 * x2 * x3)
     //     - We compute [num Fp4s per row] * [num accumulated Fp4s per trace Fp4] * [trace_domain_size] / [ext_field_size]
     fn plonk_plookup_error(&self) -> f32 {
-        self.w_accum / self.ext_size as f32
-            * (self.max_degree - 2.0)
-            * self.trace_domain_size
+        self.w_accum / self.ext_size as f32 * (self.max_degree - 2.0) * self.trace_domain_size
             / self.ext_field_size
     }
 
