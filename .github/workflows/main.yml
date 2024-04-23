@@ -100,7 +100,6 @@ jobs:
       - check
       - check-benchmarks
       - check-external
-      - check-semver
       - check-template
       - crates-validator
       - doc
