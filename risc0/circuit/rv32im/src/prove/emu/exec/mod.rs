@@ -274,17 +274,11 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         segments += 1;
         self.cycles.total += 1 << po2;
 
-        // NOTE: When a segment ends in a Halted(_) state, it may not update the
-        // post state digest. As a result, it will be the same as the pre_image.
-        // All other exit codes require the post state digest to reflect the
-        // final memory state.
-        //
-        // NOTE: The PC on the the post state is stored "+ 4". See ReceiptClaim
-        // for more detail.
+        // NOTE: When a segment ends in a Halted(_) state, the post_state will be null.
         let post_state = SystemState {
             pc: post_state.pc,
             merkle_root: match exit_code {
-                ExitCode::Halted(_) => pre_state.merkle_root,
+                ExitCode::Halted(_) => Digest::ZERO,
                 _ => post_state.merkle_root,
             },
         };

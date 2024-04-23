@@ -38,7 +38,7 @@ pub enum MultiTestSpec {
     Panic,
     Fault,
     Halt(u8),
-    PauseContinue(u8),
+    PauseResume(u8),
     ReadWriteMem {
         /// Tuples of (address, value). Zero means read the value and
         /// output it; nonzero means write that value.

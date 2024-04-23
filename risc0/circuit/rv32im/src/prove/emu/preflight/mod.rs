@@ -313,6 +313,7 @@ impl Preflight {
             self.add_txn(false, SYSTEM_START + REG_A1, self.output_ptr.0);
             self.add_txn(false, SYSTEM_START + REG_A0, self.halted.unwrap());
             self.add_cycle(false, TopMux::Body(Major::ECall, 0));
+            self.pc += WORD_SIZE;
         }
 
         let max_cycles = self.steps;

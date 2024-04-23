@@ -51,12 +51,6 @@ pub struct ReceiptClaim {
     pub pre: MaybePruned<SystemState>,
 
     /// The [SystemState] just after execution has completed.
-    ///
-    /// NOTE: In order to avoid extra logic in the rv32im circuit to perform arithmetic on the PC
-    /// with carry, the post state PC is recorded as the current PC + 4. Subtract 4 to get the
-    /// "actual" final PC of the zkVM at the end of the segment. When the exit code is `Halted` or
-    /// `Paused`, this will be the address of the halt `ecall`. When the exit code is
-    /// `SystemSplit`, this will be the address of the next instruction to be executed.
     pub post: MaybePruned<SystemState>,
 
     /// The exit code for the execution.
