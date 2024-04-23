@@ -286,7 +286,7 @@ const RV32IM_ISA: InstructionTable = [
 // - Opcode: 7 bits
 // - Func3: 3 bits
 // - Func7: 7 bits
-// In many cases, func7 and/or func3 is ignored.  A stardard trick is to decode
+// In many cases, func7 and/or func3 is ignored.  A standard trick is to decode
 // via a table, but a 17 bit lookup table destroys L1 cache.  Luckily for us,
 // in practice the low 2 bits of opcode are always 11, so we can drop them, and
 // also func7 is always either 0, 1, 0x20 or don't care, so we can reduce func7
