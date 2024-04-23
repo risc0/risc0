@@ -32,13 +32,13 @@ fn predict() -> f64 {
     // We serialize the model to a byte array before transferring it to the guest.
     let model_bytes: Vec<u8> = rmp_serde::to_vec(&model).unwrap();
 
-    // We define an input value for the model (inputs are block number and numbe of transaction in that block.  Note we modify the block number to a f64 value).
+    // We define an input value for the model (inputs are block number and number of transaction in that block.  Note we modify the block number to a f64 value).
     //**************************//
     // ADD YOUR INPUT DATA HERE //
     //**************************//
     let data: Vec<f64> = vec![18511304.0, 117.0];
 
-    // We transfer theinput  data, the rmp array length, and the serialized model over to the guest.
+    // We transfer the input data, the rmp array length, and the serialized model over to the guest.
     let env = ExecutorEnv::builder()
         .write(&data)
         .unwrap()
@@ -55,7 +55,7 @@ fn predict() -> f64 {
     let prover = default_prover();
 
     // Produce a receipt by proving the specified ELF binary.
-    let receipt = prover.prove(env, XGBOOST_ELF).unwrap();
+    let receipt = prover.prove(env, XGBOOST_ELF).unwrap().receipt;
 
     // We return the inference value committed to the journal.
     receipt.journal.decode().unwrap()

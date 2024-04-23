@@ -32,7 +32,7 @@ pub fn poly_eval<E: ExtElem>(coeffs: &[E], x: E) -> E {
 
 /// General purpose polynomial interpolation.
 ///
-/// Given the goal value f(x) at a set of evalation points x, compute
+/// Given the goal value f(x) at a set of evaluation points x, compute
 /// coefficients.
 pub fn poly_interpolate<E: ExtElem>(out: &mut [E], x: &[E], fx: &[E], size: usize) {
     // Special case the very easy ones

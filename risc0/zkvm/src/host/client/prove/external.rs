@@ -19,7 +19,7 @@ use anyhow::{anyhow, bail, ensure, Result};
 use super::{Executor, Prover, ProverOpts};
 use crate::{
     compute_image_id, host::api::AssetRequest, sha::Digestible, ApiClient, Asset, CompositeReceipt,
-    ExecutorEnv, InnerReceipt, Receipt, SegmentReceipt, SessionInfo, SuccinctReceipt,
+    ExecutorEnv, InnerReceipt, ProveInfo, Receipt, SegmentReceipt, SessionInfo, SuccinctReceipt,
     VerifierContext,
 };
 
@@ -97,26 +97,26 @@ impl Prover for ExternalProver {
         ctx: &VerifierContext,
         elf: &[u8],
         opts: &ProverOpts,
-    ) -> Result<Receipt> {
+    ) -> Result<ProveInfo> {
         tracing::debug!("Launching {}", &self.r0vm_path.to_string_lossy());
 
         let image_id = compute_image_id(elf)?;
         let client = ApiClient::new_sub_process(&self.r0vm_path)?;
         let binary = Asset::Inline(elf.to_vec().into());
-        let receipt = client.prove(&env, opts, binary)?;
+        let prove_info = client.prove(&env, opts, binary)?;
         if opts.prove_guest_errors {
-            receipt.verify_integrity_with_context(ctx)?;
+            prove_info.receipt.verify_integrity_with_context(ctx)?;
             ensure!(
-                receipt.get_claim()?.pre.digest() == image_id,
+                prove_info.receipt.get_claim()?.pre.digest() == image_id,
                 "received unexpected image ID: expected {}, found {}",
                 hex::encode(image_id),
-                hex::encode(receipt.get_claim()?.pre.digest())
+                hex::encode(prove_info.receipt.get_claim()?.pre.digest())
             );
         } else {
-            receipt.verify_with_context(ctx, image_id)?;
+            prove_info.receipt.verify_with_context(ctx, image_id)?;
         }
 
-        Ok(receipt)
+        Ok(prove_info)
     }
 
     fn get_name(&self) -> String {

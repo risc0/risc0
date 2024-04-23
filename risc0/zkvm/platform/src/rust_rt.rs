@@ -90,6 +90,12 @@ unsafe impl GlobalAlloc for BumpPointerAlloc {
     unsafe fn dealloc(&self, _: *mut u8, _: Layout) {
         // this allocator never deallocates memory
     }
+
+    unsafe fn alloc_zeroed(&self, layout: Layout) -> *mut u8 {
+        // NOTE: This is safe to avoid zeroing allocated bytes, as the bump allocator does not
+        //       re-use memory and the zkVM memory is zero-initialized.
+        self.alloc(layout)
+    }
 }
 
 #[global_allocator]

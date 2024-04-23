@@ -24,7 +24,7 @@ use crate::{
 
 // Constants from: risc0-ethereum/contracts/src/groth16/Groth16Verifier.sol
 // When running a new ceremony, update them by running cargo xtask bootstrap-groth16
-// after udpating the new Groth16Verifier.sol on the risc0-ethereum repo.
+// after updating the new Groth16Verifier.sol on the risc0-ethereum repo.
 const ALPHA_X: &str =
     "20491192805390485299153009773594534940189261866228447918068658471970481763042";
 const ALPHA_Y: &str =
