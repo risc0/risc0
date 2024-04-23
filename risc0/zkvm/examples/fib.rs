@@ -85,6 +85,7 @@ fn top(prover: Rc<dyn ProverServer>, iterations: u32, skip_prover: bool) -> Metr
         prover
             .prove_session(&ctx, &session)
             .unwrap()
+            .receipt
             .inner
             .composite()
             .unwrap()

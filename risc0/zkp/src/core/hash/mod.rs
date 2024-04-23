@@ -43,7 +43,7 @@ pub trait HashFn<F: Field>: Send + Sync {
 }
 
 /// A trait that sets the PRNG used by Fiat-Shamir.  We allow specialization at
-/// this level rather than at RngCore because some hashes such as Posidon have
+/// this level rather than at RngCore because some hashes such as Poseidon have
 /// elements distributed uniformly over the field natively.
 pub trait Rng<F: Field> {
     /// Mix in randomness from a Fiat-Shamir commitment.

@@ -85,7 +85,7 @@ pub trait Sha256 {
 
     /// Generate a hash from a pair of [Digest] using the SHA-256 compression
     /// function. Note that the result is not a standard-compliant hash of any
-    /// kwown preimage.
+    /// known preimage.
     fn hash_pair(a: &Digest, b: &Digest) -> Self::DigestPtr {
         Self::compress(&SHA256_INIT, a, b)
     }

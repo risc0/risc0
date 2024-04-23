@@ -159,7 +159,7 @@ inline void compress(thread ShaDigest& state, const thread uint32_t* chunk) {
 
 // Main entry points
 inline ShaDigest shaHash(const device Fp* data, size_t size, size_t stride) {
-  // Prepare the inital state
+  // Prepare the initial state
   uint32_t words[16];
   uint32_t curWord = 0;
   ShaDigest state = impl::initState();

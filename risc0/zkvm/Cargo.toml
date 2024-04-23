@@ -77,6 +77,7 @@ typetag = { version = "0.2", optional = true }
 [dev-dependencies]
 clap = { version = "4.4", features = ["derive"] }
 criterion = { version = "0.5", features = ["html_reports"] }
+hotbench = { workspace = true }
 lazy_static = "1.4.0"
 rand = "0.8"
 tracing-forest = "0.1"

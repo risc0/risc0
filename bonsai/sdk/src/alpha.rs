@@ -19,8 +19,8 @@ use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
 use self::responses::{
-    CreateSessRes, ImgUploadRes, ProofReq, Quotas, SessionStatusRes, SnarkReq, SnarkStatusRes,
-    UploadRes, VersionInfo,
+    CreateSessRes, ImgUploadRes, ProofReq, Quotas, ReceiptDownload, SessionStatusRes, SnarkReq,
+    SnarkStatusRes, UploadRes, VersionInfo,
 };
 use crate::{API_KEY_ENVVAR, API_KEY_HEADER, API_URL_ENVVAR, VERSION_HEADER};
 
@@ -138,6 +138,13 @@ pub mod responses {
         /// - Count of segments in this proof request
         /// - User cycles run within guest, slightly below total overhead cycles
         pub stats: Option<SessionStats>,
+    }
+
+    /// Response of the receipt/download method
+    #[derive(Deserialize, Serialize)]
+    pub struct ReceiptDownload {
+        /// Pre-Signed URL that the receipt can be downloaded (GET) from
+        pub url: String,
     }
 
     /// Snark proof request object
@@ -465,6 +472,58 @@ impl Client {
         Ok(upload_data.uuid)
     }
 
+    /// Download a existing receipt
+    ///
+    /// Allows download of older receipts without checking the current session status.
+    pub fn receipt_download(&self, session_id: &SessionId) -> Result<Vec<u8>, SdkErr> {
+        let res = self
+            .client
+            .get(format!("{}/receipts/{}", self.url, session_id.uuid))
+            .send()?;
+
+        if !res.status().is_success() {
+            let body = res.text()?;
+            return Err(SdkErr::InternalServerErr(body));
+        }
+        let res: ReceiptDownload = res.json()?;
+
+        self.download(&res.url)
+    }
+
+    /// Delete an existing image
+    ///
+    /// Allows deletion of a specified image_id.
+    pub fn image_delete(&self, image_id: &str) -> Result<(), SdkErr> {
+        let res = self
+            .client
+            .delete(format!("{}/images/{}", self.url, image_id))
+            .send()?;
+
+        if !res.status().is_success() {
+            let body = res.text()?;
+            return Err(SdkErr::InternalServerErr(body));
+        }
+
+        Ok(())
+    }
+
+    /// Delete an existing input
+    ///
+    /// Allows deletion of a specified input Uuid.
+    pub fn input_delete(&self, input_uuid: &str) -> Result<(), SdkErr> {
+        let res = self
+            .client
+            .delete(format!("{}/inputs/{}", self.url, input_uuid))
+            .send()?;
+
+        if !res.status().is_success() {
+            let body = res.text()?;
+            return Err(SdkErr::InternalServerErr(body));
+        }
+
+        Ok(())
+    }
+
     // - /sessions
 
     /// Create a new proof request Session
@@ -674,6 +733,25 @@ mod tests {
     }
 
     #[test]
+    fn image_delete() {
+        let server = MockServer::start();
+
+        let del_mock = server.mock(|when, then| {
+            when.method(DELETE)
+                .path(format!("/images/{TEST_ID}"))
+                .header(API_KEY_HEADER, TEST_KEY)
+                .header(VERSION_HEADER, TEST_VERSION);
+            then.status(200);
+        });
+
+        let server_url = format!("http://{}", server.address());
+        let client = super::Client::from_parts(server_url, TEST_KEY.to_string(), TEST_VERSION)
+            .expect("Failed to construct client");
+        client.image_delete(TEST_ID).unwrap();
+        del_mock.assert();
+    }
+
+    #[test]
     fn input_upload() {
         let data = vec![];
 
@@ -710,6 +788,25 @@ mod tests {
 
         get_mock.assert();
         put_mock.assert();
+    }
+
+    #[test]
+    fn input_delete() {
+        let server = MockServer::start();
+
+        let del_mock = server.mock(|when, then| {
+            when.method(DELETE)
+                .path(format!("/inputs/{TEST_ID}"))
+                .header(API_KEY_HEADER, TEST_KEY)
+                .header(VERSION_HEADER, TEST_VERSION);
+            then.status(200);
+        });
+
+        let server_url = format!("http://{}", server.address());
+        let client = super::Client::from_parts(server_url, TEST_KEY.to_string(), TEST_VERSION)
+            .expect("Failed to construct client");
+        client.input_delete(TEST_ID).unwrap();
+        del_mock.assert();
     }
 
     #[test]
@@ -751,6 +848,51 @@ mod tests {
 
         get_mock.assert();
         put_mock.assert();
+    }
+
+    #[test]
+    fn receipt_download() {
+        let server = MockServer::start();
+        let receipt_uuid = Uuid::new_v4();
+
+        let download_method = "download_path";
+        let download_url = format!("http://{}/{download_method}", server.address());
+        let response = ReceiptDownload { url: download_url };
+
+        let get_mock = server.mock(|when, then| {
+            when.method(GET)
+                .path(format!("/receipts/{}", receipt_uuid))
+                .header(API_KEY_HEADER, TEST_KEY)
+                .header(VERSION_HEADER, TEST_VERSION);
+            then.status(200)
+                .header("content-type", "application/json")
+                .json_body_obj(&response);
+        });
+
+        let receipt_data: Vec<u8> = vec![0x41, 0x41, 0x42, 0x42];
+        let download_mock = server.mock(|when, then| {
+            when.method(GET)
+                .path(format!("/{download_method}"))
+                .header(API_KEY_HEADER, TEST_KEY)
+                .header(VERSION_HEADER, TEST_VERSION);
+
+            then.body(&receipt_data).status(200);
+        });
+
+        let server_url = format!("http://{}", server.address());
+        let client = super::Client::from_parts(server_url, TEST_KEY.to_string(), TEST_VERSION)
+            .expect("Failed to construct client");
+        let res = client
+            .receipt_download(&SessionId {
+                uuid: receipt_uuid.to_string(),
+            })
+            .expect("Failed to upload receipt");
+
+        println!("{}", std::str::from_utf8(&res).unwrap());
+        assert_eq!(res, receipt_data);
+
+        get_mock.assert();
+        download_mock.assert();
     }
 
     #[test]

@@ -132,7 +132,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let prover = default_prover();
 
     // Produce a receipt by proving the specified ELF binary.
-    let receipt = prover.prove(env, IMAGE_CROP_ELF).unwrap();
+    let receipt = prover.prove(env, IMAGE_CROP_ELF).unwrap().receipt;
 
     // Save the receipt to disk so it can be sent to the verifier.
     fs::write(&args.receipt, bincode::serialize(&receipt).unwrap())?;

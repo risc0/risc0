@@ -189,7 +189,7 @@ impl<'a, 'de: 'a, R: WordRead + 'de> serde::de::MapAccess<'de> for MapAccess<'a,
 impl<'de, R: WordRead + 'de> Deserializer<'de, R> {
     /// Construct a Deserializer
     ///
-    /// Creates a deserializer for deserializing from the given WordWred
+    /// Creates a deserializer for deserializing from the given WordRead
     pub fn new(reader: R) -> Self {
         Deserializer {
             reader,

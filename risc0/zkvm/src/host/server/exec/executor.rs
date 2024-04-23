@@ -29,9 +29,8 @@ use risc0_zkvm_platform::{fileno, memory::GUEST_MAX_MEM, PAGE_SIZE};
 use tempfile::tempdir;
 
 use crate::{
-    host::{client::env::SegmentPath, server::session::null_callback},
-    is_dev_mode, Assumption, Assumptions, ExecutorEnv, FileSegmentRef, Output, Segment, SegmentRef,
-    Session,
+    host::client::env::SegmentPath, Assumption, Assumptions, ExecutorEnv, FileSegmentRef, Output,
+    Segment, SegmentRef, Session,
 };
 
 use super::{
@@ -123,11 +122,6 @@ impl<'a> ExecutorImpl<'a> {
     where
         F: FnMut(Segment) -> Result<Box<dyn SegmentRef>>,
     {
-        let mut callback = |segment| match is_dev_mode() {
-            true => null_callback(),
-            false => callback(segment),
-        };
-
         let journal = Journal::default();
         self.env
             .posix_io
@@ -140,8 +134,12 @@ impl<'a> ExecutorImpl<'a> {
             .unwrap_or(DEFAULT_SEGMENT_LIMIT_PO2 as u32) as usize;
 
         let mut refs = Vec::new();
-        let mut exec = Executor::new(self.image.clone(), self, self.env.trace.clone());
-        let is_dev_mode = is_dev_mode();
+        let mut exec = Executor::new(
+            self.image.clone(),
+            self,
+            self.env.input_digest,
+            self.env.trace.clone(),
+        );
 
         let start_time = Instant::now();
         let result = exec.run(segment_limit_po2, self.env.session_limit, |inner| {
@@ -183,11 +181,7 @@ impl<'a> ExecutorImpl<'a> {
                 inner,
                 output,
             };
-            let segment_ref = if is_dev_mode {
-                null_callback()?
-            } else {
-                callback(segment.into())?
-            };
+            let segment_ref = callback(segment.into())?;
             refs.push(segment_ref);
             Ok(())
         })?;
@@ -218,6 +212,7 @@ impl<'a> ExecutorImpl<'a> {
 
         let session = Session::new(
             refs,
+            self.env.input_digest.unwrap_or_default(),
             session_journal,
             result.exit_code,
             result.post_image,

@@ -91,7 +91,7 @@ fn poseidon_mix(cells: &mut [Fr; CELLS]) {
     }
 }
 
-/// A hash implemention for Poseidon in a Snark friendly field
+/// A hash implementation for Poseidon in a Snark friendly field
 struct Poseidon254HashFn;
 
 /// Returns the field representation of a given digest.
@@ -158,7 +158,7 @@ impl HashFn<BabyBear> for Poseidon254HashFn {
     }
 }
 
-/// An rng implemention for Poseidon in a Snark friendly field
+/// An rng implementation for Poseidon in a Snark friendly field
 struct Poseidon254Rng {
     // The cells of the sponge
     cells: [Fr; CELLS],
