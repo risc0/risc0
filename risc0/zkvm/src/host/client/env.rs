@@ -27,6 +27,7 @@ use std::{
 use anyhow::Result;
 use bytemuck::Pod;
 use bytes::Bytes;
+use risc0_zkp::core::digest::Digest;
 use risc0_zkvm_platform::{self, fileno};
 use serde::Serialize;
 use tempfile::TempDir;
@@ -80,6 +81,7 @@ pub struct ExecutorEnv<'a> {
     pub(crate) assumptions: Rc<RefCell<Assumptions>>,
     pub(crate) segment_path: Option<SegmentPath>,
     pub(crate) pprof_out: Option<PathBuf>,
+    pub(crate) input_digest: Option<Digest>,
 }
 
 impl<'a> ExecutorEnv<'a> {
@@ -353,6 +355,12 @@ impl<'a> ExecutorEnvBuilder<'a> {
     /// Enable the profiler and output results to the specified path.
     pub fn enable_profiler<P: AsRef<Path>>(&mut self, path: P) -> &mut Self {
         self.inner.pprof_out = Some(path.as_ref().to_path_buf());
+        self
+    }
+
+    /// Set the input digest.
+    pub fn input_digest(&mut self, digest: Digest) -> &mut Self {
+        self.inner.input_digest = Some(digest);
         self
     }
 }
