@@ -754,7 +754,7 @@ impl<F: Fn(&[u8])> std::io::Write for FdWriter<F> {
 }
 
 /// Read the input digest from the input commitment.
-pub fn input() -> Digest {
+pub fn input_digest() -> Digest {
     Digest::new([
         sys_input(0),
         sys_input(1),

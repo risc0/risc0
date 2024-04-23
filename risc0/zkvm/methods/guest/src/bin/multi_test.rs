@@ -165,7 +165,7 @@ fn main() {
             }
         }
         MultiTestSpec::SysInput(digest) => {
-            assert_eq!(env::input(), digest);
+            assert_eq!(env::input_digest(), digest);
         }
         MultiTestSpec::SysRead {
             mut buf,
