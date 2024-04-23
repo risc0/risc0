@@ -16,7 +16,7 @@ use std::{fs, io, path::PathBuf, rc::Rc};
 
 use clap::{Args, Parser, ValueEnum};
 use risc0_zkvm::{
-    get_prover_server, ApiServer, ExecutorEnv, ExecutorImpl, ProverOpts, ProverServer, ReceiptKind,
+    get_prover_server, ApiServer, ExecutorEnv, ExecutorImpl, ProverOpts, ProverServer,
     VerifierContext,
 };
 
@@ -90,6 +90,16 @@ enum HashFn {
     Sha256,
     #[value(name = "poseidon2")]
     Poseidon2,
+}
+
+#[derive(Clone, PartialEq, ValueEnum)]
+enum ReceiptKind {
+    #[value(name = "composite")]
+    Composite,
+    #[value(name = "succinct")]
+    Succinct,
+    #[value(name = "compact")]
+    Compact,
 }
 
 pub fn main() {
@@ -167,7 +177,11 @@ impl Cli {
         let opts = ProverOpts {
             hashfn: hashfn.to_string(),
             prove_guest_errors: self.prove_guest_errors,
-            receipt_kind: self.receipt_kind.clone(),
+            receipt_kind: match self.receipt_kind {
+                ReceiptKind::Composite => risc0_zkvm::ReceiptKind::Composite,
+                ReceiptKind::Succinct => risc0_zkvm::ReceiptKind::Succinct,
+                ReceiptKind::Compact => risc0_zkvm::ReceiptKind::Compact,
+            },
         };
 
         get_prover_server(&opts).unwrap()

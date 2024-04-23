@@ -3981,7 +3981,6 @@ dependencies = [
  "bytemuck",
  "bytes",
  "cfg-if",
- "clap",
  "elf",
  "getrandom",
  "hex",
