@@ -43,7 +43,7 @@ jobs:
     env:
       FEATURE: ${{ matrix.feature }}
       DISABLE_S3: ${{ matrix.device == 'nvidia_rtx_3090_ti' }}
-      S3_BENCH_PATH: s3://risc0-ci-cache/public/bench/fib/${{ runner.os }}-${{ matrix.device }}/benchmark.json
+      S3_BENCH_PATH: s3://risc0-ci-cache/public/bench/fib/${{ matrix.os }}-${{ matrix.device }}/benchmark.json
 
     steps:
       - uses: actions/checkout@v4
