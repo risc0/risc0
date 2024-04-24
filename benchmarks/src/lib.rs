@@ -23,6 +23,7 @@ use std::{
 };
 
 use risc0_zkvm::{sha::Digest, ExecutorEnv, ExecutorImpl, Receipt, Session};
+use risc0_zkvm_platform::WORD_SIZE;
 use serde::Serialize;
 use tracing::info;
 
@@ -158,14 +159,7 @@ impl Job {
 
         metrics.total_duration = metrics.exec_duration + metrics.proof_duration;
         metrics.output_bytes = receipt.journal.bytes.len() as u32;
-        metrics.proof_bytes = receipt
-            .inner
-            .composite()
-            .unwrap()
-            .segments
-            .iter()
-            .fold(0, |acc, segment| acc + segment.get_seal_bytes().len())
-            as u32;
+        metrics.proof_bytes = (receipt.inner.succinct().unwrap().seal.len() * WORD_SIZE) as u32;
 
         let verify_proof = {
             let start = Instant::now();

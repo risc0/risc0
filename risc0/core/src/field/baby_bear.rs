@@ -153,6 +153,10 @@ impl field::Elem for Elem {
     fn is_valid(&self) -> bool {
         self.0 != Self::INVALID.0
     }
+
+    fn is_reduced(&self) -> bool {
+        self.0 < P
+    }
 }
 
 macro_rules! rou_array {
@@ -483,6 +487,15 @@ impl field::Elem for ExtElem {
     // when we do operations on them anyways.
     fn is_valid(&self) -> bool {
         self.0[0].is_valid()
+    }
+
+    fn is_reduced(&self) -> bool {
+        for comp in self.0 {
+            if !comp.is_reduced() {
+                return false;
+            }
+        }
+        true
     }
 }
 
