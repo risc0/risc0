@@ -14643,25 +14643,25 @@ Fp step_verify_accum(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
     // loc("Top/mux(Mux)/reset(ResetStep)/RamHeader/FpExtReg/elem[3](Reg)"("./zirgen/components/plonk.h":218:0))
     auto x6816 = args[3][35];
     // loc("Top/mux(Mux)/reset(ResetStep)/RamBody/PlonkBody/RamPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
-    auto x6817 = args[2][128 * steps + ((cycle - 0) & mask)];
+    auto x6817 = args[2][130 * steps + ((cycle - 0) & mask)];
     assert(x6817 != Fp::invalid());
     // loc("Top/mux(Mux)/reset(ResetStep)/RamBody/PlonkBody/RamPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
-    auto x6818 = args[2][129 * steps + ((cycle - 0) & mask)];
+    auto x6818 = args[2][131 * steps + ((cycle - 0) & mask)];
     assert(x6818 != Fp::invalid());
     // loc("Top/mux(Mux)/reset(ResetStep)/RamBody/PlonkBody/RamPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
-    auto x6819 = args[2][130 * steps + ((cycle - 0) & mask)];
+    auto x6819 = args[2][132 * steps + ((cycle - 0) & mask)];
     assert(x6819 != Fp::invalid());
     // loc("Top/mux(Mux)/reset(ResetStep)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
-    auto x6820 = args[2][131 * steps + ((cycle - 0) & mask)];
+    auto x6820 = args[2][133 * steps + ((cycle - 0) & mask)];
     assert(x6820 != Fp::invalid());
     // loc("Top/mux(Mux)/reset(ResetStep)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[1](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
-    auto x6821 = args[2][132 * steps + ((cycle - 0) & mask)];
+    auto x6821 = args[2][134 * steps + ((cycle - 0) & mask)];
     assert(x6821 != Fp::invalid());
     // loc("Top/mux(Mux)/reset(ResetStep)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[2](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
-    auto x6822 = args[2][133 * steps + ((cycle - 0) & mask)];
+    auto x6822 = args[2][135 * steps + ((cycle - 0) & mask)];
     assert(x6822 != Fp::invalid());
     // loc("Top/mux(Mux)/reset(ResetStep)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[3](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
-    auto x6823 = args[2][134 * steps + ((cycle - 0) & mask)];
+    auto x6823 = args[2][136 * steps + ((cycle - 0) & mask)];
     assert(x6823 != Fp::invalid());
     // loc("./zirgen/components/plonk.h":218:0)
     auto x6824 = x6789 * x6817;
@@ -14770,25 +14770,25 @@ Fp step_verify_accum(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
     // loc("./zirgen/components/plonk.h":218:0)
     auto x6876 = x6868 + x6872;
     // loc("Top/mux(Mux)/reset(ResetStep)/RamBody/PlonkBody/RamPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
-    auto x6877 = args[2][135 * steps + ((cycle - 0) & mask)];
+    auto x6877 = args[2][137 * steps + ((cycle - 0) & mask)];
     assert(x6877 != Fp::invalid());
     // loc("Top/mux(Mux)/reset(ResetStep)/RamBody/PlonkBody/RamPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
-    auto x6878 = args[2][136 * steps + ((cycle - 0) & mask)];
+    auto x6878 = args[2][138 * steps + ((cycle - 0) & mask)];
     assert(x6878 != Fp::invalid());
     // loc("Top/mux(Mux)/reset(ResetStep)/RamBody/PlonkBody/RamPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
-    auto x6879 = args[2][137 * steps + ((cycle - 0) & mask)];
+    auto x6879 = args[2][139 * steps + ((cycle - 0) & mask)];
     assert(x6879 != Fp::invalid());
     // loc("Top/mux(Mux)/reset(ResetStep)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
-    auto x6880 = args[2][138 * steps + ((cycle - 0) & mask)];
+    auto x6880 = args[2][140 * steps + ((cycle - 0) & mask)];
     assert(x6880 != Fp::invalid());
     // loc("Top/mux(Mux)/reset(ResetStep)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[1](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
-    auto x6881 = args[2][139 * steps + ((cycle - 0) & mask)];
+    auto x6881 = args[2][141 * steps + ((cycle - 0) & mask)];
     assert(x6881 != Fp::invalid());
     // loc("Top/mux(Mux)/reset(ResetStep)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[2](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
-    auto x6882 = args[2][140 * steps + ((cycle - 0) & mask)];
+    auto x6882 = args[2][142 * steps + ((cycle - 0) & mask)];
     assert(x6882 != Fp::invalid());
     // loc("Top/mux(Mux)/reset(ResetStep)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[3](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
-    auto x6883 = args[2][141 * steps + ((cycle - 0) & mask)];
+    auto x6883 = args[2][143 * steps + ((cycle - 0) & mask)];
     assert(x6883 != Fp::invalid());
     // loc("./zirgen/components/plonk.h":218:0)
     auto x6884 = x6789 * x6877;
@@ -14959,25 +14959,25 @@ Fp step_verify_accum(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
     // loc("./zirgen/components/plonk.h":220:0)
     auto x6967 = x6966 + x6961;
     // loc("Top/mux(Mux)/reset(ResetStep)/RamBody/PlonkBody/RamPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
-    auto x6968 = args[2][156 * steps + ((cycle - 0) & mask)];
+    auto x6968 = args[2][158 * steps + ((cycle - 0) & mask)];
     assert(x6968 != Fp::invalid());
     // loc("Top/mux(Mux)/reset(ResetStep)/RamBody/PlonkBody/RamPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
-    auto x6969 = args[2][157 * steps + ((cycle - 0) & mask)];
+    auto x6969 = args[2][159 * steps + ((cycle - 0) & mask)];
     assert(x6969 != Fp::invalid());
     // loc("Top/mux(Mux)/reset(ResetStep)/RamBody/PlonkBody/RamPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
-    auto x6970 = args[2][158 * steps + ((cycle - 0) & mask)];
+    auto x6970 = args[2][160 * steps + ((cycle - 0) & mask)];
     assert(x6970 != Fp::invalid());
     // loc("Top/mux(Mux)/reset(ResetStep)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
-    auto x6971 = args[2][159 * steps + ((cycle - 0) & mask)];
+    auto x6971 = args[2][161 * steps + ((cycle - 0) & mask)];
     assert(x6971 != Fp::invalid());
     // loc("Top/mux(Mux)/reset(ResetStep)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[1](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
-    auto x6972 = args[2][160 * steps + ((cycle - 0) & mask)];
+    auto x6972 = args[2][162 * steps + ((cycle - 0) & mask)];
     assert(x6972 != Fp::invalid());
     // loc("Top/mux(Mux)/reset(ResetStep)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[2](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
-    auto x6973 = args[2][161 * steps + ((cycle - 0) & mask)];
+    auto x6973 = args[2][163 * steps + ((cycle - 0) & mask)];
     assert(x6973 != Fp::invalid());
     // loc("Top/mux(Mux)/reset(ResetStep)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[3](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
-    auto x6974 = args[2][162 * steps + ((cycle - 0) & mask)];
+    auto x6974 = args[2][164 * steps + ((cycle - 0) & mask)];
     assert(x6974 != Fp::invalid());
     // loc("./zirgen/components/plonk.h":218:0)
     auto x6975 = x6789 * x6968;

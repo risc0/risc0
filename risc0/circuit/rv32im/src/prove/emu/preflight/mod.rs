@@ -20,7 +20,7 @@ use std::{
     sync::atomic::{AtomicUsize, Ordering},
 };
 
-use anyhow::{anyhow, bail, Result};
+use anyhow::{anyhow, bail, ensure, Result};
 use crypto_bigint::{CheckedMul as _, Encoding as _, NonZero, U256, U512};
 use derive_debug::Dbg;
 use risc0_zkp::{
@@ -112,6 +112,7 @@ struct Preflight {
     pre_merkle_root: Digest,
     halted: Option<u32>,
     syscalls: VecDeque<SyscallRecord>,
+    input_digest: Digest,
 }
 
 impl Clone for PreflightCycle {
@@ -188,6 +189,7 @@ impl Preflight {
             pre_merkle_root: segment.pre_state.merkle_root,
             halted: None,
             syscalls: segment.syscalls.clone().into(),
+            input_digest: segment.input_digest,
         }
     }
 
@@ -313,6 +315,7 @@ impl Preflight {
             self.add_txn(false, SYSTEM_START + REG_A1, self.output_ptr.0);
             self.add_txn(false, SYSTEM_START + REG_A0, self.halted.unwrap());
             self.add_cycle(false, TopMux::Body(Major::ECall, 0));
+            self.pc += WORD_SIZE;
         }
 
         let max_cycles = self.steps;
@@ -430,6 +433,7 @@ impl Preflight {
         )
     }
 
+    #[allow(clippy::too_many_arguments)]
     fn sha_cycles(
         &mut self,
         block1_addr: WordAddr,
@@ -540,6 +544,19 @@ impl Preflight {
         self.output_ptr = ByteAddr(self.peek_register(REG_A1)?);
         let exit_code = self.peek_register(REG_A0)?;
         self.halted = Some(exit_code);
+        Ok(true)
+    }
+
+    fn ecall_input(&mut self) -> Result<bool> {
+        self.load_register(REG_T0)?;
+        let a0 = self.load_register(REG_A0)? as usize;
+        ensure!(a0 < DIGEST_WORDS, "sys_input index out of range");
+        let word = self.input_digest.as_words()[a0];
+        self.store_register(REG_A0, word)?;
+
+        self.add_cycle(false, TopMux::Body(Major::ECall, 0));
+
+        self.pc += WORD_SIZE;
         Ok(true)
     }
 
@@ -705,6 +722,7 @@ impl EmuContext for Preflight {
         // transaction but still cause the page to marked as loaded.
         match self.pager.load(SYSTEM_START + REG_T0) {
             ecall::HALT => self.ecall_halt(),
+            ecall::INPUT => self.ecall_input(),
             ecall::SOFTWARE => self.ecall_software(),
             ecall::SHA => self.ecall_sha(),
             ecall::BIGINT => self.ecall_bigint(),
