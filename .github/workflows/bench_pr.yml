@@ -64,8 +64,8 @@ jobs:
           aws-region: us-west-2
           role-to-assume: arn:aws:iam::083632199359:role/gha_oidc_risc0_cache_public_access
 
-      - name: Download previous benchmark data
-        run: aws s3 cp $S3_BENCH_PATH ./cache/benchmark.json
+      # - name: Download previous benchmark data
+      #   run: aws s3 cp $S3_BENCH_PATH ./cache/benchmark.json
 
       - name: Run benchmarks
         run: cargo bench --bench fib -F $FEATURE
