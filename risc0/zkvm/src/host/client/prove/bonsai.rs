@@ -141,7 +141,7 @@ impl Prover for BonsaiProver {
             InnerReceipt::Succinct(_) | InnerReceipt::Compact(_) => Ok(receipt.clone()),
             // NOTE: Bonsai always returns a SuccinctReceipt, and does not support compression of
             // SegmentReceipts uploaded by clients. It would be possible to support this, but there
-            // is not an apperent reason to do so.
+            // is not an apparent reason to do so.
             InnerReceipt::Composite(_) => Err(anyhow!(
                 "BonsaiProver does not support compress on a composite receipt"
             )),

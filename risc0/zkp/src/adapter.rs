@@ -127,7 +127,7 @@ pub trait TapsProvider {
     }
 }
 
-/// A protocol info string for the proof system and circuits. Used to seed the Fiat-Shamir transcript and provide domain seperation between different protocol and circuit versions.
+/// A protocol info string for the proof system and circuits. Used to seed the Fiat-Shamir transcript and provide domain separation between different protocol and circuit versions.
 #[derive(Debug)]
 pub struct ProtocolInfo(pub &'static [u8; 16]);
 

@@ -67,7 +67,7 @@ Soundness is often quantified in terms of “[bits]” — our system currently 
 | --------------------- | ----------------------------------------------------------------------------------------- | ---------------- | ------------- |
 | RISC-V Prover         | - Random Oracle Model <br/> - Toy Problem Conjecture                                      | 98               | Yes           |
 | Recursion Prover      | - Random Oracle Model <br/> - Toy Problem Conjecture                                      | 99               | Yes           |
-| STARK-to-SNARK Prover | - Security of elliptic curve pairing over BN254. <br/> - Knowledge of Exponent assumption | 100+             | No            |
+| STARK-to-SNARK Prover | - Security of elliptic curve pairing over BN254. <br/> - Knowledge of Exponent assumption | 99+              | No            |
 
 The Toy Problem conjecture, specified in detail in the [ethSTARK documentation], says that the best known attack on STARK proof systems is the best possible attack.
 
@@ -111,7 +111,7 @@ For a detailed discussion of the security of BN254, we refer readers to the disc
 [receipt claim]: ../../terminology#receipt-claim
 [RISC Zero zkVM: Scalable, Transparent Arguments of RISC-V Integrity]: ./proof-system-in-detail.pdf
 [RISC Zero zkVM]: ../zkvm
-[security calculator]: https://github.com/risc0/risc0/pull/1593
+[security calculator]: https://github.com/risc0/risc0/blob/main/risc0/zkp/src/prove/soundness.rs
 [this article by Justin Thaler]: https://a16zcrypto.com/posts/article/snark-security-and-performance/
 [bits]: https://a16zcrypto.com/posts/article/snark-security-and-performance/
 [Verifier Contract]: ../blockchain-integration/contracts/verifier
