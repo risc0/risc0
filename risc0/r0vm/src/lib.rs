@@ -64,7 +64,7 @@ struct Cli {
     #[arg(long, env = "RISC0_PPROF_OUT")]
     pprof_out: Option<PathBuf>,
 
-    /// The receipt format produced by the r0vm prover
+    /// The receipt kind produced by the r0vm prover
     #[arg(long, value_enum, default_value_t = ReceiptKind::Composite)]
     receipt_kind: ReceiptKind,
 }
