@@ -57,14 +57,23 @@ jobs:
 
       - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
 
-      - name: Run benchmarks
-        run: cargo bench --bench fib -F $FEATURE
+      - id: aws-creds
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-west-2
+          role-to-assume: arn:aws:iam::083632199359:role/gha_oidc_risc0_cache_public_access
+          output-credentials: true
 
       - name: Download previous benchmark data
-        uses: actions/cache/restore@v4
+        uses: prewk/s3-cp-action@v2
         with:
-          path: ./cache
-          key: fib-${{ runner.os }}-${{ matrix.device }}
+          aws_access_key_id: ${{ steps.aws-creds.outputs.aws-access-key-id }}
+          aws_secret_access_key: ${{ steps.aws-creds.outputs.aws-secret-access-key }}
+          source: s3://risc0-ci-cache/public/bench/fib/${{ runner.os }}-${{ matrix.device }}/benchmark.json
+          dest: ./cache/benchmark.json
+
+      - name: Run benchmarks
+        run: cargo bench --bench fib -F $FEATURE
 
       - name: Analyze benchmark results
         uses: risc0/github-action-benchmark@v1.19.3
@@ -79,9 +88,11 @@ jobs:
           fail-on-alert: true
           summary-always: true
 
-      - name: Save results
-        if: github.event_name == 'push'
-        uses: actions/cache/save@v4
+      - name: Save current benchmark data
+        # if: github.event_name == 'push'
+        uses: prewk/s3-cp-action@v2
         with:
-          path: ./cache
-          key: fib-${{ runner.os }}-${{ matrix.device }}
+          aws_access_key_id: ${{ steps.aws-creds.outputs.aws-access-key-id }}
+          aws_secret_access_key: ${{ steps.aws-creds.outputs.aws-secret-access-key }}
+          source: ./cache/benchmark.json
+          dest: s3://risc0-ci-cache/public/bench/fib/${{ runner.os }}-${{ matrix.device }}/benchmark.json
