@@ -31,14 +31,15 @@ use super::{get_prover_server, HalPair, ProverImpl};
 use crate::{
     host::server::testutils,
     serde::{from_slice, to_vec},
-    ExecutorEnv, ExecutorImpl, ExitCode, ProveInfo, ProverOpts, ProverServer, Receipt, Session,
-    VerifierContext,
+    ExecutorEnv, ExecutorImpl, ExitCode, ProveInfo, ProverOpts, ProverServer, Receipt, ReceiptKind,
+    Session, VerifierContext,
 };
 
 fn prover_opts_fast() -> ProverOpts {
     ProverOpts {
         hashfn: "sha-256".to_string(),
         prove_guest_errors: false,
+        receipt_kind: ReceiptKind::Composite,
     }
 }
 
@@ -59,8 +60,27 @@ fn prove_nothing(hashfn: &str) -> Result<ProveInfo> {
     let opts = ProverOpts {
         hashfn: hashfn.to_string(),
         prove_guest_errors: false,
+        receipt_kind: ReceiptKind::Composite,
     };
     get_prover_server(&opts).unwrap().prove(env, MULTI_TEST_ELF)
+}
+
+#[test]
+fn prove_nothing_succinct() {
+    let env = ExecutorEnv::builder()
+        .write(&MultiTestSpec::DoNothing)
+        .unwrap()
+        .build()
+        .unwrap();
+    let opts = ProverOpts::succinct();
+    get_prover_server(&opts)
+        .unwrap()
+        .prove(env, MULTI_TEST_ELF)
+        .unwrap()
+        .receipt
+        .inner
+        .succinct()
+        .unwrap(); // ensure that we got a succinct receipt.
 }
 
 #[test]
@@ -80,7 +100,7 @@ fn hashfn_blake2b() {
         .unwrap()
         .build()
         .unwrap();
-    let prover = ProverImpl::new("cpu:blake2b", hal_pair);
+    let prover = ProverImpl::new("cpu:blake2b", hal_pair, ReceiptKind::Composite);
     prover.prove(env, MULTI_TEST_ELF).unwrap();
 }
 
@@ -533,6 +553,7 @@ mod docker {
 }
 
 mod sys_verify {
+    use crate::ReceiptKind;
     use risc0_zkvm_methods::{
         multi_test::MultiTestSpec, HELLO_COMMIT_ELF, HELLO_COMMIT_ID, MULTI_TEST_ELF, MULTI_TEST_ID,
     };
@@ -560,6 +581,7 @@ mod sys_verify {
         let opts = ProverOpts {
             hashfn: "sha-256".to_string(),
             prove_guest_errors: true,
+            receipt_kind: ReceiptKind::Composite,
         };
 
         let env = ExecutorEnvBuilder::default()

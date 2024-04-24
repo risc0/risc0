@@ -120,6 +120,19 @@ pub struct ProverOpts {
     // moment if there is a better place. At some point before 1.0, this option should be moved or
     // dropped.
     pub prove_guest_errors: bool,
+    /// The kind of receipt to be generated.
+    pub receipt_kind: ReceiptKind,
+}
+
+/// This enum represents the various receipt kinds that can be generated.
+#[derive(Clone, Serialize, Deserialize, PartialEq)]
+pub enum ReceiptKind {
+    /// Composite Receipts resulting from proving a session
+    Composite,
+    /// Succinct Receipts resulting from applying the lift and join programgs so Composite receipts
+    Succinct,
+    /// Compact Receipts resulting from stark2snark on the Succinct receipts
+    Compact,
 }
 
 impl Default for ProverOpts {
@@ -129,6 +142,7 @@ impl Default for ProverOpts {
         Self {
             hashfn: "poseidon2".to_string(),
             prove_guest_errors: false,
+            receipt_kind: ReceiptKind::Composite,
         }
     }
 }
@@ -139,6 +153,25 @@ impl ProverOpts {
         Self {
             hashfn: "sha-256".to_string(),
             prove_guest_errors: false,
+            receipt_kind: ReceiptKind::Composite,
+        }
+    }
+
+    /// Choose the prover that enables succinct receipts.
+    pub fn succinct() -> Self {
+        Self {
+            hashfn: "poseidon2".to_string(),
+            prove_guest_errors: false,
+            receipt_kind: ReceiptKind::Succinct,
+        }
+    }
+
+    /// Choose the prover that enables compact, snark receipts, only supported for x86_64 linux
+    pub fn compact() -> Self {
+        Self {
+            hashfn: "poseidon2".to_string(),
+            prove_guest_errors: false,
+            receipt_kind: ReceiptKind::Compact,
         }
     }
 }
