@@ -17,10 +17,10 @@ permissions:
   contents: read
 
 env:
+  BRANCH: ${{ github.base_ref || github.ref_name }}
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   RISC0_BUILD_LOCKED: 1
   RISC0_TOOLCHAIN_VERSION: v2024-04-22.0
-  BRANCH_NAME: ${{ github.base_ref || github.ref_name }}
 
 jobs:
   bench:
@@ -44,8 +44,7 @@ jobs:
     env:
       FEATURE: ${{ matrix.feature }}
       DISABLE_S3: ${{ matrix.device == 'nvidia_rtx_3090_ti' }}
-      MATRIX_OS: ${{ matrix.os }}
-      MATRIX_DEVICE: ${{ matrix.device }}
+      S3_BENCH_PATH: s3://risc0-ci-cache/public/bench/${{ env.BRANCH }}/fib/${{ matrix.os }}-${{ matrix.device }}
 
     steps:
       - uses: actions/checkout@v4
@@ -64,15 +63,10 @@ jobs:
           aws-region: us-west-2
           role-to-assume: arn:aws:iam::083632199359:role/gha_oidc_risc0_cache_public_access
 
-      - name: Extract branch name
+      - name: Download previous benchmark data
         run: |
-          BRANCH=${GITHUB_BASE_REF:-${GITHUB_REF#refs/heads/}}
-          echo "S3_BENCH_PATH=s3://risc0-ci-cache/public/bench/$BRANCH/fib/$MATRIX_OS-$MATRIX_DEVICE" >> $GITHUB_ENV
-
-      # - name: Download previous benchmark data
-      #   run: |
-      #     aws s3 cp $S3_BENCH_PATH/external.json ./cache/external.json
-      #     aws s3 cp $S3_BENCH_PATH/benchmark.json ./target/hotbench/fib/benchmark.json
+          aws s3 cp $S3_BENCH_PATH/external.json ./cache/external.json
+          aws s3 cp $S3_BENCH_PATH/benchmark.json ./target/hotbench/fib/benchmark.json
 
       - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
 
@@ -93,7 +87,7 @@ jobs:
           summary-always: true
 
       - name: Save current benchmark data
-        # if: github.event_name == 'push'
+        if: github.event_name == 'push'
         run: |
           aws s3 cp ./cache/external.json $S3_BENCH_PATH/external.json
           aws s3 cp ./target/hotbench/fib/benchmark.json $S3_BENCH_PATH/benchmark.json
