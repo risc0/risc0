@@ -68,8 +68,6 @@ jobs:
       - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
       - run: cargo run --release --bin risc0-benchmark -F $FEATURE -- --out ${{ matrix.os }}-${{ matrix.device }}.csv all
         working-directory: benchmarks
-      - run: cargo run --release --bin average -F $FEATURE -- --out ${{ matrix.os }}-${{ matrix.device }}.average.csv all
-        working-directory: benchmarks
       - name: Save commit hash to a file
         run: echo "${{ github.sha }}" > COMMIT_HASH.txt
         working-directory: benchmarks
@@ -79,7 +77,6 @@ jobs:
           name: benchmarks
           path: |
             benchmarks/${{ matrix.os }}-${{ matrix.device }}.csv
-            benchmarks/${{ matrix.os }}-${{ matrix.device }}.average.csv
             benchmarks/COMMIT_HASH.txt
 
   push_to_ghpages:
@@ -106,10 +103,6 @@ jobs:
           git add dev/benchmarks/macOS-apple_m2_pro.csv
           git add dev/benchmarks/Linux-nvidia_rtx_a5000.csv
           git add dev/benchmarks/Linux-cpu.csv
-          git add dev/benchmarks/macOS-cpu.average.csv
-          git add dev/benchmarks/macOS-apple_m2_pro.average.csv
-          git add dev/benchmarks/Linux-nvidia_rtx_a5000.average.csv
-          git add dev/benchmarks/Linux-cpu.average.csv
           git add dev/benchmarks/COMMIT_HASH.txt
           if git diff --cached --exit-code; then
             echo "No changes to commit"
