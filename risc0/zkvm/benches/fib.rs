@@ -37,8 +37,8 @@ fn execute(group: &mut BenchGroup) {
             || setup_exec(iterations),
             |exec| {
                 sleep(Duration::from_secs(1));
-                exec.run(),
-            }
+                exec.run()
+            },
         )
     });
 }
