@@ -204,7 +204,7 @@ impl From<pb::api::ProverOpts> for ProverOpts {
                 0 => ReceiptKind::Composite,
                 1 => ReceiptKind::Succinct,
                 2 => ReceiptKind::Compact,
-                value => panic!("Unknown receipt format number: {value}"),
+                value => panic!("Unknown receipt kind number: {value}"),
             },
         }
     }
