@@ -27,8 +27,8 @@ use super::{
     ProverOpts as RecursionProverOpts,
 };
 use crate::{
-    default_prover, get_prover_server, ExecutorEnv, ExecutorImpl, InnerReceipt, ProverOpts,
-    Receipt, SegmentReceipt, Session, VerifierContext, ALLOWED_IDS_ROOT,
+    default_prover, get_prover_server, host::client::prove::ReceiptKind, ExecutorEnv, ExecutorImpl,
+    InnerReceipt, ProverOpts, Receipt, SegmentReceipt, Session, VerifierContext, ALLOWED_IDS_ROOT,
 };
 
 // Failure on older mac minis in the lab with Intel UHD 630 graphics:
@@ -142,6 +142,7 @@ fn generate_busy_loop_segments(hashfn: &str) -> (Session, Vec<SegmentReceipt>) {
     let opts = ProverOpts {
         hashfn: hashfn.to_string(),
         prove_guest_errors: false,
+        receipt_kind: ReceiptKind::Composite,
     };
     let prover = get_prover_server(&opts).unwrap();
 
