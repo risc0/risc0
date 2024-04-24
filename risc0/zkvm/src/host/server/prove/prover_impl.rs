@@ -18,15 +18,16 @@ use risc0_zkp::hal::{CircuitHal, Hal};
 
 use super::{HalPair, ProverServer};
 use crate::{
-    stark_to_snark,
     host::{
         client::prove::ReceiptKind,
         prove_info::ProveInfo,
-        receipt::{CompactReceipt, CompositeReceipt, InnerReceipt, SegmentReceipt, SuccinctReceipt},
+        receipt::{
+            CompactReceipt, CompositeReceipt, InnerReceipt, SegmentReceipt, SuccinctReceipt,
+        },
         recursion::{identity_p254, join, lift, resolve},
     },
     sha::Digestible,
-    Receipt, Segment, Session, VerifierContext,
+    stark_to_snark, Receipt, Segment, Session, VerifierContext,
 };
 
 /// An implementation of a Prover that runs locally.

@@ -560,13 +560,13 @@ mod docker {
             .unwrap();
         let opts = ProverOpts::compact();
         get_prover_server(&opts)
-        .unwrap()
-        .prove(env, MULTI_TEST_ELF)
-        .unwrap()
-        .receipt
-        .inner
-        .compact()
-        .unwrap(); // ensure that we got a compact receipt.
+            .unwrap()
+            .prove(env, MULTI_TEST_ELF)
+            .unwrap()
+            .receipt
+            .inner
+            .compact()
+            .unwrap(); // ensure that we got a compact receipt.
     }
 }
 
