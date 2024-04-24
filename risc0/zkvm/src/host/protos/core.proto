@@ -21,6 +21,17 @@ message PageTableInfo {
   uint32 page_table_addr = 2;
 }
 
+message ProveInfo {
+  Receipt receipt = 1;
+  SessionStats stats = 2;
+}
+
+message SessionStats {
+  uint64 segments = 1;
+  uint64 total_cycles = 2;
+  uint64 user_cycles = 3;
+}
+
 message Receipt {
   protos.base.CompatVersion version = 1;
   InnerReceipt inner = 2;

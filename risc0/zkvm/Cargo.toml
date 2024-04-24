@@ -13,11 +13,6 @@ harness = false
 required-features = ["prove"]
 
 [[bench]]
-name = "divan"
-harness = false
-required-features = ["prove"]
-
-[[bench]]
 name = "guest_run"
 harness = false
 
@@ -82,7 +77,6 @@ typetag = { version = "0.2", optional = true }
 [dev-dependencies]
 clap = { version = "4.4", features = ["derive"] }
 criterion = { version = "0.5", features = ["html_reports"] }
-divan = "0.1"
 hotbench = { workspace = true }
 lazy_static = "1.4.0"
 rand = "0.8"
@@ -96,7 +90,7 @@ crypto-bigint = { version = "0.5", default-features = false, features = [
 flate2 = "1.0"
 risc0-zkvm-methods = { path = "methods" }
 serde_json = "1.0"
-serial_test = "3.0"
+serial_test = "3.1"
 tar = "0.4"
 tempfile = "3"
 test-log = { version = "0.2", default-features = false, features = ["trace"] }

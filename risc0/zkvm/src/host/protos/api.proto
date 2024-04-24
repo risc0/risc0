@@ -12,7 +12,7 @@ message ServerRequest {
     ProveSegmentRequest prove_segment = 3;
     LiftRequest lift = 4;
     JoinRequest join = 5;
-    IdentityP254Request identiy_p254 = 6;
+    IdentityP254Request identity_p254 = 6;
     ResolveRequest resolve = 7;
   }
 }
@@ -151,6 +151,13 @@ message Assumption {
 message ProverOpts {
   string hashfn = 1;
   bool prove_guest_errors = 2;
+  ReceiptKind receipt_kind = 3;
+}
+
+enum ReceiptKind {
+  COMPOSITE = 0;
+  SUCCINCT = 1;
+  COMPACT = 2;
 }
 
 message SessionInfo {
@@ -266,7 +273,7 @@ message OnSessionDone {
 }
 
 message OnProveDone {
-  Asset receipt = 1;
+  Asset prove_info = 1;
 }
 
 message GenericReply {

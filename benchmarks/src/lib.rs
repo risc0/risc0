@@ -152,7 +152,7 @@ impl Job {
 
         let receipt = {
             let start = Instant::now();
-            let receipt = session.prove().unwrap();
+            let receipt = session.prove().unwrap().receipt;
             metrics.proof_duration = start.elapsed();
             receipt
         };

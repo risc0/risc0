@@ -274,7 +274,7 @@ impl<'a> RecursionExecutor<'a> {
     ) -> Self {
         let io = vec![BabyBearElem::INVALID; CircuitImpl::OUTPUT_SIZE];
         let po2 = RECURSION_PO2;
-        let executor = Executor::new(circuit, machine, po2, po2, &io);
+        let executor = Executor::new(circuit, machine, po2, &io);
         Self {
             zkr,
             executor,

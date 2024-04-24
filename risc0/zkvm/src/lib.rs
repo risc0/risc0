@@ -121,7 +121,7 @@ pub use {
             env::{ExecutorEnv, ExecutorEnvBuilder},
             prove::{
                 bonsai::BonsaiProver, default_executor, default_prover, external::ExternalProver,
-                Executor, Prover, ProverOpts,
+                Executor, Prover, ProverOpts, ReceiptKind,
             },
         },
     },
@@ -130,6 +130,7 @@ pub use {
 #[cfg(not(target_os = "zkvm"))]
 pub use {
     self::host::{
+        prove_info::{ProveInfo, SessionStats},
         receipt::{
             Assumption, CompactReceipt, CompositeReceipt, InnerReceipt, Journal, Receipt,
             SegmentReceipt, SuccinctReceipt, VerifierContext,

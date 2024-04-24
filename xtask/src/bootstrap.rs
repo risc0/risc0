@@ -124,7 +124,7 @@ impl Bootstrap {
             })
             .collect();
 
-        // Calculuate a Merkle root for the allowed control IDs and add it to the file.
+        // Calculate a Merkle root for the allowed control IDs and add it to the file.
         let merkle_group = RecursionProver::bootstrap_allowed_tree(valid_control_ids);
         let hash_suite = Poseidon2HashSuite::new_suite();
         let hashfn = hash_suite.hashfn.as_ref();

@@ -56,7 +56,7 @@ const R2: u32 = 1172168163;
 /// - Otherwise have as large a power of 2 in the factors of P-1 as possible.
 ///
 /// This last property is useful for number theoretical transforms (the fast
-/// fourier transform equivelant on finite fields). See NTT.h for details.
+/// fourier transform equivalent on finite fields). See NTT.h for details.
 ///
 /// The Fp class wraps all the standard arithmetic operations to make the finite
 /// field elements look basically like ordinary numbers (which they mostly are).
@@ -113,13 +113,13 @@ impl field::Elem for Elem {
         // full copies of P, with only 2^192%P left over elements in the 'partial' copy
         // (which we would normally reject with rejection sampling).
         //
-        // Even if we imagined that this failure to reject totally destroys soundess,
-        // the probablity of it occuring even once during proving is vanishingly low
+        // Even if we imagined that this failure to reject totally destroys soundness,
+        // the probability of it occurring even once during proving is vanishingly low
         // (for the about 50 samples our current verifier pulls and at a probability of
         // less than2^-161 per sample, this is less than 2^-155).  Even if we target
         // a soundness of 128 bits, we are millions of times more likely to let an
         // invalid proof by due to normal low probability events which are part of
-        // soundess analysis than due to imperfect sampling.
+        // soundness analysis than due to imperfect sampling.
         //
         // Finally, from an implementation perspective, we can view generating a number
         // in the [0, 2^192) range as using a linear combination of uniform u32s, r0,
@@ -195,7 +195,7 @@ impl Elem {
 
     /// Create a new [BabyBear] from a Montgomery form representation
     ///
-    /// Requires that `x` comes pre-encoded in Montegomery form.
+    /// Requires that `x` comes pre-encoded in Montgomery form.
     pub const fn new_raw(x: u32) -> Self {
         Self(x)
     }
@@ -443,11 +443,11 @@ impl field::Elem for ExtElem {
         // number, `b` and compute it as follows.
         let mut b0 = a[0] * a[0] + BETA * (a[1] * (a[3] + a[3]) - a[2] * a[2]);
         let mut b2 = a[0] * (a[2] + a[2]) - a[1] * a[1] + BETA * (a[3] * a[3]);
-        // Now, we make `b'` by inverting `b2`. When we muliply both sizes by `b'`, we
+        // Now, we make `b'` by inverting `b2`. When we multiply both sizes by `b'`, we
         // get `out = (a' * b') / (b * b')`.  But by construction `b * b'` is in
         // fact an element of `Elem`, call it `c`.
         let c = b0 * b0 + BETA * b2 * b2;
-        // But we can now invert `C` direcly, and multiply by `a' * b'`:
+        // But we can now invert `C` directly, and multiply by `a' * b'`:
         // `out = a' * b' * inv(c)`
         let ic = c.inv();
         // Note: if c == 0 (really should only happen if in == 0), our
@@ -483,7 +483,7 @@ impl field::Elem for ExtElem {
 
     // So we're not checking every subfield element every time we do
     // anything, assume that if our first subelement is valid, the
-    // whole thing is valid.  Any subfield elements will doublee check
+    // whole thing is valid.  Any subfield elements will double check
     // when we do operations on them anyways.
     fn is_valid(&self) -> bool {
         self.0[0].is_valid()

@@ -1,8 +1,8 @@
 {
   "title": "RISC Zero STARK-to-SNARK Prover",
   "description": "A circuit which verifies RISC Zero recursive STARKs, converting them into Groth16 SNARKs",
-  "startDate": "2024-04-03T15:00:00",
-  "endDate": "2024-05-02T03:00:00",
+  "startDate": "2024-04-05T15:00:00",
+  "endDate": "2024-05-03T03:00:00",
   "timeoutMechanismType": "FIXED",
   "penalty": 10,
   "circuits": [
@@ -14,15 +14,15 @@
       },
       "template": {
         "source": "https://github.com/risc0/risc0",
-        "commitHash": "2c2d7187896ca1e4c94428be6fadf36240b1d7f0",
+        "commitHash": "c6610fd1aee2a4eadc2e751283b69d645b1208cc",
         "paramsConfiguration": []
       },
       "verification": {
         "cfOrVm": "CF"
       },
       "artifacts": {
-        "r1csStoragePath": "http://risc0-artifacts.s3.us-west-2.amazonaws.com/tsc/2024-03-28/stark_verify.r1cs",
-        "wasmStoragePath": "http://risc0-artifacts.s3.us-west-2.amazonaws.com/tsc/2024-03-28/stark_verify.wasm"
+        "r1csStoragePath": "http://risc0-artifacts.s3.us-west-2.amazonaws.com/tsc/2024-04-04/stark_verify.r1cs",
+        "wasmStoragePath": "http://risc0-artifacts.s3.us-west-2.amazonaws.com/tsc/2024-04-04/stark_verify.wasm"
       },
       "name": "stark_verify",
       "sequencePosition": 1,
