@@ -20,6 +20,7 @@ env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   RISC0_BUILD_LOCKED: 1
   RISC0_TOOLCHAIN_VERSION: v2024-04-22.0
+  BRANCH_NAME: ${{ github.base_ref || github.ref_name }}
 
 jobs:
   bench:
@@ -43,7 +44,8 @@ jobs:
     env:
       FEATURE: ${{ matrix.feature }}
       DISABLE_S3: ${{ matrix.device == 'nvidia_rtx_3090_ti' }}
-      S3_BENCH_PATH: s3://risc0-ci-cache/public/bench/fib/${{ matrix.os }}-${{ matrix.device }}
+      MATRIX_OS: ${{ matrix.os }}
+      MATRIX_DEVICE: ${{ matrix.device }}
 
     steps:
       - uses: actions/checkout@v4
@@ -61,6 +63,11 @@ jobs:
         with:
           aws-region: us-west-2
           role-to-assume: arn:aws:iam::083632199359:role/gha_oidc_risc0_cache_public_access
+
+      - name: Extract branch name
+        run: |
+          BRANCH=${GITHUB_BASE_REF:-${GITHUB_REF#refs/heads/}}
+          echo "S3_BENCH_PATH=s3://risc0-ci-cache/public/bench/$BRANCH/fib/$MATRIX_OS-$MATRIX_DEVICE" >> $GITHUB_ENV
 
       # - name: Download previous benchmark data
       #   run: |
