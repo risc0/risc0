@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use std::{thread::sleep, time::Duration};
+
 use hotbench::{benchmark_group, benchmark_main, BenchGroup};
 use risc0_zkvm::{
     get_prover_server, ExecutorEnv, ExecutorImpl, ProverOpts, VerifierContext, RECURSION_PO2,
@@ -33,7 +35,10 @@ fn execute(group: &mut BenchGroup) {
         b.iter(
             session.user_cycles as usize,
             || setup_exec(iterations),
-            |exec| exec.run(),
+            |exec| {
+                sleep(Duration::from_secs(1));
+                exec.run(),
+            }
         )
     });
 }
