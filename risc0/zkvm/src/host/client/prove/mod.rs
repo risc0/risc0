@@ -124,7 +124,7 @@ pub struct ProverOpts {
     pub receipt_kind: ReceiptKind,
 }
 
-/// This enum represents the various receipt formats that can be generated.
+/// This enum represents the various receipt kinds that can be generated.
 #[derive(Clone, Serialize, Deserialize, PartialEq)]
 pub enum ReceiptKind {
     /// Composite Receipts resulting from proving a session
