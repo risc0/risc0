@@ -51,6 +51,9 @@ pub struct Session {
     /// any) will have [ExitCode::SystemSplit].
     pub segments: Vec<Box<dyn SegmentRef>>,
 
+    /// The input digest.
+    pub input: Digest,
+
     /// The data publicly committed by the guest program.
     pub journal: Option<Journal>,
 
@@ -111,7 +114,7 @@ impl Segment {
 ///
 /// This allows implementors to determine the best way to represent this in an
 /// pluggable manner. See the [SimpleSegmentRef] for a very basic
-/// implmentation.
+/// implementation.
 pub trait SegmentRef: Send {
     /// Resolve this reference into an actual [Segment].
     fn resolve(&self) -> Result<Segment>;
@@ -132,6 +135,7 @@ impl Session {
     /// Construct a new [Session] from its constituent components.
     pub fn new(
         segments: Vec<Box<dyn SegmentRef>>,
+        input: Digest,
         journal: Option<Vec<u8>>,
         exit_code: ExitCode,
         post_image: MemoryImage,
@@ -143,6 +147,7 @@ impl Session {
     ) -> Self {
         Self {
             segments,
+            input,
             journal: journal.map(|x| Journal::new(x)),
             exit_code,
             post_image,
@@ -204,7 +209,7 @@ impl Session {
             pre: self.pre_state.clone().into(),
             post: self.post_state.clone().into(),
             exit_code: self.exit_code,
-            input: Digest::ZERO,
+            input: self.input,
             output: output.into(),
         })
     }

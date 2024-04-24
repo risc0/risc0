@@ -134,7 +134,12 @@ impl<'a> ExecutorImpl<'a> {
             .unwrap_or(DEFAULT_SEGMENT_LIMIT_PO2 as u32) as usize;
 
         let mut refs = Vec::new();
-        let mut exec = Executor::new(self.image.clone(), self, self.env.trace.clone());
+        let mut exec = Executor::new(
+            self.image.clone(),
+            self,
+            self.env.input_digest,
+            self.env.trace.clone(),
+        );
 
         let start_time = Instant::now();
         let result = exec.run(segment_limit_po2, self.env.session_limit, |inner| {
@@ -207,6 +212,7 @@ impl<'a> ExecutorImpl<'a> {
 
         let session = Session::new(
             refs,
+            self.env.input_digest.unwrap_or_default(),
             session_journal,
             result.exit_code,
             result.post_image,

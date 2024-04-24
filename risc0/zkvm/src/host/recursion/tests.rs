@@ -27,8 +27,8 @@ use super::{
     ProverOpts as RecursionProverOpts,
 };
 use crate::{
-    default_prover, get_prover_server, ExecutorEnv, ExecutorImpl, InnerReceipt, ProverOpts,
-    Receipt, SegmentReceipt, Session, VerifierContext, ALLOWED_IDS_ROOT,
+    default_prover, get_prover_server, host::client::prove::ReceiptKind, ExecutorEnv, ExecutorImpl,
+    InnerReceipt, ProverOpts, Receipt, SegmentReceipt, Session, VerifierContext, ALLOWED_IDS_ROOT,
 };
 
 // Failure on older mac minis in the lab with Intel UHD 630 graphics:
@@ -142,6 +142,7 @@ fn generate_busy_loop_segments(hashfn: &str) -> (Session, Vec<SegmentReceipt>) {
     let opts = ProverOpts {
         hashfn: hashfn.to_string(),
         prove_guest_errors: false,
+        receipt_kind: ReceiptKind::Composite,
     };
     let prover = get_prover_server(&opts).unwrap();
 
@@ -265,11 +266,11 @@ fn test_recursion_lift_resolve_e2e() {
 
 #[test]
 fn stable_root() {
-    // This tests that none of the control IDs have changed unexpectedly
+    // This tests that none of the control IDs have changed unexpectedly.
     // If you have _intentionally_ changed control IDs, update this hash.
 
     assert_eq!(
         ALLOWED_IDS_ROOT,
-        "88c1f749250aba181168c33839d7a351671e7a5b7f3e746dde91ef6c6e9ef344"
+        "54058968ca621b3dfdf22c5d7dc65533ffbc1552e36d8b4437424d037328645e"
     );
 }
