@@ -14,7 +14,7 @@
 
 /// Merkle root of the RECURSION_CONTROL_IDS
 pub const ALLOWED_IDS_ROOT: &str =
-    "54058968ca621b3dfdf22c5d7dc65533ffbc1552e36d8b4437424d037328645e";
+    "75310e05f78b6d149d87c66ea5e2eb0b3d5afc45f0581017319c9f4cfd865113";
 
 pub const RECURSION_CONTROL_IDS: [(&str, &str); 15] = [
     (
