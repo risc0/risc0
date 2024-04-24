@@ -42,6 +42,7 @@ pub struct Segment {
     pub po2: usize,
     pub exit_code: ExitCode,
     pub index: usize,
+    pub input_digest: Digest,
     pub output_digest: Option<Digest>,
 }
 
@@ -51,8 +52,11 @@ impl Segment {
 
         // initialize Input
         let mut offset = 0;
-        for i in 0..DIGEST_WORDS * WORD_SIZE {
-            io[offset + i] = Elem::ZERO;
+        for i in 0..DIGEST_WORDS {
+            let bytes = self.input_digest.as_words()[i].to_le_bytes();
+            for j in 0..WORD_SIZE {
+                io[offset + i * WORD_SIZE + j] = (bytes[j] as u32).into();
+            }
         }
         offset += DIGEST_WORDS * WORD_SIZE;
 

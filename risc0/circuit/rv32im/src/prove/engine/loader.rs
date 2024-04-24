@@ -269,7 +269,7 @@ pub fn ram_load_cycles() -> Vec<CtrlCycle> {
     }
 
     TripleWordIter::new(&image)
-        .map(|x| CtrlCycle::ram_load(x))
+        .map(CtrlCycle::ram_load)
         .collect()
 }
 

@@ -25,8 +25,8 @@ use crate::{
         receipt::{decode_receipt_claim_from_seal, CompositeReceipt, InnerReceipt, SegmentReceipt},
         recursion::SuccinctReceipt,
     },
-    Assumptions, ExitCode, Journal, MaybePruned, Output, ProverOpts, Receipt, ReceiptClaim,
-    TraceEvent,
+    Assumptions, ExitCode, Journal, MaybePruned, Output, ProveInfo, ProverOpts, Receipt,
+    ReceiptClaim, ReceiptKind, SessionStats, TraceEvent,
 };
 
 mod ver {
@@ -200,6 +200,12 @@ impl From<pb::api::ProverOpts> for ProverOpts {
         Self {
             hashfn: opts.hashfn,
             prove_guest_errors: opts.prove_guest_errors,
+            receipt_kind: match opts.receipt_kind {
+                0 => ReceiptKind::Composite,
+                1 => ReceiptKind::Succinct,
+                2 => ReceiptKind::Compact,
+                value => panic!("Unknown receipt kind number: {value}"),
+            },
         }
     }
 }
@@ -209,6 +215,7 @@ impl From<ProverOpts> for pb::api::ProverOpts {
         Self {
             hashfn: opts.hashfn,
             prove_guest_errors: opts.prove_guest_errors,
+            receipt_kind: opts.receipt_kind as i32,
         }
     }
 }
@@ -293,6 +300,49 @@ impl TryFrom<pb::base::SemanticVersion> for semver::Version {
             patch: value.patch,
             pre: semver::Prerelease::new(&value.pre)?,
             build: semver::BuildMetadata::new(&value.build)?,
+        })
+    }
+}
+
+impl From<SessionStats> for pb::core::SessionStats {
+    fn from(value: SessionStats) -> Self {
+        Self {
+            // we use usize because that's the type returned by len() for vectors
+            segments: value.segments.try_into().unwrap(),
+            total_cycles: value.total_cycles,
+            user_cycles: value.user_cycles,
+        }
+    }
+}
+
+impl TryFrom<pb::core::SessionStats> for SessionStats {
+    type Error = anyhow::Error;
+
+    fn try_from(value: pb::core::SessionStats) -> Result<Self> {
+        Ok(Self {
+            segments: value.segments.try_into()?,
+            total_cycles: value.total_cycles,
+            user_cycles: value.user_cycles,
+        })
+    }
+}
+
+impl From<ProveInfo> for pb::core::ProveInfo {
+    fn from(value: ProveInfo) -> Self {
+        Self {
+            receipt: Some(value.receipt.into()),
+            stats: Some(value.stats.into()),
+        }
+    }
+}
+
+impl TryFrom<pb::core::ProveInfo> for ProveInfo {
+    type Error = anyhow::Error;
+
+    fn try_from(value: pb::core::ProveInfo) -> Result<Self> {
+        Ok(Self {
+            receipt: value.receipt.ok_or(malformed_err())?.try_into()?,
+            stats: value.stats.ok_or(malformed_err())?.try_into()?,
         })
     }
 }

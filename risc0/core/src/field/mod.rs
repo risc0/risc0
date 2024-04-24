@@ -105,6 +105,12 @@ pub trait Elem:
     /// methods, this may be called on an INVALID element.
     fn is_valid(&self) -> bool;
 
+    /// Returns true if this element is represented in reduced/normalized form.
+    /// Every element has exactly one reduced form. For a field of prime order
+    /// P, this typically means the underlying data is < P, and for an extension
+    /// field, this typically means every component is in reduced form.
+    fn is_reduced(&self) -> bool;
+
     /// Returns 0 if this element is INVALID, else the value of this
     /// element.  Unlike most methods, this may be called on an
     /// INVALID element.
@@ -298,7 +304,7 @@ mod tests {
     where
         F: Into<u64> + From<u64> + Debug,
     {
-        // For testng, we do 128-bit arithmetic so we don't have to worry about
+        // For testing, we do 128-bit arithmetic so we don't have to worry about
         // overflows.
         let p: u128 = p_u64 as _;
 

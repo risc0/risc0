@@ -27,8 +27,8 @@ use super::{
     ProverOpts as RecursionProverOpts,
 };
 use crate::{
-    get_prover_server, ExecutorEnv, ExecutorImpl, InnerReceipt, ProverOpts, Receipt,
-    SegmentReceipt, Session, VerifierContext,
+    default_prover, get_prover_server, host::client::prove::ReceiptKind, ExecutorEnv, ExecutorImpl,
+    InnerReceipt, ProverOpts, Receipt, SegmentReceipt, Session, VerifierContext, ALLOWED_IDS_ROOT,
 };
 
 // Failure on older mac minis in the lab with Intel UHD 630 graphics:
@@ -114,6 +114,40 @@ fn test_recursion_poseidon2() {
     assert_eq!(output_digest, *expected);
 }
 
+#[cfg_attr(
+    not(all(feature = "metal", target_os = "macos", target_arch = "x86_64")),
+    test
+)]
+#[should_panic(expected = "assertion failed: elem.is_reduced()")]
+fn test_poseidon_sanitized_inputs() {
+    use risc0_zkp::core::{digest::Digest, hash::poseidon::PoseidonHashSuite};
+
+    let suite = PoseidonHashSuite::new_suite();
+
+    // Add two digests, one of which has an element >= the Baby Bear prime
+    // Then `hash_pair` should fail as its inputs aren't in reduced form
+    let digest1 = Digest::from([2013265921, 1, 2, 3, 4, 5, 6, 7]);
+    let digest2 = Digest::from([8, 9, 10, 11, 12, 13, 14, 15]);
+    let _expect_assert = suite.hashfn.hash_pair(&digest1, &digest2);
+}
+
+#[cfg_attr(
+    not(all(feature = "metal", target_os = "macos", target_arch = "x86_64")),
+    test
+)]
+#[should_panic(expected = "assertion failed: elem.is_reduced()")]
+fn test_poseidon2_sanitized_inputs() {
+    use risc0_zkp::core::{digest::Digest, hash::poseidon2::Poseidon2HashSuite};
+
+    let suite = Poseidon2HashSuite::new_suite();
+
+    // Add two digests, one of which has an element >= the Baby Bear prime
+    // Then `hash_pair` should fail as its inputs aren't in reduced form
+    let digest1 = Digest::from([2013265921, 1, 2, 3, 4, 5, 6, 7]);
+    let digest2 = Digest::from([8, 9, 10, 11, 12, 13, 14, 15]);
+    let _expect_assert = suite.hashfn.hash_pair(&digest1, &digest2);
+}
+
 fn shorts_to_digest(elems: &[BabyBearElem]) -> Digest {
     let words: Vec<u32> = elems
         .chunks_exact(2)
@@ -142,6 +176,7 @@ fn generate_busy_loop_segments(hashfn: &str) -> (Session, Vec<SegmentReceipt>) {
     let opts = ProverOpts {
         hashfn: hashfn.to_string(),
         prove_guest_errors: false,
+        receipt_kind: ReceiptKind::Composite,
     };
     let prover = get_prover_server(&opts).unwrap();
 
@@ -214,7 +249,7 @@ fn test_recursion_lift_resolve_e2e() {
         .unwrap()
         .build()
         .unwrap();
-    let assumption_receipt_a = prover.prove(env, MULTI_TEST_ELF).unwrap();
+    let assumption_receipt_a = prover.prove(env, MULTI_TEST_ELF).unwrap().receipt;
     tracing::info!("Done proving: echo 'execution A'");
 
     tracing::info!("Proving: echo 'execution B'");
@@ -225,7 +260,7 @@ fn test_recursion_lift_resolve_e2e() {
         .unwrap()
         .build()
         .unwrap();
-    let assumption_receipt_b = prover.prove(env, MULTI_TEST_ELF).unwrap();
+    let assumption_receipt_b = prover.prove(env, MULTI_TEST_ELF).unwrap().receipt;
     tracing::info!("Done proving: echo 'execution B'");
 
     let env = ExecutorEnv::builder()
@@ -240,7 +275,7 @@ fn test_recursion_lift_resolve_e2e() {
         .unwrap();
 
     tracing::info!("Proving: sys_verify");
-    let composition_receipt = prover.prove(env, MULTI_TEST_ELF).unwrap();
+    let composition_receipt = prover.prove(env, MULTI_TEST_ELF).unwrap().receipt;
     tracing::info!("Done proving: sys_verify");
 
     let succinct_receipt = prover
@@ -249,8 +284,27 @@ fn test_recursion_lift_resolve_e2e() {
 
     let receipt = Receipt::new(
         InnerReceipt::Succinct(succinct_receipt),
-        composition_receipt.journal.bytes,
+        composition_receipt.clone().journal.bytes,
     );
 
     receipt.verify(MULTI_TEST_ID).unwrap();
+
+    // These tests take a long time. Since we have the composition receipt, test the prover trait's compress function
+    let prover = default_prover();
+
+    let succinct_receipt = prover
+        .compress(&ProverOpts::default(), &composition_receipt)
+        .unwrap();
+    succinct_receipt.verify(MULTI_TEST_ID).unwrap();
+}
+
+#[test]
+fn stable_root() {
+    // This tests that none of the control IDs have changed unexpectedly.
+    // If you have _intentionally_ changed control IDs, update this hash.
+
+    assert_eq!(
+        ALLOWED_IDS_ROOT,
+        "54058968ca621b3dfdf22c5d7dc65533ffbc1552e36d8b4437424d037328645e"
+    );
 }

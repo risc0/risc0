@@ -10,6 +10,12 @@ const config = {
   transpilePackages: ["@risc0/ui"],
   experimental: {
     caseSensitiveRoutes: true,
+    ppr: true,
+  },
+  images: {
+    dangerouslyAllowSVG: false,
+    contentDispositionType: "attachment",
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
 };
 

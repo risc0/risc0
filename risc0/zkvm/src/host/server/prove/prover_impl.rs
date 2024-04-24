@@ -19,6 +19,8 @@ use risc0_zkp::hal::{CircuitHal, Hal};
 use super::{HalPair, ProverServer};
 use crate::{
     host::{
+        client::prove::ReceiptKind,
+        prove_info::ProveInfo,
         receipt::{CompositeReceipt, InnerReceipt, SegmentReceipt, SuccinctReceipt},
         recursion::{identity_p254, join, lift, resolve},
     },
@@ -34,6 +36,7 @@ where
 {
     name: String,
     hal_pair: HalPair<H, C>,
+    receipt_kind: ReceiptKind,
 }
 
 impl<H, C> ProverImpl<H, C>
@@ -42,10 +45,11 @@ where
     C: CircuitHal<H>,
 {
     /// Construct a [ProverImpl] with the given name and [HalPair].
-    pub fn new(name: &str, hal_pair: HalPair<H, C>) -> Self {
+    pub fn new(name: &str, hal_pair: HalPair<H, C>, receipt_kind: ReceiptKind) -> Self {
         Self {
             name: name.to_string(),
             hal_pair,
+            receipt_kind,
         }
     }
 }
@@ -55,7 +59,7 @@ where
     H: Hal<Field = BabyBear, Elem = Elem, ExtElem = ExtElem>,
     C: CircuitHal<H>,
 {
-    fn prove_session(&self, ctx: &VerifierContext, session: &Session) -> Result<Receipt> {
+    fn prove_session(&self, ctx: &VerifierContext, session: &Session) -> Result<ProveInfo> {
         tracing::debug!(
             "prove_session: {}, exit_code = {:?}, journal = {:?}, segments: {}",
             self.name,
@@ -102,10 +106,22 @@ where
             );
         }
 
-        let receipt = Receipt::new(
-            InnerReceipt::Composite(composite_receipt),
-            session.journal.clone().unwrap_or_default().bytes,
-        );
+        let receipt = match self.receipt_kind {
+            ReceiptKind::Composite => Receipt::new(
+                InnerReceipt::Composite(composite_receipt),
+                session.journal.clone().unwrap_or_default().bytes,
+            ),
+            ReceiptKind::Succinct => {
+                let succinct_receipt = self.compress(&composite_receipt)?;
+                Receipt::new(
+                    InnerReceipt::Succinct(succinct_receipt),
+                    session.journal.clone().unwrap_or_default().bytes,
+                )
+            }
+            ReceiptKind::Compact => {
+                todo!("this will be implemented in the near future")
+            }
+        };
 
         // Verify the receipt to catch if something is broken in the proving process.
         receipt.verify_integrity_with_context(ctx)?;
@@ -120,7 +136,10 @@ where
             );
         }
 
-        Ok(receipt)
+        Ok(ProveInfo {
+            receipt,
+            stats: session.stats(),
+        })
     }
 
     fn prove_segment(&self, ctx: &VerifierContext, segment: &Segment) -> Result<SegmentReceipt> {

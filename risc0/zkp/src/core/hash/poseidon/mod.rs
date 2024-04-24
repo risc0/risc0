@@ -22,7 +22,7 @@ use alloc::{boxed::Box, rc::Rc, vec::Vec};
 
 use risc0_core::field::{
     baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem, Elem},
-    ExtElem,
+    Elem as BaseElem, ExtElem,
 };
 
 use self::consts::{
@@ -39,7 +39,7 @@ pub const CELLS_RATE: usize = 16;
 /// The size of the hash output in cells (~ 248 bits)
 pub const CELLS_OUT: usize = 8;
 
-/// A hash implemention for Poseidon
+/// A hash implementation for Poseidon
 struct PoseidonHashFn;
 
 impl HashFn<BabyBear> for PoseidonHashFn {
@@ -50,7 +50,10 @@ impl HashFn<BabyBear> for PoseidonHashFn {
             .chain(b.as_words())
             .map(|w| BabyBearElem::new_raw(*w))
             .collect();
-        assert!(both.len() == 16);
+        assert!(both.len() == DIGEST_WORDS * 2);
+        for elem in &both {
+            assert!(elem.is_reduced());
+        }
         to_digest(unpadded_hash(both.iter()))
     }
 

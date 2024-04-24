@@ -38,7 +38,7 @@ fn search_json(data: &str) -> Outputs {
     let prover = default_prover();
 
     // Produce a receipt by proving the specified ELF binary.
-    let receipt = prover.prove(env, SEARCH_JSON_ELF).unwrap();
+    let receipt = prover.prove(env, SEARCH_JSON_ELF).unwrap().receipt;
 
     receipt.journal.decode().unwrap()
 }
