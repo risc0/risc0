@@ -36,6 +36,7 @@ fn execute(group: &mut BenchGroup) {
             session.user_cycles as usize,
             || setup_exec(iterations),
             |exec| {
+                // poke
                 sleep(Duration::from_secs(1));
                 exec.run()
             },
