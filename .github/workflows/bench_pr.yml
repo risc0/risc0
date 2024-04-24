@@ -65,9 +65,7 @@ jobs:
           role-to-assume: arn:aws:iam::083632199359:role/gha_oidc_risc0_cache_public_access
 
       - name: Download previous benchmark data
-        uses: ./.github/actions/aws
-        with:
-          args: s3 cp $S3_BENCH_PATH ./cache/benchmark.json
+        run: aws s3 cp $S3_BENCH_PATH ./cache/benchmark.json
 
       - name: Run benchmarks
         run: cargo bench --bench fib -F $FEATURE
@@ -87,6 +85,4 @@ jobs:
 
       - name: Save current benchmark data
         # if: github.event_name == 'push'
-        uses: ./.github/actions/aws
-        with:
-          args: s3 cp ./cache/benchmark.json $S3_BENCH_PATH
+        run: aws s3 cp ./cache/benchmark.json $S3_BENCH_PATH
