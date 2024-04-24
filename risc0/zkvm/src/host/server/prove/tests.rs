@@ -29,11 +29,10 @@ use test_log::test;
 
 use super::{get_prover_server, HalPair, ProverImpl};
 use crate::{
-    host::server::prove::ReceiptKind,
     host::server::testutils,
     serde::{from_slice, to_vec},
-    ExecutorEnv, ExecutorImpl, ExitCode, ProveInfo, ProverOpts, ProverServer, Receipt, Session,
-    VerifierContext,
+    ExecutorEnv, ExecutorImpl, ExitCode, ProveInfo, ProverOpts, ProverServer, Receipt, ReceiptKind,
+    Session, VerifierContext,
 };
 
 fn prover_opts_fast() -> ProverOpts {
@@ -554,7 +553,7 @@ mod docker {
 }
 
 mod sys_verify {
-    use crate::host::server::prove::ReceiptKind;
+    use crate::ReceiptKind;
     use risc0_zkvm_methods::{
         multi_test::MultiTestSpec, HELLO_COMMIT_ELF, HELLO_COMMIT_ID, MULTI_TEST_ELF, MULTI_TEST_ID,
     };
