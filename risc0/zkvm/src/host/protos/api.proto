@@ -151,6 +151,13 @@ message Assumption {
 message ProverOpts {
   string hashfn = 1;
   bool prove_guest_errors = 2;
+  ReceiptKind receipt_kind = 3;
+}
+
+enum ReceiptKind {
+  COMPOSITE = 0;
+  SUCCINCT = 1;
+  COMPACT = 2;
 }
 
 message SessionInfo {

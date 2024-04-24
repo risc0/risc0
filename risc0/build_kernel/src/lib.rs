@@ -243,7 +243,7 @@ impl KernelBuild {
         let temp_dir = tempdir_in(&cache_dir).unwrap();
         let mut hasher = Hasher::new();
         for flag in flags {
-            hasher.add_flag(&flag);
+            hasher.add_flag(flag);
         }
         for src in self.files.iter() {
             hasher.add_file(src);

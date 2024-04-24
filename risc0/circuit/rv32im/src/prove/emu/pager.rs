@@ -275,9 +275,9 @@ impl Page {
         let byte_addr = word_addr * WORD_SIZE;
         let mut bytes = [0u8; WORD_SIZE];
         bytes.clone_from_slice(&self.0[byte_addr..byte_addr + WORD_SIZE]);
-        let data = u32::from_le_bytes(bytes);
+        //let data = u32::from_le_bytes(bytes);
         // tracing::trace!("load({addr:?}) -> 0x{data:08x}");
-        data
+        u32::from_le_bytes(bytes)
     }
 
     fn store(&mut self, addr: WordAddr, data: u32) {
