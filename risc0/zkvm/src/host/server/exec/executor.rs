@@ -163,7 +163,7 @@ impl<'a> ExecutorImpl<'a> {
                                         .iter()
                                         .map(|a| {
                                             Ok(match a {
-                                                Assumption::Proven(r) => r.get_claim()?.into(),
+                                                Assumption::Proven(r) => r.claim()?.into(),
                                                 Assumption::Unresolved(r) => r.clone(),
                                             })
                                         })

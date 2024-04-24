@@ -211,7 +211,7 @@ impl SysVerify {
         // Iterate over the list looking for a matching assumption.
         let mut assumption: Option<Assumption> = None;
         for cached_assumption in self.assumptions.borrow().cached.iter() {
-            if cached_assumption.get_claim()?.digest() == claim_digest {
+            if cached_assumption.claim()?.digest() == claim_digest {
                 assumption = Some(cached_assumption.clone());
                 break;
             }
@@ -262,7 +262,7 @@ impl SysVerify {
         // post state digest and system exit code.
         let mut assumption: Option<Assumption> = None;
         for cached_assumption in self.assumptions.borrow().cached.iter() {
-            let assumption_claim = cached_assumption.get_claim()?;
+            let assumption_claim = cached_assumption.claim()?;
             let cmp_result = Self::sys_verify_cmp(&assumption_claim, &image_id, &journal_digest);
             let (post_state_digest, sys_exit_code) = match cmp_result {
                 Ok(None) => continue,

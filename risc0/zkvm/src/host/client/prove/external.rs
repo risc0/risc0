@@ -107,10 +107,10 @@ impl Prover for ExternalProver {
         if opts.prove_guest_errors {
             prove_info.receipt.verify_integrity_with_context(ctx)?;
             ensure!(
-                prove_info.receipt.get_claim()?.pre.digest() == image_id,
+                prove_info.receipt.claim()?.pre.digest() == image_id,
                 "received unexpected image ID: expected {}, found {}",
                 hex::encode(image_id),
-                hex::encode(prove_info.receipt.get_claim()?.pre.digest())
+                hex::encode(prove_info.receipt.claim()?.pre.digest())
             );
         } else {
             prove_info.receipt.verify_with_context(ctx, image_id)?;

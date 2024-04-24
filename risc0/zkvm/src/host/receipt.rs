@@ -157,7 +157,7 @@ impl Receipt {
         self.inner.verify_integrity_with_context(ctx)?;
 
         // NOTE: Post-state digest and input digest are unconstrained by this method.
-        let claim = self.inner.get_claim()?;
+        let claim = self.inner.claim()?;
         if claim.pre.digest() != image_id.into() {
             return Err(VerificationError::ImageVerificationError);
         }
@@ -212,7 +212,7 @@ impl Receipt {
         self.inner.verify_integrity_with_context(ctx)?;
 
         // Check that self.journal is attested to by the inner receipt.
-        let claim = self.inner.get_claim()?;
+        let claim = self.inner.claim()?;
 
         let expected_output = claim.exit_code.expects_output().then(|| Output {
             journal: MaybePruned::Pruned(self.journal.digest()),
@@ -241,8 +241,8 @@ impl Receipt {
     }
 
     /// Extract the [ReceiptClaim] from this receipt.
-    pub fn get_claim(&self) -> Result<ReceiptClaim, VerificationError> {
-        self.inner.get_claim()
+    pub fn claim(&self) -> Result<ReceiptClaim, VerificationError> {
+        self.inner.claim()
     }
 }
 
@@ -357,9 +357,9 @@ impl InnerReceipt {
     }
 
     /// Extract the [ReceiptClaim] from this receipt.
-    pub fn get_claim(&self) -> Result<ReceiptClaim, VerificationError> {
+    pub fn claim(&self) -> Result<ReceiptClaim, VerificationError> {
         match self {
-            InnerReceipt::Composite(ref receipt) => receipt.get_claim(),
+            InnerReceipt::Composite(ref receipt) => receipt.claim(),
             InnerReceipt::Compact(ref compact_receipt) => Ok(compact_receipt.claim.clone()),
             InnerReceipt::Succinct(ref succinct_receipt) => Ok(succinct_receipt.claim.clone()),
             InnerReceipt::Fake { claim } => Ok(claim.clone()),
@@ -427,9 +427,9 @@ pub struct CompositeReceipt {
     /// be `None` if the continuation has no output (e.g. it ended in `Fault`).
     // NOTE: This field is needed in order to open the assumptions digest from
     // the output digest.
-    // TODO(1.0): This field can potentially be removed since
+    // TODO: This field can potentially be removed since
     // it can be included in the claim on the last segment receipt instead.
-    pub journal_digest: Option<Digest>,
+    pub(crate) journal_digest: Option<Digest>,
 }
 
 impl CompositeReceipt {
@@ -484,7 +484,7 @@ impl CompositeReceipt {
 
         // Verify all assumption receipts attached to this composite receipt.
         for receipt in self.assumptions.iter() {
-            tracing::debug!("verifying assumption: {:?}", receipt.get_claim()?.digest());
+            tracing::debug!("verifying assumption: {:?}", receipt.claim()?.digest());
             receipt.verify_integrity_with_context(ctx)?;
         }
 
@@ -496,7 +496,7 @@ impl CompositeReceipt {
     }
 
     /// Returns the [ReceiptClaim] for this [CompositeReceipt].
-    pub fn get_claim(&self) -> Result<ReceiptClaim, VerificationError> {
+    pub fn claim(&self) -> Result<ReceiptClaim, VerificationError> {
         let first_claim = &self
             .segments
             .first()
@@ -600,7 +600,7 @@ impl CompositeReceipt {
         Ok(Assumptions(
             self.assumptions
                 .iter()
-                .map(|a| Ok(a.get_claim()?.into()))
+                .map(|a| Ok(a.claim()?.into()))
                 .collect::<Result<Vec<_>, _>>()?,
         ))
     }
@@ -701,9 +701,9 @@ pub enum Assumption {
 
 impl Assumption {
     /// Returns the [ReceiptClaim] for this [Assumption].
-    pub fn get_claim(&self) -> Result<MaybePruned<ReceiptClaim>, VerificationError> {
+    pub fn claim(&self) -> Result<MaybePruned<ReceiptClaim>, VerificationError> {
         match self {
-            Self::Proven(receipt) => Ok(receipt.get_claim()?.into()),
+            Self::Proven(receipt) => Ok(receipt.claim()?.into()),
             Self::Unresolved(claim) => Ok(claim.clone()),
         }
     }

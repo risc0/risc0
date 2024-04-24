@@ -57,7 +57,7 @@ impl ProverServer for DevModeProver {
             )
         }
 
-        let claim = session.get_claim()?;
+        let claim = session.claim()?;
         let receipt = Receipt::new(
             InnerReceipt::Fake { claim },
             session.journal.clone().unwrap_or_default().bytes,

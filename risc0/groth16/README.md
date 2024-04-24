@@ -61,7 +61,7 @@ fn stark2snark() {
     let ctx = VerifierContext::default();
     let prover = get_prover_server(&opts).unwrap();
     let receipt = prover.prove_session(&ctx, &session).unwrap().receipt;
-    let claim = receipt.get_claim().unwrap();
+    let claim = receipt.claim().unwrap();
     let composite_receipt = receipt.inner.composite().unwrap();
     let succinct_receipt = prover.compress(composite_receipt).unwrap();
     let journal = session.journal.unwrap().bytes;

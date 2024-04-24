@@ -551,7 +551,7 @@ mod sys_verify {
         let env = ExecutorEnv::builder()
             .write(&spec)
             .unwrap()
-            .add_assumption(hello_commit_session.get_claim().unwrap())
+            .add_assumption(hello_commit_session.claim().unwrap())
             .build()
             .unwrap();
         let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
@@ -583,7 +583,7 @@ mod sys_verify {
             let env = ExecutorEnv::builder()
                 .write(&spec)
                 .unwrap()
-                .add_assumption(halt_session.get_claim().unwrap())
+                .add_assumption(halt_session.claim().unwrap())
                 .build()
                 .unwrap();
             let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap().run();
@@ -607,7 +607,7 @@ mod sys_verify {
             let env = ExecutorEnv::builder()
                 .write(&spec)
                 .unwrap()
-                .add_assumption(pause_session.get_claim().unwrap())
+                .add_assumption(pause_session.claim().unwrap())
                 .build()
                 .unwrap();
             let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap().run();
@@ -625,14 +625,14 @@ mod sys_verify {
         let hello_commit_session = exec_hello_commit();
 
         let spec = &MultiTestSpec::SysVerifyIntegrity {
-            claim_words: to_vec(&hello_commit_session.get_claim().unwrap()).unwrap(),
+            claim_words: to_vec(&hello_commit_session.claim().unwrap()).unwrap(),
         };
 
         // Test that it works when the assumption is added.
         let env = ExecutorEnv::builder()
             .write(&spec)
             .unwrap()
-            .add_assumption(hello_commit_session.get_claim().unwrap())
+            .add_assumption(hello_commit_session.claim().unwrap())
             .build()
             .unwrap();
         let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
@@ -660,13 +660,13 @@ mod sys_verify {
             let halt_session = exec_halt(code);
 
             let spec = &MultiTestSpec::SysVerifyIntegrity {
-                claim_words: to_vec(&halt_session.get_claim().unwrap()).unwrap(),
+                claim_words: to_vec(&halt_session.claim().unwrap()).unwrap(),
             };
 
             let env = ExecutorEnv::builder()
                 .write(&spec)
                 .unwrap()
-                .add_assumption(halt_session.get_claim().unwrap())
+                .add_assumption(halt_session.claim().unwrap())
                 .build()
                 .unwrap();
             let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
@@ -684,13 +684,13 @@ mod sys_verify {
             let pause_session = exec_pause(code);
 
             let spec = &MultiTestSpec::SysVerifyIntegrity {
-                claim_words: to_vec(&pause_session.get_claim().unwrap()).unwrap(),
+                claim_words: to_vec(&pause_session.claim().unwrap()).unwrap(),
             };
 
             let env = ExecutorEnv::builder()
                 .write(&spec)
                 .unwrap()
-                .add_assumption(pause_session.get_claim().unwrap())
+                .add_assumption(pause_session.claim().unwrap())
                 .build()
                 .unwrap();
             let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
@@ -708,7 +708,7 @@ mod sys_verify {
         // Prune the claim before providing it as input so that it cannot be checked to have no
         // assumptions.
         let pruned_claim =
-            MaybePruned::<ReceiptClaim>::Pruned(hello_commit_session.get_claim().unwrap().digest());
+            MaybePruned::<ReceiptClaim>::Pruned(hello_commit_session.claim().unwrap().digest());
         let spec = &MultiTestSpec::SysVerifyIntegrity {
             claim_words: to_vec(&pruned_claim).unwrap(),
         };
@@ -717,7 +717,7 @@ mod sys_verify {
         let env = ExecutorEnv::builder()
             .write(&spec)
             .unwrap()
-            .add_assumption(hello_commit_session.get_claim().unwrap())
+            .add_assumption(hello_commit_session.claim().unwrap())
             .build()
             .unwrap();
 
