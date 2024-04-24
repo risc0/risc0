@@ -164,10 +164,6 @@ impl KernelBuild {
             flags.push(format!("--ptxas-options=-O{ptx_opt_level}"));
         }
 
-        if let Some(append_flags) = env::var("NVCC_APPEND_FLAGS").ok() {
-            flags.push(append_flags);
-        }
-
         self.cached_compile(
             output,
             "fatbin",

@@ -83,24 +83,6 @@ fn prove_nothing_succinct() {
 }
 
 #[test]
-fn prove_nothing_succinct() {
-    let env = ExecutorEnv::builder()
-        .write(&MultiTestSpec::DoNothing)
-        .unwrap()
-        .build()
-        .unwrap();
-    let opts = ProverOpts::succinct();
-    get_prover_server(&opts)
-        .unwrap()
-        .prove(env, MULTI_TEST_ELF)
-        .unwrap()
-        .receipt
-        .inner
-        .succinct()
-        .unwrap(); // ensure that we got a succinct receipt.
-}
-
-#[test]
 fn hashfn_poseidon2() {
     prove_nothing("poseidon2").unwrap();
 }
