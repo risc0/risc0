@@ -71,6 +71,7 @@
 
 extern crate alloc;
 
+#[cfg(target_os = "zkvm")]
 pub mod guest;
 #[cfg(not(target_os = "zkvm"))]
 mod host;
