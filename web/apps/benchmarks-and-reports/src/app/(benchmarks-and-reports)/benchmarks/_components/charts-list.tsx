@@ -13,7 +13,7 @@ export function ChartsList({ charts, selectedPlatform }) {
             ? [
                 <CommandGroup key={chart.name} heading={chart.name}>
                   {[...chart.dataSet.keys()].map((benchmark) => (
-                    <Link key={`${chart.name}-${benchmark}`} scroll href={`#${chart.name}-${benchmark}`}>
+                    <Link tabIndex={-1} key={`${chart.name}-${benchmark}`} scroll href={`#${chart.name}-${benchmark}`}>
                       <CommandItem className="cursor-pointer">{benchmark}</CommandItem>
                     </Link>
                   ))}
