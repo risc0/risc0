@@ -79,7 +79,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout gh-pages repository
+      - name: Checkout gh-pages repository branch ${{ github.ref_name }}
         uses: actions/checkout@v4
         with:
           repository: risc0/ghpages
