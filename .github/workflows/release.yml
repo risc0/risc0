@@ -14,7 +14,7 @@ permissions:
   contents: write
 
 env:
-  RISC0_TOOLCHAIN_VERSION: v2024-02-08.1
+  RISC0_TOOLCHAIN_VERSION: v2024-04-22.0
   TAG: v0.22.0-alpha.1
   VERSION: "0.22.0-alpha.1"
 

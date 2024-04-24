@@ -113,9 +113,21 @@ export const cratesIoValidationTableColumns = [
                 {({ className, tokens, getLineProps, getTokenProps }) => (
                   <pre className={cn(className, "text-xs")}>
                     {tokens.map((line, index) => (
-                      <div key={`row-${index}`} {...getLineProps({ line })}>
+                      <div
+                        key={`row-${
+                          // biome-ignore lint/suspicious/noArrayIndexKey: ignore
+                          index
+                        }`}
+                        {...getLineProps({ line })}
+                      >
                         {line.map((token, index) => (
-                          <span key={`token-${index}`} {...getTokenProps({ token })} />
+                          <span
+                            key={`token-${
+                              // biome-ignore lint/suspicious/noArrayIndexKey: ignore
+                              index
+                            }`}
+                            {...getTokenProps({ token })}
+                          />
                         ))}
                       </div>
                     ))}
