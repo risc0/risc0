@@ -17,7 +17,6 @@ permissions:
   contents: read
 
 env:
-  BRANCH: ${{ github.base_ref || github.ref_name }}
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   RISC0_BUILD_LOCKED: 1
   RISC0_TOOLCHAIN_VERSION: v2024-04-22.0
@@ -44,7 +43,7 @@ jobs:
     env:
       FEATURE: ${{ matrix.feature }}
       DISABLE_S3: ${{ matrix.device == 'nvidia_rtx_3090_ti' }}
-      S3_BENCH_PATH: s3://risc0-ci-cache/public/bench/${{ env.BRANCH }}/fib/${{ matrix.os }}-${{ matrix.device }}
+      S3_BENCH_PATH: s3://risc0-ci-cache/public/bench/${{ github.base_ref || github.ref_name }}/fib/${{ matrix.os }}-${{ matrix.device }}
 
     steps:
       - uses: actions/checkout@v4
