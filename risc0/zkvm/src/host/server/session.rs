@@ -15,11 +15,7 @@
 //! This module defines [Session] and [Segment] which provides a way to share
 //! execution traces between the execution phase and the proving phase.
 
-use std::{
-    collections::BTreeSet,
-    fs,
-    path::{Path, PathBuf},
-};
+use std::{collections::BTreeSet, fs, path::PathBuf};
 
 use anyhow::{ensure, Result};
 use risc0_binfmt::{MemoryImage, SystemState};
@@ -293,15 +289,6 @@ impl SegmentRef for FileSegmentRef {
         let contents = fs::read(&self.path)?;
         let segment = bincode::deserialize(&contents)?;
         Ok(segment)
-    }
-}
-
-impl SegmentPath {
-    pub(crate) fn path(&self) -> &Path {
-        match self {
-            Self::TempDir(dir) => dir.path(),
-            Self::Path(path) => path.as_path(),
-        }
     }
 }
 
