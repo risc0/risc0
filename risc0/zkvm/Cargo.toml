@@ -41,15 +41,18 @@ hex = { version = "0.4.3", default-features = false, features = ["alloc"] }
 risc0-binfmt = { workspace = true }
 risc0-core = { workspace = true }
 risc0-zkp = { workspace = true }
-risc0-zkvm-platform = { workspace = true, features = [
-  "rust-runtime",
-  "export-getrandom",
-] }
 rrs-lib = "0.1"
 semver = { version = "1.0", default-features = false }
 serde = { version = "1.0", default-features = false, features = [
   "alloc",
   "derive",
+] }
+
+# Guest dependencies
+[target.'cfg(target_os = "zkvm")'.dependencies]
+risc0-zkvm-platform = { workspace = true, features = [
+  "rust-runtime",
+  "export-getrandom",
 ] }
 
 # Host dependencies
@@ -66,6 +69,7 @@ rayon = { version = "1.5", optional = true }
 risc0-circuit-recursion = { workspace = true }
 risc0-circuit-rv32im = { workspace = true }
 risc0-groth16 = { workspace = true }
+risc0-zkvm-platform = { workspace = true }
 rustc-demangle = { version = "0.1", optional = true }
 sha2 = { version = "0.10", default-features = false }
 tempfile = { version = "3", optional = true }
