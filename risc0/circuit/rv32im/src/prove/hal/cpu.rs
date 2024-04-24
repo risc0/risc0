@@ -35,6 +35,7 @@ use crate::{
     REGISTER_GROUP_DATA,
 };
 
+#[derive(Default)]
 pub struct CpuCircuitHal;
 
 impl CpuCircuitHal {

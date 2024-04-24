@@ -17,6 +17,7 @@ permissions:
   contents: read
 
 env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   RISC0_BUILD_LOCKED: 1
   RISC0_TOOLCHAIN_VERSION: v2024-04-22.0
 
@@ -60,7 +61,7 @@ jobs:
         run: cargo bench --bench fib -F $FEATURE
 
       - name: Download previous benchmark data
-        uses: actions/cache@v4
+        uses: actions/cache/restore@v4
         with:
           path: ./cache
           key: fib-${{ runner.os }}-${{ matrix.device }}
@@ -77,3 +78,10 @@ jobs:
           comment-on-alert: true
           fail-on-alert: true
           summary-always: true
+
+      - name: Save results
+        if: github.event_name == 'push'
+        uses: actions/cache/save@v4
+        with:
+          path: ./cache
+          key: fib-${{ runner.os }}-${{ matrix.device }}

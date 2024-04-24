@@ -28,6 +28,25 @@ pub enum TopMux {
     BytesFini,
 }
 
+impl TopMux {
+    pub fn is_safe(&self) -> bool {
+        match self {
+            TopMux::BytesInit => false,
+            TopMux::BytesSetup => false,
+            TopMux::RamInit => false,
+            TopMux::RamLoad => false,
+            TopMux::Reset => false,
+            TopMux::Body(Major::VerifyAnd, _) => false,
+            TopMux::Body(Major::VerifyDivide, _) => false,
+            TopMux::Body(Major::PageFault, _) => false,
+            TopMux::Body(Major::Halt, _) => false,
+            TopMux::Body(_, _) => true,
+            TopMux::RamFini => false,
+            TopMux::BytesFini => false,
+        }
+    }
+}
+
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub enum Major {
     Compute0,
