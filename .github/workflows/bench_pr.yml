@@ -89,7 +89,7 @@ jobs:
           summary-always: true
 
       - name: Save current benchmark data
-        # if: github.event_name == 'push'
+        # poke, if: github.event_name == 'push'
         uses: prewk/s3-cp-action@v2
         with:
           aws_access_key_id: ${{ steps.aws-creds.outputs.aws-access-key-id }}
