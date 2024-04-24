@@ -16,7 +16,6 @@ use anyhow::{bail, Result};
 
 use crate::{
     host::{
-        client::prove::ReceiptKind,
         prove_info::ProveInfo,
         receipt::{InnerReceipt, SegmentReceipt, SuccinctReceipt},
         server::session::null_callback,
@@ -83,10 +82,6 @@ impl ProverServer for DevModeProver {
     }
 
     fn prove_segment(&self, _ctx: &VerifierContext, _segment: &Segment) -> Result<SegmentReceipt> {
-        unimplemented!("This is unsupported for dev mode.")
-    }
-
-    fn get_receipt_kind(&self) -> ReceiptKind {
         unimplemented!("This is unsupported for dev mode.")
     }
 

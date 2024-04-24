@@ -106,7 +106,7 @@ where
             );
         }
 
-        let receipt = match self.get_receipt_kind() {
+        let receipt = match self.receipt_kind {
             ReceiptKind::Composite => Receipt::new(
                 InnerReceipt::Composite(composite_receipt),
                 session.journal.clone().unwrap_or_default().bytes,
@@ -165,10 +165,6 @@ where
         receipt.verify_integrity_with_context(ctx)?;
 
         Ok(receipt)
-    }
-
-    fn get_receipt_kind(&self) -> ReceiptKind {
-        self.receipt_kind.clone()
     }
 
     fn get_peak_memory_usage(&self) -> usize {
