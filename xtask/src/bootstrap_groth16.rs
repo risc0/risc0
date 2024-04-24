@@ -12,16 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{
-    fs::{self, read_to_string},
-    path::Path,
-    process::Command,
-};
+use std::{fs, path::Path, process::Command};
 
 use clap::Parser;
 use hex::FromHex;
 use regex::Regex;
-use risc0_circuit_recursion::control_id::BN254_CONTROL_ID;
 use risc0_zkvm::{
     get_prover_server,
     recursion::identity_p254,
@@ -31,11 +26,14 @@ use risc0_zkvm::{
 };
 use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID};
 
+use crate::bootstrap::Bootstrap;
+
 #[derive(Debug, Parser)]
 pub struct BootstrapGroth16 {
     /// ris0-ethereum repository path
     #[arg(long, env)]
     risc0_ethereum_path: String,
+
     /// bootstrap test receipt only (exclude rust verifier and control id)
     #[arg(long, action = clap::ArgAction::SetTrue, default_value_t = false)]
     test_receipt_only: bool,
@@ -62,10 +60,11 @@ const SOL_HEADER: &str = r#"// Copyright 2024 RISC Zero, Inc.
 
 "#;
 
-const SOLIDITY_GROTH16_VERIFIER_PATH: &str = "contracts/src/groth16/Groth16Verifier.sol";
+const SOLIDITY_VERIFIER_SOURCE: &str = "compact_proof/groth16/verifier.sol";
+const SOLIDITY_VERIFIER_TARGET: &str = "contracts/src/groth16/Groth16Verifier.sol";
 const SOLIDITY_CONTROL_ID_PATH: &str = "contracts/src/groth16/ControlID.sol";
 const SOLIDITY_TEST_RECEIPT_PATH: &str = "contracts/test/TestReceipt.sol";
-const RUST_GROTH16_VERIFIER_PATH: &str = "risc0/groth16/src/verifier.rs";
+const RUST_VERIFIER_PATH: &str = "risc0/groth16/src/verifier.rs";
 
 impl BootstrapGroth16 {
     pub fn run(&self) {
@@ -80,19 +79,10 @@ impl BootstrapGroth16 {
 }
 
 fn bootstrap_verifying_key(risc0_ethereum_path: &Path) {
-    let solidity_groth16_verifier_path = risc0_ethereum_path.join(SOLIDITY_GROTH16_VERIFIER_PATH);
-    let solidity_code = read_to_string(&solidity_groth16_verifier_path).unwrap_or_else(|_| {
-        panic!(
-            "failed to read the Solidity verifier from {}",
-            solidity_groth16_verifier_path.to_string_lossy()
-        )
-    });
-    let mut rust_code = read_to_string(RUST_GROTH16_VERIFIER_PATH).unwrap_or_else(|_| {
-        panic!(
-            "failed to read groth16.rs from {}",
-            RUST_GROTH16_VERIFIER_PATH
-        )
-    });
+    let solidity_verifier_target = risc0_ethereum_path.join(SOLIDITY_VERIFIER_TARGET);
+    std::fs::copy(SOLIDITY_VERIFIER_SOURCE, solidity_verifier_target).unwrap();
+    let solidity_code = fs::read_to_string(SOLIDITY_VERIFIER_SOURCE).unwrap();
+    let mut rust_code = fs::read_to_string(RUST_VERIFIER_PATH).unwrap();
 
     let solidity_constants = [
         "alphax", "alphay", "betax1", "betax2", "betay1", "betay2", "gammax1", "gammax2",
@@ -125,12 +115,11 @@ fn bootstrap_verifying_key(risc0_ethereum_path: &Path) {
         }
     }
 
-    fs::write(RUST_GROTH16_VERIFIER_PATH, rust_code)
-        .unwrap_or_else(|_| panic!("failed to save changes to {}", RUST_GROTH16_VERIFIER_PATH));
+    fs::write(RUST_VERIFIER_PATH, rust_code).unwrap();
 
     // Use rustfmt to format the file.
     Command::new("rustfmt")
-        .arg(RUST_GROTH16_VERIFIER_PATH)
+        .arg(RUST_VERIFIER_PATH)
         .status()
         .expect("failed to format {RUST_GROTH16_VERIFIER_PATH}");
 }
@@ -141,7 +130,7 @@ fn bootstrap_control_id(risc0_ethereum_path: &Path) {
  library ControlID {
 "#;
     let (control_id_0, control_id_1) = split_digest(Digest::from_hex(ALLOWED_IDS_ROOT).unwrap());
-    let bn254_control_id = format!("0x{}", BN254_CONTROL_ID);
+    let bn254_control_id = format!("0x{}", Bootstrap::generate_identity_bn254_control_id());
     let control_id_0 = format!("uint256 public constant CONTROL_ID_0 = {control_id_0};");
     let control_id_1 = format!("uint256 public constant CONTROL_ID_1 = {control_id_1};");
     let bn254_control_id =
@@ -187,19 +176,14 @@ fn bootstrap_test_receipt(risc0_ethereum_path: &Path) {
     let solidity_test_receipt_path = risc0_ethereum_path.join(SOLIDITY_TEST_RECEIPT_PATH);
     let content =
         &format!("{SOL_HEADER}{LIB_HEADER}\n{seal}\n{post_digest}\n{journal}\n{image_id}\n}}");
-    fs::write(&solidity_test_receipt_path, content).unwrap_or_else(|_| {
-        panic!(
-            "failed to save changes to {}",
-            solidity_test_receipt_path.display()
-        )
-    });
+    fs::write(&solidity_test_receipt_path, content).unwrap();
 
     // Use forge fmt to format the file.
     Command::new("forge")
         .arg("fmt")
         .arg(solidity_test_receipt_path.as_os_str())
         .status()
-        .unwrap_or_else(|_| panic!("failed to format {}", solidity_test_receipt_path.display()));
+        .unwrap();
 }
 
 // Splits the digest in half returning the two halves as big endian
@@ -231,7 +215,7 @@ fn generate_receipt() -> (Receipt, Digest) {
     let opts = ProverOpts::default();
     let ctx = VerifierContext::default();
     let prover = get_prover_server(&opts).unwrap();
-    let receipt = prover.prove_session(&ctx, &session).unwrap();
+    let receipt = prover.prove_session(&ctx, &session).unwrap().receipt;
     let claim = receipt.get_claim().unwrap();
     let composite_receipt = receipt.inner.composite().unwrap();
     let succinct_receipt = prover.compress(composite_receipt).unwrap();

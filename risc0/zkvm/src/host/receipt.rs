@@ -39,7 +39,6 @@ use risc0_zkp::{
     layout::Buffer,
     verify::VerificationError,
 };
-use risc0_zkvm_platform::WORD_SIZE;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 
 // Make succinct receipt available through this `receipt` module.
@@ -99,7 +98,7 @@ use crate::{
 /// # #[cfg(feature = "prove")]
 /// # {
 /// # let env = ExecutorEnv::builder().write_slice(&[20]).build().unwrap();
-/// # let receipt = default_prover().prove(env, FIB_ELF).unwrap();
+/// # let receipt = default_prover().prove(env, FIB_ELF).unwrap().receipt;
 /// receipt.verify(FIB_ID).unwrap();
 /// # }
 /// ```
@@ -386,19 +385,20 @@ impl CompactReceipt {
     pub fn verify_integrity(&self) -> Result<(), VerificationError> {
         use hex::FromHex;
         let (a0, a1) = split_digest(
-            Digest::from_hex(ALLOWED_IDS_ROOT).map_err(|_| VerificationError::InvalidProof)?,
+            Digest::from_hex(ALLOWED_IDS_ROOT)
+                .map_err(|_| VerificationError::ReceiptFormatError)?,
         )
-        .map_err(|_| VerificationError::InvalidProof)?;
+        .map_err(|_| VerificationError::ReceiptFormatError)?;
         let (c0, c1) =
-            split_digest(self.claim.digest()).map_err(|_| VerificationError::InvalidProof)?;
-        let id_p254_hash =
-            fr_from_hex_string(BN254_CONTROL_ID).map_err(|_| VerificationError::InvalidProof)?;
+            split_digest(self.claim.digest()).map_err(|_| VerificationError::ReceiptFormatError)?;
+        let id_p254_hash = fr_from_hex_string(BN254_CONTROL_ID)
+            .map_err(|_| VerificationError::ReceiptFormatError)?;
         Verifier::new(
-            &Seal::from_vec(&self.seal).map_err(|_| VerificationError::InvalidProof)?,
+            &Seal::from_vec(&self.seal).map_err(|_| VerificationError::ReceiptFormatError)?,
             vec![a0, a1, c0, c1, id_p254_hash],
-            prepared_verifying_key().map_err(|_| VerificationError::InvalidProof)?,
+            prepared_verifying_key().map_err(|_| VerificationError::ReceiptFormatError)?,
         )
-        .map_err(|_| VerificationError::InvalidProof)?
+        .map_err(|_| VerificationError::ReceiptFormatError)?
         .verify()
         .map_err(|_| VerificationError::InvalidProof)?;
 
@@ -463,22 +463,14 @@ impl CompositeReceipt {
             if !receipt.claim.output.is_none() {
                 return Err(VerificationError::ReceiptFormatError);
             }
-            expected_pre_state_digest = Some({
-                // Post state PC is stored as the "actual" value plus 4. This
-                // matches the join predicate implementation. See [ReceiptClaim]
-                // for more detail.
-                let mut post = receipt
+            expected_pre_state_digest = Some(
+                receipt
                     .claim
                     .post
                     .as_value()
                     .map_err(|_| VerificationError::ReceiptFormatError)?
-                    .clone();
-                post.pc = post
-                    .pc
-                    .checked_sub(WORD_SIZE as u32)
-                    .ok_or(VerificationError::ReceiptFormatError)?;
-                post.digest()
-            });
+                    .digest(),
+            );
         }
 
         // Verify the last receipt in the continuation.

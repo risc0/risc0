@@ -27,8 +27,9 @@ use risc0_circuit_rv32im::prove::segment::Segment as CircuitSegment;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    host::client::env::SegmentPath, sha::Digest, Assumption, Assumptions, ExitCode, Journal,
-    Output, ReceiptClaim,
+    host::{client::env::SegmentPath, prove_info::SessionStats},
+    sha::Digest,
+    Assumption, Assumptions, ExitCode, Journal, Output, ReceiptClaim,
 };
 
 #[derive(Clone, Default, Serialize, Deserialize, Debug)]
@@ -49,6 +50,9 @@ pub struct Session {
     /// or [SessionLimit](ExitCode::SessionLimit), and all other [Segment]s (if
     /// any) will have [ExitCode::SystemSplit].
     pub segments: Vec<Box<dyn SegmentRef>>,
+
+    /// The input digest.
+    pub input: Digest,
 
     /// The data publicly committed by the guest program.
     pub journal: Option<Journal>,
@@ -97,11 +101,20 @@ pub struct Segment {
     pub(crate) output: Option<Output>,
 }
 
+impl Segment {
+    /// Give the power of two length of this [Segment]
+    ///
+    /// If the [Segment]'s execution trace had 2^20 rows, this would return 20.
+    pub fn po2(&self) -> usize {
+        self.inner.po2
+    }
+}
+
 /// A reference to a [Segment].
 ///
 /// This allows implementors to determine the best way to represent this in an
 /// pluggable manner. See the [SimpleSegmentRef] for a very basic
-/// implmentation.
+/// implementation.
 pub trait SegmentRef: Send {
     /// Resolve this reference into an actual [Segment].
     fn resolve(&self) -> Result<Segment>;
@@ -122,6 +135,7 @@ impl Session {
     /// Construct a new [Session] from its constituent components.
     pub fn new(
         segments: Vec<Box<dyn SegmentRef>>,
+        input: Digest,
         journal: Option<Vec<u8>>,
         exit_code: ExitCode,
         post_image: MemoryImage,
@@ -133,6 +147,7 @@ impl Session {
     ) -> Self {
         Self {
             segments,
+            input,
             journal: journal.map(|x| Journal::new(x)),
             exit_code,
             post_image,
@@ -194,7 +209,7 @@ impl Session {
             pre: self.pre_state.clone().into(),
             post: self.post_state.clone().into(),
             exit_code: self.exit_code,
-            input: Digest::ZERO,
+            input: self.input,
             output: output.into(),
         })
     }
@@ -209,6 +224,17 @@ impl Session {
         tracing::info!("total cycles: {}", self.total_cycles);
         tracing::info!("user cycles: {}", self.user_cycles);
         tracing::info!("cycle efficiency: {}%", cycle_efficiency as u32);
+    }
+
+    /// Returns stats for the session
+    ///
+    /// This contains cycle and segment information about the session useful for debugging and measuring performance.
+    pub fn stats(&self) -> SessionStats {
+        SessionStats {
+            segments: self.segments.len(),
+            total_cycles: self.total_cycles,
+            user_cycles: self.user_cycles,
+        }
     }
 }
 

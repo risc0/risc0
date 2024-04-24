@@ -94,7 +94,7 @@ async fn main() {
     let prover = default_prover();
 
     // Produce a receipt by proving the specified ELF binary.
-    let receipt = prover.prove(exec_env, EVM_ELF).unwrap();
+    let receipt = prover.prove(exec_env, EVM_ELF).unwrap().receipt;
 
     let res: EvmResult = receipt
         .journal

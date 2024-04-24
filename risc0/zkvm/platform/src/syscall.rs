@@ -126,17 +126,17 @@ macro_rules! declare_syscall {
 }
 
 pub mod nr {
-    declare_syscall!(pub SYS_CYCLE_COUNT);
-    declare_syscall!(pub SYS_GETENV);
     declare_syscall!(pub SYS_ARGC);
     declare_syscall!(pub SYS_ARGV);
+    declare_syscall!(pub SYS_CYCLE_COUNT);
+    declare_syscall!(pub SYS_GETENV);
     declare_syscall!(pub SYS_LOG);
     declare_syscall!(pub SYS_PANIC);
     declare_syscall!(pub SYS_RANDOM);
     declare_syscall!(pub SYS_READ);
-    declare_syscall!(pub SYS_WRITE);
     declare_syscall!(pub SYS_VERIFY);
     declare_syscall!(pub SYS_VERIFY_INTEGRITY);
+    declare_syscall!(pub SYS_WRITE);
 }
 
 impl SyscallName {
@@ -304,6 +304,27 @@ pub unsafe extern "C" fn sys_pause(user_exit: u8, out_state: *const [u32; DIGEST
     );
 }
 
+#[cfg_attr(feature = "export-syscalls", no_mangle)]
+pub extern "C" fn sys_input(index: u32) -> u32 {
+    let t0 = ecall::INPUT;
+    let index = index & 0x07;
+    #[cfg(target_os = "zkvm")]
+    unsafe {
+        let a0: u32;
+        asm!(
+            "ecall",
+            in("t0") t0,
+            inout("a0") index => a0,
+        );
+        a0
+    }
+    #[cfg(not(target_os = "zkvm"))]
+    {
+        core::hint::black_box((t0, index));
+        unimplemented!()
+    }
+}
+
 /// # Safety
 ///
 /// `out_state`, `in_state`, `block1_ptr`, and `block2_ptr` must be aligned and
@@ -463,7 +484,7 @@ pub unsafe extern "C" fn sys_read(fd: u32, recv_ptr: *mut u8, nread: usize) -> u
             syscall_2(nr::SYS_READ, null_mut(), 0, fd, unaligned_at_start as u32);
         debug_assert_eq!(nread_first as usize, unaligned_at_start);
 
-        // Align up to a word boundry to do the main copy.
+        // Align up to a word boundary to do the main copy.
         let main_ptr = fill_from_word(recv_ptr, firstword, unaligned_at_start);
         if nread == unaligned_at_start {
             // We only read part of a word, and don't have to read any full words.
@@ -476,13 +497,15 @@ pub unsafe extern "C" fn sys_read(fd: u32, recv_ptr: *mut u8, nread: usize) -> u
     let main_words = main_requested / WORD_SIZE;
     let (nread_main, lastword) =
         sys_read_internal(fd, main_ptr as *mut u32, main_words, main_requested);
-    debug_assert_eq!(nread_main, main_requested);
+    debug_assert!(nread_main <= main_requested);
     let read_words = nread_main / WORD_SIZE;
 
     // Copy in individual bytes after the word-aligned section.
     let unaligned_at_end = main_requested % WORD_SIZE;
+
+    // The last 0-3 bytes are returned in lastword. Write those to complete the _requested_ read amount.
     fill_from_word(
-        main_ptr.add(read_words * WORD_SIZE),
+        main_ptr.add(main_words * WORD_SIZE),
         lastword,
         unaligned_at_end,
     );
@@ -651,11 +674,11 @@ pub extern "C" fn sys_alloc_words(nwords: usize) -> *mut u32 {
     unsafe { sys_alloc_aligned(WORD_SIZE * nwords, WORD_SIZE) as *mut u32 }
 }
 
-#[cfg(feature = "export-syscalls")]
-#[no_mangle]
 /// # Safety
 ///
 /// This function should be safe to call, but clippy complains if it is not marked as `unsafe`.
+#[cfg(feature = "export-syscalls")]
+#[no_mangle]
 pub unsafe extern "C" fn sys_alloc_aligned(bytes: usize, align: usize) -> *mut u8 {
     extern "C" {
         // This symbol is defined by the loader and marks the end
@@ -708,11 +731,12 @@ pub unsafe extern "C" fn sys_alloc_aligned(bytes: usize, align: usize) -> *mut u
 /// 0 to register a0. The caller must calculate the ReceiptClaim digest, using the provided post
 /// state digest and encode the digest into a public assumptions list for inclusion in the guest
 /// output.
-#[cfg(feature = "export-syscalls")]
-#[no_mangle]
+///
 /// # Safety
 ///
 /// `image_id`, `journal_digest`, and `from_host_buf` must be aligned and dereferenceable.
+#[cfg(feature = "export-syscalls")]
+#[no_mangle]
 pub unsafe extern "C" fn sys_verify(
     image_id: *const [u32; DIGEST_WORDS],
     journal_digest: *const [u32; DIGEST_WORDS],
@@ -737,7 +761,7 @@ pub unsafe extern "C" fn sys_verify(
 
     // Check to ensure the host indicated success by returning 0.
     // This should always be the case. This check is included for
-    // forwards-compatiblity.
+    // forwards-compatibility.
     if a0 != 0 {
         const MSG: &[u8] = "sys_verify returned error result".as_bytes();
         unsafe { sys_panic(MSG.as_ptr(), MSG.len()) };
@@ -770,7 +794,7 @@ pub unsafe extern "C" fn sys_verify_integrity(claim_digest: *const [u32; DIGEST_
 
     // Check to ensure the host indicated success by returning 0.
     // This should always be the case. This check is included for
-    // forwards-compatiblity.
+    // forwards-compatibility.
     if a0 != 0 {
         const MSG: &[u8] = "sys_verify_integrity returned error result".as_bytes();
         unsafe { sys_panic(MSG.as_ptr(), MSG.len()) };

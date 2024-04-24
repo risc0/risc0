@@ -19,7 +19,10 @@
 
 extern crate alloc;
 
-use alloc::{format, vec};
+use alloc::{
+    alloc::{alloc_zeroed, Layout},
+    format, vec,
+};
 use core::arch::asm;
 
 use getrandom::getrandom;
@@ -104,7 +107,7 @@ fn main() {
         MultiTestSpec::Halt(exit_code) => {
             env::exit(exit_code);
         }
-        MultiTestSpec::PauseContinue(exit_code) => {
+        MultiTestSpec::PauseResume(exit_code) => {
             env::log("before");
             env::pause(exit_code);
             env::log("after");
@@ -161,17 +164,21 @@ fn main() {
                 }
             }
         }
+        MultiTestSpec::SysInput(digest) => {
+            assert_eq!(env::input_digest(), digest);
+        }
         MultiTestSpec::SysRead {
             mut buf,
             fd,
             pos_and_len,
         } => {
+            let mut num_read = alloc::vec::Vec::with_capacity(pos_and_len.len());
             for (pos, len) in pos_and_len {
-                let num_read =
-                    unsafe { sys_read(fd, buf.as_mut_ptr().add(pos as usize), len as usize) };
-                assert_eq!(num_read, len as usize);
+                let n = unsafe { sys_read(fd, buf.as_mut_ptr().add(pos as usize), len as usize) };
+                num_read.push(n);
+                assert!(n <= len as usize);
             }
-            env::commit(&buf);
+            env::commit(&(buf, num_read));
         }
         MultiTestSpec::SysVerify(pairs) => {
             for (image_id, journal) in pairs.into_iter() {
@@ -310,6 +317,20 @@ fn main() {
             let a = &AlignTest1::new(54) as *const _;
             let b = &AlignTest1::new(60) as *const _;
             assert_eq!(PAGE_SIZE, b as usize - a as usize);
+        }
+        MultiTestSpec::AllocZeroed => {
+            // Bump allocator was modified to not manually zero memory in the zkVM. Simple test to
+            // ensure that zkVM memory is zeroed in initialization.
+            let array: &[u32; 512] = unsafe {
+                // Allocate some arbitrary amount of bytes
+                let layout = Layout::new::<[u32; 512]>();
+                let ptr = alloc_zeroed(layout);
+
+                &*(ptr as *const [u32; 512])
+            };
+            for value in array {
+                assert_eq!(*value, 0);
+            }
         }
     }
 }
