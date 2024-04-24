@@ -50,7 +50,7 @@ impl HashFn<BabyBear> for PoseidonHashFn {
             .chain(b.as_words())
             .map(|w| BabyBearElem::new_raw(*w))
             .collect();
-        assert!(both.len() == 16);
+        assert!(both.len() == DIGEST_WORDS * 2);
         for elem in &both {
             assert!(elem.is_reduced());
         }
