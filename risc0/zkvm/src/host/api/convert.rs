@@ -26,7 +26,7 @@ use crate::{
         recursion::SuccinctReceipt,
     },
     Assumptions, ExitCode, Journal, MaybePruned, Output, ProveInfo, ProverOpts, Receipt,
-    ReceiptClaim, SessionStats, TraceEvent,
+    ReceiptClaim, ReceiptKind, SessionStats, TraceEvent,
 };
 
 mod ver {
@@ -200,6 +200,12 @@ impl From<pb::api::ProverOpts> for ProverOpts {
         Self {
             hashfn: opts.hashfn,
             prove_guest_errors: opts.prove_guest_errors,
+            receipt_kind: match opts.receipt_kind {
+                0 => ReceiptKind::Composite,
+                1 => ReceiptKind::Succinct,
+                2 => ReceiptKind::Compact,
+                value => panic!("Unknown receipt kind number: {value}"),
+            },
         }
     }
 }
@@ -209,6 +215,7 @@ impl From<ProverOpts> for pb::api::ProverOpts {
         Self {
             hashfn: opts.hashfn,
             prove_guest_errors: opts.prove_guest_errors,
+            receipt_kind: opts.receipt_kind as i32,
         }
     }
 }

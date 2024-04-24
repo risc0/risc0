@@ -39,7 +39,6 @@ use risc0_zkp::{
     layout::Buffer,
     verify::VerificationError,
 };
-use risc0_zkvm_platform::WORD_SIZE;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 
 // Make succinct receipt available through this `receipt` module.
@@ -464,22 +463,14 @@ impl CompositeReceipt {
             if !receipt.claim.output.is_none() {
                 return Err(VerificationError::ReceiptFormatError);
             }
-            expected_pre_state_digest = Some({
-                // Post state PC is stored as the "actual" value plus 4. This
-                // matches the join predicate implementation. See [ReceiptClaim]
-                // for more detail.
-                let mut post = receipt
+            expected_pre_state_digest = Some(
+                receipt
                     .claim
                     .post
                     .as_value()
                     .map_err(|_| VerificationError::ReceiptFormatError)?
-                    .clone();
-                post.pc = post
-                    .pc
-                    .checked_sub(WORD_SIZE as u32)
-                    .ok_or(VerificationError::ReceiptFormatError)?;
-                post.digest()
-            });
+                    .digest(),
+            );
         }
 
         // Verify the last receipt in the continuation.

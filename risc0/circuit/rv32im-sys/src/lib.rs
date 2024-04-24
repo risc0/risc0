@@ -1,4 +1,4 @@
-// Copyright 2023 RISC Zero, Inc.
+// Copyright 2024 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ fn eval_check_size() {
     let generated = include_str!("../cxx/poly_fp.cpp");
     let lines = generated.lines().count();
 
-    const LINE_LIMIT: usize = 37600;
+    const LINE_LIMIT: usize = 37900;
 
     assert!(
         lines < LINE_LIMIT,
