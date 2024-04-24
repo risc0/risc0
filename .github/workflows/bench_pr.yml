@@ -43,6 +43,7 @@ jobs:
     env:
       FEATURE: ${{ matrix.feature }}
       DISABLE_S3: ${{ matrix.device == 'nvidia_rtx_3090_ti' }}
+      S3_BENCH_PATH: s3://risc0-ci-cache/public/bench/fib/${{ runner.os }}-${{ matrix.device }}/benchmark.json
 
     steps:
       - uses: actions/checkout@v4
@@ -62,15 +63,11 @@ jobs:
         with:
           aws-region: us-west-2
           role-to-assume: arn:aws:iam::083632199359:role/gha_oidc_risc0_cache_public_access
-          output-credentials: true
 
       - name: Download previous benchmark data
-        uses: prewk/s3-cp-action@v2
+        uses: ./.github/actions/aws
         with:
-          aws_access_key_id: ${{ steps.aws-creds.outputs.aws-access-key-id }}
-          aws_secret_access_key: ${{ steps.aws-creds.outputs.aws-secret-access-key }}
-          source: s3://risc0-ci-cache/public/bench/fib/${{ runner.os }}-${{ matrix.device }}/benchmark.json
-          dest: ./cache/benchmark.json
+          args: s3 cp $S3_BENCH_PATH ./cache/benchmark.json
 
       - name: Run benchmarks
         run: cargo bench --bench fib -F $FEATURE
@@ -89,10 +86,7 @@ jobs:
           summary-always: true
 
       - name: Save current benchmark data
-        # poke, if: github.event_name == 'push'
-        uses: prewk/s3-cp-action@v2
+        # if: github.event_name == 'push'
+        uses: ./.github/actions/aws
         with:
-          aws_access_key_id: ${{ steps.aws-creds.outputs.aws-access-key-id }}
-          aws_secret_access_key: ${{ steps.aws-creds.outputs.aws-secret-access-key }}
-          source: ./cache/benchmark.json
-          dest: s3://risc0-ci-cache/public/bench/fib/${{ runner.os }}-${{ matrix.device }}/benchmark.json
+          args: s3 cp ./cache/benchmark.json $S3_BENCH_PATH

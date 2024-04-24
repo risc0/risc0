@@ -1,0 +1,4 @@
+name: 'AWS CLI v2'
+runs:
+  using: docker
+  image: docker://amazon/aws-cli:2.15.2
