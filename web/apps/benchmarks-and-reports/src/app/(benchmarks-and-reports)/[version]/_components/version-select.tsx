@@ -13,7 +13,10 @@ import compact from "lodash-es/compact";
 import { useParams, usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-const VERSIONS = ["main", "0.21"];
+const VERSIONS = [
+  { label: "next", value: "main" },
+  { label: "release-0.21", value: "0.21" },
+];
 
 export function VersionSelect() {
   const { version } = useParams();
@@ -35,15 +38,15 @@ export function VersionSelect() {
       }}
       value={String(version)}
     >
-      <SelectTrigger size="sm" className="capitalize">
+      <SelectTrigger size="sm">
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
         <SelectGroup>
           <SelectLabel>Versions</SelectLabel>
-          {VERSIONS.map((version) => (
-            <SelectItem key={version} className="font-mono cursor-pointer" value={version}>
-              {version}
+          {VERSIONS.map(({ label, value }) => (
+            <SelectItem key={value} className="font-mono cursor-pointer" value={value}>
+              {label}
             </SelectItem>
           ))}
         </SelectGroup>
