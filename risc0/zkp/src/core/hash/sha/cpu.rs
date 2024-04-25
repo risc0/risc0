@@ -53,8 +53,8 @@ impl Sha256 for Impl {
     }
 
     #[inline]
-    fn hash_raw_pod_slice<T: bytemuck::Pod>(pod: &[T]) -> Self::DigestPtr {
-        let u8s: &[u8] = bytemuck::cast_slice(pod);
+    fn hash_raw_data_slice<T: bytemuck::NoUninit>(data: &[T]) -> Self::DigestPtr {
+        let u8s: &[u8] = bytemuck::cast_slice(data);
         let mut state: [u32; DIGEST_WORDS] = SHA256_INIT.into();
         for word in state.iter_mut() {
             *word = word.to_be();
