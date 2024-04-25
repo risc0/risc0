@@ -6,15 +6,12 @@ import { cratesIoValidationTableColumns } from "./crates-io-validation-table-col
 import type { CratesIoValidationTableSchema } from "./crates-io-validation-table-schema";
 
 export default async function CratesIoValidationContent({
-  version,
   mostRecentHash,
 }: {
-  version: string;
   mostRecentHash: string;
 }) {
   const cratesValidationResults: CratesIoValidationTableSchema[] = await fetchCratesValidationResults({
     hash: mostRecentHash,
-    version,
   });
 
   return (

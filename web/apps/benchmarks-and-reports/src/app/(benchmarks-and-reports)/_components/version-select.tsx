@@ -25,7 +25,7 @@ export function VersionSelect() {
     setMounted(true);
   }, []);
 
-  return mounted ? (
+  return mounted && version ? (
     <Select
       onValueChange={(value) => {
         const [_, ...pathnameWithoutVersion] = pathnameParts;

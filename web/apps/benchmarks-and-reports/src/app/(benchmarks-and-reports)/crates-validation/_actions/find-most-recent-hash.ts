@@ -2,9 +2,9 @@
 
 import env from "~/env";
 
-export async function findMostRecentHash({ version }: { version: string }) {
+export async function findMostRecentHash() {
   const response = await fetch(
-    `https://raw.githubusercontent.com/risc0/ghpages/${version}/dev/crate-validation/results/index.json`,
+    "https://raw.githubusercontent.com/risc0/ghpages/main/dev/crate-validation/results/index.json",
     {
       headers: {
         Authorization: `token ${env.GITHUB_PAT}`,

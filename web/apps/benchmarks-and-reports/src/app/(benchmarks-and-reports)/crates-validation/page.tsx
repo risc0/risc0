@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { CopyButton } from "shared/client/components/copy-button";
 import { SuspenseLoader } from "shared/client/components/suspense-loader";
-import { CRATES_VALIDATION_DESCRIPTION } from "../_utils/constants";
+import { CRATES_VALIDATION_DESCRIPTION } from "../[version]/_utils/constants";
 import { findMostRecentHash } from "./_actions/find-most-recent-hash";
 import CratesIoValidationContent from "./_components/crates-io-validation-content";
 
@@ -23,8 +23,8 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function CratesIoValidationPage({ params }) {
-  const mostRecentHash = await findMostRecentHash({ version: params.version });
+export default async function CratesIoValidationPage() {
+  const mostRecentHash = await findMostRecentHash();
 
   return (
     <div className="container max-w-screen-3xl">
@@ -50,7 +50,7 @@ export default async function CratesIoValidationPage({ params }) {
 
       <div className="mt-6">
         <Suspense fallback={<SuspenseLoader />}>
-          <CratesIoValidationContent version={params.version} mostRecentHash={mostRecentHash} />
+          <CratesIoValidationContent mostRecentHash={mostRecentHash} />
         </Suspense>
       </div>
     </div>

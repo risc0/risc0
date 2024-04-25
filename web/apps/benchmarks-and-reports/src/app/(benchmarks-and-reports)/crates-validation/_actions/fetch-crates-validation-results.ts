@@ -2,9 +2,9 @@
 
 import env from "~/env";
 
-export async function fetchCratesValidationResults({ version, hash }: { version: string; hash: string }) {
+export async function fetchCratesValidationResults({ hash }: { hash: string }) {
   const response = await fetch(
-    `https://raw.githubusercontent.com/risc0/ghpages/${version}/dev/crate-validation/results/${hash}.json`,
+    `https://raw.githubusercontent.com/risc0/ghpages/main/dev/crate-validation/results/${hash}.json`,
     {
       headers: {
         Authorization: `token ${env.GITHUB_PAT}`,
