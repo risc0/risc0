@@ -216,7 +216,7 @@ fn main() {
             env::log("Busy loop starting!");
             let mut tot_cycles = last_cycles;
 
-            while tot_cycles < cycles as usize {
+            while tot_cycles < cycles {
                 let now_cycles = env::cycle_count();
                 if now_cycles <= last_cycles {
                     // Cycle count may have reset or wrapped around.

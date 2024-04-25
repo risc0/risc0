@@ -429,9 +429,9 @@ pub unsafe extern "C" fn sys_log(msg_ptr: *const u8, len: usize) {
 }
 
 #[cfg_attr(feature = "export-syscalls", no_mangle)]
-pub extern "C" fn sys_cycle_count() -> usize {
-    let Return(a0, _) = unsafe { syscall_0(nr::SYS_CYCLE_COUNT, null_mut(), 0) };
-    a0 as usize
+pub extern "C" fn sys_cycle_count() -> u64 {
+    let Return(hi, lo) = unsafe { syscall_0(nr::SYS_CYCLE_COUNT, null_mut(), 0) };
+    ((hi as u64) << 32) + lo as u64
 }
 
 /// Reads the given number of bytes into the given buffer, posix-style.  Returns
@@ -680,6 +680,7 @@ pub extern "C" fn sys_alloc_words(nwords: usize) -> *mut u32 {
 #[cfg(feature = "export-syscalls")]
 #[no_mangle]
 pub unsafe extern "C" fn sys_alloc_aligned(bytes: usize, align: usize) -> *mut u8 {
+    #[cfg(target_os = "zkvm")]
     extern "C" {
         // This symbol is defined by the loader and marks the end
         // of all elf sections, so this is where we start our
@@ -697,6 +698,7 @@ pub unsafe extern "C" fn sys_alloc_aligned(bytes: usize, align: usize) -> *mut u
     // SAFETY: Single threaded, so nothing else can touch this while we're working.
     let mut heap_pos = unsafe { HEAP_POS };
 
+    #[cfg(target_os = "zkvm")]
     if heap_pos == 0 {
         heap_pos = unsafe { (&_end) as *const u8 as usize };
     }

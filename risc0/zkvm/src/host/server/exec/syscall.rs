@@ -55,7 +55,7 @@ pub trait Syscall {
 /// Access to memory and machine state for syscalls.
 pub trait SyscallContext {
     /// Returns the current cycle being executed.
-    fn get_cycle(&self) -> usize;
+    fn get_cycle(&self) -> u64;
 
     /// Loads the value of the given register, e.g. REG_A0.
     fn load_register(&mut self, idx: usize) -> u32;
@@ -130,7 +130,10 @@ impl Syscall for SysCycleCount {
         ctx: &mut dyn SyscallContext,
         _to_guest: &mut [u32],
     ) -> Result<(u32, u32)> {
-        Ok((ctx.get_cycle() as u32, 0))
+        let cycle = ctx.get_cycle();
+        let hi = (cycle >> 32) as u32;
+        let lo = cycle as u32;
+        Ok((hi, lo))
     }
 }
 
@@ -206,7 +209,7 @@ impl SysVerify {
             .try_into()
             .map_err(|vec| anyhow!("failed to convert to [u8; DIGEST_BYTES]: {vec:?}"))?;
 
-        tracing::debug!("SYS_VERIFY_INTEGRITY: {}", hex::encode(&claim_digest));
+        tracing::debug!("SYS_VERIFY_INTEGRITY: {}", hex::encode(claim_digest));
 
         // Iterate over the list looking for a matching assumption.
         let mut assumption: Option<Assumption> = None;
@@ -225,7 +228,7 @@ impl SysVerify {
 
         // Mark the assumption as accessed, pushing it to the head of the list, and return the success code.
         self.assumptions.borrow_mut().accessed.insert(0, assumption);
-        return Ok((0, 0));
+        Ok((0, 0))
     }
 
     fn sys_verify(&mut self, mut from_guest: Vec<u8>, to_guest: &mut [u32]) -> Result<(u32, u32)> {
@@ -254,8 +257,8 @@ impl SysVerify {
 
         tracing::debug!(
             "SYS_VERIFY: {}, {}",
-            hex::encode(&image_id),
-            hex::encode(&journal_digest)
+            hex::encode(image_id),
+            hex::encode(journal_digest)
         );
 
         // Iterate over the list looking for a matching assumption. If found, return the
@@ -291,7 +294,7 @@ impl SysVerify {
 
         // Mark the assumption as accessed, pushing it to the head of the list, and return the success code.
         self.assumptions.borrow_mut().accessed.insert(0, assumption);
-        return Ok((0, 0));
+        Ok((0, 0))
     }
 
     /// Check whether the claim satisfies the requirements to return for sys_verify.
@@ -575,7 +578,7 @@ impl<'a> PosixIo<'a> {
 
         tracing::debug!("sys_log({buf_len} bytes)");
 
-        let msg = format!("R0VM[{}] ", ctx.get_cycle().to_string());
+        let msg = format!("R0VM[{}] ", ctx.get_cycle());
         writer
             .borrow_mut()
             .write_all(&[msg.as_bytes(), &from_guest, b"\n"].concat())?;
