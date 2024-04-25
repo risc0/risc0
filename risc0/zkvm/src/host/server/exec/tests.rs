@@ -526,7 +526,7 @@ mod sys_verify {
 
     fn exec_pause(exit_code: u8) -> Session {
         let env = ExecutorEnvBuilder::default()
-            .write(&MultiTestSpec::PauseContinue(exit_code))
+            .write(&MultiTestSpec::PauseResume(exit_code))
             .unwrap()
             .build()
             .unwrap();

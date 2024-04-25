@@ -136,8 +136,7 @@ impl KernelBuild {
 
     fn compile_cuda(&mut self, output: &str) {
         println!("cargo:rerun-if-env-changed=RISC0_CUDA_OPT");
-        println!("cargo:rerun-if-env-changed=NVCC_PREPEND_FLAGS");
-        println!("cargo:rerun-if-env-changed=NVCC_APPEND_FLAGS");
+        println!("cargo:rerun-if-env-changed=RISC0_NVCC_FLAGS");
 
         // Note: we default to -O1 because O3 can upwards of 5 hours (or more)
         // to compile on the current CUDA toolchain. Using O1 only shows a ~10%
@@ -146,12 +145,11 @@ impl KernelBuild {
         let ptx_opt_level = env::var("RISC0_CUDA_OPT").unwrap_or("1".to_string());
 
         let mut flags = vec![];
-        if let Some(prepend_flags) = env::var("NVCC_PREPEND_FLAGS").ok() {
-            flags.push(prepend_flags);
-        }
         flags.push(format!("--ptxas-options=-O{ptx_opt_level}"));
-        if let Some(append_flags) = env::var("NVCC_APPEND_FLAGS").ok() {
-            flags.push(append_flags);
+        if let Ok(nvcc_flags) = env::var("RISC0_NVCC_FLAGS") {
+            flags.push(nvcc_flags);
+        } else {
+            flags.push("-arch=native".into());
         }
 
         self.cached_compile(
@@ -245,7 +243,7 @@ impl KernelBuild {
         let temp_dir = tempdir_in(&cache_dir).unwrap();
         let mut hasher = Hasher::new();
         for flag in flags {
-            hasher.add_flag(&flag);
+            hasher.add_flag(flag);
         }
         for src in self.files.iter() {
             hasher.add_file(src);

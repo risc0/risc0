@@ -27,8 +27,9 @@ use super::{
     ProverOpts as RecursionProverOpts,
 };
 use crate::{
-    default_prover, get_prover_server, ExecutorEnv, ExecutorImpl, InnerReceipt, ProverOpts,
-    Receipt, SegmentReceipt, Session, VerifierContext, ALLOWED_IDS_ROOT,
+    default_prover, get_prover_server, host::client::prove::ReceiptKind, ExecutorEnv, ExecutorImpl,
+    InnerReceipt, ProverOpts, Receipt, SegmentReceipt, Session, VerifierContext,
+    ALLOWED_CONTROL_ROOT,
 };
 
 // Failure on older mac minis in the lab with Intel UHD 630 graphics:
@@ -64,7 +65,7 @@ fn test_recursion_poseidon254() {
     const DIGEST_SHORTS: usize = DIGEST_WORDS * 2;
     assert_eq!(CircuitImpl::OUTPUT_SIZE, DIGEST_SHORTS * 2);
     let output_elems: &[BabyBearElem] =
-        bytemuck::cast_slice(&receipt.seal[..CircuitImpl::OUTPUT_SIZE]);
+        bytemuck::checked::cast_slice(&receipt.seal[..CircuitImpl::OUTPUT_SIZE]);
     let output_digest = shorts_to_digest(&output_elems[DIGEST_SHORTS..2 * DIGEST_SHORTS]);
 
     tracing::debug!("Receipt output: {:?}", output_digest);
@@ -107,11 +108,45 @@ fn test_recursion_poseidon2() {
     const DIGEST_SHORTS: usize = DIGEST_WORDS * 2;
     assert_eq!(CircuitImpl::OUTPUT_SIZE, DIGEST_SHORTS * 2);
     let output_elems: &[BabyBearElem] =
-        bytemuck::cast_slice(&receipt.seal[..CircuitImpl::OUTPUT_SIZE]);
+        bytemuck::checked::cast_slice(&receipt.seal[..CircuitImpl::OUTPUT_SIZE]);
     let output_digest = shorts_to_digest(&output_elems[DIGEST_SHORTS..2 * DIGEST_SHORTS]);
 
     tracing::debug!("Receipt output: {:?}", output_digest);
     assert_eq!(output_digest, *expected);
+}
+
+#[cfg_attr(
+    not(all(feature = "metal", target_os = "macos", target_arch = "x86_64")),
+    test
+)]
+#[should_panic(expected = "assertion failed: elem.is_reduced()")]
+fn test_poseidon_sanitized_inputs() {
+    use risc0_zkp::core::{digest::Digest, hash::poseidon::PoseidonHashSuite};
+
+    let suite = PoseidonHashSuite::new_suite();
+
+    // Add two digests, one of which has an element >= the Baby Bear prime
+    // Then `hash_pair` should fail as its inputs aren't in reduced form
+    let digest1 = Digest::from([2013265921, 1, 2, 3, 4, 5, 6, 7]);
+    let digest2 = Digest::from([8, 9, 10, 11, 12, 13, 14, 15]);
+    let _expect_assert = suite.hashfn.hash_pair(&digest1, &digest2);
+}
+
+#[cfg_attr(
+    not(all(feature = "metal", target_os = "macos", target_arch = "x86_64")),
+    test
+)]
+#[should_panic(expected = "assertion failed: elem.is_reduced()")]
+fn test_poseidon2_sanitized_inputs() {
+    use risc0_zkp::core::{digest::Digest, hash::poseidon2::Poseidon2HashSuite};
+
+    let suite = Poseidon2HashSuite::new_suite();
+
+    // Add two digests, one of which has an element >= the Baby Bear prime
+    // Then `hash_pair` should fail as its inputs aren't in reduced form
+    let digest1 = Digest::from([2013265921, 1, 2, 3, 4, 5, 6, 7]);
+    let digest2 = Digest::from([8, 9, 10, 11, 12, 13, 14, 15]);
+    let _expect_assert = suite.hashfn.hash_pair(&digest1, &digest2);
 }
 
 fn shorts_to_digest(elems: &[BabyBearElem]) -> Digest {
@@ -142,6 +177,7 @@ fn generate_busy_loop_segments(hashfn: &str) -> (Session, Vec<SegmentReceipt>) {
     let opts = ProverOpts {
         hashfn: hashfn.to_string(),
         prove_guest_errors: false,
+        receipt_kind: ReceiptKind::Composite,
     };
     let prover = get_prover_server(&opts).unwrap();
 
@@ -265,11 +301,11 @@ fn test_recursion_lift_resolve_e2e() {
 
 #[test]
 fn stable_root() {
-    // This tests that none of the control IDs have changed unexpectedly
+    // This tests that none of the control IDs have changed unexpectedly.
     // If you have _intentionally_ changed control IDs, update this hash.
 
     assert_eq!(
-        ALLOWED_IDS_ROOT,
-        "88c1f749250aba181168c33839d7a351671e7a5b7f3e746dde91ef6c6e9ef344"
+        ALLOWED_CONTROL_ROOT,
+        "75310e05f78b6d149d87c66ea5e2eb0b3d5afc45f0581017319c9f4cfd865113"
     );
 }
