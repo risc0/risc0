@@ -237,7 +237,7 @@ struct ContextAdapter<'a> {
 }
 
 impl<'a> SyscallContext for ContextAdapter<'a> {
-    fn get_cycle(&self) -> usize {
+    fn get_cycle(&self) -> u64 {
         self.ctx.get_cycle()
     }
 

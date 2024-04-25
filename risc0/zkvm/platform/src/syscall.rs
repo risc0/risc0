@@ -429,9 +429,9 @@ pub unsafe extern "C" fn sys_log(msg_ptr: *const u8, len: usize) {
 }
 
 #[cfg_attr(feature = "export-syscalls", no_mangle)]
-pub extern "C" fn sys_cycle_count() -> usize {
-    let Return(a0, _) = unsafe { syscall_0(nr::SYS_CYCLE_COUNT, null_mut(), 0) };
-    a0 as usize
+pub extern "C" fn sys_cycle_count() -> u64 {
+    let Return(hi, lo) = unsafe { syscall_0(nr::SYS_CYCLE_COUNT, null_mut(), 0) };
+    ((hi as u64) << 32) + lo as u64
 }
 
 /// Reads the given number of bytes into the given buffer, posix-style.  Returns

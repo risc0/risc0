@@ -539,7 +539,7 @@ pub fn commit_slice<T: Pod>(slice: &[T]) {
 /// began.
 ///
 /// WARNING: The cycle count is provided by the host and is not checked by the zkVM circuit.
-pub fn cycle_count() -> usize {
+pub fn cycle_count() -> u64 {
     sys_cycle_count()
 }
 
