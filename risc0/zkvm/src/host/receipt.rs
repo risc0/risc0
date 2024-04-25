@@ -22,13 +22,14 @@ use risc0_binfmt::{ExitCode, SystemState};
 use risc0_circuit_recursion::control_id::{ALLOWED_CONTROL_ROOT, BN254_CONTROL_ID};
 use risc0_circuit_rv32im::{
     control_id::{BLAKE2B_CONTROL_ID, POSEIDON2_CONTROL_ID, SHA256_CONTROL_ID},
-    layout, CIRCUIT,
+    layout, CircuitImpl, CIRCUIT,
 };
 use risc0_core::field::baby_bear::BabyBear;
 use risc0_groth16::{
     fr_from_hex_string, split_digest, verifier::prepared_verifying_key, Seal, Verifier,
 };
 use risc0_zkp::{
+    adapter::CircuitInfo as _,
     core::{
         digest::Digest,
         hash::{
@@ -765,7 +766,7 @@ fn decode_system_state_from_io(
 pub(crate) fn decode_receipt_claim_from_seal(
     seal: &[u32],
 ) -> Result<ReceiptClaim, VerificationError> {
-    let elems = bytemuck::cast_slice(seal);
+    let elems = bytemuck::checked::cast_slice(&seal[..CircuitImpl::OUTPUT_SIZE]);
     let io = layout::OutBuffer(elems);
     let body = layout::LAYOUT.mux.body;
     let pre = decode_system_state_from_io(io, body.global.pre)?;

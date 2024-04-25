@@ -208,6 +208,7 @@ impl Elem {
 
 impl ops::Add for Elem {
     type Output = Self;
+
     /// Addition for Goldilocks field [Elem]
     fn add(self, rhs: Self) -> Self {
         Elem(add(self.0, rhs.0))
@@ -223,6 +224,7 @@ impl ops::AddAssign for Elem {
 
 impl ops::Sub for Elem {
     type Output = Self;
+
     /// Subtraction for Goldilocks field [Elem]
     fn sub(self, rhs: Self) -> Self {
         Elem(sub(self.0, rhs.0))
@@ -238,6 +240,7 @@ impl ops::SubAssign for Elem {
 
 impl ops::Mul for Elem {
     type Output = Self;
+
     /// Multiplication for Goldilocks field [Elem]
     fn mul(self, rhs: Self) -> Self {
         Elem(mul(self.0, rhs.0))
@@ -253,15 +256,10 @@ impl ops::MulAssign for Elem {
 
 impl ops::Neg for Elem {
     type Output = Self;
+
     /// Negation for Goldilocks field [Elem]
     fn neg(self) -> Self {
         Elem(0) - self
-    }
-}
-
-impl From<&Elem> for u64 {
-    fn from(x: &Elem) -> Self {
-        x.0
     }
 }
 

@@ -49,7 +49,7 @@ pub fn test_recursion_circuit() -> Result<(Program, Digest)> {
 }
 
 pub fn lift(po2: usize) -> Result<(Program, Digest)> {
-    if po2 >= MIN_CYCLES_PO2 && po2 < MAX_CYCLES_PO2 {
+    if (MIN_CYCLES_PO2..MAX_CYCLES_PO2).contains(&po2) {
         get_zkr(&format!("lift_{po2}.zkr"))
     } else {
         bail!("No rv32im verifier available for po2={po2}")
