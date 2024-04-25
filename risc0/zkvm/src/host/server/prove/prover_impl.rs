@@ -64,7 +64,7 @@ where
             "prove_session: {}, exit_code = {:?}, journal = {:?}, segments: {}",
             self.name,
             session.exit_code,
-            session.journal.as_ref().map(|x| hex::encode(x)),
+            session.journal.as_ref().map(hex::encode),
             session.segments.len()
         );
         let mut segments = Vec::new();
@@ -101,8 +101,8 @@ where
             tracing::debug!("session claim: {:#?}", session.get_claim()?);
             bail!(
                 "session and composite receipt claim do not match: session {}, receipt {}",
-                hex::encode(&session.get_claim()?.digest()),
-                hex::encode(&composite_receipt.get_claim()?.digest())
+                hex::encode(session.get_claim()?.digest()),
+                hex::encode(composite_receipt.get_claim()?.digest())
             );
         }
 
@@ -136,8 +136,8 @@ where
             tracing::debug!("session claim: {:#?}", session.get_claim()?);
             bail!(
                 "session and receipt claim do not match: session {}, receipt {}",
-                hex::encode(&session.get_claim()?.digest()),
-                hex::encode(&receipt.get_claim()?.digest())
+                hex::encode(session.get_claim()?.digest()),
+                hex::encode(receipt.get_claim()?.digest())
             );
         }
 
@@ -163,7 +163,7 @@ where
 
         let receipt = SegmentReceipt {
             seal,
-            index: segment.index as u32,
+            index: segment.index,
             hashfn,
             claim,
         };
