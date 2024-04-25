@@ -1,6 +1,7 @@
 name: Benchmark Check
 
 on:
+  merge_group:
   push:
     branches: [main, "release-*"]
   pull_request:
