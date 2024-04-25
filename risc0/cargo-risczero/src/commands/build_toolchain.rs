@@ -85,7 +85,7 @@ impl BuildToolchain {
 
         if !path.join(".git").is_dir() {
             Command::new("git")
-                .args(["clone", "--branch", tag, source])
+                .args(["clone", source])
                 .arg(path)
                 .run_verbose()?;
         } else {
