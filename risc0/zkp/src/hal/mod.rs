@@ -26,7 +26,6 @@ use std::{
     sync::{Mutex, OnceLock},
 };
 
-use bytemuck::Pod;
 use risc0_core::field::{Elem, ExtElem, Field, RootsOfUnity};
 
 use crate::{
@@ -50,7 +49,7 @@ pub trait Hal {
     type Field: Field<Elem = Self::Elem, ExtElem = Self::ExtElem>;
     type Elem: Elem + RootsOfUnity;
     type ExtElem: ExtElem<SubElem = Self::Elem>;
-    type Buffer<T: Clone + Debug + PartialEq + Pod>: Buffer<T>;
+    type Buffer<T: Clone + Debug + PartialEq>: Buffer<T>;
 
     const CHECK_SIZE: usize = INV_RATE * Self::ExtElem::EXT_SIZE;
 

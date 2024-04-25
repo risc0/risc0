@@ -497,15 +497,15 @@ fn sys_input() {
 
 #[cfg(feature = "docker")]
 mod docker {
+    use crate::{
+        get_prover_server, recursion::identity_p254, CompactReceipt, ExecutorEnv, ExecutorImpl,
+        InnerReceipt, ProverOpts, Receipt, VerifierContext,
+    };
+    use risc0_groth16::docker::stark_to_snark;
+    use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID};
+
     #[test]
     fn stark2snark() {
-        use crate::{
-            get_prover_server, recursion::identity_p254, CompactReceipt, ExecutorEnv, ExecutorImpl,
-            InnerReceipt, ProverOpts, Receipt, VerifierContext,
-        };
-        use risc0_groth16::docker::stark_to_snark;
-        use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID};
-
         let env = ExecutorEnv::builder()
             .write(&MultiTestSpec::BusyLoop { cycles: 0 })
             .unwrap()
@@ -541,6 +541,24 @@ mod docker {
         );
 
         receipt.verify(MULTI_TEST_ID).unwrap();
+    }
+
+    #[test]
+    fn prover_stark2snark() {
+        let env = ExecutorEnv::builder()
+            .write(&MultiTestSpec::BusyLoop { cycles: 0 })
+            .unwrap()
+            .build()
+            .unwrap();
+        let opts = ProverOpts::compact();
+        get_prover_server(&opts)
+            .unwrap()
+            .prove(env, MULTI_TEST_ELF)
+            .unwrap()
+            .receipt
+            .inner
+            .compact()
+            .unwrap(); // ensure that we got a compact receipt.
     }
 }
 
