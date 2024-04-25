@@ -46,7 +46,8 @@ pub trait Elem:
     + core::clone::Clone
     + core::marker::Copy
     + Sized
-    + bytemuck::Pod
+    + bytemuck::NoUninit
+    + bytemuck::CheckedBitPattern
     + core::default::Default
     + Clone
     + Copy
@@ -128,6 +129,12 @@ pub trait Elem:
         self
     }
 
+    /// Returns this element, but checks to make sure it's in reduced form.
+    fn ensure_reduced(&self) -> &Self {
+        assert!(self.is_reduced());
+        self
+    }
+
     /// Interprets a slice of these elements as u32s.  These elements
     /// may not be INVALID.
     fn as_u32_slice(elems: &[Self]) -> &[u32] {
@@ -148,19 +155,7 @@ pub trait Elem:
     /// Interprets a slice of u32s as a slice of these elements.
     /// These elements may not be INVALID.
     fn from_u32_slice(u32s: &[u32]) -> &[Self] {
-        let elems = Self::from_u32_slice_unchecked(u32s);
-        if cfg!(debug_assertions) {
-            for elem in elems {
-                elem.ensure_valid();
-            }
-        }
-        elems
-    }
-
-    /// Interprets a slice of u32s as a slice of these elements.
-    /// These elements may be INVALID.
-    fn from_u32_slice_unchecked(u32s: &[u32]) -> &[Self] {
-        bytemuck::cast_slice(u32s)
+        bytemuck::checked::cast_slice(u32s)
     }
 }
 
