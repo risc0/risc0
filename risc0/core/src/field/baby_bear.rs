@@ -743,7 +743,9 @@ impl From<Elem> for ExtElem {
 
 #[cfg(test)]
 mod tests {
-    use rand::SeedableRng;
+    use alloc::{vec, vec::Vec};
+
+    use rand::{Rng, SeedableRng};
 
     use super::{field, Elem, ExtElem, P, P_U64};
     use crate::field::Elem as FieldElem;
