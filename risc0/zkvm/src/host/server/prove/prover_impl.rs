@@ -21,11 +21,13 @@ use crate::{
     host::{
         client::prove::ReceiptKind,
         prove_info::ProveInfo,
-        receipt::{CompositeReceipt, InnerReceipt, SegmentReceipt, SuccinctReceipt},
+        receipt::{
+            CompactReceipt, CompositeReceipt, InnerReceipt, SegmentReceipt, SuccinctReceipt,
+        },
         recursion::{identity_p254, join, lift, resolve},
     },
     sha::Digestible,
-    Receipt, Segment, Session, VerifierContext,
+    stark_to_snark, Receipt, Segment, Session, VerifierContext,
 };
 
 /// An implementation of a Prover that runs locally.
@@ -119,7 +121,16 @@ where
                 )
             }
             ReceiptKind::Compact => {
-                todo!("this will be implemented in the near future")
+                let succinct_receipt = self.compress(&composite_receipt)?;
+                let ident_receipt = identity_p254(&succinct_receipt).unwrap();
+                let seal_bytes = ident_receipt.get_seal_bytes();
+                let claim = session.get_claim()?;
+
+                let seal = stark_to_snark(&seal_bytes)?.to_vec();
+                Receipt::new(
+                    InnerReceipt::Compact(CompactReceipt { seal, claim }),
+                    session.journal.clone().unwrap_or_default().bytes,
+                )
             }
         };
 
