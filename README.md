@@ -128,9 +128,6 @@ structured, and other resources useful to developers new to RISC Zero, see our
 
 ## Building from source
 
-You can also build from source instead downloading the latest release.
-You might want to do this if you are making changes to this code base, or want to try out a development version.
-
 Building from source requires some additional tools and steps.
 Please refer to [CONTRIBUTING.md](./CONTRIBUTING.md) for the full instructions.
 
