@@ -40,7 +40,7 @@ RISC Zero's zkVM and the `IS_EVEN` program guarantee that it's computationally i
 
 ## Versioning
 
-The [`RiscZeroGroth16Verifier`][sepolia-verifier] contract is stateless and immutable.
+The [`RiscZeroGroth16Verifier`][RiscZeroGroth16Verifier.sol] contract is stateless and immutable.
 When new versions of the RISC Zero proof system are released, a new verifier contract will be deployed.
 
 When using this contract directly you can be sure that the verifier will never change, as it cannot be upgraded or otherwise mutated.
@@ -54,9 +54,10 @@ We are working on process to provide opt-in upgradeability for the verifier cont
 RISC Zero provides an already deployed verifier contract in the Sepolia network for your convenience.
 You can choose to use this contract or deploy your own.
 
-| Contract                      | Network   | Address                                                        |
-| ----------------------------- | --------- | -------------------------------------------------------------- |
-| [RiscZeroGroth16Verifier.sol] | [Sepolia] | [0xe57255C10291771A2E14f7eb257555AE82D78302][sepolia-verifier] |
+| Contract                      | Version                      | Network   | Address                                                                |
+| ----------------------------- | --------------------------   | --------- | ---------------------------------------------------------------------- |
+| [RiscZeroGroth16Verifier.sol] | [v0.9.0][contracts-v0.9.0]   | [Sepolia] | [0xe57255C10291771A2E14f7eb257555AE82D78302][sepolia-verifier-v0.9.0]  |
+| [RiscZeroGroth16Verifier.sol] | [v0.10.0][contracts-v0.10.0] | [Sepolia] | [0x4e9559f1fdf82dd1babdd42b4550ffdb1a1c59de][sepolia-verifier-v0.10.0] |
 
 [RiscZeroGroth16Verifier.sol]: https://github.com/risc0/risc0-ethereum/blob/release-0.8/contracts/src/groth16/RiscZeroGroth16Verifier.sol
 [IRiscZeroVerifier.sol]: https://github.com/risc0/risc0-ethereum/blob/main/contracts/src/IRiscZeroVerifier.sol
@@ -64,10 +65,13 @@ You can choose to use this contract or deploy your own.
 [article-groth16]: https://www.risczero.com/news/on-chain-verification
 [article-proof-composition]: https://www.risczero.com/news/proof-composition
 [Sepolia]: https://ethereum.org/nb/developers/docs/networks#sepolia
-[sepolia-verifier]: https://sepolia.etherscan.io/address/0xe57255C10291771A2E14f7eb257555AE82D78302#code
+[sepolia-verifier-v0.9.0]: https://sepolia.etherscan.io/address/0xe57255C10291771A2E14f7eb257555AE82D78302#code
+[sepolia-verifier-v0.10.0]: https://sepolia.etherscan.io/address/0x4e9559f1fdf82dd1babdd42b4550ffdb1a1c59de#code
 [term-journal]: /terminology#journal
 [term-receipt]: /terminology#receipt
 [term-verify]: /terminology#verify
 [term-image-id]: /terminology#image-id
 [term-zkvm-program]: /terminology#zkvm-program
 [foundry-template]: https://github.com/risc0/bonsai-foundry-template
+[contracts-v0.9.0]: https://github.com/risc0/risc0-ethereum/releases/tag/v0.9.0
+[contracts-v0.10.0]: https://github.com/risc0/risc0-ethereum/releases/tag/v0.10.0
