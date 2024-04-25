@@ -219,7 +219,7 @@ fn generate_receipt() -> (Receipt, Digest) {
     let receipt = prover.prove_session(&ctx, &session).unwrap().receipt;
     let claim = receipt.get_claim().unwrap();
     let composite_receipt = receipt.inner.composite().unwrap();
-    let succinct_receipt = prover.compress(composite_receipt).unwrap();
+    let succinct_receipt = prover.compsite_to_succinct(composite_receipt).unwrap();
     let journal = session.journal.unwrap().bytes;
 
     tracing::info!("identity_p254");

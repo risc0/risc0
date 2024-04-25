@@ -558,12 +558,11 @@ mod docker {
             .unwrap()
             .build()
             .unwrap();
-        let opts = ProverOpts::compact();
-        get_prover_server(&opts)
+        let prover = get_prover_server(&ProverOpts::succinct()).unwrap();
+        let succinct_receipt = prover.prove(env, MULTI_TEST_ELF).unwrap().receipt;
+        prover
+            .compress(ProverOpts::compact(), receipt)
             .unwrap()
-            .prove(env, MULTI_TEST_ELF)
-            .unwrap()
-            .receipt
             .inner
             .compact()
             .unwrap(); // ensure that we got a compact receipt.
