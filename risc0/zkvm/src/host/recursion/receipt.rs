@@ -105,8 +105,7 @@ impl SuccinctReceipt {
         // attempt to do anything with the hash that would make this a problem.
         let control_root =
             read_sha_halfs(&mut seal_claim).map_err(|_| VerificationError::ReceiptFormatError)?;
-        let allowed_root = Digest::from_hex(ALLOWED_IDS_ROOT)
-            .map_err(|_| VerificationError::ImplementationError)?;
+        let allowed_root = Digest::from_hex(ALLOWED_CONTROL_ROOT).unwrap();
         if control_root != allowed_root {
             tracing::debug!(
                 "succinct receipt does not match the expected control root: decoded: {:#?}, expected: {allowed_root:?}",

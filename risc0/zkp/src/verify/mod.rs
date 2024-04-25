@@ -46,7 +46,6 @@ pub enum VerificationError {
     JournalDigestMismatch,
     UnexpectedExitCode,
     InvalidHashSuite,
-    ImplementationError,
 }
 
 impl fmt::Debug for VerificationError {
@@ -73,9 +72,6 @@ impl fmt::Display for VerificationError {
             }
             VerificationError::UnexpectedExitCode => write!(f, "Unexpected exit_code"),
             VerificationError::InvalidHashSuite => write!(f, "Invalid hash suite"),
-            VerificationError::ImplementationError => {
-                write!(f, "Encountered a bug in the verifier implementation")
-            }
         }
     }
 }
