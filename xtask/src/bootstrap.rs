@@ -41,7 +41,7 @@ const CONTROL_ID_PATH_RECURSION: &str = "risc0/circuit/recursion/src/control_id.
 impl Bootstrap {
     pub fn run(&self) {
         let poseidon2_control_ids = Self::generate_rv32im_control_ids();
-        Self::generate_recursion_control_ids(&poseidon2_control_ids);
+        Self::generate_recursion_control_ids(poseidon2_control_ids);
     }
 
     fn generate_rv32im_control_ids() -> Vec<Digest> {
@@ -107,7 +107,7 @@ impl Bootstrap {
         control_id_poseidon2
     }
 
-    fn generate_recursion_control_ids(rv32im_poseidon2_control_ids: &[Digest]) {
+    fn generate_recursion_control_ids(mut allowed_control_ids: Vec<Digest>) {
         // Recursion programs (ZKRs) that are too be included in the allowed set.
         // NOTE: We use an allow list here, rather than including all ZKRs in the zip archive,
         // because there may be ZKRs included only for tests, or ones that are not part of the main
@@ -129,39 +129,39 @@ impl Bootstrap {
                 tracing::info!("computing control ID for {name} with Poseidon2");
                 let control_id = program.compute_control_id(Poseidon2HashSuite::new_suite());
 
+                if allowed_zkr_names.contains(&name) {
+                    allowed_control_ids.push(control_id);
+                }
+
                 tracing::debug!("{name} control id: {control_id:?}");
                 (name, control_id)
             })
             .collect();
 
-        let allowed_zkrs = zkr_control_ids
-            .iter()
-            .filter(|(name, _)| allowed_zkr_names.contains(name));
+        let mut allowed_control_ids_str = String::new();
+        for digest in allowed_control_ids.iter() {
+            writeln!(&mut allowed_control_ids_str, r#""{digest}","#).unwrap();
+        }
 
         // Calculuate a Merkle root for the allowed control IDs and add it to the file.
-        let merkle_group = RecursionProver::bootstrap_allowed_tree(
-            rv32im_poseidon2_control_ids
-                .iter()
-                .chain(allowed_zkrs.map(|(_, id)| id))
-                .cloned()
-                .collect(),
-        );
+        let merkle_group = RecursionProver::bootstrap_allowed_tree(allowed_control_ids);
         let hash_suite = Poseidon2HashSuite::new_suite();
         let hashfn = hash_suite.hashfn.as_ref();
-        let allowed_ids_root = merkle_group.calc_root(hashfn);
+        let allowed_control_root = merkle_group.calc_root(hashfn);
 
-        let mut inner = String::new();
+        let mut zkr_control_ids_str = String::new();
         for (name, digest) in zkr_control_ids.iter() {
-            writeln!(&mut inner, r#"("{name}", "{digest}"),"#).unwrap();
+            writeln!(&mut zkr_control_ids_str, r#"("{name}", "{digest}"),"#).unwrap();
         }
 
         let bn254_control_id = Self::generate_identity_bn254_control_id();
         let contents = format!(
             include_str!("templates/control_id_zkr.rs"),
-            allowed_ids_root,
+            allowed_control_ids_str,
+            allowed_control_root,
+            bn254_control_id,
             zkr_control_ids.len(),
-            inner,
-            bn254_control_id
+            zkr_control_ids_str,
         );
 
         tracing::info!("writing control ids to {CONTROL_ID_PATH_RECURSION}");

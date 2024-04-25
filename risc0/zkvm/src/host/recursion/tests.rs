@@ -28,7 +28,8 @@ use super::{
 };
 use crate::{
     default_prover, get_prover_server, host::client::prove::ReceiptKind, ExecutorEnv, ExecutorImpl,
-    InnerReceipt, ProverOpts, Receipt, SegmentReceipt, Session, VerifierContext, ALLOWED_IDS_ROOT,
+    InnerReceipt, ProverOpts, Receipt, SegmentReceipt, Session, VerifierContext,
+    ALLOWED_CONTROL_ROOT,
 };
 
 // Failure on older mac minis in the lab with Intel UHD 630 graphics:
@@ -304,7 +305,7 @@ fn stable_root() {
     // If you have _intentionally_ changed control IDs, update this hash.
 
     assert_eq!(
-        ALLOWED_IDS_ROOT,
+        ALLOWED_CONTROL_ROOT,
         "75310e05f78b6d149d87c66ea5e2eb0b3d5afc45f0581017319c9f4cfd865113"
     );
 }

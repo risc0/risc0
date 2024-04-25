@@ -12,9 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/// Merkle root of the RECURSION_CONTROL_IDS
-pub const ALLOWED_IDS_ROOT: &str = "{}";
+pub const ALLOWED_CONTROL_IDS: &[&str] = &[{}];
 
-pub const RECURSION_CONTROL_IDS: [(&str, &str); {}] = [{}];
+pub const ALLOWED_CONTROL_ROOT: &str = "{}";
 
 pub const BN254_CONTROL_ID: &str = "{}";
+
+pub const ZKR_CONTROL_IDS: [(&str, &str); {}] = [{}];
