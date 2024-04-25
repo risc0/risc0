@@ -47,7 +47,7 @@ pub struct MachineContext {
     pub iop_reads: BTreeMap<usize, Vec<BabyBearExtElem>>,
 }
 
-impl<'a> MachineContext {
+impl MachineContext {
     pub fn new(iop_input: VecDeque<u32>) -> Self {
         MachineContext {
             wom: Vec::new(),
@@ -111,7 +111,7 @@ impl<'a> MachineContext {
                 "u" => format!("{:width$}", next_arg()),
                 "x" => format!("{:0width$x}", next_arg()),
                 "d" => format!("{:width$}", next_arg() as i32),
-                "%" => format!("%"),
+                "%" => "%".to_string(),
                 "w" | "e" => {
                     let nexts = [next_arg(), next_arg(), next_arg(), next_arg()];
                     if nexts.iter().all(|v| *v <= 255) {
@@ -147,7 +147,7 @@ impl risc0_circuit_recursion::Externs for MachineContext {
         if self.wom.len() <= addr {
             self.wom.resize(addr + 1, BabyBearExtElem::ZERO);
         }
-        let ref mut mem_contents = self.wom[addr];
+        let mem_contents = &mut self.wom[addr];
         if *mem_contents != BabyBearExtElem::ZERO && *mem_contents != val {
             panic!("Wom {addr} overwritten with {val:?} from {mem_contents:?}");
         }
@@ -194,8 +194,8 @@ impl risc0_circuit_recursion::Externs for MachineContext {
         let mut front = self.cur_iop_body.pop_front().unwrap();
         front.resize(4, BabyBearElem::from(0u32));
         if do_mont != BabyBearElem::ZERO {
-            for i in 0..4 {
-                front[i] *= BabyBearElem::from(268435454u32);
+            for elem in front.iter_mut().take(4) {
+                *elem *= BabyBearElem::from(268435454u32);
             }
         }
         BabyBearExtElem::from_subelems(front)
@@ -221,11 +221,11 @@ impl CircuitStepHandler<BabyBearElem> for MachineContext {
                 Ok(())
             }
             "womRead" => {
-                outs.clone_from_slice(&self.wom_read(args[0]).subelems());
+                outs.clone_from_slice(self.wom_read(args[0]).subelems());
                 Ok(())
             }
             "womWrite" => {
-                let val = BabyBearExtElem::from_subelems(args[1..5].into_iter().cloned());
+                let val = BabyBearExtElem::from_subelems(args[1..5].iter().cloned());
                 self.wom_write(args[0], val);
                 Ok(())
             }
@@ -304,7 +304,7 @@ impl<'a> RecursionExecutor<'a> {
                 .par_iter()
                 .panic_fuse()
                 .cloned()
-                .zip((&self.split_points[1..]).par_iter().cloned())
+                .zip((self.split_points[1..]).par_iter().cloned())
                 .fold(
                     || {
                         ParallelHandler::new(
@@ -423,7 +423,7 @@ impl<'a> ParallelHandler<'a> {
                 "u" => format!("{:width$}", next_arg()),
                 "x" => format!("{:0width$x}", next_arg()),
                 "d" => format!("{:width$}", next_arg() as i32),
-                "%" => format!("%"),
+                "%" => "%".to_string(),
                 "w" | "e" => {
                     let nexts = [next_arg(), next_arg(), next_arg(), next_arg()];
                     if nexts.iter().all(|v| *v <= 255) {

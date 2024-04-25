@@ -112,7 +112,7 @@ pub fn join(a: &SuccinctReceipt, b: &SuccinctReceipt) -> Result<SuccinctReceipt>
         pre: a.claim.pre.clone(),
         post: b.claim.post.clone(),
         exit_code: b.claim.exit_code,
-        input: a.claim.input.clone(),
+        input: a.claim.input,
         output: b.claim.output.clone(),
     };
 
@@ -513,7 +513,7 @@ impl Prover {
         a: &SuccinctReceipt,
         allowed_ids: &MerkleGroup,
     ) -> Result<()> {
-        self.add_seal(&a.seal, &a.control_id, &allowed_ids)?;
+        self.add_seal(&a.seal, &a.control_id, allowed_ids)?;
         let mut data = Vec::<u32>::new();
         a.claim.encode(&mut data)?;
         let data_fp: Vec<BabyBearElem> = data.iter().map(|x| BabyBearElem::new(*x)).collect();
@@ -679,34 +679,34 @@ impl Prover {
 
             prover.commit_group(
                 REGISTER_GROUP_CODE,
-                hal.copy_from_elem("code", &*adapter.get_code().as_slice()),
+                hal.copy_from_elem("code", &adapter.get_code().as_slice()),
             );
             prover.commit_group(
                 REGISTER_GROUP_DATA,
-                hal.copy_from_elem("data", &*adapter.get_data().as_slice()),
+                hal.copy_from_elem("data", &adapter.get_data().as_slice()),
             );
             adapter.accumulate(prover.iop());
             prover.commit_group(
                 REGISTER_GROUP_ACCUM,
-                hal.copy_from_elem("accum", &*adapter.get_accum().as_slice()),
+                hal.copy_from_elem("accum", &adapter.get_accum().as_slice()),
             );
 
-            let mix = hal.copy_from_elem("mix", &*adapter.get_mix().as_slice());
-            let out = hal.copy_from_elem("out", &*adapter.get_io().as_slice());
+            let mix = hal.copy_from_elem("mix", &adapter.get_mix().as_slice());
+            let out = hal.copy_from_elem("out", &adapter.get_io().as_slice());
 
             prover.finalize(&[&mix, &out], circuit_hal)
         };
 
         Ok(RecursionReceipt {
             control_id: self.control_id,
-            seal: seal.into(),
+            seal,
             output: self.output.clone(),
         })
     }
 
     #[tracing::instrument(skip_all)]
     fn preflight(&mut self) -> Result<exec::MachineContext> {
-        let mut machine = exec::MachineContext::new(take(&mut self.input).into());
+        let mut machine = exec::MachineContext::new(take(&mut self.input));
         let mut preflight = preflight::Preflight::new(&mut machine);
 
         for (cycle, row) in self.program.code_by_row().enumerate() {
