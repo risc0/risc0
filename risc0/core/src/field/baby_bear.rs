@@ -143,17 +143,14 @@ impl field::Elem for Elem {
         Elem::from(val)
     }
 
-    // TODO(victor): Does this function need to exist?
     fn to_u32_words(&self) -> Vec<u32> {
         Vec::<u32>::from([self.0])
     }
 
-    // TODO(victor): This is a potentially unsafe wrapping.
     fn from_u32_words(val: &[u32]) -> Self {
         Self(val[0])
     }
 
-    // TODO(victor): How is invalid defined here?
     fn is_valid(&self) -> bool {
         self.0 != Self::INVALID.0
     }
@@ -209,7 +206,6 @@ impl Elem {
     /// Create a new [BabyBear] from a Montgomery form representation
     ///
     /// Requires that `x` comes pre-encoded in Montgomery form.
-    // TODO(victor): Look for usages of this function.
     pub const fn new_raw(x: u32) -> Self {
         Self(x)
     }
@@ -221,7 +217,6 @@ impl Elem {
 
     /// Return the Montgomery form representation used for byte-based
     /// hashes of slices of [BabyBear]s.
-    // TODO(victor): Why does this function exist given other ways of doing this?
     pub const fn as_u32_montgomery(&self) -> u32 {
         self.0
     }
@@ -229,6 +224,7 @@ impl Elem {
 
 impl ops::Add for Elem {
     type Output = Self;
+
     /// Addition for Baby Bear [Elem]
     fn add(self, rhs: Self) -> Self {
         Elem(add(self.ensure_valid().0, rhs.ensure_valid().0))
@@ -276,6 +272,7 @@ impl ops::MulAssign for Elem {
 
 impl ops::Neg for Elem {
     type Output = Self;
+
     fn neg(self) -> Self {
         Elem(0) - *self.ensure_valid()
     }
@@ -304,14 +301,6 @@ impl From<Elem> for u32 {
         decode(x.0)
     }
 }
-
-/* TODO(victor): Does this break anything?
-impl From<&Elem> for u32 {
-    fn from(x: &Elem) -> Self {
-        decode(x.0)
-    }
-}
-*/
 
 impl From<Elem> for u64 {
     fn from(x: Elem) -> Self {
@@ -435,7 +424,6 @@ impl fmt::Debug for ExtElem {
 }
 
 impl field::Elem for ExtElem {
-    // TODO(victor): Understand why invalid exists.
     const INVALID: Self = ExtElem([Elem::INVALID, Elem::INVALID, Elem::INVALID, Elem::INVALID]);
     const ZERO: Self = ExtElem::zero();
     const ONE: Self = ExtElem::one();
@@ -509,7 +497,6 @@ impl field::Elem for ExtElem {
         Self([Elem::from_u64(val), Elem::ZERO, Elem::ZERO, Elem::ZERO])
     }
 
-    // TODO(victor): Look into usages of this method.
     fn to_u32_words(&self) -> Vec<u32> {
         self.elems()
             .iter()
@@ -517,7 +504,6 @@ impl field::Elem for ExtElem {
             .collect()
     }
 
-    // TODO(victor): Look into usages of this method.
     fn from_u32_words(val: &[u32]) -> Self {
         field::ExtElem::from_subelems(val.iter().map(|word| Elem(*word)))
     }
@@ -531,11 +517,7 @@ impl field::Elem for ExtElem {
     }
 
     fn is_reduced(&self) -> bool {
-        let mut valid = true;
-        for comp in self.0 {
-            valid &= comp.0 < P;
-        }
-        valid
+        self.0.iter().all(|x| x.is_reduced())
     }
 }
 
@@ -548,7 +530,6 @@ impl field::ExtElem for ExtElem {
         Self::from([*elem.ensure_valid(), Elem::ZERO, Elem::ZERO, Elem::ZERO])
     }
 
-    // TODO(victor): Look for usages of this. It panics when less than 4 elements are provided.
     fn from_subelems(elems: impl IntoIterator<Item = Self::SubElem>) -> Self {
         let mut iter = elems.into_iter();
         let elem = Self::from([
@@ -612,7 +593,6 @@ impl ExtElem {
         Self([x, Elem::new(0), Elem::new(0), Elem::new(0)])
     }
 
-    // TODO(victor): Review usage of this method
     /// Create an [ExtElem] from a raw integer.
     pub const fn from_u32(x0: u32) -> Self {
         Self([Elem::new(x0), Elem::new(0), Elem::new(0), Elem::new(0)])
@@ -732,6 +712,7 @@ impl ops::MulAssign for ExtElem {
 
 impl ops::Mul for ExtElem {
     type Output = ExtElem;
+
     #[inline(always)]
     fn mul(self, rhs: ExtElem) -> ExtElem {
         let mut lhs = self;
@@ -742,6 +723,7 @@ impl ops::Mul for ExtElem {
 
 impl ops::Neg for ExtElem {
     type Output = Self;
+
     fn neg(self) -> Self {
         ExtElem::ZERO - self
     }
@@ -761,9 +743,7 @@ impl From<Elem> for ExtElem {
 
 #[cfg(test)]
 mod tests {
-    use alloc::{vec, vec::Vec};
-
-    use rand::{Rng, SeedableRng};
+    use rand::SeedableRng;
 
     use super::{field, Elem, ExtElem, P, P_U64};
     use crate::field::Elem as FieldElem;

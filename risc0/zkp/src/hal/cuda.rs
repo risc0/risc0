@@ -14,7 +14,6 @@
 
 use std::{cell::RefCell, fmt::Debug, marker::PhantomData, rc::Rc};
 
-use bytemuck::NoUninit;
 use cust::{
     device::DeviceAttribute,
     function::{BlockSize, GridSize},
@@ -346,7 +345,19 @@ pub struct BufferImpl<T> {
     marker: PhantomData<T>,
 }
 
-impl<T: NoUninit> BufferImpl<T> {
+#[inline]
+fn unchecked_cast<A, B>(a: &[A]) -> &[B] {
+    let new_len = std::mem::size_of_val(a) / std::mem::size_of::<B>();
+    unsafe { std::slice::from_raw_parts(a.as_ptr() as *const B, new_len) }
+}
+
+#[inline]
+fn unchecked_cast_mut<A, B>(a: &mut [A]) -> &mut [B] {
+    let new_len = std::mem::size_of_val(a) / std::mem::size_of::<B>();
+    unsafe { std::slice::from_raw_parts_mut(a.as_mut_ptr() as *mut B, new_len) }
+}
+
+impl<T> BufferImpl<T> {
     fn new(name: &'static str, size: usize) -> Self {
         let bytes_len = std::mem::size_of::<T>() * size;
         assert!(bytes_len > 0);
@@ -362,7 +373,7 @@ impl<T: NoUninit> BufferImpl<T> {
         let bytes_len = std::mem::size_of::<T>() * slice.len();
         assert!(bytes_len > 0);
         let mut buffer = RawBuffer::new(name, bytes_len);
-        let bytes = bytemuck::cast_slice(slice);
+        let bytes = unchecked_cast(slice);
         buffer.buf.copy_from(bytes).unwrap();
         BufferImpl {
             buffer: Rc::new(RefCell::new(buffer)),
@@ -385,7 +396,7 @@ impl<T: NoUninit> BufferImpl<T> {
     }
 }
 
-impl<T> Buffer<T> for BufferImpl<T> {
+impl<T: Clone> Buffer<T> for BufferImpl<T> {
     fn name(&self) -> &'static str {
         self.buffer.borrow().name
     }
@@ -407,16 +418,14 @@ impl<T> Buffer<T> for BufferImpl<T> {
     fn view<F: FnOnce(&[T])>(&self, f: F) {
         let buf = self.buffer.borrow_mut();
         let host_buf = buf.buf.as_host_vec().unwrap();
-        // TODO(victor): Find a new way to be an (unchecked) cast here.
-        let slice = bytemuck::cast_slice(&host_buf);
+        let slice = unchecked_cast(&host_buf);
         f(&slice[self.offset..]);
     }
 
     fn view_mut<F: FnOnce(&mut [T])>(&self, f: F) {
         let mut buf = self.buffer.borrow_mut();
         let mut host_buf = buf.buf.as_host_vec().unwrap();
-        // TODO(victor): Find a new way to be an (unchecked) cast here.
-        let slice = bytemuck::cast_slice(&host_buf);
+        let slice = unchecked_cast_mut(&mut host_buf);
         f(&mut slice[self.offset..]);
         buf.buf.copy_from(&host_buf).unwrap();
     }
@@ -492,7 +501,7 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
     type Field = BabyBear;
     type Elem = BabyBearElem;
     type ExtElem = BabyBearExtElem;
-    type Buffer<T: Clone + Debug + PartialEq + NoUninit> = BufferImpl<T>;
+    type Buffer<T: Clone + Debug + PartialEq> = BufferImpl<T>;
 
     fn alloc_elem(&self, name: &'static str, size: usize) -> Self::Buffer<Self::Elem> {
         BufferImpl::new(name, size)
