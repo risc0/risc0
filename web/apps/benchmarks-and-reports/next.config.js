@@ -1,5 +1,6 @@
 await import("./src/env.js");
 import withBundleAnalyzer from "@next/bundle-analyzer";
+import { latestVersion } from "./src/versions.js";
 
 /** @type {import("next").NextConfig} */
 const config = {
@@ -23,7 +24,7 @@ const config = {
     return [
       {
         source: "/",
-        destination: "/0.21",
+        destination: latestVersion ? `/${latestVersion}` : "/",
         permanent: true,
       },
     ];

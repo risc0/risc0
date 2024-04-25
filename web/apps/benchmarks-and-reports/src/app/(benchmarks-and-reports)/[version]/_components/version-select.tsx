@@ -12,17 +12,7 @@ import {
 import compact from "lodash-es/compact";
 import { useParams, usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-
-const VERSIONS = [
-  {
-    label: "next",
-    value: "main", // value is the branch name on github
-  },
-  {
-    label: "release-0.21",
-    value: "release-0.21", // value is the branch name on github
-  },
-];
+import { VERSIONS } from "~/versions";
 
 export function VersionSelect() {
   const { version } = useParams();
