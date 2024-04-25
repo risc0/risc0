@@ -128,7 +128,7 @@ pub trait ProverServer {
 
     /// Compress a [SuccinctReceipt] into a [CompactReceipt].
     fn succinct_to_compact(&self, receipt: &SuccinctReceipt) -> Result<CompactReceipt> {
-        let ident_receipt = self.identity_p254(&receipt).unwrap();
+        let ident_receipt = self.identity_p254(receipt).unwrap();
         let seal_bytes = ident_receipt.get_seal_bytes();
 
         let seal = stark_to_snark(&seal_bytes)?.to_vec();

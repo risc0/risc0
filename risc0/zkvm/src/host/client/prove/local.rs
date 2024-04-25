@@ -55,7 +55,7 @@ impl Prover for LocalProver {
             InnerReceipt::Succinct(_) | InnerReceipt::Compact(_) => Ok(receipt.clone()),
             InnerReceipt::Composite(ref inner) => Ok(Receipt {
                 inner: InnerReceipt::Succinct(
-                    get_prover_server(opts)?.compsite_to_succinct(&inner)?,
+                    get_prover_server(opts)?.compsite_to_succinct(inner)?,
                 ),
                 journal: receipt.journal.clone(),
             }),
