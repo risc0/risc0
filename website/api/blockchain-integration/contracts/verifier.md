@@ -55,7 +55,7 @@ RISC Zero provides an already deployed verifier contract in the Sepolia network 
 You can choose to use this contract or deploy your own.
 
 | Contract                      | Version                      | Network   | Address                                                                |
-| ----------------------------- | --------------------------   | --------- | ---------------------------------------------------------------------- |
+| ----------------------------- | ---------------------------- | --------- | ---------------------------------------------------------------------- |
 | [RiscZeroGroth16Verifier.sol] | [v0.9.0][contracts-v0.9.0]   | [Sepolia] | [0xe57255C10291771A2E14f7eb257555AE82D78302][sepolia-verifier-v0.9.0]  |
 | [RiscZeroGroth16Verifier.sol] | [v0.10.0][contracts-v0.10.0] | [Sepolia] | [0x4e9559f1fdf82dd1babdd42b4550ffdb1a1c59de][sepolia-verifier-v0.10.0] |
 
