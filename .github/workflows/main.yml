@@ -155,6 +155,7 @@ jobs:
           -p risc0-circuit-rv32im-sys
           -p risc0-core
           -p risc0-groth16
+          -p risc0-r0vm
           -p risc0-sys
           -p risc0-tools
           -p risc0-zkp

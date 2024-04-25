@@ -206,7 +206,7 @@ impl SysVerify {
             .try_into()
             .map_err(|vec| anyhow!("failed to convert to [u8; DIGEST_BYTES]: {vec:?}"))?;
 
-        tracing::debug!("SYS_VERIFY_INTEGRITY: {}", hex::encode(&claim_digest));
+        tracing::debug!("SYS_VERIFY_INTEGRITY: {}", hex::encode(claim_digest));
 
         // Iterate over the list looking for a matching assumption.
         let mut assumption: Option<Assumption> = None;
@@ -225,7 +225,7 @@ impl SysVerify {
 
         // Mark the assumption as accessed, pushing it to the head of the list, and return the success code.
         self.assumptions.borrow_mut().accessed.insert(0, assumption);
-        return Ok((0, 0));
+        Ok((0, 0))
     }
 
     fn sys_verify(&mut self, mut from_guest: Vec<u8>, to_guest: &mut [u32]) -> Result<(u32, u32)> {
@@ -254,8 +254,8 @@ impl SysVerify {
 
         tracing::debug!(
             "SYS_VERIFY: {}, {}",
-            hex::encode(&image_id),
-            hex::encode(&journal_digest)
+            hex::encode(image_id),
+            hex::encode(journal_digest)
         );
 
         // Iterate over the list looking for a matching assumption. If found, return the
@@ -291,7 +291,7 @@ impl SysVerify {
 
         // Mark the assumption as accessed, pushing it to the head of the list, and return the success code.
         self.assumptions.borrow_mut().accessed.insert(0, assumption);
-        return Ok((0, 0));
+        Ok((0, 0))
     }
 
     /// Check whether the claim satisfies the requirements to return for sys_verify.
@@ -575,7 +575,7 @@ impl<'a> PosixIo<'a> {
 
         tracing::debug!("sys_log({buf_len} bytes)");
 
-        let msg = format!("R0VM[{}] ", ctx.get_cycle().to_string());
+        let msg = format!("R0VM[{}] ", ctx.get_cycle());
         writer
             .borrow_mut()
             .write_all(&[msg.as_bytes(), &from_guest, b"\n"].concat())?;
