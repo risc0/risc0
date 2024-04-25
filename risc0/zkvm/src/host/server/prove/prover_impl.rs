@@ -169,7 +169,7 @@ where
 
         let receipt = SegmentReceipt {
             seal,
-            index: segment.index ,
+            index: segment.index,
             hashfn,
             claim,
         };
