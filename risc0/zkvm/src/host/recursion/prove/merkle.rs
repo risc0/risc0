@@ -87,7 +87,7 @@ impl MerkleGroup {
                 *hashfn.hash_pair(&sibling, &cur)
             };
             proof.push(sibling);
-            index = index >> 1;
+            index >>= 1;
         }
 
         proof
