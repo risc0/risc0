@@ -55,7 +55,7 @@ pub trait Syscall {
 /// Access to memory and machine state for syscalls.
 pub trait SyscallContext {
     /// Returns the current cycle being executed.
-    fn get_cycle(&self) -> usize;
+    fn get_cycle(&self) -> u64;
 
     /// Loads the value of the given register, e.g. REG_A0.
     fn load_register(&mut self, idx: usize) -> u32;
@@ -130,7 +130,10 @@ impl Syscall for SysCycleCount {
         ctx: &mut dyn SyscallContext,
         _to_guest: &mut [u32],
     ) -> Result<(u32, u32)> {
-        Ok((ctx.get_cycle() as u32, 0))
+        let cycle = ctx.get_cycle();
+        let hi = (cycle >> 32) as u32;
+        let lo = cycle as u32;
+        Ok((hi, lo))
     }
 }
 
