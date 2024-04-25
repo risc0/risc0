@@ -131,21 +131,8 @@ structured, and other resources useful to developers new to RISC Zero, see our
 You can also build from source instead downloading the latest release.
 You might want to do this if you are making changes to this code base, or want to try out a development version.
 
-First, install `git lfs` as you will need it to pull some of the files required to build the prover.
-See the instructions on the [Git LFS website](https://git-lfs.com/).
-
-Once you have cloned this repo and run `git lfs pull`, you can build `cargo risczero`.
-This will take some time, as it will need to build the prover.
-
-```sh
-cargo install --path ./risc0/cargo-risczero --features r0vm
-cargo risczero install
-```
-
-If you want to enable `metal` or `cuda` support, you can use the associated [feature flags](#feature-flags) described below.
-
-You now have a local build of `cargo risczero`.
-Note that your build may not be compatible with remote services such as Bonsai.
+Building from source requires some additional tools and steps.
+Please refer to [CONTRIBUTING.md](./CONTRIBUTING.md) for the full instructions.
 
 ## Rust Binaries
 
