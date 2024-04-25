@@ -680,6 +680,7 @@ pub extern "C" fn sys_alloc_words(nwords: usize) -> *mut u32 {
 #[cfg(feature = "export-syscalls")]
 #[no_mangle]
 pub unsafe extern "C" fn sys_alloc_aligned(bytes: usize, align: usize) -> *mut u8 {
+    #[cfg(target_os = "zkvm")]
     extern "C" {
         // This symbol is defined by the loader and marks the end
         // of all elf sections, so this is where we start our
@@ -697,6 +698,7 @@ pub unsafe extern "C" fn sys_alloc_aligned(bytes: usize, align: usize) -> *mut u
     // SAFETY: Single threaded, so nothing else can touch this while we're working.
     let mut heap_pos = unsafe { HEAP_POS };
 
+    #[cfg(target_os = "zkvm")]
     if heap_pos == 0 {
         heap_pos = unsafe { (&_end) as *const u8 as usize };
     }
