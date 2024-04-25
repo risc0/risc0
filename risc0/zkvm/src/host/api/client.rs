@@ -437,6 +437,11 @@ impl Client {
                     })
                 })
                 .collect::<Result<_>>()?,
+            segment_path: env
+                .segment_path
+                .as_ref()
+                .map(|x| x.path().to_string_lossy().into())
+                .unwrap_or_default(),
         })
     }
 

@@ -2,7 +2,7 @@ name: Benchmark Datasheet
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, release-* ]
     # Only run benchmarks on changes to following paths:
     paths:
       - 'risc0/**'
@@ -79,11 +79,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout gh-pages repository
+      - name: Checkout gh-pages repository branch ${{ github.ref_name }}
         uses: actions/checkout@v4
         with:
           repository: risc0/ghpages
           token: ${{ secrets.BENCHMARK_TOKEN }}
+          ref: ${{ github.ref_name }}
       - name: Download benchmark
         uses: actions/download-artifact@v2
         with:
