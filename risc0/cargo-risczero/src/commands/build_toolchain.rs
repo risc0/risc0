@@ -86,16 +86,13 @@ impl BuildToolchain {
 
         if !path.join(".git").is_dir() {
             Command::new("git")
-                .args([
-                    "clone",
-                    "--branch",
-                    tag,
-                    "--single-branch",
-                    "--depth",
-                    "1",
-                    source,
-                ])
+                .args(["clone", "--branch", tag, source])
                 .arg(path)
+                .run_verbose()?;
+        } else {
+            Command::new("git")
+                .args(["fetch", "origin", tag])
+                .current_dir(path)
                 .run_verbose()?;
         }
 
