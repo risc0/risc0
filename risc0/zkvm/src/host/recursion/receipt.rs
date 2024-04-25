@@ -29,7 +29,6 @@ use crate::{host::receipt::VerifierContext, sha::Digestible, ReceiptClaim};
 
 /// Return the allowed Control IDs that can be used by a zkr program.
 pub fn valid_control_ids() -> Vec<Digest> {
-    use hex::FromHex;
     ALLOWED_CONTROL_IDS
         .iter()
         .map(|x| Digest::from_hex(x).unwrap())
