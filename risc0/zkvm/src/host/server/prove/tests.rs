@@ -532,7 +532,7 @@ mod docker {
         let receipt = prover.prove_session(&ctx, &session).unwrap().receipt;
         let claim = receipt.get_claim().unwrap();
         let composite_receipt = receipt.inner.composite().unwrap();
-        let succinct_receipt = prover.compress(composite_receipt).unwrap();
+        let succinct_receipt = prover.compsite_to_succinct(composite_receipt).unwrap();
         let journal = session.journal.unwrap().bytes;
 
         tracing::info!("identity_p254");
@@ -561,7 +561,7 @@ mod docker {
         let prover = get_prover_server(&ProverOpts::succinct()).unwrap();
         let succinct_receipt = prover.prove(env, MULTI_TEST_ELF).unwrap().receipt;
         prover
-            .compress(ProverOpts::compact(), receipt)
+            .compress(&ProverOpts::compact(), &succinct_receipt)
             .unwrap()
             .inner
             .compact()
