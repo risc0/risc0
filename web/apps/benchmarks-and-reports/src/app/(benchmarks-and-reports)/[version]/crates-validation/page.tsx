@@ -23,8 +23,8 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function CratesIoValidationPage() {
-  const mostRecentHash = await findMostRecentHash();
+export default async function CratesIoValidationPage({ params }) {
+  const mostRecentHash = await findMostRecentHash({ version: params.version });
 
   return (
     <div className="container max-w-screen-3xl">
@@ -50,7 +50,7 @@ export default async function CratesIoValidationPage() {
 
       <div className="mt-6">
         <Suspense fallback={<SuspenseLoader />}>
-          <CratesIoValidationContent mostRecentHash={mostRecentHash} />
+          <CratesIoValidationContent version={params.version} mostRecentHash={mostRecentHash} />
         </Suspense>
       </div>
     </div>

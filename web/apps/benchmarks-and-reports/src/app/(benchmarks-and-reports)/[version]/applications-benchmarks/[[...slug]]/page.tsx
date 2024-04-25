@@ -41,7 +41,7 @@ export default function ApplicationsBenchmarksPage({ params }) {
         <h1 className="title-sm">Applications Benchmarks</h1>
 
         <Suspense fallback={<SuspenseLoader />}>
-          <ApplicationsBenchmarksCommitHashButton />
+          <ApplicationsBenchmarksCommitHashButton version={params.version} />
         </Suspense>
       </div>
 
@@ -66,7 +66,7 @@ export default function ApplicationsBenchmarksPage({ params }) {
 
         <div className="mt-4">
           <Suspense fallback={<SuspenseLoader />}>
-            <ApplicationsBenchmarksContent currentTab={params.slug?.[0]} />
+            <ApplicationsBenchmarksContent version={params.version} currentTab={params.slug?.[0]} />
           </Suspense>
         </div>
       </Tabs>

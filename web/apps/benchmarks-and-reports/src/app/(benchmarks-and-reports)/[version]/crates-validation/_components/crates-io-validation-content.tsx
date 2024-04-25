@@ -5,12 +5,17 @@ import { CratesIoValidationTable } from "./crates-io-validation-table";
 import { cratesIoValidationTableColumns } from "./crates-io-validation-table-columns";
 import type { CratesIoValidationTableSchema } from "./crates-io-validation-table-schema";
 
-type CratesIoValidationContentProps = {
+export default async function CratesIoValidationContent({
+  version,
+  mostRecentHash,
+}: {
+  version: string;
   mostRecentHash: string;
-};
-
-export default async function CratesIoValidationContent({ mostRecentHash }: CratesIoValidationContentProps) {
-  const cratesValidationResults: CratesIoValidationTableSchema[] = await fetchCratesValidationResults(mostRecentHash);
+}) {
+  const cratesValidationResults: CratesIoValidationTableSchema[] = await fetchCratesValidationResults({
+    hash: mostRecentHash,
+    version,
+  });
 
   return (
     <>

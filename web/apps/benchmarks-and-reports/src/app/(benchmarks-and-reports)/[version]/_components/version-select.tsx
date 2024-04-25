@@ -14,8 +14,14 @@ import { useParams, usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 const VERSIONS = [
-  { label: "next", value: "main" },
-  { label: "release-0.21", value: "0.21" },
+  {
+    label: "next",
+    value: "main", // value is the branch name on github
+  },
+  {
+    label: "release-0.21",
+    value: "release-0.21", // value is the branch name on github
+  },
 ];
 
 export function VersionSelect() {
@@ -45,7 +51,7 @@ export function VersionSelect() {
         <SelectGroup>
           <SelectLabel>Versions</SelectLabel>
           {VERSIONS.map(({ label, value }) => (
-            <SelectItem key={value} className="font-mono cursor-pointer" value={value}>
+            <SelectItem key={value} className="cursor-pointer font-mono" value={value}>
               {label}
             </SelectItem>
           ))}
