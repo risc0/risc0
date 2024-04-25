@@ -38,7 +38,7 @@ pub struct Segment {
     pub post_state: SystemState,
     #[dbg(placeholder = "...")]
     pub syscalls: Vec<SyscallRecord>,
-    pub insn_cycles: usize,
+    pub insn_cycles: u64,
     pub po2: usize,
     pub exit_code: ExitCode,
     pub index: usize,

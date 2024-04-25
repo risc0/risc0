@@ -283,7 +283,7 @@ impl Server {
                                 segment: Some(pb::api::SegmentInfo {
                                     index: segment.index,
                                     po2: segment.inner.po2 as u32,
-                                    cycles: segment.inner.insn_cycles as u32,
+                                    cycles: segment.inner.insn_cycles,
                                     segment: Some(asset),
                                 }),
                             },

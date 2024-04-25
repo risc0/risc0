@@ -815,7 +815,9 @@ impl Segment {
         let mut emu = Emulator::new();
 
         preflight.pre_steps();
-        while preflight.trace.body.cycles.len() < self.insn_cycles && preflight.halted.is_none() {
+        while preflight.trace.body.cycles.len() < self.insn_cycles as usize
+            && preflight.halted.is_none()
+        {
             emu.step(&mut preflight)?;
             preflight.pager.commit_step();
         }

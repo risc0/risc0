@@ -17,7 +17,7 @@ use risc0_zkvm::{default_prover, ExecutorEnv};
 
 fn main() {
     let segment_limit_po2 = 16; // 64k cycles
-    let cycles: u32 = 1 << segment_limit_po2;
+    let cycles: u64 = 1 << segment_limit_po2;
     let env = ExecutorEnv::builder()
         .write(&cycles)
         .unwrap()

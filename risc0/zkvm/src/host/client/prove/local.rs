@@ -71,7 +71,7 @@ impl Executor for LocalProver {
         let session = exec.run_with_callback(|segment| {
             segments.push(SegmentInfo {
                 po2: segment.inner.po2 as u32,
-                cycles: segment.inner.insn_cycles as u32,
+                cycles: segment.inner.insn_cycles,
             });
             Ok(Box::new(NullSegmentRef))
         })?;

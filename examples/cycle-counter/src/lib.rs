@@ -25,7 +25,7 @@ pub mod examples;
 
 pub struct Metrics {
     pub name: String,
-    pub cycles: u32,
+    pub cycles: u64,
 }
 
 impl Metrics {
@@ -70,7 +70,7 @@ pub fn init_logging() {
 #[derive(Serialize)]
 struct CsvRow<'a> {
     name: &'a str,
-    cycles: u32,
+    cycles: u64,
 }
 
 pub fn run_jobs<C: CycleCounter>(out_path: &PathBuf) -> Metrics {

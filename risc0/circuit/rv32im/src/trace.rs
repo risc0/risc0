@@ -25,8 +25,7 @@ pub enum TraceEvent {
     /// An instruction has started at the given program counter
     InstructionStart {
         /// Cycle number since startup
-        // TODO(breaking change): use `u64`
-        cycle: u32,
+        cycle: u64,
         /// Program counter of the instruction being executed
         pc: u32,
         /// Encoded instruction being executed.

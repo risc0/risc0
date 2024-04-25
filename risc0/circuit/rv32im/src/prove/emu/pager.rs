@@ -33,8 +33,8 @@ const SHA_INIT: usize = 5;
 const SHA_LOAD: usize = 16;
 const SHA_MAIN: usize = 52;
 
-const fn cycles_per_page(blocks_per_page: usize) -> usize {
-    1 + SHA_INIT + (SHA_LOAD + SHA_MAIN) * blocks_per_page
+const fn cycles_per_page(blocks_per_page: usize) -> u64 {
+    (1 + SHA_INIT + (SHA_LOAD + SHA_MAIN) * blocks_per_page) as u64
 }
 
 struct Page(Vec<u8>);
@@ -53,8 +53,8 @@ pub struct PageFaults {
 
 #[derive(Clone, Debug)]
 enum Action {
-    PageRead(u32, usize),
-    PageWrite(u32, usize, bool),
+    PageRead(u32, u64),
+    PageWrite(u32, u64, bool),
     Store(WordAddr, u32),
 }
 
@@ -62,7 +62,7 @@ pub struct PagedMemory {
     pub image: MemoryImage,
     page_cache: HashMap<u32, Page>,
     page_states: BTreeMap<u32, PageState>,
-    pub cycles: usize,
+    pub cycles: u64,
     pending_actions: Vec<Action>,
 }
 
@@ -250,7 +250,7 @@ impl PagedMemory {
     fn page_changed(&mut self, page_idx: u32, state: PageState) {
         let info = &self.image.info;
 
-        let page_cycles = if page_idx == info.root_idx {
+        let page_cycles: u64 = if page_idx == info.root_idx {
             let num_root_entries = info.num_root_entries as usize;
             cycles_per_page(num_root_entries / 2)
         } else {

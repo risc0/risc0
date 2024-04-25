@@ -165,7 +165,7 @@ pub struct Instruction {
     pub opcode: u32,
     pub func3: u32,
     pub func7: u32,
-    pub cycles: usize,
+    pub cycles: u64,
 }
 
 impl DecodedInstruction {
@@ -217,7 +217,7 @@ const fn insn(
     opcode: u32,
     func3: i32,
     func7: i32,
-    cycles: usize,
+    cycles: u64,
 ) -> Instruction {
     Instruction {
         kind,

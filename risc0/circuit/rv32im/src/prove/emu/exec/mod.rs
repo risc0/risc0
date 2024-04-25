@@ -89,8 +89,7 @@ pub trait SyscallContext {
     }
 
     /// Returns the current cycle count.
-    // TODO(breaking change): use `u64`
-    fn get_cycle(&self) -> usize;
+    fn get_cycle(&self) -> u64;
 }
 
 pub struct ExecutorResult {
@@ -106,8 +105,8 @@ pub struct ExecutorResult {
 
 #[derive(Default)]
 struct SessionCycles {
-    user: usize,
-    total: usize,
+    user: u64,
+    total: u64,
 }
 
 pub struct SimpleSession {
@@ -119,7 +118,7 @@ pub struct SimpleSession {
 struct PendingState {
     pc: ByteAddr,
     insn: u32,
-    cycles: usize,
+    cycles: u64,
     syscall: Option<SyscallRecord>,
     output_digest: Option<Digest>,
     exit_code: Option<ExitCode>,
@@ -128,7 +127,7 @@ struct PendingState {
 
 pub struct Executor<'a, 'b, S: Syscall> {
     pc: ByteAddr,
-    insn_cycles: usize,
+    insn_cycles: u64,
     pager: PagedMemory,
     exit_code: Option<ExitCode>,
     syscalls: Vec<SyscallRecord>,
@@ -194,7 +193,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         // leave room for reserved cycles
         const RESERVED_CYCLES: usize =
             INIT_CYCLES + MIN_HALT_CYCLES + PAGE_FINI_CYCLES + FINI_CYCLES + ZK_CYCLES;
-        let segment_limit = (1 << segment_po2) - RESERVED_CYCLES;
+        let segment_limit: u64 = (1 << segment_po2) - RESERVED_CYCLES as u64;
 
         self.reset();
 
@@ -208,7 +207,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             }
 
             if let Some(max_cycles) = max_cycles {
-                if self.cycles.user >= max_cycles as usize {
+                if self.cycles.user >= max_cycles {
                     bail!("Session limit exceeded");
                 }
             }
@@ -225,7 +224,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
                 );
             } else {
                 self.pager.undo();
-                let used_cycles = self.insn_cycles + self.pager.cycles + RESERVED_CYCLES;
+                let used_cycles = self.insn_cycles + self.pager.cycles + RESERVED_CYCLES as u64;
                 let waste = (1 << segment_po2) - used_cycles;
                 tracing::debug!(
                     "split: {} + {} + {RESERVED_CYCLES} = {used_cycles}, waste: {waste}, pending: {:?}",
@@ -260,8 +259,8 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
         }
 
         let (pre_state, partial_image, post_state) = self.pager.commit(self.pc);
-        let segment_cycles = self.insn_cycles + self.pager.cycles + RESERVED_CYCLES;
-        let po2 = log2_ceil(segment_cycles.next_power_of_two());
+        let segment_cycles = self.insn_cycles + self.pager.cycles + RESERVED_CYCLES as u64;
+        let po2 = log2_ceil(segment_cycles.next_power_of_two() as usize);
         let exit_code = self.exit_code.unwrap();
 
         callback(Segment {
@@ -422,7 +421,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
 
         tracing::trace!("{syscall:08x?}");
 
-        self.pending.cycles += chunks + 1; // syscallBody + syscallFini
+        self.pending.cycles += chunks as u64 + 1; // syscallBody + syscallFini
         self.pending.pc = self.pc + WORD_SIZE;
 
         Ok(true)
@@ -470,7 +469,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
 
         self.store_region_into_guest(state_out_ptr, bytemuck::cast_slice(&state))?;
 
-        self.pending.cycles += sha_cycles(count as usize);
+        self.pending.cycles += sha_cycles(count as usize) as u64;
         self.pending.pc = self.pc + WORD_SIZE;
 
         Ok(true)
@@ -520,7 +519,7 @@ impl<'a, 'b, S: Syscall> Executor<'a, 'b, S> {
             self.store_u32_into_guest(z_ptr + (i * WORD_SIZE) as u32, word.to_le())?;
         }
 
-        self.pending.cycles += BIGINT_CYCLES;
+        self.pending.cycles += BIGINT_CYCLES as u64;
         self.pending.pc = self.pc + WORD_SIZE;
 
         Ok(true)
@@ -712,7 +711,7 @@ impl<'a, 'b, S: Syscall> EmuContext for Executor<'a, 'b, S> {
 }
 
 impl<'a, 'b, S: Syscall> SyscallContext for Executor<'a, 'b, S> {
-    fn get_cycle(&self) -> usize {
+    fn get_cycle(&self) -> u64 {
         self.cycles.user
     }
 

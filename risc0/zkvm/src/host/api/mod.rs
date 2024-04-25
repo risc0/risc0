@@ -310,7 +310,7 @@ pub struct SegmentInfo {
 
     /// The number of user cycles without any overhead for continuations or po2
     /// padding.
-    pub cycles: u32,
+    pub cycles: u64,
 }
 
 impl Asset {

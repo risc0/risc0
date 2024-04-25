@@ -170,7 +170,7 @@ message SessionInfo {
 message SegmentInfo {
   uint32 index = 1;
   uint32 po2 = 2;
-  uint32 cycles = 3;
+  uint64 cycles = 3;
   Asset segment = 4;
 }
 
@@ -235,7 +235,7 @@ message PosixCmd {
 
 message TraceEvent {
   message InstructionStart {
-    uint32 cycle = 1;
+    uint64 cycle = 1;
     uint32 pc = 2;
     uint32 insn = 3;
   }
