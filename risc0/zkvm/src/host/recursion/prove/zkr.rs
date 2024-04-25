@@ -14,7 +14,7 @@
 
 use anyhow::{anyhow, bail, Context, Result};
 use hex::FromHex;
-use risc0_circuit_recursion::REGISTER_GROUP_CODE;
+use risc0_circuit_recursion::{control_id::ZKR_CONTROL_IDS, REGISTER_GROUP_CODE};
 use risc0_zkp::{
     adapter::TapsProvider, core::digest::Digest, field::baby_bear::BabyBearElem, MAX_CYCLES_PO2,
     MIN_CYCLES_PO2,
@@ -32,7 +32,7 @@ fn get_zkr(name: &str) -> Result<(Program, Digest)> {
             code: u32s.iter().cloned().map(BabyBearElem::from).collect(),
             code_size,
         },
-        risc0_circuit_recursion::control_id::RECURSION_CONTROL_IDS
+        ZKR_CONTROL_IDS
             .iter()
             .copied()
             .find_map(|(n, id)| {

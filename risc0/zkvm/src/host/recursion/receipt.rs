@@ -15,8 +15,7 @@
 use alloc::{collections::VecDeque, vec::Vec};
 
 use risc0_binfmt::read_sha_halfs;
-use risc0_circuit_recursion::{control_id::RECURSION_CONTROL_IDS, CircuitImpl};
-use risc0_circuit_rv32im::control_id::POSEIDON2_CONTROL_ID;
+use risc0_circuit_recursion::{control_id::ALLOWED_CONTROL_IDS, CircuitImpl};
 use risc0_core::field::baby_bear::BabyBearElem;
 use risc0_zkp::{adapter::CircuitInfo, core::digest::Digest, verify::VerificationError};
 use serde::{Deserialize, Serialize};
@@ -24,19 +23,13 @@ use serde::{Deserialize, Serialize};
 use super::CIRCUIT;
 use crate::{host::receipt::VerifierContext, sha::Digestible, ReceiptClaim};
 
-/// This function gets valid control IDs from the Poseidon2 and recursion
-/// circuits
+/// Return the allowed Control IDs that can be used by a zkr program.
 pub fn valid_control_ids() -> Vec<Digest> {
     use hex::FromHex;
-
-    let mut all_ids = Vec::new();
-    for digest_str in POSEIDON2_CONTROL_ID {
-        all_ids.push(Digest::from_hex(digest_str).unwrap());
-    }
-    for (_, digest_str) in RECURSION_CONTROL_IDS {
-        all_ids.push(Digest::from_hex(digest_str).unwrap());
-    }
-    all_ids
+    ALLOWED_CONTROL_IDS
+        .iter()
+        .map(|x| Digest::from_hex(x).unwrap())
+        .collect()
 }
 
 /// A succinct receipt, produced via recursion, proving the execution of the zkVM.

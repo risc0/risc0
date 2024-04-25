@@ -19,7 +19,7 @@ use core::fmt::Debug;
 
 use anyhow::Result;
 use risc0_binfmt::{ExitCode, SystemState};
-use risc0_circuit_recursion::control_id::{ALLOWED_IDS_ROOT, BN254_CONTROL_ID};
+use risc0_circuit_recursion::control_id::{ALLOWED_CONTROL_ROOT, BN254_CONTROL_ID};
 use risc0_circuit_rv32im::{
     control_id::{BLAKE2B_CONTROL_ID, POSEIDON2_CONTROL_ID, SHA256_CONTROL_ID},
     layout, CIRCUIT,
@@ -385,7 +385,7 @@ impl CompactReceipt {
     pub fn verify_integrity(&self) -> Result<(), VerificationError> {
         use hex::FromHex;
         let (a0, a1) = split_digest(
-            Digest::from_hex(ALLOWED_IDS_ROOT)
+            Digest::from_hex(ALLOWED_CONTROL_ROOT)
                 .map_err(|_| VerificationError::ReceiptFormatError)?,
         )
         .map_err(|_| VerificationError::ReceiptFormatError)?;
