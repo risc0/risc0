@@ -84,8 +84,8 @@ We estimate that it would take approximately 400,000 years to brute force a coll
 - We have seen several [examples] of large purchases of GPUs on the order of 350,000 so we conservatively suggest that a distributed attacker may be able to operate 1 million RTX 4090s in parallel.
 
 At $2^{98}$ [bits] of security required to force a collision, we can estimate the time to brute force a collision as follows:
-  
-```2^98 / (25,000,000,000 Hashes/s * 1,000,000 GPUs) / 60seconds / 60 minutes / 24 hours / 365 days = 401969 years```
+
+`2^98 / (25,000,000,000 Hashes/s * 1,000,000 GPUs) / 60seconds / 60 minutes / 24 hours / 365 days = 401969 years`
 
 The analysis for bits of security for the RISC-V and Recursion Prover can be found in the [security calculator].
 For a detailed cryptographic description of our STARK system, we refer readers to [RISC Zero zkVM: Scalable, Transparent Arguments of RISC-V Integrity].
