@@ -12,33 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::sync::Mutex;
-
 use anyhow::Result;
 use rand::thread_rng;
 use rayon::prelude::*;
 use risc0_zkp::{
-    adapter::{CircuitInfo as _, CircuitStep as _, CircuitStepContext, TapsProvider},
-    field::{
-        baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
-        Elem as _,
-    },
+    adapter::TapsProvider,
+    field::{baby_bear::BabyBearElem, Elem as _},
     hal::cpu::CpuBuffer,
-    prove::{
-        accum::{Accum, Handler},
-        write_iop::WriteIOP,
-    },
     ZK_CYCLES,
 };
 
 use super::machine::MachineContext;
 use crate::{
     prove::{emu::preflight::PreflightTrace, engine::loader::Loader},
-    CircuitImpl, CIRCUIT,
+    CIRCUIT,
 };
 
 pub struct WitnessGenerator {
-    steps: usize,
+    pub steps: usize,
     pub ctrl: CpuBuffer<BabyBearElem>,
     pub data: CpuBuffer<BabyBearElem>,
     pub io: CpuBuffer<BabyBearElem>,
@@ -206,91 +197,6 @@ impl WitnessGenerator {
             for cycle in 0..last_cycle {
                 machine.step_verify_bytes(self.steps, cycle, args).unwrap();
             }
-        });
-    }
-
-    #[tracing::instrument(skip_all)]
-    pub fn accumulate(
-        &mut self,
-        iop: &mut WriteIOP<BabyBear>,
-    ) -> (CpuBuffer<BabyBearElem>, CpuBuffer<BabyBearElem>) {
-        tracing::debug!("accumulate");
-
-        // Make the mixing values
-        let mix = CpuBuffer::from_fn("mix", CircuitImpl::MIX_SIZE, |_| iop.random_elem());
-
-        // Make and compute accum data
-        let accum_size = CIRCUIT.accum_size();
-        let accum = CpuBuffer::from_fn("accum", self.steps * accum_size, |_| BabyBearElem::INVALID);
-        self.compute_accum(&mix, &accum);
-
-        {
-            // Zero out 'invalid' entries in accum and io
-            let mut accum_slice = accum.as_slice_mut();
-            let mut io = self.io.as_slice_mut();
-            for value in accum_slice.iter_mut().chain(io.iter_mut()) {
-                *value = value.valid_or_zero();
-            }
-
-            // Add random noise to end of accum and change invalid element to zero
-            let mut rng = thread_rng();
-            for i in self.steps - ZK_CYCLES..self.steps {
-                for j in 0..accum_size {
-                    accum_slice[j * self.steps + i] = BabyBearElem::random(&mut rng);
-                }
-            }
-        }
-
-        (mix, accum)
-    }
-
-    #[tracing::instrument(skip_all)]
-    fn compute_accum(&mut self, mix: &CpuBuffer<BabyBearElem>, accum: &CpuBuffer<BabyBearElem>) {
-        let args = &[
-            self.ctrl.as_slice_sync(),
-            self.io.as_slice_sync(),
-            self.data.as_slice_sync(),
-            mix.as_slice_sync(),
-            accum.as_slice_sync(),
-        ];
-        let accum: Mutex<Accum<BabyBearExtElem>> = Mutex::new(Accum::new(self.steps));
-        tracing::info_span!("step_compute_accum").in_scope(|| {
-            // TODO: Add a way to be able to run this on cuda, metal, etc.
-            (0..self.steps - ZK_CYCLES).into_par_iter().for_each_init(
-                || Handler::<BabyBear>::new(&accum),
-                |handler, cycle| {
-                    CIRCUIT
-                        .step_compute_accum(
-                            &CircuitStepContext {
-                                size: self.steps,
-                                cycle,
-                            },
-                            handler,
-                            args,
-                        )
-                        .unwrap();
-                },
-            );
-        });
-        tracing::info_span!("calc_prefix_products").in_scope(|| {
-            accum.lock().unwrap().calc_prefix_products();
-        });
-        tracing::info_span!("step_verify_accum").in_scope(|| {
-            (0..self.steps - ZK_CYCLES).into_par_iter().for_each_init(
-                || Handler::<BabyBear>::new(&accum),
-                |handler, cycle| {
-                    CIRCUIT
-                        .step_verify_accum(
-                            &CircuitStepContext {
-                                size: self.steps,
-                                cycle,
-                            },
-                            handler,
-                            args,
-                        )
-                        .unwrap();
-                },
-            );
         });
     }
 }

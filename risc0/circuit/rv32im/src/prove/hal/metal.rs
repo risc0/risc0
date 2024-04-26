@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::rc::Rc;
+use std::{collections::HashMap, rc::Rc};
 
 use metal::ComputePipelineDescriptor;
 use risc0_core::field::{
@@ -21,14 +21,20 @@ use risc0_core::field::{
 };
 use risc0_zkp::{
     core::log2_ceil,
+    field::Elem as _,
     hal::{
-        metal::{BufferImpl as MetalBuffer, MetalHal, MetalHalSha256, MetalHash, MetalHashSha256},
-        CircuitHal,
+        metal::{
+            BufferImpl as MetalBuffer, KernelArg, MetalHal, MetalHalSha256, MetalHash,
+            MetalHashSha256,
+        },
+        Buffer as _, CircuitHal,
     },
-    INV_RATE,
+    INV_RATE, ZK_CYCLES,
 };
 
 const METAL_LIB: &[u8] = include_bytes!(env!("RV32IM_METAL_PATH"));
+
+const KERNEL_NAMES: &[&str] = &["eval_check", "step_compute_accum", "step_verify_accum"];
 
 use crate::{
     prove::{engine::SegmentProverImpl, SegmentProver},
@@ -38,16 +44,20 @@ use crate::{
 #[derive(Debug)]
 pub struct MetalCircuitHal<MH: MetalHash> {
     hal: Rc<MetalHal<MH>>,
-    kernel: ComputePipelineDescriptor,
+    kernels: HashMap<String, ComputePipelineDescriptor>,
 }
 
 impl<MH: MetalHash> MetalCircuitHal<MH> {
     pub fn new(hal: Rc<MetalHal<MH>>) -> Self {
         let library = hal.device.new_library_with_data(METAL_LIB).unwrap();
-        let function = library.get_function("eval_check", None).unwrap();
-        let kernel = ComputePipelineDescriptor::new();
-        kernel.set_compute_function(Some(&function));
-        Self { hal, kernel }
+        let mut kernels = HashMap::new();
+        for name in KERNEL_NAMES {
+            let function = library.get_function(name, None).unwrap();
+            let pipeline = ComputePipelineDescriptor::new();
+            pipeline.set_compute_function(Some(&function));
+            kernels.insert(name.to_string(), pipeline);
+        }
+        Self { hal, kernels }
     }
 }
 
@@ -86,7 +96,7 @@ impl<MH: MetalHash> CircuitHal<MetalHal<MH>> for MetalCircuitHal<MH> {
             self.hal.cmd_queue.clone(),
             &[domain as u32],
         );
-        let buffers = &[
+        let args = [
             check.as_arg(),
             groups[REGISTER_GROUP_CTRL].as_arg(),
             groups[REGISTER_GROUP_DATA].as_arg(),
@@ -98,8 +108,73 @@ impl<MH: MetalHash> CircuitHal<MetalHal<MH>> for MetalCircuitHal<MH> {
             po2.as_arg(),
             size.as_arg(),
         ];
-        self.hal
-            .dispatch(&self.kernel, buffers, domain as u64, None);
+        let kernel = self.kernels.get("eval_check").unwrap();
+        self.hal.dispatch(&kernel, &args, domain as u64, None);
+    }
+
+    #[tracing::instrument(skip_all)]
+    fn accumulate(
+        &self,
+        ctrl: &MetalBuffer<BabyBearElem>,
+        io: &MetalBuffer<BabyBearElem>,
+        data: &MetalBuffer<BabyBearElem>,
+        mix: &MetalBuffer<BabyBearElem>,
+        accum: &MetalBuffer<BabyBearElem>,
+        steps: usize,
+    ) {
+        let count = steps - ZK_CYCLES;
+
+        let ram = vec![BabyBearExtElem::ONE; steps];
+        let ram = MetalBuffer::copy_from("ram", &self.hal.device, self.hal.cmd_queue.clone(), &ram);
+
+        let bytes = vec![BabyBearExtElem::ONE; steps];
+        let bytes = MetalBuffer::copy_from(
+            "bytes",
+            &self.hal.device,
+            self.hal.cmd_queue.clone(),
+            &bytes,
+        );
+
+        tracing::info_span!("step_compute_accum").in_scope(|| {
+            let args = [
+                KernelArg::Integer(steps as u32),
+                ctrl.as_arg(),
+                data.as_arg(),
+                mix.as_arg(),
+                ram.as_arg(),
+                bytes.as_arg(),
+            ];
+            let kernel = self.kernels.get("step_compute_accum").unwrap();
+            self.hal.dispatch(&kernel, &args, count as u64, None);
+        });
+
+        tracing::info_span!("prefix_products").in_scope(|| {
+            use risc0_zkp::hal::Hal as _;
+            self.hal.prefix_products(&ram);
+            self.hal.prefix_products(&bytes);
+        });
+
+        tracing::info_span!("step_verify_accum").in_scope(|| {
+            let args = [
+                KernelArg::Integer(steps as u32),
+                ctrl.as_arg(),
+                data.as_arg(),
+                mix.as_arg(),
+                ram.as_arg(),
+                bytes.as_arg(),
+                accum.as_arg(),
+            ];
+            let kernel = self.kernels.get("step_verify_accum").unwrap();
+            self.hal.dispatch(&kernel, &args, count as u64, None);
+        });
+
+        tracing::info_span!("zeroize").in_scope(|| {
+            self.hal
+                .dispatch_by_name("eltwise_zeroize_fp", &[accum.as_arg()], accum.size() as u64);
+
+            self.hal
+                .dispatch_by_name("eltwise_zeroize_fp", &[io.as_arg()], io.size() as u64);
+        });
     }
 }
 

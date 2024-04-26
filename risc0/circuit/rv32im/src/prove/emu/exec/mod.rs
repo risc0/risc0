@@ -89,8 +89,7 @@ pub trait SyscallContext {
     }
 
     /// Returns the current cycle count.
-    // TODO(breaking change): use `u64`
-    fn get_cycle(&self) -> usize;
+    fn get_cycle(&self) -> u64;
 }
 
 pub struct ExecutorResult {
@@ -712,8 +711,8 @@ impl<'a, 'b, S: Syscall> EmuContext for Executor<'a, 'b, S> {
 }
 
 impl<'a, 'b, S: Syscall> SyscallContext for Executor<'a, 'b, S> {
-    fn get_cycle(&self) -> usize {
-        self.cycles.user
+    fn get_cycle(&self) -> u64 {
+        self.cycles.user as u64
     }
 
     fn peek_register(&mut self, idx: usize) -> Result<u32> {
