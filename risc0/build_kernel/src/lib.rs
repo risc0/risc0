@@ -135,30 +135,51 @@ impl KernelBuild {
     }
 
     fn compile_cuda(&mut self, output: &str) {
+        println!("cargo:rerun-if-env-changed=RISC0_CUDA_DEBUG");
+        println!("cargo:rerun-if-env-changed=RISC0_CUDA_OPT");
+        println!("cargo:rerun-if-env-changed=RISC0_NVCC_FLAGS");
+
+        let mut flags = vec![];
+        if let Ok(nvcc_flags) = env::var("RISC0_NVCC_FLAGS") {
+            flags.push(nvcc_flags);
+        } else {
+            flags.push("-arch=native".into());
+        }
+
+        fn enable_debug(output: &str) -> bool {
+            if let Ok(debug) = env::var("RISC0_CUDA_DEBUG") {
+                return debug.contains(output);
+            }
+            false
+        }
+
+        if enable_debug(output) {
+            flags.push("-G".into());
+        } else {
+            // Note: we default to -O1 because O3 can upwards of 5 hours (or more)
+            // to compile on the current CUDA toolchain. Using O1 only shows a ~10%
+            // decrease in performance but a compile time in the minutes. Use
+            // RISC0_CUDA_OPT=3 for any performance critical releases / builds / testing
+            let ptx_opt_level = env::var("RISC0_CUDA_OPT").unwrap_or("1".into());
+            flags.push(format!("--ptxas-options=-O{ptx_opt_level}"));
+        }
+
         self.cached_compile(
             output,
             "fatbin",
             CUDA_INCS,
-            |_out_dir, out_path, sys_inc_dir| {
-                println!("cargo:rerun-if-env-changed=RISC0_CUDA_OPT");
-                println!("cargo:rerun-if-env-changed=NVCC_PREPEND_FLAGS");
-                println!("cargo:rerun-if-env-changed=NVCC_APPEND_FLAGS");
-
+            &flags,
+            |_out_dir, out_path, sys_inc_dir, flags| {
                 let mut cmd = Command::new("nvcc");
                 cmd.arg("--fatbin");
                 cmd.arg("-o").arg(out_path);
                 cmd.args(self.files.iter());
                 cmd.arg("-I").arg(sys_inc_dir);
 
-                // Note: we default to -O1 because O3 can upwards of 5 hours (or more)
-                // to compile on the current CUDA toolchain. Using O1 only shows a ~10%
-                // decrease in performance but a compile time in the minutes. Use
-                // RISC0_CUDA_OPT=3 for any performance critical releases / builds / testing
-                let ptx_opt_level = env::var("RISC0_CUDA_OPT").unwrap_or_else(|_| "1".to_string());
-                cmd.arg(format!("--ptxas-options=-O{ptx_opt_level}"));
                 for inc_dir in self.inc_dirs.iter() {
                     cmd.arg("-I").arg(inc_dir);
                 }
+                cmd.args(flags);
                 let status = cmd
                     .status()
                     .expect("Failed to run 'nvcc', do you have the CUDA toolkit installed?");
@@ -174,7 +195,8 @@ impl KernelBuild {
             output,
             "metallib",
             METAL_INCS,
-            |out_dir, out_path, sys_inc_dir| {
+            &[],
+            |out_dir, out_path, sys_inc_dir, _flags| {
                 let mut air_paths = vec![];
                 for src in self.files.iter() {
                     let out_path = out_dir.join(src).with_extension("").with_extension("air");
@@ -213,11 +235,12 @@ impl KernelBuild {
         );
     }
 
-    fn cached_compile<F: Fn(&Path, &Path, &Path)>(
+    fn cached_compile<F: Fn(&Path, &Path, &Path, &[String])>(
         &self,
         output: &str,
         extension: &str,
         assets: &[(&str, &str)],
+        flags: &[String],
         inner: F,
     ) {
         let out_dir = env::var("OUT_DIR").map(PathBuf::from).unwrap();
@@ -231,6 +254,9 @@ impl KernelBuild {
 
         let temp_dir = tempdir_in(&cache_dir).unwrap();
         let mut hasher = Hasher::new();
+        for flag in flags {
+            hasher.add_flag(flag);
+        }
         for src in self.files.iter() {
             hasher.add_file(src);
         }
@@ -250,7 +276,7 @@ impl KernelBuild {
         if !cache_path.is_file() {
             let tmp_dir = temp_dir.path();
             let tmp_path = tmp_dir.join(output).with_extension(extension);
-            inner(tmp_dir, &tmp_path, &sys_inc_dir);
+            inner(tmp_dir, &tmp_path, &sys_inc_dir, flags);
             fs::rename(tmp_path, &cache_path).unwrap();
         }
         fs::copy(cache_path, &out_path).unwrap();
@@ -273,6 +299,10 @@ struct Hasher {
 impl Hasher {
     pub fn new() -> Self {
         Self { sha: Sha256::new() }
+    }
+
+    pub fn add_flag(&mut self, flag: &str) {
+        self.sha.update(flag);
     }
 
     pub fn add_file<P: AsRef<Path>>(&mut self, path: P) {

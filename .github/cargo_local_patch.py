@@ -20,7 +20,7 @@ def modify_dependency(details, new_path, start_directory):
     if isinstance(details, str):
         details = {'version': details}  # Convert to dictionary with version key
     # Now details is guaranteed to be a dictionary
-    # Skip if the depdendency uses the workspace definition
+    # Skip if the dependency uses the workspace definition
     if details.get('workspace') is not True:
         current_path = details.get('path')
         if current_path and is_subdirectory(current_path, start_directory):

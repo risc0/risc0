@@ -24,7 +24,7 @@ use bytes::Bytes;
 use risc0_binfmt::{MemoryImage, Program};
 use risc0_zkvm_methods::{
     multi_test::{MultiTestSpec, SYS_MULTI_TEST},
-    HELLO_COMMIT_ELF, MULTI_TEST_ELF, RAND_ELF, SLICE_IO_ELF, STANDARD_LIB_ELF,
+    BLST_ELF, HELLO_COMMIT_ELF, MULTI_TEST_ELF, RAND_ELF, SLICE_IO_ELF, STANDARD_LIB_ELF,
 };
 use risc0_zkvm_platform::{fileno, syscall::nr::SYS_RANDOM, PAGE_SIZE, WORD_SIZE};
 use sha2::{Digest as _, Sha256};
@@ -54,6 +54,16 @@ fn run_test(spec: MultiTestSpec) {
         .run()
         .unwrap();
     assert_eq!(session.exit_code, ExitCode::Halted(0));
+}
+
+#[test]
+fn cpp_test() {
+    let session = ExecutorImpl::from_elf(ExecutorEnv::default(), BLST_ELF)
+        .unwrap()
+        .run()
+        .unwrap();
+    let message: String = session.journal.unwrap().decode().unwrap();
+    assert_eq!(message.as_str(), "blst is such a blast");
 }
 
 #[test]
@@ -516,7 +526,7 @@ mod sys_verify {
 
     fn exec_pause(exit_code: u8) -> Session {
         let env = ExecutorEnvBuilder::default()
-            .write(&MultiTestSpec::PauseContinue(exit_code))
+            .write(&MultiTestSpec::PauseResume(exit_code))
             .unwrap()
             .build()
             .unwrap();
@@ -1106,6 +1116,11 @@ fn aligned_alloc() {
 }
 
 #[test]
+fn alloc_zeroed() {
+    run_test(MultiTestSpec::AllocZeroed);
+}
+
+#[test]
 #[should_panic(expected = "too small")]
 fn too_many_sha() {
     run_test(MultiTestSpec::TooManySha);
@@ -1193,7 +1208,7 @@ mod docker {
     #[test]
     fn session_limit() {
         fn run_session(
-            loop_cycles: u32,
+            loop_cycles: u64,
             segment_limit_po2: u32,
             session_count_limit: u64,
         ) -> anyhow::Result<Session> {

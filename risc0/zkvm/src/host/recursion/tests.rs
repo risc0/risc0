@@ -19,7 +19,6 @@ use risc0_zkp::{
     field::baby_bear::BabyBearElem,
 };
 use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID};
-use serial_test::serial;
 use test_log::test;
 
 use super::{
@@ -27,8 +26,9 @@ use super::{
     ProverOpts as RecursionProverOpts,
 };
 use crate::{
-    get_prover_server, ExecutorEnv, ExecutorImpl, InnerReceipt, ProverOpts, Receipt,
-    SegmentReceipt, Session, VerifierContext,
+    default_prover, get_prover_server, host::client::prove::ReceiptKind, ExecutorEnv, ExecutorImpl,
+    InnerReceipt, ProverOpts, Receipt, SegmentReceipt, Session, VerifierContext,
+    ALLOWED_CONTROL_ROOT,
 };
 
 // Failure on older mac minis in the lab with Intel UHD 630 graphics:
@@ -37,7 +37,6 @@ use crate::{
     not(all(feature = "metal", target_os = "macos", target_arch = "x86_64")),
     test
 )]
-#[serial]
 fn test_recursion_poseidon254() {
     use risc0_zkp::core::{digest::Digest, hash::poseidon2::Poseidon2HashSuite};
 
@@ -64,7 +63,7 @@ fn test_recursion_poseidon254() {
     const DIGEST_SHORTS: usize = DIGEST_WORDS * 2;
     assert_eq!(CircuitImpl::OUTPUT_SIZE, DIGEST_SHORTS * 2);
     let output_elems: &[BabyBearElem] =
-        bytemuck::cast_slice(&receipt.seal[..CircuitImpl::OUTPUT_SIZE]);
+        bytemuck::checked::cast_slice(&receipt.seal[..CircuitImpl::OUTPUT_SIZE]);
     let output_digest = shorts_to_digest(&output_elems[DIGEST_SHORTS..2 * DIGEST_SHORTS]);
 
     tracing::debug!("Receipt output: {:?}", output_digest);
@@ -77,7 +76,6 @@ fn test_recursion_poseidon254() {
     not(all(feature = "metal", target_os = "macos", target_arch = "x86_64")),
     test
 )]
-#[serial]
 fn test_recursion_poseidon2() {
     use risc0_zkp::core::{digest::Digest, hash::poseidon2::Poseidon2HashSuite};
 
@@ -107,11 +105,45 @@ fn test_recursion_poseidon2() {
     const DIGEST_SHORTS: usize = DIGEST_WORDS * 2;
     assert_eq!(CircuitImpl::OUTPUT_SIZE, DIGEST_SHORTS * 2);
     let output_elems: &[BabyBearElem] =
-        bytemuck::cast_slice(&receipt.seal[..CircuitImpl::OUTPUT_SIZE]);
+        bytemuck::checked::cast_slice(&receipt.seal[..CircuitImpl::OUTPUT_SIZE]);
     let output_digest = shorts_to_digest(&output_elems[DIGEST_SHORTS..2 * DIGEST_SHORTS]);
 
     tracing::debug!("Receipt output: {:?}", output_digest);
     assert_eq!(output_digest, *expected);
+}
+
+#[cfg_attr(
+    not(all(feature = "metal", target_os = "macos", target_arch = "x86_64")),
+    test
+)]
+#[should_panic(expected = "assertion failed: elem.is_reduced()")]
+fn test_poseidon_sanitized_inputs() {
+    use risc0_zkp::core::{digest::Digest, hash::poseidon::PoseidonHashSuite};
+
+    let suite = PoseidonHashSuite::new_suite();
+
+    // Add two digests, one of which has an element >= the Baby Bear prime
+    // Then `hash_pair` should fail as its inputs aren't in reduced form
+    let digest1 = Digest::from([2013265921, 1, 2, 3, 4, 5, 6, 7]);
+    let digest2 = Digest::from([8, 9, 10, 11, 12, 13, 14, 15]);
+    let _expect_assert = suite.hashfn.hash_pair(&digest1, &digest2);
+}
+
+#[cfg_attr(
+    not(all(feature = "metal", target_os = "macos", target_arch = "x86_64")),
+    test
+)]
+#[should_panic(expected = "assertion failed: elem.is_reduced()")]
+fn test_poseidon2_sanitized_inputs() {
+    use risc0_zkp::core::{digest::Digest, hash::poseidon2::Poseidon2HashSuite};
+
+    let suite = Poseidon2HashSuite::new_suite();
+
+    // Add two digests, one of which has an element >= the Baby Bear prime
+    // Then `hash_pair` should fail as its inputs aren't in reduced form
+    let digest1 = Digest::from([2013265921, 1, 2, 3, 4, 5, 6, 7]);
+    let digest2 = Digest::from([8, 9, 10, 11, 12, 13, 14, 15]);
+    let _expect_assert = suite.hashfn.hash_pair(&digest1, &digest2);
 }
 
 fn shorts_to_digest(elems: &[BabyBearElem]) -> Digest {
@@ -142,6 +174,7 @@ fn generate_busy_loop_segments(hashfn: &str) -> (Session, Vec<SegmentReceipt>) {
     let opts = ProverOpts {
         hashfn: hashfn.to_string(),
         prove_guest_errors: false,
+        receipt_kind: ReceiptKind::Composite,
     };
     let prover = get_prover_server(&opts).unwrap();
 
@@ -162,7 +195,6 @@ fn generate_busy_loop_segments(hashfn: &str) -> (Session, Vec<SegmentReceipt>) {
     not(all(feature = "metal", target_os = "macos", target_arch = "x86_64")),
     test
 )]
-#[serial]
 fn test_recursion_lift_join_identity_e2e() {
     // Prove the base case
     let (session, segments) = generate_busy_loop_segments("poseidon2");
@@ -201,7 +233,6 @@ fn test_recursion_lift_join_identity_e2e() {
     not(all(feature = "metal", target_os = "macos", target_arch = "x86_64")),
     test
 )]
-#[serial]
 fn test_recursion_lift_resolve_e2e() {
     let opts = ProverOpts::default();
     let prover = get_prover_server(&opts).unwrap();
@@ -214,7 +245,7 @@ fn test_recursion_lift_resolve_e2e() {
         .unwrap()
         .build()
         .unwrap();
-    let assumption_receipt_a = prover.prove(env, MULTI_TEST_ELF).unwrap();
+    let assumption_receipt_a = prover.prove(env, MULTI_TEST_ELF).unwrap().receipt;
     tracing::info!("Done proving: echo 'execution A'");
 
     tracing::info!("Proving: echo 'execution B'");
@@ -225,7 +256,7 @@ fn test_recursion_lift_resolve_e2e() {
         .unwrap()
         .build()
         .unwrap();
-    let assumption_receipt_b = prover.prove(env, MULTI_TEST_ELF).unwrap();
+    let assumption_receipt_b = prover.prove(env, MULTI_TEST_ELF).unwrap().receipt;
     tracing::info!("Done proving: echo 'execution B'");
 
     let env = ExecutorEnv::builder()
@@ -240,7 +271,7 @@ fn test_recursion_lift_resolve_e2e() {
         .unwrap();
 
     tracing::info!("Proving: sys_verify");
-    let composition_receipt = prover.prove(env, MULTI_TEST_ELF).unwrap();
+    let composition_receipt = prover.prove(env, MULTI_TEST_ELF).unwrap().receipt;
     tracing::info!("Done proving: sys_verify");
 
     let succinct_receipt = prover
@@ -249,8 +280,27 @@ fn test_recursion_lift_resolve_e2e() {
 
     let receipt = Receipt::new(
         InnerReceipt::Succinct(succinct_receipt),
-        composition_receipt.journal.bytes,
+        composition_receipt.clone().journal.bytes,
     );
 
     receipt.verify(MULTI_TEST_ID).unwrap();
+
+    // These tests take a long time. Since we have the composition receipt, test the prover trait's compress function
+    let prover = default_prover();
+
+    let succinct_receipt = prover
+        .compress(&ProverOpts::default(), &composition_receipt)
+        .unwrap();
+    succinct_receipt.verify(MULTI_TEST_ID).unwrap();
+}
+
+#[test]
+fn stable_root() {
+    // This tests that none of the control IDs have changed unexpectedly.
+    // If you have _intentionally_ changed control IDs, update this hash.
+
+    assert_eq!(
+        ALLOWED_CONTROL_ROOT,
+        "75310e05f78b6d149d87c66ea5e2eb0b3d5afc45f0581017319c9f4cfd865113"
+    );
 }

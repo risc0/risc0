@@ -114,7 +114,7 @@ impl<'a, Ext: Externs> Preflight<'a, Ext> {
                 let mut load = self.externs.wom_read(addr).elems()[0];
                 if do_mont != 0 {
                     // Convert from montgomery form
-                    load = load * Fp::from(943718400u32);
+                    load *= Fp::from(943718400u32);
                 }
                 trace!("  loading[{i}]: {load:?}");
                 self.poseidon2_state[group * 8 + i] += load;
@@ -142,7 +142,7 @@ impl<'a, Ext: Externs> Preflight<'a, Ext> {
                 let mut store = self.poseidon2_state[group * 8 + i];
                 if do_mont != 0 {
                     // Convert to montgomery form
-                    store = store * Fp::from(268435454u32);
+                    store *= Fp::from(268435454u32);
                 }
                 trace!("  storing[{i}]: {store:?}");
                 self.externs.wom_write(addr, FpExt::from(store));
@@ -174,7 +174,7 @@ impl<'a, Ext: Externs> Preflight<'a, Ext> {
         let opcode = macro_ops.opcode;
         let arg: [Fp; 3] = core::array::from_fn(|i| self.get(code, macro_ops.operand[i]));
         let u32arg: [u32; 3] = core::array::from_fn(|i| arg[i].into());
-        let write_addr = self.get(code, LAYOUT.code.write_addr).into();
+        let write_addr = self.get(code, LAYOUT.code.write_addr);
 
         trace!("write_addr = {write_addr:?}");
 
@@ -241,13 +241,12 @@ impl<'a, Ext: Externs> Preflight<'a, Ext> {
             let io0 = self.externs.wom_read(arg[0]);
             trace!("Reading sha from wom {:?}, got {io0:?}", arg[0]);
             let subtype = u32arg[2];
-            let val: u32;
-            if subtype == 0 {
+            let val: u32 = if subtype == 0 {
                 // Montgomery encoded.
-                val = io0.elems()[0].as_u32_montgomery();
+                io0.elems()[0].as_u32_montgomery()
             } else {
-                val = u32::from(u32::from(io0.elems()[0]) + (u32::from(io0.elems()[1]) << 16));
-            }
+                u32::from(io0.elems()[0]) + (u32::from(io0.elems()[1]) << 16)
+            };
             trace!(
                 "sha_load {:x?} (from {:?}) (subtype = {subtype})",
                 val.to_be(),
@@ -398,8 +397,8 @@ impl<'a, Ext: Externs> Preflight<'a, Ext> {
                     // instruction that wrote to the previous WOM address.
                     let prev = self.externs.wom_read(write_addr - Fp::ONE).elems()[0];
                     trace!("mix_rng prev={prev:?}");
-                    val = val * prev;
-                    self.set_not_splittable(&ctx)
+                    val *= prev;
+                    self.set_not_splittable(ctx)
                 }
                 let a = self.externs.wom_read(arg[0]);
                 let b = self.externs.wom_read(arg[1]);

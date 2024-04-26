@@ -134,7 +134,12 @@ impl<'a> ExecutorImpl<'a> {
             .unwrap_or(DEFAULT_SEGMENT_LIMIT_PO2 as u32) as usize;
 
         let mut refs = Vec::new();
-        let mut exec = Executor::new(self.image.clone(), self, self.env.trace.clone());
+        let mut exec = Executor::new(
+            self.image.clone(),
+            self,
+            self.env.input_digest,
+            self.env.trace.clone(),
+        );
 
         let start_time = Instant::now();
         let result = exec.run(segment_limit_po2, self.env.session_limit, |inner| {
@@ -176,7 +181,7 @@ impl<'a> ExecutorImpl<'a> {
                 inner,
                 output,
             };
-            let segment_ref = callback(segment.into())?;
+            let segment_ref = callback(segment)?;
             refs.push(segment_ref);
             Ok(())
         })?;
@@ -207,6 +212,7 @@ impl<'a> ExecutorImpl<'a> {
 
         let session = Session::new(
             refs,
+            self.env.input_digest.unwrap_or_default(),
             session_journal,
             result.exit_code,
             result.post_image,
@@ -231,7 +237,7 @@ struct ContextAdapter<'a> {
 }
 
 impl<'a> SyscallContext for ContextAdapter<'a> {
-    fn get_cycle(&self) -> usize {
+    fn get_cycle(&self) -> u64 {
         self.ctx.get_cycle()
     }
 
@@ -253,10 +259,10 @@ impl<'a> NewSyscall for ExecutorImpl<'a> {
     ) -> Result<(u32, u32)> {
         let mut ctx = ContextAdapter { ctx };
         self.syscall_table
-            .get_syscall(&syscall)
+            .get_syscall(syscall)
             .context(format!("Unknown syscall: {syscall:?}"))?
             .borrow_mut()
-            .syscall(&syscall, &mut ctx, into_guest)
+            .syscall(syscall, &mut ctx, into_guest)
     }
 }
 

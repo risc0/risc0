@@ -21,20 +21,17 @@ pub mod dual;
 #[cfg(feature = "metal")]
 pub mod metal;
 
-use std::{fmt::Debug, sync::Mutex};
+use std::{
+    fmt::Debug,
+    sync::{Mutex, OnceLock},
+};
 
-use bytemuck::Pod;
-use lazy_static::lazy_static;
 use risc0_core::field::{Elem, ExtElem, Field, RootsOfUnity};
 
 use crate::{
     core::{digest::Digest, hash::HashSuite},
     INV_RATE,
 };
-
-lazy_static! {
-    static ref TRACKER: Mutex<MemoryTracker> = Mutex::new(MemoryTracker::new());
-}
 
 pub trait Buffer<T>: Clone {
     fn name(&self) -> &'static str;
@@ -52,14 +49,14 @@ pub trait Hal {
     type Field: Field<Elem = Self::Elem, ExtElem = Self::ExtElem>;
     type Elem: Elem + RootsOfUnity;
     type ExtElem: ExtElem<SubElem = Self::Elem>;
-    type Buffer<T: Clone + Debug + PartialEq + Pod>: Buffer<T>;
+    type Buffer<T: Clone + Debug + PartialEq>: Buffer<T>;
 
     const CHECK_SIZE: usize = INV_RATE * Self::ExtElem::EXT_SIZE;
 
     fn has_unified_memory(&self) -> bool;
 
     fn get_memory_usage(&self) -> usize {
-        TRACKER.lock().unwrap().peak
+        tracker().lock().unwrap().peak
     }
 
     fn get_hash_suite(&self) -> &HashSuite<Self::Field>;
@@ -151,6 +148,8 @@ pub trait Hal {
         size: usize,
         stride: usize,
     );
+
+    fn prefix_products(&self, io: &Self::Buffer<Self::ExtElem>);
 }
 
 pub trait CircuitHal<H: Hal> {
@@ -166,6 +165,21 @@ pub trait CircuitHal<H: Hal> {
         po2: usize,
         steps: usize,
     );
+
+    fn accumulate(
+        &self,
+        ctrl: &H::Buffer<H::Elem>,
+        io: &H::Buffer<H::Elem>,
+        data: &H::Buffer<H::Elem>,
+        mix: &H::Buffer<H::Elem>,
+        accum: &H::Buffer<H::Elem>,
+        steps: usize,
+    );
+}
+
+fn tracker() -> &'static Mutex<MemoryTracker> {
+    static ONCE: OnceLock<Mutex<MemoryTracker>> = OnceLock::new();
+    ONCE.get_or_init(|| Mutex::new(MemoryTracker::new()))
 }
 
 struct MemoryTracker {
@@ -194,7 +208,10 @@ mod testutil {
     use std::rc::Rc;
 
     use rand::{thread_rng, RngCore};
-    use risc0_core::field::{baby_bear::BabyBearElem, Elem, ExtElem};
+    use risc0_core::field::{
+        baby_bear::{BabyBearElem, BabyBearExtElem},
+        Elem, ExtElem,
+    };
 
     use super::{dual::DualHal, Hal};
     use crate::{

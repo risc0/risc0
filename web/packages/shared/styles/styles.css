@@ -36,6 +36,10 @@
   @apply tracking-wider;
 }
 
+html {
+  @apply scroll-smooth
+}
+
 .font-mono {
   /* reset the `tracking-wider` on the monospace font */
   letter-spacing: initial;
@@ -44,4 +48,8 @@
 .lucide {
   /* bigger stroke for ALL icons */
   stroke-width: 1.75px !important;
+}
+
+a {
+  @apply focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring
 }

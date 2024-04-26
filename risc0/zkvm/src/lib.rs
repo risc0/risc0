@@ -121,7 +121,7 @@ pub use {
             env::{ExecutorEnv, ExecutorEnvBuilder},
             prove::{
                 bonsai::BonsaiProver, default_executor, default_prover, external::ExternalProver,
-                Executor, Prover, ProverOpts,
+                Executor, Prover, ProverOpts, ReceiptKind,
             },
         },
     },
@@ -130,11 +130,12 @@ pub use {
 #[cfg(not(target_os = "zkvm"))]
 pub use {
     self::host::{
+        prove_info::{ProveInfo, SessionStats},
         receipt::{
             Assumption, CompactReceipt, CompositeReceipt, InnerReceipt, Journal, Receipt,
             SegmentReceipt, SuccinctReceipt, VerifierContext,
         },
-        recursion::ALLOWED_IDS_ROOT,
+        recursion::ALLOWED_CONTROL_ROOT,
     },
     risc0_binfmt::compute_image_id,
     risc0_circuit_rv32im::control_id::POSEIDON2_CONTROL_ID,

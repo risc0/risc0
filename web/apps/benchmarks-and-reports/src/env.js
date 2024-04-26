@@ -1,11 +1,15 @@
+import { vercel } from "@t3-oss/env-core/presets";
 import { createEnv } from "@t3-oss/env-nextjs";
 import { z } from "zod";
 
 const env = createEnv({
+  extends: [vercel()],
+
   /**
    * Specify server-side environment variables schema here.
    */
   server: {
+    GITHUB_PAT: z.string(),
     NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   },
 
@@ -21,6 +25,7 @@ const env = createEnv({
    */
   runtimeEnv: {
     NODE_ENV: process.env.NODE_ENV,
+    GITHUB_PAT: process.env.GITHUB_PAT,
   },
   /**
    * Makes it so that empty strings are treated as undefined.

@@ -4,22 +4,21 @@ import { Tooltip, TooltipArrow, TooltipContent, TooltipTrigger } from "@risc0/ui
 import { joinWords } from "shared/utils/join-words";
 import type { CratesIoValidationTableSchema } from "./crates-io-validation-table-schema";
 
-type CratesIoValidationSummaryProps = {
-  data: CratesIoValidationTableSchema[];
-};
-
-export function CratesIoValidationSummary({ data }: CratesIoValidationSummaryProps) {
+export function CratesIoValidationSummary({ data }: { data: CratesIoValidationTableSchema[] }) {
   return (
     <div className="mt-2 mb-8 flex flex-row flex-wrap">
       {data.map((item) => (
         <Tooltip key={item.name} disableHoverableContent delayDuration={0}>
           <TooltipTrigger asChild>
             <a
-              className="p-[0.5px] group"
+              className="group p-[0.5px]"
               href={`https://crates.io/crates/${item.name}${item.version ? `/${item.version}` : ""}`}
               target="_blank"
               rel="noopener noreferrer"
             >
+              <span className="sr-only">{`https://crates.io/crates/${item.name}${
+                item.version ? `/${item.version}` : ""
+              }`}</span>
               <div
                 className={cn(
                   item.status === "Success"

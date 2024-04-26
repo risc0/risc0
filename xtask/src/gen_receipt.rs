@@ -30,7 +30,8 @@ impl GenReceipt {
         let receipt = get_prover_server(&opts)
             .unwrap()
             .prove(env, FIB_ELF)
-            .unwrap();
+            .unwrap()
+            .receipt;
         let receipt_bytes = bincode::serialize(&receipt).unwrap();
 
         let rust_code = format!(

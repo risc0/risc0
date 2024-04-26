@@ -31,9 +31,9 @@
 /// - Otherwise have as large a power of 2 in the factors of P-1 as possible.
 ///
 /// This last property is useful for number theoretical transforms (the fast fourier transform
-/// equivelant on finite fields).  See NTT.h for details.
+/// equivalent on finite fields).  See NTT.h for details.
 ///
-/// The Fp class wraps all the standard arithmatic operations to make the finite field elements look
+/// The Fp class wraps all the standard arithmetic operations to make the finite field elements look
 /// basically like ordinary numbers (which they mostly are).
 class Fp {
 public:
@@ -41,6 +41,7 @@ public:
   static constant uint32_t P = 15 * (uint32_t(1) << 27) + 1;
   static constant uint32_t M = 0x88000001;
   static constant uint32_t R2 = 1172168163;
+  static constant uint32_t INVALID = 0xfffffffful;
 
 private:
   // The actual value, always < P.
@@ -77,7 +78,7 @@ private:
 
   static constexpr uint32_t decode(uint32_t a) { return mul(1, a); }
 
-  // A private constructor that take the 'interal' form.
+  // A private constructor that take the 'internal' form.
   constexpr Fp(uint32_t val, bool ignore) : val(val) {}
 
 public:
@@ -102,7 +103,14 @@ public:
   static constexpr Fp maxVal() { return P - 1; }
 
   /// Get an 'invalid' Fp value
-  static constexpr Fp invalid() { return Fp(0xfffffffful, true); }
+  static constexpr Fp invalid() { return Fp(INVALID, true); }
+
+  constexpr inline Fp zeroize() {
+    if (val == INVALID) {
+      val = 0;
+    }
+    return *this;
+  }
 
   // Implement all the various overloads
   constexpr void operator=(uint32_t rhs) { val = encode(rhs); }
@@ -208,9 +216,9 @@ constexpr inline Fp pow(Fp x, size_t n) {
 }
 
 /// Compute the multiplicative inverse of x, or `1/x` in finite field terms.  Since `x^(P-1) == 1
-/// (mod P)` for any x != 0 (as a consequence of Fermat's little therorm), it follows that `x *
+/// (mod P)` for any x != 0 (as a consequence of Fermat's little theorem), it follows that `x *
 /// x^(P-2) == 1 (mod P)` for x != 0.  That is, `x^(P-2)` is the multiplicative inverse of x.
-/// Computed this way, the 'inverse' of zero comes out as zero, which is convient in many cases, so
+/// Computed this way, the 'inverse' of zero comes out as zero, which is convenient in many cases, so
 /// we leave it.
 constexpr inline Fp inv(Fp x) {
   return pow(x, Fp::P - 2);

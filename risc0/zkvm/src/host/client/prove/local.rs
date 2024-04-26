@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use anyhow::Result;
+use anyhow::{bail, Result};
 
 use super::{Executor, Prover, ProverOpts};
 use crate::{
-    get_prover_server, host::server::session::NullSegmentRef, ExecutorEnv, ExecutorImpl, Receipt,
-    SegmentInfo, SessionInfo, VerifierContext,
+    get_prover_server, host::server::session::NullSegmentRef, ExecutorEnv, ExecutorImpl,
+    InnerReceipt, ProveInfo, Receipt, SegmentInfo, SessionInfo, VerifierContext,
 };
 
 /// A [Prover] implementation that selects a [crate::ProverServer] by calling
@@ -42,12 +42,25 @@ impl Prover for LocalProver {
         ctx: &VerifierContext,
         elf: &[u8],
         opts: &ProverOpts,
-    ) -> Result<Receipt> {
+    ) -> Result<ProveInfo> {
         get_prover_server(opts)?.prove_with_ctx(env, ctx, elf)
     }
 
     fn get_name(&self) -> String {
         self.name.clone()
+    }
+
+    fn compress(&self, opts: &ProverOpts, receipt: &Receipt) -> Result<Receipt> {
+        match receipt.inner {
+            InnerReceipt::Succinct(_) | InnerReceipt::Compact(_) => Ok(receipt.clone()),
+            InnerReceipt::Composite(ref inner) => Ok(Receipt {
+                inner: InnerReceipt::Succinct(get_prover_server(opts)?.compress(inner)?),
+                journal: receipt.journal.clone(),
+            }),
+            InnerReceipt::Fake { .. } => {
+                bail!("BonsaiProver does not support compress on a composite receipt")
+            }
+        }
     }
 }
 
@@ -64,7 +77,7 @@ impl Executor for LocalProver {
         })?;
         Ok(SessionInfo {
             segments,
-            journal: session.journal.unwrap_or_default().into(),
+            journal: session.journal.unwrap_or_default(),
             exit_code: session.exit_code,
         })
     }

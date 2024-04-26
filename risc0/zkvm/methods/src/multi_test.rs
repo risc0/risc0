@@ -38,7 +38,7 @@ pub enum MultiTestSpec {
     Panic,
     Fault,
     Halt(u8),
-    PauseContinue(u8),
+    PauseResume(u8),
     ReadWriteMem {
         /// Tuples of (address, value). Zero means read the value and
         /// output it; nonzero means write that value.
@@ -48,6 +48,7 @@ pub enum MultiTestSpec {
         count: u32,
     },
     DoRandom,
+    SysInput(Digest),
     SysRead {
         // Buffer to read to
         buf: Vec<u8>,
@@ -78,7 +79,7 @@ pub enum MultiTestSpec {
     },
     BusyLoop {
         /// Busy loop until the guest has run for at least this number of cycles
-        cycles: u32,
+        cycles: u64,
     },
     LibM,
     Oom,
@@ -88,6 +89,7 @@ pub enum MultiTestSpec {
     SysLogInvalidAddr,
     TooManySha,
     AlignedAlloc,
+    AllocZeroed,
 }
 
 declare_syscall!(pub SYS_MULTI_TEST);

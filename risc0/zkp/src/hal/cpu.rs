@@ -16,7 +16,6 @@
 
 use std::{fmt::Debug, ops::Range, sync::Arc};
 
-use bytemuck::Pod;
 use ndarray::{ArrayView, ArrayViewMut, Axis};
 use parking_lot::{
     MappedRwLockReadGuard, MappedRwLockWriteGuard, RwLock, RwLockReadGuard, RwLockWriteGuard,
@@ -24,7 +23,7 @@ use parking_lot::{
 use rayon::prelude::*;
 use risc0_core::field::{Elem, ExtElem, Field};
 
-use super::{Buffer, Hal, TRACKER};
+use super::{tracker, Buffer, Hal};
 use crate::{
     core::{
         digest::Digest,
@@ -69,7 +68,7 @@ struct TrackedVec<T>(Vec<T>);
 
 impl<T> TrackedVec<T> {
     pub fn new(vec: Vec<T>) -> Self {
-        TRACKER
+        tracker()
             .lock()
             .unwrap()
             .alloc(vec.capacity() * std::mem::size_of::<T>());
@@ -79,7 +78,7 @@ impl<T> TrackedVec<T> {
 
 impl<T> Drop for TrackedVec<T> {
     fn drop(&mut self) {
-        TRACKER
+        tracker()
             .lock()
             .unwrap()
             .free(self.0.capacity() * std::mem::size_of::<T>());
@@ -93,7 +92,7 @@ pub struct CpuBuffer<T> {
     region: Region,
 }
 
-enum SyncSliceRef<'a, T: Default + Clone + Pod> {
+enum SyncSliceRef<'a, T: Default + Clone> {
     FromBuf(MappedRwLockWriteGuard<'a, [T]>),
     FromSlice(&'a SyncSlice<'a, T>),
 }
@@ -101,7 +100,7 @@ enum SyncSliceRef<'a, T: Default + Clone + Pod> {
 /// A buffer which can be used across multiple threads.  Users are
 /// responsible for ensuring that no two threads access the same
 /// element at the same time.
-pub struct SyncSlice<'a, T: Default + Clone + Pod> {
+pub struct SyncSlice<'a, T: Default + Clone> {
     _buf: SyncSliceRef<'a, T>,
     ptr: *mut T,
     size: usize,
@@ -112,9 +111,9 @@ pub struct SyncSlice<'a, T: Default + Clone + Pod> {
 //
 // The user of the SyncSlice is responsible for ensuring that no
 // two threads access the same elements at the same time.
-unsafe impl<'a, T: Default + Clone + Pod> Sync for SyncSlice<'a, T> {}
+unsafe impl<'a, T: Default + Clone> Sync for SyncSlice<'a, T> {}
 
-impl<'a, T: Default + Clone + Pod> SyncSlice<'a, T> {
+impl<'a, T: Default + Clone> SyncSlice<'a, T> {
     pub fn new(mut buf: MappedRwLockWriteGuard<'a, [T]>) -> Self {
         let ptr = buf.as_mut_ptr();
         let size = buf.len();
@@ -158,7 +157,7 @@ impl<'a, T: Default + Clone + Pod> SyncSlice<'a, T> {
     }
 }
 
-impl<T: Default + Clone + Pod> CpuBuffer<T> {
+impl<T: Default + Clone> CpuBuffer<T> {
     fn new(name: &'static str, size: usize) -> Self {
         let buf = vec![T::default(); size];
         CpuBuffer {
@@ -173,10 +172,9 @@ impl<T: Default + Clone + Pod> CpuBuffer<T> {
     }
 
     fn copy_from(name: &'static str, slice: &[T]) -> Self {
-        let bytes = bytemuck::cast_slice(slice);
         CpuBuffer {
             name,
-            buf: Arc::new(RwLock::new(TrackedVec::new(Vec::from(bytes)))),
+            buf: Arc::new(RwLock::new(TrackedVec::new(slice.to_vec()))),
             region: Region(0, slice.len()),
         }
     }
@@ -195,18 +193,12 @@ impl<T: Default + Clone + Pod> CpuBuffer<T> {
 
     pub fn as_slice(&self) -> MappedRwLockReadGuard<'_, [T]> {
         let vec = self.buf.read();
-        RwLockReadGuard::map(vec, |vec| {
-            let slice = bytemuck::cast_slice(&vec.0);
-            &slice[self.region.range()]
-        })
+        RwLockReadGuard::map(vec, |vec| &vec.0[self.region.range()])
     }
 
     pub fn as_slice_mut(&self) -> MappedRwLockWriteGuard<'_, [T]> {
         let vec = self.buf.write();
-        RwLockWriteGuard::map(vec, |vec| {
-            let slice = bytemuck::cast_slice_mut(&mut vec.0);
-            &mut slice[self.region.range()]
-        })
+        RwLockWriteGuard::map(vec, |vec| &mut vec.0[self.region.range()])
     }
 
     pub fn as_slice_sync(&self) -> SyncSlice<'_, T> {
@@ -214,7 +206,7 @@ impl<T: Default + Clone + Pod> CpuBuffer<T> {
     }
 }
 
-impl<T: Default + Clone + Pod> From<Vec<T>> for CpuBuffer<T> {
+impl<T: Default + Clone> From<Vec<T>> for CpuBuffer<T> {
     fn from(vec: Vec<T>) -> CpuBuffer<T> {
         let size = vec.len();
         CpuBuffer {
@@ -225,7 +217,7 @@ impl<T: Default + Clone + Pod> From<Vec<T>> for CpuBuffer<T> {
     }
 }
 
-impl<T: Pod> Buffer<T> for CpuBuffer<T> {
+impl<T: Clone> Buffer<T> for CpuBuffer<T> {
     fn name(&self) -> &'static str {
         self.name
     }
@@ -246,14 +238,12 @@ impl<T: Pod> Buffer<T> for CpuBuffer<T> {
 
     fn view<F: FnOnce(&[T])>(&self, f: F) {
         let buf = self.buf.read();
-        let slice = bytemuck::cast_slice(&buf.0);
-        f(&slice[self.region.range()]);
+        f(&buf.0[self.region.range()]);
     }
 
     fn view_mut<F: FnOnce(&mut [T])>(&self, f: F) {
         let mut buf = self.buf.write();
-        let slice = bytemuck::cast_slice_mut(&mut buf.0);
-        f(&mut slice[self.region.range()]);
+        f(&mut buf.0[self.region.range()]);
     }
 }
 
@@ -261,7 +251,7 @@ impl<F: Field> Hal for CpuHal<F> {
     type Field = F;
     type Elem = F::Elem;
     type ExtElem = F::ExtElem;
-    type Buffer<T: Clone + Debug + PartialEq + Pod> = CpuBuffer<T>;
+    type Buffer<T: Clone + Debug + PartialEq> = CpuBuffer<T>;
 
     fn alloc_elem(&self, name: &'static str, size: usize) -> Self::Buffer<Self::Elem> {
         CpuBuffer::new(name, size)
@@ -596,6 +586,13 @@ impl<F: Field> Hal for CpuHal<F> {
         }
     }
 
+    fn prefix_products(&self, io: &Self::Buffer<Self::ExtElem>) {
+        let mut io = io.as_slice_mut();
+        for i in 1..io.len() {
+            io[i] = io[i] * io[i - 1];
+        }
+    }
+
     fn has_unified_memory(&self) -> bool {
         true
     }
@@ -609,7 +606,7 @@ impl<F: Field> Hal for CpuHal<F> {
 mod tests {
     use hex::FromHex;
     use rand::thread_rng;
-    use risc0_core::field::baby_bear::BabyBear;
+    use risc0_core::field::baby_bear::{BabyBear, BabyBearExtElem};
 
     use super::*;
     use crate::core::hash::sha::Sha256HashSuite;
@@ -685,6 +682,26 @@ mod tests {
             1,
             16,
             &["da5698be17b9b46962335799779fbeca8ce5d491c0d26243bafef9ea1837a9d8"],
+        );
+    }
+
+    #[test]
+    fn prefix_products() {
+        let hal: CpuHal<BabyBear> = CpuHal::new(Sha256HashSuite::new_suite());
+        let io = vec![BabyBearExtElem::from_u32(2); 4];
+        let io = hal.copy_from_extelem("io", &io);
+        hal.prefix_products(&io);
+
+        let io: Vec<_> = io.as_slice().iter().cloned().collect();
+
+        assert_eq!(
+            &io,
+            &[
+                BabyBearExtElem::from_u32(2),
+                BabyBearExtElem::from_u32(4),
+                BabyBearExtElem::from_u32(8),
+                BabyBearExtElem::from_u32(16),
+            ]
         );
     }
 }
