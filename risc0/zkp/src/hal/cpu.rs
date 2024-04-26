@@ -93,8 +93,12 @@ pub struct CpuBuffer<T> {
 }
 
 enum SyncSliceRef<'a, T: Default + Clone> {
-    FromBuf(MappedRwLockWriteGuard<'a, [T]>),
-    FromSlice(&'a SyncSlice<'a, T>),
+    FromBuf {
+        _inner: MappedRwLockWriteGuard<'a, [T]>,
+    },
+    FromSlice {
+        _inner: &'a SyncSlice<'a, T>,
+    },
 }
 
 /// A buffer which can be used across multiple threads.  Users are
@@ -120,7 +124,7 @@ impl<'a, T: Default + Clone> SyncSlice<'a, T> {
         SyncSlice {
             ptr,
             size,
-            _buf: SyncSliceRef::FromBuf(buf),
+            _buf: SyncSliceRef::FromBuf { _inner: buf },
         }
     }
 
@@ -146,7 +150,7 @@ impl<'a, T: Default + Clone> SyncSlice<'a, T> {
             self.size
         );
         SyncSlice {
-            _buf: SyncSliceRef::FromSlice(self),
+            _buf: SyncSliceRef::FromSlice { _inner: self },
             ptr: unsafe { self.ptr.add(offset) },
             size,
         }

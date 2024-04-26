@@ -167,7 +167,7 @@ impl VerifyingKeyJson {
         if self.vk_beta_2.len() < 2 || self.vk_beta_2[0].len() < 2 || self.vk_beta_2[1].len() < 2 {
             return Err(anyhow!("Malformed G2 element field: vk_beta_2"));
         }
-        let beta_g2 = g2_from_bytes(&vec![
+        let beta_g2 = g2_from_bytes(&[
             vec![
                 from_u256(&self.vk_beta_2[0][1])?,
                 from_u256(&self.vk_beta_2[0][0])?,
@@ -182,7 +182,7 @@ impl VerifyingKeyJson {
         {
             return Err(anyhow!("Malformed G2 element field: vk_gamma_2"));
         }
-        let gamma_g2 = g2_from_bytes(&vec![
+        let gamma_g2 = g2_from_bytes(&[
             vec![
                 from_u256(&self.vk_gamma_2[0][1])?,
                 from_u256(&self.vk_gamma_2[0][0])?,
@@ -197,7 +197,7 @@ impl VerifyingKeyJson {
         {
             return Err(anyhow!("Malformed G2 element field: vk_delta_2"));
         }
-        let delta_g2 = g2_from_bytes(&vec![
+        let delta_g2 = g2_from_bytes(&[
             vec![
                 from_u256(&self.vk_delta_2[0][1])?,
                 from_u256(&self.vk_delta_2[0][0])?,
