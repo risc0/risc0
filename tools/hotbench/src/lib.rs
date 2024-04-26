@@ -14,6 +14,7 @@
 
 use std::{
     cell::RefCell,
+    env,
     hint::black_box,
     path::PathBuf,
     time::{Duration, Instant},
@@ -192,9 +193,11 @@ impl<'a> Bencher<'a> {
 }
 
 pub fn hotbench_main() {
-    tracing_subscriber::fmt()
-        .with_env_filter(tracing_subscriber::filter::EnvFilter::from_default_env())
-        .init();
+    if env::var("RISC0_HOTBENCH_LOG").is_ok() {
+        tracing_subscriber::fmt()
+            .with_env_filter(tracing_subscriber::filter::EnvFilter::from_default_env())
+            .init();
+    }
 }
 
 #[macro_export]
