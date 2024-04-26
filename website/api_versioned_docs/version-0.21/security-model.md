@@ -109,7 +109,7 @@ For a detailed discussion of the security of BN254, we refer readers to the disc
 [deterministically]: ../terminology#deterministic-builds
 [GitHub issue from Zcash]: https://github.com/zcash/zcash/issues/714
 [receipt claim]: ../terminology#receipt-claim
-[RISC Zero zkVM: Scalable, Transparent Arguments of RISC-V Integrity]: https://dev.risczero.com/proof-system-in-detail.pdf
+[RISC Zero zkVM: Scalable, Transparent Arguments of RISC-V Integrity]: pathname:///proof-system-in-detail.pdf
 [RISC Zero zkVM]: ./zkvm
 [security calculator]: https://github.com/risc0/risc0/pull/1661
 [this article by Justin Thaler]: https://a16zcrypto.com/posts/article/snark-security-and-performance/
