@@ -382,7 +382,7 @@ impl<T> BufferImpl<T> {
     }
 
     pub fn copy_from(name: &'static str, slice: &[T]) -> Self {
-        let bytes_len = std::mem::size_of::<T>() * slice.len();
+        let bytes_len = std::mem::size_of_val(slice) * slice.len();
         assert!(bytes_len > 0);
         let mut buffer = RawBuffer::new(name, bytes_len);
         let bytes = unchecked_cast(slice);
@@ -880,7 +880,7 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
     fn prefix_products(&self, io: &Self::Buffer<Self::ExtElem>) {
         io.view_mut(|io| {
             for i in 1..io.len() {
-                io[i] = io[i] * io[i - 1];
+                io[i] *= io[i - 1];
             }
         });
     }
@@ -894,7 +894,7 @@ pub fn prefix_products(io: &mut UnifiedBuffer<DeviceExtElem>) {
     let len = io.len();
     let io = io.as_mut_slice();
     for i in 1..len {
-        io[i].0 = io[i].0 * io[i - 1].0;
+        io[i].0 *= io[i - 1].0;
     }
 }
 

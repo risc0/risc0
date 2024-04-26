@@ -101,6 +101,7 @@ jobs:
       - check-benchmarks
       - check-external
       - check-template
+      - clippy
       - crates-validator
       - doc
       - examples
@@ -142,25 +143,6 @@ jobs:
       - run: cargo fmt --all --check --manifest-path bonsai/Cargo.toml
       - run: cargo fmt --all --check --manifest-path examples/Cargo.toml
       - run: cargo fmt --all --check --manifest-path tools/crates-validator/Cargo.toml
-      - run: |
-          cargo clippy -p bonsai-sdk
-          cargo clippy -p hotbench
-          cargo clippy -p risc0-binfmt
-          cargo clippy -p risc0-build
-          cargo clippy -p risc0-build-kernel
-          cargo clippy -p risc0-circuit-recursion
-          cargo clippy -p risc0-circuit-recursion-sys
-          cargo clippy -p risc0-circuit-rv32im
-          cargo clippy -p risc0-circuit-rv32im-sys
-          cargo clippy -p risc0-core
-          cargo clippy -p risc0-groth16
-          cargo clippy -p risc0-r0vm
-          cargo clippy -p risc0-sys
-          cargo clippy -p risc0-tools
-          cargo clippy -p risc0-zkp
-          cargo clippy -p risc0-zkvm
-          cargo clippy -p risc0-zkvm-platform
-          cargo clippy -p risc0-zkvm-receipts
       - run: cargo sort --workspace --check
       - run: cargo sort --workspace --check benchmarks
       - run: cargo sort --workspace --check bonsai
@@ -179,6 +161,34 @@ jobs:
           [ "$(grep -re 'DO[_ ]\?NOT[_ ]\?MERGE' $(git ls-tree --full-tree --name-only -r HEAD) | tee /dev/fd/2 | wc -l)" -eq "0" ]
       - name: Compare circom hashes to golden values
         run: bash ./.github/scripts/circom_stable.sh
+
+  clippy:
+    runs-on: [self-hosted, prod, "${{ matrix.os }}"]
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [Linux, macOS]
+        feature: [default]
+        device: [cpu]
+        include:
+          - os: Linux
+            feature: cuda
+          - os: macOS
+            feature: metal
+    env:
+      FEATURE: ${{ matrix.feature }}
+    steps:
+      - uses: actions/checkout@v4
+      - if: matrix.feature == 'cuda'
+        uses: ./.github/actions/cuda
+      - uses: ./.github/actions/rustup
+      - uses: ./.github/actions/sccache
+        with:
+          key: ${{ matrix.os }}-${{ matrix.feature }}
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+      - run: python clippy.py
 
   test:
     if: needs.changes.outputs.test == 'true'
@@ -202,8 +212,6 @@ jobs:
       RISC0_BUILD_LOCKED: 1
       RUST_BACKTRACE: full
     steps:
-      # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
-      - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
       - uses: actions/checkout@v4
       - if: matrix.feature == 'cuda'
         uses: ./.github/actions/cuda
@@ -272,8 +280,6 @@ jobs:
       RISC0_SERVER_PATH: ${{ github.workspace }}/target/release/r0vm
       RUST_BACKTRACE: full
     steps:
-      # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
-      - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
       - uses: actions/checkout@v4
       - if: matrix.feature == 'cuda'
         uses: ./.github/actions/cuda
@@ -300,8 +306,6 @@ jobs:
     needs: changes
     runs-on: [self-hosted, prod, macOS, cpu]
     steps:
-      # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
-      - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
@@ -316,8 +320,6 @@ jobs:
     needs: changes
     runs-on: [self-hosted, prod, macOS, cpu]
     steps:
-      # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
-      - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
       - uses: actions/checkout@v3
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
@@ -333,8 +335,6 @@ jobs:
     needs: changes
     runs-on: [self-hosted, prod, macOS, cpu]
     steps:
-      # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
-      - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
       - uses: actions/checkout@v3
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
@@ -353,8 +353,6 @@ jobs:
       matrix:
         os: [Linux, macOS]
     steps:
-      # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
-      - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -386,8 +384,6 @@ jobs:
       matrix:
         os: [Linux, macOS]
     steps:
-      # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
-      - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
@@ -415,8 +411,6 @@ jobs:
     env:
       RISC0_BUILD_LOCKED: 1
     steps:
-      # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
-      - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
@@ -433,8 +427,6 @@ jobs:
     env:
       RISC0_BUILD_LOCKED: 1
     steps:
-      # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
-      - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
       - uses: actions/checkout@v4
       - uses: browser-actions/setup-firefox@v1
       - run: firefox --version
@@ -459,8 +451,6 @@ jobs:
     needs: changes
     runs-on: [self-hosted, prod, Linux, cpu, docker]
     steps:
-      # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
-      - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
@@ -478,8 +468,6 @@ jobs:
     needs: changes
     runs-on: [self-hosted, prod, Linux, cpu, docker]
     steps:
-      # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
-      - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
       - uses: actions/checkout@v4
         with:
           lfs: true

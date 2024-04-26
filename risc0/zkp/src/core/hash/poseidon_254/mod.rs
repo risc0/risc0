@@ -31,8 +31,8 @@ use super::{HashFn, HashSuite, Rng, RngFactory};
 use crate::core::digest::Digest;
 
 fn add_round_constants(cells: &mut [Fr; CELLS], round: usize) {
-    for i in 0..CELLS {
-        cells[i] += consts::round_constants()[round * CELLS + i];
+    for (i, cell) in cells.iter_mut().enumerate() {
+        *cell += consts::round_constants()[round * CELLS + i];
     }
 }
 
@@ -54,12 +54,12 @@ fn do_partial_sboxes(cells: &mut [Fr; CELLS]) {
 
 fn multiply_by_mds(cells: &mut [Fr; CELLS]) {
     let old_cells = *cells;
-    for i in 0..CELLS {
+    for (i, cell) in cells.iter_mut().enumerate() {
         let mut tot = Fr::ZERO;
-        for j in 0..CELLS {
-            tot += consts::mds()[i * CELLS + j] * old_cells[j];
+        for (j, old_cell) in old_cells.iter().enumerate() {
+            tot += consts::mds()[i * CELLS + j] * *old_cell;
         }
-        cells[i] = tot;
+        *cell = tot;
     }
 }
 

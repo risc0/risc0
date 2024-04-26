@@ -58,7 +58,7 @@ impl<CH: CudaHash> CudaCircuitHal<CH> {
     }
 }
 
-impl<'a, CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
+impl<CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
     #[tracing::instrument(skip_all)]
     fn eval_check(
         &self,
