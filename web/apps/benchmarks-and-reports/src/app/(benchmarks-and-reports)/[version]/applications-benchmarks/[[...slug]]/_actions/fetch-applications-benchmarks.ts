@@ -1,7 +1,13 @@
 "use server";
 
-export async function fetchApplicationsBenchmarks(url: string) {
-  return fetch(`https://risc0.github.io/ghpages/dev/benchmarks/${url}`, {
+import env from "~/env";
+
+export async function fetchApplicationsBenchmarks({ url, version }: { url: string; version: string }) {
+  return fetch(`https://raw.githubusercontent.com/risc0/ghpages/${version}/dev/benchmarks/${url}`, {
+    headers: {
+      Authorization: `token ${env.GITHUB_PAT}`,
+      Accept: "application/vnd.github.v3.raw",
+    },
     next: { revalidate: 3600 },
   })
     .then((response) => {
