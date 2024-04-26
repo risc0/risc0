@@ -185,10 +185,7 @@ jobs:
       - uses: ./.github/actions/sccache
         with:
           key: ${{ matrix.os }}-${{ matrix.feature }}
-      - uses: actions/setup-python@v4
-        with:
-          python-version: "3.10"
-      - run: python clippy.py
+      - run: python3 clippy.py
 
   test:
     if: needs.changes.outputs.test == 'true'
