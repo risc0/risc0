@@ -185,7 +185,7 @@ jobs:
       - uses: ./.github/actions/sccache
         with:
           key: ${{ matrix.os }}-${{ matrix.feature }}
-      - run: python3 clippy.py
+      - run: python3 -u clippy.py
 
   test:
     if: needs.changes.outputs.test == 'true'
