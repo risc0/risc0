@@ -140,12 +140,10 @@ jobs:
           node-version: 18
       - run: cargo fmt --all --check
       - run: cargo fmt --all --check --manifest-path benchmarks/Cargo.toml
-      - run: cargo fmt --all --check --manifest-path bonsai/Cargo.toml
       - run: cargo fmt --all --check --manifest-path examples/Cargo.toml
       - run: cargo fmt --all --check --manifest-path tools/crates-validator/Cargo.toml
       - run: cargo sort --workspace --check
       - run: cargo sort --workspace --check benchmarks
-      - run: cargo sort --workspace --check bonsai
       - run: cargo sort --workspace --check examples
       - run: cargo sort --workspace --check tools/crates-validator
       - run: cargo rdme -c
