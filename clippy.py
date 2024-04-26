@@ -48,7 +48,7 @@ def main():
             cmd.append(feature)
 
         # print(cmd)
-        subprocess.run(cmd, check=True)
+        subprocess.run(cmd, check=True, stderr=subprocess.STDOUT)
         print("::endgroup::")
 
 
