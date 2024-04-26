@@ -3,11 +3,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import type { Table } from "@tanstack/react-table";
 import { ChevronLeftIcon, ChevronRightIcon, ChevronsLeftIcon, ChevronsRightIcon } from "lucide-react";
 
-interface TablePaginationProps<TData> {
-  table: Table<TData>;
-}
-
-export function TablePagination<TData>({ table }: TablePaginationProps<TData>) {
+export function TablePagination<TData>({ table }: { table: Table<TData> }) {
   return (
     <div className="flex items-center justify-between space-x-6 lg:space-x-8">
       <div className="flex items-center space-x-2">

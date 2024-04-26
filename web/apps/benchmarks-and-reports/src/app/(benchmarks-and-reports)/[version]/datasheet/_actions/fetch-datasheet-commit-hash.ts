@@ -2,9 +2,9 @@
 
 import env from "~/env";
 
-export async function fetchCratesValidationResults({ hash }: { hash: string }) {
+export async function fetchDatasheetCommitHash({ version }: { version: string }) {
   const response = await fetch(
-    `https://raw.githubusercontent.com/risc0/ghpages/main/dev/crate-validation/results/${hash}.json`,
+    `https://raw.githubusercontent.com/risc0/ghpages/${version}/dev/datasheet/COMMIT_HASH.txt`,
     {
       headers: {
         Authorization: `token ${env.GITHUB_PAT}`,
@@ -13,7 +13,7 @@ export async function fetchCratesValidationResults({ hash }: { hash: string }) {
       next: { revalidate: 3600 },
     },
   );
-  const responseJson = await response.json();
+  const responseText = await response.text();
 
-  return responseJson;
+  return responseText;
 }

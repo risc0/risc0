@@ -18,17 +18,15 @@ import { useState } from "react";
 import { TableToolbar } from "shared/client/table/table-toolbar";
 import { tableFuzzyFilter } from "shared/utils/table-fuzzy-filter";
 
-type ApplicationsBenchmarksTableProps<TData, TValue> = {
-  columns: ColumnDef<TData, TValue>[];
-  data: TData[];
-  title: string;
-};
-
 export function ApplicationsBenchmarksTable<TData, TValue>({
   title,
   columns,
   data,
-}: ApplicationsBenchmarksTableProps<TData, TValue>) {
+}: {
+  columns: ColumnDef<TData, TValue>[];
+  data: TData[];
+  title: string;
+}) {
   const [rowSelection, setRowSelection] = useState({});
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);

@@ -20,14 +20,14 @@ export const metadata: Metadata = {
   },
 };
 
-export default function DatasheetPage() {
+export default function DatasheetPage({ params }) {
   return (
     <div className="container max-w-screen-3xl">
       <div className="flex items-center justify-between gap-8">
         <h1 className="title-sm">Datasheet</h1>
 
         <Suspense fallback={<SuspenseLoader />}>
-          <DatasheetCommitHashButton />
+          <DatasheetCommitHashButton version={params.version} />
         </Suspense>
       </div>
 
@@ -35,7 +35,7 @@ export default function DatasheetPage() {
 
       <div className="mt-6 grid grid-cols-1 gap-8 xl:grid-cols-2">
         <Suspense fallback={<SuspenseLoader />}>
-          <DatasheetContent />
+          <DatasheetContent version={params.version} />
         </Suspense>
       </div>
     </div>

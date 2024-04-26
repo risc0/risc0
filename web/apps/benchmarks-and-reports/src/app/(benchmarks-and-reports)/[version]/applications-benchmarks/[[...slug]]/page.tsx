@@ -28,7 +28,7 @@ export const metadata: Metadata = {
 export default function ApplicationsBenchmarksPage({ params }) {
   if (!params.slug) {
     redirect(
-      `/applications-benchmarks/${
+      `/${params.version}/applications-benchmarks/${
         // biome-ignore lint/style/noNonNullAssertion: ignore
         replace(Object.keys(FILENAMES_TO_TITLES)[0]!, ".csv", "")
       }`,
@@ -41,7 +41,7 @@ export default function ApplicationsBenchmarksPage({ params }) {
         <h1 className="title-sm">Applications Benchmarks</h1>
 
         <Suspense fallback={<SuspenseLoader />}>
-          <ApplicationsBenchmarksCommitHashButton />
+          <ApplicationsBenchmarksCommitHashButton version={params.version} />
         </Suspense>
       </div>
 
@@ -51,7 +51,11 @@ export default function ApplicationsBenchmarksPage({ params }) {
         <div className="flex items-center overflow-auto">
           <TabsList>
             {Object.keys(FILENAMES_TO_TITLES).map((filename, index) => (
-              <Link tabIndex={-1} key={filename} href={`/applications-benchmarks/${replace(filename, ".csv", "")}`}>
+              <Link
+                tabIndex={-1}
+                key={filename}
+                href={`/${params.version}/applications-benchmarks/${replace(filename, ".csv", "")}`}
+              >
                 <TabsTrigger value={replace(filename, ".csv", "")}>
                   {Object.values(FILENAMES_TO_TITLES)[index]}
                 </TabsTrigger>
@@ -62,7 +66,7 @@ export default function ApplicationsBenchmarksPage({ params }) {
 
         <div className="mt-4">
           <Suspense fallback={<SuspenseLoader />}>
-            <ApplicationsBenchmarksContent currentTab={params.slug?.[0]} />
+            <ApplicationsBenchmarksContent version={params.version} currentTab={params.slug?.[0]} />
           </Suspense>
         </div>
       </Tabs>
