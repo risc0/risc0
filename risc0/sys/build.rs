@@ -58,6 +58,8 @@ fn build_cuda_kernels() {
     // This is a workaround for compilation errors when compiling with clang++.
     std::env::set_var("CXX", "g++");
 
+    println!("cargo:rerun-if-changed=kernels/zkp/cuda/supra_ntt_api.cu");
+
     cc::Build::new()
         .cuda(true)
         .define("FEATURE_BABY_BEAR", None)

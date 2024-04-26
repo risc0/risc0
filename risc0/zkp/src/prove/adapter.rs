@@ -12,22 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::sync::Mutex;
-
-use rand::thread_rng;
-use rayon::prelude::*;
 use risc0_core::field::{Elem, Field};
 
 use crate::{
-    adapter::{CircuitProveDef, CircuitStepContext, CircuitStepHandler, REGISTER_GROUP_ACCUM},
+    adapter::{CircuitProveDef, CircuitStepHandler},
     hal::{cpu::CpuBuffer, Hal},
-    prove::{
-        accum::{Accum, Handler},
-        executor::Executor,
-        write_iop::WriteIOP,
-    },
+    prove::{executor::Executor, write_iop::WriteIOP},
     taps::TapSet,
-    ZK_CYCLES,
 };
 
 pub struct ProveAdapter<'a, F, C, S>
@@ -38,7 +29,6 @@ where
 {
     exec: &'a mut Executor<F, C, S>,
     mix: CpuBuffer<F::Elem>,
-    accum: CpuBuffer<F::Elem>,
     steps: usize,
 }
 
@@ -53,7 +43,6 @@ where
         ProveAdapter {
             exec,
             mix: CpuBuffer::from(Vec::new()),
-            accum: CpuBuffer::from(Vec::new()),
             steps,
         }
     }
@@ -81,85 +70,6 @@ where
         iop.write_field_elem_slice(vec.as_slice());
     }
 
-    fn compute_accum(&mut self) {
-        let args = &[
-            self.exec.code.as_slice_sync(),
-            self.exec.io.as_slice_sync(),
-            self.exec.data.as_slice_sync(),
-            self.mix.as_slice_sync(),
-            self.accum.as_slice_sync(),
-        ];
-        let accum: Mutex<Accum<F::ExtElem>> = Mutex::new(Accum::new(self.steps));
-        tracing::info_span!("step_compute_accum").in_scope(|| {
-            // TODO: Add an way to be able to run this on cuda, metal, etc.
-            let c = &self.exec.circuit;
-            (0..self.steps - ZK_CYCLES).into_par_iter().for_each_init(
-                || Handler::<F>::new(&accum),
-                |accum_handler, cycle| {
-                    c.step_compute_accum(
-                        &CircuitStepContext {
-                            size: self.steps,
-                            cycle,
-                        },
-                        accum_handler,
-                        args,
-                    )
-                    .unwrap();
-                },
-            );
-        });
-        tracing::info_span!("calc_prefix_products").in_scope(|| {
-            accum.lock().unwrap().calc_prefix_products();
-        });
-        tracing::info_span!("step_verify_accum").in_scope(|| {
-            let c = &self.exec.circuit;
-            (0..self.steps - ZK_CYCLES).into_par_iter().for_each_init(
-                || Handler::<F>::new(&accum),
-                |accum_handler, cycle| {
-                    c.step_verify_accum(
-                        &CircuitStepContext {
-                            size: self.steps,
-                            cycle,
-                        },
-                        accum_handler,
-                        args,
-                    )
-                    .unwrap();
-                },
-            );
-        });
-    }
-
-    /// Perform 'accumulate' stage, using the iop for any RNG state.
-    #[tracing::instrument(skip_all)]
-    pub fn accumulate(&mut self, iop: &mut WriteIOP<F>) {
-        // Make the mixing values
-        self.mix = CpuBuffer::from_fn("mix", C::MIX_SIZE, |_| iop.random_elem());
-        // Make and compute accum data
-        let accum_size = self
-            .exec
-            .circuit
-            .get_taps()
-            .group_size(REGISTER_GROUP_ACCUM);
-        self.accum = CpuBuffer::from_fn("accum", self.steps * accum_size, |_| F::Elem::INVALID);
-
-        self.compute_accum();
-
-        // Zero out 'invalid' entries in accum and io
-        let mut accum = self.accum.as_slice_mut();
-        let mut io = self.exec.io.as_slice_mut();
-        for value in accum.iter_mut().chain(io.iter_mut()) {
-            *value = value.valid_or_zero();
-        }
-        // Add random noise to end of accum and change invalid element to zero
-        let mut rng = thread_rng();
-        for i in self.steps - ZK_CYCLES..self.steps {
-            for j in 0..accum_size {
-                accum[j * self.steps + i] = F::Elem::random(&mut rng);
-            }
-        }
-    }
-
     pub fn po2(&self) -> u32 {
         self.exec.po2 as u32
     }
@@ -170,10 +80,6 @@ where
 
     pub fn get_data(&self) -> &CpuBuffer<F::Elem> {
         &self.exec.data
-    }
-
-    pub fn get_accum(&self) -> &CpuBuffer<F::Elem> {
-        &self.accum
     }
 
     pub fn get_mix(&self) -> &CpuBuffer<F::Elem> {

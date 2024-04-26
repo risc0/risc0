@@ -22,6 +22,7 @@ pub mod witgen;
 use std::rc::Rc;
 
 use anyhow::Result;
+use rand::thread_rng;
 use risc0_zkp::{
     adapter::{CircuitInfo, TapsProvider, PROOF_SYSTEM_INFO},
     field::{
@@ -29,16 +30,13 @@ use risc0_zkp::{
         Elem as _,
     },
     hal::{CircuitHal, Hal},
-    layout::Buffer as _,
     prove::Prover,
+    ZK_CYCLES,
 };
 
 use self::witgen::WitnessGenerator;
 use super::{segment::Segment, Seal, SegmentProver};
-use crate::{
-    layout::{OutBuffer, LAYOUT},
-    CircuitImpl, CIRCUIT, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CTRL, REGISTER_GROUP_DATA,
-};
+use crate::{CircuitImpl, CIRCUIT, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CTRL, REGISTER_GROUP_DATA};
 
 struct Twin(Elem, Elem);
 
@@ -75,6 +73,7 @@ where
         let io = segment.prepare_globals();
         let mut witgen = WitnessGenerator::new(segment.po2, &io);
         witgen.execute(trace)?;
+        let steps = witgen.steps;
 
         let seal = tracing::info_span!("prove").in_scope(|| {
             let mut prover = Prover::new(self.hal.as_ref(), CIRCUIT.get_taps());
@@ -103,21 +102,39 @@ where
             prover.iop().write_field_elem_slice(vec.as_slice());
             prover.set_po2(segment.po2);
 
+            let io = self.hal.copy_from_elem("io", &witgen.io.as_slice());
+
             let ctrl = self.hal.copy_from_elem("ctrl", &witgen.ctrl.as_slice());
-            prover.commit_group(REGISTER_GROUP_CTRL, ctrl);
+            prover.commit_group(REGISTER_GROUP_CTRL, &ctrl);
 
             let data = self.hal.copy_from_elem("data", &witgen.data.as_slice());
-            prover.commit_group(REGISTER_GROUP_DATA, data);
+            prover.commit_group(REGISTER_GROUP_DATA, &data);
 
-            let (mix, accum) = witgen.accumulate(prover.iop());
+            // Make the mixing values
+            let mix: Vec<_> = (0..CircuitImpl::MIX_SIZE)
+                .map(|_| prover.iop().random_elem())
+                .collect();
+            let mix = self.hal.copy_from_elem("mix", mix.as_slice());
 
-            let accum = self.hal.copy_from_elem("accum", &accum.as_slice());
-            prover.commit_group(REGISTER_GROUP_ACCUM, accum);
+            let mut accum = vec![BabyBearElem::INVALID; steps * CIRCUIT.accum_size()];
 
-            let io = &witgen.io.as_slice();
-            tracing::debug!("Globals: {:?}", OutBuffer(io).tree(LAYOUT));
-            let io = self.hal.copy_from_elem("io", io);
-            let mix = self.hal.copy_from_elem("mix", &mix.as_slice());
+            // Add random noise to end of accum
+            let mut rng = thread_rng();
+            for i in steps - ZK_CYCLES..steps {
+                for j in 0..CIRCUIT.accum_size() {
+                    accum[j * steps + i] = BabyBearElem::random(&mut rng);
+                }
+            }
+
+            let accum = self.hal.copy_from_elem("accum", accum.as_slice());
+            self.circuit_hal
+                .accumulate(&ctrl, &io, &data, &mix, &accum, steps);
+
+            drop(ctrl);
+            drop(data);
+
+            prover.commit_group(REGISTER_GROUP_ACCUM, &accum);
+            drop(accum);
 
             prover.finalize(&[&mix, &io], self.circuit_hal.as_ref())
         });

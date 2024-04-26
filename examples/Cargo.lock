@@ -3954,7 +3954,6 @@ dependencies = [
  "digest",
  "ff",
  "hex",
- "lazy_static",
  "metal",
  "ndarray",
  "parking_lot",
@@ -3989,6 +3988,7 @@ dependencies = [
  "prost",
  "prost-build",
  "protobuf-src",
+ "rand",
  "rayon",
  "risc0-binfmt",
  "risc0-circuit-recursion",
@@ -4456,7 +4456,6 @@ dependencies = [
  "hex",
  "risc0-zkvm",
  "serde",
- "serial_test",
  "sha-methods",
 ]
 

@@ -33,13 +33,15 @@ pub struct Prover<'a, H: Hal> {
     po2: usize,
 }
 
-fn make_coeffs<H: Hal>(hal: &H, buf: H::Buffer<H::Elem>, count: usize) -> H::Buffer<H::Elem> {
+fn make_coeffs<H: Hal>(hal: &H, witness: &H::Buffer<H::Elem>, count: usize) -> H::Buffer<H::Elem> {
+    let coeffs = hal.alloc_elem("coeffs", witness.size());
+    hal.eltwise_copy_elem(&coeffs, witness);
     // Do interpolate
-    hal.batch_interpolate_ntt(&buf, count);
+    hal.batch_interpolate_ntt(&coeffs, count);
     // Convert f(x) -> f(3x), which effective multiplies coefficients c_i by 3^i.
     #[cfg(not(feature = "circuit_debug"))]
-    hal.zk_shift(&buf, count);
-    buf
+    hal.zk_shift(&coeffs, count);
+    coeffs
 }
 
 impl<'a, H: Hal> Prover<'a, H> {
@@ -74,24 +76,23 @@ impl<'a, H: Hal> Prover<'a, H> {
     /// Commits a given buffer to the IOP; the values must not subsequently
     /// change.
     #[tracing::instrument(skip_all)]
-    pub fn commit_group(&mut self, tap_group_index: usize, buf: H::Buffer<H::Elem>) {
+    pub fn commit_group(&mut self, tap_group_index: usize, witness: &H::Buffer<H::Elem>) {
         let group_size = self.taps.group_size(tap_group_index);
-        assert_eq!(buf.size() % group_size, 0);
-        assert_eq!(buf.size() / group_size, self.cycles);
+        assert_eq!(witness.size() % group_size, 0);
+        assert_eq!(witness.size() / group_size, self.cycles);
         assert!(
             self.groups[tap_group_index].is_none(),
             "Attempted to commit group {} more than once",
             self.taps.group_name(tap_group_index)
         );
 
-        let name = buf.name();
-        let coeffs = make_coeffs(self.hal, buf, group_size);
+        let coeffs = make_coeffs(self.hal, witness, group_size);
         let group_ref = self.groups[tap_group_index].insert(PolyGroup::new(
             self.hal,
             coeffs,
             group_size,
             self.cycles,
-            name,
+            witness.name(),
         ));
 
         group_ref.merkle.commit(&mut self.iop);
