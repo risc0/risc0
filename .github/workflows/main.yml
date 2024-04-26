@@ -220,13 +220,11 @@ jobs:
       - name: build workspace
         run: |
           cargo test -F $FEATURE -F prove --workspace --timings --no-run \
-            --exclude doc-test \
-            --exclude bonsai-rest-api-mock
+            --exclude doc-test
       - name: test workspace
         run: |
           cargo test -F $FEATURE -F prove --workspace --timings \
-            --exclude doc-test \
-            --exclude bonsai-rest-api-mock
+            --exclude doc-test
       - uses: actions/upload-artifact@v3
         with:
           name: cargo-timings-${{ matrix.os }}-${{ matrix.device }}
@@ -240,8 +238,7 @@ jobs:
         if: matrix.device == 'cpu'
       - run: |
           cargo check -F $FEATURE --benches --workspace \
-            --exclude doc-test \
-            --exclude bonsai-rest-api-mock
+            --exclude doc-test
       - run: cargo check -p risc0-build
         if: matrix.device == 'cpu'
       - run: cargo check -p risc0-circuit-rv32im -F $FEATURE
@@ -368,8 +365,10 @@ jobs:
         run: |
           cargo semver-checks --default-features --baseline-rev ${{ github.event.pull_request.base.sha }} \
             --exclude risc0-zkvm-platform \
-            --exclude doc-test --exclude fibonacci-methods --exclude risc0-zkvm-receipts --exclude risc0-zkvm-methods \
-            --exclude bonsai-rest-api-mock
+            --exclude doc-test \
+            --exclude fibonacci-methods \
+            --exclude risc0-zkvm-receipts \
+            --exclude risc0-zkvm-methods
       - run: sccache --show-stats
 
   check-template:
