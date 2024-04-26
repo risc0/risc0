@@ -61,6 +61,13 @@ struct FpExt {
     elems[3] = d;
   }
 
+  __device__ constexpr inline FpExt zeroize() {
+    for (uint32_t i = 0; i < 4; i++) {
+      elems[i].zeroize();
+    }
+    return *this;
+  }
+
   // Implement the addition/subtraction overloads
   __device__ constexpr FpExt operator+=(FpExt rhs) {
     for (uint32_t i = 0; i < 4; i++) {

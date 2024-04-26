@@ -172,7 +172,7 @@ impl TraceCallback for TraceProxy {
         let request = pb::api::ServerReply {
             kind: Some(pb::api::server_reply::Kind::Ok(pb::api::ClientCallback {
                 kind: Some(pb::api::client_callback::Kind::Io(pb::api::OnIoRequest {
-                    kind: Some(pb::api::on_io_request::Kind::Trace(event.try_into()?)),
+                    kind: Some(pb::api::on_io_request::Kind::Trace(event.into())),
                 })),
             })),
         };
