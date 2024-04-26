@@ -101,7 +101,7 @@ impl SuccinctReceipt {
         }
 
         // Read the Poseidon2 control root digest from the first 16 words of the output.
-        // NOTE: Implemented recursion programs has two output slots, each of size 16 elems.
+        // NOTE: Implemented recursion programs have two output slots, each of size 16 elems.
         // A SHA2 digest is encoded as 16 half words. Poseidon digests are encoded in 8 elems,
         // but are interspersed with padding to fill out the whole 16 elems.
         let control_root: Digest = seal_claim
