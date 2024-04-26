@@ -100,10 +100,17 @@ impl SuccinctReceipt {
             seal_claim.push_back(elem.as_u32())
         }
 
-        // NOTE: read_sha_halfs is a misnomer here, because the digest is Poseidon2, but we don't
-        // attempt to do anything with the hash that would make this a problem.
-        let control_root =
-            read_sha_halfs(&mut seal_claim).map_err(|_| VerificationError::ReceiptFormatError)?;
+        // Read the Poseidon2 control root digest from the first 16 words of the output.
+        // NOTE: Implemented recursion programs has two output slots, each of size 16 elems.
+        // A SHA2 digest is encoded as 16 half words. Poseidon digests are encoded in 8 elems,
+        // but are interspersed with padding to fill out the whole 16 elems.
+        let control_root: Digest = seal_claim
+            .drain(0..16)
+            .enumerate()
+            .filter_map(|(i, word)| (i & 1 == 0).then_some(word))
+            .collect::<Vec<_>>()
+            .try_into()
+            .map_err(|_| VerificationError::ReceiptFormatError)?;
         let allowed_root = Digest::from_hex(ALLOWED_CONTROL_ROOT).unwrap();
         if control_root != allowed_root {
             tracing::debug!(
