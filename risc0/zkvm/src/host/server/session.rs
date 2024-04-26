@@ -129,6 +129,7 @@ pub trait SessionEvents {
 
 impl Session {
     /// Construct a new [Session] from its constituent components.
+    #[allow(clippy::too_many_arguments)]
     pub fn new(
         segments: Vec<Box<dyn SegmentRef>>,
         input: Digest,
@@ -144,7 +145,7 @@ impl Session {
         Self {
             segments,
             input,
-            journal: journal.map(|x| Journal::new(x)),
+            journal: journal.map(Journal::new),
             exit_code,
             post_image,
             assumptions,

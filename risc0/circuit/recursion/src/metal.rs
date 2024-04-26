@@ -12,41 +12,47 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::rc::Rc;
+use std::{collections::HashMap, rc::Rc};
 
 use metal::ComputePipelineDescriptor;
 use risc0_zkp::{
     core::log2_ceil,
     field::{
         baby_bear::{BabyBearElem, BabyBearExtElem},
-        map_pow, RootsOfUnity,
+        map_pow, Elem as _, RootsOfUnity,
     },
     hal::{
-        metal::{BufferImpl as MetalBuffer, MetalHal, MetalHash},
-        CircuitHal,
+        metal::{BufferImpl as MetalBuffer, KernelArg, MetalHal, MetalHash},
+        Buffer as _, CircuitHal,
     },
-    INV_RATE,
+    INV_RATE, ZK_CYCLES,
 };
 
 const METAL_LIB: &[u8] = include_bytes!(env!("RECURSION_METAL_PATH"));
 
+const KERNEL_NAMES: &[&str] = &["eval_check", "step_compute_accum", "step_verify_accum"];
+
 use crate::{
-    GLOBAL_MIX, GLOBAL_OUT, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA,
+    GLOBAL_MIX, GLOBAL_OUT, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CTRL, REGISTER_GROUP_DATA,
 };
 
 #[derive(Debug)]
 pub struct MetalCircuitHal<MH: MetalHash> {
     hal: Rc<MetalHal<MH>>,
-    kernel: ComputePipelineDescriptor,
+    kernels: HashMap<String, ComputePipelineDescriptor>,
 }
 
 impl<MH: MetalHash> MetalCircuitHal<MH> {
     pub fn new(hal: Rc<MetalHal<MH>>) -> Self {
         let library = hal.device.new_library_with_data(METAL_LIB).unwrap();
-        let function = library.get_function("eval_check", None).unwrap();
-        let kernel = ComputePipelineDescriptor::new();
-        kernel.set_compute_function(Some(&function));
-        Self { hal, kernel }
+        let mut kernels = HashMap::new();
+        for name in KERNEL_NAMES {
+            let function = library.get_function(name, None).unwrap();
+            let pipeline = ComputePipelineDescriptor::new();
+            pipeline.set_compute_function(Some(&function));
+            kernels.insert(name.to_string(), pipeline);
+        }
+        Self { hal, kernels }
     }
 }
 
@@ -64,6 +70,8 @@ impl<MH: MetalHash> CircuitHal<MetalHal<MH>> for MetalCircuitHal<MH> {
         const EXP_PO2: usize = log2_ceil(INV_RATE);
         let domain = steps * INV_RATE;
         let rou = BabyBearElem::ROU_FWD[po2 + EXP_PO2];
+        let rou =
+            MetalBuffer::copy_from("rou", &self.hal.device, self.hal.cmd_queue.clone(), &[rou]);
         let poly_mix_pows = map_pow(poly_mix, crate::info::POLY_MIX_POWERS);
         let poly_mix_pows = MetalBuffer::copy_from(
             "poly_mix",
@@ -71,8 +79,6 @@ impl<MH: MetalHash> CircuitHal<MetalHal<MH>> for MetalCircuitHal<MH> {
             self.hal.cmd_queue.clone(),
             poly_mix_pows.as_slice(),
         );
-        let rou =
-            MetalBuffer::copy_from("rou", &self.hal.device, self.hal.cmd_queue.clone(), &[rou]);
         let po2 = MetalBuffer::copy_from(
             "po2",
             &self.hal.device,
@@ -85,9 +91,9 @@ impl<MH: MetalHash> CircuitHal<MetalHal<MH>> for MetalCircuitHal<MH> {
             self.hal.cmd_queue.clone(),
             &[domain as u32],
         );
-        let buffers = &[
+        let args = [
             check.as_arg(),
-            groups[REGISTER_GROUP_CODE].as_arg(),
+            groups[REGISTER_GROUP_CTRL].as_arg(),
             groups[REGISTER_GROUP_DATA].as_arg(),
             groups[REGISTER_GROUP_ACCUM].as_arg(),
             globals[GLOBAL_MIX].as_arg(),
@@ -97,8 +103,53 @@ impl<MH: MetalHash> CircuitHal<MetalHal<MH>> for MetalCircuitHal<MH> {
             po2.as_arg(),
             size.as_arg(),
         ];
+        let kernel = self.kernels.get("eval_check").unwrap();
+        self.hal.dispatch(&kernel, &args, domain as u64, None);
+    }
+
+    fn accumulate(
+        &self,
+        ctrl: &MetalBuffer<BabyBearElem>,
+        io: &MetalBuffer<BabyBearElem>,
+        data: &MetalBuffer<BabyBearElem>,
+        mix: &MetalBuffer<BabyBearElem>,
+        accum: &MetalBuffer<BabyBearElem>,
+        steps: usize,
+    ) {
+        let count = steps - ZK_CYCLES;
+
+        let wom = vec![BabyBearExtElem::ONE; steps];
+        let wom = MetalBuffer::copy_from("wom", &self.hal.device, self.hal.cmd_queue.clone(), &wom);
+
+        let args = [
+            KernelArg::Integer(steps as u32),
+            ctrl.as_arg(),
+            data.as_arg(),
+            mix.as_arg(),
+            wom.as_arg(),
+        ];
+        let kernel = self.kernels.get("step_compute_accum").unwrap();
+        self.hal.dispatch(&kernel, &args, count as u64, None);
+
+        use risc0_zkp::hal::Hal as _;
+        self.hal.prefix_products(&wom);
+
+        let args = [
+            KernelArg::Integer(steps as u32),
+            ctrl.as_arg(),
+            data.as_arg(),
+            mix.as_arg(),
+            wom.as_arg(),
+            accum.as_arg(),
+        ];
+        let kernel = self.kernels.get("step_verify_accum").unwrap();
+        self.hal.dispatch(&kernel, &args, count as u64, None);
+
         self.hal
-            .dispatch(&self.kernel, buffers, domain as u64, None);
+            .dispatch_by_name("eltwise_zeroize_fp", &[accum.as_arg()], accum.size() as u64);
+
+        self.hal
+            .dispatch_by_name("eltwise_zeroize_fp", &[io.as_arg()], io.size() as u64);
     }
 }
 

@@ -62,6 +62,7 @@ elf = { version = "0.7", default-features = false, optional = true }
 human-repr = { version = "1.0", optional = true }
 lazy-regex = { version = "3.1", optional = true }
 prost = { version = "0.12", optional = true }
+rand = { version = "0.8", optional = true }
 rayon = { version = "1.5", optional = true }
 risc0-circuit-recursion = { workspace = true }
 risc0-circuit-rv32im = { workspace = true }
@@ -78,7 +79,6 @@ typetag = { version = "0.2", optional = true }
 clap = { version = "4.4", features = ["derive"] }
 criterion = { version = "0.5", features = ["html_reports"] }
 hotbench = { workspace = true }
-lazy_static = "1.4.0"
 rand = "0.8"
 tracing-forest = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
@@ -90,7 +90,6 @@ crypto-bigint = { version = "0.5", default-features = false, features = [
 flate2 = "1.0"
 risc0-zkvm-methods = { path = "methods" }
 serde_json = "1.0"
-serial_test = "3.1"
 tar = "0.4"
 tempfile = "3"
 test-log = { version = "0.2", default-features = false, features = ["trace"] }
@@ -142,6 +141,7 @@ prove = [
   "dep:prost",
   "dep:prost-build",
   "dep:protobuf-src",
+  "dep:rand",
   "dep:rayon",
   "dep:rustc-demangle",
   "dep:tempfile",

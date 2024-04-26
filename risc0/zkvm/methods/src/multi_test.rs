@@ -79,7 +79,7 @@ pub enum MultiTestSpec {
     },
     BusyLoop {
         /// Busy loop until the guest has run for at least this number of cycles
-        cycles: u32,
+        cycles: u64,
     },
     LibM,
     Oom,

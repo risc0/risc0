@@ -51,3 +51,15 @@ kernel void eltwise_sum_fpext(device Fp* out,
     out[gid + i * count] = tot.elems[i];
   }
 }
+
+kernel void eltwise_zeroize_fp(uint gid [[thread_position_in_grid]],
+                               device Fp* elems) {
+  Fp val = elems[gid];
+  elems[gid] = val.zeroize();
+}
+
+kernel void eltwise_zeroize_fpext(uint gid [[thread_position_in_grid]],
+                               device FpExt* elems) {
+  FpExt val = elems[gid];
+  elems[gid] = val.zeroize();
+}

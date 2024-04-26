@@ -8,20 +8,24 @@ export const REPORTS = [
     label: "Crates.io Validation",
     href: "/crates-validation",
     description: CRATES_VALIDATION_DESCRIPTION,
+    showVersionSelect: false,
   },
   {
     label: "Benchmarks",
     href: "/benchmarks",
     description: BENCHMARKS_DESCRIPTION,
+    showVersionSelect: false,
   },
   {
     label: "Applications Benchmarks",
     href: "/applications-benchmarks",
     description: APPLICATIONS_BENCHMARKS_DESCRIPTION,
+    showVersionSelect: true,
   },
   {
     label: "Datasheet",
     href: "/datasheet",
     description: DATASHEET_DESCRIPTION,
+    showVersionSelect: true,
   },
 ] as const;

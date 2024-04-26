@@ -11,7 +11,7 @@ import {
 import compact from "lodash-es/compact";
 import { ChevronRightIcon } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { useParams, usePathname } from "next/navigation";
 import { Fragment } from "react";
 import { joinWords } from "shared/utils/join-words";
 
@@ -20,9 +20,12 @@ const HIDDEN_BREADCRUMB_ROUTES = ["applications-benchmarks"];
 
 export function Breadcrumbs() {
   const pathname = usePathname();
+  const { version } = useParams();
   const paths = compact(pathname.split("/"));
 
-  if (pathname === "/") {
+  paths.shift(); // remove version number from URL
+
+  if (pathname === "/" || paths.length === 0) {
     // non-breaking space to keep alignment
     return <>&nbsp;</>;
   }
@@ -36,7 +39,7 @@ export function Breadcrumbs() {
         <BreadcrumbList>
           <BreadcrumbItem>
             <BreadcrumbLink asChild>
-              <Link href="/">Home</Link>
+              <Link href={`/${version}`}>Home</Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator>
@@ -55,7 +58,7 @@ export function Breadcrumbs() {
                   ) : (
                     <BreadcrumbItem>
                       <BreadcrumbLink asChild>
-                        <Link className="capitalize" href={`/${path}`}>
+                        <Link className="capitalize" href={`/${version}/${path}`}>
                           {sanitizedChunk}
                         </Link>
                       </BreadcrumbLink>
