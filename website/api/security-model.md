@@ -83,7 +83,7 @@ We estimate that it would take approximately 400,000 years to brute force a coll
 - RTX 4090 [benchmarks] provide a reference SHA2-256 hashrate at less than 25,000 million hashes per second.
 - We have seen several [examples] of large purchases of GPUs on the order of 350,000 so we conservatively suggest that a distributed attacker may be able to operate 1 million RTX 4090s in parallel.
 
-At 2^98 [bits] of security required to force a collision, we can estimate the time to brute force a collision as follows:
+At $2^{98}$ [bits] of security required to force a collision, we can estimate the time to brute force a collision as follows:
   
 ```2^98 / (25,000,000,000 Hashes/s * 1,000,000 GPUs) / 60seconds / 60 minutes / 24 hours / 365 days = 401969 years```
 
