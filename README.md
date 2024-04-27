@@ -97,6 +97,7 @@ other manner of problems.  Caveat emptor.
 
 To start your own project, you can use our `cargo risczero` tool to write the
 initial boilerplate and set up a standard directory structure.
+
 First, [install Rust][install-rust] if you don't already have it, then install
 the `cargo risczero` tool. We'll use `cargo binstall` to get `cargo-risczero`
 installed. See [cargo-binstall] for more details.
@@ -124,6 +125,11 @@ More details and options for `cargo risczero` are given in
 For more guidance on how to use RISC Zero, how RISC Zero projects are typically
 structured, and other resources useful to developers new to RISC Zero, see our
 [Getting Started page][quickstart].
+
+## Building from source
+
+Building from source requires some additional tools and steps.
+Please refer to [CONTRIBUTING.md](./CONTRIBUTING.md) for the full instructions.
 
 ## Rust Binaries
 

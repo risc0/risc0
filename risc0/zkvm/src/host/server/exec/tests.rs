@@ -1208,7 +1208,7 @@ mod docker {
     #[test]
     fn session_limit() {
         fn run_session(
-            loop_cycles: u32,
+            loop_cycles: u64,
             segment_limit_po2: u32,
             session_count_limit: u64,
         ) -> anyhow::Result<Session> {

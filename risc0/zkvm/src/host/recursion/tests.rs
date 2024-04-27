@@ -19,7 +19,6 @@ use risc0_zkp::{
     field::baby_bear::BabyBearElem,
 };
 use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID};
-use serial_test::serial;
 use test_log::test;
 
 use super::{
@@ -28,7 +27,8 @@ use super::{
 };
 use crate::{
     default_prover, get_prover_server, host::client::prove::ReceiptKind, ExecutorEnv, ExecutorImpl,
-    InnerReceipt, ProverOpts, Receipt, SegmentReceipt, Session, VerifierContext, ALLOWED_IDS_ROOT,
+    InnerReceipt, ProverOpts, Receipt, SegmentReceipt, Session, VerifierContext,
+    ALLOWED_CONTROL_ROOT,
 };
 
 // Failure on older mac minis in the lab with Intel UHD 630 graphics:
@@ -37,7 +37,6 @@ use crate::{
     not(all(feature = "metal", target_os = "macos", target_arch = "x86_64")),
     test
 )]
-#[serial]
 fn test_recursion_poseidon254() {
     use risc0_zkp::core::{digest::Digest, hash::poseidon2::Poseidon2HashSuite};
 
@@ -64,7 +63,7 @@ fn test_recursion_poseidon254() {
     const DIGEST_SHORTS: usize = DIGEST_WORDS * 2;
     assert_eq!(CircuitImpl::OUTPUT_SIZE, DIGEST_SHORTS * 2);
     let output_elems: &[BabyBearElem] =
-        bytemuck::cast_slice(&receipt.seal[..CircuitImpl::OUTPUT_SIZE]);
+        bytemuck::checked::cast_slice(&receipt.seal[..CircuitImpl::OUTPUT_SIZE]);
     let output_digest = shorts_to_digest(&output_elems[DIGEST_SHORTS..2 * DIGEST_SHORTS]);
 
     tracing::debug!("Receipt output: {:?}", output_digest);
@@ -77,7 +76,6 @@ fn test_recursion_poseidon254() {
     not(all(feature = "metal", target_os = "macos", target_arch = "x86_64")),
     test
 )]
-#[serial]
 fn test_recursion_poseidon2() {
     use risc0_zkp::core::{digest::Digest, hash::poseidon2::Poseidon2HashSuite};
 
@@ -107,7 +105,7 @@ fn test_recursion_poseidon2() {
     const DIGEST_SHORTS: usize = DIGEST_WORDS * 2;
     assert_eq!(CircuitImpl::OUTPUT_SIZE, DIGEST_SHORTS * 2);
     let output_elems: &[BabyBearElem] =
-        bytemuck::cast_slice(&receipt.seal[..CircuitImpl::OUTPUT_SIZE]);
+        bytemuck::checked::cast_slice(&receipt.seal[..CircuitImpl::OUTPUT_SIZE]);
     let output_digest = shorts_to_digest(&output_elems[DIGEST_SHORTS..2 * DIGEST_SHORTS]);
 
     tracing::debug!("Receipt output: {:?}", output_digest);
@@ -197,7 +195,6 @@ fn generate_busy_loop_segments(hashfn: &str) -> (Session, Vec<SegmentReceipt>) {
     not(all(feature = "metal", target_os = "macos", target_arch = "x86_64")),
     test
 )]
-#[serial]
 fn test_recursion_lift_join_identity_e2e() {
     // Prove the base case
     let (session, segments) = generate_busy_loop_segments("poseidon2");
@@ -236,7 +233,6 @@ fn test_recursion_lift_join_identity_e2e() {
     not(all(feature = "metal", target_os = "macos", target_arch = "x86_64")),
     test
 )]
-#[serial]
 fn test_recursion_lift_resolve_e2e() {
     let opts = ProverOpts::default();
     let prover = get_prover_server(&opts).unwrap();
@@ -279,7 +275,7 @@ fn test_recursion_lift_resolve_e2e() {
     tracing::info!("Done proving: sys_verify");
 
     let succinct_receipt = prover
-        .compress(&composition_receipt.inner.composite().unwrap())
+        .compsite_to_succinct(&composition_receipt.inner.composite().unwrap())
         .unwrap();
 
     let receipt = Receipt::new(
@@ -304,7 +300,7 @@ fn stable_root() {
     // If you have _intentionally_ changed control IDs, update this hash.
 
     assert_eq!(
-        ALLOWED_IDS_ROOT,
-        "54058968ca621b3dfdf22c5d7dc65533ffbc1552e36d8b4437424d037328645e"
+        ALLOWED_CONTROL_ROOT,
+        "75310e05f78b6d149d87c66ea5e2eb0b3d5afc45f0581017319c9f4cfd865113"
     );
 }

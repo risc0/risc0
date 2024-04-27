@@ -1,6 +1,7 @@
 name: Benchmark Check
 
 on:
+  merge_group:
   push:
     branches: [main, "release-*"]
   pull_request:
@@ -86,3 +87,16 @@ jobs:
       - name: Save current benchmark data
         if: github.event_name == 'push'
         run: aws s3 cp ./cache/external.json $S3_BENCH_PATH/external.json
+
+  # see: https://github.com/orgs/community/discussions/26822
+  bench-status-check:
+    if: always()
+    needs:
+      - bench
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check all job status
+        # see https://docs.github.com/en/actions/reference/context-and-expression-syntax-for-github-actions#needs-context
+        # see https://stackoverflow.com/a/67532120/4907315
+        if: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
+        run: exit 1

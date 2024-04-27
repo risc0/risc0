@@ -54,7 +54,9 @@ impl Prover for LocalProver {
         match receipt.inner {
             InnerReceipt::Succinct(_) | InnerReceipt::Compact(_) => Ok(receipt.clone()),
             InnerReceipt::Composite(ref inner) => Ok(Receipt {
-                inner: InnerReceipt::Succinct(get_prover_server(opts)?.compress(&inner)?),
+                inner: InnerReceipt::Succinct(
+                    get_prover_server(opts)?.compsite_to_succinct(inner)?,
+                ),
                 journal: receipt.journal.clone(),
             }),
             InnerReceipt::Fake { .. } => {
@@ -77,7 +79,7 @@ impl Executor for LocalProver {
         })?;
         Ok(SessionInfo {
             segments,
-            journal: session.journal.unwrap_or_default().into(),
+            journal: session.journal.unwrap_or_default(),
             exit_code: session.exit_code,
         })
     }

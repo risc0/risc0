@@ -21,11 +21,11 @@ use crate::{
     host::{
         client::prove::ReceiptKind,
         prove_info::ProveInfo,
-        receipt::{CompositeReceipt, InnerReceipt, SegmentReceipt, SuccinctReceipt},
+        receipt::{InnerReceipt, SegmentReceipt, SuccinctReceipt},
         recursion::{identity_p254, join, lift, resolve},
     },
     sha::Digestible,
-    Receipt, Segment, Session, VerifierContext,
+    CompositeReceipt, Receipt, Segment, Session, VerifierContext,
 };
 
 /// An implementation of a Prover that runs locally.
@@ -64,7 +64,7 @@ where
             "prove_session: {}, exit_code = {:?}, journal = {:?}, segments: {}",
             self.name,
             session.exit_code,
-            session.journal.as_ref().map(|x| hex::encode(x)),
+            session.journal.as_ref().map(hex::encode),
             session.segments.len()
         );
         let mut segments = Vec::new();
@@ -98,8 +98,8 @@ where
             tracing::debug!("session claim: {:#?}", session.claim()?);
             bail!(
                 "session and composite receipt claim do not match: session {}, receipt {}",
-                hex::encode(&session.claim()?.digest()),
-                hex::encode(&composite_receipt.claim()?.digest())
+                hex::encode(session.claim()?.digest()),
+                hex::encode(composite_receipt.claim()?.digest())
             );
         }
 
@@ -109,14 +109,19 @@ where
                 session.journal.clone().unwrap_or_default().bytes,
             ),
             ReceiptKind::Succinct => {
-                let succinct_receipt = self.compress(&composite_receipt)?;
+                let succinct_receipt = self.compsite_to_succinct(&composite_receipt)?;
                 Receipt::new(
                     InnerReceipt::Succinct(succinct_receipt),
                     session.journal.clone().unwrap_or_default().bytes,
                 )
             }
             ReceiptKind::Compact => {
-                todo!("this will be implemented in the near future")
+                let succinct_receipt = self.compsite_to_succinct(&composite_receipt)?;
+                let compact_receipt = self.succinct_to_compact(&succinct_receipt)?;
+                Receipt::new(
+                    InnerReceipt::Compact(compact_receipt),
+                    session.journal.clone().unwrap_or_default().bytes,
+                )
             }
         };
 
@@ -128,8 +133,8 @@ where
             tracing::debug!("session claim: {:#?}", session.claim()?);
             bail!(
                 "session and receipt claim do not match: session {}, receipt {}",
-                hex::encode(&session.claim()?.digest()),
-                hex::encode(&receipt.claim()?.digest())
+                hex::encode(session.claim()?.digest()),
+                hex::encode(receipt.claim()?.digest())
             );
         }
 
@@ -155,17 +160,13 @@ where
 
         let receipt = SegmentReceipt {
             seal,
-            index: segment.index as u32,
+            index: segment.index,
             hashfn,
             claim,
         };
         receipt.verify_integrity_with_context(ctx)?;
 
         Ok(receipt)
-    }
-
-    fn get_peak_memory_usage(&self) -> usize {
-        self.hal_pair.hal.get_memory_usage()
     }
 
     fn lift(&self, receipt: &SegmentReceipt) -> Result<SuccinctReceipt> {

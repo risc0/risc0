@@ -58,7 +58,7 @@ pub(crate) fn g1_from_bytes(elem: &[Vec<u8>]) -> Result<G1Affine, Error> {
 }
 
 // Deserialize an element over the G2 group from bytes in big-endian format
-pub(crate) fn g2_from_bytes(elem: &Vec<Vec<Vec<u8>>>) -> Result<G2Affine, Error> {
+pub(crate) fn g2_from_bytes(elem: &[Vec<Vec<u8>>]) -> Result<G2Affine, Error> {
     if elem.len() != 2 || elem[0].len() != 2 || elem[1].len() != 2 {
         return Err(anyhow!("Malformed G2 field element"));
     }

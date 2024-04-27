@@ -102,7 +102,8 @@ pub use {
             exec::executor::ExecutorImpl,
             prove::{get_prover_server, HalPair, ProverServer},
             session::{
-                FileSegmentRef, Segment, SegmentRef, Session, SessionEvents, SimpleSegmentRef,
+                FileSegmentRef, NullSegmentRef, Segment, SegmentRef, Session, SessionEvents,
+                SimpleSegmentRef,
             },
         },
     },
@@ -135,7 +136,7 @@ pub use {
             Assumption, CompactReceipt, CompositeReceipt, InnerReceipt, Journal, Receipt,
             SegmentReceipt, SuccinctReceipt, VerifierContext,
         },
-        recursion::ALLOWED_IDS_ROOT,
+        recursion::ALLOWED_CONTROL_ROOT,
     },
     risc0_binfmt::compute_image_id,
     risc0_circuit_rv32im::control_id::POSEIDON2_CONTROL_ID,

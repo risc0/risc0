@@ -4,11 +4,7 @@ import { Tooltip, TooltipArrow, TooltipContent, TooltipTrigger } from "@risc0/ui
 import { joinWords } from "shared/utils/join-words";
 import type { CratesIoValidationTableSchema } from "./crates-io-validation-table-schema";
 
-type CratesIoValidationSummaryProps = {
-  data: CratesIoValidationTableSchema[];
-};
-
-export function CratesIoValidationSummary({ data }: CratesIoValidationSummaryProps) {
+export function CratesIoValidationSummary({ data }: { data: CratesIoValidationTableSchema[] }) {
   return (
     <div className="mt-2 mb-8 flex flex-row flex-wrap">
       {data.map((item) => (

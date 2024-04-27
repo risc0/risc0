@@ -20,8 +20,6 @@ jobs:
       RUST_BACKTRACE: full
       RUST_LOG: info
     steps:
-      # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
-      - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/rustup
       - name: Set the variables
@@ -64,7 +62,7 @@ jobs:
       - run: tail -n 1 ${{ runner.temp }}/crate-validation/crate-results.log
 
       - name: Upload artifact results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always() # upload all artifacts even on failures
         with:
           name: crates-test-results

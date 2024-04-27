@@ -15,7 +15,6 @@
 use std::{cell::RefCell, io::Write, mem, rc::Rc, sync::Arc, time::Instant};
 
 use anyhow::{Context as _, Result};
-use human_repr::HumanDuration as _;
 use risc0_binfmt::{MemoryImage, Program};
 use risc0_circuit_rv32im::prove::emu::{
     addr::ByteAddr,
@@ -122,6 +121,8 @@ impl<'a> ExecutorImpl<'a> {
     where
         F: FnMut(Segment) -> Result<Box<dyn SegmentRef>>,
     {
+        nvtx::range_push!("execute");
+
         let journal = Journal::default();
         self.env
             .posix_io
@@ -181,7 +182,7 @@ impl<'a> ExecutorImpl<'a> {
                 inner,
                 output,
             };
-            let segment_ref = callback(segment.into())?;
+            let segment_ref = callback(segment)?;
             refs.push(segment_ref);
             Ok(())
         })?;
@@ -224,10 +225,11 @@ impl<'a> ExecutorImpl<'a> {
         );
 
         tracing::info_span!("executor").in_scope(|| {
-            tracing::info!("execution time: {}", elapsed.human_duration());
+            tracing::info!("execution time: {elapsed:?}");
             session.log();
         });
 
+        nvtx::range_pop!();
         Ok(session)
     }
 }
@@ -237,7 +239,7 @@ struct ContextAdapter<'a> {
 }
 
 impl<'a> SyscallContext for ContextAdapter<'a> {
-    fn get_cycle(&self) -> usize {
+    fn get_cycle(&self) -> u64 {
         self.ctx.get_cycle()
     }
 
@@ -259,10 +261,10 @@ impl<'a> NewSyscall for ExecutorImpl<'a> {
     ) -> Result<(u32, u32)> {
         let mut ctx = ContextAdapter { ctx };
         self.syscall_table
-            .get_syscall(&syscall)
+            .get_syscall(syscall)
             .context(format!("Unknown syscall: {syscall:?}"))?
             .borrow_mut()
-            .syscall(&syscall, &mut ctx, into_guest)
+            .syscall(syscall, &mut ctx, into_guest)
     }
 }
 

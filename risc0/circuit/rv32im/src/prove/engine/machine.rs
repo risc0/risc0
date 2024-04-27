@@ -139,11 +139,13 @@ impl MachineContext {
 
     #[tracing::instrument(skip_all)]
     pub fn sort(&mut self, name: &str) {
+        nvtx::range_push!("sort({name})");
         match name {
             "ram" => self.ram_arg.sort(),
             "bytes" => self.bytes_arg.sort(),
             _ => unimplemented!("Unknown argument type {name}"),
         };
+        nvtx::range_pop!();
     }
 
     pub fn step_exec(

@@ -129,6 +129,7 @@ pub trait SessionEvents {
 
 impl Session {
     /// Construct a new [Session] from its constituent components.
+    #[allow(clippy::too_many_arguments)]
     pub fn new(
         segments: Vec<Box<dyn SegmentRef>>,
         input: Digest,
@@ -144,7 +145,7 @@ impl Session {
         Self {
             segments,
             input,
-            journal: journal.map(|x| Journal::new(x)),
+            journal: journal.map(Journal::new),
             exit_code,
             post_image,
             assumptions,
@@ -219,7 +220,7 @@ impl Session {
         tracing::info!("number of segments: {}", self.segments.len());
         tracing::info!("total cycles: {}", self.total_cycles);
         tracing::info!("user cycles: {}", self.user_cycles);
-        tracing::info!("cycle efficiency: {}%", cycle_efficiency as u32);
+        tracing::debug!("cycle efficiency: {}%", cycle_efficiency as u32);
     }
 
     /// Returns stats for the session

@@ -172,7 +172,7 @@ impl TraceCallback for TraceProxy {
         let request = pb::api::ServerReply {
             kind: Some(pb::api::server_reply::Kind::Ok(pb::api::ClientCallback {
                 kind: Some(pb::api::client_callback::Kind::Io(pb::api::OnIoRequest {
-                    kind: Some(pb::api::on_io_request::Kind::Trace(event.try_into()?)),
+                    kind: Some(pb::api::on_io_request::Kind::Trace(event.into())),
                 })),
             })),
         };
@@ -261,7 +261,7 @@ impl Server {
             request: pb::api::ExecuteRequest,
         ) -> Result<pb::api::ServerReply> {
             let env_request = request.env.ok_or(malformed_err())?;
-            let env = build_env(&conn, &env_request)?;
+            let env = build_env(conn, &env_request)?;
 
             let binary = env_request.binary.ok_or(malformed_err())?;
 
@@ -334,7 +334,7 @@ impl Server {
             request: pb::api::ProveRequest,
         ) -> Result<pb::api::ServerReply> {
             let env_request = request.env.ok_or(malformed_err())?;
-            let env = build_env(&conn, &env_request)?;
+            let env = build_env(conn, &env_request)?;
 
             let binary = env_request.binary.ok_or(malformed_err())?;
             let bytes = binary.as_bytes()?;
@@ -597,13 +597,13 @@ fn build_env<'a>(
     }
     let proxy = SliceIoProxy::new(conn.try_clone()?);
     for name in request.slice_ios.iter() {
-        env_builder.slice_io(&name, proxy.try_clone()?);
+        env_builder.slice_io(name, proxy.try_clone()?);
     }
     if let Some(segment_limit_po2) = request.segment_limit_po2 {
         env_builder.segment_limit_po2(segment_limit_po2);
     }
     env_builder.session_limit(request.session_limit);
-    if let Some(_) = request.trace_events {
+    if request.trace_events.is_some() {
         let proxy = TraceProxy::new(conn.try_clone()?);
         env_builder.trace_callback(proxy);
     }

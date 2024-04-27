@@ -148,15 +148,15 @@ impl Verifier {
 /// Computes the default prepared verifying key, used by Bonsai.
 pub fn prepared_verifying_key() -> Result<PreparedVerifyingKey<Bn254>, Error> {
     let alpha_g1 = g1_from_bytes(&[from_u256(ALPHA_X)?, from_u256(ALPHA_Y)?])?;
-    let beta_g2 = g2_from_bytes(&vec![
+    let beta_g2 = g2_from_bytes(&[
         vec![from_u256(BETA_X1)?, from_u256(BETA_X2)?],
         vec![from_u256(BETA_Y1)?, from_u256(BETA_Y2)?],
     ])?;
-    let gamma_g2 = g2_from_bytes(&vec![
+    let gamma_g2 = g2_from_bytes(&[
         vec![from_u256(GAMMA_X1)?, from_u256(GAMMA_X2)?],
         vec![from_u256(GAMMA_Y1)?, from_u256(GAMMA_Y2)?],
     ])?;
-    let delta_g2 = g2_from_bytes(&vec![
+    let delta_g2 = g2_from_bytes(&[
         vec![from_u256(DELTA_X1)?, from_u256(DELTA_X2)?],
         vec![from_u256(DELTA_Y1)?, from_u256(DELTA_Y2)?],
     ])?;

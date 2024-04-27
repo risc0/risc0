@@ -24,7 +24,7 @@ use core::{
     ops,
 };
 
-use bytemuck::{Pod, Zeroable};
+use bytemuck::{CheckedBitPattern, NoUninit, Zeroable};
 
 use crate::field::{self, Elem as FieldElem};
 
@@ -56,11 +56,12 @@ const R2: u32 = 1172168163;
 /// - Otherwise have as large a power of 2 in the factors of P-1 as possible.
 ///
 /// This last property is useful for number theoretical transforms (the fast
-/// fourier transform equivalent on finite fields). See NTT.h for details.
+/// fourier transform equivalent on finite fields). See [risc0_zkp::core::ntt]
+/// for details.
 ///
 /// The Fp class wraps all the standard arithmetic operations to make the finite
 /// field elements look basically like ordinary numbers (which they mostly are).
-#[derive(Eq, Clone, Copy, Pod, Zeroable)]
+#[derive(Eq, Clone, Copy, NoUninit, Zeroable)]
 #[repr(transparent)]
 pub struct Elem(u32);
 
@@ -159,6 +160,15 @@ impl field::Elem for Elem {
     }
 }
 
+unsafe impl CheckedBitPattern for Elem {
+    type Bits = u32;
+
+    /// Checks that the u32 is less than the modulus.
+    fn is_valid_bit_pattern(bits: &u32) -> bool {
+        *bits < P
+    }
+}
+
 macro_rules! rou_array {
     [$($x:literal),* $(,)?] => {
         [$(Elem::new($x)),* ]
@@ -214,6 +224,7 @@ impl Elem {
 
 impl ops::Add for Elem {
     type Output = Self;
+
     /// Addition for Baby Bear [Elem]
     fn add(self, rhs: Self) -> Self {
         Elem(add(self.ensure_valid().0, rhs.ensure_valid().0))
@@ -261,6 +272,7 @@ impl ops::MulAssign for Elem {
 
 impl ops::Neg for Elem {
     type Output = Self;
+
     fn neg(self) -> Self {
         Elem(0) - *self.ensure_valid()
     }
@@ -286,12 +298,6 @@ impl PartialOrd for Elem {
 
 impl From<Elem> for u32 {
     fn from(x: Elem) -> Self {
-        decode(x.0)
-    }
-}
-
-impl From<&Elem> for u32 {
-    fn from(x: &Elem) -> Self {
         decode(x.0)
     }
 }
@@ -376,9 +382,27 @@ const EXT_SIZE: usize = 4;
 /// The irreducible polynomial `x^4 + 11` was chosen because `11` is
 /// the simplest choice of `BETA` for `x^4 + BETA` that makes this polynomial
 /// irreducible.
-#[derive(Eq, Clone, Copy, Pod, Zeroable)]
+#[derive(Eq, Clone, Copy, Zeroable)]
 #[repr(transparent)]
 pub struct ExtElem([Elem; EXT_SIZE]);
+
+// ExtElem has no padding bytes as Elem has none and is 32 bits in width.
+// See bytemuck docs for a full list of requirements.
+// https://docs.rs/bytemuck/latest/bytemuck/trait.NoUninit.html#safety
+unsafe impl NoUninit for ExtElem {}
+
+unsafe impl CheckedBitPattern for ExtElem {
+    type Bits = [u32; EXT_SIZE];
+
+    /// Checks that the u32 array elements are all less than the modulus.
+    fn is_valid_bit_pattern(bits: &[u32; EXT_SIZE]) -> bool {
+        let mut valid = true;
+        for x in bits {
+            valid &= *x < P;
+        }
+        valid
+    }
+}
 
 /// Alias for the Baby Bear [ExtElem]
 pub type BabyBearExtElem = ExtElem;
@@ -407,6 +431,8 @@ impl field::Elem for ExtElem {
 
     /// Generate a random field element uniformly.
     fn random(rng: &mut impl rand_core::RngCore) -> Self {
+        // NOTE: It's possible this could be made more efficient since each field element uses 192
+        // random bits while the total entropy needed for a negligibly biased ExtElem is 288.
         Self([
             Elem::random(rng),
             Elem::random(rng),
@@ -466,6 +492,7 @@ impl field::Elem for ExtElem {
         ])
     }
 
+    /// Convert from a u64 to a base field elem, then cast to the extension field.
     fn from_u64(val: u64) -> Self {
         Self([Elem::from_u64(val), Elem::ZERO, Elem::ZERO, Elem::ZERO])
     }
@@ -483,19 +510,14 @@ impl field::Elem for ExtElem {
 
     // So we're not checking every subfield element every time we do
     // anything, assume that if our first subelement is valid, the
-    // whole thing is valid.  Any subfield elements will double check
+    // whole thing is valid.  Any subfield elements will be double checked
     // when we do operations on them anyways.
     fn is_valid(&self) -> bool {
         self.0[0].is_valid()
     }
 
     fn is_reduced(&self) -> bool {
-        for comp in self.0 {
-            if !comp.is_reduced() {
-                return false;
-            }
-        }
-        true
+        self.0.iter().all(|x| x.is_reduced())
     }
 }
 
@@ -690,6 +712,7 @@ impl ops::MulAssign for ExtElem {
 
 impl ops::Mul for ExtElem {
     type Output = ExtElem;
+
     #[inline(always)]
     fn mul(self, rhs: ExtElem) -> ExtElem {
         let mut lhs = self;
@@ -700,6 +723,7 @@ impl ops::Mul for ExtElem {
 
 impl ops::Neg for ExtElem {
     type Output = Self;
+
     fn neg(self) -> Self {
         ExtElem::ZERO - self
     }
