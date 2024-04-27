@@ -24,8 +24,9 @@ use std::{collections::VecDeque, mem::take, rc::Rc};
 use anyhow::{anyhow, Context, Result};
 use hex::FromHex;
 use merkle::MerkleGroup;
+use rand::thread_rng;
 use risc0_circuit_recursion::{
-    cpu::CpuCircuitHal, CircuitImpl, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA,
+    cpu::CpuCircuitHal, CircuitImpl, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CTRL, REGISTER_GROUP_DATA,
 };
 use risc0_circuit_rv32im::control_id::POSEIDON2_CONTROL_ID;
 use risc0_zkp::{
@@ -112,7 +113,7 @@ pub fn join(a: &SuccinctReceipt, b: &SuccinctReceipt) -> Result<SuccinctReceipt>
         pre: a.claim.pre.clone(),
         post: b.claim.post.clone(),
         exit_code: b.claim.exit_code,
-        input: a.claim.input.clone(),
+        input: a.claim.input,
         output: b.claim.output.clone(),
     };
 
@@ -513,7 +514,7 @@ impl Prover {
         a: &SuccinctReceipt,
         allowed_ids: &MerkleGroup,
     ) -> Result<()> {
-        self.add_seal(&a.seal, &a.control_id, &allowed_ids)?;
+        self.add_seal(&a.seal, &a.control_id, allowed_ids)?;
         let mut data = Vec::<u32>::new();
         a.claim.encode(&mut data)?;
         let data_fp: Vec<BabyBearElem> = data.iter().map(|x| BabyBearElem::new(*x)).collect();
@@ -677,36 +678,49 @@ impl Prover {
         } else {
             prover.set_po2(adapter.po2() as usize);
 
-            prover.commit_group(
-                REGISTER_GROUP_CODE,
-                hal.copy_from_elem("code", &*adapter.get_code().as_slice()),
-            );
-            prover.commit_group(
-                REGISTER_GROUP_DATA,
-                hal.copy_from_elem("data", &*adapter.get_data().as_slice()),
-            );
-            adapter.accumulate(prover.iop());
-            prover.commit_group(
-                REGISTER_GROUP_ACCUM,
-                hal.copy_from_elem("accum", &*adapter.get_accum().as_slice()),
-            );
+            let ctrl = hal.copy_from_elem("ctrl", &adapter.get_code().as_slice());
+            prover.commit_group(REGISTER_GROUP_CTRL, &ctrl);
 
-            let mix = hal.copy_from_elem("mix", &*adapter.get_mix().as_slice());
-            let out = hal.copy_from_elem("out", &*adapter.get_io().as_slice());
+            let data = hal.copy_from_elem("data", &adapter.get_data().as_slice());
+            prover.commit_group(REGISTER_GROUP_DATA, &data);
 
-            prover.finalize(&[&mix, &out], circuit_hal)
+            // Make the mixing values
+            let mix: Vec<_> = (0..CircuitImpl::MIX_SIZE)
+                .map(|_| prover.iop().random_elem())
+                .collect();
+            let mix = hal.copy_from_elem("mix", mix.as_slice());
+
+            let steps = adapter.get_steps();
+            let mut accum = vec![BabyBearElem::INVALID; steps * CIRCUIT.accum_size()];
+
+            // Add random noise to end of accum
+            let mut rng = thread_rng();
+            for i in steps - ZK_CYCLES..steps {
+                for j in 0..CIRCUIT.accum_size() {
+                    accum[j * steps + i] = BabyBearElem::random(&mut rng);
+                }
+            }
+
+            let io = hal.copy_from_elem("io", &adapter.get_io().as_slice());
+            let accum = hal.copy_from_elem("accum", accum.as_slice());
+
+            circuit_hal.accumulate(&ctrl, &io, &data, &mix, &accum, steps);
+
+            prover.commit_group(REGISTER_GROUP_ACCUM, &accum);
+
+            prover.finalize(&[&mix, &io], circuit_hal)
         };
 
         Ok(RecursionReceipt {
             control_id: self.control_id,
-            seal: seal.into(),
+            seal,
             output: self.output.clone(),
         })
     }
 
     #[tracing::instrument(skip_all)]
     fn preflight(&mut self) -> Result<exec::MachineContext> {
-        let mut machine = exec::MachineContext::new(take(&mut self.input).into());
+        let mut machine = exec::MachineContext::new(take(&mut self.input));
         let mut preflight = preflight::Preflight::new(&mut machine);
 
         for (cycle, row) in self.program.code_by_row().enumerate() {

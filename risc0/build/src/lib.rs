@@ -469,6 +469,7 @@ fn build_guest_package<P>(
         .read(true)
         .write(true)
         .create(true)
+        .truncate(false)
         .open(tty_file)
         .ok();
 

@@ -63,6 +63,13 @@ struct FpExt {
     elems[3] = d;
   }
 
+  constexpr inline FpExt zeroize() {
+    for (uint32_t i = 0; i < 4; i++) {
+      elems[i].zeroize();
+    }
+    return *this;
+  }
+
   // Implement the addition/subtraction overloads
   constexpr FpExt operator+=(FpExt rhs) {
     for (uint32_t i = 0; i < 4; i++) {
@@ -122,6 +129,7 @@ struct FpExt {
 #undef a
 #undef b
   }
+
   constexpr FpExt operator*=(FpExt rhs) {
     *this = *this * rhs;
     return *this;

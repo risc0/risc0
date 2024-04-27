@@ -107,7 +107,7 @@ fn main() {
         MultiTestSpec::Halt(exit_code) => {
             env::exit(exit_code);
         }
-        MultiTestSpec::PauseContinue(exit_code) => {
+        MultiTestSpec::PauseResume(exit_code) => {
             env::log("before");
             env::pause(exit_code);
             env::log("after");
@@ -164,6 +164,9 @@ fn main() {
                 }
             }
         }
+        MultiTestSpec::SysInput(digest) => {
+            assert_eq!(env::input_digest(), digest);
+        }
         MultiTestSpec::SysRead {
             mut buf,
             fd,
@@ -213,7 +216,7 @@ fn main() {
             env::log("Busy loop starting!");
             let mut tot_cycles = last_cycles;
 
-            while tot_cycles < cycles as usize {
+            while tot_cycles < cycles {
                 let now_cycles = env::cycle_count();
                 if now_cycles <= last_cycles {
                     // Cycle count may have reset or wrapped around.

@@ -19,12 +19,15 @@ use risc0_zkp::hal::{CircuitHal, Hal};
 use super::{HalPair, ProverServer};
 use crate::{
     host::{
+        client::prove::ReceiptKind,
         prove_info::ProveInfo,
-        receipt::{CompositeReceipt, InnerReceipt, SegmentReceipt, SuccinctReceipt},
+        receipt::{
+            CompactReceipt, CompositeReceipt, InnerReceipt, SegmentReceipt, SuccinctReceipt,
+        },
         recursion::{identity_p254, join, lift, resolve},
     },
     sha::Digestible,
-    Receipt, Segment, Session, VerifierContext,
+    stark_to_snark, Receipt, Segment, Session, VerifierContext,
 };
 
 /// An implementation of a Prover that runs locally.
@@ -35,6 +38,7 @@ where
 {
     name: String,
     hal_pair: HalPair<H, C>,
+    receipt_kind: ReceiptKind,
 }
 
 impl<H, C> ProverImpl<H, C>
@@ -43,10 +47,11 @@ where
     C: CircuitHal<H>,
 {
     /// Construct a [ProverImpl] with the given name and [HalPair].
-    pub fn new(name: &str, hal_pair: HalPair<H, C>) -> Self {
+    pub fn new(name: &str, hal_pair: HalPair<H, C>, receipt_kind: ReceiptKind) -> Self {
         Self {
             name: name.to_string(),
             hal_pair,
+            receipt_kind,
         }
     }
 }
@@ -61,7 +66,7 @@ where
             "prove_session: {}, exit_code = {:?}, journal = {:?}, segments: {}",
             self.name,
             session.exit_code,
-            session.journal.as_ref().map(|x| hex::encode(x)),
+            session.journal.as_ref().map(hex::encode),
             session.segments.len()
         );
         let mut segments = Vec::new();
@@ -98,15 +103,36 @@ where
             tracing::debug!("session claim: {:#?}", session.get_claim()?);
             bail!(
                 "session and composite receipt claim do not match: session {}, receipt {}",
-                hex::encode(&session.get_claim()?.digest()),
-                hex::encode(&composite_receipt.get_claim()?.digest())
+                hex::encode(session.get_claim()?.digest()),
+                hex::encode(composite_receipt.get_claim()?.digest())
             );
         }
 
-        let receipt = Receipt::new(
-            InnerReceipt::Composite(composite_receipt),
-            session.journal.clone().unwrap_or_default().bytes,
-        );
+        let receipt = match self.receipt_kind {
+            ReceiptKind::Composite => Receipt::new(
+                InnerReceipt::Composite(composite_receipt),
+                session.journal.clone().unwrap_or_default().bytes,
+            ),
+            ReceiptKind::Succinct => {
+                let succinct_receipt = self.compress(&composite_receipt)?;
+                Receipt::new(
+                    InnerReceipt::Succinct(succinct_receipt),
+                    session.journal.clone().unwrap_or_default().bytes,
+                )
+            }
+            ReceiptKind::Compact => {
+                let succinct_receipt = self.compress(&composite_receipt)?;
+                let ident_receipt = identity_p254(&succinct_receipt).unwrap();
+                let seal_bytes = ident_receipt.get_seal_bytes();
+                let claim = session.get_claim()?;
+
+                let seal = stark_to_snark(&seal_bytes)?.to_vec();
+                Receipt::new(
+                    InnerReceipt::Compact(CompactReceipt { seal, claim }),
+                    session.journal.clone().unwrap_or_default().bytes,
+                )
+            }
+        };
 
         // Verify the receipt to catch if something is broken in the proving process.
         receipt.verify_integrity_with_context(ctx)?;
@@ -116,8 +142,8 @@ where
             tracing::debug!("session claim: {:#?}", session.get_claim()?);
             bail!(
                 "session and receipt claim do not match: session {}, receipt {}",
-                hex::encode(&session.get_claim()?.digest()),
-                hex::encode(&receipt.get_claim()?.digest())
+                hex::encode(session.get_claim()?.digest()),
+                hex::encode(receipt.get_claim()?.digest())
             );
         }
 
@@ -143,7 +169,7 @@ where
 
         let receipt = SegmentReceipt {
             seal,
-            index: segment.index as u32,
+            index: segment.index,
             hashfn,
             claim,
         };

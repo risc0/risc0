@@ -1,5 +1,6 @@
 await import("./src/env.js");
 import withBundleAnalyzer from "@next/bundle-analyzer";
+import { latestVersion } from "./src/versions.js";
 
 /** @type {import("next").NextConfig} */
 const config = {
@@ -11,6 +12,22 @@ const config = {
   experimental: {
     caseSensitiveRoutes: true,
     ppr: true,
+  },
+  images: {
+    dangerouslyAllowSVG: false,
+    contentDispositionType: "attachment",
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+  },
+
+  // biome-ignore lint/suspicious/useAwait: needs to be async
+  async redirects() {
+    return [
+      {
+        source: "/",
+        destination: latestVersion ? `/${latestVersion}` : "/",
+        permanent: true,
+      },
+    ];
   },
 };
 

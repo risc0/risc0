@@ -126,17 +126,17 @@ macro_rules! declare_syscall {
 }
 
 pub mod nr {
-    declare_syscall!(pub SYS_CYCLE_COUNT);
-    declare_syscall!(pub SYS_GETENV);
     declare_syscall!(pub SYS_ARGC);
     declare_syscall!(pub SYS_ARGV);
+    declare_syscall!(pub SYS_CYCLE_COUNT);
+    declare_syscall!(pub SYS_GETENV);
     declare_syscall!(pub SYS_LOG);
     declare_syscall!(pub SYS_PANIC);
     declare_syscall!(pub SYS_RANDOM);
     declare_syscall!(pub SYS_READ);
-    declare_syscall!(pub SYS_WRITE);
     declare_syscall!(pub SYS_VERIFY);
     declare_syscall!(pub SYS_VERIFY_INTEGRITY);
+    declare_syscall!(pub SYS_WRITE);
 }
 
 impl SyscallName {
@@ -304,6 +304,27 @@ pub unsafe extern "C" fn sys_pause(user_exit: u8, out_state: *const [u32; DIGEST
     );
 }
 
+#[cfg_attr(feature = "export-syscalls", no_mangle)]
+pub extern "C" fn sys_input(index: u32) -> u32 {
+    let t0 = ecall::INPUT;
+    let index = index & 0x07;
+    #[cfg(target_os = "zkvm")]
+    unsafe {
+        let a0: u32;
+        asm!(
+            "ecall",
+            in("t0") t0,
+            inout("a0") index => a0,
+        );
+        a0
+    }
+    #[cfg(not(target_os = "zkvm"))]
+    {
+        core::hint::black_box((t0, index));
+        unimplemented!()
+    }
+}
+
 /// # Safety
 ///
 /// `out_state`, `in_state`, `block1_ptr`, and `block2_ptr` must be aligned and
@@ -408,9 +429,9 @@ pub unsafe extern "C" fn sys_log(msg_ptr: *const u8, len: usize) {
 }
 
 #[cfg_attr(feature = "export-syscalls", no_mangle)]
-pub extern "C" fn sys_cycle_count() -> usize {
-    let Return(a0, _) = unsafe { syscall_0(nr::SYS_CYCLE_COUNT, null_mut(), 0) };
-    a0 as usize
+pub extern "C" fn sys_cycle_count() -> u64 {
+    let Return(hi, lo) = unsafe { syscall_0(nr::SYS_CYCLE_COUNT, null_mut(), 0) };
+    ((hi as u64) << 32) + lo as u64
 }
 
 /// Reads the given number of bytes into the given buffer, posix-style.  Returns
@@ -653,12 +674,13 @@ pub extern "C" fn sys_alloc_words(nwords: usize) -> *mut u32 {
     unsafe { sys_alloc_aligned(WORD_SIZE * nwords, WORD_SIZE) as *mut u32 }
 }
 
-#[cfg(feature = "export-syscalls")]
-#[no_mangle]
 /// # Safety
 ///
 /// This function should be safe to call, but clippy complains if it is not marked as `unsafe`.
+#[cfg(feature = "export-syscalls")]
+#[no_mangle]
 pub unsafe extern "C" fn sys_alloc_aligned(bytes: usize, align: usize) -> *mut u8 {
+    #[cfg(target_os = "zkvm")]
     extern "C" {
         // This symbol is defined by the loader and marks the end
         // of all elf sections, so this is where we start our
@@ -676,6 +698,7 @@ pub unsafe extern "C" fn sys_alloc_aligned(bytes: usize, align: usize) -> *mut u
     // SAFETY: Single threaded, so nothing else can touch this while we're working.
     let mut heap_pos = unsafe { HEAP_POS };
 
+    #[cfg(target_os = "zkvm")]
     if heap_pos == 0 {
         heap_pos = unsafe { (&_end) as *const u8 as usize };
     }
@@ -710,11 +733,12 @@ pub unsafe extern "C" fn sys_alloc_aligned(bytes: usize, align: usize) -> *mut u
 /// 0 to register a0. The caller must calculate the ReceiptClaim digest, using the provided post
 /// state digest and encode the digest into a public assumptions list for inclusion in the guest
 /// output.
-#[cfg(feature = "export-syscalls")]
-#[no_mangle]
+///
 /// # Safety
 ///
 /// `image_id`, `journal_digest`, and `from_host_buf` must be aligned and dereferenceable.
+#[cfg(feature = "export-syscalls")]
+#[no_mangle]
 pub unsafe extern "C" fn sys_verify(
     image_id: *const [u32; DIGEST_WORDS],
     journal_digest: *const [u32; DIGEST_WORDS],

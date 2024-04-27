@@ -139,6 +139,7 @@ message ExecutorEnv {
   google.protobuf.Empty trace_events = 9;
   string pprof_out = 10;
   repeated Assumption assumptions = 11;
+  string segment_path = 12;
 }
 
 message Assumption {
@@ -151,6 +152,13 @@ message Assumption {
 message ProverOpts {
   string hashfn = 1;
   bool prove_guest_errors = 2;
+  ReceiptKind receipt_kind = 3;
+}
+
+enum ReceiptKind {
+  COMPOSITE = 0;
+  SUCCINCT = 1;
+  COMPACT = 2;
 }
 
 message SessionInfo {
@@ -227,7 +235,7 @@ message PosixCmd {
 
 message TraceEvent {
   message InstructionStart {
-    uint32 cycle = 1;
+    uint64 cycle = 1;
     uint32 pc = 2;
     uint32 insn = 3;
   }

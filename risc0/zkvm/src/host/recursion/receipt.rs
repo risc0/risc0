@@ -14,9 +14,12 @@
 
 use alloc::{collections::VecDeque, vec::Vec};
 
+use hex::FromHex;
 use risc0_binfmt::read_sha_halfs;
-use risc0_circuit_recursion::{control_id::RECURSION_CONTROL_IDS, CircuitImpl};
-use risc0_circuit_rv32im::control_id::POSEIDON2_CONTROL_ID;
+use risc0_circuit_recursion::{
+    control_id::{ALLOWED_CONTROL_IDS, ALLOWED_CONTROL_ROOT},
+    CircuitImpl,
+};
 use risc0_core::field::baby_bear::BabyBearElem;
 use risc0_zkp::{adapter::CircuitInfo, core::digest::Digest, verify::VerificationError};
 use serde::{Deserialize, Serialize};
@@ -24,19 +27,12 @@ use serde::{Deserialize, Serialize};
 use super::CIRCUIT;
 use crate::{host::receipt::VerifierContext, sha::Digestible, ReceiptClaim};
 
-/// This function gets valid control IDs from the Poseidon2 and recursion
-/// circuits
+/// Return the allowed Control IDs that can be used by a zkr program.
 pub fn valid_control_ids() -> Vec<Digest> {
-    use hex::FromHex;
-
-    let mut all_ids = Vec::new();
-    for digest_str in POSEIDON2_CONTROL_ID {
-        all_ids.push(Digest::from_hex(digest_str).unwrap());
-    }
-    for (_, digest_str) in RECURSION_CONTROL_IDS {
-        all_ids.push(Digest::from_hex(digest_str).unwrap());
-    }
-    all_ids
+    ALLOWED_CONTROL_IDS
+        .iter()
+        .map(|x| Digest::from_hex(x).unwrap())
+        .collect()
 }
 
 /// A succinct receipt, produced via recursion, proving the execution of the zkVM.
@@ -98,14 +94,34 @@ impl SuccinctReceipt {
 
         // Extract the globals from the seal
         let output_elems: &[BabyBearElem] =
-            bytemuck::cast_slice(&self.seal[..CircuitImpl::OUTPUT_SIZE]);
+            bytemuck::checked::cast_slice(&self.seal[..CircuitImpl::OUTPUT_SIZE]);
         let mut seal_claim = VecDeque::new();
         for elem in output_elems {
             seal_claim.push_back(elem.as_u32())
         }
 
-        // TODO: Read root hash
-        seal_claim.drain(0..16);
+        // Read the Poseidon2 control root digest from the first 16 words of the output.
+        // NOTE: Implemented recursion programs have two output slots, each of size 16 elems.
+        // A SHA2 digest is encoded as 16 half words. Poseidon digests are encoded in 8 elems,
+        // but are interspersed with padding to fill out the whole 16 elems.
+        let control_root: Digest = seal_claim
+            .drain(0..16)
+            .enumerate()
+            .filter_map(|(i, word)| (i & 1 == 0).then_some(word))
+            .collect::<Vec<_>>()
+            .try_into()
+            .map_err(|_| VerificationError::ReceiptFormatError)?;
+        let allowed_root = Digest::from_hex(ALLOWED_CONTROL_ROOT).unwrap();
+        if control_root != allowed_root {
+            tracing::debug!(
+                "succinct receipt does not match the expected control root: decoded: {:#?}, expected: {allowed_root:?}",
+                control_root,
+            );
+            return Err(VerificationError::ControlVerificationError {
+                control_id: control_root,
+            });
+        }
+
         // Verify the output hash matches that data
         let output_hash =
             read_sha_halfs(&mut seal_claim).map_err(|_| VerificationError::ReceiptFormatError)?;

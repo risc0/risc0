@@ -119,7 +119,7 @@ export function Charts() {
 
             <div className="w-full">
               {names.map((name) => (
-                <TabsContent id={`chart-${name}`} key={name} value={name} />
+                <TabsContent tabIndex={-1} id={`chart-${name}`} key={name} value={name} />
               ))}
             </div>
           </div>

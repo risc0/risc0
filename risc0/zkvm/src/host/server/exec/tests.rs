@@ -526,7 +526,7 @@ mod sys_verify {
 
     fn exec_pause(exit_code: u8) -> Session {
         let env = ExecutorEnvBuilder::default()
-            .write(&MultiTestSpec::PauseContinue(exit_code))
+            .write(&MultiTestSpec::PauseResume(exit_code))
             .unwrap()
             .build()
             .unwrap();
@@ -1208,7 +1208,7 @@ mod docker {
     #[test]
     fn session_limit() {
         fn run_session(
-            loop_cycles: u32,
+            loop_cycles: u64,
             segment_limit_po2: u32,
             session_count_limit: u64,
         ) -> anyhow::Result<Session> {

@@ -41,6 +41,7 @@ public:
   static constant uint32_t P = 15 * (uint32_t(1) << 27) + 1;
   static constant uint32_t M = 0x88000001;
   static constant uint32_t R2 = 1172168163;
+  static constant uint32_t INVALID = 0xfffffffful;
 
 private:
   // The actual value, always < P.
@@ -102,7 +103,14 @@ public:
   static constexpr Fp maxVal() { return P - 1; }
 
   /// Get an 'invalid' Fp value
-  static constexpr Fp invalid() { return Fp(0xfffffffful, true); }
+  static constexpr Fp invalid() { return Fp(INVALID, true); }
+
+  constexpr inline Fp zeroize() {
+    if (val == INVALID) {
+      val = 0;
+    }
+    return *this;
+  }
 
   // Implement all the various overloads
   constexpr void operator=(uint32_t rhs) { val = encode(rhs); }

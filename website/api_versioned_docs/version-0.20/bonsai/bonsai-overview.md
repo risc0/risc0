@@ -45,7 +45,7 @@ Stay tuned!
 
 Under the hood, Bonsai uses the RISC Zero zkVM to prove your programs. With the zkVM, you have access to recursive proofs, proofs composition, a general-purpose circuit (with a bespoke circuit compiler), state continuations, and continuous improvements to the proving algorithm.
 
-The zkVM is open source, and you can explore and contribute at [gtihub.com/risc0/risc0](https://github.com/risc0/risc0).
+The zkVM is open source, and you can explore and contribute at [github.com/risc0/risc0](https://github.com/risc0/risc0).
 
 ### 2. The Bonsai proving service, powered by the zkVM
 

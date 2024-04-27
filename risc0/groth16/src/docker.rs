@@ -31,13 +31,10 @@ pub fn stark_to_snark(identity_p254_seal_bytes: &[u8]) -> Result<Seal> {
 
     let tmp_dir = tempdir()?;
     let work_dir = std::env::var("RISC0_WORK_DIR");
-    let work_dir = work_dir
-        .as_ref()
-        .map(|x| Path::new(x))
-        .unwrap_or(tmp_dir.path());
+    let work_dir = work_dir.as_ref().map(Path::new).unwrap_or(tmp_dir.path());
 
     tracing::debug!("seal-to-json");
-    std::fs::write(work_dir.join("seal.r0"), &identity_p254_seal_bytes)?;
+    std::fs::write(work_dir.join("seal.r0"), identity_p254_seal_bytes)?;
     let seal_path = work_dir.join("input.json");
     let proof_path = work_dir.join("proof.json");
     let mut seal_json = Vec::new();
