@@ -240,6 +240,11 @@ impl<T: Clone> Buffer<T> for CpuBuffer<T> {
         }
     }
 
+    fn get_at(&self, idx: usize) -> T {
+        let buf = self.buf.read();
+        buf.0[idx].clone()
+    }
+
     fn view<F: FnOnce(&[T])>(&self, f: F) {
         let buf = self.buf.read();
         f(&buf.0[self.region.range()]);

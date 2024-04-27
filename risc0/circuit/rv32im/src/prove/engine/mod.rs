@@ -68,6 +68,8 @@ where
 {
     #[tracing::instrument(skip_all)]
     fn prove_segment(&self, segment: &Segment) -> Result<Seal> {
+        nvtx::range_push!("prove_segment");
+
         let trace = segment.preflight()?;
 
         let io = segment.prepare_globals();
@@ -76,6 +78,8 @@ where
         let steps = witgen.steps;
 
         let seal = tracing::info_span!("prove").in_scope(|| {
+            nvtx::range_push!("prove");
+
             let mut prover = Prover::new(self.hal.as_ref(), CIRCUIT.get_taps());
             let hashfn = Rc::clone(&self.hal.get_hash_suite().hashfn);
 
@@ -136,9 +140,13 @@ where
             prover.commit_group(REGISTER_GROUP_ACCUM, &accum);
             drop(accum);
 
-            prover.finalize(&[&mix, &io], self.circuit_hal.as_ref())
+            let seal = prover.finalize(&[&mix, &io], self.circuit_hal.as_ref());
+
+            nvtx::range_pop!();
+            seal
         });
 
+        nvtx::range_pop!();
         Ok(seal)
     }
 }

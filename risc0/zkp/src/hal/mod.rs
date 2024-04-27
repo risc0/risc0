@@ -40,6 +40,8 @@ pub trait Buffer<T>: Clone {
 
     fn slice(&self, offset: usize, size: usize) -> Self;
 
+    fn get_at(&self, idx: usize) -> T;
+
     fn view<F: FnOnce(&[T])>(&self, f: F);
 
     fn view_mut<F: FnOnce(&mut [T])>(&self, f: F);

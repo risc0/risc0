@@ -121,6 +121,8 @@ impl<'a> ExecutorImpl<'a> {
     where
         F: FnMut(Segment) -> Result<Box<dyn SegmentRef>>,
     {
+        nvtx::range_push!("execute");
+
         let journal = Journal::default();
         self.env
             .posix_io
@@ -227,6 +229,7 @@ impl<'a> ExecutorImpl<'a> {
             session.log();
         });
 
+        nvtx::range_pop!();
         Ok(session)
     }
 }

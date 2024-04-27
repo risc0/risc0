@@ -50,6 +50,8 @@ impl WitnessGenerator {
 
     #[tracing::instrument(skip_all)]
     pub fn execute(&mut self, trace: PreflightTrace) -> Result<()> {
+        nvtx::range_push!("witgen");
+
         let mut machine = MachineContext::new(self.steps, trace);
         self.compute_execute(&mut machine)?;
         self.compute_verify(&mut machine);
@@ -61,6 +63,7 @@ impl WitnessGenerator {
             .chain(self.io.as_slice_mut().par_iter_mut())
             .for_each(|value| *value = value.valid_or_zero());
 
+        nvtx::range_pop!();
         Ok(())
     }
 
@@ -103,6 +106,8 @@ impl WitnessGenerator {
 
     #[tracing::instrument(skip_all)]
     fn compute_execute(&mut self, machine: &mut MachineContext) -> Result<()> {
+        nvtx::range_push!("compute_execute");
+
         tracing::debug!("load");
         let mut loader = Loader::new(self.steps, &mut self.ctrl);
         let last_cycle = loader.load();
@@ -132,11 +137,14 @@ impl WitnessGenerator {
             }
         });
 
+        nvtx::range_pop!();
         Ok(())
     }
 
     #[tracing::instrument(skip_all)]
     fn compute_verify(&mut self, machine: &mut MachineContext) {
+        nvtx::range_push!("compute_verify");
+
         tracing::debug!("compute_verify");
         let mut rng = thread_rng();
         {
@@ -170,6 +178,7 @@ impl WitnessGenerator {
         });
 
         tracing::info_span!("step_verify_mem").in_scope(|| {
+            nvtx::range_push!("step_verify_mem");
             tracing::debug!("step_verify_mem");
             let args = &[
                 self.ctrl.as_slice_sync(),
@@ -184,10 +193,12 @@ impl WitnessGenerator {
             for cycle in 0..last_cycle {
                 machine.step_verify_mem(self.steps, cycle, args).unwrap();
             }
+            nvtx::range_pop!();
         });
 
         machine.sort("bytes");
         tracing::info_span!("step_verify_bytes").in_scope(|| {
+            nvtx::range_push!("step_verify_bytes");
             tracing::debug!("step_verify_bytes");
             let args = &[
                 self.ctrl.as_slice_sync(),
@@ -197,6 +208,9 @@ impl WitnessGenerator {
             for cycle in 0..last_cycle {
                 machine.step_verify_bytes(self.steps, cycle, args).unwrap();
             }
+            nvtx::range_pop!();
         });
+
+        nvtx::range_pop!();
     }
 }
