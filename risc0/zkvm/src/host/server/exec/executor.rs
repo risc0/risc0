@@ -15,7 +15,6 @@
 use std::{cell::RefCell, io::Write, mem, rc::Rc, sync::Arc, time::Instant};
 
 use anyhow::{Context as _, Result};
-use human_repr::HumanDuration as _;
 use risc0_binfmt::{MemoryImage, Program};
 use risc0_circuit_rv32im::prove::emu::{
     addr::ByteAddr,
@@ -122,6 +121,8 @@ impl<'a> ExecutorImpl<'a> {
     where
         F: FnMut(Segment) -> Result<Box<dyn SegmentRef>>,
     {
+        nvtx::range_push!("execute");
+
         let journal = Journal::default();
         self.env
             .posix_io
@@ -224,10 +225,11 @@ impl<'a> ExecutorImpl<'a> {
         );
 
         tracing::info_span!("executor").in_scope(|| {
-            tracing::info!("execution time: {}", elapsed.human_duration());
+            tracing::info!("execution time: {elapsed:?}");
             session.log();
         });
 
+        nvtx::range_pop!();
         Ok(session)
     }
 }

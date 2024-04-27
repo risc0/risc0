@@ -220,7 +220,7 @@ impl Session {
         tracing::info!("number of segments: {}", self.segments.len());
         tracing::info!("total cycles: {}", self.total_cycles);
         tracing::info!("user cycles: {}", self.user_cycles);
-        tracing::info!("cycle efficiency: {}%", cycle_efficiency as u32);
+        tracing::debug!("cycle efficiency: {}%", cycle_efficiency as u32);
     }
 
     /// Returns stats for the session

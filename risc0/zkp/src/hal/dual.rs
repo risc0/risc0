@@ -77,6 +77,10 @@ where
         BufferImpl::new(lhs, rhs)
     }
 
+    fn get_at(&self, idx: usize) -> T {
+        self.lhs.get_at(idx)
+    }
+
     fn view<F: FnOnce(&[T])>(&self, f: F) {
         self.lhs.view(f)
     }

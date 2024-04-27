@@ -28,6 +28,7 @@ pub fn new_jobs() -> Vec<Job> {
             risc0_benchmark_methods::BIG_BLAKE2B_ELF,
             risc0_benchmark_methods::BIG_BLAKE2B_ID.into(),
             to_vec(&guest_input).unwrap(),
+            job_size,
         ));
     }
     jobs
