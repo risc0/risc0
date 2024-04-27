@@ -32,7 +32,8 @@ use crate::{
         prove_info::ProveInfo,
         receipt::{CompositeReceipt, InnerReceipt, SegmentReceipt, SuccinctReceipt},
     },
-    is_dev_mode, ExecutorEnv, ExecutorImpl, ProverOpts, Segment, Session, VerifierContext,
+    is_dev_mode, stark_to_snark, CompactReceipt, ExecutorEnv, ExecutorImpl, ProverOpts, Receipt,
+    ReceiptKind, Segment, Session, VerifierContext,
 };
 
 /// A ProverServer can execute a given ELF binary and produce a [ProveInfo] which contains a [crate::Receipt]
@@ -86,7 +87,7 @@ pub trait ProverServer {
     /// [CompositeReceipt] into a single [SuccinctReceipt] that proves the same top-level claim. It
     /// accomplishes this by iterative application of the recursion programs including lift, join,
     /// and resolve.
-    fn compress(&self, receipt: &CompositeReceipt) -> Result<SuccinctReceipt> {
+    fn compsite_to_succinct(&self, receipt: &CompositeReceipt) -> Result<SuccinctReceipt> {
         // Compress all receipts in the top-level session into one succinct receipt for the session.
         let continuation_receipt = receipt
             .segments
@@ -110,7 +111,7 @@ pub trait ProverServer {
             |conditional: SuccinctReceipt, assumption: &InnerReceipt| match assumption {
                 InnerReceipt::Succinct(assumption) => self.resolve(&conditional, assumption),
                 InnerReceipt::Composite(assumption) => {
-                    self.resolve(&conditional, &self.compress(assumption)?)
+                    self.resolve(&conditional, &self.compsite_to_succinct(assumption)?)
                 }
                 InnerReceipt::Fake { .. } => bail!(
                     "compressing composite receipts with fake receipt assumptions is not supported"
@@ -120,6 +121,66 @@ pub trait ProverServer {
                 )
             },
         )
+    }
+
+    /// Compress a [SuccinctReceipt] into a [CompactReceipt].
+    fn succinct_to_compact(&self, receipt: &SuccinctReceipt) -> Result<CompactReceipt> {
+        let ident_receipt = self.identity_p254(receipt).unwrap();
+        let seal_bytes = ident_receipt.get_seal_bytes();
+
+        let seal = stark_to_snark(&seal_bytes)?.to_vec();
+        Ok(CompactReceipt {
+            seal,
+            claim: receipt.claim.clone(),
+        })
+    }
+
+    /// Compress a [SuccinctReceipt] into a [CompactReceipt].
+    fn compress(&self, opts: &ProverOpts, receipt: &Receipt) -> Result<Receipt> {
+        match &receipt.inner {
+            // note: fake receipts are only used in development. Therefore, compresing a fake receipt is a no-op.
+            InnerReceipt::Fake { claim: _ } => Ok(receipt.clone()),
+            InnerReceipt::Composite(_) => match opts.receipt_kind {
+                ReceiptKind::Composite => Ok(receipt.clone()),
+                ReceiptKind::Succinct => {
+                    let succinct_receipt = self.compsite_to_succinct(receipt.inner.composite()?)?;
+                    Ok(Receipt::new(
+                        InnerReceipt::Succinct(succinct_receipt),
+                        receipt.journal.bytes.clone(),
+                    ))
+                }
+                ReceiptKind::Compact => {
+                    let succinct_receipt = self.compsite_to_succinct(receipt.inner.composite()?)?;
+                    let compact_receipt = self.succinct_to_compact(&succinct_receipt)?;
+                    Ok(Receipt::new(
+                        InnerReceipt::Compact(compact_receipt),
+                        receipt.journal.bytes.clone(),
+                    ))
+                }
+            },
+            InnerReceipt::Succinct(_) => match opts.receipt_kind {
+                ReceiptKind::Composite => {
+                    bail!("compressing a succinct receipt to a composite receipt is not supported.")
+                }
+                ReceiptKind::Succinct => Ok(receipt.clone()),
+                ReceiptKind::Compact => {
+                    let compact_receipt = self.succinct_to_compact(receipt.inner.succinct()?)?;
+                    Ok(Receipt::new(
+                        InnerReceipt::Compact(compact_receipt),
+                        receipt.journal.bytes.clone(),
+                    ))
+                }
+            },
+            InnerReceipt::Compact(_) => match opts.receipt_kind {
+                ReceiptKind::Composite => {
+                    bail!("compressing a compact receipt to a composite receipt is not supported.")
+                }
+                ReceiptKind::Succinct => {
+                    bail!("compressing a compact receipt to a succinct receipt is not supported.")
+                }
+                ReceiptKind::Compact => Ok(receipt.clone()),
+            },
+        }
     }
 }
 
