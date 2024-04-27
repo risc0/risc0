@@ -19,7 +19,7 @@ RISC Zero offers the following components, each of which is ready for use on tes
    Each recursion program is identified by a [control ID], and the full list of allowed programs is identified by the [control root].
 
 4. The **STARK-to-SNARK Prover**, which verifies proofs from the RISC Zero Recursion Prover, compressing the STARK into a Groth16 SNARK.
-   The [control root] is passed to as an input, allowing for updates to our RISC-V circuit without requiring a new trusted setup ceremony.
+   The [control root] is passed to as an input, allowing for updates to our RISC-V Prover without requiring a new trusted setup ceremony.
 
 5. The **on-chain verifier contract**, which verifies proofs from the RISC Zero STARK-to-SNARK Prover.
    Version information for the on-chain verifier is available in our [verifier contract] documentation.
@@ -71,7 +71,7 @@ Soundness is often quantified in terms of “[bits]” — our system currently 
 
 The Toy Problem conjecture, specified in detail in the [ethSTARK documentation], says that the best known attack on STARK proof systems is the best possible attack.
 
-## The STARK Circuits
+## The STARK Provers
 
 The RISC-V Prover and the Recursion Prover both use STARK-based protocols, which are not known to be vulnerable to attacks via quantum computers.
 
@@ -113,7 +113,7 @@ For a detailed discussion of the security of BN254, we refer readers to the disc
 [deterministically]: ../../terminology#deterministic-builds
 [GitHub issue from Zcash]: https://github.com/zcash/zcash/issues/714
 [receipt claim]: ../../terminology#receipt-claim
-[RISC Zero zkVM: Scalable, Transparent Arguments of RISC-V Integrity]: ./proof-system-in-detail.pdf
+[RISC Zero zkVM: Scalable, Transparent Arguments of RISC-V Integrity]: pathname:///proof-system-in-detail.pdf
 [RISC Zero zkVM]: ../zkvm
 [security calculator]: https://github.com/risc0/risc0/blob/main/risc0/zkp/src/prove/soundness.rs
 [this article by Justin Thaler]: https://a16zcrypto.com/posts/article/snark-security-and-performance/
