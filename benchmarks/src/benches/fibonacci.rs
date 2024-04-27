@@ -24,6 +24,7 @@ pub fn new_jobs() -> Vec<Job> {
             risc0_benchmark_methods::FIBONACCI_ELF,
             risc0_benchmark_methods::FIBONACCI_ID.into(),
             to_vec(&iterations).unwrap(),
+            iterations as usize,
         ));
     }
     jobs

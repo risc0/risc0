@@ -30,7 +30,6 @@ jobs:
     permissions:
       pull-requests: read
     outputs:
-      check-benchmarks: ${{ steps.filter.outputs.check-benchmarks }}
       check-external: ${{ steps.filter.outputs.check-external }}
       check-semver: ${{ steps.filter.outputs.check-semver }}
       check-template: ${{ steps.filter.outputs.check-template }}
@@ -52,10 +51,6 @@ jobs:
               - Cargo.toml
               - rust-toolchain.toml
               - Cargo.lock
-            check-benchmarks:
-              - *base
-              - benchmarks/**
-              - risc0/**
             check-external:
               - *base
               - external/**
@@ -98,7 +93,6 @@ jobs:
     if: always()
     needs:
       - check
-      - check-benchmarks
       - check-external
       - check-template
       - clippy
@@ -216,14 +210,10 @@ jobs:
           key: ${{ matrix.os }}-${{ matrix.feature }}
       - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
       - name: build workspace
-        run: |
-          cargo test -F $FEATURE -F prove --workspace --timings --no-run \
-            --exclude doc-test
+        run: cargo test -F $FEATURE -F prove --workspace --timings --no-run --exclude doc-test
       - name: test workspace
-        run: |
-          cargo test -F $FEATURE -F prove --workspace --timings \
-            --exclude doc-test
-      - uses: actions/upload-artifact@v3
+        run: cargo test -F $FEATURE -F prove --workspace --timings --exclude doc-test
+      - uses: actions/upload-artifact@v4
         with:
           name: cargo-timings-${{ matrix.os }}-${{ matrix.device }}
           path: target/cargo-timings/
@@ -234,9 +224,11 @@ jobs:
         run: cargo test -p risc0-r0vm -F $FEATURE -F disable-dev-mode
       - run: cargo test -p cargo-risczero -F experimental
         if: matrix.device == 'cpu'
-      - run: |
-          cargo check -F $FEATURE --benches --workspace \
-            --exclude doc-test
+      - run: cargo run -F $FEATURE -- fibonacci
+        working-directory: benchmarks
+      - run: cargo run -F $FEATURE --example datasheet -- lift --json tmp/datasheet.json
+        working-directory: benchmarks
+      - run: cargo check -F $FEATURE --benches --workspace --exclude doc-test
       - run: cargo check -p risc0-build
         if: matrix.device == 'cpu'
       - run: cargo check -p risc0-circuit-rv32im -F $FEATURE
@@ -305,21 +297,6 @@ jobs:
           key: macOS-default
       - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
       - run: cargo doc --no-deps --exclude=risc0-zkvm-methods --workspace
-      - run: sccache --show-stats
-
-  check-benchmarks:
-    if: needs.changes.outputs.check-benchmarks == 'true'
-    needs: changes
-    runs-on: [self-hosted, prod, macOS, cpu]
-    steps:
-      - uses: actions/checkout@v3
-      - uses: ./.github/actions/rustup
-      - uses: ./.github/actions/sccache
-        with:
-          key: macOS-default
-      - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
-      - run: cargo check
-        working-directory: benchmarks
       - run: sccache --show-stats
 
   check-external:

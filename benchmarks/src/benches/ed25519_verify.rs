@@ -38,5 +38,6 @@ pub fn new_jobs() -> Vec<Job> {
         risc0_benchmark_methods::ED25519_VERIFY_ELF,
         risc0_benchmark_methods::ED25519_VERIFY_ID.into(),
         guest_input,
+        1,
     )]
 }

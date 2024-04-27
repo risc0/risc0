@@ -85,10 +85,6 @@ impl ProverServer for DevModeProver {
         unimplemented!("This is unsupported for dev mode.")
     }
 
-    fn get_peak_memory_usage(&self) -> usize {
-        0
-    }
-
     fn lift(&self, _receipt: &SegmentReceipt) -> Result<SuccinctReceipt> {
         unimplemented!("This is unsupported for dev mode.")
     }

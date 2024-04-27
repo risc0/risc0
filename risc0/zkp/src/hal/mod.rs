@@ -55,10 +55,6 @@ pub trait Hal {
 
     fn has_unified_memory(&self) -> bool;
 
-    fn get_memory_usage(&self) -> usize {
-        tracker().lock().unwrap().peak
-    }
-
     fn get_hash_suite(&self) -> &HashSuite<Self::Field>;
 
     fn alloc_digest(&self, name: &'static str, size: usize) -> Self::Buffer<Digest>;
@@ -177,19 +173,24 @@ pub trait CircuitHal<H: Hal> {
     );
 }
 
-fn tracker() -> &'static Mutex<MemoryTracker> {
+pub fn tracker() -> &'static Mutex<MemoryTracker> {
     static ONCE: OnceLock<Mutex<MemoryTracker>> = OnceLock::new();
     ONCE.get_or_init(|| Mutex::new(MemoryTracker::new()))
 }
 
-struct MemoryTracker {
-    total: usize,
-    peak: usize,
+pub struct MemoryTracker {
+    pub total: usize,
+    pub peak: usize,
 }
 
 impl MemoryTracker {
     pub fn new() -> Self {
         Self { total: 0, peak: 0 }
+    }
+
+    pub fn reset(&mut self) {
+        self.total = 0;
+        self.peak = 0;
     }
 
     pub fn alloc(&mut self, size: usize) {
