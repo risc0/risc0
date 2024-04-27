@@ -36,7 +36,6 @@ jobs:
       crates-validator: ${{ steps.filter.outputs.crates-validator }}
       doc: ${{ steps.filter.outputs.doc }}
       examples: ${{ steps.filter.outputs.examples }}
-      stark2snark: ${{ steps.filter.outputs.stark2snark }}
       test: ${{ steps.filter.outputs.test }}
       web: ${{ steps.filter.outputs.web }}
     steps:
@@ -73,13 +72,10 @@ jobs:
               - *base
               - examples/**
               - risc0/**
-            stark2snark:
-              - *base
-              - compact_proof/**
-              - risc0/**
             test:
               - *base
               - bonsai/sdk/**
+              - compact_proof/**
               - external/**
               - risc0/**
             web:
@@ -99,8 +95,7 @@ jobs:
       - crates-validator
       - doc
       - examples
-      - reproducible-build
-      - stark2snark
+      - docker
       - test
       - web
     runs-on: ubuntu-latest
@@ -226,8 +221,7 @@ jobs:
         if: matrix.device == 'cpu'
       - run: cargo run -F $FEATURE -- fibonacci
         working-directory: benchmarks
-      - run: cargo run -F $FEATURE --example datasheet -- lift --json tmp/datasheet.json
-        working-directory: benchmarks
+      - run: cargo run -F $FEATURE -F prove --example datasheet -- lift --json tmp/datasheet.json
       - run: cargo check -F $FEATURE --benches --workspace --exclude doc-test
       - run: cargo check -p risc0-build
         if: matrix.device == 'cpu'
@@ -417,25 +411,8 @@ jobs:
         working-directory: examples/browser-verify
       - run: sccache --show-stats
 
-  reproducible-build:
+  docker:
     if: needs.changes.outputs.test == 'true'
-    needs: changes
-    runs-on: [self-hosted, prod, Linux, cpu, docker]
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/rustup
-      - uses: ./.github/actions/sccache
-        with:
-          key: Linux-default
-      - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
-      - run: cargo test -p risc0-build -F docker
-      - run: cargo test -p risc0-zkvm -F docker -F prove -- "docker::"
-        env:
-          RISC0_USE_DOCKER: "1"
-      - run: sccache --show-stats
-
-  stark2snark:
-    if: needs.changes.outputs.stark2snark == 'true'
     needs: changes
     runs-on: [self-hosted, prod, Linux, cpu, docker]
     steps:
@@ -448,6 +425,9 @@ jobs:
         with:
           key: Linux-default
       - run: cargo run --bin cargo-risczero --no-default-features -- risczero install --version $RISC0_TOOLCHAIN_VERSION
+      - run: cargo test -p risc0-build -F docker
       - run: cargo test -p risc0-groth16 -F docker --release
-      - run: cargo test -p risc0-zkvm -F prove -F docker -- tests::docker::stark2snark
+      - run: cargo test -p risc0-zkvm -F docker -F prove -- docker
+        env:
+          RISC0_USE_DOCKER: "1"
       - run: sccache --show-stats
