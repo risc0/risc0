@@ -31,9 +31,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [Linux, macOS]
-        feature: [prove]
-        device: [cpu]
+        # os: [Linux, macOS]
+        # feature: [prove]
+        # device: [cpu]
         include:
           - os: Linux
             feature: cuda
@@ -44,6 +44,7 @@ jobs:
 
     env:
       FEATURE: ${{ matrix.feature }}
+      EXTRA: ""
 
     steps:
       - uses: actions/checkout@v4
@@ -72,8 +73,11 @@ jobs:
             benchmarks/COMMIT_HASH.txt
             benchmarks/${{ matrix.os }}-${{ matrix.device }}.json
 
+      - if: matrix.feature == 'cuda'
+        run: echo "EXTRA=-F docker" >> $GITHUB_ENV
+
       - name: Generate datasheet
-        run: cargo run --release -F $FEATURE --example datasheet -- --json risc0/zkvm/${{ matrix.os }}-${{ matrix.device }}.json
+        run: cargo run --release -F $FEATURE $EXTRA --example datasheet -- --json risc0/zkvm/${{ matrix.os }}-${{ matrix.device }}.json
 
       - name: Upload datasheet
         uses: actions/upload-artifact@v4
@@ -88,12 +92,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout gh-pages repository branch ${{ github.ref_name }}
+      - name: Checkout gh-pages repository branch ${{ github.base_ref || github.ref_name }}
         uses: actions/checkout@v4
         with:
           repository: risc0/ghpages
           token: ${{ secrets.BENCHMARK_TOKEN }}
-          ref: ${{ github.ref_name }}
+          ref: ${{ github.base_ref || github.ref_name }}
 
       - name: Download benchmarks
         uses: actions/download-artifact@v4

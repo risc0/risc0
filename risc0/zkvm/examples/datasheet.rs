@@ -97,6 +97,9 @@ impl Datasheet {
         println!("{table}");
 
         if let Some(path) = args.json {
+            if let Some(parent) = path.parent() {
+                std::fs::create_dir_all(parent).unwrap();
+            }
             let mut file = std::fs::OpenOptions::new()
                 .create(true)
                 .write(true)
