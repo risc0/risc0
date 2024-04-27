@@ -499,7 +499,7 @@ fn sys_input() {
 mod docker {
     use crate::{
         get_prover_server, recursion::identity_p254, CompactReceipt, ExecutorEnv, ExecutorImpl,
-        InnerReceipt, ProverOpts, ProverServer, Receipt, ReceiptKind, VerifierContext,
+        InnerReceipt, ProverOpts, Receipt, ReceiptKind, VerifierContext,
     };
     use anyhow::{bail, Result};
     use risc0_groth16::docker::stark_to_snark;
@@ -591,8 +591,8 @@ mod docker {
             .unwrap()
             .build()
             .unwrap();
-        prover = get_prover_server(&opts).unwrap();
-        prover.prove(env, MULTI_TEST_ELF).unwrap().receipt;
+        let prover = get_prover_server(&opts).unwrap();
+        prover.prove(env, MULTI_TEST_ELF).unwrap().receipt
     }
 
     #[test]
@@ -602,12 +602,6 @@ mod docker {
         self::test_compress(ProverOpts::composite(), composite_receipt).unwrap();
         self::test_compress(ProverOpts::succinct(), composite_receipt).unwrap();
         self::test_compress(ProverOpts::compact(), composite_receipt).unwrap();
-
-        let env = ExecutorEnv::builder()
-            .write(&MultiTestSpec::BusyLoop { cycles: 0 })
-            .unwrap()
-            .build()
-            .unwrap();
 
         // succinct receipts
         let succinct_receipt = &generate_receipt(ProverOpts::succinct());
