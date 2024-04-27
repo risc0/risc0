@@ -14,7 +14,6 @@
 
 use std::{
     hint::black_box,
-    io::Write,
     path::PathBuf,
     time::{Duration, Instant},
 };
@@ -100,16 +99,8 @@ impl Datasheet {
             if let Some(parent) = path.parent() {
                 std::fs::create_dir_all(parent).unwrap();
             }
-            let mut file = std::fs::OpenOptions::new()
-                .create(true)
-                .write(true)
-                .truncate(true)
-                .open(path)
-                .unwrap();
-            for entry in &self.results {
-                let json = serde_json::to_string_pretty(entry).unwrap();
-                writeln!(file, "{json}").unwrap();
-            }
+            let json = serde_json::to_string_pretty(&self.results).unwrap();
+            std::fs::write(path, json).unwrap();
         }
     }
 

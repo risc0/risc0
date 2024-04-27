@@ -124,7 +124,7 @@ jobs:
         with:
           crate: cargo-rdme
           version: "1.4.3"
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: 18
       - run: cargo fmt --all --check
@@ -298,7 +298,7 @@ jobs:
     needs: changes
     runs-on: [self-hosted, prod, macOS, cpu]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
         with:
@@ -327,7 +327,7 @@ jobs:
         uses: risc0/cargo-install@9f6037ed331dcf7da101461a20656273fa72abf0
         with:
           crate: cargo-semver-checks
-          version: "0.29.1"
+          version: "0.31.0"
       - name: run cargo semverchecks on ${{ github.event.pull_request.base.sha }}
         # There seems to be a bug in cargo-semver-checks that can't locate the platform crate...
         # All other excluded crates aren't published and therefore do not need this check
@@ -396,7 +396,7 @@ jobs:
       - uses: browser-actions/setup-firefox@v1
       - run: firefox --version
       - uses: ./.github/actions/rustup
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: 18
       - uses: ./.github/actions/sccache
