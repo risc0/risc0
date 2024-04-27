@@ -546,7 +546,7 @@ mod docker {
 
     fn test_compress(opts: ProverOpts, receipt: &Receipt) -> Result<()> {
         let prover = get_prover_server(&opts).unwrap();
-        let receipt = prover.compress(&ProverOpts::composite(), receipt)?;
+        let receipt = prover.compress(&opts, receipt)?;
         match opts.receipt_kind {
             ReceiptKind::Composite => {
                 receipt.inner.composite().unwrap();
