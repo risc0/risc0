@@ -1,13 +1,8 @@
 name: Benchmark Reports
 
 on:
-  push:
-    branches: [ main, release-* ]
-    # Only run benchmarks on changes to following paths:
-    paths:
-      - .github/workflows/bench_push.yml
-      - benchmarks/**
-      - risc0/**
+  schedule:
+    - cron: '0 7 * * *' # Nightly (ish) Pacific
 
   workflow_dispatch:
 
@@ -72,7 +67,7 @@ jobs:
       - name: Upload benchmarks
         uses: actions/upload-artifact@v4
         with:
-          name: benchmark-result
+          name: benchmark-result-${{ matrix.os }}-${{ matrix.device }}
           path: |
             benchmarks/COMMIT_HASH.txt
             benchmarks/${{ matrix.os }}-${{ matrix.device }}.json
@@ -83,7 +78,7 @@ jobs:
       - name: Upload datasheet
         uses: actions/upload-artifact@v4
         with:
-          name: datasheet-result
+          name: datasheet-result-${{ matrix.os }}-${{ matrix.device }}
           path: |
             risc0/zkvm/COMMIT_HASH.txt
             risc0/zkvm/${{ matrix.os }}-${{ matrix.device }}.json
@@ -103,14 +98,16 @@ jobs:
       - name: Download benchmarks
         uses: actions/download-artifact@v4
         with:
-          name: benchmark-result
+          pattern: benchmark-result-*
           path: dev/benchmarks
+          merge-multiple: true
 
       - name: Download datasheet
         uses: actions/download-artifact@v4
         with:
-          name: datasheet-result
+          pattern: datasheet-result-*
           path: dev/datasheet
+          merge-multiple: true
 
       - name: Push results
         run: |
