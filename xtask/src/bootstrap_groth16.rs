@@ -164,7 +164,7 @@ fn bootstrap_test_receipt(risc0_ethereum_path: &Path) {
     let seal = hex::encode(receipt.inner.compact().unwrap().seal.clone());
     let post_digest = format!(
         "0x{}",
-        hex::encode(receipt.get_claim().unwrap().post.digest().as_bytes())
+        hex::encode(receipt.claim().unwrap().post.digest().as_bytes())
     );
     let image_id = format!("0x{}", hex::encode(image_id.as_bytes()));
     let journal = hex::encode(receipt.journal.bytes);
@@ -217,7 +217,7 @@ fn generate_receipt() -> (Receipt, Digest) {
     let ctx = VerifierContext::default();
     let prover = get_prover_server(&opts).unwrap();
     let receipt = prover.prove_session(&ctx, &session).unwrap().receipt;
-    let claim = receipt.get_claim().unwrap();
+    let claim = receipt.claim().unwrap();
     let composite_receipt = receipt.inner.composite().unwrap();
     let succinct_receipt = prover.compsite_to_succinct(composite_receipt).unwrap();
     let journal = session.journal.unwrap().bytes;
