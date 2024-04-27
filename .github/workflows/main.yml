@@ -221,7 +221,7 @@ jobs:
         if: matrix.device == 'cpu'
       - run: cargo run -F $FEATURE -- fibonacci
         working-directory: benchmarks
-      - run: cargo run -F $FEATURE -F prove --example datasheet -- lift --json tmp/datasheet.json
+      - run: cargo run -F $FEATURE -F prove --example datasheet -- --json tmp/datasheet.json lift
       - run: cargo check -F $FEATURE --benches --workspace --exclude doc-test
       - run: cargo check -p risc0-build
         if: matrix.device == 'cpu'

@@ -11,6 +11,10 @@ on:
 
   workflow_dispatch:
 
+  # uncomment for only for testing changes to this workflow while in a PR
+  pull_request:
+    branches: [ main ]
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
