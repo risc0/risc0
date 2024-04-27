@@ -62,7 +62,7 @@ jobs:
       - run: tail -n 1 ${{ runner.temp }}/crate-validation/crate-results.log
 
       - name: Upload artifact results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always() # upload all artifacts even on failures
         with:
           name: crates-test-results

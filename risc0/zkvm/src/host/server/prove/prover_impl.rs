@@ -178,10 +178,6 @@ where
         Ok(receipt)
     }
 
-    fn get_peak_memory_usage(&self) -> usize {
-        self.hal_pair.hal.get_memory_usage()
-    }
-
     fn lift(&self, receipt: &SegmentReceipt) -> Result<SuccinctReceipt> {
         lift(receipt)
     }
