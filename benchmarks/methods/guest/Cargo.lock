@@ -827,7 +827,6 @@ version = "0.1.0"
 dependencies = [
  "risc0-zkvm",
  "serde",
- "sha2",
 ]
 
 [[package]]

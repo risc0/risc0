@@ -16,28 +16,25 @@ For previewing results:
 ### CPU
 
 ```console
-$ RUST_LOG=info cargo run --release --bin risc0-benchmark -- --out metrics.csv all
+$ cargo run --release
 ```
 
 ### Metal
 
 ```console
-$ RUST_LOG=info cargo run --release --bin risc0-benchmark -F metal -- --out metrics.csv all
+$ cargo run --release -F metal
 ```
 
 ### CUDA
 
 ```console
-$ RUST_LOG=info cargo run --release --bin risc0-benchmark -F cuda -- --out metrics.csv all
+$ cargo run --release -F cuda
 ```
 
 ## Running specific benchmark
 
-To run a specific benchmark replace the `all` option used in the previous command with one of the following:
-e.g.,
-
 ```console
-$ RUST_LOG=info cargo run --release -F metal -- --out metrics.csv big-sha2
+$ cargo run --release -F metal -- big-sha2
 ```
 
 ### `big-sha2`
@@ -91,35 +88,3 @@ Computes the membership proof for a given authenticated path from a leaf to a me
 ### `sudoku`
 
 Verifies a given Sudoku solution.
-
-### `zeth`
-
-Computes the proof for a given Ethereum block containing a given number of transactions.
-
-## Average benchmark
-
-An average (i.e., a given job runs for several iterations, then the time to prove a single iteration is extracted as its average) version of this benchmark is available by running:
-
-### CPU
-
-```console
-$ RUST_LOG=info cargo run --release --bin average -- --out metrics.csv all
-```
-
-### Metal
-
-```console
-$ RUST_LOG=info cargo run --release --bin average -F metal -- --out metrics.csv all
-```
-
-### CUDA
-
-```console
-$ RUST_LOG=info cargo run --release --bin average -F cuda -- --out metrics.csv all
-```
-
-### Bonsai
-
-```console
-$ RISC0_DEV_MODE=false BONSAI_API_URL=<API> BONSAI_API_KEY=<API_KEY> RUST_LOG=debug cargo run --release --bin average -- --out metrics-bonsai.csv all
-```

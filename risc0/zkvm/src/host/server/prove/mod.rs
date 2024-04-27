@@ -61,9 +61,6 @@ pub trait ProverServer {
     /// Prove the specified [Segment].
     fn prove_segment(&self, ctx: &VerifierContext, segment: &Segment) -> Result<SegmentReceipt>;
 
-    /// Return the peak memory usage that this [ProverServer] has experienced.
-    fn get_peak_memory_usage(&self) -> usize;
-
     /// Lift a [SegmentReceipt] into a [SuccinctReceipt]
     fn lift(&self, receipt: &SegmentReceipt) -> Result<SuccinctReceipt>;
 

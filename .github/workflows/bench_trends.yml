@@ -5,8 +5,8 @@ on:
     branches: [ main ]
     # Only run benchmarks on changes to following paths:
     paths:
-      - 'risc0/**'
-      - '.github/workflows/bench_*'
+      - .github/workflows/bench_trends.yml
+      - risc0/**
 
   workflow_dispatch:
 
@@ -27,11 +27,6 @@ env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   RISC0_BUILD_LOCKED: 1
   RISC0_TOOLCHAIN_VERSION: v2024-04-22.0
-
-defaults:
-  run:
-    # This ensures `-eo pipefail`, which is important for catching errors
-    shell: bash
 
 jobs:
   bench:
