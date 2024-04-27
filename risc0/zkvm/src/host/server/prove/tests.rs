@@ -571,7 +571,7 @@ mod docker {
         }
         let fake = Receipt::new(
             InnerReceipt::Fake {
-                claim: receipt.get_claim()?,
+                claim: receipt.claim()?,
             },
             receipt.clone().journal.bytes,
         );
