@@ -45,7 +45,6 @@ sha2 = { version = "0.10", optional = true }
 [features]
 cuda = [
   "dep:cust",
-  "dep:nvtx",
   "prove",
   "risc0-circuit-recursion-sys/cuda",
   "risc0-zkp/cuda",
@@ -60,6 +59,7 @@ metal = [
 ]
 prove = [
   "dep:downloader",
+  "dep:nvtx",
   "dep:rand",
   "dep:rayon",
   "dep:sha2",

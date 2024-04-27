@@ -47,7 +47,6 @@ test-log = { version = "0.2", default-features = false, features = ["trace"] }
 [features]
 cuda = [
   "dep:cust",
-  "dep:nvtx",
   "prove",
   "risc0-circuit-rv32im-sys/cuda",
   "risc0-zkp/cuda",
@@ -67,6 +66,7 @@ prove = [
   "dep:crypto-bigint",
   "dep:derive-debug",
   "dep:lazy-regex",
+  "dep:nvtx",
   "dep:rand",
   "dep:rayon",
   "dep:sha2",

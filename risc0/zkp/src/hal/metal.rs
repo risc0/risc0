@@ -381,6 +381,14 @@ impl<T: Clone> Buffer<T> for BufferImpl<T> {
         }
     }
 
+    fn get_at(&self, idx: usize) -> T {
+        self.sync();
+        let ptr = self.buffer.0.contents() as *const T;
+        let len = self.buffer.0.length() as usize / mem::size_of::<T>();
+        let slice = unsafe { slice::from_raw_parts(ptr, len) };
+        slice[self.offset + idx].clone()
+    }
+
     fn view<F: FnOnce(&[T])>(&self, f: F) {
         self.sync();
         let ptr = self.buffer.0.contents() as *const T;
