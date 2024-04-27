@@ -17,11 +17,15 @@ name = "guest_run"
 harness = false
 
 [[example]]
+name = "datasheet"
+required-features = ["prove"]
+
+[[example]]
 name = "fib"
 required-features = ["prove"]
 
 [[example]]
-name = "datasheet"
+name = "loop"
 required-features = ["prove"]
 
 [[example]]
