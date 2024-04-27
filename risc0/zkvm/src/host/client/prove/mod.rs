@@ -157,6 +157,15 @@ impl ProverOpts {
         }
     }
 
+    /// Choose the prover that enables composite receipts.
+    pub fn composite() -> Self {
+        Self {
+            hashfn: "poseidon2".to_string(),
+            prove_guest_errors: false,
+            receipt_kind: ReceiptKind::Composite,
+        }
+    }
+
     /// Choose the prover that enables succinct receipts.
     pub fn succinct() -> Self {
         Self {
