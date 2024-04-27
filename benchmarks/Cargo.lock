@@ -1830,6 +1830,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "nvtx"
+version = "1.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ad2e855e8019f99e4b94ac33670eb4e4f570a2e044f3749a0b2c7f83b841e52c"
+dependencies = [
+ "cc",
+]
+
+[[package]]
 name = "objc"
 version = "0.2.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2333,6 +2342,7 @@ dependencies = [
  "downloader",
  "hex",
  "metal",
+ "nvtx",
  "rand",
  "rayon",
  "risc0-circuit-recursion-sys",
@@ -2365,6 +2375,7 @@ dependencies = [
  "derive-debug",
  "lazy-regex",
  "metal",
+ "nvtx",
  "rand",
  "rayon",
  "risc0-binfmt",
@@ -2448,6 +2459,7 @@ dependencies = [
  "hex",
  "metal",
  "ndarray",
+ "nvtx",
  "parking_lot",
  "paste",
  "rand",
@@ -2477,6 +2489,7 @@ dependencies = [
  "hex",
  "human-repr",
  "lazy-regex",
+ "nvtx",
  "prost",
  "prost-build",
  "protobuf-src",
