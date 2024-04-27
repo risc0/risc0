@@ -175,19 +175,16 @@ pub trait CircuitHal<H: Hal> {
 
 pub fn tracker() -> &'static Mutex<MemoryTracker> {
     static ONCE: OnceLock<Mutex<MemoryTracker>> = OnceLock::new();
-    ONCE.get_or_init(|| Mutex::new(MemoryTracker::new()))
+    ONCE.get_or_init(|| Mutex::new(MemoryTracker::default()))
 }
 
+#[derive(Default)]
 pub struct MemoryTracker {
     pub total: usize,
     pub peak: usize,
 }
 
 impl MemoryTracker {
-    pub fn new() -> Self {
-        Self { total: 0, peak: 0 }
-    }
-
     pub fn reset(&mut self) {
         self.total = 0;
         self.peak = 0;

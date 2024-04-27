@@ -24,8 +24,7 @@ use enum_iterator::Sequence;
 use human_repr::{HumanCount, HumanDuration};
 use risc0_zkp::hal::tracker;
 use risc0_zkvm::{
-    get_prover_server, stark_to_snark, ExecutorEnv, ExecutorImpl, ProverOpts, VerifierContext,
-    RECURSION_PO2,
+    get_prover_server, ExecutorEnv, ExecutorImpl, ProverOpts, VerifierContext, RECURSION_PO2,
 };
 use risc0_zkvm_methods::{
     bench::{BenchmarkSpec, SpecWithIters},
@@ -358,7 +357,7 @@ impl Datasheet {
         let seal_bytes = receipt.get_seal_bytes();
 
         let start = Instant::now();
-        let seal = black_box(stark_to_snark(&seal_bytes).unwrap());
+        let seal = black_box(risc0_zkvm::stark_to_snark(&seal_bytes).unwrap());
         let duration = start.elapsed();
 
         let cycles = 1 << RECURSION_PO2;
