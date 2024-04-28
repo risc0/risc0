@@ -92,17 +92,14 @@ where
 
         // Verify the receipt to catch if something is broken in the proving process.
         composite_receipt.verify_integrity_with_context(ctx)?;
-        if composite_receipt.get_claim()?.digest() != session.get_claim()?.digest() {
+        if composite_receipt.claim()?.digest() != session.claim()?.digest() {
             tracing::debug!("composite receipt and session claim do not match");
-            tracing::debug!(
-                "composite receipt claim: {:#?}",
-                composite_receipt.get_claim()?
-            );
-            tracing::debug!("session claim: {:#?}", session.get_claim()?);
+            tracing::debug!("composite receipt claim: {:#?}", composite_receipt.claim()?);
+            tracing::debug!("session claim: {:#?}", session.claim()?);
             bail!(
                 "session and composite receipt claim do not match: session {}, receipt {}",
-                hex::encode(session.get_claim()?.digest()),
-                hex::encode(composite_receipt.get_claim()?.digest())
+                hex::encode(session.claim()?.digest()),
+                hex::encode(composite_receipt.claim()?.digest())
             );
         }
 
@@ -130,14 +127,14 @@ where
 
         // Verify the receipt to catch if something is broken in the proving process.
         receipt.verify_integrity_with_context(ctx)?;
-        if receipt.get_claim()?.digest() != session.get_claim()?.digest() {
+        if receipt.claim()?.digest() != session.claim()?.digest() {
             tracing::debug!("receipt and session claim do not match");
-            tracing::debug!("receipt claim: {:#?}", receipt.get_claim()?);
-            tracing::debug!("session claim: {:#?}", session.get_claim()?);
+            tracing::debug!("receipt claim: {:#?}", receipt.claim()?);
+            tracing::debug!("session claim: {:#?}", session.claim()?);
             bail!(
                 "session and receipt claim do not match: session {}, receipt {}",
-                hex::encode(session.get_claim()?.digest()),
-                hex::encode(receipt.get_claim()?.digest())
+                hex::encode(session.claim()?.digest()),
+                hex::encode(receipt.claim()?.digest())
             );
         }
 

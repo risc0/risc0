@@ -165,7 +165,7 @@ impl Session {
     /// Calculate for the [ReceiptClaim] associated with this [Session]. The
     /// [ReceiptClaim] is the claim that will be proven if this [Session]
     /// is passed to the [crate::Prover].
-    pub fn get_claim(&self) -> Result<ReceiptClaim> {
+    pub fn claim(&self) -> Result<ReceiptClaim> {
         // Construct the Output struct for the session, checking internal consistency.
         // NOTE: The Session output is distinct from the final Segment output because in the
         // Session output any proven assumptions are not included.

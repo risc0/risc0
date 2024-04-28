@@ -221,7 +221,7 @@ fn memory_io() {
         let session = exec.run()?;
         let receipt = prove_session_fast(&session);
         receipt.verify_integrity_with_context(&VerifierContext::default())?;
-        Ok(receipt.get_claim()?.exit_code)
+        Ok(receipt.claim()?.exit_code)
     }
 
     // Pick a memory position in the middle of the memory space, which is unlikely
@@ -523,7 +523,7 @@ mod docker {
         let ctx = VerifierContext::default();
         let prover = get_prover_server(&opts).unwrap();
         let receipt = prover.prove_session(&ctx, &session).unwrap().receipt;
-        let claim = receipt.get_claim().unwrap();
+        let claim = receipt.claim().unwrap();
         let composite_receipt = receipt.inner.composite().unwrap();
         let succinct_receipt = prover.compsite_to_succinct(composite_receipt).unwrap();
         let journal = session.journal.unwrap().bytes;
@@ -571,7 +571,7 @@ mod docker {
         }
         let fake = Receipt::new(
             InnerReceipt::Fake {
-                claim: receipt.get_claim()?,
+                claim: receipt.claim()?,
             },
             receipt.clone().journal.bytes,
         );
@@ -668,7 +668,7 @@ mod sys_verify {
         halt_receipt
             .verify_integrity_with_context(&Default::default())
             .unwrap();
-        let halt_claim = halt_receipt.get_claim().unwrap();
+        let halt_claim = halt_receipt.claim().unwrap();
         assert_eq!(halt_claim.pre.digest(), MULTI_TEST_ID.into());
         assert_eq!(halt_claim.exit_code, ExitCode::Halted(exit_code as u32));
         halt_receipt
@@ -735,7 +735,7 @@ mod sys_verify {
         let env = ExecutorEnv::builder()
             .write(&spec)
             .unwrap()
-            .add_assumption(hello_commit_receipt().get_claim().unwrap())
+            .add_assumption(hello_commit_receipt().claim().unwrap())
             .build()
             .unwrap();
 
@@ -755,7 +755,7 @@ mod sys_verify {
     #[test]
     fn sys_verify_integrity() {
         let spec = &MultiTestSpec::SysVerifyIntegrity {
-            claim_words: to_vec(&hello_commit_receipt().get_claim().unwrap()).unwrap(),
+            claim_words: to_vec(&hello_commit_receipt().claim().unwrap()).unwrap(),
         };
 
         // Test that providing the proven assumption results in an unconditional
@@ -791,7 +791,7 @@ mod sys_verify {
         let env = ExecutorEnv::builder()
             .write(&spec)
             .unwrap()
-            .add_assumption(hello_commit_receipt().get_claim().unwrap())
+            .add_assumption(hello_commit_receipt().claim().unwrap())
             .build()
             .unwrap();
         // TODO(#982) Conditional receipts currently return an error on verification.
@@ -808,7 +808,7 @@ mod sys_verify {
         let halt_receipt = prove_halt(1);
 
         let spec = &MultiTestSpec::SysVerifyIntegrity {
-            claim_words: to_vec(&halt_receipt.get_claim().unwrap()).unwrap(),
+            claim_words: to_vec(&halt_receipt.claim().unwrap()).unwrap(),
         };
 
         // Test that proving results in a success execution and unconditional receipt.
