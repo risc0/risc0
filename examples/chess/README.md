@@ -66,7 +66,7 @@ The [guest code] checks that applying the move to the initial board state is leg
 [here]: https://github.com/risc0/risc0/blob/main/examples/chess/src/main.rs#L29
 [zkVM]: https://dev.risczero.com/zkvm
 [shakmaty]: https://docs.rs/shakmaty/latest/shakmaty/
-[Rust Resources]: https://dev.risczero.com/zkvm/developer-guide/rust-resources
+[Rust Resources]: https://dev.risczero.com/api/zkvm/rust-resources
 [shakmaty]: https://docs.rs/shakmaty/latest/shakmaty/
 [guest code]: https://github.com/risc0/risc0-rust-examples/blob/main/chess/methods/guest/src/bin/checkmate.rs
 [host code]: https://github.com/risc0/risc0/blob/main/examples/chess/methods/guest/src/main.rs
