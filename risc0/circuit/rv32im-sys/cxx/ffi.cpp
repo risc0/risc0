@@ -13,6 +13,8 @@
 // limitations under the License.
 
 #include "ffi.h"
+
+#include "extern.h"
 #include "fp.h"
 #include "fpext.h"
 
@@ -20,6 +22,7 @@
 #include <stdexcept>
 
 using namespace risc0;
+using namespace risc0::circuit::rv32im;
 
 extern "C" const char* risc0_circuit_string_ptr(risc0_string* str) {
   return str->str.c_str();
@@ -47,13 +50,14 @@ void bridgeCallback(void* ctx,
   }
 }
 
-extern "C" uint32_t risc0_circuit_rv32im_step_compute_accum(risc0_error* err,
-                                                            void* ctx,
-                                                            Callback callback,
-                                                            size_t steps,
-                                                            size_t cycle,
-                                                            Fp** args_ptr,
-                                                            size_t /*args_len*/) {
+extern "C" uint32_t risc0_circuit_rv32im_step_exec(
+    risc0_error* err, void* ctx, size_t steps, size_t cycle, Fp** args_ptr) {
+  return ffi_wrap<uint32_t>(
+      err, 0, [&] { return circuit::rv32im::step_exec(ctx, steps, cycle, args_ptr).asRaw(); });
+}
+
+extern "C" uint32_t risc0_circuit_rv32im_step_compute_accum(
+    risc0_error* err, void* ctx, Callback callback, size_t steps, size_t cycle, Fp** args_ptr) {
   return ffi_wrap<uint32_t>(err, 0, [&] {
     BridgeContext bridgeCtx{ctx, callback};
     return circuit::rv32im::step_compute_accum(&bridgeCtx, bridgeCallback, steps, cycle, args_ptr)
@@ -61,13 +65,8 @@ extern "C" uint32_t risc0_circuit_rv32im_step_compute_accum(risc0_error* err,
   });
 }
 
-extern "C" uint32_t risc0_circuit_rv32im_step_verify_accum(risc0_error* err,
-                                                           void* ctx,
-                                                           Callback callback,
-                                                           size_t steps,
-                                                           size_t cycle,
-                                                           Fp** args_ptr,
-                                                           size_t /*args_len*/) {
+extern "C" uint32_t risc0_circuit_rv32im_step_verify_accum(
+    risc0_error* err, void* ctx, Callback callback, size_t steps, size_t cycle, Fp** args_ptr) {
   return ffi_wrap<uint32_t>(err, 0, [&] {
     BridgeContext bridgeCtx{ctx, callback};
     return circuit::rv32im::step_verify_accum(&bridgeCtx, bridgeCallback, steps, cycle, args_ptr)
@@ -75,26 +74,8 @@ extern "C" uint32_t risc0_circuit_rv32im_step_verify_accum(risc0_error* err,
   });
 }
 
-extern "C" uint32_t risc0_circuit_rv32im_step_exec(risc0_error* err,
-                                                   void* ctx,
-                                                   Callback callback,
-                                                   size_t steps,
-                                                   size_t cycle,
-                                                   Fp** args_ptr,
-                                                   size_t /*args_len*/) {
-  return ffi_wrap<uint32_t>(err, 0, [&] {
-    BridgeContext bridgeCtx{ctx, callback};
-    return circuit::rv32im::step_exec(&bridgeCtx, bridgeCallback, steps, cycle, args_ptr).asRaw();
-  });
-}
-
-extern "C" uint32_t risc0_circuit_rv32im_step_verify_bytes(risc0_error* err,
-                                                           void* ctx,
-                                                           Callback callback,
-                                                           size_t steps,
-                                                           size_t cycle,
-                                                           Fp** args_ptr,
-                                                           size_t /*args_len*/) {
+extern "C" uint32_t risc0_circuit_rv32im_step_verify_bytes(
+    risc0_error* err, void* ctx, Callback callback, size_t steps, size_t cycle, Fp** args_ptr) {
   return ffi_wrap<uint32_t>(err, 0, [&] {
     BridgeContext bridgeCtx{ctx, callback};
     return circuit::rv32im::step_verify_bytes(&bridgeCtx, bridgeCallback, steps, cycle, args_ptr)
@@ -102,13 +83,8 @@ extern "C" uint32_t risc0_circuit_rv32im_step_verify_bytes(risc0_error* err,
   });
 }
 
-extern "C" uint32_t risc0_circuit_rv32im_step_verify_mem(risc0_error* err,
-                                                         void* ctx,
-                                                         Callback callback,
-                                                         size_t steps,
-                                                         size_t cycle,
-                                                         Fp** args_ptr,
-                                                         size_t /*args_len*/) {
+extern "C" uint32_t risc0_circuit_rv32im_step_verify_mem(
+    risc0_error* err, void* ctx, Callback callback, size_t steps, size_t cycle, Fp** args_ptr) {
   return ffi_wrap<uint32_t>(err, 0, [&] {
     BridgeContext bridgeCtx{ctx, callback};
     return circuit::rv32im::step_verify_mem(&bridgeCtx, bridgeCallback, steps, cycle, args_ptr)

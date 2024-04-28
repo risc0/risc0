@@ -431,7 +431,6 @@ impl<T: Clone> Buffer<T> for BufferImpl<T> {
     }
 
     fn get_at(&self, idx: usize) -> T {
-        nvtx::range_push!("get_at");
         let item_size = std::mem::size_of::<T>();
         let buf = self.buffer.borrow_mut();
         let offset = (self.offset + idx) * item_size;
@@ -440,7 +439,6 @@ impl<T: Clone> Buffer<T> for BufferImpl<T> {
         let host_buf = device_slice.as_host_vec().unwrap();
         let slice: &[T] = unchecked_cast(&host_buf);
         let item = slice[0].clone();
-        nvtx::range_pop!();
         item
     }
 

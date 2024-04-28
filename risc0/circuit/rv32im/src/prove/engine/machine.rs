@@ -20,6 +20,7 @@ use std::{
 use anyhow::{anyhow, bail, ensure, Result};
 use lazy_regex::{regex, Captures};
 use rayon::prelude::*;
+use risc0_circuit_rv32im_sys::ffi::{RawMemoryTransaction, RawPreflightCycle, RawPreflightTrace};
 use risc0_zkp::{
     adapter::CircuitStepContext,
     field::{
@@ -54,6 +55,10 @@ struct Injector<'a> {
 
 pub struct MachineContext {
     trace: PreflightTrace,
+    raw_trace: RawPreflightTrace,
+    _raw_cycles: Vec<RawPreflightCycle>,
+    _raw_txns: Vec<RawMemoryTransaction>,
+    _raw_extras: Vec<u32>,
 
     // Tables for sorting arguments in proper order
     ram_arg: RamArgument,
@@ -99,8 +104,71 @@ impl<'a> Injector<'a> {
 
 impl MachineContext {
     pub fn new(steps: usize, trace: PreflightTrace) -> Self {
+        let _raw_cycles: Vec<_> = trace
+            .pre
+            .cycles
+            .iter()
+            .map(|x| {
+                let (major, minor) = x.mux.as_body().unwrap_or((Major::Compute0, 0));
+                RawPreflightCycle {
+                    major: major.as_u32(),
+                    minor,
+                    mem_idx: x.mem_idx.load(Ordering::Relaxed),
+                    extra_idx: x.extra_idx.load(Ordering::Relaxed),
+                }
+            })
+            .chain(trace.body.cycles.iter().map(|x| {
+                let (major, minor) = x.mux.as_body().unwrap_or((Major::Compute0, 0));
+                RawPreflightCycle {
+                    major: major.as_u32(),
+                    minor,
+                    mem_idx: x.mem_idx.load(Ordering::Relaxed) + trace.pre.txns.len(),
+                    extra_idx: x.extra_idx.load(Ordering::Relaxed) + trace.pre.extras.len(),
+                }
+            }))
+            .collect();
+        let _raw_txns: Vec<_> = trace
+            .pre
+            .txns
+            .iter()
+            .map(|x| RawMemoryTransaction {
+                cycle: x.cycle,
+                addr: x.addr.0,
+                data: x.data,
+            })
+            .chain(trace.body.txns.iter().map(|x| RawMemoryTransaction {
+                cycle: x.cycle + trace.pre.cycles.len(),
+                addr: x.addr.0,
+                data: x.data,
+            }))
+            .collect();
+        let _raw_extras: Vec<_> = trace
+            .pre
+            .extras
+            .iter()
+            .chain(trace.body.extras.iter())
+            .copied()
+            .collect();
+
+        let is_trace = match tracing::level_filters::LevelFilter::current()
+            .eq(&tracing::level_filters::LevelFilter::TRACE)
+        {
+            true => 1,
+            false => 0,
+        };
+
+        let raw_trace = RawPreflightTrace {
+            cycles: _raw_cycles.as_ptr(),
+            txns: _raw_txns.as_ptr(),
+            extras: _raw_extras.as_ptr(),
+            is_trace,
+        };
         Self {
             trace,
+            raw_trace,
+            _raw_cycles,
+            _raw_txns,
+            _raw_extras,
             ram_arg: RamArgument::new(steps),
             bytes_arg: BytesArgument::new(steps),
         }
@@ -157,7 +225,7 @@ impl MachineContext {
         // let cur_cycle = self.get_cycle(cycle);
         // tracing::debug!("[{cycle}] {:?}", cur_cycle);
         let ctx = CircuitStepContext { size: steps, cycle };
-        CIRCUIT.par_step_exec(&ctx, self, args)
+        CIRCUIT.par_step_exec(&ctx, &self.raw_trace, args)
     }
 
     fn next_step_exec(

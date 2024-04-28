@@ -37,6 +37,31 @@ pub struct RawError {
     pub msg: *const RawString,
 }
 
+#[repr(C)]
+pub struct RawMemoryTransaction {
+    pub cycle: usize,
+    pub addr: u32,
+    pub data: u32,
+}
+
+#[repr(C)]
+pub struct RawPreflightCycle {
+    pub major: u32,
+    pub minor: u32,
+    pub mem_idx: usize,
+    pub extra_idx: usize,
+}
+
+#[repr(C)]
+pub struct RawPreflightTrace {
+    pub cycles: *const RawPreflightCycle,
+    pub txns: *const RawMemoryTransaction,
+    pub extras: *const u32,
+    pub is_trace: u32,
+}
+
+unsafe impl Sync for RawPreflightTrace {}
+
 impl Default for RawError {
     fn default() -> Self {
         Self {
@@ -50,6 +75,14 @@ extern "C" {
 
     pub fn risc0_circuit_string_free(str: *const RawString);
 
+    pub fn risc0_circuit_rv32im_step_exec(
+        err: *mut RawError,
+        preflight: *const RawPreflightTrace,
+        steps: usize,
+        cycle: usize,
+        args_ptr: *const *mut BabyBearElem,
+    ) -> BabyBearElem;
+
     pub fn risc0_circuit_rv32im_step_compute_accum(
         err: *mut RawError,
         ctx: *mut c_void,
@@ -57,7 +90,6 @@ extern "C" {
         steps: usize,
         cycle: usize,
         args_ptr: *const *mut BabyBearElem,
-        args_len: usize,
     ) -> BabyBearElem;
 
     pub fn risc0_circuit_rv32im_step_verify_accum(
@@ -67,17 +99,6 @@ extern "C" {
         steps: usize,
         cycle: usize,
         args_ptr: *const *mut BabyBearElem,
-        args_len: usize,
-    ) -> BabyBearElem;
-
-    pub fn risc0_circuit_rv32im_step_exec(
-        err: *mut RawError,
-        ctx: *mut c_void,
-        cb: Callback,
-        steps: usize,
-        cycle: usize,
-        args_ptr: *const *mut BabyBearElem,
-        args_len: usize,
     ) -> BabyBearElem;
 
     pub fn risc0_circuit_rv32im_step_verify_bytes(
@@ -87,7 +108,6 @@ extern "C" {
         steps: usize,
         cycle: usize,
         args_ptr: *const *mut BabyBearElem,
-        args_len: usize,
     ) -> BabyBearElem;
 
     pub fn risc0_circuit_rv32im_step_verify_mem(
@@ -97,7 +117,6 @@ extern "C" {
         steps: usize,
         cycle: usize,
         args_ptr: *const *mut BabyBearElem,
-        args_len: usize,
     ) -> BabyBearElem;
 
     pub fn risc0_circuit_rv32im_poly_fp(

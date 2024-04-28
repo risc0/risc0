@@ -19,7 +19,7 @@ use risc0_circuit_rv32im_sys::ffi::{
     get_trampoline, risc0_circuit_rv32im_poly_fp, risc0_circuit_rv32im_step_compute_accum,
     risc0_circuit_rv32im_step_exec, risc0_circuit_rv32im_step_verify_accum,
     risc0_circuit_rv32im_step_verify_bytes, risc0_circuit_rv32im_step_verify_mem,
-    risc0_circuit_string_free, risc0_circuit_string_ptr, Callback, RawError,
+    risc0_circuit_string_free, risc0_circuit_string_ptr, Callback, RawError, RawPreflightTrace,
 };
 use risc0_core::field::baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem};
 use risc0_zkp::{
@@ -41,10 +41,8 @@ impl CircuitStep<BabyBearElem> for CircuitImpl {
             ctx,
             handler,
             args,
-            |err, ctx, trampoline, size, cycle, args_ptr, args_len| unsafe {
-                risc0_circuit_rv32im_step_compute_accum(
-                    err, ctx, trampoline, size, cycle, args_ptr, args_len,
-                )
+            |err, ctx, trampoline, size, cycle, args_ptr| unsafe {
+                risc0_circuit_rv32im_step_compute_accum(err, ctx, trampoline, size, cycle, args_ptr)
             },
         )
     }
@@ -59,30 +57,19 @@ impl CircuitStep<BabyBearElem> for CircuitImpl {
             ctx,
             handler,
             args,
-            |err, ctx, trampoline, size, cycle, args_ptr, args_len| unsafe {
-                risc0_circuit_rv32im_step_verify_accum(
-                    err, ctx, trampoline, size, cycle, args_ptr, args_len,
-                )
+            |err, ctx, trampoline, size, cycle, args_ptr| unsafe {
+                risc0_circuit_rv32im_step_verify_accum(err, ctx, trampoline, size, cycle, args_ptr)
             },
         )
     }
 
     fn step_exec<S: CircuitStepHandler<BabyBearElem>>(
         &self,
-        ctx: &CircuitStepContext,
-        handler: &mut S,
-        args: &[SyncSlice<BabyBearElem>],
+        _ctx: &CircuitStepContext,
+        _handler: &mut S,
+        _args: &[SyncSlice<BabyBearElem>],
     ) -> Result<BabyBearElem> {
-        call_step(
-            ctx,
-            handler,
-            args,
-            |err, ctx, trampoline, size, cycle, args_ptr, args_len| unsafe {
-                risc0_circuit_rv32im_step_exec(
-                    err, ctx, trampoline, size, cycle, args_ptr, args_len,
-                )
-            },
-        )
+        unimplemented!();
     }
 
     fn step_verify_bytes<S: CircuitStepHandler<BabyBearElem>>(
@@ -95,10 +82,8 @@ impl CircuitStep<BabyBearElem> for CircuitImpl {
             ctx,
             handler,
             args,
-            |err, ctx, trampoline, size, cycle, args_ptr, args_len| unsafe {
-                risc0_circuit_rv32im_step_verify_bytes(
-                    err, ctx, trampoline, size, cycle, args_ptr, args_len,
-                )
+            |err, ctx, trampoline, size, cycle, args_ptr| unsafe {
+                risc0_circuit_rv32im_step_verify_bytes(err, ctx, trampoline, size, cycle, args_ptr)
             },
         )
     }
@@ -113,10 +98,8 @@ impl CircuitStep<BabyBearElem> for CircuitImpl {
             ctx,
             handler,
             args,
-            |err, ctx, trampoline, size, cycle, args_ptr, args_len| unsafe {
-                risc0_circuit_rv32im_step_verify_mem(
-                    err, ctx, trampoline, size, cycle, args_ptr, args_len,
-                )
+            |err, ctx, trampoline, size, cycle, args_ptr| unsafe {
+                risc0_circuit_rv32im_step_verify_mem(err, ctx, trampoline, size, cycle, args_ptr)
             },
         )
     }
@@ -152,7 +135,6 @@ where
         usize,
         usize,
         *const *mut BabyBearElem,
-        usize,
     ) -> BabyBearElem,
 {
     let mut last_err = None;
@@ -176,7 +158,6 @@ where
         ctx.size,
         ctx.cycle,
         args.as_ptr(),
-        args.len(),
     );
     if let Some(err) = last_err {
         return Err(err);
@@ -200,22 +181,28 @@ pub trait ParallelCircuitStepHandler<E: Elem> {
 }
 
 impl CircuitImpl {
-    pub fn par_step_exec<S: ParallelCircuitStepHandler<BabyBearElem>>(
+    pub fn par_step_exec(
         &self,
         ctx: &CircuitStepContext,
-        handler: &S,
+        preflight: &RawPreflightTrace,
         args: &[SyncSlice<BabyBearElem>],
     ) -> Result<BabyBearElem> {
-        par_call_step(
-            ctx,
-            handler,
-            args,
-            |err, ctx, trampoline, size, cycle, args_ptr, args_len| unsafe {
-                risc0_circuit_rv32im_step_exec(
-                    err, ctx, trampoline, size, cycle, args_ptr, args_len,
-                )
-            },
-        )
+        let mut err = RawError::default();
+        let args: Vec<*mut BabyBearElem> = args.iter().map(SyncSlice::get_ptr).collect();
+        let result = unsafe {
+            risc0_circuit_rv32im_step_exec(&mut err, preflight, ctx.size, ctx.cycle, args.as_ptr())
+        };
+        if err.msg.is_null() {
+            Ok(result)
+        } else {
+            let what = unsafe {
+                let str = risc0_circuit_string_ptr(err.msg);
+                let msg = CStr::from_ptr(str).to_str().unwrap().to_string();
+                risc0_circuit_string_free(err.msg);
+                msg
+            };
+            Err(anyhow!(what))
+        }
     }
 
     pub fn par_step_verify_bytes<S: ParallelCircuitStepHandler<BabyBearElem>>(
@@ -228,10 +215,8 @@ impl CircuitImpl {
             ctx,
             handler,
             args,
-            |err, ctx, trampoline, size, cycle, args_ptr, args_len| unsafe {
-                risc0_circuit_rv32im_step_verify_bytes(
-                    err, ctx, trampoline, size, cycle, args_ptr, args_len,
-                )
+            |err, ctx, trampoline, size, cycle, args_ptr| unsafe {
+                risc0_circuit_rv32im_step_verify_bytes(err, ctx, trampoline, size, cycle, args_ptr)
             },
         )
     }
@@ -246,10 +231,8 @@ impl CircuitImpl {
             ctx,
             handler,
             args,
-            |err, ctx, trampoline, size, cycle, args_ptr, args_len| unsafe {
-                risc0_circuit_rv32im_step_verify_mem(
-                    err, ctx, trampoline, size, cycle, args_ptr, args_len,
-                )
+            |err, ctx, trampoline, size, cycle, args_ptr| unsafe {
+                risc0_circuit_rv32im_step_verify_mem(err, ctx, trampoline, size, cycle, args_ptr)
             },
         )
     }
@@ -270,7 +253,6 @@ where
         usize,
         usize,
         *const *mut BabyBearElem,
-        usize,
     ) -> BabyBearElem,
 {
     let mut last_err = None;
@@ -294,7 +276,6 @@ where
         ctx.size,
         ctx.cycle,
         args.as_ptr(),
-        args.len(),
     );
     if let Some(err) = last_err {
         return Err(err);
