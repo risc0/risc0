@@ -34,6 +34,7 @@ pub struct Prover<'a, H: Hal> {
 }
 
 fn make_coeffs<H: Hal>(hal: &H, witness: &H::Buffer<H::Elem>, count: usize) -> H::Buffer<H::Elem> {
+    nvtx::range_push!("make_coeffs");
     let coeffs = hal.alloc_elem("coeffs", witness.size());
     hal.eltwise_copy_elem(&coeffs, witness);
     // Do interpolate
@@ -41,6 +42,7 @@ fn make_coeffs<H: Hal>(hal: &H, witness: &H::Buffer<H::Elem>, count: usize) -> H
     // Convert f(x) -> f(3x), which effective multiplies coefficients c_i by 3^i.
     #[cfg(not(feature = "circuit_debug"))]
     hal.zk_shift(&coeffs, count);
+    nvtx::range_pop!();
     coeffs
 }
 
@@ -77,6 +79,7 @@ impl<'a, H: Hal> Prover<'a, H> {
     /// change.
     #[tracing::instrument(skip_all)]
     pub fn commit_group(&mut self, tap_group_index: usize, witness: &H::Buffer<H::Elem>) {
+        nvtx::range_push!("commit_group({})", witness.name());
         let group_size = self.taps.group_size(tap_group_index);
         assert_eq!(witness.size() % group_size, 0);
         assert_eq!(witness.size() / group_size, self.cycles);
@@ -102,6 +105,7 @@ impl<'a, H: Hal> Prover<'a, H> {
             self.taps.group_name(tap_group_index),
             group_ref.merkle.root()
         );
+        nvtx::range_pop!();
     }
 
     /// Generates the proof and returns the seal.
@@ -110,6 +114,8 @@ impl<'a, H: Hal> Prover<'a, H> {
     where
         C: CircuitHal<H>,
     {
+        nvtx::range_push!("finalize");
+
         // Set the poly mix value, which is used for constraint compression in the
         // DEEP-ALI protocol.
         let poly_mix = self.iop.random_ext_elem();
@@ -299,6 +305,7 @@ impl<'a, H: Hal> Prover<'a, H> {
         tracing::info_span!("load_combos").in_scope(|| {
             combos.view_mut(|combos| {
                 tracing::info_span!("part1").in_scope(|| {
+                    nvtx::range_push!("part1");
                     let mut cur_pos = 0;
                     let mut cur = H::ExtElem::ONE;
                     // Subtract the U coeffs from the combos
@@ -315,9 +322,11 @@ impl<'a, H: Hal> Prover<'a, H> {
                         cur_pos += 1;
                         cur *= mix;
                     }
+                    nvtx::range_pop!();
                 });
                 // Divide each element by (x - Z * back1^back) for each back
                 tracing::info_span!("part2").in_scope(|| {
+                    nvtx::range_push!("part2");
                     combos
                         .par_chunks_exact_mut(self.cycles)
                         .zip(0..combo_count)
@@ -329,12 +338,15 @@ impl<'a, H: Hal> Prover<'a, H> {
                                 );
                             }
                         });
+                    nvtx::range_pop!();
                 });
                 tracing::info_span!("part3").in_scope(|| {
+                    nvtx::range_push!("part3");
                     // Divide check polys by z^EXT_SIZE
                     let slice = &mut combos
                         [combo_count * self.cycles..combo_count * self.cycles + self.cycles];
                     assert_eq!(poly_divide(slice, z_pow), H::ExtElem::ZERO);
+                    nvtx::range_pop!();
                 });
             });
         });
@@ -368,6 +380,7 @@ impl<'a, H: Hal> Prover<'a, H> {
         // Return final proof
         let proof = self.iop.proof;
         tracing::debug!("Proof size = {}", proof.len());
+        nvtx::range_pop!();
         proof
     }
 }

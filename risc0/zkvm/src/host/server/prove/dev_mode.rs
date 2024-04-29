@@ -57,7 +57,7 @@ impl ProverServer for DevModeProver {
             )
         }
 
-        let claim = session.get_claim()?;
+        let claim = session.claim()?;
         let receipt = Receipt::new(
             InnerReceipt::Fake { claim },
             session.journal.clone().unwrap_or_default().bytes,
@@ -83,10 +83,6 @@ impl ProverServer for DevModeProver {
 
     fn prove_segment(&self, _ctx: &VerifierContext, _segment: &Segment) -> Result<SegmentReceipt> {
         unimplemented!("This is unsupported for dev mode.")
-    }
-
-    fn get_peak_memory_usage(&self) -> usize {
-        0
     }
 
     fn lift(&self, _receipt: &SegmentReceipt) -> Result<SuccinctReceipt> {

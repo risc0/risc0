@@ -69,6 +69,8 @@ impl<CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
         po2: usize,
         steps: usize,
     ) {
+        nvtx::range_push!("eval_check");
+
         let ctrl = groups[REGISTER_GROUP_CTRL];
         let data = groups[REGISTER_GROUP_DATA];
         let accum = groups[REGISTER_GROUP_ACCUM];
@@ -127,6 +129,8 @@ impl<CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
             .unwrap();
         }
         self.hal.stream.synchronize().unwrap();
+
+        nvtx::range_pop!();
     }
 
     #[tracing::instrument(skip_all)]
@@ -139,6 +143,8 @@ impl<CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
         accum: &CudaBuffer<BabyBearElem>,
         steps: usize,
     ) {
+        nvtx::range_push!("accumulate");
+
         let count = steps - ZK_CYCLES;
         let params = self.hal.compute_simple_params(count);
 
@@ -209,6 +215,8 @@ impl<CH: CudaHash> CircuitHal<CudaHal<CH>> for CudaCircuitHal<CH> {
             }
             self.hal.stream.synchronize().unwrap();
         });
+
+        nvtx::range_pop!();
     }
 }
 

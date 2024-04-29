@@ -275,7 +275,7 @@ fn test_recursion_lift_resolve_e2e() {
     tracing::info!("Done proving: sys_verify");
 
     let succinct_receipt = prover
-        .compress(&composition_receipt.inner.composite().unwrap())
+        .compsite_to_succinct(&composition_receipt.inner.composite().unwrap())
         .unwrap();
 
     let receipt = Receipt::new(

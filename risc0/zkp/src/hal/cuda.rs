@@ -382,11 +382,14 @@ impl<T> BufferImpl<T> {
     }
 
     pub fn copy_from(name: &'static str, slice: &[T]) -> Self {
+        nvtx::range_push!("copy_from");
         let bytes_len = std::mem::size_of_val(slice);
         assert!(bytes_len > 0);
         let mut buffer = RawBuffer::new(name, bytes_len);
         let bytes = unchecked_cast(slice);
         buffer.buf.copy_from(bytes).unwrap();
+        nvtx::range_pop!();
+
         BufferImpl {
             buffer: Rc::new(RefCell::new(buffer)),
             size: slice.len(),
@@ -427,19 +430,42 @@ impl<T: Clone> Buffer<T> for BufferImpl<T> {
         }
     }
 
-    fn view<F: FnOnce(&[T])>(&self, f: F) {
+    fn get_at(&self, idx: usize) -> T {
+        nvtx::range_push!("get_at");
+        let item_size = std::mem::size_of::<T>();
         let buf = self.buffer.borrow_mut();
-        let host_buf = buf.buf.as_host_vec().unwrap();
+        let offset = (self.offset + idx) * item_size;
+        let ptr = unsafe { buf.buf.as_device_ptr().offset(offset as isize) };
+        let device_slice = unsafe { DeviceSlice::from_raw_parts(ptr, item_size) };
+        let host_buf = device_slice.as_host_vec().unwrap();
+        let slice: &[T] = unchecked_cast(&host_buf);
+        let item = slice[0].clone();
+        nvtx::range_pop!();
+        item
+    }
+
+    fn view<F: FnOnce(&[T])>(&self, f: F) {
+        nvtx::range_push!("view");
+        let item_size = std::mem::size_of::<T>();
+        let buf = self.buffer.borrow_mut();
+        let offset = self.offset * item_size;
+        let len = self.size * item_size;
+        let ptr = unsafe { buf.buf.as_device_ptr().offset(offset as isize) };
+        let device_slice = unsafe { DeviceSlice::from_raw_parts(ptr, len) };
+        let host_buf = device_slice.as_host_vec().unwrap();
         let slice = unchecked_cast(&host_buf);
-        f(&slice[self.offset..]);
+        f(slice);
+        nvtx::range_pop!();
     }
 
     fn view_mut<F: FnOnce(&mut [T])>(&self, f: F) {
+        nvtx::range_push!("view_mut");
         let mut buf = self.buffer.borrow_mut();
         let mut host_buf = buf.buf.as_host_vec().unwrap();
         let slice = unchecked_cast_mut(&mut host_buf);
         f(&mut slice[self.offset..]);
         buf.buf.copy_from(&host_buf).unwrap();
+        nvtx::range_pop!();
     }
 }
 
