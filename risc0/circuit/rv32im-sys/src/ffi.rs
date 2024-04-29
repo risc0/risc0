@@ -31,6 +31,8 @@ pub type Callback = unsafe extern "C" fn(
 ) -> bool;
 
 pub enum RawString {}
+pub enum RawMachineContext {}
+pub struct WrappedMachineContext(pub *const RawMachineContext);
 
 #[repr(C)]
 pub struct RawError {
@@ -61,6 +63,7 @@ pub struct RawPreflightTrace {
 }
 
 unsafe impl Sync for RawPreflightTrace {}
+unsafe impl Sync for WrappedMachineContext {}
 
 impl Default for RawError {
     fn default() -> Self {
@@ -75,13 +78,48 @@ extern "C" {
 
     pub fn risc0_circuit_string_free(str: *const RawString);
 
+    pub fn risc0_circuit_rv32im_context_alloc(
+        trace: *const RawPreflightTrace,
+        steps: usize,
+    ) -> *const RawMachineContext;
+
+    pub fn risc0_circuit_rv32im_context_free(ctx: *const RawMachineContext);
+
     pub fn risc0_circuit_rv32im_step_exec(
         err: *mut RawError,
-        preflight: *const RawPreflightTrace,
+        ctx: *const RawMachineContext,
+        steps: usize,
+        cycle: usize,
+        args: *const *mut BabyBearElem,
+    ) -> BabyBearElem;
+
+    pub fn risc0_circuit_rv32im_step_verify_mem(
+        err: *mut RawError,
+        ctx: *const RawMachineContext,
         steps: usize,
         cycle: usize,
         args_ptr: *const *mut BabyBearElem,
     ) -> BabyBearElem;
+
+    pub fn risc0_circuit_rv32im_step_verify_bytes(
+        err: *mut RawError,
+        ctx: *const RawMachineContext,
+        steps: usize,
+        cycle: usize,
+        args_ptr: *const *mut BabyBearElem,
+    ) -> BabyBearElem;
+
+    pub fn risc0_circuit_rv32im_sort_ram(err: *mut RawError, ctx: *const RawMachineContext);
+
+    pub fn risc0_circuit_rv32im_inject_ram_backs(
+        err: *mut RawError,
+        ctx: *const RawMachineContext,
+        steps: usize,
+        cycle: usize,
+        data: *mut BabyBearElem,
+    );
+
+    pub fn risc0_circuit_rv32im_sort_bytes(err: *mut RawError, ctx: *const RawMachineContext);
 
     pub fn risc0_circuit_rv32im_step_compute_accum(
         err: *mut RawError,
@@ -93,24 +131,6 @@ extern "C" {
     ) -> BabyBearElem;
 
     pub fn risc0_circuit_rv32im_step_verify_accum(
-        err: *mut RawError,
-        ctx: *mut c_void,
-        cb: Callback,
-        steps: usize,
-        cycle: usize,
-        args_ptr: *const *mut BabyBearElem,
-    ) -> BabyBearElem;
-
-    pub fn risc0_circuit_rv32im_step_verify_bytes(
-        err: *mut RawError,
-        ctx: *mut c_void,
-        cb: Callback,
-        steps: usize,
-        cycle: usize,
-        args_ptr: *const *mut BabyBearElem,
-    ) -> BabyBearElem;
-
-    pub fn risc0_circuit_rv32im_step_verify_mem(
         err: *mut RawError,
         ctx: *mut c_void,
         cb: Callback,

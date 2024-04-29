@@ -53,7 +53,7 @@ extern_ramRead(void* ctx, size_t cycle, const char* extra, std::array<Fp, 2> arg
 
 void extern_plonkWrite_ram(void* ctx, size_t cycle, const char* extra, std::array<Fp, 7> args);
 
-void extern_plonkWrite_bytes(void* ctx, size_t cycle, const char* extra, std::array<Fp, 0> args);
+void extern_plonkWrite_bytes(void* ctx, size_t cycle, const char* extra, std::array<Fp, 2> args);
 
 std::array<Fp, 7>
 extern_plonkRead_ram(void* ctx, size_t cycle, const char* extra, std::array<Fp, 0> args);

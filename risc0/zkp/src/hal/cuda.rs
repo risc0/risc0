@@ -382,13 +382,13 @@ impl<T> BufferImpl<T> {
     }
 
     pub fn copy_from(name: &'static str, slice: &[T]) -> Self {
-        nvtx::range_push!("copy_from");
+        // nvtx::range_push!("copy_from");
         let bytes_len = std::mem::size_of_val(slice);
         assert!(bytes_len > 0);
         let mut buffer = RawBuffer::new(name, bytes_len);
         let bytes = unchecked_cast(slice);
         buffer.buf.copy_from(bytes).unwrap();
-        nvtx::range_pop!();
+        // nvtx::range_pop!();
 
         BufferImpl {
             buffer: Rc::new(RefCell::new(buffer)),

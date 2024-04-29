@@ -50,10 +50,12 @@ void bridgeCallback(void* ctx,
   }
 }
 
-extern "C" uint32_t risc0_circuit_rv32im_step_exec(
-    risc0_error* err, void* ctx, size_t steps, size_t cycle, Fp** args_ptr) {
-  return ffi_wrap<uint32_t>(
-      err, 0, [&] { return circuit::rv32im::step_exec(ctx, steps, cycle, args_ptr).asRaw(); });
+extern "C" uint32_t
+risc0_circuit_rv32im_step_exec(risc0_error* err, void* ctx, size_t steps, size_t cycle, Fp** args) {
+  return ffi_wrap<uint32_t>(err, 0, [&] {
+    // printf("step_exec(%p, %lu, %lu, %p)\n", ctx, steps, cycle, args);
+    return circuit::rv32im::step_exec(ctx, steps, cycle, args).asRaw();
+  });
 }
 
 extern "C" uint32_t risc0_circuit_rv32im_step_compute_accum(
@@ -73,22 +75,19 @@ extern "C" uint32_t risc0_circuit_rv32im_step_verify_accum(
         .asRaw();
   });
 }
-
 extern "C" uint32_t risc0_circuit_rv32im_step_verify_bytes(
-    risc0_error* err, void* ctx, Callback callback, size_t steps, size_t cycle, Fp** args_ptr) {
+    risc0_error* err, void* ctx, size_t steps, size_t cycle, Fp** args) {
   return ffi_wrap<uint32_t>(err, 0, [&] {
-    BridgeContext bridgeCtx{ctx, callback};
-    return circuit::rv32im::step_verify_bytes(&bridgeCtx, bridgeCallback, steps, cycle, args_ptr)
-        .asRaw();
+    // printf("step_verify_bytes(%p, %lu, %lu, %p)\n", ctx, steps, cycle, args);
+    return circuit::rv32im::step_verify_bytes(ctx, steps, cycle, args).asRaw();
   });
 }
 
 extern "C" uint32_t risc0_circuit_rv32im_step_verify_mem(
-    risc0_error* err, void* ctx, Callback callback, size_t steps, size_t cycle, Fp** args_ptr) {
+    risc0_error* err, void* ctx, size_t steps, size_t cycle, Fp** args) {
   return ffi_wrap<uint32_t>(err, 0, [&] {
-    BridgeContext bridgeCtx{ctx, callback};
-    return circuit::rv32im::step_verify_mem(&bridgeCtx, bridgeCallback, steps, cycle, args_ptr)
-        .asRaw();
+    // printf("step_verify_mem(%p, %lu, %lu, %p)\n", ctx, steps, cycle, args);
+    return circuit::rv32im::step_verify_mem(ctx, steps, cycle, args).asRaw();
   });
 }
 
@@ -99,4 +98,13 @@ extern "C" uint32_t risc0_circuit_rv32im_step_verify_mem(
 extern "C" FpExt
 risc0_circuit_rv32im_poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   return circuit::rv32im::poly_fp(cycle, steps, poly_mix, args);
+}
+
+extern "C" void risc0_circuit_rv32im_inject_ram_backs(
+    risc0_error* err, void* ctx, size_t steps, size_t cycle, Fp* data) {
+  ffi_wrap<uint32_t>(err, 0, [&] {
+    // printf("inject_ram_backs(%p, %lu, %lu, %p)\n", ctx, steps, cycle, data);
+    circuit::rv32im::inject_ram_backs(ctx, steps, cycle, data);
+    return 0;
+  });
 }

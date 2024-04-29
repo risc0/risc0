@@ -52,11 +52,12 @@ namespace risc0::circuit::rv32im {
 using HostBridge = void(void*, const char*, const char*, const Fp*, size_t, Fp*, size_t);
 
 Fp step_exec(void* ctx, size_t steps, size_t cycle, Fp** args);
+Fp step_verify_mem(void* ctx, size_t steps, size_t cycle, Fp** args);
+Fp step_verify_bytes(void* ctx, size_t steps, size_t cycle, Fp** args);
+void inject_ram_backs(void* ctx, size_t steps, size_t cycle, Fp* data);
 
 Fp step_compute_accum(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args);
 Fp step_verify_accum(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args);
-Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args);
-Fp step_verify_mem(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args);
 
 FpExt poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args);
 

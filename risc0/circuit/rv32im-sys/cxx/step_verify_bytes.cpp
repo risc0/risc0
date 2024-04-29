@@ -14,6 +14,7 @@
 
 // This code is automatically generated
 
+#include "extern.h"
 #include "ffi.h"
 #include "fp.h"
 
@@ -27,12 +28,13 @@ namespace risc0::circuit::rv32im {
 #if defined(__clang__)
 #pragma clang diagnostic ignored "-Wunused-parameter"
 #pragma clang diagnostic ignored "-Wunused-variable"
+#elif defined(__GNUC__)
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wunused-variable"
 #endif
 
-Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) {
+Fp step_verify_bytes(void* ctx, size_t steps, size_t cycle, Fp** args) {
   size_t mask = steps - 1;
-  std::array<Fp, 96> host_args;
-  std::array<Fp, 32> host_outs;
   // loc(unknown)
   Fp x0(255);
   // loc(unknown)
@@ -83,9 +85,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
   }
   if (x5 != 0) {
     {
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x13 = host_outs.at(0);
-      auto x14 = host_outs.at(1);
+      auto [x13, x14] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][45 * steps + cycle];
@@ -98,9 +98,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x14);
         reg = x14;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x15 = host_outs.at(0);
-      auto x16 = host_outs.at(1);
+      auto [x15, x16] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][47 * steps + cycle];
@@ -113,9 +111,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x16);
         reg = x16;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x17 = host_outs.at(0);
-      auto x18 = host_outs.at(1);
+      auto [x17, x18] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][49 * steps + cycle];
@@ -128,9 +124,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x18);
         reg = x18;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x19 = host_outs.at(0);
-      auto x20 = host_outs.at(1);
+      auto [x19, x20] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][51 * steps + cycle];
@@ -143,9 +137,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x20);
         reg = x20;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x21 = host_outs.at(0);
-      auto x22 = host_outs.at(1);
+      auto [x21, x22] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][53 * steps + cycle];
@@ -158,9 +150,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x22);
         reg = x22;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x23 = host_outs.at(0);
-      auto x24 = host_outs.at(1);
+      auto [x23, x24] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][55 * steps + cycle];
@@ -173,9 +163,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x24);
         reg = x24;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x25 = host_outs.at(0);
-      auto x26 = host_outs.at(1);
+      auto [x25, x26] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][57 * steps + cycle];
@@ -188,9 +176,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x26);
         reg = x26;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x27 = host_outs.at(0);
-      auto x28 = host_outs.at(1);
+      auto [x27, x28] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][59 * steps + cycle];
@@ -203,9 +189,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x28);
         reg = x28;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x29 = host_outs.at(0);
-      auto x30 = host_outs.at(1);
+      auto [x29, x30] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][61 * steps + cycle];
@@ -218,9 +202,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x30);
         reg = x30;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x31 = host_outs.at(0);
-      auto x32 = host_outs.at(1);
+      auto [x31, x32] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][63 * steps + cycle];
@@ -233,9 +215,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x32);
         reg = x32;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x33 = host_outs.at(0);
-      auto x34 = host_outs.at(1);
+      auto [x33, x34] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][65 * steps + cycle];
@@ -248,9 +228,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x34);
         reg = x34;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x35 = host_outs.at(0);
-      auto x36 = host_outs.at(1);
+      auto [x35, x36] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][67 * steps + cycle];
@@ -263,9 +241,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x36);
         reg = x36;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x37 = host_outs.at(0);
-      auto x38 = host_outs.at(1);
+      auto [x37, x38] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][69 * steps + cycle];
@@ -278,9 +254,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x38);
         reg = x38;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x39 = host_outs.at(0);
-      auto x40 = host_outs.at(1);
+      auto [x39, x40] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][71 * steps + cycle];
@@ -293,9 +267,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x40);
         reg = x40;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x41 = host_outs.at(0);
-      auto x42 = host_outs.at(1);
+      auto [x41, x42] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][73 * steps + cycle];
@@ -308,9 +280,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x42);
         reg = x42;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x43 = host_outs.at(0);
-      auto x44 = host_outs.at(1);
+      auto [x43, x44] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][75 * steps + cycle];
@@ -323,9 +293,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x44);
         reg = x44;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x45 = host_outs.at(0);
-      auto x46 = host_outs.at(1);
+      auto [x45, x46] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][77 * steps + cycle];
@@ -338,9 +306,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x46);
         reg = x46;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x47 = host_outs.at(0);
-      auto x48 = host_outs.at(1);
+      auto [x47, x48] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][79 * steps + cycle];
@@ -353,9 +319,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x48);
         reg = x48;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x49 = host_outs.at(0);
-      auto x50 = host_outs.at(1);
+      auto [x49, x50] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][81 * steps + cycle];
@@ -368,9 +332,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x50);
         reg = x50;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x51 = host_outs.at(0);
-      auto x52 = host_outs.at(1);
+      auto [x51, x52] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][83 * steps + cycle];
@@ -383,9 +345,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x52);
         reg = x52;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x53 = host_outs.at(0);
-      auto x54 = host_outs.at(1);
+      auto [x53, x54] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][0 * steps + cycle];
@@ -1290,9 +1250,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
   }
   if (x12 != 0) {
     {
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x351 = host_outs.at(0);
-      auto x352 = host_outs.at(1);
+      auto [x351, x352] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][37 * steps + cycle];
@@ -1305,9 +1263,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x352);
         reg = x352;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x353 = host_outs.at(0);
-      auto x354 = host_outs.at(1);
+      auto [x353, x354] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][39 * steps + cycle];
@@ -1320,9 +1276,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x354);
         reg = x354;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x355 = host_outs.at(0);
-      auto x356 = host_outs.at(1);
+      auto [x355, x356] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][41 * steps + cycle];
@@ -1335,9 +1289,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x356);
         reg = x356;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x357 = host_outs.at(0);
-      auto x358 = host_outs.at(1);
+      auto [x357, x358] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][43 * steps + cycle];
@@ -1350,9 +1302,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x358);
         reg = x358;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x359 = host_outs.at(0);
-      auto x360 = host_outs.at(1);
+      auto [x359, x360] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][45 * steps + cycle];
@@ -1365,9 +1315,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x360);
         reg = x360;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x361 = host_outs.at(0);
-      auto x362 = host_outs.at(1);
+      auto [x361, x362] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][47 * steps + cycle];
@@ -1380,9 +1328,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x362);
         reg = x362;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x363 = host_outs.at(0);
-      auto x364 = host_outs.at(1);
+      auto [x363, x364] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][49 * steps + cycle];
@@ -1395,9 +1341,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x364);
         reg = x364;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x365 = host_outs.at(0);
-      auto x366 = host_outs.at(1);
+      auto [x365, x366] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][51 * steps + cycle];
@@ -1410,9 +1354,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x366);
         reg = x366;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x367 = host_outs.at(0);
-      auto x368 = host_outs.at(1);
+      auto [x367, x368] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][53 * steps + cycle];
@@ -1425,9 +1367,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x368);
         reg = x368;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x369 = host_outs.at(0);
-      auto x370 = host_outs.at(1);
+      auto [x369, x370] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][55 * steps + cycle];
@@ -1440,9 +1380,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x370);
         reg = x370;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x371 = host_outs.at(0);
-      auto x372 = host_outs.at(1);
+      auto [x371, x372] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][57 * steps + cycle];
@@ -1455,9 +1393,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x372);
         reg = x372;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x373 = host_outs.at(0);
-      auto x374 = host_outs.at(1);
+      auto [x373, x374] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][59 * steps + cycle];
@@ -1470,9 +1406,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x374);
         reg = x374;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x375 = host_outs.at(0);
-      auto x376 = host_outs.at(1);
+      auto [x375, x376] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][61 * steps + cycle];
@@ -1485,9 +1419,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x376);
         reg = x376;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x377 = host_outs.at(0);
-      auto x378 = host_outs.at(1);
+      auto [x377, x378] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][63 * steps + cycle];
@@ -1500,9 +1432,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x378);
         reg = x378;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x379 = host_outs.at(0);
-      auto x380 = host_outs.at(1);
+      auto [x379, x380] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][65 * steps + cycle];
@@ -1515,9 +1445,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x380);
         reg = x380;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x381 = host_outs.at(0);
-      auto x382 = host_outs.at(1);
+      auto [x381, x382] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][67 * steps + cycle];
@@ -1530,9 +1458,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x382);
         reg = x382;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x383 = host_outs.at(0);
-      auto x384 = host_outs.at(1);
+      auto [x383, x384] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][0 * steps + cycle];
@@ -2269,9 +2195,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
   }
   if (x6 != 0) {
     {
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x625 = host_outs.at(0);
-      auto x626 = host_outs.at(1);
+      auto [x625, x626] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][37 * steps + cycle];
@@ -2284,9 +2208,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x626);
         reg = x626;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x627 = host_outs.at(0);
-      auto x628 = host_outs.at(1);
+      auto [x627, x628] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][39 * steps + cycle];
@@ -2299,9 +2221,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x628);
         reg = x628;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x629 = host_outs.at(0);
-      auto x630 = host_outs.at(1);
+      auto [x629, x630] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][41 * steps + cycle];
@@ -2314,9 +2234,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x630);
         reg = x630;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x631 = host_outs.at(0);
-      auto x632 = host_outs.at(1);
+      auto [x631, x632] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][43 * steps + cycle];
@@ -2329,9 +2247,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x632);
         reg = x632;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x633 = host_outs.at(0);
-      auto x634 = host_outs.at(1);
+      auto [x633, x634] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][45 * steps + cycle];
@@ -2344,9 +2260,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x634);
         reg = x634;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x635 = host_outs.at(0);
-      auto x636 = host_outs.at(1);
+      auto [x635, x636] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][47 * steps + cycle];
@@ -2359,9 +2273,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x636);
         reg = x636;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x637 = host_outs.at(0);
-      auto x638 = host_outs.at(1);
+      auto [x637, x638] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][49 * steps + cycle];
@@ -2374,9 +2286,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x638);
         reg = x638;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x639 = host_outs.at(0);
-      auto x640 = host_outs.at(1);
+      auto [x639, x640] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][51 * steps + cycle];
@@ -2389,9 +2299,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x640);
         reg = x640;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x641 = host_outs.at(0);
-      auto x642 = host_outs.at(1);
+      auto [x641, x642] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][53 * steps + cycle];
@@ -2404,9 +2312,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x642);
         reg = x642;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x643 = host_outs.at(0);
-      auto x644 = host_outs.at(1);
+      auto [x643, x644] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][55 * steps + cycle];
@@ -2419,9 +2325,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x644);
         reg = x644;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x645 = host_outs.at(0);
-      auto x646 = host_outs.at(1);
+      auto [x645, x646] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][57 * steps + cycle];
@@ -2434,9 +2338,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x646);
         reg = x646;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x647 = host_outs.at(0);
-      auto x648 = host_outs.at(1);
+      auto [x647, x648] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][59 * steps + cycle];
@@ -2449,9 +2351,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x648);
         reg = x648;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x649 = host_outs.at(0);
-      auto x650 = host_outs.at(1);
+      auto [x649, x650] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][61 * steps + cycle];
@@ -2464,9 +2364,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x650);
         reg = x650;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x651 = host_outs.at(0);
-      auto x652 = host_outs.at(1);
+      auto [x651, x652] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][63 * steps + cycle];
@@ -2479,9 +2377,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x652);
         reg = x652;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x653 = host_outs.at(0);
-      auto x654 = host_outs.at(1);
+      auto [x653, x654] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][65 * steps + cycle];
@@ -2494,9 +2390,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x654);
         reg = x654;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x655 = host_outs.at(0);
-      auto x656 = host_outs.at(1);
+      auto [x655, x656] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][67 * steps + cycle];
@@ -2509,9 +2403,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x656);
         reg = x656;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x657 = host_outs.at(0);
-      auto x658 = host_outs.at(1);
+      auto [x657, x658] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][0 * steps + cycle];
@@ -3248,9 +3140,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
   }
   if (x7 != 0) {
     {
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x899 = host_outs.at(0);
-      auto x900 = host_outs.at(1);
+      auto [x899, x900] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][37 * steps + cycle];
@@ -3263,9 +3153,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x900);
         reg = x900;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x901 = host_outs.at(0);
-      auto x902 = host_outs.at(1);
+      auto [x901, x902] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][39 * steps + cycle];
@@ -3278,9 +3166,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x902);
         reg = x902;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x903 = host_outs.at(0);
-      auto x904 = host_outs.at(1);
+      auto [x903, x904] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][41 * steps + cycle];
@@ -3293,9 +3179,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x904);
         reg = x904;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x905 = host_outs.at(0);
-      auto x906 = host_outs.at(1);
+      auto [x905, x906] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][43 * steps + cycle];
@@ -3308,9 +3192,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x906);
         reg = x906;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x907 = host_outs.at(0);
-      auto x908 = host_outs.at(1);
+      auto [x907, x908] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][45 * steps + cycle];
@@ -3323,9 +3205,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x908);
         reg = x908;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x909 = host_outs.at(0);
-      auto x910 = host_outs.at(1);
+      auto [x909, x910] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][47 * steps + cycle];
@@ -3338,9 +3218,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x910);
         reg = x910;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x911 = host_outs.at(0);
-      auto x912 = host_outs.at(1);
+      auto [x911, x912] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][49 * steps + cycle];
@@ -3353,9 +3231,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x912);
         reg = x912;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x913 = host_outs.at(0);
-      auto x914 = host_outs.at(1);
+      auto [x913, x914] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][51 * steps + cycle];
@@ -3368,9 +3244,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x914);
         reg = x914;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x915 = host_outs.at(0);
-      auto x916 = host_outs.at(1);
+      auto [x915, x916] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][53 * steps + cycle];
@@ -3383,9 +3257,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x916);
         reg = x916;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x917 = host_outs.at(0);
-      auto x918 = host_outs.at(1);
+      auto [x917, x918] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][55 * steps + cycle];
@@ -3398,9 +3270,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x918);
         reg = x918;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x919 = host_outs.at(0);
-      auto x920 = host_outs.at(1);
+      auto [x919, x920] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][57 * steps + cycle];
@@ -3413,9 +3283,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x920);
         reg = x920;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x921 = host_outs.at(0);
-      auto x922 = host_outs.at(1);
+      auto [x921, x922] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][59 * steps + cycle];
@@ -3428,9 +3296,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x922);
         reg = x922;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x923 = host_outs.at(0);
-      auto x924 = host_outs.at(1);
+      auto [x923, x924] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][61 * steps + cycle];
@@ -3443,9 +3309,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x924);
         reg = x924;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x925 = host_outs.at(0);
-      auto x926 = host_outs.at(1);
+      auto [x925, x926] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][63 * steps + cycle];
@@ -3458,9 +3322,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x926);
         reg = x926;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x927 = host_outs.at(0);
-      auto x928 = host_outs.at(1);
+      auto [x927, x928] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][65 * steps + cycle];
@@ -3473,9 +3335,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x928);
         reg = x928;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x929 = host_outs.at(0);
-      auto x930 = host_outs.at(1);
+      auto [x929, x930] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][67 * steps + cycle];
@@ -3488,9 +3348,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x930);
         reg = x930;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x931 = host_outs.at(0);
-      auto x932 = host_outs.at(1);
+      auto [x931, x932] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][0 * steps + cycle];
@@ -4227,9 +4085,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
   }
   if (x8 != 0) {
     {
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x1173 = host_outs.at(0);
-      auto x1174 = host_outs.at(1);
+      auto [x1173, x1174] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][37 * steps + cycle];
@@ -4242,9 +4098,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x1174);
         reg = x1174;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x1175 = host_outs.at(0);
-      auto x1176 = host_outs.at(1);
+      auto [x1175, x1176] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][39 * steps + cycle];
@@ -4257,9 +4111,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x1176);
         reg = x1176;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x1177 = host_outs.at(0);
-      auto x1178 = host_outs.at(1);
+      auto [x1177, x1178] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][41 * steps + cycle];
@@ -4272,9 +4124,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x1178);
         reg = x1178;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x1179 = host_outs.at(0);
-      auto x1180 = host_outs.at(1);
+      auto [x1179, x1180] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][43 * steps + cycle];
@@ -4287,9 +4137,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x1180);
         reg = x1180;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x1181 = host_outs.at(0);
-      auto x1182 = host_outs.at(1);
+      auto [x1181, x1182] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][45 * steps + cycle];
@@ -4302,9 +4150,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x1182);
         reg = x1182;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x1183 = host_outs.at(0);
-      auto x1184 = host_outs.at(1);
+      auto [x1183, x1184] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][47 * steps + cycle];
@@ -4317,9 +4163,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x1184);
         reg = x1184;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x1185 = host_outs.at(0);
-      auto x1186 = host_outs.at(1);
+      auto [x1185, x1186] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][49 * steps + cycle];
@@ -4332,9 +4176,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x1186);
         reg = x1186;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x1187 = host_outs.at(0);
-      auto x1188 = host_outs.at(1);
+      auto [x1187, x1188] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][51 * steps + cycle];
@@ -4347,9 +4189,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x1188);
         reg = x1188;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x1189 = host_outs.at(0);
-      auto x1190 = host_outs.at(1);
+      auto [x1189, x1190] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][53 * steps + cycle];
@@ -4362,9 +4202,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x1190);
         reg = x1190;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x1191 = host_outs.at(0);
-      auto x1192 = host_outs.at(1);
+      auto [x1191, x1192] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][55 * steps + cycle];
@@ -4377,9 +4215,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x1192);
         reg = x1192;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x1193 = host_outs.at(0);
-      auto x1194 = host_outs.at(1);
+      auto [x1193, x1194] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][57 * steps + cycle];
@@ -4392,9 +4228,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x1194);
         reg = x1194;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x1195 = host_outs.at(0);
-      auto x1196 = host_outs.at(1);
+      auto [x1195, x1196] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][59 * steps + cycle];
@@ -4407,9 +4241,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x1196);
         reg = x1196;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x1197 = host_outs.at(0);
-      auto x1198 = host_outs.at(1);
+      auto [x1197, x1198] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][61 * steps + cycle];
@@ -4422,9 +4254,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x1198);
         reg = x1198;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x1199 = host_outs.at(0);
-      auto x1200 = host_outs.at(1);
+      auto [x1199, x1200] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][63 * steps + cycle];
@@ -4437,9 +4267,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x1200);
         reg = x1200;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x1201 = host_outs.at(0);
-      auto x1202 = host_outs.at(1);
+      auto [x1201, x1202] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][65 * steps + cycle];
@@ -4452,9 +4280,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x1202);
         reg = x1202;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x1203 = host_outs.at(0);
-      auto x1204 = host_outs.at(1);
+      auto [x1203, x1204] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][67 * steps + cycle];
@@ -4467,9 +4293,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x1204);
         reg = x1204;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x1205 = host_outs.at(0);
-      auto x1206 = host_outs.at(1);
+      auto [x1205, x1206] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][0 * steps + cycle];
@@ -5206,9 +5030,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
   }
   if (x9 != 0) {
     {
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x1447 = host_outs.at(0);
-      auto x1448 = host_outs.at(1);
+      auto [x1447, x1448] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][37 * steps + cycle];
@@ -5221,9 +5043,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x1448);
         reg = x1448;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x1449 = host_outs.at(0);
-      auto x1450 = host_outs.at(1);
+      auto [x1449, x1450] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][39 * steps + cycle];
@@ -5236,9 +5056,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x1450);
         reg = x1450;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x1451 = host_outs.at(0);
-      auto x1452 = host_outs.at(1);
+      auto [x1451, x1452] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][41 * steps + cycle];
@@ -5251,9 +5069,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x1452);
         reg = x1452;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x1453 = host_outs.at(0);
-      auto x1454 = host_outs.at(1);
+      auto [x1453, x1454] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][43 * steps + cycle];
@@ -5266,9 +5082,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x1454);
         reg = x1454;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x1455 = host_outs.at(0);
-      auto x1456 = host_outs.at(1);
+      auto [x1455, x1456] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][45 * steps + cycle];
@@ -5281,9 +5095,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x1456);
         reg = x1456;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x1457 = host_outs.at(0);
-      auto x1458 = host_outs.at(1);
+      auto [x1457, x1458] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][47 * steps + cycle];
@@ -5296,9 +5108,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x1458);
         reg = x1458;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x1459 = host_outs.at(0);
-      auto x1460 = host_outs.at(1);
+      auto [x1459, x1460] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][49 * steps + cycle];
@@ -5311,9 +5121,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x1460);
         reg = x1460;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x1461 = host_outs.at(0);
-      auto x1462 = host_outs.at(1);
+      auto [x1461, x1462] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][51 * steps + cycle];
@@ -5326,9 +5134,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x1462);
         reg = x1462;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x1463 = host_outs.at(0);
-      auto x1464 = host_outs.at(1);
+      auto [x1463, x1464] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][53 * steps + cycle];
@@ -5341,9 +5147,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x1464);
         reg = x1464;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x1465 = host_outs.at(0);
-      auto x1466 = host_outs.at(1);
+      auto [x1465, x1466] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][55 * steps + cycle];
@@ -5356,9 +5160,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x1466);
         reg = x1466;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x1467 = host_outs.at(0);
-      auto x1468 = host_outs.at(1);
+      auto [x1467, x1468] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][57 * steps + cycle];
@@ -5371,9 +5173,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x1468);
         reg = x1468;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x1469 = host_outs.at(0);
-      auto x1470 = host_outs.at(1);
+      auto [x1469, x1470] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][59 * steps + cycle];
@@ -5386,9 +5186,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x1470);
         reg = x1470;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x1471 = host_outs.at(0);
-      auto x1472 = host_outs.at(1);
+      auto [x1471, x1472] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][61 * steps + cycle];
@@ -5401,9 +5199,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x1472);
         reg = x1472;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x1473 = host_outs.at(0);
-      auto x1474 = host_outs.at(1);
+      auto [x1473, x1474] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][63 * steps + cycle];
@@ -5416,9 +5212,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x1474);
         reg = x1474;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x1475 = host_outs.at(0);
-      auto x1476 = host_outs.at(1);
+      auto [x1475, x1476] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][65 * steps + cycle];
@@ -5431,9 +5225,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x1476);
         reg = x1476;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x1477 = host_outs.at(0);
-      auto x1478 = host_outs.at(1);
+      auto [x1477, x1478] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][67 * steps + cycle];
@@ -5446,9 +5238,7 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
         assert(reg == Fp::invalid() || reg == x1478);
         reg = x1478;
       }
-      host(ctx, "plonkRead", "bytes", host_args.data(), 0, host_outs.data(), 2);
-      auto x1479 = host_outs.at(0);
-      auto x1480 = host_outs.at(1);
+      auto [x1479, x1480] = extern_plonkRead_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/bytes.cpp":16:0)
       {
         auto& reg = args[2][0 * steps + cycle];
