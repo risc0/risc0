@@ -1,6 +1,6 @@
 "use client";
 
-import { createColumnHelper } from "@tanstack/react-table";
+import { type ColumnDef, createColumnHelper } from "@tanstack/react-table";
 import { TableColumnHeader } from "shared/client/table/table-column-header";
 import { formatBytes } from "shared/utils/format-bytes";
 import { formatDuration } from "shared/utils/format-duration";
@@ -44,4 +44,4 @@ export const datasheetTableColumns = [
       <div className="font-mono">{formatHz(row.getValue("throughput") ?? row.getValue("speed")) ?? "-"}</div>
     ),
   },
-];
+] as ColumnDef<DatasheetTableSchema, unknown>[];
