@@ -63,6 +63,7 @@ struct Args {
 
 #[derive(Eq, PartialEq, Subcommand, Sequence)]
 enum Command {
+    Execute,
     Composite,
     Lift,
     Join,
@@ -106,6 +107,7 @@ impl Datasheet {
 
     fn run_cmd(&mut self, cmd: Command) {
         match cmd {
+            Command::Execute => self.execute(),
             Command::Composite => self.composite(),
             Command::Lift => self.lift(),
             Command::Join => self.join(),
@@ -116,6 +118,31 @@ impl Datasheet {
             #[cfg(all(target_arch = "x86_64", feature = "docker"))]
             Command::Compact => self.compact(),
         }
+    }
+
+    fn execute(&mut self) {
+        let env = ExecutorEnv::builder()
+            .write(&SpecWithIters(BenchmarkSpec::SimpleLoop, 128 * 1024))
+            .unwrap()
+            .build()
+            .unwrap();
+
+        let mut exec = ExecutorImpl::from_elf(env, BENCH_ELF).unwrap();
+
+        let start = Instant::now();
+        let session = exec.run().unwrap();
+        let duration = start.elapsed();
+
+        let throughput = (session.user_cycles as f32) / duration.as_secs_f32();
+        self.results.push(PerformanceData {
+            name: "execute".into(),
+            hashfn: "N/A".into(),
+            cycles: session.user_cycles,
+            duration,
+            ram: 0,
+            seal: 0,
+            throughput,
+        });
     }
 
     fn composite(&mut self) {
