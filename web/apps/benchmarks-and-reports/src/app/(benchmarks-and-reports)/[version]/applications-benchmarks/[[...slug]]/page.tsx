@@ -13,7 +13,7 @@ import { FILENAMES_TO_TITLES } from "./_utils/constants";
 
 export function generateMetadata({ params }) {
   // read route params to generate metadata
-  const slug = params.slug[0] ?? "";
+  const slug = params.slug?.[0] ?? "";
   const slugLabel = Object.values(pick(FILENAMES_TO_TITLES, `${slug}.csv`))[0];
 
   return {
