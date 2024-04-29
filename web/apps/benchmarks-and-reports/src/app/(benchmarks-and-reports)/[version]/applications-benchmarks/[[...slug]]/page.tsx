@@ -1,6 +1,6 @@
 import { Separator } from "@risc0/ui/separator";
 import { Tabs, TabsList, TabsTrigger } from "@risc0/ui/tabs";
-import type { Metadata } from "next";
+import pick from "lodash-es/pick";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
@@ -11,19 +11,25 @@ import ApplicationsBenchmarksCommitHashButton from "./_components/applications-b
 import ApplicationsBenchmarksContent from "./_components/applications-benchmarks-content";
 import { FILENAMES_TO_TITLES } from "./_utils/constants";
 
-export const metadata: Metadata = {
-  title: "Applications Benchmark",
-  description: APPLICATIONS_BENCHMARKS_DESCRIPTION,
-  openGraph: {
-    images: [
-      {
-        url: `https://benchmarks.risczero.com/api/og?title=Applications%20Benchmark&description=${encodeURIComponent(
-          APPLICATIONS_BENCHMARKS_DESCRIPTION,
-        )}`,
-      },
-    ],
-  },
-};
+export function generateMetadata({ params }) {
+  // read route params to generate metadata
+  const slug = params.slug[0] ?? "";
+  const slugLabel = Object.values(pick(FILENAMES_TO_TITLES, `${slug}.csv`))[0];
+
+  return {
+    title: `${slugLabel} | Applications Benchmark`,
+    description: APPLICATIONS_BENCHMARKS_DESCRIPTION,
+    openGraph: {
+      images: [
+        {
+          url: `https://reports-and-benchmarks-risczero.vercel.app/api/og?title=Applications%20Benchmark&description=${encodeURIComponent(
+            APPLICATIONS_BENCHMARKS_DESCRIPTION,
+          )}`,
+        },
+      ],
+    },
+  };
+}
 
 export default function ApplicationsBenchmarksPage({ params }) {
   if (!params.slug) {
