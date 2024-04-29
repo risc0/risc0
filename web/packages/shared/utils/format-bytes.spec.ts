@@ -9,28 +9,28 @@ describe('formatBytes', () => {
   });
 
   it('should return bytes correctly', () => {
-    expect(formatBytes(1)).toBe('1.00B');
-    expect(formatBytes(0)).toBe('0.00B');
+    expect(formatBytes(1)).toBe('1.00 B');
+    expect(formatBytes(0)).toBe('0.00 B');
   });
 
   it('should return kilobytes correctly', () => {
-    expect(formatBytes(1024)).toBe('1.00KB');
+    expect(formatBytes(1024)).toBe('1.00 KB');
   });
 
   it('should return megabytes correctly', () => {
-    expect(formatBytes(1024 * 1024)).toBe('1.00MB');
+    expect(formatBytes(1024 * 1024)).toBe('1.00 MB');
   });
 
   it('should return gigabytes correctly', () => {
-    expect(formatBytes(1024 * 1024 * 1024)).toBe('1.00GB');
+    expect(formatBytes(1024 * 1024 * 1024)).toBe('1.00 GB');
   });
 
   it('should return terabytes correctly', () => {
-    expect(formatBytes(1024 * 1024 * 1024 * 1024)).toBe('1.00TB');
+    expect(formatBytes(1024 * 1024 * 1024 * 1024)).toBe('1.00 TB');
   });
 
   it('should return the correct value for non-exact sizes', () => {
-    expect(formatBytes(1500)).toBe('1.46KB');
-    expect(formatBytes(1500 * 1024)).toBe('1.46MB');
+    expect(formatBytes(1500)).toBe('1.46 KB');
+    expect(formatBytes(1500 * 1024)).toBe('1.46 MB');
   });
 });

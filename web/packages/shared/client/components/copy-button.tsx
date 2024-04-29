@@ -1,8 +1,8 @@
 "use client";
 
 import { Button, type ButtonProps } from "@risc0/ui/button";
+import { setClipboard } from "@risc0/ui/utils/set-clipboard";
 import { CopyIcon } from "lucide-react";
-import { setClipboard } from "../../utils/setClipboard";
 
 type CopyButtonProps = ButtonProps & {
   value: string;
