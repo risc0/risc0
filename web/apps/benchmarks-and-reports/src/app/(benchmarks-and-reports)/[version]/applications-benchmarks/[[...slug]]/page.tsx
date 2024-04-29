@@ -17,7 +17,7 @@ export function generateMetadata({ params }) {
   const slugLabel = Object.values(pick(FILENAMES_TO_TITLES, `${slug}.csv`))[0];
 
   return {
-    title: `${slugLabel} | Applications Benchmark`,
+    title: `${slugLabel ? `${slugLabel} | ` : ""}Applications Benchmark`,
     description: APPLICATIONS_BENCHMARKS_DESCRIPTION,
     openGraph: {
       images: [
