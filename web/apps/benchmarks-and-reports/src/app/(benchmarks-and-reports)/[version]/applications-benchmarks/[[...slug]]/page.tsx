@@ -32,13 +32,15 @@ export function generateMetadata({ params }) {
 }
 
 export default function ApplicationsBenchmarksPage({ params }) {
+  console.log("PARAMS", params);
   if (!params.slug) {
-    redirect(
-      `/${params.version}/applications-benchmarks/${
-        // biome-ignore lint/style/noNonNullAssertion: ignore
-        replace(Object.keys(FILENAMES_TO_TITLES)[0]!, ".csv", "")
-      }`,
-    );
+    console.log("HERE???");
+    const redirectUrl = `/${params.version}/applications-benchmarks/${
+      // biome-ignore lint/style/noNonNullAssertion: ignore
+      replace(Object.keys(FILENAMES_TO_TITLES)[0]!, ".csv", "")
+    }`;
+    console.log("redirectUrl???", redirectUrl);
+    redirect(redirectUrl);
   }
 
   return (
