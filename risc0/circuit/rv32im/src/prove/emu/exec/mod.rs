@@ -57,6 +57,11 @@ use crate::{
 
 pub const DEFAULT_SEGMENT_LIMIT_PO2: usize = 20;
 
+// Segments can either be stored in ram or on disk.
+// This value specifies the amount of segments that should be stored in ram
+// before switching to disk in order to avoid depleting memory.
+pub const DEFAULT_SEGMENT_RAM_STORAGE_LIMIT: u32 = 64;
+
 /// A host-side implementation of a system call.
 pub trait Syscall {
     /// Invokes the system call.

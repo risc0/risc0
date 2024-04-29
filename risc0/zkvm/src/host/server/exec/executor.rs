@@ -20,7 +20,7 @@ use risc0_circuit_rv32im::prove::emu::{
     addr::ByteAddr,
     exec::{
         Executor, Syscall as NewSyscall, SyscallContext as NewSyscallContext,
-        DEFAULT_SEGMENT_LIMIT_PO2,
+        DEFAULT_SEGMENT_LIMIT_PO2, DEFAULT_SEGMENT_RAM_STORAGE_LIMIT,
     },
 };
 use risc0_zkp::core::digest::Digest;

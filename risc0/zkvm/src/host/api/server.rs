@@ -22,6 +22,7 @@ use std::{
 use anyhow::{anyhow, bail, Result};
 use bytes::Bytes;
 use prost::Message;
+use risc0_circuit_rv32im::prove::emu::exec::DEFAULT_SEGMENT_RAM_STORAGE_LIMIT;
 use tempfile::tempdir;
 
 use super::{malformed_err, path_to_string, pb, ConnectionWrapper, Connector, TcpConnector};
@@ -29,7 +30,7 @@ use crate::{
     get_prover_server, get_version,
     host::{
         client::env::SegmentPath, client::slice_io::SliceIo, recursion::SuccinctReceipt,
-        server::exec::executor::DEFAULT_SEGMENT_RAM_STORAGE_LIMIT, server::session::NullSegmentRef,
+        server::session::NullSegmentRef,
     },
     receipt_claim::{MaybePruned, ReceiptClaim},
     ExecutorEnv, ExecutorImpl, ProverOpts, Receipt, Segment, SegmentReceipt, TraceCallback,
