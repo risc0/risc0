@@ -7,9 +7,9 @@ import { Skeleton } from "@risc0/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@risc0/ui/tabs";
 import { DownloadIcon } from "lucide-react";
 import Script from "next/script";
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { type FormattedDataSetEntry, collectBenchesPerTestCase } from "../_utils/collect-benches-per-test-case";
-import { renderBenchSet } from "../_utils/render-bench-set";
+import { renderGraph } from "../_utils/render-graph";
 import { ChartsList } from "./charts-list";
 
 export function Charts() {
@@ -62,11 +62,6 @@ export function Charts() {
     }));
 
     setBenchSet(dataset);
-
-    for (const { name, dataSet } of dataset) {
-      // biome-ignore lint/style/noNonNullAssertion: ignore
-      renderBenchSet({ platformName: name, benchSet: dataSet, main: document.getElementById(`chart-${name}`)! });
-    }
   }, [names]);
 
   if (!mounted) {
@@ -115,9 +110,31 @@ export function Charts() {
             </div>
 
             <div className="w-full">
-              {names.map((name) => (
-                <TabsContent tabIndex={-1} id={`chart-${name}`} key={name} value={name} />
-              ))}
+              {benchSet &&
+                names.map((name) => (
+                  <TabsContent tabIndex={-1} id={`chart-${name}`} key={name} value={name}>
+                    {benchSet.map(({ name: platformName, dataSet }, index) => {
+                      return (
+                        <Fragment
+                          // biome-ignore lint/suspicious/noArrayIndexKey: ignore
+                          key={`${platformName}-${index}`}
+                        >
+                          {platformName === name && (
+                            <div className="mt-6 flex flex-row flex-wrap gap-10 [&>*]:tracking-normal dark:invert">
+                              {Array.from(dataSet, ([key, value]) =>
+                                renderGraph({
+                                  platformName,
+                                  benchName: key,
+                                  dataset: value,
+                                }),
+                              )}
+                            </div>
+                          )}
+                        </Fragment>
+                      );
+                    })}
+                  </TabsContent>
+                ))}
             </div>
           </div>
         </Tabs>
