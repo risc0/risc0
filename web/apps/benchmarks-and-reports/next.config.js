@@ -27,6 +27,11 @@ let config = {
         destination: latestVersion ? `/${latestVersion}` : "/",
         permanent: true,
       },
+      {
+        source: "/:version/applications-benchmarks",
+        destination: "/:version/applications-benchmarks/macOS-apple_m2_pro", // TODO: make sure this is the right default
+        permanent: true,
+      },
     ];
   },
 };
