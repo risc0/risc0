@@ -265,7 +265,7 @@ impl Server {
             request: pb::api::ExecuteRequest,
         ) -> Result<pb::api::ServerReply> {
             let env_request = request.env.ok_or(malformed_err())?;
-            let mut env = build_env(&conn, &env_request)?;
+            let mut env = build_env(conn, &env_request)?;
 
             if env.segment_path.is_none() {
                 env.segment_path = Some(SegmentPath::TempDir(Arc::new(tempdir()?)));
