@@ -16,17 +16,17 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 
 use anyhow::Result;
 use rayon::prelude::*;
-use risc0_circuit_rv32im_sys::ffi::{
-    risc0_circuit_rv32im_context_alloc, risc0_circuit_rv32im_context_free, RawMemoryTransaction,
-    RawPreflightCycle, RawPreflightTrace, WrappedMachineContext,
-};
-use risc0_zkp::{adapter::CircuitStepContext, field::baby_bear::BabyBearElem, hal::cpu::SyncSlice};
+use risc0_circuit_rv32im_sys::ffi::{RawMemoryTransaction, RawPreflightCycle, RawPreflightTrace};
+use risc0_zkp::{field::baby_bear::BabyBearElem, hal::cpu::SyncSlice};
 
 use crate::{
-    prove::emu::{
-        addr::{ByteAddr, WordAddr},
-        mux::{Major, TopMux},
-        preflight::{Back, PreflightCycle, PreflightStage, PreflightTrace},
+    prove::{
+        emu::{
+            addr::{ByteAddr, WordAddr},
+            mux::{Major, TopMux},
+            preflight::{Back, PreflightCycle, PreflightStage, PreflightTrace},
+        },
+        hal::cpp::SyncMachineContext,
     },
     CIRCUIT,
 };
@@ -39,7 +39,7 @@ struct Injector<'a> {
 
 pub struct MachineContext {
     trace: PreflightTrace,
-    raw_machine_ctx: WrappedMachineContext,
+    raw_machine_ctx: SyncMachineContext,
     _raw_trace: Box<RawPreflightTrace>,
     _raw_cycles: Vec<RawPreflightCycle>,
     _raw_txns: Vec<RawMemoryTransaction>,
@@ -80,12 +80,6 @@ impl<'a> Injector<'a> {
         self.data
             .set(self.get_idx(117), (user_exit_code as u32).into()); // HaltCycle::userExitCode
         self.data.set(self.get_idx(118), write_addr.0.into()); // HaltCycle::writeAddr
-    }
-}
-
-impl Drop for MachineContext {
-    fn drop(&mut self) {
-        unsafe { risc0_circuit_rv32im_context_free(self.raw_machine_ctx.0) };
     }
 }
 
@@ -151,9 +145,7 @@ impl MachineContext {
             extras: _raw_extras.as_ptr(),
             is_trace,
         });
-        let raw_machine_ctx = WrappedMachineContext(unsafe {
-            risc0_circuit_rv32im_context_alloc(_raw_trace.as_ref(), steps)
-        });
+        let raw_machine_ctx = CIRCUIT.alloc_machine_ctx(_raw_trace.as_ref(), steps);
         nvtx::range_pop!();
 
         Self {
@@ -216,8 +208,7 @@ impl MachineContext {
     ) -> Result<BabyBearElem> {
         // let cur_cycle = self.get_cycle(cycle);
         // tracing::debug!("[{cycle}] {:?}", cur_cycle);
-        let ctx = CircuitStepContext { size: steps, cycle };
-        CIRCUIT.par_step_exec(&ctx, &self.raw_machine_ctx, args)
+        CIRCUIT.par_step_exec(steps, cycle, &self.raw_machine_ctx, args)
     }
 
     fn next_step_exec(
@@ -274,8 +265,7 @@ impl MachineContext {
     ) -> Result<BabyBearElem> {
         // let cur_cycle = self.get_cycle(cycle);
         // tracing::debug!("[{cycle}] {cur_cycle:?}");
-        let ctx = CircuitStepContext { size: steps, cycle };
-        CIRCUIT.par_step_verify_mem(&ctx, &self.raw_machine_ctx, args)
+        CIRCUIT.par_step_verify_mem(steps, cycle, &self.raw_machine_ctx, args)
     }
 
     fn is_verify_mem_par_safe(&self, cycle: usize) -> bool {
@@ -341,8 +331,7 @@ impl MachineContext {
         cycle: usize,
         args: &[SyncSlice<BabyBearElem>],
     ) -> Result<BabyBearElem> {
-        let ctx = CircuitStepContext { size: steps, cycle };
-        CIRCUIT.par_step_verify_bytes(&ctx, &self.raw_machine_ctx, args)
+        CIRCUIT.par_step_verify_bytes(steps, cycle, &self.raw_machine_ctx, args)
     }
 }
 

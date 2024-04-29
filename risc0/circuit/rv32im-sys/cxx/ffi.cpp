@@ -32,24 +32,6 @@ extern "C" void risc0_circuit_string_free(risc0_string* str) {
   delete str;
 }
 
-struct BridgeContext {
-  void* ctx;
-  Callback* callback;
-};
-
-void bridgeCallback(void* ctx,
-                    const char* name,
-                    const char* extra,
-                    const Fp* args_ptr,
-                    size_t args_len,
-                    Fp* outs_ptr,
-                    size_t outs_len) {
-  BridgeContext* bridgeCtx = reinterpret_cast<BridgeContext*>(ctx);
-  if (!bridgeCtx->callback(bridgeCtx->ctx, name, extra, args_ptr, args_len, outs_ptr, outs_len)) {
-    throw std::runtime_error("Host callback failure");
-  }
-}
-
 extern "C" uint32_t
 risc0_circuit_rv32im_step_exec(risc0_error* err, void* ctx, size_t steps, size_t cycle, Fp** args) {
   return ffi_wrap<uint32_t>(err, 0, [&] {
@@ -58,28 +40,20 @@ risc0_circuit_rv32im_step_exec(risc0_error* err, void* ctx, size_t steps, size_t
   });
 }
 
-extern "C" uint32_t risc0_circuit_rv32im_step_compute_accum(
-    risc0_error* err, void* ctx, Callback callback, size_t steps, size_t cycle, Fp** args_ptr) {
-  return ffi_wrap<uint32_t>(err, 0, [&] {
-    BridgeContext bridgeCtx{ctx, callback};
-    return circuit::rv32im::step_compute_accum(&bridgeCtx, bridgeCallback, steps, cycle, args_ptr)
-        .asRaw();
-  });
-}
-
-extern "C" uint32_t risc0_circuit_rv32im_step_verify_accum(
-    risc0_error* err, void* ctx, Callback callback, size_t steps, size_t cycle, Fp** args_ptr) {
-  return ffi_wrap<uint32_t>(err, 0, [&] {
-    BridgeContext bridgeCtx{ctx, callback};
-    return circuit::rv32im::step_verify_accum(&bridgeCtx, bridgeCallback, steps, cycle, args_ptr)
-        .asRaw();
-  });
-}
 extern "C" uint32_t risc0_circuit_rv32im_step_verify_bytes(
     risc0_error* err, void* ctx, size_t steps, size_t cycle, Fp** args) {
   return ffi_wrap<uint32_t>(err, 0, [&] {
     // printf("step_verify_bytes(%p, %lu, %lu, %p)\n", ctx, steps, cycle, args);
     return circuit::rv32im::step_verify_bytes(ctx, steps, cycle, args).asRaw();
+  });
+}
+
+extern "C" void risc0_circuit_rv32im_inject_ram_backs(
+    risc0_error* err, void* ctx, size_t steps, size_t cycle, Fp* data) {
+  ffi_wrap<uint32_t>(err, 0, [&] {
+    // printf("inject_ram_backs(%p, %lu, %lu, %p)\n", ctx, steps, cycle, data);
+    circuit::rv32im::inject_ram_backs(ctx, steps, cycle, data);
+    return 0;
   });
 }
 
@@ -91,6 +65,22 @@ extern "C" uint32_t risc0_circuit_rv32im_step_verify_mem(
   });
 }
 
+extern "C" uint32_t risc0_circuit_rv32im_step_compute_accum(
+    risc0_error* err, void* ctx, size_t steps, size_t cycle, Fp** args) {
+  return ffi_wrap<uint32_t>(err, 0, [&] {
+    // printf("step_compute_accum(%p, %lu, %lu, %p)\n", ctx, steps, cycle, args);
+    return circuit::rv32im::step_compute_accum(ctx, steps, cycle, args).asRaw();
+  });
+}
+
+extern "C" uint32_t risc0_circuit_rv32im_step_verify_accum(
+    risc0_error* err, void* ctx, size_t steps, size_t cycle, Fp** args) {
+  return ffi_wrap<uint32_t>(err, 0, [&] {
+    // printf("step_verify_accum(%p, %lu, %lu, %p)\n", ctx, steps, cycle, args);
+    return circuit::rv32im::step_verify_accum(ctx, steps, cycle, args).asRaw();
+  });
+}
+
 #if defined(__clang__)
 #pragma clang diagnostic ignored "-Wreturn-type-c-linkage"
 #endif
@@ -98,13 +88,4 @@ extern "C" uint32_t risc0_circuit_rv32im_step_verify_mem(
 extern "C" FpExt
 risc0_circuit_rv32im_poly_fp(size_t cycle, size_t steps, FpExt* poly_mix, Fp** args) {
   return circuit::rv32im::poly_fp(cycle, steps, poly_mix, args);
-}
-
-extern "C" void risc0_circuit_rv32im_inject_ram_backs(
-    risc0_error* err, void* ctx, size_t steps, size_t cycle, Fp* data) {
-  ffi_wrap<uint32_t>(err, 0, [&] {
-    // printf("inject_ram_backs(%p, %lu, %lu, %p)\n", ctx, steps, cycle, data);
-    circuit::rv32im::inject_ram_backs(ctx, steps, cycle, data);
-    return 0;
-  });
 }

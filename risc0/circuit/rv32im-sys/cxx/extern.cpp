@@ -16,6 +16,7 @@
 
 #include "ffi.h"
 #include "fp.h"
+#include "fpext.h"
 #include "vendor/nvtx3/nvtx3.hpp"
 #include "vendor/poolstl.hpp"
 
@@ -24,6 +25,9 @@
 #include <iostream>
 #include <stdexcept>
 #include <vector>
+
+using namespace risc0;
+using namespace risc0::circuit::rv32im;
 
 namespace risc0::circuit::rv32im {
 
@@ -80,6 +84,13 @@ struct MachineContext {
 
   void sortRam();
   void sortBytes();
+};
+
+struct AccumContext {
+  size_t steps;
+  std::array<std::vector<FpExt>, 2> pools;
+
+  void calcPrefixProducts();
 };
 
 void extern_halt(void* ctx, size_t cycle, const char* extra, std::array<Fp, 2> args) {
@@ -564,13 +575,52 @@ extern_plonkRead_bytes(void* ctx, size_t cycle, const char* extra, std::array<Fp
   return {Fp(twin >> 8 & 0xff), Fp(twin & 0xff)};
 }
 
+void extern_plonkWriteAccum_ram(void* ctx,
+                                size_t cycle,
+                                const char* extra,
+                                std::array<Fp, 4> args) {
+  // printf("plonkWriteAccumRam\n");
+  AccumContext* actx = static_cast<AccumContext*>(ctx);
+  actx->pools[0][cycle] = FpExt(args[0], args[1], args[2], args[3]);
+}
+
+void extern_plonkWriteAccum_bytes(void* ctx,
+                                  size_t cycle,
+                                  const char* extra,
+                                  std::array<Fp, 4> args) {
+  // printf("plonkWriteAccumBytes\n");
+  AccumContext* actx = static_cast<AccumContext*>(ctx);
+  actx->pools[1][cycle] = FpExt(args[0], args[1], args[2], args[3]);
+}
+
+void AccumContext::calcPrefixProducts() {
+  // printf("calcPrefixProducts\n");
+  for (size_t i = 1; i < steps; i++) {
+    pools[0][i] *= pools[0][i - 1];
+    pools[1][i] *= pools[1][i - 1];
+  }
+}
+
+std::array<Fp, 4>
+extern_plonkReadAccum_ram(void* ctx, size_t cycle, const char* extra, std::array<Fp, 0> args) {
+  // printf("plonkReadAccumRam\n");
+  AccumContext* actx = static_cast<AccumContext*>(ctx);
+  const FpExt& item = actx->pools[0][cycle];
+  return {item.elems[0], item.elems[1], item.elems[2], item.elems[3]};
+}
+
+std::array<Fp, 4>
+extern_plonkReadAccum_bytes(void* ctx, size_t cycle, const char* extra, std::array<Fp, 0> args) {
+  AccumContext* actx = static_cast<AccumContext*>(ctx);
+  const FpExt& item = actx->pools[1][cycle];
+  return {item.elems[0], item.elems[1], item.elems[2], item.elems[3]};
+}
+
 } // namespace risc0::circuit::rv32im
 
 extern "C" {
 
-using namespace risc0::circuit::rv32im;
-
-MachineContext* risc0_circuit_rv32im_context_alloc(PreflightTrace* trace, size_t steps) {
+MachineContext* risc0_circuit_rv32im_machine_context_alloc(PreflightTrace* trace, size_t steps) {
   MachineContext* ctx = new MachineContext;
   ctx->trace = trace;
   ctx->steps = steps;
@@ -581,7 +631,7 @@ MachineContext* risc0_circuit_rv32im_context_alloc(PreflightTrace* trace, size_t
   return ctx;
 }
 
-void risc0_circuit_rv32im_context_free(MachineContext* ctx) {
+void risc0_circuit_rv32im_machine_context_free(MachineContext* ctx) {
   delete ctx;
 }
 
@@ -595,6 +645,25 @@ void risc0_circuit_rv32im_sort_ram(risc0_error* err, MachineContext* ctx) {
 void risc0_circuit_rv32im_sort_bytes(risc0_error* err, MachineContext* ctx) {
   ffi_wrap<uint32_t>(err, 0, [&] {
     ctx->sortBytes();
+    return 0;
+  });
+}
+
+AccumContext* risc0_circuit_rv32im_accum_context_alloc(size_t steps) {
+  AccumContext* ctx = new AccumContext;
+  ctx->steps = steps;
+  ctx->pools[0].resize(steps, FpExt(1));
+  ctx->pools[1].resize(steps, FpExt(1));
+  return ctx;
+}
+
+void risc0_circuit_rv32im_accum_context_free(AccumContext* ctx) {
+  delete ctx;
+}
+
+void risc0_circuit_rv32im_calc_prefix_products(risc0_error* err, AccumContext* ctx) {
+  ffi_wrap<uint32_t>(err, 0, [&] {
+    ctx->calcPrefixProducts();
     return 0;
   });
 }

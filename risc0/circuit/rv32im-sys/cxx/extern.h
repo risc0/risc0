@@ -70,12 +70,12 @@ extern_syscallBody(void* ctx, size_t cycle, const char* extra, std::array<Fp, 0>
 std::array<Fp, 8>
 extern_syscallFini(void* ctx, size_t cycle, const char* extra, std::array<Fp, 0> args);
 
-void extern_plonkWriteAccum_ram(void* ctx, size_t cycle, const char* extra, std::array<Fp, 0> args);
+void extern_plonkWriteAccum_ram(void* ctx, size_t cycle, const char* extra, std::array<Fp, 4> args);
 
 void extern_plonkWriteAccum_bytes(void* ctx,
                                   size_t cycle,
                                   const char* extra,
-                                  std::array<Fp, 0> args);
+                                  std::array<Fp, 4> args);
 
 std::array<Fp, 4>
 extern_plonkReadAccum_ram(void* ctx, size_t cycle, const char* extra, std::array<Fp, 0> args);

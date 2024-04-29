@@ -12,27 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{
-    ffi::CStr,
-    os::raw::{c_char, c_void},
-    slice,
-};
+use std::os::raw::c_char;
 
 use risc0_core::field::baby_bear::{BabyBearElem, BabyBearExtElem};
 
-pub type Callback = unsafe extern "C" fn(
-    ctx: *mut c_void,
-    name: *const c_char,
-    extra: *const c_char,
-    args_ptr: *const BabyBearElem,
-    args_len: usize,
-    outs_ptr: *mut BabyBearElem,
-    outs_len: usize,
-) -> bool;
-
 pub enum RawString {}
+pub enum RawAccumContext {}
 pub enum RawMachineContext {}
-pub struct WrappedMachineContext(pub *const RawMachineContext);
 
 #[repr(C)]
 pub struct RawError {
@@ -63,7 +49,6 @@ pub struct RawPreflightTrace {
 }
 
 unsafe impl Sync for RawPreflightTrace {}
-unsafe impl Sync for WrappedMachineContext {}
 
 impl Default for RawError {
     fn default() -> Self {
@@ -78,12 +63,16 @@ extern "C" {
 
     pub fn risc0_circuit_string_free(str: *const RawString);
 
-    pub fn risc0_circuit_rv32im_context_alloc(
+    pub fn risc0_circuit_rv32im_machine_context_alloc(
         trace: *const RawPreflightTrace,
         steps: usize,
     ) -> *const RawMachineContext;
 
-    pub fn risc0_circuit_rv32im_context_free(ctx: *const RawMachineContext);
+    pub fn risc0_circuit_rv32im_machine_context_free(ctx: *const RawMachineContext);
+
+    pub fn risc0_circuit_rv32im_accum_context_alloc(steps: usize) -> *const RawAccumContext;
+
+    pub fn risc0_circuit_rv32im_accum_context_free(ctx: *const RawAccumContext);
 
     pub fn risc0_circuit_rv32im_step_exec(
         err: *mut RawError,
@@ -98,7 +87,7 @@ extern "C" {
         ctx: *const RawMachineContext,
         steps: usize,
         cycle: usize,
-        args_ptr: *const *mut BabyBearElem,
+        args: *const *mut BabyBearElem,
     ) -> BabyBearElem;
 
     pub fn risc0_circuit_rv32im_step_verify_bytes(
@@ -106,7 +95,7 @@ extern "C" {
         ctx: *const RawMachineContext,
         steps: usize,
         cycle: usize,
-        args_ptr: *const *mut BabyBearElem,
+        args: *const *mut BabyBearElem,
     ) -> BabyBearElem;
 
     pub fn risc0_circuit_rv32im_sort_ram(err: *mut RawError, ctx: *const RawMachineContext);
@@ -123,20 +112,23 @@ extern "C" {
 
     pub fn risc0_circuit_rv32im_step_compute_accum(
         err: *mut RawError,
-        ctx: *mut c_void,
-        cb: Callback,
+        ctx: *const RawAccumContext,
         steps: usize,
         cycle: usize,
-        args_ptr: *const *mut BabyBearElem,
+        args: *const *mut BabyBearElem,
     ) -> BabyBearElem;
+
+    pub fn risc0_circuit_rv32im_calc_prefix_products(
+        err: *mut RawError,
+        ctx: *const RawAccumContext,
+    );
 
     pub fn risc0_circuit_rv32im_step_verify_accum(
         err: *mut RawError,
-        ctx: *mut c_void,
-        cb: Callback,
+        ctx: *const RawAccumContext,
         steps: usize,
         cycle: usize,
-        args_ptr: *const *mut BabyBearElem,
+        args: *const *mut BabyBearElem,
     ) -> BabyBearElem;
 
     pub fn risc0_circuit_rv32im_poly_fp(
@@ -145,33 +137,4 @@ extern "C" {
         poly_mix: *const BabyBearExtElem,
         args: *const *const BabyBearElem,
     ) -> BabyBearExtElem;
-}
-
-pub fn get_trampoline<F>(_closure: &F) -> Callback
-where
-    F: FnMut(&str, &str, &[BabyBearElem], &mut [BabyBearElem]) -> bool,
-{
-    trampoline::<F>
-}
-
-extern "C" fn trampoline<F>(
-    ctx: *mut c_void,
-    name: *const c_char,
-    extra: *const c_char,
-    args_ptr: *const BabyBearElem,
-    args_len: usize,
-    outs_ptr: *mut BabyBearElem,
-    outs_len: usize,
-) -> bool
-where
-    F: FnMut(&str, &str, &[BabyBearElem], &mut [BabyBearElem]) -> bool,
-{
-    unsafe {
-        let name = CStr::from_ptr(name).to_str().unwrap();
-        let extra = CStr::from_ptr(extra).to_str().unwrap();
-        let args = slice::from_raw_parts(args_ptr, args_len);
-        let outs = slice::from_raw_parts_mut(outs_ptr, outs_len);
-        let callback = &mut *(ctx as *mut F);
-        callback(name, extra, args, outs)
-    }
 }
