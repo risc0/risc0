@@ -14,6 +14,7 @@
 
 use std::{
     cell::RefCell,
+    env,
     hint::black_box,
     path::PathBuf,
     time::{Duration, Instant},
@@ -191,6 +192,14 @@ impl<'a> Bencher<'a> {
     }
 }
 
+pub fn hotbench_main() {
+    if env::var("RISC0_HOTBENCH_LOG").is_ok() {
+        tracing_subscriber::fmt()
+            .with_env_filter(tracing_subscriber::filter::EnvFilter::from_default_env())
+            .init();
+    }
+}
+
 #[macro_export]
 macro_rules! benchmark_group {
     ($name:ident, $($function:path),+ $(,)*) => {
@@ -208,6 +217,7 @@ macro_rules! benchmark_group {
 macro_rules! benchmark_main {
     ($($group:path),+) => {
         fn main() {
+            $crate::hotbench_main();
             $(
                 $group();
             )+

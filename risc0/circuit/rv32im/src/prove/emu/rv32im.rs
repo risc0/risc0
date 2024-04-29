@@ -67,6 +67,7 @@ pub trait EmuContext {
     }
 }
 
+#[derive(Default)]
 pub struct Emulator {
     table: FastDecodeTable,
 }
@@ -286,13 +287,19 @@ const RV32IM_ISA: InstructionTable = [
 // - Opcode: 7 bits
 // - Func3: 3 bits
 // - Func7: 7 bits
-// In many cases, func7 and/or func3 is ignored.  A stardard trick is to decode
+// In many cases, func7 and/or func3 is ignored.  A standard trick is to decode
 // via a table, but a 17 bit lookup table destroys L1 cache.  Luckily for us,
 // in practice the low 2 bits of opcode are always 11, so we can drop them, and
 // also func7 is always either 0, 1, 0x20 or don't care, so we can reduce func7
 // to 2 bits, which gets us to 10 bits, which is only 1k.
 struct FastDecodeTable {
     table: FastInstructionTable,
+}
+
+impl Default for FastDecodeTable {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl FastDecodeTable {
@@ -310,12 +317,10 @@ impl FastDecodeTable {
         // Map 0 -> 0, 1 -> 1, 0x20 -> 2, everything else to 3
         let func72bits = if func7 <= 1 {
             func7
+        } else if func7 == 0x20 {
+            2
         } else {
-            if func7 == 0x20 {
-                2
-            } else {
-                3
-            }
+            3
         };
         ((op_high << 5) | (func72bits << 3) | func3) as usize
     }

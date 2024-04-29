@@ -22,7 +22,6 @@ use std::{
 use anyhow::{anyhow, bail, Result};
 use bytes::Bytes;
 use prost::Message;
-use serde::{Deserialize, Serialize};
 use tempfile::tempdir;
 
 use super::{malformed_err, path_to_string, pb, ConnectionWrapper, Connector, TcpConnector};
@@ -176,7 +175,7 @@ impl TraceCallback for TraceProxy {
         let request = pb::api::ServerReply {
             kind: Some(pb::api::server_reply::Kind::Ok(pb::api::ClientCallback {
                 kind: Some(pb::api::client_callback::Kind::Io(pb::api::OnIoRequest {
-                    kind: Some(pb::api::on_io_request::Kind::Trace(event.try_into()?)),
+                    kind: Some(pb::api::on_io_request::Kind::Trace(event.into())),
                 })),
             })),
         };
@@ -249,7 +248,7 @@ impl Server {
             pb::api::server_request::Kind::Lift(request) => self.on_lift(conn, request),
             pb::api::server_request::Kind::Join(request) => self.on_join(conn, request),
             pb::api::server_request::Kind::Resolve(request) => self.on_resolve(conn, request),
-            pb::api::server_request::Kind::IdentiyP254(request) => {
+            pb::api::server_request::Kind::IdentityP254(request) => {
                 self.on_identity_p254(conn, request)
             }
         }
@@ -359,7 +358,7 @@ impl Server {
             request: pb::api::ProveRequest,
         ) -> Result<pb::api::ServerReply> {
             let env_request = request.env.ok_or(malformed_err())?;
-            let env = build_env(&conn, &env_request)?;
+            let env = build_env(conn, &env_request)?;
 
             let binary = env_request.binary.ok_or(malformed_err())?;
             let bytes = binary.as_bytes()?;
@@ -367,21 +366,21 @@ impl Server {
             let opts: ProverOpts = request.opts.ok_or(malformed_err())?.into();
             let prover = get_prover_server(&opts)?;
             let ctx = VerifierContext::default();
-            let receipt = prover.prove_with_ctx(env, &ctx, &bytes)?;
+            let prove_info = prover.prove_with_ctx(env, &ctx, &bytes)?;
 
-            let receipt_pb: pb::core::Receipt = receipt.into();
-            let receipt_bytes = receipt_pb.encode_to_vec();
+            let prove_info: pb::core::ProveInfo = prove_info.into();
+            let prove_info_bytes = prove_info.encode_to_vec();
             let asset = pb::api::Asset::from_bytes(
                 &request.receipt_out.ok_or(malformed_err())?,
-                receipt_bytes.into(),
-                "receipt.zkp",
+                prove_info_bytes.into(),
+                "prove_info.zkp",
             )?;
 
             Ok(pb::api::ServerReply {
                 kind: Some(pb::api::server_reply::Kind::Ok(pb::api::ClientCallback {
                     kind: Some(pb::api::client_callback::Kind::ProveDone(
                         pb::api::OnProveDone {
-                            receipt: Some(asset),
+                            prove_info: Some(asset),
                         },
                     )),
                 })),
@@ -622,19 +621,23 @@ fn build_env<'a>(
     }
     let proxy = SliceIoProxy::new(conn.try_clone()?);
     for name in request.slice_ios.iter() {
-        env_builder.slice_io(&name, proxy.try_clone()?);
+        env_builder.slice_io(name, proxy.try_clone()?);
     }
     if let Some(segment_limit_po2) = request.segment_limit_po2 {
         env_builder.segment_limit_po2(segment_limit_po2);
     }
     env_builder.session_limit(request.session_limit);
-    if let Some(_) = request.trace_events {
+    if request.trace_events.is_some() {
         let proxy = TraceProxy::new(conn.try_clone()?);
         env_builder.trace_callback(proxy);
     }
     if !request.pprof_out.is_empty() {
         env_builder.enable_profiler(Path::new(&request.pprof_out));
     }
+    if !request.segment_path.is_empty() {
+        env_builder.segment_path(Path::new(&request.segment_path));
+    }
+
     for assumption in request.assumptions.iter() {
         match assumption.kind.as_ref().ok_or(malformed_err())? {
             pb::api::assumption::Kind::Proven(asset) => {

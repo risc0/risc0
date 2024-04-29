@@ -22,7 +22,7 @@ use risc0_zkvm::{
     recursion::identity_p254,
     sha::{Digest, Digestible},
     stark_to_snark, CompactReceipt, ExecutorEnv, ExecutorImpl, InnerReceipt, ProverOpts, Receipt,
-    VerifierContext, ALLOWED_IDS_ROOT,
+    VerifierContext, ALLOWED_CONTROL_ROOT,
 };
 use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID};
 
@@ -129,7 +129,8 @@ fn bootstrap_control_id(risc0_ethereum_path: &Path) {
 
  library ControlID {
 "#;
-    let (control_id_0, control_id_1) = split_digest(Digest::from_hex(ALLOWED_IDS_ROOT).unwrap());
+    let (control_id_0, control_id_1) =
+        split_digest(Digest::from_hex(ALLOWED_CONTROL_ROOT).unwrap());
     let bn254_control_id = format!("0x{}", Bootstrap::generate_identity_bn254_control_id());
     let control_id_0 = format!("uint256 public constant CONTROL_ID_0 = {control_id_0};");
     let control_id_1 = format!("uint256 public constant CONTROL_ID_1 = {control_id_1};");
@@ -163,7 +164,7 @@ fn bootstrap_test_receipt(risc0_ethereum_path: &Path) {
     let seal = hex::encode(receipt.inner.compact().unwrap().seal.clone());
     let post_digest = format!(
         "0x{}",
-        hex::encode(receipt.get_claim().unwrap().post.digest().as_bytes())
+        hex::encode(receipt.claim().unwrap().post.digest().as_bytes())
     );
     let image_id = format!("0x{}", hex::encode(image_id.as_bytes()));
     let journal = hex::encode(receipt.journal.bytes);
@@ -215,10 +216,10 @@ fn generate_receipt() -> (Receipt, Digest) {
     let opts = ProverOpts::default();
     let ctx = VerifierContext::default();
     let prover = get_prover_server(&opts).unwrap();
-    let receipt = prover.prove_session(&ctx, &session).unwrap();
-    let claim = receipt.get_claim().unwrap();
+    let receipt = prover.prove_session(&ctx, &session).unwrap().receipt;
+    let claim = receipt.claim().unwrap();
     let composite_receipt = receipt.inner.composite().unwrap();
-    let succinct_receipt = prover.compress(composite_receipt).unwrap();
+    let succinct_receipt = prover.compsite_to_succinct(composite_receipt).unwrap();
     let journal = session.journal.unwrap().bytes;
 
     tracing::info!("identity_p254");

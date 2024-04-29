@@ -23,7 +23,9 @@ use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
 use self::{bonsai::BonsaiProver, external::ExternalProver};
-use crate::{is_dev_mode, ExecutorEnv, Receipt, SessionInfo, VerifierContext};
+use crate::{
+    host::prove_info::ProveInfo, is_dev_mode, ExecutorEnv, Receipt, SessionInfo, VerifierContext,
+};
 
 /// A Prover can execute a given ELF binary and produce a
 /// [Receipt] that can be used to verify correct computation.
@@ -61,7 +63,7 @@ pub trait Prover {
     fn get_name(&self) -> String;
 
     /// Prove zkVM execution starting from the specified ELF binary.
-    fn prove(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<Receipt> {
+    fn prove(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<ProveInfo> {
         self.prove_with_ctx(
             env,
             &VerifierContext::default(),
@@ -78,7 +80,21 @@ pub trait Prover {
         ctx: &VerifierContext,
         elf: &[u8],
         opts: &ProverOpts,
-    ) -> Result<Receipt>;
+    ) -> Result<ProveInfo>;
+
+    /// Compress a [Receipt], guaranteeing that the resulting receipt is of constant size.
+    ///
+    /// Proving will, by default, produce a [CompositeReceipt](crate::CompositeReceipt), which
+    /// may contain an arbitrary number of receipts assembled into continuations and compositions.
+    /// Together, these receipts collectively prove a top-level
+    /// [ReceiptClaim](crate::ReceiptClaim). This function compresses all of the constituent
+    /// receipts of a [CompositeReceipt](crate::CompositeReceipt) into a single
+    /// [SuccinctReceipt](crate::SuccinctReceipt) that proves the same top-level claim. It
+    /// accomplishes this by iterative application of the recursion programs including lift, join,
+    /// and resolve.
+    ///
+    /// If the receipt is succinct, this function will do nothing (i.e. it is idemopotent).
+    fn compress(&self, opts: &ProverOpts, receipt: &Receipt) -> Result<Receipt>;
 }
 
 /// An Executor can execute a given ELF binary.
@@ -104,6 +120,19 @@ pub struct ProverOpts {
     // moment if there is a better place. At some point before 1.0, this option should be moved or
     // dropped.
     pub prove_guest_errors: bool,
+    /// The kind of receipt to be generated.
+    pub receipt_kind: ReceiptKind,
+}
+
+/// This enum represents the various receipt kinds that can be generated.
+#[derive(Clone, Serialize, Deserialize, PartialEq)]
+pub enum ReceiptKind {
+    /// Composite Receipts resulting from proving a session
+    Composite,
+    /// Succinct Receipts resulting from applying the lift and join programgs so Composite receipts
+    Succinct,
+    /// Compact Receipts resulting from stark2snark on the Succinct receipts
+    Compact,
 }
 
 impl Default for ProverOpts {
@@ -113,6 +142,7 @@ impl Default for ProverOpts {
         Self {
             hashfn: "poseidon2".to_string(),
             prove_guest_errors: false,
+            receipt_kind: ReceiptKind::Composite,
         }
     }
 }
@@ -123,6 +153,34 @@ impl ProverOpts {
         Self {
             hashfn: "sha-256".to_string(),
             prove_guest_errors: false,
+            receipt_kind: ReceiptKind::Composite,
+        }
+    }
+
+    /// Choose the prover that enables composite receipts.
+    pub fn composite() -> Self {
+        Self {
+            hashfn: "poseidon2".to_string(),
+            prove_guest_errors: false,
+            receipt_kind: ReceiptKind::Composite,
+        }
+    }
+
+    /// Choose the prover that enables succinct receipts.
+    pub fn succinct() -> Self {
+        Self {
+            hashfn: "poseidon2".to_string(),
+            prove_guest_errors: false,
+            receipt_kind: ReceiptKind::Succinct,
+        }
+    }
+
+    /// Choose the prover that enables compact, snark receipts, only supported for x86_64 linux
+    pub fn compact() -> Self {
+        Self {
+            hashfn: "poseidon2".to_string(),
+            prove_guest_errors: false,
+            receipt_kind: ReceiptKind::Compact,
         }
     }
 }

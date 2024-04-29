@@ -24,7 +24,7 @@ use bytes::Bytes;
 use risc0_binfmt::{MemoryImage, Program};
 use risc0_zkvm_methods::{
     multi_test::{MultiTestSpec, SYS_MULTI_TEST},
-    HELLO_COMMIT_ELF, MULTI_TEST_ELF, RAND_ELF, SLICE_IO_ELF, STANDARD_LIB_ELF,
+    BLST_ELF, HELLO_COMMIT_ELF, MULTI_TEST_ELF, RAND_ELF, SLICE_IO_ELF, STANDARD_LIB_ELF,
 };
 use risc0_zkvm_platform::{fileno, syscall::nr::SYS_RANDOM, PAGE_SIZE, WORD_SIZE};
 use sha2::{Digest as _, Sha256};
@@ -54,6 +54,16 @@ fn run_test(spec: MultiTestSpec) {
         .run()
         .unwrap();
     assert_eq!(session.exit_code, ExitCode::Halted(0));
+}
+
+#[test]
+fn cpp_test() {
+    let session = ExecutorImpl::from_elf(ExecutorEnv::default(), BLST_ELF)
+        .unwrap()
+        .run()
+        .unwrap();
+    let message: String = session.journal.unwrap().decode().unwrap();
+    assert_eq!(message.as_str(), "blst is such a blast");
 }
 
 #[test]
@@ -516,7 +526,7 @@ mod sys_verify {
 
     fn exec_pause(exit_code: u8) -> Session {
         let env = ExecutorEnvBuilder::default()
-            .write(&MultiTestSpec::PauseContinue(exit_code))
+            .write(&MultiTestSpec::PauseResume(exit_code))
             .unwrap()
             .build()
             .unwrap();
@@ -541,7 +551,7 @@ mod sys_verify {
         let env = ExecutorEnv::builder()
             .write(&spec)
             .unwrap()
-            .add_assumption(hello_commit_session.get_claim().unwrap())
+            .add_assumption(hello_commit_session.claim().unwrap())
             .build()
             .unwrap();
         let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
@@ -573,7 +583,7 @@ mod sys_verify {
             let env = ExecutorEnv::builder()
                 .write(&spec)
                 .unwrap()
-                .add_assumption(halt_session.get_claim().unwrap())
+                .add_assumption(halt_session.claim().unwrap())
                 .build()
                 .unwrap();
             let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap().run();
@@ -597,7 +607,7 @@ mod sys_verify {
             let env = ExecutorEnv::builder()
                 .write(&spec)
                 .unwrap()
-                .add_assumption(pause_session.get_claim().unwrap())
+                .add_assumption(pause_session.claim().unwrap())
                 .build()
                 .unwrap();
             let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF).unwrap().run();
@@ -615,14 +625,14 @@ mod sys_verify {
         let hello_commit_session = exec_hello_commit();
 
         let spec = &MultiTestSpec::SysVerifyIntegrity {
-            claim_words: to_vec(&hello_commit_session.get_claim().unwrap()).unwrap(),
+            claim_words: to_vec(&hello_commit_session.claim().unwrap()).unwrap(),
         };
 
         // Test that it works when the assumption is added.
         let env = ExecutorEnv::builder()
             .write(&spec)
             .unwrap()
-            .add_assumption(hello_commit_session.get_claim().unwrap())
+            .add_assumption(hello_commit_session.claim().unwrap())
             .build()
             .unwrap();
         let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
@@ -650,13 +660,13 @@ mod sys_verify {
             let halt_session = exec_halt(code);
 
             let spec = &MultiTestSpec::SysVerifyIntegrity {
-                claim_words: to_vec(&halt_session.get_claim().unwrap()).unwrap(),
+                claim_words: to_vec(&halt_session.claim().unwrap()).unwrap(),
             };
 
             let env = ExecutorEnv::builder()
                 .write(&spec)
                 .unwrap()
-                .add_assumption(halt_session.get_claim().unwrap())
+                .add_assumption(halt_session.claim().unwrap())
                 .build()
                 .unwrap();
             let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
@@ -674,13 +684,13 @@ mod sys_verify {
             let pause_session = exec_pause(code);
 
             let spec = &MultiTestSpec::SysVerifyIntegrity {
-                claim_words: to_vec(&pause_session.get_claim().unwrap()).unwrap(),
+                claim_words: to_vec(&pause_session.claim().unwrap()).unwrap(),
             };
 
             let env = ExecutorEnv::builder()
                 .write(&spec)
                 .unwrap()
-                .add_assumption(pause_session.get_claim().unwrap())
+                .add_assumption(pause_session.claim().unwrap())
                 .build()
                 .unwrap();
             let session = ExecutorImpl::from_elf(env, MULTI_TEST_ELF)
@@ -698,7 +708,7 @@ mod sys_verify {
         // Prune the claim before providing it as input so that it cannot be checked to have no
         // assumptions.
         let pruned_claim =
-            MaybePruned::<ReceiptClaim>::Pruned(hello_commit_session.get_claim().unwrap().digest());
+            MaybePruned::<ReceiptClaim>::Pruned(hello_commit_session.claim().unwrap().digest());
         let spec = &MultiTestSpec::SysVerifyIntegrity {
             claim_words: to_vec(&pruned_claim).unwrap(),
         };
@@ -707,7 +717,7 @@ mod sys_verify {
         let env = ExecutorEnv::builder()
             .write(&spec)
             .unwrap()
-            .add_assumption(hello_commit_session.get_claim().unwrap())
+            .add_assumption(hello_commit_session.claim().unwrap())
             .build()
             .unwrap();
 
@@ -1106,6 +1116,11 @@ fn aligned_alloc() {
 }
 
 #[test]
+fn alloc_zeroed() {
+    run_test(MultiTestSpec::AllocZeroed);
+}
+
+#[test]
 #[should_panic(expected = "too small")]
 fn too_many_sha() {
     run_test(MultiTestSpec::TooManySha);
@@ -1193,7 +1208,7 @@ mod docker {
     #[test]
     fn session_limit() {
         fn run_session(
-            loop_cycles: u32,
+            loop_cycles: u64,
             segment_limit_po2: u32,
             session_count_limit: u64,
         ) -> anyhow::Result<Session> {

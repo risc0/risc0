@@ -15,7 +15,6 @@
 use std::{cell::RefCell, io::Write, mem, rc::Rc, sync::Arc, time::Instant};
 
 use anyhow::{Context as _, Result};
-use human_repr::HumanDuration as _;
 use risc0_binfmt::{MemoryImage, Program};
 use risc0_circuit_rv32im::prove::emu::{
     addr::ByteAddr,
@@ -134,6 +133,8 @@ impl<'a> ExecutorImpl<'a> {
     where
         F: FnMut(Segment) -> Result<Box<dyn SegmentRef>>,
     {
+        nvtx::range_push!("execute");
+
         let journal = Journal::default();
         self.env
             .posix_io
@@ -146,7 +147,12 @@ impl<'a> ExecutorImpl<'a> {
             .unwrap_or(DEFAULT_SEGMENT_LIMIT_PO2 as u32) as usize;
 
         let mut refs = Vec::new();
-        let mut exec = Executor::new(self.image.clone(), self, self.env.trace.clone());
+        let mut exec = Executor::new(
+            self.image.clone(),
+            self,
+            self.env.input_digest,
+            self.env.trace.clone(),
+        );
 
         let start_time = Instant::now();
         let result = exec.run(segment_limit_po2, self.env.session_limit, |inner| {
@@ -170,7 +176,7 @@ impl<'a> ExecutorImpl<'a> {
                                         .iter()
                                         .map(|a| {
                                             Ok(match a {
-                                                Assumption::Proven(r) => r.get_claim()?.into(),
+                                                Assumption::Proven(r) => r.claim()?.into(),
                                                 Assumption::Unresolved(r) => r.clone(),
                                             })
                                         })
@@ -188,7 +194,7 @@ impl<'a> ExecutorImpl<'a> {
                 inner,
                 output,
             };
-            let segment_ref = callback(segment.into())?;
+            let segment_ref = callback(segment)?;
             refs.push(segment_ref);
             Ok(())
         })?;
@@ -219,6 +225,7 @@ impl<'a> ExecutorImpl<'a> {
 
         let session = Session::new(
             refs,
+            self.env.input_digest.unwrap_or_default(),
             session_journal,
             result.exit_code,
             result.post_image,
@@ -230,10 +237,11 @@ impl<'a> ExecutorImpl<'a> {
         );
 
         tracing::info_span!("executor").in_scope(|| {
-            tracing::info!("execution time: {}", elapsed.human_duration());
+            tracing::info!("execution time: {elapsed:?}");
             session.log();
         });
 
+        nvtx::range_pop!();
         Ok(session)
     }
 }
@@ -243,7 +251,7 @@ struct ContextAdapter<'a> {
 }
 
 impl<'a> SyscallContext for ContextAdapter<'a> {
-    fn get_cycle(&self) -> usize {
+    fn get_cycle(&self) -> u64 {
         self.ctx.get_cycle()
     }
 
@@ -265,10 +273,10 @@ impl<'a> NewSyscall for ExecutorImpl<'a> {
     ) -> Result<(u32, u32)> {
         let mut ctx = ContextAdapter { ctx };
         self.syscall_table
-            .get_syscall(&syscall)
+            .get_syscall(syscall)
             .context(format!("Unknown syscall: {syscall:?}"))?
             .borrow_mut()
-            .syscall(&syscall, &mut ctx, into_guest)
+            .syscall(syscall, &mut ctx, into_guest)
     }
 }
 

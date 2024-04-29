@@ -14,6 +14,7 @@
 
 // This code is automatically generated
 
+#include "extern.h"
 #include "ffi.h"
 #include "fp.h"
 
@@ -27,12 +28,13 @@ namespace risc0::circuit::rv32im {
 #if defined(__clang__)
 #pragma clang diagnostic ignored "-Wunused-parameter"
 #pragma clang diagnostic ignored "-Wunused-variable"
+#elif defined(__GNUC__)
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wunused-variable"
 #endif
 
-Fp step_verify_accum(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) {
+Fp step_verify_accum(void* ctx, size_t steps, size_t cycle, Fp** args) {
   size_t mask = steps - 1;
-  std::array<Fp, 96> host_args;
-  std::array<Fp, 32> host_outs;
   // loc(unknown)
   Fp x0(2013265910);
   // loc(unknown)
@@ -2746,11 +2748,7 @@ Fp step_verify_accum(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
     // loc("./zirgen/components/plonk.h":220:0)
     auto x1302 = x1301 + x1296;
     {
-      host(ctx, "plonkReadAccum", "bytes", host_args.data(), 0, host_outs.data(), 4);
-      auto x1303 = host_outs.at(0);
-      auto x1304 = host_outs.at(1);
-      auto x1305 = host_outs.at(2);
-      auto x1306 = host_outs.at(3);
+      auto [x1303, x1304, x1305, x1306] = extern_plonkReadAccum_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/fpext.cpp":28:0)
       {
         auto& reg = args[4][0 * steps + cycle];
@@ -6139,11 +6137,7 @@ Fp step_verify_accum(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
     // loc("./zirgen/components/plonk.h":220:0)
     auto x2886 = x2885 + x2880;
     {
-      host(ctx, "plonkReadAccum", "bytes", host_args.data(), 0, host_outs.data(), 4);
-      auto x2887 = host_outs.at(0);
-      auto x2888 = host_outs.at(1);
-      auto x2889 = host_outs.at(2);
-      auto x2890 = host_outs.at(3);
+      auto [x2887, x2888, x2889, x2890] = extern_plonkReadAccum_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/fpext.cpp":28:0)
       {
         auto& reg = args[4][0 * steps + cycle];
@@ -9334,11 +9328,7 @@ Fp step_verify_accum(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
     // loc("./zirgen/components/plonk.h":220:0)
     auto x4371 = x4370 + x4365;
     {
-      host(ctx, "plonkReadAccum", "bytes", host_args.data(), 0, host_outs.data(), 4);
-      auto x4372 = host_outs.at(0);
-      auto x4373 = host_outs.at(1);
-      auto x4374 = host_outs.at(2);
-      auto x4375 = host_outs.at(3);
+      auto [x4372, x4373, x4374, x4375] = extern_plonkReadAccum_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/fpext.cpp":28:0)
       {
         auto& reg = args[4][0 * steps + cycle];
@@ -11163,11 +11153,7 @@ Fp step_verify_accum(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
     // loc("./zirgen/components/plonk.h":220:0)
     auto x5200 = x5199 + x5194;
     {
-      host(ctx, "plonkReadAccum", "ram", host_args.data(), 0, host_outs.data(), 4);
-      auto x5201 = host_outs.at(0);
-      auto x5202 = host_outs.at(1);
-      auto x5203 = host_outs.at(2);
-      auto x5204 = host_outs.at(3);
+      auto [x5201, x5202, x5203, x5204] = extern_plonkReadAccum_ram(ctx, cycle, "ram", {});
       // loc("zirgen/components/fpext.cpp":28:0)
       {
         auto& reg = args[4][24 * steps + cycle];
@@ -13446,11 +13432,7 @@ Fp step_verify_accum(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
     // loc("./zirgen/components/plonk.h":220:0)
     auto x6289 = x6288 + x6283;
     {
-      host(ctx, "plonkReadAccum", "bytes", host_args.data(), 0, host_outs.data(), 4);
-      auto x6290 = host_outs.at(0);
-      auto x6291 = host_outs.at(1);
-      auto x6292 = host_outs.at(2);
-      auto x6293 = host_outs.at(3);
+      auto [x6290, x6291, x6292, x6293] = extern_plonkReadAccum_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/fpext.cpp":28:0)
       {
         auto& reg = args[4][0 * steps + cycle];
@@ -14643,25 +14625,25 @@ Fp step_verify_accum(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
     // loc("Top/mux(Mux)/reset(ResetStep)/RamHeader/FpExtReg/elem[3](Reg)"("./zirgen/components/plonk.h":218:0))
     auto x6816 = args[3][35];
     // loc("Top/mux(Mux)/reset(ResetStep)/RamBody/PlonkBody/RamPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
-    auto x6817 = args[2][128 * steps + ((cycle - 0) & mask)];
+    auto x6817 = args[2][130 * steps + ((cycle - 0) & mask)];
     assert(x6817 != Fp::invalid());
     // loc("Top/mux(Mux)/reset(ResetStep)/RamBody/PlonkBody/RamPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
-    auto x6818 = args[2][129 * steps + ((cycle - 0) & mask)];
+    auto x6818 = args[2][131 * steps + ((cycle - 0) & mask)];
     assert(x6818 != Fp::invalid());
     // loc("Top/mux(Mux)/reset(ResetStep)/RamBody/PlonkBody/RamPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
-    auto x6819 = args[2][130 * steps + ((cycle - 0) & mask)];
+    auto x6819 = args[2][132 * steps + ((cycle - 0) & mask)];
     assert(x6819 != Fp::invalid());
     // loc("Top/mux(Mux)/reset(ResetStep)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
-    auto x6820 = args[2][131 * steps + ((cycle - 0) & mask)];
+    auto x6820 = args[2][133 * steps + ((cycle - 0) & mask)];
     assert(x6820 != Fp::invalid());
     // loc("Top/mux(Mux)/reset(ResetStep)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[1](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
-    auto x6821 = args[2][132 * steps + ((cycle - 0) & mask)];
+    auto x6821 = args[2][134 * steps + ((cycle - 0) & mask)];
     assert(x6821 != Fp::invalid());
     // loc("Top/mux(Mux)/reset(ResetStep)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[2](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
-    auto x6822 = args[2][133 * steps + ((cycle - 0) & mask)];
+    auto x6822 = args[2][135 * steps + ((cycle - 0) & mask)];
     assert(x6822 != Fp::invalid());
     // loc("Top/mux(Mux)/reset(ResetStep)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[3](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
-    auto x6823 = args[2][134 * steps + ((cycle - 0) & mask)];
+    auto x6823 = args[2][136 * steps + ((cycle - 0) & mask)];
     assert(x6823 != Fp::invalid());
     // loc("./zirgen/components/plonk.h":218:0)
     auto x6824 = x6789 * x6817;
@@ -14770,25 +14752,25 @@ Fp step_verify_accum(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
     // loc("./zirgen/components/plonk.h":218:0)
     auto x6876 = x6868 + x6872;
     // loc("Top/mux(Mux)/reset(ResetStep)/RamBody/PlonkBody/RamPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
-    auto x6877 = args[2][135 * steps + ((cycle - 0) & mask)];
+    auto x6877 = args[2][137 * steps + ((cycle - 0) & mask)];
     assert(x6877 != Fp::invalid());
     // loc("Top/mux(Mux)/reset(ResetStep)/RamBody/PlonkBody/RamPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
-    auto x6878 = args[2][136 * steps + ((cycle - 0) & mask)];
+    auto x6878 = args[2][138 * steps + ((cycle - 0) & mask)];
     assert(x6878 != Fp::invalid());
     // loc("Top/mux(Mux)/reset(ResetStep)/RamBody/PlonkBody/RamPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
-    auto x6879 = args[2][137 * steps + ((cycle - 0) & mask)];
+    auto x6879 = args[2][139 * steps + ((cycle - 0) & mask)];
     assert(x6879 != Fp::invalid());
     // loc("Top/mux(Mux)/reset(ResetStep)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
-    auto x6880 = args[2][138 * steps + ((cycle - 0) & mask)];
+    auto x6880 = args[2][140 * steps + ((cycle - 0) & mask)];
     assert(x6880 != Fp::invalid());
     // loc("Top/mux(Mux)/reset(ResetStep)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[1](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
-    auto x6881 = args[2][139 * steps + ((cycle - 0) & mask)];
+    auto x6881 = args[2][141 * steps + ((cycle - 0) & mask)];
     assert(x6881 != Fp::invalid());
     // loc("Top/mux(Mux)/reset(ResetStep)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[2](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
-    auto x6882 = args[2][140 * steps + ((cycle - 0) & mask)];
+    auto x6882 = args[2][142 * steps + ((cycle - 0) & mask)];
     assert(x6882 != Fp::invalid());
     // loc("Top/mux(Mux)/reset(ResetStep)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[3](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
-    auto x6883 = args[2][141 * steps + ((cycle - 0) & mask)];
+    auto x6883 = args[2][143 * steps + ((cycle - 0) & mask)];
     assert(x6883 != Fp::invalid());
     // loc("./zirgen/components/plonk.h":218:0)
     auto x6884 = x6789 * x6877;
@@ -14959,25 +14941,25 @@ Fp step_verify_accum(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
     // loc("./zirgen/components/plonk.h":220:0)
     auto x6967 = x6966 + x6961;
     // loc("Top/mux(Mux)/reset(ResetStep)/RamBody/PlonkBody/RamPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
-    auto x6968 = args[2][156 * steps + ((cycle - 0) & mask)];
+    auto x6968 = args[2][158 * steps + ((cycle - 0) & mask)];
     assert(x6968 != Fp::invalid());
     // loc("Top/mux(Mux)/reset(ResetStep)/RamBody/PlonkBody/RamPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
-    auto x6969 = args[2][157 * steps + ((cycle - 0) & mask)];
+    auto x6969 = args[2][159 * steps + ((cycle - 0) & mask)];
     assert(x6969 != Fp::invalid());
     // loc("Top/mux(Mux)/reset(ResetStep)/RamBody/PlonkBody/RamPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
-    auto x6970 = args[2][158 * steps + ((cycle - 0) & mask)];
+    auto x6970 = args[2][160 * steps + ((cycle - 0) & mask)];
     assert(x6970 != Fp::invalid());
     // loc("Top/mux(Mux)/reset(ResetStep)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
-    auto x6971 = args[2][159 * steps + ((cycle - 0) & mask)];
+    auto x6971 = args[2][161 * steps + ((cycle - 0) & mask)];
     assert(x6971 != Fp::invalid());
     // loc("Top/mux(Mux)/reset(ResetStep)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[1](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
-    auto x6972 = args[2][160 * steps + ((cycle - 0) & mask)];
+    auto x6972 = args[2][162 * steps + ((cycle - 0) & mask)];
     assert(x6972 != Fp::invalid());
     // loc("Top/mux(Mux)/reset(ResetStep)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[2](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
-    auto x6973 = args[2][161 * steps + ((cycle - 0) & mask)];
+    auto x6973 = args[2][163 * steps + ((cycle - 0) & mask)];
     assert(x6973 != Fp::invalid());
     // loc("Top/mux(Mux)/reset(ResetStep)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[3](Reg)"("./zirgen/compiler/edsl/component.h":154:0))
-    auto x6974 = args[2][162 * steps + ((cycle - 0) & mask)];
+    auto x6974 = args[2][164 * steps + ((cycle - 0) & mask)];
     assert(x6974 != Fp::invalid());
     // loc("./zirgen/components/plonk.h":218:0)
     auto x6975 = x6789 * x6968;
@@ -15275,11 +15257,7 @@ Fp step_verify_accum(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
     // loc("./zirgen/components/plonk.h":220:0)
     auto x7118 = x7117 + x7112;
     {
-      host(ctx, "plonkReadAccum", "ram", host_args.data(), 0, host_outs.data(), 4);
-      auto x7119 = host_outs.at(0);
-      auto x7120 = host_outs.at(1);
-      auto x7121 = host_outs.at(2);
-      auto x7122 = host_outs.at(3);
+      auto [x7119, x7120, x7121, x7122] = extern_plonkReadAccum_ram(ctx, cycle, "ram", {});
       // loc("zirgen/components/fpext.cpp":28:0)
       {
         auto& reg = args[4][24 * steps + cycle];
@@ -17558,11 +17536,7 @@ Fp step_verify_accum(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
     // loc("./zirgen/components/plonk.h":220:0)
     auto x8207 = x8206 + x8201;
     {
-      host(ctx, "plonkReadAccum", "bytes", host_args.data(), 0, host_outs.data(), 4);
-      auto x8208 = host_outs.at(0);
-      auto x8209 = host_outs.at(1);
-      auto x8210 = host_outs.at(2);
-      auto x8211 = host_outs.at(3);
+      auto [x8208, x8209, x8210, x8211] = extern_plonkReadAccum_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/fpext.cpp":28:0)
       {
         auto& reg = args[4][0 * steps + cycle];
@@ -19391,11 +19365,7 @@ Fp step_verify_accum(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("./zirgen/components/plonk.h":220:0)
       auto x9037 = x9036 + x9031;
       {
-        host(ctx, "plonkReadAccum", "ram", host_args.data(), 0, host_outs.data(), 4);
-        auto x9038 = host_outs.at(0);
-        auto x9039 = host_outs.at(1);
-        auto x9040 = host_outs.at(2);
-        auto x9041 = host_outs.at(3);
+        auto [x9038, x9039, x9040, x9041] = extern_plonkReadAccum_ram(ctx, cycle, "ram", {});
         // loc("zirgen/components/fpext.cpp":28:0)
         {
           auto& reg = args[4][24 * steps + cycle];
@@ -20337,11 +20307,7 @@ Fp step_verify_accum(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("./zirgen/components/plonk.h":220:0)
       auto x9471 = x9470 + x9465;
       {
-        host(ctx, "plonkReadAccum", "ram", host_args.data(), 0, host_outs.data(), 4);
-        auto x9472 = host_outs.at(0);
-        auto x9473 = host_outs.at(1);
-        auto x9474 = host_outs.at(2);
-        auto x9475 = host_outs.at(3);
+        auto [x9472, x9473, x9474, x9475] = extern_plonkReadAccum_ram(ctx, cycle, "ram", {});
         // loc("zirgen/components/fpext.cpp":28:0)
         {
           auto& reg = args[4][24 * steps + cycle];
@@ -21283,11 +21249,7 @@ Fp step_verify_accum(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("./zirgen/components/plonk.h":220:0)
       auto x9905 = x9904 + x9899;
       {
-        host(ctx, "plonkReadAccum", "ram", host_args.data(), 0, host_outs.data(), 4);
-        auto x9906 = host_outs.at(0);
-        auto x9907 = host_outs.at(1);
-        auto x9908 = host_outs.at(2);
-        auto x9909 = host_outs.at(3);
+        auto [x9906, x9907, x9908, x9909] = extern_plonkReadAccum_ram(ctx, cycle, "ram", {});
         // loc("zirgen/components/fpext.cpp":28:0)
         {
           auto& reg = args[4][24 * steps + cycle];
@@ -22483,11 +22445,7 @@ Fp step_verify_accum(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("./zirgen/components/plonk.h":218:0)
       auto x10459 = x10451 + x10455;
       {
-        host(ctx, "plonkReadAccum", "ram", host_args.data(), 0, host_outs.data(), 4);
-        auto x10460 = host_outs.at(0);
-        auto x10461 = host_outs.at(1);
-        auto x10462 = host_outs.at(2);
-        auto x10463 = host_outs.at(3);
+        auto [x10460, x10461, x10462, x10463] = extern_plonkReadAccum_ram(ctx, cycle, "ram", {});
         // loc("zirgen/components/fpext.cpp":28:0)
         {
           auto& reg = args[4][24 * steps + cycle];
@@ -23651,11 +23609,7 @@ Fp step_verify_accum(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("./zirgen/components/plonk.h":220:0)
       auto x10992 = x10991 + x10986;
       {
-        host(ctx, "plonkReadAccum", "ram", host_args.data(), 0, host_outs.data(), 4);
-        auto x10993 = host_outs.at(0);
-        auto x10994 = host_outs.at(1);
-        auto x10995 = host_outs.at(2);
-        auto x10996 = host_outs.at(3);
+        auto [x10993, x10994, x10995, x10996] = extern_plonkReadAccum_ram(ctx, cycle, "ram", {});
         // loc("zirgen/components/fpext.cpp":28:0)
         {
           auto& reg = args[4][24 * steps + cycle];
@@ -24597,11 +24551,7 @@ Fp step_verify_accum(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("./zirgen/components/plonk.h":220:0)
       auto x11426 = x11425 + x11420;
       {
-        host(ctx, "plonkReadAccum", "ram", host_args.data(), 0, host_outs.data(), 4);
-        auto x11427 = host_outs.at(0);
-        auto x11428 = host_outs.at(1);
-        auto x11429 = host_outs.at(2);
-        auto x11430 = host_outs.at(3);
+        auto [x11427, x11428, x11429, x11430] = extern_plonkReadAccum_ram(ctx, cycle, "ram", {});
         // loc("zirgen/components/fpext.cpp":28:0)
         {
           auto& reg = args[4][24 * steps + cycle];
@@ -24855,11 +24805,7 @@ Fp step_verify_accum(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
     assert(x11530 != Fp::invalid());
     if (x11530 != 0) {
       {
-        host(ctx, "plonkReadAccum", "ram", host_args.data(), 0, host_outs.data(), 4);
-        auto x11531 = host_outs.at(0);
-        auto x11532 = host_outs.at(1);
-        auto x11533 = host_outs.at(2);
-        auto x11534 = host_outs.at(3);
+        auto [x11531, x11532, x11533, x11534] = extern_plonkReadAccum_ram(ctx, cycle, "ram", {});
         // loc("zirgen/components/fpext.cpp":28:0)
         {
           auto& reg = args[4][24 * steps + cycle];
@@ -24891,11 +24837,7 @@ Fp step_verify_accum(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
     assert(x11535 != Fp::invalid());
     if (x11535 != 0) {
       {
-        host(ctx, "plonkReadAccum", "ram", host_args.data(), 0, host_outs.data(), 4);
-        auto x11536 = host_outs.at(0);
-        auto x11537 = host_outs.at(1);
-        auto x11538 = host_outs.at(2);
-        auto x11539 = host_outs.at(3);
+        auto [x11536, x11537, x11538, x11539] = extern_plonkReadAccum_ram(ctx, cycle, "ram", {});
         // loc("zirgen/components/fpext.cpp":28:0)
         {
           auto& reg = args[4][24 * steps + cycle];
@@ -25869,11 +25811,7 @@ Fp step_verify_accum(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("./zirgen/components/plonk.h":218:0)
       auto x11990 = x11982 + x11986;
       {
-        host(ctx, "plonkReadAccum", "ram", host_args.data(), 0, host_outs.data(), 4);
-        auto x11991 = host_outs.at(0);
-        auto x11992 = host_outs.at(1);
-        auto x11993 = host_outs.at(2);
-        auto x11994 = host_outs.at(3);
+        auto [x11991, x11992, x11993, x11994] = extern_plonkReadAccum_ram(ctx, cycle, "ram", {});
         // loc("zirgen/components/fpext.cpp":28:0)
         {
           auto& reg = args[4][24 * steps + cycle];
@@ -26349,11 +26287,7 @@ Fp step_verify_accum(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
     assert(x12193 != Fp::invalid());
     if (x12193 != 0) {
       {
-        host(ctx, "plonkReadAccum", "ram", host_args.data(), 0, host_outs.data(), 4);
-        auto x12194 = host_outs.at(0);
-        auto x12195 = host_outs.at(1);
-        auto x12196 = host_outs.at(2);
-        auto x12197 = host_outs.at(3);
+        auto [x12194, x12195, x12196, x12197] = extern_plonkReadAccum_ram(ctx, cycle, "ram", {});
         // loc("zirgen/components/fpext.cpp":28:0)
         {
           auto& reg = args[4][24 * steps + cycle];
@@ -26385,11 +26319,7 @@ Fp step_verify_accum(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
     assert(x12198 != Fp::invalid());
     if (x12198 != 0) {
       {
-        host(ctx, "plonkReadAccum", "ram", host_args.data(), 0, host_outs.data(), 4);
-        auto x12199 = host_outs.at(0);
-        auto x12200 = host_outs.at(1);
-        auto x12201 = host_outs.at(2);
-        auto x12202 = host_outs.at(3);
+        auto [x12199, x12200, x12201, x12202] = extern_plonkReadAccum_ram(ctx, cycle, "ram", {});
         // loc("zirgen/components/fpext.cpp":28:0)
         {
           auto& reg = args[4][24 * steps + cycle];
@@ -26421,11 +26351,7 @@ Fp step_verify_accum(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
     assert(x12203 != Fp::invalid());
     if (x12203 != 0) {
       {
-        host(ctx, "plonkReadAccum", "ram", host_args.data(), 0, host_outs.data(), 4);
-        auto x12204 = host_outs.at(0);
-        auto x12205 = host_outs.at(1);
-        auto x12206 = host_outs.at(2);
-        auto x12207 = host_outs.at(3);
+        auto [x12204, x12205, x12206, x12207] = extern_plonkReadAccum_ram(ctx, cycle, "ram", {});
         // loc("zirgen/components/fpext.cpp":28:0)
         {
           auto& reg = args[4][24 * steps + cycle];
@@ -26457,11 +26383,7 @@ Fp step_verify_accum(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
     assert(x12208 != Fp::invalid());
     if (x12208 != 0) {
       {
-        host(ctx, "plonkReadAccum", "ram", host_args.data(), 0, host_outs.data(), 4);
-        auto x12209 = host_outs.at(0);
-        auto x12210 = host_outs.at(1);
-        auto x12211 = host_outs.at(2);
-        auto x12212 = host_outs.at(3);
+        auto [x12209, x12210, x12211, x12212] = extern_plonkReadAccum_ram(ctx, cycle, "ram", {});
         // loc("zirgen/components/fpext.cpp":28:0)
         {
           auto& reg = args[4][24 * steps + cycle];
@@ -27181,11 +27103,7 @@ Fp step_verify_accum(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("./zirgen/components/plonk.h":220:0)
       auto x12543 = x12542 + x12537;
       {
-        host(ctx, "plonkReadAccum", "ram", host_args.data(), 0, host_outs.data(), 4);
-        auto x12544 = host_outs.at(0);
-        auto x12545 = host_outs.at(1);
-        auto x12546 = host_outs.at(2);
-        auto x12547 = host_outs.at(3);
+        auto [x12544, x12545, x12546, x12547] = extern_plonkReadAccum_ram(ctx, cycle, "ram", {});
         // loc("zirgen/components/fpext.cpp":28:0)
         {
           auto& reg = args[4][24 * steps + cycle];
@@ -28127,11 +28045,7 @@ Fp step_verify_accum(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("./zirgen/components/plonk.h":220:0)
       auto x12977 = x12976 + x12971;
       {
-        host(ctx, "plonkReadAccum", "ram", host_args.data(), 0, host_outs.data(), 4);
-        auto x12978 = host_outs.at(0);
-        auto x12979 = host_outs.at(1);
-        auto x12980 = host_outs.at(2);
-        auto x12981 = host_outs.at(3);
+        auto [x12978, x12979, x12980, x12981] = extern_plonkReadAccum_ram(ctx, cycle, "ram", {});
         // loc("zirgen/components/fpext.cpp":28:0)
         {
           auto& reg = args[4][24 * steps + cycle];
@@ -28385,11 +28299,7 @@ Fp step_verify_accum(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
     assert(x13081 != Fp::invalid());
     if (x13081 != 0) {
       {
-        host(ctx, "plonkReadAccum", "ram", host_args.data(), 0, host_outs.data(), 4);
-        auto x13082 = host_outs.at(0);
-        auto x13083 = host_outs.at(1);
-        auto x13084 = host_outs.at(2);
-        auto x13085 = host_outs.at(3);
+        auto [x13082, x13083, x13084, x13085] = extern_plonkReadAccum_ram(ctx, cycle, "ram", {});
         // loc("zirgen/components/fpext.cpp":28:0)
         {
           auto& reg = args[4][24 * steps + cycle];
@@ -30447,11 +30357,7 @@ Fp step_verify_accum(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
     // loc("./zirgen/components/plonk.h":220:0)
     auto x14071 = x14070 + x14065;
     {
-      host(ctx, "plonkReadAccum", "bytes", host_args.data(), 0, host_outs.data(), 4);
-      auto x14072 = host_outs.at(0);
-      auto x14073 = host_outs.at(1);
-      auto x14074 = host_outs.at(2);
-      auto x14075 = host_outs.at(3);
+      auto [x14072, x14073, x14074, x14075] = extern_plonkReadAccum_bytes(ctx, cycle, "bytes", {});
       // loc("zirgen/components/fpext.cpp":28:0)
       {
         auto& reg = args[4][0 * steps + cycle];

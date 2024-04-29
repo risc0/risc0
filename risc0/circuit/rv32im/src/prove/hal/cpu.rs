@@ -26,7 +26,7 @@ use risc0_zkp::{
         cpu::{CpuBuffer, CpuHal},
         CircuitHal, Hal,
     },
-    INV_RATE,
+    INV_RATE, ZK_CYCLES,
 };
 
 use crate::{
@@ -35,6 +35,7 @@ use crate::{
     REGISTER_GROUP_DATA,
 };
 
+#[derive(Default)]
 pub struct CpuCircuitHal;
 
 impl CpuCircuitHal {
@@ -54,9 +55,9 @@ where
     #[tracing::instrument(skip_all)]
     fn eval_check(
         &self,
-        check: &H::Buffer<BabyBearElem>,
-        groups: &[&H::Buffer<BabyBearElem>],
-        globals: &[&H::Buffer<BabyBearElem>],
+        check: &CpuBuffer<BabyBearElem>,
+        groups: &[&CpuBuffer<BabyBearElem>],
+        globals: &[&CpuBuffer<BabyBearElem>],
         poly_mix: BabyBearExtElem,
         po2: usize,
         steps: usize,
@@ -103,6 +104,56 @@ where
                 check[i * domain + cycle] = ret.elems()[i];
             }
         });
+    }
+
+    #[tracing::instrument(skip_all)]
+    fn accumulate(
+        &self,
+        ctrl: &CpuBuffer<BabyBearElem>,
+        io: &CpuBuffer<BabyBearElem>,
+        data: &CpuBuffer<BabyBearElem>,
+        mix: &CpuBuffer<BabyBearElem>,
+        accum: &CpuBuffer<BabyBearElem>,
+        steps: usize,
+    ) {
+        {
+            let args = &[
+                ctrl.as_slice_sync(),
+                io.as_slice_sync(),
+                data.as_slice_sync(),
+                mix.as_slice_sync(),
+                accum.as_slice_sync(),
+            ];
+
+            let accum_ctx = CIRCUIT.alloc_accum_ctx(steps);
+
+            tracing::info_span!("step_compute_accum").in_scope(|| {
+                (0..steps - ZK_CYCLES).into_par_iter().for_each(|cycle| {
+                    CIRCUIT
+                        .par_step_compute_accum(steps, cycle, &accum_ctx, args)
+                        .unwrap();
+                });
+            });
+            tracing::info_span!("calc_prefix_products").in_scope(|| {
+                CIRCUIT.calc_prefix_products(&accum_ctx).unwrap();
+            });
+            tracing::info_span!("step_verify_accum").in_scope(|| {
+                (0..steps - ZK_CYCLES).into_par_iter().for_each(|cycle| {
+                    CIRCUIT
+                        .par_step_verify_accum(steps, cycle, &accum_ctx, args)
+                        .unwrap();
+                });
+            });
+        }
+
+        {
+            // Zero out 'invalid' entries in accum and io
+            let mut accum_slice = accum.as_slice_mut();
+            let mut io = io.as_slice_mut();
+            for value in accum_slice.iter_mut().chain(io.iter_mut()) {
+                *value = value.valid_or_zero();
+            }
+        }
     }
 }
 

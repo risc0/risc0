@@ -1,9 +1,10 @@
 import { Button } from "@risc0/ui/button";
-import { Link } from "@risc0/ui/link";
 import { GithubIcon } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { ThemeToggle } from "shared/client/theme/theme-toggle";
 import { Breadcrumbs } from "./breadcrumbs";
+import { VersionSelect } from "./version-select";
 
 export function Header() {
   return (
@@ -18,6 +19,8 @@ export function Header() {
         <Breadcrumbs />
 
         <div className="flex flex-row justify-end gap-2">
+          <VersionSelect />
+
           <ThemeToggle />
 
           <Link tabIndex={-1} target="_blank" href="https://github.com/risc0/risc0/">

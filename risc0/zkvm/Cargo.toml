@@ -13,13 +13,12 @@ harness = false
 required-features = ["prove"]
 
 [[bench]]
-name = "divan"
-harness = false
-required-features = ["prove"]
-
-[[bench]]
 name = "guest_run"
 harness = false
+
+[[example]]
+name = "datasheet"
+required-features = ["prove"]
 
 [[example]]
 name = "fib"
@@ -64,9 +63,10 @@ bincode = { version = "1.3", optional = true }
 bonsai-sdk = { workspace = true, optional = true }
 bytes = { version = "1.4", features = ["serde"], optional = true }
 elf = { version = "0.7", default-features = false, optional = true }
-human-repr = { version = "1.0", optional = true }
 lazy-regex = { version = "3.1", optional = true }
+nvtx = { version = "1.3", optional = true }
 prost = { version = "0.12", optional = true }
+rand = { version = "0.8", optional = true }
 rayon = { version = "1.5", optional = true }
 risc0-circuit-recursion = { workspace = true }
 risc0-circuit-rv32im = { workspace = true }
@@ -82,9 +82,6 @@ typetag = { version = "0.2", optional = true }
 [dev-dependencies]
 clap = { version = "4.4", features = ["derive"] }
 criterion = { version = "0.5", features = ["html_reports"] }
-divan = "0.1"
-hotbench = { workspace = true }
-lazy_static = "1.4.0"
 rand = "0.8"
 tracing-forest = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
@@ -93,10 +90,14 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 crypto-bigint = { version = "0.5", default-features = false, features = [
   "rand",
 ] }
+enum-iterator = "2.0"
 flate2 = "1.0"
+hotbench = { workspace = true }
+human-repr = { version = "1.0", features = ["1024"] }
 risc0-zkvm-methods = { path = "methods" }
 serde_json = "1.0"
-serial_test = "3.0"
+serde_with = "3.8"
+tabled = "0.15"
 tar = "0.4"
 tempfile = "3"
 test-log = { version = "0.2", default-features = false, features = ["trace"] }
@@ -143,11 +144,12 @@ prove = [
   "dep:bincode",
   "dep:bytes",
   "dep:elf",
-  "dep:human-repr",
   "dep:lazy-regex",
+  "dep:nvtx",
   "dep:prost",
   "dep:prost-build",
   "dep:protobuf-src",
+  "dep:rand",
   "dep:rayon",
   "dep:rustc-demangle",
   "dep:tempfile",

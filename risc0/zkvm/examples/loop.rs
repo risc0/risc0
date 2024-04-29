@@ -16,6 +16,7 @@ use std::{process::Command, rc::Rc, time::Instant};
 
 use clap::Parser;
 use human_repr::{HumanCount, HumanDuration};
+use risc0_zkp::hal::tracker;
 use risc0_zkvm::{
     get_prover_server, ExecutorEnv, ExecutorImpl, ProverOpts, ProverServer, Receipt, Session,
     VerifierContext,
@@ -94,7 +95,7 @@ fn main() {
             .iter()
             .fold(0, |acc, segment| acc + segment.get_seal_bytes().len());
 
-        let ram = prover.get_peak_memory_usage();
+        let ram = tracker().lock().unwrap().peak;
         let throughput = (session.total_cycles as f64) / duration.as_secs_f64();
 
         if !args.quiet {
@@ -190,6 +191,6 @@ fn top(prover: Rc<dyn ProverServer>, iterations: u64, po2: u32) -> (Session, Rec
     let mut exec = ExecutorImpl::from_elf(env, BENCH_ELF).unwrap();
     let session = exec.run().unwrap();
     let ctx = VerifierContext::default();
-    let receipt = prover.prove_session(&ctx, &session).unwrap();
+    let receipt = prover.prove_session(&ctx, &session).unwrap().receipt;
     (session, receipt)
 }

@@ -14,10 +14,10 @@
 
 use anyhow::Result;
 use assert_cmd::cargo::cargo_bin;
-use risc0_zkvm::{ExecutorEnv, ExternalProver, Prover, Receipt};
+use risc0_zkvm::{ExecutorEnv, ExternalProver, ProveInfo, Prover};
 use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID};
 
-fn prove_nothing() -> Result<Receipt> {
+fn prove_nothing() -> Result<ProveInfo> {
     let env = ExecutorEnv::builder()
         .write(&MultiTestSpec::DoNothing)
         .unwrap()
@@ -30,6 +30,6 @@ fn prove_nothing() -> Result<Receipt> {
 
 #[test_log::test]
 fn basic_proof() {
-    let receipt = prove_nothing().unwrap();
+    let receipt = prove_nothing().unwrap().receipt;
     receipt.verify(MULTI_TEST_ID).unwrap();
 }

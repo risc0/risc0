@@ -14,7 +14,8 @@
 
 use hotbench::{benchmark_group, benchmark_main, BenchGroup};
 use risc0_zkvm::{
-    get_prover_server, ExecutorEnv, ExecutorImpl, ProverOpts, VerifierContext, RECURSION_PO2,
+    get_prover_server, ExecutorEnv, ExecutorImpl, ProverOpts, ReceiptKind, VerifierContext,
+    RECURSION_PO2,
 };
 use risc0_zkvm_methods::FIB_ELF;
 
@@ -38,6 +39,20 @@ fn execute(group: &mut BenchGroup) {
     });
 }
 
+fn warmup(_group: &mut BenchGroup) {
+    #[cfg(any(feature = "cuda", feature = "metal"))]
+    {
+        println!("warmup");
+        let opts = ProverOpts::default();
+        let ctx = VerifierContext::default();
+        let prover = get_prover_server(&opts).unwrap();
+        let session = setup_exec(1).run().unwrap();
+        let segment = session.segments[0].resolve().unwrap();
+        let receipt = prover.prove_segment(&ctx, &segment).unwrap();
+        prover.lift(&receipt).unwrap();
+    }
+}
+
 fn prove_segment(group: &mut BenchGroup, hashfn: &str) {
     let name = format!("prove/{hashfn}");
     group.bench(name, |b| {
@@ -46,6 +61,7 @@ fn prove_segment(group: &mut BenchGroup, hashfn: &str) {
         let opts = ProverOpts {
             hashfn: hashfn.to_string(),
             prove_guest_errors: false,
+            receipt_kind: ReceiptKind::Composite,
         };
         let prover = get_prover_server(&opts).unwrap();
         let ctx = VerifierContext::default();
@@ -103,7 +119,7 @@ fn join(group: &mut BenchGroup) {
         b.iter(
             1 << RECURSION_PO2,
             || {
-                let receipt = prover.prove_session(&ctx, &session).unwrap();
+                let receipt = prover.prove_session(&ctx, &session).unwrap().receipt;
                 let composite = receipt.inner.composite().unwrap();
                 let left = prover.lift(&composite.segments[0]).unwrap();
                 let right = prover.lift(&composite.segments[1]).unwrap();
@@ -148,9 +164,9 @@ fn total_succinct(group: &mut BenchGroup) {
             || setup_exec(iterations),
             |exec| {
                 let session = exec.run().unwrap();
-                let receipt = prover.prove_session(&ctx, &session).unwrap();
+                let receipt = prover.prove_session(&ctx, &session).unwrap().receipt;
                 let composite_receipt = receipt.inner.composite().unwrap();
-                prover.compress(composite_receipt)
+                prover.compsite_to_succinct(composite_receipt)
             },
         );
     });
@@ -158,6 +174,7 @@ fn total_succinct(group: &mut BenchGroup) {
 
 benchmark_group!(
     fib,
+    warmup,
     execute,
     prove,
     lift,

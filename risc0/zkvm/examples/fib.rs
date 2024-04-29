@@ -51,15 +51,13 @@ struct Metrics {
 fn main() {
     let args = Args::parse();
 
-    tracing_subscriber::registry()
-        .with(tracing_subscriber::fmt::layer())
-        .with(EnvFilter::from_default_env())
-        .with(if args.tree {
-            Some(tracing_forest::ForestLayer::default())
-        } else {
-            None
-        })
-        .init();
+    if args.tree {
+        tracing_subscriber::registry()
+            .with(tracing_subscriber::fmt::layer())
+            .with(EnvFilter::from_default_env())
+            .with(tracing_forest::ForestLayer::default())
+            .init();
+    }
 
     let mut opts = ProverOpts::default();
     if let Some(hashfn) = args.hashfn {
@@ -85,6 +83,7 @@ fn top(prover: Rc<dyn ProverServer>, iterations: u32, skip_prover: bool) -> Metr
         prover
             .prove_session(&ctx, &session)
             .unwrap()
+            .receipt
             .inner
             .composite()
             .unwrap()

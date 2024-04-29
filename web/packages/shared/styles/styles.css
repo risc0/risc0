@@ -4,7 +4,7 @@
   src: url("/fonts/EuropaGroteskSH-Med.otf") format("opentype");
   font-weight: 600 900;
   font-style: normal;
-  font-display: block; /* prefer `block` to prevent FOUT */
+  font-display: swap;
 }
 
 @font-face {
@@ -13,7 +13,7 @@
   src: url("/fonts/EuropaGroteskSH-Reg.otf") format("opentype");
   font-weight: 400 500;
   font-style: normal;
-  font-display: block; /* prefer `block` to prevent FOUT */
+  font-display: swap;
 }
 
 @font-face {
@@ -22,7 +22,7 @@
   src: url("/fonts/EuropaGroteskSH-Lig.otf") format("opentype");
   font-weight: 100 300;
   font-style: normal;
-  font-display: block; /* prefer `block` to prevent FOUT */
+  font-display: swap;
 }
 
 :root {
@@ -36,6 +36,10 @@
   @apply tracking-wider;
 }
 
+html {
+  @apply scroll-smooth
+}
+
 .font-mono {
   /* reset the `tracking-wider` on the monospace font */
   letter-spacing: initial;
@@ -44,4 +48,8 @@
 .lucide {
   /* bigger stroke for ALL icons */
   stroke-width: 1.75px !important;
+}
+
+a {
+  @apply focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring
 }

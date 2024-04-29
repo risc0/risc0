@@ -83,15 +83,17 @@ pub fn conjectured_strict<H: Hal>(taps: &TapSet, coeffs_size: usize) -> f32 {
 ///    constraint).
 /// 2. The security of FRI matches its known upper bound (rather than the proven
 ///    lower bound).
-pub fn toy_model_security<H: Hal>() -> f32 {
+pub fn toy_model_security<H: Hal>(taps: &TapSet, coeffs_size: usize) -> f32 {
+    let params = parameters::<H>(taps, coeffs_size);
     let ext_size = H::ExtElem::EXT_SIZE as f32;
     let field_size = baby_bear::P as f32;
     let ext_field_size = field_size.powf(ext_size);
 
+    let plonk_plookup_error = params.plonk_plookup_error();
     let constraints_error = 1f32 / ext_field_size;
     let fri_error = RHO.powi(crate::QUERIES as i32);
 
-    let sum = constraints_error + fri_error;
+    let sum = plonk_plookup_error + constraints_error + fri_error;
     sum.log2().abs()
 }
 
@@ -122,15 +124,14 @@ fn num_folding_rounds(coeffs_size: usize, ext_size: usize) -> usize {
 
 #[derive(Copy, Clone)]
 struct Params {
-    /// The number of duplicated data columns in the witness that appear
-    /// due to the permutation from trace_time to trace_mem
-    n_sigma_mem: usize,
-    /// The number of columns in the witness that appear due to the bytes-lookup
-    n_sigma_bytes: usize,
+    /// Number of columns used in the accum section of the trace
+    w_accum: f32,
     /// No. of trace polynomials
     n_trace_polys: f32,
-    /// Max degree of the constraint system, i.e. no. of segment polynomials
-    d: f32,
+    /// maximum degree constraint
+    max_degree: f32,
+    /// no. of segment polynomials used to express the validity polynomial (aka checkPoly)
+    num_segment_polynomials: f32,
     /// Max. no. of entries used from a single column
     biggest_combo: f32,
     /// Field extension degree
@@ -149,20 +150,22 @@ struct Params {
 /// global constants.
 fn parameters<H: Hal>(taps: &TapSet, coeffs_size: usize) -> Params {
     // Circuit-specific info
-    // FIXME: get from circuit instead of hard-coding
-    let n_sigma_mem = 5;
-    // FIXME: get from circuit instead of hard-coding
-    let n_sigma_bytes = 15;
+    let w_accum = taps.group_size(REGISTER_GROUP_ACCUM) as f32;
+
     let n_trace_polys = {
-        let w_accum = taps.group_size(REGISTER_GROUP_ACCUM) as f32;
         let w_code = taps.group_size(REGISTER_GROUP_CODE) as f32;
         let w_data = taps.group_size(REGISTER_GROUP_DATA) as f32;
 
         w_accum + w_code + w_data
     };
-    // Max degree of the constraint system, i.e. no. of segment polys
+    // Max degree of the constraint system
     // FIXME: get from circuit instead of hard-coding
-    let d = 4.0;
+    let max_degree = 5.0;
+
+    // Number of segment polynomials
+    // This follows from the fact that C(P(x))/Z(x) has degree equal to deg(P) * deg(C) - deg(Z)
+    // where deg(P) = deg(Z) = trace_domain_size and deg(C) = max_degree
+    let num_segment_polynomials = max_degree - 1.0;
 
     let biggest_combo = taps.combos().map(|combo| combo.size()).max().unwrap() as f32;
 
@@ -175,10 +178,10 @@ fn parameters<H: Hal>(taps: &TapSet, coeffs_size: usize) -> Params {
     let num_folding_rounds = num_folding_rounds(coeffs_size, ext_size);
 
     Params {
-        n_sigma_mem,
-        n_sigma_bytes,
+        w_accum,
         n_trace_polys,
-        d,
+        max_degree,
+        num_segment_polynomials,
         biggest_combo,
         ext_size,
         ext_field_size,
@@ -189,9 +192,21 @@ fn parameters<H: Hal>(taps: &TapSet, coeffs_size: usize) -> Params {
 }
 
 impl Params {
+    /// Error bound on permutation & lookup argument
+    //
+    //  The permutation & lookup argument both rely on grand product accumulators, inspired by PLONK & PLOOKUP.
+    //  The soundness error for each of these arguments is bounded using a Schwartz-Zippel argument, which
+    //  can be computed as [degree of the grand product accumulator] / [field size].
+    //
+    //  We compute the degree of the accumulators as follows:
+    //     - The degree of the accumulators is equal to the number of values being accumulated.
+    //     - The values being accumulated are stored in the accum section of the execution trace.
+    //     - The number of extension field values per row is at most w_accum / ext_size.
+    //     - From one row to the next, (max_degree - 2) bounds the number of accumulated values (prod` = prod * x1 * x2 * x3)
+    //     - We compute [num Fp4s per row] * [num accumulated Fp4s per trace Fp4] * [trace_domain_size] / [ext_field_size]
     fn plonk_plookup_error(&self) -> f32 {
-        let n_columns = self.n_sigma_mem + self.n_sigma_bytes;
-        self.ext_size as f32 * n_columns as f32 * self.trace_domain_size / self.ext_field_size
+        self.w_accum / self.ext_size as f32 * (self.max_degree - 2.0) * self.trace_domain_size
+            / self.ext_field_size
     }
 
     /// (m + 1/2)^7 / (3 * sqrt(ρ)^3) * |D|^2 / |K|
@@ -218,7 +233,8 @@ impl Params {
 
     fn e_fri_constant(&self, e_proximity_gap: f32) -> f32 {
         // (w_rap + d - 1/2) * e_proximity_gap
-        let first_term = (self.n_trace_polys + self.d - 0.5) * e_proximity_gap;
+        let first_term =
+            (self.n_trace_polys + self.num_segment_polynomials - 0.5) * e_proximity_gap;
 
         // (2m + 1) * (|D| + 1) * FRI_FOLD * num_folding_rounds
         // ----------------------------------------------------
@@ -249,25 +265,13 @@ impl Params {
     fn e_deep(&self, l_plus: f32) -> f32 {
         let h_plus = self.trace_domain_size + self.biggest_combo;
 
-        let numerator = self.d * (h_plus - 1.0) + (self.trace_domain_size - 1.0);
+        let numerator =
+            self.num_segment_polynomials * (h_plus - 1.0) + (self.trace_domain_size - 1.0);
         let denominator = self.ext_field_size - self.trace_domain_size - self.lde_domain_size;
         l_plus * numerator / denominator
     }
 
     fn e_deep_ali(&self, l_plus: f32) -> f32 {
         self.e_deep(l_plus) + self.e_ali(l_plus)
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use risc0_core::field::baby_bear::BabyBear;
-
-    use crate::hal::cpu::CpuHal;
-
-    #[test]
-    fn toy_model() {
-        let security = super::toy_model_security::<CpuHal<BabyBear>>();
-        assert_eq!(security, 100.0);
     }
 }

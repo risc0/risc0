@@ -16,6 +16,7 @@ use anyhow::{bail, Result};
 
 use crate::{
     host::{
+        prove_info::ProveInfo,
         receipt::{InnerReceipt, SegmentReceipt, SuccinctReceipt},
         server::session::null_callback,
     },
@@ -44,7 +45,7 @@ use crate::{
 pub struct DevModeProver;
 
 impl ProverServer for DevModeProver {
-    fn prove_session(&self, _ctx: &VerifierContext, session: &Session) -> Result<Receipt> {
+    fn prove_session(&self, _ctx: &VerifierContext, session: &Session) -> Result<ProveInfo> {
         eprintln!(
             "WARNING: Proving in dev mode does not generate a valid receipt. \
             Receipts generated from this process are invalid and should never be used in production."
@@ -56,11 +57,16 @@ impl ProverServer for DevModeProver {
             )
         }
 
-        let claim = session.get_claim()?;
-        Ok(Receipt::new(
+        let claim = session.claim()?;
+        let receipt = Receipt::new(
             InnerReceipt::Fake { claim },
             session.journal.clone().unwrap_or_default().bytes,
-        ))
+        );
+
+        Ok(ProveInfo {
+            receipt,
+            stats: session.stats(),
+        })
     }
 
     /// Prove the specified ELF binary using the specified [VerifierContext].
@@ -69,7 +75,7 @@ impl ProverServer for DevModeProver {
         env: ExecutorEnv<'_>,
         ctx: &VerifierContext,
         elf: &[u8],
-    ) -> Result<Receipt> {
+    ) -> Result<ProveInfo> {
         let mut exec = ExecutorImpl::from_elf(env, elf)?;
         let session = exec.run_with_callback(null_callback)?;
         self.prove_session(ctx, &session)
@@ -77,10 +83,6 @@ impl ProverServer for DevModeProver {
 
     fn prove_segment(&self, _ctx: &VerifierContext, _segment: &Segment) -> Result<SegmentReceipt> {
         unimplemented!("This is unsupported for dev mode.")
-    }
-
-    fn get_peak_memory_usage(&self) -> usize {
-        0
     }
 
     fn lift(&self, _receipt: &SegmentReceipt) -> Result<SuccinctReceipt> {

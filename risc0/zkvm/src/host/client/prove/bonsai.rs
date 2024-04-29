@@ -18,7 +18,10 @@ use anyhow::{anyhow, bail, ensure, Context, Result};
 use bonsai_sdk::alpha::Client;
 
 use super::Prover;
-use crate::{compute_image_id, sha::Digestible, ExecutorEnv, ProverOpts, Receipt, VerifierContext};
+use crate::{
+    compute_image_id, sha::Digestible, ExecutorEnv, InnerReceipt, ProveInfo, ProverOpts, Receipt,
+    VerifierContext,
+};
 
 /// An implementation of a [Prover] that runs proof workloads via Bonsai.
 ///
@@ -48,7 +51,7 @@ impl Prover for BonsaiProver {
         ctx: &VerifierContext,
         elf: &[u8],
         opts: &ProverOpts,
-    ) -> Result<Receipt> {
+    ) -> Result<ProveInfo> {
         let client = Client::from_env(crate::VERSION)?;
 
         // Compute the ImageID and upload the ELF binary
@@ -105,15 +108,22 @@ impl Prover for BonsaiProver {
                 if opts.prove_guest_errors {
                     receipt.verify_integrity_with_context(ctx)?;
                     ensure!(
-                        receipt.get_claim()?.pre.digest() == image_id,
+                        receipt.claim()?.pre.digest() == image_id,
                         "received unexpected image ID: expected {}, found {}",
                         hex::encode(image_id),
-                        hex::encode(receipt.get_claim()?.pre.digest())
+                        hex::encode(receipt.claim()?.pre.digest())
                     );
                 } else {
                     receipt.verify_with_context(ctx, image_id)?;
                 }
-                return Ok(receipt);
+                return Ok(ProveInfo {
+                    receipt,
+                    stats: crate::SessionStats {
+                        segments: stats.segments,
+                        total_cycles: stats.total_cycles,
+                        user_cycles: stats.cycles,
+                    },
+                });
             } else {
                 bail!(
                     "Bonsai prover workflow [{}] exited: {} err: {}",
@@ -123,6 +133,21 @@ impl Prover for BonsaiProver {
                         .unwrap_or("Bonsai workflow missing error_msg".into()),
                 );
             }
+        }
+    }
+
+    fn compress(&self, _: &ProverOpts, receipt: &Receipt) -> Result<Receipt> {
+        match receipt.inner {
+            InnerReceipt::Succinct(_) | InnerReceipt::Compact(_) => Ok(receipt.clone()),
+            // NOTE: Bonsai always returns a SuccinctReceipt, and does not support compression of
+            // SegmentReceipts uploaded by clients. It would be possible to support this, but there
+            // is not an apparent reason to do so.
+            InnerReceipt::Composite(_) => Err(anyhow!(
+                "BonsaiProver does not support compress on a composite receipt"
+            )),
+            InnerReceipt::Fake { .. } => Err(anyhow!(
+                "BonsaiProver does not support compress on a composite receipt"
+            )),
         }
     }
 }

@@ -14,7 +14,7 @@ permissions:
   contents: write
 
 env:
-  RISC0_TOOLCHAIN_VERSION: v2024-02-08.1
+  RISC0_TOOLCHAIN_VERSION: v2024-04-22.0
   TAG: v0.22.0-alpha.1
   VERSION: "0.22.0-alpha.1"
 
@@ -61,7 +61,7 @@ jobs:
       # otherwise cargo-binstall sometimes errors with 404.
       - run: sleep 90
 
-      - uses: risc0/cargo-install@b9307573043522ab0d3e3be64a51763b765b52a4
+      - uses: risc0/cargo-install@9f6037ed331dcf7da101461a20656273fa72abf0
         with:
           crate: cargo-binstall
           version: "1.4"

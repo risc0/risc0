@@ -25,6 +25,7 @@ pub fn new_jobs() -> Vec<Job> {
             risc0_benchmark_methods::ITER_KECCAK_ELF,
             risc0_benchmark_methods::ITER_KECCAK_ID.into(),
             to_vec(&guest_input).unwrap(),
+            spec,
         ));
     }
     jobs
