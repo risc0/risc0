@@ -16,13 +16,11 @@
 
 #include "ffi.h"
 #include "fp.h"
-#include "nvtx3/nvtx3.hpp"
-#include "poolstl.hpp"
+#include "vendor/nvtx3/nvtx3.hpp"
+#include "vendor/poolstl.hpp"
 
 #include <algorithm>
 #include <cassert>
-#include <cstring>
-#include <execution>
 #include <iostream>
 #include <stdexcept>
 #include <vector>

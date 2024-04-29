@@ -17,7 +17,6 @@
 #include "fp.h"
 
 #include <array>
-#include <initializer_list>
 #include <vector>
 
 #if defined(__clang__)

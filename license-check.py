@@ -5,7 +5,7 @@ import os
 from pathlib import Path
 import subprocess
 
-PUBLIC_HEADER = '''
+PUBLIC_HEADER = """
 // Copyright {YEAR} RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,36 +19,38 @@ PUBLIC_HEADER = '''
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-'''.strip().splitlines()
+""".strip().splitlines()
 
 EXTENSIONS = [
-    '.cpp',
-    '.h',
-    '.rs',
+    ".cpp",
+    ".h",
+    ".rs",
 ]
 
 SKIP_DIRS = [
     str(Path.cwd()) + "/templates/rust-starter",
+    str(Path.cwd()) + "/risc0/circuit/rv32im-sys/cxx/vendor",
 ]
 
+
 def check_header(expected_year, lines_actual):
-    for (expected, actual) in zip(PUBLIC_HEADER, lines_actual):
-        expected = expected.replace('{YEAR}', expected_year)
+    for expected, actual in zip(PUBLIC_HEADER, lines_actual):
+        expected = expected.replace("{YEAR}", expected_year)
         if expected != actual:
             return (expected, actual)
     return None
 
 
 def check_file(root, file):
-    cmd = ['git', 'log', '-1', '--format=%ad', '--date=format:%Y', file]
-    expected_year = subprocess.check_output(cmd, encoding='UTF-8').strip()
+    cmd = ["git", "log", "-1", "--format=%ad", "--date=format:%Y", file]
+    expected_year = subprocess.check_output(cmd, encoding="UTF-8").strip()
     rel_path = file.relative_to(root)
     lines = file.read_text().splitlines()
     result = check_header(expected_year, lines)
     if result:
-        print(f'{rel_path}: invalid header!')
-        print(f'  expected: {result[0]}')
-        print(f'    actual: {result[1]}')
+        print(f"{rel_path}: invalid header!")
+        print(f"  expected: {result[0]}")
+        print(f"    actual: {result[1]}")
         return 1
     return 0
 
@@ -56,13 +58,13 @@ def check_file(root, file):
 def repo_root():
     """Return an absolute Path to the repo root"""
     cmd = ["git", "rev-parse", "--show-toplevel"]
-    return Path(subprocess.check_output(cmd, encoding='UTF-8').strip())
+    return Path(subprocess.check_output(cmd, encoding="UTF-8").strip())
 
 
 def tracked_files():
     """Yield all file paths tracked by git"""
     cmd = ["git", "ls-tree", "--full-tree", "--name-only", "-r", "HEAD"]
-    tree = subprocess.check_output(cmd, encoding='UTF-8').strip()
+    tree = subprocess.check_output(cmd, encoding="UTF-8").strip()
     for path in tree.splitlines():
         yield (repo_root() / Path(path)).absolute()
 
