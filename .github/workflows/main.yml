@@ -310,7 +310,7 @@ jobs:
           cargo install --force --path risc0/cargo-risczero -F experimental
         working-directory: risc0
       - run: cargo risczero test
-        working-directory: RustCrypto-crypto-bigint
+        working-directory: ${{ github.workspace }}/RustCrypto-crypto-bigint
       - run: sccache --show-stats
 
   doc:
