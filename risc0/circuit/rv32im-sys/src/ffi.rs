@@ -80,7 +80,7 @@ extern "C" {
         steps: usize,
         cycle: usize,
         args: *const *mut BabyBearElem,
-    ) -> BabyBearElem;
+    );
 
     pub fn risc0_circuit_rv32im_step_verify_mem(
         err: *mut RawError,
@@ -88,7 +88,7 @@ extern "C" {
         steps: usize,
         cycle: usize,
         args: *const *mut BabyBearElem,
-    ) -> BabyBearElem;
+    );
 
     pub fn risc0_circuit_rv32im_step_verify_bytes(
         err: *mut RawError,
@@ -96,11 +96,11 @@ extern "C" {
         steps: usize,
         cycle: usize,
         args: *const *mut BabyBearElem,
-    ) -> BabyBearElem;
+    );
 
     pub fn risc0_circuit_rv32im_sort_ram(err: *mut RawError, ctx: *const RawMachineContext);
 
-    pub fn risc0_circuit_rv32im_inject_ram_backs(
+    pub fn risc0_circuit_rv32im_inject_backs_ram(
         err: *mut RawError,
         ctx: *const RawMachineContext,
         steps: usize,
@@ -110,13 +110,21 @@ extern "C" {
 
     pub fn risc0_circuit_rv32im_sort_bytes(err: *mut RawError, ctx: *const RawMachineContext);
 
+    pub fn risc0_circuit_rv32im_inject_backs_bytes(
+        err: *mut RawError,
+        ctx: *const RawMachineContext,
+        steps: usize,
+        cycle: usize,
+        data: *mut BabyBearElem,
+    );
+
     pub fn risc0_circuit_rv32im_step_compute_accum(
         err: *mut RawError,
         ctx: *const RawAccumContext,
         steps: usize,
         cycle: usize,
         args: *const *mut BabyBearElem,
-    ) -> BabyBearElem;
+    );
 
     pub fn risc0_circuit_rv32im_calc_prefix_products(
         err: *mut RawError,
@@ -129,7 +137,7 @@ extern "C" {
         steps: usize,
         cycle: usize,
         args: *const *mut BabyBearElem,
-    ) -> BabyBearElem;
+    );
 
     pub fn risc0_circuit_rv32im_poly_fp(
         cycle: usize,
