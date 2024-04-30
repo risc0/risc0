@@ -484,21 +484,16 @@ impl Client {
             .get(format!("{}/receipts/{}", self.url, session_id.uuid))
             .send()?;
 
-        match res.error_for_status() {
-            Ok(res) => {
-                let res: ReceiptDownload = res.json()?;
-                self.download(&res.url)
-            },
-            Err(err) => {
-                if err.status() == Some(reqwest::StatusCode::NOT_FOUND) {
-                    return Err(SdkErr::ReceiptNotFound);
-                }
-                else {
-                    let body = res.text()?;
-                    return Err(SdkErr::InternalServerErr(body));
-                }
+        if !resp.status().is_success() {
+            if resp.status().as_u16() == 404 {
+                return Err(SdkErr::ReceiptNotFound);
             }
+            let body = resp.text()?;
+            return Err(SdkErr::InternalServerErr(body));
         }
+
+        let res: ReceiptDownload = res.json()?;
+        self.download(&res.url)
     }
 
     /// Delete an existing image
