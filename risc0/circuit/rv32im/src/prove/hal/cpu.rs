@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{rc::Rc, sync::Mutex};
+use std::rc::Rc;
 
 use rayon::prelude::*;
 use risc0_core::field::{
@@ -20,14 +20,12 @@ use risc0_core::field::{
     map_pow, Elem, ExtElem, RootsOfUnity,
 };
 use risc0_zkp::{
-    adapter::{CircuitStep as _, CircuitStepContext, PolyFp},
+    adapter::PolyFp,
     core::{hash::sha::Sha256HashSuite, log2_ceil},
-    field::baby_bear::BabyBear,
     hal::{
         cpu::{CpuBuffer, CpuHal},
         CircuitHal, Hal,
     },
-    prove::accum::{Accum, Handler},
     INV_RATE, ZK_CYCLES,
 };
 
@@ -127,37 +125,24 @@ where
                 accum.as_slice_sync(),
             ];
 
-            let accumulator: Mutex<Accum<BabyBearExtElem>> = Mutex::new(Accum::new(steps));
+            let accum_ctx = CIRCUIT.alloc_accum_ctx(steps);
+
             tracing::info_span!("step_compute_accum").in_scope(|| {
-                (0..steps - ZK_CYCLES).into_par_iter().for_each_init(
-                    || Handler::<BabyBear>::new(&accumulator),
-                    |handler, cycle| {
-                        CIRCUIT
-                            .step_compute_accum(
-                                &CircuitStepContext { size: steps, cycle },
-                                handler,
-                                args,
-                            )
-                            .unwrap();
-                    },
-                );
+                (0..steps - ZK_CYCLES).into_par_iter().for_each(|cycle| {
+                    CIRCUIT
+                        .par_step_compute_accum(steps, cycle, &accum_ctx, args)
+                        .unwrap();
+                });
             });
             tracing::info_span!("calc_prefix_products").in_scope(|| {
-                accumulator.lock().unwrap().calc_prefix_products();
+                CIRCUIT.calc_prefix_products(&accum_ctx).unwrap();
             });
             tracing::info_span!("step_verify_accum").in_scope(|| {
-                (0..steps - ZK_CYCLES).into_par_iter().for_each_init(
-                    || Handler::<BabyBear>::new(&accumulator),
-                    |handler, cycle| {
-                        CIRCUIT
-                            .step_verify_accum(
-                                &CircuitStepContext { size: steps, cycle },
-                                handler,
-                                args,
-                            )
-                            .unwrap();
-                    },
-                );
+                (0..steps - ZK_CYCLES).into_par_iter().for_each(|cycle| {
+                    CIRCUIT
+                        .par_step_verify_accum(steps, cycle, &accum_ctx, args)
+                        .unwrap();
+                });
             });
         }
 

@@ -382,13 +382,13 @@ impl<T> BufferImpl<T> {
     }
 
     pub fn copy_from(name: &'static str, slice: &[T]) -> Self {
-        nvtx::range_push!("copy_from");
+        // nvtx::range_push!("copy_from");
         let bytes_len = std::mem::size_of_val(slice);
         assert!(bytes_len > 0);
         let mut buffer = RawBuffer::new(name, bytes_len);
         let bytes = unchecked_cast(slice);
         buffer.buf.copy_from(bytes).unwrap();
-        nvtx::range_pop!();
+        // nvtx::range_pop!();
 
         BufferImpl {
             buffer: Rc::new(RefCell::new(buffer)),
@@ -431,7 +431,6 @@ impl<T: Clone> Buffer<T> for BufferImpl<T> {
     }
 
     fn get_at(&self, idx: usize) -> T {
-        nvtx::range_push!("get_at");
         let item_size = std::mem::size_of::<T>();
         let buf = self.buffer.borrow_mut();
         let offset = (self.offset + idx) * item_size;
@@ -440,7 +439,6 @@ impl<T: Clone> Buffer<T> for BufferImpl<T> {
         let host_buf = device_slice.as_host_vec().unwrap();
         let slice: &[T] = unchecked_cast(&host_buf);
         let item = slice[0].clone();
-        nvtx::range_pop!();
         item
     }
 
