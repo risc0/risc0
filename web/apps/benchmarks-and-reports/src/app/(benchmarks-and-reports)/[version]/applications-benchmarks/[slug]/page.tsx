@@ -1,8 +1,7 @@
 import { Separator } from "@risc0/ui/separator";
 import { Tabs, TabsList, TabsTrigger } from "@risc0/ui/tabs";
-import type { Metadata } from "next";
+import pick from "lodash-es/pick";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { SuspenseLoader } from "shared/client/components/suspense-loader";
 import { replace } from "string-ts";
@@ -11,30 +10,27 @@ import ApplicationsBenchmarksCommitHashButton from "./_components/applications-b
 import ApplicationsBenchmarksContent from "./_components/applications-benchmarks-content";
 import { FILENAMES_TO_TITLES } from "./_utils/constants";
 
-export const metadata: Metadata = {
-  title: "Applications Benchmark",
-  description: APPLICATIONS_BENCHMARKS_DESCRIPTION,
-  openGraph: {
-    images: [
-      {
-        url: `https://benchmarks.risczero.com/api/og?title=Applications%20Benchmark&description=${encodeURIComponent(
-          APPLICATIONS_BENCHMARKS_DESCRIPTION,
-        )}`,
-      },
-    ],
-  },
-};
+export function generateMetadata({ params }) {
+  // read route params to generate metadata
+  const slug = params.slug ?? "";
+  const slugLabel = Object.values(pick(FILENAMES_TO_TITLES, `${slug}.csv`))[0];
+
+  return {
+    title: `${slugLabel ? `${slugLabel} | ` : ""}Applications Benchmark`,
+    description: APPLICATIONS_BENCHMARKS_DESCRIPTION,
+    openGraph: {
+      images: [
+        {
+          url: `https://reports-and-benchmarks-risczero.vercel.app/api/og?title=Applications%20Benchmark&description=${encodeURIComponent(
+            APPLICATIONS_BENCHMARKS_DESCRIPTION,
+          )}`,
+        },
+      ],
+    },
+  };
+}
 
 export default function ApplicationsBenchmarksPage({ params }) {
-  if (!params.slug) {
-    redirect(
-      `/${params.version}/applications-benchmarks/${
-        // biome-ignore lint/style/noNonNullAssertion: ignore
-        replace(Object.keys(FILENAMES_TO_TITLES)[0]!, ".csv", "")
-      }`,
-    );
-  }
-
   return (
     <div className="container max-w-screen-3xl">
       <div className="flex items-center justify-between gap-8">
@@ -47,7 +43,7 @@ export default function ApplicationsBenchmarksPage({ params }) {
 
       <Separator className="mt-2" />
 
-      <Tabs className="mt-6" defaultValue={params.slug?.[0]}>
+      <Tabs className="mt-6" defaultValue={params.slug}>
         <div className="flex items-center overflow-auto">
           <TabsList>
             {Object.keys(FILENAMES_TO_TITLES).map((filename, index) => (
@@ -66,7 +62,7 @@ export default function ApplicationsBenchmarksPage({ params }) {
 
         <div className="mt-4">
           <Suspense fallback={<SuspenseLoader />}>
-            <ApplicationsBenchmarksContent version={params.version} currentTab={params.slug?.[0]} />
+            <ApplicationsBenchmarksContent version={params.version} currentTab={params.slug} />
           </Suspense>
         </div>
       </Tabs>
