@@ -299,8 +299,8 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: risc0/RustCrypto-crypto-bigint
-      - uses: ./risc0/.github/actions/rustup
-      - uses: ./risc0/.github/actions/sccache
+      - uses: ./.github/actions/rustup
+      - uses: ./.github/actions/sccache
         with:
           key: ${{ matrix.os }}-default
       - name: Install risczero toolchain
