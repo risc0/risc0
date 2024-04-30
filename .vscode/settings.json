@@ -43,7 +43,8 @@
     "charconv": "cpp",
     "stdexcept": "cpp",
     "array": "cpp",
-    "*.css": "tailwindcss"
+    "*.css": "tailwindcss",
+    "initializer_list": "cpp"
   },
   "tailwindCSS.experimental.classRegex": [
     [

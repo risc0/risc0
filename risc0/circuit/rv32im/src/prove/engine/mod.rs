@@ -70,10 +70,17 @@ where
     fn prove_segment(&self, segment: &Segment) -> Result<Seal> {
         nvtx::range_push!("prove_segment");
 
+        nvtx::range_push!("preflight");
         let trace = segment.preflight()?;
+        nvtx::range_pop!();
 
+        nvtx::range_push!("prepare_globals");
         let io = segment.prepare_globals();
+        nvtx::range_pop!();
+
+        nvtx::range_push!("alloc");
         let mut witgen = WitnessGenerator::new(segment.po2, &io);
+        nvtx::range_pop!();
         witgen.execute(trace)?;
         let steps = witgen.steps;
 
@@ -106,39 +113,53 @@ where
             prover.iop().write_field_elem_slice(vec.as_slice());
             prover.set_po2(segment.po2);
 
+            nvtx::range_push!("copy(io)");
             let io = self.hal.copy_from_elem("io", &witgen.io.as_slice());
+            nvtx::range_pop!();
 
+            nvtx::range_push!("copy(ctrl)");
             let ctrl = self.hal.copy_from_elem("ctrl", &witgen.ctrl.as_slice());
+            nvtx::range_pop!();
             prover.commit_group(REGISTER_GROUP_CTRL, &ctrl);
 
+            nvtx::range_push!("copy(data)");
             let data = self.hal.copy_from_elem("data", &witgen.data.as_slice());
+            nvtx::range_pop!();
             prover.commit_group(REGISTER_GROUP_DATA, &data);
 
             // Make the mixing values
+            nvtx::range_push!("mix");
             let mix: Vec<_> = (0..CircuitImpl::MIX_SIZE)
                 .map(|_| prover.iop().random_elem())
                 .collect();
-            let mix = self.hal.copy_from_elem("mix", mix.as_slice());
+            nvtx::range_pop!();
 
+            nvtx::range_push!("copy(mix)");
+            let mix = self.hal.copy_from_elem("mix", mix.as_slice());
+            nvtx::range_pop!();
+
+            nvtx::range_push!("alloc(accum)");
             let mut accum = vec![BabyBearElem::INVALID; steps * CIRCUIT.accum_size()];
+            nvtx::range_pop!();
 
             // Add random noise to end of accum
+            nvtx::range_push!("noise");
             let mut rng = thread_rng();
             for i in steps - ZK_CYCLES..steps {
                 for j in 0..CIRCUIT.accum_size() {
                     accum[j * steps + i] = BabyBearElem::random(&mut rng);
                 }
             }
+            nvtx::range_pop!();
 
+            nvtx::range_push!("copy(accum)");
             let accum = self.hal.copy_from_elem("accum", accum.as_slice());
+            nvtx::range_pop!();
+
             self.circuit_hal
                 .accumulate(&ctrl, &io, &data, &mix, &accum, steps);
 
-            drop(ctrl);
-            drop(data);
-
             prover.commit_group(REGISTER_GROUP_ACCUM, &accum);
-            drop(accum);
 
             let seal = prover.finalize(&[&mix, &io], self.circuit_hal.as_ref());
 
