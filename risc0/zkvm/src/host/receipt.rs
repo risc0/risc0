@@ -14,16 +14,14 @@
 
 //! Manages the output and cryptographic data for a proven computation.
 
+mod segment;
+
 use alloc::{collections::BTreeMap, string::String, vec, vec::Vec};
 use core::fmt::Debug;
 
 use anyhow::Result;
-use risc0_binfmt::{ExitCode, SystemState};
+use risc0_binfmt::ExitCode;
 use risc0_circuit_recursion::control_id::{ALLOWED_CONTROL_ROOT, BN254_CONTROL_ID};
-use risc0_circuit_rv32im::{
-    control_id::{BLAKE2B_CONTROL_ID, POSEIDON2_CONTROL_ID, SHA256_CONTROL_ID},
-    layout, CircuitImpl, CIRCUIT,
-};
 use risc0_core::field::baby_bear::BabyBear;
 use risc0_groth16::{
     fr_from_hex_string, split_digest, verifier::prepared_verifying_key, Seal, Verifier,
@@ -42,13 +40,14 @@ use risc0_zkp::{
 };
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 
-// Make succinct receipt available through this `receipt` module.
-pub use super::recursion::SuccinctReceipt;
 use crate::{
     serde::{from_slice, Error},
     sha::{Digestible, Sha256},
     Assumptions, MaybePruned, Output, ReceiptClaim,
 };
+
+pub use self::segment::SegmentReceipt;
+pub use super::recursion::SuccinctReceipt;
 
 /// A receipt attesting to the execution of a guest program.
 ///
@@ -607,78 +606,6 @@ impl CompositeReceipt {
     }
 }
 
-/// A receipt attesting to the execution of a Segment.
-///
-/// A SegmentReceipt attests that a Segment was executed in a manner
-/// consistent with the [ReceiptClaim] included in the receipt.
-#[derive(Clone, Debug, Deserialize, Serialize)]
-#[cfg_attr(test, derive(PartialEq))]
-pub struct SegmentReceipt {
-    /// The cryptographic data attesting to the validity of the code execution.
-    ///
-    /// This data is used by the ZKP Verifier (as called by
-    /// [SegmentReceipt::verify_integrity_with_context]) to cryptographically prove that this
-    /// Segment was faithfully executed. It is largely opaque cryptographic data, but contains a
-    /// non-opaque claim component, which can be conveniently accessed with
-    /// [SegmentReceipt::claim].
-    pub seal: Vec<u32>,
-
-    /// Segment index within the [Receipt]
-    pub index: u32,
-
-    /// Name of the hash function used to create this receipt.
-    pub hashfn: String,
-
-    /// [ReceiptClaim] containing information about the execution that this receipt proves.
-    pub claim: ReceiptClaim,
-}
-
-impl SegmentReceipt {
-    /// Verify the integrity of this receipt, ensuring the claim is attested
-    /// to by the seal.
-    pub fn verify_integrity_with_context(
-        &self,
-        ctx: &VerifierContext,
-    ) -> Result<(), VerificationError> {
-        tracing::debug!("SegmentReceipt::verify_integrity_with_context");
-        use hex::FromHex;
-        let check_code = |_, control_id: &Digest| -> Result<(), VerificationError> {
-            POSEIDON2_CONTROL_ID
-                .into_iter()
-                .chain(SHA256_CONTROL_ID)
-                .chain(BLAKE2B_CONTROL_ID)
-                .find(|x| Digest::from_hex(x).unwrap() == *control_id)
-                .map(|_| ())
-                .ok_or(VerificationError::ControlVerificationError {
-                    control_id: *control_id,
-                })
-        };
-        let suite = ctx
-            .suites
-            .get(&self.hashfn)
-            .ok_or(VerificationError::InvalidHashSuite)?;
-        risc0_zkp::verify::verify(&CIRCUIT, suite, &self.seal, check_code)?;
-
-        // Receipt is consistent with the claim encoded on the seal. Now check against the
-        // claim on the struct.
-        let decoded_claim = decode_receipt_claim_from_seal(&self.seal)?;
-        if decoded_claim.digest() != self.claim.digest() {
-            tracing::debug!(
-                "decoded segment receipt claim does not match claim field:\ndecoded: {:#?},\nexpected: {:#?}",
-                decoded_claim,
-                self.claim,
-            );
-            return Err(VerificationError::ReceiptFormatError);
-        }
-        Ok(())
-    }
-
-    /// Return the seal for this receipt, as a vector of bytes.
-    pub fn get_seal_bytes(&self) -> Vec<u8> {
-        self.seal.iter().flat_map(|x| x.to_le_bytes()).collect()
-    }
-}
-
 /// An assumption attached to a guest execution as a result of calling
 /// `env::verify` or `env::verify_integrity`.
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -746,58 +673,6 @@ pub struct VerifierContext {
     /// A registry of hash functions to be used by the verification process.
     pub suites: BTreeMap<String, HashSuite<BabyBear>>,
 }
-
-fn decode_system_state_from_io(
-    io: layout::OutBuffer,
-    sys_state: &layout::SystemState,
-) -> Result<SystemState, VerificationError> {
-    let bytes: Vec<u8> = io
-        .tree(sys_state.image_id)
-        .get_bytes()
-        .or(Err(VerificationError::ReceiptFormatError))?;
-    let pc = io
-        .tree(sys_state.pc)
-        .get_u32()
-        .or(Err(VerificationError::ReceiptFormatError))?;
-    let merkle_root = Digest::try_from(bytes).or(Err(VerificationError::ReceiptFormatError))?;
-    Ok(SystemState { pc, merkle_root })
-}
-
-pub(crate) fn decode_receipt_claim_from_seal(
-    seal: &[u32],
-) -> Result<ReceiptClaim, VerificationError> {
-    let elems = bytemuck::checked::cast_slice(&seal[..CircuitImpl::OUTPUT_SIZE]);
-    let io = layout::OutBuffer(elems);
-    let body = layout::LAYOUT.mux.body;
-    let pre = decode_system_state_from_io(io, body.global.pre)?;
-    let post = decode_system_state_from_io(io, body.global.post)?;
-
-    let input_bytes: Vec<u8> = io
-        .tree(body.global.input)
-        .get_bytes()
-        .or(Err(VerificationError::ReceiptFormatError))?;
-    let input = Digest::try_from(input_bytes).or(Err(VerificationError::ReceiptFormatError))?;
-
-    let output_bytes: Vec<u8> = io
-        .tree(body.global.output)
-        .get_bytes()
-        .or(Err(VerificationError::ReceiptFormatError))?;
-    let output = Digest::try_from(output_bytes).or(Err(VerificationError::ReceiptFormatError))?;
-
-    let sys_exit = io.get_u64(body.global.sys_exit_code) as u32;
-    let user_exit = io.get_u64(body.global.user_exit_code) as u32;
-    let exit_code =
-        ExitCode::from_pair(sys_exit, user_exit).or(Err(VerificationError::ReceiptFormatError))?;
-
-    Ok(ReceiptClaim {
-        pre: pre.into(),
-        post: post.into(),
-        exit_code,
-        input,
-        output: MaybePruned::Pruned(output),
-    })
-}
-
 impl Default for VerifierContext {
     fn default() -> Self {
         Self {
