@@ -16,7 +16,7 @@ export const metadata = {
   openGraph: {
     images: [
       {
-        url: "https://benchmarks.risczero.com/api/og?title=RISC%20Zero%20Benchmarks%20%26%20Reports", // @TODO: change with official URL
+        url: "https://reports-and-benchmarks-risczero.vercel.app/api/og?title=RISC%20Zero%20Benchmarks%20%26%20Reports", // @TODO: change with official URL
       },
     ],
   },
