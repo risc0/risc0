@@ -38,13 +38,26 @@ pub struct WitnessGenerator {
 impl WitnessGenerator {
     pub fn new(po2: usize, io: &[BabyBearElem]) -> Self {
         let steps = 1 << po2;
+
+        nvtx::range_push!("alloc(ctrl)");
+        let ctrl = CpuBuffer::from_fn("ctrl", steps * CIRCUIT.ctrl_size(), |_| BabyBearElem::ZERO);
+        nvtx::range_pop!();
+
+        nvtx::range_push!("alloc(data)");
+        let data = CpuBuffer::from_fn("data", steps * CIRCUIT.data_size(), |_| {
+            BabyBearElem::INVALID
+        });
+        nvtx::range_pop!();
+
+        nvtx::range_push!("alloc(io)");
+        let io = CpuBuffer::from(Vec::from(io));
+        nvtx::range_pop!();
+
         Self {
             steps,
-            ctrl: CpuBuffer::from_fn("ctrl", steps * CIRCUIT.ctrl_size(), |_| BabyBearElem::ZERO),
-            data: CpuBuffer::from_fn("data", steps * CIRCUIT.data_size(), |_| {
-                BabyBearElem::INVALID
-            }),
-            io: CpuBuffer::from(Vec::from(io)),
+            ctrl,
+            data,
+            io,
         }
     }
 
@@ -57,11 +70,13 @@ impl WitnessGenerator {
         self.compute_verify(&mut machine);
 
         // Zero out 'invalid' entries in data and output.
+        nvtx::range_push!("zeroize");
         self.data
             .as_slice_mut()
             .par_iter_mut()
             .chain(self.io.as_slice_mut().par_iter_mut())
             .for_each(|value| *value = value.valid_or_zero());
+        nvtx::range_pop!();
 
         nvtx::range_pop!();
         Ok(())
@@ -109,18 +124,23 @@ impl WitnessGenerator {
         nvtx::range_push!("compute_execute");
 
         tracing::debug!("load");
+        nvtx::range_push!("load");
         let mut loader = Loader::new(self.steps, &mut self.ctrl);
         let last_cycle = loader.load();
+        nvtx::range_pop!();
 
         #[cfg(not(feature = "seq"))]
         tracing::info_span!("inject_exec_backs").in_scope(|| {
+            nvtx::range_push!("inject_exec_backs");
             tracing::debug!("inject_exec_backs");
             for cycle in 0..last_cycle {
                 machine.inject_exec_backs(self.steps, cycle, &self.data.as_slice_sync());
             }
+            nvtx::range_pop!();
         });
 
         tracing::info_span!("step_exec").in_scope(|| {
+            nvtx::range_push!("step_exec");
             tracing::debug!("step_exec");
             let args = &[
                 self.ctrl.as_slice_sync(),
@@ -135,6 +155,7 @@ impl WitnessGenerator {
             for cycle in 0..last_cycle {
                 machine.step_exec(self.steps, cycle, args).unwrap();
             }
+            nvtx::range_pop!();
         });
 
         nvtx::range_pop!();
@@ -171,10 +192,12 @@ impl WitnessGenerator {
 
         #[cfg(not(feature = "seq"))]
         tracing::info_span!("inject_verify_mem_backs").in_scope(|| {
+            nvtx::range_push!("inject_verify_mem_backs");
             tracing::debug!("inject_verify_mem_backs");
             for cycle in 0..last_cycle {
                 machine.inject_verify_mem_backs(self.steps, cycle, self.data.as_slice_sync());
             }
+            nvtx::range_pop!();
         });
 
         tracing::info_span!("step_verify_mem").in_scope(|| {

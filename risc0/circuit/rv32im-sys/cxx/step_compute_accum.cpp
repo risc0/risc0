@@ -14,6 +14,7 @@
 
 // This code is automatically generated
 
+#include "extern.h"
 #include "ffi.h"
 #include "fp.h"
 
@@ -27,12 +28,13 @@ namespace risc0::circuit::rv32im {
 #if defined(__clang__)
 #pragma clang diagnostic ignored "-Wunused-parameter"
 #pragma clang diagnostic ignored "-Wunused-variable"
+#elif defined(__GNUC__)
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wunused-variable"
 #endif
 
-Fp step_compute_accum(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) {
+Fp step_compute_accum(void* ctx, size_t steps, size_t cycle, Fp** args) {
   size_t mask = steps - 1;
-  std::array<Fp, 96> host_args;
-  std::array<Fp, 32> host_outs;
   // loc(unknown)
   Fp x0(2013265910);
   // loc(unknown)
@@ -4481,11 +4483,7 @@ Fp step_compute_accum(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp
       auto x2176 = x2175 + x2172;
       // loc("./zirgen/components/plonk.h":262:0)
       auto x2177 = x2176 + x2171;
-      host_args.at(0) = x2154;
-      host_args.at(1) = x2162;
-      host_args.at(2) = x2170;
-      host_args.at(3) = x2177;
-      host(ctx, "plonkWriteAccum", "bytes", host_args.data(), 4, host_outs.data(), 0);
+      extern_plonkWriteAccum_bytes(ctx, cycle, "bytes", {x2154, x2162, x2170, x2177});
     }
   }
   if (x9 != 0) {
@@ -8084,11 +8082,7 @@ Fp step_compute_accum(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp
       auto x3939 = x3938 + x3935;
       // loc("./zirgen/components/plonk.h":262:0)
       auto x3940 = x3939 + x3934;
-      host_args.at(0) = x3917;
-      host_args.at(1) = x3925;
-      host_args.at(2) = x3933;
-      host_args.at(3) = x3940;
-      host(ctx, "plonkWriteAccum", "bytes", host_args.data(), 4, host_outs.data(), 0);
+      extern_plonkWriteAccum_bytes(ctx, cycle, "bytes", {x3917, x3925, x3933, x3940});
     }
   }
   if (x5 != 0) {
@@ -11687,11 +11681,7 @@ Fp step_compute_accum(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp
       auto x5702 = x5701 + x5698;
       // loc("./zirgen/components/plonk.h":262:0)
       auto x5703 = x5702 + x5697;
-      host_args.at(0) = x5680;
-      host_args.at(1) = x5688;
-      host_args.at(2) = x5696;
-      host_args.at(3) = x5703;
-      host(ctx, "plonkWriteAccum", "bytes", host_args.data(), 4, host_outs.data(), 0);
+      extern_plonkWriteAccum_bytes(ctx, cycle, "bytes", {x5680, x5688, x5696, x5703});
     }
     {
       // loc("Top/mux(Mux)/ram_load(RamLoadStep)/RamBody/PlonkBody/RamPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
@@ -13348,11 +13338,7 @@ Fp step_compute_accum(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp
       auto x6501 = x6500 + x6497;
       // loc("./zirgen/components/plonk.h":262:0)
       auto x6502 = x6501 + x6496;
-      host_args.at(0) = x6479;
-      host_args.at(1) = x6487;
-      host_args.at(2) = x6495;
-      host_args.at(3) = x6502;
-      host(ctx, "plonkWriteAccum", "ram", host_args.data(), 4, host_outs.data(), 0);
+      extern_plonkWriteAccum_ram(ctx, cycle, "ram", {x6479, x6487, x6495, x6502});
     }
   }
   if (x6 != 0) {
@@ -16951,11 +16937,7 @@ Fp step_compute_accum(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp
       auto x8264 = x8263 + x8260;
       // loc("./zirgen/components/plonk.h":262:0)
       auto x8265 = x8264 + x8259;
-      host_args.at(0) = x8242;
-      host_args.at(1) = x8250;
-      host_args.at(2) = x8258;
-      host_args.at(3) = x8265;
-      host(ctx, "plonkWriteAccum", "bytes", host_args.data(), 4, host_outs.data(), 0);
+      extern_plonkWriteAccum_bytes(ctx, cycle, "bytes", {x8242, x8250, x8258, x8265});
     }
     {
       // loc("Top/mux(Mux)/reset(ResetStep)/RamBody/PlonkBody/RamPlonkElement/Reg"("./zirgen/compiler/edsl/component.h":154:0))
@@ -18612,11 +18594,7 @@ Fp step_compute_accum(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp
       auto x9063 = x9062 + x9059;
       // loc("./zirgen/components/plonk.h":262:0)
       auto x9064 = x9063 + x9058;
-      host_args.at(0) = x9041;
-      host_args.at(1) = x9049;
-      host_args.at(2) = x9057;
-      host_args.at(3) = x9064;
-      host(ctx, "plonkWriteAccum", "ram", host_args.data(), 4, host_outs.data(), 0);
+      extern_plonkWriteAccum_ram(ctx, cycle, "ram", {x9041, x9049, x9057, x9064});
     }
   }
   if (x7 != 0) {
@@ -22215,11 +22193,7 @@ Fp step_compute_accum(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp
       auto x10826 = x10825 + x10822;
       // loc("./zirgen/components/plonk.h":262:0)
       auto x10827 = x10826 + x10821;
-      host_args.at(0) = x10804;
-      host_args.at(1) = x10812;
-      host_args.at(2) = x10820;
-      host_args.at(3) = x10827;
-      host(ctx, "plonkWriteAccum", "bytes", host_args.data(), 4, host_outs.data(), 0);
+      extern_plonkWriteAccum_bytes(ctx, cycle, "bytes", {x10804, x10812, x10820, x10827});
     }
     // loc("zirgen/compiler/edsl/component.cpp":39:0)
     auto x10828 = args[2][100 * steps + ((cycle - 0) & mask)];
@@ -23880,11 +23854,7 @@ Fp step_compute_accum(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp
         auto x11626 = x11625 + x11622;
         // loc("./zirgen/components/plonk.h":262:0)
         auto x11627 = x11626 + x11621;
-        host_args.at(0) = x11604;
-        host_args.at(1) = x11612;
-        host_args.at(2) = x11620;
-        host_args.at(3) = x11627;
-        host(ctx, "plonkWriteAccum", "ram", host_args.data(), 4, host_outs.data(), 0);
+        extern_plonkWriteAccum_ram(ctx, cycle, "ram", {x11604, x11612, x11620, x11627});
       }
     }
     // loc("zirgen/compiler/edsl/component.cpp":39:0)
@@ -25546,11 +25516,7 @@ Fp step_compute_accum(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp
         auto x12426 = x12425 + x12422;
         // loc("./zirgen/components/plonk.h":262:0)
         auto x12427 = x12426 + x12421;
-        host_args.at(0) = x12404;
-        host_args.at(1) = x12412;
-        host_args.at(2) = x12420;
-        host_args.at(3) = x12427;
-        host(ctx, "plonkWriteAccum", "ram", host_args.data(), 4, host_outs.data(), 0);
+        extern_plonkWriteAccum_ram(ctx, cycle, "ram", {x12404, x12412, x12420, x12427});
       }
     }
     // loc("zirgen/compiler/edsl/component.cpp":39:0)
@@ -27212,11 +27178,7 @@ Fp step_compute_accum(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp
         auto x13226 = x13225 + x13222;
         // loc("./zirgen/components/plonk.h":262:0)
         auto x13227 = x13226 + x13221;
-        host_args.at(0) = x13204;
-        host_args.at(1) = x13212;
-        host_args.at(2) = x13220;
-        host_args.at(3) = x13227;
-        host(ctx, "plonkWriteAccum", "ram", host_args.data(), 4, host_outs.data(), 0);
+        extern_plonkWriteAccum_ram(ctx, cycle, "ram", {x13204, x13212, x13220, x13227});
       }
     }
     // loc("zirgen/compiler/edsl/component.cpp":39:0)
@@ -29330,11 +29292,7 @@ Fp step_compute_accum(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp
         auto x14245 = x14244 + x14241;
         // loc("./zirgen/components/plonk.h":262:0)
         auto x14246 = x14245 + x14240;
-        host_args.at(0) = x14223;
-        host_args.at(1) = x14231;
-        host_args.at(2) = x14239;
-        host_args.at(3) = x14246;
-        host(ctx, "plonkWriteAccum", "ram", host_args.data(), 4, host_outs.data(), 0);
+        extern_plonkWriteAccum_ram(ctx, cycle, "ram", {x14223, x14231, x14239, x14246});
       }
     }
     // loc("zirgen/compiler/edsl/component.cpp":39:0)
@@ -30996,11 +30954,7 @@ Fp step_compute_accum(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp
         auto x15045 = x15044 + x15041;
         // loc("./zirgen/components/plonk.h":262:0)
         auto x15046 = x15045 + x15040;
-        host_args.at(0) = x15023;
-        host_args.at(1) = x15031;
-        host_args.at(2) = x15039;
-        host_args.at(3) = x15046;
-        host(ctx, "plonkWriteAccum", "ram", host_args.data(), 4, host_outs.data(), 0);
+        extern_plonkWriteAccum_ram(ctx, cycle, "ram", {x15023, x15031, x15039, x15046});
       }
     }
     // loc("zirgen/compiler/edsl/component.cpp":39:0)
@@ -32662,11 +32616,7 @@ Fp step_compute_accum(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp
         auto x15845 = x15844 + x15841;
         // loc("./zirgen/components/plonk.h":262:0)
         auto x15846 = x15845 + x15840;
-        host_args.at(0) = x15823;
-        host_args.at(1) = x15831;
-        host_args.at(2) = x15839;
-        host_args.at(3) = x15846;
-        host(ctx, "plonkWriteAccum", "ram", host_args.data(), 4, host_outs.data(), 0);
+        extern_plonkWriteAccum_ram(ctx, cycle, "ram", {x15823, x15831, x15839, x15846});
       }
     }
     // loc("zirgen/compiler/edsl/component.cpp":39:0)
@@ -32674,11 +32624,7 @@ Fp step_compute_accum(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp
     assert(x15847 != Fp::invalid());
     if (x15847 != 0) {
       {
-        host_args.at(0) = x3;
-        host_args.at(1) = x2;
-        host_args.at(2) = x2;
-        host_args.at(3) = x2;
-        host(ctx, "plonkWriteAccum", "ram", host_args.data(), 4, host_outs.data(), 0);
+        extern_plonkWriteAccum_ram(ctx, cycle, "ram", {x3, x2, x2, x2});
       }
     }
     // loc("zirgen/compiler/edsl/component.cpp":39:0)
@@ -32686,11 +32632,7 @@ Fp step_compute_accum(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp
     assert(x15848 != Fp::invalid());
     if (x15848 != 0) {
       {
-        host_args.at(0) = x3;
-        host_args.at(1) = x2;
-        host_args.at(2) = x2;
-        host_args.at(3) = x2;
-        host(ctx, "plonkWriteAccum", "ram", host_args.data(), 4, host_outs.data(), 0);
+        extern_plonkWriteAccum_ram(ctx, cycle, "ram", {x3, x2, x2, x2});
       }
     }
     // loc("zirgen/compiler/edsl/component.cpp":39:0)
@@ -34804,11 +34746,7 @@ Fp step_compute_accum(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp
         auto x16866 = x16865 + x16862;
         // loc("./zirgen/components/plonk.h":262:0)
         auto x16867 = x16866 + x16861;
-        host_args.at(0) = x16844;
-        host_args.at(1) = x16852;
-        host_args.at(2) = x16860;
-        host_args.at(3) = x16867;
-        host(ctx, "plonkWriteAccum", "ram", host_args.data(), 4, host_outs.data(), 0);
+        extern_plonkWriteAccum_ram(ctx, cycle, "ram", {x16844, x16852, x16860, x16867});
       }
     }
     // loc("zirgen/compiler/edsl/component.cpp":39:0)
@@ -35640,11 +35578,7 @@ Fp step_compute_accum(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp
         auto x17265 = x17264 + x17261;
         // loc("./zirgen/components/plonk.h":262:0)
         auto x17266 = x17265 + x17260;
-        host_args.at(0) = x17243;
-        host_args.at(1) = x17251;
-        host_args.at(2) = x17259;
-        host_args.at(3) = x17266;
-        host(ctx, "plonkWriteAccum", "ram", host_args.data(), 4, host_outs.data(), 0);
+        extern_plonkWriteAccum_ram(ctx, cycle, "ram", {x17243, x17251, x17259, x17266});
       }
     }
     // loc("zirgen/compiler/edsl/component.cpp":39:0)
@@ -36476,11 +36410,7 @@ Fp step_compute_accum(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp
         auto x17664 = x17663 + x17660;
         // loc("./zirgen/components/plonk.h":262:0)
         auto x17665 = x17664 + x17659;
-        host_args.at(0) = x17642;
-        host_args.at(1) = x17650;
-        host_args.at(2) = x17658;
-        host_args.at(3) = x17665;
-        host(ctx, "plonkWriteAccum", "ram", host_args.data(), 4, host_outs.data(), 0);
+        extern_plonkWriteAccum_ram(ctx, cycle, "ram", {x17642, x17650, x17658, x17665});
       }
     }
     // loc("zirgen/compiler/edsl/component.cpp":39:0)
@@ -37312,11 +37242,7 @@ Fp step_compute_accum(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp
         auto x18063 = x18062 + x18059;
         // loc("./zirgen/components/plonk.h":262:0)
         auto x18064 = x18063 + x18058;
-        host_args.at(0) = x18041;
-        host_args.at(1) = x18049;
-        host_args.at(2) = x18057;
-        host_args.at(3) = x18064;
-        host(ctx, "plonkWriteAccum", "ram", host_args.data(), 4, host_outs.data(), 0);
+        extern_plonkWriteAccum_ram(ctx, cycle, "ram", {x18041, x18049, x18057, x18064});
       }
     }
     // loc("zirgen/compiler/edsl/component.cpp":39:0)
@@ -37324,11 +37250,7 @@ Fp step_compute_accum(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp
     assert(x18065 != Fp::invalid());
     if (x18065 != 0) {
       {
-        host_args.at(0) = x3;
-        host_args.at(1) = x2;
-        host_args.at(2) = x2;
-        host_args.at(3) = x2;
-        host(ctx, "plonkWriteAccum", "ram", host_args.data(), 4, host_outs.data(), 0);
+        extern_plonkWriteAccum_ram(ctx, cycle, "ram", {x3, x2, x2, x2});
       }
     }
     // loc("zirgen/compiler/edsl/component.cpp":39:0)
@@ -38990,11 +38912,7 @@ Fp step_compute_accum(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp
         auto x18864 = x18863 + x18860;
         // loc("./zirgen/components/plonk.h":262:0)
         auto x18865 = x18864 + x18859;
-        host_args.at(0) = x18842;
-        host_args.at(1) = x18850;
-        host_args.at(2) = x18858;
-        host_args.at(3) = x18865;
-        host(ctx, "plonkWriteAccum", "ram", host_args.data(), 4, host_outs.data(), 0);
+        extern_plonkWriteAccum_ram(ctx, cycle, "ram", {x18842, x18850, x18858, x18865});
       }
     }
     // loc("zirgen/compiler/edsl/component.cpp":39:0)
@@ -40656,11 +40574,7 @@ Fp step_compute_accum(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp
         auto x19664 = x19663 + x19660;
         // loc("./zirgen/components/plonk.h":262:0)
         auto x19665 = x19664 + x19659;
-        host_args.at(0) = x19642;
-        host_args.at(1) = x19650;
-        host_args.at(2) = x19658;
-        host_args.at(3) = x19665;
-        host(ctx, "plonkWriteAccum", "ram", host_args.data(), 4, host_outs.data(), 0);
+        extern_plonkWriteAccum_ram(ctx, cycle, "ram", {x19642, x19650, x19658, x19665});
       }
     }
     // loc("zirgen/compiler/edsl/component.cpp":39:0)
@@ -40668,11 +40582,7 @@ Fp step_compute_accum(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp
     assert(x19666 != Fp::invalid());
     if (x19666 != 0) {
       {
-        host_args.at(0) = x3;
-        host_args.at(1) = x2;
-        host_args.at(2) = x2;
-        host_args.at(3) = x2;
-        host(ctx, "plonkWriteAccum", "ram", host_args.data(), 4, host_outs.data(), 0);
+        extern_plonkWriteAccum_ram(ctx, cycle, "ram", {x3, x2, x2, x2});
       }
     }
   }
@@ -44272,11 +44182,7 @@ Fp step_compute_accum(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp
       auto x21428 = x21427 + x21424;
       // loc("./zirgen/components/plonk.h":262:0)
       auto x21429 = x21428 + x21423;
-      host_args.at(0) = x21406;
-      host_args.at(1) = x21414;
-      host_args.at(2) = x21422;
-      host_args.at(3) = x21429;
-      host(ctx, "plonkWriteAccum", "bytes", host_args.data(), 4, host_outs.data(), 0);
+      extern_plonkWriteAccum_bytes(ctx, cycle, "bytes", {x21406, x21414, x21422, x21429});
     }
   }
   return x2;
