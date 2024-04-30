@@ -175,9 +175,12 @@ impl Prover for BonsaiProver {
         };
 
         // Assemble the compact receipt, and verify it.
-        // TODO(DO NOT MERGE(add issue number)): If the Groth16 parameters used by Bonsai do not
-        // match, this verification will fail. When Bonsai returned ReceiptMetadata, we'll be able
-        // to detect this error condition.
+        // TODO(bonsai-alpha#461): If the Groth16 parameters used by Bonsai do not match, this
+        // verification will fail. When Bonsai returned ReceiptMetadata, we'll be able to detect
+        // this error condition and report a better message. Constructing the receipt here will all
+        // the verifier info for this version of risc0-zkvm, which may be different than Bonsai. By
+        // verifying the receipt though, we at least know the proving key used on Bonsai matches
+        // the verifying key used here.
         let compact_receipt = Receipt::new(
             InnerReceipt::Compact(CompactReceipt {
                 seal: snark_receipt.snark.to_vec(),
